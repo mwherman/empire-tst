@@ -1,5 +1,5 @@
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: ccfus.f,v 1.8 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-17 19:49:19 $
+Ccc   * $Id: ccfus.f,v 1.9 2005-03-17 19:49:19 Capote Exp $
 C
       SUBROUTINE CCFUS(Stl)
 C
@@ -24,27 +24,27 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aux, aux0, ddur, delb, delta, dfl, dfl2, 
-     &                 dfla(NDCC,2), dfla2(NDCC,2), dur, eps, f, factor, 
-     &                 facw, facwd, fkap, fl, fla(NDCC,2), flam1, 
-     &                 flamem(NDCC), flo, fpi, gl, h2m, homega, p, 
-     &                 pa(NDCC,2), ra, rb, rbar, rcal, rcald, rr, rred, 
-     &                 s0, s1, s2, sig0, sigl0(NDLW), sq, su0, su1, su2, 
+      DOUBLE PRECISION aux, aux0, ddur, delb, delta, dfl, dfl2,
+     &                 dfla(NDCC,2), dfla2(NDCC,2), dur, eps, f, factor,
+     &                 facw, facwd, fkap, fl, fla(NDCC,2), flam1,
+     &                 flamem(NDCC), flo, fpi, gl, h2m, homega, p,
+     &                 pa(NDCC,2), ra, rb, rbar, rcal, rcald, rr, rred,
+     &                 s0, s1, s2, sig0, sigl0(NDLW), sq, su0, su1, su2,
      &                 sum, ur, vb, vbl, vbw, vbwl
       REAL FLOAT
-      INTEGER i1, ic1, ick, il, ilim, k, n, n1(NDCC), n1t, nd, nmax, 
+      INTEGER i1, ic1, ick, il, ilim, k, n, n1(NDCC), n1t, nd, nmax,
      &        np(NDCC), ns1
 C
 C
       WRITE (6,*) ' '
-      WRITE (6,*) 
+      WRITE (6,*)
      & ' Fusion cross section calculated using coupled channel approach'
-      WRITE (6,*) 
+      WRITE (6,*)
      &          ' by Dasso and Landowne (Comp. Phys. Comm. 46(1987)187)'
       WRITE (6,*) ' '
+      sum = 0.
       DO k = 1, NDLW
          Stl(k) = 0.
-         sum = 0.
       ENDDO
       nmax = NSCc + NACc
       ns1 = NSCc + 1
@@ -53,9 +53,11 @@ C
       RAB = ra + rb + 0.29
       rred = ra*rb/(ra + rb)
       REDm = AEJc(0)*A(0)/(AEJc(0) + A(0))
-      AU = 931.5016
-      HC = 197.3286
+
+      AU = AMUmev
+      HC =  HHBarc
       h2m = HC*HC/AU
+
       V0R = 30.08*(1. - 1.8*(1. - 2.*ZEJc(0)/AEJc(0))
      &      *(1. - 2.*Z(0)/A(0)))*rred + DV - 20.
       A0R = 0.63
@@ -68,6 +70,7 @@ C
      &        '       RB=',F6.2,'       H-OMEGA=',F5.2,/)
       eps = homega/6.283185
       rcal = rbar + delb
+
       IF (NSCc.NE.0) THEN
          WRITE (6,99010)
 99010    FORMAT (/,2X,35('*'),/,'  *    BETA    * LAMDA *   Q(MEV)   *',
@@ -77,7 +80,7 @@ C
 99015       FORMAT ('  *  ',F6.2,'    *  ',F3.0,'  *  ',F6.2,'    *')
             IF (BETcc(n).EQ.0.0D0 .AND. FIRst_ein) THEN
                WRITE (6,*) ' WARNING:'
-               WRITE (6,*) ' WARNING: Deformation for channel ', n, 
+               WRITE (6,*) ' WARNING: Deformation for channel ', n,
      &                     ' in CCFUS is 0'
                WRITE (6,*) ' WARNING: It was set internally to 1E-5'
                BETcc(n) = 1.0E-5
@@ -156,7 +159,7 @@ C           READ (5,*) FCD(N),QCC(N)
          ENDDO
          delta = FCC*dfl/(REDm*homega**2/h2m - dfl2)
          IF (ABS(delta).GT.0.99D0) delta = -.99*fl/ABS(fl)
-         vbw = vb - .5*REDm*(homega*delta)**2/h2m + fl + dfl*delta + 
+         vbw = vb - .5*REDm*(homega*delta)**2/h2m + fl + dfl*delta +
      &         .5*dfl2*delta**2
          rcald = rcal + delta
          facwd = 31.416*rcald**2*eps
@@ -179,7 +182,7 @@ C           FACTOR=31.41592*(2.*GL+1.)*HC**2/(2.*REDM*AU*EIN)
       WRITE (6,99040) sig0
 C     34 FORMAT(/,'  CROSS SECTIONS FOR E =',1F6.1,' MEV ARE$',/,
 C     *' COUPLED =',1PE10.3E2,' mb       UNCOUPLED =',1PE10.3E2,' mb',/)
-99040 FORMAT (/,'Fusion cross section without channel coupling',
+99040 FORMAT (/1x,' Fusion cross section without channel coupling',
      &        1PE10.3E2,' mb',/)
       s0 = 0.
       s1 = 0.
@@ -199,9 +202,10 @@ C     *' COUPLED =',1PE10.3E2,' mb       UNCOUPLED =',1PE10.3E2,' mb',/)
       DO n = 1, NSCc
          FLAm(n) = flamem(n)
       ENDDO
+       RETURN
       END
- 
- 
+
+
       SUBROUTINE BAR(Rbar,Vb,Homega)
 C
 C
@@ -241,8 +245,8 @@ C
       IF (rb.LE.rmax .AND. rb.GE.0.8D0) GOTO 100
       Homega = -1.
 99999 END
- 
- 
+
+
       SUBROUTINE POTENT(Rb,V0,V1,V2)
 C
 C COMMON variables
@@ -269,8 +273,8 @@ C
       V1 = V1 + v1n
       V2 = V2 + v2n
       END
- 
- 
+
+
       SUBROUTINE POT(Rr,Ur,Dur,Ddur)
 C
 C COMMON variables
