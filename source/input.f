@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-24 22:33:42 $
-Ccc   * $Id: input.f,v 1.83 2005-02-24 22:33:42 herman Exp $
+Ccc   * $Date: 2005-02-25 17:46:50 $
+Ccc   * $Id: input.f,v 1.84 2005-02-25 17:46:50 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6043,7 +6043,7 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
          IF(Mmod.EQ.0)THEN
             GAMma = GAMmafis(ib)
             DELp = DELtafis(ib)
-            SHC(Nnuc) = SHCfis(ib)
+            SHCf = SHCfis(ib)
             iff = BFF(ib)
             desteppp=destepp(ib)
          ELSE ! Mmod.GT.0
@@ -6051,19 +6051,19 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             XMInn(ib) = XMInnm(Mmod)
             GAMma = GAMmafism(Mmod)
             DELp = DELtafism(Mmod)
-            SHC(Nnuc) = SHCfism(Mmod)
+            SHCf = SHCfism(Mmod)
             iff = BFFm(Mmod)
             desteppp=destepm(Mmod)
          ENDIF
          TCRt = 0.567*DELp
-         ar = ATIl*(1.0 + SHC(nnuc)*GAMma)
+         ar = ATIl*(1.0 + SHCf*GAMma)
          DO ix = 1, 20
             xr = ar*TCRt**2
             IF(xr.GT.0.01D0)THEN
                FSHELL = 1.0 + (1.0 -
-     &                  EXP((-GAMma*xr)))*SHC(nnuc)/xr
+     &                  EXP((-GAMma*xr)))*SHCf/xr
             ELSE
-               FSHELL = 1 + GAMma*SHC(nnuc)
+               FSHELL = 1 + GAMma*SHCf
             ENDIF
             ACRt = ATIl*FSHELL
             IF(ABS(ACRt - ar).LE.0.001D0*ACRt) GOTO 1001
@@ -6092,7 +6092,7 @@ C--------45.84 stands for (12/SQRT(pi))**2
                u = xminn(ib) + (kk-1) * desteppp + del
                IF(U.GT.UCRt)THEN
                   u = u - ECOnd
-                  accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
+                  accn = ATIl*(1 + SHCf*(1 - EXP((-GAMma*U)))/U)
                   ROTemp = RODEFf(A(Nnuc), u, ACcn, aaj, momparcrt,
      &                    momortcrt, HIS(Nnuc), ARGred, EXPmax,iff)
                ELSE
