@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.10 $
-C $Id: ddhms.f,v 1.10 2004-10-08 15:52:35 Capote Exp $
+C CVS Version Management $Revision: 1.11 $
+C $Id: ddhms.f,v 1.11 2004-11-29 05:14:51 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -157,7 +157,7 @@ C     ! factor 10 prevents this becoming too small
 C
       CALL CONSTANTS  ! defines constants
       
-	CALL INIT0(icalled)
+      CALL INIT0(icalled)
 C
       IF(IOMlread.NE.0)CALL OM_INCANGMOM
 C     !read in om l-dist from tape10
@@ -2010,9 +2010,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.10 $')
+99001 FORMAT('  ddhms version: $Revision: 1.11 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.10 2004-10-08 15:52:35 Capote Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.11 2004-11-29 05:14:51 herman Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -2637,7 +2637,7 @@ C
 C
       IF(icalled.eq.0) THEN
 
-	  PARmas(1) = 1.008665
+        PARmas(1) = 1.008665
         PARmas(2) = 1.007825
         PARmas(3) = 2.014101
         PARmas(4) = 3.016049
@@ -2660,7 +2660,7 @@ C       !initial Z,A bef. emission
         JNInitcn = JNResid
         JZInitcn = JZResid
 
-	ENDIF
+      ENDIF
 C
       IF(IKIn.EQ.1)THEN
          ECMproj = ELAbproj*RESmas(JZTar, JATar)
