@@ -1,5 +1,12 @@
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
+#----INTEL f95 compiler
+#FC     =  ifort
+#FFLAGS =  -check all
+#FFLAGS =  -static
+#FFLAGS =  -ffortran-bounds-check
+#----GNU g77 FORTRAN compiler
+#FC     = g77
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
@@ -22,9 +29,9 @@ FFLAGS = -O2
 #FC	= f77
 
 #----Fujitsu f90 FORTRAN compiler
-#FC	= lf95
+FC	= lf95
 #----flag for Lahey/Fujitsu f95 FORTRAN to optimize
-#FFLAGS = --o3 
+FFLAGS = --o3 
 #----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more
 #FFLAGS = -g --chk
 #----flags for Fujitsu f90 FORTRAN compiler
