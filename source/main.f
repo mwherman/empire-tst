@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-01 22:33:01 $
-Ccc   * $Id: main.f,v 1.37 2004-09-01 22:33:01 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-09-23 18:34:14 $
+Ccc   * $Id: main.f,v 1.38 2004-09-23 18:34:14 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -228,12 +228,19 @@ C
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp
+      DOUBLE PRECISION ftmp, G 
       INTEGER NELang
 C     For factorial calculations (SCAT2)
       PARAMETER(LFMAX = 4*NDTL + 2)
+      COMMON /FACT  / G(LFMAX)
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
+C-----Plujko_new
+C     INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
+C     COMMON /MLOCOM1/ keyinput, kzz1, kaa1
+C     COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
+C-----Plujko_new(End)
+
 C
 C     Local variables
 C
@@ -256,8 +263,14 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
+C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
+C-----Plujko_new
+C     DATA keyinput/0/, kzz1/0/, kaa1/0/
+C     DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
+C     F_PRINT=1
+C-----Plujko_new(End)
 C    
 C     FACTORIAL CALCULATIONS 
 C
@@ -296,9 +309,9 @@ C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
 C           ECIS03, May 2004  
             OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
             READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..  
-            READ(45, *, END = 1500)TOTcs
+            IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
             READ(45, *, END = 1500)ecisabs
-            READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
+            IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
 C-----------Checking if CC OMP was used
             IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. 
      &      DIRect.EQ.2) ELAcs=ftmp
@@ -328,7 +341,7 @@ C--------------dummy read
 C--------get and add inelastic cross sections (including double-differential)
          ncoll = 0
          DO i = 2, ND_nlv
-            ilv = ICOllev(i)
+            ilv = ICOller(i)
             IF(ilv.GT.NLV(nnurec))GOTO 1500
             echannel = EX(NEX(1), 1) - Q(nejcec, 1) - ELV(ilv, nnurec)
 C-----------avoid reading closed channels
@@ -392,18 +405,19 @@ C                    escape if we go beyond recoil spectrum dimension
                ENDIF
             ENDIF
  1450    ENDDO
-         CLOSE(45)
+ 1500    CLOSE(45)
          CLOSE(46)
-C	     CLOSE(47)
+C	   CLOSE(47)
 C--------print elastic and direct cross sections from ECIS
- 1500    WRITE(6, *)' '
+         WRITE(6, *)' '
          WRITE(6, *)' '
          IF((MODelecis.EQ.0 .AND. DIRect.EQ.1) .OR. DIRect.EQ.3)THEN
             WRITE(6, *)' '
             IF(ncoll.GT.0)THEN
                IF(DIRect.EQ.1)THEN
                   WRITE(6, *)' Inelastic scattering results provided by'
-                  WRITE(6, *)' Coupled Channel calculations with ECIS:'
+                  WRITE(6, *)
+     >			' Coupled Channel + DWBA calculations with ECIS:'
                ENDIF
                IF(DIRect.EQ.3)THEN
                   WRITE(6, *)' Inelastic scattering results provided by'
@@ -414,24 +428,26 @@ C--------print elastic and direct cross sections from ECIS
 C
 C              RCN, 08/2004
 C
-               IF(CSAlev(1, ICOllev(2), nejcec).GT.0) THEN
-                 WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
+	         if(CSAlev(1, ICOller(2), nejcec).gt.0) then
+                 WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
 99001            FORMAT('  Angle ', 10(6x, i2, '-level'))
                  WRITE(6, *)' '
                  DO iang = 1, NDANG
-                    WRITE(6, 99002)(iang - 1)*gang, 
-     &                           (CSAlev(iang, ICOllev(ilv), nejcec), 
-     &                           ilv = 2, ncoll)
-99002               FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
+                   if(CSAlev(1, ICOller(2), nejcec).gt.0) then
+                    WRITE(6, 99002) (iang - 1)*gang, 
+     &               (CSAlev(iang, ICOller(ilv), nejcec),
+     &                       ilv = 2, min(ncoll,10))
+	             endif  
+99002              FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
                  ENDDO
                  WRITE(6, *)' '
-                 WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
-     &                        ncoll)
+                 WRITE(6, 99003)
+     &	          (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
 99003            FORMAT(6x, 3x, 11(2x, E12.6))
                  WRITE(6, *)' '
                  WRITE(6, *)' '
                  WRITE(6, *)' '
-               ENDIF
+	         endif
             ENDIF
          ENDIF
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
@@ -439,11 +455,17 @@ C
             WRITE(6, *)
      &               ' Results provided by Coupled Channel calculations'
      &               , ' with ECIS code:'
-            WRITE(6, 99004)TOTcs, ecisabs, ELAcs
+	      IF(ZEJc(0).EQ.0) THEN
+              WRITE(6, 99004)TOTcs, ecisabs, ELAcs
 99004       FORMAT(/, 2x, 'Total cross section         :', e14.7, ' mb',
      &             /, 2x, 'Absorption cross section    :', e14.7, ' mb',
      &             /, 2x, 'Shape elastic cross section :', e14.7, ' mb',
      &             //)
+	      ELSE
+              WRITE(6, 99005)ecisabs
+99005       FORMAT(/, 2x, 'Absorption cross section    :', e14.7, ' mb',
+     &             //)
+	      ENDIF
 C           RCN 05/05
 C           The printout below was changed to include the whole angular grid
 C           ala SCAT2000
@@ -466,22 +488,24 @@ C
 C
 C           RCN, 08/2004
 C
-            if(CSAlev(1, ICOllev(2), nejcec).gt.0) then
+            if(CSAlev(1, ICOller(2), nejcec).gt.0) then
               gang = 180.0/(NDANG - 1)
-              WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
+              WRITE(6, 99001)(ICOller(ilv), ilv = 2,min(ncoll,10))
               WRITE(6, *)' '
               DO iang = 1, NDANG
+               if(CSAlev(1, ICOller(2), nejcec).gt.0) then
                  WRITE(6, 99002)(iang - 1)*gang, 
-     &                      (CSAlev(iang, ICOllev(ilv), nejcec), 
-     &                       ilv = 2, ncoll)
+     &           (CSAlev(iang, ICOller(ilv), nejcec),
+     &            ilv = 2, min(ncoll,10))
+	         endif
               ENDDO
               WRITE(6, *)' '
-              WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
-     &                        ncoll)
+              WRITE(6, 99003)(POPlv(ICOller(ilv), nnurec),
+     &               			ilv = 2,min(ncoll,10))
               WRITE(6, *)' '
               WRITE(6, *)' '
               WRITE(6, *)' '
-         ENDIF
+	      endif
 C=========================================================================
 C           the following ELSE block is to print ECIS calculated XS
 C           (it could be omitted)
@@ -489,13 +513,18 @@ C           (it could be omitted)
 C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
 C           ecis03
             OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
-            READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..  
-            READ(45, *, END = 1500)ecistotxs
-            READ(45, *, END = 1500)ecisabsxs
-            READ(45, *, END = 1500)eciselaxs
-            CLOSE(45)
+            READ(45, *, END = 1540)  ! To skip first line <CROSS-S.> ..  
+            IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)ecistotxs
+            READ(45, *, END = 1540)ecisabsxs
+            IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)eciselaxs
+ 1540       CLOSE(45)
+            IF(ZEJc(0).EQ.0) THEN 
             WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
      &            ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
+	      ELSE
+            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, 
+     &            ecisabsxs/1000.
+	      ENDIF
 C
 C=========================================================================
          ENDIF
@@ -1285,6 +1314,7 @@ C-----------------------fission
                         csfis = csfis +xnorfis*(tdir+ dencomp*aafis)+
      &                          pfiso
                      ENDIF
+   
                      IF(FISmod(Nnuc).gt.0.)THEN
                         IF((dencomp + TDIrect).GT.0.)THEN
                            xnorfis = xnor*DENhf/(dencomp + TDIrect)
@@ -1680,7 +1710,7 @@ C        Mike, check the lines below
 C        It was a bug before. nexrt could be negative
 C        I intriduced a jump for this case, but may be this is not the proper thing to do !!! (08/2004) 
 C
-               if(nexrt.le.1) cycle 
+	            if(nexrt.le.1) cycle 
 
                   IF(nejc.EQ.0) THEN 
                      cejectile = 'gammas   '
