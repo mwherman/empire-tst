@@ -82,16 +82,14 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csemispoplv, deln(150), delz(98), ee0, GDIvp, 
-     &                 popdiscrete, popminus, popplus, poptotal, 
-     &                 poptotalall, poptotalcont, poptotallv, 
+      DOUBLE PRECISION deln(150), delz(98), ee0, GDIvp, 
+     &                 popdiscrete, poptotal, 
      &                 populdegas(3, NDEXD, 25), renorm, 
-     &                 specdegas(3, NDEXD), spectotg, spectotn, 
-     &                 spectotp, specundecayed, sumall, sumpopulee0, 
-     &                 sumpopultot, tmp, totemis, renpop
+     &                 specdegas(3, NDEXD), spectot(0:2),
+     &                 tmp, totemis, renpop
       REAL FLOAT
-      INTEGER i, ie, ie0, ie1, iemaxdiscrete, ii, iii, il, nnur, j, 
-     &        jparity, jspin, ndexmaximum, ndlwmaximum, nexmax, nudim, 
+      INTEGER i, ie, ie0, ie1, ndisc, ii, iii, il, nnur, j, 
+     &        jparity, jspin, ndexmaximum, lmax, nudim, 
      &        nnuc
       INTEGER INT, nextop
 C
@@ -122,9 +120,9 @@ C
       ndexmaximum = NDEXD       ! Maximum energy bin allowed by Degas
 C
       IF(NDLW.GT.25)THEN
-         ndlwmaximum = 25        ! Maximum spin allowed by Degas
+         lmax = 25        ! Maximum spin allowed by Degas
       ELSE
-         ndlwmaximum = NDLW
+         lmax = NDLW
       ENDIF
 C
       WRITE(42, 99005)
@@ -170,11 +168,6 @@ C
          GGDegas(3) = A(3)/13.0
       ENDIF
       IF(GDIvp.GT.1.0)GGDegas(3) = A(3)/GDIvp
-C
-C     ggdegas(1) = 10.03     ! g-value for CN, if not specified A/13 used
-C     ggdegas(2) =  9.98     ! g-value for CN-n
-C     ggdegas(3) =  9.98     ! g-value for CN-p
-C
       DDDegas(1) = delz(IZDegas) + deln(INDegas)     ! Pairing for CN
       DDDegas(2) = delz(IZDegas) + deln(INDegas - 1) ! Pairing for CN-n
       DDDegas(3) = delz(IZDegas - 1) + deln(INDegas) ! Pairing for CN-p
@@ -185,74 +178,10 @@ C
       IZCdegas = IZDegas
       ADEgas3 = FLOAT(IATdegas)**0.3333333
       IF(GAQdegas.EQ.0.)GAQdegas = 0.001
-C
-C
-C     read(ir,20) in,iz,key0
-C     N,Z of the compound nucleus, key of the projectile
-C     in+iz = 0 ==> stop of the program
-C
-C     READ(IR,30) EEXC0,ESTEP,AK,JGS,CJGS,BEPROJ,GAQ
-C     EXC. ENERGY (MEV), EN. STEP (MEV),
-C     MATRIX ELEMENT CONSTANT (MEV**3),
-C     G.S. SPIN OF THE TARGET,
-C     G.S. SPIN OF THE COMPOSITE SYSTEM,
-C     BINDING EN. OF PROJECTILE, IF NOT N OR P (MEV),
-C     QUADRUPOLE FRACTION (DEFAULT=0.001)
-C
-C     READ(IR,45) B
-C     BINDING ENERGIES FOR NEUTRONS (NUCLEI ACCORDING
-C     THEIR KEYS :  0, 1, ... , 9),
-C     LATER FOR PROTONS (0 TO 9)
-C
-C     READ(IR,45) GG
-C     SINGLE-PARTICLE LEVEL DENSITIES (1/MEV)
-C     BLANK LINE ON INPUT ==>  ALL G=A/13
-C
-C     READ(IR,45) DD
-C     PAIRING ENERGIES (MEV)
-C
-C     READ(IR,46) NUDI
-C     NUMBER OF DISCRETE LEVELS ENTERED FOR
-C     EACH NUCLEUS (PRESENT LIMIT: .LE. 10)
-C
-C     READ(IR,46) NBRA
-C     NUMBER OF DISCRETE LEVELS SUPPLIED FOR
-C     EACH NUCLEUS TOGETHER WITH THEIR BRANCHING RATIOS
-C     (LIMIT: .LE. NUDI)
-C
-C
-C     READ(IR,47) ENDI(J,I), SPIDI(J,I), NEXD(J,I)
-C     ENERGY OF DISCRETE LEVEL,
-C     PIN OF DISCRETE LEVEL,
-C     EXCITON NUMBER OF DISCRETE LEVEL
-C     (INPUT LINES ARE READ IN IN THE ORDER
-C     OF INCREASING NUCLEAR KEY NUMBERS (0 TO 9),
-C     WITHIN EACH NUCLEUS THEY ARE ORDERED
-C     FROM THE GROUND STATE TO THE
-C     HIGHEST ENERGY; NEGATIVE EXCITON NUMBER
-C     IMPLIES DISTRIBUTION OF EXCITON NUMBERS)
-C     NEXD .EQ. -1 ==> SEMI-EQUILIBRIUM DISTRIBUTION
-C     OF EXCITON NUMBERS
-C     NEXD .EQ. -2 ==> MAXIMAL COLLECTIVITY ASSUMPTION
-C
-C     IF (I.LE.NBRA(J)) READ(IR,48) (nole(ii), xc(ii), ii=1,9)
-C     IF (I.LE.NBRA)
-C     NUMBER OF LEVEL, WHERE THE GAMMA GOES
-C     (FROM CONSIDERED LEVEL I);
-C     BRANCHING RATIO
-C     TRANSITIONS TO LEVELS NOT GIVEN IN THIS LINE
-C     ARE CONSIDERED WITH ZERO INTENSITY
-C     BLANK CARD MEANS NO GAMMA TRANSITIONS ALLOWED,
-C     I.E. GROUND STATE OR ISOMER
-C
       DO j = 1, 10
          nudim = NUDidegas(j)
          IF(nudim.NE.0)THEN
             DO i = 1, nudim
-C
-C              READ(IR,47) ENDI(J,I), SPIDI(J,I), NEXD(J,I)
-C              IF (I.LE.NBRA(J)) READ(IR,48) (C     IF (I.LE.NBRA)
-C
                DO ii = 1, 9
                   IF(NOLedegas(ii).NE.0)THEN
                      ie = NOLedegas(ii)
@@ -263,422 +192,149 @@ C
          ENDIF
       ENDDO
 C
-C     call degasread     ! Reads original Degas input, for testing only
-C     CALL DEGASWRITE    ! For testing only
-C
-C     Call subdegas
+C     Run DEGAS
 C
       CALL SUBDEGAS(specdegas, populdegas)
 C
-C     Residual populations
-      sumall = 0.0
-      DO nnur = 1, 3  ! 1:CN, 2:CN-n, 3:CN-p
-         sumpopultot = 0.0
-         DO ie0 = 1, ndexmaximum         ! Energy bin
-            ee0 = ESTepdegas*ie0         ! Actual energy
-            sumpopulee0 = 0.0
-            DO j = 1, ndlwmaximum        ! Spin
-               sumpopulee0 = sumpopulee0 + populdegas(nnur, ie0, j)
-            ENDDO
-            sumpopultot = sumpopultot + sumpopulee0
-         ENDDO
-         sumall = sumall + sumpopultot
-      ENDDO
-      WRITE(42, *)'Sum of all populations (mb):', sumall
+C     specdegas(particle,energy bin)      = spectra of n,p,g
+C     populdegas(nucleus,energy bin,spin) = residual population
+C     of CN, CN-n, CN-p
+C     Note in DEGAS:
+C     CN    nucleus = 1
+C     CN-n  nucleus = 2
+C     CN-p  nucleus = 3
 C
-C     Puts results from subdegas into Empire's arrays for spectra and
-C     residual population, where
-C
-C     cse(spectral energy bin,gamma,nucleus) = cse(ie, 0, 1)
-C     pop(excitation energy bin,spin,parity,nucleus) =
-C     = pop(ie,j,jpar,1)
-C     = pop(ie,j,jpar,nres(1))
-C     = pop(ie,j,jpar,nres(2))
-C
-C     Normalization to initial CN population taken from Empire:
+C-----Normalization to initial CN population taken from Empire 
 C
       poptotal = 0.0
-      DO jspin = 1, ndlwmaximum
+      DO jspin = 1, lmax
          DO jparity = 1, 2
             poptotal = poptotal + POP(NEX(1), jspin, jparity, 1)
          ENDDO
       ENDDO
       renorm = poptotal/SGRdegas
-      WRITE(42, 99005)
-      WRITE(42, *)' Results from Degas transfered to Empire '
-      WRITE(42, *)'========================================='
 C
-C     Spectra from Degas normalized and transferred to Empire:
+C-----Transfer to Empire
 C
-      spectotg = 0.0
-      spectotn = 0.0
-      spectotp = 0.0
-      nexmax = EXCn/DE
-      DO ie0 = 1, nexmax      ! Spectral energy bin
-C        Gamma spectrum
-         IF(IDNa(5, 4).EQ.1)THEN
-            CSE(ie0 + 1, 0, 1) = CSE(ie0 + 1, 0, 1) + specdegas(3, ie0)
-     &                           *renorm
-            AUSpec(ie0 + 1, 0) = AUSpec(ie0 + 1, 0) + specdegas(3, ie0)
-     &                           *renorm
-            spectotg = spectotg + CSE(ie0, 0, 1)*ESTepdegas
+      DO nejcdegas = 1, 3 !over ejectiles
+         IF(nejcdegas.EQ.1) THEN !neutron
+            nejc = 1
+            nnur = NREs(1)
+            nnurdegas = 2
+         ELSEIF(nejcdegas.EQ.2) THEN !proton
+            nejc = 2
+            nnur = NREs(2)
+            nnurdegas = 3
+         ELSEIF(nejcdegas.EQ.3) THEN !gamma
+            nejc = 0
+            nnur = 1
+            nnurdegas = 1
+         ENDIF 
+C--------Number of bins in discrete region
+         ndisc = ELV(NLV(nnur), nnur)/DE + 0.5
+         ndisc = MAX(0,ndisc - 1)
+C--------Set IDNA-matrix index             
+         idnacont = 2*nejc
+         idnadisc = 2*nejc - 1
+         IF(nejc.EQ.0) THEN 
+            idnacont = 5
+            idnadisc = 5
          ENDIF
-C        Neutron spectrum
-         IF(IDNa(2, 4).EQ.1)THEN
-            CSE(ie0 + 1, 1, 1) = CSE(ie0 + 1, 1, 1) + specdegas(1, ie0)
-     &                           *renorm
-            AUSpec(ie0 + 1, 1) = AUSpec(ie0 + 1, 1) + specdegas(1, ie0)
-     &                           *renorm
-            spectotn = spectotn + CSE(ie0, 1, 1)*ESTepdegas
+         spectot(nejc) = 0.0
+C
+C--------Transfer to contiuum
+C
+         IF(IDNa(idnacont, 4).EQ.1)THEN
+            ie1 = ndisc + 1
+            DO ie0 = ie1, ie1+NEX(nnur)-1     ! Excitation energy bin
+               sumtmp = 0
+               ipop = ie0 - ie1 + 1 
+               ispec = NEX(nnur) - ipop + 1
+               DO jspin = 1, lmax  ! Spin (parities populated evenly)
+                  tmp = populdegas(nnurdegas, ie0, jspin)*0.5*renorm/DE
+                  POP(ipop, jspin, 1, nnur)
+     &               = POP(ipop, jspin, 1, nnur) + tmp
+                  POP(ipop, jspin, 2, nnur)
+     &               = POP(ipop, jspin, 2, nnur) + tmp
+                  sumtmp = sumtmp + 2.0*tmp
+               ENDDO
+               IF(nejc.EQ.1) THEN  !neutron spectra are shifted by 1
+                  CSE(ispec+1, nejc, 1) = CSE(ispec+1, nejc, 1) + sumtmp
+                  AUSpec(ispec+1,nejc)=AUSpec(ispec+1,nejc)+sumtmp
+               ELSE 
+                  CSE(ispec, nejc, 1) = CSE(ispec, nejc, 1) + sumtmp
+                  AUSpec(ispec, nejc) = AUSpec(ispec, nejc) + sumtmp
+               ENDIF 
+               spectot(nejc) = spectot(nejc) + sumtmp
+               IF(ENDf.EQ.1) THEN 
+                  POPcse(ipop,nejc,ispec,nnur) =
+     &                      POPcse(ipop,nejc,ispec,nnur)+sumtmp
+c-----------------Correct last bin (not needed for POP as for this it is 
+C-----------------done at the end)                
+                  IF(ipop.EQ.1)
+     &            POPcse(ipop,nejc,ispec,nnur)=
+     &                         POPcse(ipop,nejc,ispec,nnur)-0.5*sumtmp
+C-----------------Bin population by PE (spin/parity integrated)
+                  POPbin(ipop,nnur) = sumtmp
+C-----------------DDX using portions                  
+C-----------------for the time being not needed since DEGAS is isotropic
+C                 POPcseaf(Ie,nejc,icsp,nnur) = 1.0
+               ENDIF 
+            ENDDO
+C-----------Continuum exclusive spectra *** done ***
          ENDIF
-C        Proton spectrum
-         IF(IDNa(4, 4).EQ.1)THEN
-            CSE(ie0 + 1, 2, 1) = CSE(ie0 + 1, 2, 1) + specdegas(2, ie0)
-     &                           *renorm
-            AUSpec(ie0 + 1, 2) = AUSpec(ie0 + 1, 2) + specdegas(2, ie0)
-     &                           *renorm
-            spectotp = spectotp + CSE(ie0, 2, 1)*ESTepdegas
+C
+C--------Transfer to discrete levels
+C
+         IF(IDNa(idnadisc, 4).EQ.1)THEN
+C-----------Population evenly distributed over levels
+            popdiscrete = 0.0
+            DO ie0 = 1, ndisc
+               DO jspin = 1, lmax
+                  popdiscrete = popdiscrete + 
+     &                          populdegas(nnurdegas, ie0, jspin)
+               ENDDO
+            ENDDO
+            popdiscrete = popdiscrete*renorm*ESTepdegas/NLV(nnur)
+            popdiscang  = popdiscrete/4.0/PI
+            excnq = EX(NEX(1), 1) - Q(Nejc, 1)
+            DO il = 1, NLV(nnur)
+               POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
+C--------------store population of discrete levels for recoils' calculations
+               REClev(il, nejc) = REClev(il, nejc) + popdiscrete
+               ie = (excnq - ELV(il, Nnur))/DE + 1.0
+               CSE(ie, nejc, 1) = CSE(ie, nejc, 1) + popdiscrete/DE
+               spectot(nejc) = spectot(nejc) + popdiscrete/DE 
+               IF(ENDf.EQ.1) THEN 
+C-----------------add DEGAS discrete level contribution to the population 
+C-----------------spectrum used for the ENDF exclusive spectra
+                  POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) + 
+     &                                     popdiscrete/DE 
+ 
+               ENDIF
+C--------------Add isotropic DEGAS contribution to direct ang. distributions
+               IF(nejc.NE.0) THEN !only for particle ejectiles
+                  DO na = 1, NDANG
+                     CSAlev(na, il, nejc) = CSAlev(na, il, nejc) + 
+     &                                      popdiscang 
+                  ENDDO
+               ENDIF
+            ENDDO
          ENDIF
-      ENDDO
+         spectot(nejc) = spectot(nejc)*DE
+         CSEmis(nejc, 1) = CSEmis(nejc, 1) + spectot(nejc)
+      ENDDO   !over ejectiles
 C-----total DEGAS emission accepted in calculations (note matrix IDNa)
-      totemis = spectotg*IDNa(5, 4) + spectotn*IDNa(2, 4)
-     &          + spectotp*IDNa(4, 4)
+      totemis = spectot(0) + spectot(1) + spectot(2)
 C-----Renormalize Empire fusion distribution to account for loss due to
 C-----accepted DEGAS emission (note that there is no competition with
 C-----other reaction mechanisms)
       renpop = (poptotal - totemis)/poptotal
-      DO jspin = 1, ndlwmaximum
+      DO jspin = 1, lmax
          DO jparity = 1, 2
             POP(NEX(1), jspin, jparity, 1)
      &         = POP(NEX(1), jspin, jparity, 1)*renpop
          ENDDO
-      ENDDO
-      WRITE(42, 99005)
-      WRITE(42, *)'1) Spectra (mb/MeV)'
-      WRITE(42, *)'   Spectral energy, g, n, p'
-      DO ie0 = 1, nexmax
-         ee0 = ESTepdegas*(ie0 - 1)
-         WRITE(42, 99002)ee0, CSE(ie0, 0, 1), CSE(ie0, 1, 1), 
-     &                   CSE(ie0, 2, 1)
-      ENDDO
-      WRITE(42, 99005)
-      specundecayed = poptotal - spectotg - spectotn - spectotp
-      WRITE(42, *)' Initial CN population Degas  (mb):', sumall
-      WRITE(42, 99005)
-      WRITE(42, *)' Initial CN population Empire (mb):', poptotal
-      WRITE(42, *)' Integral preeq gamma   (mb):', spectotg
-      WRITE(42, *)' Integral preeq neutron (mb):', spectotn
-      WRITE(42, *)' Integral preeq proton  (mb):', spectotp
-      WRITE(42, *)' Integral undecayed     (mb):', specundecayed
-C
-C     Residual population from Degas normalized and transferred to Empire.
-C     This is done for CN, CN-n and CN-p final nuclei, defined by
-C     nnur =1, nres(1), nres(2),
-C     sunbject to green light from the 'model usage matrix' IDNa.
-C     - We first treat residual population of discrete levels.
-C       (blocked in the current version)                      
-C     - This is followed by residual population for continuum.
-C
-C     CN, discrete levels
-C-----population has been blocked by commenting some lines below
-C
-      IF(IDNa(5, 4).EQ.1)THEN
-         nnuc = 1
-C        WRITE(6, *)'nnuc=', nnuc
-C        WRITE(6, *)'ELV=', ELV(NLV(nnuc), nnuc)
-C        WRITE(6, *)'NEX =', NEX(nnuc)
-C        WRITE(6, *)'ndexmaximum=', ndexmaximum
-         iemaxdiscrete = ELV(NLV(nnuc), nnuc)/DE + 0.5
-C        Number of bins in discrete region
-c        iemaxdiscrete = iemaxdiscrete - 1
-C        WRITE(6, *)'iemaxdiscrete=', iemaxdiscrete
-         popdiscrete = 0.0
-         DO ie0 = 1, iemaxdiscrete
-            DO jspin = 1, ndlwmaximum
-               popdiscrete = popdiscrete + populdegas(1, ie0, jspin)
-     &                       *renorm
-            ENDDO
-C           WRITE(6, *)'populdegas to discret=', ie0, popdiscrete
-         ENDDO
-         popdiscrete = popdiscrete*ESTepdegas
-         popdiscrete = popdiscrete/NLV(nnuc)
-C        DO il = 1, NLV(nnuc)
-C           POPlv(il, nnuc) = POPlv(il, nnuc) + popdiscrete
-C-----------store population of discrete levels for recoils' calculations
-C           REClev(il, 0) = REClev(il, 0) + popdiscrete
-C        ENDDO           ! Even population of discrete levels
-C        WRITE(42, 99005)
-C        WRITE(42, *)'2) Residual popul for nnuc:', nnuc
-C        WRITE(42, *)'   Discrete level, energy, population'
-C        DO il = 1, NLV(nnuc)
-C           WRITE(42, 99003)il, ELV(il, nnuc), POPlv(il, nnuc)
-C        ENDDO
-      ENDIF
-C
-C-----CN, continuum:
-C
-      IF(IDNa(5, 4).EQ.1)THEN
-         nnuc = 1
-         ie1 = iemaxdiscrete + 1
-         nextop = ie1 + NEX(1) - 2 !highest bin excluding top CN energy
-         DO ie0 = ie1, nextop     ! over excitation energy
-            DO jspin = 1, ndlwmaximum  ! over spin (parity populated evenly)
-               tmp = populdegas(1, ie0, jspin)*0.5*renorm/DE
-               POP(ie0 - ie1 + 1, jspin, 1, nnuc) = tmp
-               POP(ie0 - ie1 + 1, jspin, 2, nnuc) = tmp
-            ENDDO
-         ENDDO
-         WRITE(42, 99005)
-         WRITE(42, *)'Residual population for nnuc:', nnuc
-         WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, nexmax
-            ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
-            popplus = 0.0
-            popminus = 0.0
-            DO jspin = 1, NDLW
-               popplus = popplus + POP(ie0, jspin, 1, nnuc)*DE
-               popminus = popminus + POP(ie0, jspin, 2, nnuc)*DE
-            ENDDO
-            WRITE(42, 99002)ee0, POP(ie0, 1, 1, nnuc), 
-     &                      POP(ie0, 2, 1, nnuc), POP(ie0, 3, 1, nnuc), 
-     &                      POP(ie0, 4, 1, nnuc), popplus
-            WRITE(42, 99002)ee0, POP(ie0, 1, 2, nnuc), 
-     &                      POP(ie0, 2, 2, nnuc), POP(ie0, 3, 2, nnuc), 
-     &                      POP(ie0, 4, 2, nnuc), popminus
-         ENDDO
-      ENDIF
-C
-C-----CN-n, discrete levels
-C-----population has been blocked by some commenting lines below
-C
-      IF(IDNa(1, 4).EQ.1)THEN
-         nnur = NREs(1)
-C--------Number of bins in discrete region
-         iemaxdiscrete = ELV(NLV(nnur), nnur)/DE + 0.5
-c        iemaxdiscrete = iemaxdiscrete - 1
-         popdiscrete = 0.0
-         DO ie0 = 1, iemaxdiscrete
-            DO jspin = 1, ndlwmaximum
-               popdiscrete = popdiscrete + populdegas(2, ie0, jspin)
-     &                       *renorm
-            ENDDO
-         ENDDO
-C--------Even population of discrete levels
-         popdiscrete = popdiscrete/NLV(nnur)
-C        DO il = 1, NLV(nnur)
-C           POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
-C-----------store population of discrete levels for recoils' calculations
-C           REClev(il, 1) = REClev(il, 1) + popdiscrete
-C-----------Add isotropic DEGAS contribution to direct ang. distributions
-C           popdiscrete = popdiscrete/4.0/PI
-C           DO na = 1, NDANG
-C              CSAlev(na, il, 1) = CSAlev(na, il, 1) + popdiscrete
-C           ENDDO
-C        ENDDO
-C        WRITE(42, 99005)
-C        WRITE(42, *)'2) Residual popul for nnur:', nnur
-C        WRITE(42, *)'   Discrete level, energy, population'
-C        DO il = 1, NLV(nnur)
-C           WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
-C        ENDDO
-      ENDIF
-C
-C-----CN-n, continuum:
-C
-      IF(IDNa(2, 4).EQ.1)THEN
-         nnur = NREs(1)
-         ie1 = iemaxdiscrete + 1
-         DO ie0 = ie1, nexmax     ! Excitation energy bin
-            DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)
-               tmp = populdegas(2, ie0, jspin)*0.5*renorm/DE
-               POP(ie0 - ie1 + 1, jspin, 1, nnur)
-     &            = POP(ie0 - ie1 + 1, jspin, 1, nnur) + tmp
-               POP(ie0 - ie1 + 1, jspin, 2, nnur)
-     &            = POP(ie0 - ie1 + 1, jspin, 2, nnur) + tmp
-            ENDDO
-         ENDDO
-         WRITE(42, 99005)
-         WRITE(42, *)'Residual population for nnur:', nnur
-         WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, nexmax
-            ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
-            popplus = 0.0
-            popminus = 0.0
-            DO jspin = 1, NDLW
-               popplus = popplus + POP(ie0, jspin, 1, nnur)*DE
-               popminus = popminus + POP(ie0, jspin, 2, nnur)*DE
-            ENDDO
-            WRITE(42, 99002)ee0, POP(ie0, 1, 1, nnur), 
-     &                      POP(ie0, 2, 1, nnur), POP(ie0, 3, 1, nnur), 
-     &                      POP(ie0, 4, 1, nnur), popplus
-            WRITE(42, 99002)ee0, POP(ie0, 1, 2, nnur), 
-     &                      POP(ie0, 2, 2, nnur), POP(ie0, 3, 2, nnur), 
-     &                      POP(ie0, 4, 2, nnur), popminus
-         ENDDO
-      ENDIF
-C-----
-C-----CN-p, discrete levels
-C-----population has been blocked by commenting lines below
-C-----
-      IF(IDNa(3, 4).EQ.1)THEN
-         nnur = NREs(2)
-C--------Number of bins in discrete region
-         iemaxdiscrete = ELV(NLV(nnur), nnur)/DE + 0.5
-c        iemaxdiscrete = iemaxdiscrete - 1
-         popdiscrete = 0.0
-         DO ie0 = 1, iemaxdiscrete
-            DO jspin = 1, ndlwmaximum
-               popdiscrete = popdiscrete + populdegas(3, ie0, jspin)
-     &                       *renorm
-            ENDDO
-         ENDDO
-         popdiscrete = popdiscrete*ESTepdegas
-         popdiscrete = popdiscrete/NLV(nnur)
-C        DO il = 1, NLV(nnur)
-C           POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
-C-----------store population of discrete levels for recoils' calculations
-C           REClev(il, 2) = REClev(il, 2) + popdiscrete
-C-----------Add isotropic DEGAS contribution to direct ang. distributions
-C           popdiscrete = popdiscrete/4.0/PI
-C           DO na = 1, NDANG
-C              CSAlev(na, il, 2) = CSAlev(na, il, 2) + popdiscrete
-C           ENDDO
-C        ENDDO        ! Even population of discrete levels
-C        WRITE(42, 99005)
-C        WRITE(42, *)'2) Residual popul for nnur:', nnur
-C        WRITE(42, *)'   Discrete level, energy, population'
-C        DO il = 1, NLV(nnur)
-C           WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
-C        ENDDO
-      ENDIF
-C-----
-C-----CN-p, continuum:
-C-----
-      IF(IDNa(4, 4).EQ.1)THEN
-         nnur = NREs(2)
-         ie1 = iemaxdiscrete + 1
-         DO ie0 = ie1, nexmax     ! Excitation energy bin
-            DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)
-               tmp = populdegas(3, ie0, jspin)*0.5*renorm/DE
-               POP(ie0 - ie1 + 1, jspin, 1, nnur)
-     &            = POP(ie0 - ie1 + 1, jspin, 1, nnur) + tmp
-               POP(ie0 - ie1 + 1, jspin, 2, nnur)
-     &            = POP(ie0 - ie1 + 1, jspin, 2, nnur) + tmp
-            ENDDO
-         ENDDO
-         WRITE(42, 99005)
-         WRITE(42, *)'Residual population for nnur:', nnur
-         WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, nexmax
-            ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
-            popplus = 0.0
-            popminus = 0.0
-            DO jspin = 1, NDLW
-               popplus = popplus + POP(ie0, jspin, 1, nnur)*DE
-               popminus = popminus + POP(ie0, jspin, 2, nnur)*DE
-            ENDDO
-            WRITE(42, 99002)ee0, POP(ie0, 1, 1, nnur), 
-     &                      POP(ie0, 2, 1, nnur), POP(ie0, 3, 1, nnur), 
-     &                      POP(ie0, 4, 1, nnur), popplus
-            WRITE(42, 99002)ee0, POP(ie0, 1, 2, nnur), 
-     &                      POP(ie0, 2, 2, nnur), POP(ie0, 3, 2, nnur), 
-     &                      POP(ie0, 4, 2, nnur), popminus
-         ENDDO
-      ENDIF
-C-----
-C-----As a next step in creating residual population, we check new
-C-----CN population integral:
-C-----
-      poptotallv = 0.0
-      DO il = 1, NLV(1)
-         poptotallv = poptotallv + POPlv(il, 1)
-      ENDDO
-      poptotalcont = 0.0
-      DO ie0 = 1, nexmax
-         DO jspin = 1, ndlwmaximum
-            DO jparity = 1, 2
-               poptotalcont = poptotalcont + POP(ie0, jspin, jparity, 1)
-     &                        *DE
-            ENDDO
-         ENDDO
-      ENDDO
-      poptotalall = poptotallv + poptotalcont
-      WRITE(42, 99005)
-      WRITE(42, *)'  Summary of CN population:'
-      WRITE(42, 99005)
-      WRITE(42, *)' Excitation energy         (MeV)=', EXCn
-      WRITE(42, *)' Initial population Degas  (mb) =', sumall
-      WRITE(42, 99005)
-      WRITE(42, *)' Initial population Empire (mb) =', poptotal
-      WRITE(42, *)' Preeq gamma emission      (mb) =', spectotg
-      WRITE(42, *)' Preeq neutron emission    (mb) =', spectotn
-      WRITE(42, *)' Preeq proton emission     (mb) =', spectotp
-      WRITE(42, *)' New pop Empire discrete   (mb) =', poptotallv
-      WRITE(42, *)' New pop Empire continuum  (mb) =', poptotalcont
-      WRITE(42, *)' New pop Empire all        (mb) =', poptotalall
-C-----
-C-----Now we update CSEmis(0,1), where 0 = g, 1 = CN
-C-----CSEmis(1,1), where 1 = n, 1 = CN
-C-----CSEmis(2,1), where 2 = p, 1 = CN:
-C-----
-C-----Gamma
-      csemispoplv = 0.0
-      DO il = 1, NLV(1)
-         csemispoplv = csemispoplv + POPlv(il, 1)
-      ENDDO
-      CSEmis(0, 1) = CSEmis(0, 1) + spectotg*IDNa(5, 4)
-      WRITE(42, 99005)
-      WRITE(42, *)'CSEmis(0,1), gamma from CN in mb:'
-      WRITE(42, *)'Discrete =', csemispoplv
-      WRITE(42, *)'All      =', CSEmis(0, 1)
-C-----
-C-----Neutrons
-C-----
-      nnur = NREs(1)
-      csemispoplv = 0.0
-      DO il = 1, NLV(nnur)
-         csemispoplv = csemispoplv + POPlv(il, nnur)
-      ENDDO
-      CSEmis(1, 1) = CSEmis(1, 1) + spectotn*IDNa(2, 4)
-      WRITE(42, 99005)
-      WRITE(42, *)'CSEmis(1,1), neutrons from CN in mb:'
-      WRITE(42, *)'Discrete =', csemispoplv
-      WRITE(42, *)'All      =', CSEmis(1, 1)
-C-----
-C-----Protons
-C-----
-      nnur = NREs(2)
-      csemispoplv = 0.0
-      DO il = 1, NLV(nnur)
-         csemispoplv = csemispoplv + POPlv(il, nnur)
-      ENDDO
-      CSEmis(2, 1) = CSEmis(2, 1) + spectotp*IDNa(4, 4)
-      WRITE(42, 99005)
-      WRITE(42, *)'CSEmis(2,1), protons from CN in mb:'
-      WRITE(42, *)'Discrete =', csemispoplv
-      WRITE(42, *)'All      =', CSEmis(2, 1)
-C-----Summary of CN energy bins
-      WRITE(42, 99005)
-      WRITE(42, *)'Summary of CN energy bins:'
-      WRITE(42, 99005)
-C-----Number of bins in CN discrete region
-      iemaxdiscrete = ELV(NLV(1), 1)/DE + 0.5
-      iemaxdiscrete = iemaxdiscrete - 1
-      WRITE(42, *)'Eexc  (MeV) =', EXCn
-      WRITE(42, *)'Estep (MeV) =', DE
-      WRITE(42, *)'Max CN discrete level =', NLV(1), ELV(NLV(1), 1)
-      WRITE(42, *)'Max CN bin in discrete region=', iemaxdiscrete
-      WRITE(42, *)'Max CN bin from Empire=', NEX(1)
-      DO ie0 = 1, NEX(1)
-         WRITE(42, *)'Exc energy from Empire=', ie0, EX(ie0, 1)
-      ENDDO
-      WRITE(42, *)' '
-      ie1 = iemaxdiscrete + 1
-      DO ie0 = ie1, nexmax
-         iii = ie0 - ie1 + 1
-         ee0 = ESTepdegas*(iii + iemaxdiscrete)
-         IF(ee0.LT.(EXCn + DE))WRITE(42, *)'Exc energy from Degas = ', 
-     &                               iii, ee0
       ENDDO
 99001 FORMAT(1x, f5.2, 5E9.2, 2E11.4)
 99002 FORMAT(1x, f5.2, 5E10.3, 2E11.4)
@@ -1848,6 +1504,12 @@ c                    ge = G*(e-dd(iip))
                      ENDIF
                   ENDDO
                ENDDO
+CMH------------never-come-back approximation - set lambda- close to 0
+               DO IJ = 1, 25
+                  DO kna = 1, 25
+                     alms(kna, IJ) = alms(kna, IJ) *1.0e-10 
+                  ENDDO
+               ENDDO
 C
 C--------------INTRANUCLEAR TRANSITION RATES ESTABLISHED
 C
@@ -2311,9 +1973,9 @@ C           4402 write(*,*) ie,il,popul(1,ie,il),popultot1
 Ceb         ENDDO
 Coblo-------Now residual population of CN at the initial
 C-----------excitation energy, ie=nestep.
-            DO iloblo = 1, 25
-               Popul(1, NEStep, iloblo) = sigmacn(iloblo)
-            ENDDO
+cMH         DO iloblo = 1, 25
+cMH            Popul(1, NEStep, iloblo) = sigmacn(iloblo)
+cMH         ENDDO
             IF(NBR.LE.0)THEN
             ENDIF
 C
