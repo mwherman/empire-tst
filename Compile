@@ -2,7 +2,6 @@
 #script to compile EMPIRE II package
 cd source
 make
-make ecis03
 cd ../util/empend
 make
 cd ../x4toc4
