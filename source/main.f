@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-07 14:32:46 $
-Ccc   * $Id: main.f,v 1.61 2005-03-07 14:32:46 herman Exp $
+Ccc   * $Date: 2005-03-09 20:03:15 $
+Ccc   * $Id: main.f,v 1.62 2005-03-09 20:03:15 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -64,7 +64,7 @@ C
       INCLUDE 'io.h'
       DATA ctldir/'../TL/'/
       icalled = 0
-      CALL THORA(6)
+c     CALL THORA(6)
 C-----
 C-----Read and prepare input data
 C-----
@@ -1663,7 +1663,7 @@ C-----end of ENDF spectra (inclusive)
          CLOSE (16,STATUS = 'delete')
          CLOSE (66,STATUS = 'delete')
          WRITE (*,*) '.'
-         CALL THORA(6)
+c        CALL THORA(6)
          STOP '. REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
