@@ -10,6 +10,12 @@ C-A        A-1400 Vienna
 C-A        AUSTRIA
 C-Version: Original code March 2001
 C-V  01/05 Increase MXEN from 2000 to 5000 (A.Trkov)
+C-V  03/07 Implement ALIASLV to modify level energies (A.Trkov)
+C-V  03/08 Sort differential data in ascending energy (A.Trkov)
+C-V  03/10 Minor fix for eof on C4 file (A.Trkov)
+C-V  04/01 Increase MXEN from 5000 to 40000 (A.Trkov)
+C-V  04/06 - Resequence DDX ang.distrib. at Eo into spectra at Ang.
+C-V        - Paging buffer for sorting to increase efficiency (Trkov)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -30,6 +36,13 @@ C-M  purposes (for example, with PLOTC4) it is advantageous if the
 C-M  data in computational file are sorted by MAT/MF/MT numbers
 C-M  and the incident particle energy. The C4SORT code performs
 C-M  this task.
+C-M
+C-M  Note:
+C-M  The entries in a C4 file may appear in any order any the file
+C-M  size may be large. Depending on the actual ordering of the data
+C-M  on a C4 file, the sorting sequence may become complex, requiring
+C-M  the file to be rewound and processed again. For this reason the
+C-M  sorting process may take a considerable amount of time.
 C-M
 C-M  Instructions
 C-M  ------------
@@ -104,6 +117,12 @@ C-M                        ZA2,MF2,MT2 must be specified for the
 C-M                        conversion to take place).
 C-M               NOTE: This option is available only in the
 C-M                     keyword-oriented input.
+C-M  '   ALIASLV' Equivalent ZA/E-LVL can be defined to correct
+C-M               level energies that appear in an EXFOR file.
+C-M                11-20  ZA1 designation on the source file.
+C-M                21-30  Level energy in the source file.
+C-M                31-40  ZA2 designation on the sorted file.
+C-M                41-50  Level energy in the sorted file.
 C-M  '   ENDC4S ' This keyword signals the end of C4SORT input. All
 C-M               instructions that follow are ignored.
 C-M
@@ -116,17 +135,33 @@ C-M    LOU  3  Sorted EXFOR data file in C4 format (output).
 C-M    LSC  4  C4SORT.TMP scratch file.
 C-M    LKB  5  Default input.
 C-M    LTT  6  Default output.
+C-M
+C-M  Dimension limits:
+C-M    MXEN - maximum number of EXFOR entries or sections by which
+C-M           sorting is done.
+C-M    LCH  - Length of the comparison string for sorting
+C-M           (defined by the sorting logic - do not change).
+C-M    MXAL - Maximum number of input alias strings.
+C-M    MXIR - Page buffer size (increasing the buffer size
+C-M           increases sorting efficiency for datasets where
+C-M           extensive re-ordering is required; e.g. high
+C-M           resolution cross section measurements at different
+C-M           angles which must be grouped to angular distributions
+C-M           at different energies).
 C-
-      PARAMETER    (MXEN=5000,LCH=30,MXAL=200)
-      CHARACTER*132 REC
-      CHARACTER*40  FLIN,FLC4,FLOU,FLSC
-      CHARACTER*35  REF
-      CHARACTER*20  ZAMT
-      CHARACTER*14  ALIA(2,MXAL)
+      PARAMETER       (MXEN=40000,LCH=34,MXAL=20,MXIR=12000)
+      CHARACTER*132    REC,RC1,RC6(MXIR)
+      CHARACTER*40     FLIN,FLC4,FLOU,FLSC
+      CHARACTER*35     REF
+      CHARACTER*20     ZAMT
+      CHARACTER*15     EIN
+      CHARACTER*14     ALIA(4,MXAL)
       CHARACTER*(LCH)  ENT(MXEN)
-      CHARACTER*11  EIN
-      LOGICAL       EXST
-      DIMENSION     IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
+      CHARACTER*1      EN1(LCH,MXEN)
+      LOGICAL          EXST
+      DIMENSION        IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
+     &                ,NSE(MXEN)
+      EQUIVALENCE     (ENT(1),EN1(1,1))
 C* Preset the ZA and reference strings
       DATA REF/'###################################'/
       DATA ZAMT/'####################'/
@@ -136,6 +171,8 @@ C* Files and logical file unit numbers
      3     FLOU/'C4.DAT'/
      4     FLSC/'C4SORT.TMP'/
       DATA LIN,LC4,LOU,LSC,LKB,LTT/ 1, 2, 3, 4, 5, 6 /
+      NSET=0
+      MPG =20000
 C*
 C* Check for the existence of the input file
       INQUIRE(FILE=FLIN,EXIST=EXST)
@@ -174,77 +211,216 @@ C* Write the banner to output
       WRITE(LTT,900) '       Source EXFOR file in C4 format : ',FLC4
       WRITE(LTT,900) '       Sorted EXFOR file in C4 format : ',FLOU
       WRITE(LTT,900)
+      IF(NALI.GT.0) THEN
+        WRITE(LTT,900) ' Aliased quantities:                    '
+        WRITE(LTT,900) ' Old:  MAT  MF  MT      ELVL New:  MAT  '
+     &                ,'MF  MT      ELVL                        '
+        DO I=1,NALI
+          WRITE(LTT,*) '    ',ALIA(1,I),ALIA(3,I),ALIA(2,I),ALIA(4,I)
+        END DO
+      END IF
    17 CONTINUE
 C*
 C* Begin processing the source file
       NEN=0
       JLN=0
+      MLN=0
+      MOU=0
+      IEN=0
 C* Copy records to scratch until the reference changes
    20 READ (LC4,901,END=200) REC
+      IF(REC(2:20).EQ.'                   ') GO TO 200
 C* Change any alias ZA/MF/MT designations
       CALL CALIAS(NALI,ALIA,REC)
+C* Decode the MF number
+      READ (REC(12:15), * ,END=801,ERR=801) MF
+C* Decode the incident particle energy
+      READ (REC(23:31),931) FIN
+C* Check for change in IZI, IZA, MF, MT
+      IF(REC(1:20).NE.ZAMT) GO TO 40
+C* Check for change in reference
+      IF(REC(98:132).NE.REF) GO TO 40
+      IF(MF.GE.4 .AND. MF.LE.6) THEN
+C* Process differential and double differential data
+C* Check for change in incident particle energy
+        IF(NINT(FIN).NE.IFIN) GO TO 40
+C* Re-sequence double differential ang.distrib to spectra
+   22   IR=IR+1
+        RC6(IR)=REC
+        IF(IR.GT.MXIR) STOP 'C4SORT ERROR - MXIR limit exceeded'
+        READ (LC4,901,END=200) REC
+        IF(REC(1:20).EQ.'                    ') GO TO 24
+C* Change any alias ZA/MF/MT designations
+        CALL CALIAS(NALI,ALIA,REC)
+C* Decode the MF number
+        READ (REC(12:15), * ,END=801,ERR=801) MF1
+C* Decode the incident particle energy
+        READ (REC(23:31),931) FIN
+C* Check for change in IZI, IZA, MF, MT
+        IF(MF1      .NE.  MF) GO TO 24
+        IF(NINT(FIN).NE.IFIN) GO TO 24
+        IF(REC(1:20).NE.ZAMT) GO TO 24
+C* Check for change in reference
+        IF(REC(98:132).NE.REF) GO TO 24
+        GO TO 22
+C*
+C* Block for one incident energy read - Sort the data
+   24   CONTINUE
+C*
+C* Write the sorted double differential block - set first angle
+        II =1
+        RC1=RC6(II)
+   26   II =II+1
+        READ (RC1(59:67),931) ANG
+        IAN=NINT(ANG*100000)
+        RC1(59:67)='#########'
+        JSET=1
+C* Find and print all other entries at this angle
+          DO J=II,IR
+            RC1=RC6(J)
+C...            PRINT *,'   ',IAN,RC1(59:67),J,II
+C* Ignore records that are already processed
+            IF (RC1(59:67).NE.'#########') THEN
+              READ (RC1(59:67),931) ANG
+              JAN=NINT(ANG*100000)
+              IF(JAN.EQ.IAN) THEN
+C...                PRINT *,'Duplicate ',RC1(1:70)
+                WRITE(LSC,901) RC1
+                JLN=JLN+1
+                NSET=NSET+1
+                JSET=JSET+1
+                RC1(59:67)='#########'
+                RC6(J)=RC1
+              END IF
+            END IF
+          END DO
+C* Find the next angle
+          I=II
+          DO J=I,IR
+            RC1=RC6(J)
+            IF (RC1(59:67).NE.'#########') THEN
+C...                PRINT *,'Printing ',RC1(1:70)
+              WRITE(LSC,901) RC1
+              JLN=JLN+1
+              NSET=NSET+1
+              II=J
+              GO TO 26
+            END IF
+          END DO
+        IF(REC(1:20).EQ.'                    ') GO TO 200
+        GO TO 40
+      END IF
+C*
+C* Record identified to belong to the same set - process next record
       WRITE(LSC,901) REC
       JLN=JLN+1
-      IF(REC(1:20).EQ.ZAMT .AND. REC(98:132).EQ.REF) GO TO 20
-C* Reference changed - decode the incident particle energy
-      READ (REC(23:31),931) FIN
-      WRITE(EIN,932) FIN
-C* Save the entry data
+      NSET=NSET+1
+      GO TO 20
+C*
+C* Make a new record entry - save the incident particle energy
+   40 WRITE(EIN,932) FIN
+C* Save the number of points for the previous entry
+      IR =1
+      RC6(IR)=REC
+      WRITE(LSC,901) REC
+      JLN=JLN+1
+      NSET=NSET+1
+      IF(NEN.GT.0) NSE(NEN)=NSET
+C* Save the new entry data
       IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
       NEN=NEN+1
       LNE(NEN)=JLN
       ENT(NEN)=REC(1:19)//EIN
       REF =REC(98:132)
       ZAMT=REC(1:20)
+      IFIN=NINT(FIN)
+c...      print *,nen,ien,ent(nen),' ',ref
+      NSET=0
 C* Proceed to next record
-      GO TO 20
+      IF(IEN.EQ.0) GO TO 20
 C* Source C4 file processed
-  200 WRITE(LTT,921) ' Number of EXFOR entries              : ',NEN
+  200 NSET=NSET+1
+      IF(NEN.GT.0) NSE(NEN)=NSET
+      WRITE(LTT,921) ' Number of EXFOR entries to sort      : ',NEN
       WRITE(LTT,921) ' Total number of records              : ',JLN
       CLOSE(UNIT=LC4)
 C*
 C* Sort the entries
-      CALL SRTTCH(NEN,LCH,ID1,ID2,ENT)
+      CALL SRTTCH(NEN,LCH,ID1,ID2,EN1)
+c...
+c...      print *,'Writing sorted entry list to c4sort.scr'
+c...      open (unit=41,file='c4sort.scr',status='unknown')
+c...      write(41,*) 'i,lne,nse,id2,ent'
+c...      do i=1,nen
+c...        write(41,'(4i6,a34)') i,lne(i),nse(i),id2(i),ent(i)
+c...      end do
+c...      close(unit=41)
+c...
       WRITE(LTT,921) ' Indices sorted - begin writing file    '
 C*
 C* Write the sorted EXFOR file from scratch
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
-      REWIND LSC
       KLN=JLN
-      JLN=0
+      I1=KLN+1
+C* Loop over different entries
       DO 420 I=1,NEN
-      ILN=ID2(I)
-      ILN=LNE(ILN)
-      IF(JLN.GT.ILN) THEN
-        REWIND LSC
-        JLN=0
-      END IF
-C* Skip up to ILN-th record
-  414 IF(JLN.EQ.ILN) GO TO 416
-      READ (LSC,901) REC
-      JLN=JLN+1
-      GO TO 414
-C* Copy records for the same reference to output
-  416 READ (REC,941) MF,XS
+        J   =ID2(I)
+        ILN =LNE(J)
+        NSET=NSE(J)
+c...          print *,'Sorted',j
+c...          print *,'I,I1,Iln,Nset',I,I1,Iln,Nset
+C* If indexing is correct, this should not happen
+        IF( ( ILN.LE. 0 .OR. ILN.GT.KLN) .OR.
+     &      (NSET.LE. 0 .OR. ILN+NSET-1.GT.KLN) ) THEN
+          PRINT *,'ILN,NSET,KLN',ILN,NSET,KLN
+          STOP 'C4SORT ERROR - Unknown indexing fault'
+        END IF
+        IF(ILN.LT.I1) THEN
+C* Rewind if next entry ILN appears before the current buffer
+          REWIND LSC
+          I2=0
+          I1=I2-MXIR+1
+        END IF
+        DO J=1,NSET
+          JLN=ILN-1+J
+          DO WHILE (I2.LT.JLN)
+            I1=I2+1
+            I2=MIN(KLN,I2+MXIR)
+            MR=I2-I1+1
+            DO L=1,MR
+              READ (LSC,901) RC6(L)
+            END DO
+          END DO
+          JJ=JLN-I1+1
+c...          print *,'i1,i2,jln',i1,i2,jln,JJ
+          REC=RC6(JJ)
 C* Suppress printout of negative cross sections
-      IF(MF.NE.3 .OR. XS.GT.0) WRITE(LOU,901) REC
-      IF(JLN.GE.KLN) GO TO 420
-      REF=REC(98:132)
-      READ (LSC,901) REC
-      JLN=JLN+1
-      IF(REF.EQ.REC(98:132)) GO TO 416
+          READ (REC,941) MF,XS
+          IF(MF.NE.3 .OR. XS.GT.0) WRITE(LOU,901) REC
+C* Print a message after every MPG sorted records
+          MLN=MLN+1
+          IF(MLN.GT.MPG) THEN
+            MOU=MOU+MPG
+            MLN=MLN-MPG
+            WRITE(LTT,921)'                       Sorted records : ',MOU
+          END IF
+        END DO
 C* Proceed to the next data set
   420 CONTINUE
 C*
 C* All data processed
   600 CLOSE(UNIT=LOU)
       STOP 'C4SORT Completed'
+C* Error trap
+  801 WRITE(*,900) 'C4SORT ERROR - Illegal C4 record :      '    
+      WRITE(*,900) '"'//REC(1:39),REC(40:78)//'"'
+      STOP 'C4SORT ERROR - reading C4 file'
 C*
   900 FORMAT(2A40)
   901 FORMAT(A132)
   921 FORMAT(A40,I6)
   931 FORMAT(BN,F9.0)
-  932 FORMAT(F11.1)
+  932 FORMAT(F15.3)
   941 FORMAT(11X,I4,25X,F9.0)
       END
       SUBROUTINE C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,IER)
@@ -252,12 +428,12 @@ C-Title  : Subroutine C4SINP
 C-Purpose: Process input instructions for C4SORT
       PARAMETER    (MXKW=10)
       CHARACTER*40  FLC4,FLOU
-      CHARACTER*14  ALIA(2,1)
+      CHARACTER*14  WORD,ALIA(4,1)
       CHARACTER*10  KWRD(MXKW),REC(8),C10
 C*
       DATA KWRD
      1/'$* C4SORT ','   FLC4IN ','   FLC4OU ','          ','          '
-     1,'   ALIAS  ','          ','          ','          ','   ENDC4S '/
+     1,'   ALIAS  ','   ALIASLV','          ','          ','   ENDC4S '/
 C* Set upper limit on alias and preset actual number
       MXAL=NALI
       NALI=0
@@ -315,10 +491,31 @@ C* '   ALIAS  '
       READ (REC(3),961) MF1,MT1
       READ (REC(4),902) IZA2
       READ (REC(5),961) MF2,MT2
-      WRITE(ALIA(1,NALI),962) IZA1,MF1,MT1
-      WRITE(ALIA(2,NALI),962) IZA2,MF2,MT2
+      IF(MF1.EQ.0) MF2=0
+      IF(MF2.EQ.0) MF2=MF1
+      IF(MT1.EQ.0) MT2=0
+      IF(MT2.EQ.0) MT2=MT1
+      WRITE(WORD,962) IZA1,MF1,MT1
+      ALIA(1,NALI)=WORD
+      WRITE(WORD,962) IZA2,MF2,MT2
+      IF(MF2.EQ.0) WORD(10:10)=' '
+      IF(MT2.EQ.0) WORD(14:14)=' '
+      ALIA(2,NALI)=WORD
+      ALIA(3,NALI)='          '
+      ALIA(4,NALI)='          '
       GO TO 90
-  170 CONTINUE
+C* '   ALIASLV'
+  170 NALI=NALI+1
+      IF(NALI.GT.MXAL) STOP 'C4SINP ERROR - MXAL Limit exceeded'
+      READ (REC(2),902) IZA1
+      READ (REC(3),903) ELV1
+      READ (REC(4),902) IZA2
+      READ (REC(5),903) ELV2
+      WRITE(ALIA(1,NALI),964) IZA1
+      WRITE(ALIA(2,NALI),964) IZA2
+      WRITE(ALIA(3,NALI),963) ELV1
+      WRITE(ALIA(4,NALI),963) ELV2
+      GO TO 90
   180 CONTINUE
   190 CONTINUE
       GO TO 90
@@ -331,9 +528,12 @@ C* Error trapped
 C*
   901 FORMAT(8A10)
   902 FORMAT(BN,I10)
+  903 FORMAT(BN,F10.0)
   904 FORMAT(' Unrecognised keyword "',A10,'"')
   961 FORMAT(BN,2I5)
   962 FORMAT(I6,I4,I4)
+  963 FORMAT(F10.2)
+  964 FORMAT(I6,'        ')
       END
       SUBROUTINE CALIAS(NALI,ALIA,REC)
 C-Title  : Subroutine CALIAS
@@ -346,20 +546,36 @@ C-D is found, it is replaced by ALIA(2,i). Note that the "state"
 C-D designator of the target nuclide is not checked.
 C-
       CHARACTER*132 REC
-      CHARACTER*14  ALIA(2,1),ALII,TEST
+      CHARACTER*14  ALIA(4,1),ALII,TEST
       IF(NALI.LT.1) RETURN
       TEST=REC(6:19)
       DO 20 I=1,NALI
       ALII=ALIA(1,I)
+C* Test matching ZA
       IF(ALII( 1: 6).NE.TEST( 1: 6)) GO TO 20
+C* Test matching MF (if not blank)
       IF(ALII( 8:10).NE.TEST( 8:10).AND.ALII( 8:10).NE.'   ' ) GO TO 20
+C* Test matching MF (if not blank)
       IF(ALII(11:14).NE.TEST(11:14).AND.ALII(11:14).NE.'    ') GO TO 20
         ALII=ALIA(2,I)
+C*        Substitute ZA
         TEST( 1: 6)=ALII( 1: 6)
+C*        Substitute MF/MT if not blank
         IF(ALII( 8:10).NE.'   ' ) TEST( 8:10)=ALII( 8:10)
         IF(ALII(11:14).NE.'    ') TEST(11:14)=ALII(11:14)
         REC(6:19)=TEST
-        RETURN
+        ALII=ALIA(3,I)
+C*        Check if level energies are to be substituted
+        IF(ALII(1:10).NE.'          ') THEN
+C*        Check the values of level energies
+          READ (REC(76:85),'(F10.0)') ELV0
+          READ (ALII      ,'(F10.0)') ELV1
+          IF(NINT(100*ELV0).EQ.NINT(100*ELV1)) THEN
+C*        Substitute level energy, if not blank
+            ALII=ALIA(4,I)
+            REC(76:85)=ALII(1:10)
+          END IF
+        END IF
    20 CONTINUE
       RETURN
       END
