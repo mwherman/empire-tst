@@ -6415,7 +6415,15 @@ $file.inp &}} -label Create
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/format $file &} -label Format 
     $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/verify $file &} -label Verify 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/process $file &} -label PreProcess 
+    $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4 
+    $site_3_0.menu93 add separator \
+        
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/stanef $file &} -label STANEF 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \

@@ -220,8 +220,17 @@ fi
 
 # RUN EMPEND, & ENDRES (ENDF FORMATING) 
 
-../scripts/format $file 1
+../scripts/format $file  
 
+# RUN ENDF-6 CHECKING CODES
+
+../scripts/verify $file
+
+# RUN PREPROCESSING CODES IN PREPRATION FOR PLOTTING 
+# PLOTC4 IS RUN IF THE LAST PRAMETER BELOW IS SET TO 2
+
+../scripts/process $file 1
+ 
 # RUN PLOTC4 (unabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
 
 #../scripts/plot $file 1
@@ -231,8 +240,8 @@ fi
 rm $work/$file-l.endf   2>/dev/null
 rm $work/$file-lin.endf 2>/dev/null
 rm $work/$file-f.endf   2>/dev/null
-#rm $work/$file-rec.endf 2>/dev/null
-#rm $work/$file-e.endf   2>/dev/null
+rm $work/$file-rec.endf 2>/dev/null
+rm $work/$file-e.endf   2>/dev/null
 #rm $work/$file-s.endf   2>/dev/null
 
 # REMOVE EMPTY FILES
