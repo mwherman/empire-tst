@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-07-16 12:47:36 $
-Ccc   * $Id: MSD-tristan.f,v 1.12 2004-07-16 12:47:36 herman Exp $
+Ccc   * $Date: 2004-10-08 16:19:43 $
+Ccc   * $Id: MSD-tristan.f,v 1.13 2004-10-08 16:19:43 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -896,6 +896,9 @@ C
          DO lt = 1, ltmaxr
 C
 C           INVERSE COUPLING CONSTANTS (FROM FIT TO EXP. ENERGIES)
+C
+C           As corrected by Dr. Harm Wienke [h.wienke@belgacom.net]
+C           Belgonucleaire/EDP, Europalaan 20, 2480 Dessel, Belgium
 C
             IF(efit(lt).NE.0.0D0)THEN
                nea = efit(lt)/ESTep + 1.5

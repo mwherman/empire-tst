@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-07 16:20:19 $
-Ccc   * $Id: HF-comp.f,v 1.32 2004-10-07 16:20:19 Capote Exp $
+Ccc   * $Date: 2004-10-08 16:23:10 $
+Ccc   * $Id: HF-comp.f,v 1.33 2004-10-08 16:23:10 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:05:50 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.9 2004-09-23 18:05:50 Capote Exp $
+Ccc   * $Date: 2004-10-08 16:21:12 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.10 2004-10-08 16:21:12 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
      &   Eexcitf, Temperf, Egamma, Keyshape)

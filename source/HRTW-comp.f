@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-07 16:22:35 $
-Ccc   * $Id: HRTW-comp.f,v 1.11 2004-10-07 16:22:35 Capote Exp $
+Ccc   * $Date: 2004-10-08 16:25:36 $
+Ccc   * $Id: HRTW-comp.f,v 1.12 2004-10-08 16:25:36 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
