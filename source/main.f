@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-27 17:47:41 $
-Ccc   * $Id: main.f,v 1.5 2001-11-27 17:47:41 mike Exp $
+Ccc   * $Date: 2002-04-05 17:26:54 $
+Ccc   * $Id: main.f,v 1.6 2002-04-05 17:26:54 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1943,6 +1943,7 @@ C--------light ions
 C-----end of ENDF spectra (inclusive)
       READ(5, *)EIN
       IF(EIN.LT.0.0D0)THEN
+         IF(FILevel)CLOSE(14)
          WRITE(12, *)' '
          STOP 'REGULAR '
       ENDIF
