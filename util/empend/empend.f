@@ -14,6 +14,8 @@ C-V        - Atomic weight ratios for target and recoils.
 C-V  02/11 Implement continuum photon spectra processing.
 C-V  03/06 Define MT numbers for incident protons.
 C-V  03/07 Fix processing of double differential data for protons.
+C-V  04/06 - Process discrete levels flagged with -ve energies.
+C-V        - Let EMPIRE to handle max. outgoing particle energy.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -272,7 +274,7 @@ C* Reading angular distributions - MF6 flagged negative
       IF(NK.LE.0) GO TO 490
 C* Write the ENDF file-4 data
       MT4=2
-  420 CALL WRIMF4(LOU,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA)
+  420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA)
      1           ,MT4,MAT,IZA,IZI,AWR,LCT,NS)
       IF(MT4.LE.0) GO TO 490
       WRITE(LTT,995) ' Processed angular distrib. for MT    : ',MT4
@@ -793,6 +795,9 @@ C* Thinning tolerance for angular distribution (fraction)
 C*
       DATA PI/3.1415926/
 C*
+c...
+c...      print *,'rdang: zap,mt,ein,emp',nint(zap),mt,ein,emp
+c...
       NOFIT=0
       NPT=0
       LHI=0
@@ -840,12 +845,12 @@ C-F Read angular distributions until a blank line is encountered
       READ (REC,807) EE,(DST(J),J=1,JXA)
       IF(KXA.GT.8) READ (LIN,809) (DST(J),J=9,KXA)
 
-      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-        print *,' ee,dst', ee*1.e6,dst(1)
-      end if
+c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
+c...        print *,' ee,dst', ee*1.e6,dst(1)
+c...      end if
 
-C* Suppress negative energies (if present)
-      IF(EE.LT.0) GO TO 450
+C* Suppress negative energies (unless processing discrete data)
+      IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
 C* Suppress negative distributions
       DO J=1,KXA
@@ -863,9 +868,9 @@ C* Convert to Legendre polynomials and store
       LO1=LOO+1
       RWO(LL)=EOU
 
-      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-        print *,' err', err
-      end if
+c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
+c...        print *,' err', err
+c...      end if
 
 C*
 C-F Check the distribution for consistency and print warnings
@@ -938,23 +943,25 @@ C* For (l > 0) divide by (2*l+1) to conform with ENDF rules.
         IF(L.GT.LOO) RWO(LPU+L)=0.
         RWO(LPU+L)=RWO(LPU+L)/FLOAT(2*L+1)
       END DO
-      IF(NPT.GT.0 .AND. (EMP.GT.0 .AND. EOU.GT.EMP) ) THEN
-C* Implement the maximum particle energy limit EMP
-C* Interpolate coefficients between EOL and EOU to EMP and discard
-C* the distribution above EMP (assumed to belong to the
-C* explicitly treated discrete levels)
-        CALL FLDINT(LO1,EOL,RWO(LPL),EOU,RWO(LPU),EMP,RWO(LPU))
-        EOU=EMP
+      IF(NPT.GT.0) THEN
+        IF(EMP.GT.0 .AND. EOU.GT.EMP) THEN
+C* Check the maximum particle energy limit EMP
+          WRITE(LTT,909) MT,NINT(ZAP),EOU,EMP
+          WRITE(LER,909) MT,NINT(ZAP),EOU,EMP
+C... Maximum energy limit should be applied within EMPIRE !!!
+C...      CALL FLDINT(LO1,EOL,RWO(LPL),EOU,RWO(LPU),EMP,RWO(LPU))
+C...      EOU=EMP
+        END IF
       END IF
 C* Save the outgoing particle energy
 
-      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-        print *,' save outgoing energy', eou,npt
-      end if
+c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
+c...        print *,' save outgoing energy', eou,npt
+c...      end if
 
       RWO(LL)=EOU
 C* Remove point at EOL if it is linearly interpolable between EO3, EOU
-      IF(NPT.GT.1) THEN
+      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
         ITHIN=1
 C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
         CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
@@ -1024,12 +1031,14 @@ C*
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
-  906 FORMAT(' EMPEND WARNING - MT',I3,' IZA',I5
+  906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.distrib. -ve')
-  907 FORMAT(' EMPEND WARNING - MT',I3,' IZA',I5
+  907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
-  908 FORMAT(' EMPEND WARNING - MT',I3,' IZA',I5
+  908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' bad ang.distr. fit at',I3,' points')
+  909 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
+     1      ,' Eou',1P,E10.3,' > available energy',E10.3)
   931 FORMAT('P(',I2.2,') Fit')
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
@@ -1065,9 +1074,10 @@ C* Search EMPIRE output for specific strings
       IF(REC(1:18).EQ.'  Decaying nucleus'          ) GO TO 210
       IF(REC(1:28).EQ.'  Spectrum of recoils  (n,x)') GO TO 220
       IF(REC(1:10).EQ.' TOTAL  CR'                  ) GO TO 290
+c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
       IF(REC(2:19).EQ.'Tot. fission cross'          ) THEN
         MT=18
-        READ(REC,'(30x, G10.4)') XS
+        READ(REC,809) XS
         GO TO 312
       END IF
       GO TO 110
@@ -1198,9 +1208,9 @@ C* Read the radiative capture cross section
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
-      DO 305 I=1,IMT
-      IF(IZB(I).EQ.IZA+1) QQM(IXS)=1.E6*BEN(1,I)
-  305 CONTINUE
+      DO I=1,IMT
+        IF(IZB(I).EQ.IZA+1) QQM(IXS)=1.E6*BEN(1,I)
+      END DO
       QQI(IXS)=QQM(IXS)
   306 XSC(NEN,IXS)=XS*1.E-3
       GO TO 110
@@ -1395,7 +1405,8 @@ C*
   805 FORMAT(I12,F10.0,16X,F12.0)
   806 FORMAT(BN,8X,8F15.0)
   808 FORMAT(24X,F12.0)
-  809 FORMAT(26X,F12.0)
+c.809 FORMAT(26X,F12.0)
+  809 FORMAT(30X,F10.0)
   891 FORMAT(A80)
   902 FORMAT(A40,1P,E10.3)
   904 FORMAT(A40,I10)
@@ -1446,7 +1457,6 @@ C* NE6 counts the Number of energy points
       LBL=1
       IK =0
       NK =0
-
 c...      NP =0
 c...      IT =0
 C*
@@ -1485,7 +1495,7 @@ C* For discrete level reactions consider only neutrons, protons, alphas
 C* Identify reaction and check if it matches the required given by JT6
       CALL EMTCHR(REC(23:30),MT,IZI)
 C...
-C...       print *,'     Assigned MT,JT,MTC',MT,JT6,MTC
+C...   print *,'     Assigned MT,JT,MTC',MT,JT6,MTC
 C...
       IF(MT.EQ. 0 .OR. MT.NE.JT6) GO TO 110
 C* Assign KZAK to outgoing particle ZA for unique react. identification
@@ -1531,7 +1541,7 @@ C* File scanned for particles - eliminate unknown particles
       NK=0
       DO 142 J=1,JK
 c...
-           print *,'Identified particle: ',POUT(J),' for mt,mtc',mt,mtc
+           print *,'Identified particle: ',POUT(J),' for mtc',mtc
 c...
       IF(IZAK(J).GE.0) THEN
         NK=NK+1
@@ -1549,7 +1559,7 @@ C* Process the spectra - Search for the reaction header cards
   200 IK=IK+1
       REWIND LIN
 c...
-          print *,'processing ',pout(ik),' ZAP',izak(ik),' for mt',mtc
+c...      print *,'processing ',pout(ik),' ZAP',izak(ik),' for mt',mtc
 c...
 c...      NE6N=0
       NE6= 0
@@ -1581,7 +1591,7 @@ C* Search the EMPIRE output for specific strings
       IF(REC(1:14).EQ.'  Elastic angu'    ) GO TO 400
       IF(REC(1:14).EQ.'  Spectrum of '    ) GO TO 600
       GO TO 210
-C* Read the energy
+C* Read the incident particle energy
   300 READ (REC(51:60),994) EE
       EE=EE*1.E6
       IF(EE.GT.E0 .AND. (EE-ETH).GT.-EE*SMALL) GO TO 210
@@ -1681,35 +1691,6 @@ c...      print *,'processing energy',ne6+1,ee,' xs=',xs3
 c...
 C* Skip this energy if cross section is zero
       IF(XS3.LE.0) GO TO 210
-C* Define the maximum energy of the outgoing particle (available energy)
-      EMX=EE*AWR/(AWR+1)+QQI(IT)
-
-C... Suppress max particle energy testing for charged particles
-C...
-      IF(IZI.GE.1000) EMX=0
-C...
-
-c...
-c...      EMX=EE*(AWR+1.-AWP)/(AWR+1.)
-c...
-C+++ Check
-C+C* Special case for continuum reactions which may have discrete levels:
-C+C*  - Truncate max.energy except if MT6<0(used to define MF4 ang.distr.)
-C+C*  - Gamma particle energy equals total available energy
-C+      IF(MT6.GT.0 .AND. POUT(IK).NE.'gammas  ') THEN
-C+        IF(MT.EQ. 91) EMX=EE*AWR/(AWR+1.)+QQI(IT)
-C+        IF(MT.EQ.649) EMX=EE*AWR/(AWR+1.)+QQI(IT)
-C+        IF(MT.EQ.849) EMX=EE*AWR/(AWR+1.)+QQI(IT)
-C+      END IF
-C+C     IF(EMX.LT.0) GO TO 210
-C+C* Define the pointwise cross section at the same energy
-C+      XS3=0.
-C+      JE3=0
-C+  625 JE3=JE3+1
-C+      EN3=EIN(JE3)
-C+      XS3=XSC(JE3,IT)
-C+      IF(ABS((EN3-EE)/EE).GT.1E-6 .AND. JE3.LT.NE3) GO TO 625
-C+++ Check end
 C*
 C* Initialise parameters if first energy point
       IF(NE6.GT.0) GO TO 620
@@ -1774,16 +1755,19 @@ C* Define the order LOR of Legendre expansion (=NA in ENDF)
       READ (LIN,891)
 C* Set the available outgoing particle energy
 C...      EMP=EMX
-C... ??????????????????????????????????
-      EMP=EMX* (AWR+1.-AWP)/(AWR+1.)
+C...      EMP=EMX* (AWR+1.-AWP)/(AWR+1.)
+C... Maximum particle energy should be set within the EMPIRE code!!!
+C... Set EMP=0 to skip testing in RDANG
+C...
+      EMP=0
       LMX=MXR-LL
 
-      if(nint(ee).eq.4000000 .and. kzak.eq.26057) then
-        print *,'ee,emp',ee,emp
-      end if
+c...      if(nint(ee).eq.4000000 .and. kzak.eq.26057) then
+c...        print *,'ee,emp',ee,emp
+c...      end if
 
       CALL RDANGD(LIN,LOR,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,LCU,LPT
-     2           ,ZAP,MT,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
+     2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C* Calculate the integral of the spectrum
       SPC=0
       EOU=RWO(LL)
@@ -1886,289 +1870,6 @@ C...        print *,'      ne6',ne6,ee
         END DO
         LL =LL+LHI+2
       END DO
-
-c#####
-c      READ (LIN,891) REC
-c      IF(REC(24:38).EQ.'               ') THEN
-cC* Proceed to reading spectrum for isotropic distributions
-c        READ (LIN,891) REC
-c        LOR=0
-c        GO TO 638
-c      END IF
-cC*
-cC* Read angles for non-isotropic distributions - Max.Legendre order LOR
-c        KXA=8
-c        J1 =1
-cC* Read the angles at which the distributions are given (8 per row)
-c  632   READ (REC,806) (ANG(J),J=J1,KXA)
-c  633   IF(ANG(KXA).EQ.0) THEN
-c          KXA=KXA-1
-c          GO TO 633
-c        ELSE IF(ANG(KXA).LT.180.) THEN
-c          READ (LIN,891) REC
-c          KXA=KXA+8
-c          IF(KXA.GT.MXA) STOP 'REAMF6 ERROR - MXA limit exceeded'
-c          J1 =J1 +8
-c          GO TO 632
-c        END IF
-cC* If less than 9 angles, calculate intermediate points by interpolation
-c        JXA=KXA
-c        IF(KXA.GT.1 .AND. KXA.LE.8) THEN
-c          KXA=JXA*2-1
-c          ANG(KXA)=ANG(JXA)
-c          DO 634 J=2,JXA
-c            ANG(KXA+2-2*J)=ANG(JXA+1-J)
-c            ANG(KXA+3-2*J)=0.5*(ANG(KXA+2-2*J)+ANG(KXA+4-2*J))
-c  634       CONTINUE
-c        END IF
-cC* Convert angles from degrees to cosines
-c        DO 636 J=1,KXA
-c          ANG(J)=COS(PI*ANG(J)/180)
-c  636   CONTINUE
-cC*
-c  638 LO1=LOR+1
-c      EOU=0.
-c      PEU=0.
-c      PEL=0.
-c      SPC=0.
-c      LPU=LL+1
-cC* Read energy\angle distributions - terminated by blank line
-c  640 READ (LIN,891) REC
-c      IF(REC(1:8).EQ.'        ') THEN
-c        IF(NEP.LE.0) SPC=0
-c        GO TO 650
-c      END IF
-c      LS =LL+LOR+2
-c      ELL=EOL
-c      EOL=EOU
-c      PE3=PEL
-c      PEL=PEU
-c      LPL=LPU
-c      LPU=LL+1
-c      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-c      READ (REC,807)          EOU,(DST(J),J=1,8)
-c      IF(JXA.GT.8) READ (LIN,809) (DST(J),J=9,JXA)
-c      IF(JXA.NE.KXA) THEN
-cC* Interpolate to double the mesh in case less than 9 angles given
-c          DST(KXA)=DST(JXA)
-c          DO 641 J=2,JXA
-c            DST(KXA+2-2*J)=     DST(JXA+1-J)
-c            DST(KXA+3-2*J)=0.5*(DST(KXA+2-2*J)+DST(KXA+4-2*J))
-c  641       CONTINUE
-c      END IF
-c      EOU=EOU*1.E6
-cC
-cC       print *,'   ee,eou',ee,eou
-cC
-cC* Convert to Legendre polynomials and store
-c      LC =MXR-LS
-c      LOO=LOR
-c      CALL LSQLGV(ANG,DST,KXA,RWO(LPU),0,LOO,ETOL,ERR,RWO(LS),LC)
-c      LHI=MAX(LHI,LOO)
-c      JPRNT=0
-cC* Check for specific reaction printout
-c      IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
-c        WRITE(LTT,907) MT,IZAP,EE,EOU,ERR*100.
-c        WRITE(LER,907) MT,IZAP,EE,EOU,ERR*100.
-c        IF(IPRNT.EQ.0) JPRNT=1
-cC* Check for specific reaction printout
-c      ELSE IF
-c     1  (IPRNT.EQ.MT                    .AND.
-c     2  (  EE .GE.EI1 .AND. EE .LE.EI2) .AND.
-c     3  (  EOU.GE.EO1 .AND. EOU.LE.EO2)) THEN
-c        JPRNT=1
-c      END IF
-cC* Check for differences in the fitted angular distributions
-cC* Fine angular mesh includes midpoints and endpoints at +/- 1
-c      KZXA=2*KXA+1
-c      ZANG(1)= 1.
-c      DO 642 I=1,KXA
-c      IF(I.GT.1)
-c     1  ZANG(2*I-1)=0.5*(ANG(I)+ANG(I-1))
-c        ZANG(2*I  )=     ANG(I)
-c        ZLEG(2*I-1)=POLLG1(ZANG(2*I-1),RWO(LPU),LOO)
-c        ZLEG(2*I  )=POLLG1(ZANG(2*I  ),RWO(LPU),LOO)
-c        EL=ABS(DST(I)-ZLEG(2*I))
-c        IF(IPRNT.GE.0 .AND. (EL .GT. 40.*ETOL*DST(I))) JPRNT=1
-c  642 CONTINUE
-c      ZANG(KZXA)=-1.
-c      ZLEG(KZXA)=POLLG1(ZANG(KZXA),RWO(LPU),LOO)
-cC* Required coefficients are defined without the (2*l+1) term and
-cC* yielding "one" after integration over (-1,1).
-cC* For (l > 0) divide by (2*l+1) to conform with ENDF rules.
-cC* Calculate values at endpoints PA(+1), PB(-1).
-c      PA=RWO(LPU)
-c      PB=PA
-c      PP=PA
-c      SS=1.
-c      DO 643 L=1,LOR
-c      IF(L.GT.LOO) RWO(LPU+L)=0.
-c      SS=-SS
-c      PA= PA+RWO(LPU+L)
-c      PB= PB+RWO(LPU+L)*SS
-c      RWO(LPU+L)=RWO(LPU+L)/FLOAT(2*L+1)
-c  643 CONTINUE
-cC* Check for negative ( < -EZERO ) values at endpoints PA(+1), PB(-1).
-c      EZERO=1.E-10
-c      IF(PA.LT.-EZERO .OR. PB.LT.-EZERO) THEN
-c        IF(IPRNT.EQ.0) JPRNT=1
-c        WRITE(LTT,906) MT,IZAP,EE,EOU
-c        WRITE(LER,906) MT,IZAP,EE,EOU
-c      END IF
-cC* Check for isotropic distributions (suppress printout)
-c      IF(LOR.LT.1) JPRNT=0
-cC* Execute test printout
-c      IF(JPRNT.NE.0) THEN
-cC*      Fitted values to the "curves" file
-c        WRITE(LCU,931) LOR
-c        DO 644 I=1,KZXA
-c        WRITE(LCU,934) ZANG(I),ZLEG(I)
-c  644   CONTINUE
-c        WRITE(LCU,934)
-cC*      Original values to the "points" file
-c        WRITE(LPT,932) EE,EOU,MT,IZAP
-c        DO 645 I=1,KXA
-c        WRITE(LPT,934) ANG(I),0.,0.,DST(I)
-c  645   CONTINUE
-c        WRITE(LPT,934)
-c      END IF
-cC* Adjust the available outgoing particle energy
-cC...      EMP=EMX
-cC... ??????????????????????????????????
-cc      EMP=EMX* (AWR+1.-AWP)/(AWR+1.)
-cc
-cc       print *,'awr,awp,emx,emp',awr,awp,emx,emp
-cc       print *,'rl,ru',rwo(lpl),rwo(lpu)
-cc
-cC* Implement the max.energy loss limit
-c      IF(EOU.LT.EMP) GO TO 646
-c      IF(EOU.LE.EOL) GO TO 646
-cC* Preserve contribution to the integral
-c      IF(RWO(LPL).GT.0 .AND. RWO(LPU).EQ.0) THEN
-cC* Case: Define the distribution at EMP by scaling the last
-cC*       non-zero point such that the integral is preserved
-c        DP =(EOU-EMP)/(EMP-ELL)
-c        PP =(1.+DP)
-c        CALL FLDSCL(LO1,PP,RWO(LPL),RWO(LPL))
-c        SPC=SPC+0.5*PEL*DP*(EOL-ELL)
-cc
-cc         print *,' A    e1,e2,int',ell,eol,0.5*PEL*DP*(EOL-ELL)
-cc
-c        PEL= RWO(LPL)
-c      ELSE
-cC* Case: Interpolate between EOU and EOL to EMP and discard
-cC*       the distribution above EMP (assumed to belong to the
-cC*       explicitly treated discrete levels)
-c        CALL FLDINT(LO1,EOL,RWO(LPL),EOU,RWO(LPU),EMP,RWO(LPU))
-c      END IF
-c      EOU=EMP
-cC* Save the outgoing particle energy
-c  646 RWO(LL)=EOU
-c      PEU=RWO(LPU)
-cC* Check for multiple zero distributions
-c      IF(NEP.LT.2) GO TO 647
-c      IF(PEU.NE.0 .OR. PEL.NE.0 .OR. PE3.NE.0) GO TO 647
-c      RWO(LL-LOR-2)=EOU
-c      IF(EOU.LT.EMP) GO TO 640
-c      GO TO 648
-cC* Add contribution to the integral
-c  647 IF(NEP.GT.0) SPC=SPC+0.5*(PEU+PEL)*(EOU-EOL)
-cc
-cC       print *,' B    e1,e2,int',eol,eou,0.5*(peu+pel)*(eou-eol)
-cc
-cC* Increment indices in the storage array
-c      LL =LL+LOR+2
-c      NW =NW+LOR+2
-c      NEP=NEP+1
-c      IF(LL+LO1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-c      IF(EOU.LT.EMP) GO TO 640
-cC* Check that the last point is zero at EMP
-c  648 IF(PEU.EQ.0) GO TO 650
-c      SPC=SPC+0.5*PEU*(EOU-EMP)
-cc
-cC       print *,' E    e1,e2,int',emp,eou,0.5*peu*(eou-emp)
-cc
-cC*      Shift energy - double points cause problems in HEATR
-c      RWO(LL)=EMP*1.00001
-c      DO 649 L=1,LO1
-c      RWO(LL+L)=0.
-c  649 CONTINUE
-c      LL =LL+LOR+2
-c      NW =NW+LOR+2
-c      NEP=NEP+1
-cC*
-cC* If the integral is zero, skip this energy point
-c  650 IF(SPC.LE.0) THEN
-cc
-c        print *,'skip mt',jt6,' for energy',ee,' int.=zero'
-cc
-c        GO TO 210
-c      END IF
-cC* Insert the incident particle threshold energy if necessary
-c      IF(NE6.GT.0 .OR. EE.LE.ETH) GO TO 660
-cC     IF(ETH.LT.ELO) GO TO 660
-c      IF(LL.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-c      NW=LL-L6
-c      DO 652 J=1,NW
-c      RWO(LL+8-J)=RWO(LL-J)
-c  652 CONTINUE
-c      LL =LL + 8
-c      RWO(L6    )=ETH
-c      RWO(L6 + 1)=0
-c      RWO(L6 + 2)=4
-c      RWO(L6 + 3)=2
-c      DE=SMALL
-c      IF(LEP.EQ.2) THEN
-c        PE=2./DE
-c      ELSE
-c        PE=1./DE
-c      END IF
-c      RWO(L6+4)=0.
-c      RWO(L6+5)=PE
-c      RWO(L6+6)=DE
-c      RWO(L6+7)=0.
-c      L6 =L6 + 8
-c      NE6=NE6+1
-cC* Save the energy and the yield
-c      EIS(NE6)=ETH
-c      YLD(NE6)=YL0
-c      E1=ETH
-CC*
-CC* Normalize distributions, pack to max. common Legendre order
-C  660 NE6=NE6+1
-C      LL =L6 + 4
-C      LL1=LL
-C      IF(SPC.LE.0) THEN
-C        DE=RWO(LL1+LOR+2)-RWO(LL1)
-c        IF(DE.LE.0) DE=SMALL
-c        IF(LEP.EQ.2) THEN
-c          PE=2./DE
-c        ELSE
-c          PE=1./DE
-c        END IF
-c        RWO(LL  )=0.
-c        RWO(LL+1)=PE
-c        RWO(LL+2)=DE
-c        RWO(LL+3)=0.
-c        LHI=0
-c        LL1=LL1+NEP*(LOR+2)
-c        LL =LL +4
-c        NEP=2
-c      ELSE
-c        DO 664 IP=1,NEP
-c          RWO(LL   )=RWO(LL1   )
-c        DO 662 IA=1,LO1
-c          RWO(LL+IA)=RWO(LL1+IA)/SPC
-c  662   CONTINUEc\
-cc
-cc        print *,(rwo(ll+ia),ia=1,lo1)
-cc
-c        LL1=LL1+LOR+2
-c        LL =LL +LHI+2
-c  664   CONTINUE
-c      END IF
-c#####
-
 C*
       LB1=LL
       RWO(L6    )=EE
@@ -2603,7 +2304,7 @@ C* Change back the sign of the MT numbers that were flagged -ve
 C*
       RETURN
       END
-      SUBROUTINE WRIMF4(LOU,MTH,QQM,QQI,NXS,MT6,RWO
+      SUBROUTINE WRIMF4(LOU,LTT,LER,MTH,QQM,QQI,NXS,MT6,RWO
      1                 ,MT,MAT,IZA,IZI,AWR,LCT,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
@@ -2629,7 +2330,7 @@ C*
 C* Write file MF4 angular distributions (first outgoing particle)
    22 MF =4
       ZA =IZA
-      LTT=1
+      LTTE=1
       LVT=0
       LI =0
       LL =1
@@ -2660,12 +2361,15 @@ C* Loop over the incident particle energies
       LL  =LL+4
 C* Determine the outgoing particle energy
       IF(MT.EQ.2) THEN
+C*      Process all energies for elastic
         EOU=0
       ELSE
-        EOU=(EIN*AWR/(AWR+1)-QQM(IT)+QQI(IT))*(AWR+1-AWP)/(AWR+1)
+C*      Determine the outgoing particle energy for discrete levels
+        EOU=(EIN*AWR/(AWR+1)+QQI(IT)) * ((AWR+1-AWP)/(AWR+1))
+        EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
-     1   EOU/EIN.LT.-1.E-4) THEN
+     1   ABS(EOU)/EIN.LT.-1.E-4) THEN
 C* Skip points below threshold
         JE=JE-1
         LL=LL+NW
@@ -2684,7 +2388,7 @@ C*        Set the threshold data and flag J2
           QQ(2)=0
         END IF
         NBT(1)=JE
-        CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,LVT,LTT, 0, 0)
+        CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,LVT,LTTE, 0, 0)
         CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR, LI,LCT, 0, 0)
         CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0, 0
      1             ,NR,JE,NBT,INT)
@@ -2697,12 +2401,13 @@ C* Process the main data block
       RR  =0.
       L2  =LL
       E2  =RWO(L2)
+C* Check if discrete level data are present
+      IF(E2.GE.0) EOU=ABS(EOU)
 C*
       IF(NEP.LE.1) THEN
 C* Copy the coefficients if a single point is given
         IF(NA1.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
         CALL FLDMOV(NA1,RWO(L2+1),QQ)
-        IF(QQ(1).NE.0) RR  =1./QQ(1)
       ELSE
 C* Linearly interpolate Legendre coefficients to EOU
         IEP =1
@@ -2715,27 +2420,34 @@ C* Linearly interpolate Legendre coefficients to EOU
      1    (E2.LT.EOU .AND. IEP.GE.NEP) ) THEN
 C* Last point or matching level to within tolerance
             CALL FLDMOV(NA1,RWO(L2+1),QQ)
-            IF(QQ(1).NE.0) RR  =1./QQ(1)
-C...           print *,' Match MT,Ein,Eou,E2',MT,EIN,EOU,E2,qqi(it)
-C...           print *,' iep,nep',iep,nep
-C...           print *,e1,(rwo(l1+j),j=1,NA1)
-C...           print *,e2,(rwo(l2+j),j=1,NA1)
-C...           read (*,'(a1)') yes
+C...          print *,'Match MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
+C... 1               ,QQM(IT)-QQI(IT)
+C...          print *,' iep,nep',iep,nep
+C...          print *,e1,(rwo(l1+j),j=1,NA1)
+C...          print *,e2,(rwo(l2+j),j=1,NA1)
+C...          read (*,'(a1)') yes
         ELSE
 C* Try next point or linearly interpolate
           IF(E2.LT.EOU) GO TO 38
           CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
-          IF(QQ(1).NE.0) RR  =1./QQ(1)
-C...           print *," Inter MT,Ein,Eou,E1,E2",MT,EIN,EOU,E1,E2,qqi(it)
-C...           print *,e1,(rwo(l1+j),j=1,NA1)
-C...           print *,e2,(rwo(l2+j),j=1,NA1)
-C...           read (*,'(a1)') yes
+          IF(ABS(EOU-E1).GT.DLVL/2) THEN
+C*          If Eout equals first point, the distribution is also
+C*          interpolated to simplify coding - suppress printout
+            WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+            WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+          END IF
+C...          print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
+c... 1               ,QQM(IT)-QQI(IT)
+C...          print *,e1,(rwo(l1+j),j=1,NA1)
+C...          print *,e2,(rwo(l2+j),j=1,NA1)
+C...          read (*,'(a1)') yes
         END IF
       END IF
       IF(NA.LE.0) THEN
         NA=1
         QQ(2)=0.
       ELSE
+        IF(QQ(1).NE.0) RR  =1./QQ(1)
         CALL FLDSCL(NA,RR,QQ(2),QQ(2))
       END IF
       NL=NA
@@ -2758,6 +2470,10 @@ C* Reduce the trailing zero Legendre coefficients
 C* All discrete levels processed - nothing to write
    80 MT=0
       RETURN
+  910 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Eout'
+     &      ,I3,I4,1P,3E11.3/
+     &       '                  Distribution interpolated between    '
+     &      ,2E11.3)
       END
       SUBROUTINE WRIMF6(LOU,RWO,MT,MAT,IZA,AWR,NK,LCT,NS)
 C-Title  : WRIMF6 Subroutine
