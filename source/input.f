@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-24 14:59:42 $
-Ccc   * $Id: input.f,v 1.41 2004-09-24 14:59:42 herman Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2004-10-07 20:40:09 $
+Ccc   * $Id: input.f,v 1.42 2004-10-07 20:40:09 Sin Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -423,6 +423,7 @@ C        default values for  Key_shape and Key_GDRGFL
          kzz=0
          kaa=0
          IGE1 = 1
+         Lqdfac = 1.0d0
          IGM1 = 0
          IGE2 = 0
 C--------Plujko_new (END)
@@ -802,14 +803,22 @@ C
             WRITE(6, *)' WARNING: be taken into account'
             WRITE(6, *)' '
          ENDIF
-         IF(MSD.NE.0 .AND. AEJc(0).GT.1.001D0)THEN
+         IF(MSD.NE.0 .AND. AEJc(0).NE.1.D0)THEN
             MSD = 0
             WRITE(6, *)' '
             WRITE(6, *)' WARNING: MSD calculations suppressed'
             WRITE(6, *)' WARNING: (possible for nucleons only)'
             WRITE(6, *)' '
          ENDIF
-         IF(LHRtw.NE.0 .AND. AEJc(0).EQ.0)THEN
+         IF(MSC.NE.0 .AND. AEJc(0).EQ.0.0D0)THEN
+            MSC = 0
+            WRITE(6, *)' '
+            WRITE(6, *)' WARNING!!!! MSC has been turned off '
+            WRITE(6, *)' WARNING!!!! (It is not allowed for '
+            WRITE(6, *)' WARNING!!!! photo-nuclear reactions)'
+            WRITE(6, *)' '
+         ENDIF
+         IF(LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0)THEN
             LHRtw = 0
             WRITE(6, *)' '
             WRITE(6, *)' WARNING!!!! HRTW has been turned off '
@@ -3413,6 +3422,24 @@ C-----
             GOTO 100
          ENDIF
 C--------Plujko_new : end of data input
+C-----
+C-----
+C-----Carlson_new : start of data input
+C-----
+         IF(name.EQ.'QD    ')THEN
+            IF(IGE1.EQ.0) THEN
+               WRITE(6, '('' Quasideuteron photo-absorption is '',
+     &    '' suppressed since E1 photo-absorption is blocked!'')')
+              ELSE
+               Lqdfac=val
+               WRITE(6,
+     &'('' Quasideuteron photoabsorption cross section will be'',
+     &  '' normalized by a factor '',F6.3)') Lqdfac
+              ENDIF
+            GOTO 100
+         ENDIF
+C--------Carlson_new : end of data input
+C-----
 C-----
 C        fisfis d --------------
 C        checking for fission data in the optional input

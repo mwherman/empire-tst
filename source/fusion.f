@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-07 16:19:11 $
-Ccc   * $Id: fusion.f,v 1.17 2004-10-07 16:19:11 Capote Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2004-10-07 20:40:09 $
+Ccc   * $Id: fusion.f,v 1.18 2004-10-07 20:40:09 Sin Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -96,9 +96,12 @@ C
 C     wf = W2*EIN*rmu
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
+C
+C  Zero qd fraction of photabsorption before it can do any damage
+      QDfrac=0.0d0
 
       IF(INT(AEJC(0)).GT.0) 
-     > coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+     & coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
       maxlw = NDLW
       IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) - 
@@ -252,9 +255,11 @@ C-------------Spin of c.n. J=j-S1
      &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
                 WPARG = PAR(ip, LVP(LEVtarg, 0), 1)
 C---------------factor 10 near HHBarc from fm**2-->mb
-                POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) + 10*
-     &          HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
-     &          (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E1(0,Z,A,EINl,0.d0,0.d0)
+                POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) +
+     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*
+     &          (10*HHBarc**2/EINl**2**PI*E1(0,Z,A,EINl,0.d0,0.d0)/2+
+     &           SIGQD(Z,A,EINl,Lqdfac)/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
+C  quasideuteron contribution SIGQD added in previous statement -- Carlson
               ENDIF
             ENDDO
           ENDDO
@@ -306,6 +311,7 @@ C-------end of E2
               csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
           ENDDO
         ENDDO
+        IF(IGE1.NE.0) QDfrac= SIGQD(Z,A,EIN1,Lqdfac)/CSFus
         GOTO 101
       ENDIF
 C-----Plujko_new(END of calculation CSFus)

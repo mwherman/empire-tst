@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-24 14:59:43 $
-Ccc   * $Id: main.f,v 1.39 2004-09-24 14:59:43 herman Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2004-10-07 20:40:10 $
+Ccc   * $Id: main.f,v 1.40 2004-10-07 20:40:10 Sin Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -266,6 +266,7 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
+C
 C-----Plujko_new
 C     DATA keyinput/0/, kzz1/0/, kaa1/0/
 C     DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/

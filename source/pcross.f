@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:10:31 $
-Ccc   * $Id: pcross.f,v 1.13 2004-09-23 18:10:31 Capote Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2004-10-07 20:40:10 $
+Ccc   * $Id: pcross.f,v 1.14 2004-10-07 20:40:10 Sin Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -75,7 +75,8 @@ C
       DO hh = 1, PMAX 
          em(hh) = 0.D0 
       ENDDO 
-      em(1) = 1.D0 
+      em(1) = 1.D0-Qdfrac
+      em(2) = Qdfrac
 C     Excitation energy (MeV) 
       ec = EXCn 
 C     Compound nucleus  

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-24 14:59:42 $
-Ccc   * $Id: gamma-strgth.f,v 1.12 2004-09-24 14:59:42 herman Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2004-10-07 20:40:09 $
+Ccc   * $Id: gamma-strgth.f,v 1.13 2004-10-07 20:40:09 Sin Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -495,4 +495,90 @@ C        GRED = 1.
      &                        (ED2)
       ENDIF
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
+      END
+C
+C --- Carlson new
+      DOUBLE PRECISION FUNCTION SIGQD(Ztar,Atar,Eg,Lqdfac)
+
+Ccc
+Ccc ********************************************************************
+Ccc *                                                                  *
+Ccc *                         SIGQD                                    *
+Ccc *                                                                  *
+Ccc *  Calculates the quasideuteron photoabsorption cross section.     *
+Ccc *                                                                  *
+Ccc * The Pauli-blocking factor in the region 20 MeV < Eg < 140 MeV    * 
+Ccc * is taken from Phys. Rev. C44, 814 (1991). The factor in the      *
+Ccc * regions Eg < 20 MeV and Eg > 140 MeV is that suggested in        *
+Ccc * IAEA-TECDOC-1178.                                                *
+Ccc *                                                                  *
+Ccc * The free deuteron photoabsorption cross section is that of       *
+Ccc * Phys. Rev. C44, 814 (1991).                                      *
+Ccc *                                                                  *
+Ccc * input:  Eg     - gamma energy                                    *
+Ccc *         Atar   - target mass number                              *
+Ccc *         Ztar   - target charge number                            *
+Ccc *         Lqdfac - multiplicative factor                           *
+Ccc *                                                                  *
+Ccc * output: SIGQD - nuclear quasideuteron absorption cross section   *
+Ccc *                                                                  *
+Ccc * calls:none                                                       *
+Ccc *                                                                  *
+Ccc *                                                                  *
+Ccc * author: B.V.Carlson                                              *
+Ccc * date:      Oct.2004                                              *
+Ccc *                                                                  *
+Ccc *                                                                  *
+Ccc ********************************************************************
+Ccc
+
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+
+      DOUBLE PRECISION Lqdfac
+
+      DOUBLE PRECISION fermicof(5)
+      DOUBLE PRECISION Lqd0
+
+      DATA fermicof/9.3537e-9,-3.4762e-6,4.1222e-4,-9.8343e-3,8.3714e-2/
+      DATA eflo/20.0/,dflo/-73.3/,efhi/140.0/,dfhi/24.2/
+      DATA sigmad0/61.2/,bndeut/2.224/,Lqd0/6.5/
+
+C   First calculate the blocking factor
+
+      IF(Eg.LT.bndeut) THEN
+
+        fermifac=0.0
+
+       ELSE IF(Eg.LT.eflo) THEN 
+
+        fermifac=EXP(dflo/Eg)
+
+       ELSE IF(Eg.LT.efhi) THEN 
+
+        fermifac=fermicof(1)
+        DO i=2,5
+          fermifac=fermicof(i)+fermifac*Eg
+         END DO
+
+       ELSE
+
+        fermifac=EXP(dfhi/Eg)
+
+       ENDIF
+
+C  Then calculate the photoabsorption cross section
+       
+      IF(Eg.LT.bndeut) THEN
+
+        SIGQD=0.0
+
+       ELSE
+
+        sigmad=sigmad0*(Sqrt(Eg-bndeut)/Eg)**3
+        SIGQD=Lqdfac*Lqd0*Ztar*(Atar-Ztar)*sigmad*fermifac/Atar
+
+       ENDIF
+
+      RETURN
+
       END

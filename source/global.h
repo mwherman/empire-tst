@@ -8,6 +8,7 @@ C-----Plujko_new: variable - SDRead
      &        DEFault_energy_functional, OMPar_riplf, RIPl_omp(0:NDEJC),
      &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
       INTEGER D_Klv, D_Llv
+      DOUBLE PRECISION Lqdfac
 C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
       DOUBLE PRECISION MFPp
       INTEGER F_PRINT, Key_shape, Key_GDRGFL
@@ -37,8 +38,6 @@ C-----Plujko_new: variables - IGE1,IGM1,IGE2
      &                  ICOllev(NDCOLLEV), ICOller(NDCOLLEV), IWArn,
      &                  NTArget, NPRoject, KTRompcc, IOMwritecc,
      &                  MODelecis, ICOmpff, IRElat(0:NDEJC, 0:NDNUC),
-
-
      &                  IGE1, IGM1, IGE2
 C
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
@@ -52,8 +51,10 @@ C
 C                      PEQc is the logical control for PCRoss call, RCN
 C                      MFPp is the exciton model mean free path parameter
 C                      GTILnor() is the normalization factor for p-h LD
+C                      Lqdfac is the qd photoabs. norrmalization factor
+C                      QDfrac is the qd fraction of photoabsorption  
      &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc, MFPp,
-     &                 ECUtColl,
+     &                 ECUtColl,Lqdfac,QDfrac,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC),
      &                 CSHms(NDEJC), A(0:NDNUC), Z(0:NDNUC), ECUt(NDNUC)
      &                 , HIS(0:NDNUC), ATIlnor(0:NDNUC), DOBs(0:NDNUC),
@@ -72,7 +73,7 @@ C
      &                 REDmsc(NDLW, 2), TUNe(0:NDEJC, 0:NDNUC),
      &                 EJMass(0:NDEJC),
      &                 SIGabs(NDETL, NDEJC+1, NDNUC)
-C              SIGabs introduced for PCROSS preequilibrium exciton model calculations
+C     SIGabs introduced for PCROSS preequilibrium exciton model calculations
 C
 C----- Plujko_new: change [GDRPAR(NDGDRPM,NDNUC) --> GDRPAR(NDGDRPM,0:NDNUC)
 C                          GQRPAR(NDGQRPM,NDNUC) --> GQRPAR(NDGQRPM,0:NDNUC)
@@ -119,7 +120,7 @@ C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
      &                 D_Lvp(NDCOLLEV), D_Def(NDCOLLEV, NDDEFCC),
      &                 D_Klv(NDCOLLEV), D_Llv(NDCOLLEV)
 C
-C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limitted
+C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limited
 C    to 0:1 on the last dimension in order to save memory - anyway, in the
 C    current implementation only first emissions  can be anisotropic (apart
 C    of DDHMS which provides inclusive spectra in any case)
@@ -154,9 +155,5 @@ C
       INTEGER bff
       DOUBLE PRECISION MOMparcrt, MOMortcrt
       COMMON /MOMENT/ MOMparcrt, MOMortcrt, veq,hoeq,defeq
-C
-C     Storing masses and mass excess for all nuclei (RIPL-2)
-C
-      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
