@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: pcross.f,v 1.11 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Date: 2004-07-26 18:37:24 $
+Ccc   * $Id: pcross.f,v 1.12 2004-07-26 18:37:24 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -444,10 +444,14 @@ C
 CRCN  Mike: Check implications of the change below !!!!
 C	   We are not putting all CS (from nexrt to Iemax is missing !!!!)
 CRCN           DO ie = iemin(nejc), iemax(nejc) 
-               DO ie = iemin(nejc), nexrt 
-               pops = xnor*spec(nejc, nexrt - ie + 1) 
-                  POP(ie, j, 1, Nnur) = POP(ie, j, 1, Nnur) + pops 
-                  POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pops 
+               DO ie = iemin(nejc), nexrt
+               pops = xnor*spec(nejc,  ie ) 
+               ie1 =  nexrt - ie + 1
+                  POP(ie1, j, 1, Nnur) = POP(ie1, j, 1, Nnur) + pops 
+                  POP(ie1, j, 2, Nnur) = POP(ie1, j, 2, Nnur) + pops 
+                  IF(j .EQ.1 )
+     &            WRITE(6, *)'nejc,ie,ie1,spec,pop',nejc,ie,ie1,pops,
+     &            POP(ie1, j, 1, Nnur)  
                ENDDO 
             ENDDO 
 c-----------add PCROSS contribution to the EMPIRE spectra CSE and  
@@ -462,8 +466,9 @@ C-----------add PCROSS to the population spectra used for deconvolution
 C-----------of the EMPIRE spectra into ENDF exclusive spectra 
             IF(ENDf.EQ.1) THEN  
 CRCN           DO ie = iemin(nejc), iemax(nejc) 
-               DO ie = iemin(nejc), nexrt
-                  icsp = nexrt - ie + 1 
+c                 icsp = nexrt - ie + 1 
+               DO icsp = iemin(nejc), nexrt
+                  ie = nexrt - icsp + 1 
                   POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur)+ 
      &                                        spec(nejc,icsp) 
 c-----------------Correct last bin (not needed for POP as for this it is  
