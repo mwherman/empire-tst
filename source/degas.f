@@ -1,6 +1,7 @@
       SUBROUTINE EMPIREDEGAS
 C
 C     P.Oblozinsky (Brookhaven National Lab), February 15, 2001
+C     E. Betak (Inst. Phys. Bratislava), May 2002
 C
 C     Empiredegas couples the code Empire (M. Herman, Vienna),
 C     and the code DEGAS (E. Betak, Bratislava) that is based
@@ -55,6 +56,7 @@ C
 C     Note: populdegas is in units of mb rather than in mb/MeV
 C
       INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       INCLUDE 'global.h'
 C
 C COMMON variables
@@ -76,16 +78,17 @@ C
       COMMON /DEGASINPUT/ BRArdegas, ENDidegas, SPIdidegas, NEXddegas, 
      &                    BDEgas, GGDegas, DDDegas, XCDegas, NUDidegas, 
      &                    NBRadegas, NOLedegas
+      COMMON /DEGASOUT/ SGRdegas
 C
 C Local variables
 C
       DOUBLE PRECISION csemispoplv, deln(150), delz(98), ee0, GDIvp, 
      &                 popdiscrete, popminus, popplus, poptotal, 
      &                 poptotalall, poptotalcont, poptotallv, 
-     &                 populdegas(3, 150, 25), renorm, specdegas(3, 150)
-     &                 , spectotg, spectotn, spectotp, specundecayed, 
-     &                 sumall, sumpopulee0, sumpopultot, tmp, totemis, 
-     &                 renpop
+     &                 populdegas(3, NDEXD, 25), renorm, 
+     &                 specdegas(3, NDEXD), spectotg, spectotn, 
+     &                 spectotp, specundecayed, sumall, sumpopulee0, 
+     &                 sumpopultot, tmp, totemis, renpop
       REAL FLOAT
       INTEGER i, ie, ie0, ie1, iemaxdiscrete, ii, iii, il, nnur, j, 
      &        jparity, jspin, ndexmaximum, ndlwmaximum, nexmax, nudim, 
@@ -116,14 +119,8 @@ C                                            ! Taken from input.f
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0., 
      &     0.43, 0., 0.50, 0., 0.39/
 C
-      IF(NDEX.GT.150)THEN
-         ndexmaximum = 150       ! Maximum energy bin allowed by Degas
-         WRITE(6, *)' '
-         WRITE(6, *)' WARNING!!! DEGAS accepts up to 150 energy bins'
-         WRITE(6, *)' '
-      ELSE
-         ndexmaximum = NDEX
-      ENDIF
+Ceb   ndexmaximum = NDEXD       ! Maximum energy bin allowed by Degas
+      ndexmaximum = NDEXD
 C
       IF(NDLW.GT.25)THEN
          ndlwmaximum = 25        ! Maximum spin allowed by Degas
@@ -307,7 +304,7 @@ C
             poptotal = poptotal + POP(NEX(1), jspin, jparity, 1)
          ENDDO
       ENDDO
-      renorm = poptotal/sumall
+      renorm = poptotal/SGRdegas
       WRITE(42, 99005)
       WRITE(42, *)' Results from Degas transfered to Empire '
       WRITE(42, *)'========================================='
@@ -425,7 +422,7 @@ C
       IF(IDNa(5, 4).EQ.1)THEN
          ie1 = iemaxdiscrete + 1
          nextop = ie1 + NEX(1) - 2
-                                  !highest bin excluding top CN energy
+C        !highest bin excluding top CN energy
          DO ie0 = ie1, nextop     ! over excitation energy
             DO jspin = 1, ndlwmaximum  ! over spin (parity populated evenly)
                tmp = populdegas(1, ie0, jspin)*0.5*renorm/DE
@@ -1017,8 +1014,8 @@ Coblo  Slovakia, January 2, 2001), was converted into subroutine
 Coblo  subdegas by P. Oblozinsky (BNL, USA), January 12, 2001.
 Coblo
 Coblo  Variables:
-Coblo    se(3,150):       spectra(g/n/p, energy bin)
-Coblo    popul(3,150,25): residual population(g/n/p,energy bin,spin)
+Coblo    se(3,NDEXD):       spectra(g/n/p, energy bin)
+Coblo    popul(3,NDEXD,25): residual population(g/n/p,energy bin,spin)
 Coblo
 Coblo Subdegas has the following changes compared to Degas:
 Coblo
@@ -1035,6 +1032,7 @@ Coblo  3) Decay is restricted to preequilibrium emission by limiting
 Coblo      number of excitons to n = 1,3,5,7. Summation over excitons
 Coblo      in Degas is done in do loops over i = 1,nn. Therefore,we
 Coblo      allow 4 terms only, see the command:
+Ceb    C H A N G E D ! ! !
 Coblo
 Coblo      - after label 3450: nn = 4 (Emil: this is not fully ok!)
 Coblo
@@ -1057,8 +1055,8 @@ Coblo  5) Results are primary spectra of gamma, neutrons and protons,
 Coblo      and population of respective residual nuclei. These results
 Coblo      are in two arrays:
 Coblo
-Coblo      se(3,150)      = spectrum(g/n/p,spectral energy bin)
-Coblo      popul(3,150,25)= population(g/n/p,residual energy bin,spin)
+Coblo      se(3,NDEXD)      = spectrum(g/n/p,spectral energy bin)
+Coblo      popul(3,NDEXD,25)= population(g/n/p,residual energy bin,spin)
 Coblo
 Coblo     All spectra and residual populations after emission of
 Coblo       neutrons and protons are handled by commands:
@@ -1112,6 +1110,8 @@ C      ****************************************************************
 C
 C
       IMPLICIT REAL*8(A - H, O - Z)
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
 C
 C COMMON variables
 C
@@ -1119,10 +1119,10 @@ C
      &       BRArdegas(10, 10, 9), C2, CJGs0, CJGsdegas, DDDegas(10), 
      &       EEXc0degas, EF, ENDi(10, 10), ENDidegas(10, 10), ESTep, 
      &       ESTepdegas, EXCef, FAL(140), FFPair(40), FFQ(40), G, GAQ, 
-     &       GAQdegas, GGDegas(10), OM(25, 150), OMD(10, 10, 10), 
-     &       RFAc(50, 90), SG(150), SIGma, SPIdi(10, 10), 
-     &       SPIdidegas(10, 10), SPP, T1111, TC(25, 150, 25), TL(25), 
-     &       TLP(2, 150, 25), XCDegas(9), XX0(25, 3, 25), 
+     &       GAQdegas, GGDegas(10), OM(25, NDEXD), OMD(10, 10, 10), 
+     &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10), 
+     &       SPIdidegas(10, 10), SPP, T1111, TC(25, NDEXD, 25), TL(25), 
+     &       TLP(2, NDEXD, 25), XCDegas(9), XX0(25, 3, 25), 
      &       XX02(25, 5, 25), XX2, XX22
       INTEGER I0, IAC, IACdegas, IAO, IAT, IATdegas, IE00, IEDegas, II0, 
      &        IIA, IIP, IJ, IL0, INDegas, ITJgs, ITSpp, IZ, IZC, 
@@ -1141,6 +1141,7 @@ C
       COMMON /DEGASINPUT/ BRArdegas, ENDidegas, SPIdidegas, NEXddegas, 
      &                    BDEgas, GGDegas, DDDegas, XCDegas, NUDidegas, 
      &                    NBRadegas, NOLedegas
+      COMMON /DEGASOUT/ SGRdegas
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
@@ -1152,7 +1153,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Popul(3, 150, 25), Se(3, 150)
+      REAL*8 Popul(3, NDEXD, 25), Se(3, NDEXD)
 C
 C Local variables
 C
@@ -1164,9 +1165,9 @@ C
      &       endim, endir, engy, eom, eomm, epmxef(2), estep2, f(25), 
      &       feebr2(10), feebra(10), feed, feepar(10), flip, fsci, ga1, 
      &       gae(2, 90), ge, geg, gf, gg(10), hlp3, omd1(10, 10, 10), 
-     &       omd2(10, 10, 10), omr(2, 25, 150), pi, pin0(25), popultot1, 
-     &       pro, q, r(2, 25, 10), rexc, rl, ro1, ro2, s, sci(25), sg1, 
-     &       sgi, sgiq
+     &       omd2(10, 10, 10), omr(2, 25, NDEXD), pi, pin0(25), pro, q, 
+     &       r(2, 25, 10), rexc, rl, ro1, ro2, s, sci(25), sg1, sgi, 
+     &       sgiq, popultot1
       REAL*8 CFA, CHAGUG, FPAIR, FQ, RFA, RO, X0, X02, X2, X22, XDAMP
       DOUBLE PRECISION DABS, DLOG, DMOD
       REAL FLOAT
@@ -1178,10 +1179,11 @@ C
      &        nole(9), nudi(10), nudi1, nudim1
       INTEGER INT, MAX0, MIN0
       REAL*8 jc, jc0
-      REAL*8 sgir, sgr, sigf, sigfc, sigmacn(25), sigmacntot, st(3, 150)
-     &       , su, sum, sumpro, t(25), t00, t0001, t11, t111, 
-     &       tau(25, 25), tf(25), tf0(25, 25), tm(9, 25, 150, 25), 
-     &       uvfee, uvgam, uvpar, uvspe(100), xc(9), xde(25, 25), xdea
+      REAL*8 sgir, sgr, sigf, sigfc, sigmacn(25), sigmacntot, 
+     &       st(3, NDEXD), su, sum, sumpro, t(25), t00, t0001, t11, 
+     &       t111, tau(25, 25), tf(25), tf0(25, 25), 
+     &       tm(9, 25, NDEXD, 25), uvfee, uvgam, uvpar, uvspe(100), 
+     &       xc(9), xde(25, 25), xdea
 C
       DO j = 1, 25            ! CN cross section as function of spin
          sigmacn(j) = 0.0
@@ -1275,7 +1277,7 @@ C
       DO i = 4, 140
          FAL(i) = DLOG(DFLOAT(i - 3)) + FAL(i - 1)
       ENDDO
-      DO j = 1, 150
+      DO j = 1, NDEXD
          DO i = 1, 3
             st(i, j) = 0.
          ENDDO
@@ -1288,15 +1290,15 @@ C
       CJGs0 = DMOD(cjgs, 1.D0)
 C     CJGS0: 0 for integer spin, 0.5 for half-integer spin of comp.syst.
 C
-C     Arrays dimensioned to 150 energy steps only!
-C     (10 reserved for discrete states, 140 for continuum space)
+C     Arrays dimensioned to NDEXD energy steps only!
+C     (10 reserved for discrete states, rest for continuum space)
       endim = eexc
       DO i = 1, 10
          NUDim = nudi(i)
          IF(NUDim.NE.0)endim = MAX(endim, eexc - ENDi(i, NUDim))
       ENDDO
  100  nestdi = INT(endim/ESTep + 0.5)
-      IF(nestdi.LT.140)THEN
+      IF(nestdi.LT.NDEXD - 10)THEN
          estep2 = ESTep/2.
          NUDim = nudi(1)
          endim = eexc
@@ -1389,6 +1391,7 @@ C        AT INCIDENT ENERGY FOR L=0, 1, ..., 14
             sgr = sgr + sum
             pin0(ijc) = sum
          ENDDO
+         SGRdegas = sgr
 Coblo    IF (SGR.LE.0.d0) STOP       ! Degas stop replaced by return
          IF(sgr.LE.0.D0)RETURN
          eg1 = 29.*SQRT((1. + 2./a3)/a3)
@@ -1431,7 +1434,7 @@ C        ESTABLISHED
          DO in = 1, 9
             DO i = 1, 25
                DO il = 1, 25
-                  DO ie = 1, 150
+                  DO ie = 1, NDEXD
                      tm(in, i, ie, il) = 0.
                   ENDDO
                ENDDO
@@ -1448,7 +1451,7 @@ C        e=10.*(ie-1) + 5
          ENDDO
 C        subscripts: EXCITON NUMBER (exact!), (2*J+1)
          DO i = 1, 3
-            DO ie = 1, 150
+            DO ie = 1, NDEXD
                Se(i, ie) = 0.
             ENDDO
          ENDDO
@@ -1457,12 +1460,12 @@ C        NEXT NUCLEUS IN THE CHAIN
          DO i = 1, 25
             DO il = 1, 25
                tf0(i, il) = 0.
-               DO ie = 1, 150
+               DO ie = 1, NDEXD
                   TC(i, ie, il) = 0.
                ENDDO
             ENDDO
          ENDDO
-         DO ie = 1, 150
+         DO ie = 1, NDEXD
             DO i = 1, 3
                Se(i, ie) = 0.
             ENDDO
@@ -1527,7 +1530,7 @@ C        IZC=IZ-1                 Corrected 14 Sept. 2000
 C        NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
          DO i = 1, 2
             KEY = i
-            DO ie = 1, 150
+            DO ie = 1, NDEXD
                engy = FLOAT(ie)*ESTep
                CALL TRANS(engy)
                DO il = 1, 25
@@ -1537,7 +1540,7 @@ C        NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
          ENDDO
 C        GAMMA INVERSE CROSS SECTIONS (GDR FORM)
          KEY = 0
-         DO ie = 1, 150
+         DO ie = 1, NDEXD
             engy = FLOAT(ie)*ESTep
             SG(ie) = CHAGUG(engy)
          ENDDO
@@ -1545,7 +1548,7 @@ C        GAMMA INVERSE CROSS SECTIONS (GDR FORM)
             sum = 0.
             DO i = 1, 25
                DO il = 1, 25
-                  DO ie = 1, 150
+                  DO ie = 1, NDEXD
                      TC(i, ie, il) = tm(II0, i, ie, il)
                      sum = sum + TC(i, ie, il)
                   ENDDO
@@ -1738,164 +1741,164 @@ C           excitation energy (reduced by preeq emission of g,n
 C           and p), and tail corresponding to spectrum of preeq
 C           gamma
             DO iloblo = 1, 25
-               DO ieoblo = 1, 150
+               DO ieoblo = 1, NDEXD
                   Popul(1, ieoblo, iloblo) = 0.0
                ENDDO
             ENDDO
             popultot1 = 0.0
-            DO ie0 = 1, NEStep
-               ie = NEStep + 1 - ie0
-               NUDim = nudi(IIP)
-               IF(ie.GT.NUDim)e = EXCef + (ie - NUDim)*ESTep
-               IF(ie.LE.NUDim)e = ENDi(IIP, ie)
-               IF(e.GE.0.)THEN
+Ceb         DO ie0 = 1, NEStep
+            ie0 = 1
+            ie = NEStep + 1 - ie0
+            NUDim = nudi(IIP)
+            IF(ie.GT.NUDim)e = EXCef + (ie - NUDim)*ESTep
+            IF(ie.LE.NUDim)e = ENDi(IIP, ie)
+            IF(e.GE.0.)THEN
 C
-C                 If necessary, only selected excitation energies are to be
-C                 considered, i.e. restriction to IE0=1 in the cycle DO 4500
-C                 takes only the highest possible excitation energy.
-C                 Alternatively, the value of the excitation energy E can be
-C                 used instead of the cycle variable IE0.
-C                 If you prefer to use selected excitation energies only, skip
-C                 whole section between labels 4300 and 4500 for energies .LT.
-C                 the lowest energy considered (see the flag below label 4300)
+C              If necessary, only selected excitation energies are to be
+C              considered, i.e. restriction to IE0=1 in the cycle DO 4500
+C              takes only the highest possible excitation energy.
+C              Alternatively, the value of the excitation energy E can be
+C              used instead of the cycle variable IE0.
+C              If you prefer to use selected excitation energies only, skip
+C              whole section between labels 4300 and 4500 for energies .LT.
+C              the lowest energy considered (see the flag below label 4300)
 C
-C                 Angular part of the density of states
+C              Angular part of the density of states
 C
-                  DO i = 1, 25
-                     alp(i) = 0.
-                     alm(i) = 0.
-                     IF(ie.GT.nudi(IIP) .OR. nexd(IIP, ie).LE.0)THEN
-                        ih = i - 1
-                        ip = i - IIA + m00
-                        ip1 = ip + 1
-                        N = ip + ih
-                        IF(N.LE.0)GOTO 155
-                        a0 = 0.25*(ip*ip + ih*ih + ip - 3*ih)
-                        a1 = 0.25*((ip - 1)**2 + (ih - 1)**2 + ip - 
-     &                       3*ih + 2)
-                        a2 = 0.25*((ip + 1)**2 + (ih + 1)**2 + ip - 
-     &                       3*ih - 2)
-                        a3 = 0.5*((ip + 2)*ip1 + ih*(ih + 1))
-                        cp = c0*CFA(e, N)*e/N
-                        cm = 1.
-                        IF(N.GT.2)cm = c0*CFA(e, N - 2)*e/(N - 2)
-C                       DENSITY AND TRANSITION RATES CALCULATION
-                        ge = G*e
+               DO i = 1, 25
+                  alp(i) = 0.
+                  alm(i) = 0.
+                  IF(ie.GT.nudi(IIP) .OR. nexd(IIP, ie).LE.0)THEN
+                     ih = i - 1
+                     ip = i - IIA + m00
+                     ip1 = ip + 1
+                     N = ip + ih
+                     IF(N.LE.0)GOTO 160
+                     a0 = 0.25*(ip*ip + ih*ih + ip - 3*ih)
+                     a1 = 0.25*((ip - 1)**2 + (ih - 1)**2 + ip - 3*ih + 
+     &                    2)
+                     a2 = 0.25*((ip + 1)**2 + (ih + 1)**2 + ip - 3*ih - 
+     &                    2)
+                     a3 = 0.5*((ip + 2)*ip1 + ih*(ih + 1))
+                     cp = c0*CFA(e, N)*e/N
+                     cm = 1.
+                     IF(N.GT.2)cm = c0*CFA(e, N - 2)*e/(N - 2)
+C                    DENSITY AND TRANSITION RATES CALCULATION
+                     ge = G*e
+                     hlp3 = 0.
+                     IF(ge - a1 - gf.GE..01)hlp3 = (ih - 1)
+     &                  *((ge - a1 - gf)/(ge - a1))**(N - 3)
+                     IF(cm.NE.0.)alm(i) = 0.5*ip*ih*(N - 2)*(1. - hlp3)
+     &                  /cm
+                     IF(ge.GE.a3)THEN
                         hlp3 = 0.
-                        IF(ge - a1 - gf.GE..01)hlp3 = (ih - 1)
-     &                     *((ge - a1 - gf)/(ge - a1))**(N - 3)
-                        IF(cm.NE.0.)alm(i) = 0.5*ip*ih*(N - 2)
-     &                     *(1. - hlp3)/cm
-                        IF(ge.GE.a3)THEN
-                           hlp3 = 0.
-                           IF(ge - a2 - gf.GE..01)hlp3 = (ih + 1)
-     &                        *EXP((N + 1)*DLOG(ge - a2 - gf) - (N - 1)
-     &                        *DLOG(ge - a0))
-                           IF(cp.NE.0.)alp(i)
-     &                        = 0.5*(EXP((N+1)*DLOG(ge-a2) - (N-1)
-     &                        *DLOG(ge-a0)) - hlp3)/(cp*(N + 1))
-                        ENDIF
+                        IF(ge - a2 - gf.GE..01)hlp3 = (ih + 1)
+     &                     *EXP((N + 1)*DLOG(ge - a2 - gf) - (N - 1)
+     &                     *DLOG(ge - a0))
+                        IF(cp.NE.0.)alp(i)
+     &                     = 0.5*(EXP((N+1)*DLOG(ge-a2) - (N-1)
+     &                     *DLOG(ge-a0)) - hlp3)/(cp*(N + 1))
                      ENDIF
-                     DO IJ = 1, 25
-                        cj = CJGs0 + IJ - 1
-                        xde(i, IJ) = XDAMP(cj)
-                     ENDDO
- 155              ENDDO
-                  IF(II0.EQ.0)THEN
-                     N = 3
-                     xdea = 0.
-                     aver = 0.
-                     DO IJ = 1, 25
-                        cj = CJGs0 + IJ - 1
-                        ijc = 2*cj + 1
-                        aver = aver + ijc*RFAc(N, ijc)
-                        xdea = xdea + xde(2, IJ)*ijc*RFAc(N, ijc)
-                     ENDDO
-                     IF(aver.EQ.0.)aver = 1.
-                     xdea = xdea/aver
-                     IF(xdea.EQ.0.)xdea = 1.
                   ENDIF
-                  DO i = 1, 25
-                     DO IJ = 1, 25
-                        alps(i, IJ) = alp(i)*xde(i, IJ)/xdea
-                     ENDDO
+                  DO IJ = 1, 25
+                     cj = CJGs0 + IJ - 1
+                     xde(i, IJ) = XDAMP(cj)
                   ENDDO
+ 160           ENDDO
+               IF(II0.EQ.0)THEN
+                  N = 3
+                  xdea = 0.
+                  aver = 0.
                   DO IJ = 1, 25
                      cj = CJGs0 + IJ - 1
                      ijc = 2*cj + 1
-                     DO i = 2, 25
-                        N = 2*i - IIA + m00 - 1
-                        alms(i, IJ) = 0.
-                        IF(.NOT.(ie.LE.NUDim .AND. (il.GT.10.OR.i.GT.10)
-     &                     ))THEN
-                           IF(ie.GT.NUDim .OR. il.GT.10 .OR. 
-     &                        i.GT.10 .OR. OMD(i, IJ, ie).NE.0.)THEN
-                              IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
-     &                           i.LE.10 .AND. N.GT.2)alms(i, IJ)
-     &                           = alps(i - 1, IJ)*OMD(i - 1, IJ, ie)
-     &                           /OMD(i, IJ, ie)
-                              IF(.NOT.(ie.GT.NUDim .AND. (N.LE.2.OR.OM(i
-     &                           ,ie).EQ.0.D0)))alms(i, IJ)
-     &                           = alps(i - 1, IJ)*OM(i - 1, ie)
-     &                           *RFAc(N - 2, ijc)
-     &                           /(OM(i, ie)*RFAc(N, ijc))
-                           ENDIF
-                        ENDIF
-                     ENDDO
+                     aver = aver + ijc*RFAc(N, ijc)
+                     xdea = xdea + xde(2, IJ)*ijc*RFAc(N, ijc)
                   ENDDO
-C
-C                 INTRANUCLEAR TRANSITION RATES ESTABLISHED
-C
+                  IF(aver.EQ.0.)aver = 1.
+                  xdea = xdea/aver
+                  IF(xdea.EQ.0.)xdea = 1.
+               ENDIF
+               DO i = 1, 25
                   DO IJ = 1, 25
-                     alms(1, IJ) = 0.
-                     alps(25, IJ) = 0.
+                     alps(i, IJ) = alp(i)*xde(i, IJ)/xdea
                   ENDDO
-Coblo             NN = 25                  ! Excitons, original value
-                  nn = 4       ! Excitons restricted to 1,3,5,7
-                  DO i = 4, 25
-                     IF(alp(i).EQ.0.D0)THEN
-                        IF(i.LE.nn)nn = i
+               ENDDO
+               DO IJ = 1, 25
+                  cj = CJGs0 + IJ - 1
+                  ijc = 2*cj + 1
+                  DO i = 2, 25
+                     N = 2*i - IIA + m00 - 1
+                     alms(i, IJ) = 0.
+                     IF(.NOT.(ie.LE.NUDim .AND. (il.GT.10.OR.i.GT.10)))
+     &                  THEN
+                        IF(ie.GT.NUDim .OR. il.GT.10 .OR. i.GT.10 .OR. 
+     &                     OMD(i, IJ, ie).NE.0.)THEN
+                           IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
+     &                        i.LE.10 .AND. N.GT.2)alms(i, IJ)
+     &                        = alps(i - 1, IJ)*OMD(i - 1, IJ, ie)
+     &                        /OMD(i, IJ, ie)
+                           IF(.NOT.(ie.GT.NUDim .AND. (N.LE.2.OR.OM(i,ie
+     &                        ).EQ.0.D0)))alms(i, IJ) = alps(i - 1, IJ)
+     &                        *OM(i - 1, ie)*RFAc(N - 2, ijc)
+     &                        /(OM(i, ie)*RFAc(N, ijc))
+                        ENDIF
                      ENDIF
                   ENDDO
-                  IF(ie.EQ.NEStep)nn0 = nn
-C                 DENSITIES AND TRANSITION RATES CALCULATION
-C                 INITIAL EXCITON CONFIGURATION
-                  DO i = 1, nn
-                     DO il = 1, 25
-                        emp(i, il) = 0.
-                        emg(i, il) = 0.
-                        tau(i, il) = 0.
-                     ENDDO
+               ENDDO
+C
+C              INTRANUCLEAR TRANSITION RATES ESTABLISHED
+C
+               DO IJ = 1, 25
+                  alms(1, IJ) = 0.
+                  alps(25, IJ) = 0.
+               ENDDO
+Coblo          NN = 25       ! Excitons, original value
+               nn = 25          ! Excitons restricted to 1,3,5,7
+               DO i = 4, 25
+                  IF(alp(i).EQ.0.D0)THEN
+                     IF(i.LE.nn)nn = i
+                  ENDIF
+               ENDDO
+               IF(ie.EQ.NEStep)nn0 = nn
+C              DENSITIES AND TRANSITION RATES CALCULATION
+C              INITIAL EXCITON CONFIGURATION
+               DO i = 1, nn
+                  DO il = 1, 25
+                     emp(i, il) = 0.
+                     emg(i, il) = 0.
+                     tau(i, il) = 0.
                   ENDDO
-C                 EMISSION RATES CALCULATIONS FOR GIVEN NUCLEI
-                  DO i = 1, nn
-                     ip = i - IIA + m00
-                     ih = i - 1
-                     N = ip + ih
-                     IF(ie.GT.NUDim)ro1 = OM(i, ie)
-                     IF(N.GE.0)THEN
-                        DO il = 1, 25
-                           cj = CJGs0 + il - 1
-                           ijc = 2*cj + 1
-                           IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
-     &                        ro1 = OMD(i, il, ie)
-                           IF(ie.LE.NUDim .AND. (il.GT.10 .OR. i.GT.10))
-     &                        ro1 = 0.
-                           IF(N.GE.1 .AND. ro1.NE.0.)THEN
-                              DO j = 1, 2
-                                 t11 = 0.
-                                 iiir = indexe + j
-                                 nudim1 = nudi(iiir)
-                                 eom = e - b(IIP, j)
-C                                if (eom.lt.estep2 .or. n.eq.1) goto 3799
-                                 IF(eom.GE.estep2 .AND. N.NE.1)THEN
-                                    ieom = INT(eom/ESTep + 0.5)
-C                                   if (ieom.le.0) goto 3799
-                                    IF(ieom.GT.0)THEN
-                                       DO ieo = 1, ieom
-                                         eeo = ESTep*ieo
-                                         eer = eom - eeo
-                                         IF(eer.GE.( - estep2))THEN
+               ENDDO
+C              EMISSION RATES CALCULATIONS FOR GIVEN NUCLEI
+               DO i = 1, nn
+                  ip = i - IIA + m00
+                  ih = i - 1
+                  N = ip + ih
+                  IF(ie.GT.NUDim)ro1 = OM(i, ie)
+                  IF(N.GE.0)THEN
+                     DO il = 1, 25
+                        cj = CJGs0 + il - 1
+                        ijc = 2*cj + 1
+                        IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
+     &                     ro1 = OMD(i, il, ie)
+                        IF(ie.LE.NUDim .AND. (il.GT.10 .OR. i.GT.10))
+     &                     ro1 = 0.
+                        IF(N.GE.1 .AND. ro1.NE.0.)THEN
+                           DO j = 1, 2
+                              t11 = 0.
+                              iiir = indexe + j
+                              nudim1 = nudi(iiir)
+                              eom = e - b(IIP, j)
+C                             if (eom.lt.estep2 .or. n.eq.1) goto 3799
+                              IF(eom.GE.estep2 .AND. N.NE.1)THEN
+                                 ieom = INT(eom/ESTep + 0.5)
+C                                if (ieom.le.0) goto 3799
+                                 IF(ieom.GT.0)THEN
+                                    DO ieo = 1, ieom
+                                       eeo = ESTep*ieo
+                                       eer = eom - eeo
+                                       IF(eer.GE.( - estep2))THEN
                                          endir = 0.
                                          IF(nudim1.NE.0)
      &                                      endir = ENDi(iiir, nudim1)
@@ -1905,27 +1908,27 @@ C                                   if (ieom.le.0) goto 3799
                                          ro2 = 0.
                                          IF(ier.GT.nudim1)
      &                                      ro2 = omr(j, i, ier)
-C                                               tato podmienka je asi zbytocna,
-C                                               ale pre kazdy pripad ...
+C                                            tato podmienka je asi zbytocna,
+C                                            ale pre kazdy pripad ...
                                          IF(ro2.NE.0.D0)THEN
                                          DO iis = 1, 25
-C                                                     Emission (E, CJ) --->
-C                                                     (EOM-EEO, SU)
+C                                                  Emission (E, CJ) --->
+C                                                  (EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
                                          isu = 2*su + 1
                                          sum = 0.
                                          s = ABS(su - 0.5)
- 156                                     rl = ABS(j - s)
- 158                                     l = INT(rl) + 1
+ 162                                     rl = ABS(j - s)
+ 164                                     l = INT(rl) + 1
                                          IF(l.LE.24)THEN
                                          sum = sum + TLP(j, ieo, l)
                                          rl = rl + 1.
-                                         IF(rl.LE.(j + s))GOTO 158
+                                         IF(rl.LE.(j + s))GOTO 164
                                          ENDIF
                                          s = s + 1.
-                                         IF(s.LE.(su + 0.5))GOTO 156
+                                         IF(s.LE.(su + 0.5))GOTO 162
                                          t11 = t11 + 
      &                                      sum*ro2*RFAc(N - 1, isu)
                                          IF(N.EQ.1)WRITE(iw, 99005)j, 
@@ -1935,7 +1938,7 @@ C                                                     (EOM-EEO, SU)
      &                                      '  t11', e10.3, '  sum', 
      &                                      e10.3, '  ro2', e10.3)
                                          ENDDO
-                                         GOTO 164
+                                         GOTO 170
                                          ENDIF
                                          ENDIF
                                          IF(i.LE.10 .AND. nudim1.NE.0)
@@ -1946,75 +1949,75 @@ C                                                     (EOM-EEO, SU)
                                          DO iis = 1, 10
                                          ier = INT(ENDi(iiir, iid)
      &                                      /ESTep + 0.5)
-C                                                        Emission (E, CJ) --->
-C                                                        (EOM-EEO, SU)
+C                                                     Emission (E, CJ) --->
+C                                                     (EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
                                          isu = 2*su + 1
                                          IF(SPIdi(iiir, iid).NE.su)
-     &                                      GOTO 162
+     &                                      GOTO 168
                                          IF(.NOT.((j.EQ.1.AND.omd1(i,iis
      &                                      ,iid).NE.0.) .OR. 
      &                                      (j.EQ.2.AND.omd2(i,iis,iid)
-     &                                      .NE.0.)))GOTO 162
+     &                                      .NE.0.)))GOTO 168
                                          sum = 0.
                                          s = ABS(su - 0.5)
                                          rl = ABS(j - s)
- 160                                     l = INT(rl) + 1
+ 166                                     l = INT(rl) + 1
                                          IF(l.LE.24)THEN
                                          sum = sum + TLP(j, ieo, l)
                                          rl = rl + 1.
-                                         IF(rl.LE.(j + s))GOTO 160
+                                         IF(rl.LE.(j + s))GOTO 166
                                          ENDIF
                                          s = s + 1.
                                          IF(s.LE.(su + 0.5))THEN
                                          rl = ABS(j - s)
-                                         GOTO 160
+                                         GOTO 166
                                          ELSE
                                          IF(j.EQ.1)t11 = t11 + 
      &                                      sum*omd1(i, iis, iid)
                                          IF(j.EQ.2)t11 = t11 + 
      &                                      sum*omd2(i, iis, iid)
                                          ENDIF
- 162                                     ENDDO
+ 168                                     ENDDO
                                          ENDIF
                                          ENDDO
                                          ENDIF
-                                         ENDIF
- 164                                   ENDDO
-                                    ENDIF
+                                       ENDIF
+ 170                                ENDDO
                                  ENDIF
-                                 tau(i, il) = tau(i, il)
-     &                              + akfc*r(j, i, IIP)*t11
-                              ENDDO
-                           ENDIF
-                           t11 = 0.
-                           IF(ie.EQ.NEStep)THEN
-C                             ! Gamma cascade not allowed
-                              IF(ie.GT.NBR)THEN
-                                 IF(ie.NE.1 .AND. ro1.NE.0.)THEN
-                                    ie1 = INT(e/ESTep + 0.5)
-                                    DO igm = 1, 60
-                                       emgg(i, il, igm) = 0.
-                                    ENDDO
-                                    DO igm = 1, ie1
-                                       egm = igm*ESTep
-                                       geg = G*egm
-C                                      IER = IE-IGM
-                                       eer = e - egm
-                                       IF(eer.GE.( - estep2) .AND. 
-     &                                    N.GT.0)THEN
-                                         t0001 = 0.
-                                         sgi = egm*egm*SG(igm)
-                                         sgiq = egm*egm*sgi*GAQ
-                                         sgir = 0.
-                                         IF((sgi + sgiq).NE.0.)
-     &                                      sgir = sgi*sgiq/(sgi + sgiq)
-                                         IF((sgi + sgiq).NE.0.)
-     &                                      sgi = sgi*sgi/(sgi + sgiq)
-                                         sgiq = sgir
-                                         DO is = 1, 3
+                              ENDIF
+                              tau(i, il) = tau(i, il)
+     &                           + akfc*r(j, i, IIP)*t11
+                           ENDDO
+                        ENDIF
+                        t11 = 0.
+                        IF(ie.EQ.NEStep)THEN
+C                          ! Gamma cascade not allowed
+                           IF(ie.GT.NBR)THEN
+                              IF(ie.NE.1 .AND. ro1.NE.0.)THEN
+                                 ie1 = INT(e/ESTep + 0.5)
+                                 DO igm = 1, 60
+                                    emgg(i, il, igm) = 0.
+                                 ENDDO
+                                 DO igm = 1, ie1
+                                    egm = igm*ESTep
+                                    geg = G*egm
+C                                   IER = IE-IGM
+                                    eer = e - egm
+                                    IF(eer.GE.( - estep2) .AND. N.GT.0)
+     &                                 THEN
+                                       t0001 = 0.
+                                       sgi = egm*egm*SG(igm)
+                                       sgiq = egm*egm*sgi*GAQ
+                                       sgir = 0.
+                                       IF((sgi + sgiq).NE.0.)
+     &                                    sgir = sgi*sgiq/(sgi + sgiq)
+                                       IF((sgi + sgiq).NE.0.)
+     &                                    sgi = sgi*sgi/(sgi + sgiq)
+                                       sgiq = sgir
+                                       DO is = 1, 3
                                          IF(is.EQ.1)su = cj - 1.
                                          IF(is.EQ.2)su = cj
                                          IF(is.EQ.3)su = cj + 1.
@@ -2069,7 +2072,7 @@ C                                      IER = IE-IGM
                                          ELSE
                                          iiir = INT((eer - endir)
      &                                      /ESTep + 0.5) + NUDim
-                                         IF(iiir.LT.1)GOTO 166
+                                         IF(iiir.LT.1)GOTO 172
                                          T1111 = b0*sgi*OM(i, iiir)
      &                                      *RFAc(N, isu)
      &                                      + b0q*sgiq*OM(i, iiir)
@@ -2084,8 +2087,8 @@ C                                      IER = IE-IGM
                                          t11 = t11 + T1111
                                          t0001 = t0001 + T1111
                                          ENDIF
- 166                                     ENDDO
-                                         IF(igm.LE.60)THEN
+ 172                                   ENDDO
+                                       IF(igm.LE.60)THEN
                                          IF(ie.GT.NUDim .AND. N.GT.0)
      &                                      emgg(i, il, igm)
      &                                      = t0001*C2/(ro1*RFAc(N, ijc)
@@ -2094,243 +2097,236 @@ C                                      IER = IE-IGM
      &                                      il.LE.10 .AND. i.LE.10)
      &                                      emgg(i, il, igm)
      &                                      = t0001*C2/ro1
-                                         ENDIF
                                        ENDIF
-                                    ENDDO
-                                 ENDIF
-                              ENDIF
-                           ENDIF
-                           emp(i, il) = 0.
-                           emg(i, il) = 0.
-                           IF(ro1.NE.0.)THEN
-                              IF(ie.GT.NUDim .AND. N.GT.0)emp(i, il)
-     &                           = tau(i, il)/(ro1*RFAc(N, ijc))
-                              IF(ie.GT.NUDim .AND. N.GT.0)emg(i, il)
-     &                           = t11*C2/(ro1*RFAc(N, ijc))
-                              IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
-     &                           i.LE.10)emp(i, il) = tau(i, il)/ro1
-                              IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
-     &                           i.LE.10)emg(i, il) = t11*C2/ro1
-                           ENDIF
-                           t11 = emp(i, il) + emg(i, il) + alps(i, il)
-     &                           + alms(i, il)
-                           IF(t11.NE.0.D0)tau(i, il) = 1./t11
-                           IJ = i - 1
-                           IF(il.EQ.ilma .AND. ie0.EQ.1 .AND. II0.EQ.0)
-     &                        WRITE(iw, 99006)ie, il, IJ, alps(i, il), 
-     &                              alms(i, il), emp(i, il), emg(i, il)
-99006                      FORMAT(1X, 3I4, 2X, 3E12.4, 3X, E12.4)
-C                          IF DESIRED, OUTPUT OF INTRANUCLEAR TRANSITION RATES
-                        ENDDO
-                     ENDIF
-                  ENDDO
-C
-C                 END OF EMISSION RATES CALCULATIONS
-C
-C                 MASTER EQ. SOLUTION FOR ONE NUCLEUS WITHIN THE CHAIN
-C
-                  IF(ie0.EQ.1)WRITE(iw, 99007)II0
-99007             FORMAT(/' Solutions for nucleus of key ', i2//3x, 
-     &                   'E ', 4x, 'J', 4x, 'particle', 4x, 'gamma', 4x, 
-     &                   'population', 
-     &                   ' c.s.  t i m e  i n t e g r a l s')
-                  IF(II0.EQ.1 .AND. e.LE.10.)THEN
-                     uvfee = 0.
-                     uvpar = 0.
-                     uvgam = 0.
-                     DO il = 1, 60
-                        uvspe(il) = 0.
-                     ENDDO
-                  ENDIF
-                  IF(ie.GT.NBR)THEN
-                     DO il = 1, 25
-                        IF(ie.GT.NUDim .OR. il.LE.10)THEN
-                           nne = 0
-                           cj = CJGs0 + il - 1
-                           DO i = 1, nn
-                              TC(i, ie, il) = 0.
-                              IF(ie.GT.NUDim .AND. OM(i, ie).NE.0.)
-     &                           nne = i
-                              IF(i.LE.10 .AND. il.LE.10)THEN
-                                 IF(ie.LE.NUDim .AND. OMD(i, il, ie)
-     &                              .NE.0.)nne = i
-                              ENDIF
-                           ENDDO
-                           IF(nne.NE.0)THEN
-                              nne1 = nne - 1
-                              feed = 0.
-                              DO i = 1, nn
-                                 tf(i) = 0.
-                                 IF(ie.GT.NUDim .AND. ie.NE.NEStep)tf(i)
-     &                              = tf0(i, il)
-                                 IF(ie.GT.NUDim .AND. II0.NE.0)tf(i)
-     &                              = tf(i) + tm(II0, i, ie, il)
-C                                IF (e.ge.14.1  .and.II0.NE.0)     TF(I) =
-C                                TF(I) + TM(II0,I,IE,IL)
-                                 IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
-     &                              i.LE.10 .AND. ie.NE.NEStep)tf(i)
-     &                              = tf0(i, il)
-                                 IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
-     &                              i.LE.10 .AND. II0.NE.0)tf(i) = tf(i)
-     &                              + tm(II0, i, ie, il)
-                                 IF(ie.EQ.NEStep .AND. II0.EQ.0 .AND. 
-     &                              i.EQ.1)tf(1) = tf(1) + pin0(il)
-                                 feed = feed + tf(i)
-                              ENDDO
-                              IF(ie.GT.NUDim .OR. nexd(IIP, ie).LT.0)
-     &                           THEN
-                                 IF(feed.LE.1.E-9)GOTO 172
-C                                CHATTERJEE AND GUPTA ALGORITHM
-                                 f(nne) = 0.
-                                 sci(nne) = 1.
-                                 IF(nne1.NE.0)THEN
-C                                   IF THE COMPUTER SKIPS FOLLOWING 2 DO-LOOPS,
-C                                   THIS IF CAN BE DELETED
-                                    DO j = 1, nne1
-                                       i = nne - j
-                                       f(i) = alps(i, il)*tau(i, il)
-     &                                    *alms(i + 1, il)
-     &                                    *tau(i + 1, il)
-                                       IF(f(i).EQ.1.)GOTO 170
-C                                      SOLUTION WITH NO EMISSION, NOT ALLOWED
-C                                      BY CH.+G. ALGORITHM
-                                    ENDDO
-                                    DO j = 1, nne1
-                                       i = nne - j
-                                       fsci = f(i)*sci(i + 1)
-                                       IF(ABS(fsci - 1.).LT.1.E-9)THEN
-                                         IF(DABS(alps(i,il)*tau(i,il) - 
-     &                                      1.).LT.1.E-9)THEN
-                                         sci(i) = 1.
-                                         GOTO 168
-                                         ENDIF
-                                       ENDIF
-                                       sci(i)
-     &                                    = 1./(1. - f(i)*sci(i + 1))
-                                    ENDDO
- 168                                IF(ie.NE.5 .OR. il.NE.1)THEN
-                                    ENDIF
-                                 ENDIF
-                                 DO i = 1, nne
-                                    br = 0.
-                                    sumpro = 0.
-                                    IF(nne1.NE.0)THEN
-                                       IF(i.NE.1)
-     &                                    br = br + alps(i - 1, il)
-     &                                    *t(i - 1)
-                                       DO k = i + 1, nne
-                                         pro = 1.
-                                         DO m = i + 1, k
-                                         pro = pro*alms(m, il)
-     &                                      *tau(m, il)*sci(m)
-                                         ENDDO
-                                         sumpro = sumpro + tf(k)*pro
-                                       ENDDO
-                                    ENDIF
-                                    br = br + tf(i) + sumpro
-                                    t(i) = sci(i)*tau(i, il)*br
-                                    IF(II0.NE.0)tm(II0, i, ie, il)
-     &                                 = t(i)
-                                    TC(i, ie, il) = t(i)
-                                 ENDDO
-                              ELSEIF(il.LE.10)THEN
-                                 DO i = 1, 10
-                                    IF(emg(i, il).NE.0.)TC(i, ie, il)
-     &                                 = tf(i)/emg(i, il)
-                                 ENDDO
-                              ENDIF
-C                             END OF MAST. EQ. SOLUTION (FOR ONE NUCLEUS AND
-C                             ONE EXC. ENERGY)
- 170                          emtg = 0.
-                              emtp = 0.
-                              DO i = 1, nn
-                                 emtp = emtp + TC(i, ie, il)*emp(i, il)
-                                 emtg = emtg + TC(i, ie, il)*emg(i, il)
-                              ENDDO
-                              IF(ie.LE.NUDim)THEN
-                                 IF(nexd(IIP, ie).LE.0 .AND. 
-     &                              emtg.NE.feed .AND. emtg.NE.0.)THEN
-                                    DO i = 1, 10
-                                       TC(i, ie, il) = TC(i, ie, il)
-     &                                    *feed/emtg
-                                    ENDDO
-                                    GOTO 170
-                                 ENDIF
-                              ENDIF
-                              DO i = 1, nn
-                                 DO igm = 1, 50
-                                    IF(igm.LE.ie)THEN
-                                       IF(e.LE.10. .AND. II0.EQ.1)
-     &                                    uvspe(igm) = uvspe(igm)
-     &                                    + TC(i, ie, il)
-     &                                    *emgg(i, il, igm)
                                     ENDIF
                                  ENDDO
-                              ENDDO
-                              uvfee = uvfee + feed
-                              uvpar = uvpar + emtp
-                              uvgam = uvgam + emtg
-                              IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
-     &                           THEN
-                                 sigmacn(il) = feed - emtp - emtg
-C                                ! CN residual population
-                                 sigmacntot = sigmacntot + sigmacn(il)
-C                                write(iw,51) e,cj,sigmacn(il),sigmacntot
                               ENDIF
-                              IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
-     &                           WRITE(iw, 99008)e, cj, emtp, emtg, 
-     &                                 feed, (TC(i, ie, il), i = 1, 3)
-99008                         FORMAT(1X, f5.2, 1x, f4.1, 1x, 2G11.4, 2x, 
-     &                               g11.4, 2x, 3E9.2)
                            ENDIF
                         ENDIF
-C                       OUTPUT: EXCITATION ENERGY; SPIN; PARTICLE, GAMMA &
-C                       TOTAL EMISSION; TIME INTEGRALS OF THE EXCITON STATES
-C                       (N=1-7*)
- 172                 ENDDO
+                        emp(i, il) = 0.
+                        emg(i, il) = 0.
+                        IF(ro1.NE.0.)THEN
+                           IF(ie.GT.NUDim .AND. N.GT.0)emp(i, il)
+     &                        = tau(i, il)/(ro1*RFAc(N, ijc))
+                           IF(ie.GT.NUDim .AND. N.GT.0)emg(i, il)
+     &                        = t11*C2/(ro1*RFAc(N, ijc))
+                           IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
+     &                        emp(i, il) = tau(i, il)/ro1
+                           IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
+     &                        emg(i, il) = t11*C2/ro1
+                        ENDIF
+                        t11 = emp(i, il) + emg(i, il) + alps(i, il)
+     &                        + alms(i, il)
+                        IF(t11.NE.0.D0)tau(i, il) = 1./t11
+                        IJ = i - 1
+                        IF(il.EQ.ilma .AND. ie0.EQ.1 .AND. II0.EQ.0)
+     &                     WRITE(iw, 99006)ie, il, IJ, alps(i, il), 
+     &                           alms(i, il), emp(i, il), emg(i, il)
+99006                   FORMAT(1X, 3I4, 2X, 3E12.4, 3X, E12.4)
+C                       IF DESIRED, OUTPUT OF INTRANUCLEAR TRANSITION RATES
+                     ENDDO
+                  ENDIF
+               ENDDO
 C
-C                    Gamma de-excitation population will be calculated
+C              END OF EMISSION RATES CALCULATIONS
 C
-                     IF(ie.NE.1)THEN
+C              MASTER EQ. SOLUTION FOR ONE NUCLEUS WITHIN THE CHAIN
 C
-C                       If you like to consider not all excitation energies,
-C                       this condition is to be modified. Currently, the gamma
-C                       de-excitation calculated next 13 lines is to all
-C                       energies except the lowest one (IE.EQ.1).
-C                       Specifically, if you want to consider only the highest
-C                       possible excitation energy, you can skip all these
-C                       lines (including the line 4400 TF0(I,IL)=T1111).
-C
-                        ie = ie - 1
-                        DO il = 1, 25
-C                          ! Spins
+               IF(ie0.EQ.1)WRITE(iw, 99007)II0
+99007          FORMAT(/' Solutions for nucleus of key ', i2//3x, 'E ', 
+     &                4x, 'J', 4x, 'particle', 4x, 'gamma', 4x, 
+     &                'population', ' c.s.  t i m e  i n t e g r a l s')
+               IF(II0.EQ.1 .AND. e.LE.10.)THEN
+                  uvfee = 0.
+                  uvpar = 0.
+                  uvgam = 0.
+                  DO il = 1, 60
+                     uvspe(il) = 0.
+                  ENDDO
+               ENDIF
+               IF(ie.GT.NBR)THEN
+                  DO il = 1, 25
+                     IF(ie.GT.NUDim .OR. il.LE.10)THEN
+                        nne = 0
+                        cj = CJGs0 + il - 1
+                        DO i = 1, nn
+                           TC(i, ie, il) = 0.
+                           IF(ie.GT.NUDim .AND. OM(i, ie).NE.0.)nne = i
+                           IF(i.LE.10 .AND. il.LE.10)THEN
+                              IF(ie.LE.NUDim .AND. OMD(i, il, ie).NE.0.)
+     &                           nne = i
+                           ENDIF
+                        ENDDO
+                        IF(nne.NE.0)THEN
+                           nne1 = nne - 1
+                           feed = 0.
                            DO i = 1, nn
-Coblo                         do 4401 i=1,4    ! Excitons limited to i=1,4
-                              IL0 = il
-                              N = 2*i - IIA - 1 + m00
-                              T1111 = 0.
-                              IF(.NOT.((ie.GT.NUDim) .AND. (N.LE.0.OR.OM
-     &                           (i,ie).EQ.0.)))THEN
-                                 IF(.NOT.((ie.LE.NUDim) .AND. (i.GT.10
-     &                              .OR.il.GT.10)))THEN
-                                    IF(ie.GT.NUDim .OR. OMD(i, il, ie)
-     &                                 .NE.0.)THEN
-                                       I0 = i
-                                       IE00 = ie
-                                       CALL GAMMD
+                              tf(i) = 0.
+                              IF(ie.GT.NUDim .AND. ie.NE.NEStep)tf(i)
+     &                           = tf0(i, il)
+                              IF(ie.GT.NUDim .AND. II0.NE.0)tf(i)
+     &                           = tf(i) + tm(II0, i, ie, il)
+C                             IF (e.ge.14.1  .and.II0.NE.0)     TF(I) =
+C                             TF(I) + TM(II0,I,IE,IL)
+                              IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
+     &                           i.LE.10 .AND. ie.NE.NEStep)tf(i)
+     &                           = tf0(i, il)
+                              IF(ie.LE.NUDim .AND. il.LE.10 .AND. 
+     &                           i.LE.10 .AND. II0.NE.0)tf(i) = tf(i)
+     &                           + tm(II0, i, ie, il)
+                              IF(ie.EQ.NEStep .AND. II0.EQ.0 .AND. 
+     &                           i.EQ.1)tf(1) = tf(1) + pin0(il)
+                              feed = feed + tf(i)
+                           ENDDO
+                           IF(ie.GT.NUDim .OR. nexd(IIP, ie).LT.0)THEN
+                              IF(feed.LE.1.E-9)GOTO 180
+C                             CHATTERJEE AND GUPTA ALGORITHM
+                              f(nne) = 0.
+                              sci(nne) = 1.
+                              IF(nne1.NE.0)THEN
+C                                IF THE COMPUTER SKIPS FOLLOWING 2 DO-LOOPS,
+C                                THIS IF CAN BE DELETED
+                                 DO j = 1, nne1
+                                    i = nne - j
+                                    f(i) = alps(i, il)*tau(i, il)
+     &                                 *alms(i + 1, il)*tau(i + 1, il)
+                                    IF(f(i).EQ.1.)GOTO 176
+C                                   SOLUTION WITH NO EMISSION, NOT ALLOWED
+C                                   BY CH.+G. ALGORITHM
+                                 ENDDO
+                                 DO j = 1, nne1
+                                    i = nne - j
+                                    fsci = f(i)*sci(i + 1)
+                                    IF(ABS(fsci - 1.).LT.1.E-9)THEN
+                                       IF(DABS(alps(i,il)*tau(i,il) - 1.
+     &                                    ).LT.1.E-9)THEN
+                                         sci(i) = 1.
+                                         GOTO 174
+                                       ENDIF
                                     ENDIF
+                                    sci(i) = 1./(1. - f(i)*sci(i + 1))
+                                 ENDDO
+ 174                             IF(ie.NE.5 .OR. il.NE.1)THEN
                                  ENDIF
                               ENDIF
-                              tf0(i, il) = T1111
-                              Popul(1, ie, il) = Popul(1, ie, il)
-     &                           + tf0(i, il)
+                              DO i = 1, nne
+                                 br = 0.
+                                 sumpro = 0.
+                                 IF(nne1.NE.0)THEN
+                                    IF(i.NE.1)br = br + alps(i - 1, il)
+     &                                 *t(i - 1)
+                                    DO k = i + 1, nne
+                                       pro = 1.
+                                       DO m = i + 1, k
+                                         pro = pro*alms(m, il)
+     &                                      *tau(m, il)*sci(m)
+                                       ENDDO
+                                       sumpro = sumpro + tf(k)*pro
+                                    ENDDO
+                                 ENDIF
+                                 br = br + tf(i) + sumpro
+                                 t(i) = sci(i)*tau(i, il)*br
+                                 IF(II0.NE.0)tm(II0, i, ie, il) = t(i)
+                                 TC(i, ie, il) = t(i)
+                              ENDDO
+                           ELSEIF(il.LE.10)THEN
+                              DO i = 1, 10
+                                 IF(emg(i, il).NE.0.)TC(i, ie, il)
+     &                              = tf(i)/emg(i, il)
+                              ENDDO
+                           ENDIF
+C                          END OF MAST. EQ. SOLUTION (FOR ONE NUCLEUS AND
+C                          ONE EXC. ENERGY)
+ 176                       emtg = 0.
+                           emtp = 0.
+                           DO i = 1, nn
+                              emtp = emtp + TC(i, ie, il)*emp(i, il)
+                              emtg = emtg + TC(i, ie, il)*emg(i, il)
                            ENDDO
-                        ENDDO
+                           IF(ie.LE.NUDim)THEN
+                              IF(nexd(IIP, ie).LE.0 .AND. 
+     &                           emtg.NE.feed .AND. emtg.NE.0.)THEN
+                                 DO i = 1, 10
+                                    TC(i, ie, il) = TC(i, ie, il)
+     &                                 *feed/emtg
+                                 ENDDO
+                                 GOTO 176
+                              ENDIF
+                           ENDIF
+                           DO i = 1, nn
+                              DO igm = 1, 50
+                                 IF(igm.LE.ie)THEN
+                                    IF(e.LE.10. .AND. II0.EQ.1)
+     &                                 uvspe(igm) = uvspe(igm)
+     &                                 + TC(i, ie, il)*emgg(i, il, igm)
+                                 ENDIF
+                              ENDDO
+                           ENDDO
+                           uvfee = uvfee + feed
+                           uvpar = uvpar + emtp
+                           uvgam = uvgam + emtg
+                           IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
+     &                        THEN
+                              sigmacn(il) = feed - emtp - emtg
+C                             ! CN residual population
+                              sigmacntot = sigmacntot + sigmacn(il)
+C                             write(iw,51) e,cj,sigmacn(il),sigmacntot
+                           ENDIF
+                           IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
+     &                        WRITE(iw, 99008)e, cj, emtp, emtg, feed, 
+     &                              (TC(i, ie, il), i = 1, 3)
+99008                      FORMAT(1X, f5.2, 1x, f4.1, 1x, 2G11.4, 2x, 
+     &                            g11.4, 2x, 3E9.2)
+                        ENDIF
                      ENDIF
+C                    OUTPUT: EXCITATION ENERGY; SPIN; PARTICLE, GAMMA &
+C                    TOTAL EMISSION; TIME INTEGRALS OF THE EXCITON STATES
+C                    (N=1-7*)
+ 180              ENDDO
+C
+C                 Gamma de-excitation population will be calculated
+C
+                  IF(ie.NE.1)THEN
+C
+C                    If you like to consider not all excitation energies,
+C                    this condition is to be modified. Currently, the gamma
+C                    de-excitation calculated next 13 lines is to all
+C                    energies except the lowest one (IE.EQ.1).
+C                    Specifically, if you want to consider only the highest
+C                    possible excitation energy, you can skip all these
+C                    lines (including the line 4400 TF0(I,IL)=T1111).
+C
+                     ie = ie - 1
+                     DO il = 1, 25
+C                       ! Spins
+Ceb                     DO i = 1, nn
+                        DO i = 1, 3
+Coblo                      do 4401 i=1,4    ! Excitons limited to i=1,4
+                           IL0 = il
+                           N = 2*i - IIA - 1 + m00
+                           T1111 = 0.
+                           IF(.NOT.((ie.GT.NUDim) .AND. (N.LE.0.OR.OM(i,
+     &                        ie).EQ.0.)))THEN
+                              IF(.NOT.((ie.LE.NUDim) .AND. (i.GT.10.OR.
+     &                           il.GT.10)))THEN
+                                 IF(ie.GT.NUDim .OR. OMD(i, il, ie)
+     &                              .NE.0.)THEN
+                                    I0 = i
+                                    IE00 = ie
+                                    CALL GAMMD
+                                 ENDIF
+                              ENDIF
+                           ENDIF
+                           tf0(i, il) = T1111
+                           Popul(1, ie, il) = Popul(1, ie, il)
+     &                        + tf0(i, il)
+                        ENDDO
+                     ENDDO
                   ENDIF
                ENDIF
-C              4402 write(*,*) ie,il,popul(1,ie,il),popultot1
-            ENDDO
+            ENDIF
+C           4402 write(*,*) ie,il,popul(1,ie,il),popultot1
+Ceb         ENDDO
 Coblo       Now residual population of CN at the initial
 C           excitation energy, ie=nestep.
             DO iloblo = 1, 25
@@ -2396,61 +2392,62 @@ C           MASTER EQ. FINISHED
 C
 C           NEUTRON, PROTON AND GAMMA SPECTRA CALCULATION
 C
-            DO ie = 1, nesteu
-               DO il = 1, 25
-                  cj = CJGs0 + il - 1
-                  ijc = 2*cj + 1
+Ceb         DO ie = 1, nesteu
+            ie = nesteu              ! Highest energy only!
+            DO il = 1, 25
+               cj = CJGs0 + il - 1
+               ijc = 2*cj + 1
 C
-Coblo             Do loop over number of excitons:
-C                 i=1,2,3,4 corresponds to n=1,3,5,7 for the first CN,
-C                 for other nuclei the relationship is more complicated
+Coblo          Do loop over number of excitons:
+C              i=1,2,3,4 corresponds to n=1,3,5,7 for the first CN,
+C              for other nuclei the relationship is more complicated
 C
-                  DO i = 1, nn0      ! Excitons
-Coblo                do 5800 i=1,4
-                     t00 = TC(i, ie, il)
-                     N = 2*i - IIA - 1 + m00
-                     IF(N.GT.0 .AND. t00.NE.0.D0)THEN
-                        IF(ie.GT.NUDim)ro1 = OM(i, ie)*RFAc(N, ijc)
-                        IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
-     &                     ro1 = OMD(i, il, ie)
-                        IF(ie.LE.NUDim .AND. (il.GT.10 .OR. i.GT.10))
-     &                     ro1 = 0.
-                        IF(ro1.NE.0.D0)THEN
+               DO i = 1, 3         ! 3 corresponds to 5 Excitons
+Coblo             do 5800 i=1,4
+                  t00 = TC(i, ie, il)
+                  N = 2*i - IIA - 1 + m00
+                  IF(N.GT.0 .AND. t00.NE.0.D0)THEN
+                     IF(ie.GT.NUDim)ro1 = OM(i, ie)*RFAc(N, ijc)
+                     IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
+     &                  ro1 = OMD(i, il, ie)
+                     IF(ie.LE.NUDim .AND. (il.GT.10 .OR. i.GT.10))
+     &                  ro1 = 0.
+                     IF(ro1.NE.0.D0)THEN
 C
-C                          LOOP OVER N (J=1), P (J=2) AND GAMMA (J=3)
+C                       LOOP OVER N (J=1), P (J=2) AND GAMMA (J=3)
 C
-                           DO j = 1, 3
-                              iiir = indexe + j
-                              nudim1 = NUDim
-                              IF(j.LE.2)nudim1 = nudi(iiir)
-                              IF(ie.GT.NUDim)eom = EXCef + (ie - NUDim)
-     &                           *ESTep
-                              IF(ie.LE.NUDim)eom = ENDi(IIP, ie)
-                              eomm = eom
-                              IF(j.LE.2)eom = eom - b(IIP, j)
-                              ieom = INT(eom/ESTep + 0.5)
-                              IF(eom.GE.estep2 .AND. ieom.GT.0)THEN
-                                 DO ieo = 1, ieom
-                                    eeo = ESTep*ieo
-                                    t11 = 0.
-                                    ro2 = 0.
-                                    eer = eom - eeo
-                                    IF(eer.GE.( - estep2))THEN
-                                       IF(j.EQ.3)THEN
-                                         geg = G*eeo
-                                         IF(ie.NE.NEStep)GOTO 188
-C                                         ! Gamma cascade not allowed
-                                         IF(ie.LE.NBR)GOTO 188
-                                         sgi = eeo*eeo*SG(ieo)*C2
-                                         sgiq = eeo*eeo*sgi*GAQ
-                                         sgir = 0.
-                                         IF((sgi + sgiq).NE.0.)
-     &                                      sgir = sgi*sgiq/(sgi + sgiq)
-                                         IF((sgi + sgiq).NE.0.)
-     &                                      sgi = sgi*sgi/(sgi + sgiq)
-                                         sgiq = sgir
-                                         IF(eer.LT.( - estep2))GOTO 186
-                                         DO is = 1, 3
+                        DO j = 1, 3
+                           iiir = indexe + j
+                           nudim1 = NUDim
+                           IF(j.LE.2)nudim1 = nudi(iiir)
+                           IF(ie.GT.NUDim)eom = EXCef + (ie - NUDim)
+     &                        *ESTep
+                           IF(ie.LE.NUDim)eom = ENDi(IIP, ie)
+                           eomm = eom
+                           IF(j.LE.2)eom = eom - b(IIP, j)
+                           ieom = INT(eom/ESTep + 0.5)
+                           IF(eom.GE.estep2 .AND. ieom.GT.0)THEN
+                              DO ieo = 1, ieom
+                                 eeo = ESTep*ieo
+                                 t11 = 0.
+                                 ro2 = 0.
+                                 eer = eom - eeo
+                                 IF(eer.GE.( - estep2))THEN
+                                    IF(j.EQ.3)THEN
+                                       geg = G*eeo
+                                       IF(ie.NE.NEStep)GOTO 196
+C                                      ! Gamma cascade not allowed
+                                       IF(ie.LE.NBR)GOTO 196
+                                       sgi = eeo*eeo*SG(ieo)*C2
+                                       sgiq = eeo*eeo*sgi*GAQ
+                                       sgir = 0.
+                                       IF((sgi + sgiq).NE.0.)
+     &                                    sgir = sgi*sgiq/(sgi + sgiq)
+                                       IF((sgi + sgiq).NE.0.)
+     &                                    sgi = sgi*sgi/(sgi + sgiq)
+                                       sgiq = sgir
+                                       IF(eer.LT.( - estep2))GOTO 194
+                                       DO is = 1, 3
                                          IF(is.EQ.1)su = cj - 1.
                                          IF(is.EQ.2)su = cj
                                          IF(is.EQ.3)su = cj + 1.
@@ -2505,7 +2502,7 @@ C                                         ! Gamma cascade not allowed
                                          ELSE
                                          iiir = INT((eer - endir)
      &                                      /ESTep + 0.5) + NUDim
-                                         IF(iiir.LT.1)GOTO 174
+                                         IF(iiir.LT.1)GOTO 182
                                          T1111 = b0*sgi*OM(i, iiir)
      &                                      *RFAc(N, isu)
      &                                      + b0q*sgiq*OM(i, iiir)
@@ -2519,44 +2516,44 @@ C                                         ! Gamma cascade not allowed
                                          ENDIF
                                          t11 = t11 + T1111
                                          ENDIF
- 174                                     ENDDO
-C                                         if (ie.gt.nudim) T11 =
-C                                         T11*T00/(RO1*RFAC(N,IJC))
-                                         t11 = t11*t00/ro1
-                                       ELSE
-                                         IF(N.EQ.1)GOTO 186
-                                         endir = 0.
-                                         IF(nudim1.NE.0)
-     &                                      endir = ENDi(iiir, nudim1)
-                                         IF(eer.GE.(endir + estep2))THEN
+ 182                                   ENDDO
+C                                      if (ie.gt.nudim) T11 =
+C                                      T11*T00/(RO1*RFAC(N,IJC))
+                                       t11 = t11*t00/ro1
+                                    ELSE
+                                       IF(N.EQ.1)GOTO 194
+                                       endir = 0.
+                                       IF(nudim1.NE.0)
+     &                                    endir = ENDi(iiir, nudim1)
+                                       IF(eer.GE.(endir + estep2))THEN
                                          ier = INT((eer - endir)
      &                                      /ESTep + 0.5) + nudim1
                                          ro2 = 0.
                                          IF(ier.GT.nudim1)
      &                                      ro2 = omr(j, i, ier)
-C                                            tato podmienka je asi zbytocna,
-C                                            ale pre kazdy pripad ...
+C                                         tato podmienka je asi zbytocna,
+C                                         ale pre kazdy pripad ...
                                          IF(ro2.NE.0.D0)THEN
                                          IF(N.GT.0)THEN
                                          DO iis = 1, 25
                                          t111 = 0.
-C                                                     Emission (E, CJ) --->
-C                                                     (EOM-EEO, SU)
+C                                                  Emission (E, CJ) --->
+C                                                  (EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
                                          isu = 2*su + 1
                                          sum = 0.
                                          s = ABS(su - 0.5)
- 176                                     rl = ABS(j - s)
- 178                                     l = INT(rl) + 1
+ 184                                     rl = ABS(j - s)
+ 186                                     l = INT(rl) + 1
                                          IF(l.LE.24)THEN
                                          sum = sum + TLP(j, ieo, l)
                                          rl = rl + 1.
-                                         IF(rl.LE.(j + s))GOTO 178
+                                         IF(rl.LE.(j + s))GOTO 186
                                          ENDIF
                                          s = s + 1.
-                                         IF(s.LE.(su + 0.5))GOTO 176
+                                         IF(s.LE.(su + 0.5))GOTO 184
                                          t111 = t00*sum*ro2*RFAc(N - 1, 
      &                                      isu)*r(j, i, IIP)*akfc/ro1
                                          t11 = t11 + t111
@@ -2568,10 +2565,10 @@ C                                                     (EOM-EEO, SU)
      &                                      + t111
                                          ENDDO
                                          ENDIF
-                                         GOTO 184
+                                         GOTO 192
                                          ENDIF
-                                         ENDIF
-                                         IF(i.LE.10)THEN
+                                       ENDIF
+                                       IF(i.LE.10)THEN
                                          IF(nudim1.NE.0)THEN
                                          DO iid = 1, nudim1
                                          IF(ABS(ENDi(iiir,iid) - eer)
@@ -2580,31 +2577,31 @@ C                                                     (EOM-EEO, SU)
                                          t111 = 0.
                                          ier = INT(ENDi(iiir, iid)
      &                                      /ESTep + 0.5)
-C                                                        Emission (E, CJ) --->
-C                                                        (EOM-EEO, SU)
+C                                                     Emission (E, CJ) --->
+C                                                     (EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
                                          isu = 2*su + 1
                                          IF(SPIdi(iiir, iid).NE.su)
-     &                                      GOTO 182
+     &                                      GOTO 190
                                          IF(.NOT.((j.EQ.1.AND.omd1(i,iis
      &                                      ,iid).NE.0.) .OR. 
      &                                      (j.EQ.2.AND.omd2(i,iis,iid)
-     &                                      .NE.0.)))GOTO 182
+     &                                      .NE.0.)))GOTO 190
                                          sum = 0.
                                          s = ABS(su - 0.5)
                                          rl = ABS(j - s)
- 180                                     l = INT(rl) + 1
+ 188                                     l = INT(rl) + 1
                                          IF(l.LE.24)THEN
                                          sum = sum + TLP(j, ieo, l)
                                          rl = rl + 1.
-                                         IF(rl.LE.(j + s))GOTO 180
+                                         IF(rl.LE.(j + s))GOTO 188
                                          ENDIF
                                          s = s + 1.
                                          IF(s.LE.(su + 0.5))THEN
                                          rl = ABS(j - s)
-                                         GOTO 180
+                                         GOTO 188
                                          ELSE
                                          IF(j.EQ.1)
      &                                      t111 = t00*sum*omd1(i, iis, 
@@ -2620,23 +2617,22 @@ C                                                        (EOM-EEO, SU)
      &                                      + t111
                                          t11 = t11 + t111
                                          ENDIF
- 182                                     ENDDO
+ 190                                     ENDDO
                                          ENDIF
                                          ENDDO
                                          ENDIF
-                                         ENDIF
                                        ENDIF
- 184                                   Se(j, ieo) = Se(j, ieo)
-     &                                    + t11/ESTep
                                     ENDIF
- 186                             ENDDO
-                              ENDIF
- 188                       ENDDO
-                        ENDIF
+ 192                                Se(j, ieo) = Se(j, ieo) + t11/ESTep
+                                 ENDIF
+ 194                          ENDDO
+                           ENDIF
+ 196                    ENDDO
                      ENDIF
-                  ENDDO
+                  ENDIF
                ENDDO
             ENDDO
+Ceb         ENDDO
 C
 C           SPECTRA OUTPUT
 C
@@ -2658,7 +2654,7 @@ C
 99014       FORMAT(' Integrals  ', 3G15.5, ' mb'//)
          ENDIF
       ELSE
-         ESTep = eexc/139.
+         ESTep = eexc/NDEXD
          GOTO 100
       ENDIF
 C
@@ -2681,7 +2677,7 @@ C     that line completely.
 C
       DO iipnuc = 2, 3
          DO i = 1, 25
-            DO ie = 1, 150
+            DO ie = 1, NDEXD
                Popul(iipnuc, ie, i) = 0.
             ENDDO
          ENDDO
@@ -2690,7 +2686,7 @@ C
          DO i = 1, 25     ! Excitons
             DO il = 1, 25
 C              ! Spins
-               DO ie = 1, 150
+               DO ie = 1, NDEXD
 C                 ! Energy
                   Popul(iipnuc, ie, il) = Popul(iipnuc, ie, il)
      &               + tm(iipnuc - 1, i, ie, il)
@@ -2750,8 +2746,8 @@ C
 C COMMON variables
 C
 C     REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ,
-C    &       OM(25, 150), OMD(10, 10, 10), SG(150), SPIdi(10, 10),
-C    &       T1111, TC(25, 150, 25)
+C    &       OM(25, NDEXD), OMD(10, 10, 10), SG(NDEXD), SPIdi(10, 10),
+C    &       T1111, TC(25, NDEXD, 25)
 C     INTEGER I0, IAT, IE0, IJ, IL0, IZ, N, NBR, NEStep, NUDim
 C     COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep,
 C    &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep,
@@ -2802,14 +2798,16 @@ C
 C     GAMMA EMISSION CALCULATION, DISCRETE LEVELS INCLUDED
 C     (feeding of states with energy IE*ESTEP and spin index IL0
 C     from all higher states by the gamma de-excitation)
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(A - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10), T0(25, 150, 25), T1111, XX0(25, 3, 25), 
-     &       XX02(25, 5, 25), XX2, XX22
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10), T0(25, NDEXD, 25), T1111, 
+     &       XX0(25, 3, 25), XX02(25, 5, 25), XX2, XX22
       INTEGER I0, IAT, IE0, II0, IIA, IIP, IJ, IL0, IZ, N, NBR, NEStep, 
      &        NUDim
       COMMON /BUF   / IIA, IIP, II0
@@ -3372,16 +3370,18 @@ C
 C
       DOUBLE PRECISION FUNCTION X0(S, J)
 C     Eq. (16) of the Report
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10), SPP
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10), SPP
       INTEGER I0, IAO, IAT, IE00, IJ, IL0, ITJgs, ITSpp, IZ, IZO, KEY, 
      &        NBR, NEStep, NN, NUDim
-      REAL*8 JGS, T1111, TC(25, 150, 25)
+      REAL*8 JGS, T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
@@ -3457,15 +3457,17 @@ C
 C
       DOUBLE PRECISION FUNCTION X2(S, J)
 C       Eq. (17) of the Report
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10)
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, 150, 25)
+      REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
@@ -3517,16 +3519,18 @@ C
       DOUBLE PRECISION FUNCTION XDAMP(J)
 C     Eq. (10) of the Report
 C     New changes 26 Oct., 1994
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, FFPair(40), 
-     &       FFQ(40), G, GAQ, OM(25, 150), OMD(10, 10, 10), RFAc(50, 90)
-     &       , SG(150), SIGma, SPIdi(10, 10)
+     &       FFQ(40), G, GAQ, OM(25, NDEXD), OMD(10, 10, 10), 
+     &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10)
       INTEGER I0, IAO, IAT, IE00, IJ, IL0, ITJgs, ITSpp, IZ, IZO, KEY, 
      &        N, NBR, NEStep, NUDim
-      REAL*8 JGS, SPP, T1111, TC(25, 150, 25)
+      REAL*8 JGS, SPP, T1111, TC(25, NDEXD, 25)
       COMMON /DAM   / FFQ, FFPair
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
@@ -3604,15 +3608,17 @@ C
 C
       DOUBLE PRECISION FUNCTION FQ(Q)
 C       Eq. (11) of the Report
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, FFPair(40), 
-     &       FFQ(40), G, GAQ, OM(25, 150), OMD(10, 10, 10), RFAc(50, 90)
-     &       , SG(150), SIGma, SPIdi(10, 10)
+     &       FFQ(40), G, GAQ, OM(25, NDEXD), OMD(10, 10, 10), 
+     &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, 150, 25)
+      REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DAM   / FFQ, FFPair
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
@@ -3652,15 +3658,17 @@ C
 C
       DOUBLE PRECISION FUNCTION FPAIR(J3)
 C       Eq. (12) of the Report
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10)
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, 150, 25)
+      REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
@@ -3789,16 +3797,18 @@ C
 C
       DOUBLE PRECISION FUNCTION X02(S, J)
 C     Analog of Eq. (16) of the Report for E2
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10), SPP
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10), SPP
       INTEGER I0, IAO, IAT, IE00, IJ, IL0, ITJgs, ITSpp, IZ, IZO, KEY, 
      &        NBR, NEStep, NN, NUDim
-      REAL*8 JGS, T1111, TC(25, 150, 25)
+      REAL*8 JGS, T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
@@ -3873,15 +3883,17 @@ C
 C
       DOUBLE PRECISION FUNCTION X22(S, J)
 C     Analog of  Eq. (17) of the Report for E2
+      INCLUDE 'dimension.h'
+      PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
 C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, 150), OMD(10, 10, 10), RFAc(50, 90), SG(150), SIGma, 
-     &       SPIdi(10, 10)
+     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+     &       SIGma, SPIdi(10, 10)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, 150, 25)
+      REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 

@@ -1,5 +1,5 @@
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: ccfus.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:35 $
+Ccc   * $Id: ccfus.f,v 1.4 2002-09-20 14:16:35 mike Exp $
 C
       SUBROUTINE CCFUS(Stl)
 C
@@ -76,7 +76,7 @@ C
             WRITE(6, 99003)BETcc(n), FLAm(n), QCC(n)
 99003       FORMAT('  *  ', F6.2, '    *  ', F3.0, '  *  ', F6.2, 
      &             '    *')
-            IF(BETcc(n).EQ.0.0D0)THEN
+            IF(BETcc(n).EQ.0.0D0 .AND. FIRst_ein)THEN
                WRITE(6, *)' WARNING !!!'
                WRITE(6, *)' WARNING !!! DEFORMATION FOR CHANNEL ', n, 
      &                    ' IN CCFUS IS 0'

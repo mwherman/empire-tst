@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-04-15 13:22:23 $
-Ccc   * $Id: input.f,v 1.8 2002-04-15 13:22:23 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: input.f,v 1.9 2002-09-20 14:16:53 mike Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -182,7 +182,9 @@ C     hhbarc = 197.328604d0                                             calc-089
 C     From SCAT2000
       ampipm = 1.395688D+02
       ampi0 = 1.349645D+02
-      AMUmev = 9.3149386D+02
+C     AMUmev = 9.3149386D+02
+C     according to the ENDF-6 manual (April 2001)
+      AMUmev = 9.31494013D+02
       AMPi = (2.D0*ampipm + ampi0)/3.D0
       ELE2 = 1.4399652D+00
       HHBarc = 1.97327053D+02
@@ -196,10 +198,11 @@ C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
 C
 C
       IF(EIN.EQ.0.0D0)THEN
-C-----
-C-----default input parameters (skipped in non-first-energy calculation)
-C-----
-C-----select Meyers-Swiatecki shell corrections
+C--------
+C--------default input parameters (skipped in non-first-energy calculation)
+C--------
+         FIRst_ein = .TRUE.   
+C--------select Meyers-Swiatecki shell corrections
          SHNix = 0.0
 C--------set angles for MSD calculations
          da = 180.0/(NDANG - 1)
@@ -773,6 +776,10 @@ C--------model matrix *** done ***
 C
 C--------read nuclear deformations and masses
          CALL READNIX
+C--------set projectile/ejectile masses
+         DO nejc = 0, NDEJC 
+            EJMass(nejc) = (AEJc(nejc)*AMUmev + XMAss_ej(nejc))/AMUmev
+         ENDDO 
 C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
          CALL READLDP
@@ -781,22 +788,22 @@ C--------Capote 2001
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
             IF(ierr.EQ.1)THEN
-               WRITE(6, *)' WARNING: SOME DISCRETE LEVELS FOR TARGET'
-     &               ,' NUCLEUS NOT FOUND'
+               WRITE(6, *)' WARNING: SOME DISCRETE LEVELS FOR TARGET', 
+     &                    ' NUCLEUS NOT FOUND'
                WRITE(6, *)' WARNING: CHECK TARGET.LEV file '
             ELSEIF(ierr.EQ.2)THEN
-               WRITE(6, *)' WARNING: NO DISCRETE LEVELS FOR TARGET'
-     &               ,' NUCLEUS FOUND'
-               WRITE(6, *)' WARNING: DIRECT CROSS SECTION WILL NOT BE'
-     &               ,' CALCULATED'
+               WRITE(6, *)' WARNING: NO DISCRETE LEVELS FOR TARGET', 
+     &                    ' NUCLEUS FOUND'
+               WRITE(6, *)' WARNING: DIRECT CROSS SECTION WILL NOT BE', 
+     &                    ' CALCULATED'
                WRITE(6, *)' WARNING: SETTING DIRECT = 0 '
                DIRect = 0
             ELSEIF(ierr.EQ.3)THEN
-               WRITE(6, *)' WARNING: SPHERICAL ODD NUCLEI, NO HINTS'
-     &               ,' FOR COLLECTIVE STATES'
+               WRITE(6, *)' WARNING: SPHERICAL ODD NUCLEI, NO HINTS', 
+     &                    ' FOR COLLECTIVE STATES'
                WRITE(6, *)' WARNING:  CHECK DIRECTLY TARGET.LEV file '
-               WRITE(6, *)' WARNING:  DIRECT CROSS SECTION WILL NOT'
-     &               ,' BE CALCULATED'
+               WRITE(6, *)' WARNING:  DIRECT CROSS SECTION WILL NOT', 
+     &                    ' BE CALCULATED'
                WRITE(6, *)' WARNING:  SETTING DIRECT = 0 '
                DIRect = 0
             ENDIF
@@ -907,11 +914,9 @@ C        Capote 1/03/2001
 C        AMAss(0) = (A(0)*amumev + XMAss(0))/(amumev + xnexc)
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
-      xmas_inc = (AEJc(0)*AMUmev + XMAss_ej(0))/AMUmev
-      xmas_trg = (A(0)*AMUmev + XMAss(0))/AMUmev
       EINl = EIN
 C     Capote 10/01
-      CALL KINEMA(EINl, EIN, xmas_inc, xmas_trg, RMU, ak2, 1, RELkin)
+      CALL KINEMA(EINl, EIN, EJMass(0), AMAss(0), RMU, ak2, 1, RELkin)
 C     EIN = EIN*A(0)/A(1)
       EXCn = EIN + Q(0, 1)
       EMAx(1) = EXCn
@@ -1227,15 +1232,15 @@ C-----calculate residual nucleus level density
       DO i = 1, NDLW
          DRTl(i) = 1.0
       ENDDO
-
+C
       IF(FITlev.GT.0.D0)THEN
 C--------remove potentially empty omp files
 C--------OMPAR.INT
-         CLOSE(18,STATUS='DELETE')
+         CLOSE(18, STATUS = 'DELETE')
 C--------OMPAR.DIR
-         CLOSE(33,STATUS='DELETE')
+         CLOSE(33, STATUS = 'DELETE')
 C--------OMPAR.RIPL
-         CLOSE(29,STATUS='DELETE')
+         CLOSE(29, STATUS = 'DELETE')
          STOP 'PLOTS DONE'
       ENDIF
 99001 FORMAT(1X, 60('='))
@@ -1300,8 +1305,8 @@ C-----set ground state *** done ***
       IF(.NOT.FILevel)THEN
 C--------constructing input and filenames
          WRITE(ctmp3, '(I3.3)')iz
-         finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
+         finp = 'z'//ctmp3//'.dat'
+         OPEN(13, FILE = '../RIPL-2/levels/'//finp, STATUS = 'OLD', 
      &        ERR = 300)
       ELSE
          REWIND 13
@@ -1321,7 +1326,7 @@ C--------create file with levels (*.lev)
 C--------NLV   number of levels with unique spin and parity
 C--------NCOMP number of levels up to which the level scheme is estimated
 C--------to be complete
-
+C
          IF(.NOT.FILevel)THEN
             BACKSPACE(13)
             READ(13, '(A80)')ch_iuf
@@ -1572,9 +1577,10 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ipu*
 Ccc   *                      P T L E V R E                               *
 Ccc   *                                                                  *
-Ccc   *  Reads form the file 13 gorund state spin and parity and first   *
-Ccc   *  2+ and 3- levels' energies (the latter to be used by CCFUS and  *
-Ccc   *  TRISTAN)                                                        *
+Ccc   *  Reads from OM-DEFORMATIONS.DAT energies of collective 2+ and    *
+Ccc   *  3- states (if possible). If not it will try to find them out    *
+Ccc   *  in the file with discrete levls. In any case will take from     *
+Ccc   *  it ground state spin and parity.                                *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * input:IA   - A of the nucleus                                    *
@@ -1609,15 +1615,39 @@ C
       CHARACTER*3 ctmp3
       CHARACTER*5 chelem
       CHARACTER*9 finp
-      DOUBLE PRECISION dum, elvr, xjlvr
+      DOUBLE PRECISION dum, DEF, elvr, xjlvr
       INTEGER iar, ilv, izr, nlvr, lvpr
       E2p = 0.0
       E3m = 0.0
+C-----First try to find 2+ and 3- states in the RIPL om-deformations file      
+      OPEN(47, FILE='../RIPL-2/optical/om-data/om-deformations.dat', 
+     &     STATUS='OLD')
+      READ(47, '(A80)')ch_iuf
+      READ(47, '(A80)')ch_iuf
+      READ(47, '(A80)')ch_iuf
+      READ(47, '(A80)')ch_iuf
+  50  READ(47,'(2I4,3x,F11.6,F5.1,I3,2X,F11.6)', END = 70)izr, iar, 
+     &     elvr, xjlvr, lvpr, defr
+      IF(Ia.NE.iar .OR. Iz.NE.izr)THEN
+         GOTO 50
+      ELSE
+         IF(E2p.EQ.0.0D0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)
+     &      E2p = elvr
+         IF(E3m.EQ.0.0D0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.( - 1))
+     &      E3m = elvr
+         IF(E2p.NE.0.0D0 .AND. E3m.NE.0.0D0) THEN
+            GOTO 70
+         ELSE 
+            GOTO 50
+         ENDIF 
+      ENDIF
+  70  CLOSE(47)
+C-----If missing in the RIPL om-deformations file try discrete levels file
 C-----constructing input and filenames
       IF(.NOT.FILevel)THEN
          WRITE(ctmp3, '(I3.3)')Iz
-         finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
+         finp = 'z'//ctmp3//'.dat'
+         OPEN(13, FILE = '../RIPL-2/levels/'//finp, STATUS = 'OLD', 
      &        ERR = 200)
       ELSE
          REWIND(13)
@@ -1808,9 +1838,9 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.17.1    |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.18      |'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |        (Millesimo)         |'
+      WRITE(6, *)'                       |         (Mondovi)          |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |             b y            |'
@@ -3906,8 +3936,8 @@ C-----constructing input and filenames
 C
       IF(.NOT.FILevel)THEN
          WRITE(ctmp3, '(I3.3)')iz
-         finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
+         finp = 'z'//ctmp3//'.dat'
+         OPEN(13, FILE = '../RIPL-2/levels/'//finp, STATUS = 'OLD', 
      &        ERR = 300)
       ELSE
          REWIND(13)

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: fusion.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:52 $
+Ccc   * $Id: fusion.f,v 1.4 2002-09-20 14:16:52 mike Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -167,12 +167,10 @@ C        IWARN=1 - 'A out of the recommended range '
 C        IWARN=2 - 'Z out of the recommended range '
 C        IWARN=3 - 'Energy requested lower than recommended for this potential'
 C        IWARN=4 - 'Energy requested higher than recommended for this potential'
-         IF(IWArn.EQ.1)WRITE(6, *)
-     &                       ' WARNING: OMP not recommended for A='
-     &                       , A(Ntrg)
-         IF(IWArn.EQ.2)WRITE(6, *)
-     &                       ' WARNING: OMP not recommended for Z='
-     &                       , Z(Ntrg)
+         IF(IWArn.EQ.1 .AND. FIRst_ein)WRITE(6, *)
+     &      ' WARNING: OMP not recommended for A=', A(Ntrg)
+         IF(IWArn.EQ.2 .AND. FIRst_ein)WRITE(6, *)
+     &      ' WARNING: OMP not recommended for Z=', Z(Ntrg)
          IF(IWArn.EQ.3 .OR. IWArn.EQ.4)WRITE(6, *)
      &      ' WARNING: OMP not recommended for E=', EIN
          IWArn = 0

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-04-05 17:03:11 $
-Ccc   * $Id: HF-comp.f,v 1.4 2002-04-05 17:03:11 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: HF-comp.f,v 1.5 2002-09-20 14:16:53 mike Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -515,12 +515,9 @@ C-----
 C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnur)
             eout = eoutc - ELV(i, Nnur)
-            cor = 1.0
-            IF(eout.LT.DE)THEN
 C-----------level above the bin
-               IF(eout.LT.0.0D0)GOTO 100
-               IF(eout.LT.DE)cor = 0.5
-            ENDIF
+            IF(eout.LT.0.0D0)GOTO 100
+            cor = 1.0
             sumdl = 0.0
             CALL TLLOC(Nnur, Nejc, eout, il, frde)
             smin = ABS(XJLv(i, Nnur) - SEJc(Nejc))
@@ -618,17 +615,18 @@ C
                   IF(j1.GE.l)THEN
                      WRITE(6, 99004)
 99004                FORMAT(10X, 'ERROR IN DISCRETE LEVEL DECAY DATA', 
-     &                      /, 10X, 'FINAL LEVEL ABOVE THE INITIAL ONE', 
+     &                      /, 10X, 'FINAL LEVEL ABOVE THE INITIAL ONE',
      &                      /, 10X, 'FURTHER DECAY NOT CONSIDERED ')
                      GOTO 99999
                   ENDIF
-C                 gacs = popl*FLOAT(IBR(l, j, 2, Nnuc))/100.
                   gacs = popl*BR(l, j, 2, Nnuc)
                   POPlv(j1, Nnuc) = POPlv(j1, Nnuc) + gacs
                   egd = ELV(l, Nnuc) - ELV(j1, Nnuc)
                   icse = 2.0001 + egd/DE
-                  CSE(icse, 0, Nnuc) = CSE(icse, 0, Nnuc) + gacs/DE
-                  CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + gacs
+                  IF(ENDF .NE. 1.0D0) THEN 
+                     CSE(icse, 0, Nnuc) = CSE(icse, 0, Nnuc) + gacs/DE
+                     CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + gacs
+                  ENDIF 
                   IF(IOUt.GT.2)WRITE(6, 99005)ELV(j1, Nnuc), 
      &                               LVP(j1, Nnuc)*XJLv(j1, Nnuc), egd, 
      &                               gacs
@@ -712,18 +710,6 @@ C-----clear scratch matrix (discrete levels)
       DO i = 1, NLV(Nnuc)
          SCRtl(i, 0) = 0.0
       ENDDO
-C-----calculate nuclear temperature for the generalized Lorenzian to be
-C-----used for E1 strength function determination. NOTE: this temperature
-C-----is not consistent with the actual level densities.
-      t = 0.
-      IF(EX(Iec, Nnuc).GT.1.0D-5)THEN
-         atil = 0.073*A(Nnuc) + 0.115*A(Nnuc)**0.666667
-         gamma = 0.40/A(Nnuc)**0.33333
-         accn = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP((-gamma*EX(Iec,Nnuc))))
-     &          /EX(Iec, Nnuc))
-         IF(EX(Iec, Nnuc).GE.YRAst(Jc, Nnuc))
-     &      t = SQRT((EX(Iec,Nnuc) - YRAst(Jc,Nnuc))/accn)
-      ENDIF
 C-----IPOS is a parity-index of final states reached by gamma
 C-----transitions which do not change parity (E2 and M1)
 C-----INEG is a parity-index of final states reached by gamma
@@ -743,7 +729,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C--------next 3 lines could be replaced with the matrix
-         se1 = E1(eg, t)*TUNe(0, Nnuc)
+         se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
          se2 = E2(eg)*TUNe(0, Nnuc)
          sm1 = XM1(eg)*TUNe(0, Nnuc)
          se2m1 = se2 + sm1
@@ -837,7 +823,7 @@ C-----do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, t)*iodd + XM1(eg)*ipar
+                  SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -940,7 +926,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          IF(RO(ier, Jc, Nnuc).NE.0.D0)THEN
             eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C-----------next 3 lines should be replaced with the matrix
-            se1 = E1(eg, t)*TUNe(0, Nnuc)
+            se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -1042,7 +1028,7 @@ C--------do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, t)*iodd + XM1(eg)*ipar
+                  SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -1098,7 +1084,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION accn, ampl, atil, ekin, ekinm, erest, fisbar, 
-     &                 fric, gamma, gpart, htom, PI, shredt, sum1, sum2, 
+     &                 fric, gamma, gpart, htom, PI, shredt, sum1, sum2,
      &                 sum3, sumf, sumgs, sumr, tau, temp
       REAL FLOAT
       INTEGER kn, knm

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: auxiliary.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:35 $
+Ccc   * $Id: auxiliary.f,v 1.4 2002-09-20 14:16:35 mike Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -79,6 +79,8 @@ C
          ENDDO
          DO nnex = 1, NDEX
             EX(nnex, nnuc) = 0.0
+            TNUc(nnex, nnuc) = 0.0
+            TNUcf(nnex, nnuc) = 0.0
             DO ilw = 1, NDLW
                RO(nnex, ilw, nnuc) = 0.0
                ROF(nnex, ilw, nnuc) = 0.0
@@ -778,7 +780,7 @@ C
      &     'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt', 
      &     'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 
      &     'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 
-     &     'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Ha', 'Sg', 'Ns', 'Hs', 
+     &     'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Ns', 'Hs', 
      &     'Mt', '??'/
       IF(Iz.GT.109)THEN
          SMAT = mat(110)

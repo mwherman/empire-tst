@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-04-15 13:22:23 $
-Ccc   * $Id: tl.f,v 1.6 2002-04-15 13:22:23 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: tl.f,v 1.7 2002-09-20 14:16:53 mike Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -246,7 +246,7 @@ C     IF ( IMOdel.EQ.0 ) model = 'spherical nucleus model'
 C     IF ( IMOdel.EQ.1 ) model = 'coupled-channels rotational model'
 C     IF ( IMOdel.EQ.2 ) model = 'vibrational model'
 C     IF ( IMOdel.EQ.3 ) model = 'non-axial deformed model'
-      IF(IMOdel.EQ.3)THEN
+      IF(IMOdel.EQ.3 .AND. FIRst_ein)THEN
          WRITE(6, *)'WARNING: NON-AXIAL DEFORMED MODEL NOT IMPLEMENTED'
          IWArn = 5
          GOTO 200
@@ -261,7 +261,7 @@ C        Imodel not used for non-inelastic channels
       IF(IMOdel.EQ.1 .AND. (.NOT.coll_defined))THEN
 C        model = 'coupled-channels rotational model'
          coll_defined = .TRUE.
-         IF(NISotop.EQ.0)THEN
+         IF(NISotop.EQ.0 .AND. FIRst_ein)THEN
             WRITE(6, *)'WARNING: NONE OF THE REQUESTED ISOTOPES IS '
             WRITE(6, *)'WARNING: INCLUDED IN THE SELECTED POTENTIAL.'
             WRITE(6, *)'WARNING: FILE WITH RIPL DISCRETE LEVELS CAN NOT'
@@ -274,22 +274,22 @@ C        model = 'coupled-channels rotational model'
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                ncalc = n
                IF(IDEf(n).GT.2*LMAx(n) .OR. NCOll(n).GT.NDCOLLEV)THEN
-                  WRITE(6, *)'RIPL discrete level is wrong'
-                  WRITE(6, *)'Too many levels or too many deformations'
-                  WRITE(6, *)'Default collective levels will be used'
+                  WRITE(6, *)'WARNING: RIPL coll. levels are wrong'
+                  WRITE(6, *)'WARNING: Too many levels or deformations'
+                  WRITE(6, *)'WARNING: Default coll levels will be used'
                   IWArn = 6
                   GOTO 200
                ENDIF
             ENDIF
          ENDDO
          IF(ncalc.EQ.0)THEN
-            WRITE(6, *)'RIPL discrete level information is not used'
-            WRITE(6, *)'Default collective levels will be used'
+            WRITE(6, *)'WARNING: RIPL collective levels are not used'
+            WRITE(6, *)'WARNING: Default levels will be used'
             GOTO 200
          ENDIF
          IF(NCOll(ncalc).EQ.0)THEN
-            WRITE(6, *)'RIPL discrete level information is not used'
-            WRITE(6, *)'Default collective levels will be used'
+            WRITE(6, *)'WARNING: RIPL collective levels are not used'
+            WRITE(6, *)'WARNING: Default levels will be used'
             GOTO 200
          ENDIF
          OPEN(32, FILE = 'TARGET_COLL.DAT')
@@ -311,15 +311,14 @@ C        model = 'coupled-channels rotational model'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
-         READ(39, '(A80)') ch_iuf
          icoll(1) = 1
          DO k = 2, NCOll(ncalc)
             icoll(k) = 0
             eripl = EEX(k, ncalc)
             REWIND(39)
+            READ(39, '(A80)') ch_iuf
             ilv = -1
  20         ilv = ilv + 1
-C           READ(39, '(a1,1x,i3,f7.3)', END = 50)ctmp, itmp, ftmp
             READ(39, '(I3,1X,F10.6)', END = 50)itmp, ftmp 
             IF(ABS(ftmp - eripl).GT.0.010)GOTO 20
             icoll(k) = ilv
@@ -429,17 +428,16 @@ C--------model = 'vibrational model'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
-         READ(39, '(A80)') ch_iuf
          icoll(1) = 1
          DO k = 2, NVIb(ncalc)
             icoll(k) = 0
             eripl = EXV(k, ncalc)
             REWIND(39)
+            READ(39, '(A80)') ch_iuf
             ilv = -1
  60         ilv = ilv + 1
-C           READ(39, '(a1,1x,i3,f7.3)', END = 100)ctmp, itmp, ftmp
             READ(39, '(I3,1X,F10.6)', END = 100)itmp, ftmp 
-            IF(ABS(ftmp - eripl).GT.0.010)GOTO 60
+            IF(ABS(ftmp - eripl).GT.0.010D0)GOTO 60
             icoll(k) = ilv
  100     ENDDO
          CLOSE(39)
@@ -528,22 +526,22 @@ C        WRITE (Ko,*) E , ' RIPL emax=' , EEMax
       RCOul(Nejc, Nnuc) = rc
       EEE = E
       gamma = 1.D0
-      IF(IREl.EQ.2)THEN
+C     IF(IREl.EQ.2)THEN
 C        Target system mass in MeV
-         emtar = xmas_nnuc*AMUmev
+C        emtar = xmas_nnuc*AMUmev
 C        Total system mass in MeV
-         emtot = (xmas_nnuc + xmas_nejc)*AMUmev
+C        emtot = (xmas_nnuc + xmas_nejc)*AMUmev
 C        Total kinetic energy in cm
-         tcm = SQRT(2*emtar*E + emtot**2) - emtot
+C        tcm = SQRT(2*emtar*E + emtot**2) - emtot
 C
 C        Relativistic correction to the potential
 C        (Used for example in Madland potential REF=2001)
 C
 C        Obtained from Dirac equation considering non relativistic target !!
 C
-         gamma = 1.D0 + tcm/(tcm + 2*xmas_nejc*AMUmev)
+C        gamma = 1.D0 + tcm/(tcm + 2*xmas_nejc*AMUmev)
 C
-      ENDIF
+C     ENDIF
 C
 C++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 C     RIPL-II
@@ -1500,9 +1498,8 @@ C              Otherwise delete the following two lines
       READ(Ki, *)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-C           read(ki,*) ecoul(j),rcoul(j),rcoul0(j),beta(j)
-            READ(Ki, '(a80)')comment
-            WRITE(Komp, '(a80,a20)')comment, ' Ecoul,rc,rc0,beta'
+          READ(Ki, '(a80)')comment
+          WRITE(Komp, '(a80,a20)')comment, ' Ecoul,RC0,RC,RC1,RC2,beta'
          ENDDO
       ENDIF
       IF(IMOdel.GT.0)THEN
@@ -1554,6 +1551,7 @@ C
 99001 FORMAT(10A8)
 C
       Ierr = 0
+      REWIND(Ko)
       READ(Ko, '(I5)', ERR = 200)IREf
       READ(Ko, 99010, ERR = 200)AUThor
       READ(Ko, 99010, ERR = 200)REFer
@@ -1614,8 +1612,8 @@ C--------------Reading depths
       READ(Ko, 99004, ERR = 200)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-            READ(Ko, 99005, ERR = 200)ECOul(j), RCOul(j), RCOul0(j), 
-     &                                BETa(j)
+            READ(Ko, 99005, ERR = 200)ecoul(j),
+     &      rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j)
          ENDDO
       ENDIF
       IF(IMOdel.EQ.1)THEN
@@ -1721,7 +1719,8 @@ C
       READ(Ki, *)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-            READ(Ki, *)ECOul(j), RCOul(j), RCOul0(j), BETa(j)
+            READ(Ki, *)ecoul(j),
+     &      rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j)
          ENDDO
       ENDIF
       IF(IMOdel.EQ.1)THEN
@@ -2031,9 +2030,9 @@ C        IWARN=1 - 'A out of the recommended range '
 C        IWARN=2 - 'Z out of the recommended range '
 C        IWARN=3 - 'Energy requested lower than recommended for this potential'
 C        IWARN=4 - 'Energy requested higher than recommended for this potential'
-         IF(IWArn.EQ.1 .AND. IOUt.EQ.5)WRITE(6, *)
+         IF(IWArn.EQ.1 .AND. IOUt.EQ.5 .AND. FIRst_ein)WRITE(6, *)
      &      'WARNING: OMP not recommended for A=', A(Nnuc)
-         IF(IWArn.EQ.2 .AND. IOUt.EQ.5)WRITE(6, *)
+         IF(IWArn.EQ.2 .AND. IOUt.EQ.5 .AND. FIRst_ein)WRITE(6, *)
      &      'WARNING: OMP not recommended for Z=', Z(Nnuc)
          IF(IWArn.EQ.3 .AND. IOUt.EQ.5)WRITE(6, *)
      &      'WARNING: Energy lower than recommended for the OMP '
@@ -2269,7 +2268,7 @@ C
          WRITE(6, *)'WARNING: FOR THIS RESIDUAL NUCLEUS'
          WRITE(6, *)'WARNING: AVAILABLE ENERGY IS ALWAYS '
          WRITE(6, *)'WARNING: BELOW COULOMB BARRIER'
-         WRITE(6, *)'WARNING: CALCULATIONS NOT NEEDED!'
+         WRITE(6, *)'WARNING: CALCULATIONS ARE NOT NEEDED!'
       ENDIF
       END
 C
@@ -2714,23 +2713,30 @@ C-----Only for target, find open channels
 C     At least ground state is always open !!, RCN 31/03/2001
 C     nd_nlvop = 0
       nd_nlvop = 1
-      IF(ND_nlv.GT.0)THEN
+      IF(ND_nlv.GT.0 .AND. DIRect.NE.3)THEN
          DO j = 2, ND_nlv
-            IF(DIRect.NE.3 .OR. IPH(j).NE.2)THEN
+            IF(IPH(j).NE.2)THEN
                eee = El - D_Elv(j)/xratio
-C              IF ( El*xratio.GT.D_Elv(j)+0.1 ) nd_nlvop = j
-               IF(eee.GT.0.05)nd_nlvop = nd_nlvop + 1
+               IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
             ENDIF
          ENDDO
       ENDIF
 C     iterm = 1
       IF(nd_nlvop.EQ.1)WRITE(6, *)
      &               ' All inelastic channels are closed at this energy'
-      ncoll = nd_nlvop
+C
+C     Considering even closed channels in calculations
+      ncoll = ND_nlv
+C     ncoll = nd_nlvop
+C
       iterm = 20
 C     For DWBA only one iteration is used
       IF(ECIs2(42:42).EQ.'T')iterm = 1
-      npp = nd_nlvop
+C     Defining one potential for each collective level
+C     If channel is closed ground state potential is used for this level
+      npp = ncoll
+C     npp = nd_nlvop
+C
       rmatch = 25.
       zerosp = 0.0
 C-----ldwmax=2.4*1.25*AN(i)**0.33333333*0.22*sqrt(parmas(i)*e)
@@ -2767,44 +2773,34 @@ C-----write(1,'(f5.2,2i2,a1,5f10.5)') zerosp,0,1,'+',EL,
 C-----0 phonon involved
       WRITE(1, '( )')
 C-----discrete levels
-      IF(nd_nlvop.GT.1)THEN
-         nwrite = 1
-         DO j = 2, ND_nlv
-            IF(DIRect.NE.3 .OR. IPH(j).NE.2)THEN
-               eee = El - D_Elv(j)/xratio
-               IF(eee.GE.0.05D0)THEN
-C                 DO j = 2 , nd_nlvop
-                  ch = '-'
-                  IF(D_Lvp(j).GT.0)ch = '+'
-                  nwrite = nwrite + 1
-                  WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0, nwrite, 
-     &                  ch, D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, 
-     &                  Z(Nnuc)*ZEJc(Nejc)
-                  IF(IPH(j).EQ.1)THEN
-                     WRITE(1, '(3i5)')IPH(j), j - 1, 0
-                  ELSE
-C--------------two   phonon states if exist are formed from the quadrupole
-C--------------quadrupole phonon spin is equal to 2+
-C                    phonon
-                     WRITE(1, '(3i5)')IPH(j), 1, 1
-                  ENDIF
-               ENDIF
+      nwrite = 1
+      DO j = 2, ND_nlv
+         IF(DIRect.NE.3 .OR. IPH(j).NE.2)THEN
+            ch = '-'
+            IF(D_Lvp(j).GT.0)ch = '+'
+            nwrite = nwrite + 1
+            WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0, nwrite, ch, 
+     &            D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
+     &            *ZEJc(Nejc)
+            IF(IPH(j).EQ.1)THEN
+               WRITE(1, '(3i5)')IPH(j), j - 1, 0
+            ELSE
+C---------two  phonon states if exist are formed from the quadrupole
+C---------quadrupole phonon spin is equal to 2+
+C              phonon
+               WRITE(1, '(3i5)')IPH(j), 1, 1
             ENDIF
-         ENDDO
+         ENDIF
+      ENDDO
 C
 C--------deformations: phonon description
 C
-         DO j = 2, ND_nlv
-            eee = El - D_Elv(j)/xratio
-            IF(eee.GE.0.05D0)THEN
-C              DO j = 2 , nd_nlvop
-C              only deformation for one phonon states is needed
-C              &          INT(D_Xjlv(j)),D_Def(j)
-               IF(IPH(j).EQ.1)WRITE(1, '(i5,5x,6f10.5)')INT(D_Xjlv(j)), 
-     &                              D_Def(j, 2)
-            ENDIF
-         ENDDO
-      ENDIF
+      DO j = 2, ND_nlv
+C        only deformation for one phonon states is needed
+         IF(IPH(j).EQ.1)WRITE(1, '(i5,5x,6f10.5)')INT(D_Xjlv(j)), 
+     &                        D_Def(j, 2)
+      ENDDO
+C
 C-----potential parameters
 C-----1) groundstate
 C     write(1,'(3f10.5)') v,rv,av
@@ -2865,82 +2861,80 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
 C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
       WRITE(1, '(3f10.5)')0., 0., 0.
-      IF(nd_nlvop.GT.1)THEN
-C-----   2) discrete levels
-         DO j = 2, ND_nlv
-            IF(DIRect.NE.3 .OR. IPH(j).NE.2)THEN
-C              DO j = 2 , nd_nlvop
-C              EEE=eninc-edis(j)/specm(k0)
-C              specm(k)=resmas(k)/(parmas(k)+resmas(k))
-               eee = El - D_Elv(j)/xratio
-               IF(eee.GE.0.05)THEN
-C                 SETPOTS  : subroutine for optical model parameters
-C                 From     cms system to Lab
-                  ecms = eee
-                  ikey = +1
 C
-C                 Transformation of energies from laboratory to center-of-mass
-C                 if needed is done inside SETPOTS() -> OMPAR()
+C-----2) discrete levels
+      DO j = 2, ND_nlv
+         IF(DIRect.NE.3 .OR. IPH(j).NE.2)THEN
+C           DO j = 2 , nd_nlvop
+C           EEE=eninc-edis(j)/specm(k0)
+C           specm(k)=resmas(k)/(parmas(k)+resmas(k))
 C
-                  CALL SETPOTS(Nejc, Nnuc, elabe, ecms, xmas_nejc, 
-     &                         xmas_nnuc, RMU, ak2, ikey)
+C           If channel is closed ground state potential is used for this level
+            eee = El - D_Elv(1)/xratio
+            eee2 = El - D_Elv(j)/xratio
+            IF(eee2.GE.0.0001)eee = eee2
+            IF(eee.GE.0.0001)THEN
+C              SETPOTS  : subroutine for optical model parameters
+C              From     cms system to Lab
+               ecms = eee
+               ikey = +1
 C
-C                 elabe = eee*xratio
-C                 CALL SETPOTS(Nejc, Nnuc, elabe)
+C              Transformation of energies from laboratory to center-of-mass
+C              if needed is done inside SETPOTS() -> OMPAR()
 C
-C                 Capote   2001
-C                 CALL SETPOTS(Nejc, Nnuc, eee)
+               CALL SETPOTS(Nejc, Nnuc, elabe, ecms, xmas_nejc, 
+     &                      xmas_nnuc, RMU, ak2, ikey)
 C
-C                 potential parameters
-C                 write(1,'(3f10.5)') v,rv,av
-                  IF(POTe(1).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')POTe(1), RVOm(1, Nejc, Nnuc), 
-     &                     AVOm(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C                 write(1,'(3f10.5)') w,rw,aw
-                  IF(POTe(3).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')POTe(3), RWOmv(1, Nejc, Nnuc), 
-     &                     AWOmv(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C-----------------write(1,'(3f10.5)') vd,rvd,avd
-                  IF(POTe(7).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')POTe(7), RWOm(1, Nejc, Nnuc), 
-     &                     AWOm(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C                 write(1,'(3f10.5)') wd,rwd,awd
-                  IF(POTe(2).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')POTe(2), RWOm(1, Nejc, Nnuc), 
-     &                     AWOm(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C                 write(1,'(3f10.5)') vvso,rrvso,aavso
-                  IF(POTe(4).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')POTe(4), RVSo(1, Nejc, Nnuc), 
-     &                     AVSo(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C                 write(1,'(3f10.5)') wwso,rwso,awso
-                  IF(WSO(1, Nejc, Nnuc).NE.0.)THEN
-                     WRITE(1, '(3f10.5)')WSO(1, Nejc, Nnuc), 
-     &                     RWSo(1, Nejc, Nnuc), AWSo(Nejc, Nnuc)
-                  ELSE
-                     WRITE(1, '(3f10.5)')0., 0., 0.
-                  ENDIF
-C                 write(1,'(3f10.5)') rc,0.,0.
-                  WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
+C              potential parameters
+C              write(1,'(3f10.5)') v,rv,av
+               IF(POTe(1).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')POTe(1), RVOm(1, Nejc, Nnuc), 
+     &                                AVOm(Nejc, Nnuc)
+               ELSE
                   WRITE(1, '(3f10.5)')0., 0., 0.
                ENDIF
+C              write(1,'(3f10.5)') w,rw,aw
+               IF(POTe(3).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')POTe(3), RWOmv(1, Nejc, Nnuc), 
+     &                                AWOmv(Nejc, Nnuc)
+               ELSE
+                  WRITE(1, '(3f10.5)')0., 0., 0.
+               ENDIF
+C-----------------write(1,'(3f10.5)') vd,rvd,avd
+               IF(POTe(7).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')POTe(7), RWOm(1, Nejc, Nnuc), 
+     &                                AWOm(Nejc, Nnuc)
+               ELSE
+                  WRITE(1, '(3f10.5)')0., 0., 0.
+               ENDIF
+C              write(1,'(3f10.5)') wd,rwd,awd
+               IF(POTe(2).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')POTe(2), RWOm(1, Nejc, Nnuc), 
+     &                                AWOm(Nejc, Nnuc)
+               ELSE
+                  WRITE(1, '(3f10.5)')0., 0., 0.
+               ENDIF
+C              write(1,'(3f10.5)') vvso,rrvso,aavso
+               IF(POTe(4).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')POTe(4), RVSo(1, Nejc, Nnuc), 
+     &                                AVSo(Nejc, Nnuc)
+               ELSE
+                  WRITE(1, '(3f10.5)')0., 0., 0.
+               ENDIF
+C              write(1,'(3f10.5)') wwso,rwso,awso
+               IF(WSO(1, Nejc, Nnuc).NE.0.)THEN
+                  WRITE(1, '(3f10.5)')WSO(1, Nejc, Nnuc), 
+     &                                RWSo(1, Nejc, Nnuc), 
+     &                                AWSo(Nejc, Nnuc)
+               ELSE
+                  WRITE(1, '(3f10.5)')0., 0., 0.
+               ENDIF
+C              write(1,'(3f10.5)') rc,0.,0.
+               WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
+               WRITE(1, '(3f10.5)')0., 0., 0.
             ENDIF
-         ENDDO
-      ENDIF
+         ENDIF
+      ENDDO
 C
       WRITE(1, '(3f10.5)')0.D0, angstep, 180.D0
       WRITE(1, '(3hFIN)')
@@ -3061,7 +3055,6 @@ C        DWBA
 C-----relativistic kinematics ?
       IF(IRElat(Nejc, Nnuc).GT.0 .OR. FLGrel.EQ.'y')ECIs1(8:8) = 'T'
 C
-C
 C     xmas_nejc = ((AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/(AMUmev + XNExc)
 C     &            )
 C     xmas_nnuc = ((A(Nnuc)*AMUmev + XMAss(Nnuc))/(AMUmev + XNExc))
@@ -3069,20 +3062,7 @@ C     xmas_nnuc = ((A(Nnuc)*AMUmev + XMAss(Nnuc))/(AMUmev + XNExc))
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 C
-C
 C-----From cms system to Lab (ECIS do inverse convertion)
-C     IF(El.LT.0)THEN
-C     El = -El
-C     elab = El
-C     ELSE
-C     ecms = El
-C     CALL KINEMA(elab, ecms, xmas_nejc, xmas_nnuc, RMU, ak2, 2,
-C     &               RELkin)
-C     ENDIF
-C-----check energy for coupling
-      xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
-C     CALL SETPOTS(Nejc, Nnuc, elab)
-C
       IF(El.LT.0.D0)THEN
          El = DABS( - El)
          elab = El
@@ -3108,21 +3088,25 @@ C     nd_nlvop = 0
          DO j = 2, ND_nlv
             eee = El - D_Elv(j)/xratio
 C           IF ( El*xratio.GT.D_Elv(j)+0.1 ) nd_nlvop = j
-            IF(eee.GT.0.05)nd_nlvop = nd_nlvop + 1
+            IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
          ENDDO
       ENDIF
       IF(nd_nlvop.EQ.1)WRITE(6, *)
      &                'All inelastic channels are closed at this energy'
-C     IF ( nd_nlvop.EQ.1 ) THEN
-C     ecis2(42:42)='T'
-C     iterm = 1
-C     WRITE (6,*) 'All inelastic channels are closed at this energy'
-C     ENDIF
-      ncoll = nd_nlvop
+C
+C     Considering even closed channels in calculations
+      ncoll = ND_nlv
+C     ncoll = nd_nlvop
+C
       iterm = 20
 C     For DWBA only one iteration is used
       IF(ECIs2(42:42).EQ.'T')iterm = 1
-      npp = nd_nlvop
+C
+C     Defining one potential for each collective level
+C     If channel is closed ground state potential is used for this level
+      npp = ncoll
+C     npp = nd_nlvop
+C
       rmatch = 25.
 C     zerosp=0.0
 C     ldwmax=2.4*1.25*AN(i)**0.33333333*0.22*sqrt(parmas(i)*e)
@@ -3165,44 +3149,38 @@ C     &                                 ((A(Nnuc)*amumev+XMAss(Nnuc))
 C     &                                 /amumev) , Z(Nnuc)*ZEJc(Nejc)
 C
 C-----Discrete levels
-      IF(nd_nlvop.GT.1)THEN
-         npho = 0
-         nwrite = 1
-         DO j = 2, ND_nlv
-            eee = El - D_Elv(j)/xratio
-            IF(eee.GE.0.05)THEN
-C              DO j = 2 , nd_nlvop
-               ch = '-'
-               IF(D_Lvp(j).GT.0)ch = '+'
-               nwrite = nwrite + 1
-C              WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j) , IPH(j) , j , ch ,
-C              Phonon angular momentum is transmitted through IPH array
-C              IPH(j)=-1 mans phonon with Lphonon=0
-               WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j), 
-     &               nwrite, ch, D_Elv(j), SEJc(Nejc), xmas_nejc, 
-     &               xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
-               IF(IPH(j).NE.0 .AND. DIRect.NE.3)THEN
-                  npho = npho + 1
-                  lev(npho) = j
-                  WRITE(1, '(10i5)')1, npho
-               ENDIF
-            ENDIF
-         ENDDO
-C-----   Description of phonons
-         IF(npho.GT.0)THEN
-C
-C           In vibrational rotational model the IPH(j) array contains the
-C           l orbital angular momentum of the phonon.
-C           We are assuming that orbital angular momentum of the phonon is
-C           equal INT(J). The k magnetic quantum number of the vibration is
-C           assumed to be zero !!!! L_PHO(lev(j))  = IPH(j)
-C           L3_pho(lev(j)) = 0
-            DO j = 1, npho
-C              IPH(lev(j)) , 0 , D_Def(lev(j))
-               WRITE(1, '(2i5,6f10.5)')INT(D_Xjlv(lev(j)) + 0.1), 0, 
-     &                                 D_Def(lev(j), 2)
-            ENDDO
+      npho = 0
+      nwrite = 1
+      DO j = 2, ND_nlv
+         ch = '-'
+         IF(D_Lvp(j).GT.0)ch = '+'
+         nwrite = nwrite + 1
+C        WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j) , IPH(j) , j , ch ,
+C        Phonon angular momentum is transmitted through IPH array
+C        IPH(j)=-1 mans phonon with Lphonon=0
+         WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j), nwrite, ch, 
+     &         D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
+     &         *ZEJc(Nejc)
+         IF(IPH(j).NE.0 .AND. DIRect.NE.3)THEN
+            npho = npho + 1
+            lev(npho) = j
+            WRITE(1, '(10i5)')1, npho
          ENDIF
+      ENDDO
+C-----   Description of phonons
+      IF(npho.GT.0)THEN
+C
+C        In vibrational rotational model the IPH(j) array contains the
+C        l orbital angular momentum of the phonon.
+C        We are assuming that orbital angular momentum of the phonon is
+C        equal INT(J). The k magnetic quantum number of the vibration is
+C        assumed to be zero !!!! L_PHO(lev(j))  = IPH(j)
+C        L3_pho(lev(j)) = 0
+         DO j = 1, npho
+C           IPH(lev(j)) , 0 , D_Def(lev(j))
+            WRITE(1, '(2i5,6f10.5)')INT(D_Xjlv(lev(j)) + 0.1), 0, 
+     &                              D_Def(lev(j), 2)
+         ENDDO
       ENDIF
 C-----Deformation of rotational band (only ground state band is present)
 C     IdefCC   = maximum degree of deformation
@@ -3270,79 +3248,80 @@ C     write(1,'(3f10.5)') wwso,rwso,awso
 C     write(1,'(3f10.5)') rc,0.,0.
       WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
       WRITE(1, '(3f10.5)')0., 0., 0.
-      IF(nd_nlvop.GT.1)THEN
 C-----   2) discrete levels
-         DO j = 2, ND_nlv
-C           DO j = 2 , nd_nlvop
-C           EEE=eninc-edis(j)/specm(k0)
-C           specm(k)=resmas(k)/(parmas(k)+resmas(k))
-            eee = El - D_Elv(j)/xratio
-            IF(eee.GE.0.05)THEN
+      DO j = 2, ND_nlv
+C        DO j = 2 , nd_nlvop
+C        EEE=eninc-edis(j)/specm(k0)
+C        specm(k)=resmas(k)/(parmas(k)+resmas(k))
+C
+C        If channel is closed ground state potential is used for this level
+         eee = El - D_Elv(1)/xratio
+         eee2 = El - D_Elv(j)/xratio
+         IF(eee2.GE.0.0001)eee = eee2
+         IF(eee.GE.0.0001)THEN
 C--------SETPOTS : subroutine for optical model parameters
 C--------From  cms system to Lab
-               ecms = eee
-               ikey = +1
+            ecms = eee
+            ikey = +1
 C
-C              Transformation of energies from laboratory to center-of-mass if
-C              needed is done inside SETPOTS() -> OMPAR()
+C           Transformation of energies from laboratory to center-of-mass if
+C           needed is done inside SETPOTS() -> OMPAR()
 C
-               CALL SETPOTS(Nejc, Nnuc, elabe, ecms, xmas_nejc, 
-     &                      xmas_nnuc, RMU, ak2, ikey)
+            CALL SETPOTS(Nejc, Nnuc, elabe, ecms, xmas_nejc, xmas_nnuc, 
+     &                   RMU, ak2, ikey)
 C
-C              elabe = eee*xratio
-C              CALL SETPOTS(Nejc, Nnuc, elabe)
-C              CALL SETPOTS(Nejc, Nnuc, eee)
+C           elabe = eee*xratio
+C           CALL SETPOTS(Nejc, Nnuc, elabe)
+C           CALL SETPOTS(Nejc, Nnuc, eee)
 C
 C--------Potential parameters
-C              write(1,'(3f10.5)') v,rv,av
-               IF(POTe(1).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')POTe(1), RVOm(1, Nejc, Nnuc), 
-     &                                AVOm(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') w,rw,aw
-               IF(POTe(3).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')POTe(3), RWOmv(1, Nejc, Nnuc), 
-     &                                AWOmv(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') vd,rvd,avd
-               IF(POTe(7).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')POTe(7), RWOm(1, Nejc, Nnuc), 
-     &                                AWOm(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') wd,rwd,awd
-               IF(POTe(2).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')POTe(2), RWOm(1, Nejc, Nnuc), 
-     &                                AWOm(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') vvso,rrvso,aavso
-               IF(POTe(4).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')POTe(4), RVSo(1, Nejc, Nnuc), 
-     &                                AVSo(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') wwso,rwso,awso
-               IF(WSO(1, Nejc, Nnuc).NE.0.)THEN
-                  WRITE(1, '(3f10.5)')WSO(1, Nejc, Nnuc), 
-     &                                RVSo(1, Nejc, Nnuc), 
-     &                                AVSo(Nejc, Nnuc)
-               ELSE
-                  WRITE(1, '(3f10.5)')0., 0., 0.
-               ENDIF
-C              write(1,'(3f10.5)') rc,0.,0.
-               WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
+C           write(1,'(3f10.5)') v,rv,av
+            IF(POTe(1).NE.0.)THEN
+               WRITE(1, '(3f10.5)')POTe(1), RVOm(1, Nejc, Nnuc), 
+     &                             AVOm(Nejc, Nnuc)
+            ELSE
                WRITE(1, '(3f10.5)')0., 0., 0.
             ENDIF
-         ENDDO
-      ENDIF
+C           write(1,'(3f10.5)') w,rw,aw
+            IF(POTe(3).NE.0.)THEN
+               WRITE(1, '(3f10.5)')POTe(3), RWOmv(1, Nejc, Nnuc), 
+     &                             AWOmv(Nejc, Nnuc)
+            ELSE
+               WRITE(1, '(3f10.5)')0., 0., 0.
+            ENDIF
+C           write(1,'(3f10.5)') vd,rvd,avd
+            IF(POTe(7).NE.0.)THEN
+               WRITE(1, '(3f10.5)')POTe(7), RWOm(1, Nejc, Nnuc), 
+     &                             AWOm(Nejc, Nnuc)
+            ELSE
+               WRITE(1, '(3f10.5)')0., 0., 0.
+            ENDIF
+C           write(1,'(3f10.5)') wd,rwd,awd
+            IF(POTe(2).NE.0.)THEN
+               WRITE(1, '(3f10.5)')POTe(2), RWOm(1, Nejc, Nnuc), 
+     &                             AWOm(Nejc, Nnuc)
+            ELSE
+               WRITE(1, '(3f10.5)')0., 0., 0.
+            ENDIF
+C           write(1,'(3f10.5)') vvso,rrvso,aavso
+            IF(POTe(4).NE.0.)THEN
+               WRITE(1, '(3f10.5)')POTe(4), RVSo(1, Nejc, Nnuc), 
+     &                             AVSo(Nejc, Nnuc)
+            ELSE
+               WRITE(1, '(3f10.5)')0., 0., 0.
+            ENDIF
+C           write(1,'(3f10.5)') wwso,rwso,awso
+            IF(WSO(1, Nejc, Nnuc).NE.0.)THEN
+               WRITE(1, '(3f10.5)')WSO(1, Nejc, Nnuc), 
+     &                             RVSo(1, Nejc, Nnuc), AVSo(Nejc, Nnuc)
+            ELSE
+               WRITE(1, '(3f10.5)')0., 0., 0.
+            ENDIF
+C           write(1,'(3f10.5)') rc,0.,0.
+            WRITE(1, '(3f10.5)')RCOul(Nejc, Nnuc), 0., 0.
+            WRITE(1, '(3f10.5)')0., 0., 0.
+         ENDIF
+      ENDDO
 C
 C-----Angular distribution step
 C
@@ -3356,12 +3335,10 @@ C     Running ECIS
          ELSE
             iwin = PIPE('../source/ecis<ecVIBROT.inp>ECIS_ROT.out#')
          ENDIF
+      ELSEIF(npho.GT.0)THEN
+         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
       ELSE
-      IF(npho.GT.0)THEN
-            iwin = PIPE('ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
-         ELSE
-            iwin = PIPE('ecis<ecVIBROT.inp>ECIS_ROT.out#')
-         ENDIF
+         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_ROT.out#')
       ENDIF
       IF(.NOT.Ltlj)THEN
          IF(DIRect.EQ.3)THEN

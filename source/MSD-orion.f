@@ -1,7 +1,6 @@
-CDEBUG
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: MSD-orion.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: MSD-orion.f,v 1.4 2002-09-20 14:16:53 mike Exp $
 C
 C     Surface real OMP part (for DOM potentials) included
 C     but contribution to form factor is ignored (see subroutine FFCAL)
@@ -1297,8 +1296,8 @@ C
          fehler = ABS(xmest - XMEs)/XMEs
 CMH      WRITE(6, *)
          IF(fehler.GT.0.01)THEN
-            WRITE(6, *)'WARNING **** WARNING **** WARNING'
-            WRITE(6, *)'==> IN FFCAL ABS(XMEST-XMES)/XMES=', fehler
+            WRITE(6, *)'WARNING FROM ORION:'
+            WRITE(6, *)'WARNING IN FFCAL ABS(XMEST-XMES)/XMES=', fehler
          ENDIF
          pmas = ABS(t1 - t2)
          tmas = TMAsr(nt)

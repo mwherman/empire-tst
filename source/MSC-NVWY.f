@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: MSC-NVWY.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: MSC-NVWY.f,v 1.4 2002-09-20 14:16:53 mike Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -1493,7 +1493,7 @@ C------------------
                            eg = EXCn - ew
                            ks = NEX(1) - kcn + 1
 C--------------------gamma transmission coefficient
-                           tg = E1(eg, t)
+                           tg = E1(eg, TNUc(kcn, 1))
 C--------------------
 C--------------------SD    contribution
 C--------------------

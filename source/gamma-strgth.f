@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: gamma-strgth.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: gamma-strgth.f,v 1.4 2002-09-20 14:16:53 mike Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -364,7 +364,7 @@ Ccc * the non-zero limit at E_gamma=0.                                 *
 Ccc *                                                                  *
 Ccc *                                                                  *
 Ccc * input:  EG - gamma energy                                        *
-Ccc *          T - nuclear temperature of the decaying state           *
+Ccc *          T - nuclear temperature of the final state              *
 Ccc *                                                                  *
 Ccc * output: E1 - gamma transmission coefficient                      *
 Ccc *                                                                  *

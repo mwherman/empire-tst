@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: bar_mom.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:35 $
+Ccc   * $Id: bar_mom.f,v 1.4 2002-09-20 14:16:35 mike Exp $
 C
       SUBROUTINE BARFIT(Iz, Ia, Il, Bfis, Segs, Selmax)
 C
@@ -690,8 +690,8 @@ C
                         Saimin = sjlt
                         Saimx = silt
                         Saimid = silt2
-                        IF(ff2.GT.0.01D0 .AND. fg2.GT.0.01D0)GOTO 5
-                        GOTO 10
+                        IF(ff2.LE.0.01D0 .OR. fg2.LE.0.01D0)GOTO 10
+                        GOTO 5
 C
 C                       ELL IS GREATER THAN 0.7, LESS THAN 0.95  USE FIRST L. C.
 C
@@ -699,8 +699,8 @@ C
                      Saimx = f1
                      Saimin = f3
                      Saimid = f1m
-                     IF(ff2.GT.0.01D0 .AND. fg2.GT.0.01D0)GOTO 5
-                     GOTO 10
+                     IF(ff2.LE.0.01D0 .OR. fg2.LE.0.01D0)GOTO 10
+                     GOTO 5
 C
 C                    ELL IS GREATER THAN 0.95,  USE 2ND L. C.
 C

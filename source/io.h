@@ -94,12 +94,12 @@ C     Added to check if file is not empty
      *,STATUS='OLD')
       OPEN(UNIT=25,FILE='../data/nix-moller-audi.dat'
      *,STATUS='OLD')
-      OPEN(UNIT=26,FILE='../RIPL-2/OPTICAL/OM-DATA/OM-PARAMETER-U.DAT
+      OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
 *-ENDIF
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
-C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
-C     OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+      OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
+      OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
 
 
 

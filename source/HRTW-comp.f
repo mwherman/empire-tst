@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: HRTW-comp.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: HRTW-comp.f,v 1.4 2002-09-20 14:16:53 mike Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -542,12 +542,8 @@ C--------
             eout = eoutc - ELV(i, Nnur)
             cor = TUNe(Nejc, Nnuc)
             IF(i.EQ.1)cor = 1.0
-            IF(eout.LT.DE)THEN
 C-----------level above the bin
-               IF(eout.LT.0.0D0)GOTO 100
-               IF(eout.LT.DE)cor = 0.5*TUNe(Nejc, Nnuc)
-               IF(i.EQ.1)cor = 0.5
-            ENDIF
+            IF(eout.LT.0.0D0)GOTO 100
             sumdl = 0.0
             CALL TLLOC(Nnur, Nejc, eout, il, frde)
             smin = ABS(XJLv(i, Nnur) - SEJc(Nejc))
@@ -665,9 +661,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION accn, atil, corr, e1t, e2t, eg, gamma, se1, se1s, 
-     &                 se2, se2m1, se2m1s, se2s, sm1, sm1s, temp, xjc, 
-     &                 xm1t
+      DOUBLE PRECISION corr, e1t, e2t, eg, se1, se1s, se2, se2m1, 
+     &                 se2m1s, se2s, sm1, sm1s, xjc, xm1t
       DOUBLE PRECISION E1, E2, VT1, XM1
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
@@ -692,19 +687,6 @@ C-----clear scratch matrix (dNH_lchrete levels)
       DO i = 1, NLV(Nnuc)
          SCRtl(i, 0) = 0.0
       ENDDO
-C-----calculate nuclear temperature for the generalized Lorenzian to be
-C-----used for E1 strength function determination. NOTE: this temperature
-C-----is not consistent with the actual level densities.
-      temp = 0.
-      IF(EX(Iec, Nnuc).GT.1.0D-5)THEN
-         atil = 0.073*A(Nnuc) + 0.115*A(Nnuc)**0.666667
-         gamma = 0.40/A(Nnuc)**0.33333
-         accn = atil*(1 + SHC(Nnuc)*(1 - EXP((-gamma*EX(Iec,Nnuc))))
-     &          /EX(Iec, Nnuc))
-         IF(EX(Iec, Nnuc).GE.YRAst(Jc, Nnuc))
-     &      temp = SQRT((EX(Iec,Nnuc) - YRAst(Jc,Nnuc))/accn)
-      ENDIF
-C
 C-----IPOS is a parity-index of final states reached by gamma
 C-----transitions which do not change parity (E2 and M1)
 C-----INEG is a parity-index of final states reached by gamma
@@ -729,7 +711,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          ENDIF
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
          IF(Nhrtw.EQ.0)THEN
-            se1 = E1(eg, temp)*TUNe(0, Nnuc)
+            se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -738,7 +720,8 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
             sm1s = sm1**2
             se2m1s = se2**2 + sm1**2
          ELSE
-            se1 = VT1(E1(eg, temp)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
+            se1 = VT1(E1(eg, TNUc(ier, Nnuc))*
+     &            TUNe(0, Nnuc), H_Tav, H_Sumtl)
             se2 = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             sm1 = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             se2m1 = se2 + sm1
@@ -881,18 +864,19 @@ C-----do loop over discrete levels -----------------------------------
                iodd = 1 - ipar
                IF(Nhrtw.EQ.0)THEN
                   e2t = E2(eg)*TUNe(0, Nnuc)
-                  e1t = E1(eg, temp)*TUNe(0, Nnuc)
+                  e1t = E1(eg, TNUc(1,Nnuc))*TUNe(0, Nnuc)
                   xm1t = XM1(eg)*TUNe(0, Nnuc)
                ELSE
                   e2t = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                  e1t = VT1(E1(eg, temp)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                  e1t = VT1(E1(eg, TNUc(1,Nnuc))*
+     &                  TUNe(0, Nnuc), H_Tav, H_Sumtl)
                   xm1t = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
                ENDIF
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + e2t*FLOAT(ipar)
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e2t**2*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, temp)*iodd + XM1(eg)*ipar
+                  SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e1t**2*iodd + 
      &               xm1t**2*ipar
                   IF(lmax.NE.1)THEN

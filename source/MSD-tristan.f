@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: MSD-tristan.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-09-20 14:16:53 $
+Ccc   * $Id: MSD-tristan.f,v 1.4 2002-09-20 14:16:53 mike Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -952,13 +952,11 @@ C
                IF(clex(lt).EQ.0.D0)THEN
                   WRITE(6, 99013)lt - 1, efit(lt), ddr
 99013             FORMAT(/
-     &                  '  WARNING - NO FIT OF RESPONSE FUNCTION FOR J='
-     &                  , I3/'   E(EXP.):', F8.2, '  2ND DERIV.:', 
-     &                  2E13.5/
-     &           '   >>> ENERGY IS INCONSISTENT WITH 2-QP SPECTRUM! <<<'
-     &           //
-     &           '   >>>     SELF-CONSISTENT RESPONSE IS USED!      <<<'
-     &           )
+     &            'WARNING: FROM TRISTAN:' /
+     &            'WARNING: - NO FIT OF RESPONSE FUNCTION FOR J=', I3/
+     &            'WARNING: E(EXP.):', F8.2, '  2ND DERIV.:', 2E13.5/
+     &            'WARNING: ENERGY IS INCONSISTENT WITH 2-QP SPECTRUM!'/
+     &            'WARNING: SELF-CONSISTENT RESPONSE IS USED!')
                   efit(lt) = 0.D0
                   clex(lt) = 0.D0
                   xea(lt) = 0.D0
