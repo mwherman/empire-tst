@@ -4053,7 +4053,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/run $file &
+        -command {exec xterm -e ../scripts/run $file 1 &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -4835,7 +4835,7 @@ adjourn .top75} \
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -activebackground #dcdcdc \
-        -dblclickcommand {exec xterm -e ../scripts/zvcomb [selection get] &} \
+        -dblclickcommand {exec xterm -e ../scripts/zvcomb $file [selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \

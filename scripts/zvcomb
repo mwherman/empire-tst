@@ -1,9 +1,9 @@
 #! /bin/sh -
 #SCRIPT TO COMBINE TWO OR MORE zvd PLOTS INTO A SINGLE ONE
-
+echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
-file=$1
-command="../util/c4zvd/zvview.exe -p:$file" 
+file=$2
+command="../util/c4zvd/zvview.exe -p:$1_" 
         if [ "$file" = "" ]
            then
             echo 'Plots available for merging:'

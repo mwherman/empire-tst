@@ -1,33 +1,27 @@
 #! /bin/sh -
 #SCRIPT TO RETRIEVE EXFOR DATA FROM THE LOCAL DATABASE USING MYSQL
 #NOTE: MYSQL SERVER WILL BE STARTED AT PORT=7777
-set -x
+
 #change to the x4cd/linux dir
 work=`pwd`
 cd ../x4cd/linux
-echo `pwd`
 
 #start MySQL server
-./mysql_start.sh 7777
+./mysql_start.sh 7777 0
 
 #define X4 variables
 X4CD=`pwd`/..
 if [ -f $X4CD/x4vars.sh ]; then source $X4CD/x4vars.sh; fi
 
-echo PWD=`pwd`
-ls -la ../x4retr/bin/x4retr2.jar
-#echo -n ... pause...\ ;read aaa
-
 #run retrieval
 $X4JRE/java -cp $JDBC:../x4retr/bin/x4retr2.jar: x4retr2 \
 	 -x4typ:$X4TYP -x4url:$X4URL -x4dat:$X4DB -x4usr:$X4USR -x4psw:$X4PSW \
-	 -out:EXFOR.dat -c:target:$1 -c:quant:$2 -c:React:$3
-#echo -n ... pause...\ ;read aaa
+	 -out:$work/EXFOR.dat -c:target:$1 -c:quant:$2 -c:React:$3
 
 #shutdown MySQL server
 ./mysql_stop.sh
 
-mv EXFOR.dat $work/
+#mv EXFOR.dat $work/
 
 #return to the 'work' directory
 cd $work
