@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-07 22:36:02 $
-Ccc   * $Id: input.f,v 1.66 2005-02-07 22:36:02 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-08 14:55:37 $
+Ccc   * $Id: input.f,v 1.67 2005-02-08 14:55:37 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6006,51 +6006,57 @@ C
       BET2 = DEFfis(ib)
       IF(NRBarc.EQ.3 .AND. ib.EQ.2) BET2 = DEFeq
 C-----where continuum starts,ends,steps in between
-      IF(Mmod.EQ.0)XMInn(ib) = 0.0001
-      IF(Mmod.GT.0)XMInnm(Mmod) = 0.0001
 
-      DO nr = 1, NRFdis(ib)
-         IF(Mmod.EQ.0 .AND. EFDis(nr, ib).GT.XMInn(ib))
-     &      XMInn(ib) = EFDis(nr, ib)
-         IF(Mmod.GT.0 .AND. EFDism(nr, Mmod).GT.XMInnm(Mmod))
-     &      XMInnm(Mmod) = EFDism(nr, Mmod)
-      ENDDO
-      IF(NRBarc.EQ.3)XMInn(2) = 0.0001
-C
-      IF(excn1.LE.EFB(ib))xmax = 4.
-      IF(excn1.LE.EFBm(mmod))xmax = 4.
 
-      IF(Mmod.EQ.0 .AND. excn1.GT.EFB(ib))xmax = excn1 -
-     &   (EFB(ib) + XMInn(ib)) + 4.
-      IF(Mmod.GT.0 .AND. excn1.GT.EFBm(Mmod))xmax = excn1 -
-     &   (EFBm(Mmod) + XMInnm(Mmod)) + 4.
+      IF(Mmod.EQ.0) THEN
+        XMInn(ib) = 0.0001
+        DO nr = 1, NRFdis(ib)
+          IF(EFDis(nr, ib).GT.XMInn(ib))  XMInn(ib) = EFDis(nr, ib)
+        ENDDO
 
-      IF(Mmod.EQ.0)THEN
-         destepp(ib)=(xmax-xminn(ib))/100.
-         NRBinfis(ib) = INT((xmax - XMInn(ib))/DEStepp(ib))
-         IF(NRBinfis(ib).GT.NFISENMAX)THEN
-            WRITE(6,*)
-     &           'Level density at saddle exceeds dimension.
-     &            Increase NFISENMAX in dimension.h'
-            STOP 'Level density at saddle exceeds NFISENMAX'
+        IF(NRBarc.EQ.3) XMInn(2) = 0.0001
+        IF(EXCn1.LE.EFB(ib)) THEN
+          xmax = 4.d0
+        ELSE
+          xmax = excn1 - (EFB(ib) + XMInn(ib)) + 4.
          ENDIF
+
+        DEStepp(ib)=(xmax-XMInn(ib))/100.
+        NRBinfis(ib) = INT((xmax - XMInn(ib))/DEStepp(ib))
+        IF(NRBinfis(ib).GT.NFISENMAX)THEN
+          WRITE(6,*)' ERROR: Level density at saddle exceeds dimensions'
+     &             ,' Increase NFISENMAX in dimension.h'
+          STOP 'ERROR: Level density at saddle exceeds NFISENMAX'
+        ENDIF
+        DO kk = 1, NRBinfis(ib)
+          UGRid(kk, ib) = XMInn(ib) + (kk - 1)*DEStepp(ib)
+        ENDDO
+
+      ELSE ! Mmod.GT.0
+        XMInnm(Mmod) = 0.0001
+        DO nr = 1, NRFdis(ib)
+          IF(EFDism(nr, Mmod).GT.XMInnm(Mmod))
+     &          XMInnm(Mmod) = EFDism(nr, Mmod)
+        ENDDO
+        IF(NRBarc.EQ.3) XMInn(2) = 0.0001  !! Should be checked for multimodal
+        IF(excn1.LE.EFBm(mmod)) THEN
+          xmax = 4.
+        ELSE
+          xmax = excn1 - (EFBm(Mmod) + XMInnm(Mmod)) + 4.
+        ENDIF
+        DEStepm(Mmod)=(xmax-XMInnm(Mmod))/100.
+        NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
+        IF(NRBinfism(Mmod).GT.NFISENMAX)THEN
+          WRITE(6,*)' ERROR: Level density at saddle exceeds dimensions'
+     &             ,' Increase NFISENMAX in dimension.h'
+          STOP 'ERROR: Level density at saddle exceeds NFISENMAX'
+        ENDIF
+        DO kk = 1, NRBinfism(Mmod)
+          UGRidf(kk, Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepm(mmod)
+        ENDDO
+
       ENDIF
-      IF(Mmod.GT.0)THEN
-         destepm(Mmod)=(xmax-xminnm(Mmod))/100.
-         NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
-      ENDIF
-C
-C----- Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003
-      IF(Mmod.EQ.0)THEN
-         DO kk = 1, NRBinfis(ib)
-            UGRid(kk, ib) = XMInn(ib) + (kk - 1)*DEStepp(ib)
-         ENDDO
-      ELSE
-         DO kk = 1, NRBinfism(Mmod)
-            UGRidf(kk, Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepm(mmod)
-         ENDDO
-      ENDIF
-C
+
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
       in = ia - iz
@@ -6079,7 +6085,9 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
 C
  150     WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
          WRITE(6, *)' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
-         STOP 'HFBCS lev dens. at the inner saddle point missing'
+         WRITE(6, *)' ERROR: HFBCS lev dens. at the inner saddle point m
+     &issing'
+         STOP 'ERROR: HFBCS lev dens. at the inner saddle point missing'
  200     CLOSE(81)
 C
          IF(NRBar.GT.1)THEN
@@ -6105,7 +6113,10 @@ C
      &                 ' IN HFBSC'
             WRITE(6, *)
      &                ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED'
-            STOP 'HFBCS lev dens. at the ouetr saddle-point missing'
+            WRITE(6, *)
+     &        'ERROR: HFBCS lev dens. at the outer saddle-point missing'
+            STOP
+     &        'ERROR: HFBCS lev dens. at the outer saddle-point missing'
  280        CLOSE(82)
          ENDIF
 C
@@ -6118,9 +6129,11 @@ C
                ENDDO
             ENDDO
          ENDIF
-      ENDIF
+
+      ELSEIF(FISden(Nnuc).EQ.1.)THEN
+C
 C-----Empire specific
-      IF(FISden(Nnuc).EQ.1.)THEN
+C
          mm2 = 0.24*A(Nnuc)**(2./3.)
          r0 = 1.4
          iff = 1
@@ -6133,14 +6146,14 @@ C-----Empire specific
          ATIl = AP1*A(Nnuc) + AP2*A23
 c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
          atil=atil*rafis
+
          IF(Mmod.EQ.0)THEN
             GAMma = GAMmafis(ib)
             DELp = DELtafis(ib)
             SHC(Nnuc) = SHCfis(ib)
             iff = BFF(ib)
             desteppp=destepp(ib)
-         ENDIF
-         IF(Mmod.GT.0)THEN
+         ELSE ! Mmod.GT.0
             NRBinfis(ib) = NRBinfism(Mmod)
             XMInn(ib) = XMInnm(Mmod)
             GAMma = GAMmafism(Mmod)
@@ -6149,6 +6162,7 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             iff = BFFm(Mmod)
             desteppp=destepm(Mmod)
          ENDIF
+
          TCRt = 0.567*DELp
          ar = ATIl*(1.0 + SHC(nnuc)*GAMma)
          DO ix = 1, 20
@@ -6212,6 +6226,7 @@ C--------45.84 stands for (12/SQRT(pi))**2
          TCRtf(ib)=tcrt
          SCRtf(ib)=scr
       ENDIF
+
       END
 c-------------------------------------------------------------------------
       DOUBLE PRECISION FUNCTION ROBCSf(A,U, Aj, Mompar, Momort, A2,iff)
