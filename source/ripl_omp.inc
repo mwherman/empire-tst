@@ -17,7 +17,11 @@ C     + rco(i,j,4)/A + rco(i,j,5)/sqrt(A)
 C     + rco(i,j,6)*A**(2/3) + rco(i,j,7)*A
 C     + rco(i,j,8)*A**2  + rco(i,j,9)*A**3
 C     + rco(i,j,10)*A**(1/3)
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     + rco(i,j,12)*E*E
 C     + rco(i,j,11)*A**(-1/3)} * [A**(1/3)]
+C      
+
 C
 C     [Note that the A dependence of rco(i,j,11) cancels out so that rco(i,j,11)
 C     is equivalent to adding a constant of that magnitude to the radius
@@ -27,7 +31,8 @@ C     R(i,j)]. RRRR = radius (fm)
      &       + RCO(i, j, 6)*atar**(2.D0/3.D0) + RCO(i, j, 7)
      &       *atar + RCO(i, j, 8)*atar**2 + RCO(i, j, 9)*atar**3 + 
      &       RCO(i, j, 10)*atar**(1.D0/3.D0) + RCO(i, j, 11)
-     &       *atar**( - 1.D0/3.D0))
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format	 
+     &       *atar**( - 1.D0/3.D0) + RCO(i,j,12)*E*E)
 C
 C     aco(i,j,k) = coefficients for specification of diffuseness a in
 C     fm where:
