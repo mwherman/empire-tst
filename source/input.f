@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 18:33:52 $
-Ccc   * $Id: input.f,v 1.92 2005-03-16 18:33:52 Capote Exp $
+Ccc   * $Date: 2005-03-17 19:50:29 $
+Ccc   * $Id: input.f,v 1.93 2005-03-17 19:50:29 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -203,12 +203,14 @@ C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
-         NSCc = 4
          NACc = 0
-         BETcc(1) = 0.0
-         BETcc(2) = 0.0
-         BETcc(3) = 0.0
-         BETcc(4) = 0.0
+C        By default only target deformation is considered
+         NSCc = 4
+C        Default deformation values, they are changed in ifindcoll()
+         BETcc(1) = 0.15
+         BETcc(2) = 0.05
+         BETcc(3) = 0.15
+         BETcc(4) = 0.05
          FLAm(1) = 2.
          FLAm(2) = 3.
          FLAm(3) = -2.
@@ -838,6 +840,8 @@ C
      & to RIPL #'',I4)') KTRompcc
             WRITE (6,*) ' '
          ENDIF
+C         DIRECT set temprarily to 1 for CCFUS calculation'
+         IF (CSRead.EQ.-2 .AND. DIRECT.EQ.0) DIRect = 1
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
@@ -2305,6 +2309,7 @@ C-----
      &            ) NSCc
             GOTO 100
          ENDIF
+
          IF (name.EQ.'NACC  ') THEN
             NACc = val
             WRITE (6,
@@ -2320,16 +2325,13 @@ C-----
      &') i1, BETcc(i1)
             GOTO 100
          ENDIF
-C-----
-         IF (name.EQ.'GDRGFL') THEN
-            KEY_gdrgfl = val
-            GOTO 100
-         ENDIF
-C        Key_GDRGFL = 0 -  GDR parameters from Messina systematics
-C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f
-C-----
+
          IF (name.EQ.'FLAM  ') THEN
             FLAm(i1) = val
+            IF(val.gt.0)
+     &      WRITE (6,*)'TARGET COLLECTIVE CHANNEL FOR CCFUS DEFINED'
+            IF(i2.lt.0)
+     &      WRITE (6,*)'PROJECTILE COLLECTIVE CHANNEL FOR CCFUS DEFINED'
             WRITE (6,
      &'('' Multipolar. of the n='',I2,'' collective level set to'',F6.3)
      &') i1, FLAm(i1)
@@ -2345,6 +2347,15 @@ C-----
             GOTO 100
          ENDIF
 C--------CCFUS input  ** done ***
+
+C-----
+         IF (name.EQ.'GDRGFL') THEN
+            KEY_gdrgfl = val
+            GOTO 100
+         ENDIF
+C        Key_GDRGFL = 0 -  GDR parameters from Messina systematics
+C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f
+C-----
          IF (name.EQ.'QFIS  ') THEN
             QFIs = val
             WRITE (6,
@@ -2419,8 +2430,8 @@ C-----
      &'('' Fusion cross section will be calculated according to distribu
      &ted barrier model'')')
             IF (CSRead.EQ.( - 2.0D0)) WRITE (6,
-     &'('' Fusion cross section will be calculated using coupled channel
-     & approach'')')
+     &'('' Fusion cross section will be calculated using CCFUS simplifie
+     &d coupled channel approach'')')
             GOTO 100
          ENDIF
 C-----
@@ -4354,7 +4365,7 @@ C
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp,
      &        itmp, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin, ngamr,
-     &        nlvr, nlvs, nmax, nnurec, nztmp
+     &        nlvr, nlvs, nmax, nnurec, nztmp, iccfus
       INTEGER NINT
       CHARACTER*6 reftmp
       ND_nlv = 0
@@ -4506,6 +4517,9 @@ C-----levels for target NNUC copied to file TARGET.lev
             D_Def(ilv,j) = 0
          ENDDO
       ENDDO
+
+      iccfus = 1
+
       beta2 = 0.D0
       beta3 = 0.D0
       OPEN (84,FILE = '../RIPL-2/optical/om-data/om-deformations.dat',
@@ -4516,9 +4530,23 @@ C-----levels for target NNUC copied to file TARGET.lev
      &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
      &                    reftmp
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
-     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') beta2 = betatmp
+     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+             beta2 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta2
+             FLAm(iccfus) = 2
+             QCC(iccfus) = -etmp
+             iccfus = iccfus + 1
+         ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
-     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') beta3 = betatmp
+     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
+             beta3 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta3
+             FLAm(iccfus) = 3
+             QCC(iccfus) = -etmp
+             iccfus = iccfus + 1
+         ENDIF
       ENDDO
       GOTO 300
   200 WRITE (6,*) ' WARNING: ',
@@ -4550,6 +4578,14 @@ C-----levels for target NNUC copied to file TARGET.lev
      &            'Default dynamical deformations 0.05(3-) will be used'
          beta3 = 0.05
       ENDIF
+      NScc = max(iccfus-1,NScc,0)
+
+      if(IZAejc(0)/1000.gt.2 .OR. KTRlom(0,0).eq.0) THEN
+C        HI calculation, deformations retrieved, setting DIRECT to 0
+          DIRECT = 0
+          return
+       endif
+
 C--------locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
   400 DO ilv = 1, nlvs
