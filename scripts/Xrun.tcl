@@ -5778,16 +5778,16 @@ adjourn .top75} \
     }
     button $site_9_0.but86 \
         -activebackground #ff0000 -activeforeground white -background #dcdcdc \
-        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the archive folder?" "" 0 No Yes ] == 1} {
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the folder?" "" 0 No Yes ] == 1} {
 exec rm -r -f $archdir
 set archdirlist [glob -nocomplain ../*/]
 set archfilelist "" }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {Delete archive} 
+        -text {Delete folder} 
     bindtags $site_9_0.but86 "$site_9_0.but86 Button $top all _vTclBalloon"
     bind $site_9_0.but86 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Delete archive folder including its content}
+        set ::vTcl::balloon::%W {Delete folder including its content}
     }
     pack $site_9_0.but84 \
         -in $site_9_0 -anchor nw -expand 0 -fill x -padx 5 -pady 12 -side top 
@@ -6220,7 +6220,7 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {cd ../source
 exec xterm -e make
-cd ../work} -cursor hand2 \
+cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text Make 
     vTcl:DefineAlias "$site_10_0.but79" "Button135" vTcl:WidgetProc "Toplevel1" 1
@@ -6232,7 +6232,7 @@ cd ../work} -cursor hand2 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command {cd ../
 exec xterm -e ./Compile
-cd work} \
+cd $workdir} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
     bindtags $site_10_0.but81 "$site_10_0.but81 Button $top all _vTclBalloon"
@@ -6486,7 +6486,7 @@ exec rm -f $file.inp} \
     $site_3_0.men78 add command \
         -command {cd ../source
 exec xterm -e make &
-cd ../work} \
+cd $workdir} \
         -label Compile 
     $top.m88 add separator \
         
