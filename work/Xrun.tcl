@@ -3891,7 +3891,7 @@ set nsh 1
 set eres 0.02
 if {$editor == ""} {set editor gvim}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list main.f input.f  fusion.f OM-scat2.f tl.f  ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  lev-dens.f  ph-lev-dens.f  print.f  pipe.f auxiliary.f  dimension.h global.h  io.h ddhms.cmb]
+set modules [list main.f input.f  fusion.f OM-scat2.f tl.f  ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  pipe.f auxiliary.f  dimension.h global.h  io.h ddhms.cmb]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -4737,7 +4737,7 @@ adjourn .top75} \
     button $site_10_0.but82 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec ../source/ecis <$file-ecis.in >$file-ecis.out } \
+        -command {exec ../source/ecis03 <$file-ecis.in >$file-ecis.out } \
         -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -highlightcolor #000000 -text {Run ECIS} 
     vTcl:DefineAlias "$site_10_0.but82" "Button162" vTcl:WidgetProc "Toplevel1" 1
@@ -6267,7 +6267,7 @@ $file.inp &}} -label Create
         
     $site_3_0.menu93 add command \
         \
-        -command {exec xterm -e ../source/ecis <$file-ecis.in >$file-ecis.out &} \
+        -command {exec xterm -e ../source/ecis03 <$file-ecis.in >$file-ecis.out &} \
         -label ECIS 
     $top.m88 add cascade \
         -menu "$top.m88.menu94" -label Outputs 
