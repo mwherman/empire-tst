@@ -1,4 +1,6 @@
 FC     =  g77
+#FFLAGS =  -static
+#FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----flags for production compilation with g77

@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: scnd-preeq.f,v 1.6 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: scnd-preeq.f,v 1.7 2003-09-25 21:16:57 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -167,7 +167,8 @@ C--------------------probability *** done ***
      &                  + pop1
                      CSE(icse, Nejc, Nnuc) = CSE(icse, Nejc, Nnuc)
      &                  + pop1
-                     IF(ENDf.EQ.1.D0)CALL BELLAC(iec, Nejc, Nnuc, pop1)
+                     IF(ENDf.EQ.1.D0)CALL EXCLUSIVEC(iec, ier, Nejc, 
+     &                  Nnuc, Nnur, pop1)
                      sumem = sumem + pop1
 C
                   ENDDO         !end do on 2-nd residue excitation energy

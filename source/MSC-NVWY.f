@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: MSC-NVWY.f,v 1.6 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: MSC-NVWY.f,v 1.7 2003-09-25 21:16:57 herman Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -1002,7 +1002,7 @@ C--------------
 C
 C************  normalization of emission rates **************************
 C
-C--------------neutron emission (if acceted, note IF on IDNA)
+C--------------neutron emission (if accepted, note IF on IDNA)
                IF(IDNa(2, 3).GT.0)THEN
                   nejc = 1
                   nnur = nresn
@@ -1015,20 +1015,24 @@ C--------------neutron emission (if acceted, note IF on IDNA)
      &                               *PIM(kg, ki)/DE
                               pop2 = SCRm(ke, jr, 2, nejc, kg)
      &                               *PIM(kg, ki)/DE
+                              popt = pop1 + pop2
                               IF(icse.GT.1)THEN
                                  CSE(icse, nejc, 1) = CSE(icse, nejc, 1)
-     &                              + pop1 + pop2
+     &                              + popt
                                  AUSpec(icse, nejc) = AUSpec(icse, nejc)
-     &                              + pop1 + pop2
+     &                              + popt
+                                 POPcse(ke,nejc,icse,nnur) =  
+     &                             POPcse(ke,nejc,icse,nnur) 
+     &                              + popt
+
                               ENDIF
                               POP(ke, jr, 1, nnur)
      &                           = POP(ke, jr, 1, nnur) + pop1
                               POP(ke, jr, 2, nnur)
      &                           = POP(ke, jr, 2, nnur) + pop2
-                              emis = emis + (pop1 + pop2)*DE
-                              CSMsc(nejc) = CSMsc(nejc) + (pop1 + pop2)
-     &                           *DE
-                              spg(kg) = spg(kg) + (pop1 + pop2)*DE
+                              emis = emis + popt*DE
+                              CSMsc(nejc) = CSMsc(nejc) + popt*DE
+                              spg(kg) = spg(kg) + popt*DE
                            ENDDO
                         ENDDO
                      ENDDO
@@ -1039,7 +1043,7 @@ C--------------neutron emission (if acceted, note IF on IDNA)
                      nnur = nresp
                   ENDIF
                ENDIF
-C--------------proton emission (if acceted, note IF on IDNA)
+C--------------proton emission (if accepted, note IF on IDNA)
                IF(IDNa(4, 3).GT.0)THEN
                   nejc = 2
                   nnur = nresp
@@ -1052,20 +1056,23 @@ C--------------proton emission (if acceted, note IF on IDNA)
      &                               *PIM(kg, ki)/DE
                               pop2 = SCRm(ke, jr, 2, nejc, kg)
      &                               *PIM(kg, ki)/DE
+                              popt = pop1 + pop2
                               IF(icse.GT.1)THEN
                                  CSE(icse, nejc, 1) = CSE(icse, nejc, 1)
-     &                              + pop1 + pop2
+     &                              + popt
                                  AUSpec(icse, nejc) = AUSpec(icse, nejc)
-     &                              + pop1 + pop2
+     &                              + popt
+                                 POPcse(ke,nejc,icse,nnur) =  
+     &                             POPcse(ke,nejc,icse,nnur) 
+     &                              + popt
                               ENDIF
                               POP(ke, jr, 1, nnur)
      &                           = POP(ke, jr, 1, nnur) + pop1
                               POP(ke, jr, 2, nnur)
      &                           = POP(ke, jr, 2, nnur) + pop2
-                              emis = emis + (pop1 + pop2)*DE
-                              CSMsc(nejc) = CSMsc(nejc) + (pop1 + pop2)
-     &                           *DE
-                              spg(kg) = spg(kg) + (pop1 + pop2)*DE
+                              emis = emis + popt*DE
+                              CSMsc(nejc) = CSMsc(nejc) + popt*DE
+                              spg(kg) = spg(kg) + popt*DE
                            ENDDO
                         ENDDO
                      ENDDO
@@ -1551,6 +1558,9 @@ C--------------------------------state density for gamma emission
      &                                    + sp
                                        AUSpec(ks, 0) = AUSpec(ks, 0)
      &                                    + sp
+                                       POPcse(kcn,0,ks,1) =  
+     &                                    POPcse(kcn,0,ks,1) 
+     &                                    + sp
                                     ENDIF
                                     gspmsc(kg, ks) = gspmsc(kg, ks) + sp
                                     IF(j.GT.1)POP(kcn, j - 1, ie1, 1)
@@ -1564,6 +1574,9 @@ C--------------------------------state density for gamma emission
      &                                    + sp
                                        AUSpec(ks, 0) = AUSpec(ks, 0)
      &                                    + sp
+                                       POPcse(kcn,0,ks,1) =  
+     &                                    POPcse(kcn,0,ks,1) 
+     &                                    + sp
                                     ENDIF
                                     gspmsc(kg, ks) = gspmsc(kg, ks) + sp
                                     POP(kcn, j, ie1, 1)
@@ -1576,6 +1589,9 @@ C--------------------------------state density for gamma emission
                                        CSE(ks, 0, 1) = CSE(ks, 0, 1)
      &                                    + sp
                                        AUSpec(ks, 0) = AUSpec(ks, 0)
+     &                                    + sp
+                                       POPcse(kcn,0,ks,1) =  
+     &                                    POPcse(kcn,0,ks,1) 
      &                                    + sp
                                     ENDIF
                                     gspmsc(kg, ks) = gspmsc(kg, ks) + sp

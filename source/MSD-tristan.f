@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: MSD-tristan.f,v 1.6 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: MSD-tristan.f,v 1.7 2003-09-25 21:16:57 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -2937,7 +2937,7 @@ C
                      ENDDO
                   ENDIF
                   IF(IOUt.GT.3)THEN
-                     WRITE(6, 99004)eout, s1, s2, s3, sigm, f11, a1, a2, 
+                     WRITE(6, 99004)eout, s1, s2, s3, sigm, f11, a1, a2,
      &                              a3, ay, f21
                      WRITE(66, 99004)eout, s1, s2, sigm
                   ENDIF
@@ -2996,7 +2996,7 @@ Ccc   * of these multipolarities.                                        *
 Ccc   *                                                                  *
 Ccc   * input:NNUC - index of the decaying nucleus                       *
 Ccc   *       NNUR - index of the residual nucleus                       *
-Ccc   *       NEJC - index of the ejectile (0 for gamma)                 *
+Ccc   *       NEJC - index of the ejectile                               *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
@@ -3033,10 +3033,14 @@ C
          WRITE(6, *)' I BETTER  S T O P'
          STOP
       ENDIF
+C-----
+C----- CONTINUUM
+C-----
       excnq = EX(NEX(Nnuc), Nnuc) - Q(Nejc, Nnuc)
 C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
 C-----total number of bins
+      WRITE(6,*)'nexrt=',nexrt 
       next = INT(excnq/DE + 1.0001)
 C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667
@@ -3062,6 +3066,25 @@ C-----ground state target spin XJLV(1,0)
                POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pops
             ENDDO
          ENDDO
+C--------add MSD contribution to the population spectra 
+C--------used for ENDF exclusive spectra
+         IF(ENDf.EQ.1) THEN 
+            DO ie = 1, nexrt
+               icsp = nexrt - ie + 1
+C--------------DE
+               POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur) + 
+     &                                     CSEmsd(icsp, Nejc)
+C--------------Correct last bin (not needed for POP as for this it is done at the end)                
+               IF(ie.EQ.1)
+     &         POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur) - 
+     &                                     0.5*CSEmsd(icsp, Nejc)
+C--------------DDX using portions                  
+               POPcseaf(Ie,Nejc,icsp,Nnur) = 1.0
+C--------------DDX
+C--------------Bin population by MSD (spin/parity integrated)
+               POPbin(ie,Nnur) = CSEmsd(icsp, Nejc)
+            ENDDO
+         ENDIF 
 C--------storing continuum recoils
          IF(ENDf.EQ.2)THEN
             nangle = NDANG
@@ -3087,6 +3110,9 @@ C
  20         ENDDO
          ENDIF
       ENDIF
+C-----
+C----- DISCRETE LEVELS
+C-----
 C-----return if MSD to discrte levels not used (matrix IDNa)
       IF(IDNa(2*Nejc - 1, 2).EQ.0)RETURN
 C-----discrete level contribution to recoil spectra
@@ -3112,12 +3138,19 @@ C
             ENDDO
  50      ENDDO
       ENDIF
-C-----distribution of the discrete level MSD contribution
+C-----distribution of the MSD contribution to discrete levels
+C-----
+C-----MSD contribution is integrated over the discrete level region and
+C-----distributed among 2+, 3- and 4+ levels (or those close to such for
+C-----noninteger spin nuclei) using arbitrary weights (most to 2+ and very
+C-----little to 4+). Angular distributions for these levels are those
+C-----provided by TRISTAN at the closest bin.
       csmsdl = 0.0
       DO ie = nexrt, next
          csmsdl = csmsdl + CSEmsd(ie, Nejc)*DE
       ENDDO
       csmsdl = csmsdl - 0.5*CSEmsd(nexrt, Nejc)*DE
+      csmsdl = csmsdl - 0.5*CSEmsd(next, Nejc)*DE
       swght = 0.0
       DO il = 2, NLV(Nnur)
          wght(il) = 0.0
@@ -3143,12 +3176,12 @@ C-----distribution of the discrete level MSD contribution
          ENDIF
       ENDDO
  100  IF(swght.EQ.0.0D0)THEN
-         WRITE(6, *)' '
-         WRITE(6, *)' HAVE NO LEVEL TO PUT MSD LEVEL CONTRIBUTION ', 
+         WRITE(6, *)' WARNING:'
+         WRITE(6, *)' WARNING: NO LEVEL TO PUT MSD LEVEL CONTRIBUTION ',
      &              csmsdl, ' mb'
-         WRITE(6, *)' LOAD EVERYTHING TO THE GROUND STATE '
-         WRITE(6, *)' ANG. DIST. OF DISCRETE LEVELS IGNORED'
-         WRITE(6, *)' '
+         WRITE(6, *)' WARNING: LOAD EVERYTHING TO THE GROUND STATE '
+         WRITE(6, *)' WARNING: ANG. DIST. OF DISCRETE LEVELS IGNORED'
+         WRITE(6, *)' WARNING:'
          POPlv(1, Nnur) = POPlv(1, Nnur) + csmsdl
          RETURN
       ENDIF
@@ -3163,14 +3196,28 @@ C--------Find the closest bin
          ie = eemi/DE + 1.5
          ie = MIN(ie, next)
 C--------Normalization factor
-         xnor = 0.0
-         IF(CSEmsd(ie, Nejc).NE.0)xnor = csmsdl*wght(il)
-     &      /CSEmsd(ie, Nejc)
+         IF(CSEmsd(ie, Nejc).NE.0) THEN
+            xnor = csmsdl*wght(il)/CSEmsd(ie, Nejc)
+         ELSE
+            xnor = 0.0
+         ENDIF
+C--------add MSD discrete level contribution to the population spectrum (DE)
+C--------used for the ENDF exclusive spectra
+         POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) + 
+     &                            csmsdl*wght(il)/DE 
 C--------Store ang. dist.
          DO na = 1, NDANG
             CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc)
      &                             + xnor*CSEa(ie, na, Nejc, 1)
          ENDDO
+C--------add MSD discrete level contribution to the population spectrum (DDX)
+C--------used for the ENDF exclusive spectra
+         IF(ENDf.EQ.1) THEN 
+C-----------DDX spectra using portions (exclude ie=nexrt since this was set
+C-----------already by the contiuum)
+            IF(ie.NE.nexrt)
+     &      POPcseaf(0,Nejc,ie,Nnur) = 1.0
+         ENDIF
 C        WRITE(6,'(''il, Elev, J, POP  '',i3,3G12.5)') il,ELV(il, Nnur),
 C        &       XJLV(il,nnur),POPlv(il, Nnur)
       ENDDO

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-07-10 22:29:55 $
-Ccc   * $Id: tl.f,v 1.13 2003-07-10 22:29:55 herman Exp $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: tl.f,v 1.14 2003-09-25 21:16:57 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -1576,7 +1576,8 @@ C
 99001 FORMAT(10A8)
 C
       Ierr = 0
-      REWIND(Ko)
+C-----Next comment has been suggested by V. Avrigeanu       
+C     REWIND(Ko)
       READ(Ko, '(I5)', ERR = 200)IREf
       READ(Ko, 99010, ERR = 200)AUThor
       READ(Ko, 99010, ERR = 200)REFer

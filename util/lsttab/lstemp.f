@@ -144,11 +144,13 @@ C* Process the index entry
       READ (C80,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
 C*
       COM2=C80(1:11)//C80(19:22)//C80(23:27)
-      IF(MF.NE.3) COM2=COM2(1:20)//'Ei'//C80(46:49)//C80(52:55)
+      IF(MF.NE.3) COM2=COM2(1:20)//C80(46:49)//C80(52:55)//
+     1" eV"
       IF(C80(56:59).NE.'    ')
-     1 COM2=COM2(1:30)//'An'//C80(56:59)
+     1 COM2=COM2(1:30)//C80(56:59)//" deg"
       IF(C80(63:67).NE.'    ')
-     1 COM2=COM2(1:30)//'Eo'//C80(64:67)//C80(70:72)
+     1 COM2=COM2(1:30)//C80(64:67)//C80(70:72)//" eV"
+
 C*
       IF(C80(55:62).EQ.'        '  ) DEG=-2
       IF(C80(63:72).EQ.'          ') EOU=-2

@@ -141,6 +141,26 @@ EFF-3.0                                  26-Fe-56    6 9000 Ei1.47+07 An  19
         fprintf(outFile,"tit: %s\n",plotTitle);
         sprintf(curveTitle,"%s %s %s %s",comment,str4,str5,str6);
         fprintf(outFile,"fun: %s\n",curveTitle);
+        if (strcmp(comment,"ENDF-VII")==0) {
+            fprintf(outFile,"color: 12\n");
+            fprintf(outFile,"thick: 2\n");
+        }
+        if (strcmp(comment,"ENDF-VI.8")==0) {
+            fprintf(outFile,"color: 1\n");
+        }
+        if (strcmp(comment,"JENDL-3.3")==0) {
+            fprintf(outFile,"color: 6\n");
+        }
+        if (strcmp(comment,"JEF-3.0")==0) {
+            fprintf(outFile,"color: 3\n");
+        }
+        if (strcmp(comment,"CENDL-2/3")==0) {
+            fprintf(outFile,"color: 14\n");
+        }
+        if (strcmp(comment,"BROND-2.2")==0) {
+            fprintf(outFile,"color: 2\n");
+        }
+
 /*
         fprintf(outFile,"x-scale: auto\n");
         fprintf(outFile,"y-scale: auto\n");
@@ -151,7 +171,6 @@ EFF-3.0                                  26-Fe-56    6 9000 Ei1.47+07 An  19
         fprintf(outFile,"y: {|s}/dTeta(mb/sr)\n");
 */
 
-        fprintf(outFile,"thick: 2\n");
         fprintf(outFile,"//\n"); //end mark
 
         for (; ; ) {

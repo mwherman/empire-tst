@@ -4,5 +4,5 @@ do
 sed s/'HMS        0.'/'HMS        1.'/ ${file} >tmp
 mv tmp ${file}
 #gv -landscape ${file}
-#       /home/herman/empire/util/c4zvd/zvv94l.exe $file
+#       /home/herman/empire/util/c4zvd/zvv95l.exe $file
 done

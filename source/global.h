@@ -1,6 +1,7 @@
 C-----GLOBAL COMMON --------------------------------------------------
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
       CHARACTER SYMbe*2, SYMb*2
+      CHARACTER reaction*21
       LOGICAL FILevel, FUSread, FISsil, OMParf, DEFormed, 
      &        DEFault_energy_functional, OMPar_riplf, RIPl_omp(0:NDEJC), 
      &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein
@@ -11,7 +12,7 @@ C
      &                  OMPar_riplf, RIPl_ompcc, CCCalc, OMParfcc, 
      &                  RELkin, FIRst_ein
 C
-      COMMON /GLOBAL_C/ SYMb(0:NDNUC), SYMbe(0:NDEJC)
+      COMMON /GLOBAL_C/ SYMb(0:NDNUC), SYMbe(0:NDEJC), reaction(NDNUC)
 C
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, 
      &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq, 
@@ -63,17 +64,13 @@ C
      &                 EX(NDEX + 1, NDNUC), TNUc(NDEX, NDNUC),
      &                 RO(NDEX, NDLW, NDNUC), TNUcf(NDEX, NDNUC),
      &                 ROF(NDEX, NDLW, NDNUC), POP(NDEX, NDLW, 2, NDNUC)
-     &                 , SCRt(NDEX, NDLW, 2, 0:NDEJC),
+     &                 ,SCRt(NDEX, NDLW, 2, 0:NDEJC),POPBIN(NDEX,NDNUC),
      &                 SCRtl(NDLV, 0:NDEJC), SCRtem(0:NDEJC),
      &                 CSEmis(0:NDEJC, 0:NDNUC), CSEmsd(NDECSE, NDEJC),
      &                 CSEhms(NDECSE, NDEJC),
      &                 CSE(NDECSE, 0:NDEJC, 0:NDNUC),
-     &                 CSA(NDANG, 0:NDEJC, NDNUC),
-     &                 CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC),
+     &                 CSEa(NDECSE, NDANG, 0:NDEJC, 0:1),
      &                 CSEahms(NDECSE, NDANG, NDEJC),
-     &                 ANCsea(NDECSE, NDANG, 2),
-     &                 CSEan(NDECSE, NDANG, NDEJC),
-     &                 APCsea(NDECSE, NDANG, 2),
      &                 RECcse(NDEREC, 0:NDEX, NDNUC),
      &                 AUSpec(NDECSE, 0:NDEJC), REClev(NDLV, 0:NDEJC),
      &                 CANgler(NDANG), SANgler(NDANG),
@@ -99,9 +96,17 @@ C
      &                 D_Lvp(NDCOLLEV), D_Def(NDCOLLEV, NDDEFCC),
      &                 D_Klv(NDCOLLEV), D_Llv(NDCOLLEV)
 C
+C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limitted
+C    to 0:1 on the last dimension in order to save memory - anyway, in the 
+C    current implementation first emissions only can be anisotropic (apart 
+C    of DDHMS which provides inclusive spectra in any case)
+
       COMMON /DEPTH / POTe(7)
 C
       COMMON /TLCOEF/ TL(NDETL, NDLW, NDEJC, NDNUC)
+      COMMON /ENDFEMIS/ POPcs(0:NDEJC, NDNUCD)
+      COMMON /ENDFSPEC/ POPcse(0:NDEX_D, 0:NDEJC, NDECSED, NDNUCD)
+      COMMON /ENDFEA/ POPcseaf(0:NDEX_D, NDEJCD, NDECSED, NDNUCD)
 C
       COMMON /NUMHLP_I/ LTUrbo
 C
@@ -124,3 +129,5 @@ C
       COMMON /MOMENT/ MOMparcrt(NFWELLS), MOMortcrt(NFWELLS)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
+
+      COMMON /delete/ popesumm,iecmem

@@ -41,7 +41,7 @@ C-M   FLCU LCU=8  Selected curve from ENDF file (PLOTTAB points fmt).
 C-M
 C-Extern.: DXSEND,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=100000,MXR=400000,MXEN=5)
+      PARAMETER   (MPT=1000,MXP=100000,MXR=400000,MXEN=8)
       CHARACTER*1  CM
       CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU
      1            ,FLEF(MXEN),COM(MXEN)
@@ -136,11 +136,18 @@ C* Process the index entry
       READ (C80,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
 C*
       COM2=C80(1:11)//C80(19:22)//C80(23:27)
-      IF(MF.NE.3) COM2=COM2(1:20)//'Ei'//C80(46:49)//C80(52:55)
+C     IF(MF.NE.3) COM2=COM2(1:20)//'E_inc='//C80(46:49)//C80(52:55)//
+c    1" eV"
+c     IF(C80(56:59).NE.'    ')
+c    1 COM2=COM2(1:30)//'An'//C80(56:59)
+c     IF(C80(63:67).NE.'    ')
+c    1 COM2=COM2(1:30)//'Eo'//C80(64:67)//C80(70:72)
+      IF(MF.NE.3) COM2=COM2(1:20)//C80(46:49)//C80(52:55)//
+     1" eV"
       IF(C80(56:59).NE.'    ')
-     1 COM2=COM2(1:30)//'An'//C80(56:59)
+     1 COM2=COM2(1:30)//C80(56:59)//" deg"
       IF(C80(63:67).NE.'    ')
-     1 COM2=COM2(1:30)//'Eo'//C80(64:67)//C80(70:72)
+     1 COM2=COM2(1:30)//C80(64:67)//C80(70:72)//" eV"
 C*
       IF(C80(55:62).EQ.'        '  ) DEG=-2
       IF(C80(63:72).EQ.'          ') EOU=-2

@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-07-10 22:29:54 $
-Ccc   * $Id: HF-comp.f,v 1.10 2003-07-10 22:29:54 herman Exp $
+Ccc   * $Date: 2003-09-25 21:16:56 $
+Ccc   * $Id: HF-comp.f,v 1.11 2003-09-25 21:16:56 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -14,18 +14,19 @@ Ccc   * divided by the H-F denominator and accumulates the rsult on the  *
 Ccc   * population array POP for a given nucleus NNUR                    *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * input:IEC  - energy index of the decaying state                  *
-Ccc   *       NNUC - index of the decaying nucleus                       *
-Ccc   *       NNUR - index of the residual nucleus                       *
-Ccc   *       NEJC - index of the ejectile (0 for gamma)                 *
-Ccc   *       XNOR - normalization factor (POP*STEP/DENHF)               *
+Ccc   * input:Iec  - energy index of the decaying state                  *
+Ccc   *       Nnuc - index of the decaying nucleus                       *
+Ccc   *       Nnur - index of the residual nucleus                       *
+Ccc   *       Nejc - index of the ejectile (0 for gamma)                 *
+Ccc   *       Xnor - normalization factor (POP*STEP/DENHF)               *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * calls:BELLAC                                                     *
+Ccc   * calls:EXCLUSIVEC                                                 *
+Ccc   *       EXCLUSIVEL                                                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * author: M.Herman                                                 *
@@ -34,6 +35,10 @@ Ccc   * revision:1    by:M. Herman                on:30.Jul.1997         *
 Ccc   * Transitions to discrete levels distributed between adjacent      *
 Ccc   * spectrum bins so that after spectrum integration average         *
 Ccc   * energy is conserved.                                             *
+Ccc   *                                                                  *
+Ccc   * revision:2    by:M. Herman                on:31.Jul.2003         *
+Ccc   * New algorithm for exclusive spectra using EXCLUYSIVEC and        *
+Ccc   * EXCLUSIVEL                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -48,13 +53,21 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, pops, xcse
+      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, pops, popt,
+     &                 xcse
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, nexrt
-      INTEGER INT, MAX0
+      INTEGER INT, MAX0 
 C
 C
 C
+C     HERE this is a check and should be deleted
+      IF(Iec.NE. iecmem) THEN
+c        WRITE(6,*)'New Iec',iec, iecmem 
+         popesum=0
+      ENDIF
+      iecmem=Iec
+C     HERE this is end of the check 
       IF(Nnuc.EQ.Nnur)THEN
          excnq = EX(Iec, Nnuc)
       ELSE
@@ -68,25 +81,30 @@ C        IF(Nejc .EQ. 0)
 C        &   WRITE(6,*)'continuum bin ',icse ,'EX ',EX(ie,Nnur),' Eemiss',
 C        &             excnq-EX(ie,Nnur)
 C
+         popt =0.0
          DO j = 1, NLW, LTUrbo              !loop over residual spins
             pop1 = Xnor*SCRt(ie, j, 1, Nejc)
             pop2 = Xnor*SCRt(ie, j, 2, Nejc)
             pops = pop1 + pop2
+            IF(ie.EQ.1)pops = pops*0.5
+            popt = popt + pops !sum over spin/pi at a given energy bin
             icse = MAX0(2, icse)
             AUSpec(icse, Nejc) = AUSpec(icse, Nejc) + pop1 + pop2
-            IF(ie.EQ.1)pops = pops*0.5
             CSE(icse, Nejc, Nnuc) = CSE(icse, Nejc, Nnuc) + pops
-            IF(ENDf.EQ.1.D0)CALL BELLAC(Iec, Nejc, Nnuc, pops)
             POP(ie, j, 1, Nnur) = POP(ie, j, 1, Nnur) + pop1
             POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pop2
             IF(Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie, j, 1, Nnur))
      &         POPmax(Nnur) = POP(ie, j, 1, Nnur)
          ENDDO
+         IF(ENDf.EQ.1 .AND. popt.NE.0.0D+0)  
+     &      CALL EXCLUSIVEC(Iec, ie, Nejc, Nnuc, Nnur,popt)
+         popt = popt*DE
+         popesum=popesum+popt
       ENDDO
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il, Nnur)
          IF(eemi.LT.0.0D0)RETURN
-C--------transitions to discrete levels are distributed
+C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
 C--------distance of the actual energy to the bin energy excluding elastic
 C--------if ENDf.NE.0
@@ -97,20 +115,26 @@ C--------if ENDf.NE.0
             icsh = icsl + 1
             pop1 = Xnor*SCRtl(il, Nejc)
             popl = pop1*(FLOAT(icsh) - xcse)/DE
+            popll = popl            !we also need popl not multiplied by 2
             IF(icsl.EQ.1)popl = 2.0*popl
             poph = pop1*(xcse - FLOAT(icsl))/DE
-            IF(icsl.LE.NDECSE)CSE(icsl, Nejc, Nnuc) = CSE(icsl, Nejc, 
-     &         Nnuc) + popl
+            IF(icsl.LE.NDECSE) THEN
+               CSE(icsl, Nejc, Nnuc) = CSE(icsl, Nejc, Nnuc) + popl
+               IF(ENDf.EQ.1 .AND. popll.NE.0.0D+0) 
+     &            CALL EXCLUSIVEL(Iec, icsl, Nejc, Nnuc,Nnur, popll)
+            ENDIF
             IF(icsh.LE.NDECSE)THEN
                CSE(icsh, Nejc, Nnuc) = CSE(icsh, Nejc, Nnuc) + poph
+               IF(ENDf.EQ.1 .AND. poph.NE.0.0D+0) 
+     &            CALL EXCLUSIVEL(Iec, icsh, Nejc, Nnuc,Nnur, poph)
             ELSE
                WRITE(6, *)' '
                WRITE(6, *)' OOPS! I AM OUT OF NDECSE DIMENSION IN ACCUM'
                STOP
             ENDIF
+            popesum=popesum+(popll+poph)*DE
          ELSE
          ENDIF 
-         IF(ENDf.EQ.1.D0)CALL BELLAC(Iec, Nejc, Nnuc, pop1/DE)
          POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
          REClev(il, Nejc) = REClev(il, Nejc) + pop1
 C--------Add isotropic CN contribution to direct ang. distributions
@@ -124,25 +148,28 @@ C--------Add isotropic CN contribution to direct ang. distributions
       END
 C
 C
-      SUBROUTINE BELLAC(Iec, Nejc, Nnuc, Popt)
+      SUBROUTINE EXCLUSIVEC(Iec, Ief, Nejc, Nnuc, Nnur, Popt)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
-Ccc   *                      B E L L A C                                 *
+Ccc   *                   E X C L U S I V E C                            *
 Ccc   *                                                                  *
-Ccc   * Substracts a piece from the first-emission double-differential   *
-Ccc   * spectrum and adds it up to the second emission. Used to          *
-Ccc   * produce ddx as requested by the ENDF format.                     *
-Ccc   * At present only two emissions are considered, i.e. (n,3n)        *
-Ccc   * reaction can't be processed.                                     *
-Ccc   *                                                                  *
+Ccc   * Deconvolutes inclusive spectra calculated by the statistical     *
+Ccc   * model into spectra for individual reactions (exclusive) as       *
+Ccc   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
+Ccc   * to continuum.                                                    *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * input:IEC  - energy index of the decaying state                  *
-Ccc   *       NNUC - index of the decaying nucleus                       *
-Ccc   *       NEJC - index of the ejectile                               *
-Ccc   *       POPT - little piece of cross section being   moved from    *
-Ccc   *              one spectrum onto another                           *
+Ccc   * input:Iec  - energy index of the decaying state                  *
+Ccc   *       Ief  - energy index of the final state                     *
+Ccc   *       Nejc - index of the ejectile                               *
+Ccc   *       Nnuc - index of the decaying nucleus                       *
+Ccc   *       Nnur - index of the final nucleus                          *
+Ccc   *       Popt - x-sec/MeV for the transition from the initial       *
+Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+Ccc   *              This cross section is directly added to the spectrum*
+Ccc   *              and Popt*DE is used to define a portion of the      *
+Ccc   *              feeding spectrum that has to be moved.              *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
@@ -151,9 +178,9 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: R. Sturiale & M.Herman                                   *
-Ccc   * date:   23.May.1996                                              *
-Ccc   * revision:1    by:M.Herman                 on:07.Feb.1997         *
+Ccc   * author: M.Herman                                                 *
+Ccc   * date:     July 2003                                              *
+Ccc   * revision:1    by:                         on:                    *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -163,166 +190,135 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Iec, Nejc, Nnuc
+      INTEGER Iec, Ief, Nejc, Nnuc, Nnur
       DOUBLE PRECISION Popt
 C
 C Local variables
 C
-      INTEGER iang, icsp
+      INTEGER iang, icsp, iejc, ie 
+      INTEGER INT
+      DOUBLE PRECISION excnq, popa, xnor 
+C
+C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
+C                                   energy bin with index Ief in Nnuc by
+C                                   Nejc particles (cumulative over all
+C                                   decays leading to this energy bin)
+C
+      IF(Nnuc.EQ.Nnur)THEN
+         excnq = EX(Iec, Nnuc)
+      ELSE
+         excnq = EX(Iec, Nnuc) - Q(Nejc, Nnuc)
+      ENDIF
+C-----Contribution comming straight from the current decay
+      icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
+      POPcse(Ief,Nejc,icsp,Nnur) =  POPcse(Ief,Nejc,icsp,Nnur) + Popt
+      
+C-----Contribution due to feeding spectra from Nnuc 
+C-----DE spectra
+      IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
+         IF(POPbin(Iec, Nnuc) .EQ. 0) RETURN 
+         xnor = Popt*DE/POPbin(Iec, Nnuc)
+         DO ie = 1, NDECSE 
+            DO iejc = 0, NDEjc 
+               IF(POPcse(Iec,iejc,ie,Nnuc).NE.0) 
+     &            POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur) +
+     &            POPcse(Iec,iejc,ie,Nnuc)*xnor 
+            ENDDO 
+C--------DDX spectra using portions      
+            DO iejc = 1, NDEJCD
+               IF(POPcseaf(Iec,iejc,ie,Nnuc).NE.0) 
+     &            POPcseaf(Ief,iejc,ie,Nnur) = 
+     &            POPcseaf(Ief,iejc,ie,Nnur) +
+     &            POPcseaf(Iec,iejc,ie,Nnuc)*xnor 
+            ENDDO 
+         ENDDO 
+      ENDIF 
+
+
+      END
+
+
+      SUBROUTINE EXCLUSIVEL(Iec, Ie, Nejc, Nnuc, Nnur, Popt)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:mpu*
+Ccc   *                   E X C L U S I V E L                            *
+Ccc   *                                                                  *
+Ccc   * Deconvolutes inclusive spectra calculated by the statistical     *
+Ccc   * model into spectra for individual reactions (exclusive) as       *
+Ccc   * requested by the ENDF format. EXCLUSIVEL is for transitions to   *
+Ccc   * discrete levels (will store population spectra on POPcse(0,.,.,.)*
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * input:Iec  - energy index of the decaying state                  *
+Ccc   *       Ie  -  index of the spectrum bin                           *
+Ccc   *       Nejc - index of the ejectile                               *
+Ccc   *       Nnuc - index of the decaying nucleus                       *
+Ccc   *       Nnur - index of the final nucleus                          *
+Ccc   *       Popt - x-sec/MeV for the transition from the initial       *
+Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+Ccc   *              This cross section is directly added to the spectrum*
+Ccc   *              and Popt*DE is used to define a portion of the      *
+Ccc   *              feeding spectrum that has to be moved.              *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * author: M.Herman                                                 *
+Ccc   * date:     July 2003                                              *
+Ccc   * revision:1    by:                         on:                    *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ief, Nejc, Nnuc, Nnur
+      DOUBLE PRECISION Popt, excnq, xnor
+C
+C Local variables
+C
+      INTEGER iang, icsp, iejc, ie 
       INTEGER INT
 C
+C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
+C                                   energy bin with index Ief in Nnuc by
+C                                   Nejc particles (cumulative over all
+C                                   decays leading to this energy bin)
 C
-C
-      IF(Nnuc.EQ.1)THEN
-C--------
-C--------compound nucleus (correction of the gamma spectrum only)
-C--------
-         icsp = INT((EX(NEX(1),1) - EX(Iec,1))/DE + 1.0001)
-C------- if ICSP=1 ==> Egamma=0 ==> no gamma was emitted ==> return
-         IF(icsp.EQ.1)RETURN
-         IF(Nejc.EQ.1)THEN
-C---------- neutron emission
-            CSE(icsp, 0, INRes) = CSE(icsp, 0, INRes) + Popt
-            CSE(icsp, 0, 1) = CSE(icsp, 0, 1) - Popt
-         ENDIF
-         IF(Nejc.EQ.2)THEN
-C---------- proton  emission
-            CSE(icsp, 0, IPRes) = CSE(icsp, 0, IPRes) + Popt
-            CSE(icsp, 0, 1) = CSE(icsp, 0, 1) - Popt
-         ENDIF
-         IF(Nejc.EQ.3)THEN
-C---------- alpha   emission
-            CSE(icsp, 0, IARes) = CSE(icsp, 0, IARes) + Popt
-            CSE(icsp, 0, 1) = CSE(icsp, 0, 1) - Popt
-         ENDIF
-      ENDIF
-      IF(Nnuc.EQ.INRes)THEN
-C-----
-C-----first residue after neutron emission
-C-----
-         icsp = INT((EX(NEX(1),1) - EX(Iec,INRes) - Q(1,1))/DE + 1.0001)
-         IF(Nejc.EQ.1)THEN
-            DO iang = 1, NDANG
-C------------- neutron emission
-               CSEa(icsp, iang, 1, INRes) = CSEa(icsp, iang, 1, INRes)
-     &            + Popt*CSEan(icsp, iang, 1)
-               CSEa(icsp, iang, 1, 1) = CSEa(icsp, iang, 1, 1)
-     &                                  - Popt*CSEan(icsp, iang, 1)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.2)THEN
-C-------    proton  emission
-            DO iang = 1, NDANG
-               CSEa(icsp, iang, 1, IPRes) = CSEa(icsp, iang, 1, IPRes)
-     &            + Popt*CSEan(icsp, iang, 1)
-               CSEa(icsp, iang, 1, 1) = CSEa(icsp, iang, 1, 1)
-     &                                  - Popt*CSEan(icsp, iang, 1)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.3)THEN
-C---------- alpha   emission
-            DO iang = 1, NDANG
-               ANCsea(icsp, iang, 1) = ANCsea(icsp, iang, 1)
-     &                                 + Popt*CSEan(icsp, iang, 1)
-               CSEa(icsp, iang, 1, 1) = CSEa(icsp, iang, 1, 1)
-     &                                  - Popt*CSEan(icsp, iang, 1)
-            ENDDO
-         ENDIF
-      ENDIF
-      IF(Nnuc.EQ.IPRes)THEN
-C-----
-C-----first residue after proton emission
-C-----
-         icsp = INT((EX(NEX(1),1) - EX(Iec,IPRes) - Q(INRes,1))
-     &          /DE + 1.0001)
-         IF(Nejc.EQ.1)THEN
-            DO iang = 1, NDANG
-C------------- neutron emission
-               CSEa(icsp, iang, 2, INRes) = CSEa(icsp, iang, 2, INRes)
-     &            + Popt*CSEan(icsp, iang, 2)
-               CSEa(icsp, iang, 2, 1) = CSEa(icsp, iang, 2, 1)
-     &                                  - Popt*CSEan(icsp, iang, 2)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.2)THEN
-C---------- proton  emission
-            DO iang = 1, NDANG
-               CSEa(icsp, iang, 2, IPRes) = CSEa(icsp, iang, 2, IPRes)
-     &            + Popt*CSEan(icsp, iang, INRes)
-               CSEa(icsp, iang, 2, 1) = CSEa(icsp, iang, 2, 1)
-     &                                  - Popt*CSEan(icsp, iang, 2)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.3)THEN
-C---------- alpha   emission
-            DO iang = 1, NDANG
-               APCsea(icsp, iang, 1) = APCsea(icsp, iang, 1)
-     &                                 + Popt*CSEan(icsp, iang, 2)
-               CSEa(icsp, iang, 2, 1) = CSEa(icsp, iang, 2, 1)
-     &                                  - Popt*CSEan(icsp, iang, 2)
-            ENDDO
-         ENDIF
-      ENDIF
-      IF(Nnuc.EQ.IARes)THEN
-C-----
-C-----first residue after alpha  emission
-C-----
-         icsp = INT((EX(NEX(1),1) - EX(Iec,IARes) - Q(3,1))/DE + 1.0001)
-         IF(Nejc.EQ.1)THEN
-            DO iang = 1, NDANG
-C------------- neutron emission
-               ANCsea(icsp, iang, 2) = ANCsea(icsp, iang, 2)
-     &                                 + Popt*CSEan(icsp, iang, 3)
-               CSEa(icsp, iang, 3, 1) = CSEa(icsp, iang, 3, 1)
-     &                                  - Popt*CSEan(icsp, iang, 3)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.2)THEN
-C---------- proton  emission
-            DO iang = 1, NDANG
-               APCsea(icsp, iang, 2) = APCsea(icsp, iang, 2)
-     &                                 + Popt*CSEan(icsp, iang, 3)
-               CSEa(icsp, iang, 3, 1) = CSEa(icsp, iang, 3, 1)
-     &                                  - Popt*CSEan(icsp, iang, 3)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.3)THEN
-C---------- alpha   emission
-            DO iang = 1, NDANG
-               CSEa(icsp, iang, 3, 1) = CSEa(icsp, iang, 3, 1)
-     &                                  - Popt*CSEan(icsp, iang, 3)
-            ENDDO
-         ENDIF
-      ENDIF
-      IF(Nnuc.EQ.ILIres .AND. NDEJC.EQ.4 .AND. NEMc.GT.0)THEN
-C-----
-C-----first residue after light ion emission
-C-----
-         icsp = INT((EX(NEX(1),1) - EX(Iec,ILIres) - Q(NDEJC,1))
-     &          /DE + 1.0001)
-         IF(Nejc.EQ.1)THEN
-            DO iang = 1, NDANG
-C------------- neutron emission
-               CSEa(icsp, iang, NDEJC, 1) = CSEa(icsp, iang, NDEJC, 1)
-     &            - Popt*CSEan(icsp, iang, NDEJC)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.2)THEN
-C---------- proton  emission
-            DO iang = 1, NDANG
-               CSEa(icsp, iang, NDEJC, 1) = CSEa(icsp, iang, NDEJC, 1)
-     &            - Popt*CSEan(icsp, iang, NDEJC)
-            ENDDO
-         ENDIF
-         IF(Nejc.EQ.3)THEN
-C---------- alpha   emission
-            DO iang = 1, NDANG
-               CSEa(icsp, iang, NDEJC, 1) = CSEa(icsp, iang, NDEJC, 1)
-     &            - Popt*CSEan(icsp, iang, NDEJC)
-            ENDDO
-         ENDIF
-      ENDIF
+C-----Contribution comming straight from the current decay
+      POPcse(0,Nejc,Ie,Nnur) =  POPcse(0,Nejc,Ie,Nnur) + Popt
+C-----Contribution due to feeding spectra from Nnuc 
+C-----DE spectra
+      IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
+         xnor = Popt*DE/POPbin(Iec, Nnuc)
+         DO iesp = 1, NDECSE 
+            DO iejc = 0, NDEjc 
+               IF(POPcse(Iec,iejc,iesp,Nnuc).NE.0)
+     &            POPcse(0,iejc,iesp,Nnur) = POPcse(0,iejc,iesp,Nnur) +
+     &            POPcse(Iec,iejc,iesp,Nnuc)*xnor
+            ENDDO 
+C--------DDX spectra using portions      
+            DO iejc = 1, NDEJCD
+               IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) 
+     &            POPcseaf(0,iejc,iesp,Nnur) = 
+     &            POPcseaf(0,iejc,iesp,Nnur) +
+     &            POPcseaf(Iec,iejc,iesp,Nnuc)*xnor 
+            ENDDO 
+         ENDDO 
+      ENDIF 
+
+
       END
+
+
 C
       SUBROUTINE DECAY(Nnuc, Iec, Jc, Ipc, Nnur, Nejc, Sum)
 Ccc
@@ -638,6 +634,10 @@ C
                   icse = 2.0001 + egd/DE
                   CSE(icse, 0, Nnuc) = CSE(icse, 0, Nnuc) + gacs/DE
                   CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + gacs
+C-----------------Add transition to the exclusive gamma spectrum 
+C-----------------NOTE: internal conversion taken into account 
+                  IF(ENDf.EQ.1) POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse,
+     &               Nnuc)+ gacs/DE
                   IF(IOUt.GT.2)WRITE(6, 99005)ELV(j1, Nnuc), 
      &                               LVP(j1, Nnuc)*XJLv(j1, Nnuc), egd, 
      &                               gacs

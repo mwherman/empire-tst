@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-07-10 22:29:54 $
-Ccc   * $Id: auxiliary.f,v 1.6 2003-07-10 22:29:54 herman Exp $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: auxiliary.f,v 1.7 2003-09-25 21:16:57 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -102,12 +102,27 @@ C
             CSEmis(nejc, nnuc) = 0.0
             DO necse = 1, NDECSE
                CSE(necse, nejc, nnuc) = 0.0
+            ENDDO
+         ENDDO
+      ENDDO
+      DO nnuc = 0, NDEJCD-1
+         DO nejc = 0, NDEJC
+            DO necse = 1, NDECSE
                DO nang = 1, NDANG
                   CSEa(necse, nang, nejc, nnuc) = 0.0
                ENDDO
             ENDDO
-            DO nang = 1, NDANG
-               CSA(nang, nejc, nnuc) = 0.0
+         ENDDO
+      ENDDO
+      DO nnuc = 1, NDNUCD 
+         DO necse = 0, NDEX_D 
+            DO inecse = 1, NDECSED
+               DO nejcd = 1, NDEJCD
+                  POPcseaf(necse,nejcd,inecse,nnuc) = 0.0
+               ENDDO
+               DO nejc = 0, NDEJC
+                  POPcse(necse,nejc,inecse,nnuc) = 0.0
+               ENDDO
             ENDDO
          ENDDO
       ENDDO
@@ -130,12 +145,6 @@ C
          CSEhms(necse, 2) = 0.0
          DO nejc = 0, NDEJC
             AUSpec(necse, nejc) = 0.0
-         ENDDO
-         DO nang = 1, NDANG
-            ANCsea(necse, nang, 1) = 0.0
-            ANCsea(necse, nang, 2) = 0.0
-            APCsea(necse, nang, 1) = 0.0
-            APCsea(necse, nang, 2) = 0.0
          ENDDO
       ENDDO
       DO nang = 1, NDANG

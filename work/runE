@@ -8,10 +8,9 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta3             '
-echo '                            (Lodi)                         '
-echo '                              by                           '
-echo '                        M. H e r m a n                     '
+echo '                     V E R S I O N  2.19.beta5             '
+echo '                                                           '
+echo '                       marching towards LODI               '
 echo '                                                           '
 echo ' '
 file=$1
@@ -87,10 +86,18 @@ if [ -f $file.exf ]; then
    cp $file.exf EXFOR.DAT
    echo 'Using existing file with EXFOR data:'  $file.exf
 fi
-if [ -f $file-*.tl  ]; then
-   rename $file TARGET $file-*.tl
+### IFIN-HH ###
+tl=`ls $file-*.tl`
+for i in $tl; do
+# if [ -s $file-*.tl ]; then
+#   rename $file TARGET $file-*.tl 
+#   echo 'Using existing files with ECIS transmission coefficients'
+   if [ -s $i ]; then
+   rename $file TARGET $i 
    echo 'Using existing files with ECIS transmission coefficients'
-fi
+   fi
+done
+### IFIN-HH ###
 echo ' '
 echo $file ' R U N N I N G  !! !  !   !    !     !'
 #cat ../util/auxiliary/missile.au >/dev/audio 2>/dev/null

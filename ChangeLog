@@ -61,7 +61,9 @@
     to reading from the EXFOR CD-ROM (V. Zerkin & M. Herman).
 24. Spctra for the ENDF formatting printed also for the proton induced 
     reactions (M. Herman).
-    
+25. File 'titles' in x4toc4 modified to treat properly min and max bin
+    energies in the emission spectra. 
+26. ZVView updated to version 9.5    
 
 
              Changes in version 2.18 with respect to 2.17.1

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-07-09 21:55:18 $
-Ccc   * $Id: input.f,v 1.16 2003-07-09 21:55:18 herman Exp $
+Ccc   * $Date: 2003-09-25 21:16:57 $
+Ccc   * $Id: input.f,v 1.17 2003-09-25 21:16:57 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -108,6 +108,7 @@ C COMMON variables
 C
       INTEGER NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
+      CHARACTER*1 cnejec
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
 C fisfis--------------------------
@@ -489,6 +490,8 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF(A(1)*0.5.NE.AINT(A(1)*0.5))HIS(1) = -0.5
+C--------set reaction string
+         reaction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
          RESidue(nnuc) = '          '
          RESidue(nnuc)(1:1) = '>'
@@ -544,6 +547,46 @@ C--------correct ejectiles symbols
                            HIS(nnuc) = -1.
                            IF(A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))HIS(nnuc)
      &                        = -0.5
+C--------------------------set reaction string
+                           reaction(nnuc) = '(z,'
+                           iend = 3
+                           IF(in.NE.0) THEN
+                              WRITE(cnejec,'(I1)') in 
+                              IF(in.GT.1) THEN  
+                                 reaction(nnuc)(iend+1:iend+1) = cnejec
+                                 iend = iend+1
+                              ENDIF
+                              reaction(nnuc)(iend+1:iend+1) = 'n'
+                              iend = iend+1
+                           ENDIF 
+                           IF(ip.NE.0) THEN
+                              WRITE(cnejec,'(I1)') ip 
+                              IF(ip.GT.1) THEN  
+                                 reaction(nnuc)(iend+1:iend+1) = cnejec
+                                 iend = iend+1
+                              ENDIF
+                              reaction(nnuc)(iend+1:iend+1) = 'p'
+                              iend = iend+1
+                           ENDIF 
+                           IF(ia.NE.0) THEN
+                              WRITE(cnejec,'(I1)') ia 
+                              IF(ia.GT.1) THEN  
+                                 reaction(nnuc)(iend+1:iend+1) = cnejec
+                                 iend = iend+1
+                              ENDIF
+                              reaction(nnuc)(iend+1:iend+1) = 'a'
+                              iend = iend+1
+                           ENDIF 
+                           IF(NDEIC.GT.0 .AND. iac.NE.0) THEN
+                              WRITE(cnejec,'(I1)') iac 
+                              IF(in.GT.1) THEN  
+                                 reaction(nnuc)(iend+1:iend+1) = cnejec
+                                 iend = iend+1
+                              ENDIF
+                              reaction(nnuc)(iend+1:iend+2) = 'li'
+                              iend = iend+2
+                           ENDIF 
+                           reaction(nnuc)(iend+1:iend+1) = ')'
 C--------------------------set residues to be used for EXFOR retrieval
                            RESidue(nnuc) = '          '
                            RESidue(nnuc)(1:1) = '>'
@@ -1926,9 +1969,9 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta4|'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta5|'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |            (Lodi)          |'
+      WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
       WRITE(6, *)' '
       WRITE(6, *)' '
