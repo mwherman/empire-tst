@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-18 19:22:51 $
-Ccc   * $Id: input.f,v 1.80 2005-02-18 19:22:51 herman Exp $
+Ccc   * $Date: 2005-02-22 05:31:25 $
+Ccc   * $Id: input.f,v 1.81 2005-02-22 05:31:25 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1098,7 +1098,7 @@ C--------print IDNa matrix
      &         (IDNa(4, j), j = 1, NDMODELS)
          WRITE(6, '('' gammas      '',8I10)')
      &         (IDNa(5, j), j = 1, NDMODELS)
-         WRITE(6, '('' alpha cont. '',8I10)')
+         WRITE(6, '('' clusters    '',8I10)')
      &         (IDNa(6, j), j = 1, NDMODELS)
          WRITE(6, *)' '
 C--------model matrix *** done ***
@@ -6496,13 +6496,13 @@ C    *  Setting parameters of GFL model                                 *
 C    *  -------------------------------                                 *
 C    *  GFL model -> S.F.Mughabghab,C.L.Dunford,Phys.Lett.B487(2000)155 *
 C    *                                                                  *
-C    *  Initially attemts are made to set parameter 'beta' and first-   *
+C    *  Initially attempts are made to set parameter 'beta' and first-  *
 C    *  -excited state energy (E2+) from"def_eff.dat" file.This file is *
 C    *  prepared from data file "raman_tableI.txt" given by  S.Raman,   *
 C    *  C.W.Nestor,Jr, P.Tikkanen [Atom.Data Nucl.Data Tabl. 78(2001)1; *
 C    *  Table 1 for even-even nuclei].The value of deformation parameter*
 C    *  '|beta2|' from "deflib.dat"file is used for 'beta' if the 'beta'*
-C    *  is absent in the "def_eff.dat" file and  global parametrisation *
+C    *  is absent in the "defeff.dat" file and  global parametrisation  *
 C    *  for parameter 'S2Plus=(E2+)*beta**2' is used in this case.      *
 C    ********************************************************************
 C

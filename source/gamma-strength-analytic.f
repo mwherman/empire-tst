@@ -1,16 +1,12 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 08:35:52 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.11 2004-11-30 08:35:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-22 05:31:25 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.12 2005-02-22 05:31:25 herman Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
      &   Eexcitf, Temperf, Egamma, Keyshape)
 C
-C     Module "gamma-strength-analytic.f" with
-C     main subroutine "GAMMA_STRENGTH.f"
-C
 C     FORTRAN77 code for  calculation of the dipole radiative
 C     strength functions for gamma-decay and photoabsorption
-C     at fixed both excitation and gamma-ray energies.
 C                (author Vladimir  Plujko)
 C             (adapted to UNIX by Mike Herman)
 C
