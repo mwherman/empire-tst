@@ -166,10 +166,10 @@ rm ENDF.IN
 mv ENDF.OUT $work/$file-s.endf
 cd $work
    
-# RUN PLOTC4 TO PRODUCE PLOTS
+# RUN PLTLST TO PRODUCE LISTINGS
 
 if [ "$2" = "" ]; then
-   ./plot $file
+ ./plotlst $file
 fi
 
 # REMOVE INTERMEDIATE ENDF FILES
