@@ -5881,32 +5881,6 @@ close $mulfile} \
     $site_11_0.opt86 insert 15 {short-outputs}
     $site_11_0.opt86 insert 16 {full-outputs}
     $site_11_0.opt86 insert 17 {PLOTC4-plots}
-    $site_11_0.opt86 insert 18 {PLOTC4-plots}
-    $site_11_0.opt86 insert 19 {PLOTC4-plots}
-    $site_11_0.opt86 insert 20 {PLOTC4-plots}
-    $site_11_0.opt86 insert 21 {PLOTC4-plots}
-    $site_11_0.opt86 insert 22 {PLOTC4-plots}
-    $site_11_0.opt86 insert 23 {PLOTC4-plots}
-    $site_11_0.opt86 insert 24 {PLOTC4-plots}
-    $site_11_0.opt86 insert 25 {PLOTC4-plots}
-    $site_11_0.opt86 insert 26 {PLOTC4-plots}
-    $site_11_0.opt86 insert 27 {PLOTC4-plots}
-    $site_11_0.opt86 insert 28 {PLOTC4-plots}
-    $site_11_0.opt86 insert 29 {PLOTC4-plots}
-    $site_11_0.opt86 insert 30 {PLOTC4-plots}
-    $site_11_0.opt86 insert 31 {PLOTC4-plots}
-    $site_11_0.opt86 insert 32 {PLOTC4-plots}
-    $site_11_0.opt86 insert 33 {PLOTC4-plots}
-    $site_11_0.opt86 insert 34 {PLOTC4-plots}
-    $site_11_0.opt86 insert 35 {PLOTC4-plots}
-    $site_11_0.opt86 insert 36 {PLOTC4-plots}
-    $site_11_0.opt86 insert 37 {PLOTC4-plots}
-    $site_11_0.opt86 insert 38 {PLOTC4-plots}
-    $site_11_0.opt86 insert 39 {PLOTC4-plots}
-    $site_11_0.opt86 insert 40 {PLOTC4-plots}
-    $site_11_0.opt86 insert 41 {PLOTC4-plots}
-    $site_11_0.opt86 insert 42 {PLOTC4-plots}
-    $site_11_0.opt86 insert 43 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
