@@ -1,4 +1,6 @@
-FC     =  g77
+#FC     =  g77
+#----INTEL f95 compiler
+FC     =  ifort
 #FFLAGS =  -static
 #FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
