@@ -107,7 +107,12 @@ C-M  Additional messages monitor the progress of the data
 C-M  formatting process.
 C-M
 C-
-      PARAMETER   (MXE=100,MXT=200,MXM=20,MXR=80000,MXI=4000)
+C* MXE - Maximum number of incident particle energy points.
+C* MXT - Maximum number of reactions (including discrete levels).
+C* MXM - Maximum number of residual nuclei.
+C* MXR - Lengrh of the real work array RWO.
+C* MXI - Length of the integer work array IWO.
+      PARAMETER   (MXE=100,MXT=200,MXM=60,MXR=120000,MXI=4000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
       DIMENSION    EIN(MXE),QQM(MXT),QQI(MXT)
@@ -640,7 +645,7 @@ C* Suppress negative energies (if present)
 C* Convert to Legendre polynomials and store
       LPU=LL+1
       LS =LPU+LOR+2
-      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in RDANG'
       LC =MXR-LS
       LOO=LOR
       CALL LSQLGV(ANG,DST,KXA,RWO(LPU),0,LOO,ETOL,ERR,RWO(LS),LC)
@@ -739,7 +744,6 @@ C*
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
       END
-
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1                 ,EIN,XSC,QQM,QQI,MTH,IZB,BEN
      1                 ,IZA,AWR,NEN,NXS)
@@ -1181,7 +1185,7 @@ C* Reaction matched - Define pointwise cross section at the same energy
       XS3=XSC(JE3,IT)
       IF(ABS((EN3-EE)/EE).GT.1E-6 .AND. JE3.LT.NE3) GO TO 425
 C* If not defined, Define the general File-6 data (HEAD and TAB1 rec.)
-      IF(NE6.GT.0) GO TO 430 
+      IF(NE6.GT.0) GO TO 430
 C* Preset the particle multiplicity
       Y  =1.
       ZAP=1.
@@ -1258,7 +1262,7 @@ C* Read energy\angle distributions
       LD =LL+LOR+2
       LS =LD+KXA
       LPU=LL+1
-      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in REAMF6'
       READ (REC,807) EOU,(RWO(LD-1+J),J=1,8)
       IF(JXA.GT.8)
      1READ (LIN,809)     (RWO(LD-1+J),J=9,JXA)
@@ -1350,7 +1354,8 @@ C* Increment indices in the storage array
       LL =LL+LOR+2
       NW =NW+LOR+2
       NEP=NEP+1
-      IF(LL+LO1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LL+LO1.GT.MXR)
+     1STOP 'EMPEND ERROR - MXR limit exceeded in REAMF6'
 C* Normalize distributions, pack to max. common Legendre order
       NE6=NE6+1
       LL =L6 + 4
@@ -1573,7 +1578,7 @@ C* Read energy\angle distributions
       END IF
       LD =LL+LOR+2
       LS =LD+KXA
-      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in REAMF6'
       READ (REC,807,ERR=650) ERD,(RWO(LD-1+J),J=1,8)
       IF(JXA.GT.8)
      1READ (LIN,809)     (RWO(LD-1+J),J=9,JXA)
@@ -1703,7 +1708,8 @@ C* Increment indices in the storage array
       LL =LL+LOR+2
       NW =NW+LOR+2
       NEP=NEP+1
-      IF(LL+LO1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LL+LO1.GT.MXR)
+     1STOP 'EMPEND ERROR - MXR limit exceeded in REAMF6'
       IF(EOU.LT.EMP) GO TO 640
 C* Check that the last point is zero at EMP
   648 IF(PEU.EQ.0) GO TO 650
@@ -1720,7 +1726,7 @@ C*
 C* Insert the incident particle threshold energy if necessary
   650 IF(NE6.GT.0 .OR. EE.LE.ETH) GO TO 660
 C     IF(ETH.LT.ELO) GO TO 660
-      IF(LL.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      IF(LL.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in REAMF6'
       NW=LL-L6
       DO 652 J=1,NW
       RWO(LL+8-J)=RWO(LL-J)
@@ -2090,7 +2096,7 @@ C* Case: Expand the cross section set by spline interpolation
       LS =MY+NEN+1
       LBL=MX
       IF(LS+3*NEN+MAX(NEN,NEO).GT.MXR)
-     1 STOP 'EMPEND ERROR - MXR limit exceeded'
+     1 STOP 'EMPEND ERROR - MXR limit exceeded in WRIMF3'
 C* Define the threshold
       ETH=MAX((-QQI(IT))*(AWR+1.)/AWR , EIN(1) )
       XSL=SMALL
@@ -2893,7 +2899,7 @@ C* Loop to find the appropriate Legendre order
    20 NLG=L
       N1 =NLG+1
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
-     1 STOP 'EMPEND ERROR - array capacity exceeded'
+     1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
       CALL LSQLEG(XP,YP,NP,RWO,N1,RWO(LL),JER)
 C* Trap zero-determinant
       IF(JER.NE.0) THEN
