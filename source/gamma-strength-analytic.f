@@ -1,3 +1,4 @@
+$DEBUG
 C     Module "gamma-strength-analytic.f" with
 C     main subroutine "GAMMA_STRENGTH.f"
 C
@@ -162,8 +163,8 @@ C
          DMEf = 1.
 C
          KEYset = 1
-C         KEYset = 2
-C         KEYset = 3
+C        KEYset = 2
+C        KEYset = 3
 C        *************************************************************
 C        * 'KEYset' is key for choise of the input parameters        *
 C        * to calculate the width of the MLO response function.      *
@@ -245,7 +246,7 @@ C        *****************************************************
          IF(KEYfbc.EQ.1)THEN
             alpfree = 23.514/DMEf/sigmapn
             ALPha = alpfree/FACtor
-          ENDIF
+         ENDIF
 C        *****************************************************
 C        * Calculation of normalization constant 'LMconst'   *
 C        * of the GFL model                                  *
@@ -365,7 +366,7 @@ C        *************************************************
             e11 = siggam*EGLO(ttf, ee)
 C-----Plujko_new(for some nuclei (some A with Z=62,64-68) EGLO<0 
 C      - problem of this model)
-           IF(e11.LT.0)e11=0.0
+            IF(e11.LT.0)e11=0.0
 C-----Plujko_new(END for some nuclei (some A with Z=62,64-68) EGLO<0 
 C     - problem of this model)
          ELSEIF(Keyshape.EQ.5)THEN
@@ -512,13 +513,15 @@ C
       DOUBLE PRECISION FUNCTION MLO1(T, U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, hh, phi, SPECRALF, T, U
-      MLO1 = SPECRALF(U, Egamma)
-      if(T.eq.0.0) then
-         phi=1
-      else
-         hh = Egamma/T
-         phi = 1./(1. - EXP( - hh))
-      endif
+	MLO1=0.d0
+      IF(Egamma.LT.0.001d0) return       
+	MLO1 = SPECRALF(U, Egamma)
+C     Underflow and Egamma = 0 protections introduced, RCN, 2004
+      phi=1.d0
+	IF(T.GT.1.d-10) THEN
+        hh = Egamma/T
+	  IF(hh.LE.15.) phi = 1./(1. - EXP( - hh))
+      ENDIF
       MLO1 = phi*MLO1
       END
 C
