@@ -4,6 +4,7 @@ if [ -d $1 ]; then
    echo 'O.K. directory:'  $1 ' exists'
    else
    mkdir $1              
+   touch $1/ho
    echo 'Have created directory:'  $1
 fi                          
 file=$2
