@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-15 23:42:31 $
-Ccc   * $Id: HF-comp.f,v 1.43 2005-02-15 23:42:31 herman Exp $
+Ccc   * $Date: 2005-02-16 16:35:20 $
+Ccc   * $Id: HF-comp.f,v 1.44 2005-02-16 16:35:20 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1657,7 +1657,8 @@ CMS      CALL GAUSSFIS(NNUc, IBAr)
       TABs = TABs + tfcon(1)
       
       IF(nrbarc.eq.3)THEN
-         Tdir23=Tdir23 + tfcon(2)
+         IF(Fisopt(nnuc).eq.0)Tdir23=Tfdis(2)*Tfdis(3) + tfcon(2)
+         IF(Fisopt(nnuc).eq.1)Tdir23=Tdir23 + tfcon(2)
          h(1,2)=hh2
          efb(2)=vv2
       ENDIF
