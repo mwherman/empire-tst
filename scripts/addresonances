@@ -1,0 +1,32 @@
+#! /bin/sh -
+#script to add resonance parameters to the ENDF-6 formatted file
+# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
+file=$1
+work=`pwd`
+
+cd ../util/endres/
+rm empire.end endf.dat 2>/dev/null
+ln -sf $work/$file.endf empire.end
+./endres <ENDRES.INP
+rm empire.end 
+mv endf.dat $work/$file.endf
+mv endres.lst $work/$file-log.endres
+cd $work
+#$work/$file.endf is the final ENDF output file
+
+# RUN STANEF
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-stan.endf
+0
+
+DONE
+EOF
+../util/stanef/stanef <INPUT
+mv $file-stan.endf $file.endf
+
+# remove left-over files
+rm INPUT 2>/dev/null
+
