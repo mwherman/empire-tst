@@ -19,10 +19,10 @@ C
      &       RCoul, RCOul0, BETa, RCOul1, RCOul2, ACOul
 C
          REAL*8 ETA,ATAR,ZTAR,TARMAS,PROJMAS,
-     &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
+     &       HBARC,AMU0C2,EFErmi,RC,ENCOUL,ACOu
 C
          COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
-     &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
+     &       HBARC,AMU0C2,EFErmi,RC,ENCOUL,ACOu
 C
       COMMON /LIB   / IREf, EMIn,
      &                EMAx, IZMin, IZMax, IAMin, IAMax, IMOdel,
