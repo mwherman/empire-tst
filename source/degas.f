@@ -2286,7 +2286,7 @@ C                    Specifically, if you want to consider only the highest
 C                    possible excitation energy, you can skip all these
 C                    lines (including the line 4400 TF0(I,IL)=T1111).
 C
-                     ie = ie - 1
+ 9876                ie = ie - 1
                      DO il = 1, 25 ! Spins
 Ceb                     DO i = 1, nn
                         DO i = 1, 3
@@ -2311,6 +2311,7 @@ Coblo                      do 4401 i=1,4    ! Excitons limited to i=1,4
      &                        + tf0(i, il)
                         ENDDO
                      ENDDO
+                     IF (ie.NE.1) GOTO 9876
                   ENDIF
                ENDIF
             ENDIF
