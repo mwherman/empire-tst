@@ -2974,9 +2974,6 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_11_0.cpd73 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_11_0.cpd74 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
-    }
     namespace eval ::widgets::$site_11_0.cpd75 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
@@ -3988,7 +3985,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -background #ffffff -highlightcolor black -menu "$top.m88" 
     wm focusmodel $top passive
-    wm geometry $top 873x299+10+654; update
+    wm geometry $top 862x296+11+657; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -4256,21 +4253,6 @@ exec $editor $file.inp &} \
     bind $site_11_0.cpd73 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit input file}
     }
-    button $site_11_0.cpd74 \
-        -activebackground #eccceccceccc -activeforeground red \
-        -background #dcdcdc \
-        -command {exec xterm -e ../scripts/run $file &
-ddlist
-adjourn .top75
-# create list of possible ddx plots} \
-        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {Run full package} 
-    vTcl:DefineAlias "$site_11_0.cpd74" "Button31" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_11_0.cpd74 "$site_11_0.cpd74 Button $top all _vTclBalloon"
-    bind $site_11_0.cpd74 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Launch complete sequence of calculations (EMPIRE+formatting+checking+...)}
-    }
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
@@ -4297,11 +4279,8 @@ adjourn .top75} \
         -side top 
     pack $site_11_0.cpd73 \
         -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -side top 
-    pack $site_11_0.cpd74 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
     pack $site_11_0.cpd75 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
+        -in $site_11_0 -anchor center -expand 1 -fill both -padx 5 -pady 5 \
         -side top 
     ::iwidgets::checkbox $site_10_0.che77 \
         -background #e6e6e6 \
@@ -6005,6 +5984,7 @@ close $mulfile} \
     $site_11_0.opt86 insert 49 {PLOTC4-plots}
     $site_11_0.opt86 insert 50 {PLOTC4-plots}
     $site_11_0.opt86 insert 51 {PLOTC4-plots}
+    $site_11_0.opt86 insert 52 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6394,7 +6374,9 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/process $file &} -label PreProcess 
+        -command {exec xterm -e ../scripts/process $file 1 &} -label PreProcess 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/plotlst $file &} -label {Plot list} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4 
     $site_3_0.menu93 add separator \
