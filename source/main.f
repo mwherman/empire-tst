@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 18:16:07 $
-Ccc   * $Id: main.f,v 1.57 2005-02-09 18:16:07 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-11 21:45:45 $
+Ccc   * $Id: main.f,v 1.58 2005-02-11 21:45:45 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1592,7 +1592,7 @@ c              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
                   espmax = EMAx(1)-Q(NDEJC,1)
                ENDIF
 CRCN           nspec = INT(espmax/DE) + 2
-               nspec = max(INT(espmax/DE) + 2,NDECSE-1)
+               nspec = min(INT(espmax/DE) + 2,NDECSE-1)
 C--------------double the first bin x-sec to preserve integral in EMPEND
                CSEfis(1,nejc) = CSEfis(1,nejc)*2
                WRITE(12, *)' '
@@ -2152,6 +2152,9 @@ c======================================================================
 C-----------fission
             csfis = csfis +xnorfis*(tdir+ dencomp*aafis)
      &               + xnorfis*pfiso
+            IF(ENDf.EQ.1 .AND. csfis.NE.0.0D+0)
+     &      CALL EXCLUSIVEC(ke, 0, -1, Nnuc, 0,csfis)
+
          ENDIF
          IF(FISmod(Nnuc).gt.0.)THEN
             IF((dencomp + TDIrect).GT.0.)THEN

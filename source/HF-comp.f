@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-09 05:26:25 $
-Ccc   * $Id: HF-comp.f,v 1.41 2005-02-09 05:26:25 herman Exp $
+Ccc   * $Date: 2005-02-11 21:45:45 $
+Ccc   * $Id: HF-comp.f,v 1.42 2005-02-11 21:45:45 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -167,10 +167,10 @@ Ccc   * to continuum.                                                    *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * input:Iec  - energy index of the decaying state                  *
-Ccc   *       Ief  - energy index of the final state                     *
-Ccc   *       Nejc - index of the ejectile                               *
+Ccc   *       Ief  - energy index of the final state (irrel. for fission)*
+Ccc   *       Nejc - index of the ejectile (-1 for fission)              *
 Ccc   *       Nnuc - index of the decaying nucleus                       *
-Ccc   *       Nnur - index of the final nucleus                          *
+Ccc   *       Nnur - index of the final nucleus (irrelevant for fission) *
 Ccc   *       Popt - x-sec/MeV for the transition from the initial       *
 Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
 Ccc   *              This cross section is directly added to the spectrum*
@@ -211,6 +211,26 @@ C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
+C-----
+C-----Fission
+C-----
+C-----Contribution due to feeding spectra from Nnuc (no decay contribution)
+C-----DE spectra (DDX are not done for fission although they could be)
+      IF(Nejc.EQ.-1) THEN 
+         IF(POPbin(Iec, Nnuc) .EQ. 0) RETURN
+         xnor = Popt*DE/POPbin(Iec, Nnuc)
+         DO ie = 1, NDECSE
+            DO iejc = 0, NDEjc
+               IF(POPcse(Iec,iejc,ie,Nnuc).NE.0)
+     &            CSEfis(ie,iejc) = CSEfis(ie,iejc) +
+     &            POPcse(Iec,iejc,ie,Nnuc)*xnor
+            ENDDO
+         ENDDO
+         RETURN   !if fission
+      ENDIF
+C-----
+C-----Particle decay
+C-----
       IF(Nnuc.EQ.Nnur)THEN
          excnq = EX(Iec, Nnuc)
       ELSE
