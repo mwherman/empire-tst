@@ -45,14 +45,16 @@
 19.Problem with the discontinuity of neutron capture cross section when 
    incident energy becomes lower than the integration bin width has been 
    solved. Capture cross sections, even at very low energies (<10 keV) can now 
-   be calculated even with as few as 50 energy bins (tested on 193-Ir)
-   (M. Herman).
+   be calculated even with as few as 50 energy bins (M. Herman).
 20.All collective levels are used in ECIS calculations with DIRECT=1,2, even if
    they can not be excited because of the too low incident energy. In the 
-   previous versions only open channels were taken into consideration and 
-   coupling to the closed ones was ignored (R. Capote).
-21.Minor corrections of nuclear masses in EMPEND (avoid potentially infinite
-   loop while the ENDF formatted file is processed by SIXTAB) (A. Trkov).
+   previous versions only open channels were considered and coupling to the 
+   closed ones was ignored (R. Capote).
+21.Minor corrections of nuclear masses in EMPEND avoid potentially infinite
+   loop while the ENDF formatted file is processed by SIXTAB (A. Trkov).
+22.Thresholds for particle emission channels corrected in EMPEND (A. Trkov).
+23.Discrete level library updated to the RIPL-2 version of September 24, 2002).
+24.LSTTAB corrected to allow for plotting spectra at 90deg with ZVView (A.Trkov).
 
 Known bugs:
 

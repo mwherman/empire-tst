@@ -53,10 +53,10 @@ ln -sf $work/$file-l.endf ENDF.IN
 rm ENDF.IN
 mv ENDF.OUT $work/$file-s.endf
 cd $work
-if  [ -f $file-s.endf ]; then
+#if  [ -f $file-s.endf ]; then
 #  rm $file-f.endf 2>/dev/null
 #   rm $file-l.endf 2>/dev/null
-fi   
+#fi   
 
 
 

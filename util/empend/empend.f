@@ -294,9 +294,11 @@ C* Energy/angle distribution data processed
   800 IF(JT6.GT.0)
      1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C* Process discrete level photon production
-      JPP=0
+C*   MXLI - maximum number of discrete levels
+C*   MXLJ - maximum number of transitions from a level
       MXLI=100
-      MXLJ=14
+      MXLJ=20
+      JPP=0
       LNB=LBI
       LLB=LNB+MXLI
       IF(LLB+MXLI*MXLJ.GT.MXI)
@@ -1555,6 +1557,7 @@ C* Convert angles from degrees to cosines
 C*
   638 LO1=LOR+1
       EOU=0.
+      EOL=0.
       PEU=0.
       PEL=0.
       SPC=0.
@@ -1571,11 +1574,11 @@ C* Read energy\angle distributions
       LD =LL+LOR+2
       LS =LD+KXA
       IF(LS.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-      READ (REC,807,ERR=650) EOU,(RWO(LD-1+J),J=1,8)
+      READ (REC,807,ERR=650) ERD,(RWO(LD-1+J),J=1,8)
       IF(JXA.GT.8)
      1READ (LIN,809)     (RWO(LD-1+J),J=9,JXA)
 C* Suppress negative outgoing particle energies (if present)
-      IF(EOU.LT.0) GO TO 640
+      IF(ERD.LT.0) GO TO 640
 C* Interpolate to double the mesh in case less than 9 angles given
       IF(JXA.NE.KXA) THEN
           RWO(LD-1+KXA)=RWO(LD-1+JXA)
@@ -1584,12 +1587,12 @@ C* Interpolate to double the mesh in case less than 9 angles given
             RWO(LD+KXA+2-2*J)=0.5*(RWO(LD+KXA+1-2*J)+RWO(LD+KXA+3-2*J))
   641       CONTINUE
       END IF
-      EOU=EOU*1.E6
 C* Convert to Legendre polynomials and store
       LC =MXR-LS
       LOO=LOR
       ELL=EOL
       EOL=EOU
+      EOU=ERD*1.E6
       PE3=PEL
       PEL=PEU
       LPL=LPU
@@ -1752,52 +1755,62 @@ C* Save the energy and the cross section
       GAM(NE6)=1.
       E1=ETH
 C*
-C* Normalize distributions, pack to max. common Legendre order
+C* Normalize distributions
   660 NE6=NE6+1
       LL =L6 + 4
       LL1=LL
 C* Check for consistency (only if MT6>0)
-      IF(MT6.GT.0 .AND. (ZAP.EQ.1. .AND.XS3.GT.0) ) THEN
-         XSP=SPC*4.E-9*PI/Y
-         DFP=100*(XSP-XS3)/XS3
-         IF(ABS(DFP).GT.2.) THEN
-           WRITE(LTT,909) MT,EE,XS3,DFP
-           WRITE(LER,909) MT,EE,XS3,DFP
-         END IF
-      END IF
-      IF(SPC.LE.0) THEN
-        DE=RWO(LL1+LOR+2)-RWO(LL1)
-        IF(DE.LE.0) DE=1.E-5
-        IF(LEP.EQ.2) THEN
-          PE=2./DE
-        ELSE
-          PE=1./DE
+      IF(MT6.GT.0) THEN
+        IF(ZAP.EQ.1. .AND.XS3.GT.0 ) THEN
+           XSP=SPC*4.E-9*PI/Y
+           DFP=100*(XSP-XS3)/XS3
+           IF(ABS(DFP).GT.2.) THEN
+             WRITE(LTT,909) MT,EE,XS3,DFP
+             WRITE(LER,909) MT,EE,XS3,DFP
+
+             write(ltt, * ) 'xsp,spc,y',xsp,spc,y
+             write(ler, * ) 'xsp,spc,y',xsp,spc,y
+
+           END IF
         END IF
-        RWO(LL  )=0.
-        RWO(LL+1)=PE
-        RWO(LL+2)=DE
-        RWO(LL+3)=0.
-        LHI=0
-        LL1=LL1+NEP*(LOR+2)
-        LL =LL +4
-        NEP=2
+        IF(SPC.LE.0) THEN
+          DE=RWO(LL1+LOR+2)-RWO(LL1)
+          IF(DE.LE.0) DE=1.E-5
+          IF(LEP.EQ.2) THEN
+            PE=2./DE
+          ELSE
+            PE=1./DE
+          END IF
+          RWO(LL1      )=0.
+          RWO(LL1+1    )=PE
+          RWO(LL1+LOR+2)=DE
+          RWO(LL1+LOR+3)=0.
+          LHI=0
+          LO1=1
+          NEP=2
+          SPC=1
+        END IF
       ELSE
-        DO 664 IP=1,NEP
-          RWO(LL   )=RWO(LL1   )
+        SPC=1
+      END IF
+C*
+C* Pack to max. common Legendre order
+      DO 664 IP=1,NEP
+        RWO(LL   )=RWO(LL1   )
         DO 662 IA=1,LO1
           RWO(LL+IA)=RWO(LL1+IA)/SPC
   662   CONTINUE
         LL1=LL1+LOR+2
         LL =LL +LHI+2
-  664   CONTINUE
-      END IF
+  664 CONTINUE
 C*
       LBL=LL
       RWO(L6    )=EE
       RWO(L6 + 1)=LHI
       RWO(L6 + 2)=NEP*(LHI+2)
       RWO(L6 + 3)=NEP
-C* Check if all reactions are given at each incident energy
+C
+* Check if all reactions are given at each incident energy
       IF(IK.EQ.1) THEN
         EIS(NE6)=EE
       ELSE
@@ -2187,9 +2200,9 @@ C*
      1                 ,MT,MAT,IZA,AWR,LCT,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
-      PARAMETER   (MXL=20)
+      PARAMETER   (MXQ=80)
       DIMENSION    RWO(1),QQM(1),QQI(1),MTH(1),NBT(1),INT(1)
-      DIMENSION    QQ(MXL)
+      DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
       DATA DLVL/1.E3/
 C*
@@ -2253,6 +2266,7 @@ C* Print header CONT and TAB2 records
         IF(ABS(EIN-ETH).LT.1.E-4*EIN) THEN
           EIN=ETH
         ELSE
+C*        Set the threshold data and flag J2
           JE=JE+1
           J2=1
           NL=2
@@ -2267,8 +2281,7 @@ C* Print header CONT and TAB2 records
 C* Print threshold distribution (if necessary)
         IF(J2.EQ.1)
      1  CALL WRLIST(LOU,MAT,MF,MT,NS,TT,ETH,LT, 0,NL, 0,QQ)
-        J2 =1
-        EOU=0
+        J2 =J2+1
       END IF
 C* Process the main data block
       RR  =0.
@@ -2277,6 +2290,7 @@ C* Process the main data block
 C*
       IF(NEP.LE.1) THEN
 C* Copy the coefficients if a single point is given
+        IF(NA1.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
         CALL FLDMOV(NA1,RWO(L2+1),QQ)
         IF(QQ(1).NE.0) RR  =1./QQ(1)
       ELSE
@@ -2292,19 +2306,20 @@ C* Linearly interpolate Legendre coefficients to EOU
 C* Last point or matching level to within tolerance
             CALL FLDMOV(NA1,RWO(L2+1),QQ)
             IF(QQ(1).NE.0) RR  =1./QQ(1)
-C...       print *," Match MT,Ein,Eou,E2",MT,EIN,EOU,E2,qqi(it)
-C...       print *,e1,(rwo(l1+j),j=1,NA1)
-C...       print *,e2,(rwo(l2+j),j=1,NA1)
-C...       read (*,'(a1)') yes
+C...           print *,' Match MT,Ein,Eou,E2',MT,EIN,EOU,E2,qqi(it)
+C...           print *,' iep,nep',iep,nep
+C...           print *,e1,(rwo(l1+j),j=1,NA1)
+C...           print *,e2,(rwo(l2+j),j=1,NA1)
+C...           read (*,'(a1)') yes
         ELSE
 C* Try next point or linearly interpolate
           IF(E2.LT.EOU) GO TO 38
           CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
           IF(QQ(1).NE.0) RR  =1./QQ(1)
-C...       print *," Inter MT,Ein,Eou,E1,E2",MT,EIN,EOU,E1,E2,qqi(it)
-C...       print *,e1,(rwo(l1+j),j=1,NA1)
-C...       print *,e2,(rwo(l2+j),j=1,NA1)
-C...       read (*,'(a1)') yes
+C...           print *," Inter MT,Ein,Eou,E1,E2",MT,EIN,EOU,E1,E2,qqi(it)
+C...           print *,e1,(rwo(l1+j),j=1,NA1)
+C...           print *,e2,(rwo(l2+j),j=1,NA1)
+C...           read (*,'(a1)') yes
         END IF
       END IF
       IF(NA.LE.0) THEN

@@ -440,6 +440,12 @@ C* Begin loop over incident particle energies
 C* Read in the data for this energy
       NMX=MXRW-LX1
       CALL RDLIST(LEN,C1,EIN,ND,NA,NW,NEP,RWO(LX1),NMX,IER)
+C...
+      IF(ND.GT.0) THEN
+        PRINT *,'SIXTAB ERROR - Discrete particle energies not coded'
+        STOP 'SIXTAB ERROR - No coding available'
+      END IF
+C...
       IF(IER.NE.0)
      1  STOP 'MF6LW7 ERROR - reading Energy data'
       IF(LANG.EQ.2 .AND. NA.NE.1)
@@ -485,8 +491,15 @@ C* Reconstruct the energy distribution for this cosine
       JP =0
       SEN=0
 C* Begin loop over secondary particle energies
+      EP0=0
   200 IP=IP+1
       EP=RWO(LX1+NCYC*(IP-1))
+C* Check that outgoing particle energies are monotonic increasing
+      IF(EP.LT.EP0) THEN
+        WRITE(LTT,964) IZAP,EIN,EP
+        GO TO 408
+      END IF
+      EP0=EP
       CSN=ACOS
       ELB=EP
       DRV=1
@@ -549,7 +562,7 @@ C* Processing of distribution for one outgoing energy point completed
   400 CONTINUE
 C*
 C* Enter energy point - skip if energy less then previous point
-      IF(IP.GT.1 .AND. ELB.LE.RWO(LXE+JP-1)) GO TO 407
+      IF(IP.GT.1 .AND. ELB.LT.RWO(LXE+JP-1)) GO TO 407
       FMU1=FMU*DRV
       RWO(LXE+JP)=ELB
       RWO(LXX+JP)=FMU1
@@ -567,7 +580,7 @@ C* Integrate over outgoing particle energy for normalisation
       ELB0=ELB
   407 IF(JP.GE.KX) STOP 'MF6LW7 ERROR - MXRW capacity exceeded'
 C* Continue with the secondary energy loop
-      IF(IP.LT.NEP) GO TO 200
+  408 IF(IP.LT.NEP) GO TO 200
 C*
 C* All secondary particles energies processed
       IF(JP.EQ. 1 ) THEN
@@ -633,6 +646,7 @@ C*
   960 FORMAT(/' Converting MF=6, MT=',I3,' to Law 7 format')
   961 FORMAT(' SIXTAB ERROR - Can not process Law',I3,' for ZAP',I6)
   962 FORMAT(12X,A8,' Representation for particle IZAP',I6)
+  964 FORMAT(' SIXTAB WARNING - Format error ZAP,Ein,Ep',I6,1P,2E10.3)
       END
       FUNCTION BACH(IZA1,IZA2,IZAT,E,EP)
 C     ******************************************************************
