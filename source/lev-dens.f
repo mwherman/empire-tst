@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:32:17 $
-Ccc   * $Id: lev-dens.f,v 1.20 2004-09-23 18:32:17 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-23 19:44:45 $
+Ccc   * $Id: lev-dens.f,v 1.21 2004-09-23 19:44:45 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -1148,7 +1148,7 @@ C-----------dependent factor
          ENDIF
          IF(bcs)THEN
             rotemp = 
-     >  	     ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff,FISCon)*RORed
+     &         ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff,FISCon)*RORed
             IF(i.EQ.1)THEN
                phi = SQRT(1. - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
@@ -1756,6 +1756,7 @@ C
                IF(arg.LT.EXPmax)THEN
                   RO(i, j, Nnuc) = r*sigs*2.5066283*(2*xj + 1.)
      &                             /5.01325/SIG/SQRT(SIG)*EXP(( - arg))
+C--------------5.01325=2*SQRT(2*pi) inverse of constant in front of the spin dependence       
                ELSE
                   RO(i, j, Nnuc) = 0.0
                ENDIF
@@ -1789,6 +1790,7 @@ C-----------Plujko_new(End)
             arg = 2.*SQRT(am*u) - ARGred
             IF(arg.GT.( - EXPmax))THEN
                r = 0.1477044*EXP(arg)/am**0.25/u**1.25
+C-----------0.1477044=SQRT(pi)/12 constant in front of energy dependence              
             ELSE
                r = 0.0
             ENDIF
@@ -1796,6 +1798,7 @@ C-----------Plujko_new(End)
                xj = j + HIS(Nnuc)
                RO(i, j, Nnuc) = r*(2*xj + 1.)/5.01325/SIG/SQRT(SIG)
      &                          *EXP(( - (xj+1.)*xj/2.0/SIG))
+C-----------5.01325=2*SQRT(2*pi) inverse of constant in front of the spin dependence       
                IF(RO(i, j, Nnuc).LT.RORed)RO(i, j, Nnuc) = 0.
             ENDDO
          ENDDO
