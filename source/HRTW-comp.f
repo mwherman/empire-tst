@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-08 16:25:36 $
-Ccc   * $Id: HRTW-comp.f,v 1.12 2004-10-08 16:25:36 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-12-16 23:37:56 $
+Ccc   * $Id: HRTW-comp.f,v 1.13 2004-12-16 23:37:56 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1442,7 +1442,7 @@ C                    ',k,INT(2.0*chsp+0.001)
                      WRITE(6, *)' MISMATCH OF ELASTIC CHANNEL IN HRTW'
                      WRITE(6, *)' REPORT THIS ERROR ALONG WITH RELATED'
                      WRITE(6, *)
-     &                        ' INPUT FILE TO: herman@ndsalpha.iaea.org'
+     &                        ' INPUT FILE TO: mwherman@bnl.gov'
                      STOP
                   ENDIF
                   vl = H_Tl(kel, 1)
