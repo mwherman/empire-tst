@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-08-02 16:20:40 $
-Ccc   * $Id: main.f,v 1.35 2004-08-02 16:20:40 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-08-30 13:33:41 $
+Ccc   * $Id: main.f,v 1.36 2004-08-30 13:33:41 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -228,12 +228,19 @@ C
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp
+      DOUBLE PRECISION ftmp, G 
       INTEGER NELang
 C     For factorial calculations (SCAT2)
       PARAMETER(LFMAX = 4*NDTL + 2)
+      COMMON /FACT  / G(LFMAX)
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
+C-----Plujko_new
+C     INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
+C     COMMON /MLOCOM1/ keyinput, kzz1, kaa1
+C     COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
+C-----Plujko_new(End)
+
 C
 C     Local variables
 C
@@ -259,6 +266,11 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
+C-----Plujko_new
+C     DATA keyinput/0/, kzz1/0/, kaa1/0/
+C     DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
+C     F_PRINT=1
+C-----Plujko_new(End)
 C    
 C     FACTORIAL CALCULATIONS 
 C
@@ -412,22 +424,27 @@ C--------print elastic and direct cross sections from ECIS
                ENDIF
                WRITE(6, *)' '
                gang = 180.0/(NDANG - 1)
-               WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
-99001          FORMAT('  Angle ', 10(6x, i2, '-level'))
-               WRITE(6, *)' '
-               DO iang = 1, NDANG
-                  WRITE(6, 99002)(iang - 1)*gang, 
+C
+C              RCN, 08/2004
+C
+	         if(CSAlev(1, ICOllev(2), nejcec).gt.0) then
+                 WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
+99001            FORMAT('  Angle ', 10(6x, i2, '-level'))
+                 WRITE(6, *)' '
+                 DO iang = 1, NDANG
+                    WRITE(6, 99002)(iang - 1)*gang, 
      &                           (CSAlev(iang, ICOllev(ilv), nejcec), 
      &                           ilv = 2, ncoll)
-99002             FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
-               ENDDO
-               WRITE(6, *)' '
-               WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
+99002               FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
+                 ENDDO
+                 WRITE(6, *)' '
+                 WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
      &                        ncoll)
-99003          FORMAT(6x, 3x, 11(2x, E12.6))
-               WRITE(6, *)' '
-               WRITE(6, *)' '
-               WRITE(6, *)' '
+99003            FORMAT(6x, 3x, 11(2x, E12.6))
+                 WRITE(6, *)' '
+                 WRITE(6, *)' '
+                 WRITE(6, *)' '
+	         endif
             ENDIF
          ENDIF
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
@@ -459,20 +476,25 @@ C
             ENDDO
 89004       FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
             WRITE(6, '(//)')
-            gang = 180.0/(NDANG - 1)
-            WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
-            WRITE(6, *)' '
-            DO iang = 1, NDANG
-               WRITE(6, 99002)(iang - 1)*gang, 
+C
+C           RCN, 08/2004
+C
+            if(CSAlev(1, ICOllev(2), nejcec).gt.0) then
+              gang = 180.0/(NDANG - 1)
+              WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
+              WRITE(6, *)' '
+              DO iang = 1, NDANG
+                 WRITE(6, 99002)(iang - 1)*gang, 
      &                      (CSAlev(iang, ICOllev(ilv), nejcec), 
      &                       ilv = 2, ncoll)
-            ENDDO
-            WRITE(6, *)' '
-            WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
+              ENDDO
+              WRITE(6, *)' '
+              WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
      &                        ncoll)
-            WRITE(6, *)' '
-            WRITE(6, *)' '
-            WRITE(6, *)' '
+              WRITE(6, *)' '
+              WRITE(6, *)' '
+              WRITE(6, *)' '
+	      endif
 C=========================================================================
 C           the following ELSE block is to print ECIS calculated XS
 C           (it could be omitted)
@@ -1667,6 +1689,13 @@ C--------
                   IF(POPCS(nejc,nnuc).EQ.0) CYCLE 
                   nspec = INT(EMAx(nnuc)/DE) + 2
                   nexrt = INT((EMAx(nnuc) - ECUt(Nnuc))/DE + 1.0001)
+C
+C        Mike, check the lines below
+C        It was a bug before. nexrt could be negative
+C        I intriduced a jump for this case, but may be this is not the proper thing to do !!! (08/2004) 
+C
+	            if(nexrt.le.1) cycle 
+
                   IF(nejc.EQ.0) THEN 
                      cejectile = 'gammas   '
                      iizaejc = 0
