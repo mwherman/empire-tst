@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-11-23 19:47:15 $
-Ccc   * $Id: input.f,v 1.44 2004-11-23 19:47:15 herman Exp $
+Ccc   * $Date: 2004-11-29 05:17:26 $
+Ccc   * $Id: input.f,v 1.45 2004-11-29 05:17:26 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -256,7 +256,7 @@ C--------set level density parameters
          DEFgw = 10.
          DEFgp = 40.
          ADIv = 0.0
-         NEX(1) = 50
+         NEXreq = 50
          FITlev = 0.0
          GCAsc = -1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
@@ -1361,8 +1361,8 @@ C          inelastic cross section
              READ(46,'(A80)',END=995) rstring
   995        write(47,'(A80)') rstring
            ENDDO
- 1000	    CLOSE(45, STATUS='DELETE')
-	    CLOSE(46, STATUS='DELETE')
+ 1000     CLOSE(45, STATUS='DELETE')
+          CLOSE(46, STATUS='DELETE')
            CLOSE(47)
 C
 C          Renormalization of the reaction cross section to consider
@@ -1392,7 +1392,7 @@ C            checking the correspondence of the excited states
  1015          write(47,'(A80)') rstring
              ENDDO
            ENDDO
- 2000	    CLOSE(45, STATUS='DELETE')
+ 2000      CLOSE(45, STATUS='DELETE')
            CLOSE(46, STATUS='DELETE')
            CLOSE(47)
          ENDIF  ! END of DIRECT.NE.3 case
@@ -1408,6 +1408,7 @@ C           Restoring KTRlom(0,0) and RIPl_omp(0)
 C
 C-----determination of excitation energy matrix in cn
 C
+      NEX(1) = NEXreq
       ECUt(1) = ELV(NLV(1), 1)
       IF(FITlev.GT.0.0D0) THEN
          ECUt(1) = 0.0
@@ -5225,7 +5226,7 @@ C           Additional levels are added for DWBA calculations
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv, 2) = 0.1
-	         ierr=0
+               ierr=0
                GOTO 500
             ENDIF
 
