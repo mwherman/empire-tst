@@ -82,7 +82,7 @@ if [ "$name3" != "" ]; then
 fi
 
 #Run ZVV (uncomment the line below to see plots as they are produced)
-../util/c4zvd/zvview.exe $root-$MT$suf.zvd &
+#../util/c4zvd/zvview.exe $root-$MT$suf.zvd &
 #rm tmp.dat c4.zvd 2>/dev/null
 #rm end1.zvd end2.zvd end3.zvd 2>/dev/null
 #rm mt_x4r.txt
