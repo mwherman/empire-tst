@@ -1,6 +1,6 @@
                               EMPIRE-II
 
-			                   Optional input
+                           Optional input
 
 Optional input consists of an  arbitrary number of records, entered in
 any order  and closed with the  GO record, which indicates  the end of
@@ -26,458 +26,477 @@ might be an arbitrary number of comments line in the optional(!) input.
 Calculation control
 -------------------
 
-NEX     Maximum number  of energy  steps in  the integration  set  to VAL
-	(default: min(50, NDEX)).
+NEX       Maximum number of energy steps in the integration set to VAL
+          (default: min(50, NDEX)).
 
-LTURBO  Step  in the angular  momentum set to  VAL. This option  can be
-	     used to  speed up Heavy  Ion calculations. Setting  LTURBO to,
-	     say, 2  only each second spin  in the Compound  Nucleus and in
-	     all  residual  nuclei  will   be  considered.  The  result  is
-	     appropriately normalized so that no flux is lost (default: 1).
+LTURBO   Step in the angular momentum set to VAL. This option can be
+         used to speed up Heavy Ion calculations. For example, setting
+         LTURBO to 2, only each second spin in the Compound Nucleus and
+         in all residual nuclei will be considered. The result is appropriately
+         normalized so that no flux is lost (default: 1).
 
-ENDF 	Controls output for ENDF formating ,
-	 = 0 no output for the ENDF formating will be created (default),
-	 = 1 output for the ENDF formating will be created (exclusive 
-        representation of spectra, approximative treatment of recoils),
-	 = 2 output for the ENDF formating will be created (inclusive spectra,
-        MT=5 representation, exact treatment of recoils)
+ENDF    Controls output for ENDF formatting ,
+       = 1 output for the ENDF formatting will be created ,
+       = 0 no output for the ENDF formatting will be created (default).
 
 Output control
---------------       
+--------------
 
-IOUT 	Main output control set to VAL ,
-	 = 0 no output except warnings, 
-	 = 1 input data and essential results (all cross sections) (default),
-	 = 2 as IOUT=1 plus fusion spin distribution, yrast state population,
-	   gamma-transition parameters, fusion barrier, inclusive spectra,
-	 = 3 as IOUT=2 + gamma  and particle spectra + discrete levels' decay
-	   + double differential cross sections (if MSD>0), 
-	 = 4 as IOUT=2 + ORION output + residual nuclei continuum population
-	   (up to spin 12), 
-	 = 5 as IOUT=2 + ORION output + transmission coefficients (up to l=12),
-	 = 6 as IOUT=2 + ORION output + level densities (up to spin 12).
+IOUT    Main output control set to VAL ,
+       = 0 no output except warnings,
+       = 1 input data and essential results (all cross sections) (default),
+       = 2 as IOUT=1 plus fusion spin distribution, yrast state population,
+           gamma -transition parameters, fusion barrier, inclusive spectra,
+       = 3 as IOUT=2 + gamma  and particle spectra + discrete levels' decay
+           + double differential cross sections (if MSD>0),
+       = 4 as IOUT=2 + ORION output + residual nuclei continuum population
+           (up to spin 12),
+       = 5 as IOUT=2 + ORION output + transmission coefficients (up
+            to l=12),
+       = 6 as IOUT=2 + ORION output + level densities (up to spin 12).
 
-NOUT 	MSC calculation output control set to VAL (default: 0).
+NOUT    MSC calculation output control set to VAL (default: 0).
 
 Fusion
 ------
 
-FUSRED 	Fusion cross section will be multiplied by VAL (default: 1.).
+FUSRED  Fusion cross section will be multiplied by VAL (default: 1.).
 
-CSREAD 	Controls HI fusion cross section determination ,
-	 >  0 HI fusion cross section is set to VAL [in mb], 
-	 = -1 distributed barrier model used ,
-	 = -2 coupled channels CCFUS-code used (default for HI).
- 	      Note: CSREAD has no effect if .fus file (FUSION in manual mode) exists!
+CSREAD  Controls HI fusion cross section determination,
+       > 0 HI fusion cross section is set to VAL [in mb],
+       = -1 distributed barrier model used ,
+       = -2 Coupled-Channels CCFUS-code used (default for HI).
+       Note: CSREAD has no effect if .fus file (FUSION in manual
+       mode) exists.
 
-BFUS 	Fusion barrier hight in the distributed barrier model
-   	set to VAL (default: B_{fus} calculated by CCFUS).
+BFUS    Fusion barrier height in the distributed barrier model  set to VAL
+        (default: B_{fus} calculated by CCFUS).
 
-SIG 	SIGMA in the distributed barrier model  set to VAL 
-      (default: 0.05B_{fus}).
+SIG     SIGMA in the distributed barrier model set to VAL 
+        (default: 0.05B_{fus}).
 
-TRUNC Truncation in the distributed barrier model set to VAL (default: 2.).
+TRUNC   Truncation in the distributed barrier model set to VAL 
+        (default: 2.).
 
-EXPUSH Extrapush energy set to VAL (default: 0.).
+EXPUSH  Extra-push energy set to VAL (default: 0.).
 
-CRL 	Critical l-value for HI fusion  set to VAL (default: 0).
+CRL     Critical l-value for HI fusion  set to VAL (default: 0).
 
-DFUS 	Diffuseness in the transmission coefficients for HI fusion set to VAL 
-      (default: 1.).
+DFUS    Diffuseness in the transmission coefficients for HI fusion
+        set to VAL (default: 1.).
 
-TRGLEV   Excited level of the target is set to VAL (default: 1 (ground state)).
+TRGLEV  Excited level of the target is set to VAL
+        (default: 1 (ground state)).
 
-Widths fluctuations (HRTW)
---------------------------
+Width fluctuations (HRTW)
+-------------------------
 
-HRTW  Controls HRTW calculations
-     = 0 no HRTW
-     = 1 HRTW up to 5 MeV incident energy and no HRTW above (default)
-     = 2 HRTW on for all incident energies
+HRTW    Controls HRTW calculations
+       = 0 no HRTW
+       = 1 HRTW up to 5 MeV incident energy, and no HRTW above
+           this value (default)
+       = 2 HRTW for all incident energies
 
 CCFUS input
 -----------
 
-DV 	DV barrier parameter in CCFUS set to VAL. This parameter can be
-   	used to adjust the fusion barrier. Typical range for changes -10<DV<10.
-	   (default: 10.).
+DV      DV barrier parameter in CCFUS set to VAL. This parameter can be used
+        to adjust the fusion barrier. Typical range for changes -10<DV<10.
+        (default: 10).
 
-FCC 	FCC parameter in CCFUS set to VAL,
-	  = 0 diagonalization of the coupling is performed at the barrier position
-	      r_{b},
-	  = 1 the exponential character of the form factor is taken into account.
-	      A second order estimation of the position and height of the effective
-	      barriers is carried out within a one-Fermi distance from r_{b}. This
-	      option is recommended for strong coupling (default). 
+FCC     FCC parameter in CCFUS set to VAL,
+       = 0 diagonalization of the coupling is performed at the barrier
+           position r_{b},
+       = 1 exponential character of the form factor is taken into
+           account.  A second order estimation of the position and
+           height of the effective barriers is carried out within a
+           one-Fermi distance from r_{b}. This option is recommended
+           for strong coupling (default).
 
-NSCC 	Number of inelastic surface channels in CCFUS set to VAL (default: 4).
+NSCC    Number of inelastic surface channels in CCFUS set to VAL
+        (default: 4).
 
-NACC 	Number of additional channels set to VAL (default: 0).
+NACC    Number of additional channels set to VAL (default: 0).
 
-BETCC 	Deformation of the I2-th collective mode set to VAL.
+BETCC   Deformation of the I2^{th} collective mode set to VAL.
 
-FLAM 	Multipolarity of the I2-th collective mode set to VAL (entered
-	   with positive sign for target modes and negative one for projectile
-	   modes) (default:  2, 3, -2, -3, needs NSCC numbers).
+FLAM    Multi-polarity of the I2-th collective mode set to VAL
+        (entered with positive sign for target modes and negative sign for
+        projectile modes) (default:  2, 3, -2, -3, needs NSCC numbers).
 
-QCC 	Q-value of the I2-th collective channel set to VAL - excitation
-	   energy of the collective level taken with a negative sign (default:
-	-  energies of the first 2+ and 3- levels in the target and the projectile). 
+QCC     Q-value of the I2-th collective channel set to VAL - excitation
+        energy of the collective level adopted with a negative sign
+        (default: - energies of the first 2+ and 3- levels in the target and
+        the projectile).
 
-FCD 	Strength of the coupling at the barrier for I2-th collective mode
-	   set to VAL. For FCC=1 the characteristic radial dependence of one-particle
-	   transfer form factor is assumed. Used only if NACC>0 (no default).
+FCD     Strength of the coupling at the barrier for I2-th collective mode
+        set to VAL. For FCC=1 the characteristic radial dependence of
+        the one-particle transfer form factor is assumed. Used only if
+        NACC>0 (no default).
 
-Coupled Channels (ECIS)
+Coupled-Channels (ECIS)
 -----------------------
 
-DIRECT Controls use of optical model
-       =0 spherical o.m. used (default)
-       =1 Coupled Channel method used for calculation of 
-          inelastic scattering to collective levels. If a selected 
-          o.m. potential is of a CC type also elastic and reaction cross 
-          sections are taken from ECIS. Otherwise, spherical o.m.
-          results, calculated with SCAT2, are used. In any case,
-          transmission coefficients for all emissions are calculated 
-          with spherical o.m.
-       =2 as above but all transmission coefficients for the incident 
-          nucleon emission are calculated within Coupled Channel 
-          approach with ECIS (extensive calculation time).
-       =3 as DIRECT=1 but DWBA is used instead of CC. All transmission
-          coefficients calculated with spherical o.m.
-          
-          NOTE: o.m. potential to be used by ECIS might be different from
-                the one used in the rest of the calculations. It can be
-                specified with the DIRPOT option.
-                
-Multi-step direct
------------------          
+DIRECT  Controls use of ECIS03
+       = 0 spherical OM used (default)
+       = 1 Coupled Channel method used for calculation of inelastic
+           scattering to collective levels. If a selected OM
+           potential is of CC type, the elastic and reaction cross
+           sections are also taken from ECIS03.  Otherwise, spherical
+           OM results are used. In any case, transmission
+           coefficients for all emissions are calculated with
+           spherical OM
+       = 2 as above but all transmission coefficients for the
+           incident nucleon emission are calculated within Coupled
+           Channel approach with ECIS03 (extensive calculation time).
+       = 3 as DIRECT=1 but DWBA is used instead of CC. All
+           transmission coefficients calculated with spherical OM
+NOTE: OM potential to be used by ECIS03 might be different from the
+one used in the rest of the calculations and can be specified with the
+DIRPOT option.
 
-MSD 	Controls Multistep Direct calculations ,
-	  = 0 no MSD calculations (default),
-	  = 1 MSD calculations selected - ORION + TRISTAN will be executed ,
-	  = 2 MSD calculations selected but only TRISTAN will be executed using
-	      the most recent results of ORION. WARNING! there is no check whether
-	      the last and the current run match with regard to the projectile,
-	      the target and the incident energy; this option can be used for a
-	      single incident energy only.
+EcDWBA  Selects all levels with energy below VAL and spin equal or less
+        than I1 to be used in DWBA calculations performed parallel to CC.
 
-COMPFF Controls form factor for the l=0 transitions
-       = 0 standard surface form factor (default)
-       = 1 compressional form factor
+Multi-step Direct
+-----------------
 
-WIDEX  Experimental energy resolution set to VAL (default: 0.2).
+MSD     Controls Multi-step Direct calculations ,
+       = 0 no MSD calculations (default),
+       = 1 MSD calculations selected - ORION + TRISTAN will be executed,
+       = 2 MSD calculations selected but only TRISTAN will be
+           executed using the most recent results of ORION. WARNING!
+           there is no check whether the last and the current run
+           match with regard to the projectile, the target and the
+           incident energy; this option can be used for a single
+           incident energy only.
 
-GAPP 	 Proton pairing gap for target set to VAL (default: 12/sqrt{A}).
+WIDEX   Experimental energy resolution set to VAL (default: 0.2).
 
-GAPN 	 Neutron pairing gap for target set to VAL (default: 12/sqrt{A}).
+GAPP    Proton pairing gap for target set to VAL (default: 12/\sqrt{A} ).
 
-HOMEGA Oscillator energy (default: 41.47/A^{1/3} MeV).
+GAPN    Neutron pairing gap for target set to VAL (default: 12/\sqrt{A} ).
 
-EFIT 	 Coupling constants of multipolarity I1 fitted to the level at energy
-	    VAL (defaults: -1 for lambda=0, E_{GDR} for lambda =1, energies
-	    of the first low-lying 2+, 3-, and 4+ levels for lambda =2, 3, and  4,
-	    respectively).
+HOMEGA  \hbar\omega  oscillator energy (default: 41.47/A^{1/3} MeV ).
 
-RESNOR Response function for multipolarity I1 will be normalized by
-	    factor VAL (default: 1.).
+EFIT    Coupling constants of multi-polarity I1 fitted to the level at
+        energy VAL (defaults: -1 for \lambda=0, E_{GDR} for \lambda=1,
+        energies of the first low-lying 2+, 3-, and 4+ levels for
+        \lambda=2,\,3,\,4, respectively).
 
-ALS 	 l-s coupling strength in the harmonic oscillator (default: 1.5).
+RESNOR  Response function for multi-polarity I1 will be normalized by
+        factor VAL (default: 1).
 
-Multi-step compound 
--------------------          
+ALS     spin-orbit coupling strength in the harmonic oscillator 
+        (default: 1.5).
 
-MSC 	Controls Multistep Compound calculations ,
-	  = 0 no MSC calculations (default),
-	  = 1 MSC calculations selected.
+Multi-step Compound
+-------------------
 
-XNI 	Initial exciton number set to VAL (default set internally depending
-	   on the case, 3 for nucleon inuced reactions).
+MSC     Controls Multi-step Compound calculations,
+       = 0 no MSC calculations (default),
+       = 1 MSC calculations selected.
 
-GDIV 	Single particle level densities in MSC set to A/VAL (default: 13.0).
+XNI     Initial exciton number set to VAL (default set internally
+        depending on the case, 3 for nucleon induced reactions).
 
-TORY 	Ratio of unlike to like nucleon-nucleon interaction cross section
-	   set to VAL. Used for determination of relative share between neutron
-	   and protons in the exciton configurations (default: 4.).
+GDIV    Single particle level densities in MSC set to A/VAL (default: 13.0).
 
-EX1 	Initial number of excitons being neutrons set to VAL (default set
-	   internally depending on the case and on TORY).
+TORY    Ratio of unlike to like nucleon-nucleon interaction cross section
+        set to VAL.  Used for the determination of the relative share
+        between neutron and protons in the exciton configurations
+        (default: 4.).
 
-EX2 	Initial number of excitons being protons set to VAL (default set
-	   internally depending on the case and on TORY).
+EX1     Initial number of excitons that are neutrons set to VAL (default
+        set internally depending on the case and on TORY).
 
-D1FRA Ratio of the spreading GDR width to the total GDR width set to
-	   VAL (default: 0.8).
+EX2     Initial number of excitons that are protons set to VAL (default
+        set internally depending on the case and on TORY).
 
-GST 	Controls gamma-emission in MSC,
-	  = 0 no gamma-emission in MSC (default),
-	  = 1 gamma-emission in MSC selected.
+D1FRA   Ratio of the spreading GDR width to the total GDR width set to
+        VAL (default: 0.8).
 
-STMRO Controls p-h level density calculations, 
-	  = 0 closed form p-h state densities selected (default),
-	  = 1 microscopic p-h state densities selected (not yet implemented) .
+GST     Controls \gamma -emission in MSC,
+       = 0 no \gamma -emission in MSC (default),
+       = 1 \gamma -emission in MSC selected.
+
+STMRO   Controls p-h level density calculations,
+       = 0 closed form p-h state densities selected (default),
+       = 1 microscopic p-h state densities selected (not yet implemented).
 
 Exciton model (DEGAS)
----------------------      
+---------------------
 
-DEGAS Controls exciton model calculations
-     = 0 DEGAS code disabled
-     = 1 DEGAS code enabled
-   
-GDIVP sets s.p.l. density parameter (g) for protons to A/VAL (default 13.)
+DEGAS   Controls exciton model calculations,
+       = 0 DEGAS code disabled (default),
+       = 1 DEGAS code enabled.
 
-Monte Carlo preequilibrium model (HMS)
--------------------------------------      
+GDIVP   Sets single-particle level density parameter (g) for protons to
+        A/VAL (default 13).
 
-HMS   Controls Monte Carlo preequilibrium calculations
-     = 0 HMS disabled
-     = 1 HMS enabled
+Monte   Carlo preequilibrium model (HMS)
+
+HMS     Controls Monte Carlo preequilibrium calculations,
+       = 0 HMS disabled (default),
+       = 1 HMS enabled.
+
+NHMS    Number of events in HMS set to VAL
+
+CHMS    Default damp rate in HMS multiplied by VAL
+
+Exciton model with cluster emission (PCROSS)
+--------------------------------------------
+
+PCROSS  Controls calculations with PCROSS
+       = 0 PCROSS disabled (default)
+       = 1 PCROSS enabled (with default 1.3 multiplier for mean free path)
+       > 1.05 and < 2 PCROSS enabled with mean free path multiplier
+            set to VAL
+
+GTILNO  Single particle level density parameter g (in PCROSS) multiplied 
+        by VAL
 
 Level densities
----------------                
+---------------
 
-LEVDEN 	Selects level density approach ,
-     = 0. EMPIRE-specific level densities, BCS + Fermi gas with deformation
-          dependent collective effects, adjusted to experimental a values and
-          to discrete levels (default),
-     = 1. Fermi gas with deformation dependent collective effects and a
-          parameters derived from the shell-model,
-     = 2. Gilbert-Cameron level densities, adjusted to experimental a values
-          and to discrete levels ,
-     = 3. microscopic HF-BCS level densities,                                 
-     > 3. Fermi gas with deformation dependent collective effects and a=A/VAL.
+LEVDEN  Selects level density approach,
+       = 0 EMPIRE-specific level densities, BCS + Fermi gas with
+           deformation-dependent collective effects, adjusted to
+           experimental a values and to discrete levels (default),
+       = 1 Fermi gas with deformation-dependent collective effects
+           and a parameters derived from the shell-model,
+       = 2 Gilbert-Cameron level densities, adjusted to experimental
+           a values and to discrete levels,
+       = 3 microscopic HF-BCS level densities,
+       > 2 Fermi gas with deformation-dependent collective effects 
+           and a=A/VAL.
 
-ATILNO   systematics' value of the asymptotic level density parameter will
-         be multiplied by VAL for the nucleus with Z=I1 and A=I2
+ATILNO  systematics value of the level density parameter \widetilde{a}
+        will be multiplied by VAL for the nucleus with Z=I1 and
+        A=I2. NOTE: if the experimental value of the level density
+        parameter exists, the term is ignored while it is used to
+        define the normalization factor when ATILNO does not appear in
+        the input or is set to 0.  Therefore, using ATILNO set to a
+        higher (or lower) value than 1 may actually result in a lower
+        (or greater) \widetilde{a} than in the default calculations.
 
-GCROA 	Level density parameter a in Gilbert-Cameron approach 
-     >  0. parameter a in nucleus Z=I1, A=I2 set to VAL ,
-     =  0. parameter a in all nuclei according to Ignatyuk systematics,
-     = -1. parameter a in all nuclei according to Arthur systematics,
-     = -2. parameter a in all nuclei according to Ilijnov systematics (default
- 	        for Gilbert-Cameron).
+GCROA   Level density parameter a in Gilbert-Cameron approach
+       >  0 parameter a in nucleus Z=I1, A=I2 set to VAL ,
+       =  0 parameter a in all nuclei according to Ignatyuk systematics,
+       = -1 parameter a in all nuclei according to Arthur systematics,
+       = -2 parameter a in all nuclei according to Ilijnov systematics
+            (default for Gilbert-Cameron).
 
-GCROUX 	Level density parameter U_{x} in Gilbert-Cameron approach for
-	      nucleus Z=I1, A=I2 set to VAL (default calculated internally).
+GCROUX  Level density parameter U_{x} in Gilbert-Cameron approach for
+        nucleus Z=I1, A=I2 set to VAL (default calculated internally).
 
-GCROD 	Pairing shift in Gilbert-Cameron approach for nucleus
-	      Z=I1, A=I2 set to VAL (default determined internally according to
-	      Gilbert-Cameron table, for Z>98 and/or N>150 Delta=12/sqrt{A} is
-	      taken).
+GCROD   Pairing shift \Delta  in Gilbert-Cameron approach for nucleus Z=I1, A=I2 set to VAL
+        (default determined internally according to Gilbert-Cameron table, for Z>98 and/or
+        N>150 \Delta=12/\sqrt{A} is taken).
 
-GCROE0 	Level density parameter E_{0} in Gilbert-Cameron approach for
-      	nucleus Z=I1, A=I2 set to VAL (default calculated internally).
+GCROE0  Level density parameter E_{0} in Gilbert-Cameron approach for nucleus Z=I1, A=I2 set
+        to VAL (default calculated internally).
 
-GCROT 	Level density parameter T in Gilbert-Cameron approach for nucleus
-         Z=I1, A=I2 set to VAL (default calculated internally).
+GCROT   Level density parameter T in Gilbert-Cameron approach for nucleus Z=I1, A=I2 set to VAL
+        (default calculated internally).
 
-FITLEV   Controls cumulative plots of levels
-      > 0 cumulative plots of discrete levels will be displayed. If
-	       LEVDEN=0 the energy range of the plot will extend VAL MeV above the
-	       last discrete level,
-	   = 0 no cumulative plots (default),
-      < 0 stop cross section calculations if there is no solution for the
-          GC fit of discrete levels (with FITLEV=0 calculations go ahead).
-	
-NIXSH = 0 shell-corrections calculated according to Myers-Swiatecki
-	       (default),
-	   = 1 shell-corrections according to Nix-Moller tables.
+FITLEV > 0 cumulative plots of discrete levels will be displayed. If LEVDEN=0 the energy range
+           of the plot will extend VAL MeV above the last discrete level,
+       = 0 no cumulative plots (default).
+
+NIXSH  = 0 shell-corrections calculated according to Myers-Swiatecki (default),
+       = 1 shell-corrections according to Nix-Moller tables.
 
 Fission
--------                         
+-------
 
-FISSHI   Controls treatment of the fission channel for nucleus
-         Z=I1, A=I2 
-      =0 advanced fission (multi-humped barrier, optical model for
-         fission) recommended for light particle or photon induced fission 
-         (default)
-      =1 fission over single-humped barrier (good only for  
-         Heavy Ion induced reactions)
-      =2 fission ignored
+FISSHI  Controls treatment of the fission channel for nucleus Z=I1, A=I2
+       = 0 advanced fission (multi-humped barrier, optical model for fission) recommended
+           for light particle or photon induced fission (default)
+       = 1 fission over single-humped barrier (good only for Heavy Ion induced reactions)
+       = 2 fission ignored
 
-FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
-      =0 Ripl-2 (microscopic calculations by Goriely with internally set
-         barrier widths taken from Lynn - default),
-      =1 internal EMPIRE library
-      =2 Ripl-1 (compilation of Maslov, model dependent!)
+The following options are valid only when FISSHI = 0
 
-FISDEN   Controls level densities at saddle points for nucleus Z=I1, A=I2 
-      =0 Ripl-2 (microscopic calculations by Goriely)
-      =1 Empire specific 
+FISBAR  Controls origin of fission barrier data for nucleus Z=I1, A=I2
+       = 0 Ripl-2 (microscopic calculations by Goriely with internally set barrier widths
+           taken from Lynn - default),
+       = 1 internal EMPIRE library
+       = 2 Ripl-1 (compilation of Maslov, model dependent!)
 
-FISOPT   Controls subbarrier effects for nucleus Z=I1, A=I2 
-      =0 no subbarrier effects
-      =1 subbarrier effects considered (only with FISBAR=1)
-      =2 subbarrier effects & isomeric fission considered 
-         (only with FISBAR=1)
+FISDEN  Controls level densities at saddle points for nucleus Z=I1, A=I2
+       = 0 Ripl-2 (microscopic calculations by Goriely)
+       = 1 Empire specific
 
-FISMOD   Controls multimodality of fission for nucleus Z=I1, A=I2 
-      =0 single-modal fission
-      =1 multimodal fission
-      =2 multimodal fission
+FISOPT  Controls subbarrier effects for nucleus Z=I1, A=I2
+       = 0 no subbarrier effects
+       = 1 subbarrier effects considered (only with FISBAR=1)
+       = 2 subbarrier effects & isomeric fission considered (only with FISBAR=1)
 
-QFIS 	  Liquid drop fission barriers multiplied by VAL (default: 1.).
+FISMOD  Controls multimodality of fission for nucleus Z=I1, A=I2
+       = 0 single-modal fission
+       = 1 multimodal fission (2 modes)
+       = 2 multimodal fission (3 modes)
 
-BETAV   Viscosity  parameter set to VAL (10^{-21}s^{-1}) (default: 4.).
+FISDIS  Controls discrete transitional states
+       = 0 no discrete states above fission barrier for nucleus Z=I1, A=I2
+       = 1 discrete states above fission barrier for nucleus Z=I1, A=I2
 
-SHRJ 	  Shell correction to fission barrier dampped to 1/2 at spin VAL 
-        (default: 24.).
+The following options are valid only when FISSHI = 1
 
-SHRD 	  Diffuseness of the shell correction damping set to VAL (default: 2.5).
+QFIS    Liquid drop fission barriers multiplied by VAL (default: 1).
 
-TEMP0   Temperature at which shell correction fade-out starts set to VAL 
-        (default: 1.65).
+BETAV   Viscosity parameter set to VAL (10^{-21}s^{-1}) (default: 4).
 
-SHRT 	  Parameter in the temperature shell correction fade-out set to VAL 
-        (default: 1.066).
+SHRJ    Shell correction to fission barrier damped to 1/2 at
+        spin VAL (default: 24).
 
-DEFGA   d (amplitude) in the Gaussian term of Eq. 1.113 set to VAL 
+SHRD    Diffuseness of the shell correction damping  set to VAL
+        (default: 2.5).
+
+TEMP0   Temperature at which shell correction fade-out  space
+        starts set to VAL (default: 1.65).
+
+SHRT    Parameter in the temperature shell correction fade-out
+        set to VAL (default: 1.066).
+
+DEFGA   d (amplitude) in the Gaussian term in fission barrier set to VAL
         (default: 0. - no correction).
 
-DEFGW   Delta J_{G} (width) in the Gaussian term of Eq. 1.113 set to VAL 
-        (default: 10.).
+DEFGW   \Delta J_{G} (width) in the Gaussian term in fission barrier
+        set to VAL (default: 10).
 
-DEFGP 	J_{G} (position) in the Gaussian term of Eq. 1.113 set to VAL 
-        (default: 40.).
+DEFGP   J_{G} (position) in the Gaussian term in fission barrier
+        set to VAL (default: 40).
 
-Gamma-ray strength functions
+Gamma-ray strength functions 
 ----------------------------
 
-GSTRFN= 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki) 
-          as in the 2.18 version and before
-      = 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2)
-      = 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2)
-      = 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2)
-      = 4 EGLO EGLO enhanced generalized Lorentzian (RIPL-2)
-      = 5 GFL  (Mughabghab)
-      = 6 SLO  standard Lorentzian
+GSTRFN = 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki)
+           as in the 2.18 version and earlier (default)
+       = 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2)
+       = 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2)
+       = 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2)
+       = 4 EGLO EGLO enhanced generalized Lorentzian (RIPL-2)
+       = 5 GFL (Mughabghab)
+       = 6 SLO standard Lorentzian
 
 GDR parameters
---------------              
+--------------
 
-GDRDYN 	Controls GDR treatment ,
-   	= 0. GDR shape depends on the ground state deformation (default),
-   	= 1. GDR shape dependance accounts for the rotation induced deformation
-	        (spin dependent).
+GDRGFL  Selects source of GDR parameters
+       = 0 Messina systematics
+       = 1 experimental or systematics of RIPL-2 (default)
 
-EGDR1 	GDR energy set to VAL (default calculated internally from the
-	      systematics).
+GDRDYN  Controls GDR treatment,
+       = 0 GDR shape depends on the ground state deformation (default),
+       = 1 GDR shape dependence accounts for the rotation induced
+           deformation (spin dependent, Eq. [totdefor]).
 
-GGDR1 	GDR width set to VAL (default calculated internally from the
-	      systematics).
+EGDR1   GDR energy of first peak set to VAL (default calculated
+        internally from systematics).
 
-CSGDR1 	GDR first hump peak cross section set to VAL (default calculated 
-         internally from the systematics).
+GGDR1   GDR width of first peak set to VAL (default calculated
+        internally from systematics).
 
-EGDR2 	GDR second hump energy set to VAL (default calculated internally
-	      from the systematics).
+CSGDR1  GDR cross section of first peak set to VAL (default calculated
+        internally from systematics).
 
-GGDR2 	GDR second hump width set to VAL (default calculated internally
-	      from the systematics).
+EGDR2   GDR energy of second peak set to VAL (default calculated internally
+        from systematics).
 
-CSGDR2 	GDR second hump peak cross section set to VAL (default calculated
-	      internally from the systematics).
+GGDR2   GDR width of second peak set to VAL (default calculated internally
+        from systematics).
 
-GDRWP 	Factor c in the energy increase of the GDR width set to VAL 
-         (default: 0.0026).
- 
-GDRWA1 	GDR first hump width increased by VAL (default: 0).
+CSGDR2  GDR cross section of second peak set to VAL (default calculated
+        internally from systematics).
 
-GDRWA2 	GDR second hump width increased by VAL (default: 0).
+GDRWP   Factor c in the energy increase of the GDR width set to VAL
+        (default: 0.0026).
 
-GDRESH 	GDR position shifted by VAL (default: 0).
+GDRWA1  GDR width of first peak increased by VAL (default: 0).
 
-GDRSPL 	Splitting of GDR humps increased by VAL (default: 0).
+GDRWA2  GDR width of second peak increased by VAL (default: 0).
 
-GDRST1 	GDR first hump peak cross section multiplied by VAL (default: 1).
+GDRESH  GDR position shifted by VAL (default: 0).
 
-GDRST2 	GDR second hump peak cross section multiplied by VAL (default: 1).
+GDRSPL  Splitting of GDR peaks increased by VAL (default: 0).
 
-GDRWEI 	relative contributions of the GDR and Weisskopf estimates to
-         the gamma-strength set to VAL*GDR+(1-VAL)*Weiss. Note
-	      that the condition 0.le.VAL.le.1 must be fulfilled (default: 1).
+GDRST1  GDR cross section of first peak multiplied by VAL (default: 1).
 
-GCASC   =0 no full gamma-cascade in the first Compound Nucleus (primary
-           transitions only)
-        =1 full gamma-cascade in the first Compound Nucleus 
-           (default: full gamma-cascade in the first Compound Nucleus if
-           the initial excitation energy is less or equal to 20 MeV, 
+GDRST2  GDR cross section of second peak multiplied by VAL (default: 1).
+
+GDRWEI  relative contributions of the GDR and Weisskopf estimates to the
+        gamma-strength set to VAL*GDR+(1-VAL)*Weiss. Note that the condition
+        0=< VAL=<1 must be fulfilled (default: 1).
+
+GCASC  = 0 no full gamma-cascade in the first Compound Nucleus
+           (only primary transitions),
+       = 1 full \gamma -cascade in the first Compound Nucleus
+           (default: full gamma-cascade in the first Compound Nucleus if the
+           initial excitation energy is less or equal to 20 MeV,
            otherwise primary transitions only).
 
-Optical Model Potential 
------------------------   
+Photo-absorption
+----------------
 
-OMPOT 	Optical model parameters, 
-         when positive internal o.m.p. are taken,
+E1     = 0 E1 photo-absorption blocked
+       = 1 E1 photo-absorption selected
 
-         for neutrons (I1 = 1):
-       = 1 Bjorklund-Fernbach-1958 ,
-       = 2 Moldauer-1963 ,
-       = 3 Becchetti-Greenlees-1969 (default for incident energies above 
-           20 MeV),
-       = 4 Wilmore-Hodgson-1964 (default for incident energies up to 20 MeV),
-       = 5 Patterson et al. 1976 ,
-       = 6 Rapaport 1979 ,
-       = 7 Konshin 1988 (Rapaport 1979 with energy dependence in R_{VOM}).
- 
-         for protons (I1 = 2) ,
-       = 1 Bjorklund-Fernbach ,
-       = 2 Becchetti-Greenlees 1969 (default),
-       = 3 Menet et al. 1971 .
- 
-         for alphas (I1 = 3) ,
-       = 1 Mc Fadden and Satchler (default).
- 
-         for light ions (I1 = 4) ,
-       = 1 Perey-Perey 1963 (default for deuterons),
-       = 1 Becchetti-Greenless (default for tritons),
-       = 1 Becchetti-Greenless (default for 3-He),
-       = 1 Kiev (default for 6-Li, 7-Li, and 7-Be).
+M1     = 0 M1 photo-absorption blocked
+       = 1 M1 photo-absorption selected
 
-         when negative RIPL o.m.p. are taken with |VAL| being RIPL
-         identification number of the potential set.
+E2     = 0 E2 photo-absorption blocked
+       = 1 E2 photo-absorption selected
 
-DIRPOT	Optical model parameters to be used by ECIS. All above applies
-         except that I1 need not be specified (refers to inelastic channel
-         by default)
+QD      Quasideuteron photo-absorption cross section normalized by a factor VAL
 
-EFERMI   Fermi Energy for dispersive om potential (default: -10.392 MeV)
+Optical Model Potential
+-----------------------
 
-EAVERP   Average energy of particle states for dispersive omp 
-         (default:-5.66 MeV)
+OMPOT   Selects optical model parameters for neutrons (I1 = 1), protons (I1 = 2),
+        or alphas (I1 = 3); VAL must be set to a RIPL-2 catalog number (Lib. No.)
+        of the potential as it appears in the empire/RIPL-2/optical/om-data/om-index.txt
+        file or in Help => 'RIPL omp' when using GUI. For backward compatibility this
+        number must be entered with a negative sign.
 
-EANONL   Threshold energy for nonlocality in dispersive omp (default: 60 MeV)
+DIRPOT  Optical model parameters to be used by ECIS03. The same as above, except
+        that I1 need not be specified (refers to inelastic channel by default).
 
-ALPHA    Mahaux nonlocality parameter in dispersive omp (default: 1.65)
+EFERMI  Fermi Energy for dispersive OM potential (default: -10.392 MeV).
 
-RELKIN   Controls kinematics
-       = 0 classical
-       = 1 relativistic
+EAVERP  Average energy of particle states for dispersive OM (default:-5.66 MeV).
 
+EANONL  Threshold energy for non-locality in dispersive OM (default: 60 MeV).
 
+ALPHA   Mahaux non-locality parameter in dispersive OM (default: 1.65).
 
-
-
+RELKIN  Controls kinematics,
+       = 0 classical (default),
+       = 1 relativistic.
 
 Miscellaneous
--------------               
+-------------
 
-BNDG     Binding energy of ejectile I3 in nucleus Z=I1, A=I2 set to VAL
-	      (default calculated internally form nuclear masses).
+BNDG    Binding energy of ejectile I3 in nucleus Z=I1, A=I2 set to VAL
+        (default calculated internally from nuclear masses).
 
-DEFPAR 	b coefficient in dynamic deformation expression set to VAL 
-         (default: 1.).
+DEFPAR  b coefficient in dynamic deformation expression set to VAL (default: 1).
 
-JSTAB 	Stability limit with respect to spin in nucleus Z=I1 and A=I2,
-	    = 0 set at a spin at which fission barrier (including shell 
-           correction) disappears (default),
-	    > 0 set to VAL.
+JSTAB   Stability limit with respect to spin for the nucleus Z=I1 and A=I2,
+       = 0 set at a spin at which fission barrier (including shell correction) disappears (default),
+       > 0 set to VAL.
+
+FITOMP  Sets calculations for GUI assisted manual fitting of optical model
+        parameters (only total, elastic, capture and inelastic scattering are
+        calculated independently of what is specified in the input).
+
 
 
                          D I M E S I O N S
-                         -----------------             
+                         -----------------
 
-The dimensions which may require modifications in everyday use of the 
+The dimensions which may require modifications in everyday use of the
 code are listed below:
 
 NDNUC    maximum number of nuclei involved in the calculation
@@ -496,4 +515,6 @@ NDMSCS   number of steps in Multistep Compound
 NDLV     maximum number of discrete levels in a single nucleus
 
 NDBR     maximum number of branching ratios for each level
+
+
 
