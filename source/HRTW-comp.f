@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-12-16 23:37:56 $
-Ccc   * $Id: HRTW-comp.f,v 1.13 2004-12-16 23:37:56 herman Exp $
+Ccc   * $Date: 2005-01-21 21:29:25 $
+Ccc   * $Id: HRTW-comp.f,v 1.14 2005-01-21 21:29:25 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -138,7 +138,8 @@ C-----------gamma emision
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
-            IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip,jcn, sumfis,cota)
+C-----------WARNING!!! MULTIMODAL IS MISSING HERE WARNING!
+            IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip,jcn, sumfis,0)
             H_Sumtl = H_Sumtl + sumfis
             H_Sweak = H_Sweak + sumfis
             IF(H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)THEN
