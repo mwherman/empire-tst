@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-08 17:06:58 $
-Ccc   * $Id: fusion.f,v 1.30 2005-02-08 17:06:58 Capote Exp $
+Ccc   * $Date: 2005-02-09 14:51:31 $
+Ccc   * $Id: fusion.f,v 1.31 2005-02-09 14:51:31 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -51,11 +51,12 @@ C
       DOUBLE PRECISION PAR, W2, xmas_npro, xmas_ntrg, RMU
       INTEGER itmp1
       LOGICAL LDBWacalc, fexist, LTLj, DOdwba
-      CHARACTER*80 ctmp
+      CHARACTER*132 ctmp
       CHARACTER*120 rstring
       CHARACTER*18 ctmp18
       INTEGER*4 IWIN,PIPE
-
+      CHARACTER*6 cTLdir
+       DATA cTLdir/6H../TL//
       PAR(i, ipa, l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
 
 C
@@ -104,13 +105,13 @@ C    &       SYMb(NTRg),INT(A(NTRg)),INT(EINl*1000)
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      INQUIRE(FILE = ('../TL/'//ctmp18//'_INC.BIN'), EXIST = fexist)
+      INQUIRE(FILE = (cTLdir//ctmp18//'_INC.BIN'), EXIST = fexist)
 
       IF(fexist) then
 C-------Here the old calculated files should be readed
-        OPEN(45, FILE = ('../TL/'//ctmp18//'_INC.BIN'),
+        OPEN(45, FILE = (cTLdir//ctmp18//'_INC.BIN'),
      &                                     FORM = 'UNFORMATTED',ERR=25)
-        IF(IOUt.EQ.5) OPEN(46, FILE = '../TL/'//ctmp18//'_INC.LST')
+        IF(IOUt.EQ.5) OPEN(46, FILE = cTLdir//ctmp18//'_INC.LST')
         READ(45, END = 25)lmax, ener
         IF(IOUt.EQ.5) WRITE(46, '(A5,I6,E12.6)')'LMAX:', lmax, ener
 
@@ -128,7 +129,7 @@ C-------Here the old calculated files should be readed
           IF(IOUt.EQ.5) THEN
             WRITE(6, *)
      &' Transmission coefficients for incident channel read from file: '
-            WRITE(6, *) ' ../TL/'//ctmp18//'_INC.BIN'
+            WRITE(6, *) ' ',cTLdir//ctmp18//'_INC.BIN'
           ENDIF
 
           GOTO 4000
@@ -486,17 +487,6 @@ C               checking the correspondence of the excited states
               CLOSE(46, STATUS='DELETE')
               CLOSE(47)
 
-              IF(IOPsys.EQ.0)THEN
-C               LINUX
-                ctmp = 'rm ccm.CS ccm.CS dwba.CS dwba.TLJ 2>/dev/null'
-                iwin = PIPE(ctmp)
-              ELSE
-C               WINDOWS
-                ctmp = 'del ccm.*>NUL'
-                iwin = PIPE(ctmp)
-                ctmp = 'del dwba.*>NUL'
-                iwin = PIPE(ctmp)
-              ENDIF
               IF(DEFormed)THEN
                 CALL ECIS2EMPIRE_TL_TRG
      &            (Npro, Ntrg, maxlw, stl, .FALSE.)
@@ -515,15 +505,6 @@ C-----------is calculated like in SOMP i.e.
 C           SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
 
-C           IF(DIRECT.EQ.3) THEN
-C             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,2)
-C           ELSE
-C             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
-C           ENDIF
-C
-C           If we are here, means we should get both TLs and angular distribution
-C           from SOMP calculation, RCN
-C
             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
 
             WRITE(6, *)' SOMP transmission coefficients used for ',
@@ -535,12 +516,12 @@ C
 
           IF(maxlw.GT.NDLW)THEN
             WRITE(6, *)
-     &      ' WARNING: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
+     &      ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
             WRITE(6, *)
-     &      ' WARNING: INCREASE NDLW IN dimension.h UP TO', maxlw + 1
+     &      ' FATAL: INCREASE NDLW IN dimension.h UP TO', maxlw + 1
             WRITE(6, *)
-     &      ' WARNING: AND RECOMPILE THE CODE'
-            STOP
+     &      ' FATAL: AND RECOMPILE THE CODE'
+            STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
           ENDIF
 
 C---------IWARN=0 - 'NO Warnings'
@@ -568,17 +549,15 @@ C     Moving incident channels results to TLs directory
 C
       IF(IOPsys.EQ.0)THEN
 C       LINUX
-        ctmp = 'mv INCIDENT.CS ../TL/'//ctmp18//'.CS'
+        ctmp = 'mv INCIDENT.CS '//cTLdir//ctmp18//'.CS'
         iwin = PIPE(ctmp)
         IF(DIRECT.GT.0) THEN
-          ctmp = 'mv INCIDENT.ICS ../TL/'//ctmp18//'.ICS'
+          ctmp = 'mv INCIDENT.ICS '//cTLdir//ctmp18//'.ICS'
           iwin = PIPE(ctmp)
         ENDIF
-        ctmp = 'mv INCIDENT.ANG ../TL/'//ctmp18//'.ANG'
+        ctmp = 'mv INCIDENT.ANG '//cTLdir//ctmp18//'.ANG'
         iwin = PIPE(ctmp)
-        ctmp = 'mv INCIDENT.TLJ ../TL/'//ctmp18//'.TLJ'
-        iwin = PIPE(ctmp)
-        ctmp = 'rm ecis03.tlj ecis03.cs ecis03.ics ecis03.ang'
+        ctmp = 'mv INCIDENT.TLJ '//cTLdir//ctmp18//'.TLJ'
         iwin = PIPE(ctmp)
       ELSE
 C       WINDOWS
@@ -592,23 +571,13 @@ C       WINDOWS
         iwin = PIPE(ctmp)
         ctmp = 'move INCIDENT.TLJ ..\\TL\\'//ctmp18//'.TLJ >NUL'
         iwin = PIPE(ctmp)
-        ctmp = 'del ecis03.tlj >NUL'
-        iwin = PIPE(ctmp)
-        ctmp = 'del ecis03.cs >NUL'
-        iwin = PIPE(ctmp)
-        ctmp = 'del ecis03.ics >NUL'
-        iwin = PIPE(ctmp)
-        ctmp = 'del ecis03.ang >NUL'
-        iwin = PIPE(ctmp)
-        ctmp = 'del ecis03.dat >NUL'
-        iwin = PIPE(ctmp)
       ENDIF
 C
 C     Save TLs, SINl
 C
 C-----Storing transmission coefficients for the incident channel
       if(IOUT.EQ.5) then
-        OPEN(46,file='../TL/'//ctmp18//'_INC.LST')
+        OPEN(46,file = cTLdir//ctmp18//'_INC.LST')
         WRITE (46,'(A5,I6,E12.6)') 'LMAX:' , maxlw , EINl
         DO l = 0, maxlw
           WRITE (46,*) l,SNGL(stl(l+1))
@@ -618,7 +587,7 @@ C-----Storing transmission coefficients for the incident channel
         CLOSE(46)
       endif
 
-      OPEN(45, FILE = ('../TL/'//ctmp18//'_INC.BIN'),
+      OPEN(45, FILE = (cTLdir//ctmp18//'_INC.BIN'),
      &                                     FORM = 'UNFORMATTED')
       WRITE(45) maxlw, EINl
       DO l = 0, maxlw
@@ -1084,7 +1053,7 @@ C
       INTEGER length,iret,IOPsys
 C     Locals
       INTEGER*4 IWIN, PIPE
-      character*80 ctmp
+      character*132 ctmp
 
       IF(IOPsys.EQ.0)THEN
 C       LINUX
