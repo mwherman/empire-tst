@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 14:51:31 $
-Ccc   * $Id: fusion.f,v 1.31 2005-02-09 14:51:31 Capote Exp $
+Ccc   * $Date: 2005-02-09 18:15:12 $
+Ccc   * $Id: fusion.f,v 1.32 2005-02-09 18:15:12 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -348,14 +348,20 @@ C           DWBA calculation. All collective levels considered
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
 
             IF(DIRECT.NE.3) THEN
+
               CALL PROCESS_ECIS(IOPsys,'dwba',4,4)
+
             ELSE
+
               CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4)
               CALL ECIS2EMPIRE_TL_TRG
      &            (Npro, Ntrg, maxlw, stl, .TRUE. )
+
               LTLj = .TRUE. ! TLs are obtained here for DIRECT=3
+
               WRITE(6, *)' SOMP transmission coefficients used for ',
      &                   'fusion determination'
+
             ENDIF
 
             IF(DIRECT.EQ.1 .OR. DIRECT.EQ.3) THEN
@@ -499,7 +505,7 @@ C               checking the correspondence of the excited states
 
           ENDIF ! END of DIRECT=1/2 block
 
-          IF( (.NOT.LTLj)  .OR. AEJc(Npro).GT.1 ) THEN
+          IF( .NOT.LTLj ) THEN
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C           SCAT2 like calculation (one state, usually gs, alone)
@@ -640,13 +646,12 @@ C--------channel spin min and max
 
       IF(LDBWacalc .AND. CSFus.gt.0.d0 .AND. SINl.gt.0.d0) THEN
         IF (DIRECT.EQ.3) then
-          WRITE(6, *)' Spherical OMP TLs normalized to substract'
-          WRITE(6, *)'    DWBA contribution to collective levels'
+          WRITE(6, *)' SOMP TLs normalized to substract',
+     &               ' DWBA contribution to collective levels'
         ELSE ! DIRECT=1 or DIRECT=2
-          WRITE(6, *)' CC OMP TLs normalized to substract DWBA'
-          WRITE(6, *)'      contribution to non-coupled levels'
+          WRITE(6, *)' CC OMP TLs normalized to substract DWBA',
+     &               ' contribution to un-coupled levels'
         ENDIF
-
       ENDIF
       IF(IOUT.EQ.5) THEN
         WRITE(6,*)
@@ -1068,8 +1073,6 @@ C       LINUX
         if(iret.eq.3) return
         ctmp = 'cp ecis03.ics '//outname(1:length)//'.ICS'
         iwin = PIPE(ctmp)
-        ctmp = 'rm file99'
-        iwin = PIPE(ctmp)
       ELSE
 C       WINDOWS
         ctmp = 'copy ecis03.cs  '//outname(1:length)//'.CS  >NUL'
@@ -1082,8 +1085,6 @@ C       WINDOWS
         iwin = PIPE(ctmp)
         if(iret.eq.3) return
         ctmp = 'copy ecis03.ics '//outname(1:length)//'.ICS >NUL'
-        iwin = PIPE(ctmp)
-        ctmp = 'del file99 >NUL'
         iwin = PIPE(ctmp)
       ENDIF
       RETURN
