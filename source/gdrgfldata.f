@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 08:04:16 $
-Ccc   * $Id: gdrgfldata.f,v 1.3 2004-06-08 08:04:16 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-17 21:54:10 $
+Ccc   * $Id: gdrgfldata.f,v 1.4 2004-06-17 21:54:10 herman Exp $
 C
       SUBROUTINE GDRGFLDATA(Znucleus, Anucleus)
 C
@@ -76,8 +76,8 @@ C       with  in global.h)
      &                 csaa, csb, EG0, EG1, EG2, ea, eb, GW0, GW1, GW2,
      &                 hbetagfl, henergygfl, BETagfl2, S2Plusgfl
       DOUBLE PRECISION etmp,fjtmp,btmp
-	INTEGER nntmp,natmp,MAXgdr
-	Parameter (MAXgdr=6000)
+      INTEGER nntmp,natmp,MAXgdr
+      Parameter (MAXgdr=6000)
 C----Plujko_new
 Cb      DOUBLE PRECISION halpha2, hcs1, hcs2, he1, he2, hgw1, hgw2, pi, z,
 Cb     &                 betagfl, energygfl, Znucleus, Anucleus
@@ -90,7 +90,7 @@ Cb     &                 betagfl, energygfl, Znucleus, Anucleus
 C----Plujko_new(End)
       INTEGER i, ka, keyload, kz, n, nana, nanz, NG, nna, nng, nnz,
      &        nzram, naram, numram, keyram, keyalpa, kaa, kzz,
-	&        nnzt(MAXgdr), nnat(MAXgdr), nngt(MAXgdr)
+     &        nnzt(MAXgdr), nnat(MAXgdr), nngt(MAXgdr)
 C
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
@@ -122,27 +122,27 @@ C       README file format (2I4,1X,A2,2I3,6F7.2,2X,A5)
         READ(81,'(///)') ! Skipping first 4 title lines
         DO i = 1, 270
            READ(81,'(2I4, 1x,2x,3x, i3, 6F7.2)', END = 40, 
-     & 		  ERR = 40) nnz(i), nna(i), nng(i),
+     &        ERR = 40) nnz(i), nna(i), nng(i),
      &          he1(i), hcs1(i), hgw1(i), he2(i), hcs2(i), hgw2(i)
         ENDDO
-40	CLOSE(81)
+40      CLOSE(81)
 C       README file format (2i4,1x,a2,f7.3,4f7.2)
 41      OPEN(81, FILE = '../RIPL-2/gamma/gdr-parameters-theor.dat', 
      &                                       STATUS = 'old',ERR=3550)
         READ(81,'(///)') ! Skipping first 4 title lines
         DO i = 1, MAXgdr
            READ(81,'(2I4, 1x,2x, f7.3, 4F7.2)', END = 50, 
-     & 		  ERR = 50) nnzt(i), nnat(i), etat(i), 
+     &       ERR = 50) nnzt(i), nnat(i), etat(i), 
      &          he1t(i), hgw1t(i), he2t(i), hgw2t(i)
-	     nngt(i)=2
-	     if(he1t(i).eq.he2t(i)) nngt(i)=1
+           nngt(i)=2
+           if(he1t(i).eq.he2t(i)) nngt(i)=1
         ENDDO
 50      CLOSE(81)
 51      OPEN(82, FILE = '../data/deflib.dat', STATUS = 'old',ERR=3600)
         READ(82, '(////)')  ! Skipping first 5 title lines
         DO i = 1, 9000
            READ(82, '((2I4, f7.3))', END = 100, ERR = 100)
-     &	            nanz(i), nana(i), halpha2(i)
+     &            nanz(i), nana(i), halpha2(i)
         ENDDO
 100     CLOSE(82)
 C       OPEN(84, FILE = 'defeff.dat', STATUS = 'old')
@@ -153,15 +153,15 @@ C       OPEN(84, FILE = 'defeff.dat', STATUS = 'old')
         numram = 0
         DO i = 1, 700
 C       README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
-            READ(84,'(2I4,4x,f10.6,1x,f4.1,6x,f10.6)', END = 200, 
-     &      	  ERR = 200) nntmp,natmp,etmp,fjtmp,btmp
-C           Selecting only 2+ states
-	      if(abs(fjtmp-2.d0).gt.0.0001) cycle 
-	      numram=numram+1 
-            nzram(numram)=nntmp
-		  naram(numram)=natmp
-	      henergygfl(numram)=etmp
-		  hbetagfl(numram)=btmp
+           READ(84,'(2I4,4x,f10.6,1x,f4.1,6x,f10.6)', END = 200, 
+     &        ERR = 200) nntmp,natmp,etmp,fjtmp,btmp
+C          Selecting only 2+ states
+           if(abs(fjtmp-2.d0).gt.0.0001) cycle 
+           numram=numram+1 
+           nzram(numram)=nntmp
+           naram(numram)=natmp
+           henergygfl(numram)=etmp
+           hbetagfl(numram)=btmp
         ENDDO
 200     CLOSE(84)
       ENDIF
@@ -198,7 +198,7 @@ C       the RIPL-2 Goriely theoretical values
             EG2 = he2t(i)
             CS2 = 0.d0
             GW2 = hgw2t(i)
-	      etaeps = etat(i)
+            etaeps = etat(i)
             IF(abs(etaeps-1.d0).GT.0.0001)THEN
 C             *************************************************
 C             *Global GDR parameterization for deformed nuclei*
@@ -315,11 +315,11 @@ C     ***********************************************************
      &           '../RIPL-2/gamma/gdr-parameters-theor.dat',
      &           ' not FOUND, DEFAULT GDR VALUES USED'
       GOTO 51
-3600  WRITE(6,'(1x,A14,A18,A43)') 'WARNING: FILE ','../data/deflib.dat',	
+3600  WRITE(6,'(1x,A14,A18,A43)') 'WARNING: FILE ','../data/deflib.dat',
      &           ' not FOUND, DEFAULT deformation VALUES USED'
       GOTO 101
-3700  WRITE(6,'(1x,A14,A45,A54)') 'WARNING: FILE ',	
+3700  WRITE(6,'(1x,A14,A45,A54)') 'WARNING: FILE ',
      &       '../RIPL-2/optical/om-data/om-deformations.dat',
      &           ' not FOUND, DEFAULT dynamical deformation VALUES USED'
-	GOTO 201 
+      GOTO 201 
       END
