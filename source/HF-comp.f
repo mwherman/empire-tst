@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-11 21:45:45 $
-Ccc   * $Id: HF-comp.f,v 1.42 2005-02-11 21:45:45 herman Exp $
+Ccc   * $Date: 2005-02-15 23:42:31 $
+Ccc   * $Id: HF-comp.f,v 1.43 2005-02-15 23:42:31 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -2210,11 +2210,11 @@ C Simpson integration
          arg1=2*PI*(UX1+efb(ibar)-Ee)/H(1,ibar)
          IF(arg1.GE.EXPmax)arg1=expmax
            
-         IF(FISden(Nnuc).EQ.1.)THEN                 
+         IF(FISden(Nnuc).EQ.1 .AND. enh1.gt.0)THEN                 
             dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
          ENDIF
          
-         IF(FISden(Nnuc).EQ.0.)THEN
+         IF(FISden(Nnuc).EQ.0 .AND. enh1.gt.0)THEN
             dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
          ENDIF
          nn = 2
