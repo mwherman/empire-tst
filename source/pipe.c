@@ -1,8 +1,8 @@
 /* pipe.c
-/*                                                    */ 
+/*                                                    */
 /* Subroutine to execute UNIX command line by FORTRAN */
 /*             or C main code                         */
-/*                                                    */ 
+/*                                                    */
 /* FORTRAN declaration:                               */
 /* INTEGER*4 PIPE,IWIN                                */
 /* FORTRAN USE:                                       */
@@ -21,54 +21,45 @@
 /* compiler and system dependent !!!!                 */
 
 #include <stdlib.h>
-#define L180 180
+#define L180 132
 
-/*
-int clrString(char str, int len)
-{
-  int i;
-  for (i=0; i<len; i++) str[i]='\0';
-}
-*/
-
-long PIPE(char strinp[180])
+long PIPE(char strinp[L180])
 { long i;
-  char str[180];
+  char str[L180];
   strncpy(str,strinp,L180); str[L180-1]='\0';
-  //printf("\n\n\n==========%s==========\n",str);
   for (i=0; i<L180; i++) {
     if ((str[i]=='\0')||(str[i]=='#')) {
-	str[i]='\0';
-	break;
+       str[i]='\0';
+       break;
     }
   }
-  //printf("\n\n\n==========%s==========\n",str);
-  //  strcpy(str,strinp);
+  printf("%s\n",str);
+  // strcpy(str,strinp);
   i=system(str);
-  return(i); 
+  return(i);
 }
 
-long pipe(char strinp[180])
+long pipe(char strinp[L180])
 {
   return(PIPE(strinp));
 }
 
-long PIPE_(char strinp[180])
+long PIPE_(char strinp[L180])
 {
   return(PIPE(strinp));
 }
 
-long pipe_(char strinp[180])
+long pipe_(char strinp[L180])
 {
   return(PIPE(strinp));
 }
 
-long _PIPE(char strinp[180])
+long _PIPE(char strinp[L180])
 {
   return(PIPE(strinp));
 }
 
-long _pipe(char strinp[180])
+long _pipe(char strinp[L180])
 {
   return(PIPE(strinp));
 }
