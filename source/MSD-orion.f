@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:23:43 $
-Ccc   * $Id: MSD-orion.f,v 1.6 2005-01-24 13:23:43 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-25 22:39:06 $
+Ccc   * $Id: MSD-orion.f,v 1.7 2005-01-25 22:39:06 herman Exp $
 C
 C     Surface real OMP part (for DOM potentials) included
 C     but contribution to form factor is ignored (see subroutine FFCAL)
@@ -570,10 +570,10 @@ C--------transfer cross sections onto XWR* matrices
       ENDIF   !on removing compressional form factor for dl=0
 C-----write results to TAPE15
       DO nlr = 1, 2
-         IF(kase.NE.2)THEN
-            WRITE(15, *)(xwr1(n, nlr), n = 1, n1wx)
-            IF(NCHanl.EQ.2)GOTO 100
-         ENDIF
+C        IF(kase.NE.2)THEN
+C           WRITE(15, *)(xwr1(n, nlr), n = 1, n1wx)
+C           IF(NCHanl.EQ.2)GOTO 100
+C        ENDIF
          WRITE(15, *)(xwr2(n, nlr), n = 1, n2mx)
  100  ENDDO
 99014 FORMAT(21X, 'VSX,DVX,WSX,WSF,VSO,WSO', 18X, '=', 6F8.3/21X,
