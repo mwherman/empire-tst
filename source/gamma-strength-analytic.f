@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.14 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-14 20:41:32 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.15 2005-03-14 20:41:32 herman Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
      &   Eexcitf,Temperf,Egamma,Keyshape)
@@ -671,8 +671,7 @@ C
 C
 C
       DATA pi24/39.47841761D0/
-      IF (U.LT.0.) U = 0.
-      ei = Egamma + U
+      ei = Egamma + MAX(U,0.0D+0)
       alphae = ALPha/EGDr
       RATEEXCC = ei/alphae/pi24
       END
