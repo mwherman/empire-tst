@@ -110,6 +110,9 @@
     to run (m. Herman)
 52. Comparison plots including an arbitrary ENDF-6 file possible also for
     spectra and double-differential cross sections (M. Herman) 
+53. ECIS03 converted into subroutine (R. Capote)
+54. SCAT2 removed (replaced by ECIS03 by R. Capote)
+
     
 
              Changes in version 2.18 with respect to 2.17.1
