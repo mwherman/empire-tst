@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-11 13:48:57 $
-Ccc   * $Id: OM-scat2.f,v 1.11 2004-06-11 13:48:57 Capote Exp $
+Ccc   * $Date: 2004-10-08 16:19:17 $
+Ccc   * $Id: OM-scat2.f,v 1.12 2004-10-08 16:19:17 Capote Exp $
 C
       SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Srr, Ipr)
 Ccc
@@ -2390,8 +2390,8 @@ C     Capote, july 2001, transfer of real surface potential
       RCOulomb = RCOul(Nejc, Nnuc)
       BETa = RNOnl(Nejc, Nnuc)
       EFErmi = EEFermi(Nejc, Nnuc)
-      EP = EEP(Nejc, Nnuc)
-      EA = EEA(Nejc, Nnuc)
+C     EP = EEP(Nejc, Nnuc)
+C     EA = EEA(Nejc, Nnuc)
       IREl = IRElat(Nejc, Nnuc)
       END
 C
@@ -2429,7 +2429,7 @@ C     common /inout/  ie,is,is1,is2,is3,is4
 C     common /physcon/ ampipm,ampi0,amu0c2,e2,hbarc
 C
       COMMON /CONSTANT/ AMUmev, PI, W2L, XNExc, CETa, CSO, RMU, AMPi, 
-     &                  ELE2, HHBarc
+     &                  ELE2, HHBarc, AMUneu, AMUpro
 C
       DATA one/1.0D+00/
       DATA two/2.0D+00/
