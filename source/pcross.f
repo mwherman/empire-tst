@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 08:04:31 $
-Ccc   * $Id: pcross.f,v 1.7 2004-06-08 08:04:31 Capote Exp $
+Ccc   * $Date: 2004-06-08 11:43:30 $
+Ccc   * $Id: pcross.f,v 1.8 2004-06-08 11:43:30 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -494,7 +494,7 @@ C
       REAL*8 ta, tz, tn, zzz, uuu, s1, s2, f1, f2, f21, f22, f23, f24 
       INTEGER*4 Heq, i, h1, hhh, p, l, m, minj, maxj, j, np, nt, j1 
 C 
-      COMMON /FACT  / FA(2*PMAX + 3), LFA(2*PMAX + 3) 
+      COMMON /PFACT / FA(2*PMAX + 3), LFA(2*PMAX + 3) 
 C 
 C     FACTORIAL CALCULATION 
 C 
@@ -914,7 +914,7 @@ C
       INTEGER*4 P, H, n, PMAX 
       PARAMETER(PMAX = 50) 
       REAL*8 FA, LFA 
-      COMMON /FACT  / FA(2*PMAX + 3), LFA(2*PMAX + 3) 
+      COMMON /PFACT / FA(2*PMAX + 3), LFA(2*PMAX + 3) 
 C 
       DENSW = 0.D0 
       n = P + H 
