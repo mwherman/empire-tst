@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-15 23:43:41 $
-Ccc   * $Id: input.f,v 1.78 2005-02-15 23:43:41 herman Exp $
+Ccc   * $Date: 2005-02-16 16:01:44 $
+Ccc   * $Id: input.f,v 1.79 2005-02-16 16:01:44 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -5554,24 +5554,6 @@ C--------gamma in Ignatyuk's formula
 C--------multiplier of atil
          AFIs(1) = 1.
          AFIs(2) = 1.
-C--------h**2/2J
-         IF(nrbarc.EQ.1)hj(Nnuc,1)=0.005
-         IF(nrbar.EQ.2)THEN
-            hj(Nnuc,1)=0.0050
-            hj(Nnuc,2)=0.0025
-         ENDIF
-         IF(nrbar.EQ.3)THEN
-            hj(Nnuc,1)=0.0050
-            hj(Nnuc,2)=0.0025
-            hj(Nnuc,3)=0.0035
-         ENDIF
-         IF(nrbar.EQ.5)THEN
-            hj(Nnuc,1)=0.0050
-            hj(Nnuc,2)=0.0025
-            hj(Nnuc,3)=0.0017
-            hj(Nnuc,4)=0.0035
-            hj(Nnuc,5)=0.0020
-         ENDIF
          IF(FISmod(Nnuc).GT.0.)THEN
             BFFm(1) = 3
             BFFm(2) = 3
@@ -5583,6 +5565,24 @@ C--------h**2/2J
                AFIsm(m) = AFIs(2)
             ENDDO
          ENDIF
+      ENDIF
+C-----h**2/2J
+      IF(nrbarc.EQ.1)hj(Nnuc,1)=0.005
+      IF(nrbar.EQ.2)THEN
+         hj(Nnuc,1)=0.0050
+         hj(Nnuc,2)=0.0025
+      ENDIF
+      IF(nrbar.EQ.3)THEN
+         hj(Nnuc,1)=0.0050
+         hj(Nnuc,2)=0.0025
+         hj(Nnuc,3)=0.0035
+      ENDIF
+      IF(nrbar.EQ.5)THEN
+         hj(Nnuc,1)=0.0050
+         hj(Nnuc,2)=0.0025
+         hj(Nnuc,3)=0.0017
+         hj(Nnuc,4)=0.0035
+         hj(Nnuc,5)=0.0020
       ENDIF
 C---- writing data in FISSION.INP
       WRITE(79, '(a8)')'Isotope:'
