@@ -33,15 +33,14 @@ fi
 # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
 
 rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
+rm ecis03.tlj ecis03.cs ecis03.ics ecis03.ang 2>/dev/null
+rm INCIDENT.CS INCIDENT.ICS INCIDENT.ANG INCIDENT.TLJ 2>/dev/null
 rm  OUTPUT.DAT LIST.DAT 2>/dev/null
 rm  OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
 rm  OMPAR.DIR 2>/dev/null
 rm  FISSION.INP 2>/dev/null
 rm  FISSION.OUT 2>/dev/null
 rm  CUMULPLOT.PS 2>/dev/null
-rm  ecis95.ics ecis95.cs 2>/dev/null
-rm  ecis95.tmp ecis95.ang 2>/dev/null
-rm  ecis95.tlj 2>/dev/null
 rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
 rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out  2>/dev/null
 rm  TARGET_COLL.DAT 2>/dev/null
