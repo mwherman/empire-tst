@@ -2943,7 +2943,7 @@ proc vTcl:project:info {} {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.cpd67 {
-        array set save {-_tooltip 1 -background 1 -borderwidth 1 -font 1 -foreground 1 -relief 1 -state 1 -textvariable 1 -validate 1 -validatecommand 1 -vcmd 1 -width 1}
+        array set save {-_tooltip 1 -background 1 -borderwidth 1 -font 1 -foreground 1 -relief 1 -state 1 -textvariable 1 -validate 1 -vcmd 1 -width 1}
     }
     namespace eval ::widgets::$site_3_0.button77 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -relief 1 -text 1}
@@ -3651,7 +3651,6 @@ proc ::ViewAll {} {
    set suf(PLOTC4-log) -log.plotc4
    set suf(X4TOC4-log) -log.x4toc4
    set suf(EMPEND-log) -log.empend
-   set suf(int-omp) -omp.int
    set suf(dir-omp) -omp.dir
    set suf(RIPL-omp) -omp.ripl
    set suf(levels) .lev
@@ -3907,16 +3906,22 @@ global widget file profilter zvfilter archfilter
 proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval
 
-set rcfl [open ../.Xrunrc r+]
-gets $rcfl file
-gets $rcfl editor
-gets $rcfl workdir
-gets $rcfl psviewer
-gets $rcfl pdfviewer
-gets $rcfl wwwviewer
-gets $rcfl compeval
+if {[file exists ../.Xrunrc] == 1} {
+   set rcfl [open ../.Xrunrc r+]
+   gets $rcfl file
+   gets $rcfl editor
+   gets $rcfl workdir
+   gets $rcfl psviewer
+   gets $rcfl pdfviewer
+   gets $rcfl wwwviewer
+   gets $rcfl compeval
+   } else {
+   set rcfl [open ../.Xrunrc a+]
+   set workdir [pwd]
+   }
 close $rcfl
 
+if {[file isdirectory $workdir] == 0} {set workdir [pwd]}
 cd $workdir
 set profilter $file
 set zvfilter $file
@@ -4169,10 +4174,9 @@ adjourn .top75} \
         set ::vTcl::balloon::%W {Select  working directory}
     }
     entry $site_3_0.cpd67 \
-        -background #dcdcdc -borderwidth 0 -font {Helvetica -12 bold} \
+        -background #e6e6e6 -borderwidth 0 -font {Helvetica -12 bold} \
         -foreground #333333 -relief flat -state disabled \
-        -textvariable workdir -validate none -validatecommand {} -vcmd {} \
-        -width 0 
+        -textvariable workdir -validate none -vcmd {} -width 0 
     vTcl:DefineAlias "$site_3_0.cpd67" "Entry3" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.cpd67 "$site_3_0.cpd67 Entry $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.cpd67 <<SetBalloon>> {
@@ -5949,17 +5953,16 @@ close $mulfile} \
     $site_11_0.opt86 insert 4 {PLOTC4-log}
     $site_11_0.opt86 insert 5 {X4TOC4-log}
     $site_11_0.opt86 insert 6 {EMPEND-log}
-    $site_11_0.opt86 insert 7 {int-omp}
-    $site_11_0.opt86 insert 8 {dir-omp}
-    $site_11_0.opt86 insert 9 {RIPL-omp}
-    $site_11_0.opt86 insert 10 {levels}
-    $site_11_0.opt86 insert 11 {coll-levels}
-    $site_11_0.opt86 insert 12 {EXFORs}
-    $site_11_0.opt86 insert 13 {C4s}
-    $site_11_0.opt86 insert 14 {ENDFs}
-    $site_11_0.opt86 insert 15 {short-outputs}
-    $site_11_0.opt86 insert 16 {full-outputs}
-    $site_11_0.opt86 insert 17 {PLOTC4-plots}
+    $site_11_0.opt86 insert 7 {dir-omp}
+    $site_11_0.opt86 insert 8 {RIPL-omp}
+    $site_11_0.opt86 insert 9 {levels}
+    $site_11_0.opt86 insert 10 {coll-levels}
+    $site_11_0.opt86 insert 11 {EXFORs}
+    $site_11_0.opt86 insert 12 {C4s}
+    $site_11_0.opt86 insert 13 {ENDFs}
+    $site_11_0.opt86 insert 14 {short-outputs}
+    $site_11_0.opt86 insert 15 {full-outputs}
+    $site_11_0.opt86 insert 16 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6024,37 +6027,30 @@ close $mulfile} \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue -omp.int -onvalue {} -selectcolor #ffff00 \
-        -text {int. omp} -variable ckmintomp 
-    $site_11_0.che76 add chk1 \
-        -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
-        -disabledforeground #a1a4a1 \
-        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.ripl -onvalue {} -selectcolor #ffff00 \
         -text {RIPL omp} -variable ckmriplomp 
-    $site_11_0.che76 add chk2 \
+    $site_11_0.che76 add chk1 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.dir -onvalue {} -selectcolor #ffff00 \
         -text {direct omp} -variable ckmdiromp 
-    $site_11_0.che76 add chk3 \
+    $site_11_0.che76 add chk2 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .lev -onvalue {} -selectcolor #ffff00 \
         -text levels -variable ckmlev 
-    $site_11_0.che76 add chk4 \
+    $site_11_0.che76 add chk3 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -lev.col -onvalue {} -selectcolor #ffff00 \
         -text {coll. levels} -variable ckmcollev 
-    $site_11_0.che76 add chk5 \
+    $site_11_0.che76 add chk4 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
