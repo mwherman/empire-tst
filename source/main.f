@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-30 18:10:34 $
-Ccc   * $Id: main.f,v 1.17 2003-12-30 18:10:34 herman Exp $
+Ccc   * $Date: 2004-01-22 17:11:02 $
+Ccc   * $Id: main.f,v 1.18 2004-01-22 17:11:02 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -205,7 +205,8 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
-      INTEGER NRBar, NRFdis, ibaro
+C     INTEGER NRBar, NRFdis, ibaro
+      INTEGER NRBar, NRFdis
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
 
       CHARACTER*9 cejectile
@@ -219,21 +220,28 @@ C     Local variables
 C
       DOUBLE PRECISION aafis, bbfis, dencomp, xnorfis
 
-      DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
+C     DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
+      DOUBLE PRECISION ares, corr, corrmsd, csemist, csfis, 
      &                 cturbo, ded, delang, elcncs, gamfis, gamt, pope, 
      &                 popleft, poplev, poptot, popread, dang, coef, 
      &                 ecm, echannel, erecoil, csmsdl, xcse, gang, q2, 
      &                 q3, qmax, qstep, recorp, recorr, sgamc, spdif, 
      &                 spdiff, stauc, step, sum, sumfis, tauf, taut, 
-     &                 weight, xccm, xizat, xnhms, xnl, xnor, zorg, zres
+C    &                 weight, xccm, xizat, xnhms, xnl, xnor, zorg, zres
+     &                 weight, xccm, xizat, xnhms, xnl, xnor, zres
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, ib, iccmh, iccml, icse, ie, il, 
-     &        ilast, iloc, imt, iorg, ip, ipar, itimes, its, iz, izaorg, 
+C    &        ilast, iloc, imt, iorg, ip, ipar, itimes, its, iz, izaorg, 
+     &        ilast, iloc, ip, ipar, itimes, its, iz, 
      &        izares, j, jcn, ke, kemax, kemin, ltrmax, mt649, mt849, 
-     &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp, 
+C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp, 
+     &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
-      DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
+
+C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
+
+
       LOGICAL nvwful
       INCLUDE 'io.h'
 C
@@ -644,7 +652,8 @@ C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
          DO kk=0,NFISENMAX
             DO jj=1,NDLW
-               DO ibars=1,NFPARAB
+cRCN 2004      DO ibars=1,NFPARAB
+               DO ibars=1,NFHump
                   rofis(kk,jj,ibars)=0.
                ENDDO
             ENDDO
@@ -659,7 +668,7 @@ C-----------moments of inertia for each deformation
             adiv1=adiv
             mm2 = 0.24*A(Nnuc)**(2./3.)
             r0 = 1.4
-            DO ibars = 1, nrbar
+            DO ibars = 1, NRBar
                CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
                MOMparcrt=6*ACRt*mm2*(1. - (2./3.)*
      &                           DEFfis(ibars))/PI**2
@@ -671,7 +680,7 @@ C-----------moments of inertia for each deformation
                IF(HJ(nnuc,ibars).LE.0.)HJ(nnuc,ibars)=0.0001
                IF(ibars.le.Nrbarc) Call DAMI_ROFIS(Nnuc,ibars)
             ENDDO
-            FISCON=0.
+            FIScon=0.
             Call WRITE_OUTFIS(Nnuc)
             adiv=adiv1
          ENDIF   
@@ -1250,8 +1259,10 @@ C-----------Integrating exclusive population spectra (ENDF)
                emeda=emeda/CSPrd(nnuc)
             ENDIF
             WRITE(6,*) '-----------------------------------------'
-            WRITE(6,'(15X,4g15.5)'),gtotsp,xtotsp,ptotsp,atotsp
-            WRITE(6,'(''E-aver.'',8X,5g15.5)'),emedg,emedn,emedp,emeda,
+            WRITE(6,'(15X,4g15.5)') gtotsp,xtotsp,ptotsp,atotsp
+C RCN       WRITE(6,'(15X,4g15.5)'),gtotsp,xtotsp,ptotsp,atotsp
+C           WRITE(6,'(''E-aver.'',8X,5g15.5)'),emedg,emedn,emedp,emeda,
+            WRITE(6,'(''E-aver.'',8X,5g15.5)') emedg,emedn,emedp,emeda,
      &               emedg+emedn+emedp+emeda 
             WRITE(6,*) '-----------------------------------------'
             POPCS(0,nnuc) = gtotsp

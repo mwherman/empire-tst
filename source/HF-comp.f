@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-30 18:10:34 $
-Ccc   * $Id: HF-comp.f,v 1.15 2003-12-30 18:10:34 herman Exp $
+Ccc   * $Date: 2004-01-22 17:11:02 $
+Ccc   * $Id: HF-comp.f,v 1.16 2004-01-22 17:11:02 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -195,8 +195,10 @@ C
 C
 C Local variables
 C
-      INTEGER iang, icsp, iejc, ie 
-      DOUBLE PRECISION excnq, popa, xnor 
+C     INTEGER iang, icsp, iejc, ie 
+      INTEGER icsp, iejc, ie 
+C     DOUBLE PRECISION excnq, popa, xnor 
+      DOUBLE PRECISION excnq, xnor 
 C
 C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
@@ -279,13 +281,16 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Iec, Ief, Nejc, Nnuc, Nnur
-      DOUBLE PRECISION Popt, excnq, xnor
+C     INTEGER Iec, Ief, Nejc, Nnuc, Nnur
+      INTEGER Iec, Nejc, Nnuc, Nnur
+C     DOUBLE PRECISION Popt, excnq, xnor
+      DOUBLE PRECISION Popt, xnor
 C
 C Local variables
 C
-      INTEGER iang, icsp, iejc, ie 
-      INTEGER INT
+C     INTEGER iang, icsp, iejc, ie 
+      INTEGER iejc, ie 
+C     INTEGER INT
 C
 C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
@@ -297,8 +302,10 @@ C-----Contribution comming straight from the current decay
 C-----Contribution due to feeding spectra from Nnuc 
 C-----DE spectra
       IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
-         xnor = Popt*DE/POPbin(Iec, Nnuc)
-         DO iesp = 1, NDECSE 
+C        RCN 01/2004
+         IF(POPbin(Iec, Nnuc).GT.0.) THEN 	   
+          xnor = Popt*DE/POPbin(Iec, Nnuc)
+          DO iesp = 1, NDECSE 
             DO iejc = 0, NDEjc 
                IF(POPcse(Iec,iejc,iesp,Nnuc).NE.0)
      &            POPcse(0,iejc,iesp,Nnur) = POPcse(0,iejc,iesp,Nnur) +
@@ -311,7 +318,8 @@ C--------DDX spectra using portions
      &            POPcseaf(0,iejc,iesp,Nnur) +
      &            POPcseaf(Iec,iejc,iesp,Nnuc)*xnor 
             ENDDO 
-         ENDDO 
+          ENDDO 
+         ENDIF
       ENDIF 
 
 
@@ -1236,31 +1244,37 @@ Ccc   * authors: M. Sin, R. Capote                                       *
 Ccc   * date:   Aug.2002                                                 *
 Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   * 1.1              RCN                            Nov.2002         *
+Ccc   * 1.2              MSin                           Nov.2003         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C     LOCAL VARIABLES
-      DOUBLE PRECISION accn, ATIl, gamma, temp
-C	DOUBLE PRECISION ampl, shredt
-      DOUBLE PRECISION ee, shctemp, Sumfis, Cota
+C     DOUBLE PRECISION accn, ATIl, gamma, temp
+      DOUBLE PRECISION ATIl
+C     DOUBLE PRECISION ampl, shredt
+C     DOUBLE PRECISION ee, shctemp, Sumfis, Cota
+      DOUBLE PRECISION ee, Sumfis, Cota
 C
       DIMENSION tfdis(NFWELLS), tfcon(NFWELLS)
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARFIS/   IBAr
       COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS)
-      COMMON /COMFIS4/ TFC, TFCc,jcc
+      COMMON /COMFIS4/ TFC, TFCc, JCC
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
       COMMON /IMAG  / TF(NFWELLS), TDIr, TABs, TDIr23
+C     DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, 
+C    &                 TABs, TDIr23, tdirr23, tdir231, TF, atal, btal, 
+C    &                 ctal, dtal, etal, aral, bral, cral, dral, eral,
+C    &                 wimagg,eeiso,tfcc,tfc,tfcon,tdir23cont,
+C    &                 tdirr23a,tdirr23b,tdirr23c,tdirr23d
+
       DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, 
      &                 TABs, TDIr23, tdirr23, tdir231, TF, atal, btal, 
      &                 ctal, dtal, etal, aral, bral, cral, dral, eral,
-     &                 wimagg,eeiso,tfcc,tfc,tfcon,tdir23cont,
-     &                 tdirr23a,tdirr23b,tdirr23c,tdirr23d
+     &                 wimagg,eeiso,tfcc,tfc,tfcon,tdir23cont
 
-c      DOUBLE PRECISION
-      
       INTEGER JC,JCC
 
 C
@@ -1276,16 +1290,18 @@ C
 C
       IF(Jc.EQ.1 .AND. Ip.EQ.1)THEN
          WRITE(80, *)'  '
-         WRITE(80, '(1x,a19,f9.5,a4)')'Excitation energy =', ee, ' MeV'
+         WRITE(80, '(1x,a19,f9.5,a4)')'Excitation energy =', EE, ' MeV'
          WRITE(80, *)' '
 C
          IF(NRBar.EQ.1)WRITE(80, '(17x,3(a2,9x))')'Td', 'Tc', 'Tf'
          IF(NRBar.EQ.2)WRITE(80, '(17x,5(a3,9x))')'TAd', 'TBd', 'TAc', 
      &                       'TBc', 'Tf'
+C        Double humped case 
          IF(NRBar.EQ.3.AND.NRWel.EQ.1)WRITE(80, '(17x,7(a4,7x))')'TAd', 
      &                       'TBd', 'TAc', 'TBc', 'Tf', 'Tdir', 'Tabs'
          IF(NRBar.EQ.3.AND.NRWel.EQ.0)WRITE(80, '(17x,7(a4,7x))')'TAd', 
      &                       'TBd', 'TCd', 'TAc', 'TBc', 'TCc', 'Tf'
+C        Triple humped case 
          IF(NRBar.EQ.5)WRITE(80, '(16x,9(a4,7x),a6)')'TAd', 'TBd', 
      &                       'TCd', 'TAc', 'TBc', 'TCc', 'Tf', 'Tdir', 
      &                       'Tabs', 'Tdir23'
@@ -1338,7 +1354,7 @@ C
          TDIr = 0.
          TABs = 0.
          TDIr23 = 0.
-         tdir23cont=0.
+         TDIr23cont=0.
 
          IF(NRBar.eq.3.and.nrwel.eq.1)eeiso=ee-efb(3)
          IF(NRBar.eq.5.and.nrwel.eq.2)eeiso=ee-efb(4)
@@ -1508,20 +1524,25 @@ C==============continuum contribution====================
          ELSE
             TFC = EXP(EXPmax)
          ENDIF
-         CALL SIMPSFIS(Nnuc,ibar,ee)
+
+
 C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient
-c        CALL GAUSSFIS(Nnuc, IBAr, ee)
-
+C        However, as for the moment it does not work, SIMPSFIS is used
+         CALL SIMPSFIS(NNUc, IBAr, ee)
+C        CALL GAUSSFIS(NNUc, IBAr)
          tfcon(IBAr) = TFCc
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr) 
       ENDDO
       TABs = TABs + tfcon(1)
 
       IF(NRBarc.eq.3.)THEN
+C        Penetrability calculations for triple-humped case 
          CALL SIMPSFIS(Nnuc,7,ee)
-         Tdir23cont=tfcc
-         Tdir23=Tdir23+tdir23cont!tfcon(2)*tfcon(3)
+         IBAr = NRBarc
+C        CALL GAUSSFIS(NNUc, IBAr)
+         Tdir23cont=TFCc
+         Tdir23=Tdir23+Tdir23cont   !tfcon(2)*tfcon(3)
       ENDIF   
 
 C
@@ -1544,7 +1565,11 @@ C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
      &                    tfcon(1), tfcon(2), SUMfis
             IF(NRWel.eq.1.and.SUBeff(Nnuc).eq.1.)THEN
                cota1 = (TF(1) + TF(2))/2
-               cotaexp = EXP( - cota1)
+               IF(cota1.LE.EXPmax)THEN
+                 cotaexp = EXP( - cota1)
+               ELSE
+                 cotaexp = 0.d0
+               ENDIF
                Cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
                WRITE(80, '(1x,a2,f4.1,1x,a3,I2,7g11.4)')'J=', 
      &                    aj, 'Pi=', Ip, tfdis(1), tfdis(2), 
@@ -1556,14 +1581,18 @@ C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
       ENDIF
 C
       IF(NRBarc.EQ.3)THEN
-         tnumm = TF(1) + TF(2)+TF(3)
+         tnumm = TF(1) + TF(2) + TF(3)
          IF(tnumm.eq.0.)THEN
-            sumfis=0.
+            Sumfis=0.
          ELSE
             Sumfis = TF(1)*Tdir23 /(tf(1)+tdir23)
             IF(NRWel.eq.2.and.SUBeff(Nnuc).eq.1.)THEN
                cota1 = (TF(1) + TDIr23)/2
-               cotaexp = EXP( - cota1)
+               IF(cota1.LE.EXPmax)THEN
+                 cotaexp = EXP( - cota1)
+               ELSE
+                 cotaexp = 0.d0
+               ENDIF
                Cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
             ENDIF
          ENDIF
@@ -1699,40 +1728,40 @@ C
 C     OPEN(157,FILE='PhaseIntegrals.txt')
 C     DO K=1,NRBar
 C     if(Einters(2*K).LT.0. .or. Einters(2*K-1).LT.0.) cycle
-C	    write(157,*) 'From Eps =',sngl(Einters(2*K-1)),
-C     &	           ' to ',sngl(Einters(2*K))
+C        write(157,*) 'From Eps =',sngl(Einters(2*K-1)),
+C     &           ' to ',sngl(Einters(2*K))
 C     write(157,*) 'Mom.Integral (',K,')=',sngl(dMomInteg(K)),
 C     &     ' Err=', sngl(ABSERR)
 C     ENDDO
-C	close(157)
+Ci    close(157)
 C
 C     Graphical test
 C
 C     IF(Ee.LT.5. .and. Ee.gt.4.6) THEN
 C     OPEN(157,FILE='Vdef.dat')
-C	ftmp=0.1
-C	I=1
+C     ftmp=0.1
+C     I=1
 C     DO WHILE(ftmp.GT.0.)
-C	    EPS=I*0.001
-C	    ftmp=Vdef(EPS)
-C     WRITE(157,*) EPS,ftmp
-C     I=I+1
-C	ENDDO
-C	CLOSE(157)
-C     OPEN(157,FILE='Vinters.dat')
-C	DO  K=1,2*NRBar
-C	    IF(Einters(K).LT.0) CYCLE
-C     WRITE(157,*) Einters(K), Vdef(Einters(K))
-C     ENDDO
-C     CLOSE(157)
-C     OPEN(157,FILE='Vjoin.dat')
-C	DO  K=1,NRBar
-C     WRITE(157,*) Ejoin(2*K-1), Vdef(Ejoin(2*K-1))
-C     WRITE(157,*) Ejoin(2*K), Vdef(Ejoin(2*K))
-C     ENDDO
-C	CLOSE(157)
-C     ENDIF
-C     STOP
+C       EPS=I*0.001
+C       ftmp=Vdef(EPS)
+C       WRITE(157,*) EPS,ftmp
+C       I=I+1
+C    ENDDO
+C    CLOSE(157)
+C    OPEN(157,FILE='Vinters.dat')
+C    DO  K=1,2*NRBar
+C       IF(Einters(K).LT.0) CYCLE
+C       WRITE(157,*) Einters(K), Vdef(Einters(K))
+C    ENDDO
+C    CLOSE(157)
+C    OPEN(157,FILE='Vjoin.dat')
+C    DO  K=1,NRBar
+C       WRITE(157,*) Ejoin(2*K-1), Vdef(Ejoin(2*K-1))
+C       WRITE(157,*) Ejoin(2*K), Vdef(Ejoin(2*K))
+C    ENDDO
+C    CLOSE(157)
+C    ENDIF
+C    STOP
 C
 C------------phases
       DO i = 1, NRBar
@@ -1767,38 +1796,31 @@ C     phas = 2.d0*PI*(VBArex(i) - Ee)/HO(i)
 C
 C
 C-----------------------------------------------------------
-      SUBROUTINE GAUSSFIS(Nnuc, Ibar, Ee)
+      SUBROUTINE GAUSSFIS(Nnuc, Ibar)
 C-----------------------------------------------------------
 C     Gauss-Legendre integration of the fission level densities
       INCLUDE 'dimension.h'
-ccc      IMPLICIT REAL*8(A-H,O-Z)
-C
       INCLUDE 'global.h'
 C
-      COMMON /COMFIS4/ TFC, TFCc,jcc
+      COMMON /COMFIS4/ TFC, TFCc, jcc
       COMMON /GDENSIT/ NNNuc, IIBar
 C
 C     INTEGER JCC
-      DOUBLE PRECISION xmax, xmin, Ee
-      DOUBLE PRECISION AJ, TFC, TFCc, XMInn
+      DOUBLE PRECISION xmax, xmin
+C     DOUBLE PRECISION AJ, TFC, TFCc, XMInn
+      DOUBLE PRECISION TFC, TFCc, XMInn
       DOUBLE PRECISION FDENSITY, abserr
       EXTERNAL FDENSITY
 C
 C     Passing parameters to the integrand function Fdensity
       IIBar = Ibar
       NNNuc = Nnuc
-C
+
       TFCc = 0.D0
 C
+      XMIn = XMInn(Ibar)
+      XMAx = XMInn(Ibar) + (nrbinfis(ibar) - 1)*destepp
 
-      xminn(ibar)=EFDis(NRfdis(ibar), ibar)
-      xmax=ee-(efb(ibar)+xminn(ibar))+5.
-
-
-c      xmax = Ee + 7.
-      xmin = XMInn(Ibar)
-c      step=(Xmax-Xmin)*0.01
-      step=destepp
       TFCc = GAUSS_INT(FDENSITY, xmin, xmax, abserr)
 C
 C     If Relative Error for Gaussian Integration > 1 %
@@ -1826,42 +1848,29 @@ C     > write(*,*) 'Gauss   = ',TFCc,' Err=',ABSERR/TFCc*100
 C
       END
 C
-      REAL*8 FUNCTION FDENSITY(Uxx)
+      REAL*8 FUNCTION FDENSITY(UXX)
 C     Penetrability in the continuum.
 C     Level densities at the saddle points are used
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 
-c      COMMON /PARFIS/    IBAr1
-      COMMON /COMFIS4/  TFC, TFCc,jcc
+      COMMON /COMFIS4/  TFC, TFCc,JCC
       COMMON /GDENSIT/ NNUc, IBAr
-      COMMON /ROFI1/ enh_ld(3, NFhump)
+      COMMON /ROFI1/ enh_ld(3, NFHump)
 C
       DATA pix2/6.28318530717958647692528676655901D0/
 C-----------------------------------------------
       FDENSITY = 0.D0
 
-      enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*uxx+enh_ld(3,ibar)*uxx**2
-      arg = pix2*Uxx/H(IBAr)
+      enh1=enh_ld(1,ibar)+(enh_ld(2,ibar)+enh_ld(3,ibar)*UXX)*UXX
+      arg = pix2*UXX/H(IBAr)
       IF(arg.GT.EXPmax)arg=expmax
-    
-      IF(FISden(NNUc).EQ.1.)THEN
-         FDENSITY =enh1* FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg))
-      ELSEIF(FISden(NNUc).EQ.0.)THEN
-C
-c         FIScon = 2.
-c         IBAr1 = IBAr
-c         CALL DAMIRO(kk, NNUc, dshif, destep, asaf,rotemp,aj,ibar)
-c         arg = pix2*Uxx/H(IBAr)
-c         IF(arg.GT.EXPmax)RETURN
 
-c        Sorry Roberto, but here or in Gaussfiss, rotemp must be replaced 
-C        with rofis; I tried to do it without succes (M.Sin) 
-         FDENSITY = ROTemp/(1. + TFC*EXP(arg))
-C
-      ENDIF
-C
+C     FISINT  function takes care of the interpolation from the  LD tables
+      FDENSITY =enh1* FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg)) 
+
+      RETURN
       END
 C
       REAL*8 FUNCTION FMOMENT(Eps)
@@ -2019,20 +2028,20 @@ C---------------------------------------------------
       INCLUDE 'global.h'
 
 
-      DOUBLE PRECISION ugrid,ux,rofis
-      INTEGER JCC,kk,ib,iugrid,nrbinfis
+      DOUBLE PRECISION ugrid,Ux,rofis
+C     INTEGER JCC,kk,Ib,iugrid,nrbinfis
+      INTEGER JCC,Ib,iugrid,nrbinfis
 C
-      IF(FISDEN(Nnuc).eq.0.)THEN
-         iugrid = nrbinfis(ib)
-         Do kk=1,iugrid
-            ugrid(kk)=xminn(ib)+(kk-1)*destepp
-         ENDDO
-      ENDIF
-
-      IF(FISDEN(Nnuc).eq.1.)iugrid=NFISEN
+      IF(FISDEN(Nnuc).eq.0.) iugrid = nrbinfis(ib)
+      IF(FISDEN(Nnuc).eq.1.) iugrid = NFISEN
 
       klo = 1
-      khi = iugrid     
+      khi = iugrid
+      IF(Ux.LE.UGRid(klo))THEN
+         klo = 0
+         khi = 1
+         GOTO 200
+      ENDIF
 c 
       IF(Ux.LE.UGRid(klo))THEN
          klo = 0
@@ -2086,28 +2095,26 @@ c--------------------------
       DOUBLE PRECISION  UGRid 
 c-------------------------
 
-
       DOUBLE PRECISION arg1,arg2,dens, destepp, UX1,UX2
       DOUBLE PRECISION  rofis, TFC, TFCc, XMInn, H
       DOUBLE PRECISION enh_ld, enh1,enh2,efb
 
-     
 
       TFCc = 0.
 c----------------------------------------------------------------------
       IF(ibar.eq.7)THEN
 
          DO i = 1,nrbinfis(3)
-            UX1=efb(3)+xminn(3)-efb(2) + (i - 1)*destepp
+C           UX1=efb(3)+xminn(3)-efb(2) + (i - 1)*destepp
             UX2 = xminn(3) + (i - 1)*destepp  
 
-            arg1 = 2*PI*(efb(2)+UX1-ee)/H(2)
+C           arg1 = 2*PI*(efb(2)+UX1-ee)/H(2)
             arg2 = 2*PI*(efb(3)+UX2-ee)/H(3)
-            IF(arg1.GE.EXPmax)arg1=expmax
+C           IF(arg1.GE.EXPmax)arg1=expmax
             IF(arg2.GE.EXPmax)arg2=expmax
 
-            teq=(1.+exp(arg1))*(1.+exp(arg2))
-            heq= 2*pi*arg2/log(teq-1.) 
+C           teq=(1.+exp(arg1))*(1.+exp(arg2))
+C           heq= 2*pi*arg2/log(teq-1.) 
             enh2=enh_ld(1,3)+enh_ld(2,3)*ux2+enh_ld(3,3)*ux2**2
             dens =enh2*ROfis(i,jcc,3)/(1. + EXP(arg2))
 
@@ -2120,30 +2127,37 @@ c     &            ))*enh2/((1. + EXP(arg1))*(1. + EXP(arg2)))
             TFCc = TFCc + dens
          ENDDO
          TFCc = TFCc*destepp
-         goto 6364
+         RETURN
       ENDIF
 c------------------------------------------------------------------------
+
       DO i = 1, nrbinfis(ibar)
          UX1 = XMInn(Ibar) + (i - 1)*destepp
          if(ux1.lt.0.)ux1=0.001
-         enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*ux1+enh_ld(3,ibar)*ux1**2
+         enh1=enh_ld(1,ibar)+(enh_ld(2,ibar)+enh_ld(3,ibar)*ux1)*ux1
          arg1 = 2*PI*(UX1+efb(ibar)-ee)/H(Ibar)
          IF(arg1.GE.EXPmax)arg1=expmax
-         IF(FISden(Nnuc).EQ.0.)THEN                 
-            dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
-         ENDIF
-         IF(FISden(Nnuc).EQ.1.)THEN
-            dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
-         ENDIF   
+
+         dens   = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
+
+C        RCN 0/2004 
+C        IF(FISden(Nnuc).EQ.0.)THEN                 
+C           dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
+C        ENDIF
+C        IF(FISden(Nnuc).EQ.1.)THEN
+C           dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
+C        ENDIF   
+
          nn = 2
          IF((i*0.5).EQ.INT(i/2))nn = 4
          IF(i.EQ.1 .OR. i.EQ.(nrbinfis(ibar)))nn = 1
          dens = nn*dens
          TFCc = TFCc + dens
-       ENDDO
-       TFCc = TFCc*destepp
-
- 6364  END
+      ENDDO
+      TFCc = TFCc*destepp
+       
+      RETURN 
+      END
 C
 c=============================================================
       SUBROUTINE WRITE_OUTFIS(Nnuc)

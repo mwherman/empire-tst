@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: tl.f,v 1.15 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Date: 2004-01-22 17:11:02 $
+Ccc   * $Id: tl.f,v 1.16 2004-01-22 17:11:02 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -312,23 +312,29 @@ C--------model = 'coupled-channels rotational model'
      &               LMAx(n), IDEf(n), BANdk(n), 
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
                WRITE(32, *)
-               WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+
+C              RCN 01/2004 
+C              WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.' 
+               WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.' 
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
          icoll(1) = 1
-csin         DO k = 2, NCOll(ncalc)
-         DO k = 2, NCOll(n)
+         DO k = 2, NCOll(ncalc) 
+csin     DO k = 2, NCOll(ncalc)
+c ???    DO k = 2, NCOll(n)
             icoll(k) = 0
             eripl = EEX(k, ncalc)
             REWIND(39)
             READ(39, '(A80)')ch_iuf
-            ilv = -1
+c           ilv = -1   rcn 2004
+            ilv = 0
  20         ilv = ilv + 1
             READ(39, '(I3,1X,F10.6)', END = 50)itmp, ftmp
-            IF(ABS(ftmp - eripl).GT.0.010)GOTO 20
-csin            icoll(k) = ilv
-               icoll(k) =k
+            IF(ABS(ftmp - eripl).GT.0.003)GOTO 20
+            icoll(k) = ilv
+csin        icoll(k) = ilv
+c ???       icoll(k) =k
  50      ENDDO
          CLOSE(39)
 C--------Setting EMPIRE global variables
@@ -343,18 +349,26 @@ C-----------The deformation for excited levels is not used in the pure
 C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
 C
-            WRITE(32, 
-     &            '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,I2,1x,e10.3)')
-c     &            icoll(k),
-     &               k, 
-     &             EEX(k, ncalc), SPIn(k, ncalc), 
-     &            IPAr(k, ncalc), 0, 0.01
+C           RCN 01/2004 
+            WRITE(32,
+     &            '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)') 
+     &            icoll(k), EEX(k, ncalc), SPIn(k, ncalc),
+     &                float(IPAr(k, ncalc)), 0 , 0,  0, 0.01
+c           WRITE(32, 
+c    &            '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,I2,1x,e10.3)')
+c    &             icoll(k),
+c    &             k, 
+c    &             EEX(k, ncalc), SPIn(k, ncalc), 
+c    &             IPAr(k, ncalc), 0, 0.01
 C
 C-----------Setting EMPIRE global variables
             ICOllev(k) = icoll(k)
             D_Elv(k) = EEX(k, ncalc)
             D_Xjlv(k) = SPIn(k, ncalc)
             D_Lvp(k) = FLOAT(IPAr(k, ncalc))
+C           RCN 01/2004 
+            D_Llv(k) = 0 
+            D_Klv(k) = 0  
             IPH(k) = 0
          ENDDO
          CLOSE(32)
@@ -370,11 +384,17 @@ C-----------Setting EMPIRE global variables
          WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
      &         IDEfcc, D_Xjlv(1), (D_Def(1, j), j = 2, IDEfcc, 2)
          WRITE(6, *)
-         WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+C        RCN 06/2003 
+C        WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.' 
+         WRITE(6, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.' 
          DO i = 1, ND_nlv
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
-     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            0.01
+c           WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+c    &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
+c    &            0.01
+C           RCN 01/2004 
+          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)') 
+     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),  
+     &            0, 0, 0.01 
          ENDDO
          WRITE(6, *)
          WRITE(6, *)
@@ -446,7 +466,7 @@ C--------model = 'vibrational model'
             ilv = -1
  60         ilv = ilv + 1
             READ(39, '(I3,1X,F10.6)', END = 100)itmp, ftmp
-            IF(ABS(ftmp - eripl).GT.0.010D0)GOTO 60
+            IF(ABS(ftmp - eripl).GT.0.0030D0)GOTO 60
             icoll(k) = ilv
  100     ENDDO
          CLOSE(39)
@@ -1667,7 +1687,12 @@ C--------------Reading depths
  100  RETURN
  200  Ierr = 1
 99004 FORMAT(10I5)
-99005 FORMAT(4F10.3)
+
+C     Suggested by V.Avrigeanu, corrected by RCN 01/2004 
+C99005 FORMAT(4F10.3)
+99005 FORMAT(6F10.3)
+
+C
 99006 FORMAT(f12.5, 1x, 6(e11.4))
 99007 FORMAT(13x, 6(e11.4))
 99008 FORMAT(5I5, f5.1, 4(1x, e10.3))
@@ -2305,6 +2330,7 @@ C     Dummy arguments
 C
       INTEGER Maxlw, Nejc, Nnuc
       DOUBLE PRECISION Stl(NDLW)
+      DOUBLE PRECISION p1,r2,rp,s0,s1					!   cBuc	  
 C
 C     Local variables
 C
@@ -2394,6 +2420,21 @@ C-----Reaction cross section in mb
      &           ' mb (read from ECIS)'
       WRITE(6, *)' Shape Elastic XS =', SNGL(selecis), 
      &           ' mb (read from ECIS)'
+
+c     Written and tested by V.Avrigeanu, checked by RCN 01/2004
+      IF(ELAb.LT.2.0D-02)THEN
+         s0 = Stl(1)/(2.0D+00*PI*SQRT(1.0D+06*ecms))
+         rp = 1.35*(AMAss(0)**0.333333333)
+         r2 = rp*rp
+         p1 = (ak2*r2)/(1.0D+00 + ak2*r2)
+         s1 = Stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*ecms))
+         rp = SQRT(selecis/(4.0D+00*1.0D+01*PI))
+         WRITE(6, 99005)s0, s1, rp
+99005    FORMAT(/' Strength functions S0 =',1pe14.7,/,
+     &           '                    S1 =', e14.7, /,
+     &           ' Scattering radius =', f6.3, ' fm')
+      ENDIF     
+
       WRITE(6, *)
       END
 C
@@ -2519,7 +2560,6 @@ C        WRITE (46,*) l , TTLl(J,l)
       ENDDO
       MAXl(J) = lmax
 C     Capote , preeq 2002
-C     IF(Nnuc.eq.1) SIGabs(J, Nejc)=sabs
       SIGabs(J, Nejc, Nnuc) = sabs
       RETURN
       END
@@ -2761,8 +2801,9 @@ C
       zerosp = 0.0
 C-----ldwmax=2.4*1.25*AN(i)**0.33333333*0.22*sqrt(parmas(i)*e)
       ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*SQRT(xmas_nejc*elab)
-C-----Maximum number of channel spin
-      njmax = MAX(ldwmax, 20)
+C-----Maximum number of channel spin (increased to 100 for high energy scattering)
+      njmax = MAX(ldwmax, 100)
+C     njmax = MAX(ldwmax, 20)
 C-----writing input
       OPEN(UNIT = 1, STATUS = 'unknown', FILE = 'ecVIB.inp')
 C-----CARD 1 : Title
@@ -3132,8 +3173,9 @@ C     ldwmax=2.4*1.25*AN(i)**0.33333333*0.22*sqrt(parmas(i)*e)
       ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*SQRT(xmas_nejc*elab)
 C     &         **0.33333333*0.22*SQRT(((AEJc(Nejc)*amumev+XMAss_ej(Nejc)
 C     &         )/amumev)*El)
-C-----Maximum number of channel spin
-      njmax = MAX(ldwmax, 20)
+C-----Maximum number of channel spin (increased to 100 for high energy scattering)
+      njmax = MAX(ldwmax, 100)
+C     njmax = MAX(ldwmax, 20)
 C-----Writing input
       OPEN(UNIT = 1, STATUS = 'unknown', FILE = 'ecVIBROT.inp')
 C-----CARD 1 : Title

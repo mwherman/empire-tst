@@ -4,7 +4,7 @@
      *,NDAFIS=1
      *,NDEX= 150
      *,NDLW= 50
-     *,NDTL= 30
+     *,NDTL= 100
      *,NDMSCS=4 
      *,NDLV=60 
      *,NDBR=30

@@ -1,4 +1,4 @@
-      SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Ssr, Ipr)
+      SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Srr, Ipr)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -16,6 +16,7 @@ Ccc   *       Ipr  - Key for printing results                            *
 Ccc   *                                                                  *
 Ccc   * output:LMAX - maximum l                                          *
 Ccc   *        STL  - matrix of transmission coefficients (in l)         *
+Ccc   *        Srr  - Reaction cross section                             *
 Ccc   *                                                                  *
 C***********************************************************************
 C     *                 *                                                *
@@ -342,7 +343,7 @@ C-----transfer o.m. Tl onto STL matrix and set them to 0 if lower than 1E-15
       ENDDO
       CLOSE(IS)
 C     Capote , preeq 2002
-	SRR=SR
+      SRR=SR
       END
 C
       COMPLEX*16 FUNCTION CGAMMA(Z)
@@ -475,6 +476,8 @@ C
          WRITE(is1, 99001)i(10), LFMAX, Aj1, Aj2, Aj3, Am1, Am2, Am3
 99001    FORMAT(' ', ' FACTORIAL TABLE SIZE IN CLEBG ', 2I5, 6F5.1)
          WRITE(is1, *)
+     &           ' Increase lfmax parameter in OM-scat2.f and recompile'
+         WRITE(6, *)
      &           ' Increase lfmax parameter in OM-scat2.f and recompile'
          WRITE(6, *)' LFMAX is actually set to ', LFMAX
          STOP 'IN CLEBG OF SCAT2'

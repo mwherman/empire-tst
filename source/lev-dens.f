@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-30 18:10:34 $
-Ccc   * $Id: lev-dens.f,v 1.12 2003-12-30 18:10:34 herman Exp $
+Ccc   * $Date: 2004-01-22 17:11:02 $
+Ccc   * $Id: lev-dens.f,v 1.13 2004-01-22 17:11:02 herman Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -172,7 +172,8 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
                ENDIF
                rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort, 
      &                  YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred, 
-     &                  EXPmax)
+C    &                  EXPmax)   RCN 31/12/2003
+     &                  EXPmax, FIScon)
                IF(rotemp.LT.RORed)rotemp = 0.0
                IF(BF.NE.0.0D0)THEN
                   RO(kk, i, Nnuc) = rotemp
@@ -186,7 +187,7 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
 C
 C
       DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort, 
-     &                                Yrast, Ss, A2, Bf, Argred, Expmax)
+     &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon)
 Ccc   *********************************************************************
 Ccc   *                                                         class:ppu *
 Ccc   *                         R O D E F                                 *
@@ -218,7 +219,7 @@ C
 C Dummy arguments
 C
       DOUBLE PRECISION A, A2, Ac, Aj, Argred, Bf, E, Expmax, Momort, 
-     &                 Mompar, Ss, Yrast
+     &                 Mompar, Ss, Yrast, FIScon
 C
 C Local variables
 C
@@ -804,7 +805,7 @@ C--------------decrease energy shift above the last level to become 0 at Qn
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf,rotemp,aj,ibars)
+               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf,rotemp,aj)
                DO ij = 1, NLWst
                   IF(kk.GT.1)rocumul = rocumul + 
      &                                 (RO(kk - 1, ij, Nnuc) + RO(kk, 
@@ -901,7 +902,7 @@ C-----------clean RO matrix
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj,ibars)
+               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj)
             ENDIF
          ENDDO
       ENDIF
@@ -925,7 +926,7 @@ C
       END
 C
 C
-      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj,ibar1)
+      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -937,9 +938,6 @@ C
       INTEGER NLWst
       COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-
-      DOUBLE PRECISION  AAJ
-      INTEGER IBAr1
 
 C Dummy arguments
 C
@@ -1017,7 +1015,9 @@ C-----------dependent factor
                ELSE
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort, 
      &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred, 
-     &                     EXPmax)
+     &                     EXPmax, FIScon)
+C    &                     EXPmax)  RCN 31/12/2003
+
                ENDIF
             ENDIF
          ENDIF
@@ -1132,7 +1132,9 @@ C-----------dependent factor
             ENDIF
          ELSE
             rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort, 
-     &               YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred, EXPmax)
+     &               YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
+     &               EXPmax, FIScon)
+C    &               EXPmax)  RCN 31/12/2003
             IF(i.EQ.1)t = SQRT(u/ac)
          ENDIF
          IF(BF.NE.0.0D0)THEN
@@ -1194,7 +1196,8 @@ C Local variables
 C
       DOUBLE PRECISION ac, aj, arg, beta, cigor, fx, momort, mompar, s, 
      &                 sb, sb0, sbnor, segnor, segs, selmax, stab, x, 
-     &                 x0, x1, xfis, xi, xk
+C    &                 x0, x1, xfis, xi, xk   RCN 31/12/2003
+     &                 x0, x1, xi, xk   
       REAL FLOAT
       INTEGER i, ia, iz, j, jstabf, k, kstab, ldstab
       INTEGER INT, MIN0
