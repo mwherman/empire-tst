@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 16:31:23 $
-Ccc   * $Id: HF-comp.f,v 1.40 2005-02-04 16:31:23 herman Exp $
+Ccc   * $Date: 2005-02-09 05:26:25 $
+Ccc   * $Id: HF-comp.f,v 1.41 2005-02-09 05:26:25 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1322,7 +1322,7 @@ C
       SUMfis = 0.0
       IF(ee.EQ.0.0D0)RETURN
 C
-C     Below is an square root of (MIU divided by 2)
+C     Below is a square root of (MIU divided by 2)
       SMIu = 0.1643167*A(Nnuc)**(5./6.)
 C
       JCC = Jc
@@ -1626,11 +1626,11 @@ C==============continuum contribution====================
          ELSE
             TFC = EXP(EXPmax)
          ENDIF
-C        SIMPSFIS remains just for testing purposes, is not used anymore
-C        GAUSSFIS is more efficient
-C        However, as for the moment it does not work, SIMPSFIS is used
+CRC      SIMPSFIS remains just for testing purposes, is not used anymore
+CRC      GAUSSFIS is more efficient
+CMS      However, as for the moment it does not work, SIMPSFIS is used
          CALL SIMPSFIS(NNUc, IBAr, ee)
-C        CALL GAUSSFIS(NNUc, IBAr)
+CMS      CALL GAUSSFIS(NNUc, IBAr)
          tfcon(IBAr) = TFCc
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr)
       ENDDO

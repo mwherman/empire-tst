@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-08 17:21:17 $
-Ccc   * $Id: input.f,v 1.69 2005-02-08 17:21:17 herman Exp $
+Ccc   * $Date: 2005-02-09 05:25:57 $
+Ccc   * $Id: input.f,v 1.70 2005-02-09 05:25:57 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3355,7 +3355,7 @@ C-------------------------------------------------------------------------
      &               '('' FISDEN  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
-               ENDIF
+            ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
