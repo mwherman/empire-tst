@@ -183,16 +183,18 @@ rm ecSPH.inp 2>/dev/null
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then
-#       RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+        # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
 
-        cd ../util/x4toc4
-        ln  -sf $work/$file.exf X4.DAT
-        ./x4toc4
-        rm X4.DAT
-        cd $work
-        mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
-        mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
-        mv ../util/x4toc4/C4.DAT $file.c4
+        ../scripts/c4 $file
+
+#       cd ../util/x4toc4
+#       ln  -sf $work/$file.exf X4.DAT
+#       ./x4toc4
+#       rm X4.DAT
+#       cd $work
+#       mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
+#       mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
+#       mv ../util/x4toc4/C4.DAT $file.c4
 #       if [ -s $file.c4 ]; then
 #          echo 'EXFOR data in computational format are stored in :'$file.c4
 #          else

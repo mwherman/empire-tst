@@ -3640,7 +3640,7 @@ adjourn .top75
 ## Procedure:  ViewAll
 
 proc ::ViewAll {} {
-   global widget editor stablist mulstname
+   global widget editor stablist mulstname psviewer
    
    set what [Optionmenu3 get]
    if {$what == "View:"} return 
@@ -3840,7 +3840,7 @@ close $abundance
 ## Procedure:  runlist
 
 proc ::runlist {stablist mulstname} {
-global widget ckmlo ckmsh ckmlog ckmendf ckmplots ckmx4 ckmc4 ckmintomp ckmriplomp  ckmdiromp ckmlev ckmcollev ckminp
+global widget ckmlo ckmsh ckmlog ckmendf ckmplots ckmx4 ckmc4 ckmriplomp  ckmdiromp ckmlev ckmcollev ckminp
 set checkept $ckmlo$ckmsh$ckmendf$ckmplots
 if {$checkept == ".lst.out*.endf.ps"} return
 foreach el $stablist {
@@ -3865,7 +3865,7 @@ foreach el $stablist {
    }
    exec xterm -e ../scripts/run $mulinputn 2
    set delistmul ""
-   lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmintomp  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
+   lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
    if {$el == ""} continue
    eval exec ../scripts/cleansel $mulinputn $el

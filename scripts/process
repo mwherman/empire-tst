@@ -91,7 +91,7 @@ cd $work
 if [ "$2" == "1" ]; then
  ../scripts/plotlst $file
 elif [ "$2" == "2" ]; then
- ../scripts/plot $file
+ ../scripts/plot $file 1
 fi
 
 # REMOVE INTERMEDIATE ENDF FILES
