@@ -1,6 +1,7 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-03 21:05:35 $
-Ccc   * $Id: lev-dens.f,v 1.15 2004-06-03 21:05:35 Capote Exp $
+Ccc   * $Date: 2004-06-03 21:14:09 $
+Ccc   * $Id: lev-dens.f,v 1.16 2004-06-03 21:14:09 Capote Exp $
+C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
