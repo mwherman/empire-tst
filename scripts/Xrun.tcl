@@ -3918,6 +3918,7 @@ if {[file exists ../.Xrunrc] == 1} {
    } else {
    set rcfl [open ../.Xrunrc a+]
    set workdir [pwd]
+   set file ""
    }
 close $rcfl
 
