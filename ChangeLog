@@ -104,6 +104,12 @@
 49. Fixed energy balance in exclusive spectra by including  missing gamma-ray 
     transitions in the ENDF file (levels without branching ratio assumed to
     decay to the ground state) (M. Herman).
+50. Scripts moved to the empire/scripts/ directory allowing for multiple
+    working directories (M. Herman)
+51. Run section in the GUI redisigned to allow for free selection of modules
+    to run (m. Herman)
+52. Comparison plots including an arbitrary ENDF-6 file possible also for
+    spectra and double-differential cross sections (M. Herman) 
     
 
              Changes in version 2.18 with respect to 2.17.1
