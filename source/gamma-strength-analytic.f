@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.6 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-07-26 19:37:30 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.7 2004-07-26 19:37:30 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
      &   Eexcitf, Temperf, Egamma, Keyshape)
@@ -113,10 +113,10 @@ C
      &                 LMConst, aa, aa3, hh, Temperf, Eexcitf
       DOUBLE PRECISION AKS0, BC, DEG, DMEf, efermi, FACtor, r0, sigmapn
       DOUBLE PRECISION EG0, GW0, ALPha, GWAll, EEGlo0, AK0, ER0,
-     &                 BETagfl2, S2Plusgfl, alpfree,  rnucl,
-     &                 EG1, GW1, CS1, EG2, GW2, CS2
+     &                 alpfree,  rnucl
+C    &                 BETagfl2, S2Plusgfl, EG1, GW1, CS1, EG2, GW2, CS2
       INTEGER KEYfbc, KEYset, Keyshape,
-     &        keyinput, kz, ka, kzz1, kaa1, keglo, NG
+     &        keyinput, kz, ka, kzz1, kaa1, keglo
 C
       COMMON /INPUTKEY/ KEYset, KEYfbc
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
@@ -466,7 +466,8 @@ C
      &                 EG0, EG1, EG2, Egamma, EGDr, FACtor, GGDr, GW0,
      &                 GW1, GW2, GWAll
       DOUBLE PRECISION hhh, pi24, DMEf
-      INTEGER KEYfbc, KEYset, NG
+C     INTEGER KEYfbc, KEYset, NG
+      INTEGER NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
       COMMON /WHELP / EG0, GW0, ALPha, GWAll

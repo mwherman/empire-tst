@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-19 19:06:06 $
-Ccc   * $Id: input.f,v 1.35 2004-07-19 19:06:06 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-07-26 19:40:17 $
+Ccc   * $Id: input.f,v 1.36 2004-07-26 19:40:17 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5008,8 +5008,9 @@ C
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, SHCfism, 
      &                 DELtafism, GAMmafism, UGRidf, AFIsm
 C
-      DOUBLE PRECISION ACR, ACRt, ATIl, mm2, MORtcrt, MPArcrt, DETcrt, 
-     &                 ECOnd, SCR, TCRt, UCRt, WFIsm
+C     DOUBLE PRECISION ACR, ACRt, ATIl, mm2, MORtcrt, MPArcrt, DETcrt, 
+C    &                 ECOnd, SCR, TCRt, UCRt, WFIsm
+      DOUBLE PRECISION mm2, MORtcrt, MPArcrt, WFIsm
 C
       INTEGER ka, kz, NRBarc, nrmod, BFFm
       CHARACTER*2 simb, symma, symmb
@@ -5471,7 +5472,7 @@ C
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm, 
      &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm
 C
-      DOUBLE PRECISION ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt, UCRt
+C     DOUBLE PRECISION ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt, UCRt
 C
 C
       INTEGER nrbarc1, iz, ia, BFFm

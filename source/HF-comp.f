@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-26 18:36:47 $
-Ccc   * $Id: HF-comp.f,v 1.26 2004-07-26 18:36:47 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-07-26 19:39:28 $
+Ccc   * $Id: HF-comp.f,v 1.27 2004-07-26 19:39:28 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -710,7 +710,7 @@ C     DOUBLE PRECISION gamma, accn, atil, t
       DOUBLE PRECISION E1, E2, XM1
 C-----Plujko_new
 Cb    REAL FLOAT
-      REAL FLOAT,fSpinIc
+C     REAL FLOAT,fSpinIc
 C-----Plujko_new(End)
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
@@ -2220,9 +2220,9 @@ C
       DOUBLE PRECISION  rofism, hm, efdism, efbm, xminnm, defbm, 
      &                  shcfism, deltafism, gammafism,afism,
      &                  tfiso,tgiso,tiso,rfiso,wfism          
-
-      DOUBLE PRECISION  ACR, ACRt, ATIl,mortcrt,mparcrt,
-     &                 DETcrt, ECOnd, SCR, TCRt, UCRt
+      DOUBLE PRECISION  mortcrt,mparcrt
+C     DOUBLE PRECISION  ACR, ACRt, ATIl,mortcrt,mparcrt,
+C    &                 DETcrt, ECOnd, SCR, TCRt, UCRt
       INTEGER bffm
 C
       WRITE(80, '(a40)')'----------------------------------------'

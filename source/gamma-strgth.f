@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: gamma-strgth.f,v 1.9 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-07-26 19:38:54 $
+Ccc   * $Id: gamma-strgth.f,v 1.10 2004-07-26 19:38:54 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -53,8 +53,7 @@ C
 C Local variables
 C
 C ------Plujko_new
-      DOUBLE PRECISION BETagfl2, S2Plusgfl,
-     &                 EG1, GW1, CS1, EG2, GW2, CS2
+      DOUBLE PRECISION EG1, GW1, CS1, EG2, GW2, CS2
       INTEGER  NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
 C ------Plujko_new (End)
@@ -424,10 +423,9 @@ C
 C-----Plujko_new
       INCLUDE 'dimension.h'
       INTEGER Key_shape , Key_GDRGFL
-      INTEGER  NG, Nnuc
+      INTEGER  Nnuc
 
-      DOUBLE PRECISION BETagfl2, S2Plusgfl,
-     &  EG1, GW1, CS1, EG2, GW2, CS2, A(0:NDNUC),Z(0:NDNUC),PI
+      DOUBLE PRECISION A(0:NDNUC),Z(0:NDNUC),PI
       DOUBLE PRECISION  Temperf, Eexcitf, Uex
 
       COMMON /GSA/ Key_shape, Key_GDRGFL
