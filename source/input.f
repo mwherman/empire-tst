@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-11 21:07:45 $
-Ccc   * $Id: input.f,v 1.74 2005-02-11 21:07:45 herman Exp $
+Ccc   * $Date: 2005-02-14 06:46:18 $
+Ccc   * $Id: input.f,v 1.75 2005-02-14 06:46:18 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -901,9 +901,8 @@ C
             WRITE(6, *)' WARNING!!!! assuming levels can be coupled '
             WRITE(6, *)' '
          ENDIF
-         IF(DIRect.GT.0 .and. DIRPOT.EQ.0) THEN
-            DIRpot = KTRlom(0, 0)
-            KTRompcc = DIRpot
+         IF(DIRect.GT.0 .and. KTRompcc.EQ.0) THEN
+            KTRompcc = KTRlom(0, 0)
             WRITE(6, *)' WARNING: DIRPOT keyword is not specified, but D
      &IRECT keyword > 0'
             WRITE(6,
@@ -917,9 +916,9 @@ C
 C--------setup model matrix (IDNa) defining which model is used where
 C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
 C                        1     2     3      4      5      6
-C        1 neut. disc.   x     x     0      x      x      0
+C        1 neut. disc.   x     x     0      0      x      0
 C        2 neut. cont.   0     x     x      x      x      x
-C        3 prot. disc.   x     x     0      x      x      0
+C        3 prot. disc.   x     x     0      0      x      0
 C        4 prot. cont.   0     x     x      x      x      x
 C        5 gamma         0     0     x      x      0      x
 C        6 alpha. cont.  0     0     0      0      0      x
@@ -2316,7 +2315,7 @@ C--------------searching in the RIPL database
             ENDIF
             WRITE(6,
      &'('' Optical model parameters for direct inelastic scattering set
-     &to RIPL #'',I4)')INT(val)
+     & to RIPL #'',I4)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
          ENDIF
@@ -6265,12 +6264,12 @@ C--------45.84 stands for (12/SQRT(pi))**2
                IF(Mmod.GT.0) ROFism(kk, jj, Mmod) =rotemp
             ENDDO
          ENDDO
-         OPEN(83,file='densfis.dat')
-         DO kk = 1, NRBinfis(1)
-                 u=xminn(1)+(kk-1)*desteppp+del
-            write(83,*)u,rofis(kk,3,1),rofis(kk,3,2)
-         ENDDO
-         close(83)
+C        OPEN(83,file='densfis.dat')
+C        DO kk = 1, NRBinfis(1)
+C                u=xminn(1)+(kk-1)*desteppp+del
+C           write(83,*)u,rofis(kk,3,1),rofis(kk,3,2)
+C        ENDDO
+C        close(83)
          ACRtf(ib)=acrt
          UCRtf(ib)=ucrt
          ECOndf(ib)=econd
