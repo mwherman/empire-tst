@@ -16,7 +16,7 @@ C
      &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq, 
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX(NDNUC), 
      &                  JSTab(NDNUC), IZA(0:NDNUC), NLV(0:NDNUC), 
-     &                  NCOmp(0:NDNUC), NREs(NDEJC), 
+     &                  NCOmp(0:NDNUC), NREs(NDEJC), LEVtarg,
      &                  KTRlom(0:NDEJC, 0:NDNUC), 
      &                  LMAxtl(NDETL, NDEJC, NDNUC), IZAejc(0:NDEJC), 
      &                  LVP(NDLV, 0:NDNUC), IOMwrite(0:NDEJC, 0:NDNUC), 
@@ -48,7 +48,7 @@ C
      &                 SFIom(0:NDEJC, 0:NDNUC), ELV(NDLV, 0:NDNUC),
      &                 XJLv(NDLV, 0:NDNUC), CSAlev(NDANG, NDLV, NDEJC),
      &                 SHC(0:NDNUC), XMAss(0:NDNUC),
-     &                 BR(NDLV, NDBR, 3, NDNUC), XMAss_ej(0:NDEJC),
+     &                 BR(NDLV, NDBR, 3, 0:NDNUC), XMAss_ej(0:NDEJC),
      &                 REDmsc(NDLW, 2), TUNe(0:NDEJC, 0:NDNUC),
      &                 EJMass(0:NDEJC),
      &                 SIGabs(NDETL, NDEJC, NDNUC)

@@ -1,7 +1,8 @@
 #!/bin/bash
 for file in $*
 do
-#sed s/'IOUT       3.'/'IOUT       1.'/ ${file} >tmp
+sed s/'HMS        0.'/'HMS        1.'/ ${file} >tmp
+mv tmp ${file}
 #gv -landscape ${file}
-        /home/herman/empire/util/c4zvd/zvv94l.exe $file
+#       /home/herman/empire/util/c4zvd/zvv94l.exe $file
 done

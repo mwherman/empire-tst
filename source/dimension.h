@@ -2,11 +2,11 @@
      * NDNUC= 80                   
      *,NDEJC=3 
      *,NDAFIS=1
-     *,NDEX=370
+     *,NDEX=170
      *,NDLW= 50
      *,NDTL= 30
      *,NDMSCS=4 
-     *,NDLV=110
+     *,NDLV=70
      *,NDBR=30
      *,NDVOM=7
      *,NDWOM=7

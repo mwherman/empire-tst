@@ -194,7 +194,7 @@ catch {package require Img}
 
 foreach img {
 
-        {{[file join / home mike empire work Projects fileopen.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects fileopen.gif]} {file not found!} user {
 R0lGODlhGAAYAOcAAAAAACYZDiccEScaDzsnFPStav7CgP7Cf/23c+WlZv7L
 k/7Tmv7Ok/7Ii/a2dRUPCf7Dhf7VnP7OkvyyafmsYvisYj0oFf7IiP7Rmf7C
 gu6gWYBTLEsxGUowGUUsF0ApFTwnFDcjEjIgES4dDykaDiUXDEYwG/7Kj/21
@@ -222,7 +222,7 @@ MRAJaZNIUY1FjBo5egQpEkFJkyhxxajU54ylRJdobLGBKZOmTZw8u+zk6c8n
 UKFEjSJVylT7U6ikogptAq3CCg2tYOKKKTbA4QomgLwCSyyyzEKLQbV4Ysst
 uOTiISq6CLLLI7z04ssvwBgUjDDD0EJMMTASQ8swxhyDTDLKLNPSjjw2FBAA
 Ow==}}
-        {{[file join / home mike empire work Projects launch.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects launch.gif]} {file not found!} user {
 R0lGODlhGAAYAIQAAAAAAGsAAMoAAdMAAfwCAvsAEP9bN/xoLPxlNPhwMvxk
 QPyZAf2ZEPyYKv2VN/ujHv+gNP39Av/CV/3KZv/Md//QZ/v+/P//////////
 /////////////////////////yH5BAEBAB8ALAAAAAAYABgAAAW34CeOZDkG
@@ -231,7 +231,7 @@ BVlfwNFo7BBUi+EadikQ8J0Bxxy0T4LBQJCQNio/bABPLlsoCThSBGCDLIOP
 P4lWYHcjjwAvFIFgfYQ0mBOBdkBGNAwRAQmLUqSeJgwLEbJbAq00C7GyDJiY
 AzuNLbiyC5cBvqUlwrjEeMjJEcvAUc4ksbiPLtIs0Ngl2o7fUCTh4iMhADs=
 }}
-        {{[file join / home mike empire work Projects editcopy.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects editcopy.gif]} {file not found!} user {
 R0lGODlhGAAYAMYAAI9/bot8a4h5aYV2ZoFzZH5wYnttX3drXXRoWop7av//
 /3NnWomJiWpgVIZ3Z29jV8nJyYJ0ZIKCgsbGxl1USn5wYWZcUWNZTmBWTFxU
 SVlRR3lsXlxbW/78+6SkpHR0dFVNRGVbUHVpW/37+fz38/r07vDq5sG6s1BJ
@@ -248,7 +248,7 @@ PD0+P0BBhAwhQg6XLl6DiigwcgRJEiVLmDRx8gSKqmHFQBCKokDKlH9UqgCx
 cgULNWfQpBHKokDLFi5dvHwBE0bMGA/dvoWDQYjMizJmzqBJo2YNmzZuUrR7
 Fy8HoTdwYMSRM4dOHTt38OSR4A+gQCKe9KQYm+JhxIlPPHH0CFIkSSwenli6
 hCmTpk1PPoEKJWoUqSeoUqlaxarVk+HDlQIBADs=}}
-        {{[file join / home mike empire work Projects edit.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects edit.gif]} {file not found!} user {
 R0lGODlhFgAWAPZQAAEBARQUFDImHi4qIjYyLjYyMkIuJlhLOHJOOk9PT1dX
 V3JmTndqVmdnZ352a3d3d4ZKHpxIBo5SKo5eNpZaOpJiLppmNqJOBq5iMrp6
 Poh6Z8JeEsxkBNZqBtpuPvJ+DuJqLpOIeJ2QfaSPb7aKarqedL2hePuFBf6W
@@ -270,7 +270,7 @@ ISI0IwEAUFBQUApIT05OOQsDAgohMzU6OyUBUFBQUFAKR4BIPz8LAwU5Gho0
 NTY2JQFQUFBQUApHTk1KBzkzGjU8QUNCQjYBUFBQUFAKR01MSkg4NzRAQ0JC
 QjssAFBQUFBQCT89PDw4NTU2Njk2NiYlJQBQUFBQUAAAAAAAAAAAAAAAAAAA
 AAAAUFBQgQA7}}
-        {{[file join / home mike empire work Projects stop.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects stop.gif]} {file not found!} user {
 R0lGODlhGAAYAOcAAJIcHIgfHX0iHnMkH2gnIF4pIV4qIZMdHd2Li/jo6M+/
 v4lgX////+edleCWj9ySi9iHh9F+frRZT2Y0LAAAAOmfl9x9d9Z6ctJzatFx
 atFwasxfWc1gYLUVFd2QidV5dt+BfdyCfNl/edd8dNV4b8VlXcxdXcVNRLMP
@@ -295,7 +295,7 @@ BAEkaFDjKRMmXr+CfYp1oNYGYb+GhcqgrMAACRw8bXFDrFoGSMjmHCggQZKn
 Lpj4sMvAyRO9BQckgPJ0KmEGVKogJkgggZWnVO+yhbpXoAEvX8CsZTDmqx4y
 kweeQZNGzRq2bt7A0SMkTuqBEg/MoVPHzh08efToidOFj1uCFAwA6OPnj3Md
 XMoUP14wOY0dQ7Lv6GJGDnWDySUSihffWSGF8+jRe1zPvr17hQEBADs=}}
-        {{[file join / home mike empire work Projects imagegallery.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects imagegallery.gif]} {file not found!} user {
 R0lGODlhGQAXAKUAAAAAABkZGSoqKjc3NxZHAh5ZBSBbByNjCCt4Cj5zJh1I
 aSBPcyFRdTJcfDdgflF9PkhISFtbW2ZmZnl5eSlbgilkkThjiDZrmDZ1pjl8
 sERrjEJ0nUh8pTGGDDaWDT2ZFkaKKWuxTTyBt0mHuVyAol6KtFOQv2qQq3aX
@@ -309,7 +309,7 @@ ERPpHCtc1PhVZgsAGRAGQIBQTgYNfftwDJBgZ4uZgwkXNny4MIBEiuHomRHA
 sB6EfhEYChAQAECAAJoAmDlgYIDChQNcAiBA4ABGgg4ENIVcAgLBgSM7Dfjs
 0MFDiA8IEAkR5qEq0w4Ifjat+sFDVGBLzDgZS7bs2GpDmGwxy5Ys2ixw4VK5
 AyUKkSRQ5sIIAgA7}}
-        {{[file join / home mike empire work Projects kthememgr.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects kthememgr.gif]} {file not found!} user {
 R0lGODlhFQAWAOcAAAICBhZOCt7SUiqSBq6uBirWHpaSBmpmBpKSCLbyYj7K
 Dx5iBvr2zrayVg4uBmKiBoLeZipqGjayCurmfhsaC2JeBtbaanJyBlaWBnba
 UiJaEoqyPo6Ojra2at7amiyaBpbOgip6EkbiHsLCJqrWduTennqmZnp6Btrm
@@ -337,11 +337,11 @@ QoRP+IGGj+lCxyiUXeJtlQLoV6531FNnwPqsYwe0K15CxncyFW/0IFI3Zp3p
 A9xSSLUZA5T395CAc44sN2BgWwXv6AfAgp0o858K4AiIyTSTILNMFffo91Az
 urwQBSQzCHBCIa8MsAYlZKUEwAINzBDiBRWI4cB+NQlEgRLDCACPDzTW6FAL
 e/j4T0AAOw==}}
-        {{[file join / home mike empire work Projects mini-run.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects mini-run.gif]} {file not found!} user {
 R0lGODlhGwAYAIAAAAAAAP///yH5BAEKAAEALAAAAAAbABgAAAI6jI+py+0P
 owJUNlrtwprxPmUaRooScJQm6rCB6r6W+n6nHdnlKO43jPtVfCADsXgEJZGm
 orHJjDkfBQA7}}
-        {{[file join / home mike empire work Projects kleandisk.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects kleandisk.gif]} {file not found!} user {
 R0lGODlhHAAYAIQAAAAAAC0qHPO5U7aRSA8ODY12QYdxP3loPXJkPMueS8SZ
 SreQR7CMRqKDRJt/Q+CrTtmnTWRbOjYyIvO9Z+evTz44JDo1I15XOaSFRUhC
 K1FKL//sXv+1ZVpSNc6IM////yH5BAEKAB8ALAAAAAAcABgAAAXS4CeO5Aic
@@ -350,7 +350,7 @@ HFIqDfAx6h6QbfcrdUUkJyR0QqlT0GpaxUKNXJIlVnZ3aTRsUwh+KCMBGI5W
 AXZ4XF4OCAQZZCYnjp0YgpNdmBqaJhsnqJ6fVg8EGpmlIgCnHLOonKoBHaQe
 sR8AtbW0trcAnx0nvWa/wrbNwcCovcpm0cOnw9DTANTV0c3Ytqfb3U+/qNfi
 3OsAN8spt9Dj6+7mMsXsBItD8O36KSEAADs=}}
-        {{[file join / home mike empire work Projects x4.gif]} {file not found!} user {
+        {{[file join / home herman empire work Projects x4.gif]} {file not found!} user {
 R0lGODlhGAAYAOcAAJIcHIgfHX0iHnMkH2gnIF4pIV4qIZMdHd2Li/jo6M+/
 v4lgX////+edleCWj9ySi9iHh9F+frRZT2Y0LAAAAOmfl9x9d9Z6ctJzatFx
 atFwasxfWc1gYLUVFd2QidV5dt+BfdyCfNl/edd8dNV4b8VlXcxdXcVNRLMP
@@ -375,7 +375,7 @@ CVxQFUNV6kuqVgdiJUm16ZSgQcqGFRggwcytYrRwZcCl6Vo8AhKsmNrUJ1cu
 davqHDggQZi5fb86DXyXQAIrc9MykFqW6mCBBrx8acp38kvAdi/jOYMmTV/K
 DLao5jL3Lh6JB+aIqWPnjpg8evYA5uNaIAUDAPr4+UNcB5cyXXiLLvibxo4h
 0Hd0MSOnN3OJ2LMvR0ihu3fvFMMGix9PnnxAADs=}}
-        {{[file join / home mike empire work Projects reload.gif]} {user image} user {
+        {{[file join / home herman empire work Projects reload.gif]} {user image} user {
 R0lGODlhGAAYAOcAABNRDaG9mai/oavApZ68lh9aGRhTEhlVE4u4f425gYq4
 f422hRxYFoS2e4K0eXmrcIGzeIO1eoCzd3mochlMEXyydAw2UQsmA1mGUVyO
 VWygZXKoanetb4GzeWWaXRxGE3Svba7d6Uh2QVOFTFWKTluTVGqlY3evb1eP
@@ -402,7 +402,7 @@ F76ACSNmDBkyZcx86UvwDJo0atSsYdPGzRs4ceTMoVPHDm2Cd/Dk0aNnD58+
 bS74+QMokKBBFwgdtFDI0KFDiBJhKYq+iFEjRxceaX8LKZKkSZMoVbIU/RKm
 C23Wb8+kaROnTp58AkooF+Cn3kWEiDIKKQyWYsopqLQhin4NEZKKKhhiuAor
 bbQi0kCEEOLKK7DEIkuIHxY0S4gopujiiy4GBAA7}}
-        {{[file join / home mike empire work Projects shortout.gif]} {user image} user {
+        {{[file join / home herman empire work Projects shortout.gif]} {user image} user {
 R0lGODlhGAAYAMYAAI9/bot8a4h5aYV2ZoFzZH5wYnttX3drXXRoWop7av//
 /3NnWomJiWpgVIZ3Z29jV8nJyYJ0ZIKCgsbGxl1USn5wYWZcUWNZTmBWTFxU
 SVlRR3lsXlxbW/78+6SkpHR0dFVNRHVpW/37+fz38/r07vDq5sG6s1BJQXFl
@@ -3582,16 +3582,19 @@ foreach el $stablist {
    set Starget [lindex $elspl 1]
    set Atarget [lindex $elspl 2]
    set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname
-   set skelinp [open skel.inp r]
-   set mulinput [open $mulinputn.inp w]
-   while {[gets $skelinp line] >=0} {
-      if [regexp xxx $line] {
-         puts $mulinput [format "%5.1f %5.1f          ;TARGET A, Z" $Atarget $Ztarget]
-      } else {puts $mulinput $line
+   set inpexists [file exists $mulinputn.inp]
+   if { $inpexists == 0 } {
+      set skelinp [open skel.inp r]
+      set mulinput [open $mulinputn.inp w]
+      while {[gets $skelinp line] >=0} {
+         if [regexp xxx $line] {
+            puts $mulinput [format "%5.1f %5.1f          ;TARGET A, Z" $Atarget $Ztarget]
+         } else {puts $mulinput $line
+         }
       }
+      close $skelinp
+      close $mulinput
    }
-   close $skelinp
-   close $mulinput
    exec xterm -e ./run $mulinputn
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmintomp  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
@@ -3847,7 +3850,7 @@ proc vTclWindow.top75 {base} {
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects fileopen.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects fileopen.gif]] \
         -relief flat -text Project: 
     bindtags $base.fra77.but78 "$base.fra77.but78 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but78 <<SetBalloon>> {
@@ -3865,7 +3868,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.inp &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects edit.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects edit.gif]] \
         -relief flat -text Input 
     bindtags $base.fra77.but80 "$base.fra77.but80 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but80 <<SetBalloon>> {
@@ -3878,7 +3881,7 @@ adjourn .top75} \
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects launch.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects launch.gif]] \
         -relief flat -text R+F+P 
     bindtags $base.fra77.but86 "$base.fra77.but86 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but86 <<SetBalloon>> {
@@ -3891,7 +3894,7 @@ adjourn .top75} \
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects mini-run.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects mini-run.gif]] \
         -relief flat -text Run 
     bindtags $base.fra77.but87 "$base.fra77.but87 Button $base all _vTclBalloon _vTclBalloon"
     bind $base.fra77.but87 <<SetBalloon>> {
@@ -3902,7 +3905,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.lst &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects editcopy.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects editcopy.gif]] \
         -relief flat -text Output 
     bindtags $base.fra77.but81 "$base.fra77.but81 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but81 <<SetBalloon>> {
@@ -3913,7 +3916,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.out &} \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects shortout.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects shortout.gif]] \
         -relief flat -text Output 
     bindtags $base.fra77.but77 "$base.fra77.but77 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but77 <<SetBalloon>> {
@@ -3924,7 +3927,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.endf &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects kthememgr.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects kthememgr.gif]] \
         -relief flat -text ENDF 
     bindtags $base.fra77.but82 "$base.fra77.but82 Button $base all _vTclBalloon _vTclBalloon"
     bind $base.fra77.but82 <<SetBalloon>> {
@@ -3935,7 +3938,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.exf &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects x4.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects x4.gif]] \
         -relief flat -text EXFOR 
     bindtags $base.fra77.but83 "$base.fra77.but83 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but83 <<SetBalloon>> {
@@ -3946,7 +3949,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.c4 &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects stop.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects stop.gif]] \
         -relief flat -text {C4 file} 
     bindtags $base.fra77.but84 "$base.fra77.but84 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but84 <<SetBalloon>> {
@@ -3957,7 +3960,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec gv -landscape $file.ps &} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects imagegallery.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects imagegallery.gif]] \
         -relief flat -text Plots 
     bindtags $base.fra77.but85 "$base.fra77.but85 Button $base all _vTclBalloon _vTclBalloon"
     bind $base.fra77.but85 <<SetBalloon>> {
@@ -3969,7 +3972,7 @@ adjourn .top75} \
 ddlist} \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects reload.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects reload.gif]] \
         -relief flat -text Update 
     bindtags $base.fra77.but76 "$base.fra77.but76 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but76 <<SetBalloon>> {
@@ -3983,7 +3986,7 @@ ddlist} \
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -highlightcolor #000000 \
-        -image [vTcl:image:get_image [file join / home mike empire work Projects kleandisk.gif]] \
+        -image [vTcl:image:get_image [file join / home herman empire work Projects kleandisk.gif]] \
         -relief flat -text Clean 
     bindtags $base.fra77.button77 "$base.fra77.button77 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.button77 <<SetBalloon>> {
@@ -5112,6 +5115,8 @@ set selecfile [lindex $selecfilelist 0]
 set exten [file extension $selecfile]
 if {$exten == ".ps"} {
   exec gv -landscape $selecfile &
+} elseif {$exten == ".eps"} {
+  exec gv -portrait $selecfile &
 } elseif {$exten == ".zvd"} {
   exec xterm -e ./zvcomb $selecfile &
 } else {
@@ -5473,14 +5478,6 @@ close $mulfile} \
     $site_11_0.opt86 insert 15 {short-outputs}
     $site_11_0.opt86 insert 16 {full-outputs}
     $site_11_0.opt86 insert 17 {PLOTC4-plots}
-    $site_11_0.opt86 insert 18 {PLOTC4-plots}
-    $site_11_0.opt86 insert 19 {PLOTC4-plots}
-    $site_11_0.opt86 insert 20 {PLOTC4-plots}
-    $site_11_0.opt86 insert 21 {PLOTC4-plots}
-    $site_11_0.opt86 insert 22 {PLOTC4-plots}
-    $site_11_0.opt86 insert 23 {PLOTC4-plots}
-    $site_11_0.opt86 insert 24 {PLOTC4-plots}
-    $site_11_0.opt86 insert 25 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #dcdcdc \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -5592,7 +5589,9 @@ close $mulfile} \
     }
     button $site_13_0.but78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {setmulpro $selmulitem $mulstname} \
+        -background #dcdcdc -command {setmulpro $selmulitem $mulstname 
+adjourn .top75 
+ddlist} \
         -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Set as project} 
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $base all _vTclBalloon"

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-04-02 22:06:19 $
-Ccc   * $Id: input.f,v 1.14 2003-04-02 22:06:19 herman Exp $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: input.f,v 1.15 2003-06-30 22:01:48 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -130,6 +130,9 @@ C
       INTEGER INDEX, INT
       LOGICAL nonzero, itmp2
       CHARACTER*2 SMAT
+      CHARACTER*3 atar
+      CHARACTER*1 proj
+      CHARACTER*132 x4string 
       INTEGER*4 iwin
       INTEGER*4 PIPE
 
@@ -259,6 +262,7 @@ C--------fusion parameters
          CRL = 0.0
          DFUs = 1.
          FUSred = 1.
+         LEVtarg = 1
 C
 C--------Capote, additional input options
 C
@@ -273,6 +277,7 @@ C        Relativistic kinematics
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes)
+C        IOPSYS = 2 LINUX on-line retrieval
          IOPsys = 0
 C
 C--------CCFUF parameters
@@ -427,7 +432,7 @@ C--------projectile
          READ(5, *)AEJc(0), ZEJc(0)
          CALL PTLEVSET(AEJc(0), ZEJc(0), SEJc(0), lpar, e2p, e3m)
 C--------product of target and projectile parities
-         LVP(1, 0) = LVP(1, 0)*lpar
+         LVP(LEVtarg, 0) = LVP(LEVtarg, 0)*lpar
          XNEjc(0) = AEJc(0) - ZEJc(0)
          IZAejc(0) = INT(1000.*ZEJc(0) + AEJc(0))
          iz = INT(ZEJc(0))
@@ -564,7 +569,43 @@ C--------------------------set residues to be used for EXFOR retrieval
             ENDDO
          ENDDO
 C--------retrieve EXFOR data
-         IF(IOPsys.EQ.0)CALL RETRIEVE
+         INQUIRE(FILE = 'EXFOR.DAT', EXIST = gexist)
+         IF(.NOT.gexist) THEN 
+            IF(IOPsys.EQ.0)CALL RETRIEVE !retrieval from the local database
+            IF(IOPsys.EQ.2) THEN
+C--------------on-line EXFOR retrieval from the remote database         
+               WRITE(atar,'(I3)') INT(A(0)) 
+               IF(atar(1:1).EQ.' ') THEN
+               atar(1:1) = atar(2:2)
+               atar(2:2) = atar(3:3)
+               atar(3:3) = ' '
+               ENDIF
+               IF(atar(1:1).EQ.' ') THEN
+               atar(1:1) = atar(2:2)
+               atar(2:2) = ' '
+               ENDIF
+C--------------set projectile  for EXFOR retrieval
+               proj = ' '
+               IF(AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0)proj = 'n'
+               IF(AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.1.0D0)proj = 'p'
+               IF(AEJc(0).EQ.4.0D0 .AND. ZEJc(0).EQ.2.0D0)proj = 'a'
+               IF(AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0)proj = 'd'
+               IF(AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0)proj = 'g'
+               IF(AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0)proj = 't'
+               IF(SYMb(0)(2:2).EQ.' ') THEN 
+               x4string = '~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.
+     &jar: x4retr x -target:"'//SYMb(0)(1:1)//'-'//atar//';'//SYMb(0)(1:
+     &1)//'-0" -Rea ct:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE"#'
+c    &1)//'-0" -Rea ct:"'//proj//',*"'//' -quant:"DE"#'
+               ELSE 
+               x4string = '~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.
+     &jar: x4retr x -target:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -
+     &React:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE"#'
+c    &React:"'//proj//',*"'//' -quant:"DE"#'
+               ENDIF 
+               iwin = PIPE(x4string)
+            ENDIF
+         ENDIF
 C--------retrieve of EXFOR data *** done ***
          NNUcd = nnuc
          NNUct = NNUcd
@@ -944,7 +985,8 @@ C        AMAss(0) = (A(0)*amumev + XMAss(0))/(amumev + xnexc)
 C     Capote 10/01
       CALL KINEMA(EINl, EIN, EJMass(0), AMAss(0), RMU, ak2, 1, RELkin)
 C     EIN = EIN*A(0)/A(1)
-      EXCn = EIN + Q(0, 1)
+      CALL LEVREAD(0)
+      EXCn = EIN + Q(0, 1) + ELV(LEVtarg,0)
       EMAx(1) = EXCn
 C-----WRITE heading on FILE12
       ia = INT(A(0))
@@ -1207,8 +1249,8 @@ C--------------print tramsmission coefficients
      &                  SEJc(nejc)
                   WRITE(6, '(1x,A10,I3,A3,I3,A3,F4.1,A3,I2)')
      &                  'TARGET: A=', INT(A(nnur)), ' Z=', INT(Z(nnur)), 
-     &                  ' S=', SNGL(XJLv(1, nnur)), ' P=', 
-     &                  INT(LVP(1, nnur))
+     &                  ' S=', SNGL(XJLv(LEVtarg, nnur)), ' P=', 
+     &                  INT(LVP(LEVtarg, nnur))
                   DO i = 1, netl
                      IF(TL(i, 1, nejc, nnur).GT.0.0)WRITE(6, 99002)
      &                  ETL(i, nejc, nnur), 
@@ -1881,7 +1923,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta1|'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta3|'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |            (Lodi)          |'
       WRITE(6, *)'                       |____________________________|'
@@ -2177,6 +2219,13 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF(name.EQ.'TRGLEV')THEN
+            LEVtarg = val
+            WRITE(6, '('' Target excited to the level '',I2)')
+     &            LEVtarg
+            GOTO 100
+         ENDIF
+C-----
          IF(name.EQ.'DFUS  ')THEN
             DFUs = val
             WRITE(6, 
@@ -2372,7 +2421,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'NHMs  ')THEN
+         IF(name.EQ.'NHMS  ')THEN
             IF(val.GT.100.0D0)THEN
                NHMs = val
                WRITE(6, '('' Number of events in HMS set to '',I10)')
@@ -2381,7 +2430,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'CHMs  ')THEN
+         IF(name.EQ.'CHMS  ')THEN
             IF(val.GT.0.0D0)THEN
                CHMs = val
                WRITE(6, 

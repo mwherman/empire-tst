@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-04-02 21:47:40 $
-Ccc   * $Id: HF-comp.f,v 1.8 2003-04-02 21:47:40 herman Exp $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: HF-comp.f,v 1.9 2003-06-30 22:01:48 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -610,7 +610,7 @@ C
 99003          FORMAT(1X//, 5X, 'Decay of  ', F7.4, ' MeV  ', F5.1, 
      &                ' level with final population ', G13.5, ' mb', /, 
      &                5X, 'Level populated ', 4X, 'E.gamma ', 4X, 
-     &                'Intensity mb ', /)
+     &                'Intensity    ', /)
                DO j = 1, NDBR
                   j1 = NINT(BR(l, j, 1, Nnuc))
                   IF(j1.EQ.0)GOTO 100
@@ -636,7 +636,7 @@ C
                   IF(IOUt.GT.2)WRITE(6, 99005)ELV(j1, Nnuc), 
      &                               LVP(j1, Nnuc)*XJLv(j1, Nnuc), egd, 
      &                               gacs
-99005             FORMAT(5X, F7.4, 2X, F5.1, 5X, F7.4, 5X, G13.5)
+99005             FORMAT(5X, F7.4, 2X, F5.1, 5X, F7.4, 5X, G13.5, ' mb')
                ENDDO
             ENDIF
          ENDIF

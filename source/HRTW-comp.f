@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: HRTW-comp.f,v 1.6 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: HRTW-comp.f,v 1.7 2003-06-30 22:01:48 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1375,17 +1375,17 @@ C
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
-      coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+      coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C
       maxlw = NDLW
       s1 = 0.5
-      IF(AINT(XJLv(1,Ntrg) + SEJc(Npro)) - XJLv(1, Ntrg) - SEJc(Npro)
-     &   .EQ.0.0D0)s1 = 1.0
+      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) - 
+     &   SEJc(Npro).EQ.0.0D0)s1 = 1.0
       CSFus = 0.0
 C-----channel spin min and max
-      eee = SEJc(Npro) - XJLv(1, Ntrg)
+      eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
       smin = ABS(eee)
-      smax = SEJc(Npro) + XJLv(1, Ntrg)
+      smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
       mul = smax - smin + 1.0001
       CSFus = 0.0
       Ich = 1
@@ -1399,7 +1399,7 @@ C        WRITE(6,*)'channel spin ',chsp
          lmax = MIN0(NDLW, lmax)
          lmax = MIN0(maxlw, lmax)
          DO k = lmin, lmax
-            IF(PAR(Ip, LVP(1,0), k - 1).NE.0.0D0)THEN
+            IF(PAR(Ip, LVP(LEVtarg,0), k - 1).NE.0.0D0)THEN
                IF(Ich.GT.NDHRTW2)THEN
                   WRITE(6, *)' '
                   WRITE(6, *)'E R R O R !'

@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.4 $
-C $Id: ddhms.f,v 1.4 2002-09-20 14:16:35 mike Exp $
+C CVS Version Management $Revision: 1.5 $
+C $Id: ddhms.f,v 1.5 2003-06-30 22:01:48 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -118,7 +118,7 @@ C
          RETURN
       ENDIF
 C
-      IF(IHIstlab.NE.0)OPEN(UNIT = 4, FILE = '/export/home/mbc/history', 
+      IF(IHIstlab.NE.0)OPEN(UNIT = 4, FILE = 'HISTORY', 
      &                      STATUS = 'unknown')               !big file
 C
       CALL HMS
@@ -2041,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.4 $')
+99001 FORMAT('  ddhms version: $Revision: 1.5 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.4 2002-09-20 14:16:35 mike Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.5 2003-06-30 22:01:48 herman Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4798,7 +4798,7 @@ C
                   ENDDO
                ENDDO
                jmax = MIN(NDLW, NDIM_JBINS + 1)
-C-----------test output
+C--------------test output
 C              WRITE(6,*)' '
 C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
 C              WRITE(6,*)' '
@@ -4808,14 +4808,14 @@ C              &                           (auxin(nu+1,jsp),jsp=1,11)
 C              ENDDO
 C              WRITE(6,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
 C              WRITE(6,*)'reqst range ',EX(1,nnur),EMAx(nnur)
-C-----------test output *** done ***
-C-----------clean interpolation output matrix
+C--------------test output *** done ***
+C--------------clean interpolation output matrix
                DO nu = 1, NDEX
                   DO jsp = 0, NDIM_JBINS
                      auxout(nu, jsp + 1) = 0.0
                   ENDDO
                ENDDO
-C-----------population of continuum
+C--------------population of continuum
                CALL INTERMAT(DEBin/2, DEBin, auxin, NDIM_EBINS + 1, 
      &                       EX(1, nnur), DE, auxout, NDEX, 
      &                       NDIM_JBINS + 1, EX(1, nnur), EMAx(nnur))
@@ -4868,7 +4868,7 @@ C              WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
                      WRITE(6, *)' '
                   ENDIF
                ENDIF
-C-----------test output
+C--------------test output
 C              WRITE(6,*)' '
 C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
 C              WRITE(6,*)' '
@@ -4876,8 +4876,8 @@ C              DO nu = 1,NEX(nnur)+1
 C              WRITE(6,'(12G12.5)') EX(nu,nnur),
 C              &                           (POP(nu,jsp,1,nnur),jsp=1,11)
 C              ENDDO
-C-----------test output *** done ***
-C-----------population of discrete levels (evenly distributed)
+C--------------test output *** done ***
+C--------------population of discrete levels (evenly distributed)
                sumcon = (RESpop(jz, jn) - sumcon)/NLV(nnur)
                IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.2)THEN
                   DO il = 1, NLV(nnur)
@@ -4893,10 +4893,10 @@ C-----------population of discrete levels (evenly distributed)
                   ENDDO
                ENDIF
 C
-C-----------transfer excitation energy dependent recoil spectra
-C-----------(if ENDF=2 only)
-C
-C-----------clean auxiliary auxrec1 matrix
+C--------------transfer excitation energy dependent recoil spectra
+C--------------(if ENDF=2 only)
+C          
+C--------------clean auxiliary auxrec1 matrix
                IF(ENDf.EQ.2)THEN
                   DO nu = 1, NDIM_EBINS + 1
                      DO mrec = 1, NDIM_RECBINS + 1
@@ -4904,7 +4904,7 @@ C-----------clean auxiliary auxrec1 matrix
                      ENDDO
                   ENDDO
                   maxrecener = 0
-C--------------transfer HMS recoil spectra onto auxrec1
+C-----------------transfer HMS recoil spectra onto auxrec1
                   DO nu = 0, Numax
                      DO mrec = 0, MAXerecspec(jz, jn, nu)
                         auxrec1(mrec + 1, nu + 1)
@@ -4913,14 +4913,14 @@ C--------------transfer HMS recoil spectra onto auxrec1
                      IF(MAXerecspec(jz, jn, nu).GT.maxrecener)
      &                  maxrecener = MAXerecspec(jz, jn, nu)
                   ENDDO
-C--------------interpolate and transfer continuum part
+C-----------------interpolate and transfer continuum part
                   CALL BINTERMAT(auxrec1, DEBinrec/2, DEBinrec, 
      &                           NDIM_RECBINS + 1, DEBin/2, DEBin, 
      &                           NDIM_EBINS + 1, RECcse(1, 1, nnur), 
      &                           zero, DERec, NDEREC, EX(1, nnur), DE, 
      &                           NDEX, zero, (maxrecener + 0.5)
      &                           *DEBinrec, EX(1, nnur), EMAx(nnur))
-C--------------test printout
+C-----------------test printout
 C                 WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur),
 C                 &                    'recoil population'
 C                 WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
@@ -4930,9 +4930,9 @@ C                 WRITE(6, '(12G12.5)')EX(nu, nnur),
 C                 &                                 (RECcse(mrec, nu, nnur),
 C                 &                                 mrec = 1, 11)
 C                 ENDDO
-C--------------test printout *** done ***
-C--------------recoils to discrete levels
-C--------------sum HMS recoil spectra to discrete levels on the first row of auxrec1
+C-----------------test printout *** done ***
+C-----------------recoils to discrete levels
+C-----------------sum HMS recoil spectra to discrete levels on the first row of auxrec1
                   ndiscmax = EX(1, nnur)/DEBin + 1.001
                   DO mrec = 1, maxrecener + 1
                      DO nu = 1, ndiscmax
@@ -4945,7 +4945,7 @@ C--------------sum HMS recoil spectra to discrete levels on the first row of aux
                      ENDDO
                      auxrec1(mrec, 1) = auxrec1(mrec, 1)*DEBin
                   ENDDO
-C--------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)
+C-----------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)
                   RECcse(1, 0, nnur) = RECcse(1, 0, nnur)
      &                                 + 2*auxrec1(1, 1) - auxrec1(2, 1)
                   auxrec1(maxrecener + 2, 1)

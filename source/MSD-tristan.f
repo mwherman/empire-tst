@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: MSD-tristan.f,v 1.5 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: MSD-tristan.f,v 1.6 2003-06-30 22:01:48 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3042,7 +3042,7 @@ C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667
       somj = 0.0
       DO j = 1, NLW, LTUrbo
-         xj = SQRT(FLOAT(j)**2 + XJLv(1, 0)**2)
+         xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg, 0)**2)
          phdj(j) = 0.0
          w = (xj + 1.0)*xj/2./SIG
          IF(w.LE.50.D0)THEN

@@ -117,7 +117,7 @@ C-M    LSC  4  C4SORT.TMP scratch file.
 C-M    LKB  5  Default input.
 C-M    LTT  6  Default output.
 C-
-      PARAMETER    (MXEN=5000,LCH=30,MXAL=20)
+      PARAMETER    (MXEN=5000,LCH=30,MXAL=200)
       CHARACTER*132 REC
       CHARACTER*40  FLIN,FLC4,FLOU,FLSC
       CHARACTER*35  REF

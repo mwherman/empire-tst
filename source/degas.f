@@ -153,8 +153,8 @@ C
       EEXcdegas0 = EXCn      ! CN excitation energy (MeV)
       ESTepdegas = DE        ! Energy step (MeV)
       AKDegas = 100.0        ! Kalbach constant for matrix element (MeV**3)
-      JGSdegas = XJLv(1, 0)  ! Target g.s. spin
-      CJGsdegas = XJLv(1, 1) ! CN     g.s. spin
+      JGSdegas = XJLv(LEVtarg, 0)  ! Target g.s. spin
+      CJGsdegas = XJLv(LEVtarg, 1) ! CN     g.s. spin
       BEProjdegas = 0.0      ! Binding of projectile if not n or p
       GAQdegas = 0.0         ! Quadrupole reaction (default=0.001)
 C

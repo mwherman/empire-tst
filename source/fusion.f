@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-04-02 21:47:40 $
-Ccc   * $Id: fusion.f,v 1.7 2003-04-02 21:47:40 herman Exp $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: fusion.f,v 1.8 2003-06-30 22:01:48 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -96,11 +96,11 @@ C     wf = W2*EIN*rmu
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
 C
-      coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+      coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
       maxlw = NDLW
-      IF(AINT(XJLv(1,Ntrg) + SEJc(Npro)) - XJLv(1, Ntrg) - SEJc(Npro)
-     &   .EQ.0.0D0)S1 = 1.0
+      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(1, Ntrg) - 
+     & SEJc(Npro).EQ.0.0D0)S1 = 1.0
       csmax = 0.0
       CSFus = 0.0
       DO i = 1, NDLW
@@ -191,9 +191,9 @@ C-----calculation of transmission coefficients ----done------
          ELTl(i) = stl(i)
       ENDDO
 C-----channel spin min and max
- 100  eee = SEJc(Npro) - XJLv(1, Ntrg)
+ 100  eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
       smin = ABS(eee)
-      smax = SEJc(Npro) + XJLv(1, Ntrg)
+      smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
       mul = smax - smin + 1.0001
       CSFus = 0.0
 C-----do loop over parity
@@ -210,7 +210,8 @@ C-----do loop over compound nucleus spin
                lmax = MIN0(NDLW, lmax)
                lmax = MIN0(maxlw, lmax)
                DO k = lmin, lmax
-                  sum = sum + PAR(ip, LVP(1, 0), k - 1)*stl(k)*DRTl(k)
+                  sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)*
+     &                  DRTl(k)
                ENDDO
             ENDDO
             POP(NEX(1), j, ip, 1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
@@ -283,9 +284,9 @@ C-----------in the SCAT2 calculated reaction XS
             ENDDO
          ENDIF
 C--------channel spin min and max
-         eee = SEJc(Npro) - XJLv(1, Ntrg)
+         eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
          smin = ABS(eee)
-         smax = SEJc(Npro) + XJLv(1, Ntrg)
+         smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
          mul = smax - smin + 1.0001
          CSFus = 0.0
          DO ip = 1, 2 ! over parity
@@ -300,7 +301,7 @@ C--------channel spin min and max
                   lmax = MIN0(NDLW, lmax)
                   lmax = MIN0(maxlw, lmax)
                   DO k = lmin, lmax
-                     sum = sum + PAR(ip, LVP(1, 0), k - 1)*stl(k)
+                     sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)
      &                     *DRTl(k)
                   ENDDO
                ENDDO
@@ -325,7 +326,7 @@ C
   300 CONTINUE      
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
-      NLW = NLW + 13
+c     NLW = NLW + 13
 C-----check whether NLW is not larger then max spin at which nucleus
 C-----is still stable
       IF(NLW.GT.JSTab(1))THEN

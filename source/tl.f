@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-12-06 09:43:36 $
-Ccc   * $Id: tl.f,v 1.10 2002-12-06 09:43:36 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: tl.f,v 1.11 2003-06-30 22:01:48 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -2236,7 +2236,8 @@ C
      &            SEJc(Nejc)
             WRITE(6, '(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)')'RESIDUAL: A=', 
      &            INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=', 
-     &            SNGL(XJLv(1, Nnuc)), ' P=', INT(LVP(1, Nnuc))
+     &            SNGL(XJLv(LEVtarg, Nnuc)), ' P=', 
+     &            INT(LVP(LEVtarg, Nnuc))
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN(UNIT = 46, STATUS = 'unknown', 
@@ -2266,7 +2267,7 @@ C
      &         SEJc(Nejc)
          WRITE(6, '(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)')'RESIDUAL: A=', 
      &         INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=', 
-     &         SNGL(XJLv(1, Nnuc)), ' P=', INT(LVP(1, Nnuc))
+     &         SNGL(XJLv(LEVtarg, Nnuc)), ' P=', INT(LVP(LEVtarg, Nnuc))
          WRITE(6, *)'WARNING: FOR THIS RESIDUAL NUCLEUS'
          WRITE(6, *)'WARNING: AVAILABLE ENERGY IS ALWAYS '
          WRITE(6, *)'WARNING: BELOW COULOMB BARRIER'
@@ -2341,7 +2342,7 @@ C--------Selecting only ground state
 C-----------Averaging over particle and target spin, summing over channel spin JC
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
-     &                   /DBLE(2*XJLv(1, Nnuc) + 1)
+     &                   /DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
             Maxlw = MAX(Maxlw, l)
          ENDIF
       ENDDO
@@ -2461,7 +2462,7 @@ C--------Selecting only ground state
 C-----------Averaging over particle and target spin, summing over channel spin JC
             TTLl(J, l) = TTLl(J, l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
-     &                   /DBLE(2*XJLv(1, Nnuc) + 1)
+     &                   /DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
             lmax = MAX(lmax, l)
          ENDIF
       ENDDO
@@ -3128,20 +3129,21 @@ C-----CARD 3
       WRITE(1, '(a50)')ECIs2
 C-----CARD 4
 C-----make sure that all contributions to s-wave scattering are included
-      jdm = XJLv(1, Nnuc) + SEJc(Nejc) + 0.6
+      jdm = XJLv(LEVtarg, Nnuc) + SEJc(Nejc) + 0.6
       WRITE(1, '(4i5,30x,i5)')ncoll, njmax, iterm, npp, jdm
 C-----Matching radius
 C-----CARD 5
       WRITE(1, '(10x,f10.5)')rmatch
       ch = '-'
-      IF(LVP(1, Nnuc).GT.0)ch = '+'
+      IF(LVP(LEVtarg, Nnuc).GT.0)ch = '+'
 C
 C-----Important: Instead of using TARGET SPIN (XJLV(1,NNUC)) and PARITY(ch)
 C-----A.Koning always used in PREGNASH SPIN=0, ch='+'
 C-----This is not TRUE for rotational model so we are using the target spin here
 C------groundstate
 C     write(1,'(f5.2,2i2,a1,5f10.5)') XJLV(1,NNUC),0,1,ch,EL,
-      WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLv(1, Nnuc), 0, 1, ch, elab, 
+      WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLv(LEVtarg, Nnuc), 0, 1, ch, 
+     &                                elab, 
      &                                SEJc(Nejc), xmas_nejc, xmas_nnuc, 
      &                                Z(Nnuc)*ZEJc(Nejc)
 C     &                                 ((AEJc(Nejc)

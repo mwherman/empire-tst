@@ -85,6 +85,8 @@ CRL 	Critical l-value for HI fusion  set to VAL (default: 0).
 DFUS 	Diffuseness in the transmission coefficients for HI fusion set to VAL 
       (default: 1.).
 
+TRGLEV   Excited level of the target is set to VAL (default: 1 (ground state)).
+
 Widths fluctuations (HRTW)
 --------------------------
 

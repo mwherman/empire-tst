@@ -1,6 +1,6 @@
 
-             Changes in version 2.19beta1 with respect to 2.18  
-                      Brookhaven, April  2003
+             Changes in version 2.19beta2 with respect to 2.18  
+                      Brookhaven, June 30  2003
 
 1.  Error in the Wilmore-Hodgson omp corrected.
     VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
@@ -40,6 +40,29 @@
 16. Three-hump fission with underbarrier effect implemented (HRTW and 
     more level density options still missing) (R. Capote, M.Herman, 
     M. Sin, and A. Ventura).
+17. Possibility of excited targets included (M. Herman).
+18. PostScript (and eps) files produced from within ZVV viewer are 
+    stored in the work directory with a name following standard 
+    convention (M. Herman).
+19. 'mb' printed after gamma emission intensity of discrete transitions
+    in oder to be able to plot respective excitation functions directly
+    from the EMPIRE output (*.lst) (M. Herman).
+20. 'zvpl' script for direct plotting from the EMPIRE output modified.
+    Additional window to paste a pattern is being opened. A bit more
+    cumbersome than before but more reliable. Before many patterns
+    were misunderstood due to skipping blanks in the pattern and garbage
+    plot was produced (M. Herman).
+21. Maximum number of aliases in c4sort.f increased to 200.
+22. 'reaction' and 'titles' files used by X4TOC4 corrected and extended 
+    to cover proton induced reactions (still needs a consistent check) 
+    (M. Herman).
+23. On-line retrival of the EXFOR data from the remote database implemented.
+    At the moment works only at nuclear data centers but will be extended
+    to reading from the EXFOR CD-ROM (V. Zerkin & M. Herman).
+24. Spctra for the ENDF formatting printed also for the proton induced 
+    reactions (M. Herman).
+    
+
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

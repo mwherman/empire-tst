@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-04-02 21:47:40 $
-Ccc   * $Id: main.f,v 1.10 2003-04-02 21:47:40 herman Exp $
+Ccc   * $Date: 2003-06-30 22:01:48 $
+Ccc   * $Id: main.f,v 1.11 2003-06-30 22:01:48 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1006,7 +1006,7 @@ C--------
             xnhms = NHMs
             debinhms = DE
             IF(debinhms.LT.1.0D0)debinhms = 1.0
-            CALL DDHMS(IZAejc(0), xizat, XJLv(1, 0), EINl, 
+            CALL DDHMS(IZAejc(0), xizat, XJLv(LEVtarg, 0), EINl, 
      &                 CSFus*corrmsd, CHMs, debinhms, xnhms, 0, 1, 0)
             CSEmis(1, 1) = CSEmis(1, 1) + CSHms(1)
             CSEmis(2, 1) = CSEmis(2, 1) + CSHms(2)
@@ -1487,7 +1487,8 @@ C     fisfis d
       CLOSE(80)
       CLOSE(79)
 C     fisfisu
-      IF(ENDf.EQ.1.0 .AND. AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0)THEN
+C     IF(ENDf.EQ.1.0 .AND. AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0)THEN
+      IF(ENDf.EQ.1.0)THEN
 C-----
 C-----ENDF spectra printout (exclusive representation MF=3&6, to be used
 C-----only below the threshold for 3 particle emission, the alternative

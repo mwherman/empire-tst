@@ -28,9 +28,12 @@ while [ "$repeat" != "n" ]
            gvim $file.lst  
         fi            
         echo ' '
-        echo -n 'Paste search pattern here:'
+        echo -n 'Paste search pattern as second line in the'
+        echo 'editor window that just have opened, then close editor, '
+        echo '(saving the file), return to THIS window and hit return.'
+        gvim PATTERN
         read spattern
-        echo $spattern >>PATTERN
+#       echo $spattern >>PATTERN
         echo -n 'Label this curve:'
         read label 
         echo 'Fun: '$label >>PLOT.zvd
