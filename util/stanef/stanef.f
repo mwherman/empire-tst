@@ -79,7 +79,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_STANEF
-!/      PUBLIC :: INPUT_DATA, I_DATA, ISUCCESS
+!/      PUBLIC :: INPUT_DATA, STANEF_DATA, ISUCCESS
 !/!
 !...LWI, DVF
 !/        PUBLIC :: IRERUN
@@ -91,7 +91,7 @@
 !...VMS, UNX, ANSI, WIN, LWI, DVF
       CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '0.1'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -167,7 +167,7 @@
          CHARACTER(LEN=1) :: I151
       END TYPE INPUT_DATA
 !
-      TYPE(INPUT_DATA) I_DATA
+      TYPE(INPUT_DATA) STANEF_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -282,23 +282,23 @@
 !     INITIALIZE INPUT PARAMETERS
 !
    10 IF(IMDC.LT.4) THEN
-         I_DATA%INFIL = '*'
-         I_DATA%OUTFIL = '*'
-         I_DATA%MODE = 0
-         I_DATA%LABEL = 0
-         I_DATA%LTEXT = ' '
-         I_DATA%INDX = 'Y'
-         I_DATA%IDLTES = 'Y'
-         I_DATA%I151 = 'Y'
+         STANEF_DATA%INFIL = '*'
+         STANEF_DATA%OUTFIL = '*'
+         STANEF_DATA%MODE = 0
+         STANEF_DATA%LABEL = 0
+         STANEF_DATA%LTEXT = ' '
+         STANEF_DATA%INDX = 'Y'
+         STANEF_DATA%IDLTES = 'Y'
+         STANEF_DATA%I151 = 'Y'
       END IF
       SELECT CASE (IMDC)
          CASE (0)
             IW = 'N'
             IONEPASS = 0
-         CASE(1)
+         CASE(1,2,3)
             IF(ILENP.NE.0)  THEN
-               CALL TOKEN(INPAR,'%',1,I_DATA%INFIL)
-               CALL TOKEN(INPAR,'%',2,I_DATA%OUTFIL)
+               CALL TOKEN(INPAR,'%',1,STANEF_DATA%INFIL)
+               CALL TOKEN(INPAR,'%',2,STANEF_DATA%OUTFIL)
                CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
                IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
@@ -312,10 +312,7 @@
                IW = '*'
                IONEPASS = 0
             END IF
-         CASE (2,3)
-            IW = '*'
-            IONEPASS = 0
-	  CASE (4,5,6)
+         CASE (4,5,6)
             IW = 'N'
             IONEPASS = 1
       END SELECT
@@ -323,67 +320,64 @@
 !     GET INPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%INFIL.EQ.'*') THEN
+         IF(STANEF_DATA%INFIL.EQ.'*') THEN
             IF(IMDC.NE.0) THEN
                WRITE(OUTPUT,FMT=TFMT)                                   &       
      &             ' Input File Specification          - '
             END IF
-            READ(INPUT,'(A)') I_DATA%INFIL
+            READ(INPUT,'(A)') STANEF_DATA%INFIL
          ELSE
             WRITE(OUTPUT,'(/2A)') ' Input file - ',                     &       
-     &           TRIM(I_DATA%INFIL)
+     &           TRIM(STANEF_DATA%INFIL)
          END IF
       END IF
 !
 !     SEE IF INPUT INDICATES FILE TERMINATION
 !
-      IF(I_DATA%INFIL.EQ.' '.OR.I_DATA%INFIL.EQ.'DONE')                 &       
+      IF(STANEF_DATA%INFIL.EQ.' '.OR.STANEF_DATA%INFIL.EQ.'DONE')       &       
      &             GO TO 100
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
-      INQUIRE(FILE=I_DATA%INFIL,EXIST=IEXIST)
+      INQUIRE(FILE=STANEF_DATA%INFIL,EXIST=IEXIST)
       IF(.NOT.IEXIST)  THEN
          IF(IMDC.LT.4) THEN
             WRITE(OUTPUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
-            GO TO 100
          END IF
          SELECT CASE (IMDC)
             CASE (0)
                CLOSE(UNIT=INPUT)
-            CASE (1)
+            CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
-            CASE (2,3)
-               GO TO 10
          END SELECT
-         ISUCCESS = 1
+         ISUCCESS = 0
          GO TO 90
       END IF
 !
 !     GET OUTPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%OUTFIL.EQ.'*' ) THEN
+         IF(STANEF_DATA%OUTFIL.EQ.'*' ) THEN
             IF(IMDC.NE.0) THEN
                WRITE(OUTPUT,FMT=TFMT)                                   &       
      &           ' Output ENDF File Specification    - '
             END IF
-            READ(INPUT,'(A)') I_DATA%OUTFIL
+            READ(INPUT,'(A)') STANEF_DATA%OUTFIL
          ELSE
             WRITE(OUTPUT,'(/2A)') ' Output file - ',                    &       
-     &             TRIM(I_DATA%OUTFIL)
+     &             TRIM(STANEF_DATA%OUTFIL)
          END IF
       END IF
-      IF(I_DATA%OUTFIL.EQ.' ')  THEN
+      IF(STANEF_DATA%OUTFIL.EQ.' ')  THEN
          IF(IMDC.EQ.1) THEN
-            I_DATA%OUTFIL = I_DATA%INFIL
+            STANEF_DATA%OUTFIL = STANEF_DATA%INFIL
          ELSE
-            IPER = INDEX(I_DATA%INFIL,'.')
+            IPER = INDEX(STANEF_DATA%INFIL,'.')
             IF(IPER.NE.0) THEN
-               I_DATA%OUTFIL = I_DATA%INFIL(1:IPER)//'STN'
+               STANEF_DATA%OUTFIL = STANEF_DATA%INFIL(1:IPER)//'STN'
             ELSE
-               IPER = LEN_TRIM(I_DATA%INFIL)
-               I_DATA%OUTFIL = I_DATA%INFIL(1:IPER)//'.STN'
+               IPER = LEN_TRIM(STANEF_DATA%INFIL)
+               STANEF_DATA%OUTFIL = STANEF_DATA%INFIL(1:IPER)//'.STN'
             END IF
         END IF
       END IF
@@ -395,19 +389,19 @@
             IF(IMDC.NE.0) THEN
                WRITE(OUTPUT,FMT=TFMT)                                   &       
      &           '     Enter ENDF Tape Label Number - '
-               READ(INPUT,'(BN,I4)',ERR=15) I_DATA%LABEL
-               IF(I_DATA%LABEL.GT.0) THEN
+               READ(INPUT,'(BN,I4)',ERR=15) STANEF_DATA%LABEL
+               IF(STANEF_DATA%LABEL.GT.0) THEN
                   WRITE(OUTPUT,'(/5X,A/7A)')                            &       
      &            'Enter ENDF Tape Label Text (66 characters maximum)', &       
      &            '        ',(FIELDF,J=1,6)
                   WRITE(OUTPUT,TFMT) '     ** '
-                  READ(INPUT,'(A)') I_DATA%LTEXT
+                  READ(INPUT,'(A)') STANEF_DATA%LTEXT
               END IF
             ELSE
                READ(INPUT,'(A)') TREC
                CALL TOKEN(TREC,',',1,BUF)
-               READ(BUF,'(BN,I4)',ERR=15) I_DATA%LABEL
-               CALL TOKEN(TREC,',',2,I_DATA%LTEXT)
+               READ(BUF,'(BN,I4)',ERR=15) STANEF_DATA%LABEL
+               CALL TOKEN(TREC,',',2,STANEF_DATA%LTEXT)
             END IF
          END IF
       END IF
@@ -441,49 +435,49 @@
          IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
             WRITE(OUTPUT,TFMT)  '     Output Tape Mode '//              &       
      &                      'CHARACTER(0) or BINARY(1) - '
-            READ(INPUT,'(BN,I1)',ERR=40) I_DATA%MODE
+            READ(INPUT,'(BN,I1)',ERR=40) STANEF_DATA%MODE
          ELSE IF(IMDC.EQ.0) THEN
             CALL TOKEN(PARAMS,',',1,BUF)
-            READ(BUF,'(BN,I1)',ERR=40)  I_DATA%MODE
+            READ(BUF,'(BN,I1)',ERR=40)  STANEF_DATA%MODE
          END IF
-  40     IF(I_DATA%MODE.EQ.1) THEN
-            I_DATA%INDX = 'N'
-            I_DATA%IDLTES = 'N'
-            I_DATA%I151 = 'N'
+  40     IF(STANEF_DATA%MODE.EQ.1) THEN
+            STANEF_DATA%INDX = 'N'
+            STANEF_DATA%IDLTES = 'N'
+            STANEF_DATA%I151 = 'N'
          ELSE
-            I_DATA%MODE = 0
+            STANEF_DATA%MODE = 0
             IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
                WRITE(OUTPUT,TFMT)   '     Create a New Directory '//    &       
      &                             '(Y(es),N(o))? - '
-               READ(INPUT,'(A)') I_DATA%INDX
+               READ(INPUT,'(A)') STANEF_DATA%INDX
             ELSE IF(IMDC.EQ.0) THEN
-               CALL TOKEN(PARAMS,',',2,I_DATA%INDX)
+               CALL TOKEN(PARAMS,',',2,STANEF_DATA%INDX)
             END IF
-            IC = ICHAR(I_DATA%INDX)
-            IF(IC.GT.96.AND.IC.LT.123)    I_DATA%INDX = CHAR(IC-32)
-            IF(I_DATA%INDX.NE.'N') I_DATA%INDX = 'Y'
+            IC = ICHAR(STANEF_DATA%INDX)
+            IF(IC.GT.96.AND.IC.LT.123)    STANEF_DATA%INDX = CHAR(IC-32)
+            IF(STANEF_DATA%INDX.NE.'N') STANEF_DATA%INDX = 'Y'
             IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
                WRITE(OUTPUT,TFMT)  '     Convert Data Fields to '//     &       
      &                            'Standard Form (Y(es),N(o))? - '
-               READ(INPUT,'(A)') I_DATA%IDLTES
+               READ(INPUT,'(A)') STANEF_DATA%IDLTES
             ELSE IF(IMDC.EQ.0) THEN
-               CALL TOKEN(PARAMS,',',3,I_DATA%IDLTES)
+               CALL TOKEN(PARAMS,',',3,STANEF_DATA%IDLTES)
             END IF
-            IC = ICHAR(I_DATA%IDLTES)
-            IF(IC.GT.96.AND.IC.LT.123)    I_DATA%IDLTES = CHAR(IC-32)
-            IF(I_DATA%IDLTES.NE.'N') I_DATA%IDLTES = 'Y'
-            IF(I_DATA%IDLTES.EQ.'Y') THEN
+            IC = ICHAR(STANEF_DATA%IDLTES)
+            IF(IC.GT.96.AND.IC.LT.123) STANEF_DATA%IDLTES = CHAR(IC-32)
+            IF(STANEF_DATA%IDLTES.NE.'N') STANEF_DATA%IDLTES = 'Y'
+            IF(STANEF_DATA%IDLTES.EQ.'Y') THEN
                IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
                   WRITE(OUTPUT,TFMT)   '     Convert Resonance '//      &       
      &                       'Parameter Fields to Standard '//          &       
      &                                'Form (Y(es),N(o))? - '
-                  READ(INPUT,'(A)') I_DATA%I151
+                  READ(INPUT,'(A)') STANEF_DATA%I151
                ELSE IF(IMDC.EQ.0) THEN
-                  CALL TOKEN(PARAMS,',',4,I_DATA%I151)
+                  CALL TOKEN(PARAMS,',',4,STANEF_DATA%I151)
                END IF
-               IC = ICHAR(I_DATA%I151)
-               IF(IC.GT.96.AND.IC.LT.123)    I_DATA%I151 = CHAR(IC-32)
-               IF(I_DATA%I151.NE.'N') I_DATA%I151 = 'Y'
+               IC = ICHAR(STANEF_DATA%I151)
+               IF(IC.GT.96.AND.IC.LT.123) STANEF_DATA%I151 = CHAR(IC-32)
+               IF(STANEF_DATA%I151.NE.'N') STANEF_DATA%I151 = 'Y'
             END IF
          END IF
       END IF
@@ -491,40 +485,40 @@
 !     OPEN INPUT AND OUTPUT FILES
 !
    50 OPEN(UNIT=ITAPE,ACCESS='SEQUENTIAL',STATUS='OLD',                 &       
-     &   FILE=I_DATA%INFIL,ACTION='READ')
-      IF(I_DATA%MODE.EQ.0) THEN
+     &   FILE=STANEF_DATA%INFIL,ACTION='READ')
+      IF(STANEF_DATA%MODE.EQ.0) THEN
 !+++MDC+++
 !...VMS
 !/         OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,          &       
-!/     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+!/     &       FILE=STANEF_DATA%OUTFIL,CARRIAGECONTROL='LIST')
 !...WIN, DVF, UNX, LWI, ANS, MOD
          OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,            &       
-     &       FILE=I_DATA%OUTFIL)
+     &       FILE=STANEF_DATA%OUTFIL)
 !---MDC---
       ELSE
          OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,            &       
-     &       FILE=I_DATA%OUTFIL,FORM='UNFORMATTED')
+     &       FILE=STANEF_DATA%OUTFIL,FORM='UNFORMATTED')
       END IF
 !
 !     OUTPUT SELECTED OPTIONS
 !
       IF(IMDC.LT.4) THEN
          WRITE(OUTPUT,'(/A)')' OPTION(S) SELECTED'
-         IF(I_DATA%LABEL.LT.0) THEN
+         IF(STANEF_DATA%LABEL.LT.0) THEN
             WRITE(OUTPUT,'(15X,A)') 'OUTPUT FILE WILL NOT BE LABELED'
-         ELSE IF(I_DATA%LABEL.EQ.0) THEN
+         ELSE IF(STANEF_DATA%LABEL.EQ.0) THEN
             WRITE(OUTPUT,'(15X,A)') 'OUTPUT FILE WILL HAVE THE SAME'//  &       
      &                   ' LABEL AS THE INPUT'
          ELSE
             WRITE(OUTPUT,'(15X,A)') 'OUTPUT FILE WILL HAVE A NEW LABEL'
          END IF
-         IF(I_DATA%MODE.EQ.0) THEN
+         IF(STANEF_DATA%MODE.EQ.0) THEN
             WRITE(OUTPUT,'(15X,A)') 'MATERIALS WILL BE RESEQUENCED'
-            IF(I_DATA%INDX.EQ.'Y')  THEN
+            IF(STANEF_DATA%INDX.EQ.'Y')  THEN
                WRITE(OUTPUT,'(15X,A)') 'A NEW INDEX WILL BE GENERATED'
             END IF
-            IF(I_DATA%IDLTES.EQ.'Y')   THEN
-               IF(I_DATA%I151.NE.'N') THEN
+            IF(STANEF_DATA%IDLTES.EQ.'Y')   THEN
+               IF(STANEF_DATA%I151.NE.'N') THEN
                   WRITE(OUTPUT,'(15X,A)')                               &       
      &                 'DATA FIELDS WILL BE CONVERTED TO STANDARD FORM'
                ELSE
@@ -542,7 +536,7 @@
 !     IF NEW INDEX IS TO BE GENERATED CREATE CONTENTS IN A SCRATCH FILE
 !      IN A PASS THROUGH THE TAPE
 !
-      IF(I_DATA%INDX.EQ.'Y')   CALL STRIP
+      IF(STANEF_DATA%INDX.EQ.'Y')   CALL STRIP
 !
 !     PROCESS TAPE LABEL
 !
@@ -555,23 +549,23 @@
 !
 !     NEW TAPE TO BE LABELED
 !
-      IF(I_DATA%LABEL.GE.0)  THEN
+      IF(STANEF_DATA%LABEL.GE.0)  THEN
 !
 !        COPY EXISTING LABEL?
 !
-         IF(I_DATA%LABEL.EQ.0) THEN
+         IF(STANEF_DATA%LABEL.EQ.0) THEN
             IF(MAT.EQ.0) GO TO 70
-            I_DATA%LABEL = MAT
-            I_DATA%LTEXT = CTEXT
+            STANEF_DATA%LABEL = MAT
+            STANEF_DATA%LTEXT = CTEXT
          END IF
 !
 !        WRITE NEW LABEL IF NEEDED
 !
-         IF(I_DATA%MODE.EQ.0)  THEN
-            WRITE(OTAPE,'(A,I4,A)')  I_DATA%LTEXT,                      &       
-     &               I_DATA%LABEL,' 0  0    0'
+         IF(STANEF_DATA%MODE.EQ.0)  THEN
+            WRITE(OTAPE,'(A,I4,A)')  STANEF_DATA%LTEXT,                 &       
+     &               STANEF_DATA%LABEL,' 0  0    0'
          ELSE
-            WRITE(OTAPE) I_DATA%LABEL,ZERO,ZERO,I_DATA%LTEXT
+            WRITE(OTAPE) STANEF_DATA%LABEL,ZERO,ZERO,STANEF_DATA%LTEXT
          END IF
       END IF
 !
@@ -581,7 +575,7 @@
 !
 !     CLOSE DATA FILES
 !
-      IF(I_DATA%INDX.EQ.'Y')    CLOSE(UNIT=IDIR,STATUS='DELETE')
+      IF(STANEF_DATA%INDX.EQ.'Y')    CLOSE(UNIT=IDIR,STATUS='DELETE')
       CLOSE(UNIT=ITAPE)
       CLOSE(UNIT=OTAPE)
 !
@@ -672,8 +666,8 @@
 !
 !     SIMPLE RESEQUENCING OF ASCII FORMAT FILE
 !
-      IF((I_DATA%INDX.EQ.'N'.AND.I_DATA%IDLTES.EQ.'N')                  &       
-     &        .AND.I_DATA%MODE.EQ.0)      THEN
+      IF((STANEF_DATA%INDX.EQ.'N'.AND.STANEF_DATA%IDLTES.EQ.'N')        &       
+     &        .AND.STANEF_DATA%MODE.EQ.0)      THEN
          NFOR = 6
          DO WHILE (MAT.GE.0)
             CALL COPYMA(1)
@@ -702,7 +696,7 @@
          CASE (1)
             CALL FILE1
 !*****IF FORMAT NOT CHANGED SIMPLY COPY AND RESEQUENCE REST OF MATERIAL
-            IF(I_DATA%MODE.EQ.0.AND.I_DATA%IDLTES.EQ.'N') THEN
+            IF(STANEF_DATA%MODE.EQ.0.AND.STANEF_DATA%IDLTES.EQ.'N') THEN
                CALL COPYMA(0)
                NSEQ = 0
                NFOR = 0
@@ -786,7 +780,7 @@
 !
 !     WRITE EACH RECORD
 !
-      IF(I_DATA%MODE.EQ.0)   THEN
+      IF(STANEF_DATA%MODE.EQ.0)   THEN
          IF(NFOR.LT.6) THEN
            IF(MT.EQ.0.OR.MF.EQ.0) IOUTS = 1
            IF(MAT.GE.0)   THEN
@@ -903,7 +897,7 @@
       INTEGER(KIND=I4) :: K,N,NN
       REAL(KIND=R4) :: C1,C2,ZA
 !
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
       INTEGER(KIND=I4), DIMENSION(NSECMAX) :: MFTD,NCD,SMODD
 !
 !     DEFINE ELEMENT SYMBOLS
@@ -940,12 +934,14 @@
 !
 !     BUILD Z-S-A FOR CARD 5
 !
-      ZSA = ' '
-      IZA = IFIX(ZA+.001)
-      IA = MOD(IZA,1000)
-      IZ = IZA/1000
-      WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
-      IF(IMETA.NE.0) ZSA(11:11) = 'M'
+      IF(NSUB.NE.12) THEN
+         ZSA = ' '
+         IZA = IFIX(ZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+         IF(IMETA.NE.0) ZSA(11:11) = 'M'
+      END IF
 !
 !     READ THIRD CONT RECORD IF ENDF-6 OR LATER
 !
@@ -967,7 +963,7 @@
 !
 !     DIRECTORY NOT REVISED SO COPY NEXT CONT RECORD
 !
-      IF(I_DATA%INDX.NE.'Y')  THEN
+      IF(STANEF_DATA%INDX.NE.'Y')  THEN
          CALL CONT(C1,C2,L1,L2,NCDS,NXC)
          NB = 1
          NDIF = 0
@@ -999,7 +995,11 @@
          DO N=1,NTRD
             NPROC = NPROC + 1
             READ(ITAPE,'(A)')   TEXTS(NPROC)
-            IF(NPROC.EQ.1) TEXTS(NPROC)(1:11) = ZSA
+            IF(NPROC.EQ.1.AND.NSUB.NE.12) THEN
+               TEXTS(NPROC)(1:11) = ZSA
+            ELSE
+               CALL UPSTR(TEXTS(NPROC)(1:11))
+            END IF
             ITEX = TEXTS(NPROC)(1:4)
             IF(ITEX.EQ.'----')   NPROC = NPROC - 1
             IF(NPROC.EQ.3)   THEN
@@ -1046,7 +1046,7 @@
 !     OUTPUT THE CONT RECORD
 !
       N2 = NSEC
-      IF(I_DATA%MODE.EQ.0)  THEN
+      IF(STANEF_DATA%MODE.EQ.0)  THEN
          WRITE(OTAPE,'(2A,4I11,I4,I2,I3,I5)')  FLOAT1,FLOAT2,           &       
      &          L1,L2,N1,N2,MAT,MF,MT,NSEQ
       ELSE
@@ -1071,13 +1071,13 @@
 !
 !     PROCESS IF OLD DIRECTORY IS RETAINED
 !
-      IF(I_DATA%INDX.EQ.'N')     THEN
+      IF(STANEF_DATA%INDX.EQ.'N')     THEN
          IF(NXC.GT.0)   THEN
             DO N=1,NXC
                READ(ITAPE,'(22X,3I11,I11,I4,I2,I3,I5)')  MFC,MTC,       &       
      &                NCC,MODC,MAT,MF,MT
                NSEQ = MIN0(NSEQ+1,99999)
-               IF(I_DATA%MODE.EQ.0)  THEN
+               IF(STANEF_DATA%MODE.EQ.0)  THEN
                   WRITE(OTAPE,'(22X,3I11,I11,I4,I2,I3,I5)') MFC,MTC,    &       
      &                NCC,MODC,MAT,MF,MT,NSEQ
                ELSE
@@ -1125,7 +1125,7 @@
 !
 !     IF DATA FIELDS ARE NOT TO BE CONVERTED, RETURN
 !
-      IF(I_DATA%IDLTES.EQ.'Y'.OR.I_DATA%MODE.EQ.1) THEN
+      IF(STANEF_DATA%IDLTES.EQ.'Y'.OR.STANEF_DATA%MODE.EQ.1) THEN
 !
 !        PROCESS NEXT HEAD CARD
 !
@@ -2775,7 +2775,7 @@
 !
 !     WRITE THE TEXT RECORD
 !
-      IF(I_DATA%MODE.EQ.1)  THEN
+      IF(STANEF_DATA%MODE.EQ.1)  THEN
          WRITE(OTAPE) MAT,MF,MT,TEXT
       ELSE
          NSEQ = MIN0(NSEQ+1,99999)
@@ -2809,7 +2809,7 @@
 !
 !     OUTPUT RECORD
 !
-      IF(I_DATA%MODE.EQ.1)   THEN
+      IF(STANEF_DATA%MODE.EQ.1)   THEN
 !
 !        BINARY MODE
 !
@@ -2871,7 +2871,7 @@
 !
 !     PROCESS THE CONT-LIKE PORTION OF RECORD
 !
-      IF(I_DATA%MODE.EQ.0)  THEN
+      IF(STANEF_DATA%MODE.EQ.0)  THEN
          CALL CONT(C1,C2,L1,L2,N1,N2)
       ELSE
          READ(ITAPE,'(2E11.4,4I11)') C1,C2,L1,L2,N1,N2
@@ -2879,7 +2879,8 @@
 !
 !     SPECIAL PROCESSING FOR FILE 2 WHEN DATA NOT TO BE REFORMATED
 !
-      IF(I_DATA%I151.NE.'Y'.AND.MT.EQ.151.AND.I_DATA%MODE.EQ.0) THEN
+      IF(STANEF_DATA%I151.NE.'Y'.AND.MT.EQ.151.                         &       
+     &             AND.STANEF_DATA%MODE.EQ.0) THEN
          NCS = (N1+5)/6
          DO N=1,NCS
             READ(ITAPE,'(A)')  RECORD
@@ -2894,7 +2895,7 @@
 !
 !        OUTPUT THE RECORD
 !
-         IF(I_DATA%MODE.EQ.1)   THEN
+         IF(STANEF_DATA%MODE.EQ.1)   THEN
 !
 !           OUTPUT IN BINARY MODE
 !
@@ -2942,7 +2943,7 @@
 !
 !     PROCESS A TAB2-LIKE PORTION OF RECORD
 !
-      IF(I_DATA%MODE.EQ.0) THEN
+      IF(STANEF_DATA%MODE.EQ.0) THEN
          CALL CANT2(C1,C2,L1,L2,N1,N2)
       ELSE
          READ(ITAPE,'(2E11.4,4I11)') C1,C2,L1,L2,N1,N2
@@ -2956,7 +2957,7 @@
 !
 !     OUTPUT RECORD
 !
-      IF(I_DATA%MODE.EQ.1)  THEN
+      IF(STANEF_DATA%MODE.EQ.1)  THEN
 !
 !        BINARY MODE
 !
@@ -3010,7 +3011,7 @@
 !
 !     PROCESS THE CONT-LIKE PORTION OF RECORD
 !
-      IF(I_DATA%MODE.EQ.0)  THEN
+      IF(STANEF_DATA%MODE.EQ.0)  THEN
          CALL CONT(C1,C2,L1,L2,N1,N2)
       ELSE
          READ(ITAPE,'(2E11.4,4I11)') C1,C2,L1,L2,N1,N2
@@ -3022,7 +3023,7 @@
 !
 !     WRITE INTERPOLATION TABLE
 !
-      IF(I_DATA%MODE.EQ.1)   THEN
+      IF(STANEF_DATA%MODE.EQ.1)   THEN
 !
 !        OUTPUT IN BINARY MODE
 !
@@ -3161,6 +3162,34 @@
 !
   100 RETURN
       END SUBROUTINE TOKEN
+!
+      SUBROUTINE UPSTR(String)
+!
+!     ROUTINE TO CONVERT A STRING TO ALL UPPER CASE
+!
+!     STRING  -  CHARACTER STRING TO BE CONVERTED
+!
+      IMPLICIT NONE
+!
+!     Dummy arguments
+!
+      CHARACTER(LEN=*) :: String
+!
+!     Local variables
+!
+      CHARACTER(LEN=1),INTRINSIC :: CHAR
+      INTEGER(KIND=4) :: i,ic,l
+      INTEGER(KIND=4),INTRINSIC :: ICHAR
+      INTEGER(KIND=4),INTRINSIC :: LEN_TRIM
+!
+      l = LEN_TRIM(String)
+      DO i = 1,l
+         ic = ICHAR(String(i:i))
+         IF(ic.GT.96.AND.ic.LT.123)String(i:i) = CHAR(ic-32)
+      END DO
+!
+      RETURN
+      END SUBROUTINE UPSTR
 !
 !***********************************************************************
 !

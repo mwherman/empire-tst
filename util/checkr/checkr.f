@@ -14,15 +14,22 @@
 ! *                           FIELD ON RECORD 5 OF 1-451
 ! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
 ! *                             NAME
-! *                        5. LIMIT ON ANGULAR POINTS IN FILE 4
+! *                        5. ADD ERROR MESSAGE IF ELASTIC TRANS-
+! *                           FORMATION MATRIX IS GIVEN
+! *                        6. LIMIT ON ANGULAR POINTS IN FILE 4
 ! *                              INCREASED TO 201
-! *                        6. LIMIT ON NUMBER OF ENERGIES AT WHICH
+! *                        7. LIMIT ON NUMBER OF ENERGIES AT WHICH
 ! *                              ANGULAR DISTRIBUTIONS IN FILES 4 AND 6
-! *                               (TAB2) INCREASED TO 1500
-! *                        7. LIMIT ON NUMBER OF SUBSECTIONS IN FILE 6
+! *                               (TAB2) INCREASED TO 2000
+! *                        8. LIMIT ON NUMBER OF SUBSECTIONS IN FILE 6
 ! *                              INCREASED TO 2000
-! *                        8. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
-! *                        9. ADDED COMMAND LINE INPUT TO UNIX AND
+! *                        9. ALLOW BOTH THE A AND R PARAMETERS TO BE
+! *                           ENERGY DEPENDENT FOR KALBACH-MANN
+! *                       10. ALLOW LPT=15 FOR CHARGED-PARTICLE ELASTIC
+! *                           SCATTERING
+! *                       11. ALLOW STABLE NUCLEI IN 8-457 (NST=1)
+! *                       12. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
+! *                       13. ADDED COMMAND LINE INPUT TO UNIX AND
 ! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
 ! *                           OPTIONS ARE ASSUMED UNLESS THIRD
@@ -82,7 +89,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_CHECKR
-!/      PUBLIC :: INPUT_DATA, I_DATA, ISUCCESS
+!/      PUBLIC :: INPUT_DATA, CHECKR_DATA, ISUCCESS
 !...LWI, DVF
 !/      PUBLIC :: IRERUN
 !---MDC---
@@ -93,7 +100,7 @@
 !...VMS, UNX, ANSI, WIN, LWI, DVF
       CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '0.1'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -162,7 +169,7 @@
          INTEGER(KIND=I4) :: MATMAX
       END TYPE INPUT_DATA
 !
-      TYPE(INPUT_DATA) I_DATA
+      TYPE(INPUT_DATA) CHECKR_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -310,7 +317,7 @@
 !     NXC   NUMBER OF SECTIONS ENCOUNTERED
 !     NXC0  NUMBER OF SECTIONS IN THE DIRECTORY
 !
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
       INTEGER(KIND=I4) :: NXC,NXC0
       INTEGER(KIND=I4), DIMENSION(NSECMAX,2):: INDX
 !
@@ -452,7 +459,8 @@
 !     PROCESS NEXT SECTION
 !
       IF(MAT.NE.MATO)  THEN  ! NEW MATERIAL
-         IF(I_DATA%MATMAX.NE.0.AND.MAT.GT.I_DATA%MATMAX)   GO TO 50
+         IF(CHECKR_DATA%MATMAX.NE.0.AND.MAT.GT.CHECKR_DATA%MATMAX)      &       
+     &               GO TO 50
          NSEQP1 = NSEQP
          MATO = MAT
          MFO = 0
@@ -461,7 +469,7 @@
          I452 = 0
          N12S = 0
          MFO = 0
-         WRITE(NOUT,'(A/X,A,I5)')  CHAR(12),'CHECK MATERIAL',MATO
+         WRITE(NOUT,'(A/1X,A,I5)')  CHAR(12),'CHECK MATERIAL',MATO
          WRITE(NOUT,'(19X,A)')                                          &       
      &          '(NO ERRORS DETECTED IN SECTIONS WITHOUT COMMENTS)'
          IF(NOUT.NE.IOUT)  THEN
@@ -536,7 +544,8 @@
 !     CHECK END OF TAPE FLAG
 !
       IF(IFIN.EQ.0) THEN
-        IF(I_DATA%MATMAX.EQ.0.OR.MAT.LE.I_DATA%MATMAX)   GO TO 20
+        IF(CHECKR_DATA%MATMAX.EQ.0.OR.MAT.LE.CHECKR_DATA%MATMAX)        &       
+     &           GO TO 20
       END IF
 !
 !     CLOSE FILES
@@ -583,19 +592,19 @@
 !     INITIALIZE TO STANDARD OPTIONS
 !
       IF(IMDC.LT.4) THEN
-         I_DATA%INFIL = '*'
-         I_DATA%OUTFIL = '*'
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+         CHECKR_DATA%INFIL = '*'
+         CHECKR_DATA%OUTFIL = '*'
+         CHECKR_DATA%MATMIN = 0
+         CHECKR_DATA%MATMAX = 0
       END IF
       SELECT CASE (IMDC)
          CASE (0)
             IW = 'N'
             IONEPASS = 0
-         CASE (1)
+         CASE (1,2,3)
             IF(ILENP.NE.0)  THEN
-               CALL TOKEN(INPAR,'%',1,I_DATA%INFIL)
-               CALL TOKEN(INPAR,'%',2,I_DATA%OUTFIL)
+               CALL TOKEN(INPAR,'%',1,CHECKR_DATA%INFIL)
+               CALL TOKEN(INPAR,'%',2,CHECKR_DATA%OUTFIL)
                CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
                IF(IC.GT.96.AND.IC.LT.123) IW = CHAR(IC-32)
@@ -609,9 +618,6 @@
                IW = '*'
                IONEPASS = 0
             END IF
-         CASE (2,3)
-            IW = '*'
-            IONEPASS = 0
          CASE (4,5,6)
             IW = 'N'
             IONEPASS = 1
@@ -620,33 +626,33 @@
 !     GET INPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%INFIL.EQ.'*') THEN
+         IF(CHECKR_DATA%INFIL.EQ.'*') THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &             ' Input File Specification             - '
             END IF
-            READ(NIN,'(A)') I_DATA%INFIL
+            READ(NIN,'(A)') CHECKR_DATA%INFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Input file - ',TRIM(I_DATA%INFIL)
+            WRITE(IOUT,'(/2A)') ' Input file - ',                       &       
+     &                TRIM(CHECKR_DATA%INFIL)
          END IF
       END IF
 !
 !     SEE IF INPUT INDICATES JOB TERMINATION
 !
-      IF(I_DATA%INFIL.EQ.' '.OR.I_DATA%INFIL.EQ.'DONE') GO TO 90
+      IF(CHECKR_DATA%INFIL.EQ.' '.OR.CHECKR_DATA%INFIL.EQ.'DONE')       &       
+     &             GO TO 90
 !
 !     MAKE SURE INPUT FILE EXISTS
-!	
-      INQUIRE(FILE=I_DATA%INFIL,EXIST=IEXIST)
+!
+      INQUIRE(FILE=CHECKR_DATA%INFIL,EXIST=IEXIST)
       IF(.NOT.IEXIST)  THEN
          IF(IMDC.LT.4) THEN
             WRITE(IOUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
          END IF
          SELECT CASE (IMDC)
-            CASE (1)
+            CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
-            CASE (2,3)
-               GO TO 10
          END SELECT
          GO TO 90
       END IF
@@ -654,17 +660,18 @@
 !     GET OUTPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%OUTFIL.EQ.'*' ) THEN
+         IF(CHECKR_DATA%OUTFIL.EQ.'*' ) THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &              ' Output Message File Specification    - '
             END IF
-            READ(NIN,'(A)') I_DATA%OUTFIL
+            READ(NIN,'(A)') CHECKR_DATA%OUTFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Output file - ', TRIM(I_DATA%OUTFIL)
+            WRITE(IOUT,'(/2A)') ' Output file - ',                      &       
+     &              TRIM(CHECKR_DATA%OUTFIL)
          END IF
       END IF
-      IF(I_DATA%OUTFIL.NE.' ')  THEN
+      IF(CHECKR_DATA%OUTFIL.NE.' ')  THEN
          NOUT = JOUT             ! SETS FORTRAN OUTPUT UNIT IF DISK FILE
       END IF
 !
@@ -690,16 +697,16 @@
 !
 !     OPEN INPUT AND OUTPUT FILES
 !
-      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',FILE=I_DATA%INFIL, &       
-     &   ACTION='READ')
+      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',                   &       
+     &          FILE=CHECKR_DATA%INFIL,ACTION='READ')
       IF(NOUT.NE.6) THEN
 !+++MDC+++
 !...VMS
 !/         OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,           &       
-!/     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+!/     &       FILE=CHECKR_DATA%OUTFIL,CARRIAGECONTROL='LIST')
 !...WIN, DVF, UNX, LWI, ANS, MOD
          OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,             &       
-     &       FILE=I_DATA%OUTFIL)
+     &       FILE=CHECKR_DATA%OUTFIL)
 !---MDC---
       END IF
 !
@@ -714,13 +721,13 @@
       END IF
       WRITE(NOUT,'(2A)')                                                &       
      &   'Input File Specification------------------------',            &       
-     &   TRIM(I_DATA%INFIL)
-      IF(I_DATA%MATMIN.EQ.0.AND.I_DATA%MATMAX.EQ.0)   THEN
+     &   TRIM(CHECKR_DATA%INFIL)
+      IF(CHECKR_DATA%MATMIN.EQ.0.AND.CHECKR_DATA%MATMAX.EQ.0)   THEN
          WRITE(NOUT,'(A)')  'Check the Entire File'
        ELSE
          WRITE(NOUT,'(A,I4,A,I4)')                                      &       
      &        'Check Materials---------------------------------',       &       
-     &             I_DATA%MATMIN,' to ',I_DATA%MATMAX
+     &             CHECKR_DATA%MATMIN,' to ',CHECKR_DATA%MATMAX
       END IF
       GO TO 100
 !
@@ -756,8 +763,8 @@
 !     BLANK RESPONSE IS THE SAME AS SELECTING ALL
 !
       IF(MATSIN.EQ.' ')  THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+         CHECKR_DATA%MATMIN = 0
+         CHECKR_DATA%MATMAX = 0
          GO TO 100
       END IF
 !
@@ -784,22 +791,22 @@
 !
 !     CONVERT FROM ASCII
 !
-      I_DATA%MATMIN = 1
-      I_DATA%MATMAX = 9999
-      READ(BUF1,'(BN,I4)',ERR=20) I_DATA%MATMIN
-   20 READ(BUF2,'(BN,I4)',ERR=25) I_DATA%MATMAX
+      CHECKR_DATA%MATMIN = 1
+      CHECKR_DATA%MATMAX = 9999
+      READ(BUF1,'(BN,I4)',ERR=20) CHECKR_DATA%MATMIN
+   20 READ(BUF2,'(BN,I4)',ERR=25) CHECKR_DATA%MATMAX
 !
 !     SET THE MATERIAL NUMBER LIMITS
 !
-   25 IF(I_DATA%MATMIN.LE.0) THEN
-         I_DATA%MATMIN = 1
+   25 IF(CHECKR_DATA%MATMIN.LE.0) THEN
+         CHECKR_DATA%MATMIN = 1
       END IF
-      IF(I_DATA%MATMAX.LT.I_DATA%MATMIN)  THEN
-         I_DATA%MATMAX = I_DATA%MATMIN
+      IF(CHECKR_DATA%MATMAX.LT.CHECKR_DATA%MATMIN)  THEN
+         CHECKR_DATA%MATMAX = CHECKR_DATA%MATMIN
       END IF
-      IF(I_DATA%MATMIN.EQ.1.AND.I_DATA%MATMAX.EQ.9999) THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+      IF(CHECKR_DATA%MATMIN.EQ.1.AND.CHECKR_DATA%MATMAX.EQ.9999) THEN
+         CHECKR_DATA%MATMIN = 0
+         CHECKR_DATA%MATMAX = 0
       END IF
 !
   100 RETURN
@@ -870,8 +877,8 @@
 !
 !     LOOK FOR BEGINNING OF FIRST MATERIAL REQUESTED
 !
-   60 IF(I_DATA%MATMIN.GT.0)   THEN
-         DO WHILE(MAT.LT.I_DATA%MATMIN)
+   60 IF(CHECKR_DATA%MATMIN.GT.0)   THEN
+         DO WHILE(MAT.LT.CHECKR_DATA%MATMIN)
             READ(JIN,'(A)',END=90)  IFIELD
             ISEQ = ISEQ + 1
             NSEQ = 0
@@ -879,23 +886,24 @@
    65       IF(MAT.LT.0)  GO TO 70
             IF(ASEQ.EQ.' ') NSEQ = ISEQ
          END DO
-         IF(MAT.GT.I_DATA%MATMAX) GO TO 70
+         IF(MAT.GT.CHECKR_DATA%MATMAX) GO TO 70
       END IF
       GO TO 75
 !
 !     FAILED TO FIND A MATERIAL
 !
-   70 IF(I_DATA%MATMIN.EQ.I_DATA%MATMAX) THEN
-         IF(I_DATA%MATMIN.EQ.0) THEN
+   70 IF(CHECKR_DATA%MATMIN.EQ.CHECKR_DATA%MATMAX) THEN
+         IF(CHECKR_DATA%MATMIN.EQ.0) THEN
             EMESS = 'INPUT FILE DOES NOT CONTAIN ANY ENDF EVALUATIONS'
          ELSE
             WRITE(EMESS,'(A,I5)')                                       &       
-     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',I_DATA%MATMIN
+     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',                &       
+     &           CHECKR_DATA%MATMIN
          END IF
       ELSE
          WRITE(EMESS,'(A,I5,A,I5)')                                     &       
      &        'INPUT FILE DOES NOT CONTAIN ANY MATERIALS',              &       
-     &         I_DATA%MATMIN,' TO',I_DATA%MATMAX
+     &         CHECKR_DATA%MATMIN,' TO',CHECKR_DATA%MATMAX
       END IF
       WRITE(NOUT,'(/A)')  EMESS
       IF(NOUT.NE.IOUT) THEN
@@ -1726,12 +1734,14 @@
 !
 !     BUILD Z-S-A FOR CARD 5, FIELD 1 TEST
 !
-      ZSA = ' '
-      IZA = IFIX(ZA+.001)
-      IA = MOD(IZA,1000)
-      IZ = IZA/1000
-      WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
-      IF(LISO.NE.0) ZSA(11:11) = 'M'
+      IF(NSUB.NE.12) THEN
+         ZSA = ' '
+         IZA = IFIX(ZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+         IF(LISO.NE.0) ZSA(11:11) = 'M'
+      END IF
 !
 !     READ IN COMMENT RECORDS
 !
@@ -1745,7 +1755,7 @@
          CALL RDTEXT
          IF(IERX.EQ.1)   GO TO 100
          IF(NC.EQ.1) THEN
-            IF(ZSA.NE.TEXT(1:11)) THEN
+            IF(NSUB.NE.12.AND.ZSA.NE.TEXT(1:11)) THEN
                EMESS = 'ZSYNAM SHOULD BE '//TRIM(ZSA)//' NOT '//        &       
      &                 TRIM(TEXT(1:11))
                CALL ERROR_MESSAGE(NSEQP)
@@ -2092,11 +2102,6 @@
       NRO = N1H
       IF(NFOR.GE.6)  THEN
          CALL TEST1(NRO,0,1,'NRO',1)
-         IF(NLIB.EQ.0.AND.NRO.GT.0) THEN
-            EMESS = 'ENERGY DEPENDENT SCATTERING LENGTH NOT '//         &       
-     &              'ALLOWED IN ENDF/B-VI'
-            CALL ERROR_MESSAGE(0)
-         END IF
       END IF
       IF(NFOR.GE.6)  THEN
          NAPS = N2H
@@ -2715,6 +2720,11 @@
 !*****TEST TRANSFORMATION MATRIX FLAG
       LVT = L1H
       CALL TEST1(LVT,0,1,'LVT',2)
+      IF(LVT.EQ.1) THEN
+         WRITE(EMESS,'(A)')                                             &       
+     &       ' THE ELASTIC TRANSFORMATION MATRIX IS NO LONGER SUPPORTED'
+         CALL ERROR_MESSAGE(NSEQP)
+      END IF
 !*****TEST ANGULAR REPRESENTATION FLAG
       LTT = L2H
       CALL TEST1(LTT,0,3,'LTT',2)
@@ -3035,7 +3045,7 @@
                   IF(LANG.EQ.1)   THEN
                      CALL TEST1(NA,0,NLEGMAX,'NA',1)
                   ELSE IF(LANG.EQ.2)   THEN
-                     CALL TEST2(NA,1,'NA')
+                     CALL TEST1(NA,1,2,'NA',1)
                   ELSE
                      CALL TEST1(NA,0,2*NANGMAX+1,'NA',1)
                      IF(MOD(NA,2).NE.0)   THEN
@@ -3076,7 +3086,12 @@
                      NWT = NL
 !*****************TABULAR REPRESENTATION
                   ELSE
-                     CALL TEST1(LTP,12,14,'LTP',2)
+                     CALL TEST1(LTP,12,15,'LTP',2)
+                     IF(LTP.EQ.13) THEN
+                        WRITE(EMESS,'(A,I3,A)')                         &       
+     &                     'LTP =',LTP,' NOT PERMITTED FOR LAW=5'
+                        CALL ERROR_MESSAGE(NSEQP1)
+                     END IF
                      IF(IERX.EQ.1)   GO TO 100
                      CALL TEST1(NL,2,NANGMAX,'NL',1)
                      NWT = 2*NL
@@ -3438,7 +3453,7 @@
 !
       REAL(KIND=R4), INTRINSIC :: FLOAT
 !
-      INTEGER(KIND=I4) :: NSP
+      INTEGER(KIND=I4) :: NSP,NST
       INTEGER(KIND=I4) :: NDKT
       INTEGER(KIND=I4) :: NUM
       INTEGER(KIND=I4) :: ISTP,IS
@@ -3460,13 +3475,19 @@
          END IF
       END IF
       NSP = N2H
+      NST = N1H
+      CALL TEST1(NST,0,1,'NST',1)
 !
 !     PROCESS AVERAGE DECAY ENERGIES
 !
       CALL RDLIST
-      IF(NPL.NE.34) THEN
-         CALL TEST2(NPL,6,'NI')
-         IF (IERX.EQ.1)  GO TO 100
+      IF(NST.EQ.0) THEN
+         IF(NPL.NE.34) THEN
+            CALL TEST2(NPL,6,'NI')
+            IF (IERX.EQ.1)  GO TO 100
+         END IF
+      ELSE
+         CALL TEST2(NPL,0,'NI')
       END IF
 !
 !     PROCESS DECAY MODES
@@ -3479,8 +3500,12 @@
          IERX = 1
          GO TO 100
       END IF
-      NUM = NPL/NREP6
-      CALL TEST2(NDKT,NUM,'NDK')
+      IF(NST.EQ.0) THEN
+         NUM = NPL/NREP6
+         CALL TEST2(NDKT,NUM,'NDK')
+      ELSE
+         CALL TEST2(NDKT,0,'NDK')
+      END IF
       IF(IERX.EQ.1)   GO TO 100
 !
 !     PROCESS DECAY SPECTRA
@@ -3813,7 +3838,7 @@
          DO N=1,N12S
             IF(MT.EQ.MTS(N)) THEN
                IF(NKS(N).NE.NK) THEN
-                  WRITE(EMESS,'(A,I3,A,I3,A)')                          &       
+                  WRITE(EMESS,'(A,I3,A,I4,A)')                          &       
      &               'NK =',NK,' MUST BE EQUAL TO',NKS(N),              &       
      &               ' AS IN FILE 12 OR 13'
                   CALL ERROR_MESSAGE(NSEQP1)
@@ -4604,7 +4629,7 @@
 !
 !        CHECK SEQUENCING OF MTL-VALUES
 !
-         IF(MTL.EQ.(MTLP+1)) THEN
+         IF(MTL.EQ.(MTLP+1).OR.MTL.EQ.MTLP) THEN
             MTLP = MTL
          ELSE
             WRITE(EMESS,'(A,I3,A)')                                     &       

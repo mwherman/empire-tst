@@ -75,7 +75,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_FIZCON
-!/      PUBLIC :: INPUT_DATA, I_DATA, ISUCCESS
+!/      PUBLIC :: INPUT_DATA, FIZCON_DATA, ISUCCESS
 !...LWI, DVF
 !/      PUBLIC :: Default_epsiln, epsiln3, IRERUN
 !---MDC---
@@ -86,7 +86,7 @@
 !...VMS, UNX, ANSI, WIN, LWI, DVF
       CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '0.1'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -165,7 +165,7 @@
          REAL(KIND=R4) :: EPSILN
       END TYPE INPUT_DATA
 !
-      TYPE(INPUT_DATA) :: I_DATA
+      TYPE(INPUT_DATA) :: FIZCON_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -208,7 +208,7 @@
 !
 !     STORES MTS(SECTIONS) AND THEIR ENERGY SPANS
 !
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
       INTEGER(KIND=I4) :: NXC
       INTEGER(KIND=I4), DIMENSION(NSECMAX,2) :: INDX,ENGS
 !
@@ -826,7 +826,8 @@
 !     PROCESS NEXT SECTION
 !
       IF(MAT.NE.MATO)  THEN    !NEW MATERIAL
-         IF(I_DATA%MATMAX.NE.0.AND.MAT.GT.I_DATA%MATMAX) GO TO 70
+         IF(FIZCON_DATA%MATMAX.NE.0.AND.MAT.GT.FIZCON_DATA%MATMAX)      &       
+     &                  GO TO 70
          NSEQP1 = NSEQP
          MATO = MAT
          MFO = 0
@@ -956,7 +957,8 @@
 !     CHECK END OF TAPE FLAG
 !
       IF(IFIN.EQ.0) THEN
-         IF(I_DATA%MATMAX.EQ.0.OR.MAT.LE.I_DATA%MATMAX)  GO TO 20
+         IF(FIZCON_DATA%MATMAX.EQ.0.OR.MAT.LE.FIZCON_DATA%MATMAX)       &       
+     &                   GO TO 20
       END IF
 !
 !     CLOSE FILES
@@ -1017,22 +1019,22 @@
 !     INITIALIZE TO STANDARD OPTIONS
 !
       IF(IMDC.LT.4) THEN
-         I_DATA%INFIL = '*'
-         I_DATA%OUTFIL = '*'
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
-         I_DATA%ICKT = 1
-         I_DATA%ISUM = 0
-         I_DATA%EPSILN = DEFAULT_EPSILN
+         FIZCON_DATA%INFIL = '*'
+         FIZCON_DATA%OUTFIL = '*'
+         FIZCON_DATA%MATMIN = 0
+         FIZCON_DATA%MATMAX = 0
+         FIZCON_DATA%ICKT = 1
+         FIZCON_DATA%ISUM = 0
+         FIZCON_DATA%EPSILN = DEFAULT_EPSILN
       END IF
       SELECT CASE (IMDC)
          CASE (0)
             IW = 'N'
             IONEPASS = 0
-         CASE(1)
+         CASE(1,2,3)
             IF(ILENP.NE.0)  THEN
-               CALL TOKEN(INPAR,'%',1,I_DATA%INFIL)
-               CALL TOKEN(INPAR,'%',2,I_DATA%OUTFIL)
+               CALL TOKEN(INPAR,'%',1,FIZCON_DATA%INFIL)
+               CALL TOKEN(INPAR,'%',2,FIZCON_DATA%OUTFIL)
                CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
                IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
@@ -1046,9 +1048,6 @@
                IW = '*'
                IONEPASS = 0
             END IF
-         CASE (2,3)
-            IW = '*'
-            IONEPASS = 0
          CASE (4,5,6)
             IW = 'N'
             IONEPASS = 1
@@ -1057,33 +1056,33 @@
 !     GET INPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%INFIL.EQ.'*') THEN
+         IF(FIZCON_DATA%INFIL.EQ.'*') THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &             ' Input File Specification             - '
             END IF
-            READ(NIN,'(A)') I_DATA%INFIL
+            READ(NIN,'(A)') FIZCON_DATA%INFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Input file - ', TRIM(I_DATA%INFIL)
+            WRITE(IOUT,'(/2A)') ' Input file - ',                       &       
+     &               TRIM(FIZCON_DATA%INFIL)
          END IF
       END IF
 !
 !     SEE IF INPUT INDICATES FILE TERMINATION
 !
-      IF(I_DATA%INFIL.EQ.' '.OR.I_DATA%INFIL.EQ.'DONE') GO TO 90
+      IF(FIZCON_DATA%INFIL.EQ.' '.OR.FIZCON_DATA%INFIL.EQ.'DONE')       &       
+     &               GO TO 90
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
-      INQUIRE(FILE=I_DATA%INFIL,EXIST=IEXIST)
+      INQUIRE(FILE=FIZCON_DATA%INFIL,EXIST=IEXIST)
       IF(.NOT.IEXIST)  THEN
          IF(IMDC.LT.4) THEN
             WRITE(IOUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
          END IF
          SELECT CASE (IMDC)
-            CASE (1)
+            CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
-            CASE (2,3)
-               GO TO 10
          END SELECT
          GO TO 90
       END IF
@@ -1091,17 +1090,18 @@
 !     GET OUTPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%OUTFIL.EQ.'*' ) THEN
+         IF(FIZCON_DATA%OUTFIL.EQ.'*' ) THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &           ' Output Message File Specification    - '
             END IF
-            READ(NIN,'(A)') I_DATA%OUTFIL
+            READ(NIN,'(A)') FIZCON_DATA%OUTFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Output file - ', TRIM(I_DATA%OUTFIL)
+            WRITE(IOUT,'(/2A)') ' Output file - ',                      &       
+     &              TRIM(FIZCON_DATA%OUTFIL)
          END IF
       END IF
-      IF(I_DATA%OUTFIL.NE.' ')  THEN
+      IF(FIZCON_DATA%OUTFIL.NE.' ')  THEN
          NOUT = JOUT             ! SETS FORTRAN OUTPUT UNIT IF DISK FILE
       END IF
 !
@@ -1146,7 +1146,7 @@
          READ(NIN,'(A)') IW
          IC = ICHAR(IW)
          IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
-         IF(IW.EQ.'Y')   I_DATA%ICKT = 0
+         IF(IW.EQ.'Y')   FIZCON_DATA%ICKT = 0
 !
 !        SUM UP TESTS?
 !
@@ -1164,7 +1164,7 @@
 !        SUM UP TESTS SELECTED, GET THE EPSILON TOLERANCE
 !
          IF(IW.EQ.'Y')   THEN
-            I_DATA%ISUM = 1
+            FIZCON_DATA%ISUM = 1
             IF(IMDC.EQ.0) THEN
                CALL TOKEN(MATSIN,',',5,BUF2)
                READ(BUF2,'(BN,E12.5)',ERR=45) EPS
@@ -1175,22 +1175,22 @@
                READ(NIN,'(E12.5)',ERR=50)  EPS
             END IF
    50       IF(EPS.EQ.0.)   EPS = DEFAULT_EPSILN
-            I_DATA%EPSILN = EPS
+            FIZCON_DATA%EPSILN = EPS
          END IF
       END IF
 !
 !     OPEN INPUT AND OUTPUT FILES
 !
-      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',FILE=I_DATA%INFIL, &       
-     &   ACTION='READ')
+      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',                   &       
+     &                FILE=FIZCON_DATA%INFIL,ACTION='READ')
       IF(NOUT.NE.6) THEN
 !+++MDC+++
 !...VMS
 !/         OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,           &       
-!/     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+!/     &       FILE=FIZCON_DATA%OUTFIL,CARRIAGECONTROL='LIST')
 !...WIN, DVF, UNX, LWI, ANS, MOD
          OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,             &       
-     &       FILE=I_DATA%OUTFIL)
+     &       FILE=FIZCON_DATA%OUTFIL)
 !---MDC---
       END IF
 !
@@ -1213,22 +1213,22 @@
       END IF
       WRITE(NOUT,'(2A)')                                                &       
      &   'Input File Specification------------------------',            &       
-     &   TRIM(I_DATA%INFIL)
-      IF(I_DATA%MATMIN.EQ.0.AND.I_DATA%MATMAX.EQ.0)   THEN
+     &   TRIM(FIZCON_DATA%INFIL)
+      IF(FIZCON_DATA%MATMIN.EQ.0.AND.FIZCON_DATA%MATMAX.EQ.0)   THEN
          WRITE(NOUT,'(A)')  'Check the Entire File'
       ELSE
          WRITE(NOUT,'(A,I4,A,I4)')                                      &       
      &        'Check Materials---------------------------------',       &       
-     &             I_DATA%MATMIN,' to ',I_DATA%MATMAX
+     &             FIZCON_DATA%MATMIN,' to ',FIZCON_DATA%MATMAX
       END IF
-      IF(I_DATA%ISUM.EQ.1)   THEN
+      IF(FIZCON_DATA%ISUM.EQ.1)   THEN
          WRITE(NOUT,'(A)')  'Sum Up Tests will be Performed'
          WRITE(NOUT,'(A,F8.5)') '  Fractional Difference Allowed '//    &       
-     &             'is ',I_DATA%EPSILN
+     &             'is ',FIZCON_DATA%EPSILN
       ELSE
          WRITE(NOUT,'(A)')  'Sum Up Tests will be Omitted'
       END IF
-      IF(I_DATA%ICKT.EQ.0)   THEN
+      IF(FIZCON_DATA%ICKT.EQ.0)   THEN
          WRITE(NOUT,'(A)')  'Deviant Point Check will be Performed'
          WRITE(NOUT,'(A)')                                              &       
      &       'Consecutive Equal Value Check will be Performed'
@@ -1272,8 +1272,8 @@
 !     BLANK RESPONSE IS THE SAME AS SELECTING ALL
 !
       IF(MATSIN.EQ.' ')  THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+         FIZCON_DATA%MATMIN = 0
+         FIZCON_DATA%MATMAX = 0
          GO TO 100
       END IF
 !
@@ -1300,22 +1300,22 @@
 !
 !     CONVERT FROM ASCII
 !
-      I_DATA%MATMIN = 1
-      I_DATA%MATMAX = 9999
-      READ(BUF1,'(BN,I4)',ERR=20) I_DATA%MATMIN
-   20 READ(BUF2,'(BN,I4)',ERR=25) I_DATA%MATMAX
+      FIZCON_DATA%MATMIN = 1
+      FIZCON_DATA%MATMAX = 9999
+      READ(BUF1,'(BN,I4)',ERR=20) FIZCON_DATA%MATMIN
+   20 READ(BUF2,'(BN,I4)',ERR=25) FIZCON_DATA%MATMAX
 !
 !     SET THE MATERIAL NUMBER LIMITS
 !
-   25 IF(I_DATA%MATMIN.LE.0) THEN
-         I_DATA%MATMIN = 1
+   25 IF(FIZCON_DATA%MATMIN.LE.0) THEN
+         FIZCON_DATA%MATMIN = 1
       END IF
-      IF(I_DATA%MATMAX.LT.I_DATA%MATMIN)  THEN
-         I_DATA%MATMAX = I_DATA%MATMIN
+      IF(FIZCON_DATA%MATMAX.LT.FIZCON_DATA%MATMIN)  THEN
+         FIZCON_DATA%MATMAX = FIZCON_DATA%MATMIN
       END IF
-      IF(I_DATA%MATMIN.EQ.1.AND.I_DATA%MATMAX.EQ.9999) THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+      IF(FIZCON_DATA%MATMIN.EQ.1.AND.FIZCON_DATA%MATMAX.EQ.9999) THEN
+         FIZCON_DATA%MATMIN = 0
+         FIZCON_DATA%MATMAX = 0
       END IF
 !
   100 RETURN
@@ -1378,29 +1378,30 @@
 !
 !     LOOK FOR BEGINNING OF FIRST MATERIAL REQUESTED
 !
-   60 IF(I_DATA%MATMIN.GT.0)   THEN
-         DO WHILE(MAT.LT.I_DATA%MATMIN)
+   60 IF(FIZCON_DATA%MATMIN.GT.0)   THEN
+         DO WHILE(MAT.LT.FIZCON_DATA%MATMIN)
             READ(JIN,'(A)',END=90)  IFIELD
             READ(IFIELD,'(66X,I4,I2,I3,I5)',ERR=65) MAT,MF,MT,NSEQ
    65       IF(MAT.LT.0) GO TO 70
          END DO
-         IF(MAT.GT.I_DATA%MATMAX) GO TO 70
+         IF(MAT.GT.FIZCON_DATA%MATMAX) GO TO 70
       END IF
       GO TO 75
 !
 !     FAILED TO FIND A MATERIAL
 !
-   70 IF(I_DATA%MATMIN.EQ.I_DATA%MATMAX) THEN
-         IF(I_DATA%MATMIN.EQ.0) THEN
+   70 IF(FIZCON_DATA%MATMIN.EQ.FIZCON_DATA%MATMAX) THEN
+         IF(FIZCON_DATA%MATMIN.EQ.0) THEN
             EMESS = 'INPUT FILE DOES NOT CONTAIN ANY ENDF EVALUATIONS'
          ELSE
             WRITE(EMESS,'(A,I5)')                                       &       
-     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',I_DATA%MATMIN
+     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',                &       
+     &           FIZCON_DATA%MATMIN
          END IF
       ELSE
          WRITE(EMESS,'(A,I5,A,I5)')                                     &       
      &        'INPUT FILE DOES NOT CONTAIN ANY MATERIALS',              &       
-     &         I_DATA%MATMIN,' TO',I_DATA%MATMAX
+     &         FIZCON_DATA%MATMIN,' TO',FIZCON_DATA%MATMAX
       END IF
       WRITE(NOUT,'(/A)')  EMESS
       IF(NOUT.NE.IOUT) THEN
@@ -1447,7 +1448,7 @@
             CALL CKF7
          CASE (8)
             CALL CKF8
-         CASE (9)
+         CASE (9,10)
             CALL CKF9
          CASE (12,13)
             CALL CKF12
@@ -1572,6 +1573,10 @@
       LIS = L1H
       LISO = L2H
       NFOR = N2H
+      IF(LIS.NE.0.AND.ELIS.EQ.0.0)  THEN
+         EMESS = 'ELIS SHOULD not  BE ZERO FOR A METASTABLE STATE'
+         CALL ERROR_MESSAGE(NSEQP)
+      END IF
 !
 !     ENDF-V FORMAT FILE
 !
@@ -1606,7 +1611,11 @@
       IF(LIS.EQ.0)  THEN
          ELISM = 0.
       ELSE
-         ELISM = ENMAX
+         IF(NSUB.GE.10) THEN
+            ELISM = ENMAX
+         ELSE
+            ELISM = 3.0E+6
+         END IF
       END IF
       CALL TEST6(ELIS,0.0,ELISM,'ELIS')
 !
@@ -1682,7 +1691,7 @@
 !
 !     INITIALIZE FOR NUBAR SUMUP TEST
 !
-      IF(LFI.EQ.1.AND.I_DATA%ISUM.EQ.1) CALL SUM452(-1)
+      IF(LFI.EQ.1.AND.FIZCON_DATA%ISUM.EQ.1) CALL SUM452(-1)
 !
       RETURN
       END SUBROUTINE CKS451
@@ -1803,7 +1812,7 @@
       ERQ = Y(15)
       ET = Y(17)
       DELTA = ABS(ET-SSUM)/ET
-      IF(DELTA.GT.I_DATA%EPSILN)   THEN
+      IF(DELTA.GT.FIZCON_DATA%EPSILN)   THEN
          WRITE(EMESS,'(A,1PE12.5,A,1PE12.5)')                           &       
      &             'TOTAL ENERGY RELEASE PER FISSION=',ET,              &       
      &             '  SUM OF PARTIALS=',SSUM
@@ -1811,7 +1820,7 @@
       END IF
       ERBAR = Y(13)
       DELTA = ABS(SSUM-ERBAR-ERQ)/ERQ
-      IF(DELTA.GT.I_DATA%EPSILN)  THEN
+      IF(DELTA.GT.FIZCON_DATA%EPSILN)  THEN
          WRITE(EMESS,'(A,1PE12.5,A,1PE12.5,A)')                         &       
      &            'TOTAL ENERGY (',SSUM,') LESS NEUTRINO ENERGY (',     &       
      &            ERBAR,')'
@@ -2215,10 +2224,7 @@
 !*****READ REACTION CHANNEL DEFINITIONS
       CALL RDCONT
       NAW = 0
-      MTRE(1) = L1H
-      MTRE(2) = L2H
-      MTRE(3) = N1H
-      MTRE(4) = N2H
+      MTRE = (/L1H,L2H,N1H,N2H/)
       DO II=1,4
          MTREC = MTRE(II)
          IF(MTREC.GT.102)  THEN
@@ -2755,7 +2761,7 @@
          CALL ERROR_MESSAGE(NSEQP1)
       ELSE
 !********TEST SPIN LIMITS
-         CALL TEST6(SPIN,0.0,12.0,'SPI')
+         CALL TEST6(SPIN,0.0,16.0,'SPI')
       END IF
 !
 !     TEST SPIN TO SEE IF INTEGRAL OR HALF-INTEGRAL
@@ -2795,7 +2801,7 @@
 !
 !     INITIALIZE FOR SUMUP TEST FIRST TIME
 !
-      IF(ITEST.EQ.0.AND.I_DATA%ISUM.GT.0)   CALL SUMF3(-1)
+      IF(ITEST.EQ.0.AND.FIZCON_DATA%ISUM.GT.0)   CALL SUMF3(-1)
 !
 !     READ DATA TABLE
 !
@@ -2885,7 +2891,7 @@
 !
 !     IF SUMUP DESIRED, DO IT
 !
-   25 IF(I_DATA%ISUM.NE.0)   CALL SUMF3(MT)
+   25 IF(FIZCON_DATA%ISUM.NE.0)   CALL SUMF3(MT)
 !
       RETURN
       END SUBROUTINE CKF3
@@ -3716,7 +3722,7 @@
             IF(AWR.LT.40.0)   THEN
                IF(ABS(ABS(U-Q1)/Q1).GT.EPSILN3)   THEN
                   WRITE(EMESS,'(A,I2,A,1PE12.5,A,1PE12.5)')             &       
-     &               'FOR LF=',LF,' U OF',U,' OUT OF RANGE FOR Q OF',Q
+     &               'FOR LF=',LF,' U OF',U,' OUT OF RANGE FOR Q OF ',Q
                   CALL ERROR_MESSAGE(0)
                END IF
             ELSE
@@ -5899,7 +5905,8 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NS,LFSO,IZAP
+      INTEGER(KIND=I4) :: NS,LFSO,IZAP,IZAPT
+      INTEGER(KIND=I4) :: IZ,IA,IZA
       INTEGER(KIND=I4) :: M,N,NMTX
       REAL(KIND=R4) :: Q,QM
       REAL(KIND=R4) :: ELO,EHI,ELOPR,EHIPR
@@ -5910,7 +5917,7 @@
 !
 !     INITIALIZE SUMUP TEST
 !
-      IF(I_DATA%ISUM.EQ.1)   CALL SUMPAR(-1)
+      IF(FIZCON_DATA%ISUM.EQ.1)   CALL SUMPAR(-1)
 !
 !     GET MF=3 Q VALUE FOR THIS REACTION
 !
@@ -5929,6 +5936,19 @@
          CALL RDTAB1
          Q = C2
          IF(NFOR.GE.6) QM = C1
+         IZAP = L1
+!
+!        TEST PRODUCT SPECIFICATION
+!
+         IZA = IFIX(ZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         IZAPT = GET_IZAP(IZ,IA,NSUB/10,MT)
+         IF(IZAP.NE.IZAPT) THEN
+            WRITE(EMESS,'(A,I6)')                                       &       
+     &                'IZAP SHOULD BE SET TO ',IZAPT
+            CALL ERROR_MESSAGE(NSEQP)
+         END IF
 !
 !        TEST ENERGY RANGE
 !
@@ -5963,7 +5983,6 @@
 !        CHECK THAT THIS FINAL PRODUCT AND STATE IS DEFINED IN FILE 8
 !
          LFSO = L2
-         IZAP = L1
          DO M=1,NLMF
             IF(LMFS(2,M).NE.0) THEN
                IF(LMFS(1,M).EQ.MT.AND.LMFS(2,M).EQ.MF)   THEN
@@ -5996,6 +6015,46 @@
 !
       RETURN
       END SUBROUTINE CKF9
+!
+!***********************************************************************
+!
+      INTEGER(KIND=4) FUNCTION GET_IZAP(IZ,IA,IPZA,MT)
+!
+!     FUNCTION TO CALCULATE THE PRODUCT IZA FROM THE TARGET, PROJECTILE
+!       AND REACTION (MT).
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=4) :: MT,IZ,IA,IPZA
+!
+      INTEGER(KIND=4) :: N
+!
+!     REACTION PRODUCTS
+!
+      INTEGER(KIND=4), PARAMETER :: NRECS=36
+      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: MTS =             &       
+     &       (/ 4,11,16,17,22, 23,24,25,28,29, 30,32,33,34, 35, 36,37,  &       
+     &         41,42,44,45,102,103,104,105,106,107,108,109,111,112,113, &       
+     &         114,115,116,117/)
+      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: DZ =              &       
+     &       (/ 0,-1, 0, 0,-2, -6,-2,-2,-1,-4, -4,-1,-1,-2, -5, -5, 0,  &       
+     &         -1,-1,-2,-3,  0, -1, -1, -1, -2, -2, -4, -6, -2, -3, -5, &       
+     &         -5, -2, -2, -3/)
+      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: DA =              &       
+     &       (/-1,-4,-2,-3,-5,-13,-6,-7,-2,-9,-10,-3,-4,-4,-11,-12, -4, &       
+     &         -3,-5,-3,-6,  0, -1, -2, -3, -3, -4, -8,-12, -2, -5,-11, &       
+     &         -10, -3, -4, -6/)
+!
+      GET_IZAP = 0
+      DO N=1,NRECS
+         IF(MT.EQ.MTS(N)) THEN
+            GET_IZAP = 1000*(IZ+DZ(N)) + (IA+DA(N)) + IPZA
+            GO TO 100
+         END IF
+      END DO
+!
+  100 RETURN
+      END FUNCTION GET_IZAP
 !
 !***********************************************************************
 !
@@ -6066,7 +6125,7 @@
 !
 !     INITIALIZE SUMUP TEST
 !
-      IF(I_DATA%ISUM.NE.0.AND.NK.GT.1)  CALL SUMPAR(-1)
+      IF(FIZCON_DATA%ISUM.NE.0.AND.NK.GT.1)  CALL SUMPAR(-1)
 !
 !     PROCESS ALL PARTIALS
 !
@@ -6443,8 +6502,8 @@
 !
 !     AVOID DEVIANT POINT TEST ON THIS FILE
 !
-      ICKTT = I_DATA%ICKT
-      I_DATA%ICKT = 1
+      ICKTT = FIZCON_DATA%ICKT
+      FIZCON_DATA%ICKT = 1
 !
 !     CHECK THAT SECTION IS IN THE INDEX
 !
@@ -6508,7 +6567,7 @@
 !
 !     RESTORE DEVIANT POINT CHECK FLAG
 !
-  70  I_DATA%ICKT = ICKTT
+  70  FIZCON_DATA%ICKT = ICKTT
 !
       RETURN
       END SUBROUTINE CKF15
@@ -6596,7 +6655,7 @@
 !
 !     INITIALIZE FOR SUMUP TEST FIRST TIME
 !
-      IF(ITEST.EQ.0.AND.I_DATA%ISUM.GT.0)   CALL SUMGAM(-1)
+      IF(ITEST.EQ.0.AND.FIZCON_DATA%ISUM.GT.0)   CALL SUMGAM(-1)
 !
 !     READ DATA
 !
@@ -6604,7 +6663,7 @@
 !
 !     DO SUMUP FOR THIS MT IF NEEDED
 !
-      IF(I_DATA%ISUM.GT.0)  CALL SUMGAM(MT)
+      IF(FIZCON_DATA%ISUM.GT.0)  CALL SUMGAM(MT)
 !
 !     SAVE ENERGY RANGE SPAN
 !
@@ -8128,7 +8187,7 @@
          ELSE
             DELTA = COT
          END IF
-         IF(ABS(DELTA).GE.I_DATA%EPSILN)  THEN
+         IF(ABS(DELTA).GE.FIZCON_DATA%EPSILN)  THEN
 !***********HEADING FOR FIRST TIME ERROR DETECTED
             IF(ITLE.EQ.0) THEN
                ITLE=1
@@ -8140,7 +8199,7 @@
                WRITE(NOUT,'(15(I3,1X))')  (MTOO(J),J=1,NMTO)
                WRITE(EMESS,'(3X,A,F10.6)')                              &       
      &            'SUM OF PARTIAL COEFFICIENTS DIFFERED FROM THE'//     &       
-     &         ' TOTAL BY MORE THAN ',I_DATA%EPSILN
+     &         ' TOTAL BY MORE THAN ',FIZCON_DATA%EPSILN
                CALL ERROR_MESSAGE(0)
                EMESS = '         COEF #            TOTAL'//             &       
      &                 '           SUM PARTIALS      DELTA'
@@ -8991,16 +9050,16 @@
 !     CROSS SECTIONS SUM TO FILE 3 OR LESS IN FILE 10
 !
    15 IF(ITFLE.EQ.9.OR.ITFLE.EQ.10)   THEN
-         IF(DELTA.LT.-I_DATA%EPSILN)  THEN
+         IF(DELTA.LT.-FIZCON_DATA%EPSILN)  THEN
             IF(INIT.EQ.0)    THEN
                INIT = 1
                IF(MF.EQ.9)  THEN
-                  WRITE(NOUT,20)  I_DATA%EPSILN
+                  WRITE(NOUT,20)  FIZCON_DATA%EPSILN
    20             FORMAT(/5X,'SUM OF MULTIPLICITIES EXCEEDED UNITY ',   &       
      &               'BY MORE THAN ',F10.6,' AT THE FOLLOWING POINTS'// &       
      &                7X,'ENERGY             SUMMATION')
                ELSE
-                  WRITE(NOUT,25)  I_DATA%EPSILN
+                  WRITE(NOUT,25)  FIZCON_DATA%EPSILN
    25             FORMAT(/5X,'SUM OF CROSS SECTIONS EXCEEDED FILE 3 ',  &       
      &               'BY MORE THAN ',F10.6,' AT THE FOLLOWING POINTS'// &       
      &               7X,'ENERGY             SUMMATION')
@@ -9016,7 +9075,7 @@
 !     COMPARE AGAINST PERCENTAGE ERROR
 !
       ELSE
-         IF(ABS(DELTA).LE.I_DATA%EPSILN) GO TO 100
+         IF(ABS(DELTA).LE.FIZCON_DATA%EPSILN) GO TO 100
 !
 !        TEST FAILED
 !
@@ -9050,7 +9109,7 @@
 !           OUTPUT TEST TYPE DEPENDENT TABLE HEADINGS
 !
    50       IF(IPC.EQ.1) THEN
-               WRITE(NOUT,55) I_DATA%EPSILN
+               WRITE(NOUT,55) FIZCON_DATA%EPSILN
    55          FORMAT(/5X,'THE SUM OF PARTIAL INTEGRALS DIFFERED FROM ',&       
      &                  'THE TOTAL INTEGRAL BY MORE '/                  &       
      &           9X,'THAN ',F10.6,' IN THE FOLLOWING INTERVALS'/        &       
@@ -9060,7 +9119,7 @@
      &           8X,'ENERGY RANGE          TOTAL INTEGRAL  ',           &       
      &                  'TOTAL-PARTIALS      DELTA')
             ELSE
-               WRITE(NOUT,60) I_DATA%EPSILN
+               WRITE(NOUT,60) FIZCON_DATA%EPSILN
    60          FORMAT(/5X,'THE SUM OF PARTIALS DIFFERED FROM THE ',     &       
      &           'TOTAL BY MORE THAN ',F10.6/                           &       
      &           10X,'AT THE FOLLOWING POINTS'//                        &       
@@ -9075,8 +9134,13 @@
             WRITE(NOUT,'(1X,1PE11.4,A,1PE11.4,2(1PE16.5),0PF14.6)')     &       
      &                    E1T,' TO ',E2T,XINT,DIFF,DELTA
          ELSE
-            WRITE(NOUT,'(3(1PE15.5,5X),5X,F10.6)')                      &       
+            IF(ABS(DELTA).GT.10.) THEN
+               WRITE(NOUT,'(3(1PE15.5,5X),3X,A)')                       &       
+     &                   XT(J),YTOJ,YT(J),'GREATER THAN 10'
+            ELSE
+               WRITE(NOUT,'(3(1PE15.5,5X),5X,0PF10.6)')                 &       
      &                   XT(J),YTOJ,YT(J),DELTA
+            end if
          END IF
       END IF
 !
@@ -9638,7 +9702,7 @@
          ELSE
             IF(MF1.NE.M)   THEN
                WRITE(NOUT,15)  M
-   15          FORMAT(//80('-')/' FILE ',I2)
+   15          FORMAT(//80('-')/'FILE ',I2)
             END IF
             WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             CALL MISFIL(M,2,2,NMISS)
@@ -9950,7 +10014,7 @@
       WRITE(EMESS,'(A,I3,A,I3,A)')                                      &       
      &        'SECTION',MFC,'/',MTC,' NOT IN INDEX'
       CALL ERROR_MESSAGE(0)
-      IF(NXC.GE.350) GO TO 100
+      IF(NXC.GE.NSECMAX) GO TO 100
       NXC = NXC + 1
       IF(N.NE.NXC)  THEN
          IU = NXC - N
@@ -10080,7 +10144,7 @@
          WRITE(EMESS,'(A,1PE12.5,A)')                                   &       
      &         'THE MAXIMUM INCIDENT ENERGY OF ',EHI,' (EV)'
          CALL ERROR_MESSAGE(0)
-         WRITE(NOUT,'(3X,A,1PE12.5)')                                   &       
+         WRITE(EMESS,'(3X,A,1PE12.5)')                                  &       
      &         'SHOULD BE GREATER THAN OR EQUAL TO ',ENMAX
          CALL ERROR_MESSAGE(0)
       END IF
@@ -10112,7 +10176,7 @@
 !
 !     INITIALIZE DEVIANT POINT CHECK FLAG
 !
-      JCKT = I_DATA%ICKT
+      JCKT = FIZCON_DATA%ICKT
       n1 = 0
       N2 = 0
 !
@@ -10184,7 +10248,7 @@
 !
 !     MESSAGE IF DEVIANT POINT TEST SUPPRESSED
 !
-   30 IF(JCKT.NE.I_DATA%ICKT)  THEN
+   30 IF(JCKT.NE.FIZCON_DATA%ICKT)  THEN
          EMESS = 'DEVIANT POINT CHECK SUPPRESSED DUE TO DATA ERRORS'
          CALL ERROR_MESSAGE(0)
       END IF
@@ -10426,7 +10490,7 @@
 !
 !     TEST FOR CONSECUTIVE EQUAL VALUES
 !
-   90 IF(I_DATA%ICKT.EQ.0)   CALL TEST4
+   90 IF(FIZCON_DATA%ICKT.EQ.0)   CALL TEST4
 !
       RETURN
       END SUBROUTINE TEST1
