@@ -1,6 +1,6 @@
 
-             Changes in version 2.19beta10 with respect to 2.18  
-                      Brookhaven, June 30  2003
+             Changes in version 2.19beta12 with respect to 2.18  
+                      Brookhaven, February  2004
 
 1.  Error in the Wilmore-Hodgson omp corrected.
     VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
@@ -8,7 +8,7 @@
     (-0.00118) (M. Herman).
 2.  MSD is automatically turned off for non-nucleon incident reactions
     (M. Herman). 
-3.  Internal conversion coefficinets included in the gamma cascade
+3.  Internal conversion coefficients included in the gamma cascade
     between discrete levels (ICC data from RIPL-2)(M. Herman).
 4.  Bug in reading branching ratios from the RIPL-2 file corrected
     (emission probabilities instead of branching ratios were used
@@ -32,12 +32,12 @@
     in the file *.out with energy of the CN excitation energy and
     respective cross section scaled to preserve spectrum integral.
 12. Option for manual OMP fitting added to the new GUI (M. Herman).
-13. PSYCHE added to the chain of utlity codes (M. Herman).
+13. PSYCHE added to the chain of utility codes (M. Herman).
 14. Spectral energies for ENDF formatting printed in F10.5 instead
     of F9.4 format to improve accuracy (M. Herman).
 15. EMPEND revised to eliminate some undesired entries in the ENDF 
     file (A. Trkov).
-16. Three-hump fission with underbarrier effects implemented 
+16. Three-hump fission with under-barrier effects implemented 
     (R. Capote, M.Herman, M. Sin, and A. Ventura).
 17. Possibility of excited targets included (M. Herman).
 18. PostScript (and eps) files produced from within ZVV viewer are 
@@ -55,7 +55,7 @@
 22. 'reaction' and 'titles' files used by X4TOC4 corrected and extended 
     to cover proton induced reactions (still needs a consistent check) 
     (M. Herman).
-23. On-line retrival of the EXFOR data from the remote database implemented.
+23. On-line retrieval of the EXFOR data from the remote database implemented.
     At the moment works only at nuclear data centers but will be extended
     to reading from the EXFOR CD-ROM (V. Zerkin & M. Herman).
 24. Spectra for the ENDF formatting printed also for the proton induced 
@@ -69,7 +69,13 @@
 29. sixtab.f and dxsend.f modified to enable processing of more 
     advanced formatting used in the recent LANL evaluations (discrete 
     gamma's are still not processed correctly in such cases) (A. Trkov).
-
+30. Archives directories moved from inside 'work' to 'empire' to make 
+    'work' more manageable (change inside Xrun.tcl) (M. Herman). 
+31. Retrieval of EXFOR data from the relational MySQL database opens
+    access to the periodically updated EXFOR library issued by the IAEA-NDS
+    on CD-ROM's (V. Zerkin M. Herman).
+32. Preequilibrium emission of clusters (Iwamoto-Harada) coded by R. Capote
+    and implemented by M. Herman.
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

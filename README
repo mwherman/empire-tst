@@ -1,9 +1,9 @@
                        E M P I R E  I I
 
-                        version 2.19beta1
+                        version 2.19beta12
                              (Lodi)
 
-                         02 April, 2003
+                          February, 2004
 
 Compilation:
 
@@ -22,13 +22,12 @@ Try also beta version of the new GUI (Xrun.tcl in the work directory).
 Although not fully completed, this interface provides all functionalities
 of the previous 'lrun.tcl' and much more (e.g., ZVV plotting of double
 differential and single spectra, file managment features, and multiple
-runs). Xrun.tcl needs Tcl/Tk, Tix, incr Widgets, and bash shell. The 
+runs). Xrun.tcl needs Tcl/Tk, incr Widgets, and bash shell. The 
 former three are included in most Linux distributions (e.g., RedHat) 
 but might not be installed by default. They can also be downloaded free 
 of charge from many web sites, e.g.: 
 
 http://tcl.sourceforge.net/ (Tcl/Tk),
-http://tix.sourceforge.net/ (Tix),
 http://incrtcl.sourceforge.net/iwidgets/index.html (incr Widgets). 
 
 Otherwise one can use scripts provided in the empire/work directory. 

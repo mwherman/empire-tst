@@ -1,9 +1,9 @@
   1.00               ;INCIDENT ENERGY (IN LAB)
 xxx.   xx.           ;TARGET  A , Z 
   1.    0.           ;PROJECTILE A, Z
-2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+1                    ;NUMBER OF NEUTRONS  TO BE EMITTED
 1                    ;NUMBER OF PROTONS  TO BE EMITTED
-0                    ;NUMBER OF ALPHAS   TO BE EMITTED
+1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       1.                                               
 LEVDEN     0.                                              
@@ -15,6 +15,7 @@ OMPOT  -2405.       1
 OMPOT  -5405.       2
 DEGAS      0.
 HMS        0.
+PCROSS     1.                      
 GO                                                  
 2.
 4.
@@ -27,8 +28,6 @@ GO
 16.
 18.
 20.
-25.
-30.
 -1.
 NIXSH      1.
 FITLEV     2.
