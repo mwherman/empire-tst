@@ -19,7 +19,7 @@ work=`pwd`
 # RUN PREPROCESSING CODES IN PREPRATION FOR PLOTTING 
 # PLOTC4 IS RUN IF THE LAST PRAMETER BELOW IS SET TO 2
 
-../scripts/process $file 1
+../scripts/process $file $2
  
 # RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
 
