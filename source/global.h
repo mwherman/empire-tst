@@ -51,8 +51,8 @@ C
 C                      PEQc is the logical control for PCRoss call, RCN
 C                      MFPp is the exciton model mean free path parameter
 C                      GTILnor() is the normalization factor for p-h LD
-C                      Lqdfac is the qd photoabs. norrmalization factor
-C                      QDfrac is the qd fraction of photoabsorption  
+C                      Lqdfac is the qd photoabs. normalization factor
+C                      QDfrac is the qd fraction of photoabsorption
      &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc, MFPp,
      &                 ECUtColl,Lqdfac,QDfrac,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC),
@@ -110,7 +110,7 @@ C                          GMRPAR(NDGMRPM,NDNUC) --> GMRPAR(NDGMRPM,0:NDNUC)]
      &                 RWOm(NDRWOM, 0:NDEJC, 0:NDNUC),
      &                 RWOmv(NDRWOM, 0:NDEJC, 0:NDNUC),
      &                 RVSo(NDRVSO, 0:NDEJC, 0:NDNUC),
-     &                 RCOul(0:NDEJC, 0:NDNUC),EEFermi(0:NDEJC,0:NDNUC), 
+     &                 RCOul(0:NDEJC, 0:NDNUC),EEFermi(0:NDEJC,0:NDNUC),
 C                      RCN, 09/2004
 C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
      &                 OMEmin(0:NDEJC, 0:NDNUC),
@@ -155,5 +155,9 @@ C
       INTEGER bff
       DOUBLE PRECISION MOMparcrt, MOMortcrt
       COMMON /MOMENT/ MOMparcrt, MOMortcrt, veq,hoeq,defeq
+C
+C     Storing masses and mass excess for all nuclei (RIPL-2)
+C
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
