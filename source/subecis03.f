@@ -36,6 +36,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN(87,file='file87')
       OPEN(88,file='file88')
       OPEN(89,file='file89')
+      OPEN(90,file='file90')
       OPEN(99,file='file99')
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-018
       CLOSE(75)
@@ -56,6 +57,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE(87,status='delete')
       CLOSE(88,status='delete')
       CLOSE(89,status='delete')
+      CLOSE(90,status='delete')
       CLOSE(99,status='delete')
       RETURN                                                            ECIS-019
       END                                                               ECIS-020
