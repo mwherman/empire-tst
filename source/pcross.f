@@ -12,14 +12,14 @@ C     AC,ZC = MASS AND ATOMIC NUMBER OF THE COMPOUND NUCLEUS
 C     EC CN EXCITATION ENERGY, LEVEL DENSITY & PAIRING FOR COMP.NUC.
 C     GC,PC LEVEL DENSITY & PAIRING FOR COMP.NUC.
 C     G(NEJc),PAIR(NEJc) THE SAME FOR RESIDUAL NUCLEI AFTER EMISSION
-C     KME = MEAN FREE PATH PARAMETER
+C     MFPp = MEAN FREE PATH PARAMETER
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-      REAL*8 KME, C1, PI26, EPS, Sigr
+      REAL*8 C1, PI26, EPS, Sigr
       INTEGER*4 PMAX
-      PARAMETER(C1 = 3.6824121D17, EPS = 1.D-4, KME = 1.3D0, 
+      PARAMETER(C1 = 3.6824121D17, EPS = 1.D-4,  
      &          PI26 = 1.6449340107D0, PMAX = 50)
       CHARACTER*12 status
 C
@@ -54,7 +54,8 @@ C
 C     NPRoject - projectile nejc number
 C
 C     INITIALIZATION
-      cme = KME/1.4D21
+         
+      cme = MFPp/1.4D21
 C
       fr = 0.D0
       totemis = 0.D0
@@ -71,9 +72,9 @@ C     Excitation energy (MeV)
 C     Compound nucleus 
       ac = A(1)
       zc = Z(1)
-      gc = ROPar(1, 1)/PI26
+      gc = ROPar(1, 1)/PI26*GTIlnor(1)
       IF(gc.EQ.0.D0)THEN
-         gc = ac/8./PI26
+         gc = ac/8./PI26*GTIlnor(1)
          pc = 0.
       ELSE
          pc = ROPar(3, 1)
@@ -109,7 +110,7 @@ C
 99001 FORMAT(/' ', 57('-')/)
       WRITE(6, 99002)
 99002 FORMAT(5X, ' Preequilibrium decay (PCROSS)',/)
-      WRITE(6, 99003) KME
+      WRITE(6, 99003) MFPp
 99003 FORMAT(/,1X, 'Mean free path parameter = ', F4.2,/)
 C
 C     NEJcm is the maximum number of particles emitted
@@ -123,9 +124,9 @@ C     NEJcm is the maximum number of particles emitted
             STOP 'EXCITON'
          ENDIF
          nures(nejc) = nnur
-         g(nejc) = ROPar(1, nnur)/PI26
+         g(nejc) = ROPar(1, nnur)/PI26*GTIlnor(nnur)
          IF(g(nejc).EQ.0.)THEN
-            g(nejc) = ar/8./PI26
+            g(nejc) = ar/8./PI26*GTIlnor(nnur)
             pair(nejc) = 0.
          ELSE
             pair(nejc) = ROPar(3, nnur)
