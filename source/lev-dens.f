@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-01 18:58:24 $
-Ccc   * $Id: lev-dens.f,v 1.19 2004-09-01 18:58:24 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-09-23 18:32:17 $
+Ccc   * $Id: lev-dens.f,v 1.20 2004-09-23 18:32:17 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -733,7 +733,7 @@ C
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
       IF(FISCON.gt.0.)THEN
-         atil=atil
+         atil=atil+2.
       ELSE
          ATIl = ATIl*ATIlnor(Nnuc)
       ENDIF   
@@ -854,17 +854,17 @@ C--------------decrease energy shift above the last level to become 0 at Qn
 C--------cumulative plot of levels along with the l.d. formula
          IF(FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0)THEN
             WRITE(6, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), 
-     &                     ATIlnor(Nnuc)
+     &                     ATIlnor(Nnuc),atil,NLV(Nnuc)
 99001       FORMAT('Cumulative plot for ', I3, '-', A2, '-', I3, 
-     &             ' norm=', F6.4)
+     &             ' norm=', F6.4,' atil=', F4.1,' Ncut=',I3)
             WRITE(35, *)'set terminal postscript enhanced color'
             WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
             WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), 
-     &                      dshift, UCRt - DEL - dshift, Q(1, Nnuc), 
-     &                      DEF(1, Nnuc)
-99002       FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', 
-     &             I3, '   U shift = ', F6.3, ' Ucrt = ', F5.2, 
-     &             ' Qn = ', F5.2, ' Def = ', F6.2, '"')
+     &                      dshift, UCRt - DEL - dshift,  
+     &                      DEF(1, Nnuc), atil,NLV(Nnuc)
+99002       FORMAT('set title "Cumul. plot for ', I3, '-', A2, '-', 
+     &         I3, '   U shift = ', F6.3, ' Ucrt = ', F5.2, 
+     &         ' Def = ', F6.2,' atil=',F4.1,' Ncut=',I3,'"')
             WRITE(35, *)'set logscale y'
             WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
             WRITE(35, *)'set ylabel "Number of levels" 0,0'
@@ -1425,10 +1425,19 @@ C     CALL DAMPKS(A, A2, t, qk)
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
-      ROBCS =ROBCS*vibrk*momo*t*qdamp
-      if(iff.eq.2) ROBCS =ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
-      if(iff.eq.3) ROBCS =ROBCS*2
-      if(iff.eq.4) ROBCS =ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
+C     Changed according to Mihaela's recommendation
+C     ROBCS =ROBCS*vibrk*momo*t*qdamp
+      IF(FISCon.EQ.2) THEN
+         ROBCS =ROBCS*vibrk*momort*tcrt*qdamp
+      else
+         ROBCS =ROBCS*vibrk*momo*t*qdamp
+      endif   
+c     IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
+c     IF(iff.eq.3) ROBCS = ROBCS*2
+c     IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
+      IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(Mompar*tcrt)
+      IF(iff.eq.3) ROBCS = ROBCS*2
+      IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(Momort*tcrt)
       END
 C
 C
@@ -1539,6 +1548,8 @@ C-----a-parameter given in input
 C-----Ignatyuk parametrization
       IF(ROPaa(Nnuc).EQ.0.0D0)THEN
          atil = 0.154*A(Nnuc) + 6.3E-5*A(Nnuc)**2
+C--------next line assures normalization to experimental data (on average)
+         atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054
          ROPar(1, Nnuc) = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*5.))
      &                    /5.)
@@ -1547,6 +1558,8 @@ C-----Ignatyuk parametrization
 C-----Arthurs' parametrization
       IF(ROPaa(Nnuc).EQ.( - 1.0D0))THEN
          atil = 0.1375*A(Nnuc) - 8.36E-5*A(Nnuc)**2
+C--------next line assures normalization to experimental data (on average)
+         atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054
          ROPar(1, Nnuc) = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*5.))
      &                    /5.)
@@ -1617,9 +1630,10 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
             IF(NLV(Nnuc).GT.3)THEN
                WRITE(6, *)' a=', A(Nnuc), 'Z=', Z(Nnuc)
                WRITE(6, *)' A=', am, ' UX=', ux, ' T=', tm, ' EO=', eo
-               WRITE(35, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
+               WRITE(35, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &			 NLV(Nnuc)
 99001          FORMAT('set title "NO SOLUTION FOR ', I3, '-', A2, '-', 
-     &                I3, '"')
+     &                I3,' Ncut=',I3,'"')
                WRITE(35, *)'set terminal postscript enhanced color'
                WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
                WRITE(35, *)'set logscale y'
@@ -1691,13 +1705,14 @@ C-----fit nuclear temperature (and Ux) to discrete levels
       ENDIF
 C-----plot fit of the levels with the low energy l.d. formula
       IF(FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3)THEN
-         WRITE(6, *)' A=', A(Nnuc), 'Z=', Z(Nnuc)
+         WRITE(6, *)' A=', A(Nnuc), 'Z=', Z(Nnuc),' Ncut=',NLV(Nnuc)
          WRITE(6, *)' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
          WRITE(35, *)'set terminal postscript enhanced color'
          WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
-         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
-99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
-     &          '"')
+         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &				   am,t,NLV(Nnuc)
+99002    FORMAT('set title "Cumul.plot for ', I3, '-', A2, '-', I3, 
+     &          ': a=',F4.1,' T=',F4.1,' Ncut=',I3,'"')
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
          WRITE(35, *)'set ylabel "Number of levels" 0,0'
