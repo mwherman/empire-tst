@@ -97,6 +97,8 @@
     implemented by R. Capote and M. Herman.
 44. Reaction/MT-number conversion table for X4TOC4 updated to include gammas
     in the incident channel (M. Herman).
+45. Ordering error in ENDF/MF12 corrected in EMPEND (A. Trkov)
+    
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 
