@@ -1,0 +1,79 @@
+  
+ REACTION   0-n -  1 +  63-Eu-153 INCIDENT ENERGY   14.0     MeV
+ COMPOUND NUCLEUS ENERGY   20.350 MeV
+ FUSION CROSS SECTION =   2233.19     mb
+  63-Eu-154 production cross section 0.275757     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  3.6716     mb
+ n  emission cross section  2228.2     mb
+ p  emission cross section  3.2812     mb
+ He emission cross section  1.4249     mb
+  63-Eu-153 production cross section  236.930     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  852.62     mb
+ n  emission cross section  1981.7     mb
+ p  emission cross section 0.14378E-01 mb
+ He emission cross section 0.19943E-01 mb
+  63-Eu-152 production cross section  1981.58     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  6868.5     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section 0.13421E-07 mb
+  62-Sm-153 production cross section  2.89306     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  8.6542     mb
+ n  emission cross section 0.38813     mb
+ p  emission cross section 0.39231E-15 mb
+ He emission cross section 0.11065E-08 mb
+  62-Sm-152 production cross section 0.401646     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.73585     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  62-Sm-151 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  61-Pm-150 production cross section  1.26559     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  3.1364     mb
+ n  emission cross section 0.14224     mb
+ p  emission cross section 0.85104E-10 mb
+ He emission cross section 0.18395E-07 mb
+  61-Pm-149 production cross section 0.162176     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.28283     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section 0.20512E-11 mb
+  61-Pm-148 production cross section 0.134211E-07 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.42468E-08 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  60-Nd-149 production cross section 0.119159E-08 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.14761E-08 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  60-Nd-148 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  60-Nd-147 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  
+ Tot. fission cross section    0.000     mb
+  

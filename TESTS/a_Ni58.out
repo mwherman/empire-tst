@@ -2,97 +2,97 @@
  REACTION   2-He-  4 +  28-Ni- 58 INCIDENT ENERGY   40.0     MeV
  COMPOUND NUCLEUS ENERGY   40.785 MeV
  FUSION CROSS SECTION =   1542.74     mb
-  30-Zn- 62 production cross section  .216628E-03 mb
-    fission  cross section  .00000     mb
- g  emission cross section  228.18     mb
- n  emission cross section  409.58     mb
- p  emission cross section  812.76     mb
- He emission cross section  250.18     mb
- d  emission cross section  97.673     mb
-  30-Zn- 61 production cross section  .373687     mb
-    fission  cross section  .00000     mb
- g  emission cross section  2.1862     mb
- n  emission cross section  30.962     mb
- p  emission cross section  342.18     mb
- He emission cross section  34.485     mb
- d  emission cross section  1.5839     mb
-  29-Cu- 61 production cross section  1.56073     mb
-    fission  cross section  .00000     mb
- g  emission cross section  11.626     mb
- n  emission cross section  320.72     mb
- p  emission cross section  368.18     mb
- He emission cross section  114.29     mb
- d  emission cross section  8.0067     mb
-  29-Cu- 60 production cross section  218.672     mb
-    fission  cross section  .00000     mb
- g  emission cross section  1140.4     mb
- n  emission cross section  24.014     mb
- p  emission cross section  508.91     mb
- He emission cross section  8.8859     mb
- d  emission cross section  .73648E-01 mb
-  28-Ni- 58 production cross section  76.6559     mb
-    fission  cross section  .00000     mb
- g  emission cross section  141.86     mb
- n  emission cross section  32.305     mb
- p  emission cross section  127.42     mb
- He emission cross section  13.336     mb
- d  emission cross section  .53068     mb
-  28-Ni- 57 production cross section  40.5635     mb
-    fission  cross section  .00000     mb
- g  emission cross section  213.04     mb
- n  emission cross section  1.0926     mb
- p  emission cross section  25.102     mb
- He emission cross section  .31630E-01 mb
- d  emission cross section  .20640E-05 mb
-  27-Co- 57 production cross section  164.733     mb
-    fission  cross section  .00000     mb
- g  emission cross section  838.76     mb
- n  emission cross section  19.575     mb
- p  emission cross section  56.733     mb
- He emission cross section  .67180     mb
- d  emission cross section  .43280E-04 mb
-  27-Co- 56 production cross section  54.0531     mb
-    fission  cross section  .00000     mb
- g  emission cross section  81.637     mb
- n  emission cross section  .28132E-03 mb
- p  emission cross section  .38593E-01 mb
- He emission cross section  .29152E-09 mb
- d  emission cross section  .00000     mb
-  29-Cu- 59 production cross section  22.7127     mb
-    fission  cross section  .00000     mb
- g  emission cross section  54.059     mb
- n  emission cross section  .00000     mb
- p  emission cross section  2.8847     mb
- He emission cross section  .52490E-03 mb
- d  emission cross section  .00000     mb
-  28-Ni- 59 production cross section  514.601     mb
-    fission  cross section  .00000     mb
- g  emission cross section  1581.6     mb
- n  emission cross section  1.7320     mb
- p  emission cross section  .55926     mb
- He emission cross section  .46679E-02 mb
- d  emission cross section  .00000     mb
-  27-Co- 55 production cross section  .808277E-03 mb
-    fission  cross section  .00000     mb
- g  emission cross section  .10895E-07 mb
- n  emission cross section  .00000     mb
- p  emission cross section  .00000     mb
- He emission cross section  .00000     mb
- d  emission cross section  .00000     mb
-  26-Fe- 55 production cross section  .433039E-01 mb
-    fission  cross section  .00000     mb
- g  emission cross section  .14967E-01 mb
- n  emission cross section  .00000     mb
- p  emission cross section  .00000     mb
- He emission cross section  .00000     mb
- d  emission cross section  .00000     mb
-  26-Fe- 54 production cross section  11.6622     mb
-    fission  cross section  .00000     mb
- g  emission cross section  61.008     mb
- n  emission cross section  .29678E-01 mb
- p  emission cross section  1.6433     mb
- He emission cross section  .11187E-02 mb
- d  emission cross section  .00000     mb
+  30-Zn- 62 production cross section 0.201730E-03 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  227.19     mb
+ n  emission cross section  403.33     mb
+ p  emission cross section  823.11     mb
+ He emission cross section  247.40     mb
+ d  emission cross section  96.565     mb
+  30-Zn- 61 production cross section 0.343259     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  1.9938     mb
+ n  emission cross section  30.226     mb
+ p  emission cross section  337.66     mb
+ He emission cross section  33.559     mb
+ d  emission cross section  1.5434     mb
+  29-Cu- 61 production cross section  1.58504     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  11.816     mb
+ n  emission cross section  323.84     mb
+ p  emission cross section  375.29     mb
+ He emission cross section  114.56     mb
+ d  emission cross section  7.8285     mb
+  29-Cu- 60 production cross section  218.523     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  1130.7     mb
+ n  emission cross section  23.549     mb
+ p  emission cross section  507.37     mb
+ He emission cross section  8.5459     mb
+ d  emission cross section 0.72664E-01 mb
+  28-Ni- 58 production cross section  76.5693     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  141.25     mb
+ n  emission cross section  31.385     mb
+ p  emission cross section  126.06     mb
+ He emission cross section  12.943     mb
+ d  emission cross section 0.51519     mb
+  28-Ni- 57 production cross section  38.7779     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  203.25     mb
+ n  emission cross section 0.97982     mb
+ p  emission cross section  25.158     mb
+ He emission cross section 0.28071E-01 mb
+ d  emission cross section 0.19581E-05 mb
+  27-Co- 57 production cross section  163.311     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  826.28     mb
+ n  emission cross section  17.899     mb
+ p  emission cross section  58.804     mb
+ He emission cross section 0.60006     mb
+ d  emission cross section 0.45626E-04 mb
+  27-Co- 56 production cross section  52.0747     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  79.681     mb
+ n  emission cross section 0.23645E-03 mb
+ p  emission cross section 0.41307E-01 mb
+ He emission cross section 0.23131E-09 mb
+ d  emission cross section  0.0000     mb
+  29-Cu- 59 production cross section  22.0830     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  52.618     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  3.0091     mb
+ He emission cross section 0.42794E-03 mb
+ d  emission cross section  0.0000     mb
+  28-Ni- 59 production cross section  512.804     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  1563.7     mb
+ n  emission cross section  1.7107     mb
+ p  emission cross section 0.65011     mb
+ He emission cross section 0.41840E-02 mb
+ d  emission cross section  0.0000     mb
+  27-Co- 55 production cross section 0.666348E-03 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.88867E-08 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+ d  emission cross section  0.0000     mb
+  26-Fe- 55 production cross section 0.455371E-01 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.15878E-01 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+ d  emission cross section  0.0000     mb
+  26-Fe- 54 production cross section  11.2336     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  58.689     mb
+ n  emission cross section 0.26647E-01 mb
+ p  emission cross section  1.6817     mb
+ He emission cross section 0.88799E-03 mb
+ d  emission cross section  0.0000     mb
   
- Tot. fission cross section    .0000     mb
+ Tot. fission cross section    0.000     mb
   

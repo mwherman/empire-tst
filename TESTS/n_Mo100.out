@@ -1,0 +1,79 @@
+  
+ REACTION   0-n -  1 +  42-Mo-100 INCIDENT ENERGY   14.0     MeV
+ COMPOUND NUCLEUS ENERGY   19.259 MeV
+ FUSION CROSS SECTION =   1956.32     mb
+  42-Mo-101 production cross section 0.543380     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  4.0837     mb
+ n  emission cross section  1957.0     mb
+ p  emission cross section  3.1431     mb
+ He emission cross section  3.3419     mb
+  42-Mo-100 production cross section  434.749     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  1053.9     mb
+ n  emission cross section  1522.4     mb
+ p  emission cross section 0.27520E-05 mb
+ He emission cross section 0.56463E-02 mb
+  42-Mo- 99 production cross section  1522.43     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  4409.3     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  41-Nb-100 production cross section  3.09916     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  6.5293     mb
+ n  emission cross section 0.43806E-01 mb
+ p  emission cross section  0.0000     mb
+ He emission cross section 0.16431E-16 mb
+  41-Nb- 99 production cross section 0.438086E-01 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.25641E-01 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  41-Nb- 98 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  40-Zr- 97 production cross section  2.95467     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  8.8079     mb
+ n  emission cross section 0.32038     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section 0.24027E-13 mb
+  40-Zr- 96 production cross section 0.326022     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section 0.64744E-01 mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  40-Zr- 95 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  39-Y - 96 production cross section 0.164314E-16 mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  39-Y - 95 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  39-Y - 94 production cross section  0.00000     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  0.0000     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  
+ Tot. fission cross section    0.000     mb
+  
