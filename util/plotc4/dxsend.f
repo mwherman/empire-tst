@@ -207,6 +207,8 @@ C*
       SUBROUTINE ELMABN(IZ,NUC,ZEL,FRC)
 C-Title  : Subroutine ELMABN
 C-Purpose: Define fractional isotopic abundance of elements
+C-Version:
+C-V 04/11 Add data A>60
       PARAMETER  (MXIZ=24,MXEL=100)
 C* Main array containing the abundances
       DIMENSION ZAB(MXIZ,MXEL),ZEL(1),FRC(1)
@@ -475,101 +477,101 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z60/
+     & 60142.,0.373,   60143.,0.122,    60144.,0.238,
+     & 60145.,0.083,   60146.,0.172,    60148.,0.057,
+     & 60150.,0.056,       0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 62144.,0.0307,  62147.,0.1499,   62148.,0.1124,
+     & 62149.,0.1382,  62150.,0.0738,   62152.,0.2675,
+     & 62154.,0.2275,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 63151.,0.4781,  63153.,0.5219,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 64152.,0.0020,  64154.,0.0218,   64155.,0.1480,
+     & 64156.,0.2047,  64157.,0.1565,   64158.,0.2484,
+     & 64160.,0.2186,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 65159.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 66156.,0.0006,  66158.,0.0010,   66160.,0.0234,
+     & 66161.,0.1891,  66162.,0.2551,   66163.,0.2490,
+     & 66164.,0.2818,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 67165.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 68162.,0.0014,  68164.,0.0161,   68166.,0.3361,
+     & 68167.,0.2293,  68168.,0.2678,   68170.,0.1493,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     & 69169.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z70/
+     & 70168.,0.0013,  70170.,0.0304,   70171.,0.1428,
+     & 70172.,0.2183,  70173.,0.1613,   70174.,0.3183,
+     & 70176.,0.1276,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 71175.,0.9741,  71176.,0.0259,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 72174.,0.0016,  72176.,0.0526,   72177.,0.1860,
+     & 72178.,0.2728,  72179.,0.13629,  72180.,0.3508,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 73180.,0.00012, 73181.,0.99988,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 74180.,0.0012,  74182.,0.2650,   74183.,0.1431,
+     & 74184.,0.3064,  74186.,0.2842,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 75185.,0.3740,  75187.,0.6260,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 76184.,0.0002,  76186.,0.0159,   76187.,0.0196,
+     & 76188.,0.1324,  76189.,0.1615,   76190.,0.2626,
+     & 76192.,0.4078,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 77191.,0.373,   77193.,0.627,        0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 78190.,0.00014, 78191.,0.00782,  78194.,0.32967,
+     & 78195.,0.33832, 78196.,0.25242,  78198.,0.07163,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     & 79197.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z80/
+     & 80196.,0.0015,  80198.,0.0997,   80199.,0.1687,
+     & 80200.,0.2310,  80201.,0.1318,   80202.,0.2986,
+     & 80204.,0.0687,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 81203.,0.29524, 81205.,0.70476,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     & 82204.,0.014,   82206.,0.241,    82207.,0.221,
+     & 82208.,0.524,       0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     & 83209.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -598,6 +600,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z90/
+     & 90232.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -605,8 +608,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     & 92234.,0.000055,92235.,0.007200, 92238.,0.99274,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -641,7 +643,7 @@ C*
 C*
       NUC=0
 c...
-      IF(IZ.GE.60) STOP 'ERROR - Data for IZ>=59 not availabe'
+C...  IF(IZ.GE.60) STOP 'ERROR - Data for IZ>=59 not availabe'
 c...
       DO I=1,MXIZ
         ZEL(I)=ZAB(2*I-1,IZ)
@@ -733,7 +735,8 @@ C* Find the matching energy level for discrete inelastic ang.distr.
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(MT.GT.90 .OR. IER.NE.0) THEN
 C* No more discrete levels - use last
-          MT=MT0
+          MT =MT0
+          ELV=EL1
           GO TO 60
         END IF
         IF(MT.LE.50) THEN
@@ -1935,16 +1938,19 @@ c...
 c...    print *,'     Summing discr.level yields MF/MT,LV',MF,MT0,LV
 c...
         CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
+        LLI=1
+c...
+c...    CALL SUMYLG(LV,LG,IWO,RWO,GTO,NT,NW,RWO(LLI))
 C* Process the gamma lines
-        NX =(MRW-NW)/2
-        LXE=1+NW
+        NX =(MRW-(LLI+NW))/2
+        LXE=LLI+NW
         LXB=LXE+NX
         NEN=21
         NE1=1
         ENR(1)=RWO(1)
         DXS(1)=0
         DO 128 JT=1,NT
-          EOU=RWO(1+(JT-1)*(LG+1))
+          EOU=RWO(LLI+(JT-1)*(LG+1))
           IF(EOU.LE.0) THEN
             PRINT *,'WARNING Gamma Eou=',EOU,' for mt,jt',MT0,JT
             GO TO 128
@@ -2123,6 +2129,31 @@ C*
   900 RETURN
 C*
   902 FORMAT(2F11.0,4I11)
+      END
+      SUBROUTINE SUMYLG(LV,LG,ID,RWO,GTO,NG,LW,GAM)
+C-Title  : Subroutine SUMYLG
+C-Purpose: Sum yields from lower levels and redefine gamma energies
+C-Version: October 2004 - rewritten to correct flawed logic
+C-Description:
+C-D  LV  Total number of levels
+C-D  LG  Flag for the number of parameters:
+C-D       1  Branching ratios only
+C-D       2  Branching ratios and gamma fractions given.
+C-D  ID  index array giving the starting address of the data
+C-D      for a each level in the work array RWO.
+C-D  RWO Level energy and branching information. Level zero
+C-D      (ground state) only contains the level energy  in the
+C-D      first word or array RWO. The data for each level consist
+C-D      of pairs of numbers, giving the final level energy and
+C-D      the branching ratio to that level.
+C-D  GTO Sum of all gamma fractions - it can be used for
+C-D      checking purposes. It should be close to 1.
+C-D  NG  Final number of gamma lines packed into the output array GAM.
+C-D  LW  Length of the packed output vector.
+C-D  GAM Output array of packed gamma energies and yields.
+C-
+      DIMENSION  ID(1),RWO(1),GAM(1)
+      RETURN
       END
       SUBROUTINE SUMYLD(LV,LG,ID,RWO,GTO,NG,LW)
 C-Title  : Subroutine SUMYLD
@@ -2443,19 +2474,26 @@ C-Purpose: Read an ENDF TAB1 record
 C-Description:
 C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
-C-D    IER=9 on exit if available field length NMX is exceeded.
+C-D    IER=1  End-of-file
+C-D        2  Read error
+C-D        9  Available field length NMX is exceeded.
 C-
       DIMENSION    NBT(100),INR(100)
       DIMENSION    EN(NMX), XS(NMX)
 C*
-      READ (LEF,902) C1,C2,L1,L2,N1,N2
-      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      IER=0
+      READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
       JP=N2
       IF(N2.GT.NMX) THEN
         JP=NMX
         IER=9
       END IF
-      READ (LEF,904) (EN(J),XS(J),J=1,JP)
+      READ (LEF,904,END=100,ERR=200) (EN(J),XS(J),J=1,JP)
+      RETURN
+  100 IER=1
+      RETURN
+  200 IER=2
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
@@ -2465,10 +2503,17 @@ C*
       SUBROUTINE RDTAB2(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,IER)
 C-Title  : Subroutine RDTAB2
 C-Purpose: Read an ENDF TAB2 record
+C-D  Error condition:
+C-D    IER=1  End-of-file
+C-D        2  Read error
       DIMENSION    NBT(100),INR(100)
 C*
-      READ (LEF,902) C1,C2,L1,L2,N1,N2
-      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
+      RETURN
+  100 IER=1
+      RETURN
+  200 IER=2
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
@@ -3007,6 +3052,10 @@ C*
       SUBROUTINE YTGEOU(PMU,EA,EB,NEP,EOU,DXS,INR)
 C-Title  : Subroutine YTGEOU
 C-Purpose: Integrate a pointwise tabulated function over EA - EB
+C-Author : A.Trkov, IAEA, Vienna, Austria
+C-Version:
+C-V  05/01 Fix interpolation at energy boundaries
+C* WARNING: Only lin-lin or histogram interpolation allowed
       DIMENSION  EOU(NEP),DXS(NEP)
 C*
       PMU=0
@@ -3023,18 +3072,18 @@ C* Treat lower energy bound
         IF(INR.EQ.2) F1=F1+(F2-F1)*(EA-E1)/(E2-E1)
         E1=EA
       END IF
+      IF(E1.GE.EB) RETURN
 C* Treat upper energy bound
-      IF(E1.GT.EB) GO TO 20
       IF(E2.GT.EB) THEN
-        IF(INR.EQ.2) F1=F1+(F2-F1)*(EB-E1)/(E2-E1)
+        IF(INR.LT.2) THEN
+          F2=F1
+        ELSE
+          F2=F1+(F2-F1)*(EB-E1)/(E2-E1)
+        END IF
         E2=EB
       END IF
 C* Define average function value over the interval
-      IF(INR.EQ.1) THEN
-        FF=F1
-      ELSE
-        FF=0.5*(F2+F1)
-      END IF
+      FF=0.5*(F2+F1)
 C* Add interval contribution to the integral
       PMU=PMU+FF*(E2-E1)
    20 CONTINUE
