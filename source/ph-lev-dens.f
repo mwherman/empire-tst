@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: ph-lev-dens.f,v 1.8 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-03-17 10:54:40 $
+Ccc   * $Id: ph-lev-dens.f,v 1.9 2005-03-17 10:54:40 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
@@ -241,7 +241,7 @@ C-----seems to be 7b
          RETURN
       ENDIF
       WRITE (50,99005) J, L, K, X
-99005 FORMAT (1X,'ERROR',5X,'W1(',I1,',',I1,',',I1,',',E12.5,')')
+99005 FORMAT (1X,'ERROR:',5X,'W1(',I1,',',I1,',',I1,',',E12.5,')')
       STOP
       END
 C
@@ -269,7 +269,7 @@ C-----looks like 7a
          RETURN
       ENDIF
       IF (J.LT.0 .OR. K.GT.15) THEN
-         WRITE (6,*) 'message from W2 J, L, K,', J, L, K
+C        WRITE (6,*) 'WARNING: message from W2 J, L, K,', J, L, K
          W2 = 0.0
          RETURN
       ENDIF
@@ -470,7 +470,7 @@ C-----------hole part
       END
 C
       SUBROUTINE TRATES
-      WRITE (6,*) 'TRATES NOT IMPLEMENTED'
+      WRITE (6,*) 'ERROR: TRATES NOT IMPLEMENTED'
       END
 C
 C
@@ -485,7 +485,8 @@ C Local variables
 C
 C     Just dummy line to avoid compiler warning
       ROPHM = N + I + E + G
-      WRITE (6,*) 'MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
+      WRITE (6,*)
+     > 'ERROR: MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
       ROPHM = 0.0
       END
 C
@@ -585,7 +586,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum, 
+      DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum,
      &                 t1, t2
       DOUBLE PRECISION FCTR
       REAL FLOAT
