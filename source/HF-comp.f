@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-02 20:22:37 $
-Ccc   * $Id: HF-comp.f,v 1.30 2004-09-02 20:22:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-09-23 18:27:33 $
+Ccc   * $Id: HF-comp.f,v 1.31 2004-09-23 18:27:33 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1613,7 +1613,9 @@ C==============continuum contribution====================
          hh2=h(1,2)
          vv2=efb(2)
          h(1,2)=hoeq 
-         efb(2)=veq        
+c        Msin 08/2004 
+c        efb(2)=veq
+         efb(2)=veq+jc*0.017        
       ENDIF
 
       DO IBAr = 1, NRBarc1    
@@ -2170,7 +2172,7 @@ C
 C
 
 C-----------------------------------------------------------
-      SUBROUTINE SIMPSFIS(Nnuc, Ibar, ee)
+      SUBROUTINE SIMPSFIS(Nnuc, Ibar, Ee)
 C-----------------------------------------------------------
 C Simpson integration
       INCLUDE 'dimension.h'

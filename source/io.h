@@ -28,6 +28,8 @@ c     60     main
 c     62     main
 c     66     MSD-Tristan
 c     77     input
+c    133     tl
+c    134     tl
 c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='NEW')
