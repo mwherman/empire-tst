@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-19 19:06:06 $
-Ccc   * $Id: main.f,v 1.34 2004-07-19 19:06:06 herman Exp $
+Ccc   * $Date: 2004-08-02 16:20:40 $
+Ccc   * $Id: main.f,v 1.35 2004-08-02 16:20:40 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1929,7 +1929,6 @@ C-----------------double-differential spectra
                         CSEa(iccml, nang, nejc, 0)
      &                     = CSEa(iccml, nang, nejc, 0)
      &                     + CSEa(icse, nang, nejc, 1)*(1.0 - weight)
-       WRITE(6,*)'nuc,ejc,an,CSEa',nnuc,nejc,nang,CSEa(icse,nang,nejc,1)
 C                       double contribution to the first energy bin to
 C                       to conserve the integral
                         IF(iccml.EQ.1 .AND. icse.NE.1)
