@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-21 21:32:43 $
-Ccc   * $Id: input.f,v 1.56 2005-01-21 21:32:43 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-01-23 02:19:00 $
+Ccc   * $Id: input.f,v 1.57 2005-01-23 02:19:00 Carlson Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2894,7 +2894,7 @@ C-----
          ENDIF
 C-----
          IF(name.EQ.'NHMS  ')THEN
-            IF(val.GT.100.0D0)THEN
+            IF(val.GT.99.0D0)THEN
                NHMs = val
                WRITE(6, '('' Number of events in HMS set to '',I10)')
      &               NHMs
