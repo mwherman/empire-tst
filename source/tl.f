@@ -249,7 +249,7 @@ C        ND_nlv = NCOll(ncalc)
          IF(NLD_cc.NE.NCOll(ncalc)) THEN
           WRITE(6, *)
      >    'WARNING: Default number of coupled levels: ',NLD_cc
-          WRITE(6, *) 
+          WRITE(6, *)
      >    'WARNING: is not equal ',NCOll(ncalc),' (used in CC RIPL OMP)'
          ENDIF
 C
@@ -290,36 +290,36 @@ C
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE(32, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-               
+
                WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n),
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n),
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
 
                WRITE(6, *)
                WRITE(32, *)
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   10    READ(134,'(A80)',END=30) ch_iuf                
+   10    READ(134,'(A80)',END=30) ch_iuf
          WRITE(133,'(A80)') ch_iuf
          GOTO 10
-   30    CLOSE(133)   
+   30    CLOSE(133)
          CLOSE(134,STATUS='DELETE')
 C        CLOSE(134)
          IF(IOPsys.EQ.0)THEN
@@ -402,7 +402,7 @@ C
          IF(NLD_cc.NE.NVIb(ncalc)) THEN
            WRITE(6, *)
      >     'WARNING: Default number of coupled levels: ',NLD_cc
-           WRITE(6, *) 
+           WRITE(6, *)
      >     'WARNING: is not equal ',NVIb(ncalc),' (used in CC RIPL OMP)'
          ENDIF
          WRITE(6, *)
@@ -442,29 +442,29 @@ C
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                WRITE(6, *)   '   Ncoll'
                WRITE(32, *)  '   Ncoll'
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *) '   Ncoll'
- 
+
                WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
-               READ(134,'(A80)') ch_iuf        
-               WRITE(133,'(A80)')  ND_nlv        
+               READ(134,'(A80)') ch_iuf
+               WRITE(133,'(A80)')  ND_nlv
 
                WRITE(6, *)
                WRITE(32, *)
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-               READ(134,'(A80)') ch_iuf        
+               READ(134,'(A80)') ch_iuf
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   70    READ(134,'(A80)',END=80) ch_iuf                
+   70    READ(134,'(A80)',END=80) ch_iuf
          WRITE(133,'(A80)') ch_iuf
          GOTO 70
-   80    CLOSE(133)   
+   80    CLOSE(133)
          CLOSE(134,STATUS='DELETE')
          IF(IOPsys.EQ.0)THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
@@ -515,12 +515,12 @@ C     INITIALIZING /RIPLXX
 C
 C     COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
 C    &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
-C     
+C
       eta = (XN(Nnuc) - Z(Nnuc))/A(Nnuc)
       atar = iainp
       ztar = izinp
       tarmas = xmas_nnuc
-      projmas = xmas_nejc 
+      projmas = xmas_nejc
 
       hbarc = HHBarc
       amu0c2 = AMUmev
@@ -560,7 +560,7 @@ C-----Volume imaginary potential: Woods-Saxon
       AWOmv(Nejc, Nnuc) = alib(2)
 C     Real surface contribution
       VOMs(1, Nejc, Nnuc) = vlib(3)
-C-----Surface imaginary potential: 
+C-----Surface imaginary potential:
 C-----if rco(4,1,1) >0.0: Woods-Saxon derivative surface potential
 C-----if rco(4,1,1) <0.0: Gaussian surface potential.
       WOMs(1, Nejc, Nnuc) = vlib(4)
@@ -1297,8 +1297,8 @@ C-----Read optical model parameters from the RIPL-II library and create local
 C-----omp file
 C
       INTEGER i, j, l, Iaejcr, Ianucr, Nejcr, Nnucr, Ieof
-     &        
-      INTEGER Ki, Komp, krange 
+     &
+      INTEGER Ki, Komp, krange
       CHARACTER*80 comment
       CHARACTER*2 Symbnucr, Symbejcr
 
@@ -2584,7 +2584,7 @@ C-----CARD 4
       WRITE(1, '(4i5)')ncoll, njmax, iterm, npp
 C-----Matching radius
 C-----CARD 5
-      rmatch = 20.d0 
+      rmatch = 20.d0
       WRITE(1, '(10x,f10.5)')rmatch
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
@@ -2954,7 +2954,7 @@ C     ldwmax=2.4*1.25*AN(i)**0.33333333*0.22*sqrt(parmas(i)*e)
      & SQRT((xmas_nejc+xmas_nnuc)*elab)
 C     &         **0.33333333*0.22*SQRT(((AEJc(Nejc)*amumev+XMAss_ej(Nejc)
 C     &         )/amumev)*El)
-C-----Maximum number of channel spin 
+C-----Maximum number of channel spin
       njmax = MAX(ldwmax, 20)
 C-----Writing input
       OPEN(UNIT = 1, STATUS = 'unknown', FILE = 'ecVIBROT.inp')
@@ -2971,7 +2971,7 @@ C-----make sure that all contributions to s-wave scattering are included
       jdm = XJLv(LEVtarg, Nnuc) + SEJc(Nejc) + 0.6
       WRITE(1, '(4i5,30x,i5)')ncoll, njmax, iterm, npp, jdm
 C-----CARD 5
-      rmatch = 20.d0 
+      rmatch = 20.d0
       WRITE(1, '(10x,f10.5)')rmatch
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
@@ -3321,7 +3321,7 @@ C     The IF block should be added on upgrade from the om-retrieve code
       if(pot(i,j,18).ne.0.) then
         Ef=pot(i,j,18) + pot(i,j,19)*atar
         EFErmi = Ef
-      endif 
+      endif
       elf = el - Ef
 c
 c     Calculate radius and diffuseness parameters
@@ -3499,7 +3499,7 @@ c         if(idr.ge.2) then
 c           analytical DOM integral
             DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DerDWV)
             DWVder = 0.d0
-c           coulomb correction for real volume potential 
+c           coulomb correction for real volume potential
             if(b(1,1,5).ne.0.d0) DerDWV = -b(1,1,5)*encoul2*DerDWV
             if(b(1,1,5).ne.0.d0) then
               DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
@@ -3521,32 +3521,32 @@ c
           if(Ea.eq.0.) Ea=1000.1d0
           Dwplus = 0.d0
           Dwmin = 0.d0
-          T12der = 0.d0  
+          T12der = 0.d0
           if(Ea.lt.1000.) THEN
              Dwplus = AlphaV*DOM_INT_T2(Ef,Ea,EEE)
              dtmp1 = Wvf(AAv,Bv,Ep,Ef,Ef+Ea,n)
              Dwmin = dtmp1*DOM_INT_T1(Ef,Ea,EEE)
              DWV = DWV + Dwplus + Dwmin
-c            coulomb correction for nonlocal dispersive contribution  
-c                to real volume potential 
+c            coulomb correction for nonlocal dispersive contribution
+c                to real volume potential
               if(b(1,1,5).ne.0.d0) then
                if(eee.ne.0.05d0) then
-                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.05d0)  
-                 T2m = DOM_INT_T2(Ef,Ea,EEE-0.05d0)  
-                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*10.d0 
+                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.05d0)
+                 T2m = DOM_INT_T2(Ef,Ea,EEE-0.05d0)
+                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*10.d0
                  T1p = DOM_INT_T1(Ef,Ea,EEE+0.05d0)
                  T1m = DOM_INT_T1(Ef,Ea,EEE-0.05d0)
                  T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*10.d0
-                 T12der =  T1der + T2der 
+                 T12der =  T1der + T2der
                    else
-                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.1d0)  
+                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.1d0)
                  T2m = DOM_INT_T2(Ef,Ea,EEE-0.1d0)
-                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*5.d0 
+                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*5.d0
                  T1p = DOM_INT_T1(Ef,Ea,EEE+0.1d0)
                  T1m = DOM_INT_T1(Ef,Ea,EEE-0.1d0)
                  T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*5.d0
-                 T12der =  T1der + T2der 
-               endif 
+                 T12der =  T1der + T2der
+               endif
              endif
           endif
         endif
@@ -3578,7 +3578,7 @@ C         if(Ea.eq.0.) Ea=1000.1d0
 c           analytical DOM integral
             DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DerDWS)
             DWSder = 0.d0
-c           Coulomb correction for real surface potential 
+c           Coulomb correction for real surface potential
             if(b(1,1,5).ne.0.d0) DerDWS = -b(1,1,5)*encoul2*DerDWS
             if(b(1,1,5).ne.0.d0) then
               DWSp = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE+0.1d0,n,dtmp)
@@ -3643,7 +3643,7 @@ c       Geometry parameters are the same as for the imaginary spin orbit
 c       potential(imag and real)
         vlib(5) = vlib(5) + DWVso
         write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
-     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)                     
+     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)
       endif
 
       return
@@ -3738,7 +3738,7 @@ c      Wso
 
       REAL*8 FUNCTION Vhf(einp,alpha_PB,beta_PB,gamma_PB)
 c
-c     According to Morillon B, Romain P, PRC70(2004)014601 
+c     According to Morillon B, Romain P, PRC70(2004)014601
 c
 c     Originally coded in c++ by Morillon B. and Romain P.
 c
@@ -3752,11 +3752,11 @@ c
 c     getting amu
       xtmp=xkine(sngl(einp),amu)
       miu_sur_hbar2 = amu / hbarc**2
-      coef1 = -0.5d0 * beta_PB**2 * miu_sur_hbar2  
-      coef2 =  4.0d0 * (gamma_PB * miu_sur_hbar2)**2 
+      coef1 = -0.5d0 * beta_PB**2 * miu_sur_hbar2
+      coef2 =  4.0d0 * (gamma_PB * miu_sur_hbar2)**2
 
-      niter = 0. 
-      Vhf = -45.d0 
+      niter = 0.
+      Vhf = -45.d0
 10    niter = niter + 1
       Vtmp = Vhf
       Etmp = einp - Vtmp
@@ -3774,7 +3774,7 @@ c     RCN 08/2004, xkine calculated by relativistic kinematics when needed
       include "ripl2empire.h"
       real*8 amu
 
-      mtot = (tarmas+projmas)  
+      mtot = (tarmas+projmas)
 
       if(irel .eq. 0) then
 c
@@ -3787,14 +3787,14 @@ c
 c         e1  = el*xkine
 c         w2  = ck2*amu
 c         ak2 = w2*e1
-      else 
+      else
 c
 c-----------------------------------------------------------------------
 c  Relativistic kinematics
 c-----------------------------------------------------------------------
 c
 c         e1  = amu0c2*mtot*
-c    * (        DSQRT(1.d0 + 
+c    * (        DSQRT(1.d0 +
 c    *       2.d0*el/(amu0c2*tarmas*((1.d0+projmas/tarmas)**2))) - 1.d0)
           p2  = (ei*(ei + 2.d0*amu0c2*projmas)) /
      *          ((1.d0+projmas/tarmas)**2 + 2.d0*ei/(amu0c2*tarmas))
@@ -3817,7 +3817,7 @@ C     DISPERSIVE OPTICAL MODEL POTENTIAL PACKAGE
 C
 c     Analytical dispersive integrals are included
 c     see Quesada JM et al, Computer Physics Communications 153(2003) 97
-c                           Phys. Rev. C67(2003) 067601             
+c                           Phys. Rev. C67(2003) 067601
 C
       REAL*8 FUNCTION DOM_INT_Wv(Ef,Ep,Av,Bv,E,n,DerivIntWv)
 C
@@ -3918,15 +3918,15 @@ C
 
       DerEmin  = -Emin**(m-1) *
      &          ( Emin**m + Bs**m + ( -Cs*Emin**(m+1) +
-     &            Bs**m *(-Cs*Emin+m) ) * exp(-Cs*Emin)*EIn(Cs*Emin) ) 
-     &           / (Emin**m + Bs**m)**2 
+     &            Bs**m *(-Cs*Emin+m) ) * exp(-Cs*Emin)*EIn(Cs*Emin) )
+     &           / (Emin**m + Bs**m)**2
 
       ResEplus = -Eplus**m / (Eplus**m + Bs**m)
 
       DerEplus =  Eplus**(m-1) *
      &          ( Eplus**m + Bs**m + ( Cs*Eplus**(m+1) +
-     &            Bs**m *(Cs*Eplus+m) ) * exp(Cs*Eplus)*EIn(-Cs*Eplus) ) 
-     &           / (Eplus**m + Bs**m)**2 
+     &            Bs**m *(Cs*Eplus+m) ) * exp(Cs*Eplus)*EIn(-Cs*Eplus) )
+     &           / (Eplus**m + Bs**m)**2
 
 C----------------------------------
 C     Complex arithmetic follows
@@ -3961,7 +3961,7 @@ C----------------------------------
       IMPLICIT NONE
       real*8 A,B,Ep,Ef,E,ee
       integer n
-      
+
       WV=0.d0
       if(E.LE.Ef) E=2.d0*Ef-E
       if(E.LT.Ep) return
@@ -3983,18 +3983,18 @@ C----------------------------------
 
       arg=C*(E-Ep)
       IF(arg.GT.15) return
-      ee=(E-Ep)**m 
+      ee=(E-Ep)**m
       WDD=A*ee/(ee+B**m)*EXP(-arg)
       return
       end
 
-     
+
       REAL*8 FUNCTION DOM_int_T1(Ef,Ea,E)
 C
 C     Integral over E' corresponding to nonlocal additions T1(E'<<0)
 C
       IMPLICIT NONE
-      
+
       real*8 E,Ea,Ef,Ex,Ea2,Eax,Pi,T11,T12,T13
 
       Pi=4.d0*ATAN(1.d0)
@@ -4004,8 +4004,8 @@ C
       Eax=Ex+Ea
 
       T11 = 0.5d0*log(Ea)/Ex
-      T12 =  ( (2*Ea+Ex)*log(Ea)+0.5d0*pi*Ex ) 
-     &      /(2.*(Eax**2 + Ea2))        
+      T12 =  ( (2*Ea+Ex)*log(Ea)+0.5d0*pi*Ex )
+     &      /(2.*(Eax**2 + Ea2))
       T13 = -Eax**2*log(Eax)/(Ex*(Eax**2+Ea2))
 
       DOM_int_T1 = Ex/Pi*(T11+T12+T13)
@@ -4024,7 +4024,7 @@ C
 
       R1=1.5*DSQRT(El)*dLOG(abs((El-E)/Ea))
 
-      IF(E.eq.0.d0) THEN
+      IF(abs(E).LT.1.d-6) THEN
         R2=0.5*El**1.5d0*(1.d0/El-dlog(abs(El/Ea))/Ef)
       ELSE
         R2=0.5*El**1.5d0/(E*Ef)*

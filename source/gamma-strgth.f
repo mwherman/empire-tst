@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2004-10-19 02:35:32 $
-Ccc   * $Id: gamma-strgth.f,v 1.15 2004-10-19 02:35:32 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-11-30 08:35:28 $
+Ccc   * $Id: gamma-strgth.f,v 1.16 2004-11-30 08:35:28 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -41,9 +41,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
@@ -166,20 +166,20 @@ C        Transferring to EMPIRE arrays (RCN, 09/2004
 C-----Kyiv.Photonuclear channel, Plujko_new(End)
       IF(IOUt.GT.1)THEN
          WRITE(6, 99001)
-99001    FORMAT(1X, 'Gamma transitions parameters', //10X, 'E1 ', 11X, 
+99001    FORMAT(1X, 'Gamma transitions parameters', //10X, 'E1 ', 11X,
      &          'E2 ', 11X, 'M1 '/)
-         WRITE(6, 99002)TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1, Nnuc), 
+         WRITE(6, 99002)TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1, Nnuc),
      &                  GQRpar(1, Nnuc), GMRpar(1, Nnuc)
-99002    FORMAT(1X, 'TE', 7X, F4.2, 2(9X, F4.2), /, 1X, 'CE ', 4X, F7.3, 
+99002    FORMAT(1X, 'TE', 7X, F4.2, 2(9X, F4.2), /, 1X, 'CE ', 4X, F7.3,
      &          2(6X, F7.3), /, 1X, 'E1 ', 4X, F6.2, 2(7X, F6.2))
-         WRITE(6, 99003)GDRpar(2, Nnuc), GQRpar(2, Nnuc), 
-     &                  GMRpar(2, Nnuc), GDRpar(3, Nnuc), 
+         WRITE(6, 99003)GDRpar(2, Nnuc), GQRpar(2, Nnuc),
+     &                  GMRpar(2, Nnuc), GDRpar(3, Nnuc),
      &                  GQRpar(3, Nnuc), GMRpar(3, Nnuc)
-99003    FORMAT(1X, 'W1 ', 4X, F6.2, 2(7X, F6.2), /, 1X, 'D1', 1X, 
+99003    FORMAT(1X, 'W1 ', 4X, F6.2, 2(7X, F6.2), /, 1X, 'D1', 1X,
      &          F10.2, 2(3X, F10.2))
-         WRITE(6, 99004)GDRpar(4, Nnuc), GDRpar(5, Nnuc), 
+         WRITE(6, 99004)GDRpar(4, Nnuc), GDRpar(5, Nnuc),
      &                  GDRpar(6, Nnuc)
-99004    FORMAT(1X, 'E2 ', 4X, F6.2, /, 1X, 'W2 ', 4X, F6.2, /, 1X, 
+99004    FORMAT(1X, 'E2 ', 4X, F6.2, /, 1X, 'W2 ', 4X, F6.2, /, 1X,
      &          'D2 ', F10.2)
          WRITE(6, 99005)
 99005    FORMAT(1X, /, 7X, '(1-TE)*Weiss. + TE*GMR', //)
@@ -233,9 +233,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
@@ -245,7 +245,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a23, ac, damp, defexc, dt, e(2), esys1, esys2, 
+      DOUBLE PRECISION a23, ac, damp, defexc, dt, e(2), esys1, esys2,
      &                 ewsrs, g(2), s(2), t, tgscr
 C
 C
@@ -314,9 +314,9 @@ C     Capote 2001, W2 -> W2L to avoid conflict
       ED1 = e(1)**2
       ED2 = e(2)**2
       IF(Nnuc.EQ.1 .AND. Jcn.EQ.1)WRITE(6, *)
-     &'  J      DEF       E1        G1       S1         E2           G2 
+     &'  J      DEF       E1        G1       S1         E2           G2
      &       S2'
-      IF(Nnuc.EQ.1)WRITE(6, 99001)Jcn, defexc, e(1), g(1), s(1), e(2), 
+      IF(Nnuc.EQ.1)WRITE(6, 99001)Jcn, defexc, e(1), g(1), s(1), e(2),
      &                            g(2), s(2)
 99001 FORMAT(1X, I3, 7F10.4)
       END
@@ -327,9 +327,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
@@ -359,9 +359,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
@@ -441,9 +441,9 @@ C-----Plujko_new
       COMMON /GSA/ Key_shape, Key_GDRGFL
 C-----Plujko_new(End)
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
@@ -489,7 +489,7 @@ C-----Plujko_new(End)
 C-----setting GRED=1 removes energy dependence of the width
 C-----for the second hump of gener. Lorenzian
 C        GRED = 1.
-         IF(D2.NE.0.0D0)gdr = gdr + 
+         IF(D2.NE.0.0D0)gdr = gdr +
      &                     D2*ed*ed*gred/((ed - ED2)**2 + W2*gred**2*ed)
      &                   + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/SQRT(ED2)
       ENDIF
@@ -506,7 +506,7 @@ Ccc *                         SIGQD                                    *
 Ccc *                                                                  *
 Ccc *  Calculates the quasideuteron photoabsorption cross section.     *
 Ccc *                                                                  *
-Ccc * The Pauli-blocking factor in the region 20 MeV < Eg < 140 MeV    * 
+Ccc * The Pauli-blocking factor in the region 20 MeV < Eg < 140 MeV    *
 Ccc * is taken from Phys. Rev. C44, 814 (1991). The factor in the      *
 Ccc * regions Eg < 20 MeV and Eg > 140 MeV is that suggested in        *
 Ccc * IAEA-TECDOC-1178.                                                *
@@ -545,9 +545,9 @@ Ccc
 C   First calculate the blocking factor
       IF(Eg.LT.bndeut) THEN
         fermifac=0.0
-       ELSE IF(Eg.LT.eflo) THEN 
+       ELSE IF(Eg.LT.eflo) THEN
         fermifac=EXP(dflo/Eg)
-       ELSE IF(Eg.LT.efhi) THEN 
+       ELSE IF(Eg.LT.efhi) THEN
         fermifac=fermicof(1)
         DO i=2,5
           fermifac=fermicof(i)+fermifac*Eg

@@ -1407,7 +1407,7 @@ c                    ge = G*(e-dd(iip))
 CMH------------never-come-back approximation - set lambda- close to 0
                DO IJ = 1, 25
                   DO kna = 1, 25
-                     alms(kna, IJ) = alms(kna, IJ) *1.0e-10 
+                     alms(kna, IJ) = alms(kna, IJ) *1.0e-6 
                   ENDDO
                ENDDO
 C
@@ -1769,7 +1769,6 @@ C-----------------------------------BY CH.+G. ALGORITHM
                                  sumpro = 0.
                                  IF(i.NE.1)br = br + alps(i - 1, il)
      &                              *t(i - 1)
-                                 T(I)=0.
                                  IF(nne1.NE.0)THEN
                                     DO k = i + 1, nne
                                        pro = 1.
