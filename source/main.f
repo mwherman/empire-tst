@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-12 01:20:22 $
-Ccc   * $Id: main.f,v 1.46 2005-01-12 01:20:22 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-01-23 02:16:46 $
+Ccc   * $Id: main.f,v 1.47 2005-01-23 02:16:46 Carlson Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1010,7 +1010,8 @@ C--------
             debinhms = DE
             IF(debinhms.LT.1.0D0)debinhms = 1.0
             CALL DDHMS(IZAejc(0), xizat, XJLv(LEVtarg, 0), EINl,
-     &        CSFus*corrmsd, CHMs, debinhms, xnhms, 0, 1, 0, icalled)
+     &        CSFus*corrmsd, CHMs, debinhms, xnhms, 0, 1, 0, QDFrac,
+     &        icalled)
 
             icalled = 1
             CSEmis(1, 1) = CSEmis(1, 1) + CSHms(1)
