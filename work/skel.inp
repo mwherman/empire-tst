@@ -14,6 +14,11 @@ ENDF       1.
 DEGAS      1.
 PCROSS     1.
 GDIVP     10.
+*OMPOT  -2405.       1
+*OMPOT  -5405.       2
+*OMPOT  -9600.       3
+*DIRECT     1.
+*DIRPOT -2601.
 GO
 0.002
 0.005
@@ -55,4 +60,5 @@ LEVDEN     0.
 OMPOT  -2405.       1
 OMPOT  -5405.       2
 OMPOT  -9600.       3
+DIRECT     1.
 DIRPOT -2601.
