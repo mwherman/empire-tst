@@ -1,7 +1,6 @@
-C-----GLOBAL COMMON --------------------------------------------------C
+C-----GLOBAL COMMON --------------------------------------------------
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-
-
       CHARACTER SYMbe*2, SYMb*2
       CHARACTER reaction*21
 C-----Plujko_new: variable - SDRead
@@ -16,7 +15,6 @@ C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
       COMMON /MLO/ F_PRINT
       COMMON /UCOM/ Uexcit(NDEx,NDNuc)
 C-----Plujko_new(End)
-
       COMMON /GLOBAL_L/ FISsil(NDNUC), FILevel, FUSread, OMParf,
      &                  DEFormed, DEFault_energy_functional, RIPl_omp,
      &                  OMPar_riplf, RIPl_ompcc, CCCalc, OMParfcc,
@@ -39,8 +37,6 @@ C-----Plujko_new: variables - IGE1,IGM1,IGE2
      &                  ICOllev(NDCOLLEV), ICOller(NDCOLLEV), IWArn,
      &                  NTArget, NPRoject, KTRompcc, IOMwritecc,
      &                  MODelecis, ICOmpff, IRElat(0:NDEJC, 0:NDNUC),
-
-
 
 
      &                  IGE1, IGM1, IGE2
@@ -113,9 +109,10 @@ C                          GMRPAR(NDGMRPM,NDNUC) --> GMRPAR(NDGMRPM,0:NDNUC)]
      &                 RWOm(NDRWOM, 0:NDEJC, 0:NDNUC),
      &                 RWOmv(NDRWOM, 0:NDEJC, 0:NDNUC),
      &                 RVSo(NDRVSO, 0:NDEJC, 0:NDNUC),
-     &                 RCOul(0:NDEJC, 0:NDNUC),
-     &                 EEFermi(0:NDEJC, 0:NDNUC), EEP(0:NDEJC, 0:NDNUC),
-     &                 EEA(0:NDEJC, 0:NDNUC), OMEmin(0:NDEJC, 0:NDNUC),
+     &                 RCOul(0:NDEJC, 0:NDNUC),EEFermi(0:NDEJC,0:NDNUC), 
+C                      RCN, 09/2004
+C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
+     &                 OMEmin(0:NDEJC, 0:NDNUC),
      &                 OMEmax(0:NDEJC, 0:NDNUC), AWSo(0:NDEJC, 0:NDNUC),
      &                 RWSo(NDRVSO, 0:NDEJC, 0:NDNUC), DIRect, SINl,
      &                 D_Elv(NDCOLLEV), D_Xjlv(NDCOLLEV),
@@ -126,7 +123,6 @@ C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limitted
 C    to 0:1 on the last dimension in order to save memory - anyway, in the
 C    current implementation only first emissions  can be anisotropic (apart
 C    of DDHMS which provides inclusive spectra in any case)
-
       COMMON /DEPTH / POTe(7)
 C
       COMMON /TLCOEF/ TL(NDETL, NDLW, NDEJC, NDNUC)
@@ -139,7 +135,7 @@ C
       COMMON /NUMHLP_R/ RORed, ARGred, EXPmax, EXPdec, TURbo
 C
       COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
-     &                  ELE2, HHBarc
+     &                  ELE2, HHBarc, AMUneu, AMUpro
 C
       COMMON /COMFIS_OPT/ FISbar(NDNUC), FISden(NDNUC), FISdis(NDNUC),
      &                    FISopt(NDNUC),FISshi(NDNUC),FISmod(NDNUC)
@@ -158,5 +154,9 @@ C
       INTEGER bff
       DOUBLE PRECISION MOMparcrt, MOMortcrt
       COMMON /MOMENT/ MOMparcrt, MOMortcrt, veq,hoeq,defeq
+C
+C     Storing masses and mass excess for all nuclei (RIPL-2)
+C
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
