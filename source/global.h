@@ -4,7 +4,7 @@ C
       CHARACTER SYMbe*2, SYMb*2
       CHARACTER reaction*21
 C-----Plujko_new: variable - SDRead
-      LOGICAL FILevel, FUSread, FISsil, OMParf, DEFormed,
+      LOGICAL FILevel, FUSread, FISsil, DEFormed,
      &        DEFault_energy_functional, OMPar_riplf,
      &        CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
       INTEGER D_Klv, D_Llv
@@ -16,7 +16,7 @@ C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
       COMMON /MLO/ F_PRINT
       COMMON /UCOM/ Uexcit(NDEx,NDNuc)
 C-----Plujko_new(End)
-      COMMON /GLOBAL_L/ FISsil(NDNUC), FILevel, FUSread, OMParf,
+      COMMON /GLOBAL_L/ FISsil(NDNUC), FILevel, FUSread,
      &                  DEFormed, DEFault_energy_functional,
      &                  OMPar_riplf, CCCalc, OMParfcc,
      &                  RELkin, FIRst_ein, SDREAD
