@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-08-30 13:33:41 $
-Ccc   * $Id: main.f,v 1.36 2004-08-30 13:33:41 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-01 22:33:01 $
+Ccc   * $Id: main.f,v 1.37 2004-09-01 22:33:01 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -228,19 +228,12 @@ C
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp, G 
+      DOUBLE PRECISION ftmp
       INTEGER NELang
 C     For factorial calculations (SCAT2)
       PARAMETER(LFMAX = 4*NDTL + 2)
-      COMMON /FACT  / G(LFMAX)
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
-C-----Plujko_new
-C     INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
-C     COMMON /MLOCOM1/ keyinput, kzz1, kaa1
-C     COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
-C-----Plujko_new(End)
-
 C
 C     Local variables
 C
@@ -263,14 +256,8 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
-C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
-C-----Plujko_new
-C     DATA keyinput/0/, kzz1/0/, kaa1/0/
-C     DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
-C     F_PRINT=1
-C-----Plujko_new(End)
 C    
 C     FACTORIAL CALCULATIONS 
 C
@@ -427,7 +414,7 @@ C--------print elastic and direct cross sections from ECIS
 C
 C              RCN, 08/2004
 C
-	         if(CSAlev(1, ICOllev(2), nejcec).gt.0) then
+               IF(CSAlev(1, ICOllev(2), nejcec).GT.0) THEN
                  WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
 99001            FORMAT('  Angle ', 10(6x, i2, '-level'))
                  WRITE(6, *)' '
@@ -444,7 +431,7 @@ C
                  WRITE(6, *)' '
                  WRITE(6, *)' '
                  WRITE(6, *)' '
-	         endif
+               ENDIF
             ENDIF
          ENDIF
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
@@ -494,7 +481,7 @@ C
               WRITE(6, *)' '
               WRITE(6, *)' '
               WRITE(6, *)' '
-	      endif
+         ENDIF
 C=========================================================================
 C           the following ELSE block is to print ECIS calculated XS
 C           (it could be omitted)
@@ -1298,7 +1285,6 @@ C-----------------------fission
                         csfis = csfis +xnorfis*(tdir+ dencomp*aafis)+
      &                          pfiso
                      ENDIF
-   
                      IF(FISmod(Nnuc).gt.0.)THEN
                         IF((dencomp + TDIrect).GT.0.)THEN
                            xnorfis = xnor*DENhf/(dencomp + TDIrect)
@@ -1694,7 +1680,7 @@ C        Mike, check the lines below
 C        It was a bug before. nexrt could be negative
 C        I intriduced a jump for this case, but may be this is not the proper thing to do !!! (08/2004) 
 C
-	            if(nexrt.le.1) cycle 
+               if(nexrt.le.1) cycle 
 
                   IF(nejc.EQ.0) THEN 
                      cejectile = 'gammas   '
