@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-11-30 14:06:36 $
-Ccc   * $Id: input.f,v 1.47 2004-11-30 14:06:36 herman Exp $
+Ccc   * $Date: 2004-11-30 23:41:12 $
+Ccc   * $Id: input.f,v 1.48 2004-11-30 23:41:12 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1409,6 +1409,7 @@ C
 C-----determination of excitation energy matrix in cn
 C
       ECUt(1) = ELV(NLV(1), 1)
+      NEX(1) = NEXreq  
       IF(FITlev.GT.0.0D0) THEN
          ECUt(1) = 0.0
 C
