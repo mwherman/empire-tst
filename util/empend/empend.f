@@ -19,6 +19,8 @@ C-V        - Let EMPIRE to handle max. outgoing particle energy.
 C-V  04/07 - Fix ordering of levels in MF12,
 C-V        - Read in values in double precision to avoid underflow.
 C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
+C-V  04/07 - Add (n,5n) MT47
+C-V        - Check for absence of distribution data (NP=0 in MF6).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -121,7 +123,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=100,MXT=200,MXM=60,MXR=200000,MXI=8000)
+      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=200000,MXI=8000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -477,6 +479,9 @@ C* (n,3np) cross section
         ELSE IF(JZA  .EQ. IZA-3005) THEN
 C* (n,npa) cross section
           MT =   45
+        ELSE IF(JZA  .EQ. IZA-4   ) THEN
+C* (n,5n) cross section
+          MT =   47
         ELSE IF(JZA  .EQ. IZA-4007) THEN
 C* (n,2a) cross section
           MT =  108
@@ -551,6 +556,9 @@ C* (p,n2p) cross section
         ELSE IF(JZA  .EQ. IZA-2005) THEN
 C* (p,npa) cross section
           MT =45
+        ELSE IF(JZA  .EQ. IZA+IZI-5) THEN
+C* (p,4n) cross section
+          MT =   47
         ELSE IF(JZA  .EQ. IZA+1001) THEN
 C* Radiative capture cross section
           MT =102
@@ -617,6 +625,7 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,4n) ') MT= 37
         IF(PTST.EQ.' (z,2np)') MT= 41
         IF(PTST.EQ.' (z,3np)') MT= 42
+        IF(PTST.EQ.' (z,5n) ') MT= 47
         IF(PTST.EQ.' (z,n)  ') MT= 91
         IF(PTST.EQ.' (z,gamm') MT=102
         IF(PTST.EQ.' (z,2p) ') MT=111
@@ -736,6 +745,7 @@ C* Outgoing neutrons
         IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR. MT.EQ.41) YI=2
         IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
         IF(MT.EQ.37) YI=4
+        IF(MT.EQ.47) YI=5
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
         IF(MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
@@ -1966,6 +1976,17 @@ C...        print *,'np,ne6',np,ne6
           WRITE(LTT,995) ' EMPEND ERROR - No gamma yields for MT  ',JT6
           WRITE(LER,995) ' EMPEND ERROR - No gamma yields for MT  ',JT6
           STOP ' EMPEND ERROR - undefined yields'
+        ELSE
+          WRITE(LTT,995) ' EMPEND WARNING - Reaction MT           ',JT6
+          WRITE(LTT,995) '      No distribution data for particle ',IZAP
+          WRITE(LER,995) ' EMPEND WARNING - Reaction MT           ',JT6
+          WRITE(LER,995) '      No distribution data for particle ',IZAP
+c...
+          NK=0
+          RETURN
+c...
+          NK=NK-1
+          GO TO 704
         END IF
       ELSE IF(NP.EQ.2) THEN
         RWO(LAE  )=E1
@@ -1994,12 +2015,12 @@ C* Compact the array (No. of pts. for yields .le. NE3+1)
 c...       PRINT *,'      REAMF6 IK,LXA,LP1,LPK,LL',IK,LXA,LP1,LPK,LL
 
       NW=LL-LPK
-      DO 704 I=1,NW
-      RWO(LP1-1+I)=RWO(LPK-1+I)
-  704 CONTINUE
+      DO I=1,NW
+        RWO(LP1-1+I)=RWO(LPK-1+I)
+      END DO
       LBL=LP1+NW
 C* Reaction data read - check for next outgoing particle
-      IF(IK.LT.NK) THEN
+  704 IF(IK.LT.NK) THEN
         REWIND LIN
         GO TO 200
       END IF
