@@ -6380,6 +6380,8 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/addresonances $file &} -label {Add resonances}
+    $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/process $file 1 &} \
         -label PreProcess 
     $site_3_0.menu93 add command \
