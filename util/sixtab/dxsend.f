@@ -1,3 +1,656 @@
+      SUBROUTINE DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF0,MT0,KEA,EIN,PAR,EPS
+     1                 ,ENR,DXS,RWO,NEN,MEN,MRW,LTT,ELV)
+C-Title  : Subroutine DXSELM
+C-Purpose: Extract double differential cross sections from ENDF
+C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
+C-Version: 15-Dec-2003 (Original code).
+C-Description:
+C-D  The function of this routine is an extension of DXSEND and DXSEN1
+C-D  routines, which retrieves the differential cross section at a
+C-D  specified incident particle energy and scattering angle. The
+C-D  hierarchy of the routines is as follows:
+C-D    DXSELM - main entry, looping DXSEND for all nuclides (isotopes)
+C-D             in a mixture (element), if necessary.
+C-D    DXSEND - called from DXSEND, looping over all contributing
+C-D             reactions (e.g. summing over reactions emitting a
+C-D             specific nuclide to produce particle emission
+C-D             spectrum for that particle).
+C-D    DXSEN1 - called from DXSEND, retrieving the data from the
+C-D             ENDF file and reconstructing the desired cross
+C-D             section or spectrum.
+C-D  For details see the description of DXSEND and DXSEN1 routines.
+C-D  Formal parameters are:
+C-D  LEF  - File unit number from which the ENDF file is read.
+C-D  NUC  - Number of nuclides in a mixture (if NUC=0, a single
+C-D         nuclide with fractional abundance =1 is assumed).
+C-D  ZEL  - Requested nuclide list. The nuclides are identified by
+C-D         their ZA identification number. If ZA>0 it is given in
+C-D         terms of Z*1000+A+LIS0/10 where Z is the atomic number,
+C-D         A the mass number and LIS0 the metastable state number.
+C-D         When ZA<0 it implies the ENDF material MAT number.
+C-D  FRC    Fractional abundance of nuclides from the list.
+C-D  ZAP  - Outgoing particle ZA designation (ZAP=1 for neutrons).
+C-D  MF0  - Requested file number (ENDF conventions).
+C-D  MT0  - Requested reaction number. Broadly this follows the ENDF
+C-D         conventions.
+C-D  KEA  - Control flag to select retrieval:
+C-D           0  cross sections,
+C-D           1  angular distributions,
+C-D           2  energy spectra.
+C-D  EIN  - Incident particle energy (eV).
+C-D  PAR  - Fixed parameter when requesting differential data:
+C-D         KEA=0, MF0=10, PAR is the requested metastable state
+C-D                (0=ground, 1=first metastable, etc.).
+C-D         KEA=1, PAR is the requested outgoing particle energy.
+C-D         KEA=2, PAR is the requested scattering angle (degrees).
+C-D                A value PAR < 0 implies angle integrated energy
+C-D                distribution.
+C-D  EPS  - Resolution broadening parameter is used for the two-body
+C-D         scattering reactions like the elastic and discrete inelastic
+C-D         cross sections  where in principle the energy distribution
+C-D         is a delta function. For such reactions the energy
+C-D         distribution is displayed as a Gaussian distribution where
+C-D         EPS the fractional half-width at half-maximum. Such
+C-D         representation is convenient for comparison with measured
+C-D         data.
+C-D  ENR  - Argument vector of the assembled output cross section.
+C-D  DXS  - Function vector of the assembled output cross section.
+C-D  RWO  - Work array of length MRW.
+C-D  NEN  - Number of points in the assembled output cross section
+C-D         vector.
+C-D  MEN  - Available size of ENR and DXS arrays.
+C-D  MRW  - Available size of the RWO work array.
+C-D  LTT  - Unit number for printing error messages and warnings.
+C-D         If less or equal zero, printout is suppressed and
+C-D         LTT is set equal to -IER where the values imply:
+C-D           1  Specified material not found.
+C-D           2  End-of-file before material found.
+C-D           3  General read error.
+C-D           9  Array limit MRW exceeded.
+C-D          11  Multiple interpolation ranges and/or law other
+C-D              than lin-lin encountered.
+C-D          12  Correlated energy-angle distributions not in Law-7
+C-D              representation.
+C-D          13  Processing not coded for specified reaction.
+C-D          14  Requested particle not found.
+C-D  ELV  - Discrete level energy where discrete levels are not
+C-D         identified by their MT number.
+C-D
+C-Extern.: DXSEND,DXSEN1
+C*
+      DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),ZEL(1),FRC(1)
+C*
+      NE1=0
+      IEL=1
+      ML =0
+      LX =1
+      KRW=MRW
+      IZA=ABS(ZEL(IEL))+0.01
+      IF(ZEL(IEL).LT.0) IZA=-IZA
+      IF(NUC.GT.0) GO TO 60
+C* Check if the specified material exist as is
+      MF=0
+      MT=0
+      ZE=ZEL(IEL)
+      CALL FINDMT(LEF,ZE,ZA,AWR,L1,L2,NS,N2,MAT,MF,MT,IER)
+      IF(IER.EQ.0) THEN
+        REWIND LEF
+        GO TO 60
+      END IF
+C* Reconstruct elemental composition
+      IA=IZA-1000*(IZA/1000)
+      IF(IZA.LT.0 .OR. IA.NE.0) THEN
+        IER=1
+        IF(LTT.GT.0) THEN
+          WRITE(LTT,903) ' DXSELM WARNING - Nuclide not found   : ',IZA
+        ELSE
+          LTT=-IER
+        END IF
+        RETURN
+      END IF
+      IZ=IZA/1000
+      CALL ELMABN(IZ,NUC,ZEL,FRC)
+C...
+C...      PRINT *,'IZ,NUC,IEL',IZ,NUC
+C...      DO I=1,NUC
+C...        PRINT *,ZEL(I),FRC(I)
+C...      END DO
+C...
+C*
+C* Retrieve the distribution for the specified nuclide
+   60 ZA=ZEL(IEL)
+      IZA=NINT(ZA)
+      KK =KEA
+      PP =PAR
+      MF =MF0
+      MT =MT0
+      CALL DXSEND(LEF,ZA,ZAP,MF,MT,KK,EIN,PP,EPS,ENR,DXS
+     1           ,RWO(LX),NE,MEN,KRW,LTT,ELV)
+      IF(NE.LE.0) THEN
+        IF(LTT.GT.0 .AND. NUC.GT.1) THEN
+        WRITE(LTT,903) ' DXSELM WARNING - Missing contrib. from ',IZA
+        END IF
+        ML=ML+1
+        GO TO 74
+      END IF
+      NEN=NE
+      IF(NUC.EQ.0) GO TO 90
+C* Multiply by the fractional abundance
+      IF(LTT.GT.0) THEN
+        IF(FRC(IEL).LT.1.E-12) THEN
+        WRITE(LTT,903) ' DXSELM WARNING - zero abun. for nuclide',IZA
+        END IF
+      END IF
+      DO I=1,NE
+        DXS(I)=DXS(I)*FRC(IEL)
+      END DO
+      IF(NE1.EQ.0) GO TO 70
+C* Begin processing the previously accumulated distribution
+      IF( NEN.EQ.0) THEN
+        NEN=NE1
+        GO TO 74
+      END IF
+C* Move the previously saved distribution in the work field
+      LX=MRW/2
+      DO I=1,NE1
+        RWO(LX-1+I)=RWO(NE1+I)
+      END DO
+C* Generate the union grid
+      LUE= 1+NE1
+      LUX=LX+NE1
+      KX =MRW-LUX
+      CALL UNIGRD(NEN,ENR,NE1,RWO,NE2,RWO(LUE),KX)
+C* Interpolate current distribution to the union grid
+      CALL FITGRD(NEN,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
+      NEN=NE2
+      DO I=1,NEN
+        ENR(I)=RWO(LUE-1+I)
+        DXS(I)=RWO(LUX-1+I)
+      END DO
+C* Interpolate saved distribution to the union grid
+      CALL FITGRD(NE1,RWO,RWO(LX),NE2,RWO(LUE),RWO(LUX))
+C* Add the current to the saved distribution
+      DO I=1,NEN
+        DXS(I)=DXS(I)+RWO(LUX-1+I)
+      END DO
+C* Save the summed distribution 
+   70 LX=1+NEN*2
+      KRW=MRW-LX
+      NE1=NEN
+      DO I=1,NEN
+        RWO(I    )=ENR(I)
+        RWO(I+NEN)=DXS(I)
+      END DO
+C* Select next reaction
+   74 IF(IEL.LT.NUC) THEN
+        IEL=IEL+1
+        GO TO 60
+      END IF
+C*
+C* All processing completed
+   90 CONTINUE
+      IF(ML.GT.0 .AND. NUC.GT.0) THEN
+        WRITE(LTT,904) ML,NUC
+      END IF
+c...
+C...      print *,'nen',nen
+C...      print *,enr(1),dxs(1)
+C...      print *,enr(nen),dxs(nen)
+c...
+      RETURN
+C*
+  901 FORMAT(2A40)
+  903 FORMAT(A40,I6)
+  904 FORMAT(' DXSELM WARNING - failed reconstructing'
+     1       ,I3,' out of',I3,' nuclides')
+      END
+      SUBROUTINE ELMABN(IZ,NUC,ZEL,FRC)
+C-Title  : Subroutine ELMABN
+C-Purpose: Define fractional isotopic abundance of elements
+      PARAMETER  (MXIZ=24,MXEL=100)
+C* Main array containing the abundances
+      DIMENSION ZAB(MXIZ,MXEL),ZEL(1),FRC(1)
+C* Equivalenced fields for the data statement
+      DIMENSION Z00(MXIZ,  9 )
+      DIMENSION Z10(MXIZ, 10 )
+      DIMENSION Z20(MXIZ, 10 )
+      DIMENSION Z30(MXIZ, 10 )
+      DIMENSION Z40(MXIZ, 10 )
+      DIMENSION Z50(MXIZ, 10 )
+      DIMENSION Z60(MXIZ, 10 )
+      DIMENSION Z70(MXIZ, 10 )
+      DIMENSION Z80(MXIZ, 10 )
+      DIMENSION Z90(MXIZ, 10 )
+      EQUIVALENCE ( ZAB(1,  1 ), Z00(1,1) )
+      EQUIVALENCE ( ZAB(1, 10 ), Z10(1,1) )
+      EQUIVALENCE ( ZAB(1, 20 ), Z20(1,1) )
+      EQUIVALENCE ( ZAB(1, 30 ), Z30(1,1) )
+      EQUIVALENCE ( ZAB(1, 40 ), Z40(1,1) )
+      EQUIVALENCE ( ZAB(1, 50 ), Z50(1,1) )
+      EQUIVALENCE ( ZAB(1, 60 ), Z60(1,1) )
+      EQUIVALENCE ( ZAB(1, 70 ), Z70(1,1) )
+      EQUIVALENCE ( ZAB(1, 80 ), Z80(1,1) )
+      EQUIVALENCE ( ZAB(1, 90 ), Z90(1,1) )
+C*
+      DATA Z00/
+     &  1001.,0.999885, 1002.,0.000115,     0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  2003.,.00000137,2004.,0.99999863,   0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  3006.,0.0759,   3007.,0.9241,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  4009.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  5010.,0.199,    5011.,0.801,        0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  6012.,0.9893,   6013.,0.0107,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  7014.,0.99632,  7015.,0.00368,      0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  8016.,0.99757,  8017.,0.00038,   8018.,0.00205,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &  9019.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z10/
+     & 10020.,0.9048,  10021.,0.0027,   10022.,0.0925,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 11023.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 12024.,0.7899,  12025.,0.10,     12026.,0.1101,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 13027.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 14028.,0.922297,14029.,0.046832,     0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 15031.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 16032.,0.9493,  16033.,0.0076,   16034.,0.0429,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 17035.,0.7578,  17037.,0.2422,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 18036.,0.003365,18038.,0.000632, 18040.,0.996003,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 19039.,0.932581,19040.,0.000117, 19041.,0.067302,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+       DATA Z20/
+     & 20040.,0.9694,  20042.,0.00647,  20043.,0.00135,
+     & 20044.,0.0209,  20046.,0.00004,  20048.,0.00187,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 21021.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 22046.,0.0825,  22047.,0.0744,   22048.,0.7372,
+     & 22049.,0.0541,  22050.,0.0518,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 23050.,0.0025,  23051.,0.9975,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 24050.,0.04345, 24052.,0.83789,  24053.,0.09501,
+     & 24054.,0.02365,     0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 25055.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 26054.,0.05845, 26056.,0.91754,  26057.,0.02119,
+     & 26058.,0.00282,     0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 27059.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 28058.,0.680769,28060.,0.262231, 28061.,0.011399,
+     & 28062.,0.036345,28064.,0.009256,     0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 29063.,0.6917,  29065.,0.3083,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z30/
+     & 30064.,0.4863,  30066.,0.2790,   30067.,0.0410,
+     & 30068.,0.1875,  30070.,0.0062,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 31069.,0.60108, 31071.,0.39892,      0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 32070.,0.2084,  32072.,0.2754,   32073.,0.0773,
+     & 32074.,0.3628,  32076.,0.0761,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 33075.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 34074.,0.0089,  34076.,0.0937,   34077.,0.0763,
+     & 34078.,0.2377,  34080.,0.4961,   34082.,0.0873,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 35079.,0.5069,  35081.,0.4931,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 36078.,0.0035,  36080.,0.0228,   36082.,0.1158,
+     & 36083.,0.1149,  36084.,0.570,    36086.,0.1730,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 37085.,0.7217,  37087.,0.2783,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 38084.,0.0056,  38086.,0.0986,   38087.,0.070,
+     & 38088.,0.8258,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 39089.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z40/
+     & 40090.,0.5145,  40091.,0.1122,   40092.,0.1715,
+     & 40094.,0.1738,  40096.,0.0280,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 41093.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 42092.,0.1484,  42094.,0.0925,   42095.,0.1592,
+     & 42096.,0.1668,  42097.,0.0955,   42098.,0.2413,
+     & 42100.,0.0963,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 43000.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 44096.,0.0554,  44098.,0.0187,   44099.,0.1276,
+     & 44100.,0.1260,  44101.,0.1706,   44102.,0.3155,
+     & 44104.,0.1862,      0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 45103.,1.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 46102.,0.0102,  46104.,0.1114,   46105.,0.2233,
+     & 46106.,0.2733,  46108.,0.2646,   46110.,0.1172,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 47107.,0.51839, 47109.,0.48161,      0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 48106.,0.0125,  48108.,0.0089,   48110.,0.1280,
+     & 48111.,0.1280,  48112.,0.2413,   48113.,0.1222,
+     & 48114.,0.2873,  48116.,0.0749,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 49113.,0.0429,  49115.,0.9571,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z50/
+     & 50112.,0.0097,  50114.,0.0066,   50115.,0.0034,
+     & 50116.,0.1454,  50117.,0.0768,   50118.,0.2422,
+     & 50119.,0.0859,  50120.,0.3258,   50122.,0.0463,
+     & 50124.,0.0579,      0.,0.,           0.,0.,
+     & 51121.,0.5721,  51123.,0.4279,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 52120.,0.0009,  52122.,0.0255,   52123.,0.0089,
+     & 52124.,0.0474,  52125.,0.0707,   52126.,0.1884,
+     & 52128.,0.3174,  52130.,0.3408,       0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 53127.,1.0,         0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 54124.,0.009,   54126.,0.0009,   54128.,0.0192,
+     & 54129.,0.2644,  54130.,0.0408,   54131.,0.2118,
+     & 54132.,0.2689,  54134.,0.1044,   54136.,0.0887,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 55133.,1.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 56130.,0.00106, 56132.,0.00101,  56134.,0.02417,
+     & 56135.,0.06592, 56136.,0.07854,  56137.,0.11232,
+     & 56138.,0.71698,     0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 57138.,0.00090, 57139.,0.99910,      0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 58136.,0.00185, 58138.,0.00251,  58140.,0.88450,
+     & 58142.,0.11114,     0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     & 59141.,1.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z60/
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z70/
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z80/
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z90/
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+C*
+      NUC=0
+c...
+      IF(IZ.GE.60) STOP 'ERROR - Data for IZ>=59 not availabe'
+c...
+      DO I=1,MXIZ
+        ZEL(I)=ZAB(2*I-1,IZ)
+        FRC(I)=ZAB(2*I  ,IZ)
+        IF(NINT(ZEL(I)).LE.0) RETURN
+        NUC=NUC+1
+      END DO
+      RETURN
+      END
       SUBROUTINE DXSEND(LEF,ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
      1                 ,RWO,NEN,MEN,MRW,LTT,ELV)
 C-Title  : Subroutine DXSEND
@@ -13,8 +666,7 @@ C-V          discrete inelastic levels by level energy rather than
 C-V          MT number.
 C-V        - Fix spectra of charged particles.
 C-V        - Add photon spectra.
-C-V  03/01 - Add MF5 Maxwellian fission spectrum representation.
-C-V        - Add LO=1, LF=2 capability for MF12 processing.
+C-V  04/01 Improved diagnostics.
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
@@ -27,11 +679,25 @@ C-D  For details see the description of the DXSEN1 routine.
 C-Extern.: DXSEN1
 C-
 C* Limits: Max.No.of reactions=MXL, interp.ranges=MXI
-      PARAMETER   (MXL=200,MXI=100)
+      PARAMETER   (MXL=200,MXI=100,MXE=20)
+      CHARACTER*40 MSG(MXE)
+      DIMENSION    NBT(MXI),INR(MXI),LST(MXL)
 C*
       DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN)
-     1            ,LST(MXL)
-      DIMENSION    NBT(MXI),INR(MXI)
+      DATA MSG/
+     1  'Specified material not found            ',
+     2  'End-of-file before material found       ',
+     3  'General read error                      ',
+     4  '?','?','?','?','?',
+     9  'Array limit MRW exceeded                ',
+     D  '?',
+     1  'Multiple interp. ranges and/or law not 2',
+     2  'Correlated ener/ang distr. not in Law-7 ',
+     3  'Processing not coded for specified react',
+     4  'Requested particle not found            ',
+     5  'No differential data present            ',
+     6  '?','?','?','?',
+     D  'Unknown error ?                         '/
 C*
       LOOP=0
       LX  =1
@@ -45,6 +711,10 @@ C*
       MINL=0
       M600=0
       M800=0
+c...
+      print *,'DXSEND: ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS'
+      print *,         ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS
+c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
       IF(ELV.GT.0 .AND.
@@ -246,8 +916,14 @@ C* Retrieve the double differential cross section energy distribution
      1           ,RWO(LX),NE,MEN,KRW,IER)
       IF( IER.NE.0) THEN
         IF(LTT.GT.0) THEN
-        WRITE(LTT,903) ' DXSEND WARNING - Error condition flag  ',IER
-        WRITE(LTT,903) '            Failed reconstruction for MT',MT
+        IF(IER.LT.MXE) THEN
+        WRITE(LTT,901) ' DXSEND WARNING - Error encountered   : '
+     &                 ,MSG(IER)
+        ELSE
+        WRITE(LTT,903) ' DXSEND WARNING - Error condition flag: ',IER
+        END IF
+        WRITE(LTT,903) '            Failed reconstruction for MF',MF0
+        WRITE(LTT,903) '                                      MT',MT
         END IF
         ML=ML+1
         GO TO 74
@@ -306,6 +982,7 @@ C...      print *,enr(nen),dxs(nen)
 c...
       RETURN
 C*
+  901 FORMAT(2A40)
   903 FORMAT(A40,I4)
   904 FORMAT(' DXSEND WARNING - failed reconstructing'
      1       ,I3,' out of',I3,' reactions')
@@ -325,7 +1002,10 @@ C-V  02/05 - Fix processing of MT600,600 series angular distributions.
 C-V        - Provisionally add photon spectra (assumed isotropic).
 C-V  02/10 - Add photon spectra from (n,gamma)
 C-V          WARNING: Photon emission assumed isotropic.
+C-V  03/01 - Add MF5 Maxwellian fission spectrum representation.
+C-V        - Add LO=1, LF=2 capability for MF12 processing.
 C-V  03/11 - Guard cross section retrieval against overflow.
+C-V  03/12 - Implement MF6 Law2 LANG>10 processing.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -381,16 +1061,16 @@ C-D         include the following:
 C-D          1  Specified material not found.
 C-D          2  End-of-file before material found.
 C-D          3  General read error.
-C-D         21  Multiple interpolation ranges and/or law other
-C-M             than lin-lin encountered.
-C-D         22  Array limit MRW exceeded.
-C-D         23  Correlated energy-angle distributions not in Law-7
+C-D          9  Array limit MRW exceeded.
+C-D         11  Multiple interpolation ranges and/or law other
+C-D             than lin-lin encountered.
+C-D         12  Correlated energy-angle distributions not in Law-7
 C-D             representation.
-C-D         24  Requested particle not found.
-C-D         31  Processing not coded for specified reaction.
+C-D         13  Processing not coded for specified reaction.
+C-D         14  Requested particle not found.
 C-D
 C-Extern.: SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,FINT2D,YTGEOU,FNGAUS,
-C-E        FYTG2D,UNIGRD,FITGRD
+C-E        FYTG2D,UNIGRD,FITGRD,VECLIN,FINEND
 C-
       PARAMETER   (MIW=100)
       DIMENSION    IWO(MIW)
@@ -411,7 +1091,8 @@ C* Check the requested type of output
       AIN=-2
       EOU=-2
       SAN= 1/(2*PI)
-      MST =1+NINT(PAR)
+      MST= 1+NINT(PAR)
+      AWP=-1
       IF     (KEA.EQ.2) THEN
 C* Case: Energy spectrum at fixed scattering angle requested
         MST=1
@@ -516,11 +1197,11 @@ C...
       NX=MRW/2
       LX=NX+1
 C* Read TAB1 cross sections (can be more than 1 if MF 10)
-      DO 31 J=1,MST
-      CALL RDTAB1(LEF,QM,QI,L1,L2,NR,NP,NBT,INR
-     1           ,RWO,RWO(LX),NX,IER)
-      IF(IER.NE.0) GO TO 900
-   31 CONTINUE
+      DO J=1,MST
+        CALL RDTAB1(LEF,QM,QI,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        IF(IER.NE.0) GO TO 900
+      END DO
       IF(EIN.GT.0) THEN
         IF(EIN.LT.RWO(1) .OR. EIN.GT.RWO(NP)) THEN
 C* Case: Required point is below thershold or above last point
@@ -529,7 +1210,7 @@ C* Case: Required point is below thershold or above last point
         END IF
       END IF
       IF(NR.NE.1 .OR. INR(1).GT.2) THEN
-        IER=21
+        IER=11
         GO TO 900
       END IF
 C* Case: Cross section is required on output - finish processing
@@ -570,7 +1251,7 @@ C* No MF4/5/6 possible only for discrete level (two-body isotr.) react.
         ELSE IF(IZAP0.EQ.2004) THEN
           IF(MT0.GE.800 .AND. MT0.LT.849) GO TO 40
         END IF
-        IER=25
+        IER=15
         PRINT *,'WARNING - No differential data for MT',MT0
         GO TO 900
       END IF
@@ -634,6 +1315,17 @@ C*
 C* Process angular distribution data in MF 4
    42 LVT=L1
       LTT=L2
+C* Assume two-body scattering for elastic & inelastic scattering
+C* and other discrete-level reactions for INCIDENT NEUTRONS
+      IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) THEN
+        AWP=1
+      ELSE IF(MT0.GE.600 .AND. MT0.LT.649) THEN
+        AWP=1
+      ELSE IF(MT0.GE.800 .AND. MT0.LT.849) THEN
+        AWP=4
+      ELSE
+        AWP=-1
+      END IF
       IF(LTT.EQ.0) GO TO 45
       IF(LTT.NE.2) THEN
         PRINT *,'WARNING - Can not process MF/MT/LTT',MF,MT,LTT
@@ -668,7 +1360,10 @@ C* Read incident energy definitions
 C* For each incident energy read the angular distribution
       CALL RDTAB1(LEF,TEMP,EI2,LT,L2,NRP,NEP1,NBT(NM),INR(NM)
      1           ,RWO(LXE),RWO(LXX),KX,IER)
-      IF(IER.NE.0) STOP 'DENXS1 ERROR reading ang.distributions'
+      IF(IER.NE.0) THEN
+        PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+        STOP 'DXSEN1 ERROR reading ang.distributions'
+      END IF
 C...  IF(NRP.GT.1)
 C... 1 PRINT *,' WARNING - Multiple A interp.ranges for MF 4, MT',MT
 C* Lin-interpolate angular distributions over incident energies
@@ -676,73 +1371,97 @@ C* Lin-interpolate angular distributions over incident energies
       CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR(NM)
      1               ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,KX)
    44 CONTINUE
-C* Integrate over cosine
+C*
+C* Angular distribution at incident energy Ein processed
+C* Calculate  integral SS over distribution DXS at cosines ENR
    45 EA=ENR(1)
       EB=ENR(NE1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INR)
-C* Convert to Lab coordinate system if necessary
-C* Ref: R.F. Berland, CHAD Code to Handle Angular Data, NAA-SR-11231 (1965)
-C*   XCM - cosine os scattering angle in CM system
-C*   XLB - cosine os scattering angle in Lab system
-      IF(LCT.EQ.2) THEN
-        GAM=SQRT( EIN/ (EIN*AWR*AWR+QI*AWR*(AWR+1) ) )
-        DO 46 I=1,NE1
-        XCM=ENR(I)
-        XLB=(GAM+XCM)/SQRT(1+GAM*GAM+2*GAM*XCM)
-        DMC=2*GAM*XLB + SQRT(1-GAM*GAM*(1-XLB*XLB))
-     1     +(GAM*XLB)**2 / SQRT(1-GAM*GAM*(1-XLB*XLB))
-        ENR(I)=XLB
-        DXS(I)=DXS(I)*DMC
-   46   CONTINUE
+C*
+C* Process energy distributions for two-body reactions (AWP>0)
+C* Definitions:
+C*  XCM - cosine os scattering angle in CM system
+C*  XLB - cosine os scattering angle in Lab system
+C*  AWR - mass ratio of target and projectile (=A)
+C*  AWP - mass ratio of ejectile and projectile (=A-dash)
+C* Kinematics equations for 2-body problem form ENDF-102 Appendix E
+C* Equation (E.3)
+      IF(AWP.GT.0) THEN
+        BET=(AWR*(AWR+1-AWP)/AWP)*( 1+(1+AWR)*QI/(AWR*EIN) )
+        BET=SQRT(BET)
+        DO I=1,NE1
+          IF(LCT.EQ.2) THEN
+C*          CM co-ordinate system conversion to Lab
+            XCM=ENR(I)
+C*          Lab cosine of scattering: equation (E.11)
+            SBT= BET*BET + 1 + 2*XCM*BET
+            QBT= SQRT( SBT )
+            XLB=(1+BET*XCM)/QBT
+C*          Jacobian of the transformation dXCM/dXLB (derivative of E.11)
+            DCM=(SBT*QBT)/(BET*BET*(BET+XCM))
+          ELSE
+C*          Lab co-ordinate system
+            XLB=ENR(I)
+C*          CM cosine of scattering: inverse equation (E.11)
+C*          (the larger root of the quadratic equation is taken)
+          
+            XCM=(XLB*XLB-1 + XLB*SQRT(XLB*XLB+BET*BET-1) )/BET
+            SBT= BET*BET + 1 + 2*XCM*BET
+            DCM=1
+          END IF
+          EO =EIN*SBT*AWP/((AWR+1)*(AWR+1))
+C*        Outgoing particle energy: equation (E.10)
+          ENR(I)=XLB
+          DXS(I)=DXS(I)*DCM
+          RWO(LXE-1+I)=EO
+        END DO
       END IF
+c...
+c...      print *,'spectrum at Ei',EIN,' for MF4/MT',MT
+c...      do i=1,ne1
+c...        print *,'cos,Eou,dst',enr(i),rwo(lxe-1+i),dxs(i)
+c...      end do
+c...
       IF(KEA.EQ.1) THEN
-C* Case: Angular distribution
+C* Case: Angular distribution (no further processing required)
         YL=YL/SS
         IF(EOU.LT.0) GO TO 800
       END IF
       INA=2
       IF(DEG.GE.0) THEN
 C* Case: Specified outgoing particle cosine
-        YA=FINTXS(AIN,ENR,DXS,NE1,INA,IER)/SS
         XLB=AIN
+        YA =FINTXS(XLB,ENR,DXS,NE1,INA,IER)/SS
         YL =YL*YA
+        IF(AWP.GT.0) THEN
+C*        Interpolate precomputed Eou corresponding to Xlb
+          IER=0
+          EO =FINTXS(XLB,ENR,RWO(LXE),NE1,INA,IER)
+          NE1=21
+          CALL FNGAUS(EO ,NE1,ENR,DXS,EPS)
+          GO TO 800
+        END IF
       ELSE
 C* Case: Angle-integrated energy distribution
-        DO 47 I=1,NE1
-        DXS(I)=DXS(I)*ENR(I)
-   47   CONTINUE
+C*       Calculate cosine*distribution
+        DO I=1,NE1
+          RWO(LXX-1+I)=ENR(I)*DXS(I)
+        END DO
         EA=ENR(1)
         EB=ENR(NE1)
-        CALL YTGEOU(XLB,EA,EB,NE1,ENR,DXS,INR)
+C*        Integrate cosine*distribution
+        CALL YTGEOU(SPS,EA,EB,NE1,ENR,RWO(LXX),INA)
+C*        Integrate distribution
+        CALL YTGEOU(SDS,EA,EB,NE1,ENR,DXS,INA)
+C*        Average cosine of the outgoing particle in the Lab system
+        XLB=SPS/SDS
       END IF
-C*
-C* Assume two-body scattering for elastic & inelastic scattering
-C* and other discrete-lever reactions
-      IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) THEN
-        AWO=1
-        GO TO 48
-      ELSE IF(MT0.GE.600 .AND. MT0.LT.649) THEN
-        AWO=1
-        GO TO 48
-      ELSE IF(MT0.GE.800 .AND. MT0.LT.849) THEN
-        AWO=4
-        GO TO 48
-      ELSE
-        GO TO 50
-      END IF
-   48 IER=0
-C* Available energy and distribution (gausssian)
-C...              Check AWo and Eou definition !!!
-      EAV=EIN + QI*(1+AWR)/AWR
-      ECM=EAV*(AWR/(1+AWR))**2
-      GAM=SQRT( EIN/ (EIN*AWR*AWR+QI*AWR*(AWR+1) ) )
-      ACM=-GAM*(1-XLB*XLB) + XLB*SQRT(1-GAM*GAM*(1-XLB*XLB))
-      EOU=ECM + ( EIN + 2*ACM*(AWR+AWO)*SQRT(EIN*ECM) )/(AWR+AWO)**2
-C...
-C...  EOU=EAV*(AWR+1)/(AWR+1-AWO)
-C...
+      IF(AWP.LT.0) GO TO 50
+C* Interpolate precomputed Eou corresponding to Xlb
+      IER=0
+      EO =FINTXS(XLB,ENR,RWO(LXE),NE1,INA,IER)
       NE1=21
-      CALL FNGAUS(EOU,NE1,ENR,DXS,EPS)
+      CALL FNGAUS(EO ,NE1,ENR,DXS,EPS)
       GO TO 800
 C*
 C* Process energy distribution data in MF 5
@@ -756,7 +1475,7 @@ C* Process energy distribution data in MF 5
       IF(MF.EQ.5 .AND. NK.GT.1) THEN
 C...    No multiple representations are allowed
         PRINT *,'WARNING - No mult.represent.allowed for MF5 MT',MT0
-        IER=31
+        IER=13
         GO TO 900
       END IF
       JK=0
@@ -778,7 +1497,7 @@ C* If not the right particle try next one
    52     CONTINUE
           IF(JK.LT.NK) GO TO 51
           PRINT *,' WARNING - No matching particle ZAP',ZAP0
-          STOP 'DENXS1 - ZAP not matched'
+          STOP 'DXSEN1 - ZAP not matched'
         END IF
         YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
       END IF
@@ -827,7 +1546,10 @@ C...
           RWO(LXX-1+I)=RWO(LXE-1+2*I)
    53     CONTINUE
         END IF
-        IF(IER.NE.0) STOP 'DENXS1 ERROR reading energy.distrib.'
+        IF(IER.NE.0) THEN
+          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+          STOP 'DXSEN1 ERROR reading energy.distrib.'
+        END IF
         IF(KEA.EQ.2) THEN
 Case: Interpolate outgoing particle energy distributions
           CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
@@ -845,7 +1567,6 @@ Case: Interpolate distrib. to a given outgoing particle energy
           END IF
         END IF
    54   CONTINUE
-
       ELSE IF(LF.EQ.7) THEN
 C* Energy dependent Maxwellian fission spectrum (Law 7)
         NX=MRW/2
@@ -933,7 +1654,7 @@ Case: Calculate values at the given outgoing particle energy
 C...    Secondary particle energy distributions MF 5 not coded
         PRINT *,'WARNING - Processing not coded for MF5 MT',MT0
         PRINT *,'                                      Law',LF
-        IER=31
+        IER=13
         GO TO 900
       END IF
       GO TO 800
@@ -960,36 +1681,113 @@ C* KX2 - Max. permissible number of points per set
       KX2=LD/2
       LXF= 1+KX2
       LXY=LX+KX2
-C* Retrieve the neutron yield
+C* Retrieve the particle yield
       CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
      1           ,RWO,RWO(LX),KX,IER)
-      IF(LAW.NE.7) THEN
-C*        Set IER to flag error and terminate if not Law-7 in MF 6
-        IER=23
-        GO TO 900
-      END IF
+C* Check for matching particle - else skip section
       IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
+c...
+c...        print *,'Skipping particle/mf/mt/law',nint(zap),mf,mt,law
+c...
         IF(JNK.GE.NK) THEN
-          PRINT *,'DENXS1 WARNING - Particle not found',NINT(ZAP0)
-          IER=24
+          PRINT *,'DXSEN1 WARNING - Particle not found',NINT(ZAP0)
+          IER=14
           GO TO 900
         END IF
 C* Skip the subsection for this particle
-        CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
-        NM=NR+1
-        DO 64 IE=1,NE
-        CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU,NBT(NM),INR(NM),IER)
-        NO=NM+NMU
-        LXE=1
-        LXX=LX
-        DO 62 IM=1,NMU
-        CALL RDTAB1(LEF,C1,AI2,L1,L2,NRP,NEP2,NBT(NO),INR(NO)
-     1             ,RWO(LXE),RWO(LXX),KX,IER)
-   62   CONTINUE
-   64   CONTINUE
+        IF     (LAW.EQ.2) THEN
+C*        Skip subsection for Law 2
+          CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+          MX=MRW-LXX
+          DO IE=1,NE
+            CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO(LXX),MX,IER)
+            IF(IER.NE.0) THEN
+              STOP 'DXSEN1 ERROR - Skipping MF6 Law 2 data in RDLIST'
+            END IF
+          END DO
+        ELSE IF(LAW.EQ.3) THEN
+C*        No subsection for Law 3
+        ELSE IF(LAW.EQ.4) THEN
+C*        No subsection for Law 4
+        ELSE IF(LAW.EQ.7) THEN
+C*        Skip subsection for Law 7
+          CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+          NM=NR+1
+          DO IE=1,NE
+            CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU,NBT(NM),INR(NM),IER)
+            NO=NM+NMU
+            LXE=1
+            LXX=LX
+            DO IM=1,NMU
+              CALL RDTAB1(LEF,C1,AI2,L1,L2,NRP,NEP2,NBT(NO),INR(NO)
+     1                   ,RWO(LXE),RWO(LXX),KX,IER)
+            END DO
+          END DO
+        ELSE
+C*        Unsupported Law - cannot skip the section for this particle
+C*        Set IER to flag error and terminate
+          PRINT *,'DXSEND ERROR - Skipping MF/MT/Law',MF,MT,LAW
+          IER=12
+          GO TO 900
+        END IF
         GO TO 61
       END IF
-      IF(NR.NE.1 .OR. INR(1).GT.2) IER=21
+C* Check the data representation for this particle
+c...
+c...      print *,'processing particle/mf/mt/law',nint(zap),mf,mt,law
+c...
+      IF(LAW.EQ.7) GO TO 70
+      IF(LAW.EQ.2) GO TO 62
+C*        Unsupported Law - cannot skip the section for this particle
+C*        Set IER to flag error and terminate
+          PRINT *,'DXSEND ERROR - Processing MF/MT/Law',MF,MT,LAW
+          IER=12
+          GO TO 900
+C*
+C* Process MF 6 Law 2 data
+   62 CONTINUE
+        CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+C...    IF(NR.GT.1)
+C... 1   PRINT *,' WARNING - Multiple interp.ranges for MF 6, MT',MT
+        NE1=0
+        EI1=0
+        MX=MRW-LXX
+        DO IE=1,NE
+C* Process the angular distribution for each incident energy
+          CALL RDLIST(LEF,C1,EI2,LANG,L2,NW,NEP1,RWO(LXX),MX,IER)
+          IF(IER.NE.0) THEN
+            STOP 'DXSEN1 ERROR - Reading MF6 Law 2 data in RDLIST'
+          END IF
+          IF(LANG.LT.11) THEN
+            PRINT *,'WARNING - Cannot process MF/MT/LANG',MF,MT,LANG
+            PRINT *,'          Distributions not pointwise'
+            IER=41
+            GO TO 900
+          END IF
+          DO J=1,NEP1
+            RWO(LXE-1+J)=RWO(LXX+2*J-2)
+            RWO(LXX-1+J)=RWO(LXX+2*J-1)
+          END DO
+C* Linearise the angular distribution
+          EPL=0.005
+          NRA=1
+          LRA=NR+1
+          NBT(LRA)=NEP1
+          INR(LRA)=LANG-10
+          CALL VECLIN(NRA,NEP1,NBT(LRA),INR(LRA)
+     1               ,RWO(LXE),RWO(LXX),LD,EPL)
+C* Lin-interpolate angular distributions over incident energies
+          INA=2
+          INE=2
+          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INA
+     1                   ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,LD)
+        END DO
+C* The rest of processing is identifal to MF 4 case
+        GO TO 45
+C*
+C* Process MF 6 Law 7 data
+   70 CONTINUE
+      CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
       YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
 C* Read incident energy definitions
       CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
@@ -999,7 +1797,10 @@ C* Read incident energy definitions
       DO 74 IE=1,NE
 C* Read incident cosine definitions
       CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU,NBT(NM),INR(NM),IER)
-      IF(IER.NE.0) STOP 'DENXS1 ERROR reading distributions'
+      IF(IER.NE.0 .AND. IER.NE.11) THEN
+         PRINT *,'ERROR READING TAB2 i(En) MF/MT/IER',IE,MF,MT,IER
+         STOP 'DXSEN1 ERROR reading distributions'
+      END IF
 C...  IF(NRM.GT.1)
 C... 1 PRINT *,' WARNING - Multiple E interp.ranges for MF 6, MT',MT
       NO=NM+NMU
@@ -1010,7 +1811,10 @@ C... 1 PRINT *,' WARNING - Multiple E interp.ranges for MF 6, MT',MT
 C* For each cosine and energy read the distributions
       CALL RDTAB1(LEF,C1,AI2,L1,L2,NRP,NEP2,NBT(NO),INR(NO)
      1           ,RWO(LXE),RWO(LXX),KX,IER)
-      IF(IER.NE.0) STOP 'DENXS1 ERROR reading distributions'
+      IF(IER.NE.0 .AND. IER.NE.11) THEN
+        PRINT *,'ERROR READING TAB1 i(cos) MF/MT/IER',IM,MF,MT,IER
+        STOP 'DXSEN1 ERROR reading distributions'
+      END IF
 C...  IF(NRP.GT.1)
 C... 1 PRINT *,' WARNING - Multiple A interp.ranges for MF 6, MT',MT
 C* Integrate over energy for this cosine
@@ -1085,7 +1889,7 @@ C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-C...      print *,'Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
+c...      print *,'Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
@@ -1095,9 +1899,9 @@ C* Changing LF between data sets is currently not accomodated
         LG =L2
         NS =N1
         LL =LV*(LG+1)
-        DO 123 J=1,LL
-        RWO(LLI+J)=0
-  123   CONTINUE
+        DO J=1,LL
+          RWO(LLI+J)=0
+        END DO
         LX =MRW-LLI
         CALL RDLIST(LEF,ES,C2,LP,L2,NW,NT,RWO(LLI+1),LX,IER)
         IF(NW.GT.LL) THEN
@@ -1207,7 +2011,7 @@ C* Only one section for tabulated distributions is allowed at present
             PRINT *,'DXSEN1 WARNING >1 section for MF/MT',MF,MT
             STOP 'DXSEN1 ERROR >1 section for MF 15'
           END IF
-C* Read the fractional contribution of the section
+C* Read the fractional contribution of the section 
           CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
      1               ,RWO(LE),RWO(LX),KX,IER)
           YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR,IER)
@@ -1227,12 +2031,12 @@ C* For each incident energy read the outg.particle energy distribution
      1               ,RWO(LE),RWO(LX),KX,IER)
           IF(IER.NE.0) THEN
             PRINT *,'DXSEN1 ERROR - Reading MF/MT',MF,MT
-            STOP 'DENXS1 ERROR reading energy.distrib.'
+            STOP 'DXSEN1 ERROR reading energy.distrib.'
           END IF
 C* Scale by the fractional contribution
-          DO 133 J=1,NF
+          DO J=1,NF
             RWO(LX-1+J)=RWO(LX-1+J)*YLT
-  133     CONTINUE
+          END DO
 C* Linearise to tolerance EXS, if necessary
           EXS=0.01
           IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
@@ -1259,22 +2063,22 @@ C* Generate the union grid
 C* Interpolate accumulated distribution to the union grid
         CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
         NE1=NE2
-        DO 135 I=1,NE1
+        DO I=1,NE1
           ENR(I)=RWO(LUE-1+I)
           DXS(I)=RWO(LUX-1+I)
-  135   CONTINUE
+        END DO
 C* Interpolate distribution for the current photon to the union grid
         CALL FITGRD(NEN,RWO(LXE),RWO(LXX),NE1,RWO(LUE),RWO(LUX))
 C* Assume isotropic photon distributions
         ANG=0.5
 C* Add the current to the saved distribution
         FRC=ANG*YLK
-        DO 136 I=1,NE1
+        DO I=1,NE1
           DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
-  136   CONTINUE
+        END DO
   138   CONTINUE
       ELSE
-        IER=99
+        IER=13
         PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
         GO TO 900
       END IF
@@ -1282,7 +2086,7 @@ C* Add the current to the saved distribution
 C*
 C* Photon angular distributions
   140 CONTINUE
-        IER=99
+        IER=13
         PRINT *,'WARNING - No coding/data for MF',MF,' MT',MT0
         GO TO 900
 C*
@@ -1360,9 +2164,9 @@ C* Insert missing level and shift the rest
 C...
 C...           PRINT *,'               Shift LJ,LK',LJ,LK
 C...
-            DO 22 L=1,LL
+            DO L=1,LL
               RWO(LJ-L+LG+1)=RWO(LJ-L)
-   22       CONTINUE
+            END DO
             RWO(LK  )=EL
             RWO(LK+1)=0
             EB=EL
@@ -1630,7 +2434,7 @@ C-Purpose: Read an ENDF TAB1 record
 C-Description:
 C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
-C-D    IER=22 on exit if available field length NMX is exceeded.
+C-D    IER=9 on exit if available field length NMX is exceeded.
 C-
       DIMENSION    NBT(100),INR(100)
       DIMENSION    EN(NMX), XS(NMX)
@@ -1640,7 +2444,7 @@ C*
       JP=N2
       IF(N2.GT.NMX) THEN
         JP=NMX
-        IER=22
+        IER=9
       END IF
       READ (LEF,904) (EN(J),XS(J),J=1,JP)
       RETURN
@@ -1664,7 +2468,7 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
-      DOUBLE PRECISION RR(6)
+      DOUBLE PRECISION RUFL,RR(6)
       DIMENSION    VK(1)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
@@ -1674,14 +2478,22 @@ C*
       END IF
       IF(N1.EQ.0) RETURN
 C* Read the LIST2 entries, watch for underflow
+      NUFL=0
+      RUFL=1
       DO J=1,N1,6
         READ (LEF,903) (RR(K),K=1,6)
         DO K=1,6
-          IF(RR(K).NE.0 .AND. ABS(RR(K)).LT.1.E-30)
-     1      PRINT *,' RDTAB2 WARNING - Reading ',RR(K)
+          IF(RR(K).NE.0 .AND. ABS(RR(K)).LT.1.E-30) THEN
+            NUFL=NUFL+1
+            IF(ABS(RR(K)).LT.ABS(RUFL)) RUFL=RR(K)
+          END IF
           VK(J-1+K)=RR(K)
         END DO
       END DO
+      IF(NUFL.GT.0) THEN
+        PRINT *,' RDLIST WARNING - Underflow conditions',NUFL
+        PRINT *,'                        Minimum number',RUFL
+      END IF
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
@@ -1902,13 +2714,11 @@ C-Description:
 C-D  A pair of tabulated distribution with arguments in EN1 and EN2,
 C-D  function values XS1 and XS2 defined over NEP1 and NEP2 points
 C-D  and given at the independent arguments AI1 and AI2, respectively
-C-D  are interpolated. Interpolation law for the distribution is
-C-D  INE=1 (histogram) or INE=2 (linear) are allowed. Distributions
-C-D  are first linearised (if necessary) and defined on a union
-C-D  grid. Then they are interpolated to the independent argument
-C-D  value AI. Allowed interpolation laws are INR=2 (linear),
-C-D  INR=12 (corresponding point) of INR=22 (unit base).
-C-D  Special features:
+C-D  are interpolated. Distributions are first linearised (if necessary)
+C-D  and defined on a union grid. Then they are interpolated to the
+C-D  independent argument value AI. Allowed interpolation laws are
+C-D  INR=1 (histogram), INR=2 (linear), INR=12 (corresponding point)
+C-D  or INR=22 (unit base). Special features:
 C-D  - The interpolated distribution is normalised such that its
 C-D    integral is equal to the interpolated integrals of the 
 C-D    distributions at AI1 and AI2. This makes a difference
@@ -1955,10 +2765,10 @@ C* Check if first set or point below the required argument
       IF(NEP1.GT.0  .AND. AI2.GT.AI) GO TO 22
 C*
 C* Case: Move table to the first field
-      DO 21 I=1,NEP2
-      EN1(I)=EN2(I)
-      XS1(I)=XS2(I)
-   21 CONTINUE
+      DO I=1,NEP2
+        EN1(I)=EN2(I)
+        XS1(I)=XS2(I)
+      END DO
       AI1=AI2
       NEP1=NEP2
       GO TO 40
@@ -2179,9 +2989,9 @@ C* Normalisation constant is the integral
       E0=EE
    20 CONTINUE
 C* Normalise
-      DO 22 I=1,NEN
-      DXS(I)=DXS(I)/SS
-   22 CONTINUE
+      DO I=1,NEN
+        DXS(I)=DXS(I)/SS
+      END DO
 C*
       RETURN
       END
@@ -2254,12 +3064,12 @@ C...      PRINT *,'J,MEP2',J,MEP2
       IF(NEP0.LE.0) THEN
 C*
 C* First set of points - initialise integral
-        DO 22 I=1,NEP2
-        EN0(I)=EN2(I)
-        EN1(I)=EN2(I)
-        XS0(I)=0
-        XS1(I)=XS2(I)
-   22   CONTINUE
+        DO I=1,NEP2
+          EN0(I)=EN2(I)
+          EN1(I)=EN2(I)
+          XS0(I)=0
+          XS1(I)=XS2(I)
+        END DO
         NEP0=NEP2
         NEP1=NEP2
         AI1=AI2
@@ -2272,16 +3082,16 @@ C* Make a union grid
       CALL UNIGRD(NEP1,EN1,NEP2,EN2,NEU,EN2(LUNI),KX)
 C* Interpolate integrated distribution to the union grid
       CALL FITGRD(NEP0,EN0,XS0,NEU,EN2(LUNI),XS2(LUNI))
-      DO 31 I=1,NEU
-      EN0(I)=EN2(LUNI-1+I)
-      XS0(I)=XS2(LUNI-1+I)
-   31 CONTINUE
+      DO I=1,NEU
+        EN0(I)=EN2(LUNI-1+I)
+        XS0(I)=XS2(LUNI-1+I)
+      END DO
 C* Interpolate first distribution to the union grid
       CALL FITGRD(NEP1,EN1,XS1,NEU,EN2(LUNI),XS2(LUNI))
-      DO 32 I=1,NEU
-      EN1(I)=EN2(LUNI-1+I)
-      XS1(I)=XS2(LUNI-1+I)
-   32 CONTINUE
+      DO I=1,NEU
+        EN1(I)=EN2(LUNI-1+I)
+        XS1(I)=XS2(LUNI-1+I)
+      END DO
 C* Interpolate second distribution to the union grid
       CALL FITGRD(NEP2,EN2,XS2,NEU,EN2(LUNI),XS2(LUNI))
 C* Add the contribution to the integral
@@ -2334,6 +3144,7 @@ C-Purpose: Polynomial Pn(x) of order NC with NC+1 coefficients C(i)
       SUBROUTINE VECLIN(NR,NP,NBT,INR,ENR,XSR,MXPT,EPS)
 C-Title  : Subroutine VECLIN
 C-Purpose: Expand tabulated vector to be lin-lin interpolable
+C-Extern.: FINEND
       DIMENSION  NBT(NR),INR(NR),ENR(MXPT),XSR(MXPT)
 C*
       IIN=1
