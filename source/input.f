@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-15 23:04:56 $
-Ccc   * $Id: input.f,v 1.77 2005-02-15 23:04:56 herman Exp $
+Ccc   * $Date: 2005-02-15 23:43:41 $
+Ccc   * $Id: input.f,v 1.78 2005-02-15 23:43:41 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1874,19 +1874,31 @@ C
       ENDIF
       WRITE(6, *)
       WRITE(6, *)
-      WRITE(6, 99005)
-99005 FORMAT('    Nucleus   ', 6X, 'Shell Corr.  Deform.',
-     &       '  Fiss. barr.')
-      WRITE(6, 99006)
-99006 FORMAT('              ', 6X, '  (J=0)       (J=0)    ',
-     &       '    (J=0)')
-      WRITE(6, *)
-      DO i = 1, NNUct
-         IF(EMAx(i).NE.0.0D0)WRITE(6, 99007)IFIX(SNGL(Z(i))), SYMb(i),
-     &                             IFIX(SNGL(A(i))), SHC(i), DEF(1, i),
-     &                             FISb(1, i)
-99007    FORMAT(1X, I3, '-', A2, '-', I3, 4X, 10F12.3)
-      ENDDO
+      IF(FISSHI(1).NE.0) THEN
+         WRITE(6, 99005)
+99005    FORMAT('    Nucleus   ', 6X, 'Shell Corr.  Deform.',
+     &          '  Fiss. barr.')
+         WRITE(6, 99006)
+99006    FORMAT('              ', 6X, '  (J=0)       (J=0)    ',
+     &          '    (J=0)')
+         WRITE(6, *)
+         DO i = 1, NNUct
+           IF(EMAx(i).NE.0.0D0)WRITE(6, 99007)IFIX(SNGL(Z(i))), SYMb(i),
+     &                              IFIX(SNGL(A(i))), SHC(i), DEF(1, i),
+     &                              FISb(1, i)
+99007      FORMAT(1X, I3, '-', A2, '-', I3, 4X, 10F12.3)
+         ENDDO
+      ELSE
+         WRITE(6, 99335)
+99335    FORMAT('    Nucleus   ', 6X, 'Shell Corr.  Deform.')
+         WRITE(6, 99336)
+99336    FORMAT('              ', 6X, '  (J=0)       (J=0)    ')
+         WRITE(6, *)
+         DO i = 1, NNUct
+           IF(EMAx(i).NE.0.0D0)WRITE(6, 99007)IFIX(SNGL(Z(i))), SYMb(i),
+     &                              IFIX(SNGL(A(i))), SHC(i), DEF(1, i)
+         ENDDO
+      ENDIF
       WRITE(6, *)
       IF(KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE(6, *)
      &  ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
@@ -6084,11 +6096,11 @@ C-----where continuum starts,ends,steps in between
         ENDDO
 
         IF(NRBarc.EQ.3) XMInn(2) = 0.0001
-        IF(EXCn1.LE.EFB(ib)) THEN
-          xmax = 4.d0
+        IF(EXCn1.LE.(EFB(ib)+Xminn(ib))) THEN
+           xmax = Xminn(ib)+4.d0
         ELSE
-          xmax = excn1 - (EFB(ib) + XMInn(ib)) + 4.
-         ENDIF
+           xmax = excn1 - (EFB(ib) + XMInn(ib)) + 4.
+        ENDIF
 
         DEStepp(ib)=(xmax-XMInn(ib))/100.
         NRBinfis(ib) = INT((xmax - XMInn(ib))/DEStepp(ib))
@@ -6108,10 +6120,10 @@ C-----where continuum starts,ends,steps in between
      &          XMInnm(Mmod) = EFDism(nr, Mmod)
         ENDDO
         IF(NRBarc.EQ.3) XMInn(2) = 0.0001  !! Should be checked for multimodal
-        IF(excn1.LE.EFBm(mmod)) THEN
-          xmax = 4.
+        IF(excn1.LE.(EFBm(mmod)+Xminnm(mmod))) THEN
+           xmax = Xminn(mmod)+4.
         ELSE
-          xmax = excn1 - (EFBm(Mmod) + XMInnm(Mmod)) + 4.
+           xmax = excn1 - (EFBm(Mmod) + XMInnm(Mmod)) + 4.
         ENDIF
         DEStepm(Mmod)=(xmax-XMInnm(Mmod))/100.
         NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
