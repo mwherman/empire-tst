@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: tl.f,v 1.24 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-08-30 13:40:34 $
+Ccc   * $Id: tl.f,v 1.25 2004-08-30 13:40:34 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -182,7 +182,10 @@ C-----Common blocks and declarations for ominput11.f [July 6, 2001]
 C
 C-----Parameter statement
 C
-      PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+C-----Parameter statement
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+      PARAMETER(NDIM1 = 10, NDIM2 = 12, NDIM3 = 24, NDIM4 = 30, 
      &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
 C
       CHARACTER*1 AUThor, REFer, SUMmary
@@ -1447,7 +1450,10 @@ C
       CHARACTER*80 comment
       CHARACTER*10 potnam(6)
       CHARACTER*2 Symbnucr, Symbejcr
-      PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+C-----Parameter statement
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+      PARAMETER(NDIM1 = 10, NDIM2 = 12, NDIM3 = 24, NDIM4 = 30, 
      &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
       CHARACTER*1 AUThor, REFer, SUMmary
       COMMON /LIB   / IREf, EMIn, 
@@ -1571,7 +1577,10 @@ C
       INTEGER krange, LMAx, n, NCOll, NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, 
      &        NDIM6, NDIM7, NISotop, NPH, NVIb, IREl, IDR
 C
-      PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+C-----Parameter statement
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+      PARAMETER(NDIM1 = 10, NDIM2 = 12, NDIM3 = 24, NDIM4 = 30, 
      &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
       CHARACTER*1 AUThor, REFer, SUMmary
       CHARACTER*80 comment
@@ -1723,7 +1732,10 @@ C     Common blocks and declarations for ominput11.f [July 6, 2001] - RIPL-II
 C
 C     Parameter statement
 C
-      PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+C-----Parameter statement
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+      PARAMETER(NDIM1 = 10, NDIM2 = 12, NDIM3 = 24, NDIM4 = 30, 
      &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
       CHARACTER*1 AUThor, REFer, SUMmary
       COMMON /LIB   / IREf, EMIn, 
@@ -1812,7 +1824,10 @@ C
       CHARACTER*8 ldum, proj
       CHARACTER*40 model
       CHARACTER*20 area
-      PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+C-----Parameter statement
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     PARAMETER(NDIM1 = 10, NDIM2 = 11, NDIM3 = 24, NDIM4 = 30, 
+      PARAMETER(NDIM1 = 10, NDIM2 = 12, NDIM3 = 24, NDIM4 = 30, 
      &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
       CHARACTER*1 AUThor, REFer, SUMmary
       COMMON /LIB   / IREf, EMIn, 
