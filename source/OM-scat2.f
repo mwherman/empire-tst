@@ -2126,7 +2126,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,, //, 2x, 
+     &       , //, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
@@ -2231,7 +2231,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,, //, 2x, 
+     &       , //, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
@@ -2335,7 +2335,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,, //, 2x, 
+     &       , //, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)

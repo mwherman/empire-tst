@@ -161,8 +161,8 @@ MSD 	Controls Multistep Direct calculations ,
 	      single incident energy only.
 
 COMPFF Controls form factor for the l=0 transitions
-       = 0 standard surface form factor
-       = 1 compressional form factor (default)
+       = 0 standard surface form factor (default)
+       = 1 compressional form factor
 
 WIDEX  Experimental energy resolution set to VAL (default: 0.2).
 

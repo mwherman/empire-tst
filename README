@@ -1,30 +1,33 @@
                        E M P I R E  I I
 
-                        version 2.16beta  
+                         version 2.16
+                         (Montenotte)
 
-                         June 26, 2001
+                         July 10, 2001
 
 Installation:
 
-On UNIX systems just run Install in the main empire-2.16beta directory.
+On UNIX systems just run Install inside the main empire directory.
 
 Running:
 
-Use lrun.tcl script in the empire-2.16beta/work directory. This needs Tcl/Tk
+Use lrun.tcl script in the empire/work directory. This needs Tcl/Tk
 and bash shell installed. Otherwise one can use scripts also provided in the
-empire-2.16beta/work directory. Please refer to empire-2.13 write-up for more
+empire/work directory. Please refer to empire-2.13 write-up for more
 details.
 
 Please note that:
 
 1. EXFOR library is not provided with this distribution. You should copy
    or link EXFOR/subent directory from empire-2.13 or later to 
-   empire-2.16beta/EXFOR/subent, e.g., being in empire-2.16beta/EXFOR type
-   ln -s (path to empire-2.13)/empire-2.13/EXFOR/subent subent
+   empire/EXFOR/subent, e.g., being in empire/EXFOR type
+   ln -s (path to empire-2.13)/empire/EXFOR/subent subent
    Do NOT replace other files in the EXFOR dir as the new ones are different.
 
 3. Documentation has not yet been updated and is not provided. Use the one
-   of empire-2.13 and the file Empire-Degas-Ecis.txt.
+   of empire-2.13 and the file Empire-Degas-Ecis.txt. The latter one
+   together with the on-line help (EMPIRE input) contain enough details for
+   using new features of the code.
 
 3. List of new features and bug fixes is contained in the WHATSNEW file.
 

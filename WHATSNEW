@@ -1,5 +1,5 @@
-             Changes in version 2.16beta with respect to 2.15 
-                      Vienna,   June  2001
+             Changes in version 2.16 with respect to 2.15 
+                      Vienna,   July  2001
 
 1. EXFOR retrieval using FORTRAN instead of UNIX 'grep'
 2. Fission barrier set to 1000 MeV for Z<19
@@ -48,10 +48,11 @@
 25.Division by 0 in fitting field parameters in MSD-tristan.f protected.     
 26.GUI modified to include 'zvpl' script and allow for merging ZVV plots. 
 27.Form factor for the l=0 transitions in MSD controled from the optional
-   input (default: compressional)
+   input (default: standard surface form factor)
 28.Provision for use of combined preequilibrium models in a single run.
 29.'zvcomb' script added to combine various existing ZVView plots.
-30.Utility code manuals and general hints added to the GUI under Help menu
+30.Utility code manuals and Frequently Asked Questions (FAQ) added to 
+   the GUI under Help menu
 31.Utility code inputs accessible from the GUI Options menu
 32.Utility code c4sort added to sort *.c4 file in ascending energy. Actually,
    it is disabled (commented) in run and runE scripts as it takes long
@@ -67,8 +68,6 @@ Known bugs:
 To do:
 
 - adjust energy for the ddx spectra in EMPEND to account for the recoils
-- add interpolation on ECIS Tl file to allow for different incident 
-  energies
 - complete data transfer from HMS 
 - clean mixed character and numerical data in commons in tl.f
 

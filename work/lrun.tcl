@@ -1,43 +1,42 @@
-#!/usr/bin/wish
-#############################################################################
-# Visual Tcl v1.20 Project
-#
+#!/bin/sh
+# the next line restarts using wish\
+exec wish "$0" "$@" 
 
-#################################
-# GLOBAL VARIABLES
-#
-global file; 
-global selectedButton; 
-global widget; 
-
-#################################
-# USER DEFINED PROCEDURES
-#
-proc init {argc argv} {
-
-}
-
-init $argc $argv
-
-
-proc {main} {argc argv} {
-
-}
-
-proc {Window} {args} {
-global vTcl
-    set cmd [lindex $args 0]
-    set name [lindex $args 1]
-    set newname [lindex $args 2]
-    set rest [lrange $args 3 end]
-    if {$name == "" || $cmd == ""} {return}
-    if {$newname == ""} {
-        set newname $name
+if {![info exists vTcl(sourcing)]} {
+    switch $tcl_platform(platform) {
+	windows {
+	}
+	default {
+	    option add *Scrollbar.width 10
+	}
     }
+    
+}
+#############################################################################
+# Visual Tcl v1.51 Project
+#
+
+#################################
+# VTCL LIBRARY PROCEDURES
+#
+
+global editor
+set editor gvim
+
+if {![info exists vTcl(sourcing)]} {
+proc Window {args} {
+    global vTcl
+    set cmd     [lindex $args 0]
+    set name    [lindex $args 1]
+    set newname [lindex $args 2]
+    set rest    [lrange $args 3 end]
+    if {$name == "" || $cmd == ""} { return }
+    if {$newname == ""} { set newname $name }
+    if {$name == "."} { wm withdraw $name; return }
     set exists [winfo exists $newname]
     switch $cmd {
         show {
-            if {$exists == "1" && $name != "."} {wm deiconify $name; return}
+            if {$exists} { wm deiconify $newname; return }
             if {[info procs vTclWindow(pre)$name] != ""} {
                 eval "vTclWindow(pre)$name $newname $rest"
             }
@@ -53,56 +52,330 @@ global vTcl
         destroy { if $exists {destroy $newname; return} }
     }
 }
+}
+
+if {![info exists vTcl(sourcing)]} {
+proc {vTcl:DefineAlias} {target alias widgetProc top_or_alias cmdalias} {
+    global widget
+
+    set widget($alias) $target
+    set widget(rev,$target) $alias
+
+    if {$cmdalias} {
+        interp alias {} $alias {} $widgetProc $target
+    }
+
+    if {$top_or_alias != ""} {
+        set widget($top_or_alias,$alias) $target
+
+        if {$cmdalias} {
+            interp alias {} $top_or_alias.$alias {} $widgetProc $target
+        }
+    }
+}
+
+proc {vTcl:Toplevel:WidgetProc} {w args} {
+    if {[llength $args] == 0} {
+        return -code error "wrong # args: should be \"$w option ?arg arg ...?\""
+    }
+
+    ## The first argument is a switch, they must be doing a configure.
+    if {[string index $args 0] == "-"} {
+        set command configure
+
+        ## There's only one argument, must be a cget.
+        if {[llength $args] == 1} {
+            set command cget
+        }
+    } else {
+        set command [lindex $args 0]
+        set args [lrange $args 1 end]
+    }
+
+    switch -- $command {
+        "hide" -
+        "Hide" {
+            Window hide $w
+        }
+
+        "show" -
+        "Show" {
+            Window show $w
+        }
+
+        "ShowModal" {
+            Window show $w
+            raise $w
+            grab $w
+            tkwait window $w
+            grab release $w
+        }
+
+        default {
+            eval $w $command $args
+        }
+    }
+}
+
+proc {vTcl:WidgetProc} {w args} {
+    if {[llength $args] == 0} {
+        return -code error "wrong # args: should be \"$w option ?arg arg ...?\""
+    }
+
+    ## The first argument is a switch, they must be doing a configure.
+    if {[string index $args 0] == "-"} {
+        set command configure
+
+        ## There's only one argument, must be a cget.
+        if {[llength $args] == 1} {
+            set command cget
+        }
+    } else {
+        set command [lindex $args 0]
+        set args [lrange $args 1 end]
+    }
+
+    eval $w $command $args
+}
+}
+
+if {[info exists vTcl(sourcing)]} {
+proc vTcl:project:info {} {
+    namespace eval ::widgets::.srun {
+        array set save {-background 1 -highlightbackground 1 -highlightcolor 1 -menu 1}
+    }
+    namespace eval ::widgets::.srun.input {
+        array set save {-background 1 -borderwidth 1 -closeenough 1 -confine 1 -height 1 -highlightbackground 1 -highlightcolor 1 -relief 1 -selectbackground 1 -width 1}
+    }
+    namespace eval ::widgets::.srun.input.project {
+        array set save {-background 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -justify 1 -selectbackground 1 -selectforeground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::.srun.input.but31 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but18 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but17 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but36 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but19 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but20 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.viewlong {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but27 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but22 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but23 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but28 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but25 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but21 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.titel {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.source {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but26 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.modulist {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -indicatoron 1 -menu 1 -padx 1 -pady 1 -relief 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.modulist.m {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::.srun.input.sourcemenu {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -indicatoron 1 -menu 1 -padx 1 -pady 1 -relief 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.sourcemenu.m {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1}
+    }
+    namespace eval ::widgets::.srun.input.but30 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.input {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab34 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab35 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab37 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but29 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.browse {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.men19 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -menu 1 -padx 1 -pady 1 -relief 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.men19.m {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1}
+    }
+    namespace eval ::widgets::.srun.input.but33 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but32 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab33 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but34 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but35 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but24 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but37 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but38 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab17 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.lab18 {
+        array set save {-background 1 -borderwidth 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but39 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.but40 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.cpd32 {
+        array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -highlightcolor 1 -width 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.05 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -height 1 -highlightbackground 1 -highlightcolor 1 -menu 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.05.06 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.01 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -height 1 -highlightbackground 1 -highlightcolor 1 -menu 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.01.02 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.men40 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -height 1 -highlightbackground 1 -highlightcolor 1 -menu 1 -padx 1 -pady 1 -text 1 -width 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.men40.01 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.men40.01.02 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::.srun.cpd32.men40.01.men41 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -font 1 -foreground 1 -tearoff 1}
+    }
+    namespace eval ::widgets_bindings {
+        set tagslist {}
+    }
+}
+}
+#################################
+# USER DEFINED PROCEDURES
+#
+
+proc {main} {argc argv} {
+
+}
+
+proc init {argc argv} {
+
+}
+
+init $argc $argv
 
 #################################
 # VTCL GENERATED GUI PROCEDURES
 #
 
-proc vTclWindow. {base} {
+proc vTclWindow. {base {container 0}} {
     if {$base == ""} {
         set base .
     }
     ###################
     # CREATING WIDGETS
     ###################
+    if {!$container} {
     wm focusmodel $base passive
-    wm geometry $base 1x1+0+0
+    wm geometry $base 1x1+0+0; update
     wm maxsize $base 1265 994
     wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm withdraw $base
     wm title $base "vt.tcl"
+    bindtags $base "$base Vtcl.tcl all"
+    }
     ###################
     # SETTING GEOMETRY
     ###################
 }
 
-proc vTclWindow.srun {base} {
+proc vTclWindow.srun {base {container 0}} {
     if {$base == ""} {
         set base .srun
     }
-    if {[winfo exists $base]} {
+    if {[winfo exists $base] && (!$container)} {
         wm deiconify $base; return
     }
+
+    global widget
+
     ###################
     # CREATING WIDGETS
     ###################
+    if {!$container} {
     toplevel $base -class Toplevel \
         -background #4b7b82 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu .srun.m17 
+        -highlightcolor #ffffff -menu "$base.m17" 
     wm focusmodel $base passive
-    wm geometry $base 211x947+8+68
+    wm geometry $base 211x947+12+68; update
     wm maxsize $base 1265 994
     wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Empire control"
+    }
     canvas $base.input \
-        -background #4b7b82 -borderwidth 2 -confine 0 -height 207 \
-        -highlightbackground #304d49 -highlightcolor #ffffff -relief groove \
-        -selectbackground #365e66 -width 296 
+        -background #4b7b82 -borderwidth 2 -closeenough 1.0 -confine 0 \
+        -height 207 -highlightbackground #304d49 -highlightcolor #ffffff \
+        -relief groove -selectbackground #365e66 -width 296 
     entry $base.input.project \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--16-120-75-75-p-67-iso8859-1 \
@@ -210,7 +483,7 @@ exec $editor $file.inp &} \
         -background #860000 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -indicatoron 1 -menu .srun.input.modulist.m \
+        -highlightcolor #ffffff -indicatoron 1 -menu "$base.input.modulist.m" \
         -padx 4 -pady 3 -relief raised -text {Edit module} 
     menu $base.input.modulist.m \
         -activebackground #4b7b82 -activeforeground #ffffff \
@@ -222,54 +495,107 @@ exec $editor $file.inp &} \
         -background #860000 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -indicatoron 1 -menu .srun.input.sourcemenu.m \
-        -padx 4 -pady 3 -relief raised -text {Edit  module} 
+        -highlightcolor #ffffff -indicatoron 1 \
+        -menu "$base.input.sourcemenu.m" -padx 4 -pady 3 -relief raised \
+        -text {Edit  module} 
     menu $base.input.sourcemenu.m \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/main.f &} -label main 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/main.f &} -font {} \
+        -foreground {} -image {} -label Main 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/input.f &} -label input 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/input.f &} -font {} \
+        -foreground {} -image {} -label Input 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/OM-scat2.f &} -label OM-scat2 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/OM-scat2.f &} \
+        -font {} -foreground {} -image {} -label OM-scat2 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/MSD-orion.f &} -label MSD-orion 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/MSD-orion.f &} \
+        -font {} -foreground {} -image {} -label MSD-orion 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/MSD-tristan.f &} -label MSD-tristan 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/MSD-tristan.f &} \
+        -font {} -foreground {} -image {} -label MSD-tristan 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/MSC-NVWY.f &} -label MSC-NVWY 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/MSC-NVWY.f &} \
+        -font {} -foreground {} -image {} -label MSC-NVWY 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/HF-comp.f &} -label HF-comp 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/HF-comp.f &} -font {} \
+        -foreground {} -image {} -label HF-comp 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/HRTW-comp.f &} -label HRTW-comp 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/HRTW-comp.f &} \
+        -font {} -foreground {} -image {} -label HRTW-comp 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/ddhms.f &} -label hms 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/ddhms.f &} -font {} \
+        -foreground {} -image {} -label HMS 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/degas.f &} -label degas 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/degas.f &} -font {} \
+        -foreground {} -image {} -label DEGAS 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/ecis.f &} -label ECIS 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/ecis.f &} -font {} \
+        -foreground {} -image {} -label ECIS 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/ccfus.f &} -label ccfus 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/ccfus.f &} -font {} \
+        -foreground {} -image {} -label CCFUS 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/fusion.f &} -label fusion 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/fusion.f &} -font {} \
+        -foreground {} -image {} -label Fusion 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/gamma-strgth.f &} \
-        -label gamma-strgth 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/gamma-strgth.f &} \
+        -font {} -foreground {} -image {} -label gamma-strgth 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/lev-dens.f &} -label lev-dens 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/lev-dens.f &} \
+        -font {} -foreground {} -image {} -label Lev-dens 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/ph-lev-dens.f &} -label ph-lev-dens 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/ph-lev-dens.f &} \
+        -font {} -foreground {} -image {} -label ph-lev-dens 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/print.f &} -label print 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/print.f &} -font {} \
+        -foreground {} -image {} -label Print 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/tl.f &} -label tl 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/tl.f &} -font {} \
+        -foreground {} -image {} -label Tl 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/auxiliary.f &} -label auxiliary 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/auxiliary.f &} \
+        -font {} -foreground {} -image {} -label Auxiliary 
     $base.input.sourcemenu.m add command \
-        -command {exec $editor ../source/scnd-preeq.f &} -label scnd-preeq 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/scnd-preeq.f &} \
+        -font {} -foreground {} -image {} -label Scnd-preeq 
+    $base.input.sourcemenu.m add separator
+    $base.input.sourcemenu.m add command \
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/global.h &} -font {} \
+        -foreground {} -image {} -label global.h 
+    $base.input.sourcemenu.m add command \
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/io.h &} -font {} \
+        -foreground {} -image {} -label io.h 
+    $base.input.sourcemenu.m add command \
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/ddhms.cmb &} -font {} \
+        -foreground {} -image {} -label ddhms.cmb 
     button $base.input.but30 \
         -activebackground #df5130 -activeforeground #fffefe \
         -background #be5a41 \
@@ -319,7 +645,7 @@ set file [file tail $dfile]} \
         -background #005a00 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu .srun.input.men19.m -padx 4 -pady 3 \
+        -highlightcolor #ffffff -menu "$base.input.men19.m" -padx 4 -pady 3 \
         -relief raised -text {Select MT and >} 
     menu $base.input.men19.m \
         -activebackground #4b7b82 -activeforeground #ffffff \
@@ -327,31 +653,70 @@ set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff 
     $base.input.men19.m add radiobutton \
-        -value {MT=1 (total)} -command {set MT {1}} -label {MT=1 (total)} 
+        -value {MT=1 (total)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {1}} -font {} -foreground {} -image {} \
+        -label {MT=1 (total)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=2 (elas)} -command {set MT {2}} -label {MT=2 (elas)} 
+        -value {MT=2 (elas)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {2}} -font {} -foreground {} -image {} \
+        -label {MT=2 (elas)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=4 (n,n')} -command {set MT {4}} -label {MT=4 (n,n')} 
+        -value {MT=4 (n,n')} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {4}} -font {} -foreground {} -image {} \
+        -label {MT=4 (n,n')} 
     $base.input.men19.m add radiobutton \
-        -value {MT=16 (n,2n)} -command {set MT {16}} -label {MT=16 (n,2n)} 
+        -value {MT=16 (n,2n)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {16}} -font {} -foreground {} -image {} \
+        -label {MT=16 (n,2n)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=17 (n,3n)} -command {set MT {17}} -label {MT=17 (n,3n)} 
+        -value {MT=17 (n,3n)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {17}} -font {} -foreground {} -image {} \
+        -label {MT=17 (n,3n)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=18 (n,f)} -command {set MT {18}} -label {MT=18 (n,f)} 
+        -value {MT=18 (n,f)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {18}} -font {} -foreground {} -image {} \
+        -label {MT=18 (n,f)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=22 (n,na)} -command {set MT {22}} -label {MT=22 (n,na)} 
+        -value {MT=22 (n,na)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {22}} -font {} -foreground {} -image {} \
+        -label {MT=22 (n,na)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=28 (n,np)} -command {set MT {28}} -label {MT=28 (n,np)} 
+        -value {MT=28 (n,np)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {28}} -font {} -foreground {} -image {} \
+        -label {MT=28 (n,np)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=45 (n,npa)} -command {set MT {45}} -label {MT=45 (n,npa)} 
+        -value {MT=45 (n,npa)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {45}} -font {} -foreground {} -image {} \
+        -label {MT=45 (n,npa)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=102 (n,g)} -command {set MT {102}} -label {MT=102 (n,g)} 
+        -value {MT=102 (n,g)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {102}} -font {} -foreground {} -image {} \
+        -label {MT=102 (n,g)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=103 (n,p)} -command {set MT {103}} -label {MT=103 (n,p)} 
+        -value {MT=103 (n,p)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {103}} -font {} -foreground {} -image {} \
+        -label {MT=103 (n,p)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=107 (n,a)} -command {set MT {107}} -label {MT=107 (n,a)} 
+        -value {MT=107 (n,a)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {107}} -font {} -foreground {} -image {} \
+        -label {MT=107 (n,a)} 
     $base.input.men19.m add radiobutton \
-        -value {MT=112 (n,pa)} -command {set MT {112}} -label {MT=112 (n,pa)} 
+        -value {MT=112 (n,pa)} -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set MT {112}} -font {} -foreground {} -image {} \
+        -label {MT=112 (n,pa)} 
     button $base.input.but33 \
         -activebackground #dc5032 -activeforeground #ffffff \
         -background #be5a41 -command {exec xterm -e zvd $file $MT &} \
@@ -429,7 +794,7 @@ set file [file tail $dfile]} \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu .srun.cpd32.05.06 -padx 4 -pady 3 \
+        -highlightcolor #ffffff -menu "$base.cpd32.05.06" -padx 4 -pady 3 \
         -text Help 
     menu $base.cpd32.05.06 \
         -activebackground #4b7b82 -activeforeground #ffffff \
@@ -437,33 +802,55 @@ set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -tearoff 0 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../hints.txt &} -label {Hints} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor inplist &} -font {} \
+        -foreground {} -image {} -label {EMPIRE input} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor inplist &} -label {EMPIRE input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../data/ripl-omp.index &} \
+        -font {} -foreground {} -image {} -label RIPL-omp 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../data/ripl-omp.index &} -label RIPL-omp 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../hints.txt &} -font {} \
+        -foreground {} -image {} -label FAQ 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/empend/manual.txt &} -label {EMPEND manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/empend/manual.txt &} \
+        -font {} -foreground {} -image {} -label {EMPEND manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/c4sort/manual.txt &} -label {C4SORT manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/c4sort/manual.txt &} \
+        -font {} -foreground {} -image {} -label {C4SORT manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/legend/manual.txt &} -label {LEGEND manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/legend/manual.txt &} \
+        -font {} -foreground {} -image {} -label {LEGEND manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/plotc4/manual.txt &} -label {PLOTC4 manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/plotc4/manual.txt &} \
+        -font {} -foreground {} -image {} -label {PLOTC4 manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/x4toc4/manual.txt &} -label {X4TOC4 manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/x4toc4/manual.txt &} \
+        -font {} -foreground {} -image {} -label {X4TOC4 manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/fixup/manual.txt &}  -label {FIXUP manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/fixup/manual.txt &} \
+        -font {} -foreground {} -image {} -label {FIXUP manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/lsttab/manual.txt &} -label {LSTTAB manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/lsttab/manual.txt &} \
+        -font {} -foreground {} -image {} -label {LSTTAB manual} 
     $base.cpd32.05.06 add command \
-        -command {exec $editor ../util/sixtab/manual.txt &} -label {SIXTAB manual} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/sixtab/manual.txt &} \
+        -font {} -foreground {} -image {} -label {SIXTAB manual} 
     menubutton $base.cpd32.01 \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu .srun.cpd32.01.02 -padx 4 -pady 3 \
+        -highlightcolor #ffffff -menu "$base.cpd32.01.02" -padx 4 -pady 3 \
         -text File 
     menu $base.cpd32.01.02 \
         -activebackground #4b7b82 -activeforeground #ffffff \
@@ -471,7 +858,8 @@ set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -tearoff 0 
     $base.cpd32.01.02 add command \
-        \
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} \
         -command {set ifile [open listpro w+]
 set inp_files [glob -nocomplain *.inp]
 
@@ -481,17 +869,21 @@ foreach name $inp_files {
   
 close $ifile  
 exec $editor listpro &} \
-        -label {List projects} 
+        -font {} -foreground {} -image {} -label {List projects} 
     $base.cpd32.01.02 add command \
-        -command {exec rm  $file\.* $file-*\.*} -label {Remove project} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec rm  $file\.* $file-*\.*} -font {} \
+        -foreground {} -image {} -label {Remove project} 
     $base.cpd32.01.02 add command \
-        -command exit -label Exit 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command exit -font {} -foreground {} -image {} \
+        -label Exit 
     menubutton $base.cpd32.men40 \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu .srun.cpd32.men40.01 -padx 4 -pady 3 \
+        -highlightcolor #ffffff -menu "$base.cpd32.men40.01" -padx 4 -pady 3 \
         -text Options -width 6 
     menu $base.cpd32.men40.01 \
         -activebackground #4b7b82 -activeforeground #ffffff \
@@ -499,57 +891,103 @@ exec $editor listpro &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -tearoff 0 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor skel.inp &} -label {Default input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor skel.inp &} -font {} \
+        -foreground {} -image {} -label {Default input} 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor EMPEND.INP &} -label {EMPEND input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor EMPEND.INP &} -font {} \
+        -foreground {} -image {} -label {EMPEND input} 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor ../util/plotc4/PLOTC4.INP &} \
-        -label {PLOTC4 input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/plotc4/PLOTC4.INP &} \
+        -font {} -foreground {} -image {} -label {PLOTC4 input} 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor ../util/fixup/FIXUP.INP &} \
-        -label {FIXUP input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/fixup/FIXUP.INP &} \
+        -font {} -foreground {} -image {} -label {FIXUP input} 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor ../util/c4sort/C4SORT.INP &} \
-        -label {C4SORT input} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../util/c4sort/C4SORT.INP &} \
+        -font {} -foreground {} -image {} -label {C4SORT input} 
     $base.cpd32.men40.01 add command \
-        -command {exec $editor ../source/Makefile &} \
-        -label {Edit Makefile} 
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../source/Makefile &} -font {} \
+        -foreground {} -image {} -label {Edit Makefile} 
     $base.cpd32.men40.01 add cascade \
-        -menu .srun.cpd32.men40.01.men41 -label {Select editor} 
+        -menu "$base.cpd32.men40.01.men41" -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} -command {} \
+        -font {} -foreground {} -image {} -label {Select editor} 
     menu $base.cpd32.men40.01.02 \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -tearoff 0 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value gvim -command {set editor {gvim}} -label gvim 
+        -value gvim -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {gvim}} -font {} -foreground {} -image {} \
+        -label gvim 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value emacs -command {set editor {emacs}} -label emacs 
+        -value emacs -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {emacs}} -font {} -foreground {} -image {} \
+        -label emacs 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value jove -command {set editor {jove}} -label jove 
+        -value jove -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {jove}} -font {} -foreground {} -image {} \
+        -label jove 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value nedit -command {set editor nedit} -label nedit 
+        -value nedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor nedit} -font {} -foreground {} -image {} \
+        -label nedit 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value kedit -command {set editor {kedit}} -label kedit 
+        -value kedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {kedit}} -font {} -foreground {} -image {} \
+        -label kedit 
     $base.cpd32.men40.01.02 add radiobutton \
-        -value GXedit -command {set editor {gxedit}} -label GXedit 
+        -value GXedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {gxedit}} -font {} -foreground {} -image {} \
+        -label GXedit 
     menu $base.cpd32.men40.01.men41 \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -tearoff 0 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value gvim -command {set editor {gvim}} -label gvim -state active 
+        -value gvim -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {gvim}} -font {} -foreground {} -image {} \
+        -label gvim 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value emacs -command {set editor {emacs}} -label emacs 
+        -value emacs -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {emacs}} -font {} -foreground {} -image {} \
+        -label emacs 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value nedit -command {set editor {nedit}} -label nedit 
+        -value nedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {nedit}} -font {} -foreground {} -image {} \
+        -label nedit 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value kedit -command {set editor {kedit}} -label kedit 
+        -value kedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {kedit}} -font {} -foreground {} -image {} \
+        -label kedit 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value jove -command {set editor {jove}} -label jove 
+        -value jove -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {jove}} -font {} -foreground {} -image {} \
+        -label jove 
     $base.cpd32.men40.01.men41 add radiobutton \
-        -value GXedit -command {set editor {gxedit}} -label GXedit 
+        -value GXedit -variable selectedButton -activebackground {} \
+        -activeforeground {} -accelerator {} -background {} \
+        -command {set editor {gxedit}} -font {} -foreground {} -image {} \
+        -label GXedit 
     ###################
     # SETTING GEOMETRY
     ###################
@@ -634,9 +1072,9 @@ exec $editor listpro &} \
     place $base.cpd32 \
         -x 5 -y 5 -width 197 -height 26 -anchor nw 
     pack $base.cpd32.05 \
-        -in .srun.cpd32 -anchor center -expand 0 -fill none -side right 
+        -in $base.cpd32 -anchor center -expand 0 -fill none -side right 
     pack $base.cpd32.01 \
-        -in .srun.cpd32 -anchor nw -expand 0 -fill none -side left 
+        -in $base.cpd32 -anchor nw -expand 0 -fill none -side left 
     place $base.cpd32.men40 \
         -x 36 -y 1 -width 59 -height 24 -anchor nw 
 }
