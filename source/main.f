@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-04 00:10:05 $
-Ccc   * $Id: main.f,v 1.44 2005-01-04 00:10:05 herman Exp $
+Ccc   * $Date: 2005-01-06 01:40:03 $
+Ccc   * $Id: main.f,v 1.45 2005-01-06 01:40:03 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -263,13 +263,8 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
-C-----Plujko_new
-C     DATA keyinput/0/, kzz1/0/, kaa1/0/
-C     DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
-C     F_PRINT=1
-C-----Plujko_new(End)
 C
-C     FACTORIAL CALCULATIONS
+C-----Factorial calculations
 C
       CALL FCT()
 
@@ -277,31 +272,31 @@ C
       icalled = 0
 C
 C-----
-C-----read and prepare input data
+C-----Read and prepare input data
 C-----
  1400 CALL INPUT
 C-----
-C-----print input data
+C-----Print input data
 C-----
       IF(IOUt.GT.0)CALL PRINPUT
       WRITE(*, '(''  C.M. incident energy '',G10.5,'' MeV'')')EIN
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----
-C-----Plujko_new (Prepares Giant Resonance parameters - systematics)
-      CALL ULM(0)
-C-----Plujko_new (END of Prepares Giant Resonance parameters - systematics)
+C-----Prepare Giant Resonance parameters - systematics
 C-----
-C-----calculate reaction cross section and its spin distribution
+      CALL ULM(0)
+C-----
+C-----Calculate reaction cross section and its spin distribution
 C-----
       CALL MARENG(0, 0)
 C-----
-C-----get ECIS results
+C-----Get ECIS results
 C-----
       IF(DIRect.GT.0)THEN
-C--------locate position of the target among residues
+C--------Locate position of the target among residues
          CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
-C--------locate position of the projectile among ejectiles
+C--------Locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
@@ -908,8 +903,10 @@ C-----------------of discrete levels by a neutron, proton or alpha.
 C-----------------These gammas should not go into MT=91, 649, or 849.
                   IF((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849
      &               ) .AND. il.NE.1)THEN
-                     POPlv(1, nnuc) = POPlv(1, nnuc) + POPlv(il, nnuc)
-                     POPlv(il, nnuc) = 0.0
+                     POPlv(1, nnuc) = POPlv(1, nnuc) + CSDirlev(il,nejc)
+                     POPlv(il, nnuc) = POPlv(il, nnuc)-CSDirlev(il,nejc)
+c                    POPlv(1, nnuc) = POPlv(1, nnuc) + POPlv(il, nnuc)
+c                    POPlv(il, nnuc) = 0.0
                   ENDIF
                ENDDO
  3392          CONTINUE
@@ -1060,7 +1057,8 @@ C--------
             CSEmis(2, 1) = CSEmis(2, 1) + CSMsc(2)
             IF(nvwful)GOTO 1650
          ENDIF
-         IF(nnuc.EQ.1 .AND. IOUt.GE.3)THEN
+         IF(nnuc.EQ.1 .AND. IOUt.GE.3 .AND. 
+     &      (CSEmis(1, 1)+CSEmis(2, 1)).NE.0) THEN
             WRITE(6, *)' '
             WRITE(6, *)' Preequilibrium spectra (sum of all models):'
             CALL AUERST(1, 0)
@@ -1399,7 +1397,8 @@ c--------------check for the number of branching ratios
      &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
             ENDIF
          ENDDO
-         IF(ENDf.GT.0) THEN
+         IF(ENDf.GT.0 .AND. (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. 
+     &      nnuc.EQ.mt649 .OR. nnuc.EQ.mt849)) THEN
             WRITE(12, '(1X,/,10X,40(1H-),/)')
             WRITE(12,*)' '
 C-----------write Int. Conv. Coefff. for discrete transitions
@@ -1431,11 +1430,12 @@ C--------gamma decay of discrete levels (DECAYD)
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.5,''
      &mb  '',''reaction: '',A21)')iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &reaction(nnuc)
-            IF(kemin.EQ.NEX(nnuc))WRITE(6,
+            IF(kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1)WRITE(6,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
          ENDIF
 C--------Integrating exclusive population spectra (ENDF)
+         IF(CSPrd(nnuc) .NE. 0) THEN
          gtotsp=0
          xtotsp=0
          ptotsp=0
@@ -1460,43 +1460,41 @@ C--------Integrating exclusive population spectra (ENDF)
                emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
             ENDIF
          ENDDO
-C       Add contribution from discrete levels for MT=91,649,849
-C       (merely for checking purpose)
-         IF(nnuc.EQ.mt91) THEN
-            nejc = 1
-            DO ilev = 1, NLV(nnuc)
-               xtotsp = xtotsp + CSDirlev(ilev,nejc)
-c              xtotsp = xtotsp + CSAlev(1, ilev, Nejc)*4*pi
-               WRITE(6,*) 'neutron level',ilev, CSAlev(1, ilev, Nejc)
-            ENDDO
-         ELSEIF(nnuc.EQ.mt649) THEN
-            nejc = 2
-            DO ilev = 1, NLV(nnuc)
-               ptotsp = ptotsp + CSDirlev(ilev,nejc)
-c              ptotsp = ptotsp + CSAlev(1, ilev, Nejc)*4*pi
-               WRITE(6,*) 'proton level',ilev, CSAlev(1, ilev, Nejc)
-            ENDDO
-         ELSEIF(nnuc.EQ.mt849) THEN
-            nejc = 3
-            DO ilev = 1, NLV(nnuc)
-               atotsp = atotsp + CSDirlev(ilev,nejc)
-c              atotsp = atotsp + CSAlev(1, ilev, Nejc)*4*pi
-               WRITE(6,*) 'alpha level',ilev, CSAlev(1, ilev, Nejc)
-            ENDDO
-         ENDIF
          POPCS(0,nnuc) = gtotsp
          POPCS(1,nnuc) = xtotsp
          POPCS(2,nnuc) = ptotsp
          POPCS(3,nnuc) = atotsp
          IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
-         IF(CSPrd(nnuc).NE.0.0D+0) THEN
-            emedg=emedg/CSPrd(nnuc)
-            emedn=emedn/CSPrd(nnuc)
-            emedp=emedp/CSPrd(nnuc)
-            emeda=emeda/CSPrd(nnuc)
-            emedh=emedh/CSPrd(nnuc)
-         ENDIF
+         IF(gtotsp .NE. 0) emedg=emedg/gtotsp
+c        the line below may replace the one above to get average gamma energy times
+c        gamma multiplictiy in the case of (n,p) reaction (for comparison with PSYCHE)
+c        IF(ptotsp .NE. 0) emedg=emedg/ptotsp
+         IF(xtotsp .NE. 0) emedn=emedn/xtotsp
+         IF(ptotsp .NE. 0) emedp=emedp/ptotsp
+         IF(atotsp .NE. 0) emeda=emeda/atotsp
+         IF(htotsp .NE. 0) emedh=emedh/htotsp
          IF(IOUt.GT.3) THEN
+C        Add contributions to discrete levels for MT=91,649,849
+C        (merely for checking purpose)
+            IF(nnuc.EQ.mt91) THEN
+               nejc = 1
+               WRITE(6,*) 'Sum to continuum',xtotsp 
+               DO ilev = 1, NLV(nnuc)
+                  xtotsp = xtotsp + CSDirlev(ilev,nejc)
+               ENDDO
+            ELSEIF(nnuc.EQ.mt649) THEN
+               nejc = 2
+               WRITE(6,*) 'Sum to continuum',ptotsp 
+               DO ilev = 1, NLV(nnuc)
+                  ptotsp = ptotsp + CSDirlev(ilev,nejc)
+               ENDDO
+            ELSEIF(nnuc.EQ.mt849) THEN
+               nejc = 3
+               WRITE(6,*) 'Sum to continuum',atotsp 
+               DO ilev = 1, NLV(nnuc)
+                  atotsp = atotsp + CSDirlev(ilev,nejc)
+               ENDDO
+            ENDIF
             WRITE(6,*) '----------------------------------------------'
             WRITE(6,*) 'Test printout (exclusive spectra)'
             WRITE(6,'('' Energy'',12x,''gamma'',10x,''neutron'',8x,
@@ -1530,6 +1528,7 @@ c              atotsp = atotsp + CSAlev(1, ilev, Nejc)*4*pi
      &                 POPcseaf(0,2,ispec,nnuc)
             ENDDO
             WRITE(6, *)' '
+         ENDIF
          ENDIF
 C-----------calculate life-times and widths
          IF(IOUt.GT.0)THEN
@@ -1574,13 +1573,14 @@ C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1 .AND. INT(AEJC(0)).NE.0)THEN
             WRITE(6,*)
-            WRITE(6,*) ' INCID.ENERGY (CMS) =',EIN,' MeV'
-            WRITE(6,*) ' SHAPE ELASTIC :', ELAcs,' mb'
-            WRITE(6,*) ' CN ELASTIC    :', POPlv(1, mt2),' mb'
+            WRITE(6,*) 'Incident energy (CMS)      ',EIN,' MeV'
+            WRITE(6,*) 'Shape elastic cross section', ELAcs,' mb'
+            WRITE(6,*) 'CN elastic cross section   ', POPlv(1, mt2),
+     &                 ' mb'
             ELAcs = ELAcs + POPlv(1, mt2)
 C-----------CN contribution to elastic ddx
             elcncs = POPlv(1, mt2)/4.0/PI
-            WRITE(6,*) ' CN ELASTIC ANG.DIST. :', elcncs,' mb/str'
+            WRITE(6,*) 'CN elastic angular distrib.', elcncs,' mb/str'
             WRITE(6,*)
          ENDIF
          WRITE(12,
@@ -1678,7 +1678,6 @@ C--------
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF(POPCS(nejc,nnuc).EQ.0) CYCLE
                   nspec = INT(EMAx(nnuc)/DE) + 2
-                  nexrt = INT((EMAx(nnuc) - ECUt(Nnuc))/DE + 1.0001)
                   IF(nejc.EQ.0) THEN
                      cejectile = 'gammas   '
                      iizaejc = 0
@@ -1729,8 +1728,8 @@ C-----------------------(continuum part)
                               CSEa(ie, nang, nejc, 0) = 0.0
                            ENDDO
                         ENDDO
-                        IF(nexrt.GE.1) THEN
-                           DO ie = 1, nexrt ! reconstruct continuum DDX spectrum
+                        IF(nspec.GE.1) THEN
+                           DO ie = 1, nspec ! reconstruct continuum DDX spectrum
                               DO nang = 1,NDANG
                                  piece = CSEmsd(ie,nejc)
                                  IF(ie.EQ.NEXr(nejc, 1)) piece=0.5*piece

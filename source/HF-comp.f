@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-04 00:10:05 $
-Ccc   * $Id: HF-comp.f,v 1.35 2005-01-04 00:10:05 herman Exp $
+Ccc   * $Date: 2005-01-06 01:40:03 $
+Ccc   * $Id: HF-comp.f,v 1.36 2005-01-06 01:40:03 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -289,16 +289,12 @@ C
 C
 C Dummy arguments
 C
-C     INTEGER Iec, Ief, Nejc, Nnuc, Nnur
       INTEGER Iec, Nejc, Nnuc, Nnur
-C     DOUBLE PRECISION Popt, excnq, xnor
       DOUBLE PRECISION Popt, xnor
 C
 C Local variables
 C
-C     INTEGER iang, icsp, iejc, ie 
       INTEGER iejc, ie 
-C     INTEGER INT
 C
 C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
@@ -309,8 +305,8 @@ C-----Contribution comming straight from the current decay
       POPcse(0,Nejc,Ie,Nnur) =  POPcse(0,Nejc,Ie,Nnur) + Popt
 C-----Contribution due to feeding spectra from Nnuc 
 C-----DE spectra
-      IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
-         IF(POPbin(Iec, Nnuc).GT.0.) THEN    
+      IF(Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
+         IF(POPbin(Iec, Nnuc).GT.0) THEN    
           xnor = Popt*DE/POPbin(Iec, Nnuc)
           DO iesp = 1, NDECSE 
             DO iejc = 0, NDEjc 
