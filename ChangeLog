@@ -6,12 +6,15 @@
    VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
    was also found to be wrong in the preliminary version of RIPL-2 
    (-0.00118).
-2. MSD is turned off for non-nucleon incident particles. 
+2. MSD is automatically turned off for non-nucleon incident reactions. 
 3. Internal conversion coefficinets included in the gamma cascade
    between discrete levels (ICC data from RIPL-2).
 4. Bug in reading branching ratios from the RIPL-2 file corrected
    (emission probabilities instead of branching ratios were used
    in the previous RIPL-2 versions).
+5. Bug in DEGAS resulting in lack of the preequilibrium population in 
+   the Compound Nucleus continuum corrected (bug has been introduced in
+   version 2.18)
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 
