@@ -212,7 +212,11 @@ C* Extract the data from the C4 file
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
      1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
       CALL DXSEXF(LC4,LPN,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NP,NS,SCL,COM2)
-      IF(NP.LE.0) PRINT *,'DXSEXF PNT:mt,kea,ein,par',mt,kea,ein,par
+      IF(NP.LE.0) THEN
+        PRINT *,'DXSEXF ERROR: No matching points'
+      ELSE
+        PRINT *,'DXSEXF No.of points',NP
+      END IF
 C*
 C* Try another set of points
       REWIND LC4
@@ -381,11 +385,11 @@ C* Test for matching data request
       IF(MT  .NE.MT0   ) GO TO 20
       IF(MF.GE.4 .AND. MF.LE.6) THEN
 C* Test outgoing particle
-      IF(MT.GE.9000) THEN
-        IF6=F6
-        IF(F6.EQ.0) IF6=1
-        IF(IZAP0.NE.IF6) GO TO 20
-      END IF
+        IF(MT.GE.9000) THEN
+          IF6=F6
+          IF(F6.EQ.0) IF6=1
+          IF(IZAP0.NE.IF6) GO TO 20
+        END IF
 C* Test incident energy
         IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test outgoing particle and discrete level energy
@@ -396,7 +400,7 @@ C* Test outgoing particle energy for correl.ang.distributions
      &     ABS(PR0-F7).GT.ETOL*F7 ) GO TO 20
 C* Test outgoing particle scattering angle for correal.ang.distrib.
         IF((MF.EQ.6 .AND. KEA.EQ.2) .AND.
-     &     ABS(COS(PR0*PI/180)-F5).GT.ABS(ETOL*F5) ) GO TO 20
+     &     ABS(COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
       END IF
 C* Identify next set of points if author changes
       IF(REF.NE.RF0) THEN

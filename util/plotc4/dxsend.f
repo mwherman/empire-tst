@@ -158,12 +158,12 @@ C* Select contributing reactions
 C*
 C* Gamma emission: suppress angular distributions
         IF(KEA.EQ.1) THEN
-        IF(LTT.GT.0) THEN
-        WRITE(LTT,903) ' DXSEND WARNING - No Angular distrib.   '
-        WRITE(LTT,903) '                       No coding for ZAP',IZAP
+          IF(LTT.GT.0) THEN
+          WRITE(LTT,903) ' DXSEND WARNING - No Angular distrib.   '
+          WRITE(LTT,903) '                       No coding for ZAP',IZAP
           NEN=0
           GO TO 90
-        END IF
+          END IF
         END IF
 C* Prepare reaction list
    44   MF=3
@@ -184,8 +184,8 @@ C* Select contributiong reactions
         GO TO 44
       ELSE
 C* Not coded for other particles
-        PRINT *,'DXSEND WARNING - Not coded for eject.ZAP',IZAP
 C...    STOP 'DXSEND ERROR - No coding for requested particle'
+        PRINT *,'DXSEND WARNING - Not coded for eject.ZAP',IZAP
         GO TO 90
       END IF
 C* All reactions found - begin processing
@@ -284,8 +284,9 @@ C-V          Note the redefinition of PAR to degrees instead
 C-V          of cosine when requesting double-differential
 C-V          energy spectra (KEA=2).
 C-V  02/05 - Fix processing of MT600,600 series angular distributions.
-C-V        - Provisionally add gamma-production.
-C-V          WARNING: no gammas from discrete levels and MF15.
+C-V        - Provisionally add photon spectra (assumed isotropic).
+C-V  02/10 - Add photon spectra from (n,gamma)
+C-V          WARNING: Photon emission assumed isotropic.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -521,17 +522,21 @@ C* Gamma production only from MF 6,12,14,15
         IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12) THEN
           MF =12
           IF     (MT0.GT. 50 .AND. MT0.LT. 91) THEN
-            MT=51
+            MT =51
           ELSE IF(MT0.GT.600 .AND. MT0.LT.649) THEN
-            MT=601
+            MT =601
+          ELSE IF(MT0.GT.650 .AND. MT0.LT.699) THEN
+            MT =651
+          ELSE IF(MT0.GT.700 .AND. MT0.LT.749) THEN
+            MT =701
+          ELSE IF(MT0.GT.750 .AND. MT0.LT.799) THEN
+            MT =751
           ELSE IF(MT0.GT.800 .AND. MT0.LT.849) THEN
             MT=801
-          ELSE
-            GO TO 150
           END IF
           CALL SKIPSC(LEF)
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
-          IF(IER.NE.0) GO TO 150
+          IF(IER.NE.0) GO TO 140
           GO TO 120
         END IF
       END IF
@@ -949,18 +954,21 @@ C*
       IF(KEA.EQ.2 .AND. DEG.LT.0) SAN=SAN*2
       GO TO 800
 C*
-C* Photon branching ratio data
+C* Photon emission data
+C... Assume isotropic scattering - no coding to read MF 14
   120 IF(KEA.NE.2) GO TO 150
-      IF( (MT0.GT. 50 .AND. MT0.LT. 91) .OR.
-     1    (MT0.GT.600 .AND. MT0.LT.649) .OR.
-     1    (MT0.GT.800 .AND. MT0.LT.849) ) THEN
-C* Ground state level
+      LO=L1
+c...  IF( (MT0.GT. 50 .AND. MT0.LT. 91) .OR.
+c... 1    (MT0.GT.600 .AND. MT0.LT.649) .OR.
+c... 1    (MT0.GT.800 .AND. MT0.LT.849) ) THEN
+      IF(LO.EQ.2) THEN
+C* Transition probability arrays given
         LG =0
         LV =0
         LLI=1
         RWO(LLI)=0
         LLI=LLI+1
-C* Read photon branching ratios to discrete-leves
+C* Read photon branching ratios to all discrete-leves up to the present
   122   LV =LV +1
         IWO(LV)=LLI
 C* Changing LF between data sets is currently not accomodated
@@ -996,9 +1004,9 @@ C* Read the data for the next level
         IWO(LV+1)=LLI
 C*
 C* All levels up to the current one read - sum the yields
-C...
-C...        print *,'     Processing MT',MT0
-C...
+c....
+c....        print *,'     Processing MF/MT',MF,MT0
+c....
         CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
 C* Process the gamma lines
         NX =(MRW-NW)/2
@@ -1038,11 +1046,89 @@ C* Add the current to the saved distribution
   126     CONTINUE
   128   CONTINUE
         GO TO 800
+      ELSE IF(LO.EQ.1) THEN
+C* Multiplicities given
+        NK=N1
+C* Dummy-read the total photon multiplicity
+        LXE=1
+        LXX=MRW/2
+        KX =LXX-LXE
+        IF(NK.GT.1) CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1                         ,RWO(LXE),RWO(LXX),KX,IER)
+C* Read photon data for all subsections
+        DO 138 IK=1,NK
+C* Photon energy and yield
+        CALL RDTAB1(LEF,EG,ES,LP,LF,NR,NP,NBT,INR
+     1             ,RWO(LXE),RWO(LXX),KX,IER)
+        YL=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
+        IF(IER.NE.0) THEN
+          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+          STOP 'DXSEND1 ERROR - Reading MF12'
+        END IF
+C* Modify photon energy for primary photons
+        IF(LP.EQ.2) EG=EG+EIN*AWR/(AWR+1)
+        IF(LF.EQ.1) THEN
+C* Normalised tabulated function
+          IF(IK.LT.NK) THEN
+            PRINT *,'DXSEN1 WARNING - Tabulated distr. not last'
+          END IF
+          MF=15
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
+C* Only one section is allowed at present
+          IF(NC.GT.1) THEN
+            PRINT *,'DXSEN1 WARNING >1 section for MF/MT',MF,MT
+            STOP 'DXSEN1 ERROR >1 section for MF 15'
+          END IF
+C* Read the fractional contribution of the section 
+          CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
+     1               ,RWO(LXE),RWO(LXX),KX,IER)
+          YL=YL*FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
+          IF(LF.NE.1) THEN
+            IER=99
+            PRINT *,'WARNING - No coding for MF 15, MT',MT0,' LF',LF
+            GO TO 900
+          END IF
+          EI1=0
+          NE1=0
+C* Read interpolation data for the incident energies
+          CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+          NM =2
+          DO 134 IE=1,NE
+C* For each incident energy read the outg.particle energy distribution
+          CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
+     1               ,RWO(LXE),RWO(LXX),KX,IER)
+          IF(IER.NE.0) THEN
+            PRINT *,'DXSEN1 ERROR - Reading MF/MT',MF,MT
+            STOP 'DENXS1 ERROR reading energy.distrib.'
+          END IF
+          INE=INR(NM)
+          IF(NRP.GT.1)
+     1      PRINT *,'WARNING - Multiple Eout int.rng. MF 15, MT',MT
+          IF(INE.GT.2) THEN
+            PRINT *,'WARNING - Non-linear interp. for MF 15, MT',MT
+            INE=2
+          END IF
+C* Interpolate outgoing particle energy distributions
+          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
+     1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
+  134     CONTINUE
+C*
+        ELSE IF(LF.EQ.2) THEN
+C* Discrete photon energy
+          IER=99
+          PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
+          GO TO 900
+        ELSE
+          PRINT *,'ERROR - Illegal flag MF/MT/LF',MF,MT,LF
+          STOP 'DXSEND1 ERROR - Illegal LF in MF 12'
+        END IF
+  138   CONTINUE
       ELSE
         IER=99
-        PRINT *,'WARNING - No coding for MF 12, MT',MT0
+        PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
         GO TO 900
       END IF
+      GO TO 800
 C*
 C* Photon angular distributions
   140 CONTINUE
