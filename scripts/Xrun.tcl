@@ -3037,6 +3037,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_11_0.cpd67 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
+    namespace eval ::widgets::$site_8_0.cpd67 {
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -width 1 -wraplength 1}
+    }
     set site_8_1 [lindex [$base.tab88 childsite] 1]
     namespace eval ::widgets::$site_8_1 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
@@ -4059,7 +4062,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but86" "Button8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but86 "$site_3_0.but86 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but86 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Launch full sequence of calculations (EMPIRE+EMPEND+...+PLOTC4) }
+        set ::vTcl::balloon::%W {Launch full sequence (calculations + formatting + preprocessing + checking) }
     }
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -4191,7 +4194,7 @@ adjourn .top75} \
     }
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
-        -command {exec ../scripts/clean $file &
+        -command {exec ../scripts/clean $file 
 adjourn .top75} \
         -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -4489,6 +4492,28 @@ adjourn .top75} \
     pack $site_10_0.cpd72 \
         -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
         -side right 
+    button $site_8_0.cpd67 \
+        -activebackground #ff0000 -activeforeground White -background #dcdcdc \
+        -command {set rcfl [open ../.Xrunrc w+]
+puts $rcfl $file
+puts $rcfl $editor
+puts $rcfl $workdir
+puts $rcfl $psviewer
+puts $rcfl $pdfviewer
+puts $rcfl $wwwviewer
+puts $rcfl $compeval
+close $rcfl
+
+
+exit} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 2m -relief raised -text Exit -width 10 -wraplength 60 
+    vTcl:DefineAlias "$site_8_0.cpd67" "Button56" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_8_0.cpd67 "$site_8_0.cpd67 Button $top all _vTclBalloon"
+    bind $site_8_0.cpd67 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Close GUI}
+    }
     pack $site_8_0.lab69 \
         -in $site_8_0 -anchor center -expand 0 -fill none -side left 
     pack $site_8_0.lab100 \
@@ -4497,6 +4522,8 @@ adjourn .top75} \
     pack $site_8_0.lab70 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
         -pady 2 -side left 
+    pack $site_8_0.cpd67 \
+        -in $site_8_0 -anchor center -expand 0 -fill none -pady 100 -side top 
     set site_8_1 [lindex [$top.tab88 childsite] 1]
     ::iwidgets::labeledframe $site_8_1.lab106 \
         -ipadx 5 -ipady 5 \
@@ -5970,6 +5997,7 @@ close $mulfile} \
     $site_11_0.opt86 insert 14 {short-outputs}
     $site_11_0.opt86 insert 15 {full-outputs}
     $site_11_0.opt86 insert 16 {PLOTC4-plots}
+    $site_11_0.opt86 insert 17 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
