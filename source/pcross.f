@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 11:43:30 $
-Ccc   * $Id: pcross.f,v 1.8 2004-06-08 11:43:30 Capote Exp $
+Ccc   * $Date: 2004-06-11 13:59:33 $
+Ccc   * $Id: pcross.f,v 1.9 2004-06-11 13:59:33 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -33,13 +33,14 @@ C
       REAL*8 ec, gc, pc, fr 
       REAL*8 totemis, cme, hlp1, eee, ff1, ff2, ff3, wb, wda, sg, er,  
      &       ff, emis 
+	LOGICAL CallPCROSS/.FALSE./ 
 C 
 C     REAL MATRIX 
 C 
 C     FORMAL PARAMETERS 
       REAL*8 cross(NDEJC + 1), g(NDEJC + 1), pair(NDEJC + 1) 
       REAL*8 em(PMAX), we(NDEJC + 1, PMAX, NDEX), spec(NDEJC + 1, NDEX), 
-     &       L(NDEJC + 1, PMAX), flm(4, 4), r(4, PMAX, NDEJC),  
+     &       L(NDEJC + 1, PMAX), flm(4, 4), R(4, PMAX, NDEJC),  
      &       eint(NDEX), fint(NDEX), emaxi, emini, phdj(NDLW), ftmp 
 C 
 C     REAL FUNCTIONS 
@@ -49,16 +50,22 @@ C
 C     INTEGER VARIABLES 
 C 
       INTEGER*4 ac, ao, ar, p, hh, h1, i, ienerg, NHEq, icon, j,  
-     &          icon3, zc, zr, ap, zp, ihmax, ien 
+     &          icon3, zc, zr, ap, zp, ihmax, ien
       INTEGER*2 iemin(NDEJC + 1), iemax(NDEJC + 1), nures(NDEJC + 1) 
 C 
 C====================================================================== 
       COMMON /CALC5 / L, NHEq 
+	SAVE CallPcross,r
+
 C 
 C     NPRoject - projectile nejc number 
 C 
 C     INITIALIZATION 
           
+C 	Projectile mass and charge numbers 
+      ap = AEJc(NPRoject) 
+      zp = ZEJc(NPRoject) 
+C 
       cme = MFPp/1.4D21 
 C 
       fr = 0.D0 
@@ -70,7 +77,6 @@ C
          em(hh) = 0.D0 
       ENDDO 
       em(1) = 1.D0 
-C 
 C     Excitation energy (MeV) 
       ec = EXCn 
 C     Compound nucleus  
@@ -113,9 +119,6 @@ C     ZERO ARRAY INITIALIZATION
             L(nejc, hh) = 0.D0 
          ENDDO 
       ENDDO 
-C 
-      ap = AEJc(NPRoject) 
-      zp = ZEJc(NPRoject) 
 C 
       WRITE(6, 99001) 
 99001 FORMAT(/' ', 57('-')/) 
@@ -172,7 +175,9 @@ C
       nures(NEJcm + 1) = nnur 
       beta2 = 0. 
 C 
-      CALL RQFACT(NHEq, r) 
+      IF(.NOT.CallPCROSS) CALL RQFACT(NHEq, r) 
+
+	CallPCROSS = .TRUE.  ! To avoid r factor recalculation at each call
 C 
 C*************************************************************** 
 C     EMISSION RATES CALCULATIONS FOLLOWS 
@@ -209,12 +214,12 @@ C
 C        PARTICLE-HOLE LOOP 
 C 
          DO h1 = 1, NHEq 
-C 
+C
            icon = 0 
            hh = h1 - 1  
            IF(hh.EQ.0 .AND. nejc.NE.NEJcm + 1) CYCLE 
 C 
-           p = hh + ap 
+           p = hh + ap   
            ff2 = DENSW(gc, pc, p, hh, ec) 
            IF(ff2.EQ.0.) CYCLE 
 C 
@@ -330,7 +335,7 @@ C
          cross(nejc) = hlp1 
       ENDDO 
        
-      IF(IOUt.GE.3)THEN 
+      IF(IOUt.GE.1)THEN 
         DO nejc = 1, NEJcm + 1 
           IF(nejc.LE.3)THEN !nucleons and alpha 
              IF(IDNa(2*nejc,6).EQ.0) THEN 
@@ -339,12 +344,12 @@ C
                 status = "  (accepted)" 
              ENDIF 
              WRITE(6,  
-     &             '(1X,A2,'' PE emission cross section'',G12.5, 
+     &             '(1X,A2,'' PCROSS emission cross section'',G12.5, 
      &             '' mb'',A12)')SYMbe(nejc), cross(nejc), status 
           ELSEIF(nejc.EQ.4 .AND. NEJcm.NE.3)THEN !light ion (always accepted) 
              status = "  (accepted)" 
              WRITE(6,  
-     &             '(1X,A2,'' PE emission cross section'',G12.5, 
+     &             '(1X,A2,'' PCROSS emission cross section'',G12.5, 
      &             '' mb'',A12)')SYMbe(nejc), cross(nejc), status 
           ELSE !gamma 
              IF(IDNa(5,6).EQ.0) THEN 
@@ -353,7 +358,7 @@ C
                 status = "  (accepted)" 
              ENDIF 
              WRITE(6,  
-     &             '(1X,A2,'' PE emission cross section'',G12.5, 
+     &             '(1X,A2,'' PCROSS emission cross section'',G12.5, 
      &             '' mb'',A12)')'g ', cross(nejc), status 
           ENDIF  
 C---------We don't need this spectrum printout any more but I leave it 
@@ -429,11 +434,19 @@ c-----------number of spectrum bins to continuum WARNING! might be negative!
          ENDIF  
 c--------number of spectrum bins to continuum WARNING! might be negative! 
          nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001) 
-         IF(nexrt.GT.0)THEN 
+CRCN     IF(nexrt.GT.0 )THEN 	
+         IF(nexrt.GT.iemin(nejc) )THEN 
+C           write(6,*) 'nexrt:',nexrt
+C	      write(6,*) 'ejectile:',nejc
+C	      write(6,*) 'Iemin,Iemax:',iemin(nejc), iemax(nejc) 
             DO j = 1, NLW, LTUrbo 
                xnor = 0.5*phdj(j)/somj 
-               DO ie = iemin(nejc), iemax(nejc) 
-                  pops = xnor*spec(nejc, nexrt - ie + 1) 
+C
+CRCN  Mike: Check implications of the change below !!!!
+C	   We are not putting all CS (from nexrt to Iemax is missing !!!!)
+CRCN           DO ie = iemin(nejc), iemax(nejc) 
+               DO ie = iemin(nejc), nexrt 
+	            pops = xnor*spec(nejc, nexrt - ie + 1) 
                   POP(ie, j, 1, Nnur) = POP(ie, j, 1, Nnur) + pops 
                   POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pops 
                ENDDO 
@@ -449,7 +462,8 @@ c-----------add PCROSS contribution to the total ejectile emission
 C-----------add PCROSS to the population spectra used for deconvolution  
 C-----------of the EMPIRE spectra into ENDF exclusive spectra 
             IF(ENDf.EQ.1) THEN  
-               DO ie = iemin(nejc), iemax(nejc) 
+CRCN           DO ie = iemin(nejc), iemax(nejc) 
+               DO ie = iemin(nejc), nexrt
                   icsp = nexrt - ie + 1 
                   POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur)+ 
      &                                        spec(nejc,icsp) 
@@ -546,7 +560,7 @@ C
             DO h1 = 1, Heq 
 C 
                hhh = h1 - 1 
-               p = hhh + ap 
+               p = hhh + Ap 
                IF(p.GE.l)THEN 
                   m = ab - l 
                   minj = MAX(0, l - nb) 
@@ -642,8 +656,7 @@ C
          LM(i) = 0. 
       ENDDO 
       NMAx = Nheq 
-C     DO 365 H1=1,PMAX 
-      DO h1 = 1, Nheq 
+      DO h1 = 1 , Nheq 
          h = h1 - 1 
          p = h + Ap 
          n = p + h 
@@ -677,48 +690,51 @@ C     REAL VARIABLES
 C     SCALARS 
       REAL*8 Cme, hlp1, hlp2, hlp4 
 C     MATRIX 
-      REAL*8 L(NDEJC + 1, PMAX), LM(PMAX), ln(PMAX), b(PMAX), LP(PMAX) 
+      REAL*8 L(NDEJC + 1, PMAX), LM(PMAX), LN(PMAX), b(PMAX), LP(PMAX) 
       REAL*8 c(PMAX), e(PMAX), Em(PMAX), ls(PMAX) 
 C 
 C     INTEGER VARIABLES 
 C 
-      INTEGER*4 hhh, h1, i, Ih2, NMAx, Ap, n, ij, NHEq 
+      INTEGER*4 hhh, h1, i, Ih2, NMAx, n, ij, NHEq, Ap 
 C====================================================================== 
       COMMON /CALC3 / LP, LM, NMAx 
       COMMON /CALC5 / L, NHEq 
 C====================================================================== 
       DO i = 1, PMAX 
-         ln(i) = 0. 
+         LN(i) = 0. 
       ENDDO 
-C     N=NMAX-1 
       n = NMAx 
       IF(n.GT.PMAX)n = PMAX 
       DO h1 = 1, n 
          DO i = 1, NEJcm + 1 
-            ln(h1) = ln(h1) + L(i, h1) 
+            LN(h1) = LN(h1) + L(i, h1) 
          ENDDO 
 C----------------------------------------- 
 C        NEVER COME BACK ASUMPTION IS ASSUMED 
 C 
          LM(h1) = LM(h1)*1.D-7 
 C----------------------------------------- 
-         ls(h1) = Cme*ln(h1) + LP(h1) + LM(h1) 
+         LS(h1) = Cme*LN(h1) + LP(h1) + LM(h1) 
       ENDDO 
-      IF(IOUt.GT.3) WRITE(6, 99001) 
-99001 FORMAT(/2X, 'N', 8X, 'E  m  i  s  s  i  o  n     r  a  t  e  s',  
-     &       '       T r a n s i t i o n   r a t e s', //, 5X,  
-     &       'neutrons   protons    alphas    gammas    total',  
-     &       '        plus     minus     total'/) 
+      IF(IOUt.GE.3 .AND. NEJcm.EQ.3) WRITE(6, 99001) 
+99001 FORMAT(/2X, 'N', 5X, 'T r a n s i t i o n   r a t e s   ',  
+     &       '        E  m  i  s  s  i  o  n     r  a  t  e  s', //, 5X,  
+     &       '   plus     minus     TOTAL              TOTAL     gammas 
+     &  neutrons   protons   alphas'/) 
+      IF(IOUt.GE.3 .AND. NEJcm.EQ.4) WRITE(6, 99005) 
+99005 FORMAT(/2X, 'N', 5X, 'T r a n s i t i o n   r a t e s   ',  
+     &       '        E  m  i  s  s  i  o  n     r  a  t  e  s', //, 5X,  
+     &       '   plus     minus     TOTAL              TOTAL     gammas 
+     &  neutrons   protons   alphas   light ions'/) 
       DO h1 = 1, n 
          hhh = h1 - 1 
          ij = 2*hhh + Ap 
          hlp1 = LP(h1)/Cme 
          hlp2 = LM(h1)/Cme 
          hlp4 = hlp1 + hlp2 
-         IF(IOUt.GT.3) WRITE(6, 99002)ij, (L(i, h1), i = 1, 4), ln(h1),  
-     &      hlp1, hlp2, hlp4 
-C 
-99002    FORMAT(I3, 5E10.3, 2X, 3E10.3) 
+         IF(IOUt.GE.3) WRITE(6, 99002) ij, 
+     &   hlp1,hlp2,hlp4,ln(h1),L(NEJcm+1, h1),(L(i, h1), i = 1, NEJcm) 
+99002    FORMAT(I3, 3E10.3, 10X, 6E10.3) 
       ENDDO 
 C 
 C     INITIAL CONDITIONS 
@@ -746,15 +762,18 @@ C--------------------------------------------------------------------
          Em(h1) = b(h1)*Cme 
          IF(Em(h1).NE.0.)Ih2 = h1 
       ENDDO 
-c     WRITE(6, 99003) 
+      IF(IOUt.GE.3) WRITE(6, 99003) 
 99003 FORMAT(/3X, 'TIME INTEGRALS OF TAU(N)'/3X,  
-     &       '     UP TO Nequil       '/) 
+     &       ' N   UP TO Nequil       ') 
       Ih2 = MIN(Ih2, NHEq) 
-      DO h1 = 1, Ih2 
-         hhh = 2*(h1 - 1) + Ap 
-c        WRITE(6, 99004)hhh, Em(h1) 
+	IF(IOUt.GE.3) THEN
+        DO h1 = 1, Ih2 
+           hhh = 2*(h1 - 1) + Ap 
+           WRITE(6, 99004)hhh, Em(h1) 
 99004    FORMAT(I5, 2E14.3) 
-      ENDDO 
+        ENDDO 
+	  WRITE(6, *)
+	ENDIF
       RETURN 
       END 
 C 
