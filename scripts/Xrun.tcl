@@ -3853,7 +3853,7 @@ foreach el $stablist {
    set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname
    set inpexists [file exists $mulinputn.inp]
    if { $inpexists == 0 } {
-      set skelinp [open skel.inp r]
+      set skelinp [open ../scripts/skel.inp r]
       set mulinput [open $mulinputn.inp w]
       while {[gets $skelinp line] >=0} {
          if [regexp xxx $line] {
@@ -3878,9 +3878,9 @@ foreach el $stablist {
    }
 }
 if {$mulstname == ""} {
-    exec cp skel.inp default.inp
+    exec cp ../scripts/skel.inp default.inp
     } else {
-    exec cp skel.inp $mulstname.inp
+    exec cp ../scripts/skel.inp $mulstname.inp
     }
 }
 #############################################################################
@@ -4231,7 +4231,7 @@ adjourn .top75} \
     button $site_11_0.cpd72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {exec xterm -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i skel.inp $file.inp 
+        -command {exec xterm -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i ../scripts/skel.inp $file.inp 
 adjourn .top75
 exec $editor $file.inp &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
@@ -6266,7 +6266,7 @@ exit} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
-        -command {exec $editor skel.inp &} -label {Default input} 
+        -command {exec $editor ../scripts/skel.inp &} -label {Default input} 
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/empend/EMPEND.INP &} \
         -label {EMPEND input} 
