@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: input.f,v 1.15 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-07-09 21:55:18 $
+Ccc   * $Id: input.f,v 1.16 2003-07-09 21:55:18 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -988,6 +988,8 @@ C     EIN = EIN*A(0)/A(1)
       CALL LEVREAD(0)
       EXCn = EIN + Q(0, 1) + ELV(LEVtarg,0)
       EMAx(1) = EXCn
+C-----set Q-value for CN production      
+      QPRod(1) = Q(0, 1)
 C-----WRITE heading on FILE12
       ia = INT(A(0))
       iae = INT(AEJc(0))
@@ -1198,6 +1200,9 @@ C              CALL CLEAR
             ENDIF
             IF(Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0)ECUt(nnur)
      &         = EX(1, nnur)
+C-----------determination of Q-value for isotop prodiction
+            qtmp = QPRod(nnuc) - Q(nejc, nnuc)
+            IF(qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
             IF(FITlev.GT.0.0D0)ECUt(nnur) = 0.0
 C-----------determination of etl matrix and transmission coeff. calculation
 C-----------first 4 elements are set independently in order to get more
@@ -1315,12 +1320,10 @@ C     fisfis d --------------------
 C     the fission input is created if it does not exist
       DO nnuc = 1, NNUct
         FISsil(nnuc) = .TRUE.
-C-------Fission temporary closed to allow standard calculations
-C-------for nuclei for which no fission barriers are available
-C-------next line should be deleted to enable fission
-        FISsil(nnuc) = .FALSE.
         xfis = 0.0205*Z(nnuc)**2/A(nnuc)
         IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
+C       RCN 06/2003
+        IF(FISbar(nnuc).LT.0.) FISsil(nnuc) = .FALSE.
       ENDDO
       INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
       IF(.NOT.gexist)THEN
@@ -1923,7 +1926,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta3|'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta4|'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |            (Lodi)          |'
       WRITE(6, *)'                       |____________________________|'
@@ -4059,19 +4062,28 @@ C--------'collective levels:'
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
 C--------Reading ground state infomation (to avoid overwriting deformation)
-         READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
-     &        ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1)
-         WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
-     &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1), 0.01
+C
+C        Changed RCN 06/2003
+         READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+     &    ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1),
+     &    IPH(1), D_Llv(1), D_Klv(1)
+         WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+     &    ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1),
+     &    IPH(1), D_Llv(1), D_Klv(1), 0.01
+
          DO i = 2, ND_nlv
-C           WRITE (32,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
-C           &     ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), D_Def(i,2)
-            READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
+C        Changed RCN 06/2003
+C         READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,I4,6e10.3)')
+          READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &           D_Def(i, 2)
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
-     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            D_Def(i, 2)
+C        Changed RCN 06/2003
+C    &           D_Def(i, 2)
+     &           D_Llv(i),D_Klv(i),D_Def(i, 2)
+          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
+C        Changed RCN 06/2003
+C    &           D_Def(i, 2)
+     &           D_Llv(i),D_Klv(i),D_Def(i, 2)
          ENDDO
          CLOSE(32)
          IFINDCOLL = 0
@@ -4080,7 +4092,9 @@ C           &     ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), D_Def(i,2)
       ia = A(0)
       iz = Z(0)
       DEFormed = .FALSE.
-      IF(ABS(DEF(1,0)).GT.0.15)DEFormed = .TRUE.
+C     IF(ABS(DEF(1,0)).GT.0.15)DEFormed = .TRUE
+C     RCN 06/2003.
+      IF(ABS(DEF(1,0)).GT.0.1)DEFormed = .TRUE.
       i20p = 0
       i21p = 0
       i0p = 0
@@ -4152,6 +4166,10 @@ C        ENDDO
             D_Lvp(ND_nlv) = lvpr
             D_Xjlv(ND_nlv) = xjlvr
             IPH(ND_nlv) = 0
+C           RCN 06/2003
+            D_Llv(ND_nlv) = 0
+            D_Klv(ND_nlv) = 0
+
             D_Def(ND_nlv, 2) = DEF(1, 0)
             gspin = xjlvr
             gspar = DBLE(lvpr)
@@ -4325,6 +4343,12 @@ C--------------------swapping
                      dtmp = ICOllev(i)
                      ICOllev(i) = ICOllev(j)
                      ICOllev(j) = dtmp
+                     dtmp = D_Llv(i)
+                     D_Llv(i) = D_Llv(j)
+                     D_Llv(j) = dtmp
+                     dtmp = D_Klv(i)
+                     D_Klv(i) = D_Klv(j)
+                     D_Klv(j) = dtmp
                   ENDIF
                ENDDO
             ENDDO
@@ -4333,19 +4357,23 @@ C--------------------swapping
          WRITE(6, *)'   Ncoll  '
          WRITE(6, '(3x,I5)')ND_nlv
          WRITE(6, *)
-         WRITE(6, *)' N   E[MeV]  J   pi Iph   Dyn.Def.'
+C        RCN 06/2003
+C        WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+         WRITE(6, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          WRITE(32, *)
          WRITE(32, *)'   Ncoll  '
          WRITE(32, '(3x,3I5)')ND_nlv
          WRITE(32, *)
-         WRITE(32, *)' N   E[MeV]  J   pi Iph   Dyn.Def.'
+C        RCN 06/2003
+C        WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+         WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-            WRITE(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
-     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            D_Def(i, 2)
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
-     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            D_Def(i, 2)
+          WRITE(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), 
+     &            IPH(i), D_Llv(i), D_Klv(i), D_Def(i, 2)
+          WRITE(6 , '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), 
+     &            IPH(i), D_Llv(i), D_Klv(i), D_Def(i, 2)
          ENDDO
       ELSE
          WRITE(32, 99001)
@@ -4366,20 +4394,28 @@ C--------------------swapping
          WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
      &         IDEfcc, D_Xjlv(1), (D_Def(1, j), j = 2, IDEfcc, 2)
          WRITE(6, *)
-         WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+C        RCN 06/2003
+C        WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+         WRITE(6, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          WRITE(32, *)
          WRITE(32, *)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
      &         IDEfcc, D_Xjlv(1), (D_Def(1, j), j = 2, IDEfcc, 2)
          WRITE(32, *)
-         WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+C        RCN 06/2003
+C        WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+         WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-            WRITE(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+C        RCN 06/2003
+          WRITE(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            0.01
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+C        RCN 06/2003
+     &            0, 0, 0.01
+C        RCN 06/2003
+          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            0.01
+C        RCN 06/2003
+     &            0, 0, 0.01
          ENDDO
       ENDIF
       CLOSE(32)

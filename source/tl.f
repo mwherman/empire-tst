@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: tl.f,v 1.11 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-07-09 21:55:18 $
+Ccc   * $Id: tl.f,v 1.12 2003-07-09 21:55:18 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -311,7 +311,9 @@ C--------model = 'coupled-channels rotational model'
      &               LMAx(n), IDEf(n), BANdk(n), 
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
                WRITE(32, *)
-               WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+C              RCN 06/2003
+C              WRITE(32, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+               WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
@@ -340,10 +342,11 @@ C-----------The deformation for excited levels is not used in the pure
 C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
 C
+C           RCN 06/2003
             WRITE(32, 
-     &            '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,I2,1x,e10.3)')
-     &            icoll(k), EEX(k, ncalc), SPIn(k, ncalc), 
-     &            IPAr(k, ncalc), 0, 0.01
+     &          '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,3(I2,1x),e10.3)')
+     &          icoll(k), EEX(k, ncalc), SPIn(k, ncalc), 
+     &          IPAr(k, ncalc), 0, 0, 0, 0.01
 C
 C-----------Setting EMPIRE global variables
             ICOllev(k) = icoll(k)
@@ -351,6 +354,9 @@ C-----------Setting EMPIRE global variables
             D_Xjlv(k) = SPIn(k, ncalc)
             D_Lvp(k) = FLOAT(IPAr(k, ncalc))
             IPH(k) = 0
+C           RCN 06/2003
+            D_Llv(k) = 0
+            D_Klv(k) = 0
          ENDDO
          CLOSE(32)
          WRITE(6, *)
@@ -365,11 +371,16 @@ C-----------Setting EMPIRE global variables
          WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
      &         IDEfcc, D_Xjlv(1), (D_Def(1, j), j = 2, IDEfcc, 2)
          WRITE(6, *)
-         WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+C              RCN 06/2003
+C              WRITE(6, *)' N   E[MeV]  K   pi Iph   Dyn.Def.'
+               WRITE(6, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+C         RCN 06/2003
+C         WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            0.01
+     &            0, 0, 0.01
+C    &            0.01
          ENDDO
          WRITE(6, *)
          WRITE(6, *)
@@ -428,7 +439,9 @@ C--------model = 'vibrational model'
                WRITE(32, '(3x,a6)')'   Ncoll'
                WRITE(32, '(3x,I5)')NVIb(n)
                WRITE(32, *)
-               WRITE(32, *)' N   E[MeV]  J   pi Lph   Dyn.Def.'
+C              RCN 06/2003
+C              WRITE(32, *)' N   E[MeV]  J   pi Lph   Dyn.Def.'
+               WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
@@ -450,16 +463,21 @@ C--------Setting EMPIRE global variables
          IDEfcc = 2
          LMAxcc = 0
          DO k = 1, NVIb(ncalc)
+C           RCN, 06/2003
             WRITE(32, 
-     &            '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,I2,1x,e10.3)')
-     &            icoll(k), EXV(k, ncalc), SPInv(k, ncalc), 
-     &            IPArv(k, ncalc), NPH(k, ncalc), DEFv(k, ncalc)
+     &         '(1x,I2,1x,F7.4,1x,F4.1,1x,i2,''.'',1x,3(I2,1x),e10.3)')
+     &          icoll(k), EXV(k, ncalc), SPInv(k, ncalc), 
+     &          IPArv(k, ncalc), NPH(k, ncalc), 0, 0, DEFv(k, ncalc)
 C-----------Setting EMPIRE global variables
             ICOllev(k) = icoll(k)
             D_Elv(k) = EXV(k, ncalc)
             D_Xjlv(k) = SPInv(k, ncalc)
             D_Lvp(k) = FLOAT(IPArv(k, ncalc))
             IPH(k) = NPH(k, ncalc)
+C           RCN 06/2003
+            D_Llv(k) = 0
+            D_Klv(k) = 0
+
             D_Def(k, 2) = DEFv(k, ncalc)
          ENDDO
          CLOSE(32)
@@ -474,11 +492,14 @@ C-----------Setting EMPIRE global variables
          WRITE(6, *)'   Ncoll'
          WRITE(6, '(3x,I5)')ND_nlv
          WRITE(6, *)
-         WRITE(6, *)' N   E[MeV]  J   pi Iph   Dyn.Def.'
+C        RCN 06/2003
+C        WRITE(6, *)' N   E[MeV]  J   pi Lph   Dyn.Def.'
+         WRITE(6, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-            WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,e10.3)')
+C         RCN 06/2003
+          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
-     &            D_Def(i, 2)
+     &            0, 0, D_Def(i, 2)
          ENDDO
          WRITE(6, *)
          WRITE(6, *)
@@ -1502,8 +1523,9 @@ C              Otherwise delete the following two lines
       READ(Ki, *)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-          READ(Ki, '(a80)')comment
-          WRITE(Komp, '(a80,a20)')comment, ' Ecoul,RC0,RC,RC1,RC2,beta'
+            READ(Ki, '(a80)')comment
+            WRITE(Komp, '(a80,a20)')comment, 
+     &                              ' Ecoul,RC0,RC,RC1,RC2,beta'
          ENDDO
       ENDIF
       IF(IMOdel.GT.0)THEN
@@ -1580,10 +1602,9 @@ C--------------Reading radius
                ELSE
                   READ(Ko, 99007, ERR = 200)(RCO(i, j, n), n = 8, 13)
                ENDIF
-               IF(NDIM2.GT.13)THEN
-C                 READ(Ko, 99007, ERR = 200)(RCO(i, j, n), n = 14,NDIM2)
-                  STOP '1 IN tl.f, UNCOMMENT READ ABOVE AND REMOVE STOP'
-               ENDIF
+C     READ(Ko, 99007, ERR = 200)(RCO(i, j, n), n = 14,NDIM2)
+               IF(NDIM2.GT.13)STOP 
+     &                 '1 IN tl.f, UNCOMMENT READ ABOVE AND REMOVE STOP'
 C--------------Reading diffuss
                READ(Ko, 99006, ERR = 200)(ACO(i, j, n), n = 1, 7)
                IF(NDIM2.GT.7 .AND. NDIM2.LE.13)THEN
@@ -1616,8 +1637,8 @@ C--------------Reading depths
       READ(Ko, 99004, ERR = 200)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-            READ(Ko, 99005, ERR = 200)ecoul(j),
-     &      rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j)
+            READ(Ko, 99005, ERR = 200)ECOul(j), RCOul0(j), RCOul(j), 
+     &                                RCOul1(j), RCOul2(j), BETa(j)
          ENDDO
       ENDIF
       IF(IMOdel.EQ.1)THEN
@@ -1723,8 +1744,8 @@ C
       READ(Ki, *)JCOul
       IF(JCOul.GT.0)THEN
          DO j = 1, JCOul
-            READ(Ki, *)ecoul(j),
-     &      rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j)
+            READ(Ki, *)ECOul(j), RCOul0(j), RCOul(j), RCOul1(j), 
+     &                 RCOul2(j), BETa(j)
          ENDDO
       ENDIF
       IF(IMOdel.EQ.1)THEN
@@ -2014,9 +2035,12 @@ C
                   stl(i1) = 0.0
                ENDDO
             ELSE
-C--------------call of the optical model routine
-               IF(ener.GT.0.D0)CALL OMTL(Nejc, Nnuc, ener, maxlw, stl, 
-     &            0)
+C-----------call of the optical model routine
+               IF(ener.GT.0.D0)CALL OMTL(Nejc, Nnuc, ener, maxlw, stl,
+     &              SRR, 0)
+C              Capote , preeq 2002
+C              IF(Nnuc.eq.1) SIGabs(i, Nejc)=SRR
+               SIGabs(i, Nejc, Nnuc) = SRR
                LMAxtl(i, Nejc, Nnuc) = MIN0(maxlw, NDLW)
             ENDIF
 C-----------transfer of the calculated transmission coeff. onto TL matrix
@@ -2505,6 +2529,10 @@ C        WRITE (46,*) l , TTLl(J,l)
          WRITE(46)TTLl(J, l)
       ENDDO
       MAXl(J) = lmax
+C     Capote , preeq 2002
+C     IF(Nnuc.eq.1) SIGabs(J, Nejc)=sabs
+      SIGabs(J, Nejc, Nnuc) = sabs
+      RETURN
       END
 C
 C
@@ -2987,16 +3015,17 @@ C
 C     Dummy arguments
 C
       DOUBLE PRECISION El
-      LOGICAL Ltlj
+      LOGICAL Ltlj, fexist
       INTEGER Nejc, Nnuc
 C
 C     Local variables
 C
       CHARACTER*1 ch
+      CHARACTER*80 cline
       DOUBLE PRECISION eee, elab, rmatch, xmas_nejc, xmas_nnuc, xratio
       DOUBLE PRECISION elabe
       INTEGER ip, iterm, j, ldwmax, lev(NDLV), ncoll, nd_nlvop, njmax, 
-     &        npho, npp, k
+     &        npho, npp, k, KKK, LLL
       INTEGER*4 iwin
       INTEGER*4 PIPE
 C     INTEGER NINT
@@ -3025,20 +3054,42 @@ C-----Coulomb potential deformed
 C-----Real and imaginary central potential deformed
       ECIs1(12:12) = 'T'
 C-----Real SO potential deformed
-C-----ECIs1(13:13) = 'T'
+      ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
-C-----ECIs1(14:14) = 'T'
+      ECIs1(14:14) = 'T'
+
+      INQUIRE(FILE = 'MAT_ELEM.INP', EXIST = fexist)
+      IF(fexist) THEN
+         ECIs1(15:15) = 'T'
+         WRITE(6, *) 'MATRIX ELEMENT FILE WAS FOUND ...'
+      ENDIF
+
 C-----Usual coupled equations instead of ECIS scheme is used
-C-----Spin-orbit potential must be not deformed !!
-      ECIs1(21:21) = 'T'
+C     Spin-orbit potential must be not deformed !!
+C     ECIs1(21:21) = 'T'
+      ECIs1(21:21) = 'F'
 C-----ECIS iteration scheme is used.
-C-----Shift to coupled equations if convergence is not achieved
-C-----ECIs1(23:23) = 'T'
+C     Shift to coupled equations if convergence is not achieved
+C     ECIs1(23:23) = 'T'
+      ECIs1(23:23) = 'F'
+      ECIs1(28:28) = 'F'
+
+C     Save storage
+      ECIs1(24:24) = 'T'
+
       ECIs2 = BECis2
 C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----Penetrabilities punched on cards
       ECIs2(13:13) = 'F'
+C     Output of the reduced matrix elements
+      ECIs2(2:2) = 'T'
+      ECIs2(4:4) = 'T'
+      ECIs2(11:11) = 'T'
+
+C	Print logical controls
+      ECIs2(21:21) = 'T'
+
       IF(Ltlj)THEN
          ECIs2(13:13) = 'T'
          ECIs2(14:14) = 'F'
@@ -3158,36 +3209,60 @@ C-----Discrete levels
          ch = '-'
          IF(D_Lvp(j).GT.0)ch = '+'
          nwrite = nwrite + 1
-C        WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j) , IPH(j) , j , ch ,
-C        Phonon angular momentum is transmitted through IPH array
-C        IPH(j)=-1 mans phonon with Lphonon=0
-         WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j), nwrite, ch, 
-     &         D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
-     &         *ZEJc(Nejc)
+C
+C	   FOR PHONON STATES IPH(j)=1,2,3...
+C
          IF(IPH(j).NE.0 .AND. DIRect.NE.3)THEN
+            WRITE(1, '(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 1, nwrite, 
+     &          ch, D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
+     &         *ZEJc(Nejc)
             npho = npho + 1
             lev(npho) = j
-            WRITE(1, '(10i5)')1, npho
+            WRITE(1, '(10i5)')1, IPH(j)
+         ELSE
+            WRITE(1, '(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, nwrite, 
+     &          ch, D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
+     &         *ZEJc(Nejc)
          ENDIF
       ENDDO
 C-----Description of phonons
       IF(npho.GT.0)THEN
 C
-C--------In vibrational rotational model the IPH(j) array contains the
-C--------l orbital angular momentum of the phonon.
-C--------We are assuming that orbital angular momentum of the phonon is
-C--------equal INT(J). The k magnetic quantum number of the vibration is
-C--------assumed to be zero !!!! L_PHO(lev(j))  = IPH(j)
-C--------L3_pho(lev(j)) = 0
+C        In vibrational rotational model the IPH(j) array contains the
+C        l orbital angular momentum of the phonon.
+C        We are assuming that orbital angular momentum of the phonon is
+C        equal INT(J). The k magnetic quantum number of the vibration is
+C        assumed to be zero !!!! L_PHO(lev(j))  = IPH(j)
+C        L3_pho(lev(j)) = 0
+C
+CCCCCCCC What is quoted above is not anymore true, since June 2003, RCN         
+C        The L orbital angular momentum of the phonon is D_Llv(j)
+C        The K magnetic quantum number of the vibration is D_Klv(j)
+C        The 1-phonon states have IPH(j)=1
+C        The 2-phonon states have IPH(j)=2
+
+         IPHONON0=IPH(1)
          DO j = 1, npho
 C           IPH(lev(j)) , 0 , D_Def(lev(j))
-            WRITE(1, '(2i5,6f10.5)')INT(D_Xjlv(lev(j)) + 0.1), 0, 
-     &                              D_Def(lev(j), 2)
+            IF(j.gt.1 .AND. IPH(lev(j)).EQ.IPHONON0) cycle
+
+            IPHONON0=IPH(lev(j))
+C
+C           L is the orbital angular momentum of the phonon = J +/- 1/2
+C
+            LLL = D_Llv(lev(j))
+C
+C           KKK is the K magnetic quantum number
+C
+            KKK = D_Klv(lev(j))
+
+            WRITE(1, '(2i5,6f10.5)') LLL, KKK, D_Def(lev(j), 2)
+
          ENDDO
       ENDIF
-C-----Deformation of rotational band (only ground state band is present)
-C-----IdefCC   = maximum degree of deformation
-C-----LMaxCC   = maximum L in multipole decomposition
+C-----Deformation of rotational band 
+C     IdefCC   = maximum degree of deformation
+C     LMaxCC   = maximum L in multipole decomposition
       WRITE(1, '(2i5,f10.5)')IDEfcc, LMAxcc, D_Xjlv(1)
 C     WRITE (1,'(6f10.5)') D_Def(1)
       WRITE(1, '(6f10.5)')(D_Def(1, k), k = 2, IDEfcc, 2)
@@ -3329,8 +3404,16 @@ C
 C-----Angular distribution step
 C
       WRITE(1, '(3f10.5)')0.D0, angstep, 180.D0
-      WRITE(1, '(3hFIN)')
+C     Reading matrix element file
+      IF(fexist) THEN
+         OPEN(7,FILE='MAT_ELEM.INP',STATUS='OLD')
+  268    READ(7,'(A80)',END=269) cline
+         WRITE(1,'(A80)') cline
+         GO TO 268
+      ENDIF
+  269 WRITE(1, '(3hFIN)')
       CLOSE(UNIT = 1)
+      CLOSE(UNIT = 7)
 C-----Running ECIS
       IF(IOPsys.EQ.0)THEN
          IF(npho.GT.0)THEN
