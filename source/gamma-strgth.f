@@ -1,6 +1,6 @@
-Ccc   * $Author: Sin $
-Ccc   * $Date: 2004-10-07 20:40:09 $
-Ccc   * $Id: gamma-strgth.f,v 1.13 2004-10-07 20:40:09 Sin Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-10-07 20:44:18 $
+Ccc   * $Id: gamma-strgth.f,v 1.14 2004-10-07 20:44:18 herman Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -544,41 +544,24 @@ Ccc
       DATA sigmad0/61.2/,bndeut/2.224/,Lqd0/6.5/
 
 C   First calculate the blocking factor
-
       IF(Eg.LT.bndeut) THEN
-
         fermifac=0.0
-
        ELSE IF(Eg.LT.eflo) THEN 
-
         fermifac=EXP(dflo/Eg)
-
        ELSE IF(Eg.LT.efhi) THEN 
-
         fermifac=fermicof(1)
         DO i=2,5
           fermifac=fermicof(i)+fermifac*Eg
          END DO
-
        ELSE
-
         fermifac=EXP(dfhi/Eg)
-
        ENDIF
-
 C  Then calculate the photoabsorption cross section
-       
       IF(Eg.LT.bndeut) THEN
-
         SIGQD=0.0
-
        ELSE
-
         sigmad=sigmad0*(Sqrt(Eg-bndeut)/Eg)**3
         SIGQD=Lqdfac*Lqd0*Ztar*(Atar-Ztar)*sigmad*fermifac/Atar
-
        ENDIF
-
       RETURN
-
       END
