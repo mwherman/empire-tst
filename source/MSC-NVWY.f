@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: MSC-NVWY.f,v 1.11 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-03-17 19:48:56 $
+Ccc   * $Id: MSC-NVWY.f,v 1.12 2005-03-17 19:48:56 Capote Exp $
 C
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
@@ -37,14 +37,14 @@ C
 C PARAMETER definitions
 C
       INTEGER NC2, IV
-      PARAMETER (NC2 = NDMSCS + 2,IV = 18)
+      PARAMETER (NC2 = NDMSCS + 2,IV = 25)
 C
 C COMMON variables
 C
       INTEGER IE(NC2)
-      DOUBLE PRECISION OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS), 
-     &                 PREp(NC2,2), SCRm(NDEX,NDLW,2,2,NDMSCS), 
-     &                 WP(NDEX,NDLW,2), YP(NDEX,NDMSCS,3,2), 
+      DOUBLE PRECISION OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS),
+     &                 PREp(NC2,2), SCRm(NDEX,NDLW,2,2,NDMSCS),
+     &                 WP(NDEX,NDLW,2), YP(NDEX,NDMSCS,3,2),
      &                 ZP(NDEX,NC2,3,2), ZSUm(NDEX,NC2,2)
       COMMON /MSC   / SCRm, WP, YP, ZP, ZSUm, OMJd, PIM, PREp, IE
 C
@@ -54,10 +54,10 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION corr, hisr, ps1, ps2, s, smax, smin, tl1, tl2, 
+      DOUBLE PRECISION corr, hisr, ps1, ps2, s, smax, smin, tl1, tl2,
      &                 tl3, tlj, xjc, xjr
       REAL FLOAT
-      INTEGER i, ichsp, ier, iermax, ietl, iexc, ip1, ip2, ipar, itlc, 
+      INTEGER i, ichsp, ier, iermax, ietl, iexc, ip1, ip2, ipar, itlc,
      &        j, jr, l, lmax, lmaxf, lmin, mul, n
       INTEGER MIN0
 C
@@ -124,7 +124,7 @@ C-----------------------factor of 4 missing (it will be applied when PS is calcu
      &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
                         tl3 = tlj*ZP(iermax,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
-                        ps1 = ps1 + 
+                        ps1 = ps1 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
      &                        *OMJd(IE(n) - 1,jr)
@@ -140,7 +140,7 @@ C-----------------------factor of 4 missing (it will be applied when PS is calcu
      &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
                         tl3 = tlj*ZP(iermax,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
-                        ps2 = ps2 + 
+                        ps2 = ps2 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
      &                        *OMJd(IE(n) - 1,jr)
@@ -171,7 +171,7 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
      &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
                         tl3 = tlj*ZP(iermax,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
-                        ps1 = ps1 + 
+                        ps1 = ps1 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
      &                        *OMJd(IE(n) - 1,jr)
@@ -187,7 +187,7 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
      &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
                         tl3 = tlj*ZP(iermax,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
-                        ps2 = ps2 + 
+                        ps2 = ps2 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
      &                        *OMJd(IE(n) - 1,jr)
@@ -222,7 +222,7 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
      &                        /(1. + tlj*ZSUm(ier,n + 1,Nejc))**2
                         tl3 = tlj*ZP(ier,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(ier,n + 2,Nejc))**2
-                        ps1 = ps1 + 
+                        ps1 = ps1 +
      &                        (tl1*YP(ier,n,1,Nejc)*OMJd(IE(n) - 3,jr)
      &                        + tl2*YP(ier,n,2,Nejc)*OMJd(IE(n) - 1,jr)
      &                        + tl3*YP(ier,n,3,Nejc)*OMJd(IE(n) + 1,jr))
@@ -237,7 +237,7 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
      &                        /(1. + tlj*ZSUm(ier,n + 1,Nejc))**2
                         tl3 = tlj*ZP(ier,n,3,Nejc)
      &                        /(1. + tlj*ZSUm(ier,n + 2,Nejc))**2
-                        ps2 = ps2 + 
+                        ps2 = ps2 +
      &                        (tl1*YP(ier,n,1,Nejc)*OMJd(IE(n) - 3,jr)
      &                        + tl2*YP(ier,n,2,Nejc)*OMJd(IE(n) - 1,jr)
      &                        + tl3*YP(ier,n,3,Nejc)*OMJd(IE(n) + 1,jr))
@@ -266,8 +266,8 @@ C--------decay to the continuum ------ done -----------------------------
          ENDDO
       ENDIF
       END
- 
- 
+
+
       SUBROUTINE HMSC(Nvwful)
 Ccc
 Ccc   ********************************************************************
@@ -296,15 +296,15 @@ C
 C PARAMETER definitions
 C
       INTEGER NC2, ISD, NG, IV
-      PARAMETER (NC2 = NDMSCS + 2,ISD = 0,NG = 4*NDMSCS - 3*ISD,IV = 18)
+      PARAMETER (NC2 = NDMSCS + 2,ISD = 0,NG = 4*NDMSCS - 3*ISD,IV = 25)
 C
 C COMMON variables
 C
-      DOUBLE PRECISION BMSc, EXTr, FACt(100), G, GSP(1), 
-     &                 OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS), 
-     &                 PIM1(NDMSCS), PREp(NC2,2), 
-     &                 SCRm(NDEX,NDLW,2,2,NDMSCS), SIGnx, 
-     &                 WP(NDEX,NDLW,2), YP(NDEX,NDMSCS,3,2), 
+      DOUBLE PRECISION BMSc, EXTr, FACt(100), G, GSP(1),
+     &                 OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS),
+     &                 PIM1(NDMSCS), PREp(NC2,2),
+     &                 SCRm(NDEX,NDLW,2,2,NDMSCS), SIGnx,
+     &                 WP(NDEX,NDLW,2), YP(NDEX,NDMSCS,3,2),
      &                 ZP(NDEX,NC2,3,2), ZSUm(NDEX,NC2,2)
       INTEGER IE(NC2)
       COMMON /DELETE/ GSP
@@ -318,25 +318,25 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION accn, apig(NG,NG), apim(NDMSCS,NDMSCS), atil, 
-     &                 aw(NDMSCS), awj(NDMSCS,NDLW), awm(NDMSCS), 
-     &                 bbb(NDMSCS), ccre, cgd, coulb, det, ecc, ecor, 
-     &                 ecor1, ecor2, ecor3, efc, eg, egdr, egdrr, emis, 
-     &                 en, entl, eps, eptl, ew, gamma, gdrw, 
-     &                 gspmsc(NDMSCS,NDEX), omn, omp, pig(NG,NG), 
-     &                 pigx(NG), pigy(NG), pimem(NDMSCS), pop1, pop2, 
-     &                 popars, popart(NDMSCS), popt, prop, propt, rbu, 
-     &                 rog, rop, roph(NC2,4), roph3(NC2), rophc(NC2), 
-     &                 ropht(NC2), sdabs, sdsp(NDEX), sp, spg(NDMSCS), 
-     &                 spr(NG), spw, sumtlg, tg, tg1, tg2, tg3, tgc, 
-     &                 tl1, tl2, tl3, tlg, tls, tx, undeg(NG,NG), 
-     &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2), 
+      DOUBLE PRECISION accn, apig(NG,NG), apim(NDMSCS,NDMSCS), atil,
+     &                 aw(NDMSCS), awj(NDMSCS,NDLW), awm(NDMSCS),
+     &                 bbb(NDMSCS), ccre, cgd, coulb, det, ecc, ecor,
+     &                 ecor1, ecor2, ecor3, efc, eg, egdr, egdrr, emis,
+     &                 en, entl, eps, eptl, ew, gamma, gdrw,
+     &                 gspmsc(NDMSCS,NDEX), omn, omp, pig(NG,NG),
+     &                 pigx(NG), pigy(NG), pimem(NDMSCS), pop1, pop2,
+     &                 popars, popart(NDMSCS), popt, prop, propt, rbu,
+     &                 rog, rop, roph(NC2,4), roph3(NC2), rophc(NC2),
+     &                 ropht(NC2), sdabs, sdsp(NDEX), sp, spg(NDMSCS),
+     &                 spr(NG), spw, sumtlg, tg, tg1, tg2, tg3, tgc,
+     &                 tl1, tl2, tl3, tlg, tls, tx, undeg(NG,NG),
+     &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2),
      &                 xga, xxxx, y, yd, ygdr
       DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
       REAL FLOAT
-      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, iloc, inc, 
-     &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, izares, 
-     &        izpcon, j, jr, jx, k, k1, k2, k3, kc, kc1, kcn, ke, 
+      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, iloc, inc,
+     &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, izares,
+     &        izpcon, j, jr, jx, k, k1, k2, k3, kc, kc1, kcn, ke,
      &        key_tmp, kg, kgin, ki, ks, m, m1, m2, mpigx(NG), mpigy(NG)
      &        , nc1, ncm, ncont, nejc, nnur, npigzero, nresn, nresp
       DOUBLE PRECISION yre, ysp
@@ -407,7 +407,7 @@ C-----calculation of factorial      ***** done *******
       izares = 1000.0*Z(1) + A(1) - 1.
       CALL WHERE(izares,nresn,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (6,*) 
+         WRITE (6,*)
      &'RESIDUAL NUCLEUS AFTER NEUTRON EMISSION FROM CN HAS NOT BEEN DETE
      &RMINED BEFORE CALL OF HMSC'
          WRITE (6,*) 'OPEN NEUTRON EMISSION'
@@ -417,7 +417,7 @@ C-----calculation of factorial      ***** done *******
       izares = 1000.0*(Z(1) - 1.0) + A(1) - 1.
       CALL WHERE(izares,nresp,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (6,*) 
+         WRITE (6,*)
      &'RESIDUAL NUCLEUS AFTER PROTON  EMISSION FROM CN HAS NOT BEEN DETE
      &RMINED BEFORE CALL OF HMSC'
          WRITE (6,*) 'OPEN PROTON  EMISSION'
@@ -428,7 +428,7 @@ C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       G = A(1)/GDIv
       IF (STMro.EQ.1.0D0) THEN
          WRITE (6,
-     &'(     '' Microscopic p-h state densities will be calculated with 
+     &'(     '' Microscopic p-h state densities will be calculated with
      &parameters'')')
          CALL TRATES
          ini = 1000000
@@ -976,7 +976,7 @@ C--------------neutron emission (if accepted, note IF on IDNA)
      &                              + popt
                                  POPcse(ke,nejc,icse,nnur)
      &                              = POPcse(ke,nejc,icse,nnur) + popt
- 
+
                               ENDIF
                               POP(ke,jr,1,nnur) = POP(ke,jr,1,nnur)
      &                           + pop1
@@ -1339,7 +1339,7 @@ C                       CALL MATIN1(pig,ggg,NG,1,det)
                         CALL MTXINV(pig,pigx,pigy,mpigx,mpigy,NG,eps,
      &                              irflag)
                         IF (irflag.NE.0) THEN
-                           WRITE (6,*) 'C.N. state J=', j*ipii, 
+                           WRITE (6,*) 'C.N. state J=', j*ipii,
      &                     ' PIG-matrix in MSC gamma emission singular '
                            GOTO 20
                         ENDIF
@@ -1438,7 +1438,7 @@ C--------------------------
                               IF (kcn.EQ.1) THEN
 C--------------------------------propagator
                                  prop = 1./
-     &                                  (egdrr**2 + 0.25*(gdrw*D1Fra + 
+     &                                  (egdrr**2 + 0.25*(gdrw*D1Fra +
      &                                  gdrw*(1-D1Fra)*.75)**2)
 C--------------------------------absorption cross section times propagator
                                  sdabs = popart(1)
@@ -1476,7 +1476,7 @@ C--------------------------do loop over stages and substages
                               IF (rophc(kg).NE.0.0D0) THEN
 C--------------------------------state density for gamma emission
                                  IF (STMro.EQ.0.D0) THEN
-                                    ecor = 
+                                    ecor =
      &                                 (((ip(kg)-1)**2 + (ih(kg)-1)**2)
      &                                 /4.0 + (ip(kg) - ih(kg))
      &                                 /4.0 - (ih(kg) - 1)/2.0)/G
