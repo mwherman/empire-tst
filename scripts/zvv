@@ -1,0 +1,9 @@
+#!/bin/bash
+blank=" "
+list=""
+for file in $*
+do
+list=$list$file$blank
+done
+../util/c4zvd/zvview.exe -p:$file $list 
+exit

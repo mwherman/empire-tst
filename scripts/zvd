@@ -1,0 +1,56 @@
+#! /bin/sh -
+#script to  display exp. and calculated data with ZVView by V. Zerkin
+file=$1
+MT=$2
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *endf  
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
+fi                          
+if [ "$2" = "" ]
+   then
+echo -n 'Input MT number to be plotted: '
+read MT
+fi                          
+
+# FIRST RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+
+if [ ! -f $file-s.endf ]; then
+   cd ../util/fixup/
+   rm OUTPUT.ENDF
+   ln -sf $work/$file.endf OUTPUT.ENDF
+   ./fixup
+   rm OUTPUT.ENDF
+   mv FIXUP.ENDF $work/$file-f.endf
+   cd $work
+
+   # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+   cd ../util/sixtab/
+   rm ENDF.IN ENDF.OUT 2>/dev/null
+   ln -sf $work/$file-f.endf ENDF.IN
+   ./sixtab
+   rm ENDF.IN
+   mv ENDF.OUT $work/$file-s.endf
+   cd $work
+   if  [ -f $file-s.endf ]; then
+      rm $file-f.endf 2>/dev/null
+   fi   
+
+fi
+
+
+# RUN ZVD
+
+cd ../util/c4zvd/
+ln -sf $work/$file-s.endf Empire
+./c4zvv A $MT $work/$file.c4 Empire $file-$MT.zvd 
+mv $file-$MT.zvd $work
+cd $work
+
+exit

@@ -1,0 +1,187 @@
+#! /bin/sh -
+#script to format EMPIRE II output
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *out
+echo ' '
+echo -n 'Choose one of the above (without .out extention!): '
+read file
+fi                          
+
+#run EMPEND to format EMPIRE output into ENDF
+
+cp $file.out OUTPUT.DAT
+../util/empend/empend <EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
+mv empend.log $file-log.empend
+rm OUTPUT.DAT
+
+
+# RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+
+rm $file-f.endf 2>/dev/null
+cd ../util/fixup/
+rm OUTPUT.ENDF 2>/dev/null
+ln -sf $work/$file-e.endf OUTPUT.ENDF
+cp FIXUP1.INP FIXUP.INP
+./fixup
+rm OUTPUT.ENDF
+mv FIXUP.ENDF $work/$file-f.endf
+mv FIXUP.LST $work/$file-log.fixup
+cd $work
+
+
+# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
+
+rm $file.endf 2>/dev/null
+cd ../util/endres/
+rm empire.end endf.dat 2>/dev/null
+ln -sf $work/$file-f.endf empire.end
+./endres <ENDRES.INP
+rm empire.end 
+mv endf.dat $work/$file.endf
+mv endres.lst $work/$file-log.endres
+cd $work
+# $work/$file.endf is the final ENDF output file
+
+# RUN STANEF
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-stan.endf
+0
+
+DONE
+EOF
+../util/stanef/stanef <INPUT
+mv $file-stan.endf $file.endf
+
+# RUN CHECKR
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.checkr
+
+DONE
+EOF
+../util/checkr/checkr <INPUT
+
+# RUN FIZCON
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.fizcon
+
+DONE
+EOF
+../util/fizcon/fizcon <INPUT
+
+
+# RUN PSYCHE
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.psyche
+Y
+
+EOF
+../util/psyche/psyche <INPUT
+
+
+# RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP
+
+rm $file-f2.endf 2>/dev/null
+cd ../util/fixup/
+rm OUTPUT.ENDF 2>/dev/null
+ln -sf $work/$file.endf OUTPUT.ENDF
+cp FIXUP2.INP FIXUP.INP
+./fixup
+rm OUTPUT.ENDF
+mv FIXUP.ENDF $work/$file-f2.endf
+mv FIXUP.LST $work/$file-log.fixup2
+cd $work
+
+
+# RUN LINEAR
+
+cd ../util/linear/
+rm LINEAR.OUT 2>/dev/null
+ln -sf $work/$file-f2.endf ENDF.IN
+./linear
+rm ENDF.IN
+mv LINEAR.OUT $work/$file-lin.endf
+mv LINEAR.LST $work/$file-log.linear
+cd $work
+
+
+# RUN RECENT
+
+cd ../util/recent/
+rm RECENT.OUT 2>/dev/null
+ln -sf $work/$file-lin.endf ENDF.IN
+./recent
+rm ENDF.IN
+mv RECENT.OUT $work/$file-rec.endf
+mv RECENT.LST $work/$file-log.recent
+cd $work
+
+# RUN SIGMA1
+
+cd ../util/sigma1/
+rm SIGMA1.OUT 2>/dev/null
+ln -sf $work/$file-rec.endf ENDF.IN
+./sigma1
+rm ENDF.IN
+mv SIGMA1.OUT $work/$file-sig.endf
+mv SIGMA1.LST $work/$file-log.sigma1
+cd $work
+
+# RUN LEGEND
+
+rm $file-l.endf 2>/dev/null
+cd ../util/legend/
+rm LEGEND.OUT 2>/dev/null
+ln -sf $work/$file-sig.endf ENDF.IN
+./legend
+rm ENDF.IN
+mv LEGEND.OUT $work/$file-l.endf
+mv LEGEND.LST $work/$file-log.legend
+cd $work
+
+# RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+rm $file-s.endf 2>/dev/null
+cd ../util/sixtab/
+rm ENDF.IN ENDF.OUT 2>/dev/null
+ln -sf $work/$file-l.endf ENDF.IN
+./sixtab
+rm ENDF.IN
+mv ENDF.OUT $work/$file-s.endf
+cd $work
+   
+
+# RUN PLTLST TO PRODUCE LISTING OR PLOTC4
+if [ "$2" = "1" || "$2" = "" ]; then
+ ../scripts/plotlst $file
+elif [ "$2" = "2" ]; then
+ ../scripts/plot $file
+fi
+
+# REMOVE INTERMEDIATE ENDF FILES
+
+#rm $work/$file-l.endf 2>/dev/null
+#rm $work/$file-lin.endf 2>/dev/null
+#rm $work/$file-f.endf 2>/dev/null
+#rm $work/$file-f2.endf 2>/dev/null
+#rm $work/$file-rec.endf 2>/dev/null
+#rm $work/$file-e.endf 2>/dev/null
+#rm $work/$file-s.endf 2>/dev/null
+
+exit

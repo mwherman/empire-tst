@@ -1,0 +1,95 @@
+#! /bin/sh -
+#SCRIPT TO EXTRACT CROSS SECTIONS FROM THE EMPIRE OUTPUT AND PLOT THEM
+#WITH ZVVIEW
+
+repeat=y
+echo '#zvview.exe' >PLOT.zvd
+file=$1
+filem=""
+while [ "$repeat" != "n" ] 
+        do
+        echo 'at incident energy' >PATTERN
+        echo '#begin case/u' >>PLOT.zvd
+        if [ "$file" = "" ]
+           then
+            echo 'Outputs available for extraction'
+            echo ' '
+            ls *\.lst
+            echo ' '
+            echo -n 'Choose one of the above (without .lst extention): '
+            read file
+        fi            
+        if [ "$file" = "" ]
+           then
+           file=$filem
+        fi            
+        if [ "$file" != "$filem" ]
+           then
+           gvim $file.lst  
+        fi            
+        echo ' '
+        echo -n 'Paste search pattern as second line in the'
+        echo 'editor window that just have opened, then close editor, '
+        echo '(saving the file), return to THIS window and hit return.'
+        gvim PATTERN
+        read spattern
+#       echo $spattern >>PATTERN
+        echo -n 'Label this curve:'
+        read label 
+        echo 'Fun: '$label >>PLOT.zvd
+        echo '//'>>PLOT.zvd
+        grep -f PATTERN $file.lst   |
+        awk '{if($1 ~ "Reaction") 
+           {
+            for(i=1;i<=NF;i++) if($i =="MeV") v[NR]=$(i-1)
+           }
+                else
+           {
+            for(i=1;i<=NF;i++) if($i =="mb") v[NR]=$(i-1)
+           }
+              }
+             END {for(i=1;i<=NR/2;i++) print  v[2*i-1]*1e+6,"  ",v[i*2]/1000}' \
+             >> PLOT.zvd
+
+        echo '//'>>PLOT.zvd
+        echo '#end case/u'>>PLOT.zvd
+        echo -n 'Do you want another curve (y/n):'
+        read repeat
+        filem=$file
+        file=""
+done
+echo -n 'Input plot title (1-st line):'
+read title
+echo -n 'Input plot title (2-nd line):'
+read title2
+echo '#begin control.tit/c'>>PLOT.zvd
+echo '[Main]'>>PLOT.zvd
+echo 'tit: '$title >>PLOT.zvd
+echo 'tit2: '$title2 >>PLOT.zvd
+echo 'lx-win: 1000'>>PLOT.zvd
+echo 'ly-win: 720'>>PLOT.zvd
+echo 'x-scale: LIN'>>PLOT.zvd
+echo 'y-scale: LIN'>>PLOT.zvd
+echo 'x: E '>>PLOT.zvd
+echo 'x-long: Incident Energy'>>PLOT.zvd 
+echo 'y: Cross Section'>>PLOT.zvd 
+echo 'x-units:   MeV'>>PLOT.zvd 
+echo 'y-units:   barns'>>PLOT.zvd 
+echo 'noStat: 0'>>PLOT.zvd
+echo 'x-grid: 0'>>PLOT.zvd
+echo 'y-grid: 0'>>PLOT.zvd
+echo 'buttons: 1'>>PLOT.zvd
+echo '  '>>PLOT.zvd
+echo '[Func]'>>PLOT.zvd
+echo 'useIfunc: 0'>>PLOT.zvd
+echo 'useFunc:'>>PLOT.zvd 
+echo 'hide: 0'>>PLOT.zvd
+echo 'dash: 0'>>PLOT.zvd
+echo 'color: 1'>>PLOT.zvd
+echo 'con: 1'>>PLOT.zvd
+echo 'dot: 0'>>PLOT.zvd
+echo 'bot: 0'>>PLOT.zvd
+echo 'thick: 1'>>PLOT.zvd
+echo '#end control.tit/c'>>PLOT.zvd
+
+../util/c4zvd/zvview.exe -p:$file PLOT.zvd

@@ -1,0 +1,30 @@
+#! /bin/sh -
+#SCRIPT TO PLOT ANG. DISTR. AND DOUBLE-DIFFERENTIAL CROSS SECTIONS
+file=$1
+work=`pwd`
+cd ../util/lsttab
+rm LSTTAB.CUR LSTTAB.PNT PLOTC4.LST EMPIRE.LST HF.DAT 2>/dev/null
+ln -sf $work/$file.c4 C4.DAT
+ln -sf $work/$file-s.endf ENDF.DAT
+#next 2 links are for plotting inclusive spctra directly from EMPIRE 
+#output (*.lst). The second one must be adjusted! 
+#ln -sf $work/$file.lst EMPIRE.LST
+#ln -sf $work/HFde-p/$file.lst HF.DAT
+ln -sf $work/$file-log.plotc4 PLOTC4.LST
+./lsttab <LSTTAB.INP
+mv LSTTAB.CUR ../c4zvd/LSTTAB.CUR
+mv LSTTAB.PNT ../c4zvd/LSTTAB.PNT
+cd ../c4zvd
+rm zv*.ps zv*.eps 2>/dev/null
+./pntzvdl.bat LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+mv DDXPLOT.zvd $work/$file-$2.zvd
+if [ -f zv00.ps ]; then
+   mv zv00.ps $work/$file-$2.ps 
+fi
+if [ -f zv00.eps ]; then
+   mv zv00.eps $work/$file-$2.eps
+fi
+rm LSTTAB.CUR LSTTAB.PNT  2>/dev/null
+cd $work
+exit
+

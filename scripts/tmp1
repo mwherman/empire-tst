@@ -1,0 +1,150 @@
+acomp:../scripts/mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 4   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 16  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 17  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 18  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 22  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 28  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 45  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 102 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+acomp:../scripts/mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+clean:#script to clean work directory
+cleansel:#script to clean work directory selectively
+format:#script to format EMPIRE II output
+format: ../scripts/plotlst $file
+guizvv.tcl:proc ::vTcl:image:create_new_image {filename {description {no description}} {type {}} {data {}}} {
+guizvv.tcl:            set script [file dirname [info script]]
+guizvv.tcl:            set filename [file join $script [file tail $filename] ]
+guizvv.tcl:            set description "file not found!"
+guizvv.tcl:    set ::vTcl(images,$reference,description) $description
+guizvv.tcl:exec xterm -e ../scripts/showzvd $zvd} \
+guizvv.tcl:exec xterm -e ../scripts/zvv $zvd &
+guizvv.tcl:if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
+guizvv.tcl:exec xterm -e ../scripts/showzvd $zvd} \
+run:        ../scripts/sortc4 $file  
+run:../scripts/format $file 1
+run:#../scripts/plot $file 1
+runE:        ../scripts/sortc4 $file  
+run-piece-wise:# script to run three inputs in different energy ranges
+run-piece-wise:../scripts/runE $root-a
+run-piece-wise:../scripts/runE $root-b
+run-piece-wise:../scripts/runE $root-c
+run-piece-wise:../scripts/format $root
+store:#script to move all results of the calculations to another directory
+storemul:#script to move all za*$2 files to another directory
+tmp:acomp:../scripts/mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 4   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 16  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 17  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 18  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 22  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 28  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 45  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 102 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:acomp:../scripts/mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+tmp:format: ../scripts/plotlst $file
+tmp:guizvv.tcl:exec xterm -e ../scripts/showzvd $zvd} \
+tmp:guizvv.tcl:exec xterm -e ../scripts/zvv $zvd &
+tmp:guizvv.tcl:if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
+tmp:guizvv.tcl:exec xterm -e ../scripts/showzvd $zvd} \
+tmp:run:        ../scripts/sortc4 $file  
+tmp:run:../scripts/format $file 1
+tmp:run:#../scripts/plot $file 1
+tmp:runE:        ../scripts/sortc4 $file  
+tmp:run-piece-wise:../scripts/runE $root-a
+tmp:run-piece-wise:../scripts/runE $root-b
+tmp:run-piece-wise:../scripts/runE $root-c
+tmp:run-piece-wise:../scripts/format $root
+tmp:Xrun.tcl:exec xterm -e ../scripts/storemul $archdir/ $mulstname
+tmp:Xrun.tcl:   exec xterm -e ../scripts/run $mulinputn
+tmp:Xrun.tcl:   eval exec ../scripts/cleansel $mulinputn $el
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &
+tmp:Xrun.tcl:        -command {exec ../scripts/clean $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/format $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/plot $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/x4interface $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/c4 $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/sortc4 $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/run-piece-wise $file 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/run $file 
+tmp:Xrun.tcl:exec xterm -e ../scripts/zvvddx $file omp1 1
+tmp:Xrun.tcl:exec xterm -e ../scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
+tmp:Xrun.tcl:exec xterm -e ../scripts/zvvddx $file omp2 1
+tmp:Xrun.tcl:exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
+tmp:Xrun.tcl:        -dblclickcommand {exec xterm -e ../scripts/zvcomb [selection get] &} \
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/zvd $file $mt &
+tmp:Xrun.tcl:        -command {exec ../scripts/guizvv.tcl $file &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/zvpl $file &
+tmp:Xrun.tcl:exec xterm -e ../scripts/zvvddx $file $multi &} \
+tmp:Xrun.tcl:exec ../scripts/clean $file
+tmp:Xrun.tcl:exec ../scripts/clean $file
+tmp:Xrun.tcl:  exec xterm -e ../scripts/zvcomb $selecfile &
+tmp:Xrun.tcl:  exec xterm -e ../scripts/zvcomb $archdir/$archfile &
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/store ../archive/$archdir $file 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &} -label Run+Form+Plot 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &} -label Run 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/format $file &} -label Format 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/plot $file &} -label Plot 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/zvpl $file &} -label {Create ZVV plot} 
+tmp:Xrun.tcl:        -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots} 
+tmp:Xrun.tcl:        -command {exec ../scripts/guizvv.tcl $file &} -label {Compare ZVV} 
+tmp:Xrun.tcl:        -command {exec ../scripts/clean $file &} -label {Clean project} 
+tmp:Xrun.tcl:        -command {exec ../scripts/clean $file
+Xrun.tcl:proc ::vTcl:image:create_new_image {filename {description {no description}} {type {}} {data {}}} {
+Xrun.tcl:            set script [file dirname [info script]]
+Xrun.tcl:            set filename [file join $script [file tail $filename] ]
+Xrun.tcl:            set description "file not found!"
+Xrun.tcl:    set ::vTcl(images,$reference,description) $description
+Xrun.tcl:     ## reloaded, the key is used to find the font description
+Xrun.tcl:exec xterm -e ../scripts/storemul $archdir/ $mulstname
+Xrun.tcl:   exec xterm -e ../scripts/run $mulinputn
+Xrun.tcl:   eval exec ../scripts/cleansel $mulinputn $el
+Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &
+Xrun.tcl:        -command {exec ../scripts/clean $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/format $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/plot $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/x4interface $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/c4 $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/sortc4 $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/run-piece-wise $file 
+Xrun.tcl:        -command {exec xterm -e ../scripts/run $file 
+Xrun.tcl:exec xterm -e ../scripts/zvvddx $file omp1 1
+Xrun.tcl:exec xterm -e ../scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
+Xrun.tcl:exec xterm -e ../scripts/zvvddx $file omp2 1
+Xrun.tcl:exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
+Xrun.tcl:        -dblclickcommand {exec xterm -e ../scripts/zvcomb [selection get] &} \
+Xrun.tcl:        -command {exec xterm -e ../scripts/zvd $file $mt &
+Xrun.tcl:        -command {exec ../scripts/guizvv.tcl $file &
+Xrun.tcl:        -command {exec xterm -e ../scripts/zvpl $file &
+Xrun.tcl:exec xterm -e ../scripts/zvvddx $file $multi &} \
+Xrun.tcl:exec ../scripts/clean $file
+Xrun.tcl:exec ../scripts/clean $file
+Xrun.tcl:  exec xterm -e ../scripts/zvcomb $selecfile &
+Xrun.tcl:  exec xterm -e ../scripts/zvcomb $archdir/$archfile &
+Xrun.tcl:        -command {exec xterm -e ../scripts/store ../archive/$archdir $file 
+Xrun.tcl:        -command {exec xterm -e ../scripts/run $file &} -label Run+Form+Plot 
+Xrun.tcl:        -command {exec xterm -e ../scripts/runE $file &} -label Run 
+Xrun.tcl:        -command {exec xterm -e ../scripts/format $file &} -label Format 
+Xrun.tcl:        -command {exec xterm -e ../scripts/plot $file &} -label Plot 
+Xrun.tcl:        -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4 
+Xrun.tcl:        -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4 
+Xrun.tcl:        -command {exec xterm -e ../scripts/zvpl $file &} -label {Create ZVV plot} 
+Xrun.tcl:        -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots} 
+Xrun.tcl:        -command {exec ../scripts/guizvv.tcl $file &} -label {Compare ZVV} 
+Xrun.tcl:        -command {exec ../scripts/clean $file &} -label {Clean project} 
+Xrun.tcl:        -command {exec ../scripts/clean $file
+zvd:#script to  display exp. and calculated data with ZVView by V. Zerkin

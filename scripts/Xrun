@@ -1,0 +1,11 @@
+#!/bin/bash
+#Script to fire X4 retrieval interface
+work=`pwd`
+cd ../x4cd/linux
+mysql_start.sh>mysql.log
+cd $work
+../scripts/Xrun.tcl 
+cd ../x4cd/linux
+mysql_stop.sh>>mysql.log
+cd $work
+exit

@@ -1,0 +1,6 @@
+#!/bin/bash
+for file in $*
+do
+../util/c4zvd/zvview.exe -p:$file $file
+done
+exit
