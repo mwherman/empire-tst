@@ -1,8 +1,9 @@
       PROGRAM X4TOC4                                                    X4T00050
 C-Title  : Program PLOTC4
 C-Version: 86-1 (August 1986)
-C-V      2001-3 (March 2001)  *Minor corrections
+C-V      2001/03 (March 2001)  *Minor corrections
 C-V      2002/10 Read sample thickness, convert transmission to x-sect.
+C-V      2004/01 Define all input filenames from input.
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -26,8 +27,8 @@ C-A  Telephone  925-423-7359
 C-A  e-mail     CULLEN1@LLNL.GOV
 C-A  Website    HTTP://REDDOG1.LLNL.GOV
 C-A
-C-A  VERSION 2001-3 IMPLEMENTED BY:
-C-A  ------------------------------
+C-A  VERSION 2001/03 AND LATER IMPLEMENTED BY:
+C-A  ----------------------------------------
 C-A  Andrej Trkov
 C-A  The Nuclear Data Section
 C-A  International Atomic Energy Agency
@@ -647,21 +648,23 @@ C-M  it will be ignored and the status field will be output as blank.
 C-M
 C-M  INPUT FILES
 C-M  -----------
-C-M  Unit  Description
-C-M  ----  -----------
-C-M   10   EXFOR data (to be translated) (BCD - 80 characters/record)
-C-M   12   EXFOR reaction dictionary     (BCD - 80 characters/record)
-C-M   14   EXFOR title dictionary        (BCD - 80 characters/record)
-C-M   15   EXFOR units dictionary        (BCD - 80 characters/record)
+C-M  Unit Name     Description
+C-M  ---- -------  -----------
+C-M    5  X4INP    X4TOC4.INP  Input defining filenames (fixed filename)
+C-M   10  X4       EXFOR data to be translated (default 'X4.DAT')
+C-M   12  EXFOR14A EXFOR reaction dictionary (default 'EXFOR14A.DAT')
+C-M   14  EXFOR24A EXFOR title dictionary (default 'EXFOR24A.DAT')
+C-M   15  EXFOR25A EXFOR units dictionary (default 'EXFOR25A.DAT')
 C-M
 C-M  OUTPUT FILES
 C-M  ------------
-C-M  Unit  Description
-C-M  ----  -----------
-C-M    4   List of all undefined EXFOR reactions, titles and units
-C-M        found during the translation (if any).(BCD -  80 characters)
-C-M    6   Output report                         (BCD - 132 characters)
-C-M   11   Computation format experimental data  (BCD - 131 characters)
+C-M  Unit Name     Description
+C-M  ---- -------  -----------
+C-M    4  X4NEW    List of all undefined EXFOR reactions, titles
+C-M                and units found during the translation, if any
+C-M                (default 'NEWX4.DAT')
+C-M    6  X4LST    X4TOC4.LST output report (default 'X4TOC4.LST')
+C-M   11  C4       Output data in computation format (default 'C4.DAT')
 C-M
 C-M  SCRATCH FILES
 C-M  -------------
@@ -669,7 +672,15 @@ C-M  NONE
 C-M
 C-M  INPUT PARAMETERS
 C-M  ----------------
-C-M  None
+C-M  The input file contains the list of files in the following order:
+C-M    X4       EXFOR data (to be translated)
+C-M    C4       Output data in computation format
+C-M    EXFOR14A EXFOR reaction dictionary
+C-M    EXFOR24A EXFOR title dictionary
+C-M    EXFOR25A EXFOR units dictionary
+C-M  If any of the filenames is blank or if an end-of-file mark is
+C-M  encountered, the remaining filenames assume their default
+C-M  values.
 C-M
 C-M  REPORTING ERRORS
 C-M  ----------------
@@ -752,8 +763,8 @@ C-M   READ(10,1000,END=100,ERR=200) A,B,C,D
 C-M
 C***** COMPUTER DEPENDENT CODING ******
       INTEGER OUTP,OTAPE
-      CHARACTER*40 X4,EXFOR14A,EXFOR24A,EXFOR25A,X4NEW,C4
-     1            ,X4INP,X4LST,FLNM,BLNK
+      CHARACTER*40 X4,X4NEW,C4,X4INP,X4LST,FLNM,BLNK
+      CHARACTER*60 EXFOR14A,EXFOR24A,EXFOR25A,FLNM60
       CHARACTER*4 CARD1,ENDSUB,KEYTAB
       CHARACTER*1 CARD2,ENT,SUBENT                                      X4T07270
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T07280
@@ -799,7 +810,15 @@ C***** TRKOV
       IF(FLNM.NE.BLNK) X4=FLNM
       READ (INP,'(A40)',END=9) FLNM
       IF(FLNM.NE.BLNK) C4=FLNM
-    9 WRITE(*,*)'INPUT  FILE : ',X4INP
+      READ (INP,'(A60)',END=9) FLNM60
+      IF(FLNM60(1:40).NE.BLNK) EXFOR14A=FLNM60
+      READ (INP,'(A60)',END=9) FLNM60
+      IF(FLNM60(1:40).NE.BLNK) EXFOR24A=FLNM60
+      READ (INP,'(A60)',END=9) FLNM60
+      IF(FLNM60(1:40).NE.BLNK) EXFOR25A=FLNM60
+    9 CLOSE(UNIT=INP)
+C*
+      WRITE(*,*)'INPUT  FILE : ',X4INP
       WRITE(*,*)'SOURCE FILE : ',X4
       WRITE(*,*)'OUTPUT FILE : ',C4
       OPEN (UNIT=ITAPE ,FILE=X4      ,STATUS='OLD')
@@ -1976,9 +1995,7 @@ C-----COPY AUTHOR TO OUTPUT ARRAY.                                      X4T18920
    50 AUTHK(I)=AUTHN(I)                                                 X4T18950
 C-----ADD YEAR TO END OF AUTHOR.                                        X4T18960
       IF(NREF.LE.0) GO TO 70                                            X4T18970
-CMH---HERMAN HAS PUT THE YEAR BACK TO THE LAST FOR FIELDS OF THE FIELD    
-C     KAUTH=KAUTH+1                                                     X4T18980
-      KAUTH=21                                                          X4T18980
+      KAUTH=KAUTH+1                                                     X4T18980
       DO 60 I=1,4                                                       X4T18990
       KAUTH=KAUTH+1                                                     X4T19000
    60 AUTHK(KAUTH)=REFERN(I)                                            X4T19010
@@ -3410,9 +3427,13 @@ C-----8 (I.E. NO OUTPUT FIELD 9) OR IF THE NEXT FIELD IS ALREADY USED.  X4T33210
       GO TO 270                                                         X4T33270
 C-----SELECT SMALLEST AND LARGEST IN 2 SUCCESSIVE FIELDS.               X4T33280
   200 IF(NPT.EQ.1) WRITE(OUTP,6140)                                     X4T33290
+      JL=IMOUT(KFIELD,ISANR,1)                                          TRKOV
+      JH=JL                                                             TRKOV
       DO 250 KMULT=1,JMULT                                              X4T33300
       II=IMOUT(KFIELD,ISANR,KMULT)                                      X4T33310
       DX=ABS(VALUES(II))                                                X4T33320
+C-----SKIP ZERO ENTRIES                                                 TRKOV
+      IF(DX.EQ.0) GO TO 250                                             TRKOV
       IF(KMULT.EQ.1) GO TO 210                                          X4T33330
       IF(DX-DXMIN) 220,230,230                                          X4T33340
   210 JH=II                                                             X4T33350
