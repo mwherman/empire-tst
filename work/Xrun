@@ -3,7 +3,7 @@
 cd ../x4cd/linux
 mysql_start.sh>mysql.log
 cd ../../work
-Xrun.tcl &
+Xrun.tcl 
 cd ../x4cd/linux
 mysql_stop.sh>>mysql.log
 cd ../../work
