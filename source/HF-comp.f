@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-18 00:15:54 $
-Ccc   * $Id: HF-comp.f,v 1.14 2003-12-18 00:15:54 herman Exp $
+Ccc   * $Date: 2003-12-30 18:10:34 $
+Ccc   * $Id: HF-comp.f,v 1.15 2003-12-30 18:10:34 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1248,8 +1248,8 @@ C	DOUBLE PRECISION ampl, shredt
 C
       DIMENSION tfdis(NFWELLS), tfcon(NFWELLS)
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
-      COMMON /PARFIS/ ROTemp, AC, AAJ, IBAr
-      COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS), NRBarc
+      COMMON /PARFIS/   IBAr
+      COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS)
       COMMON /COMFIS4/ TFC, TFCc,jcc
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
       COMMON /IMAG  / TF(NFWELLS), TDIr, TABs, TDIr23
@@ -1291,44 +1291,14 @@ C
      &                       'Tabs', 'Tdir23'
       ENDIF
 C
-      NRBarc = NRBar - NRWel
+c      NRBarc = NRBar - NRWel
 
       DO IBAr = 1, NRBarc
          tfdis(IBAr) = 0.
          tfcon(IBAr) = 0.
       ENDDO
-
-C
-C     You shoud take a look Mike, RCN 11/02
-C
-C     RCN comment : We are not dealing with LDM barriers,
-C     so it is difficult to justify the barrier heigth dependence
-C     on the shell correction
-C     Therefore for the time being we are setting SHCtemp =0.d0
-C     so no barrier's shell correction dependence and therefore
-C     barrier heigths are temperature independent
-C
-C-----temperature fade-out of the shell correction (to be tested)
-      temp = 0.
-      ATIl = 0.073*A(Nnuc) + 0.115*A(Nnuc)**0.666667
-      gamma = 0.40/A(Nnuc)**0.33333
-      accn = ATIl*(1 + SHC(Nnuc)*(1 - DEXP((-gamma*ee)))/ee)
-      IF(ee.GE.YRAst(Jc, Nnuc))temp = SQRT((ee - YRAst(Jc,Nnuc))/accn)
-
-      ampl = EXP(TEMp0*SHRt)
-      shredt = 1.
-      IF(temp.GE.TEMp0)shredt = ampl*EXP(( - SHRt*temp))
-C-----temperature fade-out of the shell correction *** done *****
-      SHCtemp = FISb(Jc, Nnuc) - SHC(Nnuc)*SHCjf(Jc, Nnuc)*shredt
-      ekinm = EX(Iec, Nnuc) - fisba
-      SHCtemp = FISb(Jc, Nnuc) - SHC(Nnuc)*SHCjf(Jc, Nnuc)*shredt
-      SHCtemp = SHC(Nnuc)*SHCjf(Jc, Nnuc)*shredt
-
-      shctemp = 0.D0
-C
 C==============discrete contribution====================
-
-      IF(SUBbar(Nnuc).EQ.0.)THEN
+      IF(SUBeff(Nnuc).EQ.0.)THEN
          DO IBAr = 1, NRBarc
             DO nr = 1, NRFdis(IBAr)
                sfmin = SFDis(nr, IBAr)
@@ -1347,15 +1317,11 @@ C==============discrete contribution====================
                DO jnc = sfmin, Jc, ist
                   IF(jnc.EQ.Jc .AND. IPFdis(nr, IBAr).EQ.Ip)THEN
                      snc = FLOAT(jnc) + HIS(Nnuc)
-C                    Added by RCN, 11/2002, to be tested
-C                    Shell correction decrease of the barrier is considered
-C                    It is nucleus and spin dependent
-                     exfis = EFDis(nr, IBAr) - shctemp + HJ(nnuc,IBAr)
+                     exfis = EFDis(nr, IBAr) + HJ(nnuc,IBAr)
      &                       *(snc*(snc + 1) - SFDis(nr, IBAr)
      &                       *(SFDis(nr,IBAr) + 1))
                      VBArex(IBAr) = EFB(IBAr) + exfis
-                     
-                        arg = 2*PI*(VBArex(IBAr) - ee)/H(IBAr)
+                     arg = 2*PI*(VBArex(IBAr) - ee)/H(IBAr)
                      IF(arg.LE.EXPmax)THEN
                         TFD(IBAr) = 1./(1. + EXP(arg))
                      ELSE
@@ -1368,14 +1334,10 @@ C                    It is nucleus and spin dependent
          ENDDO
       ENDIF
 C
-      IF(SUBbar(Nnuc).EQ.1.)THEN
+      IF(SUBeff(Nnuc).EQ.1.)THEN
          TDIr = 0.
          TABs = 0.
          TDIr23 = 0.
-         tdirr23a=0.
-         tdirr23b=0.
-         tdirr23c=0.
-         tdirr23d=0.
          tdir23cont=0.
 
          IF(NRBar.eq.3.and.nrwel.eq.1)eeiso=ee-efb(3)
@@ -1400,41 +1362,30 @@ C
                IF(jnc.EQ.Jc .AND. IPFdis(nr, 1).EQ.Ip)THEN
                   snc = FLOAT(jnc) + HIS(Nnuc)
                   DO IBAr = 1, NRBar
-C                    Added by RCN, 11/2002, to be tested
-C                    Shell correction decrease of the barrier is considered
-C                    It is nucleus and spin dependent
-                     exfis = EFDis(nr, IBAr) - shctemp + HJ(nnuc,IBAr)
+                     exfis = EFDis(nr, IBAr) + HJ(nnuc,IBAr)
      &                       *(snc*(snc + 1) - SFDis(nr, IBAr)
      &                       *(SFDis(nr,IBAr) + 1))
+                     if(exfis.lt.0.)exfis=0.
                      VBArex(IBAr) = EFB(IBAr) + exfis
                   ENDDO
 C
-C                 WKBFIS remains just for testing purposes, is not used anymore
-c                 CALL WKBFIS(ee) !analytical calculation of the penetrabilities
-C
-C                 WKBFISNUM uses numerical gaussian integration being more
-C                 efficient
-C
                   CALL WKBFISNUM(ee)
-C
+
                   DO IBAr = 1, NRBarc                    
-                     IF(PHAsr(IBAr).LE.0.)THEN
+                     IF(PHAsr(IBAr).LE.0.)THEN  
                         arg = 2*PI*(VBArex(IBAr) - ee)/H(IBAr)
                      ELSE
                         arg = PHAsr(IBAr)
-                     ENDIF
-C                    Transmission coefficients TFD() calculation
-                     IF(arg.LE.EXPmax)THEN
-                        TFD(IBAr) = 1./(1. + EXP(arg))
-                     ELSE
-                        TFD(IBAr) = 0.0
-                     ENDIF                       
+                     ENDIF 
+                     IF(arg.GT.EXPmax)arg=expmax
+                     TFD(IBAr) = 1./(1. + EXP(arg))
                   ENDDO
 C                 
                   IF(NRBar.EQ.3.and.NRWel.eq.1.)THEN
 C                    Penetrability calculations for double-humped case
                      delt = WIMagg*PHAsr(3)
-                     IF(delt.LE.EXPmax)THEN
+                     IF(delt.GT.EXPmax)delt=EXPmax
+                     IF(ee.LT.vbarex(1).AND.ee.LT.vbarex(2))THEN
                         tdir1 = (1. - TFD(1))*(1. - TFD(2))
                         tdirr = TFD(1)*TFD(2)
      &                          /(EXP(delt) + 2*SQRT(ABS(tdir1))
@@ -1450,50 +1401,50 @@ C                    Penetrability calculations for double-humped case
                         tdirr = 0.
                         tabss = TFD(1)
                      ENDIF
-                  IF(ee.GE.vbarex(1).or.ee.ge.vbarex(2))THEN
-                        tdirr = 0.
-                        tabss = TFD(1)
-                  ENDIF      
                   ENDIF   
   
                   IF(NRBar.EQ.5.and.NRWel.eq.2.)THEN
 C                    Penetrability calculations for triple-humped case 
 c                    (for the particular barrier of Th)
-
-                      IF(ee.le.vbarex(4).and.ee.le.vbarex(5))THEN
+                     IF(ee.le.vbarex(4).and.ee.le.vbarex(5))THEN
                         tfd(1)=0.
                         tfd(2)=0.
                         tfd(3)=0.
                         tdirr=0.
                         tabss=0.
                         tdir23=0.
-
-c                      write(6,*)'TDIR23-0'
                         goto 7654 
-                     ENDIF
-                     IF(ee.ge.vbarex(2).and.ee.ge.vbarex(3))THEN
-                        tdirr23d=0.
-                         write(6,*)'TDIR23-1',tdirr23d
-                     ENDIF   
-                     IF(ee.gt.vbarex(2).and.ee.lt.vbarex(3))THEN
-                        tdirr23c=tfd(3)*(1.4/(1.+exp(ee-efb(2))))
-                         write(6,*)'TDIR23-2',tdirr23c
-                     ENDIF
-                     IF(ee.lt.vbarex(2).and.ee.lt.vbarex(3))THEN
-                           tdir231 = (1. - TFD(2))*(1. - TFD(3))
-                           tdirr23b = TFD(2)*TFD(3)
-     &                    /(1. + 2*SQRT(ABS(tdir231))*COS(1.62*PHAsr(5))  !!!!!!!
-     &                         + tdir231)
-                      write(6,*)'TDIR23-3',tdirr23b      
-                     ENDIF
-                     IF(ee.le.vbarex(5))then
-                           tdirr23a=tfd(2)*tfd(3) !!!!!!! to be replaced by num.calc.  
-c                           goto 7653
-                           write(6,*)'TDIR23-4',tdirr23a
+c--------- to be replaced by numerical calculation
                      ENDIF
 
-                 
-                     IF(ee.lt.vbarex(1).and.ee.lt.vbarex(2))THEN 
+c                     IF(ee.ge.vbarex(2).and.ee.ge.vbarex(3))THEN
+c                        tdirr23=0.  !ibar=7
+c                         write(6,*)'TDIR23-1',tdirr23
+c                     ENDIF   
+
+c                     IF(ee.gt.vbarex(2).and.ee.lt.vbarex(3))THEN
+c                        tdirr23=tfd(3)*tfd(2)!(1./(1.+exp(ee-efb(2))))  
+c                         write(6,*)'TDIR23-2',tdirr23
+c                     ENDIF
+                     IF(ee.gt.vbarex(2))then
+                        teq=(1.+exp(2*pi*(vbarex(2)-ee)/h(2)))*
+     &                      (1.+exp(2*pi*(vbarex(3)-ee)/h(3)))
+                        heq= 2*pi*(vbarex(3)-ee)/log(teq-1.) 
+                        tdirr23=1./ (1.+exp(2*pi*(vbarex(3)-ee)/heq))
+                     ENDIF   
+                     IF(ee.lt.vbarex(2).and.ee.lt.vbarex(3))THEN
+                        IF(ee.le.vbarex(5))then
+                           tdirr23=tfd(2)*tfd(3) !!to be replaced by num.calc.  
+                        ELSE
+                           tdir231 = (1. - TFD(2))*(1. - TFD(3))
+                           tdirr23 = TFD(2)*TFD(3)
+     &                    /(1. + 2*SQRT(ABS(tdir231))*COS(PHAsr(5))
+     &                         + tdir231)
+                        ENDIF
+                     ENDIF
+
+                     IF(ee.lt.vbarex(1).and.ee.lt.vbarex(2)
+     &                  .AND.ee.GT.vbarex(5))THEN 
                         delt = WIMagg*PHAsr(4)
                         atal = EXP( - delt)*(1. - TFD(1))*(1. - TFD(2))
      &                         + EXP(delt)*(1. - TFD(2))*(1. - TFD(3))
@@ -1512,7 +1463,8 @@ c                           goto 7653
      &                         /(atal + btal*COS(PHAsr(4) - PHAsr(5))
      &                       + ctal*COS(PHAsr(4) + PHAsr(5))
      &                       + dtal*COS(PHAsr(4)) + etal*COS(PHAsr(5)))
-                    
+
+
                         aral = EXP( - delt)*(2. - TFD(2) - TFD(3))
      &                       + EXP(delt)*(1. - TFD(1))
      &                       *((1. - TFD(2))*(1. - TFD(3)) + 1.)
@@ -1528,16 +1480,16 @@ c                           goto 7653
      &                         + aral + bral*COS((PHAsr(4)-PHAsr(5)))
      &                         + cral*COS((PHAsr(4)+PHAsr(5)))
      &                         + dral*COS(PHAsr(4))
-     &                        + eral*COS(PHAsr(5)))       
+     &                         + eral*COS(PHAsr(5)))  
                      ELSE
                         tdirr=0.
                         tabss=tfd(1)
                      ENDIF
                   ENDIF
- 7653                TDIr = TDIr + tdirr
-                     TABs = TABs + tabss
-                     TDIr23 = TDIr23 + tdirr23a+tdirr23b+
-     &                        tdirr23c+tdirr23d
+ 7653            if(tabss+tdirr.GT.1.)tdirr=0.   
+                 TDIr = TDIr + tdirr
+                 TABs = TABs + tabss
+                 TDIr23 = TDIr23 + tdirr23
 C
  7654             DO IBAr = 1, NRBarc
                      tfdis(IBAr) = tfdis(IBAr) + TFD(IBAr)
@@ -1549,15 +1501,8 @@ C
 C
 C==============continuum contribution====================
       AJ = FLOAT(Jc) + HIS(Nnuc)
-  
-C
-C     Added by RCN, 11/2002, to be tested
-C     Shell correction decrease of the barrier is considered
-C     It is nucleus and spin dependent
-      shctemp=0.0
       DO IBAr = 1, NRBarc
-         arg = 2*PI*(EFB(IBAr) - ee - shctemp)/H(IBAr)
-c         write(80,*)'arg',ibar,ee,arg,expmax,exp(arg)
+         arg = 2*PI*(EFB(IBAr) - ee)/H(IBAr)
          IF(arg.LE.EXPmax)THEN
             TFC = EXP(arg)
          ELSE
@@ -1567,58 +1512,47 @@ c         write(80,*)'arg',ibar,ee,arg,expmax,exp(arg)
 C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient
 c        CALL GAUSSFIS(Nnuc, IBAr, ee)
+
          tfcon(IBAr) = TFCc
-
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr) 
-c         TF(IBAr) = tfcon(IBAr)
       ENDDO
-C
+      TABs = TABs + tfcon(1)
 
+      IF(NRBarc.eq.3.)THEN
+         CALL SIMPSFIS(Nnuc,7,ee)
+         Tdir23cont=tfcc
+         Tdir23=Tdir23+tdir23cont!tfcon(2)*tfcon(3)
+      ENDIF   
 
-            TABs = TABs + tfcon(1)
-ccc            TABs = TABs
-ccc            TABs = tfcon(1)
-
-ccc            Tdir=0.
-
-
-            IF(NRBarc.eq.3.)THEN
-               CALL SIMPSFIS(Nnuc,7,ee)
-               Tdir23cont=tfcc
-               Tdir23=Tdir23+tdir23cont!tfcon(2)*tfcon(3)
-c               tdir23=tf(3)
-                write(6,*)'TDIR23-tot',tdir23,tfcon(2)*tfcon(3),tfcon(1)
-            ENDIF   
-cc      ENDIF   
-C
-cc      smm = FLOAT(Jc) + HIS(Nnuc)
 C
 C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
       IF(NRBar.EQ.1)THEN
          Sumfis = TF(1)
          WRITE(80, '(1x,a2,f4.1,1x,a3,I2,3g11.4)')'J=', aj, 'Pi=', Ip, 
      &         tfdis(1), tfcon(1), SUMfis
-         fisba = VBArex(1)
-         htom = H(1)
       ENDIF
-C
+ 
       IF(NRBarc.EQ.2.)THEN
          tnumm = TF(1) + TF(2)
          IF(tnumm.EQ.0.0)THEN
             Sumfis = 0.
          ELSE
             Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))
-            IF(NRWel.eq.1.and.SUBBAR(Nnuc).eq.1.)THEN
+            IF(SUBeff(Nnuc).EQ.0.)
+     &         WRITE(80, '(1x,a2,f4.1,1x,a3,I2,7g11.4)')'J=', 
+     &                    aj, 'Pi=', Ip, tfdis(1), tfdis(2), 
+     &                    tfcon(1), tfcon(2), SUMfis
+            IF(NRWel.eq.1.and.SUBeff(Nnuc).eq.1.)THEN
                cota1 = (TF(1) + TF(2))/2
                cotaexp = EXP( - cota1)
                Cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
-            ENDIF   
-         ENDIF
-         WRITE(80, '(1x,a2,f4.1,1x,a3,I2,7g11.4)')'J=', 
+               WRITE(80, '(1x,a2,f4.1,1x,a3,I2,7g11.4)')'J=', 
      &                    aj, 'Pi=', Ip, tfdis(1), tfdis(2), 
      &                    tfcon(1), tfcon(2), SUMfis, TDIr, TABs
-         fisba = VBArex(2)
-         htom = H(2)
+            ENDIF   
+         ENDIF
+
+        
       ENDIF
 C
       IF(NRBarc.EQ.3)THEN
@@ -1626,9 +1560,8 @@ C
          IF(tnumm.eq.0.)THEN
             sumfis=0.
          ELSE
-c           Sumfis = TF(1)*TF(2)*TF(3) /(tf(1)+tf(2)*tf(3))
-             Sumfis = TF(1)*Tdir23 /(tf(1)+tdir23)
-            IF(NRWel.eq.2.and.SUBBAR(Nnuc).eq.1.)THEN
+            Sumfis = TF(1)*Tdir23 /(tf(1)+tdir23)
+            IF(NRWel.eq.2.and.SUBeff(Nnuc).eq.1.)THEN
                cota1 = (TF(1) + TDIr23)/2
                cotaexp = EXP( - cota1)
                Cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
@@ -1637,54 +1570,10 @@ c           Sumfis = TF(1)*TF(2)*TF(3) /(tf(1)+tf(2)*tf(3))
          WRITE(80, '(1x,a2,f4.1,1x,a3,I2,10g11.4)')'J=', aj, 'Pi=', Ip, 
      &         tfdis(1), tfdis(2), tfdis(3), tfcon(1), tfcon(2), 
      &         tfcon(3), SUMfis, TDIr, TABs, TDIr23
-         fisba = VBArex(3)
-         htom = H(3)
       ENDIF
 
-C**************************************************************************
-C	          Viscosity effects are considered below
-C
-C     Fission barrier here is assumed to be the outer barrier (RCN, 12/02)
-C
-      betav=0.0D0
-      IF(BETav.NE.0.0D0)THEN
-C--------reduction of the fission width due to possible return from the
-C--------saddle point (nuclear viscosity 1-st effect)
-         if(htom.eq.0.) htom = 1.0d0
-         SUMfis = SUMfis*(SQRT(1.0 + (BETav/2./htom)**2)
-     &            - BETav/2./htom)
-         IF(fisba - YRAst(Jc, Nnuc).GT.0.0D0)THEN
-C-----------reduction of fission width due to the transient time needed
-C-----------to form a saddle point (nuclear viscosity 2-nd effect)
-C-----------according to Rastopchin et al. Sov. Jour. Nucl. Phys. 53,741(1991)
-C-----------omega1=omega0=1.6*10^21 (1/s) hbar*omega=1MeV
-C-----------BETAV critical =3.2; 0.19531 stands for 1/(2*omega1**2)
-            gpart = DENhf/RO(Iec, Jc, Nnuc)/2./PI
-
-            IF(temp.GT.0.0)THEN
-C
-C             GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
-              tau = LOG(10.0*(fisba - YRAst(Jc,Nnuc))/temp)
-C
-              IF(BETav.LT.3.2D0)THEN
-C                under-damped motion
-                 tau = tau/BETav
-              ELSE
-C                over-damped motion
-                 tau = tau*BETav*0.19531
-              ENDIF
-              fric = gpart*tau/0.6589
-              fric = MIN(EXPmax, fric)
-              IF(fric.GT.0D0)THEN
-                 fric = EXP( - fric)
-                 SUMfis = SUMfis*fric
-              ENDIF
-           ENDIF
-        ENDIF
-      ENDIF
-C----------------------------------------------------
       DENhf = DENhf + Sumfis
-C----------------------------------------------------
+
       END
 C
 C===================================================================
@@ -1694,13 +1583,13 @@ C-------------------------------------------------------------------
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-      DIMENSION EPSil(NFWELLS), EJOin(2*NFWELLS), VJJ(NFWELLS)
+      DIMENSION EPSil(NFPARAB), EJOin(2*NFPARAB), VJJ(NFPARAB)
       DIMENSION ho(nfwells)
-      DIMENSION einters(2*NFWELLS), dmominteg(NFWELLS)
+      DIMENSION einters(2*NFPARAB), dmominteg(NFPARAB)
 C
-      COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS), NRBarc
+      COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEXcit
-      COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
+      COMMON /CMIU  / SMIu, PHAsr(NFPARAB)
 C
       DOUBLE PRECISION Ee, H, TFD, VBArex, SMIu, PHAsr,ho
 C
@@ -1846,16 +1735,16 @@ C     ENDIF
 C     STOP
 C
 C------------phases
-Ccc   DO i = 1, NRBar
-Ccc   phas = 2.*dMomInteg(i)
+      DO i = 1, NRBar
+         phas = 2.*dMomInteg(i)
 C-----------super-barrier, Hill-Wheeler
-Ccc   IF(phas.LE.0.)phas = 2.d0*PI*(VBArex(i) - Ee)/HO(i)
-Ccc   IF(phas.LE.EXPmax)THEN
-Ccc   TFD(i) = 1./(1. + EXP(phas))
-Ccc   ELSE
-C     cc           TFD(i) = 0.0
-Ccc   ENDIF
-Ccc   ENDDO
+         IF(phas.LE.0.)phas = 2.d0*PI*(VBArex(i) - Ee)/HO(i)
+         IF(phas.LE.EXPmax)THEN
+            TFD(i) = 1./(1. + EXP(phas))
+         ELSE
+            TFD(i) = 0.0
+         ENDIF
+      ENDDO
 C
 C     fis1
 C     Phases output
@@ -1902,13 +1791,14 @@ C
       TFCc = 0.D0
 C
 
-c      xminn(ibar)=EFDis(NRfdis(ibar), ibar)
-c      xmax=ee-(efb(ibar)+xminn(ibar))+5.
+      xminn(ibar)=EFDis(NRfdis(ibar), ibar)
+      xmax=ee-(efb(ibar)+xminn(ibar))+5.
 
 
-cc      xmax = Ee + 7.
-cc      xmin = XMInn(Ibar)
-C	step=(Xmax-Xmin)*0.01
+c      xmax = Ee + 7.
+      xmin = XMInn(Ibar)
+c      step=(Xmax-Xmin)*0.01
+      step=destepp
       TFCc = GAUSS_INT(FDENSITY, xmin, xmax, abserr)
 C
 C     If Relative Error for Gaussian Integration > 1 %
@@ -1943,28 +1833,31 @@ C     Level densities at the saddle points are used
       INCLUDE 'global.h'
 C
 
-      COMMON /PARFIS/ ROTemp, AC, AAJ, IBAr1
+c      COMMON /PARFIS/    IBAr1
       COMMON /COMFIS4/  TFC, TFCc,jcc
       COMMON /GDENSIT/ NNUc, IBAr
-
+      COMMON /ROFI1/ enh_ld(3, NFhump)
 C
       DATA pix2/6.28318530717958647692528676655901D0/
 C-----------------------------------------------
       FDENSITY = 0.D0
-C
+
+      enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*uxx+enh_ld(3,ibar)*uxx**2
+      arg = pix2*Uxx/H(IBAr)
+      IF(arg.GT.EXPmax)arg=expmax
+    
       IF(FISden(NNUc).EQ.1.)THEN
-C
-         arg = pix2*Uxx/H(IBAr)
-         IF(arg.GT.EXPmax)RETURN
-         FDENSITY = FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg))
-C
+         FDENSITY =enh1* FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg))
       ELSEIF(FISden(NNUc).EQ.0.)THEN
 C
-         FIScon = 2
-         IBAr1 = IBAr
-         CALL DAMIRO(kk, NNUc, dshif, destep, asaf)
-         arg = pix2*Uxx/H(IBAr)
-         IF(arg.GT.EXPmax)RETURN
+c         FIScon = 2.
+c         IBAr1 = IBAr
+c         CALL DAMIRO(kk, NNUc, dshif, destep, asaf,rotemp,aj,ibar)
+c         arg = pix2*Uxx/H(IBAr)
+c         IF(arg.GT.EXPmax)RETURN
+
+c        Sorry Roberto, but here or in Gaussfiss, rotemp must be replaced 
+C        with rofis; I tried to do it without succes (M.Sin) 
          FDENSITY = ROTemp/(1. + TFC*EXP(arg))
 C
       ENDIF
@@ -2164,11 +2057,6 @@ C
 C
 C     LEVEL DENSITY INTERPOLATION
 C
-
-c      IF(ROFis(klo, JCC,Ib).eq.0.)then
-c         FISINT=0.
-c         goto 209
-c         endif
  200  hhh = UGRid(khi) - UGRid(klo)
       c1 = (UGRid(khi) - Ux)/hhh
       c2 = (Ux - UGRid(klo))/hhh
@@ -2179,196 +2067,10 @@ c         endif
       ELSE
          FISINT = MAX(c1*r1 + c2*r2, 0.)
       ENDIF
-c      IF(r1.eq.0 .AND. r2.eq.0)FISINT=0.
 C
- 209  END
-C
-C
-C***********************************************************************
-C***********************************************************************
-C     FUNCTIONS BELOW ARE NOT USED NOW; LEFT FOR TESTING PURPOSES
-C
-C===================================================================
-      SUBROUTINE WKBFIS(Ee)
-C-----------------------------------------------------
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-      COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS), NRBarc
-      COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
-      DOUBLE PRECISION Ee, H, TFD, VBArex, vwelex(2), hw(2)
-      DOUBLE PRECISION defo(3), defow(2), ematch(0:3, 3), smatch(2, 3), 
-     &                 aal(3), cal(3), aalw(2), calw(2), PHAFIS2, 
-     &                 PHAFIS3, phas(3), phasw(2), PHAsr, SMIu, smiu1, 
-     &                 xh(3), xw(2), xhm(2, 3), xwm(2, 3),  
-     &                 ph1(2, 3), ph2(2, 3), ph3(2, 3), 
-     &                 ph4(2, 3), pw1(2, 3), pw2(2, 3), pw3(2, 3), 
-     &                 pw4(2, 3)
-
-C
-      IF(NRBarc.EQ.2)THEN
-         nrwel = 1
-         vwelex(1) = VBArex(3)
-         hw(1) = H(3)
-      ENDIF
-      IF(NRBarc.EQ.3)THEN
-         nrwel = 2
-         vwelex(1) = VBArex(3)
-         hw(1) = H(3)
-         vwelex(2) = VBArex(5)
-         hw(2) = H(5)
-      ENDIF
-C
-      smiu1 = 2.*SMIu*SMIu
-C
-      ematch(0, 1) = 0.
-      ematch(NRBar, NRBar) = 0.
-      defo(1) = (VBArex(1))**0.5/(SMIu*H(1))
-      write(6,*)'defff',defo(1),vbarex(1),smiu,h(1)
-      DO i = 2, 3!NRBarc + NRBarc/2
-         smatch(i - 1, i - 1) = defo(i - 1)
-     &                          + (VBArex(i - 1) - vwelex(i - 1))
-     &                          **0.5/(SMIu*H(i - 1)
-     &                          *(1 + H(i-1)**2/hw(i-1)**2)**0.5)
-         defow(i - 1) = smatch(i - 1, i - 1)
-     &                  + (smatch(i - 1, i - 1) - defo(i - 1))
-     &                  *(H(i - 1)**2/hw(i - 1)**2)
-         smatch(i - 1, i) = defow(i - 1) + (VBArex(i) - vwelex(i - 1))
-     &                      **0.5/(SMIu*hw(i - 1)
-     &                      *(1 + hw(i-1)**2/H(i)**2)**0.5)
-         defo(i) = smatch(i - 1, i) + (smatch(i - 1, i) - defow(i - 1))
-     &             *(hw(i - 1)**2/H(i)**2)
-         ematch(i - 1, i - 1) = VBArex(i - 1)
-     &                          + (vwelex(i - 1) - VBArex(i - 1))
-     &                          /(1 + (H(i-1)/hw(i-1))**2)
-         ematch(i - 1, i) = vwelex(i - 1) + (VBArex(i) - vwelex(i - 1))
-     &                      /(1 + (hw(i-1)/H(i))**2)
-      ENDDO
-
-      write(6,*)'deform',defo(1),defow(1),defo(2),defow(2),defo(3)
-
-C     aal and cal means AAL(berto) and CAL(berto); w is added for wells
-      DO j = 1, nrwel
-         aalw(j) = 2*smiu1*(vwelex(j) - Ee)
-         calw(j) = (smiu1*hw(j))**2
-         xw(j) = (SQRT(2*(Ee-vwelex(j))/(smiu1*hw(j)**2)))
-      ENDDO
-      DO i = 1, NRBar
-         aal(i) = 2*smiu1*(VBArex(i) - Ee)
-         cal(i) = -(smiu1*H(i))**2
-         xh(i) = (SQRT(2*(VBArex(i)-Ee)/(smiu1*H(i)**2)))
-C
-         DO j = 1, nrwel
-            xhm(j, i) = smatch(j, i) - defo(i)
-            xwm(j, i) = smatch(j, i) - defow(j)
-C           right intersection from the hump point of view
-            IF(j.EQ.i)THEN
-C              for humps
-               ph1(j, i) = PHAFIS2(aal(i), cal(i), -xh(i))
-               ph2(j, i) = PHAFIS2(aal(i), cal(i), xhm(j, i))
-               ph3(j, i) = PHAFIS3(aalw(j), calw(j), xwm(j, i))
-               ph4(j, i) = PHAFIS3(aalw(j), calw(j), -xw(j))
-C              for wells
-               pw1(j, i) = PHAFIS2( - aalw(j), -calw(j), xw(j))
-               pw2(j, i) = PHAFIS2( - aalw(j), -calw(j), xwm(j, i))
-               pw3(j, i) = PHAFIS3( - aal(i), -cal(i), xhm(j, i))
-               pw4(j, i) = PHAFIS3( - aal(i), -cal(i), xh(i))
-            ENDIF
-C           left intersection from the hump point of view
-            IF(j.EQ.i - 1)THEN
-C              for humps
-               ph1(j, i) = PHAFIS2(aal(i), cal(i), xh(i))
-               ph2(j, i) = PHAFIS2(aal(i), cal(i), xhm(j, i))
-               ph3(j, i) = PHAFIS3(aalw(j), calw(j), xwm(j, i))
-               ph4(j, i) = PHAFIS3(aalw(j), calw(j), xw(j))
-C              for wells
-               pw1(j, i) = PHAFIS2( - aalw(j), -calw(j), -xw(j))
-               pw2(j, i) = PHAFIS2( - aalw(j), -calw(j), xwm(j, i))
-               pw3(j, i) = PHAFIS3( - aal(i), -cal(i), xhm(j, i))
-               pw4(j, i) = PHAFIS3( - aal(i), -cal(i), -xh(i))
-            ENDIF
-         ENDDO
-      ENDDO
-C
-      DO i = 1, NRBar
-         IF(Ee.GE.VBArex(i))THEN
-            phas(i) = PI*(VBArex(i) - Ee)/H(i)
-            GOTO 50
-         ENDIF
-         IF(Ee.LT.VBArex(i))THEN
-            IF(Ee.GE.ematch(i - 1, i) .AND. Ee.GE.ematch(i, i))THEN
-               phas(i) = PI*(VBArex(i) - Ee)/H(i)
-               GOTO 50
-            ENDIF
-            IF(Ee.LT.ematch(i - 1, i) .AND. Ee.LT.ematch(i, i))THEN
-               phas(i) = PHAFIS2(aal(i), cal(i), xhm(i, i))
-     &                   - PHAFIS2(aal(i), cal(i), xhm(i - 1, i))
-     &                   + ph3(i - 1, i) - ph4(i - 1, i) + ph4(i, i)
-     &                   - ph3(i, i)
-               GOTO 50
-            ENDIF
-            IF(Ee.LT.ematch(i - 1, i) .AND. Ee.GE.ematch(i, i))THEN
-               phas(i) = ph1(i - 1, i) - ph2(i - 1, i) + ph3(i - 1, i)
-     &                   - ph4(i - 1, i)
-               GOTO 50
-            ENDIF
-            IF(Ee.GE.ematch(i - 1, i) .AND. Ee.LT.ematch(i, i))THEN
-               phas(i) = ph2(i, i) - ph1(i, i) + ph4(i, i) - ph3(i, i)
-            ENDIF
-         ENDIF
- 50      PHAsr(i) = phas(i)
-      ENDDO
-C
-C
-      DO j = 1, nrwel
-         IF(Ee.EQ.VBArex(j) .AND. Ee.EQ.VBArex(j + 1))THEN
-            phasw(j) = PI*(Ee - vwelex(j))
-            GOTO 100
-         ENDIF
-         IF(Ee.LE.ematch(j, j) .AND. Ee.LE.ematch(j, j + 1))THEN
-            phasw(j) = PI*(Ee - vwelex(j))/hw(j)
-            GOTO 100
-         ENDIF
-C
-         IF(Ee.GT.ematch(j, j) .AND. Ee.GT.ematch(j, j + 1))THEN
-            phasw(j) = PHAFIS2( - aalw(j), -calw(j), xwm(j, j + 1))
-     &                 - PHAFIS2( - aalw(j), -calw(j), xwm(j, j))
-     &                 + pw4(j, j + 1) - pw3(j, j + 1) + pw3(j, j)
-     &                 - pw4(j, j)
-            GOTO 100
-         ENDIF
-         IF(Ee.GT.ematch(j, j) .AND. Ee.LE.ematch(j, j + 1))THEN
-            phasw(j) = pw1(j, j) - pw2(j, j) + pw3(j, j) - pw4(j, j)
-            GOTO 100
-         ENDIF
-         IF(Ee.LE.ematch(j, j) .AND. Ee.GT.ematch(j, j + 1))THEN
-            phasw(j) = pw2(j, j + 1) - pw1(j, j + 1) + pw4(j, j + 1)
-     &                 - pw3(j, j + 1)
-         ENDIF
- 100  ENDDO
-      IF(nrwel.EQ.1)PHAsr(3) = phasw(1)
-      IF(nrwel.EQ.2)THEN
-         PHAsr(4) = phasw(1)
-         PHAsr(5) = phasw(2)
-      ENDIF
       END
 C
-      DOUBLE PRECISION FUNCTION PHAFIS2(Aal, Cal, X)
-      DOUBLE PRECISION Aal, Cal, X
-      PHAFIS2 = 0.D0
-      IF(DABS(X*DSQRT(-Cal/Aal)).LE.1.D0)
-     &   PHAFIS2 = (Aal*0.5/DSQRT(DABS(Cal)))*DASIN(X*DSQRT( - Cal/Aal))
-     &   + 0.5*X*DSQRT(DABS(Aal + Cal*X**2))
-      END
-C-----------------------------------------------------------------
-      DOUBLE PRECISION FUNCTION PHAFIS3(Aal, Cal, X)
-      DOUBLE PRECISION Aal, Cal, X
-      PHAFIS3 = (LOG(ABS(X*DSQRT(Cal)+DSQRT(DABS(Aal+Cal*X**2)))))
-     &          *(Aal/(2*DSQRT(Cal)))
-     &          + 0.5*X*DSQRT(DABS(Aal + Cal*X**2))
-      END
-C
-C
+
 C-----------------------------------------------------------
       SUBROUTINE SIMPSFIS(Nnuc, Ibar, Ee)
 C-----------------------------------------------------------
@@ -2376,7 +2078,7 @@ C Simpson integration
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       COMMON /COMFIS4/ TFC, TFCc,jcc
-       COMMON /ROFI1/ enh_ld(3, NFhump)
+      COMMON /ROFI1/ enh_ld(3, NFhump)
 C
       INTEGER nn, i
 
@@ -2392,33 +2094,25 @@ c-------------------------
      
 
       TFCc = 0.
-     
-
+c----------------------------------------------------------------------
       IF(ibar.eq.7)THEN
-         write(80,*)'nrbiiin',nrbinfis(3), xminn(3),'nnuc',FISden(nnuc)
+
          DO i = 1,nrbinfis(3)
-c            UX2 = Xminn(3) + (i - 1)*destepp
-             UX2 = .02 + (i - 1)*destepp
             UX1=efb(3)+xminn(3)-efb(2) + (i - 1)*destepp
+            UX2 = xminn(3) + (i - 1)*destepp  
+
             arg1 = 2*PI*(efb(2)+UX1-ee)/H(2)
             arg2 = 2*PI*(efb(3)+UX2-ee)/H(3)
+            IF(arg1.GE.EXPmax)arg1=expmax
+            IF(arg2.GE.EXPmax)arg2=expmax
+
+            teq=(1.+exp(arg1))*(1.+exp(arg2))
+            heq= 2*pi*arg2/log(teq-1.) 
             enh2=enh_ld(1,3)+enh_ld(2,3)*ux2+enh_ld(3,3)*ux2**2
-c      write(80,*)'arg',arg1,arg2,expmax       
-            IF(arg1.LE.EXPmax.and.arg2.LE.EXPmax)THEN
-c               IF(FISden(Nnuc).EQ.0.)THEN                 
-                  dens =min(FISINT(2,UX1,jcc,nnuc),FISINT(3,UX2,jcc,nnuc
-     &            ))*enh2/((1. + EXP(arg1))*(1. + EXP(arg2)))
+            dens =enh2*ROfis(i,jcc,3)/(1. + EXP(arg2))
 
-cc      write(80,*)'den',dens,FISINT(2,UX1,jcc,nnuc),FISINT(3,UX2,jcc,nnuc
-cc     &            ),(1. + EXP(arg1)),(1. + EXP(arg2))
-c              ENDIF
-c               IF(FISden(Nnuc).EQ.1.)THEN
-c                  dens=enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. + EXP(arg1))
-c               ENDIF   
-            ELSE
-               dens = 0.0   
-            ENDIF
-
+c            dens =min(FISINT(2,UX1,jcc,nnuc),FISINT(3,UX2,jcc,nnuc
+c     &            ))*enh2/((1. + EXP(arg1))*(1. + EXP(arg2)))
             nn = 2
             IF((i*0.5).EQ.INT(i/2))nn = 4
             IF(i.EQ.1 .OR. i.EQ.(nrbinfis(3)))nn = 1
@@ -2426,37 +2120,26 @@ c               ENDIF
             TFCc = TFCc + dens
          ENDDO
          TFCc = TFCc*destepp
-         write(80,*)'tfcc',tfcc
          goto 6364
       ENDIF
-
-
-c      write(80,*)'nrbin',nrbinfis(ibar)
-
+c------------------------------------------------------------------------
       DO i = 1, nrbinfis(ibar)
          UX1 = XMInn(Ibar) + (i - 1)*destepp
+         if(ux1.lt.0.)ux1=0.001
          enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*ux1+enh_ld(3,ibar)*ux1**2
-         arg1 = 2*PI*(efb(ibar)+UX1-ee)/H(Ibar)
-         IF(arg1.LE.EXPmax)THEN
-             IF(FISden(Nnuc).EQ.0.)THEN                 
-                dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
-c      write(80,*)'den',ux1,dens,jcc, ibar,rofis(I, jcc,ibar)
-c     &                        (1. + EXP(arg1)),enh1
-             ENDIF
-             IF(FISden(Nnuc).EQ.1.)THEN
-                dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. + EXP(arg1))
-c      write(80,*)'den',ux1,dens, FISINT(Ibar, UX1,jcc,nnuc),
-c     &                        (1. + EXP(arg1))
-             ENDIF   
-          ELSE
-             dens = 0.0   
-          ENDIF
-
-          nn = 2
-          IF((i*0.5).EQ.INT(i/2))nn = 4
-          IF(i.EQ.1 .OR. i.EQ.(nrbinfis(ibar)))nn = 1
-          dens = nn*dens
-          TFCc = TFCc + dens
+         arg1 = 2*PI*(UX1+efb(ibar)-ee)/H(Ibar)
+         IF(arg1.GE.EXPmax)arg1=expmax
+         IF(FISden(Nnuc).EQ.0.)THEN                 
+            dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
+         ENDIF
+         IF(FISden(Nnuc).EQ.1.)THEN
+            dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
+         ENDIF   
+         nn = 2
+         IF((i*0.5).EQ.INT(i/2))nn = 4
+         IF(i.EQ.1 .OR. i.EQ.(nrbinfis(ibar)))nn = 1
+         dens = nn*dens
+         TFCc = TFCc + dens
        ENDDO
        TFCc = TFCc*destepp
 
@@ -2539,10 +2222,10 @@ C
             ENDIF
 C
             WRITE(80, *)' '
-            WRITE(80,*)'SUBBAR=', SUBbar(nnuc)
+            WRITE(80,*)'SUBEFF=', SUBeff(nnuc)
             WRITE(80, *)' '
 
-            IF(SUBbar(Nnuc).EQ.1.)THEN
+            IF(SUBeff(Nnuc).EQ.1.)THEN
                WRITE(80,*) '  '
                WRITE(80,*) '      W0         W1         W2'
                WRITE(80, '(3f11.4)')(wimag(i), i=1,3)
@@ -2574,10 +2257,6 @@ C
                WRITE(80, '(3(A9,f9.5),a9,f11.5)')'Acrt=', ACRt, 'Ucrt=', 
      &               UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
                WRITE(80, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
-               DO i = 1, nrbarc
-                  WRITE(80, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
-     &                  MOMparcrt(nnuc,i), ' Momort=', MOMortcrt(nnuc,i)
-               ENDDO
             ENDIF
 
             WRITE(80,*) '   '      

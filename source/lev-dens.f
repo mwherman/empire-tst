@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-18 00:15:55 $
-Ccc   * $Id: lev-dens.f,v 1.11 2003-12-18 00:15:55 herman Exp $
+Ccc   * $Date: 2003-12-30 18:10:34 $
+Ccc   * $Id: lev-dens.f,v 1.12 2003-12-30 18:10:34 herman Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -161,9 +161,9 @@ C--------------normal states
                IF(BF.NE.0.0D0)THEN
 C-----------------inertia moments by Karwowski with spin dependence
 C-----------------(spin dependent deformation beta calculated according to B.-Mot.)
-                  CALL SIGMAK(A(Nnuc), Z(Nnuc), DEF(1, Nnuc), 1.0D0, u, 
-     &                        ac, aj, mompar, momort, A2, stab, cigor, 
-     &                        DEFpar, DEFga, DEFgw, DEFgp)
+                  CALL SIGMAK(A(Nnuc), Z(Nnuc), DEF(1, Nnuc), 1.0D0, u,
+     $                 ac, aj, mompar, momort, A2, stab, cigor, DEFpar,
+     $                 DEFga, DEFgw, DEFgp)
                   IF(A2.LT.0.D0)THEN
                      BF = 1
                   ELSE
@@ -289,6 +289,7 @@ C-----damping ***** done *********
       ELSE
          kmin = 1
       ENDIF
+      if(fiscon.eq.2.)bf=0.
       DO k = kmin, i
          ak = k + Ss
          IF(Bf.NE.1.0D0)THEN
@@ -308,11 +309,10 @@ C-----------rotation parallel to the symmetry axis
             ENDIF
          ENDIF
       ENDDO
- 100  RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
+ 100  RODEF =con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(vibrk - qv*(vibrk - 1.))
       END
-C
-C
+C     C
 C
       SUBROUTINE DAMPROT(E1, Qk)
 CCCC  *****************************************************************
@@ -648,7 +648,7 @@ C
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
      &                 DELp, DETcrt, ECOnd, GAMma, SCR, TCRt, UCRt
       INTEGER NLWst
-      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
 C Dummy arguments
@@ -713,9 +713,12 @@ C-----determination of the pairing shift --- done -----
 C
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
-      ATIl = ATIl*ATIlnor(Nnuc)
+      IF(FISCON.EQ.2.)THEN
+         atil=atil!*0.7
+      ELSE
+         ATIl = ATIl*ATIlnor(Nnuc)
+      ENDIF   
       TCRt = 0.567*DELp
-
       IF(BF.EQ.0.0D0 .AND. Asaf.LT.0.D0)THEN
          ACRt = -ATIl*Asaf
       ELSE
@@ -740,6 +743,7 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt, SHC(Nnuc), GAMma)
       IF(BF.EQ.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
       SCR = 2.*ACRt*TCRt
+      
       IF(FIScon.NE.2.)THEN
 C-----
 C-----fit level densities to discrete levels applying energy shift
@@ -800,7 +804,7 @@ C--------------decrease energy shift above the last level to become 0 at Qn
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf)
+               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf,rotemp,aj,ibars)
                DO ij = 1, NLWst
                   IF(kk.GT.1)rocumul = rocumul + 
      &                                 (RO(kk - 1, ij, Nnuc) + RO(kk, 
@@ -897,7 +901,7 @@ C-----------clean RO matrix
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf)
+               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj,ibars)
             ENDIF
          ENDDO
       ENDIF
@@ -921,21 +925,22 @@ C
       END
 C
 C
-      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf)
+      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj,ibar1)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+C
 C
 C COMMON variables
 C
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
      &                 DELp, DETcrt, ECOnd, GAMma, SCR, TCRt, UCRt
       INTEGER NLWst
-      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /PARFIS/ ROTemp, AC, AAJ,  IBAr1
+
       DOUBLE PRECISION  AAJ
       INTEGER IBAr1
-C
+
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Destep, Dshif
@@ -957,7 +962,7 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
-ccc      write(6,*)'all-del', nnuc,a(nnuc),z(nnuc),del,bf
+ 
       IF(FIScon.EQ.2.)goto 6666
 C-----determination of U for normal states
       IF(BF.NE.0.D0)THEN
@@ -978,45 +983,21 @@ C-----determination of U for normal states
 C     fisfis d ===================================
  6666 IF(FIScon.EQ.2.)THEN
          Bf=0.0D0
-         aj = aaj
-         ia=int(A(nnuc))  
-         iz=int(Z(nnuc))
-         in=ia-iz
-       DELp = 12./SQRT(A(Nnuc))
-       DEL = 0.
-       IF(MOD(in, 2).NE.0)DEL = DELp
-       IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
-       ap1 = 0.94431E-01
-       ap2 = -0.80140E-01
-       gamma = 0.75594E-01
-       IF(Z(nnuc).GE.85.D0)THEN
-          ap1 = ap1*1.2402
-          ap2 = ap2*1.2402
-          gamma = gamma*1.2494
-       ENDIF
-       ATIl = AP1*A(Nnuc) + AP2*A23
-       ATIl = ATIl*ATIlnor(Nnuc)
-       ECOnd = 1.5*ACRt*DELp**2/(pi*pi)
-c      write(6,*)'saddle', nnuc,z(nnuc),a(nnuc),in,iz,del,atil,!,atilnor
-c     &  atilnor(nnuc),gamma,acrt,econd
-         mompar = MOMparcrt(nnuc,IBAr1)
-         momort = MOMortcrt(nnuc,IBAr1)
-         u=(kk-1)*destep+dshif+del   
+         mompar = MOMparcrt
+         momort = MOMortcrt
+         u=(kk-1)*destepp+dshif+del
+
          IF(U.GT.UCRt)THEN 
             accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
-         ELSE
-            accn = ACRt
-         ENDIF
-         temp = 0.
-         shredt = 1.
-C--------temperature fade-out of the shell correction  --- done ----
-         IF(u.GT.UCRt)THEN
-            u = u - ECOnd
+            u = u -ECOnd
             bcs = .FALSE.
          ELSE
+            accn = ACRt
             bcs = .TRUE.
          ENDIF
+
          IF(u.GT.0.0D0)THEN
+C
 C-----------calculation of level density parameter 'a' including surface
 C-----------dependent factor
             qigor = ( - 0.00246 + 0.3912961*cigor - 
@@ -1027,18 +1008,15 @@ C-----------dependent factor
             ELSE
                bsq = 1.0 + 0.4*(cigor - 1.0)**2
             ENDIF
-            ATIl = AP1*A(Nnuc) + AP2*A23*bsq
-            ATIl = ATIl*ATIlnor(Nnuc)
+            ATIl = AP1*A(Nnuc) + AP2*A23!*bsq
             IF(Asaf.GE.0.D0)AC = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
             IF(Asaf.LT.0.D0)AC = -ATIl*Asaf
-c            write(6,*)'a-saddle',nnuc,z(nnuc),a(nnuc),ac
             IF(AC.GT.0.D0)THEN
                IF(bcs)THEN
-                  ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, A2)
-C                 !*RORed
+                  ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2)
                ELSE
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort, 
-     &                     YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred, 
+     &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred, 
      &                     EXPmax)
                ENDIF
             ENDIF
@@ -1143,11 +1121,11 @@ C-----------dependent factor
             ATIl = ATIl*ATIlnor(Nnuc)
             ac = ATIl*FSHELL(u, SHC(Nnuc), GAMma)
 
-            write(80,*)'norm-a',nnuc,z(nnuc),a(nnuc),ac
+
             IF(ac.LE.0.0D0)RETURN
          ENDIF
          IF(bcs)THEN
-            rotemp = ROBCS(A(Nnuc), u, aj, mompar, momort, A2)*RORed
+            rotemp = ROBCS(A(Nnuc),u,aj, mompar, momort, A2)*RORed
             IF(i.EQ.1)THEN
                phi = SQRT(1. - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
@@ -1256,9 +1234,9 @@ C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
       IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0)RETURN
 C-----check of the input data ---- done -----------------------------
 C-----check whether the nucleus is fissile
-      FISsil(Nnuc) = .TRUE.
-      xfis = 0.0205*Z(Nnuc)**2/A(Nnuc)
-      IF(xfis.LT.0.3D0)FISsil(Nnuc) = .FALSE.
+csin      FISsil(Nnuc) = .TRUE.
+csin      xfis = 0.0205*Z(Nnuc)**2/A(Nnuc)
+csin      IF(xfis.LT.0.3D0)FISsil(Nnuc) = .FALSE.
 C-----determination of the yrast and saddle point energies
 C
 C-----determination of the LD rotational stability limit LDSTAB
@@ -1386,7 +1364,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt, UCRt
-      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
 C
 C Dummy arguments
 C
@@ -1983,13 +1961,13 @@ C
             GOTO 450
          ENDIF
  500     hhh = uugrid(khi) - uugrid(klo)
-         c1 = (UUGRid(khi) - u)/hhh
-         c2 = (u - UUGRid(klo))/hhh
+         c1 = (uUGRid(khi) - u)/hhh
+         c2 = (u - uUGRid(klo))/hhh
          DO j = 1, jmaxl
             r1 = rhogrid(klo, j)
             r2 = rhogrid(khi, j)
             IF(r1.GT.0 .AND. r2.GT.0)THEN
-               RO(kk, j, Nnuc) = 10.0D+0**(c1*DLOG10(r1)+c2*DLOG10(r2))
+               RO(kk, j, Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
             ELSE
                RO(kk, j, Nnuc) = c1*r1 + c2*r2
             ENDIF

@@ -118,8 +118,8 @@ C
      &                  ELE2, HHBarc
 C
       COMMON /COMFIS_OPT/ FISbar(NDNUC), FISden(NDNUC), FISdis(NDNUC), 
-     &                    SUBbar(NDNUC)
-      COMMON /COMFIS_I/ NRBar, NRWel, NRFdis(NFPARAB),
+     &                    SUBeff(NDNUC)
+      COMMON /COMFIS_I/ NRBar, NRWel, NRBarc,NRFdis(NFPARAB),
      &                   IPFdis(NFTRANS, NFPARAB)
       COMMON /COMFIS_R/ EFB(NFPARAB), H(NFPARAB), HJ(NDNUC,NFPARAB), 
      &                  DEFfis(NFPARAB), EFDis(NFTRANS, NFPARAB), 
@@ -129,7 +129,7 @@ C
      &                   destepp, FISCON, NRbinfis(NFHUMP) 
 C
       DOUBLE PRECISION MOMparcrt, MOMortcrt
-      COMMON /MOMENT/ MOMparcrt(NDNUC,NFPARAB), MOMortcrt(NDNUC,NFPARAB)
+      COMMON /MOMENT/ MOMparcrt, MOMortcrt
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
 

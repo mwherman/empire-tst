@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-12-18 00:15:55 $
-Ccc   * $Id: main.f,v 1.16 2003-12-18 00:15:55 herman Exp $
+Ccc   * $Date: 2003-12-30 18:10:34 $
+Ccc   * $Id: main.f,v 1.17 2003-12-30 18:10:34 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -203,9 +203,10 @@ C     COMMON variables
 C
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
       INTEGER NRBar, NRFdis, ibaro
-      DOUBLE PRECISION TF, TDIr, TABs, TDIr23
+      DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
 
       CHARACTER*9 cejectile
 C
@@ -655,23 +656,27 @@ C-----------moments of inertia for each deformation
             Call DEFO_FIS(Nnuc)
             NRbarc=Nrbar-Nrwel
             FIScon = 2.
+            adiv1=adiv
             mm2 = 0.24*A(Nnuc)**(2./3.)
             r0 = 1.4
             DO ibars = 1, nrbar
                CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
-               MOMparcrt(nnuc,ibars)=6*ACRt*mm2*(1. - (2./3.)*
+               MOMparcrt=6*ACRt*mm2*(1. - (2./3.)*
      &                           DEFfis(ibars))/PI**2
-               MOMortcrt(nnuc,ibars) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
+               IF(momparcrt.lt.2.)momparcrt=2.  !!!!!!!!!!!
+               MOMortcrt = 0.0095616*r0**2*A(Nnuc)**(5./3.)
      &                             *(1. + (1./3.)*DEFfis(ibars))
-               HJ(nnuc,ibars)=0.5*(1.0/Momparcrt(nnuc,ibars)-
-     &                    1.0/Momortcrt(nnuc,ibars))
-               IF(ibars.gt.Nrbarc)goto 3031
-               IF(FISDEN(Nnuc).EQ.0.)Call DAMIROFIS(Nnuc,ibars)
- 3031       ENDDO
-            IF(FISDEN(Nnuc).EQ.1) Call DAMIROFIS(Nnuc,1)
+               HJ(nnuc,ibars)=0.5*(1.0/Momparcrt-
+     &                    1.0/Momortcrt)
+               IF(HJ(nnuc,ibars).LE.0.)HJ(nnuc,ibars)=0.0001
+               IF(ibars.le.Nrbarc) Call DAMI_ROFIS(Nnuc,ibars)
+            ENDDO
             FISCON=0.
-            Call WRITE_OUTFIS(Nnuc) 
+            Call WRITE_OUTFIS(Nnuc)
+            adiv=adiv1
          ENDIF   
+
+
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
          stauc = 0.0
@@ -994,7 +999,7 @@ C-----------------gamma emision
                      CALL DECAYT(nnuc, ke, jcn, ip, sum)
                   ENDIF
 C-----------------fission
-C                 IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
+c                IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
 C                 fisfis-----------------------------------------------
                   dencomp = DENhf
                   aafis = 0.
@@ -1055,15 +1060,15 @@ C-----------------
      &               *step/RO(ke, jcn, nnuc)
 C                 FISfis d-------------------------------------
 C--------------subbarrier effect--------------------------
-                  IF(FISsil(nnuc) .AND. SUBbar(nnuc).EQ.1.)THEN
-                     if((dencomp + TDIr).gt.0.)then
+                  IF(FISsil(nnuc) .AND. SUBeff(nnuc).EQ.1.)THEN
+                     IF((dencomp + TDIr).GT.0.)THEN
                         xnorfis = xnor*DENhf/(dencomp + TDIr)
-                     else
+                     ELSE
                         xnorfis=0.
-                     endif   
-C                    fis1
-                     IF(NRBar.EQ.3.and.NRwel.eq.1)THEN
-                      IF(TF(1).GT.0..AND.TF(2).GT.0..and.Tabs.gt.0.)THEN
+                     ENDIF   
+
+                     IF(NRBarc.EQ.2.and.NRwel.eq.1)THEN
+                        IF(TF(2)*Tabs.GT.0.)THEN
                            bbfis = (TDIr + dencomp)*(TF(1) + TF(2))
      &                             /(TABs*TF(2))
                            aafis = (1. + bbfis**2 + 2*bbfis*cota)
@@ -1074,8 +1079,7 @@ C                    fis1
                      ENDIF
 C
                      IF(NRBar.EQ.5)THEN
-                        IF(TF(1).GT.0. .AND. TF(2).GT.0. .AND. 
-     &                  TF(3).GT.0..and.Tabs.gt.0..and.tdir23.gt.0.)THEN
+                        IF(Tabs*tdir23.gt.0.)THEN
                            bbfis = (TDIr + dencomp)*(TF(1) + TDIr23)
      &                             /(TABs * TDIr23)
                            aafis = 1/sqrt(1. + bbfis**2 + 2*bbfis*cota)
@@ -1085,10 +1089,9 @@ C
                      ENDIF
 C-----------------------fission
                      csfis = csfis + xnorfis*(TDIr + dencomp*aafis)
-                     IF(FISsil(nnuc) .AND. jcn.EQ.NLW .AND. ip.EQ. - 1)
+                     IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
      &                  WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
      &                        ' mb'
-C                    WRITE(80,*)xnorfis,tdir,dencomp,aafis
 C-----------------------particles
                      DO nejc = 1, NEJcm
                         nnur = NREs(nejc)
@@ -1116,11 +1119,10 @@ C-----------------gammas
                   CSEmis(0, nnuc) = CSEmis(0, nnuc) + xnor*SCRtem(0)
                   POP(ke, jcn, ipar, nnuc) = 0.0
 C-----------------fission
-                  csfis = csfis + sumfis*xnor
-                  IF(FISsil(nnuc) .AND. jcn.EQ.NLW .AND. ip.EQ. - 1)
+                  csfis = csfis + sumfis * xnor
+                  IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
      &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
      &                     ' mb'
-                   WRITE(80,*)'csfis=', csfis,sumfis,xnor 
 C-----------------calculate total emission
  1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
@@ -1296,7 +1298,7 @@ C-----------life-times and widths  *** done ***
      &            )csfis
          ENDIF
 c        if(nnuc.eq.1)TOTcsfis = TOTcsfis + csfis
-          TOTcsfis = TOTcsfis + csfis
+         TOTcsfis = TOTcsfis + csfis
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1)THEN
