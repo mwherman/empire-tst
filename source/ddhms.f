@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.5 $
-C $Id: ddhms.f,v 1.5 2003-06-30 22:01:48 herman Exp $
+C CVS Version Management $Revision: 1.6 $
+C $Id: ddhms.f,v 1.6 2004-04-23 05:15:45 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2041,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.5 $')
+99001 FORMAT('  ddhms version: $Revision: 1.6 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.5 2003-06-30 22:01:48 herman Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.6 2004-04-23 05:15:45 herman Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4897,7 +4897,7 @@ C--------------transfer excitation energy dependent recoil spectra
 C--------------(if ENDF=2 only)
 C          
 C--------------clean auxiliary auxrec1 matrix
-               IF(ENDf.EQ.2)THEN
+               IF(ENDf.GT.0)THEN
                   DO nu = 1, NDIM_EBINS + 1
                      DO mrec = 1, NDIM_RECBINS + 1
                         auxrec1(mrec, nu) = 0.0

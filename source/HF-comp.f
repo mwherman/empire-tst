@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:54 $
-Ccc   * $Id: HF-comp.f,v 1.18 2004-04-21 03:39:54 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-04-23 05:15:44 $
+Ccc   * $Id: HF-comp.f,v 1.19 2004-04-23 05:15:44 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -67,7 +67,7 @@ c        WRITE(6,*)'New Iec',iec, iecmem
          popesum=0
       ENDIF
       iecmem=Iec
-C     HERE this is end of the check 
+C     HERE this is the end of the check 
       IF(Nnuc.EQ.Nnur)THEN
          excnq = EX(Iec, Nnuc)
       ELSE
@@ -104,20 +104,16 @@ C
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il, Nnur)
          IF(eemi.LT.0.0D0)RETURN
+         pop1 = Xnor*SCRtl(il, Nejc)
 C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
 C--------distance of the actual energy to the bin energy excluding elastic
 C--------if ENDf.NE.0
-
-C        Bug found by Mike, CN XS was not added 
-         pop1 = Xnor*SCRtl(il, Nejc)
          IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
      &      .OR. Iec.NE.NEX(1)) THEN 
             xcse = eemi/DE + 1.0001
             icsl = INT(xcse)
             icsh = icsl + 1
-C           Bug found by Mike, CN XS was not added 
-C           pop1 = Xnor*SCRtl(il, Nejc)
             popl = pop1*(FLOAT(icsh) - xcse)/DE
             popll = popl            !we also need popl not multiplied by 2
             IF(icsl.EQ.1)popl = 2.0*popl
@@ -229,12 +225,13 @@ C-----DE spectra
      &            POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur) +
      &            POPcse(Iec,iejc,ie,Nnuc)*xnor 
             ENDDO 
-C--------DDX spectra using portions      
+C--------neutron and proton DDX spectra using portions      
             DO iejc = 1, NDEJCD
-               IF(POPcseaf(Iec,iejc,ie,Nnuc).NE.0) 
-     &            POPcseaf(Ief,iejc,ie,Nnur) = 
+               IF(POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN 
+                  POPcseaf(Ief,iejc,ie,Nnur) = 
      &            POPcseaf(Ief,iejc,ie,Nnur) +
      &            POPcseaf(Iec,iejc,ie,Nnuc)*xnor 
+               ENDIF 
             ENDDO 
          ENDDO 
       ENDIF 
@@ -315,12 +312,14 @@ C        RCN 01/2004
      &            POPcse(0,iejc,iesp,Nnur) = POPcse(0,iejc,iesp,Nnur) +
      &            POPcse(Iec,iejc,iesp,Nnuc)*xnor
             ENDDO 
-C--------DDX spectra using portions      
+C--------neutron and proton DDX spectra using portions      
             DO iejc = 1, NDEJCD
-               IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) 
-     &            POPcseaf(0,iejc,iesp,Nnur) = 
+               IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) THEN
+                  POPcseaf(0,iejc,iesp,Nnur) = 
      &            POPcseaf(0,iejc,iesp,Nnur) +
      &            POPcseaf(Iec,iejc,iesp,Nnuc)*xnor 
+                  ief=0
+               ENDIF 
             ENDDO 
           ENDDO 
          ENDIF

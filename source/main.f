@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:54 $
-Ccc   * $Id: main.f,v 1.20 2004-04-21 03:39:54 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-04-23 05:15:45 $
+Ccc   * $Id: main.f,v 1.21 2004-04-23 05:15:45 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -335,7 +335,7 @@ C              each 4th result from ECIS (2.5 deg grid)
                READ(45, '(15x,E12.5)', END = 1500)
      &              CSAlev(NDANG, ilv, nejcec)
 C--------------construct recoil spectra due to direct transitions
-               IF(ENDf.EQ.2)THEN
+               IF(ENDf.GT.0)THEN
                   coef = 2*PI*dang/DERec
                   echannel = echannel*EJMass(0)/AMAss(1)
                   DO iang = 1, NELang
@@ -424,9 +424,7 @@ C           (it could be omitted)
             READ(45, *, END = 1500)ecisabsxs
             READ(45, *, END = 1500)eciselaxs
             CLOSE(45)
-C           WRITE(6, 99014)EINL,ECISTOTxs, ECISABSxs, ECISELAxs
-C9014       FORMAT(//,'Elab:',F9.3,'  ECIS(tot,abs,elast): ',3(e14.7,1x)//)
-            WRITE(62, '(1x,f9.3,3x,4F14.3,1x))')EINl, ecistotxs/1000., 
+            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
      &            ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
 C
 C=========================================================================
@@ -956,7 +954,7 @@ C--------
 C--------start nnuc nucleus decay
 C--------
          popleft = 0.0
-C--------assure that full gamma cascade in the first CN is
+C--------ensure that full gamma cascade in the first CN is
 C--------accounted for in the case of ENDF calculations
          IF(ENDf.GT.0.0D0)GCAsc = 1.0
 C--------turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
@@ -976,7 +974,7 @@ C
          IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0)LHRtw = 0
          IF(nnuc.EQ.1 .AND. LHRtw.GT.0)THEN
             CALL HRTW
-            IF(ENDf.EQ.2)CALL RECOIL(kemax, nnuc) !recoil spectrum
+            IF(ENDf.GT.0)CALL RECOIL(kemax, nnuc) !recoil spectrum
             kemax = NEX(nnuc) - 1
             GCAsc = 1.0
          ENDIF
@@ -1161,7 +1159,7 @@ C-----------------calculate total emission
                   csemist = csemist + csfis
  1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
-            IF(ENDf.EQ.2)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
+            IF(ENDf.GT.0)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
          ENDDO                  !loop over c.n. excitation energy
 C--------
 C--------Hauser-Feshbach decay of nnuc  ***done***
@@ -1580,7 +1578,8 @@ C                          printed (4*Pi*CSAlev(1,il,3)
                      ENDIF 
                   ENDIF 
                ENDDO
-            ENDIF       
+            ENDIF
+            CALL PRINT_RECOIL(nnuc)
          ENDDO
       ENDIF 
 C-----
@@ -1652,48 +1651,10 @@ C-----ENDF spectra printout (inclusive representation MT = 10 or 5
 C-----this is a recommended option)
 C-----
       IF(ENDf.EQ.2.0D0)THEN
-C--------
-C--------spectra of residues
-C--------
+C--------print spectra of residues
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-            IF(CSPrd(nnuc).GT.0.0D0)THEN
-C-------------normalize recoil spectra to remove eventual inaccuracy
-C-------------due to numerical integration of angular distributions
-C-------------and find last non-zero cross section for printing
-               corr = 0.0
-               ilast = 0
-               DO ie = 1, NDEREC
-                  corr = corr + RECcse(ie, 0, nnuc)
-                  IF(RECcse(ie, 0, nnuc).NE.0)ilast = ie
-               ENDDO
-C              WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
-               corr = CSPrd(nnuc)/corr/DERec
-               ilast = MIN(ilast + 1, NDEREC)
-               DO ie = 1, ilast
-                  RECcse(ie, 0, nnuc) = RECcse(ie, 0, nnuc)*corr
-               ENDDO
-               WRITE(12, *)' '
-               WRITE(12, '(A34,I6,A6,F12.5)')
-     &               '  Spectrum of recoils  (n,x)  ZAP=', IZA(nnuc), 
-     &               ' mass=', AMAss(nnuc)
-               WRITE(12, *)' '
-               WRITE(12, '('' Energy    mb/MeV'')')
-               WRITE(12, *)' '
-               DO ie = 1, ilast
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DERec, 
-     &                  RECcse(ie, 0, nnuc)
-               ENDDO
-               IF(ABS(1.0 - corr).GT.0.01D0)THEN
-                  WRITE(6, *)' '
-                  WRITE(6, *)'WARNING: ZAP= ', IZA(nnuc)
-                  WRITE(6, *)'WARNING: x-section balance in recoils '
-                  WRITE(6, *)'WARNING: difference = ', (1.0 - corr)
-     &                       *100.0, '%'
-                  WRITE(6, *)' '
-               ENDIF
-            ENDIF
+            CALL PRINT_RECOIL(nnuc)
          ENDDO !over decaying nuclei in ENDF spectra printout
-C--------recoils *** done ***
 C--------print inclusive gamma spectrum
          WRITE(12, *)' '
          WRITE(12, *)' Spectrum of gammas   (n,x) ZAP=     0'
@@ -1758,20 +1719,22 @@ C--------light ions
          ENDIF
       ENDIF
 C-----end of ENDF spectra (inclusive)
-      WRITE(6,*) '----------------------------------------------'
-      WRITE(6,*) 'Test printout (integrals of portions of DDX spectra)'
-      WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
-      WRITE(6,*) '----------------------------------------------'
-      DO ispec=1,NEX(1)+10             
-         controln = 0
-         controlp = 0
-         DO nnuc = 1,NNUCD
-            controln = controln + POPcseaf(0,1,ispec,nnuc) 
-            controlp = controlp + POPcseaf(0,2,ispec,nnuc) 
-         ENDDO 
-         WRITE(6,'(3g15.5)')(ispec-1)*DE, 
-     &           controln, controlp
-      ENDDO
+      IF(ENDf.GT.4) THEN
+         WRITE(6,*) '----------------------------------------------'
+         WRITE(6,*) 'Test - integrals of portions of DDX spectra'
+         WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
+         WRITE(6,*) '----------------------------------------------'
+         DO ispec=1,NEX(1)+10
+            controln = 0
+            controlp = 0
+            DO nnuc = 1,NNUCD
+               controln = controln + POPcseaf(0,1,ispec,nnuc)
+               controlp = controlp + POPcseaf(0,2,ispec,nnuc)
+            ENDDO
+            WRITE(6,'(3g15.5)')(ispec-1)*DE,
+     &              controln, controlp
+         ENDDO
+      ENDIF 
 
       READ(5, *)EIN
       IF(EIN.LT.0.0D0)THEN
@@ -1779,7 +1742,7 @@ C-----end of ENDF spectra (inclusive)
          WRITE(12, *)' '
          WRITE(6, *)' '
          WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
-         STOP 'REGULAR '
+         STOP 'REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
       GOTO 1400
@@ -1914,4 +1877,51 @@ C-----gamma decay to discrete levels (stored with icse=0)
      &                             *REClev(il, nejc)/DERec
          ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
+      END
+
+
+
+      SUBROUTINE PRINT_RECOIL(nnuc)
+C-----
+C-----prints recoil spectrum of nnuc residue
+C-----
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      IF(CSPrd(nnuc).GT.0.0D0)THEN
+C-------normalize recoil spectra to remove eventual inaccuracy
+C-------due to numerical integration of angular distributions
+C-------and find last non-zero cross section for printing
+         corr = 0.0
+         ilast = 0
+         DO ie = 1, NDEREC
+            corr = corr + RECcse(ie, 0, nnuc)
+            IF(RECcse(ie, 0, nnuc).NE.0)ilast = ie
+         ENDDO
+C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
+         corr = CSPrd(nnuc)/corr/DERec
+         ilast = MIN(ilast + 1, NDEREC)
+         DO ie = 1, ilast
+            RECcse(ie, 0, nnuc) = RECcse(ie, 0, nnuc)*corr
+         ENDDO
+         WRITE(12, *)' '
+         WRITE(12, '(A34,I6,A6,F12.5)')
+     &         '  Spectrum of recoils  (n,x)  ZAP=', IZA(nnuc),
+     &         ' mass=', AMAss(nnuc)
+         WRITE(12, *)' '
+         WRITE(12, '('' Energy    mb/MeV'')')
+         WRITE(12, *)' '
+         DO ie = 1, ilast
+            WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DERec,
+     &            RECcse(ie, 0, nnuc)
+         ENDDO
+         IF(ABS(1.0 - corr).GT.0.01D0)THEN
+            WRITE(6, *)' '
+            WRITE(6, *)'WARNING: ZAP= ', IZA(nnuc)
+            WRITE(6, *)'WARNING: x-section balance in recoils '
+            WRITE(6, *)'WARNING: difference = ', (1.0 - corr)
+     &                 *100.0, '%'
+            WRITE(6, *)' '
+         ENDIF
+      ENDIF
+      RETURN
       END

@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:53 $
-Ccc   * $Id: fusion.f,v 1.10 2004-04-21 03:39:53 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-04-23 05:15:45 $
+Ccc   * $Id: fusion.f,v 1.11 2004-04-23 05:15:45 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -354,8 +354,8 @@ C-----do loop over compound nucleus spin
                lmax = MIN0(NDLW, lmax)
                lmax = MIN0(maxlw, lmax)
                DO k = lmin, lmax
-                  sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)
-     >                                                       *DRTl(k)
+                  sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)*
+     &                  DRTl(k)
                ENDDO
             ENDDO
             POP(NEX(1), j, ip, 1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)

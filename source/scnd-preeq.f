@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-02-09 21:19:13 $
-Ccc   * $Id: scnd-preeq.f,v 1.8 2004-02-09 21:19:13 herman Exp $
+Ccc   * $Date: 2004-04-23 05:15:45 $
+Ccc   * $Id: scnd-preeq.f,v 1.9 2004-04-23 05:15:45 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -198,14 +198,28 @@ C--------store second chance emission cross section on the appropriate emission 
          CSEmis(Nejc, Nnuc) = CSEmis(Nejc, Nnuc) + sum
       ENDIF
 C-----reduce 1-st residue population on the last entry
-      IF(Last.GT.1)THEN
+      IF(Last.GE.1)THEN
          DO iec = 1, NEX(Nnuc)
+            IF(POPbin(iec,Nnuc).NE.0) THEN 
+            sumpopsub = 0
             DO jc = 1, NLW, LTUrbo
                POP(iec, jc, 1, Nnuc) = POP(iec, jc, 1, Nnuc)
      &                                 - popsub(iec, jc, 1)
                POP(iec, jc, 2, Nnuc) = POP(iec, jc, 2, Nnuc)
      &                                 - popsub(iec, jc, 2)
+               sumpopsub = sumpopsub + popsub(iec, jc, 1) + 
+     &                     popsub(iec, jc, 2)
             ENDDO
+C-----------reduce 1-st residue population DDX spectra (using portions) 
+C-----------on the last entry
+            DO ie = 1, NDECSE
+               DO iejc = 1, NDEJCD
+                  POPcseaf(iec,iejc,ie,Nnuc) = 
+     &               POPcseaf(iec,iejc,ie,Nnuc)*(1-sumpopsub/POPbin(iec,
+     &               Nnuc))
+               ENDDO
+            ENDDO
+            ENDIF 
          ENDDO
       ENDIF
       END

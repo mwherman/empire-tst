@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-02-09 21:19:13 $
-Ccc   * $Id: MSD-tristan.f,v 1.8 2004-02-09 21:19:13 herman Exp $
+Ccc   * $Date: 2004-04-23 05:15:45 $
+Ccc   * $Id: MSD-tristan.f,v 1.9 2004-04-23 05:15:45 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3086,7 +3086,7 @@ C--------------Bin population by MSD (spin/parity integrated)
             ENDDO
          ENDIF 
 C--------storing continuum recoils
-         IF(ENDf.EQ.2)THEN
+         IF(ENDf.GT.0)THEN
             nangle = NDANG
             dang = 3.14159/FLOAT(nangle - 1)
             coef = 2*3.14159*dang/DERec
@@ -3119,7 +3119,7 @@ C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
       IF(nexrt.LE.0)nexrt = 1
-      IF(ENDf.EQ.2)THEN
+      IF(ENDf.GT.0)THEN
          DO ie = nexrt, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
             DO na = 1, nangle
