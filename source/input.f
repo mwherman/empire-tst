@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-11-29 05:17:26 $
-Ccc   * $Id: input.f,v 1.45 2004-11-29 05:17:26 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-11-30 09:53:55 $
+Ccc   * $Id: input.f,v 1.46 2004-11-30 09:53:55 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -256,7 +256,7 @@ C--------set level density parameters
          DEFgw = 10.
          DEFgp = 40.
          ADIv = 0.0
-         NEXreq = 50
+         NEX(1) = 50
          FITlev = 0.0
          GCAsc = -1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
@@ -290,13 +290,13 @@ C                Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1361,8 +1361,8 @@ C          inelastic cross section
              READ(46,'(A80)',END=995) rstring
   995        write(47,'(A80)') rstring
            ENDDO
- 1000     CLOSE(45, STATUS='DELETE')
-          CLOSE(46, STATUS='DELETE')
+ 1000      CLOSE(45, STATUS='DELETE')
+           CLOSE(46, STATUS='DELETE')
            CLOSE(47)
 C
 C          Renormalization of the reaction cross section to consider
@@ -1408,7 +1408,6 @@ C           Restoring KTRlom(0,0) and RIPl_omp(0)
 C
 C-----determination of excitation energy matrix in cn
 C
-      NEX(1) = NEXreq
       ECUt(1) = ELV(NLV(1), 1)
       IF(FITlev.GT.0.0D0) THEN
          ECUt(1) = 0.0
@@ -1532,7 +1531,7 @@ C-----------determination of excitation energy matrix in res. nuclei
      &                                - Q(nejc, nnuc)
             EMAx(nnur) = DMAX1(emaxr, EMAx(nnur))
             NEX(nnur) = max(INT((EMAx(nnur) - ECUt(nnur))/DE + 1.0),0)
-            NEXr(nejc, nnuc) = 
+            NEXr(nejc, nnuc) =
      &                max(INT((emaxr - ECUt(nnur))/DE + 1.0),0)
             IF(NEX(nnur).GT.NDEX)THEN
                WRITE(6, *)' NUMBER OF BINS IN RESIDUAL NUCLEUS A=',
@@ -3486,7 +3485,7 @@ C-------------------------------------------------------------------------
                DO nnuc = 1, NDNUC
                   FISmod(nnuc) = val
                ENDDO
-               WRITE(6, 
+               WRITE(6,
      &               '('' FISMOD  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
@@ -3511,7 +3510,7 @@ C-------------------------------------------------------------------------
                DO nnuc = 1, NDNUC
                   FISopt(nnuc) = val
                ENDDO
-               WRITE(6, 
+               WRITE(6,
      &               '('' FISOPT  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
@@ -3536,7 +3535,7 @@ C-------------------------------------------------------------------------
                DO nnuc = 1, NDNUC
                   FISbar(nnuc) = val
                ENDDO
-               WRITE(6, 
+               WRITE(6,
      &               '('' FISBAR  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
@@ -3561,7 +3560,7 @@ C-------------------------------------------------------------------------
                DO nnuc = 1, NDNUC
                   FISden(nnuc) = val
                ENDDO
-               WRITE(6, 
+               WRITE(6,
      &               '('' FISDEN  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
@@ -3586,7 +3585,7 @@ C-------------------------------------------------------------------------
                DO nnuc = 1, NDNUC
                   FISdis(nnuc) = val
                ENDDO
-               WRITE(6, 
+               WRITE(6,
      &               '('' FISDIS  in all nuclei set to '',F6.3)'
      &               ) val
                GOTO 100
@@ -3677,7 +3676,7 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
   100 CLOSE(UNIT = 27)
 
       DO iz = 0, 130
-         DO ia = 1, 400
+         DO ia = 0, 400
           RESmas(iz, ia) = 0
             EXCessmass(iz, ia) = 0
          ENDDO
@@ -5120,7 +5119,7 @@ C           the database we assume arbitrary dynamical deformations
 C              ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv, 1) = 0.0
                IF(gspin.NE.0.D0)THEN
-                ICOllev(ND_nlv) = ilv + 50	       
+                ICOllev(ND_nlv) = ilv + 50
                 WRITE(6, *)'WARNING: ONLY DWBA CALCULATIONS ALLOWED FOR'
                 WRITE(6, *)'WARNING: ODD SPHERICAL NUCLEUS'
                 WRITE(6, *)'WARNING: SETTING DIRECT key to 3'
@@ -5226,7 +5225,7 @@ C           Additional levels are added for DWBA calculations
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv, 2) = 0.1
-               ierr=0
+                ierr=0
                GOTO 500
             ENDIF
 
