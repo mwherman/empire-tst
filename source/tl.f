@@ -2584,9 +2584,10 @@ C-----CARD 4
       WRITE(1, '(4i5)')ncoll, njmax, iterm, npp
 C-----Matching radius
 C-----CARD 5
-C     WRITE(1, '(10x,f10.5)')rmatch
+      rmatch = 20.d0 
+      WRITE(1, '(10x,f10.5)')rmatch
 C     Matching radius calculated within ECIS
-      WRITE(1, *)
+C     WRITE(1, *)
 C-----ground state
 C     ch = '-'
 C     IF ( LVP(1,Nnuc).GT.0 ) ch = '+'
@@ -2970,9 +2971,10 @@ C-----make sure that all contributions to s-wave scattering are included
       jdm = XJLv(LEVtarg, Nnuc) + SEJc(Nejc) + 0.6
       WRITE(1, '(4i5,30x,i5)')ncoll, njmax, iterm, npp, jdm
 C-----CARD 5
-C     WRITE(1, '(10x,f10.5)')rmatch
+      rmatch = 20.d0 
+      WRITE(1, '(10x,f10.5)')rmatch
 C     Matching radius calculated within ECIS
-      WRITE(1, *)
+C     WRITE(1, *)
       ch = '-'
       IF(LVP(LEVtarg, Nnuc).GT.0)ch = '+'
 C
@@ -3249,6 +3251,7 @@ C
 C
 C     From om-retrieve.f (RIPL interface)
 C
+C
       subroutine optmod(el,vlib,rlib,alib)
 c
 c     Routine to generate input for ECIS96 from RIPL-2 library
@@ -3263,13 +3266,12 @@ c
 c     To use dispersive optical model package
 c
 c             functions
-c
       real*8 DOM_int_Ws,DOM_int_Wv,DOM_int_T1,DOM_int_T2,Vhf
       real*8 DOM_int,WVf,WDf,Delta_WD,Delta_WV
 c             variables
       real*8 As,Bs,Cs,AAv,Bv,AAvso,Bvso,EEE,Ep,Ea,Ef
       real*8 alpha_PB,beta_PB,gamma_PB,Vnonl
-      real*8 DWS,DWV,DWVso
+      real*8 DWS,DWV,DWVso,DerDWV,DerDWS,dtmp
       real*8 WDE,WVE
       integer n,iq,nns
 
@@ -3313,10 +3315,14 @@ c
       if(el.gt.epot(i,j)) jp=j+1
  204  continue
       j=min0(jp,jab)
-      Ef=dble(int(100000*efermi))/100000
-      if(pot(i,j,18).ne.0.) Ef=pot(i,j,18) + pot(i,j,19)*atar
-      if(pot(i,j,18).ne.0.) EFErmi=Ef
-      elf = el - Ef      
+      Ef=dble(int(100000*EFErmi))/100000
+C
+C     The IF block should be added on upgrade from the om-retrieve code
+      if(pot(i,j,18).ne.0.) then
+        Ef=pot(i,j,18) + pot(i,j,19)*atar
+        EFErmi = Ef
+      endif 
+      elf = el - Ef
 c
 c     Calculate radius and diffuseness parameters
       if(rco(i,j,13).eq.0.) then
@@ -3330,13 +3336,13 @@ C--------------------------------------------------------------------
 C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
      *       + rco(i,j,2)*el
      *       + rco(i,j,12)*el*el
-	else
+      else
 C     RCN, 09/2004, to handle new extension to the OMP RIPL-2 format
-	  nn = int(rco(i,j,7))
+        nn = int(rco(i,j,7))
         rlib(i)= ( abs(rco(i,j,1)) + rco(i,j,2)*atar ) *
      *           ( 1.d0 - ( rco(i,j,3) + rco(i,j,4)*atar ) * elf**nn/
-     *           ( elf**nn + ( rco(i,j,5) + rco(i,j,6)*atar )**nn ) )             
-	endif 
+     *           ( elf**nn + ( rco(i,j,5) + rco(i,j,6)*atar )**nn ) )
+      endif
 
       alib(i)=abs(aco(i,j,1)) + aco(i,j,2)*el + aco(i,j,3)*eta
      *        + aco(i,j,4)/atar + aco(i,j,5)/sqrt(atar)
@@ -3349,79 +3355,83 @@ c
 c
 c     Special Koning-type potential formulas
 c
-      if (pot(i,j,24).eq.1.) then  
+      if (pot(i,j,24).eq.1.) then
 c
-c       Koning-type formulas 
+c       Koning-type formulas
 c
         elf = el - Ef
-	   
+
         if(i.eq.1) call bcoget(b,j)
         vc=0.
         if(i.eq.1 .and. b(1,j,5).ne.0.) vc =
-     +  b(1,j,1)*encoul2*( b(1,j,2) - 2.*b(1,j,3)*elf + 
+     +  b(1,j,1)*encoul2*( b(1,j,2) - 2.*b(1,j,3)*elf +
      +  3.*b(1,j,4)*elf**2 + b(i,j,14)*b(i,j,13)*exp(-b(i,j,14)*elf) )
-       
-	  nn = int(pot(i,j,13))
-c       Retrieving average energy of the particle states Ep   	    
+
+        nn = int(pot(i,j,13))
+c       Retrieving average energy of the particle states Ep
         Ep=Ef
-	  if( (i.eq.2) .or. (i.eq.4) )
+        if( (i.eq.2) .or. (i.eq.4) )
      >     Ep=dble(int(100000*pot(i,j,20)))/100000
         if(Ep.eq.0.) Ep=Ef
         elf = el - Ep
 
         iq=1
-	  if(i.eq.4 .and. b(4,j,12).gt.0.) iq=nint(b(4,j,12))
+        if(i.eq.4 .and. b(4,j,12).gt.0.) iq=nint(b(4,j,12))
 
         vlib(i)=
      +    b(i,j,1)*( b(i,j,15) - b(i,j,2)*elf + b(i,j,3)*elf**2 -
-     +    b(i,j,4)*elf**3 + b(i,j,13)*exp(-b(i,j,14)*elf) ) + 
+     +    b(i,j,4)*elf**3 + b(i,j,13)*exp(-b(i,j,14)*elf) ) +
      +    b(i,j,5)*vc + b(i,j,6)*(elf**nn/(elf**nn + b(i,j,7)**nn)) +
      +    b(i,j,8)*exp(-b(i,j,9)*elf**iq)*(elf**nn/
      +    (elf**nn + b(i,j,10)**nn)) +
      +    b(i,j,11)*exp(-b(i,j,12)*elf)
 
-	endif 
+      endif
 
-      if (pot(i,j,24).eq.2.) then  
+      if (pot(i,j,24).eq.2.) then
 c
-c       Morillon-Romain formulas 
+c       Morillon-Romain formulas
 c
-        elf = el - Ef 
+        elf = el - Ef
         if(i.eq.1) call bcoget(b,j)
-        vc=0.
-c       Morillon-Romain formulae defined for neutrons only, no Coulomb yet
-c       if(i.eq.1 .and. b(1,j,5).ne.0.) vc =
-c    +  b(1,j,1)*encoul2*( b(1,j,2) - 2.*b(1,j,3)*elf + 
-c    +  3.*b(1,j,4)*elf**2 + b(i,j,14)*b(i,j,13)*exp(-b(i,j,14)*elf) )
 
 c       Vhf(E) calculated from nonlocal approximation
-c          as suggested by Perey and Buck 
+c          as suggested by Perey and Buck
 c
         alpha_PB = dble(int(100000*b(i,j,1)))/100000
         beta_PB  = dble(int(100000*b(i,j,2)))/100000
-  	  gamma_PB = dble(int(100000*b(i,j,3)))/100000
-	  
-	  EEE = dble(int(1000000*el))/1000000
+        gamma_PB = dble(int(100000*b(i,j,3)))/100000
+
+        EEE = dble(int(1000000*el))/1000000
 
         iq=1
-	  if(i.eq.4 .and. b(4,j,12).gt.0.) iq=nint(b(4,j,12))
+        if(i.eq.4 .and. b(4,j,12).gt.0.) iq=nint(b(4,j,12))
 
+        vc=0.
         Vnonl = 0.
-        if(i.eq.1) Vnonl = -Vhf(EEE,alpha_PB,beta_PB,gamma_PB)
-        
-	  vlib(i)=
+        if(i.eq.1) then
+	    Vnonl = -Vhf(EEE,alpha_PB,beta_PB,gamma_PB)
+C         Numerical derivative of the Vhf
+          if(b(1,j,5).ne.0.) then
+	      Vnonlm = -Vhf(EEE-0.05,alpha_PB,beta_PB,gamma_PB)
+	      Vnonlp = -Vhf(EEE+0.05,alpha_PB,beta_PB,gamma_PB)
+C           Coulomb correction for Hartree-Fock potential
+            vc = encoul2*(Vnonlm-Vnonlp)*10.d0
+          endif
+        endif
+        vlib(i)=
      +    Vnonl + b(i,j,5)*vc +
      +    b(i,j,6)*(elf**nn/(elf**nn + b(i,j,7)**nn)) +
      +    b(i,j,8)*exp(-b(i,j,9)*elf**iq)*(elf**nn/
      +    (elf**nn + b(i,j,10)**nn)) +
      +    b(i,j,11)*exp(-b(i,j,12)*elf)
-	endif 
+      endif
 c
 c     Nonlocality consideration
 c
 c     Retrieving energy above which nonlocality in the volume absorptive
 c               potential is considered (Ea)
-c 
+c
       Ea=dble(int(100000*pot(i,j,21)))/100000
       if(Ea.eq.0.) Ea=1000.1d0
       if(i.eq.2 .and. Ea.lt.1000. .and. el.gt.(Ef+Ea) )
@@ -3459,7 +3469,6 @@ c     Standard potential formulas
       if(el.gt.0.) vlib(i) = vlib(i) + pot(i,j,17)*encoul/el**2
      *    + (pot(i,j,5) + pot(i,j,15)*eta + pot(i,j,16)*el)*dlog(el)
  300  continue
-
 c
 c     To calculate dispersion relation contribution
 c
@@ -3467,7 +3476,7 @@ c
 c
 c       Exact calculation of the dispersive contribution
 c
-	  EEE = dble(int(1000000*el))/1000000
+        EEE = dble(int(1000000*el))/1000000
 
         i=2
 c       Only one energy range
@@ -3479,31 +3488,68 @@ c
           AAv=dble(int(100000*b(i,j,6)))/100000
           Bv=dble(int(100000*b(i,j,7)))/100000
           n = nint( pot(i,j,13) )
-          if(n.eq.0 .or. mod(n,2).eq.1) 
-     +      stop 'Zero or odd exponent in Wv(E) for dispersive OMP'    
+          if(n.eq.0 .or. mod(n,2).eq.1)
+     +      stop 'Zero or odd exponent in Wv(E) for dispersive OMP'
 
-c     Retrieving average energy of the particle states Ep   	    
+c     Retrieving average energy of the particle states Ep
           Ep=dble(int(100000*pot(i,j,20)))/100000
           if(Ep.eq.0.) Ep=Ef
 
 c         if(idr.ge.2) then
 c           analytical DOM integral
-            DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n)
-c	    endif
+            DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DerDWV)
+	      DWVder = 0.d0
+c           coulomb correction for real volume potential 
+	      if(b(1,1,5).ne.0.d0) DerDWV = -b(1,1,5)*encoul2*DerDWV
+	      if(b(1,1,5).ne.0.d0) then
+              DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
+              DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
+	        DWVder = b(1,1,5)*encoul2*(DWVm-DWVp)*5.d0
+            endif
+c         endif
 
 c         if(idr.le.-2) then
 c           numerical DOM integral (not needed for a time being)
-c           WVE=WVf(AAv,Bv,Ep,EEE,n)
+c           WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
 c           DWV=2*DOM_int(Delta_WV,WVf,Ef,Ef+5.*Bv,150000.d0,EEE,0.d0)
 c         endif
 c
-c         Nonlocality correction to the DOM integral 
+c         Nonlocality correction to the DOM integral
 c           (only used if Ea is non-zero)
 c
-          if(Ea.lt.1000.)
-     +        DWV=DWV+Wvf(AAv,Bv,Ep,Ef-Ea,n)*DOM_INT_T1(Ef,Ea,EEE)+
-     +            AlphaV*DOM_INT_T2(Ef,Ea,EEE)
-	  endif
+          Ea=dble(int(100000*pot(i,j,21)))/100000
+          if(Ea.eq.0.) Ea=1000.1d0
+          Dwplus = 0.d0
+          Dwmin = 0.d0
+          T12der = 0.d0  
+          if(Ea.lt.1000.) THEN
+             Dwplus = AlphaV*DOM_INT_T2(Ef,Ea,EEE)
+             dtmp1 = Wvf(AAv,Bv,Ep,Ef,Ef+Ea,n)
+             Dwmin = dtmp1*DOM_INT_T1(Ef,Ea,EEE)
+             DWV = DWV + Dwplus + Dwmin
+c            coulomb correction for nonlocal dispersive contribution  
+c                to real volume potential 
+ 	       if(b(1,1,5).ne.0.d0) then
+               if(eee.ne.0.05d0) then
+                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.05d0)  
+                 T2m = DOM_INT_T2(Ef,Ea,EEE-0.05d0)  
+			   T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*10.d0 
+	           T1p = DOM_INT_T1(Ef,Ea,EEE+0.05d0)
+	           T1m = DOM_INT_T1(Ef,Ea,EEE-0.05d0)
+	           T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*10.d0
+	           T12der =  T1der + T2der 
+			 else
+                 T2p = DOM_INT_T2(Ef,Ea,EEE+0.1d0)  
+                 T2m = DOM_INT_T2(Ef,Ea,EEE-0.1d0)
+			   T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*5.d0 
+	           T1p = DOM_INT_T1(Ef,Ea,EEE+0.1d0)
+	           T1m = DOM_INT_T1(Ef,Ea,EEE-0.1d0)
+	           T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*5.d0
+	           T12der =  T1der + T2der 
+               endif 
+	       endif
+          endif
+        endif
 
         i=4
 c       Only one energy range
@@ -3516,29 +3562,51 @@ c       Real surface contribution from Dispersive relation
           Bs=dble(int(100000*b(i,j,10)))/100000
           Cs=dble(int(100000*b(i,j,9)))/100000
           n = nint( pot(i,j,13) )
-          if(n.eq.0 .or. mod(n,2).eq.1) 
-     +      stop 'Zero or odd exponent in Wd(E) for dispersive OMP'    
-	    
-		iq=1
-	    if(b(4,j,12).gt.0.) iq=nint(b(4,j,12))
+          if(n.eq.0 .or. mod(n,2).eq.1)
+     +      stop 'Zero or odd exponent in Wd(E) for dispersive OMP'
 
-c     Retrieving average energy of the particle states Ep   	    
+          iq=1
+          if(b(4,j,12).gt.0.) iq=nint(b(4,j,12))
+
+c         Retrieving average energy of the particle states Ep
           Ep=dble(int(100000*pot(i,j,20)))/100000
           if(Ep.eq.0.) Ep=Ef
+C         Ea=dble(int(100000*pot(i,j,21)))/100000
+C         if(Ea.eq.0.) Ea=1000.1d0
 
           if(idr.ge.2) then
 c           analytical DOM integral
-            DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n)
-	    endif
+            DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DerDWS)
+	      DWSder = 0.d0
+c           Coulomb correction for real surface potential 
+	      if(b(1,1,5).ne.0.d0) DerDWS = -b(1,1,5)*encoul2*DerDWS
+	      if(b(1,1,5).ne.0.d0) then
+              DWSp = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE+0.1d0,n,dtmp)
+              DWSm = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE-0.1d0,n,dtmp)
+	        DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
+            endif
+          endif
 
           if(idr.le.-2) then
 c           numerical DOM integral
-            nns=n  
+            nns=n
             WDE=WDf(As,Bs,Cs,Ep,EEE,n,iq)
             DWS = 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE,WDE)
+	      DWSder = 0.d0
+c           Coulomb correction for real surface potential 
+	      if(b(1,1,5).ne.0.d0) then
+              WDE=WDf(As,Bs,Cs,Ep,EEE+0.1d0,n,iq)
+              DWSp = 
+     >	 	 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE+0.1d0,WDE)
+              WDE=WDf(As,Bs,Cs,Ep,EEE-0.1d0,n,iq)
+              DWSm =
+     >		 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE-0.1d0,WDE)
+c             Numerical derivative
+	        DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
+	      endif
           endif
 
-	  endif
+        endif
 
         i=6
 c       Only one energy range
@@ -3551,32 +3619,32 @@ c
           AAvso=dble(int(100000*b(i,j,6)))/100000
           Bvso=dble(int(100000*b(i,j,7)))/100000
           n = nint( pot(i,j,13) )
-          if(n.eq.0 .or. mod(n,2).eq.1) 
-     +      stop 'Zero or odd exponent in Wso(E) for dispersive OMP'    
+          if(n.eq.0 .or. mod(n,2).eq.1)
+     +      stop 'Zero or odd exponent in Wso(E) for dispersive OMP'
 
 c         analytical DOM integral
-          DWVso=DOM_INT_Wv(Ef,Ef,AAvso,Bvso,EEE,n)
+          DWVso=DOM_INT_Wv(Ef,Ef,AAvso,Bvso,EEE,n,dtmp)
 
-	endif
+        endif
 
 c       Adding real volume dispersive contribution to the real potential
 c       Geometry parameters are the same as for the volume
 c       potential(imag and real).
-        vlib(1)=vlib(1)+dwv
+        Vhfnum = vlib(1)
+        vlib(1)= vlib(1)+dwv+DWVder+T12der
 c       Including real surface dispersive contribution
 c       Geometry parameters are the same as for the imaginary surface
 c       potential.
-        vlib(3)=dws
+        vlib(3)=dws+DWSder
         alib(3)=alib(4)
         rlib(3)=rlib(4)
 c       Adding real spin orbit dispersive contribution to the real spin orbit potential
 c       Geometry parameters are the same as for the imaginary spin orbit
 c       potential(imag and real)
         vlib(5) = vlib(5) + DWVso
-	write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
-     &          atar, ztar, el, (vlib(i),rlib(i),alib(i),i=1,6)               	
+        write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
+     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)               	
       endif
-
 
       return
       end
@@ -3604,15 +3672,15 @@ c
        call setr(0.,b,90*ndim1)
 
 c      Original Koning dependence
-       b(1,j,1)  =  pot(1,j,1) + pot(1,j,2)*atar + pot(1,j,8)*eta 
+       b(1,j,1)  =  pot(1,j,1) + pot(1,j,2)*atar + pot(1,j,8)*eta
 
-	 if((pot(1,j,20).ne.0.) .and. 
+       if((pot(1,j,20).ne.0.) .and.
      +    (pot(1,j,14) + pot(1,j,15)*atar + pot(1,j,16)).ne.0. ) then
-c        Soukhovitski dependence 
+c        Soukhovitski dependence
          b(1,j,1)  =  pot(1,j,1) + pot(1,j,2)*atar + pot(1,j,8)*eta +
      +                pot(1,j,20)*eta/
      +               (pot(1,j,14) + pot(1,j,15)*atar + pot(1,j,16))
-	 endif
+       endif
        b(1,j,2)  =  pot(1,j,3) + pot(1,j,4)*atar
        b(1,j,3)  =  pot(1,j,5) + pot(1,j,6)*atar
        b(1,j,4)  =  pot(1,j,7)
@@ -3622,14 +3690,16 @@ c        Soukhovitski dependence
 
 c      b coefficients from 13 to 15 added for Soukhovitski potential
 c      V^DISP_R
-	 b(1,j,13)  =  pot(1,j,16) 
+       b(1,j,13)  =  pot(1,j,16)
 c      Lambda_R
-	 b(1,j,14)  =  pot(1,j,17)
+       b(1,j,14)  =  pot(1,j,17)
 c      V^0_R + V^A_R*(A-232)
-	 b(1,j,15)  =  pot(1,j,14) + pot(1,j,15)*atar 
+       b(1,j,15)  =  pot(1,j,14) + pot(1,j,15)*atar
 c      To preserve compatibility with RIPL-2 Koning database
 c      b(i,j,15) must be equal to 1. !!! for Koning OMP
- 	 if(abs(b(1,j,15)).lt.1.e-8) b(1,j,15) = 1.
+       if((pot(1,j,14) + pot(1,j,15)*atar + pot(1,j,16)).eq.0.)
+     >          b(1,j,15) = 1.
+C      if(abs(b(1,j,15)).lt.1.e-8) b(1,j,15) = 1.
 
 c      Wv( Av )
        b(2,j,6)  =  pot(2,j,1) + pot(2,j,2)*atar
@@ -3641,18 +3711,18 @@ c
 c      added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
 c      Wd( As )
 c      b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta
-       b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta + pot(4,j,7)*atar 
+       b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta + pot(4,j,7)*atar
 
 c      Wd( Cs )
        if(pot(4,j,3).ne.0.) then
-         b(4,j,9)  =  pot(4,j,2) + 
+         b(4,j,9)  =  pot(4,j,2) +
      +                pot(4,j,3)/(1.+ exp((atar-pot(4,j,4))/pot(4,j,5)))
        else
-         b(4,j,9)  =  pot(4,j,2) 
+         b(4,j,9)  =  pot(4,j,2)
        endif
 c      Wd( Bs )
        b(4,j,10) =  pot(4,j,6)
-C      Wd( q ) 
+C      Wd( q )
        b(4,j,12) =  pot(4,j,12)
 
 c      Vso
@@ -3661,6 +3731,7 @@ c      Vso
 c      Wso
        b(6,j,6)  =  pot(6,j,1)
        b(6,j,7)  =  pot(6,j,3)
+
 
       return
       end
@@ -3748,19 +3819,19 @@ c     Analytical dispersive integrals are included
 c     see Quesada JM et al, Computer Physics Communications 153(2003) 97
 c                           Phys. Rev. C67(2003) 067601             
 C
-      REAL*8 FUNCTION DOM_INT_Wv(Ef,Ep,Av,Bv,E,n)
+      REAL*8 FUNCTION DOM_INT_Wv(Ef,Ep,Av,Bv,E,n,DerivIntWv)
 C
-C               Analytical dispersive integral for 
+C      Analytical dispersive integral and its derivative for
 C      Wv(E)=Av*(E-Ep)**n/( (E-Ep)**n + Bv**n )  for E>Ep
 C      Wv(E)=Wv(2*Ef-E)                          for E<2Ef-Ep
-C      Wv(E)=0                                     OTHERWISE   
+C      Wv(E)=0                                     OTHERWISE
 C
       IMPLICIT NONE
       REAL*8 Ef,Ep,Av,Bv,E,pi
       REAL*8 E0,Ex,Eplus,Emin,Rs,ResEmin,ResEplus
-
+      REAL*8 DerEmin, DerEplus, Rds, DerivIntWv
       COMPLEX*16 Pj,I,Zj,Ztmp
-      COMPLEX*8 Fs
+      COMPLEX*8 Fs,Ds
 
 
       INTEGER N,j
@@ -3774,45 +3845,62 @@ C
       Eplus = Ex + E0
       Emin  = Ex - E0
       DOM_INT_Wv = 0.d0
+	DerivIntWv = 0.d0
 
       ResEmin  =  Emin**n / (Emin**n + Bv**n)
 
-      ResEplus = -(Eplus**n / (Eplus**n + Bv**n))
+      DerEmin  =  Emin**(n-1) *
+	>           ( Emin**n + Bv**n*(1.d0 + n*log(dabs(Emin)) ) ) 
+	>           / (Emin**n + Bv**n)**2 
+
+      ResEplus = -Eplus**n / (Eplus**n + Bv**n)
+
+      DerEplus = -Eplus**(n-1) *
+	>           ( Eplus**n + Bv**n*(1.d0+n*log(Eplus)) ) 
+	>           / (Eplus**n + Bv**n)**2 
 
 C----------------------------------
 C     Complex arithmetic follows
       Fs = (0.d0,0.d0)
+	Ds = (0.d0,0.d0)
       do j=1,n
        Ztmp = I*(2*j-1)/dble(n)*pi
        Pj = Bv*exp(Ztmp)
-       Zj = Pj * (2*Pj + Eplus -Emin) * Ex 
-       Zj = Zj / ( (Pj + E0) * (Pj+Eplus) * (Pj-Emin) ) 
+       Zj = Pj * (2*Pj +Eplus -Emin) * Ex
+       Zj = Zj / ( (Pj+E0) * (Pj+Eplus) * (Pj-Emin) )
        Fs = Fs + Zj*log(-Pj)
+	 Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*log(-Pj)
+     >           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
       enddo
-      
-      IF(ABS(IMAG(Fs)).gt.1.e-4) STOP 'Too big imag part in Wv' 
-      Rs = REAL(Fs)
+
+      IF(ABS(IMAG(Fs)).gt.1.e-4) STOP '(F) Too big imag part in Wv'
+      Rs  = REAL(Fs)
+      IF(ABS(IMAG(Ds)).gt.1.e-4) STOP '(D) Too big imag part in Wv'
+	Rds = REAL(Ds)
 C----------------------------------
-      
+
       DOM_INT_Wv = -Av/pi*
      &  (Rs/n  + ResEplus*log(Eplus) + ResEmin*log(dabs(Emin)))
-      
+
+      DerivIntWv = -Av/pi*( Rds/n + DerEplus + DerEmin)
+
       RETURN
       END
 
-      REAL*8 FUNCTION DOM_INT_Ws(Ef,Ep,As,Bs,Cs,E,m)
+      REAL*8 FUNCTION DOM_INT_Ws(Ef,Ep,As,Bs,Cs,E,m,DerivIntWs)
 C
-C               Analytical dispersive integral for 
+C      Analytical dispersive integral and its derivative for
 C      Ws(E)=As*(E-Ep)**m/( (E-Ep)**m + Bs**m ) * exp(-Cs*(E-Ep)) for E>Ep
 C      Ws(E)=Ws(2*Ef-E)                                           for E<2Ef-Ep
-C      Ws(E)=0                                                    OTHERWISE   
+C      Ws(E)=0                                                    OTHERWISE
 C
       IMPLICIT NONE
       REAL*8 Ef,Ep,As,Bs,Cs,E,EIn
       COMPLEX*16 I,Pj,Zj,Ztmp,zfi
-      COMPLEX*8 Fs
+      COMPLEX*8 Fs,Ds
       REAL*8 E0,Ex,Eplus,Emin,pi
       REAL*8 Rs,ResEmin,ResEplus
+	REAL*8 DerivIntWs,DerEmin,DerEplus,Rds
       INTEGER m,j
 
       DATA I/(0.d0,1.d0)/
@@ -3824,29 +3912,47 @@ C
       Eplus = Ex + E0
       Emin  = Ex - E0
       DOM_INT_Ws = 0.d0
+	DerivIntWs = 0.d0
 
       ResEmin  =  Emin**m / (Emin**m + Bs**m)
 
+      DerEmin  = -Emin**(m-1) *
+	>          ( Emin**m + Bs**m + ( -Cs*Emin**(m+1) +
+     >            Bs**m *(-Cs*Emin+m) ) * exp(-Cs*Emin)*EIn(Cs*Emin) ) 
+	>           / (Emin**m + Bs**m)**2 
+
       ResEplus = -Eplus**m / (Eplus**m + Bs**m)
+
+      DerEplus =  Eplus**(m-1) *
+	>          ( Eplus**m + Bs**m + ( Cs*Eplus**(m+1) +
+     >            Bs**m *(Cs*Eplus+m) ) * exp(Cs*Eplus)*EIn(-Cs*Eplus) ) 
+	>           / (Eplus**m + Bs**m)**2 
 
 C----------------------------------
 C     Complex arithmetic follows
       Fs = (0.d0,0.d0)
+      Ds = (0.d0,0.d0)
       do j=1,m
        Ztmp = I*(2*j-1)/dble(m)*pi
        Pj = Bs*exp(Ztmp)
-       Zj = Pj * (2*Pj + Eplus -Emin) * Ex 
-       Zj = Zj / (Pj + E0) / (Pj+Eplus) / (Pj-Emin) 
+       Zj = Pj * (2*Pj +Eplus -Emin) * Ex
+       Zj = Zj / (Pj+E0) / (Pj+Eplus) / (Pj-Emin)
        Fs = Fs + Zj* zfi(-Pj*Cs)
+	 Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*zfi(-Pj*Cs)
+     >           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
       enddo
 
-      IF(ABS(IMAG(Fs)).gt.1.e-4) STOP 'Too big imag part in Ws' 
-      Rs = REAL(Fs)
+      IF(ABS(IMAG(Fs)).gt.1.e-4) STOP '(F) Too big imag part in Wv'
+      Rs  = REAL(Fs)
+      IF(ABS(IMAG(Ds)).gt.1.e-4) STOP '(D) Too big imag part in Wv'
+      Rds = REAL(Ds)
 C----------------------------------
-      
-      DOM_INT_Ws = As/pi*(Rs/m 
+
+      DOM_INT_Ws = As/pi*(Rs/m
      &                  - ResEplus*exp(Cs*Eplus)*EIn(-Cs*Eplus)
      &                  - ResEmin*exp(-Cs*Emin)*EIn(Cs*Emin) )
+
+      DerivIntWs = As/pi*( Rds/m + DerEplus + DerEmin)
 
       RETURN
       END
@@ -3911,44 +4017,31 @@ C
 C
 C     Integral over E' corresponding to nonlocal additions T2(E'>>0)
 C
-	IMPLICIT NONE
-	real*8 E,Ea,Ef,EL,Pi
+      IMPLICIT REAL*8(A-H,O-Z)
 
       Pi=4.d0*ATAN(1.d0)
-      EL=Ef+Ea 
-      DOM_int_T2= 1.d0 / Pi * (  
-     >      sqrt(abs(Ef)) * atan( (2*sqrt(EL*abs(Ef)))/(EL-abs(Ef)) )
-     > +    EL**1.5d0/(2*Ef)*log(Ea/EL) )
+      El=Ef+Ea
 
-      IF(E.GT.EL) THEN
+      R1=1.5*DSQRT(El)*dLOG(abs((El-E)/Ea))
 
-      DOM_int_T2 = DOM_int_T2 + 1.d0/Pi* ( 
-     >  sqrt(E) * log( (sqrt(E)+sqrt(EL)) / (sqrt(E)-sqrt(EL)) ) +
-     >  1.5d0*sqrt(EL)*log((E-EL)/Ea) + EL**1.5d0/(2*E)*log(EL/(E-EL)) )
-
-      ELSEIF(E.EQ.EL) THEN
-
-      DOM_int_T2 = DOM_int_T2 + 1.d0/Pi*1.5d0*sqrt(EL)
-     > *log((2**(4.d0/3.d0)*EL)/Ea)
-
-      ELSEIF(E.GT.0.d0 .AND. E.LE.EL) THEN
-
-      DOM_int_T2 = DOM_int_T2 + 1.d0/Pi * (
-     > sqrt(e) * log( (sqrt(E)+sqrt(EL)) / (sqrt(EL)-sqrt(E)) ) + 
-     > 1.5d0*sqrt(EL)*log((EL-E)/Ea)+EL**1.5d0/(2.d0*E)*log(EL/(EL-E)) )
-
-      ELSEIF(E.EQ.0.d0) THEN
-
-      DOM_int_T2 = DOM_int_T2 + 1.d0/Pi*1.5d0*sqrt(EL)
-     > *log(EL/Ea)+0.5d0*sqrt(EL)
-
+      IF(E.eq.0.d0) THEN
+        R2=0.5*El**1.5d0*(1.d0/El-dlog(abs(El/Ea))/Ef)
       ELSE
-
-      DOM_int_T2 = DOM_int_T2 + 1.d0/Pi * (
-     > -sqrt(abs(E))*atan( 2*(sqrt(EL-abs(E))) / (EL-abs(E)) ) +
-     > 1.5d0*sqrt(EL)*log((EL-E)/Ea)+EL**1.5d0/(2.d0*E)*log(EL/(EL-E)) )
-
+        R2=0.5*El**1.5d0/(E*Ef)*
+     >            ( Ef*dlog(dabs(El/(El-E))) -E*dlog(dabs(El/Ea)) )
       ENDIF
+
+      R3=2*DSQRT(dABS(Ef))*( 0.5d0*Pi - atan( DSQRT(El/dabs(Ef)) ) )
+
+      IF(E.GE.0.d0) THEN
+        R4=DSQRT(E)*
+     >           dlog(dabs( (dsqrt(El)+dsqrt(E))/(dsqrt(El)-dsqrt(E)) ))
+      ELSE
+        R4=-2.d0*DSQRT(dabs(E))*( 0.5d0*Pi - atan( DSQRT(dabs(El/E)) ) )
+      ENDIF
+
+      DOM_int_T2 =  1.d0/Pi*(R1+R2+R3+R4)
+
       RETURN
       END
 C
@@ -4016,11 +4109,12 @@ C
       return
       end
 C
-      real*8 function WVf(A,B,Ep,E,n)
-      real*8 A,B,Ep,E
-	integer n
+      real*8 function WVf(A,B,Ep,Ef,E,n)
+      real*8 A,B,Ep,E,Ef
+      integer n
 C
       WVf=0.d0
+      if(E.LE.Ef) E=2.d0*Ef-E
       if(E.LE.Ep) return
 C
       ee=(E-Ep)**n
@@ -4028,6 +4122,7 @@ C
 C
       return
       end
+
 C
       real*8 function DELTA_WD(WDf,y)
       real*8 E,Ef,A,B,C,Ep,y,WDf,WDE,WVE
@@ -4128,4 +4223,3 @@ c
 c
       RETURN
       END
-c**********************************************************
