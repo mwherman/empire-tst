@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-01-22 17:11:02 $ 
-Ccc   * $Id: input.f,v 1.22 2004-01-22 17:11:02 herman Exp $ 
+Ccc   * $Date: 2004-02-09 21:19:13 $ 
+Ccc   * $Id: input.f,v 1.23 2004-02-09 21:19:13 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -277,6 +277,12 @@ C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes) 
 C        IOPSYS = 2 LINUX on-line retrieval 
          IOPsys = 0 
+C--------Mode of EXFOR retrieval
+C        IX4ret = 0 no EXFOR retrieval
+C        IX4ret = 1 local MySQL server (to become 2.19 default)
+C        IX4ret = 2 remote SYBASE server 
+C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
+         IX4ret = 3
 C 
 C--------CCFUF parameters 
          DV = 10. 
@@ -361,6 +367,8 @@ C--------GDR parameters
 C--------set options for DEGAS (exciton preequilibrium) 
          DEGa = 0.0 
          GDIvp = 13.0 
+C--------set options for PCROSS (exciton preequilibrium + cluster emission) 
+         PEQc = 0.0 
 C--------set ENDF flag to 0 (no ENDF file for formatting) 
          ENDf = 0.0 
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident) 
@@ -609,10 +617,10 @@ C--------------------------set residues to be used for EXFOR retrieval
             ENDDO 
          ENDDO 
 C--------retrieve EXFOR data 
-         INQUIRE(FILE = 'EXFOR.DAT', EXIST = gexist) 
+         INQUIRE(FILE = 'EXFOR.dat', EXIST = gexist) 
          IF(.NOT.gexist) THEN  
-            IF(IOPsys.EQ.0)CALL RETRIEVE !retrieval from the local database 
-            IF(IOPsys.EQ.2) THEN 
+            IF(IX4ret.EQ.3)CALL RETRIEVE !retrieval from the local database 
+            IF(IX4ret.EQ.1 .OR. IX4ret.EQ.2) THEN 
 C--------------on-line EXFOR retrieval from the remote database          
                WRITE(atar,'(I3)') INT(A(0))  
                IF(atar(1:1).EQ.' ') THEN 
@@ -632,18 +640,26 @@ C--------------set projectile  for EXFOR retrieval
                IF(AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0)proj = 'd' 
                IF(AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0)proj = 'g' 
                IF(AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0)proj = 't' 
-               IF(SYMb(0)(2:2).EQ.' ') THEN  
+C--------------retrieval from the remote database
+               IF(SYMb(0)(2:2).EQ.' ' .AND.  IX4ret.EQ.2) THEN  
                x4string = '~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.
      &jar: x4retr x -target:"'//SYMb(0)(1:1)//'-'//atar//';'//SYMb(0)(1:
      &1)//'-0" -Rea ct:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE"#' 
-c    &1)//'-0" -Rea ct:"'//proj//',*"'//' -quant:"DE"#' 
-               ELSE  
+               ELSEIF(IX4ret.EQ.2) THEN 
                x4string = '~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.
      &jar: x4retr x -target:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -
      &React:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE"#' 
-c    &React:"'//proj//',*"'//' -quant:"DE"#' 
                ENDIF  
-               iwin = PIPE(x4string) 
+C--------------retrieval from the local MySQL database
+               IF(SYMb(0)(2:2).EQ.' ' .AND.  IX4ret.EQ.1) THEN  
+               x4string = './X4retrieve "'//SYMb(0)(1:1)//'-0'//';'
+     &//SYMb(0)(1:1)//'-'//atar//'" '//'"CS;DA;DAE;DE" '//'"'//proj//
+     &',*"#' 
+               ELSEIF(IX4ret.EQ.1) THEN 
+               x4string = './X4retrieve "'//SYMb(0)//'-0'//';'
+     &//SYMb(0)//'-'//atar//'" '//'"CS;DA;DAE;DE" '//'"'//proj//',*"#' 
+               ENDIF  
+               iwin = PIPE(x4string)
             ENDIF 
          ENDIF 
 C--------retrieve of EXFOR data *** done *** 
@@ -723,6 +739,7 @@ C
             WRITE(6, *)' ' 
          ENDIF 
          IF(DEGa.GT.0)GCAsc = 1. 
+         IF(PEQc.GT.0)GCAsc = 1.  ! PCROSS
          IF(MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0  
      &      .AND.A(NNUc).GT.1.0D0)THEN 
             WRITE(6, *)' ' 
@@ -738,18 +755,19 @@ C
             WRITE(6, *)' ' 
          ENDIF  
 C--------setup model matrix (IDNa) defining which model is used where 
-C                      ECIS   MSD   MSC   DEGAS   HMS 
-C                        1     2     3      4      5 
-C        1 neut. disc.   x     x     x      x      x 
-C        2 neut. cont.   x     x     x      x      x 
-C        3 prot. disc.   x     x     x      x      x 
-C        4 prot. cont.   x     x     x      x      x 
-C        5 gamma         x     x     x      x      x 
+C                      ECIS   MSD   MSC   DEGAS   HMS   PCROSS 
+C                        1     2     3      4      5      6 
+C        1 neut. disc.   x     x     0      x      x      0
+C        2 neut. cont.   0     x     x      x      x      x
+C        3 prot. disc.   x     x     0      x      x      0
+C        4 prot. cont.   0     x     x      x      x      x
+C        5 gamma         0     0     x      x      0      x
+C        6 alpha. cont.  0     0     0      0      0      x
 C 
 C--------with x=1 if used and x=0 if not. 
 C 
 C--------initialize matrix with 0's 
-         DO i = 1, NDREGIONS !over ejectiles/regions 
+         DO i = 1, NDREGIONS   !over ejectiles/regions 
             DO j = 1, NDMODELS !over models in the order as above 
                IDNa(i, j) = 0 
             ENDDO 
@@ -777,17 +795,17 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
             IDNa(2, 3) = 1 
             IDNa(4, 3) = 1 
             IF(GST.GT.0)IDNa(5, 3) = 1 
-C-----------stop MSC charge-exchange if DEGAS active 
-            IF(DEGa.GT.0 .OR. LHMs.GT.0)THEN 
+C-----------stop MSC charge-exchange if DEGAS,DDHMS or PCROSS active 
+            IF(DEGa.GT.0 .OR. LHMs.GT.0. OR. PEQc.GT.0.)THEN 
                IF(NPRoject.EQ.1)THEN 
                   IDNa(4, 3) = 0 
                ELSEIF(NPRoject.EQ.2)THEN 
                   IDNa(2, 3) = 0 
                ELSE 
                   WRITE(6, *)'' 
-                  WRITE(6, *)'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN ' 
-                  WRITE(6, *)'THIS CASE. EXECUTION S T O P P E D !!!! ' 
-                  STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD ' 
+                  WRITE(6, *)'DEGAS/PCROSS AND MSD/MSC ARE NOT COMPATIB' 
+                  WRITE(6, *)'LE IN THIS CASE. EXECUTION S T O P P E D '
+                  STOP 'ILLEGAL COMBINATION DEGAS/PCROSS + MSC/MSD !!!!'   
                ENDIF 
             ENDIF 
          ENDIF 
@@ -822,6 +840,15 @@ C-----------stop DEGAS particle channels if HMS active
                IDNa(3, 4) = 0 
                IDNa(4, 4) = 0 
             ENDIF 
+C-----------stop DEGAS completely if PCROSS is active 
+CMH---------NO, lets' leave it so that we can have DEGAS and PCROSS clusters
+C           IF(PEQc.GT.0)THEN 
+C              IDNa(1, 4) = 0
+C              IDNa(2, 4) = 0
+C              IDNa(3, 4) = 0
+C              IDNa(4, 4) = 0
+C              IDNa(5, 4) = 0
+C           ENDIF 
          ENDIF 
 C--------set HMS  (.,5) 
          IF(LHMs.GT.0)THEN 
@@ -845,6 +872,44 @@ C-----------stop HMS inelastic scattering if MSC and/or MSD active
                ENDIF 
             ENDIF 
          ENDIF 
+C--------set PCROSS  (.,6) cluster emission
+         IF(PEQc.GT.0)THEN 
+            IDNa(1, 6) = 0 
+            IDNa(2, 6) = 1 
+            IDNa(3, 6) = 0 
+            IDNa(4, 6) = 1 
+            IDNa(5, 6) = 1 
+            IDNa(6, 6) = 1 
+C-----------stop PCROSS gammas if calculated within MSC 
+            IF(GST.GT.0 .AND. MSC.GT.0)IDNa(5, 6) = 0 
+C-----------stop PCROSS inelastic scattering if MSC and/or MSD active 
+            IF(MSC.GT.0 .OR. MSD.GT.0)THEN 
+               IF(NPRoject.EQ.2)THEN 
+C                 IDNa(3, 6) = 0 
+                  IDNa(4, 6) = 0 
+               ELSEIF(NPRoject.EQ.1)THEN 
+C                 IDNa(1, 6) = 0 
+                  IDNa(2, 6) = 0 
+               ELSE 
+                  WRITE(6, *)'' 
+                  WRITE(6, *)'PCROSS AND MSD/MSC ARE NOT COMPATIBLE IN ' 
+                  WRITE(6, *)'THIS CASE. EXECUTION S T O P P E D !!!! ' 
+                  STOP 'ILLEGAL COMBINATION PCROSS + MSC/MSD' 
+               ENDIF 
+            ENDIF 
+C-----------stop PCROSS nucleon channels if HMS active 
+            IF(LHMs.GT.0)THEN 
+               IDNa(2, 6) = 0 
+               IDNa(4, 6) = 0 
+            ENDIF 
+C-----------stop PCROSS nucleon and gamma channels if DEGAS active 
+            IF(DEGa.GT.0)THEN 
+               IDNa(2, 6) = 0 
+               IDNa(4, 6) = 0 
+               IDNa(5, 6) = 0 
+            ENDIF 
+         ENDIF 
+
 C--------print IDNa matrix 
          WRITE(6, *)' ' 
          WRITE(6, *) 
@@ -853,18 +918,20 @@ C--------print IDNa matrix
      &             '                      ---------------------------- ' 
          WRITE(6, *)' ' 
          WRITE(6, *)'Exit channel       ECIS       MSD       MSC',  
-     &              '      DEGAS      HMS ' 
+     &              '      DEGAS      HMS      PCROSS' 
          WRITE(6, *)' ' 
-         WRITE(6, '('' neut. disc. '',5I10)') 
+         WRITE(6, '('' neut. disc. '',8I10)') 
      &         (IDNa(1, j), j = 1, NDMODELS) 
-         WRITE(6, '('' neut. cont. '',5I10)') 
+         WRITE(6, '('' neut. cont. '',8I10)') 
      &         (IDNa(2, j), j = 1, NDMODELS) 
-         WRITE(6, '('' prot. disc. '',5I10)') 
+         WRITE(6, '('' prot. disc. '',8I10)') 
      &         (IDNa(3, j), j = 1, NDMODELS) 
-         WRITE(6, '('' prot. cont. '',5I10)') 
+         WRITE(6, '('' prot. cont. '',8I10)') 
      &         (IDNa(4, j), j = 1, NDMODELS) 
-         WRITE(6, '('' gammas      '',5I10)') 
+         WRITE(6, '('' gammas      '',8I10)') 
      &         (IDNa(5, j), j = 1, NDMODELS) 
+         WRITE(6, '('' alpha cont. '',8I10)') 
+     &         (IDNa(6, j), j = 1, NDMODELS) 
          WRITE(6, *)' ' 
 C--------model matrix *** done *** 
 C--------reset some options if OMP fitting option selected 
@@ -877,6 +944,7 @@ C--------reset some options if OMP fitting option selected
          MSC = 0 
          LHMs = 0 
          DEGa = 0 
+         PEQc = 0 
          NNUcd = 1 
          NNUct = 4 
          ENDIF  
@@ -1967,7 +2035,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_')) 
       WRITE(6, *)'                        ____________________________' 
       WRITE(6, *)'                       |                            |' 
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b10  |' 
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b12  |' 
       WRITE(6, *)'                       |                            |' 
       WRITE(6, *)'                       |  marching towards LODI ;-) |' 
       WRITE(6, *)'                       |____________________________|' 
@@ -2029,6 +2097,20 @@ C--------DEGAS input
             WRITE(6,  
      &'('' Proton s.p.l. density set to A/'',f5.2,'' in''             ,' 
      &' code DEGAS '')')GDIvp 
+            GOTO 100 
+         ENDIF 
+C--------PCROSS input 
+         IF(name.EQ.'PCROSS')THEN 
+            PEQc = val 
+            IF(val.GT.0)THEN 
+               WRITE(6,  
+     &'('' Exciton model calculations with code'',                       
+     &  '' PCROSS enabled, including cluster emission '')') 
+            ELSE 
+               WRITE(6,  
+     &'('' Exciton model calculations with code'',                       
+     &  '' PCROSS disabled '')') 
+            ENDIF 
             GOTO 100 
          ENDIF 
 C 
@@ -3931,7 +4013,7 @@ C-----constant parameters for EXFOR retrieval
       DATA reaction/'N,F       ', 'N,TOT     '/ 
       DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/ 
 C-----open local file for storing retrieved EXFOR data 
-      OPEN(UNIT = 19, FILE = 'EXFOR.DAT', STATUS = 'NEW', ERR = 99999) 
+      OPEN(UNIT = 19, FILE = 'EXFOR.dat', STATUS = 'NEW', ERR = 99999) 
 C-----open EXFOR index 
       OPEN(UNIT = 20, FILE = '../EXFOR/X4-INDEX.TXT', STATUS = 'OLD') 
 C      
@@ -5021,17 +5103,17 @@ c      destepp=0.2   !!!!!
          IF(ibars.eq.2)enh_sym(ibars)=1. 
          IF(ibars.eq.3)enh_sym(ibars)=1.  
 
-C          Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003 
-           DO kk=1,nrbinfis(ibars)
-             UGRid(kk)=xminn(ibars)+(kk-1)*destepp
-           ENDDO
+C        Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003 
+         DO kk=1,nrbinfis(ibars)
+           UGRid(kk)=xminn(ibars)+(kk-1)*destepp
+         ENDDO
 
-           DO jj=1,NLW
-             AAJ = FLOAT(jj) + HIS(Nnuc)
-             DO kk=1,nrbinfis(ibars)
-                Call DAMIRO(kk,NNUc,XMInn(ibars),destepp,0.,rotemp,aaj) 
-                ROFis(kk,jj,ibars)=rotemp*enh_sym(ibars) 
-           ENDDO 
+         DO jj=1,NLW
+            AAJ = FLOAT(jj) + HIS(Nnuc)
+            DO kk=1,nrbinfis(ibars)
+               Call DAMIRO(kk,NNUc,XMInn(ibars),destepp,0.,rotemp,aaj) 
+               ROFis(kk,jj,ibars)=rotemp*enh_sym(ibars) 
+            ENDDO 
          ENDDO   
       ENDIF 
 C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file 

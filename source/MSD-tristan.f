@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: MSD-tristan.f,v 1.7 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Date: 2004-02-09 21:19:13 $
+Ccc   * $Id: MSD-tristan.f,v 1.8 2004-02-09 21:19:13 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3040,7 +3040,7 @@ C-----
 C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
 C-----total number of bins
-      WRITE(6,*)'nexrt=',nexrt 
+C     WRITE(6,*)'nexrt=',nexrt 
       next = INT(excnq/DE + 1.0001)
 C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667

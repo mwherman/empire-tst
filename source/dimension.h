@@ -1,6 +1,7 @@
       PARAMETER(
      * NDNUC= 50                   
-     *,NDEJC=3 
+c      for PCROSS
+     *,NDEJC=4 
      *,NDAFIS=1
      *,NDEX= 150
      *,NDLW= 50
@@ -29,8 +30,9 @@
      *,NDCC=10
      *,NDROPM=7
      *,NDGDRPM=10
-     *,NDGQRPM=8,NDGMRPM=8,NDKNTR=3,NDREGIONS=5
-     *,NDMODELS=5,NDDEFCC=6,NDCOLLEV=35
+     *,NDGQRPM=8,NDGMRPM=8,NDKNTR=3
+C      PCROSS added	 
+     *,NDREGIONS=6,NDMODELS=6,NDDEFCC=6,NDCOLLEV=35
      *,NFwells=5,NFsadles=5,NFtrans=50
      *,NFisEN=55,NFisJ=30,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
 

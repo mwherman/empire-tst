@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-01-22 17:11:02 $
-Ccc   * $Id: HF-comp.f,v 1.16 2004-01-22 17:11:02 herman Exp $
+Ccc   * $Date: 2004-02-09 21:19:13 $
+Ccc   * $Id: HF-comp.f,v 1.17 2004-02-09 21:19:13 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -303,7 +303,7 @@ C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
 C        RCN 01/2004
-         IF(POPbin(Iec, Nnuc).GT.0.) THEN 	   
+         IF(POPbin(Iec, Nnuc).GT.0.) THEN    
           xnor = Popt*DE/POPbin(Iec, Nnuc)
           DO iesp = 1, NDECSE 
             DO iejc = 0, NDEjc 
@@ -1524,7 +1524,6 @@ C==============continuum contribution====================
          ELSE
             TFC = EXP(EXPmax)
          ENDIF
-
 
 C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient

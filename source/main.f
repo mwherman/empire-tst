@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-01-22 17:11:02 $
-Ccc   * $Id: main.f,v 1.18 2004-01-22 17:11:02 herman Exp $
+Ccc   * $Date: 2004-02-09 21:19:13 $
+Ccc   * $Id: main.f,v 1.19 2004-02-09 21:19:13 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -494,8 +494,8 @@ C--------print MSD double differential cross sections
                WRITE(6, *)' '
             ENDDO
          ENDIF
-         WRITE(6, *)' Neutron MSD cross section = ', CSMsd(1), ' mb'
-         WRITE(6, *)' Proton  MSD cross section = ', CSMsd(2), ' mb'
+         WRITE(6, *)' n MSD emission cross section ', CSMsd(1), ' mb'
+         WRITE(6, *)' p MSD emission cross section ', CSMsd(2), ' mb'
          WRITE(6, *)' '
 C--------correct CN population for the MSD emission
          corrmsd = (CSFus - CSMsd(1) - CSMsd(2))/CSFus
@@ -863,6 +863,15 @@ C--------
      &            CSEmis(2, 1)
             WRITE(6, *)' '
          ENDIF          ! Degas done
+
+C--------
+C-------- PCROSS exciton model calculations of preequilibrium contribution
+C-------- including cluster emission by Iwamoto-Harada model 
+         IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. PEQc.GT.0)THEN
+            ftmp=CSFus*corrmsd
+            CALL PCRoss(ftmp)
+         ENDIF          ! PCRoss done
+
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
@@ -1223,64 +1232,75 @@ C--------gamma decay of discrete levels (DECAYD)
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
 C-----------Integrating exclusive population spectra (ENDF)
-            WRITE(6,*) '----------------------------------------------'
-            WRITE(6,*) 'Test printout (exclusive spectra)'
-            WRITE(6,'('' Energy'',12x,''gamma'',10x,''neutron'',8x,
-     &      ''proton'',9x,''alpha'')')
-            WRITE(6,*) '----------------------------------------------'
-            gtotsp=0
-            xtotsp=0
-            ptotsp=0
-            atotsp=0
-            htotsp=0
-            emedg=0
-            emedn=0
-            emedp=0
-            emeda=0
-            DO ispec=1,NEX(1)+10             
-               WRITE(6,'(5g15.5)')(ispec-1)*DE, 
-     &                 POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
-     &                 POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc) 
-               gtotsp=gtotsp+POPcse(0,0,ispec,nnuc)*de
-               xtotsp=xtotsp+POPcse(0,1,ispec,nnuc)*de
-               ptotsp=ptotsp+POPcse(0,2,ispec,nnuc)*de
-               atotsp=atotsp+POPcse(0,3,ispec,nnuc)*de
-               emedg=emedg+POPcse(0,0,ispec,nnuc)*de*(ispec-1)*DE
-               emedn=emedn+POPcse(0,1,ispec,nnuc)*de*(ispec-1)*DE
-               emedp=emedp+POPcse(0,2,ispec,nnuc)*de*(ispec-1)*DE
-               emeda=emeda+POPcse(0,3,ispec,nnuc)*de*(ispec-1)*DE
-               IF(NDEJC.EQ.4)
-     &         htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
-            ENDDO
-            IF(CSPrd(nnuc).NE.0.0D+0) THEN 
-               emedg=emedg/CSPrd(nnuc)
-               emedn=emedn/CSPrd(nnuc)
-               emedp=emedp/CSPrd(nnuc)
-               emeda=emeda/CSPrd(nnuc)
-            ENDIF
-            WRITE(6,*) '-----------------------------------------'
-            WRITE(6,'(15X,4g15.5)') gtotsp,xtotsp,ptotsp,atotsp
-C RCN       WRITE(6,'(15X,4g15.5)'),gtotsp,xtotsp,ptotsp,atotsp
-C           WRITE(6,'(''E-aver.'',8X,5g15.5)'),emedg,emedn,emedp,emeda,
-            WRITE(6,'(''E-aver.'',8X,5g15.5)') emedg,emedn,emedp,emeda,
-     &               emedg+emedn+emedp+emeda 
-            WRITE(6,*) '-----------------------------------------'
-            POPCS(0,nnuc) = gtotsp
-            POPCS(1,nnuc) = xtotsp
-            POPCS(2,nnuc) = ptotsp
-            POPCS(3,nnuc) = atotsp
-            IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
-            WRITE(6,*) '----------------------------------------------'
-            WRITE(6,*) 'Test printout (portions of DDX spectra)'
-            WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
-            WRITE(6,*) '----------------------------------------------'
-            DO ispec=1,NEX(1)+10             
-               WRITE(6,'(5g15.5)')(ispec-1)*DE, 
-     &                 POPcseaf(0,1,ispec,nnuc),
-     &                 POPcseaf(0,2,ispec,nnuc)
-            ENDDO
-            
-            WRITE(6, *)' '
+            IF(IOUt.GT.3) THEN 
+             WRITE(6,*) '----------------------------------------------'
+             WRITE(6,*) 'Test printout (exclusive spectra)'
+             WRITE(6,'('' Energy'',12x,''gamma'',10x,''neutron'',8x,
+     &       ''proton'',9x,''alpha'',8x,''l. ion'')')
+             WRITE(6,*) '----------------------------------------------'
+             gtotsp=0
+             xtotsp=0
+             ptotsp=0
+             atotsp=0
+             htotsp=0
+             emedg=0
+             emedn=0
+             emedp=0
+             emeda=0
+             emedh=0
+             DO ispec=1,NEX(1)+10             
+                IF(NDEJC.EQ.4) THEN
+                WRITE(6,'(6g15.5)')(ispec-1)*DE, 
+     &                  POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
+     &                  POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc), 
+     &                  POPcse(0,NDEJC,ispec,nnuc)
+                ELSE
+                WRITE(6,'(5g15.5)')(ispec-1)*DE, 
+     &                  POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
+     &                  POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc) 
+                ENDIF
+                gtotsp=gtotsp+POPcse(0,0,ispec,nnuc)*de
+                xtotsp=xtotsp+POPcse(0,1,ispec,nnuc)*de
+                ptotsp=ptotsp+POPcse(0,2,ispec,nnuc)*de
+                atotsp=atotsp+POPcse(0,3,ispec,nnuc)*de
+                emedg=emedg+POPcse(0,0,ispec,nnuc)*de*(ispec-1)*DE
+                emedn=emedn+POPcse(0,1,ispec,nnuc)*de*(ispec-1)*DE
+                emedp=emedp+POPcse(0,2,ispec,nnuc)*de*(ispec-1)*DE
+                emeda=emeda+POPcse(0,3,ispec,nnuc)*de*(ispec-1)*DE
+                IF(NDEJC.EQ.4) THEN
+                   htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
+                   emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
+                ENDIF
+             ENDDO
+             IF(CSPrd(nnuc).NE.0.0D+0) THEN 
+                emedg=emedg/CSPrd(nnuc)
+                emedn=emedn/CSPrd(nnuc)
+                emedp=emedp/CSPrd(nnuc)
+                emeda=emeda/CSPrd(nnuc)
+                emedh=emedh/CSPrd(nnuc)
+             ENDIF
+             WRITE(6,*) '-----------------------------------------'
+             WRITE(6,'(15X,5g15.5)') gtotsp,xtotsp,ptotsp,atotsp,htotsp
+             WRITE(6,'(''E-aver.'',8X,6g15.5)') emedg,emedn,emedp,emeda,
+     &                emedh,emedg+emedn+emedp+emeda+emedh 
+             WRITE(6,*) '-----------------------------------------'
+             POPCS(0,nnuc) = gtotsp
+             POPCS(1,nnuc) = xtotsp
+             POPCS(2,nnuc) = ptotsp
+             POPCS(3,nnuc) = atotsp
+             IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
+             WRITE(6,*) '----------------------------------------------'
+             WRITE(6,*) 'Test printout (portions of DDX spectra)'
+             WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
+             WRITE(6,*) '----------------------------------------------'
+             DO ispec=1,NEX(1)+10             
+                WRITE(6,'(5g15.5)')(ispec-1)*DE, 
+     &                  POPcseaf(0,1,ispec,nnuc),
+     &                  POPcseaf(0,2,ispec,nnuc)
+             ENDDO
+             
+             WRITE(6, *)' '
+            ENDIF 
 C-----------calculate life-times and widths
             IF(csemist.NE.0.0D0)THEN
                taut = stauc*6.589E-22*2.0*PI/csemist

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: scnd-preeq.f,v 1.7 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Date: 2004-02-09 21:19:13 $
+Ccc   * $Id: scnd-preeq.f,v 1.8 2004-02-09 21:19:13 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -188,11 +188,11 @@ C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          WRITE(6, *)' '
          WRITE(6, *)' '
          IF(Nejc.EQ.1)THEN
-            WRITE(6, *)' Second-chance preequilibrium emission of ', 
-     &                 'neutrons = ', sum, ' mb'
+            WRITE(6, *)' n second-chance preequilibrium emission ', 
+     &                 'crosss section ', sum, ' mb'
          ELSEIF(Nejc.EQ.2)THEN
-            WRITE(6, *)' Second-chance preequilibrium emission of ', 
-     &                 'protons = ', sum, ' mb'
+            WRITE(6, *)' p second-chance preequilibrium emission ', 
+     &                 'crosss section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc, Nnuc) = CSEmis(Nejc, Nnuc) + sum

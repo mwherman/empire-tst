@@ -26,7 +26,7 @@ OBJF =	HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 	      gamma-strgth.o 	input.o	         lev-dens.o    main.o\
 	      ph-lev-dens.o  	pipe.o	         print.o	     OM-scat2.o\
 	      tl.o		         scnd-preeq.o      HRTW-comp.o   ddhms.o\
-         degas.o
+         degas.o           pcross.o
 
 
 empire:   $(OBJF)

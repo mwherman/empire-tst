@@ -19,6 +19,7 @@ C
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, 
      &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq, 
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX(NDNUC), 
+     &                  IX4ret, 
      &                  JSTab(NDNUC), IZA(0:NDNUC), NLV(0:NDNUC), 
      &                  NCOmp(0:NDNUC), NREs(NDEJC), LEVtarg,
      &                  KTRlom(0:NDEJC, 0:NDNUC), 
@@ -38,7 +39,8 @@ C
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar, 
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FITomp,
      &                 FITlev, DV, FCC, STMro, DEGa, GDIvp, TORy, EX1, 
-     &                 EX2, GST, XNI, TOTcsfis, CSfis,
+C                      PEQc is the logical control for PCRoss call, RCN 	 
+     &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC), 
      &                 CSHms(NDEJC), A(0:NDNUC), Z(0:NDNUC), ECUt(NDNUC)
      &                 , HIS(0:NDNUC), ATIlnor(0:NDNUC), DOBs(0:NDNUC), 
@@ -55,8 +57,8 @@ C
      &                 BR(NDLV, NDBR, 3, 0:NDNUC), XMAss_ej(0:NDEJC),
      &                 REDmsc(NDLW, 2), TUNe(0:NDEJC, 0:NDNUC),
      &                 EJMass(0:NDEJC),
-     &                 SIGabs(NDETL, NDEJC, NDNUC)
-C              SIGabs introduced for preequilibrium exciton model calculations
+     &                 SIGabs(NDETL, NDEJC+1, NDNUC)
+C              SIGabs introduced for PCROSS preequilibrium exciton model calculations
 C
       COMMON /GLOBAL2/ POPlv(NDLV, NDNUC), Q(0:NDEJC, 0:NDNUC),
      &                 CSPrd(NDNUC), YRAst(NDLW, NDNUC),
