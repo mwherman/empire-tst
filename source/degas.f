@@ -82,16 +82,18 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION deln(150), delz(98), ee0, GDIvp, 
+C      DOUBLE PRECISION deln(150), delz(98), ee0, GDIvp, 
+      DOUBLE PRECISION deln(150), delz(98), GDIvp, 
      &                 popdiscrete, poptotal, 
      &                 populdegas(3, NDEXD, 25), renorm, 
      &                 specdegas(3, NDEXD), spectot(0:2),
      &                 tmp, totemis, renpop
       REAL FLOAT
-      INTEGER i, ie, ie0, ie1, ndisc, ii, iii, il, nnur, j, 
-     &        jparity, jspin, ndexmaximum, lmax, nudim, 
-     &        nnuc
-      INTEGER INT, nextop
+      INTEGER i, ie, ie0, ie1, ndisc, ii, il, nnur, j, 
+     &        jparity, jspin, ndexmaximum, lmax, nudim
+C    &        nnuc,iii 
+C     INTEGER INT, nextop
+      INTEGER INT
 C
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0., 
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0., 
