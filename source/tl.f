@@ -1531,6 +1531,7 @@ C
       REAL SNGL
 
       Maxlw = 0
+      ncoll = 0
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
@@ -1542,7 +1543,6 @@ C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq
 C-----Loop over the number of coupled equations
-      ncoll = 0
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
@@ -1611,6 +1611,8 @@ C-----Absorption cross section in mb
         SINl = SINl + dtmp
       ENDDO
  300  CLOSE(45)
+
+      IF(SINl.eq.0.d0) return
 
       IF(SINl.GT.ABScs)THEN
         WRITE(6, *)
@@ -1706,6 +1708,8 @@ C
       REAL SNGL
 
       lmax = 0
+      ncoll = 0
+
       ecms = ETL(J, Nejc, Nnuc)
 C-----
 C----- Input of transmission coefficients
@@ -1716,7 +1720,6 @@ C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq
 C-----Loop over the number of coupled equations
-      ncoll = 0
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
@@ -1752,6 +1755,9 @@ C     For vibrational the Tls must be multiplied by
       READ(45, *, END = 400)sreacecis
       IF (ZEjc(NEJc).eq.0) READ(45, *, END = 400)selecis
  400  CLOSE(45)
+
+      SINl = 0.d0
+      SIGabs(J, Nejc, Nnuc) = 0.d0
 
       if(sreacecis.le.0.d0)  RETURN
 
@@ -2854,7 +2860,8 @@ c             functions
 c             variables
       real*8 As,Bs,Cs,AAv,Bv,AAvso,Bvso,EEE,Ep,Ea,Ef
       real*8 alpha_PB,beta_PB,gamma_PB,Vnonl
-      real*8 DWS,DWV,DWVso,DerDWV,DerDWS,dtmp
+C     real*8 DWS,DWV,DWVso,DerDWV,DerDWS,dtmp
+      real*8 DWS,DWV,DWVso,dtmp,DWVder,DWSder
       real*8 WDE,WVE
       integer n,iq,nns
       common /energy/EEE,Ef,Ep
@@ -3053,7 +3060,7 @@ c       Only one energy range
         j=1
 c       Real volume contribution from Dispersive relation
         DWV=0.d0
-c
+        DWVder=0.d0
         if(pot(2,1,24).ne.0) then
           AAv=dble(int(100000*b(i,j,6)))/100000
           Bv=dble(int(100000*b(i,j,7)))/100000
@@ -3065,15 +3072,14 @@ c     Retrieving average energy of the particle states Ep
           if(Ep.eq.0.) Ep=Ef
 c         if(idr.ge.2) then
 c           analytical DOM integral
-            DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DerDWV)
-            DWVder = 0.d0
+            DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DWVder)
 c           coulomb correction for real volume potential
-            if(b(1,1,5).ne.0.d0) DerDWV = -b(1,1,5)*encoul2*DerDWV
-            if(b(1,1,5).ne.0.d0) then
-              DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
-              DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
-              DWVder = b(1,1,5)*encoul2*(DWVm-DWVp)*5.d0
-            endif
+            if(b(1,1,5).ne.0.d0) DWVder = -b(1,1,5)*encoul2*DWVder
+c           if(b(1,1,5).ne.0.d0) then
+c             DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
+c             DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
+c             DWVder = b(1,1,5)*encoul2*(DWVm-DWVp)*5.d0
+c           endif
 c         endif
 c         if(idr.le.-2) then
 c           numerical DOM integral (not needed for a time being)
@@ -3122,6 +3128,7 @@ c       Only one energy range
         j=1
 c       Real surface contribution from Dispersive relation
         DWS=0.d0
+        DWSder=0.d0
         if(pot(4,1,24).ne.0) then
           As=dble(int(100000*b(i,j,8)))/100000
           Bs=dble(int(100000*b(i,j,10)))/100000
@@ -3138,22 +3145,20 @@ C         Ea=dble(int(100000*pot(i,j,21)))/100000
 C         if(Ea.eq.0.) Ea=1000.1d0
           if(idr.ge.2) then
 c           analytical DOM integral
-            DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DerDWS)
-            DWSder = 0.d0
+            DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DWSder)
 c           Coulomb correction for real surface potential
-            if(b(1,1,5).ne.0.d0) DerDWS = -b(1,1,5)*encoul2*DerDWS
-            if(b(1,1,5).ne.0.d0) then
-              DWSp = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE+0.1d0,n,dtmp)
-              DWSm = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE-0.1d0,n,dtmp)
-              DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
-            endif
+            if(b(1,1,5).ne.0.d0) DWSder = -b(1,1,5)*encoul2*DWSder
+C           if(b(1,1,5).ne.0.d0) then
+C             DWSp = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE+0.1d0,n,dtmp)
+C             DWSm = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE-0.1d0,n,dtmp)
+C             DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
+C           endif
           endif
           if(idr.le.-2) then
 c           numerical DOM integral
             nns=n
             WDE=WDf(As,Bs,Cs,Ep,EEE,n,iq)
             DWS = 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE,WDE)
-            DWSder = 0.d0
 c           Coulomb correction for real surface potential
             if(b(1,1,5).ne.0.d0) then
               WDE=WDf(As,Bs,Cs,Ep,EEE+0.1d0,n,iq)
