@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:21:33 $
-Ccc   * $Id: input.f,v 1.58 2005-01-24 13:21:33 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-24 18:05:15 $
+Ccc   * $Id: input.f,v 1.59 2005-01-24 18:05:15 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
