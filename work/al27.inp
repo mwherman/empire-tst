@@ -15,7 +15,7 @@ HRTW       1.
 DEGAS      1.
 OMPOT  -2405.       1
 OMPOT  -5405.       2
-*OMPOT  -9600.       3
+#OMPOT  -9600.       3
 GO                                                  
 0.002
 0.005
