@@ -1,8 +1,8 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: bar_mom.f,v 1.5 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-03-04 17:21:18 $
+Ccc   * $Id: bar_mom.f,v 1.6 2005-03-04 17:21:18 herman Exp $
 C
-      SUBROUTINE BARFIT(Iz, Ia, Il, Bfis, Segs, Selmax)
+      SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
 C
 C    THIS SUBROUTINE RETURNS THE BARRIER HEIGHT BFIS, THE GROUND-STATE
 C    ENERGY SEGS, IN MEV, AND THE ANGULAR MOMENTUM AT WHICH THE FISSION
@@ -95,6 +95,7 @@ C    THE FOLLOWING IS NECESSARY FOR 32-BIT MACHINES LIKE DEC VAX, IBM,ET
 C
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - z)
 C
+C
 C Dummy arguments
 C
       DOUBLE PRECISION Bfis, Segs, Selmax
@@ -103,12 +104,11 @@ C
 C Local variables
 C
       DOUBLE PRECISION a, a1, a2, aa, aj, ak, amax, amax2, amin, amin2, 
-     &                 bfis0, egs, egs1(5, 7), egs2(5, 7), egs3(5, 7), 
-     &                 egs4(5, 7), egs5(5, 7), egscof(5, 7, 5), el, 
-     &                 el20, el80, ell, elmax, elmcof(5, 4), 
-     &                 elzcof(7, 7), emncof(5, 4), emxcof(7, 5), pa(7), 
-     &                 pl(10), pz(7), q, qa, qb, sel20, sel80, x, y, z, 
-     &                 zz
+     &                 bfis0, egs, egs1(5,7), egs2(5,7), egs3(5,7), 
+     &                 egs4(5,7), egs5(5,7), egscof(5,7,5), el, el20, 
+     &                 el80, ell, elmax, elmcof(5,4), elzcof(7,7), 
+     &                 emncof(5,4), emxcof(7,5), pa(7), pl(10), pz(7), 
+     &                 q, qa, qb, sel20, sel80, x, y, z, zz
       DOUBLE PRECISION DBLE
       REAL FLOAT
       INTEGER i, j, k, l, m
@@ -117,11 +117,11 @@ C     DOUBLE PRECISION ELZCOF,PA,PZ,AA,ZZ,EL20,EL80,BFIS0,ELMAX,PL,ELL
 C     DOUBLE PRECISION EGS,EGS1,EGS2,EGS3,EGS4,EGS5,EGSCOF
 C
 C
-      EQUIVALENCE(egs1, egscof)
-      EQUIVALENCE(egs2, egscof(1, 1, 2))
-      EQUIVALENCE(egs3, egscof(1, 1, 3))
-      EQUIVALENCE(egs4, egscof(1, 1, 4))
-      EQUIVALENCE(egs5, egscof(1, 1, 5))
+      EQUIVALENCE (egs1,egscof)
+      EQUIVALENCE (egs2,egscof(1,1,2))
+      EQUIVALENCE (egs3,egscof(1,1,3))
+      EQUIVALENCE (egs4,egscof(1,1,4))
+      EQUIVALENCE (egs5,egscof(1,1,5))
       DATA emncof/ - 9.01100E+2, -1.40818E+3, 2.77000E+3, -7.06695E+2, 
      &     8.89867E+2, 1.35355E+4, -2.03847E+4, 1.09384E+4, -4.86297E+3, 
      &     -6.18603E+2, -3.26367E+3, 1.62447E+3, 1.36856E+3, 1.31731E+3, 
@@ -209,20 +209,20 @@ C
 C
 C     THE PROGRAM STARTS HERE
 C
-      IF(Iz.GE.19)THEN
-         IF(Iz.GT.111)THEN
-            PRINT 99001
+      IF (Iz.GE.19) THEN
+         IF (Iz.GT.111) THEN
+            PRINT 99005
 C
-99001       FORMAT(/10X, 
+99005       FORMAT (/10X,
      &             '*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19 OR '
-     &             , 
+     &             ,
      &             ' GREATER THAN 111.  BFIS IS SET TO 0.0.  *  *  *  *'
      &             )
-         ELSEIF(Iz.GT.102 .AND. Il.GT.0)THEN
-            PRINT 99002
-99002       FORMAT(/10X, 
+         ELSEIF (Iz.GT.102 .AND. Il.GT.0) THEN
+            PRINT 99010
+99010       FORMAT (/10X,
      &             '*  *  *  *  BARFIT CALLED WITH  Z  GREATER THAN 102'
-     &             , 
+     &             ,
      &    ' AND  L  NOT EQUAL TO ZERO.  BFIS IS SET TO 0.0.  *  *  *  *'
      &    )
          ELSE
@@ -231,20 +231,20 @@ C
             el = FLOAT(Il)
             amin = 1.2*z + 0.01*z*z
             amax = 5.8*z - 0.024*z*z
-            IF(a.LT.amin .OR. a.GT.amax)THEN
-               PRINT 99003, Ia
-99003          FORMAT(/10X, '*  *  *  *  BARFIT CALLED WITH  A =', I3, 
-     &                ', OUTSIDE ', 'THE ALLOWED VALUES FOR Z = ', I3, 
-     &                ' *  *  *  *')
+            IF (a.LT.amin .OR. a.GT.amax) THEN
+               PRINT 99015, Ia
+99015          FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  A =',I3,
+     &                 ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
+     &                 ' *  *  *  *')
             ELSE
                aa = a/400.
                zz = z/100.
                bfis0 = 0.
-               CALL LPOLY(zz, 7, pz)
-               CALL LPOLY(aa, 7, pa)
+               CALL LPOLY(zz,7,pz)
+               CALL LPOLY(aa,7,pa)
                DO i = 1, 7
                   DO j = 1, 7
-                     bfis0 = bfis0 + elzcof(j, i)*pz(j)*pa(i)
+                     bfis0 = bfis0 + elzcof(j,i)*pz(j)*pa(i)
                   ENDDO
                ENDDO
                egs = 0.
@@ -252,35 +252,34 @@ C
                Bfis = bfis0
                amin2 = 1.4*z + 0.009*z*z
                amax2 = 20. + 3.0*z
-               IF((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
-     &            Il.GT.0)THEN
-                  PRINT 99004, Ia, Il
-99004             FORMAT(/10X, '*  *  *  *  BARFIT CALLED WITH  A  =', 
-     &                   I3, ', OUTSIDE', 
-     &                   ' THE ALLOWED VALUES FOR Z = ', I3/26X, 
-     &                   'FOR NONZERO  L =', I3, '  *  *  *  *')
+               IF ((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
+     &             Il.GT.0) THEN
+                  PRINT 99020, Ia, Il
+99020             FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  A  =',
+     &                    I3,', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',
+     &                    I3/26X,'FOR NONZERO  L =',I3,'  *  *  *  *')
                ELSE
                   el80 = 0.
                   el20 = 0.
                   elmax = 0.
                   DO i = 1, 4
                      DO j = 1, 5
-                        el80 = el80 + DBLE(elmcof(j, i))*pz(j)*pa(i)
-                        el20 = el20 + DBLE(emncof(j, i))*pz(j)*pa(i)
+                        el80 = el80 + DBLE(elmcof(j,i))*pz(j)*pa(i)
+                        el20 = el20 + DBLE(emncof(j,i))*pz(j)*pa(i)
                      ENDDO
                   ENDDO
                   sel80 = el80
                   sel20 = el20
                   DO i = 1, 5
                      DO j = 1, 7
-                        elmax = elmax + emxcof(j, i)*pz(j)*pa(i)
+                        elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
                      ENDDO
                   ENDDO
                   Selmax = elmax
-                  IF(Il.LT.1)RETURN
+                  IF (Il.LT.1) RETURN
                   x = sel20/Selmax
                   y = sel80/Selmax
-                  IF(el.LE.sel20)THEN
+                  IF (el.LE.sel20) THEN
                      q = 0.2/(sel20**2*sel80**2*(sel20 - sel80))
                      qa = q*(4.*sel80**3 - sel20**3)
                      qb = -q*(4.*sel80**2 - sel20**2)
@@ -299,24 +298,24 @@ C
                      Bfis = Bfis*(a1 + (z - 1.)*(a2 + qb*z)*z*z*(z - 1.)
      &                      )
                   ENDIF
-                  IF(Bfis.LE.0.0D0 .OR. el.GT.Selmax)Bfis = 0.0
+                  IF (Bfis.LE.0.0D0 .OR. el.GT.Selmax) Bfis = 0.0
 C
 C                 NOW CALCULATE ROTATING GROUND-STATE ENERGY
 C
-                  IF(el.GT.Selmax .AND. Il.NE.1000)RETURN
+                  IF (el.GT.Selmax .AND. Il.NE.1000) RETURN
                   ell = el/elmax
-                  IF(Il.EQ.1000)ell = 1.D0
-                  CALL LPOLY(ell, 9, pl)
+                  IF (Il.EQ.1000) ell = 1.D0
+                  CALL LPOLY(ell,9,pl)
                   DO k = 1, 5
                      DO l = 1, 7
                         DO m = 1, 5
-                           egs = egs + egscof(m, l, k)*pz(l)*pa(k)
+                           egs = egs + egscof(m,l,k)*pz(l)*pa(k)
      &                           *pl(2*m - 1)
                         ENDDO
                      ENDDO
                   ENDDO
                   Segs = egs
-                  IF(Segs.LT.0.0D0)Segs = 0.0
+                  IF (Segs.LT.0.0D0) Segs = 0.0
                   RETURN
                ENDIF
             ENDIF
@@ -326,15 +325,15 @@ C
          Selmax = 0.0
          RETURN
       ENDIF
-      PRINT 99005
-99005 FORMAT(/10X, '*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19    '
-     &       , ' BFIS IS SET TO 100.0.  *  *  *  *')
+      PRINT 99025
+99025 FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19    '
+     &        ,' BFIS IS SET TO 100.0.  *  *  *  *')
       Bfis = 100.
       Segs = 0.0
       Selmax = 0.0
       END
 C
-      SUBROUTINE MOMFIT(Iz, Ia, Il, Saimin, Saimid, Saimx, Selmax)
+      SUBROUTINE MOMFIT(Iz,Ia,Il,Saimin,Saimid,Saimx,Selmax)
 C
 C    THIS SUBROUTINE RETURNS THE THREE PRINCIPAL-AXIS MOMENTS OF INERTIA
 C    AND THE ANGULAR MOMENTUM AT WHICH THE FISSION
@@ -406,6 +405,7 @@ C        OR RESPONSIBILITY FOR THE USE OF THIS SOFTWARE.
 C
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - z)
 C
+C
 C Dummy arguments
 C
       INTEGER Ia, Il, Iz
@@ -413,22 +413,21 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a, aa, aa2, aa3, aa4, ai70, ai70c(6, 5), ai95, 
-     &                 ai952, ai952c(6, 5), ai95c(6, 5), aimax, aimax2, 
-     &                 aimaxc(6, 5), aimaxh, aimidh, aimx2c(6, 5), 
-     &                 aimx3c(4, 4), aimx4c(4, 4), aizro, aizroc(6, 5), 
+      DOUBLE PRECISION a, aa, aa2, aa3, aa4, ai70, ai70c(6,5), ai95, 
+     &                 ai952, ai952c(6,5), ai95c(6,5), aimax, aimax2, 
+     &                 aimaxc(6,5), aimaxh, aimidh, aimx2c(6,5), 
+     &                 aimx3c(4,4), aimx4c(4,4), aizro, aizroc(6,5), 
      &                 alpha, amax, amax2, amin, amin2, bb, bb2, bb3, 
-     &                 bb4, beta, bi70, bi70c(6, 4), bi95, bi95c(6, 4), 
-     &                 bimax, bimaxc(6, 4), bizro, bizroc(6, 4), el, 
-     &                 ell, elmax, emxcof(7, 5), f1, f1m, f2, f2m, f3, 
-     &                 f4, ff1, ff2, fg1, fg2, gam, gam2, gam3, pa(7), 
-     &                 pi, pz(7), q1, q2, q3, q4, q5, q6, sai70, sai95, 
+     &                 bb4, beta, bi70, bi70c(6,4), bi95, bi95c(6,4), 
+     &                 bimax, bimaxc(6,4), bizro, bizroc(6,4), el, ell, 
+     &                 elmax, emxcof(7,5), f1, f1m, f2, f2m, f3, f4, 
+     &                 ff1, ff2, fg1, fg2, gam, gam2, gam3, pa(7), pi, 
+     &                 pz(7), q1, q2, q3, q4, q5, q6, sai70, sai95, 
      &                 sai952, saimax, saizro, sbi70, sbi95, sbimax, 
      &                 sbizro, sigt, sigt2, silt, silt2, simax2, sjgt
       REAL FLOAT
       INTEGER i, j, k, l
       DOUBLE PRECISION sjlt, z, zz
-C
       DATA emxcof/ - 4.10652732E6, 1.00064947E7, -1.09533751E7, 
      &     7.84797252E6, -3.78574926E6, 1.12237945E6, -1.77561170E5, 
      &     1.08763330E7, -2.63758245E7, 2.85472400E7, -2.01107467E7, 
@@ -528,12 +527,12 @@ C
 C
 C     THE PROGRAM STARTS HERE
 C
-      IF(Iz.GE.19 .AND. Iz.LE.111)THEN
-         IF(Iz.GT.102 .AND. Il.GT.0)THEN
-            PRINT 99001
-99001       FORMAT(/10X, 
+      IF (Iz.GE.19 .AND. Iz.LE.111) THEN
+         IF (Iz.GT.102 .AND. Il.GT.0) THEN
+            PRINT 99005
+99005       FORMAT (/10X,
      &             '*  *  *  *  MOMFIT CALLED WITH  Z  GREATER THAN 102'
-     &             , 
+     &             ,
      &  ' AND  L  NOT EQUAL TO ZERO.  MOMENTS ARE SET TO 0.0.*  *  *  *'
      &  )
             GOTO 100
@@ -543,39 +542,38 @@ C
             el = FLOAT(Il)
             amin = 1.2*z + 0.01*z*z
             amax = 5.8*z - 0.024*z*z
-            IF(a.LT.amin .OR. a.GT.amax)THEN
-               PRINT 99002, Ia
-99002          FORMAT(/10X, '*  *  *  *  MOMFIT CALLED WITH  A =', I3, 
-     &                ', OUTSIDE ', 'THE ALLOWED VALUES FOR Z = ', I3, 
-     &                ' *  *  *  *')
+            IF (a.LT.amin .OR. a.GT.amax) THEN
+               PRINT 99010, Ia
+99010          FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  A =',I3,
+     &                 ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
+     &                 ' *  *  *  *')
                GOTO 100
             ELSE
                aa = a/400.
                zz = z/100.
                amin2 = 1.4*z + 0.009*z*z
                amax2 = 20. + 3.0*z
-               IF((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
-     &            Il.GT.0)THEN
-                  PRINT 99003, Ia, Il
-99003             FORMAT(/10X, '*  *  *  *  MOMFIT CALLED WITH  A  =', 
-     &                   I3, ', OUTSIDE', 
-     &                   ' THE ALLOWED VALUES FOR Z = ', I3/26X, 
-     &                   'FOR NONZERO  L =', I3, '  *  *  *  *')
+               IF ((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
+     &             Il.GT.0) THEN
+                  PRINT 99015, Ia, Il
+99015             FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  A  =',
+     &                    I3,', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',
+     &                    I3/26X,'FOR NONZERO  L =',I3,'  *  *  *  *')
                   GOTO 100
                ELSE
-                  CALL LPOLY(aa, 6, pa)
+                  CALL LPOLY(aa,6,pa)
                   elmax = 0.
-                  CALL LPOLY(zz, 7, pz)
+                  CALL LPOLY(zz,7,pz)
                   DO i = 1, 5
                      DO j = 1, 7
-                        elmax = elmax + emxcof(j, i)*pz(j)*pa(i)
+                        elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
                      ENDDO
                   ENDDO
                   Selmax = elmax
 C--------in       case l is larger than the stability limit set it to selmax
-                  IF(el.GT.Selmax)el = Selmax
+                  IF (el.GT.Selmax) el = Selmax
                   ell = el/Selmax
-                  IF(Il.EQ.1000)ell = 1.0
+                  IF (Il.EQ.1000) ell = 1.0
                   aizro = 0.
                   ai70 = 0.
                   aimax = 0.
@@ -589,40 +587,40 @@ C--------in       case l is larger than the stability limit set it to selmax
 C
 C                 NOW CALCULATE ROTATING MOMENTS OF INERTIA
 C
-                  IF(el.GT.Selmax .AND. Il.LT.1000)RETURN
+                  IF (el.GT.Selmax .AND. Il.LT.1000) RETURN
                   DO l = 1, 6
                      DO k = 1, 5
-                        aizro = aizro + aizroc(l, k)*pz(l)*pa(k)
-                        ai70 = ai70 + ai70c(l, k)*pz(l)*pa(k)
-                        ai95 = ai95 + ai95c(l, k)*pz(l)*pa(k)
-                        aimax = aimax + aimaxc(l, k)*pz(l)*pa(k)
-                        ai952 = ai952 + ai952c(l, k)*pz(l)*pa(k)
-                        aimax2 = aimax2 + aimx2c(l, k)*pz(l)*pa(k)
+                        aizro = aizro + aizroc(l,k)*pz(l)*pa(k)
+                        ai70 = ai70 + ai70c(l,k)*pz(l)*pa(k)
+                        ai95 = ai95 + ai95c(l,k)*pz(l)*pa(k)
+                        aimax = aimax + aimaxc(l,k)*pz(l)*pa(k)
+                        ai952 = ai952 + ai952c(l,k)*pz(l)*pa(k)
+                        aimax2 = aimax2 + aimx2c(l,k)*pz(l)*pa(k)
                      ENDDO
                      DO k = 1, 4
-                        bizro = bizro + bizroc(l, k)*pz(l)*pa(k)
-                        bi70 = bi70 + bi70c(l, k)*pz(l)*pa(k)
-                        bi95 = bi95 + bi95c(l, k)*pz(l)*pa(k)
-                        bimax = bimax + bimaxc(l, k)*pz(l)*pa(k)
+                        bizro = bizro + bizroc(l,k)*pz(l)*pa(k)
+                        bi70 = bi70 + bi70c(l,k)*pz(l)*pa(k)
+                        bi95 = bi95 + bi95c(l,k)*pz(l)*pa(k)
+                        bimax = bimax + bimaxc(l,k)*pz(l)*pa(k)
                      ENDDO
                   ENDDO
                   ff1 = 1.0
                   ff2 = 0.0
                   fg1 = 1.0
                   fg2 = 0.0
-C-----NEXT        LINE WAS AFTER AIMAXH=0. (MOVED HERE TO AVOID UNDEFINE)
+C-----NEXT LINE WAS AFTER AIMAXH=0. (MOVED HERE TO AVOID UNDEFINE)
                   aimidh = 0.
-                  IF(Iz.GT.70)THEN
+                  IF (Iz.GT.70) THEN
                      aimaxh = 0.
                      DO l = 1, 4
                         DO k = 1, 4
-                           aimaxh = aimaxh + aimx3c(l, k)*pz(l)*pa(k)
-                           aimidh = aimidh + aimx4c(l, k)*pz(l)*pa(k)
+                           aimaxh = aimaxh + aimx3c(l,k)*pz(l)*pa(k)
+                           aimidh = aimidh + aimx4c(l,k)*pz(l)*pa(k)
                         ENDDO
                      ENDDO
-                     IF(Iz.GT.80)ff1 = 0.0
-                     IF(Iz.GE.80 .OR. bimax.GT.0.95D0)fg1 = 0.0
-                     IF(aimaxh.GT.aimax)ff1 = 0.0
+                     IF (Iz.GT.80) ff1 = 0.0
+                     IF (Iz.GE.80 .OR. bimax.GT.0.95D0) fg1 = 0.0
+                     IF (aimaxh.GT.aimax) ff1 = 0.0
                      ff2 = 1.0 - ff1
                      fg2 = 1.0 - fg1
                      aimax = aimax*ff1 + ff2*aimaxh
@@ -630,25 +628,25 @@ C-----NEXT        LINE WAS AFTER AIMAXH=0. (MOVED HERE TO AVOID UNDEFINE)
                   ENDIF
                   saizro = aizro
                   bimax = bimax*fg1 + aimidh*fg2
-                  IF(saizro.LT.0.0D0)saizro = 0.0
+                  IF (saizro.LT.0.0D0) saizro = 0.0
                   sai70 = ai70
-                  IF(sai70.LT.0.0D0)sai70 = 0.0
+                  IF (sai70.LT.0.0D0) sai70 = 0.0
                   sai95 = ai95
-                  IF(sai95.LT.0.0D0)sai95 = 0.0
+                  IF (sai95.LT.0.0D0) sai95 = 0.0
                   saimax = aimax
-                  IF(saimax.LT.0.0D0)saimax = 0.0
+                  IF (saimax.LT.0.0D0) saimax = 0.0
                   sai952 = ai952
-                  IF(sai952.LT.0.0D0)sai952 = 0.0
+                  IF (sai952.LT.0.0D0) sai952 = 0.0
                   simax2 = aimax2
-                  IF(simax2.LT.0.0D0)simax2 = 0.0
+                  IF (simax2.LT.0.0D0) simax2 = 0.0
                   sbimax = bimax
-                  IF(sbimax.LT.0.0D0)sbimax = 0.0
+                  IF (sbimax.LT.0.0D0) sbimax = 0.0
                   sbi70 = bi70
-                  IF(sbi70.LT.0.0D0)sbi70 = 0.0
+                  IF (sbi70.LT.0.0D0) sbi70 = 0.0
                   sbi95 = bi95
-                  IF(sbi95.LT.0.0D0)sbi95 = 0.0
+                  IF (sbi95.LT.0.0D0) sbi95 = 0.0
                   sbizro = bizro
-                  IF(sbizro.LT.0.0D0)sbizro = 0.0
+                  IF (sbizro.LT.0.0D0) sbizro = 0.0
                   q1 = -3.148849569
                   q2 = 4.465058752
                   q3 = -1.316209183
@@ -682,16 +680,16 @@ C-----NEXT        LINE WAS AFTER AIMAXH=0. (MOVED HERE TO AVOID UNDEFINE)
                   f2m = silt2*COS(beta)**2 + sigt2*SIN(beta)**2
                   f3 = sjlt*COS(alpha)**2 + sjgt*SIN(alpha)**2
                   f4 = sjlt*COS(beta)**2 + sjgt*SIN(beta)**2
-                  IF(ell.LE.0.95D0)THEN
-                     IF(ell.LE.0.70D0)THEN
+                  IF (ell.LE.0.95D0) THEN
+                     IF (ell.LE.0.70D0) THEN
 C
 C                       ELL IS LESS THAN 0.7,  USE ILT
 C
                         Saimin = sjlt
                         Saimx = silt
                         Saimid = silt2
-                        IF(ff2.LE.0.01D0 .OR. fg2.LE.0.01D0)GOTO 10
-                        GOTO 5
+                        IF (ff2.GT.0.01D0 .AND. fg2.GT.0.01D0) GOTO 5
+                        GOTO 10
 C
 C                       ELL IS GREATER THAN 0.7, LESS THAN 0.95  USE FIRST L. C.
 C
@@ -699,8 +697,8 @@ C
                      Saimx = f1
                      Saimin = f3
                      Saimid = f1m
-                     IF(ff2.LE.0.01D0 .OR. fg2.LE.0.01D0)GOTO 10
-                     GOTO 5
+                     IF (ff2.GT.0.01D0 .AND. fg2.GT.0.01D0) GOTO 5
+                     GOTO 10
 C
 C                    ELL IS GREATER THAN 0.95,  USE 2ND L. C.
 C
@@ -708,12 +706,12 @@ C
                   Saimx = f2
                   Saimin = f4
                   Saimid = f2m
-                  IF(ff2.LE.0.01D0 .OR. fg2.LE.0.01D0)GOTO 10
+                  IF (ff2.LE.0.01D0 .OR. fg2.LE.0.01D0) GOTO 10
 C
 C                 FOR NUCLEI WITH Z GT 80 USE 4TH ORDER FUNCTION WITH SEPARATE
 C                 FIT TO IMAX AND IMAX2
 C
- 5                q1 = 4.001600640
+    5             q1 = 4.001600640
                   q2 = 0.960784314
                   q3 = 2.040816327
                   aa3 = q1*sai70 - q2*saimax - (1. + q3)*saizro
@@ -723,25 +721,25 @@ C
                   Saimx = saizro + aa3*ell**2 + bb3*ell**4
                   Saimid = saizro + aa4*ell**2 + bb4*ell**4
                ENDIF
- 10            Saimid = MIN(Saimx, Saimid)
-               IF(Saimin.LT.0.0D0)Saimin = 0.0
+   10          Saimid = MIN(Saimx,Saimid)
+               IF (Saimin.LT.0.0D0) Saimin = 0.0
                RETURN
             ENDIF
          ENDIF
       ENDIF
-      PRINT 99004
+      PRINT 99020
 C
-99004 FORMAT(/10X, '*  *  *  *  MOMFIT CALLED WITH  Z  LESS THAN 19 OR '
-     &       , ' GREATER THAN 111.  MOMENTS ARE SET TO 0.0.  *  *  *  *'
-     &       )
- 100  aimax = 0.0
+99020 FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  Z  LESS THAN 19 OR '
+     &        ,' GREATER THAN 111.  MOMENTS ARE SET TO 0.0.  *  *  *  *'
+     &        )
+  100 aimax = 0.0
       Saimx = 0.0
       Saimin = 0.0
       Saimid = 0.0
       Selmax = 0.0
       END
 C
-      SUBROUTINE LPOLY(X, N, Pl)
+      SUBROUTINE LPOLY(X,N,Pl)
 C
 C    THIS SUBROUTINE CALCULATES THE ORDINARY LEGENDRE POLYNOMIALS OF
 C    ORDER 0 TO N-1 OF ARGUMENT  X  AND STORES THEM IN THE VECTOR
@@ -754,6 +752,7 @@ C    NOTE:  PL AND X MUST BE DOUBLE PRECISION ON 32-BIT COMPUTERS
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+C
 C Dummy arguments
 C
       INTEGER N
@@ -763,8 +762,6 @@ C
 C Local variables
 C
       INTEGER i
-C
-Corig DOUBLE PRECISION PL(9)
       Pl(1) = 1.0
       Pl(2) = X
       DO i = 3, N

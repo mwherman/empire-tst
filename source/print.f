@@ -1,8 +1,8 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-24 22:33:43 $
-Ccc   * $Id: print.f,v 1.5 2005-02-24 22:33:43 herman Exp $
+Ccc   * $Date: 2005-03-04 17:21:19 $
+Ccc   * $Id: print.f,v 1.6 2005-03-04 17:21:19 herman Exp $
 C
-      SUBROUTINE AUERST(Nnuc, Nejc)
+      SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -44,53 +44,50 @@ C
       csemax = 0.
       kmax = 1
       DO i = 1, NDEX
-         IF(CSE(i, Nejc, Nnuc).GT.0.0D0)kmax = i
-         csemax = DMAX1(CSE(i, Nejc, Nnuc), csemax)
+         IF (CSE(i,Nejc,Nnuc).GT.0.0D0) kmax = i
+         csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
-      IF(csemax.EQ.0.0D0)RETURN
+      IF (csemax.EQ.0.0D0) RETURN
       kmax = kmax + 2
-      kmax = MIN0(NDEX, kmax)
+      kmax = MIN0(NDEX,kmax)
       kmax = MIN0(kmax,NDECSE) ! RCN
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
       s1 = s2*0.1
       s0 = s1*0.1
-      IF(Nejc.EQ.0)THEN
-         WRITE(6, 99001)
-99001    FORMAT(1X, ///, 1X, 54('*'), 1X, 'gamma spectrum  ', 54('*'), 
-     &          //)
+      IF (Nejc.EQ.0) THEN
+         WRITE (6,99005)
+99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
          GOTO 100
       ENDIF
       ia = AEJc(Nejc)
-      IF(AEJc(Nejc).GT.1.0D0 .AND. Nejc.NE.0)WRITE(6, 99002)ia, 
-     &   SYMbe(Nejc)
-99002 FORMAT(1X, ///, 1X, 54('*'), 1X, I3, '-', A2, ' spectrum  ', 
-     &       54('*'), //)
-      IF(AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0)WRITE(6, 99003)
-99003 FORMAT(1X, ///, 1X, 54('*'), 1X, 'neutron spectrum  ', 54('*'), 
-     &       //)
-      IF(AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0)WRITE(6, 99004)
-99004 FORMAT(1X, ///, 1X, 54('*'), 1X, 'proton spectrum  ', 54('*'), //)
-      IF(AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0)WRITE(6, 99009)
-99009 FORMAT(1X, ///, 1X, 54('*'), 1X, 'alpha  spectrum  ', 54('*'), //)
- 100  WRITE(6, 99005)s0, s1, s2, s3
-99005 FORMAT(1X, 'Ener. ', 5X, 'Spectr. ', 4X, E6.1, 25X, E6.1, 25X, 
-     &       E6.1, 25X, E6.1)
-      WRITE(6, 99006)
-99006 FORMAT(2X, 'MeV ', 6X, 'mb/MeV ', 5X, 'I ', 3(29X, 'I '))
-      WRITE(6, 99008)
+      IF (AEJc(Nejc).GT.1.0D0 .AND. Nejc.NE.0) WRITE (6,99010) ia, 
+     &    SYMbe(Nejc)
+99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
+      IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) WRITE (6,99015)
+99015 FORMAT (1X,///,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
+      IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) WRITE (6,99020)
+99020 FORMAT (1X,///,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
+      IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) WRITE (6,99025)
+99025 FORMAT (1X,///,1X,54('*'),1X,'alpha  spectrum  ',54('*'),//)
+  100 WRITE (6,99030) s0, s1, s2, s3
+99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
+     &        E6.1)
+      WRITE (6,99035)
+99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
+      WRITE (6,99045)
       totspec = 0.0
       DO i = 1, kmax
-         totspec = totspec + CSE(i, Nejc, Nnuc)
+         totspec = totspec + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
-         IF(CSE(i, Nejc, Nnuc).GE.s0)THEN
+         IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
-            l = MIN0(93, l)
+            l = MIN0(93,l)
             DO ij = 1, l
                symc(ij) = hstar
             ENDDO
-            IF(l.NE.93)THEN
+            IF (l.NE.93) THEN
                l = l + 1
                DO ij = l, 93
                   symc(ij) = haha
@@ -101,13 +98,12 @@ C
          DO ij = 1, 93
             symc(ij) = haha
          ENDDO
- 150     WRITE(6, 99007)e, CSE(i, Nejc, Nnuc), symc
-99007    FORMAT(1X, F6.2, 3X, E11.4, 2X, 'I ', 93A1, 'I ')
+  150    WRITE (6,99040) e, CSE(i,Nejc,Nnuc), symc
+99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-      WRITE(6, 99008)
-      totspec = totspec - 
-     &          0.5*(CSE(1, Nejc, Nnuc) + CSE(kmax, Nejc, Nnuc))
+      WRITE (6,99045)
+      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
-      WRITE(6, *)' Integrated spectrum ', totspec, ' mb'
-99008 FORMAT(24X, 93('-'))
+      WRITE (6,*) ' Integrated spectrum ', totspec, ' mb'
+99045 FORMAT (24X,93('-'))
       END
