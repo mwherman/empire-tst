@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-22 05:31:25 $
-Ccc   * $Id: input.f,v 1.81 2005-02-22 05:31:25 herman Exp $
+Ccc   * $Date: 2005-02-23 19:29:13 $
+Ccc   * $Id: input.f,v 1.82 2005-02-23 19:29:13 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4377,9 +4377,6 @@ C
       iatar = A(Nnuc)
       izpro = ZEJc(Nejc)
       iapro = AEJc(Nejc)
-C     b1 = A(Nnuc)*AMUmev + EXCessmass(iztar,iatar)
-C     b2 = ar*AMUmev + EXCessmass(zr,ar)
-C     b3 = AEJc(Nejc)*AMUmev + EXCessmass(izpro,iapro)
       b1 = A(Nnuc)*AMUmev + XMAss(Nnuc)
       b2 = ar*AMUmev + EXCessmass(zr,ar)
       b3 = AEJc(Nejc)*AMUmev + XMAss_ej(Nejc)
