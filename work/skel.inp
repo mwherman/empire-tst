@@ -8,8 +8,8 @@ xxx.   xx.           ;TARGET  A , Z
 IOUT       1.                                               
 LEVDEN     0.                                              
 NEX       60.                                                   
-MSD        0.                                                     
-MSC        0.                                                         
+MSD        1.                                                     
+MSC        1.                                                         
 ENDF       1.                     
 OMPOT  -2405.       1
 OMPOT  -5405.       2
