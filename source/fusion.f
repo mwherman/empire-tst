@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-10-01 16:20:10 $
-Ccc   * $Id: fusion.f,v 1.5 2002-10-01 16:20:10 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: fusion.f,v 1.6 2002-11-29 15:27:24 mike Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -661,7 +661,7 @@ C
       DOUBLE PRECISION FUNCTION G(X)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
-C     Capote 2001, added common variables
+C Capote 2001, added common variables
 C
 C COMMON variables
 C

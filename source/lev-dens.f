@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-10-01 16:20:10 $
-Ccc   * $Id: lev-dens.f,v 1.7 2002-10-01 16:20:10 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: lev-dens.f,v 1.8 2002-11-29 15:27:24 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -651,6 +651,10 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
+C fisfis d
+      COMMON /FISC  / FIScon
+      REAL FIScon
+C fisfis u
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Cf
@@ -737,160 +741,167 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt, SHC(Nnuc), GAMma)
       IF(BF.EQ.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
       SCR = 2.*ACRt*TCRt
+      IF(FIScon.NE.2.)THEN
 C-----
 C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
 C-----
-      IF(FITlev.GT.0 .AND. RORed.EQ.0)THEN
-         WRITE(6, *)' '
-         WRITE(6, *)' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
-         WRITE(6, *)' CHECK WHETHER YOU CAN INCREASE EXPmax in input.f'
-         WRITE(6, *)' (MAXIMUM ARGUMENT OF THE EXPONENT ALLOWED)'
-         WRITE(6, *)
-     &             ' IF YOUR SYSTEM ALLOWS FOR THIS DO IT AND RECOMPILE'
-         WRITE(6, *)' OTHERWISE YOU CAN NOT ASK FOR SUCH A HIGH ENERGY'
-         WRITE(6, *)' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
-         WRITE(6, *)' FOR THE TIME BEING EXECUTION TERMINATED'
-         STOP
-      ENDIF
-      IF(Q(1, Nnuc).EQ.0.0D0)THEN
-         REWIND 25
-         CALL BNDG(1, Nnuc, Q(1, Nnuc))
-      ENDIF
-C-----get distance between Qn and the last level
-      ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
-      dshift = 0.0
-      iter = 0
-C-----we are not going to fit discrete levels if there are not more
-C-----than three or if max excitation energy is so high that levels
-C-----can not be taken into account (RORed=0)
-      IF(NLV(Nnuc).GT.3 .AND. RORed.GT.0)THEN
-         IF(FITlev.GT.0.0D0)THEN
+         IF(FITlev.GT.0 .AND. RORed.EQ.0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)' Fitting l.d. to discrete levels'
-            WRITE(6, *)NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc), Nnuc), 
-     &                 ' MeV'
+            WRITE(6, *)' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
+            WRITE(6, *)
+     &               ' CHECK WHETHER YOU CAN INCREASE EXPmax in input.f'
+            WRITE(6, *)' (MAXIMUM ARGUMENT OF THE EXPONENT ALLOWED)'
+            WRITE(6, *)
+     &             ' IF YOUR SYSTEM ALLOWS FOR THIS DO IT AND RECOMPILE'
+            WRITE(6, *)
+     &               ' OTHERWISE YOU CAN NOT ASK FOR SUCH A HIGH ENERGY'
+            WRITE(6, *)' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
+            WRITE(6, *)' FOR THE TIME BEING EXECUTION TERMINATED'
+            STOP
          ENDIF
-         defit = (ELV(NLV(Nnuc), Nnuc) + MAX(FITlev, 4.0D0))
-     &           /FLOAT(NDEX - 1)
-         nplot = (ELV(NLV(Nnuc), Nnuc) + FITlev)/defit
- 150     rocumul = 1.0
-         iter = iter + 1
-         kkl = 0
-         kku = 0
-         DO kk = 1, NDEX
+         IF(Q(1, Nnuc).EQ.0.0D0)THEN
+            REWIND 25
+            CALL BNDG(1, Nnuc, Q(1, Nnuc))
+         ENDIF
+C--------get distance between Qn and the last level
+         ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
+         dshift = 0.0
+         iter = 0
+C--------we are not going to fit discrete levels if there are not more
+C--------than three or if max excitation energy is so high that levels
+C--------can not be taken into account (RORed=0)
+         IF(NLV(Nnuc).GT.3 .AND. RORed.GT.0)THEN
+            IF(FITlev.GT.0.0D0)THEN
+               WRITE(6, *)' '
+               WRITE(6, *)' Fitting l.d. to discrete levels'
+               WRITE(6, *)NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc), Nnuc)
+     &                    , ' MeV'
+            ENDIF
+            defit = (ELV(NLV(Nnuc), Nnuc) + MAX(FITlev, 4.0D0))
+     &              /FLOAT(NDEX - 1)
+            nplot = (ELV(NLV(Nnuc), Nnuc) + FITlev)/defit
+ 120        rocumul = 1.0
+            iter = iter + 1
+            kkl = 0
+            kku = 0
+            DO kk = 1, NDEX
+C--------------clean RO matrix
+               IF(BF.NE.0.0D0)THEN
+                  DO i = 1, NDLW
+                     RO(kk, i, Nnuc) = 0.0
+                  ENDDO
+               ENDIF
+C--------------decrease energy shift above the last level to become 0 at Qn
+               exkk = FLOAT(kk - 1)*defit
+               IF(exkk.LE.ELV(NLV(Nnuc), Nnuc))THEN
+                  dshif = dshift
+               ELSEIF(exkk.LT.Q(1, Nnuc) .AND. ellq.NE.0.0D0)THEN
+                  dshif = dshift*(Q(1, Nnuc) - exkk)/ellq
+               ELSE
+                  dshif = 0.0
+               ENDIF
+               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf)
+               DO ij = 1, NLWst
+                  IF(kk.GT.1)rocumul = rocumul + 
+     &                                 (RO(kk - 1, ij, Nnuc) + RO(kk, 
+     &                                 ij, Nnuc))*defit/RORed
+               ENDDO
+               IF(rocumul.LE.FLOAT(NLV(Nnuc)))THEN
+                  kkl = kk
+                  rocumd = rocumul
+               ELSEIF(kku.EQ.0)THEN
+                  kku = kk
+                  rocumu = rocumul
+               ENDIF
+            ENDDO
+            rocumd = LOG(rocumd)
+            rocumu = LOG(rocumu)
+            rolev = LOG(FLOAT(NLV(Nnuc)))
+            dshi = (rolev - rocumd)/(rocumu - rocumd)
+            dshi = (kkl - 1 + dshi)*defit
+            dshi = dshi - ELV(NLV(Nnuc), Nnuc)
+            dshift = dshift + dshi
+            IF(FITlev.GT.0.0D0)WRITE(6, '(I3,4X,3G12.5)')iter, dshi, 
+     &                               dshift
+            IF(ABS(dshi).GT.0.01D0)THEN
+               IF(iter.LE.20)GOTO 120
+            ENDIF
+         ENDIF
+C--------cumulative plot of levels along with the l.d. formula
+         IF(FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0)THEN
+            WRITE(6, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), 
+     &                     ATIlnor(Nnuc)
+99001       FORMAT('Cumulative plot for ', I3, '-', A2, '-', I3, 
+     &             ' norm=', F6.4)
+            WRITE(35, *)'set terminal postscript enhanced color'
+            WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
+            WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), 
+     &                      dshift, UCRt - DEL - dshift, Q(1, Nnuc), 
+     &                      DEF(1, Nnuc)
+99002       FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', 
+     &             I3, '   U shift = ', F6.3, ' Ucrt = ', F5.2, 
+     &             ' Qn = ', F5.2, ' Def = ', F6.2, '"')
+            WRITE(35, *)'set logscale y'
+            WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
+            WRITE(35, *)'set ylabel "Number of levels" 0,0'
+            WRITE(35, *)
+     &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
+            CLOSE(35)
+            REWIND 36
+            REWIND 34
+            WRITE(36, *)'0.0 1.0'
+            DO il = 2, NLV(Nnuc)
+               WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
+               WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
+            ENDDO
+            rocumul = 1.0
+            WRITE(34, *)'0.0  ', rocumul
+            DO kk = 2, nplot
+C-----------integration over energy. There should be factor 2 because of the
+C-----------parity but it cancels with the 1/2 steming from the trapezoid
+C-----------integration
+               DO ij = 1, NLWst
+                  rocumul = rocumul + 
+     &                      (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))
+     &                      *defit/RORed
+               ENDDO
+               WRITE(34, *)defit*FLOAT(kk - 1), rocumul
+            ENDDO
+            CLOSE(36)
+            CLOSE(34)
+            iwin = PIPE('gnuplot fort.35#')
+            CLOSE(35)
+         ENDIF
+C--------plotting fit of the levels with low energy formula  ***done***
+C
+C--------fitting discrete levels ---- done ------
+C--------
+C--------do loop over excitation energy
+C--------
+         IF(Q(1, Nnuc).EQ.0.0D0)THEN
+            REWIND 25
+            CALL BNDG(1, Nnuc, Q(1, Nnuc))
+         ENDIF
+         ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
+         DO kk = 1, NEX(Nnuc)
 C-----------clean RO matrix
             IF(BF.NE.0.0D0)THEN
                DO i = 1, NDLW
                   RO(kk, i, Nnuc) = 0.0
                ENDDO
             ENDIF
-C-----------decrease energy shift above the last level to become 0 at Qn
-            exkk = FLOAT(kk - 1)*defit
-            IF(exkk.LE.ELV(NLV(Nnuc), Nnuc))THEN
-               dshif = dshift
-            ELSEIF(exkk.LT.Q(1, Nnuc) .AND. ellq.NE.0.0D0)THEN
-               dshif = dshift*(Q(1, Nnuc) - exkk)/ellq
-            ELSE
-               dshif = 0.0
-            ENDIF
-            CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf)
-            DO ij = 1, NLWst
-               IF(kk.GT.1)rocumul = rocumul + 
-     &                              (RO(kk - 1, ij, Nnuc) + RO(kk, ij, 
-     &                              Nnuc))*defit/RORed
-            ENDDO
-            IF(rocumul.LE.FLOAT(NLV(Nnuc)))THEN
-               kkl = kk
-               rocumd = rocumul
-            ELSEIF(kku.EQ.0)THEN
-               kku = kk
-               rocumu = rocumul
+            IF(FITlev.LE.0.0D0 .OR. EX(kk, Nnuc).GE.ELV(NLV(Nnuc), Nnuc)
+     &         )THEN
+               IF(EX(kk, Nnuc).LE.Q(1, Nnuc) .AND. ellq.NE.0.0D0)THEN
+                  dshif = dshift*(Q(1, Nnuc) - EX(kk, Nnuc))/ellq
+               ELSE
+                  dshif = 0.0
+               ENDIF
+               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf)
             ENDIF
          ENDDO
-         rocumd = LOG(rocumd)
-         rocumu = LOG(rocumu)
-         rolev = LOG(FLOAT(NLV(Nnuc)))
-         dshi = (rolev - rocumd)/(rocumu - rocumd)
-         dshi = (kkl - 1 + dshi)*defit
-         dshi = dshi - ELV(NLV(Nnuc), Nnuc)
-         dshift = dshift + dshi
-         IF(FITlev.GT.0.0D0)WRITE(6, '(I3,4X,3G12.5)')iter, dshi, dshift
-         IF(ABS(dshi).GT.0.01D0)THEN
-            IF(iter.LE.20)GOTO 150
-         ENDIF
       ENDIF
-C-----cumulative plot of levels along with the l.d. formula
-      IF(FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0)THEN
-         WRITE(6, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), 
-     &                  ATIlnor(Nnuc)
-99001    FORMAT('Cumulative plot for ', I3, '-', A2, '-', I3, ' norm=', 
-     &          F6.4)
-         WRITE(35, *)'set terminal postscript enhanced color'
-         WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
-         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), dshift, 
-     &                   UCRt - DEL - dshift, Q(1, Nnuc), DEF(1, Nnuc)
-99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
-     &          '   U shift = ', F6.3, ' Ucrt = ', F5.2, ' Qn = ', F5.2, 
-     &          ' Def = ', F6.2, '"')
-         WRITE(35, *)'set logscale y'
-         WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
-         WRITE(35, *)'set ylabel "Number of levels" 0,0'
-         WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
-         CLOSE(35)
-         REWIND 36
-         REWIND 34
-         WRITE(36, *)'0.0 1.0'
-         DO il = 2, NLV(Nnuc)
-            WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
-            WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
-         ENDDO
-         rocumul = 1.0
-         WRITE(34, *)'0.0  ', rocumul
-         DO kk = 2, nplot
-C-----------integration over energy. There should be factor 2 because of the
-C-----------parity but it cancels with the 1/2 steming from the trapezoid
-C-----------integration
-            DO ij = 1, NLWst
-               rocumul = rocumul + 
-     &                   (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))
-     &                   *defit/RORed
-            ENDDO
-            WRITE(34, *)defit*FLOAT(kk - 1), rocumul
-         ENDDO
-         CLOSE(36)
-         CLOSE(34)
-         iwin = PIPE('gnuplot fort.35#')
-         CLOSE(35)
-      ENDIF
-C-------plotting fit of the levels with low energy formula  ***done***
-C
-C-----fitting discrete levels ---- done ------
-C-----
-C-----do loop over excitation energy
-C-----
-      IF(Q(1, Nnuc).EQ.0.0D0)THEN
-         REWIND 25
-         CALL BNDG(1, Nnuc, Q(1, Nnuc))
-      ENDIF
-      ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
-      DO kk = 1, NEX(Nnuc)
-C--------clean RO matrix
-         IF(BF.NE.0.0D0)THEN
-            DO i = 1, NDLW
-               RO(kk, i, Nnuc) = 0.0
-            ENDDO
-         ENDIF
-         IF(FITlev.LE.0.0D0 .OR. EX(kk, Nnuc).GE.ELV(NLV(Nnuc), Nnuc))
-     &      THEN
-            IF(EX(kk, Nnuc).LE.Q(1, Nnuc) .AND. ellq.NE.0.0D0)THEN
-               dshif = dshift*(Q(1, Nnuc) - EX(kk, Nnuc))/ellq
-            ELSE
-               dshif = 0.0
-            ENDIF
-            CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf)
-         ENDIF
-      ENDDO
       END
 C
 C
@@ -924,6 +935,13 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
+C fisfis d
+      COMMON /FISC  / FIScon
+      COMMON /PARFIS/ ROTemp, AC, AAJ, UX, IBAr1
+      DOUBLE PRECISION UX, AAJ
+      INTEGER IBAr1
+      REAL FIScon
+C fisfis u
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Destep, Dshif
@@ -961,7 +979,66 @@ C-----determination of U for normal states
             bcs = .TRUE.
          ENDIF
       ENDIF
-C     
+C     fisfis d ===================================
+      IF(FIScon.EQ.2.)THEN
+         aj = AAJ
+         mompar = MOMparcrt(IBAr1)
+         momort = MOMortcrt(IBAr1)
+C        goto 45192
+         IF(UX.GT.UCRt)THEN
+            accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*UX)))/UX)
+         ELSE
+            accn = ACRt
+         ENDIF
+         temp = 0.
+C        goto 45192
+Cc       IF(ux.GE.YRAst(i, Nnuc))
+Cc       &       temp = SQRT((ux - YRAst(i,Nnuc))/accn)
+Cc       ampl = EXP(TEMp0*SHRt)
+         shredt = 1.
+Cc       IF(temp.GE.TEMp0)shredt = ampl*EXP(( - SHRt*temp))
+C--------temperature fade-out of the shell correction  --- done ----
+         u = UX + DEL
+C        ! - FISb(i, Nnuc) + SHC(Nnuc)
+C        &          *shredt*SHCjf(i, Nnuc)
+         IF(u.GT.UCRt)THEN
+            u = u - ECOnd
+            bcs = .FALSE.
+         ELSE
+            bcs = .TRUE.
+         ENDIF
+C        goto 45192
+         IF(u.GT.0.0D0)THEN
+C
+C-----------calculation of level density parameter 'a' including surface
+C-----------dependent factor
+            qigor = ( - 0.00246 + 0.3912961*cigor - 
+     &              0.00536399*cigor**2 - 0.051313*cigor**3 + 
+     &              0.043075445*cigor**4) - 0.375
+            IF(qigor.GT.0.077D0)THEN
+               bsq = 0.983 + 0.439*qigor
+            ELSE
+               bsq = 1.0 + 0.4*(cigor - 1.0)**2
+            ENDIF
+            ATIl = AP1*A(Nnuc) + AP2*A23*bsq
+            ATIl = ATIl*ATIlnor(Nnuc)
+            IF(Asaf.GE.0.D0)AC = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
+            IF(Asaf.LT.0.D0)AC = -ATIl*Asaf
+            IF(AC.GT.0.D0)THEN
+               IF(bcs)THEN
+                  ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, A2)
+C                 !*RORed
+               ELSE
+                  ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort, 
+     &                     YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred, 
+     &                     EXPmax)
+               ENDIF
+            ENDIF
+         ENDIF
+         GOTO 99999
+      ENDIF
+C     fisfis u =============================================
+C-----
 C-----do loop over angular momentum
 C     
       DO i = 1, NLWst
@@ -984,7 +1061,7 @@ C-----ACCN  servs only to calculate temperature fade-out
             ampl = EXP(TEMp0*SHRt)
             shredt = 1.
             IF(temp.GE.TEMp0)shredt = ampl*EXP(( - SHRt*temp))
-C-----temperature fade-out of the shell correction  --- done ----
+C-----------temperature fade-out of the shell correction  --- done ----
             u = EX(Kk, Nnuc) + DEL - FISb(i, Nnuc) + SHC(Nnuc)
      &          *shredt*SHCjf(i, Nnuc)
             IF(u.GT.UCRt)THEN
@@ -1213,9 +1290,9 @@ C-----according to Myers&Swiatecki, Phys. Rev. C60(1999)014606
      &t to '',G10.5)')INT(A(Nnuc)), SYMb(Nnuc), sb0
          ENDIF
 C
-C-----determination of the yrast, saddle point energies and deformations
+C--------determination of the yrast, saddle point energies and deformations
 C
-C-----do loop over angular momentum
+C--------do loop over angular momentum
          segnor = 1.0
          sbnor = 1.0
          jstabf = 0
@@ -1366,37 +1443,37 @@ C
 C
 C
       SUBROUTINE ROGC(Nnuc, Scutf)
-Ccc
-Ccc   ********************************************************************
-Ccc   *                                                         CLASS:PPU*
-Ccc   *                         R O G C                                  *
-Ccc   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
-Ccc   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
-Ccc   *                                                                  *
-Ccc   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
-Ccc   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
-Ccc   *                                                                  *
-Ccc   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
-Ccc   *                                                                  *
-Ccc   * CALLS:RIVOLI                                                     *
-Ccc   *                                                                  *
-Ccc   * AUTHOR: M.HERMAN                                                 *
-Ccc   * DATE:   18.FEB.1993                                              *
-Ccc   * REVISION:1    BY:M.Herman                 ON:29.Apr.1996         *
-Ccc   * REVISION:2    BY:M.Herman                 ON:29.Oct.1996         *
-Ccc   *   Automatic fit of nuclear temperature, Ux, and Eo to            *
-Ccc   *   the discrete level scheme added. GNU-plots of the cumulative   *
-Ccc   *   number of levels compared to the low energy GC formula         *
-Ccc   *   provided.                                                      *
-Ccc   * REVISION:3    BY:M.Herman                 ON:14.Jul.1997         *
-Ccc   *   Table with a-parameters resulting from Mebel's analysis        *
-Ccc   *   added as default.                                              *
-Ccc   *                                                                  *
-Ccc   * REVISION:4    BY:M.Herman                 ON:07.Feb.2000         *
-Ccc   *   Structure simplified by adding a call to PRERO                 *
-Ccc   *                                                                  *
-Ccc   ********************************************************************
-Ccc
+CCC
+CCC   ********************************************************************
+CCC   *                                                         CLASS:PPU*
+CCC   *                         R O G C                                  *
+CCC   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
+CCC   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
+CCC   *                                                                  *
+CCC   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
+CCC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
+CCC   *                                                                  *
+CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
+CCC   *                                                                  *
+CCC   * CALLS:RIVOLI                                                     *
+CCC   *                                                                  *
+CCC   * AUTHOR: M.HERMAN                                                 *
+CCC   * DATE:   18.FEB.1993                                              *
+CCC   * REVISION:1    BY:M.Herman                 ON:29.Apr.1996         *
+CCC   * REVISION:2    BY:M.Herman                 ON:29.Oct.1996         *
+CCC   *   Automatic fit of nuclear temperature, Ux, and Eo to            *
+CCC   *   the discrete level scheme added. GNU-plots of the cumulative   *
+CCC   *   number of levels compared to the low energy GC formula         *
+CCC   *   provided.                                                      *
+CCC   * REVISION:3    BY:M.Herman                 ON:14.Jul.1997         *
+CCC   *   Table with a-parameters resulting from Mebel's analysis        *
+CCC   *   added as default.                                              *
+CCC   *                                                                  *
+CCC   * REVISION:4    BY:M.Herman                 ON:07.Feb.2000         *
+CCC   *   Structure simplified by adding a call to PRERO                 *
+CCC   *                                                                  *
+CCC   ********************************************************************
+CCC
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1547,7 +1624,7 @@ C-----------set nuclear temperature to the value from the systematics
             IF(amas.LT.100.D0)t = 60./amas + 0.06
             tm = t
             GOTO 500
-C-------plotting fit of the levels with low energy formula  ***done***
+C-----------plotting fit of the levels with low energy formula  ***done***
          ELSEIF(FITlev.LT.0.0D0)THEN
             WRITE(6, *)' ERROR IN DISCRETE LEVEL FITTING'
             WRITE(6, *)' EXECUTION STOPPED BECAUSE OF FITLEV<0 OPTION '
@@ -1624,7 +1701,7 @@ C-----plotting fit of the levels with low energy formula  ***done***
       ROPar(5, Nnuc) = t
       IF(ig.NE.0)THEN
 C--------calculation of level densities below EXL
-C--------/  low energy formula /
+C--------(low energy formula) 
 C
          DO i = 1, ig
             e = EX(i, Nnuc)
@@ -1693,6 +1770,7 @@ C-----fermi gas level density formula
 C-----(note no numerical scaling)
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+C
 C
 C Dummy arguments
 C
@@ -1765,38 +1843,38 @@ C
 C
 C
       SUBROUTINE ROHFBCS(Nnuc)
-Ccc
-Ccc   *********************************************************************
-Ccc   *                                                         CLASS:PPU *
-Ccc   *                      R O H F B C S                                *
-Ccc   *                                                                   *
-Ccc   *  Reads level densities calculated in the frame of the Hartree-    *
-Ccc   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
-Ccc   *  them linearily in log to the EMPIRE energy grid.                 *
-Ccc   *  level densities were generated and provided to RIPL-2 by         *
-Ccc   *  S. Goriely.                                                      *
-Ccc   *                                                                   *
-Ccc   *                                                                   *
-Ccc   *                                                                   *
-Ccc   *  INPUT:                                                           *
-Ccc   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
-Ccc   *                                                                   *
-Ccc   *                                                                   *
-Ccc   * OUTPUT:NONE                                                       *
-Ccc   *                                                                   *
-Ccc   * CALLS:ALIT                                                        *
-Ccc   *                                                                   *
-Ccc   *                                                                   *
-Ccc   * AUTHOR: M. HERMAN (BASED ON THE ORGINAL ROUTINE BY S. GORIELI)    *
-Ccc   * DATE:   November 14, 2001                                         *
-Ccc   *                                                                   *
-Ccc   *                                                                   *
-Ccc   *********************************************************************
-Ccc
+CCC
+CCC   *********************************************************************
+CCC   *                                                         CLASS:PPU *
+CCC   *                      R O H F B C S                                *
+CCC   *                                                                   *
+CCC   *  Reads level densities calculated in the frame of the Hartree-    *
+CCC   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
+CCC   *  them linearily in log to the EMPIRE energy grid.                 *
+CCC   *  level densities were generated and provided to RIPL-2 by         *
+CCC   *  S. Goriely.                                                      *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *  INPUT:                                                           *
+CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   * OUTPUT:NONE                                                       *
+CCC   *                                                                   *
+CCC   * CALLS:ALIT                                                        *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   * AUTHOR: M. HERMAN (BASED ON THE ORGINAL ROUTINE BY S. GORIELI)    *
+CCC   * DATE:   November 14, 2001                                         *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *********************************************************************
+CCC
       PARAMETER(NLDGRID = 55, JMAX = 30)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      DIMENSION ugrid(0:NLDGRID), tgrid(0:NLDGRID), cgrid(0:NLDGRID)
+      DIMENSION uugrid(0:NLDGRID), tgrid(0:NLDGRID), cgrid(0:NLDGRID)
       DIMENSION rhoogrid(0:NLDGRID), rhotgrid(0:NLDGRID)
       DIMENSION rhogrid(0:NLDGRID, JMAX)
       DIMENSION rhouj(JMAX)
@@ -1809,7 +1887,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, ugrid, 
+      DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, uugrid, 
      &                 rhotgrid, cgrid
       INTEGER kk, ia, iz, j, jmax1, izr, iar, k, khi
 C
@@ -1824,7 +1902,7 @@ C     initialization
 C-------------------------------------------------------------------
       jmax1 = MIN(NDLW, JMAX)
       DO i = 0, NLDGRID
-         ugrid(i) = 0.
+         uugrid(i) = 0.
          tgrid(i) = 0.
          cgrid(i) = 1.
          rhoogrid(i) = 1.E-20
@@ -1850,11 +1928,11 @@ C
       READ(34, *)
       READ(34, *)
       i = 1
- 200  READ(34, 99003, END = 400)ugrid(i), tgrid(i), cgrid(i), 
+ 200  READ(34, 99003, END = 400)uugrid(i), tgrid(i), cgrid(i), 
      &                          rhoogrid(i), rhotgrid(i), 
      &                          (rhogrid(i, j), j = 1, jmax1)
 99003 FORMAT(1x, f6.2, f7.3, 1x, 1p, 33E9.2, 0p)
-      IF(ugrid(i).LE.0.001)GOTO 400
+      IF(uugrid(i).LE.0.001)GOTO 400
       IF(i.EQ.NLDGRID)GOTO 400
       i = i + 1
       GOTO 200
@@ -1879,27 +1957,27 @@ C--------interpolation in the level density tables
 C        
          klo = 1
          khi = iugrid
-         IF(u.LE.ugrid(klo))THEN
+         IF(u.LE.uugrid(klo))THEN
             klo = 0
             khi = 1
             GOTO 500
          ENDIF
-         IF(u.GE.ugrid(khi))THEN
+         IF(u.GE.uugrid(khi))THEN
             klo = iugrid - 1
             GOTO 500
          ENDIF
  450     IF(khi - klo.GT.1)THEN
             k = (khi + klo)/2.
-            IF(ugrid(k).GT.u)THEN
+            IF(uugrid(k).GT.u)THEN
                khi = k
             ELSE
                klo = k
             ENDIF
             GOTO 450
          ENDIF
- 500     h = ugrid(khi) - ugrid(klo)
-         c1 = (ugrid(khi) - u)/h
-         c2 = (u - ugrid(klo))/h
+ 500     hhh = uugrid(khi) - uugrid(klo)
+         c1 = (UGRid(khi) - u)/hhh
+         c2 = (u - UGRid(klo))/hhh
          DO j = 1, jmax1
             r1 = rhogrid(klo, j)
             r2 = rhogrid(khi, j)
@@ -1913,4 +1991,3 @@ C
          TNUc(kk, Nnuc) = c1*tgrid(klo) + c2*tgrid(khi)
       ENDDO
       END
-C

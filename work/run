@@ -8,9 +8,9 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.18                   '
-echo '                          (Mondovi)                        '
-echo '                             by                            '
+echo '                     V E R S I O N  2.19.alpha             '
+echo '                            (Lodi)                         '
+echo '                              by                           '
 echo '                        M. H e r m a n                     '
 echo '                                                           '
 echo ' '
@@ -39,6 +39,8 @@ rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
 rm  OUTPUT.DAT LIST.DAT 2>/dev/null
 rm  OMPAR.OMP OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
 rm  OMPAR.DIR 2>/dev/null
+rm  FISSION.INP 2>/dev/null
+rm  FISSION.OUT 2>/dev/null
 rm  CUMULPLOT.PS 2>/dev/null
 rm  ecis95.ics ecis95.cs 2>/dev/null
 rm  ecis95.tmp ecis95.ang 2>/dev/null
@@ -77,6 +79,10 @@ if [ -s $file.fus ]; then
    cp $file.fus FUSION 
    echo 'Using existing file with fusion cross sections:'  $file.fus
 fi
+if [ -s $file-inp.fis ]; then
+   cp $file-inp.fis FISSION.INP 
+   echo 'Using existing file with fission input:'  $file-inp.fis
+fi
 if [ -s $file.exf ]; then
    cp $file.exf EXFOR.DAT 
    echo 'Using existing file with EXFOR data:'  $file.exf
@@ -106,6 +112,9 @@ if [ ! -s $file-omp.ripl ]; then
 fi
 if [ ! -s $file-omp.dir ]; then
    cp OMPAR.DIR $file-omp.dir  2>/dev/null
+fi
+if [ ! -s $file-inp.fis ]; then
+   cp FISSION.INP $file-inp.fis  2>/dev/null
 fi
 if [ ! -s $file-*.tl  ]; then
    rename TARGET $file TARGET-*.tl 2>/dev/null

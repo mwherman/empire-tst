@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:35 $
-Ccc   * $Id: auxiliary.f,v 1.4 2002-09-20 14:16:35 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: auxiliary.f,v 1.5 2002-11-29 15:27:24 mike Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -39,6 +39,7 @@ C
       EX2 = 0.0
       NLW = 0
       CSFus = 0.0
+      TOTcsfis = 0.0
       CRL = 0.0
       DENhf = 0.0
       CSMsd(1) = 0.0

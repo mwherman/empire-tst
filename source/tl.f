@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-10-01 16:20:10 $
-Ccc   * $Id: tl.f,v 1.8 2002-10-01 16:20:10 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: tl.f,v 1.9 2002-11-29 15:27:24 mike Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -29,7 +29,7 @@ C        {
 C        Strenght is fixed for given energy so POTe(i) = pot(i,1)
 C        this option will be used for RIPL potential
 C        }
-
+C
       SUBROUTINE HITL(Stl)
 C
 Ccc
@@ -257,6 +257,11 @@ C--------Imodel not used for non-inelastic channels
      &      .OR. ZEJc(Nejc).NE.ZEJc(0))GOTO 200
       ENDIF
       MODelcc = IMOdel
+
+C     RCN 11/2002	
+C     IF (ND_nlv.GT.0) coll_defined=.TRUE.
+      IF (ND_nlv.GT.0 .and. NISotop.EQ.0) coll_defined=.TRUE.
+
       IF(IMOdel.EQ.1 .AND. (.NOT.coll_defined))THEN
 C--------model = 'coupled-channels rotational model'
          coll_defined = .TRUE.
@@ -315,10 +320,10 @@ C--------model = 'coupled-channels rotational model'
             icoll(k) = 0
             eripl = EEX(k, ncalc)
             REWIND(39)
-            READ(39, '(A80)') ch_iuf
+            READ(39, '(A80)')ch_iuf
             ilv = -1
  20         ilv = ilv + 1
-            READ(39, '(I3,1X,F10.6)', END = 50)itmp, ftmp 
+            READ(39, '(I3,1X,F10.6)', END = 50)itmp, ftmp
             IF(ABS(ftmp - eripl).GT.0.010)GOTO 20
             icoll(k) = ilv
  50      ENDDO
@@ -432,10 +437,10 @@ C--------model = 'vibrational model'
             icoll(k) = 0
             eripl = EXV(k, ncalc)
             REWIND(39)
-            READ(39, '(A80)') ch_iuf
+            READ(39, '(A80)')ch_iuf
             ilv = -1
  60         ilv = ilv + 1
-            READ(39, '(I3,1X,F10.6)', END = 100)itmp, ftmp 
+            READ(39, '(I3,1X,F10.6)', END = 100)itmp, ftmp
             IF(ABS(ftmp - eripl).GT.0.010D0)GOTO 60
             icoll(k) = ilv
  100     ENDDO
@@ -526,19 +531,19 @@ C        WRITE (Ko,*) E , ' RIPL emax=' , EEMax
       EEE = E
       gamma = 1.D0
 C     IF(IREl.EQ.2)THEN
-C        Target system mass in MeV
-C        emtar = xmas_nnuc*AMUmev
-C        Total system mass in MeV
-C        emtot = (xmas_nnuc + xmas_nejc)*AMUmev
-C        Total kinetic energy in cm
-C        tcm = SQRT(2*emtar*E + emtot**2) - emtot
+C     Target system mass in MeV
+C     emtar = xmas_nnuc*AMUmev
+C     Total system mass in MeV
+C     emtot = (xmas_nnuc + xmas_nejc)*AMUmev
+C     Total kinetic energy in cm
+C     tcm = SQRT(2*emtar*E + emtot**2) - emtot
 C
-C        Relativistic correction to the potential
-C        (Used for example in Madland potential REF=2001)
+C     Relativistic correction to the potential
+C     (Used for example in Madland potential REF=2001)
 C
-C        Obtained from Dirac equation considering non relativistic target !!
+C     Obtained from Dirac equation considering non relativistic target !!
 C
-C        gamma = 1.D0 + tcm/(tcm + 2*xmas_nejc*AMUmev)
+C     gamma = 1.D0 + tcm/(tcm + 2*xmas_nejc*AMUmev)
 C
 C     ENDIF
 C
@@ -1149,7 +1154,7 @@ C
                AVSo(Nejc, Nnuc) = 0.66
                VOM(2, Nejc, Nnuc) = 47.01
                VOM(3, Nejc, Nnuc) = -0.267
-               VOM(4, Nejc, Nnuc) = -0.00018
+               VOM(4, Nejc, Nnuc) = -0.0018
                WOMs(2, Nejc, Nnuc) = 9.52
                WOMs(3, Nejc, Nnuc) = -0.053
                VSO(2, Nejc, Nnuc) = 7.0
@@ -1415,7 +1420,7 @@ C
      &                NCOll(NDIM4), NVIb(NDIM4), NISotop, IZ(NDIM4), 
      &                IA(NDIM4), LMAx(NDIM4), BANdk(NDIM4), 
      &                DEF(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj, 
-     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
+     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR, 
      &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4), 
      &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4), 
      &                XMUbeta(NDIM4), EX(NDIM6, NDIM4), 
@@ -1428,7 +1433,7 @@ C
 99001 FORMAT(80A1)
       Ieof = 0
       READ(Ki, *)IREf
-      WRITE(Komp, '(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)')IREf, Nnucr,
+      WRITE(Komp, '(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)')IREf, Nnucr, 
      &      Nejcr, Ianucr, Symbnucr, Iaejcr, Symbejcr
 C     WRITE (Ko,'(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)') IREf ,
 C     &       Nnucr , Nejcr , Ianucr , Symbnucr , Iaejcr , Symbejcr
@@ -1645,7 +1650,7 @@ C--------------Reading depths
       ELSEIF(IMOdel.EQ.3)THEN
          READ(Ko, 99004, ERR = 200)NISotop
          DO n = 1, NISotop
-            READ(Ko, 99003, ERR = 200)IZ(n), IA(n), BETa0(n), GAMma0(n),
+            READ(Ko, 99003, ERR = 200)IZ(n), IA(n), BETa0(n), GAMma0(n), 
      &                                XMUbeta(n)
 99003       FORMAT(2I5, 1p, 3(1x, e11.4))
          ENDDO
@@ -1667,7 +1672,7 @@ C
 C******************* subroutine omin ***************************
       SUBROUTINE OMIN(Ki, Ieof, Irelout)
 C
-C     routine to read optical model parameters 
+C     routine to read optical model parameters
 C
 C     Common blocks and declarations for ominput11.f [July 6, 2001] - RIPL-II
 C
@@ -1683,7 +1688,7 @@ C
      &                NCOll(NDIM4), NVIb(NDIM4), NISotop, IZ(NDIM4), 
      &                IA(NDIM4), LMAx(NDIM4), BANdk(NDIM4), 
      &                DEF(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj, 
-     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
+     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR, 
      &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4), 
      &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4), 
      &                XMUbeta(NDIM4), EX(NDIM6, NDIM4), 
@@ -1771,7 +1776,7 @@ C
      &                NCOll(NDIM4), NVIb(NDIM4), NISotop, IZ(NDIM4), 
      &                IA(NDIM4), LMAx(NDIM4), BANdk(NDIM4), 
      &                DEF(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj, 
-     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
+     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR, 
      &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4), 
      &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4), 
      &                XMUbeta(NDIM4), EX(NDIM6, NDIM4), 

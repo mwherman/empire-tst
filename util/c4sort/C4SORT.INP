@@ -3,6 +3,11 @@ $* C4SORT
    FLC4IN ../x4toc4/c4.out
    FLC4OU ../x4toc4/c4.out
 
+   ALIAS       77000    3    1     77193    3    1
+
+   ALIAS       32000    3    1     32070    3    1
+   ALIAS       32000    3    1     32074    3    1
+
    ALIAS       26000    4    2     26056    4    2
    ALIAS       26000    5 9000     26056    5 9000
    ALIAS       26000    6 9000     26056    6 9000

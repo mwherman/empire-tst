@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: MSD-orion.f,v 1.4 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: MSD-orion.f,v 1.5 2002-11-29 15:27:24 mike Exp $
 C
 C     Surface real OMP part (for DOM potentials) included
 C     but contribution to form factor is ignored (see subroutine FFCAL)

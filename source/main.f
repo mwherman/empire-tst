@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-10-01 16:20:10 $
-Ccc   * $Id: main.f,v 1.8 2002-10-01 16:20:10 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: main.f,v 1.9 2002-11-29 15:27:24 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -201,6 +201,23 @@ Ccc
 C
 C     COMMON variables
 C
+C fisfis d---------------------------
+      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /IMAG  / TF(NFWELLS), WIMag, TDIr, TABs, TDIr23
+      INTEGER NRBar, NRFdis, ibaro
+      DOUBLE PRECISION TF, WIMag, TDIr, TABs, TDIr23
+      CHARACTER*40 line
+      CHARACTER*2 carz, cara
+      CHARACTER*8 cara1
+      CHARACTER*28 cara2
+      CHARACTER*8 cara5
+      CHARACTER*20 cara3
+      CHARACTER*15 cara4
+      CHARACTER*36 cara6
+      CHARACTER*7 cara9
+      CHARACTER*55 cara10
+C fisfis u-----------------------------
+C
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
       INTEGER NELang
 C-----next COMMON is to transfer elastic ddx from Scat-2
@@ -208,6 +225,9 @@ C-----next COMMON is to transfer elastic ddx from Scat-2
 C
 C     Local variables
 C
+C fisfis d-----------------
+      DOUBLE PRECISION aafis, bbfis, dencomp, xnorfis
+C fisfis u------------------
       DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
      &                 cturbo, ded, delang, elcncs, gamfis, gamt, pope, 
      &                 popleft, poplev, poptot, popread, dang, coef, 
@@ -292,9 +312,9 @@ C--------------add direct transition to the spectrum
                poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
                CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
-C              Empire uses 10 deg grid for inelastic so we have to take 
+C              Empire uses 10 deg grid for inelastic so we have to take
 C              each 4th result from ECIS (2.5 deg grid)
-               DO iang = 1, NDANG-1
+               DO iang = 1, NDANG - 1
                   READ(45, '(15x,E12.5)', END = 1500)
      &                 CSAlev(iang, ilv, nejcec)
                   READ(45, '(15x,E12.5)', END = 1500)
@@ -401,6 +421,10 @@ C
 C=========================================================================
          ENDIF
       ENDIF
+C
+C     Skipping all emission calculations
+C     GOTO 99999
+C
 C-----locate postions of ENDF MT-numbers 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
       CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
@@ -618,8 +642,188 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
             POP(NEX(1), i, 2, 1) = POP(NEX(1), i, 2, 1)*cturbo
          ENDDO
       ENDIF
+C     fisfis d
+      OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
+      OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN')
+C     fisfis u
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
+C        fisfis d
+         IF(FISsil(nnuc))THEN
+            READ(79, '(a40)')line
+ 1560       READ(79, '(4x,a2,i3,2x,a2,i3)')carz, iz, cara, ia
+            IF(carz.NE.'Z=')GOTO 1560
+            IF(carz.EQ.'Z=' .AND. iz.NE.Z(nnuc) .OR. ia.NE.A(nnuc))
+     &         GOTO 1560
+            READ(79, '(a40)')line
+            READ(79, '(a8,f2.0,a28,a20)')cara1, FISbar(nnuc), cara2, 
+     &           cara3
+            READ(79, '(a15,i1)')cara4, NRBar
+            READ(79, *)
+            READ(79, *)
+            IF(NRBar.EQ.1)READ(79, '(2f8.3)')EFB(1), H(1)
+            IF(NRBar.EQ.2)READ(79, '(4f8.3)')
+     &                         (EFB(i), H(i), i = 1, NRBar)
+            IF(NRBar.EQ.3)READ(79, '(6f8.3,15x,f8.3)')
+     &                         (EFB(i), H(i), i = 1, NRBar), 
+     &                         CNOrm_im_well
+            IF(NRBar.EQ.5)READ(79, '(10f8.3,15x,f8.3)')
+     &                         (EFB(i), H(i), i = 1, NRBar), 
+     &                         CNOrm_im_well
+            READ(79, *)
+            READ(79, *)
+            READ(79, '(5f9.4)')(HJ(i), i = 1, NRBar)
+            READ(79, *)
+            READ(79, *)
+            READ(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
+            READ(79, *)
+            READ(79, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
+            READ(79, *)
+            DO ibar = 1, NRBar
+               READ(79, '(a39,I2,a2,I2)')cara7, ibaro, cara8, 
+     &              NRFdis(ibar)
+               READ(79, *)
+               DO nr = 1, NRFdis(ibar)
+                  READ(79, '(1x,1f5.3,1f6.1,1i4)')EFDis(nr, ibar), 
+     &                 SFDis(nr, ibar), IPFdis(nr, ibar)
+               ENDDO
+            ENDDO
+            READ(79, *)
+C
+            nrbarc = NRBar
+C           ! To be changed for the 3-humped barrier
+            IF(NRBar.EQ.3)nrbarc = 2
+            IF(NRBar.EQ.5)nrbarc = 3
+C
+            READ(79, '(a7,f2.0,a55)')cara9, FISden(nnuc), cara10
+            IF(FISden(nnuc).EQ.0.)THEN
+C              RIPL-2 LD
+               UGRid(0) = 0
+               DO ibar = 1, nrbarc
+                  READ(79, *)
+                  DO i = 1, NFISEN
+                     READ(79, '(f7.2,30e9.2,0px)')UGRid(i), 
+     &                    (ROFi(ibar, i, j), j = 1, NFISJ)
+                  ENDDO
+                  DO j = 1, NFISJ
+                     ROFi(ibar, 0, j) = 0
+                  ENDDO
+               ENDDO
+            ENDIF
+C
+            IF(FISden(nnuc).EQ.1.)THEN
+               READ(79, '(3(A9,f9.5),a9,f11.5)')cara, ACRt, cara, UCRt, 
+     &              cara, ECOnd, cara, DETcrt
+               READ(79, '(2(A9,f9.5))')cara, TCRt, cara, SCR
+               DO i = 1, nrbarc
+                  READ(79, '(i3,A10,f11.6,a10,f11.6)')ii, cara, 
+     &                 MOMparcrt(i), cara, MOMortcrt(i)
+               ENDDO
+            ENDIF
+C
+            WRITE(80, '(a40)')line
+            WRITE(80, '(4x,a2,i3,2x,a2,i3)')'Z=', INT(Z(nnuc)), 'A=', 
+     &            INT(A(nnuc))
+            WRITE(80, '(a40)')line
+            WRITE(80, '(a8,f2.0,a28,a20)')cara1, FISbar(nnuc), cara2, 
+     &            cara3
+            WRITE(80, '(a15,i1)')cara4, NRBar
+            WRITE(80, *)'  '
+C
+            IF(NRBar.EQ.1)THEN
+               WRITE(80, '(a)')'    Va      ha    (in Mev) '
+               WRITE(80, '(2f8.3)')EFB(1), H(1)
+               WRITE(80, *)' '
+               WRITE(80, '(2a10)')'h2/2J(A)', '(in MeV)'
+               WRITE(80, '(f9.4)')HJ(1)
+               WRITE(80, *)' '
+               WRITE(80, '(a10)')'Beta2(A)'
+               WRITE(80, '(f9.4)')DEFfis(1)
+               WRITE(80, *)' '
+            ENDIF
+C
+            IF(NRBar.EQ.2)THEN
+               WRITE(80, '(a)')
+     &                    '    Va      ha      Vb      hb     (in Mev) '
+               WRITE(80, '(4f8.3)')(EFB(i), H(i), i = 1, NRBar)
+               WRITE(80, *)' '
+               WRITE(80, '(3a10)')'h2/2J(A)', 'h2/2J(B)', '(in MeV)'
+               WRITE(80, '(2f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, *)' '
+               WRITE(80, '(2a10)')'Beta2(A)', 'Beta2(B)'
+               WRITE(80, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
+               WRITE(80, *)' '
+            ENDIF
+C
+            IF(NRBar.EQ.3)THEN
+               WRITE(80, '(a,1x,a)')
+     &       '    Va      ha      Vb      hb      Vi      hi  (in Mev) '
+     &       , '   Normal. Coeff for Wi'
+               WRITE(80, '(6f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar)
+     &               , CNOrm_im_well
+               WRITE(80, *)' '
+               WRITE(80, '(4a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(I)', 
+     &                            '(in MeV)'
+               WRITE(80, '(3f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, *)' '
+               WRITE(80, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(I)'
+               WRITE(80, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
+               WRITE(80, *)' '
+            ENDIF
+C
+            IF(NRBar.EQ.5)THEN
+               WRITE(80, '(a,1x,a)')
+     &'    Va      ha      Vb      hb      Va      ha      Vc hc      Vi
+     &      hi      Vo      ho  (in Mev) ', '   Normal. Coeff for Wi'
+               WRITE(80, '(10f8.3,15x,f8.3)')
+     &               (EFB(i), H(i), i = 1, NRBar), CNOrm_im_well
+               WRITE(80, *)' '
+               WRITE(80, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)', 
+     &                            'h2/2J(I)', 'h2/2J(O)', '(in MeV)'
+               WRITE(80, '(5f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, *)' '
+               WRITE(80, '(6a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)', 
+     &                            'Beta2(I)', 'Beta2(O)', '        '
+               WRITE(80, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
+               WRITE(80, *)' '
+            ENDIF
+C
+            WRITE(80, *)' '
+            WRITE(80, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
+            WRITE(80, *)' '
+C
+            DO ibar = 1, NRBar
+               IF(ibar.LT.3)WRITE(80, '(a39,I2,a2,I2)')
+     &                            'Number of discrete states at barrier'
+     &                            , ibar, '=', NRFdis(ibar)
+               IF(NRBar.EQ.3 .AND. ibar.EQ.3)WRITE(80, '(a48,I2,a2,I2)')
+     &            'Number of discrete states at isomeric valley', ibar, 
+     &            '=', NRFdis(ibar)
+               IF(NRBar.EQ.5 .AND. (ibar.EQ.3 .OR. ibar.EQ.5))
+     &            WRITE(80, '(a48,I2,a2,I2)')
+     &            'Number of discrete states at isomeric valley', ibar, 
+     &            '=', NRFdis(ibar)
+               WRITE(80, *)'Edis   Jdis  Pidis'
+               DO nr = 1, NRFdis(ibar)
+                  WRITE(80, '(1x,1f5.3,1f6.1,1i4)')EFDis(nr, ibar), 
+     &                  SFDis(nr, ibar), IPFdis(nr, ibar)
+               ENDDO
+            ENDDO
+            WRITE(80, *)'  '
+C
+C
+            WRITE(80, '(a7,f2.0,a55)')cara9, FISden(nnuc), cara10
+            IF(FISden(nnuc).EQ.1.)THEN
+               WRITE(80, '(3(A9,f9.5),a9,f11.5)')'Acrt=', ACRt, 'Ucrt=', 
+     &               UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
+               WRITE(80, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
+               DO i = 1, nrbarc
+                  WRITE(80, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
+     &                  MOMparcrt(i), ' Momort=', MOMortcrt(i)
+               ENDDO
+            ENDIF
+         ENDIF
+C        fisfis u
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
          stauc = 0.0
@@ -652,10 +856,10 @@ C--------reset variables for life-time calculations
 C-----------------check for the number of branching ratios
                   nbr = 0
                   DO ib = 1, NDBR
-                     IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1555
+                     IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1565
                      nbr = ib
                   ENDDO
- 1555             IF(nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND. 
+ 1565             IF(nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND. 
      &               (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. 
      &               nnuc.EQ.mt849))WRITE(6, *)
      &               ' WARNING: BRANCHING RATIOS FOR LEVEL ', il, 
@@ -676,6 +880,61 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il, nnuc) = 0.0
                   ENDIF
                ENDDO
+               WRITE(12,*)' ' 
+C--------------write Int. Conv. Coefff. for discrete transitions               
+               WRITE(12, 
+     &               '(1X,/,10X,''Internal conversion coefficients'')')
+               WRITE(12, '(1X,/,10X,40(1H-),/)')
+
+               DO il = 1, NLV(nnuc)
+C-----------------check for the number of branching ratios
+                  nbr = 0
+                  DO ib = 1, NDBR
+                     IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1566
+                     nbr = ib
+                  ENDDO
+ 1566             CONTINUE
+                  WRITE(12, 99014)il, ELV(il, nnuc), LVP(il, nnuc), 
+     &                            XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
+     &                            (NINT(BR(il,ib,1,nnuc)), 
+     &                            BR(il, ib, 3, nnuc), ib = 1, nbr)
+               ENDDO
+               WRITE(12, '(1X,/,10X,40(1H-),/)')
+C--------------temporary output to check dir contribution to disc levels
+C              gang=10.
+C              IF(nnuc.EQ.mt91) THEN
+C              nejcec=1
+C              ELSEIF(nnuc.EQ.mt649) THEN
+C              nejcec=2
+C              ELSEIF(nnuc.EQ.mt849) THEN
+C              nejcec=3
+C              ELSE
+C              WRITE(6,*)'SALTO Nnuc= ',Nnuc
+C              GO TO 3392
+C              ENDIF
+C              WRITE(6, 9995)(ilv, ilv = 1, 11)
+C9995          FORMAT('  Angle  ', 11(6x, i2, '-level'))
+C              WRITE(6, *)' '
+C              DO iang = 1, NDANG
+C              WRITE(6, 99006)(iang - 1)*gang,
+C              &               (CSAlev(iang, il, nejcec),il=1,11)
+C              ENDDO
+C              WRITE(6, *)' '
+C              WRITE(6, 9995)(ilv, ilv = 12, 22)
+C              WRITE(6, *)' '
+C              DO iang = 1, NDANG
+C              WRITE(6, 99006)(iang - 1)*gang,
+C              &               (CSAlev(iang, il, nejcec),il=12,22)
+C              ENDDO
+C              WRITE(6, *)' '
+C              WRITE(6, 9995)(ilv, ilv = 23,NLV(nnuc) )
+C              WRITE(6, *)' '
+C              DO iang = 1, NDANG
+C              WRITE(6, 99006)(iang - 1)*gang,
+C              &               (CSAlev(iang, il, nejcec),il=23, NLV(nnuc))
+C              ENDDO
+C3392          CONTINUE
+C--------------temporary output *** done ***
                WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------write elastic to tape 12
                IF(nnuc.EQ.mt91)THEN
@@ -702,11 +961,14 @@ C--------------write elastic to tape 12
             WRITE(6, *)' '
             WRITE(6, *)
      &                'Continuum of this nucleus has not been populated'
-            GOTO 1600
+            GOTO 1650
          ENDIF
 C--------prepare gamma transition parameters
          CALL ULM(nnuc)
 C--------calculate compound nucleus level density at saddle point
+C        fisfis
+         GOTO 1600
+C        fisfis
          IF(FISsil(nnuc))THEN
             IF(ADIv.EQ.0.0D0)CALL ROEMP(nnuc, 1.D0, 0.0D0)
             IF(ADIv.EQ.1.0D0)CALL ROCOL(nnuc, 1.D0, 2.D0)
@@ -725,7 +987,7 @@ Cpr            WRITE(6,20) (EX(I,NNUC),(ROF(I,J,NNUC),J=49,60),I=1,NEX(NNUC))
             ENDIF
          ENDIF
 C--------locate residual nuclei
-         DO nejc = 1, NEJcm
+ 1600    DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
             izares = INT(1000.0*zres + ares)
@@ -808,7 +1070,7 @@ C--------
             CSEmis(0, 1) = CSEmis(0, 1) + CSMsc(0)
             CSEmis(1, 1) = CSEmis(1, 1) + CSMsc(1)
             CSEmis(2, 1) = CSEmis(2, 1) + CSMsc(2)
-            IF(nvwful)GOTO 1600
+            IF(nvwful)GOTO 1650
          ENDIF
          IF(nnuc.EQ.1 .AND. IOUt.GE.3)THEN
             WRITE(6, *)' '
@@ -828,7 +1090,7 @@ C--------
 C--------start nnuc nucleus decay
 C--------
          popleft = 0.0
-C--------ensure that full gamma cascade in the first CN is
+C--------assure that full gamma cascade in the first CN is
 C--------accounted for in the case of ENDF calculations
          IF(ENDf.GT.0.0D0)GCAsc = 1.0
 C--------turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
@@ -882,7 +1144,7 @@ C--------------do loop over decaying nucleus spin
                   DENhf = 0.0
                   IF(POP(ke, jcn, ipar, nnuc).LT.POPmax(nnuc))THEN
                      popleft = popleft + POP(ke, jcn, ipar, nnuc)*DE
-                     GOTO 1560
+                     GOTO 1610
                   ENDIF
 C-----------------do loop over ejectiles
                   DO nejc = 1, NEJcm
@@ -897,7 +1159,13 @@ C-----------------gamma emision
                      CALL DECAYT(nnuc, ke, jcn, ip, sum)
                   ENDIF
 C-----------------fission
-                  IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
+C                 IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
+C                 fisfis-----------------------------------------------
+                  dencomp = DENhf
+                  aafis = 0.
+                  IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip, jcn, sumfis,
+     &               cota)
+C                 fisfis-----------------------------------------------
 C-----------------fission                       ***done***
 C-----------------distribute yrast population over discrete levels
 C
@@ -937,7 +1205,7 @@ C--------------------look for the discrete level with the closest spin
      &I3)')INT(100./xnl), il
                         ENDIF
                      ENDDO
-                     GOTO 1560
+                     GOTO 1610
                   ENDIF
 C-----------------
 C-----------------normalization and accumulation
@@ -947,6 +1215,54 @@ C-----------------
                   IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc + 
      &               DENhf*POP(ke, jcn, ipar, nnuc)
      &               *step/RO(ke, jcn, nnuc)
+C                 FISfis d-------------------------------------
+C--------------subbarrier effect--------------------------
+                  IF(FISsil(nnuc) .AND. SUBbar(nnuc).EQ.1.)THEN
+                     xnorfis = xnor*DENhf/(dencomp + TDIr)
+C                    fis1
+                     IF(NRBar.EQ.3)THEN
+                        IF(TF(1).GT.0. .AND. TF(2).GT.0.)THEN
+                           bbfis = (TDIr + dencomp)*(TF(1) + TF(2))
+     &                             /(TABs*TF(2))
+                           aafis = (1 + bbfis**2 + 2*bbfis*cota)
+     &                             **( - 0.5)
+                        ELSE
+                           aafis = 0.
+                        ENDIF
+                     ENDIF
+C
+                     IF(NRBar.EQ.5)THEN
+                        IF(TF(1).GT.0. .AND. TF(2).GT.0. .AND. 
+     &                     TF(3).GT.0.)THEN
+                           bbfis = (TDIr + dencomp)*(TF(1) + TDIr23)
+     &                             /(TABs*TDIr23)
+                           aafis = (1 + bbfis**2 + 2*bbfis*cota)
+     &                             **( - 0.5)
+                        ELSE
+                           aafis = 0.
+                        ENDIF
+                     ENDIF
+C-----------------------fission
+                     csfis = csfis + xnorfis*(TDIr + dencomp*aafis)
+                     IF(FISsil(nnuc) .AND. jcn.EQ.NLW .AND. ip.EQ. - 1)
+     &                  WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
+     &                        ' mb'
+C                    WRITE(80,*)xnorfis,tdir,dencomp,aafis
+C-----------------------particles
+                     DO nejc = 1, NEJcm
+                        nnur = NREs(nejc)
+                        CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
+                        CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
+     &                     + xnorfis*SCRtem(nejc)*(1 - aafis)
+                     ENDDO
+C-----------------gammas
+                     CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
+                     CSEmis(0, nnuc) = CSEmis(0, nnuc)
+     &                                 + xnorfis*SCRtem(0)*(1 - aafis)
+                     POP(ke, jcn, ipar, nnuc) = 0.0
+                     GOTO 1605
+                  ENDIF
+C                 FISfis u--------------------------
 C-----------------particles
                   DO nejc = 1, NEJcm
                      nnur = NREs(nejc)
@@ -960,12 +1276,15 @@ C-----------------gammas
                   POP(ke, jcn, ipar, nnuc) = 0.0
 C-----------------fission
                   csfis = csfis + sumfis*xnor
+                  IF(FISsil(nnuc) .AND. jcn.EQ.NLW .AND. ip.EQ. - 1)
+     &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
+     &                     ' mb'
 C-----------------calculate total emission
-                  DO nejc = 0, NEJcm
+ 1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
                   ENDDO
                   csemist = csemist + csfis
- 1560          ENDDO                   !loop over decaying nucleus spin
+ 1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF(ENDf.EQ.2)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
          ENDDO                  !loop over c.n. excitation energy
@@ -976,7 +1295,7 @@ C--------printout of results for the decay of NNUC nucleus
          IF(IOUt.GT.0)WRITE(6, 
      &          '(1X,/,'' Population left because too small '',G12.5,/)'
      &          )popleft*DE
- 1600    IF(IOUt.GT.0)WRITE(6, 
+ 1650    IF(IOUt.GT.0)WRITE(6, 
      &                      '(1X,/,10X,''Discrete level population'')')
          IF(IOUt.GT.0 .AND. kemin.EQ.NEX(nnuc))WRITE(6, 
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
@@ -1013,6 +1332,26 @@ c--------------check for the number of branching ratios
      &                      (NINT(BR(il,ib,1,nnuc)), 
      &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
             ENDIF
+         ENDDO
+         WRITE(12, '(1X,/,10X,40(1H-),/)')
+         WRITE(12,*)' ' 
+C--------write Int. Conv. Coefff. for discrete transitions               
+         WRITE(12, 
+     &         '(1X,/,10X,''Internal conversion coefficients'')')
+         WRITE(12, '(1X,/,10X,40(1H-),/)')
+
+         DO il = 1, NLV(nnuc)
+C-----------check for the number of branching ratios
+            nbr = 0
+            DO ib = 1, NDBR
+               IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1567
+               nbr = ib
+            ENDDO
+ 1567       CONTINUE
+            WRITE(12, 99014)il, ELV(il, nnuc), LVP(il, nnuc), 
+     &                      XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
+     &                      (NINT(BR(il,ib,1,nnuc)), 
+     &                      BR(il, ib, 3, nnuc), ib = 1, nbr)
          ENDDO
          WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------gamma decay of discrete levels (DECAYD)
@@ -1055,6 +1394,7 @@ C-----------life-times and widths  *** done ***
             WRITE(6, '('' Fission    cross section    '',G12.5,'' mb'')'
      &            )csfis
          ENDIF
+         TOTcsfis = TOTcsfis + csfis
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1)THEN
@@ -1159,6 +1499,10 @@ C--------
 C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
+C     fisfis d
+      CLOSE(80)
+      CLOSE(79)
+C     fisfisu
       IF(ENDf.EQ.1.0 .AND. AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0)THEN
 C-----
 C-----ENDF spectra printout (exclusive representation MF=3&6, to be used
@@ -1813,6 +2157,12 @@ C--------------------to conserve the integral
             ENDDO
          ENDDO
       ENDIF
+      WRITE(6, *)' '
+      WRITE(6, '(''  Total fission cross section '',G12.5,'' mb'')')
+     &      TOTcsfis
+      WRITE(12, *)' '
+      WRITE(12, '('' Tot. fission cross section '',G12.4,'' mb'')')
+     &      TOTcsfis
       IF(IOUt.GT.1)THEN
          WRITE(6, '(1X,//,''Inclusive spectra (C.M.)'',//)')
          DO nejc = 0, NEJcm
@@ -1924,7 +2274,7 @@ C--------light ions
             WRITE(12, *)' '
             WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
             DO ie = 1, nspec
-               WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE,
+               WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE, 
      &               (CSEa(ie, nang, NDEJC, 0), nang = 1, NDANG)
             ENDDO
          ENDIF
@@ -1934,24 +2284,17 @@ C-----end of ENDF spectra (inclusive)
       IF(EIN.LT.0.0D0)THEN
          IF(FILevel)CLOSE(14)
          WRITE(12, *)' '
-         WRITE(6,*)' ' 
-         WRITE(6,*)'CALCULATIONS COMPLETED SUCCESSFULLY' 
+         WRITE(6, *)' '
+         WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
          STOP 'REGULAR '
       ENDIF
       FIRst_ein = .FALSE.
       GOTO 1400
-
-
-
-               WRITE(12,99012)il, ELV(il, nnuc), LVP(il, nnuc),
-     &                      XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
-     &                      (NINT(BR(il,ib,1,nnuc)), 
-     &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
-
-
-99012 FORMAT(10X, I2, F10.4, I5, F8.1, G15.6, I3, 1x, 
-     &       7(I3, 1x, F6.4, 1x), :/, (53X, 1x, 7(I3,1x,F6.4,1x)))
+99012 FORMAT(I12, F10.4, I5, F8.1, G15.6, I3,
+     &       7(I4, F7.4), :/, (53X, 7(I4, F7.4)))
 99013 FORMAT(1X, F5.2, 12G10.3)
+99014 FORMAT(I12, F10.4, I5, F8.1, G15.6, I3, 
+     &       7(I4, E11.4), :/, (53X, 7(I4, E11.4)))
       END
 C
 C

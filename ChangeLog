@@ -1,4 +1,18 @@
 
+             Changes in version 2.19 with respect to 2.18  
+                      Vienna,   November  2002
+
+1. Error in the Wilmore-Hodgson omp corrected.
+   VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
+   was also found to be wrong in the preliminary version of RIPL-2 
+   (-0.00118).
+2. MSD is turned off for non-nucleon incident particles. 
+3. Internal conversion coefficinets included in the gamma cascade
+   between discrete levels (ICC data from RIPL-2).
+4. Bug in reading branching ratios from the RIPL-2 file corrected
+   (emission probabilities instead of branching ratios were used
+   in the previous RIPL-2 versions).
+
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 
 1. Bug fixed in reading levels file when preparing collective levels for

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:35 $
-Ccc   * $Id: bar_mom.f,v 1.4 2002-09-20 14:16:35 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: bar_mom.f,v 1.5 2002-11-29 15:27:24 mike Exp $
 C
       SUBROUTINE BARFIT(Iz, Ia, Il, Bfis, Segs, Selmax)
 C

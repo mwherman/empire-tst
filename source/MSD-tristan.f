@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: MSD-tristan.f,v 1.4 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-11-29 15:27:24 $
+Ccc   * $Id: MSD-tristan.f,v 1.5 2002-11-29 15:27:24 mike Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -72,7 +72,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION AI, ALSin, ANGle(NDANG), AR, CLRn(11), CNOrin(22)
-     &                 , CROs1(30, 49, 2*NDANG), CROs2(30, 49, 2*NDANG),
+     &                 , CROs1(30, 49, 2*NDANG), CROs2(30, 49, 2*NDANG), 
      &                 DTHeta, ECEntr(5), EFItin(22), EOUtmi, EOUtmx, 
      &                 ESTep, ETMax, ETMin, EXTcom(10), FACb, 
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2), 
@@ -81,7 +81,7 @@ C
      &                 RHOb(301, 11, 2), RI, ROPt, RR, THEta1, THEta2, 
      &                 U0, U9, W0, WIDex, WIDexin, WR1(12*NDANG), 
      &                 WR2(144*NDANG)
-      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
+      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x, 
      &        ICC, ICMax, ID, IE, IG, KDEnvi, KEX3, KEXcom(10), KRTmax, 
      &        KRType, KTRl(10), L9(10), NAVerg, NCHanl, NEBinx, NFAc12, 
      &        NN, NQ1x, NQ2x, NRMax(10), NTHeta, NZ
@@ -113,7 +113,7 @@ C
       REAL FLOAT
       INTEGER i1, i2, ic, ic1, ic12, ic1xr, ic2, ic2xr, icp, icpx, 
      &        iout2, ka, kb, kread, l1, l12x, l1maxr, l2, l2maxm, 
-     &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr,
+     &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr, 
      &        nnb, np, npb, nq, nq12x, nwr1, nwr2, nzb
       INTEGER INT
 C
@@ -401,7 +401,7 @@ C
      &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega, 
      &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, 
      &                 QSTep, RAC, RHO(301, 11), RHOb(301, 11, 2), RI, 
-     &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
+     &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21), 
      &                 U0, U9, UAMp(500, 2), VAMp(500, 2), VLS(2), W0, 
      &                 WIDex, WIDexin
       INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID, 
@@ -802,7 +802,7 @@ C                                      count number of 2-qp configurations
 C
                                        nconf(ltp1) = nconf(ltp1) + 1
 C
-C                                      calculate the 2-quasiparticle Green   
+C                                      calculate the 2-quasiparticle Green
 C                                      function calculate the 2-quasiparticle
 C                                      response function prepare for the
 C                                      self-consistent width of QRPA-states
@@ -1085,10 +1085,10 @@ C-----sum rules
 C
          DO ltp1 = 1, ltmaxr
             DO ne = 1, nebinx
-               h = ESTep
-               IF(ne.EQ.1 .OR. ne.EQ.nebinx)h = 0.5*h
+               hhh = ESTep
+               IF(ne.EQ.1 .OR. ne.EQ.nebinx)hhh = 0.5*hhh
                eqq = Est(ne)
-               t2 = h*RHO(ne, ltp1)
+               t2 = hhh*RHO(ne, ltp1)
                SRNew(ltp1) = SRNew(ltp1) + t2
                SREw(ltp1) = SREw(ltp1) + t2*eqq
                IF(eqq.LE.ETMax)SREwl(ltp1) = SREwl(ltp1) + t2*eqq
@@ -1660,7 +1660,7 @@ C
      &                 EFItin(22), ESP(500, 2), GAP(2), GAPin(2), 
      &                 HOMega, HOMin, RMS(3), RST(201), UAMp(500, 2), 
      &                 VAMp(500, 2), VLS(2), WIDexin
-      INTEGER IBLk(2), JBL(2), JSP(500, 2), LBL(2), LSP(500, 2), NBL(2), 
+      INTEGER IBLk(2), JBL(2), JSP(500, 2), LBL(2), LSP(500, 2), NBL(2),
      &        NHOle(2), NRX, NSP(500, 2), NTOtal(2)
       COMMON /BLOCK / IBLk, NBL, LBL, JBL
       COMMON /EVBCS / EBCs, VAMp, UAMp
@@ -1677,7 +1677,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION a3, ad, all, als, anp(2, 2), bcsrerun, chemic, 
-     &                 dnz, e0, espx, h, hom, pi, pqn, r, rd, rde, rmsd, 
+     &                 dnz, e0, espx, hhh, hom, pi, pqn, r, rd,rde,rmsd,
      &                 rnp(3, 2), rw0, rws, uscal, uvec, vll(16, 2), w, 
      &                 xnp
       DOUBLE PRECISION EHO
@@ -1712,18 +1712,18 @@ C
       VLS(I3) = (5.0 + 8.0/a3**2)/HOMega
       rd = rnp(1, I3)*a3 + rnp(2, I3) + rnp(3, I3)*dnz
       ad = anp(1, I3) + anp(2, I3)*dnz
-      h = 0.2
+      hhh = 0.2
       rmsd = 0.
       NRX = 100
       r = 0.0
       w = 2.0
       DO n = 1, NRX
-         r = r + h
+         r = r + hhh
          w = 6. - w
          IF(n.EQ.NRX)w = 1.
          rmsd = rmsd + r**4*w/(1. + EXP((r-rd)/ad))
       ENDDO
-      rmsd = rmsd*h/3.
+      rmsd = rmsd*hhh/3.
       rde = 0.75/(rd**3*pi*(1. + (pi*ad/rd)**2))
 C
 C-----calculate E0 = U(R=0) for protons and neutrons
@@ -2101,7 +2101,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALPha(11, 6), AN(6), ANGle(NDANG), BST(3), 
-     &                 CLRn(11), DTHeta, DUMmy(1041), ECEntr(5), EOUtmi,
+     &                 CLRn(11), DTHeta, DUMmy(1041), ECEntr(5), EOUtmi, 
      &                 EOUtmx, ESP(500, 2), ESTep, ETMax, ETMin, 
      &                 EXTcom(10), FACb, FAClog(500), FFAc1d(2), 
      &                 FFAc2d(2), FFAc3d(2), FFTot(10), FNOrm(6), 
@@ -2110,9 +2110,9 @@ C
      &                 RHO(301, 11), RHOb(301, 11, 2), RMS(3), ROPt, 
      &                 SREw(21), SREwl(21), SRNew(21), THEta1, THEta2, 
      &                 U9, VLS(2), WIDex
-      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
+      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x, 
      &        ICC, ICMax, ID, IE, IG, JSP(500, 2), KDEnvi, KEX3, 
-     &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), LSP(500, 2),
+     &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), LSP(500, 2), 
      &        NAVerg, NCHanl, NEBinx, NFAc12, NHOle(2), NLEv(301, 11), 
      &        NN, NQ1x, NQ2x, NRMax(10), NSP(500, 2), NTHeta, NTOtal(2), 
      &        NZ
@@ -2135,7 +2135,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:501), h
+      DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:501), hhh
       REAL FLOAT
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb, 
      &        nlmax
@@ -2239,7 +2239,7 @@ C        WRITE(6,974) (SREWL(LT),LT=1,LTMAXR)
          SREw(ic) = ESTep*0.5*(ETMin*RHOb(1, ic, 1) + e1*RHOb(2, ic, 1))
       ENDDO
       eex = ETMin - ESTep
-      h = ESTep/3.
+      hhh = ESTep/3.
       WRITE(6, 99011)(ic - 1, ic = 1, ICMax)
 99011 FORMAT('1'/5X, 'EWSR AS A FUNCTION OF EXCITATION ENERGY'/' ', 3X, 
      &       'EX ', 11(5X, I3, 3X))
@@ -2251,7 +2251,7 @@ C        WRITE(6,974) (SREWL(LT),LT=1,LTMAXR)
             e2 = e1 - ESTep
             DO ic = 1, ICMax
                SREw(ic) = SREw(ic)
-     &                    + h*(e2*RHOb(ne - 2, ic, 1) + 4.*e1*RHOb
+     &                    + hhh*(e2*RHOb(ne - 2, ic, 1) + 4.*e1*RHOb
      &                    (ne - 1, ic, 1) + e0*RHOb(ne, ic, 1))
             ENDDO
             WRITE(6, 99012)eex, (SREw(ic), ic = 1, ICMax)
@@ -2484,7 +2484,7 @@ C
      &                 RHOb(301, 11, 2), ROPt, THEta1, THEta2, WIDex
       INTEGER IC12x, IC1mx, IC1mxr, IC2mx, IC2mxr, ICMax, KDEnvi, KEX3, 
      &        KEXcom(10), KRTmax, KRType, KTRl(10), LC1mx, LC2mx, 
-     &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10),
+     &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10), 
      &        NTHeta, NZ
       COMMON /CC    / THEta1, THEta2, NCHanl, NN, NZ, IC1mxr, IC2mxr, 
      &                KRType, KRTmax, KDEnvi, NTHeta, NEBinx, NAVerg, 
@@ -2865,9 +2865,9 @@ C
                         nemx = MIN0(Nbinx, nemn + NAVerg)
                         sum = 0.
                         DO neb = nemn, nemx
-                           h = ESTep
-                           IF(neb.EQ.nemn .OR. neb.EQ.nemx)h = 0.5*h
-                           sum = sum + h*Crose(neb, na, kcp)
+                           hhh = ESTep
+                           IF(neb.EQ.nemn .OR. neb.EQ.nemx)hhh = 0.5*hhh
+                           sum = sum + hhh*Crose(neb, na, kcp)
                         ENDDO
                         sg(ne) = sum/delta
                      ENDDO
