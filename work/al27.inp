@@ -1,19 +1,19 @@
   0.001              ;INCIDENT ENERGY (IN LAB)
- 27.   13.           ;TARGET  A , Z 
+ 27.   13.           ;TARGET  A , Z
   1.    0.           ;PROJECTILE A, Z
 2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
 1                    ;NUMBER OF PROTONS  TO BE EMITTED
 1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
-IOUT       1.                                               
-LEVDEN     0.                                              
-NEX      100.                                                   
-MSD        1.                                                     
-MSC        1.                                                         
-ENDF       1.                     
-OMPOT  -2405.       1
-OMPOT  -5405.       2
-GO                                                  
+IOUT       1.
+LEVDEN     0.
+NEX      100.
+MSD        1.
+MSC        1.
+ENDF       1.
+* Dispersive potential used in the neutron channel
+OMPOT   -419.       1
+GO
 0.002
 0.005
 0.007
@@ -50,4 +50,5 @@ GO
 -1.
 NIXSH      1.
 FITLEV     2.
-LEVDEN     0.                                              
+LEVDEN     0.
+OMPOT  -5405.       2
