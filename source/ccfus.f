@@ -1,5 +1,5 @@
-Ccc   * $Date: 2004-07-16 12:47:36 $
-Ccc   * $Id: ccfus.f,v 1.6 2004-07-16 12:47:36 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: ccfus.f,v 1.7 2005-02-24 22:33:42 herman Exp $
 C
       SUBROUTINE CCFUS(Stl)
 C
@@ -11,7 +11,6 @@ C     CODED BY C.H. DASSO AND S. LANDOWNE          KOBENHAVN MCMLXXXIII
 C     ------------------------------------------------------------------
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -202,13 +201,10 @@ C     *' COUPLED =',1PE10.3E2,' mb       UNCOUPLED =',1PE10.3E2,' mb',/)
          FLAm(n) = flamem(n)
       ENDDO
       END
-C
-C
-C
-C
+ 
+ 
       SUBROUTINE BAR(Rbar, Vb, Homega)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -247,14 +243,10 @@ C
       IF(rb.LE.rmax .AND. rb.GE.0.8D0)GOTO 100
       Homega = -1.
 99999 END
-C
-C
-C
-C
-C
+ 
+ 
       SUBROUTINE POTENT(Rb, V0, V1, V2)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -281,14 +273,10 @@ C
       V1 = V1 + v1n
       V2 = V2 + v2n
       END
-C
-C
-C
-C
-C
+ 
+ 
       SUBROUTINE POT(Rr, Ur, Dur, Ddur)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -302,7 +290,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION arg, arg1, ss
-C
 C
       ss = Rr - RAB
       arg = EXP(( - ss/A0R))

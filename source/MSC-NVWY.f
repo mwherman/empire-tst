@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:54 $
-Ccc   * $Id: MSC-NVWY.f,v 1.8 2004-04-21 03:39:54 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: MSC-NVWY.f,v 1.9 2005-02-24 22:33:43 herman Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -46,7 +46,7 @@ C
 C COMMON variables
 C
       INTEGER IE(NC2)
-      DOUBLE PRECISION OMJd(0:2*NDMSCS + IV, NDLW), PIM(NDMSCS, NDMSCS), 
+      DOUBLE PRECISION OMJd(0:2*NDMSCS + IV, NDLW), PIM(NDMSCS, NDMSCS),
      &                 PREp(NC2, 2), SCRm(NDEX, NDLW, 2, 2, NDMSCS), 
      &                 WP(NDEX, NDLW, 2), YP(NDEX, NDMSCS, 3, 2), 
      &                 ZP(NDEX, NC2, 3, 2), ZSUm(NDEX, NC2, 2)
@@ -271,7 +271,8 @@ C--------decay to the continuum ------ done -----------------------------
 99001    FORMAT(1X, F5.2, 12G10.3)
       ENDIF
       END
-C
+ 
+ 
       SUBROUTINE HMSC(Nvwful)
 Ccc
 Ccc   ********************************************************************
@@ -290,35 +291,6 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
-Ccc   * calls:    AUERST                                                 *
-Ccc   *           DECHMS                                                 *
-Ccc   *           E1                                                     *
-Ccc   *           GDOWN                                                  *
-Ccc   *               W                                                  *
-Ccc   *               W1                                                 *
-Ccc   *               W2                                                 *
-Ccc   *               W3                                                 *
-Ccc   *           MATIN                                                  *
-Ccc   *           MATIN1                                                 *
-Ccc   *           OMJ                                                    *
-Ccc   *           ROPHM                                                  *
-Ccc   *           TRATES                                                 *
-Ccc   *           VQ                                                     *
-Ccc   *              WOBL                                                *
-Ccc   *           W (see above)                                          *
-Ccc   *           WHERE                                                  *
-Ccc   *           WILLI                                                  *
-Ccc   *           WOBL                                                   *
-Ccc   *           WT                                                     *
-Ccc   *               W (see above)                                      *
-Ccc   *           ZERO                                                   *
-Ccc   *               W (see above)                                      *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   25.May.1994                                              *
-Ccc   * revision:1    by:M. Herman                on:04.Feb.2000         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc

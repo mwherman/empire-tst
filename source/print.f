@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-07 16:31:55 $
-Ccc   * $Id: print.f,v 1.4 2004-10-07 16:31:55 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: print.f,v 1.5 2005-02-24 22:33:43 herman Exp $
 C
       SUBROUTINE AUERST(Nnuc, Nejc)
 Ccc
@@ -28,7 +28,6 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C Dummy arguments
 C
       INTEGER Nejc, Nnuc
@@ -41,8 +40,6 @@ C
       CHARACTER haha, hstar, symc(93)
       INTEGER i, ia, ij, kmax, l, n
       INTEGER IFIX, MIN0
-C
-C
       DATA hstar, haha/'*', ' '/
       csemax = 0.
       kmax = 1

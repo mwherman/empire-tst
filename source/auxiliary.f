@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-16 05:33:33 $
-Ccc   * $Id: auxiliary.f,v 1.12 2005-02-16 05:33:33 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: auxiliary.f,v 1.13 2005-02-24 22:33:42 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -26,17 +26,10 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C Local variables
 C
       INTEGER ilw, irec, j, nang, necse, nejc, netl, nnex, nnlv, nnuc
-C
-C
-C
-C
-C----Plujko_new
-       F_PRINT=F_PRINT+10
-C----Plujko_new(End)
+      F_PRINT=F_PRINT+10
       XNI = 0.
       TORy = 4.
       EX1 = 0.0
@@ -97,9 +90,7 @@ C----Plujko_new(End)
          DO nnex = 1, NDEX
             EX(nnex, nnuc) = 0.0
             TNUc(nnex, nnuc) = 0.0
-C----Plujko_new
-             Uexcit(nnex,nnuc) = 0.0
-C----Plujko_new(End)
+            Uexcit(nnex,nnuc) = 0.0
             TNUcf(nnex, nnuc) = 0.0
             DO ilw = 1, NDLW
                RO(nnex, ilw, nnuc) = 0.0
@@ -176,15 +167,14 @@ C----Plujko_new(End)
          REDmsc(j, 1) = 1.0
          REDmsc(j, 2) = 1.0
       ENDDO
-C
       END
-C
+
+
       SUBROUTINE INTGRS(A, B, Y, Dintg)
 CCCC *****************************************************************
 CCCC * Calculates an integral                                        *
 CCCC *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -196,8 +186,6 @@ C
       DOUBLE PRECISION d, dintg1, prec, sum, x
       INTEGER i, n
       EXTERNAL Y
-C
-C
       prec = 0.01
       sum = 0.
       n = 1
@@ -221,8 +209,8 @@ C
          GOTO 100
       ENDIF
 99999 END
-C
-C
+ 
+ 
       SUBROUTINE LSQLGV(Xp, Yp, Np, Qq, Lmi, Lmx, Emm, Err, Rwo, Mxr)
 C-Title  : LSQLGV Subroutine
 C-Purpose: Least-squares fitting by variable order Legendre polynomials
@@ -247,7 +235,6 @@ C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
-C
 C Dummy arguments
 C
       DOUBLE PRECISION Emm, Err
@@ -260,8 +247,6 @@ C
       DOUBLE PRECISION DMAX1
       INTEGER i, ip, jer, l, l1, lmx1, n1, nlg
       DOUBLE PRECISION POLLG1
-C
-C
       lmx1 = Lmx
       nlg = 0
       Lmx = MIN(Lmx, Np - 1)
@@ -305,15 +290,14 @@ C*
       ENDIF
  100  Lmx = nlg
       END
-C
-C
+ 
+ 
       SUBROUTINE LSQLEG(Xp, Yp, Np, Qq, N1, Aa, Ier)
 C-Title  : LSQLEG Subroutine
 C-Purpose: Fit Legendre coefficients to a set of data
 C-Description:
 C-D
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -324,8 +308,6 @@ C Local variables
 C
       DOUBLE PRECISION det, pi, pj
       INTEGER i, j, ldig, lf, lp, m, nlg
-C
-C
 C*    Perform linear transformation of the coordinate system
       Ier = 0
       lf = N1 + 1
@@ -357,8 +339,8 @@ C*    Solve the system of equations
       IF(det.NE.0.0D0)RETURN
       Ier = 1
       END
-C
-C
+ 
+ 
       DOUBLE PRECISION FUNCTION POLLG1(Uu, Ql, Nl)
 C-Title  : POLLG1 Function
 C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
@@ -368,7 +350,6 @@ C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -392,8 +373,8 @@ C     DIMENSION QL(1),PL(20)
       ENDDO
       POLLG1 = ss
       END
-C
-C
+ 
+ 
       SUBROUTINE PLNLEG(Uu, Pl, Nl)
 C-Title  : PLNLEG Subroutine
 C-Purpose: Evaluate Legendre polynomials up to order NL
@@ -404,7 +385,6 @@ C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -428,8 +408,8 @@ C     DIMENSION PL(1)
      &               /FLOAT(l)
       ENDDO
       END
-C
-C
+ 
+ 
       SUBROUTINE MTXGUP(A, F, X, N, Ldig, Det)
 C-Title  : MTXGUP subroutine
 C-Purpose: Matrix solver, Gauss elimination, part.pivoting
@@ -440,7 +420,6 @@ C-D elimination technique with partial pivoting by rows.
 C-Author : A.Trkov , Institute J.Stefan Ljubljana, 1984
 C-Version: 93/3 - improved zero-determinant trapping
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -471,7 +450,6 @@ C*       Find the pivot
             RETURN
          ENDIF
          Det = Det*a1
-C        DET=DET+LOG10(ABS(A(I1,I1)))
          IF(k1.GE.i)THEN
             a1 = A(k1, i1)
             A(k1, i1) = A(i1, i1)
@@ -512,7 +490,8 @@ C*    Solve by backward substitution
       ENDDO
       X(1) = F(1)/A(1, 1)
       END
-C
+
+      
       SUBROUTINE MATIN(As, Bs, N, M, Determ)
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - Z)
       INCLUDE 'dimension.h'
@@ -530,8 +509,6 @@ C
      &                 , sog, swap, t
       INTEGER i, icolum, indeks(NDMSCS, 2), ipivot(NDMSCS), irow, j, 
      &        jcolum, jrow, k, l, l1, nnn
-C
-C
 C
 C     matrix inversion with accompanying solution of liner equations
 C
@@ -643,14 +620,12 @@ C
          ENDDO
       ENDDO
       END
-C
-C
-C
-C
+ 
+ 
+ 
       SUBROUTINE MATIN1(As, Bs, N, M, Determ)
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - Z)
       INCLUDE 'dimension.h'
-C
 C
 C PARAMETER definitions
 C
@@ -668,8 +643,6 @@ C
       DOUBLE PRECISION a(NG, NG), amax, b(NG), pivot(NG), sog, swap, t
       INTEGER i, icolum, indeks(NG, 2), ipivot(NG), irow, j, jcolum, 
      &        jrow, k, l, l1, nnn
-C
-C
 C
 C     matrix inversion with accompanying solution of liner equations
 C
@@ -817,7 +790,8 @@ C
       ENDIF
       SMAT = mat(Iz)
       END
-C
+
+
       SUBROUTINE WHERE(Izaf, Nnuc, Iloc)
 Ccc
 Ccc   ********************************************************************
@@ -847,7 +821,6 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C Dummy arguments
 C
@@ -916,7 +889,8 @@ C
       WRITE(6, *)' EXECUTION STOPPED'
       STOP
       END
-C
+
+      
       SUBROUTINE MTXINV(A, X, Y, Mx, My, N, Eps, Irflag)
 C
 C-Title  : MTXINV subroutine
@@ -931,7 +905,6 @@ C-D   IRFLAG      - Error flag: 0 - normal termination, 1 - singularity
 C-Author : Dr.J.Arkuszewski, EIR, Wurenlingen, Switzerland, (1986)
 C-    Note : Comments rearranged and name changed from XIRTAM to MTXINV
 C*    Pivot determination
-C
 C
 C Dummy arguments
 C
@@ -1020,9 +993,8 @@ C*    Matrix ordering
       ENDDO
       Irflag = 0
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE MTXDG3(A, F, X, N, Im)
 C-Title  : MTXDG3 subroutine
 C-Purpose: Tridiagonal Matrix solver, Gauss elimination, no pivoting
@@ -1062,9 +1034,9 @@ C*    Backward sweep (x = U-1 p)
          X(ni) = F(ni) + A(3, ni)*X(ni + 1)
       ENDDO
       END
-C
-C
-C
+ 
+ 
+ 
       SUBROUTINE INTERMAT(Xi, Si, Yi, N, Xo, So, Yo, M, L, Emin, Emax)
 Ccc
 Ccc   ********************************************************************
@@ -1110,19 +1082,13 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:     June.2001                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.200x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       IMPLICIT NONE
       DOUBLE PRECISION Xi, Yi, Xo, Yo, Si, So, xis, yiue, yiud, xint, 
      &                 Emin, Emax
-C
-C     INTEGER N, M, L, ii1, ii2, io1, io2, imin, imax
       INTEGER N, M, L, ii1, ii2, io1, imin, imax
-C
       DIMENSION Yi(N, L), Yo(M, L)
 C
 C-----Check ranges and steps
@@ -1200,9 +1166,9 @@ C--------start intrpolation
          ENDDO
       ENDDO
       END
-C
-C
-C
+ 
+ 
+ 
       SUBROUTINE BINTERMAT(Yi, Xi, Sxi, Nxi, Zi, Szi, Nzi, Yo, Xo, Sxo, 
      &                     Nxo, Zo, Szo, Nzo, Exmin, Exmax, Ezmin, 
      &                     Ezmax)
@@ -1258,9 +1224,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   July 2001                                                *
-Ccc   * revision:#    by:name                     on:xx.mon.200x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -1268,17 +1231,14 @@ Ccc
       DOUBLE PRECISION Yi, Xi, Sxi, Zi, Szi, Yo, Xo, Sxo, Zo, Szo, 
      &                 Exmin, Exmax, Ezmin, Ezmax, xis, zis, xint, t, u, 
      &                 fyi, f1, f2, f3, f4, summino
-C
       INTEGER Nxi, Nzi, Nxo, Nzo, ixo, izo, ixi, izi, ixmin, ixmax, 
      &        izmin, izmax
-C
       DIMENSION Yi(Nxi, Nzi), Yo(Nxo, Nzo), fyi(0:Nxi + 1, 0:Nzi + 1)
 C
 C-----Check ranges and steps
       IF(Nxi.EQ.1 .OR. Nzi.EQ.1)THEN
          WRITE(6, *)' DIMENSION EQUAL TO 1 IN BINTERMAT'
          STOP
-C        xint = Yi(1,izo)
       ENDIF
       IF(Exmin - Xo.LT. - 0.0001)THEN
          WRITE(6, *)' '

@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-16 14:00:26 $
-Ccc   * $Id: HRTW-comp.f,v 1.16 2005-02-16 14:00:26 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: HRTW-comp.f,v 1.17 2005-02-24 22:33:42 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -77,9 +77,6 @@ C
      &        nnuc, nnur
       INTEGER INT
       DOUBLE PRECISION VT1
-C
-C
-C
 C-----threshold for considering channel as a 'strong' one
       H_Tthr = 0.0001
 C-----set CN nucleus
@@ -313,9 +310,6 @@ Ccc   *                                                                  *
 Ccc   * calls:TLLOC                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:    5.Sep.2000                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -652,9 +646,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:12 Jan. 1994                                                *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -682,13 +673,9 @@ C
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
-C
-C
-C
       Sum = 0.0
       SCRtem(0) = 0.0
       xjc = FLOAT(Jc) + HIS(Nnuc)
-C     WRITE(6,*) ' decaying state spin=',xjc,' and parity=',ipc
       jmin = MAX0(1, Jc - 2)
       jmax = MIN0(NLW, Jc + 2)
 C-----clear scratch matrix (continuum)
@@ -726,11 +713,8 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          ENDIF
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
          IF(Nhrtw.EQ.0)THEN
-C-----------Plujko_new
             se1 = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(1,Nnuc))*
      &            TUNe(0, Nnuc)
-Cb          se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
-C-----------Plujko_new(End)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -739,12 +723,8 @@ C-----------Plujko_new(End)
             sm1s = sm1**2
             se2m1s = se2**2 + sm1**2
          ELSE
-C-----------Plujko_new
             se1 = VT1(E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &            TUNe(0, Nnuc), H_Tav, H_Sumtl)
-Cb          se1 = VT1(E1(eg, TNUc(ier, Nnuc))*
-Cb     &            TUNe(0, Nnuc), H_Tav, H_Sumtl)
-C----------Plujko_new(End)
             se2 = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             sm1 = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             se2m1 = se2 + sm1
@@ -864,7 +844,7 @@ C--------decaying state spin index = NLW
             ENDIF
          ENDIF
  100  ENDDO
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 (trapezoid
+C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
             Sum = Sum + SCRt(i, j, 1, 0) + SCRt(i, j, 2, 0)
@@ -872,7 +852,7 @@ C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 (trapezoid
          Sum = Sum - 0.5*(SCRt(1, j, 1, 0) + SCRt(1, j, 2, 0))
       ENDDO
       Sum = Sum*DE
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 -- DONE ----
+C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
@@ -887,31 +867,21 @@ C--------do loop over discrete levels -----------------------------------
                iodd = 1 - ipar
                IF(Nhrtw.EQ.0)THEN
                   e2t = E2(eg)*TUNe(0, Nnuc)
-C-----------------Plujko_new
                   e1t = E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))
      &                     *TUNe(0, Nnuc)
-Cb                e1t = E1(eg, TNUc(1,Nnuc))*TUNe(0, Nnuc)
-C-----------------Plujko_new(End)
                   xm1t = XM1(eg)*TUNe(0, Nnuc)
                ELSE
                   e2t = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
-C-----------------Plujko_new
                   e1t = VT1(E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))
      &                  *TUNe(0, Nnuc), H_Tav, H_Sumtl)
-Cb                e1t = VT1(E1(eg, TNUc(1,Nnuc))*
-Cb     &                  TUNe(0, Nnuc), H_Tav, H_Sumtl)
-C----Plujko_new(End)
                   xm1t = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
                ENDIF
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + e2t*FLOAT(ipar)
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e2t**2*FLOAT(ipar)
                ELSE
-C-----------------Plujko_new
                   SCRtl(i, 0) = E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),
      &                             Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
-Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
-C-----------------Plujko_new(End)
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e1t**2*iodd + 
      &               xm1t**2*ipar
                   IF(lmax.NE.1)THEN
@@ -964,14 +934,9 @@ Ccc   *                                                                  *
 Ccc   * calls:                                                           *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   10.Sept.2000                                             *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
-Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
-C
 C
 C COMMON variables
 C
@@ -985,8 +950,6 @@ C
 C Dummy arguments
 C
       DOUBLE PRECISION Rho, T
-C
-C
       H_Sumtls = H_Sumtls + T**2*Rho
       IF(T.GT.H_Tthr)THEN
 C        !strong or weak
@@ -997,10 +960,10 @@ C        !strong or weak
          ENDIF
       ELSE
          H_Sweak = H_Sweak + T*Rho
-C        WRITE(6,*)'weak T,Rho,H_Sweak ',T,Rho,H_Sweak
       ENDIF
       END
-C
+
+
       DOUBLE PRECISION FUNCTION VT(Tl)
 C
 Ccc   *********************************************************************
@@ -1020,14 +983,10 @@ Ccc   * input: Tl    - transmission coefficient                           *
 Ccc   *                                                                   *
 Ccc   * output: Tl                                                        *
 Ccc   *                                                                   *
-Ccc   * author: M.Herman                                                  *
-Ccc   * date:   10.Sept.2000                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x          *
 Ccc   *                                                                   *
 Ccc   *********************************************************************
 C
       INCLUDE 'dimension.h'
-C
 C
 C COMMON variables
 C
@@ -1054,9 +1013,8 @@ C
          VT = H_Tl(NSCh, 1)
       ENDIF
       END
-C
-C
-C
+
+
       DOUBLE PRECISION FUNCTION VT1(Tl, Tav, Sumtl)
 C
 Ccc   *****************************************************************
@@ -1075,9 +1033,6 @@ Ccc   * output: VT1                                                   *
 Ccc   *                                                               *
 Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
-Ccc   * author: M.Herman                                              *
-Ccc   * date:   10.Sept.2000                                          *
-Ccc   * revision:#    by:name                     on:xx.mon.199x      *
 Ccc   *                                                               *
 Ccc   *****************************************************************
 C
@@ -1092,9 +1047,8 @@ C
       VT1 = 1 + VT1*(EEF(Tl, Tav, Sumtl) - 1.0)
       VT1 = Tl/VT1
       END
-C
-C
-C
+
+
       DOUBLE PRECISION FUNCTION EEF(Tl, Tav, Sumtl)
 C
 Ccc   *****************************************************************
@@ -1111,9 +1065,6 @@ Ccc   * output: Eef - elastic enhancement factor                      *
 Ccc   *                                                               *
 Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
-Ccc   * author: M.Herman                                              *
-Ccc   * date:   10.Sept.2000                                          *
-Ccc   * revision:#    by:name                     on:xx.mon.199x      *
 Ccc   *                                                               *
 Ccc   *****************************************************************
 C
@@ -1122,7 +1073,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION a, al
-C
       IF(Tl.LT.1.0D-10)THEN
          EEF = 3.0
          RETURN
@@ -1131,9 +1081,8 @@ C
       a = 87.0*(Tl - Tav)**2*Tl**5/Sumtl**7
       EEF = 1.0 + 2.0/(1.0 + Tl**al) + a
       END
-C
-C
-C
+
+
       SUBROUTINE AUSTER(V, Tav, Sumtl, Sweak, Lch, Ndhrtw1)
 C
 Ccc   *****************************************************************
@@ -1155,9 +1104,6 @@ Ccc   *                                                               *
 Ccc   *                                                               *
 Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
-Ccc   * author: M.Herman                                              *
-Ccc   * date:   10.Sept.2000                                          *
-Ccc   * revision:#    by:name                     on:xx.mon.199x      *
 Ccc   *                                                               *
 Ccc   *****************************************************************
 C
@@ -1170,7 +1116,6 @@ C
       DOUBLE PRECISION e(Ndhrtw1), sum, sv, vd(Ndhrtw1), vp(Ndhrtw1)
       DOUBLE PRECISION EEF
       INTEGER i, icount
-C
       IF(Lch.GT.Ndhrtw1)THEN
          WRITE(6, *)
      &             'ERROR in AUSTER: Lch bigger than allowed by NDHRTW1'
@@ -1180,13 +1125,10 @@ C
       icount = 0
       sv = Sweak
       sum = Sweak
-C     WRITE(6,*)'Sweak ',Sweak
       DO i = 1, Lch
          e(i) = EEF(V(i, 1), Tav, Sumtl) - 1.
          sum = sum + V(i, 1)*V(i, 2)
-C        WRITE(6,*)'Tl, rho, sum ',V(i,1),V(i,2),sum
       ENDDO
-C     WRITE(6,*)'Sumtl, sum AUSTER ',Sumtl,sum
       DO i = 1, Lch
          vd(i) = V(i, 1)
          vp(i) = V(i, 1)
@@ -1202,7 +1144,6 @@ C     WRITE(6,*)'Sumtl, sum AUSTER ',Sumtl,sum
       ENDIF
       sum = sv
       sv = Sweak
-C     WRITE(6,*)'AUSTER iteration ',(vp(i),i=1,Lch)
       DO i = 1, Lch
 C
 C--------relative accuracy of V is set below and may be altered
@@ -1219,10 +1160,8 @@ C
       ENDDO
       GOTO 100
       END
-C
-C
-C
-C
+
+
       SUBROUTINE ELCORR(Nnuc, Iec, Jc, Ipc, Nnur, Nejc, Nhrtw)
 Ccc
 Ccc   ********************************************************************
@@ -1247,9 +1186,6 @@ Ccc   *                                                                  *
 Ccc   * calls:TLLOC                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   28.Sep.2000                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -1279,10 +1215,6 @@ C     DOUBLE PRECISION cor
       REAL FLOAT
       INTEGER i, iel, il, ipar, kel, l, lmax, lmin
       INTEGER INT, MIN0
-C
-C
-C
-C     WRITE(6,*)'  '
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----
 C-----decay to discrete levels
@@ -1308,7 +1240,6 @@ C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
             ipar = 1 + LVP(i, Nnur)*Ipc*( - 1)**(l - 1)
             tld = ELTl(l)
-C           WRITE(6,*)'l tl, ipar, s ',l,tld,ipar, s
             IF(l.EQ.INT(H_Abs(Nhrtw,2)) .AND. (2.0*s).EQ.H_Abs(Nhrtw, 3)
      &         .AND. ipar.NE.0)THEN
 C--------------got a true elastic channel
@@ -1318,18 +1249,14 @@ C--------------got a true elastic channel
      &                  MEMel(iel, 2).EQ.l)THEN
                         kel = MEMel(iel, 1)
                         v = H_Tl(kel, 1)
-C                       WRITE(6,*)'got strong el. for correction ',v
                      ENDIF
                   ENDDO
                ELSE
                   v = VT1(tld, H_Tav, H_Sumtl)
-C                 WRITE(6,*)'got weak elastic for correction',v
                ENDIF
                popadd = v*(EEF(tld, H_Tav, H_Sumtl) - 1.0)
                SCRtl(i, Nejc) = SCRtl(i, Nejc) + popadd
                SCRtem(Nejc) = SCRtem(Nejc) + popadd
-C              WRITE(6,*)'TL, VT, EEF, popadd ',Tld, v,
-C              &             EEF(Tld,H_Tav,H_Sumtl),popadd
             ENDIF
          ENDDO
 C--------do loop over l --- done ----------------------------------------
@@ -1338,9 +1265,8 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
       ENDIF
 99999 END
-C
-C
-C
+
+
       SUBROUTINE HRTW_MARENG(Npro, Ntrg, Jcn, Ip, Ich)
 Ccc
 Ccc   ********************************************************************
@@ -1359,15 +1285,11 @@ Ccc   *                                                                  *
 Ccc   * output: Ich  - number of physical channels contributing to JCN Ip*
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   30.Aug.2000                                              *
-Ccc   * revision:1    by:xxxxxx                   on:  .xxx.xxxx         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -1391,18 +1313,13 @@ C
       INTEGER INT, MIN0
       DOUBLE PRECISION PAR, xmas_npro, xmas_ntrg, RMU
       DOUBLE PRECISION VT1
-C
-C
       PAR(i, ipa, l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
-C
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-C
       el = EINl
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
       wf = ak2/10.D0
       coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
-C
       maxlw = NDLW
       s1 = 0.5
       IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) - 
@@ -1417,7 +1334,6 @@ C-----channel spin min and max
       Ich = 1
       DO ichsp = 1, mul
          chsp = smin + FLOAT(ichsp - 1)
-C        WRITE(6,*)'channel spin ',chsp
          lmin = ABS(Jcn - chsp - s1) + 0.0001
          lmax = Jcn + chsp - s1 + 0.0001
          lmin = lmin + 1
@@ -1439,14 +1355,9 @@ C        WRITE(6,*)'channel spin ',chsp
                   vl = VT1(ELTl(k), H_Tav, H_Sumtl)
                ELSEIF(ELTl(k).LT.H_Tthr)THEN
                   vl = VT1(ELTl(k), H_Tav, H_Sumtl)
-C                 WRITE(6,*)'weak elastic l=',k-1
                ELSE
                   kel = 0
                   DO iel = 1, NDHRTW2
-C                    WRITE(6,*)'iel,#,MEMk,MEM2s,k,spin ',
-C                    &            iel,' ',MEMel(iel,1),'
-C                    ',MEMel(iel,2),MEMel(iel,3), &            '
-C                    ',k,INT(2.0*chsp+0.001)
                      IF(MEMel(iel, 3).EQ.INT(2.0*chsp + 0.001) .AND. 
      &                  MEMel(iel, 2).EQ.k)kel = MEMel(iel, 1)
                   ENDDO
@@ -1463,8 +1374,6 @@ C                    ',k,INT(2.0*chsp+0.001)
                IF(vl.NE.0.0D0)THEN
                   H_Abs(Ich, 1) = vl*coef*(FLOAT(2*Jcn + 1) - 2.0*s1)
      &                            *FUSred*REDmsc(Jcn, Ip)*DRTl(k)
-C                 WRITE(6,*) 'JCN, ip, l, 2*chsp, x-sec ', JCN, ip, k,
-C                 &          2.0*chsp,H_Abs(ich,1)
                   H_Abs(Ich, 2) = k
                   H_Abs(Ich, 3) = 2.0*chsp
                   Ich = Ich + 1

@@ -1,9 +1,7 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-26 16:38:19 $
-Ccc   * $Id: MSD-orion.f,v 1.8 2005-01-26 16:38:19 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: MSD-orion.f,v 1.9 2005-02-24 22:33:43 herman Exp $
 C
-C     Surface real OMP part (for DOM potentials) included
-C     but contribution to form factor is ignored (see subroutine FFCAL)
 C
 C
       SUBROUTINE ORION(Q2, Q3, Ktrl3, Extcom1, Ldw, Ist, Ltrmax, Atar,
@@ -39,27 +37,6 @@ Ccc *                                                                  *
 Ccc * output:TAPE15                                                    *
 Ccc *                                                                  *
 Ccc *                                                                  *
-Ccc * calls:  CCCTRL                                                   *
-Ccc *             FLGLCH                                               *
-Ccc *             OMPOTEN                                              *
-Ccc *         FFCAL                                                    *
-Ccc *         HIBORN                                                   *
-Ccc *             MSTEP                                                *
-Ccc *         OPMPARN                                                  *
-Ccc *             OMPAR                                                *
-Ccc *             WHERE                                                *
-Ccc *         XSEC                                                     *
-Ccc *             LEGNDR                                               *
-Ccc *             XSC12                                                *
-Ccc *                 CLEBSCH                                          *
-Ccc *                 XSCABC                                           *
-Ccc *                     CLEBHF                                       *
-Ccc *                     CLEBRD                                       *
-Ccc *                     CLEBZ                                        *
-Ccc *                     RACHLF                                       *
-Ccc *                     RACSIM                                       *
-Ccc *                                                                  *
-Ccc *                                                                  *
 Ccc *                                                                  *
 Ccc * author: H.Lenske                                                 *
 Ccc *                                                                  *
@@ -70,6 +47,8 @@ Ccc * revision:1    by:M.Herman                 on: 2.Nov.1997         *
 Ccc * Compressional form factor in l=0 transfer implemented (see       *
 Ccc * modification to FFCAL by H. Lenske).                             *
 Ccc *                                                                  *
+Ccc * Surface real OMP part (for DOM potentials) included              *
+Ccc * but contribution to form factor is ignored (see subroutine FFCAL)*
 Ccc ********************************************************************
 Ccc
 CMAD
@@ -145,9 +124,6 @@ C
      &                 WSOr(4), WSXf(4), WSXr(4), XBAr, XMAx, XMEs,
      &                 ZPR(4), ZTR(4), DVXr(4), DVXf(4), wsof(4)
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300, 4), ZERo
-C     INTEGER ia, ib, ic, id, ie, ig, ISTw(3), JJ, JLSmax, KCFf(4),
-C    &        l1outp, l9(9), LBTrf(4), lcaltr, LDWmxr(4), LDWmxr1(3),
-C    &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl,
       INTEGER ISTw(3), JJ, JLSmax, KCFf(4), KEXcom(50), KEXcom1(8),
      &        KEXcom2(28), KTLout(50), KTLout1(8), KTLout2(28), KTRl(30)
      &        , KTRl1(8), KTRl2(28), LBTrf(4), LDWmxr(4), LDWmxr1(3),
@@ -156,7 +132,6 @@ C    &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl,
       COMMON /BRMH  / WR1, WR2, SGMa, SGMat, P, CSUm2, XAMp, PLM10m,
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1,
      &                CONst2
-C
       COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr,
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim,
@@ -173,7 +148,6 @@ C
       COMMON /RACFAC/ FAClog, RAC, U9
       COMMON /SOIMAG/ WSOr, DFNsir, RZEsir
       COMMON /SPIN  / ISTw, JJ
-C
       COMMON /RSURF / DVXr, DVXf
 C
 C Dummy arguments
@@ -190,8 +164,6 @@ C
       CHARACTER*3 ampmwr, holamu, holpmu
       INTEGER i, ind, j, kase, kder, maxi, mini, n, n1mx, n1wx, n2mx,
      &        na, nc, nejc, nlr, no, nw1, nw2, nw3, nz
-C
-CWQAN
       EQUIVALENCE(EXTcom(1), EXTcom2)
       EQUIVALENCE(KTLout(1), KTLout2)
       EQUIVALENCE(KEXcom(1), KEXcom2)
@@ -202,8 +174,6 @@ CWQAN
       EQUIVALENCE(KTRl(1), KTRl1)
       DATA holamu, holpmu/'AMU', 'PMU'/
       OPEN(8, FORM = 'unformatted', STATUS = 'scratch')
-C
-CWQAN
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -581,7 +551,8 @@ C-----write results to TAPE15
      &       'DFN,DFNW,DFNS,DFNSP', 14X, '=', 4F8.3/21X,
      &       'RZERO,RZEROW,RZEROS,RZROSP,RZEROC=', 5F8.3)
       END
-C
+ 
+ 
       SUBROUTINE OPMPARN(Atar, Ztar, Nejc, E, V, Dvs, W, Wd, Vs, Vi, Av,
      &                   Aw, Ad, As, Ai, Rv, Rw, Rd, Rs, Ri, Rc, Mi, Mt)
       INCLUDE 'dimension.h'
@@ -639,7 +610,8 @@ C     Ri = 1.0
       Ri = Rs
       Ai = As
       END
-C
+ 
+ 
       SUBROUTINE CCCTRL(Iout)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C

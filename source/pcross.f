@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-14 17:03:02 $
-Ccc   * $Id: pcross.f,v 1.18 2005-02-14 17:03:02 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: pcross.f,v 1.19 2005-02-24 22:33:43 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C
@@ -26,34 +26,18 @@ C
       PARAMETER(C1 = 3.6824121D17, EPS = 1.D-4,
      &          PI26 = 1.6449340107D0, PMAX = 50)
       CHARACTER*12 status
-C
-C     REAL VARIABLES
-C     SCALARS
-C
       REAL*8 ec, gc, pc, fr, aat, azt
       REAL*8 totemis, cme, hlp1, eee, ff1, ff2, ff3, wb, wda, sg, er,
      &       ff, emis
       LOGICAL CallPCROSS
-C
-C     REAL MATRIX
-C
-C     FORMAL PARAMETERS
       REAL*8 cross(NDEJC + 1), g(NDEJC + 1), pair(NDEJC + 1)
       REAL*8 em(PMAX), we(NDEJC + 1, PMAX, NDEX), spec(NDEJC + 1, NDEX),
      &       L(NDEJC + 1, PMAX), flm(4, 4), R(4, PMAX, NDEJC),
      &       eint(NDEX), fint(NDEX), emaxi, emini, phdj(NDLW), ftmp
-C
-C     REAL FUNCTIONS
-C
       REAL*8 DENSW
-C
-C     INTEGER VARIABLES
-C
       INTEGER*4 ac, ao, ar, p, hh, h1, i, ienerg, NHEq, icon, j,
      &          icon3, zc, zr, ap, ihmax, ien
       INTEGER*2 iemin(NDEJC + 1), iemax(NDEJC + 1), nures(NDEJC + 1)
-C
-C======================================================================
       COMMON /CALC5 / L, NHEq
       DATA CallPcross/.FALSE./
       SAVE CallPcross,r
@@ -64,9 +48,7 @@ C     INITIALIZATION
 
 C      Projectile mass number
       ap = AEJc(NPRoject)
-C
       cme = MFPp/1.4D21
-C
       fr = 0.D0
       totemis = 0.D0
       DO i = 1, NDEJC + 1
@@ -103,7 +85,6 @@ C
 C     EXCITON EQUILIBRIUM NUMBER NHEq
 C
       NHEq = MIN(PMAX-1, NINT(SQRT(1.4*gc*ec))) + 1
-C
 C     ZERO ARRAY INITIALIZATION
       DO nejc = 1, NDEJC + 1
          iemin(nejc) = 2
@@ -128,6 +109,7 @@ C
 99003 FORMAT(/,1X, 'Mean free path parameter = ', F4.2,/)
 C
 C     NEJcm is the maximum number of particles emitted
+C
       DO nejc = 1, NEJcm
          ar = ac - AEJc(nejc)
          zr = zc - ZEJc(nejc)
@@ -171,8 +153,6 @@ C           Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             IF(sg.LT.1.D-6)iemin(nejc) = ienerg
          ENDDO
       ENDDO
-C
-C
       izares = INT(1000*zc + ac)
       CALL WHERE(izares, nnur, iloc)
       nures(NEJcm + 1) = nnur
@@ -185,17 +165,13 @@ C     Last continuum energy bin is calculated, RCN 11/2004
          IF(ec.GT.eee)iemax(NEJcm + 1) = ienerg
          IF(iemax(NEJcm + 1).GE.nexrt) iemax(NEJcm + 1) = nexrt
       ENDDO
-C
       IF(.NOT.CallPCROSS) CALL RQFACT(NHEq, r)
       CallPCROSS = .TRUE.  ! To avoid r factor recalculation at each call
 C
-C***************************************************************
 C     EMISSION RATES CALCULATIONS FOLLOWS
 C
 C     PRIMARY PARTICLE LOOP
 C
-C
-
 C     IF(Key_shape.NE.0) THEN
 C        Should be already available
 C        Set GDRGFL parameters
@@ -203,39 +179,31 @@ C        CALL GDRGFLDATA(zc, ac)
 C     ENDIF
 
       DO nejc = 1, NEJcm + 1
-C
          nnur = nures(nejc)
-C
          IF(nejc.NE.NEJcm + 1)THEN
             ao = AEJc(nejc)
             zo = ZEJc(nejc)
             ar = ac - ao
             zr = zc - zo
-C
             IF(ao.EQ.1 .AND. zo.EQ.0)ff1 = 2.0173*ar/(ar + 1.0087) ! n
             IF(ao.EQ.1 .AND. zo.EQ.1)ff1 = 2.0145*ar/(ar + 1.0073) ! p
             IF(ao.EQ.4 .AND. zo.EQ.2)ff1 = 4.0015*ar/(ar + 4.0015) ! alpha
             IF(ao.EQ.3 .AND. zo.EQ.1)ff1 = 6.0298*ar/(ar + 3.0149) ! t
             IF(ao.EQ.2 .AND. zo.EQ.1)ff1 = 6.0408*ar/(ar + 2.0136) ! d
-C
          ELSE
-C
             ar = ac
             zr = zc
             ao = 0
             zo = 0
             ff1 = 1.D0/AMUmev
-C
          ENDIF
 C
 C        PARTICLE-HOLE LOOP
 C
          DO h1 = 1, NHEq
-C
            icon = 0
            hh = h1 - 1
            IF(hh.EQ.0 .AND. nejc.NE.NEJcm + 1) CYCLE
-C
            p = hh + ap
            ff2 = DENSW(gc, pc, p, hh, ec)
            IF(ff2.EQ.0.) CYCLE
@@ -254,13 +222,10 @@ C            Inverse cross section
              ELSE
                aat = ac
                azt = zc
-C              sg = SGAM(aat, azt, eee)
                sg = SGAM(aat, azt, eee)
              ENDIF
              IF(sg.eq.0.) cycle
-C
              er = EMAx(nnur) - eee
-C
              IF(er.LE.EPS) cycle
              hlp1 = 0.D0
 C            PREEQ n & p EMISSION
@@ -452,22 +417,14 @@ c-----------number of spectrum bins to continuum WARNING! might be negative!
          ENDIF
 c--------number of spectrum bins to continuum WARNING! might be negative!
          nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
-CRCN     IF(nexrt.GT.0 )THEN
          IF(nexrt.GT.iemin(nejc) )THEN
-C           write(6,*) 'nexrt:',nexrt
-C            write(6,*) 'ejectile:',nejc
-C            write(6,*) 'Iemin,Iemax:',iemin(nejc), iemax(nejc)
             DO j = 1, NLW, LTUrbo
                xnor = 0.5*phdj(j)/somj
                DO ie = iemin(nejc), iemax(nejc)
-C              DO ie = iemin(nejc), nexrt
                pops = xnor*spec(nejc,  ie )
                ie1 =  nexrt - ie + 1
                   POP(ie1, j, 1, Nnur) = POP(ie1, j, 1, Nnur) + pops
                   POP(ie1, j, 2, Nnur) = POP(ie1, j, 2, Nnur) + pops
-C                 IF(j .EQ.1 )
-C    &            WRITE(6, *)'nejc,ie,ie1,spec,pop',nejc,ie,ie1,pops,
-C    &            POP(ie1, j, 1, Nnur)
                ENDDO
             ENDDO
 c-----------add PCROSS contribution to the EMPIRE spectra CSE and
@@ -514,6 +471,7 @@ C-----other reaction mechanisms)
       WRITE(6, 99001)
       END
 
+
       SUBROUTINE RQFACT(Heq, R)
 C
 C     INDC(CPR)-014 and references there in
@@ -527,7 +485,6 @@ C
       INTEGER*4 at, zt, ap, zp, ab, zb, nb, ac, zc
       REAL*8 ta, tz, tn, zzz, uuu, s1, s2, f1, f2, f21, f22, f23, f24
       INTEGER*4 Heq, i, h1, hhh, p, l, m, minj, maxj, j, np, nt, j1
-C
       COMMON /PFACT / FA(2*PMAX + 3), LFA(2*PMAX + 3)
 C
 C     FACTORIAL CALCULATION
@@ -542,7 +499,6 @@ C
          LFA(i) = ALOG(FLOAT(i - 3)) + LFA(i - 1)
          FA(i) = (i - 3)*FA(i - 1)
       ENDDO
-C
       DO nejc = 1, NEJcm
          DO h1 = 1, PMAX
             DO l = 1, 4
@@ -550,14 +506,12 @@ C
             ENDDO
          ENDDO
       ENDDO
-C
       ac = A(1)
       zc = Z(1)
       ap = AEJc(NPRoject)
       at = ac - ap
       zp = ZEJc(NPRoject)
       zt = zc - zp
-C
       nt = at - zt
       np = ap - zp
       tn = nt
@@ -570,15 +524,11 @@ C     Q-FACTOR CALCULATION FOR PARTICLE EMISSION
 C
 C
       DO nejc = 1, NEJcm
-C
          ab = AEJc(nejc)
          zb = ZEJc(nejc)
          nb = ab - zb
-C
          DO l = 1, ab
-C
             DO h1 = 1, Heq
-C
                hhh = h1 - 1
                p = hhh + Ap
                IF(p.GE.l)THEN
@@ -586,13 +536,10 @@ C
                   minj = MAX(0, l - nb)
                   maxj = MIN(l, zb)
                   s1 = 0.D0
-C
                   DO i = 0, hhh
-C
                      f1 = zzz**i*uuu**(hhh - i)
      &                    *EXP(LFA(hhh + 3) - LFA(hhh - i + 3)
      &                    - LFA(i + 3))
-C
                      s2 = 0.D0
                      DO j = minj, maxj
                         f21 = 1.D0
@@ -624,31 +571,21 @@ C
                            f24 = f24/FA(nb - l + j + 3)
                         ENDIF
                         s2 = f21*f22*f23*f24 + s2
-C
                      ENDDO
-C
                      s1 = s1 + f1*s2
-C
                   ENDDO
-C
                   f2 = 1.D0
                   DO j = 0, m - 1
                      f2 = f2*(at - hhh - j)
                   ENDDO
-C
                   f2 = EXP(LFA(l + 3) + LFA(m + 3) + LFA(p - l + 3)
      &                 - LFA(p + 3) + LFA(ab + 3) - LFA(zb + 3)
      &                 - LFA(nb + 3))/f2
-C
                   R(l, h1, nejc) = s1*f2*(ta/tz)**zb*(ta/tn)**nb
                ENDIF
-C
             ENDDO
-C
          ENDDO
-C
       ENDDO
-C
       DO nejc = 1, NEJcm
          ab = AEJc(nejc)
          DO h1 = 1, Heq
@@ -657,9 +594,10 @@ C
             ENDDO
          ENDDO
       ENDDO
-C
       END
-C
+
+
+
       SUBROUTINE TRANSIT(E, Gc, Ap, Nheq)
       IMPLICIT LOGICAL*1(A - Z)
       INTEGER*4 PMAX, Nheq
@@ -696,11 +634,11 @@ C
 C     END OF TRANSITION RATES CALCULATIONS [ NORMALIZED TO CME ]
 C*****************************************************************
       END
-C
+
+
       SUBROUTINE RESOL(Em, Ih2, Ap, Cme)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       INTEGER*4 PMAX
       PARAMETER(PMAX = 50)
 C
@@ -763,13 +701,11 @@ C
          b(i) = Em(i)
          Em(i) = 0.
       ENDDO
-C
       c(1) = 0.D0
       DO h1 = 1, n - 1
          c(h1 + 1) = -LP(h1)
          e(h1) = -LM(h1 + 1)
       ENDDO
-C
       CALL MASTER(c, ls, e, b, n, PMAX)
 C--------------------------------------------------------------------
 C     NEVER COME BACK ASSUMPTION(ONLY PE-CONTRIBUTION)
@@ -796,21 +732,20 @@ C--------------------------------------------------------------------
       ENDIF
       RETURN
       END
-C
+
+
       SUBROUTINE MASTER(Subd, Diag, Superd, B, N, Ndim)
       IMPLICIT LOGICAL(A - Z)
       INTEGER*4 N, Ndim
       REAL*8 Subd(Ndim), Diag(Ndim), Superd(Ndim), B(Ndim)
       INTEGER*4 k, kb, kp1, nm1, nm2
       REAL*8 t
-C
       Subd(1) = Diag(1)
       nm1 = N - 1
       IF(nm1.GE.1)THEN
          Diag(1) = Superd(1)
          Superd(1) = 0.0D0
          Superd(N) = 0.0D0
-C
          DO k = 1, nm1
             kp1 = k + 1
             IF(DABS(Subd(kp1)).GE.DABS(Subd(k)))THEN
@@ -854,7 +789,8 @@ C
          ENDIF
       ENDIF
       END
-C
+
+
       SUBROUTINE PREFORMATION(Flm, E)
 C
 C IWAMOTO,HARADA COALESCENCE PICK-UP MODEL, PHYS.REV.1982,V.26,P.1821
@@ -874,7 +810,6 @@ C     FOR FAST POLYNOMIAL EVALUATION
       DO l = 2, 5
          x(l) = E*x(l - 1)
       ENDDO
-C
 C     DEUTERON (MASS = 2)
       IF(E.LT.80.D0)THEN
          Flm(2, 2) = MAX(0.00821 + 0.02038*x(1) + 5.95941E-4*x(2)
@@ -884,7 +819,6 @@ C     DEUTERON (MASS = 2)
          Flm(2, 2) = 1.
       ENDIF
       Flm(2, 1) = MAX(1. - Flm(2, 2), 0.)
-C
 C     TRITIUM or HELIUM-3 (MASS = 3)
       IF(E.LT.70.D0)THEN
          Flm(3, 1) = MAX(0.57315 - 0.02083*x(1) + 3.19204E-4*x(2)
@@ -892,7 +826,6 @@ C     TRITIUM or HELIUM-3 (MASS = 3)
       ELSE
          Flm(3, 1) = 0.D0
       ENDIF
-C
       IF(E.LT.170.)THEN
          Flm(3, 3) = MAX(0.00705 - 0.00164*x(1) + 2.16549E-4*x(2)
      &               - 1.73867E-6*x(3) + 5.24069E-9*x(4)
@@ -900,9 +833,7 @@ C
       ELSE
          Flm(3, 3) = 1.D0
       ENDIF
-C
       Flm(3, 2) = MAX(1.D0 - Flm(3, 1) - Flm(3, 3), 0.D0)
-C
 C     ALPHA PARTICLES (M=4)
       IF(E.LT.70.D0)THEN
          Flm(4, 1) = MAX(0.29119 - 0.01434*x(1) + 3.34045E-4*x(2)
@@ -910,7 +841,6 @@ C     ALPHA PARTICLES (M=4)
       ELSE
          Flm(4, 1) = 0.D0
       ENDIF
-C
       IF(E.LT.130.D0)THEN
          Flm(4, 2) = 0.60522 + 1.30071E-4*x(1) - 1.77653E-4*x(2)
      &               + 1.64048E-6*x(3) - 4.55562E-9*x(4)
@@ -918,7 +848,6 @@ C
       ELSE
          Flm(4, 2) = 0.D0
       ENDIF
-C
       IF(E.LT.30.D0)THEN
          Flm(4, 4) = 0.D0
       ELSEIF(E.LT.300.D0)THEN
@@ -928,16 +857,14 @@ C
       ELSE
          Flm(4, 4) = 1.D0
       ENDIF
-C
       IF(E.LT.300.D0)THEN
          Flm(4, 3) = MAX(1.D0 - Flm(4, 1) - Flm(4, 2) - Flm(4, 4), 0.D0)
       ELSE
          Flm(4, 3) = 0.D0
       ENDIF
-C
       END
-C
-C
+ 
+ 
       FUNCTION DENSW(G, D, P, H, E)
 C
 C  WILLIAMS FORMULATION, PAULI CORRECTION BY KALBACH
@@ -954,7 +881,6 @@ C
       PARAMETER(PMAX = 50)
       REAL*8 FA, LFA
       COMMON /PFACT / FA(2*PMAX + 3), LFA(2*PMAX + 3)
-C
       DENSW = 0.D0
       n = P + H
       IF(n.LE.0)RETURN
@@ -962,11 +888,10 @@ C
       a = .25D0*(P*(P - 1) + H*(H - 1))
       u = G*(E - D) - a
       IF(u.LE.0.)RETURN
-C
       DENSW = G*(DEXP((n-1)*DLOG(u) - fac))
-C
       END
-C
+
+
       FUNCTION SGAM_OLD(A, Z, Eg)
 C [1] S.A.FAYANS
 C     "Lectures,DUBNA,feb.1982"

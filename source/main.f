@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-11 21:45:45 $
-Ccc   * $Id: main.f,v 1.58 2005-02-11 21:45:45 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: main.f,v 1.59 2005-02-24 22:33:43 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -8,171 +8,7 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
 Ccc   *                         E M P I R E                              *
 Ccc   *                                                                  *
-Ccc   *     Main of the EMPIRE code. A full call structure tree is       *
-Ccc   *     given below in alphabetical order:                           *
-Ccc   *                                                                  *
-Ccc   *    ACCUM                                                         *
-Ccc   *        BELLAC                                                    *
-Ccc   *    ACCUMSD                                                       *
-Ccc   *    AUERST                                                        *
-Ccc   *    DECAY                                                         *
-Ccc   *        TLLOC                                                     *
-Ccc   *    DECAYD                                                        *
-Ccc   *    DECAYG                                                        *
-Ccc   *        E1                                                        *
-Ccc   *        E2                                                        *
-Ccc   *        XM1                                                       *
-Ccc   *    DECAYT                                                        *
-Ccc   *        E1                                                        *
-Ccc   *        E2                                                        *
-Ccc   *        XM1                                                       *
-Ccc   *    FISSION                                                       *
-Ccc   *        TLF                                                       *
-Ccc   *    HMSC                                                          *
-Ccc   *        AUERST                                                    *
-Ccc   *        DECHMS                                                    *
-Ccc   *        E1                                                        *
-Ccc   *        GDOWN                                                     *
-Ccc   *            W                                                     *
-Ccc   *                W1                                                *
-Ccc   *                W2                                                *
-Ccc   *                W3                                                *
-Ccc   *        MATIN                                                     *
-Ccc   *        MATIN1                                                    *
-Ccc   *        OMJ                                                       *
-Ccc   *        ROPHM                                                     *
-Ccc   *        TRATES                                                    *
-Ccc   *        VQ                                                        *
-Ccc   *            WOBL                                                  *
-Ccc   *        W (see above)                                             *
-Ccc   *        WHERE                                                     *
-Ccc   *        WILLI                                                     *
-Ccc   *        WOBL                                                      *
-Ccc   *        WT                                                        *
-Ccc   *            W (see above)                                         *
-Ccc   *        ZERO                                                      *
-Ccc   *            W (see above)                                         *
-Ccc   *    INPUT                                                         *
-Ccc   *        BNDG                                                      *
-Ccc   *            WHERE                                                 *
-Ccc   *        CLEAR                                                     *
-Ccc   *        LEVREAD                                                   *
-Ccc   *            BCDNUM                                                *
-Ccc   *        PTLEVSET                                                  *
-Ccc   *            PTLEVRE                                               *
-Ccc   *        READIN                                                    *
-Ccc   *            WHERE                                                 *
-Ccc   *        READLDP                                                   *
-Ccc   *            FSHELL                                                *
-Ccc   *            WHERE                                                 *
-Ccc   *        READNIX                                                   *
-Ccc   *            SHELLC                                                *
-Ccc   *                LYMASM                                            *
-Ccc   *                    XI                                            *
-Ccc   *                    XIMOD                                         *
-Ccc   *            WHERE                                                 *
-Ccc   *        ROCOL                                                     *
-Ccc   *            ALIT                                                  *
-Ccc   *            BARFIT                                                *
-Ccc   *                LPOLY                                             *
-Ccc   *            MOMFIT                                                *
-Ccc   *                LPOLY                                             *
-Ccc   *            RODEF                                                 *
-Ccc   *                DAMPV                                             *
-Ccc   *                VIBR                                              *
-Ccc   *            SHCFADE                                               *
-Ccc   *            SIGMAK                                                *
-Ccc   *        ROEMP                                                     *
-Ccc   *            BNDG (see above)                                      *
-Ccc   *            DAMIRO                                                *
-Ccc   *                FSHELL                                            *
-Ccc   *                MOMFIT (see above)                                *
-Ccc   *                ROBCS                                             *
-Ccc   *                    DAMPKS                                        *
-Ccc   *                    VIBR                                          *
-Ccc   *                RODEF (see above)                                 *
-Ccc   *                SIGMAK                                            *
-Ccc   *            FSHELL                                                *
-Ccc   *            PIPE                                                  *
-Ccc   *            PRERO                                                 *
-Ccc   *                BARFIT (see above)                                *
-Ccc   *                SHCFADE                                           *
-Ccc   *                SIGMAK                                            *
-Ccc   *        ROGC                                                      *
-Ccc   *            BARFIT (see above)                                    *
-Ccc   *            PIPE                                                  *
-Ccc   *            RIVOLI                                                *
-Ccc   *            SHCFADE                                               *
-Ccc   *            SIGMAK                                                *
-Ccc   *        SMAT                                                      *
-Ccc   *        TLEVAL                                                    *
-Ccc   *            TRANSINP                                              *
-Ccc   *        WHERE                                                     *
-Ccc   *    MARENG                                                        *
-Ccc   *        HITL                                                      *
-Ccc   *            BNDG (see above)                                      *
-Ccc   *            CCFUS                                                 *
-Ccc   *                BAR                                               *
-Ccc   *                    POTENT                                        *
-Ccc   *                        POT                                       *
-Ccc   *                POT                                               *
-Ccc   *            PUSH                                                  *
-Ccc   *                F                                                 *
-Ccc   *                G                                                 *
-Ccc   *                    F                                             *
-Ccc   *                INTGRS                                            *
-Ccc   *            XFUS                                                  *
-Ccc   *    ORION                                                         *
-Ccc   *        CCCTRL                                                    *
-Ccc   *            FLGLCH                                                *
-Ccc   *            OMPOTEN                                               *
-Ccc   *        FFCAL                                                     *
-Ccc   *        HIBORN                                                    *
-Ccc   *            MSTEP                                                 *
-Ccc   *        OPMPARN                                                   *
-Ccc   *            OMPAR                                                 *
-Ccc   *            WHERE                                                 *
-Ccc   *        XSEC                                                      *
-Ccc   *            LEGNDR                                                *
-Ccc   *            XSC12                                                 *
-Ccc   *                CLEBSCH                                           *
-Ccc   *                XSCABC                                            *
-Ccc   *                    CLEBHF                                        *
-Ccc   *                    CLEBRD                                        *
-Ccc   *                    CLEBZ                                         *
-Ccc   *                    RACHLF                                        *
-Ccc   *                    RACSIM                                        *
-Ccc   *    PRINPUT                                                       *
-Ccc   *    ROCOL (see above)                                             *
-Ccc   *    ROEMP (see above)                                             *
-Ccc   *    TRISTAN                                                       *
-Ccc   *        RESPNS                                                    *
-Ccc   *            INELAS                                                *
-Ccc   *                CLEBTRI                                           *
-Ccc   *                DWIDTH                                            *
-Ccc   *                RADIAL                                            *
-Ccc   *            SPLVL                                                 *
-Ccc   *                BCS                                               *
-Ccc   *                    ESORT                                         *
-Ccc   *                    NUMBER                                        *
-Ccc   *                EHO                                               *
-Ccc   *                ESORT                                             *
-Ccc   *                INDF                                              *
-Ccc   *        SPECTR                                                    *
-Ccc   *            INVERT                                                *
-Ccc   *            LSQLEG                                                *
-Ccc   *                MTXGUP                                            *
-Ccc   *                PLNLEG                                            *
-Ccc   *            PNORM                                                 *
-Ccc   *                POLYNM                                            *
-Ccc   *            POLYNM                                                *
-Ccc   *    ULM                                                           *
-Ccc   *    ULMDYN                                                        *
-Ccc   *    WHERE                                                         *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   June 1994                                                *
+Ccc   *     Main of the EMPIRE code.                                     *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
@@ -1843,22 +1679,28 @@ C
 C
 C
       SUBROUTINE RECOIL(Ke, Nnuc)
-C
-C----
-C----Construct recoil spectra:
-C----Each excitation bin is given its recoil spectrum, when a particle
-C----is emitted its recoil velocity is vector added to the parent recoil
-C----velocity and a resulting spectrum is summed upon daughter recoil
-C----spectrum corresponding to the populated energy bin in the
-C----daughter (kinematical normalization taken into account).
-C----Daughter recoil spectra will be distributed between
-C----adjacent bins (inversly proportional to the
-C----distance of the actual energy to the bin energy
-C----in order to conserve energy).
-C----Requires that continuum spectra from each bin are stored on the
-C----AUSpec array and those to discrete levels on the REClev for each
-C----reaction mechanism considered in the calculations.
-C----
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:ppu*
+Ccc   *                         RECOIL                                   *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *  Constructs recoil spectra:                                      *
+Ccc   *  Each excitation bin is given recoil spectrum, when a particle   *
+Ccc   *  is emitted its recoil velocity is vector added to the parent    *
+Ccc   *  recoil velocity and a resulting spectrum is summed upon daughter*
+Ccc   *  recoil spectrum corresponding to the populated energy bin in the*
+Ccc   *  daughter (kinematical normalization taken into account).        *
+Ccc   *  Daughter recoil spectra will be distributed between             *
+Ccc   *  adjacent bins (inversly proportional to the                     *
+Ccc   *  distance of the actual energy to the bin energy                 *
+Ccc   *  in order to conserve energy).                                   *
+Ccc   *  Requires that continuum spectra from each bin are stored on the *
+Ccc   *  AUSpec array and those to discrete levels on the REClev for each*
+Ccc   *  reaction mechanism considered in the calculations.              *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1965,6 +1807,8 @@ C-----gamma decay to discrete levels (stored with icse=0)
          ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
       END
+
+
       SUBROUTINE PRINT_RECOIL(nnuc,react)
 C-----
 C-----prints recoil spectrum of nnuc residue
@@ -2016,7 +1860,8 @@ C--------print end point again with 0 xs for consistency with particle spectra
       ENDIF
       RETURN
       END
-C-------------------------------------------------------------------
+
+
       SUBROUTINE FISCROSS(nnuc, ke, ip, jcn, sumfis, sumfism,
      &                    dencomp, aafis, ifluct)
 
@@ -2118,7 +1963,8 @@ C
          ENDDO
        ENDIF
        END
-c======================================================================
+
+
        SUBROUTINE XSECt(nnuc, m, xnor, sumfis, sumfism, ke, ipar, jcn,
      &                  dencomp, aafis)
 

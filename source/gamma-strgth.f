@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-12-10 09:59:14 $
-Ccc   * $Id: gamma-strgth.f,v 1.17 2004-12-10 09:59:14 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: gamma-strgth.f,v 1.18 2005-02-24 22:33:42 herman Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -25,19 +25,11 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   21.Jan.1994                                              *
-Ccc   *                                                                  *
-Ccc   * revision:1    by:M.Herman            on:5.July.1995              *
-Ccc   * Messina GDR systematics introduced                               *
-Ccc   *                                                                  *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -52,12 +44,9 @@ C
 C
 C Local variables
 C
-C ------Plujko_new
       DOUBLE PRECISION EG1, GW1, CS1, EG2, GW2, CS2
       INTEGER  NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
-C ------Plujko_new (End)
-
       DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
 C
 C
@@ -144,7 +133,6 @@ C
 C
 C-----printout of gamma transition parameters
 C
-C-----Kyiv.Photonuclear channel, Plujko_new
       IF(Key_GDRGFL.EQ.0)THEN
          EG1 = GDRpar(1, Nnuc)
          GW1 = GDRpar(2, Nnuc)
@@ -163,7 +151,6 @@ C        Transferring to EMPIRE arrays (RCN, 09/2004
          IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = GW2
          IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = CS2
       ENDIF
-C-----Kyiv.Photonuclear channel, Plujko_new(End)
       IF(IOUt.GT.1)THEN
          WRITE(6, 99001)
 99001    FORMAT(1X, 'Gamma transitions parameters', //10X, 'E1 ', 11X,
@@ -185,8 +172,6 @@ C-----Kyiv.Photonuclear channel, Plujko_new(End)
 99005    FORMAT(1X, /, 7X, '(1-TE)*Weiss. + TE*GMR', //)
       ENDIF
       W1 = GDRpar(2, Nnuc)**2
-C     Capote 2001
-C     Changed to avoid conflict with GLOBAL CONSTANT W2
       W2L = GDRpar(5, Nnuc)**2
       WE2 = GQRpar(2, Nnuc)**2
       WM1 = GMRpar(2, Nnuc)**2
@@ -195,8 +180,8 @@ C     Changed to avoid conflict with GLOBAL CONSTANT W2
       EE2 = GQRpar(1, Nnuc)**2
       EM1 = GMRpar(1, Nnuc)**2
       END
-C
-C
+
+
       SUBROUTINE ULMDYN(Nnuc, Jcn, Exc)
 Ccc
 Ccc   ********************************************************************
@@ -220,16 +205,10 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   23.Jan.1995                                              *
-Ccc   * revision:1    by:M.Herman            on:5.July.1995              *
-Ccc   * Messina GDR systematics introduced                               *
-Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -247,9 +226,6 @@ C Local variables
 C
       DOUBLE PRECISION a23, ac, damp, defexc, dt, e(2), esys1, esys2,
      &                 ewsrs, g(2), s(2), t, tgscr
-C
-C
-C
       a23 = A(Nnuc)**0.66667
       ac = 0.073*A(Nnuc) + 0.115*a23
       dt = 0.1
@@ -309,7 +285,6 @@ C-----GDR parameters according to Messina systematics
       D1 = 5.46E-7*s(1)*g(1)**2
       D2 = 5.46E-7*s(2)*g(2)**2
       W1 = g(1)**2
-C     Capote 2001, W2 -> W2L to avoid conflict
       W2L = g(2)**2
       ED1 = e(1)**2
       ED2 = e(2)**2
@@ -320,10 +295,10 @@ C     Capote 2001, W2 -> W2L to avoid conflict
      &                            g(2), s(2)
 99001 FORMAT(1X, I3, 7F10.4)
       END
-C
+
+
       DOUBLE PRECISION FUNCTION E2(Eg)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -340,22 +315,19 @@ C Local variables
 C
       DOUBLE PRECISION ed, gqr
 C
-C
-C
 C-----calculates transmission coefficients for E2 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
       IF(TE2.NE.0.D0)gqr = DE2*ed*ed/((ed - EE2)**2 + WE2*ed)
       E2 = (1 - TE2)*CE2*3.54E-13*A4*ed*ed*Eg + TE2*gqr
       END
-C
-C
+
+
       DOUBLE PRECISION FUNCTION XM1(Eg)
 C
 C-----calculates transmission coefficients for M1 gammas /Eqs. 17,18,19/
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -376,11 +348,9 @@ C
       IF(TM1.NE.0.D0)gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)
       XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
       END
-C
-C
-C-----Plujko_new
+
+
       DOUBLE PRECISION FUNCTION E1(Nnuc,Z,A,Eg, T,Uex)
-C-----Plujko_new(End)
 Ccc
 Ccc ********************************************************************
 Ccc *                                                         class:PPU*
@@ -416,21 +386,12 @@ Ccc *                                                                  *
 Ccc * calls:none                                                       *
 Ccc *                                                                  *
 Ccc *                                                                  *
-Ccc * author: M.Herman                                                 *
-Ccc * date:      Jan.1994                                              *
-Ccc *                                                                  *
-Ccc * revision:1    by:M.Herman            on: 3.Oct.2000              *
-Ccc * Generalized Lorenzian completed                                  *
-Ccc *                                                                  *
-Ccc * revision:#    by:name                     on:xx.mon.199x         *
-Ccc *                                                                  *
 Ccc ********************************************************************
 Ccc
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C COMMON variables
 C
-C-----Plujko_new
       INCLUDE 'dimension.h'
       INTEGER Key_shape , Key_GDRGFL
       INTEGER  Nnuc
@@ -439,8 +400,6 @@ C-----Plujko_new
       DOUBLE PRECISION  Temperf, Eexcitf, Uex
 
       COMMON /GSA/ Key_shape, Key_GDRGFL
-C-----Plujko_new(End)
-C
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2,
@@ -455,8 +414,6 @@ C
       DOUBLE PRECISION ed, gdr, gred
       DATA PI/3.1415926D0/
 C
-C
-C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
@@ -467,21 +424,16 @@ C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
 C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
 C     GRED = 1.
 
-C-----Plujko_new
       IF(Key_shape.NE.0) THEN
          Temperf = T
-C        Alevel = 0.21*(A(Nnuc) + 0.001)**0.87
-C        Eexcitf = Alevel *T**2
          Eexcitf = Uex
 
 C        init GDRGFL parametrs
          CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
-C
          E1=2*PI*Eg**3*GAMMA_STRENGTH(Z(Nnuc), A(Nnuc),
      &        Eexcitf, Temperf, Eg , Key_shape)
          RETURN
       ENDIF
-C-----Plujko_new(End)
 
       IF(TE1.NE.0.0D0)THEN
          gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
@@ -495,8 +447,8 @@ C        GRED = 1.
       ENDIF
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
       END
-C
-C --- Carlson new
+
+
       DOUBLE PRECISION FUNCTION SIGQD(Ztar,Atar,Eg,Lqdfac)
 
 Ccc
@@ -524,24 +476,15 @@ Ccc *                                                                  *
 Ccc * calls:none                                                       *
 Ccc *                                                                  *
 Ccc *                                                                  *
-Ccc * author: B.V.Carlson                                              *
-Ccc * date:      Oct.2004                                              *
-Ccc *                                                                  *
-Ccc *                                                                  *
 Ccc ********************************************************************
 Ccc
-
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-
       DOUBLE PRECISION Lqdfac
-
       DOUBLE PRECISION fermicof(5)
       DOUBLE PRECISION Lqd0
-
       DATA fermicof/9.3537e-9,-3.4762e-6,4.1222e-4,-9.8343e-3,8.3714e-2/
       DATA eflo/20.0/,dflo/-73.3/,efhi/140.0/,dfhi/-24.2/
       DATA sigmad0/61.2/,bndeut/2.224/,Lqd0/6.5/
-
 C   First calculate the blocking factor
       IF(Eg.LT.bndeut) THEN
         fermifac=0.0

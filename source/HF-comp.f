@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-16 16:35:20 $
-Ccc   * $Id: HF-comp.f,v 1.44 2005-02-16 16:35:20 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: HF-comp.f,v 1.45 2005-02-24 22:33:42 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -28,16 +28,6 @@ Ccc   * calls:EXCLUSIVEC                                                 *
 Ccc   *       EXCLUSIVEL                                                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   28.Oct.1993                                              *
-Ccc   * revision:1    by:M. Herman                on:30.Jul.1997         *
-Ccc   * Transitions to discrete levels distributed between adjacent      *
-Ccc   * spectrum bins so that after spectrum integration average         *
-Ccc   * energy is conserved.                                             *
-Ccc   *                                                                  *
-Ccc   * revision:2    by:M. Herman                on:31.Jul.2003         *
-Ccc   * New algorithm for exclusive spectra using EXCLUSIVEC and         *
-Ccc   * EXCLUSIVEL                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -56,9 +46,6 @@ C
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, nexrt
       INTEGER INT, MAX0
-C
-C
-C
 C-----
 C-----Continuum
 C-----
@@ -70,11 +57,6 @@ C-----
       nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
       DO ie = 1, nexrt                      !loop over residual energies (continuum)
          icse = (excnq - EX(ie, Nnur))/DE + 1.0001
-C
-C        IF(Nejc .EQ. 0)
-C        &   WRITE(6,*)'continuum bin ',icse ,'EX ',EX(ie,Nnur),' Eemiss',
-C        &             excnq-EX(ie,Nnur)
-C
          popt =0.0
          DO j = 1, NLW, LTUrbo              !loop over residual spins
             pop1 = Xnor*SCRt(ie, j, 1, Nejc)
@@ -152,8 +134,8 @@ C--------Add isotropic CN contribution to direct ang. distributions
          ENDIF
       ENDDO
       END
-C
-C
+ 
+ 
       SUBROUTINE EXCLUSIVEC(Iec, Ief, Nejc, Nnuc, Nnur, Popt)
 Ccc
 Ccc   ********************************************************************
@@ -184,9 +166,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:     July 2003                                              *
-Ccc   * revision:1    by:                         on:                    *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -261,6 +240,8 @@ C--------neutron and proton DDX spectra using portions
          ENDDO
       ENDIF
       END
+
+
       SUBROUTINE EXCLUSIVEL(Iec, Ie, Nejc, Nnuc, Nnur, Popt)
 Ccc
 Ccc   ********************************************************************
@@ -291,9 +272,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:     July 2003                                              *
-Ccc   * revision:1    by:                         on:                    *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -340,7 +318,8 @@ C-----------neutron and proton DDX spectra using portions
          ENDIF
       ENDIF
       END
-C
+ 
+ 
       SUBROUTINE DECAY(Nnuc, Iec, Jc, Ipc, Nnur, Nejc, Sum)
 Ccc
 Ccc   ********************************************************************
@@ -374,9 +353,6 @@ Ccc   *                                                                  *
 Ccc   * calls:TLLOC                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   28.Oct.1993                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -572,7 +548,8 @@ C--------do loop over discrete levels --------- done --------------------
       SCRtem(Nejc) = Sum
 Cpr   WRITE(6,*) 'TOTAL SUM=',SUM
       END
-C
+ 
+
       SUBROUTINE DECAYD(Nnuc)
 Ccc
 Ccc   ********************************************************************
@@ -592,9 +569,6 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   11.Jan.1996                                              *
-Ccc   * revision:     by:                         on:                    *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -679,7 +653,8 @@ C-----------------NOTE: internal conversion taken into account
          ENDIF
  100  ENDDO
 99999 END
-C
+
+
       SUBROUTINE DECAYG(Nnuc, Iec, Jc, Ipc, Sum)
 Ccc
 Ccc   ********************************************************************
@@ -710,15 +685,11 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:12 Jan. 1994                                                *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C Dummy arguments
 C
@@ -736,43 +707,6 @@ C     REAL FLOAT,fSpinIc
 C-----Plujko_new(End)
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
-C
-C
-C
-C-----Plujko_new - under construction
-c     GO TO 250
-c
-c
-c     file  for output of widths
-c     OPEN(UNIT=54, FILE='SUMHF.OUT' , STATUS='NEW' )
-c     IF (F_PRINT.EQ.11) THEN
-c      OPEN(UNIT=54, FILE='SUMHF.OUT' , STATUS='NEW' )
-c      WRITE(54, * ) 'Nnuc - decaying nucleus  '
-c      WRITE(54, * ) 'Iec  - energy index of the decaying state '
-c      WRITE(54, * ) 'EX(Iec, Nnuc)- energy of the decaying state '
-c      WRITE(54, * ) 'SpinIc   - spin  of the decaying state  '
-c      WRITE(54, * ) 'Ipc  - parity of the decaying state    '
-c      WRITE(54, * )'Sum - sum of transmission coefficients over all '
-c      WRITE(54, * )'outgoing channels for the requested decay (partial'
-c      WRITE(54, * )' sums are stored in SCRT and SCRTL arrays for '
-c      WRITE(54, * )'continuum and discrete levels respectively. SUMs '
-c      WRITE(54, * )'for all ejectiles combine to the total '
-c      WRITE(54, * )'Hauser-Feshbach denominator. Inverse of the latter'
-c      WRITE(54, * )' multiplied by the population of the '
-c      WRITE(54, * )'(NNUC,IEC,JC,IPC) state is used to normalize  '
-c      WRITE(54, * )'SCRT and SCRTL matrices to give residual  '
-c      WRITE(54, * )'nucleuse population. '
-c     ENDIF
-c     IF (F_PRINT.EQ.11.OR.F_PRINT.EQ.110) THEN
-c      WRITE(54, * ) ' =============================================='
-c      WRITE(54,*)'Projectile energy = ',EINl,' MeV'
-c      WRITE(54, * )'Gc = Sum / (2 *Pi * RO(Iec, Jc , Nnuc) )'
-c      WRITE(54, * ) ' ______________________________________________'
-c      WRITE(54, * ) 'Nnuc   Iec  EX(Iec, Nnuc)  SpinIc  Ipc     Gc'
-c     ENDIF
-c     F_PRINT = 100
-c 250 CONTINUE
-C-----Plujko_new(End)
       Sum = 0.0
       SCRtem(0) = 0.0
       xjc = FLOAT(Jc) + HIS(Nnuc)
@@ -809,11 +743,8 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C--------next 3 lines could be replaced with the matrix
-C--------Plujko_new
          se1 = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &  TUNe(0, Nnuc)
-Cb         se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
-C--------Plujko_new(End)
          se2 = E2(eg)*TUNe(0, Nnuc)
          sm1 = XM1(eg)*TUNe(0, Nnuc)
          se2m1 = se2 + sm1
@@ -883,7 +814,7 @@ C--------decaying state spin index = NLW
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------
 99001 FORMAT(1X, F5.2, 12G10.3)
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 (trapezoid
+C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
             Sum = Sum + SCRt(i, j, 1, 0) + SCRt(i, j, 2, 0)
@@ -891,7 +822,7 @@ C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 (trapezoid
          Sum = Sum - 0.5*(SCRt(1, j, 1, 0) + SCRt(1, j, 2, 0))
       ENDDO
       Sum = Sum*DE
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 -- DONE ----
+C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
@@ -907,11 +838,8 @@ C-----do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-C-----------------Plujko_new
                   SCRtl(i, 0) =
      &  E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
-Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
-C-----------------Plujko_new(End)
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -924,7 +852,8 @@ C-----do loop over discrete levels --------- done --------------------
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END
-C
+
+
       SUBROUTINE DECAYT(Nnuc, Iec, Jc, Ipc, Sum)
 Ccc
 Ccc   ********************************************************************
@@ -956,9 +885,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:20 May. 1994                                                *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -1014,11 +940,8 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          IF(RO(ier, Jc, Nnuc).NE.0.D0)THEN
             eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C-----------next 3 lines should be replaced with the matrix
-C-----------Plujko_new
             se1 =
      &   E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*TUNe(0, Nnuc)
-Cb          se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
-C----Plujko_new(End)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -1098,13 +1021,13 @@ C-----------decaying state spin index = NLW
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------
 99001 FORMAT(1X, F5.2, 12G10.3)
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 (trapezoid
+C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO i = 1, Iec - 1
          Sum = Sum + SCRt(i, Jc, 1, 0) + SCRt(i, Jc, 2, 0)
       ENDDO
       Sum = Sum - 0.5*(SCRt(1, Jc, 1, 0) + SCRt(1, Jc, 2, 0))
       Sum = Sum*DE
-C-----INTEGRATION OF RO*GTL IN CONTINUUM FOR EJECTILE 0 -- DONE ----
+C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
@@ -1120,11 +1043,8 @@ C--------do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-C-----------------Plujko_new
                   SCRtl(i, 0) =
      &  E1(Nnuc,A,Z,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
-Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
-C-----------------Plujko_new(End)
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -1137,7 +1057,8 @@ C-----do loop over discrete levels --------- done --------------------
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END
-C
+
+
       SUBROUTINE FISSION(Nnuc, Iec, Jc, Sumfis)
 Ccc
 Ccc   ********************************************************************
@@ -1162,9 +1083,6 @@ Ccc   *                                                                  *
 Ccc   * calls:TLF                                                        *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   31.Jan.1994                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -1185,9 +1103,7 @@ C
       REAL FLOAT
       INTEGER kn, knm
       DOUBLE PRECISION TLF
-C
-C
-C
+
       Sumfis = 0.0
       IF(EX(Iec, Nnuc).EQ.0.0D0)RETURN
 C-----temperature fade-out of the shell correction
@@ -1269,30 +1185,22 @@ C           GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
       ENDIF
       DENhf = DENhf + Sumfis
       END
-C
+
+
       DOUBLE PRECISION FUNCTION TLF(Ekin)
 C-----energy dependent transmission coefficient (note that htom is
 C-----fixed below and does not depend on angular momentum as it might)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
-C
-C     Argument
-C
       DOUBLE PRECISION Ekin
-C
-C     Local variables
-C
       DOUBLE PRECISION atlf, htom, pix2
-C
       DATA pix2/6.28318530717958647692528676655901D0/
       DATA htom/1.D0/
-C
       TLF = 1.D0
       atlf = pix2*Ekin/htom
       IF(atlf.LT.38.D0)TLF = 1./(1. + EXP((-atlf)))
-C
       END
-C
+
+
       SUBROUTINE FISFIS(Nnuc, Iec, Ip, Jc, Sumfis, mmod)
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
@@ -1317,16 +1225,10 @@ Ccc   *                                                                  *
 Ccc   * calls:...                                                        *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * authors: M. Sin, R. Capote                                       *
-Ccc   * date:   Aug.2002                                                 *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
-Ccc   * 1.1              RCN                            Nov.2002         *
-Ccc   * 1.2              MSin                           Nov.2003         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
       COMMON /COMFIS4/ TFC, TFCc, JCC
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
@@ -1337,16 +1239,12 @@ C
      &                 wimagg,eeiso,tfcc,tfc, efbmin,efbmax,
      &                 tfdis(NFPARAB), tfcon(NFPARAB),
      &                 ee, Sumfis, hh2,vv2,tfiso
-C
       ee = EX(Iec, Nnuc)
       SUMfis = 0.0
       IF(ee.EQ.0.0D0)RETURN
-C
 C     Below is a square root of (MIU divided by 2)
       SMIu = 0.1643167*A(Nnuc)**(5./6.)
-C
       JCC = Jc
-C
       IF(Jc.EQ.1 .AND. Ip.EQ.1.and.mmod.lt.2)THEN
          WRITE(80, *)'  '
          WRITE(80, '(1x,a19,f9.5,a4)')'Excitation energy =', EE, ' MeV'
@@ -1368,7 +1266,6 @@ C---------triple-humped
      &                       'TCd', 'TAc', 'Teqc', 'Tf', 'Tdir',
      &                       'Tabs', 'Tdir23'
       ENDIF
-C
       DO IBAr = 1, NRBarc
          tfdis(IBAr) = 0.
          tfcon(IBAr) = 0.
@@ -1411,17 +1308,12 @@ C==============discrete contribution====================
       ENDIF
 C-------subbarrier effects
       IF(FISopt(Nnuc).gt.0.)THEN
-C
-C        RCN, 01/2005 to correct a bug pointed out by MH
-C
          TDIr = 0.d0
          TABs = 0.d0
          TDIr23 = 0.d0
-
          IF(NRBar.eq.3.and.nrwel.eq.1)eeiso=ee-efb(3)
          IF(NRBar.eq.5.and.nrwel.eq.2)eeiso=ee-efb(4)
          wimagg=wimag(1)+wimag(2)*eeiso+wimag(3)*eeiso**2
-C
          DO nr = 1, NRFdis(1)
             sfmin = SFDis(nr, 1)
             ist = 1
@@ -1433,34 +1325,16 @@ C
                sfmin = 1.
                ist = 2
             ENDIF
-C
             sfmin = sfmin - HIS(Nnuc)
             DO jnc = sfmin, Jc, ist
                IF(jnc.EQ.Jc .AND. IPFdis(nr, 1).EQ.Ip)THEN
                   snc = FLOAT(jnc) + HIS(Nnuc)
-
                   DO IBAr = 1, NRBar
                      exfis = EFDis(nr, IBAr) + HJ(nnuc,IBAr)
      &                       *(snc*(snc + 1) - SFDis(nr, IBAr)
      &                       *(SFDis(nr,IBAr) + 1))
-c                     IF(SFDis(nr,IBAr).lt.0.9.and.SFDis(nr,IBAr).gt.0.4)
-c     &                                    THEN
-c--------------------- the decoupling term for K=1/2
-c                        acor=0.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c                        if(snc.eq.0.5)acor=-1.1
-c                        if(snc.eq.1.5)acor=1.1
-c                        if(snc.eq.2.5)acor=-1.1
-c                        if(snc.eq.3.5)acor=1.1
-c                        if(snc.eq.4.5)acor=-1.1
-c                        if(snc.eq.5.5)acor=1.1
-c                        if(snc.eq.6.5)acor=-1.1
-c                        if(snc.eq.7.5)acor=1.1
-c                        if(IPFdis(nr, 1).EQ. - 1)acor=-acor
-c                        exfis=exfis+ HJ(nnuc,IBAr)*acor*(snc+0.5)
-c                     ENDIF
                      VBArex(IBAr) = EFB(IBAr) + exfis
                   ENDDO
-C
                   IF(NRBar.EQ.3.and.NRWel.eq.1)THEN
                      ho(1)=h(nr,1)
                      ho(2)=h(nr,3)
@@ -1474,7 +1348,6 @@ C
                      ho(5)=h(nr,3)
                   ENDIF
                   CALL WKBFISNUM(ee,0.)
-
                   DO IBAr = 1, NRBarc
                      IF(PHAsr(IBAr).LE.0.)THEN
                         arg = 2*PI*(VBArex(IBAr) - ee)/H(nr,IBAr)
@@ -1521,7 +1394,6 @@ C         light actinides
                   IF(NRBar.EQ.5.and.NRWel.eq.2.)THEN
 c-----------region I
                      IF(ee.le.vbarex(4).and.ee.le.vbarex(5))THEN
-c                       call wkbfisnum(ee,2.) !!!!!
                         tfd(1)=0.
                         tfd(2)=0.
                         tfd(3)=0.
@@ -1669,7 +1541,6 @@ c      gamma transition in isomeric well, not calculated yet
       ELSE
          TG2=0.
       ENDIF
-
 C
 C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 c-----single-humped
@@ -1716,30 +1587,22 @@ C----triple-humped
      &         SUMfis, TDIr, TABs, TDIr23
       ENDIF
       if(sumfis.lt.0.0000000000000001)sumfis=0.
-
       DENhf = DENhf + Sumfis
-
       END
-C
-C===================================================================
+
+
       SUBROUTINE WKBFISNUM(Ee,subwell)
 C     Calculates Momentum integrals by Gauss - Legendre method
-C-------------------------------------------------------------------
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       DIMENSION EPSil(NFPARAB), EJOin(2*NFPARAB), VJJ(NFPARAB)
       DIMENSION einters(2*NFPARAB), dmominteg(NFPARAB)
-C
       COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEX,subwell1
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
-C
       DOUBLE PRECISION Ee, H, TFD, VBArex, SMIu, PHAsr,ho,dmom
       REAL subwell1,subwell
-C
       EXTERNAL FMOMENT
-C*******************************************************
       IF(NRBar.EQ.3.and.NRWel.eq.1)THEN
          VJJ(1) = VBArex(1)
          VJJ(2) = VBArex(3)
@@ -1761,18 +1624,15 @@ C     EJOin(i) are the corresponding deformation at which parabols join
      &           + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
      &           /(SMIu*HO(1))
       EJOin(1) = 2*EPSil(1) - EJOin(2)
-C
       DO k = 2, NRBar
          EJOin(2*k - 1) = EJOin(2*(k - 1))
          EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
      &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
-C
          IF(k.LT.NRBar)EJOin(2*k) = EPSil(k)
      &                              + SQRT(( - 1)**k*(VJJ(k+1) - VJJ(k))
      &                              /(1.D0 + (HO(k)/HO(k+1))**2))
      &                              /(SMIu*HO(k))
       ENDDO
-
       EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
 C-----Einters(i) are the deformations corresponding to the intersection points
 C     between parabols and the straigth line parallel to the deformation
@@ -1795,7 +1655,6 @@ C           RIGTH intersect
             einters(2*j) = EPSil(j) + es
          ENDIF
  100  ENDDO
-
 C-------------------------------------------------------------------
 C     Difficult logical block below to discriminate between intersection
 C     points corresponding to different parabols
@@ -1847,54 +1706,6 @@ C     Momentum integrals calculated by Gauss-Legendre integration
       subwell1=subwell
       if(subwell.eq.1.)
      & dmom=GAUSS_INT(FMOMENT, einters(5), einters(10), abserr)
-C
-C     OPEN(157,FILE='PhaseIntegrals.txt')
-C     DO K=1,NRBar
-C     if(Einters(2*K).LT.0. .or. Einters(2*K-1).LT.0.) cycle
-C        write(157,*) 'From Eps =',sngl(Einters(2*K-1)),
-C     &           ' to ',sngl(Einters(2*K))
-C     write(157,*) 'Mom.Integral (',K,')=',sngl(dMomInteg(K)),
-C     &     ' Err=', sngl(ABSERR)
-C     ENDDO
-Ci    close(157)
-C
-C     Graphical test
-C
-C     IF(Ee.LT.5. .and. Ee.gt.4.6) THEN
-C     OPEN(157,FILE='Vdef.dat')
-C     ftmp=0.1
-C     I=1
-C     DO WHILE(ftmp.GT.0.)
-C       EPS=I*0.001
-C       ftmp=Vdef(EPS)
-C       WRITE(157,*) EPS,ftmp
-C       I=I+1
-C    ENDDO
-C    CLOSE(157)
-C    OPEN(157,FILE='Vinters.dat')
-C    DO  K=1,2*NRBar
-C       IF(Einters(K).LT.0) CYCLE
-C       WRITE(157,*) Einters(K), Vdef(Einters(K))
-C    ENDDO
-C    CLOSE(157)
-C    OPEN(157,FILE='Vjoin.dat')
-C    DO  K=1,NRBar
-C       WRITE(157,*) Ejoin(2*K-1), Vdef(Ejoin(2*K-1))
-C       WRITE(157,*) Ejoin(2*K), Vdef(Ejoin(2*K))
-C    ENDDO
-C    CLOSE(157)
-C    ENDIF
-C    STOP
-C
-C------------phases
-CMH---commented the below since not used
-c     DO i = 1, NRBar
-c        phas = 2.*dMomInteg(i)
-c     ENDDO
-c     if(subwell.eq.1.)then
-c        phas = 2.*dMom
-c     endif
-C     Phases output
       IF(NRBar.EQ.3)THEN
          PHAsr(1) = 2.*dmominteg(1)
          PHAsr(2) = 2.*dmominteg(3)
@@ -1909,27 +1720,22 @@ C     Phases output
          if(subwell.eq.1.) PHAsr(2) = 2.*dmom
       ENDIF
       END
-C
-C-----------------------------------------------------------
+
+
       SUBROUTINE GAUSSFIS(Nnuc, Ibar)
-C-----------------------------------------------------------
 C     Gauss-Legendre integration of the fission level densities
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       COMMON /COMFIS4/ TFC, TFCc, jcc
       COMMON /GDENSIT/ NNNuc, IIBar
-C
       DOUBLE PRECISION xmax, xmin
       DOUBLE PRECISION TFC, TFCc, XMInn
       DOUBLE PRECISION FDENSITY, abserr
       EXTERNAL FDENSITY
-C
 C     Passing parameters to the integrand function Fdensity
       IIBar = Ibar
       NNNuc = Nnuc
       TFCc = 0.D0
-C
       XMIn = XMInn(Ibar)
       XMAx = XMInn(Ibar) + (nrbinfis(ibar) - 1)*destepp(ibar)
       TFCc = GAUSS_INT(FDENSITY, xmin, xmax, abserr)
@@ -1954,70 +1760,57 @@ C
  100     TFCc = 0.D0
          TFCc = GAUSS_INT(FDENSITY, xmin, xabs, abserr)
       ENDIF
-C     IF(TFCc.GT.0.d0)
-C     > write(*,*) 'Gauss   = ',TFCc,' Err=',ABSERR/TFCc*100
-C
       END
-C-------------------------------------------------------------
+
+
       REAL*8 FUNCTION FDENSITY(UXX)
 C     Penetrability in the continuum.
 C     Level densities at the saddle points are used
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       COMMON /COMFIS4/  TFC, TFCc,JCC
       COMMON /GDENSIT/ NNUc, IBAr
-C
       DATA pix2/6.28318530717958647692528676655901D0/
-C
       FDENSITY = 0.D0
-
       enh1=enh_ld(1,ibar)+(enh_ld(2,ibar)+enh_ld(3,ibar)*UXX)*UXX
       arg = pix2*UXX/H(1,IBAr)
       IF(arg.GT.EXPmax)arg=expmax
-
 C     FISINT  function takes care of the interpolation from the  LD tables
       FDENSITY =enh1* FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg))
       RETURN
       END
-C---------------------------------------------------
+
+
       REAL*8 FUNCTION FMOMENT(Eps)
       INCLUDE 'dimension.h'
       IMPLICIT REAL*8(A-H,O-Z)
-C
       DIMENSION EPSil(NFPARAB), EJOin(2*NFPARAB), VJJ(NFPARAB)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ,  UEX, subwell1
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
       Real subwell1
       Double Precision ho
-C
       FMOMENT = 2*SMIu*DSQRT(DABS(UEX - VDEF(Eps)))
-C
       END
-C----------------------------------------------------
+
+
       REAL*8 FUNCTION VDEF(Eps)
 C     calculation of the deformation potential energy
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
       DIMENSION EPSil(NFPARAB), EJOin(2*NFPARAB), VJJ(NFPARAB)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEX,subwell1
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
       REAL subwell1
       DOUBLE PRECISION ho
-C
       VDEF = 0.D0
-C
       IF(Eps.LE.EJOin(2))THEN
          VDEF = VJJ(1) - (SMIu*Ho(1)*(Eps - EPSil(1)))**2
          RETURN
       ENDIF
-C
       IF(Eps.GE.EJOin(2*NRBar - 1))THEN
          VDEF = VJJ(NRBar) - (SMIu*Ho(NRBar)*(Eps - EPSil(NRBar)))**2
          RETURN
       ENDIF
-C
       IF(subwell1.eq.1.)THEN
              if(eps.lt.ejoin(4).and.eps.gt.ejoin(3))
      &            VDEF = VJJ(2) + (SMIu*Ho(2)*(Eps - EPSil(2)))**2
@@ -2038,7 +1831,8 @@ C
          ENDDO
       ENDIF
       END
-C---------------------------------------------------------
+
+
       REAL*8 FUNCTION GAUSS_INT(F, Ea, Eb, Abserr)
       IMPLICIT REAL*8(A - H, O - Z)
       REAL*8 Eb, Ea
@@ -2114,7 +1908,6 @@ C
       DATA wgk(20)/0.076377867672080736705502835038061D0/
       DATA wgk(21)/0.076600711917999656445049901530102D0/
 C
-C
 C     Integrating from Ea to Eint
       centr1 = 0.5D+00*(Ea + Eb)
       hlgth1 = 0.5D+00*(Eb - Ea)
@@ -2137,22 +1930,18 @@ C
          resg1 = resg1 + wg(j)*fsum
          resk1 = resk1 + wgk(jtw)*fsum + wgk(jtwm1)*(fval1m1 + fval2m1)
       ENDDO
-C
       GAUSS_INT = resk1*hlgth1
       Abserr = ABS((resk1 - resg1)*hlgth1)
-C
       END
-C
-C---------------------------------------------------
+
+
       DOUBLE PRECISION FUNCTION FISINT(Ib, Ux,jcc,nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       DOUBLE PRECISION ugrid,Ux,rofis
       INTEGER JCC,Ib,iugrid,nrbinfis
-C
       IF(FISDEN(Nnuc).eq.1.) iugrid = nrbinfis(ib)
       IF(FISDEN(Nnuc).eq.0.) iugrid = NFISEN
-
       klo = 1
       khi = iugrid
       IF(Ux.LE.UGRid(klo,ib))THEN
@@ -2178,7 +1967,7 @@ C
          ENDIF
          GOTO 100
       ENDIF
-C--------- LEVEL DENSITY INTERPOLATION
+C-----LEVEL DENSITY INTERPOLATION
  200  hhh = UGRid(khi,ib) - UGRid(klo,ib)
       c1 = (UGRid(khi,ib) - Ux)/hhh
       c2 = (Ux - UGRid(klo,ib))/hhh
@@ -2189,20 +1978,16 @@ C--------- LEVEL DENSITY INTERPOLATION
       ELSE
          FISINT = MAX(c1*r1 + c2*r2, 0.)
       ENDIF
-C
       END
-C
 
-C-----------------------------------------------------------
+
       SUBROUTINE SIMPSFIS(Nnuc, Ibar, Ee)
-C-----------------------------------------------------------
-C Simpson integration
+C-----Simpson integration
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       COMMON /COMFIS4/ TFC, TFCc,jcc
       DOUBLE PRECISION arg1,dens, destepp, UX1, rofis, TFC,
      &                 TFCc, XMInn, H, enh1
-
       TFCc = 0.
       DO i = 1, nrbinfis(ibar)
          UX1 = XMInn(Ibar) + (i - 1)*destepp(ibar)
@@ -2226,10 +2011,9 @@ C Simpson integration
       ENDDO
       TFCc = TFCc*destepp(ibar)
       END
-C
-c=============================================================
-      SUBROUTINE WRITE_OUTFIS(Nnuc)
 
+
+      SUBROUTINE WRITE_OUTFIS(Nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       character*36 cara1 
@@ -2244,13 +2028,11 @@ c=============================================================
      &                scrtf(2),mortcrt(nfparab),mparcrt(nfparab),
      &                econdf(2)
       COMMON /FIS_ISO / tfiso,tgiso,tiso,rfiso
-C
       DOUBLE PRECISION  rofism, hm, efdism, efbm, xminnm, defbm,
      &                  shcfism, deltafism, gammafism,afism,
      &                  tfiso,tgiso,tiso,rfiso,wfism
       DOUBLE PRECISION  mortcrt,mparcrt
       INTEGER bffm
-C
       WRITE(80, '(a40)')'----------------------------------------'
       WRITE(80, '(4x,a2,i3,2x,a2,i3)')'Z=', INT(Z(nnuc)), 'A=',
      &            INT(A(nnuc))
@@ -2259,7 +2041,6 @@ C
       WRITE(80,*)'No.of parabolas=', NRBar,
      &            '   No.of wells=', Nrwel
       WRITE(80, *)'  '
-C
       IF(NRBar.EQ.1)THEN
          WRITE(80, '(a)')'    Va      ha    (in Mev) '
          WRITE(80, '(2f8.3)')EFB(1), H(1,1)
@@ -2271,12 +2052,7 @@ C
          WRITE(80, '(f9.4)')DEFfis(1)
          WRITE(80, *)' '
       ENDIF
-C
       IF(NRBar.EQ.2)THEN
-c         WRITE(80, '(a)')
-c     &                    '    Va      ha      Vb      hb     (in Mev) '
-c         WRITE(80, '(4f8.3)')(EFB(i), H(1,i), i = 1, NRBar)
-
          IF(FISmod(Nnuc).eq.0.)THEN
             WRITE(80, '(a)')
      &                    '    Va      ha      Vb      hb     (in Mev) '
@@ -2297,7 +2073,6 @@ c         WRITE(80, '(4f8.3)')(EFB(i), H(1,i), i = 1, NRBar)
      &       EFB(1), H(1,1), efbm(1),hm(1,1), efbm(2),hm(1,2),
      &       efbm(3),hm(1,3)
           ENDIF
-
          WRITE(80, *)' '
          WRITE(80, '(3a10)')'h2/2J(A)', 'h2/2J(B)', '(in MeV)'
          WRITE(80, '(2f9.4)')(HJ(nnuc,i), i = 1, NRBar)
@@ -2306,7 +2081,6 @@ c         WRITE(80, '(4f8.3)')(EFB(i), H(1,i), i = 1, NRBar)
          WRITE(80, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(80, *)' '
       ENDIF
-C
       IF(NRBar.EQ.3)THEN
          IF(FISmod(Nnuc).eq.0.)THEN
             WRITE(80, '(a,1x,a)')
@@ -2339,7 +2113,6 @@ C
          WRITE(80, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(80, *)' '
       ENDIF
-C
       IF(NRBar.EQ.5)THEN
          WRITE(80, '(a,1x,a)')
      &'    Va      ha      Vb      hb      Vc       hc      Vi      hi
@@ -2355,7 +2128,6 @@ C
          WRITE(80, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(80, *)' '
       ENDIF
-C
       IF(FISmod(Nnuc).eq.0..and.nrbar.ge.3)THEN
          WRITE(80, *)' '
          WRITE(80, *)'  Tiso1/2 fission = ',tfiso,' (s)'
@@ -2363,12 +2135,10 @@ C
          WRITE(80, *)'  Tiso1/2 total   = ',tiso,' (s)'
          WRITE(80, *)'  Rfiso   = ',rfiso
       ENDIF
-
       WRITE(80, *)' '
       IF(FISopt(Nnuc).EQ.0.)cara1 = ' Subbarrier effects neglected '
       IF(FISopt(Nnuc).GT.0.)cara1 = ' Subbarrier effects considered'
       WRITE(80, '(a8,f2.0,a36)')'FISOPT=', FISopt(Nnuc), cara1
-
       WRITE(80,'(A8,F2.0)')'FISMOD =', FISmod(nnuc)
       WRITE(80, *)' '
       IF(FISopt(Nnuc).gt.0.)THEN
@@ -2377,7 +2147,6 @@ C
          WRITE(80, '(3f11.4)')(wimag(i), i=1,3)
          WRITE(80,*)
       ENDIF
-C
       DO ibar = 1, NRBar
          IF(ibar.LT.3)WRITE(80, '(a39,I2,a2,I2)')
      &            'Number of discrete states at barrier'
@@ -2408,19 +2177,14 @@ C
          ENDDO
       ENDDO
       WRITE(80, *)'  '
-C
-C
       IF(nrbarc.eq.3)THEN
          WRITE(80, *)'Parameters of the outer equivalent barrier'
          WRITE(80, *)'     Veq=',veq, ' MeV     heq=',hoeq,' MeV'
          WRITE(80, *)' '
       endif
       WRITE(80, '(A8,F2.0)')'FISDEN =', FISden(nnuc)
-
       nrbarc1=nrbarc
       IF(nrbarc.eq.3)nrbarc1=2
-
-
       IF(FISden(nnuc).EQ.1.)THEN
          DO ib=1,nrbarc1
             WRITE(80,*)'Barrier  ',ib
@@ -2431,13 +2195,10 @@ C
      &             'Scrt=', SCRtf(ib)
          ENDDO
        ENDIF
-
       WRITE(80,*)'  '
-
       IF(FISden(nnuc).eq.1.)THEN
          WRITE(80,*)
      &   '  Asymmetry  shell-corr  delta    gamma    atilf/atil ' 
-         
          DO nr=1, NRBarc1
             IF(FISmod(Nnuc).eq.0..or.
      &           (Fismod(nnuc).gt.0..and.nr.ne.2)) THEN
@@ -2455,7 +2216,6 @@ C
             ENDIF
          ENDDO
       ENDIF
-
       WRITE(80,*) '   '
       WRITE(80,*) '                a0       a1      a2'
       DO nr=1, NRBarc1

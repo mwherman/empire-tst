@@ -1,107 +1,113 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-22 05:31:25 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.12 2005-02-22 05:31:25 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.13 2005-02-24 22:33:42 herman Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
      &   Eexcitf, Temperf, Egamma, Keyshape)
 C
-C     FORTRAN77 code for  calculation of the dipole radiative
-C     strength functions for gamma-decay and photoabsorption
-C                (author Vladimir  Plujko)
-C             (adapted to UNIX by Mike Herman)
+C     
+C     
+C     
+C       
+C     
+C     
 C
-C
-C
-C     ******************************************************
-C     *       E1 strength function calculations            *
-C     *       ---------------------------------            *
-C     *                                                    *
-C     *   The input parameters appearing as arguments:     *
-C     *   --------------------------------------------     *
-C     *                                                    *
-C     *   Znucleus = atomic number of a nucleus;           *
-C     *                                                    *
-C     *   Anucleus = mass number of a nucleus;             *
-C     *                                                    *
-C     *   Eexcitf  = excitation energy;                    *
-C     *                                                    *
-C     *   Temperf = Temperf(Eexcitf) ---- temperature  at  *
-C     *                            given excitation energy;*
-C     *                                                    *
-C     *   Egamma   = gamma-ray energy;                     *
-C     *                                                    *
-C     *   Keyshape = key to specify the E1 strength shape. *
-C     *                                                    *
-C     *   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  *
-C     *                                                    *
-C     * 'Eexcitf  = Eexcit-Egamma' for  gamma  - decay;    *
-C     * 'Eexcitf  = Eexcit'        for photoabsorption;    *
-C     *  with 'Eexcit' for initial state excitation energy;*
-C     *                                                    *
-C     *  Keyshape =1 --> fE1=MLO1                          *
-C     *  Keyshape =2 --> fE1=MLO2                          *
-C     *  Keyshape =3 --> fE1=MLO3                          *
-C     *  Keyshape =4 --> fE1=EGLO                          *
-C     *  Keyshape =5 --> fE1=GFL                           *
-C     *  Keyshape =6 --> fE1=SLO                           *
-C     *                                                    *
-C     *  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --   *
-C     *                                                    *
-C     *   The input parameters transferring by COMMON's:   *
-C     *   ---------------------------------------------    *
-C     *                                                    *
-C     *  COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG *
-C     *  COMMON /GFLPARAM/ BETagfl2, S2Plusgfl             *
-C     *                                                    *
-C     *   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  *
-C     *                                                    *
-C     * 'COMMON/PARGDR/EG1,GW1,CS1,EG2,GW2,CS2,NG'contains *
-C     *  input for GDR parameters (all deformed nuclei are *
-C     *  considered as  axially symmetric spheroids):      *
-C     *                                                    *
-C     *  EG1= peak energy of the first peak,               *
-C     *  GW1= full width of the first peak at half-maximum,*
-C     *  CS1= peak cross section of the first peak,        *
-C     *  EG2= peak energy of the second peak,              *
-C     *  CS2= peak cross section of the second peak,       *
-C     *  GW2= full width of the second peak at half-maximum*
-C     *  CS2= peak cross section of the second peak,       *
-C     *  NG : for NG=1, single peak(spherical nucleus),    *
-C     *       for NG=2, double peaks(deformed nucleus);    *
-C     *                                                    *
-C     * 'COMMON /GFLPARAM/ BETagfl2, S2Plusgfl'  contains  *
-C     *  input parameters of the GFL model:                *
-C     *                                                    *
-C     *  BETagfl2(=beta**2)= square of "deformation"       *
-C     *                     parameter 'beta' associated    *
-C     *                     with nuclear quadrupole moment,*
-C     *  S2Plus(=(E2+)*beta**2)= product of first-excited  *
-C     *                          2+ state energy(in MeV)   *
-C     *                          deforamation parameter    *
-C     *  [see, S.Raman,C.W.Nestor,Jr, P.Tikkanen,          *
-C     *   Atom.Data Nucl.Data Tabl. 78(2001)1,             *
-C     *   for beta and E2+ values]                         *
-C     *                                                    *
-C     *   ----------------------------------------------   *
-C     *  All other parameters of the E1 strength           *
-C     *  calculations are set by default in this           *
-C     *  FUNCTION and are placed in the following          *
-C     *  COMMON statements:                                *
-C     *                                                    *
-C     *    COMMON /INPUTKEY/ KEYset,KEYfbc                 *
-C     *    COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf   *
-C     *    COMMON /INPUTGFL/ LMConst                       *
-C     *    COMMON /HEGLO / EEGlo0, AK0, ER0                *
-C     *                                                    *
-C     *  Setting  the  parameters  of  the MLO  approach   *
-C     *  is only described in detail below. In particular, *
-C     *  it is governed by the key 'KEYset' which can take *
-C     *  the value 1,2,3. The value 'KEYset=1' is assigned *
-C     *  by default; so, the following  set of  parameters *
-C     *  are adopted: KEYfbc=1=>FACtor=1;KEYdeg=2=>k_{s}=  *
-C     *  =k_{s}(Egamma) with AKS0=k_{s}0)=0.3;DEG=n_{s}=1. *
-C     *                                                    *
-C     ******************************************************
+C     ****************************************************************
+C     *       E1 strength function calculations                      *
+C     *       ---------------------------------                      *
+C     *                                                              *
+C     *   FORTRAN77 code for  calculation of the dipole radiative    *
+C     *   strength functions for gamma-decay and photoabsorption     *
+C     *              (author Vladimir  Plujko)                       *
+C     *           (adapted to UNIX by Mike Herman)                   *
+C     *                                                              *
+C     *                                                              *
+C     *   The input parameters appearing as arguments:               *
+C     *   --------------------------------------------               *
+C     *                                                              *
+C     *   Znucleus = atomic number of a nucleus;                     *
+C     *                                                              *
+C     *   Anucleus = mass number of a nucleus;                       *
+C     *                                                              *
+C     *   Eexcitf  = excitation energy;                              *
+C     *                                                              *
+C     *   Temperf = Temperf(Eexcitf) ---- temperature  at            *
+C     *                            given excitation energy;          *
+C     *                                                              *
+C     *   Egamma   = gamma-ray energy;                               *
+C     *                                                              *
+C     *   Keyshape = key to specify the E1 strength shape.           *
+C     *                                                              *
+C     *   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --            *
+C     *                                                              *
+C     * 'Eexcitf  = Eexcit-Egamma' for  gamma  - decay;              *
+C     * 'Eexcitf  = Eexcit'        for photoabsorption;              *
+C     *  with 'Eexcit' for initial state excitation energy;          *
+C     *                                                              *
+C     *  Keyshape =1 --> fE1=MLO1                                    *
+C     *  Keyshape =2 --> fE1=MLO2                                    *
+C     *  Keyshape =3 --> fE1=MLO3                                    *
+C     *  Keyshape =4 --> fE1=EGLO                                    *
+C     *  Keyshape =5 --> fE1=GFL                                     *
+C     *  Keyshape =6 --> fE1=SLO                                     *
+C     *                                                              *
+C     *  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --             *
+C     *                                                              *
+C     *   The input parameters transferring by COMMON's:             *
+C     *   ---------------------------------------------              *
+C     *                                                              *
+C     *  COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG           *
+C     *  COMMON /GFLPARAM/ BETagfl2, S2Plusgfl                       *
+C     *                                                              *
+C     *   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --            *
+C     *                                                              *
+C     * 'COMMON/PARGDR/EG1,GW1,CS1,EG2,GW2,CS2,NG'contains           *
+C     *  input for GDR parameters (all deformed nuclei are           *
+C     *  considered as  axially symmetric spheroids):                *
+C     *                                                              *
+C     *  EG1= peak energy of the first peak,                         *
+C     *  GW1= full width of the first peak at half-maximum,          *
+C     *  CS1= peak cross section of the first peak,                  *
+C     *  EG2= peak energy of the second peak,                        *
+C     *  CS2= peak cross section of the second peak,                 *
+C     *  GW2= full width of the second peak at half-maximum          *
+C     *  CS2= peak cross section of the second peak,                 *
+C     *  NG : for NG=1, single peak(spherical nucleus),              *
+C     *       for NG=2, double peaks(deformed nucleus);              *
+C     *                                                              *
+C     * 'COMMON /GFLPARAM/ BETagfl2, S2Plusgfl'  contains            *
+C     *  input parameters of the GFL model:                          *
+C     *                                                              *
+C     *  BETagfl2(=beta**2)= square of "deformation"                 *
+C     *                     parameter 'beta' associated              *
+C     *                     with nuclear quadrupole moment,          *
+C     *  S2Plus(=(E2+)*beta**2)= product of first-excited            *
+C     *                          2+ state energy(in MeV)             *
+C     *                          deforamation parameter              *
+C     *  [see, S.Raman,C.W.Nestor,Jr, P.Tikkanen,                    *
+C     *   Atom.Data Nucl.Data Tabl. 78(2001)1,                       *
+C     *   for beta and E2+ values]                                   *
+C     *                                                              *
+C     *   ----------------------------------------------             *
+C     *  All other parameters of the E1 strength                     *
+C     *  calculations are set by default in this                     *
+C     *  FUNCTION and are placed in the following                    *
+C     *  COMMON statements:                                          *
+C     *                                                              *
+C     *    COMMON /INPUTKEY/ KEYset,KEYfbc                           *
+C     *    COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf             *
+C     *    COMMON /INPUTGFL/ LMConst                                 *
+C     *    COMMON /HEGLO / EEGlo0, AK0, ER0                          *
+C     *                                                              *
+C     *  Setting  the  parameters  of  the MLO  approach             *
+C     *  is only described in detail below. In particular,           *
+C     *  it is governed by the key 'KEYset' which can take           *
+C     *  the value 1,2,3. The value 'KEYset=1' is assigned           *
+C     *  by default; so, the following  set of  parameters           *
+C     *  are adopted: KEYfbc=1=>FACtor=1;KEYdeg=2=>k_{s}=            *
+C     *  =k_{s}(Egamma) with AKS0=k_{s}0)=0.3;DEG=n_{s}=1.           *
+C     *                                                              *
+C     ****************************************************************
 C
       IMPLICIT NONE
       DOUBLE PRECISION E1_gsa
@@ -214,9 +220,7 @@ C              *************************************************************
                AKS0 = 0.7
             ELSE
                KEYfbc = 1
-C               KEYfbc = 2
                FACtor = 0.5
-C               BC = 0.7
                DEG = 3.
                AKS0 = 0.1
             ENDIF
@@ -252,7 +256,6 @@ C        *******************************
 C        * Parameters of EGLO model    *
 C        *******************************
          keglo = 1
-C        keglo=2
          IF(keglo.GT.1)THEN
             hh = aa - 145
             AK0 = 1.5
@@ -277,7 +280,6 @@ C        ***********************************************
          GWAll = 6.857764*SQRT(efermi*DMEf)/rnucl
          ER0 = 41.0/aa3
          keglo = 1
-C        keglo=2
          IF(keglo.GT.1)THEN
             hh = aa - 145
             AK0 = 1.5
@@ -292,7 +294,8 @@ C        keglo=2
       ENDIF
       GAMMA_STRENGTH = E1_gsa(Egamma, Eexcitf, Temperf, Keyshape)
       END
-C
+
+
       DOUBLE PRECISION FUNCTION E1_gsa(Egamma, Eexcitf, Temperf,
      &  Keyshape)
 C    **************************************************
@@ -345,11 +348,9 @@ C        *************************************************
             e11 = siggam*MLO3(ttf, ee)
          ELSEIF(Keyshape.EQ.4)THEN
             e11 = siggam*EGLO(ttf, ee)
-C-----Plujko_new(for some nuclei (some A with Z=62,64-68) EGLO<0
-C      - problem of this model)
+C-----for some nuclei with Z=62,64-68 EGLO<0
+C      - problem of in the EGLO model
             IF(e11.LT.0)e11=0.0
-C-----Plujko_new(END for some nuclei (some A with Z=62,64-68) EGLO<0
-C     - problem of this model)
          ELSEIF(Keyshape.EQ.5)THEN
             e11 = siggam*GFL(ttf, ee)
          ELSEIF(Keyshape.EQ.6)THEN
@@ -359,11 +360,10 @@ C     - problem of this model)
          ENDIF
          e10 = e10 + e11
       ENDDO
-Cb oleg???     E1 = 8.674D-08*e10
       E1_gsa = 8.674D-08*e10
-C  oleg
       END
-C
+
+
       DOUBLE PRECISION FUNCTION SLO(Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, EGDr, GGDr
@@ -371,7 +371,6 @@ C
       SLO = Egamma*GGDr/((EGDr*EGDr - Egamma*Egamma)**2 + (Egamma*GGDr)
      &      **2)
       END
-C
       DOUBLE PRECISION FUNCTION EGLO(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION AK0, ceglo1, ceglo2, egamma2, EEGlo0, Egamma,
@@ -391,7 +390,8 @@ C
       hh = Egamma*gel/((er2 - egamma2)**2 + (Egamma*gel)**2)
       EGLO = hh + ceglo2*gel0
       END
-C
+
+
       DOUBLE PRECISION FUNCTION GFL(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, egamma2, gamma, EGDr, GGDr, T, WIDTHGFL,
@@ -403,7 +403,8 @@ C
       GFL = LMConst*EGDr*gamma/((EGDr*EGDr - egamma2)
      &      **2 + (Egamma*gamma)**2)
       END
-C
+
+
       DOUBLE PRECISION FUNCTION WIDTHGFL(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION T, Egamma, EGDr, GGDr, pi24, BETagfl2, const1,
@@ -417,12 +418,12 @@ C
       const2 = (GGDr - gdq0)/(EGDr**2)
       WIDTHGFL = const2*(egamma2 + pi24*T**2) + gdq
       END
-C
+
+
       DOUBLE PRECISION FUNCTION MLO3(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION amlo3, egamma2, Egamma, EGDr, gamma, GGDr, hh,
      &                 phi, T, WIDTH
-C
       COMMON /HELP  / EGDr, GGDr
       egamma2 = Egamma**2
       gamma = WIDTH(T, Egamma)
@@ -438,7 +439,8 @@ C
       ENDIF
       MLO3 = phi*amlo3
       END
-C
+
+
       DOUBLE PRECISION FUNCTION WIDTH(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION AKSET, ALPha, CS1, CS2, d, EG0, EG1, EG2,
@@ -455,14 +457,14 @@ C
       g2body = (Egamma**2 + pi24*T**2)/ALPha/pi24
       WIDTH = g1body + g2body
       END
-C
+
+
       DOUBLE PRECISION FUNCTION AKSET(Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION AKS0, akse, aksr, ALPha, BC, CS1, CS2, DEG,
      &                 EG0, EG1, EG2, Egamma, EGDr, FACtor, GGDr, GW0,
      &                 GW1, GW2, GWAll
       DOUBLE PRECISION hhh, pi24, DMEf
-C     INTEGER KEYfbc, KEYset, NG
       INTEGER NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
@@ -490,14 +492,15 @@ C     INTEGER KEYfbc, KEYset, NG
       ENDIF
       AKSET = aksr
 99999 END
-C
+
+
       DOUBLE PRECISION FUNCTION MLO1(T, U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, hh, phi, SPECRALF, T, U
       MLO1 = 0.d0
       If(Egamma.LE.0.d0) return
       MLO1 = SPECRALF(U, Egamma)
-C     Protection against T=0 introduced, RCN 11/2004
+C     Protection against T=0 
       if(T.EQ.0.d0) return
       phi=1.d0
       if(T.GT.0.00001d0) then
@@ -506,7 +509,8 @@ C     Protection against T=0 introduced, RCN 11/2004
       endif
       MLO1 = phi*MLO1
       END
-C
+
+
       DOUBLE PRECISION FUNCTION SPECRALF(U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION AK0, alphaphi, EEGlo0, Egamma, EGDr, egsq, ER0,
@@ -531,7 +535,8 @@ C
       g = 2.*hhh4*alphaphi*hhh1/((hhh2 - er0sq1)**2 + 4.*hhh3*hhh4**2)
       SPECRALF = Egamma*g/((ersq - egsq)**2 + egsq*g**2)
       END
-C
+
+
       DOUBLE PRECISION FUNCTION RATEKINC(T, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION EG0, GW0, ALPha, Egamma, GWAll, pi24, T
@@ -539,7 +544,8 @@ C
       DATA pi24/39.47841761D0/
       RATEKINC = (Egamma**2 + pi24*T**2)/ALPha/pi24
       END
-C
+
+
       DOUBLE PRECISION FUNCTION RATEEXCC(U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION ALPha, alphae, Egamma, EGDr, ei, GGDr,
@@ -552,7 +558,8 @@ C
       alphae = ALPha/EGDr
       RATEEXCC = ei/alphae/pi24
       END
-C
+
+
       DOUBLE PRECISION FUNCTION MLO2(T, U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION egamma2, Egamma, EGDr, gamma, GGDr, hh, phi, T,
@@ -572,7 +579,8 @@ C
       ENDIF
       MLO2 = phi*tpa0
       END
-C
+
+
       DOUBLE PRECISION FUNCTION WIDTHEXC(U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION AKSET, ALPha, CS1, CS2, d, EG0, EG1, EG2,

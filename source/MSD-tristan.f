@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-01-31 19:26:20 $
-Ccc   * $Id: MSD-tristan.f,v 1.22 2005-01-31 19:26:20 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: MSD-tristan.f,v 1.23 2005-02-24 22:33:43 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -23,28 +23,6 @@ CCC   *       TAPE15 - ORION results                                   *
 CCC   *                                                                *
 CCC   *                                                                *
 CCC   * output:none                                                    *
-CCC   *                                                                *
-CCC   *                                                                *
-CCC   * calls: RESPNS                                                  *
-CCC   *            INELAS                                              *
-CCC   *                CLEBTRI                                         *
-CCC   *                DWIDTH                                          *
-CCC   *                RADIAL                                          *
-CCC   *            SPLVL                                               *
-CCC   *                BCS                                             *
-CCC   *                    ESORT                                       *
-CCC   *                    NUMBER                                      *
-CCC   *                EHO                                             *
-CCC   *                ESORT                                           *
-CCC   *                INDF                                            *
-CCC   *        SPECTR                                                  *
-CCC   *            INVERT                                              *
-CCC   *            LSQLEG                                              *
-CCC   *                MTXGUP                                          *
-CCC   *                PLNLEG                                          *
-CCC   *            PNORM                                               *
-CCC   *                POLYNM                                          *
-CCC   *            POLYNM                                              *
 CCC   *                                                                *
 CCC   *                                                                *
 CCC   *                                                                *
@@ -129,8 +107,6 @@ C
       OPEN(16, FILE = 'TAPE16', STATUS = 'UNKNOWN',
      &     FORM = 'UNFORMATTED')
 C     OPEN(15, FILE='TAPE15', STATUS='OLD')
-C
-C
       FAClog(1) = 0.0D0
       FAClog(2) = 0.0D0
       fn = 1.D0
@@ -433,10 +409,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a3, ad, aew, anp(2, 2), anz, api, aqq, bosc,
-     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),  ! new
+     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),
      &                 ceff, clex(11),
-     &                 clsc(11), cneg, cnorm, cpos, cr1(11), cr2,         ! new
-     &                 cr3(11), dci(11), dcr(11), ddr(2), de3, deqq,      ! new
+     &                 clsc(11), cneg, cnorm, cpos, cr1(11), cr2,      
+     &                 cr3(11), dci(11), dcr(11), ddr(2), de3, deqq,  
      &                 dnz, dqqst(5000),
      &                 dr, dwex, dwsx, e, e0, efit(22), efitx, egr, em,
      &                 emi, emisq, ep, epl, eplsq, eqq, eqqst(5000),
@@ -846,71 +822,71 @@ C                                         response functions
                                          rfqqy(ne, ltp1)
      &                                      = rfqqy(ne, ltp1) + greeny
                                        ENDDO
-C                                                                                  ! new
-C calculate the 2qp response function at the fitting energy                        ! new
-C                                                                                  ! new
-                                       IF(efit(ltp1).NE.0.0D0)THEN                 ! new
-                                         i = 1                                     ! new
-                                         ext = efit(ltp1)-ESTep/10.D0              ! new+
-                                         Do while (i.le.3)                         ! new
-                                            emi = eqq - ext                        ! new
-                                            epl = eqq + ext                        ! new
-                                            emisq = emi*emi                        ! new
-                                            eplsq = epl*epl                        ! new
-                                            pxmd = 1./(emisq + dwsx)               ! new
-                                            pymd = 1./(eplsq + dwsx)               ! new
-C                                                                                  ! new
-C                                           real and imaginary parts of the 2-qp   ! new
-C                                           Green function                         ! new
-C                                                                                  ! new
-                                            greenr = (emi*pxmd +                   ! new
-     &                                      epl*pymd)*umatqq                       ! new
-                                            greenx = wqq*(pxmd - pymd)             ! new
-     &                                      *umatqq                                ! new
-                                            greeny=(pxmd - pymd)*umatqq            ! new
-C                                                                                  ! new
-C                                           real and imaginary parts of the 2-qp   ! new
-C                                           response function                      ! new
-                                            if (i .eq. 1) then                     ! new
-                                               cr1( ltp1)                          ! new
-     &                                         = cr1( ltp1) + greenr               ! new
-                                               ccm( ltp1)                          ! new
-     &                                         = ccm( ltp1) + greenx               ! new
-     &                                         + 0.5D0*WIDex*greeny                ! new
-                                            else if (i.eq.2)                       ! new
-     &                                         then                                ! new
-                                               ccr( ltp1)                          ! new
-     &                                         = ccr( ltp1) + greenr               ! new
-                                               xea( ltp1)                          ! new+
-     &                                         = xea( ltp1) + greenx               ! new+
-                                               yea( ltp1)                          ! new+
-     &                                         = yea( ltp1) + greeny               ! new+
-                                               cci( ltp1)                          ! new
-     &                                         = cci( ltp1) + greenx               ! new
-     &                                         + 0.5D0*WIDex*greeny                ! new
-C                                                                                  ! new
-C calculate the 1'st derivative of the 2qp response function at the fitting energy ! new
-C                                                                                  ! new
-                                               dcr( ltp1)= dcr( ltp1) +            ! new+
-     &                                         ((emisq - dwsx)*pxmd**2 -           ! new+
-     &                                         (eplsq - dwsx)*pymd**2)*            ! new+
-     &                                         umatqq                              ! new+
-                                               dci( ltp1)= dci( ltp1) +            ! new+
-     &                                         ((2.D0*wqq + WIDex)*(emi*           ! new+
-     &                                         pxmd**2+epl*pymd**2))*              ! new+
-     &                                         umatqq                              ! new+
-                                            else if (i.eq.3) then                  ! new
-                                               cr3( ltp1)                          ! new
-     &                                         = cr3( ltp1) + greenr               ! new
-                                               ccp( ltp1)                          ! new
-     &                                         = ccp( ltp1) + greenx               ! new
-     &                                         + 0.5D0*WIDex*greeny                ! new
-                                            else                                   ! new
-                                            endif                                  ! new
-                                            ext = ext + ESTep/10.0D0                      ! new
-                                            i = i + 1                              ! new
-                                         ENDDO                                     ! new
-                                      ENDIF                                        ! new
+C                                                                        
+C calculate the 2qp response function at the fitting energy              
+C                                                                       
+                                       IF(efit(ltp1).NE.0.0D0)THEN      
+                                         i = 1                          
+                                         ext = efit(ltp1)-ESTep/10.D0   
+                                         Do while (i.le.3)              
+                                            emi = eqq - ext             
+                                            epl = eqq + ext             
+                                            emisq = emi*emi             
+                                            eplsq = epl*epl             
+                                            pxmd = 1./(emisq + dwsx)    
+                                            pymd = 1./(eplsq + dwsx)    
+C                                                                                  
+C                                           real and imaginary parts of the 2-qp   
+C                                           Green function                         
+C                                                                                  
+                                            greenr = (emi*pxmd +        
+     &                                      epl*pymd)*umatqq            
+                                            greenx = wqq*(pxmd - pymd)  
+     &                                      *umatqq                     
+                                            greeny=(pxmd - pymd)*umatqq 
+C                                                                                  
+C                                           real and imaginary parts of the 2-qp   
+C                                           response function                      
+                                            if (i .eq. 1) then          
+                                               cr1( ltp1)               
+     &                                         = cr1( ltp1) + greenr    
+                                               ccm( ltp1)               
+     &                                         = ccm( ltp1) + greenx    
+     &                                         + 0.5D0*WIDex*greeny     
+                                            else if (i.eq.2)            
+     &                                         then                     
+                                               ccr( ltp1)               
+     &                                         = ccr( ltp1) + greenr    
+                                               xea( ltp1)               
+     &                                         = xea( ltp1) + greenx    
+                                               yea( ltp1)               
+     &                                         = yea( ltp1) + greeny    
+                                               cci( ltp1)               
+     &                                         = cci( ltp1) + greenx    
+     &                                         + 0.5D0*WIDex*greeny     
+C                                                                                  
+C calculate the 1'st derivative of the 2qp response function at the fitting energy 
+C                                                                                  
+                                               dcr( ltp1)= dcr( ltp1) + 
+     &                                         ((emisq - dwsx)*pxmd**2 -
+     &                                         (eplsq - dwsx)*pymd**2)* 
+     &                                         umatqq                   
+                                               dci( ltp1)= dci( ltp1) + 
+     &                                         ((2.D0*wqq + WIDex)*(emi*
+     &                                         pxmd**2+epl*pymd**2))*   
+     &                                         umatqq                   
+                                            else if (i.eq.3) then       
+                                               cr3( ltp1)               
+     &                                         = cr3( ltp1) + greenr    
+                                               ccp( ltp1)               
+     &                                         = ccp( ltp1) + greenx    
+     &                                         + 0.5D0*WIDex*greeny     
+                                            else                        
+                                            endif                       
+                                            ext = ext + ESTep/10.0D0   
+                                            i = i + 1                   
+                                         ENDDO                          
+                                      ENDIF                             
                                     ENDIF
                                  ENDDO
                               ENDIF
@@ -984,30 +960,30 @@ C              ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)
 C              ccm = rfqqx(nea - 1, lt) + wex*rfqqy(nea - 1, lt)
 C              dci = 0.5D0*(ccp - ccm)/ESTep
 C              MH added the following IF  to avoid division by 0
-               IF(dcr(lt).NE.0.0D0)THEN                           ! new
+               IF(dcr(lt).NE.0.0D0)THEN                           
 C                 xir = dci/dcr
 C                 xpos = cci*xir/(1.D0 + SQRT(1.D0 + xir**2))
 C                 xneg = -cci**2/xpos
 C                 cpos = ccr + xpos
 C                 cneg = ccr + xneg
-                  xir = dci(lt)/dcr(lt)                           ! new
-                  xpos = cci(lt)*xir/(1.D0 + SQRT(1.D0 + xir**2)) ! new
-                  xneg = -cci(lt)**2/xpos                         ! new
-                  cpos = ccr(lt) + xpos                           ! new
-                  cneg = ccr(lt) + xneg                           ! new
+                  xir = dci(lt)/dcr(lt)                           
+                  xpos = cci(lt)*xir/(1.D0 + SQRT(1.D0 + xir**2)) 
+                  xneg = -cci(lt)**2/xpos                         
+                  cpos = ccr(lt) + xpos                           
+                  cneg = ccr(lt) + xneg                           
                   ccpm(1) = cpos
                   ccpm(2) = cneg
 C
 C                 check   for maximum
 C
 C                 cr1 = rfqqr(nea - 1, lt)
-                  cr2 = ccr(lt)                                   !new
+                  cr2 = ccr(lt)                                   
 C                 cr3 = rfqqr(nea + 1, lt)
                   clex(lt) = 0.D0
                   DO j = 1, 2
-                     re1 = ccm(lt)/((ccpm(j) - cr1(lt))**2 + ccm(lt)**2) ! new
-                     re2 = cci(lt)/((ccpm(j) - cr2)**2 + cci(lt)**2)     ! new
-                     re3 = ccp(lt)/((ccpm(j) - cr3(lt))**2 + ccp(lt)**2) ! new
+                     re1 = ccm(lt)/((ccpm(j) - cr1(lt))**2 + ccm(lt)**2)
+                     re2 = cci(lt)/((ccpm(j) - cr2)**2 + cci(lt)**2)    
+                     re3 = ccp(lt)/((ccpm(j) - cr3(lt))**2 + ccp(lt)**2)
                      ddr(j) = (re3 + re1 - 2.D0*re2)/ESTep**2
                      rrr(j) = re2
                   ENDDO
@@ -1022,11 +998,11 @@ C                 cr3 = rfqqr(nea + 1, lt)
 99012             FORMAT('  C(+),R(+):', 2E13.5/'  C(-),R(-):', 2E13.5,
      &                   '  CPL:', F10.5)
 C                 cr1 = rfqqr(nea - 1, lt)
-                  cr2 = ccr(lt)                                  !new
+                  cr2 = ccr(lt)                                  
 C                 cr3 = rfqqr(nea + 1, lt)
-                  re1 = ccm(lt)/((clex(lt) - cr1(lt))**2 + ccm(lt)**2) ! new
-                  re2 = cci(lt)/((clex(lt) - cr2)**2 + cci(lt)**2) !new
-                  re3 = ccp(lt)/((clex(lt) - cr3(lt))**2 + ccp(lt)**2) ! new
+                  re1 = ccm(lt)/((clex(lt) - cr1(lt))**2 + ccm(lt)**2) 
+                  re2 = cci(lt)/((clex(lt) - cr2)**2 + cci(lt)**2) 
+                  re3 = ccp(lt)/((clex(lt) - cr3(lt))**2 + ccp(lt)**2) 
                ELSE
                   clex(lt) = 0.0
                ENDIF

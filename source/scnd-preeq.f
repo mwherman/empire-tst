@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: scnd-preeq.f,v 1.9 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: scnd-preeq.f,v 1.10 2005-02-24 22:33:43 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -37,9 +37,6 @@ Ccc   *                                                                  *
 Ccc   * calls:TLLOC                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   16.Apr.2000                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc

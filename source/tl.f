@@ -1,5 +1,4 @@
       SUBROUTINE HITL(Stl)
-C
 Ccc
 Ccc   ************************************************************
 Ccc   *                                                 class:ppu*
@@ -131,8 +130,8 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          Stl(i) = 1.0/(1.0 + EXP((-arg)))
       ENDDO
       END
-C
-C
+ 
+ 
       SUBROUTINE RIPL2EMPIRE(Nejc, Nnuc, E)
 C
 C-----Sets CC optical model parameters according to RIPL
@@ -167,9 +166,7 @@ C********************************************************************
 C     SETTING COLLECTIVE LEVELS for DIRECT CALCULATIONS
 C
       MODelcc = 0
-C     RCN, 09/2004
       IF(DIRECT.EQ.0) IMOdel = 0
-C
 C-----IF ( IMOdel.EQ.0 ) model = 'spherical nucleus model'
 C-----IF ( IMOdel.EQ.1 ) model = 'coupled-channels rotational model'
 C-----IF ( IMOdel.EQ.2 ) model = 'vibrational model'
@@ -179,7 +176,6 @@ C-----IF ( IMOdel.EQ.3 ) model = 'non-axial deformed model'
          IWArn = 5
          GOTO 200
       ENDIF
-C
       IF(IMOdel.EQ.1 .OR. IMOdel.EQ.2)THEN
 C--------Imodel not used for non-inelastic channels
          IF(iainp.NE.A(0) .OR. izinp.NE.Z(0) .OR. AEJc(Nejc).NE.AEJc(0)
@@ -483,9 +479,6 @@ C
 C
 C     INITIALIZING /RIPLXX
 C
-C     COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
-C    &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
-C
       eta = (XN(Nnuc) - Z(Nnuc))/A(Nnuc)
       atar = iainp
       ztar = izinp
@@ -493,7 +486,6 @@ C
       projmas = xmas_nejc
       hbarc = HHBarc
       amu0c2 = AMUmev
-C     rc is an output variable
       encoul=0.4*ztar/atar**(1./3.)
       EFErmi = EEFermi(Nejc,Nnuc)
       call optmod(E,vlib,rlib,alib)
@@ -546,8 +538,8 @@ C-----****
       RWSo(1, Nejc, Nnuc) = rlib(6)
       AWSo(Nejc, Nnuc) = alib(6)
       END
-C
-C
+ 
+ 
       SUBROUTINE OMPAR(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2,
      &                 Komp, Ikey)
 C
@@ -571,11 +563,8 @@ C
 C     Local variables
 C
       CHARACTER*2 symbnucr, symbejcr
-C
       LOGICAL fexist, relcal
-C
       COMMON /LOCAL / MODelcc
-C
 C-----Erasing parameters of O.M.P.
       DO i = 1, NDVOM
          VOM(i, Nejc, Nnuc) = 0.0
@@ -608,7 +597,6 @@ C-----Arbitrarily default value
 C     EEFermi(Nejc, Nnuc) = -10.6
 C     EEP(Nejc, Nnuc) = EEFermi(Nejc, Nnuc)
       IRElat(Nejc, Nnuc) = 0
-C
       fexist = OMPar_riplf
       IF(CCCalc)fexist = OMParfcc
 C-----OMPAR.RIPL file exists ?
@@ -658,7 +646,6 @@ C
 C-----Ener must be in LAB system
 C
  50   IRElat(Nejc, Nnuc) = irel
-C
       relcal = .FALSE.
       IF(IRElat(Nejc, Nnuc).GT.0 .OR. RELkin)relcal = .TRUE.
       IF(Ikey.LT.0)THEN
@@ -668,10 +655,8 @@ C
         CALL KINEMA(Eilab, Eicms, Mi, Mt, Rrmu, Ak2, 2, relcal)
         ener = Eilab
       ENDIF
-C
       CALL RIPL2EMPIRE(Nejc, Nnuc, ener)
       IF(CCCalc)MODelecis = MODelcc
-C
       WOMs(1, Nejc, Nnuc) = MAX(WOMs(1, Nejc, Nnuc), 0.D0)
       WOMv(1, Nejc, Nnuc) = MAX(WOMv(1, Nejc, Nnuc), 0.D0)
 C-----Some default protections
@@ -720,9 +705,8 @@ C-----------increase IOMWRITE so that all these is not written again and again
       ENDIF
 C-----O.M. potential parameters written
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE CREATE_OMPAR(Ki, Komp, Ieof, Nnucr, Nejcr, Ianucr,
      &                        Symbnucr, Iaejcr, Symbejcr)
 C
@@ -730,7 +714,6 @@ C-----Read optical model parameters from the RIPL-II library and create local
 C-----omp file
 C
       INTEGER i, j, l, Iaejcr, Ianucr, Nejcr, Nnucr, Ieof
-     &
       INTEGER Ki, Komp, krange
       CHARACTER*80 comment
       CHARACTER*2 Symbnucr, Symbejcr
@@ -743,8 +726,6 @@ C
       READ(Ki, *)IREf
       WRITE(Komp, '(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)')IREf, Nnucr,
      &      Nejcr, Ianucr, Symbnucr, Iaejcr, Symbejcr
-C     WRITE (Ko,'(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)') IREf ,
-C     &       Nnucr , Nejcr , Ianucr , Symbnucr , Iaejcr , Symbejcr
       DO l = 2, 7
          READ(Ki, '(a80)')comment
          WRITE(Komp, '(a80)')comment
@@ -825,9 +806,8 @@ C
       ENDIF
       WRITE(Komp, '(A8)')'++++++++'
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE READ_OMPAR_RIPL(Ko, Ierr, Irelout)
       CHARACTER*80 comment
       INCLUDE 'ripl2empire.h'
@@ -835,10 +815,7 @@ C
 C-----Read RIPL optical model parameters from the local OMPAR.RIPL file
 C
 99001 FORMAT(10A8)
-C
       Ierr = 0
-C-----Next comment has been suggested by V. Avrigeanu
-C     REWIND(Ko)
       READ(Ko, '(I5)', ERR = 200)IREf
       READ(Ko, 99010, ERR = 200)AUThor
       READ(Ko, 99010, ERR = 200)REFer
@@ -847,9 +824,7 @@ C     REWIND(Ko)
       READ(Ko, 99004, ERR = 200)IZMin, IZMax
       READ(Ko, 99004, ERR = 200)IAMin, IAMax
       READ(Ko, 99004, ERR = 200)IMOdel, IZProj, IAProj, IREl, IDR
-C
       Irelout = IREl
-C
       DO i = 1, 6
          READ(Ko, 99004, ERR = 200)JRAnge(i)
          IF(JRAnge(i).NE.0)THEN
@@ -875,7 +850,6 @@ C--------------Reading diffuss
                   READ(Ko, 99007, ERR = 200)(ACO(i, j, n), n = 8, 13)
                ENDIF
                IF(NDIM2.GT.13)THEN
-C                 READ(Ko, 99007, ERR = 200)(ACO(i, j, n), n = 14,NDIM2)
                   STOP '2 IN tl.f, UNCOMMENT READ ABOVE AND REMOVE STOP'
                ENDIF
 C--------------Reading depths
@@ -949,10 +923,8 @@ C--------------Reading depths
 99009 FORMAT(f12.8, f7.1, 2I4, 1p, 2(1x, e11.4))
 99010 FORMAT(80A1)
       END
-C
-C
-C
-C******************* subroutine omin ***************************
+ 
+ 
       SUBROUTINE OMIN(Ki, Ieof, Irelout)
 C
 C     routine to read optical model parameters
@@ -967,9 +939,7 @@ C
       READ(Ki, *)IZMin, IZMax
       READ(Ki, *)IAMin, IAMax
       READ(Ki, *)IMOdel, IZProj, IAProj, IREl, IDR
-C
       Irelout = IREl
-C
       DO i = 1, 6
          READ(Ki, *)JRAnge(i)
          IF(JRAnge(i).NE.0)THEN
@@ -1018,7 +988,8 @@ C
  100  Ieof = 1
 99001 FORMAT(80A1)
       END
-C
+ 
+ 
       SUBROUTINE SUMPRT(Ko)
 C
 C     print summary information from RIPL formatted library
@@ -1028,9 +999,7 @@ C
       CHARACTER*40 model
       CHARACTER*20 area
 99001 FORMAT(' IREF=', i5, 2x, a8, ' incident, ', a40)
-C
       DATA ldum/'++++++++'/
-C
       IF(IZProj.EQ.0 .AND. IAProj.EQ.1)proj = ' Neutron'
       IF(IZProj.EQ.1 .AND. IAProj.EQ.1)proj = '  Proton'
       IF(IZProj.EQ.1 .AND. IAProj.EQ.2)proj = 'Deuteron'
@@ -1052,7 +1021,6 @@ C
       IF(iarea.GE.650 .AND. iarea.LE.699)area = 'India, Pakistan'
       IF(iarea.GE.700 .AND. iarea.LE.799)area = 'Others'
       IF(iarea.GE.800 .AND. iarea.LE.999)area = 'Reserved'
-C
       WRITE(Ko, 99002)IREf, proj, model
 99002 FORMAT(' IREF=', i5, 2x, a8, ' incident, ', a40)
       IF(IDR.GT.0)WRITE(Ko, '('' Dispersive optical model'')')
@@ -1066,7 +1034,6 @@ C
       WRITE(Ko, 99003)IZMin, IZMax, IAMin, IAMax, iemin, iemax
 99003 FORMAT(' Z-Range=', i3, '-', i2, '  A-Range=', i4, '-', i3,
      &       '  E-Range=', i4, '-', i3, ' MeV')
-C
       DO nn = 1, 80
          n = 80 - nn + 1
          IF(AUThor(n).NE.' ')GOTO 100
@@ -1074,7 +1041,6 @@ C
  100  nauth = MIN0(80, n)
       WRITE(Ko, 99004)(AUThor(n), n = 1, nauth)
 99004 FORMAT(' Author(s)= ', 60A1, /12x, 20A1)
-C
       DO nn = 1, 80
          n = 80 - nn + 1
          IF(REFer(n).NE.' ')GOTO 200
@@ -1082,7 +1048,6 @@ C
  200  nrefer = MIN0(80, n)
       WRITE(Ko, 99005)(REFer(n), n = 1, nrefer)
 99005 FORMAT(' Reference= ', 60A1, /12x, 20A1)
-C
       DO nn = 1, 320
          n = 320 - nn + 1
          IF(SUMmary(n).NE.' ')GOTO 300
@@ -1091,20 +1056,17 @@ C
       WRITE(Ko, 99006)(SUMmary(n), n = 1, nsum)
 99006 FORMAT('   Summary= ', 60A1, /12x, 60A1, /12x, 60A1, /12x, 60A1,
      &       /12x, 60A1, /12x, 20A1)
-C
       WRITE(Ko, 99007)(ldum, i = 1, 9)
 99007 FORMAT(10A8)
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE FINDPOT_OMPAR_RIPL(Ki, Ieof, Ipoten, Nnuc, Nejc)
 C
 C-----Find IPOTEN entry in the RIPL optical model database
 C
       INTEGER Ieof, Ipoten, iref, Ki, Nejc, nejcr, Nnuc, nnucr
       CHARACTER*3 ctmp
-C
       Ieof = 0
       REWIND(Ki)
       READ(Ki, '(3i5)')iref, nnucr, nejcr
@@ -1121,9 +1083,8 @@ C
       RETURN
  200  Ieof = 1
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE TLEVAL(Nejc, Nnuc, Nonzero)
 CCC
 CCC   ********************************************************************
@@ -1139,11 +1100,6 @@ CCC   *              OF NEJC ON NNUC)                                    *
 CCC   *                                                                  *
 CCC   * OUTPUT:Nonzero true if non-zero Tl's are returned                *
 CCC   *                                                                  *
-CCC   *                                                                  *
-CCC   * AUTHOR: M.HERMAN                                                 *
-CCC   * DATE:   13.FEB.1993                                              *
-CCC   * REVISION:1    BY:R.CAPOTE                 ON:  .JAN.1999         *
-CCC   * REVISION:2    BY:R.CAPOTE                 ON:  .JAN.2001         *
 CCC   ********************************************************************
 CCC
       INCLUDE 'dimension.h'
@@ -1165,7 +1121,6 @@ C
       INTEGER i, l
       INTEGER INT, MIN0
       LOGICAL Nonzero
-C
       Nonzero = .FALSE.
       IF(SEJc(Nejc).GT.1.0D0)THEN
          WRITE(6,
@@ -1220,9 +1175,8 @@ C--------transfer of the calculated transmission coeff. onto TL matrix
  50   ENDDO
       RETURN
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE TLLOC(Nnuc, Nejc, Eout, Il, Frde)
 Ccc
 Ccc   ********************************************************************
@@ -1245,10 +1199,6 @@ Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   01.June.1993                                             *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
-Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -1264,7 +1214,6 @@ C
       DOUBLE PRECISION detl
       INTEGER i
       INTEGER INT
-C
       IF(Eout.GT.ETL(5, Nejc, Nnuc))THEN
          Il = INT((Eout - ETL(5,Nejc,Nnuc))/DE) + 5
          Frde = (Eout - ETL(Il, Nejc, Nnuc))/DE
@@ -1293,9 +1242,6 @@ C
 C       Please send any comments, corrections or improvements to:
 C
 C                             Roberto Capote
-C
-C          Email-address: rcapotenoyyahoo.com
-C          Email-address: rcapote@cica.es
 C
 C          INPUT  : NEJC - Ejectile key
 C                   NNUC - Residual nucleus key
@@ -1341,7 +1287,6 @@ C
 
 C-----data initialization
       CALL INIT(Nejc, Nnuc)
-C
 C-----Cleaning transmission coefficient matrix
       DO i = 1, NDETL
          MAXl(i) = 0
@@ -1386,10 +1331,8 @@ C
          READ(45,END=220)TTLl(ien, l)
          IF(IOUt.EQ.5)WRITE(46, *)l, TTLl(ien, l)
       ENDDO
-C     Capote , preeq 01/2005
       READ(45,END=220) SIGabs(ien, Nejc, Nnuc)
       GOTO 100
-C
  200  CLOSE(45)
       IF(IOUt.EQ.5) CLOSE(46)
       IF(IOUt.EQ.5)
@@ -1418,7 +1361,6 @@ C-----for transsmission coefficient calculations
       ien_beg = -1
       DO i = 2, Nen
          IF(ETL(i, Nejc, Nnuc).GT.culbar) then
-C           IF(ien_beg.EQ. - 1)ien_beg = i
             ien_beg = i
             goto 350
          ENDIF
@@ -1568,7 +1510,6 @@ C-----------Averaging over particle and target spin, summing over channel spin J
       ENDDO
       GOTO 100
  200  CLOSE(45)
-
 C     For vibrational the Tls must be multiplied by
       IF(LVIbrat) then
         DO l = 0, Maxlw
@@ -1579,7 +1520,6 @@ C     For vibrational the Tls must be multiplied by
       TOTcs = 0.d0
       ABScs = 0.d0
       ELAcs = 0.d0
-C     OPEN(UNIT = 45, FILE = 'ecis03.cs', STATUS = 'old', ERR = 400)
       OPEN(UNIT = 45, FILE = 'INCIDENT.CS', STATUS = 'old', ERR = 400)
       READ(45, *, END = 400) ! Skipping first line
       IF (ZEjc(NEJc).eq.0) READ(45, *) TOTcs
@@ -1606,11 +1546,8 @@ C-----Absorption cross section in mb
         sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = cte*sabs
-
       if(sabs.le.0.d0) return
-
       SINl = 0.D0
-
       OPEN(UNIT = 45, FILE = 'INCIDENT.ICS', STATUS = 'old', ERR= 300)
       READ(45, *, END = 300) ! Skipping first line
       DO l = 1, NDCollev
@@ -1618,9 +1555,7 @@ C-----Absorption cross section in mb
         SINl = SINl + dtmp
       ENDDO
  300  CLOSE(45)
-
       IF(SINl.eq.0.d0) return
-
       IF(SINl.GT.ABScs)THEN
         WRITE(6, *)
         WRITE(6, *) ' WARNING: LOOK ECIS NON-CONVERGENCE !!'
@@ -1645,9 +1580,7 @@ C-----Absorption cross section in mb
      &   '(5x,''**************************************************'')')
           STOP 200
       ENDIF
-
       sreac = sabs + SINl
-
       IF(IOUT.EQ.5 .AND. sabs.gt.0.d0) then
           WRITE(6, *)
           WRITE(6, *)' INCIDENT CHANNEL:'
@@ -1675,12 +1608,10 @@ C
       DO l = 0, Maxlw
         Stl(l + 1)=Stl(l + 1)*(ABScs-SINl)/sabs
       ENDDO
-
       RETURN
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE ECIS2EMPIRE_TR(Nejc, Nnuc, J, LVIbrat)
 C
 C     Process ECIS output to obtain TTLl,MaxL matrix for EMPIRE energy grid
@@ -1713,10 +1644,8 @@ C
       CHARACTER*1 parc
       LOGICAL LVIbrat
       REAL SNGL
-
       lmax = 0
       ncoll = 0
-
       ecms = ETL(J, Nejc, Nnuc)
 C-----
 C----- Input of transmission coefficients
@@ -1745,14 +1674,12 @@ C-----------Averaging over particle and target spin, summing over channel spin J
       ENDDO
       GOTO 100
  200  CLOSE(45)
-
 C     For vibrational the Tls must be multiplied by
       IF(LVIbrat) then
         DO l = 0, lmax
           TTLl(J, l) = TTLl(J, l)*DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
         ENDDO
       ENDIF
-
       stotecis = 0.d0
       selecis = 0.d0
       sreacecis = 0.d0
@@ -1762,30 +1689,23 @@ C     For vibrational the Tls must be multiplied by
       READ(45, *, END = 400)sreacecis
       IF (ZEjc(NEJc).eq.0) READ(45, *, END = 400)selecis
  400  CLOSE(45)
-
       SINl = 0.d0
       SIGabs(J, Nejc, Nnuc) = 0.d0
-
       if(sreacecis.le.0.d0)  RETURN
-
       IF(IOUT.EQ.5) then
-
 C       xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
         xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
         xmas_nejc = EJMass(Nejc)
 C       xmas_nnuc = AMAss(Nnuc)
         CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc, RMU, ak2, 2, RELkin)
-
 C-------ECIS constant
         cte = PI/(W2*RMU*ecms)
-
 C-------Reaction cross section in mb
         sabs = 0.D0
         DO l = 0, lmax
           sabs = sabs + TTLl(J, l)*DBLE(2*l + 1)
         ENDDO
         sabs = cte*sabs
-
         OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
         READ(45, *, END = 300) ! Skipping one line
         SINl = 0.D0
@@ -1794,9 +1714,7 @@ C-------Reaction cross section in mb
           SINl = SINl + dtmp
         ENDDO
  300    CLOSE(45)
-
         sreac = sabs + SINl
-
         IF(sabs.gt.0.d0) then
           WRITE(6, *)
           WRITE(6, '(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)')'  LMAX:',
@@ -1812,7 +1730,6 @@ C-------Reaction cross section in mb
           ENDIF
         ENDIF
       ENDIF
-
 C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE(46)lmax, J, ecms
       DO l = 0, lmax
@@ -1820,20 +1737,16 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       ENDDO
       WRITE(46) sreacecis
       MAXl(J) = lmax
-C     Capote , preeq 2002
       SIGabs(J, Nejc, Nnuc) = sreacecis
       RETURN
       END
 C
 C
-C
       BLOCKDATA FORTL
-C
       INCLUDE "pre_ecis.h"
       DATA(PARname(i), i = 1, 9)/'neutron ', 'proton  ', 'deuteron',
      &     'triton  ', 'he-3    ', 'alpha   ', 'ION-1   ', 'ION-2   ',
      &     'ION-3   '/
-C
       DATA(NUC(i), i = 1, 103)/'H_', 'HE', 'LI', 'BE', 'B_', 'C_', 'N_',
      &     'O_', 'F_', 'NE', 'NA', 'MG', 'AL', 'SI', 'P_', 'S_', 'CL',
      &     'AR', 'K_', 'CA', 'SC', 'TI', 'V ', 'CR', 'MN', 'FE', 'CO',
@@ -1846,9 +1759,8 @@ C
      &     'RA', 'AC', 'TH', 'PA', 'U_', 'NP', 'PU', 'AM', 'CM', 'BK',
      &     'CF', 'ES', 'FM', 'MD', 'NO', 'LR'/
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE INIT(Nejc, Nnuc)
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -1895,9 +1807,8 @@ C--------A>99
       OUTfile = ctarget//'_'//ceject
 CPR---write(6,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE ECIS_CCVIB(Nejc, Nnuc, El, LDWBA, INLkey)
 C
 C     -------------------------------------------------------------
@@ -1942,7 +1853,6 @@ C
       INTEGER INT, NINT
       INTEGER ip, iterm, j, ldwmax, ncoll, nd_nlvop, njmax, npp
       INTEGER nwrite
-C
       IF(AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0)ip = 1
       IF(AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0)ip = 2
       IF(AEJc(Nejc).EQ.2.D0 .AND. ZEJc(Nejc).EQ.1.D0)ip = 3
@@ -2279,9 +2189,8 @@ C
 
       RETURN
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE ECIS_CCVIBROT(Nejc, Nnuc, El, INLkey)
 C
 C     -------------------------------------------------------------
@@ -2659,19 +2568,16 @@ C-----Running ECIS
       ELSE
         CALL ECIS('ecVIBROT.inp','ECIS_ROT.out#')
       ENDIF
-
       END
-C
+
+
       SUBROUTINE SETPOTS(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2,
      &                   Ikey)
 C
 C     Transfers o.m. parameters to ECIS
 C
       INCLUDE 'dimension.h'
-C
       INCLUDE 'global.h'
-C
-C
       DOUBLE PRECISION AAE, AQ, BETa, POT, R, RCOulomb, RRE
       DOUBLE PRECISION Rrmu, Ak2, Mi, Mt
       INTEGER i
@@ -2731,11 +2637,10 @@ C     Setting geometrical parameters
       RCOulomb = RCOul(Nejc, Nnuc)
       BETa = RNOnl(Nejc, Nnuc)
       EFErmi = EEFermi(Nejc, Nnuc)
-C     EP = EEP(Nejc, Nnuc)
-C     EA = EEA(Nejc, Nnuc)
       IREl = IRElat(Nejc, Nnuc)
       END
-C
+ 
+ 
       SUBROUTINE KINEMA(EL, E1, Mi, Mt, Amu, Ak2, Iopt, Relcal)
 C
 C     Author: O.Bersillon (SCAT2000)
@@ -2761,22 +2666,14 @@ C----------------------------------------------------------------------*
 C***********************************************************************
 C
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
-C
       DOUBLE PRECISION Mi, Mt, mtot
       LOGICAL Relcal
-C
       COMMON /CONSTANT/ AMUmev, PI, W2L, XNExc, CETa, CSO, RMU, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
-C
       DATA one/1.0D+00/
       DATA two/2.0D+00/
-C
-C=======================================================================
-C
       ck2 = (two*AMUmev)/(HHBarc**2)
-C
       mtot = Mi + Mt
-C
       IF(Iopt.EQ.1)THEN
 C
 C***********************************************************************
@@ -2867,7 +2764,6 @@ c             functions
 c             variables
       real*8 As,Bs,Cs,AAv,Bv,AAvso,Bvso,EEE,Ep,Ea,Ef
       real*8 alpha_PB,beta_PB,gamma_PB,Vnonl
-C     real*8 DWS,DWV,DWVso,DerDWV,DerDWS,dtmp
       real*8 DWS,DWV,DWVso,dtmp,DWVder,DWSder
       real*8 WDE,WVE
       integer n,iq,nns
@@ -2881,7 +2777,7 @@ c     Nonlocality constants alpha fixed according to Mahaux 1991
 c     real*8 AlphaS
 c     data AlphaS/0.235d0/
       external Delta_WV,WVf,Delta_WD,WDf
-cc
+c
 c     Generate optical model parameters for ECIS
 c
       pi=acos(-1.d0)
@@ -3214,7 +3110,8 @@ C    &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)
       endif
       return
       end
-c
+ 
+ 
       subroutine setr (a,b,n)
 c     ******************************************************************
 c     set all elements of array b(n) to real number a.
@@ -3224,7 +3121,8 @@ c     ******************************************************************
   100 b(k)=a
       return
       end
-c
+ 
+ 
       subroutine bcoget(b,j)
 c
 c     Routine to compute b coefficients for Koning global potential
@@ -3233,7 +3131,6 @@ c     Modified by R.Capote to extend RIPL format
 c
       include "ripl2empire.h"
       dimension b(6,ndim1,15)
-c
        call setr(0.,b,90*ndim1)
 c      Original Koning dependence
        b(1,j,1)  =  pot(1,j,1) + pot(1,j,2)*atar + pot(1,j,8)*eta
@@ -3291,6 +3188,8 @@ c      Wso
        b(6,j,7)  =  pot(6,j,3)
       return
       end
+
+
       REAL*8 FUNCTION Vhf(einp,alpha_PB,beta_PB,gamma_PB)
 c
 c     According to Morillon B, Romain P, PRC70(2004)014601
@@ -3317,6 +3216,8 @@ c     getting amu
       if( abs(Vhf - Vtmp) .GT. 0.0001 .AND.  niter.LT.10000) goto 10
       return
       end
+
+
       REAL FUNCTION xkine(ei,amu)
 c***********************************************************************
 c     From lab to CM (the input quantity is el = Elab)
@@ -3356,6 +3257,8 @@ c         amu   = amu / amu0c2
       endif
       return
       end
+
+
 C
 C==========================================================================
 C     AUTHOR: Dr. Roberto Capote Noy
@@ -3421,6 +3324,9 @@ C----------------------------------
       DerivIntWv = -Av/pi*( Rds/n + DerEplus + DerEmin)
       RETURN
       END
+
+
+
       REAL*8 FUNCTION DOM_INT_Ws(Ef,Ep,As,Bs,Cs,E,m,DerivIntWs)
 C
 C      Analytical dispersive integral and its derivative for
@@ -3478,6 +3384,8 @@ C----------------------------------
       DerivIntWs = As/pi*( Rds/m + DerEplus + DerEmin)
       RETURN
       END
+
+
       real*8 function WV(A,B,Ep,Ef,E,n)
       IMPLICIT NONE
       real*8 A,B,Ep,Ef,E,ee
@@ -3489,6 +3397,8 @@ C----------------------------------
       WV=A*ee/(ee+B**n)
       return
       end
+
+
       real*8 function WDD(A,B,C,Ep,Ef,E,m)
       IMPLICIT NONE
       real*8 A,B,C,Ep,Ef,E,ee,arg
@@ -3502,6 +3412,8 @@ C----------------------------------
       WDD=A*ee/(ee+B**m)*EXP(-arg)
       return
       end
+
+
       REAL*8 FUNCTION DOM_int_T1(Ef,Ea,E)
 C
 C     Integral over E' corresponding to nonlocal additions T1(E'<<0)
@@ -3517,10 +3429,10 @@ C
      &      /(2.*(Eax**2 + Ea2))
       T13 = -Eax**2*log(Eax)/(Ex*(Eax**2+Ea2))
       DOM_int_T1 = Ex/Pi*(T11+T12+T13)
-C
       RETURN
       END
-C
+ 
+ 
       REAL*8 FUNCTION DOM_int_T2(Ef,Ea,E)
 C
 C     Integral over E' corresponding to nonlocal additions T2(E'>>0)
@@ -3545,10 +3457,12 @@ C
       DOM_int_T2 =  1.d0/Pi*(R1+R2+R3+R4)
       RETURN
       END
+ 
+ 
+      complex*16 function zfi(za)
 C
 C-----FUNCTION TO EVALUATE exp(Z)*E1(Z)
 C
-      complex*16 function zfi(za)
 C
 C Complex exponential integral function multiplied by exponential
 C
@@ -3579,10 +3493,13 @@ C
       zfi=1.d0/(zfi+za)
       return
       end
+
+
+
+      REAL*8 FUNCTION EIn(X)
 C
 C-----FUNCTION TO EVALUATE Ei(X)
 C
-      REAL*8 FUNCTION EIn(X)
       IMPLICIT NONE
       REAL*8 FAC, H, X
       INTEGER N
@@ -3595,50 +3512,47 @@ C
       ENDDO
       RETURN
       END
-c*******************************************
+
+
       real*8 function DELTA_WV(WVf,y)
       real*8 E,Ef,A,B,Ep,y,WVf,WDE,WVE
       integer n
       common /energy/E,Ef,Ep
       common /Wenerg/WDE,WVE
       common /pdatav/A,B,n
-C
       DELTA_WV=(WVf(A,B,Ep,y,n) - WVE)
      &         /((y-Ef)**2-(E-Ef)**2)
       return
       end
-C
+ 
+ 
       real*8 function WVf(A,B,Ep,Ef,E,n)
       real*8 A,B,Ep,E,Ef
       integer n
-C
       WVf=0.d0
       if(E.LE.Ef) E=2.d0*Ef-E
       if(E.LE.Ep) return
-C
       ee=(E-Ep)**n
       WVf=A*ee/(ee+B**n)
-C
       return
       end
-C
+ 
+ 
       real*8 function DELTA_WD(WDf,y)
       real*8 E,Ef,A,B,C,Ep,y,WDf,WDE,WVE
       integer m,iq
       common /energy/E,Ef,Ep
       common /Wenerg/WDE,WVE
       common /pdatas/A,B,C,m,iq
-C
       DELTA_WD=(WDf(A,B,C,Ep,y,m,iq) - WDE)
      &            /((y-Ef)**2-(E-Ef)**2)
-C
       return
       end
-C
+
+
       real*8 function WDf(A,B,C,Ep,E,m,iq)
       real*8 A,B,C,Ep,E,ee,arg
       integer m,iq
-C
       WDf=0.d0
       if(E.Lt.Ep) return
       arg=C*(E-Ep)**iq
@@ -3647,7 +3561,8 @@ C
       WDf=A*ee/(ee+B**m)*EXP(-arg)
       return
       end
-C
+ 
+ 
       REAL*8 FUNCTION DOM_int(DELTAF,F,Ef,Eint,Ecut,E,WE_cte)
 C
 C     DOM integral (20 points Gauss-Legendre)
@@ -3714,10 +3629,8 @@ C
         ABSC2 = HLGTH2*XXX
       RESG2=RESG2 + WWW*(DELTAF(F,CENTR2-ABSC2)+DELTAF(F,CENTR2+ABSC2))
       ENDDO
-c
       CORR=0.5d0*WE_cte/(E-Ef)*dlog((Ecut-(E-Ef))/(Ecut+(E-Ef)))
       DOM_int = ( RESG1*HLGTH1+RESG2*HLGTH2 + CORR) *
      >           (E-Ef)/(acos(-1.d0))
-c
       RETURN
       END

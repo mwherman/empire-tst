@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-14 17:03:58 $
-Ccc   * $Id: lev-dens.f,v 1.31 2005-02-14 17:03:58 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-24 22:33:43 $
+Ccc   * $Id: lev-dens.f,v 1.32 2005-02-24 22:33:43 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -41,27 +41,6 @@ CCC   *     BF=3. STANDS FOR THE TRIAXIAL YRAST STATE                     *
 CCC   *                                                                   *
 CCC   * OUTPUT:NONE                                                       *
 CCC   *                                                                   *
-CCC   * CALLS:ALIT                                                        *
-CCC   *       BARFIT:LPOLY                                                *
-CCC   *       SIGMAK                                                      *
-CCC   *       SHCFADE                                                     *
-CCC   *       MOMFIT:LPOLY                                                *
-CCC   *       RODEF:VIBR                                                  *
-CCC   *             DAMPV                                                 *
-CCC   *             DAMPKS                                                *
-CCC   *       SHCFADE                                                     *
-CCC   *       SIGMAK                                                      *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   * AUTHOR: D'ARRIGO AND M.HERMAN                                     *
-CCC   * DATE:     .JUL.1992                                               *
-CCC   * ADDAPTED      BY:M.HERMAN                 ON:20.JAN.1993          *
-CCC   *                                                                   *
-CCC   * REVISION:1    BY:M.HERMAN AND D'ARRIGO    ON:20.MAY.1993          *
-CCC   * REVISION:2    BY:M.HERMAN                 ON:19.OCT.1993          *
-CCC   * REVISION:3    BY:M.HERMAN                 ON:07.FEB.2000          *
-CCC   *     Structure simplified by introducing a call to PRERO           *
-CCC   *                                                                   *
 CCC   *                                                                   *
 CCC   *********************************************************************
 CCC
@@ -88,7 +67,6 @@ C
       REAL FLOAT
       INTEGER i, ia, iz, kk
       DOUBLE PRECISION RODEF
-C
       ia = A(Nnuc)
       iz = Z(Nnuc)
       A23 = A(Nnuc)**0.666667
@@ -115,9 +93,7 @@ C--------check whether a-parameter determined from the shell-model s.p.s. exists
       ENDIF
       DO kk = 1, NEX(Nnuc)
          u = EX(kk, Nnuc) - DEL
-C--------Plujko_new
          Uexcit(kk, Nnuc) = max(u,0.d0)
-C--------Plujko_new(End)
          IF(Gcc.EQ.2.D0)THEN
 C-----------a-parameter determined from the fit to the shell-model s.p.s.
             IF(BF.EQ.0.D0)THEN
@@ -133,9 +109,7 @@ C-----------set nuclear temperature (spin independent taken at J=0 or 1/2)
             IF(BF.EQ.0.0D0)THEN
                              !saddle point
                u = EX(kk, Nnuc) - DEL - FISb(1, Nnuc)
-C--------------Plujko_new
                Uexcit(kk, Nnuc) = max(u,0.d0)
-C--------------Plujko_new(End)
                IF(u.GT.0.0D0)TNUcf(kk, Nnuc) = SQRT(u/ac)
             ELSE
                !normal states
@@ -147,9 +121,7 @@ C-----------set nuclear temperature  *** done ***
 C--------------saddle point
                IF(BF.EQ.0.0D0)THEN
                   u = EX(kk, Nnuc) - DEL - FISb(i, Nnuc)
-C-----------------Plujko_new
                   Uexcit(kk, Nnuc) = max(u,0.d0)
-C-----------------Plujko_new(End)
                   IF(u.LE.0.0D0)GOTO 100
                   IF(Z(Nnuc).LT.102.D0 .AND. Z(Nnuc).GE.19.D0)THEN
 C--------------------next call is to calculate deformation parameter A2 only
@@ -193,8 +165,8 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
          ENDIF
  100  ENDDO
       END
-C
-C
+
+      
       DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort,
      &           Yrast, Ss, Bf, Argred, Expmax)
 Ccc   *********************************************************************
@@ -208,17 +180,6 @@ Ccc   *  Collective enhancement effects are taken into account including  *
 Ccc   *  their energy fade-out.                                           *
 Ccc   *                                                                   *
 Ccc   *                                                                   *
-Ccc   *  calls:RODEF                                                      *
-Ccc   *            DAMPV                                                  *
-Ccc   *            VIBR                                                   *
-Ccc   *        SHCFADE                                                    *
-Ccc   *        SIGMAK                                                     *
-Ccc   *                                                                   *
-Ccc   * author: M.Herman                                                  *
-Ccc   * date:      Jul.1992                                               *
-Ccc   * addapted      by:M.Herman                 on:19.Oct.1993          *
-Ccc   *                                                                   *
-Ccc   * revision:1    by:M. Herman                on:4 June 1998          *
 Ccc   *                                                                   *
 Ccc   *********************************************************************
 Ccc
@@ -235,8 +196,6 @@ C
       DOUBLE PRECISION ak, arg, con, const, e1, qk, qv, seff, sort2,
      &                 sum, t, u, vibrk
       INTEGER i, k, kmin
-C
-C
       DATA const/0.01473144/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
 C-----the last 2.0 takes into account parity (half to half)
@@ -322,8 +281,8 @@ C-----------rotation parallel to the symmetry axis
  100  RODEF =con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(vibrk - qv*(vibrk - 1.))
       END
-C     C
-C
+
+
       SUBROUTINE DAMPROT(E1, Qk)
 CCCC  *****************************************************************
 CCCC  * damping of rotational  effects with Fermi function independent
@@ -338,22 +297,19 @@ C
 C Local variables
 C
       DOUBLE PRECISION dmphalf, dmpdiff
-C
       Qk = 0.
       dmphalf = 40.
       dmpdiff = 10.
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
       END
-C
-C
-C
+
+
       SUBROUTINE VIBR(A, T, Vibrk)
 CCCC  *****************************************************************
 CCCC  *  Calculates vibrational enhancement of level densities
 CCCC  *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -369,9 +325,8 @@ C
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
       Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
       END
-C
-C
-C
+
+
       SUBROUTINE SIGMAK(A, Z, B, Bf, E, Ac, Aj, Mompar, Momort, A2,
      &                  Stab, Cigor, Defpar, Defga, Defgw, Defgp)
 Cccc  *****************************************************************
@@ -393,8 +348,6 @@ C
      &                 dt, eta, gammaf, gammay, gauss, pi, r1f, r1y,
      &                 r2f, r2y, r3f, r3y, rbmsph, rf, t, tgscr, x, y,
      &                 ycrit
-C
-C
       pi = 3.14159
       if(A.LE.0.d0) return
 C---- YBM : Y di Bohr-Mottelson, vol.2, pag.663
@@ -404,8 +357,6 @@ C     YBM=2.1*AJ**2/A**2.33333
       ycrit = 1.4*(1 - x)**2
       Stab = SQRT(ycrit*eta*A**2.33333/1.9249)
       y = 1.9249*Aj*(Aj + 1.0)/eta/A**2.33333
-C     WRITE (6, *)
-C     1      'SIGMAK CALLED WITH A SPIN EXCEEDING STABILITY LIMIT'
       IF(y.GT.ycrit)y = ycrit
 C-----calculation of dynamic deformation in terms of the ldm
 C-----saddle point
@@ -469,15 +420,13 @@ C     A2=0
      &         0.571*A2*a4 + 1.897*A2**2*a4 + 0.700*a4**2)*rbmsph
       IF(ABS(A2).LE.0.001D0)Momort = Mompar
       END
-C
-C
-C
+
+      
       SUBROUTINE SIGMA(A, B, E, Ac, Spar, Sort)
 Cccc  *****************************************************************
 Cccc  *  calculates paralel and orthogonal spin cut-off factors
 Cccc  *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -486,8 +435,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION ht, m0, orti, pi, r0, rm2, sphi, t
-C
-C
       DATA m0, r0, ht, pi/1.044, 1.24, 6.589, 3.141592/
       t = SQRT(E/Ac)
       sphi = 2./5.*m0*r0**2*A**(5./3.)
@@ -497,9 +444,8 @@ C
       Sort = SQRT(orti*t/ht**2)
       IF(B.LE.0.05D0)Sort = Spar
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE DAMPKS(A, B, T, Q)
 Ccc   *****************************************************************
 Ccc   *              damping by Karwowski                             *
@@ -507,7 +453,6 @@ Ccc   *        slow for dmpc.gt.0    fast for dmpc.lt.0               *
 Ccc   * q=0 for t=0, q=1/2 for t=ecoriolis, q=1 for t=infinity        *
 Ccc   *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -521,9 +466,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION arg, d, delta, r
-C
-C
-C
 C-----DMPC=1. selects slow damping
       DMPc = 1.
       IF(ABS(B).LT.0.0001D0 .OR. DMPc.EQ.0.0D0)THEN
@@ -549,15 +491,14 @@ C--------fast damping
          Q = 1/(EXP(arg) + 1)
       ENDIF
       END
-C
-C
+
+
       SUBROUTINE DAMPV(T, Q)
 CCC   *****************************************************************
 CCC   *         DAMPING FOR VIBRATIONAL EFFECTS                       *
 CCC   * Q=0 FOR T=0, Q=1/2 FOR T=THALF    , Q=1 FOR T=INFINITY        *
 CCC   *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -566,21 +507,18 @@ C
 C Local variables
 C
       DOUBLE PRECISION arg, dt, thalf
-C
-C
       thalf = 1.
       dt = 0.1
       arg = (T - thalf)/dt
       Q = 1.0/(EXP((-arg)) + 1.0)
       END
-C
-C
+ 
+ 
       SUBROUTINE DAMP(A, B, U, Q)
 Ccc   *****************************************************************
 Ccc   *                  damping of Rastopchin                        *
 Ccc   *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -590,8 +528,6 @@ C Local variables
 C
       REAL ALOG
       DOUBLE PRECISION de, delta, e, q1, q2, r, u1, u2
-C
-C
       Q = 0.0
 C-----calculation of delta def. param from a2 def. param.
       r = 2.*(B + 1.)/(2. - B)
@@ -613,9 +549,8 @@ C-----calculation of delta def. param from a2 def. param.
          Q = q2
       ENDIF
       END
-C
-C
-C
+ 
+ 
       SUBROUTINE ROEMP(Nnuc, Cf, Asaf)
 CCC
 CCC   *****************************************************************
@@ -644,15 +579,10 @@ CCC   *                                                               *
 CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
 CCC   *       DAMIRO                                                  *
 CCC   *                                                               *
-CCC   * AUTHOR: M.HERMAN                                              *
-CCC   * DATE:   29.SEP.1998                                           *
-CCC   * REVISION:1    BY:                         ON:                 *
-CCC   *                                                               *
 CCC   *****************************************************************
 CCC
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -678,8 +608,6 @@ C
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
-C
-C
       pi2 = PI*PI
       BF = 1.0
       IF(Cf.NE.0.0D0)BF = 0.0D0
@@ -858,8 +786,6 @@ C--------cumulative plot of levels along with the l.d. formula
             WRITE(35, *)
      &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
             CLOSE(35)
-C           REWIND 36
-C           REWIND 34
             OPEN(34,file='fort.34')
             OPEN(36,file='fort.36')
             WRITE(36, *)'0.0 1.0'
@@ -933,29 +859,25 @@ C----------plot level density
            CLOSE(38)
         ENDIF
       END
-C
-C
+ 
+ 
       DOUBLE PRECISION FUNCTION FSHELL(X, Xs, Xg)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
       DOUBLE PRECISION X, Xg, Xs
-C
-C
       IF(X.GT.0.01D0)THEN
          FSHELL = 1.0 + (1.0 - EXP((-Xg*X)))*Xs/X
       ELSE
          FSHELL = 1 + Xg*Xs
       ENDIF
       END
-C
-C
+ 
+ 
       SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -979,8 +901,6 @@ C
       DOUBLE PRECISION FSHELL, ROBCS, RODEF
       INTEGER i, ia, iz
       INTEGER INT
-C
-C
       bcs = .TRUE.
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
@@ -1001,7 +921,6 @@ C-----determination of U for normal states
             bcs = .TRUE.
          ENDIF
       ENDIF
-C     fisfis d ===================================
 
 C-----
 C-----do loop over angular momentum
@@ -1035,9 +954,7 @@ C-----------temperature fade-out of the shell correction  --- done ----
             ELSE
                bcs = .TRUE.
             ENDIF
-C-----------Plujko_new
             Uexcit(Kk,Nnuc) = max(u,0.d0)
-C-----------Plujko_new(End)
             IF(u.LE.0.0D0)GOTO 99999
             IF(Z(Nnuc).LT.102.0D0 .AND. Z(Nnuc).GE.19.0D0)THEN
 C--------------next line is to calculate deformation parameter A2 only
@@ -1125,8 +1042,8 @@ C-----------dependent factor
          ENDIF
       ENDDO
 99999 END
-C
-C
+ 
+ 
       SUBROUTINE PRERO(Nnuc, Cf)
 CCC
 CCC   ********************************************************************
@@ -1159,7 +1076,6 @@ CCC
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C COMMON variables
 C
       DOUBLE PRECISION A2, A23, AP1, AP2, BF, DEL, DELp, GAMma
@@ -1175,14 +1091,11 @@ C Local variables
 C
       DOUBLE PRECISION ac, aj, arg, beta, cigor, fx, momort, mompar, s,
      &                 sb, sb0, sbnor, segnor, segs, selmax, stab, x,
-C    &                 x0, x1, xfis, xi, xk   RCN 31/12/2003
      &                 x0, x1, xi, xk
       REAL FLOAT
       INTEGER i, ia, iz, j, jstabf, k, kstab, ldstab
       INTEGER INT, MIN0
       DOUBLE PRECISION SHCFADE
-C
-C
 C-----check of the input data ---------------------------------------
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
@@ -1209,10 +1122,6 @@ C-----check of the input data ---------------------------------------
      &'EXECUTION STOPPED'')')Nnuc, Nnuc
          STOP
       ENDIF
-C     WRITE(6,
-C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
-C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
-C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
       IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0)RETURN
 C-----check of the input data ---- done -----------------------------
 C-----check whether the nucleus is fissile
@@ -1332,16 +1241,14 @@ c             ROFis(i, k, Nnuc) = 0.0
       ENDDO
 C-----setting to 0 level density array ------ done ------
       END
-C
-C
-C
+ 
+ 
       DOUBLE PRECISION FUNCTION ROBCS (A, U, Aj, Mompar, Momort, A2)
 CCC   ********************************************************************
 CCC   *                                                         CLASS:APU*
 CCC   *                        R O B C S                                 *
 CCC   ********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1372,7 +1279,6 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF(momo.LT.0.0D0)RETURN
       seff2 = momp*t
       IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333d0*momo**0.6666d0*t
-C     arg = s - Aj*(Aj + 1.0)/(2.0*seff2)
       IF(seff2.LE.0.0D0)RETURN
       arg = s - (Aj+0.5d0)**2/(2.d0*seff2)
       IF(arg.LE.0.0D0)RETURN
@@ -1384,9 +1290,8 @@ C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
       ROBCS = ROBCS*vibrk*momo*t*qdamp
       END
-C
-C
-C
+ 
+ 
       DOUBLE PRECISION FUNCTION SHCFADE(J, Shrj, Shrd)
 C
 Ccc   ********************************************************************
@@ -1400,7 +1305,6 @@ Ccc   ********************************************************************
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
-C
 C Dummy arguments
 C
       INTEGER J
@@ -1409,13 +1313,12 @@ C
 C Local variables
 C
       REAL FLOAT
-C
       SHCFADE = 1.
       IF(Shrd.NE.0.D0)SHCFADE = 1.0/(1.0 + EXP((FLOAT(J)-Shrj)/Shrd))
       END
-C
-C
-C
+ 
+ 
+ 
       SUBROUTINE ROGC(Nnuc, Scutf)
 CCC
 CCC   ********************************************************************
@@ -1429,22 +1332,6 @@ CCC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
 CCC   *                                                                  *
 CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
 CCC   *                                                                  *
-CCC   * CALLS:RIVOLI                                                     *
-CCC   *                                                                  *
-CCC   * AUTHOR: M.HERMAN                                                 *
-CCC   * DATE:   18.FEB.1993                                              *
-CCC   * REVISION:1    BY:M.Herman                 ON:29.Apr.1996         *
-CCC   * REVISION:2    BY:M.Herman                 ON:29.Oct.1996         *
-CCC   *   Automatic fit of nuclear temperature, Ux, and Eo to            *
-CCC   *   the discrete level scheme added. GNU-plots of the cumulative   *
-CCC   *   number of levels compared to the low energy GC formula         *
-CCC   *   provided.                                                      *
-CCC   * REVISION:3    BY:M.Herman                 ON:14.Jul.1997         *
-CCC   *   Table with a-parameters resulting from Mebel's analysis        *
-CCC   *   added as default.                                              *
-CCC   *                                                                  *
-CCC   * REVISION:4    BY:M.Herman                 ON:07.Feb.2000         *
-CCC   *   Structure simplified by adding a call to PRERO                 *
 CCC   *                                                                  *
 CCC   ********************************************************************
 CCC
@@ -1474,8 +1361,6 @@ C
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
-C
-C
       eom = 0.0
       cf = 0.0
 C-----next call prepares for lev. dens. calculations
@@ -1593,8 +1478,6 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                CLOSE(35)
                OPEN(34,file='fort.34')
                OPEN(36,file='fort.36')
-C              REWIND 36
-C              REWIND 34
                WRITE(36, *)'0.0 1.0'
                DO il = 2, NLV(Nnuc)
                   WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
@@ -1681,8 +1564,6 @@ C-----plot fit of the levels with the low energy l.d. formula
          CLOSE(35)
          OPEN(34,file='fort.34')
          OPEN(36,file='fort.36')
-C        REWIND 36
-C        REWIND 34
          WRITE(36, *)'0.0 1.0'
          DO il = 2, NLV(Nnuc)
             WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
@@ -1727,12 +1608,8 @@ C              0.5 coming from parity
                RO(i, j, Nnuc) = 0.5*RHOU*RJJ
                IF(RO(i, j, Nnuc).LT.RORed) RO(i, j, Nnuc) = 0.
 9875        ENDDO
-C           RCN, 12/2004
-C           efort = MAX(0.0D0, (e - DEL))
             efort = e
-C-----------Plujko_new
             Uexcit(i, Nnuc) = efort
-C-----------Plujko_new(End)
             TNUc(i, Nnuc) = SQRT(efort/am)
 9876     ENDDO
       ENDIF
@@ -1746,9 +1623,7 @@ C
             u = EX(i, Nnuc) - DEL
             IF(igna.EQ.1)am = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*u))
      &                        /u)
-C-----------Plujko_new
             Uexcit(i, Nnuc) = max(u,0.d0)
-C-----------Plujko_new(End)
             TNUc(i, Nnuc) = SQRT(u/am)
 C           RCN 12/2004
 C           IF(Scutf.LT.0.0D0)sigh = could be calculated according to Dilg's recommendations
@@ -1831,9 +1706,9 @@ C
          B = 0.
       ENDIF
       END
-C
-C
-C
+ 
+ 
+ 
       SUBROUTINE ROHFBCS(Nnuc)
 CCC
 CCC   *********************************************************************
@@ -1881,8 +1756,6 @@ C
       DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, uugrid,
      &                 rhotgrid, cgrid
       INTEGER kk, ia, iz, j, jmaxl, izr, iar, k, khi
-C
-C
       cf = 0
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1931,9 +1804,7 @@ C
       iugrid = i - 1
       DO kk = 1, NEX(Nnuc)
          u = EX(kk, Nnuc)
-C-----Plujko_new
          Uexcit(kk, Nnuc) = u
-C-----Plujko_new(End)
          IF(u.LT.0.)RETURN
          IF(u.GT.150.0D0)THEN
             WRITE(6, *)' '

@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-23 19:29:13 $
-Ccc   * $Id: input.f,v 1.82 2005-02-23 19:29:13 herman Exp $
+Ccc   * $Date: 2005-02-24 22:33:42 $
+Ccc   * $Id: input.f,v 1.83 2005-02-24 22:33:42 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -13,72 +13,7 @@ Ccc   *     input and calls READIN for optional input reading.           *
 Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   * output:none                                                      *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * calls: BNDG                                                      *
-Ccc   *            WHERE                                                 *
-Ccc   *        CLEAR                                                     *
-Ccc   *        LEVREAD                                                   *
-Ccc   *            BCDNUM                                                *
-Ccc   *        PTLEVSET                                                  *
-Ccc   *            PTLEVRE                                               *
-Ccc   *        READIN                                                    *
-Ccc   *            WHERE                                                 *
-Ccc   *        READLDP                                                   *
-Ccc   *            FSHELL                                                *
-Ccc   *            WHERE                                                 *
-Ccc   *        READNIX                                                   *
-Ccc   *            SHELLC                                                *
-Ccc   *                LYMASM                                            *
-Ccc   *                    XI                                            *
-Ccc   *                    XIMOD                                         *
-Ccc   *            WHERE                                                 *
-Ccc   *        ROCOL                                                     *
-Ccc   *            ALIT                                                  *
-Ccc   *            BARFIT                                                *
-Ccc   *                LPOLY                                             *
-Ccc   *            MOMFIT                                                *
-Ccc   *                LPOLY                                             *
-Ccc   *            RODEF                                                 *
-Ccc   *                DAMPV                                             *
-Ccc   *                VIBR                                              *
-Ccc   *            SHCFADE                                               *
-Ccc   *            SIGMAK                                                *
-Ccc   *        ROEMP                                                     *
-Ccc   *            BNDG (see above)                                      *
-Ccc   *            DAMIRO                                                *
-Ccc   *                FSHELL                                            *
-Ccc   *                MOMFIT (see above)                                *
-Ccc   *                ROBCS                                             *
-Ccc   *                    DAMPKS                                        *
-Ccc   *                    VIBR                                          *
-Ccc   *                RODEF (see above)                                 *
-Ccc   *                SIGMAK                                            *
-Ccc   *            FSHELL                                                *
-Ccc   *            PIPE                                                  *
-Ccc   *            PRERO                                                 *
-Ccc   *                BARFIT (see above)                                *
-Ccc   *                SHCFADE                                           *
-Ccc   *                SIGMAK                                            *
-Ccc   *        ROGC                                                      *
-Ccc   *            BARFIT (see above)                                    *
-Ccc   *            PIPE                                                  *
-Ccc   *            RHOU                                                  *
-Ccc   *            RJJ                                                   *
-Ccc   *            SHCFADE                                               *
-Ccc   *            SIGMAK                                                *
-Ccc   *        SMAT                                                      *
-Ccc   *        TLEVAL                                                    *
-Ccc   *            TRANSINP                                              *
-Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:      Jun.1994                                              *
-Ccc   *      revision by: M.Herman                   November 2000       *
-Ccc   *      revision by: R.Capote                   January  2001       *
-Ccc   *      revision by: R.Capote                   January  2005       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -94,11 +29,9 @@ C
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
       LOGICAL gexist
-C-----Plujko_new
       INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
       COMMON /MLOCOM1/ keyinput, kzz1, kaa1
       COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
-C-----Plujko_new(End)
 C
 C Local variables
 C
@@ -274,7 +207,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -392,7 +325,6 @@ C--------ejectile alpha
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.0
-C--------Plujko_new
 C        default values for  Key_shape and Key_GDRGFL
          KEY_shape = 0
          KEY_gdrgfl = 1
@@ -407,7 +339,6 @@ C        default values for  Key_shape and Key_GDRGFL
          Lqdfac = 1.0d0
          IGM1 = 0
          IGE2 = 0
-C--------Plujko_new (END)
 C
 C--------read entire input for the first energy calculations
 C--------mandatory part of the input
@@ -534,9 +465,7 @@ C--------NNUct total number of nuclei considered
 C
          NEJcm = NDEJC
          IF(aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0)NEJcm = 3
-C--------Plujko_new (projectile symbol correction)
          IF(ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0)SYMbe(0) = gamma
-C--------Plujko_new (END of  projectile symbol correction)
 C
 C--------correct ejectiles symbols
          DO nejc = 1, NEJcm
@@ -1204,7 +1133,6 @@ C-----set o.m.p. for the incident channel
          KTRlom(NPRoject, NTArget) = KTRompcc
       ENDIF
 
-C-----Plujko_new (set giant resonance parameters for target)
       GDRpar(1, 0) = EGDr1
       GDRpar(2, 0) = GGDr1
       GDRpar(3, 0) = CSGdr1
@@ -1229,7 +1157,6 @@ C-----Plujko_new (set giant resonance parameters for target)
       GMRpar(6, 0) = 0.0
       GMRpar(7, 0) = 1.0
       GMRpar(8, 0) = 0.0
-C-----Plujko_new (END of set giant resonance parameters for target)
 C
 C-----compound nucleus 1
       nnuc = 1
@@ -2117,7 +2044,6 @@ C
       n = ia - iz
       ncor = 0
       izcor = 0
-C-----Plujko_new (define Gspin, Gspar, E2p, E3m for gamma)
       IF(ia.EQ.0)THEN
 C        WRITE(*,*)'Input gamma channel  P T L E V S E T  '
          E2p = 0.D0
@@ -2126,7 +2052,6 @@ C        WRITE(*,*)'Input gamma channel  P T L E V S E T  '
          Gspar = 1
          RETURN
       ENDIF
-C-----Plujko_new (END define Gspin, Gspar, E2p, E3m for gamma)
 C
 C
       IF(FLOAT(n/2).NE.FLOAT(n)/2.0)ncor = 1
@@ -2422,8 +2347,6 @@ C-----
      &')i1, BETcc(i1)
             GOTO 100
          ENDIF
-C-----
-C-----Plujko_new
 C-----   init GDR & GFL for GSA
          IF(name.EQ.'GDRGFL')THEN
             KEY_gdrgfl = val
@@ -2431,8 +2354,6 @@ C-----   init GDR & GFL for GSA
          ENDIF
 C        Key_GDRGFL = 0 -  GDR parameters from Messina systematics
 C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f
-C-----Plujko_new(End)
-C-----
          IF(name.EQ.'FLAM  ')THEN
             FLAm(i1) = val
             WRITE(6,
@@ -2678,23 +2599,19 @@ C-----
             GOTO 100
          ENDIF
 C-----
-C--------Plujko_new
 C------- Insert Key for module "gamma-strength-analytic.f",
 C        Key_shape - key to specify the E1 strength shape    .
-C
          IF(name.EQ.'GSTRFN')THEN
-C           Key_shape = 0 --> old ver.2.18 variant for E1 stength-function fE1
-C           Key_shape =1 --> fE1=MLO1
-C           Key_shape =2 --> fE1=MLO2
-C           Key_shape =3 --> fE1=MLO3
-C           Key_shape =4 --> fE1=EGLO
-C           Key_shape =5 --> fE1=GFL
-C           Key_shape =6 --> fE1=SLO
+C-----------Key_shape = 0 --> old ver.2.18 variant for E1 stength-function fE1
+C-----------Key_shape =1 --> fE1=MLO1
+C-----------Key_shape =2 --> fE1=MLO2
+C-----------Key_shape =3 --> fE1=MLO3
+C-----------Key_shape =4 --> fE1=EGLO
+C-----------Key_shape =5 --> fE1=GFL
+C-----------Key_shape =6 --> fE1=SLO
             KEY_shape = val
-C           WRITE(6, '(" E1 strength shape key set to ", I3 )')Key_shape
             GOTO 100
          ENDIF
-C--------Plujko_new (End)
 C-----
          IF(name.EQ.'GDRDYN')THEN
             GDRdyn = val
@@ -3243,8 +3160,6 @@ C-----
             GOTO 100
          ENDIF
 C-----
-C-----Plujko_new : start of data input
-C-----
          IF(name.EQ.'E1    ')THEN
             IF(val.GT.0.0D+0) THEN
                WRITE(6, '('' E1 photo-absorption selected'')')
@@ -3274,10 +3189,6 @@ C-----
             IGE2 = val
             GOTO 100
          ENDIF
-C--------Plujko_new : end of data input
-C-----
-C-----
-C-----Carlson_new : start of data input
 C-----
          IF(name.EQ.'QD    ')THEN
             IF(IGE1.EQ.0) THEN
@@ -3291,11 +3202,7 @@ C-----
               ENDIF
             GOTO 100
          ENDIF
-C--------Carlson_new : end of data input
-C-----
-C-----
-C        fisfis d --------------
-C        checking for fission data in the optional input
+C----- checking for fission data in the optional input
          IF(name.EQ.'FISSHI')THEN
             izar = i1*1000 + i2
             IF(val.EQ.0) THEN
@@ -3325,7 +3232,6 @@ C        checking for fission data in the optional input
             WRITE(6,*) 'For ',i2,'-',SYMb(nnuc),' ', fstring
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
          IF(name.EQ.'FISMOD')THEN
             izar = i1*1000 + i2
             IF(izar.EQ.0)THEN
@@ -3350,7 +3256,6 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
          IF(name.EQ.'FISOPT')THEN
             izar = i1*1000 + i2
             IF(izar.EQ.0)THEN
@@ -3375,7 +3280,6 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
          IF(name.EQ.'FISBAR')THEN
             izar = i1*1000 + i2
             IF(izar.EQ.0)THEN
@@ -3400,7 +3304,6 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
          IF(name.EQ.'FISDEN')THEN
             izar = i1*1000 + i2
             IF(izar.EQ.0)THEN
@@ -3425,7 +3328,6 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
          IF(name.EQ.'FISDIS')THEN
             izar = i1*1000 + i2
             IF(izar.EQ.0)THEN
@@ -3450,8 +3352,6 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-------------------------------------------------------------------------
-C        fisfis u ----------------------------------------------------
          WRITE(6, '('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
      &         name
       ENDIF
@@ -3479,10 +3379,6 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   * calls:where                                                      *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman & R.Sturiale                                    *
-Ccc   * date:   27.Sep.1996                                              *
-Ccc   * revision:1    by: R.Capote               on:09.2004              *
-Ccc   * RIPL-2 databse used                                              *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -3495,10 +3391,6 @@ C
       INTEGER ii, iloc, nixa, nixz, nnuc
       DIMENSION izaf(NMAsse), excess(NMAsse)
       DIMENSION beta2x(NMAsse), emicx(NMAsse)
-C     OPEN(UNIT = 27, STATUS = 'unknown', FILE = '../data/mass-hms.dat')
-C     READ(27, '(///i7)')nmass
-C     READ(27, '(5(i7,f11.6,f7.1))')(izaf(k), excess(k), spnpar, k = 1,
-C    &                              nmass)
 C     RIPL-2 mass file adopted (format: (2i4,1x,a2,1x,i1,3f10.3,4f8.3))
 C     Ground state properties based on the FRDM model
 C     9066 masses
@@ -3646,16 +3538,6 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * calls:where                                                      *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   12.Jul.1997                                              *
-Ccc   * revision:1    by:M. Herman                on:11.07.1998          *
-Ccc   *               EMPIRE systematics for level density parameter 'a' *
-Ccc   *               introduced, 'a' values compatible with the dynamic *
-Ccc   *               level density model read in form file ldp.dat,     *
-Ccc   *               local normalization of the systematics to the exp. *
-Ccc   *               data introduced for the dynamic and Gilbert-       *
-Ccc   *               Cameron level densities.                           *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -4352,11 +4234,6 @@ Ccc   *                                                                *
 Ccc   *                                                                *
 Ccc   * calls:where                                                    *
 Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   * author: M.Herman & R.Sturiale                                  *
-Ccc   * date:   27.Sep.1996                                            *
-Ccc   * revision:1    by:M.Herman                 on: 1.Dec.1997       *
-Ccc   *                                                                *
 Ccc   ******************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -4401,11 +4278,6 @@ Ccc   * output: none                                                   *
 Ccc   *                                                                *
 Ccc   *                                                                *
 Ccc   * calls: none                                                    *
-Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   * author: M.Herman                                               *
-Ccc   * date:   23.Oct.1999                                            *
-Ccc   * revision:     by:                         on:                  *
 Ccc   *                                                                *
 Ccc   ******************************************************************
 Ccc
@@ -4537,16 +4409,6 @@ Ccc   * TARGET.LEV       contains all discrete levels for the target     *
 Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
-Ccc   * author: R.Capote                                                 *
-Ccc   * date:   21.Jan.2001                                              *
-Ccc   * revision:                                                        *
-Ccc   * date:   07.March.2001                                            *
-Ccc   * revision:                                                        *
-Ccc   * date:   07.June.2004(RIPL-2 deformations parameters added)       *
-Ccc   *                     (K=8+ included within the gs rotational band *
-Ccc   * revision:                                                        *
-Ccc   * date:   10.Sept.2004                                             *
-Ccc   *         Non coupled levels for DWBA calculations retrieved       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -4725,7 +4587,6 @@ C
      &     STATUS = 'old', ERR = 200)
       READ(84, '(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
-C        README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
          READ(84, '(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)', END = 300,
      &        ERR = 300)nztmp, natmp, etmp, jtmp, iptmp, betatmp, reftmp
          IF(nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
@@ -5172,7 +5033,6 @@ C-----------------swapping
                ENDIF
             ENDDO
          ENDDO
-C        ENDIF
          WRITE(6, *)
          WRITE(6, *)'   Ncoll  '
          WRITE(6, '(3x,I5)')ND_nlv
@@ -5314,7 +5174,7 @@ C
 C
       SUBROUTINE INPFIS(Nnuc)
 C
-C Creates fission.inp  which contains all the fission
+C Creates fission.inp  which contains all fission
 C parameters independent of energy.
 C
       INCLUDE 'dimension.h'
@@ -5432,7 +5292,7 @@ C------  Lynn values
                H(1, 1) = 0.65
                H(1, 2) = 0.45
             ENDIF
-C-------default values for the second well
+C----------default values for the second well
             H(1, 3) = 1.
             EFB(3) = 2.
          ENDIF
@@ -5606,7 +5466,6 @@ C---- writing data in FISSION.INP
      &                            '      Nr.wells=', NRWel
       WRITE(79, '(a8,f2.0)')'FISMOD =', FISmod(Nnuc)
       WRITE(79, *)'  '
-C
       IF(NRBar.EQ.1)THEN
          WRITE(79, '(a)')'    Va      ha    (in Mev) '
          WRITE(79, '(2f8.3)')EFB(1), H(1, 1)
@@ -5618,7 +5477,6 @@ C
          WRITE(79, '(f9.4)')DEFfis(1)
          WRITE(79, *)' '
       ENDIF
-C
       IF(NRBar.EQ.2)THEN
          IF(FISmod(Nnuc).EQ.0.)THEN
             WRITE(79, '(a)')
@@ -5647,7 +5505,6 @@ C
          WRITE(79, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(79, *)' '
       ENDIF
-C
       IF(NRBar.EQ.3)THEN
          IF(FISmod(Nnuc).EQ.0.)THEN
             WRITE(79, '(a,1x,a)')
@@ -5678,7 +5535,6 @@ C
          WRITE(79, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(79, *)'  '
       ENDIF
-C
       IF(NRBar.EQ.5)THEN
          WRITE(79, '(a,1x,a)')
      &'    Va      ha      Vb      hb      Vc       hc      Vi
@@ -5694,12 +5550,10 @@ C
          WRITE(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
          WRITE(79, *)' '
       ENDIF
-C
       IF(FISopt(Nnuc).EQ.0.)cara1 = ' Subbarrier effects neglected '
       IF(FISopt(Nnuc).GT.0.)cara1 = ' Subbarrier effects considered'
       WRITE(79, '(a8,f2.0,a36)')'FISOPT=', FISopt(Nnuc), cara1
       WRITE(79, *)' '
-C
       IF(FISopt(Nnuc).GT.0.)THEN
          WRITE(79, *)'  '
          WRITE(79, '(a161)')
@@ -5713,7 +5567,6 @@ C
          WRITE(79, '(3f11.4)')(WIMag(i), i = 1, 3)
          WRITE(79, *)
       ENDIF
-C
       DO ibar = 1, NRBar
          WRITE(79, '(a39,I2,a2,I2)')
      &                            'Number of discrete states at barrier'
@@ -5737,15 +5590,12 @@ C
          ENDDO
       ENDDO
       WRITE(79, *)'  '
-C
       IF(NRBarc.EQ.3)THEN
          WRITE(79, *)' Veq(MeV)  Heq(MeV)  defeq'
          WRITE(79, '(3f9.3)')VEQ, HOEq, DEFeq
       ENDIF
-C
       nrbarc1 = NRBarc
       IF(NRBarc.EQ.3)nrbarc1 = 2
-C
       IF(FISden(Nnuc).EQ.0.)THEN
          cara2 =
      &          'Level densities at the saddle points taken from RIPL-2'
@@ -5753,7 +5603,6 @@ C
          WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
          WRITE(79, *)
       ENDIF
-C
       IF(FISden(Nnuc).EQ.1.)THEN
          cara2 = 'Level densities at the saddle points EMPIRE specific'
          WRITE(79, *)'  '
@@ -5761,7 +5610,6 @@ C
          WRITE(79, *)'  '
          WRITE(79, *)
      &'  Asymmetry  shell-corr  delta    gamma    atilf/atil at saddles'
-C
          DO nr = 1, nrbarc1
             IF(FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
@@ -5776,14 +5624,13 @@ C
             ENDIF
          ENDDO
       ENDIF
-C---- the coefficients of a linear energy dependent factor adjusting
-C     the fission level densities;
+C-----coefficients of a linear energy dependent factor adjusting
+C-----fission level densities;
       DO nr = 1, nrbarc1
          ENH_ld(1, nr) = 1.
          ENH_ld(2, nr) = 0.
          ENH_ld(3, nr) = 0.
       ENDDO
-C
       WRITE(79, *)'   '
       WRITE(79, '(a87)')
      &'Coefficients of a linear energy dependent factor adjusting the fi
@@ -5792,16 +5639,13 @@ C
      &'(a0 + a1*E + a2*E**2) * rho(E,J) where E stands for excitation en
      &ergy above the barrier'
       WRITE(79, *)'                a0       a1       a2 '
-C
       DO nr = 1, nrbarc1
          WRITE(79, '(1x, A8, 1x, I1, 3f9.3)')'Barrier', nr,
      &         ENH_ld(1, nr), ENH_ld(2, nr), ENH_ld(3, nr)
       ENDDO
-C
       END
 C*==read_inpfis.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-C
-C---------------------------------------------------------------------
+
       SUBROUTINE READ_INPFIS(Nnuc)
 C
       INCLUDE 'dimension.h'
@@ -5817,45 +5661,36 @@ C
      &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
      &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
       DOUBLE PRECISION csfism
-C
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm,
      &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm,
      &                 destepm
-C
       INTEGER nrbarc1, iz, ia, BFFm
       CHARACTER*2 carz, cara3
       CHARACTER*8 cara8
       CHARACTER*33 cara1
       CHARACTER*40 line
-C
       OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
  100  READ(79, '(A8)')cara8
-C
       IF(cara8.NE.'Isotope:')GOTO 100
       READ(79, '(a40)')line
       READ(79, '(4x,a2,i3,2x,a2,i3)')carz, iz, cara3, ia
       IF(carz.EQ.'Z=' .AND. iz.NE.INT(Z(Nnuc)) .OR. ia.NE.INT(A(Nnuc)))
      &   GOTO 100
-C
       READ(79, '(a40)')line
       READ(79, '(a8,f2.0,a28,a20)')cara8, FISbar(Nnuc)
       READ(79, '(15x,i1,15x,i1)')NRBar, NRWel
       READ(79, '(a8,f2.0)')cara8, FISmod(Nnuc)
       READ(79, *)
       READ(79, *)
-C
       nrmod = INT(FISmod(Nnuc)) + 1
-C
       IF(FISmod(Nnuc).EQ.0.)READ(79, *)(EFB(i), H(1, i), i = 1, NRBar)
       IF(FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2), EFB(3), H(1, 3)
-C
       IF(FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2)
       IF(FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.1)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2), EFBm(3), HM(1, 3), EFB(3)
      &   , H(1, 3)
-C
       IF(FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2), EFBm(3), HM(1, 3)
       READ(79, *)
@@ -5865,10 +5700,8 @@ C
       READ(79, *)
       READ(79, *)(DEFfis(i), i = 1, NRBar)
       READ(79, *)
-C
       READ(79, '(a8,f2.0,a36)')cara8, FISopt(Nnuc), cara1
       READ(79, *)
-C
       IF(FISopt(Nnuc).GT.0.)THEN
          READ(79, *)
          READ(79, *)
@@ -5876,7 +5709,6 @@ C
          READ(79, '(3f11.4)')(WIMag(i), i = 1, 3)
          READ(79, *)
       ENDIF
-C
       DO ibar = 1, NRBar
          READ(79, '(a39,I2,a2,I2)')line, ibaro, cara8, NRFdis(ibar)
          READ(79, *)
@@ -5896,19 +5728,15 @@ C
       ENDDO
       READ(79, *)
       NRBarc = NRBar - NRWel
-C
       IF(NRBarc.EQ.3)THEN
          READ(79, *)
          READ(79, '(3f9.3)')VEQ, HOEq, DEFeq
       ENDIF
       READ(79, *)
-C
       nrbarc1 = NRBarc
       IF(NRBarc.EQ.3)nrbarc1 = 2
-C
       READ(79, '(a7,f2.0)')cara8, FISden(Nnuc)
       READ(79, *)
-C
       IF(FISden(Nnuc).EQ.1.)THEN
          READ(79, *)
          DO ibar = 1, nrbarc1
@@ -5926,18 +5754,15 @@ C
             ENDIF
          ENDDO
       ENDIF
-C
       READ(79, *)
       READ(79, *)
       READ(79, *)
       READ(79, *)
-C
       DO nr = 1, nrbarc1
          READ(79, '(1x, A8, 1x, I1, 3f9.3)')cara8, i, ENH_ld(1, nr),
      &        ENH_ld(2, nr), ENH_ld(3, nr)
       ENDDO
       CLOSE(79)
-C
       END
 C*==defo_fis.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 C-----------------------------------------------------------------------
@@ -5997,18 +5822,15 @@ C-----deformations at saddles and wells and matching points--------------------
      &           + SQRT((vjj(1) - vjj(2))/(1.D0 + (ho(1)/ho(2))**2))
      &           /(smiu*ho(1))
       ejoin(1) = 2*epsil(1) - ejoin(2)
-C
       DO k = 2, nrbarm
          ejoin(2*k - 1) = ejoin(2*(k - 1))
          epsil(k) = ejoin(2*(k - 1)) + (ho(k - 1)/ho(k))
      &              **2*(ejoin(2*(k-1)) - epsil(k - 1))
-C
          IF(k.LT.nrbarm)ejoin(2*k) = epsil(k)
      &                               + SQRT(( - 1)**k*((vjj(k+1)-vjj(k))
      &                               )/(1.D0 + (ho(k)/ho(k+1))**2))
      &                               /(smiu*ho(k))
       ENDDO
-C
       IF(NRBarc.EQ.2 .AND. NRWel.EQ.0)THEN
          DEFfis(1) = epsil(1)
          DEFfis(2) = epsil(3)
@@ -6025,7 +5847,7 @@ C
          DEFfis(4) = epsil(2)
          DEFfis(5) = epsil(4)
       ENDIF
-C-------parameters of the equivalent outer barrier
+C-----parameters of the equivalent outer barrier
 100   DO ibars = 1, NRBarc
          XMInn(ibars) = 0.0001
          DO nr = 1, NRFdis(ibars)
@@ -6038,16 +5860,13 @@ C-------parameters of the equivalent outer barrier
          efbmin = MIN(EFB(2) + XMInn(2), EFB(3) + XMInn(3))
          tf2 = 1./(1. + EXP( - 2.*PI*(efbmin-vvqq-EFB(2)))/H(1, 2))
          tf3 = 1./(1. + EXP( - 2.*PI*(efbmin-vvqq-EFB(3)))/H(1, 3))
-C
          VEQ = efbmin
          tdir = (1. - tf2)*(1. - tf3)
          tdir23 = tf2*tf3/(1. + SQRT(ABS(tdir)) + tdir)
          rog = LOG(1./tdir23 - 1.)
-C
          HOEq = ABS(2*PI*((efbmin-vvqq-VEQ))/rog)
          beta1 = epsil(3) - SQRT(EFB(2))/(smiu*H(1, 2))
          beta2 = epsil(5) + SQRT(EFB(3))/(smiu*H(1, 3))
-C
          DEFeq = (beta2 - beta1)/2. + epsil(2)
       ENDIF
       END
@@ -6079,29 +5898,22 @@ C-----continuum, level densities at saddle points
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm,
      &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm,
      &                 destepm
-C
       DOUBLE PRECISION ACR, ACRt, ATIl, MORtcrt, MPArcrt, DETcrt, ECOnd,
      &                 SCR, TCRt, UCRt, BET2
       DOUBLE PRECISION rotemp, ROFis, rafis
-C
       DOUBLE PRECISION EFDis, EFB, UGRid, XMInn, xmax,mm2
-C----------------------
       CHARACTER*2 simb
       CHARACTER*50 filename
       INTEGER BFFm
-C
       excn1 = EMAx(Nnuc)
       BET2 = DEFfis(ib)
       IF(NRBarc.EQ.3 .AND. ib.EQ.2) BET2 = DEFeq
 C-----where continuum starts,ends,steps in between
-
-
       IF(Mmod.EQ.0) THEN
         XMInn(ib) = 0.0001
         DO nr = 1, NRFdis(ib)
           IF(EFDis(nr, ib).GT.XMInn(ib))  XMInn(ib) = EFDis(nr, ib)
         ENDDO
-
         IF(NRBarc.EQ.3) XMInn(2) = 0.0001
         IF(EXCn1.LE.(EFB(ib)+Xminn(ib))) THEN
            xmax = Xminn(ib)+4.d0
@@ -6142,9 +5954,7 @@ C-----where continuum starts,ends,steps in between
         DO kk = 1, NRBinfism(Mmod)
           UGRidf(kk, Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepm(mmod)
         ENDDO
-
       ENDIF
-
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
       in = ia - iz
@@ -6170,14 +5980,12 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
          IF(ii.EQ.NFISEN)GOTO 200
          ii = ii + 1
          GOTO 100
-C
  150     WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
          WRITE(6, *)' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
          WRITE(6, *)' ERROR: HFBCS lev dens. at the inner saddle point m
      &issing'
          STOP 'ERROR: HFBCS lev dens. at the inner saddle point missing'
  200     CLOSE(81)
-C
          IF(NRBar.GT.1)THEN
             WRITE(filename, 99003)iz
 99003       FORMAT('../RIPL-2/fission/fis-levden-hfbcs-outer/z', i3.3,
@@ -6207,7 +6015,6 @@ C
      &        'ERROR: HFBCS lev dens. at the outer saddle-point missing'
  280        CLOSE(82)
          ENDIF
-C
          IF(NFISJ.LT.NLW)THEN
             DO ibb = 1, NRBarc
                DO j = NFISJ + 1, NLW
@@ -6217,7 +6024,6 @@ C
                ENDDO
             ENDDO
          ENDIF
-
       ELSEIF(FISden(Nnuc).EQ.1.)THEN
 C
 C-----Empire specific
@@ -6234,7 +6040,6 @@ C
          ATIl = AP1*A(Nnuc) + AP2*A23
 c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
          atil=atil*rafis
-
          IF(Mmod.EQ.0)THEN
             GAMma = GAMmafis(ib)
             DELp = DELtafis(ib)
@@ -6250,7 +6055,6 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             iff = BFFm(Mmod)
             desteppp=destepm(Mmod)
          ENDIF
-
          TCRt = 0.567*DELp
          ar = ATIl*(1.0 + SHC(nnuc)*GAMma)
          DO ix = 1, 20
@@ -6313,15 +6117,13 @@ C        close(83)
          TCRtf(ib)=tcrt
          SCRtf(ib)=scr
       ENDIF
-
       END
-c-------------------------------------------------------------------------
+
+
       DOUBLE PRECISION FUNCTION ROBCSf(A,U, Aj, Mompar, Momort, A2,iff)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
       COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
       DOUBLE PRECISION  Momort, Mompar, momo, momp
-C
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471/,pi/3.1415926d0/
       ROBCS = 0.d0
@@ -6347,21 +6149,18 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF(iff.eq.3) ROBCSf = ROBCSf*2.
       IF(iff.eq.4) ROBCSf = ROBCSf*4.*sqrt(2.*pi)*sqrt(momp*t)
       END
-C------------------------------------------------------------------------
+
+
       DOUBLE PRECISION FUNCTION RODEFf(A, E, Ac, Aj, Mompar, Momort,
      &                 Ss,  Argred, Expmax,iff)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
-C
       DOUBLE PRECISION A,  Ac, Aj, Argred, E, Expmax, Momort,
      &                 Mompar, Ss
       INTEGER i, k, kmin
-C
       DATA const/0.01473144/,pi/3.1515926d0/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
       RODEFf = 0.d0
       sum = 0.d0
-
       IF(Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0)THEN
          WRITE(6, *)'WARNING: Negative moment of inertia for spin ', Aj
          WRITE(6, *)'WARNING: 0 level density returned by rodef'
@@ -6417,9 +6216,9 @@ c        u = e - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
       IF(iff.eq.3) RODEFf = RODEFf*2.
       IF(iff.eq.4) RODEFf = RODEFf*4.*sqrt(2.*pi)*sqrt(mompar*t)
       END
-c---------------------------------------------------
+
+
       SUBROUTINE DAMPROTVIB(E1, Qk,t,q, A, vibrk)
-C---------------------------------------------------
       DOUBLE PRECISION E1, Qk,dmphalf, dmpdiff,Q, T,arg, dt, thalf,
      &                 A, vibrk,cost, ht, m0, pi, r0, sdrop
       Qk = 0.
@@ -6528,7 +6327,6 @@ C
      &        nana(9000), halpha2(9000), hbetagfl(700),
      &        henergygfl(700), nzram(700), naram(700),numram
       DATA pi/3.141592654D0/
-C
       kz = Znucleus + 0.001
       ka = Anucleus + 0.001
       IF(kz.EQ.kzz .AND. ka.EQ.kaa) return
@@ -6608,9 +6406,7 @@ C          Selecting only 2+ states
       EG0 = 31.2/a3 + 20.6/SQRT(a3)
       GW0 = 0.026*EG0**1.91
       CS0 = 1.2*120.*n*zz/(aann*pi*GW0)
-C----Plujko_new
       IF (Key_GDRGFL.NE.0) THEN
-C----Plujko_new(END)
         DO i = 1, 270
           IF(kz.EQ.nnz(i) .AND. ka.EQ.nna(i))THEN
             NG = nng(i)
@@ -6645,9 +6441,7 @@ C             *************************************************
             ENDIF
           ENDIF
         ENDDO
-C----Plujko_new
       ENDIF
-C----Plujko_new(END)
 C     ***********************************************************
 C     *Setting the deformation parameter from "deflib.dat" file *
 C     *for calculation of the GDR energies and widths           *
