@@ -1,8 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Sin $
-Ccc   * $Date: 2004-10-07 20:40:09 $
-Ccc   * $Id: input.f,v 1.42 2004-10-07 20:40:09 Sin Exp $
-C
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-10-08 15:51:37 $
+Ccc   * $Id: input.f,v 1.43 2004-10-08 15:51:37 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -188,8 +187,8 @@ C     W2=0.04784467   (ECIS)
 C
 C     Changed to ECIS-OLD SCAT PRESCRIPTION
 C     CORRESPOND TO THE FOLLOWING CONSTANT VALUES
-C     AMUmev=931.5017646d0                                              calc-088
-C     hhbarc = 197.328604d0                                             calc-089
+C     AMUmev=931.5017646d0
+C     hhbarc = 197.328604d0
       XNExc = 8.071323D0
 C-----From SCAT2000
       ampipm = 1.395688D+02
@@ -200,6 +199,11 @@ C-----according to the ENDF-6 manual (April 2001)
       AMPi = (2.D0*ampipm + ampi0)/3.D0
       ELE2 = 1.4399652D+00
       HHBarc = 1.97327053D+02
+C
+C     CHECK mass values
+C
+      AMUneu = 1.008665d0
+      AMUpro = 1.007825d0
 C
 C-----already converted to mb
 C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
@@ -293,7 +297,6 @@ C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 1
-
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -625,13 +628,28 @@ C--------------------------set reaction string
                            ENDIF
                            IF(NDEJC.GT.3 .AND. iac.NE.0)THEN
                               WRITE(cnejec, '(I1)')iac
-                              IF(in.GT.1)THEN
+                              IF(iac.GT.1)THEN
                                  REAction(nnuc)(iend + 1:iend + 1)
      &                              = cnejec
                                  iend = iend + 1
                               ENDIF
-                              REAction(nnuc)(iend + 1:iend + 2) = 'li'
-                              iend = iend + 2
+C                             REAction(nnuc)(iend + 1:iend + 2) = 'li'
+C                             iend = iend + 2
+                          IF(AEJc(NDEJC).eq.2 .and.
+     &                           ZEJc(NDEJC).eq.1) THEN
+                                 REAction(nnuc)(iend + 1:iend + 1)='d'
+                                 iend = iend + 1
+                          ENDIF
+                          IF(AEJc(NDEJC).eq.3 .and.
+     &                           ZEJc(NDEJC).eq.1) THEN
+                                 REAction(nnuc)(iend + 1:iend + 1)='t'
+                                 iend = iend + 1
+                          ENDIF
+                          IF(AEJc(NDEJC).eq.3 .and.
+     &                           ZEJc(NDEJC).eq.2) THEN
+                                 REAction(nnuc)(iend + 1:iend + 3)='He3'
+                                 iend = iend + 3
+                          ENDIF
                            ENDIF
                            REAction(nnuc)(iend + 1:iend + 1) = ')'
 C--------------------------set residues to be used for EXFOR retrieval
@@ -1050,16 +1068,17 @@ C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
          CALL READLDP
 C--------Capote 2001
-         IF(DIRect.GT.0 .AND. AEJc(0).LE.1.0D0)THEN
+C        IF(DIRect.GT.0 .AND. AEJc(0).LE.1.0D0)THEN
+         IF(DIRect.GT.0)THEN  ! Inelastic scattering by DWBA for all particles
 
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
 
 C           Defining ICOller(i)
             DO i = 2, ND_nlv
-            itmp=ICOllev(i)
-            if(itmp.gt.50) itmp = ICOllev(i) - 50
-               ICOller(i) = itmp
+             itmp=ICOllev(i)
+             if(itmp.gt.50) itmp = ICOllev(i) - 50
+             ICOller(i) = itmp
             ENDDO
 
             IF(ierr.EQ.1)THEN
@@ -1216,8 +1235,6 @@ C-----set giant resonance parameters for CN
 Csinsin
 C        Q(1,1)=4.
 C        Q(0,1)=2.
-C        Capote 1/03/2001
-C        AMAss(0) = (A(0)*amumev + XMAss(0))/(amumev + xnexc)
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
       EINl = EIN
@@ -1284,7 +1301,6 @@ C        DWBA calculation for additional collective levels
          CALL ECIS_CCVIB(0, 0, -EINl, .FALSE., .TRUE.)
 
          IF(DIRECT.NE.3) THEN
-
            IF(IOPsys.EQ.0)THEN
 C            LINUX
              ctmp = 'mv ecis03.cs dwba.cs'
@@ -1296,7 +1312,7 @@ C            LINUX
 C            ctmp = 'mv ecis03.pol dwba.pol'
 C            iwin = PIPE(ctmp)
            ELSE
-C	       WINDOWS
+C          WINDOWS
              iwin = PIPE('move ecis03.cs dwba.cs')
              iwin = PIPE('move ecis03.ics dwba.ics')
              iwin = PIPE('move ecis03.ang dwba.ang')
@@ -1322,7 +1338,7 @@ C          LINUX
 C            ctmp = 'mv ecis03.pol ccm.pol'
 C            iwin = PIPE(ctmp)
            ELSE
-C	     WINDOWS
+C        WINDOWS
             iwin = PIPE('copy ecis03.cs ccm.cs>NUL')
             iwin = PIPE('move ecis03.ics ccm.ics')
             iwin = PIPE('move ecis03.ang ccm.ang')
@@ -1345,10 +1361,8 @@ C          inelastic cross section
              READ(46,'(A80)',END=995) rstring
   995        write(47,'(A80)') rstring
            ENDDO
-C1000	     CLOSE(45, STATUS='DELETE')
-C	     CLOSE(46, STATUS='DELETE')
- 1000     CLOSE(45)
-        CLOSE(46)
+ 1000	    CLOSE(45, STATUS='DELETE')
+	    CLOSE(46, STATUS='DELETE')
            CLOSE(47)
 C
 C          Renormalization of the reaction cross section to consider
@@ -1367,8 +1381,6 @@ C          angular distribution
 C            checking the correspondence of the excited states
              IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
                write(6,*)
-     >       ' WARNING: DWBA and CCM state order does not coincide'
-             STOP
      >          ' WARNING: DWBA and CCM state order does not coincide'
              ENDIF
  1010        BACKSPACE 45
@@ -1379,14 +1391,11 @@ C            checking the correspondence of the excited states
                READ(46,'(A80)' , END = 1015) rstring
  1015          write(47,'(A80)') rstring
              ENDDO
-             ENDDO
-C2000	     CLOSE(45, STATUS='DELETE')
-C          CLOSE(46, STATUS='DELETE')
- 2000	     CLOSE(45)
-           CLOSE(46)
-             CLOSE(47)
-
-           ENDIF  ! END of DIRECT.NE.3 case
+           ENDDO
+ 2000	    CLOSE(45, STATUS='DELETE')
+           CLOSE(46, STATUS='DELETE')
+           CLOSE(47)
+         ENDIF  ! END of DIRECT.NE.3 case
 
          IF(KTRompcc.GT.0)THEN
 C           Restoring KTRlom(0,0) and RIPl_omp(0)
@@ -1401,12 +1410,12 @@ C-----determination of excitation energy matrix in cn
 C
       ECUt(1) = ELV(NLV(1), 1)
       IF(FITlev.GT.0.0D0) THEN
-           ECUt(1) = 0.0
+         ECUt(1) = 0.0
 C
 C        RCN, 09/2004 (If ENDF ne 0, then MAx(Ncut)=40 !! (no good option)
 C--------set ENDF flag to 0 (no ENDF file for formatting)
          ENDF=0
-        ENDIF
+      ENDIF
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -1415,7 +1424,7 @@ C-----check whether any residue excitation is higher than CN
       ENDDO
       IF(EMAx(1) - ECUt(1).LT.EMAx(1) - qmin)THEN
          DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
-         NEX(1) = max(NINT((EMAx(1) - ECUt(1))/DE),2)
+         NEX(1) = max(INT((EMAx(1) - ECUt(1))/DE),2)
       ENDIF
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       DO i = 1, NEX(1)
@@ -1515,9 +1524,6 @@ C-----------determination of excitation energy matrix in res. nuclei
             IF(FITlev.GT.0.0D0)ECUt(nnur) = 0.0
             IF(Q(nejc, nnuc).EQ.0.0D0)THEN
                CALL BNDG(nejc, nnuc, Q(nejc, nnuc))
-C              Capote 1/03/2001
-C              AMAss(nnuc) = (A(nnuc)*amumev + XMAss(nnuc))
-C              &                       /(amumev + xnexc)
                AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
             ENDIF
             emaxr = 0.0
@@ -2340,9 +2346,9 @@ C           ICOmpff = 0
 C           ENDIF
 C-----------Print some final input options
             IF(DIRect.eq.0) then
-             ECUtColl = 0.
-             SCUtColl = 0
-              ENDIF
+            ECUtColl = 0.
+            SCUtColl = 0
+            ENDIF
             IF(KEY_shape.EQ.0)WRITE(6,
      &           '('' E1 strength shape function set to EMPIRE v2.18'')'
      &           )
@@ -2480,8 +2486,8 @@ C                 &       'RIPL OMP will be used for inelastic channel '
          ENDIF
          IF(name.EQ.'EcDWBA')THEN
             ECUtColl = val
-              JCUtColl = i1
-              IF(JCUtColl.eq.0) JCUtColl=2
+            JCUtColl = i1
+            IF(JCUtColl.eq.0) JCUtColl=2
             WRITE(6,
      &       '('' Cut-off energy for collective levels for DWBA calculat
      &ions is'',F5.1,'' MeV'')' ) ECUtColl
@@ -3615,29 +3621,18 @@ Ccc   *                                                         class:iou*
 Ccc   *                         R E A D N I X                            *
 Ccc   *                                                                  *
 Ccc   *     Reads nuclear deformations masses and shell-corrections      *
-Ccc   *     from the input parametr library file nix-moller-audi.dat     *
-Ccc   *     file organized in the following way:                         *
-Ccc   *     Z, N, A                                                      *
-Ccc   *     EPS1, EPS2, EPS3, EPS4, EPSsym6  (Deformations)              *
-Ccc   *     BETA1, BETA2, BETA4, BETA6       (Deformations)              *
-Ccc   *     Emic, Mth, Mexp, SIGexp        (Shell corrections and Masses)*
-Ccc   *     EmicFL, MthFL                                                *
-Ccc   *                                                                  *
+Ccc   *     from the RIPL-2 mass file mass-frdm95.dat                    *
 Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   * output:none                                                      *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * calls:where                                                      *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   * author: M.Herman & R.Sturiale                                    *
 Ccc   * date:   27.Sep.1996                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
-Ccc   *                                                                  *
+Ccc   * revision:1    by: R.Capote               on:09.2004              *
+Ccc   * RIPL-2 databse used                                              *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -3645,11 +3640,80 @@ Ccc
 C
 C Local variables
 C
-      DOUBLE PRECISION beta2, beta3, beta4, beta6, emic, emicfl, eps2,
-     &                 eps3, eps4, eps6, eps6sym, sigexp, xmassexp,
-     &                 xmassth, xmassthfl, zmn, zmx
+      DOUBLE PRECISION xmassexp,xmassth, zmn, zmx
       DOUBLE PRECISION DMAX1
-      INTEGER ii, iloc, nixa, nixn, nixz, nnuc
+      INTEGER ii, iloc, nixa, nixz, nnuc
+      DIMENSION izaf(NMAsse), excess(NMAsse)
+      DIMENSION beta2x(NMAsse), emicx(NMAsse)
+
+C     OPEN(UNIT = 27, STATUS = 'unknown', FILE = '../data/mass-hms.dat')
+C     READ(27, '(///i7)')nmass
+C     READ(27, '(5(i7,f11.6,f7.1))')(izaf(k), excess(k), spnpar, k = 1,
+C    &                              nmass)
+
+C     RIPL-2 mass file adopted (format: (2i4,1x,a2,1x,i1,3f10.3,4f8.3))
+C     Ground state properties based on the FRDM model
+C     9066 masses
+
+      OPEN(UNIT = 27, STATUS = 'OLD',
+     &          FILE = '../RIPL-2/masses/mass-frdm95.dat')
+C     Skipping header lines
+      read(27,*)
+      read(27,*)
+      read(27,*)
+      read(27,*)
+      DO k=1,NMAsse
+C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
+       READ(27, '(2i4,4x,i1,3f10.3,f8.3)',END=100)
+     &   nixz, nixa, iflag, xmassexp, xmassth, emicx(k), beta2x(k)
+       izaf(k)=nixz*1000+nixa
+       if(iflag.GE.1) then
+         excess(k) = xmassexp
+       else
+         excess(k) = xmassth
+       endif
+      ENDDO
+  100 CLOSE(UNIT = 27)
+
+      DO iz = 0, 130
+         DO ia = 1, 400
+          RESmas(iz, ia) = 0
+            EXCessmass(iz, ia) = 0
+         ENDDO
+      ENDDO
+C
+      DO k = 1, NMAsse
+         iz = izaf(k)/1000
+         ia = MOD(izaf(k), 1000)
+       if(iz.gt.130 .OR. ia.gt.400) cycle
+         RESmas(iz, ia) = REAL(ia) + excess(k)/AMUmev
+         EXCessmass(iz, ia) = excess(k)
+      ENDDO
+C
+C     nucmas: subroutine for formula of Duflo-Zuker for masses outside M-N
+C
+      DO iz = 6, 100
+         DO ia = 2*iz - 10, 3*iz
+            IF(RESmas(iz, ia).EQ.0.D0)THEN
+               in = ia - iz
+               CALL NUCMAS(in, iz, ebin)
+               RESmas(iz, ia) = iz*AMUpro + in*AMUneu - ebin/AMUmev
+               EXCessmass(iz, ia) = RESmas(iz, ia)*AMUmev - REAL(ia)
+            ENDIF
+         ENDDO
+      ENDDO
+
+C     mbc1 a quick/temp? solution to weird light undefined masses: define
+C     resmas=A for al nuclei so far undefined
+C     prvisouly i had a problem for be6 => be5 +n since mass be5 undefined
+      DO iz = 1, 130
+         DO ia = 1, 400
+            IF(RESmas(iz, ia).EQ.0.D0)THEN
+               RESmas(iz, ia) = REAL(ia)/AMUmev
+               EXCessmass(iz, ia) = 0
+            ENDIF
+         ENDDO
+      ENDDO
 C
       zmx = 0.
       zmn = 200.
@@ -3657,45 +3721,47 @@ C
          zmx = DMAX1(Z(nnuc), zmx)
          zmn = MIN(Z(nnuc), zmn)
       ENDDO
- 100  READ(25, '(3I5,9F10.3,6F10.2)', END = 99999)nixz, nixn, nixa,
-     &     eps2, eps3, eps4, eps6, eps6sym, beta2, beta3, beta4, beta6,
-     &     emic, xmassth, xmassexp, sigexp, emicfl, xmassthfl
-      IF(nixz.GE.zmn .AND. nixz.LE.zmx)THEN
-         CALL WHERE(nixz*1000 + nixa, nnuc, iloc)
+
+      DO k = 1, NMAsse
+       nixz = izaf(k)/1000
+       nixa = MOD(izaf(k), 1000)
+       iz = izaf(k)/1000
+       ia = MOD(izaf(k), 1000)
+       IF(nixz.GE.zmn .AND. nixz.LE.zmx)THEN
+         CALL WHERE(izaf(k), nnuc, iloc)
          IF(iloc.EQ.0)THEN
-            SHC(nnuc) = emic
-            IF(SHNix.EQ.0.D0)CALL SHELLC(A(nnuc), Z(nnuc), SHC(nnuc))
-            DEF(1, nnuc) = beta2
-            IF(xmassexp.NE.0.D0)THEN
-               XMAss(nnuc) = xmassexp
-            ELSE
-               XMAss(nnuc) = xmassth
-            ENDIF
+            SHC(nnuc) = emicx(k)
+            IF(SHNix.EQ.0.D0) CALL SHELLC(A(nnuc), Z(nnuc), SHC(nnuc))
+            DEF(1, nnuc) = beta2x(k)
+            XMAss(nnuc) = EXCessmass(iz, ia)
          ENDIF
          IF(nixz.EQ.Z(0) .AND. nixa.EQ.A(0))THEN
-            SHC(0) = emic
+            SHC(0) = emicx(k)
             IF(SHNix.EQ.0.D0)CALL SHELLC(A(0), Z(0), SHC(0))
-            DEF(1, 0) = beta2
-            IF(xmassexp.NE.0.D0)THEN
-               XMAss(0) = xmassexp
-            ELSE
-               XMAss(0) = xmassth
-            ENDIF
+            DEF(1, 0) = beta2x(k)
+          XMAss(0) = EXCessmass(iz, ia)
          ENDIF
-      ELSE
+       ELSE
          DO ii = 0, NDEJC
             IF(nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii))THEN
-               DEFprj = beta2
-               IF(xmassexp.NE.0.D0)THEN
-                  XMAss_ej(ii) = xmassexp
-               ELSE
-                  XMAss_ej(ii) = xmassth
-               ENDIF
+               DEFprj = beta2x(k)
+               XMAss_ej(ii) = EXCessmass(iz, ia)
             ENDIF
          ENDDO
-      ENDIF
-      GOTO 100
-99999 END
+       ENDIF
+      ENDDO
+
+      iztar = Z(0)
+      iatar = A(0)
+      izpro = ZEJc(0)
+      iapro = AEJc(0)
+      efermi=-0.5*( EXCessmass(iztar-izpro, iatar-iapro)
+     &             -EXCessmass(iztar+izpro, iatar+iapro)
+     &        +2.*EXCessmass(izpro      , iapro      ) )
+      EEFermi(0,0) = efermi
+
+      RETURN
+      END
 C*==readldp.spg  processed by SPAG 6.20Rc at 12:12 on  7 Jul 2004
 C
 C
@@ -4450,117 +4516,26 @@ C
 C
 C Local variables
 C
-      INTEGER ar, iloc, nixa, nixn, nixz, nnur, zr
-      DOUBLE PRECISION b1, b2, b3, beta2, beta3, beta4, beta6, emic,
-     &                 emicfl, eps2, eps3, eps4, eps6, eps6sym, sigexp,
-     &                 xmassexp, xmassr, xmassth, xmassthfl
-      INTEGER INT
+      INTEGER ar, zr, iztar, iatar, izpro, iapro
+      DOUBLE PRECISION b1, b2, b3
       zr = Z(Nnuc) - ZEJc(Nejc)
       ar = A(Nnuc) - AEJc(Nejc)
-      CALL WHERE(INT(zr*1000 + ar), nnur, iloc)
-      IF(iloc.EQ.0)THEN
-         xmassr = XMAss(nnur)
-      ELSEIF(INT(zr*1000 + ar).EQ.INT(Z(0)*1000 + A(0)))THEN
-         xmassr = XMAss(0)
-      ELSE
-C--------nucleus out of range of those involved needed (likely to
-C--------determine neutron binding energy for level density
-C--------determination)
- 50      READ(25, '(3I5,9F10.3,6F10.2)', END = 100)nixz, nixn, nixa,
-     &        eps2, eps3, eps4, eps6, eps6sym, beta2, beta3, beta4,
-     &        beta6, emic, xmassth, xmassexp, sigexp, emicfl, xmassthfl
-         IF(nixz.EQ.INT(zr) .AND. nixa.EQ.INT(ar))THEN
-            IF(xmassexp.NE.0.D0)THEN
-               xmassr = xmassexp
-            ELSE
-               xmassr = xmassth
-            ENDIF
-            GOTO 200
-         ENDIF
-         GOTO 50
-         CALL duflo(ar-zr,zr,xmassr,AMUmev)
- 100     WRITE(6, *)'ZA=', zr*1000 + ar, ' NNUC=', nnur
-         WRITE(6, *)'BNDG: NUCLEUS NOT FOUND. CALL DUFLO()'
-         CALL duflo(ar-zr,zr,xmassr,AMUmev)
-      ENDIF
- 200  b1 = A(Nnuc)*AMUmev + XMAss(Nnuc)
-      b2 = ar*AMUmev + xmassr
+      iztar = Z(Nnuc)
+      iatar = A(Nnuc)
+      izpro = ZEJc(Nejc)
+      iapro = AEJc(Nejc)
+C     b1 = A(Nnuc)*AMUmev + EXCessmass(iztar,iatar)
+C     b2 = ar*AMUmev + EXCessmass(zr,ar)
+C     b3 = AEJc(Nejc)*AMUmev + EXCessmass(izpro,iapro)
+      b1 = A(Nnuc)*AMUmev + XMAss(Nnuc)
+      b2 = ar*AMUmev + EXCessmass(zr,ar)
       b3 = AEJc(Nejc)*AMUmev + XMAss_ej(Nejc)
       Bnd = b2 + b3 - b1
+      EEFermi(Nejc,Nnuc) =
+     &       -0.5*( EXCessmass(iztar-izpro, iatar-iapro)
+     &             -EXCessmass(iztar+izpro, iatar+iapro)
+     &        +2.*EXCessmass(izpro      , iapro      ) )
       END
-
-      subroutine duflo(nn,nz,excess,AMUmev)
-c
-c                --------------------------------------------
-c                |Nuclear mass formula of Duflo-Zuker (1992)|
-c                --------------------------------------------
-c
-      real*8 excess, AMUmev
-      dimension xmag(6),zmag(5),a(21)
-      data zmag/14.,28.,50.,82.,114./
-      data xmag/14.,28.,50.,82.,126.,184./
-      data a/16.178,18.422,120.146,202.305,12.454,0.73598,5.204,1.0645,
-     +1.4206,0.0548,0.1786,.6181,.0988,.0265,-.1537,.3113,-.6650,-.0553,
-     +-.0401,.1774,.4523/
-c
-      x=nn
-      z=nz
-      t=abs(x-z)*.5
-      v=x+z
-      s=v**(2./3.)
-      u=v**(1./3.)
-c     a5=a(5)
-c     if(z.gt.x) a5=0.
-      E0=a(1)*v-a(2)*s-a(3)*t*t/v+a(4)*t*t/u/v-a(5)*t/u-a(6)*z*z/u
-      esh=0.
-      esh1=0.
-      do 10 k=2,5
-        f1=zmag(k-1)
-        f2=zmag(k)
-        dfz=f2-f1
-        if(z.ge.f1.and.z.lt.f2) then
-          roz=(z-f1)/dfz
-          pz=roz*(roz-1)*dfz
-          do 20 l=2,6
-            f3=xmag(l-1)
-            f4=xmag(l)
-            dfn=f4-f3
-            if(x.ge.f3.and.x.lt.f4) then
-              ron=(x-f3)/dfn
-              pn=ron*(ron-1)*dfn
-              esh=(pn+pz)*a(8)+a(10)*pn*pz
-              xx=2.*ron-1.
-              zz=2.*roz-1.
-              txxx=pn*xx
-              tzzz=pz*zz
-              txxz=pn*zz
-              tzzx=pz*xx
-              kl=l-k
-              if(kl.eq.0) esh1=a(k+10)*(txxx+tzzz)+a(k+15)*(txxz+tzzx)
-              if(kl.eq.1)
-     +          esh1=a(k+11)*txxx-a(k+16)*txxz+a(k+10)*tzzz-a(k+15)*tzzx
-              if(kl.eq.2)
-     +          esh1=a(k+12)*txxx+a(k+17)*txxz+a(k+10)*tzzz+a(k+15)*tzzx
-                edef=a(9)*(pn+pz)+a(11)*pn*pz
-                if(esh.lt.edef) esh=edef
-            end if
-   20     continue
-        end if
-   10 continue
-      ebin=e0+esh+esh1
-      nn2=nn/2
-      nz2=nz/2
-      nn2=2*nn2
-      nz2=2*nz2
-      if(nn2.ne.nn) ebin=ebin-a(7)/u
-      if(nz2.ne.nz) ebin=ebin-a(7)/u
-      rneumas=1.008665
-      rpromas=1.007825
-      amass=nz*rpromas+nn*rneumas-ebin/AMUmev
-      excess=(amass-nz-nn)*AMUmev
-      return
-      end
-
 C*==retrieve.spg  processed by SPAG 6.20Rc at 12:12 on  7 Jul 2004
 C
 C
@@ -4832,12 +4807,12 @@ C
       i4p = 0
       i6p = 0
       i8p = 0
-        i1m = 0
+      i1m = 0
       i3m = 0
-        i5m = 0
-        i22p = 0
-        i41p = 0
-        i31p = 0
+      i5m = 0
+      i22p = 0
+      i41p = 0
+      i31p = 0
       ND_nlv = 0
       ierr = 1
 C
@@ -4860,7 +4835,7 @@ C
          GOTO 100
       ENDIF
       BACKSPACE(13)
-        NLVs=0
+      NLVs=0
       OPEN(UNIT = 32, FILE = 'TARGET.LEV', STATUS = 'UNKNOWN')
       READ(13, '(A80)')ch_iuf
       WRITE(32, '(A80)')ch_iuf
@@ -4869,10 +4844,10 @@ C
      &        xjlvr, lvpr, t12, ndbrlin
 C        RCN 09/2004, NLVs limited by binding energy
          IF(elvr.LT.qn) THEN
-             NLVs=NLVs+1
+         NLVs=NLVs+1
            WRITE(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr,
      &         xjlvr, lvpr, t12, 0
-           ENDIF
+         ENDIF
          DO nbr = 1, ndbrlin
             READ(13, '(A1)')dum
          ENDDO
@@ -4880,8 +4855,8 @@ C        RCN 09/2004, NLVs limited by binding energy
 C
 C     Maximum number of levels scanned for collectivity = 49
 C       99 = 50 + 49 which is the maximum number allowed to be printed in I2 format
-C  
-        NLVs=min(NLVs,49)
+C
+      NLVs=min(NLVs,49)
 
       DO ilv = 1, nlvr + ngamr
          BACKSPACE(13)
@@ -4933,14 +4908,14 @@ C        README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
      &    'E(2+) level is not contained in Raman 2001 database (RIPL-2)'
          WRITE(6, *)' WARNING: ',
      &            'Default dynamical deformations 0.15(2+) will be used'
-           beta2 = 0.15
+       beta2 = 0.15
       ENDIF
       IF(beta3.EQ.0.D0)THEN
          WRITE(6, *)' WARNING: ',
      &        'E(3-) level is not contained in Kibedi database (RIPL-2)'
          WRITE(6, *)' WARNING: ',
      &            'Default dynamical deformations 0.05(3-) will be used'
-           beta3 = 0.05
+       beta3 = 0.05
       ENDIF
 C400  DO ilv = 1, nlvr
  400  DO ilv = 1, NLVs
@@ -5124,7 +5099,7 @@ C              Additional levels are added for DWBA calculations
                   GOTO 500
                ENDIF
 
-                 IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
+               IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
 
                IF(i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
      &            i8p.NE.0  .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
@@ -5143,14 +5118,14 @@ C           the database we assume arbitrary dynamical deformations
             IF(ilv.EQ.1)THEN
 C              ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv, 1) = 0.0
+               IF(gspin.NE.0.D0)THEN
+                ICOllev(ND_nlv) = ilv + 50	       
+                WRITE(6, *)'WARNING: ONLY DWBA CALCULATIONS ALLOWED FOR'
+                WRITE(6, *)'WARNING: ODD SPHERICAL NUCLEUS'
+                WRITE(6, *)'WARNING: SETTING DIRECT key to 3'
+                DIRect = 3
+               ENDIF
                GOTO 500
-            ENDIF
-            IF(gspin.NE.0.D0)THEN
-               WRITE(6, *)'NO SUGGESTIONS FOR COLLECTIVE LEVELS!!!!'
-               WRITE(6, *)'ODD SPHERICAL NUCLEUS, SEE TARGET.LEV FILE'
-               WRITE(6, *)'TO SELECT COLLECTIVE LEVELS'
-               ierr = 3
-               GOTO 600
             ENDIF
             IF(i20p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)THEN
                i20p = ilv
@@ -5249,7 +5224,8 @@ C           Additional levels are added for DWBA calculations
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv, 2) = 0.01
+               D_Def(ND_nlv, 2) = 0.1
+	         ierr=0
                GOTO 500
             ENDIF
 
@@ -5434,8 +5410,8 @@ C--------------------swapping
          WRITE(32, *)
          WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-             ftmp = D_Def(i, 2)
-             if(i.eq.1) ftmp = 0.01
+            ftmp =  D_Def(i, 2)
+            if(i.eq.1) ftmp = 0.01
             WRITE(32,
      &            '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 0,
@@ -5743,7 +5719,7 @@ C------- writing data in FISSION.INP
      &                              '  Fundamental barriers from ', cara
       WRITE(79, '(a15,i1,a15,i1)')' Nr.parabolas =', NRBar,
      &                            '      Nr.wells=', NRWel
-      WRITE(79, *)'FISMOD=', FISmod(Nnuc)
+      WRITE(79, '(a8,f2.0)')'FISMOD =', FISmod(Nnuc)
       WRITE(79, *)'  '
 C
       IF(NRBar.EQ.1)THEN
@@ -5834,8 +5810,8 @@ C
          WRITE(79, *)' '
       ENDIF
 C
-      IF(FISopt(Nnuc).EQ.0.)cara1 = 'Subbarrier effects not considered'
-      IF(FISopt(Nnuc).GT.0.)cara1 = 'Subbarrier effects considered'
+      IF(FISopt(Nnuc).EQ.0.)cara1 = ' Subbarrier effects neglected '
+      IF(FISopt(Nnuc).GT.0.)cara1 = ' Subbarrier effects considered'
       WRITE(79, '(a8,f2.0,a36)')'FISOPT=', FISopt(Nnuc), cara1
       WRITE(79, *)' '
 C
@@ -6007,7 +5983,7 @@ C
       READ(79, '(a40)')line
       READ(79, '(a8,f2.0,a28,a20)')cara8, FISbar(Nnuc)
       READ(79, '(15x,i1,15x,i1)')NRBar, NRWel
-      READ(79, *)cara8, FISmod(Nnuc)
+      READ(79, '(a8,f2.0)')cara8, FISmod(Nnuc)
       READ(79, *)
       READ(79, *)
 C
