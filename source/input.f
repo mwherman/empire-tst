@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-14 06:46:18 $
-Ccc   * $Id: input.f,v 1.75 2005-02-14 06:46:18 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-14 17:05:01 $
+Ccc   * $Id: input.f,v 1.76 2005-02-14 17:05:01 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -268,13 +268,13 @@ C                Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -690,7 +690,7 @@ C--------------retrieval from the remote database
      &t:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -React:"'//proj//
      &',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
                ENDIF
-C--------------retrieval from the local MySQL database 
+C--------------retrieval from the local MySQL database
 C--------------including data for the natural element
 C              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
 C                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
@@ -907,7 +907,7 @@ C
      &IRECT keyword > 0'
             WRITE(6,
      &'(''  Optical model parameters for direct inelastic scattering set
-     & to RIPL #'',I4)') INT(DIRpot)
+     & to RIPL #'',I4)') KTRompcc
             WRITE(6, *)' '
          ENDIF
 
@@ -2208,13 +2208,8 @@ C-----initialization of TRISTAN input parameters  *** done ***
       IF(name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1).NE.'!')
      &   THEN
          BACKSPACE(5)
-         READ(5, '(A6,G10.5,4I5)')name, val, i1, i2, i3, i4
+         READ(5, '(A6,G10.5,4I5)',ERR=9876)name, val, i1, i2, i3, i4
          IF(name.EQ.'GO    ')THEN
-C           IF(DOMP) THEN
-C           WRITE(6, *)'Dispersive optical model is used'
-C           Compressional form-factor is set off
-C           ICOmpff = 0
-C           ENDIF
 C-----------Print some final input options
             IF(DIRect.eq.0) then
               ECUtColl = 0.
@@ -2248,7 +2243,7 @@ C-----------Print some final input options
      &'' parameters '')')
             IF(OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3))WRITE(6,
      &'('' Input file OMPAR.DIR with optical model'',
-     &'' parameters to be used by ECIS '')')
+     &'' parameters to be used in inelastic scattering'')')
             IF(DIRect.EQ.0 .AND. KTRompcc.NE.0)WRITE(6,
      &'(1X,/,         '' WARNING: No direct calculations have been selec
      &ted'',/,        '' WARNING: but DIRPOT keyword is specified.'',/,
@@ -3439,6 +3434,9 @@ C        fisfis u ----------------------------------------------------
      &         name
       ENDIF
       GOTO 100
+ 9876 WRITE(6, '('' FATAL: INVALID FORMAT in KEY: '',A6,
+     &           '', EMPIRE STOPPED'')')   name
+      STOP ' FATAL: INVALID FORMAT in input KEY '
       END
 C*==readnix.spg  processed by SPAG 6.20Rc at 12:12 on  7 Jul 2004
 C
@@ -3483,9 +3481,9 @@ C     RIPL-2 mass file adopted (format: (2i4,1x,a2,1x,i1,3f10.3,4f8.3))
 C     Ground state properties based on the FRDM model
 C     9066 masses
       OPEN(UNIT = 27, STATUS = 'OLD',
-     &          FILE = '../RIPL-2/masses/mass-frdm95.dat')
+     &          FILE = '../RIPL-2/masses/mass-frdm95.dat',ERR=200)
 C     Skipping header lines
-      read(27,*)
+      read(27,*,END=200)
       read(27,*)
       read(27,*)
       read(27,*)
@@ -3588,6 +3586,12 @@ C     Fermi energies calculated for all nuclei and projectile combinations
          ENDDO
       ENDDO
       RETURN
+
+
+  200  WRITE(6,*) 'FATAL: File ../RIPL-2/masses/mass-frdm95.dat missing'
+
+
+       STOP       'FATAL: File ../RIPL-2/masses/mass-frdm95.dat missing'
       END
 C*==readldp.spg  processed by SPAG 6.20Rc at 12:12 on  7 Jul 2004
 C
@@ -5335,8 +5339,8 @@ C
 C-----RIPLE-2 ETFSI values2
       IF(FISbar(Nnuc).EQ.0.)THEN
          OPEN(51, FILE = '../RIPL-2/fission/fis-barrier-etfsi.dat',
-     &        STATUS = 'OLD')
-         READ(51, *)
+     &        STATUS = 'OLD', ERR = 100)
+         READ(51, *, END = 100)
          READ(51, *)
          READ(51, *)
          READ(51, *)
@@ -5356,13 +5360,18 @@ C-----RIPLE-2 ETFSI values2
          WRITE(6, *)' CHANGE FISBAR OPTION(NOW=0) '
          WRITE(6, *)' OR IGNORE FISSION SETTING FISSHI=2'
          WRITE(6, *)' EXECUTION TERMINATED'
-         STOP 'Fission barrier missing'
+         WRITE(6, *)' FATAL: file ../RIPL-2/fission/fis-barrier-etfsi.da 
+
+     &t may be missing'
+
+         STOP ' FATAL: Fission barrier can not be retrieved'
+
       ENDIF
 C-----RIPL-2 "experimental" values
  200  IF(FISbar(Nnuc).EQ.2.)THEN
          OPEN(52, FILE = '../RIPL-2/fission/fis-barrier-exp.dat',
-     &        STATUS = 'OLD')
-         READ(52, *)
+     &        STATUS = 'OLD', ERR = 300)
+         READ(52, * , END = 300)
          READ(52, *)
          READ(52, *)
          READ(52, *)
@@ -5380,7 +5389,12 @@ C-----RIPL-2 "experimental" values
  300     WRITE(6, *)' NO EXPERIMENTAL FISSION BARRIER FOR Z=',
      &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
          WRITE(6, *)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
-         STOP 'Fission barrier missing'
+               WRITE(6, *)' FATAL: file ../RIPL-2/fission/fis-barrier-exp.dat 
+
+     &may be missing'
+
+         STOP ' FATAL: Fission barrier can not be retrieved'
+
  310  ENDIF
 C
 C------  default values for curvatures
@@ -5391,7 +5405,7 @@ C------  Lynn values
                H(1, 1) = 1.04
                H(1, 2) = 0.6
             ENDIF
-            IF(ka/2.NE.INT(ka/2))THEN  ! odd A
+            IF(ka/2.NE.INT(ka/2))THEN                          ! odd A
                H(1, 1) = 0.8
                H(1, 2) = 0.52
             ENDIF
@@ -5406,7 +5420,7 @@ C-------default values for the second well
 C
 C----FISBAR(Nnuc)=1. internal library
  400  IF(FISbar(Nnuc).EQ.1.)THEN
-         OPEN(81, FILE = '../data/fisbar.dat', STATUS = 'OLD')
+         OPEN(81, FILE = '../data/fisbar.dat', STATUS = 'OLD', ERR=500)
  450     READ(81, *, END = 500)kz, ka, NRBar, NRWel,
      &                         (EFB(i), H(1, i), i = 1, NRBar)
          IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc)))GOTO 450
@@ -5415,8 +5429,11 @@ C----FISBAR(Nnuc)=1. internal library
  500     WRITE(6, *)' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=',
      &              INT(A(Nnuc)), ' IN INTERNAL LIBRARY (fisbar.dat)'
          WRITE(6, *)' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
-         STOP 'Fission barrier missing'
-C
+
+         WRITE(6, *)' FATAL: May be file ../data/fisbar.dat missing'
+
+         STOP ' FATAL: Fission barrier can not be retrieved'
+
       ENDIF
 C     Default value for curvatures and protection !!
  600  DO i = 1, NRBar
@@ -6119,14 +6136,14 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
          WRITE(filename, 99001)iz
 99001    FORMAT('../RIPL-2/fission/fis-levden-hfbcs-inner/z', i3.3,
      &          '.dat')
-         OPEN(UNIT = 81, FILE = filename)
-         READ(81, *)
- 50      READ(81, 99002, ERR = 50, END = 150)simb, izr, iar
+         OPEN(UNIT = 81, FILE = filename, ERR=150)
+         READ(81, *, END = 150)
+ 50      READ(81, 99002, ERR = 150, END = 150)simb, izr, iar
 99002    FORMAT(23x, a2, i3, 3x, i3)
          IF(simb.NE.'Z=')GOTO 50
          IF(iar.NE.ia .OR. izr.NE.iz)GOTO 50
-         READ(81, *)
-         READ(81, *)
+         READ(81, *, END = 150)
+         READ(81, *, END = 150)
          ii = 1
  100     READ(81, '(f7.2,f7.3,1x,33e9.2)')UGRid(ii, 1), t, t, t, t,
      &        (ROFis(ii, j, 1), j = 1, NFISJ)
@@ -6146,14 +6163,14 @@ C
             WRITE(filename, 99003)iz
 99003       FORMAT('../RIPL-2/fission/fis-levden-hfbcs-outer/z', i3.3,
      &             '.dat')
-            OPEN(UNIT = 82, FILE = filename)
-            READ(82, *)
- 220        READ(82, 99004, ERR = 220, END = 260)simb, izr, iar
+            OPEN(UNIT = 82, FILE = filename, ERR=260)
+            READ(82, *, END = 260)
+ 220        READ(82, 99004, ERR = 260, END = 260)simb, izr, iar
 99004       FORMAT(23x, a2, i3, 3x, i3)
             IF(simb.NE.'Z=')GOTO 220
             IF(iar.NE.ia .OR. izr.NE.iz)GOTO 220
-            READ(82, *)
-            READ(82, *)
+            READ(82, *, END = 260)
+            READ(82, *, END = 260)
             ii = 1
  240        READ(82, '(f7.2,f7.3,1x,33e9.2)')UGRid(ii, 2), t, t, t, t,
      &           (ROFis(ii, j, 2), j = 1, NFISJ)
