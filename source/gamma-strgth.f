@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-10-07 20:44:18 $
-Ccc   * $Id: gamma-strgth.f,v 1.14 2004-10-07 20:44:18 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2004-10-19 02:35:32 $
+Ccc   * $Id: gamma-strgth.f,v 1.15 2004-10-19 02:35:32 Carlson Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -490,9 +490,8 @@ C-----setting GRED=1 removes energy dependence of the width
 C-----for the second hump of gener. Lorenzian
 C        GRED = 1.
          IF(D2.NE.0.0D0)gdr = gdr + 
-     &                        D2*ed*ed*gred/((ed - ED2)**2 + W2*gred*ed)
-     &                        + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/SQRT
-     &                        (ED2)
+     &                     D2*ed*ed*gred/((ed - ED2)**2 + W2*gred**2*ed)
+     &                   + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/SQRT(ED2)
       ENDIF
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
       END
@@ -540,7 +539,7 @@ Ccc
       DOUBLE PRECISION Lqd0
 
       DATA fermicof/9.3537e-9,-3.4762e-6,4.1222e-4,-9.8343e-3,8.3714e-2/
-      DATA eflo/20.0/,dflo/-73.3/,efhi/140.0/,dfhi/24.2/
+      DATA eflo/20.0/,dflo/-73.3/,efhi/140.0/,dfhi/-24.2/
       DATA sigmad0/61.2/,bndeut/2.224/,Lqd0/6.5/
 
 C   First calculate the blocking factor

@@ -1,6 +1,6 @@
-Ccc   * $Author: Sin $
-Ccc   * $Date: 2004-10-07 20:40:09 $
-Ccc   * $Id: fusion.f,v 1.18 2004-10-07 20:40:09 Sin Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2004-10-19 02:35:32 $
+Ccc   * $Id: fusion.f,v 1.19 2004-10-19 02:35:32 Carlson Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -257,7 +257,7 @@ C-------------Spin of c.n. J=j-S1
 C---------------factor 10 near HHBarc from fm**2-->mb
                 POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) +
      &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*
-     &          (10*HHBarc**2/EINl**2**PI*E1(0,Z,A,EINl,0.d0,0.d0)/2+
+     &          (10*HHBarc**2*PI*E1(0,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)+
      &           SIGQD(Z,A,EINl,Lqdfac)/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
 C  quasideuteron contribution SIGQD added in previous statement -- Carlson
               ENDIF
@@ -311,7 +311,7 @@ C-------end of E2
               csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
           ENDDO
         ENDDO
-        IF(IGE1.NE.0) QDfrac= SIGQD(Z,A,EIN1,Lqdfac)/CSFus
+        IF(IGE1.NE.0) QDfrac= SIGQD(Z,A,EINl,Lqdfac)/CSFus
         GOTO 101
       ENDIF
 C-----Plujko_new(END of calculation CSFus)
