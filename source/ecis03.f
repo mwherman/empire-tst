@@ -2,7 +2,7 @@ C 01/01/04                                                      ECIS03  ECIS-000
 C USE CHARACTER*4 IF THE TYPE OF ARGUMENT IS CONTROLLED BY COMPILER     ECIS-001
 C THE FUJITSU COMPILER GIVES AN "INFORMATION" DIAGNOSTIC FOR THE        ECIS-002
 C EQUIVALENCE STATEMENT MIXING CHARACTER TYPE WITH OTHER TYPES.         ECIS-003
-      PARAMETER (IDMX=1000000)                                          ECIS-004
+      PARAMETER (IDMX=4000000)                                          ECIS-004
       DIMENSION NW(2,IDMX)                                              ECIS-005
       CHARACTER*4 CW(2,IDMX)                                            ECIS-006
       REAL*8 DW(IDMX)                                                   ECIS-007
@@ -18689,23 +18689,29 @@ C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
       ND=1                                                              RESU-287
       IF (WV(5,1).EQ.0.D0) ND=3                                         RESU-288
       WRITE (58,1009) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),ND              RESU-289
-      WRITE (158,'(1x,F10.3\)') WV(12,1)                                RCN
+      WRITE (158,'(1x,F10.3,$)') WV(12,1)                               RCN
       IF (NCOLS.NE.1) WRITE (59,1010) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),RESU-290
      1NCOLS-1                                                           RESU-291
    30 IF (WV(5,1).NE.0.D0) GO TO 31                                     RESU-292
       WRITE (MW,1011) TX(1)                                             RESU-293
       IF (LO(59)) WRITE (58,1012) TX(1)                                 RESU-294
-      IF (LO(59)) WRITE (158,'(3x,F10.2\)') TX(1)                       RCN
+      IF (LO(59)) WRITE (158,'(3x,F10.2,$)') TX(1)                      RCN
    31 RX=TX(1)-TX(2)                                                    RESU-295
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-296
-      IF (LO(59)) WRITE (158,'(1x,F10.2\)') RX                          RCN
+      IF (LO(59)) THEN                                                  RCN
+        IF (WV(5,1).NE.0.D0) THEN                                       RCN
+            WRITE (158,'(1x,F10.2)') RX                                 RCN
+        ELSE                                                            RCN
+            WRITE (158,'(1x,F10.2,$)') RX                               RCN
+        ENDIF                                                           RCN
+      ENDIF                                                             RCN
       IF (LO(81)) GO TO 32                                              RESU-297
       WRITE (MW,1013) RX                                                RESU-298
       GO TO 42                                                          RESU-299
 C COMPOUND NUCLEUS RESULTS                                              RESU-300
    32 WRITE (MW,1014) RX                                                RESU-301
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-302
-      IF (LO(59)) WRITE (158,'(1x,F10.2\)') RX                          RCN
+      IF (LO(59)) WRITE (158,'(1x,F10.2,$)') RX                         RCN
       NDP=2*NCOLL+NSP(1)+1                                              RESU-303
       RX=RX-TX(NCOLL+2)                                                 RESU-304
       WRITE (MW,1015) RX                                                RESU-305
@@ -18772,7 +18778,6 @@ C PSEUDO DO LOOP ON LEVELS                                              RESU-365
    43 IF (WV(3,INIV).GT.0.D0) GO TO 44                                  RESU-366
       WRITE (MW,1027) INIV                                              RESU-367
       IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-368
-
       GO TO 57                                                          RESU-369
    44 RX=TX(INIV+1)                                                     RESU-370
       IF (LO(81)) RX=RX+TX(NCOLL+INIV+1)                                RESU-371
