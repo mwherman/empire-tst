@@ -1065,9 +1065,9 @@ C* Search EMPIRE output for specific strings
       IF(REC(1:18).EQ.'  Decaying nucleus'          ) GO TO 210
       IF(REC(1:28).EQ.'  Spectrum of recoils  (n,x)') GO TO 220
       IF(REC(1:10).EQ.' TOTAL  CR'                  ) GO TO 290
-      IF(REC(5:20).EQ.'fission  cross s'            ) THEN
+      IF(REC(2:19).EQ.'Tot. fission cross'          ) THEN
         MT=18
-        READ(REC,809) XS
+        READ(REC,'(30x, G10.4)') XS
         GO TO 312
       END IF
       GO TO 110
