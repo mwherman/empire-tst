@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-31 01:12:46 $
-Ccc   * $Id: input.f,v 1.62 2005-01-31 01:12:46 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-04 16:35:04 $
+Ccc   * $Id: input.f,v 1.63 2005-02-04 16:35:04 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -169,20 +169,16 @@ C     CM=931.494013 +/- 0.000037 MeV
 C     The above value is the one used also in the ENDF-6 manual (April 2001)
       AMUmev = 9.31494013D+02
 C     CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
-
       HHBarc=197.32696801D0
 C     HHBarc = 1.97327053D+02  (EMPIRE v 2.18)
-
       XNExc = 8.071323D0
 C-----From SCAT2000
       ampipm = 1.395688D+02
       ampi0 = 1.349645D+02
 C
       AMPi = (2.D0*ampipm + ampi0)/3.D0
-
 c     ELE2 = e*e in MeV.fm
       ELE2 = 1.4399652D+00
-
 C     Neutron mass = 1.008 664 915 60(55) u
       AMUneu = 1.008665d0
 C     Proton mass = 1.007 276 466 88(13) u
@@ -190,7 +186,6 @@ C     Proton mass = 1.007 276 466 88(13) u
 C
 C-----already converted to mb
       W2 = 2.D0*AMUmev/HHBarc**2/10.D0
-
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
@@ -273,13 +268,13 @@ C                Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -749,7 +744,6 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
             ILIres = -1
          ENDIF
 C--------inteligent defaults
-
 C--------optical model parameter set selection
          IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0)THEN
 C           INCIDENT GAMMA
@@ -760,7 +754,6 @@ C           KTRlom(0, 0) = 1   (RCN, Bjorklund OMP must be coded into RIPL)
          ELSE
             KTRlom(0, 0) = 0
          ENDIF
-
          DO i = 1, NDNUC
             IF(EIN.GT.20.0D0)THEN
 C              KTRlom(1, i) = 3
@@ -849,7 +842,6 @@ C
             WRITE(6, *)' WARNING!!!! for the photo-nuclear reactions  '
             WRITE(6, *)' WARNING!!!! and has been turned off  '
             WRITE(6, *)' '
-
          ENDIF
 C--------input consistency check  *** done ***
 C
@@ -1057,19 +1049,15 @@ C--------set projectile/ejectile masses
 C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
          CALL READLDP
-
          IF(DIRect.GT.0)THEN  ! Inelastic scattering by DWBA for all particles
-
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
-
 C           Defining ICOller(i)
             DO i = 2, ND_nlv
              itmp=ICOllev(i)
              if(itmp.gt.50) itmp = ICOllev(i) - 50
              ICOller(i) = itmp
             ENDDO
-
             IF(ierr.EQ.1)THEN
                WRITE(6, *)' WARNING: Some collective discrete levels',
      &                    '  for target nucleus not found'
@@ -1120,9 +1108,7 @@ C--------fix-up deformations for coupled channels *** done ***
                IOMwrite(nejc, nnuc) = 0
             ENDDO
          ENDDO
-
       ENDIF
-
       NLW = NDLW
       CSFus = CSRead
 C-----KTRLOM Optical Model control
@@ -1266,12 +1252,10 @@ C-----WRITE heading on FILE6
          WRITE(6, '('' Projectile binding energy'',F8.3,'' MeV'')')
      &         Q(0, 1)
       ENDIF
-
 C********************************************************************
 C     DIRECT.GT.0 block eliminated RCN, 01/2005
 C          (transferred to fusion.f)
 C********************************************************************
-
 C
 C-----determination of excitation energy matrix in cn
 C
@@ -1515,12 +1499,10 @@ C-----calculate residual nucleus level density
          IF(NEX(nnur).GE.1 .OR. FITlev.GT.0)THEN
             IF(ADIv.EQ.0.0D0)CALL ROEMP(nnur, 0.0D0, 0.024D0)
             IF(ADIv.EQ.1.0D0)CALL ROCOL(nnur, 0.D0, 2.D0)
-
 C           RCN 12/2004
 C           It should be added <m2> to the input ( to use 0.124 if needed)
             IF(ADIv.EQ.2.0D0)CALL ROGC(nnur, 0.24D0)
 C           IF(ADIv.EQ.2.0D0)CALL ROGC(nnur, 0.146D0)
-
             IF(ADIv.EQ.3.0D0)CALL ROHFBCS(nnur)
             IF(ADIv.GT.3.0D0)CALL ROCOL(nnur, 0.D0, 1.D0)
             IF(IOUt.EQ.6)THEN
@@ -1547,29 +1529,26 @@ C--------OMPAR.RIPL
          CLOSE(29, STATUS = 'DELETE')
          STOP 'PLOTS DONE'
       ENDIF
-
 C---- fission input is created if it does not exist and FISSHI=0
       DO nnuc = 1, NNUct
-         FISsil(nnuc) = .TRUE.
-C--------the fissioning condition replaced according to  fission
-C--------barriers available in RIPL-2  (MS)
-         IF(Z(nnuc).LT.78.)FISsil(nnuc) = .FALSE.
-         IF(FISshi(nnuc).EQ.2.)FISsil(nnuc) = .FALSE.
+         FISsil(nnuc) = .TRUE. 
+         IF(FISshi(nnuc).EQ.0..AND.(Z(nnuc).LT.78..OR.A(Nnuc).LT.224.))
+     &       FISsil(nnuc) = .FALSE.  
          IF(FISshi(nnuc).EQ.1.)THEN
-            FISsil(nnuc) = .TRUE.
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)
             IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
          ENDIF
+         IF(FISshi(nnuc).EQ.2.)FISsil(nnuc) = .FALSE.
       ENDDO
       IF(FISshi(nnuc).EQ.0)THEN
          INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
          IF(.NOT.gexist)THEN
             OPEN(79, FILE = 'FISSION.INP', STATUS = 'UNKNOWN')
-            DO nnuc = 1, NNUcd
-               IF(FISsil(nnuc))CALL INPFIS(nnuc)
-            ENDDO
+                 DO nnuc = 1, NNUcd
+                    IF(FISsil(Nnuc)) CALL INPFIS(nnuc)
+                 ENDDO
+            CLOSE(79)
          ENDIF
-         CLOSE(79)
       ENDIF
 99001 FORMAT(1X, 60('='))
 99002 FORMAT(1X, 13G10.4)
@@ -1841,7 +1820,6 @@ C
      &                             FISb(1, i)
 99007    FORMAT(1X, I3, '-', A2, '-', I3, 4X, 10F12.3)
       ENDDO
-
       WRITE(6, *)
       IF(KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE(6, *)
      &  ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
@@ -2175,7 +2153,6 @@ C-----------Print some final input options
               ECUtColl = 0.
               JCUtColl = 0
             ENDIF
-
             IF(KEY_shape.EQ.0)WRITE(6,
      &         '('' E1 strength function as in EMPIRE v2.18 (EGLO)'')')
             IF(KEY_shape.EQ.1)WRITE(6,
@@ -3434,16 +3411,13 @@ C
       INTEGER ii, iloc, nixa, nixz, nnuc
       DIMENSION izaf(NMAsse), excess(NMAsse)
       DIMENSION beta2x(NMAsse), emicx(NMAsse)
-
 C     OPEN(UNIT = 27, STATUS = 'unknown', FILE = '../data/mass-hms.dat')
 C     READ(27, '(///i7)')nmass
 C     READ(27, '(5(i7,f11.6,f7.1))')(izaf(k), excess(k), spnpar, k = 1,
 C    &                              nmass)
-
 C     RIPL-2 mass file adopted (format: (2i4,1x,a2,1x,i1,3f10.3,4f8.3))
 C     Ground state properties based on the FRDM model
 C     9066 masses
-
       OPEN(UNIT = 27, STATUS = 'OLD',
      &          FILE = '../RIPL-2/masses/mass-frdm95.dat')
 C     Skipping header lines
@@ -3463,7 +3437,6 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
        endif
       ENDDO
   100 CLOSE(UNIT = 27)
-
       DO iz = 0, 130
          DO ia = 0, 400
           RESmas(iz, ia) = 0
@@ -3491,7 +3464,6 @@ C
             ENDIF
          ENDDO
       ENDDO
-
 C     mbc1 a quick/temp? solution to weird light undefined masses: define
 C     resmas=A for al nuclei so far undefined
 C     prvisouly i had a problem for be6 => be5 +n since mass be5 undefined
@@ -3510,7 +3482,6 @@ C
          zmx = DMAX1(Z(nnuc), zmx)
          zmn = MIN(Z(nnuc), zmn)
       ENDDO
-
       DO k = 1, NMAsse
        nixz = izaf(k)/1000
        nixa = MOD(izaf(k), 1000)
@@ -3539,7 +3510,6 @@ C
          ENDDO
        ENDIF
       ENDDO
-
 C     Fermi energies calculated for all nuclei and projectile combinations
       DO nnuc = 0, NNUct
          iztar = Z(nnuc)
@@ -4510,7 +4480,6 @@ C
       INTEGER i, i0p, i20p, i21p, i3m, i4p, i6p, i8p, ia, iar, ierr,
      &        ilv, itmp, iz, izr, j, lvpr, nlvr, nztmp, natmp, iptmp
       INTEGER i1m, i5m, i22p, i31p, i41p
-
 C
       ND_nlv = 0
       INQUIRE(FILE = 'TARGET_COLL.DAT', EXIST = fexist)
@@ -4646,7 +4615,6 @@ C     Maximum number of levels scanned for collectivity = 49
 C       99 = 50 + 49 which is the maximum number allowed to be printed in I2 format
 C
       NLVs=min(NLVs,49)
-
       DO ilv = 1, nlvr + ngamr
          BACKSPACE(13)
       ENDDO
@@ -4706,17 +4674,13 @@ C        README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
      &            'Default dynamical deformations 0.05(3-) will be used'
        beta3 = 0.05
       ENDIF
-
 C--------locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
-
  400  DO ilv = 1, NLVs
          READ(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr,
      &        xjlvr, lvpr, t12, ndbrlin
-
 C        Skipping levels in continuum
          IF(ilv.GT.NLV(nnurec)) goto 600
-
          IF(ilv.EQ.1)THEN
             delta_k = 2.D0
             IF(xjlvr.NE.0.D0)delta_k = 1.D0
@@ -4885,7 +4849,6 @@ c           beta2 = DEF(1, 0)
                ENDIF
 C              Additional levels are added for DWBA calculations
                IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
-
                IF(ECUtColl.gt.0. .AND. xjlvr.LE.JCUtColl)THEN
                   ND_nlv = ND_nlv + 1
                   ICOllev(ND_nlv) = ilv+50
@@ -4898,7 +4861,6 @@ C              Additional levels are added for DWBA calculations
                   if(ND_nlv.EQ.NDCOLLEV) goto 600
                   GOTO 500
                ENDIF
-
                IF(i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
      &            i8p.NE.0  .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
      &            i3m.NE.0  .AND. i5m.NE.0 .AND. i21p.NE.0.AND.
@@ -5013,9 +4975,7 @@ C              ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv, 2) = 0.05
                GOTO 500
             ENDIF
-
             IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
-
 C           Additional levels are added for DWBA calculations
             IF(ECUtColl.gt.0. .AND. xjlvr.LE.JCUtColl)THEN
                ND_nlv = ND_nlv + 1
@@ -5029,7 +4989,6 @@ C           Additional levels are added for DWBA calculations
                if(ND_nlv.EQ.NDCOLLEV) goto 600
                GOTO 500
             ENDIF
-
             IF(i20p.NE.0 .AND. i3m.NE.0  .AND. i20p.NE.0 .AND.
      &         i21p.NE.0 .AND. i4p.NE.0  .AND. i3m.NE.0 .AND.
      &         i0p.NE.0  .AND. i22p.NE.0 .AND. i41p.NE.0 .AND.
@@ -5090,7 +5049,6 @@ C--------------------swapping
                ENDIF
             ENDDO
          ENDDO
-
 C-----------Putting one phonon coupled states first for spherical
          DO i = 2, ND_nlv
              if(ICOllev(i).GE.50) cycle
@@ -5125,7 +5083,6 @@ C-----------------swapping
                ENDIF
             ENDDO
          ENDDO
-
 C        ENDIF
          WRITE(6, *)
          WRITE(6, *)'   Ncoll  '
@@ -5164,7 +5121,6 @@ C        ENDIF
      &N < 50 for coupled levels )'
          WRITE(6, '(1x,i3,1x,i3,a35)')iz, ia,
      &                                ' nucleus is treated as deformed'
-
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
             DO j = i + 1, ND_nlv
@@ -5197,7 +5153,6 @@ C--------------------swapping
                ENDIF
             ENDDO
          ENDDO
-
          WRITE(6, *)
          WRITE(6, *)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc,
@@ -5270,7 +5225,7 @@ C
 C
       SUBROUTINE INPFIS(Nnuc)
 C
-C This subroutine creates the fission.inp  which contains all the fission
+C Creates fission.inp  which contains all the fission
 C parameters independent of energy.
 C
       INCLUDE 'dimension.h'
@@ -5282,21 +5237,22 @@ C
       COMMON /CRITFIS/ ACRtf(2), UCRtf(2), TCRtf(2), DETcrtf(2),
      &                 SCRtf(2), MORtcrt(NFPARAB), MPArcrt(NFPARAB),
      &                 ECOndf(2)
-      COMMON /FISSMOD/ ROFism(60, 30, 3), HM(NFTRANS, 3),
-     &                 EFDism(NFTRANS, 3), UGRidf(0:NFISENMAX, 3),
-     &                 EFBm(3), XMInnm(3), AFIsm(3), DEFbm(3),
-     &                 SHCfism(3), DELtafism(3), GAMmafism(3),
-     &                 WFIsm(3), BFFm(3),NRBinfism(3)
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+     &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
+     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
+     &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
+     &                 SHCfism(NFMOD), DELtafism(NFMOD),
+     &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
+     &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
+     &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
+      DOUBLE PRECISION csfism
 C
-      DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, SHCfism,
-     &                 DELtafism, GAMmafism, UGRidf, AFIsm
-C
-C     DOUBLE PRECISION ACR, ACRt, ATIl, mm2, MORtcrt, MPArcrt, DETcrt,
-C    &                 ECOnd, SCR, TCRt, UCRt, WFIsm
-      DOUBLE PRECISION mm2, MORtcrt, MPArcrt, WFIsm
+      DOUBLE PRECISION ROFism, HM, EFDism,  XMInnm, DEFbm, SHCfism,
+     &                 DELtafism, GAMmafism, UGRidf, AFIsm,destepm
+      DOUBLE PRECISION MORtcrt, MPArcrt, WFIsm
 C
       INTEGER ka, kz, NRBarc, nrmod, BFFm
-      CHARACTER*2 simb, symma, symmb
+      CHARACTER*2 simb
       CHARACTER*20 cara
       CHARACTER*33 cara1
       CHARACTER*55 cara2
@@ -5305,13 +5261,19 @@ C-----fundamental fission barrier
 C-----FISBAR=0 RIPL-2; HF-BCS theoretical heights for simple and double barriers,
 C---- information about curvatures and wells provided by the code
 C
+      DO i=1,5
+         efb(i)=0.
+      ENDDO
+      NRBar=0
+      NRWel=0
+C-----RIPLE-2 ETFSI values2
       IF(FISbar(Nnuc).EQ.0.)THEN
          OPEN(51, FILE = '../RIPL-2/fission/fis-barrier-etfsi.dat',
      &        STATUS = 'OLD')
-         READ(51, '(a100)')simb
-         READ(51, '(a100)')simb
-         READ(51, '(a100)')simb
-         READ(51, '(a100)')simb
+         READ(51, *)
+         READ(51, *)
+         READ(51, *)
+         READ(51, *)
  50      READ(51, '(2i4,1x,a2,1x,10f9.2)', END = 100)kz, ka, simb, cin,
      &        hin, ain, EFB(1), bexp, cout, hout, aout, EFB(2), bexp1
          IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc)))GOTO 50
@@ -5322,9 +5284,41 @@ C
             WRITE(6, *)' Setting the number of fission barriers equal 1'
             NRBar = 1
          ENDIF
-         NRWel = 0
+         GOTO 320
+ 100     WRITE(6, *)' NO THEORETICAL FISSION BARRIER FOR Z=',
+     &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
+         WRITE(6, *)' CHANGE FISBAR OPTION(NOW=0) '
+         WRITE(6, *)' OR IGNORE FISSION SETTING FISSHI=2'
+         WRITE(6, *)' EXECUTION TERMINATED'
+         STOP 'Fission barrier missing'
+      ENDIF
+C-----RIPL-2 "experimental" values
+ 200  IF(FISbar(Nnuc).EQ.2.)THEN
+         OPEN(52, FILE = '../RIPL-2/fission/fis-barrier-exp.dat',
+     &        STATUS = 'OLD')
+         READ(52, *)
+         READ(52, *)
+         READ(52, *)
+         READ(52, *)
+ 250     READ(52, '(2(1x,i3),3x,2(f8.3,4x),9x)', END = 300)
+     &           kz, ka,  EFB(1),  EFB(2)
+         
+         IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc)))  GOTO 250
+         NRBAR=2
+         IF(EFB(1).EQ.0.)THEN
+            EFB(1)=EFB(2)
+            NRBAR=1
+         ENDIF
+         CLOSE(52)
+         GOTO 310
+ 300     WRITE(6, *)' NO EXPERIMENTAL FISSION BARRIER FOR Z=',
+     &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
+         WRITE(6, *)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
+         STOP 'Fission barrier missing'
+ 310  ENDIF
+C
 C------  default values for curvatures
-         IF(NRBar.EQ.1)H(1, 1) = 1.
+ 320  IF(NRBar.EQ.1)H(1, 1) = 1.
 C------  Lynn values
          IF(NRBar.EQ.2)THEN
             IF(ka/2.EQ.INT(ka/2) .AND. kz/2.EQ.INT(kz/2))THEN  ! even-even
@@ -5343,41 +5337,6 @@ C-------default values for the second well
             H(1, 3) = 1.
             EFB(3) = 2.
          ENDIF
-         GOTO 200
- 100     WRITE(6, *)' NO THEORETICAL FISSION BARRIER FOR Z=',
-     &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
-         WRITE(6, *)' CHANGE FISBAR OPTION(NOW=0). EXECUTION TERMINATED'
-         STOP 'Fission barrier missing'
-      ENDIF
-C-----FISBAR(Nnuc)=2. RIPL-2 "experimental values"
-C     To be used with care, model dependent !!!!!
- 200  IF(FISbar(Nnuc).EQ.2.)THEN
-         OPEN(52, FILE = '../RIPL-2/fission/fis-barrier-exp.dat',
-     &        STATUS = 'OLD')
-         READ(52, '(a100)')simb
-         READ(52, '(a100)')simb
-         READ(52, '(a100)')simb
-         READ(52, '(a100)')simb
- 250     READ(52, '(2(1x,i3),1x,a2,2(f8.3,4a),f9.3)', END = 300)kz, ka,
-     &        simb, EFB(1), symma, EFB(2), symmb, deltaf
-C        below is the original Mihaela's line but this is not a RIPL-2 format
-C        &        ka, simb, symma, EFB(1), H(1), symmb, EFB(2), H(2), deltaf
-         IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc)))GOTO 250
-         CLOSE(52)
-         NRBar = 2
-         IF(EFB(2).EQ.0.)THEN
-            WRITE(6, *)' 2nd FISSION BARRIER ENERGY = 0 in RIPL2 exper.'
-            WRITE(6, *)' Setting the number of fission barriers equal 1'
-            NRBar = 1
-         ENDIF
-         NRWel = 0
-         GOTO 400
- 300     WRITE(6, *)' NO EXPERIMENTAL FISSION BARRIER FOR Z=',
-     &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
-         WRITE(6, *)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
-         STOP 'Fission barrier missing'
-      ENDIF
-C
 C
 C----FISBAR(Nnuc)=1. internal library
  400  IF(FISbar(Nnuc).EQ.1.)THEN
@@ -5393,7 +5352,6 @@ C----FISBAR(Nnuc)=1. internal library
          STOP 'Fission barrier missing'
 C
       ENDIF
-C
 C     Default value for curvatures and protection !!
  600  DO i = 1, NRBar
          IF(H(1, i).EQ.0)H(1, i) = 1.
@@ -5401,6 +5359,11 @@ C     Default value for curvatures and protection !!
 C
       IF(NRWel.NE.(NRBar - 1)/2)FISopt(Nnuc) = 0.
       NRBarc = NRBar - NRWel
+      IF(FISMOD(Nnuc).GT.0..AND.NRBarc.NE.2.)THEN
+         WRITE(6,*)'Multi-modal fission calculated only for
+     &              double-humped barrier. FISMOD set to 0'
+         FISmod(NNuc)=0.
+      ENDIF
 C
 C----------------------input fundamental fission barrier *** done
 C------- discrete barriers---------------------------------------
@@ -5470,44 +5433,63 @@ C
 C
       CALL DEFO_FIS(Nnuc)
 C
-      FIScon = 2.
-      mm2 = 0.24*A(Nnuc)**(2./3.)
-      r0 = 1.4
       nrbarc1 = NRBarc
 C
 C================  level densities at saddles  ===============================
-      DO ibars = 1, NRBar
-         IF(ibars.LE.2)THEN
-            SHC(Nnuc) = SHCfis(ibars)
-            DELp = DELtafis(ibars)
-            GAMma = GAMmafis(ibars)
-            CALL ROEMP(Nnuc, 1.0D0, AFIs(ibars))
-            ACRtf(ibars) = ACRt
-            UCRtf(ibars) = UCRt
-            TCRtf(ibars) = TCRt
-            ECOndf(ibars) = ECOnd
-            DETcrtf(ibars) = DETcrt
-            SCRtf(ibars) = SCR
+      IF(FISden(Nnuc).EQ.1.)THEN
+C--------nuclear shape asymmetry at saddles
+C             bff=1 axial, mass symmetry
+C             bff=2 axial asymmetry,mass symmetry
+C             bff=3 axial symmetry,mass asymmetry
+C             bff=4 axial asymmetry,mass asymmetry
+         BFF(1) = 1.
+         IF(A(Nnuc).GT.236)BFF(1) = 2.
+         BFF(2) = 3.
+C--------shell corrections at saddles according to RIPL-2
+         SHCfis(1) = 2.6
+         IF(Z(Nnuc).GT.97.)SHCFIS(1)=2.6-0.1*(Z(Nnuc)-97.)
+         SHCfis(2) = 0.6+0.1*(Z(Nnuc)-97.)+0.04*(A(Nnuc)-Z(Nnuc)-143.)
+         IF(Z(Nnuc).GT.97.) SHCfis(2) = 0.6+0.04*(A(Nnuc)-Z(Nnuc)-143.)
+C--------pairing at saddles according to RIPL-2
+         DELtafis(1) = 14./SQRT(A(Nnuc))
+         DELtafis(2) = 14./SQRT(A(Nnuc))
+C--------gamma in Ignatyuk's formula 
+         GAMmafis(1) = 2.113*atil*A(Nnuc)**(-4./3.) !0.4*A(Nnuc)**( - 1./3.)
+         GAMmafis(2) = 2.113*atil*A(Nnuc)**(-4./3.) !0.4*A(Nnuc)**( - 1./3.)
+C--------multiplier of atil
+         AFIs(1) = 1.
+         AFIs(2) = 1.
+C--------h**2/2J
+         IF(nrbarc.EQ.1)hj(Nnuc,1)=0.005
+         IF(nrbar.EQ.2)THEN
+            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,2)=0.0025
+         ENDIF 
+         IF(nrbar.EQ.3)THEN
+            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,2)=0.0025
+            hj(Nnuc,3)=0.0035   
+         ENDIF 
+         IF(nrbar.EQ.5)THEN
+            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,2)=0.0025
+            hj(Nnuc,3)=0.0017
+            hj(Nnuc,4)=0.0035
+            hj(Nnuc,5)=0.0020     
+         ENDIF 
+         IF(FISmod(Nnuc).GT.0.)THEN
+            BFFm(1) = 3
+            BFFm(2) = 3
+            BFFm(3) = 3
+            DO m = 1, nrmod
+               SHCfism(m) = SHCfis(2)
+               DELtafism(m) = DELtafis(2)
+               GAMmafism(m) = GAMmafis(2)
+               AFIsm(m) = AFIs(2)
+            ENDDO
          ENDIF
-         MPArcrt(ibars) = 6*ACRt*mm2*(1. - (2./3.)*DEFfis(ibars))/PI**2
-         IF(MPArcrt(ibars).LT.2.)MPArcrt(ibars) = 2.
-                                                    !!!!!!!!!!!
-         MORtcrt(ibars) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &                    *(1. + (1./3.)*DEFfis(ibars))
-         HJ(Nnuc, ibars) = 0.5*(1.0/MPArcrt(ibars) - 1.0/MORtcrt(ibars))
-         HJ(Nnuc, ibars) = 0.5/MORtcrt(ibars)
-         IF(HJ(Nnuc, ibars).LE.0.)HJ(Nnuc, ibars) = 0.0001
-C
-         IF(NRBarc.EQ.3 .AND. ibars.EQ.2)THEN
-            MPArcrt(2) = 6*ACRt*mm2*(1. - (2./3.)*DEFeq)/PI**2
-            IF(MPArcrt(2).LT.2.)MOMparcrt = 2.
-                                             !!!!!!!!!!!
-            MORtcrt(2) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &                   *(1. + (1./3.)*DEFeq)
-         ENDIF
-      ENDDO
-C
-C------- writing data in FISSION.INP
+      ENDIF
+C---- writing data in FISSION.INP
       WRITE(79, '(a8)')'Isotope:'
       WRITE(79, '(a40)')'----------------------------------------'
       WRITE(79, '(4x,a2,i3,2x,a2,i3)')'Z=', INT(Z(Nnuc)), 'A=',
@@ -5675,39 +5657,8 @@ C
          WRITE(79, *)'  '
          WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
          WRITE(79, *)'  '
-C
-C        bff=1 axial, mass symmetry
-C        bff=2 axial asymmetry,mass symmetry
-C        bff=3 axial symmetry,mass asymmetry
-C        bff=4 axial asymmetry,mass asymmetry
-C
-C        Values should be taken as recommended in RIPL-2 handbook
-C
-         BFF(1) = 2.
-         BFF(2) = 3.
-         SHCfis(1) = 2.5
-         SHCfis(2) = 0.6
-         DELtafis(1) = 12./SQRT(A(Nnuc))
-         DELtafis(2) = 12./SQRT(A(Nnuc))
-         GAMmafis(1) = 0.4*A(Nnuc)**( - 1./3.)
-         GAMmafis(2) = 0.4*A(Nnuc)**( - 1./3.)
-         AFIs(1) = 0.
-         AFIs(2) = 0.
-         IF(FISmod(Nnuc).GT.0.)THEN
-            BFFm(1) = 1
-            BFFm(2) = 3
-            BFFm(3) = 3
-            DO m = 1, nrmod
-               SHCfism(m) = SHCfis(2)
-               DELtafism(m) = DELtafis(2)
-               GAMmafism(m) = GAMmafis(2)
-               AFIsm(m) = AFIs(2)
-            ENDDO
-         ENDIF
-C
          WRITE(79, *)
-     &'Nuclear shape asymmetry at saddles, shell correct,    delta, gamm
-     &a, asaf '
+     &'  Asymmetry  shell-corr  delta    gamma    atilf/atil at saddles'
 C
          DO nr = 1, nrbarc1
             IF(FISmod(Nnuc).EQ.0. .OR.
@@ -5723,7 +5674,7 @@ C
             ENDIF
          ENDDO
       ENDIF
-C-------- the coefficients of a linear energy dependent factor adjusting
+C---- the coefficients of a linear energy dependent factor adjusting
 C     the fission level densities;
       DO nr = 1, nrbarc1
          ENH_ld(1, nr) = 1.
@@ -5755,24 +5706,25 @@ C
       INCLUDE 'global.h'
 C
 C
-      COMMON /FISSMOD/ ROFism(60, 30, 3), HM(NFTRANS, 3),
-     &                 EFDism(NFTRANS, 3), UGRidf(0:NFISENMAX, 3),
-     &                 EFBm(3), XMInnm(3), AFIsm(3), DEFbm(3),
-     &                 SHCfism(3), DELtafism(3), GAMmafism(3),
-     &                 WFIsm(3), BFFm(3),NRBinfism(3)
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+     &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
+     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
+     &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
+     &                 SHCfism(NFMOD), DELtafism(NFMOD),
+     &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
+     &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
+     &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
+      DOUBLE PRECISION csfism
 C
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm,
-     &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm
-C
-C     DOUBLE PRECISION ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt, UCRt
-C
+     &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm,
+     &                 destepm
 C
       INTEGER nrbarc1, iz, ia, BFFm
       CHARACTER*2 carz, cara3
       CHARACTER*8 cara8
       CHARACTER*33 cara1
       CHARACTER*40 line
-C
 C
       OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
  100  READ(79, '(A8)')cara8
@@ -5795,7 +5747,6 @@ C
       IF(FISmod(Nnuc).EQ.0.)READ(79, *)(EFB(i), H(1, i), i = 1, NRBar)
       IF(FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2), EFB(3), H(1, 3)
-C
 C
       IF(FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0)READ(79, *)EFB(1), H(1, 1),
      &   EFBm(1), HM(1, 1), EFBm(2), HM(1, 2)
@@ -6001,7 +5952,7 @@ C
 C*==dami_rofis.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 C
 C--------------------------------------------
-      SUBROUTINE DAMI_ROFIS(Nnuc, Ibars, Mmod, Afiss)
+      SUBROUTINE DAMI_ROFIS(Nnuc, ib, Mmod, rafis)
 C-----continuum, level densities at saddle points
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -6011,99 +5962,84 @@ C-----continuum, level densities at saddle points
      &                 SCRtf(2), MORtcrt(NFPARAB), MPArcrt(NFPARAB),
      &                 ECOndf(2)
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /FISSMOD/ ROFism(60, 30, 3), HM(NFTRANS, 3),
-     &                 EFDism(NFTRANS, 3), UGRidf(0:NFISENMAX, 3),
-     &                 EFBm(3), XMInnm(3), AFIsm(3), DEFbm(3),
-     &                 SHCfism(3), DELtafism(3), GAMmafism(3),
-     &                 WFIsm(3), BFFm(3),NRBinfism(3)
-C
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+     &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
+     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(0:NFMOD),
+     &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
+     &                 SHCfism(NFMOD), DELtafism(NFMOD),
+     &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
+     &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
+     &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
+ 
+      DOUBLE PRECISION csfism
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm,
-     &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm
+     &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm,
+     &                 destepm
 C
       DOUBLE PRECISION ACR, ACRt, ATIl, MORtcrt, MPArcrt, DETcrt, ECOnd,
      &                 SCR, TCRt, UCRt, BET2
-      DOUBLE PRECISION rotemp, ROFis, Afiss
+      DOUBLE PRECISION rotemp, ROFis, rafis
 C
-      DOUBLE PRECISION EFDis, EFB, UGRid, XMInn, xmax
+      DOUBLE PRECISION EFDis, EFB, UGRid, XMInn, xmax,mm2
 C----------------------
       CHARACTER*2 simb
       CHARACTER*50 filename
       INTEGER BFFm
+CMH temprary argred should be transferred      
+      argred=0
 C
       excn1 = EMAx(Nnuc)
-      BET2 = DEFfis(Ibars)
-      IF(NRBarc.EQ.3 .AND. Ibars.EQ.2) BET2 = DEFeq
+      BET2 = DEFfis(ib)
+      IF(NRBarc.EQ.3 .AND. ib.EQ.2) BET2 = DEFeq
 C-----where continuum starts,ends,steps in between
-      IF(Mmod.EQ.0)XMInn(Ibars) = 0.0001
+      IF(Mmod.EQ.0)XMInn(ib) = 0.0001
       IF(Mmod.GT.0)XMInnm(Mmod) = 0.0001
-      DO nr = 1, NRFdis(Ibars)
-         IF(Mmod.EQ.0 .AND. EFDis(nr, Ibars).GT.XMInn(Ibars))
-     &      XMInn(Ibars) = EFDis(nr, Ibars)
+    
+      DO nr = 1, NRFdis(ib)
+         IF(Mmod.EQ.0 .AND. EFDis(nr, ib).GT.XMInn(ib))
+     &      XMInn(ib) = EFDis(nr, ib)
          IF(Mmod.GT.0 .AND. EFDism(nr, Mmod).GT.XMInnm(Mmod))
      &      XMInnm(Mmod) = EFDism(nr, Mmod)
       ENDDO
-      IF(NRBarc.EQ.3)XMInn(2) = 0.001
+      IF(NRBarc.EQ.3)XMInn(2) = 0.0001
 C
-      xmax = 5.
-      IF(Mmod.EQ.0 .AND. excn1.GT.EFB(Ibars))xmax = excn1 -
-     &   (EFB(Ibars) + XMInn(Ibars)) + 5.
+      IF(excn1.LE.EFB(ib))xmax = 4.
+      IF(excn1.LE.EFBm(mmod))xmax = 4.
+      
+      IF(Mmod.EQ.0 .AND. excn1.GT.EFB(ib))xmax = excn1 -
+     &   (EFB(ib) + XMInn(ib)) + 4.
       IF(Mmod.GT.0 .AND. excn1.GT.EFBm(Mmod))xmax = excn1 -
-     &   (EFBm(Mmod) + XMInnm(Mmod)) + 5.
-C
-C     destepp=(xmax-xminn(ibars))/100.
-      DEStepp = .2
-C
-      IF(Mmod.EQ.0)NRBinfis(Ibars) = INT((xmax - XMInn(Ibars))/DEStepp)
-      IF(Mmod.GT.0)NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepp)
-C
-C----- Initializing UGRid() for FISden(NNUc)=1  RCN 31/12/2003
+     &   (EFBm(Mmod) + XMInnm(Mmod)) + 4.
+      
       IF(Mmod.EQ.0)THEN
-         DO kk = 1, NRBinfis(Ibars)
-            UGRid(kk, Ibars) = XMInn(Ibars) + (kk - 1)*DEStepp
+         destepp(ib)=(xmax-xminn(ib))/100.
+         NRBinfis(ib) = INT((xmax - XMInn(ib))/DEStepp(ib))
+         IF(NRBinfis(ib).GT.NFISENMAX)THEN
+            WRITE(6,*)
+     &           'Level density at saddle exceeds dimension. 
+     &            Increase NFISENMAX in dimension.h'
+            STOP 'Level density at saddle exceeds NFISENMAX'
+         ENDIF
+      ENDIF
+      IF(Mmod.GT.0)THEN
+         destepm(Mmod)=(xmax-xminnm(Mmod))/100.
+         NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))  
+      ENDIF
+C
+C----- Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003
+      IF(Mmod.EQ.0)THEN
+         DO kk = 1, NRBinfis(ib)
+            UGRid(kk, ib) = XMInn(ib) + (kk - 1)*DEStepp(ib)
          ENDDO
       ELSE
          DO kk = 1, NRBinfism(Mmod)
-            UGRidf(kk, Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepp
+            UGRidf(kk, Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepm(mmod)
          ENDDO
       ENDIF
 C
-      IF(FISden(Nnuc).EQ.1.)THEN
-         FIScon = 2.
-         MOMortcrt = MORtcrt(Ibars)
-         MOMparcrt = MPArcrt(Ibars)
-         iff = 1
-         IF(Mmod.EQ.0)THEN
-            GAMma = GAMmafis(Ibars)
-            DELp = DELtafis(Ibars)
-            SHC(Nnuc) = SHCfis(Ibars)
-            iff = (BFF(Ibars))
-            ACRt = ACRtf(Ibars)
-            UCRt = UCRtf(Ibars)
-            TCRt = TCRtf(Ibars)
-            SCR = SCRtf(Ibars)
-            DETcrt = DETcrtf(Ibars)
-            Afiss = AFIs(Ibars)
-            ECOnd = ECOndf(Ibars)
-         ENDIF
-         IF(Mmod.GT.0)THEN
-            NRBinfis(Ibars) = NRBinfism(Mmod)
-            XMInn(Ibars) = XMInnm(Mmod)
-            iff = BFFm(Mmod)
-            GAMma = GAMmafism(Mmod)
-            DELp = DELtafism(Mmod)
-            SHC(Nnuc) = SHCfism(Mmod)
-            Afiss = AFIsm(Mmod)
-         ENDIF
-         DO jj = 1, NLW
-            aaj = FLOAT(jj) + HIS(Nnuc)
-            DO kk = 1, NRBinfis(Ibars)
-               CALL DAMIRO(kk, Nnuc, XMInn(Ibars), DEStepp, Afiss,
-     &                     rotemp, aaj, iff)
-               IF(Mmod.EQ.0)ROFis(kk, jj, Ibars) = rotemp
-               IF(Mmod.GT.0)ROFism(kk, jj, Mmod) = rotemp
-            ENDDO
-         ENDDO
-      ENDIF
+      iz = INT(Z(Nnuc))
+      ia = INT(A(Nnuc))
+      in = ia - iz
 C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
       IF(FISden(Nnuc).EQ.0.)THEN
          iz = INT(Z(Nnuc))
@@ -6160,16 +6096,231 @@ C
          ENDIF
 C
          IF(NFISJ.LT.NLW)THEN
-            DO ib = 1, NRBarc
+            DO ibb = 1, NRBarc
                DO j = NFISJ + 1, NLW
                   DO ii = 1, NFISEN
-                     ROFis(ii, j, ib) = 0.
+                     ROFis(ii, j, ibb) = 0.
                   ENDDO
                ENDDO
             ENDDO
          ENDIF
       ENDIF
+C-----Empire specific
+      IF(FISden(Nnuc).EQ.1.)THEN
+ccc         ARGred=0.d0
+         mm2 = 0.24*A(Nnuc)**(2./3.)
+         r0 = 1.4
+         iff = 1
+         AP1 = .52268E-01
+         AP2 = .13395E+00
+         IF(Z(Nnuc).GE.85.D0)THEN
+            AP1 = AP1*1.2942
+            AP2 = AP2*1.2942
+         ENDIF
+         ATIl = AP1*A(Nnuc) + AP2*A23
+c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
+         atil=atil*rafis
+         IF(Mmod.EQ.0)THEN
+            GAMma = GAMmafis(ib)
+            DELp = DELtafis(ib)
+            SHC(Nnuc) = SHCfis(ib)
+            iff = BFF(ib)
+            desteppp=destepp(ib) 
+         ENDIF   
+         IF(Mmod.GT.0)THEN
+            NRBinfis(ib) = NRBinfism(Mmod)
+            XMInn(ib) = XMInnm(Mmod)
+            GAMma = GAMmafism(Mmod)         
+            DELp = DELtafism(Mmod)
+            SHC(Nnuc) = SHCfism(Mmod)
+            iff = BFFm(Mmod)
+            desteppp=destepm(Mmod)
+         ENDIF
+         TCRt = 0.567*DELp
+         ar = ATIl*(1.0 + SHC(nnuc)*GAMma)       
+         DO ix = 1, 20
+            xr = ar*TCRt**2
+            IF(xr.GT.0.01D0)THEN
+               FSHELL = 1.0 + (1.0 - 
+     &                  EXP((-GAMma*xr)))*SHC(nnuc)/xr
+            ELSE
+               FSHELL = 1 + GAMma/ SHC(nnuc)
+            ENDIF                   
+            ACRt = ATIl*FSHELL
+            IF(ABS(ACRt - ar)/ACRt.LE.0.001D0) GOTO 1001
+            ar = ACRt
+         ENDDO
+         WRITE(6, *)' WARNING: Last iteration acrt=', ACRt
+         WRITE(6, *)' WARNING: Execution continues'
+ 1001    IF(ACRt.LT.0.0D0)ACRt = 0.0
+         ECOnd = 1.5*ACRt*DELp**2/(pi*pi)
+         UCRt = ACRt*TCRt**2 + ECOnd
+C--------45.84 stands for (12/SQRT(pi))**2
+         DETcrt = (12./SQRT(pi))**2*ACRt**3*TCRt**5
+         SCR = 2.*ACRt*TCRt
+         Momparcrt=6*ACRt*mm2*(1. - (2./3.)*
+     &             DEFfis(ib))/PI**2
+         IF(momparcrt.lt.2.)momparcrt=2.
+         Momortcrt = 0.0095616*r0**2*A(Nnuc)**(5./3.)
+     &               *(1. + (1./3.)*DEFfis(ib))
+         DEL = 0.
+         IF(MOD(in, 2).NE.0)DEL = DELp
+         IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
+      
+         DO jj = 1, NLW
+            aaj = FLOAT(jj) + HIS(Nnuc)    
+            DO kk = 1, NRBinfis(ib)
+               u = xminn(ib) + (kk-1) * desteppp + del
+               IF(U.GT.UCRt)THEN
+                  u = u - ECOnd
+                  accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
+                  ROTemp = RODEFf(A(Nnuc), u, ACcn, aaj, momparcrt, 
+     &                    momortcrt, HIS(Nnuc), ARGred, EXPmax,iff)
+               ELSE
+                  accn = ACRt          
+                  ROTemp = ROBCSf(A(Nnuc), u, aaj, momparcrt, momortcrt,
+     &                     bet2, iff) * RORed
+               ENDIF
+               IF(Mmod.EQ.0) ROFis(kk, jj, ib) = rotemp
+               IF(Mmod.GT.0) ROFism(kk, jj, Mmod) =rotemp           
+            ENDDO
+         ENDDO
+         OPEN(83,file='densfis.dat')
+         DO kk = 1, NRBinfis(1)
+                 u=xminn(1)+(kk-1)*desteppp+del
+            write(83,*)u,rofis(kk,3,1),rofis(kk,3,2)
+         ENDDO
+         close(83)
+         ACRtf(ib)=acrt
+         UCRtf(ib)=ucrt
+         ECOndf(ib)=econd 
+         DETcrtf(ib)=detcrt
+         TCRtf(ib)=tcrt
+         SCRtf(ib)=scr
+      ENDIF
+      END
+c-------------------------------------------------------------------------
+      DOUBLE PRECISION FUNCTION ROBCSf (A,U, Aj, Mompar, Momort, A2,iff)
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+      COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
+      DOUBLE PRECISION  Momort, Mompar, momo, momp
+C
+C-----CONST=1/(2*SQRT(2 PI))
+CMH temprary argred should be transferred      
+      argred=0
+      DATA const/0.199471/,pi/3.1415926d0/
+      ROBCS = 0.0
+      ROBCSf=0.0
+      phi2 = 1.d0 - U/UCRt
+      phi = SQRT(phi2)      
+      t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
+      s = SCR*TCRt*(1. - phi2)/t
+      det = DETcrt*(1. - phi2)*(1. + phi2)**2
+      momp = Mompar*TCRt*(1. - phi2)/t
+      IF(momp.LT.0.0D0)RETURN
+      momo = Momort*0.3333 + 0.6666*Momort*TCRt*(1. - phi2)/t
+      IF(momo.LT.0.0D0)RETURN
+      seff2 = momp*t
+      IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333*momo**0.6666*t
+      arg = s - (Aj+0.5)**2/(2.0*seff2) - ARGred
+      IF(arg.LE.0.0D0)RETURN
+      ROBCS = 0.5*const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
+      CALL DAMPROTVIB(u, Qk,t,qv, A, vibrk)
+      qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
+      ROBCSf = ROBCS*vibrk*momo*t*qdamp
+      IF(iff.eq.2) ROBCSf = ROBCSf*2.*sqrt(2.*pi)*sqrt(momp*t)
+      IF(iff.eq.3) ROBCSf = ROBCSf*2.
+      IF(iff.eq.4) ROBCSf = ROBCSf*4.*sqrt(2.*pi)*sqrt(momp*t)
+      END
+C------------------------------------------------------------------------
+      DOUBLE PRECISION FUNCTION RODEFf(A, E, Ac, Aj, Mompar, Momort,
+     &                 Ss,  Argred, Expmax,iff)
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+C
+C
+      DOUBLE PRECISION A,  Ac, Aj, Argred, E, Expmax, Momort,
+     &                 Mompar, Ss
+      INTEGER i, k, kmin
+C
+      DATA const/0.01473144/
+C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
+      RODEFf = 0.0
+      sum = 0.0
+      pi=3.14159
+      IF(Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0)THEN
+         WRITE(6, *)'WARNING: Negative moment of inertia for spin ', Aj
+         WRITE(6, *)'WARNING: 0 level density returned by rodef'
+         RETURN
+      ENDIF
+      IF(Ac.EQ.0.0D0)THEN
+         WRITE(6, '('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEFF'')')
+         STOP
+      ENDIF
+      seff = 1.0/Mompar - 1.0/Momort
+      t = SQRT(e/Ac)
+      con = const/Ac**0.25/SQRT(Mompar*t)
+C-----vibrational ehancement, vib+rot damping
+      CALL DAMPROTVIB(E, Qk,t,qv, A, vibrk)
+      IF(qv.GE.0.999D0)vibrk = 1.0
+      sort2 = Momort*t
+      IF(Ss.EQ.( - 1.0D0))THEN
+         arg = 2*SQRT(Ac*e) - Argred
+         IF(arg.LE.( - Expmax))THEN
+            sum = 0.0
+         ELSEIF(e.GT.1.0D0)THEN
+            sum = EXP(arg)/e**1.25
+         ELSE
+            sum = EXP(arg)
+         ENDIF
+         IF(Aj.LT.1.0D0)GOTO 100
+      ENDIF
+      i = Aj + 1.
+      IF(Ss.EQ.( - 1.0D0))THEN
+         kmin = 2
+      ELSE
+         kmin = 1
+      ENDIF
+      DO k = kmin, i
+         ak = k + Ss
+C-----------rotation perpendicular to the symmetry axis
+         u = e - 0.5*ak**2*seff
+C-----------rotation parallel to the symmetry axis
+c        u = e - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
+         IF(u.LE.0.0D0)GOTO 100
+         arg = 2.0*SQRT(Ac*u) - Argred
+         IF(arg.GT.( - Expmax))THEN
+            IF(u.GT.1.0D0)THEN
+               sum = sum + 2.0*EXP(arg)/u**1.25
+            ELSE
+               sum = sum + 2.0*EXP(arg)
+            ENDIF
+         ENDIF
+      ENDDO
+ 100  RODEFf = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
+     &         *(vibrk - qv*(vibrk - 1.))
+      IF(iff.eq.2) RODEFf = RODEFf*2.*sqrt(2.*pi)*sqrt(mompar*t)
+      IF(iff.eq.3) RODEFf = RODEFf*2.
+      IF(iff.eq.4) RODEFf = RODEFf*4.*sqrt(2.*pi)*sqrt(mompar*t)
+      END
+c---------------------------------------------------
+      SUBROUTINE DAMPROTVIB(E1, Qk,t,q, A, vibrk)
+C---------------------------------------------------
+      DOUBLE PRECISION E1, Qk,dmphalf, dmpdiff,Q, T,arg, dt, thalf,
+     &                 A, vibrk,cost, ht, m0, pi, r0, sdrop
+      Qk = 0.
+      dmphalf = 40.
+      dmpdiff = 10.
+      Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
+     &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
+      thalf = 1.
+      dt = 0.1
+      arg = (T - thalf)/dt
+      Q = 1.0/(EXP((-arg)) + 1.0)
+      DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
+      sdrop = 17./(4.*pi*r0**2)
+      cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
+      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
       END
 
       SUBROUTINE GDRGFLDATA(Znucleus, Anucleus)
