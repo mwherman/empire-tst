@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-08-30 13:31:09 $
-Ccc   * $Id: lev-dens.f,v 1.18 2004-08-30 13:31:09 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-01 18:58:24 $
+Ccc   * $Id: lev-dens.f,v 1.19 2004-09-01 18:58:24 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -733,7 +733,7 @@ C
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
       IF(FISCON.gt.0.)THEN
-         atil=atil+2.
+         atil=atil
       ELSE
          ATIl = ATIl*ATIlnor(Nnuc)
       ENDIF   
@@ -1425,19 +1425,10 @@ C     CALL DAMPKS(A, A2, t, qk)
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
-C     Changed according to Mihaela's recommendation
-C     ROBCS =ROBCS*vibrk*momo*t*qdamp
-      IF(FISCon.EQ.2) THEN
-         ROBCS =ROBCS*vibrk*momort*tcrt*qdamp
-      else
-         ROBCS =ROBCS*vibrk*momo*t*qdamp
-      endif   
-c     IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
-c     IF(iff.eq.3) ROBCS = ROBCS*2
-c     IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
-      IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(Mompar*tcrt)
-      IF(iff.eq.3) ROBCS = ROBCS*2
-      IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(Momort*tcrt)
+      ROBCS =ROBCS*vibrk*momo*t*qdamp
+      if(iff.eq.2) ROBCS =ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
+      if(iff.eq.3) ROBCS =ROBCS*2
+      if(iff.eq.4) ROBCS =ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
       END
 C
 C
