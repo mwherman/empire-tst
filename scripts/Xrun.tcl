@@ -2869,17 +2869,9 @@ proc ::vTcl:WidgetProc {w args} {
         ## If no arguments, returns the path the alias points to
         return $w
     }
-    ## The first argument is a switch, they must be doing a configure.
-    if {[string index $args 0] == "-"} {
-        set command configure
-        ## There's only one argument, must be a cget.
-        if {[llength $args] == 1} {
-            set command cget
-        }
-    } else {
-        set command [lindex $args 0]
-        set args [lrange $args 1 end]
-    }
+
+    set command [lindex $args 0]
+    set args [lrange $args 1 end]
     uplevel $w $command $args
 }
 #############################################################################
@@ -2912,46 +2904,46 @@ proc vTcl:project:info {} {
     }
     set site_3_0 $base.fra77
     namespace eval ::widgets::$site_3_0.but78 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.ent79 {
         array set save {-_tooltip 1 -background 1 -font 1 -foreground 1 -justify 1 -textvariable 1 -validate 1 -vcmd 1}
     }
     namespace eval ::widgets::$site_3_0.but80 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but86 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but87 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but81 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but77 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but82 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but83 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but84 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but85 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_3_0.but76 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_3_0.lab77 {
-        array set save {-activebackground 1 -background 1 -width 1}
+    namespace eval ::widgets::$site_3_0.cpd67 {
+        array set save {-_tooltip 1 -background 1 -borderwidth 1 -cursor 1 -font 1 -foreground 1 -justify 1 -relief 1 -state 1 -textvariable 1 -vcmd 1 -width 1}
     }
     namespace eval ::widgets::$site_3_0.button77 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$base.tab88 {
         array set save {-angle 1 -backdrop 1 -bevelamount 1 -raiseselect 1 -tabborders 1 -tabforeground 1 -tabpos 1}
@@ -2973,10 +2965,10 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but93 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab94 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -2987,19 +2979,19 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but95 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.lab96 {
         array set save {-activebackground 1 -background 1 -font 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but97 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but98 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but99 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab100 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3010,13 +3002,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but93 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but101 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab102 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3027,13 +3019,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but93 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but101 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab103 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3044,13 +3036,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but93 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but101 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.cpd67 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3061,7 +3053,7 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
     }
     set site_8_1 [lindex [$base.tab88 childsite] 1]
     namespace eval ::widgets::$site_8_1 {
@@ -3077,19 +3069,19 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.cpd70 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but71 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but95 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but97 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but72 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab106 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3100,19 +3092,19 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.cpd67 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_10_0.but72 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but73 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but74 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but71 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab105 {
         array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
@@ -3123,13 +3115,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but74 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but73 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but71 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab75 {
         array set save {-labelfont 1 -labelpos 1 -labeltext 1}
@@ -3140,13 +3132,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_10_0
     namespace eval ::widgets::$site_10_0.but81 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but82 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but83 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1}
     }
     set site_8_2 [lindex [$base.tab88 childsite] 2]
     namespace eval ::widgets::$site_8_2 {
@@ -3180,16 +3172,16 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -background 1 -disabledforeground 1 -font 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but96 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.cpd69 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.but88 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.but89 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_8_0.fra76 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -width 1}
@@ -3221,7 +3213,7 @@ proc vTcl:project:info {} {
         array set save {-justify 1 -labelfont 1 -labeltext 1 -textbackground 1 -textvariable 1}
     }
     namespace eval ::widgets::$site_9_0.but81 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.com77 {
         array set save {-command 1 -justify 1 -labelfont 1 -labelpos 1 -labeltext 1 -selectioncommand 1 -textbackground 1 -textvariable 1 -unique 1 -width 1}
@@ -3239,52 +3231,52 @@ proc vTcl:project:info {} {
     }
     set site_9_0 $site_8_0.fra112
     namespace eval ::widgets::$site_9_0.but113 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but114 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but115 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.fra71 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -highlightcolor 1 -width 1}
     }
     set site_9_0 $site_8_0.fra71
-    namespace eval ::widgets::$site_9_0.but115 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -text 1}
-    }
     namespace eval ::widgets::$site_9_0.but71 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -state 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -state 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but116 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -state 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -state 1 -text 1}
+    }
+    namespace eval ::widgets::$site_9_0.but115 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.fra117 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -width 1}
     }
     set site_9_0 $site_8_0.fra117
     namespace eval ::widgets::$site_9_0.button78 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but113 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but114 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.frame77 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -highlightcolor 1 -width 1}
     }
     set site_9_0 $site_8_0.frame77
     namespace eval ::widgets::$site_9_0.but115 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but71 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but116 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     set site_8_4 [lindex [$base.tab88 childsite] 4]
     namespace eval ::widgets::$site_8_4 {
@@ -3308,13 +3300,13 @@ proc vTcl:project:info {} {
     }
     set site_9_0 $site_8_0.fra122
     namespace eval ::widgets::$site_9_0.but123 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.but124 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.but125 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_8_0.scr77 {
         array set save {-activebackground 1 -dblclickcommand 1 -hscrollmode 1 -labelfont 1 -labelpos 1 -labeltext 1 -listvariable 1 -selectioncommand 1 -selectmode 1 -textbackground 1 -textfont 1 -vscrollmode 1 -width 1}
@@ -3334,13 +3326,13 @@ proc vTcl:project:info {} {
         array set save {-background 1 -insertbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_10_0.but83 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but84 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but85 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     set site_8_5 [lindex [$base.tab88 childsite] 5]
     namespace eval ::widgets::$site_8_5 {
@@ -3375,20 +3367,20 @@ proc vTcl:project:info {} {
         array set save {-background 1 -insertbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_11_0.but84 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_11_0.but85 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.fra82 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -width 1}
     }
     set site_9_0 $site_8_0.fra82
     namespace eval ::widgets::$site_9_0.but84 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_9_0.but86 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     set site_8_6 [lindex [$base.tab88 childsite] 6]
     namespace eval ::widgets::$site_8_6 {
@@ -3415,10 +3407,10 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -hscrollmode 1 -labelpos 1 -selectioncommand 1 -selectmode 1 -textbackground 1 -textfont 1 -visibleitems 1}
     }
     namespace eval ::widgets::$site_12_0.but88 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -state 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -state 1 -text 1}
     }
     namespace eval ::widgets::$site_12_0.but76 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_11_0.fra89 {
         array set save {-background 1 -borderwidth 1 -height 1 -highlightbackground 1 -width 1}
@@ -3428,7 +3420,7 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -hscrollmode 1 -labelfont 1 -labelpos 1 -listvariable 1 -selectioncommand 1 -selectmode 1 -textbackground 1 -textfont 1 -visibleitems 1}
     }
     namespace eval ::widgets::$site_12_0.but88 {
-        array set save {-activebackground 1 -background 1 -command 1 -font 1 -highlightbackground 1 -text 1}
+        array set save {-activebackground 1 -background 1 -command 1 -cursor 1 -font 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_12_0.ent90 {
         array set save {-_tooltip 1 -background 1 -textvariable 1 -width 1}
@@ -3438,19 +3430,19 @@ proc vTcl:project:info {} {
     }
     set site_12_0 $site_11_0.fra76
     namespace eval ::widgets::$site_12_0.but77 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_12_0.ent77 {
         array set save {-justify 1 -labelfont 1 -labelpos 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_12_0.but78 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_12_0.but79 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_12_0.but76 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_11_0.opt86 {
         array set save {-activeforeground 1 -command 1 -font 1 -foreground 1 -labelfont 1 -labeltext 1}
@@ -3479,7 +3471,7 @@ proc vTcl:project:info {} {
         array set save {-_tooltip 1 -background 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_13_0.but78 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_11_0.lab79 {
         array set save {-labelfont 1 -labelpos 1 -labeltext 1}
@@ -3493,7 +3485,7 @@ proc vTcl:project:info {} {
         array set save {-_tooltip 1 -background 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_13_0.but78 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     set site_8_7 [lindex [$base.tab88 childsite] 7]
     namespace eval ::widgets::$site_8_7 {
@@ -3512,13 +3504,13 @@ proc vTcl:project:info {} {
     }
     set site_10_0 $site_9_0.fra79
     namespace eval ::widgets::$site_10_0.but80 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_10_0.but81 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     namespace eval ::widgets::$site_10_0.but79 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
     $base.tab88 select 0
     namespace eval ::widgets::$base.m88 {
@@ -3579,6 +3571,15 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$base.m76 {
         array set save {-disabledforeground 1 -tearoff 1}
     }
+    namespace eval ::widgets::$base.__tk_filedialog {
+    }
+    set site_4_0 $base.__tk_filedialog.bot
+    set site_4_0 $base.__tk_filedialog.top
+    set site_5_0 $site_4_0.f1
+    set site_5_0 $site_4_0.f3
+    set site_5_0 $site_4_0.f2
+    set site_6_0 $site_5_0.a
+    set site_6_0 $site_5_0.b
     namespace eval ::widgets_bindings {
         set tagslist {_vTclBalloon _TopLevel}
     }
@@ -3701,7 +3702,12 @@ foreach el $filetmp {
 set filelist [lsort -dictionary $filelist]
 
 # list of archive directories
-set archdirlist [glob -nocomplain ../archive/*/]
+set archdirlistmp [glob -nocomplain ../*/]
+set archdirlist {}
+foreach elm $archdirlistmp {
+if {$elm != "../RIPL-2/" && $elm != "../data/" &&  $elm != "../scripts/"  && $elm != "../CVS/"  && $elm != "../doc/"  && $elm != "../EXFOR/"  && $elm != "../source/"  && $elm != "../util/"  && $elm != "../x4cd/" } then {
+lappend archdirlist $elm }
+}
 set archdirlist [lsort -dictionary $archdirlist]
 
 #list of files in the selected archive directory
@@ -3766,7 +3772,7 @@ global widget file
 
 proc ::fileDialog {w} {
 global widget
-global file zvfilter zvvplots profilter filelist archfilter 
+global file zvfilter zvvplots profilter filelist archfilter workdir
 
     #   Type names		Extension(s)	Mac File Type(s)
     #
@@ -3777,14 +3783,35 @@ global file zvfilter zvvplots profilter filelist archfilter
     }
      
 set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project input file"]
-set dfile [file rootname $defile]
-set file [file tail $dfile]
-set zvfilter $file
-set profilter $file
-set archfilter $file 
-Combobox1 clear
-# create list of possible ddx plots 
-ddlist
+set workdir [file dirname $defile]
+set pdir [lindex [file split $workdir] end-1]  
+if { $pdir != "empire" } {
+  if {[tk_dialog .dialogsi Confirm "Requested directory is in a wrong level. You will be able to view files but to run calculations. Is it OK?" "" 0 No Yes ] == 1} {
+    cd $workdir
+    set dfile [file rootname $defile]
+    set file [file tail $dfile]
+    set zvfilter $file
+    set profilter $file
+    set archfilter $file 
+    Combobox1 clear
+    # create list of possible ddx plots 
+    ddlist
+    # update all file lists
+    adjourn .top75
+  }
+} else {
+    cd $workdir
+    set dfile [file rootname $defile]
+    set file [file tail $dfile]
+    set zvfilter $file
+    set profilter $file
+    set archfilter $file 
+    Combobox1 clear
+    # create list of possible ddx plots 
+    ddlist
+    # update all file lists
+    adjourn .top75
+}
 }
 #############################################################################
 ## Procedure:  readabun
@@ -3896,7 +3923,12 @@ set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
 set filelist [lsort -dictionary $filelist]
-set archdirlist [glob -nocomplain ../archive/*/]
+set archdirlistmp [glob -nocomplain ../*/]
+set archdirlist {}
+foreach elm $archdirlistmp {
+if {$elm != "../RIPL-2/" && $elm != "../data/" &&  $elm != "../scripts/"  && $elm != "../CVS/"  && $elm != "../doc/"  && $elm != "../EXFOR/"  && $elm != "../source/"  && $elm != "../util/"  && $elm != "../x4cd/" } then {
+lappend archdirlist $elm }
+}
 set archdirlist [lsort -dictionary $archdirlist]
 }
 
@@ -3946,7 +3978,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -background #ffffff -highlightcolor black -menu "$top.m88" 
     wm focusmodel $top passive
-    wm geometry $top 796x297+32+637; update
+    wm geometry $top 830x297+0+613; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -3967,7 +3999,7 @@ proc vTclWindow.top75 {base} {
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {fileDialog .top75
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects fileopen.gif]] \
         -relief flat -text Project: 
@@ -3986,7 +4018,7 @@ adjourn .top75} \
     }
     button $site_3_0.but80 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.inp &} \
+        -background #dcdcdc -command {exec $editor $file.inp &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects edit.gif]] \
@@ -4001,8 +4033,8 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/run $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects launch.gif]] \
         -relief flat -text R+F+P 
     vTcl:DefineAlias "$site_3_0.but86" "Button8" vTcl:WidgetProc "Toplevel1" 1
@@ -4015,8 +4047,8 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/runE $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects mini-run.gif]] \
         -relief flat -text Run 
     vTcl:DefineAlias "$site_3_0.but87" "Button9" vTcl:WidgetProc "Toplevel1" 1
@@ -4026,7 +4058,7 @@ adjourn .top75} \
     }
     button $site_3_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.lst &} \
+        -background #dcdcdc -command {exec $editor $file.lst &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects editcopy.gif]] \
@@ -4038,7 +4070,7 @@ adjourn .top75} \
     }
     button $site_3_0.but77 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.out &} \
+        -background #dcdcdc -command {exec $editor $file.out &} -cursor hand2 \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects shortout.gif]] \
@@ -4051,7 +4083,7 @@ adjourn .top75} \
     button $site_3_0.but82 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file.endf &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects kthememgr.gif]] \
         -relief flat -text ENDF 
@@ -4062,7 +4094,7 @@ adjourn .top75} \
     }
     button $site_3_0.but83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.exf &} \
+        -background #dcdcdc -command {exec $editor $file.exf &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects x4.gif]] \
@@ -4074,7 +4106,7 @@ adjourn .top75} \
     }
     button $site_3_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.c4 &} \
+        -background #dcdcdc -command {exec $editor $file.c4 &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects stop.gif]] \
@@ -4087,7 +4119,7 @@ adjourn .top75} \
     button $site_3_0.but85 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec gv -landscape $file.ps &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects imagegallery.gif]] \
         -relief flat -text Plots 
@@ -4099,7 +4131,7 @@ adjourn .top75} \
     button $site_3_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {adjourn .top75
-ddlist} \
+ddlist} -cursor hand2 \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects reload.gif]] \
@@ -4109,15 +4141,22 @@ ddlist} \
     bind $site_3_0.but76 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Update lists of files (do after running any code) }
     }
-    label $site_3_0.lab77 \
-        -activebackground #dcdcdc -background #dcdcdc -width 10 
-    vTcl:DefineAlias "$site_3_0.lab77" "Label9" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_3_0.cpd67 \
+        -background #dcdcdc -borderwidth 0 -cursor tcross \
+        -font {Helvetica -12 bold} -foreground #666666 -justify left \
+        -relief flat -state disabled -textvariable workdir -vcmd {} -width 0 
+    vTcl:DefineAlias "$site_3_0.cpd67" "Entry3" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_3_0.cpd67 "$site_3_0.cpd67 Entry $top all _vTclBalloon _vTclBalloon _vTclBalloon"
+    bind $site_3_0.cpd67 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {current working directory}
+    }
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
         -command {exec ../scripts/clean $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -highlightcolor #000000 \
+        -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc \
+        -highlightcolor #000000 \
         -image [vTcl:image:get_image [file join / home herman empire work Projects kleandisk.gif]] \
         -relief flat -text Clean 
     bindtags $site_3_0.button77 "$site_3_0.button77 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
@@ -4148,12 +4187,12 @@ adjourn .top75} \
         -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left 
     pack $site_3_0.but76 \
         -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
-    pack $site_3_0.lab77 \
-        -in $site_3_0 -anchor center -expand 0 -fill x -side left 
+    pack $site_3_0.cpd67 \
+        -in $site_3_0 -anchor center -expand 1 -fill both -padx 5 -side left 
     pack $site_3_0.button77 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     ::iwidgets::tabnotebook $top.tab88 \
-        -angle 20 -backdrop #dcdcdc -bevelamount 2 -raiseselect 1 \
+        -angle 20 -backdrop #dcdcdc -bevelamount 2 -raiseselect 0 \
         -tabborders 1 -tabforeground #666666 -tabpos n 
     vTcl:DefineAlias "$top.tab88" "Tabnotebook1" vTcl:WidgetProc "Toplevel1" 1
     $top.tab88 add \
@@ -4185,7 +4224,7 @@ adjourn .top75} \
         -command {exec xterm -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i skel.inp $file.inp 
 adjourn .top75
 exec $editor $file.inp &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
         -relief raised -text Create 
     vTcl:DefineAlias "$site_10_0.but92" "Button13" vTcl:WidgetProc "Toplevel1" 1
@@ -4195,7 +4234,7 @@ exec $editor $file.inp &} \
     }
     button $site_10_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.inp &} \
+        -background #dcdcdc -command {exec $editor $file.inp &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
         -relief raised -text Edit 
@@ -4222,9 +4261,9 @@ exec $editor $file.inp &} \
 adjourn .top75
 # create list of possible ddx plots 
 ddlist} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 1m \
-        -relief raised -text {Run full package}
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 1m -relief raised -text {Run full package} 
     vTcl:DefineAlias "$site_10_0.but95" "Button15" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but95 "$site_10_0.but95 Button $top all _vTclBalloon"
     bind $site_10_0.but95 <<SetBalloon>> {
@@ -4239,9 +4278,9 @@ ddlist} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/runE $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -relief raised \
-        -text {Run EMPIRE}
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -relief raised -text {Run EMPIRE} 
     vTcl:DefineAlias "$site_10_0.but97" "Button16" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but97 "$site_10_0.but97 Button $top all _vTclBalloon"
     bind $site_10_0.but97 <<SetBalloon>> {
@@ -4252,9 +4291,9 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/format $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -relief raised \
-        -text Format 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -relief raised -text Format 
     vTcl:DefineAlias "$site_10_0.but98" "Button17" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but98 "$site_10_0.but98 Button $top all _vTclBalloon"
     bind $site_10_0.but98 <<SetBalloon>> {
@@ -4267,9 +4306,9 @@ adjourn .top75} \
 adjourn .top75
 # create list of possible ddx plots 
 ddlist} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -relief raised \
-        -text Plot 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -relief raised -text Plot 
     vTcl:DefineAlias "$site_10_0.but99" "Button18" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but99 "$site_10_0.but99 Button $top all _vTclBalloon"
     bind $site_10_0.but99 <<SetBalloon>> {
@@ -4293,7 +4332,7 @@ ddlist} \
     set site_10_0 [$site_8_0.lab100 childsite]
     button $site_10_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.lst &} \
+        -background #dcdcdc -command {exec $editor $file.lst &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Full 
@@ -4304,7 +4343,7 @@ ddlist} \
     }
     button $site_10_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.out &} \
+        -background #dcdcdc -command {exec $editor $file.out &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Short 
@@ -4316,7 +4355,7 @@ ddlist} \
     button $site_10_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-r.endf &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text ENDF 
     vTcl:DefineAlias "$site_10_0.but101" "Button21" vTcl:WidgetProc "Toplevel1" 1
@@ -4338,7 +4377,7 @@ ddlist} \
     set site_10_0 [$site_8_0.lab102 childsite]
     button $site_10_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.lev &} \
+        -background #dcdcdc -command {exec $editor $file.lev &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text All 
@@ -4350,7 +4389,7 @@ ddlist} \
     button $site_10_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-lev.col &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Collective 
     vTcl:DefineAlias "$site_10_0.but93" "Button23" vTcl:WidgetProc "Toplevel1" 1
@@ -4361,7 +4400,7 @@ ddlist} \
     button $site_10_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec gv -landscape $file-cum.ps &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Cumul. plot} 
     vTcl:DefineAlias "$site_10_0.but101" "Button24" vTcl:WidgetProc "Toplevel1" 1
@@ -4384,7 +4423,7 @@ ddlist} \
     button $site_10_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.int &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Internal 
     vTcl:DefineAlias "$site_10_0.but92" "Button25" vTcl:WidgetProc "Toplevel1" 1
@@ -4395,7 +4434,7 @@ ddlist} \
     button $site_10_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.ripl &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text RIPL 
     vTcl:DefineAlias "$site_10_0.but93" "Button26" vTcl:WidgetProc "Toplevel1" 1
@@ -4406,7 +4445,7 @@ ddlist} \
     button $site_10_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.dir &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Direct 
     vTcl:DefineAlias "$site_10_0.but101" "Button27" vTcl:WidgetProc "Toplevel1" 1
@@ -4429,7 +4468,7 @@ ddlist} \
     button $site_10_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-inp.fis &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Fission input} -wraplength 40 
     vTcl:DefineAlias "$site_10_0.but92" "Button30" vTcl:WidgetProc "Toplevel1" 1
@@ -4469,9 +4508,9 @@ ddlist} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/x4interface $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 1m \
-        -relief raised -text {GUI interface} 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 1m -relief raised -text {GUI interface} 
     vTcl:DefineAlias "$site_10_0.cpd70" "Button37" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd70 "$site_10_0.cpd70 Button $top all _vTclBalloon"
     bind $site_10_0.cpd70 <<SetBalloon>> {
@@ -4479,7 +4518,7 @@ adjourn .top75} \
     }
     button $site_10_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.exf &} \
+        -background #dcdcdc -command {exec $editor $file.exf &} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {View EXFOR} 
@@ -4493,9 +4532,9 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/c4 $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 1m \
-        -relief raised -text {Run X4TOC4} 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 1m -relief raised -text {Run X4TOC4} 
     vTcl:DefineAlias "$site_10_0.but95" "Button28" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but95 "$site_10_0.but95 Button $top all _vTclBalloon"
     bind $site_10_0.but95 <<SetBalloon>> {
@@ -4506,9 +4545,9 @@ adjourn .top75} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/sortc4 $file &
 adjourn .top75} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 1m \
-        -relief raised -text {Sort C4} 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 1m -relief raised -text {Sort C4} 
     vTcl:DefineAlias "$site_10_0.but97" "Button29" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but97 "$site_10_0.but97 Button $top all _vTclBalloon"
     bind $site_10_0.but97 <<SetBalloon>> {
@@ -4516,7 +4555,7 @@ adjourn .top75} \
     }
     button $site_10_0.but72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.c4 &} \
+        -background #dcdcdc -command {exec $editor $file.c4 &} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {View C4} 
@@ -4547,8 +4586,8 @@ adjourn .top75} \
         -command {exec cp $file.inp $file-a.inp
 exec cp $file.inp $file-b.inp
 exec cp $file.inp $file-c.inp} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -padx 1m \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -padx 1m \
         -text {Create 3 piece-wise input templates} -wraplength 70 
     vTcl:DefineAlias "$site_10_0.cpd67" "Button167" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd67 "$site_10_0.cpd67 Button $top all _vTclBalloon"
@@ -4558,7 +4597,7 @@ exec cp $file.inp $file-c.inp} \
     button $site_10_0.but72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-a.inp &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Edit  input a} 
     vTcl:DefineAlias "$site_10_0.but72" "Button158" vTcl:WidgetProc "Toplevel1" 1
@@ -4569,7 +4608,7 @@ exec cp $file.inp $file-c.inp} \
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-b.inp &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Edit  input b} 
     vTcl:DefineAlias "$site_10_0.but73" "Button159" vTcl:WidgetProc "Toplevel1" 1
@@ -4580,7 +4619,7 @@ exec cp $file.inp $file-c.inp} \
     button $site_10_0.but74 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-c.inp &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Edit  input c} 
     vTcl:DefineAlias "$site_10_0.but74" "Button160" vTcl:WidgetProc "Toplevel1" 1
@@ -4593,8 +4632,9 @@ exec cp $file.inp $file-c.inp} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/run-piece-wise $file 
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -padx 1m -text {Run piece-wise} 
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -padx 1m \
+        -text {Run piece-wise} 
     vTcl:DefineAlias "$site_10_0.but71" "Button157" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but71 "$site_10_0.but71 Button $top all _vTclBalloon"
     bind $site_10_0.but71 <<SetBalloon>> {
@@ -4620,7 +4660,7 @@ adjourn .top75} \
     button $site_10_0.but74 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.ripl &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Edit RIPL OMP} 
     vTcl:DefineAlias "$site_10_0.but74" "Button155" vTcl:WidgetProc "Toplevel1" 1
@@ -4692,8 +4732,9 @@ exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
 exec xterm -e ../scripts/zvvddx $file omp2 1
 exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -padx 1m -text {Run fit + Plot} 
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -padx 1m \
+        -text {Run fit + Plot} 
     vTcl:DefineAlias "$site_10_0.but73" "Button154" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but73 "$site_10_0.but73 Button $top all _vTclBalloon"
     bind $site_10_0.but73 <<SetBalloon>> {
@@ -4705,8 +4746,9 @@ adjourn .top75} \
         -command {exec mv $file-omp1.zvd $file-omp1R.zvd
 exec mv $file-omp2.zvd $file-omp2R.zvd
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -padx 1m -text {Store as ref.} 
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -padx 1m \
+        -text {Store as ref.} 
     vTcl:DefineAlias "$site_10_0.but71" "Button156" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but71 "$site_10_0.but71 Button $top all _vTclBalloon"
     bind $site_10_0.but71 <<SetBalloon>> {
@@ -4726,7 +4768,7 @@ adjourn .top75} \
     button $site_10_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-ecis.in &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -text {Edit input} 
     vTcl:DefineAlias "$site_10_0.but81" "Button161" vTcl:WidgetProc "Toplevel1" 1
@@ -4738,8 +4780,9 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {exec ../source/ecis03 <$file-ecis.in >$file-ecis.out } \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -highlightcolor #000000 -text {Run ECIS} 
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc \
+        -highlightcolor #000000 -text {Run ECIS} 
     vTcl:DefineAlias "$site_10_0.but82" "Button162" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but82 "$site_10_0.but82 Button $top all _vTclBalloon"
     bind $site_10_0.but82 <<SetBalloon>> {
@@ -4748,7 +4791,7 @@ adjourn .top75} \
     button $site_10_0.but83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-ecis.out &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -text {View output} 
     vTcl:DefineAlias "$site_10_0.but83" "Button163" vTcl:WidgetProc "Toplevel1" 1
@@ -4880,7 +4923,7 @@ adjourn .top75} \
         -background #e6e6e6 \
         -command {exec xterm -e ../scripts/zvd $file $mt &
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -text {Plot  selected MT} -wraplength 120 
     vTcl:DefineAlias "$site_9_0.but96" "Button122" vTcl:WidgetProc "Toplevel1" 1
@@ -4897,7 +4940,7 @@ foreach el $seleczvvlist {
    exec rm -f $el
 }
 adjourn .top75 }} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {<= Delete selected} -wraplength 120 
     vTcl:DefineAlias "$site_9_0.cpd69" "Button123" vTcl:WidgetProc "Toplevel1" 1
@@ -4910,7 +4953,7 @@ adjourn .top75 }} \
         -background #e6e6e6 \
         -command {exec ../scripts/guizvv.tcl $file &
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -text {Launch ZVV interface } -wraplength 72 
     vTcl:DefineAlias "$site_9_0.but88" "Button129" vTcl:WidgetProc "Toplevel1" 1
@@ -4923,7 +4966,7 @@ adjourn .top75} \
         -background #e6e6e6 \
         -command {exec xterm -e ../scripts/zvpl $file &
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -text {ZVV plot from EMPIRE} -wraplength 72 
     vTcl:DefineAlias "$site_9_0.but89" "Button130" vTcl:WidgetProc "Toplevel1" 1
@@ -5056,7 +5099,7 @@ close $lsttab
 #exec gvim LSTTAB.INP
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
 exec xterm -e ../scripts/zvvddx $file $multi &} \
-        -font {Helvetica -12 } -foreground darkgreen \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Plot the list } 
     vTcl:DefineAlias "$site_9_0.but81" "Button131" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but81 "$site_9_0.but81 Button $top all _vTclBalloon"
@@ -5106,7 +5149,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {EMPIRE warnings} 
     vTcl:DefineAlias "$site_9_0.but113" "Button43" vTcl:WidgetProc "Toplevel1" 1
@@ -5117,7 +5160,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but114 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file.x42c4_lst &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {X4TOC4 log} 
     vTcl:DefineAlias "$site_9_0.but114" "Button44" vTcl:WidgetProc "Toplevel1" 1
@@ -5128,7 +5171,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but115 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file.x42c4_errs &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {X4TOC4 errors} 
     vTcl:DefineAlias "$site_9_0.but115" "Button45" vTcl:WidgetProc "Toplevel1" 1
@@ -5150,31 +5193,31 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -highlightbackground #dcdcdc -highlightcolor #000000 -width 250 
     vTcl:DefineAlias "$site_8_3.fra71" "Frame18" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra71
-    button $site_9_0.but115 \
-        -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file-log.psyche &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -text {PSYCHE log} 
-    vTcl:DefineAlias "$site_9_0.but115" "Button164" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.checkr &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -text {CHECKR log} 
+        -highlightcolor #000000 -padx 1m -state normal -text {CHECKR log} 
     vTcl:DefineAlias "$site_9_0.but71" "Button165" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but116 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.fizcon &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -text {FIZCON log} 
+        -highlightcolor #000000 -padx 1m -state normal -text {FIZCON log} 
     vTcl:DefineAlias "$site_9_0.but116" "Button166" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but116 "$site_9_0.but116 Button $top all _vTclBalloon"
     bind $site_9_0.but116 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View control output of the FIZCON code}
     }
+    button $site_9_0.but115 \
+        -activebackground #eccceccceccc -activeforeground limegreen \
+        -background #dcdcdc -command {exec $editor $file-log.psyche &} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -foreground darkgreen -highlightbackground #dcdcdc \
+        -highlightcolor #000000 -padx 1m -text {PSYCHE log} 
+    vTcl:DefineAlias "$site_9_0.but115" "Button164" vTcl:WidgetProc "Toplevel1" 1
     pack $site_9_0.but71 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
@@ -5192,7 +5235,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.button78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.empend &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
         -text {EMPEND log} 
@@ -5204,7 +5247,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but113 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.fixup &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {FIXUP log} 
     vTcl:DefineAlias "$site_9_0.but113" "Button47" vTcl:WidgetProc "Toplevel1" 1
@@ -5215,7 +5258,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but114 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.legend &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {LEGEND log} 
     vTcl:DefineAlias "$site_9_0.but114" "Button48" vTcl:WidgetProc "Toplevel1" 1
@@ -5240,7 +5283,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but115 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.linear &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
         -text {LINEAR log} 
@@ -5248,14 +5291,14 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.recent &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -padx 1m -text {RECENT log} 
     vTcl:DefineAlias "$site_9_0.but71" "Button151" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but116 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.plotc4 &} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
         -text {PLOTC4 log} 
@@ -5294,13 +5337,6 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -labelpos n -labeltext {Select file types:} -relief flat 
     vTcl:DefineAlias "$site_8_4.che119" "Checkbox1" vTcl:WidgetProc "Toplevel1" 1
-#   $site_11_0.che79 add chk0 \
-#       -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
-#       -disabledforeground #a1a4a1 \
-#       -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-#       -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-#       -justify left -offvalue .lst -onvalue {} -selectcolor #00ff00 \
-#       -text {full output} -variable ckmlo 
     $site_8_4.che119 add chk0 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
@@ -5381,8 +5417,8 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue *.zvd -padx 1 -selectcolor orange \
-        -text {ZVV plots} -variable ckzvv 
+        -justify left -offvalue { } -onvalue *.zvd -padx 1 \
+        -selectcolor orange -text {ZVV plots} -variable ckzvv 
     $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
@@ -5395,8 +5431,8 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -lev.col -padx 1 -selectcolor red \
-        -text {collective levels} -variable ckcollev 
+        -justify left -offvalue { } -onvalue -lev.col -padx 1 \
+        -selectcolor red -text {collective levels} -variable ckcollev 
     $site_8_4.che120 add chk6 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
@@ -5409,8 +5445,8 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -inp.fis -padx 1 -selectcolor red \
-        -text {fission input} -variable ckfisinp 
+        -justify left -offvalue { } -onvalue -inp.fis -padx 1 \
+        -selectcolor red -text {fission input} -variable ckfisinp 
     frame $site_8_4.fra122 \
         -background #e6e6e6 -height 75 -highlightbackground #dcdcdc \
         -width 125 
@@ -5419,10 +5455,10 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #dcdcdc \
-        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \$ckinp\ \$ckfisinp\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nadjourn\ .top75\n\} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 0 -relief raised \
-        -text {Delete selected files} -wraplength 60 
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \$ckinp\ \$ckfisinp\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ ../scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nadjourn\ .top75\n\} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
+        -relief raised -text {Delete selected files} -wraplength 60 
     vTcl:DefineAlias "$site_9_0.but123" "Button51" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but123 "$site_9_0.but123 Button $top all _vTclBalloon"
     bind $site_9_0.but123 <<SetBalloon>> {
@@ -5435,9 +5471,9 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
 exec ../scripts/clean $file
 adjourn .top75
 }} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 2m \
-        -relief raised -text {Clean project} -wraplength 60 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 2m -relief raised -text {Clean project} -wraplength 60 
     vTcl:DefineAlias "$site_9_0.but124" "Button52" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but124 "$site_9_0.but124 Button $top all _vTclBalloon"
     bind $site_9_0.but124 <<SetBalloon>> {
@@ -5449,9 +5485,9 @@ adjourn .top75
 exec ../scripts/clean $file
 exec rm -f $file.inp
 adjourn .top75 }} \
-        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
-        -highlightbackground #dcdcdc -image {} -padx 1m -pady 2m \
-        -relief raised -text {Remove project} -wraplength 60 
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
+        -pady 2m -relief raised -text {Remove project} -wraplength 60 
     vTcl:DefineAlias "$site_9_0.but125" "Button53" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but125 "$site_9_0.but125 Button $top all _vTclBalloon"
     bind $site_9_0.but125 <<SetBalloon>> {
@@ -5511,7 +5547,7 @@ adjourn .top75
 Combobox1 clear
 # create list of possible ddx plots 
 ddlist} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Change to its project} 
     vTcl:DefineAlias "$site_10_0.but83" "Button126" vTcl:WidgetProc "Toplevel1" 1
@@ -5522,7 +5558,7 @@ ddlist} \
     button $site_10_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $selecfile &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -text Edit 
     vTcl:DefineAlias "$site_10_0.but84" "Button127" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but84 "$site_10_0.but84 Button $top all _vTclBalloon"
@@ -5539,7 +5575,7 @@ foreach el $selecfilelist {
 set selecfile ""
 
 adjourn .top75 }} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete all selected} 
     vTcl:DefineAlias "$site_10_0.but85" "Button128" vTcl:WidgetProc "Toplevel1" 1
@@ -5628,7 +5664,7 @@ set archfile [lindex $selarchfilelist 0]} \
     button $site_11_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $archdir/$archfile &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -text {Edit file} 
     bindtags $site_11_0.but84 "$site_11_0.but84 Button $top all _vTclBalloon"
     bind $site_11_0.but84 <<SetBalloon>> {
@@ -5644,7 +5680,7 @@ foreach el $selarchfilelist {
 }
 set archfile ""
 adjourn .top75 }} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete selected} 
     bindtags $site_11_0.but85 "$site_11_0.but85 Button $top all _vTclBalloon"
@@ -5675,7 +5711,7 @@ adjourn .top75 }} \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/store ../archive/$archdir $file 
 adjourn .top75} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -text {<= Store project} 
     bindtags $site_9_0.but84 "$site_9_0.but84 Button $top all _vTclBalloon"
@@ -5688,7 +5724,7 @@ adjourn .top75} \
 exec rm -r -f $archdir
 set archdirlist [glob -nocomplain */]
 set archfilelist "" }} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete archive} 
     bindtags $site_9_0.but86 "$site_9_0.but86 Button $top all _vTclBalloon"
@@ -5746,14 +5782,14 @@ lappend stablist [lindex $elf 0]
     }
     button $site_12_0.but88 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {readabun } -font {Helvetica -12 } \
-        -foreground darkgreen -highlightbackground #dcdcdc -state disabled \
-        -text {Load all} 
+        -background #dcdcdc -command {readabun } -cursor hand2 \
+        -font {Helvetica -12 } -foreground darkgreen \
+        -highlightbackground #dcdcdc -state disabled -text {Load all} 
     vTcl:DefineAlias "$site_12_0.but88" "Button139" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {readabun ../RIPL-2/masses/abundance.dat} \
+        -command {readabun ../RIPL-2/masses/abundance.dat} -cursor hand2 \
         -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Load stable} 
     vTcl:DefineAlias "$site_12_0.but76" "Button142" vTcl:WidgetProc "Toplevel1" 1
@@ -5776,8 +5812,8 @@ lappend stablist [lindex $elf 0]
     vTcl:DefineAlias "$site_12_0.scr87" "Scrolledlistbox3" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but88 \
         -activebackground #eccceccceccc -background #dcdcdc \
-        -command {lappend stablist $adnuc} -font {Helvetica -12 } \
-        -highlightbackground #dcdcdc -text ^ 
+        -command {lappend stablist $adnuc} -cursor hand2 \
+        -font {Helvetica -12 } -highlightbackground #dcdcdc -text ^ 
     vTcl:DefineAlias "$site_12_0.but88" "Button140" vTcl:WidgetProc "Toplevel1" 1
     entry $site_12_0.ent90 \
         -background white -textvariable adnuc -width 8 
@@ -5802,7 +5838,7 @@ lappend stablist [lindex $elf 0]
         -background #dcdcdc \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the list?" "" 0 No Yes ] == 1} {
 set stablist "" }} \
-        -font {Helvetica -12 } -foreground darkred \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkred \
         -highlightbackground #dcdcdc -text {Clear list} 
     vTcl:DefineAlias "$site_12_0.but77" "Button141" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_12_0.ent77 \
@@ -5818,7 +5854,7 @@ foreach el $stablist {
 puts $mulfile $el
 }
 close $mulfile} \
-        -font {Helvetica -12 } -foreground darkgreen \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Save list} 
     vTcl:DefineAlias "$site_12_0.but78" "Button144" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but78 "$site_12_0.but78 Button $top all _vTclBalloon"
@@ -5833,7 +5869,7 @@ while {[gets $mulfile line] >= 0} {
 lappend  stablist $line 
 }
 close $mulfile} \
-        -font {Helvetica -12 } -foreground darkgreen \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Load list} 
     vTcl:DefineAlias "$site_12_0.but79" "Button145" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but79 "$site_12_0.but79 Button $top all _vTclBalloon"
@@ -5843,7 +5879,7 @@ close $mulfile} \
     button $site_12_0.but76 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command {runlist $stablist $mulstname} \
-        -font {Helvetica -12 } -foreground darkred \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkred \
         -highlightbackground #dcdcdc -text {Run list} 
     vTcl:DefineAlias "$site_12_0.but76" "Button143" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but76 "$site_12_0.but76 Button $top all _vTclBalloon"
@@ -5907,6 +5943,8 @@ close $mulfile} \
     $site_11_0.opt86 insert 41 {PLOTC4-plots}
     $site_11_0.opt86 insert 42 {PLOTC4-plots}
     $site_11_0.opt86 insert 43 {PLOTC4-plots}
+    $site_11_0.opt86 insert 44 {PLOTC4-plots}
+    $site_11_0.opt86 insert 45 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6026,7 +6064,7 @@ close $mulfile} \
         -command {setmulpro $selmulitem $mulstname 
 adjourn .top75 
 ddlist} \
-        -font {Helvetica -12 } -foreground darkgreen \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Set as project} 
     vTcl:DefineAlias "$site_13_0.but78" "Button149" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
@@ -6054,7 +6092,7 @@ ddlist} \
         -background #dcdcdc \
         -command {ArchiveList $archdir $stablist $mulstname
 adjourn .top75} \
-        -font {Helvetica -12 } -foreground darkgreen \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Store list results} 
     vTcl:DefineAlias "$site_13_0.but78" "Button150" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
@@ -6108,7 +6146,7 @@ adjourn .top75} \
     button $site_10_0.but80 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command {exec $editor ../source/dimension.h &} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Edit dimensions} -wraplength 70 
     bindtags $site_10_0.but80 "$site_10_0.but80 Button $top all _vTclBalloon"
@@ -6120,7 +6158,7 @@ adjourn .top75} \
         -background #dcdcdc -command {cd ../
 exec xterm -e ./Compile
 cd work} \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
     bindtags $site_10_0.but81 "$site_10_0.but81 Button $top all _vTclBalloon"
     bind $site_10_0.but81 <<SetBalloon>> {
@@ -6131,7 +6169,7 @@ cd work} \
         -background #dcdcdc \
         -command {cd ../source
 exec xterm -e make
-cd ../work} \
+cd ../work} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text Make 
     vTcl:DefineAlias "$site_10_0.but79" "Button135" vTcl:WidgetProc "Toplevel1" 1
@@ -6317,7 +6355,8 @@ $file.inp &}} -label Create
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
-        -command {exec xterm -e ../scripts/zvpl $file &} -label {Create ZVV plot} 
+        -command {exec xterm -e ../scripts/zvpl $file &} \
+        -label {Create ZVV plot} 
     $site_3_0.menu95 add command \
         -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots} 
     $site_3_0.menu95 add command \
@@ -6487,4 +6526,5 @@ bind "_TopLevel" <Destroy> {
 
 Window show .
 Window show .top75
+
 main $argc $argv
