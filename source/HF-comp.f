@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-12-23 00:27:04 $
-Ccc   * $Id: HF-comp.f,v 1.34 2004-12-23 00:27:04 herman Exp $
+Ccc   * $Date: 2005-01-04 00:10:05 $
+Ccc   * $Id: HF-comp.f,v 1.35 2005-01-04 00:10:05 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -60,13 +60,16 @@ C
 C
 C
 C
+C-----
+C-----Continuum
+C-----
       IF(Nnuc.EQ.Nnur)THEN
          excnq = EX(Iec, Nnuc)
       ELSE
          excnq = EX(Iec, Nnuc) - Q(Nejc, Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
-      DO ie = 1, nexrt                      !loop over residual energies
+      DO ie = 1, nexrt                      !loop over residual energies (continuum)
          icse = (excnq - EX(ie, Nnur))/DE + 1.0001
 C
 C        IF(Nejc .EQ. 0)
@@ -94,21 +97,27 @@ C
             POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pop2
             IF(Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie, j, 1, Nnur))
      &         POPmax(Nnur) = POP(ie, j, 1, Nnur)
-         ENDDO
+         ENDDO !over residual spins
          IF(ENDf.EQ.1 .AND. popt.NE.0.0D+0)  
      &      CALL EXCLUSIVEC(Iec, ie, Nejc, Nnuc, Nnur,popt)
          popt = popt*DE
-      ENDDO
+      ENDDO !over residual energies in continuum
+C-----
+C-----Discrete levels
+C-----
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il, Nnur)
          IF(eemi.LT.0.0D0)RETURN
          pop1 = Xnor*SCRtl(il, Nejc)
+C--------Add contribution to discrete level population
+         POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
+C--------Add contribution to recoils auxiliary matrix for discrete levels
+         REClev(il, Nejc) = REClev(il, Nejc) + pop1
+C--------Add contribution of discrete levels to emission spectra
 C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
-C--------distance of the actual energy to the bin energy excluding elastic
-C--------if ENDf.NE.0
-cc       IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
-cc   &      .OR. Iec.NE.NEX(1)) THEN 
+C--------distance of the actual energy to the bin energy 
+C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
          IF(Nnuc.NE.1 .OR. ENDf.NE.1 .OR. Iec.NE.NEX(1) 
      &      .OR. Nejc.EQ.0) THEN 
             xcse = eemi/DE + 1.0001
@@ -134,14 +143,12 @@ cc   &      .OR. Iec.NE.NEX(1)) THEN
             ENDIF
          ELSE
          ENDIF 
-         POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
-         REClev(il, Nejc) = REClev(il, Nejc) + pop1
 C--------Add isotropic CN contribution to direct ang. distributions
          IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0)THEN
-            CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
+             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
             pop1 = pop1/4.0/PI
             DO na = 1, NDANG
-               CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc) + pop1
+                CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc) + pop1
             ENDDO
          ENDIF
       ENDDO

@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-11-30 23:41:12 $
-Ccc   * $Id: input.f,v 1.48 2004-11-30 23:41:12 herman Exp $
+Ccc   * $Date: 2005-01-04 00:10:05 $
+Ccc   * $Id: input.f,v 1.49 2005-01-04 00:10:05 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3043,11 +3043,9 @@ C-----
      &           '('' Output for the ENDF formatting will be created'')'
      &           )
             IF(ENDf.EQ.1.0D0)WRITE(6,
-     &'('' using exclusive representation (ENDF=1) - good at low energie
-     &s (up to (n,3n) threshold)'')')
+     &'('' using exclusive representation (ENDF=1) '')')
             IF(ENDf.EQ.2.0D0)WRITE(6,
-     &'('' using inclusive representation (ENDF=2) - good at all energie
-     &s'')')
+     &'('' using inclusive representation (ENDF=2) '')')
             GOTO 100
          ENDIF
 C-----
@@ -3179,6 +3177,14 @@ C-----
          ENDIF
          IF(name.EQ.'ATILNO')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO i = 1, NDNUC
+                  ATIlnor(i) = val
+               ENDDO
+               WRITE(6,
+     &'('' L.d. parameter in all nuclei multiplied by '',F6.1)') val
+               GOTO 100
+            ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,

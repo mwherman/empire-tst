@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-12-23 00:27:05 $
-Ccc   * $Id: main.f,v 1.43 2004-12-23 00:27:05 herman Exp $
+Ccc   * $Date: 2005-01-04 00:10:05 $
+Ccc   * $Id: main.f,v 1.44 2005-01-04 00:10:05 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -868,6 +868,17 @@ C--------reset variables for life-time calculations
             WRITE(12, *)' ----------------------------------------------
      &-----------------'
             IF(nnuc.NE.1)THEN
+               IF(nnuc.EQ.mt91) THEN
+                  nejc=1
+               ELSEIF(nnuc.EQ.mt649) THEN
+                  nejc=2
+               ELSEIF(nnuc.EQ.mt849) THEN
+                  nejc=3
+               ELSEIF(nnuc.EQ.1) THEN
+                  nejc=0
+               ELSE
+                  GO TO 3392
+               ENDIF
                WRITE(12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
@@ -886,7 +897,8 @@ C-----------------check for the number of branching ratios
      &               ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &               ' are missing'
                   WRITE(12, 99012)il, ELV(il, nnuc), LVP(il, nnuc),
-     &                            XJLv(il, nnuc), POPlv(il, nnuc), nbr,
+c    &                            XJLv(il, nnuc), POPlv(il, nnuc), nbr,
+     &                            XJLv(il, nnuc), CSDirlev(il,nejc),nbr,
      &                            (NINT(BR(il,ib,1,nnuc)),
      &                            BR(il, ib, 2, nnuc), ib = 1, nbr)
 C-----------------next IF moves levels population to the ground state
@@ -900,41 +912,7 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il, nnuc) = 0.0
                   ENDIF
                ENDDO
-C--------------temporary output to check dir contribution to disc levels
-C              gang=10.
-C              IF(nnuc.EQ.mt91) THEN
-C              nejcec=1
-C              ELSEIF(nnuc.EQ.mt649) THEN
-C              nejcec=2
-C              ELSEIF(nnuc.EQ.mt849) THEN
-C              nejcec=3
-C              ELSE
-C              WRITE(6,*)'SALTO Nnuc= ',Nnuc
-C              GO TO 3392
-C              ENDIF
-C              WRITE(6, 9995)(ilv, ilv = 1, 11)
-C9995          FORMAT('  Angle  ', 11(6x, i2, '-level'))
-C              WRITE(6, *)' '
-C              DO iang = 1, NDANG
-C              WRITE(6, 99006)(iang - 1)*gang,
-C              &               (CSAlev(iang, il, nejcec),il=1,11)
-C              ENDDO
-C              WRITE(6, *)' '
-C              WRITE(6, 9995)(ilv, ilv = 12, 22)
-C              WRITE(6, *)' '
-C              DO iang = 1, NDANG
-C              WRITE(6, 99006)(iang - 1)*gang,
-C              &               (CSAlev(iang, il, nejcec),il=12,22)
-C              ENDDO
-C              WRITE(6, *)' '
-C              WRITE(6, 9995)(ilv, ilv = 23,NLV(nnuc) )
-C              WRITE(6, *)' '
-C              DO iang = 1, NDANG
-C              WRITE(6, 99006)(iang - 1)*gang,
-C              &               (CSAlev(iang, il, nejcec),il=23, NLV(nnuc))
-C              ENDDO
-C3392          CONTINUE
-C--------------temporary output *** done ***
+ 3392          CONTINUE
                WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------write elastic to tape 12
                IF(nnuc.EQ.mt2)THEN
@@ -980,10 +958,10 @@ C        fisfis
                WRITE(6, '(1X,/,'' Saddle point level density'',/)')
                WRITE(6, 99010)(EX(i, nnuc), (ROF(i,j,nnuc), j = 1, 12),
      &                        i = 1, NEX(nnuc))
-Cpr            WRITE(6,20) (EX(I,NNUC),(ROF(I,J,NNUC),J=13,24),I=1,NEX(NNUC))
-Cpr            WRITE(6,20) (EX(I,NNUC),(ROF(I,J,NNUC),J=25,36),I=1,NEX(NNUC))
-Cpr            WRITE(6,20) (EX(I,NNUC),(ROF(I,J,NNUC),J=37,48),I=1,NEX(NNUC))
-Cpr            WRITE(6,20) (EX(I,NNUC),(ROF(I,J,NNUC),J=49,60),I=1,NEX(NNUC))
+Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=13,24),i=1,nex(nnuc))
+Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=25,36),i=1,nex(nnuc))
+Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=37,48),i=1,nex(nnuc))
+Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=49,60),i=1,nex(nnuc))
 99010          FORMAT(1X, 13G10.4)
             ENDIF
          ENDIF
@@ -1051,7 +1029,7 @@ C--------
                WRITE(6, *)
      &                'WARNING: HMS Inclusive total emissions treated  '
                WRITE(6, *)
-     &                'WARNING: as comming from the first cn. allows   '
+     &                'WARNING: as comming from the first CN. Allows   '
                WRITE(6, *)
      &                'WARNING: to check flux balance as long as       '
                WRITE(6, *)
@@ -1061,7 +1039,7 @@ C--------
                WRITE(6, *)
      &                'WARNING: balance will get wrong.  This is OK    '
                WRITE(6, *)
-     &                'WARNING: since inclusive spectra are fine and   '
+     &                'WARNING: since inclusive spectra are fine and,  '
                WRITE(6, *)
      &                'WARNING: in any case there are no approximations'
                WRITE(6, *)
@@ -1148,11 +1126,9 @@ C--------------calculate population in the energy bin ke
                ENDDO
                POPbin(ke,nnuc) = pope*step
             ENDIF
-C-----------do loop over decaying nucleus parity
-            DO ipar = 1, 2
+            DO ipar = 1, 2 !over decaying nucleus parity
                ip = INT(( - 1.0)**(ipar + 1))
-C--------------do loop over decaying nucleus spin
-               DO jcn = 1, NLW, LTUrbo
+               DO jcn = 1, NLW, LTUrbo !over decaying nucleus spin
                   IF(GDRdyn.EQ.1.0D0)
      &               CALL ULMDYN(nnuc, jcn, EX(ke, nnuc))
 99011             FORMAT(1X, 'J,DEF ', I3, F9.4)
@@ -1161,8 +1137,7 @@ C--------------do loop over decaying nucleus spin
                      popleft = popleft + POP(ke, jcn, ipar, nnuc)*DE
                      GOTO 1610
                   ENDIF
-C-----------------do loop over ejectiles
-                  DO nejc = 1, NEJcm
+                  DO nejc = 1, NEJcm !over ejectiles
                      nnur = NREs(nejc)
                      CALL DECAY(nnuc, ke, jcn, ip, nnur, nejc, sum)
                   ENDDO
@@ -1282,7 +1257,7 @@ C-----------------
                   IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc +
      &               DENhf*POP(ke, jcn, ipar, nnuc)
      &               *step/RO(ke, jcn, nnuc)
-C--------------subbarrier effects
+C-----------------subbarrier effects (fission)
                   IF(FISsil(nnuc) .AND. FISOPT(nnuc).gt.0.
      &               .AND.FISSHI(Nnuc).NE.1.)THEN
                      IF(FISmod(Nnuc).eq.0.)THEN
@@ -1330,22 +1305,21 @@ C-----------------------fission
      &                        tfbm(m)*aafis*(dencomp + TDIrect)/tfb)
                         ENDDO
                      ENDIF
-C-----------------------particles
+C--------------------particles
                      DO nejc = 1, NEJcm
                         nnur = NREs(nejc)
                         CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
                         CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
      &                     + xnorfis*SCRtem(nejc)*(1 - aafis)
                      ENDDO
-C-----------------gammas
+C--------------------gammas
                      CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
                      CSEmis(0, nnuc) = CSEmis(0, nnuc)
      &                                 + xnorfis*SCRtem(0)*(1 - aafis)
                      POP(ke, jcn, ipar, nnuc) = 0.0
                      GOTO 1605
                   ENDIF
-c---------------------------------------------------------------
-c--------------no subbarrier effects
+C-----------------no subbarrier effects
 C-----------------particles
                   DO nejc = 1, NEJcm
                      nnur = NREs(nejc)
@@ -1380,7 +1354,6 @@ C-----------------calculate total emission
                ENDDO
             ENDIF
          ENDDO                  !loop over c.n. excitation energy
-cccc!!!!!! csemist multimodal
 C--------
 C--------Hauser-Feshbach decay of nnuc  ***done***
 C--------
@@ -1487,23 +1460,30 @@ C--------Integrating exclusive population spectra (ENDF)
                emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
             ENDIF
          ENDDO
-c        Add contribution from discrete levels for MT=91,649,849
-c        IF(nnuc.EQ.mt91) THEN
-c           nejc = 1
-c           DO ilev = 1, NLV(nnuc)
-c              xtotsp = xtotsp + CSDirlev(ilev,nejc)
-c           ENDDO
-c        ELSEIF(nnuc.EQ.mt649) THEN
-c           nejc = 2
-c           DO ilev = 1, NLV(nnuc)
-c              ptotsp = ptotsp + CSDirlev(ilev,nejc)
-c           ENDDO
-c        ELSEIF(nnuc.EQ.mt849) THEN
-c           nejc = 3
-c           DO ilev = 1, NLV(nnuc)
-c              atotsp = atotsp + CSDirlev(ilev,nejc)
-c           ENDDO
-c        ENDIF
+C       Add contribution from discrete levels for MT=91,649,849
+C       (merely for checking purpose)
+         IF(nnuc.EQ.mt91) THEN
+            nejc = 1
+            DO ilev = 1, NLV(nnuc)
+               xtotsp = xtotsp + CSDirlev(ilev,nejc)
+c              xtotsp = xtotsp + CSAlev(1, ilev, Nejc)*4*pi
+               WRITE(6,*) 'neutron level',ilev, CSAlev(1, ilev, Nejc)
+            ENDDO
+         ELSEIF(nnuc.EQ.mt649) THEN
+            nejc = 2
+            DO ilev = 1, NLV(nnuc)
+               ptotsp = ptotsp + CSDirlev(ilev,nejc)
+c              ptotsp = ptotsp + CSAlev(1, ilev, Nejc)*4*pi
+               WRITE(6,*) 'proton level',ilev, CSAlev(1, ilev, Nejc)
+            ENDDO
+         ELSEIF(nnuc.EQ.mt849) THEN
+            nejc = 3
+            DO ilev = 1, NLV(nnuc)
+               atotsp = atotsp + CSDirlev(ilev,nejc)
+c              atotsp = atotsp + CSAlev(1, ilev, Nejc)*4*pi
+               WRITE(6,*) 'alpha level',ilev, CSAlev(1, ilev, Nejc)
+            ENDDO
+         ENDIF
          POPCS(0,nnuc) = gtotsp
          POPCS(1,nnuc) = xtotsp
          POPCS(2,nnuc) = ptotsp
@@ -1691,7 +1671,7 @@ C     fisfis d
 C     fisfisu
       IF(ENDf.EQ.1)THEN
 C--------
-C--------ENDF spectra printout (exact exclusive representation)
+C--------ENDF spectra printout (exclusive representation)
 C--------
          DO nnuc = 1, NNUcd               !loop over decaying nuclei
             IF(CSPrd(nnuc).GT.0.0D0)THEN
@@ -1735,7 +1715,7 @@ C-----------------Exclusive DDX spectra (neutrons & protons)
                      IF((nnuc.EQ.mt91 .AND. nejc.EQ.1) .OR.
      &                  (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN ! first emission reactions
 C-----------------------(discrete levels part)
-                        DO il = 1, NLV(nnuc), 1  !(levels)
+                        DO il = 1, NLV(nnuc)  !(levels)
                            espec = (EMAx(nnuc) - ELV(il, nnuc))/recorp
                            IF(espec.GE.0)
      &                     WRITE(12, '(F10.5,E14.5,7E15.5,/,

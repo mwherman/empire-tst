@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-12-23 00:27:04 $
-Ccc   * $Id: MSD-tristan.f,v 1.18 2004-12-23 00:27:04 herman Exp $
+Ccc   * $Date: 2005-01-04 00:10:05 $
+Ccc   * $Id: MSD-tristan.f,v 1.19 2005-01-04 00:10:05 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3206,8 +3206,10 @@ C--------Normalization factor
          ENDIF
 C--------Add MSD transitions to discrete levels to the population spectrum   
 C--------used for the ENDF exclusive spectra
-         POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) +
-     &                            csmsdl*wght(il)/DE
+C--------This is actually not needed since MSD contribution to discrete levels
+C--------is done through the CSDirlev and CSAlev
+c        POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) +
+c    &                            csmsdl*wght(il)/DE
 C--------Store ang. dist.
          DO na = 1, NDANG
             CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc)
@@ -3215,11 +3217,12 @@ C--------Store ang. dist.
          ENDDO
 C--------add MSD discrete level contribution to the population spectrum (DDX)
 C--------used for the ENDF exclusive spectra
-         IF(ENDf.EQ.1) THEN
+c        IF(ENDf.EQ.1) THEN
 C-----------DDX spectra using portions (exclude ie=nexrt since this was set
 C-----------already by the contiuum)
-            IF(ie.NE.nexrt) POPcseaf(0,Nejc,ie,Nnur) = 1.0
-         ENDIF
+C-----------Actually not needed since done through the CSDirlev and CSAlev
+c           IF(ie.NE.nexrt) POPcseaf(0,Nejc,ie,Nnur) = 1.0
+c        ENDIF
 C        WRITE(6,'(''il, Elev, J, POP  '',i3,3G12.5)') il,ELV(il, Nnur),
 C        &       XJLV(il,nnur),POPlv(il, Nnur)
       ENDDO
