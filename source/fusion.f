@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: fusion.f,v 1.15 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-09-23 18:25:33 $
+Ccc   * $Id: fusion.f,v 1.16 2004-09-23 18:25:33 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -184,9 +184,9 @@ C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C-----------Preparing INPUT and RUNNING ECIS
 C-----------(or reading already calculated file)
             IF(DEFormed)THEN
-               CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE.)
+               CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE., 0)
             ELSE
-               CALL ECIS_CCVIB(Npro, Ntrg, einlab, .TRUE.)
+               CALL ECIS_CCVIB(Npro, Ntrg, einlab, .TRUE., .FALSE.)
             ENDIF
             CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl)
             tlj_calc = .TRUE.
@@ -353,7 +353,7 @@ C        ecis03
 C        OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
          OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
          READ(45, *, END = 150)  ! Skipping first line <CROSS.S>
-         READ(45, *, END = 150)totcs
+         IF(ZEJc(0).eq.0) READ(45, *, END = 150)totcs
          READ(45, *, END = 150)ecis_abs
  150     CLOSE(45)
          SINl = 0.d0
