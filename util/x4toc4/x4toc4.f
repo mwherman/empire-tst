@@ -4,6 +4,7 @@ C-Version: 86-1 (August 1986)
 C-V      2001/03 (March 2001)  *Minor corrections
 C-V      2002/10 Read sample thickness, convert transmission to x-sect.
 C-V      2004/01 Define all input filenames from input.
+C-V      2004/10 Redefine MT>=9000 to define incident particle.
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -1950,6 +1951,7 @@ C                                                                       X4T18470
       CHARACTER*4 CARD1,TITLE,UNIT,DATUM,BLANK4,OUTLIN,IM78             X4T18490
       CHARACTER*1 CARD2,ENT,SUBENT,FLAGI,FLAGR,ZAN,AUTH1,AUTHN,AUTHK,   X4T18500
      1 REFER1,REFERN,LABCM,STAT1,STATN,BLANK,ZANRES,ZANRAT,DIGITS,ZANOK X4T18510
+     1,ZAPO(6,8)                                                        TRKOV
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T18520
       COMMON/CARDS/CARD1(3,6),CARD2(14)                                 X4T18530
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18540
@@ -1975,6 +1977,14 @@ C                                                                       X4T18470
       DATA BLANK/' '/                                                   X4T18750
       DATA BLANK4/'    '/                                               X4T18760
       DATA DIGITS/'0','1','2','3','4','5','6','7','8','9'/              X4T18770
+      DATA ZAPO /' ',' ',' ',' ',' ','0',                               TRKOV
+     2           ' ',' ',' ',' ',' ','1',                               TRKOV
+     3           ' ',' ','1','0','0','1',                               TRKOV
+     4           ' ',' ','1','0','0','2',                               TRKOV
+     5           ' ',' ','1','0','0','3',                               TRKOV
+     6           ' ',' ','2','0','0','3',                               TRKOV
+     7           ' ',' ','2','0','0','4',                               TRKOV
+     8           ' ','9','9','9','9','9'/                               TRKOV
 C                                                                       X4T18780
 C     DEFINE STATUS, AUTHOR AND YEAR FROM CURRENT SUBENTRY OR COMMON    X4T18790
 C     SUBENTRY.                                                         X4T18800
@@ -2259,7 +2269,16 @@ C-----FOR COSINE ERROR).                                                X4T21580
   370 CALL RESZA(OUTLIN(1,6),ZANRES(1,ISANR))                           X4T21590
       GO TO 390                                                         X4T21600
 C-----NO PRODUCT ZA. PRINT WARNING IF MT = 9000 - 9999.                 X4T21610
-  380 IF(NPT.EQ.1.AND.MTR(ISANR).GE.9000) WRITE(OUTP,6090)              X4T21620
+C 380 IF(NPT.EQ.1.AND.MTR(ISANR).GE.9000) WRITE(OUTP,6090)              X4T21620
+  380 IF(MTR(ISANR).LT.9000) GO TO 390                                  TRKOV
+      IF(NPT.GT.1) GO TO 382                                            TRKOV
+      IPO=MTR(ISANR)                                                    TRKOV
+      IPO=IPO-1000*(IPO/1000)                                           TRKOV
+      MTR(ISANR)=MTR(ISANR)-IPO                                         TRKOV
+      IPO=IPO+1                                                         TRKOV
+      IF(IPO.GT.8) IPO=8                                                TRKOV
+      WRITE(OUTP,6090) (ZAPO(J,IPO),J=1,6)                              TRKOV
+  382 CALL RESZA(OUTLIN(1,6),ZAPO(1,IPO))                               TRKOV
 C                                                                       X4T21630
 C     RATIO                                                             X4T21640
 C                                                                       X4T21650
@@ -2344,7 +2363,9 @@ C                                                                       X4T22160
      3       10X,'            CHECK AND CORRECT OUTPUT.')               X4T22440
  6080 FORMAT(10X,'WARNING.....PRODUCT ZA =',7A1,                        X4T22450
      1 ' (EXPECT MT = 9000 - 9999)')                                    X4T22460
- 6090 FORMAT(10X,'WARNING.....EXPECT PRODUCT ZA FOR MT=9000-9999')      X4T22470
+C6090 FORMAT(10X,'WARNING.....EXPECT PRODUCT ZA FOR MT=9000-9999')      X4T22470
+ 6090 FORMAT(10X,'WARNING.....EXPECT PRODUCT ZA FOR MT=9000-9999'/      TRKOV
+     1       10X,'            SET DEFAULT ',6A1,'.9')                   TRKOV
  6100 FORMAT(10X,'WARNING.....EXPECT RATIO ZA/MT FOR MF = 203')         X4T22480
  6110 FORMAT(10X,'WARNING.....RATIO ZA =',7A1,' CONVERTED TO'/          X4T22490
      1       10X,'                  ZA =',7A1)                          X4T22500
