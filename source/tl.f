@@ -173,7 +173,7 @@ C
       MODelcc = 0
 
 C     RCN, 09/2004
-	IF(DIRECT.EQ.0) IMOdel = 0
+      IF(DIRECT.EQ.0) IMOdel = 0
 C
 C-----IF ( IMOdel.EQ.0 ) model = 'spherical nucleus model'
 C-----IF ( IMOdel.EQ.1 ) model = 'coupled-channels rotational model'
@@ -235,7 +235,7 @@ C        ND_nlv = NCOll(ncalc)
          NLD_cc = 0
          DO k = 1, ND_nlv
           if(icollev(k).LT.50) NLD_cc = NLD_cc +1
-	   ENDDO
+         ENDDO
 
          WRITE(6, *)
          WRITE(6, *)
@@ -246,51 +246,51 @@ C        ND_nlv = NCOll(ncalc)
             D_Def(1, k) = DDEf(ncalc, k)
          ENDDO
 
-	   IF(NLD_cc.NE.NCOll(ncalc)) THEN
+         IF(NLD_cc.NE.NCOll(ncalc)) THEN
           WRITE(6, *)
      >    'WARNING: Default number of coupled levels: ',NLD_cc
           WRITE(6, *) 
      >    'WARNING: is not equal ',NCOll(ncalc),' (used in CC RIPL OMP)'
-	   ENDIF
+         ENDIF
 C
 C        Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN(32, FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN(134, FILE = 'TARGET_COLL.DAT')
-	   OPEN(133, FILE = 'COLL.DAT')
+         OPEN(133, FILE = 'COLL.DAT')
 
          WRITE(6, *)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE(32, *)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
-	   READ(134,'(A80)') ch_iuf    ! FIRST LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf    ! FIRST LINE
+         WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)'Dyn.deformations are not used in symm.rot.model'
          WRITE(32, *)'Dyn.deformations are not used in symm.rot.model'
-	   READ(134,'(A80)') ch_iuf	  ! 2ND LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf        ! 2ND LINE
+         WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          WRITE(32, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                 ' nucleus is treated as deformed'
-	   READ(134,'(A80)') ch_iuf	  ! 3ER LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf        ! 3ER LINE
+         WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)
          WRITE(32, *)
-	   READ(134,'(A80)') ch_iuf	  ! EMPTY LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf        ! EMPTY LINE
+         WRITE(133,'(A80)') ch_iuf
 
-	   DEFORMED=.TRUE.
+         DEFORMED=.TRUE.
          DO n = 1, NISotop
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                WRITE(6, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE(32, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                
@@ -300,23 +300,23 @@ C
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n),
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
 
                WRITE(6, *)
                WRITE(32, *)
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   10    READ(134,'(A80)',END=30) ch_iuf	          
+   10    READ(134,'(A80)',END=30) ch_iuf                
          WRITE(133,'(A80)') ch_iuf
          GOTO 10
    30    CLOSE(133)   
@@ -398,13 +398,13 @@ C
          NLD_cc = 0
          DO k = 1, ND_nlv
           if(icollev(k).LT.50) NLD_cc = NLD_cc +1
-	   ENDDO
-	   IF(NLD_cc.NE.NVIb(ncalc)) THEN
+         ENDDO
+         IF(NLD_cc.NE.NVIb(ncalc)) THEN
            WRITE(6, *)
      >     'WARNING: Default number of coupled levels: ',NLD_cc
            WRITE(6, *) 
      >     'WARNING: is not equal ',NVIb(ncalc),' (used in CC RIPL OMP)'
-	   ENDIF
+         ENDIF
          WRITE(6, *)
          WRITE(6, *)
 C
@@ -412,56 +412,56 @@ C        Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN(32, FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN(134, FILE = 'TARGET_COLL.DAT')
-	   OPEN(133, FILE = 'COLL.DAT')
+         OPEN(133, FILE = 'COLL.DAT')
          WRITE(6, *)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE(32, *)
      &           'Collective levels from RIPL CC OMP, vibrational model'
-	   READ(134,'(A80)') ch_iuf    ! FIRST LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf    ! FIRST LINE
+         WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)'Dynamical deformations should be adjusted'
          WRITE(32, *)'Dynamical deformations should be adjusted'
-	   READ(134,'(A80)') ch_iuf	  ! 2ND LINE
-	   WRITE(133,'(A80)') 'Dynamical deformations should be adjusted'
+         READ(134,'(A80)') ch_iuf        ! 2ND LINE
+         WRITE(133,'(A80)') 'Dynamical deformations should be adjusted'
 
          WRITE(6, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                ' nucleus is treated as spherical'
          WRITE(32, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                ' nucleus is treated as spherical'
-	   READ(134,'(A80)') ch_iuf	  ! 3ER LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf        ! 3ER LINE
+         WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)
          WRITE(32, *)
-	   READ(134,'(A80)') ch_iuf	  ! EMPTY LINE
-	   WRITE(133,'(A80)') ch_iuf
+         READ(134,'(A80)') ch_iuf        ! EMPTY LINE
+         WRITE(133,'(A80)') ch_iuf
 
-	   DEFORMED=.FALSE.
+         DEFORMED=.FALSE.
          DO n = 1, NISotop
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                WRITE(6, *)   '   Ncoll'
                WRITE(32, *)  '   Ncoll'
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *) '   Ncoll'
  
                WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
-	         READ(134,'(A80)') ch_iuf	  
-               WRITE(133,'(A80)')  ND_nlv	  
+               READ(134,'(A80)') ch_iuf        
+               WRITE(133,'(A80)')  ND_nlv        
 
                WRITE(6, *)
                WRITE(32, *)
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-	         READ(134,'(A80)') ch_iuf	  
+               READ(134,'(A80)') ch_iuf        
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   70    READ(134,'(A80)',END=80) ch_iuf	          
+   70    READ(134,'(A80)',END=80) ch_iuf                
          WRITE(133,'(A80)') ch_iuf
          GOTO 70
    80    CLOSE(133)   
@@ -586,8 +586,8 @@ C
       SUBROUTINE OMPAR(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2,
      &                 Komp, Ko, Ikey)
 C
-C	IKEY < 0  :   EIlab is given
-C	IKEY > 0  :   EIcms is given
+C      IKEY < 0  :   EIlab is given
+C      IKEY > 0  :   EIcms is given
 C
 C-----Sets optical model parameters
 C
@@ -2116,7 +2116,7 @@ C     Dummy arguments
 C
       INTEGER Maxlw, Nejc, Nnuc
       DOUBLE PRECISION Stl(NDLW)
-      DOUBLE PRECISION p1,r2,rp,s0,s1					!   cBuc
+      DOUBLE PRECISION p1,r2,rp,s0,s1                              !   cBuc
 C
 C     Local variables
 C
@@ -2543,10 +2543,10 @@ C
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
       nd_nlvop = 1
-	nd_cons = 1
+      nd_cons = 1
       DO j = 2, ND_nlv
           if(.NOT.LDWBA .AND. icollev(j).GT.50) cycle
-	    nd_cons = nd_cons + 1
+          nd_cons = nd_cons + 1
           eee = El - D_Elv(j)/xratio
           IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
       ENDDO
@@ -2615,14 +2615,14 @@ C--------If channel is closed ground state potential is used for this level
            nwrite = nwrite + 1
            WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0, nwrite, ch,
      &            D_Elv(j)
-	   ELSE
+         ELSE
            WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0,      1, ch,
      &            D_Elv(j)
-	   ENDIF
+         ENDIF
          IF(LDWBA .OR. DIRECT.EQ.3) THEN
 C           If DWBA, all states are assumed to be one phonon
-	      WRITE(1, '(3i5)') 1, j - 1, 0
-	   ELSE
+            WRITE(1, '(3i5)') 1, j - 1, 0
+         ELSE
             IF(IPH(j).EQ.1)THEN
                WRITE(1, '(3i5)')IPH(j), j - 1, 0
             ELSE
@@ -2630,7 +2630,7 @@ C--------------two  phonon states if exist are formed from the quadrupole
 C--------------quadrupole phonon spin is equal to 2+ phonon
                WRITE(1, '(3i5)')IPH(j), 1, 1
             ENDIF
-	   ENDIF
+         ENDIF
       ENDDO
 C
 C--------deformations: phonon description
@@ -2645,7 +2645,7 @@ C           If DWBA, all states are assumed to be one phonon
 C           only one phonon states need deformations as input
             IF(IPH(j).EQ.1)WRITE(1, '(i5,5x,6f10.5)')INT(D_Xjlv(j)),
      &                        D_Def(j, 2)
-	   ENDIF
+         ENDIF
       ENDDO
 C
 C-----potential parameters
@@ -2922,13 +2922,13 @@ C-----At least ground state is always open !!, RCN 31/03/2001
 C-----nd_nlvop = 0
       nd_nlvop = 1
       IF(ND_nlv.GT.0)THEN
-	   nd_cons=1
+         nd_cons=1
          DO j = 2, ND_nlv
 C           All levels with icollev(j)>50 should be calculated by DWBA
-	      if(INLkey.eq.0 .AND. icollev(j).gt.50) cycle
+            if(INLkey.eq.0 .AND. icollev(j).gt.50) cycle
 C           All levels with icollev(j)<50 should be calculated by CC
-	      if(INLkey.eq.1 .AND. icollev(j).LT.50) cycle
-	      nd_cons = nd_cons + 1
+            if(INLkey.eq.1 .AND. icollev(j).LT.50) cycle
+            nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
          ENDDO
@@ -3007,7 +3007,7 @@ C    &         D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
 C    &         *ZEJc(Nejc)
           WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j), nwrite, ch,
      &         D_Elv(j)
-	   ELSE
+         ELSE
           WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j),      1, ch,
      &         D_Elv(j)
          ENDIF
@@ -3193,12 +3193,12 @@ C        LINUX
          ENDIF
       ELSE
 C        WINDOWS
-	   IF(npho.GT.0)THEN
+         IF(npho.GT.0)THEN
            iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
          ELSE
            iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_ROT.out#')
          ENDIF
-	ENDIF
+      ENDIF
 
       IF(.NOT.Ltlj)THEN
          IF(DIRect.EQ.3)THEN
@@ -3219,7 +3219,7 @@ C     Dummy arguments
 C
       INTEGER*4 Iwin
       CHARACTER*(*) Sname
-	LOGICAL LDWBA
+      LOGICAL LDWBA
 C
 C     Local variables
 C
@@ -3232,16 +3232,16 @@ C        &                     'Total, reaction and elastic c.s. calculated'
 C        &                     , ' with ' , Sname , ' model'
          INQUIRE(FILE = 'ecis03.ics', EXIST = fexist)
          IF(fexist) THEN
-	    IF(LDWBA) THEN
-	      WRITE(6, *)
+          IF(LDWBA) THEN
+            WRITE(6, *)
      &      'Inelastic c.s. to non-coupled collective levels calculated'
      &    , ' with DWBA model'
-	    ELSE
-	      WRITE(6, *)
+          ELSE
+            WRITE(6, *)
      &      'Inelastic c.s. to coupled collective levels calculated'
      &    , ' with ', Sname,' model'
-	    ENDIF
-	   ENDIF
+          ENDIF
+         ENDIF
       ELSE
          WRITE(6, *)'SYSTEM PROBLEM RUNNING ECIS in', Sname
          STOP '17'
@@ -3410,11 +3410,11 @@ c
         vc=0.
         Vnonl = 0.
         if(i.eq.1) then
-	    Vnonl = -Vhf(EEE,alpha_PB,beta_PB,gamma_PB)
+          Vnonl = -Vhf(EEE,alpha_PB,beta_PB,gamma_PB)
 C         Numerical derivative of the Vhf
           if(b(1,j,5).ne.0.) then
-	      Vnonlm = -Vhf(EEE-0.05,alpha_PB,beta_PB,gamma_PB)
-	      Vnonlp = -Vhf(EEE+0.05,alpha_PB,beta_PB,gamma_PB)
+            Vnonlm = -Vhf(EEE-0.05,alpha_PB,beta_PB,gamma_PB)
+            Vnonlp = -Vhf(EEE+0.05,alpha_PB,beta_PB,gamma_PB)
 C           Coulomb correction for Hartree-Fock potential
             vc = encoul2*(Vnonlm-Vnonlp)*10.d0
           endif
@@ -3498,13 +3498,13 @@ c     Retrieving average energy of the particle states Ep
 c         if(idr.ge.2) then
 c           analytical DOM integral
             DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DerDWV)
-	      DWVder = 0.d0
+            DWVder = 0.d0
 c           coulomb correction for real volume potential 
-	      if(b(1,1,5).ne.0.d0) DerDWV = -b(1,1,5)*encoul2*DerDWV
-	      if(b(1,1,5).ne.0.d0) then
+            if(b(1,1,5).ne.0.d0) DerDWV = -b(1,1,5)*encoul2*DerDWV
+            if(b(1,1,5).ne.0.d0) then
               DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
               DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
-	        DWVder = b(1,1,5)*encoul2*(DWVm-DWVp)*5.d0
+              DWVder = b(1,1,5)*encoul2*(DWVm-DWVp)*5.d0
             endif
 c         endif
 
@@ -3529,25 +3529,25 @@ c
              DWV = DWV + Dwplus + Dwmin
 c            coulomb correction for nonlocal dispersive contribution  
 c                to real volume potential 
- 	       if(b(1,1,5).ne.0.d0) then
+              if(b(1,1,5).ne.0.d0) then
                if(eee.ne.0.05d0) then
                  T2p = DOM_INT_T2(Ef,Ea,EEE+0.05d0)  
                  T2m = DOM_INT_T2(Ef,Ea,EEE-0.05d0)  
-			   T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*10.d0 
-	           T1p = DOM_INT_T1(Ef,Ea,EEE+0.05d0)
-	           T1m = DOM_INT_T1(Ef,Ea,EEE-0.05d0)
-	           T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*10.d0
-	           T12der =  T1der + T2der 
-			 else
+                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*10.d0 
+                 T1p = DOM_INT_T1(Ef,Ea,EEE+0.05d0)
+                 T1m = DOM_INT_T1(Ef,Ea,EEE-0.05d0)
+                 T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*10.d0
+                 T12der =  T1der + T2der 
+                   else
                  T2p = DOM_INT_T2(Ef,Ea,EEE+0.1d0)  
                  T2m = DOM_INT_T2(Ef,Ea,EEE-0.1d0)
-			   T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*5.d0 
-	           T1p = DOM_INT_T1(Ef,Ea,EEE+0.1d0)
-	           T1m = DOM_INT_T1(Ef,Ea,EEE-0.1d0)
-	           T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*5.d0
-	           T12der =  T1der + T2der 
+                     T2der =  b(1,1,5)*encoul2*AlphaV*(T2m-T2p)*5.d0 
+                 T1p = DOM_INT_T1(Ef,Ea,EEE+0.1d0)
+                 T1m = DOM_INT_T1(Ef,Ea,EEE-0.1d0)
+                 T1der = b(1,1,5)*encoul2*dtmp1*(T1m-T1p)*5.d0
+                 T12der =  T1der + T2der 
                endif 
-	       endif
+             endif
           endif
         endif
 
@@ -3577,13 +3577,13 @@ C         if(Ea.eq.0.) Ea=1000.1d0
           if(idr.ge.2) then
 c           analytical DOM integral
             DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DerDWS)
-	      DWSder = 0.d0
+            DWSder = 0.d0
 c           Coulomb correction for real surface potential 
-	      if(b(1,1,5).ne.0.d0) DerDWS = -b(1,1,5)*encoul2*DerDWS
-	      if(b(1,1,5).ne.0.d0) then
+            if(b(1,1,5).ne.0.d0) DerDWS = -b(1,1,5)*encoul2*DerDWS
+            if(b(1,1,5).ne.0.d0) then
               DWSp = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE+0.1d0,n,dtmp)
               DWSm = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE-0.1d0,n,dtmp)
-	        DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
+              DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
             endif
           endif
 
@@ -3592,18 +3592,18 @@ c           numerical DOM integral
             nns=n
             WDE=WDf(As,Bs,Cs,Ep,EEE,n,iq)
             DWS = 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE,WDE)
-	      DWSder = 0.d0
-c           Coulomb correction for real surface potential 
-	      if(b(1,1,5).ne.0.d0) then
+            DWSder = 0.d0
+c           Coulomb correction for real surface potential
+            if(b(1,1,5).ne.0.d0) then
               WDE=WDf(As,Bs,Cs,Ep,EEE+0.1d0,n,iq)
-              DWSp = 
-     >	 	 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE+0.1d0,WDE)
+              DWSp =
+     &         2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE+0.1d0,WDE)
               WDE=WDf(As,Bs,Cs,Ep,EEE-0.1d0,n,iq)
               DWSm =
-     >		 2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE-0.1d0,WDE)
+     &         2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE-0.1d0,WDE)
 c             Numerical derivative
-	        DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
-	      endif
+              DWSder = b(1,1,5)*encoul2*(DWSm-DWSp)*5.d0
+            endif
           endif
 
         endif
@@ -3643,7 +3643,7 @@ c       Geometry parameters are the same as for the imaginary spin orbit
 c       potential(imag and real)
         vlib(5) = vlib(5) + DWVso
         write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
-     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)               	
+     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)                     
       endif
 
       return
@@ -3736,7 +3736,7 @@ c      Wso
       return
       end
 
-	REAL*8 FUNCTION Vhf(einp,alpha_PB,beta_PB,gamma_PB)
+      REAL*8 FUNCTION Vhf(einp,alpha_PB,beta_PB,gamma_PB)
 c
 c     According to Morillon B, Romain P, PRC70(2004)014601 
 c
@@ -3744,9 +3744,9 @@ c     Originally coded in c++ by Morillon B. and Romain P.
 c
 c     Coded in FORTRAN and tested by RCN, August 2004.
 c
-	real*8 einp,alpha_PB,beta_PB,gamma_PB,amu
-	real*8 Vtmp,Etmp,miu_sur_hbar2, coef1, coef2
-	integer niter
+      real*8 einp,alpha_PB,beta_PB,gamma_PB,amu
+      real*8 Vtmp,Etmp,miu_sur_hbar2, coef1, coef2
+      integer niter
       include "ripl2empire.h"
 
 c     getting amu
@@ -3763,9 +3763,9 @@ c     getting amu
       Vhf = alpha_PB * dexp(coef1 * Etmp + coef2 * Etmp**2)
       if( abs(Vhf - Vtmp) .GT. 0.0001 .AND.  niter.LT.10000) goto 10
       return
-	end
+      end
 
-	REAL FUNCTION xkine(ei,amu)
+      REAL FUNCTION xkine(ei,amu)
 c***********************************************************************
 c     From lab to CM (the input quantity is el = Elab)
 c***********************************************************************
@@ -3803,10 +3803,10 @@ c         ak2 = p2 / (hbarc*hbarc)
           etott = DSQRT((amu0c2*tarmas)**2  + p2)
           amu   = etoti*etott / (etoti + etott)
 c         amu   = amu / amu0c2
-	    xkine = etott / (etoti + etott)
+          xkine = etott / (etoti + etott)
       endif
       return
-	end
+      end
 C
 C==========================================================================
 C     AUTHOR: Dr. Roberto Capote Noy
@@ -3845,38 +3845,38 @@ C
       Eplus = Ex + E0
       Emin  = Ex - E0
       DOM_INT_Wv = 0.d0
-	DerivIntWv = 0.d0
+      DerivIntWv = 0.d0
 
       ResEmin  =  Emin**n / (Emin**n + Bv**n)
 
       DerEmin  =  Emin**(n-1) *
-	>           ( Emin**n + Bv**n*(1.d0 + n*log(dabs(Emin)) ) ) 
-	>           / (Emin**n + Bv**n)**2 
+     &           ( Emin**n + Bv**n*(1.d0 + n*log(dabs(Emin)) ) )
+     &           / (Emin**n + Bv**n)**2
 
       ResEplus = -Eplus**n / (Eplus**n + Bv**n)
 
       DerEplus = -Eplus**(n-1) *
-	>           ( Eplus**n + Bv**n*(1.d0+n*log(Eplus)) ) 
-	>           / (Eplus**n + Bv**n)**2 
+     &           ( Eplus**n + Bv**n*(1.d0+n*log(Eplus)) )
+     &           / (Eplus**n + Bv**n)**2
 
 C----------------------------------
 C     Complex arithmetic follows
       Fs = (0.d0,0.d0)
-	Ds = (0.d0,0.d0)
+      Ds = (0.d0,0.d0)
       do j=1,n
        Ztmp = I*(2*j-1)/dble(n)*pi
        Pj = Bv*exp(Ztmp)
        Zj = Pj * (2*Pj +Eplus -Emin) * Ex
        Zj = Zj / ( (Pj+E0) * (Pj+Eplus) * (Pj-Emin) )
        Fs = Fs + Zj*log(-Pj)
-	 Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*log(-Pj)
-     >           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
+       Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*log(-Pj)
+     &           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
       enddo
 
       IF(ABS(IMAG(Fs)).gt.1.e-4) STOP '(F) Too big imag part in Wv'
       Rs  = REAL(Fs)
       IF(ABS(IMAG(Ds)).gt.1.e-4) STOP '(D) Too big imag part in Wv'
-	Rds = REAL(Ds)
+      Rds = REAL(Ds)
 C----------------------------------
 
       DOM_INT_Wv = -Av/pi*
@@ -3900,7 +3900,7 @@ C
       COMPLEX*8 Fs,Ds
       REAL*8 E0,Ex,Eplus,Emin,pi
       REAL*8 Rs,ResEmin,ResEplus
-	REAL*8 DerivIntWs,DerEmin,DerEplus,Rds
+      REAL*8 DerivIntWs,DerEmin,DerEplus,Rds
       INTEGER m,j
 
       DATA I/(0.d0,1.d0)/
@@ -3912,21 +3912,21 @@ C
       Eplus = Ex + E0
       Emin  = Ex - E0
       DOM_INT_Ws = 0.d0
-	DerivIntWs = 0.d0
+      DerivIntWs = 0.d0
 
       ResEmin  =  Emin**m / (Emin**m + Bs**m)
 
       DerEmin  = -Emin**(m-1) *
-	>          ( Emin**m + Bs**m + ( -Cs*Emin**(m+1) +
-     >            Bs**m *(-Cs*Emin+m) ) * exp(-Cs*Emin)*EIn(Cs*Emin) ) 
-	>           / (Emin**m + Bs**m)**2 
+     &          ( Emin**m + Bs**m + ( -Cs*Emin**(m+1) +
+     &            Bs**m *(-Cs*Emin+m) ) * exp(-Cs*Emin)*EIn(Cs*Emin) ) 
+     &           / (Emin**m + Bs**m)**2 
 
       ResEplus = -Eplus**m / (Eplus**m + Bs**m)
 
       DerEplus =  Eplus**(m-1) *
-	>          ( Eplus**m + Bs**m + ( Cs*Eplus**(m+1) +
-     >            Bs**m *(Cs*Eplus+m) ) * exp(Cs*Eplus)*EIn(-Cs*Eplus) ) 
-	>           / (Eplus**m + Bs**m)**2 
+     &          ( Eplus**m + Bs**m + ( Cs*Eplus**(m+1) +
+     &            Bs**m *(Cs*Eplus+m) ) * exp(Cs*Eplus)*EIn(-Cs*Eplus) ) 
+     &           / (Eplus**m + Bs**m)**2 
 
 C----------------------------------
 C     Complex arithmetic follows
@@ -3938,8 +3938,8 @@ C     Complex arithmetic follows
        Zj = Pj * (2*Pj +Eplus -Emin) * Ex
        Zj = Zj / (Pj+E0) / (Pj+Eplus) / (Pj-Emin)
        Fs = Fs + Zj* zfi(-Pj*Cs)
-	 Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*zfi(-Pj*Cs)
-     >           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
+       Ds = Ds + 2*Pj*(Ex*Ex + (Pj+E0)**2)*zfi(-Pj*Cs)
+     &           /( (Pj+Eplus)**2 * (Pj-Emin)**2 )
       enddo
 
       IF(ABS(IMAG(Fs)).gt.1.e-4) STOP '(F) Too big imag part in Wv'
@@ -3958,9 +3958,9 @@ C----------------------------------
       END
 
       real*8 function WV(A,B,Ep,Ef,E,n)
-	IMPLICIT NONE
+      IMPLICIT NONE
       real*8 A,B,Ep,Ef,E,ee
-	integer n
+      integer n
       
       WV=0.d0
       if(E.LE.Ef) E=2.d0*Ef-E
@@ -3973,7 +3973,7 @@ C----------------------------------
       end
 
       real*8 function WDD(A,B,C,Ep,Ef,E,m)
-	IMPLICIT NONE
+      IMPLICIT NONE
       real*8 A,B,C,Ep,Ef,E,ee,arg
       integer m
 
@@ -3993,9 +3993,9 @@ C----------------------------------
 C
 C     Integral over E' corresponding to nonlocal additions T1(E'<<0)
 C
-	IMPLICIT NONE
-	
-	real*8 E,Ea,Ef,Ex,Ea2,Eax,Pi,T11,T12,T13
+      IMPLICIT NONE
+      
+      real*8 E,Ea,Ef,Ex,Ea2,Eax,Pi,T11,T12,T13
 
       Pi=4.d0*ATAN(1.d0)
 
@@ -4005,7 +4005,7 @@ C
 
       T11 = 0.5d0*log(Ea)/Ex
       T12 =  ( (2*Ea+Ex)*log(Ea)+0.5d0*pi*Ex ) 
-     >      /(2.*(Eax**2 + Ea2))        
+     &      /(2.*(Eax**2 + Ea2))        
       T13 = -Eax**2*log(Eax)/(Ex*(Eax**2+Ea2))
 
       DOM_int_T1 = Ex/Pi*(T11+T12+T13)
@@ -4028,14 +4028,14 @@ C
         R2=0.5*El**1.5d0*(1.d0/El-dlog(abs(El/Ea))/Ef)
       ELSE
         R2=0.5*El**1.5d0/(E*Ef)*
-     >            ( Ef*dlog(dabs(El/(El-E))) -E*dlog(dabs(El/Ea)) )
+     &            ( Ef*dlog(dabs(El/(El-E))) -E*dlog(dabs(El/Ea)) )
       ENDIF
 
       R3=2*DSQRT(dABS(Ef))*( 0.5d0*Pi - atan( DSQRT(El/dabs(Ef)) ) )
 
       IF(E.GE.0.d0) THEN
         R4=DSQRT(E)*
-     >           dlog(dabs( (dsqrt(El)+dsqrt(E))/(dsqrt(El)-dsqrt(E)) ))
+     &           dlog(dabs( (dsqrt(El)+dsqrt(E))/(dsqrt(El)-dsqrt(E)) ))
       ELSE
         R4=-2.d0*DSQRT(dabs(E))*( 0.5d0*Pi - atan( DSQRT(dabs(El/E)) ) )
       ENDIF
@@ -4053,15 +4053,15 @@ C Complex exponential integral function multiplied by exponential
 C
 C AUTHOR: J. Raynal
 C
-	IMPLICIT NONE
+      IMPLICIT NONE
       real*8 aj
       complex*16 za,y
-	integer m,i
+      integer m,i
       zfi=0.d0
       if (za.eq.0.) return
       if (dabs(dreal(za)+18.5d0).ge.25.d0) go to 3
       if (dsqrt(625.d0-(dreal(za)+18.5d0)**2)/1.665d0.lt.dabs(dimag(za))
-     1) go to 3
+     &) go to 3
       zfi=-.57721566490153d0-cdlog(za)
       y=1.d0
       do 1 m=1,2000
@@ -4083,7 +4083,7 @@ C
 C-----FUNCTION TO EVALUATE Ei(X)
 C
       REAL*8 FUNCTION EIn(X)
-	IMPLICIT NONE
+      IMPLICIT NONE
       REAL*8 FAC, H, X
       INTEGER N
       EIn = 0.57721566490153d0+LOG(ABS(X))
@@ -4099,13 +4099,13 @@ C
 c*******************************************
       real*8 function DELTA_WV(WVf,y)
       real*8 E,Ef,A,B,Ep,y,WVf,WDE,WVE
-	integer n
+      integer n
       common /energy/E,Ef,Ep
       common /Wenerg/WDE,WVE
       common /pdatav/A,B,n
 C
       DELTA_WV=(WVf(A,B,Ep,y,n) - WVE)
-     >         /((y-Ef)**2-(E-Ef)**2)
+     &         /((y-Ef)**2-(E-Ef)**2)
       return
       end
 C
@@ -4126,20 +4126,20 @@ C
 C
       real*8 function DELTA_WD(WDf,y)
       real*8 E,Ef,A,B,C,Ep,y,WDf,WDE,WVE
-	integer m,iq
+      integer m,iq
       common /energy/E,Ef,Ep
       common /Wenerg/WDE,WVE
       common /pdatas/A,B,C,m,iq
 C
       DELTA_WD=(WDf(A,B,C,Ep,y,m,iq) - WDE)
-     >            /((y-Ef)**2-(E-Ef)**2)
+     &            /((y-Ef)**2-(E-Ef)**2)
 C
       return
       end
 C
       real*8 function WDf(A,B,C,Ep,E,m,iq)
       real*8 A,B,C,Ep,E,ee,arg
-	integer m,iq
+      integer m,iq
 C
       WDf=0.d0
       if(E.Lt.Ep) return
