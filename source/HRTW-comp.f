@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: HRTW-comp.f,v 1.10 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-10-07 16:22:35 $
+Ccc   * $Id: HRTW-comp.f,v 1.11 2004-10-07 16:22:35 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1383,25 +1383,11 @@ C
 C
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-C     rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
-C
-C     wf = W2*EIN*rmu
-C     coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
-C
-C     wf = .0047837*AEJc(Npro)*A(Ntrg)*EIN/(AEJc(Npro)+A(Ntrg))
-C     coef = 3.14159/wf/(2*XJLv(1,Ntrg)+1.0)/(2*SEJc(Npro)+1.0)
 C
       el = EINl
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
-C     wf = W2*ecms*rmu
+
       wf = ak2/10.D0
-
-C     IF(AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
-C       RCN 02/2004 
-C       !!! RCN fake value for gammas 
-C       wf= 0.01d0
-C     ENDIF
-
       coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C
       maxlw = NDLW
