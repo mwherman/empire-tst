@@ -1,7 +1,6 @@
-$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-07 10:34:01 $
-Ccc   * $Id: gdrgfldata.f,v 1.2 2004-06-07 10:34:01 Capote Exp $
+Ccc   * $Date: 2004-06-08 08:04:16 $
+Ccc   * $Id: gdrgfldata.f,v 1.3 2004-06-08 08:04:16 Capote Exp $
 C
       SUBROUTINE GDRGFLDATA(Znucleus, Anucleus)
 C
@@ -126,7 +125,7 @@ C       README file format (2I4,1X,A2,2I3,6F7.2,2X,A5)
      & 		  ERR = 40) nnz(i), nna(i), nng(i),
      &          he1(i), hcs1(i), hgw1(i), he2(i), hcs2(i), hgw2(i)
         ENDDO
-40	  CLOSE(81)
+40	CLOSE(81)
 C       README file format (2i4,1x,a2,f7.3,4f7.2)
 41      OPEN(81, FILE = '../RIPL-2/gamma/gdr-parameters-theor.dat', 
      &                                       STATUS = 'old',ERR=3550)
@@ -197,7 +196,7 @@ C       the RIPL-2 Goriely theoretical values
             CS1 = CS0
             GW1 = hgw1t(i)
             EG2 = he2t(i)
-C           CS2 = hcs2t(i)
+            CS2 = 0.d0
             GW2 = hgw2t(i)
 	      etaeps = etat(i)
             IF(abs(etaeps-1.d0).GT.0.0001)THEN

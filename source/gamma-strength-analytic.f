@@ -1,4 +1,7 @@
-$DEBUG
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-08 08:07:21 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.4 2004-06-08 08:07:21 Capote Exp $
+C
 C     Module "gamma-strength-analytic.f" with
 C     main subroutine "GAMMA_STRENGTH.f"
 C
@@ -513,15 +516,13 @@ C
       DOUBLE PRECISION FUNCTION MLO1(T, U, Egamma)
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, hh, phi, SPECRALF, T, U
-	MLO1=0.d0
-      IF(Egamma.LT.0.001d0) return       
-	MLO1 = SPECRALF(U, Egamma)
+      MLO1 = 0.d0
+      If(Egamma.LE.0.d0) return
+      MLO1 = SPECRALF(U, Egamma)
 C     Underflow and Egamma = 0 protections introduced, RCN, 2004
       phi=1.d0
-	IF(T.GT.1.d-10) THEN
-        hh = Egamma/T
-	  IF(hh.LE.15.) phi = 1./(1. - EXP( - hh))
-      ENDIF
+      hh = Egamma/T
+      IF(hh.LE.15.) phi = 1.d0/(1.d0 - EXP( - hh))
       MLO1 = phi*MLO1
       END
 C

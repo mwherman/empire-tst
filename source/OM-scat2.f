@@ -1,3 +1,7 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-08 08:07:00 $
+Ccc   * $Id: OM-scat2.f,v 1.10 2004-06-08 08:07:00 Capote Exp $
+C
       SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Srr, Ipr)
 Ccc
 Ccc   ********************************************************************
@@ -211,6 +215,7 @@ C---------------------------------------------------------------------
       COMMON /CONST / MI, SI, ZI, MT, ZT, PIL, AK2, CETal, W2L, CSOl
       COMMON /ENER  / E1, ELAb
       COMMON /FACT  / G(LFMAX)
+
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /POTEN1/ R(7), RE(7), AQ(7), AE(7), POT(7, 6)
       COMMON /POTEN2/ RCOulomb, BETa, EFErmi, EP, EA, IREl

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-01 22:00:45 $ 
-Ccc   * $Id: input.f,v 1.27 2004-06-01 22:00:45 herman Exp $ 
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-08 08:03:57 $ 
+Ccc   * $Id: input.f,v 1.28 2004-06-08 08:03:57 Capote Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -291,7 +291,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server 
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C 
 C--------CCFUF parameters 
          DV = 10. 
@@ -757,6 +757,14 @@ C           INCIDENT GAMMA
 C--------inteligent defaults *** done *** 
 C 
          CALL READIN   !optional part of the input 
+
+C           Key_shape = 0 --> old ver.2.18 variant for E1 stength-function fE1
+C           Key_shape =1 --> fE1=MLO1
+C           Key_shape =2 --> fE1=MLO2
+C           Key_shape =3 --> fE1=MLO3
+C           Key_shape =4 --> fE1=EGLO
+C           Key_shape =5 --> fE1=GFL
+C           Key_shape =6 --> fE1=SLO
 C 
 C--------check of input consistency 
 C 
@@ -1049,12 +1057,6 @@ C--------fix-up deformations for coupled channels *** done ***
 C-----KTRLOM Optical Model control 
 C-----set o.m.p. for the incident channel 
 C     RCN 02/2004
-
-C     IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN  
-C        INCIDENT GAMMA
-C        KTRlom(0, 0) = -1
-C     ELSE       
-
       KTRlom(0, 0) = 1 
       IF(AEJc(0).GT.4.0D0)THEN 
            KTRlom(0, 0) = 0 
@@ -1071,9 +1073,6 @@ C     ELSE
            KTRlom(NPRoject, NTArget) = KTRompcc 
            RIPl_omp(0) = RIPl_ompcc 
       ENDIF 
-
-C     ENDIF
-
 C-----Plujko_new (set giant resonance parameters for target)
       GDRpar(1, 0) = EGDr1
       GDRpar(2, 0) = GGDr1
@@ -2135,6 +2134,24 @@ C           WRITE(6, *)'Dispersive optical model is used'
 C           Compressional form-factor is set off 
 C           ICOmpff = 0 
 C           ENDIF 
+            if(Key_shape.eq.0) WRITE(6, 
+     &      '('' E1 strength shape function set to EMPIRE v2.18'')')
+            if(Key_shape.eq.1) WRITE(6, 
+     &      '('' E1 strength shape function set to MLO1'')')
+            if(Key_shape.eq.2) WRITE(6, 
+     &      '('' E1 strength shape function set to MLO2'')')
+            if(Key_shape.eq.3) WRITE(6, 
+     &      '('' E1 strength shape function set to MLO3'')')
+            if(Key_shape.eq.4) WRITE(6, 
+     &      '('' E1 strength shape function set to EGLO'')')
+            if(Key_shape.eq.5) WRITE(6, 
+     &      '('' E1 strength shape function set to GFL'')')
+            if(Key_shape.eq.6) WRITE(6, 
+     &      '('' E1 strength shape function set to SLO'')')
+            if(Key_GDRGFL.eq.0) WRITE(6,  
+     &      '('' GDR parameters from Messina systematics'')') 
+            if(Key_GDRGFL.ne.0) WRITE(6,  
+     &      '('' GDR parameters from RIPL-2/Plujko systematics'')') 
             WRITE(6, *)' ' 
             IF(OMParf .OR. OMPar_riplf .OR. OMParfcc)THEN 
                WRITE(6, *)'Existing, case specific, o.m.p. files: ' 
