@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-03-04 17:21:19 $
-Ccc   * $Id: MSD-tristan.f,v 1.24 2005-03-04 17:21:19 herman Exp $
+Ccc   * $Date: 2005-03-07 22:01:31 $
+Ccc   * $Id: MSD-tristan.f,v 1.25 2005-03-07 22:01:31 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
 CCC
@@ -24,12 +24,14 @@ CCC   *                                                                *
 CCC   *                                                                *
 CCC   * output:none                                                    *
 CCC   *                                                                *
+CCC   *                                                                *
+CCC   *                                                                *
 CCC   * author: H.Lenske                                               *
+CCC   *                                                                *
 CCC   ******************************************************************
 CCC
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -40,10 +42,10 @@ C
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2), 
      &                 FFTot(10), GAPin(2), HOMin, Q0, QGRand, QMAx, 
      &                 QMIna, QMInb, QS1, QS2, QSTep, RAC, 
-     &                 RHOb(301,11,2), RI, ROPt, RR, THEta1, THEta2, U0, 
+     &                 RHOb(301,11,2), RI, ROPt, RR, THEta1, THEta2, U0,
      &                 U9, W0, WIDex, WIDexin, WR1(12*NDANG), 
      &                 WR2(144*NDANG)
-      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x, 
+      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
      &        ICC, ICMax, ID, IE, IG, KDEnvi, KEX3, KEXcom(10), KRTmax, 
      &        KRType, KTRl(10), L9(10), NAVerg, NCHanl, NEBinx, NFAc12, 
      &        NN, NQ1x, NQ2x, NRMax(10), NTHeta, NZ
@@ -59,7 +61,7 @@ C
      &                Q0, FACb, FFTot, NRMax
       COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr, 
-     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d, 
+     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
      &                FFAc3d
       COMMON /U_OPT / U0, W0, RR, RI, AR, AI
 C
@@ -78,9 +80,6 @@ C
      &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr, 
      &        nnb, np, npb, nq, nq12x, nwr1, nwr2, nzb
       INTEGER INT
-C
-C
-C
 C
 C-----L1MAXM - maximum l transfer
 C-----QM - maximum energy loss
@@ -153,7 +152,6 @@ C-----experimental energy resolution
       QGRand = 0.
       IF (THEta1.LE.0.D0) THEta1 = ANGle(1)
       IF (THEta2.LE.0.D0) THEta2 = ANGle(nangle - 1)
-CMH   NTHETA=(THETA2-THETA1)/DTHETA+1.2
       KRTmax = MIN(KRType,2)
       DO n = 1, NFAc12
          FFAc1d(n) = 1.
@@ -174,7 +172,6 @@ C
       ETMax = ( - QMAx) + 25.*ESTep
       IF (ETMax.GT.eccm) ETMax = eccm - ESTep
       NEBinx = (ETMax - ETMin)/ESTep + 1.2
-Cmh   EOUTMX=ECCM+QGRAND
       EOUtmx = ESTep*FLOAT(NEBinx)
       EOUtmi = EOUtmx - ESTep*FLOAT(NEBinx)
       WRITE (6,99020)
@@ -347,12 +344,10 @@ C
 99065 FORMAT ('1')
       END
 C
- 
 C
       SUBROUTINE INELAS(Est,Nn,Nz,Nebins)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -395,14 +390,15 @@ C
       DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, aqq, bosc, 
      &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11), 
      &                 ceff, clex(11), clsc(11), cneg, cnorm, cpos, 
-     &                 cr1(11), cr2, cr3(11), d1, dci(11), dcr(11), 
-     &                 ddr(2), de3, deqq, dnz, dqqst(5000), dr, dwex, 
-     &                 dwsx, e, e0, efit(22), efitx, egr, em, emi, 
-     &                 emisq, ep, epl, eplsq, eqq, eqqst(5000), eqqx, 
-     &                 ess(0:10000), est3, ext, f1, fe, ff1, fltwp1, 
-     &                 fourpi, fpi, greenr, greenx, greeny, hat, hcorr, 
-     &                 hhh, homeb, phtrm, pxmd, pymd, qqi, qqr, qqx, 
-     &                 qqy, r, r1, rd, rdopt, rdsq, re1, re2, re3
+     &                 cr1(11), cr2, cr3(11), dci(11), dcr(11), ddr(2), 
+     &                 de3, deqq, dnz, dqqst(5000), dr, dwex, dwsx, e, 
+     &                 e0, efit(22), efitx, egr, em, emi, emisq, ep, 
+     &                 epl, eplsq, eqq, eqqst(5000), eqqx, ess(0:10000), 
+     &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi, 
+     &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm, 
+     &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt, 
+     &                 rdsq, re1, re2, re3, reduqq, resid
+      REAL d1, hhh
       DOUBLE PRECISION DWIDTH
       REAL FLOAT
       INTEGER i, j, jtw1, jtw2, k, kc, kcx, kh, kmax, kp, kqq, krt, 
@@ -410,17 +406,13 @@ C
      &        ltmin, ltp, ltp1, ltr, lttw, n, nconf(21), ne, nebinx, 
      &        nesx, nh, nlhm, nlpm, nos1, nos2, np, np1, nr, nxmax
       INTEGER IABS, INT
-      DOUBLE PRECISION reduqq, resid, rfqqr(0:501,11), rfqqx(0:501,11), 
-     &                 rfqqy(0:501,11), rh0, rho1, rl, rmax, rmosc, 
-     &                 rmsgs, rnorm, rnp(3,2), rp, rqr, rrr(2), rws, 
-     &                 rwsq, t1, t2, umatqq, veff, vnorm, w, wbcs, we, 
-     &                 wgr, widas, wide(0:10000), widea, widgr, wqa, 
-     &                 wqq, wqqst(5000), wqrex, x, xea(11), xir, xneg, 
-     &                 xp, xpos, xqq, yea(11), yqq
-C
-C
-C
-C
+      DOUBLE PRECISION rfqqr(0:501,11), rfqqx(0:501,11), rfqqy(0:501,11)
+     &                 , rh0, rho1, rl, rmax, rmosc, rmsgs, rnorm, 
+     &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2, 
+     &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas, 
+     &                 wide(0:10000), widea, widgr, wqa, wqq, 
+     &                 wqqst(5000), wqrex, x, xea(11), xir, xneg, xp, 
+     &                 xpos, xqq, yea(11), yqq
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0, 
      &     0.8931D0/
@@ -477,7 +469,6 @@ C
       IF (nebinx.NE.Nebins .AND. IOUt.GT.3) WRITE (6,99005) nebinx*ESTep
 99005 FORMAT (/' >> LIMIT OF EX IS INCREASED TO:',F9.3,' (MEV) <<'/
      &        '    (USED TO DETERMINE THE COUPLING CONSTANTS)')
-C
       ltmaxr = ICMax
       lmax = ICMax*2 + 2
       est3 = ESTep/3.
@@ -501,7 +492,6 @@ C-----set xea and yea to 0 to avoid undefined if efit's are 0
       ad = ad/a1
       rdsq = rd*rd
       rh0 = 0.75*a1/(rd**3*PI*(1. + (PI*ad/rd)**2))
-C     RWS=RW0*A3
       rws = rd
       rwsq = rws*rws
       ROPt = RR
@@ -553,13 +543,13 @@ C-----with L=0. these were absent in the previous version of the code.
          ess(ne) = e
       ENDDO
 C
-C     calculate the moments of the g.s. density distribution
-C     (to be used for self-consistent RPA coupling constants)
+C-----calculate the moments of the g.s. density distribution
+C-----(to be used for self-consistent RPA coupling constants)
 C
       api = fpi/a1
       dr = 0.2
 C
-C     fix rmax such that radial integrals are accurate to 1.e-04
+C-----fix rmax such that radial integrals are accurate to 1.e-04
 C
       rp = rd + ad*4.*LOG(10.)
       rmax = rp + ad*(lmax - 1.)*LOG(rp/rd)
@@ -569,8 +559,8 @@ C
          GSDm(l) = 0.0
       ENDDO
 C
-C     -->> the factor 4*pi/A is excluded - see definition of
-C     -->> selfconsistent RPA-coupling constants
+C------->> the factor 4*pi/A is excluded - see definition of
+C------->> selfconsistent RPA-coupling constants
 C
 C     (output contains the factor - see below)
 C
@@ -602,7 +592,7 @@ C
 99025    FORMAT (I5,5E14.7)
       ENDDO
 C
-C     adjust oscillator constant to r.m.s. - radius
+C-----adjust oscillator constant to r.m.s. - radius
 C
       rmsgs = api*GSDm(3)
       rmosc = RMS(3)/BST(3)**2
@@ -627,9 +617,9 @@ C
       ENDIF
       HOMega = homeb
 C
-C     compute inelastic       excitations for KRT=1
-C     compute charge exchange excitations for KRT=2
-C     (KRT=2 for (n,p)-reaction step)
+C-----compute inelastic       excitations for KRT=1
+C-----compute charge exchange excitations for KRT=2
+C-----(KRT=2 for (n,p)-reaction step)
 C
       krtx = 1
       DO krt = 1, krtx
@@ -653,20 +643,20 @@ C
             SRNew(lt) = 0.0
             SREwl(lt) = 0.0
             nconf(lt) = 0.0
-            ccr(lt) = 0.D0                                 ! new
-            cci(lt) = 0.D0                                 ! new
-            dcr(lt) = 0.D0                                 ! new
-            dci(lt) = 0.D0                                 ! new
-            cr1(lt) = 0.D0                                 ! new
-            cr3(lt) = 0.D0                                 ! new
-            ccm(lt) = 0.D0                                 ! new
-            ccp(lt) = 0.D0                                 ! new
+            ccr(lt) = 0.D0                                 
+            cci(lt) = 0.D0                                 
+            dcr(lt) = 0.D0                                 
+            dci(lt) = 0.D0                                 
+            cr1(lt) = 0.D0                                 
+            cr3(lt) = 0.D0                                 
+            ccm(lt) = 0.D0                                 
+            ccp(lt) = 0.D0                                 
          ENDDO
          IF (krt.EQ.1) kmax = 2
          IF (krt.EQ.2) kmax = 1
 C
-C        KRT=1 inelastic excitation
-C        KRT=2 charge exchange excitation for (n,p) reaction
+C--------KRT=1 inelastic excitation
+C--------KRT=2 charge exchange excitation for (n,p) reaction
 C
          DO k = 1, kmax
             IF (krt.EQ.1) THEN
@@ -698,12 +688,12 @@ C
                            IF (eqq.LE.eqqx) THEN
                               kc = kc + 1
 C
-C                             total width at the 2-qp energy (multiplied by
-C                             factor 1/2)
+C-----------------------------total width at the 2-qp energy (multiplied by
+C-----------------------------factor 1/2)
                               wqq = DWIDTH(eqq,widas,e0,aew)*0.5
 C
-C                             energy shift at the 2-qp energy (dispersion
-C                             integral)
+C-----------------------------energy shift at the 2-qp energy (dispersion
+C-----------------------------integral)
                               deqq = 0.D0
                               w = 4.
                               de3 = ESTep/3.
@@ -723,7 +713,7 @@ C                             integral)
                               eqq = eqq + deqq
                               eqqst(kc) = eqq
 C
-C                             end of energy shift
+C-----------------------------end of energy shift
 C
                               l1 = IABS(ltp - lth)
                               l2 = IABS(jtw1 - jtw2)/2
@@ -739,10 +729,10 @@ C
                                  DO ltp1 = ltmin, ltmax, 2
                                     lttw = 2*(ltp1 - 1)
 C
-C                                   calculate the 2-qp matrix elements
-C                                   REDUQQ = reduced matrix element (squared)
-C                                   PHTRM = radial  matrix element
-C                                   UMATQQ = full    matrix element (squared)
+C-----------------------------------calculate the 2-qp matrix elements
+C-----------------------------------REDUQQ = reduced matrix element (squared)
+C-----------------------------------PHTRM = radial  matrix element
+C-----------------------------------UMATQQ = full    matrix element (squared)
 C
                                     IA = jtw1
                                     IB = jtw2
@@ -767,14 +757,14 @@ C
                                     umatqq = reduqq*(phtrm*wbcs)**2
                                     IF (umatqq.GE.1.D-08) THEN
 C
-C                                      count number of 2-qp configurations
+C--------------------------------------count number of 2-qp configurations
 C
                                        nconf(ltp1) = nconf(ltp1) + 1
 C
-C                                      calculate the 2-quasiparticle Green
-C                                      function calculate the 2-quasiparticle
-C                                      response function prepare for the
-C                                      self-consistent width of QRPA-states
+C--------------------------------------calculate the 2-quasiparticle Green
+C--------------------------------------function calculate the 2-quasiparticle
+C--------------------------------------response function prepare for the
+C--------------------------------------self-consistent width of QRPA-states
                                        DO ne = 0, nebinx + 1
                                          ext = Est(ne)
                                          dwex = wqq + 0.5D0*WIDex
@@ -786,8 +776,8 @@ C                                      self-consistent width of QRPA-states
                                          pxmd = 1./(emisq + dwsx)
                                          pymd = 1./(eplsq + dwsx)
 C
-C                                         real and imaginary parts of the 2-qp
-C                                         Green functions
+C----------------------------------------real and imaginary parts of the 2-qp
+C----------------------------------------Green functions
                                          greenr = (emi*pxmd + epl*pymd)
      &                                      *umatqq
                                          greenx = wqq*(pxmd - pymd)
@@ -817,8 +807,8 @@ C
                                          pxmd = 1./(emisq + dwsx)
                                          pymd = 1./(eplsq + dwsx)
 C
-C                                           real and imaginary parts of the 2-qp
-C                                           Green function
+C----------------------------------------real and imaginary parts of the 2-qp
+C----------------------------------------Green function
 C
                                          greenr = (emi*pxmd + epl*pymd)
      &                                      *umatqq
@@ -826,8 +816,8 @@ C
      &                                      *umatqq
                                          greeny = (pxmd - pymd)*umatqq
 C
-C                                           real and imaginary parts of the 2-qp
-C                                           response function
+C----------------------------------------real and imaginary parts of the 2-qp
+C----------------------------------------response function
                                          IF (i.EQ.1) THEN
                                          cr1(ltp1) = cr1(ltp1) + greenr
                                          ccm(ltp1) = ccm(ltp1)
@@ -875,7 +865,7 @@ C
          kqq = 1
          IF (kqq.EQ.1) THEN
 C
-C           sorting
+C-----------sorting
 C
             DO n = 1, kcx - 1
                np1 = n + 1
@@ -903,43 +893,29 @@ C
          ENDIF
 C
 C
-C        the multipole fields are normalized as:
-C        U(l;r) = (r/rd)**l * homega
-C        rd     = half-density radius of the g.s. density rhogs(r)
-C        homega = oscillator energy
-C        0
-C        the Tassie model is taken for the transition densities:              0
-C        rhotr(l;r) = (r/rd)**(l-1)*rd*d rhogs(r) /dr
-C        rd         = half-density radius of rhogs(r)
-C        self-consistent    coupling constants CLSC(L)
-C        phenomenological   coupling constants CLEX(L)
-C        renomalization of  coupling constants CLRN(L) = CLEX(L)/CLSC(L)
-C        ( from fit to experimental energies )
+C--------the multipole fields are normalized as:
+C--------U(l;r) = (r/rd)**l * homega
+C--------rd     = half-density radius of the g.s. density rhogs(r)
+C--------homega = oscillator energy
+C--------0
+C--------the Tassie model is taken for the transition densities:              0
+C--------rhotr(l;r) = (r/rd)**(l-1)*rd*d rhogs(r) /dr
+C--------rd         = half-density radius of rhogs(r)
+C--------self-consistent    coupling constants CLSC(L)
+C--------phenomenological   coupling constants CLEX(L)
+C--------renomalization of  coupling constants CLRN(L) = CLEX(L)/CLSC(L)
+C--------( from fit to experimental energies )
 C
-C        >>>> the inverse coupling constants are calculated! <<<<
+C-------->>>> the inverse coupling constants are calculated! <<<<
 C
-C        units for CLSC and CLEX :   [MeV]
+C--------units for CLSC and CLEX :   [MeV]
 C
          DO lt = 1, ltmaxr
 C
 C           INVERSE COUPLING CONSTANTS (FROM FIT TO EXP. ENERGIES)
 C
             IF (efit(lt).NE.0.0D0) THEN
-C              nea = efit(lt)/ESTep + 1.5
-C              ccr = rfqqr(nea, lt)
-C              dcr = 0.5D0*(rfqqr(nea + 1, lt) - rfqqr(nea - 1, lt))
-C    &               /ESTep
-C              cci = rfqqx(nea, lt) + wex*rfqqy(nea, lt)
-C              ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)
-C              ccm = rfqqx(nea - 1, lt) + wex*rfqqy(nea - 1, lt)
-C              dci = 0.5D0*(ccp - ccm)/ESTep
-C              MH added the following IF  to avoid division by 0
                IF (dcr(lt).NE.0.0D0) THEN
-C                 xir = dci/dcr
-C                 xpos = cci*xir/(1.D0 + SQRT(1.D0 + xir**2))
-C                 xneg = -cci**2/xpos
-C                 cpos = ccr + xpos
-C                 cneg = ccr + xneg
                   xir = dci(lt)/dcr(lt)
                   xpos = cci(lt)*xir/(1.D0 + SQRT(1.D0 + xir**2))
                   xneg = -cci(lt)**2/xpos
@@ -948,7 +924,7 @@ C                 cneg = ccr + xneg
                   ccpm(1) = cpos
                   ccpm(2) = cneg
 C
-C                 check   for maximum
+C-----------------check   for maximum
 C
 C                 cr1 = rfqqr(nea - 1, lt)
                   cr2 = ccr(lt)
@@ -1003,22 +979,18 @@ C
             IF (l.EQ.1 .OR. efit(lt).GT.homeb) THEN
                IF (l.GT.1) clsc(lt) = vnorm*GSDm(lm)*SQRT(fltwp1)
      &                                *rdsq/(rd*rws)**l
-C
-C-----isovector strength is chosen as 1/2 of the isoscalar strength
-C
+C--------------isovector strength is chosen as 1/2 of the isoscalar strength
                IF (l.EQ.1) clsc(lt) = -0.5D0*vnorm*GSDm(2)
      &                                *4.D0/(rws*SQRT(fltwp1))
             ELSE
-C
-C-----vibrational model  (good for low-energy states)
-C
+C-----------vibrational model  (good for low-energy states)
                clsc(lt) = vnorm*GSDm(l + 1)*(l + 3)
      &                    /(SQRT(fltwp1)*rws**l)
             ENDIF
 C
-C-----monopole case (0+) - compressional mode
-C-----factor pi**2/6 comes from series expansion of
-C-----the   0+ transition potential
+C-----------monopole case (0+) - compressional mode
+C-----------factor pi**2/6 comes from series expansion of
+C-----------the   0+ transition potential
 C
             IF (l.EQ.0) clsc(lt) = 2.*(vnorm/rwsq)*GSDm(3)*36.D0/PI**4
             IF (efit(lt).GT.0.0D0) THEN
@@ -1028,17 +1000,17 @@ C
                clex(lt) = clsc(lt)
             ENDIF
 C
-C-----effective coupling constant is used in the response functions
+C-----------effective coupling constant is used in the response functions
 C           ( if EFIT is .NE. 0 )
 C
             ceff = 1./clex(lt)
             cnorm = ceff*ceff
             rnorm = cnorm/CLRn(lt)**2
-C-----normalization of the response function with the factor given in input
+C-----------normalization of the response function with the factor given in input
             rnorm = rnorm*CNOrin(lt)
 C
-C-----calculate the QRPA response function                    (rho )
-C-----calculate the QRPA deformation parameters               (beta)
+C-----------calculate the QRPA response function                    (rho )
+C-----------calculate the QRPA deformation parameters               (beta)
 C
             DO ne = 1, nebinx
                qqr = rfqqr(ne,lt)*cnorm
@@ -1052,16 +1024,16 @@ C
                rho1 = rnorm*qqi/(rqr**2 + qqi**2)
                RHO(ne,lt) = rho1/PI
 C
-C              write response function on tape17
-C              (presently not activated)
+C--------------write response function on tape17
+C--------------(presently not activated)
 C
 C              WRITE(17,*)EST(NE),RHO(NE,LT)
             ENDDO
 99070       FORMAT (F8.3,5E11.4,F8.3)
 C
-C-----calculate RPA-deformation parameters beta
-C-----(integrated over an energy interval of 2*ESTEP )
-C-----(except for the first and last mesh points   )
+C-----------calculate RPA-deformation parameters beta
+C-----------(integrated over an energy interval of 2*ESTEP )
+C-----------(except for the first and last mesh points   )
 C
             BETa(1,lt) = 0.5*ESTep*(RHO(1,lt) + RHO(2,lt))
             BETa(nebinx,lt) = 0.5*ESTep*(RHO(nebinx,lt) + RHO(nebinx - 1
@@ -1110,8 +1082,8 @@ C
          WRITE (6,99095) eqqx
 99095    FORMAT (8X,'CONFIGURATION SPACE IS EQQX:',F9.3,' (MEV)')
 C
-C-----calculate non-energy weighted (SRNEW) and energy weighted (SREW)
-C-----sum rules
+C--------calculate non-energy weighted (SRNEW) and energy weighted (SREW)
+C--------sum rules
 C
          DO ltp1 = 1, ltmaxr
             DO ne = 1, nebinx
@@ -1135,8 +1107,6 @@ C        608 FORMAT(1H ,F7.2,11E11.4)
 C
 C
       SUBROUTINE RADIAL(Bdtw,Phtrm,N1,L1,N2,L2,Ltr)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1155,8 +1125,6 @@ C
       INTEGER IABS
       INTEGER k1, k2, k3, k4, k5, k6, k7, k8, l, ln1, ln2, nc1, nc2, 
      &        nup1, nup1mi, nup1mx
-C
-C
       Phtrm = 0.0
       l = Ltr
       IF (MOD(l + L1 + L2,2).NE.0) RETURN
@@ -1203,9 +1171,8 @@ C
       ENDIF
       END
 C
-      SUBROUTINE CLEBTRI
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+      SUBROUTINE CLEBTRI
 C
 C COMMON variables
 C
@@ -1220,8 +1187,6 @@ C
      &        icpf, k1, k2, k3, nz, nzm1, nzmi, nzmic2, nzmic3, nzmx, 
      &        nzt1, nzt2, nzt3, nzt4, nzt5
       INTEGER IABS
-C
-C
       RAC = 0.0
       IF (ID + IE.EQ.IG) THEN
          k1 = IA + IB + IC
@@ -1310,8 +1275,6 @@ C
 C
 C
       SUBROUTINE TRIDIG(N,A,B,C,D,Ierr)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -1322,8 +1285,6 @@ C Local variables
 C
       DOUBLE PRECISION alpha
       INTEGER i, j, k
-C
-C
       Ierr = 0
       IF (N.LE.1) THEN
          IF (D(1).EQ.0.D0) THEN
@@ -1359,8 +1320,6 @@ C
 99999 END
 C
       SUBROUTINE BCS(A,Gap,I3,Ndim,Chemic)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1409,7 +1368,7 @@ C-----sort energies
 C
       CALL ESORT(Ndim,I3)
 C
-C     BCS CALCULATION IN THE CONSTANT GAP APPROXIMATION
+C-----BCS CALCULATION IN THE CONSTANT GAP APPROXIMATION
 C
       gsq = Gap*Gap
       dc = 1.0
@@ -1424,9 +1383,7 @@ C
       IF (ii.GT.imax) WRITE (6,*) 
      &                   ' INITIALISATION FOR CHEMICAL POTENTIAL FAILED'
       chem(2) = chem(1) + dc
-C
       CALL NUMBER(Ndim,I3,gsq,A,xnum,chem(2),d(2))
-C
       IF (d(1)*d(2).LE.0.0D0) THEN
          ii = 0
   150    ii = ii + 1
@@ -1435,9 +1392,7 @@ C
          chem(2) = chem(1)
          d(2) = d(1)
          chem(1) = chem(1) + dc
-C
          CALL NUMBER(Ndim,I3,gsq,A,xnum,chem(1),d(1))
-C
          IF (ABS(d(1)).LT.1.D-04) THEN
             Chemic = chem(1)
             text(1) = ' BCS FOR PROTONS  '
@@ -1469,8 +1424,8 @@ C--------------'indeks undefined' message. (n is not used anyway)
      &                         VAMp(i,I3), vsq, eh, ep
 99020          FORMAT (I5,3I4,'/2',F9.4,2F8.5,F8.3,2X,2F8.3)
 C
-C              TEMPORARY
-C              (SKIP CALCULATION OF MICROSC. G.S. DENSITIES)
+C--------------TEMPORARY
+C--------------(SKIP CALCULATION OF MICROSC. G.S. DENSITIES)
 C
                IF (vsq.LT.0.0D0) THEN
                   IF (IBLk(I3).EQ.0) THEN
@@ -1514,8 +1469,6 @@ C
       END
 C
       SUBROUTINE NUMBER(Ndim,I3,Gsq,A,Xnum,Chem,D)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1534,8 +1487,6 @@ C Local variables
 C
       DOUBLE PRECISION e, eta, fjj, s1, s2, vsq
       INTEGER n
-C
-C
       Xnum = 0.0
       s1 = 0.0
       s2 = 0.0
@@ -1556,8 +1507,6 @@ C
       END
 C
       SUBROUTINE ESORT(Ndim,I3)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1575,10 +1524,6 @@ C
       INTEGER i, ip, j, jp, k, kp, n, np, np1
       DOUBLE PRECISION q, qp, u, up, v, vp, x, xp
 C
-C
-C
-C     DIMENSION INDEKS(NDIM)
-C
 C     ORDER ENERGIES
 C
 C     DO 3 N=1,NDIM
@@ -1593,7 +1538,7 @@ C
          k = JJ(n,I3)
          u = UAMp(n,I3)
          v = VAMp(n,I3)
-C        L=INDEKS(N)
+C--------L=INDEKS(N)
          DO np = np1, Ndim
             xp = ESP(np,I3)
             qp = EBCs(np,I3)
@@ -1602,7 +1547,7 @@ C        L=INDEKS(N)
             kp = JJ(np,I3)
             up = UAMp(n,I3)
             vp = VAMp(n,I3)
-C           LP=INDEKS(NP)
+C-----------LP=INDEKS(NP)
             IF (x.GT.xp) THEN
                ESP(np,I3) = x
                EBCs(np,I3) = q
@@ -1611,7 +1556,7 @@ C           LP=INDEKS(NP)
                NN(np,I3) = i
                LL(np,I3) = j
                JJ(np,I3) = k
-C              INDEKS(NP)=L
+C--------------INDEKS(NP)=L
                ESP(n,I3) = xp
                EBCs(n,I3) = qp
                UAMp(n,I3) = up
@@ -1619,7 +1564,7 @@ C              INDEKS(NP)=L
                NN(n,I3) = ip
                LL(n,I3) = jp
                JJ(n,I3) = kp
-C              INDEKS(N)=LP
+C--------------INDEKS(N)=LP
                x = xp
                q = qp
                u = up
@@ -1627,7 +1572,7 @@ C              INDEKS(N)=LP
                i = ip
                j = jp
                k = kp
-C              L=LP
+C--------------L=LP
             ENDIF
          ENDDO
       ENDDO
@@ -1636,7 +1581,6 @@ C
 C
       INTEGER FUNCTION INDF(N,L,Jtw)
 C
-C
 C Dummy arguments
 C
       INTEGER Jtw, L, N
@@ -1644,30 +1588,14 @@ C
 C Local variables
 C
       INTEGER n0, np
-C
-C
-C
-C
-C Dummy arguments
-C
-C
-C Local variables
-C
-C
-C
       np = 2*(N - 1) + L
       n0 = (np*(np + 1))/2
       INDF = n0 + (Jtw + 1)/2
       END
-C
-C
       DOUBLE PRECISION FUNCTION DWIDTH(E,W0,E0,A0)
 C
 C-----damping width of 1-phonon states
 C-----anti-symmetric E-dependence is taken
-C
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -1676,17 +1604,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION f0, fe, g0, ge
-C
-C
-C
-C
-C Dummy arguments
-C
-C
-C Local variables
-C
-C
-C
       fe = EXP((E - E0)/A0)
       ge = EXP(( - (E+E0)/A0))
       f0 = 1./(1. + fe)
@@ -1696,8 +1613,6 @@ C
 C
 C
       SUBROUTINE SPLVL(I3,Amass,Nz,Iout)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -1733,10 +1648,7 @@ C
       INTEGER INDF
       INTEGER INT
       CHARACTER*10 text(2)
-C
-C
-C
-C
+
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0, 
      &     0.8931D0/
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
@@ -1746,11 +1658,10 @@ C
      &     0.0000D0, 0.0000D0, 0.0250D0, 0.0225D0, 0.0225D0, 0.0225D0, 
      &     0.0225D0, 0.0225D0, 0.0225D0, 0.0225D0, 0.0225D0, 0.0225D0, 
      &     0.0225D0, 0.0225D0, 0.0225D0/
-C     M. Herman increased first dimension in vll to 16 and set vll(16,1)
-C     =0.0315 and vll(16,2)=0.0225 to avoid going out of dimension
-C     also set vll(5,2) to 0.0225 instead of 0.0313 as in the original version.
+C-----M. Herman increased first dimension in vll to 16 and set vll(16,1)
+C-----=0.0315 and vll(16,2)=0.0225 to avoid going out of dimension
+C-----also set vll(5,2) to 0.0225 instead of 0.0313 as in the original version.
       DATA uscal, uvec, rw0/51.5D0, 35.4D0, 1.27D0/
-C
       pi = 4.*ATAN(1.D0)
       dnz = (Amass - 2.*Nz)/Amass
       a3 = Amass**(1./3.)
@@ -1798,19 +1709,19 @@ C
          UAMp(n,I3) = 0.0
       ENDDO
 C
-C     input Nilsson parameters for protons (I3=1) and neutrons (I3=2)
-C     first  card:
-C     HOM= hbar*omega (oscillator energy in MeV)
-C     ALS= l*s strength (in MeV)
-C     note: als is converted into units of homega intrinsically
-C     second card:
-C     pairing with blocking if IBLK .gt. 0
-C     NBL,LBL,JBL : nrad,l,2*j of blocked state
-C     third  card:
-C     NHX= number of (hole) states to be included in the BCS-calculation
-C     GAP= pairing gap
-C     NHX cards with:
-C     NSP,LSP,JSP,ESP  - nrad,l,2*j,esp  for BCS-configurations
+C-----input Nilsson parameters for protons (I3=1) and neutrons (I3=2)
+C-----first  card:
+C-----HOM= hbar*omega (oscillator energy in MeV)
+C-----ALS= l*s strength (in MeV)
+C-----note: als is converted into units of homega intrinsically
+C-----second card:
+C-----pairing with blocking if IBLK .gt. 0
+C-----NBL,LBL,JBL : nrad,l,2*j of blocked state
+C-----third  card:
+C-----NHX= number of (hole) states to be included in the BCS-calculation
+C-----GAP= pairing gap
+C-----NHX cards with:
+C-----NSP,LSP,JSP,ESP  - nrad,l,2*j,esp  for BCS-configurations
 C
       hom = HOMin
       als = ALSin
@@ -2047,10 +1958,9 @@ C
   200 NHOle(I3) = nhx
 C
       DO n = 1, nhx
-C
-C        external energy is taken if ESP .ne. 0.0 (with rerunning - only
-C        internal) internal energy is taken if ESP .eq. 0.0 (spherical
-C        Nilsson-HO)
+C--------external energy is taken if ESP .ne. 0.0 (with rerunning - only
+C--------internal) internal energy is taken if ESP .eq. 0.0 (spherical
+C--------Nilsson-HO)
          np = INDF(NSP(n,I3),LSP(n,I3),JSP(n,I3))
          iocc(np) = 1
          IF (ESP(n,I3).EQ.0.0D0) THEN
@@ -2109,8 +2019,8 @@ C--------rerun BCS
                      NSP(k,I3) = nr
                      LSP(k,I3) = l
                      JSP(k,I3) = jtw
-C                    here the first index of vll could be out of dimension
-C                    thus vll dimension has been increased to vll(16,2)
+C--------------------here the first index of vll could be out of dimension
+C--------------------thus vll dimension has been increased to vll(16,2)
                      all = vll(nq + 1,I3)
                      ESP(k,I3) = EHO(nr,l,jtw,HOMega,all,VLS(I3))
                      ESP(k,I3) = ESP(k,I3) + e0
@@ -2125,7 +2035,7 @@ C                    thus vll dimension has been increased to vll(16,2)
       NTOtal(I3) = k
       ndim = k
 C
-C     <R**2> is calculated
+C-----<R**2> is calculated
 C
       RMS(I3) = 0.0
       DO nl = 1, nhx
@@ -2133,16 +2043,13 @@ C
          RMS(I3) = RMS(I3) + pqn*FLOAT(JSP(nl,I3) + 1)*VAMp(nl,I3)**2
       ENDDO
       RMS(I3) = RMS(I3)*BST(I3)**2
-C
       CALL ESORT(ndim,I3)
-C
       END
 C
 C
       SUBROUTINE RESPNS
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
@@ -2186,8 +2093,6 @@ C
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb, 
      &        nlmax
 C
-C
-C
 C-----in RHO,NLEV,RHOB etc the increased argument NEB corresponds to
 C-----increased excitation energy.
 C
@@ -2196,9 +2101,7 @@ C
       ltmaxr = ICMax
       DO k = 1, 2
          RMS(k) = 0.0
-CCCCCC
          CALL SPLVL(k,a1,NZ,IOUt)
-CCCCCC
          ipr = 1
          IF (ipr.NE.0) THEN
             IF (k.EQ.1) THEN
@@ -2227,9 +2130,7 @@ CCCCCC
             ENDDO
          ENDDO
       ENDDO
-CCCCCC
       CALL INELAS(est,NN,NZ,NEBinx)
-CCCCCC
       DO lp1 = 1, ltmaxr
          DO ne = 1, NEBinx
             RHOb(ne,lp1,1) = RHO(ne,lp1)
@@ -2246,7 +2147,6 @@ CCCCCC
                RHOb(ne,lp1,2) = RHO(ne,lp1)
             ENDDO
          ENDDO
-CCCCC
       ENDIF
   100 IF (iout4.NE.0) THEN
          krtx = KTRl(7) + 1
@@ -2308,8 +2208,6 @@ C        WRITE(6,974) (SREWL(LT),LT=1,LTMAXR)
 C
 C
       DOUBLE PRECISION FUNCTION EHO(N,L,Jtw,Hbo,All,Als)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -2320,17 +2218,6 @@ C Local variables
 C
       DOUBLE PRECISION ell, els, fjj, fso, rll
       INTEGER nq
-C
-C
-C
-C
-C Dummy arguments
-C
-C
-C Local variables
-C
-C
-C
       nq = 2*(N - 1) + L
       rll = L*(L + 1.)
       fjj = 0.25*(Jtw + 2.)*Jtw
@@ -2344,9 +2231,8 @@ C
       EHO = Hbo*(nq + 1.5 + ell + els)
       END
 C
-      SUBROUTINE POLYNM(N,X,F)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+      SUBROUTINE POLYNM(N,X,F)
 C
 C Dummy arguments
 C
@@ -2359,10 +2245,6 @@ C
       REAL FLOAT
       INTEGER i, k
       DOUBLE PRECISION y
-C
-C
-C
-C
       y = FLOAT(N - 1) - 2.*X
       F(1) = 1.
       F(2) = y/FLOAT(N - 1)
@@ -2375,8 +2257,6 @@ C
 C
 C
       SUBROUTINE PNORM(Ndim,N,Fnorm,Fxn)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -2388,6 +2268,7 @@ C
       REAL FLOAT
       DOUBLE PRECISION flog(30), x
       INTEGER j, k, ntw
+
       flog(1) = 0.
       flog(2) = 0.
       ntw = 2*N
@@ -2409,8 +2290,6 @@ C
 C
 C
       SUBROUTINE INVERT(Ndim,N,A,B)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -2422,6 +2301,7 @@ C
       DOUBLE PRECISION cik, hilf, pivot, s1, s2
       REAL FLOAT
       INTEGER i, indx, indy, ix, iy, j, k, l, m, merkx(20), merky(20)
+
       DO i = 1, N
          merkx(i) = 0
          merky(i) = 0
@@ -2560,10 +2440,11 @@ C
      &                 an, ay, aynorm, csfit(NDANG), delta, eout, f1(15)
      &                 , f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7), 
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6), 
-     &                 fq2(6,6), gmat(15,15), hhh, piece, pxsec, q1, q2, 
+     &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2, 
      &                 qq(5), rb12, s1, s2, s3, sg(301), sigm, sn, sum, 
      &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15)
       REAL FLOAT
+      REAL hhh
       INTEGER i, ic, icp, icpmx, icpx, ier, iloc, j, jx, k, k1, k2, k2n, 
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1, 
      &        lc, lc1, lcp1, ln, m2, m2n, mx, my, n, n0, n1, n2, n2n, 
@@ -2654,18 +2535,18 @@ C
          DO na = 1, nangle
             IF (kr.EQ.1) THEN
 C
-C              one-step
+C--------------one-step
 C
                DO n1 = 1, NQ1x
                   DO icp = 1, icpx
 C
-C                    ICP = 1   left  x-sections
-C                    ICP = 2   right x-section
+C--------------------ICP = 1   left  x-sections
+C--------------------ICP = 2   right x-section
 C
                      READ (16) (Cros(n1,lc1,icp),lc1 = 1,LC1mx,KEX3)
                      IF (KEX3.NE.1) THEN
 C
-C                       interpolation for L1
+C-----------------------interpolation for L1
 C
                         DO ic = 1, IC1mx
                            sum = 0.
@@ -2690,9 +2571,7 @@ C
                   ENDDO
                ENDDO
 C
-C
-C              interpolation for Q1-dependence
-C
+C--------------interpolation for Q1-dependence
 C
                DO l1p1 = 1, LC1mx
                   DO icp = 1, icpx
@@ -2726,7 +2605,7 @@ C
                ENDDO
 C
 C
-C              two - step
+C--------------two - step
 C
 C
                IF (NCHanl.EQ.2) GOTO 20
@@ -2736,7 +2615,7 @@ C
                   READ (16) (Cros(nq,KEX3*(ic-1) + 1,icp),ic = 1,IC12x)
                   IF (KEX3.NE.1) THEN
 C
-C                    interpolation for (L1,L2)-dependence
+C--------------------interpolation for (L1,L2)-dependence
 C
                      DO i = 1, IC1mx
                         DO j = 1, IC2mx
@@ -2770,13 +2649,9 @@ C
                            Cros(nq,lc,icp) = EXP(sum)
                         ENDDO
                      ENDDO
-C
-C
                   ENDIF
                ENDDO
             ENDDO
-C
-C
             lc = 0
             DO l1p1 = 1, LC1mx
                DO l2p1 = 1, LC2mx
@@ -2784,7 +2659,7 @@ C
                   DO icp = 1, icpx
                      nq = 0
 C
-C                    interpolation for (Q1,Q2)-dependence
+C--------------------interpolation for (Q1,Q2)-dependence
 C
                      DO nx = 1, NQ1x
                         n2n = MAX0(n0,nx)
@@ -2848,12 +2723,12 @@ C
      &                       /(((-QMAx)) - ((-QMIna)))
                         CALL POLYNM(NQ1x,xq,f1)
                         nepp = ne - nep + 1
-C                       next two lines are for (p,alpha) calculations (orig. as
-C                       came from mu)
-C                       IF(KR.EQ.1)RB12=RHOB(NEP,L1P1,2)*RHOB(NEPP,L2P1,1)
-C                       IF(KR.EQ.2)RB12=RHOB(NEP,L1P1,1)*RHOB(NEPP,L2P1,2) next
-C                       line substitutes previous 2 according to Horst's
-C                       suggestion
+C-----------------------next two lines are for (p,alpha) calculations (orig. as
+C-----------------------came from mu)
+C-----------------------IF(KR.EQ.1)RB12=RHOB(NEP,L1P1,2)*RHOB(NEPP,L2P1,1)
+C-----------------------IF(KR.EQ.2)RB12=RHOB(NEP,L1P1,1)*RHOB(NEPP,L2P1,2) next
+C-----------------------line substitutes previous 2 according to Horst's
+C-----------------------suggestion
                         rb12 = RHOb(nep,l1p1,krtx - kr + 1)
      &                         *RHOb(nepp,l2p1,kr)
                         DO icp = 1, icpx
@@ -2895,9 +2770,7 @@ C                       suggestion
             IF (NAVerg.GT.0) THEN
                IF (KTRl(7).EQ.1 .AND. kr.EQ.1) GOTO 50
 C
-C
-C              averaging of the X - section and analyzing powers
-C
+C--------------averaging of the X - section and analyzing powers
 C
                ncm1 = NCHanl - 1
                DO nc = 1, ncm1
@@ -3022,24 +2895,6 @@ C
 C
 C
       SUBROUTINE ACCUMSD(Nnuc,Nnur,Nejc)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C Dummy arguments
-C
-      INTEGER Nejc, Nnuc, Nnur
-C
-C Local variables
-C
-      DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil, 
-     &                 excnq, phdj(NDLW), pops, somj, swght, w, weight, 
-     &                 wght(NDLV), xj, xnor
-      REAL FLOAT
-      INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
-      INTEGER INT
-C
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -3061,12 +2916,23 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:   19.Nov.1996                                              *
-Ccc   * revision:#    by:name                     on:xx.mon.199x         *
-Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nejc, Nnuc, Nnur
+C
+C Local variables
+C
+      DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil, 
+     &                 excnq, phdj(NDLW), pops, somj, swght, w, weight, 
+     &                 wght(NDLV), xj, xnor
+      REAL FLOAT
+      INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
+      INTEGER INT
       IF (NEX(Nnuc).LT.1) THEN
          WRITE (6,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
          WRITE (6,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
@@ -3174,7 +3040,6 @@ C-----(NOTE: it is usually negative in such a case)
      &                               + csmsdl*(1.0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
      &            + csmsdl*weight
-C
             ENDDO
    50    ENDDO
       ENDIF
