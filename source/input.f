@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 18:17:02 $
-Ccc   * $Id: input.f,v 1.72 2005-02-09 18:17:02 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-02-11 00:42:52 $
+Ccc   * $Id: input.f,v 1.73 2005-02-11 00:42:52 Carlson Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -848,14 +848,14 @@ C
          IF(DEGa.NE.0 .AND. AEJc(0).NE.1.D0)THEN
             WRITE(6, *)' '
             WRITE(6, *)'FATAL: DEGAS allowed only for incident nucleons'
-            WRITE(6, *)'FATAL: Executions STOPPED'
+            WRITE(6, *)'FATAL: Execution STOPPED'
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
-         IF(LHMs.NE.0 .AND. AEJc(0).NE.1.D0)THEN
+         IF(LHMs.NE.0 .AND. AEJc(0).GT.1.D0)THEN
             WRITE(6, *)' '
             WRITE(6, *)'FATAL: HMS allowed only for incident nucleons'
-            WRITE(6, *)'FATAL: Executions STOPPED'
-            STOP ' HMS allowed only for incident nucleons'
+            WRITE(6, *)'FATAL: and gammas -  Execution STOPPED'
+            STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
          IF(FISBAR(nnuc).NE.1 .AND. FISopt(nnuc).NE. 0)THEN
             FISopt(nnuc) = 0
@@ -869,8 +869,8 @@ C
             DIRect = 0
             WRITE(6, *)' '
             WRITE(6, *)' WARNING!!!! Direct mechanism is not supported '
-            WRITE(6, *)' WARNING!!!! for the photo-nuclear reactions  '
-            WRITE(6, *)' WARNING!!!! and has been turned off  '
+            WRITE(6, *)' WARNING!!!! for photo-nuclear reactions and '
+            WRITE(6, *)' WARNING!!!! has been turned off  '
             WRITE(6, *)' '
          ENDIF
          IF(DIRect.EQ.3 .and.  ( MOD(NINT(A(0)),2).NE.0 .OR.
