@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-01 22:01:36 $
-Ccc   * $Id: main.f,v 1.27 2004-06-01 22:01:36 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-07 10:38:17 $
+Ccc   * $Id: main.f,v 1.28 2004-06-07 10:38:17 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -204,14 +204,16 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
-C     INTEGER NRBar, NRFdis, ibaro
       INTEGER NRBar, NRFdis
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp
+      DOUBLE PRECISION ftmp, G 
       INTEGER NELang
+C     For factorial calculations (SCAT2)
+      PARAMETER(LFMAX = 4*NDTL + 2)
+      COMMON /FACT  / G(LFMAX)
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
 C-----Plujko_new
@@ -241,15 +243,21 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
-C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
-
       LOGICAL nvwful
-      INCLUDE 'io.h'
 C-----Plujko_new
-      F_PRINT=1
+
       DATA keyinput/0/, kzz1/0/, kaa1/0/
       DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
+
+      F_PRINT=1
 C-----Plujko_new(End)
+
+      INCLUDE 'io.h'
+C    
+C     FACTORIAL CALCULATIONS 
+C
+      CALL FCT()
+
 C
 C-----
 C-----read and prepare input data
