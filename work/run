@@ -8,8 +8,8 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.17.1                 '
-echo '                         (Millesimo)                       '
+echo '                     V E R S I O N  2.18                   '
+echo '                          (Mondovi)                        '
 echo '                             by                            '
 echo '                        M. H e r m a n                     '
 echo '                                                           '
@@ -129,7 +129,7 @@ if [ ! -s $file-lev.col ]; then
 fi
 if [ -s CUMULPLOT.PS ]; then
    ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
-   gv $file-cum.ps
+   gv -landscape $file-cum.ps &
 fi
 mv EXFOR.DAT $file.exf
 mv ECIS_ROT.out $file-ecis.out 2>/dev/null
@@ -205,6 +205,7 @@ fi
     #RUN EMPEND TO FORMAT EMPIRE OUTPUT INTO ENDF
 
     ../util/empend/empend <EMPEND.INP && cp OUTPUT.ENDF $file.endf
+    mv empend.log $file-log.empend
     rm OUTPUT.DAT
 
 if  [ -s $file.endf ]; then
@@ -217,6 +218,7 @@ if  [ -s $file.endf ]; then
     ./fixup
     rm OUTPUT.ENDF
     mv FIXUP.ENDF $work/$file-f.endf
+    mv FIXUP.LST $work/$file-log.fixup
     cd $work
 
     # RUN LEGEND
@@ -228,6 +230,7 @@ if  [ -s $file.endf ]; then
     ./legend
     rm FIXUP.OUT
     mv LEGEND.OUT $work/$file-l.endf
+    mv LEGEND.LST $work/$file-log.legend
     cd $work
 
     # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
@@ -255,33 +258,36 @@ if  [ -s $file.endf ]; then
     ./plotc4
     rm C4.DAT ENDF.DAT 
     mv plot.ps $work/$file.ps
+    mv PLOTC4.LST $work/$file-log.plotc4
     cd $work
     # ghostview -landscape $file.ps  
 fi
 
-echo ' '
-if  [ -s $file.ps ]; then
-        echo 'Use Plotc4 button (or hit p key and Enter) to view plots'
-        echo 'Hit Enter to close this window'
-        read dum
-        if [ $dum == "p" ]; then
-            ghostview -landscape $file.ps
-          else
-            exit
-        fi
-        else
-        echo 'No plots were produced for this calculation'
-        if  [ ! -s $file.c4 ]; then
-                echo 'no EXFOR data in ' $file.c4
-        fi
-        if  [ ! -s $file.endf ]; then
-                echo 'calculated results were not properly formatted' 
-        fi
-        echo ' '
-        echo 'Hit Enter to close this window'
-        read dum
-        exit
-fi
+exit
+
+#echo ' '
+#if  [ -s $file.ps ]; then
+#        echo 'Use Plotc4 button (or hit p key and Enter) to view plots'
+#        echo 'Hit Enter to close this window'
+#        read dum
+#        if [ $dum == "p" ]; then
+#            ghostview -landscape $file.ps
+#          else
+#            exit
+#        fi
+#        else
+#        echo 'No plots were produced for this calculation'
+#        if  [ ! -s $file.c4 ]; then
+#                echo 'no EXFOR data in ' $file.c4
+#        fi
+#        if  [ ! -s $file.endf ]; then
+#                echo 'calculated results were not properly formatted' 
+#        fi
+#        echo ' '
+#        echo 'Hit Enter to close this window'
+#        read dum
+#        exit
+#fi
 
 
 

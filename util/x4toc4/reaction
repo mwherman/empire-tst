@@ -265,6 +265,9 @@ FIELD 6.                                                                       1
 (N,SCT),DA/DE                                       1  69000  0
 (N,SCT),DA/DE,,RAW                                  1  69000  0
 (N,SCT),DAE                                         1  69000  0
+(N,INL),DAE                                         1  69000  0
+(N,INL),DA/DE                                       1  69000  0
+(N,X)EM,DA/DE                                       1  69000  0
 (N,X),SIG                                           1  39000  0
 (N,X)CN,SIG                                         1  39000  0
 (P,X),SIG                                           1  39001  0

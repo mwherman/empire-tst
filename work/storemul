@@ -1,0 +1,13 @@
+#! /bin/sh -
+#script to move all za*$2 files to another directory
+if [ -d $1 ]; then
+   echo 'O.K. directory:'  $1 ' exists'
+   else
+   mkdir $1              
+   echo 'Have created directory:'  $1
+fi                          
+file=$2
+
+mv -f za*$file* $1/ 2>/dev/null
+
+exit

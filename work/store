@@ -8,23 +8,23 @@ if [ -d $1 ]; then
 fi                          
 file=$2
 
-cp $file.inp tmp1234567.inp
-cp $file.lev tmp1234567.lev
-cp $file-omp.int tmp1234567-omp.int
-cp $file-omp.ripl tmp1234567-omp.ripl
-cp $file.exf tmp1234567.exf
-cp $file.c4 tmp1234567.c4
-cp $file-lev.col tmp1234567-lev.col
+cp -p -f $file.inp tmp1234567.inp 2>/dev/null
+cp -p -f $file.lev tmp1234567.lev 2>/dev/null
+cp -p -f $file-omp.int tmp1234567-omp.int 2>/dev/null
+cp -p -f $file-omp.ripl tmp1234567-omp.ripl 2>/dev/null
+cp -p -f $file.exf tmp1234567.exf 2>/dev/null
+cp -p -f $file.c4 tmp1234567.c4 2>/dev/null
+cp -p -f $file-lev.col tmp1234567-lev.col 2>/dev/null
 
-mv $file* $1/
+mv -f $file* $1/ 2>/dev/null
 
-cp tmp1234567.inp $file.inp 
-cp tmp1234567.lev $file.lev 
-cp tmp1234567-omp.int $file-omp.int 
-cp tmp1234567-omp.ripl $file-omp.ripl 
-cp tmp1234567.exf $file.exf 
-cp tmp1234567.c4 $file.c4 
-cp tmp1234567-lev.col $file-lev.col 
+mv -f tmp1234567.inp $file.inp 2>/dev/null 
+mv -f tmp1234567.lev $file.lev  2>/dev/null
+mv -f tmp1234567-omp.int $file-omp.int  2>/dev/null
+mv -f tmp1234567-omp.ripl $file-omp.ripl  2>/dev/null
+mv -f tmp1234567.exf $file.exf  2>/dev/null
+mv -f tmp1234567.c4 $file.c4  2>/dev/null
+mv -f tmp1234567-lev.col $file-lev.col  2>/dev/null
 
 
 echo 'All files have been moved'

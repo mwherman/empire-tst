@@ -1,0 +1,19 @@
+#! /bin/sh -
+#SCRIPT TO PLOT ANG. DISTR. AND DOUBLE-DIFFERENTIAL CROSS SECTIONS
+file=$1
+work=`pwd`
+cd ../util/lsttab
+rm LSTTAB.CUR LSTTAB.PNT PLOTC4.LST 2>/dev/null
+ln -sf ../../work/$file.c4 C4.DAT
+ln -sf ../../work/$file-s.endf ENDF.DAT
+ln -sf ../../work/$file-log.plotc4 PLOTC4.LST
+lsttab <LSTTAB.INP
+mv LSTTAB.CUR ../c4zvd/LSTTAB.CUR
+mv LSTTAB.PNT ../c4zvd/LSTTAB.PNT
+cd ../c4zvd
+pntzvdl.bat LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+mv DDXPLOT.zvd ../../work/$file-$2.zvd
+rm LSTTAB.CUR LSTTAB.PNT  2>/dev/null
+cd $work
+exit
+

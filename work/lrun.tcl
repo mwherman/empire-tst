@@ -404,25 +404,25 @@ exec $editor $file.inp &} \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Edit } 
     button $base.input.but17 \
         -activebackground #df5130 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./run $file &} \
+        -background #be5a41 -command {exec xterm -e run $file &} \
         -font -adobe-helvetica-medium-r-bold--14-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Run+Format+Plot 
     button $base.input.but36 \
         -activebackground #dc5032 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./runE $file &} \
+        -background #be5a41 -command {exec xterm -e runE $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Run 
     button $base.input.but19 \
         -activebackground #dc5032 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./format $file &} \
+        -background #be5a41 -command {exec xterm -e format $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Format 
     button $base.input.but20 \
         -activebackground #dc5032 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./plot $file &} \
+        -background #be5a41 -command {exec xterm -e plot $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Plot 
@@ -464,7 +464,7 @@ exec $editor $file.inp &} \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Levels 
     button $base.input.but21 \
         -activebackground #f00000 -activeforeground #fffefe \
-        -background #860000 -command {exec ./clean $file core ../util/*/core &} \
+        -background #860000 -command {exec clean $file core ../util/*/core &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Clean 
@@ -639,7 +639,7 @@ cd ../work} \
     button $base.input.browse \
         -activebackground #283cb4 -activeforeground #ffffff \
         -background #283e76 \
-        -command {set defile  [exec ./xgetfile -title "select input file" -pattern *.inp ] 
+        -command {set defile  [exec xgetfile -title "select input file" -pattern *.inp ] 
 set dfile [file rootname $defile]
 set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-bold--12-120-75-75-p-67-iso8859-1 \
@@ -724,7 +724,7 @@ set file [file tail $dfile]} \
         -label {MT=112 (n,pa)} 
     button $base.input.but33 \
         -activebackground #dc5032 -activeforeground #ffffff \
-        -background #be5a41 -command {exec xterm -e ./zvd $file $MT &} \
+        -background #be5a41 -command {exec xterm -e zvd $file $MT &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text ZVV 
@@ -781,13 +781,13 @@ set file [file tail $dfile]} \
         -highlightcolor black -text Outputs: 
     button $base.input.but39 \
         -activebackground #dc5032 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./zvpl $file &} \
+        -background #be5a41 -command {exec xterm -e zvpl $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Create ZVV} -width 0 
     button $base.input.but40 \
         -activebackground #dc5032 -activeforeground #fffefe \
-        -background #be5a41 -command {exec xterm -e ./zvcomb &} \
+        -background #be5a41 -command {exec xterm -e zvcomb &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Merge ZVV} 
@@ -806,7 +806,7 @@ set file [file tail $dfile]} \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Plotc4 
     button $base.input.zvvgui \
         -activebackground #007900 -activeforeground white -background #005a00 \
-        -command {exec ./guizvv.tcl $file &} -font {Helvetica -12} -foreground white \
+        -command {exec guizvv.tcl $file &} -font {Helvetica -12} -foreground white \
         -height 28 -text {Compare ENDF files} -width 143 
     frame $base.cpd32 \
         -background #dcdcdc -borderwidth 1 -height 30 \
@@ -830,7 +830,11 @@ set file [file tail $dfile]} \
     $base.cpd32.05.06 add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor ../RIPL-2/OPTICAL/OM-DATA/OM-INDEX.TXT &} \
-        -font {} -foreground {} -image {} -label RIPL-omp 
+        -font {} -foreground {} -image {} -label {RIPL o.m.p.} 
+    $base.cpd32.05.06 add command \
+        -activebackground {} -activeforeground {} -accelerator {} \
+        -background {} -command {exec $editor ../RIPL-2/OPTICAL/OM-DATA/OM-DEFORMATIONS.DAT &} \
+        -font {} -foreground {} -image {} -label {RIPL coll. levels}
     $base.cpd32.05.06 add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor ../hints.txt &} -font {} \

@@ -1,11 +1,18 @@
-      SUBROUTINE DXSEND(LEF,ZA0,ZAP,MT0,KEA,EIN,PAR,EPS,ENR,DXS
-     1                 ,RWO,NEN,MEN,MRW,LTT)
+      SUBROUTINE DXSEND(LEF,ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
+     1                 ,RWO,NEN,MEN,MRW,LTT,ELV)
 C-Title  : Subroutine DXSEND
 C-Purpose: Extract double differential cross sections from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
 C-Version: 15-Dec-2000 (Original code).
 C-V  01/03 - Correct trapping of unknown MF4 data representation.
 C-V        - Add MT5 to sumation list for input MT0=5.
+C-V  02/01 - Allow processing of MF23,26 & other outgoing particles.
+C-V  02/05 - Make MT103,107 redundant when MT600,800 series present.
+C-V        - Add parameter ELV to match angular distributions of
+C-V          discrete inelastic levels by level energy rather than
+C-V          MT number.
+C-V        - Fix spectra of charged particles.
+C-V        - Add photon spectra.
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
@@ -17,75 +24,213 @@ C-D  all contributions are summed.
 C-D  For details see the description of the DXSEN1 routine.
 C-Extern.: DXSEN1
 C-
-      CHARACTER*66 C66
+C* Limits: Max.No.of reactions=MXL, interp.ranges=MXI
+      PARAMETER   (MXL=200,MXI=100)
+C*
       DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN)
-     1            ,LST(100)
+     1            ,LST(MXL)
+      DIMENSION    NBT(MXI),INR(MXI)
 C*
       LOOP=0
       LX  =1
       NE1 =0
+      NEN =0
       KRW =MRW
+      MF  =MF0
       MT  =MT0
-      IF(MT0.NE.5) GO TO 40
-C* Find all neutron emission reactions
+      I600=0
+      I800=0
+C*
+C* Find the appropriate discrete level for inelastic angular distrib.
+      IF(ELV.GT.0 .AND.
+     1  (MF0.EQ.4 .AND. (MT0.GE.51 .AND. MT0.LT.91) ) ) THEN
+C* Find the matching energy level for discrete inelastic ang.distr.
+        REWIND LEF
+        CALL SKIPSC(LEF)
+        MF=3
+        DE=ELV
+   12   MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(MT.GT.90 .OR. IER.NE.0) THEN
+C* No more discrete levels - use last
+          MT=MT0
+          GO TO 60
+        END IF
+        IF(MT.LE.50) THEN
+C* Try next reaction
+          CALL SKIPSC(LEF)
+          GO TO 12
+        END IF
+C* Inelastic level found, check energy level
+        CALL RDTAB2(LEF,QM,QI,L1,L2,NR,NP,NBT,INR,IER)
+        CALL SKIPSC(LEF)
+        EE=-QI
+        IF(ABS(EE-ELV).LT.DE) THEN
+          MT0=MT
+          DE =ABS(EE-ELV)
+        END IF
+        IF(EE.LT.ELV) GO TO 12
+        MT=MT0
+      END IF
+C*
+C* Check if reaction summation is required
+      IF(MT0.NE.5) GO TO 60
+C* Find particle emission reactions
       REWIND LEF
       CALL SKIPSC(LEF)
       IZAP=ZAP+0.1
-      IF(IZAP.NE.1) GO TO 24
-C* Prepare reaction list for neutron emission
-   20 MF=3
-      MT=0
-      CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
-      IF(IER.NE.0) GO TO 30
-      CALL SKIPSC(LEF)
-C* Select contributiong reactions
-      IF(MT.EQ. 5) GO TO 22
-      IF(MT.EQ.11) GO TO 22
-      IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
-      IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
-      IF(MT.EQ.18) GO TO 22
-      IF(MT.GE.28 .AND. MT.LE.30) GO TO 22
-      IF(MT.GE.32 .AND. MT.LE.37) GO TO 22
-      IF(MT.GE.41 .AND. MT.LE.45) GO TO 22
-      IF(MT.EQ.91) GO TO 22
+      IF(IZAP.EQ.1) THEN
+C*
+C* Neutron emission: prepare reaction list
+   20   MF=3
+        MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.NE.0) GO TO 50
+        CALL SKIPSC(LEF)
+C* Select contributing reactions
+        IF(MT.EQ. 5) GO TO 22
+        IF(MT.EQ.11) GO TO 22
+        IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
+        IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
+        IF(MT.EQ.18) GO TO 22
+        IF(MT.GE.28 .AND. MT.LE.30) GO TO 22
+        IF(MT.GE.32 .AND. MT.LE.37) GO TO 22
+        IF(MT.GE.41 .AND. MT.LE.45) GO TO 22
+        IF(MT.EQ.91) GO TO 22
 C* Process elastic and discrete inelastic only if requesting
 C* energy distributions or aver. energy ang.distrib.
-      IF( (KEA.EQ.2 .OR. (KEA.EQ. 1 .AND. PAR.LE.0) ) .AND.
-     1  (   MT.EQ.2 .OR. ( MT.GE.50 .AND. MT.LE.90) ) ) GO TO 22
-      GO TO 20
-   22 LOOP=LOOP+1
-      LST(LOOP)=MT
-      GO TO 20
+        IF( ( KEA.EQ.2 .OR.
+     &       (KEA.EQ.1 .AND. PAR.LT.0) ) .AND.
+     &      (  MT.EQ.2 .OR.
+     &       ( MT.GE.50.AND. MT.LE.90) ) ) GO TO 22
+        GO TO 20
+   22   LOOP=LOOP+1
+        IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
+        LST(LOOP)=MT
+        GO TO 20
 C*
-   24 CONTINUE
+      ELSE IF(IZAP.EQ.1001) THEN
+C*
+C* Proton emission: prepare reaction list
+   24   MF=3
+        MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.NE.0) GO TO 50
+        CALL SKIPSC(LEF)
+C* Select contributing reactions
+        IF( MT.EQ.  5                  .OR.
+     &      MT.EQ. 28                  .OR.
+     &     (MT.GE. 41 .AND. MT.LE. 42) .OR.
+     &     (MT.EQ. 44 .AND. MT.LE. 45) .OR.
+     &      MT.EQ.103                  .OR.
+     &     (MT.GE.111 .AND. MT.LE.112) .OR.
+     &     (MT.GE.115 .AND. MT.LE.116) .OR.
+     &     (MT.GE.600 .AND. MT.LE.649)) THEN
+          LOOP=LOOP+1
+          LST(LOOP)=MT
+          IF(MT.GE.600 .AND. MT.LE.649) I600=1
+        END IF
+        GO TO 24
+      ELSE IF(IZAP.EQ.2004) THEN
+C*
+C* Alpha emission: prepare reaction list
+   34   MF=3
+        MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.NE.0) GO TO 50
+        CALL SKIPSC(LEF)
+C* Select contributing reactions
+        IF( MT.EQ.  5                  .OR.
+     &     (MT.GE. 22 .AND. MT.LE. 25) .OR.
+     &     (MT.GE. 29 .AND. MT.LE. 30) .OR.
+     &     (MT.GE. 35 .AND. MT.LE. 36) .OR.
+     &      MT.EQ. 45                  .OR.
+     &     (MT.GE.107 .AND. MT.LE.109) .OR.
+     &     (MT.GE.112 .AND. MT.LE.114) .OR.
+     &      MT.EQ.117                  .OR.
+     &     (MT.GE.800 .AND. MT.LE.849)) THEN
+          LOOP=LOOP+1
+          LST(LOOP)=MT
+          IF(MT.GE.800 .AND. MT.LE.849) I800=1
+        END IF
+        GO TO 34
+      ELSE IF(IZAP.EQ.0) THEN
+C*
+C* Gamma emission: suppress angular distributions
+        IF(KEA.EQ.1) THEN
+        IF(LTT.GT.0) THEN
+        WRITE(LTT,903) ' DXSEND WARNING - No Angular distrib.   '
+        WRITE(LTT,903) '                       No coding for ZAP',IZAP
+          NEN=0
+          GO TO 90
+        END IF
+        END IF
+C* Prepare reaction list
+   44   MF=3
+        MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.NE.0) GO TO 50
+        CALL SKIPSC(LEF)
+C* Select contributiong reactions
+        IF( MT.EQ.  5                  .OR.
+     &     (MT.GE. 11 .AND. MT.LE.199) .OR.
+     &     (MT.GT.600 .AND. MT.LE.649) .OR.
+     &     (MT.GT.800 .AND. MT.LE.849)) THEN
+          LOOP=LOOP+1
+          LST(LOOP)=MT
+          IF(MT.GE.600 .AND. MT.LE.649) I600=1
+          IF(MT.GE.800 .AND. MT.LE.849) I800=1
+        END IF
+        GO TO 44
+      ELSE
 C* Not coded for other particles
-      STOP 'DXSEND ERROR - No coding for requested particle'
+        PRINT *,'DXSEND WARNING - Not coded for eject.ZAP',IZAP
+C...    STOP 'DXSEND ERROR - No coding for requested particle'
+        GO TO 90
+      END IF
 C* All reactions found - begin processing
-   30 CONTINUE
+   50 IF(LOOP.LT.1) THEN
+        WRITE(LTT,903) ' DXSEND WARNING - No data on file for MT',MT0
+        GO TO 90
+      END IF
+C* Exclude cumulative reactions if discrete levels present
+      IL=0
+      DO 52 I=1,LOOP
+      IL=IL+1
+      LST(IL)=LST(I)
+      IF(LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
+      IF(LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
+   52 CONTINUE
+      LOOP=IL
       IL=1
+      ML=0
       MT=LST(IL)
+C...
+c...      print *,(lst(j),j=1,loop)
 C*
 C* Retrieve the double differential cross section energy distribution
-   40 CALL DXSEN1(LEF,ZA0,ZAP,MT,KEA,EIN,PAR,EPS,ENR,DXS
-     1           ,RWO(LX),NEN,MEN,KRW,IER)
+   60 CALL DXSEN1(LEF,ZA0,ZAP,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS
+     1           ,RWO(LX),NE,MEN,KRW,IER)
       IF( IER.NE.0) THEN
         IF(LTT.GT.0) THEN
         WRITE(LTT,903) ' DXSEND WARNING - Error condition flag  ',IER
-        WRITE(LTT,903) '              Failed reconstruct. for MT',MT
+        WRITE(LTT,903) '            Failed reconstruction for MT',MT
         END IF
-        GO TO 54
+        ML=ML+1
+        GO TO 74
       END IF
+      NEN=NE
       IF(LOOP.EQ.0) GO TO 90
-      IF( NE1.EQ.0) GO TO 50
+      IF( NE1.EQ.0) GO TO 70
       IF( NEN.EQ.0) THEN
         NEN=NE1
-        GO TO 54
+        GO TO 74
       END IF
 C* Move the previously saved distribution in the work field
       LX=MRW/2
-      DO 42 I=1,NE1
+      DO 62 I=1,NE1
       RWO(LX-1+I)=RWO(NE1+I)
-   42 CONTINUE
+   62 CONTINUE
 C* Generate the union grid
       LUE= 1+NE1
       LUX=LX+NE1
@@ -94,50 +239,61 @@ C* Generate the union grid
 C* Interpolate current distribution to the union grid
       CALL FITGRD(NEN,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
       NEN=NE2
-      DO 44 I=1,NEN
+      DO 64 I=1,NEN
       ENR(I)=RWO(LUE-1+I)
       DXS(I)=RWO(LUX-1+I)
-   44 CONTINUE
+   64 CONTINUE
 C* Interpolate saved distribution to the union grid
       CALL FITGRD(NE1,RWO,RWO(LX),NE2,RWO(LUE),RWO(LUX))
 C* Add the current to the saved distribution
-      DO 46 I=1,NEN
+      DO 66 I=1,NEN
       DXS(I)=DXS(I)+RWO(LUX-1+I)
-   46 CONTINUE
+   66 CONTINUE
 C* Save the summed distribution 
-   50 LX=1+NEN*2
+   70 LX=1+NEN*2
       KRW=MRW-LX
       NE1=NEN
-      DO 52 I=1,NEN
+      DO 72 I=1,NEN
       RWO(I    )=ENR(I)
       RWO(I+NEN)=DXS(I)
-   52 CONTINUE
+   72 CONTINUE
 C* Select next reaction
-   54 IF(IL.GE.LOOP) GO TO 90
+   74 IF(IL.GE.LOOP) GO TO 90
       IL=IL+1
       MT=LST(IL)
-      GO TO 40
+      GO TO 60
 C*
 C* All processing completed
-   90 RETURN
+   90 CONTINUE
+      IF(ML.GT.0 .AND. LOOP.GT.0) WRITE(LTT,904) ML,LOOP
+      RETURN
 C*
   903 FORMAT(A40,I4)
+  904 FORMAT(' DXSEND WARNING - failed reconstructing'
+     1       ,I3,' out of',I3,' reactions')
       END
-      SUBROUTINE DXSEN1(LEF,ZA0,ZAP0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
+      SUBROUTINE DXSEN1(LEF,ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
      1                 ,RWO,NEN,MEN,MRW,IER)
 C-Title  : Subroutine DXSEN1
 C-Purpose: Extract cross sect. and differential cross sect. from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
 C-Version: 18-May-2001 (Original code).
-C-V        19-Jul-2001 Fix neutron multiplicity for MF 4/5
+C-V  01/07 - Fix neutron multiplicity for MF 4/5
+C-V  02/01 - Allow processing of MF23,26, other out.particles.
+C-V          Note the redefinition of PAR to degrees instead
+C-V          of cosine when requesting double-differential
+C-V          energy spectra (KEA=2).
+C-V  02/05 - Fix processing of MT600,600 series angular distributions.
+C-V        - Provisionally add gamma-production.
+C-V          WARNING: no gammas from discrete levels and MF15.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
-C-D  spectra KEA=2, parameter PAR < -2) and double differential cross
+C-D  spectra KEA=2, parameter PAR < 0) and double differential cross
 C-D  sections (correlated energy/angle distributions with the same
 C-D  conventions for KEA. Parameter PAR is the requested outgoing
 C-D  particle energy when the correlated angular distribution are
-C-D  requested. Similarly, PAR is the cosine of the scattering angle
+C-D  requested. Similarly, PAR is the scattering angle (degrees)
 C-D  when the spectrum at a particular scattering angle is requested.
 C-D  Differential cross sections are output in the Lab co-ordinate
 C-D  system.
@@ -149,17 +305,20 @@ C-D         given in terms of Z*1000+A+LIS0/10 where Z is the atomic
 C-D         number, A the mass number and LIS0 the metastable state
 C-D         number. When ZA<0 it implies the ENDF material MAT number.
 C-D  ZAP0 - Outgoing particle ZA designation (ZAP0=1 for neutrons).
+C-D  MF0  - Requested file number (ENDF conventions).
 C-D  MT0  - Requested reaction number. Broadly this follows the ENDF
 C-D         conventions.
-C-D  KEA  - Control flag to select retrieval of cross section (KEA=0)
-C-D         angular distributions (KEA=1) of energy spectra (KEA=2).
+C-D  KEA  - Control flag to select retrieval:
+C-D           0  cross sections,
+C-D           1  angular distributions,
+C-D           2  energy spectra.
 C-D  EIN  - Incident particle energy (eV).
 C-D  PAR  - Fixed parameter when requesting differential data:
+C-D         KEA=0, MF0=10, PAR is the requested metastable state
+C-D                (0=ground, 1=first metastable, etc.).
 C-D         KEA=1, PAR is the requested outgoing particle energy.
-C-D                A value PAR <= -2 implies integrated distribution
-C-D                over all angles.
-C-D         KEA=2, PAR is the requested scattering angle (cosine).
-C-D                A value PAR <= -2 implies angle integrated energy
+C-D         KEA=2, PAR is the requested scattering angle (degrees).
+C-D                A value PAR < 0 implies angle integrated energy
 C-D                distribution.
 C-D  EPS  - Resolution broadening parameter is used for the two-body
 C-D         scattering reactions like the elastic and discrete inelastic
@@ -187,123 +346,204 @@ C-M             than lin-lin encountered.
 C-D         22  Array limit MRW exceeded.
 C-D         23  Correlated energy-angle distributions not in Law-7
 C-D             representation.
+C-D         24  Requested particle not found.
 C-D         31  Processing not coded for specified reaction.
 C-D
 C-Extern.: SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,FINT2D,YTGEOU,FNGAUS,
 C-E        FYTG2D,UNIGRD,FITGRD
 C-
-      CHARACTER*66 C66
+      PARAMETER   (MIW=100)
+      DIMENSION    IWO(MIW)
       DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN)
       DIMENSION    NBT(100),INR(100)
       DIMENSION    AMU(100),PMU(100)
 C*
       DATA PI/3.14159265/
+C...
+C...      PRINT *,'ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+C...     1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+C...
 C*
 C* Check the requested type of output
+      MF = MF0
       NEN= 0
+      DEG=-2
       AIN=-2
       EOU=-2
+      SAN= 1/(2*PI)
+      MST =1+NINT(PAR)
       IF     (KEA.EQ.2) THEN
-C* Energy spectrum at fixed scattering angle requested
-        AIN=PAR
+C* Case: Energy spectrum at fixed scattering angle requested
+        MST=1
+        DEG=PAR
+        IF(DEG.GE.0) THEN
+          AIN=COS(DEG*PI/180)
+        ELSE
+          SAN= 1
+        END IF
       ELSE IF(KEA.EQ.1) THEN
-C* Angular distribution at fixed outgoing particle energy requested
+C* Case: Angular distribution at fixed outgoing particle energy requested
+        MST=1
         EOU=PAR
       END IF
-C* Cosine of the scattering angle
-      ALB=AIN
 C*
       REWIND LEF
       CALL SKIPSC(LEF)
 C*
-C* Define multiplicity for the neutron emission reactions
+C* Define particle multiplicities
       YL =1
-      IF(KEA.EQ.0 .OR. NINT(ZAP0).NE.1) GO TO 30
-      IF(MT0.EQ.19) GO TO 90
-C* (n,2n+x)
-      IF(MT0.EQ.11 .OR.
-     &   MT0.EQ.16 .OR.
-     &   MT0.EQ.21 .OR.
-     &   MT0.EQ.24 .OR.
-     &   MT0.EQ.30 .OR.
-     &   MT0.EQ.41) YL=2
-C* (n,3n+x)
-      IF(MT0.EQ.17 .OR.
-     &   MT0.EQ.25 .OR.
-     &   MT0.EQ.38 .OR.
-     &   MT0.EQ.42) YL=3
-C* (n,fission)
-      IF(MT0.NE.18) GO TO 30
-      MF =1
-      MT =452
-      CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
-      IF(IER.NE.0) GO TO 90
-      READ (C66,902) C1,AWR,IDMY,LNU
-      IF     (LNU.EQ.1) THEN
-        CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,IER)
-        NN=NC-1
-        YL=POLYNX(EIN,RWO,NN)
-      ELSE IF(LNU.EQ.2) THEN
-        NX=MRW/2
-        LX=NX+1
-        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
-     1             ,RWO,RWO(LX),NX,IER)
-        IF(IER.NE.0) GO TO 90
-        YL=FINTXS(EIN,RWO,RWO(LX),NP,INR,IER)
-      ELSE
-        PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
-        STOP    'DXSEN1 ERROR - Invalid LNU for NuBar representation'
+      IF(KEA.EQ.0) GO TO 30
+      IZAP0=NINT(ZAP0)
+      IF(IZAP0.EQ.1) THEN
+C* Neutron emission reactions
+C*        (n,2n+x)
+        IF(MT0.EQ.11 .OR.
+     &     MT0.EQ.16 .OR.
+     &     MT0.EQ.21 .OR.
+     &     MT0.EQ.24 .OR.
+     &     MT0.EQ.30 .OR.
+     &     MT0.EQ.41) YL=2
+C*        (n,3n+x)
+        IF(MT0.EQ.17 .OR.
+     &     MT0.EQ.25 .OR.
+     &     MT0.EQ.38 .OR.
+     &     MT0.EQ.42) YL=3
+C*        (n,fission)
+C*        Ignore second chance fission (use total fission only)
+        IF(MT0.EQ.19) GO TO 900
+        IF(MT0.EQ.18) THEN
+          MF =1
+          MT =452
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
+          IF(IER.NE.0) GO TO 900
+          IF     (LNU.EQ.1) THEN
+            CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,MRW,IER)
+            NN=NC-1
+            YL=POLYNX(EIN,RWO,NN)
+          ELSE IF(LNU.EQ.2) THEN
+            NX=MRW/2
+            LX=NX+1
+            CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1                 ,RWO,RWO(LX),NX,IER)
+            IF(IER.NE.0) GO TO 900
+            YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+          ELSE
+            PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
+            STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
+          END IF
+        END IF
+      ELSE IF(IZAP0.EQ.1001) THEN
+C* Proton emission reactions
+        IF(MT0.EQ. 44 .OR.
+     &     MT0.EQ.111       ) YL=2
+      ELSE IF(IZAP0.EQ.2004) THEN
+C* Alpha emission reactions
+        IF(MT0.EQ. 29 .OR.
+     &     MT0.EQ. 30 .OR.
+     &     MT0.EQ. 35 .OR.
+     &     MT0.EQ. 36 .OR.
+     &     MT0.EQ.108 .OR.
+     &     MT0.EQ.113 .OR.
+     &     MT0.EQ.114       ) YL=2
       END IF
 C*
 C* Retrieve the cross section on MF3
-   30 MF =3
+   30 IF     (MF0.GE.3 .AND. MF0.LE.6 ) THEN
+        MF=3
+      ELSE IF(MF0.EQ.10)                THEN
+        MF=10
+      ELSE IF(MF0.EQ.23 .OR. MF0.EQ.26) THEN
+        MF=23
+      ELSE
+        PRINT *,'DXSEN1 ERROR - Illegal MF output request',MF0
+        STOP 'DXSEN1 ERROR - Illegal MF output request'
+      END IF
       MT =MT0
-      CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
-      IF(IER.NE.0) GO TO 90
-      READ (C66,902) C1,AWR
+      CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NS,N2,MAT,MF,MT,IER)
+      IF(IER.NE.0) GO TO 900
       NX=MRW/2
       LX=NX+1
-      CALL RDTAB1(LEF,C1,QQ,L1,L2,NR,NP,NBT,INR
+C* Read TAB1 cross sections (can be more than 1 if MF 10)
+      DO 31 J=1,MST
+      CALL RDTAB1(LEF,QM,QI,L1,L2,NR,NP,NBT,INR
      1           ,RWO,RWO(LX),NX,IER)
-      IF(IER.NE.0) GO TO 90
+      IF(IER.NE.0) GO TO 900
+   31 CONTINUE
       IF(EIN.GT.0) THEN
         IF(EIN.LT.RWO(1) .OR. EIN.GT.RWO(NP)) THEN
 C* Case: Required point is below thershold or above last point
           NEN=0
-          GO TO 90
+          GO TO 900
         END IF
       END IF
       IF(NR.NE.1 .OR. INR(1).GT.2) THEN
         IER=21
-        GO TO 90
+        GO TO 900
       END IF
-C* Case: Cross section is required
+C* Case: Cross section is required on output - finish processing
       IF(KEA.EQ.0) THEN
         NEN=NP
         DO 32 I=1,NEN
         ENR(I)=RWO(     I)
         DXS(I)=RWO(LX-1+I)
    32   CONTINUE
-        GO TO 90
+        GO TO 900
       END IF
 C* Case: Proceed with the retrieval of differential data
       ETOP=RWO(NP)
-      XS=FINTXS(EIN,RWO,RWO(LX),NP,INR,IER)
+      XS=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
-        GO TO 90
+        GO TO 900
       END IF
 C*
 C* Find the energy/angle distribution data
-      MF =0
+   34 MF =0
       MT =MT0
-      CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
-      IF(IER.EQ.0 .AND. MF.EQ.6) GO TO 60
-C* No MF4/5/6 possible only for two-body scattering
-      IF(IER.NE.0 .AND.
-     1  (MT0.NE.2 .AND. (MT0.LT.50 .OR. MT0.GT.90) ) ) GO TO 90
-C* Preset isotropic CM angular distribution for this MT
-      LCT=2
+      CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+C* Error trapping when no data found in the ENDF file
+      IF(IER.NE.0) THEN
+C* No MF4/5/6 possible only for two-body (isotropic) reactions
+        IF     (IZAP0.EQ.   1) THEN
+          IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) GO TO 40
+        ELSE IF(IZAP0.EQ.1001) THEN
+          IF(MT0.GE.600 .AND. MT0.LT.649) GO TO 40
+        ELSE IF(IZAP0.EQ.2004) THEN
+          IF(MT0.GE.800 .AND. MT0.LT.849) GO TO 40
+        END IF
+        IER=25
+        PRINT *,'WARNING - No differential data for MT',MT0
+        GO TO 900
+      END IF
+C* Gamma production only from MF 6,12,14,15
+      IF(IZAP0.EQ.   0) THEN
+        IF(MF.EQ.12) REWIND LEF
+        IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12) THEN
+          MF =12
+          IF     (MT0.GT. 50 .AND. MT0.LT. 91) THEN
+            MT=51
+          ELSE IF(MT0.GT.600 .AND. MT0.LT.649) THEN
+            MT=601
+          ELSE IF(MT0.GT.800 .AND. MT0.LT.849) THEN
+            MT=801
+          ELSE
+            GO TO 150
+          END IF
+          CALL SKIPSC(LEF)
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+          IF(IER.NE.0) GO TO 150
+          GO TO 120
+        END IF
+      END IF
+C*
+C* Select appropriate file processing
+      IF(MF.EQ. 6) GO TO  60
+      IF(MF.EQ. 4) GO TO  40
+        CALL SKIPSC(LEF)
+        GO TO 34
+C*
+C* Process MF 4 data - Preset isotropic CM angular distributions
+   40 LCT=2
       NR =1
       INR(1)=2
       NE1=11
@@ -319,7 +559,8 @@ C* Check for error condition
       END IF
 C*
 C* Process angular distribution data in MF 4
-   42 READ (C66,902) C1,AWR,LVT,LTT,N1,N2
+   42 LVT=L1
+      LTT=L2
       IF(LTT.EQ.0) GO TO 45
       IF(LTT.NE.2) THEN
         PRINT *,'WARNING - Can not process MF4 LTT',LTT
@@ -328,10 +569,8 @@ C* Process angular distribution data in MF 4
         GO TO 45
       END IF
 C* Secondary particle angular distributions MF4 processing
-      IF     (LVT.EQ.0) THEN
-        READ (LEF,902)  C1,C2,LI,LCT,N1,N2
-      ELSE IF(LVT.EQ.1) THEN
-        CALL RDLIST(LEF,C1,C2,LI,LCT,NK,NM,RWO,IER)
+      IF(LVT.LE.1) THEN
+        CALL RDLIST(LEF,C1,C2,LI,LCT,NK,NM,RWO,MRW,IER)
       ELSE
         PRINT *,'WARNING - Illegal value for MF4       LVT=',LVT
         IER=41
@@ -370,7 +609,7 @@ C* Integrate over cosine
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INR)
 C* Convert to Lab coordinate system if necessary
       IF(LCT.EQ.2) THEN
-        GAM=SQRT( EIN/ (EIN*AWR*AWR+QQ*AWR*(AWR+1) ) )
+        GAM=SQRT( EIN/ (EIN*AWR*AWR+QI*AWR*(AWR+1) ) )
         DO 46 I=1,NE1
         XCM=ENR(I)
         XLB=(GAM+XCM)/SQRT(1+GAM*GAM+2*GAM*XCM)
@@ -383,16 +622,16 @@ C* Convert to Lab coordinate system if necessary
       IF(KEA.EQ.1) THEN
 C* Case: Angular distribution
         YL=YL/SS
-        IF(EOU.LT.0) GO TO 80
+        IF(EOU.LT.0) GO TO 800
       END IF
       INA=2
-      IF(ALB.GE.-1) THEN
+      IF(DEG.GE.0) THEN
 C* Case: Specified outgoing particle cosine
-        YL=YL*FINTXS(ALB,ENR,DXS,NE1,INA,IER)/SS
-        XLB=ALB
+        YA=FINTXS(AIN,ENR,DXS,NE1,INA,IER)/SS
+        XLB=AIN
+        YL =YL*YA
       ELSE
 C* Case: Angle-integrated energy distribution
-        YL =YL/2
         DO 47 I=1,NE1
         DXS(I)=DXS(I)*ENR(I)
    47   CONTINUE
@@ -400,37 +639,73 @@ C* Case: Angle-integrated energy distribution
         EB=ENR(NE1)
         CALL YTGEOU(XLB,EA,EB,NE1,ENR,DXS,INR)
       END IF
-      IF(MT0.NE.2 .AND. (MT0.LT.50 .OR. MT0.GT.90) ) GO TO 50
 C*
-C* Assume two-body scattering for elastic&inelastic scattering
-      IER=0
+C* Assume two-body scattering for elastic & inelastic scattering
+C* and other discrete-lever reactions
+      IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LE.99) ) THEN
+        AWO=1
+        GO TO 48
+      ELSE IF(MT0.GE.600 .AND. MT0.LE.649) THEN
+        AWO=1
+        GO TO 48
+      ELSE IF(MT0.GE.800 .AND. MT0.LE.849) THEN
+        AWO=4
+        GO TO 48
+      ELSE
+        GO TO 50
+      END IF
+   48 IER=0
 C* Available energy and distribution (gausssian)
-      EAV=EIN + QQ*(1+AWR)/AWR
+C...              Check AWo and Eou definition !!!
+      EAV=EIN + QI*(1+AWR)/AWR
       ECM=EAV*(AWR/(1+AWR))**2
+      GAM=SQRT( EIN/ (EIN*AWR*AWR+QI*AWR*(AWR+1) ) )
       ACM=-GAM*(1-XLB*XLB) + XLB*SQRT(1-GAM*GAM*(1-XLB*XLB))
-      EOU=ECM + ( EIN + 2*ACM*(AWR+1)*SQRT(EIN*ECM) )/(AWR+1)**2
+      EOU=ECM + ( EIN + 2*ACM*(AWR+AWO)*SQRT(EIN*ECM) )/(AWR+AWO)**2
+C...
+C...  EOU=EAV*(AWR+1)/(AWR+1-AWO)
+C...
       NE1=21
       CALL FNGAUS(EOU,NE1,ENR,DXS,EPS)
-      GO TO 80
+      GO TO 800
 C*
 C* Process energy distribution data in MF 5
    50 IF(MF.EQ.4) THEN
         MF =5
         MT =MT0
-        CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,NK,N2,MAT,MF,MT,IER)
       END IF
       NX=MRW/2
       LX=NX+1
-      READ (C66,902) C1,C2,L1,L2,NK,N2
-      IF(NK.GT.1) THEN
+      IF(MF.EQ.5 .AND. NK.GT.1) THEN
 C...    No multiple representations are allowed
         PRINT *,'WARNING - No mult.represent.allowed for MF5 MT',MT0
         IER=31
-        GO TO 90
+        GO TO 900
       END IF
-C... Dummy read - Pk(e) is assumed equal 1 for a single representation
-      CALL RDTAB1(LEF,UPEN,C2,L1,LF,NR,NP,NBT,INR
+      JK=0
+   51 JK=JK+1
+C* Read weights for the distributions (MF5) or multiplicities(MF26)
+      CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
      1           ,RWO,RWO(LX),NX,IER)
+      IF     (MF.EQ. 5) THEN
+C* Interpret Pk(e) - assumed equal 1 for a single representation
+      ELSE IF(MF.EQ.26) THEN
+C* Interpret particle multiplicity
+        ZAP=C1
+        IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
+C* If not the right particle try next one
+          CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+          MX=MRW-LXE
+          DO 52 IE=1,NE
+          CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO(LXE),MX,IER)
+   52     CONTINUE
+          IF(JK.LT.NK) GO TO 51
+          PRINT *,' WARNING - No matching particle ZAP',ZAP0
+          STOP 'DENXS1 - ZAP not matched'
+        END IF
+        YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+      END IF
 C* Process the distributions
       IF(LF.EQ.1) THEN
 C* Pointwise representation (Law 1)
@@ -439,36 +714,52 @@ C* Pointwise representation (Law 1)
         LXE=LEP+NP
         LXX=LPP+NP
         KX =NX -NP
-        CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
-        NM=2
-        Y1=0
+        NM =2
+        Y1 =0
         EI1=0
         NE1=0
+        CALL RDTAB2(LEF,C1,C2,LANG,LEP,NR,NE,NBT,INR,IER)
         DO 54 IE=1,NE
 C* For each incident energy read the outg.particle energy distribution
-        CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
-     1             ,RWO(LXE),RWO(LXX),KX,IER)
-        IF(IER.NE.0) STOP 'DENXS1 ERROR reading energy.distrib.'
-        IF(NRP.GT.1)
-     1   PRINT *,'WARNING - Multiple E interp.ranges for MF 5, MT',MT
-        INE=INR(NM)
-        IF(INE.GT.2) THEN
-          PRINT *,'WARNING - Non-linear interpolation for MF 5, MT',MT
-          INE=2
+        IF(MF.EQ.5) THEN
+          CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
+     1               ,RWO(LXE),RWO(LXX),KX,IER)
+          INE=INR(NM)
+          IF(NRP.GT.1)
+     1      PRINT *,'WARNING - Multiple Eout int.rng. MF 5, MT',MT
+          IF(INE.GT.2) THEN
+            PRINT *,'WARNING - Non-linear interp. for MF 5, MT',MT
+            INE=2
+          END IF
+        ELSE
+          MX=MRW-LXE
+          CALL RDLIST(LEF,C1,EI2,L1,L2,N1,NF,RWO(LXE),MX,IER)
+          IF(NF.GT.LXX-LXE) STOP 'DXSEN1 ERROR - Array limit'
+          INE=LEP
+          IF(INE.GT.2) THEN
+            PRINT *,'WARNING - Non-linear interp. for MF/MT',MF,MT
+            INE=2
+          END IF
+          DO 53 I=1,NF
+          RWO(LXE-1+I)=RWO(LXE-2+2*I)
+          RWO(LXX-1+I)=RWO(LXE-1+2*I)
+   53     CONTINUE
         END IF
+        IF(IER.NE.0) STOP 'DENXS1 ERROR reading energy.distrib.'
         IF(KEA.EQ.2) THEN
 Case: Interpolate outgoing particle energy distributions
           CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
      1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
         ELSE
-Case: Interpolate values to a given outgoing particle energy
+Case: Interpolate distrib. to a given outgoing particle energy
           EA=RWO(LXE)
           EB=RWO(LXE-1+NF)
           CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
           Y2=FINTXS(EOU,RWO(LXE),RWO(LXX),NF,INE,IER)/SS
           IF(EIN.GE.EI1 .AND. EIN.LE.EI2) THEN
-            YL=YL*( Y1 + (Y2-Y1)*(EIN-EI1)/(EI2-EI1) )
-            GO TO 80
+            YY=( Y1 + (Y2-Y1)*(EIN-EI1)/(EI2-EI1) )
+            YL=YL*YY
+            GO TO 800
           END IF
         END IF
    54   CONTINUE
@@ -476,9 +767,10 @@ Case: Interpolate values to a given outgoing particle energy
 C* Energy dependent Watt spectrum (Law 11)
         NX=MRW/2
         LX=NX+1
+        UPEN=C1
         IF(EIN-UPEN.LE.0) THEN
           NEN=0
-          GO TO 90
+          GO TO 900
         END IF
 C* Read and interpolate Watt parameter Wa
         CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
@@ -516,19 +808,21 @@ C*         Limit the table to the upper energy on the ENDF file
         ELSE
 Case: Calculate values at the given outgoing particle energy
           YL=YL*SPWATT(EOU,EIN,UPEN,WA,WB)
-          GO TO 80
+          GO TO 800
         END IF
       ELSE
 C...    Secondary particle energy distributions MF 5 not coded
         PRINT *,'WARNING - Processing not coded for MF5 MT',MT0
         PRINT *,'                                      Law',LF
         IER=31
-        GO TO 90
+        GO TO 900
       END IF
-      GO TO 80
+      GO TO 800
 C*
-C* Process coupled energy/angle distributions MF6 (first particle only)
-   60 READ (C66,902) C1,AWR, L1,LCT,NK,N2
+C* Process coupled energy/angle distributions MF6 of selected particle
+      CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+   60 LCT=L2
+      NK =N1
       JNK=0
    61 JNK=JNK+1
 C* Split the work array RWO to operate on function and argument
@@ -536,13 +830,15 @@ C* 1   - First argument
 C* LX  - First function
 C* LXE - Second argument
 C* LXX - Second function
-C* KX  - Max. permissible number of points per set
+C* LXF - Third argument (angle-integrated case only)
+C* LXY - Third function (angle-integrated case only)
+C* KX2 - Max. permissible number of points per set
       KX =MRW/2
       LX =KX+1
       LD =KX/2
       LXE= 1+LD
       LXX=LX+LD
-      KX2=KX/2
+      KX2=LD/2
       LXF= 1+KX2
       LXY=LX+KX2
 C* Retrieve the neutron yield
@@ -551,10 +847,14 @@ C* Retrieve the neutron yield
       IF(LAW.NE.7) THEN
 C*        Set IER to flag error and terminate if not Law-7 in MF 6
         IER=23
-        GO TO 90
+        GO TO 900
       END IF
       IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
-        IF(JNK.GE.NK) STOP 'DENXS1 ERROR - Particle not found'
+        IF(JNK.GE.NK) THEN
+          PRINT *,'DENXS1 WARNING - Particle not found',NINT(ZAP)
+          IER=24
+          GO TO 900
+        END IF
 C* Skip the subsection for this particle
         CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
         NM=NR+1
@@ -571,7 +871,7 @@ C* Skip the subsection for this particle
         GO TO 61
       END IF
       IF(NR.NE.1 .OR. INR(1).GT.2) IER=21
-      YL=FINTXS(EIN,RWO,RWO(LX),NP,INR,IER)
+      YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
 C* Read incident energy definitions
       CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
       NM=NR+1
@@ -599,7 +899,7 @@ C* Integrate over energy for this cosine
       EA=RWO(LXE)
       EB=RWO(LXE-1+NEP2)
       CALL YTGEOU(PMU(IM),EA,EB,NEP2,RWO(LXE),RWO(LXX),INR(NO))
-      IF(KEA.NE.2) THEN
+      IF(KEA.EQ.1) THEN
 C* Case: Assemble the angular distribution at the required energy
         RWO(     IM)=AI2
         IF(EOU.GT.0) THEN
@@ -614,14 +914,14 @@ C*       Case: Average outgoing particle energy
         END IF
         NEP1=NMU
       ELSE
-        IF(AIN.LT.-1) THEN
+        IF(DEG.LT.0) THEN
 C* Case: Integrate between distributions for two cosines
           CALL FYTG2D(    NEP1,RWO     ,RWO(LX)
      1               ,AI1,NEP3,RWO(LXF),RWO(LXY),INR(NM)
      1               ,AI2,NEP2,RWO(LXE),RWO(LXX),INR(NO),KX2)
         ELSE
 C* Case: Interpolate between distributions for two cosines
-          CALL FINT2D(ALB,AI1,NEP1,RWO     ,RWO(LX) ,INR(NM)
+          CALL FINT2D(AIN,AI1,NEP1,RWO     ,RWO(LX) ,INR(NM)
      1                   ,AI2,NEP2,RWO(LXE),RWO(LXX),INR(NO),KX)
         END IF
       END IF
@@ -633,7 +933,7 @@ C... Should calculate the proper lower bound for the cosine !!!
       INM=INR(NM)
       INM=INM-10*(INM/10)
       CALL YTGEOU(SS,A1,A2,NMU,AMU,PMU,INM)
-      IF(AIN.LT.-1) SS=SS*(A2-A1)
+      IF(DEG.LT.0) SS=SS*(A2-A1)
       DO 73 I=1,NEP1
       RWO(LX-1+I)=RWO(LX-1+I)/SS
    73 CONTINUE
@@ -646,24 +946,287 @@ C* Lin-interpolate between distributions for two incident energies
      1               ,EI2,NEP1,RWO,RWO(LX),INE,MX)
 C*
    74 CONTINUE
+      IF(KEA.EQ.2 .AND. DEG.LT.0) SAN=SAN*2
+      GO TO 800
+C*
+C* Photon branching ratio data
+  120 IF(KEA.NE.2) GO TO 150
+      IF( (MT0.GT. 50 .AND. MT0.LT. 91) .OR.
+     1    (MT0.GT.600 .AND. MT0.LT.649) .OR.
+     1    (MT0.GT.800 .AND. MT0.LT.849) ) THEN
+C* Ground state level
+        LG =0
+        LV =0
+        LLI=1
+        RWO(LLI)=0
+        LLI=LLI+1
+C* Read photon branching ratios to discrete-leves
+  122   LV =LV +1
+        IWO(LV)=LLI
+C* Changing LF between data sets is currently not accomodated
+        IF(LG.GT.0 .AND. LG.NE.L2)
+     1    STOP 'DXSEN1 ERROR - Redefined LF reading MF 12'
+        LO =L1
+        LG =L2
+        NS =N1
+        IF(LO.NE.2) THEN
+          IER=43
+          PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
+          GO TO 900
+        END IF
+        LL =LV*(LG+1)
+        DO 123 J=1,LL
+        RWO(LLI+J)=0
+  123   CONTINUE
+        LX =MRW-LLI
+        CALL RDLIST(LEF,ES,C2,LP,L2,NW,NT,RWO(LLI+1),LX,IER)
+        IF(NW.GT.LL) THEN
+          IER=43
+          PRINT *,'ERROR - in MT',MT0,' Used space',NW
+     1           ,' Exceeds reserved space for',LV,' levels'
+          GO TO 900
+        END IF
+        RWO(LLI)=ES
+        LLI=LLI+1+LL
+C* Read the data for the next level
+        CALL SKIPSC(LEF)
+        MT =0
+        CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.EQ.0 .AND. MT.LT.MT0) GO TO 122
+        IWO(LV+1)=LLI
+C*
+C* All levels up to the current one read - sum the yields
+C...
+C...        print *,'     Processing MT',MT0
+C...
+        CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
+C* Process the gamma lines
+        NX =(MRW-NW)/2
+        LXE=1+NW
+        LXB=LXE+NX
+        NEN=21
+        NE1=1
+        ENR(1)=RWO(1)
+        DXS(1)=0
+        DO 128 JT=1,NT
+          EOU=RWO(1+(JT-1)*(LG+1))
+          IF(EOU.LE.0) THEN
+            PRINT *,'WARNING Gamma Eou=',EOU,' for mt,jt',MT0,JT
+            GO TO 128
+          END IF
+          CALL FNGAUS(EOU,NEN,RWO(LXE),RWO(LXB),EPS)
+          LUE=LXE+NEN
+          LUX=LXB+NEN
+          KX =NX -NEN
+          CALL UNIGRD(NE1,ENR,NEN,RWO(LXE),NE2,RWO(LUE),KX)
+C* Interpolate current distribution to the union grid
+          CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
+          NE1=NE2
+          DO 124 I=1,NE1
+            ENR(I)=RWO(LUE-1+I)
+            DXS(I)=RWO(LUX-1+I)
+  124     CONTINUE
+C* Interpolate saved distribution to the union grid
+          CALL FITGRD(NEN,RWO(LXE),RWO(LXB),NE2,RWO(LUE),RWO(LUX))
+C* Assume isotropic photon distributions
+          ANG=0.5
+C* Add the current to the saved distribution
+          FRC=ANG*RWO(2+(JT-1)*(LG+1))
+          IF(LG.EQ.2) FRC=FRC*RWO(3+(JT-1)*(LG+1))
+          DO 126 I=1,NE1
+            DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
+  126     CONTINUE
+  128   CONTINUE
+        GO TO 800
+      ELSE
+        IER=99
+        PRINT *,'WARNING - No coding for MF 12, MT',MT0
+        GO TO 900
+      END IF
+C*
+C* Photon angular distributions
+  140 CONTINUE
+        IER=99
+        PRINT *,'WARNING - No coding for MF',MF,' MT',MT0
+        GO TO 900
+C* Photon continuum energy distributions
+  150 CONTINUE
+        IER=99
+        PRINT *,'WARNING - No coding for MF 15, MT',MT0
+        GO TO 900
 C*
 C* Distribution assembled - check that the last point is zero
-   80 NEN=NE1
+  800 NEN=NE1
       IF(KEA.EQ.2 .AND. DXS(NEN).NE.0) THEN
         NEN=NEN+1
         ENR(NEN)=ENR(NEN-1)
         DXS(NEN)=0
       END IF
 C* Scale the distribution by the cross section
-      SS=YL*XS/(2*PI)
-      IF(KEA.EQ.2 .AND. PAR.LT.-1) SS=4*PI*SS
-      DO 84 I=1,NEN
+      SS=YL*XS*SAN
+      DO 804 I=1,NEN
       DXS(I)=SS*DXS(I)
-   84 CONTINUE
+  804 CONTINUE
 C*
-   90 RETURN
+  900 RETURN
 C*
   902 FORMAT(2F11.0,4I11)
+      END
+      SUBROUTINE SUMYLD(LV,LG,ID,RWO,GTO,NG,LW)
+C-Title  : Subroutine SUMYLD
+C-Purpose: Sum yields from lower levels and redefine gamma energies
+C-Description:
+C-D  LV  Total number of levels
+C-D  LG  Flag for the number of parameters:
+C-D       1  Branching ratios only
+C-D       2  Branching ratios and gamma fractions given.
+C-D  ID  index array giving the starting address of the data
+C-D      for a each level in the work array RWO. Level zero
+C-D      (ground state) only contains the level energy  in the
+C-D      first word or array RWO. The data for each level consist
+C-D      of pairs of numbers, giving the final level energy and
+C-D      the branching ratio to that level.
+C-D  GTO Sum of all gamma fractions - it can be used for
+C-D      checking purposes. It should be close to 1.
+C-D  NG  Final number of gamma lines packed into the output array.
+C-D  LW  Length of the packed output vector.
+C-
+      DIMENSION  ID(1),RWO(1)
+C* Make sure that the decaying levels form a complete set.
+C* Fill missing levels
+      DO 40 I=1,LV
+        LI=ID(I)
+        EL=RWO(1)
+        ND=ID(I+1)-LI
+C...
+C...    PRINT *,I,LI,ND,(RWO(LI-1+J),J=1,ND)
+C...
+        IF(I.LT.2) GO TO 40
+        DO 26 J=1,LV
+C* Test J-th level at EA
+          EA=RWO(LI+1)
+C* Apply test to final level intervals of the present level
+          DO 24 K=2,I
+            LK=LI+1+(K-1)*(LG+1)
+            EB=RWO(LK)
+C* Check if tested level fals in between a tabulated interval
+            EE=(EB+EA)*1.E-5
+C...
+C...        PRINT *,'     Elvl',EL,EA,EB,(EL-EA)*(EL-EB),EE
+C...
+            IF((EL-EA)*(EL-EB).GE.-EE) GO TO 23
+C* Insert missing level and shift the rest
+            LJ=ID(I+1)-(LG+1)
+            LL=LJ-LK
+C...
+C...           PRINT *,'               Shift LJ,LK',LJ,LK
+C...
+            DO 22 L=1,LL
+              RWO(LJ-L+LG+1)=RWO(LJ-L)
+   22       CONTINUE
+            RWO(LK  )=EL
+            RWO(LK+1)=0
+            EB=EL
+   23       EA=EB
+   24     CONTINUE
+          LL=ID(J)
+          EL=RWO(LL)
+   26   CONTINUE
+C...
+C...        PRINT *,I,LI,ND,(RWO(LI-1+J),J=1,ND)
+C...
+   40 CONTINUE
+C*
+C* Transform final level energies to gamma energies
+      DO 50 I=1,LV
+        LI=ID(I)
+        EL=RWO(LI)
+C* Process final states of current level
+        DO 46 J=1,I
+          LJ=LI+1+(J-1)*(LG+1)
+          EG=EL-RWO(LJ)
+          RWO(LJ)=EG
+   46   CONTINUE
+C...
+C...      LJ=ID(I+1)-1
+C...      PRINT *,I,(RWO(J),J=LI,LJ)
+C...
+   50 CONTINUE
+C*
+C* Define gamma intensities and level population (work backwards)
+      DO 54 I=1,LV
+        LI=ID(I)
+        RWO(LI)=0
+   54 CONTINUE
+      RWO(LI)=1
+      GTO=0
+C* Overwrite level energies with level population
+      DO 80 I=1,LV
+        JV =LV+1-I
+        LI =ID(JV)
+        GLV=RWO(LI)
+C...
+C...    PRINT *,'LVL,GLV',JV,GLV
+C...
+        DO 74 J=1,JV
+          KJ =LI+2+(J-1)*(LG+1)
+          GJ =RWO(KJ)
+          GV =GLV*GJ
+          RWO(KJ)=GV
+          KV =JV-J
+          IF(KV.GT.0) THEN
+            K=ID(KV)
+            RWO(K)=RWO(K)+GV
+          ELSE
+            GTO=GTO+GV
+          END IF
+C...
+C...      PRINT *,'  L,J,GJ,GV',LV+1-I,KV,GJ,GV
+C...
+   74   CONTINUE
+C...
+C...    LI=ID(I  )
+C...    LJ=ID(I+1)-1
+C...    PRINT *,I,(RWO(J),J=LI,LJ)
+C...
+   80 CONTINUE
+C...
+C...      PRINT *,'                        *** Next ***'
+C...      PRINT *,0,GTO
+C...      DO 82 I=1,LV
+C...        LI=ID(I  )
+C...        LJ=ID(I+1)-1
+C...        PRINT *,I,(RWO(J),J=LI,LJ)
+C...   82 CONTINUE
+C...
+C*
+C* Pack the gamma energies and yields
+      LI=1
+      LW=1
+      NG=0
+      DO 88 I=1,LV
+        LI=LI+1
+        DO 86 J=1,I
+          IF(RWO(LI+2).LE.0) GO TO 85
+          RWO(LW)=RWO(LI+1)
+          DO 84 K=1,LG
+            RWO(LW+K)=RWO(LI+1+K)
+   84     CONTINUE
+          NG=NG+1
+          LW=LW+1+LG
+   85     LI=LI+1+LG
+   86   CONTINUE
+   88 CONTINUE
+C...
+C...          PRINT *,'Gamma energies and intensities'
+C...          DO 92 I=1,NG
+C...          K=(I-1)*(LG+1)
+C...          PRINT *,I,RWO(1+K),RWO(2+K)
+C...   92     CONTINUE
+C...
+C...          IF(LV.GT.2) STOP
+C...
+      RETURN
       END
       FUNCTION SPWATT(EE,EI,EU,WA,WB)
 C-Title  : Function SPWATT
@@ -683,7 +1246,7 @@ C* Spectrum
       SPWATT=EXP(-EE/WA)*SINH(SQRT(EE*WB))/CNRM
       RETURN
       END
-      SUBROUTINE FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
+      SUBROUTINE FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
 C-Title  : Subroutine FINDMT
 C-Purpose: Find specified reaction in an ENDF file
 C-Description:
@@ -766,7 +1329,7 @@ C* Loop to find the reaction type number
       IF(MAT.LT.0) GO TO 81
       GO TO 32
 C* Normal termination
-   40 IF(ZA.EQ.0) READ (C66,92) ZA
+   40 READ (C66,92) ZA,AW,L1,L2,N1,N2
       RETURN
 C*
 C* Error traps
@@ -828,12 +1391,16 @@ C*
   902 FORMAT(2F11.0,4I11)
   903 FORMAT(6I11)
       END
-      SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,IER)
+      SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
       DIMENSION    VK(1)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
+      IF(N1.GT.MVK) THEN
+        IER=-1
+        RETURN
+      END IF
       IF(N1.GT.0) READ (LEF,903) (VK(J),J=1,N1)
       RETURN
 C*
@@ -898,11 +1465,11 @@ C-Purpose: Write a CONT record to an ENDF file
    40 FORMAT(6A11,I4,I2,I3,I5)
       END
       SUBROUTINE WRTAB1(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
-     1                 ,NR,NP,NBT,INT,X,Y)
+     1                 ,NR,NP,NBT,INR,X,Y)
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INT(1),X(1),Y(1)
+      DIMENSION     NBT(1),INR(1),X(1),Y(1)
       DATA BLN/'           '/
 C* First line of the TAB1 record
       CALL CHENDF(C1,REC(1))
@@ -921,7 +1488,7 @@ C* Write interpolation data
       IF(N.GE.NR) GO TO 24
       N =N+1
       WRITE(REC(I+1),42) NBT(N)
-      WRITE(REC(I+2),42) INT(N)
+      WRITE(REC(I+2),42) INR(N)
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
@@ -946,11 +1513,11 @@ C* Loop for all argument&function pairs
    42 FORMAT(I11)
       END
       SUBROUTINE WRTAB2(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
-     1                 ,NR,NZ,NBT,INT)
+     1                 ,NR,NZ,NBT,INR)
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INT(1)
+      DIMENSION     NBT(1),INR(1)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -958,7 +1525,6 @@ C* First line of the TAB2 record
       WRITE(REC(3),42) L1
       WRITE(REC(4),42) L2
       WRITE(REC(5),42) NR
-
       WRITE(REC(6),42) NZ
       NS=NS+1
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
@@ -970,7 +1536,7 @@ C* Write interpolation data
       IF(N.GE.NR) GO TO 24
       N =N+1
       WRITE(REC(I+1),42) NBT(N)
-      WRITE(REC(I+2),42) INT(N)
+      WRITE(REC(I+2),42) INR(N)
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
@@ -1081,7 +1647,7 @@ C*
 C* Begin processing the distribution at the current point
       IF(INE.EQ.1) THEN
 C* Convert histogram interpolation to linear
-        J=2*NEP2-1
+        J=2*NEP2
         IF(J.GT.MEP2) THEN
 C...      PRINT *,'J,MEP2',J,MEP2
           STOP 'FINT2D ERROR - MEP2 limit exceeded'
@@ -1089,12 +1655,12 @@ C...      PRINT *,'J,MEP2',J,MEP2
         DO 20 I=2,NEP2
         J=J-1
         EN2(J)=EN2(NEP2+2-I)
-        XS2(J)=XS2(NEP2+1-I)
+        XS2(J)=XS2(NEP2+2-I)
         J=J-1
-        EN2(J)=EN2(NEP2+1-I)
+        EN2(J)=EN2(NEP2+2-I)
         XS2(J)=XS2(NEP2+1-I)
    20   CONTINUE
-        NEP2=2*NEP2-2
+        NEP2=2*NEP2-1
       END IF
 C* Check if first set or point below the required argument
       IF(NEP1.GT.0  .AND. AI2.GT.AI) GO TO 22
@@ -1162,8 +1728,9 @@ C* Interpolate second distribution to the union grid
 C* Interpolate distributions to the required argument
    33 DO 34 I=1,NEU
       X1=XS1(I)
-      XX=XS2(LUNI-1+I)
-      IF(AI1.NE.AI2) XX=X1+(XX-X1)*(AI-AI1)/(AI2-AI1)
+      X2=XS2(LUNI-1+I)
+      XX=X2
+      IF(AI1.NE.AI2) XX=X1+(X2-X1)*(AI-AI1)/(AI2-AI1)
       XS1(I)=XX
    34 CONTINUE
       AI1=AI
@@ -1364,20 +1931,21 @@ C*
 C* Convert second set of points to linearly interpolable form
       IF(INE.EQ.1) THEN
 C* Convert histogram interpolation to linear
-        J=2*NEP2-1
+
+        J=2*NEP2
         IF(J.GT.MEP2) THEN
 C...      PRINT *,'J,MEP2',J,MEP2
-          STOP 'FYTG2D ERROR - MEP2 limit exceeded'
+          STOP 'FINT2D ERROR - MEP2 limit exceeded'
         END IF
         DO 20 I=2,NEP2
         J=J-1
         EN2(J)=EN2(NEP2+2-I)
-        XS2(J)=XS2(NEP2+1-I)
+        XS2(J)=XS2(NEP2+2-I)
         J=J-1
-        EN2(J)=EN2(NEP2+1-I)
+        EN2(J)=EN2(NEP2+2-I)
         XS2(J)=XS2(NEP2+1-I)
    20   CONTINUE
-        NEP2=2*NEP2-2
+        NEP2=2*NEP2-1
       END IF
       IF(NEP0.LE.0) THEN
 C*
@@ -1395,37 +1963,39 @@ C* First set of points - initialise integral
       END IF
 C*
 C* Make a union grid
-      LU1=1
-      LU2=1
-   30 LUNI=LU2+NEP2
+   30 LUNI=1+NEP2
       KX=MEP2-LUNI
-      CALL UNIGRD(NEP1,EN1(LU1),NEP2,EN2(LU2),NEU,EN2(LUNI),KX)
+      CALL UNIGRD(NEP1,EN1,NEP2,EN2,NEU,EN2(LUNI),KX)
 C* Interpolate integrated distribution to the union grid
-      CALL FITGRD(NEP0,EN0(LU1),XS0,NEU,EN2(LUNI),XS2(LUNI))
+      CALL FITGRD(NEP0,EN0,XS0,NEU,EN2(LUNI),XS2(LUNI))
       DO 31 I=1,NEU
       EN0(I)=EN2(LUNI-1+I)
       XS0(I)=XS2(LUNI-1+I)
    31 CONTINUE
 C* Interpolate first distribution to the union grid
-      CALL FITGRD(NEP1,EN1(LU1),XS1,NEU,EN2(LUNI),XS2(LUNI))
+      CALL FITGRD(NEP1,EN1,XS1,NEU,EN2(LUNI),XS2(LUNI))
       DO 32 I=1,NEU
       EN1(I)=EN2(LUNI-1+I)
       XS1(I)=XS2(LUNI-1+I)
    32 CONTINUE
 C* Interpolate second distribution to the union grid
-      CALL FITGRD(NEP2,EN2(LU2),XS2,NEU,EN2(LUNI),XS2(LUNI))
+      CALL FITGRD(NEP2,EN2,XS2,NEU,EN2(LUNI),XS2(LUNI))
 C* Add the contribution to the integral
       DO 34 I=1,NEU
+      EN2(I)=EN2(LUNI-1+I)
+      XS2(I)=XS2(LUNI-1+I)
       IF(INR.EQ.1) THEN
         FF=XS2(I)*(AI2-AI1)
       ELSE
         FF=0.5*(XS1(I)+XS2(I))*(AI2-AI1)
       END IF
       XS0(I)=XS0(I)+FF
+      XS1(I)=XS2(I)
    34 CONTINUE
       AI1=AI2
-      NEP1=NEU
       NEP0=NEU
+      NEP1=NEU
+      NEP2=NEU
 C* Integration completed
    40 RETURN
       END

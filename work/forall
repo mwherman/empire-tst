@@ -1,6 +1,7 @@
 #!/bin/bash
 for file in $*
 do
-sed s/'IOUT       3.'/'IOUT       1.'/ ${file} >tmp
-mv tmp ${file} 
+#sed s/'IOUT       3.'/'IOUT       1.'/ ${file} >tmp
+#mv tmp ${file}
+        gv -landscape ${file}
 done

@@ -8,8 +8,8 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.17.1                 '
-echo '                          (Millesimo)                      '
+echo '                     V E R S I O N  2.18                   '
+echo '                           (Mondovi)                       '
 echo '                              by                           '
 echo '                        M. H e r m a n                     '
 echo '                                                           '
@@ -203,16 +203,6 @@ if  [ -s $file.exf ]; then
         #rm $file.exf
     fi
 fi
-
-echo ' '
-echo 'Calculations and EXFOR retrieval hopefully completed.'
-echo 'If ENDF option has been selected you can use Format button '
-echo 'to produce ENDF file and comparison plots.'
-echo 'Note that Plotc4 and ZVV plots can be created from the ENDF'
-echo 'formatted file only. However, Create-ZVV button can be used'
-echo 'on the standard EMPIRE output (no ENDF file needed).'
-echo 'Hit Enter to close this window'
-read dum
 exit
 
 

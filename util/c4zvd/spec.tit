@@ -1,0 +1,15 @@
+NODIALOG: 1
+TIT2: PGAA (IAEA CRP-10693/R0)
+X-GRID: 0
+Y-GRID: 0
+LX-WIN: 600 400 700 412
+LY-WIN: 450 300 500 335
+BUTTONS: 0
+NOSTAT: 1
+X-UNITS: KEV
+Y-UNITS: B
+X: Energy
+Y: Cross Section
+x-long: Energy
+!legend: 1
+mode: FIXSYM

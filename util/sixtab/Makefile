@@ -14,7 +14,7 @@ FFLAGS =
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =	sixtab.o
+OBJF =	sixtab.o dxsend.o
 
 
 sixtab:   $(OBJF)

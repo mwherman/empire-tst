@@ -2,4 +2,26 @@ $* C4SORT
           Sort the EXFOR file in C4 format overwriting the original file
    FLC4IN ../x4toc4/c4.out
    FLC4OU ../x4toc4/c4.out
+
+   ALIAS       26000    4    2     26056    4    2
+   ALIAS       26000    5 9000     26056    5 9000
+   ALIAS       26000    6 9000     26056    6 9000
+
+   ALIAS       14000    4    2     14028    4    2
+   ALIAS       14000    5 9000     14028    5 9000
+   ALIAS       14000    6 9000     14028    6 9000
+
    ENDC4S
+
+$* END
+
+
+Lines below '$* END' are not read by SORTC4. 
+In the input above, ALIAS lines
+instruct SORTC4 to treat data for the natural element as taken on a specified
+isotop (in the example above data on natural Fe and Si will be denoted in C4 
+file as if were measured on 56-Fe and 28-Si respectively). Conversion is only applied to MF and MT 
+numbers following target specification. The above aliases have no effect on other 
+elements, thus can be kept as an example.
+
+

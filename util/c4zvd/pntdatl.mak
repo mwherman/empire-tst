@@ -1,24 +1,28 @@
-NAME   = datzvd
+NAME   = pntdat
 O      = obj
+O      = o
 NAMEOBJ= $(NAME).$(O)
 NAMEEXE= $(NAME).exe
+NAMEMAK= $(NAME)l.mak
 LH     = ../
 
 OBJ0 = $(NAME).$(O)
-OBJ1 = 
-OBJ2 = zv1_str.$(O) d_alloc.$(O)
+OBJ1 = zv1_str.$(O)
 
 OBJS = $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3)
 
 CC     = cl
+CC     = cc
 CFLAGS = -c
 
 LINK   = link
+LINK   = cc
 OPT    =
 LIBS   =
 LFLAGS = /out:$(NAMEEXE)
+LFLAGS = -o$(NAMEEXE)
 
-$(NAMEEXE) :  $(NAME).mak $(OBJS)
+$(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 	$(LINK) $(OBJS) $(LFLAGS)
 
 #.c.obj:
