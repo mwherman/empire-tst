@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-24 20:34:36 $
-Ccc   * $Id: input.f,v 1.60 2005-01-24 20:34:36 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-25 01:06:51 $
+Ccc   * $Id: input.f,v 1.61 2005-01-25 01:06:51 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2168,9 +2168,10 @@ C           ICOmpff = 0
 C           ENDIF
 C-----------Print some final input options
             IF(DIRect.eq.0) then
-            ECUtColl = 0.
-            SCUtColl = 0
+              ECUtColl = 0.
+              JCUtColl = 0
             ENDIF
+
             IF(KEY_shape.EQ.0)WRITE(6,
      &         '('' E1 strength function as in EMPIRE v2.18 (EGLO)'')')
             IF(KEY_shape.EQ.1)WRITE(6,
