@@ -22,7 +22,7 @@ Q I CHANGE OMP IN THE *-*.omp FILE BUT THERE IS NO EFFECT?
 
 A When modifying omp in one of  the *.omp files be aware that the 
   potential appears for the incoming and the outgoing channel. If 
-  projrctile is the same as one of the ejectiles the same potential
+  projectile is the same as one of the ejectiles the same potential
   appears twice. To be on the safe side change BOTH.   
 
 
