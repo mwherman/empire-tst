@@ -27,7 +27,6 @@ echo ' '
 echo 'R U N N I N G    P L T L S T'
 ./pltlst
 rm C4.DAT 
-cp PLOTC4.LST $work
 mv PLOTC4.LST $work/$file-log.plotc4
 cd $work
 exit
