@@ -88,16 +88,6 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN(UNIT=29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-*-IF VMS
-*-    OPEN(UNIT=23,FILE='[-.data]nparac.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=24,FILE='[-.data]ldp.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=25,FILE='[-.data]nix-moller-audi.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=26,FILE='[-.RIPL-2.OPTICAL.OM-DATA]OM-PARAMETER-U.DAT'
-*-   *,STATUS='OLD')
-*-ELSEIF LINUX
       OPEN(UNIT=23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
       OPEN(UNIT=24,FILE='../data/ldp.dat'
@@ -107,7 +97,6 @@ C    *,STATUS='OLD')
       OPEN(UNIT=25,FILE='OMPdata.dat')
       OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
-*-ENDIF
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
 C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
