@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-14 17:14:39 $
-Ccc   * $Id: lev-dens.f,v 1.9 2003-10-14 17:14:39 herman Exp $
+Ccc   * $Date: 2003-10-30 18:45:18 $
+Ccc   * $Id: lev-dens.f,v 1.10 2003-10-30 18:45:18 herman Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -651,10 +651,6 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
-C fisfis d
-      COMMON /FISC  / FIScon
-      REAL FIScon
-C fisfis u
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Cf
@@ -684,7 +680,8 @@ C     WRITE(6,
 C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
 C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
 C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0)RETURN
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0.and.fiscon.ne.2)
+     &                     RETURN
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
       AP1 = 0.94431E-01
@@ -718,6 +715,7 @@ C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
       ATIl = ATIl*ATIlnor(Nnuc)
       TCRt = 0.567*DELp
+
       IF(BF.EQ.0.0D0 .AND. Asaf.LT.0.D0)THEN
          ACRt = -ATIl*Asaf
       ELSE
@@ -733,6 +731,7 @@ C-----set Ignatyuk type energy dependence for 'a'
          WRITE(6, *)' WARNING: LAST ITERATION HAS GIVEN ACRT=', ACRt
          WRITE(6, *)' WARNING: EXECUTION CONTINUES'
       ENDIF
+
  100  IF(ACRt.LT.0.0D0)ACRt = 0.0
       ECOnd = 1.5*ACRt*DELp**2/pi2
       UCRt = ACRt*TCRt**2 + ECOnd
@@ -934,14 +933,10 @@ C
       INTEGER NLWst
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-C
-C fisfis d
-      COMMON /FISC  / FIScon
       COMMON /PARFIS/ ROTemp, AC, AAJ,  IBAr1
       DOUBLE PRECISION  AAJ
       INTEGER IBAr1
-      REAL FIScon
-C fisfis u
+
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Destep, Dshif
@@ -963,6 +958,8 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
+ 
+ccc      write(6,*)'all-del', nnuc,a(nnuc),z(nnuc),del,bf
       IF(FIScon.EQ.2.)goto 6666
 C-----determination of U for normal states
       IF(BF.NE.0.D0)THEN
@@ -984,9 +981,35 @@ C     fisfis d ===================================
  6666 IF(FIScon.EQ.2.)THEN
          Bf=0.0D0
          aj = aaj
-      
-         mompar = MOMparcrt(IBAr1)
-         momort = MOMortcrt(IBAr1)
+         ia=int(A(nnuc))  
+         iz=int(Z(nnuc))
+         in=ia-iz
+       DELp = 12./SQRT(A(Nnuc))
+       DEL = 0.
+       IF(MOD(in, 2).NE.0)DEL = DELp
+       IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
+
+       ap1 = 0.94431E-01
+       ap2 = -0.80140E-01
+       gamma = 0.75594E-01
+       IF(Z(nnuc).GE.85.D0)THEN
+          ap1 = ap1*1.2402
+          ap2 = ap2*1.2402
+          gamma = gamma*1.2494
+       ENDIF
+
+
+       ATIl = AP1*A(Nnuc) + AP2*A23
+       ATIl = ATIl*ATIlnor(Nnuc)
+
+        ECOnd = 1.5*ACRt*DELp**2/(pi*pi)
+
+
+
+c      write(6,*)'saddle', nnuc,z(nnuc),a(nnuc),in,iz,del,atil,!,atilnor
+c     &  atilnor(nnuc),gamma,acrt,econd
+         mompar = MOMparcrt(nnuc,IBAr1)
+         momort = MOMortcrt(nnuc,IBAr1)
          
          u=(kk-1)*destep+dshif+del   
 
@@ -996,12 +1019,12 @@ C     fisfis d ===================================
             accn = ACRt
          ENDIF
          temp = 0.
-C        goto 45192
-Cc       IF(ux.GE.YRAst(i, Nnuc))
-Cc       &       temp = SQRT((ux - YRAst(i,Nnuc))/accn)
-Cc       ampl = EXP(TEMp0*SHRt)
+
+
+
+
          shredt = 1.
-Cc       IF(temp.GE.TEMp0)shredt = ampl*EXP(( - SHRt*temp))
+
 C--------temperature fade-out of the shell correction  --- done ----
 
          IF(u.GT.UCRt)THEN
@@ -1027,6 +1050,8 @@ C-----------dependent factor
             ATIl = ATIl*ATIlnor(Nnuc)
             IF(Asaf.GE.0.D0)AC = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
             IF(Asaf.LT.0.D0)AC = -ATIl*Asaf
+
+c            write(6,*)'a-saddle',nnuc,z(nnuc),a(nnuc),ac
             IF(AC.GT.0.D0)THEN
                IF(bcs)THEN
                   ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, A2)
@@ -1137,6 +1162,8 @@ C-----------dependent factor
             ATIl = AP1*A(Nnuc) + AP2*A23*bsq
             ATIl = ATIl*ATIlnor(Nnuc)
             ac = ATIl*FSHELL(u, SHC(Nnuc), GAMma)
+
+            write(80,*)'norm-a',nnuc,z(nnuc),a(nnuc),ac
             IF(ac.LE.0.0D0)RETURN
          ENDIF
          IF(bcs)THEN
@@ -1360,7 +1387,7 @@ C-----set to 0 level density array
             ELSE
                ROF(i, k, Nnuc) = 0.0
             ENDIF
-             ROFis(i, k, Nnuc) = 0.0
+c             ROFis(i, k, Nnuc) = 0.0
          ENDDO
       ENDDO
 C-----setting to 0 level density array ------ done ------
@@ -1881,7 +1908,6 @@ CCC
       DIMENSION uugrid(0:NLDGRID), tgrid(0:NLDGRID), cgrid(0:NLDGRID)
       DIMENSION rhoogrid(0:NLDGRID), rhotgrid(0:NLDGRID)
       DIMENSION rhogrid(0:NLDGRID, JMAX)
-      DIMENSION rhouj(JMAX)
       CHARACTER*56 filename
       CHARACTER*2 car2
 C
@@ -1891,9 +1917,9 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, uugrid, 
+      DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, uugrid,
      &                 rhotgrid, cgrid
-      INTEGER kk, ia, iz, j, jmax1, izr, iar, k, khi
+      INTEGER kk, ia, iz, j, jmaxl, izr, iar, k, khi
 C
 C
       cf = 0
@@ -1904,19 +1930,16 @@ C-----next call prepares for lev. dens. calculations
 C-------------------------------------------------------------------
 C     initialization
 C-------------------------------------------------------------------
-      jmax1 = MIN(NDLW, JMAX)
+      jmaxl = MIN(NDLW, JMAX)
       DO i = 0, NLDGRID
          uugrid(i) = 0.
          tgrid(i) = 0.
          cgrid(i) = 1.
          rhoogrid(i) = 1.E-20
          rhotgrid(i) = 1.E-20
-         DO j = 1, jmax1
+         DO j = 1, jmaxl
             rhogrid(i, j) = 1.E-20
          ENDDO
-      ENDDO
-      DO j = 1, jmax1
-         rhouj(j) = 0.
       ENDDO
       WRITE(filename, 99001)iz
 99001 FORMAT('../RIPL-2/densities/total/level-densities-hfbcs/z', i3.3, 
@@ -1925,7 +1948,7 @@ C-------------------------------------------------------------------
  100  READ(34, 99002, ERR = 100, END = 300)car2, izr, iar
 99002 FORMAT(23x, a2, i3, 3x, i3)
       IF(car2.NE.'Z=')GOTO 100
-      IF(iar.NE.ia)GOTO 100
+      IF(iar.NE.ia .OR. izr.NE.iz)GOTO 100
 C     
 C-----reading microscopic lev. dens. from the RIPL-2 file
 C     
@@ -1934,7 +1957,7 @@ C
       i = 1
  200  READ(34, 99003, END = 400)uugrid(i), tgrid(i), cgrid(i), 
      &                          rhoogrid(i), rhotgrid(i), 
-     &                          (rhogrid(i, j), j = 1, jmax1)
+     &                          (rhogrid(i, j), j = 1, jmaxl)
 99003 FORMAT(1x, f6.2, f7.3, 1x, 1p, 33E9.2, 0p)
       IF(uugrid(i).LE.0.001)GOTO 400
       IF(i.EQ.NLDGRID)GOTO 400
@@ -1982,7 +2005,7 @@ C
  500     hhh = uugrid(khi) - uugrid(klo)
          c1 = (UGRid(khi) - u)/hhh
          c2 = (u - UGRid(klo))/hhh
-         DO j = 1, jmax1
+         DO j = 1, jmaxl
             r1 = rhogrid(klo, j)
             r2 = rhogrid(khi, j)
             IF(r1.GT.0 .AND. r2.GT.0)THEN

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-14 17:14:39 $
-Ccc   * $Id: input.f,v 1.18 2003-10-14 17:14:39 herman Exp $
+Ccc   * $Date: 2003-10-30 18:45:18 $
+Ccc   * $Id: input.f,v 1.19 2003-10-30 18:45:18 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -4517,25 +4517,25 @@ C
 C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /FISC  / FIScon
 
-      COMMON /ROFI1/ enh_ld(2, NFHUMP)
+      COMMON /CRITNI  / TCRtni(9,NFPARAB), ECOndni(9,NFPARAB),
+     &                  ACRtni(9,NFPARAB), UCRtni(9,NFPARAB),
+     &                  DETcrtni(9,NFPARAB), SCRtni(9,NFPARAB)
+c     &                  ACR, ATIl
+      COMMON /ROFI1/ enh_ld(3, NFHUMP)
 
 
-      DOUBLE PRECISION r0, mm2,enh_ldm
+      DOUBLE PRECISION r0, mm2,enh_ld
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
      &                 DELp, DETcrt, ECOnd, GAMma, SCR, TCRt, UCRt
 
-      DOUBLE PRECISION ho(NFPARAB), epsil(NFPARAB),ejoin(2*NFPARAB),
-     &                 vjj(NFPARAB),smiu
 
       INTEGER ka, kz, NLWst, nrbarc
-      REAL Fiscon
+
       CHARACTER*2 simb, symma, symmb
       CHARACTER*20 cara
       CHARACTER*33 cara1
       CHARACTER*55 cara2
-      CHARACTER*50 filename
 C
 C-----fundamental fission barrier
 C-----FISBAR=0 RIPL-2; HF-BCS theoretical heights for simple and double barriers,
@@ -4627,96 +4627,13 @@ C     Default value for curvatures and protection !!
       ENDDO
 C
       IF(NRWel.NE.(NRBar-1)/2) SUBbar(Nnuc) = 0.
+
       NRBarc=NRBar-NRWel
 
-
-C-----deformations at saddles and wells and matching points--------------------
-C     Fission barriers are modelled by NRBar parabols
-C     EPSil(i) are the parabols vortex
-C     EJOin(i) are the corresponding deformation at which parabols join
-
-      SMIu = 0.1643167*A(Nnuc)**(5./6.)
-      IF(NRBar.eq.1) THEN
-         deffis(1)=SQRT(efb(1))/(SMIu*H(1))+2*def(1,Nnuc)
-         Goto 7692
-      ENDIF
-
-      IF(NRBarc.eq.2) THEN
-          NRbarm=3
-         If(NRwel.eq.0)THEN
-            efb(3)=2.
-            h(3) = 1.
-         ENDIF   
-         VJJ(1) = efb(1)
-         VJJ(2) = efb(3)
-         VJJ(3) = efb(2)
-         ho(1)=h(1)
-         ho(2)=h(3)
-         ho(3)=h(2)
-      ENDIF
-      IF(NRBarc.eq.3) THEN
-         NRbarm=5
-         If(NRwel.eq.0)THEN
-            efb(4)=2.
-            h(4) = 1.
-            efb(5)=5.
-            h(5) = 1.2
-         ENDIF
-         If(NRwel.eq.2)THEN
-            VJJ(1) = efb(1)
-            VJJ(2) = efb(4)
-            VJJ(3) = efb(2)
-            VJJ(4) = efb(5)
-            VJJ(5) = efb(3)
-            ho(1)=h(1)
-            ho(2)=h(4)
-            ho(3)=h(2)
-            ho(4)=h(5)
-            ho(5)=h(3)
-         ENDIF
-      ENDIF
-
-      DO i=1,nrbarm
-         epsil(i)=0.
-         ejoin(i)=0.
-c         ejoin(2*i)=0.
-      ENDDO   
-
-      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))+2*def(1,Nnuc)
-      EJOin(2) = EPSil(1)
-     &          + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
-     &           /(SMIu*HO(1))
-      EJOin(1) = 2*EPSil(1) - EJOin(2)
-C
-      DO k = 2, NRBarm
-         EJOin(2*k - 1) = EJOin(2*(k - 1))
-         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
-     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
-C
-         IF(k.LT.NRBarm)EJOin(2*k) = EPSil(k)
-     &               + SQRT(ABS(( - 1)**k*((VJJ(k+1) - VJJ(k)))
-     &                              /(1.D0 + (HO(k)/HO(k+1))**2)))
-     &                              /(SMIu*HO(k))
-
-      ENDDO
-     
-
-      IF(NRBarc.eq.2.and.NRWel.eq.1) THEN
-         deffis(1) = epsil(1)
-         deffis(2) = epsil(3)
-         deffis(3) = epsil(2)
-      ENDIF
-      IF(NRBarc.eq.3) THEN
-         deffis(1) = epsil(1)
-         deffis(2) = epsil(3)
-         deffis(3) = epsil(5)
-         deffis(4) = epsil(2)
-         deffis(5) = epsil(4)        
-      ENDIF
-
+    
 C----------------------input fundamental fission barrier *** done
-C     discrete barriers---------------------------------------
- 7692 DO ibar = 1, NRBar
+C------- discrete barriers---------------------------------------
+      DO ibar = 1, NRBar
          EFDis(1, ibar) = 0.
          SFDis(1, ibar) = XJLv(1, Nnuc)
          IPFdis(1, ibar) = LVP(1, Nnuc)
@@ -4772,23 +4689,6 @@ C
          ENDIF
       ENDIF
 
-
-C----moments of inertia for each deformation
-         FIScon = 2.
-         CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
-         mm2 = 0.24*A(Nnuc)**(2./3.)
-         r0 = 1.4
-         DO i = 1, nrbar
-
-      write(6,*)'mom',acrt,mm2,deffis(i),momparcrt(i),momortcrt(i)      
-            MOMparcrt(i) = 6*ACRt*mm2*(1. - (2./3.)*DEFfis(i))/PI**2
-            MOMortcrt(i) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &                     *(1. + (1./3.)*DEFfis(i))
-           write(6,*)'orto',a(nnuc),momortcrt(i),deffis(i)
-            HJ(i) = 0.5*(1.0/Momparcrt(i) - 1.0/Momortcrt(i))
-         ENDDO
-C
-C
 C------- writing data in FISSION.INP
       WRITE(79, '(a8)')'Isotope:'
       WRITE(79, '(a40)')'----------------------------------------'
@@ -4808,67 +4708,30 @@ C------- writing data in FISSION.INP
          WRITE(79, '(a)')
      &         '    Va      ha    (in Mev) '
          WRITE(79, '(2f8.3)')EFB(1), H(1) 
-         WRITE(79, *)' '
-         WRITE(79, '(2a10)')'h2/2J(A)', '(in MeV)'
-         WRITE(79, '(f9.4)') HJ(1)
-         WRITE(79, *)' '
-         WRITE(79, '(a10)')'Beta2(A)'
-         WRITE(79, '(f9.4)')DEFfis(1)
-         WRITE(79, *)' '
       ENDIF
 
       IF(NRBar.EQ.2) THEN
          WRITE(79, '(a)')
      &         '    Va      ha      Vb      hb     (in Mev) '
          WRITE(79, '(4f8.3)')(EFB(i), H(i), i = 1, NRBar) 
-         WRITE(79, *)' '
-         WRITE(79, '(3a10)')'h2/2J(A)', 'h2/2J(B)', '(in MeV)'
-         WRITE(79, '(2f9.4)')(HJ(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(2a10)')'Beta2(A)', 'Beta2(B)'
-         WRITE(79, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
-         WRITE(79, *)' '
       ENDIF
 
       IF(NRBar.EQ.3.and.NRWel.EQ.1) THEN
          WRITE(79, '(a,1x,a)')
      &       '    Va      ha      Vb      hb      Vi      hi  (in Mev) '
          WRITE(79, '(6f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(4a10)')'h2/2J(A)', 'h2/2J(B)','h2/2J(I)','(in MeV)'
-         WRITE(79, '(3f9.4)')(HJ(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(I)'
-         WRITE(79, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
-         WRITE(79, *)' '
       ENDIF
 
       IF(NRBar.EQ.3.and.NRWel.EQ.0) THEN
          WRITE(79, '(a,1x,a)')
      &       '    Va      ha      Vb      hb      Vc      hc  (in Mev) '
          WRITE(79, '(6f8.3,15x)')(EFB(i), H(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(4a10)')'h2/2J(A)', 'h2/2J(B)','h2/2J(C)','(in MeV)'
-         WRITE(79, '(3f9.4)')(HJ(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)'
-         WRITE(79, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
-         WRITE(79, *)' '
       ENDIF
 
       IF(NRBar.EQ.5) THEN
          WRITE(79, '(a,1x,a)') '    Va      ha      Vb      hb      Vc
      &    hc      Vi      hi      Vo      ho        (in Mev) '
          WRITE(79, '(10f8.3,15x)')(EFB(i), H(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)',
-     &                      'h2/2J(I)', 'h2/2J(O)', '(in MeV)'
-         WRITE(79, '(5f9.4)')(HJ(i), i = 1, NRBar)
-         WRITE(79, *)' '
-         WRITE(79, '(6a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)',
-     &                     'Beta2(I)', 'Beta2(O)', '        '
-         WRITE(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
-         WRITE(79, *)' '
       ENDIF
 
 C
@@ -4918,13 +4781,13 @@ C
          WRITE(79,*) '  '
          WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
          WRITE(79,*) '  '
-         WRITE(79, '(A9,f9.5,a9,f9.5, A9,f9.5,a9,f11.5)')'Acrt=', ACRt, 
-     &         'Ucrt=', UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
-         WRITE(79, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
+c         WRITE(79, '(A9,f9.5,a9,f9.5, A9,f9.5,a9,f11.5)')'Acrt=', ACRt, 
+c     &         'Ucrt=', UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
+c         WRITE(79, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
          WRITE(79,*) '  '
          DO i = 1, nrbarc
             WRITE(79, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
-     &            MOMparcrt(i), ' Momort=', MOMortcrt(i)
+     &            MOMparcrt(nnuc,i), ' Momort=', MOMortcrt(nnuc,i)
          ENDDO
       ENDIF
 
@@ -4934,6 +4797,7 @@ c         the fission level densities;
       DO nr=1, NRBarc
          enh_ld(1,nr)=1.
          enh_ld(2,nr)=0.
+         enh_ld(3,nr)=0.
       ENDDO         
 
       WRITE(79,*) '   '     
@@ -4943,41 +4807,38 @@ c         the fission level densities;
      &energy'
       WRITE(79,*) '                a0       a1  '
       DO nr=1, NRBarc
-         WRITE(79,'(1x, A8, 1x, I1, 2f9.3)') 'Barrier', nr,
-     &           enh_ld(1,nr),enh_ld(2,nr)
+         WRITE(79,'(1x, A8, 1x, I1, 3f9.3)') 'Barrier', nr,
+     &           enh_ld(1,nr),enh_ld(2,nr),enh_ld(3,nr)
          
       ENDDO   
 C
       END
 
-c----------------------------------------------------------------------
+
+c---------------------------------------------------------------------
       SUBROUTINE READ_INPFIS(Nnuc)
       
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C     
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
-      COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /FISC  / FIScon
-      COMMON /ROFI1/ enh_ld(2, NFHUMP)
+      COMMON /ROFI1/ enh_ld(3, NFHUMP)
 C     
 
 
 c      DOUBLE PRECISION enh_ld
-      DOUBLE PRECISION r0, mm2
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
      &     DELp, DETcrt, ECOnd, enh_ld, GAMma, SCR, TCRt, UCRt
       
 
-      INTEGER ka, kz, NLWst, nrbarc,iz,ia
-      CHARACTER*2 simb, symma, symmb,carz,cara3
+      INTEGER NLWst, nrbarc,iz,ia
+      CHARACTER*2 carz,cara3
       CHARACTER*8 cara8
       CHARACTER*20 cara
       CHARACTER*33 cara1
       CHARACTER*55 cara2
-      CHARACTER*50 filename
+      CHARACTER*40 line 
 
-      REAL FISCON
 C     
      
       OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
@@ -5003,13 +4864,14 @@ C
      &        (EFB(i), H(i), i = 1, NRBar) 
          IF(NRBar.EQ.5)READ(79, '(10f8.3,15x)')
      &        (EFB(i), H(i), i = 1, NRBar) 
-         READ(79, *)
-         READ(79, *)
-         READ(79, '(5f9.4)')(HJ(i), i = 1, NRBar)
-         READ(79, *)
-         READ(79, *)
-         READ(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
-         READ(79, *)
+c         READ(79, *)
+c         READ(79, *)
+c         READ(79, '(5f9.4)')(HJ(nnuc,i), i = 1, NRBar)
+c         READ(79, *)
+c         READ(79, *)
+c         READ(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
+c         READ(79, *)
+c
          READ(79, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
          READ(79, *)
 C     
@@ -5038,13 +4900,13 @@ C
               
          IF(FISden(nnuc).EQ.0.)THEN
             READ(79,*)  
-            READ(79, '(3(A9,f9.5),a9,f11.5)')cara, ACRt, cara, UCRt, 
-     &           cara, ECOnd, cara, DETcrt
-            READ(79, '(2(A9,f9.5))')cara, TCRt, cara, SCR
+c            READ(79, '(3(A9,f9.5),a9,f11.5)')cara, ACRt, cara, UCRt, 
+c     &           cara, ECOnd, cara, DETcrt
+c            READ(79, '(2(A9,f9.5))')cara, TCRt, cara, SCR
             READ(79,*)  
             DO i = 1, nrbarc
                READ(79, '(i3,A10,f11.6,a10,f11.6)')ii, cara, 
-     &              MOMparcrt(i), cara, MOMortcrt(i)
+     &              MOMparcrt(nnuc,i), cara, MOMortcrt(nnuc,i)
             ENDDO
          ENDIF
          READ(79, *)    
@@ -5053,8 +4915,8 @@ C
          READ(79,*)cara1
 
          DO nr=1, NRBarc
-            READ(79,'(1x, A8, 1x, I1, 2f9.3)') cara5, i, 
-     &           enh_ld(1,nr),enh_ld(2,nr)                          
+            READ(79,'(1x, A8, 1x, I1, 3f9.3)') cara5, i, 
+     &           enh_ld(1,nr),enh_ld(2,nr),enh_ld(3,nr)                      
          ENDDO
       ELSE
          GOTO 1560        
@@ -5062,22 +4924,122 @@ C
       CLOSE(79)
       
       END
+
+c-----------------------------------------------------------------------
+      SUBROUTINE DEFO_FIS(Nnuc)
+C-----continuum, level densities at saddle points
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      DOUBLE PRECISION ho(NFPARAB), epsil(NFPARAB),ejoin(2*NFPARAB),
+     &                 vjj(NFPARAB),smiu
+
+      NRBarc=NRBar-NRWel
+
+
+C-----deformations at saddles and wells and matching points--------------------
+C     Fission barriers are modelled by NRBar parabols
+C     EPSil(i) are the parabols vortex
+C     EJOin(i) are the corresponding deformation at which parabols join
+
+      SMIu = 0.1643167*A(Nnuc)**(5./6.)
+      IF(NRBar.eq.1) THEN
+         deffis(1)=SQRT(efb(1))/(SMIu*H(1))+2*def(1,Nnuc)
+         Goto 7692
+      ENDIF
+
+      IF(NRBarc.eq.2) THEN
+          NRbarm=3
+         If(NRwel.eq.0)THEN
+            efb(3)=2.
+            h(3) = 1.
+         ENDIF   
+         VJJ(1) = efb(1)
+         VJJ(2) = efb(3)
+         VJJ(3) = efb(2)
+         ho(1)=h(1)
+         ho(2)=h(3)
+         ho(3)=h(2)
+      ENDIF
+      IF(NRBarc.eq.3) THEN
+         NRbarm=5
+         If(NRwel.eq.0)THEN
+            efb(4)=2.
+            h(4) = 1.
+            efb(5)=5.
+            h(5) = 1.2
+         ENDIF
+         If(NRwel.eq.2)THEN
+            VJJ(1) = efb(1)
+            VJJ(2) = efb(4)
+            VJJ(3) = efb(2)
+            VJJ(4) = efb(5)
+            VJJ(5) = efb(3)
+            ho(1)=h(1)
+            ho(2)=h(4)
+            ho(3)=h(2)
+            ho(4)=h(5)
+            ho(5)=h(3)
+         ENDIF
+      ENDIF
+
+      DO i=1,nrbarm
+         epsil(i)=0.
+         ejoin(i)=0.
+         deffis(i)=0.
+      ENDDO   
+
+      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))+2*def(1,Nnuc)
+      EJOin(2) = EPSil(1)
+     &          + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
+     &           /(SMIu*HO(1))
+      EJOin(1) = 2*EPSil(1) - EJOin(2)
+C
+      DO k = 2, NRBarm
+         EJOin(2*k - 1) = EJOin(2*(k - 1))
+         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
+     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
+C
+         IF(k.LT.NRBarm)EJOin(2*k) = EPSil(k)
+     &               + SQRT(ABS(( - 1)**k*((VJJ(k+1) - VJJ(k)))
+     &                              /(1.D0 + (HO(k)/HO(k+1))**2)))
+     &                              /(SMIu*HO(k))
+
+      ENDDO
+      
+      IF(NRBarc.eq.2.and.NRWel.eq.0) THEN
+         deffis(1) = epsil(1)
+         deffis(2) = epsil(3)
+      ENDIF
+      IF(NRBarc.eq.2.and.NRWel.eq.1) THEN
+         deffis(1) = epsil(1)
+         deffis(2) = epsil(3)
+         deffis(3) = epsil(2)
+      ENDIF
+      IF(NRBarc.eq.3) THEN
+         deffis(1) = epsil(1)
+         deffis(2) = epsil(3)
+         deffis(3) = epsil(5)
+         deffis(4) = epsil(2)
+         deffis(5) = epsil(4)        
+      ENDIF
+ 7692 END
+
+
+
+
 c--------------------------------------------
-      SUBROUTINE DAMI_ROFIS(Nnuc)
+      SUBROUTINE DAMI_ROFIS(Nnuc,ibars)
 C-----continuum, level densities at saddle points
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      COMMON /FISC  / FIScon
       COMMON /PARFIS/ ROTemp, AC, AAJ,IBAr
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
-      COMMON /ROFI1/ enh_ld(2, NFHUMP)
 
-      REAL FIScon
       DOUBLE PRECISION rotemp,rofis
 c-------------------
 
-      DOUBLE PRECISION enh_ld,efdis,efb,ugrid,xminn,xmax
+      DOUBLE PRECISION efdis,efb,ugrid,xminn,xmax
 c----------------------
       CHARACTER*2 simb, symma, symmb
       CHARACTER*20 cara
@@ -5085,45 +5047,28 @@ c----------------------
       CHARACTER*55 cara2
       CHARACTER*50 filename
 C
+      ibar=ibars
       NRbarc=NRbar-NRwel
       destepp=(excn+5.0D+0)/200
-c      destepp=0.1
+      xminn(ibar)=0.001
+      DO nr=1,NRfdis(ibar)
+         IF(EFDis(nr,ibar).GT.xminn(ibar))xminn(ibar)=EFDis(nr, ibar)
+      ENDDO   
+      xmax=excn-(efb(ibar)+xminn(ibar))+5.
+      nrbinfis(ibar)=int((xmax-xminn(ibar))/destepp)
 
 
-      DO ibar=1,NRBarc
-         xminn(ibar)=0.01
-         DO nr=1,NRfdis(ibar)
-            IF(EFDis(nr,ibar).GT.xminn(ibar))xminn(ibar)=EFDis(nr, ibar)
-         ENDDO   
-         xmax=excn-(efb(ibar)+xminn(ibar))+5.
-         nrbinfis(ibar)=int((xmax-xminn(ibar))/destepp)
-      ENDDO
-
-      IF(FISDEN(Nnuc).EQ.0.)THEN
+      IF(FISden(Nnuc).eq.0)THEN
          FISCON=2.
-         DO ibar=1,NRBarc
-            DO jj=1,NLW
-               AAJ = FLOAT(jj) + HIS(Nnuc)
-               DO kk=1,nrbinfis(ibar)
-                  Call DAMIRO(kk,Nnuc,xminn(ibar),destepp,0.)
-                  rofis(kk,jj,ibar)=rotemp
-c         write(80,*)'ROFIS',kk,ROFis(kk, jj,1),ROFis(kk, jj,2),
-c     &                      ROFis(kk, jj,3)
-               ENDDO
-            ENDDO  
-         ENDDO   
+         DO jj=1,NLW
+            AAJ = FLOAT(jj) + HIS(Nnuc)
+            DO kk=1,nrbinfis(ibar)
+               Call DAMIRO(kk,Nnuc,xminn(ibar),destepp,0.)
+               rofis(kk,jj,ibar)=rotemp
+            ENDDO
+         ENDDO  
       ENDIF
 
-      
-      if(nnuc.eq.1) then
-         DO kk=1,nrbinfis(3)
-            enerfist=xminn(3)+(kk-1)*destepp                
-            write(57,*)enerfist,ROFis(kk, 1,1),ROFis(kk, 1,2),
-     &                      ROFis(kk, 1,3)
-         ENDDO
-       endif
-
-      FISCON=0.
 C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file
       IF(FISden(Nnuc).EQ.1.)THEN
          iz = INT(Z(Nnuc))
@@ -5136,15 +5081,15 @@ C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file
  650     READ(81, 99002, ERR = 650, END = 750)simb, izr, iar
 99002    FORMAT(23x, a2, i3, 3x, i3)
          IF(simb.NE.'Z=')GOTO 650
-         IF(iar.NE.ia)GOTO 650
+         IF(iar.NE.ia .OR. izr.NE.iz)GOTO 650
          READ(81, *)
          READ(81, *)
-         i = 1
- 700     READ(81, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
-     &        (ROFis(i, j, 1), j = 1, NFISJ)
-         IF(UGRid(i).LE.0.001)GOTO 800
-         IF(i.EQ.NFISEN)GOTO 800
-         i = i + 1
+         ii = 1
+ 700     READ(81, '(f7.2,f7.3,1x,33e9.2)')UGRid(ii), t, t, t, t, 
+     &        (ROFis(ii, j, 1), j = 1, NFISJ)
+         IF(UGRid(ii).LE.0.001)GOTO 800
+         IF(ii.EQ.NFISEN)GOTO 800
+         ii = ii + 1
          GOTO 700
 
         
@@ -5163,15 +5108,15 @@ C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file
  820        READ(82, 99004, ERR = 820, END = 860)simb, izr, iar
 99004       FORMAT(23x, a2, i3, 3x, i3)
             IF(simb.NE.'Z=')GOTO 820
-            IF(iar.NE.ia)GOTO 820
+            IF(iar.NE.ia .OR. izr.NE.iz)GOTO 820
             READ(82, *)
             READ(82, *)
-            i = 1
- 840        READ(82, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
-     &           (ROFis(i, j,2), j = 1, NFISJ)
-            IF(UGRid(i).LE.0.001)GOTO 880
-            IF(i.EQ.NFISEN)GOTO 880
-            i = i + 1
+            ii = 1
+ 840        READ(82, '(f7.2,f7.3,1x,33e9.2)')UGRid(ii), t, t, t, t, 
+     &           (ROFis(ii, j,2), j = 1, NFISJ)
+            IF(UGRid(ii).LE.0.001)GOTO 880
+            IF(ii.EQ.NFISEN)GOTO 880
+            ii = ii + 1
             GOTO 840
  860        WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, 
      &                 ' IN HFBSC'
@@ -5182,40 +5127,43 @@ C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file
          ENDIF         
 
          IF(NRBarc.EQ.3)THEN
-            DO i = 1, NFISEN
+            DO ii = 1, NFISEN
                DO j=1,NFISJ
-                  ROFis(i, j,3)=ROFis(i, j,2)
+                  ROFis(ii, j,3)=ROFis(ii, j,2)
                ENDDO   
             ENDDO
          ENDIF
 
-         UGRid(0) = 0.
-         DO ibar=1,NRBarc
-            DO j = 1, NFISJ
-               ROFis(0, j,ibar) = 0.
-            ENDDO
-         ENDDO
+        
          
          IF(NFISJ.LT.NLW)THEN
-            DO ibar=1,NRBarc
+            DO ib=1,NRBarc
                DO j = NFISJ+1,NLW
-                  Do i=1,NFISen
-                     ROFis(i, j,ibar) = 0.
+                  Do ii=1,NFISen
+                     ROFis(ii, j,ib) = 0.
                   ENDDO   
                ENDDO
             ENDDO  
          ENDIF   
       ENDIF
 
-      write(6,*)'fisden',nnuc,fisden(nnuc)
-      DO i = 1, NFISEN              
-c         write(6,*)'ROFIS',ROFis(i, 1,1), ROFis(i, 1,2),ROFis(i, 1,3)       
-      ENDDO
-      Do ibar=1,nrbarc
-         Do i=1,nrbinfis(ibar)
-            write(6,*)'rofiss',ibar,i,rofis(i,3,ibar)
+c      UGRid(0) = 0.
+c      DO ib=1,NRBarc
+c         DO j = 1, NFISJ
+c            ROFis(0, j,ib) = 0.
+c         ENDDO
+c         ENDDO
 
-            ENDDO
-            ENDDO
+
+
+c      DO ii = 1, NFISEN              
+c         write(6,*)'ROFIS',ROFis(ii, 1,1), ROFis(ii, 1,2),ROFis(ii, 1,3)       
+c      ENDDO
+c      Do ibar=1,nrbarc
+c         Do ii=1,nrbinfis(ibar)
+c            write(6,*)'rofiss',ibar,i,rofis(i,3,ibar)
+
+c            ENDDO
+c            ENDDO
 
       END

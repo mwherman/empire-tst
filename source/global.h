@@ -1,5 +1,7 @@
-C-----GLOBAL COMMON --------------------------------------------------
+C-----GLOBAL COMMON --------------------------------------------------C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+
+
       CHARACTER SYMbe*2, SYMb*2
       CHARACTER reaction*21
       LOGICAL FILevel, FUSread, FISsil, OMParf, DEFormed, 
@@ -36,7 +38,7 @@ C
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar, 
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FITomp,
      &                 FITlev, DV, FCC, STMro, DEGa, GDIvp, TORy, EX1, 
-     &                 EX2, GST, XNI, TOTcsfis, 
+     &                 EX2, GST, XNI, TOTcsfis, CSfis,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC), 
      &                 CSHms(NDEJC), A(0:NDNUC), Z(0:NDNUC), ECUt(NDNUC)
      &                 , HIS(0:NDNUC), ATIlnor(0:NDNUC), DOBs(0:NDNUC), 
@@ -119,15 +121,15 @@ C
      &                    SUBbar(NDNUC)
       COMMON /COMFIS_I/ NRBar, NRWel, NRFdis(NFPARAB),
      &                   IPFdis(NFTRANS, NFPARAB)
-      COMMON /COMFIS_R/ EFB(NFPARAB), H(NFPARAB), HJ(NFPARAB), 
+      COMMON /COMFIS_R/ EFB(NFPARAB), H(NFPARAB), HJ(NDNUC,NFPARAB), 
      &                  DEFfis(NFPARAB), EFDis(NFTRANS, NFPARAB), 
      &                  SFDis(NFTRANS, NFPARAB), wimag(3)
       COMMON /COMFIS_CON/ ROFis(0:NFISENMAX, NDLW,NFHUMP),
      &                   UGRid(0:NFISENMAX), xminn(NFHUMP),
-     &                   NRbinfis(NFHUMP),JCC,destepp
+     &                   destepp, FISCON, NRbinfis(NFHUMP) 
 C
       DOUBLE PRECISION MOMparcrt, MOMortcrt
-      COMMON /MOMENT/ MOMparcrt(NFPARAB), MOMortcrt(NFPARAB)
+      COMMON /MOMENT/ MOMparcrt(NDNUC,NFPARAB), MOMortcrt(NDNUC,NFPARAB)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
 

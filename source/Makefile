@@ -6,7 +6,7 @@ FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
-FFLAGS =  -g -C
+#FFLAGS =  -g -C
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
 #----standard f77 FORTRAN compiler

@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-14 17:14:38 $
-Ccc   * $Id: HF-comp.f,v 1.12 2003-10-14 17:14:38 herman Exp $
+Ccc   * $Date: 2003-10-30 18:45:18 $
+Ccc   * $Id: HF-comp.f,v 1.13 2003-10-30 18:45:18 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -196,7 +196,6 @@ C
 C Local variables
 C
       INTEGER iang, icsp, iejc, ie 
-      INTEGER INT
       DOUBLE PRECISION excnq, popa, xnor 
 C
 C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
@@ -1251,7 +1250,7 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARFIS/ ROTemp, AC, AAJ, IBAr
       COMMON /COMFIS3/ VBArex(NFWELLS), TFD(NFWELLS), NRBarc
-      COMMON /COMFIS4/   TFC, TFCc
+      COMMON /COMFIS4/ TFC, TFCc,jcc
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
       COMMON /IMAG  / TF(NFWELLS), TDIr, TABs, TDIr23
       DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, 
@@ -1271,7 +1270,6 @@ C----------------------------------------
       IF(ee.EQ.0.0D0)RETURN
 C
 C     Below is an square root of (MIU divided by 2)
-C     SMIU= SQRT(0.054*A(Nnuc)**(5./3.)/2)
       SMIu = 0.1643167*A(Nnuc)**(5./6.)
 C
       JCC = Jc
@@ -1352,7 +1350,7 @@ C==============discrete contribution====================
 C                    Added by RCN, 11/2002, to be tested
 C                    Shell correction decrease of the barrier is considered
 C                    It is nucleus and spin dependent
-                     exfis = EFDis(nr, IBAr) - shctemp + HJ(IBAr)
+                     exfis = EFDis(nr, IBAr) - shctemp + HJ(nnuc,IBAr)
      &                       *(snc*(snc + 1) - SFDis(nr, IBAr)
      &                       *(SFDis(nr,IBAr) + 1))
                      VBArex(IBAr) = EFB(IBAr) + exfis
@@ -1380,8 +1378,8 @@ C
          tdirr23d=0.
          tdir23cont=0.
 
-         IF(NRBar.eq.3.and.FWel.eq.1)eeiso=ee-efb(3)
-         IF(NRBar.eq.5.and.FWel.eq.2)eeiso=ee-efb(4)
+         IF(NRBar.eq.3.and.nrwel.eq.1)eeiso=ee-efb(3)
+         IF(NRBar.eq.5.and.nrwel.eq.2)eeiso=ee-efb(4)
          wimagg=wimag(1)+wimag(2)*eeiso+wimag(3)*eeiso**2
 C
          DO nr = 1, NRFdis(1)
@@ -1405,7 +1403,7 @@ C
 C                    Added by RCN, 11/2002, to be tested
 C                    Shell correction decrease of the barrier is considered
 C                    It is nucleus and spin dependent
-                     exfis = EFDis(nr, IBAr) - shctemp + HJ(IBAr)
+                     exfis = EFDis(nr, IBAr) - shctemp + HJ(nnuc,IBAr)
      &                       *(snc*(snc + 1) - SFDis(nr, IBAr)
      &                       *(SFDis(nr,IBAr) + 1))
                      VBArex(IBAr) = EFB(IBAr) + exfis
@@ -1478,7 +1476,7 @@ c                      write(6,*)'TDIR23-0'
                          write(6,*)'TDIR23-1',tdirr23d
                      ENDIF   
                      IF(ee.gt.vbarex(2).and.ee.lt.vbarex(3))THEN
-                        tdirr23c=tfd(3)*(1./(1.+exp(ee-efb(2))))
+                        tdirr23c=tfd(3)*(1.4/(1.+exp(ee-efb(2))))
                          write(6,*)'TDIR23-2',tdirr23c
                      ENDIF
                      IF(ee.lt.vbarex(2).and.ee.lt.vbarex(3))THEN
@@ -1570,27 +1568,28 @@ C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient
 c        CALL GAUSSFIS(Nnuc, IBAr, ee)
          tfcon(IBAr) = TFCc
-c         write(80,*)'tfcc=',tfcc,ibar,tfcon(ibar)
+
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr) 
 c         TF(IBAr) = tfcon(IBAr)
       ENDDO
 C
-c      IF(ee.ge.vbarex(2).and.ee.ge.vbarex(3))THEN                  
-c         CALL SIMPSFIS(Nnuc,7,ee)
-c         Tdir23cont=tfcc
-       
-      IF(SUBBar(Nnuc).eq.1.)THEN
+
+
             TABs = TABs + tfcon(1)
-c            TABs =  tfcon(1)
-c            Tdir=0.
+ccc            TABs = TABs
+ccc            TABs = tfcon(1)
+
+ccc            Tdir=0.
+
+
             IF(NRBarc.eq.3.)THEN
                CALL SIMPSFIS(Nnuc,7,ee)
                Tdir23cont=tfcc
-               Tdir23=Tdir23+Tdir23cont !tfcon(2)*tfcon(3)
+               Tdir23=Tdir23+tdir23cont!tfcon(2)*tfcon(3)
 c               tdir23=tf(3)
-c                write(6,*)'TDIR23-tot',tdir23,tfcon(2)*tfcon(3),tfcon(1)
+                write(6,*)'TDIR23-tot',tdir23,tfcon(2)*tfcon(3),tfcon(1)
             ENDIF   
-      ENDIF   
+cc      ENDIF   
 C
 cc      smm = FLOAT(Jc) + HIS(Nnuc)
 C
@@ -1887,7 +1886,7 @@ ccc      IMPLICIT REAL*8(A-H,O-Z)
 C
       INCLUDE 'global.h'
 C
-      COMMON /COMFIS4/ TFC, TFCc
+      COMMON /COMFIS4/ TFC, TFCc,jcc
       COMMON /GDENSIT/ NNNuc, IIBar
 C
 C     INTEGER JCC
@@ -1943,11 +1942,11 @@ C     Level densities at the saddle points are used
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-      COMMON /FISC  / FIScon
+
       COMMON /PARFIS/ ROTemp, AC, AAJ, IBAr1
-c      COMMON /COMFIS4/ Jcc, TFC, TFCc
+      COMMON /COMFIS4/  TFC, TFCc,jcc
       COMMON /GDENSIT/ NNUc, IBAr
-       REAL FIScon
+
 C
       DATA pix2/6.28318530717958647692528676655901D0/
 C-----------------------------------------------
@@ -1957,14 +1956,12 @@ C
 C
          arg = pix2*Uxx/H(IBAr)
          IF(arg.GT.EXPmax)RETURN
-         FDENSITY = FISINT(IBAr, Uxx,jcc)/(1. + TFC*EXP(arg))
+         FDENSITY = FISINT(IBAr, Uxx,jcc,nnuc)/(1. + TFC*EXP(arg))
 C
       ELSEIF(FISden(NNUc).EQ.0.)THEN
 C
          FIScon = 2
-         AAJ = AJ
          IBAr1 = IBAr
-         UX = Uxx
          CALL DAMIRO(kk, NNUc, dshif, destep, asaf)
          arg = pix2*Uxx/H(IBAr)
          IF(arg.GT.EXPmax)RETURN
@@ -2124,13 +2121,13 @@ C
       END
 C
 C---------------------------------------------------
-      DOUBLE PRECISION FUNCTION FISINT(Ib, Ux,jcc1)
+      DOUBLE PRECISION FUNCTION FISINT(Ib, Ux,jcc,nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
 
       DOUBLE PRECISION ugrid,ux,rofis
-      INTEGER JCC1,kk,ib,iugrid,nrbinfis
+      INTEGER JCC,kk,ib,iugrid,nrbinfis
 C
       IF(FISDEN(Nnuc).eq.0.)THEN
          iugrid = nrbinfis(ib)
@@ -2168,15 +2165,15 @@ C
 C     LEVEL DENSITY INTERPOLATION
 C
 
-c      IF(ROFis(klo, JCC1,Ib).eq.0.)then
+c      IF(ROFis(klo, JCC,Ib).eq.0.)then
 c         FISINT=0.
 c         goto 209
 c         endif
  200  hhh = UGRid(khi) - UGRid(klo)
       c1 = (UGRid(khi) - Ux)/hhh
       c2 = (Ux - UGRid(klo))/hhh
-      r1 = ROFis(klo, JCC1,Ib)
-      r2 = ROFis(khi, JCC1,Ib)
+      r1 = ROFis(klo, JCC,Ib)
+      r2 = ROFis(khi, JCC,Ib)
       IF(r1.GT.0 .AND. r2.GT.0)THEN
          FISINT = MAX(10.**(c1*DLOG10(r1) + c2*DLOG10(r2)), 0.)
       ELSE
@@ -2379,8 +2376,8 @@ C Simpson integration
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 c      COMMON /PARFIS/ ROTemp, AC, AAJ, UX, IBAr1
-      COMMON /COMFIS4/ TFC, TFCc
-       COMMON /ROFI1/ enh_ld(2, NFhump)
+      COMMON /COMFIS4/ TFC, TFCc,jcc
+       COMMON /ROFI1/ enh_ld(3, NFhump)
 C
       INTEGER nn, i
 
@@ -2399,24 +2396,26 @@ c-------------------------
      
 
       IF(ibar.eq.7)THEN
+         write(80,*)'nrbiiin',nrbinfis(3), xminn(3),'nnuc',FISden(nnuc)
          DO i = 1,nrbinfis(3)
-            UX2 = Xminn(3) + (i - 1)*destepp
+c            UX2 = Xminn(3) + (i - 1)*destepp
+             UX2 = .02 + (i - 1)*destepp
             UX1=efb(3)+xminn(3)-efb(2) + (i - 1)*destepp
             arg1 = 2*PI*(efb(2)+UX1-ee)/H(2)
             arg2 = 2*PI*(efb(3)+UX2-ee)/H(3)
+            enh2=enh_ld(1,3)+enh_ld(2,3)*ux2+enh_ld(3,3)*ux2**2
+c      write(80,*)'arg',arg1,arg2,expmax       
             IF(arg1.LE.EXPmax.and.arg2.LE.EXPmax)THEN
-               IF(FISden(Nnuc).EQ.0.)THEN                 
-                  dens =min(FISINT(2,UX1,jcc),FISINT(3,UX2,jcc))
-     &                 /((1. + EXP(arg1))*(1. + EXP(arg2)))
+c               IF(FISden(Nnuc).EQ.0.)THEN                 
+                  dens =min(FISINT(2,UX1,jcc,nnuc),FISINT(3,UX2,jcc,nnuc
+     &            ))*enh2/((1. + EXP(arg1))*(1. + EXP(arg2)))
 
-c        write(6,*) 'dend',dens,FISINT(2,UX1,jcc),FISINT(3,UX2,jcc),
-c     &                 (1. + EXP(arg1)),(1. + EXP(arg2))
-
-
-               ENDIF
-               IF(FISden(Nnuc).EQ.1.)THEN
-                  dens = enh1* FISINT(Ibar, UX1,jcc) /(1. + EXP(arg1))
-               ENDIF   
+cc      write(80,*)'den',dens,FISINT(2,UX1,jcc,nnuc),FISINT(3,UX2,jcc,nnuc
+cc     &            ),(1. + EXP(arg1)),(1. + EXP(arg2))
+c              ENDIF
+c               IF(FISden(Nnuc).EQ.1.)THEN
+c                  dens=enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. + EXP(arg1))
+c               ENDIF   
             ELSE
                dens = 0.0   
             ENDIF
@@ -2428,6 +2427,7 @@ c     &                 (1. + EXP(arg1)),(1. + EXP(arg2))
             TFCc = TFCc + dens
          ENDDO
          TFCc = TFCc*destepp
+         write(80,*)'tfcc',tfcc
          goto 6364
       ENDIF
 
@@ -2436,16 +2436,18 @@ c      write(80,*)'nrbin',nrbinfis(ibar)
 
       DO i = 1, nrbinfis(ibar)
          UX1 = XMInn(Ibar) + (i - 1)*destepp
-         enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*ux1
+         enh1=enh_ld(1,ibar)+enh_ld(2,ibar)*ux1+enh_ld(3,ibar)*ux1**2
          arg1 = 2*PI*(efb(ibar)+UX1-ee)/H(Ibar)
          IF(arg1.LE.EXPmax)THEN
              IF(FISden(Nnuc).EQ.0.)THEN                 
                 dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
+c      write(80,*)'den',ux1,dens,jcc, ibar,rofis(I, jcc,ibar)
+c     &                        (1. + EXP(arg1)),enh1
              ENDIF
              IF(FISden(Nnuc).EQ.1.)THEN
-                dens = enh1* FISINT(Ibar, UX1,jcc) /(1. + EXP(arg1))
-c                dens = 1. /(1. + EXP(arg1))
-c                write(80,*)'fisint', i,ibar,jcc,FISINT(Ibar, UX1,jcc)
+                dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. + EXP(arg1))
+c      write(80,*)'den',ux1,dens, FISINT(Ibar, UX1,jcc,nnuc),
+c     &                        (1. + EXP(arg1))
              ENDIF   
           ELSE
              dens = 0.0   
@@ -2468,7 +2470,7 @@ c=============================================================
       INCLUDE 'global.h'
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
-      COMMON /ROFI1/ enh_ld(2, NFhump)
+      COMMON /ROFI1/ enh_ld(3, NFhump)
       nrbarc = NRBar-NRWel
 
 
@@ -2486,7 +2488,7 @@ C
                WRITE(80, '(2f8.3)')EFB(1), H(1)
                WRITE(80, *)' '
                WRITE(80, '(2a10)')'h2/2J(A)', '(in MeV)'
-               WRITE(80, '(f9.4)')HJ(1)
+               WRITE(80, '(f9.4)')HJ(nnuc,1)
                WRITE(80, *)' '
                WRITE(80, '(a10)')'Beta2(A)'
                WRITE(80, '(f9.4)')DEFfis(1)
@@ -2499,7 +2501,7 @@ C
                WRITE(80, '(4f8.3)')(EFB(i), H(i), i = 1, NRBar)
                WRITE(80, *)' '
                WRITE(80, '(3a10)')'h2/2J(A)', 'h2/2J(B)', '(in MeV)'
-               WRITE(80, '(2f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, '(2f9.4)')(HJ(nnuc,i), i = 1, NRBar)
                WRITE(80, *)' '
                WRITE(80, '(2a10)')'Beta2(A)', 'Beta2(B)'
                WRITE(80, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
@@ -2513,7 +2515,7 @@ C
                WRITE(80, *)' '
                WRITE(80, '(4a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(I)', 
      &                            '(in MeV)'
-               WRITE(80, '(3f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, '(3f9.4)')(HJ(nnuc,i), i = 1, NRBar)
                WRITE(80, *)' '
                WRITE(80, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(I)'
                WRITE(80, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
@@ -2529,7 +2531,7 @@ C
                WRITE(80, *)' '
                WRITE(80, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)', 
      &                            'h2/2J(I)', 'h2/2J(O)', '(in MeV)'
-               WRITE(80, '(5f9.4)')(HJ(i), i = 1, NRBar)
+               WRITE(80, '(5f9.4)')(HJ(nnuc,i), i = 1, NRBar)
                WRITE(80, *)' '
                WRITE(80, '(6a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)', 
      &                            'Beta2(I)', 'Beta2(O)', '        '
@@ -2575,14 +2577,14 @@ C
                WRITE(80, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
                DO i = 1, nrbarc
                   WRITE(80, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
-     &                  MOMparcrt(i), ' Momort=', MOMortcrt(i)
+     &                  MOMparcrt(nnuc,i), ' Momort=', MOMortcrt(nnuc,i)
                ENDDO
             ENDIF
 
             WRITE(80,*) '   '      
             WRITE(80,*) '                a0       a1  '
             DO nr=1, NRBarc
-               WRITE(80,'(1x, A8, 1x, I1, 2f9.3)') 'Barrier', nr,
-     &              enh_ld(1,nr),enh_ld(2,nr)       
+               WRITE(80,'(1x, A8, 1x, I1, 3f9.3)') 'Barrier', nr,
+     &              enh_ld(1,nr),enh_ld(2,nr),enh_ld(3,nr)         
             ENDDO   
       END

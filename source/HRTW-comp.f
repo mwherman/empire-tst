@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: HRTW-comp.f,v 1.7 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-10-30 18:45:18 $
+Ccc   * $Id: HRTW-comp.f,v 1.8 2003-10-30 18:45:18 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -138,7 +138,7 @@ C-----------gamma emision
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
-            IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
+            IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip,jcn, sumfis,cota)
             H_Sumtl = H_Sumtl + sumfis
             H_Sweak = H_Sweak + sumfis
             IF(H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)THEN

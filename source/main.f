@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-14 17:14:39 $
-Ccc   * $Id: main.f,v 1.14 2003-10-14 17:14:39 herman Exp $
+Ccc   * $Date: 2003-10-30 18:45:18 $
+Ccc   * $Id: main.f,v 1.15 2003-10-30 18:45:18 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -201,23 +201,13 @@ Ccc
 C
 C     COMMON variables
 C
-C fisfis d---------------------------
+
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
       INTEGER NRBar, NRFdis, ibaro
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23
-      CHARACTER*40 line
-      CHARACTER*2 carz, cara
-      CHARACTER*8 cara1
-      CHARACTER*28 cara2
-      CHARACTER*8 cara5
-      CHARACTER*20 cara3
-      CHARACTER*15 cara4
-      CHARACTER*36 cara6
-      CHARACTER*7 cara9
-      CHARACTER*55 cara10
+
       CHARACTER*9 cejectile
-C fisfis u-----------------------------
 C
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
       INTEGER NELang
@@ -226,9 +216,8 @@ C-----next COMMON is to transfer elastic ddx from Scat-2
 C
 C     Local variables
 C
-C fisfis d-----------------
       DOUBLE PRECISION aafis, bbfis, dencomp, xnorfis
-C fisfis u------------------
+
       DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
      &                 cturbo, ded, delang, elcncs, gamfis, gamt, pope, 
      &                 popleft, poplev, poptot, popread, dang, coef, 
@@ -648,15 +637,40 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
          ENDDO
       ENDIF
 C     fisfis d
-       write(6,*)'hello0'
+
       OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN') 
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
-C        fisfis d
+         DO kk=0,NFISENMAX
+            DO jj=1,NDLW
+               DO ibars=1,NFPARAB
+                  rofis(kk,jj,ibars)=0.
+               ENDDO
+            ENDDO
+         ENDDO
+      
          IF(FISsil(nnuc))THEN
             Call READ_INPFIS(Nnuc)
-            Call Dami_rofis(Nnuc)
-            Call WRITE_OUTFIS(Nnuc)
+            Call DEFO_FIS(Nnuc)
+C------------moments of inertia for each deformation
+            NRbarc=Nrbar-Nrwel
+            FIScon = 2.
+            mm2 = 0.24*A(Nnuc)**(2./3.)
+            r0 = 1.4
+            DO ibars = 1, nrbar
+               CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
+               MOMparcrt(nnuc,ibars)=6*ACRt*mm2*(1. - (2./3.)*
+     &                           DEFfis(ibars))/PI**2
+               MOMortcrt(nnuc,ibars) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
+     &                             *(1. + (1./3.)*DEFfis(ibars))
+               HJ(nnuc,ibars)=0.5*(1.0/Momparcrt(nnuc,ibars)-
+     &                    1.0/Momortcrt(nnuc,ibars))
+               IF(ibars.gt.Nrbarc)goto 3031
+               IF(FISDEN(Nnuc).EQ.0.)Call DAMI_ROFIS(Nnuc,ibars)
+ 3031       ENDDO
+            IF(FISDEN(Nnuc).EQ.1) Call Dami_rofis(Nnuc,1)
+            FISCON=0.
+            Call WRITE_OUTFIS(Nnuc) 
          ENDIF   
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
@@ -1281,7 +1295,8 @@ C-----------life-times and widths  *** done ***
             WRITE(6, '('' Fission    cross section    '',G12.5,'' mb'')'
      &            )csfis
          ENDIF
-         TOTcsfis = TOTcsfis + csfis
+c        if(nnuc.eq.1)TOTcsfis = TOTcsfis + csfis
+          TOTcsfis = TOTcsfis + csfis
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1)THEN
