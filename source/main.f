@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 14:52:04 $
-Ccc   * $Id: main.f,v 1.56 2005-02-09 14:52:04 Capote Exp $
+Ccc   * $Date: 2005-02-09 18:16:07 $
+Ccc   * $Id: main.f,v 1.57 2005-02-09 18:16:07 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1830,7 +1830,7 @@ C-----end of ENDF spectra (inclusive)
          CALL THORA(6)
          STOP '. REGULAR STOP'
       ENDIF
-      CALL THORA(6)
+C     CALL THORA(6)
       FIRst_ein = .FALSE.
       GOTO 1400
 99012 FORMAT(I12, F10.4, I5, F8.1, G15.6, I3,
