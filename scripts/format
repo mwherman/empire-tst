@@ -36,16 +36,17 @@ cd $work
 
 # RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
 
-rm $file.endf 2>/dev/null
-cd ../util/endres/
-rm empire.end endf.dat 2>/dev/null
-ln -sf $work/$file-f.endf empire.end
-./endres <ENDRES.INP
-rm empire.end 
-mv endf.dat $work/$file.endf
-mv endres.lst $work/$file-log.endres
-cd $work
+#rm $file.endf 2>/dev/null
+#cd ../util/endres/
+#rm empire.end endf.dat 2>/dev/null
+#ln -sf $work/$file-f.endf empire.end
+#./endres <ENDRES.INP
+#rm empire.end 
+#mv endf.dat $work/$file.endf
+#mv endres.lst $work/$file-log.endres
+#cd $work
 # $work/$file.endf is the final ENDF output file
+mv $file-f.endf $file.endf
 
 # RUN STANEF
 
@@ -59,5 +60,10 @@ DONE
 EOF
 ../util/stanef/stanef <INPUT
 mv $file-stan.endf $file.endf
+
+# remove left-over files
+rm INPUT 2>/dev/null
+rm angdis.cur 2>/dev/null
+rm angdis.pnt 2>/dev/null
 
 exit
