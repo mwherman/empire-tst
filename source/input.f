@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-16 16:01:44 $
-Ccc   * $Id: input.f,v 1.79 2005-02-16 16:01:44 herman Exp $
+Ccc   * $Date: 2005-02-18 19:22:51 $
+Ccc   * $Id: input.f,v 1.80 2005-02-18 19:22:51 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -815,6 +815,16 @@ C        Key_shape =6 --> fE1=SLO
 C
 C--------check input for consistency
 C
+         DO nnuc = 1, NNUcd 
+            IF(FISBAR(nnuc).NE.1 .AND. FISopt(nnuc).NE. 0)THEN
+               FISopt(nnuc) = 0
+               WRITE(6, *)' '
+               WRITE(6, *)' WARNING: Subbarrier effects in the fission'
+               WRITE(6, *)' WARNING: channel allowed only for FISBAR=1'
+               WRITE(6, *)' WARNING: FISOPT has been set to 0 '
+               WRITE(6, *)' '
+            ENDIF 
+         ENDDO 
          IF(LHRtw.NE.0 .AND. LTUrbo.NE.1)THEN
             LTUrbo = 1
             WRITE(6, *)' '
