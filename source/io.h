@@ -3,42 +3,70 @@ c
 c     Unit#  Module
 c
 c      1     tl
-c      3     MSD-Orion3
+c      3     MSD-Orion
 c      4     ddhms
 c      8     MSD-Orion
 c      9     ddhms
 c     10     ddhms
 c     13     input
-c     15     MSD-Orion3
-c     16     MSD-Tristan
 c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
 c     22     input
-c     27     ddhms
+c     27     ddhms,input
 c     28     ddhms
 c     32     input,tl
 c     34     lev-dens
+c     35     lev-dens
+c     36     lev-dens
+c     38     lev-dens
 c     39     tl
-c     43     SDREAD (Plujko change)
 c     45     tl,fusion,main
 c     46     tl,fusion,main
-c     60     main
-c     62     main
-c     66     MSD-Tristan
+c     47     fusion,input
+c     51     input
+c     52     input
+c     54     HF-comp
+c     55     ecis03
+c     58     ecis03
+c     59     ecis03
+c     60     ecis03,main
+c     61     ecis03
+c     62     ecis03,main
+c     63     ecis03
+c     64     ecis03
+c     65     ecis03
+c     66     ecis03,MSD-Tristan
+c     75     ecis03
+c     76     ecis03
 c     77     input
+c     78     ecis03
+c     79     input
+c     80     main
+c     81     input
+c     82     input
+c     83     input
+c     84     input
+c     85     ecis03
+c     86     ecis03
+c     87     ecis03
+c     88     ecis03
+c     89     ecis03
+c     90     ecis03
+c     99     ecis03
 c    133     tl
 c    134     tl
+c    157     HF-comp
 c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='NEW')
-C-----Plujko_new (spin distribution from file SDFILE)
+C-----spin distribution from file SDFILE
       OPEN(UNIT=43,FILE='SDREAD', STATUS='OLD', ERR=768)
       SDREAD=.TRUE.
       GOTO 869
  768  SDREAD=.FALSE.
  869  CONTINUE
-C-----Plujko_new (END of spin distribution from file SDFILE)
+C-----fusion transmission coefficients from file FUSION
       OPEN(UNIT=11,FILE='FUSION'   , STATUS='OLD', ERR=778)
       FUSREAD=.TRUE.
       GOTO 889
@@ -76,24 +104,13 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN(UNIT=29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-*-IF VMS
-*-    OPEN(UNIT=23,FILE='[-.data]nparac.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=24,FILE='[-.data]ldp.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=25,FILE='[-.data]nix-moller-audi.dat'
-*-   *,STATUS='OLD')
-*-    OPEN(UNIT=26,FILE='[-.RIPL-2.OPTICAL.OM-DATA]OM-PARAMETER-U.DAT'
-*-   *,STATUS='OLD')
-*-ELSEIF LINUX
       OPEN(UNIT=23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
       OPEN(UNIT=24,FILE='../data/ldp.dat'
      *,STATUS='OLD')
-      OPEN(UNIT=25,FILE='OMPdata.dat')
+C     OPEN(UNIT=25,FILE='OMPdata.dat')
       OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
-*-ENDIF
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
 C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
