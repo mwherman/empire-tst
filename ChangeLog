@@ -74,7 +74,7 @@
     access to the periodically updated EXFOR library issued by the IAEA-NDS
     on CD-ROMs (V. Zerkin M. Herman).
 31. Preequilibrium emission of clusters (Iwamoto-Harada) coded by R. Capote
-    and implemented by M. Herman.
+    (PCROSS module) and implemented by M. Herman.
 32. Xrun.tcl GUI updated: selective delete, access to fission input, and 
     generation of three piece-wise input templates (M. Herman).
 33. ZVView updated to the zvv97l.exe version (V. Zerkin).
@@ -88,6 +88,11 @@
 38. CHECKR added to the chain of utility codes (M. Herman).
 39. FIZCON added to the chain of utility codes (M. Herman).
 40. STANEF added to the chain of utility codes (M. Herman).
+41. Printing particle spectra in the *.out output of EMPIRE rearanged
+    so that transitions to the discrete levels  are printed first with negative
+    energies and end points of the spectra are indicated by repeating the line.
+42. Suite of gamma-strength functions from RIPL-2 coded by Plujko and
+    implemented by R. Capote.
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

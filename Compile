@@ -17,6 +17,8 @@ cd ../sixtab
 make
 cd ../lsttab
 make
+cd ../pltlst
+make
 cd ../legend
 make
 cd ../endres

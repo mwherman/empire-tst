@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.6 $
-C $Id: ddhms.f,v 1.6 2004-04-23 05:15:45 herman Exp $
+C CVS Version Management $Revision: 1.7 $
+C $Id: ddhms.f,v 1.7 2004-06-15 22:16:18 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2041,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.6 $')
+99001 FORMAT('  ddhms version: $Revision: 1.7 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.6 2004-04-23 05:15:45 herman Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.7 2004-06-15 22:16:18 herman Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4746,6 +4746,8 @@ C-----finally store ddx on Empire array CSEa
 C
 C-----transfer population of residual nuclei
 C
+      CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
+      CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
       DO jz = 0, Jzmax
          DO jn = 0, Jnmax
             IF(jz.EQ.0 .AND. jn.EQ.0)THEN   ! 1-st CN
@@ -4822,17 +4824,17 @@ C--------------population of continuum
                sumcon = 0.0
                DO nu = 1, NEX(nnur)
                   DO jsp = 1, jmax
-                     IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.2)THEN
+                     IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.mt91)THEN
                         POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
      &                     + auxout(nu, jsp)
                         POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
      &                     + auxout(nu, jsp)
-                     ELSEIF(IDNa(4, 5).EQ.1 .AND. nnur.EQ.3)THEN
+                     ELSEIF(IDNa(4, 5).EQ.1 .AND. nnur.EQ.mt649)THEN
                         POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
      &                     + auxout(nu, jsp)
                         POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
      &                     + auxout(nu, jsp)
-                     ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+                     ELSEIF(nnur.NE.mt91 .AND. nnur.NE.mt649)THEN
                         POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
      &                     + auxout(nu, jsp)
                         POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
@@ -4879,22 +4881,23 @@ C              ENDDO
 C--------------test output *** done ***
 C--------------population of discrete levels (evenly distributed)
                sumcon = (RESpop(jz, jn) - sumcon)/NLV(nnur)
-               IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.2)THEN
+               IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.mt91)THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + sumcon
                   ENDDO
-               ELSEIF(IDNa(3, 5).EQ.1 .AND. nnur.EQ.3)THEN
+               ELSEIF(IDNa(3, 5).EQ.1 .AND. nnur.EQ.mt649)THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + sumcon
                   ENDDO
-               ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+               ELSEIF(nnur.NE.mt91 .AND. nnur.NE.mt649)THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il, nnur) = POPlv(il, nnur) + sumcon
                   ENDDO
                ENDIF
 C
 C--------------transfer excitation energy dependent recoil spectra
-C--------------(if ENDF=2 only)
 C          
 C--------------clean auxiliary auxrec1 matrix
                IF(ENDf.GT.0)THEN

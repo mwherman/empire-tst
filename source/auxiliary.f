@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-01 21:59:26 $
-Ccc   * $Id: auxiliary.f,v 1.10 2004-06-01 21:59:26 herman Exp $
+Ccc   * $Date: 2004-06-15 22:16:18 $
+Ccc   * $Id: auxiliary.f,v 1.11 2004-06-15 22:16:18 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -69,6 +69,7 @@ C----Plujko_new(End)
       DO nejc = 0, NEJcm
          DO il = 1, NDLV
             REClev(il, nejc) = 0.0
+            CSDirlev(il,nejc) = 0.0
          ENDDO
          DO ie = 1, NDECSE
             AUSpec(ie, nejc) = 0.0

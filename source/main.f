@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-11 22:13:34 $
-Ccc   * $Id: main.f,v 1.31 2004-06-11 22:13:34 herman Exp $
+Ccc   * $Date: 2004-06-15 22:16:19 $
+Ccc   * $Id: main.f,v 1.32 2004-06-15 22:16:19 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -338,6 +338,7 @@ C              ECIS03, May 2004, changed to read from file 46
 C              READ(45, *, END = 1500)popread
                ncoll = i
                POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
+               CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
                CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
 C--------------add direct transition to the spectrum
                popl = popread*(FLOAT(icsh) - xcse)/DE
@@ -1340,6 +1341,23 @@ C--------Integrating exclusive population spectra (ENDF)
                emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
             ENDIF
          ENDDO
+c        Add contribution from discrete levels for MT=91,649,849
+         IF(nnuc.EQ.mt91) THEN
+            nejc = 1
+            DO ilev = 1, NLV(nnuc)
+               xtotsp = xtotsp + CSDirlev(ilev,nejc)
+            ENDDO 
+         ELSEIF(nnuc.EQ.mt649) THEN
+            nejc = 2
+            DO ilev = 1, NLV(nnuc)
+               ptotsp = ptotsp + CSDirlev(ilev,nejc)
+            ENDDO 
+         ELSEIF(nnuc.EQ.mt849) THEN
+            nejc = 3
+            DO ilev = 1, NLV(nnuc)
+               atotsp = atotsp + CSDirlev(ilev,nejc)
+            ENDDO 
+         ENDIF 
          POPCS(0,nnuc) = gtotsp
          POPCS(1,nnuc) = xtotsp
          POPCS(2,nnuc) = ptotsp
@@ -1523,6 +1541,7 @@ C--------
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF(POPCS(nejc,nnuc).EQ.0) CYCLE 
                   nspec = INT(EMAx(nnuc)/DE) + 2
+                  nexrt = INT((EMAx(nnuc) - ECUt(Nnuc))/DE + 1.0001)
                   IF(nejc.EQ.0) THEN 
                      cejectile = 'gammas   '
                      iizaejc = 0
@@ -1573,8 +1592,7 @@ C-----------------------(continuum part)
                               CSEa(ie, nang, nejc, 0) = 0.0
                            ENDDO
                         ENDDO
-                        DO ie = 1, nspec ! reconstruct DDX spectrum
-C Add here IF omitting adding MSD component related to discrete levels
+                        DO ie = 1, nexrt ! reconstruct continuum DDX spectrum
                            DO nang = 1,NDANG 
                               piece = CSEmsd(ie,nejc)
                               IF(ie.EQ.NEXr(nejc, 1)) piece = 0.5*piece
@@ -1583,11 +1601,27 @@ C Add here IF omitting adding MSD component related to discrete levels
      &                        *POPcseaf(0,nejc,ie,Nnuc))
      &                        /4.0/PI + CSEa(ie, nang, nejc, 1)*
      &                        POPcseaf(0,nejc,ie,Nnuc))
-                              WRITE(6,*)'ie,nang,nnuc,nejc',
-     &                           ie,nang,nnuc,nejc 
-                              WRITE(6,*)'POPcse,piece,POPcseaf',
-     &                           POPcse(0,nejc,ie,nnuc),piece,
-     &                           POPcseaf(0,nejc,ie,Nnuc)
+c                             WRITE(6,*)'ie,nang,nnuc,nejc',
+c    &                           ie,nang,nnuc,nejc 
+c                             WRITE(6,*)'POPcse,piece,POPcseaf',
+c    &                           POPcse(0,nejc,ie,nnuc),piece,
+c    &                           POPcseaf(0,nejc,ie,Nnuc)
+                           ENDDO
+                        ENDDO
+                        DO ie = nexrt+1, nspec ! reconstruct discrete DDX spectrum
+                           DO nang = 1,NDANG 
+c                             piece = CSEmsd(ie,nejc)
+c                             IF(ie.EQ.NEXr(nejc, 1)) piece = 0.5*piece
+                              CSEa(ie, nang, nejc, 0) = 
+     &                           POPcse(0,nejc,ie,nnuc)/4.0/PI 
+c                             CSEa(ie, nang, nejc, 0) = 
+c    &                        (POPcse(0,nejc,ie,nnuc) - piece
+c    &                        *POPcseaf(0,nejc,ie,Nnuc))/4.0/PI
+c                             WRITE(6,*)'ie,nang,nnuc,nejc',
+c    &                           ie,nang,nnuc,nejc 
+c                             WRITE(6,*)'POPcse,piece,POPcseaf',
+c    &                           POPcse(0,nejc,ie,nnuc),piece,
+c    &                           POPcseaf(0,nejc,ie,Nnuc)
                            ENDDO
                         ENDDO
                         DO nang = 1,NDANG !double the first bin to preserve integral in EMPEND

@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-11 13:59:33 $
-Ccc   * $Id: pcross.f,v 1.9 2004-06-11 13:59:33 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-15 22:16:19 $
+Ccc   * $Id: pcross.f,v 1.10 2004-06-15 22:16:19 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -33,7 +33,7 @@ C
       REAL*8 ec, gc, pc, fr 
       REAL*8 totemis, cme, hlp1, eee, ff1, ff2, ff3, wb, wda, sg, er,  
      &       ff, emis 
-	LOGICAL CallPCROSS/.FALSE./ 
+      LOGICAL CallPCROSS/.FALSE./ 
 C 
 C     REAL MATRIX 
 C 
@@ -55,7 +55,7 @@ C
 C 
 C====================================================================== 
       COMMON /CALC5 / L, NHEq 
-	SAVE CallPcross,r
+      SAVE CallPcross,r
 
 C 
 C     NPRoject - projectile nejc number 
@@ -88,13 +88,13 @@ C
 C     By setting GTIlnor(1) to zero we are setting gc=A/13 !! 
 C 
       IF(gc.EQ.0.D0)THEN 
-	   gc = ac/13. 
-	   if(GTIlnor(1).GT.0.) gc = ac/13.*GTIlnor(1) 
-	   ftmp=0. 
-	   if(ac.gt.0.d0) ftmp= 12./sqrt(dble(float(ac))) 
-	   pc = ftmp                                                ! odd   
-	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.0) pc = 2*ftmp      ! e-e 
-	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.1) pc = 0           ! o-o 
+      gc = ac/13. 
+      if(GTIlnor(1).GT.0.) gc = ac/13.*GTIlnor(1) 
+      ftmp=0. 
+      if(ac.gt.0.d0) ftmp= 12./sqrt(dble(float(ac))) 
+      pc = ftmp                                                ! odd   
+      if(mod(ac,2).eq.0 .and. mod(zc,2).eq.0) pc = 2*ftmp      ! e-e 
+      if(mod(ac,2).eq.0 .and. mod(zc,2).eq.1) pc = 0           ! o-o 
       ENDIF 
 C     NEJcm + 1 correspond to the compound gamma emitting nucleus 
       g(NEJcm + 1) = gc 
@@ -145,12 +145,12 @@ C        By setting GTIlnor(nnur) to zero we are setting g(nejc)=A/13 !!
 C 
          IF(g(nejc).EQ.0.)THEN 
             g(nejc) = ar/13. 
- 	    if(GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur) 
-	    ftmp=0. 
-	    if(ar.gt.0.d0) ftmp= 12./sqrt(dble(float(ar))) 
+       if(GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur) 
+       ftmp=0. 
+       if(ar.gt.0.d0) ftmp= 12./sqrt(dble(float(ar))) 
             pair(nejc) = ftmp                                           ! odd   
-	    if(mod(ar,2).eq.0 .and. mod(zr,2).eq.0) pair(nejc) = 2*ftmp ! e-e 
-   	    if(mod(ar,2).eq.0 .and. mod(zr,2).eq.1) pair(nejc) = 0      ! o-o 
+       if(mod(ar,2).eq.0 .and. mod(zr,2).eq.0) pair(nejc) = 2*ftmp ! e-e 
+       if(mod(ar,2).eq.0 .and. mod(zr,2).eq.1) pair(nejc) = 0      ! o-o 
          ENDIF 
 C        Maximum and minimum energy bin 
          DO  ienerg = 2, NEX(nnur) 
@@ -177,7 +177,7 @@ C
 C 
       IF(.NOT.CallPCROSS) CALL RQFACT(NHEq, r) 
 
-	CallPCROSS = .TRUE.  ! To avoid r factor recalculation at each call
+      CallPCROSS = .TRUE.  ! To avoid r factor recalculation at each call
 C 
 C*************************************************************** 
 C     EMISSION RATES CALCULATIONS FOLLOWS 
@@ -446,7 +446,7 @@ CRCN  Mike: Check implications of the change below !!!!
 C	   We are not putting all CS (from nexrt to Iemax is missing !!!!)
 CRCN           DO ie = iemin(nejc), iemax(nejc) 
                DO ie = iemin(nejc), nexrt 
-	            pops = xnor*spec(nejc, nexrt - ie + 1) 
+               pops = xnor*spec(nejc, nexrt - ie + 1) 
                   POP(ie, j, 1, Nnur) = POP(ie, j, 1, Nnur) + pops 
                   POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pops 
                ENDDO 
@@ -766,14 +766,14 @@ C--------------------------------------------------------------------
 99003 FORMAT(/3X, 'TIME INTEGRALS OF TAU(N)'/3X,  
      &       ' N   UP TO Nequil       ') 
       Ih2 = MIN(Ih2, NHEq) 
-	IF(IOUt.GE.3) THEN
+      IF(IOUt.GE.3) THEN
         DO h1 = 1, Ih2 
            hhh = 2*(h1 - 1) + Ap 
            WRITE(6, 99004)hhh, Em(h1) 
 99004    FORMAT(I5, 2E14.3) 
         ENDDO 
-	  WRITE(6, *)
-	ENDIF
+        WRITE(6, *)
+      ENDIF
       RETURN 
       END 
 C 

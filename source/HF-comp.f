@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-11 22:13:34 $
-Ccc   * $Id: HF-comp.f,v 1.23 2004-06-11 22:13:34 herman Exp $
+Ccc   * $Date: 2004-06-15 22:16:17 $
+Ccc   * $Id: HF-comp.f,v 1.24 2004-06-15 22:16:17 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -139,6 +139,7 @@ cc   &      .OR. Iec.NE.NEX(1)) THEN
          REClev(il, Nejc) = REClev(il, Nejc) + pop1
 C--------Add isotropic CN contribution to direct ang. distributions
          IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0)THEN
+            CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
             pop1 = pop1/4.0/PI
             DO na = 1, NDANG
                CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc) + pop1

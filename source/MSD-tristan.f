@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-06-11 22:13:35 $
-Ccc   * $Id: MSD-tristan.f,v 1.10 2004-06-11 22:13:35 herman Exp $
+Ccc   * $Date: 2004-06-15 22:16:18 $
+Ccc   * $Id: MSD-tristan.f,v 1.11 2004-06-15 22:16:18 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -2943,14 +2943,15 @@ C
                   ENDIF
                   necs = Nbinx - ne + 2
 C-----------------store ddx to continuum
-                  IF(IDNa(2*nej, 2).NE.0 .AND. necs.LE.NEX(nnur))THEN
+                  IF(IDNa(2*nej, 2).NE.0 .AND. necs.LE.NEX(nnur)-1)THEN
                      CSEa(necs, na, nej, 1) = CSEa(necs, na, nej, 1)
      &                  + sigm
-C-----------------store ddx to discrete level region
-                  ELSEIF(IDNa(2*nej - 1, 2).NE.0 .AND. necs.GT.NEX(nnur)
-     &                   )THEN
-                     CSEa(necs, na, nej, 1) = CSEa(necs, na, nej, 1)
-     &                  + sigm
+C-----------------discrete level region is not needed since spectra are
+C-----------------constructed out of discrte levels
+c                 ELSEIF(IDNa(2*nej - 1, 2).NE.0 .AND. necs.GE.NEX(nnur)
+c    &                   )THEN
+c                    CSEa(necs, na, nej, 1) = CSEa(necs, na, nej, 1)
+c    &                  + sigm
                   ENDIF
                ENDIF
             ENDDO
@@ -3190,6 +3191,7 @@ C-----provided by TRISTAN at the closest bin.
          eemi = excnq - ELV(il, Nnur)
          IF(eemi.LT.0.0D0)RETURN
          POPlv(il, Nnur) = POPlv(il, Nnur) + csmsdl*wght(il)
+         CSDirlev(il,nejc) = CSDirlev(il,nejc) + csmsdl*wght(il)
 C--------Store ang. distr. for discrete levels. For each level shape of the closest CSEa
 C--------bin is taken and normalized with level population  csmsdl*wght(il)
 C--------Find the closest bin

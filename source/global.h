@@ -62,6 +62,7 @@ C
      &                 ETL(NDETL, NDEJC, NDNUC), SEJc(0:NDEJC),
      &                 SFIom(0:NDEJC, 0:NDNUC), ELV(NDLV, 0:NDNUC),
      &                 XJLv(NDLV, 0:NDNUC), CSAlev(NDANG, NDLV, NDEJC),
+     &                 CSDirlev(NDLV, NDEJC),
      &                 SHC(0:NDNUC), XMAss(0:NDNUC),
      &                 BR(NDLV, NDBR, 3, 0:NDNUC), XMAss_ej(0:NDEJC),
      &                 REDmsc(NDLW, 2), TUNe(0:NDEJC, 0:NDNUC),

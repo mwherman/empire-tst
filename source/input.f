@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-11 22:13:34 $ 
-Ccc   * $Id: input.f,v 1.30 2004-06-11 22:13:34 herman Exp $ 
+Ccc   * $Date: 2004-06-15 22:16:18 $ 
+Ccc   * $Id: input.f,v 1.31 2004-06-15 22:16:18 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -2157,7 +2157,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_')) 
       WRITE(6, *)'                        ____________________________' 
       WRITE(6, *)'                       |                            |' 
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b16  |' 
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b17  |' 
       WRITE(6, *)'                       |                            |' 
       WRITE(6, *)'                       |  marching towards LODI ;-) |' 
       WRITE(6, *)'                       |____________________________|' 
