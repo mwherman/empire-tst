@@ -21,6 +21,7 @@ C-V        - Read in values in double precision to avoid underflow.
 C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
 C-V  04/07 - Add (n,5n) MT47
 C-V        - Check for absence of distribution data (NP=0 in MF6).
+C-V  04/09 - Check for normalisation overflow in WRIMF4
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -514,7 +515,7 @@ C* (p,n3a) cross section
 C* (p,2na) cross section
           MT =24
         ELSE IF(JZA  .EQ. IZA-1006) THEN
-C* (p,2na) cross section
+C* (p,3na) cross section
           MT =25
         ELSE IF(JZA  .EQ. IZA-   1) THEN
 C* (p,np) cross section
@@ -603,6 +604,118 @@ C* (p,pt) cross section
           MT =116
         ELSE IF(JZA  .EQ. IZA-2005) THEN
 C* (p,da) cross section
+          MT =117
+        END IF
+      ELSE IF(IZI.EQ.2004) THEN
+C* INCIDENT ALPHAS
+        IF     (JZA  .EQ. IZA+IZI-   1) THEN
+C* Discrete level (a,n) cross section
+          MT =50
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (a,2nd) cross section
+          MT =11
+        ELSE IF(JZA  .EQ. IZA+IZI-   2) THEN
+C* (a,2n) cross section
+          MT =16
+        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
+C* (a,na) cross section
+          MT =22
+        ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
+C* (a,n3a) cross section
+          MT =23
+        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
+C* (a,2na) cross section
+          MT =24
+        ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
+C* (a,3na) cross section
+          MT =25
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C* (a,np) cross section
+          MT =28
+        ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
+C* (a,n2a) cross section
+          MT =29
+        ELSE IF(JZA  .EQ. IZA+IZI-4010) THEN
+C* (a,2n2a) cross section
+          MT =30
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (a,nd) cross section
+          MT =32
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (a,nt) cross section
+          MT =33
+c... Conflicts with (a,a) reaction
+c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+c...C* (a,n+He3) cross section
+c...          MT =34
+        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
+C* (a,nd2a) cross section
+          MT =35
+        ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
+C* (a,nt2a) cross section
+          MT =36
+        ELSE IF(JZA  .EQ. IZA+IZI-   4) THEN
+C* (a,4n) cross section
+          MT =37
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (a,2np) cross section
+          MT =41
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (a,3np) cross section
+          MT =42
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (a,n2p) cross section
+          MT =44
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C* (a,npa) cross section
+          MT =45
+        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
+C* (a,4n) cross section
+          MT =   47
+        ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
+C* (a,g) radiative capture cross section
+          MT =102
+        ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
+C* (a,p) cross section
+          MT =103
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C* (a,d) cross section
+          MT =104
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (a,t) cross section
+          MT =105
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (a,He3) cross section
+          MT =106
+        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+C* Discrete level (a,a) cross section
+          MT =800
+        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
+C* (a,2a) cross section
+          MT =108
+        ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
+C* (a,3a) cross section
+          MT =109
+        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
+C* (a,2p) cross section
+          MT =111
+        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
+C* (a,pa) cross section
+          MT =112
+        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
+C* (a,t2a) cross section
+          MT =113
+        ELSE IF(JZA  .EQ. IZA+IZI-5010) THEN
+C* (a,d2a) cross section
+          MT =114
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (a,pd) cross section
+          MT =115
+        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+C* (a,pt) cross section
+          MT =116
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C* (a,da) cross section
           MT =117
         END IF
       END IF
@@ -1192,9 +1305,9 @@ c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
 C* Identify projectile, target and energy
   200 READ (REC(11:20),802) KZ,CH,KA
       IZI=KZ*1000+KA
-      IF(IZI.NE.1 .AND. IZI.NE.1001) THEN
-        WRITE(LTT,995) ' EMPEND ERROR - Invalid projectile ZA   ',IZI
-        STOP 'EMPEND ERROR - Invalid projectile'
+      IF(IZI.NE.1 .AND. IZI.NE.1001 .AND. IZI.NE.2004) THEN
+        WRITE(LTT,904) ' EMPEND ERROR - Invalid projectile ZA   ',IZI
+c...    STOP 'EMPEND ERROR - Invalid projectile'
       END IF
       READ (REC(24:33),802) IZ,CH,IA
       IZA=IZ*1000+IA
@@ -1213,8 +1326,10 @@ C*
       IF(NEN.GT.MXE) STOP 'EMPEND ERROR - MXE limit exceeded'
       EIN(NEN)=EE
       CHEN=REC(51:80)
-C* Read the binding energies of the last nucleon for all residuals
+C* Read the binding energies of the last nucleon, if given
+C* (Omission allowed in new files where Q values are specified explicitly)
   207 READ (LIN,891) REC
+      IF(REC(1:10).EQ.' FUSION CR') GO TO 110
       IF(REC(1:10).NE.'    Nucleu') GO TO 207
       READ (LIN,891)
       IMT=0
@@ -1246,7 +1361,7 @@ C* For unidentified products with non-zero x-sect. print warning
         IF(REC(13:22).NE.'production') GO TO 212
         READ (REC,803) XS
         IF(XS.GT.0) THEN
-          COM=' WARNING - Skip'//REC(2:22)//REC(38:52)//' at'//CHEN
+          COM=' WARNING - Skip'//REC(2:22)//REC(37:52)//' at'//CHEN
           WRITE(LTT,891) COM
           WRITE(LER,891) COM
         END IF
@@ -1279,6 +1394,10 @@ C* Incident neutrons: Exclude MT 600, 800 and redefine 50 to 91
 C* Incident protons: Exclude MT 50, 800 and redefine 600 to 649
         IF(MTK.EQ. 50 .OR. MTK.EQ.800) GO TO 110
         IF(MTK.EQ.600) MTK=649
+      ELSE IF(IZI.EQ.2004) THEN
+C* Incident alphas: Exclude MT 50, 800 and redefine 800 to 849
+        IF(MTK.EQ. 50 .OR. MTK.EQ.600) GO TO 110
+        IF(MTK.EQ.800) MTK=849
       END IF
       M5=0
       DO 222 I=1,NXS
@@ -2177,6 +2296,8 @@ C*
         NSUB=   10
       ELSE IF(IZI.EQ.1001) THEN
         NSUB=10010
+      ELSE IF(IZI.EQ.2004) THEN
+        NSUB=20040
       ELSE
         PRINT *,'ERROR - NSUB undefined, Invalid inc. particle',IZI
         STOP 'ERROR - NSUB Undefined'
@@ -2502,11 +2623,11 @@ C...          print *,e2,(rwo(l2+j),j=1,NA1)
 C...          read (*,'(a1)') yes
         END IF
       END IF
-      IF(NA.LE.0) THEN
+      IF(NA.LE.0 .OR. ABS(QQ(1)).LT.1.E-20) THEN
         NA=1
         QQ(2)=0.
       ELSE
-        IF(QQ(1).NE.0) RR  =1./QQ(1)
+        RR  =1./QQ(1)
         CALL FLDSCL(NA,RR,QQ(2),QQ(2))
       END IF
       NL=NA
