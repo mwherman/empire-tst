@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 18:32:16 $
-Ccc   * $Id: tl.f,v 1.48 2005-03-16 18:32:16 Capote Exp $
+Ccc   * $Date: 2005-03-16 22:24:37 $
+Ccc   * $Id: tl.f,v 1.49 2005-03-16 22:24:37 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -112,6 +112,9 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+C-----For dispersive optical model potentials
+C-----It is ripl2empireS.h because it must be compatible
+C-----with global.h declarations so some variables must be renamed
       INCLUDE 'ripl2empireS.h'
 C
 C COMMON variables
@@ -138,11 +141,6 @@ C
 C-----Sets CC optical model parameters according to RIPL
 C
 C-----E must be in lab system !!!
-C
-C-----It is S because it must be compatible with global.h declarations
-C-----so some variables must be renamed
-C
-C-----For dispersive optical model potentials
 C
       DATA coll_defined/.FALSE./
       iainp = A(Nnuc)
@@ -511,12 +509,12 @@ C-----Volume imaginary potential: Woods-Saxon
 C-----Real surface contribution
       VOMs(Nejc,Nnuc) = vlib(3)
 C-----Surface imaginary potential:
-C-----if rco(4,1,1) >0.0: Woods-Saxon derivative surface potential
-C-----if rco(4,1,1) <0.0: Gaussian surface potential.
       WOMs(Nejc,Nnuc) = vlib(4)
       RWOm(Nejc,Nnuc) = rlib(4)
       AWOm(Nejc,Nnuc) = alib(4)
       SFIom(Nejc,Nnuc) = 1.D0
+C-----if rco(4,1,1) >0.0: Woods-Saxon derivative surface potential
+C-----if rco(4,1,1) <0.0: Gaussian surface potential.
       IF (RCO(4,1,1).LT.0.0) SFIom(Nejc,Nnuc) = -1.D0
 C-----Real spin-orbit
 C-----****
@@ -2578,14 +2576,6 @@ C     ener = Elab
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C COMMON variables
-C
-C     DOUBLE PRECISION AAE(7), AQ(7), BETa, EA, EFErmi, EP, POT(7,6),
-C    &                 R(7), RCOulomb, RRE(7), ACOulomb
-C     INTEGER IREl
-C     COMMON /POTEN1/ R, RRE, AQ, AAE, POT
-C     COMMON /POTEN2/ RCOulomb, ACOulomb, BETa, EFErmi, EP, EA, IREl
 C
 C Dummy arguments
 C
