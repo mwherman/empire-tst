@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-06 14:16:52 $
-Ccc   * $Id: main.f,v 1.55 2005-02-06 14:16:52 Capote Exp $
+Ccc   * $Date: 2005-02-09 14:52:04 $
+Ccc   * $Id: main.f,v 1.56 2005-02-09 14:52:04 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -212,6 +212,7 @@ C
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       CHARACTER*18 ctmp18
+      CHARACTER*6 cTLdir
       DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, ELAda(101)
       DOUBLE PRECISION ftmp
       INTEGER NELang
@@ -239,6 +240,8 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
       INTEGER INT, MIN0
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
+      DATA cTLdir/6h../TL//
+
       INCLUDE 'io.h'
       icalled = 0
       CALL THORA(6)
@@ -282,14 +285,14 @@ C     TOTcs, ABScs,ELAcs are initialized within MARENG()
       NELang = 73
       ecm = EINl - EIN
       dang = 3.14159/FLOAT(NELang - 1)
-      OPEN(45, FILE = ('../TL/'//ctmp18//'.ANG'),STATUS= 'OLD',ERR=1500)
+      OPEN(45, FILE = (cTLdir//ctmp18//'.ANG'),STATUS= 'OLD',ERR=1500)
       READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
       READ(45, *, END = 1500)  ! To skip level identifier line
       DO iang = 1, NELang
         READ(45, '(7x,E12.5)', END = 1500)ELAda(iang)
       ENDDO
       IF(DIRECT.EQ.0) goto 1500
-      OPEN(46, FILE = ('../TL/'//ctmp18//'.ICS'),STATUS= 'OLD',ERR=1500)
+      OPEN(46, FILE = (cTLdir//ctmp18//'.ICS'),STATUS= 'OLD',ERR=1500)
       READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
 C-----get and add inelastic cross sections (including double-differential)
       DO i = 2, ND_nlv

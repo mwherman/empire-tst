@@ -613,7 +613,7 @@ C
       IF(CCCalc)fexist = OMParfcc
 C-----OMPAR.RIPL file exists ?
       IF(fexist)THEN
-C-----------komp = 29       OR 33
+C-----------komp = 29 OR 33
             ipoten = KTRlom(Nejc, Nnuc)
             CALL FINDPOT_OMPAR_RIPL(Komp, ieof, ipoten, Nnuc, Nejc)
             IF(ieof.EQ.0)THEN
@@ -648,7 +648,10 @@ C
 C-----Searching in the RIPL database for IPOTEN catalog number
       CALL FINDPOT(ki, ieof, ipoten)
 C-----Here ieof must be 0 always because we checked in input.f
-      IF(ieof.GT.0)STOP 'PROBLEM with RIPL OMP library'
+      IF(ieof.GT.0) then
+        WRITE(6,*) 'ERROR: PROBLEM with OMPAR.DIR library,RIPL #',ipoten
+        STOP 'ERROR: PROBLEM with OMPAR.DIR library'
+      ENDIF
 C-----Reading o.m.  potential parameters for IPOTEN catalog number
       CALL OMIN(ki, ieof, irel)
 C
@@ -695,10 +698,11 @@ C
 C--------komp = 29 OR 33
          ipoten = KTRlom(Nejc, Nnuc)
          CALL FINDPOT(ki, ieof, ipoten)
-         IF(ieof.GT.0) THEN
-             WRITE(6,*) 'WARNING: PROBLEM with RIPL OMP library'
-             STOP 'PROBLEM with RIPL OMP library'
-          ENDIF
+         IF(ieof.GT.0) then
+           WRITE(6,*)
+     >      'ERROR: PROBLEM with OMPAR.RIPL library,RIPL #',ipoten
+           STOP 'ERROR: PROBLEM with OMPAR.RIPL library'
+         ENDIF
 C--------Reading IPOTEN catalog number potential parameters
          ianucr = INT(A(Nnuc))
          symbnucr = SYMb(Nnuc)
@@ -1332,6 +1336,9 @@ C
       INTEGER INT
       REAL SNGL
       CHARACTER*18 ctmp18
+      CHARACTER*6 cTLdir
+      DATA cTLdir/6h../TL//
+
 C-----data initialization
       CALL INIT(Nejc, Nnuc)
 C
@@ -1353,11 +1360,11 @@ C    &       SYMb(NNUc),INT(A(NNUc)),INT(EINl*1000)
      &         INT(ZEJc(Nejc)),INT(AEJc(Nejc)),
      &         INT(Z(NNUc)),   INT(A(NNUc)),   INT(EINl*1000)
       IOK=1
-      INQUIRE(FILE = ('../TL/'//ctmp18//'.BIN'), EXIST = fexist)
+      INQUIRE(FILE = (cTLdir//ctmp18//'.BIN'), EXIST = fexist)
       IF(.NOT.fexist) GOTO 300
 C-----Here the previously calculated files should be read
-      OPEN(45, FILE = ('../TL/'//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
-      IF(IOUt.EQ.5)OPEN(46, FILE = '../TL/'//ctmp18//'.LST')
+      OPEN(45, FILE = (cTLdir//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
+      IF(IOUt.EQ.5)OPEN(46, FILE = cTLdir//ctmp18//'.LST')
  100  READ(45, END = 200)lmax, ien, ener
       IF(IOUt.EQ.5)WRITE(46, '(A5,2I6,E12.6)')'LMAX:', lmax, ien, ener
 C
@@ -1387,7 +1394,7 @@ C
       IF(IOUt.EQ.5) CLOSE(46)
       IF(IOUt.EQ.5)
      &   WRITE(6, *)'Transmission coefficients read from file: ',
-     &           ('../TL/'//ctmp18//'.BIN')
+     &           (cTLdir//ctmp18//'.BIN')
       RETURN
 
  220  CLOSE(45, STATUS = 'DELETE')
@@ -1433,7 +1440,7 @@ C
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN(UNIT = 46, STATUS = 'unknown',
-     &        FILE = ('../TL/'//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
+     &        FILE = (cTLdir//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
@@ -1470,7 +1477,7 @@ C
          ENDDO
          CLOSE(46)
          IF(IOUt.EQ.5) WRITE(6, *)' Transm. coeff. written to file:',
-     &              (' ../TL/'//ctmp18//'.BIN')
+     &              (cTLdir//ctmp18//'.BIN')
          IF(IOUt.EQ.5) WRITE(6, *)
      &            ' ==================================================='
       ELSEIF(IOUt.EQ.5)THEN
