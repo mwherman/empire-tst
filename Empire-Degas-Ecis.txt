@@ -68,7 +68,7 @@ by GDIV.
 
 If necessary, further tuning could be done via matrix element for
 residual nucleon-nucleon interaction (proportional to Kalbach
-constant, presently set to K = 100, see akdegas in Degas.f).
+constant, presently set to K = 100, see akdegas in degas.f).
 
 1.5 Compatibility
 
@@ -112,7 +112,7 @@ harmonic vibrational CCM modes are available.
 Ecis is invoked by the input line DIRECT, with values 1, 2 or 
 3. This will replace the default value DIRECT = 0.
 
-An important feature is an automated preparation of detailed
+An important feature is an automatized preparation of detailed
 input for Ecis. This is done by using Empire built-in discrete
 level schemes (orsi.liv) and built-in deformation parameters
 (nix-moller-audi.dat, see beta2 for quadrupole deformations).
@@ -189,7 +189,7 @@ Population of (n,n') or (p,p') collective levels is calculated by
 DWBA. This gives approximate direct cross section. However, spherical
 transmission coefficients Tl provided by SCAT2 are used for whole
 energy grid, that is for subsequent preequilibrium and HF calculations.
-These results are re-normalized at the Tl's level by taking into 
+These results are renormalized at the Tl's level by taking into 
 account direct component. Elastic, absorption and inelastic total 
 cross sections are taken from the SCAT2 (Spherical OM) calculations.
 

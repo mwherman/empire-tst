@@ -1,3 +1,12 @@
+             Changes in version 2.16.2 with respect to 2.16 
+                      Vienna,   21 August  2001
+
+1. Implementation of the HMS model completed (needs testing)
+2. New version of V. Zerkin viewer (zvv94l.exe) provides eps
+   format and interaction with plot titles (use A + right shift)
+3. Duplicate use of file 33 removed (36 used in lev-dens.f)
+
+
              Changes in version 2.16 with respect to 2.15 
                       Vienna,   July  2001
 
