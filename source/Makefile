@@ -40,6 +40,6 @@ main.o  : io.h
 ddhms.o : ddhms.cmb
 tl.o	: pre_ecis.h
 
-OBJE =  ecis.o
-ecis:	$(OBJE)
-	$(FC) -o $@ $(OBJE)
+OBJE =  ecis03.o
+ecis03:	$(OBJE)
+	$(FC) -o ecis03 $(OBJE)
