@@ -213,7 +213,7 @@ if  [ -s $file.exf ]; then
            else
            echo 'File with EXFOR data in computational format is EMPTY'
         fi
-        # COMMENT THE LINE BELOW TO KEEP FILE WITH RETRIEVED EXFOR DATA 
+        # UNCOMMENT THE LINE BELOW TO REMOVE FILE WITH RETRIEVED EXFOR DATA 
         #rm $file.exf
     fi
 fi

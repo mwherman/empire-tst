@@ -5175,13 +5175,13 @@ exec xterm -e ./zvvddx $file $multi &} \
     bind $site_9_0.but116 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View control output of the PLOTC4 code}
     }
-    pack $site_9_0.but115 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
     pack $site_9_0.but71 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     pack $site_9_0.but116 \
+        -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
+        -side top 
+    pack $site_9_0.but115 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     frame $site_8_3.fra117 \
@@ -5294,54 +5294,61 @@ exec xterm -e ./zvvddx $file $multi &} \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -labelpos n -labeltext {Select files:} -relief flat 
     vTcl:DefineAlias "$site_8_4.che119" "Checkbox1" vTcl:WidgetProc "Toplevel1" 1
+#   $site_11_0.che79 add chk0 \
+#       -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
+#       -disabledforeground #a1a4a1 \
+#       -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
+#       -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
+#       -justify left -offvalue .lst -onvalue {} -selectcolor #00ff00 \
+#       -text {full output} -variable ckmlo 
     $site_8_4.che119 add chk0 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .lst -selectcolor green \
+        -justify left -offvalue { } -onvalue .lst -selectcolor green \
         -text {full output} -variable cklo 
     $site_8_4.che119 add chk1 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .out -selectcolor green \
+        -justify left -offvalue { } -onvalue .out -selectcolor green \
         -text {short output} -variable cksh 
     $site_8_4.che119 add chk2 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -log* -selectcolor green \
+        -justify left -offvalue { } -onvalue -log* -selectcolor green \
         -text {log files} -variable cklog 
     $site_8_4.che119 add chk3 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue *.endf -selectcolor green \
+        -justify left -offvalue { } -onvalue *.endf -selectcolor green \
         -text ENDF -variable ckendf 
     $site_8_4.che119 add chk4 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .ps -selectcolor green \
+        -justify left -offvalue { } -onvalue .ps -selectcolor green \
         -text {PLOTC4 plots} -variable ckplots 
     $site_8_4.che119 add chk5 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .exf -selectcolor orange \
+        -justify left -offvalue { } -onvalue .exf -selectcolor orange \
         -text EXFOR -variable ckx4 
     $site_8_4.che119 add chk6 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .c4 -selectcolor orange \
+        -justify left -offvalue { } -onvalue .c4 -selectcolor orange \
         -text {C4 file} -variable ckc4 
     ::iwidgets::checkbox $site_8_4.che120 \
         -background #e6e6e6 \
@@ -5353,56 +5360,56 @@ exec xterm -e ./zvvddx $file $multi &} \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -omp.int -padx 1 \
+        -justify left -offvalue { } -onvalue -omp.int -padx 1 \
         -selectcolor orange -text {internal omp} -variable ckintomp 
     $site_8_4.che120 add chk1 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -omp.ripl -padx 1 \
+        -justify left -offvalue { } -onvalue -omp.ripl -padx 1 \
         -selectcolor orange -text {RIPL omp} -variable ckriplomp 
     $site_8_4.che120 add chk2 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -omp.dir -padx 1 \
+        -justify left -offvalue { } -onvalue -omp.dir -padx 1 \
         -selectcolor orange -text {direct omp} -variable ckdiromp 
     $site_8_4.che120 add chk3 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue *.zvd -padx 1 -selectcolor orange \
+        -justify left -offvalue { } -onvalue *.zvd -padx 1 -selectcolor orange \
         -text {ZVV plots} -variable ckzvv 
     $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .lev -padx 1 -selectcolor red \
+        -justify left -offvalue { } -onvalue .lev -padx 1 -selectcolor red \
         -text levels -variable cklev 
     $site_8_4.che120 add chk5 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -lev.col -padx 1 -selectcolor red \
+        -justify left -offvalue { } -onvalue -lev.col -padx 1 -selectcolor red \
         -text {collective levels} -variable ckcollev 
     $site_8_4.che120 add chk6 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue .inp -padx 1 -selectcolor red \
+        -justify left -offvalue { } -onvalue .inp -padx 1 -selectcolor red \
         -text {EMPIRE input} -variable ckinp 
     $site_8_4.che120 add chk7 \
         -activebackground #f6f7f6 -activeforeground black -anchor w \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue {} -onvalue -inp.fis -padx 1 -selectcolor red \
+        -justify left -offvalue { } -onvalue -inp.fis -padx 1 -selectcolor red \
         -text {fission input} -variable ckfisinp 
     frame $site_8_4.fra122 \
         -background #e6e6e6 -height 75 -highlightbackground #dcdcdc \

@@ -286,28 +286,32 @@ NIXSH = 0 shell-corrections calculated according to Myers-Swiatecki
 Fission
 -------                         
 
-FISSHI   Controls treatment of the fission channel
-      =0 advanced treatment (multi-humped barrier, optical model for
-         fission) recommended for neucleon induced fission (default)
-      =1 simple treatment good only for the Heavy Ion induced reactions
+FISSHI   Controls treatment of the fission channel for nucleus
+         Z=I1, A=I2 
+      =0 advanced fission (multi-humped barrier, optical model for
+         fission) recommended for light particle or photon induced fission 
+         (default)
+      =1 fission over single-humped barrier (good only for  
+         Heavy Ion induced reactions)
       =2 fission ignored
 
-FISBAR   Controls origin of fission barrier data
-      =0 Ripl-2 (microscopic calculations by Goriely, default),
+FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
+      =0 Ripl-2 (microscopic calculations by Goriely with internally set
+         barrier widths taken from Lynn - default),
       =1 internal EMPIRE library
       =2 Ripl-1 (compilation of Maslov, model dependent!)
 
-FISDEN   Controls level densities at saddle points
+FISDEN   Controls level densities at saddle points for nucleus Z=I1, A=I2 
       =0 Ripl-2 (microscopic calculations by Goriely)
       =1 Empire specific 
 
-FISOPT   Controls subbarrier effects
+FISOPT   Controls subbarrier effects for nucleus Z=I1, A=I2 
       =0 no subbarrier effects
       =1 subbarrier effects considered (only with FISBAR=1)
       =2 subbarrier effects & isomeric fission considered 
          (only with FISBAR=1)
 
-FISMOD   Controls multimodality of fission
+FISMOD   Controls multimodality of fission for nucleus Z=I1, A=I2 
       =0 single-modal fission
       =1 multimodal fission
       =2 multimodal fission
