@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-07-26 19:38:54 $
-Ccc   * $Id: gamma-strgth.f,v 1.10 2004-07-26 19:38:54 Capote Exp $
+Ccc   * $Date: 2004-09-23 18:10:41 $
+Ccc   * $Id: gamma-strgth.f,v 1.11 2004-09-23 18:10:41 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -74,6 +74,7 @@ C
       IF(CM1.EQ.0.0D0)CM1 = 0.1
 C-----GDR parameters according to Messina sytematics
       esys2 = 50.0*A(Nnuc)**( - 0.232)
+      NG=2
       IF(ABS(DEF(1,Nnuc)).GE.0.064D0)THEN
          esys1 = esys2*EXP(( - SIGN(1.D0,DEF(1,Nnuc))*0.946*DEF(1,Nnuc))
      &           )
@@ -102,6 +103,7 @@ C-----GDR parameters according to Messina sytematics
          e(2) = 0.
          s(2) = 0.
          g(2) = 1.
+	   NG=1
       ENDIF
       IF(ABS(DEF(1,Nnuc)).GT.0.064D0)THEN
          IF(e(1) - e(2).LT.GDRspl)THEN
@@ -116,6 +118,7 @@ C-----GDR parameters according to Messina sytematics
       IF(GDRpar(4, Nnuc).EQ.0.0D0)GDRpar(4, Nnuc) = e(2)
       IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = g(2)
       IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = s(2)
+
       D1 = 5.46E-7*GDRpar(3, Nnuc)*GDRpar(2, Nnuc)**2
       D2 = 5.46E-7*GDRpar(6, Nnuc)*GDRpar(5, Nnuc)**2
 C
@@ -152,6 +155,13 @@ C-----Kyiv.Photonuclear channel, Plujko_new
        ELSE
 C        init GDRGFL parametrs
          CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
+C        Transferring to EMPIRE arrays (RCN, 09/2004
+         IF(GDRpar(1, Nnuc).EQ.0.0D0)GDRpar(1, Nnuc) = EG1
+         IF(GDRpar(2, Nnuc).EQ.0.0D0)GDRpar(2, Nnuc) = GW1
+         IF(GDRpar(3, Nnuc).EQ.0.0D0)GDRpar(3, Nnuc) = CS1
+         IF(GDRpar(4, Nnuc).EQ.0.0D0)GDRpar(4, Nnuc) = EG2
+         IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = GW2
+         IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = CS2
       ENDIF
 C-----Kyiv.Photonuclear channel, Plujko_new(End)
       IF(IOUt.GT.1)THEN
