@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-08 14:55:37 $
-Ccc   * $Id: input.f,v 1.67 2005-02-08 14:55:37 Capote Exp $
+Ccc   * $Date: 2005-02-08 17:06:13 $
+Ccc   * $Id: input.f,v 1.68 2005-02-08 17:06:13 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -855,6 +855,19 @@ C
             WRITE(6, *)' WARNING!!!! and has been turned off  '
             WRITE(6, *)' '
          ENDIF
+
+         IF(DIRect.EQ.3 .and.  ( MOD(NINT(A(0)),2).NE.0 .OR.
+     &      MOD(NINT(Z(0)),2).NE.0) ) THEN
+            DIRect = 0
+            WRITE(6, *)' '
+            WRITE(6, *)' WARNING!!!! DWBA mechanism is not supported'
+            WRITE(6, *)' WARNING!!!! for reactions on odd nuclei    '
+            WRITE(6, *)' WARNING!!!! and has been turned off        '
+            WRITE(6, *)' WARNING!!!! You could try DIRECT 1 or 2    '
+            WRITE(6, *)' WARNING!!!! assuming levels can be coupled '
+            WRITE(6, *)' '
+         ENDIF
+
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
@@ -6175,7 +6188,7 @@ CRCN           FSHELL = 1 + GAMma/ SHC(nnuc)
                FSHELL = 1 + GAMma*SHC(nnuc)
             ENDIF
             ACRt = ATIl*FSHELL
-            IF(ABS(ACRt - ar)/ACRt.LE.0.001D0) GOTO 1001
+            IF(ABS(ACRt - ar).LE.0.001D0*ACRt) GOTO 1001
             ar = ACRt
          ENDDO
          WRITE(6, *)' WARNING: Last iteration acrt=', ACRt
