@@ -367,7 +367,7 @@ proc vTclWindow.srun {base {container 0}} {
     ###################
     if {!$container} {
     toplevel $base -class Toplevel \
-        -background #4b7b82 -highlightbackground #4b7b82 \
+        -background #dcdcdc -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -menu "$base.m17" 
     wm focusmodel $base passive
     wm geometry $base 211x947+4+64; update
@@ -379,136 +379,136 @@ proc vTclWindow.srun {base {container 0}} {
     wm title $base "Empire control"
     }
     canvas $base.input \
-        -background #4b7b82 -borderwidth 2 -closeenough 1.0 -confine 0 \
-        -height 207 -highlightbackground #304d49 -highlightcolor #ffffff \
+        -background #dcdcdc -borderwidth 2 -closeenough 1.0 -confine 0 \
+        -height 207 -highlightbackground #304d49 -highlightcolor black \
         -relief groove -selectbackground #365e66 -width 296 
     entry $base.input.project \
-        -background #4b7b82 \
+        -background #ffffff \
         -font -adobe-helvetica-medium-r-normal--16-120-75-75-p-67-iso8859-1 \
-        -foreground #fefefe -highlightbackground #374d4e \
-        -highlightcolor #ffffff -justify right -selectbackground #41525c \
+        -foreground black -highlightbackground #374d4e \
+        -highlightcolor #ffffff -justify right -selectbackground red \
         -selectforeground #ffffff -textvariable file 
     button $base.input.but31 \
         -activebackground #283cb4 -activeforeground #ffffff \
         -background #283e76 \
         -command {file copy skel.inp $file.inp
 exec $editor $file.inp &} \
-        -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -font -adobe-helvetica-medium-r-bold--12-120-75-75-p-67-iso8859-1 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Create } 
     button $base.input.but18 \
         -activebackground #283cb4 -activeforeground #fffefe \
         -background #283e76 -command {exec $editor $file.inp &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Edit } 
     button $base.input.but17 \
         -activebackground #df5130 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e run $file &} \
         -font -adobe-helvetica-medium-r-bold--14-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Run+Format+Plot 
     button $base.input.but36 \
         -activebackground #dc5032 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e runE $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Run 
     button $base.input.but19 \
         -activebackground #dc5032 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e format $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Format 
     button $base.input.but20 \
         -activebackground #dc5032 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e plot $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Plot 
     button $base.input.viewlong \
         -activebackground #007900 -activeforeground #fefefe \
         -background #005a00 -command {exec $editor $file.lst &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Emp-full -width 0 
     button $base.input.but27 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.out  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Emp-short } 
     button $base.input.but22 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.exf &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text EXFOR 
     button $base.input.but23 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.c4 &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {C4 file} 
     button $base.input.but28 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.endf  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text ENDF 
     button $base.input.but25 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec gv $file-cum.ps &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Levels 
     button $base.input.but21 \
         -activebackground #f00000 -activeforeground #fffefe \
         -background #860000 -command {exec clean $file core ../util/*/core &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Clean 
     label $base.input.titel \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text {EMPIRE } 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text {EMPIRE } 
     label $base.input.source \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #fefefe -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text {Modify source} 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text {Modify source} 
     button $base.input.but26 \
         -activebackground #f00000 -activeforeground #fefefe \
         -background #860000 -command {exec $editor ../source/dimension.h &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Edit dimensions} 
     menubutton $base.input.modulist \
-        -activebackground #f00000 -activeforeground #ffffff \
+        -activebackground #f00000 -activeforeground #fefefe \
         -background #860000 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -indicatoron 1 -menu "$base.input.modulist.m" \
         -padx 4 -pady 3 -relief raised -text {Edit module} 
     menu $base.input.modulist.m \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     menubutton $base.input.sourcemenu \
-        -activebackground #f00000 -activeforeground #ffffff \
+        -activebackground #f00000 -activeforeground black \
         -background #860000 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -indicatoron 1 \
         -menu "$base.input.sourcemenu.m" -padx 4 -pady 3 -relief raised \
         -text {Edit  module} 
     menu $base.input.sourcemenu.m \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff 
+        -foreground black 
     $base.input.sourcemenu.m add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor ../source/main.f &} -font {} \
@@ -608,55 +608,55 @@ exec $editor $file.inp &} \
 exec xterm -e make &
 cd ../work} \
         -font -adobe-helvetica-medium-r-bold--14-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Make 
     label $base.input.input \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Input: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Input: 
     label $base.input.lab34 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Execute: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Execute: 
     label $base.input.lab35 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-normal--16-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text {or :} 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text {or :} 
     label $base.input.lab37 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Outputs: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Outputs: 
     button $base.input.but29 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-omp.int  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Int. omp} 
     button $base.input.browse \
-        -activebackground #8aa6a6 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #283cb4 -activeforeground #ffffff \
+        -background #283e76 \
         -command {set defile  [exec xgetfile -title "select input file" -pattern *.inp ] 
 set dfile [file rootname $defile]
 set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-bold--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -padx 9 -pady 3 -text Project: 
+        -foreground #ffffff -highlightbackground #283cb4 \
+        -highlightcolor #283e76 -padx 9 -pady 3 -text Project: 
     menubutton $base.input.men19 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -menu "$base.input.men19.m" -padx 4 -pady 3 \
         -relief raised -text {Select MT and >} 
     menu $base.input.men19.m \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff 
+        -foreground black 
     $base.input.men19.m add radiobutton \
         -value {MT=1 (total)} -variable selectedButton -activebackground {} \
         -activeforeground {} -accelerator {} -background {} \
@@ -726,103 +726,103 @@ set file [file tail $dfile]} \
         -activebackground #dc5032 -activeforeground #ffffff \
         -background #be5a41 -command {exec xterm -e zvd $file $MT &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text ZVV 
     button $base.input.but32 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-ecis.out  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Ecis 
     label $base.input.lab33 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Out/In: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Out/In: 
     button $base.input.but34 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-lev.col  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Coll. levels} 
     button $base.input.but35 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.lev  &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Levels 
     button $base.input.but24 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-omp.ripl &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {RIPL omp} 
     button $base.input.but37 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-ecis.in &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {ECIS inp} 
     button $base.input.but38 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file-omp.dir &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Dir. omp} 
     label $base.input.lab17 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Plots: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Plots: 
     label $base.input.lab18 \
-        -background #4b7b82 -borderwidth 1 \
+        -background #dcdcdc -borderwidth 1 \
         -font -adobe-helvetica-medium-r-bold--18-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -text Outputs: 
+        -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor black -text Outputs: 
     button $base.input.but39 \
         -activebackground #dc5032 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e zvpl $file &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Create ZVV} -width 0 
     button $base.input.but40 \
         -activebackground #dc5032 -activeforeground #fffefe \
         -background #be5a41 -command {exec xterm -e zvcomb &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Merge ZVV} 
     button $base.input.button53 \
         -activebackground #007900 -activeforeground orange \
         -background #005a00 \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground orange -height 26 -highlightbackground #4b7b82 \
+        -foreground orange -height 26 -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Warnings -width 73 
     button $base.input.button54 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec gv -landscape $file.ps &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -highlightbackground #4b7b82 \
+        -foreground #ffffff -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -padx 9 -pady 3 -text Plotc4 
     button $base.input.zvvgui \
         -activebackground #007900 -activeforeground white -background #005a00 \
         -command {exec guizvv.tcl $file &} -font {Helvetica -12} -foreground white \
         -height 28 -text {Compare ENDF files} -width 143 
     frame $base.cpd32 \
-        -background #4b7b82 -borderwidth 1 -height 30 \
-        -highlightbackground #4b7b82 -highlightcolor #ffffff -width 30 
+        -background #dcdcdc -borderwidth 1 -height 30 \
+        -highlightbackground #dcdcdc -highlightcolor #ffffff -width 30 
     menubutton $base.cpd32.05 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu "$base.cpd32.05.06" -padx 4 -pady 3 \
+        -foreground black -height 1 -highlightbackground #dcdcdc \
+        -highlightcolor black -menu "$base.cpd32.05.06" -padx 4 -pady 3 \
         -text Help 
     menu $base.cpd32.05.06 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     $base.cpd32.05.06 add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor inplist &} -font {} \
@@ -872,17 +872,17 @@ set file [file tail $dfile]} \
         -background {} -command {exec $editor ../util/sixtab/manual.txt &} \
         -font {} -foreground {} -image {} -label {SIXTAB manual} 
     menubutton $base.cpd32.01 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu "$base.cpd32.01.02" -padx 4 -pady 3 \
+        -foreground black -height 1 -highlightbackground #dcdcdc \
+        -highlightcolor black -menu "$base.cpd32.01.02" -padx 4 -pady 3 \
         -text File 
     menu $base.cpd32.01.02 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     $base.cpd32.01.02 add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} \
@@ -905,17 +905,17 @@ exec $editor listpro &} \
         -background {} -command exit -font {} -foreground {} -image {} \
         -label Exit 
     menubutton $base.cpd32.men40 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -height 1 -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -menu "$base.cpd32.men40.01" -padx 4 -pady 3 \
+        -foreground black -height 1 -highlightbackground #dcdcdc \
+        -highlightcolor black -menu "$base.cpd32.men40.01" -padx 4 -pady 3 \
         -text Options -width 6 
     menu $base.cpd32.men40.01 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     $base.cpd32.men40.01 add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor skel.inp &} -font {} \
@@ -945,10 +945,10 @@ exec $editor listpro &} \
         -activeforeground {} -accelerator {} -background {} -command {} \
         -font {} -foreground {} -image {} -label {Select editor} 
     menu $base.cpd32.men40.01.02 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     $base.cpd32.men40.01.02 add radiobutton \
         -value gvim -variable selectedButton -activebackground {} \
         -activeforeground {} -accelerator {} -background {} \
@@ -982,10 +982,10 @@ exec $editor listpro &} \
     $base.cpd32.men40.01.02 invoke 0
 
     menu $base.cpd32.men40.01.men41 \
-        -activebackground #4b7b82 -activeforeground #ffffff \
-        -background #4b7b82 \
+        -activebackground #dcdcdc -activeforeground black \
+        -background #dcdcdc \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
-        -foreground #ffffff -tearoff 0 
+        -foreground black -tearoff 0 
     $base.cpd32.men40.01.men41 add radiobutton \
         -value gvim -variable selectedButton -activebackground {} \
         -activeforeground {} -accelerator {} -background {} \

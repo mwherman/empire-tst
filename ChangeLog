@@ -1,4 +1,17 @@
 
+             Changes in version 2.17.1 with respect to 2.17
+                      Vienna,   April  2002
+
+1. Bug in reading RIPL discrete levels fixed by R. Capote.
+2. All scripts modified: (i) all links made symbolic to allow for using
+   network drives, (ii) ./ added in front of calls (thus ./ is no loger needed 
+   in the PATH), (iii) xterm remains open after calculations are completed
+   so that runtime messages can be inspected (M. Herman).
+3. GUI backgorund color changed to gray (M. Herman).
+4. guizvv.tcl for graphical comparison of up to three calculations/evaluations 
+   (already present in 2.17) modified (nonstandard Tcl/Tk widget replaced)
+   (M. Herman).
+
              Changes in version 2.17 with respect to 2.17beta
                       Vienna,   February  2002
 

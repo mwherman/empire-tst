@@ -1,9 +1,9 @@
                        E M P I R E  I I
 
-                         version 2.17
+                         version 2.17.1
                          (Millesimo)
 
-                      15 February, 2002
+                          15 April, 2002
 
 Compilation:
 
@@ -17,7 +17,7 @@ Running:
 
 Use lrun.tcl script in the empire/work directory. This needs Tcl/Tk
 and bash shell installed. Otherwise one can use scripts also provided in the
-empire/work directory. Please refer to EMPIRE-2.17 write-up in the
+empire/work directory. Please refer to EMPIRE-2.17.1 write-up in the
 empire/doc directory for more details.
 
 

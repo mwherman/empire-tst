@@ -18,10 +18,12 @@ C/* compiler and system dependent !!!!                 */
 C
       INTEGER*4 FUNCTION PIPE(Stringp)
 C     MSFORTRAN
-      CHARACTER*(*) Stringp
+      USE PORTLIB
+      CHARACTER*(*) STRINGP
 C     LAHEY FORTRAN
 C     pipe=0
 C     CALL SYSTEM(STRINP)
 C     MSFORTRAN
-      PIPE = SYSTEM(Stringp)
+      pipe = SYSTEM (stringp)
+      RETURN
       END

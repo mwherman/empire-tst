@@ -90,9 +90,9 @@ echo ' '
 while [ -f $file.exf ]; do
     # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
 
-    ln  $file.exf ../util/x4toc4/exfor.in
+    ln  -sf $file.exf ../util/x4toc4/exfor.in
     cd ../util/x4toc4
-    x4toc4
+    ./x4toc4
     rm exfor.in
     cd ../../work
     mv ../util/x4toc4/errors $file.x42c4_errs
@@ -115,16 +115,16 @@ while [ -f $file.exf ]; do
 
     cd ../util/fixup/
     rm OUTPUT.ENDF
-    ln ../../work/$file.endf OUTPUT.ENDF
-    fixup
+    ln -sf ../../work/$file.endf OUTPUT.ENDF
+    ./fixup
     rm OUTPUT.ENDF
 
     cd ../plotc4
-    ln ../../work/$file.c4 C4.DAT  
-    ln ../fixup/FIXUP.ENDF ENDF.DAT 
+    ln -sf ../../work/$file.c4 C4.DAT  
+    ln -sf ../fixup/FIXUP.ENDF ENDF.DAT 
     echo ' '
     echo 'R U N N I G    P L O T C 4'
-    plotc4
+    ./plotc4
     rm C4.DAT ENDF.DAT ../fixup/FIXUP.ENDF
     mv plot.ps ../../work/$file.ps
     cd ../../work

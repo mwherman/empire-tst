@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-04-05 17:03:55 $
-Ccc   * $Id: tl.f,v 1.5 2002-04-05 17:03:55 mike Exp $
+Ccc   * $Date: 2002-04-15 13:22:23 $
+Ccc   * $Id: tl.f,v 1.6 2002-04-15 13:22:23 mike Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -214,7 +214,7 @@ C
       DOUBLE PRECISION vstr, rrrr, aaaa
       INTEGER IWArn, itmp, ncalc, ilv, n
       LOGICAL coll_defined
-      CHARACTER*1 ctmp
+      CHARACTER*80 ch_iuf
 C
 C
 C-----For dispersive optical model potentials
@@ -311,6 +311,7 @@ C        model = 'coupled-channels rotational model'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
+         READ(39, '(A80)') ch_iuf
          icoll(1) = 1
          DO k = 2, NCOll(ncalc)
             icoll(k) = 0
@@ -318,7 +319,8 @@ C        model = 'coupled-channels rotational model'
             REWIND(39)
             ilv = -1
  20         ilv = ilv + 1
-            READ(39, '(a1,1x,i3,f7.3)', END = 50)ctmp, itmp, ftmp
+C           READ(39, '(a1,1x,i3,f7.3)', END = 50)ctmp, itmp, ftmp
+            READ(39, '(I3,1X,F10.6)', END = 50)itmp, ftmp 
             IF(ABS(ftmp - eripl).GT.0.010)GOTO 20
             icoll(k) = ilv
  50      ENDDO
@@ -427,6 +429,7 @@ C--------model = 'vibrational model'
             ENDIF
          ENDDO
          OPEN(39, FILE = 'TARGET.LEV')
+         READ(39, '(A80)') ch_iuf
          icoll(1) = 1
          DO k = 2, NVIb(ncalc)
             icoll(k) = 0
@@ -434,7 +437,8 @@ C--------model = 'vibrational model'
             REWIND(39)
             ilv = -1
  60         ilv = ilv + 1
-            READ(39, '(a1,1x,i3,f7.3)', END = 100)ctmp, itmp, ftmp
+C           READ(39, '(a1,1x,i3,f7.3)', END = 100)ctmp, itmp, ftmp
+            READ(39, '(I3,1X,F10.6)', END = 100)itmp, ftmp 
             IF(ABS(ftmp - eripl).GT.0.010)GOTO 60
             icoll(k) = ilv
  100     ENDDO
@@ -2998,8 +3002,8 @@ C
       INTEGER ip, iterm, j, ldwmax, lev(NDLV), ncoll, nd_nlvop, njmax, 
      &        npho, npp, k
       INTEGER*4 iwin
-      INTEGER NINT
       INTEGER*4 PIPE
+C     INTEGER NINT
       INTEGER jdm, nwrite
 C
       IF(AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0)ip = 1
@@ -3352,10 +3356,12 @@ C     Running ECIS
          ELSE
             iwin = PIPE('../source/ecis<ecVIBROT.inp>ECIS_ROT.out#')
          ENDIF
-      ELSEIF(npho.GT.0)THEN
-         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
       ELSE
-         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_ROT.out#')
+      IF(npho.GT.0)THEN
+            iwin = PIPE('ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
+         ELSE
+            iwin = PIPE('ecis<ecVIBROT.inp>ECIS_ROT.out#')
+         ENDIF
       ENDIF
       IF(.NOT.Ltlj)THEN
          IF(DIRect.EQ.3)THEN

@@ -11,16 +11,16 @@ name2=$6
 dir3=$7
 name3=$8
 
-mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 4   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 16  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 17  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 22  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 28  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 45  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 102 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
-mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 4   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 16  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 17  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 22  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 28  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 45  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 102 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+./mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
 exit

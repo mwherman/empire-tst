@@ -6,23 +6,23 @@
 #
 root=$1
 echo 'running ' $root
-runE $root-a
+./runE $root-a
 cp $root-a.c4 $root-b.c4 
 cp $root-a.exf $root-b.exf 
 cp $root-a.lev $root-b.lev 
 cp $root-a-lev.col $root-b-lev.col 
 cp $root-a-omp.int $root-b-omp.int 
 cp $root-a-omp.ripl $root-b-omp.ripl 
-runE $root-b
+./runE $root-b
 cp $root-a.c4 $root-c.c4 
 cp $root-a.exf $root-c.exf 
 cp $root-a.lev $root-c.lev 
 cp $root-a-lev.col $root-c-lev.col 
 cp $root-a-omp.int $root-c-omp.int 
 cp $root-a-omp.ripl $root-c-omp.ripl 
-runE $root-c
+./runE $root-c
 cat $root-a.out $root-b.out $root-c.out >$root.out
-format $root
+./format $root
 cp $root-a.c4 $root.c4 
 cp $root-a.exf $root.exf 
 rm $root-b.c4 $root-c.c4 2>/dev/null

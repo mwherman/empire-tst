@@ -16,8 +16,8 @@ if [ ! -f $file-s.endf ]; then
    rm $file-f.endf 2>/dev/null
    cd ../util/fixup/
    rm OUTPUT.ENDF 2>/dev/null
-   ln $work/$file.endf OUTPUT.ENDF
-   fixup
+   ln -sf $work/$file.endf OUTPUT.ENDF
+   ./fixup
    rm OUTPUT.ENDF
    mv FIXUP.ENDF $work/$file-f.endf
    cd $work
@@ -27,8 +27,8 @@ if [ ! -f $file-s.endf ]; then
     rm $file-l.endf 2>/dev/null
     cd ../util/legend/
     rm LEGEND.OUT 2>/dev/null
-    ln $work/$file-f.endf FIXUP.OUT
-    legend
+    ln -sf $work/$file-f.endf FIXUP.OUT
+    ./legend
     rm FIXUP.OUT
     mv LEGEND.OUT $work/$file-l.endf
     cd $work
@@ -38,8 +38,8 @@ if [ ! -f $file-s.endf ]; then
     rm $file-s.endf 2>/dev/null
     cd ../util/sixtab/
     rm ENDF.IN ENDF.OUT 2>/dev/null
-    ln $work/$file-l.endf ENDF.IN
-    sixtab
+    ln -sf $work/$file-l.endf ENDF.IN
+    ./sixtab
     rm ENDF.IN
     mv ENDF.OUT $work/$file-s.endf
     cd $work
@@ -54,11 +54,11 @@ fi
 # RUN PLOTC4 TO PRODUCE PLOTS
 
 cd ../util/plotc4
-ln $work/$file.c4 C4.DAT  
-ln $work/$file-s.endf ENDF.DAT 
+ln -sf $work/$file.c4 C4.DAT  
+ln -sf $work/$file-s.endf ENDF.DAT 
 echo ' '
 echo 'R U N N I G    P L O T C 4'
-plotc4
+./plotc4
 rm C4.DAT ENDF.DAT 
 mv plot.ps $work/$file.ps
 cd $work

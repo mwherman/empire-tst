@@ -8,7 +8,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.17                   '
+echo '                     V E R S I O N  2.17.1                 '
 echo '                          (Millesimo)                      '
 echo '                              by                           '
 echo '                        M. H e r m a n                     '
@@ -179,28 +179,40 @@ rm OMPAR.INT OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
 #  fi
 #  echo ' '
 
-if  [ -f $file.exf ]; then
-    if  [ ! -f $file.c4 ]; then
+if  [ -s $file.exf ]; then
+    if  [ ! -s $file.c4 ]; then
         # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
 
-        ln  $file.exf ../util/x4toc4/exfor.in
         cd ../util/x4toc4
-        x4toc4
+        ln  -sf $work/$file.exf exfor.in
+        ./x4toc4
         rm exfor.in
         # RUN c4sort TO SORT C4 DATA   
         cd ../c4sort
-        c4sort
+        ./c4sort
         cd $work
         mv ../util/x4toc4/errors $file.x42c4_errs
         mv ../util/x4toc4/x4toc4.lst $file.x42c4_lst
         mv ../util/x4toc4/c4.out $file.c4
-        if [ -f $file.c4 ]; then
+        if [ -s $file.c4 ]; then
            echo 'EXFOR data in computational format are stored in :'$file.c4
+           else
+           echo 'File with EXFOR data in computational format is EMPTY'
         fi
         # COMMENT THE LINE BELOW TO KEEP FILE WITH RETRIEVED EXFOR DATA 
         #rm $file.exf
     fi
 fi
+
+echo ' '
+echo 'Calculations and EXFOR retrieval hopefully completed.'
+echo 'If ENDF option has been selected you can use Format button '
+echo 'to produce ENDF file and comparison plots.'
+echo 'Note that Plotc4 and ZVV plots can be created from the ENDF'
+echo 'formatted file only. However, Create-ZVV button can be used'
+echo 'on the standard EMPIRE output (no ENDF file needed).'
+echo 'Hit Enter to close this window'
+read dum
 exit
 
 

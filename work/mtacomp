@@ -18,8 +18,9 @@ if [ $suf == "-" ]; then
 fi
 
 rm $root-$MT$suf.zvd  2>/dev/null
+ln -sf ../util/c4zvd/mt_x4r.txt mt_x4r.txt
 
-#     FIRST SET AND EXFOR (.c4)
+#     FIRST ENDF SET AND EXFOR (.c4)
 if [ "$name1" != "" ]; then
    rm EXFOR tmp.dat c4.zvd end1.zvd  $name1  2>/dev/null
    ln -sf $dir1/$root.c4 EXFOR
@@ -46,10 +47,10 @@ if [ "$name1" != "" ]; then
    fi
    rm EXFOR $name1 2>/dev/null
 fi
-#     SECOND SET 
+#     SECOND ENDF SET 
 if [ "$name2" != "" ]; then
    rm $name2 end2.zvd  2>/dev/null
-   ln -sf $dir2/$root-s.endf $name2
+   ln -sf $dir2 $name2
    ../util/c4zvd/endzvd.exe A $MT $name2 end2.zvd
    if [ -s end2.zvd ]; then
       echo '#begin aa.tit' >>end2.zvd
@@ -63,10 +64,10 @@ if [ "$name2" != "" ]; then
    rm $name2 2>/dev/null
 fi
 
-#     THIRD SET 
+#     THIRD ENDF SET 
 if [ "$name3" != "" ]; then
    rm $name3 end3.zvd  2>/dev/null
-   ln -sf $dir3/$root-s.endf $name3
+   ln -sf $dir3 $name3
    ../util/c4zvd/endzvd.exe A $MT $name3 end3.zvd
    if [ -s end3.zvd ]; then
       echo '#begin aa.tit' >>end3.zvd
@@ -80,9 +81,10 @@ if [ "$name3" != "" ]; then
    rm $name3 2>/dev/null
 fi
 
-#Run ZVV
-#../util/c4zvd/zvv94l.exe $root-$MT$suf.zvd
+#Run ZVV (uncomment the line below to see plots as they are produced)
+#../util/c4zvd/zvv94l.exe $root-$MT$suf.zvd &
 rm tmp.dat c4.zvd 2>/dev/null
 rm end1.zvd end2.zvd end3.zvd 2>/dev/null
+rm mt_x4r.txt
 
 exit

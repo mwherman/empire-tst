@@ -23,8 +23,8 @@ fi
 if [ ! -f $file-s.endf ]; then
    cd ../util/fixup/
    rm OUTPUT.ENDF
-   ln $work/$file.endf OUTPUT.ENDF
-   fixup
+   ln -sf $work/$file.endf OUTPUT.ENDF
+   ./fixup
    rm OUTPUT.ENDF
    mv FIXUP.ENDF $work/$file-f.endf
    cd $work
@@ -33,8 +33,8 @@ if [ ! -f $file-s.endf ]; then
 
    cd ../util/sixtab/
    rm ENDF.IN ENDF.OUT 2>/dev/null
-   ln $work/$file-f.endf ENDF.IN
-   sixtab
+   ln -sf $work/$file-f.endf ENDF.IN
+   ./sixtab
    rm ENDF.IN
    mv ENDF.OUT $work/$file-s.endf
    cd $work
@@ -48,8 +48,8 @@ fi
 # RUN ZVD
 
 cd ../util/c4zvd/
-ln -fs $work/$file-s.endf Empire
-c4zvv A $MT $work/$file.c4 Empire $file-$MT.zvd 
+ln -sf $work/$file-s.endf Empire
+./c4zvv A $MT $work/$file.c4 Empire $file-$MT.zvd 
 mv $file-$MT.zvd $work
 cd $work
 

@@ -2,16 +2,18 @@
 #SCRIPT TO UN X4TOC4       
 
 file=$1
-ln  $file.exf ../util/x4toc4/exfor.in
 cd ../util/x4toc4
-x4toc4
+ln  -sf ../../work/$file.exf exfor.in
+./x4toc4
 rm exfor.in
 cd ../../work
 mv ../util/x4toc4/errors $file.x42c4_errs
 mv ../util/x4toc4/x4toc4.lst $file.x42c4_lst
 mv ../util/x4toc4/c4.out $file.c4
-if [ -f $file.c4 ]; then
-   echo 'EXFOR data in computational format are stored in :'$file.c4
+if [ -s $file.c4 ]; then
+   echo 'EXFOR data in computational format are stored in: '$file.c4
+   else
+   echo 'File with EXFOR data in computational format is EMPTY'
 fi
 exit
 
