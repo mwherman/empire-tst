@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:54 $
-Ccc   * $Id: lev-dens.f,v 1.14 2004-04-21 03:39:54 Capote Exp $
+Ccc   * $Date: 2004-06-03 21:05:35 $
+Ccc   * $Id: lev-dens.f,v 1.15 2004-06-03 21:05:35 Capote Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -879,7 +879,7 @@ C-----------integration
      &                      (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))
      &                      *defit/RORed
                ENDDO
-               WRITE(34, *)defit*FLOAT(kk - 1), rocumul
+               WRITE(34, *)defit*FLOAT(kk - 1), max(rocumul,1.d0)
             ENDDO
             CLOSE(36)
             CLOSE(34)
@@ -1617,7 +1617,7 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                   WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
                   rolowint = EXP(( - eom/tm))
      &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
-                  WRITE(34, *)ELV(il, Nnuc), rolowint
+                  WRITE(34, *)ELV(il, Nnuc), max(rolowint,1.d0)
                ENDDO
                CLOSE(36)
                CLOSE(34)
@@ -1679,20 +1679,22 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE(6, *)' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
          WRITE(35, *)'set terminal postscript enhanced color'
          WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
-         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
-99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
-     &          '"')
+         WRITE(35, 99002) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &                    t, eo, ux, am      
+99002    FORMAT('set title "N(E) for ', I3, '-', A2, '-', I3, 
+     &          '  T=',f6.3,' E0=',f7.3,' Ux=',f4.1,' a=',f6.2,' "')
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
-         WRITE(35, *)'set ylabel "Number of levels" 0,0'
+         WRITE(35, *)'set ylabel "Cumulative number of levels" 0,0'
          WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
          CLOSE(35)
          DO il = 2, NLV(Nnuc)
             WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
             WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
             rolowint = EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
-            WRITE(34, *)ELV(il, Nnuc), rolowint
+            WRITE(34, *)ELV(il, Nnuc), max(1.d0,rolowint)
          ENDDO
+
          CLOSE(36)
          CLOSE(34)
          iwin = PIPE('gnuplot fort.35#')
