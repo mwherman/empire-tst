@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: ph-lev-dens.f,v 1.5 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-24 13:19:23 $
+Ccc   * $Id: ph-lev-dens.f,v 1.6 2005-01-24 13:19:23 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In, Ip, Ih, X)
 C
@@ -265,7 +265,7 @@ C-----seems to be 7b
          RETURN
       ENDIF
       WRITE(50, 99001)J, L, K, X
-99001 FORMAT(1X, 'ERROR', 5X, 'W1(', I1, ',', I1, ',', I1, ',', E12.5, 
+99001 FORMAT(1X, 'ERROR', 5X, 'W1(', I1, ',', I1, ',', I1, ',', E12.5,
      &       ')')
       STOP
       END
@@ -365,7 +365,7 @@ C-----seems to be second part of 7c
          RETURN
       ENDIF
       WRITE(50, 99001)J, L, K, X
-99001 FORMAT(1X, 'ERROR', 5X, 'W3(', I1, ',', I1, ',', I1, ',', E12.5, 
+99001 FORMAT(1X, 'ERROR', 5X, 'W3(', I1, ',', I1, ',', I1, ',', E12.5,
      &       ')')
       STOP
       END
@@ -413,7 +413,7 @@ C
          RETURN
       ENDIF
       WRITE(6, 99001)Ip, Ih, n
-99001 FORMAT(1X, /1X, ' ERROR IN WOBL CALL P=', I2, '  H=', I2, '  N=', 
+99001 FORMAT(1X, /1X, ' ERROR IN WOBL CALL P=', I2, '  H=', I2, '  N=',
      &       I2, '    WOBL=0.0 RETURNED', /)
       END
 C
@@ -512,7 +512,7 @@ C-----------hole part
          ENDIF
       ENDIF
       WRITE(6, 99001)Ip, Ih, U
-99001 FORMAT(1X, 'ERROR IN VQ INPUT: P=', I2, ' H=', I2, ' E=', F8.4, 
+99001 FORMAT(1X, 'ERROR IN VQ INPUT: P=', I2, ' H=', I2, ' E=', F8.4,
      &       '  VQ=0 RETURNED')
       END
 C
@@ -525,6 +525,7 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION ROPHM(N, I, E, G)
+
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -534,7 +535,12 @@ C
       INTEGER I, N
 C
 C
+C     Just dummy line to avoid compiler warning
+      A = N+I+E+G
+C     Just dummy line to avoid compiler warning
+
       WRITE(6, *)'MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
+
       ROPHM = 0.0
       END
 C
@@ -654,7 +660,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum, 
+      DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum,
      &                 t1, t2
       DOUBLE PRECISION FCTR
       REAL FLOAT
