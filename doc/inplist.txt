@@ -220,9 +220,72 @@ GST     Controls \gamma -emission in MSC,
        = 0 no \gamma -emission in MSC (default),
        = 1 \gamma -emission in MSC selected.
 
-STMRO   Controls p-h level density calculations,
-       = 0 closed form p-h state densities selected (default),
-       = 1 microscopic p-h state densities selected (not yet implemented).
+Multi-step direct
+-----------------          
+
+MSD 	Controls Multistep Direct calculations ,
+	  = 0 no MSD calculations (default),
+	  = 1 MSD calculations selected - ORION + TRISTAN will be executed ,
+	  = 2 MSD calculations selected but only TRISTAN will be executed using
+	      the most recent results of ORION. WARNING! there is no check whether
+	      the last and the current run match with regard to the projectile,
+	      the target and the incident energy; this option can be used for a
+	      single incident energy only.
+
+COMPFF Controls form factor for the l=0 transitions
+       = 0 standard surface form factor (default)
+       = 1 compressional form factor
+
+WIDEX  Experimental energy resolution set to VAL (default: 0.2).
+
+GAPP 	 Proton pairing gap for target set to VAL (default: 12/sqrt{A}).
+
+GAPN 	 Neutron pairing gap for target set to VAL (default: 12/sqrt{A}).
+
+HOMEGA Oscillator energy (default: 41.47/A^{1/3} MeV).
+
+EFIT 	 Coupling constants of multipolarity I1 fitted to the level at energy
+	    VAL (defaults: -1 for lambda=0, E_{GDR} for lambda =1, energies
+	    of the first low-lying 2+, 3-, and 4+ levels for lambda =2, 3, and  4,
+	    respectively).
+
+RESNOR Response function for multipolarity I1 will be normalized by
+	    factor VAL (default: 1.).
+
+ALS 	 l-s coupling strength in the harmonic oscillator (default: 1.5).
+
+Multi-step compound 
+-------------------          
+
+MSC 	Controls Multistep Compound calculations ,
+	  = 0 no MSC calculations (default),
+	  = 1 MSC calculations selected.
+
+XNI 	Initial exciton number set to VAL (default set internally depending
+	   on the case, 3 for nucleon inuced reactions).
+
+GDIV 	Single particle level densities in MSC set to A/VAL (default: 13.0).
+
+TORY 	Ratio of unlike to like nucleon-nucleon interaction cross section
+	   set to VAL. Used for determination of relative share between neutron
+	   and protons in the exciton configurations (default: 4.).
+
+EX1 	Initial number of excitons being neutrons set to VAL (default set
+	   internally depending on the case and on TORY).
+
+EX2 	Initial number of excitons being protons set to VAL (default set
+	   internally depending on the case and on TORY).
+
+D1FRA Ratio of the spreading GDR width to the total GDR width set to
+	   VAL (default: 0.8).
+
+GST 	Controls gamma-emission in MSC,
+	  = 0 no gamma-emission in MSC (default),
+	  = 1 gamma-emission in MSC selected.
+
+STMRO Controls p-h level density calculations, 
+	  = 0 closed form p-h state densities selected (default),
+	  = 1 microscopic p-h state densities selected (not yet implemented) .
 
 Exciton model (DEGAS)
 ---------------------
@@ -234,7 +297,8 @@ DEGAS   Controls exciton model calculations,
 GDIVP   Sets single-particle level density parameter (g) for protons to
         A/VAL (default 13).
 
-Monte   Carlo preequilibrium model (HMS)
+Monte Carlo preequilibrium model (HMS)
+--------------------------------------
 
 HMS     Controls Monte Carlo preequilibrium calculations,
        = 0 HMS disabled (default),
@@ -324,9 +388,52 @@ FISBAR  Controls origin of fission barrier data for nucleus Z=I1, A=I2
        = 1 internal EMPIRE library
        = 2 Ripl-1 (compilation of Maslov, model dependent!)
 
-FISDEN  Controls level densities at saddle points for nucleus Z=I1, A=I2
-       = 0 Ripl-2 (microscopic calculations by Goriely)
-       = 1 Empire specific
+FISSHI   Controls treatment of the fission channel for nucleus
+         Z=I1, A=I2 
+      =0 advanced fission (multi-humped barrier, optical model for
+         fission) recommended for light particle or photon induced fission 
+         (default)
+      =1 fission over single-humped barrier (good only for  
+         Heavy Ion induced reactions)
+      =2 fission ignored
+
+      The following options are valid only when FISSHI = 0
+
+FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
+      =0 Ripl-2 (microscopic calculations by Goriely with internally set
+         barrier widths taken from Lynn - default),
+      =1 internal EMPIRE library
+      =2 Ripl-1 (compilation of Maslov, model dependent!)
+
+FISDEN   Controls level densities at saddle points for nucleus Z=I1, A=I2 
+      =0 Ripl-2 (microscopic calculations by Goriely)
+      =1 Empire specific 
+
+FISOPT   Controls subbarrier effects for nucleus Z=I1, A=I2 
+      =0 no subbarrier effects
+      =1 subbarrier effects considered (only with FISBAR=1)
+      =2 subbarrier effects & isomeric fission considered 
+         (only with FISBAR=1)
+
+FISMOD   Controls multimodality of fission for nucleus Z=I1, A=I2 
+      =0 single-modal fission
+      =1 multimodal fission
+      =2 multimodal fission
+
+FISDIS   Controls discrete transitional states
+      =0 no discrete states above fission barrier for nucleus Z=I1, A=I2
+      =1 discrete states above fission barrier for nucleus Z=I1, A=I2
+
+      The following options are valid only when FISSHI = 1 
+
+QFIS 	  Liquid drop fission barriers multiplied by VAL (default: 1.).
+
+BETAV   Viscosity  parameter set to VAL (10^{-21}s^{-1}) (default: 4.).
+
+SHRJ 	  Shell correction to fission barrier dampped to 1/2 at spin VAL 
+        (default: 24.).
+
+SHRD 	  Diffuseness of the shell correction damping set to VAL (default: 2.5).
 
 FISOPT  Controls subbarrier effects for nucleus Z=I1, A=I2
        = 0 no subbarrier effects
@@ -372,14 +479,14 @@ DEFGP   J_{G} (position) in the Gaussian term in fission barrier
 Gamma-ray strength functions 
 ----------------------------
 
-GSTRFN = 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki)
-           as in the 2.18 version and earlier (default)
-       = 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2)
-       = 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2)
-       = 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2)
-       = 4 EGLO EGLO enhanced generalized Lorentzian (RIPL-2)
-       = 5 GFL (Mughabghab)
-       = 6 SLO standard Lorentzian
+GSTRFN= 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki) 
+          as in the 2.18 version and earlier
+      = 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2)
+      = 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2)
+      = 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2)
+      = 4 EGLO EGLO enhanced generalized Lorentzian (RIPL-2)
+      = 5 GFL  (Mughabghab)
+      = 6 SLO  standard Lorentzian
 
 GDR parameters
 --------------
@@ -393,8 +500,14 @@ GDRDYN  Controls GDR treatment,
        = 1 GDR shape dependence accounts for the rotation induced
            deformation (spin dependent, Eq. [totdefor]).
 
-EGDR1   GDR energy of first peak set to VAL (default calculated
-        internally from systematics).
+GDRGFL   Selects source of GDR parameters
+      = 0 Messina systematics
+      = 1 experimental or systematics of RIPL-2 (default)
+
+GDRDYN 	Controls GDR treatment ,
+   	= 0. GDR shape depends on the ground state deformation (default),
+   	= 1. GDR shape dependance accounts for the rotation induced deformation
+	        (spin dependent).
 
 GGDR1   GDR width of first peak set to VAL (default calculated
         internally from systematics).
@@ -440,16 +553,18 @@ GCASC  = 0 no full gamma-cascade in the first Compound Nucleus
 Photo-absorption
 ----------------
 
-E1     = 0 E1 photo-absorption blocked
-       = 1 E1 photo-absorption selected
+E1       =0 E1 photo-absorption blocked
+         =1 E1 photo-absorption selected
 
-M1     = 0 M1 photo-absorption blocked
-       = 1 M1 photo-absorption selected
+M1       =0 M1 photo-absorption blocked
+         =1 M1 photo-absorption selected
 
-E2     = 0 E2 photo-absorption blocked
-       = 1 E2 photo-absorption selected
+E2       =0 E2 photo-absorption blocked
+         =1 E2 photo-absorption selected
 
-QD      Quasideuteron photo-absorption cross section normalized by a factor VAL
+QD          Quasideuteron photoabsorption cross section normalized by 
+            a factor VAL
+
 
 Optical Model Potential
 -----------------------
@@ -490,7 +605,6 @@ JSTAB   Stability limit with respect to spin for the nucleus Z=I1 and A=I2,
 FITOMP  Sets calculations for GUI assisted manual fitting of optical model
         parameters (only total, elastic, capture and inelastic scattering are
         calculated independently of what is specified in the input).
-
 
 
                          D I M E S I O N S
