@@ -1,6 +1,5 @@
       PARAMETER(
      * NDNUC= 60
-c      for PCROSS
      *,NDEJC=4
      *,NDAFIS=1
      *,NDEX= 101
