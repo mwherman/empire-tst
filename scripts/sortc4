@@ -21,6 +21,7 @@ fi
    # SORT C4 FILE
 
    cd ../util/x4toc4
+   rm C4.DAT C4.SRT 2>/dev/null
    ln  -sf $work/$file.c4 C4.DAT
    # RUN c4sort TO SORT C4 DATA   
    cd ../c4sort

@@ -4,6 +4,7 @@
 work=`pwd`
 file=$1
 cd ../util/x4toc4
+rm X4.DAT NEWX4.DAT X4TOC4.LST C4.DAT 2>/dev/null
 ln  -sf $work/$file.exf X4.DAT
 ./x4toc4
 rm X4.DAT
