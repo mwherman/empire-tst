@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-30 19:48:10 $ 
-Ccc   * $Id: input.f,v 1.32 2004-06-30 19:48:10 herman Exp $ 
+Ccc   * $Date: 2004-07-02 20:15:50 $ 
+Ccc   * $Id: input.f,v 1.33 2004-07-02 20:15:50 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -793,6 +793,15 @@ C
             WRITE(6, *)' WARNING!!!! (possible for nucleons only)' 
             WRITE(6, *)' ' 
          ENDIF  
+         IF(LHRtw.NE.0 .AND.  AEJc(0).EQ.0) THEN
+            LHRtw = 0
+            WRITE(6, *)' ' 
+            WRITE(6, *)' WARNING!!!! HRTW has been turned off '
+            WRITE(6, *)' WARNING!!!! (It is not allowed for '
+            WRITE(6, *)' WARNING!!!! photo-nuclear reactions)'
+            WRITE(6, *)' ' 
+            
+         ENDIF 
 C--------setup model matrix (IDNa) defining which model is used where 
 C                      ECIS   MSD   MSC   DEGAS   HMS   PCROSS 
 C                        1     2     3      4      5      6 
