@@ -3170,11 +3170,12 @@ C-----Eq. (11) of the Report
 C
 C COMMON variables
 C
-      REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, FFPair(40), 
-     &       FFQ(40), G, GAQ, OM(25, NDEXD), OMD(10, 10, 10), 
-     &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10)
-      INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, NDEXD, 25)
+C     REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, FFPair(40), 
+C    &       FFQ(40), G, GAQ, OM(25, NDEXD), OMD(10, 10, 10), 
+C    &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10)
+      REAL*8 FFPair(40), FFQ(40), RFAc(50, 90), SIGma
+C     INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
+C     REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DAM   / FFQ, FFPair
       COMMON /DEN   / RFAc, SIGma
 C
@@ -3217,11 +3218,12 @@ C-----Eq. (12) of the Report
 C
 C COMMON variables
 C
-      REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
-     &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
-     &       SIGma, SPIdi(10, 10)
-      INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
-      REAL*8 T1111, TC(25, NDEXD, 25)
+C     REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
+C    &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
+C    &       SIGma, SPIdi(10, 10)
+      REAL*8 RFAc(50, 90), SIGma
+C     INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
+C     REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
 C
 C Dummy arguments
