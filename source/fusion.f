@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-07 22:36:02 $
-Ccc   * $Id: fusion.f,v 1.29 2005-02-07 22:36:02 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-08 17:06:58 $
+Ccc   * $Id: fusion.f,v 1.30 2005-02-08 17:06:58 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -515,11 +515,16 @@ C-----------is calculated like in SOMP i.e.
 C           SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
 
-            IF(DIRECT.EQ.3) THEN
-              CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,2)
-            ELSE
-              CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
-            ENDIF
+C           IF(DIRECT.EQ.3) THEN
+C             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,2)
+C           ELSE
+C             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
+C           ENDIF
+C
+C           If we are here, means we should get both TLs and angular distribution
+C           from SOMP calculation, RCN
+C
+            CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
 
             WRITE(6, *)' SOMP transmission coefficients used for ',
      &                 'fusion determination'
