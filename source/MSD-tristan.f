@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-11-30 08:39:31 $
-Ccc   * $Id: MSD-tristan.f,v 1.15 2004-11-30 08:39:31 Capote Exp $
+Ccc   * $Date: 2004-12-17 06:49:45 $
+Ccc   * $Id: MSD-tristan.f,v 1.16 2004-12-17 06:49:45 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -897,34 +897,15 @@ C
 C
 C           INVERSE COUPLING CONSTANTS (FROM FIT TO EXP. ENERGIES)
 C
-C           As corrected by Dr. Harm Wienke [h.wienke@belgacom.net]
-C           Belgonucleaire/EDP, Europalaan 20, 2480 Dessel, Belgium
-C
             IF(efit(lt).NE.0.0D0)THEN
-               nea = efit(lt)/ESTep + 1.
+               nea = efit(lt)/ESTep + 1.5
                wex = 0.5D0*WIDex
-C              ccr = rfqqr(nea, lt)
-               rest = efit(lt) - (nea - 1)*ESTep                  !new
-               ccr = rfqqr(nea,lt) + rest*                        !new
-     &         (rfqqr(nea+1,lt)-rfqqr(nea,lt))/ESTep              !new
-C              dcr = 0.5D0*(rfqqr(nea + 1, lt) - rfqqr(nea - 1, lt))
-C    &               /ESTep
-               dcr=0.5D0*((rfqqr(nea+2,lt)-rfqqr(nea+1,lt))*      !new
-     &         rest/ESTep + rfqqr(nea+1,lt) -                     !new
-     &         (rfqqr(nea,lt)-rfqqr(nea-1,lt))*rest/ESTep         !new
-     &         - rfqqr(nea-1,lt))/ESTep                           !new
-C              cci = rfqqx(nea, lt) + wex*rfqqy(nea, lt)
-               cci = rfqqx(nea, lt) + wex*rfqqy(nea, lt) +        !new
-     &         rest*(rfqqx(nea+1,lt)-rfqqx(nea,lt))/ESTep +       !new
-     &         rest*wex*(rfqqy(nea+1,lt)-rfqqy(nea,lt))/ESTep     !new
-C              ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)
-               ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)+ !new
-     &         (rfqqx(nea+2,lt)-rfqqx(nea+1,lt))*rest/ESTep  +    !new
-     &         wex*(rfqqy(nea+2,lt)-rfqqy(nea+1,lt))*rest/ESTep   !new
-C              ccm = rfqqx(nea - 1, lt) + wex*rfqqy(nea - 1, lt)
-               ccm = rfqqx(nea-1, lt) + wex*rfqqy(nea - 1, lt)+   !new
-     &         (rfqqx(nea,lt)-rfqqx(nea-1,lt))*rest/ESTep  +      !new
-     &         wex*(rfqqy(nea,lt)-rfqqy(nea-1,lt))*rest/ESTep     !new
+               ccr = rfqqr(nea, lt)
+               dcr = 0.5D0*(rfqqr(nea + 1, lt) - rfqqr(nea - 1, lt))
+     &               /ESTep
+               cci = rfqqx(nea, lt) + wex*rfqqy(nea, lt)
+               ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)
+               ccm = rfqqx(nea - 1, lt) + wex*rfqqy(nea - 1, lt)
                dci = 0.5D0*(ccp - ccm)/ESTep
 C              MH added the following IF  to avoid division by 0
                IF(dcr.NE.0.0D0)THEN
@@ -938,13 +919,9 @@ C              MH added the following IF  to avoid division by 0
 C
 C                 check   for maximum
 C
-C                 cr1 = rfqqr(nea - 1, lt)
-                  cr1 = rfqqr(nea - 1, lt) +                     !new
-     &            (rfqqr(nea,lt)-rfqqr(nea-1,lt))*rest/ESTep     !new
+                  cr1 = rfqqr(nea - 1, lt)
                   cr2 = ccr
-C                 cr3 = rfqqr(nea + 1, lt)
-                  cr3 = rfqqr(nea + 1, lt) +                     !new
-     &            (rfqqr(nea+2,lt)-rfqqr(nea+1,lt))*rest/ESTep   !new
+                  cr3 = rfqqr(nea + 1, lt)
                   clex(lt) = 0.D0
                   DO j = 1, 2
                      re1 = ccm/((ccpm(j) - cr1)**2 + ccm**2)
@@ -963,13 +940,9 @@ C                 cr3 = rfqqr(nea + 1, lt)
                   ENDIF
 99012             FORMAT('  C(+),R(+):', 2E13.5/'  C(-),R(-):', 2E13.5,
      &                   '  CPL:', F10.5)
-C                 cr1 = rfqqr(nea - 1, lt)
-                  cr1 = rfqqr(nea - 1, lt) +                     !new
-     &            (rfqqr(nea,lt)-rfqqr(nea-1,lt))*rest/ESTep     !new
+                  cr1 = rfqqr(nea - 1, lt)
                   cr2 = ccr
-C                 cr3 = rfqqr(nea + 1, lt)
-                  cr3 = rfqqr(nea + 1, lt) +                     !new
-     &            (rfqqr(nea+2,lt)-rfqqr(nea+1,lt))*rest/ESTep   !new
+                  cr3 = rfqqr(nea + 1, lt)
                   re1 = ccm/((clex(lt) - cr1)**2 + ccm**2)
                   re2 = cci/((clex(lt) - cr2)**2 + cci**2)
                   re3 = ccp/((clex(lt) - cr3)**2 + ccp**2)
@@ -989,12 +962,8 @@ C                 cr3 = rfqqr(nea + 1, lt)
                   xea(lt) = 0.D0
                   yea(lt) = 0.D0
                ELSE
-C                 xea(lt) = rfqqx(nea, lt)
-                  xea(lt) = rfqqx(nea, lt) + rest*             !new
-     &            (rfqqx(nea+1,lt)-rfqqx(nea,lt))/ESTep        !new
-C                 yea(lt) = rfqqy(nea, lt)
-                  yea(lt) = rfqqy(nea, lt) + rest*             !new
-     &            (rfqqy(nea+1,lt)-rfqqy(nea,lt))/ESTep        !new
+                  xea(lt) = rfqqx(nea, lt)
+                  yea(lt) = rfqqy(nea, lt)
                ENDIF
             ENDIF
 C
