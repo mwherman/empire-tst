@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 18:15:12 $
-Ccc   * $Id: fusion.f,v 1.32 2005-02-09 18:15:12 Capote Exp $
+Ccc   * $Date: 2005-02-14 17:12:24 $
+Ccc   * $Id: fusion.f,v 1.33 2005-02-14 17:12:24 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -94,10 +94,7 @@ C
       DO i = 1, NDLW
          stl(i) = 0.0
       ENDDO
-C
-C     WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
-C    &         INT(ZEJc(NPRo)),INT(AEJc(NPRo)),
-C    &       SYMb(NTRg),INT(A(NTRg)),INT(EINl*1000)
+
       WRITE(ctmp18, '(i2.2,i3.3,1h_,i2.2,i3.3,1h_,i6.6)')
      &         INT(ZEJc(NPRo)),INT(AEJc(NPRo)),
      &         INT(Z(Ntrg)),   INT(A(NTRg)),   INT(EINl*1000)
@@ -465,7 +462,7 @@ C             Inelastic cross section (incident.ics)
 C             Angular distribution (incident.ang)
               OPEN(45, FILE = 'dwba.ANG', STATUS = 'OLD', ERR=2000)
               READ(45, '(A80)', END = 2000) rstring
-              OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
+              OPEN(46, FILE = 'ccm.ANG' , STATUS = 'OLD', ERR=2000)
               READ(46, '(A80)', END=1005) ! first line is taken from dwba
  1005         OPEN(47, FILE = 'INCIDENT.ANG' , STATUS = 'UNKNOWN')
               write(47,'(A80)') rstring
