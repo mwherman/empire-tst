@@ -171,6 +171,10 @@ MSD     Controls Multi-step Direct calculations ,
            incident energy; this option can be used for a single
            incident energy only.
 
+COMPFF  Controls form factor for l=0 transfer 
+       = 0 surface form factor (default)
+       = 1 compressional form factor
+
 WIDEX   Experimental energy resolution set to VAL (default: 0.2).
 
 GAPP    Proton pairing gap for target set to VAL (default: 12/\sqrt{A} ).
