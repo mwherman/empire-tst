@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:21:15 $
-Ccc   * $Id: lev-dens.f,v 1.26 2005-01-24 13:21:15 Capote Exp $
+Ccc   * $Date: 2005-01-24 18:39:52 $
+Ccc   * $Id: lev-dens.f,v 1.27 2005-01-24 18:39:52 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -185,7 +185,7 @@ C    &                  YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
 C    &                  EXPmax, FIScon,iff,tcrt)
                rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
      &                  YRAst(i, Nnuc), HIS(Nnuc),     BF, ARGred,
-     &                  EXPmax)
+     &                  EXPmax, FIScon)
                IF(rotemp.LT.RORed)rotemp = 0.0
                IF(BF.NE.0.0D0)THEN
                   RO(kk, i, Nnuc) = rotemp
@@ -201,7 +201,7 @@ C
 C     DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort,
 C    &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon,iff,tcrt)
       DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort,
-     &           Yrast, Ss, Bf, Argred, Expmax)
+     &           Yrast, Ss, Bf, Argred, Expmax, FIScon)
 Ccc   *********************************************************************
 Ccc   *                                                         class:ppu *
 Ccc   *                         R O D E F                                 *
@@ -235,7 +235,7 @@ C
 C     DOUBLE PRECISION A, A2, Ac, Aj, Argred, Bf, E, Expmax, Momort,
 C    &                 Mompar, Ss, Yrast, FIScon, tcrt
       DOUBLE PRECISION A,     Ac, Aj, Argred, Bf, E, Expmax, Momort,
-     &                 Mompar, Ss, Yrast
+     &                 Mompar, Ss, Yrast, FIScon
 C     INTEGER iff
 C
 C Local variables
@@ -289,7 +289,7 @@ C-----(NOT consistent with the builtin systematics)
 C     CALL DAMPKS(A,A2,T,QK)
 C-----damping of rotational  effects with Fermi function independent
 C-----of deformation and mass number (consistent with the builtin systematics)
-      CALL DAMPROT(e1, qk,FIScon)
+      CALL DAMPROT(e1, qk)
 C-----damping ***** done *********
       sort2 = Momort*t
       IF(Ss.EQ.( - 1.0D0))THEN
@@ -309,7 +309,7 @@ C-----damping ***** done *********
       ELSE
          kmin = 1
       ENDIF
-      if(fiscon.eq.2.)bf=0.
+      if(fiscon.eq.2.) bf=0.
       DO k = kmin, i
          ak = k + Ss
          IF(Bf.NE.1.0D0)THEN
@@ -337,7 +337,7 @@ c     IF(iff.eq.4) RODEF = RODEF*4.*sqrt(2.*pi)*sqrt(mompar*tcrt)
       END
 C     C
 C
-      SUBROUTINE DAMPROT(E1, Qk,FIScon)
+      SUBROUTINE DAMPROT(E1, Qk)
 CCCC  *****************************************************************
 CCCC  * damping of rotational  effects with Fermi function independent
 CCCC  * of deformation and mass number (consistent with the builtin systematics)
@@ -355,13 +355,6 @@ C
       Qk = 0.
       dmphalf = 40.
       dmpdiff = 10.
-      IF(FIScon.eq.2)THEN
-c      write(6,*)'fisc',fiscon
-c      dmphalf = 60.
-c      dmpdiff = 15.
-       dmphalf = 40.
-       dmpdiff = 10.
-      ENDIF
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
       END
@@ -730,7 +723,7 @@ C-----Empire systematics with Nix-Moeller shell corrections
             AP2 = AP2*1.2402
             GAMma = GAMma*1.2494
          ENDIF
-C-----Empire systematics with M-S shell corrections
+C--------Empire systematics with M-S shell corrections
          IF(SHNix.EQ.0.0D0)THEN
             AP1 = .52268E-01
             AP2 = .13395E+00
@@ -1072,7 +1065,7 @@ C-----------dependent factor
                   i = INT(aj - HIS(Nnuc))
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort,
      &                     YRAst(i, Nnuc), HIS(Nnuc),       BF, ARGred,
-     &                     EXPmax)
+     &                     EXPmax, FIScon)
 C                 ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort,
 C    &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred,
 C    &                     EXPmax, FIScon,iff,tcrt)
@@ -1198,7 +1191,7 @@ C    &               EXPmax, FIScon,iff,tcrt)
 C           01/2005
             rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
      &               YRAst(i, Nnuc), HIS(Nnuc),     BF, ARGred,
-     &               EXPmax)
+     &               EXPmax, FIScon)
             IF(i.EQ.1)t = SQRT(u/ac)
          ENDIF
 
@@ -1465,7 +1458,7 @@ C     arg = s - Aj*(Aj + 1.0)/(2.0*seff2)
       arg = s - (Aj+0.5d0)**2/(2.d0*seff2)
       IF(arg.LE.0.0D0)RETURN
 C     CALL DAMPKS(A, A2, t, qk)
-      CALL DAMPROT(U, qk,FIScon)
+      CALL DAMPROT(U, qk)
       qdamp = 1.d0 - qk*(1.d0 - 1.d0/(momo*t))
       ROBCS = 0.5d0*const*(2*Aj + 1.d0)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational enhancement factor
