@@ -197,6 +197,17 @@ C     POT(6,i) = strength parameters                                     *
 C     wso = pot(6,1) + pot(6,2)*e + pot(6,3)*e*e + pot(6,4)*e*e*e        *
 C     pot(6,5)*ln(e) * pot(6,6)*sqrt(e)                                  *
 C                                                                        *
+C     Added by R.Capote, july 2001                                       *
+C     read(ie,*) r(6),re(6),a(6),ae(6),(pot(6,i),i=1,6)                  *
+C     ****                                                               *
+C     Real surface potential (from dispersive relations)                 *
+C     R (7)    = radius (fm)                                             *
+C     RE(7)    = linear energy dependence of the radius                  *
+C     A (7)    = diffuseness (fm)                                        *
+C     AE(7)    = linear energy dependence of the diffuseness             *
+C     POT(7,i) = strength parameters                                     *
+C     dwd = pot(7,1)                                                     *
+C                                                                        *
 C     read(ie,*) rcoul,ewmax,beta                                        *
 C     ****                                                               *
 C     RCOUL = Coulomb radius                                             *
@@ -239,7 +250,7 @@ C     PI,W2 are defined globally, PIL,W2L locally
       COMMON /ENER  / E1, EINc
       COMMON /FACT  / G(LFMAX)
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
-      COMMON /POTEN1/ R(6), RE(6), AQ(6), AE(6), POT(6, 6)
+      COMMON /POTEN1/ R(7), RE(7), AQ(7), AE(7), POT(7, 6)
       COMMON /POTEN2/ RCOulomb, EWMax, BETa
       COMMON /TCE   / TC(LTCMAX)
       COMMON /XS    / SE, SR, ST
@@ -325,7 +336,7 @@ C
 C
 C     Initialisations
 C
-      DO i = 1, 6
+      DO i = 1, 7
          AQ(i) = zero
          AE(i) = zero
          R(i) = zero
@@ -852,7 +863,7 @@ C***********************************************************************
 C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
       COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
-      COMMON /POTEN1/ R(6), RE(6), A(6), AE(6), POT(6, 6)
+      COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
       COMMON /POTEN2/ RCOul, EWMax, BETa
       END
 C
@@ -1205,38 +1216,37 @@ C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - h, O - Z)
       INCLUDE 'dimension.h'
       DOUBLE PRECISION A, accur, AE, ak, AK2, argmin, av, BETa, BI, BR, 
-     &                 c1, c2, ceta, d1, dt1, dt2, dt3, dt4, dt6, E1
+     &               c1, c2, ceta, d1, dt1, dt2, dt3, dt4, dt6, dt7, E1
       DOUBLE PRECISION EINc, el, eps, epstl, ETA, eti, etr, EWMax, fc, 
-     &                 fcp, fj, fjmin, fl, gc, gcp, h, one, p1, p2, p3
+     &               fcp, fj, fjmin, fl, gc, gcp, h, one, p1, p2, p3
       DOUBLE PRECISION p4, p5, PI, POT, pote, POTi, POTr, PSIi, PSIip, 
-     &                 PSIr, PSIrp, R, r1, r2, r3, r4, r6, RCOul, 
+     &               PSIr, PSIrp, R, r1, r2, r3, r4, r6, r7, RCOul, 
      &                 rcoulb, RE
       DOUBLE PRECISION rho, rint, rm, rv, seven, SI, sl, spo, step, T, 
-     &                 t1, t2, t3, t4, t6, two, u1, u2, vcl, volint
+     &                t1, t2, t3, t4, t6, t7, two, u1, u2, vcl, volint
       DOUBLE PRECISION VSO, w2, W2L, WSO, y1, y2, yy, zero, ZI, ZT, zz
       INTEGER i, IE, ipl, Ipr, IS, IS1, IS2, IS3, IS4, j, k, l, lm1, 
      &        Lmax, lmaxc, LTCMAX, npt, npt3
       PARAMETER(LTCMAX = NDTL)
 C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
-      CHARACTER*10 type(6)
+      CHARACTER*10 type(7)
       REAL*8 MI, MT, mt3, mu
 C     real*16 a1,a2,a3,a4,a5
       REAL*8 a1, a2, a3, a4, a5
-      DIMENSION av(6), rv(6), pote(6)
-      DIMENSION volint(6)
+      DIMENSION av(7), rv(7), pote(7), volint(7)
       DIMENSION u1(7), y1(7)
       DIMENSION fc(LTCMAX), fcp(LTCMAX), gc(LTCMAX), gcp(LTCMAX)
 C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
       COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2L
       COMMON /ENER  / E1, EINc
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
-      COMMON /POTEN1/ R(6), RE(6), A(6), AE(6), POT(6, 6)
+      COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
       COMMON /POTEN2/ RCOul, EWMax, BETa
       COMMON /POTN  / POTi(305), POTr(305), VSO(305), WSO(305)
       COMMON /PSI   / PSIr, PSIrp, PSIi, PSIip
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       DATA type/'REAL      ', 'IMAG.SURF1', 'IMAG.VOLUM', 'VSO (REAL)', 
-     &     'IMAG.SURF2', 'WSO (IMAG)'/
+     &     'IMAG.SURF2', 'WSO (IMAG)','REAL.SURF ' /
       DATA argmin/ - 1.745D+02/, zero/0.0D+00/, epstl/1.0D-10/
       DATA eps/1.0D-03/, one/1.0D+00/, two/2.0D+00/, seven/7.0D+00/
 C
@@ -1276,23 +1286,23 @@ C     w2  = (2*amu*c**2) / ((hbar*c)**2)
 C
 C     Radius
 C
-      DO i = 1, 6
+      DO i = 1, 7
          rv(i) = (DABS(R(i)))*mt3
       ENDDO
       rcoulb = RCOul*mt3
 C
 C     Diffuseness
 C
-      DO i = 1, 6
+      DO i = 1, 7
          av(i) = A(i)
          IF(av(i).LE.zero)av(i) = one
       ENDDO
 C
 C     Strength
 C
-      DO i = 1, 6
+      DO i = 1, 7
          pote(i) = POT(i, 1)
-         IF(pote(i).LT.zero)pote(i) = zero
+         IF(i.le.3.and.pote(i).LT.zero) pote(i) = zero
       ENDDO
 C
 C     Matching radius
@@ -1302,7 +1312,8 @@ C
       r3 = rv(3) + seven*A(3)
       r4 = rv(4) + seven*A(4)
       r6 = rv(6) + seven*A(6)
-      rm = 1.5*DMAX1(r1, r2, r3, r4, r6)
+      r7 = rv(7) + seven*A(7)
+      rm = 1.5*DMAX1(r1, r2, r3, r4, r6, r7)
       rho = ak*rm
 C
 C     Coulomb functions at the matching radius
@@ -1334,12 +1345,14 @@ C
       t3 = one/DEXP(rv(3)/av(3))
       t4 = one/DEXP(rv(4)/av(4))
       t6 = one/DEXP(rv(6)/av(6))
+      t7 = one/DEXP(rv(7)/av(7))
 C
       dt1 = DEXP(h/av(1))
       dt2 = DEXP(h/av(2))
       dt3 = DEXP(h/av(3))
       dt4 = DEXP(h/av(4))
       dt6 = DEXP(h/av(6))
+      dt7 = DEXP(h/av(7))
 C
       DO i = 1, npt3
          rint = DFLOAT(i)*h
@@ -1348,6 +1361,10 @@ C        Real potential
 C
          t1 = t1*dt1
          POTr(i) = +pote(1)/(one + t1)
+c
+c  Real surface potential (Woods-Saxon derivative)
+         t7 = t7*dt7
+         potr(i) = potr(i) + 4.0*pote(7) * t7/((one + t7)**2)
 C
 C        Imaginary volume potential
 C
@@ -1498,7 +1515,10 @@ C
      &            /(3.0*MT)
       IF(R(2).GT.zero)volint(2) = 16.0*PI*rv(2)*rv(2)*av(2)*pote(2)
      &                            *(one + ((PI*av(2)/rv(2))**2)/3.0)/MT
-      volint(3) = zero
+      volint(7) = 16.0*PI*rv(7)*rv(7)*av(7)*pote(7)
+     &                            *(one + ((PI*av(7)/rv(7))**2)/3.0)/MT
+      volint(3) = 4.0*PI*rv(3)*pote(3)*(one*rv(3)*rv(3) + (PI*av(3))**2)
+     &            /(3.0*MT)
       volint(4) = zero
       volint(5) = zero
       volint(6) = zero
@@ -1520,6 +1540,9 @@ C
 99004    FORMAT(
      &' POTENTIALS PARAMETERS CALCULATED FOR A GIVEN ENERGY FUNCTIONAL B
      &Y USER'/)
+         WRITE(IS, 99014)     EL,E1
+99014    FORMAT(/' LABORATORY ENERGY : ',f9.3,' MeV'/
+     >           '        CMS ENERGY : ',f9.3,' MeV'/)
          WRITE(IS, 99005)ak, ETA, rm, h, npt, lm1
 C
 99005    FORMAT(' ', 'K =', 1p, e12.5, 5x, 'ETA =', e12.5, 9x, 'RM =', 
@@ -1534,7 +1557,7 @@ C
          WRITE(IS, 99006)
 99006    FORMAT(' ', 'POTENTIAL ', 2x, 'STRENGTH', 2x, '  r0  ', 2x, 
      &          'RADIUS', 2x, 'DIFFUSENESS', 2x, 'VOLUME INTEG.')
-         DO j = 1, 6
+         DO j = 1, 7
             IF(j.NE.5)WRITE(IS, 99007)type(j), pote(j), ABS(R(j)), 
      &                                rv(j), av(j), volint(j)
 99007       FORMAT(' ', a10, 1x, f9.4, 1x, f7.4, 1x, f7.4, 3x, f7.4, 6x, 
@@ -2126,7 +2149,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       , //, 2x, 
+     &       ,//, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
@@ -2158,7 +2181,7 @@ C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
       COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
       COMMON /ENER  / E1, EINc
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
-      COMMON /POTEN1/ R(6), RE(6), A(6), AE(6), POT(6, 6)
+      COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
       COMMON /TCE   / TC(LTCMAX)
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       COMMON /XS    / SE, SR, ST
@@ -2231,7 +2254,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       , //, 2x, 
+     &       ,//, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
@@ -2335,7 +2358,7 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       , //, 2x, 
+     &       ,//, 2x, 
      &       'Total cross section         :', e14.7, ' mb', /, 2x, 
      &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
@@ -2358,7 +2381,7 @@ C
 C
 C     COMMON variables
 C
-      COMMON /POTEN1/ R(6), RRE(6), AQ(6), AAE(6), POT(6, 6)
+      COMMON /POTEN1/ R(7), RRE(7), AQ(7), AAE(7), POT(7, 6)
       COMMON /POTEN2/ RCOulomb, EWMax, BETa
 C
 C     Ener must be in LAB system
@@ -2380,12 +2403,14 @@ C-----set OMP onto SCAT variables
 C     Energy dependence (if any) must be considered in OMPAR
 C     Setting potential strength
       POTe(1) = VOM(1, Nejc, Nnuc)
+C     Capote, july 2001, real surface potential 
+      POTe(7) = VOMs(1, Nejc, Nnuc)
       POTe(2) = WOMs(1, Nejc, Nnuc)
       POTe(3) = WOMv(1, Nejc, Nnuc)
       POTe(4) = VSO(1, Nejc, Nnuc)
       POTe(6) = WSO(1, Nejc, Nnuc)
 C     Setting geometrical parameters for SCAT2
-      DO i = 1, 6
+      DO i = 1, 7
          POT(i, 1) = POTe(i)
       ENDDO
       R(1) = RVOm(1, Nejc, Nnuc)
@@ -2393,6 +2418,9 @@ C     Setting geometrical parameters for SCAT2
       R(2) = RWOm(1, Nejc, Nnuc)
       IF(SFIom(Nejc, Nnuc).LT.0.0D0)R(2) = -R(2)
       AQ(2) = AWOm(Nejc, Nnuc)
+C     Capote, july 2001, transfer of real surface potential 
+      R(7) = R(2)
+      AQ(7) = AQ(2)
       R(3) = RWOmv(1, Nejc, Nnuc)
       AQ(3) = AWOmv(Nejc, Nnuc)
       R(4) = RVSo(1, Nejc, Nnuc)

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-09 17:33:39 $
-Ccc   * $Id: lev-dens.f,v 1.1.1.1 2001-07-09 17:33:39 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:16 $
+Ccc   * $Id: lev-dens.f,v 1.2 2001-08-21 15:36:16 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -768,14 +768,14 @@ C-------cumulative plot of levels along with the l.d. formula
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
          WRITE(35, *)'set ylabel "Number of levels" 0,0'
-         WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.33" t "lev" w l'
+         WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
          CLOSE(35)
-         REWIND 33
+         REWIND 36
          REWIND 34
-         WRITE(33, *)'0.0 1.0'
+         WRITE(36, *)'0.0 1.0'
          DO il = 2, NLV(Nnuc)
-            WRITE(33, *)ELV(il, Nnuc), FLOAT(il - 1)
-            WRITE(33, *)ELV(il, Nnuc), FLOAT(il)
+            WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
+            WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
          ENDDO
          rocumul = 1.0
          WRITE(34, *)'0.0  ', rocumul
@@ -789,7 +789,7 @@ C-----integration
             ENDDO
             WRITE(34, *)defit*FLOAT(kk - 1), rocumul
          ENDDO
-         CLOSE(33)
+         CLOSE(36)
          CLOSE(34)
          iwin = PIPE('gnuplot -persist fort.35#')
          CLOSE(35)
@@ -1405,15 +1405,16 @@ C
 C-----calculation of matching point /if UX=0.0/
 C
  100  IF(am - 6./t.LE.0.0D0)THEN
-         WRITE(6, 
-     &'(1X,//,'' LEVEL DENSITY PARAMETERS INCONSISTENT'',/,     '' THIS 
-     &MAY HAPPEN IF YOU HAVE USED DEFAULT SYSTEMATICS FOR TOO   LIGHT NU
-     &CLEUS'',/,                                                '' OR HA
-     &VE ALLOWED FOR TOO MANY DISCRETE LEVELS ENTERING THE REGION WHERE 
-     &THESE ARE LOST'',/,                                       '' REANA
-     &LISE L.D. PARAMETERS. '')')
-         WRITE(6, *)'Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
-         WRITE(6, *)'a-parameter ', am, ' nuclear temperatue ', t
+         WRITE(6, *)'WARNING: ' 
+         WRITE(6, *)'WARNING: LEVEL DENSITY PARAMETERS INCONSISTENT' 
+         WRITE(6, *)'WARNING: THIS MAY HAPPEN IF YOU HAVE USED DEFAULT' 
+         WRITE(6, *)'WARNING: SYSTEMATICS FOR TOO LIGHT NUCLEUS OR ' 
+         WRITE(6, *)'WARNING: HAVE ALLOWED FOR TOO MANY DISCRETE LEVELS'
+         WRITE(6, *)'WARNING: ENTERING THE REGION WHERE THESE ARE LOST' 
+         WRITE(6, *)'WARNING: REANALISE GC L.D. PARAMETERS FOR:' 
+         WRITE(6, *)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
+         WRITE(6, *)'WARNING: a=', am, ' T=', t
+         WRITE(6, *)'WARNING: ' 
 C--------anyhow, plot fit of the levels with the low energy l.d. formula
          IF(FITlev.GE.0.0D0)THEN
             IF(NLV(Nnuc).GT.3)THEN
@@ -1426,23 +1427,23 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
                WRITE(35, *)'set ylabel "Number of levels" 0,0'
                WRITE(35, *)
-     &               'plot "fort.34" t "fit" w l ,"fort.33" t "lev" w l'
+     &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
                CLOSE(35)
                DO il = 2, NLV(Nnuc)
-                  WRITE(33, *)ELV(il, Nnuc), FLOAT(il - 1)
-                  WRITE(33, *)ELV(il, Nnuc), FLOAT(il)
+                  WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
+                  WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
                   rolowint = EXP(( - eom/tm))
      &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
                   WRITE(34, *)ELV(il, Nnuc), rolowint
                ENDDO
-               CLOSE(33)
+               CLOSE(36)
                CLOSE(34)
                iwin = PIPE('gnuplot -persist fort.35#')
             ENDIF
             GOTO 500
 C-------plotting fit of the levels with low energy formula  ***done***
          ELSEIF(FITlev.LT.0.0D0)THEN
-            STOP 'REGULAR EXIT'
+            STOP 'ERROR IN DISCRETE LEVEL FITTING (GC)'
          ENDIF
       ENDIF
       DO i = 1, 10
@@ -1492,15 +1493,15 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
          WRITE(35, *)'set ylabel "Number of levels" 0,0'
-         WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.33" t "lev" w l'
+         WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
          CLOSE(35)
          DO il = 2, NLV(Nnuc)
-            WRITE(33, *)ELV(il, Nnuc), FLOAT(il - 1)
-            WRITE(33, *)ELV(il, Nnuc), FLOAT(il)
+            WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
+            WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
             rolowint = EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
             WRITE(34, *)ELV(il, Nnuc), rolowint
          ENDDO
-         CLOSE(33)
+         CLOSE(36)
          CLOSE(34)
          iwin = PIPE('gnuplot -persist fort.35#')
       ENDIF

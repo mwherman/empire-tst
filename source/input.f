@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-10 14:53:01 $
-Ccc   * $Id: input.f,v 1.2 2001-07-10 14:53:01 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:17 $
+Ccc   * $Id: input.f,v 1.3 2001-08-21 15:36:17 mike Exp $
 C
       SUBROUTINE INPUT
 C
@@ -251,6 +251,12 @@ C
          CCCalc = .FALSE.
          IOMwritecc = 0
          MODelecis = 0
+C
+C--------Parameters for dispersive om potentials
+         EFErmi = -10.392D0
+         EANonl = 60.D0
+         AALpha = 1.65D0
+         EAVerp = -5.66D0
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes)
@@ -615,22 +621,22 @@ C--------inteligent defaults *** done ***
 C
          CALL READIN   !optional part of the input
 C
-C--------check of input consistency 
+C--------check of input consistency
 C
          IF(LHRtw.NE.0 .AND. LTUrbo.NE.1)THEN
             LTUrbo = 1
             WRITE(6, *)' '
-            WRITE(6, *)'WARNING!!!'
-            WRITE(6, *)'WARNING!!!  LTURBO>1 is incompatible ', 
-     &                 'WARNING!!!  with HRTW'
-            WRITE(6, *)'WARNING!!!  LTURBO HAS BEEN SET TO 1'
+            WRITE(6, *)'WARNING'
+            WRITE(6, *)'WARNING LTURBO>1 is incompatible ', 
+     &                 'WARNING with HRTW'
+            WRITE(6, *)'WARNING LTURBO HAS BEEN SET TO 1'
             WRITE(6, *)' '
          ENDIF
          IF(DEGa.GT.0)GCAsc = 1.
          IF(MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)' WARNING!!!! Normally both MSD and MSC should'
-            WRITE(6, *)' WARNING!!!! be taken into account'
+            WRITE(6, *)'WARNING Normally both MSD and MSC should'
+            WRITE(6, *)'WARNING be taken into account'
             WRITE(6, *)' '
          ENDIF
 C--------setup model matrix (IDNa) defining which model is used where
@@ -711,50 +717,57 @@ C           stop DEGAS inelastic scattering if MSC and/or MSD active
               ENDIF
             ENDIF 
 C           stop DEGAS particle channels if HMS active
-            IF(LHMs.GT.0) THEN
-               IDNa(1,4) = 0
-               IDNa(2,4) = 0
-               IDNa(3,4) = 0
-               IDNa(4,4) = 0
+            IF(LHMs.GT.0)THEN
+               IDNa(1, 4) = 0
+               IDNa(2, 4) = 0
+               IDNa(3, 4) = 0
+               IDNa(4, 4) = 0
             ENDIF
-         ENDIF 
-C--------set HMS  (.,5) 
-         IF(LHMs.GT.0) THEN 
-            IDNa(1,5) = 1
-            IDNa(2,5) = 1
-            IDNa(3,5) = 1
-            IDNa(4,5) = 1
+         ENDIF
+C--------set HMS  (.,5)
+         IF(LHMs.GT.0)THEN
+            IDNa(1, 5) = 1
+            IDNa(2, 5) = 1
+            IDNa(3, 5) = 1
+            IDNa(4, 5) = 1
 C           stop HMS inelastic scattering if MSC and/or MSD active
-            IF(MSC.GT.0 .OR. MSD.GT.0) THEN 
-              IF(NPRoject.EQ.2) THEN
-                 IDNa(3,5) = 0
-                 IDNa(4,5) = 0
-              ELSEIF(NPRoject.EQ.1) THEN
-                 IDNa(1,5) = 0
-                 IDNa(2,5) = 0
-              ELSE
-                 WRITE(6,*)'' 
-                 WRITE(6,*)'HMS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                 WRITE(6,*)'THIS CASE. EXECUTION S T O P P E D !!!! '
-                 STOP 'ILLEGAL COMBINATION HMS + MSC/MSD'
-              ENDIF
-            ENDIF 
-         ENDIF 
-C--------print IDNa matrix          
-         WRITE(6,*)' '
-         WRITE(6,*)'                      Use of preequilibrium models '
-         WRITE(6,*)'                      ---------------------------- '
-         WRITE(6,*)' '
-         WRITE(6,*)'Exit channel       ECIS       MSD       MSC',
-     &             '      DEGAS      HMS '
-         WRITE(6,*)' '
-         WRITE(6,'('' neut. disc. '',5I10)') (IDNa(1,j),j = 1,NDMODELS)
-         WRITE(6,'('' neut. cont. '',5I10)') (IDNa(2,j),j = 1,NDMODELS)
-         WRITE(6,'('' prot. disc. '',5I10)') (IDNa(3,j),j = 1,NDMODELS)
-         WRITE(6,'('' prot. cont. '',5I10)') (IDNa(4,j),j = 1,NDMODELS)
-         WRITE(6,'('' gammas      '',5I10)') (IDNa(5,j),j = 1,NDMODELS)
-         WRITE(6,*)' '
-C--------model matrix *** done ***         
+            IF(MSC.GT.0 .OR. MSD.GT.0)THEN
+               IF(NPRoject.EQ.2)THEN
+                  IDNa(3, 5) = 0
+                  IDNa(4, 5) = 0
+               ELSEIF(NPRoject.EQ.1)THEN
+                  IDNa(1, 5) = 0
+                  IDNa(2, 5) = 0
+               ELSE
+                  WRITE(6, *)''
+                  WRITE(6, *)'HMS AND MSD/MSC ARE NOT COMPATIBLE IN '
+                  WRITE(6, *)'THIS CASE. EXECUTION S T O P P E D !!!! '
+                  STOP 'ILLEGAL COMBINATION HMS + MSC/MSD'
+               ENDIF
+            ENDIF
+         ENDIF
+C--------print IDNa matrix
+         WRITE(6, *)' '
+         WRITE(6, *)
+     &             '                      Use of preequilibrium models '
+         WRITE(6, *)
+     &             '                      ---------------------------- '
+         WRITE(6, *)' '
+         WRITE(6, *)'Exit channel       ECIS       MSD       MSC', 
+     &              '      DEGAS      HMS '
+         WRITE(6, *)' '
+         WRITE(6, '('' neut. disc. '',5I10)')
+     &         (IDNa(1, j), j = 1, NDMODELS)
+         WRITE(6, '('' neut. cont. '',5I10)')
+     &         (IDNa(2, j), j = 1, NDMODELS)
+         WRITE(6, '('' prot. disc. '',5I10)')
+     &         (IDNa(3, j), j = 1, NDMODELS)
+         WRITE(6, '('' prot. cont. '',5I10)')
+     &         (IDNa(4, j), j = 1, NDMODELS)
+         WRITE(6, '('' gammas      '',5I10)')
+     &         (IDNa(5, j), j = 1, NDMODELS)
+         WRITE(6, *)' '
+C--------model matrix *** done ***
 C
 C--------avoid low incident energy when fitting discrete levels
          IF(FITlev.GT.0.0D0)EIN = MAX(EIN, 20.0D0)
@@ -1710,13 +1723,17 @@ C-----initialization of TRISTAN input parameters
       ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
-      WRITE(6, *)'            ____________________________'
-      WRITE(6, *)'            |  E M P I R E  -  2.16     |'
-      WRITE(6, *)'            |      (Montenotte)         |'
-      WRITE(6, *)'            |                           |'
-      WRITE(6, *)'            |           b y             |'
-      WRITE(6, *)'            |     M.  H e r m a n       |'
-      WRITE(6, *)'            |___________________________|'
+      WRITE(6, *)'                        ____________________________'
+      WRITE(6, *)'                       |                            |'
+      WRITE(6, *)'                       |    E M P I R E  -  2.16.2  |'
+      WRITE(6, *)'                       |                            |'
+      WRITE(6, *)'                       |        (Montenotte)        |'
+      WRITE(6, *)'                       |                            |'
+      WRITE(6, *)'                       |                            |'
+      WRITE(6, *)'                       |             b y            |'
+      WRITE(6, *)'                       |                            |'
+      WRITE(6, *)'                       |       M.  H e r m a n      |'
+      WRITE(6, *)'                       |____________________________|'
       WRITE(6, *)' '
       WRITE(6, *)' '
       WRITE(6, *)'Parameters specified explicitly in input'
@@ -1779,24 +1796,11 @@ C--------DEGAS input
 C
 C--------ECIS input
 C
-C        IF(name.EQ.'CCFULL')THEN
-C        IF(val.NE.0)WRITE(6,
-C        &'('' ECIS will be used for calculation of'',
-C        &  '' Tl`s in the inelastic channel'')')
-C        DIRect = 2
-C        GOTO 100
-C        ENDIF
-C
-C
 C        In the following block two parameters
 C        are defined, KTRompCC and RIPL_ompCC
 C        DIRECT is set to 1 if equal zero to allow for ECIS calc.
 C
-C        IF(name.EQ.'CCPOT ')THEN
          IF(name.EQ.'DIRPOT')THEN
-C           If CCFULL is present then DIRect = 2 before
-C           IF(DIRect.eq.0) DIRect = 1
-C           IF(DIRect.eq.0) DIRect = 3
             RIPl_ompcc = .FALSE.
 C
             IF(val.LT.0)THEN
@@ -1837,12 +1841,43 @@ C
          ENDIF
 C
 C--------ECIS input  *** done ***
+C
+C--------To be used by dispersive om potentials, Capote july 2001
+C
+         IF(name.EQ.'EFERMI')THEN
+            EFErmi = val
+            WRITE(6, '(1x,A36,F9.4,A4)')'Fermi Energy = ', val, ' MeV'
+            GOTO 100
+         ENDIF
+C
+         IF(name.EQ.'EAVERP')THEN
+            EAVerp = val
+            WRITE(6, '(1x,A36,F9.4,A4)')
+     &          'Average energy of particle states = ', val,' MeV' 
+            GOTO 100
+         ENDIF
+C
+         IF(name.EQ.'EANONL')THEN
+            EANonl=val
+            WRITE(6, '(1x,A36,F9.4,A18)')  
+     &      'Threshold energy for nonlocality = ', val,
+     &      ' MeV (DEF: 60 MeV)'
+            GOTO 100
+         ENDIF
+C
+         IF(name.EQ.'ALPHA ')THEN
+            AALpha = val
+            WRITE(6, '(1x,A36,F9.4,A12)')
+     &            'Mahaux nonlocality parameter = ', val, ' (DEF: 1.65)'
+            GOTO 100
+         ENDIF
+C--------dispersive om potentials  *** done ***
          IF(name.EQ.'BFUS  ')THEN
             BFUs = val
             WRITE(6, '('' Fusion barrier set to '',F7.2,'' MeV'')')BFUs
             GOTO 100
          ENDIF
-C-----CCFUS input
+C--------CCFUS input
          IF(name.EQ.'FCD   ')THEN
             FCD(i1) = val
             WRITE(6, 
@@ -1903,7 +1938,7 @@ C-----
      &')i1, QCC(i1)
             GOTO 100
          ENDIF
-C-----CCFUS input  ** done ***
+C--------CCFUS input  ** done ***
          IF(name.EQ.'QFIS  ')THEN
             QFIs = val
             WRITE(6, 
@@ -2204,7 +2239,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'NHMs  ')THEN
+         IF(name.EQ.'NHMS  ')THEN
             IF(val.GT.100.0D0)THEN
                NHMs = val
                WRITE(6, '('' Number of events in HMS set to '',I10)')
@@ -2213,7 +2248,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'CHMs  ')THEN
+         IF(name.EQ.'CHMS  ')THEN
             IF(val.GT.0.0D0)THEN
                CHMs = val
                WRITE(6, 
@@ -2547,7 +2582,7 @@ C-----
      &                 )
             GOTO 100
          ENDIF
-C-----Tuning factors
+C--------Tuning factors
          IF(name.EQ.'TUNE  ')THEN
             izar = i1*1000 + i2
             CALL WHERE(izar, nnuc, iloc)
@@ -2563,7 +2598,7 @@ C-----Tuning factors
      &         '' multiplied by '',F6.3)')i3, i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
-C-----input for TRISTAN (MSD)
+C--------input for TRISTAN (MSD)
          IF(name.EQ.'WIDEX ')THEN
             WIDexin = val
             IF(WIDexin.GT.0.0D0)WRITE(6, 
@@ -2633,7 +2668,7 @@ C-----
      &d by factor '',F6.3)')i1, CNOrin(i1 + 1)
             GOTO 100
          ENDIF
-C-----TRISTAN (MSD) input **** done ****
+C--------TRISTAN (MSD) input **** done ****
          IF(name.EQ.'NIXSH ')THEN
             SHNix = val
             IF(SHNix.NE.0.0D0)WRITE(6, 

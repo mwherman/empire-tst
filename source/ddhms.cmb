@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 1.1.1.1 $
-c $Id: ddhms.cmb,v 1.1.1.1 2001-07-09 17:33:39 mike Exp $
+c CVS Version Management $Revision: 1.2 $
+c $Id: ddhms.cmb,v 1.2 2001-08-21 15:36:17 mike Exp $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 500)    !must be >  emax=einc+Q /debin
@@ -143,8 +143,8 @@ c /print/ flag for printing
       integer iprintdiag
  
 c /const/ used in calculation   !vdepang used just in ang dist routines
-      common/constmbc/ pi,amu,hbarc,zmnuc,vdep,vdepang
-      real*8 pi,amu,hbarc,zmnuc,vdep,vdepang
+      common/constmbc/ pi_g,amu,hbarc,zmnuc,vdep,vdepang
+      real*8 pi_g,amu,hbarc,zmnuc,vdep,vdepang
  
 c /isochar/isospin structure of p-h states
       common/isochar/isospi2p1h(100),isospi1p1h(100),isospi1h(100),

@@ -14,6 +14,9 @@ c     27     ddhms
 c     28     ddhms
 c     31     SCAT2
 c     32     input
+c     33     lev-dens
+c     34     lev-dens
+c     35     lev-dens
 c     60     main
 c     77     input
 c
@@ -60,7 +63,7 @@ C     Added to check if file is not empty
       OPEN(UNIT=33, FILE='OMPAR.DIR', STATUS='NEW')
 891   CONTINUE
       OPEN(UNIT=29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
-C     Added to check if file is not empty
+C     Check whether file is not empty
       READ(29,*,END=776)
       REWIND(29)
       OMPAR_RIPLF=.TRUE.

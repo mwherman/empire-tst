@@ -1,6 +1,9 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-09 17:33:38 $
-Ccc   * $Id: MSD-orion.f,v 1.1.1.1 2001-07-09 17:33:38 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:17 $
+Ccc   * $Id: MSD-orion.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+C
+C     surface real OMP part (for DOM potentials) still to be included 
+C
 C
       SUBROUTINE ORION(Q2, Q3, Ktrl3, Extcom1, Ldw, Ist, Ltrmax, Atar, 
      &                 Ztar, Apro, Zpro, Iout, Angle, Ndang, Icompff)
@@ -29,7 +32,7 @@ Ccc *       IOUT   - controls output amount (0-6)                      *
 Ccc *       ANGLE  - matrix of angles                                  *
 Ccc *       NDANG  - ANGLE matrix dimension                            *
 Ccc *       Icompff- 0 for surface form factor in l=0 transfer         *
-Ccc *                1 for compressional form factor in l=0 transfer         *
+Ccc *                1 for compressional form factor in l=0 transfer   *
 Ccc *                                                                  *
 Ccc *                                                                  *
 Ccc * output:TAPE15                                                    *
@@ -125,28 +128,34 @@ C
      &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DZEro(4)
      &                 , ECM(4), EGS(4), ELAb, ETA, ETUnit, EXTcom(50), 
      &                 EXTcom2(10), FAClm(NGLXX), FAClog(500), 
-     &                 P(975, NGLXX), pl(30), plm10, PLM10m(NGLXX), 
-     &                 plm20, PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
-     &                 RACie(50), radian, RD, RHOmx, RMAsr(4), RZEcf(4), 
+C    &                 P(975, NGLXX), pl(30), plm10, PLM10m(NGLXX), 
+     &                 P(975, NGLXX),                PLM10m(NGLXX), 
+C    &                 plm20, PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
+     &                        PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
+C    &                 RACie(50), radian, RD, RHOmx, RMAsr(4), RZEcf(4), 
+     &                 RACie(50),         RD, RHOmx, RMAsr(4), RZEcf(4),
      &                 RZEcr(4), RZEf(4), RZEr(4), RZEsf(4), RZEsir(4), 
      &                 RZEspf(4), RZEspr(4), RZEsr(4), RZEwf(4), 
      &                 RZEwr(4), SGMa(25, NGLXX, 2), SGMat(NGLXX, 2), 
-     &                 SGMaz, SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4), 
+     &                 SGMaz, SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4),
      &                 U9, VSOf(4), VSOr(4), VSXf(4), VSXr(4), WN(4), 
      &                 WNIni(4), WNUnit, WR1(1000, 2), WR2(5000, 2), 
      &                 WSFf(4), WSFr(4), WSOr(4), WSXf(4), WSXr(4), 
      &                 XBAr, XMAx, XMEs, ZPR(4), ZTR(4)
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300, 4), ZERo
-      INTEGER ia, ib, ic, id, ie, ig, ISTw(3), JJ, JLSmax, KCFf(4), 
+C     INTEGER ia, ib, ic, id, ie, ig, ISTw(3), JJ, JLSmax, KCFf(4), 
+      INTEGER                         ISTw(3), JJ, JLSmax, KCFf(4), 
      &        KEXcom(50), KEXcom1(8), KEXcom2(28), KTLout(50), 
      &        KTLout1(8), KTLout2(28), KTRl(30), KTRl1(8), KTRl2(28), 
-     &        l1outp, l9(9), LBTrf(4), lcaltr, LDWmxr(4), LDWmxr1(3), 
-     &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl, 
+C    &        l1outp, l9(9), LBTrf(4), lcaltr, LDWmxr(4), LDWmxr1(3),
+     &                       LBTrf(4),         LDWmxr(4), LDWmxr1(3), 
+C    &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl,
+     &        LLRow(120), LMAx, LTRamx(4),        MXRow, NANglr, NCHanl,
      &        NNDim(4), NODf(4), NXCple, NXMax
       COMMON /BRMH  / WR1, WR2, SGMa, SGMat, P, CSUm2, XAMp, PLM10m, 
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1, 
      &                CONst2
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -191,6 +200,7 @@ CWQAN
       OPEN(8, FORM = 'unformatted', STATUS = 'scratch')
 C
 CWQAN
+      kase = 0
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -599,9 +609,13 @@ C
       W = WOMv(1, Nejc, nnuc)
       Wd = WOMs(1, Nejc, nnuc)
       Vs = VSO(1, Nejc, nnuc)
-      Vi = 0.0
-      Ai = 1.0
-      Ri = 1.0
+C     Corrected by Capote, july 2001      
+C     Vi = 0.0
+C     Ai = 1.0
+C     Ri = 1.0
+      Vi = WSO(1, Nejc, nnuc)
+      Ri = Rs
+      Ai = As
       END
 
 

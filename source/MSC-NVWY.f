@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-09 17:33:38 $
-Ccc   * $Id: MSC-NVWY.f,v 1.1.1.1 2001-07-09 17:33:38 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:17 $
+Ccc   * $Id: MSC-NVWY.f,v 1.2 2001-08-21 15:36:17 mike Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -1647,12 +1647,12 @@ C-----
       WRITE(6, 99020)NDMSCS
 99020 FORMAT(1X, //, 30X, 'H e i d e l b e r g  M. S. C.  d e c a y  (', 
      &       I2, ' stages)', //)
-      IF(GST.NE.0)CALL AUERST(1, 0)
-      CALL AUERST(1, 1)
+c     IF(GST.NE.0)CALL AUERST(1, 0)
+c     CALL AUERST(1, 1)
       IF(IOUt.GT.0)WRITE(6, 
      &'(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')')
      &  SYMbe(1), CSMsc(1)
-      CALL AUERST(1, 2)
+c     CALL AUERST(1, 2)
       IF(IOUt.GT.0)WRITE(6, 
      &'(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')')
      &  SYMbe(2), CSMsc(2)

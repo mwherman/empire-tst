@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.1.1.1 $
-C $Id: ddhms.f,v 1.1.1.1 2001-07-09 17:33:39 mike Exp $
+C CVS Version Management $Revision: 1.2 $
+C $Id: ddhms.f,v 1.2 2001-08-21 15:36:17 mike Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -88,7 +88,7 @@ C
       OPEN(UNIT = 28, FILE = 'ddhms.out', STATUS = 'unknown')
 C     !main output
       OPEN(UNIT = 9, FILE = 'spec', STATUS = 'unknown')
-                                                 !small file of ang-int spectra
+C     !small file of ang-int spectra
 C
 Cmh---transfer formal parameter values onto the variables in common
 Cmh---since the latter ones can not be used as formal parameters directly
@@ -109,10 +109,11 @@ C
          PROjtype = 'prot'
       ELSE
          WRITE(6, *)''
-         WRITE(6, *)'WARNING!!!'
-         WRITE(6, *)'WARNING!!! HMS CAN TREAT ONLY NEUTRON OR PROTON'
-         WRITE(6, *)'WARNING!!! AS PROJECTILES'
-         WRITE(6, *)'WARNING!!! HMS DISPOSITION IGNORED.'
+         WRITE(6, *)'WARNING'
+         WRITE(6, *)'WARNING: HMS CAN TREAT ONLY NEUTRON OR PROTON'
+         WRITE(6, *)'WARNING: AS PROJECTILES'
+         WRITE(6, *)'WARNING: HMS DISPOSITION IGNORED.'
+         WRITE(6, *)'WARNING'
          WRITE(6, *)''
          RETURN
       ENDIF
@@ -255,7 +256,7 @@ C        mom conservation:
             prec = DSQRT(pzrec*pzrec + pxrec*pxrec + pyrec*pyrec)
             THReclab = DACOS(pzrec/prec)
             PHReclab = DATAN2(pyrec, pxrec)
-            IF(PHReclab.LT.0.D0)PHReclab = PHReclab + (2.*PI)
+            IF(PHReclab.LT.0.D0)PHReclab = PHReclab + (2.*PI_g)
             amrec = RESmas(JZResid, JZResid + JNResid)*AMU
             EREclab = prec*prec/(2.*amrec)
 C           also, some of the energy dumped into CN becomes kinetic energy, so
@@ -374,7 +375,7 @@ C
 C
          IF(IHIstlab.NE.0)THEN
 C           write out HISTORY FILE info corresponding to this event.
-            c = 180./PI
+            c = 180./PI_g
             DO n = 1, NEMiss
                IF(IHIstlab.EQ.1)THEN
 C                 !lab frame
@@ -443,9 +444,9 @@ C      iexist2p1h() =1 if exists, 0 if no longer exists
 C      iexist1p1h() =1 if exists, 0 if no longer exists
 C      iexist1h()   =1 if exists, 0 if no longer exists
 C
-C      isospi2p1h() = ppipnuhpihnu indicator of prot (pi) - neu(nu) excitations
-C      isospi1p1h() = ppipnuhpihnu indicator of prot (pi) - neu(nu) excitations
-C      isospi1h() = ppipnuhpihnu indicator of prot (pi) - neu(nu) excitations
+C      isospi2p1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
+C      isospi1p1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
+C      isospi1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
 C
 C      uex2p1h(i2p1h)= excitation energy of i2p1h-th 2p1h state
 C      uex1p1h(i1p1h)= excitation energy of i1p1h-th 1p1h state
@@ -712,10 +713,10 @@ C
                JNResid = JNResid - 1
             ENDIF
 C
-            nth = INT(TH1p*36./PI) + 1
-            nph = INT(PH1p*36./PI) + 1
-            nthlab = INT(THPlab*36./PI) + 1
-            nphlab = INT(PHPlab*36./PI) + 1
+            nth = INT(TH1p*36./PI_g) + 1
+            nph = INT(PH1p*36./PI_g) + 1
+            nthlab = INT(THPlab*36./PI_g) + 1
+            nphlab = INT(PHPlab*36./PI_g) + 1
             IF(SELtype.EQ.'prot')THEN
                DDDxsp(nebinchan, nth, nph) = DDDxsp(nebinchan, nth, nph)
      &            + 1.                                  ! add into p emiss spec
@@ -1046,10 +1047,10 @@ C
                JNResid = JNResid - 1
             ENDIF
 C
-            nth = INT(TH1p*36./PI) + 1
-            nph = INT(PH1p*36./PI) + 1
-            nthlab = INT(THPlab*36./PI) + 1
-            nphlab = INT(PHPlab*36./PI) + 1
+            nth = INT(TH1p*36./PI_g) + 1
+            nph = INT(PH1p*36./PI_g) + 1
+            nthlab = INT(THPlab*36./PI_g) + 1
+            nphlab = INT(PHPlab*36./PI_g) + 1
             IF(SELtype.EQ.'prot')THEN
                DDDxsp(nebinchan, nth, nph) = DDDxsp(nebinchan, nth, nph)
      &            + 1.                                  ! add into p emiss spec
@@ -1370,10 +1371,10 @@ C
                JNResid = JNResid - 1
             ENDIF
 C
-            nth = INT(TH1p*36./PI) + 1
-            nph = INT(PH1p*36./PI) + 1
-            nthlab = INT(THPlab*36./PI) + 1
-            nphlab = INT(PHPlab*36./PI) + 1
+            nth = INT(TH1p*36./PI_g) + 1
+            nph = INT(PH1p*36./PI_g) + 1
+            nthlab = INT(THPlab*36./PI_g) + 1
+            nphlab = INT(PHPlab*36./PI_g) + 1
             IF(SELtype.EQ.'prot')THEN
                DDDxsp(nebinchan, nth, nph) = DDDxsp(nebinchan, nth, nph)
      &            + 1.                                  ! add into p emiss spec
@@ -1702,16 +1703,16 @@ C
      &       siginv, rmass, beta, spin, gfree, cons
 C
 C     epart = particle energy relative to well bottom.
-C     nonrel expression is rate=2 mu elab siginv / pi**2 hbar**3 g  (g rel to
+C     nonrel expression is rate=2 mu elab siginv / PI_g**2 hbar**3 g  (g rel to
 C     well bottom) rel expression is:
-C     rate= siginv(2s+1)beta*dsqrt(e)(m+e)dsqrt(2m+e) /(2 pi*2 hbar**3 * grel)
+C     rate= siginv(2s+1)beta*dsqrt(e)(m+e)dsqrt(2m+e) /(2 PI_g*2 hbar**3 * grel)
 C     where grel is the relativistic state density of nucleons of one kind (n
 C     or p) inside the nucleus.
 C
 C
 C
 C     I calculate the Fermi energy. Do simply using nonrel expressions.
-C     rho(eps)=4 r0**3/(3.pi (hbarc)**3)*atar*mdsqrt(2m)dsqrt(e)  nonrel.
+C     rho(eps)=4 r0**3/(3.PI_g (hbarc)**3)*atar*mdsqrt(2m)dsqrt(e)  nonrel.
 C     = identical to dsqrt(e)*atar/131.
 C     integrate this to ef gives the number of neutrons and protons
 C     so (atar/131.)*(2/3)*ef**(3/2) = N or Z, so:
@@ -1724,7 +1725,7 @@ C
 C     Now use rel expression for density of neut or proton:
       IF(SELtype.EQ.'neut')vd = efermin
       IF(SELtype.EQ.'prot')vd = efermip
-      c = 4.*(1.5**3.)/(3.*PI*(HBArc**3))*ATAr
+      c = 4.*(1.5**3.)/(3.*PI_g*(HBArc**3))*ATAr
       glev = c*DSQRT(Epart + vd)*(ZMNuc + Epart + vd)
      &       *DSQRT(2.*ZMNuc + Epart + vd)
 C     this is the density for each type of nucleon. While I use A (and not N,Z)
@@ -1743,13 +1744,13 @@ C     !*4 since on de=.25 grid
 C
       rmass = ZMNuc
       beta = DSQRT(1. - (rmass/(rmass+echan))**2)
-                                                 !relativistic velocity
+C     !relativistic velocity
 C
 C     now calculate relativistic free phase space
       spin = 0.5
       gfree = (2.*spin + 1.)*DSQRT(echan)*(rmass + echan)
      &        *DSQRT(2.*rmass + echan)
-      gfree = gfree/(2.*PI*PI*(HBArc**3.))
+      gfree = gfree/(2.*PI_g*PI_g*(HBArc**3.))
 C     this doesn't include the free volume, which cancels
 C
       cons = 3.E22  ! constants multiplier (inc c, and fm*3 to mb)
@@ -1815,12 +1816,12 @@ C     !in units of fermi
      &       *(DLOG(1. + DEXP(-c/z)) - DLOG(1. + DEXP((rr-c)/z)))
 C
 C
-C     Blann seems to use a central density of ds=A/(4/3 pi r0**3 A) where
+C     Blann seems to use a central density of ds=A/(4/3 PI_g r0**3 A) where
 C     r0=1.5 fm (this density = 7.07e37 nucl/cm**3 c.f 1.re38 in Blanns Nuc Phys
 C     A213 91973) paper - a bit low. Ask Marshall.
 C
       r0 = 1.5 !fm
-      ds = 1/((4./3.)*PI*r0**3)
+      ds = 1/((4./3.)*PI_g*r0**3)
 C
 C
       rhoav = ds*dave !this is the average nucleon density
@@ -2040,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.1.1.1 $')
+99001 FORMAT('  ddhms version: $Revision: 1.2 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.1.1.1 2001-07-09 17:33:39 mike Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.2 2001-08-21 15:36:17 mike Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -2241,11 +2242,11 @@ C
 C     ddxs printouts
       anorm = SIGreac/(DEBin*FLOAT(NEVents))
 C     now double-differential spectra
-      dph = 5.*PI/180.
-      dth = 5.*PI/180.
+      dph = 5.*PI_g/180.
+      dth = 5.*PI_g/180.
       DO ne = 0, nemax
          DO nth = 1, 36
-            th = (FLOAT(nth)*5. - 2.5)*PI/180.
+            th = (FLOAT(nth)*5. - 2.5)*PI_g/180.
             DO nph = 1, 72
                DDXsn(ne, nth) = DDXsn(ne, nth) + DDDxsn(ne, nth, nph)
                DDXsp(ne, nth) = DDXsp(ne, nth) + DDDxsp(ne, nth, nph)
@@ -2268,12 +2269,12 @@ C
             DDXsplab(ne, nth) = DDXsplab(ne, nth)
      &                          *anorm/(DSIN(th)*dth*dph)
 C
-            DXSn1(ne) = DXSn1(ne) + DDXsn(ne, nth)*2.*PI*DSIN(th)*dth
-            DXSp1(ne) = DXSp1(ne) + DDXsp(ne, nth)*2.*PI*DSIN(th)*dth
+            DXSn1(ne) = DXSn1(ne) + DDXsn(ne, nth)*2.*PI_g*DSIN(th)*dth
+            DXSp1(ne) = DXSp1(ne) + DDXsp(ne, nth)*2.*PI_g*DSIN(th)*dth
             DXSn1lab(ne) = DXSn1lab(ne) + DDXsnlab(ne, nth)
-     &                     *2.*PI*DSIN(th)*dth
+     &                     *2.*PI_g*DSIN(th)*dth
             DXSp1lab(ne) = DXSp1lab(ne) + DDXsplab(ne, nth)
-     &                     *2.*PI*DSIN(th)*dth
+     &                     *2.*PI_g*DSIN(th)*dth
 C
          ENDDO
 C
@@ -2494,6 +2495,7 @@ C
             ENDDO
          ENDDO
       ENDIF
+      CALL EMPTRANS(nemax, jzmax, jnmax, numax)
 99034 FORMAT(' energy-bin histogram width=', f10.3, ' MeV')
 99035 FORMAT(f10.2, 2x, f10.2, 2x, f10.2, 10x, f10.2, 2x, f10.2)
 99036 FORMAT(/, 
@@ -2503,19 +2505,9 @@ C
 99038 FORMAT(f6.1, 1x, 10(1p, 1E8.1))
 99039 FORMAT('  SUM:', 1x, 10(1p, 1E8.1))
 99040 FORMAT(' deg. ', 1x, 10(f8.2), '*protons*')
-C
 99041 FORMAT(' nucleus Z,A=', i3, ',', i3, ' population=', 1p, 1E10.3, 
      &       'mb (% of reaction=', 1p, 1E10.3, '%)')
-C
-C
       END
-C
-C
-C
-C
-C
-C
-C
 C
 C
       SUBROUTINE MASSES
@@ -3045,7 +3037,7 @@ C
       SUBROUTINE ROTATION(Th1, Ph1, Th2, Ph2, Rottheta, Rotphi)
 C
       IMPLICIT NONE
-      INCLUDE 'ddhms.cmb'   !just to use pi
+      INCLUDE 'ddhms.cmb'   !just to use PI_g
       REAL*8 Th1, Ph1, Th2, Ph2, Rottheta, Rotphi, twopi, x, y, z
 C
 C     calculates theta,phi-angles in projectile coordinate system
@@ -3061,11 +3053,11 @@ C     z1,z2, and x2, i.e. it has phi2=0.
 C     (remember, with these rotations, the new x2 axis, from which phi2 is
 C     measured, is defined to be in the plane of z1 and z2)
 C
-      twopi = 2.*PI
+      twopi = 2.*PI_g
 C
-C     if(th1.gt.pi.or.th2.gt.pi.or.th1.lt.0..or.th2.lt.0.)
+C     if(th1.gt.PI_g.or.th2.gt.PI_g.or.th1.lt.0..or.th2.lt.0.)
 C     +write(6,*)'th1,th2=',th1,th2
-C     if(th1.gt.pi.or.th2.gt.pi.or.th1.lt.0..or.th2.lt.0.)
+C     if(th1.gt.PI_g.or.th2.gt.PI_g.or.th1.lt.0..or.th2.lt.0.)
 C     +stop 'theta angles out of range'
 C     if(ph1.gt.twopi.or.ph2.gt.twopi.or.ph1.lt.0..or.ph2.lt.0.)
 C     +stop 'phi angles out of range'
@@ -3073,10 +3065,10 @@ C
       z = -DCOS(Ph2)*DSIN(Th2)*DSIN(Th1) + DCOS(Th1)*DCOS(Th2)
       Rottheta = DACOS(z)
 C
-      IF(Rottheta.LT.0.D0)Rottheta = Rottheta + 2.*PI
+      IF(Rottheta.LT.0.D0)Rottheta = Rottheta + 2.*PI_g
       IF(Rottheta.LT.0.D0)WRITE(6, *)Rottheta
       IF(Rottheta.LT.0.D0)STOP 'rottheta -ve'
-C     remember, theta is always in range 0 to pi, so single valued and no
+C     remember, theta is always in range 0 to PI_g, so single valued and no
 C     ambiguity.
 C
 C
@@ -3094,15 +3086,15 @@ C
      &    *DSIN(Ph2) + DSIN(Th1)*DCOS(Ph1)*DCOS(Th2)
 C
 C     write(6,*)'x,y=',x,y
-      Rotphi = DATAN2(y, x)   ! returns angle in (-pi,pi) range
+      Rotphi = DATAN2(y, x)   ! returns angle in (-PI_g,PI_g) range
       IF(Rotphi.LT.0.0D0)Rotphi = Rotphi + twopi
 C
 C
 Cmbc  I add
-      IF(Rotphi.EQ.2.*PI)Rotphi = 0.
+      IF(Rotphi.EQ.2.*PI_g)Rotphi = 0.
 C
 C     if(rotphi.ge.0.and.rotphi.le.twopi)go to 21
-C     if(rottheta.ge.0..and.rottheta.le.pi)go to 21
+C     if(rottheta.ge.0..and.rottheta.le.PI_g)go to 21
 C     write(8,*)'th1,ph1,th2,ph2,rottheta,rotphi=',
 C     +th1,ph1,th2,ph2,rottheta,rotphi
 C     write(8,*)'rotphi,rottheta=',rotphi,rottheta
@@ -3190,11 +3182,11 @@ C     r=ranf(0)
       IF(DABS(arg).GT.1.D0)arg = arg/DABS(arg)
 C     !prevents creeping over 1 or -1
       th2 = DACOS(arg)
-      IF(th2.GE.0 .AND. th2.LE.2.*PI)THEN
+      IF(th2.GE.0 .AND. th2.LE.2.*PI_g)THEN
 C
 C        above line = analytic result to sample ang dis (Eq.2.6 in my
 C        PRC57,233(1998))
-         ph2 = RANG()*2.*PI     !ph2 selected randomly (azimuthally-symmetric)
+         ph2 = RANG()*2.*PI_g     !ph2 selected randomly (azimuthally-symmetric)
 C
          CALL ROTATION(th1, ph1, th2, ph2, rottheta, rotphi)
          TH1p = rottheta
@@ -3213,7 +3205,7 @@ C
          IF(DABS(arg).GT.1.D0)arg = arg/DABS(arg)
          th2rem = DACOS(arg)
 C
-         IF(ZKRem.EQ.0.D0 .OR. th2rem.LT.0.D0 .OR. th2rem.GT.PI)THEN
+         IF(ZKRem.EQ.0.D0 .OR. th2rem.LT.0.D0 .OR. th2rem.GT.PI_g)THEN
             WRITE(28, *)'** dcos(th2),1.e-4,zkrem,zkinit,zkscat=', 
      &                  DCOS(th2), 1.E-4, ZKRem, zkinit, ZKScat
             WRITE(28, *)'zkrem,zkinit,zkscat,th2,cth2,sth2,arg,th2rem=', 
@@ -3226,8 +3218,8 @@ C
      &                  2.*zkinit*ZKScat*DCOS(th2)
 C
          ENDIF
-         ph2rem = ph2 + PI
-         IF(ph2.GT.PI)ph2rem = ph2 - PI
+         ph2rem = ph2 + PI_g
+         IF(ph2.GT.PI_g)ph2rem = ph2 - PI_g
 C        these values need to be rotated into projectile's coordinate system:
 C
          CALL ROTATION(th1, ph1, th2rem, ph2rem, rottheta, rotphi)
@@ -3649,15 +3641,15 @@ C     Now infer new lab particle energy and angles:
       EPLab = 0.5*AMEjec*vplab*vplab
       THPlab = DACOS(zvplab/vplab)
       PHPlab = DATAN2(yvplab, xvplab)
-C     !datan2 returns a value in (-pi,pi) range
-      IF(PHPlab.LT.0.D0)PHPlab = PHPlab + (2.*PI)
+C     !datan2 returns a value in (-PI_g,PI_g) range
+      IF(PHPlab.LT.0.D0)PHPlab = PHPlab + (2.*PI_g)
 C
 C     now calculate new recoil energy, angle.
       vreclab = DSQRT(XVAdd*XVAdd + YVAdd*YVAdd + ZVAdd*ZVAdd)
       EREclab = 0.5*AMResid*vreclab*vreclab
       THReclab = DACOS(ZVAdd/vreclab)
       PHReclab = DATAN2(YVAdd, XVAdd)
-      IF(PHReclab.LT.0.D0)PHReclab = PHReclab + (2.*PI)
+      IF(PHReclab.LT.0.D0)PHReclab = PHReclab + (2.*PI_g)
 C
       END
 C
@@ -3700,7 +3692,7 @@ C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
-      PI = DACOS( - 1.D0)
+      PI_g = DACOS( - 1.D0)
       ZMNuc = 939.D0
       HBArc = 197.D0
       AMU = 931.5012D0
@@ -4357,12 +4349,12 @@ C     dum
          edumarray(nedum) = ETC(nedum, IDProj)
       ENDDO
       ke = ISERCH(ek, edumarray, ne, aa, a5, a6)
-                                             !GNASH routine to fine index ke
+C     !GNASH routine to fine index ke
 Ccorrepsonding to ke index in etc
 Cfor  value@ke < ek < value@ke+1
 C
       LMAx_inctcsplined = LMAxtc(ke + 1, IDProj)
-                                              !like GNASH nle, cautiously take upper ke+1
+C     !like GNASH nle, cautiously take upper ke+1
 C     index.in general,  ke <= ek < ke+1 indices. Since lmax incr with incr
 C     energy, it is safe to take upper ke+1 value
       IF(LMAx_inctcsplined.GT.NDIM_LTC)STOP 'ndim_ltc exceeded'
@@ -4542,3 +4534,430 @@ C
 C
 C ******************** end ddhms.f ********************************
 C
+C
+C
+C
+      SUBROUTINE EMPTRANS(Nemax, Jzmax, Jnmax, Numax)
+C-----Nemax max number of energy bins in HMS
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      INCLUDE 'ddhms.cmb'
+      INTEGER ne, nth, Nemax, Numax, jz, jn, jsp, nu, mrec, Jnmax, 
+     &        Jzmax, nempmax, nejc, ndiscmax
+      REAL*8 csfit, qq, adum
+      DIMENSION qq(5), csfit(NDANG), adum(5, 7), nempmax(2)
+      DOUBLE PRECISION zero
+      DIMENSION auxin(NDIM_EBINS + 1, NDIM_JBINS + 1), 
+     &          auxout(NDEX, NDIM_JBINS + 1), 
+     &          auxrec1(NDIM_RECBINS + 1, NDIM_EBINS + 1)
+      DOUBLE PRECISION auxin, auxout, auxrec1, sumcon, xmre
+      INTEGER izar, iloc, nnur, jmax, maxrecener
+C
+C     introduced: CSHms(nejc)     - total HMS emission for nejc
+C     CSEhms(ie,nejc) - energy spectrum for HMS emission of nejc
+C
+C
+      IF(DE.GT.DEBin)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)' Energy grid in EMPIRE must be at least as dense'
+         WRITE(6, *)' as in HMS to avoid going out of memory boundaries'
+         WRITE(6, *)' You have to increase NEX in the optional input to'
+         WRITE(6, *)MAX(Nemax, Numax) + 3, 
+     &              ' or more. Ensure that this    '
+         WRITE(6, *)' number fits NDEX value in the dimension.h file.'
+         WRITE(6, *)' EXECUTION STOPPED ! ! !'
+         STOP
+      ENDIF
+C-----fix end points of neutron and proton spectra in Empire units
+      DO nejc = 1, 2
+         nempmax(nejc) = (NEXr(nejc, 1)*DE + ECUt(nejc + 1))/DE + 1.0
+      ENDDO
+      zero = 0.0
+C
+C-----transfer inclusive neutron spectrum
+C
+      jz = 0
+      jn = 1
+      izar = IZA(1) - 1000*jz - (jn + jz)
+      CALL WHERE(izar, nnur, iloc)
+C-----to continuum
+      IF(IDNa(2, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DXSn, 
+     &                                 NDIM_EBINS + 1, 0.0D0, DE, 
+     &                                 CSEhms(1, 1), NDECSE, 1, zero, 
+     &                                 (NEX(nnur) - 1)*DE)
+C-----to discrte levels
+      IF(IDNa(1, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DXSn, 
+     &                                 NDIM_EBINS + 1, 0.0D0, DE, 
+     &                                 CSEhms(1, 1), NDECSE, 1,
+     &                                 NEX(nnur)*DE, EMAx(nnur))
+      DO ne = 1, NDECSE
+         IF(ENDf.EQ.1)THEN
+            CSE(ne, 1, 1) = CSE(ne, 1, 1) + CSEhms(ne, 1)
+         ELSE
+            CSE(ne, 1, 0) = CSE(ne, 1, 0) + CSEhms(ne, 1)
+         ENDIF
+         CSHms(1) = CSHms(1) + CSEhms(ne, 1)
+      ENDDO
+      CSHms(1) = CSHms(1) - 0.5*(CSEhms(1, 1) + CSEhms(NDECSE, 1))
+      CSHms(1) = CSHms(1)*DE
+C
+C-----transfer inclusive proton spectrum
+C
+      jz = 1
+      jn = 0
+      izar = IZA(1) - 1000*jz - (jn + jz)
+      CALL WHERE(izar, nnur, iloc)
+C-----to continuum
+      IF(IDNa(4, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DXSp, 
+     &                                 NDIM_EBINS + 1, 0.0D0, DE, 
+     &                                 CSEhms(1, 2), NDECSE, 1, zero, 
+     &                                 (NEX(nnur) - 1)*DE)
+C-----to discrte levels
+      IF(IDNa(3, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DXSp, 
+     &                                 NDIM_EBINS + 1, 0.0D0, DE, 
+     &                                 CSEhms(1, 2), NDECSE, 1, 
+     &                                 NEX(nnur)*DE, EMAx(nnur))
+      DO ne = 1, NDECSE
+         IF(ENDf.EQ.1)THEN
+            CSE(ne, 2, 1) = CSE(ne, 2, 1) + CSEhms(ne, 2)
+         ELSE
+            CSE(ne, 2, 0) = CSE(ne, 2, 0) + CSEhms(ne, 2)
+         ENDIF
+         CSHms(2) = CSHms(2) + CSEhms(ne, 2)
+      ENDDO
+      CSHms(2) = CSHms(2) - 0.5*(CSEhms(1, 2) + CSEhms(NDECSE, 2))
+      CSHms(2) = CSHms(2)*DE
+C
+C-----transfer inclusive neutron double-differential cross sections
+C
+      nejc = 1  !neutron out
+      jz = 0
+      jn = 1
+      izar = IZA(1) - 1000*jz - (jn + jz)
+      CALL WHERE(izar, nnur, iloc)
+C-----TEMPORARY: assume that NDANG in EMPIRE is 19. If not stop.
+C-----           This makes transition from 5 deg grid to 10 deg trivial.
+      IF(NDANG.NE.19)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19'
+         WRITE(6, *)'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+         WRITE(6, *)
+     &             'SET NDANG TO 19 AND RECOMPILE OR GIVE UP HMS OPTION'
+         STOP
+      ENDIF
+C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
+      DO ne = 0, Nemax
+         DDXsn(ne, 1) = DDXsn(ne, 1) + (DDXsn(ne, 1) - DDXsn(ne, 2))/2.0
+         IF(DDXsn(ne, 1).LT.0.0D+0)DDXsn(ne, 1) = 0.0
+         DO nth = 2, NDANG - 1
+            DDXsn(ne, nth) = (DDXsn(ne, 2*(nth-1)) + DDXsn(ne, 2*nth - 1
+     &                       ))/2.
+         ENDDO
+         DDXsn(ne, NDANG) = DDXsn(ne, 36)
+     &                      + (DDXsn(ne, 36) - DDXsn(ne, 35))/2.
+         IF(DDXsn(ne, NDANG).LT.0.0D+0)DDXsn(ne, NDANG) = 0.0
+      ENDDO
+C-----interpolate in energy
+C-----to continuum
+      IF(IDNa(2, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DDXsn, 
+     &                                 NDIM_EBINS + 1, 0.D0, DE, 
+     &                                 CSEahms(1, 1, nejc), NDECSE, 19, 
+     &                                 zero, (NEX(nnur) - 1)*DE)
+C-----to discrte levels
+      IF(IDNa(1, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DDXsn, 
+     &                                 NDIM_EBINS + 1, 0.D0, DE, 
+     &                                 CSEahms(1, 1, nejc), NDECSE, 19, 
+     &                                 NEX(nnur)*DE, EMAx(nnur))
+C-----integrate interpolated ddx over angle and normalize ddx to the angle
+C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
+C-----finally store ddx on Empire array CSEa
+      DO ne = 1, nempmax(nejc)
+         DO na = 1, NDANG
+            csfit(na) = CSEahms(ne, NDANG - na + 1, nejc)
+         ENDDO
+         CALL LSQLEG(CANgler, csfit, NDANG, qq, 5, adum, ier)
+         IF(qq(1).NE.0.0D+0)THEN
+            xnor = CSEhms(ne, nejc)/(4.0*3.14159*qq(1))
+            DO na = 1, NDANG
+               CSEahms(ne, na, nejc) = CSEahms(ne, na, nejc)*xnor
+               IF(ENDf.EQ.1)THEN
+                  CSEa(ne, na, nejc, 1) = CSEa(ne, na, nejc, 1)
+     &               + CSEahms(ne, na, nejc)
+               ELSE
+                  CSEa(ne, na, nejc, 0) = CSEa(ne, na, nejc, 0)
+     &               + CSEahms(ne, na, nejc)
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+C
+C-----transfer inclusive proton double-differential cross sections
+C
+      nejc = 2  !proton out
+      jz = 1
+      jn = 0
+      izar = IZA(1) - 1000*jz - (jn + jz)
+      CALL WHERE(izar, nnur, iloc)
+C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
+      DO ne = 0, Nemax
+         DDXsp(ne, 1) = DDXsp(ne, 1) + (DDXsp(ne, 1) - DDXsp(ne, 2))/2.0
+         IF(DDXsp(ne, 1).LT.0.0D+0)DDXsp(ne, 1) = 0.0
+         DO nth = 2, NDANG - 1
+            DDXsp(ne, nth) = (DDXsp(ne, 2*(nth-1)) + DDXsp(ne, 2*nth - 1
+     &                       ))/2.
+         ENDDO
+         DDXsp(ne, NDANG) = DDXsp(ne, 36)
+     &                      + (DDXsp(ne, 36) - DDXsp(ne, 35))/2.
+         IF(DDXsp(ne, NDANG).LT.0.0D+0)DDXsp(ne, NDANG) = 0.0
+      ENDDO
+C-----interpolate in energy
+C-----to continuum
+      IF(IDNa(4, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DDXsp, 
+     &                                 NDIM_EBINS + 1, 0.D0, DE, 
+     &                                 CSEahms(1, 1, nejc), NDECSE, 19, 
+     &                                 zero, (NEX(nnur) - 1)*DE)
+C-----to discrte levels
+      IF(IDNa(3, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DDXsp, 
+     &                                 NDIM_EBINS + 1, 0.D0, DE, 
+     &                                 CSEahms(1, 1, nejc), NDECSE, 19, 
+     &                                 NEX(nnur)*DE, EMAx(nnur))
+C-----integrate interpolated ddx over angle and normalize ddx to the angle
+C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
+C-----finally store ddx on Empire array CSEa
+      DO ne = 1, nempmax(nejc)
+         DO na = 1, NDANG
+            csfit(na) = CSEahms(ne, NDANG - na + 1, nejc)
+         ENDDO
+         CALL LSQLEG(CANgler, csfit, NDANG, qq, 5, adum, ier)
+         IF(qq(1).NE.0.0D+0)THEN
+            xnor = CSEhms(ne, nejc)/(4.0*3.14159*qq(1))
+            DO na = 1, NDANG
+               CSEahms(ne, na, nejc) = CSEahms(ne, na, nejc)*xnor
+               IF(ENDf.EQ.1)THEN
+                  CSEa(ne, na, nejc, 1) = CSEa(ne, na, nejc, 1)
+     &               + CSEahms(ne, na, nejc)
+               ELSE
+                  CSEa(ne, na, nejc, 0) = CSEa(ne, na, nejc, 0)
+     &               + CSEahms(ne, na, nejc)
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+C
+C-----transfer population of residual nuclei
+C
+      DO jz = 0, Jzmax
+         DO jn = 0, Jnmax
+            IF(jz.EQ.0 .AND. jn.EQ.0) THEN  ! 1-st CN
+               nucn = EX(NEX(1),1)/Debin 
+               IF(JMAxujspec(0,0,nucn).EQ.0) THEN 
+                  IF(JMAxujspec(0,0,nucn+1).GT.0) THEN
+                     nucn = nucn + 1
+                  ELSEIF(JMAxujspec(0,0,nucn-1).GT.0) THEN 
+                     nucn = nucn - 1
+                  ELSE
+                     WRITE(6,*)' ' 
+                     WRITE(6,*)'Got lost! Can not find HMS ' 
+                     WRITE(6,*)'population of the 1-st CN. ' 
+                     WRITE(6,*)'Have searched bins ',nucn-1 
+                     WRITE(6,*)'through ',nucn+1,' but they' 
+                     WRITE(6,*)'seem to contain 0 cross section.' 
+                     WRITE(6,*)'I better STOP              ' 
+                     STOP
+                  ENDIF
+               ENDIF 
+               DO jsp = 0,JMAxujspec(0,0,nucn)  
+                  POP(NEX(1),jsp+1,1,1) = 0.5*UJSpec(0,0,nucn,jsp)
+                  POP(NEX(1),jsp+1,2,1) = 0.5*UJSpec(0,0,nucn,jsp)
+               ENDDO 
+               DO jsp = JMAxujspec(0,0,nucn)+1, NDLW-1  
+                  POP(NEX(1),jsp+1,1,1) = 0
+                  POP(NEX(1),jsp+1,2,1) = 0
+               ENDDO 
+               DO jsp = 0, NDLW-1  
+               ENDDO 
+               GOTO 50  
+            ENDIF
+            izar = IZA(1) - 1000*jz - (jn + jz)
+            CALL WHERE(izar, nnur, iloc)
+            IF(iloc.EQ.1)GOTO 50  !ignore population of not considered nuclei
+            DO nu = 0, Numax
+               DO jsp = 0, JMAxujspec(jz, jn, nu)
+                  auxin(nu + 1, jsp + 1) = 0.5*UJSpec(jz, jn, nu, jsp)
+               ENDDO
+               DO jsp = JMAxujspec(jz, jn, nu) + 1, NDIM_JBINS
+                  auxin(nu + 1, jsp + 1) = 0.0
+               ENDDO
+            ENDDO
+            DO nu = Numax + 1, NDIM_EBINS
+               DO jsp = 0, NDIM_JBINS
+                  auxin(nu + 1, jsp + 1) = 0.0
+               ENDDO
+            ENDDO
+            jmax = MIN(NDLW, NDIM_JBINS + 1)
+C-----------test output
+C           WRITE(6,*)' '
+C           WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
+C           WRITE(6,*)' '
+C           DO nu = 0, numax
+C           WRITE(6,'(12G12.5)') (nu+0.5)*Debin,
+C           &                           (auxin(nu+1,jsp),jsp=1,11)
+C           ENDDO
+C           WRITE(6,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
+C           WRITE(6,*)'reqst range ',EX(1,nnur),EMAx(nnur)
+C-----------test output *** done ***
+C-----------clean interpolation output matrix
+            DO nu = 1, NDEX
+               DO jsp = 0, NDIM_JBINS
+                  auxout(nu, jsp + 1) = 0.0
+               ENDDO
+            ENDDO
+C-----------population of continuum
+            CALL INTERMAT(DEBin/2, DEBin, auxin, NDIM_EBINS + 1, 
+     &                    EX(1, nnur), DE, auxout, NDEX, NDIM_JBINS + 1,
+     &                    EX(1, nnur), EMAx(nnur))
+            sumcon = 0.0
+            DO nu = 1, NEX(nnur)
+               DO jsp = 1, jmax
+                  IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.2)THEN
+                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                  + auxout(nu, jsp)
+                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                  + auxout(nu, jsp)
+                  ELSEIF(IDNa(4, 5).EQ.1 .AND. nnur.EQ.3)THEN
+                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                  + auxout(nu, jsp)
+                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                  + auxout(nu, jsp)
+                  ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                  + auxout(nu, jsp)
+                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                  + auxout(nu, jsp)
+                  ENDIF
+                  sumcon = sumcon + 2*auxout(nu, jsp)
+                  IF(nu.EQ.1 .OR. nu.EQ.NEX(nnur))sumcon = sumcon - 
+     &               auxout(nu, jsp)
+               ENDDO
+            ENDDO
+            sumcon = sumcon*DE
+c           WRITE(6, *)'continuum population = ', sumcon, ' mb'
+c           WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
+            IF(nnur.GT.3)THEN
+               IF(IDNa(2, 5).EQ.0)THEN
+                  WRITE(6, *)' '
+                  WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
+                  WRITE(6, *)'WARNING: HMS EMISSION OF NEUTRONS'
+                  WRITE(6, *)'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
+                  WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
+                  WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+                  WRITE(6, *)' '
+               ENDIF
+               IF(IDNa(4, 5).EQ.0)THEN
+                  WRITE(6, *)' '
+                  WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
+                  WRITE(6, *)'WARNING: HMS EMISSION OF PROTONS '
+                  WRITE(6, *)'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
+                  WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
+                  WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+                  WRITE(6, *)' '
+               ENDIF
+            ENDIF
+C-----------test output
+C           WRITE(6,*)' '
+C           WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
+C           WRITE(6,*)' '
+C           DO nu = 1,NEX(nnur)+1
+C           WRITE(6,'(12G12.5)') EX(nu,nnur),
+C           &                           (POP(nu,jsp,1,nnur),jsp=1,11)
+C           ENDDO
+C-----------test output *** done ***
+C-----------population of discrete levels (evenly distributed)
+            sumcon = (RESpop(jz, jn) - sumcon)/NLV(nnur)
+            IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.2)THEN
+               DO il = 1, NLV(nnur)
+                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+               ENDDO
+            ELSEIF(IDNa(3, 5).EQ.1 .AND. nnur.EQ.3)THEN
+               DO il = 1, NLV(nnur)
+                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+               ENDDO
+            ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+               DO il = 1, NLV(nnur)
+                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+               ENDDO
+            ENDIF
+C
+C-----------transfer excitation energy dependent recoil spectra
+C-----------(if ENDF=2 only)
+C
+C-----------clean auxiliary auxrec1 matrix
+            IF(ENDf.EQ.2)THEN
+               DO nu = 1, NDIM_EBINS + 1
+                  DO mrec = 1, NDIM_RECBINS + 1
+                     auxrec1(mrec, nu) = 0.0
+                  ENDDO
+               ENDDO
+               maxrecener = 0
+C--------------transfer HMS recoil spectra onto auxrec1
+               DO nu = 0, Numax
+                  DO mrec = 0, MAXerecspec(jz, jn, nu)
+                     auxrec1(mrec + 1, nu + 1)
+     &                  = RECspec(jz, jn, nu, mrec)
+                  ENDDO
+                  IF(MAXerecspec(jz, jn, nu).GT.maxrecener)
+     &               maxrecener = MAXerecspec(jz, jn, nu)
+               ENDDO
+C--------------interpolate and transfer continuum part
+               CALL BINTERMAT(auxrec1, DEBinrec/2, DEBinrec, 
+     &                        NDIM_RECBINS + 1, DEBin/2, DEBin, 
+     &                        NDIM_EBINS + 1, RECcse(1, 1, nnur), zero, 
+     &                        DERec, NDEREC, EX(1, nnur), DE, NDEX, 
+     &                        zero, (maxrecener + 0.5)*DEBinrec, 
+     &                        EX(1, nnur), EMAx(nnur))
+C--------------test printout
+c              WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur), 
+c    &                    'recoil population'
+c              WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
+c              WRITE(6, *)' '
+c              DO nu = 1, NEX(nnur)
+c                 WRITE(6, '(12G12.5)')EX(nu, nnur), 
+c    &                                 (RECcse(mrec, nu, nnur), 
+c    &                                 mrec = 1, 11)
+c              ENDDO
+C--------------test printout *** done ***
+C--------------recoils to discrete levels
+C--------------sum HMS recoil spectra to discrete levels on the first row of auxrec1
+               ndiscmax = EX(1, nnur)/DEBin + 1.001
+               DO mrec = 1, maxrecener+1
+                  DO nu = 1, ndiscmax  
+                     IF(nu.EQ.1 .OR. nu.EQ.ndiscmax) THEN
+                        sumcon = 0.5*auxrec1(mrec, nu)
+                     ELSE 
+                        sumcon = auxrec1(mrec, nu)
+                     ENDIF 
+                     auxrec1(mrec, 1) = auxrec1(mrec, 1) + sumcon
+                  ENDDO 
+                  auxrec1(mrec, 1) = auxrec1(mrec, 1)*DEBin
+               ENDDO 
+C--------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)               
+               RECcse(1, 0, nnur) = RECcse(1, 0, nnur) + 2*auxrec1(1,1) 
+     &                              - auxrec1(2,1)
+               auxrec1(maxrecener+2,1) = 2*auxrec1(maxrecener+1,1) - 
+     &                                 auxrec1(maxrecener,1)
+               ndiscmax = (maxrecener+0.5)*DEBinrec/DERec + 1
+               DO mrec = 2, ndiscmax 
+                  xmre = (mrec - 1)*DERec/DEBinrec + 1.0001 
+                  mre = INT(xmre)
+                  RECcse(mrec, 0, nnur) = RECcse(mrec, 0, nnur) + 
+     &              auxrec1(mre,1) + (xmre-FLOAT(mre))*
+     &              (auxrec1(mre+1,1)-auxrec1(mre,1))
+               ENDDO 
+ 
+            ENDIF
+ 50      ENDDO  !over jn
+      ENDDO !over jz
+C     To do:
+C     -  check whether you add LAB or CM spectra
+C
+      END

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2001-07-09 17:33:38 $
-Ccc   * $Id: MSD-tristan.f,v 1.1.1.1 2001-07-09 17:33:38 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:17 $
+Ccc   * $Id: MSD-tristan.f,v 1.2 2001-08-21 15:36:17 mike Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -275,7 +275,7 @@ C                 READ(15,3434)(WR1(N),N=1,NWR1)
                   IF(kread.EQ.0)READ(15, *)(WR2(n), n = 1, nwr2)
 C                 modiffication to run formated orion output
 C                 IF(KREAD.EQ.0)READ(15,3434)(WR2(N),N=1,NWR2)
-                  IF(kread.EQ.1)READ(16)(WR2(n), n = 1, nwr2)
+C                 IF(kread.EQ.1)READ(16)(WR2(n), n = 1, nwr2)
                   n2 = 0
                   DO ic1 = 1, ic1xr
                      IF(ic1.GT.IC1x)GOTO 60

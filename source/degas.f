@@ -327,7 +327,7 @@ C        Gamma spectrum
      &                        *renorm
             AUSpec(ie0 + 1, 0) = AUSpec(ie0 + 1, 0) + specdegas(3, ie0)
      &                        *renorm
-            spectotg = spectotg + CSE(ie0, 0, 1)*ESTepdegas
+            spectotg = spectotg + specdegas(3, ie0)*renorm*ESTepdegas
          ENDIF
 C        Neutron spectrum
          IF(IDNa(2,4).EQ.1) THEN
@@ -335,7 +335,7 @@ C        Neutron spectrum
      &                        *renorm
             AUSpec(ie0 + 1, 1) = AUSpec(ie0 + 1, 1) + specdegas(1, ie0)
      &                        *renorm
-            spectotn = spectotn + CSE(ie0, 1, 1)*ESTepdegas
+            spectotn = spectotn + specdegas(1, ie0)*renorm*ESTepdegas
          ENDIF
 C        Proton spectrum
          IF(IDNa(4,4).EQ.1) THEN
@@ -343,7 +343,7 @@ C        Proton spectrum
      &                        *renorm
             AUSpec(ie0 + 1, 2) = AUSpec(ie0 + 1, 2) + specdegas(2, ie0)
      &                        *renorm
-            spectotp = spectotp + CSE(ie0, 2, 1)*ESTepdegas
+            spectotp = spectotp + specdegas(2, ie0)*renorm*ESTepdegas
          ENDIF
       ENDDO
 C-----total DEGAS emission accepted in calculations (note matrix IDNa)      

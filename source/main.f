@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-09 17:33:39 $
-Ccc   * $Id: main.f,v 1.1.1.1 2001-07-09 17:33:39 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:16 $
+Ccc   * $Id: main.f,v 1.2 2001-08-21 15:36:16 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -322,32 +322,34 @@ C--------print elastic and direct cross sections from ECIS
  1500    WRITE(6, *)' '
          WRITE(6, *)' '
          IF((MODelecis.EQ.0 .AND. DIRect.EQ.1) .OR. DIRect.EQ.3)THEN
-            WRITE(6, *)' '
-            IF(DIRect.EQ.1)THEN
-               WRITE(6, *)' Inelastic scattering results provided by'
-               WRITE(6, *)' Coupled Channel calculations with ECIS:'
-            ENDIF
-            IF(DIRect.EQ.3)THEN
-               WRITE(6, *)' Inelastic scattering results provided by'
-               WRITE(6, *)' DWBA calculations with ECIS:'
-            ENDIF
-            WRITE(6, *)' '
-            gang = 180.0/(NELang - 1)
-            WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
-99001       FORMAT('  Angle ', 10(6x, i2, '-level'))
-            WRITE(6, *)' '
-            DO iang = 1, NELang
-               WRITE(6, 99002)(iang - 1)*gang, 
-     &                        (CSAlev(iang, ICOllev(ilv), nejcec), 
-     &                        ilv = 2, ncoll)
-99002          FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
-            ENDDO
-            WRITE(6, *)' '
-            WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, ncoll)
-99003       FORMAT(6x, 3x, 11(2x, E12.6))
-            WRITE(6, *)' '
-            WRITE(6, *)' '
-            WRITE(6, *)' '
+           WRITE(6, *)' '
+           IF(ncoll.gt.0) THEN
+              IF(DIRect.EQ.1)THEN
+                 WRITE(6, *)' Inelastic scattering results provided by'
+                 WRITE(6, *)' Coupled Channel calculations with ECIS:'
+              ENDIF
+              IF(DIRect.EQ.3)THEN
+                 WRITE(6, *)' Inelastic scattering results provided by'
+                 WRITE(6, *)' DWBA calculations with ECIS:'
+              ENDIF
+              WRITE(6, *)' '
+              gang = 180.0/(NELang - 1)
+              WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
+99001         FORMAT('  Angle ', 10(6x, i2, '-level'))
+              WRITE(6, *)' '
+              DO iang = 1, NELang
+                 WRITE(6, 99002)(iang - 1)*gang, 
+     &                          (CSAlev(iang, ICOllev(ilv), nejcec), 
+     &                          ilv = 2, ncoll)
+99002            FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
+              ENDDO
+              WRITE(6, *)' '
+              WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv =2,ncoll)
+99003         FORMAT(6x, 3x, 11(2x, E12.6))
+              WRITE(6, *)' '
+              WRITE(6, *)' '
+              WRITE(6, *)' '
+           ENDIF
          ENDIF
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
             WRITE(6, *)' '
@@ -376,6 +378,18 @@ C--------print elastic and direct cross sections from ECIS
             WRITE(6, *)' '
             WRITE(6, *)' '
             WRITE(6, *)' '
+C=========================================================================
+C     the following ELSE block is to print ECIS calculated XS
+C                     (it could be omitted)
+C        ELSE
+C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C            READ(45, *, END = 1500)ECISTOTxs
+C            READ(45, *, END = 1500)ECISABSxs
+C            READ(45, *, END = 1500)ECISELAxs
+C           CLOSE(45)
+C           WRITE(6, 99014)EINL,ECISTOTxs, ECISABSxs, ECISELAxs
+C99014  FORMAT(//,'Elab:',F9.3,'  ECIS(tot,abs,elast): ',3(e14.7,1x)//)
+C=========================================================================
          ENDIF
       ENDIF
 C-----locate postions of ENDF MT-numbers 91, 649, and 849
@@ -385,6 +399,7 @@ C-----locate postions of ENDF MT-numbers 91, 649, and 849
 C-----
 C-----calculate MSD contribution
 C-----
+      corrmsd = 1.0
       IF(MSD.NE.0 .AND. EIN.GT.5.D0)THEN
 C--------call ORION
          REWIND 15
@@ -481,18 +496,27 @@ C--------locate residual nucleus after MSD emission
             STOP
          ENDIF
          IF(CSMsd(nejc).NE.0.0D0)CALL ACCUMSD(1, nnur, nejc)
+C--------add MSD contribution to energy spectra (angle int.)
+         DO nejc = 1, 2
+            DO ie = 1, NEX(1)
+               CSE(ie, nejc, 1) = CSE(ie, nejc, 1)
+     &                          + CSEmsd(ie, nejc)
+            ENDDO
+C-----------add MSD contribution to the total NEJC emission
+            CSEmis(nejc, 1) = CSEmis(nejc, 1) + CSMsd(nejc)
+         ENDDO
 C--------second chance preequilibrium emission after MSD emission
 C--------neutron emission
          izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
          CALL WHERE(izares, nnurn, iloc)
          IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
-         IF(iloc.EQ.0 .AND. IOUt.GT.2)CALL AUERST(nnur, 1)
+         IF(iloc.EQ.0 .AND. IOUt.GT.3)CALL AUERST(nnur, 1)
 C--------proton emission
          izares = izares - 1000
          CALL WHERE(izares, nnurp, iloc)
          IF(iloc.EQ.0)THEN
             CALL SCNDPREEQ(nnur, nnurp, 2, 1)
-            IF(IOUt.GT.2)CALL AUERST(nnur, 2)
+            IF(IOUt.GT.3)CALL AUERST(nnur, 2)
          ELSE
             CALL SCNDPREEQ(nnur, nnurp, 2, 2)
          ENDIF
@@ -596,13 +620,11 @@ C--------reset variables for life-time calculations
          IF(ENDf.NE.0.0D0)THEN
             WRITE(12, *)' '
             WRITE(12, *)' --------------------------------------------'
-            WRITE(12, 
-     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,                   
+            WRITE(12, '(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,
      &  ''  mass='',F10.6)')INT(Z(nnuc)), SYMb(nnuc), ia, AMAss(nnuc)
             WRITE(12, *)' --------------------------------------------'
             IF(nnuc.NE.1)THEN
-               WRITE(12, 
-     &'(1X,/,10X,''Discrete level population '',                        
+               WRITE(12,'(1X,/,10X,''Discrete level population '', 
      &''before gamma cascade'')')
                WRITE(12, '(1X,/,10X,40(1H-),/)')
                DO il = 1, NLV(nnuc)
@@ -615,7 +637,7 @@ C--------------check for the number of branching ratios
  1555             IF(nbr.EQ.0 .AND. il.NE.1 .AND. 
      &               (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. 
      &               nnuc.EQ.mt849))WRITE(6, *)
-     &               ' WARNING!!!: BRANCHING RATIOS FOR LEVEL ', il, 
+     &               'WARNING: BRANCHING RATIOS FOR LEVEL ', il, 
      &               ' IN ', INT(A(nnuc)), '-', SYMb(nnuc), 
      &               ' ARE MISSING'
                   WRITE(12, 99013)il, ELV(il, nnuc), LVP(il, nnuc), 
@@ -735,37 +757,50 @@ C--------
          IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. DEGa.GT.0)THEN
             CALL EMPIREDEGAS
             WRITE(6, *)' '
-            WRITE(6, *)' gamma spectrum from DEGAS:'
-            CALL AUERST(1, 0)
-            WRITE(6, *)' '
-            WRITE(6, *)' neutron spectrum from DEGAS:'
-            CALL AUERST(1, 1)
-            WRITE(6, *)' '
-            WRITE(6, *)' proton spectrum from DEGAS:'
-            CALL AUERST(1, 2)
-            WRITE(6, *)' '
             WRITE(6, *)' Start of summary from DEGAS'
             WRITE(6, *)' ---------------------------'
             IF(GDIv.GT.1.0)WRITE(6, *)' g = A/gdiv, gdiv =', GDIv
             WRITE(6, *)' '
-            WRITE(6, *)' DEGAS gamma emission (CN) =',CSEmis(0, 1), 'mb'
-            WRITE(6, *)' DEGAS neut. emission (CN) =',CSEmis(1, 1), 'mb'
-            WRITE(6, *)' DEGAS prot. emission (CN) =',CSEmis(2, 1), 'mb'
+            WRITE(6, '('' DEGAS gamma emission (CN) ='',G12.5,''mb'')')
+     &                 CSEmis(0, 1)
+            WRITE(6, '('' DEGAS neut. emission (CN) ='',G12.5,''mb'')')
+     &                 CSEmis(1, 1)
+            WRITE(6, '('' DEGAS prot. emission (CN) ='',G12.5,''mb'')')
+     &                 CSEmis(2, 1)
             WRITE(6, *)' '
          ENDIF          ! Degas done
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
-         IF(nnuc.EQ.1 .AND. LHMs.NE.0)THEN
+         IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. LHMs.NE.0)THEN
             CLOSE(8)
             xizat = IZA(0)
             xnhms = NHMs
-            CALL DDHMS(IZAejc(0), xizat, XJLv(1, 0), EINl, CSFus, CHMs, 
-     &                 1.0D0, xnhms, 0, 0, 0)
-C           CSEmis(0,1) = CSEmis(0,1) + ?
-C           CSEmis(1,1) = CSEmis(1,1) + ?
-C           CSEmis(2,1) = CSEmis(2,1) + ?
+            debinhms = DE
+            IF(debinhms.LT.1.0D0 ) debinhms = 1.0 
+            CALL DDHMS(IZAejc(0), xizat, XJLv(1, 0), EINl, 
+     &                 CSFus*corrmsd, CHMs, debinhms, xnhms, 0, 1, 0)
+            CSEmis(1,1) = CSEmis(1,1) + CSHms(1)
+            CSEmis(2,1) = CSEmis(2,1) + CSHms(2)
+            WRITE(6, '('' HMS inclusive neut. emission ='',G12.5, 
+     &                 ''mb'')') CSHms(1)
+            WRITE(6, '('' HMS inclusive prot. emission ='',G12.5, 
+     &                 ''mb'')') CSHms(2)
+            IF(ENDF.EQ.1) THEN 
+            WRITE(6,*)' ' 
+            WRITE(6,*)'WARNING: HMS INCLUSIVE TOTAL EMISSIONS TREATED  '
+            WRITE(6,*)'WARNING: AS COMMING FROM THE FIRST CN. ALLOWS   '
+            WRITE(6,*)'WARNING: TO CHECK FLUX BALANCE AS LONG AS       '
+            WRITE(6,*)'WARNING: MULTIPLE P.E. CAN BE NEGLECTED. AT     '
+            WRITE(6,*)'WARNING: HIGHER ENERGIES THIS DOES NOT HOLD AND '
+            WRITE(6,*)'WARNING: BALANCE WILL GET WRONG.  THIS IS OK    '
+            WRITE(6,*)'WARNING: SINCE INCLUSIVE SPECTRA ARE FINE AND   '
+            WRITE(6,*)'WARNING: IN ANY CASE THERE ARE NO APPROXIMATIONS'
+            WRITE(6,*)'WARNING: FOR PRODUCTION CROSS SECTIONS AND      '
+            WRITE(6,*)'WARNING: RECOILS!                               '
+            WRITE(6,*)' ' 
             CLOSE(8)
+            ENDIF 
          ENDIF
 C--------
 C--------Heidelberg Multistep Compound calculations
@@ -776,6 +811,20 @@ C--------
             CSEmis(1, 1) = CSEmis(1, 1) + CSMsc(1)
             CSEmis(2, 1) = CSEmis(2, 1) + CSMsc(2)
             IF(nvwful)GOTO 1600
+         ENDIF
+         IF(nnuc.EQ.1 .AND. IOUt.GE.3)THEN
+            WRITE(6, *)' '
+            WRITE(6, *)' Preequilibrium spectra (sum of all models):'
+            CALL AUERST(1, 0)
+            CALL AUERST(1, 1)
+            CALL AUERST(1, 2)
+            WRITE(6, *)' '
+            IF(LHMs.NE.0 .AND. ENDf.NE.1)THEN
+               WRITE(6, *)' HMS spectra stored as inclusive:'
+               CALL AUERST(0, 1)
+               CALL AUERST(0, 2)
+               WRITE(6, *)' '
+            ENDIF
          ENDIF
 C--------
 C--------start nnuc nucleus decay
@@ -793,14 +842,7 @@ C--------in the first CN
          ENDIF
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
-         IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0)THEN
-            LHRtw = 0
-            WRITE(6, *)' '
-            WRITE(6, *)'Widths fluctuation has been turned off'
-            WRITE(6, *)'due to the high incident energy. Set HRTW to 2'
-            WRITE(6, *)'in the optional input to keep it active.'
-            WRITE(6, *)' '
-         ENDIF
+         IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0) LHRtw = 0
          IF(nnuc.EQ.1 .AND. LHRtw.GT.0)THEN
             CALL HRTW
             IF(ENDf.EQ.2)CALL RECOIL(kemax, nnuc) !recoil spectrum
@@ -893,8 +935,8 @@ C--------------------look for the discrete level with the closest spin
                            REClev(il, 0) = REClev(il, 0)
      &                        + POP(ke, jcn, ipar, nnuc)*ded/xnl
                            IF(IOUt.GT.1)WRITE(6, 
-     &           '(I3,''% of this was assumed to populate level #'',I3)'
-     &           )INT(100./xnl), il
+     &           '(10X,I3,''% of this was assumed to populate level #'',
+     &           I3)')INT(100./xnl), il
                         ENDIF
                      ENDDO
                      GOTO 1560
@@ -1020,9 +1062,6 @@ C-----------------add H-F and MSC contribution to the ddx table
      &                  + CSE(ie, nejc, nnuc)/4.0/PI
                   ENDDO
                   IF(nnuc.EQ.1)THEN
-C-----------------add MSD contribution to the energy spectra (angle int.)
-                     CSE(ie, nejc, nnuc) = CSE(ie, nejc, nnuc)
-     &                  + CSEmsd(ie, nejc)
                      DO iang = 1, NDANG
                         IF(CSE(ie, nejc, nnuc).NE.0.0D0)
      &                     CSEan(ie, iang, nejc)
@@ -1031,9 +1070,6 @@ C-----------------add MSD contribution to the energy spectra (angle int.)
                      ENDDO
                   ENDIF
                ENDDO
-C--------------add MSD contribution to the total NEJC emission
-               IF(nnuc.EQ.1)CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
-     &            + CSMsd(nejc)
             ENDIF
             IF(IOUt.GT.2)CALL AUERST(nnuc, nejc)
             IF(IOUt.GT.0)WRITE(6, 
@@ -1724,7 +1760,7 @@ C-----
      &                                  + CSE(icse, nejc, nnuc)
      &                                  *(1.0 - weight)
 C-----------------double contribution to the first energy bin to
-C-----------------to conserve the integral
+C-----------------conserve the integral
                   IF(iccml.EQ.1 .AND. icse.NE.1)CSE(iccml, nejc, 0)
      &               = CSE(iccml, nejc, 0) + CSE(icse, nejc, nnuc)
      &               *(1.0 - weight)
@@ -1735,7 +1771,7 @@ C-----------------to conserve the integral
      &                  = CSEa(iccml, nang, nejc, 0)
      &                  + CSEa(icse, nang, nejc, nnuc)*(1.0 - weight)
 C--------------------double contribution to the first energy bin to
-C--------------------to conserve the integral
+C--------------------conserve the integral
                      IF(iccml.EQ.1 .AND. icse.NE.1)
      &                  CSEa(iccml, nang, nejc, 0)
      &                  = CSEa(iccml, nang, nejc, 0)
@@ -1792,8 +1828,10 @@ C              WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
                ENDDO
                IF(ABS(1.0 - corr).GT.0.01D0)THEN
                   WRITE(6, *)' '
-                  WRITE(6, *)'WARNING !!! x-section balance in recoils '
-                  WRITE(6, *)'difference = ', ABS(1.0 - corr)*100.0, '%'
+                  WRITE(6, *)'WARNING: ZAP= ',IZA(nnuc) 
+                  WRITE(6, *)'WARNING: x-section balance in recoils '
+                  WRITE(6, *)'WARNING: difference = ', 
+     &                        (1.0 - corr)*100.0, '%'
                   WRITE(6, *)' '
                ENDIF
             ENDIF
@@ -1806,7 +1844,7 @@ C--------print inclusive gamma spectrum
          WRITE(12, '('' Energy    mb/MeV'')')
          WRITE(12, *)' '
          DO ie = 1, NDECSE
-            WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, CSE(ie, 0, 1)
+            WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, CSE(ie, 0, 0)
          ENDDO
 C--------print inclusive spectra of ejectiles
 C--------neutrons
@@ -1819,7 +1857,7 @@ C--------neutrons
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
          DO ie = 1, nspec
             WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE, 
-     &            (CSEa(ie, nang, 1, 1), nang = 1, NDANG)
+     &            (CSEa(ie, nang, 1, 0), nang = 1, NDANG)
          ENDDO
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
@@ -1831,7 +1869,7 @@ C--------protons
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
          DO ie = 1, nspec
             WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE, 
-     &            (CSEa(ie, nang, 2, 1), nang = 1, NDANG)
+     &            (CSEa(ie, nang, 2, 0), nang = 1, NDANG)
          ENDDO
 C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
@@ -1843,7 +1881,7 @@ C--------alphas
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
          DO ie = 1, nspec
             WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE, 
-     &            (CSEa(ie, nang, 3, 1), nang = 1, NDANG)
+     &            (CSEa(ie, nang, 3, 0), nang = 1, NDANG)
          ENDDO
 C--------light ions
          IF(NDEJC.EQ.4 .AND. NEMc.GT.0)THEN
@@ -1858,7 +1896,7 @@ C--------light ions
             WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
             DO ie = 1, nspec
                WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)*DE, 
-     &               (CSEa(ie, nang, NDEJC, 1), nang = 1, NDANG)
+     &               (CSEa(ie, nang, NDEJC, 0), nang = 1, NDANG)
             ENDDO
          ENDIF
       ENDIF

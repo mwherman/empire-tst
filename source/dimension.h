@@ -1,5 +1,5 @@
       PARAMETER(
-     * NDNUC= 35                   
+     * NDNUC= 55                   
      *,NDEJC=3 
      *,NDAFIS=1
      *,NDEX=100
@@ -11,7 +11,7 @@
      *,NDRVOM=3
      *,NDRWOM=3
      *,NDRVSO=3
-     *,NDLV=30
+     *,NDLV=10
      *,NDHRTW1=500         
      *,NDHRTW2=10         
      *,NDETL=NDEX+5

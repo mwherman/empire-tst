@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-07-09 17:33:38 $
-Ccc   * $Id: MSD-orion3.f,v 1.1.1.1 2001-07-09 17:33:38 mike Exp $
+Ccc   * $Date: 2001-08-21 15:36:17 $
+Ccc   * $Id: MSD-orion3.f,v 1.2 2001-08-21 15:36:17 mike Exp $
 C
       SUBROUTINE ORION(Q2, Q3, Ktrl3, Extcom1, Ldw, Ist, Ltrmax, Atar, 
      &                 Ztar, Apro, Zpro, Iout, Angle, Ndang, Icompff)
