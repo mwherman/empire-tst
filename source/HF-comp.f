@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-07-26 19:39:28 $
-Ccc   * $Id: HF-comp.f,v 1.27 2004-07-26 19:39:28 Capote Exp $
+Ccc   * $Date: 2004-08-30 13:27:49 $
+Ccc   * $Id: HF-comp.f,v 1.28 2004-08-30 13:27:49 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1613,7 +1613,9 @@ C==============continuum contribution====================
          hh2=h(1,2)
          vv2=efb(2)
          h(1,2)=hoeq 
-         efb(2)=veq        
+c        Msin 08/2004 
+c        efb(2)=veq
+         efb(2)=veq+jc*0.017        
       ENDIF
 
       DO IBAr = 1, NRBarc1    
