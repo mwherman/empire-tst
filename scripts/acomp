@@ -24,4 +24,24 @@ name3=$8
 ../scripts/mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
 ../scripts/mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
 ../scripts/mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 51  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 52  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 53  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 54  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 55  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 56  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 57  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 58  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 59  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 60  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 61  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 62  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 63  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 64  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 65  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 66  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 67  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 68  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 69  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
+../scripts/mtacomp 70  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
 exit
