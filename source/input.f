@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-07 14:31:30 $
-Ccc   * $Id: input.f,v 1.88 2005-03-07 14:31:30 herman Exp $
+Ccc   * $Date: 2005-03-09 20:02:24 $
+Ccc   * $Id: input.f,v 1.89 2005-03-09 20:02:24 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1572,8 +1572,9 @@ C
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
-      DOUBLE PRECISION dum, egamma, pelm, pgamma, qn, sum, t12, xicc
+      DOUBLE PRECISION egamma, pelm, pgamma, qn, sum, t12, xicc
       CHARACTER*9 finp
+      CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr, 
      &        ndb, ndbrlin, ngamr, nlvr, nmax
       INTEGER INT
@@ -1865,7 +1866,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION betatmp, dum, elvr, etmp, jtmp, t12, xjlvr
+      DOUBLE PRECISION betatmp, elvr, etmp, jtmp, t12, xjlvr
+      CHARACTER*1 dum
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
@@ -4343,8 +4345,9 @@ Ccc
 C
 C Local variables
 C
-      DOUBLE PRECISION beta2, beta3, betatmp, delta_k, dtmp, dum, elvr, 
+      DOUBLE PRECISION beta2, beta3, betatmp, delta_k, dtmp, elvr, 
      &                 etmp, ftmp, gspar, gspin, jtmp, qn, t12, xjlvr
+      CHARACTER*1 dum
       CHARACTER*5 chelem
       CHARACTER*100 ch_iuf, comment
       CHARACTER*3 ctmp3
