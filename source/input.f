@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-09 05:25:57 $
-Ccc   * $Id: input.f,v 1.70 2005-02-09 05:25:57 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-09 14:50:40 $
+Ccc   * $Id: input.f,v 1.71 2005-02-09 14:50:40 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -745,29 +745,47 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
          ENDIF
 C--------inteligent defaults
 C--------optical model parameter set selection
-         IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0)THEN
+         IF     (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
 C           INCIDENT GAMMA
             KTRlom(0, 0) = -1
-         ELSEIF(AEJc(0).LE.4.0D0)THEN
-C           KTRlom(0, 0) = 1   (RCN, Bjorklund OMP must be coded into RIPL)
-            KTRlom(0, 0) = 2405
-         ELSE
-            KTRlom(0, 0) = 0
+         ELSEIF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) THEN  ! neutrons
+            IF(A(0).LE.220) THEN
+              KTRlom(0, 0) = 2405    ! Koning potential
+C             (Morillon dispersive global potential 2407 could be used)
+            ELSE
+              KTRlom(0, 0) = 2601    ! Soukhovitskii CC OMP
+C             (to be replaced by Soukhovistkii & Capote dispersive CC OMP)
+            ENDIF
+         ELSEIF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.1) THEN
+            IF(A(0).LE.220) THEN
+              KTRlom(0, 0) = 5405
+            ELSE
+              KTRlom(0, 0) = 4601    ! Soukhovitskii CC OMP
+C             (to be replaced by Soukhovistkii & Capote dispersive CC OMP)
+            ENDIF
+         ELSEIF(AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
+            KTRlom(0, 0) = 6400      ! Bojowald OMP for deuterons
+         ELSEIF(AEJc(0).EQ.3 .AND. ZEJc(0).EQ.1) THEN
+            KTRlom(0, 0) = 7100      ! Bechetti OMP for tritons
+         ELSEIF((AEJc(0).EQ.4.OR.AEJc(0).EQ.3) .AND. ZEJc(0).EQ.1) THEN
+            KTRlom(0, 0) = 9600      ! Avrigeanu OMP for He-4 and He-3
+C           (McFadden global potential 9100 could be used)
          ENDIF
          DO i = 1, NDNUC
-            IF(EIN.GT.20.0D0)THEN
-C              KTRlom(1, i) = 3
-               KTRlom(1, i) = 100
-            ELSE
-C              KTRlom(1, i) = 4
-               KTRlom(1, i) = 401
+            KTRlom(1, i) = 2405
+            if(NPRoject.EQ.1) KTRlom(1, i) = KTRlom(0, 0)
+            KTRlom(2, i) = 5405
+            if(NPRoject.EQ.2) KTRlom(2, i) = KTRlom(0, 0)
+            KTRlom(3, i) = 9600
+            if(NPRoject.EQ.3) KTRlom(3, i) = KTRlom(0, 0)
+            IF(NDEJC.GT.3) THEN
+               KTRlom(NDEJC, i) = 9600
+               IF(AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC).EQ.1)
+     &                                             KTRlom(NDEJC, i)=6400
+               IF(AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC).EQ.1)
+     &                                             KTRlom(NDEJC, i)=7100
+               if(NPRoject.EQ.NDEJC) KTRlom(NDEJC, i) = KTRlom(0, 0)
             ENDIF
-C           KTRlom(2, i) = 2
-            KTRlom(2, i) = 4101
-C           KTRlom(3, i) = 1
-            KTRlom(3, i) = 9100
-C           IF(NDEJC.GT.3) KTRlom(NDEJC, i) = 1
-            IF(NDEJC.GT.3) KTRlom(NDEJC, i) = 9100
          ENDDO
 C
 C        It is probably necessary to use Koning's potential as default
@@ -829,14 +847,14 @@ C
          ENDIF
          IF(DEGa.NE.0 .AND. AEJc(0).NE.1.D0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)' DEGAS allowed only for incident nucleons'
-            WRITE(6, *)' Executions STOPPED'
+            WRITE(6, *)'FATAL: DEGAS allowed only for incident nucleons'
+            WRITE(6, *)'FATAL: Executions STOPPED'
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
          IF(LHMs.NE.0 .AND. AEJc(0).NE.1.D0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)' HMS allowed only for incident nucleons'
-            WRITE(6, *)' Executions STOPPED'
+            WRITE(6, *)'FATAL: HMS allowed only for incident nucleons'
+            WRITE(6, *)'FATAL: Executions STOPPED'
             STOP ' HMS allowed only for incident nucleons'
          ENDIF
          IF(FISBAR(nnuc).NE.1 .AND. FISopt(nnuc).NE. 0)THEN
@@ -855,7 +873,6 @@ C
             WRITE(6, *)' WARNING!!!! and has been turned off  '
             WRITE(6, *)' '
          ENDIF
-
          IF(DIRect.EQ.3 .and.  ( MOD(NINT(A(0)),2).NE.0 .OR.
      &      MOD(NINT(Z(0)),2).NE.0) ) THEN
             DIRect = 0
@@ -865,6 +882,16 @@ C
             WRITE(6, *)' WARNING!!!! and has been turned off        '
             WRITE(6, *)' WARNING!!!! You could try DIRECT 1 or 2    '
             WRITE(6, *)' WARNING!!!! assuming levels can be coupled '
+            WRITE(6, *)' '
+         ENDIF
+         IF(DIRect.GT.0 .and. DIRPOT.EQ.0) THEN
+            DIRpot = KTRlom(0, 0)
+            KTRompcc = DIRpot
+            WRITE(6, *)' WARNING: DIRPOT keyword is not specified, but D
+     &IRECT keyword > 0'
+            WRITE(6,
+     &'(''  Optical model parameters for direct inelastic scattering set
+     & to RIPL #'',I4)') INT(DIRpot)
             WRITE(6, *)' '
          ENDIF
 
@@ -2197,13 +2224,10 @@ C-----------Print some final input options
             IF(KEY_gdrgfl.NE.0)WRITE(6,
      &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
             WRITE(6, *)' '
-            IF(OMParf .OR. OMPar_riplf .OR. OMParfcc)THEN
+            IF(OMPar_riplf .OR. OMParfcc)THEN
                WRITE(6, *)'Existing, case specific, o.m.p. files: '
                WRITE(6, *)'-------------------------------------'
             ENDIF
-            IF(OMParf)WRITE(6,
-     &'('' Input file OMPAR.INT with internal optical model'',
-     &'' parameters '')')
             IF(OMPar_riplf)WRITE(6,
      &'('' Input file OMPAR.RIPL with RIPL optical model'',
      &'' parameters '')')
@@ -2275,7 +2299,7 @@ C--------------searching in the RIPL database
                STOP
             ENDIF
             WRITE(6,
-     &'('' Optical model parameters for direct inleastic scattering set
+     &'('' Optical model parameters for direct inelastic scattering set
      &to RIPL #'',I4)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
