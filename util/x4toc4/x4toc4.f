@@ -2338,7 +2338,7 @@ C                                                                       X4T22160
  1000 FORMAT(6(2A4,A3),14A1)                                            X4T22190
  1010 FORMAT(6(2A4,A2,A1))                                              X4T22200
  1020 FORMAT(6(2A4,A3))                                                 X4T22210
- 1100 FORMAT(I5,7A1,I3,I4,3A1,8(2A4,A1),A3,25A1,5A1,I3,A1)              X4T22220
+ 1100 FORMAT(I5,7A1,I3,I4,3A1,8(2A4,A1),A3,25A1,5A1,I3,A2)              X4T22220
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T22230
  6010 FORMAT(10X,'WARNING.....MULTI-DIMENSIONAL DATA TABLE')            X4T22240
  6020 FORMAT(10X,'WARNING.....DATA IS NOT DEFINED. DATA POINT IGNORED') X4T22250
