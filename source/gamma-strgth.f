@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 08:35:28 $
-Ccc   * $Id: gamma-strgth.f,v 1.16 2004-11-30 08:35:28 Capote Exp $
+Ccc   * $Date: 2004-12-10 09:59:14 $
+Ccc   * $Id: gamma-strgth.f,v 1.17 2004-12-10 09:59:14 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
