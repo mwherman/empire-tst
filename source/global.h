@@ -1,21 +1,27 @@
 C-----GLOBAL COMMON --------------------------------------------------C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-
-
       CHARACTER SYMbe*2, SYMb*2
       CHARACTER reaction*21
+C-----Plujko_new: variable - SDRead      
       LOGICAL FILevel, FUSread, FISsil, OMParf, DEFormed, 
      &        DEFault_energy_functional, OMPar_riplf, RIPl_omp(0:NDEJC), 
-     &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein
+     &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
       INTEGER D_Klv, D_Llv
-C
+C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
+      INTEGER F_PRINT, Key_shape, Key_GDRGFL
+      COMMON /GSA/ Key_shape, Key_GDRGFL
+      COMMON /MLO/ F_PRINT
+      COMMON /UCOM/ Uexcit(NDEx,NDNuc)
+C-----Plujko_new(End)
+
       COMMON /GLOBAL_L/ FISsil(NDNUC), FILevel, FUSread, OMParf, 
      &                  DEFormed, DEFault_energy_functional, RIPl_omp, 
      &                  OMPar_riplf, RIPl_ompcc, CCCalc, OMParfcc, 
-     &                  RELkin, FIRst_ein
+     &                  RELkin, FIRst_ein, SDREAD
 C
       COMMON /GLOBAL_C/ SYMb(0:NDNUC), SYMbe(0:NDEJC), reaction(NDNUC)
 C
+C-----Plujko_new: variables - IGE1,IGM1,IGE2
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, 
      &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq, 
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX(NDNUC), 
@@ -29,7 +35,7 @@ C
      &                  ND_nlv, IPH(NDCOLLEV), LMAxcc, IDEfcc, IOPsys, 
      &                  ICOllev(NDCOLLEV), IWArn, NTArget, NPRoject, 
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, 
-     &                  IRElat(0:NDEJC, 0:NDNUC)
+     &                  IRElat(0:NDEJC, 0:NDNUC),IGE1, IGM1, IGE2
 C
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav, 
      &                 DENhf, GCAsc, BFUs, GDIv, GDRweis, CHMs, DERec, 
@@ -39,7 +45,7 @@ C
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar, 
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FITomp,
      &                 FITlev, DV, FCC, STMro, DEGa, GDIvp, TORy, EX1, 
-C                      PEQc is the logical control for PCRoss call, RCN 	 
+C                      PEQc is the logical control for PCRoss call, RCN      
      &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC), 
      &                 CSHms(NDEJC), A(0:NDNUC), Z(0:NDNUC), ECUt(NDNUC)
@@ -60,11 +66,14 @@ C
      &                 SIGabs(NDETL, NDEJC+1, NDNUC)
 C              SIGabs introduced for PCROSS preequilibrium exciton model calculations
 C
+C----- Plujko_new: change [GDRPAR(NDGDRPM,NDNUC) --> GDRPAR(NDGDRPM,0:NDNUC)
+C                          GQRPAR(NDGQRPM,NDNUC) --> GQRPAR(NDGQRPM,0:NDNUC)
+C                          GMRPAR(NDGMRPM,NDNUC) --> GMRPAR(NDGMRPM,0:NDNUC)]
       COMMON /GLOBAL2/ POPlv(NDLV, NDNUC), Q(0:NDEJC, 0:NDNUC),
      &                 CSPrd(NDNUC), YRAst(NDLW, NDNUC),
-     &                 SHCjf(NDLW, NDNUC), GDRpar(NDGDRPM, NDNUC),
-     &                 GQRpar(NDGQRPM, NDNUC), FISb(NDLW, NDNUC),
-     &                 GMRpar(NDGMRPM, NDNUC), ROPar(NDROPM, NDNUC),
+     &                 SHCjf(NDLW, NDNUC), GDRpar(NDGDRPM, 0:NDNUC),
+     &                 GQRpar(NDGQRPM, 0:NDNUC), FISb(NDLW, NDNUC),
+     &                 GMRpar(NDGMRPM, 0:NDNUC), ROPar(NDROPM, NDNUC),
      &                 EX(NDEX + 1, NDNUC), TNUc(NDEX, NDNUC),
      &                 RO(NDEX, NDLW, NDNUC), TNUcf(NDEX, NDNUC),
      &                 ROF(NDEX, NDLW, NDNUC), POP(NDEX, NDLW, 2, NDNUC)

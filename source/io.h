@@ -21,6 +21,7 @@ c     31     SCAT2
 c     32     input,tl
 c     34     lev-dens
 c     39     tl    
+c     43     SDREAD (Plujko change)
 c     45     tl,fusion,main    
 c     46     tl    
 c     60     main
@@ -31,6 +32,13 @@ c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='NEW')
       OPEN(UNIT=10,FILE='TAPE10.OUT')  !in SCAT2
+C-----Plujko_new (spin distribution from file SDFILE)
+      OPEN(UNIT=43,FILE='SDREAD', STATUS='OLD', ERR=768)
+      SDREAD=.TRUE.
+      GOTO 869
+ 768  SDREAD=.FALSE.
+ 869  CONTINUE
+C-----Plujko_new (END of spin distribution from file SDFILE)    
       OPEN(UNIT=11,FILE='FUSION'   , STATUS='OLD', ERR=778)
       FUSREAD=.TRUE.
       GOTO 889

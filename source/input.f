@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-02-09 21:19:13 $ 
-Ccc   * $Id: input.f,v 1.23 2004-02-09 21:19:13 herman Exp $ 
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $ 
+Ccc   * $Id: input.f,v 1.24 2004-04-21 03:39:54 Capote Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -120,7 +120,7 @@ C
      &                 e2p, e3m, emaxr, qmin, qtmp, zclu, zres, ztmp 
       CHARACTER*3 ca1 
       DOUBLE PRECISION DATAN, DMAX1 
-      CHARACTER*2 deut, trit 
+      CHARACTER*2 deut, trit ,gamma
       REAL FLOAT, SNGL 
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,  
      &        ip, irec, iz, izares, izatmp, j, lpar, na, nejc, nema,  
@@ -158,7 +158,10 @@ C
      &     0.43, 0., 0.50, 0., 0.39/ 
 C     Capote 2001, redefined below and using globally 
 C     DATA xnexc, amumev/8.071323, 931.1494/ 
-      DATA deut, trit/'d ', 't '/ 
+      DATA deut, trit/'d ', 't '/
+C-----Plujko_new
+      DATA gamma/'g '/
+C-----Plujko_new (END)
       ARGred = -1. 
 C-----maximum argument of EXP function supported by the computer 
       EXPmax = 74. 
@@ -261,6 +264,12 @@ C--------fusion parameters
          DFUs = 1. 
          FUSred = 1. 
          LEVtarg = 1 
+C--------Plujko_new
+C        default values for  Key_shape and Key_GDRGFL
+         Key_shape = 0
+         Key_GDRGFL = 1
+C
+C-----Plujko_new (End)
 C 
 C--------Capote, additional input options 
 C 
@@ -274,15 +283,14 @@ C        Relativistic kinematics
          RELkin = .FALSE. 
 C 
 C        IOPSYS = 0 LINUX 
-C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes) 
-C        IOPSYS = 2 LINUX on-line retrieval 
-         IOPsys = 0 
+C        IOPSYS = 1 WINDOWS
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server 
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 3
+         IX4ret = 1
 C 
 C--------CCFUF parameters 
          DV = 10. 
@@ -400,6 +408,12 @@ C--------ejectile alpha
          iz = INT(ZEJc(3)) 
          SYMbe(3) = SMAT(iz) 
          SEJc(3) = 0.0 
+C--------Plujko_new
+         IGE1 = 0
+         IGM1 = 0
+         IGE2 = 0
+C--------Plujko_new (END)
+         
 C--------read entire input for the first energy calculations 
 C--------mandatory part of the input 
 C--------incident energy (in LAB) 
@@ -436,7 +450,13 @@ C
 C--------target ******  done  ******** 
 C--------projectile 
          READ(5, *)AEJc(0), ZEJc(0) 
-         CALL PTLEVSET(AEJc(0), ZEJc(0), SEJc(0), lpar, e2p, e3m) 
+       IF(AEJc(0).eq.0 .and. ZEJc(0).eq.0 ) THEN
+C          GAMMA EMISSION
+         SEJc(0)=1
+         lpar=-1
+       ELSE
+           CALL PTLEVSET(AEJc(0), ZEJc(0), SEJc(0), lpar, e2p, e3m) 
+         ENDIF
 C--------product of target and projectile parities 
          LVP(LEVtarg, 0) = LVP(LEVtarg, 0)*lpar 
          XNEjc(0) = AEJc(0) - ZEJc(0) 
@@ -519,11 +539,15 @@ C--------NNUct total number of nuclei considered
 C         
          NEJcm = NDEJC 
          IF(aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0)NEJcm = 3 
+C--------Plujko_new (projectile symbol correction)
+         IF(ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0) SYMbe(0) = gamma
+C--------Plujko_new (END of  projectile symbol correction)
+         
 C--------correct ejectiles symbols 
          DO nejc = 1, NEJcm 
-            IF(ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.2.0D0)SYMbe(nejc) 
+            IF(ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.2.0D0)SYMbe(nejc)
      &         = deut 
-            IF(ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.3.0D0)SYMbe(nejc) 
+            IF(ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.3.0D0)SYMbe(nejc)
      &         = trit 
          ENDDO 
          DO iac = 0, NEMc 
@@ -707,12 +731,17 @@ C--------By default non RIPL potentials are used
          DO i = 0, NDEJC 
             RIPl_omp(i) = .FALSE. 
          ENDDO 
-C--------optical model parameter set selection 
-         IF(AEJc(0).LE.4.0D0)THEN 
-            KTRlom(0, 0) = 1 
-         ELSE 
-            KTRlom(0, 0) = 0 
-         ENDIF 
+C--------optical model parameter set selection
+         IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN  
+C           INCIDENT GAMMA
+            KTRlom(0, 0) = -1
+       ELSE    
+            IF(AEJc(0).LE.4.0D0)THEN 
+               KTRlom(0, 0) = 1 
+            ELSE 
+               KTRlom(0, 0) = 0 
+            ENDIF 
+         ENDIF
          DO i = 1, NDNUC 
             IF(EIN.GT.20.0D0)THEN 
                KTRlom(1, i) = 3 
@@ -909,7 +938,6 @@ C-----------stop PCROSS nucleon and gamma channels if DEGAS active
                IDNa(5, 6) = 0 
             ENDIF 
          ENDIF 
-
 C--------print IDNa matrix 
          WRITE(6, *)' ' 
          WRITE(6, *) 
@@ -1017,22 +1045,59 @@ C--------fix-up deformations for coupled channels *** done ***
       CSFus = CSRead 
 C-----KTRLOM Optical Model control 
 C-----set o.m.p. for the incident channel 
+C     RCN 02/2004
+
+C     IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN  
+C        INCIDENT GAMMA
+C        KTRlom(0, 0) = -1
+C     ELSE       
+
       KTRlom(0, 0) = 1 
       IF(AEJc(0).GT.4.0D0)THEN 
-         KTRlom(0, 0) = 0 
+           KTRlom(0, 0) = 0 
       ELSE 
-         DO nejc = 1, NDEJC 
+           DO nejc = 1, NDEJC 
             IF(ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))THEN 
                KTRlom(0, 0) = KTRlom(nejc, 1) 
                RIPl_omp(0) = RIPl_omp(nejc) 
             ENDIF 
-         ENDDO 
+           ENDDO 
+         ENDIF
+         IF(KTRompcc.GT.0 .AND. DIRect.EQ.2)THEN 
+           KTRlom(0, 0) = KTRompcc 
+           KTRlom(NPRoject, NTArget) = KTRompcc 
+           RIPl_omp(0) = RIPl_ompcc 
       ENDIF 
-      IF(KTRompcc.GT.0 .AND. DIRect.EQ.2)THEN 
-         KTRlom(0, 0) = KTRompcc 
-         KTRlom(NPRoject, NTArget) = KTRompcc 
-         RIPl_omp(0) = RIPl_ompcc 
-      ENDIF 
+
+C     ENDIF
+
+C-----Plujko_new (set giant resonance parameters for target)
+      GDRpar(1, 0) = EGDr1
+      GDRpar(2, 0) = GGDr1
+      GDRpar(3, 0) = CSGdr1
+      GDRpar(4, 0) = EGDr2
+      GDRpar(5, 0) = GGDr2
+      GDRpar(6, 0) = CSGdr2
+      GDRpar(7, 0) = GDRweis
+      GDRpar(8, 0) = 0.0
+      GQRpar(1, 0) = 0.0
+      GQRpar(2, 0) = 0.0
+      GQRpar(3, 0) = 0.0
+      GQRpar(4, 0) = 0.0
+      GQRpar(5, 0) = 0.0
+      GQRpar(6, 0) = 0.0
+      GQRpar(7, 0) = 1.0
+      GQRpar(8, 0) = 0.0
+      GMRpar(1, 0) = 0.0
+      GMRpar(2, 0) = 0.0
+      GMRpar(3, 0) = 0.0
+      GMRpar(4, 0) = 0.0
+      GMRpar(5, 0) = 0.0
+      GMRpar(6, 0) = 0.0
+      GMRpar(7, 0) = 1.0
+      GMRpar(8, 0) = 0.0
+C-----Plujko_new (END of set giant resonance parameters for target)
+        
 C-----compound nucleus 1 
       nnuc = 1 
       IF(NEX(1).GT.NDEX)THEN 
@@ -1949,6 +2014,18 @@ C
       n = ia - iz 
       ncor = 0 
       izcor = 0 
+C-----Plujko_new (define Gspin, Gspar, E2p, E3m for gamma)
+      IF(ia.EQ.0)THEN
+C       WRITE(*,*)'Input gamma channel  P T L E V S E T  '
+        E2p = 0.D0
+        E3m = 0.D0
+        Gspin = 1
+        Gspar = 1
+        return
+      ENDIF
+C-----Plujko_new (END define Gspin, Gspar, E2p, E3m for gamma)
+      
+      
       IF(FLOAT(n/2).NE.FLOAT(n)/2.0)ncor = 1 
       IF(FLOAT(iz/2).NE.FLOAT(iz)/2.0)izcor = 1 
       IF(ia.LE.4)THEN 
@@ -2219,6 +2296,16 @@ C-----
      &')i1, BETcc(i1) 
             GOTO 100 
          ENDIF 
+C-----
+C-----Plujko_new
+C----- init GDR & GFL for GSA
+         IF (name.EQ.'GDRGFL') THEN
+            Key_GDRGFL = val
+            GOTO 100
+         ENDIF
+C        Key_GDRGFL = 0 -  values loading in input.f
+C        Key_GDRGFL = 1 -  values loading in gdrgfldata.f
+C-----Plujko_new(End)
 C----- 
          IF(name.EQ.'FLAM  ')THEN 
             FLAm(i1) = val 
@@ -2474,6 +2561,24 @@ C-----
             GOTO 100 
          ENDIF 
 C----- 
+C--------Plujko_new
+C------- Insert Key for module "gamma-strength-analytic.f",
+C        Key_shape - key to specify the E1 strength shape    .
+
+         IF(name.EQ.'KGSF  ')THEN
+C           Key_shape = 0 --> old ver.2.18 variant for E1 stength-function fE1
+C           Key_shape =1 --> fE1=MLO1
+C           Key_shape =2 --> fE1=MLO2
+C           Key_shape =3 --> fE1=MLO3
+C           Key_shape =4 --> fE1=EGLO
+C           Key_shape =5 --> fE1=GFL
+C           Key_shape =6 --> fE1=SLO
+            Key_shape = val
+            WRITE(6, '(" E1 strength shape key set to ", I3 )')Key_shape
+            GOTO 100
+         ENDIF
+C--------Plujko_new (End)
+C-----
          IF(name.EQ.'GDRDYN')THEN 
             GDRdyn = val 
             IF(GDRdyn.NE.0.D0)WRITE(6,  
@@ -3013,6 +3118,25 @@ C-----
             GOTO 100 
          ENDIF 
 C----- 
+C-----Plujko_new : start of data input
+C-----
+         IF(name.EQ.'E1    ')THEN
+            WRITE(6,'('' E1 calculations selected'')')
+            IGE1 = val
+            GOTO 100
+         ENDIF
+C-----
+         IF(name.EQ.'M1    ')THEN
+            IGM1 = val
+            GOTO 100
+         ENDIF
+C-----
+         IF(name.EQ.'E2    ')THEN
+            IGE2 = val
+            GOTO 100
+         ENDIF
+C--------Plujko_new : end of data input
+C-----
 C        fisfis d -------------- 
 C        checking for fission data in the optional input 
          IF(name.EQ.'SUBEFF')THEN 
@@ -4929,7 +5053,6 @@ C
      &              SFDis(nr, ibar), IPFdis(nr, ibar) 
             ENDDO 
          ENDDO
-
 C      WRITE(79, *)'  '
 C      IF(FISden(Nnuc).EQ.1.)THEN
 C          cara2 = 'Level densities at the saddle points taken from
@@ -4945,7 +5068,6 @@ C         WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
 C         WRITE(79,*) '  '
 C         WRITE(79,*) '  '
 C      ENDIF
-
          READ(79, *) 
          READ(79, *) 
          nrbarc = NRBar-NRWel          
@@ -4957,7 +5079,6 @@ C
 C           READ(79,*) line   RCN 2004 
          ENDIF 
 c        READ(79, *) !!!!!!!!!   
-
          READ(79,*)       
          READ(79,*)       
          READ(79,*)  
@@ -5102,12 +5223,10 @@ c      destepp=0.2   !!!!!
          IF(ibars.eq.1)enh_sym(ibars)=1. 
          IF(ibars.eq.2)enh_sym(ibars)=1. 
          IF(ibars.eq.3)enh_sym(ibars)=1.  
-
 C        Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003 
          DO kk=1,nrbinfis(ibars)
            UGRid(kk)=xminn(ibars)+(kk-1)*destepp
          ENDDO
-
          DO jj=1,NLW
             AAJ = FLOAT(jj) + HIS(Nnuc)
             DO kk=1,nrbinfis(ibars)

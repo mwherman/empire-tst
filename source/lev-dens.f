@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-01-22 17:11:02 $
-Ccc   * $Id: lev-dens.f,v 1.13 2004-01-22 17:11:02 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: lev-dens.f,v 1.14 2004-04-21 03:39:54 Capote Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -114,6 +114,9 @@ C--------check whether a-parameter determined from the shell-model s.p.s. exists
       ENDIF
       DO kk = 1, NEX(Nnuc)
          u = EX(kk, Nnuc) - DEL
+C--------Plujko_new
+         Uexcit(kk, Nnuc) = max(u,0.d0)
+C--------Plujko_new(End)
          IF(Gcc.EQ.2.D0)THEN
 C-----------a-parameter determined from the fit to the shell-model s.p.s.
             IF(BF.EQ.0.D0)THEN
@@ -129,6 +132,9 @@ C-----------set nuclear temperature (spin independent taken at J=0 or 1/2)
             IF(BF.EQ.0.0D0)THEN
                              !saddle point
                u = EX(kk, Nnuc) - DEL - FISb(1, Nnuc)
+C--------------Plujko_new
+               Uexcit(kk, Nnuc) = max(u,0.d0)
+C--------------Plujko_new(End)
                IF(u.GT.0.0D0)TNUcf(kk, Nnuc) = SQRT(u/ac)
             ELSE
                !normal states
@@ -140,6 +146,9 @@ C-----------set nuclear temperature  *** done ***
 C--------------saddle point
                IF(BF.EQ.0.0D0)THEN
                   u = EX(kk, Nnuc) - DEL - FISb(i, Nnuc)
+C-----------------Plujko_new
+                  Uexcit(kk, Nnuc) = max(u,0.d0)
+C-----------------Plujko_new(End)
                   IF(u.LE.0.0D0)GOTO 100
                   IF(Z(Nnuc).LT.102.D0 .AND. Z(Nnuc).GE.19.D0)THEN
 C--------------------next call is to calculate deformation parameter A2 only
@@ -1056,6 +1065,9 @@ C-----------temperature fade-out of the shell correction  --- done ----
             ELSE
                bcs = .TRUE.
             ENDIF
+C-----------Plujko_new
+            Uexcit(Kk,Nnuc) = max(u,0.d0)
+C-----------Plujko_new(End)
             IF(u.LE.0.0D0)GOTO 99999
             IF(Z(Nnuc).LT.102.0D0 .AND. Z(Nnuc).GE.19.0D0)THEN
 C--------------next line is to calculate deformation parameter A2 only
@@ -1719,6 +1731,9 @@ C
                IF(RO(i, j, Nnuc).LT.RORed)RO(i, j, Nnuc) = 0.
             ENDDO
             efort = MAX(0.0D0, (e - DEL))
+C-----------Plujko_new
+            Uexcit(i, Nnuc) = efort
+C-----------Plujko_new(End)
             TNUc(i, Nnuc) = SQRT(efort/am)
          ENDDO
       ENDIF
@@ -1730,6 +1745,10 @@ C--------EXL /fermi gas formula/
 C
          DO i = ig, NEX(Nnuc)
             u = EX(i, Nnuc) - DEL
+C-----------Plujko_new
+            Uexcit(i, Nnuc) = max(u,0.d0)
+C-----------Plujko_new(End)
+            
             IF(igna.EQ.1)am = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*u))
      &                        /u)
             t = SQRT(u/am)
@@ -1931,6 +1950,9 @@ C
       iugrid = i - 1
       DO kk = 1, NEX(Nnuc)
          u = EX(kk, Nnuc)
+C-----Plujko_new
+         Uexcit(kk, Nnuc) = u
+C-----Plujko_new(End)
          IF(u.LT.0.)RETURN
          IF(u.GT.150.0D0)THEN
             WRITE(6, *)' '

@@ -1,4 +1,4 @@
-FC     =  g77
+#FC     =  g77
 #FFLAGS =  -static
 #FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
@@ -15,7 +15,7 @@ FC     =  g77
 #FC	= /usr/absoft/bin/f90
 #FFLAGS = -g
 #----Fujitsu f90 FORTRAN compiler
-#FC	= frt
+FC	= lf95
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g
@@ -23,10 +23,10 @@ FC     =  g77
 
 OBJF =	HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 	      auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
-	      gamma-strgth.o 	input.o	         lev-dens.o    main.o\
-	      ph-lev-dens.o  	pipe.o	         print.o	     OM-scat2.o\
-	      tl.o		         scnd-preeq.o      HRTW-comp.o   ddhms.o\
-         degas.o           pcross.o
+	      gamma-strgth.o 	input.o	          lev-dens.o    main.o\
+	      ph-lev-dens.o  	pipe.o	          print.o	OM-scat2.o\
+	      tl.o		scnd-preeq.o      HRTW-comp.o   ddhms.o\
+              gdrgfldata.o      degas.o           pcross.o  gamma-strength-analytic.o
 
 
 empire:   $(OBJF)
@@ -37,7 +37,6 @@ $(OBJF) : global.h dimension.h
 main.o  : io.h 
 ddhms.o : ddhms.cmb
 tl.o	: pre_ecis.h
-
 
 OBJE =  ecis.o
 ecis:	$(OBJE)

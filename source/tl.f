@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-01-22 17:11:02 $
-Ccc   * $Id: tl.f,v 1.16 2004-01-22 17:11:02 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: tl.f,v 1.17 2004-04-21 03:39:54 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -2364,6 +2364,7 @@ C-----| Input of transmission coefficients|
 C------------------------------------------
 C-----Opening ecis95 output file containing Tlj
       OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+C     READ(45, *) ! for ECIS03
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq
@@ -2499,6 +2500,7 @@ C----- Input of transmission coefficients
 C-----
 C-----Opening ecis95 output file containing Tlj
       OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+C     READ(45, *) ! for ECIS03
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq

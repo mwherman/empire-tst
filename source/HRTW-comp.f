@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: HRTW-comp.f,v 1.8 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: HRTW-comp.f,v 1.9 2004-04-21 03:39:54 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -712,7 +712,11 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          ENDIF
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
          IF(Nhrtw.EQ.0)THEN
-            se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C-----------Plujko_new
+            se1 = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(1,Nnuc))*
+     &            TUNe(0, Nnuc)
+Cb          se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C-----------Plujko_new(End)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -721,8 +725,12 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
             sm1s = sm1**2
             se2m1s = se2**2 + sm1**2
          ELSE
-            se1 = VT1(E1(eg, TNUc(ier, Nnuc))*
+C-----------Plujko_new
+            se1 = VT1(E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &            TUNe(0, Nnuc), H_Tav, H_Sumtl)
+Cb          se1 = VT1(E1(eg, TNUc(ier, Nnuc))*
+Cb     &            TUNe(0, Nnuc), H_Tav, H_Sumtl)
+C----------Plujko_new(End)
             se2 = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             sm1 = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
             se2m1 = se2 + sm1
@@ -865,19 +873,31 @@ C--------do loop over discrete levels -----------------------------------
                iodd = 1 - ipar
                IF(Nhrtw.EQ.0)THEN
                   e2t = E2(eg)*TUNe(0, Nnuc)
-                  e1t = E1(eg, TNUc(1,Nnuc))*TUNe(0, Nnuc)
+C-----------------Plujko_new
+                  e1t = E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))
+     &                     *TUNe(0, Nnuc)
+Cb                e1t = E1(eg, TNUc(1,Nnuc))*TUNe(0, Nnuc)
+C-----------------Plujko_new(End)
                   xm1t = XM1(eg)*TUNe(0, Nnuc)
                ELSE
                   e2t = VT1(E2(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                  e1t = VT1(E1(eg, TNUc(1,Nnuc))*
-     &                  TUNe(0, Nnuc), H_Tav, H_Sumtl)
+C-----------------Plujko_new
+                  e1t = VT1(E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))
+     &                  *TUNe(0, Nnuc), H_Tav, H_Sumtl)
+Cb                e1t = VT1(E1(eg, TNUc(1,Nnuc))*
+Cb     &                  TUNe(0, Nnuc), H_Tav, H_Sumtl)
+C----Plujko_new(End)
                   xm1t = VT1(XM1(eg)*TUNe(0, Nnuc), H_Tav, H_Sumtl)
                ENDIF
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + e2t*FLOAT(ipar)
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e2t**2*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
+C-----------------Plujko_new
+                  SCRtl(i, 0) = E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),
+     &                             Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
+Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
+C-----------------Plujko_new(End)
                   IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + e1t**2*iodd + 
      &               xm1t**2*ipar
                   IF(lmax.NE.1)THEN
@@ -1375,6 +1395,13 @@ C
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
+
+C     IF(AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
+C       RCN 02/2004 
+C       !!! RCN fake value for gammas 
+C       wf= 0.01d0
+C     ENDIF
+
       coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C
       maxlw = NDLW

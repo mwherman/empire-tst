@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-02-09 21:19:13 $
-Ccc   * $Id: main.f,v 1.19 2004-02-09 21:19:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: main.f,v 1.20 2004-04-21 03:39:54 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -201,25 +201,27 @@ Ccc
 C
 C     COMMON variables
 C
-
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
 C     INTEGER NRBar, NRFdis, ibaro
       INTEGER NRBar, NRFdis
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
-
       CHARACTER*9 cejectile
 C
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
       INTEGER NELang
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
+C-----Plujko_new
+      INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
+      COMMON /MLOCOM1/ keyinput, kzz1, kaa1
+      COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
+C-----Plujko_new(End)
 C
 C     Local variables
 C
       DOUBLE PRECISION aafis, bbfis, dencomp, xnorfis
-
 C     DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
       DOUBLE PRECISION ares, corr, corrmsd, csemist, csfis, 
      &                 cturbo, ded, delang, elcncs, gamfis, gamt, pope, 
@@ -238,12 +240,15 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
-
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
-
 
       LOGICAL nvwful
       INCLUDE 'io.h'
+C-----Plujko_new
+      F_PRINT=1
+      DATA keyinput/0/, kzz1/0/, kaa1/0/
+      DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
+C-----Plujko_new(End)
 C
 C-----
 C-----read and prepare input data
@@ -256,6 +261,10 @@ C-----
       WRITE(*, '(''  C.M. incident energy '',G10.5,'' MeV'')')EIN
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
+C-----
+C-----Plujko_new (Prepares Giant Resonance parameters - systematics)
+      CALL ULM(0)
+C-----Plujko_new (END of Prepares Giant Resonance parameters - systematics)
 C-----
 C-----calculate reaction cross section and its spin distribution
 C-----
@@ -572,8 +581,14 @@ C-----
          WRITE(6, *)' '
          DO i = 1, NLW
             IF(MOD(ia, 2).EQ.0)THEN
-               WRITE(6, '(1X,I5,G12.5,5X,I5,G12.5)')i, 
-     &               POP(NEX(1), i, 1, 1), ( - i), POP(NEX(1), i, 2, 1)
+C-------------Plujko_new(Correction of  c.n. spin view J=i-1)
+              WRITE(6, '(1X,I5,G12.5,5X,I5,G12.5)')i-1,
+     &        POP(NEX(1), i, 1, 1), ( - (i-1)), POP(NEX(1), i, 2, 1)
+C-------------Plujko_new(END of correction of c.n. spin view J=i-1 )
+C-------------Plujko_new (Cb - blocking comment, correction of c.n. spin view J=i-1)
+Cb            WRITE(6, '(1X,I5,G12.5,5X,I5,G12.5)')i,
+Cb     &               POP(NEX(1), i, 1, 1), ( - i), POP(NEX(1), i, 2, 1)
+
             ELSE
                WRITE(6, '(1X,I4,''/2'',G12.5,5X,I4,''/2'',G12.5)')
      &               2*i - 1, POP(NEX(1), i, 1, 1), ( - (2*i - 1)), 
@@ -646,7 +661,6 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
          ENDDO
       ENDIF
 C     fisfis d
-
       OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN') 
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
@@ -684,7 +698,6 @@ C-----------moments of inertia for each deformation
             Call WRITE_OUTFIS(Nnuc)
             adiv=adiv1
          ENDIF   
-
 
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
@@ -863,7 +876,6 @@ C--------
      &            CSEmis(2, 1)
             WRITE(6, *)' '
          ENDIF          ! Degas done
-
 C--------
 C-------- PCROSS exciton model calculations of preequilibrium contribution
 C-------- including cluster emission by Iwamoto-Harada model 
@@ -871,7 +883,6 @@ C-------- including cluster emission by Iwamoto-Harada model
             ftmp=CSFus*corrmsd
             CALL PCRoss(ftmp)
          ENDIF          ! PCRoss done
-
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
@@ -959,6 +970,9 @@ C--------turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF(FITomp.NE.0) kemin = NEX(nnuc) 
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
+C
+C        Please check the line below for the INCIDENT GAMMAS (02/2004)
+C
          IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0)LHRtw = 0
          IF(nnuc.EQ.1 .AND. LHRtw.GT.0)THEN
             CALL HRTW
@@ -1084,7 +1098,6 @@ C--------------subbarrier effect--------------------------
                      ELSE
                         xnorfis=0.
                      ENDIF   
-
                      IF(NRBarc.EQ.2.and.NRwel.eq.1)THEN
                         IF(TF(2)*Tabs.GT.0.)THEN
                            bbfis = (TDIr + dencomp)*(TF(1) + TF(2))
@@ -1268,8 +1281,9 @@ C-----------Integrating exclusive population spectra (ENDF)
                 emedp=emedp+POPcse(0,2,ispec,nnuc)*de*(ispec-1)*DE
                 emeda=emeda+POPcse(0,3,ispec,nnuc)*de*(ispec-1)*DE
                 IF(NDEJC.EQ.4) THEN
-                   htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
-                   emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
+                  htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
+C                 too long line, RCN 09/feb/2004 
+                  emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
                 ENDIF
              ENDDO
              IF(CSPrd(nnuc).NE.0.0D+0) THEN 
@@ -1744,7 +1758,6 @@ C--------light ions
          ENDIF
       ENDIF
 C-----end of ENDF spectra (inclusive)
-
       WRITE(6,*) '----------------------------------------------'
       WRITE(6,*) 'Test printout (integrals of portions of DDX spectra)'
       WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
@@ -1759,7 +1772,6 @@ C-----end of ENDF spectra (inclusive)
          WRITE(6,'(3g15.5)')(ispec-1)*DE, 
      &           controln, controlp
       ENDDO
-
 
       READ(5, *)EIN
       IF(EIN.LT.0.0D0)THEN

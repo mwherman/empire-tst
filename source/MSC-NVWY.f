@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: MSC-NVWY.f,v 1.7 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: MSC-NVWY.f,v 1.8 2004-04-21 03:39:54 Capote Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -1484,7 +1484,14 @@ C-----------------------
                            eg = EXCn - ew
                            ks = NEX(1) - kcn + 1
 C--------------------------gamma transmission coefficient
-                           tg = E1(eg, TNUc(kcn, 1))
+C--------------------------Plujko_new
+C--------------------------not tested (only changing E1 (6 parameters now))
+                           Key_tmp = Key_shape
+Cb                         tg = E1(eg, TNUc(kcn, 1))
+                           tg = E1(Nnur,Z,A,eg, TNUc(kcn, 1), 
+     >                             Uexcit(kcn,1))
+                           Key_shape = Key_tmp
+C--------------------------Plujko_new(End)
 C--------------------------
 C--------------------------SD contribution
 C--------------------------

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2003-07-10 22:29:54 $
-Ccc   * $Id: fusion.f,v 1.9 2003-07-10 22:29:54 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:53 $
+Ccc   * $Id: fusion.f,v 1.10 2004-04-21 03:39:53 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -70,8 +70,15 @@ C
 C
 C Local variables
 C
+C-----Plujko_new (new variables for SDREAD - ParcnJ,cnJ )
+C     cnJ    - spin of CN
+C     ParcnJ - parity of CN
+Cb      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, eee, PI, smax, 
+Cb     &                 smin, stl(NDLW), sum, wf,POPTest 
       DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, eee, PI, smax, 
-     &                 smin, stl(NDLW), sum, wf
+     &                 smin, stl(NDLW), sum, wf, POPTest, ParcnJ, cnJ  
+C-----Plujko_new (END of new variables for SDREAD - ParcnJ,cnJ )
+
       DOUBLE PRECISION DMAX1
       REAL FLOAT
       INTEGER i, ichsp, ip, ipa, j, k, l, lmax, lmin, maxlw, mul
@@ -95,17 +102,58 @@ C
 C     wf = W2*EIN*rmu
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
+
+C     IF(AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
+C      !!! RCN 02/2004 fake value for gammas 
+C      wf= 0.01d0
+C     ENDIF
 C
-      coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+      IF(INT(AEJC(0)).GT.0) 
+     > coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
       maxlw = NDLW
-      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(1, Ntrg) - 
+      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) - 
      & SEJc(Npro).EQ.0.0D0)S1 = 1.0
       csmax = 0.0
       CSFus = 0.0
       DO i = 1, NDLW
          stl(i) = 0.0
       ENDDO
+
+C-----Plujko_new(spin distribution from file SDREAD)
+C     If you have file "SDFILE" -> it is possible to use input spin distribution
+C     Format of file:
+C     rows with sequentialy  cnJ - spin of nucleus, ParcnJ - parity, csvalue -
+C     cross-section
+C     limits: cnJ=n*0.5, where n=0,1,2...
+C               A of c.n. /2 = integer --> cnJ=n*1, where n=0,1,2...
+C               A of c.n. /2 = integer+1/2 --> cnJ=n*1/2, where n=0,1,2...
+C             ParcnJ=-1 or 1
+C             csvalue = value in mb
+C     reading no more than 2*NDLW rows   
+      IF(INT(AEJC(0)).EQ.0)THEN
+        IF(.NOT.SDREAD) GOTO 100
+        WRITE(6, *)
+     &' Spin distribution of fusion cross section read from SDREAD file'
+        WRITE(6, *)
+     &' (all previous instructions concerning fusion ignored)'
+        DO i = 1, 2*NDLW
+            READ(43, *, END = 101) cnJ,ParcnJ,csvalue
+C-----------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
+            IF(2*cnJ-DINT(2*cnJ).NE.0.00) 
+     >               STOP 'cnJ!=n*1/2, n=0,+-1...  in SDREAD file'
+            j=IDNINT(cnJ+S1)
+            IF(ParcnJ.EQ.1.) ip = 1
+            IF(ParcnJ.EQ.-1.)ip = 2
+            IF(ParcnJ.NE.1.AND.ParcnJ.NE.-1) 
+     >               STOP 'ParcnJ!=+-1 in SDREAD file'
+            POP(NEX(1), j, ip, 1) = csvalue
+            CSFus = CSFus + POP(NEX(1), j, ip, 1)
+            csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+        ENDDO
+      ENDIF  
+C-----Plujko_new(END of spin distribution from file SDFILE)
+
 C-----if FUSREAD true read l distribution of fusion cross section
 C-----and calculate transmission coefficients
       IF(FUSread)THEN
@@ -172,7 +220,7 @@ C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
          IF(IWArn.EQ.2 .AND. FIRst_ein)WRITE(6, *)
      &      ' WARNING: OMP not recommended for Z=', Z(Ntrg)
          IF(IWArn.EQ.3 .OR. IWArn.EQ.4)WRITE(6, *)
-     &      ' WARNING: OMP not recommended for E=', EIN
+     &      ' WARNING: OMP not recommended for E=', EINl
          IWArn = 0
 C
          IF(maxlw.GT.NDLW)THEN
@@ -185,13 +233,109 @@ C
 C
       ENDIF
 C-----calculation of h.i. transmission coefficients for fusion
-      IF(KTRlom(Npro, Ntrg).EQ.0)CALL HITL(stl)
+      IF(KTRlom(Npro, Ntrg).EQ.0) CALL HITL(stl)
+
+C     RCN 02/2004  gamma trial      
+C     IF(KTRlom(Npro, Ntrg).LT.0 .AND. 
+C    >   AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
+C        INCIDENT GAMMA
+C        einlab = EINl
+C        CALL ULM(1)
+C        stl(1)=E1(einlab, 0.d0)
+C     ENDIF
+
 C-----calculation of transmission coefficients ----done------
       DO i = 1, NDLW
          ELTl(i) = stl(i)
       ENDDO
+      
+C-----Plujko_new (calculation CSFus)
+ 100  IF(INT(AEJC(0)).EQ.0)THEN
+        WRITE(6,*)'Incident gamma E1+M1+E2 channel ', ' IGE1=',IGE1,'
+     &  IGM1=',IGM1,' IGE2=',IGE2
+        CSFus = 0.0     
+
+C       PI = 3.14159D0  already defined in common
+C       chPI=c*h/2/PI [Mev*fm]
+C       chPI=197.3287D0 already defined in common as HHBarc
+
+C-------for E1
+        IF(IGE1.NE.0)THEN
+C---------do loop over parity
+          DO ip = 1, 2
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
+                WPARG = PAR(ip, LVP(LEVtarg, 0), 1)
+C---------------factor 10 near HHBarc from fm**2-->mb
+                POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) + 10*
+     &          HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
+     &          (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E1(0,Z,A,EINl,0.d0,0.d0)
+                POPTest = POP(NEX(1), j, ip, 1)
+                CSFus = CSFus + POP(NEX(1), j, ip, 1)
+                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDIF
+C-------end for E1
+
+C-------for M1
+        IF(IGM1.NE.0)THEN
+C---------do loop over parity
+          DO ip = 1, 2
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
+                WPARG = PAR(ip, LVP(LEVtarg, 0), 2)
+C---------------factor 10 near HHBarc from fm**2-->mb
+                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
+     &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
+     &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*XM1(EINl)
+                CSFus = CSFus + POP(NEX(1), j, ip, 1)
+                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDIF
+C-------end for M1
+
+C-------for E2
+        IF(IGE2.NE.0)THEN
+C---------do loop over parity
+          DO ip = 1, 2
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.2.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.2.0) THEN
+                WPARG = PAR(ip, LVP(LEVtarg, 0), 2)
+C---------------factor 10 near HHBarc from fm**2-->mb
+                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
+     &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
+     &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E2(EINl)
+                CSFus = CSFus + POP(NEX(1), j, ip, 1)
+                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDIF
+C-------end for E2
+        GOTO 101
+      ENDIF
+C-----Plujko_new(END of calculation CSFus)
+C
 C-----channel spin min and max
- 100  eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
+C-----Plujko_new (Cb - blocking comment)
+Cb 100  eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
+C-----Plujko_new (END of blocking comment)
+C-----Plujko_new(operator without label 100)
+       eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
+C-----Plujko_new (END of operator without label 100)       
       smin = ABS(eee)
       smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
       mul = smax - smin + 1.0001
@@ -210,8 +354,8 @@ C-----do loop over compound nucleus spin
                lmax = MIN0(NDLW, lmax)
                lmax = MIN0(maxlw, lmax)
                DO k = lmin, lmax
-                  sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)*
-     &                  DRTl(k)
+                  sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)
+     >                                                       *DRTl(k)
                ENDDO
             ENDDO
             POP(NEX(1), j, ip, 1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
@@ -220,8 +364,11 @@ C-----do loop over compound nucleus spin
             csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
          ENDDO
       ENDDO
+C-----Input gamma E1 channel (label 101)
+ 101  CONTINUE
+C-----Input gamma E1 channel (END of label 101)
 C-----CAPOTE 2001
-      IF((DIRect.EQ.1 .OR. DIRect.EQ.3) .AND. AEJc(Npro).LE.1)THEN
+         IF((DIRect.EQ.1 .OR. DIRect.EQ.3) .AND. AEJc(Npro).LE.1)THEN
          ecis_abs = 0.
 C--------read ECIS absorption cross section
          OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
@@ -326,7 +473,7 @@ C
   300 CONTINUE      
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
-c     NLW = NLW + 13
+      NLW = NLW + 13
 C-----check whether NLW is not larger then max spin at which nucleus
 C-----is still stable
       IF(NLW.GT.JSTab(1))THEN

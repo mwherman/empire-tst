@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: gamma-strgth.f,v 1.6 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:53 $
+Ccc   * $Id: gamma-strgth.f,v 1.7 2004-04-21 03:39:53 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -52,6 +52,14 @@ C
 C
 C Local variables
 C
+C ------Plujko_new
+      DOUBLE PRECISION BETagfl2, S2Plusgfl,
+     &                 EG1, GW1, CS1, EG2, GW2, CS2
+      INTEGER  NG
+      COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
+C ------Plujko_new (End)
+
       DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
 C
 C
@@ -135,6 +143,19 @@ C
 C
 C-----printout of gamma transition parameters
 C
+C-----Kyiv.Photonuclear channel, Plujko_new
+C     IF(Key_GDRGFL.EQ.0)THEN
+C        EG1 = GDRpar(1, Nnuc)
+C        GW1 = GDRpar(2, Nnuc)
+C        CS1 = GDRpar(3, Nnuc)
+C        EG2 = GDRpar(4, Nnuc)
+C        GW2 = GDRpar(5, Nnuc)
+C        CS2 = GDRpar(6, Nnuc)
+C      ELSE
+C        init GDRGFL parametrs
+C        CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
+C      ENDIF
+C-----Kyiv.Photonuclear channel, Plujko_new(End)
       IF(IOUt.GT.1)THEN
          WRITE(6, 99001)
 99001    FORMAT(1X, 'Gamma transitions parameters', //10X, 'E1 ', 11X, 
@@ -349,7 +370,10 @@ C
       END
 C
 C
-      DOUBLE PRECISION FUNCTION E1(Eg, T)
+C-----Plujko_new
+Cb    DOUBLE PRECISION FUNCTION E1(Eg, T)
+      DOUBLE PRECISION FUNCTION E1(Nnuc,Z,A,Eg, T,Uex)
+C-----Plujko_new(End)
 Ccc
 Ccc ********************************************************************
 Ccc *                                                         class:PPU*
@@ -397,8 +421,21 @@ Ccc ********************************************************************
 Ccc
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
-C
 C COMMON variables
+C
+C-----Plujko_new
+      INCLUDE 'dimension.h'
+      INTEGER Key_shape , Key_GDRGFL
+      INTEGER  NG, Nnuc
+
+      DOUBLE PRECISION BETagfl2, S2Plusgfl,
+     &  EG1, GW1, CS1, EG2, GW2, CS2, A(0:NDNUC),Z(0:NDNUC),PI
+      DOUBLE PRECISION  Temperf, Eexcitf, Uex
+
+      COMMON /GSA/ Key_shape, Key_GDRGFL
+      COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
+C-----Plujko_new(End)
 C
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
@@ -412,6 +449,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ed, gdr, gred
+      DATA PI/3.1415926D0/
 C
 C
 C
@@ -424,6 +462,23 @@ C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
       gred = (ed + 39.478351*T**2)/ED1
 C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
 C     GRED = 1.
+
+C-----Plujko_new
+      IF(Key_shape.NE.0) THEN
+         Temperf = T
+C        Alevel = 0.21*(A(Nnuc) + 0.001)**0.87
+C        Eexcitf = Alevel *T**2
+         Eexcitf = Uex
+
+C        init GDRGFL parametrs
+         CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
+C
+         E1=2*PI*Eg**3*GAMMA_STRENGTH(Z(Nnuc), A(Nnuc),
+     &        Eexcitf, Temperf, Eg , Key_shape)
+         RETURN
+      ENDIF
+C-----Plujko_new(End)
+
       IF(TE1.NE.0.0D0)THEN
          gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
      &         + 0.7*D1*39.478351*T**2*ed*Eg/ED1/ED1/SQRT(ED1)

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: auxiliary.f,v 1.7 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:53 $
+Ccc   * $Id: auxiliary.f,v 1.8 2004-04-21 03:39:53 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -33,6 +33,10 @@ C
 C
 C
 C
+C
+C----Plujko_new
+       F_PRINT=F_PRINT+10
+C----Plujko_new(End)
       XNI = 0.
       TORy = 4.
       EX1 = 0.0
@@ -82,6 +86,9 @@ C
          DO nnex = 1, NDEX
             EX(nnex, nnuc) = 0.0
             TNUc(nnex, nnuc) = 0.0
+C----Plujko_new
+             Uexcit(nnex,nnuc) = 0.0
+C----Plujko_new(End)
             TNUcf(nnex, nnuc) = 0.0
             DO ilw = 1, NDLW
                RO(nnex, ilw, nnuc) = 0.0

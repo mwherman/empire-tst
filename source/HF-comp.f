@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-02-09 21:19:13 $
-Ccc   * $Id: HF-comp.f,v 1.17 2004-02-09 21:19:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-04-21 03:39:54 $
+Ccc   * $Id: HF-comp.f,v 1.18 2004-04-21 03:39:54 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -108,12 +108,16 @@ C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
 C--------distance of the actual energy to the bin energy excluding elastic
 C--------if ENDf.NE.0
+
+C        Bug found by Mike, CN XS was not added 
+         pop1 = Xnor*SCRtl(il, Nejc)
          IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
      &      .OR. Iec.NE.NEX(1)) THEN 
             xcse = eemi/DE + 1.0001
             icsl = INT(xcse)
             icsh = icsl + 1
-            pop1 = Xnor*SCRtl(il, Nejc)
+C           Bug found by Mike, CN XS was not added 
+C           pop1 = Xnor*SCRtl(il, Nejc)
             popl = pop1*(FLOAT(icsh) - xcse)/DE
             popll = popl            !we also need popl not multiplied by 2
             IF(icsl.EQ.1)popl = 2.0*popl
@@ -705,12 +709,50 @@ C
       DOUBLE PRECISION eg, se1, se2, se2m1, sm1, xjc
 C     DOUBLE PRECISION gamma, accn, atil, t
       DOUBLE PRECISION E1, E2, XM1
-      REAL FLOAT
+C-----Plujko_new
+Cb    REAL FLOAT
+      REAL FLOAT,fSpinIc
+C-----Plujko_new(End)
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
 C
 C
 C
+C-----Plujko_new - under construction
+      GO TO 250
+C
+C
+C     file  for output of widths
+C     OPEN(UNIT=54, FILE='SUMHF.OUT' , STATUS='NEW' )
+      IF (F_PRINT.EQ.11) THEN
+       OPEN(UNIT=54, FILE='SUMHF.OUT' , STATUS='NEW' )
+       WRITE(54, * ) 'Nnuc - decaying nucleus  '
+       WRITE(54, * ) 'Iec  - energy index of the decaying state '
+       WRITE(54, * ) 'EX(Iec, Nnuc)- energy of the decaying state '
+       WRITE(54, * ) 'SpinIc   - spin  of the decaying state  '
+       WRITE(54, * ) 'Ipc  - parity of the decaying state    '
+       WRITE(54, * )'Sum - sum of transmission coefficients over all '
+       WRITE(54, * )'outgoing channels for the requested decay (partial'
+       WRITE(54, * )' sums are stored in SCRT and SCRTL arrays for '
+       WRITE(54, * )'continuum and discrete levels respectively. SUMs '
+       WRITE(54, * )'for all ejectiles combine to the total '
+       WRITE(54, * )'Hauser-Feshbach denominator. Inverse of the latter'
+       WRITE(54, * )' multiplied by the population of the '
+       WRITE(54, * )'(NNUC,IEC,JC,IPC) state is used to normalize  '
+       WRITE(54, * )'SCRT and SCRTL matrices to give residual  '
+       WRITE(54, * )'nucleuse population. '
+      ENDIF
+      IF (F_PRINT.EQ.11.OR.F_PRINT.EQ.110) THEN
+       WRITE(54, * ) ' =============================================='
+       WRITE(54,*)'Projectile energy = ',EINl,' MeV'
+       WRITE(54, * )'Gc = Sum / (2 *Pi * RO(Iec, Jc , Nnuc) )'
+       WRITE(54, * ) ' ______________________________________________'
+       WRITE(54, * ) 'Nnuc   Iec  EX(Iec, Nnuc)  SpinIc  Ipc     Gc'
+      ENDIF
+      F_PRINT = 100
+250   CONTINUE
+C-----Plujko_new(End)
+
       Sum = 0.0
       SCRtem(0) = 0.0
       xjc = FLOAT(Jc) + HIS(Nnuc)
@@ -747,7 +789,11 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
          eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C--------next 3 lines could be replaced with the matrix
-         se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C--------Plujko_new
+         se1 = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
+     &  TUNe(0, Nnuc)
+Cb         se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C--------Plujko_new(End)
          se2 = E2(eg)*TUNe(0, Nnuc)
          sm1 = XM1(eg)*TUNe(0, Nnuc)
          se2m1 = se2 + sm1
@@ -841,8 +887,11 @@ C-----do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, TNUc(1, Nnuc))*iodd + XM1(eg)
-     &                          *ipar
+C-----------------Plujko_new
+                  SCRtl(i, 0) = 
+     &  E1(Nnuc,Z,A,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
+Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
+C-----------------Plujko_new(End)
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -854,6 +903,19 @@ C-----do loop over discrete levels --------- done --------------------
       ENDIF
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
+C-----Plujko_new -under construction
+      GO TO 255
+      Gc = Sum / (2 *Pi * RO(Iec, Jc , Nnuc) )
+C     RO(ier, Jc + 1, Nnuc)
+      fEX = EX(Iec, Nnuc)
+      fSpinIc = FLOAT(Jc) + HIS(Nnuc)
+C
+C
+      iA = INT(A(nnuc))
+      WRITE(54, 1112 ) iA, SYMb(Nnuc),Iec, fEX, fSpinIc,  Ipc , Gc
+1112  Format(1X, I3, A2, 4X, I2,3X, F9.5 ,6X, F3.1, 4X, I2, 3X, E12.4)
+255   CONTINUE
+C-----Plujko_new(End)
       END
 C
       SUBROUTINE DECAYT(Nnuc, Iec, Jc, Ipc, Sum)
@@ -945,7 +1007,11 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          IF(RO(ier, Jc, Nnuc).NE.0.D0)THEN
             eg = EX(Iec, Nnuc) - EX(ier, Nnuc)
 C-----------next 3 lines should be replaced with the matrix
-            se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C-----------Plujko_new
+            se1 = 
+     &   E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*TUNe(0, Nnuc)
+Cb          se1 = E1(eg, TNUc(ier, Nnuc))*TUNe(0, Nnuc)
+C----Plujko_new(End)
             se2 = E2(eg)*TUNe(0, Nnuc)
             sm1 = XM1(eg)*TUNe(0, Nnuc)
             se2m1 = se2 + sm1
@@ -1047,8 +1113,11 @@ C--------do loop over discrete levels -----------------------------------
                IF(lmin.EQ.2)THEN
                   SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)*FLOAT(ipar)
                ELSE
-                  SCRtl(i, 0) = E1(eg, TNUc(1, Nnuc))*iodd + XM1(eg)
-     &                          *ipar
+C-----------------Plujko_new
+                  SCRtl(i, 0) = 
+     &  E1(Nnuc,A,Z,eg, TNUc(1,Nnuc),Uexcit(1,Nnuc))*iodd + XM1(eg)*ipar
+Cb                SCRtl(i, 0) = E1(eg, TNUc(1,Nnuc))*iodd + XM1(eg)*ipar
+C-----------------Plujko_new(End)
                   IF(lmax.NE.1)SCRtl(i, 0) = SCRtl(i, 0) + E2(eg)
      &               *FLOAT(ipar)
                ENDIF
@@ -1616,7 +1685,8 @@ C
       DIMENSION einters(2*NFPARAB), dmominteg(NFPARAB)
 C
       COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEXcit
+      COMMON /COMFIS5/ EPSil, EJOin, VJJ
+	COMMON /ExcEnergy/ UEXcitt
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB)
 C
       DOUBLE PRECISION Ee, H, TFD, VBArex, SMIu, PHAsr,ho
@@ -1717,7 +1787,7 @@ C        RIGTH intersect
 C---------------------------------
 C
 C     Momentum integrals calculated by Gauss-Legendre integration
-      UEXcit = Ee
+      UEXcitt = Ee
       DO k = 1, NRBar
          dmominteg(k) = 0.D0
          IF(einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)dmominteg(k)
@@ -1878,8 +1948,9 @@ C
 c     INCLUDE 'global.h'
 C
       DIMENSION EPSil(NFWELLS), EJOin(2*NFWELLS), VJJ(NFWELLS)
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEXcit
+      COMMON /COMFIS5/ EPSil, EJOin, VJJ
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
+	COMMON /ExcEnergy/ UEXcit
 C
       FMOMENT = 2*SMIu*DSQRT(DABS(UEXcit - VDEF(Eps)))
 C
@@ -1891,10 +1962,11 @@ C     calculation of the deformation potential energy
       INCLUDE 'global.h'
 C
       DIMENSION EPSil(NFWELLS), EJOin(2*NFWELLS), VJJ(NFWELLS)
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEXcit
+      COMMON /COMFIS5/ EPSil, EJOin, VJJ
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
 C
 C-----------------------------------------------
+       
       VDEF = 0.D0
 C
       IF(Eps.LE.EJOin(2))THEN
