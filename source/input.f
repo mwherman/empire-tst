@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-07-26 19:40:17 $
-Ccc   * $Id: input.f,v 1.36 2004-07-26 19:40:17 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-08-02 16:19:26 $
+Ccc   * $Id: input.f,v 1.37 2004-08-02 16:19:26 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -286,7 +286,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 2
 C
 C--------CCFUF parameters
          DV = 10.
@@ -1539,7 +1539,7 @@ C-------- fission input is created if it does not exist and FISSHI=0
 C-------the fissioning condition replaced according to  fission
 C-------barriers available in RIPL-2  (MS)
          IF(Z(nnuc).LT.78.)FISsil(nnuc) = .FALSE.
-         IF(FISshi(nnuc).EQ.3.)FISsil(nnuc) = .FALSE.
+         IF(FISshi(nnuc).EQ.2.)FISsil(nnuc) = .FALSE.
          IF(FISshi(nnuc).EQ.1.)THEN
             FISsil(nnuc) = .TRUE.
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)
@@ -5123,8 +5123,15 @@ C----------------------input fundamental fission barrier *** done
 C------- discrete barriers---------------------------------------
       DO ibar = 1, NRBar
          EFDis(1, ibar) = 0.
-         SFDis(1, ibar) = XJLv(1, Nnuc)
-         IPFdis(1, ibar) = LVP(1, Nnuc)
+         IF(A(Nnuc)/2.EQ.INT(A(Nnuc)/2))THEN
+            SFDis(1, ibar)=0.0
+         ELSE
+            SFDis(1, ibar)=0.5
+         ENDIF   
+         IF(XJLv(1,Nnuc).ge.0.)SFDis(1, ibar) = XJLv(1, Nnuc)
+         IPFdis(1, ibar)=1
+         IF(LVP(1,Nnuc).ne.IPFdis(1, ibar))
+     &        IPFdis(1, ibar) = LVP(1, Nnuc)
          IF(FISdis(Nnuc).EQ.0.)NRFdis(ibar) = 1
       ENDDO
 C
