@@ -213,8 +213,6 @@ C---------------------------------------------------------------------
       COMMON /FACT  / G(LFMAX)
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /POTEN1/ R(7), RE(7), AQ(7), AE(7), POT(7, 6)
-C     COMMON /POTEN2/ RCOulomb, BETa
-C
       COMMON /POTEN2/ RCOulomb, BETa, EFErmi, EP, EA, IREl
       COMMON /TCE   / TC(LTCMAX)
       COMMON /XS    / SE, SR, ST
@@ -242,7 +240,7 @@ C
       iba = 0
 C---------------------------------------------------
       IF(ida.NE.0)THEN
-         CALL FCT()
+C        CALL FCT()   ! Moved to main.f to be executed only once
          CALL PREANG(ida, na)
       ENDIF
       xmas_npro = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
@@ -341,7 +339,7 @@ C-----transfer o.m. Tl onto STL matrix and set them to 0 if lower than 1E-15
             Stl(i) = 0.
          ENDIF
       ENDDO
-      CLOSE(IS)
+      CLOSE(IS,status='delete')
 C     Capote , preeq 2002
       SRR=SR
       END
@@ -578,8 +576,6 @@ C
          RETURN
       ENDIF
       END
-C
-C
 C
       SUBROUTINE FCT()
 C***********************************************************************
