@@ -22,6 +22,9 @@ C-M    energy point.
 C-M  - Photon spectra in MF 6 are extrapolated to thermal energies in
 C-M    a similar way like the elastic angular distributions.
 C-M    
+C-External routines from DXSEND.F
+C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
+C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
       PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
 C*
@@ -42,6 +45,7 @@ C*
 C*
       NMT=0
       ELE=1.E-5
+      ERL=ELE
 C-F  Write ENDRES banner
       WRITE(LTT,691) ' ENDRES - Add Resonance Data to ENDF    '
       WRITE(LTT,691) ' ===================================    '
@@ -93,6 +97,7 @@ C* ENDRES log file
       WRITE(LLG,691) ' Output ENDF file                     : ',FLOU
       WRITE(LLG,691) '                          File header : ',HD66
 C* Write the header to output and log file
+      IF(M1.EQ.0) M1=7777
       CALL WRTEXT(LOU, M1,M2,M3,NS,HD66)
 C*
 C-F  Identify ZA and AWR on the source file to be edited
@@ -165,7 +170,7 @@ C* Check AWR consistency on the resonance file
       END IF
 C*
 C-F  Process the resonance data and define the energy range
-      IF(MF.EQ.2 .AND. MT.EQ.151) REWIND LRR
+      IF(MFR.EQ.2 .AND. MTR.EQ.151) REWIND LRR
   120 CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       IF(MA1.NE.MA1 .OR. MF.NE.2 .OR. MT.NE.151) GO TO 120
       CH66( 1:11)=CHZA
@@ -179,12 +184,13 @@ C-F  Process the resonance data and define the energy range
 C* Process a resonance section
   122 CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      READ (CH66,891) ERL,EH,LRU,LRF,NRO,NAPS
+      READ (CH66,891) EL,EH,LRU,LRF,NRO,NAPS
       IF(LRU.EQ.0) THEN
 C* Case: no resonance parameters
         GO TO 128
       ELSE IF(LRU.EQ.1) THEN
 C* Case: Resolved resonance range present -  copy to output
+        ERL=EL
         ERH=EH
         IF(NIS.GT.1) THEN
           WRITE(LTT,691) ' ENDRES WARNING - Multi-isotope file    '
@@ -301,6 +307,9 @@ C* Interpolate cross section to the upper resonance range energy
       END IF
 C* Check threshold energy
       ETH=-QI*(AWR+1)/AWR
+
+      print *,'k1,eth,ele,erl',k1,eth,ele,erl
+
       IF(ETH.LT.ELE) THEN
 C* Add points below threshold
         EAD=MAX(ETH,ERL)
@@ -329,13 +338,18 @@ C* Write the SEND record and check the next MT
 C* All pointwise cross sections processed - write the FEND record
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
 C*
-C-F  Check threshold in files MF=4
+C-F  Check threshold in files MF>=4
   140 CALL RDTEXT(LEM,MA1,MF,MT,CH66,IER)
-      IF(IER.EQ.1 .OR. MA1.LE.0) THEN
+      IF(IER.EQ.1 .OR. MA1.LT.0) THEN
         MAT=-1
+        CH66=BL66
         GO TO 274
       END IF
       IF(MF.EQ.0) THEN
+        IF(MA1.EQ.0) THEN
+          MAT=0
+          CH66=BL66
+        END IF
         CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
         GO TO 140
       END IF
@@ -445,6 +459,9 @@ C* Duplicate the first multiplicity to ERL and copy the rest
             NP=NP+1
             RWO(K1)=ERL
             RWO(K2)=RWO(K2+1)
+            DO J=1,NR
+              NBT(J)=NBT(J)+1
+            END DO
             CALL WRTAB1(LOU,MAT,MF,MT,NS,C1,C2,LIP,LAW,NR,NP
      &                 ,NBT,INR,RWO(K1),RWO(K2))
             IF     (LAW.EQ.0) THEN
@@ -524,4 +541,375 @@ C*
   698 FORMAT(BN,I10)
   891 FORMAT(2F11.0,4I11)
   892 FORMAT(I11)
+      END
+      SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
+C-Title  : RDTEXT Subroutine
+C-Purpose: Read a text record to an ENDF file
+      CHARACTER*66  REC
+      READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
+      IER=0
+      RETURN
+   81 IER=1
+      RETURN
+   82 IER=2
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
+C-Title  : WRTEXT Subroutine
+C-Purpose: Write a text record to an ENDF file
+      CHARACTER*66  REC
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) REC,MAT,MF,MT,NS
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+C-Title  : Subroutine FINDMT
+C-Purpose: Find specified reaction in an ENDF file
+C-Description:
+C-D  The routine finds the specified material, file or section
+C-D  in an ENDF file. The material may be characterised by the
+C-D  ZA0 number defined as Z*1000+A+LIS0/10 (the decimal point
+C-D  allows for isomeric states). Alternately, if ZA0<0, the
+C-D  absolute integer value is interpreted as the required MAT
+C-D  number. If MF and MT are non-zero, the file is scanned
+C-D  until the value on the file matches the input value.
+C-D
+C-D  Notes:
+C-D  - The search for metastable states by ZA0 is only possible
+C-D    if MF1 MT451 data are on the file.
+C-D  - In this case the actual file position is on the second
+C-D    record of this section.
+C-D  - Once the required ZA is identified, the ZA0 value is
+C-D    redefined to -MAT to search by the MAT number in
+C-D    consecutive searches, if required.
+C-D
+C-D  Error flags:
+C-D  IER = 0  Normal termination.
+C-D        1  Specified material not found.
+C-D        2  End-of-file before material found.
+C-D        3  Read error.
+C-
+      CHARACTER*66 C66
+C* Initialise
+      IER= 0
+      MF0=MF
+      MT0=MT
+      MF =-1
+      MT =-1
+      MMM=-1
+      ZA = 0
+      IF     (ZA0.LT.0) THEN
+        MAT0=-ZA0+0.1
+      ELSE IF(ZA0.GT.0) THEN
+        IZA0=ZA0*10
+      ELSE
+        CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+        IF(IER.GT.0) GO TO 80
+        MAT0=-1
+        GO TO 21
+      END IF
+C*
+C* Loop to find the specified material
+   20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LT.0) GO TO 80
+      IF(ZA0.LT.0) THEN
+C* Case: Search by MAT number
+        IF(MAT.NE.MAT0) GO TO 20
+      ELSE
+C* Case: Search by ZA number (including decimal LIS0)
+        IF(MT.EQ.0) GO TO 20
+        IF(MAT.EQ.MMM ) GO TO 20
+        MMM=MAT
+        READ (C66,92) ZA
+        IZA=ZA*10
+        IF(MF.EQ.1. AND. MT.EQ.451) THEN
+          READ (LEF,92) DD,DD,LIS,LIS0
+          IZA=IZA+LIS0
+        END IF
+        IF(IZA.NE.IZA0) GO TO 20
+        ZA=IZA*0.1
+        ZA0=-MAT
+      END IF
+C* Loop to find the file number
+   21 IF(MF0.EQ. 0) GO TO 30
+   22 IF(MF0.EQ.MF) GO TO 30
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
+      GO TO 22
+C* Loop to find the reaction type number
+   30 IF(MT0.EQ. 0) GO TO 40
+   32 IF(MT0.EQ.MT) GO TO 40
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
+      IF(MF0.GT.0 .AND. MF.GT.MF0) GO TO 20
+      GO TO 32
+C* Normal termination
+   40 READ (C66,92) ZA,AW,L1,L2,N1,N2
+      RETURN
+C*
+C* Error traps
+   80 IER=IER+1
+      RETURN
+C*
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
+      END
+      SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
+C-Title  : WRCONT Subroutine
+C-Purpose: Write a CONT record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DATA BLN/'           '/
+      DO 10 I=1,6
+      REC(I)=BLN
+   10 CONTINUE
+      IF( (C1.EQ.0. .AND. C2.EQ.0.) .AND.
+     1    (L1.EQ.0  .AND. L2.EQ.0 ) .AND.
+     2    (N1.EQ.0  .AND. N2.EQ.0 ) ) GO TO 12
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),20) L1
+      WRITE(REC(4),20) L2
+      WRITE(REC(5),20) N1
+      WRITE(REC(6),20) N2
+   12 NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      RETURN
+   20 FORMAT(I11)
+   40 FORMAT(6A11,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
+C-Title  : Subroutine RDHEAD
+C-Purpose: Read an ENDF HEAD record
+C-Description:
+C-D  The HEAD record of an ENDF file is read. The following error
+C-D  conditions are trapped by setting the IER flag:
+C-D    IER = 0  Normal termination
+C-D          1  End-of-file
+C-D          2  Read error
+C-
+      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      RETURN
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
+C-Title  : Subroutine RDTAB1
+C-Purpose: Read an ENDF TAB1 record
+C-Description:
+C-D  The TAB1 record of an ENDF-formatted file is read.
+C-D  Error condition:
+C-D    IER=9 on exit if available field length NMX is exceeded.
+C-
+      DIMENSION    NBT(100),INR(100)
+      DIMENSION    EN(NMX), XS(NMX)
+C*
+      READ (LEF,902) C1,C2,L1,L2,N1,N2
+      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      JP=N2
+      IF(N2.GT.NMX) THEN
+        JP=NMX
+        IER=9
+      END IF
+      READ (LEF,904) (EN(J),XS(J),J=1,JP)
+      RETURN
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6I11)
+  904 FORMAT(6F11.0)
+      END
+      SUBROUTINE RDTAB2(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,IER)
+C-Title  : Subroutine RDTAB2
+C-Purpose: Read an ENDF TAB2 record
+      DIMENSION    NBT(100),INR(100)
+C*
+      READ (LEF,902) C1,C2,L1,L2,N1,N2
+      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      RETURN
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6I11)
+      END
+      SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
+C-Title  : Subroutine RDLIST
+C-Purpose: Read an ENDF LIST record
+      DOUBLE PRECISION RUFL,RR(6)
+      DIMENSION    VK(1)
+C*
+      READ (LEF,902) C1,C2,L1,L2,N1,N2
+      IF(N1+5.GT.MVK) THEN
+        IER=-1
+        RETURN
+      END IF
+      IF(N1.EQ.0) RETURN
+C* Read the LIST2 entries, watch for underflow
+      NUFL=0
+      RUFL=1
+      DO J=1,N1,6
+        READ (LEF,903) (RR(K),K=1,6)
+        DO K=1,6
+          IF(RR(K).NE.0 .AND. ABS(RR(K)).LT.1.E-30) THEN
+            NUFL=NUFL+1
+            IF(ABS(RR(K)).LT.ABS(RUFL)) RUFL=RR(K)
+          END IF
+          VK(J-1+K)=RR(K)
+        END DO
+      END DO
+      IF(NUFL.GT.0) THEN
+        PRINT *,' RDLIST WARNING - Underflow conditions',NUFL
+        PRINT *,'                        Minimum number',RUFL
+      END IF
+      RETURN
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6F11.0)
+      END
+      SUBROUTINE WRTAB1(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
+     1                 ,NR,NP,NBT,INR,X,Y)
+C-Title  : WRTAB1 Subroutine
+C-Purpose: Write a TAB1 record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     NBT(1),INR(1),X(1),Y(1)
+      DATA BLN/'           '/
+C* First line of the TAB1 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NR
+      WRITE(REC(6),42) NP
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+C* Write interpolation data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NR) GO TO 24
+      N =N+1
+      WRITE(REC(I+1),42) NBT(N)
+      WRITE(REC(I+2),42) INR(N)
+   24 I =I +2
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NR) GO TO 20
+C* Loop for all argument&function pairs
+      N =0
+   30 I =0
+   32 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NP) GO TO 34
+      N =N+1
+      CALL CHENDF(X(N),REC(I+1))
+      CALL CHENDF(Y(N),REC(I+2))
+   34 I =I+2
+      IF(I.LT.6) GO TO 32
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NP) GO TO 30
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE WRTAB2(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
+     1                 ,NR,NZ,NBT,INR)
+C-Title  : WRTAB2 Subroutine
+C-Purpose: Write a TAB2 record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     NBT(1),INR(1)
+      DATA BLN/'           '/
+C* First line of the TAB2 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NR
+      WRITE(REC(6),42) NZ
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+C* Write interpolation data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NR) GO TO 24
+      N =N+1
+      WRITE(REC(I+1),42) NBT(N)
+      WRITE(REC(I+2),42) INR(N)
+   24 I =I +2
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NR) GO TO 20
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE WRLIST(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,NPL,N2,BN)
+C-Title  : WRLIST Subroutine
+C-Purpose: Write a LIST record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     BN(1)
+      DATA BLN/'           '/
+C* First line of the TAB2 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NPL
+      WRITE(REC(6),42) N2
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(NPL.EQ.0) RETURN
+C* Write data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      IF(N.GE.NPL) GO TO 24
+      N =N+1
+      CALL CHENDF(BN(N),REC(I+1))
+   24 I =I +1
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NPL) GO TO 20
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE CHENDF(FF,CH)
+C-Title  : CHENDF Subroutine
+C-Purpose: Pack value into 11-character string
+      CHARACTER*1  SN
+      CHARACTER*11 CH
+      CH=' 0.00000+00'
+      FA=ABS(FF)
+      IA=0
+   20 IF(FA.LT.1.0E-30 ) RETURN
+      IF(FA.LT.9.999950) GO TO 40
+      FA=FA*0.1
+      IA=IA+1
+      GO TO 20
+   40 IF(FA.GE.0.999995) GO TO 50
+      FA=FA*10.
+      IA=IA-1
+      GO TO 40
+   50 SN='+'
+      IF(IA.LT.0) THEN
+        SN='-'
+        IA=-IA
+      END IF
+      IF(FF.LT.0) FA=-FA
+      WRITE(CH,80) FA,SN,IA
+      RETURN
+   80 FORMAT(F8.5,A1,I2.2)
       END
