@@ -37,9 +37,8 @@
     of F9.4 format to improve accuracy (M. Herman).
 15. EMPEND revised to eliminate some undesired entries in the ENDF 
     file (A. Trkov).
-16. Three-hump fission with underbarrier effect implemented (HRTW and 
-    more level density options still missing) (R. Capote, M.Herman, 
-    M. Sin, and A. Ventura).
+16. Three-hump fission with underbarrier effects implemented 
+    (R. Capote, M.Herman, M. Sin, and A. Ventura).
 17. Possibility of excited targets included (M. Herman).
 18. PostScript (and eps) files produced from within ZVV viewer are 
     stored in the work directory with a name following standard 
