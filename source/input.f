@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-13 10:50:41 $
-Ccc   * $Id: input.f,v 1.52 2005-01-13 10:50:41 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-13 15:30:37 $
+Ccc   * $Id: input.f,v 1.53 2005-01-13 15:30:37 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -865,8 +865,8 @@ C
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
-C        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
-C        1     2     3      4      5      6
+C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C                        1     2     3      4      5      6
 C        1 neut. disc.   x     x     0      x      x      0
 C        2 neut. cont.   0     x     x      x      x      x
 C        3 prot. disc.   x     x     0      x      x      0
@@ -1382,7 +1382,7 @@ C          angular distribution
 C            checking the correspondence of the excited states
              IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
                write(6,*)
-     >          ' WARNING: DWBA and CCM state order does not coincide'
+     &          ' WARNING: DWBA and CCM state order does not coincide'
              ENDIF
  1010        BACKSPACE 45
              READ(45, '(A80)', END = 2000) rstring
@@ -1462,7 +1462,7 @@ C     It should be added <m2> to the input ( to use 0.146 if needed)
          WRITE(6, '(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')ia,
      &         SYMb(nnuc)
          WRITE(6, 99002)(EX(i, nnuc),
-     &            (RO(i,j,nnuc)*EXP(ARGred), j = 1, 12), i = 1, NEX(nnuc))
+     &         (RO(i,j,nnuc)*EXP(ARGred), j = 1, 12), i = 1, NEX(nnuc))
       ENDIF
 C
 C-----other decaying nuclei
