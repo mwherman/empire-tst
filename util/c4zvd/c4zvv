@@ -9,5 +9,5 @@ rm tmp.dat c4.zvd end.zvd $5
 eecho #!zvview.exe >$5
 cat c4.zvd >>$5
 cat end.zvd >>$5
-./zvv93l.exe $5
+./zvv94l.exe $5
 
