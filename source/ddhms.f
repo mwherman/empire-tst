@@ -1,12 +1,12 @@
       SUBROUTINE DDHMS(Izaproj, Tartyper, Ajtarr, Elabprojr, Sigreacr, 
      &                 Amultdamp, Debinr, Readnevr, Ihistlabr, 
-     &                 Irecprintr, Iomlreadr)
+     &                 Irecprintr, Iomlreadr, icalled)
 C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.8 $
-C $Id: ddhms.f,v 1.8 2004-07-16 12:47:36 herman Exp $
+C CVS Version Management $Revision: 1.9 $
+C $Id: ddhms.f,v 1.9 2004-10-07 16:15:56 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -75,12 +75,12 @@ C----------------------------------------------------------------------------
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-      INTEGER Izaproj, Ihistlabr, Irecprintr, Iomlreadr
+      INTEGER Izaproj, Ihistlabr, Irecprintr, Iomlreadr, icalled
       REAL*8 Tartyper, Ajtarr, Elabprojr, Sigreacr, Amultdamp, Debinr, 
      &       Readnevr
 C
 C     define kinematics option ikin=1,2
-      IKIn = 1   !ikin=1 prefered. see text ar top of this code.
+      IKIn = 1   !ikin=1 prefered. see text at top of this code.
 C
 C     diagnostic print flag
       IPRintdiag = 0 !0=no print of details
@@ -121,19 +121,16 @@ C
       IF(IHIstlab.NE.0)OPEN(UNIT = 4, FILE = 'HISTORY', 
      &                      STATUS = 'unknown')               !big file
 C
-      CALL HMS
+      CALL HMS(icalled)
       END
 C
 C
-C
-C
-      SUBROUTINE HMS
+      SUBROUTINE HMS(icalled)
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
-C
-      INTEGER nem, jsweep, n, i
+      INTEGER nem, jsweep, n, i, icalled
       REAL*8 etotemiss, test, c
       REAL*8 pxrec, pyrec, pzrec, prec, amrec, event
 C
@@ -141,6 +138,8 @@ C
       INTEGER jtrans, nubin, jbin, mrecbin
       REAL*8 avradius, sumav
       REAL*8 adiffuse, rsample
+      REAL*8 EXCessmass, RESmas
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
 C
       avradius = 0
       sumav = 0
@@ -157,7 +156,8 @@ C     ! factor 10 prevents this becoming too small
       IDUm = -1  !starting value to call to ran0c random number function
 C
       CALL CONSTANTS  ! defines constants
-      CALL INIT0
+      
+	CALL INIT0(icalled)
 C
       IF(IOMlread.NE.0)CALL OM_INCANGMOM
 C     !read in om l-dist from tape10
@@ -464,8 +464,6 @@ C
 C
 C
       SUBROUTINE DEEXCITE2P1H
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
       INTEGER nexist2p1horig, nexist1p1horig, n, jstudy, npresid, 
@@ -818,8 +816,6 @@ C
 C
 C
       SUBROUTINE DEEXCITE1P1H
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -1150,9 +1146,6 @@ C
 C
 C
       SUBROUTINE DEEXCITE1H
-C
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -1463,12 +1456,9 @@ C
 C
 C
       SUBROUTINE PRINTIEXIST
-C      include 'ddhms.cmb'
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-C
       INTEGER i
-C
       WRITE(28, *)'**************************************************'
       WRITE(28, *)'isospin (prot-part neut-part prot-hole neut-hole:'
       WRITE(28, *)
@@ -1497,11 +1487,9 @@ C
       SUBROUTINE SELECTEN2P1H(Jstudy, Pair, Epart)
 C selects 1p energy from 2p1h, from equiprobable distribution,
 C using equidistant s-p model (well-depth restricted Williams)
-C      include 'ddhms.cmb'
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-C
       INTEGER Jstudy, nmonte
       REAL*8 Pair, Epart, e, x, xtest
       REAL*8 RANG
@@ -1556,11 +1544,8 @@ C
       SUBROUTINE SELECTEN1P1H(Jstudy, Pair, Epart)
 C selects 1p energy from 1p1h, from equiprobable distribution,
 C using equidistant s-p model (well-depth restricted Williams)
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-C
       INTEGER Jstudy
       REAL*8 Pair, Epart, e, x
       REAL*8 RANG
@@ -1588,11 +1573,8 @@ C
       SUBROUTINE SELECTEN1P2H(Jstudy, Pair, Epart)
 C selects 1p energy from 1p2h, from equiprobable distribution,
 C using equidistant s-p model (well-depth restricted Williams)
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-C
       INTEGER Jstudy, nmonte
       REAL*8 Pair, Epart, e, x
       REAL*8 RANG
@@ -1633,11 +1615,8 @@ C selects a collision partner (neutron or proton) depending on the
 C particle type of the initiator of the collision
 C initiator       = seltype
 C partner selected= coltype
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-C
       REAL*8 vfermi, beta, signnpp, signp, probnn, probpp, c, Epart
       REAL*8 RANG
 C----------------------------------------------------------
@@ -1694,8 +1673,6 @@ C
 C
 C
       SUBROUTINE EMISSRATE(Epart, Emrate)
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -1775,9 +1752,6 @@ C
 C
 C
       SUBROUTINE DAMPING(Epart, Damprate)
-C
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -1879,9 +1853,6 @@ C
 C
 C
       SUBROUTINE SETUPINITPH
-C
-C      include 'ddhms.cmb'
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -1921,8 +1892,6 @@ C
 C
 C
       SUBROUTINE ZEROARRAYS
-C
-C      include 'ddhms.cmb'
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
       INTEGER j
@@ -1972,7 +1941,6 @@ C
 C
 C
       SUBROUTINE OUTPUTPRINT
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
       DIMENSION ecount(0:10) !count array for printing energies
@@ -1982,6 +1950,7 @@ C
 C
       REAL*8 sumn, sump, anorm, dph, dth, th, ecount, thet, sumnlab, 
      &       sumplab, restot, zjadd
+
       restot = 0
 C     !the total production of all heavy residuals
 C
@@ -2041,9 +2010,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.8 $')
+99001 FORMAT('  ddhms version: $Revision: 1.9 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.8 2004-07-16 12:47:36 herman Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.9 2004-10-07 16:15:56 Capote Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -2511,64 +2480,8 @@ C
 C
 C
       SUBROUTINE MASSES
-C
-      IMPLICIT NONE
-      INCLUDE 'ddhms.cmb'
-C
-      INTEGER izaf, nmass, k, iz, ia, in
-      REAL*8 excess, spnpar, ebin
-C
-C
-C   -----------------------------------------------------------------
-C   | Read nuclear masses from table or calculate with D.Z formula |
-C   -----------------------------------------------------------------
-C
-      DIMENSION izaf(5000), excess(5000)
-      OPEN(UNIT = 27, STATUS = 'unknown', FILE = '../data/mass-hms.dat')
-      READ(27, '(///i7)')nmass
-      READ(27, '(5(i7,f11.6,f7.1))')(izaf(k), excess(k), spnpar, k = 1, 
-     &                              nmass)
-C
-      DO iz = 0, 130
-         DO ia = 1, 400
-            EXCessmass(iz, ia) = 0
-            RESmas(iz, ia) = 0
-         ENDDO
-      ENDDO
-C
-      DO k = 1, nmass
-         iz = izaf(k)/1000
-         ia = MOD(izaf(k), 1000)
-         RESmas(iz, ia) = REAL(ia) + excess(k)/AMU
-         EXCessmass(iz, ia) = excess(k)
-      ENDDO
-      CLOSE(UNIT = 27)
-C
-C     nucmas: subroutine for formula of Duflo-Zuker for masses outside M-N
-C
-      DO iz = 6, 100
-         DO ia = 2*iz - 10, 3*iz
-            IF(RESmas(iz, ia).EQ.0.D0)THEN
-               in = ia - iz
-               CALL NUCMAS(in, iz, ebin)
-               RESmas(iz, ia) = iz*PARmas(2) + in*PARmas(1) - ebin/AMU
-               EXCessmass(iz, ia) = RESmas(iz, ia)*AMU - REAL(ia)
-            ENDIF
-         ENDDO
-      ENDDO
-C
-C     mbc1 a quick/temp? solution to weird light undefined masses: define
-C     resmas=A for al nuclei so far undefined
-C     prvisouly i had a problem for be6 => be5 +n since mass be5 undefined
-      DO iz = 1, 130
-         DO ia = 1, 400
-            IF(RESmas(iz, ia).EQ.0.D0)THEN
-               RESmas(iz, ia) = REAL(ia)/AMU
-               EXCessmass(iz, ia) = 0
-            ENDIF
-         ENDDO
-      ENDDO
-C
+C     RCN, 09/2004
+C     SUBROUTINE DELETED AS EXCessmass and RESmas defined globally
       END
 C
       SUBROUTINE NUCMAS(Nn, Nz, Ebin)
@@ -2659,6 +2572,8 @@ C
       INCLUDE 'ddhms.cmb'
       INTEGER jzfinal, jnfinal, jafinal, jaresid, jzejec, jaejec
       REAL*8 ampart
+      REAL*8 EXCessmass, RESmas
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
 C
 C     calculate binding (separation energy) for particle of interest
 C     also, calculate mass of ejectile and heavy resid (if part. emitted)
@@ -2708,41 +2623,44 @@ C
 C
 C
 C
-      SUBROUTINE INIT0
+      SUBROUTINE INIT0(icalled)
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-      INTEGER nth, nph, nen, jz, jn, jsp, mem
+      INTEGER nth, nph, nen, jz, jn, jsp, mem, icalled
       INTEGER jzproj, japroj
 C
       REAL*8 amproj, sepejecn, sepejecp
+      REAL*8 EXCessmass, RESmas
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
+
 C
-C     data (parmas(i),i=1,7) /1.008665,1.007825,2.014101,3.016049,
-C     +  3.016029,4.002603,0./
-      PARmas(1) = 1.008665
-      PARmas(2) = 1.007825
-      PARmas(3) = 2.014101
-      PARmas(4) = 3.016049
-      PARmas(5) = 3.016029
-      PARmas(6) = 4.002603
-      PARmas(7) = 0
+      IF(icalled.eq.0) THEN
+
+	  PARmas(1) = 1.008665
+        PARmas(2) = 1.007825
+        PARmas(3) = 2.014101
+        PARmas(4) = 3.016049
+        PARmas(5) = 3.016029
+        PARmas(6) = 4.002603
+        PARmas(7) = 0
 C
+C       CALL MASSES
+        CALL SIGNON  !calculate inv x/s from Kalbach's routines
 C
+        JATar = NINT(ATAr)
+        JZTar = NINT(ZTAr)
+        JNTar = NINT(ANTar)
 C
-      CALL MASSES
-      CALL SIGNON  !calculate inv x/s from Kalbach's routines
-C
-      JATar = NINT(ATAr)
-      JZTar = NINT(ZTAr)
-      JNTar = NINT(ANTar)
-C
-      IF(PROjtype.EQ.'prot')JZResid = JZTar + 1
-C     !initial Z,A bef. emission
-      IF(PROjtype.EQ.'prot')JNResid = JNTar
-      IF(PROjtype.EQ.'neut')JZResid = JZTar
-      IF(PROjtype.EQ.'neut')JNResid = JNTar + 1
-      JNInitcn = JNResid
-      JZInitcn = JZResid
+        IF(PROjtype.EQ.'prot')JZResid = JZTar + 1
+C       !initial Z,A bef. emission
+        IF(PROjtype.EQ.'prot')JNResid = JNTar
+        IF(PROjtype.EQ.'neut')JZResid = JZTar
+        IF(PROjtype.EQ.'neut')JNResid = JNTar + 1
+        JNInitcn = JNResid
+        JZInitcn = JZResid
+
+	ENDIF
 C
       IF(IKIn.EQ.1)THEN
          ECMproj = ELAbproj*RESmas(JZTar, JATar)
@@ -2916,7 +2834,6 @@ C
 C
 C
       SUBROUTINE PAIRING(Pair)
-C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
       INTEGER jzfinal, jnfinal, jzeven, jneven
@@ -3691,11 +3608,18 @@ C
       SUBROUTINE CONSTANTS
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
+      REAL*8 AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
+     &                  ELE2, HHBarc, AMUneu, AMUpro
+      COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
+     &                  ELE2, HHBarc, AMUneu, AMUpro
 C
-      PI_g = DACOS( - 1.D0)
       ZMNuc = 939.D0
-      HBArc = 197.D0
-      AMU = 931.5012D0
+C     PI_g = DACOS( - 1.D0)
+      PI_g = PI
+C     HBArc = 197.D0
+      HBArc = HHBarc 
+C     AMU = 931.5012D0
+      AMU = AMUmev
 C
 C     I have to deal with a slight inconsistency. vdep used in
 C     phase space expressions, and in Blann's emiss rate expressions,
@@ -4021,6 +3945,9 @@ C
 C
 C
       SUBROUTINE OM_INCANGMOM
+C
+C     Should be adapted to use incident particle Tls()
+C
 C routine to determine l-dist from the OM brought in by the
 C incident projectile. Used in HMS to sample a radius such
 C that the classical am mimicks the OM distributions.
@@ -4037,9 +3964,12 @@ C    om_ldist() array - function of l
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
+      REAL*8 EXCessmass, RESmas
+      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
       DATA PARticle/'neutron ', 'proton  ', 'deuteron', 'triton  ', 
      &     'he-3    ', 'alpha   ', 'gammaray', 'fission '/
       DATA XSPin/0.5, 0.5, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0/
+
 C     !note d xspin(3)=>0 in tcread
       EPSilontc = 1.E-6         !ratio tl/t0 tc cut-off check
 C
@@ -4051,9 +3981,6 @@ C
       CALL TCFLUX_L_INC
 C
       END
-C
-C
-C
 C
       SUBROUTINE TCREAD(Epsilon)
 C f77 version
