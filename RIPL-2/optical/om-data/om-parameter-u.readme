@@ -1,21 +1,16 @@
 Directory: optical/om-data/
-File:      capote_om-parameter.readme (September 21, 2004)
+File:      om-parameter.readme (Feb.28 2005)
 **********************************************************
 
-      capote_om-parameter-a.dat & capote_om-parameter-u.dat
+                    om-parameter-u.dat
 
               Optical model parameter library
-           (provided by R. Capote on Sept 21, 2004)
+           (provided by R. Capote on Feb 28, 2005)
            ****************************************
 
 Content
 -------
 Compilation of the Optical Model Potential parameters.
-The library is divided into two parts:
-(i) an archival file (om-parameter-a.dat) that contains all potentials
-we have compiled, and (ii) a users file (om-parameter-u.dat) that is
-a subset of the archival file with all single-energy potentials removed.
-A table below summarizes contents of both files.
 
 The following extensions of the format were introduced:
 1) Energy dependent radius up to E**2
@@ -24,6 +19,8 @@ The following extensions of the format were introduced:
     See J.Phys.G. Nucl.Part.Phys. 30(2004) 905-920)
 4) Buck and Perey energy dependence of the local real potential
    (as coded and employed by B. Morillon and P. Romain)
+5) Wood-Saxon charge distribution is allowed by specifying its
+   difusseness acoul.
 
 The following changes were introduced into the processing code:
 1) Analytical dispersive integrals are included
@@ -66,7 +63,7 @@ epot(i,j)
 
 jcoul
        *****LOOP j=1,jcoul
-ecoul(j),rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j)
+ecoul(j),rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j),acoul(j)
        *****END j LOOP
 
     (1)*****SKIP TO (2)***** IF IMODEL NOT EQUAL TO 1
@@ -343,6 +340,7 @@ And, continuing the definitions:
                from the expression
                RC = [rcoul0(j)*A**(-1/3) + rcoul(j) + rcoul1(j)*A**(-2/3) +
                     rcoul2(j)*A**(-5/3)] * A**(1/3)
+   acoul(j)  = diffuseness in fm of the Wood-Saxon charge distribution.
     beta(j)  = nonlocality range.  Note that when beta(j).ne.0.,
                then the imaginary potential is pure derivative
                Woods-Saxon for energy range j
