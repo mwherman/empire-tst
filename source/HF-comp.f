@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-19 14:24:18 $
-Ccc   * $Id: HF-comp.f,v 1.21 2004-05-19 14:24:18 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-08 15:30:42 $
+Ccc   * $Id: HF-comp.f,v 1.22 2004-06-08 15:30:42 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1310,10 +1310,7 @@ Ccc   ********************************************************************
       INCLUDE 'global.h'
 C
 C     LOCAL VARIABLES
-C     DOUBLE PRECISION accn, ATIl, gamma, temp
       DOUBLE PRECISION ATIl
-C     DOUBLE PRECISION ampl, shredt
-C     DOUBLE PRECISION ee, shctemp, Sumfis, Cota
       DOUBLE PRECISION ee, Sumfis, Cota
 C
       DIMENSION tfdis(NFWELLS), tfcon(NFWELLS)
@@ -1323,11 +1320,6 @@ C
       COMMON /COMFIS4/ TFC, TFCc, JCC
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
       COMMON /IMAG  / TF(NFWELLS), TDIr, TABs, TDIr23
-C     DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, 
-C    &                 TABs, TDIr23, tdirr23, tdir231, TF, atal, btal, 
-C    &                 ctal, dtal, etal, aral, bral, cral, dral, eral,
-C    &                 wimagg,eeiso,tfcc,tfc,tfcon,tdir23cont,
-C    &                 tdirr23a,tdirr23b,tdirr23c,tdirr23d
 
       DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, 
      &                 TABs, TDIr23, tdirr23, tdir231, TF, atal, btal, 
@@ -1366,7 +1358,7 @@ C        Triple humped case
      &                       'Tabs', 'Tdir23'
       ENDIF
 C
-c      NRBarc = NRBar - NRWel
+C     NRBarc = NRBar - NRWel
 
       DO IBAr = 1, NRBarc
          tfdis(IBAr) = 0.
@@ -1492,15 +1484,6 @@ c                    (for the particular barrier of Th)
 c--------- to be replaced by numerical calculation
                      ENDIF
 
-c                     IF(ee.ge.vbarex(2).and.ee.ge.vbarex(3))THEN
-c                        tdirr23=0.  !ibar=7
-c                         write(6,*)'TDIR23-1',tdirr23
-c                     ENDIF   
-
-c                     IF(ee.gt.vbarex(2).and.ee.lt.vbarex(3))THEN
-c                        tdirr23=tfd(3)*tfd(2)!(1./(1.+exp(ee-efb(2))))  
-c                         write(6,*)'TDIR23-2',tdirr23
-c                     ENDIF
                      IF(ee.gt.vbarex(2))then
                         teq=(1.+exp(2*pi*(vbarex(2)-ee)/h(2)))*
      &                      (1.+exp(2*pi*(vbarex(3)-ee)/h(3)))
