@@ -1,14 +1,14 @@
 #----GNU g77 FORTRAN compiler
-#FC     =  g77
+FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
 #----GNU g95 FORTRAN compiler
-FC     =  g95
+#FC     =  g95
 #----flags for detailed warnings
-FFLAGS = -Wall
+#FFLAGS = -Wall
 
 #----INTEL f95 compiler
 #FC     =  ifort
@@ -46,7 +46,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             thora.o
 
 empire:   $(OBJF)
-       $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 
 $(OBJF) : global.h dimension.h
