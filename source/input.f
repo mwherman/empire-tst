@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-14 17:40:02 $ 
-Ccc   * $Id: input.f,v 1.25 2004-05-14 17:40:02 herman Exp $ 
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-05-19 18:54:34 $ 
+Ccc   * $Id: input.f,v 1.26 2004-05-19 18:54:34 Capote Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -235,7 +235,8 @@ C--------set level density parameters
             ROPar(2, nnuc) = 0. 
             ROPar(4, nnuc) = 0. 
             ROPar(5, nnuc) = 0. 
-            ATIlnor(nnuc) = 0. 
+            ATIlnor(nnuc) = 0.
+		  GTILnor(nnuc) = 1. 
             LVP(1, nnuc) = 0 
          ENDDO 
          IZA(0) = 0 
@@ -377,6 +378,7 @@ C--------set options for DEGAS (exciton preequilibrium)
          GDIvp = 13.0 
 C--------set options for PCROSS (exciton preequilibrium + cluster emission) 
          PEQc = 0.0 
+	   MFPp = 1.3
 C--------set ENDF flag to 0 (no ENDF file for formatting) 
          ENDf = 0.0 
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident) 
@@ -973,6 +975,7 @@ C--------reset some options if OMP fitting option selected
          LHMs = 0 
          DEGa = 0 
          PEQc = 0 
+         MFPp = 1.3
          NNUcd = 1 
          NNUct = 4 
          ENDIF  
@@ -2178,19 +2181,21 @@ C--------DEGAS input
          ENDIF 
 C--------PCROSS input 
          IF(name.EQ.'PCROSS')THEN 
-            PEQc = val 
             IF(val.GT.0)THEN 
                WRITE(6,  
      &'('' Exciton model calculations with code'',                       
      &  '' PCROSS enabled, including cluster emission '')') 
+               if(val.gt.1.05 .and. val.le.2.d0) MFPp = val                 
+               PEQc = 1.                 
             ELSE 
                WRITE(6,  
      &'('' Exciton model calculations with code'',                       
      &  '' PCROSS disabled '')') 
+               PEQc = 0.                 
             ENDIF 
             GOTO 100 
          ENDIF 
-C 
+C
 C--------ECIS input 
 C 
 C--------In the following block two parameters 
@@ -2927,6 +2932,22 @@ C-----
             WRITE(6,  
      &'('' L.d. parameter in '',I3,A2,'' multiplied by '',        F6.1)' 
      &)i2, SYMb(nnuc), val 
+            GOTO 100 
+         ENDIF 
+
+         IF(name.EQ.'GTILNO')THEN 
+            izar = i1*1000 + i2 
+            CALL WHERE(izar, nnuc, iloc) 
+            IF(iloc.EQ.1)THEN 
+               WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,  
+     &               SYMb(nnuc) 
+               WRITE(6, '('' NORMALIZATION OF G-tilde IGNORED'')') 
+               GOTO 100 
+            ENDIF 
+            GTIlnor(nnuc) = val 
+            WRITE(6,  
+     &'('' Single particle L.D. parameter G in '',I3,A2,
+     &  '' multiplied by '',        F6.1)') i2, SYMb(nnuc), val 
             GOTO 100 
          ENDIF 
 C----- 
