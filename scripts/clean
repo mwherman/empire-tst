@@ -1,15 +1,6 @@
 #! /bin/sh -
 #script to clean work directory
 file=$1
-if [ "$1" = "" ]
-   then
-echo 'Files that might need to be cleared'
-echo ' '
-ls *lev
-echo ' '
-echo -n 'Choose one of the above (without .lev extention!): '
-read file
-fi           
 mv $file.inp ttt987654321.qqq
 rm $file\.* $file-*\.*  core 2>/dev/null 
 mv ttt987654321.qqq $file.inp 
