@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:25:33 $
-Ccc   * $Id: fusion.f,v 1.16 2004-09-23 18:25:33 Capote Exp $
+Ccc   * $Date: 2004-10-07 16:19:11 $
+Ccc   * $Id: fusion.f,v 1.17 2004-10-07 16:19:11 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -88,12 +88,8 @@ C-----Plujko_new (END of new variables for SDREAD - ParcnJ,cnJ )
 C
 C-----Reduced mass corrected for proper mass values
 C
-C     xmas_Npro = ((AEJc(Npro)*amumev+XMAss_ej(Npro))/(amumev+xnexc))
-C     xmas_Ntrg = ((A(Ntrg)*amumev+XMAss(Ntrg))/(amumev+xnexc))
-C     rmu= xmas_Npro*xmas_Ntrg/(xmas_Npro+xmas_Ntrg)
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-C     rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
       el = EINl
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
 C
