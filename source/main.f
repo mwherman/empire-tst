@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-19 14:24:18 $
-Ccc   * $Id: main.f,v 1.24 2004-05-19 14:24:18 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-05-19 18:56:16 $
+Ccc   * $Id: main.f,v 1.25 2004-05-19 18:56:16 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -224,7 +224,7 @@ C     Local variables
 C
       DOUBLE PRECISION aafis, bbfis, dencomp, xnorfis
 C     DOUBLE PRECISION aorg, ares, corr, corrmsd, csemist, csfis, 
-      DOUBLE PRECISION ares, corr, corrmsd, csemist, csfis, 
+      DOUBLE PRECISION       ares,       corrmsd, csemist, csfis, 
      &                 cturbo, ded, delang, elcncs, gamfis, gamt, pope, 
      &                 popleft, poplev, poptot, popread, dang, coef, 
      &                 ecm, echannel, erecoil, csmsdl, xcse, gang, q2, 
@@ -235,7 +235,7 @@ C    &                 weight, xccm, xizat, xnhms, xnl, xnor, zorg, zres
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, ib, iccmh, iccml, icse, ie, il, 
 C    &        ilast, iloc, imt, iorg, ip, ipar, itimes, its, iz, izaorg, 
-     &        ilast, iloc, ip, ipar, itimes, its, iz, 
+     &               iloc, ip, ipar, itimes, its, iz, 
      &        izares, j, jcn, ke, kemax, kemin, ltrmax, mt649, mt849, 
 C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp, 
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
