@@ -8,7 +8,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta18            '
+echo '                     V E R S I O N  2.19.beta20            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -201,20 +201,22 @@ if  [ -s $file.exf ]; then
         ln  -sf $work/$file.exf X4.DAT
         ./x4toc4
         rm X4.DAT
-        # RUN c4sort TO SORT C4 DATA   
-        cd ../c4sort
-        ./c4sort
         cd $work
         mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
         mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
         mv ../util/x4toc4/C4.DAT $file.c4
-        if [ -s $file.c4 ]; then
-           echo 'EXFOR data in computational format are stored in :'$file.c4
-           else
-           echo 'File with EXFOR data in computational format is EMPTY'
-        fi
-        # UNCOMMENT THE LINE BELOW TO REMOVE FILE WITH RETRIEVED EXFOR DATA 
-        #rm $file.exf
+#       if [ -s $file.c4 ]; then
+#          echo 'EXFOR data in computational format are stored in :'$file.c4
+#          else
+#          echo 'File with EXFOR data in computational format is EMPTY'
+#       fi
+#       # COMMENT THE LINE BELOW TO KEEP FILE WITH RETRIEVED EXFOR DATA 
+#       #rm $file.exf
+
+        # RUN c4sort TO SORT C4 DATA   
+
+        ../bin/sortc4 $file  
+
     fi
 fi
 
