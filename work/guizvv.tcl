@@ -429,7 +429,7 @@ set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e showzvd $zvd} \
+exec xterm -e ./showzvd $zvd} \
         -foreground white -highlightbackground #dcdcdc -highlightcolor white \
         -text {Show selected plots} -width 15 
     button $base.merge \
@@ -442,7 +442,7 @@ set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e zvv $zvd &
+exec xterm -e ./zvv $zvd &
 #exec showzvd $zvd} \
         -foreground white -highlightbackground #dcdcdc -highlightcolor white \
         -text {Merge selected plots} -width 15 
@@ -497,7 +497,7 @@ exit} \
         -command {set suff -$suf
 set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
-if {$i != ""} {exec xterm -e mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
+if {$i != ""} {exec xterm -e ./mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
 }} \
         -foreground white -highlightbackground #dcdcdc -highlightcolor white \
         -pady 1m -text {Create selected} -width 15 
@@ -515,7 +515,7 @@ set mts [list 1 2 4 16 17 22 28 45 102 103 107 112]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e showzvd $zvd} \
+exec xterm -e ./showzvd $zvd} \
         -foreground white -highlightbackground #dcdcdc -highlightcolor white \
         -text {Show all} -width 15 
     label $base.sep-lab \
