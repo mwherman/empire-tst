@@ -513,8 +513,12 @@ C
       IMPLICIT NONE
       DOUBLE PRECISION Egamma, hh, phi, SPECRALF, T, U
       MLO1 = SPECRALF(U, Egamma)
-      hh = Egamma/T
-      phi = 1./(1. - EXP( - hh))
+      if(T.eq.0.0) then
+         phi=1
+      else
+         hh = Egamma/T
+         phi = 1./(1. - EXP( - hh))
+      endif
       MLO1 = phi*MLO1
       END
 C
