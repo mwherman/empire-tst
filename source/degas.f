@@ -67,7 +67,7 @@ C
      &                 GAQdegas, GGDegas(10), SPIdidegas(10, 10), 
      &                 XCDegas(9)
       INTEGER IACdegas, IATdegas, IEDegas, INDegas, IZCdegas, IZDegas, 
-     &        KEYdegas0, NBRadegas(10), NEXddegas(10, 10), NOLedegas(9), 
+     &        KEYdegas0, NBRadegas(10), NEXddegas(10, 10), NOLedegas(9),
      &        NUDidegas(10)
       REAL*8 JGSdegas
       CHARACTER*79 TITdegas
@@ -390,7 +390,7 @@ C        WRITE(6, *)'NEX =', NEX(nnuc)
 C        WRITE(6, *)'ndexmaximum=', ndexmaximum
          iemaxdiscrete = ELV(NLV(nnuc), nnuc)/DE + 0.5
 C        Number of bins in discrete region
-         iemaxdiscrete = iemaxdiscrete - 1
+c        iemaxdiscrete = iemaxdiscrete - 1
 C        WRITE(6, *)'iemaxdiscrete=', iemaxdiscrete
          popdiscrete = 0.0
          DO ie0 = 1, iemaxdiscrete
@@ -455,7 +455,7 @@ C
          nnur = NREs(1)
 C--------Number of bins in discrete region
          iemaxdiscrete = ELV(NLV(nnur), nnur)/DE + 0.5
-         iemaxdiscrete = iemaxdiscrete - 1
+c        iemaxdiscrete = iemaxdiscrete - 1
          popdiscrete = 0.0
          DO ie0 = 1, iemaxdiscrete
             DO jspin = 1, ndlwmaximum
@@ -524,7 +524,7 @@ C-----
          nnur = NREs(2)
 C--------Number of bins in discrete region
          iemaxdiscrete = ELV(NLV(nnur), nnur)/DE + 0.5
-         iemaxdiscrete = iemaxdiscrete - 1
+c        iemaxdiscrete = iemaxdiscrete - 1
          popdiscrete = 0.0
          DO ie0 = 1, iemaxdiscrete
             DO jspin = 1, ndlwmaximum
@@ -1598,7 +1598,7 @@ C
             epmxef(j) = MAX(rexc - INT(rexc/ESTep + 0.5)*ESTep, 0.D0)
          ENDDO
          IF(eexc.GT.0.D0)THEN
-            DO ieo = 1, nesteu
+            DO ieo = 1, neste1
                DO i = 1, 25
                   ih = i - 1
                   ip = i - IIA + m00

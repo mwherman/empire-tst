@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-17 19:12:28 $
-Ccc   * $Id: main.f,v 1.23 2004-05-17 19:12:28 herman Exp $
+Ccc   * $Date: 2004-05-19 14:24:18 $
+Ccc   * $Id: main.f,v 1.24 2004-05-19 14:24:18 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1628,7 +1628,7 @@ C ACHTUNG nspec has to be recalculated (alpha might have neg Q)
                   iizaejc = izaejc(nejc)
                ENDIF
 C--------------double the first bin x-sec to preserve integral in EMPEND
-               CSEfis(0,nejc) = CSEfis(0,nejc)*2 
+               CSEfis(1,nejc) = CSEfis(1,nejc)*2 
                WRITE(12, *)' '
                WRITE(12, *)' Spectrum of ', cejectile, 
      &               '(z,fission)          ', ' ZAP= ', iizaejc

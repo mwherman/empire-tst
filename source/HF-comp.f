@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-14 17:40:02 $
-Ccc   * $Id: HF-comp.f,v 1.20 2004-05-14 17:40:02 herman Exp $
+Ccc   * $Date: 2004-05-19 14:24:18 $
+Ccc   * $Id: HF-comp.f,v 1.21 2004-05-19 14:24:18 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -92,7 +92,6 @@ C
          IF(ENDf.EQ.1 .AND. popt.NE.0.0D+0)  
      &      CALL EXCLUSIVEC(Iec, ie, Nejc, Nnuc, Nnur,popt)
          popt = popt*DE
-         popesum=popesum+popt
       ENDDO
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il, Nnur)
@@ -125,7 +124,6 @@ C--------if ENDf.NE.0
                WRITE(6, *)' OOPS! I AM OUT OF NDECSE DIMENSION IN ACCUM'
                STOP
             ENDIF
-            popesum=popesum+(popll+poph)*DE
          ELSE
          ENDIF 
          POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
