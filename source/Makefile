@@ -1,12 +1,5 @@
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
-#----INTEL f95 compiler
-#FC     =  ifort
-#FFLAGS =  -check all
-#FFLAGS =  -static
-#FFLAGS =  -ffortran-bounds-check
-#----GNU g77 FORTRAN compiler
-#FC     = g77
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
@@ -14,11 +7,14 @@
 
 #----INTEL f95 compiler
 #FC     =  ifort
+#FFLAGS =  -check all
+#FFLAGS =  -static
+#FFLAGS =  -ffortran-bounds-check
+#----flags for debuging using ifort compiler
+#FFLAGS =  -g -check bounds -traceback
 #----flags for production compilation with ifort
 #FFLAGS = -O2
 #FFLAGS = -fast
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -check bounds -traceback
 #----flags for profiling using ifort compiler
 #FFLAGS =  -pg
 
@@ -28,15 +24,12 @@
 #----standard f77 FORTRAN compiler
 #FC   = f77
 
-#----Fujitsu f90 FORTRAN compiler
+#----Lahey/Fujitsu f95 FORTRAN compiler
 FC    = lf95
-#----flag for Lahey/Fujitsu f95 FORTRAN to optimize
+#----flag for Lahey/Fujitsu to optimize
 #FFLAGS = --o3
-#----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more
-FFLAGS = -g --chk
-#----flags for Fujitsu f90 FORTRAN compiler
-#FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
-#FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g
+#----flag for Lahey/Fujitsu to check boundaries and more
+#FFLAGS = -g --chk
 
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
@@ -45,11 +38,11 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       subecis03.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-            hora_lin.o
+            hora_win.o
 
 
 empire:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 
 $(OBJF) : global.h dimension.h
