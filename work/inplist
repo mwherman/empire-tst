@@ -21,7 +21,7 @@ energies (one per record) terminated with a record containing negative
 value.  Anything below this line will be ignored by the code.
 
 *) Any  line starting  with !, #,  or *  is treated as  comment. There
-might be an arbitrary number of comments line in any input.
+might be an arbitrary number of comments line in the optional(!) input.
 
 Calculation control
 -------------------

@@ -1,6 +1,6 @@
 #! /bin/sh -
 #SCRIPT TO RUN EMPIRE II
-#cat ../util/auxiliary/herewego.au >/dev/audio 2>/dev/null
+cat ../util/auxiliary/herewego.au >/dev/audio 2>/dev/null
 echo '                                                           '
 echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      H   H '
 echo '          E      MM  MM  P   P  I  R   R  E          H   H '
@@ -8,7 +8,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.16.2                 '
+echo '                     V E R S I O N  2.16.3                 '
 echo '                         (Montenotte)                      '
 echo '                              by                           '
 echo '                        M. H e r m a n                     '
@@ -48,7 +48,7 @@ rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out  2>/dev/null
 rm  TARGET_COLL.DAT 2>/dev/null
 rm  TARGET_COLL.RIPL 2>/dev/null
 rm  TARGET-*.tl 2>/dev/null
-rm  warnings
+rm  warnings 2>/dev/null
 
 # COPY INPUT FILES FOR A GIVEN CASE
 
@@ -90,7 +90,7 @@ echo $file ' R U N N I N G  !! !  !   !    !     !'
 time nice ../source/empire
 echo 'DONE !!!'
 #cat ../util/auxiliary/gong.au >/dev/audio 2>/dev/null
-#cat ../util/auxiliary/applause.au >/dev/audio 2>/dev/null
+cat ../util/auxiliary/applause.au >/dev/audio 2>/dev/null
 
 #MOVE CASE-RELATED FILES TO THE RIGHT PALCE
 
@@ -138,7 +138,7 @@ mv ecVIBROT.inp $file-ecis.in 2>/dev/null
 # SHOW WARNINGS
 
 grep WARNING $file.lst >warnings
-xterm -bg darkorange -title WARNINGS -e vi warnings  
+#xterm -bg darkorange -title WARNINGS -e vi warnings  
 
 # DELETE TEMPORARY FILES
 
