@@ -16,8 +16,8 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       MR=5                                                              ECIS-015
       MW=6                                                              ECIS-016
       MS=8                                                              ECIS-017
-      OPEN(58,file='ecis03.cs')                                   
-      OPEN(158,file='ecis03.dat')                                   
+      OPEN(58,file='ecis03.cs')
+      OPEN(55,file='ecis03.dat')
       OPEN(59,file='ecis03.ics')
       OPEN(60,file='file60')
       OPEN(61,file='file61')
@@ -34,7 +34,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN(99,file='file99')
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-018
       CLOSE(58)
-      CLOSE(158)
+      CLOSE(55)
       CLOSE(59)
       CLOSE(60,status='delete')
       CLOSE(61,status='delete')
@@ -7340,7 +7340,12 @@ C  TRANSPOSITION                                                        VICM-095
      1))                                                                VICM-097
     6 GO TO ( 7 , 9 , 10 , 14 , 18 , 24 ) , I                           VICM-098
 C  (0||Q||0)                                                            VICM-099
-    7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) GO TO 41                VICM-100
+C   7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) GO TO 41                VICM-100
+    7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) THEN
+        WRITE(*,*) 'J1=',J1,IPI(3,J1)
+        WRITE(*,*) 'J2=',J2,IPI(3,J2)
+        GO TO 41
+      ENDIF
       IF (LO(102)) GO TO 26                                             VICM-101
       DO 8 L=1,NBT1                                                     VICM-102
       IF (NBTA(18,L).NE.0) GO TO 8                                      VICM-103
@@ -7356,7 +7361,12 @@ C  (IP||Q||0)  WITH IP=J2                                               VICM-112
     9 IF (2*IT.GT.IDT) CALL MEMO('VIBM',IDT,2*IT,2)                     VICM-113
       N2=IPH(2,J2)                                                      VICM-114
       IF (IPH(1,J2).GT.2) N2=NVAR(1,N2+1)                               VICM-115
-      IF ((IPI(3,J2).NE.(2*NBTA(17,N2)+1)).OR.(IPI(3,J1).NE.1)) GO TO 41VICM-116
+      IF ((IPI(3,J2).NE.(2*NBTA(17,N2)+1)).OR.(IPI(3,J1).NE.1)) THEN
+        WRITE(*,*) 'J1=',J1,IPI(3,J1)
+        WRITE(*,*) 'J2=',J2,IPI(3,J2)
+        WRITE(*,*) '2*NBTA(17,N2)+1 =',2*NBTA(17,N2)+1
+        GO TO 41
+      ENDIF
       IQ(1,IT)=N2                                                       VICM-117
       IQ(2,IT)=NBTA(17,N2)                                              VICM-118
       IQ(3,IT)=NSP                                                      VICM-119
@@ -11942,9 +11952,9 @@ C FOLDING OF CHARGE DISTRIBUTION WITH COULOMB POTENTIAL                 STDP-547
       IF (IDX.GT.2*NX) CALL MEMO('STDF',NX,(IDX+1)/2,2)                 STDP-549
       A7=0.D0                                                           STDP-550
       IF (LT(8)) A7=VA(NMB+4)                                           STDP-551
-C     PAP(1)=AP                                                                     
+C     PAP(1)=AP
 C     CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,PAP(1),A7,CCZ,A6,.TRUE.,
-C    >	  .FALSE.)
+C    >   .FALSE.)
       CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,AP,A7,CCZ,A6,.TRUE.,.FALSE.) STDP-552
       IF (A6.EQ.0.D0) A6=DABS(V(ISM,L1)*DFLOAT(2*L+1)*(ISM*HH)**(L+1)/(CSTDP-553
      1CZ*VA(NMB)))                                                      STDP-554
@@ -18689,20 +18699,20 @@ C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
       ND=1                                                              RESU-287
       IF (WV(5,1).EQ.0.D0) ND=3                                         RESU-288
       WRITE (58,1009) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),ND              RESU-289
-      WRITE (158,'(1x,F10.3,$)') WV(12,1)                               RCN
+      WRITE (55,'(1x,F10.3,$)') WV(12,1)                                RCN
       IF (NCOLS.NE.1) WRITE (59,1010) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),RESU-290
      1NCOLS-1                                                           RESU-291
    30 IF (WV(5,1).NE.0.D0) GO TO 31                                     RESU-292
       WRITE (MW,1011) TX(1)                                             RESU-293
       IF (LO(59)) WRITE (58,1012) TX(1)                                 RESU-294
-      IF (LO(59)) WRITE (158,'(3x,F10.2,$)') TX(1)                      RCN
+      IF (LO(59)) WRITE (55,'(3x,F10.2,$)') TX(1)                       RCN
    31 RX=TX(1)-TX(2)                                                    RESU-295
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-296
       IF (LO(59)) THEN                                                  RCN
         IF (WV(5,1).NE.0.D0) THEN                                       RCN
-            WRITE (158,'(1x,F10.2)') RX                                 RCN
+            WRITE (55,'(1x,F10.2)') RX                                  RCN
         ELSE                                                            RCN
-            WRITE (158,'(1x,F10.2,$)') RX                               RCN
+            WRITE (55,'(1x,F10.2,$)') RX                                RCN
         ENDIF                                                           RCN
       ENDIF                                                             RCN
       IF (LO(81)) GO TO 32                                              RESU-297
@@ -18711,7 +18721,7 @@ C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
 C COMPOUND NUCLEUS RESULTS                                              RESU-300
    32 WRITE (MW,1014) RX                                                RESU-301
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-302
-      IF (LO(59)) WRITE (158,'(1x,F10.2,$)') RX                         RCN
+      IF (LO(59)) WRITE (55,'(1x,F10.2,$)') RX                          RCN
       NDP=2*NCOLL+NSP(1)+1                                              RESU-303
       RX=RX-TX(NCOLL+2)                                                 RESU-304
       WRITE (MW,1015) RX                                                RESU-305
@@ -18791,7 +18801,7 @@ C PSEUDO DO LOOP ON LEVELS                                              RESU-365
    46 IF (LO(81)) WRITE (MW,1032) TX(INIV+1)                            RESU-379
       IF (LO(159)) GO TO 47                                             RESU-380
       IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-381
-      IF (INIV.EQ.1) WRITE (158,'(1x,F10.2)') RX                        RCN
+      IF (INIV.EQ.1) WRITE (55,'(1x,F10.2)') RX                         RCN
       IF (INIV.NE.1) WRITE (59,1033) RX,INIV-1                          RESU-382
    47 IF (LO(81)) WRITE (MW,1034) TX(NCOLL+INIV+1)                      RESU-383
       IF (LO(66)) GO TO 62                                              RESU-384
