@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: main.f,v 1.11 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-07-10 22:29:54 $
+Ccc   * $Id: main.f,v 1.12 2003-07-10 22:29:54 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -240,7 +240,7 @@ C fisfis u------------------
      &        ilast, iloc, imt, iorg, ip, ipar, itimes, its, iz, izaorg, 
      &        izares, j, jcn, ke, kemax, kemin, ltrmax, mt649, mt849, 
      &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp, 
-     &        nspec, irec, icsl, icsh
+     &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
       LOGICAL nvwful
       INCLUDE 'io.h'
@@ -425,7 +425,8 @@ C
 C     Skipping all emission calculations
 C     GOTO 99999
 C
-C-----locate postions of ENDF MT-numbers 91, 649, and 849
+C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
+      CALL WHERE(IZA(1) - IZAejc(0), mt2, iloc)
       CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
       CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
       CALL WHERE(IZA(1) - IZAejc(3), mt849, iloc)
@@ -842,11 +843,14 @@ C--------reset variables for life-time calculations
          ENDIF
          IF(ENDf.NE.0.0D0)THEN
             WRITE(12, *)' '
-            WRITE(12, *)' --------------------------------------------'
+            WRITE(12, *)' ----------------------------------------------
+     &-----------------'
             WRITE(12, 
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
-     &0.6)')INT(Z(nnuc)), SYMb(nnuc), ia, AMAss(nnuc)
-            WRITE(12, *)' --------------------------------------------'
+     &0.6,'' Q-value='',F10.6)')INT(Z(nnuc)), SYMb(nnuc), ia, 
+     &AMAss(nnuc), QPRod(nnuc)
+            WRITE(12, *)' ----------------------------------------------
+     &-----------------'
             IF(nnuc.NE.1)THEN
                WRITE(12, 
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
@@ -917,7 +921,7 @@ C3392          CONTINUE
 C--------------temporary output *** done ***
                WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------write elastic to tape 12
-               IF(nnuc.EQ.mt91)THEN
+               IF(nnuc.EQ.mt2)THEN
                   WRITE(12, *)' '
                   WRITE(12, 
      &                  '('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
@@ -1382,9 +1386,9 @@ C-----------life-times and widths  *** done ***
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1)THEN
-            ELAcs = ELAcs + POPlv(1, mt91)
+            ELAcs = ELAcs + POPlv(1, mt2)
 C-----------CN contribution to elastic ddx
-            elcncs = POPlv(1, mt91)/4.0/PI
+            elcncs = POPlv(1, mt2)/4.0/PI
          ENDIF
          WRITE(12, 
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,'' 
@@ -1509,7 +1513,7 @@ C-----
                IF(CSPrd(imt).GT.0.0D0)THEN
                   nspec = INT(EMAx(imt)/DE) + 2
                   WRITE(12, *)' '
-                  WRITE(12, *)' Spectrum of neutrons (n,2n) '
+                  WRITE(12, *)' Spectrum of neutrons (n,2n) ZAP=     1'
                   WRITE(12, 
      &                 '(30X,''A      n      g      l      e      s '')'
      &                 )
@@ -1547,7 +1551,7 @@ C-----------------cross sections and divides outgoing energies
                   ENDDO
 C-----------------recoils *** done ***
                   WRITE(12, *)' '
-                  WRITE(12, *)' Spectrum of gammas   (n,2n) '
+                  WRITE(12, *)' Spectrum of gammas   (n,2n) ZAP=     0'
                   WRITE(12, *)' '
                   WRITE(12, '('' Energy    mb/MeV'')')
                   WRITE(12, *)' '
@@ -1574,7 +1578,7 @@ C-----
                IF(CSPrd(imt).GT.0.0D0)THEN
                   nspec = INT(EMAx(imt)/DE) + 2
                   WRITE(12, *)' '
-                  WRITE(12, *)' Spectrum of neutrons (n,3n)'
+                  WRITE(12, *)' Spectrum of neutrons (n,3n) ZAP=     1'
                   WRITE(12, 
      &                 '(30X,''A      n      g      l      e      s '')'
      &                 )
@@ -1612,7 +1616,7 @@ C-----------------cross sections and divides outgoing energies
                   ENDDO
 C-----------------recoils *** done ***
                   WRITE(12, *)' '
-                  WRITE(12, *)' Spectrum of gammas   (n,3n)'
+                  WRITE(12, *)' Spectrum of gammas   (n,3n) ZAP=     0'
                   WRITE(12, *)' '
                   WRITE(12, '('' Energy    mb/MeV'')')
                   WRITE(12, *)' '
@@ -1635,7 +1639,7 @@ C-----
             IF(CSPrd(imt).GT.0.0D0)THEN
                nspec = INT(EMAx(imt)/DE) + 2
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of neutrons (n,np) '
+               WRITE(12, *)' Spectrum of neutrons (n,np) ZAP=     1'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -1646,7 +1650,7 @@ C-----
      &            nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of protons  (n,np) '
+               WRITE(12, *)' Spectrum of protons  (n,np) ZAP=  1001'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -1681,7 +1685,7 @@ C--------------cross sections and divides outgoing energies
                ENDDO
 C--------------recoils *** done ***
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of gammas   (n,np) '
+               WRITE(12, *)' Spectrum of gammas   (n,np) ZAP=     0'
                WRITE(12, *)' '
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
@@ -1702,7 +1706,7 @@ C-----
             IF(CSPrd(imt).GT.0.0D0)THEN
                nspec = INT(EMAx(imt)/DE) + 2
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of neutrons (n,na) '
+               WRITE(12, *)' Spectrum of neutrons (n,na) ZAP=     1'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -1714,7 +1718,7 @@ C-----
      &                  nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of alphas   (n,na) '
+               WRITE(12, *)' Spectrum of alphas   (n,na) ZAP=  2004'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -1749,7 +1753,7 @@ C--------------cross sections and divides outgoing energies
                ENDDO
 C--------------recoils *** done ***
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of gammas   (n,na) '
+               WRITE(12, *)' Spectrum of gammas   (n,na) ZAP=     0'
                WRITE(12, *)' '
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
@@ -1810,7 +1814,7 @@ C-----------cross sections and divides outgoing energies
      &               ( - 1))
             ENDDO
             WRITE(12, *)' '
-            WRITE(12, *)' Spectrum of gammas   (n,n)  '
+            WRITE(12, *)' Spectrum of gammas   (n,n)  ZAP=     0'
             WRITE(12, *)' '
             WRITE(12, '('' Energy    mb/MeV'')')
             WRITE(12, *)' '
@@ -1828,7 +1832,7 @@ C-----
          CALL WHERE(izares, imt, iloc)
          IF(iloc.NE.1)THEN
             WRITE(12, *)' '
-            WRITE(12, *)' Spectrum of gammas   (n,gamma)  '
+            WRITE(12, *)' Spectrum of gammas   (n,gamma) ZAP=     0'
             WRITE(12, *)' '
             WRITE(12, '('' Energy       mb/MeV'')')
             WRITE(12, *)' '
@@ -1858,7 +1862,7 @@ C-----
             IF(CSPrd(imt).GT.0.0D0)THEN
                nspec = INT(EMAx(imt)/DE) + 2
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of protons  (n,p) '
+               WRITE(12, *)' Spectrum of protons  (n,p)  ZAP=  1001'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -1897,7 +1901,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=601-6
      &                  ( - 1))
                ENDDO
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of gammas   (n,p) '
+               WRITE(12, *)' Spectrum of gammas   (n,p)  ZAP=     0'
                WRITE(12, *)' '
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
@@ -1920,9 +1924,11 @@ C-----
                   nspec = INT(EMAx(imt)/DE) + 2
                   WRITE(12, *)' '
                   WRITE(12, 
-     &'(''  Spectrum of  '',I1,''-'',A2,4X,                          ''(
-     &n,'',I1,''-'',A2,'')'')')INT(AEJc(NDEJC)), SYMbe(NDEJC), 
-     &                         INT(AEJc(NDEJC)), SYMbe(NDEJC)
+     &'(''  Spectrum of  '',I1,''-'',A2,4X,''(n,'',I1,''-'',A2,'')'',
+     &''ZAP='',I6)')
+     &                     INT(AEJc(NDEJC)), SYMbe(NDEJC), 
+     &                     INT(AEJc(NDEJC)), SYMbe(NDEJC),
+     &                     IZAejc(4)
                   WRITE(12, 
      &                 '(30X,''A      n      g      l      e      s '')'
      &                 )
@@ -1961,9 +1967,9 @@ C-----
      &                     nang = NDANG, 1, ( - 1))
                   ENDDO
                   WRITE(12, *)' '
-                  WRITE(12, '(A26,I1,''-'',A2,A6)')
+                  WRITE(12, '(A26,I1,''-'',A2,'') ZAP=     0'')')
      &                  '  Spectrum of gammas   (n,', INT(AEJc(NDEJC)), 
-     &                  SYMbe(NDEJC), ')     '
+     &                  SYMbe(NDEJC)
                   WRITE(12, *)' '
                   WRITE(12, '('' Energy    mb/MeV'')')
                   WRITE(12, *)' '
@@ -1985,7 +1991,7 @@ C-----
             IF(CSPrd(imt).GT.0.0D0)THEN
                nspec = INT(EMAx(imt)/DE) + 2
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of alphas   (n,a)'
+               WRITE(12, *)' Spectrum of alphas   (n,a)  ZAP=  2004'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -2024,7 +2030,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=801-8
      &                  ( - 1))
                ENDDO
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of gammas   (n,a) '
+               WRITE(12, *)' Spectrum of gammas   (n,a)  ZAP=     0'
                WRITE(12, *)' '
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
@@ -2035,7 +2041,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=801-8
             ENDIF
          ENDIF
 C-----
-C-----   MT=???
+C-----   MT=112
 C-----
          ares = A(1) - 5.0D0
          zres = Z(1) - 3.0D0
@@ -2045,7 +2051,7 @@ C-----
             IF(CSPrd(imt).GT.0.0D0)THEN
                nspec = INT(EMAx(imt)/DE) + 2
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of protons  (n,pa) '
+               WRITE(12, *)' Spectrum of protons  (n,pa) ZAP=  1001'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -2056,7 +2062,7 @@ C-----
      &                  nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of alphas   (n,pa) '
+               WRITE(12, *)' Spectrum of alphas   (n,pa) ZAP=  2004'
                WRITE(12, 
      &               '(30X,''A      n      g      l      e      s '')')
                WRITE(12, *)' '
@@ -2090,7 +2096,7 @@ C--------------cross sections and divides outgoing energies
                ENDDO
 C--------------recoils *** done ***
                WRITE(12, *)' '
-               WRITE(12, *)' Spectrum of gammas   (n,pa) '
+               WRITE(12, *)' Spectrum of gammas   (n,pa) ZAP=     0'
                WRITE(12, *)' '
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
@@ -2214,7 +2220,7 @@ C              WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
 C--------recoils *** done ***
 C--------print inclusive gamma spectrum
          WRITE(12, *)' '
-         WRITE(12, *)' Spectrum of gammas   (n,x) '
+         WRITE(12, *)' Spectrum of gammas   (n,x) ZAP=     0'
          WRITE(12, *)' '
          WRITE(12, '('' Energy    mb/MeV'')')
          WRITE(12, *)' '
@@ -2226,7 +2232,7 @@ C--------neutrons
          nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
          IF(nspec.GT.NDECSE)nspec = NDECSE
          WRITE(12, *)' '
-         WRITE(12, *)' Spectrum of neutrons (n,x) '
+         WRITE(12, *)' Spectrum of neutrons (n,x) ZAP=     1'
          WRITE(12, '(30X,''A      n      g      l      e      s '')')
          WRITE(12, *)' '
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
@@ -2238,7 +2244,7 @@ C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
          IF(nspec.GT.NDECSE)nspec = NDECSE
          WRITE(12, *)' '
-         WRITE(12, *)' Spectrum of protons  (n,x) '
+         WRITE(12, *)' Spectrum of protons  (n,x) ZAP=  1001'
          WRITE(12, '(30X,''A      n      g      l      e      s '')')
          WRITE(12, *)' '
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
@@ -2250,7 +2256,7 @@ C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
          IF(nspec.GT.NDECSE)nspec = NDECSE
          WRITE(12, *)' '
-         WRITE(12, *)' Spectrum of alphas   (n,x) '
+         WRITE(12, *)' Spectrum of alphas   (n,x) ZAP=  2004'
          WRITE(12, '(30X,''A      n      g      l      e      s '')')
          WRITE(12, *)' '
          WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
@@ -2265,7 +2271,7 @@ C--------light ions
             WRITE(12, *)' '
             WRITE(12, 
      &'(''  Spectrum of  '',I1,''-'',A2,4X,                          ''(
-     &n,x)'')')INT(AEJc(NDEJC)), SYMbe(NDEJC)
+     &n,x)'')')INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(4)
             WRITE(12, '(30X,''A      n      g      l      e      s '')')
             WRITE(12, *)' '
             WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles

@@ -12,7 +12,7 @@ C The impact of this bug on previous calculation is unknown, but
 C it will affect only scattering of identical projectile and target.
 C Therefore for nucleon induced reactions previous calculations are OK,
 C
-      real*8 w(600000)                                                  ecis-001
+      real*8 w(1000000)                                                  ecis-001
       common w                                                          ecis-002
 
 c     To get total, reaction and elastic cross section on gs in mb
@@ -41,7 +41,7 @@ c     To get angular distributions for all open channels
 c     (lo(64)=T)   
       open(unit=74,status='unknown',file='ecis95.ang')                  capote
 
-      call calc(w,w,w,600000)                                           ecis-003
+      call calc(w,w,w,1000000)                                           ecis-003
       stop                                                              ecis-004
       end                                                               ecis-005
 c 15/04/88  ibm and cdc version                                 ecis88  memo-000

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: fusion.f,v 1.8 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-07-10 22:29:54 $
+Ccc   * $Id: fusion.f,v 1.9 2003-07-10 22:29:54 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -155,11 +155,11 @@ C
             WRITE(6, *)' Spherical OM transmission coefficients', 
      &                 ' used for fusion determination'
             IF(MODelecis.EQ.0 .OR. DIRect.EQ.3)THEN
-               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, 1)
+               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 1)
             ELSE
                WRITE(6, *)' Fusion cross section normalized', 
      &                    ' to coupled channel reaction cross section'
-               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, 0)
+               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 0)
             ENDIF
          ENDIF
 C--------IWARN=0 - 'NO Warnings'

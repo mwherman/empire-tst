@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-06-30 22:01:48 $
-Ccc   * $Id: HF-comp.f,v 1.9 2003-06-30 22:01:48 herman Exp $
+Ccc   * $Date: 2003-07-10 22:29:54 $
+Ccc   * $Id: HF-comp.f,v 1.10 2003-07-10 22:29:54 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -88,23 +88,28 @@ C
          IF(eemi.LT.0.0D0)RETURN
 C--------transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
-C--------distance of the actual energy to the bin energy
-         xcse = eemi/DE + 1.0001
-         icsl = INT(xcse)
-         icsh = icsl + 1
-         pop1 = Xnor*SCRtl(il, Nejc)
-         popl = pop1*(FLOAT(icsh) - xcse)/DE
-         IF(icsl.EQ.1)popl = 2.0*popl
-         poph = pop1*(xcse - FLOAT(icsl))/DE
-         IF(icsl.LE.NDECSE)CSE(icsl, Nejc, Nnuc) = CSE(icsl, Nejc, Nnuc)
-     &      + popl
-         IF(icsh.LE.NDECSE)THEN
-            CSE(icsh, Nejc, Nnuc) = CSE(icsh, Nejc, Nnuc) + poph
+C--------distance of the actual energy to the bin energy excluding elastic
+C--------if ENDf.NE.0
+         IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
+     &      .OR. Iec.NE.NEX(1)) THEN 
+            xcse = eemi/DE + 1.0001
+            icsl = INT(xcse)
+            icsh = icsl + 1
+            pop1 = Xnor*SCRtl(il, Nejc)
+            popl = pop1*(FLOAT(icsh) - xcse)/DE
+            IF(icsl.EQ.1)popl = 2.0*popl
+            poph = pop1*(xcse - FLOAT(icsl))/DE
+            IF(icsl.LE.NDECSE)CSE(icsl, Nejc, Nnuc) = CSE(icsl, Nejc, 
+     &         Nnuc) + popl
+            IF(icsh.LE.NDECSE)THEN
+               CSE(icsh, Nejc, Nnuc) = CSE(icsh, Nejc, Nnuc) + poph
+            ELSE
+               WRITE(6, *)' '
+               WRITE(6, *)' OOPS! I AM OUT OF NDECSE DIMENSION IN ACCUM'
+               STOP
+            ENDIF
          ELSE
-            WRITE(6, *)' '
-            WRITE(6, *)' OOPS! I AM OUT OF NDECSE DIMENSION IN ACCUM'
-            STOP
-         ENDIF
+         ENDIF 
          IF(ENDf.EQ.1.D0)CALL BELLAC(Iec, Nejc, Nnuc, pop1/DE)
          POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
          REClev(il, Nejc) = REClev(il, Nejc) + pop1
@@ -610,7 +615,7 @@ C
 99003          FORMAT(1X//, 5X, 'Decay of  ', F7.4, ' MeV  ', F5.1, 
      &                ' level with final population ', G13.5, ' mb', /, 
      &                5X, 'Level populated ', 4X, 'E.gamma ', 4X, 
-     &                'Intensity    ', /)
+     &                'Intensity  ', /)
                DO j = 1, NDBR
                   j1 = NINT(BR(l, j, 1, Nnuc))
                   IF(j1.EQ.0)GOTO 100
@@ -894,8 +899,7 @@ C Local variables
 C
       DOUBLE PRECISION E1, E2, XM1
       DOUBLE PRECISION eg, se1, se2, se2m1, sm1, sumn, sump, xjc
-C	DOUBLE PRECISION t
-      REAL FLOAT
+C     REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, lmax, lmin
 C
 C
@@ -1123,7 +1127,6 @@ C
       erest = ekinm - (knm - 1)*DE
 C-----IEC to g.s.
       sumgs = TLF(ekinm)
-C     1./(1. + EXP((-ekinm*..)))
 C-----IEC to IEC
       sum1 = TLF(0.0D0)*ROF(Iec, Jc, Nnuc)
       IF(knm.EQ.1)THEN

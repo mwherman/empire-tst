@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: auxiliary.f,v 1.5 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-07-10 22:29:54 $
+Ccc   * $Id: auxiliary.f,v 1.6 2003-07-10 22:29:54 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -66,6 +66,7 @@ C
          CSPrd(nnuc) = 0.0
          EX(1, nnuc) = 0.0
          JSTab(nnuc) = 0.0
+         QPRod(nnuc) = -1000.0
          DO j = 1, NDLW
             FISb(j, nnuc) = 0.0
          ENDDO

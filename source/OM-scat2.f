@@ -1,4 +1,4 @@
-      SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Ipr)
+      SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Ssr, Ipr)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -189,7 +189,7 @@ C*************************************************************************
       DOUBLE PRECISION AE, AK2, AQ, BETa, E1, ELAb, CETal, CSO, G, PIL, 
      &                 POT, R, RCOulomb, RE, rrmu, SE
       DOUBLE PRECISION SI, SR, ST, TC, W2L, xmas_npro, xmas_ntrg, zero, 
-     &                 ZI, ZT
+     &                 ZI, ZT, SRR
       INTEGER i, iba, ida, IE, imt, ip, ipl, ipot, IS, IS1, IS2, IS3, 
      &        IS4, izt, j, LFMAX, LTCMAX, na
       PARAMETER(LTCMAX = NDTL, LFMAX = 4*NDTL + 2)
@@ -234,6 +234,8 @@ C
       W2L = W2*10.D0
       CETal = CETa
       CSOl = CSO
+C     Capote Preeq 2002
+	SRR = 0.
 C
       ida = 1
       iba = 0
@@ -339,6 +341,8 @@ C-----transfer o.m. Tl onto STL matrix and set them to 0 if lower than 1E-15
          ENDIF
       ENDDO
       CLOSE(IS)
+C     Capote , preeq 2002
+	SRR=SR
       END
 C
       COMPLEX*16 FUNCTION CGAMMA(Z)
