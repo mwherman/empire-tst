@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 18:33:17 $
-Ccc   * $Id: MSD-orion.f,v 1.12 2005-03-16 18:33:17 Capote Exp $
+Ccc   * $Date: 2005-03-16 22:24:14 $
+Ccc   * $Id: MSD-orion.f,v 1.13 2005-03-16 22:24:14 Capote Exp $
 C
 C
 C
@@ -620,8 +620,8 @@ C     Vi = 0.0
 C     Ai = 1.0
 C     Ri = 1.0
       Vi = WSO(Nejc,nnuc)
-      Ri = Rs
-      Ai = As
+      Ri = RWSO(Nejc,nnuc)
+      Ai = AWSO(Nejc,nnuc)
       END
 
 
@@ -1303,7 +1303,7 @@ C           Definition of FormFactors :
 C           FF for KDER=1,2,3,4,5,6:   (selected by LBTRF in input!)
 C           1:= 1st Derivative WS        (Dispersive contribution considered)
 C           2:= Volume WS                     (Dispersive contribution
-C           considered) 3:= 2nd Derivative WS        (Dispersive contribution
+C           considered) 3:= 2nd Derivative WS (Dispersive contribution
 C           considered) 4:= Modified 2nd deriv.
 C           5:= Volume and 1st deriv superimposed
 C
