@@ -11,6 +11,7 @@ C-V  02/05 Fix MF4 processing for discrete levels.
 C-V  02/09 - Fix thresholds for multi-particle emission
 C-V        - Photon branching ratios for the last level (MF12)
 C-V        - Atomic weight ratios for target and recoils.
+C-V  02/11 Implement continuum photon spectra processing.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -445,6 +446,7 @@ C-Purpose: Assign MT number from reaction string
       IF(PTST.EQ.' (n,3n) ') MT= 17
       IF(PTST.EQ.' (n,np) ') MT= 28
       IF(PTST.EQ.' (n,na) ') MT= 22
+      IF(PTST.EQ.' (n,gamm') MT= 102
       IF(PTST.EQ.' (n,p)  ') MT=649
       IF(PTST.EQ.' (n,a)  ') MT=849
       RETURN
@@ -1131,11 +1133,13 @@ C* Test print files
       END IF
 C* Search for the reaction header cards
 C*   NE6 counts the Number of energy points
+      NE6N=0
       LCT=2
       IT =0
       NK =0
       IK =0
       MTX=0
+      NP =0
       E0 =-1.
   110 READ (LIN,891,END=700) REC
       IF(REC(1:10).EQ.' REACTION '        ) GO TO 200
@@ -1185,7 +1189,7 @@ C* Reaction matched - Define pointwise cross section at the same energy
       XS3=XSC(JE3,IT)
       IF(ABS((EN3-EE)/EE).GT.1E-6 .AND. JE3.LT.NE3) GO TO 425
 C* If not defined, Define the general File-6 data (HEAD and TAB1 rec.)
-      IF(NE6.GT.0) GO TO 430
+      IF(NE6.GT.0) GO TO 430 
 C* Preset the particle multiplicity
       Y  =1.
       ZAP=1.
@@ -1390,14 +1394,7 @@ C* Read the energy/angle distribution data
 C* Identify the reaction and assign the MT number
       KZAK=0
       IF(REC(15:22).EQ.'recoils ') READ (REC(35:58),808) KZAK
-      IF(REC(24:30).EQ.'(n,x)  ') MT=  5
-      IF(REC(24:30).EQ.'(n,n)  ') MT= 91
-      IF(REC(24:30).EQ.'(n,2n) ') MT= 16
-      IF(REC(24:30).EQ.'(n,3n) ') MT= 17
-      IF(REC(24:30).EQ.'(n,np) ') MT= 28
-      IF(REC(24:30).EQ.'(n,na) ') MT= 22
-      IF(REC(24:30).EQ.'(n,p)  ') MT=649
-      IF(REC(24:30).EQ.'(n,a)  ') MT=849
+      CALL  EMTCHR(REC(23:30),MT)
       IF(MT.EQ. 0 ) GO TO 110
       IF(MT.NE.JT6) GO TO 110
       IF(IT.GT.0 .AND. MT.GE.MTX) GO TO 620
@@ -1470,7 +1467,15 @@ C* Preset the particle multiplicity
       ELSE IF (POUT(IK).EQ.'gammas  ') THEN
         ZAP=0.
         AWP=0.
-        NP =NE6N
+C* If gamma is first particle, assume No.of points for yields=x.s.
+
+        IF(MT.EQ.102) PRINT *,'NP,NE6N',NP,NE6N
+
+        IF(NE6N.GT.0) THEN
+          NP =NE6N
+        ELSE
+          NP =NE3
+        END IF
       ELSE IF (POUT(IK).EQ.'protons ') THEN
         ZAP=1001.
         AWP=AWH/AWN
