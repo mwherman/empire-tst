@@ -33,7 +33,7 @@ long PIPE(char strinp[L180])
        break;
     }
   }
-  printf("%s\n",str);
+//  printf("%s\n",str);
   // strcpy(str,strinp);
   i=system(str);
   return(i);
