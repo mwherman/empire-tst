@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.13 $
-C $Id: ddhms.f,v 1.13 2005-01-23 02:41:27 Carlson Exp $
+C CVS Version Management $Revision: 1.14 $
+C $Id: ddhms.f,v 1.14 2005-01-23 03:27:30 Carlson Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2091,9 +2091,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.13 $')
+99001 FORMAT('  ddhms version: $Revision: 1.14 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.13 2005-01-23 02:41:27 Carlson Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.14 2005-01-23 03:27:30 Carlson Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4879,8 +4879,8 @@ C--------------population of continuum
                   ENDDO
                ENDDO
               sumcon = sumcon*DE
-              WRITE(28,*)'continuum population = ', sumcon, ' mb'
-              WRITE(28,*)'HMS resid population = ', RESpop(jz, jn),' mb'
+c              WRITE(6 ,*)'continuum population = ', sumcon, ' mb'
+c              WRITE(6 ,*)'HMS resid population = ', RESpop(jz, jn),' mb'
                IF(nnur.GT.3 .AND. FIRst_ein)THEN
                   IF(IDNa(2, 5).EQ.0)THEN
                      WRITE(6, *)' '
