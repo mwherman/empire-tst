@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-25 12:59:27 $
-Ccc   * $Id: fusion.f,v 1.24 2005-01-25 12:59:27 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-01-30 12:32:59 $
+Ccc   * $Id: fusion.f,v 1.25 2005-01-30 12:32:59 Carlson Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -148,12 +148,12 @@ C---------E1
           IF(IGE1.NE.0)THEN
 C----------factor 10 near HHBarc from fm**2-->mb
            E1Tmp=10*HHBarc**2*PI*E1(Ntrg,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
-     &          /(2*XJLv(LEVtarg, Ntrg)+1)
-           QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
+           QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)
+           E1Tmp=(E1Tmp+QDTmp/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
 C----------do loop over parity
            DO ip = 1, 2
 C           Quasideuteron contribution QDTmp by Carlson
-            WPARG=PAR(ip, LVP(LEVtarg, 0), 1)*(E1Tmp + QDTmp)
+            WPARG=PAR(ip, LVP(LEVtarg, 0), 1)*E1Tmp
 C-----------do loop over compound nucleus spin
             DO j = 1, NDLW
 C-------------Spin of c.n. J=j-S1
@@ -216,8 +216,8 @@ C-------end of E2
               csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
           ENDDO
         ENDDO
-C                     QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
-        IF(IGE1.NE.0) QDfrac= 3.d0*QDTmp/CSFus
+C                     QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)
+        IF(IGE1.NE.0) QDfrac = QDTmp/CSFus
 
         ENDIF
 C-------END of calculation of fusion cross section
