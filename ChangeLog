@@ -1,14 +1,15 @@
 
-             Changes in version 2.19 with respect to 2.18  
-                      Vienna,   November  2002
+             Changes in version 2.19beta1 with respect to 2.18  
+                      Brookhaven, April  2003
 
 1.  Error in the Wilmore-Hodgson omp corrected.
     VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
     was also found to be wrong in the preliminary version of RIPL-2 
-    (-0.00118).
-2.  MSD is automatically turned off for non-nucleon incident reactions. 
+    (-0.00118) (M. Herman).
+2.  MSD is automatically turned off for non-nucleon incident reactions
+    (M. Herman). 
 3.  Internal conversion coefficinets included in the gamma cascade
-    between discrete levels (ICC data from RIPL-2).
+    between discrete levels (ICC data from RIPL-2)(M. Herman).
 4.  Bug in reading branching ratios from the RIPL-2 file corrected
     (emission probabilities instead of branching ratios were used
     in the previous RIPL-2 versions) (R. Capote).
@@ -19,21 +20,26 @@
     to merge resonance parameters into the final ENDF file (also dxsend.f 
     has been updated) (A. Trkov).
 7.  LINEAR and RECENT utility codes added in order to reconstruct cross
-    sections from the resonance parameters and enable plotting.
-8.  Some potentially empty files removed if actually empty.
-9.  run, runE, format and plot scripts modified to avoid double coding.
+    sections from the resonance parameters and enable plotting 
+    (M. Herman & A. Trkov).
+8.  Some potentially empty files removed if actually empty (M. Herman).
+9.  run, runE, format and plot scripts modified to avoid double coding
+    (M. Herman).
 10. Processing with FIXUP split into two runs to avoid redundant data
-    in the final ENDF file (reconstruction of S203 postponed to the 
-    second run).
+    in the final ENDF file (reconstruction of 203 and 207 postponed to the 
+    second run) (M. Herman).
 11. Last energy point in the gamma spectra from capture included 
     in the file *.out with energy of the CN excitation energy and
     respective cross section scaled to preserve spectrum integral.
-12. Option for manual OMP fitting added to the new GUI.
-13. PSYCHE added to the chain of utlity codes.
+12. Option for manual OMP fitting added to the new GUI (M. Herman).
+13. PSYCHE added to the chain of utlity codes (M. Herman).
 14. Spectral energies for ENDF formatting printed in F10.5 instead
-    of F9.4 format to improve accuracy.
+    of F9.4 format to improve accuracy (M. Herman).
 15. EMPEND revised to eliminate some undesired entries in the ENDF 
-    file.
+    file (A. Trkov).
+16. Three-hump fission with underbarrier effect implemented (HRTW and 
+    more level density options still missing) (R. Capote, M.Herman, 
+    M. Sin, and A. Ventura).
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 
