@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-24 18:05:15 $
-Ccc   * $Id: input.f,v 1.59 2005-01-24 18:05:15 herman Exp $
+Ccc   * $Date: 2005-01-24 20:34:36 $
+Ccc   * $Id: input.f,v 1.60 2005-01-24 20:34:36 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -851,8 +851,8 @@ C
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
-C        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
-C        1     2     3      4      5      6
+C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C                        1     2     3      4      5      6
 C        1 neut. disc.   x     x     0      x      x      0
 C        2 neut. cont.   0     x     x      x      x      x
 C        3 prot. disc.   x     x     0      x      x      0
@@ -2268,7 +2268,7 @@ C--------------searching in the RIPL database
                STOP
             ENDIF
             WRITE(6,
-     &'('' Optical model parameters for ECIS calculation set to '',I4
+     &'('' Optical model parameters for ECIS set to RIPL-2 #'',I4
      &)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
@@ -2853,9 +2853,6 @@ C--------------Searching in the RIPL database for i1 catalog number
                WRITE(6,
      &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
      &)')i1, INT(val)
-C              WRITE(6,
-C    &'('' (will be used if not overwritten in the OMPAR.RIPL file)'')
-C    &')
             ELSE
                WRITE(6,
      &'('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')')
@@ -2924,7 +2921,8 @@ C-----
                   ROPaa(i) = val
                ENDDO
                IF(val.GT.0.0D0)WRITE(6,
-     &'('' L.d. a-parameter in all nuclei multiplied by '',F6.1)') val
+     &       '('' L. d. a-parameter set to '',F6.3,'' for all nuclei'')'
+     &       )val
                IF(val.EQ.0.0D0)WRITE(6,
      &      '('' L. d. a-parameter according to Ignatyuk systematics'')'
      &      )
@@ -2945,7 +2943,7 @@ C-----
             ENDIF
             ROPaa(nnuc) = val
             WRITE(6,
-     &'('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
+     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -2956,7 +2954,7 @@ C-----
                   ATIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' L.d. parameter in all nuclei multiplied by '',F6.1)') val
+     &'('' L.d. a-parameter in all nuclei multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -2980,7 +2978,7 @@ C
                   GTIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' Single particle L.D. parameter G multiplied by '',F6.1)') val
+     &'('' Single particle l.d. parameter g multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -2992,7 +2990,7 @@ C
             ENDIF
             GTIlnor(nnuc) = val
             WRITE(6,
-     &'('' Single particle L.D. parameter G in '',I3,A2,
+     &'('' Single particle l.d. parameter g in '',I3,A2,
      &  '' multiplied by '',        F6.1)')i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3056,16 +3054,13 @@ C-----
             ENDIF
             ROPar(5, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter T   in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter T in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'FITLEV')THEN
             FITlev = val
-            IF(FITlev.GT.0.0D0)WRITE(6,
-     &                 '('' Cumulative plots of levels will be done '')'
-     &                 )
             GOTO 100
          ENDIF
 C-----
@@ -6233,7 +6228,7 @@ C    ********************************************************************
 C
       IMPLICIT NONE
       INTEGER nntmp,natmp,MAXgdr
-      PARAMETER (MAXgdr=6000)
+      PARAMETER (MAXgdr=5986)
       INTEGER  Key_GDRGFL, Key_shape
       INTEGER i, ka, keyload, kz, n, nana, nanz, NG, nna, nng, nnz,
      &        nzram, naram, numram, keyram, keyalpa, kaa, kzz,
