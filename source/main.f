@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-07 10:38:17 $
-Ccc   * $Id: main.f,v 1.28 2004-06-07 10:38:17 Capote Exp $
+Ccc   * $Date: 2004-06-08 15:29:34 $
+Ccc   * $Id: main.f,v 1.29 2004-06-08 15:29:34 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -537,7 +537,7 @@ C-----------set to Q's to 0 if negative due to rounding error
  1550    REWIND 15
          WRITE(6, *)' '
          WRITE(6, *)' '
-         CALL ULM(1)
+         CALL ULM(1)   
          CALL TRISTAN(0, 0, ltrmax, qmax, qstep)
 C        CLOSE (15)
 C--------print MSD double differential cross sections
@@ -856,8 +856,6 @@ C--------------temporary output *** done ***
                WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------write elastic to tape 12
                IF(nnuc.EQ.mt2)THEN
-C RCN 05/04  TO MIKE:
-C I am not sure that CN elastic contribution elcncs is already calculated here
                  WRITE(12, *)' '
                  WRITE(12, 
      &                  '('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
@@ -873,9 +871,6 @@ C I am not sure that CN elastic contribution elcncs is already calculated here
      &                            NELang)
 99009            FORMAT(9X, 8E15.5)
                  WRITE(12, *)' '
-C                WRITE(6, 
-C    &             '('' CN ELASTIC CROSS SECTION ='',G12.5,
-C    &             '' mb/str'')') elcncs
                   IF(elcncs.EQ.0) WRITE(6,*)'WARNING: CN ELASTIC IS 0' 
                ENDIF
             ENDIF
@@ -1430,30 +1425,8 @@ C--------down on the ground state
             ELAcs = ELAcs + POPlv(1, mt2)
 C-----------CN contribution to elastic ddx
             elcncs = POPlv(1, mt2)/4.0/PI
-            WRITE(6,*) ' CN ELASTIC    :', elcncs,' mb/str'
+            WRITE(6,*) ' CN ELASTIC ANG.DIST. :', elcncs,' mb/str'
             WRITE(6,*) 
-
-C		  DO iang=1,NELang
-C	        ELAda(iang) = ELAda(iang) + elcncs
-C	      ENDDO
-
-C           IF(ENDf.NE.0.0D0)THEN
-C             WRITE(12, '(1X,/,10X,40(1H-),/)')
-C-------------write elastic to tape 12
-C             WRITE(12, *)' '
-C             WRITE(12,'('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
-C    &           ELAcs
-C             WRITE(12, *)' '
-C             WRITE(12, *)' Elastic angular distribution '
-C             WRITE(12, *)' '
-C             delang = 180./FLOAT(NELang - 1)
-C             WRITE(12, 99008)(FLOAT(iang - 1)*delang, iang = 1,NELang)
-C99008         FORMAT(10X, 8G15.5)
-C             WRITE(12, 99009)(ELAda(iang), iang = 1,NELang)
-C99009         FORMAT(9X, 8E15.5)
-C             WRITE(12, *)' '
-C	      ENDIF
-
          ENDIF
          WRITE(12, 
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,'' 
