@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-13 20:29:32 $
-Ccc   * $Id: input.f,v 1.54 2005-01-13 20:29:32 herman Exp $
+Ccc   * $Date: 2005-01-19 17:26:31 $
+Ccc   * $Id: input.f,v 1.55 2005-01-19 17:26:31 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2339,8 +2339,8 @@ C-----initialization of TRISTAN input parameters  *** done ***
       WRITE(6, *)'                       |____________________________|'
       WRITE(6, *)' '
       WRITE(6, *)' '
-      WRITE(6, *)'Parameters specified explicitly in input'
-      WRITE(6, *)'----------------------------------------'
+      WRITE(6, *)'Following options/parameters have been used'
+      WRITE(6, *)'-------------------------------------------'
       WRITE(6, *)' '
  100  READ(5, '(A1)')name(1:1)
       IF(name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1).NE.'!')
@@ -2359,32 +2359,23 @@ C-----------Print some final input options
             SCUtColl = 0
             ENDIF
             IF(KEY_shape.EQ.0)WRITE(6,
-     &           '('' E1 strength shape function set to EMPIRE v2.18'')'
-     &           )
+     &         '('' E1 strength function as in EMPIRE v2.18 (EGLO)'')')
             IF(KEY_shape.EQ.1)WRITE(6,
-     &                   '('' E1 strength shape function set to MLO1'')'
-     &                   )
+     &         '('' E1 strength function set to MLO1'')')
             IF(KEY_shape.EQ.2)WRITE(6,
-     &                   '('' E1 strength shape function set to MLO2'')'
-     &                   )
+     &         '('' E1 strength function set to MLO2'')')
             IF(KEY_shape.EQ.3)WRITE(6,
-     &                   '('' E1 strength shape function set to MLO3'')'
-     &                   )
+     &         '('' E1 strength function set to MLO3'')')
             IF(KEY_shape.EQ.4)WRITE(6,
-     &                   '('' E1 strength shape function set to EGLO'')'
-     &                   )
+     &         '('' E1 strength function set to EGLO'')')
             IF(KEY_shape.EQ.5)WRITE(6,
-     &                    '('' E1 strength shape function set to GFL'')'
-     &                    )
+     &         '('' E1 strength function set to GFL'')')
             IF(KEY_shape.EQ.6)WRITE(6,
-     &                    '('' E1 strength shape function set to SLO'')'
-     &                    )
+     &         '('' E1 strength shape function set to SLO'')')
             IF(KEY_gdrgfl.EQ.0)WRITE(6,
-     &                  '('' GDR parameters from Messina systematics'')'
-     &                  )
+     &         '('' GDR parameters from Messina systematics'')')
             IF(KEY_gdrgfl.NE.0)WRITE(6,
-     &            '('' GDR parameters from RIPL-2/Plujko systematics'')'
-     &            )
+     &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
             WRITE(6, *)' '
             IF(OMParf .OR. OMPar_riplf .OR. OMParfcc)THEN
                WRITE(6, *)'Existing, case specific, o.m.p. files: '
@@ -2412,39 +2403,29 @@ C-----------Printout of some final input options   *** done ***
 C--------DEGAS input
          IF(name.EQ.'DEGAS ')THEN
             DEGa = val
-            IF(val.GT.0)THEN
-               WRITE(6,
-     &'('' Exciton model calculations with code'',
-     &  '' DEGAS enabled '')')
-            ELSE
-               WRITE(6,
-     &'('' Exciton model calculations with code'',
-     &  '' DEGAS disabled '')')
-            ENDIF
+            IF(val.GT.0) WRITE(6,
+     &'('' Exciton model calculations with code DEGAS '')')
             GOTO 100
          ENDIF
          IF(name.EQ.'GDIVP ')THEN
             GDIvp = val
             WRITE(6,
-     &'('' Proton s.p.l. density set to A/'',f5.2,'' in''             ,'
-     &' code DEGAS '')')GDIvp
+     &'('' Proton s.p.l. density set to A/'',f5.2,'' in'',
+     &'' code DEGAS '')')GDIvp
             GOTO 100
          ENDIF
 C--------PCROSS input
          IF(name.EQ.'PCROSS')THEN
             IF(val.GT.0)THEN
                WRITE(6,
-     &'('' Exciton model calculations with code'',
-     &  '' PCROSS enabled, including cluster emission '')')
+     &'('' Exciton model calculations with code PCROSS'',/,
+     &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
                IF(val.GT.1.05 .AND. val.LE.2.D0)MFPp = val
                WRITE(6,
-     &'('' Mean free path parameter for PCROSS changed to '',F4.1,
-     &  '' (Default value : 1.3)'')') MFPp
+     &'('' Mean free path parameter in PCROSS set to '',F4.1,
+     &  '' (Default value: 1.3)'')') MFPp
                PEQc = 1.
             ELSE
-               WRITE(6,
-     &'('' Exciton model calculations with code'',
-     &  '' PCROSS disabled '')')
                PEQc = 0.
             ENDIF
             GOTO 100
@@ -2475,7 +2456,7 @@ C                 &       'RIPL OMP will be used for inelastic channel '
                ENDIF
             ENDIF
             WRITE(6,
-     &'('' Optical model parameters for ECIS calculation set to '',I4
+     &'('' Optical model parameters for ECIS set to RIPL-2 #'',I4
      &)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
@@ -2483,14 +2464,13 @@ C                 &       'RIPL OMP will be used for inelastic channel '
          IF(name.EQ.'DIRECT')THEN
             DIRect = val
             IF(DIRect.EQ.3)WRITE(6,
-     &    '('' ECIS (DWBA method) will be used for direct scattering'')'
-     &    )
-            IF(DIRect.EQ.1)WRITE(6,
-     &      '('' ECIS (CC method) will be used for direct scattering'')'
-     &      )
+     &    '('' DWBA (ECIS) used for direct inelastic scattering'')')
+            IF(DIRect.EQ.1 .OR. DIRect.EQ.2)WRITE(6,
+     &      '('' Coupled Channels (ECIS) used for direct inelastic scatt
+     &ering'')')
             IF(DIRect.EQ.2)WRITE(6,
-     &'('' ECIS (CC method) will be used for direct scattering and ''
-     &,''Tl`s in the inelastic channel'')')
+     &      '('' Coupled Channels (ECIS) used for Tl calculations in ine
+     &lastic channels'')')
             GOTO 100
          ENDIF
          IF(name.EQ.'EcDWBA')THEN
@@ -2498,11 +2478,11 @@ C                 &       'RIPL OMP will be used for inelastic channel '
             JCUtColl = i1
             IF(JCUtColl.eq.0) JCUtColl=2
             WRITE(6,
-     &       '('' Cut-off energy for collective levels for DWBA calculat
-     &ions is'',F5.1,'' MeV'')' ) ECUtColl
+     &       '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' 
+     &)' ) ECUtColl
             WRITE(6,
-     &       '('' All levels with spin less or equal to '',I1,'' will be
-     & considered in DWBA calculations'')' ) JCUtColl
+     &       '('' All levels with spin less or equal to '',I1,
+     & '' considered in DWBA'')' ) JCUtColl
             GOTO 100
          ENDIF
 C
@@ -2511,10 +2491,10 @@ C
          IF(name.EQ.'RELKIN')THEN
             IF(val.NE.0.)THEN
                RELkin = .TRUE.
-               WRITE(6, '(1x,A)')'Relativistic kinematics will be used'
+               WRITE(6, '(1x,A)')'Relativistic kinematics used'
             ELSE
                WRITE(6, '(1x,A)')
-     &                        'Non-relativistic kinematics will be used'
+     &                        'Non-relativistic kinematics used'
             ENDIF
             GOTO 100
          ENDIF
@@ -2606,8 +2586,7 @@ C-----
          IF(name.EQ.'LEVDEN')THEN
             ADIv = val
             IF(ADIv.EQ.0.0D0)WRITE(6,
-     &          '('' Level densities with  dynamic effects selected '')'
-     &          )
+     &         '('' EMPIRE-specific level densities were selected '')')
             IF(ADIv.EQ.1.0D0)WRITE(6,
      &   '('' ROCOL level densities with fitted parameters selected '')'
      &   )
@@ -2615,11 +2594,9 @@ C-----
      &     '('' ROCOL level densities with a=A/''  ,F5.2,'' selected'')'
      &     )ADIv
             IF(ADIv.EQ.2.0D0)WRITE(6,
-     &                '('' Gilbert-Cameron level densities selected '')'
-     &                )
+     &         '('' Gilbert-Cameron level densities were selected '')')
             IF(ADIv.EQ.3.0D0)WRITE(6,
-     &               '('' Microscopic HFBCS level densities selected'')'
-     &               )
+     &         '('' Microscopic HFBCS level densities were selected'')')
             GOTO 100
          ENDIF
 C-----
@@ -2649,7 +2626,7 @@ C-----
 C-----
          IF(name.EQ.'FUSRED')THEN
             FUSred = val
-            WRITE(6, '('' Fusion cross section reduced by '',F6.3)')
+            WRITE(6, '('' Fusion cross section was reduced by '',F6.3)')
      &            FUSred
             GOTO 100
          ENDIF
@@ -2706,7 +2683,7 @@ C-----
 C-----
          IF(name.EQ.'TRGLEV')THEN
             LEVtarg = val
-            WRITE(6, '('' Target excited to the level '',I2)')LEVtarg
+            WRITE(6, '('' Target excited to the level #'',I2)')LEVtarg
             GOTO 100
          ENDIF
 C-----
@@ -2736,16 +2713,16 @@ C-----
 C-----
          IF(name.EQ.'IOUT  ')THEN
             IOUt = val
-            WRITE(6,
-     &            '('' Main calculations output control set to '',I2)')
-     &            IOUt
+c           WRITE(6,
+c    &            '('' Main calculations output control set to '',I2)')
+c    &            IOUt
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'NOUT  ')THEN
             NOUt = val
-            WRITE(6, '('' MSC calculation output control set to '',I2)')
-     &            NOUt
+c           WRITE(6, '('' MSC calculation output control set to '',I2)')
+c    &            NOUt
             GOTO 100
          ENDIF
 C-----
@@ -2758,8 +2735,7 @@ C-----
          IF(name.EQ.'TORY  ')THEN
             TORy = val
             WRITE(6,
-     &'('' Ratio of unlike to like nucleon interaction cross section set
-     & to '',F5.2)')TORy
+     &'(''(n-p)/(n-n) interaction strength ratio set to '',F5.2)')TORy
             GOTO 100
          ENDIF
 C-----
@@ -2782,11 +2758,7 @@ C-----
          IF(name.EQ.'GST   ')THEN
             GST = val
             IF(GST.EQ.1.0D0)WRITE(6,
-     &                            '('' Gamma emission in MSC allowed'')'
-     &                            )
-            IF(GST.EQ.0.0D0)WRITE(6,
-     &                       '('' Gamma  emission in MSC not allowed'')'
-     &                       )
+     &        '('' Gamma emission in MSC allowed'')')
             GOTO 100
          ENDIF
 C-----
@@ -2804,8 +2776,7 @@ C-----
          IF(name.EQ.'GDIV  ')THEN
             GDIv = val
             WRITE(6,
-     &'('' Single particle level density in MSC set to A/''      ,F5.2)'
-     &)GDIv
+     &'('' Single particle level density in MSC set to A/'',F5.2)')GDIv
             GOTO 100
          ENDIF
 C-----
@@ -2827,8 +2798,8 @@ C-----
          IF(name.EQ.'NEX   ')THEN
             NEXreq = val
             WRITE(6,
-     &'('' Maximum number of energy steps in the integration set to '',I
-     &3)')NEXreq
+     &'('' Number of energy steps in the integration set to '',
+     &I3)')NEXreq
             GOTO 100
          ENDIF
 C-----
@@ -2853,26 +2824,26 @@ C-----
          IF(name.EQ.'GDRDYN')THEN
             GDRdyn = val
             IF(GDRdyn.NE.0.D0)WRITE(6,
-     &                       '('' Deformation dependent GDR selected'')'
-     &                       )
+     &         '('' Deformation dependent GDR selected'')')
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'EGDR1 ')THEN
             EGDr1 = val
-            WRITE(6, '('' GDR energy set to '',F5.2)')EGDr1
+            WRITE(6, '('' GDR first hump energy set to '',F5.2)')EGDr1
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'GGDR1 ')THEN
             GGDr1 = val
-            WRITE(6, '('' GDR width set to '',F5.2)')GGDr1
+            WRITE(6, '('' GDR first hump width set to '',F5.2)')GGDr1
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'CSGDR1')THEN
             CSGdr1 = val
-            WRITE(6, '('' GDR peak cross section set to '',F6.2)')CSGdr1
+            WRITE(6, '('' GDR first hump cross section set to '',F6.2)')
+     &         CSGdr1
             GOTO 100
          ENDIF
 C-----
@@ -2899,8 +2870,8 @@ C-----
          IF(name.EQ.'MSD   ')THEN
             MSD = val
             IF(MSD.EQ.1)WRITE(6,
-     &             '('' MSD calculations with ORION+TRISTAN selected'')'
-     &             )
+     &         '('' MSD calculations with ORION+TRISTAN were selected'')
+     &            ')
             IF(MSD.EQ.2)WRITE(6,
      &         '('' MSD calculations will use previous ORION results'')'
      &         )
@@ -2910,16 +2881,14 @@ C-----
          IF(name.EQ.'MSC   ')THEN
             MSC = val
             IF(MSC.NE.0)WRITE(6,
-     &                     '('' Heidelberg MSC calculations selected'')'
-     &                     )
+     &         '('' Heidelberg MSC calculations were selected'')')
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'HMS   ')THEN
             LHMs = val
             IF(LHMs.NE.0)WRITE(6,
-     &                 '('' HMS preequilibrium calculations selected'')'
-     &                 )
+     &         '('' HMS preequilibrium calculations were selected'')')
             GOTO 100
          ENDIF
 C-----
@@ -2936,8 +2905,7 @@ C-----
             IF(val.GT.0.0D0)THEN
                CHMs = val
                WRITE(6,
-     &  '('' Default damp rate in HMS multiplied by '',           F6.3)'
-     &  )CHMs
+     &  '('' Default damp rate in HMS multiplied by '',F6.3)')CHMs
             ENDIF
             GOTO 100
          ENDIF
@@ -2945,32 +2913,28 @@ C-----
          IF(name.EQ.'HRTW  ')THEN
             LHRtw = val
             IF(LHRtw.NE.0)WRITE(6,
-     &               '('' HRTW width fluctuation correction selected'')'
-     &               )
+     &         '('' HRTW width fluctuation correction was selected'')')
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'GDRWP ')THEN
             DIToro = val
             WRITE(6,
-     &  '('' Factor in energy increase of GDR width'',            F7.5)'
-     &  )DIToro
+     &  '('' Factor in energy increase of GDR width'',F7.5)')DIToro
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'GDRWA1')THEN
             GDRwa1 = val
             WRITE(6,
-     &'('' GDR first peak width increased by '',                F5.2,''
-     &MeV '')')GDRwa1
+     &'('' GDR first hump width increased by '',F5.2,'' MeV'')')GDRwa1
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'GDRWA2')THEN
             GDRwa2 = val
             WRITE(6,
-     &'('' GDR second peak width increased by '',               F5.2,''
-     &MeV '')')GDRwa2
+     &'('' GDR second hump width increased by '',F5.2,'' MeV'')')GDRwa2
             GOTO 100
          ENDIF
 C-----
@@ -2984,7 +2948,7 @@ C-----
          IF(name.EQ.'GDRSPL')THEN
             GDRspl = val
             WRITE(6,
-     &'('' Splitting of GDR peaks increased by '',F6.3,         '' MEV''
+     &'('' Splitting of GDR humps increased by '',F6.3,'' MEV''
      &)')GDRspl
             GOTO 100
          ENDIF
@@ -2992,16 +2956,16 @@ C-----
          IF(name.EQ.'GDRST1  ')THEN
             EWSr1 = val
             WRITE(6,
-     &'('' Gamma strength multiplied by '',F6.3,'' for the firs t GDR pe
-     &ak'')')EWSr1
+     &'('' Gamma strength multiplied by '',F6.3,'' for the first GDR hum
+     &p'')')EWSr1
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'GDRST2  ')THEN
             EWSr2 = val
             WRITE(6,
-     &'('' Gamma strength multiplied by '',F6.3,'' for the seco nd GDR p
-     &eak'')')EWSr2
+     &'('' Gamma strength multiplied by '',F6.3,'' for the second GDR hu
+     &mp'')')EWSr2
             GOTO 100
          ENDIF
 C-----
@@ -3016,15 +2980,14 @@ C-----
          IF(name.EQ.'DEFPAR')THEN
             DEFpar = val
             WRITE(6,
-     &      '('' Dynam. deformation param. multiplyer '',F7.3         )'
-     &      )DEFpar
+     &      '('' Dynamic deformation multiplyer '',F7.3)')DEFpar
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'DEFGA ')THEN
             DEFga = val
             WRITE(6,
-     &'('' Gaussian correction to deformation (amplitude)       '',F7.3)
+     &'('' Gaussian correction to deformation (amplitude)'',F7.3)
      &')DEFga
             GOTO 100
          ENDIF
@@ -3032,7 +2995,7 @@ C-----
          IF(name.EQ.'DEFGW ')THEN
             DEFgw = val
             WRITE(6,
-     &'('' Gaussian correction to deformation (width)           '',F7.3)
+     &'('' Gaussian correction to deformation (width)'',F7.3)
      &')DEFgw
             GOTO 100
          ENDIF
@@ -3040,20 +3003,17 @@ C-----
          IF(name.EQ.'DEFGP ')THEN
             DEFgp = val
             WRITE(6,
-     &'('' Gaussian correction to deformation (position)        '',F7.3)
+     &'('' Gaussian correction to deformation (position)'',F7.3)
      &')DEFgp
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'ENDF  ')THEN
             ENDf = val
-            IF(ENDf.NE.0.0D0)WRITE(6,
-     &           '('' Output for the ENDF formatting will be created'')'
-     &           )
             IF(ENDf.EQ.1.0D0)WRITE(6,
-     &'('' using exclusive representation (ENDF=1) '')')
+     &'('' Exclusive spectra representation selected '')')
             IF(ENDf.EQ.2.0D0)WRITE(6,
-     &'('' using inclusive representation (ENDF=2) '')')
+     &'('' Inclusive spectra representation selected '')')
             GOTO 100
          ENDIF
 C-----
@@ -3074,25 +3034,18 @@ C--------------Searching in the RIPL database for i1 catalog number
                IF(ieof.EQ.0)THEN
                   RIPl_omp(i1) = .TRUE.
                   val = -val
-C                 WRITE(6, *)'RIPL OMP will be used for ejectile ', i1
                ELSE
-                  WRITE(6, *)'Requested RIPL entry ', ipoten,
+                  WRITE(6, *)'Requested RIPL entry #', ipoten,
      &                       ' not found, using default choice'
                   GOTO 100
                ENDIF
                WRITE(6,
      &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
      &)')i1, INT(val)
-               WRITE(6,
-     &'('' (will be used if not overwritten in the OMPAR.RIPL file)'')
-     &')
             ELSE
                WRITE(6,
      &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
      &)')i1, INT(val)
-               WRITE(6,
-     &'('' (will be used if not overwritten in the OMPAR.INT file)'')
-     &')
             ENDIF
 C-----
             DO i = 1, NDNUC
@@ -3190,7 +3143,7 @@ C-----
                   ATIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' L.d. parameter in all nuclei multiplied by '',F6.1)') val
+     &'('' L.d. a-parameter in all nuclei multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -3202,7 +3155,7 @@ C-----
             ENDIF
             ATIlnor(nnuc) = val
             WRITE(6,
-     &'('' L.d. parameter in '',I3,A2,'' multiplied by '',        F6.1)'
+     &'('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
      &)i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3214,7 +3167,7 @@ C
                   GTIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' Single particle L.D. parameter G multiplied by '',F6.1)') val
+     &'('' Single particle l.d. parameter g multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -3226,7 +3179,7 @@ C
             ENDIF
             GTIlnor(nnuc) = val
             WRITE(6,
-     &'('' Single particle L.D. parameter G in '',I3,A2,
+     &'('' Single particle l.d. parameter g in '',I3,A2,
      &  '' multiplied by '',        F6.1)')i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3242,7 +3195,7 @@ C-----
             ENDIF
             ROPar(2, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter Ux  in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter Ux in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3258,7 +3211,7 @@ C-----
             ENDIF
             ROPar(3, nnuc) = val
             WRITE(6,
-     & '('' Pairing shift Del  in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' Pairing shift in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3274,7 +3227,7 @@ C-----
             ENDIF
             ROPar(4, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter E0  in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter Eo in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3290,16 +3243,13 @@ C-----
             ENDIF
             ROPar(5, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter T   in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter T in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'FITLEV')THEN
             FITlev = val
-            IF(FITlev.GT.0.0D0)WRITE(6,
-     &                 '('' Cumulative plots of levels will be done '')'
-     &                 )
             GOTO 100
          ENDIF
 C-----
@@ -3322,7 +3272,7 @@ C--------Tuning factors
             ENDIF
             TUNe(i3, nnuc) = val
             WRITE(6,
-     &'('' Emission of ejectile '',I1,'' from '',I3,A2,
+     &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' multiplied by '',F6.3)')i3, i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3339,11 +3289,11 @@ C-----
             ICOmpff = val
             IF(ICOmpff.GT.0)THEN
                WRITE(6,
-     &'('' Compressional form factor for l=0 momentum transfer will be''
+     &'('' Compressional l=0 form factor''
      &,'' used in MSD calculations'')')
             ELSE
                WRITE(6,
-     &'('' Usual surface form factor for l=0 momentum transfer will be''
+     &'('' Surface l=0 form factor''
      &,'' used in MSD calculations'')')
             ENDIF
             GOTO 100
@@ -3384,7 +3334,7 @@ C-----
          IF(name.EQ.'EFIT  ')THEN
             EFItin(i1 + 1) = val
             IF(EFItin(i1 + 1).GT.0.0D0)WRITE(6,
-     &'('' Field strength of multipolarity'',I3,'' fitted to the level a
+     &'('' Field strength of multipolarity'',I2,'' fitted to the level a
      &t '',F6.3,'' MeV'')')i1, EFItin(i1 + 1)
             GOTO 100
          ENDIF
@@ -3392,8 +3342,8 @@ C-----
          IF(name.EQ.'RESNOR')THEN
             CNOrin(i1 + 1) = val
             WRITE(6,
-     &'('' Response function for multipolarity'',I3,'' will be normalize
-     &d by factor '',F6.3)')i1, CNOrin(i1 + 1)
+     &'('' Response function for multipolarity'',I3,'' normalized by fac
+     &tor '',F6.3)')i1, CNOrin(i1 + 1)
             GOTO 100
          ENDIF
 C--------TRISTAN (MSD) input **** done ****
@@ -3462,7 +3412,7 @@ C-----
               ELSE
                Lqdfac=val
                WRITE(6,
-     &'('' Quasideuteron photoabsorption cross section will be'',
+     &'('' Quasideuteron photoabsorption cross section'',
      &  '' normalized by a factor '',F6.3)') Lqdfac
               ENDIF
             GOTO 100
