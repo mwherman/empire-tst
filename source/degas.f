@@ -143,6 +143,19 @@ C     Input parameters needed for Degas are taken from Empire:
 C
       IZDegas = INT(Z(1))                       ! Z of compound nucleus (CN)
       INDegas = INT(A(1) - Z(1))                ! N of CN
+
+      IF(AEJc(0).NE.1.)THEN
+         WRITE(6, *)''
+         WRITE(6, *)'WARNING'
+         WRITE(6, *)'WARNING: DEGAS can treat only neutron or proton '
+         WRITE(6, *)'WARNING: as projectiles.'
+         WRITE(6, *)'WARNING: DEGAS disposition ignored.'
+         WRITE(6, *)'WARNING'
+         WRITE(6, *)''
+         RETURN
+       ENDIF
+C      IF((AEJc(0).EQ.0.) .AND. ZEJc(0).EQ.0.)KEYdegas0 = 0
+
       IF((AEJc(0).EQ.1.) .AND. ZEJc(0).EQ.0.)KEYdegas0 = 1
 C     ! Incident neutron
       IF((AEJc(0).EQ.1.) .AND. ZEJc(0).EQ.1.)KEYdegas0 = 2
