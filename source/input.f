@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 16:35:04 $
-Ccc   * $Id: input.f,v 1.63 2005-02-04 16:35:04 herman Exp $
+Ccc   * $Date: 2005-02-04 22:45:20 $
+Ccc   * $Id: input.f,v 1.64 2005-02-04 22:45:20 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -826,6 +826,18 @@ C
             WRITE(6, *)' WARNING!!!! (It is not allowed for '
             WRITE(6, *)' WARNING!!!! photo-nuclear reactions)'
             WRITE(6, *)' '
+         ENDIF
+         IF(DEGa.NE.0 .AND. AEJc(0).NE.1.D0)THEN
+            WRITE(6, *)' '
+            WRITE(6, *)' DEGAS allowed only for incident nucleons'
+            WRITE(6, *)' Executions STOPPED'
+            STOP ' DEGAS allowed only for incident nucleons'
+         ENDIF
+         IF(LHMs.NE.0 .AND. AEJc(0).NE.1.D0)THEN
+            WRITE(6, *)' '
+            WRITE(6, *)' HMS allowed only for incident nucleons'
+            WRITE(6, *)' Executions STOPPED'
+            STOP ' HMS allowed only for incident nucleons'
          ENDIF
          IF(FISBAR(nnuc).NE.1 .AND. FISopt(nnuc).NE. 0)THEN
             FISopt(nnuc) = 0
