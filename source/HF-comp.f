@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-08-30 13:27:49 $
-Ccc   * $Id: HF-comp.f,v 1.28 2004-08-30 13:27:49 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-01 18:53:05 $
+Ccc   * $Id: HF-comp.f,v 1.29 2004-09-01 18:53:05 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1613,9 +1613,7 @@ C==============continuum contribution====================
          hh2=h(1,2)
          vv2=efb(2)
          h(1,2)=hoeq 
-c        Msin 08/2004 
-c        efb(2)=veq
-         efb(2)=veq+jc*0.017        
+         efb(2)=veq        
       ENDIF
 
       DO IBAr = 1, NRBarc1    
@@ -1628,7 +1626,7 @@ c        efb(2)=veq
 C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient
 C        However, as for the moment it does not work, SIMPSFIS is used
-         CALL SIMPSFIS(NNUc, IBAr, ee)
+         CALL SIMPSFIS(NNUc, IBAr)
 C        CALL GAUSSFIS(NNUc, IBAr)
          tfcon(IBAr) = TFCc
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr)  
@@ -2172,7 +2170,7 @@ C
 C
 
 C-----------------------------------------------------------
-      SUBROUTINE SIMPSFIS(Nnuc, Ibar, Ee)
+      SUBROUTINE SIMPSFIS(Nnuc, Ibar)
 C-----------------------------------------------------------
 C Simpson integration
       INCLUDE 'dimension.h'
