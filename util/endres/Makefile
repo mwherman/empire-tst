@@ -16,7 +16,7 @@ FFLAGS =
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =	endres.o dxsend.o 
+OBJF =	endres.o 
 
 
 endres:   $(OBJF)
