@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: fusion.f,v 1.35 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-14 21:13:38 $
+Ccc   * $Id: fusion.f,v 1.36 2005-03-14 21:13:38 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -36,7 +36,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ctmp1, 
-     &                 ctmp2, e1tmp, ecms, einlab, el, ener, p1, parcnj, 
+     &                 ctmp2, e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW), 
      &                 stmp1, stmp2, sum, wf, wparg, xmas_npro, 
      &                 xmas_ntrg
@@ -47,7 +47,7 @@ C
       LOGICAL dodwba, fexist, ldbwacalc, ltlj
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
-      INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul, 
+      INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
      &        nang
       INTEGER IDNINT, INT, MIN0, NINT
       INTEGER*4 iwin
@@ -60,6 +60,10 @@ C
 C  Zero qd fraction of photabsorption before it can do any damage
 C
       QDFrac = 0.0D0
+C
+C-----No DWBA by default   
+C
+      ldbwacalc = .FALSE.
 C
 C-----Reduced mass corrected for proper mass values
 C
