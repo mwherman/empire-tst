@@ -15,7 +15,7 @@ fi
 #run EMPEND to format EMPIRE output into ENDF
 
 cp $file.out OUTPUT.DAT
-../util/empend/empend <EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
+../util/empend/empend <../util/empend/EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
 mv empend.log $file-log.empend
 rm OUTPUT.DAT
 
