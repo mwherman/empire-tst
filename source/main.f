@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-01-30 12:35:15 $
-Ccc   * $Id: main.f,v 1.52 2005-01-30 12:35:15 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-31 01:12:35 $
+Ccc   * $Id: main.f,v 1.53 2005-01-31 01:12:35 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -182,6 +182,8 @@ Ccc
 C
 C     COMMON variables
 C
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl
+C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl,
      &                bet2
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
@@ -206,19 +208,10 @@ C
      &                 tdirm(3),cota,cota1,cotaexp
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
-      DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp, G
+      CHARACTER*18 ctmp18
+      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, ELAda(101)
+      DOUBLE PRECISION ftmp
       INTEGER NELang
-C     For factorial calculations (SCAT2)
-      PARAMETER(LFMAX = 4*NDTL + 2)
-      COMMON /FACT  / G(LFMAX)
-C-----next COMMON is to transfer elastic ddx from Scat-2
-      COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
-C-----Plujko_new
-C     INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
-C     COMMON /MLOCOM1/ keyinput, kzz1, kaa1
-C     COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
-C-----Plujko_new(End)
 C
 C     Local variables
 C
@@ -244,12 +237,13 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
+
       icalled = 0
-C
+
+      CALL THORA(6)
 C-----
 C-----Read and prepare input data
 C-----
-      CALL HORA(6)
  1400 CALL INPUT
 C-----
 C-----Print input data
@@ -266,7 +260,6 @@ C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
       CALL MARENG(0, 0)
-      IF(IZAejc(0).eq.0) go to 1234
 C-----
 C-----Get ECIS results
 C-----
@@ -275,24 +268,18 @@ C--------locate position of the target among residues
 C--------locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
-      ELAcs = 0.d0
-      TOTcs = 0.d0
-      ecisabs = 0.d0
+      WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+     &         INT(ZEJc(0)),INT(AEJc(0)),
+     &       SYMb(0),INT(A(0)),INT(EINl*1000)
 
-      OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD',ERR=1500)
-      READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
-      IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
-      READ(45, *, END = 1500)ecisabs
-      IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
-      ELAcs=ftmp
-      CLOSE(45)
+C     TOTcs, ABScs,ELAcs are initialized within MARENG()
 
       ncoll = 0
       NELang = 73
       ecm = EINl - EIN
       dang = 3.14159/FLOAT(NELang - 1)
 
-      OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD',ERR=1500)
+      OPEN(45, FILE = ('../TL/'//ctmp18//'.ANG'),STATUS= 'OLD',ERR=1500)
       READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
       READ(45, *, END = 1500)  ! To skip level identifier line
       DO iang = 1, NELang
@@ -300,16 +287,13 @@ C
       ENDDO
 
       IF(DIRECT.EQ.0) goto 1500
-
-      OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD',ERR=1500)
+      OPEN(46, FILE = ('../TL/'//ctmp18//'.ICS'),STATUS= 'OLD',ERR=1500)
       READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
-C     OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')
-C     READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
 
 C-----get and add inelastic cross sections (including double-differential)
       DO i = 2, ND_nlv
         ilv = ICOller(i)
-        IF(ilv.GT.NLV(nnurec))GOTO 1500
+        IF(ilv.GT.NLV(nnurec)) CYCLE
         echannel = EX(NEX(1), 1) - Q(nejcec, 1) - ELV(ilv, nnurec)
 C-------avoid reading closed channels
         IF(echannel.GE.0.0001)THEN
@@ -370,8 +354,8 @@ C                    escape if we go beyond recoil spectrum dimension
         ENDIF
  1450 ENDDO
  1500 CLOSE(45)
+
       IF(DIRECT.NE.0) CLOSE(46)
-C      IF(DIRECT.EQ.0) CLOSE(47)
 
 C-----print elastic and direct cross sections from ECIS
       WRITE(6, *)' '
@@ -380,20 +364,11 @@ C-----print elastic and direct cross sections from ECIS
         WRITE(6, *)
      &     ' Results provided by Spherical Optical Model calculations'
         WRITE(6, *)' '
-      ELSEIF(DIRect.EQ.1)THEN
-        IF(MODelecis.GT.0)THEN
-          WRITE(6, *)
-     &     ' Results provided by Coupled Channel calculations'
-        ELSE
-          WRITE(6, *)
-     &     ' Results provided by Spherical Optical Model calculations'
-        ENDIF
-        WRITE(6, *) ' Inelastic scattering results provided by'
-        WRITE(6, *) ' Coupled Channel + DWBA calculations'
-        WRITE(6, *)' '
-      ELSEIF(DIRect.EQ.2)THEN
+      ELSEIF(DIRect.EQ.1 .OR. DIRect.EQ.2)THEN
         WRITE(6, *)
      &     ' Results provided by Coupled Channel calculations'
+        WRITE(6, *) ' Inelastic scattering results provided by'
+        WRITE(6, *) ' Coupled Channel + DWBA calculations'
         WRITE(6, *)' '
       ELSEIF(DIRect.EQ.3)THEN
         WRITE(6, *)
@@ -402,11 +377,13 @@ C-----print elastic and direct cross sections from ECIS
      &     ' Inelastic scattering results provided by DWBA calculations'
         WRITE(6, *)' '
       ENDIF
-
+C
+C     ABScs = CSfus  always  !!!
+C
       IF(ZEJc(0).EQ.0) THEN
-        WRITE(6, 99004)TOTcs, ecisabs, ELAcs
+        WRITE(6, 99004)TOTcs, ABScs, ELAcs
       ELSE
-        WRITE(6, 99005)ecisabs
+        WRITE(6, 99005) ABScs
       ENDIF
 
       WRITE(6, 89001)
@@ -460,7 +437,6 @@ C     Skipping all emission calculations
 C     GOTO 99999
 C
 C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
- 1234 CONTINUE
       CALL WHERE(IZA(1) - IZAejc(0), mt2, iloc)
       CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
       CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
@@ -532,6 +508,7 @@ C--------print MSD double differential cross sections
          WRITE(6, *)' '
 C--------correct CN population for the MSD emission
          corrmsd = (CSFus - CSMsd(1) - CSMsd(2))/CSFus
+
          IF(corrmsd.LT.0.0D0)THEN
             WRITE(6, *)' '
             WRITE(6, *)'MSD EMISSION LARGER THEN FUSION CROSS SECTION'
@@ -625,23 +602,12 @@ Cb     &               POP(NEX(1), i, 1, 1), ( - i), POP(NEX(1), i, 2, 1)
             WRITE(6,
      &'(''   Fusion cross section = '',G13.6,
      &  '' mb '')')CSFus
-         ELSEIF(DIRect.EQ.1)THEN
+         ELSEIF(DIRect.EQ.1 .OR. DIRECT.EQ.2 )THEN
             WRITE(6,
      &'(''   Fusion cross section = '',G13.6,
      &  '' mb including'')')CSFus
             WRITE(6,
-     &'(''   CC inelastic to discrete levels = '',
-     &  G13.6,'' mb'')')SINl
-            WRITE(6,
-     &'(''   Spin distribution does NOT contain'',
-     &  '' CC inelastic contribution '')')
-         ELSEIF(DIRect.EQ.2)THEN
-            CSFus = CSFus + SINl
-            WRITE(6,
-     &'(''   Fusion cross section = '',G13.6,
-     &  '' mb including'')')CSFus
-            WRITE(6,
-     &'(''   CC inelastic to discrete levels = '',
+     &'(''   CC+DWBA inelastic to discrete levels = '',
      &  G13.6,'' mb'')')SINl
             WRITE(6,
      &'(''   Spin distribution calculated using '',
@@ -1026,9 +992,6 @@ C--------turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF(FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
-C
-C        Please check the line below for the INCIDENT GAMMAS (02/2004)
-C
          IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0)LHRtw = 0
          IF(nnuc.EQ.1 .AND. LHRtw.GT.0)THEN
             CALL HRTW
@@ -2029,17 +1992,21 @@ C-----end of ENDF spectra (inclusive)
          IF(FILevel)CLOSE(14)
          WRITE(12, *)' '
          WRITE(6, *)' '
-         WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
+         WRITE(6, *)' CALCULATIONS COMPLETED SUCCESSFULLY'
          CLOSE(15,status='delete')
          CLOSE(16,status='delete')
          CLOSE(66,status='delete')
-           write(*,*) '.'
-         CALL HORA(6)
+         write(*,*) '.'
+         CALL THORA(6)
          STOP '. REGULAR STOP'
       ENDIF
-      CALL HORA(6)
+
+      CALL THORA(6)
+
       FIRst_ein = .FALSE.
+
       GOTO 1400
+
 99012 FORMAT(I12, F10.4, I5, F8.1, G15.6, I3,
      &       7(I4, F7.4), :/, (53X, 7(I4, F7.4)))
 99013 FORMAT(1X, F5.2, 12G10.3)
@@ -2222,65 +2189,4 @@ C--------print end point again with 0 xs for consistency with particle spectra
          ENDIF
       ENDIF
       RETURN
-      END
-
-      SUBROUTINE HORA(IOUT)
-C
-C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL AND SINCE THE LAST CALL
-C              (LAHEY and MS FORTRAN compatible)
-C
-      REAL*8 DIFTIM,BEGTIM,ENDTIM,DIFTI1
-      INTEGER*2 IHR,MIN,ISEC,I110,IH,MIN1,IS,I10
-      INTEGER IOUT
-      LOGICAL NEVER_CALLED
-      DATA NEVER_CALLED/.TRUE./
-      SAVE BEGTIM,NEVER_CALLED
-
-      IF (NEVER_CALLED) then
-        NEVER_CALLED = .FALSE.
-C begin MS-Fortran
-C        CALL GETTIM (IHR,MIN,ISEC,I110)
-C        BEGTIM=DBLE(IHR*3600.+MIN*60.+ISEC+I110*.01)
-C end MS-Fortran
-C begin g77
-        BEGTIM=SECOND()
-        I110=100*BEGTIM+0.5
-        ISEC=BEGTIM
-        I110=I110-100*ISEC
-        MIN=ISEC/60
-        ISEC=ISEC-60*MIN
-        IHR=MIN/60
-        MIN=MIN-60*IHR
-C end g77
-        WRITE(IOUT,1002) IHR,MIN,ISEC,I110
-C        WRITE(*,1002) IHR,MIN,ISEC,I110
-      ELSE
-C begin MS-Fortran
-C        CALL GETTIM (IH,MIN1,IS,I10)
-C        ENDTIM=DBLE(IH*3600.+MIN1*60.+IS+I10*.01)
-C end MS-Fortran
-C begin g77
-        ENDTIM=SECOND()
-        I10=100*ENDTIM+0.5
-        IS=ENDTIM
-        I10=I10-100*IS
-        MIN1=IS/60
-        IS=IS-60*MIN1
-        IH=MIN1/60
-        MIN1=MIN1-60*IH
-C end g77
-        IF(ENDTIM.LT.BEGTIM) ENDTIM = ENDTIM +  86400.D0
-        DIFTIM=(ENDTIM-BEGTIM)/60.
-        DIFTI1=(DIFTIM-INT(DIFTIM))*60.
-        WRITE(IOUT,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
-C        WRITE(*,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
-      ENDIF
-
-      RETURN
- 1001 FORMAT (/15X,' CURRENT TIME: ',
-     1 I2,3H H ,I2,5H MIN ,I2,5H SEC ,I2,5H HUN /
-     1 15X,' CALCULATION TIME: ',I3,' MIN ',I2,' SEC'/)
- 1002 FORMAT (/15X,' START TIME: ',
-     1 I2,3H H ,I2,5H MIN ,I2,5H SEC ,I2,5H HUN /)
-C====================================================================
       END

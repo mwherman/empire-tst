@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-25 01:06:51 $
-Ccc   * $Id: input.f,v 1.61 2005-01-25 01:06:51 Capote Exp $
+Ccc   * $Date: 2005-01-31 01:12:46 $
+Ccc   * $Id: input.f,v 1.62 2005-01-31 01:12:46 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -156,38 +156,41 @@ C-----maximum exponent of 10 supported by the computer (for real*8)
       ENDDO
       iccerr = 0
 C
-C     Capote 2001
 C     Defining global physical and mathematical constants
 C     They are passed through CONSTANT common block
 C
-C     W2=0.04784468   (OLD SCAT)
-C     W2=0.04784369   (NEA-DATA-BANK PRESCRIPTION )
-C     W2=0.047837/10  (EMPIRE) converting already to mb
-C     W2=0.04784467   (ECIS)
+C     THE FOLLOWING DEFINITIONS COPIED FROM ECIS03 code (NEA DATA BANK)
 C
-C     Changed to ECIS-OLD SCAT PRESCRIPTION
-C     CORRESPOND TO THE FOLLOWING CONSTANT VALUES
-C     AMUmev=931.5017646d0
-C     hhbarc = 197.328604d0
+C CONSTANTS COMPUTED FROM THE FUNDAMENTAL CONSTANTS, ATOMIC MASS, HBAR*C
+C AND ALPHA, AS GIVEN IN THE EUROPEAN PHYSICAL JOURNAL, PAGE 73, VOLUME
+C 15 (2000) REFERRING FOR THESE VALUES TO THE 1998 CODATA SET WHICH MAY
+C BE FOUND AT http://physics.nist.gov/constants
+C     CM=931.494013 +/- 0.000037 MeV
+C     The above value is the one used also in the ENDF-6 manual (April 2001)
+      AMUmev = 9.31494013D+02
+C     CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
+
+      HHBarc=197.32696801D0
+C     HHBarc = 1.97327053D+02  (EMPIRE v 2.18)
+
       XNExc = 8.071323D0
 C-----From SCAT2000
       ampipm = 1.395688D+02
       ampi0 = 1.349645D+02
-C-----AMUmev = 9.3149386D+02
-C-----according to the ENDF-6 manual (April 2001)
-      AMUmev = 9.31494013D+02
+C
       AMPi = (2.D0*ampipm + ampi0)/3.D0
+
+c     ELE2 = e*e in MeV.fm
       ELE2 = 1.4399652D+00
-      HHBarc = 1.97327053D+02
-C
-C     CHECK mass values
-C
+
+C     Neutron mass = 1.008 664 915 60(55) u
       AMUneu = 1.008665d0
-      AMUpro = 1.007825d0
+C     Proton mass = 1.007 276 466 88(13) u
+      AMUpro = 1.007276d0
 C
 C-----already converted to mb
-C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
       W2 = 2.D0*AMUmev/HHBarc**2/10.D0
+
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
@@ -270,13 +273,13 @@ C                Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1054,8 +1057,7 @@ C--------set projectile/ejectile masses
 C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
          CALL READLDP
-C--------Capote 2001
-C        IF(DIRect.GT.0 .AND. AEJc(0).LE.1.0D0)THEN
+
          IF(DIRect.GT.0)THEN  ! Inelastic scattering by DWBA for all particles
 
 C--------fix-up deformations and discrete levels for ECIS coupled channels
@@ -1118,7 +1120,9 @@ C--------fix-up deformations for coupled channels *** done ***
                IOMwrite(nejc, nnuc) = 0
             ENDDO
          ENDDO
+
       ENDIF
+
       NLW = NDLW
       CSFus = CSRead
 C-----KTRLOM Optical Model control
@@ -1216,9 +1220,6 @@ C-----set giant resonance parameters for CN
       GMRpar(8, nnuc) = 0.0
       IF(Q(0, 1).EQ.0.0D0)THEN
          CALL BNDG(0, 1, Q(0, 1))
-Csinsin
-C        Q(1,1)=4.
-C        Q(0,1)=2.
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
       EINl = EIN
@@ -1266,10 +1267,10 @@ C-----WRITE heading on FILE6
      &         Q(0, 1)
       ENDIF
 
-c
-c     eLIMINADO EL CALCULO DE direct>0 DE AQUI
-C          (VER mareng)  RCN 01/2005
-c
+C********************************************************************
+C     DIRECT.GT.0 block eliminated RCN, 01/2005
+C          (transferred to fusion.f)
+C********************************************************************
 
 C
 C-----determination of excitation energy matrix in cn
@@ -1279,8 +1280,9 @@ C
       IF(FITlev.GT.0.0D0) THEN
          ECUt(1) = 0.0
 C
-C        RCN, 09/2004 (If ENDF ne 0, then MAx(Ncut)=40 !! (no good option)
+C        If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting)
+C           if FITlev > 0
          ENDF=0
       ENDIF
 C-----check whether any residue excitation is higher than CN
@@ -1342,6 +1344,8 @@ C
                WRITE(6, '('' NO LOCATION ASCRIBED TO NUCLEUS '')')izares
                STOP
             ENDIF
+C           Mass of the residual nnclei
+C           AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
             IF(EMAx(nnur).EQ.0.0D0)THEN
 C--------------determination of discrete levels and pairing shifts for rn
                IF(LVP(1, nnur).EQ.0)CALL LEVREAD(nnur)
@@ -1410,7 +1414,6 @@ C-----------determination of excitation energy matrix in res. nuclei
      &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
                NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
                STOP
-C              CALL CLEAR
             ENDIF
             IF(NEX(nnur).GT.0)THEN
                DO i = 1, NEX(nnur)
@@ -1472,20 +1475,21 @@ C-----------calculate tramsmission coefficients
                CALL TLEVAL(nejc, nnur, nonzero)
 C--------------print transmission coefficients
                IF(nonzero .AND. IOUt.EQ.5)THEN
-                  WRITE(6, *)'Transmission coefficients for '
-                  WRITE(6, '(1x,A14,I3,A3,I3,A3,F4.1)')'Projectile: A=',
+                 WRITE(6, *)
+                 WRITE(6, *)' Transmission coefficients for '
+                 WRITE(6, '(1x,A15,I3,A3,I3,A3,F4.1)')' Projectile: A=',
      &                  INT(AEJc(nejc)), ' Z=', INT(ZEJc(nejc)), ' S=',
      &                  SEJc(nejc)
-                  WRITE(6, '(1x,A10,I3,A3,I3,A3,F4.1,A3,I2)')
-     &                  'TARGET: A=', INT(A(nnur)), ' Z=', INT(Z(nnur)),
-     &                  ' S=', SNGL(XJLv(LEVtarg, nnur)), ' P=',
+                 WRITE(6, '(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
+     &                 ' TARGET: A=', INT(A(nnur)), ' Z=', INT(Z(nnur)),
+     &                 ' S=', SNGL(XJLv(LEVtarg, nnur)), ' P=',
      &                  INT(LVP(LEVtarg, nnur))
-                  DO i = 1, netl
+                 DO i = 1, netl
                      IF(TL(i, 1, nejc, nnur).GT.0.0)WRITE(6, 99002)
      &                  ETL(i, nejc, nnur),
      &                  (TL(i, j, nejc, nnur), j = 1, 12)
-                  ENDDO
-                  WRITE(6, '(1X,/)')
+                 ENDDO
+                 WRITE(6, '(1X,/)')
                ENDIF
 C--------------check of etl index determination (to be deleted)
 C              IEXR=NEX(NNUC)-NEXR(NEJC,NNUC)
@@ -2269,8 +2273,8 @@ C--------------searching in the RIPL database
                STOP
             ENDIF
             WRITE(6,
-     &'('' Optical model parameters for ECIS set to RIPL-2 #'',I4
-     &)')INT(val)
+     &'('' Optical model parameters for direct inleastic scattering set
+     &to RIPL #'',I4)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
          ENDIF
@@ -2852,8 +2856,8 @@ C--------------Searching in the RIPL database for i1 catalog number
                   GOTO 100
                ENDIF
                WRITE(6,
-     &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
-     &)')i1, INT(val)
+     &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
+     &'', I4)')i1, INT(val)
             ELSE
                WRITE(6,
      &'('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')')
@@ -4599,7 +4603,7 @@ C
       i41p = 0
       i31p = 0
       ND_nlv = 0
-      ierr = 1
+      ierr = 0
 C
 C-----constructing input and filenames
 C
@@ -4702,10 +4706,17 @@ C        README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
      &            'Default dynamical deformations 0.05(3-) will be used'
        beta3 = 0.05
       ENDIF
-C400  DO ilv = 1, nlvr
+
+C--------locate position of the target among residues
+      CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
+
  400  DO ilv = 1, NLVs
          READ(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr,
      &        xjlvr, lvpr, t12, ndbrlin
+
+C        Skipping levels in continuum
+         IF(ilv.GT.NLV(nnurec)) goto 600
+
          IF(ilv.EQ.1)THEN
             delta_k = 2.D0
             IF(xjlvr.NE.0.D0)delta_k = 1.D0

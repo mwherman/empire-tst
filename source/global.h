@@ -115,7 +115,7 @@ C                      RCN, 09/2004
 C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
      &                 OMEmin(0:NDEJC, 0:NDNUC),
      &                 OMEmax(0:NDEJC, 0:NDNUC), AWSo(0:NDEJC, 0:NDNUC),
-     &                 RWSo(NDRVSO, 0:NDEJC, 0:NDNUC), DIRect, SINl,
+     &                 RWSo(NDRVSO, 0:NDEJC, 0:NDNUC), DIRect,
      &                 D_Elv(NDCOLLEV), D_Xjlv(NDCOLLEV),
      &                 D_Lvp(NDCOLLEV), D_Def(NDCOLLEV, NDDEFCC),
      &                 D_Klv(NDCOLLEV), D_Llv(NDCOLLEV)

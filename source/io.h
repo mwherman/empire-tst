@@ -22,7 +22,7 @@ c     34     lev-dens
 c     39     tl
 c     43     SDREAD (Plujko change)
 c     45     tl,fusion,main
-c     46     tl
+c     46     tl,fusion,main
 c     60     main
 c     62     main
 c     66     MSD-Tristan
@@ -54,7 +54,6 @@ C-----Plujko_new (END of spin distribution from file SDFILE)
 C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
       OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
       OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
-      OPEN(UNIT=62,FILE='ECIS_XS.DAT',STATUS='UNKNOWN')
       OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
       OMPARF=.FALSE.
       OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
