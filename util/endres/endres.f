@@ -1,6 +1,8 @@
       PROGRAM ENDRES
 C-Title  : Program ENDRES
 C-Purpose: Insert resonance data into an ENDF file
+C-Author : A. Trkov, IAEA-NDS, Vienna, Austria
+C-Version: November 2003
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -8,6 +10,18 @@ C-M
 C-M  The program is primarily intended to complete a partial ENDF
 C-M  file produced from a nuclear model calculation by inserting the
 C-M  resonance parameter data from another ENDF file.
+C-M
+C-M  Procedures
+C-M  The following tasks are performed:
+C-M  - The resonance parameters MF 2 are inserted into the file.
+C-M  - The energy range of the cross sections for total, elastic,
+C-M    capture and fission (if present) are extended down to 1.E-5 eV.
+C-M  - The elastic angular distributions are extended down to
+C-M    1.E-5 eV by repeating the distribution of the first available
+C-M    energy point.
+C-M  - Photon spectra in MF 6 are extrapolated to thermal energies in
+C-M    a similar way like the elastic angular distributions.
+C-M    
 C-
       PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
 C*
@@ -59,8 +73,15 @@ C*   Output ENDF file
       READ (LKB,691) FLNM
       IF(FLNM.NE.BLNK) FLOU=FLNM
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
-C*   ENDRES log file
-      OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
+C-F  Define the LSSF flag
+      LSSF=0
+      WRITE(LTT,691) ' Enter LSSF flag                        '
+      WRITE(LTT,691) ' LSSF=0 Calculate x.s. from URRP        '
+      WRITE(LTT,691) '$     1 URRP for self-shielding only :  '
+      READ (LKB,691,END=18) FLNM
+      IF(FLNM.NE.BLNK) READ (FLNM,698) LSSF
+C* ENDRES log file
+   18 OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
       WRITE(LLG,691) ' ENDRES - Add Resonance Data to ENDF    '
       WRITE(LLG,691) ' ===================================    '
       WRITE(LLG,691)
@@ -90,6 +111,7 @@ C*
 C-F  Find equivalent nuclide (matching ZA) on the resonance file
       MFR=0
       MTR=0
+      ERH=0
       CALL FINDMT(LRR,ZA0,ZA,AW,L1,L2,N1,N2,MAR,MFR,MTR,IER)
       IF(IER.GT.0) THEN
         IF     (IER.EQ.1) THEN
@@ -149,15 +171,82 @@ C-F  Process the resonance data and define the energy range
       CH66( 1:11)=CHZA
       CH66(12:22)=CHAW
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      READ (CH66,891) XZA,XAWR,IDMY,IDMY,NIS,IDMY
       CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+      READ (CH66,891) XZA,XABN,IDMY,LFW,NER,IDMY
       CH66( 1:11)=CHZA
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
-      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      READ (CH66,891) ERL,ERH
+C* Process a resonance section
   122 CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      IF(MF.NE.0) GO TO 122
+      READ (CH66,891) ERL,EH,LRU,LRF,NRO,NAPS
+      IF(LRU.EQ.0) THEN
+C* Case: no resonance parameters
+        GO TO 128
+      ELSE IF(LRU.EQ.1) THEN
+C* Case: Resolved resonance range present -  copy to output
+        ERH=EH
+        IF(NIS.GT.1) THEN
+          WRITE(LTT,691) ' ENDRES WARNING - Multi-isotope file    '
+          WRITE(LTT,691) '                  limited support       '
+          WRITE(LLG,691) ' ENDRES WARNING - Multi-isotope file    '
+          WRITE(LLG,691) '                  limited support       '
+          GO TO 128
+        END IF
+C*       No special procedures needed for single range evaluations
+        IF(NER.EQ.1) GO TO 128
+C*       Processing the resolved resonance range
+        IF(LRF.EQ.1 .OR. LRF.EQ.2 .OR. LRF.EQ.3) THEN
+C*         Copy the energy-dependent radius
+          IF(NRO.NE.0) THEN
+            CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+            READ (CH66,891) DMY,DMY,IDMY,IDMY,NR,IDMY
+            CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            NN=(NR-1)/3+1
+            DO I=1,NN
+              CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+              CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            END DO
+          END IF
+          CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+          CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+          READ (CH66,891) DMY,DMY,IDMY,IDMY,NLS,IDMY
+          DO L=1,NLS
+            CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+            CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            READ (CH66,891) DMY,DMY,IDMY,IDMY,IDMY,NRS
+            DO J=1,NRS
+              CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+              CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            END DO
+          END DO
+          GO TO 122
+        ELSE
+
+          WRITE(LTT,692) ' ENDRES ERROR - No coding fo NER= 2/LRF=',LRF  
+          WRITE(LLG,692) ' ENDRES ERROR - No coding fo NER= 2/LRF=',LRF  
+
+          STOP 'ENDRES ERROR - No coding fo NER=2/LRF'
+
+        END IF
+
+      ELSE IF(LRU.EQ.2) THEN
+C* Case: Unresolved resonance range present - process LSSF and copy
+        CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+        READ (CH66,891) DMY,DMY,LSSF1
+        WRITE(CH66(23:33),892) LSSF
+        CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+        IF(LSSF.EQ.0) ERH=EH
+      ELSE
+C* Case: Unknown LRU - copy as is to output
+        WRITE(LTT,692) ' ENDRES WARNING - Unrecognised LRU =    ',LRU
+        WRITE(LTT,691) '                  limited support       '
+        GO TO 128
+      END IF
+C* Copy the rest of the resonance file to output
+  128 CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      IF(MF.NE.0) GO TO 128
 C*
 C-F  Find the pointwise cross sections in the source file
   130 CALL RDTEXT(LEM,MA1,MF,MT,CH66,IER)
@@ -432,5 +521,7 @@ C*
   691 FORMAT(2A40)
   692 FORMAT(A40,I6)
   696 FORMAT(A66)
+  698 FORMAT(BN,I10)
   891 FORMAT(2F11.0,4I11)
+  892 FORMAT(I11)
       END
