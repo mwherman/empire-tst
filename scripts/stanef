@@ -1,0 +1,28 @@
+#! /bin/sh -
+#script to standardize ENDF formatted file with STANEF
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'ENDF files ready to run'
+echo ' '
+ls *endf
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
+fi                          
+
+# RUN STANEF
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-stan.endf
+0
+
+DONE
+EOF
+../util/stanef/stanef <INPUT
+mv $file-stan.endf $file.endf
+
+exit

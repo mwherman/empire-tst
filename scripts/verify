@@ -1,0 +1,52 @@
+#! /bin/sh -
+#script to verify ENDF formatting and perform physics check 
+#on the file originating from EMPIRE 
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *\.endf
+echo ' '
+echo -n 'Choose one of the above (without .out extention!): '
+read file
+fi                          
+
+
+# RUN CHECKR
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.checkr
+
+DONE
+EOF
+../util/checkr/checkr <INPUT
+
+# RUN FIZCON
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.fizcon
+
+DONE
+EOF
+../util/fizcon/fizcon <INPUT
+
+
+# RUN PSYCHE
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.psyche
+Y
+
+EOF
+../util/psyche/psyche <INPUT
+
+
+exit
