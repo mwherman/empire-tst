@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: main.f,v 1.60 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-07 14:32:46 $
+Ccc   * $Id: main.f,v 1.61 2005-03-07 14:32:46 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -748,7 +748,7 @@ C           IF(PEQc.GT.0) CALL AUERST(1, 3)
             ENDIF
          ENDIF
 C--------
-C--------start nnuc nucleus decay
+C--------start Hauser-Feshbach nnuc nucleus decay
 C--------
          popleft = 0.0
 C--------ensure that full gamma cascade in the first CN is
@@ -769,8 +769,7 @@ C--------account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.5.0D+0) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
             CALL HRTW
-            IF (ENDf.GT.0) CALL RECOIL(kemax,nnuc)
-                                                  !recoil spectrum
+            IF (ENDf.GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
             kemax = NEX(nnuc) - 1
             GCAsc = 1.0
          ENDIF
