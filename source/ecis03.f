@@ -17,6 +17,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       MW=6                                                              ECIS-016
       MS=8                                                              ECIS-017
       OPEN(58,file='ecis03.cs')                                   
+      OPEN(158,file='ecis03.dat')                                   
       OPEN(59,file='ecis03.ics')
       OPEN(60,file='file60')
       OPEN(61,file='file61')
@@ -30,8 +31,10 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN(87,file='file87')
       OPEN(88,file='file88')
       OPEN(89,file='file89')
+      OPEN(99,file='file99')
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-018
       CLOSE(58)
+      CLOSE(158)
       CLOSE(59)
       CLOSE(60,status='delete')
       CLOSE(61,status='delete')
@@ -45,6 +48,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE(87,status='delete')
       CLOSE(88,status='delete')
       CLOSE(89,status='delete')
+      CLOSE(99,status='delete')
       STOP                                                              ECIS-019
       END                                                               ECIS-020
 C 01/01/04                                                      ECIS03  HORA-000
@@ -9699,7 +9703,8 @@ C CHANGE OF PARITY                                                      CAL1-184
       READ (99,1008) K1,K2,U1,U2                                        CAL1-201
    20 WRITE (63,1008) K1,K2,U1,U2                                       CAL1-202
    21 CONTINUE                                                          CAL1-203
-      CLOSE (99,STATUS='DELETE')                                        CAL1-204
+C     CLOSE (99,STATUS='DELETE')                                        CAL1-204
+      CLOSE (99)                                                        CAL1-204
    22 KCB=MAX0(NCT(5),NCT(6))                                           CAL1-205
       NDX=NXC+8*KCB                                                     CAL1-206
       NDY=NDX+JTH                                                       CAL1-207
@@ -10291,7 +10296,7 @@ C OUTPUT OF POTENTIALS                                                  POTE-481
  1019 FORMAT (//' TENSOR MULTIPOLES',I6/)                               POTE-549
  1020 FORMAT (5X,I5,1P,2D26.7,' I',10X,2D16.7,' I')                     POTE-550
       END                                                               POTE-551
-C 01/01/04                                                      ECIS03  ROTP-000
+C 25/07/04                                                      ECIS03  ROTP-000
       SUBROUTINE ROTP(BETA,NBTA,BTA,IP,V,VA,IVY,IV,PP,B,P,VAL,ID1,ISM,H,ROTP-001
      1INVZ,IQ1,IQM,INY,NBT1,PGN,XGN,CCZ,LO)                             ROTP-002
 C INPUT VARIABLES:  BETA,NBTA: DEFORMATIONS, EQUIVALENT BY CALL         ROTP-003
@@ -10540,8 +10545,8 @@ C DEFORMED COULOMB POTENTIAL                                            ROTP-226
    41 IF (INVZ.EQ.0) GO TO 51                                           ROTP-246
       IF (LO(8*I+55)) GO TO 51                                          ROTP-247
       DO 50 K=INX,IQ1                                                   ROTP-248
-      IF (IVY(I-3,K-INY).EQ.0) GO TO 50                                 ROTP-249
-      L=IVY(7,K-INY)+1                                                  ROTP-250
+      L=IVY(7,K-INY)+1                                                  ROTP-249
+      IF ((IVY(I-3,K-INY).EQ.0).OR.(L.EQ.1)) GO TO 50                   ROTP-250
       D=L                                                               ROTP-251
       N=IV(K)                                                           ROTP-252
       IF (R.LT.P(I,J)) GO TO 42                                         ROTP-253
@@ -10647,8 +10652,8 @@ C COULOMB POTENTIALS WITH DIFFUSE CHARGE DISTRIBUTION                   ROTP-337
    63 IF (INVZ.EQ.0.OR.LO(8*I+55)) GO TO 67                             ROTP-353
       DO 66 J=1,INVZ                                                    ROTP-354
       N=IVY(I-3,J)                                                      ROTP-355
-      IF (N.EQ.0) GO TO 66                                              ROTP-356
-      L=IVY(7,J)                                                        ROTP-357
+      L=IVY(7,J)                                                        ROTP-356
+      IF ((N.EQ.0).OR.(L.EQ.0)) GO TO 66                                ROTP-357
       I1=N+ITX(I+8)                                                     ROTP-358
       IF (LO(100)) I1=IT5+11*J+I                                        ROTP-359
       I2=I1                                                             ROTP-360
@@ -11937,6 +11942,9 @@ C FOLDING OF CHARGE DISTRIBUTION WITH COULOMB POTENTIAL                 STDP-547
       IF (IDX.GT.2*NX) CALL MEMO('STDF',NX,(IDX+1)/2,2)                 STDP-549
       A7=0.D0                                                           STDP-550
       IF (LT(8)) A7=VA(NMB+4)                                           STDP-551
+C     PAP(1)=AP                                                                     
+C     CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,PAP(1),A7,CCZ,A6,.TRUE.,
+C    >	  .FALSE.)
       CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,AP,A7,CCZ,A6,.TRUE.,.FALSE.) STDP-552
       IF (A6.EQ.0.D0) A6=DABS(V(ISM,L1)*DFLOAT(2*L+1)*(ISM*HH)**(L+1)/(CSTDP-553
      1CZ*VA(NMB)))                                                      STDP-554
@@ -18681,19 +18689,23 @@ C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
       ND=1                                                              RESU-287
       IF (WV(5,1).EQ.0.D0) ND=3                                         RESU-288
       WRITE (58,1009) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),ND              RESU-289
+      WRITE (158,'(1x,F10.3\)') WV(12,1)                                RCN
       IF (NCOLS.NE.1) WRITE (59,1010) WV(1,1),WV(12,1),WV(2,1),IPI(4,1),RESU-290
      1NCOLS-1                                                           RESU-291
    30 IF (WV(5,1).NE.0.D0) GO TO 31                                     RESU-292
       WRITE (MW,1011) TX(1)                                             RESU-293
       IF (LO(59)) WRITE (58,1012) TX(1)                                 RESU-294
+      IF (LO(59)) WRITE (158,'(3x,F10.2\)') TX(1)                       RCN
    31 RX=TX(1)-TX(2)                                                    RESU-295
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-296
+      IF (LO(59)) WRITE (158,'(1x,F10.2\)') RX                          RCN
       IF (LO(81)) GO TO 32                                              RESU-297
       WRITE (MW,1013) RX                                                RESU-298
       GO TO 42                                                          RESU-299
 C COMPOUND NUCLEUS RESULTS                                              RESU-300
    32 WRITE (MW,1014) RX                                                RESU-301
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-302
+      IF (LO(59)) WRITE (158,'(1x,F10.2\)') RX                          RCN
       NDP=2*NCOLL+NSP(1)+1                                              RESU-303
       RX=RX-TX(NCOLL+2)                                                 RESU-304
       WRITE (MW,1015) RX                                                RESU-305
@@ -18774,6 +18786,7 @@ C PSEUDO DO LOOP ON LEVELS                                              RESU-365
    46 IF (LO(81)) WRITE (MW,1032) TX(INIV+1)                            RESU-379
       IF (LO(159)) GO TO 47                                             RESU-380
       IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-381
+      IF (INIV.EQ.1) WRITE (158,'(1x,F10.2)') RX                        RCN
       IF (INIV.NE.1) WRITE (59,1033) RX,INIV-1                          RESU-382
    47 IF (LO(81)) WRITE (MW,1034) TX(NCOLL+INIV+1)                      RESU-383
       IF (LO(66)) GO TO 62                                              RESU-384
