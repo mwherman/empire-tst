@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-15 15:53:21 $
-Ccc   * $Id: tl.f,v 1.46 2005-03-15 15:53:21 herman Exp $
+Ccc   * $Date: 2005-03-15 20:19:50 $
+Ccc   * $Id: tl.f,v 1.47 2005-03-15 20:19:50 herman Exp $
  
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2199,7 +2199,7 @@ C
 C-----Running ECIS
 C
       IF (Inlkey.EQ.0) THEN
-         CALL ECIS('ecSPH.inp','ECIS_SPH.out#')
+         CALL ECIS('ecSPH.inp','ECIS_SPH.out')
       ELSE
          CALL ECIS('ecVIB.inp','ECIS_VIB.out')
       ENDIF
@@ -2565,9 +2565,9 @@ C
       CLOSE (UNIT = 1)
 C-----Running ECIS
       IF (npho.GT.0) THEN
-         CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out#')
+         CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out')
       ELSE
-         CALL ECIS('ecVIBROT.inp','ECIS_ROT.out#')
+         CALL ECIS('ecVIBROT.inp','ECIS_ROT.out')
       ENDIF
       END
  
