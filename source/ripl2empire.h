@@ -16,12 +16,12 @@ C
 C
       REAL*4 EMin, EMax, EPOt, RCO, ACO, POT, BANdk, DEF, EXV, DEFv,
      &       THEtm, BETa0, GAMma0, XMUbeta, EX, SPIn, SPInv, ECoul,
-     &       RCoul, RCOul0, BETa, RCOul1, RCOul2
+     &       RCoul, RCOul0, BETa, RCOul1, RCOul2, ACOul
 C
-	  REAL*8 ETA,ATAR,ZTAR,TARMAS,PROJMAS,
+         REAL*8 ETA,ATAR,ZTAR,TARMAS,PROJMAS,
      &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
-C	  
-	  COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
+C
+         COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
      &       HBARC,AMU0C2,EFErmi,RC,ENCOUL
 C
       COMMON /LIB   / IREf, EMIn,
@@ -38,6 +38,6 @@ C
      &                SPIn(NDIM6, NDIM4), IPAr(NDIM6, NDIM4),
      &                SPInv(NDIM7, NDIM4), JCOul, ECOul(NDIM1),
      &                RCOul(NDIM1), RCOul0(NDIM1), BETa(NDIM1),
-     &                RCOul1(NDIM1), RCOul2(NDIM1),
+     &                RCOul1(NDIM1), RCOul2(NDIM1), ACOul(NDIM1),
      &                AUThor(80), REFer(80), SUMmary(320)
 
