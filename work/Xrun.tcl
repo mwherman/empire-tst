@@ -3822,7 +3822,7 @@ adjourn .top75} \
         -justify right -textvariable file -validate none -vcmd {} 
     bindtags $base.fra77.ent79 "$base.fra77.ent79 Entry $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.ent79 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Project root name}
+        set ::vTcl::balloon::%W {Root name of the project}
     }
     button $base.fra77.but80 \
         -activeforeground limegreen -command {exec $editor $file.inp &} \
@@ -3885,7 +3885,7 @@ adjourn .top75} \
         -relief flat -text ENDF 
     bindtags $base.fra77.but82 "$base.fra77.but82 Button $base all _vTclBalloon _vTclBalloon"
     bind $base.fra77.but82 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {ENDF-6 formatted file}
+        set ::vTcl::balloon::%W {View ENDF-6 formatted file}
     }
     button $base.fra77.but83 \
         -activeforeground limegreen -command {exec $editor $file.exf &} \
@@ -3895,7 +3895,7 @@ adjourn .top75} \
         -relief flat -text EXFOR 
     bindtags $base.fra77.but83 "$base.fra77.but83 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but83 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Experimental data (EXFOR)}
+        set ::vTcl::balloon::%W {View experimental data (EXFOR)}
     }
     button $base.fra77.but84 \
         -activeforeground limegreen -command {exec $editor $file.c4 &} \
@@ -3905,7 +3905,7 @@ adjourn .top75} \
         -relief flat -text {C4 file} 
     bindtags $base.fra77.but84 "$base.fra77.but84 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but84 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {EXFOR data translated into computational format}
+        set ::vTcl::balloon::%W {View EXFOR data translated into computational format}
     }
     button $base.fra77.but85 \
         -activeforeground limegreen -command {exec gv -landscape $file.ps &} \
@@ -3925,7 +3925,7 @@ ddlist} \
         -relief flat -text Update 
     bindtags $base.fra77.but76 "$base.fra77.but76 Button $base all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $base.fra77.but76 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Update lists of files after running any code }
+        set ::vTcl::balloon::%W {Update lists of files (do after running any code) }
     }
     label $base.fra77.lab77 \
         -width 10 
@@ -4069,7 +4069,7 @@ ddlist} \
         -relief raised -text Full 
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $base all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Full output from EMPIRE}
+        set ::vTcl::balloon::%W {View full output of EMPIRE}
     }
     button $site_10_0.but93 \
         -activeforeground limegreen -command {exec $editor $file.out &} \
@@ -4078,7 +4078,7 @@ ddlist} \
         -relief raised -text Short 
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $base all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Short output from EMPIRE}
+        set ::vTcl::balloon::%W {View short output of EMPIRE}
     }
     button $site_10_0.but101 \
         -activeforeground limegreen -command {exec $editor $file.endf &} \
@@ -4087,7 +4087,7 @@ ddlist} \
         -relief raised -text ENDF 
     bindtags $site_10_0.but101 "$site_10_0.but101 Button $base all _vTclBalloon"
     bind $site_10_0.but101 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {ENDF-6 file}
+        set ::vTcl::balloon::%W {View ENDF-6 file}
     }
     pack $site_10_0.but92 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4107,7 +4107,7 @@ ddlist} \
         -relief raised -text All 
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $base all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Discrete level for all nuclei  involved in the calculation}
+        set ::vTcl::balloon::%W {Edit discrete levels for all nuclei involved in the calculation}
     }
     button $site_10_0.but93 \
         -activeforeground limegreen -command {exec $editor $file-lev.col &} \
@@ -4116,7 +4116,7 @@ ddlist} \
         -relief raised -text Collective 
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $base all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Collective levels used for direct calculations with ECIS}
+        set ::vTcl::balloon::%W {Edit collective levels used for direct calculations with ECIS}
     }
     button $site_10_0.but101 \
         -activeforeground limegreen \
@@ -4126,7 +4126,7 @@ ddlist} \
         -relief raised -text {Cumul. plot} 
     bindtags $site_10_0.but101 "$site_10_0.but101 Button $base all _vTclBalloon"
     bind $site_10_0.but101 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Cumulative plots of discrete levels along with lev. dens.}
+        set ::vTcl::balloon::%W {View cumulative plots of discrete levels along with lev. dens.}
     }
     pack $site_10_0.but92 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4146,7 +4146,7 @@ ddlist} \
         -relief raised -text Internal 
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $base all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Optical model parameters from potentials coded inside EMPIRE}
+        set ::vTcl::balloon::%W {Edit optical model parameters from potentials coded inside EMPIRE}
     }
     button $site_10_0.but93 \
         -activeforeground limegreen -command {exec $editor $file-omp.ripl &} \
@@ -4155,7 +4155,7 @@ ddlist} \
         -relief raised -text RIPL 
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $base all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Optical model parameters taken from RIPL}
+        set ::vTcl::balloon::%W {Edit optical model parameters taken from RIPL}
     }
     button $site_10_0.but101 \
         -activeforeground limegreen -command {exec $editor $file-omp.dir &} \
@@ -4164,7 +4164,7 @@ ddlist} \
         -relief raised -text Direct 
     bindtags $site_10_0.but101 "$site_10_0.but101 Button $base all _vTclBalloon"
     bind $site_10_0.but101 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Optical model parameters used for direct calculations with ECIS}
+        set ::vTcl::balloon::%W {Edit optical model parameters used for direct calculations with ECIS}
     }
     pack $site_10_0.but92 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4213,7 +4213,7 @@ adjourn .top75} \
         -relief raised -text {Sort C4} 
     bindtags $site_10_0.but97 "$site_10_0.but97 Button $base all _vTclBalloon"
     bind $site_10_0.but97 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Sort C4 file resulting from X4TOC4 run}
+        set ::vTcl::balloon::%W {Sort C4 file resulting from the X4TOC4 run}
     }
     pack $site_10_0.but95 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4231,7 +4231,7 @@ adjourn .top75} \
         -relief raised -text EXFOR 
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $base all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Experimental data in EXFOR  format}
+        set ::vTcl::balloon::%W {View experimental data in EXFOR  format}
     }
     button $site_10_0.but93 \
         -activeforeground limegreen -command {exec $editor $file.c4 &} \
@@ -4240,7 +4240,7 @@ adjourn .top75} \
         -relief raised -text {C4 file} 
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $base all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Experimental data in the computational format}
+        set ::vTcl::balloon::%W {Edit experimental data in the computational format}
     }
     pack $site_10_0.but92 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4258,7 +4258,7 @@ adjourn .top75} \
         -relief raised -text {X4TOC4 output} 
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $base all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Output of the X4TOC4 code}
+        set ::vTcl::balloon::%W {View output of the X4TOC4 code}
     }
     button $site_10_0.but93 \
         -activeforeground limegreen \
@@ -4291,7 +4291,7 @@ adjourn .top75} \
         -relief raised -text {Edit X4TOC4 table} 
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $base all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Correspondence between  EXFOR codes and  ENDF-6 ones}
+        set ::vTcl::balloon::%W {Correspondence between EXFOR codes and ENDF-6 ones}
     }
     pack $site_10_0.lab108 \
         -in $site_10_0 -anchor center -expand 0 -fill none -side top 
@@ -4399,7 +4399,7 @@ adjourn .top75} \
         -foreground darkred -text {Launch ZVV interface } -wraplength 72 
     bindtags $site_8_2.fra84.but88 "$site_8_2.fra84.but88 Button $base all _vTclBalloon"
     bind $site_8_2.fra84.but88 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Create comparison of up to 3 evaluations as well as single plot}
+        set ::vTcl::balloon::%W {Create comparison of up to 3 evaluations (single plot is also OK)}
     }
     button $site_8_2.fra84.but89 \
         -activeforeground red \
@@ -4576,7 +4576,7 @@ exec xterm -e zvvddx $file $multi &} \
         -relief raised -text {EMPIRE warnings} 
     bindtags $site_8_3.fra112.but113 "$site_8_3.fra112.but113 Button $base all _vTclBalloon"
     bind $site_8_3.fra112.but113 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Warnigs produced by EMPIRE}
+        set ::vTcl::balloon::%W {View warnigs produced by EMPIRE}
     }
     button $site_8_3.fra112.but114 \
         -activeforeground limegreen -command {exec $editor $file.x42c4_lst &} \
@@ -4585,7 +4585,7 @@ exec xterm -e zvvddx $file $multi &} \
         -relief raised -text {X4TOC4 log} 
     bindtags $site_8_3.fra112.but114 "$site_8_3.fra112.but114 Button $base all _vTclBalloon"
     bind $site_8_3.fra112.but114 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Control output of the X4TOC4 code}
+        set ::vTcl::balloon::%W {View control output of the X4TOC4 code}
     }
     button $site_8_3.fra112.but115 \
         -activeforeground limegreen \
@@ -4608,7 +4608,7 @@ exec xterm -e zvvddx $file $multi &} \
         -text {EMPEND log} 
     bindtags $site_8_3.fra117.button78 "$site_8_3.fra117.button78 Button $base all _vTclBalloon"
     bind $site_8_3.fra117.button78 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Control output of the EMPEND code}
+        set ::vTcl::balloon::%W {View control output of the EMPEND code}
     }
     button $site_8_3.fra117.but113 \
         -activeforeground limegreen -command {exec $editor $file-log.fixup &} \
@@ -4617,7 +4617,7 @@ exec xterm -e zvvddx $file $multi &} \
         -relief raised -text {FIXUP log} 
     bindtags $site_8_3.fra117.but113 "$site_8_3.fra117.but113 Button $base all _vTclBalloon"
     bind $site_8_3.fra117.but113 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Control output of the FIXUP code}
+        set ::vTcl::balloon::%W {View control output of the FIXUP code}
     }
     button $site_8_3.fra117.but114 \
         -activeforeground limegreen \
@@ -4627,7 +4627,7 @@ exec xterm -e zvvddx $file $multi &} \
         -relief raised -text {LEGEND log} 
     bindtags $site_8_3.fra117.but114 "$site_8_3.fra117.but114 Button $base all _vTclBalloon"
     bind $site_8_3.fra117.but114 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Control output of the LEGEND code}
+        set ::vTcl::balloon::%W {View control output of the LEGEND code}
     }
     frame $site_8_3.frame77 \
         -borderwidth 2 -height 75 -highlightbackground #dcdcdc \
@@ -4647,7 +4647,7 @@ exec xterm -e zvvddx $file $multi &} \
         -text {PLOTC4 log} 
     bindtags $site_8_3.frame77.but116 "$site_8_3.frame77.but116 Button $base all _vTclBalloon"
     bind $site_8_3.frame77.but116 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Control output of the PLOTC4 code}
+        set ::vTcl::balloon::%W {View control output of the PLOTC4 code}
     }
     pack $site_8_3.lab111 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 5 \
@@ -4800,7 +4800,7 @@ exec xterm -e zvvddx $file $multi &} \
         -text {Delete selected files} -wraplength 60 
     bindtags $site_8_4.fra122.but123 "$site_8_4.fra122.but123 Button $base all _vTclBalloon"
     bind $site_8_4.fra122.but123 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Delete all project related files of the types selected with check button}
+        set ::vTcl::balloon::%W {Delete all project related files of the types selected with check buttons}
     }
     button $site_8_4.fra122.but124 \
         -activeforeground Red -command {exec clean $file
@@ -4870,7 +4870,7 @@ ddlist} \
         -foreground darkgreen -padx 1m -text {Change to its project} 
     bindtags $site_10_0.but83 "$site_10_0.but83 Button $base all _vTclBalloon"
     bind $site_10_0.but83 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Make project to which the file belongs a current project}
+        set ::vTcl::balloon::%W {Make project to which the file belongs the current project}
     }
     button $site_10_0.but84 \
         -activeforeground limegreen -command {exec $editor $selecfile &} \
@@ -5000,7 +5000,7 @@ adjourn .top75} \
         -foreground darkred -text {Delete selected} 
     bindtags $site_11_0.but85 "$site_11_0.but85 Button $base all _vTclBalloon"
     bind $site_11_0.but85 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Delete all selected file}
+        set ::vTcl::balloon::%W {Delete all selected files}
     }
     pack $site_11_0.ent82 \
         -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -side top 
@@ -5030,7 +5030,7 @@ set archfilelist ""} \
         -foreground darkred -text {Delete archive} 
     bindtags $site_8_5.fra82.but86 "$site_8_5.fra82.but86 Button $base all _vTclBalloon"
     bind $site_8_5.fra82.but86 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Delet whole archieve directory}
+        set ::vTcl::balloon::%W {Delete whole archieve directory}
     }
     pack $site_8_5.scr77 \
         -in $site_8_5 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
@@ -5279,7 +5279,7 @@ close $mulfile} \
         -foreground darkgreen -text {Set as project} 
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $base all _vTclBalloon"
     bind $site_13_0.but78 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Make the selected list item the current project (input must have been saved)}
+        set ::vTcl::balloon::%W {Make the selected list item the current project}
     }
     pack $site_13_0.ent77 \
         -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top 
