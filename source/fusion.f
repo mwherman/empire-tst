@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-28 09:56:04 $
-Ccc   * $Id: fusion.f,v 1.12 2004-05-28 09:56:04 Capote Exp $
+Ccc   * $Date: 2004-06-08 15:26:25 $
+Ccc   * $Id: fusion.f,v 1.13 2004-06-08 15:26:25 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -103,11 +103,6 @@ C     wf = W2*EIN*rmu
 C     wf = W2*ecms*rmu
       wf = ak2/10.D0
 
-C     IF(AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
-C      !!! RCN 02/2004 fake value for gammas 
-C      wf= 0.01d0
-C     ENDIF
-C
       IF(INT(AEJC(0)).GT.0) 
      > coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
@@ -234,15 +229,6 @@ C
       ENDIF
 C-----calculation of h.i. transmission coefficients for fusion
       IF(KTRlom(Npro, Ntrg).EQ.0) CALL HITL(stl)
-
-C     RCN 02/2004  gamma trial      
-C     IF(KTRlom(Npro, Ntrg).LT.0 .AND. 
-C    >   AEJc(0).eq.0 .AND. ZEJc(0).eq.0) THEN
-C        INCIDENT GAMMA
-C        einlab = EINl
-C        CALL ULM(1)
-C        stl(1)=E1(einlab, 0.d0)
-C     ENDIF
 
 C-----calculation of transmission coefficients ----done------
       DO i = 1, NDLW
