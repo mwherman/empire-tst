@@ -47,15 +47,52 @@ mv endres.lst $work/$file-log.endres
 cd $work
 # $work/$file.endf is the final ENDF output file
 
+# RUN STANEF
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-stan.endf
+0
+
+DONE
+EOF
+../util/stanef/stanef <INPUT
+mv $file-stan.endf $file.endf
+
+# RUN CHECKR
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.checkr
+
+DONE
+EOF
+../util/checkr/checkr <INPUT
+
+# RUN FIZCON
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.fizcon
+
+DONE
+EOF
+../util/fizcon/fizcon <INPUT
+
+
 # RUN PSYCHE
 
-cd ../util/psyche/
-rm PSYCHE.OUT 2>/dev/null
-ln -sf $work/$file.endf ENDF.IN
-./psyche<INPUT
-rm ENDF.IN
-mv PSYCHE.OUT $work/$file-log.psyche
-cd $work
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.psyche
+Y
+
+EOF
+../util/psyche/psyche <INPUT
 
 
 # RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP

@@ -3076,6 +3076,9 @@ proc vTcl:project:info {} {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
     set site_10_0 $site_10_0
+    namespace eval ::widgets::$site_10_0.cpd70 {
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1}
+    }
     namespace eval ::widgets::$site_10_0.but71 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -padx 1 -text 1}
     }
@@ -3685,6 +3688,7 @@ global widget filelist archdirlist archfilelist zvvplots profilter zvfilter arch
 
 # list of zvv plots 
 set zvvplots [glob -nocomplain *$zvfilter*.zvd]
+set zvvplots [lsort -dictionary $zvvplots]
 
 # file list
 set filetmp [glob -nocomplain *$profilter*]
@@ -3694,9 +3698,11 @@ foreach el $filetmp {
   lappend filelist $el
  }
 }
+set filelist [lsort -dictionary $filelist]
 
 # list of archive directories
 set archdirlist [glob -nocomplain ../archive/*/]
+set archdirlist [lsort -dictionary $archdirlist]
 
 #list of files in the selected archive directory
 set archfiletmp [glob -nocomplain $archdir/*$archfilter*]
@@ -3706,6 +3712,7 @@ foreach el $archfiletmp {
   lappend archfilelist [file tail $el]
  }
 }
+set archfilelist [lsort -dictionary $archfilelist]
 }
 #############################################################################
 ## Procedure:  ddlist
@@ -3886,8 +3893,11 @@ if {$editor == ""} {set editor gvim}
 if {$profilter == ""} {set profilter *.inp}
 set modules [list main.f input.f  fusion.f OM-scat2.f tl.f  ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  lev-dens.f  ph-lev-dens.f  print.f  pipe.f auxiliary.f  dimension.h global.h  io.h ddhms.cmb]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
+set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
+set filelist [lsort -dictionary $filelist]
 set archdirlist [glob -nocomplain ../archive/*/]
+set archdirlist [lsort -dictionary $archdirlist]
 }
 
 init $argc $argv
@@ -3936,7 +3946,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -background #ffffff -highlightcolor black -menu "$top.m88" 
     wm focusmodel $top passive
-    wm geometry $top 796x297+14+638; update
+    wm geometry $top 796x297+32+637; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -4454,6 +4464,19 @@ ddlist} \
         -labelpos nw -labeltext EXFOR 
     vTcl:DefineAlias "$site_8_1.lab104" "Labeledframe6" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab104 childsite]
+    button $site_10_0.cpd70 \
+        -activebackground #eccceccceccc -activeforeground red \
+        -background #dcdcdc \
+        -command {exec xterm -e ./x4interface $file &
+adjourn .top75} \
+        -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
+        -highlightbackground #dcdcdc -image {} -padx 1m -pady 1m \
+        -relief raised -text {GUI interface} 
+    vTcl:DefineAlias "$site_10_0.cpd70" "Button37" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd70 "$site_10_0.cpd70 Button $top all _vTclBalloon"
+    bind $site_10_0.cpd70 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Fire up EXFOR retrieval interface}
+    }
     button $site_10_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file.exf} \
@@ -4502,6 +4525,8 @@ adjourn .top75} \
     bind $site_10_0.but72 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View experimental data in computational format}
     }
+    pack $site_10_0.cpd70 \
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     pack $site_10_0.but71 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     pack $site_10_0.but95 \
@@ -4524,7 +4549,7 @@ exec cp $file.inp $file-b.inp
 exec cp $file.inp $file-c.inp} \
         -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -padx 1m \
-        -text {Create 3 piece-wise inputs} -wraplength 70 
+        -text {Create 3 piece-wise input templates} -wraplength 70 
     vTcl:DefineAlias "$site_10_0.cpd67" "Button167" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd67 "$site_10_0.cpd67 Button $top all _vTclBalloon"
     bind $site_10_0.cpd67 <<SetBalloon>> {
@@ -4601,7 +4626,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.but74" "Button155" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but74 "$site_10_0.but74 Button $top all _vTclBalloon"
     bind $site_10_0.but74 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Edit optical model parameters extracted  from RIPL}
+        set ::vTcl::balloon::%W {Edit optical model parameters extracted from RIPL}
     }
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -4672,7 +4697,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.but73" "Button154" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but73 "$site_10_0.but73 Button $top all _vTclBalloon"
     bind $site_10_0.but73 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Run manual fit of optical model parameter}
+        set ::vTcl::balloon::%W {Run manual fit of optical model parameters }
     }
     button $site_10_0.but71 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -4685,7 +4710,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.but71" "Button156" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but71 "$site_10_0.but71 Button $top all _vTclBalloon"
     bind $site_10_0.but71 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Store last result to include in further plots as reference }
+        set ::vTcl::balloon::%W {Store last result as a reference line for further plots }
     }
     pack $site_10_0.but74 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
@@ -4739,7 +4764,7 @@ adjourn .top75} \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     pack $site_8_1.lab104 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -padx 5 \
-        -pady 2 -side left 
+        -pady 2 -side right 
     pack $site_8_1.lab106 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -padx 5 \
         -pady 2 -side left 
@@ -4866,11 +4891,12 @@ adjourn .top75} \
     button $site_9_0.cpd69 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #e6e6e6 \
-        -command {foreach el $seleczvvlist {
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
+foreach el $seleczvvlist {
    if {$el == ""} continue
    exec rm -f $el
 }
-adjourn .top75} \
+adjourn .top75 }} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {<= Delete selected} -wraplength 120 
@@ -4947,7 +4973,7 @@ foreach el $ddxlist {
    set prev $el 
 }
 lappend dd} \
-        -selectmode multiple -width 44 -yscrollcommand {Scrollbar1 set} 
+        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
         -background #ffffff -font {Helvetica -10} -label # \
@@ -5042,7 +5068,7 @@ exec xterm -e ./zvvddx $file $multi &} \
         -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page3.cs.fra79.com77 _addToList}} \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name} -selectioncommand {set ddx $memlist($multi)} \
-        -textbackground #ffffff -textvariable multi -unique 0 -width 10 
+        -textbackground #ffffff -textvariable multi -unique 1 -width 10 
     vTcl:DefineAlias "$site_9_0.com77" "Combobox1" vTcl:WidgetProc "Toplevel1" 1
     pack $site_9_0.ent80 \
         -in $site_9_0 -anchor nw -expand 0 -fill x -side top 
@@ -5133,17 +5159,17 @@ exec xterm -e ./zvvddx $file $multi &} \
     vTcl:DefineAlias "$site_9_0.but115" "Button164" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file-log.cheker &} \
+        -background #dcdcdc -command {exec $editor $file-log.checkr &} \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -state disabled -text {CHEKER log} 
+        -highlightcolor #000000 -padx 1m -text {CHECKR log} 
     vTcl:DefineAlias "$site_9_0.but71" "Button165" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but116 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.fizcon &} \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -state disabled -text {FIZCON log} 
+        -highlightcolor #000000 -padx 1m -text {FIZCON log} 
     vTcl:DefineAlias "$site_9_0.but116" "Button166" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but116 "$site_9_0.but116 Button $top all _vTclBalloon"
     bind $site_9_0.but116 <<SetBalloon>> {
@@ -5386,7 +5412,7 @@ exec xterm -e ./zvvddx $file $multi &} \
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #dcdcdc \
-        -command set\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \$ckinp\ \$ckfisinp\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nadjourn\ .top75 \
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \$ckinp\ \$ckfisinp\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nadjourn\ .top75\n\} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -image {} -padx 0 -relief raised \
         -text {Delete selected files} -wraplength 60 
@@ -5397,8 +5423,11 @@ exec xterm -e ./zvvddx $file $multi &} \
     }
     button $site_9_0.but124 \
         -activebackground #eccceccceccc -activeforeground Red \
-        -background #dcdcdc -command {exec ./clean $file
-adjourn .top75} \
+        -background #dcdcdc \
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to clean the project?" "" 0 No Yes ] == 1} {
+exec ./clean $file
+adjourn .top75
+}} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -image {} -padx 1m -pady 2m \
         -relief raised -text {Clean project} -wraplength 60 
@@ -5409,9 +5438,10 @@ adjourn .top75} \
     }
     button $site_9_0.but125 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
-        -command {exec ./clean $file
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the project?" "" 0 No Yes ] == 1} {
+exec ./clean $file
 exec rm -f $file.inp
-adjourn .top75} \
+adjourn .top75 }} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -image {} -padx 1m -pady 2m \
         -relief raised -text {Remove project} -wraplength 60 
@@ -5494,13 +5524,14 @@ ddlist} \
     }
     button $site_10_0.but85 \
         -activebackground red -activeforeground white -background #dcdcdc \
-        -command {foreach el $selecfilelist {
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
+foreach el $selecfilelist {
    if {$el == ""} continue
    exec rm -f $el
 }
 set selecfile ""
 
-adjourn .top75} \
+adjourn .top75 }} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete all selected} 
@@ -5599,12 +5630,13 @@ set archfile [lindex $selarchfilelist 0]} \
     button $site_11_0.but85 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {foreach el $selarchfilelist {
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
+foreach el $selarchfilelist {
    if {$el == ""} continue
    exec rm -f $archdir/$el
 }
 set archfile ""
-adjourn .top75} \
+adjourn .top75 }} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete selected} 
@@ -5645,9 +5677,10 @@ adjourn .top75} \
     }
     button $site_9_0.but86 \
         -activebackground #ff0000 -activeforeground white -background #dcdcdc \
-        -command {exec rm -r -f $archdir
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the archive directory?" "" 0 No Yes ] == 1} {
+exec rm -r -f $archdir
 set archdirlist [glob -nocomplain */]
-set archfilelist ""} \
+set archfilelist "" }} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Delete archive} 
@@ -5759,8 +5792,11 @@ lappend stablist [lindex $elf 0]
     set site_12_0 $site_11_0.fra76
     button $site_12_0.but77 \
         -activebackground #eccceccceccc -activeforeground red \
-        -background #dcdcdc -command {set stablist ""} -font {Helvetica -12 } \
-        -foreground darkred -highlightbackground #dcdcdc -text {Clear list} 
+        -background #dcdcdc \
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the list?" "" 0 No Yes ] == 1} {
+set stablist "" }} \
+        -font {Helvetica -12 } -foreground darkred \
+        -highlightbackground #dcdcdc -text {Clear list} 
     vTcl:DefineAlias "$site_12_0.but77" "Button141" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_12_0.ent77 \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
@@ -5844,6 +5880,26 @@ close $mulfile} \
     $site_11_0.opt86 insert 21 {PLOTC4-plots}
     $site_11_0.opt86 insert 22 {PLOTC4-plots}
     $site_11_0.opt86 insert 23 {PLOTC4-plots}
+    $site_11_0.opt86 insert 24 {PLOTC4-plots}
+    $site_11_0.opt86 insert 25 {PLOTC4-plots}
+    $site_11_0.opt86 insert 26 {PLOTC4-plots}
+    $site_11_0.opt86 insert 27 {PLOTC4-plots}
+    $site_11_0.opt86 insert 28 {PLOTC4-plots}
+    $site_11_0.opt86 insert 29 {PLOTC4-plots}
+    $site_11_0.opt86 insert 30 {PLOTC4-plots}
+    $site_11_0.opt86 insert 31 {PLOTC4-plots}
+    $site_11_0.opt86 insert 32 {PLOTC4-plots}
+    $site_11_0.opt86 insert 33 {PLOTC4-plots}
+    $site_11_0.opt86 insert 34 {PLOTC4-plots}
+    $site_11_0.opt86 insert 35 {PLOTC4-plots}
+    $site_11_0.opt86 insert 36 {PLOTC4-plots}
+    $site_11_0.opt86 insert 37 {PLOTC4-plots}
+    $site_11_0.opt86 insert 38 {PLOTC4-plots}
+    $site_11_0.opt86 insert 39 {PLOTC4-plots}
+    $site_11_0.opt86 insert 40 {PLOTC4-plots}
+    $site_11_0.opt86 insert 41 {PLOTC4-plots}
+    $site_11_0.opt86 insert 42 {PLOTC4-plots}
+    $site_11_0.opt86 insert 43 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \

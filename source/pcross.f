@@ -130,6 +130,8 @@ C     NEJcm is the maximum number of particles emitted
          ELSE
             pair(nejc) = ROPar(3, nnur)
          ENDIF
+C--------adjusting g for proton emission
+c        IF(nejc.EQ.2) g(nejc) = g(nejc)*1.2
 C        Maximum and minimum energy bin
          DO  ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
@@ -462,9 +464,9 @@ c-----------------Bin population by PE (spin/parity integrated)
             ENDIF 
          ENDIF 
       ENDDO  !over ejectiles
-C-----Renormaliz EMPIRE fusion distribution to account for loss due to
-C-----accepted DEGAS emission (note that there is no competition with
-C-----other reaction mechanisms
+C-----Renormalize EMPIRE fusion distribution to account for loss due to
+C-----accepted PCROSS emission (note that there is no competition with
+C-----other reaction mechanisms)
       renpop = (Sigr - totemis)/Sigr
       DO jspin = 1, NDLW
          DO jparity = 1, 2

@@ -8,7 +8,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta14            '
+echo '                     V E R S I O N  2.19.beta16            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -170,8 +170,6 @@ rm FUSION fort.70 fort.66 fort.16 2>/dev/null
 rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
 rm ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
 rm OMPAR.INT OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
-# UNCOMMENT THE LINE BELOW TO REMOVE THE FILE WITH LIST OF RETRIEVED EXFOR ENTRIES 
-#rm $file.res 2>/dev/null
 
 #VIEW OUTPUT FILES
 

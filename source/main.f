@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: main.f,v 1.21 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Date: 2004-05-14 17:40:03 $
+Ccc   * $Id: main.f,v 1.22 2004-05-14 17:40:03 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -208,6 +208,7 @@ C     INTEGER NRBar, NRFdis, ibaro
       INTEGER NRBar, NRFdis
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
       CHARACTER*9 cejectile
+      CHARACTER*21 reactionx
 C
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
       INTEGER NELang
@@ -336,13 +337,23 @@ C              each 4th result from ECIS (2.5 deg grid)
      &              CSAlev(NDANG, ilv, nejcec)
 C--------------construct recoil spectra due to direct transitions
                IF(ENDf.GT.0)THEN
-                  coef = 2*PI*dang/DERec
+                  dang = PI/FLOAT(NDANG - 1)
+                  coef = 2*PI*dang
+C                 check whether integral over angles agrees with x-sec. read from ECIS 
+                  csum = 0.0
+                  DO iang = 1, NDANG 
+                     csum = csum + CSAlev(iang, ilv, nejcec)*
+     &                      SANgler(iang)*coef
+                  ENDDO
+C                 correct 'coef' for eventual imprecision and include recoil DE
+                  coef = coef*POPlv(ilv, nnurec)/csum/DERec
                   echannel = echannel*EJMass(0)/AMAss(1)
-                  DO iang = 1, NELang
+                  DO iang = 1, NDANG
                      erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
      &                         *CANgler(iang)
                      irec = erecoil/DERec + 1.001
                      weight = (erecoil - (irec - 1)*DERec)/DERec
+C                    escape if we go beyond recoil spectrum dimension
                      IF(irec + 1.GT.NDEREC)GOTO 1450
                      csmsdl = CSAlev(iang, ilv, nejcec)*SANgler(iang)
      &                        *coef
@@ -351,6 +362,7 @@ C--------------construct recoil spectra due to direct transitions
                      RECcse(irec + 1, 0, nnurec)
      &                  = RECcse(irec + 1, 0, nnurec) + csmsdl*weight
                   ENDDO
+
                ENDIF
             ENDIF
  1450    ENDDO
@@ -1152,6 +1164,18 @@ C-----------------fission
                   IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
      &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
      &                     ' mb'
+C                 construct fission related spectra of particles     
+                  IF(POPbin(ke, Nnuc) .GT. 0) THEN 
+                     xnorfispec = sumfis*xnor/POPbin(ke, Nnuc)
+                     DO ie = 1, NDECSE 
+                        DO nejc = 0, NEJcm
+                           CSEfis(ie,nejc) = CSEfis(ie,nejc) +  
+     &                     POPcse(ke,nejc,ie,Nnuc)*xnorfispec 
+                        ENDDO 
+                     ENDDO 
+                  ENDIF 
+C                *** done *** construct fission related spectra 
+
 C-----------------calculate total emission
  1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
@@ -1160,7 +1184,7 @@ C-----------------calculate total emission
  1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF(ENDf.GT.0)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
-         ENDDO                  !loop over c.n. excitation energy
+         ENDDO                  !loop over c.n. excitation energy bins (ke)
 C--------
 C--------Hauser-Feshbach decay of nnuc  ***done***
 C--------
@@ -1242,78 +1266,81 @@ C--------gamma decay of discrete levels (DECAYD)
             IF(kemin.EQ.NEX(nnuc))WRITE(6, 
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
-C-----------Integrating exclusive population spectra (ENDF)
-            IF(IOUt.GT.3) THEN 
-             WRITE(6,*) '----------------------------------------------'
-             WRITE(6,*) 'Test printout (exclusive spectra)'
-             WRITE(6,'('' Energy'',12x,''gamma'',10x,''neutron'',8x,
-     &       ''proton'',9x,''alpha'',8x,''l. ion'')')
-             WRITE(6,*) '----------------------------------------------'
-             gtotsp=0
-             xtotsp=0
-             ptotsp=0
-             atotsp=0
-             htotsp=0
-             emedg=0
-             emedn=0
-             emedp=0
-             emeda=0
-             emedh=0
-             DO ispec=1,NEX(1)+10             
-                IF(NDEJC.EQ.4) THEN
-                WRITE(6,'(6g15.5)')(ispec-1)*DE, 
-     &                  POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
-     &                  POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc), 
-     &                  POPcse(0,NDEJC,ispec,nnuc)
-                ELSE
-                WRITE(6,'(5g15.5)')(ispec-1)*DE, 
-     &                  POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
-     &                  POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc) 
-                ENDIF
-                gtotsp=gtotsp+POPcse(0,0,ispec,nnuc)*de
-                xtotsp=xtotsp+POPcse(0,1,ispec,nnuc)*de
-                ptotsp=ptotsp+POPcse(0,2,ispec,nnuc)*de
-                atotsp=atotsp+POPcse(0,3,ispec,nnuc)*de
-                emedg=emedg+POPcse(0,0,ispec,nnuc)*de*(ispec-1)*DE
-                emedn=emedn+POPcse(0,1,ispec,nnuc)*de*(ispec-1)*DE
-                emedp=emedp+POPcse(0,2,ispec,nnuc)*de*(ispec-1)*DE
-                emeda=emeda+POPcse(0,3,ispec,nnuc)*de*(ispec-1)*DE
-                IF(NDEJC.EQ.4) THEN
-                  htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
-C                 too long line, RCN 09/feb/2004 
-                  emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
-                ENDIF
-             ENDDO
-             IF(CSPrd(nnuc).NE.0.0D+0) THEN 
-                emedg=emedg/CSPrd(nnuc)
-                emedn=emedn/CSPrd(nnuc)
-                emedp=emedp/CSPrd(nnuc)
-                emeda=emeda/CSPrd(nnuc)
-                emedh=emedh/CSPrd(nnuc)
-             ENDIF
-             WRITE(6,*) '-----------------------------------------'
-             WRITE(6,'(15X,5g15.5)') gtotsp,xtotsp,ptotsp,atotsp,htotsp
-             WRITE(6,'(''E-aver.'',8X,6g15.5)') emedg,emedn,emedp,emeda,
-     &                emedh,emedg+emedn+emedp+emeda+emedh 
-             WRITE(6,*) '-----------------------------------------'
-             POPCS(0,nnuc) = gtotsp
-             POPCS(1,nnuc) = xtotsp
-             POPCS(2,nnuc) = ptotsp
-             POPCS(3,nnuc) = atotsp
-             IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
-             WRITE(6,*) '----------------------------------------------'
-             WRITE(6,*) 'Test printout (portions of DDX spectra)'
-             WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
-             WRITE(6,*) '----------------------------------------------'
-             DO ispec=1,NEX(1)+10             
-                WRITE(6,'(5g15.5)')(ispec-1)*DE, 
-     &                  POPcseaf(0,1,ispec,nnuc),
-     &                  POPcseaf(0,2,ispec,nnuc)
-             ENDDO
-             
-             WRITE(6, *)' '
-            ENDIF 
+         ENDIF
+C--------Integrating exclusive population spectra (ENDF)
+         gtotsp=0
+         xtotsp=0
+         ptotsp=0
+         atotsp=0
+         htotsp=0
+         emedg=0
+         emedn=0
+         emedp=0
+         emeda=0
+         emedh=0
+         DO ispec=1,NEX(1)+10
+            gtotsp=gtotsp+POPcse(0,0,ispec,nnuc)*de
+            xtotsp=xtotsp+POPcse(0,1,ispec,nnuc)*de
+            ptotsp=ptotsp+POPcse(0,2,ispec,nnuc)*de
+            atotsp=atotsp+POPcse(0,3,ispec,nnuc)*de
+            emedg=emedg+POPcse(0,0,ispec,nnuc)*de*(ispec-1)*DE
+            emedn=emedn+POPcse(0,1,ispec,nnuc)*de*(ispec-1)*DE
+            emedp=emedp+POPcse(0,2,ispec,nnuc)*de*(ispec-1)*DE
+            emeda=emeda+POPcse(0,3,ispec,nnuc)*de*(ispec-1)*DE
+            IF(NDEJC.EQ.4) THEN
+               htotsp=htotsp+POPcse(0,NDEJC,ispec,nnuc)*de
+               emedh=emedh+POPcse(0,NDEJC,ispec,nnuc)*de*(ispec-1)*DE
+            ENDIF
+         ENDDO
+         POPCS(0,nnuc) = gtotsp
+         POPCS(1,nnuc) = xtotsp
+         POPCS(2,nnuc) = ptotsp
+         POPCS(3,nnuc) = atotsp
+         IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
+         IF(CSPrd(nnuc).NE.0.0D+0) THEN
+            emedg=emedg/CSPrd(nnuc)
+            emedn=emedn/CSPrd(nnuc)
+            emedp=emedp/CSPrd(nnuc)
+            emeda=emeda/CSPrd(nnuc)
+            emedh=emedh/CSPrd(nnuc)
+         ENDIF
+         IF(IOUt.GT.3) THEN
+            WRITE(6,*) '----------------------------------------------'
+            WRITE(6,*) 'Test printout (exclusive spectra)'
+            WRITE(6,'('' Energy'',12x,''gamma'',10x,''neutron'',8x,
+     &      ''proton'',9x,''alpha'',8x,''l. ion'')')
+            WRITE(6,*) '----------------------------------------------'
+            DO ispec=1,NEX(1)+10
+               IF(NDEJC.EQ.4) THEN
+               WRITE(6,'(6g15.5)')(ispec-1)*DE,
+     &                 POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
+     &                 POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc),
+     &                 POPcse(0,NDEJC,ispec,nnuc)
+               ELSE
+               WRITE(6,'(5g15.5)')(ispec-1)*DE,
+     &                 POPcse(0,0,ispec,nnuc),POPcse(0,1,ispec,nnuc),
+     &                 POPcse(0,2,ispec,nnuc),POPcse(0,3,ispec,nnuc)
+               ENDIF
+            ENDDO
+            WRITE(6,*) '-----------------------------------------'
+            WRITE(6,'(15X,5g15.5)') gtotsp,xtotsp,ptotsp,atotsp,htotsp
+            WRITE(6,'(''E-aver.'',8X,6g15.5)') emedg,emedn,emedp,emeda,
+     &               emedh,emedg+emedn+emedp+emeda+emedh
+            WRITE(6,*) '-----------------------------------------'
+            WRITE(6,*) ' '
+            WRITE(6,*) '----------------------------------------------'
+            WRITE(6,*) 'Test printout (portions of DDX spectra)'
+            WRITE(6,'('' Energy'',12x,''neutron'',10x,''proton'')')
+            WRITE(6,*) '----------------------------------------------'
+            DO ispec=1,NEX(1)+10
+               WRITE(6,'(5g15.5)')(ispec-1)*DE,
+     &                 POPcseaf(0,1,ispec,nnuc),
+     &                 POPcseaf(0,2,ispec,nnuc)
+            ENDDO
+            WRITE(6, *)' '
+         ENDIF
 C-----------calculate life-times and widths
+         IF(IOUt.GT.0)THEN
             IF(csemist.NE.0.0D0)THEN
                taut = stauc*6.589E-22*2.0*PI/csemist
                WRITE(6, '('' Average total   life-time'',G12.5,'' s'')')
@@ -1340,7 +1367,6 @@ C-----------life-times and widths  *** done ***
             WRITE(6, '('' Fission    cross section    '',G12.5,'' mb'')'
      &            )csfis
          ENDIF
-c        if(nnuc.eq.1)TOTcsfis = TOTcsfis + csfis
          TOTcsfis = TOTcsfis + csfis
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
@@ -1467,11 +1493,9 @@ c                 POPcse(0, nejc, 1, nnuc) =  POPcse(0, nejc, 1, nnuc)*2
      &                  reaction(nnuc), ' ZAP= ', iizaejc
 C-----------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C-----------------multiplies cross sections and divides outgoing energies
-C-----------------ATTENTION: TEMPORARY! should be replaced by recorp calculated
-C-----------------from the balance with the proper recoil spectrum
                   recorp = 1.0
-c                 IF(nejc.GT.0)
-c    &               recorp = 1. + EJMass(nejc)/AMAss(nnuc)
+                  IF(nejc.GT.0)
+     &               recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 C-----------------Exclusive DDX spectra (neutrons & protons) 
                   IF(nejc.GE.1 .AND. nejc.LE.NDEjcd) THEN  
                      WRITE(12, 
@@ -1556,7 +1580,7 @@ C--------------------double the first bin x-sec to preserve integral in EMPEND
                      WRITE(12, '('' Energy    mb/MeV'')')
                      WRITE(12, *)' '
                      IF(nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN ! first emission (z,a) reaction
-                        DO ie = 1,  NEXr(nejc, 1) ! MT=649 (continuum)
+                        DO ie = 1,  NEXr(nejc, 1) ! MT=849 (continuum)
                            WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE/ 
      &                          recorp, POPcse(0, nejc, ie, nnuc)*recorp
                         ENDDO
@@ -1577,11 +1601,50 @@ C                          printed (4*Pi*CSAlev(1,il,3)
                         ENDDO
                      ENDIF 
                   ENDIF 
-               ENDDO
+               ENDDO  ! over ejectiles
             ENDIF
-            CALL PRINT_RECOIL(nnuc)
-         ENDDO
+            IF(nnuc.NE.1) CALL PRINT_RECOIL(nnuc,reaction(nnuc))
+         ENDDO  ! over decaying nuclei
+C--------Fission related spectra of particles and gammas
+         IF(TOTcsfis.GT.0.0D0)THEN 
+            DO nejc = 0, NDEJC         !loop over ejectiles
+c              IF(POPCS(nejc,nnuc).EQ.0) CYCLE 
+C ACHTUNG nspec has to be recalculated (alpha might have neg Q)
+               nspec = INT(EMAx(nnuc)/DE) + 2
+               IF(nejc.EQ.0) THEN 
+                  cejectile = 'gammas   '
+                  iizaejc = 0
+               ELSEIF(nejc.EQ.1) THEN 
+                  cejectile = 'neutrons '
+                  iizaejc = izaejc(nejc)
+               ELSEIF(nejc.EQ.2) THEN 
+                  cejectile = 'protons  '
+                  iizaejc = izaejc(nejc)
+               ELSEIF(nejc.EQ.3) THEN 
+                  cejectile = 'alphas   '
+                  iizaejc = izaejc(nejc)
+               ELSEIF(nejc.EQ.4) THEN 
+                  cejectile = 'lt. ions '
+                  iizaejc = izaejc(nejc)
+               ENDIF
+C--------------double the first bin x-sec to preserve integral in EMPEND
+               CSEfis(0,nejc) = CSEfis(0,nejc)*2 
+               WRITE(12, *)' '
+               WRITE(12, *)' Spectrum of ', cejectile, 
+     &               '(z,fission)          ', ' ZAP= ', iizaejc
+               WRITE(12, *)' '
+               WRITE(12, '('' Energy    mb/MeV'')')
+               WRITE(12, *)' '
+               DO ie = 1, nspec
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE 
+     &                 , CSEfis(ie,nejc)
+               ENDDO
+            ENDDO  ! over ejectiles
+         ENDIF
       ENDIF 
+C-----
+C-----ENDF spectra inclusive representation 
+C-----
 C-----
 C-----
 C-----sum exclusive energy spectra and double-differential cross
@@ -1648,12 +1711,12 @@ C-----------------------to conserve the integral
       ENDIF
 C-----
 C-----ENDF spectra printout (inclusive representation MT = 10 or 5
-C-----this is a recommended option)
 C-----
       IF(ENDf.EQ.2.0D0)THEN
 C--------print spectra of residues
+         reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-            CALL PRINT_RECOIL(nnuc)
+            CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C--------print inclusive gamma spectrum
          WRITE(12, *)' '
@@ -1758,7 +1821,7 @@ C
       SUBROUTINE RECOIL(Ke, Nnuc)
 C
 C----
-C----Construct recoil spectra (ENDF=2):
+C----Construct recoil spectra:
 C----Each excitation bin is given its recoil spectrum, when a particle
 C----is emitted its recoil velocity is vector added to the parent recoil
 C----velocity and a resulting spectrum is summed upon daughter recoil
@@ -1881,10 +1944,11 @@ C-----gamma decay to discrete levels (stored with icse=0)
 
 
 
-      SUBROUTINE PRINT_RECOIL(nnuc)
+      SUBROUTINE PRINT_RECOIL(nnuc,react)
 C-----
 C-----prints recoil spectrum of nnuc residue
 C-----
+      CHARACTER*21 react
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       IF(CSPrd(nnuc).GT.0.0D0)THEN
@@ -1904,8 +1968,8 @@ C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
             RECcse(ie, 0, nnuc) = RECcse(ie, 0, nnuc)*corr
          ENDDO
          WRITE(12, *)' '
-         WRITE(12, '(A34,I6,A6,F12.5)')
-     &         '  Spectrum of recoils  (n,x)  ZAP=', IZA(nnuc),
+         WRITE(12, '(A23,A7,A4,I6,A6,F12.5)')
+     &         '  Spectrum of recoils  ',react,'ZAP=', IZA(nnuc),
      &         ' mass=', AMAss(nnuc)
          WRITE(12, *)' '
          WRITE(12, '('' Energy    mb/MeV'')')

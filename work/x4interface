@@ -1,0 +1,15 @@
+#!/bin/bash
+#Script to fire X4 retrieval interface
+
+work=`pwd`
+rm x4r1x4.x4 2>/dev/null
+rm /tmp/x4* 2>/dev/null
+cd ../x4cd/linux
+mysql_start.sh
+x4java2_mysql.sh
+mysql_stop.sh
+cd $work
+if [ -s x4r1x4.x4 ]; then
+mv x4r1x4.x4 $work/$1.exf
+fi
+exit

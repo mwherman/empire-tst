@@ -119,8 +119,7 @@ C                                            ! Taken from input.f
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0., 
      &     0.43, 0., 0.50, 0., 0.39/
 C
-Ceb   ndexmaximum = NDEXD       ! Maximum energy bin allowed by Degas
-      ndexmaximum = NDEXD
+      ndexmaximum = NDEXD       ! Maximum energy bin allowed by Degas
 C
       IF(NDLW.GT.25)THEN
          ndlwmaximum = 25        ! Maximum spin allowed by Degas
@@ -311,12 +310,10 @@ C
 C
 C     Spectra from Degas normalized and transferred to Empire:
 C
-C-----NOTE: these spectra are transferred in full even if ECIS is active
       spectotg = 0.0
       spectotn = 0.0
       spectotp = 0.0
       nexmax = EXCn/DE
-      IF(nexmax.GT.ndexmaximum)nexmax = ndexmaximum
       DO ie0 = 1, nexmax      ! Spectral energy bin
 C        Gamma spectrum
          IF(IDNa(5, 4).EQ.1)THEN
@@ -346,9 +343,9 @@ C        Proton spectrum
 C-----total DEGAS emission accepted in calculations (note matrix IDNa)
       totemis = spectotg*IDNa(5, 4) + spectotn*IDNa(2, 4)
      &          + spectotp*IDNa(4, 4)
-C-----Renormaliz Empire fusion distribution to account for loss due to
+C-----Renormalize Empire fusion distribution to account for loss due to
 C-----accepted DEGAS emission (note that there is no competition with
-C-----other reaction mechanisms
+C-----other reaction mechanisms)
       renpop = (poptotal - totemis)/poptotal
       DO jspin = 1, ndlwmaximum
          DO jparity = 1, 2
@@ -434,7 +431,7 @@ C
          WRITE(42, 99005)
          WRITE(42, *)'Residual population for nnuc:', nnuc
          WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, ndexmaximum
+         DO ie0 = 1, nexmax
             ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
             popplus = 0.0
             popminus = 0.0
@@ -491,7 +488,7 @@ C
       IF(IDNa(2, 4).EQ.1)THEN
          nnur = NREs(1)
          ie1 = iemaxdiscrete + 1
-         DO ie0 = ie1, ndexmaximum     ! Excitation energy bin
+         DO ie0 = ie1, nexmax     ! Excitation energy bin
             DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)
                tmp = populdegas(2, ie0, jspin)*0.5*renorm/DE
                POP(ie0 - ie1 + 1, jspin, 1, nnur)
@@ -503,7 +500,7 @@ C
          WRITE(42, 99005)
          WRITE(42, *)'Residual population for nnur:', nnur
          WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, ndexmaximum
+         DO ie0 = 1, nexmax
             ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
             popplus = 0.0
             popminus = 0.0
@@ -560,7 +557,7 @@ C-----
       IF(IDNa(4, 4).EQ.1)THEN
          nnur = NREs(2)
          ie1 = iemaxdiscrete + 1
-         DO ie0 = ie1, ndexmaximum     ! Excitation energy bin
+         DO ie0 = ie1, nexmax     ! Excitation energy bin
             DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)
                tmp = populdegas(3, ie0, jspin)*0.5*renorm/DE
                POP(ie0 - ie1 + 1, jspin, 1, nnur)
@@ -572,7 +569,7 @@ C-----
          WRITE(42, 99005)
          WRITE(42, *)'Residual population for nnur:', nnur
          WRITE(42, *)'Exc energy, 4x spin, +/-, sum'
-         DO ie0 = 1, ndexmaximum
+         DO ie0 = 1, nexmax
             ee0 = ESTepdegas*(ie0 + iemaxdiscrete)
             popplus = 0.0
             popminus = 0.0
@@ -597,7 +594,7 @@ C-----
          poptotallv = poptotallv + POPlv(il, 1)
       ENDDO
       poptotalcont = 0.0
-      DO ie0 = 1, ndexmaximum
+      DO ie0 = 1, nexmax
          DO jspin = 1, ndlwmaximum
             DO jparity = 1, 2
                poptotalcont = poptotalcont + POP(ie0, jspin, jparity, 1)
@@ -677,7 +674,7 @@ C-----Number of bins in CN discrete region
       ENDDO
       WRITE(42, *)' '
       ie1 = iemaxdiscrete + 1
-      DO ie0 = ie1, ndexmaximum
+      DO ie0 = ie1, nexmax
          iii = ie0 - ie1 + 1
          ee0 = ESTepdegas*(iii + iemaxdiscrete)
          IF(ee0.LT.(EXCn + DE))WRITE(42, *)'Exc energy from Degas = ', 
@@ -909,7 +906,7 @@ C
      &       ENDidegas(10, 10), ESTepdegas, GAQdegas, GGDegas(10), 
      &       SPIdidegas(10, 10), XCDegas(9)
       INTEGER IACdegas, IATdegas, IEDegas, INDegas, IZCdegas, IZDegas, 
-     &        KEYdegas0, NBRadegas(10), NEXddegas(10, 10), NOLedegas(9), 
+     &        KEYdegas0, NBRadegas(10), NEXddegas(10, 10), NOLedegas(9),
      &        NUDidegas(10)
       REAL*8 JGSdegas
       CHARACTER*79 TITdegas
@@ -1120,8 +1117,8 @@ C
      &       RFAc(50, 90), SG(NDEXD), SIGma, SPIdi(10, 10), 
      &       SPIdidegas(10, 10), SPP, T1111, TC(25, NDEXD, 25), TL(25), 
      &       TLP(2, NDEXD, 25), XCDegas(9), XX0(25, 3, 25), 
-     &       XX02(25, 5, 25), XX2, XX22
-      INTEGER I0, IAC, IACdegas, IAO, IAT, IATdegas, IE00, IEDegas, II0, 
+     &       XX02(25, 5, 25), XX2, XX22,  XP(3,25)
+      INTEGER I0, IAC, IACdegas, IAO, IAT, IATdegas, IE00, IEDegas, II0,
      &        IIA, IIP, IJ, IL0, INDegas, ITJgs, ITSpp, IZ, IZC, 
      &        IZCdegas, IZDegas, IZO, KEY, KEYdegas0, N, NBR, 
      &        NBRadegas(10), NEStep, NEXddegas(10, 10), NOLedegas(9), 
@@ -1143,7 +1140,7 @@ C
       COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
      &                IE00, IZ, N, IL0, NUDim, NBR
-      COMMON /GMM   / XX0, XX02, XX2, XX22
+      COMMON /GMM   / XX0, XX02, XX2, XX22, XP
       COMMON /MC    / SPP, JGS, IAO, IZO, KEY, ITSpp, ITJgs
       COMMON /TRA   / TL
       COMMON /TRC   / TLP
@@ -1170,7 +1167,7 @@ C
       REAL FLOAT
       INTEGER i, iatx, ie, ie0, ie1, ieo, ieoblo, ieom, ier, igm, ih, 
      &        ii1, iid, iiir, iipnuc, iis, ijc, ik, il, ilis, ilma, 
-     &        iloblo, in, indexe, inx, ip, ip1, ir, is, isu, iw, izx, j, 
+     &        iloblo, in, indexe, inx, ip, ip1, ir, is, isu, iw, izx, j,
      &        jav, k, key0, l, m, m00, nbr1, nbra(10), ndi, nestdi, 
      &        neste1, nestem, nesteu, nexd(10, 10), nn, nn0, nne, nne1, 
      &        nole(9), nudi(10), nudi1, nudim1
@@ -1179,7 +1176,7 @@ C
       REAL*8 sgir, sgr, sigf, sigfc, sigmacn(25), sigmacntot, 
      &       st(3, NDEXD), su, sum, sumpro, t(25), t00, t0001, t11, 
      &       t111, tau(25, 25), tf(25), tf0(25, 25), 
-     &       tm(9, 25, NDEXD, 25), uvfee, uvgam, uvpar, uvspe(100), 
+     &       tm(9, 25, NDEXD, 25),  
      &       xc(9), xde(25, 25), xdea
 C
       DO j = 1, 25            ! CN cross section as function of spin
@@ -1486,6 +1483,7 @@ C--------NEXT NUCLEUS IN THE CHAIN
                DO is = 1, 5
                   DO IJ = 1, 25
                      IF(is.LE.3)XX0(i, is, IJ) = 0.
+                     IF (is.le.3 .and. i.eq.1)  XP(is,IJ)=0.
                      XX02(i, is, IJ) = 0.
                   ENDDO
                ENDDO
@@ -1513,6 +1511,7 @@ C--------NEXT NUCLEUS IN THE CHAIN
                      IF(is.EQ.4)s = ABS(cj - 2.)
                      IF(is.EQ.5)s = cj + 2.
                      IF(is.LE.3)XX0(i, is, IJ) = X0(s, cj)
+                     IF(is.le.3 .and. i.eq.1)  XP(IS,IJ)=X2(S,CJ)
                      XX02(i, is, IJ) = X02(s, cj)
                   ENDDO
                ENDDO
@@ -1592,7 +1591,8 @@ C
          EXCef = MAX(eexc - (NEStep - nudi(IIP))*ESTep, 0.D0)
          DO j = 1, 2
             iiir = indexe + j
-            nudim1 = nudi(iiir)
+            nudim1 = 0
+            if (iiir.le.10) nudim1 = nudi(iiir)
             rexc = eexc - b(IIP, j)
             IF(nudim1.NE.0)rexc = rexc - ENDi(iiir, nudim1)
             epmxef(j) = MAX(rexc - INT(rexc/ESTep + 0.5)*ESTep, 0.D0)
@@ -2029,15 +2029,13 @@ C                                   IER = IE-IGM
                                          T1111 = 0.
                                          bm = 0.
                                          b0 = 0.
-                                         IF(N.GE.1 .AND. i.NE.1 .AND. 
-     &                                      is.LE.3)
-     &                                      bm = geg*XX2/((N - 2)
-     &                                      *XX0(i - 1, is, il)
-     &                                      + geg*XX2)
-                                         IF(is.LE.3)
-     &                                      b0 = N*XX0(i, is, il)
-     &                                      /(N*XX0(i, is, il)
-     &                                      + geg*XX2)
+      if (n.ge.3 .and. i.ne.1 .and. is.le.3
+     A    .AND. ((n-2)*xx0(i-1,is,il)+geg*xp(is,il)).ne.0.)
+     1            bm=geg*xp(is,il)/((n-2)*xx0(i-1,is,il)
+     2                                 +geg*xp(is,il))
+      if (is.le.3 .AND. (n*xx0(i,is,il)+geg*xp(is,il)).ne.0.)
+     1       b0=n*xx0(i,is,il)/(n*xx0(i,is,il)+geg*xp(is,il))
+
                                          bmq = 0.
                                          IF(N.GE.1 .AND. i.NE.1)
      &                                      bmq = geg*XX22/((N - 2)
@@ -2064,9 +2062,11 @@ C                                   IER = IE-IGM
      &                                      SPIdi(IIP, iid).EQ.su)THEN
                                          T1111 = (b0*sgi + b0q*sgiq)
      &                                      *OMD(i, ilis, iid)
-                                         IF(i.NE.1)T1111 = T1111 + 
+                                 IF(n.GT.2)T1111 = T1111 +
      &                                      (bm*sgi + bmq*sgiq)
      &                                      *OMD(i - 1, ilis, iid)
+
+     
                                          ENDIF
                                          ENDDO
                                          ENDIF
@@ -2137,14 +2137,6 @@ C
 99007          FORMAT(/' Solutions for nucleus of key ', i2//3x, 'E ', 
      &                4x, 'J', 4x, 'particle', 4x, 'gamma', 4x, 
      &                'population', ' c.s.  t i m e  i n t e g r a l s')
-               IF(II0.EQ.1 .AND. e.LE.10.)THEN
-                  uvfee = 0.
-                  uvpar = 0.
-                  uvgam = 0.
-                  DO il = 1, 60
-                     uvspe(il) = 0.
-                  ENDDO
-               ENDIF
                IF(ie.GT.NBR)THEN
                   DO il = 1, 25
                      IF(ie.GT.NUDim .OR. il.LE.10)THEN
@@ -2213,9 +2205,10 @@ C-----------------------------------BY CH.+G. ALGORITHM
                               DO i = 1, nne
                                  br = 0.
                                  sumpro = 0.
+                                 IF(i.NE.1)br = br + alps(i - 1, il)
+     &                              *t(i - 1)
+                                 T(I)=0.
                                  IF(nne1.NE.0)THEN
-                                    IF(i.NE.1)br = br + alps(i - 1, il)
-     &                                 *t(i - 1)
                                     DO k = i + 1, nne
                                        pro = 1.
                                        DO m = i + 1, k
@@ -2254,18 +2247,6 @@ C--------------------------ONE EXC. ENERGY)
                                  GOTO 176
                               ENDIF
                            ENDIF
-                           DO i = 1, nn
-                              DO igm = 1, 50
-                                 IF(igm.LE.ie)THEN
-                                    IF(e.LE.10. .AND. II0.EQ.1)
-     &                                 uvspe(igm) = uvspe(igm)
-     &                                 + TC(i, ie, il)*emgg(i, il, igm)
-                                 ENDIF
-                              ENDDO
-                           ENDDO
-                           uvfee = uvfee + feed
-                           uvpar = uvpar + emtp
-                           uvgam = uvgam + emtg
                            IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
      &                        THEN
 C-----------------------------CN residual population
@@ -2369,9 +2350,9 @@ C              de-excitation of discrete levels according to branchings
                DO ie0 = 1, NBR
                   ie = nbr1 - ie0
                   tf(ie) = feebra(ie) + feebr2(ie) + feepar(ie)
-                  WRITE(iw, 99010)ENDi(IIP, ie), SPIdi(IIP, ie), tf(ie), 
+                  WRITE(iw, 99010)ENDi(IIP, ie), SPIdi(IIP, ie), tf(ie),
      &                            feepar(ie), feebra(ie), feebr2(ie)
-99010             FORMAT(f6.3, f5.1, f10.3, '  (', e9.3, '+', e9.3, '+', 
+99010             FORMAT(f6.3, f5.1, f10.3, '  (', e9.3, '+', e9.3, '+',
      &                   e9.3, ')')
                   ie1 = ie - 1
                   IF(ie1.NE.0)THEN
@@ -2381,7 +2362,7 @@ C              de-excitation of discrete levels according to branchings
                            gae(2, i) = brar(IIP, ie, i)*tf(ie)
                            feebr2(i) = feebr2(i) + gae(2, i)
                            WRITE(iw, 99011)gae(1, i), gae(2, i)
-99011                      FORMAT(23x, 'Egam =', f6.3, ' MeV,   c.s. =', 
+99011                      FORMAT(23x, 'Egam =', f6.3, ' MeV,   c.s. =',
      &                            g10.3, ' mb')
                         ENDIF
                      ENDDO
@@ -2459,17 +2440,14 @@ C                                      ! Gamma cascade not allowed
                                          T1111 = 0.
                                          bm = 0.
                                          b0 = 0.
-                                         IF(N.GT.1 .AND. i.NE.1 .AND. 
-     &                                      is.LE.3)
-     &                                      bm = geg*XX2/((N - 2)
-     &                                      *XX0(i - 1, is, il)
-     &                                      + geg*XX2)
-                                         IF(is.LE.3)
-     &                                      b0 = N*XX0(i, is, il)
-     &                                      /(N*XX0(i, is, il)
-     &                                      + geg*XX2)
+      if (n.gt.2 .and. i.ne.1 .and. is.le.3
+     A    .AND. ((n-2)*xx0(i-1,is,il) +geg*xp(is,il)).ne.0.) 
+     1            bm=geg*xp(is,il)/((n-2)*xx0(i-1,is,il)
+     2                                 +geg*xp(is,il))
+      if (is.le.3 .AND. (n*xx0(i,is,il)+geg*xp(is,il)).ne.0.) 
+     1      b0=n*xx0(i,is,il)/(n*xx0(i,is,il)+geg*xp(is,il))
                                          bmq = 0.
-                                         IF(N.GE.1 .AND. i.NE.1)
+                                         IF(N.GE.3 .AND. i.NE.1)
      &                                      bmq = geg*XX22/((N - 2)
      &                                      *XX02(i - 1, is, il)
      &                                      + geg*XX22)
@@ -2494,9 +2472,11 @@ C                                      ! Gamma cascade not allowed
      &                                      SPIdi(IIP, iid).EQ.su)THEN
                                          T1111 = (b0*sgi + b0q*sgiq)
      &                                      *OMD(i, ilis, iid)
-                                         IF(i.NE.1)T1111 = T1111 + 
+                                         IF(i.NE.1 .AND. n.gt.2)
+     &                                      T1111 = T1111 +
      &                                      (bm*sgi + bmq*sgiq)
      &                                      *OMD(i - 1, ilis, iid)
+
                                          ENDIF
                                          ENDDO
                                          ENDIF
@@ -2804,7 +2784,7 @@ C
       REAL*8 AF, C2, CJGs0, ENDi(10, 10), ESTep, EXCef, G, GAQ, 
      &       OM(25, NDEXD), OMD(10, 10, 10), RFAc(50, 90), SG(NDEXD), 
      &       SIGma, SPIdi(10, 10), T0(25, NDEXD, 25), T1111, 
-     &       XX0(25, 3, 25), XX02(25, 5, 25), XX2, XX22
+     &       XX0(25, 3, 25), XX02(25, 5, 25), XX2, XX22,  XP(3,25)
       INTEGER I0, IAT, IE0, II0, IIA, IIP, IJ, IL0, IZ, N, NBR, NEStep, 
      &        NUDim
       COMMON /BUF   / IIA, IIP, II0
@@ -2812,7 +2792,7 @@ C
       COMMON /GAD   / T0, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
      &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
      &                IE0, IZ, N, IL0, NUDim, NBR
-      COMMON /GMM   / XX0, XX02, XX2, XX22
+      COMMON /GMM   / XX0, XX02, XX2, XX22, XP
 C
 C Local variables
 C
@@ -2864,10 +2844,15 @@ Coblo DO 20 IEG=IE1,NESTEP
                   IF(.NOT.(ieg.LE.NUDim .AND. (ilp.GT.10.OR.i.GT.10)))
      &               THEN
                      sgi = 0.
+                     sgiq = 0.
+                     if (XX0(I,IS,ILP).eq.0. .AND. XP(IS,ILP).eq.0.) 
+     &                        GOTO 20
                      IF(is.LE.3)sgi = gm*gm*SG(igm)
-     &                                /(N*XX0(i, is, ilp) + geg*XX2)
-                     sgiq = GAQ*gm*gm*gm*gm*SG(igm)
+     &                           /(N*XX0(i, is, ilp) + geg*XP(IS,ILP))
+                     if ((N*XX02(I,IS,ILP)+GEG*XX22).ne.0.)
+     &               sgiq = GAQ*gm*gm*gm*gm*SG(igm)
      &                      /(N*XX02(i, is, ilp) + geg*XX22)
+
                      sgir = 0.
                      IF((sgi + sgiq).NE.0.)sgir = sgi*sgiq/(sgi + sgiq)
                      IF((sgi + sgiq).NE.0.)sgi = sgi*sgi/(sgi + sgiq)
@@ -2879,20 +2864,23 @@ Coblo DO 20 IEG=IE1,NESTEP
      &                             *sgi*N*XX0(i, is, ilp)
      &                             /(OM(i, ieg)*RFAc(N, isu))
                         IF(ieg.GT.NUDim .AND. 
-     &                     (OM(i,ieg)*RFAc(N,ijc).NE.0.))T1111 = T1111 + 
+     &                     (OM(i,ieg)*RFAc(N,ijc).NE.0.))T1111 = T1111 +
      &                     T0(i, ieg, ilp)*sgiq*N*XX02(i, is, ilp)
      &                     /(OM(i, ieg)*RFAc(N, isu))
                         IF(ieg.GT.NUDim .AND. i.EQ.25)GOTO 20
                      ENDIF
-                     IF(ieg.GT.NUDim .AND. OM(i + 1, ieg).NE.0.D0 .AND. 
-     &                  is.LE.3)T1111 = T1111 + T0(i + 1, ieg, ilp)
-     &                                  *geg*sgi*XX2/(OM(i + 1, ieg)
-     &                                  *RFAc(N + 2, isu))
+                     IF(ieg.GT.NUDim .AND. OM(i + 1, ieg).NE.0.D0 .AND.
+     &                  is.LE.3 .AND. (i+1).le.25)
+     &                  T1111 = T1111 + T0(i + 1, ieg, ilp)
+     &                              *geg*sgi*XP(IS,ILP)/(OM(i + 1, ieg)
+     &                              *RFAc(N + 2, isu))
+
                      IF(ieg.LE.NUDim .AND. OMD(i, ilp, ieg).NE.0. .AND. 
      &                  is.LE.3)T1111 = T1111 + T0(i, ieg, ilp)
      &                                  *sgi*N*XX0(i, is, ilp)
      &                                  /OMD(i, ilp, ieg)
-                     IF(ieg.GT.NUDim .AND. OM(i + 1, ieg).NE.0.D0)
+                     IF(ieg.GT.NUDim .AND. OM(i + 1, ieg).NE.0.D0
+     &                  .AND. (I+1).le.25)
      &                  T1111 = T1111 + T0(i + 1, ieg, ilp)
      &                          *geg*sgiq*XX22/(OM(i + 1, ieg)
      &                          *RFAc(N + 2, isu))
@@ -2902,9 +2890,10 @@ Coblo DO 20 IEG=IE1,NESTEP
      &                          /OMD(i, ilp, ieg)
                      IF(i.NE.10)THEN
                         IF(ieg.LE.NUDim .AND. OMD(i + 1, ilp, ieg)
-     &                     .NE.0.D0 .AND. is.LE.3)T1111 = T1111 + 
+     &                     .NE.0.D0 .AND. is.LE.3 .AND. (i+1).le.25)
+     &                     T1111 = T1111 +
      &                     T0(i + 1, ieg, ilp)
-     &                     *geg*sgi*XX2/OMD(i + 1, ilp, ieg)
+     &                     *geg*sgi*XP(IS,ILP)/OMD(i + 1, ilp, ieg)
                         IF(ieg.LE.NUDim .AND. OMD(i + 1, ilp, ieg)
      &                     .NE.0.D0)T1111 = T1111 + T0(i + 1, ieg, ilp)
      &                     *geg*sgiq*XX22/OMD(i + 1, ilp, ieg)
@@ -2914,9 +2903,15 @@ Coblo DO 20 IEG=IE1,NESTEP
  20         ENDDO
          ENDIF
       ENDDO
-      IF(ie.GT.NUDim .AND. N.GT.0)T1111 = T1111*OM(i, ie)
-     &   *C2*RFAc(N, ijc)
-      IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10)
+      if (ie.gt.nudim .and. n.gt.0 .and.OM(I,IE).eq.0.)
+     1                 T1111 = 0.
+      if (ie.le.nudim .and. il.le.10 .and. i.le.10
+     1                               .and. omd(i,il,ie).eq.0.) 
+     2                 T1111 = 0.
+      if (ie.gt.nudim .and. n.gt.0 .and.OM(I,IE).ne.0.)
+     & T1111 = T1111*OM(i, ie)*C2*RFAc(N, ijc)
+      IF(ie.LE.NUDim .AND. il.LE.10 .AND. i.LE.10 
+     &   .AND. omd(i,il,ie).ne.0.)
      &   T1111 = T1111*OMD(i, il, ie)*C2
       END
 C
@@ -2937,7 +2932,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a, a23, a3, ala, am, amu, anu, d, del, e0, e1, e2, ec, ec2, 
+      REAL*8 a, a23, a3, ala, am, amu, anu, d, del, e0, e1, e2, ec, ec2,
      &       egr, em, gam, p, q, r, sgm, sig, xi, z
       REAL FLOAT
 C

@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:44 $
-Ccc   * $Id: HF-comp.f,v 1.19 2004-04-23 05:15:44 herman Exp $
+Ccc   * $Date: 2004-05-14 17:40:02 $
+Ccc   * $Id: HF-comp.f,v 1.20 2004-05-14 17:40:02 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -37,7 +37,7 @@ Ccc   * spectrum bins so that after spectrum integration average         *
 Ccc   * energy is conserved.                                             *
 Ccc   *                                                                  *
 Ccc   * revision:2    by:M. Herman                on:31.Jul.2003         *
-Ccc   * New algorithm for exclusive spectra using EXCLUYSIVEC and        *
+Ccc   * New algorithm for exclusive spectra using EXCLUSIVEC and         *
 Ccc   * EXCLUSIVEL                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
@@ -61,13 +61,6 @@ C
 C
 C
 C
-C     HERE this is a check and should be deleted
-      IF(Iec.NE. iecmem) THEN
-c        WRITE(6,*)'New Iec',iec, iecmem 
-         popesum=0
-      ENDIF
-      iecmem=Iec
-C     HERE this is the end of the check 
       IF(Nnuc.EQ.Nnur)THEN
          excnq = EX(Iec, Nnuc)
       ELSE

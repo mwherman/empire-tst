@@ -5,7 +5,7 @@
 1.  Error in the Wilmore-Hodgson omp corrected.
     VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
     was also found to be wrong in the preliminary version of RIPL-2 
-    (-0.00118) (M. Herman).
+    (M. Herman).
 2.  MSD is automatically turned off for non-nucleon incident reactions
     (M. Herman). 
 3.  Internal conversion coefficients included in the gamma cascade
@@ -37,9 +37,9 @@
     of F9.4 format to improve accuracy (M. Herman).
 15. EMPEND revised to eliminate some undesired entries in the ENDF 
     file (A. Trkov).
-16. Three-hump fission with under-barrier effects implemented 
-    (R. Capote, M.Herman, M. Sin, and A. Ventura).
-17. Possibility of excited targets included (M. Herman).
+16. Fission with under-barrier effects in terms of optical model for
+    fission implemented (R. Capote, M.Herman, M. Sin, and A. Ventura).
+17. Reactions on excited targets (M. Herman).
 18. PostScript (and eps) files produced from within ZVV viewer are 
     stored in the work directory with a name following standard 
     convention (M. Herman).
@@ -48,7 +48,7 @@
     from the EMPIRE output (*.lst) (M. Herman).
 20. 'zvpl' script for direct plotting from the EMPIRE output modified.
     Additional window to paste a pattern is being opened. A bit more
-    cumbersome than before but more reliable. Before many patterns
+    cumbersome than before but more reliable. Before, many patterns
     were misunderstood due to skipping blanks in the pattern and garbage
     plot was produced (M. Herman).
 21. Maximum number of aliases in c4sort.f increased to 200.
@@ -62,20 +62,32 @@
     reactions (M. Herman).
 25. File 'titles' in x4toc4 modified to treat properly min and max bin
     energies in the emission spectra (M. Herman).
-26. ZVView updated to version 9.5 (V. Zerkin)
-27. Correction to DEGAS regarding flux conservation (E. Betak)
-28. X4TOC4 replaced with the version available from ENDVER (version
+26. Correction to DEGAS regarding flux conservation (E. Betak)
+27. X4TOC4 replaced with the version available from ENDVER (version
     2001-8) (A. Trkov).
-29. sixtab.f and dxsend.f modified to enable processing of more 
+28. sixtab.f and dxsend.f modified to enable processing of more 
     advanced formatting used in the recent LANL evaluations (discrete 
     gamma's are still not processed correctly in such cases) (A. Trkov).
-30. Archives directories moved from inside 'work' to 'empire' to make 
+29. Archives directories moved from inside 'work' to 'empire' to make 
     'work' more manageable (change inside Xrun.tcl) (M. Herman). 
-31. Retrieval of EXFOR data from the relational MySQL database opens
+30. Retrieval of EXFOR data from the relational MySQL database - opens
     access to the periodically updated EXFOR library issued by the IAEA-NDS
-    on CD-ROM's (V. Zerkin M. Herman).
-32. Preequilibrium emission of clusters (Iwamoto-Harada) coded by R. Capote
+    on CD-ROMs (V. Zerkin M. Herman).
+31. Preequilibrium emission of clusters (Iwamoto-Harada) coded by R. Capote
     and implemented by M. Herman.
+32. Xrun.tcl GUI updated: selective delete, access to fission input, and 
+    generation of three piece-wise input templates (M. Herman).
+33. ZVView updated to the zvv97l.exe version (V. Zerkin).
+34. Spectra of recoils calculated using 'ENDF=2 prescrption' instead of a
+    rough approximation used before (M. Herman).
+35. Pre-fission spectra of particles printed in *.out for ENDF formating
+    (M. Herman)
+36. Zerkin's GUI allowing for customized EXFOR retrieval can be started 
+    from the EMPIRE GUI (M. Herman)
+37. Confirmation dialogs added to GUI for all 'delete' buttons(M. Herman)
+38. CHECKR added to the chain of utility codes (M. Herman).
+39. FIZCON added to the chain of utility codes (M. Herman).
+40. STANEF added to the chain of utility codes (M. Herman).
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

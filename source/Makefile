@@ -2,7 +2,7 @@
 #FFLAGS =  -static
 #FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
-#FC     = g77
+FC     = g77
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
@@ -15,7 +15,9 @@
 #FC	= /usr/absoft/bin/f90
 #FFLAGS = -g
 #----Fujitsu f90 FORTRAN compiler
-FC	= lf95
+#FC	= lf95
+#----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more
+#FFLAGS = --chk
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g

@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:53 $
-Ccc   * $Id: auxiliary.f,v 1.8 2004-04-21 03:39:53 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-05-14 17:40:02 $
+Ccc   * $Id: auxiliary.f,v 1.9 2004-05-14 17:40:02 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -54,6 +54,7 @@ C----Plujko_new(End)
          CSEmis(nejc, 0) = 0.0
          DO necse = 1, NDECSE
             CSE(necse, nejc, 0) = 0.0
+            CSEfis(necse,nejc) = 0.0
             DO nang = 1, NDANG
                CSEa(necse, nang, nejc, 0) = 0.0
             ENDDO

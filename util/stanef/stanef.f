@@ -3,84 +3,27 @@
 ! *
 ! *     PROGRAM STANEF
 ! *
-! *     PROGRAM TO CONVERT TO STANDARD FORM AN ENDF-V OR ENDF-IV
+! *     STANEF WILL CONVERT TO STANDARD FORM AN ENDF-5 OR ENDF-6
 ! *     FORMAT DATA FILE. THE FUNCTIONS INCLUDE CREATING OR MODIFYING
 ! *     THE TAPE ID RECORD, CREATING A DIRECTORY IN MT=451, CREATING
 ! *     OR MODIFYING SPECIAL HOLERITH ID RECORD IN FREE TEXT,
 ! *     CONVERTING INTEGER AND FLOATING POINT FIELDS TO STANDARD FORM,
 ! *     RESEQUENCING THE MATERIALS AND CONVERSION TO BINARY
 ! *
-! *         VERSION 6.0    JULY 1985  C.L.DUNFORD
-! *                        1. STNDRD CONVERTED TO FORTRAN-77
-! *                        2. NEW ENDF-6 FORMATS FILES 1-27 ADDED
-! *                        3. BINARY OUTPUT ALA RIGEL ADDED
-! *         VERSION 6.1    DECEMBER 1985  C.L. DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.0
-! *         VERSION 6.2    DECEMBER 1986  C.L. DUNFORD
-! *                        1. FILE=6, LAW=7 ADDED
-! *                        2. ADD TO MT=457, SPECTRA COVARIANCES
-! *         VERSION 6.3    AUGUST 1987  C.L. DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.2
-! *                        2. PROCESS MORE THAN ONE INPUT FILE
-! *                        3. FORMAT CHANGES OF MAY 1987 EXCEPT
-! *                             FOR GENERALIZED R-MATRIX
-! *                        4. STANDARD OPTIONS IN INTERACTIVE
-! *                             MODE
-! *         VERSION 6.4    MAY 1988  C.L. DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.3
-! *                        2. INCIDENT PARTICLES WITH Z GT 2
-! *                        3. HYBRID R-FUNCTION FOR RESONANCE REGION
-! *         VERSION 6.5    APRIL 1989  C.L. DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.4
-! *                        2. NEW FORMATS FOR FILES 32, 34, 35 AND 40
-! *         VERSION 6.6    JUNE 1990  C.L. DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.5
-! *         VERSION 6.7    JUNE 1991  C.L.DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.6
-! *         VERSION 6.8    JULY 1992  C.L.DUNFORD
-! *                        1. CORRECTIONS TO VERSION 6.7
-! *                        2. VMS INPUT ON COMMAND LINE
-! *         VERSION 6.9    NOVEMBER 1993  C.L.DUNFORD
-! *                        1. FIX BUG IN FILE 34 PROCESSING
-! *                        2. BUG FIX IN NORMAL ROUTINE FOR E-09
-! *                        3. CHANGE NLIB FOR BROND TO 41
-! *                        4. INCREASE NUMBER OF SECTIONS ALLOWED
-! *         VERSION 6.10   NOVEMBER 1995  C.L.DUNFORD
-! *                        1. FIXED ROUNDOFF PROBLEM WHICH FIRST APPEARS
-! *                           ON RISC MACHINES WHEN CONVERTING A
-! *                           FLOATING POINT NUMBER TO STANDARD FORM
-! *         VERSION 6.11   APRIL 1998   C.L.DUNFORD
-! *                        1. ALLOW 50000 POINTS IN TAB AND LIST RECORDS
-! *                        2. NOW THAT THE NUMBER OF RECORDS IN A
-! *                           MATERIAL MAY EXCEED 99999, UNTIL A FORMAT
-! *                           CHANGE TO HANDLE THIS SITUATION IS
-! *                           APPROVED, ALL SUCCEEDING CARDS WILL ALSO
-! *                           HAVE 99999 IN THE SEQUENCING FIELD.
-! *                        3. IMPLEMENT REVISED SEQUENCING SYSTEM
-! *                        4. COMBINED LEGENDRE AND TABULAR ALLOWED IN
-! *                           A SINGLE SECTION IN FILE 4
-! *         VERSION 6.12   FEBRUARY 2001 C.L.DUNFORD
-! *                        1. CORRECTED ERROR WHEN ONLY RESEQUENCING IS
-! *                           REQUIRED; ASSUMED ENDF-5 FORMAT, NOW
-! *                           ASSUMES ENDF-6
-! *                        2. PRESERVE DATA FORMAT IN THE RESOLVED
-! *                           RESONANCE REGION
-! *                        3. IMPLEMENT "$" OUTPUT CONTROL ON UNIX
-! *                        4. PUT ALL LABEL INPUT ON A SINGLE INPUT
-! *                           RECORD IN BATCH MODE
-! *                        5. CREATE THREE INTERACTIVE VERSIONS AND ONE
-! *                           BATCH VERSION
-! *                        6. IMPLEMENT NEW ELECTRO-ATOMIC DATA FORMATS
-! *         VERSION 6.13   MAY 2002     C.L.DUNFORD
-! *                        1. RECODE TO MEET F95 STANDARD
-! *                        2. 6.12 BUGS REPORTED BY MAY 2002
-! *                        3. FORMAT MODIFICATIONS FOR RADIOACTIVE
-! *                           PRODUCTS IN FILES 8, 9 AMD 10
-! *                        4. WINDOWS GRAPHICAL INTERFACE ADDED USING
-! *                           DIGITAL VISUAL FORTRAN
-! *                        5. UNIX GRAPHICAL INTERFACE ADDED USING
-! *                           LAHEY FORTRAN WITH WINTERACTER
-! *
+! *         VERSION 7.0    APR 2004     C.L.DUNFORD
+! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
+! *                           MODLIB PRODULE
+! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
+! *                           GROUP PARAMETERS.
+! *                        3. CONSTRUCT PROPER ZSA SYMBOL FOR FIRST
+! *                           FIELD ON RECORD 5 OF 1-451
+! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
+! *                           NAME
+! *                        5. ADDED COMMAND LINE INPUT TO UNIX AND
+! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
+! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
+! *                           OPTIONS ARE ASSUMED UNLESS THIRD
+! *                           PARAMETER IS N.
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -103,9 +46,10 @@
 !        UNX  -  COMMAND MODE FOR UNIX USING LAHEY FORTRAN
 !        DVF  -  GRAPHICAL MODE FOR PC USING DIGITAL VISUAL FORTRAN
 !        LWI  -  GRAPHICAL MODE FOR UNIX USING LAHEY WINTERACTER
+!        MOD  -  MODULE FOR THE MODLIB PROJECT OF NEA WPEC
 !
 !     THE "ANS" VERSION MEETS F95 STANDARDS FOR FIXED OR FREE FORMAT
-!       SOURCE
+!       SOURCE AND USES A FILE FOR NON-INTERACTIVE INPUT (BATCH MODE)
 !     THE "VMS" VERSION WILL COMPILE WITH EITHER THE FORTRAN-77 OR
 !       FORTRAN-90 VMS COMPILER
 !     THE "DVF" VERSION HAS A WINDOWS GRAPHICAL INTERFACE. IT WILL
@@ -116,187 +60,153 @@
 !       RUNNING UNDER UNIX
 !
 !***********************************************************************
+!+++MDC+++
+!...VMS, ANS, WIN, UNX
 !
-      MODULE STANEF_DEF
+!     MAIN PROGRAM FOR NON-WINDOWS IMPLEMENTATION OF STANEF
 !
-!     DEFINES ALL GLOBAL VARIABLES
+      PROGRAM STANEF
+!
+      IMPLICIT NONE
+!...LWI, DVF, MOD
+!/!
+!/!     MODULE IMPLEMENTATION OF STANEF FOR MODLIB AND WINDOWS
+!/!
+!/      MODULE STANEF
+!/!
+!/      IMPLICIT NONE
+!/!
+!/      PRIVATE
+!/!
+!/      PUBLIC :: RUN_STANEF
+!/      PUBLIC :: INPUT_DATA, I_DATA, ISUCCESS
+!/!
+!...LWI, DVF
+!/        PUBLIC :: IRERUN
+!---MDC---
 !
 !     STANEF VERSION NUMBER
 !
-      IMPLICIT NONE
+!+++MDC+++
+!...VMS, UNX, ANSI, WIN, LWI, DVF
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
+!...MOD
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '0.1'
+!---MDC---
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '6.13'
+!     DEFINE VARIABLE PRECISION
+!
+      INTEGER(KIND=4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
+      INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
+      INTEGER(KIND=4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
 !
 !     STANDARD FORTRAN INPUT AND OUTPUT UNITS
 !
-      INTEGER(KIND=4), PARAMETER :: INPUT=5,OUTPUT=6
+      INTEGER(KIND=I4) ::  INPUT
+      INTEGER(KIND=I4), PARAMETER :: INPUT0 = 5
+      INTEGER(KIND=I4), PARAMETER :: OUTPUT=6
 !
 !     ENDF DISK FILE INPUT AND CHECKING OUTPUT FORTRAN UNITS
 !
-      INTEGER(KIND=4), PARAMETER :: ITAPE=20,OTAPE=21
+      INTEGER(KIND=I4), PARAMETER :: ITAPE=20,OTAPE=21
 !
 !     SCRATCH UNIT FOR CONSTRUCTING THE DIRECTORY
 !
-      INTEGER(KIND=4), PARAMETER :: IDIR=22
+      INTEGER(KIND=I4), PARAMETER :: IDIR=22
+!
+!     IMDC  FLAG FOR IMPLEMENTATION OPTION
+!     TFMT  FORMAT FOR INTERACTIVE INPUT PROMPT
+!     STATUS PARAMETER FOR OPENING NEW FILE
+!
+!+++MDC+++
+!...ANS
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 0
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = ' '
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!...VMS
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 1
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'NEW'
+!...WIN
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 2
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!...UNX
+      INTEGER(KIND=I4), PARAMETER :: IMDC = 3
+      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!...DVF
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 4
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!...LWI
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 5
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!...MOD
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 6
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!---MDC---
 !
 !     COMMAND LINE INPUT TEXT AND TEXT LENGTH
 !
-      CHARACTER(LEN=100) INPAR
-      INTEGER(KIND=4) ILENP
+      CHARACTER(LEN=100) :: INPAR
+      INTEGER(KIND=I4) :: ILENP
+!
+!     INPUT DEFINED DATA TYPE
 !
       TYPE INPUT_DATA
-         CHARACTER(LEN=100) INFIL
-         INTEGER(KIND=4) ILEN
-         CHARACTER(LEN=100) OUTFIL
-         INTEGER(KIND=4) OLEN
-         INTEGER(KIND=4) MODE
-         INTEGER(KIND=4) LABEL
-         CHARACTER(LEN=66) LTEXT
-         CHARACTER(LEN=1) INDX
-         CHARACTER(LEN=1) IDLTES
-         CHARACTER(LEN=1) I151
+         CHARACTER(LEN=100) :: INFIL
+         CHARACTER(LEN=100) :: OUTFIL
+         INTEGER(KIND=I4) :: MODE
+         INTEGER(KIND=I4) :: LABEL
+         CHARACTER(LEN=66) :: LTEXT
+         CHARACTER(LEN=1) :: INDX
+         CHARACTER(LEN=1) :: IDLTES
+         CHARACTER(LEN=1) :: I151
       END TYPE INPUT_DATA
 !
       TYPE(INPUT_DATA) I_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
-      INTEGER(KIND=4) IONEPASS        !  0, YES;  1, NO
+      INTEGER(KIND=I4) :: IONEPASS        !  0, YES;  1, NO
+!
+!     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
+!
+      INTEGER(KIND=I4) :: ISUCCESS, IRERUN
 !
 !     FORMAT OF MATERIAL BEING PROCESSED
 !
-      INTEGER(KIND=4) NFOR
+      INTEGER(KIND=I4) :: NFOR
 !
 !     CONTENTS OF FIELDS ON A HEAD/CONT RECORD
 !
-      INTEGER(KIND=4) L1H,L2H,N1H,N2H
-      REAL(KIND=4)    C1H,C2H
+      INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
+      REAL(KIND=R4)    :: C1H,C2H
 !
 !     TEXT PORTION OF A MT=451 RECORD
 !
-      CHARACTER(LEN=66) TEXT
+      CHARACTER(LEN=66) :: TEXT
 !
-      INTEGER(KIND=4), PARAMETER :: INTERPMAX=200
-      INTEGER(KIND=4), DIMENSION(INTERPMAX) ::  NBT,INT
-      INTEGER(KIND=4), PARAMETER :: POINTSMAX=50000
-      REAL(KIND=4), DIMENSION(POINTSMAX) :: X,Y
+      INTEGER(KIND=I4), PARAMETER :: INTERPMAX=200
+      INTEGER(KIND=I4), DIMENSION(INTERPMAX) ::  NBT,INTRP
+      INTEGER(KIND=I4), PARAMETER :: POINTSMAX=50000
+      REAL(KIND=R4), DIMENSION(POINTSMAX) :: X,Y
 !
 !     TAGS ON CURRENT RECORD
 !
-      INTEGER(KIND=4) MAT,MF,MT,NSEQ
+      INTEGER(KIND=I4) :: MAT,MF,MT,NSEQ
 !
-      END MODULE STANEF_DEF
-!
-!***********************************************************************
-!
-      MODULE STANEF_MDC
-!
-!     ALL MACHINE DEPENDENT CODE EXCEPT FOR MACHINE DEPENDENT MAIN
-!       PROGRAM
-!
-!     THE WINDOWS GRAPHICAL INTERFACE REQUIRES THAT CHECKER BE A
-!        SUBROUTINE
-!
-!     IMDC  FLAG FOR COMPILER OPTION
-!     TFMT  FORMAT FOR INTERACTIVE INPUT PROMPT
-!     STATUS PARAMETER FOR OPENING NEW FILE
-!
-!+++MDC+++
-!...ANS
-      INTEGER(KIND=4), PARAMETER :: IMDC = 0
-      CHARACTER(LEN=*), PARAMETER :: TFMT = ' '
-      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'UNKNOWN'
-!...VMS
-!/      INTEGER(KIND=4), PARAMETER :: IMDC = 1
-!/      INTEGER(KIND=2) ILENP2
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'NEW'
-!...WIN
-!/      INTEGER(KIND=4), PARAMETER :: IMDC = 2
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'UNKNOWN'
-!...UNX
-!/      INTEGER(KIND=4), PARAMETER :: IMDC = 3
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'UNKNOWN'
-!...DVF
-!/      INTEGER(KIND=4), PARAMETER :: IMDC = 4
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'UNKNOWN'
-!...LWI
-!/      INTEGER(KIND=4), PARAMETER :: IMDC = 5
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'UNKNOWN'
-!---MDC---
-!
-      CONTAINS
-!
-!***********************************************************************
-!
-      SUBROUTINE GET_FROM_CLINE
-!
-!     GET CONTENTS OF COMMAND LINE FOR VMS
-!
-      USE STANEF_DEF, ONLY :INPAR,ILENP
-!
-      IMPLICIT NONE
-!
-      INPAR = ' '
-      ILENP = 0
-!+++MDC+++
-!...VMS
-!/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
-!/      ILENP = ILENP2
-!---MDC---
-!
-      RETURN
-      END SUBROUTINE GET_FROM_CLINE
-!
-!***********************************************************************
-!
-      SUBROUTINE OUT_STATUS
-!
-!     DISPLAYS THE IDENTIFICATION OF THE SECTION BEING PROCESSED
-!
-      USE STANEF_DEF, ONLY : OUTPUT
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-!+++MDC+++
-!...DVF, LWI
-!/      USE STANEF_WIN_DEF, ONLY :IRERUN
-!---MDC---
-!
-      IMPLICIT NONE
-!
-      IF(MAT.GT.0.AND.MF.GT.0.AND.MT.GT.0) THEN
-!+++MDC+++
-!...VMS, ANS, WIN, UNX
-         WRITE(OUTPUT,'(5X,A,I5,A,I3,A,I4)')                            &       
-     &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
-!...DVF, LWI
-!/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MAT,MF,MT)
-!---MDC---
-      END IF
-!
-      RETURN
-      END SUBROUTINE OUT_STATUS
-!
-      END MODULE STANEF_MDC
-!
-!***********************************************************************
+      REAL(KIND=R4), PARAMETER :: ZERO=0.0
 !
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
-      PROGRAM STANEF
 !
-!     MAIN PROGRAM FOR NON-WINDOWS IMPLEMENTATION
+!     EXECUTE THE STANEF PROGRAM WHEN A STAND ALONE PROGRAM
 !
-      USE STANEF_DEF, ONLY : OUTPUT
-!
-      IMPLICIT NONE
-!
-      INTEGER(KIND=4) ISUCCESS
-!
-      CALL STANEF_RUN(ISUCCESS)
+      CALL RUN_STANEF
 !
 !     TERMINATE JOB
 !
@@ -307,18 +217,17 @@
          WRITE(OUTPUT,'(/A)') '   '
          STOP '     JOB TERMINATED'
       END IF
-!
-      END PROGRAM STANEF
 !---MDC---
+!
+      CONTAINS
 !
 !***********************************************************************
 !
-      SUBROUTINE STANEF_RUN(ISUCCESS)
+      SUBROUTINE RUN_STANEF
 !
 !     EXECUTES ENDF FILE STANDARDIZATION PROCESS
 !
-!***********************************************************************
-!
+!-----------------------------------------------------------------------
 !     INFIL = INPUT FILE SPECIFICATION
 !     OUTFIL =OUTPUT FILE SPECIFICATION
 !     LABEL =ID NUMBER OF THE OUTPUT FILE, TREATED AS FOLLOWS
@@ -339,32 +248,22 @@
 !     I151  =CONRTOL FOR STANDARDIZATION OF THE LIST DATA IN 151
 !           =N---DO NOT CONVERT NUMERIC FIELDS
 !           =Y---CONVERT NUMERIC FIELDS TO STANDARD FORM
-!
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!
-      USE STANEF_DEF, ONLY : VERSION
-      USE STANEF_DEF, ONLY : INPUT,OUTPUT,ITAPE,OTAPE,IDIR
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : ILENP,INPAR
-      USE STANEF_DEF, ONLY : IONEPASS
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-!
-      USE STANEF_MDC, ONLY : IMDC,TFMT,OSTATUS
-      USE STANEF_MDC, ONLY : GET_FROM_CLINE
+!_______________________________________________________________________
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) ISUCCESS
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=1), INTRINSIC :: CHAR
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, ICHAR
 !
-      LOGICAL(KIND=4) IEXIST
-      CHARACTER(LEN=1) IW
-      CHARACTER(LEN=80) TREC
-      CHARACTER(LEN=15) PARAMS
-      CHARACTER(LEN=4) BUF
-      CHARACTER(LEN=66) CTEXT
-      INTEGER(KIND=4) IPER,IC
-      INTEGER(KIND=4) J
-      REAL(KIND=4), PARAMETER :: ZERO = 0.0
+      LOGICAL(KIND=I4) IEXIST
+      CHARACTER(LEN=1) :: IW
+      CHARACTER(LEN=80) :: TREC
+      CHARACTER(LEN=15) :: PARAMS
+      CHARACTER(LEN=4) :: BUF
+      CHARACTER(LEN=66) :: CTEXT
+      INTEGER(KIND=I4) :: IPER,IC
+      INTEGER(KIND=I4) :: J
 !
       CHARACTER(LEN=11), PARAMETER :: FIELDF='----------+'
 !
@@ -375,7 +274,7 @@
          WRITE(OUTPUT,'(/2A)') ' PROGRAM STANEF VERSION ',VERSION
       END IF
 !
-!     CHECK FOR COMMAND LINE INPUT
+!     SEE IF INPUT PASSED FROM A DRIVER OR FROM THE COMMAND LINE
 !
       IONEPASS = 0
       CALL GET_FROM_CLINE
@@ -383,14 +282,14 @@
 !     INITIALIZE INPUT PARAMETERS
 !
    10 IF(IMDC.LT.4) THEN
-         I_DATA%IDLTES = 'Y'
-         I_DATA%I151 = 'Y'
+         I_DATA%INFIL = '*'
+         I_DATA%OUTFIL = '*'
          I_DATA%MODE = 0
          I_DATA%LABEL = 0
          I_DATA%LTEXT = ' '
          I_DATA%INDX = 'Y'
-         I_DATA%INFIL = '*'
-         I_DATA%OUTFIL = '*'
+         I_DATA%IDLTES = 'Y'
+         I_DATA%I151 = 'Y'
       END IF
       SELECT CASE (IMDC)
          CASE (0)
@@ -398,9 +297,9 @@
             IONEPASS = 0
          CASE(1)
             IF(ILENP.NE.0)  THEN
-               CALL TOKEN(INPAR,'/',1,I_DATA%INFIL)
-               CALL TOKEN(INPAR,'/',2,I_DATA%OUTFIL)
-               CALL TOKEN(INPAR,'/',3,IW)
+               CALL TOKEN(INPAR,'%',1,I_DATA%INFIL)
+               CALL TOKEN(INPAR,'%',2,I_DATA%OUTFIL)
+               CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
                IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
                IF(IW.EQ.' ') THEN
@@ -416,7 +315,7 @@
          CASE (2,3)
             IW = '*'
             IONEPASS = 0
-	  CASE (4,5)
+	  CASE (4,5,6)
             IW = 'N'
             IONEPASS = 1
       END SELECT
@@ -430,11 +329,9 @@
      &             ' Input File Specification          - '
             END IF
             READ(INPUT,'(A)') I_DATA%INFIL
-            I_DATA%ILEN = LEN_TRIM(I_DATA%INFIL)
          ELSE
-            I_DATA%ILEN = LEN_TRIM(I_DATA%INFIL)
             WRITE(OUTPUT,'(/2A)') ' Input file - ',                     &       
-     &           I_DATA%INFIL(1:I_DATA%ILEN)
+     &           TRIM(I_DATA%INFIL)
          END IF
       END IF
 !
@@ -449,8 +346,11 @@
       IF(.NOT.IEXIST)  THEN
          IF(IMDC.LT.4) THEN
             WRITE(OUTPUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
+            GO TO 100
          END IF
          SELECT CASE (IMDC)
+            CASE (0)
+               CLOSE(UNIT=INPUT)
             CASE (1)
                IF(IONEPASS.EQ.0) GO TO 10
             CASE (2,3)
@@ -469,11 +369,9 @@
      &           ' Output ENDF File Specification    - '
             END IF
             READ(INPUT,'(A)') I_DATA%OUTFIL
-            I_DATA%OLEN = LEN_TRIM(I_DATA%OUTFIL)
          ELSE
-            I_DATA%OLEN = LEN_TRIM(I_DATA%OUTFIL)
             WRITE(OUTPUT,'(/2A)') ' Output file - ',                    &       
-     &             I_DATA%OUTFIL(1:I_DATA%OLEN)
+     &             TRIM(I_DATA%OUTFIL)
          END IF
       END IF
       IF(I_DATA%OUTFIL.EQ.' ')  THEN
@@ -488,7 +386,6 @@
                I_DATA%OUTFIL = I_DATA%INFIL(1:IPER)//'.STN'
             END IF
         END IF
-        I_DATA%OLEN = LEN_TRIM(I_DATA%OUTFIL)
       END IF
 !
 !     GET TAPE LABEL
@@ -596,8 +493,14 @@
    50 OPEN(UNIT=ITAPE,ACCESS='SEQUENTIAL',STATUS='OLD',                 &       
      &   FILE=I_DATA%INFIL,ACTION='READ')
       IF(I_DATA%MODE.EQ.0) THEN
+!+++MDC+++
+!...VMS
+!/         OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,          &       
+!/     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+!...WIN, DVF, UNX, LWI, ANS, MOD
          OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,            &       
-     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+     &       FILE=I_DATA%OUTFIL)
+!---MDC---
       ELSE
          OPEN(UNIT=OTAPE,ACCESS='SEQUENTIAL',STATUS=OSTATUS,            &       
      &       FILE=I_DATA%OUTFIL,FORM='UNFORMATTED')
@@ -688,7 +591,7 @@
 !
   100 RETURN
 !
-      END SUBROUTINE STANEF_RUN
+      END SUBROUTINE RUN_STANEF
 !
 !***********************************************************************
 !
@@ -697,13 +600,10 @@
 !     ROUTINE TO PASS THROUGH AN ENDF TAPE TO EXTRACT DATA REQUIRED
 !      FOR DIRECTORY GENERATION
 !
-      USE STANEF_DEF, ONLY : ITAPE,IDIR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) MFO,MTO
-      INTEGER(KIND=4) NC,MFT
+      INTEGER(KIND=I4) :: MFO,MTO
+      INTEGER(KIND=I4) :: NC,MFT
 !
 !     OPEN SCRATCH FILE
 !
@@ -768,13 +668,6 @@
 !
 !     ROUTINE TO CONTROL CONSTRUCTION OF NEW ENDF TAPE
 !
-      USE STANEF_DEF, ONLY : ITAPE,IDIR
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
 !     SIMPLE RESEQUENCING OF ASCII FORMAT FILE
@@ -805,7 +698,7 @@
 !     BRANCH ON FILE TYPE
 !
       SELECT CASE (MF)
- 
+!
          CASE (1)
             CALL FILE1
 !*****IF FORMAT NOT CHANGED SIMPLY COPY AND RESEQUENCE REST OF MATERIAL
@@ -858,7 +751,7 @@
 !
          CASE DEFAULT
             CALL COPYFL
- 
+!
       END SELECT
       GO TO 10
 !
@@ -872,19 +765,9 @@
 !     ROUTINE TO COPY A FILE WITH NO CHANGE TO A NEW TAPE EXCEPT FOR
 !       RESEQUENCING
 !
-      USE STANEF_DEF, ONLY : OUTPUT,ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : TEXT
-      USE STANEF_DEF, ONLY : NSEQ
-!
-      USE STANEF_MDC, ONLY : IMDC
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) IOUTS
+      INTEGER(KIND=I4) :: IOUTS
 !
 !     OUTPUT ERROR MESSAGE
 !
@@ -940,20 +823,13 @@
 !     ROUTINE TO COPY A MATERIAL WITH NO CHANGE TO A NEW TAPE EXCEPT FOR
 !       RESEQUENCING.
 !
-      USE STANEF_DEF, ONLY : OUTPUT,ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : TEXT
-      USE STANEF_DEF, ONLY : NSEQ
-!
-      USE STANEF_MDC, ONLY : IMDC
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) ISEQ
+      INTEGER(KIND=I4) :: ISEQ
 !
-      INTEGER(KIND=4) IOUTS
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
+!
+      INTEGER(KIND=I4) :: IOUTS
 !
 !     INITIALIZE SEQUENCE NUMBER FOR EACH NEW MATERIAL ENCOUNTERED
 !
@@ -1007,48 +883,69 @@
 !
 !     ROUTINE TO PROCESS FILE 1
 !
-      USE STANEF_DEF, ONLY : OUTPUT,ITAPE,OTAPE,IDIR
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-      USE STANEF_DEF, ONLY : TEXT
-      USE STANEF_DEF, ONLY : NSEQ
-!
-      USE STANEF_MDC, ONLY : IMDC
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      CHARACTER(LEN=1) IREV
-      CHARACTER(LEN=4) ITEX
-      CHARACTER(LEN=11) FLOAT1,FLOAT2
+      INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
+!
+      CHARACTER(LEN=1) :: IREV
+      CHARACTER(LEN=4) :: ITEX
+      CHARACTER(LEN=11) :: FLOAT1,FLOAT2
       CHARACTER(LEN=66), DIMENSION(3) :: TEM
       CHARACTER(LEN=66), DIMENSION(6) :: TEXTS
-      INTEGER(KIND=4) NMOD,NLIB,NSUB,NVER
-      INTEGER(KIND=4) NCDS,NXC,N2
-      INTEGER(KIND=4) L1,L2,N1
-      INTEGER(KIND=4) MATD,NTRD,NPROC,KL,NB,NDIF,NSEC
-      INTEGER(KIND=4) NOFF,NFREV,NCC,MODC
-      INTEGER(KIND=4) MFTC,MFC,MTC
-      INTEGER(KIND=4) K,N,NN
-      INTEGER(KIND=4), PARAMETER :: NSECMAX=350
-      INTEGER(KIND=4), DIMENSION(NSECMAX) :: MFTD,NCD,SMODD
-      REAL(KIND=4) C1,C2
-      REAL(KIND=4), PARAMETER :: ZERO=0.0
+      CHARACTER(LEN=11) :: ZSA
+      INTEGER(KIND=I4) :: NMOD,NLIB,NSUB,NVER
+      INTEGER(KIND=I4) :: IZA,IZ,IA,IMETA
+      INTEGER(KIND=I4) :: NCDS,NXC,N2
+      INTEGER(KIND=I4) :: L1,L2,N1
+      INTEGER(KIND=I4) :: MATD,NTRD,NPROC,KL,NB,NDIF,NSEC
+      INTEGER(KIND=I4) :: NOFF,NFREV,NCC,MODC
+      INTEGER(KIND=I4) :: MFTC,MFC,MTC
+      INTEGER(KIND=I4) :: K,N,NN
+      REAL(KIND=R4) :: C1,C2,ZA
+!
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
+      INTEGER(KIND=I4), DIMENSION(NSECMAX) :: MFTD,NCD,SMODD
+!
+!     DEFINE ELEMENT SYMBOLS
+!
+      INTEGER(KIND=I4), PARAMETER :: IELM=110
+      CHARACTER(LEN=2), DIMENSION(IELM), PARAMETER ::                   &       
+     &   ELEMNT = (/                                                    &       
+     &       'H ','He','Li','Be','B ','C ','N ','O ','F ','Ne',         &       
+     &       'Na','Mg','Al','Si','P ','S ','Cl','Ar','K ','Ca',         &       
+     &       'Sc','Ti','V ','Cr','Mn','Fe','Co','Ni','Cu','Zn',         &       
+     &       'Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y ','Zr',         &       
+     &       'Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn',         &       
+     &       'Sb','Te','I ','Xe','Cs','Ba','La','Ce','Pr','Nd',         &       
+     &       'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb',         &       
+     &       'Lu','Hf','Ta','W ','Re','Os','Ir','Pt','Au','Hg',         &       
+     &       'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',         &       
+     &       'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',         &       
+     &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds'/)
 !
       IF(IMDC.LT.4) WRITE(OUTPUT,'(/)')
       CALL OUT_STATUS
 !
 !     SAVE MATERIAL MOD NUMBER AND LIBRARY NUMBER
 !
+      ZA = C1H
       NMOD = N2H
       NLIB = N1H
 !
 !     READ SECOND CONT RECORD
 !
       CALL CONT(C1,C2,L1,L2,N1,NFOR)
+      IMETA = L2
       IF(NFOR.EQ.0)  NFOR = 5
+!
+!     BUILD Z-S-A FOR CARD 5
+!
+      ZSA = ' '
+      IZA = IFIX(ZA+.001)
+      IA = MOD(IZA,1000)
+      IZ = IZA/1000
+      WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+      IF(IMETA.NE.0) ZSA(11:11) = 'M'
 !
 !     READ THIRD CONT RECORD IF ENDF-6 OR LATER
 !
@@ -1102,6 +999,7 @@
          DO N=1,NTRD
             NPROC = NPROC + 1
             READ(ITAPE,'(A)')   TEXTS(NPROC)
+            IF(NPROC.EQ.1) TEXTS(NPROC)(1:11) = ZSA
             ITEX = TEXTS(NPROC)(1:4)
             IF(ITEX.EQ.'----')   NPROC = NPROC - 1
             IF(NPROC.EQ.3)   THEN
@@ -1249,15 +1147,17 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=1) IREV
+      CHARACTER(LEN=1) :: IREV
       CHARACTER(LEN=66), DIMENSION(3) :: CARRAY
-      INTEGER(KIND=4) NFOR,NLIB,NVER,NSUB,MAT
- 
-      CHARACTER(LEN=24) BCD
-      INTEGER(KIND=4) NCBCD
-      INTEGER(KIND=4) IPART,ITYPE,IERR,N
+      INTEGER(KIND=I4) :: NFOR,NLIB,NVER,NSUB,MAT
 !
-      INTEGER(KIND=4), PARAMETER :: NSUBS=21
+      INTEGER(KIND=I4), INTRINSIC :: MOD
+!
+      CHARACTER(LEN=24) :: BCD
+      INTEGER(KIND=I4) :: NCBCD
+      INTEGER(KIND=I4) :: IPART,ITYPE,IERR,N
+!
+      INTEGER(KIND=I4), PARAMETER :: NSUBS=21
       CHARACTER(LEN=40),DIMENSION(NSUBS) :: TSUBS
       DATA TSUBS/'PHOTONUCLEAR DATA                       ',            &       
      &           'PHOTON-INDUCED FISSION PRODUCT YIELDS   ',            &       
@@ -1280,9 +1180,9 @@
      &           'INCIDENT ALPHA DATA                     ',            &       
      &           'ALPHA-INDUCED FISSION PRODUCT YIELDS    ',            &       
      &           'UNKNOWN SUBLIBRARY                      '/
-      INTEGER(KIND=4), DIMENSION(NSUBS) :: ISUBS
-      DATA ISUBS/0,1,3,4,5,6,10,11,12,113,10010,10011,10020,10021,      &       
-     &          10030,10031,20030,20031,20040,20041,99999/
+      INTEGER(KIND=I4), DIMENSION(NSUBS), PARAMETER ::                   &      
+     &    ISUBS = (/0,1,3,4,5,6,10,11,12,113,10010,10011,10020,10021,   &       
+     &          10030,10031,20030,20031,20040,20041,99999/)
 !
 !     INITIALIZE TEXT
 !
@@ -1340,27 +1240,30 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=14) LIBBCD
-      INTEGER(KIND=4) NLIB,NVER
+      CHARACTER(LEN=14) :: LIBBCD
+      INTEGER(KIND=I4) :: NLIB,NVER
 !
-      CHARACTER(LEN=1) TCHAR
-      CHARACTER(LEN=14) LIBTMP
-      INTEGER(KIND=4) INVER,LNC,NCF
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!
+      CHARACTER(LEN=1) :: TCHAR
+      CHARACTER(LEN=14) :: LIBTMP
+      INTEGER(KIND=I4) :: INVER,LNC,NCF
       INTEGER I,N
 !
-      INTEGER(KIND=4), PARAMETER :: NLIBS=13
-      INTEGER(KIND=4), DIMENSION(NLIBS) :: LIBS
-      DATA LIBS/0,1,2,3,4,5,6,31,32,33,34,41,99/
-      CHARACTER(LEN=8), DIMENSION(NLIBS) :: TLIBS
-      DATA TLIBS/'ENDF/B  ','ENDF/A  ','JEF     ','EFF     ',           &       
-     &           'ENDF/HE ','CENDL   ','JENDL   ','INDL/V  ',           &       
-     &           'INDL/A  ','INDL/F  ','IRDF    ','BROND   ',           &       
-     &           'UNKNOWN '/
+      INTEGER(KIND=I4), PARAMETER :: NLIBS=13
+      INTEGER(KIND=I4), DIMENSION(NLIBS), PARAMETER ::                   &      
+     &        LIBS = (/0,1,2,3,4,5,6,31,32,33,34,41,99/)
+      CHARACTER(LEN=8), DIMENSION(NLIBS), PARAMETER ::                  &       
+     &      TLIBS = (/'ENDF/B  ','ENDF/A  ','JEF     ','EFF     ',      &       
+     &                'ENDF/HE ','CENDL   ','JENDL   ','INDL/V  ',      &       
+     &                'INDL/A  ','INDL/F  ','IRDF    ','BROND   ',      &       
+     &                'UNKNOWN '/)
 !
-      CHARACTER(LEN=5), DIMENSION(20) :: NUMS
-      DATA NUMS/'I','II','III','IV','V','VI','VII','VIII',              &       
-     &         'IX','X','XI','XII','XIII','XIV','XV','XVI','XVII',      &       
-     &         'XVIII','XIX','?????'/
+      CHARACTER(LEN=5), DIMENSION(20), PARAMETER ::                     &       
+     &     NUMS = (/'I    ','II   ','III  ','IV   ','V    ','VI   ',    &       
+     &              'VII  ','VIII ','IX   ','X    ','XI   ','XII  ',    &       
+     &              'XIII ','XIV  ','XV   ','XVI  ','XVII ','XVIII',    &       
+     &              'XIX  ','?????'/)
 !
 !     FIND LIBRARY ID
 !
@@ -1409,7 +1312,7 @@
 !     BCD   =RESULTING ALPHANUMERIC EQUIVALENT.
 !     NCBCD  =NUMBER OF CHARACTERS IN BCD STRING
 !     IERR  =ERROR INDICATOR. SET EQUAL TO ONE IF IZ IS NOT IN THE RANGE
-!            1 TO 104, OR IA IS NOT IN THE RANGE 1 TO 999. IT IS
+!            1 TO 110, OR IA IS NOT IN THE RANGE 1 TO 999. IT IS
 !            SET EQUAL TO ZERO IF BOTH ARE IN ACCEPTABLE RANGE.
 !
 !     THE NAME OF THE ELEMENT FOLLOWED BY ITS ATOMIC NUMBER IS LEFT
@@ -1418,18 +1321,21 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=*) BCD
-      INTEGER(KIND=4) ZA,NCBCD,IERR
+      CHARACTER(LEN=*) :: BCD
+      INTEGER(KIND=I4) :: ZA,NCBCD,IERR
 !
-      CHARACTER(LEN=24) BCDX
-      CHARACTER(LEN=1) CCHAR
-      INTEGER(KIND=4) IZ,IA,NC,IC
-      INTEGER(KIND=4) IJK,I
+      CHARACTER(LEN=1), INTRINSIC :: CHAR
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, ICHAR
+!
+      CHARACTER(LEN=24) :: BCDX
+      CHARACTER(LEN=1) :: CCHAR
+      INTEGER(KIND=I4) :: IZ,IA,NC,IC
+      INTEGER(KIND=I4) :: IJK,I
 !
 !     DEFINE ELEMENT NAMES
 !
-      INTEGER(KIND=4), PARAMETER :: IELM=103
-      CHARACTER(LEN=12), DIMENSION(IELM) :: ELEMNT
+      INTEGER(KIND=I4), PARAMETER :: IELM=110
+      CHARACTER(LEN=13), DIMENSION(IELM) :: ELEMNT
       DATA (ELEMNT(IJK),IJK=1,10)/   'Hydrogen    ',                    &       
      &                               'Helium      ',                    &       
      &                               'Lithium     ',                    &       
@@ -1532,7 +1438,14 @@
      &                               'Fermium     '/
       DATA (ELEMNT(IJK),IJK=101,IELM)/'Mendelevium ',                   &       
      &                               'Nobelium    ',                    &       
-     &                               'Lawrencium  '/
+     &                               'Lawrencium  ',                    &       
+     &                               'Rutherfordium',                   &       
+     &                               'Dubnium     ',                    &       
+     &                               'Seaborgium  ',                    &       
+     &                               'Bohrium     ',                    &       
+     &                               'Hassium     ',                    &       
+     &                               'Meitnerium  ',                    &       
+     &                               'Darmstadtium'/
 !
 !     INITIALIZE
 !
@@ -1546,8 +1459,14 @@
 !
 !     DETERMINE IF IZ AND IA ARE IN THE ALLOWABLE RANGE.
 !
-      IF(IZ.LE.0.OR.IZ.GT.IELM)   GO TO 90
-      IF(IA.LT.0.OR.IA.GE.1000) GO TO 90
+      IF(IZ.LE.0.OR.IZ.GT.IELM) THEN
+         IERR = 1
+         GO TO 100
+      ENDIF
+      IF(IA.LT.0.OR.IA.GE.1000) THEN
+         IERR = 1
+         GO TO 100
+      ENDIF
 !
 !     ZERO A CORRESPONDS TO NATURAL ELEMENTS
 !
@@ -1577,11 +1496,6 @@
          END DO
       END IF
       NCBCD = NC
-      GO TO 100
-!
-!     IZ AND/OR IA NOT VALID
-!
-   90 IERR = 1
 !
   100 RETURN
       END SUBROUTINE ZAID
@@ -1592,14 +1506,10 @@
 !
 !     ROUTINE TO PROCESS ALL BUT MF=451 OF FILE 1
 !
-      USE STANEF_DEF, ONLY : MT,MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2,N,NE
+      REAL(KIND=R4) :: C1,C2
 !
    10 CALL OUT_STATUS
 !
@@ -1619,7 +1529,14 @@
 !     DELAYED NEUTRON YIELD DATA.
 !
          CASE (455)
-            CALL CANT(C1,C2,L1,L2,N1,N2)
+            IF(L1H.EQ.1) THEN
+               CALL CANT2(C1,C2,L1,L2,N1,NE)
+               DO N=1,NE
+                  CALL CANT(C1,C2,L1,L2,N1,N2)
+               END DO
+            ELSE
+               CALL CANT(C1,C2,L1,L2,N1,N2)
+            END IF
             IF(L2H.EQ.1)    THEN
                CALL CANT(C1,C2,L1,L2,N1,N2)
             ELSE
@@ -1630,7 +1547,7 @@
 !
          CASE (458)
             CALL CANT(C1,C2,L1,L2,N1,N2)
- 
+!
       END SELECT
 !
 !     PROCESS SEND CARD
@@ -1651,17 +1568,13 @@
 !
 !     ROUTINE TO PROCESS FILE 2
 !
-      USE STANEF_DEF, ONLY : N1H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NIS,NLS,NJS,NSS,NCRE
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) LFW,NER,LRU,LRF,NRO,LBK,LPS
-      INTEGER(KIND=4) I,II,J,N,NCR,LIL,NL,NS,NJ
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NIS,NLS,NJS,NSS,NCRE
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LBK,LPS
+      INTEGER(KIND=I4) :: I,II,J,N,NCR,LIL,NL,NS,NJ
+      REAL(KIND=R4) :: C1,C2
 !
       CALL OUT_STATUS
 !
@@ -1791,15 +1704,10 @@
 !
 !     ROUTINE TO PROCESS FILE 3
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS IN FILE 3
 !
@@ -1829,17 +1737,12 @@
 !
 !     ROUTINE TO PROCESS FILE 4 DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LTT,LI,NE
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LTT,LI,NE
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS IN FILE 4
 !
@@ -1904,7 +1807,7 @@
       END DO
 !
       RETURN
-      END
+      END SUBROUTINE FILE4
 !
 !***********************************************************************
 !
@@ -1912,17 +1815,12 @@
 !
 !     ROUTINE TO PROCESS FILE FIVE DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NK,NE,LF
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NK,NE,LF
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -1973,7 +1871,6 @@
 !
       RETURN
       END SUBROUTINE FILE5
- 
 !
 !***********************************************************************
 !
@@ -1981,17 +1878,12 @@
 !
 !     ROUTINE TO PROCESS FILE SIX DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NK,NE,LF,NMU
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,J,N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NK,NE,LF,NMU
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,J,N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2058,20 +1950,13 @@
 !
 !     ROUTINE TO PROCESS FILE SEVEN DATA
 !
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : Y
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LTHR,LT,NB,NS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,N,NN
-      REAL(KIND=4), DIMENSION(4) :: CFLAG
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LTHR,LT,NB,NS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,N,NN
+      REAL(KIND=R4), DIMENSION(4) :: CFLAG
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2154,17 +2039,12 @@
 !
 !     ROUTINE TO PROCESS FILE EIGHT DATA
 !
-      USE STANEF_DEF, ONLY : MF,MT
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LEP1,NSP,LCON,LCOV,NER,NO,NS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N,NN
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LEP1,NSP,LCON,LCOV,NER,NO,NS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N,NN
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2249,17 +2129,12 @@
 !
 !     ROUTINE TO PROCESS FILE NINE AND TEN DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2292,17 +2167,12 @@
 !
 !     ROUTINE TO PROCESS FILE TWELVE AND THIRTEEN DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LO,NK
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LO,NK
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2345,17 +2215,12 @@
 !
 !     ROUTINE TO PROCESS FILE FOURTEEN DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LI,LTT,NI,NK,NKL,NE
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) K,N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LI,LTT,NI,NK,NKL,NE
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: K,N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2428,17 +2293,12 @@
 !
 !     ROUTINE TO PROCESS FILE FIFTEEN DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NC,NE
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N,NN
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NC,NE
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N,NN
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2475,15 +2335,10 @@
 !
 !     ROUTINE TO PROCESS FILE 23 AND 27 DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2511,17 +2366,12 @@
 !
 !     ROUTINE TO PROCESS FILE 26
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NK,LAW,NE
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NK,LAW,NE
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2569,17 +2419,12 @@
 !
 !     ROUTINE TO PROCESS FILE 28
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NSS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NSS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2607,7 +2452,7 @@
       END DO
 !
       RETURN
-      END
+      END SUBROUTINE FILE28
 !
 !***********************************************************************
 !
@@ -2615,17 +2460,13 @@
 !
 !     ROUTINE TO PROCESS FILE 32
 !
-      USE STANEF_DEF, ONLY : N1H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) LFW,NER,LRU,LRF,NRO,LCOMP
-      INTEGER(KIND=4) NIS,NIT,NLS,NJS,NLRS,NSRS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,II,I2,N,NN
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP
+      INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,II,I2,N,NN
+      REAL(KIND=R4) :: C1,C2
 !
       CALL OUT_STATUS
 !
@@ -2707,17 +2548,12 @@
 !
 !     ROUTINE TO PROCESS FILE 33 DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) MTL,NL,NC,NI
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) I,J,N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: MTL,NL,NC,NI
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: I,J,N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2773,17 +2609,12 @@
 !
 !     ROUTINE TO PROCESS FILE 34 DATA
 !
-      USE STANEF_DEF, ONLY : MF,MT
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NI,NMT1,NL,NL1,NSS
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) J,N,NN
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NI,NMT1,NL,NL1,NSS
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: J,N,NN
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2833,17 +2664,12 @@
 !
 !     ROUTINE TO PROCESS FILE 35 DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NK
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) N
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NK
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: N
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2876,17 +2702,12 @@
 !
 !     ROUTINE TO PROCESS FILE 40 DATA
 !
-      USE STANEF_DEF, ONLY : MF
-      USE STANEF_DEF, ONLY : C1H,C2H,L1H,L2H,N1H,N2H
-!
-      USE STANEF_MDC, ONLY : OUT_STATUS
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) NS,NL,NC,NI
-      INTEGER(KIND=4) L1,L2,N1,N2
-      INTEGER(KIND=4) J,N,NN
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: NS,NL,NC,NI
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: J,N,NN
+      REAL(KIND=R4) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2942,15 +2763,11 @@
 !
 !     SUBROUTINE TO READ AND WRITE A TEXT RECORD IN CHARACTER FORMAT
 !
-      USE STANEF_DEF, ONLY : ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : TEXT
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) IPATH
+      INTEGER(KIND=I4) :: IPATH
+!
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
 !     READ THE TEXT RECORD
 !
@@ -2974,20 +2791,16 @@
 !
 !     READ AND WRITE A CONT RECORD
 !
-      USE STANEF_DEF, ONLY : ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : NFOR
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
+!
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
       CHARACTER(LEN=11), DIMENSION(2) ::  FLOATS
-      CHARACTER(LEN=11), PARAMETER :: RZERO=(' 0.000000+0')
-      CHARACTER(LEN=11), PARAMETER :: IZERO=('          0')
+      CHARACTER(LEN=11), PARAMETER :: RZERO=' 0.000000+0',              &       
+     &                                IZERO='          0'
 !
 !     READ CONT RECORD
 !
@@ -3044,21 +2857,17 @@
 !
 !     READ AND WRITE A LIST RECORD
 !
-      USE STANEF_DEF, ONLY : ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : Y
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
 !
-      CHARACTER(LEN=66) RECORD
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
+!
+      CHARACTER(LEN=66) :: RECORD
       CHARACTER(LEN=66), DIMENSION(6) :: FLOATS
-      INTEGER(KIND=4) NCS,NU,MM
-      INTEGER(KIND=4) M,N
+      INTEGER(KIND=I4) :: NCS,NU,MM
+      INTEGER(KIND=I4) :: M,N
 !
 !     PROCESS THE CONT-LIKE PORTION OF RECORD
 !
@@ -3120,21 +2929,16 @@
 !
 !     READ AND WRITE A TAB1 RECORD
 !
-      USE STANEF_DEF, ONLY : ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : NBT,INT
-      USE STANEF_DEF, ONLY : X,Y
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
+!
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
       CHARACTER(LEN=66), DIMENSION(6) :: FLOATS
-      INTEGER(KIND=4)  NP,NU,MM,NN
-      INTEGER(KIND=4) M,N
+      INTEGER(KIND=I4)  :: NP,NU,MM,NN
+      INTEGER(KIND=I4) :: M,N
 !
 !     PROCESS A TAB2-LIKE PORTION OF RECORD
 !
@@ -3142,7 +2946,7 @@
          CALL CANT2(C1,C2,L1,L2,N1,N2)
       ELSE
          READ(ITAPE,'(2E11.4,4I11)') C1,C2,L1,L2,N1,N2
-         READ(ITAPE,'(6I11)') (NBT(N),INT(N),N=1,N1)
+         READ(ITAPE,'(6I11)') (NBT(N),INTRP(N),N=1,N1)
       END IF
 !
 !     READ IN DATA ARRAY
@@ -3157,7 +2961,7 @@
 !        BINARY MODE
 !
          WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,                      &       
-     &           (NBT(N),INT(N),N=1,N1),(X(N),Y(N),N=1,NP)
+     &           (NBT(N),INTRP(N),N=1,N1),(X(N),Y(N),N=1,NP)
 !
 !        FORMAT THE FLOATING POINT NUMBERS
 !
@@ -3185,7 +2989,7 @@
       END IF
 !
       RETURN
-      END
+      END SUBROUTINE CANT1
 !
 !***********************************************************************
 !
@@ -3193,20 +2997,16 @@
 !
 !     READ AND WRITE A TAB2 RECORD
 !
-      USE STANEF_DEF, ONLY : ITAPE,OTAPE
-      USE STANEF_DEF, ONLY : I_DATA
-      USE STANEF_DEF, ONLY : MAT,MF,MT
-      USE STANEF_DEF, ONLY : NBT,INT
-      USE STANEF_DEF, ONLY : NSEQ
-!
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) L1,L2,N1,N2
-      REAL(KIND=4) C1,C2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      REAL(KIND=R4) :: C1,C2
+!
+      INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
       CHARACTER(LEN=66), DIMENSION(6) :: FIXS
-      INTEGER(KIND=4)  N
-      INTEGER(KIND=4) I,J,K
+      INTEGER(KIND=I4)  :: N
+      INTEGER(KIND=I4) :: I,J,K
 !
 !     PROCESS THE CONT-LIKE PORTION OF RECORD
 !
@@ -3218,7 +3018,7 @@
 !
 !     READ INTERPOLATION TABLE
 !
-      READ(ITAPE,'(6I11)')  (NBT(I),INT(I),I=1,N1)
+      READ(ITAPE,'(6I11)')  (NBT(I),INTRP(I),I=1,N1)
 !
 !     WRITE INTERPOLATION TABLE
 !
@@ -3226,7 +3026,8 @@
 !
 !        OUTPUT IN BINARY MODE
 !
-         WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,(NBT(N),INT(N),N=1,N1)
+         WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,                      &       
+     &                (NBT(N),INTRP(N),N=1,N1)
       ELSE
 !
 !        OUTPUT IN ASCII MODE
@@ -3235,14 +3036,14 @@
             NSEQ = MIN0(NSEQ+1,99999)
             IF(N+2.LE.N1)   THEN
                WRITE(OTAPE,'(6I11,I4,I2,I3,I5)')                        &       
-     &                (NBT(I),INT(I),I=N,N+2),MAT,MF,MT,NSEQ
+     &                (NBT(I),INTRP(I),I=N,N+2),MAT,MF,MT,NSEQ
             ELSE
                J =  0
                DO K=N,N1
                   J = J + 1
                   WRITE(FIXS(J),'(I11)') NBT(K)
                   J = J + 1
-                  WRITE(FIXS(J),'(I11)') INT(K)
+                  WRITE(FIXS(J),'(I11)') INTRP(K)
                END DO
                DO K=J+1,6
                   FIXS(K) = ' '
@@ -3264,13 +3065,16 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=11) CX
-      REAL(KIND=4) X
+      CHARACTER(LEN=11) :: CX
+      REAL(KIND=R4) :: X
 !
-      CHARACTER(LEN=1) SIGN
-      INTEGER(KIND=4) IPOW
-      REAL(KIND=4) POWER
-      REAL(KIND=8) FNUM
+      INTEGER(KIND=I4), INTRINSIC :: IFIX, IABS
+      REAL(KIND=R4), INTRINSIC :: ABS
+!
+      CHARACTER(LEN=1) :: CSIGN
+      INTEGER(KIND=I4) :: IPOW
+      REAL(KIND=R4) :: POWER
+      REAL(KIND=R8) :: FNUM
 !
 !     INITIALIZE
 !
@@ -3281,10 +3085,10 @@
          POWER = ALOG10(ABS(X)) + .000002
          IPOW = IFIX(POWER)
          IF(POWER.LT.0.0)   THEN
-            SIGN = '-'
+            CSIGN = '-'
             IPOW = IPOW - 1
          ELSE
-            SIGN = '+'
+            CSIGN = '+'
          END IF
 !
 !        FIND NORMALIZED MANTISSA
@@ -3295,12 +3099,12 @@
 !        TWO DIGIT EXPONENT
 !
          IF(IPOW.GE.10)   THEN
-            WRITE(CX,'(F8.5,A1,I2)')  FNUM,SIGN,IPOW
+            WRITE(CX,'(F8.5,A1,I2)')  FNUM,CSIGN,IPOW
 !
 !        ONE DIGIT EXPONENT
 !
          ELSE
-            WRITE(CX,'(F9.6,A1,I1)')  FNUM,SIGN,IPOW
+            WRITE(CX,'(F9.6,A1,I1)')  FNUM,CSIGN,IPOW
          END IF
       ELSE
          CX = ' 0.000000+0'
@@ -3317,13 +3121,15 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=*) INSTR,OUTSTR,DELIM
-      INTEGER(KIND=4) ITOK
+      CHARACTER(LEN=*) :: INSTR,OUTSTR,DELIM
+      INTEGER(KIND=I4) :: ITOK
 !
-      INTEGER(KIND=4) ILEN,JLEN
-      INTEGER(KIND=4) ITOKP
-      INTEGER(KIND=4) IBEG
-      INTEGER(KIND=4) I
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!
+      INTEGER(KIND=I4) :: ILEN,JLEN
+      INTEGER(KIND=I4) :: ITOKP
+      INTEGER(KIND=I4) :: IBEG
+      INTEGER(KIND=I4) :: I
 !
 !     INITIALIZE
 !
@@ -3355,3 +3161,71 @@
 !
   100 RETURN
       END SUBROUTINE TOKEN
+!
+!***********************************************************************
+!
+      SUBROUTINE GET_FROM_CLINE
+!
+!     GET CONTENTS OF COMMAND LINE OR NAME OF BATCH INPUT FILE
+!
+      IMPLICIT NONE
+!
+!+++MDC+++
+!...VMS
+!/      INTEGER(KIND=2) :: ILENP2
+!...ANS
+!/      CHARACTER(LEN=100) :: CFILE
+!---MDC---
+!
+      INPAR = ' '
+      ILENP = 0
+      INPUT = INPUT0
+!
+!+++MDC+++
+!...VMS
+!/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
+!/      ILENP = ILENP2
+!...UNX
+      CALL GETCL(INPAR)
+      ilenp = LEN_TRIM(INPAR)
+!...DVF
+!/      CALL GETARG(1,INPAR)
+!/      ilenp = LEN_TRIM(INPAR)
+!...ANS
+!/      WRITE(OUTPUT,'(A)')                                             &       
+!/     &    ' Control File Specification        - '
+!/      READ(INPUT,'(A)') CFILE
+!/      INPUT = 19
+!/      OPEN(UNIT=INPUT,FILE=CFILE,STATUS='OLD')
+!---MDC---
+!
+      RETURN
+      END SUBROUTINE GET_FROM_CLINE
+!
+!***********************************************************************
+!
+      SUBROUTINE OUT_STATUS
+!
+!     DISPLAYS THE IDENTIFICATION OF THE SECTION BEING PROCESSED
+!
+      IMPLICIT NONE
+!
+      IF(MAT.GT.0.AND.MF.GT.0.AND.MT.GT.0) THEN
+!+++MDC+++
+!...VMS, ANS, WIN, UNX, MOD
+         WRITE(OUTPUT,'(5X,A,I5,A,I3,A,I4)')                            &       
+     &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
+!...DVF, LWI
+!/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MAT,MF,MT)
+!---MDC---
+      END IF
+!
+      RETURN
+      END SUBROUTINE OUT_STATUS
+!
+!+++MDC+++
+!...VMS, ANS, WIN, UNX
+      END PROGRAM STANEF
+!...LWI, DVF, MOD
+!/      END MODULE STANEF
+!---MDC---

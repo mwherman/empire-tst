@@ -81,6 +81,7 @@ C                          GMRPAR(NDGMRPM,NDNUC) --> GMRPAR(NDGMRPM,0:NDNUC)]
      &                 SCRtl(NDLV, 0:NDEJC), SCRtem(0:NDEJC),
      &                 CSEmis(0:NDEJC, 0:NDNUC), CSEmsd(NDECSE, NDEJC),
      &                 CSEhms(NDECSE, NDEJC),
+     &                 CSEfis(NDECSE, NDEJC),
      &                 CSE(NDECSE, 0:NDEJC, 0:NDNUC),
      &                 CSEa(NDECSE, NDANG, 0:NDEJC, 0:1),
      &                 CSEahms(NDECSE, NDANG, NDEJC),
