@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-08 15:54:48 $
-Ccc   * $Id: main.f,v 1.41 2004-10-08 15:54:48 Capote Exp $
+Ccc   * $Date: 2004-11-30 08:39:21 $
+Ccc   * $Id: main.f,v 1.42 2004-11-30 08:39:21 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -437,7 +437,7 @@ C
                     WRITE(6, 99002) (iang - 1)*gang,
      &               (CSAlev(iang, ICOller(ilv), nejcec),
      &                       ilv = 2, min(ncoll,10))
-                     endif  
+                     endif
 99002              FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
                  ENDDO
                  WRITE(6, *)' '
@@ -1594,7 +1594,7 @@ C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1 .AND. INT(AEJC(0)).NE.0)THEN
             WRITE(6,*)
-            WRITE(6,*) ' INCID.ENERGY (CMS) =',EIN,' MeV'	    
+            WRITE(6,*) ' INCID.ENERGY (CMS) =',EIN,' MeV'
             WRITE(6,*) ' SHAPE ELASTIC :', ELAcs,' mb'
             WRITE(6,*) ' CN ELASTIC    :', POPlv(1, mt2),' mb'
             ELAcs = ELAcs + POPlv(1, mt2)
