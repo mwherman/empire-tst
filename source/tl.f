@@ -1547,9 +1547,10 @@ C           For vibrational model spin is always assumed to be zero
       ENDDO
       GOTO 100
  200  CLOSE(45)
+	Maxlw =  Maxlw + 1
 C-----Reaction cross section in mb
       sabs = 0.D0
-      DO l = 0, Maxlw
+      DO l = 0, Maxlw 
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = cte*sabs
@@ -2014,16 +2015,15 @@ C-----CARD 5
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
 C-----ground state
-      ch = '-'
-      IF ( LVP(LEVtarg,Nnuc).GT.0 ) ch = '+'
+C     ch = '-'
+C     IF ( LVP(LEVtarg,Nnuc).GT.0 ) ch = '+'
 C-----Important: Instead of using TARGET SPIN (XJLV(1,NNUC)) and PARITY(ch)
 C-----A.Koning always used in PREGNASH SPIN=0, ch='+'
 C-----It is justified for vibrational model and DWBA calculations
 C-----so we are using zero spin here
 C-----NOT TRUE for rotational model calculations (see ecis_CCrot)
-C-----write(1,'(f5.2,2i2,a1,5f10.5)') zerosp,0,1,'+',EL,
-C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')zerosp, 0, 1, '+', elab,
-      WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(LEVtarg,NNUC),0,1, ch, elab,
+C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(LEVtarg,NNUC),0,1, ch, elab,
+      WRITE(1, '(f5.2,2i2,a1,5f10.5)')zerosp, 0, 1, '+', elab,
      &                                SEJc(Nejc), xmas_nejc, xmas_nnuc,
      &                                Z(Nnuc)*ZEJc(Nejc)
 C-----0 phonon involved
@@ -2318,8 +2318,7 @@ C-----Penetrabilities punched on cards
       IF(Ltlj)THEN
          ECIs2(13:13) = 'T'
 C        RCN 01/2005
-C        ECIs2(5:5) = 'F'
-C        ECIs2(14:14) = 'F'
+         ECIs2(5:5) = 'F'
 C--------Smatrix output
          ECIs2(6:6) = 'F'
       ENDIF

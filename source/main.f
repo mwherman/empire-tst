@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-25 00:00:20 $
-Ccc   * $Id: main.f,v 1.49 2005-01-25 00:00:20 Capote Exp $
+Ccc   * $Date: 2005-01-25 13:03:56 $
+Ccc   * $Id: main.f,v 1.50 2005-01-25 13:03:56 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -266,48 +266,46 @@ C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
       CALL MARENG(0, 0)
+
 C-----
 C-----Get ECIS results
 C-----
-C-----Locate position of the target among residues
+C--------locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
-C-----Locate position of the projectile among ejectiles
+C--------locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
-C     IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-C       OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
-C       READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
-C       IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
-C       READ(45, *, END = 1500)ecisabs
-C       IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
-C-------Checking if CC OMP was used
-C       IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR.
-C    &      DIRect.EQ.2) ELAcs=ftmp
-C       CLOSE(45)
-C     ENDIF
-      OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+      ELAcs = 0.d0
+      TOTcs = 0.d0
+      ecisabs = 0.d0
+
+      OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD',ERR=1500)
       READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
       IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
       READ(45, *, END = 1500)ecisabs
       IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
-      CLOSE(45)
       ELAcs=ftmp
+      CLOSE(45)
 
+      ncoll = 0
       NELang = 73
       ecm = EINl - EIN
       dang = 3.14159/FLOAT(NELang - 1)
-      OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD')
+
+      OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD',ERR=1500)
       READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
       READ(45, *, END = 1500)  ! To skip level identifier line
-C     OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')
-C     READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
       DO iang = 1, NELang
-        READ(45, '(7x,E12.5)', END = 1500) ELAda(iang)
+        READ(45, '(7x,E12.5)', END = 1500)ELAda(iang)
       ENDDO
 
-      ncoll = 0
+      IF(DIRECT.EQ.0) goto 1500
+
       OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD',ERR=1500)
       READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
+C     OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')
+C     READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
+
 C-----get and add inelastic cross sections (including double-differential)
       DO i = 2, ND_nlv
         ilv = ICOller(i)
@@ -315,65 +313,102 @@ C-----get and add inelastic cross sections (including double-differential)
         echannel = EX(NEX(1), 1) - Q(nejcec, 1) - ELV(ilv, nnurec)
 C-------avoid reading closed channels
         IF(echannel.GE.0.0001)THEN
-           xcse = echannel/DE + 1.0001
-           icsl = INT(xcse)
-           icsh = icsl + 1
-           READ(46, *, END = 1500)popread
-           ncoll = i
-           POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
-           CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
-           CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
-C----------add direct transition to the spectrum
-           popl = popread*(FLOAT(icsh) - xcse)/DE
-           IF(icsl.EQ.1)popl = 2.0*popl
-           poph = popread*(xcse - FLOAT(icsl))/DE
-           CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
-           CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
-           READ(45, *, END = 1500)    ! Skipping level identifier line
-C          Empire uses 10 deg grid for inelastic so we have to take
-C          each 4th result from ECIS (2.5 deg grid)
-           DO iang = 1, NDANG - 1
-            READ(45, '(7x,E12.5)', END = 1500) CSAlev(iang, ilv, nejcec)
-            READ(45, '(7x,E12.5)', END = 1500)
-            READ(45, '(7x,E12.5)', END = 1500)
-            READ(45, '(7x,E12.5)', END = 1500)
-           ENDDO
-           READ(45, '(7x,E12.5)', END = 1500) CSAlev(NDANG, ilv, nejcec)
-C----------construct recoil spectra due to direct transitions
-           IF(ENDf.GT.0)THEN
-              dang = PI/FLOAT(NDANG - 1)
-              coef = 2*PI*dang
-C             check whether integral over angles agrees with x-sec. read from ECIS
-              csum = 0.0
-              DO iang = 1, NDANG
-                csum = csum + CSAlev(iang, ilv, nejcec)*
-     &                        SANgler(iang)*coef
-              ENDDO
-C             correct 'coef' for eventual imprecision and include recoil DE
-              coef = coef*POPlv(ilv, nnurec)/csum/DERec
-              echannel = echannel*EJMass(0)/AMAss(1)
-              DO iang = 1, NDANG
-                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
-     &                     *CANgler(iang)
-                irec = erecoil/DERec + 1.001
-                weight = (erecoil - (irec - 1)*DERec)/DERec
-C               escape if we go beyond recoil spectrum dimension
-                IF(irec + 1.GT.NDEREC)GOTO 1450
-                csmsdl = CSAlev(iang, ilv, nejcec)*SANgler(iang)*coef
-                RECcse(irec, 0, nnurec) = RECcse(irec, 0, nnurec)
+               xcse = echannel/DE + 1.0001
+               icsl = INT(xcse)
+               icsh = icsl + 1
+               READ(46, *, END = 1500)popread
+               ncoll = i
+               POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
+               CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
+               CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
+C--------------add direct transition to the spectrum
+               popl = popread*(FLOAT(icsh) - xcse)/DE
+               IF(icsl.EQ.1)popl = 2.0*popl
+               poph = popread*(xcse - FLOAT(icsl))/DE
+               CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
+               CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
+               READ(45, *, END = 1500)    ! Skipping level identifier line
+C              Empire uses 10 deg grid for inelastic so we have to take
+C              each 4th result from ECIS (2.5 deg grid)
+               DO iang = 1, NDANG - 1
+                  READ(45, '(7x,E12.5)', END = 1500)
+     &                 CSAlev(iang, ilv, nejcec)
+                  READ(45, '(7x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
+               ENDDO
+               READ(45, '(7x,E12.5)', END = 1500)
+     &              CSAlev(NDANG, ilv, nejcec)
+C--------------construct recoil spectra due to direct transitions
+               IF(ENDf.GT.0)THEN
+                  dang = PI/FLOAT(NDANG - 1)
+                  coef = 2*PI*dang
+C                 check whether integral over angles agrees with x-sec. read from ECIS
+                  csum = 0.0
+                  DO iang = 1, NDANG
+                     csum = csum + CSAlev(iang, ilv, nejcec)*
+     &                      SANgler(iang)*coef
+                  ENDDO
+C                 correct 'coef' for eventual imprecision and include recoil DE
+                  coef = coef*POPlv(ilv, nnurec)/csum/DERec
+                  echannel = echannel*EJMass(0)/AMAss(1)
+                  DO iang = 1, NDANG
+                     erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
+     &                         *CANgler(iang)
+                     irec = erecoil/DERec + 1.001
+                     weight = (erecoil - (irec - 1)*DERec)/DERec
+C                    escape if we go beyond recoil spectrum dimension
+                     IF(irec + 1.GT.NDEREC)GOTO 1450
+                     csmsdl = CSAlev(iang, ilv, nejcec)*SANgler(iang)
+     &                        *coef
+                     RECcse(irec, 0, nnurec) = RECcse(irec, 0, nnurec)
      &                  + csmsdl*(1.0 - weight)
-                RECcse(irec + 1, 0, nnurec)
+                     RECcse(irec + 1, 0, nnurec)
      &                  = RECcse(irec + 1, 0, nnurec) + csmsdl*weight
-              ENDDO
-           ENDIF
+                  ENDDO
+               ENDIF
         ENDIF
  1450 ENDDO
  1500 CLOSE(45)
-      CLOSE(46)
-C     CLOSE(47)
+      IF(DIRECT.NE.0) CLOSE(46)
+C      IF(DIRECT.EQ.0) CLOSE(47)
+
+C-----print elastic and direct cross sections from ECIS
       WRITE(6, *)' '
       WRITE(6, *)' '
-C-----print elastic cross sections from ECIS
+      IF(DIRect.EQ.0)THEN
+        WRITE(6, *)
+     &     ' Results provided by Spherical Optical Model calculations'
+        WRITE(6, *)' '
+      ELSEIF(DIRect.EQ.1)THEN
+        IF((MODelecis.GT.0) THEN
+          WRITE(6, *)
+     &     ' Results provided by Coupled Channel calculations'
+        ELSE
+          WRITE(6, *)
+     &     ' Results provided by Spherical Optical Model calculations'
+        ENDIF
+        WRITE(6, *) ' Inelastic scattering results provided by'
+        WRITE(6, *) ' Coupled Channel + DWBA calculations'
+        WRITE(6, *)' '
+      ELSEIF(DIRect.EQ.2)THEN
+        WRITE(6, *)
+     &     ' Results provided by Coupled Channel calculations'
+        WRITE(6, *)' '
+      ELSEIF(DIRect.EQ.3)THEN
+        WRITE(6, *)
+     &     ' Results provided by Spherical Optical Model calculations'
+        WRITE(6, *)
+     &     ' Inelastic scattering results provided by DWBA calculations'
+        WRITE(6, *)' '
+      ENDIF
+
+      IF(ZEJc(0).EQ.0) THEN
+        WRITE(6, 99004)TOTcs, ecisabs, ELAcs
+      ELSE
+        WRITE(6, 99005)ecisabs
+      ENDIF
+
       WRITE(6, 89001)
       WRITE(6, 89002)
       gang = 180.0/(NELang - 1)
@@ -383,71 +418,32 @@ C-----print elastic cross sections from ECIS
         WRITE(6, 89004)( (j-1)*gang,ELAda(j),j=imint, imaxt)
       ENDDO
       WRITE(6, '(//)')
-      if(ncoll.gt.0) then
-C-------print direct cross sections from ECIS
-        IF((MODelecis.EQ.0 .AND. DIRect.EQ.1) .OR. DIRect.EQ.3)THEN
-            WRITE(6, *)' '
-            IF(ncoll.GT.0)THEN
-               IF(DIRect.EQ.1)THEN
-                  WRITE(6, *)' Inelastic scattering results provided by'
-                  WRITE(6, *)
-     >          ' Coupled Channel + DWBA calculations with ECIS:'
-               ENDIF
-               IF(DIRect.EQ.3)THEN
-                  WRITE(6, *)' Inelastic scattering results provided by'
-                  WRITE(6, *)' DWBA calculations with ECIS:'
-               ENDIF
-            ENDIF
-        ENDIF
-        IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-         WRITE(6, *)' '
-         WRITE(6, *) ' Results provided by Coupled Channel calculations'
-     &             , ' with ECIS code:'
-          IF(ZEJc(0).EQ.0) THEN
-            WRITE(6, 99004)TOTcs, ecisabs, ELAcs
-          ELSE
-            WRITE(6, 99005)ecisabs
-          ENDIF
-C==================================================================
-C       the following ELSE block is to print ECIS calculated XS
-C       (it could be omitted)
-        ELSE
-          OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
-          READ(45, *, END = 1540)  ! To skip first line <CROSS-S.> ..
-          IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)ecistotxs
-          READ(45, *, END = 1540)ecisabsxs
-          IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)eciselaxs
- 1540     CLOSE(45)
-          IF(ZEJc(0).EQ.0) THEN
-            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
-     &        ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
-          ELSE
-            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl,
-     &        ecisabsxs/1000.
-          ENDIF
-C==================================================================
-        ENDIF
-C       The printout below was changed to include the whole angular grid
-        WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
+
+      IF(ncoll.GT.0)THEN
         WRITE(6, *)' '
         gang = 180.0/(NDANG - 1)
-        DO iang = 1, NDANG
-          if(ncoll.gt.0) then
-            WRITE(6, 99002) (iang - 1)*gang,
-     &             (CSAlev(iang, ICOller(ilv), nejcec),
-     &                     ilv = 2, min(ncoll,10))
-          endif
-        ENDDO
-        WRITE(6, *)' '
-        WRITE(6, 99003)
-     &    (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
-        WRITE(6, *)' '
-        WRITE(6, *)' '
-        WRITE(6, *)' '
-      endif
+
+        if(CSAlev(1, ICOller(2), nejcec).gt.0) then
+           WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
+           WRITE(6, *)' '
+           DO iang = 1, NDANG
+              if(CSAlev(1, ICOller(2), nejcec).gt.0) then
+                 WRITE(6, 99002) (iang - 1)*gang,
+     &               (CSAlev(iang, ICOller(ilv), nejcec),
+     &                    ilv = 2, min(ncoll,10))
+               endif
+           ENDDO
+           WRITE(6, *)' '
+           WRITE(6, 99003)
+     &  (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
+           WRITE(6, *)' '
+           WRITE(6, *)' '
+           WRITE(6, *)' '
+        endif
+      ENDIF
+
 89001 FORMAT(' ', 46x, 'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',
-     &     /,' ', 46x, 40('*'), /, ' ', 56x, 'CENTER-OF-MASS SYSTEM',
-     &     ///)
+     &    /,' ', 46x, 40('*'), /, ' ', 56x, 'CENTER-OF-MASS SYSTEM',///)
 89002 FORMAT(' ', 5x, 4('    TETA ', 2x, 'D.SIGMA/D.OMEGA', 6x),/)
 89004 FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
 99001 FORMAT('  Angle ', 10(6x, i2, '-level'))
@@ -457,6 +453,8 @@ C       The printout below was changed to include the whole angular grid
      &       /, 2x, 'Absorption cross section    :', e14.7, ' mb',
      &       /, 2x, 'Shape elastic cross section :', e14.7, ' mb',//)
 99005 FORMAT(/, 2x, 'Absorption cross section    :', e14.7, ' mb',//)
+
+C=========================================================================
 C
 C     Skipping all emission calculations
 C     GOTO 99999
