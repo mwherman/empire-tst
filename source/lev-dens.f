@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:20:38 $
-Ccc   * $Id: lev-dens.f,v 1.33 2005-03-04 17:20:38 herman Exp $
+Ccc   * $Date: 2005-03-07 14:32:29 $
+Ccc   * $Id: lev-dens.f,v 1.34 2005-03-07 14:32:29 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1762,7 +1762,7 @@ C
 99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
      &        '.dat')
       OPEN (UNIT = 34,FILE = filename,ERR = 300)
-  100 READ (34,99010,ERR = 300,END = 300) car2, izr, iar
+  100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar
 99010 FORMAT (23x,a2,i3,3x,i3)
       IF (car2.NE.'Z=') GOTO 100
       IF (iar.NE.ia .OR. izr.NE.iz) GOTO 100
