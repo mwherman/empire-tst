@@ -8,10 +8,10 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.16                   '
-echo '                         (Montenotte)                      '
-echo '                              by                           '
-echo '                         M. H e r m a n                    '
+echo '                     V E R S I O N  2.16.2                 '
+echo '                        (Montenotte)                       '
+echo '                             by                            '
+echo '                        M. H e r m a n                     '
 echo '                                                           '
 echo ' '
 file=$1
@@ -47,6 +47,7 @@ rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out  2>/dev/null
 rm  TARGET_COLL.DAT 2>/dev/null
 rm  TARGET_COLL.RIPL 2>/dev/null
 rm  TARGET-*.tl 2>/dev/null
+rm  warnings
 
 # COPY INPUT FILES FOR A GIVEN CASE
 
@@ -132,6 +133,11 @@ mv ECIS_VIBROT.out $file-ecis.out 2>/dev/null
 mv ecVIB.inp $file-ecis.in 2>/dev/null
 mv ecROT.inp $file-ecis.in 2>/dev/null
 mv ecVIBROT.inp $file-ecis.in 2>/dev/null
+
+# SHOW WARNINGS
+
+grep WARNING $file.lst >warnings
+xterm -bg darkorange -title WARNINGS -e vi warnings 
 
 # DELETE TEMPORARY FILES
 

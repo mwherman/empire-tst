@@ -228,8 +228,8 @@ Monte Carlo preequilibrium model (HMS)
 -------------------------------------      
 
 HMS   Controls Monte Carlo preequilibrium calculations
-     = 0 Monte Carlo preequilibrium calculations disabled
-     = 1 Monte Carlo preequilibrium calculations enabled
+     = 0 HMS disabled
+     = 1 HMS enabled
 
 Level densities
 ---------------                
@@ -390,9 +390,23 @@ OMPOT 	Optical model parameters,
          when negative RIPL o.m.p. are taken with |VAL| being RIPL
          identification number of the potential set.
 
-OMDIR 	Optical model parameters to be used by ECIS. All above applies
+DIRPOT	Optical model parameters to be used by ECIS. All above applies
          except that I1 need not be specified (refers to inelastic channel
          by default)
+
+EFERMI   Fermi Energy for dispersive om potential (default: -10.392 MeV)
+
+EAVERP   Average energy of particle states for dispersive omp 
+         (default:-5.66 MeV)
+
+EANONL   Threshold energy for nonlocality in dispersive omp (default: 60 MeV)
+
+ALPHA    Mahaux nonlocality parameter in dispersive omp (default: 1.65)
+
+
+
+
+
 
 Miscellaneous
 -------------               
