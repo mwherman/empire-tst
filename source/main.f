@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 16:31:24 $
-Ccc   * $Id: main.f,v 1.54 2005-02-04 16:31:24 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-06 14:16:52 $
+Ccc   * $Id: main.f,v 1.55 2005-02-06 14:16:52 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -191,7 +191,7 @@ C
       COMMON /CRITFIS/acrtf(2), ucrtf(2), tcrtf(2), detcrtf(2),
      &                scrtf(2),mortcrt(nfparab),mparcrt(nfparab),
      &                econdf(2)
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
      &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
@@ -199,9 +199,9 @@ C
      &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
      &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
      &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
-     
+
       COMMON /FIS_ISO / tfiso,tgiso,tiso,rfiso, pfiso
-     
+
       DOUBLE PRECISION  rofism, hm, efdism, efbm, xminnm, defbm,
      &                  shcfism, deltafism, gammafism,ugridf,afism,
      &                  tfiso,tgiso,tiso,rfiso,tg2,wfism,
@@ -241,7 +241,7 @@ C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
       icalled = 0
-         CALL THORA(6)
+      CALL THORA(6)
 C-----
 C-----Read and prepare input data
 C-----
@@ -269,9 +269,14 @@ C--------locate position of the target among residues
 C--------locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
-      WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C     WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C    &         INT(ZEJc(0)),INT(AEJc(0)),
+C    &       SYMb(0),INT(A(0)),INT(EINl*1000)
+      WRITE(ctmp18, '(i2.2,i3.3,1h_,i2.2,i3.3,1h_,i6.6)')
      &         INT(ZEJc(0)),INT(AEJc(0)),
-     &       SYMb(0),INT(A(0)),INT(EINl*1000)
+     &         INT(Z(0)),   INT(A(0)),   INT(EINl*1000)
+
+
 C     TOTcs, ABScs,ELAcs are initialized within MARENG()
       ncoll = 0
       NELang = 73
@@ -652,7 +657,7 @@ C-----start DO loop over decaying nuclei
             Call READ_INPFIS(Nnuc)
             nrbarc1=nrbarc
             IF(nrbarc.eq.3)nrbarc1=2
-          
+
             DO i = 1, NRBarc1
                IF(FISmod(nnuc).eq.0..or.
      &           (Fismod(nnuc).gt.0..and.i.ne.2))THEN
@@ -1044,7 +1049,7 @@ C-----------------fission ()
                   IF(FISsil(nnuc).AND.(FISSHI(Nnuc).EQ.1.))
      &            CALL FISSION(nnuc, ke, jcn, sumfis)
                   IF(FISsil(nnuc).AND.(FISSHI(Nnuc).NE.1.))
-     &            CALL FISCROSS(nnuc, ke, ip, jcn, sumfis, 
+     &            CALL FISCROSS(nnuc, ke, ip, jcn, sumfis,
      &                            sumfism,dencomp,aafis,0)
 C-----------------normalization and accumulation
 C-----------------
@@ -1055,7 +1060,7 @@ C-----------------
      &               *step/RO(ke, jcn, nnuc)
                   CALL XSECt(nnuc, m, xnor, sumfis,  sumfism,
      &                       ke, ipar, jcn, dencomp, aafis)
-     
+
 C-----------------calculate total emission
  1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
@@ -1646,7 +1651,7 @@ C-----------------double-differential spectra
                         CSEa(iccml, nang, nejc, 0)
      &                     = CSEa(iccml, nang, nejc, 0)
      &                     + CSEa(icse, nang, nejc, 1)*(1.0 - weight)
-C                       double contribution to the first energy bin to
+C                       double contribution to the first energy bin
 C                       to conserve the integral
                         IF(iccml.EQ.1 .AND. icse.NE.1)
      &                     CSEa(iccml, nang, nejc, 0)
@@ -2010,8 +2015,8 @@ C--------print end point again with 0 xs for consistency with particle spectra
       END
 C-------------------------------------------------------------------
       SUBROUTINE FISCROSS(nnuc, ke, ip, jcn, sumfis, sumfism,
-     &                    dencomp, aafis, ifluct)      
- 
+     &                    dencomp, aafis, ifluct)
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2019,7 +2024,7 @@ C
       COMMON /COMFIS4/ TFC, TFCc, JCC
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23,TG2
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
      &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
@@ -2035,7 +2040,7 @@ C
       IF(ifluct.eq.0) dencomp = DENhf
       aafis = 0.
       IF(FISmod(Nnuc).eq.0.)THEN
-         CALL FISFIS(nnuc, ke, ip, jcn, sumfis,0)     
+         CALL FISFIS(nnuc, ke, ip, jcn, sumfis,0)
          IF(FISopt(Nnuc).gt.0.)THEN
             IF(NRWel.eq.1) cota1 = (TF(1) + TF(2)+TG2)/2
             IF(NRWel.eq.2) cota1 = (TF(1) + TDIr23+TG2)/2
@@ -2044,7 +2049,7 @@ C
       IF(FISmod(Nnuc).gt.0.)THEN
           tfb=0.
           tdirect=0.
-          DO m=1,int(FISmod(Nnuc))+1  
+          DO m=1,int(FISmod(Nnuc))+1
              efb(2)=efbm(m)
              DO k=1,nrfdis(2)
                 h(k,2)=hm(k,m)
@@ -2057,7 +2062,7 @@ C
                 UGRid(kk,2)=UGRidf(kk,m)
                 rofis(kk,jcn,2)=rofism(kk,jcn,m)
              ENDDO
-             CALL FISFIS(nnuc, ke, ip, jcn, sumfis,m)         
+             CALL FISFIS(nnuc, ke, ip, jcn, sumfis,m)
              tfbm(m)=tf(2)
              tfb=tfb+tfbm(m)
              IF(FISopt(Nnuc).gt.0.)THEN
@@ -2067,14 +2072,14 @@ C
              IF(FISopt(Nnuc).gt.0.) cota1 = (TF(1) + TFb+TG2)/2
           ENDDO
       ENDIF
-     
+
       IF(cota1.LE.EXPmax)THEN
          cotaexp = EXP( - cota1)
       ELSE
          cotaexp = 0.d0
       ENDIF
       Cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
-      
+
       IF(FISmod(Nnuc).eq.0..and.fisopt(nnuc).gt.0.)THEN
          IF(NRBarc.EQ.2.and.NRwel.eq.1)Tout=tf(2)
          IF(NRBar.EQ.5)Tout=Tdir23
@@ -2090,8 +2095,8 @@ C
          IF(tout.gt.0.and.tg2.gt.0.)
      &         pfiso=(tdir+ dencomp)*(Rfiso-1.)*
      &                        TG2*aafis/(tout+TG2)
-      ENDIF   
-      
+      ENDIF
+
       IF(FISmod(Nnuc).gt.0.)THEN
          IF(Tfb*Tabs.GT.0.)THEN
             bbfis = (TDIrect + dencomp)*
@@ -2101,22 +2106,22 @@ C
          ELSE
             aafis = 0.
          ENDIF
-         DO m=1,int(FISmod(Nnuc))+1 
+         DO m=1,int(FISmod(Nnuc))+1
             IF((tf(1)+tfb).gt.0.)THEN
                sumfism(m)=tf(1)*tfbm(m)/(tf(1)+tfb)
             ELSE
                sumfism(m)=0.
             ENDIF
          ENDDO
-       ENDIF   
+       ENDIF
        END
 c======================================================================
        SUBROUTINE XSECt(nnuc, m, xnor, sumfis, sumfism, ke, ipar, jcn,
-     &                  dencomp, aafis)     
- 
+     &                  dencomp, aafis)
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
      &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
@@ -2124,7 +2129,7 @@ c======================================================================
      &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
      &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
      &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
-    
+
       COMMON /FIS_ISO / tfiso,tgiso,tiso,rfiso,pfiso
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23,TG2
       DOUBLE PRECISION csfis, sumfis,xnor,xnorfis
@@ -2140,9 +2145,9 @@ c======================================================================
                 xnorfis = xnor*DENhf/(dencomp + TDIr)
             ELSE
                 xnorfis=0.
-            ENDIF   
+            ENDIF
 C-----------fission
-            csfis = csfis +xnorfis*(tdir+ dencomp*aafis) 
+            csfis = csfis +xnorfis*(tdir+ dencomp*aafis)
      &               + xnorfis*pfiso
          ENDIF
          IF(FISmod(Nnuc).gt.0.)THEN
@@ -2152,7 +2157,7 @@ C-----------fission
                 xnorfis=0.
             ENDIF
             DO m=1,int(FISmod(Nnuc))+1
-               csfism(m) = csfism(m) + xnorfis * (tdirm(m) * (1.-aafis) 
+               csfism(m) = csfism(m) + xnorfis * (tdirm(m) * (1.-aafis)
      &                    +  tfbm(m) * aafis * (dencomp + TDIrect)/tfb)
             ENDDO
          ENDIF
@@ -2161,7 +2166,7 @@ C------------particles
             nnur = NREs(nejc)
             CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
                        CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc) +
-     &                 xnorfis*SCRtem(nejc)*(1 - aafis)       
+     &                 xnorfis*SCRtem(nejc)*(1 - aafis)
          ENDDO
 C------------gammas
          CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
@@ -2190,4 +2195,4 @@ C--------fission
          ENDDO
       ENDIF
  100  continue
-      END           
+      END
