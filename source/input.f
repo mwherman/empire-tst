@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:20:38 $
-Ccc   * $Id: input.f,v 1.87 2005-03-04 17:20:38 herman Exp $
+Ccc   * $Date: 2005-03-07 14:31:30 $
+Ccc   * $Id: input.f,v 1.88 2005-03-07 14:31:30 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1521,15 +1521,13 @@ C---- fission input is created if it does not exist and FISSHI=0
          ENDIF
          IF (FISshi(nnuc).EQ.2.) FISsil(nnuc) = .FALSE.
       ENDDO
-      IF (FISshi(nnuc).EQ.0) THEN
-         INQUIRE (FILE = 'FISSION.INP',EXIST = gexist)
-         IF (.NOT.gexist) THEN
-            OPEN (79,FILE = 'FISSION.INP',STATUS = 'UNKNOWN')
-            DO nnuc = 1, NNUcd
-               IF (FISsil(nnuc)) CALL INPFIS(nnuc)
-            ENDDO
-            CLOSE (79)
-         ENDIF
+      INQUIRE (FILE = 'FISSION.INP',EXIST = gexist)
+      IF (.NOT.gexist) THEN
+         OPEN (79,FILE = 'FISSION.INP',STATUS = 'UNKNOWN')
+         DO nnuc = 1, NNUcd
+            IF (FISsil(nnuc) .AND. FISshi(nnuc).EQ.0) CALL INPFIS(nnuc)
+         ENDDO
+         CLOSE (79)
       ENDIF
 99005 FORMAT (1X,60('='))
 99010 FORMAT (1X,13G10.4)
