@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-03-07 22:01:31 $
-Ccc   * $Id: MSD-tristan.f,v 1.25 2005-03-07 22:01:31 herman Exp $
+Ccc   * $Date: 2005-03-07 22:31:08 $
+Ccc   * $Id: MSD-tristan.f,v 1.26 2005-03-07 22:31:08 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
 CCC
@@ -359,7 +359,7 @@ C
      &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega, 
      &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, 
      &                 QSTep, RAC, RHO(301,11), RHOb(301,11,2), RI, 
-     &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21), 
+     &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
      &                 U0, U9, UAMp(500,2), VAMp(500,2), VLS(2), W0, 
      &                 WIDex, WIDexin
       INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID, 
@@ -376,7 +376,7 @@ C
       COMMON /SPQN  / ESP, NSP, LSP, JSP
       COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr, 
-     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d, 
+     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
      &                FFAc3d
       COMMON /U_OPT / U0, W0, RR, RI, AU, AW
 C
@@ -388,15 +388,15 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, aqq, bosc, 
-     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11), 
+     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),
      &                 ceff, clex(11), clsc(11), cneg, cnorm, cpos, 
      &                 cr1(11), cr2, cr3(11), dci(11), dcr(11), ddr(2), 
      &                 de3, deqq, dnz, dqqst(5000), dr, dwex, dwsx, e, 
      &                 e0, efit(22), efitx, egr, em, emi, emisq, ep, 
-     &                 epl, eplsq, eqq, eqqst(5000), eqqx, ess(0:10000), 
+     &                 epl, eplsq, eqq, eqqst(5000), eqqx, ess(0:10000),
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi, 
-     &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm, 
-     &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt, 
+     &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm,
+     &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt,
      &                 rdsq, re1, re2, re3, reduqq, resid
       REAL d1, hhh
       DOUBLE PRECISION DWIDTH
@@ -424,11 +424,8 @@ C     & ETC. TO: ',NEBINX
 C     STOP
 C     ENDIF
 C     WRITE(17,*)NEBINX,ICMAX
-      PI = 4.*ATAN(1.)
       fpi = 4.*PI
       fourpi = 1.0/fpi
-C-----energy of the first collective +0 state (GMR)
-C     EFIT(1) = GMRPAR(1,1)
 C-----selfconsistent strength taken for the l=0 transfer field
       efit(1) = 0.0
       IF (EFItin(1).GT.0.0D0) efit(1) = EFItin(1)
@@ -2415,7 +2412,7 @@ C
      &                 RHOb(301,11,2), ROPt, THEta1, THEta2, WIDex
       INTEGER IC12x, IC1mx, IC1mxr, IC2mx, IC2mxr, ICMax, KDEnvi, KEX3, 
      &        KEXcom(10), KRTmax, KRType, KTRl(10), LC1mx, LC2mx, 
-     &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10), 
+     &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10),
      &        NTHeta, NZ
       COMMON /CC    / THEta1, THEta2, NCHanl, NN, NZ, IC1mxr, IC2mxr, 
      &                KRType, KRTmax, KDEnvi, NTHeta, NEBinx, NAVerg, 
@@ -2438,17 +2435,17 @@ C Local variables
 C
       DOUBLE PRECISION a1, a2, a3, adum(5,7), al1l2(7,7), amat(15,15), 
      &                 an, ay, aynorm, csfit(NDANG), delta, eout, f1(15)
-     &                 , f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7), 
+     &                 , f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6), 
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2, 
      &                 qq(5), rb12, s1, s2, s3, sg(301), sigm, sn, sum, 
      &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15)
       REAL FLOAT
       REAL hhh
-      INTEGER i, ic, icp, icpmx, icpx, ier, iloc, j, jx, k, k1, k2, k2n, 
+      INTEGER i, ic, icp, icpmx, icpx, ier, iloc, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1, 
      &        lc, lc1, lcp1, ln, m2, m2n, mx, my, n, n0, n1, n2, n2n, 
-     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, nemn, 
+     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, nemn,
      &        nemx, nep, nepp, nmax, nnur, np, npx, nq, nqx, nx, ny
       INTEGER MAX0, MIN0
       EQUIVALENCE (f2(1),f21)
