@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: lev-dens.f,v 1.17 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-08-30 13:31:09 $
+Ccc   * $Id: lev-dens.f,v 1.18 2004-08-30 13:31:09 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -733,7 +733,7 @@ C
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
       IF(FISCON.gt.0.)THEN
-         atil=atil
+         atil=atil+2.
       ELSE
          ATIl = ATIl*ATIlnor(Nnuc)
       ENDIF   
@@ -1032,7 +1032,7 @@ C-----------dependent factor
             IF(AC.GT.0.D0)THEN
                IF(bcs)THEN
                   ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2,
-     &                     iff)
+     &                     iff,FISCON)
                ELSE
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort, 
      &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred, 
@@ -1147,7 +1147,8 @@ C-----------dependent factor
             IF(ac.LE.0.0D0)RETURN
          ENDIF
          IF(bcs)THEN
-            rotemp = ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff)*RORed
+            rotemp = 
+     >  	     ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff,FISCon)*RORed
             IF(i.EQ.1)THEN
                phi = SQRT(1. - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
@@ -1378,7 +1379,8 @@ C-----setting to 0 level density array ------ done ------
 C
 C
 C
-      DOUBLE PRECISION FUNCTION ROBCS(A, U, Aj, Mompar, Momort, A2,iff)
+      DOUBLE PRECISION FUNCTION ROBCS (A, U, Aj, Mompar, Momort, A2,iff,
+     &        FISCON)
 CCC   ********************************************************************
 CCC   *                                                         CLASS:APU*
 CCC   *                        R O B C S                                 *
@@ -1421,12 +1423,21 @@ C     CALL DAMPKS(A, A2, t, qk)
       CALL DAMPROT(U, qk)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
-C-----vibrational ehancement factor
+C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
-      ROBCS =ROBCS*vibrk*momo*t*qdamp
-      if(iff.eq.2) ROBCS =ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
-      if(iff.eq.3) ROBCS =ROBCS*2
-      if(iff.eq.2) ROBCS =ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
+C     Changed according to Mihaela's recommendation
+C     ROBCS =ROBCS*vibrk*momo*t*qdamp
+      IF(FISCon.EQ.2) THEN
+         ROBCS =ROBCS*vibrk*momort*tcrt*qdamp
+      else
+         ROBCS =ROBCS*vibrk*momo*t*qdamp
+      endif   
+c     IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
+c     IF(iff.eq.3) ROBCS = ROBCS*2
+c     IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
+      IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(Mompar*tcrt)
+      IF(iff.eq.3) ROBCS = ROBCS*2
+      IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(Momort*tcrt)
       END
 C
 C
