@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 22:45:20 $
-Ccc   * $Id: input.f,v 1.64 2005-02-04 22:45:20 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-06 14:19:30 $
+Ccc   * $Id: input.f,v 1.65 2005-02-06 14:19:30 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1543,9 +1543,9 @@ C--------OMPAR.RIPL
       ENDIF
 C---- fission input is created if it does not exist and FISSHI=0
       DO nnuc = 1, NNUct
-         FISsil(nnuc) = .TRUE. 
+         FISsil(nnuc) = .TRUE.
          IF(FISshi(nnuc).EQ.0..AND.(Z(nnuc).LT.78..OR.A(Nnuc).LT.224.))
-     &       FISsil(nnuc) = .FALSE.  
+     &       FISsil(nnuc) = .FALSE.
          IF(FISshi(nnuc).EQ.1.)THEN
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)
             IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
@@ -3511,7 +3511,7 @@ C
             SHC(0) = emicx(k)
             IF(SHNix.EQ.0.D0)CALL SHELLC(A(0), Z(0), SHC(0))
             DEF(1, 0) = beta2x(k)
-          XMAss(0) = EXCessmass(iz, ia)
+            XMAss(0) = EXCessmass(iz, ia)
          ENDIF
        ELSE
          DO ii = 0, NDEJC
@@ -5249,7 +5249,7 @@ C
       COMMON /CRITFIS/ ACRtf(2), UCRtf(2), TCRtf(2), DETcrtf(2),
      &                 SCRtf(2), MORtcrt(NFPARAB), MPArcrt(NFPARAB),
      &                 ECOndf(2)
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
      &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
@@ -5314,7 +5314,7 @@ C-----RIPL-2 "experimental" values
          READ(52, *)
  250     READ(52, '(2(1x,i3),3x,2(f8.3,4x),9x)', END = 300)
      &           kz, ka,  EFB(1),  EFB(2)
-         
+
          IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc)))  GOTO 250
          NRBAR=2
          IF(EFB(1).EQ.0.)THEN
@@ -5465,7 +5465,7 @@ C--------shell corrections at saddles according to RIPL-2
 C--------pairing at saddles according to RIPL-2
          DELtafis(1) = 14./SQRT(A(Nnuc))
          DELtafis(2) = 14./SQRT(A(Nnuc))
-C--------gamma in Ignatyuk's formula 
+C--------gamma in Ignatyuk's formula
          GAMmafis(1) = 2.113*atil*A(Nnuc)**(-4./3.) !0.4*A(Nnuc)**( - 1./3.)
          GAMmafis(2) = 2.113*atil*A(Nnuc)**(-4./3.) !0.4*A(Nnuc)**( - 1./3.)
 C--------multiplier of atil
@@ -5474,21 +5474,21 @@ C--------multiplier of atil
 C--------h**2/2J
          IF(nrbarc.EQ.1)hj(Nnuc,1)=0.005
          IF(nrbar.EQ.2)THEN
-            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,1)=0.0050
             hj(Nnuc,2)=0.0025
-         ENDIF 
+         ENDIF
          IF(nrbar.EQ.3)THEN
-            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,1)=0.0050
             hj(Nnuc,2)=0.0025
-            hj(Nnuc,3)=0.0035   
-         ENDIF 
+            hj(Nnuc,3)=0.0035
+         ENDIF
          IF(nrbar.EQ.5)THEN
-            hj(Nnuc,1)=0.0050 
+            hj(Nnuc,1)=0.0050
             hj(Nnuc,2)=0.0025
             hj(Nnuc,3)=0.0017
             hj(Nnuc,4)=0.0035
-            hj(Nnuc,5)=0.0020     
-         ENDIF 
+            hj(Nnuc,5)=0.0020
+         ENDIF
          IF(FISmod(Nnuc).GT.0.)THEN
             BFFm(1) = 3
             BFFm(2) = 3
@@ -5718,7 +5718,7 @@ C
       INCLUDE 'global.h'
 C
 C
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
      &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
@@ -5968,21 +5968,23 @@ C--------------------------------------------
 C-----continuum, level densities at saddle points
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl,
      &                BET2
       COMMON /CRITFIS/ ACRtf(2), UCRtf(2), TCRtf(2), DETcrtf(2),
      &                 SCRtf(2), MORtcrt(NFPARAB), MPArcrt(NFPARAB),
      &                 ECOndf(2)
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD),
      &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
-     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(0:NFMOD),
+     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
      &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
      &                 SHCfism(NFMOD), DELtafism(NFMOD),
      &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
      &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
      &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
- 
+
       DOUBLE PRECISION csfism
       DOUBLE PRECISION ROFism, HM, EFDism, EFBm, XMInnm, DEFbm, WFIsm,
      &                 SHCfism, DELtafism, GAMmafism, UGRidf, AFIsm,
@@ -5997,8 +5999,6 @@ C----------------------
       CHARACTER*2 simb
       CHARACTER*50 filename
       INTEGER BFFm
-CMH temprary argred should be transferred      
-      argred=0
 C
       excn1 = EMAx(Nnuc)
       BET2 = DEFfis(ib)
@@ -6006,7 +6006,7 @@ C
 C-----where continuum starts,ends,steps in between
       IF(Mmod.EQ.0)XMInn(ib) = 0.0001
       IF(Mmod.GT.0)XMInnm(Mmod) = 0.0001
-    
+
       DO nr = 1, NRFdis(ib)
          IF(Mmod.EQ.0 .AND. EFDis(nr, ib).GT.XMInn(ib))
      &      XMInn(ib) = EFDis(nr, ib)
@@ -6017,25 +6017,25 @@ C-----where continuum starts,ends,steps in between
 C
       IF(excn1.LE.EFB(ib))xmax = 4.
       IF(excn1.LE.EFBm(mmod))xmax = 4.
-      
+
       IF(Mmod.EQ.0 .AND. excn1.GT.EFB(ib))xmax = excn1 -
      &   (EFB(ib) + XMInn(ib)) + 4.
       IF(Mmod.GT.0 .AND. excn1.GT.EFBm(Mmod))xmax = excn1 -
      &   (EFBm(Mmod) + XMInnm(Mmod)) + 4.
-      
+
       IF(Mmod.EQ.0)THEN
          destepp(ib)=(xmax-xminn(ib))/100.
          NRBinfis(ib) = INT((xmax - XMInn(ib))/DEStepp(ib))
          IF(NRBinfis(ib).GT.NFISENMAX)THEN
             WRITE(6,*)
-     &           'Level density at saddle exceeds dimension. 
+     &           'Level density at saddle exceeds dimension.
      &            Increase NFISENMAX in dimension.h'
             STOP 'Level density at saddle exceeds NFISENMAX'
          ENDIF
       ENDIF
       IF(Mmod.GT.0)THEN
          destepm(Mmod)=(xmax-xminnm(Mmod))/100.
-         NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))  
+         NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
       ENDIF
 C
 C----- Initializing UGRid() for FISden(NNUc)=0  RCN 31/12/2003
@@ -6119,7 +6119,6 @@ C
       ENDIF
 C-----Empire specific
       IF(FISden(Nnuc).EQ.1.)THEN
-ccc         ARGred=0.d0
          mm2 = 0.24*A(Nnuc)**(2./3.)
          r0 = 1.4
          iff = 1
@@ -6137,27 +6136,27 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             DELp = DELtafis(ib)
             SHC(Nnuc) = SHCfis(ib)
             iff = BFF(ib)
-            desteppp=destepp(ib) 
-         ENDIF   
+            desteppp=destepp(ib)
+         ENDIF
          IF(Mmod.GT.0)THEN
             NRBinfis(ib) = NRBinfism(Mmod)
             XMInn(ib) = XMInnm(Mmod)
-            GAMma = GAMmafism(Mmod)         
+            GAMma = GAMmafism(Mmod)
             DELp = DELtafism(Mmod)
             SHC(Nnuc) = SHCfism(Mmod)
             iff = BFFm(Mmod)
             desteppp=destepm(Mmod)
          ENDIF
          TCRt = 0.567*DELp
-         ar = ATIl*(1.0 + SHC(nnuc)*GAMma)       
+         ar = ATIl*(1.0 + SHC(nnuc)*GAMma)
          DO ix = 1, 20
             xr = ar*TCRt**2
             IF(xr.GT.0.01D0)THEN
-               FSHELL = 1.0 + (1.0 - 
+               FSHELL = 1.0 + (1.0 -
      &                  EXP((-GAMma*xr)))*SHC(nnuc)/xr
             ELSE
                FSHELL = 1 + GAMma/ SHC(nnuc)
-            ENDIF                   
+            ENDIF
             ACRt = ATIl*FSHELL
             IF(ABS(ACRt - ar)/ACRt.LE.0.001D0) GOTO 1001
             ar = ACRt
@@ -6178,23 +6177,23 @@ C--------45.84 stands for (12/SQRT(pi))**2
          DEL = 0.
          IF(MOD(in, 2).NE.0)DEL = DELp
          IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
-      
+
          DO jj = 1, NLW
-            aaj = FLOAT(jj) + HIS(Nnuc)    
+            aaj = FLOAT(jj) + HIS(Nnuc)
             DO kk = 1, NRBinfis(ib)
                u = xminn(ib) + (kk-1) * desteppp + del
                IF(U.GT.UCRt)THEN
                   u = u - ECOnd
                   accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
-                  ROTemp = RODEFf(A(Nnuc), u, ACcn, aaj, momparcrt, 
+                  ROTemp = RODEFf(A(Nnuc), u, ACcn, aaj, momparcrt,
      &                    momortcrt, HIS(Nnuc), ARGred, EXPmax,iff)
                ELSE
-                  accn = ACRt          
+                  accn = ACRt
                   ROTemp = ROBCSf(A(Nnuc), u, aaj, momparcrt, momortcrt,
      &                     bet2, iff) * RORed
                ENDIF
                IF(Mmod.EQ.0) ROFis(kk, jj, ib) = rotemp
-               IF(Mmod.GT.0) ROFism(kk, jj, Mmod) =rotemp           
+               IF(Mmod.GT.0) ROFism(kk, jj, Mmod) =rotemp
             ENDDO
          ENDDO
          OPEN(83,file='densfis.dat')
@@ -6205,27 +6204,25 @@ C--------45.84 stands for (12/SQRT(pi))**2
          close(83)
          ACRtf(ib)=acrt
          UCRtf(ib)=ucrt
-         ECOndf(ib)=econd 
+         ECOndf(ib)=econd
          DETcrtf(ib)=detcrt
          TCRtf(ib)=tcrt
          SCRtf(ib)=scr
       ENDIF
       END
 c-------------------------------------------------------------------------
-      DOUBLE PRECISION FUNCTION ROBCSf (A,U, Aj, Mompar, Momort, A2,iff)
+      DOUBLE PRECISION FUNCTION ROBCSf(A,U, Aj, Mompar, Momort, A2,iff)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
       COMMON /CRIT  / TCRt,ECOnd,ACRt, UCRt, DETcrt, SCR, ACR, ATIl,bet2
       DOUBLE PRECISION  Momort, Mompar, momo, momp
 C
 C-----CONST=1/(2*SQRT(2 PI))
-CMH temprary argred should be transferred      
-      argred=0
       DATA const/0.199471/,pi/3.1415926d0/
-      ROBCS = 0.0
-      ROBCSf=0.0
+      ROBCS = 0.d0
+      ROBCSf=0.d0
       phi2 = 1.d0 - U/UCRt
-      phi = SQRT(phi2)      
+      phi = SQRT(phi2)
       t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
       s = SCR*TCRt*(1. - phi2)/t
       det = DETcrt*(1. - phi2)*(1. + phi2)**2
@@ -6235,7 +6232,7 @@ CMH temprary argred should be transferred
       IF(momo.LT.0.0D0)RETURN
       seff2 = momp*t
       IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333*momo**0.6666*t
-      arg = s - (Aj+0.5)**2/(2.0*seff2) - ARGred
+      arg = s - (Aj+0.5)**2/(2.0*seff2)
       IF(arg.LE.0.0D0)RETURN
       ROBCS = 0.5*const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
       CALL DAMPROTVIB(u, Qk,t,qv, A, vibrk)
@@ -6255,11 +6252,11 @@ C
      &                 Mompar, Ss
       INTEGER i, k, kmin
 C
-      DATA const/0.01473144/
+      DATA const/0.01473144/,pi/3.1515926d0/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
-      RODEFf = 0.0
-      sum = 0.0
-      pi=3.14159
+      RODEFf = 0.d0
+      sum = 0.d0
+
       IF(Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0)THEN
          WRITE(6, *)'WARNING: Negative moment of inertia for spin ', Aj
          WRITE(6, *)'WARNING: 0 level density returned by rodef'
