@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: tl.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2001-11-06 15:57:54 $
+Ccc   * $Id: tl.f,v 1.4 2001-11-06 15:57:54 mike Exp $
 C
       SUBROUTINE HITL(Stl)
 C
@@ -539,7 +539,9 @@ C     RR   = radius (fm)
 C     AA   = diffuseness (fm)
 C     POTE = strength (MeV)
       i = 1
-      INCLUDE "ripl_omp.h"
+C     about 140 lines are repeated 5 times, therefore they are put into
+C     the file ripl_omp.inc file and included whenever necessary 
+      INCLUDE "ripl_omp.inc"
       VOM(1, Nejc, Nnuc) = vstr
       RVOm(1, Nejc, Nnuc) = rrrr
       AVOm(Nejc, Nnuc) = aaaa
@@ -547,7 +549,7 @@ C     Volume imaginary potential: Woods-Saxon
 C     ****
       i = 2
       IF(JRAnge(i).GT.0)THEN
-         INCLUDE "ripl_omp.h"
+         INCLUDE "ripl_omp.inc"
          WOMv(1, Nejc, Nnuc) = vstr
          RWOmv(1, Nejc, Nnuc) = rrrr
          AWOmv(Nejc, Nnuc) = aaaa
@@ -557,7 +559,7 @@ C     if R(2) < 0., Gaussian
 C     ****
       i = 4
       IF(JRAnge(i).GT.0)THEN
-         INCLUDE "ripl_omp.h"
+         INCLUDE "ripl_omp.inc"
          WOMs(1, Nejc, Nnuc) = vstr
          RWOm(1, Nejc, Nnuc) = rrrr
          AWOm(Nejc, Nnuc) = aaaa
@@ -570,7 +572,7 @@ C     Real spin-orbit
 C     ****
       i = 5
       IF(JRAnge(i).GT.0)THEN
-         INCLUDE "ripl_omp.h"
+         INCLUDE "ripl_omp.inc"
          VSO(1, Nejc, Nnuc) = vstr
          RVSo(1, Nejc, Nnuc) = rrrr
          AVSo(Nejc, Nnuc) = aaaa
@@ -579,7 +581,7 @@ C     Imaginary spin-orbit
 C     ****
       i = 6
       IF(JRAnge(i).GT.0)THEN
-         INCLUDE "ripl_omp.h"
+         INCLUDE "ripl_omp.inc"
          WSO(1, Nejc, Nnuc) = vstr
          RWSo(1, Nejc, Nnuc) = rrrr
          AWSo(Nejc, Nnuc) = aaaa
@@ -1030,8 +1032,8 @@ C
                ELSE
                   IF(AEJc(Nejc).EQ.6D0 .AND. ZEJc(Nejc).EQ.3.D0)GOTO 100
                   IF(AEJc(Nejc).EQ.7D0 .AND. ZEJc(Nejc).EQ.3.D0)GOTO 100
-                  IF(AEJc(Nejc).EQ.7D0 .AND. ZEJc(Nejc).EQ.4.D0)GOTO 100
-                  GOTO 120
+                  IF(AEJc(Nejc).NE.7D0 .OR. ZEJc(Nejc).NE.4.D0)GOTO 120
+                  GOTO 100
                ENDIF
 C---------------------------------------------------------
 C              N E U T R O N S
@@ -1543,8 +1545,10 @@ C--------------Reading radius
                ELSE
                   READ(Ko, 99007, ERR = 200)(RCO(i, j, n), n = 8, 13)
                ENDIF
-               IF(NDIM2.GT.13)READ(Ko, 99007, ERR = 200)
-     &                             (RCO(i, j, n), n = 14, NDIM2)
+               IF(NDIM2.GT.13)THEN
+C                 READ(Ko, 99007, ERR = 200)(RCO(i, j, n), n = 14,NDIM2)
+                  STOP '1 IN tl.f, UNCOMMENT READ ABOVE AND REMOVE STOP'
+               ENDIF
 C--------------Reading diffuss
                READ(Ko, 99006, ERR = 200)(ACO(i, j, n), n = 1, 7)
                IF(NDIM2.GT.7 .AND. NDIM2.LE.13)THEN
@@ -1552,8 +1556,10 @@ C--------------Reading diffuss
                ELSE
                   READ(Ko, 99007, ERR = 200)(ACO(i, j, n), n = 8, 13)
                ENDIF
-               IF(NDIM2.GT.13)READ(Ko, 99007, ERR = 200)
-     &                             (ACO(i, j, n), n = 14, NDIM2)
+               IF(NDIM2.GT.13)THEN
+C                 READ(Ko, 99007, ERR = 200)(ACO(i, j, n), n = 14,NDIM2)
+                  STOP '2 IN tl.f, UNCOMMENT READ ABOVE AND REMOVE STOP'
+               ENDIF
 C--------------Reading depths
                READ(Ko, 99006, ERR = 200)(POT(i, j, n), n = 1, 7)
                IF(NDIM3.GT.7 .AND. NDIM3.LE.13)THEN
@@ -1945,9 +1951,9 @@ C        IWARN=4 - 'Energy requested higher than recommended for this potential'
          IF(IWArn.EQ.2 .AND. IOUt.EQ.5)WRITE(6, *)
      &      ' WARNING: OMP not recommended for Z=', Z(Nnuc)
          IF(IWArn.EQ.3 .AND. IOUt.EQ.5)WRITE(6, *)
-     &   ' WARNING: OMP not recommended for low energies in Tl calc'
+     &      ' WARNING: OMP not recommended for low energies in Tl calc'
          IF(IWArn.EQ.4 .AND. IOUt.EQ.5)WRITE(6, *)
-     &  ' WARNING: OMP not recommended for high energies in Tl calc'
+     &      ' WARNING: OMP not recommended for high energies in Tl calc'
          IWArn = 0
          tlj_calc = .TRUE.
 C--------transfer of the calculated transmission coeff. onto TL matrix
@@ -2563,7 +2569,6 @@ C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
-      INCLUDE 'angular.h'
 C
 C     Dummy arguments
 C
@@ -2593,6 +2598,7 @@ C
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0)ip = 8
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0)ip = 9
 C-----Data initialization
+      angstep = 2.5
       CALL INIT(Nejc, Nnuc)
       ECIs1 = BECis1
 C-----Deformation read instead of deformation lengths
@@ -2950,7 +2956,6 @@ C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
-      INCLUDE 'angular.h'
 C
 C     Dummy arguments
 C
@@ -2980,6 +2985,7 @@ C
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0)ip = 8
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0)ip = 9
 C     Data initialization
+      angstep = 2.5
       CALL INIT(Nejc, Nnuc)
       ECIs1 = BECis1
 C-----Rotational model

@@ -726,7 +726,6 @@ C                -1 and 1 by step of 0.02                              *
 C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
       INCLUDE 'dimension.h'
-      INCLUDE 'angular.h'
       DOUBLE PRECISION AK2, ANG, CANg, d, deg, ETA, one, PI, PL, PL1, 
      &                 PL2, rad, SI, three, two, W2, x, xl, zero, ZI
       DOUBLE PRECISION ZT
@@ -750,16 +749,14 @@ C
       IF(idaa.EQ.1)THEN
 C
 C        Calculate cosines of equally spaced angles
-C
-C
 C        WARNING NA must be less than 101 !!!
-C        Na = 73
-C        d = deg/DFLOAT(Na - 1)
-         d = angstep
-         Na = deg/d + 1
+C
+         Na = 73
+         d = deg/DFLOAT(Na - 1)
          IF(Na.GT.101)THEN
-            WRITE(6, *)'Increase AngStep variable in dimension.h !!'
-            WRITE(6, *)'Too many angular points'
+            WRITE(6, *)' '
+            WRITE(6, *)'FATAL ERROR!'
+            WRITE(6, *)'TOO MANY ANGULAR POINTS REQUESTED FROM SCAT2'
             STOP
          ENDIF
 C        do i=1,na

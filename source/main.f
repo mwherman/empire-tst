@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: main.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2001-11-06 15:57:54 $
+Ccc   * $Id: main.f,v 1.4 2001-11-06 15:57:54 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -253,7 +253,7 @@ C
             READ(45, *, END = 1500)ecisabs
             CLOSE(45)
          ENDIF
-         NELang = 19
+         NELang = 73
          ecm = EINl - EIN
          dang = 3.14159/FLOAT(NELang - 1)
          OPEN(45, FILE = 'ecis95.ang', STATUS = 'OLD')
@@ -292,10 +292,17 @@ C--------------add direct transition to the spectrum
                poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
                CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
-               DO iang = 1, NELang
+C              Empire uses 10 deg grid for inelastic so we have to take 
+C              each 4th result from ECIS (2.5 deg grid)
+               DO iang = 1, NDANG-1
                   READ(45, '(15x,E12.5)', END = 1500)
      &                 CSAlev(iang, ilv, nejcec)
+                  READ(45, '(15x,E12.5)', END = 1500)
+                  READ(45, '(15x,E12.5)', END = 1500)
+                  READ(45, '(15x,E12.5)', END = 1500)
                ENDDO
+               READ(45, '(15x,E12.5)', END = 1500)
+     &              CSAlev(NDANG, ilv, nejcec)
 C--------------construct recoil spectra due to direct transitions
                IF(ENDf.EQ.2)THEN
                   coef = 2*PI*dang/DERec
@@ -331,11 +338,11 @@ C--------print elastic and direct cross sections from ECIS
                   WRITE(6, *)' DWBA calculations with ECIS:'
                ENDIF
                WRITE(6, *)' '
-               gang = 180.0/(NELang - 1)
+               gang = 180.0/(NDANG - 1)
                WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
 99001          FORMAT('  Angle ', 10(6x, i2, '-level'))
                WRITE(6, *)' '
-               DO iang = 1, NELang
+               DO iang = 1, NDANG
                   WRITE(6, 99002)(iang - 1)*gang, 
      &                           (CSAlev(iang, ICOllev(ilv), nejcec), 
      &                           ilv = 2, ncoll)
@@ -360,11 +367,11 @@ C--------print elastic and direct cross sections from ECIS
      &             /, 2x, 'Absorption cross section    :', e14.7, ' mb', 
      &             /, 2x, 'Shape elastic cross section :', e14.7, ' mb', 
      &             //)
-            gang = 180.0/(NELang - 1)
+            gang = 180.0/(NDANG - 1)
             WRITE(6, 99005)(ICOllev(ilv), ilv = 2, ncoll)
 99005       FORMAT('  Angle    Elastic', 10(6x, i2, '-level'))
             WRITE(6, *)' '
-            DO iang = 1, NELang
+            DO iang = 1, NDANG
                WRITE(6, 99006)(iang - 1)*gang, ELAda(iang), 
      &                        (CSAlev(iang, ICOllev(ilv), nejcec), 
      &                        ilv = 2, ncoll)
