@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-04 00:10:05 $
-Ccc   * $Id: input.f,v 1.49 2005-01-04 00:10:05 herman Exp $
+Ccc   * $Date: 2005-01-06 23:53:47 $
+Ccc   * $Id: input.f,v 1.50 2005-01-06 23:53:47 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1232,9 +1232,6 @@ C-----set giant resonance parameters for CN
       GMRpar(8, nnuc) = 0.0
       IF(Q(0, 1).EQ.0.0D0)THEN
          CALL BNDG(0, 1, Q(0, 1))
-Csinsin
-C        Q(1,1)=4.
-C        Q(0,1)=2.
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
       EINl = EIN
