@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-25 01:07:39 $
-Ccc   * $Id: fusion.f,v 1.23 2005-01-25 01:07:39 Capote Exp $
+Ccc   * $Date: 2005-01-25 12:59:27 $
+Ccc   * $Id: fusion.f,v 1.24 2005-01-25 12:59:27 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -309,12 +309,12 @@ C--------------Preparing INPUT and RUNNING ECIS
 C--------------(or reading already calculated file)
                IF(DEFormed)THEN
 
-                     CALL ECIS_CCVIBROT(Npro, Ntrg, einlab,.TRUE., 0)
+                 CALL ECIS_CCVIBROT(Npro, Ntrg, einlab,.TRUE., 0)
                  CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl,.FALSE.)
 
-                   ELSE
+               ELSE
 
-                     CALL ECIS_CCVIB(Npro, Ntrg, einlab, .FALSE., -1)
+                 CALL ECIS_CCVIB(Npro, Ntrg, einlab, .FALSE., -1)
 
                  IF(IOPsys.EQ.0)THEN
 C                  LINUX
