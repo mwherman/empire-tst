@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: MSD-tristan.f,v 1.27 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Date: 2005-03-14 20:48:27 $
+Ccc   * $Id: MSD-tristan.f,v 1.28 2005-03-14 20:48:27 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
 CCC
@@ -3004,6 +3004,7 @@ C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
       IF (nexrt.LE.0) nexrt = 1
       IF (ENDf.GT.0) THEN
+         nangle = NDANG
          DO ie = nexrt, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
             DO na = 1, nangle
