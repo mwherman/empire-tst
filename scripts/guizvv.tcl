@@ -591,7 +591,7 @@ set file [tk_getOpenFile -filetypes $types  -parent $w -title "Select ENDF file"
 
 proc ::init {argc argv} {
 global root suf name1 dir1 name2 dir2 name3 dir3
-set rcfl [open .guizvvrc r+]
+set rcfl [open ../.guizvvrc r+]
 gets $rcfl root
 gets $rcfl suf
 gets $rcfl name1 
@@ -817,7 +817,7 @@ exec xterm -e ../scripts/zvv $zvd &
     button $top.exit \
         -activebackground #f00000 -activeforeground #ffffff \
         -background #dcdcdc \
-        -command {set rcfl [open .guizvvrc w]
+        -command {set rcfl [open ../.guizvvrc w]
 puts $rcfl "$root"
 puts $rcfl "$suf"
 puts $rcfl "$name1" 
