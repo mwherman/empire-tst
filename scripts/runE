@@ -155,7 +155,7 @@ rm OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
 rm INPUT  2>/dev/null
 rm INPUT.DAT  2>/dev/null
 rm FISSION.INP  2>/dev/null
-rm FISSION.OUT  2>/dev/null
+#rm FISSION.OUT  2>/dev/null
 rm OMPAR.DIR  2>/dev/null
 rm OMPdata.dat  2>/dev/null
 rm 'ECIS_SPH.out#'  2>/dev/null
@@ -186,22 +186,6 @@ if  [ -s $file.exf ]; then
         # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
 
         ../scripts/c4 $file
-
-#       cd ../util/x4toc4
-#       ln  -sf $work/$file.exf X4.DAT
-#       ./x4toc4
-#       rm X4.DAT
-#       cd $work
-#       mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
-#       mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
-#       mv ../util/x4toc4/C4.DAT $file.c4
-#       if [ -s $file.c4 ]; then
-#          echo 'EXFOR data in computational format are stored in :'$file.c4
-#          else
-#          echo 'File with EXFOR data in computational format is EMPTY'
-#       fi
-#       # COMMENT THE LINE BELOW TO KEEP FILE WITH RETRIEVED EXFOR DATA 
-#       #rm $file.exf
 
         # RUN c4sort TO SORT C4 DATA   
 
