@@ -12,7 +12,7 @@ Ccc   *                                                                  *
 Ccc   * input:NEJC - index of projectile (ejectile)                      *
 Ccc   *       NNUC - index of the target (residual) nucleus              *
 Ccc   *       ENERG- channel energy                                      *
-Ccc   *                                                                  *
+Ccc   *       Ipr  - Key for printing results                            *
 Ccc   *                                                                  *
 Ccc   * output:LMAX - maximum l                                          *
 Ccc   *        STL  - matrix of transmission coefficients (in l)         *
@@ -32,6 +32,14 @@ C     Imaginary spin orbit capabilites added                             *
 C     Fixed potential parameters can be used                             *
 C     (user defined energy functional for V,r,a)                         *
 C     only r(i),a(i),pot(i,1) are used                                   *
+C     REV.4.3 MARCH 2000 (R.CAPOTE)                                      *
+C     Real surface potential added with exactly                          *
+C     the same form factor as surface absorption                         *
+C     To be used for DR potentials                                       *
+C     Strength of this potential = DELTA V_d(E)                          *
+C     must be obtained by Dispersion relations externally                *
+C     REV.4.4 OCTOBER 2001 (R.CAPOTE)                                    *
+C     Relativistic kinematics was added using Bersillon's SCAT2000 subr. *
 C*************************************************************************
 C     REFERENCE :                                                        *
 C     O.BERSILLON                                                        *
@@ -52,13 +60,8 @@ C     is       16  Output listing file                      seq.  133   f*
 C     is3      19  Summary output                           seq.   80   f*
 C------------------------------------------------------------------------*
 C*************************************************************************
-C     INPUT DATA:                                                        *
+C     SOME IMPORTANT INFORMATION:                                                        *
 C     ===========                                                        *
-C     read(ie,*) ipr,ida,iba,ipu                                         *
-C     ****                                                               *
-C     IPR   Print option                                                 *
-C     =  1  print transmission coefficients T(l,j)                       *
-C     =  0  no print of T(l,j)                                           *
 C     IDA   Angular distribution calculation option                      *
 C     =  1  calculate shape elastic angular distribution for             *
 C     uniformly spaced angles from 0 to 180 degrees by                   *
@@ -71,50 +74,18 @@ C     = -1  calculate also Legendre polynomial coefficients              *
 C     (neutrons only)                                                    *
 C     = -2  calculate also Legendre polynomial coefficients              *
 C     (neutrons only)                                                    *
-C     IBA   Output option on the file IS1                                *
-C     =  0  don't print                                                  *
-C     IPU   Output option on the file IS3                                *
-C     =  1  print cross sections and angular distributions               *
-C     =  0  don't print                                                  *
 C                                                                        *
-C     10 continue                                                        *
-C     read(ie,*) ne                                                      *
-C     ****                                                               *
-C     NE    Number of incident energies                                  *
+C     Energ Incident energy (MeV)                                        *
+C     if Energ > 0.  center of mass energies                             *
+C              < 0.  laboratory energies                                 *
 C                                                                        *
-C     read(ie,*) (en(j),j=1,ne)                                          *
-C     ****                                                               *
-C     EN(J) Incident energies (MeV)                                      *
-C     if EN(1) > 0.  center of mass energies                             *
-C     < 0.  laboratoty energies                                          *
-C                                                                        *
-C     20 continue                                                        *
-C     read(ie,*) izt,imt                                                 *
-C     ****                                                               *
 C     IZT   Atomic number of the target                                  *
 C     IMT   Mass   number of the target                                  *
 C                                                                        *
-C     30 continue                                                        *
-C     read(ie,*) ip,ipot                                                 *
-C     ****                                                               *
 C     IP    Type of incident particule                                   *
 C     IPOT  Type of built-in parameters                                  *
 C                                                                        *
-C     IP   =  1 neutron      IPOT = 1 --> Wilmore - Hodgson              *
-C     2 --> Beccheti - Greenless                                         *
-C     3 --> Ferrer - Carlson - Rapaport                                  *
-C     4 --> Bersillon - Cindro                                           *
-C     5 --> Madland (actinides)                                          *
-C     =  2 proton       IPOT = 1 --> Perey                               *
-C     2 --> Beccheti - Greenless                                         *
-C     =  3 deuteron     IPOT = 1 --> Lohr - Haeberli                     *
-C     2 --> Perey                                                        *
-C     =  4 triton       IPOT = 1 --> Beccheti - Greenless                *
-C     =  5 helium-3     IPOT = 1 --> Beccheti - Greenless                *
-C     =  6 alpha        IPOT = 1 --> potentiel moyen                     *
-C                                                                        *
-C     IPOT =  0  optical parameters have to be read                      *
-C     IPOT <  0  optical parameters have to be read                      *
+C     IP   =  1 neutron      IPOT = -1 (always USER defined potential)   *
 C     Potential depth are directly read instead of coefficients          *
 C     Geometrical parameters are also fixed                              *
 C     Only one energy is allowed !!!                                     *
@@ -125,6 +96,12 @@ C     This version assumes IPOT is always < 0  (Capote 2001)             *
 C                                                                        *
 C     read(ie,*) r(1),re(1),a(1),ae(1),(pot(1,i),i=1,6)                  *
 C     ****                                                               *
+C
+C     Includes dispersive contribution from the                          *
+C
+C     volume imaginary potential (with the same geometry)                *
+C
+C                                                                        *
 C     Real potential: Woods-Saxon                                        *
 C     R (1)    = radius (fm)                                             *
 C     RE(1)    = linear energy dependence of the radius                  *
@@ -170,20 +147,7 @@ C     pot(4,5)*ln(e) * pot(4,6)*sqrt(e)                                  *
 C                                                                        *
 C     read(ie,*) r(5),re(5),a(5),ae(5),(pot(5,i),i=1,6)                  *
 C     ****                                                               *
-C     Second form of the Woods-Saxon derivative imaginary potential      *
-C     R (5)    = radius (fm)                                             *
-C     RE(5)    = linear energy dependence of the radius                  *
-C     A (5)    = diffuseness (fm)                                        *
-C     AE(5)    = linear energy dependence of the diffuseness             *
-C     POT(5,i) = strength parameters                                     *
-C     if EWMAX < 0.                                                      *
-C     wd = pot(5,1) + pot(5,2)*e + pot(5,3)*e*e + pot(5,4)*e*e*e         *
-C     pot(5,5)*ln(e) * pot(5,6)*sqrt(e)                                  *
-C     if EWMAX > 0.                                                      *
-C     wd = pot(5,1) + pot(5,2)*E + pot(5,3)*E*E + pot(5,4)*E*E*E         *
-C     pot(5,5)*ln(E) * pot(5,6)*sqrt(E)                                  *
-C     where E = e - ewmax                                                *
-C     if EWMAX = 0. NOT USED                                             *
+C     NOT USED                                                           *
 C                                                                        *
 C     Added by R.Capote, 2001                                            *
 C     read(ie,*) r(6),re(6),a(6),ae(6),(pot(6,i),i=1,6)                  *
@@ -197,39 +161,35 @@ C     POT(6,i) = strength parameters                                     *
 C     wso = pot(6,1) + pot(6,2)*e + pot(6,3)*e*e + pot(6,4)*e*e*e        *
 C     pot(6,5)*ln(e) * pot(6,6)*sqrt(e)                                  *
 C                                                                        *
-C     Added by R.Capote, july 2001                                       *
-C     read(ie,*) r(6),re(6),a(6),ae(6),(pot(6,i),i=1,6)                  *
-C     ****                                                               *
-C     Real surface potential (from dispersive relations)                 *
-C     R (7)    = radius (fm)                                             *
-C     RE(7)    = linear energy dependence of the radius                  *
-C     A (7)    = diffuseness (fm)                                        *
-C     AE(7)    = linear energy dependence of the diffuseness             *
-C     POT(7,i) = strength parameters                                     *
-C     dwd = pot(7,1)                                                     *
+C   Added by R.Capote, 2001                                              *
+C   read(ie,*) r(7),re(7),a(7),ae(7),DELTA_Vs,Eff,Ep                     *
+C   ****                                                                 *
+C     (for Dispersive optical model)                                     *
+C     Dispersive contribution from                                       *
+C             Surface imaginary potential: Woods-Saxon derivative        *
 C                                                                        *
-C     read(ie,*) rcoul,ewmax,beta                                        *
+C     pot(7,1) = DELTA_Vs must be calculated by dispersive relation      *
+C     pot(7,2) = Eff Fermi energy                                        *
+C     pot(7,3) = Ep  Average energy of the particle states               *
+C                                                                        *
+C       R (7)    = radius (fm)                                           *
+C       RE(7)    = linear energy dependence of the radius                *
+C       A (7)    = diffuseness (fm)                                      *
+C       AE(7)    = linear energy dependence of the diffuseness           *
+C                                                                        *
+C     read(ie,*) rcoul,beta                                              *
 C     ****                                                               *
 C     RCOUL = Coulomb radius                                             *
-C     EWMAX = Threshold laboratory energy for the second form of the     *
-C     imaginary potential (Woods-Saxon derivative)                       *
 C     BETA  = nonlocality range                                          *
 C     if BETA .ne. 0. the imaginary potential is pure DWS                *
-C                                                                        *
-C     read(ie,*) isuit                                                   *
-C     ****                                                               *
-C     ISUIT = 0 end                                                      *
-C     = 1 new complete case                             (goto 10)        *
-C     = 2 the energy grid is conserved for a new system (goto 20)        *
-C     = 3 the projectile or the parameters are changed  (goto 30)        *
 C                                                                        *
 C*************************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      DOUBLE PRECISION AE, AK2, amu, AQ, BETa, E1, EINc, elab, eps, ETA, 
-     &                 EWMax, G, one, PIL, POT, R, RCOulomb, RE, rmu, SE
-      DOUBLE PRECISION SI, SR, ST, TC, two, W2L, xmas_npro, xmas_ntrg, 
-     &                 zero, ZI, ZT
+      DOUBLE PRECISION AE, AK2, AQ, BETa, E1, ELAb, CETal, CSO, G, PIL, 
+     &                 POT, R, RCOulomb, RE, rrmu, SE
+      DOUBLE PRECISION SI, SR, ST, TC, W2L, xmas_npro, xmas_ntrg, zero, 
+     &                 ZI, ZT
       INTEGER i, iba, ida, IE, imt, ip, ipl, ipot, IS, IS1, IS2, IS3, 
      &        IS4, izt, j, LFMAX, LTCMAX, na
       PARAMETER(LTCMAX = NDTL, LFMAX = 4*NDTL + 2)
@@ -245,21 +205,22 @@ C
 C     COMMON variables
 C
 C     CAPOTE 2001
-C     PI,W2 are defined globally, PIL,W2L locally
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PIL, AK2, ETA, W2L
-      COMMON /ENER  / E1, EINc
+C     PI,W2,CETA,CSO are defined globally, PIL,W2L,CETAL,CSOL locally
+C---------------------------------------------------------------------
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PIL, AK2, CETal, W2L, CSOl
+      COMMON /ENER  / E1, ELAb
       COMMON /FACT  / G(LFMAX)
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /POTEN1/ R(7), RE(7), AQ(7), AE(7), POT(7, 6)
-      COMMON /POTEN2/ RCOulomb, EWMax, BETa
+C     COMMON /POTEN2/ RCOulomb, BETa
+C
+      COMMON /POTEN2/ RCOulomb, BETa, EFErmi, EP, EA, IREl
       COMMON /TCE   / TC(LTCMAX)
       COMMON /XS    / SE, SR, ST
 C
-C     data ami /1.008665,1.007825,2.014102,3.016050,3.016030,4.002603/
-C     data asi /0.5, 0.5, 1.0, 0.5, 0.5, 0.0/
-C     data azi /0. , 1. , 1. , 1. , 2. , 2. /
-C     data bcd/8hneutron ,8hproton  ,8hdeuteron,8htriton  ,
-C     1 8hhe-3    ,8halpha   /
+      DATA zero/0.0D+00/
+C
+C
       IS = 31
       IS1 = 6
       IS3 = 10
@@ -268,22 +229,21 @@ C     not used
       IS2 = 33
       IS4 = 35
       OPEN(IS, FILE = 'SCAT2.OUT', STATUS = 'UNKNOWN')
+C
       PIL = PI
       W2L = W2*10.D0
+      CETal = CETa
+      CSOl = CSO
+C
       ida = 1
       iba = 0
-      zero = 0.0D+00
-      eps = 1.0D-03
-      one = 1.0D+00
-      two = 2.0D+00
-      PI = 3.141592654D+00
+C---------------------------------------------------
       IF(ida.NE.0)THEN
          CALL FCT()
          CALL PREANG(ida, na)
       ENDIF
       xmas_npro = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
       xmas_ntrg = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
-      rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
       izt = Z(Nnuc)
       imt = A(Nnuc)
       ZT = DFLOAT(izt)
@@ -294,7 +254,6 @@ C     MI = AEJc(Nejc)
       ZI = ZEJc(Nejc)
       SI = SEJc(Nejc)
       ipl = IFIX(SNGL(2.0*SI + 1.001))
-      amu = MT/(MI + MT)
       ipot = KTRlom(Nejc, Nnuc)
       IF(Nejc.EQ.0)THEN
          IF(AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0)
@@ -304,6 +263,7 @@ C     MI = AEJc(Nejc)
          IF(AEJc(Nejc).EQ.4.D0 .AND. ZEJc(Nejc).EQ.2.D0)
      &      ipot = KTRlom(3, 1)
       ENDIF
+C
 C     ****
 C     IP =
 C     1 NEUTRON
@@ -323,17 +283,6 @@ C
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0)ip = 8
       IF(AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0)ip = 9
 C
-C
-C     Transformation of energies from laboratory to center-of-mass if needed
-C
-      IF(Energ.LT.zero)THEN
-         EINc = DABS(Energ)*amu
-         elab = DABS(Energ)
-      ELSE
-         EINc = Energ
-         elab = Energ/amu
-      ENDIF
-C
 C     Initialisations
 C
       DO i = 1, 7
@@ -346,20 +295,30 @@ C
          ENDDO
       ENDDO
       BETa = zero
-      EWMax = 1.0D+03
       RCOulomb = zero
       DO j = 1, LTCMAX
          TC(j) = zero
       ENDDO
       ref = 'USER'
-      E1 = EINc
+C
 C     Capote 2001
 C     Potential depths must be calculated in LAB system
+C     CALL SETPOTS(Nejc, Nnuc, ELAB)
 C
-C     CALL SETPOTS(Nejc,Nnuc,e1)
-      CALL SETPOTS(Nejc, Nnuc, elab)
+      IF(Energ.LT.zero)THEN
+         ELAb = DABS(Energ)
+         ikey = -1
+      ELSE
+         E1 = Energ
+         ikey = +1
+      ENDIF
 C
-      CALL SCAT(Lmax, Ipr)
+C     Transformation of energies from laboratory to center-of-mass if needed
+C     is done inside SETPOTS() -> OMPAR()
+C
+      CALL SETPOTS(Nejc, Nnuc, ELAb, E1, MI, MT, rrmu, AK2, ikey)
+C
+      CALL SCAT(Lmax, Ipr, rrmu)
 C
       IF(ipl.EQ.1)THEN
          CALL SPIN0(Lmax, Ipr)
@@ -368,7 +327,7 @@ C
       ELSEIF(ipl.EQ.3)THEN
          CALL SPIN1(Lmax, Ipr)
       ENDIF
-      IF(Ipr.NE.0)WRITE(IS3, FMT = '(1p,4e10.3)')elab, SR, SE, ST
+      IF(Ipr.NE.0)WRITE(IS3, FMT = '(1p,4e10.3)')ELAb, SR, SE, ST
       IF(ida.NE.0 .AND. ip.EQ.1)CALL SHAPEL2(Lmax, ida, na, ipl, Ipr)
       IF(ida.NE.0 .AND. ip.NE.1)CALL SHAPEC(Lmax, ida, na, ipl, Ipr)
 C-----transfer o.m. Tl onto STL matrix and set them to 0 if lower than 1E-15
@@ -406,9 +365,10 @@ C
      &     +0.000000000000293, -0.000000000000102, +0.000000000000037, 
      &     -0.000000000000014, +0.000000000000006/
 C
-      zero = 0.0D+00
-      half = 5.0D-01
-      one = 1.0D+00
+C
+      DATA zero/0.0D+00/, one/1.0D+00/, half/0.5D+00/
+C
+C
       const = 2.506628274631001D+00
       u = Z
       x = DBLE(u)
@@ -481,11 +441,11 @@ C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       EQUIVALENCE(i(9), i9)
       EQUIVALENCE(i(10), i10)
       EQUIVALENCE(i(11), i11)
+C
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/, eps/0.001D0/
+C
+C
       is1 = 6
-      zero = 0.0D+00
-      eps = 1.0D-03
-      one = 1.0D+00
-      two = 2.0D+00
       CLEBG = zero
 C
 C     Convert the arguments to integer
@@ -626,7 +586,8 @@ C***********************************************************************
       INCLUDE 'dimension.h'
       PARAMETER(LFMAX = 4*NDTL + 2)
       COMMON /FACT  / FACto(LFMAX)
-      zero = 0.0D+00
+C
+      DATA zero/0.D0/
       FACto(1) = zero
       FACto(2) = zero
       DO k = 3, LFMAX
@@ -651,17 +612,15 @@ C***********************************************************************
       REAL*8 MI, MT
       DIMENSION y(2, 305), u(305), w(305)
       DIMENSION f1(2, 2), f2(2, 2), f3(2, 2), s1(2), s2(2)
-C     common /const/ mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /POTN  / POTi(305), POTr(305), VSO(305), WSO(305)
       COMMON /PSI   / PSIr, PSIrp, PSIi, PSIip
 C
-      zero = 0.0D+00
-      eps = 1.0D-20
-      one = 1.0D+00
-      two = 2.0D+00
-      ten = 1.0D+01
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/
+C
+      DATA ten/1.0D+01/, eps/0.001D0/
+C
 C
 C=======================================================================
 C     Integration formula
@@ -767,6 +726,7 @@ C                -1 and 1 by step of 0.02                              *
 C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
       INCLUDE 'dimension.h'
+      INCLUDE 'angular.h'
       DOUBLE PRECISION AK2, ANG, CANg, d, deg, ETA, one, PI, PL, PL1, 
      &                 PL2, rad, SI, three, two, W2, x, xl, zero, ZI
       DOUBLE PRECISION ZT
@@ -777,25 +737,34 @@ C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /ANGULAR/ ANG(73), CANg(101), PL(2*LTCMAX - 1, 101), 
      &                 PL1(2*LTCMAX - 1, 101), PL2(2*LTCMAX - 1, 101)
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
-      three = 3.0D+00
-      deg = 1.8D+02
+C
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/, three/3.D0/
+C
+      DATA deg/180.D0/
+C
+C
       rad = deg/PI
       idaa = IABS(Ida)
       IF(idaa.EQ.1)THEN
 C
 C        Calculate cosines of equally spaced angles
 C
-         Na = 73
-         d = deg/DFLOAT(Na - 1)
+C
+C        WARNING NA must be less than 101 !!!
+C        Na = 73
+C        d = deg/DFLOAT(Na - 1)
+         d = angstep
+         Na = deg/d + 1
+         IF(Na.GT.101)THEN
+            WRITE(6, *)'Increase AngStep variable in dimension.h !!'
+            WRITE(6, *)'Too many angular points'
+            STOP
+         ENDIF
 C        do i=1,na
 C        ang(i) = dfloat(i-1)*d
-         DO i = 1, 73
+         DO i = 1, Na
             ANG(i) = DBLE(i - 1)*d
             CANg(i) = DCOS(ANG(i)/rad)
             IF(DABS(CANg(i)).LT.1.0D-06)CANg(i) = zero
@@ -804,6 +773,8 @@ C        ang(i) = dfloat(i-1)*d
 C
 C        Calculate equally spaced cosines
 C
+C
+C        WARNING NA must be less than 101 !!!
          Na = 101
          d = two/DFLOAT(Na - 1)
          DO i = 1, Na
@@ -851,24 +822,6 @@ C
       END
 C
 C
-      SUBROUTINE PRIPOT()
-C***********************************************************************
-C  Print optical potential parameters                                  *
-C***********************************************************************
-      IMPLICIT DOUBLE PRECISION(A - H, O - Z)
-      DOUBLE PRECISION A, AE, AK2, BETa, ETA, EWMax, PI, POT, R, RCOul, 
-     &                 RE, SI, W2, ZI, ZT
-      INTEGER IE, IS, IS1, IS2, IS3, IS4
-      REAL*8 MI, MT
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
-      COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
-      COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
-      COMMON /POTEN2/ RCOul, EWMax, BETa
-      END
-C
-C
-C
       DOUBLE PRECISION FUNCTION RACAH(A, B, C, D, E, F)
 C***********************************************************************
 C     Calculate Racah coefficients      w(a,b,c,d;e,f)                 *
@@ -912,10 +865,11 @@ C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       EQUIVALENCE(i(15), i15)
       EQUIVALENCE(i(16), i16)
 C
-      zero = 0.0D+00
-      eps = 1.0D-03
-      one = 1.0D+00
-      two = 2.0D+00
+C
+C
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/, eps/0.001D0/
+C
+C
       RACAH = zero
 C
 C     Convert arguments to integer and make usefull combinations
@@ -1025,10 +979,8 @@ C***********************************************************************
 C     parameter ( ltcmax=100)
       DIMENSION Fc(LTCMAX), Fcp(LTCMAX), Gc(LTCMAX), Gcp(LTCMAX)
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
-C     gpmax = 1.0d+75
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/
+C
       gpmax = 1.0D+38
       pace = Step
       acc = Accur
@@ -1208,7 +1160,7 @@ C
 99999 END
 C
 C
-      SUBROUTINE SCAT(Lmax, Ipr)
+      SUBROUTINE SCAT(Lmax, Ipr, Rrmu)
 C***********************************************************************
 C     Calculate transmission coefficients t(l,j)                       *
 C     and the matrix elements eta(l,j)                                 *
@@ -1216,37 +1168,38 @@ C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - h, O - Z)
       INCLUDE 'dimension.h'
       DOUBLE PRECISION A, accur, AE, ak, AK2, argmin, av, BETa, BI, BR, 
-     &               c1, c2, ceta, d1, dt1, dt2, dt3, dt4, dt6, dt7, E1
-      DOUBLE PRECISION EINc, el, eps, epstl, ETA, eti, etr, EWMax, fc, 
-     &               fcp, fj, fjmin, fl, gc, gcp, h, one, p1, p2, p3
+     &                 c1, c2, CETa, d1, dt1, dt2, dt3, dt4, dt6, E1
+      DOUBLE PRECISION ELAb, eps, epstl, eti, etr, fc, fcp, fj, fjmin, 
+     &                 fl, gc, gcp, h, one, p1, p2, p3
       DOUBLE PRECISION p4, p5, PI, POT, pote, POTi, POTr, PSIi, PSIip, 
-     &               PSIr, PSIrp, R, r1, r2, r3, r4, r6, r7, RCOul, 
+     &                 PSIr, PSIrp, R, r1, r2, r3, r4, r6, RCOul, 
      &                 rcoulb, RE
       DOUBLE PRECISION rho, rint, rm, rv, seven, SI, sl, spo, step, T, 
-     &                t1, t2, t3, t4, t6, t7, two, u1, u2, vcl, volint
-      DOUBLE PRECISION VSO, w2, W2L, WSO, y1, y2, yy, zero, ZI, ZT, zz
+     &                 t1, t2, t3, t4, t6, two, u1, u2, vcl, volint
+      DOUBLE PRECISION VSO, w2, WSO, y1, y2, yy, zero, ZI, ZT, zz
       INTEGER i, IE, ipl, Ipr, IS, IS1, IS2, IS3, IS4, j, k, l, lm1, 
      &        Lmax, lmaxc, LTCMAX, npt, npt3
       PARAMETER(LTCMAX = NDTL)
 C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       CHARACTER*10 type(7)
-      REAL*8 MI, MT, mt3, mu
-C     real*16 a1,a2,a3,a4,a5
+      REAL*8 MI, MT, mt3
       REAL*8 a1, a2, a3, a4, a5
       DIMENSION av(7), rv(7), pote(7), volint(7)
       DIMENSION u1(7), y1(7)
       DIMENSION fc(LTCMAX), fcp(LTCMAX), gc(LTCMAX), gcp(LTCMAX)
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2L
-      COMMON /ENER  / E1, EINc
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, CETa, W2L, CSO
+      COMMON /ENER  / E1, ELAb
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
+C
       COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
-      COMMON /POTEN2/ RCOul, EWMax, BETa
+C     COMMON /POTEN2/ RCOul, BETa
+C
+      COMMON /POTEN2/ RCOul, BETa, EFErmi, EP, EA, IREl
       COMMON /POTN  / POTi(305), POTr(305), VSO(305), WSO(305)
       COMMON /PSI   / PSIr, PSIrp, PSIi, PSIip
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       DATA type/'REAL      ', 'IMAG.SURF1', 'IMAG.VOLUM', 'VSO (REAL)', 
-     &     'IMAG.SURF2', 'WSO (IMAG)','REAL.SURF ' /
+     &     'IMAG.SURF2', 'WSO (IMAG)', 'REAL.SURF '/
       DATA argmin/ - 1.745D+02/, zero/0.0D+00/, epstl/1.0D-10/
       DATA eps/1.0D-03/, one/1.0D+00/, two/2.0D+00/, seven/7.0D+00/
 C
@@ -1258,52 +1211,34 @@ C
          ENDDO
       ENDDO
 C
+C     Capote 2001
 C     Constants
 C
-      mu = MI*MT/(MI + MT)
-      el = E1*(MI + MT)/MT
 C
-C-BER.W2=0.04784468*MU      ( MOD. CFM.  NEA-DATA-BANK PRESCRIPTION )
-C     w2 = 0.04784369*mu
-C     ck2  = 4.784504d-02
-C
-C     Capote 2001
-      w2 = W2L*mu
-      ceta = 1.574855D-01
-C     w2  = ck2*mu
-      AK2 = w2*E1
-      ak = SQRT(AK2)
+      w2 = W2L*Rrmu
+      ak = DSQRT(AK2)
       zz = ZI*ZT
-      ETA = ceta*zz*SQRT(mu/E1)
-      mt3 = MT**0.333333
+      eta = CETa*zz*DSQRT(Rrmu/E1)
+      vcl = ak*eta/w2
+      mt3 = MT**(1.D0/3.D0)
 C
-C     e1  = center of mass energy
-C     el  = laboratory energy
-C     mu  = reduced mass
-C     ak2 = k**2
-C     ak  = k
-C     w2  = (2*amu*c**2) / ((hbar*c)**2)
+      rcoulb = RCOul*mt3
 C
-C     Radius
+C     Radius, Diffuseness, Strength
 C
       DO i = 1, 7
          rv(i) = (DABS(R(i)))*mt3
-      ENDDO
-      rcoulb = RCOul*mt3
 C
-C     Diffuseness
-C
-      DO i = 1, 7
          av(i) = A(i)
+C
          IF(av(i).LE.zero)av(i) = one
-      ENDDO
 C
-C     Strength
-C
-      DO i = 1, 7
          pote(i) = POT(i, 1)
-         IF(i.le.3.and.pote(i).LT.zero) pote(i) = zero
+C
+         IF(i.LE.3 .AND. pote(i).LT.zero)pote(i) = zero
+C
       ENDDO
+C
 C
 C     Matching radius
 C
@@ -1312,8 +1247,7 @@ C
       r3 = rv(3) + seven*A(3)
       r4 = rv(4) + seven*A(4)
       r6 = rv(6) + seven*A(6)
-      r7 = rv(7) + seven*A(7)
-      rm = 1.5*DMAX1(r1, r2, r3, r4, r6, r7)
+      rm = 1.5*DMAX1(r1, r2, r3, r4, r6)
       rho = ak*rm
 C
 C     Coulomb functions at the matching radius
@@ -1325,14 +1259,13 @@ C     Calculate only usefull l-values
 C
       lmaxc = IDINT(2.5*rho**0.8 + 3.5)
       lmaxc = MIN0(lmaxc, LTCMAX)
-      CALL RCWFN(rho, ETA, 0, lmaxc - 1, fc, fcp, gc, gcp, accur, step)
+      CALL RCWFN(rho, eta, 0, lmaxc - 1, fc, fcp, gc, gcp, accur, step)
 C
 C     Calculate potentials (h = integration step)
 C
       npt = 200
       npt3 = npt + 3
       h = rm/DFLOAT(npt)
-      vcl = ak*ETA/w2
       IF(BETa.NE.zero)THEN
          pote(3) = zero
          c2 = BETa*BETa/16.
@@ -1345,14 +1278,12 @@ C
       t3 = one/DEXP(rv(3)/av(3))
       t4 = one/DEXP(rv(4)/av(4))
       t6 = one/DEXP(rv(6)/av(6))
-      t7 = one/DEXP(rv(7)/av(7))
 C
       dt1 = DEXP(h/av(1))
       dt2 = DEXP(h/av(2))
       dt3 = DEXP(h/av(3))
       dt4 = DEXP(h/av(4))
       dt6 = DEXP(h/av(6))
-      dt7 = DEXP(h/av(7))
 C
       DO i = 1, npt3
          rint = DFLOAT(i)*h
@@ -1361,21 +1292,33 @@ C        Real potential
 C
          t1 = t1*dt1
          POTr(i) = +pote(1)/(one + t1)
-c
-c  Real surface potential (Woods-Saxon derivative)
-         t7 = t7*dt7
-         potr(i) = potr(i) + 4.0*pote(7) * t7/((one + t7)**2)
+C
 C
 C        Imaginary volume potential
 C
          t3 = t3*dt3
          POTi(i) = +pote(3)/(one + t3)
+C
+C
+C
          IF(R(2).GT.zero)THEN
 C
 C           Imaginary surface potential (Woods-Saxon derivative)
 C
             t2 = t2*dt2
             POTi(i) = POTi(i) + 4.0*pote(2)*t2/((one + t2)**2)
+C
+C
+C
+C           Dispersive real surface contribution
+C
+C           Real surface potential (Woods-Saxon derivative)
+C
+C           (with the imaginary surface geometry)
+C
+            POTr(i) = POTr(i) + 4.0*pote(7)*t2/((one + t2)**2)
+C
+C
          ELSEIF(R(2).LT.zero)THEN
 C
 C           Imaginary surface potential (Gaussian)
@@ -1383,6 +1326,8 @@ C
             yy = -(((rint-rv(2))/av(2))**2)
             IF(yy.GT.argmin)POTi(i) = POTi(i) + pote(2)*DEXP(yy)
          ENDIF
+C
+C
          IF(BETa.GT.zero)THEN
 C
 C           Local equivalent of a non local potential
@@ -1435,12 +1380,14 @@ C
 C        Spin-orbit potential
 C
          t4 = t4*dt4
-         VSO(i) = +2.043655*pote(4)*t4/(av(4)*rint*((one+t4)**2))
+C        VSO(i) = +2.043655*pote(4)*t4/(av(4)*rint*((one+t4)**2))
+         VSO(i) = CSO*pote(4)*t4/(av(4)*rint*((one+t4)**2))
 C
 C        Imaginary Spin-orbit potential (Capote 2001)
 C
          t6 = t6*dt6
-         WSO(i) = +2.043655*pote(6)*t6/(av(6)*rint*((one+t6)**2))
+C        WSO(i) = +2.043655*pote(6)*t6/(av(6)*rint*((one+t6)**2))
+         WSO(i) = CSO*pote(6)*t6/(av(6)*rint*((one+t6)**2))
          POTr(i) = -POTr(i)*w2
          POTi(i) = -POTi(i)*w2
          VSO(i) = -VSO(i)*w2
@@ -1513,12 +1460,13 @@ C
  200  lm1 = Lmax - 1
       volint(1) = 4.0*PI*rv(1)*pote(1)*(one*rv(1)*rv(1) + (PI*av(1))**2)
      &            /(3.0*MT)
-      IF(R(2).GT.zero)volint(2) = 16.0*PI*rv(2)*rv(2)*av(2)*pote(2)
-     &                            *(one + ((PI*av(2)/rv(2))**2)/3.0)/MT
-      volint(7) = 16.0*PI*rv(7)*rv(7)*av(7)*pote(7)
-     &                            *(one + ((PI*av(7)/rv(7))**2)/3.0)/MT
+      IF(rv(2).GT.zero)volint(2) = 16.0*PI*rv(2)*rv(2)*av(2)*pote(2)
+     &                             *(one + ((PI*av(2)/rv(2))**2)/3.0)/MT
+      IF(rv(7).GT.zero)volint(7) = 16.0*PI*rv(7)*rv(7)*av(7)*pote(7)
+     &                             *(one + ((PI*av(7)/rv(7))**2)/3.0)/MT
       volint(3) = 4.0*PI*rv(3)*pote(3)*(one*rv(3)*rv(3) + (PI*av(3))**2)
      &            /(3.0*MT)
+C
       volint(4) = zero
       volint(5) = zero
       volint(6) = zero
@@ -1540,12 +1488,12 @@ C
 99004    FORMAT(
      &' POTENTIALS PARAMETERS CALCULATED FOR A GIVEN ENERGY FUNCTIONAL B
      &Y USER'/)
-         WRITE(IS, 99014)     EL,E1
-99014    FORMAT(/' LABORATORY ENERGY : ',f9.3,' MeV'/
-     >           '        CMS ENERGY : ',f9.3,' MeV'/)
-         WRITE(IS, 99005)ak, ETA, rm, h, npt, lm1
+         WRITE(IS, 99005)ELAb, E1
+99005    FORMAT(/' LABORATORY ENERGY : ', f9.3, 
+     &          ' MeV'/'        CMS ENERGY : ', f9.3, ' MeV'/)
+         WRITE(IS, 99006)ak, eta, rm, h, npt, lm1
 C
-99005    FORMAT(' ', 'K =', 1p, e12.5, 5x, 'ETA =', e12.5, 9x, 'RM =', 
+99006    FORMAT(' ', 'K =', 1p, e12.5, 5x, 'ETA =', e12.5, 9x, 'RM =', 
      &          e12.5, 2x, 'DR =', e12.5, 8x, i4, ' POINTS', 10x, 
      &          'LMAX =', i3, /)
          IF(R(2).LT.zero)THEN
@@ -1554,20 +1502,35 @@ C
      &             'Gaussian FORM-FACTOR is used for surface absoprtion'
             WRITE(IS, *)
          ENDIF
-         WRITE(IS, 99006)
-99006    FORMAT(' ', 'POTENTIAL ', 2x, 'STRENGTH', 2x, '  r0  ', 2x, 
+         WRITE(IS, 99007)
+99007    FORMAT(' ', 'POTENTIAL ', 2x, 'STRENGTH', 2x, '  r0  ', 2x, 
      &          'RADIUS', 2x, 'DIFFUSENESS', 2x, 'VOLUME INTEG.')
          DO j = 1, 7
-            IF(j.NE.5)WRITE(IS, 99007)type(j), pote(j), ABS(R(j)), 
+C
+            IF(av(j).EQ.1 .AND. pote(j).EQ.0)av(j) = 0.
+            IF(j.NE.5)WRITE(IS, 99008)type(j), pote(j), ABS(R(j)), 
      &                                rv(j), av(j), volint(j)
-99007       FORMAT(' ', a10, 1x, f9.4, 1x, f7.4, 1x, f7.4, 3x, f7.4, 6x, 
+99008       FORMAT(' ', a10, 1x, f9.4, 1x, f7.4, 1x, f7.4, 3x, f7.4, 6x, 
      &             f8.2)
          ENDDO
-         WRITE(IS, 99008)rcoulb, BETa
-99008    FORMAT(' ', 'COULOMB   ', 11x, 
-     &          f7.4//' NON LOCALITY PARAMETER(BETA)=', f7.4)
-         WRITE(IS, 99009)
-99009    FORMAT(' ', 56x)
+         WRITE(IS, 99009)rcoulb, BETa, EFErmi, EP
+99009    FORMAT(' COULOMB   ', 11x, 
+     &          f7.4//' NON LOCALITY PARAMETER(BETA)=', 
+     &          f7.4//' FERMI ENERGY =', f9.4, 
+     &          ' MeV'//' AVERAGE ENERGY OF SPL Ep =', f9.4, ' MeV'/)
+         IF(EA.LT.1000.D0)THEN
+            WRITE(IS, 99010)
+99010       FORMAT(' NONLOCALITY IN VOLUME ABSORPTION IS CONSIDERED :')
+            WRITE(IS, 99011)EA
+99011       FORMAT('   ENERGY ABOVE WHICH NONLOCALITY IS ASSUMED Ea =', 
+     &             f9.4, ' MeV'//)
+         ELSE
+            WRITE(IS, 99012)
+99012       FORMAT(' NONLOCALITY IN VOLUME ABSORPTION IS NOT CONSIDERED'
+     &             //)
+         ENDIF
+         WRITE(IS, 99013)
+99013    FORMAT(' ', 56x)
       ENDIF
       END
 C
@@ -1580,8 +1543,7 @@ C***********************************************************************
       IMPLICIT DOUBLE PRECISION(a - H, O - z)
       INCLUDE 'dimension.h'
       DOUBLE PRECISION ak, AK2, al, ANG, arg, BI, BR, CANg, cost, dsig, 
-     &                 dsigr, ELAcs, ELAda, ETA, four, one, PI, PL, PL1, 
-     &                 PL2
+     &                 dsigr, ELAcs, ELAda, ETA, one, PI, PL, PL1, PL2
       DOUBLE PRECISION pol20, pol21, pol22, polar, rad, rap, SI, sig0, 
      &                 sigl, sint, som, T, ten, three, tmpang, TOTcs, 
      &                 two, twosr, W2, zero
@@ -1595,7 +1557,6 @@ C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       COMPLEX*16 a(101), b(101), c(101), d(101), e(101)
       COMPLEX*16 ai, onec, zeroc
       COMPLEX*16 CGAMMA
-C     complex*16 chk
       COMPLEX*16 csigl(LTCMAX), etac(3, LTCMAX), fc(101)
       COMPLEX*16 c1(LTCMAX), c2(LTCMAX), c3(LTCMAX), c4(LTCMAX), 
      &           c5(LTCMAX)
@@ -1606,8 +1567,7 @@ C     complex*16 chk
       DIMENSION tmpang(101)
       COMMON /ANGULAR/ ANG(73), CANg(101), PL(2*LTCMAX - 1, 101), 
      &                 PL1(2*LTCMAX - 1, 101), PL2(2*LTCMAX - 1, 101)
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
 C
@@ -1619,13 +1579,13 @@ C
       DATA zeroc/(0.0, 0.0)/
       DATA angtyp/'     TETA', 'COS(TETA)'/
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/, three/3.D0/
+C
+      DATA ten/1.0D+01/
+C
+C
+C
       twosr = DSQRT(two)
-      three = 3.0D+00
-      four = 4.0D+00
-      ten = 1.0D+01
 C
       NELang = Na
       IS3 = 7
@@ -1641,11 +1601,11 @@ C
          polar(i) = zero
          fc(i) = zeroc
       ENDDO
-      DO i=1, 101
+      DO i = 1, 101
          pol20(i) = 0.0
          pol21(i) = 0.0
          pol22(i) = 0.0
-      ENDDO 
+      ENDDO
 C
 C     Store angles or cosines into a temporary array
 C
@@ -1912,22 +1872,22 @@ C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       DIMENSION bl(61), da(101)
       COMMON /ANGULAR/ ANG(73), C(101), PL(2*LTCMAX - 1, 101), 
      &                 PL1(2*LTCMAX - 1, 101), PL2(2*LTCMAX - 1, 101)
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
 C
 C-----next COMMON is to transfer elastic ddx to Empire
 C
       COMMON /ELASCAT/ ELAda(101), TOTcs, ELAcs, NELang
+C
+C
+C
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/
+C
+      DATA four/4.D0/, ten/1.0D+01/, eps/0.001D0/, eight/8.0D+00/
+C
+C
       NELang = Na
-      zero = 0.0D+00
-      eps = 1.0D-03
-      one = 1.0D+00
-      two = 2.0D+00
-      four = 4.0D+00
-      eight = 8.0D+00
-      ten = 1.0D+01
       rad = 1.8D+02/PI
       idaa = IABS(Ida)
       lmax2 = 2*Lmax - 1
@@ -2088,8 +2048,8 @@ C     for spin 0 incident particles                                    *
 C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
       INCLUDE 'dimension.h'
-      DOUBLE PRECISION AK2, al2, BI, BR, E1, EINc, el, ELAcs, ELAda, 
-     &                 ETA, one, PI, SE, SI, SR, ST, T, TC, ten, tm
+      DOUBLE PRECISION AK2, al2, BI, BR, E1, ELAb, ELAcs, ELAda, ETA, 
+     &                 one, PI, SE, SI, SR, ST, T, TC, ten, tm
       DOUBLE PRECISION TOTcs, two, W2, zero, ZI, ZT
       INTEGER IE, Ipr, IS, IS1, IS2, IS3, IS4, k, l, Lmax, LTCMAX, 
      &        NELang
@@ -2097,19 +2057,15 @@ C
       PARAMETER(LTCMAX = NDTL)
 C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       REAL*8 MI, MT
-C     common /const/ mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
-      COMMON /ENER  / E1, EINc
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
+      COMMON /ENER  / E1, ELAb
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /TCE   / TC(LTCMAX)
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       COMMON /XS    / SE, SR, ST
       COMMON /ELASCAT/ ELAda(101), TOTcs, ELAcs, NELang
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
-      ten = 1.0D+01
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/, ten/1.0D+01/
       SE = zero
       SR = zero
       ST = zero
@@ -2137,7 +2093,6 @@ C
       SR = ten*SR*PI/AK2
       ST = ten*ST*PI/AK2
       IF(Ipr.NE.0)THEN
-         el = E1*(MI + MT)/MT
          WRITE(IS, 99004)ST, SR, SE
          WRITE(IS1, 99004)ST, SR, SE
       ENDIF
@@ -2149,9 +2104,8 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,//, 2x, 
-     &       'Total cross section         :', e14.7, ' mb', /, 2x, 
-     &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
+     &       , //, 2x, 'Total cross section         :', e14.7, ' mb', /, 
+     &       2x, 'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
       END
 C
@@ -2167,7 +2121,7 @@ C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
       INCLUDE 'dimension.h'
       DOUBLE PRECISION A, AE, AK2, al, al1, al2, b1, b2, BI, BR, E1, 
-     &                 EINc, el, ELAcs, ELAda, ETA, four, one, p1, PI
+     &                 ELAb, ELAcs, ELAda, ETA, four, one, p1, PI
       DOUBLE PRECISION POT, R, r2, RE, rp, s0, s1, SE, SI, SR, ST, T, 
      &                 TC, ten, tm, TOTcs, two, W2, zero, ZI
       DOUBLE PRECISION ZT
@@ -2177,21 +2131,19 @@ C
       PARAMETER(LTCMAX = NDTL)
 C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       REAL*8 MI, MT
-C     common /const/  mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
-      COMMON /ENER  / E1, EINc
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
+      COMMON /ENER  / E1, ELAb
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
+C
       COMMON /POTEN1/ R(7), RE(7), A(7), AE(7), POT(7, 6)
       COMMON /TCE   / TC(LTCMAX)
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       COMMON /XS    / SE, SR, ST
       COMMON /ELASCAT/ ELAda(101), TOTcs, ELAcs, NELang
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
-      four = 4.0D+00
-      ten = 1.0D+01
+      DATA four/4.D0/, ten/1.0D+01/
+C
       SE = zero
       SR = zero
       ST = zero
@@ -2232,7 +2184,6 @@ C
       SR = ten*SR*PI/AK2
       ST = ten*ST*PI/AK2
       IF(Ipr.GT.0)THEN
-         el = E1*(MI + MT)/MT
          WRITE(IS, 99004)ST, SR, SE
          WRITE(IS1, 99004)ST, SR, SE
       ENDIF
@@ -2254,9 +2205,8 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,//, 2x, 
-     &       'Total cross section         :', e14.7, ' mb', /, 2x, 
-     &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
+     &       , //, 2x, 'Total cross section         :', e14.7, ' mb', /, 
+     &       2x, 'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
 99005 FORMAT(' ', 27x, 'Strength functions   S0', 1pe14.7, /, ' ', 48x, 
      &       'S1', e14.7, /, ' ', 33x, 'Scattering radius', e14.7, //)
@@ -2273,8 +2223,8 @@ C     for spin 1 incident particles                                    *
 C***********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
       INCLUDE 'dimension.h'
-      DOUBLE PRECISION AK2, al, al1, al2, al3, b1, b2, BI, BR, E1, EINc, 
-     &                 el, ELAcs, ELAda, ETA, one, PI, SE, SI, SR
+      DOUBLE PRECISION AK2, al, al1, al2, al3, b1, b2, BI, BR, E1, ELAb, 
+     &                 ELAcs, ELAda, ETA, one, PI, SE, SI, SR
       DOUBLE PRECISION ST, T, TC, ten, three, tm, TOTcs, two, W2, zero, 
      &                 ZI, ZT
       INTEGER i, IE, Ipr, IS, IS1, IS2, IS3, IS4, k, l, Lmax, LTCMAX, 
@@ -2282,20 +2232,17 @@ C***********************************************************************
       PARAMETER(LTCMAX = NDTL)
 C     parameter ( ltcmax=100, LFMAX=4*NDTL+2)
       REAL*8 MI, MT
-C     common /const/ mi,si,zi,mt,zt,pi,ak2,eta
-      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2
-      COMMON /ENER  / E1, EINc
+      COMMON /CONST / MI, SI, ZI, MT, ZT, PI, AK2, ETA, W2, CSO
+      COMMON /ENER  / E1, ELAb
       COMMON /INOUT / IE, IS, IS1, IS2, IS3, IS4
       COMMON /TCE   / TC(LTCMAX)
       COMMON /TLJ   / BR(3, LTCMAX), BI(3, LTCMAX), T(3, LTCMAX)
       COMMON /XS    / SE, SR, ST
       COMMON /ELASCAT/ ELAda(101), TOTcs, ELAcs, NELang
+      DATA zero/0.0D+00/, one/1.0D+00/, two/2.0D+00/
 C
-      zero = 0.0D+00
-      one = 1.0D+00
-      two = 2.0D+00
-      three = 3.0D+00
-      ten = 1.0D+01
+      DATA three/3.D0/, ten/1.0D+01/
+C
       SE = zero
       SR = zero
       ST = zero
@@ -2346,7 +2293,6 @@ C
       SR = ten*SR*PI/AK2
       ST = ten*ST*PI/AK2
       IF(Ipr.GT.0)THEN
-         el = E1*(MI + MT)/MT
          WRITE(IS, 99004)ST, SR, SE
          WRITE(IS1, 99004)ST, SR, SE
       ENDIF
@@ -2358,52 +2304,61 @@ C
 99003 FORMAT(1p, 6E11.4)
 99004 FORMAT(//, 
      &       '  Results provided by Spherical Optical Model code SCAT2:'
-     &       ,//, 2x, 
-     &       'Total cross section         :', e14.7, ' mb', /, 2x, 
-     &       'Absorption cross section    :', e14.7, ' mb', /, 2x, 
+     &       , //, 2x, 'Total cross section         :', e14.7, ' mb', /, 
+     &       2x, 'Absorption cross section    :', e14.7, ' mb', /, 2x, 
      &       'Shape elastic cross section :', e14.7, ' mb', ///)
       END
 C
 C
-      SUBROUTINE SETPOTS(Nejc, Nnuc, Elab)
+      SUBROUTINE SETPOTS(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2, 
+     &                   Ikey)
 C
 C     Transfers o.m. parameters to ECIS  or SCAT2
 C
       INCLUDE 'dimension.h'
+C
       INCLUDE 'global.h'
-      DOUBLE PRECISION AAE, AQ, BETa, ener, EWMax, POT, R, RCOulomb, RRE
+C
+C
+      DOUBLE PRECISION AAE, AQ, BETa, POT, R, RCOulomb, RRE
+      DOUBLE PRECISION Rrmu, Ak2, Mi, Mt
       INTEGER i
 C
 C     Dummy arguments
 C
-      DOUBLE PRECISION Elab
+      DOUBLE PRECISION Eilab, Eicms
       INTEGER Nejc, Nnuc
 C
 C     COMMON variables
 C
+C
       COMMON /POTEN1/ R(7), RRE(7), AQ(7), AAE(7), POT(7, 6)
-      COMMON /POTEN2/ RCOulomb, EWMax, BETa
+      COMMON /POTEN2/ RCOulomb, BETa, EFErmi, EP, EA, IREl
 C
 C     Ener must be in LAB system
 C
-      ener = Elab
+C     ener = Elab
 C
       IF(CCCalc)THEN
 C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          komp = 33
          ko = 33
-         CALL OMPAR(Nejc, Nnuc, ener, komp, ko)
+C        CALL OMPAR(Nejc, Nnuc, ener, komp, ko)
+         CALL OMPAR(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2, komp, 
+     &              ko, Ikey)
       ELSE
 C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          komp = 29
          ko = 18
-         CALL OMPAR(Nejc, Nnuc, ener, komp, ko)
+C        CALL OMPAR(Nejc, Nnuc, ener, komp, ko)
+         CALL OMPAR(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2, komp, 
+     &              ko, Ikey)
       ENDIF
 C-----set OMP onto SCAT variables
 C     Energy dependence (if any) must be considered in OMPAR
 C     Setting potential strength
       POTe(1) = VOM(1, Nejc, Nnuc)
-C     Capote, july 2001, real surface potential 
+C     Capote, july 2001, real surface potential
       POTe(7) = VOMs(1, Nejc, Nnuc)
       POTe(2) = WOMs(1, Nejc, Nnuc)
       POTe(3) = WOMv(1, Nejc, Nnuc)
@@ -2418,7 +2373,7 @@ C     Setting geometrical parameters for SCAT2
       R(2) = RWOm(1, Nejc, Nnuc)
       IF(SFIom(Nejc, Nnuc).LT.0.0D0)R(2) = -R(2)
       AQ(2) = AWOm(Nejc, Nnuc)
-C     Capote, july 2001, transfer of real surface potential 
+C     Capote, july 2001, transfer of real surface potential
       R(7) = R(2)
       AQ(7) = AQ(2)
       R(3) = RWOmv(1, Nejc, Nnuc)
@@ -2429,4 +2384,123 @@ C     Capote, july 2001, transfer of real surface potential
       AQ(6) = AWSo(Nejc, Nnuc)
       RCOulomb = RCOul(Nejc, Nnuc)
       BETa = RNOnl(Nejc, Nnuc)
+      EFErmi = EEFermi(Nejc, Nnuc)
+      EP = EEP(Nejc, Nnuc)
+      EA = EEA(Nejc, Nnuc)
+      IREl = IRElat(Nejc, Nnuc)
+      END
+C
+      SUBROUTINE KINEMA(El, E1, Mi, Mt, Amu, Ak2, Iopt, Relcal)
+C
+C     Author: O.Bersillon (SCAT2000)
+C
+C***********************************************************************
+C  Kinematics:   lab  <===>  CM                                        *
+C    With relativistic kinematics, the reduced mass is replaced by     *
+C    the reduced total energy                                          *
+C----------------------------------------------------------------------*
+C  EL     = current lab kinetic energy                                 *
+C  E1     = current  CM kinetic energy                                 *
+C  MI     = incident particle rest mass (in a.m.u.)                    *
+C  MT     = target   nucleus  rest mass (in a.m.u.)                    *
+C  AMU    = reduced mass                                               *
+C  AK2    = CM wave number                                             *
+C  IOPT   = 1   from lab to CM                                         *
+C           2   from CM  to lab                                        *
+C  IRELAT = 0   classical    kinematics                                *
+C           1   relativistic kinematics                                *
+C----------------------------------------------------------------------*
+C  AMUmev = a.m.u. in MeV                                              *
+C----------------------------------------------------------------------*
+C  Called by MAIN                                                      *
+C***********************************************************************
+C
+      IMPLICIT DOUBLE PRECISION(A - H, O - Z)
+C
+      DOUBLE PRECISION Mi, Mt, mtot
+      LOGICAL Relcal
+C
+C     common /inout/  ie,is,is1,is2,is3,is4
+C     common /physcon/ ampipm,ampi0,amu0c2,e2,hbarc
+C
+      COMMON /CONSTANT/ AMUmev, PI, W2L, XNExc, CETa, CSO, RMU, AMPi, 
+     &                  ELE2, HHBarc
+C
+      DATA one/1.0D+00/
+      DATA two/2.0D+00/
+C
+C=======================================================================
+C
+      ck2 = (two*AMUmev)/(HHBarc**2)
+C
+      mtot = Mi + Mt
+C
+      IF(Iopt.EQ.1)THEN
+C
+C***********************************************************************
+C        From lab to CM (the input quantity is Elab)
+C***********************************************************************
+C
+         IF(.NOT.Relcal)THEN
+C
+C-----------------------------------------------------------------------
+C           Classical    kinematics
+C-----------------------------------------------------------------------
+C
+            Amu = Mi*Mt/mtot
+            E1 = El*Mt/mtot
+            w2 = ck2*Amu
+            Ak2 = w2*E1
+         ELSE
+C
+C-----------------------------------------------------------------------
+C           Relativistic kinematics
+C-----------------------------------------------------------------------
+C
+            E1 = DSQRT(mtot*mtot + two*Mt*El) - mtot
+            E1 = AMUmev*mtot*
+     &           (DSQRT(one + two*El/(AMUmev*Mt*((one+Mi/Mt)**2)))
+     &           - one)
+            p2 = (El*(El + two*AMUmev*Mi))
+     &           /((one + Mi/Mt)**2 + two*El/(AMUmev*Mt))
+            Ak2 = p2/(HHBarc*HHBarc)
+            etoti = DSQRT((AMUmev*Mi)**2 + p2)
+            etott = DSQRT((AMUmev*Mt)**2 + p2)
+            Amu = etoti*etott/(etoti + etott)
+            Amu = Amu/AMUmev
+         ENDIF
+C
+C
+C
+C***********************************************************************
+C        From  CM to lab (the input quantity is Ecm)
+C***********************************************************************
+C
+      ELSEIF(.NOT.Relcal)THEN
+C
+C-----------------------------------------------------------------------
+C        Classical    kinematics
+C-----------------------------------------------------------------------
+C
+         Amu = Mi*Mt/mtot
+         El = E1*mtot/Mt
+         Ak2 = ck2*Amu*E1
+      ELSE
+C
+C-----------------------------------------------------------------------
+C        Relativistic kinematics
+C-----------------------------------------------------------------------
+C
+         El = E1*(E1 + two*AMUmev*mtot)/(two*AMUmev*Mt)
+         p2 = E1*(E1 + two*AMUmev*mtot)*(E1 + two*AMUmev*Mi)
+     &        *(E1 + two*AMUmev*Mt)/((two*(E1+AMUmev*mtot))**2)
+         Ak2 = p2/(HHBarc*HHBarc)
+         etoti = DSQRT((AMUmev*Mi)**2 + p2)
+         etott = DSQRT((AMUmev*Mt)**2 + p2)
+         Amu = etoti*etott/(etoti + etott)
+         Amu = Amu/AMUmev
+C
+C
+      ENDIF
+C
       END

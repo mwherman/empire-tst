@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:16 $
-Ccc   * $Id: scnd-preeq.f,v 1.3 2001-08-21 15:36:16 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: scnd-preeq.f,v 1.4 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -96,7 +96,7 @@ C--------calculation of factorial      ***** done *******
 C--------divide single nucleon in the continuum into neutron and proton components
 C--------assume TORY ratio between unlike and like interaction
          pnratio = TORy/(TORy + 1.0)
-                                   !unlike
+C        !unlike
          IF(ZEJc(0).EQ.0.0D0 .AND. Nejc.EQ.1)pnratio = 1.0 - pnratio
          IF(ZEJc(0).EQ.1.0D0 .AND. Nejc.EQ.2)pnratio = 1.0 - pnratio
 C--------do loop over 1-st residue excitation energy
@@ -187,13 +187,13 @@ C--------trapezoidal integration of continuum population for ejectile nejc
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          WRITE(6, *)' '
          WRITE(6, *)' '
-         IF(Nejc.EQ.1) THEN 
-            WRITE(6, *)' Second-chance preequilibrium emission of ',
+         IF(Nejc.EQ.1)THEN
+            WRITE(6, *)' Second-chance preequilibrium emission of ', 
      &                 'neutrons = ', sum, ' mb'
-         ELSEIF(Nejc.EQ.2) THEN 
-            WRITE(6, *)' Second-chance preequilibrium emission of ',
+         ELSEIF(Nejc.EQ.2)THEN
+            WRITE(6, *)' Second-chance preequilibrium emission of ', 
      &                 'protons = ', sum, ' mb'
-         ENDIF 
+         ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc, Nnuc) = CSEmis(Nejc, Nnuc) + sum
       ENDIF

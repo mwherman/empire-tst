@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: HRTW-comp.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: HRTW-comp.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1342,7 +1342,7 @@ C
       REAL FLOAT
       INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, maxlw, mul
       INTEGER INT, MIN0
-      DOUBLE PRECISION PAR, xmas_npro, xmas_ntrg, rmu
+      DOUBLE PRECISION PAR, xmas_npro, xmas_ntrg, RMU
       DOUBLE PRECISION VT1
 C
 C
@@ -1350,14 +1350,20 @@ C
 C
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-      rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
+C     rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
 C
-      wf = W2*EIN*rmu
-C
-      coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+C     wf = W2*EIN*rmu
+C     coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C
 C     wf = .0047837*AEJc(Npro)*A(Ntrg)*EIN/(AEJc(Npro)+A(Ntrg))
 C     coef = 3.14159/wf/(2*XJLv(1,Ntrg)+1.0)/(2*SEJc(Npro)+1.0)
+C
+      el = EINl
+      CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
+C     wf = W2*ecms*rmu
+      wf = ak2/10.D0
+      coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+C
       maxlw = NDLW
       s1 = 0.5
       IF(AINT(XJLv(1,Ntrg) + SEJc(Npro)) - XJLv(1, Ntrg) - SEJc(Npro)

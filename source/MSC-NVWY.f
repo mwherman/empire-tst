@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: MSC-NVWY.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: MSC-NVWY.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -61,8 +61,8 @@ C
       DOUBLE PRECISION corr, hisr, ps1, ps2, s, smax, smin, tl1, tl2, 
      &                 tl3, tlj, xjc, xjr
       REAL FLOAT
-      INTEGER i , ichsp , ier , iermax , ietl , iexc , ip1 , ip2 , 
-     &        ipar , itlc , j , jr , l , lmax , lmaxf , lmin , mul , n
+      INTEGER i, ichsp, ier, iermax, ietl, iexc, ip1, ip2, ipar, itlc, 
+     &        j, jr, l, lmax, lmaxf, lmin, mul, n
       INTEGER MIN0
 C
 C
@@ -342,13 +342,12 @@ C
      &                 ZP(NDEX, NC2, 3, 2), ZSUm(NDEX, NC2, 2)
       INTEGER IE(NC2)
       COMMON /DELETE/ GSP
-      COMMON /EB    / EXTr , BMSc , FACt , G
-      COMMON /MSC   / SCRm , WP , YP , ZP , ZSUm , OMJd , PIM , PREp , 
-     &                IE
+      COMMON /EB    / EXTr, BMSc, FACt, G
+      COMMON /MSC   / SCRm, WP, YP, ZP, ZSUm, OMJd, PIM, PREp, IE
       COMMON /PRSI  / SIGnx
-c
-c Dummy arguments
-c
+C
+C Dummy arguments
+C
       LOGICAL Nvwful
 C
 C Local variables
@@ -494,7 +493,7 @@ C-----peaks is added to the average; this being absolutely arbitrary)
      &                                /(GDRpar(3, 1) + GDRpar(6, 1))
      &                                + 0.5*(GDRpar(4, 1) - GDRpar(1, 1)
      &                                )
-      WRITE(6, '('' Spreading/total GDR width ='',G12.5)') D1Fra
+      WRITE(6, '('' Spreading/total GDR width ='',G12.5)')D1Fra
       egdrr = EXCn - egdr
 C-----
 C-----calculation of spin distribution for each exciton number
@@ -1011,7 +1010,7 @@ C--------------
                   ENDDO
                ENDDO
                IF(NOUt.GT.1)WRITE(6, 99010)POP(NEX(1), j, i, 1)
-99010          FORMAT(1X, 'Population to be distributed=', E12.5, ' mb',
+99010          FORMAT(1X, 'Population to be distributed=', E12.5, ' mb', 
      &                /)
                IF(NOUt.GT.3)WRITE(6, 99011)PIM1
 99011          FORMAT(1X, 'PIM TO BE USED (NORMALIZED):', /, 1X, 
@@ -1019,11 +1018,11 @@ C--------------
 C
 C************  normalization of emission rates **************************
 C
-C--------------neutron emission (if acceted, note IF on IDNA)               
-               IF(IDNa(2,3).GT.0) THEN 
+C--------------neutron emission (if acceted, note IF on IDNA)
+               IF(IDNa(2, 3).GT.0)THEN
                   nejc = 1
                   nnur = nresn
-                  DO ke = 1 , NEX(nnur)
+                  DO ke = 1, NEX(nnur)
                      icse = NEX(nnur) - ke + 1
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
@@ -1056,11 +1055,11 @@ C--------------neutron emission (if acceted, note IF on IDNA)
                      nnur = nresp
                   ENDIF
                ENDIF
-C--------------proton emission (if acceted, note IF on IDNA)               
-               IF(IDNa(4,3).GT.0) THEN 
+C--------------proton emission (if acceted, note IF on IDNA)
+               IF(IDNa(4, 3).GT.0)THEN
                   nejc = 2
                   nnur = nresp
-                  DO ke = 1 , NEX(nnur)
+                  DO ke = 1, NEX(nnur)
                      icse = NEX(nnur) - ke + 1
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
@@ -1098,7 +1097,7 @@ C--------------proton emission (if acceted, note IF on IDNA)
 C
 C************* Gamma emission  ******************************************
 C
-               IF(GST.NE.0D0 .AND. IDNa(5,3).GT.0)THEN
+               IF(GST.NE.0D0 .AND. IDNa(5, 3).GT.0)THEN
                   IF(egdrr.GT.0.0D0)THEN
 C-----------------ereasing PIG matrix
                      DO ix = 1, NG
@@ -1635,9 +1634,8 @@ C-----------------t     gamma gamma estimate done
                   ENDIF
                ENDIF
             ENDIF
- 20         IF(POP(NEX(1), j, i, 1).GT.0)
-     &      REDmsc(j, i) = (POP(NEX(1), j, i, 1) - emis)
-     &                     /POP(NEX(1), j, i, 1)
+ 20         IF(POP(NEX(1), j, i, 1).GT.0)REDmsc(j, i)
+     &         = (POP(NEX(1), j, i, 1) - emis)/POP(NEX(1), j, i, 1)
             POP(NEX(1), j, i, 1) = POP(NEX(1), j, i, 1) - emis
          ENDDO
       ENDDO
@@ -1647,15 +1645,15 @@ C-----
       WRITE(6, 99020)NDMSCS
 99020 FORMAT(1X, //, 30X, 'H e i d e l b e r g  M. S. C.  d e c a y  (', 
      &       I2, ' stages)', //)
-c     IF(GST.NE.0)CALL AUERST(1, 0)
-c     CALL AUERST(1, 1)
+C     IF(GST.NE.0)CALL AUERST(1, 0)
+C     CALL AUERST(1, 1)
       IF(IOUt.GT.0)WRITE(6, 
-     &'(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')')
-     &  SYMbe(1), CSMsc(1)
-c     CALL AUERST(1, 2)
+     &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
+     &           )SYMbe(1), CSMsc(1)
+C     CALL AUERST(1, 2)
       IF(IOUt.GT.0)WRITE(6, 
-     &'(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')')
-     &  SYMbe(2), CSMsc(2)
+     &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
+     &           )SYMbe(2), CSMsc(2)
 99021 FORMAT(1X, 12E11.4)
 99022 FORMAT(1X, /)
 99023 FORMAT(1X, 12E11.4)

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: HF-comp.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: HF-comp.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -38,17 +38,16 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Nejc , Nnuc , Nnur
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Nejc, Nnuc, Nnur
       DOUBLE PRECISION Xnor
-c
-c Local variables
-c
-      DOUBLE PRECISION eemi , excnq , pop1 , pop2 , poph , popl , pops , 
-     &                 xcse
+C
+C Local variables
+C
+      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, pops, xcse
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, nexrt
       INTEGER INT, MAX0
@@ -108,13 +107,13 @@ C--------distance of the actual energy to the bin energy
          IF(ENDf.EQ.1.D0)CALL BELLAC(Iec, Nejc, Nnuc, pop1/DE)
          POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
          REClev(il, Nejc) = REClev(il, Nejc) + pop1
-C--------Add isotropic CN contribution to direct ang. distributions 
-         IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1)) THEN
+C--------Add isotropic CN contribution to direct ang. distributions
+         IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1))THEN
             pop1 = pop1/4.0/PI
             DO na = 1, NDANG
                CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc) + pop1
             ENDDO
-         ENDIF 
+         ENDIF
       ENDDO
       END
 C
@@ -154,16 +153,16 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Nejc , Nnuc
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Nejc, Nnuc
       DOUBLE PRECISION Popt
-c
-c Local variables
-c
-      INTEGER iang , icsp
+C
+C Local variables
+C
+      INTEGER iang, icsp
       INTEGER INT
 C
 C
@@ -360,17 +359,17 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Ipc , Jc , Nejc , Nnuc , Nnur
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ipc, Jc, Nejc, Nnuc, Nnur
       DOUBLE PRECISION Sum
-c
-c Local variables
-c
-      DOUBLE PRECISION cor , corr , eout , eoutc , frde , hisr , s , 
-     &                 smax , smin , sumdl , sumtl1 , sumtl2 , xjc , xjr
+C
+C Local variables
+C
+      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, s, smax, 
+     &                 smin, sumdl, sumtl1, sumtl2, xjc, xjr
       REAL FLOAT
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar, 
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
@@ -538,7 +537,7 @@ C-----------DO LOOP OVER L ------------------------------------------------
      &                              + frde*(TL(il + 1, l, Nejc, Nnur)
      &                              - TL(il, l, Nejc, Nnur))
             ENDDO
-c-----------DO LOOP OVER L --- DONE ----------------------------------------
+C-----------DO LOOP OVER L --- DONE ----------------------------------------
             s = s + 1.
             IF(s.LE.smax)GOTO 20
 C-----------LOOP OVER CHANNEL SPIN ------ DONE ----------------------------
@@ -546,7 +545,7 @@ C-----------LOOP OVER CHANNEL SPIN ------ DONE ----------------------------
             SCRtl(i, Nejc) = sumdl
             Sum = Sum + sumdl
          ENDDO
-c--------DO LOOP OVER DISCRETE LEVELS --------- DONE --------------------
+C--------DO LOOP OVER DISCRETE LEVELS --------- DONE --------------------
       ENDIF
  100  DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
@@ -580,16 +579,15 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
+C
+C
+C Dummy arguments
+C
       INTEGER Nnuc
-c
-c Local variables
-c
-      DOUBLE PRECISION egd , gacs , popl
-      REAL FLOAT
+C
+C Local variables
+C
+      DOUBLE PRECISION egd, gacs, popl
       INTEGER i, icse, j, j1, l
 C
 C
@@ -599,7 +597,7 @@ C
      &       'Discrete gamma transitions ', /, 1X, 27('*'), //)
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF(IBR(l, 1, 2, Nnuc).EQ.0)THEN
+         IF(BR(l, 1, 2, Nnuc).EQ.0.)THEN
             IF(IOUt.GT.2)WRITE(6, 99002)ELV(l, Nnuc), LVP(l, Nnuc)
      &                                  *XJLv(l, Nnuc), POPlv(l, Nnuc)
 99002       FORMAT(1X, //, 5X, 'Level of energy  ', F8.4, ' MeV', 
@@ -615,7 +613,7 @@ C
      &                5X, 'Level populated ', 4X, 'E.gamma ', 4X, 
      &                'Intensity mb ', /)
                DO j = 1, NDBR
-                  j1 = IBR(l, j, 1, Nnuc)
+                  j1 = NINT(BR(l, j, 1, Nnuc))
                   IF(j1.EQ.0)GOTO 100
                   IF(j1.GE.l)THEN
                      WRITE(6, 99004)
@@ -624,7 +622,8 @@ C
      &                      /, 10X, 'FURTHER DECAY NOT CONSIDERED ')
                      GOTO 99999
                   ENDIF
-                  gacs = popl*FLOAT(IBR(l, j, 2, Nnuc))/100.
+C                 gacs = popl*FLOAT(IBR(l, j, 2, Nnuc))/100.
+                  gacs = popl*BR(l, j, 2, Nnuc)
                   POPlv(j1, Nnuc) = POPlv(j1, Nnuc) + gacs
                   egd = ELV(l, Nnuc) - ELV(j1, Nnuc)
                   icse = 2.0001 + egd/DE
@@ -678,18 +677,18 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Ipc , Jc , Nnuc
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ipc, Jc, Nnuc
       DOUBLE PRECISION Sum
-c
-c Local variables
-c
-      DOUBLE PRECISION accn , atil , eg , gamma , se1 , se2 , se2m1 , 
-     &                 sm1 , t , xjc
-      DOUBLE PRECISION E1 , E2 , XM1
+C
+C Local variables
+C
+      DOUBLE PRECISION accn, atil, eg, gamma, se1, se2, se2m1, sm1, t, 
+     &                 xjc
+      DOUBLE PRECISION E1, E2, XM1
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
@@ -891,18 +890,17 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Ipc , Jc , Nnuc
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ipc, Jc, Nnuc
       DOUBLE PRECISION Sum
-c
-c Local variables
-c
-      DOUBLE PRECISION E1 , E2 , XM1
-      DOUBLE PRECISION eg , se1 , se2 , se2m1 , sm1 , sumn , sump , t , 
-     &                 xjc
+C
+C Local variables
+C
+      DOUBLE PRECISION E1, E2, XM1
+      DOUBLE PRECISION eg, se1, se2, se2m1, sm1, sumn, sump, t, xjc
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, lmax, lmin
 C
@@ -1090,11 +1088,11 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c
-c
-c Dummy arguments
-c
-      INTEGER Iec , Jc , Nnuc
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Jc, Nnuc
       DOUBLE PRECISION Sumfis
 C
 C Local variables
@@ -1103,7 +1101,7 @@ C
      &                 fric, gamma, gpart, htom, PI, shredt, sum1, sum2, 
      &                 sum3, sumf, sumgs, sumr, tau, temp
       REAL FLOAT
-      INTEGER kn , knm
+      INTEGER kn, knm
       DOUBLE PRECISION TLF
 C
 C
@@ -1199,12 +1197,12 @@ C
 C Dummy arguments
 C
       DOUBLE PRECISION Ekin
-c
-c Local variables
-c
-      DOUBLE PRECISION atlf , htom , pi
-c
-c
+C
+C Local variables
+C
+      DOUBLE PRECISION atlf, htom, pi
+C
+C
       htom = 1.0
       pi = 3.141593
       TLF = 1.

@@ -1,8 +1,10 @@
+CDEBUG
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: MSD-orion.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: MSD-orion.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
-C     surface real OMP part (for DOM potentials) still to be included 
+C     Surface real OMP part (for DOM potentials) included
+C     but contribution to form factor is ignored (see subroutine FFCAL)
 C
 C
       SUBROUTINE ORION(Q2, Q3, Ktrl3, Extcom1, Ldw, Ist, Ltrmax, Atar, 
@@ -122,40 +124,41 @@ C
 C
 C COMMON variables
 C
+C    &                 P(975, NGLXX), pl(30), plm10, PLM10m(NGLXX),
+C    &                 plm20, PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC,
+C    &                 RACie(50), radian, RD, RHOmx, RMAsr(4), RZEcf(4),
+C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), C1Mem(2), CE(4), 
      &                 CFUnir(4), CHArgr(4), CONst1, CONst2, DFNf(4), 
      &                 DFNr(4), DFNsf(4), DFNsir(4), DFNspf(4), 
      &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DZEro(4)
      &                 , ECM(4), EGS(4), ELAb, ETA, ETUnit, EXTcom(50), 
      &                 EXTcom2(10), FAClm(NGLXX), FAClog(500), 
-C    &                 P(975, NGLXX), pl(30), plm10, PLM10m(NGLXX), 
-     &                 P(975, NGLXX),                PLM10m(NGLXX), 
-C    &                 plm20, PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
-     &                        PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
-C    &                 RACie(50), radian, RD, RHOmx, RMAsr(4), RZEcf(4), 
-     &                 RACie(50),         RD, RHOmx, RMAsr(4), RZEcf(4),
-     &                 RZEcr(4), RZEf(4), RZEr(4), RZEsf(4), RZEsir(4), 
-     &                 RZEspf(4), RZEspr(4), RZEsr(4), RZEwf(4), 
-     &                 RZEwr(4), SGMa(25, NGLXX, 2), SGMat(NGLXX, 2), 
-     &                 SGMaz, SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4),
-     &                 U9, VSOf(4), VSOr(4), VSXf(4), VSXr(4), WN(4), 
-     &                 WNIni(4), WNUnit, WR1(1000, 2), WR2(5000, 2), 
-     &                 WSFf(4), WSFr(4), WSOr(4), WSXf(4), WSXr(4), 
-     &                 XBAr, XMAx, XMEs, ZPR(4), ZTR(4)
+     &                 P(975, NGLXX), PLM10m(NGLXX), PLM20m(NGLXX), 
+     &                 PMAsr(4), QVAlue(4), RAC, RACie(50), RD, RHOmx, 
+     &                 RMAsr(4), RZEcf(4), RZEcr(4), RZEf(4), RZEr(4), 
+     &                 RZEsf(4), RZEsir(4), RZEspf(4), RZEspr(4), 
+     &                 RZEsr(4), RZEwf(4), RZEwr(4), SGMa(25, NGLXX, 2), 
+     &                 SGMat(NGLXX, 2), SGMaz, SGMazz(4), SQRt10, 
+     &                 THEta(NGLXX), TMAsr(4), U9, VSOf(4), VSOr(4), 
+     &                 VSXf(4), VSXr(4), WN(4), WNIni(4), WNUnit, 
+     &                 WR1(1000, 2), WR2(5000, 2), WSFf(4), WSFr(4), 
+     &                 WSOr(4), WSXf(4), WSXr(4), XBAr, XMAx, XMEs, 
+     &                 ZPR(4), ZTR(4), DVXr(4), DVXf(4), wsof(4)
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300, 4), ZERo
-C     INTEGER ia, ib, ic, id, ie, ig, ISTw(3), JJ, JLSmax, KCFf(4), 
-      INTEGER                         ISTw(3), JJ, JLSmax, KCFf(4), 
-     &        KEXcom(50), KEXcom1(8), KEXcom2(28), KTLout(50), 
-     &        KTLout1(8), KTLout2(28), KTRl(30), KTRl1(8), KTRl2(28), 
+C     INTEGER ia, ib, ic, id, ie, ig, ISTw(3), JJ, JLSmax, KCFf(4),
 C    &        l1outp, l9(9), LBTrf(4), lcaltr, LDWmxr(4), LDWmxr1(3),
-     &                       LBTrf(4),         LDWmxr(4), LDWmxr1(3), 
 C    &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl,
-     &        LLRow(120), LMAx, LTRamx(4),        MXRow, NANglr, NCHanl,
+      INTEGER ISTw(3), JJ, JLSmax, KCFf(4), KEXcom(50), KEXcom1(8), 
+     &        KEXcom2(28), KTLout(50), KTLout1(8), KTLout2(28), KTRl(30)
+     &        , KTRl1(8), KTRl2(28), LBTrf(4), LDWmxr(4), LDWmxr1(3), 
+     &        LLRow(120), LMAx, LTRamx(4), MXRow, NANglr, NCHanl, 
      &        NNDim(4), NODf(4), NXCple, NXMax
       COMMON /BRMH  / WR1, WR2, SGMa, SGMat, P, CSUm2, XAMp, PLM10m, 
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1, 
      &                CONst2
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
+C
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -172,6 +175,8 @@ C    &        LLRow(120), LMAx, LTRamx(4), mmxtr, MXRow, NANglr, NCHanl,
       COMMON /SOIMAG/ WSOr, DFNsir, RZEsir
       COMMON /SPIN  / ISTw, JJ
 C
+      COMMON /RSURF / DVXr, DVXf
+C
 C Dummy arguments
 C
       DOUBLE PRECISION Apro, Atar, Extcom1, Q2, Q3, Zpro, Ztar
@@ -182,7 +187,7 @@ C Local variables
 C
       DOUBLE PRECISION ad, ai, amupmu, as, av, aw, e, ec, fn, rc, ri, 
      &                 rs, rv, rw, v, vi, vs, w, wd, xwr1(1000, 2), 
-     &                 xwr2(5000, 2)
+     &                 xwr2(5000, 2), mi, mt
       CHARACTER*3 ampmwr, holamu, holpmu
       INTEGER i, ind, j, kase, kder, maxi, mini, n, n1mx, n1wx, n2mx, 
      &        na, nc, nejc, nlr, no, nw1, nw2, nw3, nz
@@ -200,7 +205,6 @@ CWQAN
       OPEN(8, FORM = 'unformatted', STATUS = 'scratch')
 C
 CWQAN
-      kase = 0
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -219,7 +223,7 @@ Cmh   READ(5,*) QVALUE(2),QVALUE(3)
       FAClog(1) = 0.
       FAClog(2) = 0.
       fn = 1.
-      DO n = 3 , 500
+      DO n = 3, 500
          fn = fn + 1.
          FAClog(n) = FAClog(n - 1) + LOG(fn)
       ENDDO
@@ -265,7 +269,7 @@ Cmh   READ(5,*)(EXTCOM(N),N=1,10)
 Cmh   EXTCOM(1) defines incident energy (passed trough formal parameters)
 Cmh   EXTCOM(2) defines mesh
       EXTcom(2) = 0.1
-      DO n = 3 , 10
+      DO n = 3, 10
          EXTcom(n) = 0.0
       ENDDO
 Cmh   READ(5,*) NCHANL,NANGLR,(LDWMXR(N),N=1,3),(ISTW(N),N=1,3)
@@ -302,13 +306,20 @@ Cmh   set maximum l-transfer
          READ(5, *)(ANGler(n), n = 1, NANglr)
       ELSE
          NANglr = -NANglr
-         DO na = 1 , NANglr
+         DO na = 1, NANglr
             ANGler(na) = Angle(na)
          ENDDO
       ENDIF
       DO j = 1, JLSmax
 Cmh      READ(5,*)LBTRF(J),NODF(J),KCFF(J),EGS(J),DZERO(J)
 Cmh      LBTRF must be negative for inelastic
+C        R.Capote, july 2001
+C        Formfactor is always selected to be the number (1) [LBTrf(j)=-1]
+C        which means 1st WS derivative, therefore no effort
+C        is done to calculate LBTrf(j) cases for j= -2,-3,-4,-5  !!!
+C        (see FFCAL)
+C        Compressional formfactor must not be used with DOMP !!!!
+C
          LBTrf(j) = -1
          NODf(j) = 1
          KCFf(j) = 1
@@ -334,12 +345,18 @@ Cmh         *          RZER(N),RZEWR(N),RZESR(N),RZESPR(N),RZECR(N)
 Cmh         TFAC=(TMASR(N)-2.*ZTR(N))/TMASR(N)
 Cmh         ZFAC=ZTR(N)/(TMASR(N)**.3333333333)
             e = ELAb
+C
+C		         This transformation is not consistent with REL KINEM (must be
+C           updated !!!)
             IF(n.NE.1)THEN
                ec = ELAb*TMAsr(1)/(TMAsr(1) + PMAsr(1)) - QVAlue(n)
                e = ec*(TMAsr(n) + PMAsr(n))/TMAsr(n)
             ENDIF
             nz = ZPR(n) + .1
             na = PMAsr(n) + .1
+C           Capote 10/2001
+            mi = PMAsr(n)
+            mt = TMAsr(n)
 C
 C------definition of NEJC (1,2,3,4 for n,p,alpha, light ion)
 C
@@ -347,10 +364,11 @@ C
             IF(na.EQ.1 .AND. nz.EQ.0)nejc = 1
             IF(na.EQ.1 .AND. nz.EQ.1)nejc = 2
             IF(na.EQ.2 .AND. nz.EQ.2)nejc = 3
-            CALL OPMPARN(Atar, Ztar, nejc, e, v, w, wd, vs, vi, av, aw, 
-     &                   ad, as, ai, rv, rw, RD, rs, ri, rc)
+            CALL OPMPARN(Atar, Ztar, nejc, e, v, dvs, w, wd, vs, vi, av, 
+     &                   aw, ad, as, ai, rv, rw, RD, rs, ri, rc, mi, mt)
             IF(KTRl(4).EQ.1)vs = 0.0
             VSXr(n) = v
+            DVXr(n) = dvs
             WSXr(n) = w
             WSFr(n) = wd
             VSOr(n) = vs
@@ -375,9 +393,11 @@ C
          IF(LBTrf(n).LT.0 .AND. NODf(n).NE.0)THEN
             nc = NODf(n)
             VSXf(n) = VSXr(nc)
+            DVXf(n) = DVXr(nc)
             WSXf(n) = WSXr(nc)
             WSFf(n) = WSFr(nc)
             VSOf(n) = VSOr(nc)
+            wsof(n) = WSOr(nc)
             DFNf(n) = DFNr(nc)
             DFNwf(n) = DFNwr(nc)
             DFNsf(n) = DFNsr(nc)
@@ -405,9 +425,10 @@ C
 99003       FORMAT(/21X, 'CHANNEL NO.', I1, 6X, 'TMAS=', F5.1, 2X, 
      &             'PMAS=', F5.1, 2X, 'ZT=', F5.1, '  ZP=', F5.1, 3X, 
      &             'LDWMX=', I2, 3X, 'ISTW=', I1/)
-            WRITE(6, 99014)VSXr(n), WSXr(n), WSFr(n), VSOr(n), DFNr(n), 
-     &                     DFNwr(n), DFNsr(n), DFNspr(n), RZEr(n), 
-     &                     RZEwr(n), RZEsr(n), RZEspr(n), RZEcr(n)
+            WRITE(6, 99014)VSXr(n), DVXr(n), WSXr(n), WSFr(n), VSOr(n), 
+     &                     WSOr(n), DFNr(n), DFNwr(n), DFNsr(n), 
+     &                     DFNspr(n), RZEr(n), RZEwr(n), RZEsr(n), 
+     &                     RZEspr(n), RZEcr(n)
          ENDDO
       ENDIF
       IF(Iout.GT.3)THEN
@@ -430,10 +451,11 @@ C
 99007       FORMAT(/21X, 'JLS=', I1/21X, 'NC=', I1, 2X, 'KDER=', I1, 2X, 
      &             'KCFF=', I1, 5X, 'BETA=', F7.4)
          ENDIF
-         IF(Iout.GT.3)WRITE(6, 99014)VSXf(n), WSXf(n), WSFf(n), VSOf(n), 
-     &                               DFNf(n), DFNwf(n), DFNsf(n), 
-     &                               DFNspf(n), RZEf(n), RZEwf(n), 
-     &                               RZEsf(n), RZEspf(n), RZEcf(n)
+         IF(Iout.GT.3)WRITE(6, 99014)VSXf(n), DVXf(n), WSXf(n), WSFf(n), 
+     &                               VSOf(n), wsof(n), DFNf(n), DFNwf(n)
+     &                               , DFNsf(n), DFNspf(n), RZEf(n), 
+     &                               RZEwf(n), RZEsf(n), RZEspf(n), 
+     &                               RZEcf(n)
       ENDDO
       IF(Iout.GT.3)WRITE(6, 99008)(i, i = 1, 28)
 99008 FORMAT(////7X, 28I4)
@@ -557,30 +579,31 @@ C-----write results to TAPE15
          ENDIF
          WRITE(15, *)(xwr2(n, nlr), n = 1, n2mx)
  100  ENDDO
-99014 FORMAT(21X, 'VSX,WSX,WSF,VSO', 18X, '=', 4F8.3/21X, 
+99014 FORMAT(21X, 'VSX,DVX,WSX,WSF,VSO,WSO', 18X, '=', 6F8.3/21X, 
      &       'DFN,DFNW,DFNS,DFNSP', 14X, '=', 4F8.3/21X, 
      &       'RZERO,RZEROW,RZEROS,RZROSP,RZEROC=', 5F8.3)
       END
-
-
-
-      SUBROUTINE OPMPARN(Atar, Ztar, Nejc, E, V, W, Wd, Vs, Vi, Av, Aw, 
-     &                   Ad, As, Ai, Rv, Rw, Rd, Rs, Ri, Rc)
+C
+      SUBROUTINE OPMPARN(Atar, Ztar, Nejc, E, V, Dvs, W, Wd, Vs, Vi, Av, 
+     &                   Aw, Ad, As, Ai, Rv, Rw, Rd, Rs, Ri, Rc, Mi, Mt)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C Dummy arguments
 C
       DOUBLE PRECISION Ad, Ai, As, Atar, Av, Aw, E, Rc, Rd, Ri, Rs, Rv, 
-     &                 Rw, V, Vi, Vs, W, Wd, Ztar
+     &                 Rw, V, Dvs, Vi, Vs, W, Wd, Ztar, Mi, Mt
+C
+      DOUBLE PRECISION RMU, ak2
+C
       INTEGER Nejc
-c
-c Local variables
-c
-      INTEGER iloc , izaf , nnuc
+C
+C Local variables
+C
+      INTEGER iloc, izaf, nnuc
       INTEGER INT
-c
-c
+C
+C
       izaf = Ztar*1000 + Atar
       CALL WHERE(izaf, nnuc, iloc)
       IF(iloc.EQ.1)THEN
@@ -595,7 +618,9 @@ C     Using settings for inelastic channel
 C
       komp = 29
       ko = 18
-      CALL OMPAR(Nejc, nnuc, E, komp, ko)
+C     CALL OMPAR(Nejc, nnuc, E, komp, ko)
+C     E is always in lab system => IKEY = -1
+      CALL OMPAR(Nejc, nnuc, E, eicms, Mi, Mt, RMU, ak2, komp, ko, -1)
       Rv = RVOm(1, Nejc, nnuc)
       Av = AVOm(Nejc, nnuc)
       Rw = RWOm(1, Nejc, nnuc)
@@ -606,10 +631,11 @@ C
       As = AVSo(Nejc, nnuc)
       Rc = RCOul(Nejc, nnuc)
       V = VOM(1, Nejc, nnuc)
+      Dvs = VOMs(1, Nejc, nnuc)
       W = WOMv(1, Nejc, nnuc)
       Wd = WOMs(1, Nejc, nnuc)
       Vs = VSO(1, Nejc, nnuc)
-C     Corrected by Capote, july 2001      
+C     Corrected by Capote, july 2001
 C     Vi = 0.0
 C     Ai = 1.0
 C     Ri = 1.0
@@ -617,9 +643,7 @@ C     Ri = 1.0
       Ri = Rs
       Ai = As
       END
-
-
-
+C
       SUBROUTINE CCCTRL(Iout)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -639,7 +663,7 @@ C
      &                 RZEsr(4), RZEwr(4), SGMaz, SGMazz(4), 
      &                 THEta(NGLXX), TMAsr(4), VSOr(4), VSXr(4), WN(4), 
      &                 WNIni(4), WNUnit, WSFr(4), WSXr(4), XBAr, XMAx, 
-     &                 XMEs
+     &                 XMEs, DVXr(4), DVXf(4)
       DOUBLE COMPLEX EXSgri(50, 3), TTI, TTR, ZERo
       INTEGER KEXcom(50), KTLout(50), KTRl(30), LDWmxr(4), LLRow(120), 
      &        LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NNDim(4), NXCple, 
@@ -655,6 +679,8 @@ C
      &                LTRamx, WNUnit, ETUnit, XMEs, ANGler, THEta, TTR, 
      &                TTI, ZERo, ELAb, ETA, XBAr, XMAx, SGMaz, RHOmx, 
      &                RD, LDWmxr
+C
+      COMMON /RSURF / DVXr, DVXf
 C
 C Dummy arguments
 C
@@ -791,9 +817,7 @@ CBF      MATCHING POINT IN MSTEP IS AT NXMAX-2
       CALL OMPOTEN
       REWIND 7
       END
-
-
-
+C
       SUBROUTINE FLGLCH
       IMPLICIT DOUBLE PRECISION(A - h), DOUBLE PRECISION(O - Z)
 C
@@ -1042,10 +1066,7 @@ C
       tra = trb
       GOTO 200
 99999 END
-
-
-
-
+C
       SUBROUTINE OMPOTEN
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -1066,7 +1087,7 @@ C
      &                 VCEntr(MAXX, 3), VCOulm(MAXX, 3), VSOr(4), 
      &                 VSPin(MAXX, 3), VSPini(MAXX, 3), VSXr(4), WN(4), 
      &                 WNIni(4), WNUnit, WSFr(4), WSOr(4), WSXr(4), 
-     &                 XBAr, XMAx, XMEs
+     &                 XBAr, XMAx, XMEs, DVXr(4), DVXf(4)
       INTEGER KEXcom(50), KTLout(50), KTRl(30), LDWmxr(4), LLRow(120), 
      &        LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NNDim(4), NXCple, 
      &        NXMax
@@ -1083,12 +1104,14 @@ C
      &                RD, LDWmxr
       COMMON /SOIMAG/ WSOr, DFNsir, RZEsir
 C
+      COMMON /RSURF / DVXr, DVXf
+C
 C Local variables
 C
       DOUBLE PRECISION charge, dfn, dfns, dfnsp, dfnspi, dfnw, dx, 
      &                 pform(3, 5), pmas, rzero, rzeroc, rzeros, rzerow, 
      &                 rzrosi, rzrosp, tmas, vclfc1, vclfc2, vso, vspfc, 
-     &                 vsx, wsf, wso, wspfc, wsx, x, xbarc, xbars, 
+     &                 vsx, wsf, wso, wspfc, wsx, x, xbarc, xbars, dvx, 
      &                 xbarsi, xbarsp, xbarw, xbfac, xmem(4000)
       INTEGER k, n, nx
 C
@@ -1097,6 +1120,7 @@ C     DOUBLE PRECISION XMEM(MAXX), PFORM(3,5)
 C
       DO n = 1, NCHanl
          vsx = VSXr(n)
+         dvx = DVXr(n)
          wsx = WSXr(n)
          wsf = WSFr(n)
          vso = VSOr(n)
@@ -1147,7 +1171,9 @@ C
                pform(2, k) = 1.0/(1.0 + pform(1, k))
                pform(3, k) = pform(1, k)*pform(2, k)*pform(2, k)
             ENDDO
-            VCEntr(nx, n) = -vsx*pform(2, 1)
+C           Dispersive real surface contribution added (- 4.0*dvx*pform(3, 3))
+C           Geometry parameters of imaginary surface potential (k=3) used
+            VCEntr(nx, n) = -vsx*pform(2, 1) - 4.0*dvx*pform(3, 3)
             VCEnti(nx, n) = ( - wsx*pform(2, 2)) - 4.0*wsf*pform(3, 3)
             VSPin(nx, n) = (vspfc*pform(3, 4))/x
             VSPini(nx, n) = (wspfc*pform(3, 5))/x
@@ -1170,10 +1196,8 @@ C
          ENDIF
       ENDDO
       END
-
-
-
-
+C
+C
       SUBROUTINE FFCAL
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -1195,7 +1219,7 @@ C
      &                 TMAsr(4), VINti(MAXX, 2), VINtr(MAXX, 2), VSOf(4)
      &                 , VSOr(4), VSXf(4), VSXr(4), WN(4), WNIni(4), 
      &                 WNUnit, WSFf(4), WSFr(4), WSXf(4), WSXr(4), XBAr, 
-     &                 XMAx, XMEs, ZPR(4), ZTR(4)
+     &                 XMAx, XMEs, ZPR(4), ZTR(4), DVXr(4), DVXf(4)
       INTEGER JLSmax, KCFf(4), KEXcom(50), KTLout(50), KTRl(30), 
      &        LBTrf(4), LDWmxr(4), LLRow(120), LMAx, LTRamx(4), MXRow, 
      &        NANglr, NCHanl, NNDim(4), NODf(4), NXCple, NXMax
@@ -1215,12 +1239,14 @@ C
      &                TTI, ZERo, ELAb, ETA, XBAr, XMAx, SGMaz, RHOmx, 
      &                RD, LDWmxr
 C
+      COMMON /RSURF / DVXr, DVXf
+C
 C Local variables
 C
       DOUBLE PRECISION dfn, dfns, dfnw, dx, dzr, exr, exs, exw, fehler, 
      &                 pmas, t1, t2, t3, t4, tmas, vfac1, vfac2, vsx, 
      &                 wdfc1, wfac1, wsf, wsx, x, xbars, xbarw, xbfac, 
-     &                 xmem(MAXX), xmest, z1, z2, zzp, zzt
+     &                 xmem(MAXX), xmest, z1, z2, zzp, zzt, dvx
       INTEGER i, iffpr, kder, n, n1, n2, nt, nx
 C
 C<<<<<<<<<<<<< variant A
@@ -1287,6 +1313,8 @@ CB       IF(LBTRF(N1).GE.0) GO TO 301
          ENDIF
          xbfac = tmas**0.33333333
          vsx = VSXf(n1)
+C        added dispersive real surface contribution
+         dvx = DVXf(n1)
          wsx = WSXf(n1)
          wsf = WSFf(n1)
          dfn = DFNf(n1)
@@ -1299,6 +1327,10 @@ CB       IF(LBTRF(N1).GE.0) GO TO 301
          vfac2 = vfac1*XBAr*0.5/dfn
          wfac1 = -wsx*xbarw/dfnw
          wdfc1 = -4.0*wsf*xbars/dfns
+C        added dvc1,dvc2 with imaginary surface geometry
+C        exactly equal to real case (vfac1 and vfac2)
+         dvc1 = -dvx*xbarw/dfnw
+         dvc2 = dvc1*xbarw*0.5/dfnw
          x = 0.0
          dx = xmest
          DO nx = 1, NXMax
@@ -1315,21 +1347,61 @@ C
 C
 C           Definition of FormFactors :
 C           FF for KDER=1,2,3,4,5,6:   (selected by LBTRF in input!)
-C           1st Derivative WS/Volume WS/2nd Derivative WS/modifed 2nd
-C           deriv./Volume and 1st deriv superimposed
+C           1:= 1st Derivative WS        (Dispersive contribution considered)
+C           2:= Volume WS                     (Dispersive contribution
+C           considered) 3:= 2nd Derivative WS        (Dispersive contribution
+C           considered) 4:= Modified 2nd deriv.
+C           5:= Volume and 1st deriv superimposed
 C
-            IF(kder.EQ.1)VINtr(nx, n1) = vfac1*exr/(1.0 + exr)**2
+C           1)  1st derivative of the real surface contribution ~ 2nd WS
+C           derivative H.Lenske gave the OK for the expression below (taken
+C           from kder=3 expression !!) It is assumed that formfactor cames from
+C           the 1st derivative of the full real potential therefore the first
+C           (old) term cames from the d/dx(VRvol), the second from d/dx(VRsurf)
+C           Imaginary surface geometry is used for the second (dispersive)
+C           contribution for obvious reason
+            IF(kder.EQ.1)VINtr(nx, n1) = vfac1*exr/(1.0 + exr)
+     &         **2 + dvc2*(exw - 1.0)*exw/(1.0 + exw)**3
+C
+C           2)  Real surface contribution is added to volume WS (full real
+C           contribution) H.Lenske gave the OK for the expression below (taken
+C           from kder=1 expression !!) It is assumed that formfactor is equal
+C           to the full real potential (volume + surface) Imaginary surface
+C           geometry is used for the second (dispersive) contribution for
+C           obvious reason
             IF(kder.EQ.2)VINtr(nx, n1) = vfac1/(1.0 + exr)
+     &         + dvc1*exw/(1.0 + exw)**2
+C
+C           Real surface contribution is not considered in this case
+C           (it must be proportional to the 3rd WS derivative)
+C           this formfactor is not used within EMPIRE
+C           (because only inelastic scattering is calculated with ORION, no
+C           transfer)
             IF(kder.EQ.3)VINtr(nx, n1) = vfac2*(exr - 1.0)
      &         *exr/(1.0 + exr)**3
+C
+C           Real surface contribution is not considered in this case
+C           this formfactor is not used within EMPIRE
+C           (because only inelastic scattering is calculated with ORION, no
+C           transfer)
             IF(kder.EQ.4)VINtr(nx, n1)
      &         = vfac1*exr*exw/((1.0 + exr)**2*(1. + exw))
+C
+C           Real surface contribution is not considered in this case
+C           this formfactor is not used within EMPIRE
+C           (because only inelastic scattering is calculated with ORION, no
+C           transfer)
             IF(kder.EQ.5)VINtr(nx, n1) = wfac1/(1. + exw)
      &         + wdfc1*exs/(1. + exs)**2
 C
 C           Monopole case (H. Lenske, Oct. 29, 1997):
 C
             IF(kder.EQ.6)THEN
+C
+C              Real surface contribution is not considered in this case
+C              This formfactor is not used within EMPIRE as long as
+C              compressional formfactor is not used !!!!!!!
+C
                VINtr(nx, n1) = -(3.0*vsx - x*(vsx/dfn)*exr/(1. + exr))
      &                         /(1. + exr)
                VINti(nx, n1) = ( - (3.0*wsx - x*(wsx/dfnw)*exw/(1.+exw))
@@ -1342,9 +1414,9 @@ C
             IF(KCFf(n1).NE.0)VINti(nx, n1) = wfac1*exw/(1.0 + exw)
      &         **2 + wdfc1*(exs - 1.0)*exs/(1.0 + exs)**3
  50      ENDDO
-cB
-cB       FOR TRANSFER REACTIONS THE MISSING PART MUST BE INSERTED HERE
-cB
+CB
+CB       FOR TRANSFER REACTIONS THE MISSING PART MUST BE INSERTED HERE
+CB
          dzr = DZEro(n1)
          DO nx = 1, NXMax
             VINtr(nx, n1) = VINtr(nx, n1)*dzr
@@ -1375,10 +1447,8 @@ C        CLOSE(30)
          ENDIF
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE HIBORN
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -1397,7 +1467,7 @@ C
      &                 SGMaz, SGMazz(4), THEta(NGLXX), TMAsr(4), 
      &                 VINti(MAXX, 2), VINtr(MAXX, 2), VSOr(4), VSXr(4), 
      &                 WN(4), WNIni(4), WNUnit, WSFr(4), WSXr(4), XBAr, 
-     &                 XMAx, XMEs, XSQiv(MAXX)
+     &                 XMAx, XMEs, XSQiv(MAXX), DVXr(4), DVXf(4)
       DOUBLE COMPLEX CFOrm(MAXX, 2), CMAt1(42, 61), CMAt2(42, 42, 61), 
      &               TTI, TTR, ZERo
       INTEGER ISTw(3), JJ, KEXcom(50), KTLout(50), KTRl(30), LDWmxr(4), 
@@ -1418,6 +1488,8 @@ C
      &                TTI, ZERo, ELAb, ETA, XBAr, XMAx, SGMaz, RHOmx, 
      &                RD, LDWmxr
       COMMON /SPIN  / ISTw, JJ
+C
+      COMMON /RSURF / DVXr, DVXf
 C
 C Local variables
 C
@@ -1488,7 +1560,7 @@ C
 C
 CB    FORMFACTOR MULTIPLIED BY 2*RMAS/HBAR**2 (=1/CFUNIR)
       x = 0.0
-      DO nx = 1 , NXMax
+      DO nx = 1, NXMax
          x = x + dx
          XSQiv(nx) = 1./(x*x)
          CFOrm(nx, 1) = DCMPLX(VINtr(nx, 1), VINti(nx, 1))/CFUnir(2)
@@ -1504,10 +1576,10 @@ CB    FORMFACTOR MULTIPLIED BY 2*RMAS/HBAR**2 (=1/CFUNIR)
       kheq = 0
       kieq = 1
       na = 0
-c
-c     LOOP OVER INCIDENT PARTIAL WAVES
-c
-      DO la = 0 , ldwmxa
+C
+C     LOOP OVER INCIDENT PARTIAL WAVES
+C
+      DO la = 0, ldwmxa
          ii1 = 1
          latw = la + la
          n1 = 0
@@ -1616,10 +1688,8 @@ C
      &       E13.5)
 C
       END
-
-
-
-
+C
+C
       SUBROUTINE MSTEP(Lptw, Jptw, Cmat, Ktype, Nch)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -1629,6 +1699,7 @@ C
       PARAMETER(MAXX = 4000, NGLXX = 100)
 C
 C COMMON variables
+C
 C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), CE(4), CFUnir(4), 
      &                 CHArgr(4), DFNr(4), DFNspr(4), DFNsr(4), DFNwr(4)
@@ -1640,7 +1711,8 @@ C
      &                 VCEnti(MAXX, 3), VCEntr(MAXX, 3), VCOulm(MAXX, 3)
      &                 , VSOr(4), VSPin(MAXX, 3), VSPini(MAXX, 3), 
      &                 VSXr(4), WN(4), WNIni(4), WNUnit, WSFr(4), 
-     &                 WSXr(4), XBAr, XMAx, XMEs, XSQiv(MAXX)
+     &                 WSXr(4), XBAr, XMAx, XMEs, XSQiv(MAXX), DVXr(4), 
+     &                 DVXf(4)
       DOUBLE COMPLEX CFH(0:MAXX, 3), CFI(0:MAXX, 3), CFOrm(MAXX, 2), 
      &               CSRc(0:MAXX, 2), CST(2, 3), EXSgri(50, 3), TTI, 
      &               TTR, ZERo
@@ -1654,15 +1726,17 @@ C
       COMMON /COUWF / EXSgri, FC, FDC, GC, GDC
       COMMON /NCONST/ H, HTWelv, HSQ
       COMMON /NCONSTI/ NRX
-      COMMON /OMPOT / VCEntr , VCEnti , VSPin , VCOulm , VSPini
-      COMMON /PARAMT/ NCHanl , MXRow , NXMax , NXCple , NANglr , LMAx , 
-     &                LTRamx , WNUnit , ETUnit , XMEs , ANGler , THEta , 
-     &                TTR , TTI , ZERo , ELAb , ETA , XBAr , XMAx , 
-     &                SGMaz , RHOmx , RD , LDWmxr
-      COMMON /WFST  / CFH , CFI , CSRc , CST
-c
-c Dummy arguments
-c
+      COMMON /OMPOT / VCEntr, VCEnti, VSPin, VCOulm, VSPini
+      COMMON /PARAMT/ NCHanl, MXRow, NXMax, NXCple, NANglr, LMAx, 
+     &                LTRamx, WNUnit, ETUnit, XMEs, ANGler, THEta, TTR, 
+     &                TTI, ZERo, ELAb, ETA, XBAr, XMAx, SGMaz, RHOmx, 
+     &                RD, LDWmxr
+      COMMON /WFST  / CFH, CFI, CSRc, CST
+C
+      COMMON /RSURF / DVXr, DVXf
+C
+C Dummy arguments
+C
       DOUBLE COMPLEX Cmat
       INTEGER Jptw, Ktype, Lptw, Nch
 C
@@ -1798,10 +1872,8 @@ C
          ENDIF
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE XSEC(Iout)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -1824,7 +1896,7 @@ C
      &                 SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4), U9, 
      &                 VSOr(4), VSXr(4), WN(4), WNIni(4), WNUnit, 
      &                 WR1(1000, 2), WR2(5000, 2), WSFr(4), WSXr(4), 
-     &                 XBAr, XMAx, XMEs
+     &                 XBAr, XMAx, XMEs, DVXf(4), DVXr(4)
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300, 4), ZERo
       INTEGER ISTw(3), ISTw1, ISTw2, ISTw3, J12mxt, J1Tw, J2Tw, JAS, 
      &        JBS, JCS, JJ, JLMitw, JLMxtw, JLRang, KASe, KEXcom(50), 
@@ -1851,6 +1923,8 @@ C
      &                RD, LDWmxr
       COMMON /RACFAC/ FAClog, RAC, U9
       COMMON /SPIN  / ISTw, JJ
+C
+      COMMON /RSURF / DVXr, DVXf
 C
 C Dummy arguments
 C
@@ -2059,11 +2133,11 @@ C
 C
 C-----MH commented the bolck below (June 2001)
 C     DO nlr = 1, 2
-C        IF(KASe.NE.2)THEN
-C           WRITE(12, *)(WR1(n, nlr), n = 1, n1wx)
-C           IF(NCHanl.EQ.2)GOTO 200
-C        ENDIF
-C        WRITE(12, *)(WR2(n, nlr), n = 1, n2mx)
+C     IF(KASe.NE.2)THEN
+C     WRITE(12, *)(WR1(n, nlr), n = 1, n1wx)
+C     IF(NCHanl.EQ.2)GOTO 200
+C     ENDIF
+C     WRITE(12, *)(WR2(n, nlr), n = 1, n2mx)
 C200  ENDDO
 C
 C
@@ -2084,12 +2158,12 @@ C
                wl = WR1(n1, 1)
                wr = WR1(n1, 2)
                wq(l1) = 0.5*(wl + wr)
-c--------------MH added protection against 0 (June 2001)               
-               IF(wl+wr .NE. 0) THEN 
+C--------------MH added protection against 0 (June 2001)
+               IF(wl + wr.NE.0)THEN
                   an(l1) = (wl - wr)/(wl + wr)
-               ELSE 
+               ELSE
                   an(l1) = 0.0
-               ENDIF 
+               ENDIF
             ENDDO
             WRITE(19, 99014)th, (wq(l1), l1 = 1, l1p1mx)
             WRITE(20, 99014)th, (an(l1), l1 = 1, l1p1mx)
@@ -2099,10 +2173,8 @@ c--------------MH added protection against 0 (June 2001)
 99013 FORMAT(7X, A1, I4, I5, 1X, 40E13.5)
 99014 FORMAT(F9.5, 8E12.4)
       END
-
-
-
-
+C
+C
       SUBROUTINE XSC12(Iout)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2367,34 +2439,34 @@ C1005             CONTINUE
       ENDDO
 C
 C     Output of Cross Sections
-C 
-      IF(Iout.GT.3) THEN
-      OPEN(3, FILE = 'xs.d', STATUS = 'unknown')
-      DO l1 = 0, L1Maxm
-         WRITE(6, 99003)l1, l1, (l2, l2 = 0, MIN(9, L2Maxm))
-99003    FORMAT(/' 1- and 2-step Cross Sections for L1:', I3/'   Theta', 
-     &          5X, 'L1:', I2, 9(7X, 'L2:', I2))
-         WRITE(3, 99004)l1, l1, (l2, l2 = 0, MIN(9, L2Maxm))
-99004    FORMAT('# 1- and 2-step Cross Sections for L1:', I3/'#  Theta', 
-     &          8X, 'L1:', I2, 9(10X, 'L2:', I2))
-         DO na = 1, NANglr
-            WRITE(6, 99005)ANGler(na), xsig1(l1, na), 
-     &                     (xsig2(l1, l2, na), l2 = 0, MIN(9, L2Maxm))
-99005       FORMAT(F8.3, 10E12.4)
-            WRITE(3, 99006)ANGler(na), xsig1(l1, na), 
-     &                     (xsig2(l1, l2, na), l2 = 0, MIN(9, L2Maxm))
-99006       FORMAT(F9.4, 10E15.7)
+C
+      IF(Iout.GT.3)THEN
+         OPEN(3, FILE = 'xs.d', STATUS = 'unknown')
+         DO l1 = 0, L1Maxm
+            WRITE(6, 99003)l1, l1, (l2, l2 = 0, MIN(9, L2Maxm))
+99003       FORMAT(/' 1- and 2-step Cross Sections for L1:', 
+     &             I3/'   Theta', 5X, 'L1:', I2, 9(7X, 'L2:', I2))
+            WRITE(3, 99004)l1, l1, (l2, l2 = 0, MIN(9, L2Maxm))
+99004       FORMAT('# 1- and 2-step Cross Sections for L1:', 
+     &             I3/'#  Theta', 8X, 'L1:', I2, 9(10X, 'L2:', I2))
+            DO na = 1, NANglr
+               WRITE(6, 99005)ANGler(na), xsig1(l1, na), 
+     &                        (xsig2(l1, l2, na), l2 = 0, MIN(9, L2Maxm)
+     &                        )
+99005          FORMAT(F8.3, 10E12.4)
+               WRITE(3, 99006)ANGler(na), xsig1(l1, na), 
+     &                        (xsig2(l1, l2, na), l2 = 0, MIN(9, L2Maxm)
+     &                        )
+99006          FORMAT(F9.4, 10E15.7)
+            ENDDO
+            WRITE(3, 99007)
+99007       FORMAT()
          ENDDO
-         WRITE(3, 99007)
-99007    FORMAT()
-      ENDDO
-      CLOSE(3)
+         CLOSE(3)
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE XSCABC
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2427,22 +2499,21 @@ C
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1, 
      &                CONst2
       COMMON /CLEBAB/ CLEbmm
-      COMMON /CMATR / CMAt1 , CMAt2
-      COMMON /PARAMT/ NCHanl , MXRow , NXMax , NXCple , NANglr , LMAx , 
-     &                LTRamx , WNUnit , ETUnit , XMEs , ANGler , THEta , 
-     &                TTR , TTI , ZERo , ELAb , ETA , XBAr , XMAx , 
-     &                SGMaz , RHOmx , RD , LDWmxr
-      COMMON /RACFAC/ FAClog , RAC , U9
-      COMMON /RACFACI/ IA , IB , IC , ID , IE , IG , L9
-c
-c Local variables
-c
-      DOUBLE PRECISION a1 , a2 , ab , b1 , b12sjc , b1b2 , b2 , c1 , 
-     &                 c2 , c3 , c5 , h12 , h1p , h2p , hatac1 , 
-     &                 hatbc2 , hatj1 , hatj2 , hatja , hatjb , hatjc , 
-     &                 hatl1 , hatl2 , hatla , hatlb , hatlc , s1 , 
-     &                 s1p , s2 , s2p , s5 , sga , sjc
-      DOUBLE COMPLEX ari , cmri , csum1 , eri
+      COMMON /CMATR / CMAt1, CMAt2
+      COMMON /PARAMT/ NCHanl, MXRow, NXMax, NXCple, NANglr, LMAx, 
+     &                LTRamx, WNUnit, ETUnit, XMEs, ANGler, THEta, TTR, 
+     &                TTI, ZERo, ELAb, ETA, XBAr, XMAx, SGMaz, RHOmx, 
+     &                RD, LDWmxr
+      COMMON /RACFAC/ FAClog, RAC, U9
+      COMMON /RACFACI/ IA, IB, IC, ID, IE, IG, L9
+C
+C Local variables
+C
+      DOUBLE PRECISION a1, a2, ab, b1, b12sjc, b1b2, b2, c1, c2, c3, c5, 
+     &                 h12, h1p, h2p, hatac1, hatbc2, hatj1, hatj2, 
+     &                 hatja, hatjb, hatjc, hatl1, hatl2, hatla, hatlb, 
+     &                 hatlc, s1, s1p, s2, s2p, s5, sga, sjc
+      DOUBLE COMPLEX ari, cmri, csum1, eri
       REAL FLOAT
       INTEGER IABS, MAX0, MIN0
       INTEGER ie1, ie1max, ie1min, ii, iimax, iimin, ja, jadpmx, jami, 
@@ -2801,17 +2872,15 @@ CB
          ENDDO
          IF(jamx.NE.jamx8)THEN
             jamxp1 = jamx + JAS
-            DO ja = jamxp1 , jamx8 , JAS
+            DO ja = jamxp1, jamx8, JAS
                jatw = 2*ja - 2 + ISTw1
                CALL CLEBRD(jatw, jbtw, J12mxt, kaspar, jtl)
             ENDDO
          ENDIF
  100  ENDDO
       END
-
-
-
-
+C
+C
       SUBROUTINE LEGNDR
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2845,7 +2914,7 @@ C
          mmax = MIN0(LCAltr, MMXtr) + 1
          IF(mmax.GE.3)THEN
             fm = 0.
-            DO m = 3 , mmax
+            DO m = 3, mmax
                fmp1 = fm + 1.
                PL(m) = ct*fmp1*PL(m - 1) - (fl - fm)*(fl + fmp1)
      &                 *PL(m - 2)
@@ -2857,14 +2926,12 @@ C
       k1 = MOD(LCAltr, 2)
       mmax = MMXtr + 1
       PL(1) = co**k1
-      DO m = 2 , mmax
+      DO m = 2, mmax
          PL(m) = 0.
       ENDDO
 99999 END
-
-
-
-
+C
+C
       SUBROUTINE CLEBSCH
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2966,10 +3033,8 @@ C
          ENDIF
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE CLEBRD(Jatw, Jbtw, J12mxt, Kasem2, Jtl)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2994,10 +3059,8 @@ C
          READ(8)(CLEbmm(n), n = 1, Jtl)
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE CLEBZ
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -3042,10 +3105,8 @@ C
          ENDIF
       ENDIF
       END
-
-
-
-
+C
+C
       SUBROUTINE RACHLF
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -3081,10 +3142,8 @@ C
       ENDIF
  100  RAC = s1*SQRT(fn/fd)
       END
-
-
-
-
+C
+C
       SUBROUTINE RACSIM(Racie)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -3168,7 +3227,7 @@ C
       f2 = i2
       f3 = i3 - 1
       f4 = i4 - 1
-      DO nezr = 2 , nezrag
+      DO nezr = 2, nezrag
          f1 = f1 - 1.
          f2 = f2 - 1.
          f3 = f3 + 1.
@@ -3193,7 +3252,7 @@ C
          f2 = ibdf
          f3 = 0.
          f4 = iabcd1
-         DO nz = 2 , nzp1x2
+         DO nz = 2, nzp1x2
             f1 = f1 - 1.
             f2 = f2 - 1.
             f3 = f3 + 1.
@@ -3202,23 +3261,21 @@ C
          ENDDO
       ENDIF
       IE = iemin - 2
-      DO ier = 1 , ierang
+      DO ier = 1, ierang
          IE = IE + 2
          nzmin = MAX0(0, iadftw - IE, ibcftw - IE)/2 + 1
          nzmax = MIN0((iabtw - IE)/2, (icdtw - IE)/2, nzp1x2 - 1) + 1
          ieloc = (IE - nezitw)/2
          sum = 0.
-         DO nz = nzmin , nzmax
+         DO nz = nzmin, nzmax
             nez = nz + ieloc
             sum = sum + t1fc(nez)*t2fc(nz)
          ENDDO
          Racie(ier) = dfccor(ier)*sum
       ENDDO
       END
-
-
-
-
+C
+C
       SUBROUTINE CLEBHF
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C

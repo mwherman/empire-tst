@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.2 $
-C $Id: ddhms.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+C CVS Version Management $Revision: 1.3 $
+C $Id: ddhms.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2041,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.2 $')
+99001 FORMAT('  ddhms version: $Revision: 1.3 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.2 2001-08-21 15:36:17 mike Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.3 2001-11-06 08:50:34 mike Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4588,7 +4588,7 @@ C-----to continuum
 C-----to discrte levels
       IF(IDNa(1, 5).EQ.1)CALL INTERMAT(DEBin/2, DEBin, DXSn, 
      &                                 NDIM_EBINS + 1, 0.0D0, DE, 
-     &                                 CSEhms(1, 1), NDECSE, 1,
+     &                                 CSEhms(1, 1), NDECSE, 1, 
      &                                 NEX(nnur)*DE, EMAx(nnur))
       DO ne = 1, NDECSE
          IF(ENDf.EQ.1)THEN
@@ -4748,212 +4748,219 @@ C-----transfer population of residual nuclei
 C
       DO jz = 0, Jzmax
          DO jn = 0, Jnmax
-            IF(jz.EQ.0 .AND. jn.EQ.0) THEN  ! 1-st CN
-               nucn = EX(NEX(1),1)/Debin 
-               IF(JMAxujspec(0,0,nucn).EQ.0) THEN 
-                  IF(JMAxujspec(0,0,nucn+1).GT.0) THEN
+            IF(jz.EQ.0 .AND. jn.EQ.0)THEN   ! 1-st CN
+               nucn = EX(NEX(1), 1)/DEBin
+               IF(JMAxujspec(0, 0, nucn).EQ.0)THEN
+                  IF(JMAxujspec(0, 0, nucn + 1).GT.0)THEN
                      nucn = nucn + 1
-                  ELSEIF(JMAxujspec(0,0,nucn-1).GT.0) THEN 
+                  ELSEIF(JMAxujspec(0, 0, nucn - 1).GT.0)THEN
                      nucn = nucn - 1
                   ELSE
-                     WRITE(6,*)' ' 
-                     WRITE(6,*)'Got lost! Can not find HMS ' 
-                     WRITE(6,*)'population of the 1-st CN. ' 
-                     WRITE(6,*)'Have searched bins ',nucn-1 
-                     WRITE(6,*)'through ',nucn+1,' but they' 
-                     WRITE(6,*)'seem to contain 0 cross section.' 
-                     WRITE(6,*)'I better STOP              ' 
+                     WRITE(6, *)' '
+                     WRITE(6, *)'Got lost! Can not find HMS '
+                     WRITE(6, *)'population of the 1-st CN. '
+                     WRITE(6, *)'Have searched bins ', nucn - 1
+                     WRITE(6, *)'through ', nucn + 1, ' but they'
+                     WRITE(6, *)'seem to contain 0 cross section.'
+                     WRITE(6, *)'I better STOP              '
                      STOP
                   ENDIF
-               ENDIF 
-               DO jsp = 0,JMAxujspec(0,0,nucn)  
-                  POP(NEX(1),jsp+1,1,1) = 0.5*UJSpec(0,0,nucn,jsp)
-                  POP(NEX(1),jsp+1,2,1) = 0.5*UJSpec(0,0,nucn,jsp)
-               ENDDO 
-               DO jsp = JMAxujspec(0,0,nucn)+1, NDLW-1  
-                  POP(NEX(1),jsp+1,1,1) = 0
-                  POP(NEX(1),jsp+1,2,1) = 0
-               ENDDO 
-               DO jsp = 0, NDLW-1  
-               ENDDO 
-               GOTO 50  
+               ENDIF
+               DO jsp = 0, JMAxujspec(0, 0, nucn)
+                  POP(NEX(1), jsp + 1, 1, 1)
+     &               = 0.5*UJSpec(0, 0, nucn, jsp)
+                  POP(NEX(1), jsp + 1, 2, 1)
+     &               = 0.5*UJSpec(0, 0, nucn, jsp)
+               ENDDO
+               DO jsp = JMAxujspec(0, 0, nucn) + 1, NDLW - 1
+                  POP(NEX(1), jsp + 1, 1, 1) = 0
+                  POP(NEX(1), jsp + 1, 2, 1) = 0
+               ENDDO
+               DO jsp = 0, NDLW - 1
+               ENDDO
+               GOTO 50
             ENDIF
             izar = IZA(1) - 1000*jz - (jn + jz)
             CALL WHERE(izar, nnur, iloc)
-            IF(iloc.EQ.1)GOTO 50  !ignore population of not considered nuclei
-            DO nu = 0, Numax
-               DO jsp = 0, JMAxujspec(jz, jn, nu)
-                  auxin(nu + 1, jsp + 1) = 0.5*UJSpec(jz, jn, nu, jsp)
+            IF(iloc.NE.1)THEN     !ignore population of not considered nuclei
+               DO nu = 0, Numax
+                  DO jsp = 0, JMAxujspec(jz, jn, nu)
+                     auxin(nu + 1, jsp + 1)
+     &                  = 0.5*UJSpec(jz, jn, nu, jsp)
+                  ENDDO
+                  DO jsp = JMAxujspec(jz, jn, nu) + 1, NDIM_JBINS
+                     auxin(nu + 1, jsp + 1) = 0.0
+                  ENDDO
                ENDDO
-               DO jsp = JMAxujspec(jz, jn, nu) + 1, NDIM_JBINS
-                  auxin(nu + 1, jsp + 1) = 0.0
+               DO nu = Numax + 1, NDIM_EBINS
+                  DO jsp = 0, NDIM_JBINS
+                     auxin(nu + 1, jsp + 1) = 0.0
+                  ENDDO
                ENDDO
-            ENDDO
-            DO nu = Numax + 1, NDIM_EBINS
-               DO jsp = 0, NDIM_JBINS
-                  auxin(nu + 1, jsp + 1) = 0.0
-               ENDDO
-            ENDDO
-            jmax = MIN(NDLW, NDIM_JBINS + 1)
+               jmax = MIN(NDLW, NDIM_JBINS + 1)
 C-----------test output
-C           WRITE(6,*)' '
-C           WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
-C           WRITE(6,*)' '
-C           DO nu = 0, numax
-C           WRITE(6,'(12G12.5)') (nu+0.5)*Debin,
-C           &                           (auxin(nu+1,jsp),jsp=1,11)
-C           ENDDO
-C           WRITE(6,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
-C           WRITE(6,*)'reqst range ',EX(1,nnur),EMAx(nnur)
+C              WRITE(6,*)' '
+C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
+C              WRITE(6,*)' '
+C              DO nu = 0, numax
+C              WRITE(6,'(12G12.5)') (nu+0.5)*Debin,
+C              &                           (auxin(nu+1,jsp),jsp=1,11)
+C              ENDDO
+C              WRITE(6,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
+C              WRITE(6,*)'reqst range ',EX(1,nnur),EMAx(nnur)
 C-----------test output *** done ***
 C-----------clean interpolation output matrix
-            DO nu = 1, NDEX
-               DO jsp = 0, NDIM_JBINS
-                  auxout(nu, jsp + 1) = 0.0
+               DO nu = 1, NDEX
+                  DO jsp = 0, NDIM_JBINS
+                     auxout(nu, jsp + 1) = 0.0
+                  ENDDO
                ENDDO
-            ENDDO
 C-----------population of continuum
-            CALL INTERMAT(DEBin/2, DEBin, auxin, NDIM_EBINS + 1, 
-     &                    EX(1, nnur), DE, auxout, NDEX, NDIM_JBINS + 1,
-     &                    EX(1, nnur), EMAx(nnur))
-            sumcon = 0.0
-            DO nu = 1, NEX(nnur)
-               DO jsp = 1, jmax
-                  IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.2)THEN
-                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
-     &                  + auxout(nu, jsp)
-                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
-     &                  + auxout(nu, jsp)
-                  ELSEIF(IDNa(4, 5).EQ.1 .AND. nnur.EQ.3)THEN
-                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
-     &                  + auxout(nu, jsp)
-                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
-     &                  + auxout(nu, jsp)
-                  ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
-                     POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
-     &                  + auxout(nu, jsp)
-                     POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
-     &                  + auxout(nu, jsp)
-                  ENDIF
-                  sumcon = sumcon + 2*auxout(nu, jsp)
-                  IF(nu.EQ.1 .OR. nu.EQ.NEX(nnur))sumcon = sumcon - 
-     &               auxout(nu, jsp)
+               CALL INTERMAT(DEBin/2, DEBin, auxin, NDIM_EBINS + 1, 
+     &                       EX(1, nnur), DE, auxout, NDEX, 
+     &                       NDIM_JBINS + 1, EX(1, nnur), EMAx(nnur))
+               sumcon = 0.0
+               DO nu = 1, NEX(nnur)
+                  DO jsp = 1, jmax
+                     IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.2)THEN
+                        POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                     + auxout(nu, jsp)
+                        POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                     + auxout(nu, jsp)
+                     ELSEIF(IDNa(4, 5).EQ.1 .AND. nnur.EQ.3)THEN
+                        POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                     + auxout(nu, jsp)
+                        POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                     + auxout(nu, jsp)
+                     ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+                        POP(nu, jsp, 1, nnur) = POP(nu, jsp, 1, nnur)
+     &                     + auxout(nu, jsp)
+                        POP(nu, jsp, 2, nnur) = POP(nu, jsp, 2, nnur)
+     &                     + auxout(nu, jsp)
+                     ENDIF
+                     sumcon = sumcon + 2*auxout(nu, jsp)
+                     IF(nu.EQ.1 .OR. nu.EQ.NEX(nnur))sumcon = sumcon - 
+     &                  auxout(nu, jsp)
+                  ENDDO
                ENDDO
-            ENDDO
-            sumcon = sumcon*DE
-c           WRITE(6, *)'continuum population = ', sumcon, ' mb'
-c           WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
-            IF(nnur.GT.3)THEN
-               IF(IDNa(2, 5).EQ.0)THEN
-                  WRITE(6, *)' '
-                  WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
-                  WRITE(6, *)'WARNING: HMS EMISSION OF NEUTRONS'
-                  WRITE(6, *)'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
-                  WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
-                  WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
-                  WRITE(6, *)' '
+               sumcon = sumcon*DE
+C              WRITE(6, *)'continuum population = ', sumcon, ' mb'
+C              WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
+               IF(nnur.GT.3)THEN
+                  IF(IDNa(2, 5).EQ.0)THEN
+                     WRITE(6, *)' '
+                     WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
+                     WRITE(6, *)'WARNING: HMS EMISSION OF NEUTRONS'
+                     WRITE(6, *)
+     &                         'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
+                     WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
+                     WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+                     WRITE(6, *)' '
+                  ENDIF
+                  IF(IDNa(4, 5).EQ.0)THEN
+                     WRITE(6, *)' '
+                     WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
+                     WRITE(6, *)'WARNING: HMS EMISSION OF PROTONS '
+                     WRITE(6, *)
+     &                         'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
+                     WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
+                     WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+                     WRITE(6, *)' '
+                  ENDIF
                ENDIF
-               IF(IDNa(4, 5).EQ.0)THEN
-                  WRITE(6, *)' '
-                  WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
-                  WRITE(6, *)'WARNING: HMS EMISSION OF PROTONS '
-                  WRITE(6, *)'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
-                  WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
-                  WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
-                  WRITE(6, *)' '
-               ENDIF
-            ENDIF
 C-----------test output
-C           WRITE(6,*)' '
-C           WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
-C           WRITE(6,*)' '
-C           DO nu = 1,NEX(nnur)+1
-C           WRITE(6,'(12G12.5)') EX(nu,nnur),
-C           &                           (POP(nu,jsp,1,nnur),jsp=1,11)
-C           ENDDO
+C              WRITE(6,*)' '
+C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
+C              WRITE(6,*)' '
+C              DO nu = 1,NEX(nnur)+1
+C              WRITE(6,'(12G12.5)') EX(nu,nnur),
+C              &                           (POP(nu,jsp,1,nnur),jsp=1,11)
+C              ENDDO
 C-----------test output *** done ***
 C-----------population of discrete levels (evenly distributed)
-            sumcon = (RESpop(jz, jn) - sumcon)/NLV(nnur)
-            IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.2)THEN
-               DO il = 1, NLV(nnur)
-                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
-               ENDDO
-            ELSEIF(IDNa(3, 5).EQ.1 .AND. nnur.EQ.3)THEN
-               DO il = 1, NLV(nnur)
-                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
-               ENDDO
-            ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
-               DO il = 1, NLV(nnur)
-                  POPlv(il, nnur) = POPlv(il, nnur) + sumcon
-               ENDDO
-            ENDIF
+               sumcon = (RESpop(jz, jn) - sumcon)/NLV(nnur)
+               IF(IDNa(1, 5).EQ.1 .AND. nnur.EQ.2)THEN
+                  DO il = 1, NLV(nnur)
+                     POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+                  ENDDO
+               ELSEIF(IDNa(3, 5).EQ.1 .AND. nnur.EQ.3)THEN
+                  DO il = 1, NLV(nnur)
+                     POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+                  ENDDO
+               ELSEIF(nnur.NE.2 .AND. nnur.NE.3)THEN
+                  DO il = 1, NLV(nnur)
+                     POPlv(il, nnur) = POPlv(il, nnur) + sumcon
+                  ENDDO
+               ENDIF
 C
 C-----------transfer excitation energy dependent recoil spectra
 C-----------(if ENDF=2 only)
 C
 C-----------clean auxiliary auxrec1 matrix
-            IF(ENDf.EQ.2)THEN
-               DO nu = 1, NDIM_EBINS + 1
-                  DO mrec = 1, NDIM_RECBINS + 1
-                     auxrec1(mrec, nu) = 0.0
+               IF(ENDf.EQ.2)THEN
+                  DO nu = 1, NDIM_EBINS + 1
+                     DO mrec = 1, NDIM_RECBINS + 1
+                        auxrec1(mrec, nu) = 0.0
+                     ENDDO
                   ENDDO
-               ENDDO
-               maxrecener = 0
+                  maxrecener = 0
 C--------------transfer HMS recoil spectra onto auxrec1
-               DO nu = 0, Numax
-                  DO mrec = 0, MAXerecspec(jz, jn, nu)
-                     auxrec1(mrec + 1, nu + 1)
-     &                  = RECspec(jz, jn, nu, mrec)
+                  DO nu = 0, Numax
+                     DO mrec = 0, MAXerecspec(jz, jn, nu)
+                        auxrec1(mrec + 1, nu + 1)
+     &                     = RECspec(jz, jn, nu, mrec)
+                     ENDDO
+                     IF(MAXerecspec(jz, jn, nu).GT.maxrecener)
+     &                  maxrecener = MAXerecspec(jz, jn, nu)
                   ENDDO
-                  IF(MAXerecspec(jz, jn, nu).GT.maxrecener)
-     &               maxrecener = MAXerecspec(jz, jn, nu)
-               ENDDO
 C--------------interpolate and transfer continuum part
-               CALL BINTERMAT(auxrec1, DEBinrec/2, DEBinrec, 
-     &                        NDIM_RECBINS + 1, DEBin/2, DEBin, 
-     &                        NDIM_EBINS + 1, RECcse(1, 1, nnur), zero, 
-     &                        DERec, NDEREC, EX(1, nnur), DE, NDEX, 
-     &                        zero, (maxrecener + 0.5)*DEBinrec, 
-     &                        EX(1, nnur), EMAx(nnur))
+                  CALL BINTERMAT(auxrec1, DEBinrec/2, DEBinrec, 
+     &                           NDIM_RECBINS + 1, DEBin/2, DEBin, 
+     &                           NDIM_EBINS + 1, RECcse(1, 1, nnur), 
+     &                           zero, DERec, NDEREC, EX(1, nnur), DE, 
+     &                           NDEX, zero, (maxrecener + 0.5)
+     &                           *DEBinrec, EX(1, nnur), EMAx(nnur))
 C--------------test printout
-c              WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur), 
-c    &                    'recoil population'
-c              WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
-c              WRITE(6, *)' '
-c              DO nu = 1, NEX(nnur)
-c                 WRITE(6, '(12G12.5)')EX(nu, nnur), 
-c    &                                 (RECcse(mrec, nu, nnur), 
-c    &                                 mrec = 1, 11)
-c              ENDDO
+C                 WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur),
+C                 &                    'recoil population'
+C                 WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
+C                 WRITE(6, *)' '
+C                 DO nu = 1, NEX(nnur)
+C                 WRITE(6, '(12G12.5)')EX(nu, nnur),
+C                 &                                 (RECcse(mrec, nu, nnur),
+C                 &                                 mrec = 1, 11)
+C                 ENDDO
 C--------------test printout *** done ***
 C--------------recoils to discrete levels
 C--------------sum HMS recoil spectra to discrete levels on the first row of auxrec1
-               ndiscmax = EX(1, nnur)/DEBin + 1.001
-               DO mrec = 1, maxrecener+1
-                  DO nu = 1, ndiscmax  
-                     IF(nu.EQ.1 .OR. nu.EQ.ndiscmax) THEN
-                        sumcon = 0.5*auxrec1(mrec, nu)
-                     ELSE 
-                        sumcon = auxrec1(mrec, nu)
-                     ENDIF 
-                     auxrec1(mrec, 1) = auxrec1(mrec, 1) + sumcon
-                  ENDDO 
-                  auxrec1(mrec, 1) = auxrec1(mrec, 1)*DEBin
-               ENDDO 
-C--------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)               
-               RECcse(1, 0, nnur) = RECcse(1, 0, nnur) + 2*auxrec1(1,1) 
-     &                              - auxrec1(2,1)
-               auxrec1(maxrecener+2,1) = 2*auxrec1(maxrecener+1,1) - 
-     &                                 auxrec1(maxrecener,1)
-               ndiscmax = (maxrecener+0.5)*DEBinrec/DERec + 1
-               DO mrec = 2, ndiscmax 
-                  xmre = (mrec - 1)*DERec/DEBinrec + 1.0001 
-                  mre = INT(xmre)
-                  RECcse(mrec, 0, nnur) = RECcse(mrec, 0, nnur) + 
-     &              auxrec1(mre,1) + (xmre-FLOAT(mre))*
-     &              (auxrec1(mre+1,1)-auxrec1(mre,1))
-               ENDDO 
- 
+                  ndiscmax = EX(1, nnur)/DEBin + 1.001
+                  DO mrec = 1, maxrecener + 1
+                     DO nu = 1, ndiscmax
+                        IF(nu.EQ.1 .OR. nu.EQ.ndiscmax)THEN
+                           sumcon = 0.5*auxrec1(mrec, nu)
+                        ELSE
+                           sumcon = auxrec1(mrec, nu)
+                        ENDIF
+                        auxrec1(mrec, 1) = auxrec1(mrec, 1) + sumcon
+                     ENDDO
+                     auxrec1(mrec, 1) = auxrec1(mrec, 1)*DEBin
+                  ENDDO
+C--------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)
+                  RECcse(1, 0, nnur) = RECcse(1, 0, nnur)
+     &                                 + 2*auxrec1(1, 1) - auxrec1(2, 1)
+                  auxrec1(maxrecener + 2, 1)
+     &               = 2*auxrec1(maxrecener + 1, 1)
+     &               - auxrec1(maxrecener, 1)
+                  ndiscmax = (maxrecener + 0.5)*DEBinrec/DERec + 1
+                  DO mrec = 2, ndiscmax
+                     xmre = (mrec - 1)*DERec/DEBinrec + 1.0001
+                     mre = INT(xmre)
+                     RECcse(mrec, 0, nnur) = RECcse(mrec, 0, nnur)
+     &                  + auxrec1(mre, 1) + (xmre - FLOAT(mre))
+     &                  *(auxrec1(mre + 1, 1) - auxrec1(mre, 1))
+                  ENDDO
+C
+               ENDIF
             ENDIF
  50      ENDDO  !over jn
       ENDDO !over jz

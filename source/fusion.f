@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: fusion.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: fusion.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -76,25 +76,10 @@ C
       REAL FLOAT
       INTEGER i, ichsp, ip, ipa, j, k, l, lmax, lmin, maxlw, mul
       INTEGER MIN0
-      DOUBLE PRECISION PAR, W2, xmas_npro, xmas_ntrg, rmu
+      DOUBLE PRECISION PAR, W2, xmas_npro, xmas_ntrg, RMU
       LOGICAL tlj_calc
       PAR(i, ipa, l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
       tlj_calc = .FALSE.
-C
-C-BER.W2=0.04784468   (OLD SCAT)
-C     W2=0.04784369   (NEA-DATA-BANK PRESCRIPTION )
-C     W2=0.047837/10  (EMPIRE) converting already to mb
-C     W2=0,04784467   (ECIS)
-C
-C     Changed to ECIS-OLD SCAT PRESCRIPTION (see main.f)
-C     CORRESPONDS TO THE FOLLOWING VALUES
-C     cm = amumev
-C     cm=931.5017646d0                                                  calc-088
-C     chb=197.328604d0                                                  calc-089
-C     W2=2.d0*cm/chb**2
-C
-C     Capote 2001
-C     wf = .0047837*AEJc(Npro)*A(Ntrg)*EIN/(AEJc(Npro) + A(Ntrg))
 C
 C     Reduced mass corrected for proper mass values
 C
@@ -103,9 +88,13 @@ C     xmas_Ntrg = ((A(Ntrg)*amumev+XMAss(Ntrg))/(amumev+xnexc))
 C     rmu= xmas_Npro*xmas_Ntrg/(xmas_Npro+xmas_Ntrg)
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-      rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
+C     rmu = xmas_npro*xmas_ntrg/(xmas_npro + xmas_ntrg)
+      el = EINl
+      CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
 C
-      wf = W2*EIN*rmu
+C     wf = W2*EIN*rmu
+C     wf = W2*ecms*rmu
+      wf = ak2/10.D0
 C
       coef = PI/wf/(2*XJLv(1, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
@@ -142,6 +131,7 @@ C-----and calculate transmission coefficients
 C-----calculation of o.m. transmission coefficients for absorption
       IF(KTRlom(Npro, Ntrg).GT.0)THEN
 C
+         einlab = -EINl
          IWArn = 0
 C
          IF(DIRect.EQ.2 .AND. AEJc(Npro).LE.1)THEN
@@ -153,9 +143,9 @@ C           is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C           Preparing INPUT and RUNNING ECIS
 C           (or reading already calculated file)
             IF(DEFormed)THEN
-               CALL ECIS_CCVIBROT(Npro, Ntrg, EIN, .TRUE.)
+               CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE.)
             ELSE
-               CALL ECIS_CCVIB(Npro, Ntrg, EIN, .TRUE.)
+               CALL ECIS_CCVIB(Npro, Ntrg, einlab, .TRUE.)
             ENDIF
             CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl)
             tlj_calc = .TRUE.
@@ -165,11 +155,11 @@ C
             WRITE(6, *)' Spherical OM transmission coefficients', 
      &                 ' used for fusion determination'
             IF(MODelecis.EQ.0 .OR. DIRect.EQ.3)THEN
-               CALL OMTL(Npro, Ntrg, EIN, maxlw, stl, 1)
+               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, 1)
             ELSE
                WRITE(6, *)' Fusion cross section normalized', 
      &                    ' to coupled channel reaction cross section'
-               CALL OMTL(Npro, Ntrg, EIN, maxlw, stl, 0)
+               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, 0)
             ENDIF
          ENDIF
 C        IWARN=0 - 'NO Warnings'
@@ -178,13 +168,13 @@ C        IWARN=2 - 'Z out of the recommended range '
 C        IWARN=3 - 'Energy requested lower than recommended for this potential'
 C        IWARN=4 - 'Energy requested higher than recommended for this potential'
          IF(IWArn.EQ.1)WRITE(6, *)
-     &                       ' RIPL warning: Not recommended OMP for A='
+     &                       ' WARNING: OMP not recommended for A='
      &                       , A(Ntrg)
          IF(IWArn.EQ.2)WRITE(6, *)
-     &                       ' RIPL warning: Not recommended OMP for Z='
+     &                       ' WARNING: OMP not recommended for Z='
      &                       , Z(Ntrg)
          IF(IWArn.EQ.3 .OR. IWArn.EQ.4)WRITE(6, *)
-     &      ' RIPL warning: Not recommended OMP for E=', EIN
+     &      ' WARNING: OMP not recommended for E=', EIN
          IWArn = 0
 C
          IF(maxlw.GT.NDLW)THEN

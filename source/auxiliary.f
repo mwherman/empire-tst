@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: auxiliary.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: auxiliary.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -1031,10 +1031,10 @@ C*    Backward sweep (x = U-1 p)
          X(ni) = F(ni) + A(3, ni)*X(ni + 1)
       ENDDO
       END
-
-
-
-            SUBROUTINE INTERMAT(Xi,Si,Yi,N,Xo,So,Yo,M,L,Emin,Emax)
+C
+C
+C
+      SUBROUTINE INTERMAT(Xi, Si, Yi, N, Xo, So, Yo, M, L, Emin, Emax)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:apu*
@@ -1086,93 +1086,95 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       IMPLICIT NONE
-      DOUBLE PRECISION Xi, Yi, Xo, Yo, Si, So, xis, 
-     &                 yiue, yiud, xint, Emin, Emax
-
-      INTEGER N, M, L, ii1, ii2, io1, io2, imin, imax
-
-      DIMENSION Yi(N,L), Yo(M,L)
-
-C-----Check ranges and steps   
-c     IF(Emin.LT.Xo) THEN
-      IF(Emin-Xo.LT.-0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'INTERMAT: Inconsistent request               ' 
-         WRITE(6,*)'INTERMAT: Lower limit point requested: ',Emin     
-         WRITE(6,*)'INTERMAT: is below the minimum:        ',Xo     
-         WRITE(6,*)'INTERMAT: Execution terminated'
+      DOUBLE PRECISION Xi, Yi, Xo, Yo, Si, So, xis, yiue, yiud, xint, 
+     &                 Emin, Emax
+C
+C     INTEGER N, M, L, ii1, ii2, io1, io2, imin, imax
+      INTEGER N, M, L, ii1, ii2, io1, imin, imax
+C
+      DIMENSION Yi(N, L), Yo(M, L)
+C
+C-----Check ranges and steps
+C     IF(Emin.LT.Xo) THEN
+      IF(Emin - Xo.LT. - 0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'INTERMAT: Inconsistent request               '
+         WRITE(6, *)'INTERMAT: Lower limit point requested: ', Emin
+         WRITE(6, *)'INTERMAT: is below the minimum:        ', Xo
+         WRITE(6, *)'INTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Emax-(Xo+(M-1)*So).GT.0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'INTERMAT: Inconsistent request               ' 
-         WRITE(6,*)'INTERMAT: Upper limit point requested: ',Emax     
-         WRITE(6,*)'INTERMAT: is above the maximum:        ',Xo+(M-1)*So
-         WRITE(6,*)'INTERMAT: Execution terminated'
+      ENDIF
+      IF(Emax - (Xo + (M-1)*So).GT.0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'INTERMAT: Inconsistent request               '
+         WRITE(6, *)'INTERMAT: Upper limit point requested: ', Emax
+         WRITE(6, *)'INTERMAT: is above the maximum:        ', 
+     &              Xo + (M - 1)*So
+         WRITE(6, *)'INTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Xi-Emin.GT.0.5*Si) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'INTERMAT: Lower limit point provided:  ',Xi     
-         WRITE(6,*)'INTERMAT: Lower limit point requested: ',Emin     
-         WRITE(6,*)'INTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'INTERMAT: Execution terminated'
+      ENDIF
+      IF(Xi - Emin.GT.0.5*Si)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'INTERMAT: Lower limit point provided:  ', Xi
+         WRITE(6, *)'INTERMAT: Lower limit point requested: ', Emin
+         WRITE(6, *)'INTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'INTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Emax-(Xi+(N-1)*Si).GT.0.5*Si) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'INTERMAT: Upper limit point requested: ',Emax
-         WRITE(6,*)'INTERMAT: Upper limit point  provided: ',Xi+(N-1)*Si
-         WRITE(6,*)'INTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'INTERMAT: Execution terminated'
+      ENDIF
+      IF(Emax - (Xi + (N-1)*Si).GT.0.5*Si)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'INTERMAT: Upper limit point requested: ', Emax
+         WRITE(6, *)'INTERMAT: Upper limit point  provided: ', 
+     &              Xi + (N - 1)*Si
+         WRITE(6, *)'INTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'INTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(So.LE.0 .OR. Si.LE.0) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'INTERMAT: Both X increments must be positive ' 
-         WRITE(6,*)'INTERMAT: Provided input  increment: ', Si
-         WRITE(6,*)'INTERMAT: Provided output increment: ', So
-         WRITE(6,*)'INTERMAT: Execution terminated'
+      ENDIF
+      IF(So.LE.0 .OR. Si.LE.0)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'INTERMAT: Both X increments must be positive '
+         WRITE(6, *)'INTERMAT: Provided input  increment: ', Si
+         WRITE(6, *)'INTERMAT: Provided output increment: ', So
+         WRITE(6, *)'INTERMAT: Execution terminated'
          STOP
-      ENDIF 
-C-----Start with the matrix      
+      ENDIF
+C-----Start with the matrix
       DO ii2 = 1, L   !take one column at a time
-C--------extrapolate to get just one point above the last         
-         yiue = 2*Yi(N,ii2) - Yi(N-1,ii2)
-         yiue = MAX(0.0D0,yiue)
-C--------extrapolate to get just one point blow the first         
-         yiud = 2*Yi(1,ii2) - Yi(2,ii2)
-         yiud = MAX(0.0D0,yiud)
+C--------extrapolate to get just one point above the last
+         yiue = 2*Yi(N, ii2) - Yi(N - 1, ii2)
+         yiue = MAX(0.0D0, yiue)
+C--------extrapolate to get just one point blow the first
+         yiud = 2*Yi(1, ii2) - Yi(2, ii2)
+         yiud = MAX(0.0D0, yiud)
 C--------define indices corresponding to the requested energy range
          imin = (Emin - Xo)/So + 1.01
          imax = (Emax - Xo)/So + 1.01
 C--------start intrpolation
          DO io1 = imin, imax
-            xis = ((Xo+(io1-1)*So) - Xi)/Si + 1 
+            xis = ((Xo + (io1-1)*So) - Xi)/Si + 1
             ii1 = INT(xis)
-            IF(N.EQ.1) THEN 
-               xint = Yi(1,ii2) 
-            ELSEIF(ii1.EQ.0) THEN 
-               xint = yiud + (Yi(1,ii2)-yiud)
-     &                      *(xis-FLOAT(ii1))
-            ELSEIF(ii1.EQ.N) THEN
-               xint = Yi(ii1,ii2) + (yiue-Yi(ii1,ii2))
-     &                       *(xis-FLOAT(ii1))
+            IF(N.EQ.1)THEN
+               xint = Yi(1, ii2)
+            ELSEIF(ii1.EQ.0)THEN
+               xint = yiud + (Yi(1, ii2) - yiud)*(xis - FLOAT(ii1))
+            ELSEIF(ii1.EQ.N)THEN
+               xint = Yi(ii1, ii2) + (yiue - Yi(ii1, ii2))
+     &                *(xis - FLOAT(ii1))
             ELSE
-               xint = Yi(ii1,ii2) + (Yi(ii1+1,ii2)-Yi(ii1,ii2))
-     &                       *(xis-FLOAT(ii1))
-            ENDIF 
-            IF(xint.LT.0) xint = 0
-            Yo(io1,ii2) = Yo(io1,ii2) + xint
-         ENDDO 
-      ENDDO 
-      RETURN
-      END 
-
-
-
-      SUBROUTINE BINTERMAT(Yi,Xi,Sxi,Nxi,Zi,Szi,Nzi,Yo,Xo,Sxo,Nxo,
-     &                     Zo,Szo,Nzo,Exmin,Exmax,Ezmin,Ezmax)
+               xint = Yi(ii1, ii2) + (Yi(ii1 + 1, ii2) - Yi(ii1, ii2))
+     &                *(xis - FLOAT(ii1))
+            ENDIF
+            IF(xint.LT.0)xint = 0
+            Yo(io1, ii2) = Yo(io1, ii2) + xint
+         ENDDO
+      ENDDO
+      END
+C
+C
+C
+      SUBROUTINE BINTERMAT(Yi, Xi, Sxi, Nxi, Zi, Szi, Nzi, Yo, Xo, Sxo, 
+     &                     Nxo, Zo, Szo, Nzo, Exmin, Exmax, Ezmin, 
+     &                     Ezmax)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:apu*
@@ -1210,11 +1212,11 @@ Ccc   *       Nxo  first dimension of the Yo array                       *
 Ccc   *       Zo   X value of the first element in the Yo array (2nd dim)*
 Ccc   *       Szo  step in the argument of the Yo array  (2nd dim)       *
 Ccc   *       Nzo  second dimension of the Yo array                      *
-Ccc   *       Exmin lower limit of energy range for interpolation        * 
+Ccc   *       Exmin lower limit of energy range for interpolation        *
 Ccc   *             (1st dim)                                            *
 Ccc   *       Exmax upper limit of energy range for interpolation        *
 Ccc   *             (1st dim)                                            *
-Ccc   *       Ezmin lower limit of energy range for interpolation        * 
+Ccc   *       Ezmin lower limit of energy range for interpolation        *
 Ccc   *             (2nd dim)                                            *
 Ccc   *       Ezmax upper limit of energy range for interpolation        *
 Ccc   *             (2nd dim)                                            *
@@ -1232,146 +1234,147 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       IMPLICIT NONE
-      DOUBLE PRECISION Yi,Xi,Sxi,Zi,Szi,Yo,Xo,Sxo,
-     &                 Zo,Szo,Exmin,Exmax,Ezmin,Ezmax,
-     &                 xis, zis, xint, t, u,
+      DOUBLE PRECISION Yi, Xi, Sxi, Zi, Szi, Yo, Xo, Sxo, Zo, Szo, 
+     &                 Exmin, Exmax, Ezmin, Ezmax, xis, zis, xint, t, u, 
      &                 fyi, f1, f2, f3, f4, summino
-
-      INTEGER Nxi, Nzi, Nxo, Nzo, ixo, izo, 
-     &        ixi, izi, ixmin, ixmax, izmin, izmax
-
-      DIMENSION Yi(Nxi,Nzi), Yo(Nxo,Nzo),fyi(0:Nxi+1,0:Nzi+1)
-
-C-----Check ranges and steps   
-      IF(Nxi.EQ.1 .OR. Nzi.Eq.1) THEN
-         WRITE(6,*)' DIMENSION EQUAL TO 1 IN BINTERMAT' 
+C
+      INTEGER Nxi, Nzi, Nxo, Nzo, ixo, izo, ixi, izi, ixmin, ixmax, 
+     &        izmin, izmax
+C
+      DIMENSION Yi(Nxi, Nzi), Yo(Nxo, Nzo), fyi(0:Nxi + 1, 0:Nzi + 1)
+C
+C-----Check ranges and steps
+      IF(Nxi.EQ.1 .OR. Nzi.EQ.1)THEN
+         WRITE(6, *)' DIMENSION EQUAL TO 1 IN BINTERMAT'
          STOP
-c        xint = Yi(1,izo) 
-      ENDIF 
-      IF(Exmin-Xo.LT.-0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Inconsistent request (1)           ' 
-         WRITE(6,*)'BINTERMAT: Lower limit point requested: ',Exmin     
-         WRITE(6,*)'BINTERMAT: is below the minimum:        ',Xo     
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+C        xint = Yi(1,izo)
+      ENDIF
+      IF(Exmin - Xo.LT. - 0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Inconsistent request (1)           '
+         WRITE(6, *)'BINTERMAT: Lower limit point requested: ', Exmin
+         WRITE(6, *)'BINTERMAT: is below the minimum:        ', Xo
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Exmax-(Xo+(Nxo-1)*Sxo).GT.0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Inconsistent request (2)           ' 
-         WRITE(6,*)'BINTERMAT: Upper limit point requested: ',Exmax     
-         WRITE(6,*)'BINTERMAT: is above the maximum:   ',Xo+( Nxo-1)*Sxo
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Exmax - (Xo + (Nxo-1)*Sxo).GT.0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Inconsistent request (2)           '
+         WRITE(6, *)'BINTERMAT: Upper limit point requested: ', Exmax
+         WRITE(6, *)'BINTERMAT: is above the maximum:   ', 
+     &              Xo + (Nxo - 1)*Sxo
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Xi-Exmin.GT.0.5*Sxi) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Lower X limit point provided:  ',Xi     
-         WRITE(6,*)'BINTERMAT: Lower X limit point requested: ',Exmin
-         WRITE(6,*)'BINTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Xi - Exmin.GT.0.5*Sxi)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Lower X limit point provided:  ', Xi
+         WRITE(6, *)'BINTERMAT: Lower X limit point requested: ', Exmin
+         WRITE(6, *)'BINTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Exmax-(Xi+(Nxi-1)*Sxi).GT.0.5*Sxi) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Upper X limit point requested: ',Exmax
-         WRITE(6,*)'BINTERMAT: Upper X limit point provided:',
-     &             Xi+(Nxi-1)*Sxi
-         WRITE(6,*)'BINTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Exmax - (Xi + (Nxi-1)*Sxi).GT.0.5*Sxi)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Upper X limit point requested: ', Exmax
+         WRITE(6, *)'BINTERMAT: Upper X limit point provided:', 
+     &              Xi + (Nxi - 1)*Sxi
+         WRITE(6, *)'BINTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Ezmin-Zo.LT.-0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Inconsistent request (3)           ' 
-         WRITE(6,*)'BINTERMAT: Lower limit point requested: ',Ezmin     
-         WRITE(6,*)'BINTERMAT: is below the minimum:        ',Zo     
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Ezmin - Zo.LT. - 0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Inconsistent request (3)           '
+         WRITE(6, *)'BINTERMAT: Lower limit point requested: ', Ezmin
+         WRITE(6, *)'BINTERMAT: is below the minimum:        ', Zo
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Ezmax-(Zo+(Nzo-1)*Szo).GT.0.0001) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Inconsistent request (4)           ' 
-         WRITE(6,*)'BINTERMAT: Upper limit point requested: ',Ezmax     
-         WRITE(6,*)'BINTERMAT: is above the maximum:    ',Zo+(Nzo-1)*Szi
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Ezmax - (Zo + (Nzo-1)*Szo).GT.0.0001)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Inconsistent request (4)           '
+         WRITE(6, *)'BINTERMAT: Upper limit point requested: ', Ezmax
+         WRITE(6, *)'BINTERMAT: is above the maximum:    ', 
+     &              Zo + (Nzo - 1)*Szi
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Zi-Ezmin.GT.0.5*Szi) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Lower Z limit point provided:  ',Zi     
-         WRITE(6,*)'BINTERMAT: Lower Z limit point requested: ',Ezmin   
-         WRITE(6,*)'BINTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Zi - Ezmin.GT.0.5*Szi)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Lower Z limit point provided:  ', Zi
+         WRITE(6, *)'BINTERMAT: Lower Z limit point requested: ', Ezmin
+         WRITE(6, *)'BINTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Ezmax-(Zi+(Nzi-1)*Szi).GT.0.5*Szi) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: Upper Z limit point requested: ',Ezmax
-         WRITE(6,*)'BINTERMAT: Upper Z limit point  provided:'
-     &              ,Zi+(Nzi-1)*Szi
-         WRITE(6,*)'BINTERMAT: I am instructed not to extrapolate ' 
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Ezmax - (Zi + (Nzi-1)*Szi).GT.0.5*Szi)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: Upper Z limit point requested: ', Ezmax
+         WRITE(6, *)'BINTERMAT: Upper Z limit point  provided:', 
+     &              Zi + (Nzi - 1)*Szi
+         WRITE(6, *)'BINTERMAT: I am instructed not to extrapolate '
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
-      IF(Sxo.LE.0 .OR. Sxi.LE.0 .OR. Szo.LE.0 .OR. Szi.LE.0) THEN
-         WRITE(6,*)' ' 
-         WRITE(6,*)'BINTERMAT: All increments must be positive ' 
-         WRITE(6,*)'BINTERMAT: Provided input  increments: ', Sxi,Szi
-         WRITE(6,*)'BINTERMAT: Provided output increments: ', Sxo,Szo
-         WRITE(6,*)'BINTERMAT: Execution terminated'
+      ENDIF
+      IF(Sxo.LE.0 .OR. Sxi.LE.0 .OR. Szo.LE.0 .OR. Szi.LE.0)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)'BINTERMAT: All increments must be positive '
+         WRITE(6, *)'BINTERMAT: Provided input  increments: ', Sxi, Szi
+         WRITE(6, *)'BINTERMAT: Provided output increments: ', Sxo, Szo
+         WRITE(6, *)'BINTERMAT: Execution terminated'
          STOP
-      ENDIF 
+      ENDIF
 C-----transfer input matrix onto  fyi (contains frame)
       DO ixi = 1, Nxi
          DO izi = 1, Nzi
-            fyi(ixi,izi) = Yi(ixi,izi)
-         ENDDO 
-      ENDDO 
+            fyi(ixi, izi) = Yi(ixi, izi)
+         ENDDO
+      ENDDO
 C-----define indices corresponding to the requested x range (1-st dim)
       ixmin = (Exmin - Xo)/Sxo + 1.01
       ixmax = (Exmax - Xo)/Sxo + 1.01
-      
+C
 C-----define indices corresponding to the requested z range (2-nd dim)
       izmin = (Ezmin - Zo)/Szo + 1.01
       izmax = (Ezmax - Zo)/Szo + 1.01
-C-----Fill frame of the fyi matrix 
-      DO izi = 1, Nzi   !over z (2-nd dimension)  
-C--------extrapolate to get one column to the left of Yi         
-         fyi(0,izi) = 2*Yi(1,izi) - Yi(2,izi)
-C--------extrapolate to get one column at the end of Yi         
-         fyi(Nxi+1,izi) = 2*Yi(Nxi,izi) - Yi(Nxi-1,izi)
+C-----Fill frame of the fyi matrix
+      DO izi = 1, Nzi   !over z (2-nd dimension)
+C--------extrapolate to get one column to the left of Yi
+         fyi(0, izi) = 2*Yi(1, izi) - Yi(2, izi)
+C--------extrapolate to get one column at the end of Yi
+         fyi(Nxi + 1, izi) = 2*Yi(Nxi, izi) - Yi(Nxi - 1, izi)
       ENDDO
-      DO ixi = 1, Nxi   !over x (1-st dimension)  
-C--------extrapolate to get one row on the top of Yi         
-         fyi(ixi,0) = 2*Yi(ixi,1) - Yi(ixi,1)
-C--------extrapolate to get one row at the bottom of Yi         
-         fyi(ixi,Nzi+1) = 2*Yi(ixi,Nzi) - Yi(ixi,Nzi-1)
+      DO ixi = 1, Nxi   !over x (1-st dimension)
+C--------extrapolate to get one row on the top of Yi
+         fyi(ixi, 0) = 2*Yi(ixi, 1) - Yi(ixi, 1)
+C--------extrapolate to get one row at the bottom of Yi
+         fyi(ixi, Nzi + 1) = 2*Yi(ixi, Nzi) - Yi(ixi, Nzi - 1)
       ENDDO
 C-----start intrpolation
-      summino=0
-      DO izo = izmin, izmax   !over z (2-nd dimension)  
+      summino = 0
+      DO izo = izmin, izmax   !over z (2-nd dimension)
          DO ixo = ixmin, ixmax   !over x (1-st dimension)
-C-----------localize four sorounding points             
-            xis = ((Xo+(ixo-1)*Sxo) - Xi)/Sxi + 1 
+C-----------localize four sorounding points
+            xis = ((Xo + (ixo-1)*Sxo) - Xi)/Sxi + 1
             ixi = INT(xis)
             t = xis - ixi
-            zis = ((Zo+(izo-1)*Szo) - Zi)/Szi + 1 
+            zis = ((Zo + (izo-1)*Szo) - Zi)/Szi + 1
             izi = INT(zis)
             u = zis - izi
-            f1 = fyi(ixi  ,izi  )
-            f2 = fyi(ixi+1,izi  )
-            f3 = fyi(ixi+1,izi+1)
-            f4 = fyi(ixi  ,izi+1)
-C-----------interpolate             
-            xint = (1-t)*(1-u)*f1 + t*(1-u)*f2 + t*u*f3 + (1-t)*u*f4
-            IF(xint.LT.0) xint = 0
-            Yo(ixo,izo) = Yo(ixo,izo) + xint
-            IF(izo.EQ.izmin .OR. izo.EQ.izmax) xint=xint/2.
-            IF(ixo.EQ.ixmin .OR. ixo.EQ.ixmax) xint=xint/2.
-            summino=summino+xint
-         ENDDO 
-      ENDDO 
-c     WRITE(6,*)'recoil to cont=',summino*Sxo*Szo 
-      RETURN
-      END 
+            f1 = fyi(ixi, izi)
+            f2 = fyi(ixi + 1, izi)
+            f3 = fyi(ixi + 1, izi + 1)
+            f4 = fyi(ixi, izi + 1)
+C-----------interpolate
+            xint = (1 - t)*(1 - u)*f1 + t*(1 - u)*f2 + t*u*f3 + (1 - t)
+     &             *u*f4
+            IF(xint.LT.0)xint = 0
+            Yo(ixo, izo) = Yo(ixo, izo) + xint
+            IF(izo.EQ.izmin .OR. izo.EQ.izmax)xint = xint/2.
+            IF(ixo.EQ.ixmin .OR. ixo.EQ.ixmax)xint = xint/2.
+            summino = summino + xint
+         ENDDO
+      ENDDO
+C     WRITE(6,*)'recoil to cont=',summino*Sxo*Szo
+      END

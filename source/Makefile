@@ -9,15 +9,13 @@ FC     = g77
 #----standard f77 FORTRAN compiler
 #FC	= f77
 #----Absoft f90 FORTRAN compiler
-#FC	= /usr/absoft/bin/f90
-#FFLAGS = -P
-#FFLAGS = -g -Rb
-#FFLAGS =  -Rb
+#FC	= f90
+#FFLAGS = -g
 #----Fujitsu f90 FORTRAN compiler
-#FC	= /usr/FFC/bin/f90
+#FC	= frt
 #----flags for Fujitsu f90 FORTRAN compiler
-#FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
+#FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g
 
 
 OBJF =	HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\

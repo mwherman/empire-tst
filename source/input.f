@@ -1,10 +1,8 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: input.f,v 1.3 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: input.f,v 1.4 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE INPUT
-C
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -168,22 +166,31 @@ C     Capote 2001
 C     Defining global physical and mathematical constants
 C     They are passed through CONSTANT common block
 C
-C     .W2=0.04784468   (OLD SCAT)
+C     W2=0.04784468   (OLD SCAT)
 C     W2=0.04784369   (NEA-DATA-BANK PRESCRIPTION )
 C     W2=0.047837/10  (EMPIRE) converting already to mb
-C     W2=0,04784467   (ECIS)
+C     W2=0.04784467   (ECIS)
 C
 C     Changed to ECIS-OLD SCAT PRESCRIPTION
 C     CORRESPOND TO THE FOLLOWING CONSTANT VALUES
-C     cm = amumev
-C     cm=931.5017646d0                                                  calc-088
-C     chb=197.328604d0                                                  calc-089
-C     W2=2.d0*cm/chb**2
-      AMUmev = 931.5017646D0
-      PI = 4.D0*DATAN(1.D0)
-C     already converted to mb
-      W2 = 0.04784467D0/10.D0
+C     AMUmev=931.5017646d0                                              calc-088
+C     hhbarc = 197.328604d0                                             calc-089
       XNExc = 8.071323D0
+C     From SCAT2000
+      ampipm = 1.395688D+02
+      ampi0 = 1.349645D+02
+      AMUmev = 9.3149386D+02
+      AMPi = (2.D0*ampipm + ampi0)/3.D0
+      ELE2 = 1.4399652D+00
+      HHBarc = 1.97327053D+02
+C
+C     already converted to mb
+C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
+      W2 = 2.D0*AMUmev/HHBarc**2/10.D0
+      CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
+      CSO = (HHBarc/AMPi)**2
+      PI = 4.D0*DATAN(1.D0)
+C
 C
       IF(EIN.EQ.0.0D0)THEN
 C-----
@@ -243,7 +250,7 @@ C--------fusion parameters
          DFUs = 1.
          FUSred = 1.
 C
-C--------Capote, additional input options related to ECIS
+C--------Capote, additional input options
 C
          DIRect = 0
          dirpot = 0
@@ -251,16 +258,11 @@ C
          CCCalc = .FALSE.
          IOMwritecc = 0
          MODelecis = 0
-C
-C--------Parameters for dispersive om potentials
-         EFErmi = -10.392D0
-         EANonl = 60.D0
-         AALpha = 1.65D0
-         EAVerp = -5.66D0
+C        Relativistic kinematics
+         RELkin = .FALSE.
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes)
-C
          IOPsys = 0
 C
 C--------CCFUF parameters
@@ -289,7 +291,7 @@ C--------IOUt=1 input data and essential results (all cross sections)
 C--------IOUt=2 as IOUt=1 plus fusion spin distribution, yrast state
 C--------       population, gamma-transition parameters, fusion barrier,
 C--------       inclusive spectra
-C--------IOUt=3 as IOUt=2 + gamma and particle spectra + disc. levels' decay
+C--------IOUt=3 as IOUt=2 + gamma and particle spectra + disc. levels decay
 C--------IOUt=4 as IOUt=2 + residual nuclei continuum population
 C--------       (up to spin 12)
 C--------IOUt=5 as IOUt=2 + transmission coefficients (up to l=12)
@@ -304,6 +306,7 @@ C--------
 C--------default input parameters for MSD
 C--------
          MSD = 0
+C        It must be off for DOM potential
          ICOmpff = 0  !compressional form factor off
 C        ICOmpff = 1  !compressional form factor on
 C--------
@@ -317,8 +320,6 @@ C--------set single particle level density parameter default in MSC as A/13.
 C--------NOUT controls output amount in MSC (valid range 0-4, higher the value
 C--------more printout)
          NOUt = 0
-C--------set ENDF flag to 0 (no ENDF file for formatting)
-         ENDf = 0.0
 C--------XNI initial exciton number (0 internal determination)
          XNI = 0.
          TORy = 4.
@@ -493,7 +494,6 @@ C--------
 C--------NNUCD number of decaying nuclei
 C--------NNUCT total number of nuclei considered
 C--------
-C--------
          NEJcm = NDEJC
          IF(aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0)NEJcm = 3
 C--------correct ejectiles symbols
@@ -626,17 +626,17 @@ C
          IF(LHRtw.NE.0 .AND. LTUrbo.NE.1)THEN
             LTUrbo = 1
             WRITE(6, *)' '
-            WRITE(6, *)'WARNING'
-            WRITE(6, *)'WARNING LTURBO>1 is incompatible ', 
-     &                 'WARNING with HRTW'
-            WRITE(6, *)'WARNING LTURBO HAS BEEN SET TO 1'
+            WRITE(6, *)'WARNING!!!'
+            WRITE(6, *)'WARNING!!!  LTURBO>1 is incompatible ', 
+     &                 'WARNING!!!  with HRTW'
+            WRITE(6, *)'WARNING!!!  LTURBO HAS BEEN SET TO 1'
             WRITE(6, *)' '
          ENDIF
          IF(DEGa.GT.0)GCAsc = 1.
          IF(MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)'WARNING Normally both MSD and MSC should'
-            WRITE(6, *)'WARNING be taken into account'
+            WRITE(6, *)' WARNING!!!! Normally both MSD and MSC should'
+            WRITE(6, *)' WARNING!!!! be taken into account'
             WRITE(6, *)' '
          ENDIF
 C--------setup model matrix (IDNa) defining which model is used where
@@ -650,73 +650,73 @@ C       5 gamma         x     x     x      x      x
 C
 C        with x=1 if used and x=0 if not.
 C--------initialize matrix with 0's
-         DO i = 1,NDREGIONS !over ejectiles/regions
-            DO j = 1,NDMODELS !over models in the order as above
-               IDNa(i,j) = 0
-            ENDDO 
-         ENDDO 
-C--------set ECIS (.,1)         
-         IF(DIRect.GT.0) THEN 
-            IF(NPRoject.EQ.1) THEN
-               IDNa(1,1) = 1
-            ELSEIF(NPRoject.EQ.2) THEN
-               IDNa(3,1) = 1
+         DO i = 1, NDREGIONS !over ejectiles/regions
+            DO j = 1, NDMODELS !over models in the order as above
+               IDNa(i, j) = 0
+            ENDDO
+         ENDDO
+C--------set ECIS (.,1)
+         IF(DIRect.GT.0)THEN
+            IF(NPRoject.EQ.1)THEN
+               IDNa(1, 1) = 1
+            ELSEIF(NPRoject.EQ.2)THEN
+               IDNa(3, 1) = 1
             ENDIF
-         ENDIF 
-C--------set MSD  (.,2) (discrete only if ECIS not used)         
-         IF(MSD.GT.0) THEN 
-            IF(NPRoject.EQ.1) THEN
-               IF(DIRect.EQ.0) IDNa(1,2) = 1
-               IDNa(2,2) = 1
-            ELSEIF(NPRoject.EQ.2) THEN
-               IF(DIRect.EQ.0) IDNa(3,2) = 1
-               IDNa(4,2) = 1
+         ENDIF
+C--------set MSD  (.,2) (discrete only if ECIS not used)
+         IF(MSD.GT.0)THEN
+            IF(NPRoject.EQ.1)THEN
+               IF(DIRect.EQ.0)IDNa(1, 2) = 1
+               IDNa(2, 2) = 1
+            ELSEIF(NPRoject.EQ.2)THEN
+               IF(DIRect.EQ.0)IDNa(3, 2) = 1
+               IDNa(4, 2) = 1
             ENDIF
-         ENDIF 
-C--------set MSC  (.,3) (note no discrete transitions in MSC) 
-         IF(MSC.GT.0) THEN 
-            IDNa(2,3) = 1
-            IDNa(4,3) = 1
-            IF(GST.GT.0) IDNa(5,3) = 1  
-C           stop MSC charge-exchange if DEGAS active 
-            IF(DEGa.GT.0 .OR. LHMs.GT.0) THEN 
-              IF(NPRoject.EQ.1) THEN
-                 IDNa(4,3) = 0
-              ELSEIF(NPRoject.EQ.2) THEN
-                 IDNa(2,3) = 0
-              ELSE
-                 WRITE(6,*)'' 
-                 WRITE(6,*)'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                 WRITE(6,*)'THIS CASE. EXECUTION S T O P P E D !!!! '
-                 STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD '
-              ENDIF
-            ENDIF 
-         ENDIF 
-C--------set DEGAS  (.,4) 
-         IF(DEGa.GT.0) THEN 
-            IDNa(1,4) = 1
-            IDNa(2,4) = 1
-            IDNa(3,4) = 1
-            IDNa(4,4) = 1
-            IDNa(5,4) = 1
-C           stop DEGAS gammas if calculated within MSC
-            IF(GST.GT.0 .AND. MSC.GT.0) IDNa(5,4) = 0  
-C           stop DEGAS inelastic scattering if MSC and/or MSD active
-            IF(MSC.GT.0 .OR. MSD.GT.0) THEN 
-              IF(NPRoject.EQ.2) THEN
-                 IDNa(3,4) = 0
-                 IDNa(4,4) = 0
-              ELSEIF(NPRoject.EQ.1) THEN
-                 IDNa(1,4) = 0
-                 IDNa(2,4) = 0
-              ELSE
-                 WRITE(6,*)'' 
-                 WRITE(6,*)'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                 WRITE(6,*)'THIS CASE. EXECUTION S T O P P E D !!!! '
-                 STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD'
-              ENDIF
-            ENDIF 
-C           stop DEGAS particle channels if HMS active
+         ENDIF
+C--------set MSC  (.,3) (note no discrete transitions in MSC)
+         IF(MSC.GT.0)THEN
+            IDNa(2, 3) = 1
+            IDNa(4, 3) = 1
+            IF(GST.GT.0)IDNa(5, 3) = 1
+C-----------stop MSC charge-exchange if DEGAS active
+            IF(DEGa.GT.0 .OR. LHMs.GT.0)THEN
+               IF(NPRoject.EQ.1)THEN
+                  IDNa(4, 3) = 0
+               ELSEIF(NPRoject.EQ.2)THEN
+                  IDNa(2, 3) = 0
+               ELSE
+                  WRITE(6, *)''
+                  WRITE(6, *)'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN '
+                  WRITE(6, *)'THIS CASE. EXECUTION S T O P P E D !!!! '
+                  STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD '
+               ENDIF
+            ENDIF
+         ENDIF
+C--------set DEGAS  (.,4)
+         IF(DEGa.GT.0)THEN
+            IDNa(1, 4) = 1
+            IDNa(2, 4) = 1
+            IDNa(3, 4) = 1
+            IDNa(4, 4) = 1
+            IDNa(5, 4) = 1
+C-----------stop DEGAS gammas if calculated within MSC
+            IF(GST.GT.0 .AND. MSC.GT.0)IDNa(5, 4) = 0
+C-----------stop DEGAS inelastic scattering if MSC and/or MSD active
+            IF(MSC.GT.0 .OR. MSD.GT.0)THEN
+               IF(NPRoject.EQ.2)THEN
+                  IDNa(3, 4) = 0
+                  IDNa(4, 4) = 0
+               ELSEIF(NPRoject.EQ.1)THEN
+                  IDNa(1, 4) = 0
+                  IDNa(2, 4) = 0
+               ELSE
+                  WRITE(6, *)''
+                  WRITE(6, *)'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN '
+                  WRITE(6, *)'THIS CASE. EXECUTION S T O P P E D !!!! '
+                  STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD'
+               ENDIF
+            ENDIF
+C-----------stop DEGAS particle channels if HMS active
             IF(LHMs.GT.0)THEN
                IDNa(1, 4) = 0
                IDNa(2, 4) = 0
@@ -730,7 +730,7 @@ C--------set HMS  (.,5)
             IDNa(2, 5) = 1
             IDNa(3, 5) = 1
             IDNa(4, 5) = 1
-C           stop HMS inelastic scattering if MSC and/or MSD active
+C-----------stop HMS inelastic scattering if MSC and/or MSD active
             IF(MSC.GT.0 .OR. MSD.GT.0)THEN
                IF(NPRoject.EQ.2)THEN
                   IDNa(3, 5) = 0
@@ -849,7 +849,6 @@ C-----set o.m.p. for the incident channel
             ENDIF
          ENDDO
       ENDIF
-C
       IF(KTRompcc.GT.0 .AND. DIRect.EQ.2)THEN
          KTRlom(0, 0) = KTRompcc
          KTRlom(NPRoject, NTArget) = KTRompcc
@@ -905,14 +904,18 @@ C-----set giant resonance parameters for CN
       GMRpar(6, nnuc) = 0.0
       GMRpar(7, nnuc) = 1.0
       GMRpar(8, nnuc) = 0.0
-      EINl = EIN
-      EIN = EIN*A(0)/A(1)
       IF(Q(0, 1).EQ.0.0D0)THEN
          CALL BNDG(0, 1, Q(0, 1))
 C        Capote 1/03/2001
 C        AMAss(0) = (A(0)*amumev + XMAss(0))/(amumev + xnexc)
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
+      xmas_inc = (AEJc(0)*AMUmev + XMAss_ej(0))/AMUmev
+      xmas_trg = (A(0)*AMUmev + XMAss(0))/AMUmev
+      EINl = EIN
+C     Capote 10/01
+      CALL KINEMA(EINl, EIN, xmas_inc, xmas_trg, RMU, ak2, 1, RELkin)
+C     EIN = EIN*A(0)/A(1)
       EXCn = EIN + Q(0, 1)
       EMAx(1) = EXCn
 C-----WRITE heading on FILE12
@@ -950,40 +953,40 @@ C-----WRITE heading on FILE6
          WRITE(6, '('' Projectile binding energy'',F8.3,'' MeV'')')
      &         Q(0, 1)
       ENDIF
-C
       IF(DIRect.GT.0)THEN
          IF(KTRompcc.GT.0)THEN
-C           Saving KTRlom(0,0) and RIPl_omp(0)
+C-----------Saving KTRlom(0,0) and RIPl_omp(0)
             itmp1 = KTRlom(0, 0)
             itmp2 = RIPl_omp(0)
             KTRlom(0, 0) = KTRompcc
             RIPl_omp(0) = RIPl_ompcc
          ENDIF
-C
          IF(DIRect.NE.2)CCCalc = .TRUE.
-C
-C        Coupled channel calculation of discrete level inelastic scattering
-C        NEJC=0 => projectile
-C        NNUC=0 => target
-C        EL = EINL => incident energy
-C        Calling interface subroutine to do ECIS call
+C--------  
+C--------Coupled channel calculation of discrete level inelastic scattering
+C--------NEJC=0 => projectile
+C--------NNUC=0 => target
+C--------EL = EINL => incident energy
+C--------Calling interface subroutine to do ECIS call
          IF(DEFormed)THEN
-            CALL ECIS_CCVIBROT(0, 0, EIN, .FALSE.)
+C           CALL ECIS_CCVIBROT(0, 0, EIN , .FALSE.)
+C           Capote 10/01
+            CALL ECIS_CCVIBROT(0, 0, -EINl, .FALSE.)
          ELSE
-            CALL ECIS_CCVIB(0, 0, EIN, .FALSE.)
+C           CALL ECIS_CCVIB(0, 0, EIN , .FALSE.)
+C           Capote 10/01
+            CALL ECIS_CCVIB(0, 0, -EINl, .FALSE.)
          ENDIF
-C
          IF(KTRompcc.GT.0)THEN
 C           Restoring KTRlom(0,0) and RIPl_omp(0)
             KTRlom(0, 0) = itmp1
             RIPl_omp(0) = itmp2
          ENDIF
-C
          IF(DIRect.NE.2)CCCalc = .FALSE.
-C
       ENDIF
 C
 C-----determination of excitation energy matrix in cn
+C
       ECUt(1) = ELV(NLV(1), 1)
       IF(FITlev.GT.0.0D0)ECUt(1) = 0.0
 C-----check whether any residue excitation is higher than CN
@@ -1164,8 +1167,6 @@ Cpr         >        AEJC(NEJC),' Z=',ZEJC(NEJC)
 Cpr         DO I=1,NETL
 Cpr         WRITE(6,*) I,ETL(I,NEJC,NNUR)
 Cpr         END DO
-C           Capote, 01/99, Place changed to have message printed
-C           before TLEVAL is called
 C-----------calculate tramsmission coefficients
             CALL TLEVAL(nejc, nnur, nonzero)
 C-----------print tramsmission coefficients
@@ -1235,8 +1236,6 @@ C
 C
 C
       SUBROUTINE LEVREAD(Nnuc)
-C
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ipu*
@@ -1273,12 +1272,15 @@ C
 C Local variables
 C
       CHARACTER*80 ch_iuf
+      CHARACTER*3 ctmp3
+      CHARACTER*5 chelem
+      CHARACTER*9 finp
       DOUBLE PRECISION dum, sum
-      REAL FLOAT
-      INTEGER ia, iar, ilv, iuf(2, NDBR), iz, izr, nbr, nlvr
-      INTEGER INT, MIN0
+      INTEGER ia, iar, ilv, iz, izr, nbr, nlvr
+      INTEGER INT, MIN
 C-----set ground state in case nucleus not in file
       NLV(Nnuc) = 1
+      NCOmp(Nnuc) = 1
       ELV(1, Nnuc) = 0.0
       LVP(1, Nnuc) = 1
       XJLv(1, Nnuc) = 0.0
@@ -1286,10 +1288,22 @@ C-----set ground state in case nucleus not in file
 C-----set ground state *** done ***
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
-      REWIND 13
- 100  READ(13, '(1X,I4,18X,2I3)', END = 200)nlvr, iar, izr
+      IF(.NOT.FILevel)THEN
+C--------constructing input and filenames
+         WRITE(ctmp3, '(I3.3)')iz
+         finp = 'Z'//'_'//ctmp3//'.DAT'
+         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+     &   ERR = 300)
+      ELSE
+         REWIND 13
+      ENDIF
+ 100  READ(13, '(A5,6I5,2f12.6)', END = 200)chelem, iar, izr, nlvr, 
+     &     ngamr, nmax, itmp2
+C-----nmax is a number of levels that constitute a complete scheme as 
+C-----estimated by Belgya for RIPL-2.
+C-----It is used, but I visual checking with FITLEV=2 is always recommended.
       IF(ia.NE.iar .OR. iz.NE.izr)THEN
-         DO ilv = 1, nlvr
+         DO ilv = 1, nlvr + ngamr
             READ(13, '(A1)')dum
          ENDDO
          GOTO 100
@@ -1297,61 +1311,108 @@ C-----set ground state *** done ***
 C--------create file with levels xxx.lev
          IF(.NOT.FILevel)THEN
             BACKSPACE(13)
-            READ(13, 99002)ch_iuf
-            WRITE(14, 99002)ch_iuf
-            DO ilv = 1, nlvr
-               READ(13, 99002)ch_iuf
-               WRITE(14, 99002)ch_iuf
-            ENDDO
-            DO ilv = 1, nlvr
-               BACKSPACE(13)
-            ENDDO
+            READ(13, '(A80)')ch_iuf
+            WRITE(14, '(A80)')ch_iuf
          ENDIF
-C--------levels for nucleus NNUC copied to file xxx.lev
-         IF(NLV(Nnuc).EQ.1 .AND. nlvr.GT.1)NLV(Nnuc) = nlvr
-         NLV(Nnuc) = MIN0(NDLV, NLV(Nnuc))
-         DO ilv = 1, NLV(Nnuc)
-C-----------clean IUF matrix
-            DO nbr = 1, NDBR
-               iuf(1, nbr) = 0
-               iuf(2, nbr) = 0
-            ENDDO
-            READ(13, 99001)LVP(ilv, Nnuc), ELV(ilv, Nnuc), 
-     &                     XJLv(ilv, Nnuc), 
-     &                     (iuf(1, nbr), iuf(2, nbr), nbr = 1, NDBR)
-99001       FORMAT(1X, I3, F8.3, 1X, F5.1, 14X, 11(I2, I2))
-C-----------next line sets parity to positive if unknown
-            IF(LVP(ilv, Nnuc).EQ.0)LVP(ilv, Nnuc) = 1
-            sum = 0.0
-            DO nbr = 1, NDBR
-               IBR(ilv, nbr, 1, Nnuc) = iuf(1, nbr)
-               IBR(ilv, nbr, 2, Nnuc) = iuf(2, nbr)
-               IF(IBR(ilv, nbr, 1, Nnuc).NE.0 .AND. 
-     &            IBR(ilv, nbr, 2, Nnuc).EQ.0)IBR(ilv, nbr, 2, Nnuc)
-     &            = 100
-               sum = sum + IBR(ilv, nbr, 2, Nnuc)
-            ENDDO
-            IF(sum.NE.100D0 .AND. sum.NE.0.0D0)THEN
-               sum = 100.0/sum
-               DO nbr = 1, NDBR
-                  IBR(ilv, nbr, 2, Nnuc)
-     &               = AINT(FLOAT(IBR(ilv,nbr,2,Nnuc))*sum + 0.5)
+         IF(nlvr.NE.0)THEN
+            IF(NLV(Nnuc).EQ.1 .AND. nmax.GT.1)NLV(Nnuc)
+     &         = MIN(NDLV, nmax)
+            IF(ENDf.NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc), 40) 
+            IF(nlvr.GT.NDLV)THEN
+C              WRITE(6, *)
+C              WRITE(6, '('' ELEMENT ='',A5,2x,2HZ=,I3)')chelem, izr
+C              WRITE(6, '('' TOO MANY DISCRETE LEVELS ='',I3)')nlvr
+C              WRITE(6, '('' MAXIMUM DIMENSION IN EMPIRE ='',I3)')NDLV
+C              WRITE(6, '('' SOME DISCRETE LEVELS WERE DISCARDED'')')
+C              WRITE(6, *)
+            ENDIF
+            IF(NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1)NCOmp(Nnuc)
+     &         = MIN(NDLV, nlvr)
+            IF(.NOT.FILevel)THEN
+               DO ilv = 1, nlvr + ngamr
+                  READ(13, '(A80)')ch_iuf
+                  WRITE(14, '(A80)')ch_iuf
+               ENDDO
+               DO ilv = 1, nlvr + ngamr
+                  BACKSPACE(13)
                ENDDO
             ENDIF
-         ENDDO
+C-----------levels for nucleus NNUC copied to file xxx.lev
+            DO ilv = 1, NLV(Nnuc)
+               READ(13, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')istart, 
+     &              ELV(ilv, Nnuc), XJLv(ilv, Nnuc), LVP(ilv, Nnuc), 
+     &              t12, ndbrlin
+               IF(ilv.NE.1)THEN
+                  IF(ELV(ilv, Nnuc).EQ.0.)THEN
+                     WRITE(6, *)
+                     WRITE(6, '('' ELEMENT ='',A5,2x,2HZ=,I3)')chelem, 
+     &                     izr
+                     WRITE(6, 
+     &             '('' EXCITED STATE '',I3,'' HAS ZERO EXCIT.ENERGY'')'
+     &             )ilv
+                  ENDIF
+                  IF(ELV(ilv, Nnuc).GT.15.)THEN
+                     WRITE(6, *)
+                     WRITE(6, '('' ELEMENT ='',A5,2x,2HZ=,I3)')chelem, 
+     &                     izr
+                     WRITE(6, 
+     &               '('' EXCITED STATE '',I3,'' HAS ENERGY > 15 MeV'')'
+     &               )ilv
+                  ENDIF
+                  IF(ndbrlin.GT.NDBR)THEN
+                     WRITE(6, *)
+                     WRITE(6, '('' ELEMENT ='',A5,2x,2HZ=,I3)')chelem, 
+     &                     izr
+                     WRITE(6, '('' TOO MANY GAMMA DECAYS ='',I3)')
+     &                     ndbrlin
+                     WRITE(6, '('' MAXIMUM DIMENSION IN EMPIRE ='',I3)')
+     &                     NDBR
+                     WRITE(6, '('' SOME DECAY GAMMAS WERE DISCARDED'')')
+                  ENDIF
+C----------------clean IUF matrix
+                  DO nbr = 1, NDBR
+                     BR(ilv, nbr, 1, Nnuc) = 0.
+                     BR(ilv, nbr, 2, Nnuc) = 0.
+                  ENDDO
+                  ndb = MIN(ndbrlin, NDBR)
+                  sum = 0.0
+                  isum = 0
+                  DO nbr = 1, ndb
+                     READ(13, '(39X,I4,1X,F10.3,3(1X,E10.3))')ifinal, 
+     &                    egamma, pgamma, pelm, picc
+C--------------------only gamma decay is considered up to now
+                     IF(pgamma.GT.0.)THEN
+                        sum = sum + pgamma
+                        isum = isum + 1
+                        BR(ilv, isum, 1, Nnuc) = ifinal
+                        BR(ilv, isum, 2, Nnuc) = pgamma
+                     ENDIF
+                  ENDDO
+                  IF(sum.NE.1.D0 .AND. sum.NE.0.D0)THEN
+                     sum = 1.D0/sum
+                     DO nbr = 1, isum
+                        BR(ilv, nbr, 2, Nnuc) = BR(ilv, nbr, 2, Nnuc)
+     &                     *sum
+                     ENDDO
+                  ENDIF
+               ENDIF
+            ENDDO
+         ENDIF
       ENDIF
+      IF(.NOT.FILevel)CLOSE(13)
       RETURN
  200  WRITE(6, 
-     &'('' LEVELS FOR NUCLEUS A='',I3,'' Z='',I3,'' NOT FOUND ON THE FIL
-     &E'')')ia, iz
-99002 FORMAT(A80)
+     &'('' LEVELS FOR NUCLEUS A='',I3,'' Z='',I3,'' NOT FOUND IN THE RIP
+     &L DATABASE'')')ia, iz
+      IF(.NOT.FILevel)CLOSE(13)
+      RETURN
+ 300  WRITE(6, '('' RIPL LEVELS DATABASE NOT FOUND '')')
+      IF(.NOT.FILevel)CLOSE(13)
       END
 C
 C
 C
       SUBROUTINE PRINPUT
-C
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -1383,7 +1444,6 @@ C
       INTEGER IFIX
       REAL SNGL
       WRITE(6, *)
-C
       WRITE(6, *)
       WRITE(6, 99008)
       WRITE(6, *)
@@ -1423,12 +1483,9 @@ C
      &                             FISb(1, i)
 99007    FORMAT(1X, I3, '-', A2, '-', I3, 4X, 10F12.3)
       ENDDO
-C
       WRITE(6, *)
-C
       IF(KTRompcc.GT.0 .AND. DIRect.GT.0 .AND. RIPl_ompcc)WRITE(6, *)
      &   ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-C
       IF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0)THEN
          IF(KTRompcc.EQ.1 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
      &      WRITE(6, *)' inelastic neutron OMP: Bjorklund-Fernbach 1958'
@@ -1446,7 +1503,6 @@ C
          IF(KTRompcc.EQ.7 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
      &      WRITE(6, *)' inelastic neutron OMP: Konshin 1988 '
       ENDIF
-C
       IF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.1)THEN
          IF(KTRompcc.EQ.1 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
      &      WRITE(6, *)' inelastic proton OMP: Bjorklund-Fernbach 1958'
@@ -1455,11 +1511,9 @@ C
          IF(KTRompcc.EQ.3 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
      &      WRITE(6, *)' inelastic proton OMP: Menet et al. 1971 '
       ENDIF
-C
       IF(RIPl_omp(1))WRITE(6, *)
      &                 ' neutron o. m. parameters: RIPL catalog number '
      &                 , KTRlom(1, 1)
-C
       IF(KTRlom(1, 1).EQ.1)WRITE(6, *)
      &              ' neutron o. m. parameters: Bjorklund-Fernbach 1958'
       IF(KTRlom(1, 1).EQ.2)WRITE(6, *)
@@ -1474,38 +1528,35 @@ C
      &                        ' neutron o. m. parameters: Rapaport 1979'
       IF(KTRlom(1, 1).EQ.7)WRITE(6, *)
      &                        ' neutron o. m. parameters: Konshin 1988 '
-C
       IF(RIPl_omp(2))WRITE(6, *)
      &                 ' proton  o. m. parameters: RIPL catalog number '
      &                 , KTRlom(2, 1)
-C
       IF(KTRlom(2, 1).EQ.1)WRITE(6, *)
      &              ' proton  o. m. parameters: Bjorklund-Fernbach 1958'
       IF(KTRlom(2, 1).EQ.2)WRITE(6, *)
      &             ' proton  o. m. parameters: Becchetti-Greenlees 1969'
       IF(KTRlom(2, 1).EQ.3)WRITE(6, *)
      &                   ' proton  o. m. parameters: Menet et al. 1971 '
-C
       IF(RIPl_omp(3))WRITE(6, *)
      &                 ' alpha   o. m. parameters: RIPL catalog number '
      &                 , KTRlom(3, 1)
       IF(KTRlom(3, 1).EQ.1)WRITE(6, *)
      &               ' alpha   o. m. parameters: Mc Fadden and Satchler'
-C
       WRITE(6, *)
 99008 FORMAT(10X, 'B i n d i n g    e n e r g i e s')
       END
 C
 C
-      SUBROUTINE PTLEVRE(Ia, Iz, Gspin, Gspar, E2p, E3m)
 C
+      SUBROUTINE PTLEVRE(Ia, Iz, Gspin, Gspar, E2p, E3m)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ipu*
 Ccc   *                      P T L E V R E                               *
 Ccc   *                                                                  *
 Ccc   *  Reads form the file 13 gorund state spin and parity and first   *
-Ccc   *  2+ and 3- levels' energies (the latter to be used by CCFUS)     *
+Ccc   *  2+ and 3- levels' energies (the latter to be used by CCFUS and  *
+Ccc   *  TRISTAN)                                                        *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * input:IA   - A of the nucleus                                    *
@@ -1537,47 +1588,61 @@ C
 C Local variables
 C
       CHARACTER*80 ch_iuf
+      CHARACTER*3 ctmp3
+      CHARACTER*5 chelem
+      CHARACTER*9 finp
       DOUBLE PRECISION dum, elvr, xjlvr
-      INTEGER iar, ilv, izr, lvpr, nlvr
-C
+      INTEGER iar, ilv, izr, nlvr, lvpr
       E2p = 0.0
       E3m = 0.0
-      REWIND 13
- 100  READ(13, '(1X,I4,18X,2I3)', END = 200)nlvr, iar, izr
+C-----constructing input and filenames
+      IF(.NOT.FILevel)THEN
+         WRITE(ctmp3, '(I3.3)')Iz
+         finp = 'Z'//'_'//ctmp3//'.DAT'
+         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+     &   ERR = 200)
+      ELSE
+         REWIND(13)
+      ENDIF
+ 100  READ(13, '(A5,6I5,2f12.6)', END = 200)chelem, iar, izr, nlvr, 
+     &     ngamr, nmax, itmp2
       IF(Ia.NE.iar .OR. Iz.NE.izr)THEN
-         DO ilv = 1, nlvr
+         DO ilv = 1, nlvr + ngamr
             READ(13, '(A1)')dum
          ENDDO
          GOTO 100
       ELSE
-C-----create file with levels xxx.lev
+C--------create file with levels xxx.lev
          IF(.NOT.FILevel)THEN
             BACKSPACE(13)
-            READ(13, 99002)ch_iuf
-            WRITE(14, 99002)ch_iuf
-            DO ilv = 1, nlvr
-               READ(13, 99002)ch_iuf
-               WRITE(14, 99002)ch_iuf
+            READ(13, '(A80)')ch_iuf
+            WRITE(14, '(A80)')ch_iuf
+            DO ilv = 1, nlvr + ngamr
+               READ(13, '(A80)')ch_iuf
+               WRITE(14, '(A80)')ch_iuf
             ENDDO
-            DO ilv = 1, nlvr
+            DO ilv = 1, nlvr + ngamr
                BACKSPACE(13)
             ENDDO
          ENDIF
 C--------levels for nucleus NNUC copied to file xxx.lev
          DO ilv = 1, nlvr
-            READ(13, 99001)lvpr, elvr, xjlvr
-99001       FORMAT(1X, I3, F8.3, 1X, F5.1)
+            READ(13, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')ilvr, elvr, 
+     &           xjlvr, lvpr, t12, ndbrlin
             IF(ilv.EQ.1)THEN
                Gspin = xjlvr
                Gspar = lvpr
             ENDIF
-            IF(E2p.EQ.0.0D0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)
-     &         E2p = elvr
-            IF(E3m.EQ.0.0D0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.( - 1))
-     &         E3m = elvr
-            IF(E3m.NE.0.0D0 .AND. E2p.NE.0.0D0)RETURN
+C-----------skipping levels with unknown spin or parity
+            IF(ilv.LE.nmax)THEN
+               IF(E2p.EQ.0.0D0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)
+     &            E2p = elvr
+               IF(E3m.EQ.0.0D0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.( - 1))
+     &            E3m = elvr
+            ENDIF
          ENDDO
       ENDIF
+      IF(.NOT.FILevel)CLOSE(13)
       RETURN
  200  Gspin = 0.
       IF(Ia.NE.2*(Ia/2))Gspin = 0.5
@@ -1588,8 +1653,10 @@ C--------levels for nucleus NNUC copied to file xxx.lev
       WRITE(6, 
      & '('' JUST TO BE SURE I SET G.S. PARITY TO + AND SPIN TO:'',F5.1)'
      & )Gspin
-99002 FORMAT(A80)
+      IF(.NOT.FILevel)CLOSE(13)
       END
+C
+C
 C
       SUBROUTINE PTLEVSET(Ar, Zr, Gspin, Gspar, E2p, E3m)
 Ccc
@@ -1598,7 +1665,7 @@ Ccc   *                                                         class:ipu*
 Ccc   *                      P T L E V S E T                             *
 Ccc   *                                                                  *
 Ccc   *  Sets ground state spin and parity and first 2+ and 3- levels'   *
-Ccc   *  energies (the latter to be used by CCFUS). For even-even nuclei *
+Ccc   *  energies (latter for CCFUS and TRISTAN). For even-even nuclei   *
 Ccc   *  just calls PTLEVRE. For other calls PTLEVRE for neighbouring    *
 Ccc   *  nuclei and take average for 2+ and 3- energies.                 *
 Ccc   *                                                                  *
@@ -1632,7 +1699,6 @@ C
       REAL FLOAT
       INTEGER ia, ium2, iz, izcor, n, ncor
       INTEGER INT
-C
       ia = INT(Ar)
       iz = INT(Zr)
       n = ia - iz
@@ -1711,7 +1777,6 @@ C
       INTEGER INT
       CHARACTER*6 name
       DOUBLE PRECISION val
-C
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -1725,7 +1790,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |    E M P I R E  -  2.16.2  |'
+      WRITE(6, *)'                       |    E M P I R E  -  2.16.3  |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |        (Montenotte)        |'
       WRITE(6, *)'                       |                            |'
@@ -1745,6 +1810,11 @@ C-----initialization of TRISTAN input parameters  *** done ***
          BACKSPACE(5)
          READ(5, '(A6,G10.5,4I5)')name, val, i1, i2, i3, i4
          IF(name.EQ.'GO    ')THEN
+C           IF(DOMP) THEN
+C           WRITE(6, *)'Dispersive optical model is used'
+C           Compressional form-factor is set off
+C           ICOmpff = 0
+C           ENDIF
             WRITE(6, *)' '
             IF(OMParf .OR. OMPar_riplf .OR. OMParfcc)THEN
                WRITE(6, *)'Existing, case specific, o.m.p. files: '
@@ -1759,16 +1829,12 @@ C-----initialization of TRISTAN input parameters  *** done ***
             IF(OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3))WRITE(6, 
      &'('' Input file OMPAR.DIR with optical model'',                   
      &'' parameters to be used by ECIS '')')
-C
-C
-C
-C
-C
-            IF(DIRect.EQ.0 .AND. KTRompcc.NE.0)WRITE(6, '(1X,/,
-     &'' WARNING: NO DIRECT CALCULATIONS HAVE BEEN SELECTED'',/, 
-     &'' WARNING: BUT DIRPOT KEYWORD IS SPECIFIED.'',/,             
-     &'' WARNING: SET DIRECT KEYWORD IN THE INPUT FILE TO A NONZERO'',/,
-     &'' WARNING: VALUE IF YOU WANT TO INCLUDE DIRECT CONTRIBUTION.'')')
+            IF(DIRect.EQ.0 .AND. KTRompcc.NE.0)WRITE(6, 
+     &'(1X,/,         '' WARNING: NO DIRECT CALCULATIONS HAVE BEEN SELEC
+     &TED'',/,        '' WARNING: BUT DIRPOT KEYWORD IS SPECIFIED.'',/, 
+     &                '' WARNING: SET DIRECT KEYWORD IN THE INPUT FILE T
+     &O A NONZERO'',/,'' WARNING: VALUE IF YOU WANT TO INCLUDE DIRECT CO
+     &NTRIBUTION.'')')
             WRITE(6, *)' '
             RETURN
          ENDIF
@@ -1796,17 +1862,16 @@ C--------DEGAS input
 C
 C--------ECIS input
 C
-C        In the following block two parameters
-C        are defined, KTRompCC and RIPL_ompCC
-C        DIRECT is set to 1 if equal zero to allow for ECIS calc.
+C--------In the following block two parameters
+C--------are defined, KTRompCC and RIPL_ompCC
+C--------DIRECT is set to 1 if equal zero to allow for ECIS calc.
 C
          IF(name.EQ.'DIRPOT')THEN
             RIPl_ompcc = .FALSE.
-C
             IF(val.LT.0)THEN
                ki = 26
                ipoten = -INT(val)
-C              Searching in the RIPL database for i1 catalog number
+C--------------searching in the RIPL database for i1 catalog number
                CALL FINDPOT(ki, ieof, ipoten)
                IF(ieof.EQ.0)THEN
                   RIPl_ompcc = .TRUE.
@@ -1818,60 +1883,39 @@ C                 &       'RIPL OMP will be used for inelastic channel '
      &                       ' not found, using default '
                   GOTO 100
                ENDIF
-C
             ENDIF
-C
             WRITE(6, 
      &'('' Optical model parameters for ECIS calculation set to '',I4   
      &)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
          ENDIF
-C
          IF(name.EQ.'DIRECT')THEN
             DIRect = val
             IF(DIRect.EQ.3)WRITE(6, 
-     &   '('' ECIS (DWBA method) will be used for direct scattering'')')
+     &    '('' ECIS (DWBA method) will be used for direct scattering'')'
+     &    )
             IF(DIRect.EQ.1)WRITE(6, 
-     &   '('' ECIS (CC method) will be used for direct scattering'')')
+     &      '('' ECIS (CC method) will be used for direct scattering'')'
+     &      )
             IF(DIRect.EQ.2)WRITE(6, 
-     &   '('' ECIS (CC method) will be used for direct scattering and ''
-     &   ,''Tl`s in the inelastic channel'')')
+     &'('' ECIS (CC method) will be used for direct scattering and ''   
+     &,''Tl`s in the inelastic channel'')')
             GOTO 100
          ENDIF
 C
 C--------ECIS input  *** done ***
 C
-C--------To be used by dispersive om potentials, Capote july 2001
-C
-         IF(name.EQ.'EFERMI')THEN
-            EFErmi = val
-            WRITE(6, '(1x,A36,F9.4,A4)')'Fermi Energy = ', val, ' MeV'
+         IF(name.EQ.'RELKIN')THEN
+            IF(val.NE.0.)THEN
+               RELkin = .TRUE.
+               WRITE(6, '(1x,A)')'Relativistic kinematics will be used'
+            ELSE
+               WRITE(6, '(1x,A)')
+     &                        'Non-relativistic kinematics will be used'
+            ENDIF
             GOTO 100
          ENDIF
-C
-         IF(name.EQ.'EAVERP')THEN
-            EAVerp = val
-            WRITE(6, '(1x,A36,F9.4,A4)')
-     &          'Average energy of particle states = ', val,' MeV' 
-            GOTO 100
-         ENDIF
-C
-         IF(name.EQ.'EANONL')THEN
-            EANonl=val
-            WRITE(6, '(1x,A36,F9.4,A18)')  
-     &      'Threshold energy for nonlocality = ', val,
-     &      ' MeV (DEF: 60 MeV)'
-            GOTO 100
-         ENDIF
-C
-         IF(name.EQ.'ALPHA ')THEN
-            AALpha = val
-            WRITE(6, '(1x,A36,F9.4,A12)')
-     &            'Mahaux nonlocality parameter = ', val, ' (DEF: 1.65)'
-            GOTO 100
-         ENDIF
-C--------dispersive om potentials  *** done ***
          IF(name.EQ.'BFUS  ')THEN
             BFUs = val
             WRITE(6, '('' Fusion barrier set to '',F7.2,'' MeV'')')BFUs
@@ -1953,7 +1997,8 @@ C-----
      &          '('' Level densities with  dynamic effects selected '')'
      &          )
             IF(ADIv.EQ.1.0D0)WRITE(6, 
-     &  '('' ROCOL level densities with fitted parameters selected '')')
+     &   '('' ROCOL level densities with fitted parameters selected '')'
+     &   )
             IF(ADIv.GT.2.0D0)WRITE(6, 
      &     '('' ROCOL level densities with a=A/''  ,F5.2,'' selected'')'
      &     )ADIv
@@ -2239,7 +2284,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'NHMS  ')THEN
+         IF(name.EQ.'NHMs  ')THEN
             IF(val.GT.100.0D0)THEN
                NHMs = val
                WRITE(6, '('' Number of events in HMS set to '',I10)')
@@ -2248,7 +2293,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF(name.EQ.'CHMS  ')THEN
+         IF(name.EQ.'CHMs  ')THEN
             IF(val.GT.0.0D0)THEN
                CHMs = val
                WRITE(6, 
@@ -2366,6 +2411,12 @@ C-----
             IF(ENDf.NE.0.0D0)WRITE(6, 
      &           '('' Output for the ENDF formatting will be created'')'
      &           )
+            IF(ENDf.EQ.1.0D0)WRITE(6, 
+     &           '('' using exclusive representation (ENDF=1) - good at 
+     &low energies (up to (n,3n) threshold)'')')
+            IF(ENDf.EQ.2.0D0)WRITE(6, 
+     &           '('' using inclusive representation (ENDF=2) - good at 
+     &all energies'')')
             GOTO 100
          ENDIF
 C-----
@@ -2377,11 +2428,11 @@ C-----
                WRITE(6, '('' OPTICAL MODEL  SETTING IGNORED'')')
                GOTO 100
             ENDIF
-C
+C-----
             IF(val.LT.0)THEN
                ki = 26
                ipoten = -INT(val)
-C              Searching in the RIPL database for i1 catalog number
+C--------------Searching in the RIPL database for i1 catalog number
                CALL FINDPOT(ki, ieof, ipoten)
                IF(ieof.EQ.0)THEN
                   RIPl_omp(i1) = .TRUE.
@@ -2406,7 +2457,7 @@ C                 WRITE(6, *)'RIPL OMP will be used for ejectile ', i1
      &'('' (will be used if not overwritten in the OMPAR.INT file)'')   
      &')
             ENDIF
-C
+C-----
             DO i = 1, NDNUC
                KTRlom(i1, i) = INT(val)
             ENDDO
@@ -2609,7 +2660,7 @@ C--------input for TRISTAN (MSD)
 C-----
          IF(name.EQ.'COMPFF')THEN
             ICOmpff = val
-            IF(ICOmpff.GT.0) THEN
+            IF(ICOmpff.GT.0)THEN
                WRITE(6, 
      &'('' Compressional form factor for l=0 momentum transfer will be''
      &,'' used in MSD calculations'')')
@@ -2698,6 +2749,7 @@ C-----
       END
 C
 C
+C
       SUBROUTINE READNIX
 Ccc
 Ccc   ********************************************************************
@@ -2732,7 +2784,6 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C Local variables
 C
@@ -2789,6 +2840,7 @@ C
 99999 END
 C
 C
+C
       SUBROUTINE READLDP
 Ccc
 Ccc   ********************************************************************
@@ -2833,20 +2885,20 @@ Ccc
 C
 C Local variables
 C
-      DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil, 
+      DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma, 
      &                 pi2, qn, tcrt, uexc, xr
       REAL FLOAT
       DOUBLE PRECISION FSHELL
       INTEGER iloc, ix, izamn, izamx, izar, nexp, nlevc, nnuc
-      INTEGER INT, MAX0, MIN0
+      INTEGER INT, MAX, MIN
 C
       pi2 = PI**2
       izamx = 0
       izamn = 200000
       DO nnuc = 0, NNUct
-         izamx = MAX0(IZA(nnuc), izamx)
-         izamn = MIN0(IZA(nnuc), izamn)
+         izamx = MAX(IZA(nnuc), izamx)
+         izamn = MIN(IZA(nnuc), izamn)
       ENDDO
       nexp = 0
       atilsum = 0.0
@@ -2950,10 +3002,9 @@ C-----------------EMPIRE systematics with M-S shell corrections
       END
 C
 C
-      SUBROUTINE SHELLC(Annuc, Znnuc, Shllc)
-C=========================
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+      SUBROUTINE SHELLC(Annuc, Znnuc, Shllc)
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C COMMON variables
 C
@@ -2971,7 +3022,6 @@ C
       DOUBLE PRECISION cbarr, cmass
       INTEGER ia, iz, nobarr
       INTEGER INT
-C
 C-----IPARQ=0 fission barrier, mass and shell correction from Myers-Swiatecki
 C-----IPARQ=1 fission barrier from Krappe-Nix
       IPArq = 0
@@ -2980,9 +3030,9 @@ C-----IPARQ=1 fission barrier from Krappe-Nix
 C     NN=IA-IZ
       CALL LYMASM(iz, ia, cmass, cbarr, nobarr)
 C     CALL TZTN
-C-------DL and DW are Cameron mass and shell correction respectively
-C     DL=DELCAM(FLOAT(IA),FLOAT(IZ))
-C     DW=TZ(IZ)+TN(NN)
+C-----DL and DW are Cameron mass and shell correction respectively
+C-----DL=DELCAM(FLOAT(IA),FLOAT(IZ))
+C-----DW=TZ(IZ)+TN(NN)
 99001 FORMAT(//20X, 'Z =', I2, '  A=', I3)
 99002 FORMAT(/1X, 'SHELL CORRECTION   M.-SW=', E10.3, '  CAMERON=', 
      &       E10.3)
@@ -2991,9 +3041,10 @@ C     DW=TZ(IZ)+TN(NN)
       Shllc = SHLl
       END
 C
+C
+C
       BLOCKDATA 
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -3005,9 +3056,6 @@ C
       COMMON /DEF2  / PA, PB
       COMMON /RKROT / RK
       COMMON /STEP  / ZT, ZTT, ZVT
-C
-C
-C
 C
 C     COMMON variables
 C
@@ -3161,7 +3209,6 @@ C     WILLIAM D. MYERS - 6 JULY 1970
 C
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - z)
 C
-C
 C COMMON variables
 C
       DOUBLE PRECISION BARr, ENEx, SHLl, SMAss
@@ -3178,7 +3225,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION a, a1, a2, a2rt, a3, a3rt, a3rt2, acor, alevel, 
-     &                 ampar, c, c2, c2d2, cay1, cay2, cay3, cay4, cay5, 
      &                 cay6, coulmb, d, ee, em(10), emp(10), eps, exmt2, 
      &                 ext2, f(2), ff, fuzsur, gamma, gl, oddev, parmas, 
      &                 s, smalc, spw, sshell, sufnuc, sym, t, t2, test, 
@@ -3434,11 +3480,10 @@ C
       DOUBLE PRECISION FUNCTION XIMOD(Z)
 C
 C     6-POINT LAGRANGE INTERPOLATION
-C      IN MODIFIED LIQUID-DROP FORMULA
-C         ( KRAPPE [ NIX --  IAEA-SM-174/12 )
+C     IN MODIFIED LIQUID-DROP FORMULA
+C     ( KRAPPE [ NIX --  IAEA-SM-174/12 )
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -3532,7 +3577,6 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C Dummy arguments
 C
       DOUBLE PRECISION Bnd
@@ -3545,8 +3589,6 @@ C
      &                 emicfl, eps2, eps3, eps4, eps6, eps6sym, sigexp, 
      &                 xmassexp, xmassr, xmassth, xmassthfl
       INTEGER INT
-C
-C     DATA amumev/931.1494/
       zr = Z(Nnuc) - ZEJc(Nejc)
       ar = A(Nnuc) - AEJc(Nejc)
       CALL WHERE(INT(zr*1000 + ar), nnur, iloc)
@@ -3555,9 +3597,9 @@ C     DATA amumev/931.1494/
       ELSEIF(INT(zr*1000 + ar).EQ.INT(Z(0)*1000 + A(0)))THEN
          xmassr = XMAss(0)
       ELSE
-C-----------nucleus out of range of those involved needed (likely to
-C-----------determine neutron binding energy for level density
-C-----------determination)
+C--------nucleus out of range of those involved needed (likely to
+C--------determine neutron binding energy for level density
+C--------determination)
  50      READ(25, '(3I5,9F10.3,6F10.2)', END = 100)nixz, nixn, nixa, 
      &        eps2, eps3, eps4, eps6, eps6sym, beta2, beta3, beta4, 
      &        beta6, emic, xmassth, xmassexp, sigexp, emicfl, xmassthfl
@@ -3580,6 +3622,7 @@ C-----------determination)
       b3 = AEJc(Nejc)*AMUmev + XMAss_ej(Nejc)
       Bnd = b2 + b3 - b1
       END
+C
 C
 C
       SUBROUTINE RETRIEVE
@@ -3609,7 +3652,6 @@ Ccc
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
       INCLUDE 'dimension.h'
 C
-C
 C COMMON variables
 C
       INTEGER NCHr
@@ -3627,9 +3669,8 @@ C
       CHARACTER*5 quantity(5)
       CHARACTER*10 reaction(2)
       CHARACTER*25 subent
-C
 C-----constant parameters for EXFOR retrieval
-      DATA reaction/'N,F       ','N,TOT     '/
+      DATA reaction/'N,F       ', 'N,TOT     '/
       DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
 C-----open local file for storing retrieved EXFOR data
       OPEN(UNIT = 19, FILE = 'EXFOR.DAT', STATUS = 'NEW', ERR = 99999)
@@ -3698,6 +3739,7 @@ C-----
 99999 END
 C
 C
+C
       INTEGER FUNCTION IFINDCOLL()
 Ccc
 Ccc   ********************************************************************
@@ -3747,12 +3789,14 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C     Local variables
 C
       DOUBLE PRECISION beta2, beta3, delta_k, dtmp, dum, elvr, ftmp, 
      &                 gspar, gspin, xjlvr
       CHARACTER*100 ch_iuf, comment
+      CHARACTER*5 chelem
+      CHARACTER*9 finp
+      CHARACTER*3 ctmp3
       DOUBLE PRECISION DBLE
       LOGICAL fexist
       INTEGER i, i0p, i20p, i21p, i3m, i4p, i6p, ia, iar, ierr, ilv, 
@@ -3766,25 +3810,25 @@ C
          WRITE(6, *)'-------------------------------------------------'
          WRITE(6, *)' '
          OPEN(UNIT = 32, FILE = 'TARGET_COLL.DAT', STATUS = 'OLD')
-C        Collective levels automatically selected, pls check
+C--------Collective levels automatically selected, pls check
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        empty line
+C--------empty line
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        82 208    nucleus is treated as spherical
+C--------82 208    nucleus is treated as spherical
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        empty line
+C--------empty line
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
+C--------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
          DEFormed = .FALSE.
          IF(DEF(1, 0).NE.0.D0)DEFormed = .TRUE.
          IF(DEFormed)THEN
-C           Number of collective levels
+C-----------Number of collective levels
             READ(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
      &           IDEfcc, ftmp, (D_Def(1, j), j = 2, IDEfcc, 2)
             WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')ND_nlv, LMAxcc, 
@@ -3793,24 +3837,24 @@ C           Number of collective levels
             READ(32, '(3x,3I5)')ND_nlv
             WRITE(6, '(3x,3I5)')ND_nlv
          ENDIF
-C        IF ND_NLV=0 , THEN NO COLLECTIVE LEVELS WILL BE CONSIDERED
-C        SETTING DIRECT to ZERO
+C--------if nd_nlv=0 , then no collective levels will be considered
+C--------setting direct to zero
          IF(ND_nlv.EQ.0)THEN
             WRITE(6, *)' ND_NLV=0 in COLLECTIVE.LEV FILE'
             WRITE(6, *)' NO COLLECTIVE LEVELS WILL BE CONSIDERED'
             WRITE(6, *)' DIRECT WAS SET TO ZERO'
-C           SETTING DIRECT to ZERO
+C-----------setting direct to zerO
             DIRect = 0
             IFINDCOLL = 2
             RETURN
          ENDIF
-C        empty line
+C--------empty line
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        '     COLLECTIVE LEVELS:'
+C--------'     collective levels:'
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C        Reading ground state infomation (to avoid overwriting deformation)
+C--------Reading ground state infomation (to avoid overwriting deformation)
          READ(32, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
      &        ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1)
          WRITE(6, '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,I2,1x,6e10.3)')
@@ -3841,27 +3885,45 @@ C           &     ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), D_Def(i,2)
       i3m = 0
       ND_nlv = 0
       ierr = 1
-      REWIND(13)
- 100  READ(13, '(1X,I4,18X,2I3)', END = 400)nlvr, iar, izr
+C
+C-----constructing input and filenames
+C
+      IF(.NOT.FILevel)THEN
+         WRITE(ctmp3, '(I3.3)')iz
+         finp = 'Z'//'_'//ctmp3//'.DAT'
+         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+     &   ERR = 300)
+      ELSE
+         REWIND(13)
+      ENDIF
+ 100  READ(13, '(A5,6I5,2f12.6)', END = 300)chelem, iar, izr, nlvr, 
+     &     ngamr, nmax, itmp2
       IF(ia.NE.iar .OR. iz.NE.izr)THEN
-         DO ilv = 1, nlvr
+         DO ilv = 1, nlvr + ngamr
             READ(13, '(A1)')dum
          ENDDO
          GOTO 100
       ENDIF
-      OPEN(UNIT = 32, FILE = 'TARGET.LEV', STATUS = 'UNKNOWN')
       BACKSPACE(13)
-      READ(13, 99002)ch_iuf
-      WRITE(32, 99002)ch_iuf
+      OPEN(UNIT = 32, FILE = 'TARGET.LEV', STATUS = 'UNKNOWN')
+      READ(13, '(A80)')ch_iuf
+      WRITE(32, '(A80)')ch_iuf
       DO ilv = 1, nlvr
-         READ(13, 99002)ch_iuf
-         WRITE(32, 99002)ch_iuf
+         READ(13, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr, 
+     &        xjlvr, lvpr, t12, ndbrlin
+         WRITE(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr, 
+     &         xjlvr, lvpr, t12, 0
+         DO nbr = 1, ndbrlin
+            READ(13, '(A1)')dum
+         ENDDO
       ENDDO
-      DO ilv = 1, nlvr
+      DO ilv = 1, nlvr + ngamr
          BACKSPACE(13)
       ENDDO
-      CLOSE(32)
-C--------levels for target NNUC copied to file TARGET.lev
+      IF(.NOT.FILevel)CLOSE(13)
+      REWIND(32)
+      READ(32, '(A1)')dum
+C-----levels for target NNUC copied to file TARGET.lev
       LMAxcc = 4
       IDEfcc = 4
       DO ilv = 1, MAX_COLL
@@ -3870,8 +3932,13 @@ C--------levels for target NNUC copied to file TARGET.lev
          ENDDO
       ENDDO
       DO ilv = 1, nlvr
-         READ(13, 99001)lvpr, elvr, xjlvr
-99001    FORMAT(1X, I3, F8.3, 1X, F5.1)
+C        READ(13, 99001)lvpr, elvr, xjlvr
+C9001    FORMAT(1X, I3, F8.3, 1X, F5.1)
+         READ(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr, 
+     &        xjlvr, lvpr, t12, ndbrlin
+C        DO nbr = 1,  NDBRlin
+C        READ(13, '(A1)') dum
+C        ENDDO
          IF(ilv.EQ.1)THEN
             delta_k = 2.D0
             IF(xjlvr.NE.0.D0)delta_k = 1.D0
@@ -3886,8 +3953,8 @@ C--------levels for target NNUC copied to file TARGET.lev
             gspar = DBLE(lvpr)
          ENDIF
          IF(DEFormed)THEN
-C           deformed nuclei follow
-C           assuming all dynamical deformation equal to static deformation
+C-----------deformed nuclei follow
+C-----------assuming all dynamical deformation equal to static deformation
             beta2 = DEF(1, 0)
             IF(ilv.NE.1)THEN
                IF(i20p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND. 
@@ -3932,9 +3999,9 @@ C           assuming all dynamical deformation equal to static deformation
                ENDIF
             ENDIF
          ELSE
-C           spherical nuclei follow
-C           FOR SPHERICAL TARGET TAKING DYNAMICAL DEFORMATION EQUAL TO
-C           0.15 (1PH 2+) and 0.05(1PH 3-) ARBITRARILY
+C-----------spherical nuclei follow
+C-----------for spherical target taking dynamical deformation equal to
+C-----------0.15 (1PH 2+) and 0.05(1PH 3-) arbitrarily
             beta2 = 0.15
             beta3 = 0.05
             IF(ilv.EQ.1)THEN
@@ -4010,21 +4077,20 @@ C              ground state deformation for spherical nucleus is 0.0
             ENDIF
          ENDIF
  200  ENDDO
-C
  300  IFINDCOLL = ierr
-C
+      CLOSE(32)
       OPEN(UNIT = 32, FILE = 'TARGET_COLL.DAT', STATUS = 'UNKNOWN')
       IF(.NOT.DEFormed)THEN
          WRITE(6, *)
-         WRITE(6,99002)
-     &   'Collective levels selected automatically from available target
-     & levels (vibrational model)           '
+         WRITE(6, 99001)
+     &' Collective levels selected automatically from available target l
+     &evels (vibrational model)           '
          WRITE(6, *)
          WRITE(6, '(1x,i3,1x,i3,a35)')iz, ia, 
      &                                ' nucleus is treated as spherical'
-         WRITE(32,99002)
-     &   'Collective levels selected automatically from available target
-     & levels (vibrational model)           '
+         WRITE(32, 99001)
+     &' Collective levels selected automatically from available target l
+     &evels (vibrational model)           '
          WRITE(32, *)
          WRITE(32, '(1x,i3,1x,i3,a35)')iz, ia, 
      &                                ' nucleus is treated as spherical'
@@ -4032,11 +4098,11 @@ C
 C           1st state is 3-, deleting all other collectives
             ND_nlv = 2
          ELSE
-C           Putting one phonon states first for spherical
+C-----------Putting one phonon states first for spherical
             DO i = 2, ND_nlv
                DO j = i + 1, ND_nlv
                   IF(IPH(j).LT.IPH(i))THEN
-C                    swapping
+C--------------------swapping
                      itmp = IPH(i)
                      IPH(i) = IPH(j)
                      IPH(j) = itmp
@@ -4064,7 +4130,6 @@ C                    swapping
          WRITE(6, '(3x,I5)')ND_nlv
          WRITE(6, *)
          WRITE(6, *)' N   E[MeV]  J   pi Iph   Dyn.Def.'
-C
          WRITE(32, *)
          WRITE(32, *)'   Ncoll  '
          WRITE(32, '(3x,3I5)')ND_nlv
@@ -4078,18 +4143,17 @@ C
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
      &            D_Def(i, 2)
          ENDDO
-C
       ELSE
-         WRITE(32,99002)
-     &   'Collective levels selected automatically from available target
-     & levels (symm.rotational model)       '
+         WRITE(32, 99001)
+     &' Collective levels selected automatically from available target l
+     &evels (symm.rotational model)       '
          WRITE(32, *)'Dyn.deformations are not used in symm.rot.model'
          WRITE(32, '(1x,i3,1x,i3,a35)')iz, ia, 
      &                                 ' nucleus is treated as deformed'
          WRITE(6, *)
-         WRITE(6,99002)
-     &   'Collective levels selected automatically from available target
-     & levels (symm.rotational model)       '
+         WRITE(6, 99001)
+     &' Collective levels selected automatically from available target l
+     &evels (symm.rotational model)       '
          WRITE(6, *)'Dyn.deformations are not used in symm.rot.model'
          WRITE(6, '(1x,i3,1x,i3,a35)')iz, ia, 
      &                                ' nucleus is treated as deformed'
@@ -4113,16 +4177,17 @@ C
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
      &            0.01
          ENDDO
-C
       ENDIF
       CLOSE(32)
       RETURN
-C     target nucleus does not have discrete level information available
- 400  ierr = 2
+C-----target nucleus does not have discrete level information available
+      ierr = 2
       IFINDCOLL = ierr
       RETURN
-99002 FORMAT(A100)
+99001 FORMAT(A100)
       END
+C
+C
 C
       SUBROUTINE FINDPOT(Ki, Ieof, Ipoten)
 C

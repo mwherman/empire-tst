@@ -15,15 +15,13 @@ C/* The calling FORTRAN program must declare           */
 C/* PIPE as INTEGER*4 funtion to avoid memory problems */
 C/* Do not use default declaration please, they are    */
 C/* compiler and system dependent !!!!                 */
-
-      INTEGER*4 FUNCTION pipe(STRINGP)
+C
+      INTEGER*4 FUNCTION PIPE(Stringp)
 C     MSFORTRAN
-      USE PORTLIB
-      CHARACTER*(*) STRINGP
+      CHARACTER*(*) Stringp
 C     LAHEY FORTRAN
 C     pipe=0
 C     CALL SYSTEM(STRINP)
 C     MSFORTRAN
-      pipe = SYSTEM (stringp)
-      RETURN
+      PIPE = SYSTEM(Stringp)
       END

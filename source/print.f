@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:16 $
-Ccc   * $Id: print.f,v 1.2 2001-08-21 15:36:16 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: print.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE AUERST(Nnuc, Nejc)
 Ccc

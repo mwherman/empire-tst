@@ -5,6 +5,7 @@ c
 c      1     tl
 c      3     MSD-Orion3
 c      8     MSD-Orion
+c     15     MSD-Orion3
 c     16     MSD-Tristan
 c     19     input
 c     20     input
@@ -14,10 +15,9 @@ c     27     ddhms
 c     28     ddhms
 c     31     SCAT2
 c     32     input
-c     33     lev-dens
-c     34     lev-dens
-c     35     lev-dens
 c     60     main
+c     62     main
+c     66     MSD-Tristan
 c     77     input
 c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
@@ -36,12 +36,15 @@ c
 *-IF VMS
 *-    OPEN(UNIT=13,FILE='[-.data]orsi.liv', STATUS='OLD')
 *-ELSEIF LINUX
-      OPEN(UNIT=13,FILE='../data/orsi.liv' ,STATUS='OLD')
+C     OPEN(UNIT=13,FILE='../data/orsi.liv' ,STATUS='OLD')
 *-ENDIF
       OPEN(UNIT=14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
 C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
       OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
+      OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
+      OPEN(UNIT=62,FILE='ECIS_XS.DAT',STATUS='UNKNOWN')      
+      OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
       OPEN(UNIT=18,FILE='OMPAR.INT' ,STATUS='OLD', ERR=779)
 C     Added to check if file is not empty
       READ(18,*,END=781)
@@ -63,7 +66,7 @@ C     Added to check if file is not empty
       OPEN(UNIT=33, FILE='OMPAR.DIR', STATUS='NEW')
 891   CONTINUE
       OPEN(UNIT=29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
-C     Check whether file is not empty
+C     Added to check if file is not empty
       READ(29,*,END=776)
       REWIND(29)
       OMPAR_RIPLF=.TRUE.
@@ -91,13 +94,12 @@ C     Check whether file is not empty
      *,STATUS='OLD')
 C     RIPL OMP database
       OPEN(UNIT=26,FILE='../data/omp.ripl'
+C     OPEN(UNIT=26,FILE='../data/omparameter.dat'
      *,STATUS='OLD')
 *-ENDIF
 c     OPEN(UNIT=30,FILE='GAMMA.DAT')
       OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
-
-
 
 
 

@@ -3,24 +3,27 @@ C-----GLOBAL COMMON --------------------------------------------------
       CHARACTER SYMBE*2, SYMB*2
       LOGICAL FILEVEL, FUSREAD, FISSIL, OMPARF,
      & DEFORMED, DEFAULT_ENERGY_FUNCTIONAL, OMPAR_RIPLF,
-     & RIPL_OMP(0:NDEJC),RIPL_OMPCC,CCcalc,OMPARfCC
+     & RIPL_OMP(0:NDEJC),RIPL_OMPCC,CCcalc,OMPARfCC,RELKIN
 
       COMMON /GLOBAL_L/FISSIL(NDNUC), FILEVEL, FUSREAD, OMPARF,
      & DEFORMED, DEFAULT_ENERGY_FUNCTIONAL, RIPL_OMP, OMPAR_RIPLF,
-     & RIPL_OMPCC, CCcalc, OMPARfCC
+     & RIPL_OMPCC, CCcalc, OMPARfCC, RELKIN
 
       COMMON /GLOBAL_C/SYMB(0:NDNUC), SYMBE(0:NDEJC)
 
       COMMON /GLOBAL_I/NLW, NNUCD, NEJCM, MSD, MSC, NNUCT, NSCC, NACC,
      &     LHMS, NHMS, INRES, IPRES, IARES, ILIRES, NEXREQ, IFLUC, LHRTW
      &     , NEMC, NOUT, IOUT, NEX(NDNUC), JSTAB(NDNUC), IZA(0:NDNUC),
-     &     NLV(0:NDNUC), NRES(NDEJC), KTRLOM(0:NDEJC,0:NDNUC),
-     &     LMAXTL(NDETL,NDEJC, NDNUC), IZAEJC(0:NDEJC), LVP(NDLV,0:NDNUC
-     &     ), IBR(NDLV,NDBR,2, NDNUC), IOMWRITE(0:NDEJC,0:NDNUC),
+C    NLV    Number of levels with unique spin and parity
+C    NCOMP  Number of levels up to which the level scheme is estimated to be complete
+     &     NLV(0:NDNUC), NCOMP(0:NDNUC),
+     &     NRES(NDEJC), KTRLOM(0:NDEJC,0:NDNUC),
+     &     LMAXTL(NDETL,NDEJC, NDNUC), IZAEJC(0:NDEJC),
+     &     LVP(NDLV,0:NDNUC), IOMWRITE(0:NDEJC,0:NDNUC),
      &     NEXR(NDEJC,NDNUC), IDNA(NDREGIONS,NDMODELS),
      &     ND_NLV,IPH(MAX_Coll),LMaxCC,IDefCC,
      &     IOPSYS, ICOLLEV(MAX_Coll),IWARN,NTARGET,NPROJECT,KTRompCC,
-     &     IOMwriteCC,ModelECIS,ICOmpff
+     &     IOMwriteCC,ModelECIS,ICOmpff,IRElat(0:NDEJC,0:NDNUC)
 
       COMMON /GLOBAL0/EIN, EINL, EXCN, CSFUS, CRL, DFUS, DE, BETAV,
      &     DENHF,GCASC, BFUS, GDIV, GDRWEIS, CHMS, DEREC,ENDF, SHNIX,
@@ -29,7 +32,7 @@ C-----GLOBAL COMMON --------------------------------------------------
      &     GDRWA2, GDRESH, GDRSPL, DITORO, EWSR1, EWSR2, DEFPAR,DEFPRJ,
      &     DEFGA, DEFGW, DEFGP, ADIV, FUSRED, FITLEV, DV, FCC,STMRO,
      &     DEGA, GDIVP, TORY, EX1, EX2, GST, XNI, D1FRA,
-     &     CSMSC(0:2), CSMSD(NDEJC), CSHMS(NDEJC), A(0:NDNUC), 
+     &     CSMSC(0:2), CSMSD(NDEJC), CSHMS(NDEJC), A(0:NDNUC),
      &     Z(0:NDNUC),
      &     ECUT(NDNUC), HIS(0:NDNUC), ATILNOR(0:NDNUC), DOBS(0:NDNUC),
      &     BETCC(NDCC), FLAM(NDCC), QCC(NDCC), FCD(NDCC), XN(0:NDNUC),
@@ -40,7 +43,7 @@ C-----GLOBAL COMMON --------------------------------------------------
       COMMON /GLOBAL1/DRTL(NDLW), EMAX(NDNUC), ROPAA(NDNUC), ETL(NDETL,
      &     NDEJC,NDNUC), SEJC(0:NDEJC), SFIOM(0:NDEJC,0:NDNUC), ELV(NDLV
      &     ,0 :NDNUC), XJLV(NDLV,0:NDNUC), CSALEV(NDANG,NDLV,NDEJC),
-     &     SHC(0:NDNUC), XMASS(0:NDNUC),
+     &     SHC(0:NDNUC), XMASS(0:NDNUC), BR(NDLV,NDBR,2, NDNUC),
      &     XMASS_EJ(0:NDEJC), REDMSC(NDLW,2), TUNE(0:NDEJC,0:NDNUC)
 
       COMMON /GLOBAL2/POPLV(NDLV,NDNUC), Q(0:NDEJC,0:NDNUC), CSPRD(NDNUC
@@ -52,25 +55,26 @@ C-----GLOBAL COMMON --------------------------------------------------
      &     SCRTEM(0:NDEJC), CSEMIS(0:NDEJC,0:NDNUC),
      &     CSEMSD(NDECSE,NDEJC), CSEHMS(NDECSE,NDEJC),
      &     CSE(NDECSE,0:NDEJC,0:NDNUC), CSA(NDANG,0:NDEJC,NDNUC),
-     &     CSEA(NDECSE, NDANG,0:NDEJC,0:NDNUC), 
+     &     CSEA(NDECSE, NDANG,0:NDEJC,0:NDNUC),
      &     CSEAHMS(NDECSE, NDANG,NDEJC),
      &     ANCSEA(NDECSE,NDANG,2),
      &     CSEAN(NDECSE, NDANG,NDEJC), APCSEA(NDECSE,NDANG,2),
      &     RECCSE(NDEREC,0:NDEX, NDNUC),AUSPEC(NDECSE,0:NDEJC),
      &     RECLEV(NDLV,0:NDEJC), CANGLER(NDANG), SANGLER(NDANG),
-     &     VOM(NDVOM,0:NDEJC,0:NDNUC) , VOMS(NDVOM,0:NDEJC,0:NDNUC), 
+     &     VOM(NDVOM,0:NDEJC,0:NDNUC) , VOMS(NDVOM,0:NDEJC,0:NDNUC),
      &     WOMV(NDWOM,0:NDEJC,0:NDNUC), WOMS(NDWOM,0:NDEJC,0:NDNUC),
      &     VSO(NDVSO,0:NDEJC,0:NDNUC) , WSO(NDVSO,0:NDEJC,0:NDNUC) ,
-     &     AVOM(0: NDEJC,0:NDNUC), AWOM(0:NDEJC,0:NDNUC), 
-     &     AWOMV(0:NDEJC,0:NDNUC), AVSO(0:NDEJC,0:NDNUC), 
-     &     RNONL(0:NDEJC,0:NDNUC), RVOM(NDRVOM,0: NDEJC,0:NDNUC), 
+     &     AVOM(0: NDEJC,0:NDNUC), AWOM(0:NDEJC,0:NDNUC),
+     &     AWOMV(0:NDEJC,0:NDNUC), AVSO(0:NDEJC,0:NDNUC),
+     &     RNONL(0:NDEJC,0:NDNUC), RVOM(NDRVOM,0: NDEJC,0:NDNUC),
      &     RWOM(NDRWOM,0:NDEJC,0:NDNUC), RWOMV(NDRWOM,0:NDEJC,0:NDNUC),
      &     RVSO(NDRVSO,0:NDEJC,0:NDNUC), RCOUL(0:NDEJC,0: NDNUC),
-     &     OMEMIN(0:NDEJC,0:NDNUC), OMEMAX(0:NDEJC,0:NDNUC),
+     &     EEFermi(0:NDEJC,0: NDNUC),EEP(0:NDEJC,0: NDNUC),
+     &     EEA(0:NDEJC,0: NDNUC),
+     &     OMEMIN(0:NDEJC,0:NDNUC),OMEMAX(0:NDEJC,0:NDNUC),
      &     AWSO(0:NDEJC,0:NDNUC),RWSO(NDRVSO,0:NDEJC,0:NDNUC),
      &     DIRECT, Sinl, D_ELV(MAX_Coll),D_XJLV(MAX_Coll),
-     &     D_LVP(MAX_Coll),D_DEF(MAX_Coll,LMAX_CC),
-     &     Efermi, Eanonl, aalpha, Eaverp
+     &     D_LVP(MAX_Coll),D_DEF(MAX_Coll,LMAX_CC)
 
 C     D_DEF(MAX_Coll)
 
@@ -82,7 +86,7 @@ C     D_DEF(MAX_Coll)
 
       COMMON /NUMHLP_R/RORED, ARGRED, EXPMAX, EXPDEC, TURBO
 
-      COMMON /CONSTANT/amumev,pi,w2,xnexc
+      COMMON /CONSTANT/amumev,pi,w2,xnexc,ceta,cso,rmu,ampi,ele2,hhbarc
 
 C-----GLOBAL COMMON ---END-----------------------------------------
 
@@ -120,7 +124,7 @@ C        this option will be used for RIPL potential
 C        }
 C
 C        Physical and mathematical constants
-C        amumev,pi,W2,xnexc
+C        amumev,pi,W2,xnexc,ceta,cso,ampi,ele2,hhbarc
 C
 C   WARNING codes for RIPL potentials
 C     IWARN=0 - 'NO Warnings'

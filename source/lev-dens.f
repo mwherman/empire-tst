@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-08-21 15:36:16 $
-Ccc   * $Id: lev-dens.f,v 1.2 2001-08-21 15:36:16 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: lev-dens.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -647,13 +647,11 @@ C
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
       in = ia - iz
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)THEN
-c        WRITE(6, 
-c    &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           '' 
-c    &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
-c    &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-         RETURN
-      ENDIF
+C     WRITE(6,
+C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
+C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
+C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)RETURN
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
       AP1 = 0.94431E-01
@@ -965,7 +963,7 @@ C-----damping (no surface correction)
             ATIl = AP1*A(Nnuc) + AP2*A23
             ATIl = ATIl*ATIlnor(Nnuc)
             ac = ATIl*FSHELL(u, SHC(Nnuc), GAMma)
-c-----------HERE here FSHELL can become negative     
+C-----------HERE here FSHELL can become negative
             IF(ac.LE.0.0D0)RETURN
             CALL SIGMAK(A(Nnuc), Z(Nnuc), DEF(1, Nnuc), 1.0D0, u, ac, 
      &                  aj, mompar, momort, A2, stab, cigor, DEFpar, 
@@ -1086,13 +1084,11 @@ C-----check of the input data ---------------------------------------
      &'EXECUTION STOPPED'')')Nnuc, Nnuc
          STOP
       ENDIF
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)THEN
-C        WRITE(6, 
-C    &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           '' 
-C    &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
-C    &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-         RETURN
-      ENDIF
+C     WRITE(6,
+C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
+C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
+C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)RETURN
 C-----check of the input data ---- done -----------------------------
 C-----check whether the nucleus is fissile
       FISsil(Nnuc) = .TRUE.
@@ -1405,16 +1401,16 @@ C
 C-----calculation of matching point /if UX=0.0/
 C
  100  IF(am - 6./t.LE.0.0D0)THEN
-         WRITE(6, *)'WARNING: ' 
-         WRITE(6, *)'WARNING: LEVEL DENSITY PARAMETERS INCONSISTENT' 
-         WRITE(6, *)'WARNING: THIS MAY HAPPEN IF YOU HAVE USED DEFAULT' 
-         WRITE(6, *)'WARNING: SYSTEMATICS FOR TOO LIGHT NUCLEUS OR ' 
+         WRITE(6, *)'WARNING: '
+         WRITE(6, *)'WARNING: LEVEL DENSITY PARAMETERS INCONSISTENT'
+         WRITE(6, *)'WARNING: THIS MAY HAPPEN IF YOU HAVE USED DEFAULT'
+         WRITE(6, *)'WARNING: SYSTEMATICS FOR TOO LIGHT NUCLEUS OR '
          WRITE(6, *)'WARNING: HAVE ALLOWED FOR TOO MANY DISCRETE LEVELS'
-         WRITE(6, *)'WARNING: ENTERING THE REGION WHERE THESE ARE LOST' 
-         WRITE(6, *)'WARNING: REANALISE GC L.D. PARAMETERS FOR:' 
+         WRITE(6, *)'WARNING: ENTERING THE REGION WHERE THESE ARE LOST'
+         WRITE(6, *)'WARNING: REANALISE GC L.D. PARAMETERS FOR:'
          WRITE(6, *)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
          WRITE(6, *)'WARNING: a=', am, ' T=', t
-         WRITE(6, *)'WARNING: ' 
+         WRITE(6, *)'WARNING: '
 C--------anyhow, plot fit of the levels with the low energy l.d. formula
          IF(FITlev.GE.0.0D0)THEN
             IF(NLV(Nnuc).GT.3)THEN

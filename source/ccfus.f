@@ -1,5 +1,5 @@
-Ccc   * $Date: 2001-08-21 15:36:17 $
-Ccc   * $Id: ccfus.f,v 1.2 2001-08-21 15:36:17 mike Exp $
+Ccc   * $Date: 2001-11-06 08:50:34 $
+Ccc   * $Id: ccfus.f,v 1.3 2001-11-06 08:50:34 mike Exp $
 C
       SUBROUTINE CCFUS(Stl)
 C
