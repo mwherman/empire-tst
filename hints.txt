@@ -10,7 +10,7 @@ A Running 'FITLEV'  is not only a wise  thing to do in  order to check
 
 Q WHY ISOMERIC CROSS SECTIONS GET TOO HIGH THRESHOLD?
 
-A Isomeric  cross sections  can  NOT be  calculated  with ENDF  option
+A Isomeric  cross sections  CAN  NOT BE  CALCULATED  WITH ENDF  option
   activated  since direct  transitions  to discrete  levels after  the
   first neutron, proton and alpha emission are shifted artificially to
   the ground state. This is  done to avoid gamma transitions following
@@ -49,7 +49,7 @@ A Execute 'Clean'  after any  change in the  input file  that involves
 
 Q I'VE MADE 'CLEAN' AND LOST ALL FILES I HAD ADJUSTED BY HAND!
 
-A Note that 'Clean' button will remove  all(!)  project related  files
+A Note that 'Clean' button will remove  ALL(!)  project related  files
   except the input.  If you  want to preserve any file (usually *.lev,
   *.omp or *.col  which could have been modified  manually) you should
   rename    them   before    making   'clean'    and    restore   them

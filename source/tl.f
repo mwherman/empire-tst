@@ -1,7 +1,35 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 15:57:54 $
-Ccc   * $Id: tl.f,v 1.4 2001-11-06 15:57:54 mike Exp $
+Ccc   * $Date: 2002-04-05 17:03:55 $
+Ccc   * $Id: tl.f,v 1.5 2002-04-05 17:03:55 mike Exp $
 C
+C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
+C        ND_NLV - Number of discrete levels to be included in the
+C        inelastic scattering calculations (COMMON GLOBAL_I)
+C
+C        j from 1 to ND_NLV (maximum NDCOLLEV)
+C        D_ELV(j),D_XJLV(j),D_LVP(j),IPH(j),D_DEF(j,NDDEFCC)
+C        energy, spin, parity, number of phonons and deformation for each level
+C        Sinl - total inelastic cross section to collective levels
+C
+C        DEFORMED, DEFAULT_ENERGY_FUNCTIONAL
+C
+C        If DEFAULT_ENERGY_FUNCTIONAL=.TRUE. then
+C        {
+C        SCAT2 optical model energy dependence is used so strenght
+C        are calculated as follows:
+C        POTe(i) = pot(i,1) + pot(i,2)*Ener + pot(i,3)*Ener*Ener    +
+C       *            pot(i,4)*Ener*Ener*Ener  + pot(i,5)*dlog(Ener) +
+C       *            pot(i,6)*dsqrt(Ener)
+C        WARNING: EMPIRE version before 2.15.6 used the following:
+C        POTe(i) = pot(i,1) + pot(i,2)*Ener + pot(i,3)*Ener*Ener    +
+C       *            pot(i,4)*dlog(Ener)
+C        }
+C        If DEFAULT_ENERGY_FUNCTIONAL=.FALSE. then
+C        {
+C        Strenght is fixed for given energy so POTe(i) = pot(i,1)
+C        this option will be used for RIPL potential
+C        }
+
       SUBROUTINE HITL(Stl)
 C
 Ccc
@@ -159,7 +187,7 @@ C
       CHARACTER*1 AUThor, REFer, SUMmary
       INTEGER IREf, IZMin, IZMax, IAMin, IAMax, IMOdel, JRAnge, NCOll, 
      &        NVIb, NISotop, IZ, IA, LMAx, IDEf, IZProj, IAProj, IREl, 
-     &        IDR, IPArv, NPH, IPAr, JCOul, icoll(MAX_COLL)
+     &        IDR, IPArv, NPH, IPAr, JCOul, icoll(NDCOLLEV)
 C
       REAL*4 EEMin, EEMax, EPOt, RCO, ACO, POT, BANdk, DDEf, EXV, DEFv, 
      &       THEtm, BETa0, GAMma0, XMUbeta, EEX, SPIn, SPInv, EECoul, 
@@ -245,7 +273,7 @@ C        model = 'coupled-channels rotational model'
          DO n = 1, NISotop
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                ncalc = n
-               IF(IDEf(n).GT.2*LMAx(n) .OR. NCOll(n).GT.MAX_COLL)THEN
+               IF(IDEf(n).GT.2*LMAx(n) .OR. NCOll(n).GT.NDCOLLEV)THEN
                   WRITE(6, *)'RIPL discrete level is wrong'
                   WRITE(6, *)'Too many levels or too many deformations'
                   WRITE(6, *)'Default collective levels will be used'
@@ -364,7 +392,7 @@ C--------model = 'vibrational model'
                      GOTO 200
                   ENDIF
                ENDDO
-               IF(NVIb(n).GT.MAX_COLL)THEN
+               IF(NVIb(n).GT.NDCOLLEV)THEN
                   WRITE(6, *)'RIPL discrete level is wrong'
                   WRITE(6, *)'Too many levels'
                   WRITE(6, *)'Default collective levels will be used'
@@ -1361,7 +1389,8 @@ C
       SUBROUTINE CREATE_OMPAR(Ki, Komp, Ieof, Nnucr, Nejcr, Ianucr, 
      &                        Symbnucr, Iaejcr, Symbejcr)
 C
-C-----Read optical model parameters from the RIPL-II library
+C-----Read optical model parameters from the RIPL-II library and create local
+C-----omp file
 C
       REAL ACO, BANdk, BETa, BETa0, DEF, DEFv, ECOul, EMAx, EMIn, EPOt, 
      &     EX, EXV, GAMma0, POT, RCO, RCOul, RCOul0, SPIn, SPInv, THEtm
@@ -1385,7 +1414,7 @@ C
      &                NCOll(NDIM4), NVIb(NDIM4), NISotop, IZ(NDIM4), 
      &                IA(NDIM4), LMAx(NDIM4), BANdk(NDIM4), 
      &                DEF(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj, 
-     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR, 
+     &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
      &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4), 
      &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4), 
      &                XMUbeta(NDIM4), EX(NDIM6, NDIM4), 
@@ -1398,7 +1427,7 @@ C
 99001 FORMAT(80A1)
       Ieof = 0
       READ(Ki, *)IREf
-      WRITE(Komp, '(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)')IREf, Nnucr, 
+      WRITE(Komp, '(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)')IREf, Nnucr,
      &      Nejcr, Ianucr, Symbnucr, Iaejcr, Symbejcr
 C     WRITE (Ko,'(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)') IREf ,
 C     &       Nnucr , Nejcr , Ianucr , Symbnucr , Iaejcr , Symbejcr
@@ -1637,7 +1666,7 @@ C
 C******************* subroutine omin ***************************
       SUBROUTINE OMIN(Ki, Ieof, Irelout)
 C
-C     routine to read optical model parameters in parameter lib
+C     routine to read optical model parameters 
 C
 C     Common blocks and declarations for ominput11.f [July 6, 2001] - RIPL-II
 C
@@ -1725,7 +1754,7 @@ C
 C
       SUBROUTINE SUMPRT(Ko)
 C
-C     routine to print summary information from RIPL formatted library
+C     print summary information from RIPL formatted library
 C
       CHARACTER*8 ldum, proj
       CHARACTER*40 model
@@ -2097,7 +2126,7 @@ C
 C
 C
 C     --------------------------------------------------------------------
-C     | Calculation of the  transmission coefficients by ECIS95          |
+C     | Calculation of   transmission coefficients using ECIS95          |
 C     |                for EMPIRE energy grid                            |
 C     --------------------------------------------------------------------
 C
@@ -2244,8 +2273,7 @@ C
 C
       SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc, Nnuc, Maxlw, Stl)
 C
-C     PROCESS ECIS OUTPUT TO OBTAIN Stl matrix for incident channel
-C
+C     Process ECIS output to obtain Stl matrix for the incident channel
 C     Reads from unit 45 and writes to unit 6
 C
 C     INPUT:  Nejc,Nnuc ejectile and residual nucleus index
@@ -2354,8 +2382,7 @@ C
 C
       SUBROUTINE ECIS2EMPIRE_TR(Nejc, Nnuc, J)
 C
-C     PROCESS ECIS OUTPUT TO OBTAIN TTLl,MaxL matrix for EMPIRE energy grid
-C
+C     Process ECIS output to obtain TTLl,MaxL matrix for EMPIRE energy grid
 C     Reads from units 45, 46 and writes to unit 6
 C
 C     INPUT:  Nejc  ejectile nucleus index

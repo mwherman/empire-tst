@@ -1,7 +1,9 @@
+FC     =  g77
+FFLAGS = 
 #----GNU g77 FORTRAN compiler
-FC     = g77
+#FC     = g77
 #----flags for production compilation with g77
-FFLAGS = -O3 
+#FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
 #FFLAGS =  -fno-underscoring  -ggdb
 #----Linux script calling f2c converter and gcc C compiler

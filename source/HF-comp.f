@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: HF-comp.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-04-05 17:03:11 $
+Ccc   * $Id: HF-comp.f,v 1.4 2002-04-05 17:03:11 mike Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -108,7 +108,7 @@ C--------distance of the actual energy to the bin energy
          POPlv(il, Nnur) = POPlv(il, Nnur) + pop1
          REClev(il, Nejc) = REClev(il, Nejc) + pop1
 C--------Add isotropic CN contribution to direct ang. distributions
-         IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1))THEN
+         IF(Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0)THEN
             pop1 = pop1/4.0/PI
             DO na = 1, NDANG
                CSAlev(na, il, Nejc) = CSAlev(na, il, Nejc) + pop1

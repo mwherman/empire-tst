@@ -6,7 +6,7 @@
 1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 1  2. 1.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       1.                                               
-LEVDEN     3.                                              
+LEVDEN     0.                                              
 NEX      100.                                                   
 MSD        1.                                                     
 MSC        1.                                                         

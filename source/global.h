@@ -14,15 +14,13 @@ C-----GLOBAL COMMON --------------------------------------------------
       COMMON /GLOBAL_I/NLW, NNUCD, NEJCM, MSD, MSC, NNUCT, NSCC, NACC,
      &     LHMS, NHMS, INRES, IPRES, IARES, ILIRES, NEXREQ, IFLUC, LHRTW
      &     , NEMC, NOUT, IOUT, NEX(NDNUC), JSTAB(NDNUC), IZA(0:NDNUC),
-C    NLV    Number of levels with unique spin and parity
-C    NCOMP  Number of levels up to which the level scheme is estimated to be complete
      &     NLV(0:NDNUC), NCOMP(0:NDNUC),
      &     NRES(NDEJC), KTRLOM(0:NDEJC,0:NDNUC),
      &     LMAXTL(NDETL,NDEJC, NDNUC), IZAEJC(0:NDEJC),
      &     LVP(NDLV,0:NDNUC), IOMWRITE(0:NDEJC,0:NDNUC),
      &     NEXR(NDEJC,NDNUC), IDNA(NDREGIONS,NDMODELS),
-     &     ND_NLV,IPH(MAX_Coll),LMaxCC,IDefCC,
-     &     IOPSYS, ICOLLEV(MAX_Coll),IWARN,NTARGET,NPROJECT,KTRompCC,
+     &     ND_NLV,IPH(NDCOLLEV),LMaxCC,IDefCC,
+     &     IOPSYS, ICOLLEV(NDCOLLEV),IWARN,NTARGET,NPROJECT,KTRompCC,
      &     IOMwriteCC,ModelECIS,ICOmpff,IRElat(0:NDEJC,0:NDNUC)
 
       COMMON /GLOBAL0/EIN, EINL, EXCN, CSFUS, CRL, DFUS, DE, BETAV,
@@ -73,10 +71,8 @@ C    NCOMP  Number of levels up to which the level scheme is estimated to be com
      &     EEA(0:NDEJC,0: NDNUC),
      &     OMEMIN(0:NDEJC,0:NDNUC),OMEMAX(0:NDEJC,0:NDNUC),
      &     AWSO(0:NDEJC,0:NDNUC),RWSO(NDRVSO,0:NDEJC,0:NDNUC),
-     &     DIRECT, Sinl, D_ELV(MAX_Coll),D_XJLV(MAX_Coll),
-     &     D_LVP(MAX_Coll),D_DEF(MAX_Coll,LMAX_CC)
-
-C     D_DEF(MAX_Coll)
+     &     DIRECT, Sinl, D_ELV(NDCOLLEV),D_XJLV(NDCOLLEV),
+     &     D_LVP(NDCOLLEV),D_DEF(NDCOLLEV,NDDEFCC)
 
       COMMON /DEPTH/ POTE(7)
 
@@ -89,50 +85,3 @@ C     D_DEF(MAX_Coll)
       COMMON /CONSTANT/amumev,pi,w2,xnexc,ceta,cso,rmu,ampi,ele2,hhbarc
 
 C-----GLOBAL COMMON ---END-----------------------------------------
-
-C---- Capote
-C     IOPSYS = 0 LINUX
-C     IOPSYS = 1 WINDOWS
-C---- Capote / Simone
-C
-C     ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
-C     ND_NLV - Number of discrete levels to be included in the
-C            inelastic scattering calculations (COMMON GLOBAL_I)
-C
-C        j from 1 to ND_NLV (maximum MAX_Coll)
-C        D_ELV(j),D_XJLV(j),D_LVP(j),IPH(j),D_DEF(j,LMAX_CC)
-C        energy, spin, parity, number of phonons and deformation for each level
-C        Sinl - total inelastic cross section to collective levels
-C
-C        DEFORMED, DEFAULT_ENERGY_FUNCTIONAL
-C
-C        If DEFAULT_ENERGY_FUNCTIONAL=.TRUE. then
-C        {
-C        SCAT2 optical model energy dependence is used so strenght
-C        are calculated as follows:
-C        POTe(i) = pot(i,1) + pot(i,2)*Ener + pot(i,3)*Ener*Ener    +
-C       *            pot(i,4)*Ener*Ener*Ener  + pot(i,5)*dlog(Ener) +
-C       *            pot(i,6)*dsqrt(Ener)
-C        WARNING: EMPIRE version before 2.15.6 used the following:
-C        POTe(i) = pot(i,1) + pot(i,2)*Ener + pot(i,3)*Ener*Ener    +
-C       *            pot(i,4)*dlog(Ener)
-C        }
-C        If DEFAULT_ENERGY_FUNCTIONAL=.FALSE. then
-C        {
-C        Strenght is fixed for given energy so POTe(i) = pot(i,1)
-C        this option will be used for RIPL potential
-C        }
-C
-C        Physical and mathematical constants
-C        amumev,pi,W2,xnexc,ceta,cso,ampi,ele2,hhbarc
-C
-C   WARNING codes for RIPL potentials
-C     IWARN=0 - 'NO Warnings'
-C     IWARN=1 - 'A out of the recommended range '
-C     IWARN=2 - 'Z out of the recommended range '
-C     IWARN=3 - 'Energy requested lower than recommended for this potential'
-C     IWARN=4 - 'Energy requested higher than recommended for this potential'
-C     IWARN=5 - ''
-C     IWARN=6 - 'non axial deformed potential is not implemented in EMPIRE'
-
-

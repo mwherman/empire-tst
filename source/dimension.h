@@ -1,12 +1,12 @@
       PARAMETER(
-     * NDNUC= 70                   
+     * NDNUC= 50                   
      *,NDEJC=3 
      *,NDAFIS=1
      *,NDEX=150
      *,NDLW= 50
      *,NDTL= 30
      *,NDMSCS=3 
-     *,NDLV=200
+     *,NDLV=100
      *,NDBR=30
      *,NDVOM=7
      *,NDWOM=7
@@ -29,7 +29,7 @@
      *,NDKNTR=3
      *,NDREGIONS=5
      *,NDMODELS=5
-     *,LMAX_CC=6
-     *,MAX_Coll=20
+     *,NDDEFCC=6
+     *,NDCOLLEV=20
      *)
 

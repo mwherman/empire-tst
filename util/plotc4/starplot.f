@@ -1,62 +1,44 @@
       SUBROUTINE STARPLOT
-C===============================================================================
-C
-C     PURPOSE
-C     =======
-C     HARD COPY VERSION OF CALCOMP LIKE GRAPHICS INTERFACE FOR USE ON
-C     SUN COMPUTER. THIS ROUTINE PRODUCES POSTSCRIPT FORMATTED FILES
-C     THAT ARE SENT ONE AFTER THE OTHER TO THE LOCAL PRINTER. SEE THE
-C     BELOW INSTRUCTIONS ON HOW TO INTERFACE THIS ROUTINE TO YOUR
-C     POSTSCRIPT PRINTER.
-C
-C     THE ONLY ACTIVE ENTRY POINTS ARE,
-C
-C     (1) STARPLOT - INITIALIZE PLOTTER
-C     (2) ENDPLOTS - END ALL PLOTTING
-C     (3) NEXTPLOT - END OF A PLOT
-C     (4) PLOT     - MOVE OR DRAW
-C     (5) MYSIZE   - DEFINE LOCAL PLOTTER SIZE
-C     (6) INTERACT - INDICATE NOT IN INTERACTIVE MODE
-C     (7) SENDOUT  - SEND PLOT TO PRINTER
-C
-C     DUMMY ROUTINES, ONLY USED BY THE INTERACTIVE VERSION OF PLOTTAB.
-C
-C     (1) BOXCOLOR - FILL A RECTANGLE WITH COLOR
-C     (2) NEWPLOT  - BLANK THE SCREEN
-C     (3) PEN      - CHANGE COLOR
-C     (5) MOUSEY   - TEST OF KEYBOARD OR MOUSE INPUT
-C     (6) SHOWTEXT - DISPLAY INTERACTIVE TEXT
-C
-C     COMPUTER DEPENDENCE
-C     ===================
-C     THE ONLY COMPUTER DEPENDENT PART OF THIS ROUTINE IS HOW
-C     TO SEND THE PLOT FILE TO A PRINTER = CALL SENDOUT. AS
-C     DISTRIBUTED THE PROGRAM WRITES OUTPUT INTO A FILE NAMED
-C     PLOTTAB.PLT. AT THE END OF EACH PLOT IT CALLS SENDOUT.
-C     SENDOUT DOES A SYSTEM CALL = CALL SYSTEM('SEND.BAT') -
-C     WHICH EXECUTES A FILE NAMED SEND.BAT. THE CONTENTS OF
-C     THIS FILE ARE COMPUTER DEPENDENT. IT SHOULD INSTRUCT
-C     YOUR COMPUTER TO SEND THE FILE - PLOTTAB.PLT - TO YOUR
-C     PRINTER - AND IF NECESSARY DELAY UNTIL PRINTING IS
-C     FINISHED. FOR EXAMPLE, ON A SUN WORKSTATION SEND.BAT
-C     CONTAINS A SINGLE LINE,
-C
-C     lpr -h PLOTTAB.PLT
-C
-C     WHICH CAUSES THE FILE PLOTTAB.PLT TO BE PRINTED AS A
-C     POSTSCRIPT FORMATTED FILE.
-C
-C     WARNING - IMMEDIATELY AFTER THE SYSTEM CALL THIS ROUTINE
-C     WILL RE-INITIALIZE PLOTTAB.PLT AND START WRITING INTO
-C     IT. ON MOST COMPUTER WHEN YOU PRINT A FILE THE SYSTEM
-C     WILL MAKE A COPY OF THE FILE AND PUT THE COPY INTO THE
-C     PRINT QUEUE - SO THAT YOU CAN IMMEDIATELY MODIFY THE
-C     ORIGINAL FILE WITHOUT EFFECTING THE FILE TO BE PRINTED.
-C     IF YOUR SYSTEM DOES THIS YOU NEED NOT DELAY UNTIL THE
-C     PLOT HAS BEEN PRINTED - IF YOUR SYSTEM DOES NOT DO THIS
-C     YOU MUST DELAY - YOU WILL HAVE TO MODIFY SENDOUT TO
-C     ACCOMPLISH THIS.
-C
+C-Title  : Subroutine STARPLOT
+C-Purpose: Calcomp-like graphics PostScript Interface
+C-Version:
+C-V  02/01 - Update instructions for use.
+C-V        - Conform with "%%Page: n m" DSC format.
+C-Author : (?) Based on a version of STARPLOT obtained from D.E.Cullen,
+C-A            Modified by A.Trkov, IAEA, Vienna.
+C-M
+C-M  STARPLOT Users' Guide
+C-M  =====================
+C-M
+C-M  PURPOSE
+C-M  =======
+C-M  Hard copy version of Calcomp like graphics interface for use on
+C-M  a variety of computers. This routine produces postscript formatted
+C-M  file "plot.plt"that can be viewed with a PostScript viewer or
+C-M  sent to a PostScript printer.
+C-M
+C-M  The only active entry points are:
+C-M
+C-M  (1) STARPLOT - Initialize plotter
+C-M  (2) ENDPLOTS - End all plotting
+C-M  (3) NEXTPLOT - End of a plot
+C-M  (4) PLOT     - Move or draw
+C-M  (5) MYSIZE   - Define local plotter size
+C-M  (6) INTERACT - Indicate not in interactive mode
+C-M  (7) SENDOUT  - Send plot to printer
+C-M
+C-M  Dummy routines, only used by the interactive version of plottab:
+C-M
+C-M  (1) BOXCOLOR - Fill a rectangle with color
+C-M  (2) NEWPLOT  - Blank the screen
+C-M  (3) PEN      - Change color
+C-M  (5) MOUSEY   - Test of keyboard or mouse input
+C-M  (6) SHOWTEXT - Display interactive text
+C-M
+C-M  COMPUTER DEPENDENCE
+C-M  ===================
+C-M  There should be no computer dependent coding in this routine.
+C-
 C===============================================================================
       SAVE
       DIMENSION XSIZE(2),YSIZE(2)
@@ -64,20 +46,23 @@ C
 C     OUTPUT UNIT NUMBER
 C
       DATA IDEV/16/
+C***** TRKOV
+      DATA NPLOT/0/
+C***** TRKOV
 C
 C     DEFINE STANDARD PLOT SCALING.
 C
 C***** OLD
-C     DATA XMIN/-0.4947/
-C     DATA XMAX/13.9947/
-C     DATA YMIN/-0.3/
-C     DATA YMAX/10.3/
+      DATA XMIN/-0.4947/
+      DATA XMAX/13.9947/
+      DATA YMIN/-0.3/
+      DATA YMAX/10.3/
 C***** OLD
 C***** TRKOV
-      DATA XMIN/ 0./
-      DATA XMAX/24./
-      DATA YMIN/ 0./
-      DATA YMAX/17./
+C     DATA XMIN/ 0./
+C     DATA XMAX/24./
+C     DATA YMIN/ 0./
+C     DATA YMAX/17./
 C***** TRKOV
 C
 C     TRANSLATION FROM INPUT INCHES TO OUTPUT UNITS
@@ -142,21 +127,34 @@ C
 C-----OPEN FILE FOR PLOTTING STROKES.
 C***** OLD
 C     OPEN(IDEV,FILE='PLOTTAB.PLT')
+C     WRITE(IDEV,10) IPLOT,THICKNES
+C  10 FORMAT(
+C    1 '%!PS-Adobe-2.0'/
+C    2 '%%Creator: STARPLOT'/
+C    2 '585 27 translate'/
+C    4 '%%Page:',I4/
+C    5 '90 rotate'/
+C    6 'newpath'/
+C    7 F4.1,' setlinewidth'/
+C    8 ' 1 setlinecap'/
+C    9 ' 1 setlinejoin')
 C***** OLD
 C***** TRKOV
-      IF(IPLOT.LE.1) OPEN(IDEV,FILE='plot.ps')
-C***** TRKOV
-      WRITE(IDEV,10) IPLOT,THICKNES
+      IF(IPLOT.LE.0) OPEN(IDEV,FILE='plot.ps')
+      IF(IPLOT.LE.0) WRITE(IDEV,10)
+      WRITE(IDEV,12) IPLOT+1,IPLOT+1,THICKNES
    10 FORMAT(
      1 '%!PS-Adobe-2.0'/
-     2 '%%Creator: STARPLOT'/
-     2 '585 27 translate'/
-     4 '%%Page:',I4/
+     2 '%%Creator: STARPLOT')
+   12 FORMAT(
+     3 '585 27 translate'/
+     4 '%%Page:',2I4/
      5 '90 rotate'/
      6 'newpath'/
      7 F4.1,' setlinewidth'/
      8 ' 1 setlinecap'/
      9 ' 1 setlinejoin')
+C***** TRKOV
 C-----INITIALIZE STROKE COUNT IN CURRENT SET OF STROKES.
       ICNT=0
       LASTPEN=0
@@ -213,6 +211,10 @@ C     END OF ALL PLOTTING - IF ANY OUTPUT REMAINS, FINISH LAST PLOT.
 C
 C===============================================================================
       IF(ICOUNT.GT.0) GO TO 90
+C***** TRKOV
+      WRITE(IDEV,82) IPLOT
+   82 FORMAT('%%Pages:',I4)
+C***** TRKOV
       RETURN
       ENTRY NEXTPLOT
 C===============================================================================

@@ -1,35 +1,24 @@
                        E M P I R E  I I
 
-                         version 2.17beta
-                         (Montenotte)
+                         version 2.17
+                         (Millesimo)
 
-                      27 November, 2001
+                      15 February, 2002
 
-Installation:
+Compilation:
 
-On UNIX systems just run Install inside the main empire directory.
+On UNIX systems just run 'Compile' script inside the main empire 
+directory. This will compile all components of the package including
+utility codes. If you have used 'setup-emp' script to install 
+EMPIRE-II this step is not needed as the whole package should 
+already be compiled.
 
 Running:
 
 Use lrun.tcl script in the empire/work directory. This needs Tcl/Tk
 and bash shell installed. Otherwise one can use scripts also provided in the
-empire/work directory. Please refer to empire-2.13 write-up for more
-details.
-
-Please note that:
-
-1. EXFOR library is not provided with this distribution. You should copy
-   or link EXFOR/subent directory from empire-2.13 or later to 
-   empire/EXFOR/subent, e.g., being in empire/EXFOR type
-   ln -s (path to empire-2.13)/empire/EXFOR/subent subent
-   Do NOT replace other files in the EXFOR dir as the new ones are different.
-
-3. Documentation has not yet been updated and is not provided. Use the one
-   of empire-2.13 and the file Empire-Degas-Ecis.txt. The latter one
-   together with the on-line help (EMPIRE input) contain enough details for
-   using new features of the code.
-
-3. List of new features and bug fixes is contained in the WHATSNEW file.
+empire/work directory. Please refer to EMPIRE-2.17 write-up in the
+empire/doc directory for more details.
 
 
 Report problems to: herman@ndsalpha.iaea.org

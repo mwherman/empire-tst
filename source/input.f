@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-27 17:47:40 $
-Ccc   * $Id: input.f,v 1.6 2001-11-27 17:47:40 mike Exp $
+Ccc   * $Date: 2002-04-05 17:03:33 $
+Ccc   * $Id: input.f,v 1.7 2002-04-05 17:03:33 mike Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1301,7 +1301,7 @@ C-----set ground state *** done ***
 C--------constructing input and filenames
          WRITE(ctmp3, '(I3.3)')iz
          finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
      &        ERR = 300)
       ELSE
          REWIND 13
@@ -1310,14 +1310,18 @@ C--------constructing input and filenames
      &     ngamr, nmax, itmp2, qn
 C-----nmax is a number of levels that constitute a complete scheme as
 C-----estimated by Belgya for RIPL-2.
-C-----It is used, but I visual checking with FITLEV=2 is always recommended.
+C-----It is used, but a visual check with FITLEV is always recommended.
       IF(ia.NE.iar .OR. iz.NE.izr)THEN
          DO ilv = 1, nlvr + ngamr
             READ(13, '(A1)')dum
          ENDDO
          GOTO 100
       ELSE
-C--------create file with levels *.lev
+C--------create file with levels (*.lev)
+C--------NLV   number of levels with unique spin and parity
+C--------NCOMP number of levels up to which the level scheme is estimated
+C--------to be complete
+
          IF(.NOT.FILevel)THEN
             BACKSPACE(13)
             READ(13, '(A80)')ch_iuf
@@ -1326,6 +1330,7 @@ C--------create file with levels *.lev
          IF(nlvr.NE.0)THEN
             IF(NLV(Nnuc).EQ.1 .AND. nmax.GT.1)NLV(Nnuc)
      &         = MIN(NDLV, nmax)
+C-----------limit to max. of 40 levels if ENDF active     
             IF(ENDf.NE.0.0D0)NLV(Nnuc) = MIN(NLV(Nnuc), 40)
             IF(NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1)NCOmp(Nnuc)
      &         = MIN(NDLV, nlvr)
@@ -1612,7 +1617,7 @@ C-----constructing input and filenames
       IF(.NOT.FILevel)THEN
          WRITE(ctmp3, '(I3.3)')Iz
          finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
      &        ERR = 200)
       ELSE
          REWIND(13)
@@ -1803,7 +1808,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.17beta  |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.17      |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |        (Millesimo)         |'
       WRITE(6, *)'                       |                            |'
@@ -3675,13 +3680,13 @@ C
 C Local variables
 C
       CHARACTER*80 exforec
-      CHARACTER*33 filename, toplast, topname
+      CHARACTER*36 filename, toplast, topname
       INTEGER iend, nnuc
       INTEGER INDEX
       CHARACTER*115 indexrec
       CHARACTER*5 quantity(5)
       CHARACTER*10 reaction(2)
-      CHARACTER*25 subent
+      CHARACTER*8 subent
 C-----constant parameters for EXFOR retrieval
       DATA reaction/'N,F       ', 'N,TOT     '/
       DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
@@ -3696,7 +3701,7 @@ C 25  CLOSE(19, STATUS = 'DELETE')
 C 50  CONTINUE
       OPEN(UNIT = 19, FILE = 'EXFOR.DAT', STATUS = 'NEW', ERR = 99999)
 C-----open EXFOR index
-      OPEN(UNIT = 20, FILE = '../EXFOR/REAC_SIG.TXT', STATUS = 'OLD')
+      OPEN(UNIT = 20, FILE = '../EXFOR/X4-INDEX.TXT', STATUS = 'OLD')
 C-----
 C-----scan EXFOR index for relevant subentries
 C-----
@@ -3726,20 +3731,10 @@ C-----
 C-----retrive EXFOR entry including top subentry 001
 C-----
       toplast = ' '
-      filename = '../EXFOR/subent'
-      iend = INDEX(filename, ' ')
-      filename(iend:iend + 1) = '/'
-      iend = iend + 1
-      filename(iend:iend + 3) = subent
-      iend = iend + 3
-      filename(iend:iend + 1) = '/'
-      iend = iend + 1
-      filename(iend:iend + 8) = subent
-      iend = iend + 8
-      topname = filename
-      topname(iend - 3:iend) = '001'
-      filename(iend:iend + 4) = '.txt'
-      topname(iend:iend + 4) = '.txt'
+      filename = '../EXFOR/subent'//'/'//subent(1:2)//'/'//subent(1:4)//
+     &'/'//subent(1:8)//'.txt'
+      topname = '../EXFOR/subent'//'/'//subent(1:2)//'/'//subent(1:4)//'
+     &/'//subent(1:5)//'001.txt'
       IF(topname.NE.toplast)THEN
          OPEN(UNIT = 22, FILE = topname, ERR = 600, STATUS = 'OLD')
  250     READ(22, 99001, END = 300)exforec
@@ -3912,7 +3907,7 @@ C
       IF(.NOT.FILevel)THEN
          WRITE(ctmp3, '(I3.3)')iz
          finp = 'Z'//ctmp3//'.DAT'
-         OPEN(13, FILE = '../data/RIPL/levels/'//finp, STATUS = 'OLD', 
+         OPEN(13, FILE = '../RIPL-2/LEVELS/'//finp, STATUS = 'OLD', 
      &        ERR = 300)
       ELSE
          REWIND(13)
@@ -3947,7 +3942,7 @@ C
 C-----levels for target NNUC copied to file TARGET.lev
       LMAxcc = 4
       IDEfcc = 4
-      DO ilv = 1, MAX_COLL
+      DO ilv = 1, NDCOLLEV
          DO j = 2, IDEfcc, 2
             D_Def(ilv, j) = 0
          ENDDO

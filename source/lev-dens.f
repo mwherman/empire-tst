@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-27 17:47:41 $
-Ccc   * $Id: lev-dens.f,v 1.4 2001-11-27 17:47:41 mike Exp $
+Ccc   * $Date: 2002-04-05 17:03:42 $
+Ccc   * $Id: lev-dens.f,v 1.5 2002-04-05 17:03:42 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -1715,11 +1715,11 @@ CCC   *********************************************************************
 CCC   *                                                         CLASS:PPU *
 CCC   *                      R O H F B C S                                *
 CCC   *                                                                   *
-CCC   *  READS LEVEL DENSITIES CALCULATED IN THE FRAME OF THE HARTREE-    *
-CCC   *  FOCK-BCS MODEL AND STORED IN THE TABLES (RIPL-2) AND INTERPOLATES*
-CCC   *  THEM LINEARILY IN LOG TO THE EMPIRE ENERGY GRID.                 *
-CCC   *  LEVEL DENSITIES WERE GENERATED AND PROVIDED TO RIPL-2 BY         * 
-CCC   *  S. GORIELY.                                                      *
+CCC   *  Reads level densities calculated in the frame of the Hartree-    *
+CCC   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
+CCC   *  them linearily in log to the EMPIRE energy grid.                 *
+CCC   *  level densities were generated and provided to RIPL-2 by         * 
+CCC   *  S. Goriely.                                                      *
 CCC   *                                                                   *
 CCC   *                                                                   *
 CCC   *                                                                   *
@@ -1786,7 +1786,7 @@ C-------------------------------------------------------------------
          Rhouj(j) = 0.
       ENDDO
       WRITE(filename, 99001)iz
-99001 FORMAT('../data/RIPL/densities/total/HFBCS/Z', i3.3, '.DAT')
+99001 FORMAT('../RIPL-2/DENSITIES/TOTAL/HFBCS/Z', i3.3, '.DAT')
       OPEN(UNIT = 34, FILE = filename)
  100  READ(34, 99002, ERR = 100, END = 300)car2, izr, iar
 99002 FORMAT(23x, a2, i3, 3x, i3)

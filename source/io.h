@@ -41,11 +41,6 @@ c
       FILEVEL=.TRUE.
       GOTO 888
  777  FILEVEL=.FALSE.
-*-IF VMS
-*-    OPEN(UNIT=13,FILE='[-.data]orsi.liv', STATUS='OLD')
-*-ELSEIF LINUX
-C     OPEN(UNIT=13,FILE='../data/orsi.liv' ,STATUS='OLD')
-*-ENDIF
       OPEN(UNIT=14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
 C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
@@ -90,8 +85,7 @@ C     Added to check if file is not empty
 *-   *,STATUS='OLD')
 *-    OPEN(UNIT=25,FILE='[-.data]nix-moller-audi.dat'
 *-   *,STATUS='OLD')
-*-    RIPL OMP database
-*-    OPEN(UNIT=26,FILE='[-.data]omp.ripl'
+*-    OPEN(UNIT=26,FILE='[-.RIPL-2.OPTICAL.OM-DATA]OM-PARAMETER-U.DAT'
 *-   *,STATUS='OLD')
 *-ELSEIF LINUX
       OPEN(UNIT=23,FILE='../data/nparac.dat'
@@ -100,14 +94,12 @@ C     Added to check if file is not empty
      *,STATUS='OLD')
       OPEN(UNIT=25,FILE='../data/nix-moller-audi.dat'
      *,STATUS='OLD')
-C     RIPL OMP database
-      OPEN(UNIT=26,FILE='../data/omp.ripl'
-C     OPEN(UNIT=26,FILE='../data/omparameter.dat'
-     *,STATUS='OLD')
+      OPEN(UNIT=26,FILE='../RIPL-2/OPTICAL/OM-DATA/OM-PARAMETER-U.DAT
+     *',STATUS='OLD')
 *-ENDIF
-c     OPEN(UNIT=30,FILE='GAMMA.DAT')
-      OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
-      OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+C     OPEN(UNIT=30,FILE='GAMMA.DAT')
+C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
+C     OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
 
 
 

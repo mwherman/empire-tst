@@ -242,7 +242,8 @@ LEVDEN 	Selects level density approach ,
           parameters derived from the shell-model,
      = 2. Gilbert-Cameron level densities, adjusted to experimental a values
           and to discrete levels ,
-     > 2. Fermi gas with deformation dependent collective effects and a=A/VAL.
+     = 3. microscopic HF-BCS level densities,                                 
+     > 3. Fermi gas with deformation dependent collective effects and a=A/VAL.
 
 ATILNO   systematics' value of the asymptotic level density parameter will
          be multiplied by VAL for the nucleus with Z=I1 and A=I2

@@ -1,10 +1,32 @@
 
+             Changes in version 2.17 with respect to 2.17beta
+                      Vienna,   February  2002
+
+1. Bug in adding CN contribution to angular distributions for discrete 
+   levels corrected. Gammas were added to CSAlev(.,.,0) in HF-comp.f
+   with 0 being out of dimension. Adding of gammas is now blocked. Thanks
+   to V. Plujko for pointing it out.
+2. PLOTC4 updated by A. Trkov to produce spectra (including 
+   double-differential ones) for outgoing protons and alphas. Structure 
+   of the PostScript files improved.
+3. RIPL files placed in the empire/RIPL-2 directory following RIPL-2
+   structure and naming convention (compatibility with the RIPL-2 CD-ROM).
+4. Optical model database again updated to the preliminary version form RIPL-2
+5. EXFOR database updated to the version of 18.05.2001 (NOTE: previous EXFOR
+   database will NOT work due to a different directory structure).
+6. File with levels (14) closed at the end.
+7. The new 'setup-emp' script assists installation procedure and allows
+   to use EXFOR library and/or HF-BCS level densities directly from the
+   CD-ROM without copying them onto the hard disk.
+8. EMPIRE manual accessible from the GUI ("Help -> EMPIRE manual" button)
+   
+
              Changes in version 2.17beta with respect to 2.16.2 
                       Vienna,   November  2001
 
 1. Dispersive optical model potential implemented (SCAT2, ECIS, ORION3)
    (R. Capote)
-2. Optical model database updated to the preliminary version of RIPL-2
+2. Optical model database updated to the preliminary version form RIPL-2
    (including 4 dispersive omp) (R. Capote)
 3. Discrete levels database updated to the preliminary version of RIPL-2
    (R. Capote)
@@ -16,9 +38,9 @@
 6. GUI starts with gvim editor selected by default (M. Herman)
 7. Two compilation warnings in tl.f fixed (M. Herman)
 8. Cumulative plots of discrete levels created as a PostScript file rather
-   than being dumpped onto the screen. Stored as *-cum.ps and available 
+   than being dumped onto the screen. Stored as *-cum.ps and available 
    through GUI (M. Herman)
-9. Damping of the rotational level density ehancement below BCS critical
+9. Damping of the rotational level density enhancement below BCS critical
    energy made consistent with the one above critical energy. Removes 
    discontinuity at critical energy for perfectly spherical nuclei (def=0)
    (M. Herman)
@@ -54,7 +76,7 @@ To do:
 1. EXFOR retrieval using FORTRAN instead of UNIX 'grep'
 2. Fission barrier set to 1000 MeV for Z<19
 3. GDR second hump energy set to 0 for spherical nuclei
-4. Temperature in the generalized Lorenzian protected against 0 excitation
+4. Temperature in the generalized Lorentzian protected against 0 excitation
    energy
 5. Plotc4.f improved (A. Trkov) to allow for up to 23 data sets to be drawn
    on a single plot. Plotc4 input modified to include whole energy range.
@@ -74,7 +96,7 @@ To do:
 13.Fixed bug in flux conservation when GST option selected but
    MSC gamma channel closed.
 14.New version of SCAT2 introduced by R. Capote
-15.Link to ECIS for calculation of the elasic, absorption and cross 
+15.Link to ECIS for calculation of the elastic, absorption and cross 
    sections to discrete collective levels within rotational and 
    vibrational CC model.  Includes automatic selection of collective 
    levels (R. Capote). 
@@ -92,12 +114,12 @@ To do:
    the MT list for ZVView plotting.
 23.'zvpl' script added for plotting excitation function for any cross section 
    from the main EMPIRE output (*.lst)
-24.'run-piece-wise' script aded for running up to 3 different inputs for the 
+24.'run-piece-wise' script added for running up to 3 different inputs for the 
     same case in the 3 non-overlapping energy ranges (incident energies inside 
     and among the 3 ranges must increase monotonically). 
 25.Division by 0 in fitting field parameters in MSD-tristan.f protected.     
 26.GUI modified to include 'zvpl' script and allow for merging ZVV plots. 
-27.Form factor for the l=0 transitions in MSD controled from the optional
+27.Form factor for the l=0 transitions in MSD controlled from the optional
    input (default: standard surface form factor)
 28.Provision for use of combined preequilibrium models in a single run.
 29.'zvcomb' script added to combine various existing ZVView plots.
@@ -165,7 +187,7 @@ To do:
              Changes in version 2.13 with respect to 2.12.2
                       Vienna,   March 2000 
 
-1.  general clean-up of the Fortran source
+1.  general clean-up of the FORTRAN source
 2.  new organization of modules that reflects physical contents
 3.  check whether  MSD cross section is not larger than the fusion 
     cross section
