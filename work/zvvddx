@@ -7,7 +7,7 @@ rm LSTTAB.CUR LSTTAB.PNT PLOTC4.LST 2>/dev/null
 ln -sf ../../work/$file.c4 C4.DAT
 ln -sf ../../work/$file-s.endf ENDF.DAT
 ln -sf ../../work/$file-log.plotc4 PLOTC4.LST
-lsttab <LSTTAB.INP
+./lsttab <LSTTAB.INP
 mv LSTTAB.CUR ../c4zvd/LSTTAB.CUR
 mv LSTTAB.PNT ../c4zvd/LSTTAB.PNT
 cd ../c4zvd
