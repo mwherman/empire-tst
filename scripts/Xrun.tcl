@@ -3284,7 +3284,7 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_8_0.che120 {
         array set save {-background 1 -labelfont 1 -relief 1}
         namespace eval subOptions {
-            array set save {-activebackground 1 -activeforeground 1 -anchor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightcolor 1 -highlightthickness 1 -justify 1 -offvalue 1 -onvalue 1 -padx 1 -selectcolor 1 -text 1 -variable 1}
+            array set save {-activebackground 1 -activeforeground 1 -anchor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightcolor 1 -highlightthickness 1 -justify 1 -offvalue 1 -onvalue 1 -padx 1 -relief 1 -selectcolor 1 -text 1 -variable 1}
         }
     }
     namespace eval ::widgets::$site_8_0.fra122 {
@@ -3292,7 +3292,7 @@ proc vTcl:project:info {} {
     }
     set site_9_0 $site_8_0.fra122
     namespace eval ::widgets::$site_9_0.but123 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -state 1 -text 1 -wraplength 1}
     }
     namespace eval ::widgets::$site_9_0.but124 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -wraplength 1}
@@ -4260,9 +4260,9 @@ exec $editor $file.inp &} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {exec xterm -e ../scripts/run $file &
+ddlist
 adjourn .top75
-# create list of possible ddx plots 
-ddlist} \
+# create list of possible ddx plots} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
         -pady 1m -relief raised -text {Run full package} 
@@ -4280,9 +4280,10 @@ if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/verify 
 if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file 1} 
 if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e ../scripts/plot $file} 
 
-adjourn .top75
 # create list of possible ddx plots 
-ddlist} \
+ddlist
+
+adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Run selected ->} 
@@ -4300,8 +4301,8 @@ ddlist} \
         -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     pack $site_11_0.cpd75 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -ipady 5 -padx 5 \
-        -pady 5 -side bottom 
+        -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
+        -side top 
     ::iwidgets::checkbox $site_10_0.che77 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* \
@@ -5418,18 +5419,18 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -justify left -offvalue { } -onvalue .c4 -selectcolor orange \
         -text {C4 file} -variable ckc4 
     $site_8_4.che119 add chk7 \
-        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue 0 -onvalue 1 -selectcolor #b03060 \
+        -justify left -offvalue n -onvalue 0001_ -selectcolor green \
         -text {neutron Tl's} -variable ctln 
     $site_8_4.che119 add chk8 \
-        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue 0 -onvalue 1 -selectcolor #b03060 \
+        -justify left -offvalue n -onvalue 0101_ -selectcolor green \
         -text {proton Tl's} -variable ctlp 
     ::iwidgets::checkbox $site_8_4.che120 \
         -background #e6e6e6 \
@@ -5441,64 +5442,64 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -omp.ripl -padx 1 \
+        -justify left -offvalue { } -onvalue -omp.ripl -padx 1 -relief flat \
         -selectcolor orange -text {OM parameters} -variable ckriplomp 
     $site_8_4.che120 add chk1 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -omp.dir -padx 1 \
+        -justify left -offvalue { } -onvalue -omp.dir -padx 1 -relief flat \
         -selectcolor orange -text {OMP for direct} -variable ckdiromp 
     $site_8_4.che120 add chk2 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue *.zvd -padx 1 \
+        -justify left -offvalue { } -onvalue *.zvd -padx 1 -relief flat \
         -selectcolor orange -text {ZVV plots} -variable ckzvv 
     $site_8_4.che120 add chk3 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue .lev -padx 1 -selectcolor red \
-        -text levels -variable cklev 
+        -justify left -offvalue { } -onvalue .lev -padx 1 -relief flat \
+        -selectcolor red -text levels -variable cklev 
     $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -lev.col -padx 1 \
+        -justify left -offvalue { } -onvalue -lev.col -padx 1 -relief flat \
         -selectcolor red -text {collective levels} -variable ckcollev 
     $site_8_4.che120 add chk5 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue .inp -padx 1 -selectcolor red \
-        -text {EMPIRE input} -variable ckinp 
+        -justify left -offvalue { } -onvalue .inp -padx 1 -relief flat \
+        -selectcolor red -text {EMPIRE input} -variable ckinp 
     $site_8_4.che120 add chk6 \
-        -activebackground #f6f7f6 -activeforeground black -anchor w \
+        -activebackground #f6f7f6 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -inp.fis -padx 1 \
+        -justify left -offvalue { } -onvalue -inp.fis -padx 1 -relief flat \
         -selectcolor red -text {fission input} -variable ckfisinp 
     $site_8_4.che120 add chk7 \
-        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue 0 -onvalue 1 -padx 1 -selectcolor #b03060 \
-        -text {alpha Tl's} -variable ctla 
+        -justify left -offvalue n -onvalue 0204_ -padx 1 -relief flat \
+        -selectcolor green -text {alpha Tl's} -variable ctla 
     $site_8_4.che120 add chk8 \
-        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue 0 -onvalue 1 -padx 1 -selectcolor #b03060 \
-        -text {L.I. Tl's} -variable ctli 
+        -justify left -offvalue 0 -onvalue 1 -padx 1 -relief flat \
+        -selectcolor green -text {Tl directory} -variable ctldir 
     frame $site_8_4.fra122 \
         -background #e6e6e6 -height 75 -highlightbackground #dcdcdc \
         -width 125 
@@ -5507,10 +5508,11 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #dcdcdc \
-        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \nset\ detlist\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\ \$ctli\n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ ../scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ exec\ rm\ -f\ \$file-tl/*\$el*\n\}\n\nadjourn\ .top75\n\} \
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ ../scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nset\ work\ \[pwd\]\nset\ detlist\ \"\"\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\n\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"n\"\ \}\ continue\n\ \ \ set\ detl\ \[glob\ -path\ \$work/\$file-tl/\ \$el*\]\n\ \ \ set\ detll\ \[split\ \$detl\ \"\ \"\]\n\ \ \ foreach\ edel\ \$detll\ \{\n\ \ \ file\ delete\ \$edel\n\ \ \ \}\n\}\nif\ \{\$ctldir\ ==\ 1\}\ \{\n\ \ \ file\ delete\ -force\ \$work/\$file-tl\n\}\n\nadjourn\ .top75\n\} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
-        -relief raised -text {Delete selected files} -wraplength 60 
+        -relief raised -state normal -text {Delete selected files} \
+        -wraplength 60 
     vTcl:DefineAlias "$site_9_0.but123" "Button51" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but123 "$site_9_0.but123 Button $top all _vTclBalloon"
     bind $site_9_0.but123 <<SetBalloon>> {
@@ -6002,6 +6004,7 @@ close $mulfile} \
     $site_11_0.opt86 insert 48 {PLOTC4-plots}
     $site_11_0.opt86 insert 49 {PLOTC4-plots}
     $site_11_0.opt86 insert 50 {PLOTC4-plots}
+    $site_11_0.opt86 insert 51 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6404,12 +6407,6 @@ $file.inp &}} -label {Create input}
         -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4 
-    $site_3_0.menu93 add separator \
-        
-    $site_3_0.menu93 add command \
-        \
-        -command {exec xterm -e ../source/ecis03 <$file-ecis.in >$file-ecis.out &} \
-        -label ECIS 
     $top.m88 add cascade \
         -menu "$top.m88.menu94" -label Outputs 
     set site_3_0 $top.m88
