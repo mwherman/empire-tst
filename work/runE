@@ -8,7 +8,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta12            '
+echo '                     V E R S I O N  2.19.beta14            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -87,7 +87,7 @@ if [ -f $file.exf ]; then
    echo 'Using existing file with EXFOR data:'  $file.exf
 fi
 ### IFIN-HH ###
-tl=`ls $file-*.tl`
+tl=`ls $file-*.tl 2>/dev/null`
 for i in $tl; do
 # if [ -s $file-*.tl ]; then
 #   rename $file TARGET $file-*.tl 

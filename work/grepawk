@@ -13,4 +13,4 @@ awk '{if($1 ~ "Reaction")
      >> $1.res
 
 echo '//'>>$1.res
-../util/c4zvd/zvv93l.exe $1.res/u
+../util/c4zvd/zvview.exe $1.res/u

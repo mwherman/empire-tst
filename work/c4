@@ -1,6 +1,7 @@
 #! /bin/sh -
 #SCRIPT TO UN X4TOC4       
 
+work=`pwd`
 file=$1
 cd ../util/x4toc4
 ln  -sf $work/$file.exf X4.DAT

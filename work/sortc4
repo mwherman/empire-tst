@@ -21,12 +21,12 @@ fi
    # SORT C4 FILE
 
    cd ../util/x4toc4
-   ln  -sf $work/$file.c4 c4.out
+   ln  -sf $work/$file.c4 C4.DAT
    # RUN c4sort TO SORT C4 DATA   
    cd ../c4sort
    ./c4sort
    cd $work
-   mv ../util/x4toc4/c4.out $file.c4
+   mv ../util/x4toc4/C4.DAT $file.c4
    if [ -s $file.c4 ]; then
       echo 'EXFOR data in computational format are stored in :'$file.c4
       else

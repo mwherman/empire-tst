@@ -92,4 +92,4 @@ echo 'bot: 0'>>PLOT.zvd
 echo 'thick: 1'>>PLOT.zvd
 echo '#end control.tit/c'>>PLOT.zvd
 
-../util/c4zvd/zvv95l.exe PLOT.zvd
+../util/c4zvd/zvview.exe PLOT.zvd

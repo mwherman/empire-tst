@@ -5,5 +5,5 @@ for file in $*
 do
 list=$list$file$blank
 done
-../util/c4zvd/zvv95l.exe $list 
+../util/c4zvd/zvview.exe $list 
 exit
