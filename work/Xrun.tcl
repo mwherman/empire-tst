@@ -3360,7 +3360,7 @@ global widget
 #   set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname
 #   exec xterm -e store $archdir $mulinputn
 #}
-exec xterm -e storemul $archdir/ $mulstname
+exec xterm -e ./storemul $archdir/ $mulstname
 if {$mulstname == ""} {
     exec mv default.inp $archdir/
     } else {
@@ -3561,12 +3561,12 @@ foreach el $stablist {
    }
    close $skelinp
    close $mulinput
-   exec xterm -e run $mulinputn
+   exec xterm -e ./run $mulinputn
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmintomp  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
    if {$el == ""} continue
-   eval exec cleansel $mulinputn $el
+   eval exec ./cleansel $mulinputn $el
       if {$el == $ckmlog} {
          exec rm -f $mulinputn.x42c4_errs
          exec rm -f $mulinputn.x42c4_lst
@@ -3836,7 +3836,7 @@ adjourn .top75} \
     }
     button $base.fra77.but86 \
         -activeforeground red \
-        -command {exec xterm -e run $file &
+        -command {exec xterm -e ./run $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 \
@@ -3848,7 +3848,7 @@ adjourn .top75} \
     }
     button $base.fra77.but87 \
         -activeforeground red \
-        -command {exec xterm -e runE $file &
+        -command {exec xterm -e ./runE $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 \
@@ -3931,7 +3931,7 @@ ddlist} \
         -width 10 
     button $base.fra77.button77 \
         -activebackground red -activeforeground White \
-        -command {exec clean $file &
+        -command {exec ./clean $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -highlightcolor #000000 \
@@ -3999,7 +3999,7 @@ exec $editor $file.inp &} \
     set site_10_0 [$site_8_0.lab94 childsite]
     button $site_10_0.but95 \
         -activeforeground red \
-        -command {exec xterm -e run $file &
+        -command {exec xterm -e ./run $file &
 adjourn .top75
 # create list of possible ddx plots 
 ddlist} \
@@ -4014,7 +4014,7 @@ ddlist} \
         -activebackground #dcdcdc -font {Helvetica -12 } -text or 
     button $site_10_0.but97 \
         -activeforeground red \
-        -command {exec xterm -e runE $file &
+        -command {exec xterm -e ./runE $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 -image {} -padx 1m -relief raised \
@@ -4025,7 +4025,7 @@ adjourn .top75} \
     }
     button $site_10_0.but98 \
         -activeforeground red \
-        -command {exec xterm -e format $file &
+        -command {exec xterm -e ./format $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 -image {} -padx 1m -relief raised \
@@ -4036,7 +4036,7 @@ adjourn .top75} \
     }
     button $site_10_0.but99 \
         -activeforeground red \
-        -command {exec xterm -e plot $file &
+        -command {exec xterm -e ./plot $file &
 adjourn .top75
 # create list of possible ddx plots 
 ddlist} \
@@ -4195,7 +4195,7 @@ ddlist} \
     set site_10_0 [$site_8_1.lab104 childsite]
     button $site_10_0.but95 \
         -activeforeground red \
-        -command {exec xterm -e c4 $file &
+        -command {exec xterm -e ./c4 $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 -image {} -padx 1m -pady 1m \
@@ -4206,7 +4206,7 @@ adjourn .top75} \
     }
     button $site_10_0.but97 \
         -activeforeground red \
-        -command {exec xterm -e sortc4 $file &
+        -command {exec xterm -e ./sortc4 $file &
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 -image {} -padx 1m -pady 1m \
@@ -4312,7 +4312,7 @@ adjourn .top75} \
     set site_8_2 [lindex [$base.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -background #d9d9d9 \
-        -dblclickcommand {exec xterm -e zvcomb [selection get] &} \
+        -dblclickcommand {exec xterm -e ./zvcomb [selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectmode extended -textbackground #ffffff \
@@ -4383,7 +4383,7 @@ adjourn .top75} \
         -font {Helvetica -12 } -text {Select MT:} 
     button $site_8_2.fra84.but96 \
         -activeforeground red \
-        -command {exec xterm -e zvd $file $mt &
+        -command {exec xterm -e ./zvd $file $mt &
 adjourn .top75} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -text {Plot  selected MT} -wraplength 120 
@@ -4393,7 +4393,7 @@ adjourn .top75} \
     }
     button $site_8_2.fra84.but88 \
         -activeforeground red \
-        -command {exec guizvv.tcl $file &
+        -command {exec ./guizvv.tcl $file &
 adjourn .top75} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -text {Launch ZVV interface } -wraplength 72 
@@ -4403,7 +4403,7 @@ adjourn .top75} \
     }
     button $site_8_2.fra84.but89 \
         -activeforeground red \
-        -command {exec xterm -e zvpl $file &
+        -command {exec xterm -e ./zvpl $file &
 adjourn .top75} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -text {ZVV plot from EMPIRE} -wraplength 72 
@@ -4502,7 +4502,7 @@ puts $lsttab ""
 close $lsttab
 #exec gvim LSTTAB.INP
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
-exec xterm -e zvvddx $file $multi &} \
+exec xterm -e ./zvvddx $file $multi &} \
         -font {Helvetica -12 } -foreground darkred -text {Plot the list } 
     bindtags $site_8_2.fra79.but81 "$site_8_2.fra79.but81 Button $base all _vTclBalloon"
     bind $site_8_2.fra79.but81 <<SetBalloon>> {
@@ -4803,7 +4803,7 @@ exec xterm -e zvvddx $file $multi &} \
         set ::vTcl::balloon::%W {Delete all project related files of the types selected with check buttons}
     }
     button $site_8_4.fra122.but124 \
-        -activeforeground Red -command {exec clean $file
+        -activeforeground Red -command {exec ./clean $file
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #d9d9d9 -image {} -padx 1m -pady 2m \
@@ -4814,7 +4814,7 @@ adjourn .top75} \
     }
     button $site_8_4.fra122.but125 \
         -activebackground Red -activeforeground White \
-        -command {exec clean $file
+        -command {exec ./clean $file
 exec rm -f $file.inp
 adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} -foreground darkred \
@@ -4832,7 +4832,7 @@ set exten [file extension $selecfile]
 if {$exten == ".ps"} {
   exec gv -landscape $selecfile &
 } elseif {$exten == ".zvd"} {
-  exec xterm -e zvcomb $selecfile &
+  exec xterm -e ./zvcomb $selecfile &
 } else {
   exec $editor $selecfile &
 }} \
@@ -4951,7 +4951,7 @@ set archexten [file extension $archfile]
 if {$archexten == ".ps"} {
   exec gv -landscape $archdir/$archfile &
 } elseif {$archexten == ".zvd"} {
-  exec xterm -e zvcomb $archdir/$archfile &
+  exec xterm -e ./zvcomb $archdir/$archfile &
 } else {
   exec $editor $archdir/$archfile &
 }} \
@@ -5013,7 +5013,7 @@ adjourn .top75} \
         -borderwidth 2 -height 75 -width 125 
     button $site_8_5.fra82.but84 \
         -activeforeground limegreen \
-        -command {exec xterm -e store $archdir $file 
+        -command {exec xterm -e ./store $archdir $file 
 adjourn .top75} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -text {<= Store project} 
@@ -5377,7 +5377,7 @@ adjourn .top75} \
     }
     button $site_8_7.fra84.fra79.but81 \
         -activeforeground red -command {cd ../
-exec xterm -e Compile
+exec xterm -e ./Compile
 cd work} \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -text {Make all} 
@@ -5548,19 +5548,19 @@ $file.inp &}} -label Create
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $base.m88.menu93 add command \
-        -command {exec xterm -e run $file &} -label Run+Form+Plot 
+        -command {exec xterm -e ./run $file &} -label Run+Form+Plot 
     $base.m88.menu93 add separator
     $base.m88.menu93 add command \
-        -command {exec xterm -e runE $file &} -label Run 
+        -command {exec xterm -e ./runE $file &} -label Run 
     $base.m88.menu93 add command \
-        -command {exec xterm -e format $file &} -label Format 
+        -command {exec xterm -e ./format $file &} -label Format 
     $base.m88.menu93 add command \
-        -command {exec xterm -e plot $file &} -label Plot 
+        -command {exec xterm -e ./plot $file &} -label Plot 
     $base.m88.menu93 add separator
     $base.m88.menu93 add command \
-        -command {exec xterm -e c4 $file &} -label X4TOC4 
+        -command {exec xterm -e ./c4 $file &} -label X4TOC4 
     $base.m88.menu93 add command \
-        -command {exec xterm -e sortc4 $file &} -label SORTC4 
+        -command {exec xterm -e ./sortc4 $file &} -label SORTC4 
     $base.m88.menu93 add separator
     $base.m88.menu93 add command \
         \
@@ -5595,11 +5595,11 @@ $file.inp &}} -label Create
         -command {exec gv $file.ps &} -label {PLOTC4 plots} 
     $base.m88.menu95 add separator
     $base.m88.menu95 add command \
-        -command {exec xterm -e zvpl $file &} -label {Create ZVV plot} 
+        -command {exec xterm -e ./zvpl $file &} -label {Create ZVV plot} 
     $base.m88.menu95 add command \
-        -command {exec xterm -e zvcomb &} -label {Merge ZVV plots} 
+        -command {exec xterm -e ./zvcomb &} -label {Merge ZVV plots} 
     $base.m88.menu95 add command \
-        -command {exec guizvv.tcl $file &} -label {Compare ZVV} 
+        -command {exec ./guizvv.tcl $file &} -label {Compare ZVV} 
     $base.m88.menu95 add separator
     $base.m88.menu95 add command \
         -command {exec gv -landscape $file-cum.ps &} -label {Cumul. levels} 
@@ -5643,9 +5643,9 @@ $file.inp &}} -label Create
     menu $base.m88.men77 \
         -disabledforeground #a1a4a1 -tearoff 0 
     $base.m88.men77 add command \
-        -command {exec clean $file &} -label {Clean project} 
+        -command {exec ./clean $file &} -label {Clean project} 
     $base.m88.men77 add command \
-        -command {exec clean $file
+        -command {exec ./clean $file
 exec rm -f $file.inp} -label {Delete project} 
     menu $base.m88.men78 \
         -disabledforeground #a1a4a1 -tearoff 0 
