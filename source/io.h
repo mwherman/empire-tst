@@ -83,7 +83,6 @@ C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
       OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
       OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
       OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
-C      OMPARF=.FALSE.
       OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
 C     Added to check if file is not empty
       READ(33,*,END=881)
@@ -108,7 +107,6 @@ C     Added to check if file is not empty
      *,STATUS='OLD')
       OPEN(UNIT=24,FILE='../data/ldp.dat'
      *,STATUS='OLD')
-C     OPEN(UNIT=25,FILE='OMPdata.dat')
       OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
