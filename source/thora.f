@@ -1,7 +1,13 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-03-17 19:48:16 $
+Ccc   * $Id: thora.f,v 1.2 2005-03-17 19:48:16 Capote Exp $
       SUBROUTINE THORA(IOUT)
+C
 C     R. Capote, March 2005
+C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
-C      (Elapsed time must be less than one month)
+C     Note: Elapsed time must be less than one month
+C
 C     (g77, g95, LAHEY, and MS FORTRAN compatible)
 C
       REAL BEGTIM,ENDTIM,BEGDAY,ENDDAY,DIFTIM,DIFTI1
@@ -41,7 +47,7 @@ C
  1001 FORMAT
      >(/22X,' START TIME: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
   101 FORMAT
-     >(/' START TIME: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
+     >(/1x,' START TIME: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
  1002 FORMAT
      >(/ 1X,' CURRENT TIME: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'
      > //1X,' CALCULATION TIME: ',I3,' MIN ',I2,' SEC'/)
