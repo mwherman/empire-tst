@@ -13,5 +13,6 @@ fi
 mv $file.inp ttt987654321.qqq
 rm $file\.* $file-*\.*  core 2>/dev/null 
 mv ttt987654321.qqq $file.inp 
+rm -r $file-tl 2>/dev/null
 exit
 
