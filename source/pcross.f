@@ -36,7 +36,7 @@ C     FORMAL PARAMETERS
       REAL*8 cross(NDEJC + 1), g(NDEJC + 1), pair(NDEJC + 1)
       REAL*8 em(PMAX), we(NDEJC + 1, PMAX, NDEX), spec(NDEJC + 1, NDEX),
      &       L(NDEJC + 1, PMAX), flm(4, 4), r(4, PMAX, NDEJC), 
-     &       eint(NDEX), fint(NDEX), emaxi, emini, phdj(NDLW)
+     &       eint(NDEX), fint(NDEX), emaxi, emini, phdj(NDLW), ftmp
 C
 C     REAL FUNCTIONS
 C
@@ -73,11 +73,18 @@ C     Compound nucleus
       ac = A(1)
       zc = Z(1)
       gc = ROPar(1, 1)/PI26*GTIlnor(1)
+      pc = ROPar(3, 1)
+C
+C     By setting GTIlnor(1) to zero we are setting gc=A/13 !!
+C
       IF(gc.EQ.0.D0)THEN
-         gc = ac/8./PI26*GTIlnor(1)
-         pc = 0.
-      ELSE
-         pc = ROPar(3, 1)
+	   gc = ac/13.
+	   if(GTIlnor(1).GT.0.) gc = ac/13.*GTIlnor(1)
+	   ftmp=0.
+	   if(ac.gt.0.d0) ftmp= 12./sqrt(dble(float(ac)))
+       pc = ftmp                                           ! odd  
+	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.0) pc = 2*ftmp ! e-e
+	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.1) pc = 0      ! o-o
       ENDIF
 C     NEJcm + 1 correspond to the compound gamma emitting nucleus
       g(NEJcm + 1) = gc
@@ -125,14 +132,19 @@ C     NEJcm is the maximum number of particles emitted
          ENDIF
          nures(nejc) = nnur
          g(nejc) = ROPar(1, nnur)/PI26*GTIlnor(nnur)
+         pair(nejc) = ROPar(3, nnur)
+C
+C        By setting GTIlnor(nnur) to zero we are setting g(nejc)=A/13 !!
+C
          IF(g(nejc).EQ.0.)THEN
-            g(nejc) = ar/8./PI26*GTIlnor(nnur)
-            pair(nejc) = 0.
-         ELSE
-            pair(nejc) = ROPar(3, nnur)
+            g(nejc) = ar/13.
+ 	        if(GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur)
+	        ftmp=0.
+	        if(ar.gt.0.d0) ftmp= 12./sqrt(dble(float(ar)))
+            pair(nejc) = ftmp                                           ! odd  
+	        if(mod(ar,2).eq.0 .and. mod(zr,2).eq.0) pair(nejc) = 2*ftmp ! e-e
+   	        if(mod(ar,2).eq.0 .and. mod(zr,2).eq.1) pair(nejc) = 0      ! o-o
          ENDIF
-C--------adjusting g for proton emission
-c        IF(nejc.EQ.2) g(nejc) = g(nejc)*1.2
 C        Maximum and minimum energy bin
          DO  ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
@@ -175,7 +187,7 @@ C
             zr = zc - zo
 C
             IF(ao.EQ.1 .AND. zo.EQ.0)ff1 = 2.0173*ar/(ar + 1.0087) ! n
-            IF(ao.EQ.1 .AND. zo.EQ.1)ff1 = 2.0145*ar/(ar + 1.0073) !    p
+            IF(ao.EQ.1 .AND. zo.EQ.1)ff1 = 2.0145*ar/(ar + 1.0073) ! p
             IF(ao.EQ.4 .AND. zo.EQ.2)ff1 = 4.0015*ar/(ar + 4.0015) ! alpha
             IF(ao.EQ.3 .AND. zo.EQ.1)ff1 = 6.0298*ar/(ar + 3.0149) ! t
             IF(ao.EQ.2 .AND. zo.EQ.1)ff1 = 6.0408*ar/(ar + 2.0136) ! d
