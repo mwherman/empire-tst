@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-17 19:50:29 $
-Ccc   * $Id: input.f,v 1.93 2005-03-17 19:50:29 Capote Exp $
+Ccc   * $Date: 2005-03-18 23:46:09 $
+Ccc   * $Id: input.f,v 1.94 2005-03-18 23:46:09 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -193,13 +193,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -840,8 +840,7 @@ C
      & to RIPL #'',I4)') KTRompcc
             WRITE (6,*) ' '
          ENDIF
-C         DIRECT set temprarily to 1 for CCFUS calculation'
-         IF (CSRead.EQ.-2 .AND. DIRECT.EQ.0) DIRect = 1
+
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
@@ -4579,12 +4578,6 @@ c            CCFUS deformations
          beta3 = 0.05
       ENDIF
       NScc = max(iccfus-1,NScc,0)
-
-      if(IZAejc(0)/1000.gt.2 .OR. KTRlom(0,0).eq.0) THEN
-C        HI calculation, deformations retrieved, setting DIRECT to 0
-          DIRECT = 0
-          return
-       endif
 
 C--------locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
