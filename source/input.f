@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 09:53:55 $
-Ccc   * $Id: input.f,v 1.46 2004-11-30 09:53:55 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-11-30 14:06:36 $
+Ccc   * $Id: input.f,v 1.47 2004-11-30 14:06:36 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -290,13 +290,13 @@ C                Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
-C        IX4ret = 1 local MySQL server (to become 2.19 default)
+C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
