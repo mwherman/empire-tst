@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-09 14:50:40 $
-Ccc   * $Id: input.f,v 1.71 2005-02-09 14:50:40 Capote Exp $
+Ccc   * $Date: 2005-02-09 18:17:02 $
+Ccc   * $Id: input.f,v 1.72 2005-02-09 18:17:02 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -767,7 +767,7 @@ C             (to be replaced by Soukhovistkii & Capote dispersive CC OMP)
             KTRlom(0, 0) = 6400      ! Bojowald OMP for deuterons
          ELSEIF(AEJc(0).EQ.3 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0, 0) = 7100      ! Bechetti OMP for tritons
-         ELSEIF((AEJc(0).EQ.4.OR.AEJc(0).EQ.3) .AND. ZEJc(0).EQ.1) THEN
+         ELSEIF((AEJc(0).EQ.4.OR.AEJc(0).EQ.3) .AND. ZEJc(0).EQ.2) THEN
             KTRlom(0, 0) = 9600      ! Avrigeanu OMP for He-4 and He-3
 C           (McFadden global potential 9100 could be used)
          ENDIF
@@ -1163,22 +1163,21 @@ C--------fix-up deformations for coupled channels *** done ***
       ENDIF
       NLW = NDLW
       CSFus = CSRead
+
 C-----KTRLOM Optical Model control
 C-----set o.m.p. for the incident channel
-C     RCN 02/2004
-      KTRlom(0, 0) = 1
-      IF(AEJc(0).GT.4.0D0)THEN
-         KTRlom(0, 0) = 0
-      ELSE
-         DO nejc = 1, NDEJC
-            IF(ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))
-     &          KTRlom(0, 0) = KTRlom(nejc, 1)
-         ENDDO
-      ENDIF
+      DO nejc = 1, NDEJC
+       IF(ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))
+     &   KTRlom(0, 0) = KTRlom(nejc, 1)
+      ENDDO
+
+      IF(AEJc(0).GT.4.0D0) KTRlom(0, 0) = 0 ! HI
+
       IF(KTRompcc.GT.0 .AND. DIRect.EQ.2)THEN
          KTRlom(0, 0) = KTRompcc
          KTRlom(NPRoject, NTArget) = KTRompcc
       ENDIF
+
 C-----Plujko_new (set giant resonance parameters for target)
       GDRpar(1, 0) = EGDr1
       GDRpar(2, 0) = GGDr1
@@ -1882,7 +1881,7 @@ C
       WRITE(6, *) ' alpha     o. m. parameters: RIPL catalog number '
      &                 , KTRlom(3, 1)
       IF(NEMc.GT.0)
-     &WRITE(6, *) ' cluster o. m. parameters: RIPL catalog number '
+     &WRITE(6, *) ' cluster   o. m. parameters: RIPL catalog number '
      &              , KTRlom(NDEJC, 1)
 C
       WRITE(6, *)
