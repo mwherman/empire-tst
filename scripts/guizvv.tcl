@@ -601,11 +601,12 @@ gets $rcfl dir2
 gets $rcfl name3 
 gets $rcfl dir3
 close $rcfl
+set dir1 ""
 if {$argc > 0} {set root [lindex $argv 0]}
 if {$argc > 1} {set suf [lindex $argv 1]}
 if {$suf == "" && $name2 != ""} {set suf "comp"}
 if {$name2 == ""} {set suf ""}
-if {$name1 == ""} {set name1 "Empire-II"}
+if {$name1 == ""} {set name1 "Empire"}
 if {$dir1 == ""} {set dir1 [pwd]}
 }
 
