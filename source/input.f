@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: input.f,v 1.11 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Date: 2002-12-06 09:43:28 $
+Ccc   * $Id: input.f,v 1.12 2002-12-06 09:43:28 mike Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -649,7 +649,7 @@ C
             WRITE(6, *)' WARNING!!!! be taken into account'
             WRITE(6, *)' '
          ENDIF
-         IF(MSD.NE.0 .AND. A(NNUc).GT.1.0D0) THEN 
+         IF(MSD.NE.0 .AND. AEJc(0).GT.1.001D0) THEN 
             MSD = 0
             WRITE(6, *)' '
             WRITE(6, *)' WARNING!!!! MSD calculations suppressed'
@@ -1263,7 +1263,7 @@ C     the fission input is created if it does not exist
 C-------Fission temporary closed to allow standard calculations
 C-------for nuclei for which no fission barriers are available
 C-------next line should be deleted to enable fission
-C       FISsil(nnuc) = .FALSE.
+        FISsil(nnuc) = .FALSE.
         xfis = 0.0205*Z(nnuc)**2/A(nnuc)
         IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
       ENDDO

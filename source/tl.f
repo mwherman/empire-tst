@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: tl.f,v 1.9 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Date: 2002-12-06 09:43:36 $
+Ccc   * $Id: tl.f,v 1.10 2002-12-06 09:43:36 mike Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -259,7 +259,7 @@ C--------Imodel not used for non-inelastic channels
       MODelcc = IMOdel
 
 C     RCN 11/2002	
-C     IF (ND_nlv.GT.0) coll_defined=.TRUE.
+c     IF (ND_nlv.GT.0) coll_defined=.TRUE.
       IF (ND_nlv.GT.0 .and. NISotop.EQ.0) coll_defined=.TRUE.
 
       IF(IMOdel.EQ.1 .AND. (.NOT.coll_defined))THEN
