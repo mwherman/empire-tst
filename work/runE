@@ -212,13 +212,30 @@ if  [ -s $file.exf ]; then
         #rm $file.exf
     fi
 fi
+
+# REMOVE EMPTY FILES
+
+
+if [ ! -s $file-omp.dir ]; then 
+       rm $file-omp.dir  2>/dev/null
+fi
+if [ ! -s $file-omp.int ]; then 
+       rm $file-omp.int  2>/dev/null
+fi
+if [ ! -s $file-lev.col ]; then 
+       rm $file-lev.col  2>/dev/null
+fi
+if [ ! -s $file.war ]; then 
+       rm $file.war  2>/dev/null
+fi
+if [ ! -s $file-ecis.in ]; then 
+       rm $file-ecis.in  2>/dev/null
+fi
+if [ ! -s $file-ecis.out ]; then 
+       rm $file-ecis.out  2>/dev/null
+fi
+if [ ! -s $file-inp.fis ]; then 
+       rm $file-inp.fis  2>/dev/null
+fi
+
 exit
-
-
-
-
-
-
-
-
-

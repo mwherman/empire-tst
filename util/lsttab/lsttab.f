@@ -4,6 +4,7 @@ C-Purpose: Tabulate ENDF and EXFOR data in PLOTTAB format
 C-Author : A.Trkov, IAEA-NDS.
 C-Version: 00/12 Original code
 C-V  02/06 - Fix formal parameters calling DXSEND (A.Trkov).
+C-V  02/12 - Fix DXSEXF retrieval of elastic angular distrib (Trkov).
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -185,10 +186,10 @@ c...
       OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD')
       CALL DXSEND(LEF,ZA,ZAP,MF ,MTE,KEA,EIN,PAR,EP6,ES,SG
      1           ,RWO,NP,MXP,MXR,LTT,ELV)
-c...
-      print *,'                   mte,np',mte,np
-c...
-      IF(NP.LE.0) PRINT *,'DXSEND CUR:mt,kea,ein,par',mt,kea,ein,par
+      IF(NP.LE.0) THEN
+        PRINT *,'DXSEND ERROR - No matching curves for'
+        PRINT *,'       mt,kea,ein,par',mt,kea,ein,par
+      END IF
       CLOSE(UNIT=LEF)
 C* Prepare the ENDF comment header for the PLOTTAB curves file
       COM1=COM(M)
@@ -394,7 +395,7 @@ C* Test incident energy
         IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test outgoing particle and discrete level energy
         IF( MF.EQ.4 .AND.
-     &     ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
+     &    (PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) ) GO TO 20
 C* Test outgoing particle energy for correl.ang.distributions
         IF((MF.EQ.6 .AND. KEA.EQ.1) .AND.
      &     ABS(PR0-F7).GT.ETOL*F7 ) GO TO 20

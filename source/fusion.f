@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: fusion.f,v 1.6 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-04-02 21:47:40 $
+Ccc   * $Id: fusion.f,v 1.7 2003-04-02 21:47:40 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -322,12 +322,13 @@ C
          IF(POP(NEX(1), j, 1, 1)*10000.D0.GT.csmax)GOTO 300
          IF(POP(NEX(1), j, 2, 1)*10000.D0.GT.csmax)GOTO 300
       ENDDO
+  300 CONTINUE      
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
-C     NLW = NLW + 3
+      NLW = NLW + 13
 C-----check whether NLW is not larger then max spin at which nucleus
 C-----is still stable
- 300  IF(NLW.GT.JSTab(1))THEN
+      IF(NLW.GT.JSTab(1))THEN
          NLW = JSTab(1)
          IF(IOUt.GT.0)THEN
             WRITE(6, '('' Maximum spin to preserve stability is'',I4)')

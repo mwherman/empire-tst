@@ -95,25 +95,4 @@ Q GUI SHOWS UP BUT 'RUN' BUTTON DOES NOTHIG?
 
 A Most likely these are scripts that are not running properly. See above.
 
-Q EMPEND PRINTS A FEW LINES AND RUNS FOR EVER?
 
-A This is a deficiency of the current version of EMPEND. It happens when
-  all cross sections for a certain reaction requested in input are 0 because
-  the highest incident  energy is below the  threshold.  There are three 
-  ways of getting around the problem:
-
-  1. exclude calculations for the closed channels (decrease number of
-     emissions in input)
-
-  2. increase the highest incident energy above the threshold
-
-  3. change EMPEND input to the following:
-
-     OUTPUT.DAT
-     OUTPUT.ENDF
-     0 
-     1111
-
-     (NOTE: this option is NOT RECOMMENDED as the resulting ENDF file will
-     contain incident energies exactly as specified in the input and zero
-     cross sections at thersholds will be missing)

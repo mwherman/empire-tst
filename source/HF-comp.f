@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-12-06 09:43:20 $
-Ccc   * $Id: HF-comp.f,v 1.7 2002-12-06 09:43:20 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-04-02 21:47:40 $
+Ccc   * $Id: HF-comp.f,v 1.8 2003-04-02 21:47:40 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -520,39 +520,31 @@ C-----------level above the bin
 C           2.18+
             IF(eout.LT.0.0D0)GOTO 100
             cor = 1.0
-c-----------below are previous for testing
-C           2.17-
-C           cor = 1.0
-C           IF(eout.LT.DE)THEN
-C              IF(eout.LT.0.0D0)GOTO 100
-C              IF(eout.LT.DE)cor = 0.5
-C           ENDIF
-c-----------end testing
             sumdl = 0.0
             CALL TLLOC(Nnur, Nejc, eout, il, frde)
             smin = ABS(XJLv(i, Nnur) - SEJc(Nejc))
             smax = XJLv(i, Nnur) + SEJc(Nejc) + 0.01
             s = smin
-C-----------LOOP OVER CHANNEL SPIN ----------------------------------------
+C-----------loop over channel spin ----------------------------------------
  20         lmin = INT(ABS(xjc - s) + 1.01)
             lmax = INT(xjc + s + 1.01)
             lmax = MIN0(NLW, lmax)
-C-----------DO LOOP OVER L ------------------------------------------------
+C-----------do loop over l ------------------------------------------------
             DO l = lmin, lmax
                ipar = 1 + LVP(i, Nnur)*Ipc*( - 1)**(l - 1)
                IF(ipar.NE.0)sumdl = sumdl + TL(il, l, Nejc, Nnur)
      &                              + frde*(TL(il + 1, l, Nejc, Nnur)
      &                              - TL(il, l, Nejc, Nnur))
             ENDDO
-C-----------DO LOOP OVER L --- DONE ----------------------------------------
+C-----------do loop over l --- done ----------------------------------------
             s = s + 1.
             IF(s.LE.smax)GOTO 20
-C-----------LOOP OVER CHANNEL SPIN ------ DONE ----------------------------
+C-----------loop over channel spin ------ done ----------------------------
             sumdl = sumdl*RORed*cor*TUNe(Nejc, Nnuc)
             SCRtl(i, Nejc) = sumdl
             Sum = Sum + sumdl
          ENDDO
-C--------DO LOOP OVER DISCRETE LEVELS --------- DONE --------------------
+C--------do loop over discrete levels --------- done --------------------
       ENDIF
  100  DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
@@ -639,11 +631,8 @@ C
                   gacs = gacs/(1 + BR(l, j, 3, Nnuc)) ! int. conversion
                   egd = ELV(l, Nnuc) - ELV(j1, Nnuc)
                   icse = 2.0001 + egd/DE
-C-----------------next IF seems to be redundant - we should have these in ENDF file
-C                 IF(ENDf.NE.1.0D0)THEN
                   CSE(icse, 0, Nnuc) = CSE(icse, 0, Nnuc) + gacs/DE
                   CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + gacs
-C                 ENDIF
                   IF(IOUt.GT.2)WRITE(6, 99005)ELV(j1, Nnuc), 
      &                               LVP(j1, Nnuc)*XJLv(j1, Nnuc), egd, 
      &                               gacs

@@ -379,10 +379,11 @@ C     This is done for CN, CN-n and CN-p final nuclei, defined by
 C     nnur =1, nres(1), nres(2),
 C     sunbject to green light from the 'model usage matrix' IDNa.
 C     - We first treat residual population of discrete levels.
+C       (blocked in the current version)                      
 C     - This is followed by residual population for continuum.
 C
 C     CN, discrete levels
-C
+C-----population has been blocked by commenting some lines below
 C
       IF(IDNa(5, 4).EQ.1)THEN
          nnuc = 1
@@ -402,24 +403,25 @@ C        WRITE(6, *)'iemaxdiscrete=', iemaxdiscrete
             ENDDO
 C           WRITE(6, *)'populdegas to discret=', ie0, popdiscrete
          ENDDO
-C        popdiscrete = popdiscrete*ESTepdegas
+         popdiscrete = popdiscrete*ESTepdegas
          popdiscrete = popdiscrete/NLV(nnuc)
-         DO il = 1, NLV(nnuc)
-            POPlv(il, nnuc) = POPlv(il, nnuc) + popdiscrete
+C        DO il = 1, NLV(nnuc)
+C           POPlv(il, nnuc) = POPlv(il, nnuc) + popdiscrete
 C-----------store population of discrete levels for recoils' calculations
-            REClev(il, 0) = REClev(il, 0) + popdiscrete
-         ENDDO           ! Even population of discrete levels
-         WRITE(42, 99005)
-         WRITE(42, *)'2) Residual popul for nnuc:', nnuc
-         WRITE(42, *)'   Discrete level, energy, population'
-         DO il = 1, NLV(nnuc)
-            WRITE(42, 99003)il, ELV(il, nnuc), POPlv(il, nnuc)
-         ENDDO
+C           REClev(il, 0) = REClev(il, 0) + popdiscrete
+C        ENDDO           ! Even population of discrete levels
+C        WRITE(42, 99005)
+C        WRITE(42, *)'2) Residual popul for nnuc:', nnuc
+C        WRITE(42, *)'   Discrete level, energy, population'
+C        DO il = 1, NLV(nnuc)
+C           WRITE(42, 99003)il, ELV(il, nnuc), POPlv(il, nnuc)
+C        ENDDO
       ENDIF
 C
 C-----CN, continuum:
 C
       IF(IDNa(5, 4).EQ.1)THEN
+         nnuc = 1
          ie1 = iemaxdiscrete + 1
          nextop = ie1 + NEX(1) - 2 !highest bin excluding top CN energy
          DO ie0 = ie1, nextop     ! over excitation energy
@@ -450,6 +452,7 @@ C
       ENDIF
 C
 C-----CN-n, discrete levels
+C-----population has been blocked by some commenting lines below
 C
       IF(IDNa(1, 4).EQ.1)THEN
          nnur = NREs(1)
@@ -465,27 +468,28 @@ C--------Number of bins in discrete region
          ENDDO
 C--------Even population of discrete levels
          popdiscrete = popdiscrete/NLV(nnur)
-         DO il = 1, NLV(nnur)
-            POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
+C        DO il = 1, NLV(nnur)
+C           POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
 C-----------store population of discrete levels for recoils' calculations
-            REClev(il, 1) = REClev(il, 1) + popdiscrete
+C           REClev(il, 1) = REClev(il, 1) + popdiscrete
 C-----------Add isotropic DEGAS contribution to direct ang. distributions
-            popdiscrete = popdiscrete/4.0/PI
-            DO na = 1, NDANG
-               CSAlev(na, il, 1) = CSAlev(na, il, 1) + popdiscrete
-            ENDDO
-         ENDDO
-         WRITE(42, 99005)
-         WRITE(42, *)'2) Residual popul for nnur:', nnur
-         WRITE(42, *)'   Discrete level, energy, population'
-         DO il = 1, NLV(nnur)
-            WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
-         ENDDO
+C           popdiscrete = popdiscrete/4.0/PI
+C           DO na = 1, NDANG
+C              CSAlev(na, il, 1) = CSAlev(na, il, 1) + popdiscrete
+C           ENDDO
+C        ENDDO
+C        WRITE(42, 99005)
+C        WRITE(42, *)'2) Residual popul for nnur:', nnur
+C        WRITE(42, *)'   Discrete level, energy, population'
+C        DO il = 1, NLV(nnur)
+C           WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
+C        ENDDO
       ENDIF
 C
 C-----CN-n, continuum:
 C
       IF(IDNa(2, 4).EQ.1)THEN
+         nnur = NREs(1)
          ie1 = iemaxdiscrete + 1
          DO ie0 = ie1, ndexmaximum     ! Excitation energy bin
             DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)
@@ -517,6 +521,7 @@ C
       ENDIF
 C-----
 C-----CN-p, discrete levels
+C-----population has been blocked by commenting lines below
 C-----
       IF(IDNa(3, 4).EQ.1)THEN
          nnur = NREs(2)
@@ -530,29 +535,30 @@ C--------Number of bins in discrete region
      &                       *renorm
             ENDDO
          ENDDO
-C        popdiscrete = popdiscrete*ESTepdegas
+         popdiscrete = popdiscrete*ESTepdegas
          popdiscrete = popdiscrete/NLV(nnur)
-         DO il = 1, NLV(nnur)
-            POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
+C        DO il = 1, NLV(nnur)
+C           POPlv(il, nnur) = POPlv(il, nnur) + popdiscrete
 C-----------store population of discrete levels for recoils' calculations
-            REClev(il, 2) = REClev(il, 2) + popdiscrete
+C           REClev(il, 2) = REClev(il, 2) + popdiscrete
 C-----------Add isotropic DEGAS contribution to direct ang. distributions
-            popdiscrete = popdiscrete/4.0/PI
-            DO na = 1, NDANG
-               CSAlev(na, il, 2) = CSAlev(na, il, 2) + popdiscrete
-            ENDDO
-         ENDDO        ! Even population of discrete levels
-         WRITE(42, 99005)
-         WRITE(42, *)'2) Residual popul for nnur:', nnur
-         WRITE(42, *)'   Discrete level, energy, population'
-         DO il = 1, NLV(nnur)
-            WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
-         ENDDO
+C           popdiscrete = popdiscrete/4.0/PI
+C           DO na = 1, NDANG
+C              CSAlev(na, il, 2) = CSAlev(na, il, 2) + popdiscrete
+C           ENDDO
+C        ENDDO        ! Even population of discrete levels
+C        WRITE(42, 99005)
+C        WRITE(42, *)'2) Residual popul for nnur:', nnur
+C        WRITE(42, *)'   Discrete level, energy, population'
+C        DO il = 1, NLV(nnur)
+C           WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
+C        ENDDO
       ENDIF
 C-----
 C-----CN-p, continuum:
 C-----
       IF(IDNa(4, 4).EQ.1)THEN
+         nnur = NREs(2)
          ie1 = iemaxdiscrete + 1
          DO ie0 = ie1, ndexmaximum     ! Excitation energy bin
             DO jspin = 1, ndlwmaximum  ! Spin (parities populated evenly)

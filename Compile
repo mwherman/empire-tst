@@ -19,6 +19,14 @@ cd ../lsttab
 make
 cd ../legend
 make
+cd ../endres
+make
+cd ../linear
+make
+cd ../recent
+make
+cd ../sigma1
+make
 cd ../c4zvd
 make -f c4dat.mak
 make -f datzvdl.mak

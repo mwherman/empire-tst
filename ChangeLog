@@ -2,19 +2,38 @@
              Changes in version 2.19 with respect to 2.18  
                       Vienna,   November  2002
 
-1. Error in the Wilmore-Hodgson omp corrected.
-   VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
-   was also found to be wrong in the preliminary version of RIPL-2 
-   (-0.00118).
-2. MSD is automatically turned off for non-nucleon incident reactions. 
-3. Internal conversion coefficinets included in the gamma cascade
-   between discrete levels (ICC data from RIPL-2).
-4. Bug in reading branching ratios from the RIPL-2 file corrected
-   (emission probabilities instead of branching ratios were used
-   in the previous RIPL-2 versions).
-5. Bug in DEGAS resulting in lack of the preequilibrium population in 
-   the Compound Nucleus continuum corrected (bug has been introduced in
-   version 2.18)
+1.  Error in the Wilmore-Hodgson omp corrected.
+    VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
+    was also found to be wrong in the preliminary version of RIPL-2 
+    (-0.00118).
+2.  MSD is automatically turned off for non-nucleon incident reactions. 
+3.  Internal conversion coefficinets included in the gamma cascade
+    between discrete levels (ICC data from RIPL-2).
+4.  Bug in reading branching ratios from the RIPL-2 file corrected
+    (emission probabilities instead of branching ratios were used
+    in the previous RIPL-2 versions) (R. Capote).
+5.  Bug in DEGAS resulting in lack of the preequilibrium population in 
+    the Compound Nucleus continuum corrected (bug has been introduced in
+    version 2.18) (E. Betak).
+6.  ENDRES code and BNL-325 file with resonance parameters added in order
+    to merge resonance parameters into the final ENDF file (also dxsend.f 
+    has been updated) (A. Trkov).
+7.  LINEAR and RECENT utility codes added in order to reconstruct cross
+    sections from the resonance parameters and enable plotting.
+8.  Some potentially empty files removed if actually empty.
+9.  run, runE, format and plot scripts modified to avoid double coding.
+10. Processing with FIXUP split into two runs to avoid redundant data
+    in the final ENDF file (reconstruction of S203 postponed to the 
+    second run).
+11. Last energy point in the gamma spectra from capture included 
+    in the file *.out with energy of the CN excitation energy and
+    respective cross section scaled to preserve spectrum integral.
+12. Option for manual OMP fitting added to the new GUI.
+13. PSYCHE added to the chain of utlity codes.
+14. Spectral energies for ENDF formatting printed in F10.5 instead
+    of F9.4 format to improve accuracy.
+15. EMPEND revised to eliminate some undesired entries in the ENDF 
+    file.
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

@@ -32,7 +32,7 @@ C
      &                 TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1, 
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2, 
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar, 
-     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred, 
+     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FITomp,
      &                 FITlev, DV, FCC, STMro, DEGa, GDIvp, TORy, EX1, 
      &                 EX2, GST, XNI, TOTcsfis, 
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), 

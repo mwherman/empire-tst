@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: main.f,v 1.9 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-04-02 21:47:40 $
+Ccc   * $Id: main.f,v 1.10 2003-04-02 21:47:40 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -880,26 +880,6 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il, nnuc) = 0.0
                   ENDIF
                ENDDO
-               WRITE(12,*)' ' 
-C--------------write Int. Conv. Coefff. for discrete transitions               
-               WRITE(12, 
-     &               '(1X,/,10X,''Internal conversion coefficients'')')
-               WRITE(12, '(1X,/,10X,40(1H-),/)')
-
-               DO il = 1, NLV(nnuc)
-C-----------------check for the number of branching ratios
-                  nbr = 0
-                  DO ib = 1, NDBR
-                     IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1566
-                     nbr = ib
-                  ENDDO
- 1566             CONTINUE
-                  WRITE(12, 99014)il, ELV(il, nnuc), LVP(il, nnuc), 
-     &                            XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
-     &                            (NINT(BR(il,ib,1,nnuc)), 
-     &                            BR(il, ib, 3, nnuc), ib = 1, nbr)
-               ENDDO
-               WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------temporary output to check dir contribution to disc levels
 C              gang=10.
 C              IF(nnuc.EQ.mt91) THEN
@@ -1100,6 +1080,8 @@ C--------in the first CN
             IF(GCAsc.EQ.0.0D0)kemin = NEX(nnuc)
             IF(GCAsc.EQ. - 1.0D0 .AND. EXCn.GT.20.0D0)kemin = NEX(nnuc)
          ENDIF
+C--------turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
+         IF(FITomp.NE.0) kemin = NEX(nnuc) 
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
          IF(LHRtw.EQ.1 .AND. EIN.GT.5.0D+0)LHRtw = 0
@@ -1333,27 +1315,29 @@ c--------------check for the number of branching ratios
      &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
             ENDIF
          ENDDO
-         WRITE(12, '(1X,/,10X,40(1H-),/)')
-         WRITE(12,*)' ' 
-C--------write Int. Conv. Coefff. for discrete transitions               
-         WRITE(12, 
-     &         '(1X,/,10X,''Internal conversion coefficients'')')
-         WRITE(12, '(1X,/,10X,40(1H-),/)')
-
-         DO il = 1, NLV(nnuc)
-C-----------check for the number of branching ratios
-            nbr = 0
-            DO ib = 1, NDBR
-               IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1567
-               nbr = ib
+         IF(ENDf.GT.0) THEN 
+            WRITE(12, '(1X,/,10X,40(1H-),/)')
+            WRITE(12,*)' ' 
+C-----------write Int. Conv. Coefff. for discrete transitions               
+            WRITE(12, 
+     &            '(1X,/,10X,''Internal conversion coefficients'')')
+            WRITE(12, '(1X,/,10X,40(1H-),/)')
+            
+            DO il = 1, NLV(nnuc)
+C--------------check for the number of branching ratios
+               nbr = 0
+               DO ib = 1, NDBR
+                  IF(BR(il, ib, 2, nnuc).EQ.0.)GOTO 1567
+                  nbr = ib
+               ENDDO
+ 1567          CONTINUE
+               WRITE(12, 99014)il, ELV(il, nnuc), LVP(il, nnuc), 
+     &                         XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
+     &                         (NINT(BR(il,ib,1,nnuc)), 
+     &                         BR(il, ib, 3, nnuc), ib = 1, nbr)
             ENDDO
- 1567       CONTINUE
-            WRITE(12, 99014)il, ELV(il, nnuc), LVP(il, nnuc), 
-     &                      XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
-     &                      (NINT(BR(il,ib,1,nnuc)), 
-     &                      BR(il, ib, 3, nnuc), ib = 1, nbr)
-         ENDDO
-         WRITE(12, '(1X,/,10X,40(1H-),/)')
+            WRITE(12, '(1X,/,10X,40(1H-),/)')
+         ENDIF 
 C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
          ia = INT(A(nnuc))
@@ -1536,7 +1520,7 @@ C-----------------multiplies cross sections and divides outgoing energies
 C-----------------ATTENTION: TEMPORARY - this treatment is crude
                   recorp = 1. + EJMass(1)/AMAss(imt)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp, 
      &                     (CSEa(ie, nang, 1, iorg)*recorp, nang = 1, 
      &                     NDANG)
@@ -1555,7 +1539,7 @@ C-----------------RECORR recoil correction factor defined 1+Ar/Ap which multipli
 C-----------------cross sections and divides outgoing energies
                   recorr = 1. + AMAss(imt)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorr, 
      &                     (CSEa(ie, nang, 1, iorg)*recorr, 
      &                     nang = NDANG, 1, ( - 1))
@@ -1567,7 +1551,7 @@ C-----------------recoils *** done ***
                   WRITE(12, '('' Energy    mb/MeV'')')
                   WRITE(12, *)' '
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                     WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                     CSE(ie, 0, imt)
                   ENDDO
                ENDIF
@@ -1601,7 +1585,7 @@ C-----------------multiplies cross sections and divides outgoing energies
 C-----------------ATTENTION: TEMPORARY - this treatment is very crude
                   recorp = 1. + EJMass(1)/AMAss(imt)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp, 
      &                     (CSEa(ie, nang, 1, iorg)*recorp, nang = 1, 
      &                     NDANG)
@@ -1620,7 +1604,7 @@ C-----------------RECORR recoil correction factor defined 1+Ar/Ap which multipli
 C-----------------cross sections and divides outgoing energies
                   recorr = 1. + AMAss(imt)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorr, 
      &                     (CSEa(ie, nang, 1, iorg)*recorr, 
      &                     nang = NDANG, 1, ( - 1))
@@ -1633,7 +1617,7 @@ C-----------------recoils *** done ***
                   WRITE(12, *)' '
                   ngspec = INT(EMAx(imt)/DE) + 1
                   DO ie = 1, ngspec
-                     WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                     WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                     CSE(ie, 0, imt)
                   ENDDO
                ENDIF
@@ -1656,8 +1640,9 @@ C-----
                WRITE(12, *)' '
                WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE, (CSEa(ie, nang, 1, IPRes), nang = 1, NDANG)
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &            FLOAT(ie - 1)*DE, (CSEa(ie, nang, 1, IPRes), 
+     &            nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
                WRITE(12, *)' Spectrum of protons  (n,np) '
@@ -1671,8 +1656,8 @@ C--------------ATTENTION: approximate treatment
 C--------------recoil due to proton only considered
                recorp = 1. + EJMass(2)/AMAss(imt)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorp, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorp, 
      &                  (CSEa(ie, nang, 2, INRes)*recorp, nang = 1, 
      &                  NDANG)
                ENDDO
@@ -1688,8 +1673,8 @@ C--------------RECORR recoil correction factor defined 1+Ar/Ap which multiplies
 C--------------cross sections and divides outgoing energies
                recorr = 1. + AMAss(imt)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorr, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorr, 
      &                  (CSEa(ie, nang, 2, INRes)*recorr, nang = NDANG, 
      &                  1, ( - 1))
                ENDDO
@@ -1700,7 +1685,7 @@ C--------------recoils *** done ***
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                  CSE(ie, 0, imt)
                ENDDO
             ENDIF
@@ -1722,8 +1707,8 @@ C-----
                WRITE(12, *)' '
                WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE, 
      &                  (ANCsea(ie, nang, 1) + CSEa(ie, nang, 1, IARes), 
      &                  nang = 1, NDANG)
                ENDDO
@@ -1739,8 +1724,8 @@ C--------------ATTENTION: approximate treatment
 C--------------recoil due to alpha only considered
                recorp = 1. + EJMass(3)/AMAss(IARes)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorp, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorp, 
      &                  ((ANCsea(ie,nang,2) + CSEa(ie,nang,3,INRes))
      &                  *recorp, nang = 1, NDANG)
                ENDDO
@@ -1756,8 +1741,8 @@ C--------------RECORR recoil correction factor defined 1+Ar/Ap which multiplies
 C--------------cross sections and divides outgoing energies
                recorr = 1. + AMAss(IARes)/4.
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorr, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorr, 
      &                  ((ANCsea(ie,nang,2) + CSEa(ie,nang,3,INRes))
      &                  *recorp, nang = NDANG, 1, ( - 1))
                ENDDO
@@ -1768,7 +1753,7 @@ C--------------recoils *** done ***
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                  CSE(ie, 0, imt)
                ENDDO
             ENDIF
@@ -1792,8 +1777,8 @@ C-----------cross sections and divides outgoing energies
             recorp = 1. + EJMass(1)/AMAss(imt)
 C-----------neutrons to continuum
             DO ie = 1, NEXr(1, 1)
-               WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &               *DE/recorp, 
+               WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &               FLOAT(ie - 1)*DE/recorp, 
      &               (CSEa(ie, nang, 1, 1)*recorp, nang = 1, NDANG)
             ENDDO
 C-----------neutrons to discrete levels (direct transitions)
@@ -1803,7 +1788,7 @@ C-----------are used for the ENDF formatting (x-sec being taken from MT=51-90)
             DO il = NLV(imt), 1, -1
                espec = (EMAx(imt) - ELV(il, imt))/recorp
                IF(espec.GE.0)
-     &         WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+     &         WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &               espec, 
      &               (CSAlev(nang, il, 1)*recorp/DE, nang = 1, NDANG)
             ENDDO
@@ -1818,8 +1803,8 @@ C-----------RECORR recoil correction factor defined 1+Ar/Ap which multiplies
 C-----------cross sections and divides outgoing energies
             recorr = 1. + AMAss(imt)
             DO ie = 1, nspec
-               WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &               *DE/recorr, 
+               WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &               FLOAT(ie - 1)*DE/recorr, 
      &               (CSEa(ie, nang, 1, 1)*recorr, nang = NDANG, 1, 
      &               ( - 1))
             ENDDO
@@ -1829,7 +1814,7 @@ C-----------cross sections and divides outgoing energies
             WRITE(12, '('' Energy    mb/MeV'')')
             WRITE(12, *)' '
             DO ie = 1, nspec
-               WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+               WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                                  CSE(ie, 0, imt)
             ENDDO
          ENDIF
@@ -1846,10 +1831,19 @@ C-----
             WRITE(12, *)' '
             WRITE(12, '('' Energy       mb/MeV'')')
             WRITE(12, *)' '
-            nspec = INT(EMAx(imt)/DE) + 1
+            nspec = INT(EMAx(imt)/DE) + 2
             DO ie = 1, nspec
-               WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
-     &                                  CSE(ie, 0, imt)
+               espec = FLOAT(ie - 1)*DE
+C--------------if espec>EMAx set it to EMAx and renormalize cross section                
+               IF(espec.GT.EMAx(imt)+1.0D-3) THEN 
+                  CSE(ie, 0, imt) = CSE(ie, 0, imt)*DE/
+     &                              (EMAx(imt) - espec + DE) 
+                  espec = EMAx(imt)
+               ENDIF
+C--------------increase the last point by factor of 2 to preserve integral
+C--------------in EMPEND
+               IF(ie.EQ.nspec) CSE(ie, 0, imt) = CSE(ie, 0, imt)*2 
+               WRITE(12, '(F10.5,E14.5)') espec, CSE(ie, 0, imt)
             ENDDO
          ENDIF
 C-----
@@ -1871,8 +1865,8 @@ C-----
                recorp = 1. + EJMass(2)/AMAss(imt)
 C--------------protons to continuum
                DO ie = 1, NEXr(2, 1)
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorp, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorp, 
      &                  (CSEa(ie, nang, 2, 1)*recorp, nang = 1, NDANG)
                ENDDO
 C--------------protons to discrete levels (direct transitions)
@@ -1882,7 +1876,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=601-6
                DO il = NLV(imt), 1, -1
                   espec = (EMAx(imt) - ELV(il, imt))/recorp
                   IF(espec.GE.0)
-     &            WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+     &            WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                  espec, 
      &                  (CSAlev(nang, il, 2)*recorp/DE, nang = 1, NDANG)
                ENDDO
@@ -1896,8 +1890,8 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=601-6
                WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
                recorr = 1. + AMAss(imt)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorr, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorr, 
      &                  (CSEa(ie, nang, 2, 1)*recorr, nang = NDANG, 1, 
      &                  ( - 1))
                ENDDO
@@ -1907,7 +1901,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=601-6
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                  CSE(ie, 0, imt)
                ENDDO
             ENDIF
@@ -1936,7 +1930,7 @@ C-----
      &                  ANGles
                   recorp = 1. + EJMass(NDEJC)/AMAss(imt)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp, 
      &                     (CSEa(ie, nang, NDEJC, 1)*recorp, nang = 1, 
      &                     NDANG)
@@ -1960,7 +1954,7 @@ C-----
      &                  ANGles
                   recorr = 1. + AMAss(imt)/EJMass(NDEJC)
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+                     WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorr, 
      &                     (CSEa(ie, nang, NDEJC, 1)*recorr, 
      &                     nang = NDANG, 1, ( - 1))
@@ -1973,7 +1967,7 @@ C-----
                   WRITE(12, '('' Energy    mb/MeV'')')
                   WRITE(12, *)' '
                   DO ie = 1, nspec
-                     WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                     WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                     CSE(ie, 0, imt)
                   ENDDO
                ENDIF
@@ -1998,8 +1992,8 @@ C-----
                recorp = 1. + EJMass(3)/AMAss(imt)
 C--------------alphas to continuum
                DO ie = 1, NEXr(3, 1)
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorp, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                   FLOAT(ie - 1)*DE/recorp, 
      &                  (CSEa(ie, nang, 3, 1)*recorp, nang = 1, NDANG)
                ENDDO
 C--------------alphas to discrete levels (direct transitions)
@@ -2009,7 +2003,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=801-8
                DO il = NLV(imt), 1, -1
                   espec = (EMAx(imt) - ELV(il, imt))/recorp
                   IF(espec.GE.0)
-     &            WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')
+     &            WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                  espec, 
      &                  (CSAlev(nang, il, 3)*recorp/DE, nang = 1, NDANG)
                ENDDO
@@ -2023,8 +2017,8 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=801-8
                WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
                recorr = 1. + AMAss(imt)/EJMass(3)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorr, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorr, 
      &                  (CSEa(ie, nang, 3, 1)*recorr, nang = NDANG, 1, 
      &                  ( - 1))
                ENDDO
@@ -2034,7 +2028,7 @@ C--------------are used for the ENDF formatting (x-sec being taken from MT=801-8
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                  CSE(ie, 0, imt)
                ENDDO
             ENDIF
@@ -2056,8 +2050,9 @@ C-----
                WRITE(12, *)' '
                WRITE(12, '('' Energy   '',8G15.5,/,(10X,8G15.5))')ANGles
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE, (APCsea(ie, nang, 1), nang = 1, NDANG)
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE, (APCsea(ie, nang, 1), 
+     &                  nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
                WRITE(12, *)' Spectrum of alphas   (n,pa) '
@@ -2071,8 +2066,8 @@ C--------------ATTENTION: approximate treatment
 C--------------recoil due to alpha only considered
                recorp = 1. + EJMass(3)/AMAss(IARes)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorp, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorp, 
      &                  (APCsea(ie, nang, 2)*recorp, nang = 1, NDANG)
                ENDDO
                WRITE(12, *)' '
@@ -2087,8 +2082,8 @@ C--------------RECORR recoil correction factor defined 1+Ar/Ap which multiplies
 C--------------cross sections and divides outgoing energies
                recorr = 1. + AMAss(IARes)/EJMass(3)
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,8E15.5,/,(9X,8E15.5))')FLOAT(ie - 1)
-     &                  *DE/recorr, 
+                  WRITE(12, '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                  FLOAT(ie - 1)*DE/recorr, 
      &                  (APCsea(ie, nang, 2)*recorp, nang = NDANG, 1, 
      &                  ( - 1))
                ENDDO
@@ -2099,7 +2094,7 @@ C--------------recoils *** done ***
                WRITE(12, '('' Energy    mb/MeV'')')
                WRITE(12, *)' '
                DO ie = 1, nspec
-                  WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DE, 
+                  WRITE(12, '(F10.5,E14.5)')FLOAT(ie - 1)*DE, 
      &                  CSE(ie, 0, imt)
                ENDDO
             ENDIF

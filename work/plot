@@ -5,52 +5,18 @@ if [ "$1" = "" ]
    then
 echo 'Data ready for plotting:'
 echo ' '
-ls *.endf
+ls *-s.endf
 echo ' '
-echo -n 'Choose one of the above (without .inp extention!): '
+echo -n 'Choose one of the above (without -s.endf extention!): '
 read file
 fi                          
 
-# RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
 if [ ! -f $file-s.endf ]; then
-   rm $file-f.endf 2>/dev/null
-   cd ../util/fixup/
-   rm OUTPUT.ENDF 2>/dev/null
-   ln -sf $work/$file.endf OUTPUT.ENDF
-   ./fixup
-   rm OUTPUT.ENDF
-   mv FIXUP.ENDF $work/$file-f.endf
-   mv FIXUP.LST $work/$file-log.fixup
-   cd $work
-
-    # RUN LEGEND
-
-    rm $file-l.endf 2>/dev/null
-    cd ../util/legend/
-    rm LEGEND.OUT 2>/dev/null
-    ln -sf $work/$file-f.endf FIXUP.OUT
-    ./legend
-    rm FIXUP.OUT
-    mv LEGEND.OUT $work/$file-l.endf
-    mv LEGEND.LST $work/$file-log.legend
-    cd $work
-
-    # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
-
-    rm $file-s.endf 2>/dev/null
-    cd ../util/sixtab/
-    rm ENDF.IN ENDF.OUT 2>/dev/null
-    ln -sf $work/$file-l.endf ENDF.IN
-    ./sixtab
-    rm ENDF.IN
-    mv ENDF.OUT $work/$file-s.endf
-    cd $work
-    if  [ -f $file-s.endf ]; then
-       rm $file-f.endf 2>/dev/null
-       rm $file-l.endf 2>/dev/null
-    fi   
-
-
+   echo ' '
+   echo ' '
+   echo 'Error in plot; can not find: '$file-s.endf 
+#  read bye
+   exit
 fi    
 
 # RUN PLOTC4 TO PRODUCE PLOTS
@@ -63,8 +29,9 @@ echo 'R U N N I G    P L O T C 4'
 ./plotc4
 rm C4.DAT ENDF.DAT 
 mv plot.ps $work/$file.ps
-mv plot.ps $work/$file.ps
 mv PLOTC4.LST $work/$file-log.plotc4
 cd $work
-ghostview -landscape $file.ps  
+if [ "$2" = "" ]; then        
+   ghostview -landscape $file.ps  
+fi
 exit

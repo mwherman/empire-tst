@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-12-06 09:43:28 $
-Ccc   * $Id: input.f,v 1.12 2002-12-06 09:43:28 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-04-02 21:47:40 $
+Ccc   * $Id: input.f,v 1.13 2003-04-02 21:47:40 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -786,6 +786,19 @@ C--------print IDNa matrix
      &         (IDNa(5, j), j = 1, NDMODELS)
          WRITE(6, *)' '
 C--------model matrix *** done ***
+C--------reset some options if OMP fitting option selected
+         IF(FITomp.GT.0) THEN 
+         IOUt = 1
+         NEXreq = 10
+         GCAsc = 1
+         ENDf = 1
+         MSD = 0
+         MSC = 0
+         LHMs = 0
+         DEGa = 0
+         NNUcd = 1
+         NNUct = 4
+         ENDIF 
 C
 C--------read nuclear deformations and masses
          CALL READNIX
@@ -2711,6 +2724,14 @@ C-----
             IF(FITlev.GT.0.0D0)WRITE(6, 
      &                 '('' Cumulative plots of levels will be done '')'
      &                 )
+            GOTO 100
+         ENDIF
+C-----
+         IF(name.EQ.'FITOMP')THEN
+            FITomp = val
+            IF(FITomp.GT.0.0D0)WRITE(6, 
+     &                 '('' OM parameter adjustment selected,'',
+     &                  '' (will reset several options'')')
             GOTO 100
          ENDIF
 C--------Tuning factors

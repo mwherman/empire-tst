@@ -15,20 +15,95 @@ fi
 #run EMPEND to format EMPIRE output into ENDF
 
 cp $file.out OUTPUT.DAT
-../util/empend/empend <EMPEND.INP && mv OUTPUT.ENDF $file.endf
+../util/empend/empend <EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
 mv empend.log $file-log.empend
 rm OUTPUT.DAT
+
 
 # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
 
 rm $file-f.endf 2>/dev/null
 cd ../util/fixup/
 rm OUTPUT.ENDF 2>/dev/null
-ln -sf $work/$file.endf OUTPUT.ENDF
+ln -sf $work/$file-e.endf OUTPUT.ENDF
+cp FIXUP1.INP FIXUP.INP
 ./fixup
 rm OUTPUT.ENDF
 mv FIXUP.ENDF $work/$file-f.endf
 mv FIXUP.LST $work/$file-log.fixup
+cd $work
+
+
+# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
+
+rm $file.endf 2>/dev/null
+cd ../util/endres/
+rm empire.end endf.dat 2>/dev/null
+ln -sf $work/$file-f.endf empire.end
+./endres <ENDRES.INP
+rm empire.end 
+mv endf.dat $work/$file.endf
+mv endres.lst $work/$file-log.endres
+cd $work
+# $work/$file.endf is the final ENDF output file
+
+# RUN PSYCHE
+
+cd ../util/psyche/
+rm PSYCHE.OUT 2>/dev/null
+ln -sf $work/$file.endf ENDF.IN
+./psyche<INPUT
+rm ENDF.IN
+mv PSYCHE.OUT $work/$file-log.psyche
+cd $work
+
+
+# RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP
+
+rm $file-f2.endf 2>/dev/null
+cd ../util/fixup/
+rm OUTPUT.ENDF 2>/dev/null
+ln -sf $work/$file.endf OUTPUT.ENDF
+cp FIXUP2.INP FIXUP.INP
+./fixup
+rm OUTPUT.ENDF
+mv FIXUP.ENDF $work/$file-f2.endf
+mv FIXUP.LST $work/$file-log.fixup2
+cd $work
+
+
+# RUN LINEAR
+
+cd ../util/linear/
+rm LINEAR.OUT 2>/dev/null
+ln -sf $work/$file-f2.endf ENDF.IN
+./linear
+rm ENDF.IN
+mv LINEAR.OUT $work/$file-lin.endf
+mv LINEAR.LST $work/$file-log.linear
+cd $work
+
+
+# RUN RECENT
+
+cd ../util/recent/
+rm RECENT.OUT 2>/dev/null
+ln -sf $work/$file-lin.endf ENDF.IN
+./recent
+rm ENDF.IN
+mv RECENT.OUT $work/$file-rec.endf
+mv RECENT.LST $work/$file-log.recent
+cd $work
+
+# RUN SIGMA1
+
+cd ../util/sigma1/
+rm SIGMA1.OUT 2>/dev/null
+ln -sf $work/$file-rec.endf ENDF.IN
+./sigma1
+rm ENDF.IN
+mv SIGMA1.OUT $work/$file-sig.endf
+mv SIGMA1.LST $work/$file-log.sigma1
 cd $work
 
 # RUN LEGEND
@@ -36,9 +111,9 @@ cd $work
 rm $file-l.endf 2>/dev/null
 cd ../util/legend/
 rm LEGEND.OUT 2>/dev/null
-ln -sf $work/$file-f.endf FIXUP.OUT
+ln -sf $work/$file-sig.endf ENDF.IN
 ./legend
-rm FIXUP.OUT
+rm ENDF.IN
 mv LEGEND.OUT $work/$file-l.endf
 mv LEGEND.LST $work/$file-log.legend
 cd $work
@@ -53,26 +128,21 @@ ln -sf $work/$file-l.endf ENDF.IN
 rm ENDF.IN
 mv ENDF.OUT $work/$file-s.endf
 cd $work
-#if  [ -f $file-s.endf ]; then
-#  rm $file-f.endf 2>/dev/null
-#   rm $file-l.endf 2>/dev/null
-#fi   
-
-
-
+   
 # RUN PLOTC4 TO PRODUCE PLOTS
 
-cd ../util/plotc4
-ln -sf $work/$file.c4 C4.DAT  
-ln -sf $work/$file-s.endf ENDF.DAT 
-echo ' '
-echo 'R U N N I G    P L O T C 4'
-./plotc4
-rm C4.DAT ENDF.DAT 
-mv plot.ps $work/$file.ps
-mv PLOTC4.LST $work/$file-log.plotc4
-cd $work
-ghostview -landscape $file.ps  
+if [ "$2" = "" ]; then
+   ./plot $file
+fi
 
+# REMOVE INTERMEDIATE ENDF FILES
+
+#rm $work/$file-l.endf 2>/dev/null
+#rm $work/$file-lin.endf 2>/dev/null
+#rm $work/$file-f.endf 2>/dev/null
+#rm $work/$file-f2.endf 2>/dev/null
+#rm $work/$file-rec.endf 2>/dev/null
+#rm $work/$file-e.endf 2>/dev/null
+#rm $work/$file-s.endf 2>/dev/null
 
 exit

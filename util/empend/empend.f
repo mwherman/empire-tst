@@ -347,21 +347,42 @@ C* Photon production data from discrete levels processed
       IF(JPP.GT.0)
      1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C* Process photon angular distribution for discrete levels (isotropic)
+      JPP  =0
+      LV50 =0
+      LV600=0
+      LV800=0
       DO 892 I=1,NXS
-      IF     (IWO(MTH-1+I).EQ. 51) THEN
-        JZA=IZA
-        MT0=50
-      ELSE IF(IWO(MTH-1+I).EQ.601) THEN
-        JZA=IZA-1000
-        MT0=600-1
-      ELSE IF(IWO(MTH-1+I).EQ.801) THEN
-        JZA=IZA-2003
-        MT0=800-1
+      IF     (IWO(MTH-1+I).GE. 51 .AND. IWO(MTH-1+I).LT. 91) THEN
+C* Count levels of the MT50 series
+        LV50=LV50+1
+      ELSE IF(IWO(MTH-1+I).GE.601 .AND. IWO(MTH-1+I).LT.649) THEN
+C* Count levels of the MT800 series
+        LV600=LV600+1
+      ELSE IF(IWO(MTH-1+I).GE.801 .AND. IWO(MTH-1+I).LT.849) THEN
+C* Count levels of the MT800 series
+        LV800=LV800+1
       ELSE
         GO TO 892
       END IF
-      CALL WRMF14(LOU,MAT,MT0,IZA,AWR,NLV,NS)
   892 CONTINUE
+      IF(LV50 .GT.0) THEN
+C* Write photon distributions for MT50 series
+        JPP=JPP+1
+        MT0=50
+        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV50 ,NS)
+      END IF
+      IF(LV600.GT.0) THEN
+C* Write photon distributions for MT600 series
+        JPP=JPP+1
+        MT0=600
+        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV600,NS)
+      END IF
+      IF(LV800.GT.0) THEN
+C* Write photon distributions for MT800 series
+        JPP=JPP+1
+        MT0=800
+        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV800,NS)
+      END IF
 C* Photon angular distributions from discrete levels processed
       IF(JPP.GT.0)
      1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
@@ -742,7 +763,7 @@ C*
   800 RETURN
 C*
   806 FORMAT(6X,8(5X,F10.4))
-  807 FORMAT(BN,F9.4,8F15.4)
+  807 FORMAT(BN,F10.5,F14.4,7F15.4)
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
       END
@@ -1086,7 +1107,6 @@ C*
   804 FORMAT(1X,I3,1X,A2,1X,I3,4X,3F10.0)
   805 FORMAT(I12,F10.0,16X,F12.0)
   806 FORMAT(BN,8X,8F15.0)
-  807 FORMAT(BN,F8.0,8F15.0)
   808 FORMAT(24X,F12.0)
   891 FORMAT(A80)
   902 FORMAT(A40,1P,E10.3)
@@ -1890,7 +1910,7 @@ C*
   804 FORMAT(1X,I3,1X,A2,1X,I3,4X,3F10.0)
   805 FORMAT(I12,F10.0,16X,F12.0)
   806 FORMAT(6X,8(5X,F10.4))
-  807 FORMAT(BN,F9.4,8F15.4)
+  807 FORMAT(BN,F10.5,F14.4,7F15.4)
   808 FORMAT(BN,I6,6X,F12.0)
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
@@ -2240,6 +2260,7 @@ C* Write file MF4 angular distributions (first outgoing particle)
       IF(ZAP.EQ.0 .OR. ZAP.GT.2004.) THEN
         STOP 'WRIMF4 ERROR - Illegal first particle'
       END IF
+      AWP=RWO(LL+1)
       NP =RWO(LL+5)+0.1
       NE =RWO(LL+2*NP+9)+0.1
       JE =NE
@@ -2264,9 +2285,10 @@ C* Determine the outgoing particle energy
       IF(MT.EQ.2) THEN
         EOU=0
       ELSE
-        EOU=(EIN*AWR/(AWR+1)-QQM(IT)+QQI(IT))*AWR/(AWR+1)
+        EOU=(EIN*AWR/(AWR+1)-QQM(IT)+QQI(IT))*(AWR+1-AWP)/(AWR+1)
       END IF
-      IF(EOU/EIN.LT.-1.E-4) THEN
+      IF(EIN-ETH.LT.-1.E-4 .OR.
+     1   EOU/EIN.LT.-1.E-4) THEN
 C* Skip points below threshold
         JE=JE-1
         LL=LL+NW

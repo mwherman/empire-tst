@@ -211,65 +211,45 @@ if  [ -s $file.exf ]; then
     fi
 fi
 
-    #RUN EMPEND TO FORMAT EMPIRE OUTPUT INTO ENDF
+# RUN EMPEND, & ENDRES (ENDF FORMATING) 
 
-    ../util/empend/empend <EMPEND.INP && cp OUTPUT.ENDF $file.endf
-    mv empend.log $file-log.empend
-    rm OUTPUT.DAT
+./format $file 1
 
-if  [ -s $file.endf ]; then
-    # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+# RUN PLOTC4
 
-    rm $file-f.endf 2>/dev/null
-    cd ../util/fixup/
-    rm OUTPUT.ENDF 2>/dev/null
-    ln -sf $work/$file.endf OUTPUT.ENDF
-    ./fixup
-    rm OUTPUT.ENDF
-    mv FIXUP.ENDF $work/$file-f.endf
-    mv FIXUP.LST $work/$file-log.fixup
-    cd $work
+./plot $file 1
 
-    # RUN LEGEND
+# REMOVE INTERMEDIATE ENDF FILES
 
-    rm $file-l.endf 2>/dev/null
-    cd ../util/legend/
-    rm LEGEND.OUT 2>/dev/null
-    ln -sf $work/$file-f.endf FIXUP.OUT
-    ./legend
-    rm FIXUP.OUT
-    mv LEGEND.OUT $work/$file-l.endf
-    mv LEGEND.LST $work/$file-log.legend
-    cd $work
+rm $work/$file-l.endf   2>/dev/null
+rm $work/$file-lin.endf 2>/dev/null
+rm $work/$file-f.endf   2>/dev/null
+#rm $work/$file-rec.endf 2>/dev/null
+#rm $work/$file-e.endf   2>/dev/null
+#rm $work/$file-s.endf   2>/dev/null
 
-    # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+# REMOVE EMPTY FILES
 
-    rm $file-s.endf 2>/dev/null
-    cd ../util/sixtab/
-    rm ENDF.IN ENDF.OUT 2>/dev/null
-    ln -sf $work/$file-l.endf ENDF.IN
-    ./sixtab
-    rm ENDF.IN
-    mv ENDF.OUT $work/$file-s.endf
-    cd $work
-    if  [ -s $file-s.endf ]; then
-       rm $file-f.endf 2>/dev/null
-       rm $file-l.endf 2>/dev/null
-    fi   
-
-    # RUN PLOTC4 TO PRODUCE PLOTS
-
-    cd ../util/plotc4
-    ln -sf $work/$file.c4 C4.DAT  
-    ln -sf $work/$file-s.endf ENDF.DAT 
-    echo ' '
-    echo 'R U N N I N G    P L O T C 4'
-    ./plotc4
-    rm C4.DAT ENDF.DAT 
-    mv plot.ps $work/$file.ps
-    mv PLOTC4.LST $work/$file-log.plotc4
-    cd $work
-    # ghostview -landscape $file.ps  
+if [ ! -s $file-omp.dir ]; then 
+       rm $file-omp.dir  2>/dev/null
+fi
+if [ ! -s $file-omp.int ]; then 
+       rm $file-omp.int  2>/dev/null
+fi
+if [ ! -s $file-lev.col ]; then 
+       rm $file-lev.col  2>/dev/null
+fi
+if [ ! -s $file.war ]; then 
+       rm $file.war  2>/dev/null
+fi
+if [ ! -s $file-ecis.in ]; then 
+       rm $file-ecis.in  2>/dev/null
+fi
+if [ ! -s $file-ecis.out ]; then 
+       rm $file-ecis.out  2>/dev/null
+fi
+if [ ! -s $file-inp.fis ]; then 
+       rm $file-inp.fis  2>/dev/null
 fi
 
 exit

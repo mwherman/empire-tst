@@ -1,12 +1,12 @@
       PARAMETER(
-     * NDNUC= 50                   
+     * NDNUC= 80                   
      *,NDEJC=3 
      *,NDAFIS=1
-     *,NDEX=170
+     *,NDEX=370
      *,NDLW= 50
      *,NDTL= 30
      *,NDMSCS=4 
-     *,NDLV=100
+     *,NDLV=110
      *,NDBR=30
      *,NDVOM=7
      *,NDWOM=7

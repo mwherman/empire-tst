@@ -13,6 +13,8 @@ C-V          discrete inelastic levels by level energy rather than
 C-V          MT number.
 C-V        - Fix spectra of charged particles.
 C-V        - Add photon spectra.
+C-V  03/01 - Add MF5 Maxwellian fission spectrum representation.
+C-V        - Add LO=1, LF=2 capability for MF12 processing.
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
@@ -40,6 +42,9 @@ C*
       MT  =MT0
       I600=0
       I800=0
+      MINL=0
+      M600=0
+      M800=0
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
       IF(ELV.GT.0 .AND.
@@ -169,7 +174,14 @@ C* Prepare reaction list
    44   MF=3
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
-        IF(IER.NE.0) GO TO 50
+        IF(IER.NE.0) THEN
+          IF(KEA.GT.0) THEN
+            REWIND LEF
+            GO TO 46
+          ELSE
+            GO TO 50
+          END IF
+        END IF
         CALL SKIPSC(LEF)
 C* Select contributiong reactions
         IF( MT.EQ.  5                  .OR.
@@ -182,6 +194,23 @@ C* Select contributiong reactions
           IF(MT.GE.800 .AND. MT.LE.849) I800=1
         END IF
         GO TO 44
+C* Add reactions with wholy contained cross sections in MF13
+   46   MF=13
+        MT=0
+        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+        IF(IER.NE.0) GO TO 50
+        CALL SKIPSC(LEF)
+C* If cumulative gamma production present, set flag to exclude partials
+          IF(MT.EQ.  4) MINL=1
+          IF(MT.EQ.103) M600=1
+          IF(MT.EQ.107) M800=1
+C* Check for double counting of reactions
+        DO I=1,LOOP
+          IF(LST(I).EQ.MT) GO TO 46
+        END DO
+        LOOP=LOOP+1
+        LST(LOOP)=MT
+        GO TO 46
       ELSE
 C* Not coded for other particles
 C...    STOP 'DXSEND ERROR - No coding for requested particle'
@@ -200,13 +229,17 @@ C* Exclude cumulative reactions if discrete levels present
       LST(IL)=LST(I)
       IF(LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
       IF(LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
+      IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
+      IF((LST(I).GT.600 .AND. LST(I).LE.649) .AND. M600.EQ.1) IL=IL-1
+      IF((LST(I).GT.800 .AND. LST(I).LE.849) .AND. M800.EQ.1) IL=IL-1
    52 CONTINUE
       LOOP=IL
       IL=1
       ML=0
       MT=LST(IL)
 C...
-c...      print *,(lst(j),j=1,loop)
+      PRINT *,'Contributing reactions:',(lst(j),j=1,loop)
+C...
 C*
 C* Retrieve the double differential cross section energy distribution
    60 CALL DXSEN1(LEF,ZA0,ZAP,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS
@@ -461,7 +494,19 @@ C* Retrieve the cross section on MF3
       END IF
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NS,N2,MAT,MF,MT,IER)
-      IF(IER.NE.0) GO TO 900
+C...
+C...      print *,'Searching MAT,MF,MT,IER',MAT,MF,MT,IER
+C...
+      IF(IER.NE.0) THEN
+        IF(KEA.EQ.2 .AND. IZAP0.EQ.0) THEN
+          REWIND LEF
+          MF =13
+          MT =MT0
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+          IF(IER.EQ.0) GO TO 120
+        END IF
+        GO TO 900
+      END IF
       NX=MRW/2
       LX=NX+1
 C* Read TAB1 cross sections (can be more than 1 if MF 10)
@@ -493,6 +538,9 @@ C* Case: Cross section is required on output - finish processing
 C* Case: Proceed with the retrieval of differential data
       ETOP=RWO(NP)
       XS=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+C...
+C...      print *,'     Cross section=',xs
+C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
         GO TO 900
@@ -504,7 +552,7 @@ C* Find the energy/angle distribution data
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 C* Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
-C* No MF4/5/6 possible only for two-body (isotropic) reactions
+C* No MF4/5/6 possible only for discrete level (two-body isotr.) react.
         IF     (IZAP0.EQ.   1) THEN
           IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) GO TO 40
         ELSE IF(IZAP0.EQ.1001) THEN
@@ -516,11 +564,11 @@ C* No MF4/5/6 possible only for two-body (isotropic) reactions
         PRINT *,'WARNING - No differential data for MT',MT0
         GO TO 900
       END IF
-C* Gamma production only from MF 6,12,14,15
+C* Gamma production only from MF 6,12,13,14,15
       IF(IZAP0.EQ.   0) THEN
-        IF(MF.EQ.12) REWIND LEF
-        IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12) THEN
-          MF =12
+        IF(MF.EQ.12 .OR. MF.EQ.13) REWIND LEF
+        IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12 .OR. MF.EQ.13) THEN
+          IF(MF.LT.12) MF =12
           IF     (MT0.GT. 50 .AND. MT0.LT. 91) THEN
             MT =51
           ELSE IF(MT0.GT.600 .AND. MT0.LT.649) THEN
@@ -534,9 +582,19 @@ C* Gamma production only from MF 6,12,14,15
           ELSE IF(MT0.GT.800 .AND. MT0.LT.849) THEN
             MT=801
           END IF
-          CALL SKIPSC(LEF)
-          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
-          IF(IER.NE.0) GO TO 140
+   36     CALL SKIPSC(LEF)
+          JF=MF
+          JT=MT
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
+          IF(IER.NE.0) THEN
+            IF(MF.EQ.12) THEN
+              REWIND LEF
+              MF=13
+              GO TO 36
+            ELSE
+              GO TO 140
+            END IF
+          END IF
           GO TO 120
         END IF
       END IF
@@ -568,8 +626,8 @@ C* Process angular distribution data in MF 4
       LTT=L2
       IF(LTT.EQ.0) GO TO 45
       IF(LTT.NE.2) THEN
-        PRINT *,'WARNING - Can not process MF4 LTT',LTT
-        PRINT *,'          Distributions should be linearised'
+        PRINT *,'WARNING - Can not process MF/MT/LTT',MF,MT,LTT
+        PRINT *,'          Distributions not pointwise'
         IER=41
         GO TO 45
       END IF
@@ -647,13 +705,13 @@ C* Case: Angle-integrated energy distribution
 C*
 C* Assume two-body scattering for elastic & inelastic scattering
 C* and other discrete-lever reactions
-      IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LE.99) ) THEN
+      IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) THEN
         AWO=1
         GO TO 48
-      ELSE IF(MT0.GE.600 .AND. MT0.LE.649) THEN
+      ELSE IF(MT0.GE.600 .AND. MT0.LT.649) THEN
         AWO=1
         GO TO 48
-      ELSE IF(MT0.GE.800 .AND. MT0.LE.849) THEN
+      ELSE IF(MT0.GE.800 .AND. MT0.LT.849) THEN
         AWO=4
         GO TO 48
       ELSE
@@ -729,13 +787,19 @@ C* For each incident energy read the outg.particle energy distribution
         IF(MF.EQ.5) THEN
           CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
      1               ,RWO(LXE),RWO(LXX),KX,IER)
+C* Linearise to tolerance EXS, if necessary
+          EXS=0.01
+          IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
+     1                            ,RWO(LXE),RWO(LXX),KX,EXS)
           INE=INR(NM)
+C...
           IF(NRP.GT.1)
      1      PRINT *,'WARNING - Multiple Eout int.rng. MF 5, MT',MT
           IF(INE.GT.2) THEN
             PRINT *,'WARNING - Non-linear interp. for MF 5, MT',MT
             INE=2
           END IF
+C...
         ELSE
           MX=MRW-LXE
           CALL RDLIST(LEF,C1,EI2,L1,L2,N1,NF,RWO(LXE),MX,IER)
@@ -768,6 +832,43 @@ Case: Interpolate distrib. to a given outgoing particle energy
           END IF
         END IF
    54   CONTINUE
+
+      ELSE IF(LF.EQ.7) THEN
+C* Energy dependent Maxwellian fission spectrum (Law 7)
+        NX=MRW/2
+        LX=NX+1
+        UPEN=C1
+        IF(EIN-UPEN.LE.0) THEN
+          NEN=0
+          GO TO 900
+        END IF
+C* Read and interpolate Maxwellian temperature parameter Theta
+        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        INE=INR(1)
+        IF(NR.GT.1) THEN
+          PRINT *,'WARNING - Multiple interp. ranges in MF5 MT',MT0
+        END IF
+        IF(INE.GT.2) THEN
+          PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
+        END IF
+        THETA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
+        IF(KEA.EQ.2) THEN
+Case: Generate outgoing particle energy distributions
+          NE1=101
+C*         Limit the table to the upper energy on the ENDF file
+          EE =MIN(ETOP,EIN-UPEN)
+          DE =EE/(NE1-1)
+          DO 56 I=1,NE1
+          EE =(I-1)*DE
+          ENR(I)=EE
+          DXS(I)=SPMAXW(EE,EIN,UPEN,THETA)
+   56     CONTINUE
+        ELSE
+Case: Calculate values at the given outgoing particle energy
+          YL=YL*SPMAXW(EOU,EIN,UPEN,THETA)
+          GO TO 800
+        END IF
       ELSE IF(LF.EQ.11) THEN
 C* Energy dependent Watt spectrum (Law 11)
         NX=MRW/2
@@ -856,7 +957,7 @@ C*        Set IER to flag error and terminate if not Law-7 in MF 6
       END IF
       IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
         IF(JNK.GE.NK) THEN
-          PRINT *,'DENXS1 WARNING - Particle not found',NINT(ZAP)
+          PRINT *,'DENXS1 WARNING - Particle not found',NINT(ZAP0)
           IER=24
           GO TO 900
         END IF
@@ -951,37 +1052,35 @@ C* Lin-interpolate between distributions for two incident energies
      1               ,EI2,NEP1,RWO,RWO(LX),INE,MX)
 C*
    74 CONTINUE
-      IF(KEA.EQ.2 .AND. DEG.LT.0) SAN=SAN*2
       GO TO 800
 C*
 C* Photon emission data
 C... Assume isotropic scattering - no coding to read MF 14
-  120 IF(KEA.NE.2) GO TO 150
+  120 IF(MF.EQ.13) THEN
+C* File MF13 has same structure as MF12/LO=1 but includes XS
+        XS=1
+        L1=1
+      END IF
+      IF(KEA.NE.2) GO TO 140
       LO=L1
-c...  IF( (MT0.GT. 50 .AND. MT0.LT. 91) .OR.
-c... 1    (MT0.GT.600 .AND. MT0.LT.649) .OR.
-c... 1    (MT0.GT.800 .AND. MT0.LT.849) ) THEN
+      LV =0
+      LG =0
+      LLI=1
+      RWO(LLI)=0
+      LLI=LLI+1
+C* Read photon branching ratios to all discrete-leves up to the present
+  122 LV =LV +1
+      IWO(LV)=LLI
+C...
+C...      print *,'Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
+C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
-        LG =0
-        LV =0
-        LLI=1
-        RWO(LLI)=0
-        LLI=LLI+1
-C* Read photon branching ratios to all discrete-leves up to the present
-  122   LV =LV +1
-        IWO(LV)=LLI
 C* Changing LF between data sets is currently not accomodated
         IF(LG.GT.0 .AND. LG.NE.L2)
-     1    STOP 'DXSEN1 ERROR - Redefined LF reading MF 12'
-        LO =L1
+     1    STOP 'DXSEN1 ERROR - Redefined LG reading MF 12'
         LG =L2
         NS =N1
-        IF(LO.NE.2) THEN
-          IER=43
-          PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
-          GO TO 900
-        END IF
         LL =LV*(LG+1)
         DO 123 J=1,LL
         RWO(LLI+J)=0
@@ -998,15 +1097,17 @@ C* Changing LF between data sets is currently not accomodated
         LLI=LLI+1+LL
 C* Read the data for the next level
         CALL SKIPSC(LEF)
+        MM =MT
         MT =0
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
-        IF(IER.EQ.0 .AND. MT.LT.MT0) GO TO 122
+        IF(IER.EQ.0 .AND.
+     1     (MM+1.EQ.MT .AND. MT.LE.MT0) ) GO TO 122
         IWO(LV+1)=LLI
 C*
 C* All levels up to the current one read - sum the yields
-c....
-c....        print *,'     Processing MF/MT',MF,MT0
-c....
+c...
+c...    print *,'     Summing discr.level yields MF/MT,LV',MF,MT0,LV
+c...
         CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
 C* Process the gamma lines
         NX =(MRW-NW)/2
@@ -1048,80 +1149,116 @@ C* Add the current to the saved distribution
         GO TO 800
       ELSE IF(LO.EQ.1) THEN
 C* Multiplicities given
-        NK=N1
-C* Dummy-read the total photon multiplicity
+        NK =N1
+        NE1=0
+C* Subdivide the available work array
         LXE=1
-        LXX=MRW/2
-        KX =LXX-LXE
+        LE =MRW/2
+        KXX=LE
+        KX =LE/2
+        LXX=LXE+KX
+        LX =LE +KX
+C* Dummy-read the total photon multiplicity
         IF(NK.GT.1) CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
-     1                         ,RWO(LXE),RWO(LXX),KX,IER)
+     1                         ,RWO(LXE),RWO(LXX),KXX,IER)
 C* Read photon data for all subsections
         DO 138 IK=1,NK
 C* Photon energy and yield
         CALL RDTAB1(LEF,EG,ES,LP,LF,NR,NP,NBT,INR
-     1             ,RWO(LXE),RWO(LXX),KX,IER)
-        YL=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
+     1             ,RWO(LXE),RWO(LXX),KXX,IER)
+        IF(IER.NE.0) THEN
+          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+          STOP 'DXSEND1 ERROR - Reading MF12'
+        END IF
+        YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
           STOP 'DXSEND1 ERROR - Reading MF12'
         END IF
 C* Modify photon energy for primary photons
         IF(LP.EQ.2) EG=EG+EIN*AWR/(AWR+1)
+C* Consider various data representations in MF12
         IF(LF.EQ.1) THEN
-C* Normalised tabulated function
+C* Normalised tabulated function given in file MF15
           IF(IK.LT.NK) THEN
             PRINT *,'DXSEN1 WARNING - Tabulated distr. not last'
           END IF
           MF=15
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
-C* Only one section is allowed at present
+          IF(IER.NE.0) THEN
+            PRINT *,'WARNING - No abulated data for MF15 MT',MT0
+            GO TO 800
+          END IF
+C* Only one section for tabulated distributions is allowed at present
           IF(NC.GT.1) THEN
             PRINT *,'DXSEN1 WARNING >1 section for MF/MT',MF,MT
             STOP 'DXSEN1 ERROR >1 section for MF 15'
           END IF
 C* Read the fractional contribution of the section 
           CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
-     1               ,RWO(LXE),RWO(LXX),KX,IER)
-          YL=YL*FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
+     1               ,RWO(LE),RWO(LX),KX,IER)
+          YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR,IER)
           IF(LF.NE.1) THEN
             IER=99
             PRINT *,'WARNING - No coding for MF 15, MT',MT0,' LF',LF
             GO TO 900
           END IF
           EI1=0
-          NE1=0
+          NEN=0
 C* Read interpolation data for the incident energies
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
           NM =2
           DO 134 IE=1,NE
 C* For each incident energy read the outg.particle energy distribution
           CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
-     1               ,RWO(LXE),RWO(LXX),KX,IER)
+     1               ,RWO(LE),RWO(LX),KX,IER)
           IF(IER.NE.0) THEN
             PRINT *,'DXSEN1 ERROR - Reading MF/MT',MF,MT
             STOP 'DENXS1 ERROR reading energy.distrib.'
           END IF
+C* Scale by the fractional contribution
+          DO 133 J=1,NF
+            RWO(LX-1+J)=RWO(LX-1+J)*YLT
+  133     CONTINUE
+C* Linearise to tolerance EXS, if necessary
+          EXS=0.01
+          IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
+     1                            ,RWO(LE),RWO(LX),KX,EXS)
           INE=INR(NM)
-          IF(NRP.GT.1)
-     1      PRINT *,'WARNING - Multiple Eout int.rng. MF 15, MT',MT
-          IF(INE.GT.2) THEN
-            PRINT *,'WARNING - Non-linear interp. for MF 15, MT',MT
-            INE=2
-          END IF
 C* Interpolate outgoing particle energy distributions
-          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
-     1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
+          CALL FINT2D(EIN,EI1,NEN ,RWO(LXE),RWO(LXX),INR
+     1                   ,EI2,NF  ,RWO(LE) ,RWO(LX) ,INE,KX)
   134     CONTINUE
 C*
         ELSE IF(LF.EQ.2) THEN
 C* Discrete photon energy
-          IER=99
-          PRINT *,'WARNING - No coding for MF 12, MT',MT0,' LO',LO
-          GO TO 900
+          NEN=21
+          CALL FNGAUS(EG,NEN,RWO(LXE),RWO(LXX),EPS)
         ELSE
           PRINT *,'ERROR - Illegal flag MF/MT/LF',MF,MT,LF
           STOP 'DXSEND1 ERROR - Illegal LF in MF 12'
         END IF
+C* Generate the union grid
+        LUE=LXE+NEN
+        LUX=LXX+NEN
+        KX =NX -NEN
+        CALL UNIGRD(NE1,ENR,NEN,RWO(LXE),NE2,RWO(LUE),KX)
+C* Interpolate accumulated distribution to the union grid
+        CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
+        NE1=NE2
+        DO 135 I=1,NE1
+          ENR(I)=RWO(LUE-1+I)
+          DXS(I)=RWO(LUX-1+I)
+  135   CONTINUE
+C* Interpolate distribution for the current photon to the union grid
+        CALL FITGRD(NEN,RWO(LXE),RWO(LXX),NE1,RWO(LUE),RWO(LUX))
+C* Assume isotropic photon distributions
+        ANG=0.5
+C* Add the current to the saved distribution
+        FRC=ANG*YLK
+        DO 136 I=1,NE1
+          DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
+  136   CONTINUE
   138   CONTINUE
       ELSE
         IER=99
@@ -1133,20 +1270,18 @@ C*
 C* Photon angular distributions
   140 CONTINUE
         IER=99
-        PRINT *,'WARNING - No coding for MF',MF,' MT',MT0
-        GO TO 900
-C* Photon continuum energy distributions
-  150 CONTINUE
-        IER=99
-        PRINT *,'WARNING - No coding for MF 15, MT',MT0
+        PRINT *,'WARNING - No coding/data for MF',MF,' MT',MT0
         GO TO 900
 C*
 C* Distribution assembled - check that the last point is zero
   800 NEN=NE1
-      IF(KEA.EQ.2 .AND. DXS(NEN).NE.0) THEN
-        NEN=NEN+1
-        ENR(NEN)=ENR(NEN-1)
-        DXS(NEN)=0
+      IF(KEA.EQ.2) THEN
+        IF(DXS(NEN).NE.0) THEN
+          NEN=NEN+1
+          ENR(NEN)=ENR(NEN-1)
+          DXS(NEN)=0
+        END IF
+        IF(DEG.LT.0) SAN=SAN*2
       END IF
 C* Scale the distribution by the cross section
       SS=YL*XS*SAN
@@ -1185,7 +1320,7 @@ C* Fill missing levels
         EL=RWO(1)
         ND=ID(I+1)-LI
 C...
-C...    PRINT *,I,LI,ND,(RWO(LI-1+J),J=1,ND)
+C...        PRINT *,'Lvl,Adr,ND',I,LI,ND,(RWO(LI-1+J),J=1,ND)
 C...
         IF(I.LT.2) GO TO 40
         DO 26 J=1,LV
@@ -1314,6 +1449,18 @@ C...          IF(LV.GT.2) STOP
 C...
       RETURN
       END
+      FUNCTION SPMAXW(EE,EI,EU,THETA)
+C-Title  : Function SPMAXW
+C-Purpose: Calculate the Maxwellian fission spectrum value at energy EE
+      DATA PI/3.1415926/
+C* Normalisation constant
+      E0=(EI-EU)/THETA
+      E1=SQRT(E0)
+      CNRM=( 0.5*SQRT(PI)*ERRFN1(E1)-E1*EXP(-E0) ) * THETA**1.5
+C* Spectrum
+      SPMAXW=SQRT(EE)*EXP(-EE/THETA)/CNRM
+      RETURN
+      END
       FUNCTION SPWATT(EE,EI,EU,WA,WB)
 C-Title  : Function SPWATT
 C-Purpose: Calculate the Watt fission spectrum value at energy EE
@@ -1342,9 +1489,7 @@ C-D  ZA0 number defined as Z*1000+A+LIS0/10 (the decimal point
 C-D  allows for isomeric states). Alternately, if ZA0<0, the
 C-D  absolute integer value is interpreted as the required MAT
 C-D  number. If MF and MT are non-zero, the file is scanned
-C-D  until the value on the file matches the input value. The
-C-D  first record of the material (or section) is placed in the
-C-D  character string C66.
+C-D  until the value on the file matches the input value.
 C-D
 C-D  Notes:
 C-D  - The search for metastable states by ZA0 is only possible
@@ -1375,14 +1520,15 @@ C* Initialise
       ELSE IF(ZA0.GT.0) THEN
         IZA0=ZA0*10
       ELSE
-        READ (LEF,91,END=82,ERR=83) C66,MAT,MF,MT
+        CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+        IF(IER.GT.0) GO TO 80
         MAT0=-1
         GO TO 21
       END IF
 C*
 C* Loop to find the specified material
-   20 READ (LEF,91,END=82,ERR=83) C66,MAT,MF,MT
-      IF(MAT.LT.0) GO TO 81
+   20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LT.0) GO TO 80
       IF(ZA0.LT.0) THEN
 C* Case: Search by MAT number
         IF(MAT.NE.MAT0) GO TO 20
@@ -1404,29 +1550,24 @@ C* Case: Search by ZA number (including decimal LIS0)
 C* Loop to find the file number
    21 IF(MF0.EQ. 0) GO TO 30
    22 IF(MF0.EQ.MF) GO TO 30
-      READ (LEF,91,END=82,ERR=83) C66,MAT,MF,MT
-      IF(MAT.LE.0) GO TO 81
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
       GO TO 22
 C* Loop to find the reaction type number
    30 IF(MT0.EQ. 0) GO TO 40
    32 IF(MT0.EQ.MT) GO TO 40
-      READ (LEF,91,END=82,ERR=83) C66,MAT,MF,MT
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
       IF(MF0.GT.0 .AND. MF.GT.MF0) GO TO 20
-      IF(MAT.LT.0) GO TO 81
       GO TO 32
 C* Normal termination
    40 READ (C66,92) ZA,AW,L1,L2,N1,N2
       RETURN
 C*
 C* Error traps
-   81 IER=1
-      RETURN
-   82 IER=2
-      RETURN
-   83 IER=3
+   80 IER=IER+1
       RETURN
 C*
-   91 FORMAT(A66,I4,I2,I3,I5)
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
       SUBROUTINE SKIPSC(LEF)
@@ -1434,11 +1575,36 @@ C-Title  : Subroutine SKIPSC
 C-Purpose: Skip current section in an ENDF file
 C-
       CHARACTER*66 C66
-   20 READ (LEF,91) C66,MAT,MF,MT
+   20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
       IF(MT.NE.0) GO TO 20
       RETURN
-C*
-   91 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
+C-Title  : RDTEXT Subroutine
+C-Purpose: Read a text record to an ENDF file
+      CHARACTER*66  REC
+      READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
+      IER=0
+      RETURN
+   81 IER=1
+      RETURN
+   82 IER=2
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
+C-Title  : Subroutine RDHEAD
+C-Purpose: Read an ENDF HEAD record
+C-Description:
+C-D  The HEAD record of an ENDF file is read. The following error
+C-D  conditions are trapped by setting the IER flag:
+C-D    IER = 0  Normal termination
+C-D          1  End-of-file
+C-D          2  Read error
+C-
+      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      RETURN
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
       SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
 C-Title  : Subroutine RDTAB1
@@ -1523,6 +1689,7 @@ C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
       CHARACTER*66  REC
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) REC,MAT,MF,MT,NS
       RETURN
    40 FORMAT(A66,I4,I2,I3,I5)
@@ -1545,6 +1712,7 @@ C-Purpose: Write a CONT record to an ENDF file
       WRITE(REC(5),20) N1
       WRITE(REC(6),20) N2
    12 NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       RETURN
    20 FORMAT(I11)
@@ -1565,6 +1733,7 @@ C* First line of the TAB1 record
       WRITE(REC(5),42) NR
       WRITE(REC(6),42) NP
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
 C* Write interpolation data
       N =0
@@ -1578,6 +1747,7 @@ C* Write interpolation data
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NR) GO TO 20
 C* Loop for all argument&function pairs
@@ -1592,6 +1762,7 @@ C* Loop for all argument&function pairs
    34 I =I+2
       IF(I.LT.6) GO TO 32
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NP) GO TO 30
       RETURN
@@ -1613,6 +1784,7 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NR
       WRITE(REC(6),42) NZ
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
 C* Write interpolation data
       N =0
@@ -1626,6 +1798,7 @@ C* Write interpolation data
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NR) GO TO 20
       RETURN
@@ -1646,6 +1819,7 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NPL
       WRITE(REC(6),42) N2
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(NPL.EQ.0) RETURN
 C* Write data
@@ -1658,6 +1832,7 @@ C* Write data
    24 I =I +1
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NPL) GO TO 20
       RETURN
@@ -1849,6 +2024,8 @@ C-D  retain double points within a grid that allow for function
 C-D  discontinuities.
 C-
       DIMENSION EN1(NEP1),EN2(NEP2),EUN(NEP2)
+      IF(NEP2.LE.0) GO TO 30
+      IF(NEP1.LE.0) GO TO 34
       NEU=0
       J1 =1
       J2 =1
@@ -1891,6 +2068,19 @@ C* Test for double points in a grid
       IF(EN2(J2).EQ.EUN(NEU)) GO TO 20
       IF(J1.GT.NEP1) GO TO 20
       GO TO 8
+C*
+C* Add all points from the first set
+   30 NEU=NEP1
+      DO 32 J=1,NEU
+      EUN(J)=EN1(J)
+   32 CONTINUE
+      GO TO 40
+C*
+C* Add all points from the first set
+   34 NEU=NEP2
+      DO 36 J=1,NEU
+      EUN(J)=EN2(J)
+   36 CONTINUE
 C*
 C* All points processed
    40 CONTINUE
@@ -2111,5 +2301,80 @@ C-Purpose: Polynomial Pn(x) of order NC with NC+1 coefficients C(i)
       F  =F*X + C(NC1-I)
    10 CONTINUE
    20 POLYNX = F
+      RETURN
+      END
+      SUBROUTINE VECLIN(NR,NP,NBT,INR,ENR,XSR,MXPT,EPS)
+C-Title  : Subroutine VECLIN
+C-Purpose: Expand tabulated vector to be lin-lin interpolable
+      DIMENSION  NBT(NR),INR(NR),ENR(MXPT),XSR(MXPT)
+C*
+      IIN=1
+      I1 =1
+      I2 =2
+      MP =NP
+C* Check interpolation between points
+      DO I=2,MP
+        IF(I.GT.NBT(IIN)) IIN=IIN+1
+        IF(IIN.GT.NR) STOP 'VECLIN ERROR - Illegal interpolation range'
+        INT=INR(IIN)
+        IF(INT.LE.2) GO TO 40
+        E1=ENR(I1)
+        X1=XSR(I1)
+        E2=ENR(I2)
+        X2=XSR(I2)
+        EA=E1
+        XA=X1
+C* Check the midpoint of the remaining interval
+   20   EE=(EA+E2)/2
+        XX=FINEND(INT,EE,E1,X1,E2,X2)
+        XL=FINEND(  2,EE,EA,XA,E2,X2)
+        IF(ABS(XL-XX).GT.EPS*XX) THEN
+C* Interpolation tolerance not satisfied
+C* Insert a point and shift the rest
+          ES=E2
+          XS=X2
+          DO J=I2,NP
+            ER=ENR(J+1)
+            XR=XSR(J+1)
+            ENR(J+1)=ES
+            XSR(J+1)=XS
+            ES=ER
+            XS=XR
+          END DO
+          ENR(I2)=EE
+          XSR(I2)=XX
+          EA=EE
+          XA=XX
+          I2=I2+1
+          NP=NP+1
+          GO TO 20
+        END IF
+   40   I1=I2
+        I2=I2+1
+      END DO
+C* Update the interpolation range information
+      NR=1
+      NBT(1)=NP
+      INR(1)=2
+      RETURN
+      END
+      FUNCTION FINEND(INT,EE,E1,X1,E2,X2)
+C-Title  : Function FINEND
+C-Purpose: Interpolate between two points according to ENDF interp.flags
+      IF     (INT.EQ.2) THEN
+        FINEND=X1+(EE-E1)*(X2-X1)/(E2-E1)
+      ELSE IF(INT.EQ.3) THEN
+        FINEND=X1+(X2-X1)*LOG(EE/E1)/LOG(E2/E1)
+      ELSE IF(INT.EQ.4) THEN
+C...
+C...      PRINT *,'EE,E1,E2,U',EE,E1,E2,(EE-E1)/(E2-E1)
+C...
+        FINEND=X1*(X2/X1)**((EE-E1)/(E2-E1))
+      ELSE IF(INT.EQ.5) THEN
+        FINEND=X1*(EE/E1)**(LOG(X2/X1)/LOG(E2/E1))
+      ELSE
+        PRINT *,'FINEND ERROR - Illegal interpolation flag request',INT
+        STOP 'FINEND ERROR - Illegal interpolation flag'
+      END IF
       RETURN
       END
