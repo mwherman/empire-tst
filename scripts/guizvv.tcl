@@ -855,7 +855,7 @@ if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir
     button $top.creatazvd \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
-        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\} \
+        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ ../scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Create all} \
         -width 15 
