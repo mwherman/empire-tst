@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-08 17:06:13 $
-Ccc   * $Id: input.f,v 1.68 2005-02-08 17:06:13 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-08 17:21:17 $
+Ccc   * $Id: input.f,v 1.69 2005-02-08 17:21:17 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6184,7 +6184,6 @@ c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
                FSHELL = 1.0 + (1.0 -
      &                  EXP((-GAMma*xr)))*SHC(nnuc)/xr
             ELSE
-CRCN           FSHELL = 1 + GAMma/ SHC(nnuc)
                FSHELL = 1 + GAMma*SHC(nnuc)
             ENDIF
             ACRt = ATIl*FSHELL
