@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-28 09:51:49 $
-Ccc   * $Id: tl.f,v 1.19 2004-05-28 09:51:49 Capote Exp $
+Ccc   * $Date: 2004-05-28 11:50:26 $
+Ccc   * $Id: tl.f,v 1.20 2004-05-28 11:50:26 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -656,29 +656,37 @@ C-----****
 C-----Only one energy range
       j = 1
       dwv = 0.D0
-      ecutdom = 1000.D0
+C     ecutdom = 1000.D0
+C     To be consistent with analytical solution 
+      ecutdom = 150000.D0
       IF(POT(i, j, 24).NE.0.)THEN
          AV = DBLE(INT(100000*POT(i,j,1)))/100000
          BV = DBLE(INT(100000*POT(i,j,3)))/100000
          IF(POT(i, j, 13).EQ.2)THEN
 C-----------DOM integral
             WVE = WV2(AV, BV, EP, EEE)
-            dwv = 2*DOM_INT(DELTA_WV, WV2, EF, EF + 50.D0, ecutdom, EEE, 
-     &            WVE)
+C           dwv = 2*DOM_INT(DELTA_WV, WV2, EF, EF + 50.D0, ecutdom, EEE, 
+C    &            WVE)
+            dwv = 2*DOM_INT(DELTA_WV, WV2, EF, EF + 5.*Bv, ecutdom, EEE, 
+     &            0.d0)
             IF(ea.LT.1000.D0)dwv = dwv + DOM_INT_T1(AV, EF, ea, EEE)
      &                             + DOM_INT_T2(EF, ea, EEE)
          ENDIF
          IF(POT(i, j, 13).EQ.4)THEN
 C-----------DOM integral
             WVE = WV4(AV, BV, EP, EEE)
-            dwv = 2*DOM_INT(DELTA_WV, WV4, EF, EF + 50.D0, ecutdom, EEE, 
-     &            WVE)
+C           dwv = 2*DOM_INT(DELTA_WV, WV4, EF, EF + 50.D0, ecutdom, EEE, 
+C    &            WVE)
+            dwv = 2*DOM_INT(DELTA_WV, WV4, EF, EF + 5.*Bv, ecutdom, EEE, 
+     &            0.d0)
             IF(ea.LT.1000.D0)dwv = dwv + DOM_INT_T1(AV, EF, ea, EEE)
      &                             + DOM_INT_T2(EF, ea, EEE)
          ENDIF
       ENDIF
       dwd = 0.D0
       i = 4
+C     To be consistent with analytical solution 
+      ecutdom = 2000.D0
 C-----Only one energy range
       j = 1
       IF(POT(i, j, 24).NE.0.)THEN
@@ -688,12 +696,16 @@ C-----Only one energy range
          IF(POT(i, j, 13).EQ.2)THEN
 C-----------DOM integral
             WDE = WD2(AS, BS, CS, EP, EEE)
-            dwd = 2*DOM_INT(DELTA_WD, WD2, EF, EF + 20.D0, ecutdom, EEE, 
+C           dwd = 2*DOM_INT(DELTA_WD, WD2, EF, EF + 20.D0, ecutdom, EEE, 
+C    &            WDE)
+            dwd = 2*DOM_INT(DELTA_WD, WD2, EF, EF + 30.D0, ecutdom, EEE, 
      &            WDE)
          ENDIF
          IF(POT(i, j, 13).EQ.4)THEN
 C-----------DOM integral
             WDE = WD4(AS, BS, CS, EP, EEE)
+C           dwd = 2*DOM_INT(DELTA_WD, WD4, EF, EF + 30.D0, ecutdom, EEE, 
+C    &            WDE)
             dwd = 2*DOM_INT(DELTA_WD, WD4, EF, EF + 30.D0, ecutdom, EEE, 
      &            WDE)
          ENDIF
