@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:14 $
-Ccc   * $Id: tl.f,v 1.45 2005-03-11 17:22:14 herman Exp $
+Ccc   * $Date: 2005-03-15 15:53:21 $
+Ccc   * $Id: tl.f,v 1.46 2005-03-15 15:53:21 herman Exp $
  
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2201,7 +2201,7 @@ C
       IF (Inlkey.EQ.0) THEN
          CALL ECIS('ecSPH.inp','ECIS_SPH.out#')
       ELSE
-         CALL ECIS('ecVIB.inp','ECIS_VIB.out#')
+         CALL ECIS('ecVIB.inp','ECIS_VIB.out')
       ENDIF
       END
  
