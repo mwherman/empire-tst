@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:20:14 $
-Ccc   * $Id: pcross.f,v 1.17 2005-01-24 13:20:14 Capote Exp $
+Ccc   * $Date: 2005-02-14 17:03:02 $
+Ccc   * $Id: pcross.f,v 1.18 2005-02-14 17:03:02 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C
@@ -33,7 +33,7 @@ C
       REAL*8 ec, gc, pc, fr, aat, azt
       REAL*8 totemis, cme, hlp1, eee, ff1, ff2, ff3, wb, wda, sg, er,
      &       ff, emis
-      LOGICAL CallPCROSS/.FALSE./
+      LOGICAL CallPCROSS
 C
 C     REAL MATRIX
 C
@@ -55,6 +55,7 @@ C
 C
 C======================================================================
       COMMON /CALC5 / L, NHEq
+      DATA CallPcross/.FALSE./
       SAVE CallPcross,r
 C
 C     NPRoject - projectile nejc number
