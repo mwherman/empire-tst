@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-14 17:40:02 $
-Ccc   * $Id: auxiliary.f,v 1.9 2004-05-14 17:40:02 herman Exp $
+Ccc   * $Date: 2004-06-01 21:59:26 $
+Ccc   * $Id: auxiliary.f,v 1.10 2004-06-01 21:59:26 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -64,6 +64,14 @@ C----Plujko_new(End)
          DO nang = 1, NDANG
             CSEahms(necse, nang, 1) = 0.0
             CSEahms(necse, nang, 2) = 0.0
+         ENDDO
+      ENDDO
+      DO nejc = 0, NEJcm
+         DO il = 1, NDLV
+            REClev(il, nejc) = 0.0
+         ENDDO
+         DO ie = 1, NDECSE
+            AUSpec(ie, nejc) = 0.0
          ENDDO
       ENDDO
       DO nnuc = 1, NDNUC
