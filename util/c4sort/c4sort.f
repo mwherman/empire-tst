@@ -149,7 +149,7 @@ C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-
-      PARAMETER       (MXEN=40000,LCH=34,MXAL=20,MXIR=12000)
+      PARAMETER       (MXEN=140000,LCH=34,MXAL=20,MXIR=12000)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*40     FLIN,FLC4,FLOU,FLSC
       CHARACTER*35     REF

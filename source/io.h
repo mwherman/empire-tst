@@ -102,8 +102,9 @@ C     Added to check if file is not empty
      *,STATUS='OLD')
       OPEN(UNIT=24,FILE='../data/ldp.dat'
      *,STATUS='OLD')
-      OPEN(UNIT=25,FILE='../data/nix-moller-audi.dat'
-     *,STATUS='OLD')
+C     OPEN(UNIT=25,FILE='../data/nix-moller-audi.dat'
+C    *,STATUS='OLD')
+      OPEN(UNIT=25,FILE='OMPdata.dat')
       OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
 *-ENDIF
