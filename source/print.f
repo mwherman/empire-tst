@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-21 20:04:50 $
-Ccc   * $Id: print.f,v 1.8 2005-03-21 20:04:50 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-01 12:09:25 $
+Ccc   * $Id: print.f,v 1.9 2005-04-01 12:09:25 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -47,10 +47,10 @@ C
          IF (CSE(i,Nejc,Nnuc).GT.1.D-15) kmax = i
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
-      IF (csemax.EQ.1.D-16) RETURN
+      IF (csemax.LE.1.D-15) RETURN
       kmax = kmax + 2
-      kmax = MIN0(NDEX,kmax)
-      kmax = MIN0(kmax,NDECSE) ! RCN
+      kmax = MIN0(NDEX,kmax,NDECSE)
+C     kmax = MIN0(kmax,NDECSE) ! RCN
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
@@ -62,7 +62,7 @@ C
          GOTO 100
       ENDIF
       ia = AEJc(Nejc)
-      IF (AEJc(Nejc).GT.1.0D0 .AND. Nejc.NE.0) WRITE (6,99010) ia, 
+      IF (AEJc(Nejc).GT.1.0D0 .AND. Nejc.NE.0) WRITE (6,99010) ia,
      &    SYMbe(Nejc)
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
       IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) WRITE (6,99015)
