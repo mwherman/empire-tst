@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-08 15:51:37 $
-Ccc   * $Id: input.f,v 1.43 2004-10-08 15:51:37 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-11-23 19:47:15 $
+Ccc   * $Id: input.f,v 1.44 2004-11-23 19:47:15 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -5680,14 +5680,14 @@ C================  level densities at saddles  ===============================
             SHC(Nnuc) = SHCfis(ibars)
             DELp = DELtafis(ibars)
             GAMma = GAMmafis(ibars)
+            CALL ROEMP(Nnuc, 1.0D0, AFIs(ibars))
+            ACRtf(ibars) = ACRt
+            UCRtf(ibars) = UCRt
+            TCRtf(ibars) = TCRt
+            ECOndf(ibars) = ECOnd
+            DETcrtf(ibars) = DETcrt
+            SCRtf(ibars) = SCR
          ENDIF
-         CALL ROEMP(Nnuc, 1.0D0, AFIs(ibars))
-         ACRtf(ibars) = ACRt
-         UCRtf(ibars) = UCRt
-         TCRtf(ibars) = TCRt
-         ECOndf(ibars) = ECOnd
-         DETcrtf(ibars) = DETcrt
-         SCRtf(ibars) = SCR
          MPArcrt(ibars) = 6*ACRt*mm2*(1. - (2./3.)*DEFfis(ibars))/PI**2
          IF(MPArcrt(ibars).LT.2.)MPArcrt(ibars) = 2.
                                                     !!!!!!!!!!!
