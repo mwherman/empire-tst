@@ -1427,29 +1427,27 @@ C
          DO i = ien_beg, Nen
             ener = ETL(i, Nejc, Nnuc)
             IF( ener. LE. 0.d0) cycle
+
             IF(DIRect.EQ.2 .AND. AEJc(Nejc).LE.1)THEN
+
 C-------------Transmission coefficient matrix for incident channel
 C-------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C             Only coupled levels are considered
               IF(DEFormed)THEN
 C               In this case we need only CC calculation so INLkey=0
                 CALL ECIS_CCVIBROT(Nejc, Nnuc, ener, .TRUE., 0)
-
                 CALL ECIS2EMPIRE_TR(Nejc, Nnuc, i, .FALSE.)
-
               ELSE
 C               EXACT (no DWBA) calculation
                 CALL ECIS_CCVIB(Nejc, Nnuc, ener, .FALSE., -1)
-
                 CALL ECIS2EMPIRE_TR(Nejc, Nnuc, i, .TRUE.)
-
               ENDIF
+
             ELSE
 C
 C             Spherical optical model is assumed, only one level (gs)
 C
               CALL ECIS_CCVIB(Nejc, Nnuc, ener, .TRUE., 0)
-
               CALL ECIS2EMPIRE_TR(Nejc, Nnuc, i, .TRUE.)
 
             ENDIF
@@ -1919,7 +1917,6 @@ C     ECIs1(23:23) = 'T'
       ECIs2 = BECis2
 C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
-      IF(INLkey.eq.0) ECIs2(14:14) = 'F'
 C-----penetrabilities punched on cards
       ECIs2(13:13) = 'T'
 C     RCN 01/2005
@@ -2017,15 +2014,16 @@ C-----CARD 5
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
 C-----ground state
-C     ch = '-'
-C     IF ( LVP(1,Nnuc).GT.0 ) ch = '+'
+      ch = '-'
+      IF ( LVP(LEVtarg,Nnuc).GT.0 ) ch = '+'
 C-----Important: Instead of using TARGET SPIN (XJLV(1,NNUC)) and PARITY(ch)
 C-----A.Koning always used in PREGNASH SPIN=0, ch='+'
 C-----It is justified for vibrational model and DWBA calculations
 C-----so we are using zero spin here
 C-----NOT TRUE for rotational model calculations (see ecis_CCrot)
 C-----write(1,'(f5.2,2i2,a1,5f10.5)') zerosp,0,1,'+',EL,
-      WRITE(1, '(f5.2,2i2,a1,5f10.5)')zerosp, 0, 1, '+', elab,
+C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')zerosp, 0, 1, '+', elab,
+      WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(LEVtarg,NNUC),0,1, ch, elab,
      &                                SEJc(Nejc), xmas_nejc, xmas_nnuc,
      &                                Z(Nnuc)*ZEJc(Nejc)
 C-----0 phonon involved
@@ -2319,8 +2317,9 @@ C-----Penetrabilities punched on cards
       ECIs2(13:13) = 'F'
       IF(Ltlj)THEN
          ECIs2(13:13) = 'T'
-         ECIs2(14:14) = 'F'
-         ECIs2(5:5) = 'T'
+C        RCN 01/2005
+C        ECIs2(5:5) = 'F'
+C        ECIs2(14:14) = 'F'
 C--------Smatrix output
          ECIs2(6:6) = 'F'
       ENDIF

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:22:12 $
-Ccc   * $Id: fusion.f,v 1.22 2005-01-24 13:22:12 Capote Exp $
+Ccc   * $Date: 2005-01-25 01:07:39 $
+Ccc   * $Id: fusion.f,v 1.23 2005-01-25 01:07:39 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -263,40 +263,43 @@ C---------------Saving KTRlom(0,0)
                 itmp1 = KTRlom(0, 0)
                 KTRlom(0, 0) = KTRompcc
               ENDIF
-
+              CCCalc = .FALSE.
               IF(DIRect.NE.2) CCCalc = .TRUE.
 
-              CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+              IF(.NOT.DEFORMED) THEN
 
-              IF(DIRECT.NE.3) THEN
+                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
 
-               IF(IOPsys.EQ.0)THEN
-C               LINUX
-                ctmp = 'cp ecis03.cs dwba.cs'
-                iwin = PIPE(ctmp)
-                ctmp = 'mv ecis03.ang dwba.ang'
-                iwin = PIPE(ctmp)
-                ctmp = 'mv ecis03.ics dwba.ics'
-                iwin = PIPE(ctmp)
-C               ctmp = 'mv ecis03.pol dwba.pol'
-C               iwin = PIPE(ctmp)
-               ELSE
-C               WINDOWS
-                ctmp = 'copy ecis03.cs dwba.cs>NUL'
-                iwin = PIPE(ctmp)
-                ctmp = 'move ecis03.ang dwba.ang>NUL'
-                iwin = PIPE(ctmp)
-                ctmp = 'move ecis03.ics dwba.ics>NUL'
-                iwin = PIPE(ctmp)
-C               ctmp = 'moveecis03.pol dwba.pol>NUL'
-C               iwin = PIPE(ctmp)
-               ENDIF
+                IF(DIRECT.NE.3) THEN
+
+                  IF(IOPsys.EQ.0)THEN
+C                   LINUX
+                    ctmp = 'cp ecis03.cs dwba.cs'
+                    iwin = PIPE(ctmp)
+                    ctmp = 'mv ecis03.ang dwba.ang'
+                    iwin = PIPE(ctmp)
+                    ctmp = 'mv ecis03.ics dwba.ics'
+                    iwin = PIPE(ctmp)
+C                   ctmp = 'mv ecis03.pol dwba.pol'
+C                   iwin = PIPE(ctmp)
+                  ELSE
+C                   WINDOWS
+                    ctmp = 'copy ecis03.cs dwba.cs>NUL'
+                    iwin = PIPE(ctmp)
+                    ctmp = 'move ecis03.ang dwba.ang>NUL'
+                    iwin = PIPE(ctmp)
+                    ctmp = 'move ecis03.ics dwba.ics>NUL'
+                    iwin = PIPE(ctmp)
+C                   ctmp = 'moveecis03.pol dwba.pol>NUL'
+C                   iwin = PIPE(ctmp)
+                  ENDIF
+
+                ENDIF
 
               ENDIF
 
               IF(DIRect.LE.2 .AND. AEJc(Npro).LE.1) THEN
 C--------------Target nucleus (elastic channel), incident neutron or proton
-
 
                WRITE(6, *)' CC transmission coefficients used for ',
      &                 'fusion determination'
@@ -305,133 +308,102 @@ C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Preparing INPUT and RUNNING ECIS
 C--------------(or reading already calculated file)
                IF(DEFormed)THEN
-                CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE., 0)
-               ELSE
-                CALL ECIS_CCVIB(Npro, Ntrg, einlab, .FALSE., -1)
-               ENDIF
 
-               IF(IOPsys.EQ.0)THEN
-C               LINUX
-                ctmp = 'cp ecis03.cs ccm.cs'
-                iwin = PIPE(ctmp)
-                ctmp = 'mv ecis03.ang ccm.ang'
-                iwin = PIPE(ctmp)
-                ctmp = 'mv ecis03.ics ccm.ics'
-                iwin = PIPE(ctmp)
-C               ctmp = 'mv ecis03.pol ccm.pol'
-C               iwin = PIPE(ctmp)
-               ELSE
-C               WINDOWS
-                iwin = PIPE('copy ecis03.cs ccm.cs>NUL')
-                iwin = PIPE('move ecis03.ics ccm.ics>NUL')
-                iwin = PIPE('move ecis03.ang ccm.ang>NUL')
-C               iwin = PIPE('move ecis03.pol ccm.pol>NUL')
-               ENDIF
-C
-C              Joining both DWBA and CCM files
-C
-C              total, elastic and reaction cross section is from CCM
-C
-C              inelastic cross section
-               OPEN(45, FILE = 'dwba.ics', STATUS = 'OLD', ERR=1000)
-               OPEN(46, FILE = 'ccm.ics' , STATUS = 'OLD')
-               OPEN(47, FILE = 'ecis03.ics' , STATUS = 'UNKNOWN')
-               READ(45, '(A80)', END = 1000) rstring
-               READ(46, '(A80)', END=990) ! first line is taken from dwba
-  990          write(47,'(A80)') rstring
-               DO i = 2, ND_nlv
-                READ(45, '(A80)', END = 1000) rstring
-                READ(46,'(A80)',END=995) rstring
-  995           write(47,'(A80)') rstring
-               ENDDO
- 1000          CLOSE(45)
-               CLOSE(46)
-C1000          CLOSE(45, STATUS='DELETE')
-C              CLOSE(46, STATUS='DELETE')
-               CLOSE(47)
-C
-C              Renormalization of the reaction cross section to consider
-C              DWBA calculated inelastic cross section should be checked.
-C
-C              angular distribution
-               OPEN(45, FILE = 'dwba.ang', STATUS = 'OLD', ERR=2000)
-               READ(45, '(A80)', END = 2000) rstring
-               OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
-               READ(46, '(A80)', END=1005) ! first line is taken from dwba
- 1005          OPEN(47, FILE = 'ecis03.ang' , STATUS = 'UNKNOWN')
-               write(47,'(A80)') rstring
-               DO i = 1, ND_nlv
-                READ(45, '(5x,F5.1,A1,4x,i5)', END = 2000) stmp1,
-     &                                                ctmp1,nang
-                READ(46, '(5x,F5.1,A1)', END = 1010) stmp2,ctmp2
-C               checking the correspondence of the excited states
-                IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
-                  write(6,*)
-     >            ' WARNING: DWBA and CCM state order does not coincide'
-                ENDIF
- 1010           BACKSPACE 45
-                READ(45, '(A80)', END = 2000) rstring
-                write(47,'(A80)') rstring
-                DO j = 1, nang
-                  READ(45, '(A80)', END = 2000) rstring
-                  READ(46,'(A80)' , END = 1015) rstring
- 1015             write(47,'(A80)') rstring
-                ENDDO
-               ENDDO
- 2000          CLOSE(45, STATUS='DELETE')
-               CLOSE(46, STATUS='DELETE')
-               CLOSE(47)
-
-
-               IF(DEFormed)THEN
-
+                     CALL ECIS_CCVIBROT(Npro, Ntrg, einlab,.TRUE., 0)
                  CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl,.FALSE.)
 
-               ELSE
+                   ELSE
+
+                     CALL ECIS_CCVIB(Npro, Ntrg, einlab, .FALSE., -1)
+
+                 IF(IOPsys.EQ.0)THEN
+C                  LINUX
+                   ctmp = 'cp ecis03.cs ccm.cs'
+                   iwin = PIPE(ctmp)
+                   ctmp = 'mv ecis03.ang ccm.ang'
+                   iwin = PIPE(ctmp)
+                   ctmp = 'mv ecis03.ics ccm.ics'
+                   iwin = PIPE(ctmp)
+C                  ctmp = 'mv ecis03.pol ccm.pol'
+C                  iwin = PIPE(ctmp)
+                 ELSE
+C                  WINDOWS
+                   iwin = PIPE('copy ecis03.cs ccm.cs>NUL')
+                   iwin = PIPE('move ecis03.ics ccm.ics>NUL')
+                   iwin = PIPE('move ecis03.ang ccm.ang>NUL')
+C                  iwin = PIPE('move ecis03.pol ccm.pol>NUL')
+                 ENDIF
+C
+C                Joining both DWBA and CCM files
+C                total, elastic and reaction cross section is from CCM
+C
+C                inelastic cross section
+                 OPEN(45, FILE = 'dwba.ics', STATUS = 'OLD', ERR=1000)
+                 OPEN(46, FILE = 'ccm.ics' , STATUS = 'OLD')
+                 OPEN(47, FILE = 'ecis03.ics' , STATUS = 'UNKNOWN')
+                 READ(45, '(A80)', END = 1000) rstring
+                 READ(46, '(A80)', END=990) ! first line is taken from dwba
+  990            write(47,'(A80)') rstring
+                 DO i = 2, ND_nlv
+                   READ(45, '(A80)', END = 1000) rstring
+                   READ(46,'(A80)',END=995) rstring
+  995              write(47,'(A80)') rstring
+                 ENDDO
+ 1000            CLOSE(45, STATUS='DELETE')
+                 CLOSE(46, STATUS='DELETE')
+                 CLOSE(47)
+C                angular distribution
+                 OPEN(45, FILE = 'dwba.ang', STATUS = 'OLD', ERR=2000)
+                 READ(45, '(A80)', END = 2000) rstring
+                 OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
+                 READ(46, '(A80)', END=1005) ! first line is taken from dwba
+ 1005            OPEN(47, FILE = 'ecis03.ang' , STATUS = 'UNKNOWN')
+                 write(47,'(A80)') rstring
+                 DO i = 1, ND_nlv
+                   READ(45, '(5x,F5.1,A1,4x,i5)', END = 2000) stmp1,
+     &                                                ctmp1,nang
+                   READ(46, '(5x,F5.1,A1)', END = 1010) stmp2,ctmp2
+C                  checking the correspondence of the excited states
+                   IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
+                     write(6,*)
+     >            ' WARNING: DWBA and CCM state order does not coincide'
+                   ENDIF
+ 1010              BACKSPACE 45
+                   READ(45, '(A80)', END = 2000) rstring
+                   write(47,'(A80)') rstring
+                   DO j = 1, nang
+                     READ(45, '(A80)', END = 2000) rstring
+                     READ(46,'(A80)' , END = 1015) rstring
+ 1015                write(47,'(A80)') rstring
+                   ENDDO
+                 ENDDO
+ 2000            CLOSE(45, STATUS='DELETE')
+                 CLOSE(46, STATUS='DELETE')
+                 CLOSE(47)
 
                  CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl,.TRUE.)
 
                ENDIF
 
-
               ELSE ! DIRECT.GE.2 OR CLUSTER
 
                WRITE(6, *)' Spherical OM transmission coefficients',
      &                   ' used for fusion determination'
-
-
-               CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
-
-
+               CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
                CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl, .TRUE.)
-
-
                IF(.NOT. (MODelecis.EQ.0 .OR. DIRect.EQ.3))
      &           WRITE(6, *)' Fusion cross section normalized',
      &                      ' to coupled channel reaction cross section'
               ENDIF
 
-
            ELSE ! DIRECT = 0
 
-
              WRITE(6, *)' Spherical OM transmission coefficients',
-
      &                   ' used for fusion determination'
-
-
-
-              CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
-
-
-
+              CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
               CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl, .TRUE.)
 
-
            ENDIF
-
-
-
 C----------IWARN=0 - 'NO Warnings'
 C----------IWARN=1 - 'A out of the recommended range '
 C----------IWARN=2 - 'Z out of the recommended range '
@@ -456,23 +428,15 @@ C
            ENDIF
 
         ELSEIF(KTRlom(Npro, Ntrg).EQ.0) THEN
-
 C----------calculation of h.i. transmission coefficients for fusion
            CALL HITL(stl)
-
         ENDIF
 
       ENDIF
-
-
 C-----calculation of transmission coefficients ----done------
-
       DO i = 1, NDLW
-
         ELTl(i) = stl(i)
-
       ENDDO
-
 
       smin = ABS(SEJc(Npro) - XJLv(LEVtarg, Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
