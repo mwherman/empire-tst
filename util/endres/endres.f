@@ -3,6 +3,7 @@ C-Title  : Program ENDRES
 C-Purpose: Insert resonance data into an ENDF file
 C-Author : A. Trkov, IAEA-NDS, Vienna, Austria
 C-Version: November 2003
+C-V  04/11 - Fix bug in correcting threshold x-sect in MF 3.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -281,8 +282,9 @@ C* Read the cross sections
      &           ,RWO(K1),RWO(K2),NMX,IER)
 C* First energy point for the present reaction
       E1 =RWO(K1)
-C* Low energy limit on file is determined from any reaction with Q>0
-      IF(QI.GE.0) ELE=E1
+C* Low energy limit on file is used for reactions with Q>0
+      ELL=ELE
+      IF(QI.GE.0) ELL=E1
 C*
 C* Correct the total, elastic, fission, capture
       IF(MT.EQ.1 .OR. MT.EQ.2 .OR. MT.EQ.18 .OR. MT.EQ.102) THEN
@@ -307,10 +309,10 @@ C* Interpolate cross section to the upper resonance range energy
       END IF
 C* Check threshold energy
       ETH=-QI*(AWR+1)/AWR
-
-      print *,'k1,eth,ele,erl',k1,eth,ele,erl
-
-      IF(ETH.LT.ELE) THEN
+c...
+      print *,'mt,k1,ele,eth,ell,erl',mt,k1,ele,eth,ell,erl
+c...
+      IF(ETH.LT.ELL .AND. ETH.GT.ELE) THEN
 C* Add points below threshold
         EAD=MAX(ETH,ERL)
         NMT=NMT+1
@@ -370,16 +372,20 @@ C* Copy the transformation matrix, if given
             CALL RDHEAD(LEM,MA1,MF,MT,C1,C2,LI,LCT,N1,N2,IER)
             CALL WRCONT(LOU,MAT,MF,MT,NS,C1,C2,LI,LCT,N1,N2)
           END IF
+          IF(LTT.NE.0) THEN
 C* Modify the TAB2 record for one extra energy point
-          CALL RDTAB2(LEM,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
-          NE =NE+1
-          DO J=1,NR
-            NBT(J)=NBT(J)+1
-          END DO
-          CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,L1,L2
-     1                   ,NR,NE,NBT,INR)
+            CALL RDTAB2(LEM,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+            NE =NE+1
+            DO J=1,NR
+              NBT(J)=NBT(J)+1
+            END DO
+            CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,L1,L2
+     1                 ,NR,NE,NBT,INR)
+          END IF
+          IF(LTT.EQ.0) THEN
+            GO TO 142
 C* Duplicate the first distribution to ERL and copy the rest
-          IF(LTT.EQ.1) THEN
+          ELSE IF(LTT.EQ.1) THEN
             CALL RDLIST(LEM,C1,EE,LT,L2,N1,NL,RWO,MXRW,IER)
             CALL WRLIST(LOU,MAT,MF,MT,NS,C1,ERL,LT,L2,N1,NL,RWO)
             CALL WRLIST(LOU,MAT,MF,MT,NS,C1,EE ,LT,L2,N1,NL,RWO)
