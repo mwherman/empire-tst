@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-06 14:17:24 $
-Ccc   * $Id: lev-dens.f,v 1.30 2005-02-06 14:17:24 Capote Exp $
+Ccc   * $Date: 2005-02-14 17:03:58 $
+Ccc   * $Id: lev-dens.f,v 1.31 2005-02-14 17:03:58 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -1905,16 +1905,16 @@ C-------------------------------------------------------------------
       WRITE(filename, 99001)iz
 99001 FORMAT('../RIPL-2/densities/total/level-densities-hfbcs/z', i3.3,
      &       '.dat')
-      OPEN(UNIT = 34, FILE = filename)
- 100  READ(34, 99002, ERR = 100, END = 300)car2, izr, iar
+      OPEN(UNIT = 34, FILE = filename, ERR=300)
+  100 READ(34, 99002, ERR=300, END=300) car2, izr, iar
 99002 FORMAT(23x, a2, i3, 3x, i3)
       IF(car2.NE.'Z=')GOTO 100
       IF(iar.NE.ia .OR. izr.NE.iz)GOTO 100
 C
 C-----reading microscopic lev. dens. from the RIPL-2 file
 C
-      READ(34, *)
-      READ(34, *)
+      READ(34, *, END=300)
+      READ(34, *, END=300)
       i = 1
  200  READ(34, 99003, END = 400)uugrid(i), tgrid(i), cgrid(i),
      &                          rhoogrid(i), rhotgrid(i),
