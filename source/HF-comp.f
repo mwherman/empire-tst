@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: HF-comp.f,v 1.46 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-09 20:01:50 $
+Ccc   * $Id: HF-comp.f,v 1.47 2005-03-09 20:01:50 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1312,7 +1312,7 @@ C==============discrete contribution====================
                   ist = 2
                ENDIF
                sfmin = sfmin - HIS(Nnuc)
-               DO jnc = sfmin, Jc, ist
+               DO jnc = INT(sfmin), Jc, ist
                   IF (jnc.EQ.Jc .AND. IPFdis(nr,ibar).EQ.Ip) THEN
                      snc = FLOAT(jnc) + HIS(Nnuc)
                      exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
@@ -1351,7 +1351,7 @@ C-------subbarrier effects
                ist = 2
             ENDIF
             sfmin = sfmin - HIS(Nnuc)
-            DO jnc = sfmin, Jc, ist
+            DO jnc = INT(sfmin), Jc, ist
                IF (jnc.EQ.Jc .AND. IPFdis(nr,1).EQ.Ip) THEN
                   snc = FLOAT(jnc) + HIS(Nnuc)
                   DO ibar = 1, NRBar
