@@ -171,7 +171,7 @@ proc ::vTcl:image:get_creation_type {filename} {
 
 foreach img {
 
-        {{[file join / usr local vtcl images edit open.gif]} {} stock {
+        {{[file join / usr lib vtcl-1.6.0 images edit open.gif]} {} stock {
 R0lGODlhFAAUAPcAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwMDcwKbK8AAA
 AAAAKgAAVQAAfwAAqgAA1AAqAAAqKgAqVQAqfwAqqgAq1ABVAABVKgBVVQBV
 fwBVqgBV1AB/AAB/KgB/VQB/fwB/qgB/1ACqAACqKgCqVQCqfwCqqgCq1ADU
@@ -380,17 +380,9 @@ proc ::vTcl:WidgetProc {w args} {
         ## If no arguments, returns the path the alias points to
         return $w
     }
-    ## The first argument is a switch, they must be doing a configure.
-    if {[string index $args 0] == "-"} {
-        set command configure
-        ## There's only one argument, must be a cget.
-        if {[llength $args] == 1} {
-            set command cget
-        }
-    } else {
-        set command [lindex $args 0]
-        set args [lrange $args 1 end]
-    }
+
+    set command [lindex $args 0]
+    set args [lrange $args 1 end]
     uplevel $w $command $args
 }
 #############################################################################
@@ -446,6 +438,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_3_0.chkbn3n {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -justify 1 -offvalue 1 -onvalue 1 -text 1 -variable 1}
     }
+    namespace eval ::widgets::$site_3_0.chkbnfis {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -justify 1 -offvalue 1 -onvalue 1 -text 1 -variable 1}
+    }
     namespace eval ::widgets::$site_3_0.chkbnna {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -justify 1 -offvalue 1 -onvalue 1 -text 1 -variable 1}
     }
@@ -469,6 +464,9 @@ proc vTcl:project:info {} {
     }
     namespace eval ::widgets::$site_3_0.selectmt {
         array set save {-background 1 -padx 1 -text 1}
+    }
+    namespace eval ::widgets::$site_3_0.ent70 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$base.show {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -text 1 -width 1}
@@ -539,17 +537,8 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$base.m67 {
         array set save {-disabledforeground 1 -tearoff 1}
     }
-    namespace eval ::widgets::$base.__tk_filedialog {
-    }
-    set site_4_0 $base.__tk_filedialog.bot
-    set site_4_0 $base.__tk_filedialog.top
-    set site_5_0 $site_4_0.f1
-    set site_5_0 $site_4_0.f3
-    set site_5_0 $site_4_0.f2
-    set site_6_0 $site_5_0.a
-    set site_6_0 $site_5_0.b
     namespace eval ::widgets_bindings {
-        set tagslist _TopLevel
+        set tagslist {_TopLevel _vTclBalloon}
     }
     namespace eval ::vTcl::modules::main {
         set procs {
@@ -667,7 +656,7 @@ proc vTclWindow.topwindow {base} {
         -background #dcdcdc -highlightbackground #dcdcdc \
         -highlightcolor #000000 -menu "$top.m67" 
     wm focusmodel $top passive
-    wm geometry $top 331x679+122+252; update
+    wm geometry $top 331x747+115+113; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -757,6 +746,13 @@ proc vTclWindow.topwindow {base} {
         -text {112 (x,pa)} -variable npa 
     label $site_3_0.selectmt \
         -background #dcdcdc -padx 1 -text {Select MT:} 
+    entry $site_3_0.ent70 \
+        -background white -insertbackground black -textvariable any -width 6 
+    vTcl:DefineAlias "$site_3_0.ent70" "Entry1" vTcl:WidgetProc "$top" 1
+    bindtags $site_3_0.ent70 "$site_3_0.ent70 Entry $top all _vTclBalloon"
+    bind $site_3_0.ent70 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Enter any MT number valid for MF=3}
+    }
     grid $site_3_0.chkbtot \
         -in $site_3_0 -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky w 
     grid $site_3_0.chkbel \
@@ -785,6 +781,8 @@ proc vTclWindow.topwindow {base} {
         -in $site_3_0 -column 0 -row 13 -columnspan 1 -rowspan 1 -sticky w 
     grid $site_3_0.selectmt \
         -in $site_3_0 -column 0 -row 0 -columnspan 1 -rowspan 1 
+    grid $site_3_0.ent70 \
+        -in $site_3_0 -column 0 -row 14 -columnspan 1 -rowspan 1 
     button $top.show \
         -activebackground #cccccc -activeforeground #00ff00 \
         -background #dcdcdc \
@@ -792,7 +790,7 @@ proc vTclWindow.topwindow {base} {
 set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
@@ -807,7 +805,7 @@ exec xterm -e ./showzvd $zvd} \
 set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
@@ -847,7 +845,7 @@ exit} \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
         -command {set suff -$suf
-set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any]
 foreach i $mts {
 if {$i != ""} {exec xterm -e ./mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
 }} \
@@ -911,7 +909,7 @@ exec xterm -e ./showzvd $zvd} \
         -command {fileDialog .topwindow 
 set dir1 [file dirname $file]} \
         -disabledforeground #a1a1a1 -font {Helvetica -12} \
-        -image [vTcl:image:get_image [file join / usr local vtcl images edit open.gif]] \
+        -image [vTcl:image:get_image [file join / usr lib vtcl-1.6.0 images edit open.gif]] \
         -text button 
     vTcl:DefineAlias "$top.but70" "Button1" vTcl:WidgetProc "$top" 1
     button $top.cpd71 \
@@ -919,7 +917,7 @@ set dir1 [file dirname $file]} \
         -command {fileDialog .topwindow 
 set dir2 $file} \
         -disabledforeground #a1a1a1 -font {Helvetica -12} \
-        -image [vTcl:image:get_image [file join / usr local vtcl images edit open.gif]] \
+        -image [vTcl:image:get_image [file join / usr lib vtcl-1.6.0 images edit open.gif]] \
         -text button 
     vTcl:DefineAlias "$top.cpd71" "Button2" vTcl:WidgetProc "$top" 1
     button $top.cpd72 \
@@ -927,7 +925,7 @@ set dir2 $file} \
         -command {fileDialog .topwindow 
 set dir3 $file} \
         -disabledforeground #a1a1a1 -font {Helvetica -12} \
-        -image [vTcl:image:get_image [file join / usr local vtcl images edit open.gif]] \
+        -image [vTcl:image:get_image [file join / usr lib vtcl-1.6.0 images edit open.gif]] \
         -text button 
     vTcl:DefineAlias "$top.cpd72" "Button3" vTcl:WidgetProc "$top" 1
     menu $top.m67 \
@@ -1007,6 +1005,70 @@ bind "_TopLevel" <<DeleteWindow>> {
 }
 bind "_TopLevel" <Destroy> {
     if {[winfo toplevel %W] == "%W"} {incr _topcount -1}
+}
+#############################################################################
+## Binding tag:  _vTclBalloon
+
+
+if {![info exists vTcl(sourcing)]} {
+bind "_vTclBalloon" <<KillBalloon>> {
+    namespace eval ::vTcl::balloon {
+        after cancel $id
+        if {[winfo exists .vTcl.balloon]} {
+            destroy .vTcl.balloon
+        }
+        set set 0
+    }
+}
+bind "_vTclBalloon" <<vTclBalloon>> {
+    if {$::vTcl::balloon::first != 1} {break}
+
+    namespace eval ::vTcl::balloon {
+        set first 2
+        if {![winfo exists .vTcl]} {
+            toplevel .vTcl; wm withdraw .vTcl
+        }
+        if {![winfo exists .vTcl.balloon]} {
+            toplevel .vTcl.balloon -bg black
+        }
+        wm overrideredirect .vTcl.balloon 1
+        label .vTcl.balloon.l  -text ${%W} -relief flat  -bg #ffffaa -fg black -padx 2 -pady 0 -anchor w
+        pack .vTcl.balloon.l -side left -padx 1 -pady 1
+        wm geometry  .vTcl.balloon  +[expr {[winfo rootx %W]+[winfo width %W]/2}]+[expr {[winfo rooty %W]+[winfo height %W]+4}]
+        set set 1
+    }
+}
+bind "_vTclBalloon" <Button> {
+    namespace eval ::vTcl::balloon {
+        set first 0
+    }
+    vTcl:FireEvent %W <<KillBalloon>>
+}
+bind "_vTclBalloon" <Enter> {
+    namespace eval ::vTcl::balloon {
+        ## self defining balloon?
+        if {![info exists %W]} {
+            vTcl:FireEvent %W <<SetBalloon>>
+        }
+        set set 0
+        set first 1
+        set id [after 500 {vTcl:FireEvent %W <<vTclBalloon>>}]
+    }
+}
+bind "_vTclBalloon" <Leave> {
+    namespace eval ::vTcl::balloon {
+        set first 0
+    }
+    vTcl:FireEvent %W <<KillBalloon>>
+}
+bind "_vTclBalloon" <Motion> {
+    namespace eval ::vTcl::balloon {
+        if {!$set} {
+            after cancel $id
+            set id [after 500 {vTcl:FireEvent %W <<vTclBalloon>>}]
+        }
+    }
+}
 }
 
 Window show .

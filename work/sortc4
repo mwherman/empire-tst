@@ -26,7 +26,7 @@ fi
    cd ../c4sort
    ./c4sort
    cd $work
-   mv ../util/x4toc4/C4.DAT $file.c4
+   mv ../util/x4toc4/C4.SRT $file.c4
    if [ -s $file.c4 ]; then
       echo 'EXFOR data in computational format are stored in :'$file.c4
       else
