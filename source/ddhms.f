@@ -1,12 +1,12 @@
       SUBROUTINE DDHMS(Izaproj, Tartyper, Ajtarr, Elabprojr, Sigreacr,
      &                 Amultdamp, Debinr, Readnevr, Ihistlabr,
-     &                 Irecprintr, Iomlreadr, icalled)
+     &                 Irecprintr, Iomlreadr, Qdfracr, icalled)
 C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.12 $
-C $Id: ddhms.f,v 1.12 2004-11-30 09:53:13 Capote Exp $
+C CVS Version Management $Revision: 1.13 $
+C $Id: ddhms.f,v 1.13 2005-01-23 02:41:27 Carlson Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -77,7 +77,7 @@ C
       INCLUDE 'ddhms.cmb'
       INTEGER Izaproj, Ihistlabr, Irecprintr, Iomlreadr, icalled
       REAL*8 Tartyper, Ajtarr, Elabprojr, Sigreacr, Amultdamp, Debinr,
-     &       Readnevr
+     &       Readnevr, Qdfracr
 C
 C     define kinematics option ikin=1,2
       IKIn = 1   !ikin=1 prefered. see text at top of this code.
@@ -102,16 +102,20 @@ Cmh---since the latter ones can not be used as formal parameters directly
       IHIstlab = Ihistlabr
       IREcprint = Irecprintr
       IOMlread = Iomlreadr
+      QDFrax = Qdfracr
 C
       IF(Izaproj.EQ.1)THEN
          PROjtype = 'neut'
       ELSEIF(Izaproj.EQ.1001)THEN
          PROjtype = 'prot'
+      ELSEIF(Izaproj.EQ.0)THEN
+         PROjtype = 'gamm'
+         IF(Qdfracr.gt.0.0d0) CALL QDPINIT(Elabprojr)
       ELSE
          WRITE(6, *)''
          WRITE(6, *)'WARNING'
-         WRITE(6, *)'WARNING: HMS can treat only neutron or proton'
-         WRITE(6, *)'WARNING: as projectiles'
+         WRITE(6, *)'WARNING: HMS can treat only neutron, proton or '
+         WRITE(6, *)'WARNING: gamma as projectiles.'
          WRITE(6, *)'WARNING: HMS disposition ignored.'
          WRITE(6, *)'WARNING'
          WRITE(6, *)''
@@ -137,7 +141,7 @@ C
       REAL*8 ra, radius, ajhms, ajfinal, ajinit
       INTEGER jtrans, nubin, jbin, mrecbin
       REAL*8 avradius, sumav
-      REAL*8 adiffuse, rsample
+      REAL*8 adiffuse, rsample, ajyrast
       REAL*8 EXCessmass, RESmas
       COMMON /XMASS/ EXCessmass(0:130,0:400), RESmas(0:130,0:400)
 C
@@ -193,6 +197,7 @@ C
 C
 C%%%%%%%%%%% MAIN LOOP OVER EVENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 C
+         IF(IPRintdiag.EQ.1)WRITE(28, *)' NEVents=',NEVents
       DO NEV = 1, NEVents
 C
 C++++++++++++++++++++++++++++++++++
@@ -206,7 +211,7 @@ C        write(iuo,20)rijk
 C        20 format(25h starting random number =,2x,f16.0,tl1,1h )
 C++++++++++++++++++++++++++++++++++
 C
-         IF(IPRintdiag.EQ.1)WRITE(28, *)'****new event'
+         IF(IPRintdiag.EQ.1)WRITE(28, *)'****new event ',NEV
          IF(NEV.EQ.12345678)WRITE(6, *)'event=', NEV
 C        every 100000 events, print out a statement to screen:
          event = NEV
@@ -296,7 +301,11 @@ C           for ikin=2
          ENDIF
          IF(IPRintdiag.EQ.1)WRITE(28, *)'etotemiss+ucndump=',
      &                                  etotemiss + UCNdump, test
-         IF(test.GE.0.001D0)STOP ' no energy balance'
+         IF(test.GE.0.001D0)THEN
+           WRITE(28,*)'etotemiss,ucndump,convmass,ecmproj:',
+     &                 etotemiss,ucndump,convmass,ecmproj
+           STOP ' no energy balance'
+          ENDIF
 C
          IF(IPRintdiag.EQ.1)WRITE(28, *)'residual nucleus z and n=',
      &                                  JNResid, JZResid
@@ -328,6 +337,8 @@ C        !this is really an l-transfer
 C
 C
          CALL BOOSTSPIN(ajhms, ajfinal)
+         IF(IPRintdiag.EQ.1)WRITE(28, *)' prec,jtrans,ajfinal:',
+     1                                      prec,jtrans,ajfinal
 C        !couples to target spin ajtar
 C
 C        this coding approximately accounts for couplings of non-zero spins.
@@ -1320,6 +1331,8 @@ C           ! an extra particle has been emitted
             EEM = epart - BINding
 C           !the emission energy reduced by b.e.
             CONvmass = CONvmass + BINding
+            IF(IPRintdiag.EQ.1)WRITE(28, *)
+     &      'BINding,CONvmass,epart,EEM:', BINding,CONvmass,epart,EEM
 C           ! add to buffer energy converted to mass
             EEMiss(NEMiss) = EEM
 C           ! the emission energy put in this array
@@ -1856,36 +1869,104 @@ C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
+      REAL*8 c
+      REAL*8 RANG
+      REAL*8 e,px,pz,ph,eg2
+C
 C     subroutine sets up the initial p-h excitation
 C
+      IF(PROjtype.eq.'gamm') THEN
+C     here, we assume 1p1h for GR excitation and 2 1p1h for QD excitation
+        c=RANG()
+        IF(IPRintdiag.EQ.1)WRITE(28, *)' gam - QDFrax,c',QDFrax,c
+        if(c.gt.QDFrax) then
+C     GR excitation
+          NEXist1p1h = 1
+          NTOt1p1h = 1
+          IEXist1p1h(1) = 1
+
+          c=RANG()
+
+          IF(c.gt.ZTAr/ATAr) then
+C     ! neutron particle-hole
+            ISOspi1p1h(1)='0101'
+           ELSE
+C     ! proton particle-hole
+            ISOspi1p1h(1)='1010'
+           ENDIF
+
+          UEX1p1h(1) = ECMproj
+          IF(NEV.EQ.12345678)WRITE(6, *)'ecmproj, uex2p1h(1)=',
+     &                                  ECMproj, UEX1p1h(1)
+          TH1p1h(1) = 0.
+C     !initial projectile moving along the z-axis
+          PH1p1h(1) = 0.
+          ZK1p1h(1) = ECMproj
+          IF(IPRintdiag.EQ.1)WRITE(28, *)' GD:ex,p,th,ph',
+     1    UEX1p1h(1),ZK1p1h(1),TH1p1h(1),PH1p1h(1)
+C     !init mom of gamma
+         ELSE
+C     QD excitation
+          NEXist1p1h = 2
+          NTOt1p1h = 2
+          IEXist1p1h(1) = 1
+          IEXist1p1h(2) = 1
+C neutron and proton p-h
+          ISOspi1p1h(1) = '0101'
+          ISOspi1p1h(2) = '1010'
+C
+          call qdpchoose(ECMproj,e,px,pz,ph)
+          eg2 = 0.5d0*ECMproj
+C neutron p-h
+          UEX1p1h(1) = eg2 + e
+          ZK1p1h(1) = DSQRT((eg2+pz)**2+px**2)
+          TH1p1h(1) = DACOS((eg2+pz)/ZK1p1h(1))
+          PH1p1h(1) = ph
+          IF(IPRintdiag.EQ.1)WRITE(28, *)' QD-n:ex,p,th,ph',
+     1    UEX1p1h(1),ZK1p1h(1),TH1p1h(1),PH1p1h(1)
+C proton p-h
+          UEX1p1h(2) = eg2 - e
+          ZK1p1h(2) = DSQRT((eg2-pz)**2+px**2)
+          TH1p1h(2) = DACOS((eg2-pz)/ZK1p1h(2))
+          IF(ph .GT. PI_g) THEN
+            PH1p1h(2) = ph - PI_g
+           ELSE
+            PH1p1h(2) = ph + PI_g
+           ENDIF
+          IF(IPRintdiag.EQ.1)WRITE(28, *)' QD-p:ex,p,th,ph',
+     1    UEX1p1h(2),ZK1p1h(2),TH1p1h(2),PH1p1h(2)
+
+         ENDIF
+       ELSE
 C     here, for starts, we assume 2p1h
 C
 C     projectile type = variable projtype
-      SELtype = PROjtype
-      CALL SELCOLTYPE(ECMproj + SEPproj)
+        SELtype = PROjtype
+        CALL SELCOLTYPE(ECMproj + SEPproj)
 C     returns the collision partner type 'coltype'
 C
-      NEXist2p1h = 1
-      NTOt2p1h = 1
-      IEXist2p1h(1) = 1
+        NEXist2p1h = 1
+        NTOt2p1h = 1
+        IEXist2p1h(1) = 1
 C
-      IF(PROjtype.EQ.'prot' .AND. COLtype.EQ.'prot')ISOspi2p1h(1)
+        IF(PROjtype.EQ.'prot' .AND. COLtype.EQ.'prot')ISOspi2p1h(1)
      &    = '2010'
-      IF(PROjtype.EQ.'prot' .AND. COLtype.EQ.'neut')ISOspi2p1h(1)
+        IF(PROjtype.EQ.'prot' .AND. COLtype.EQ.'neut')ISOspi2p1h(1)
      &    = '1101'
-      IF(PROjtype.EQ.'neut' .AND. COLtype.EQ.'prot')ISOspi2p1h(1)
+        IF(PROjtype.EQ.'neut' .AND. COLtype.EQ.'prot')ISOspi2p1h(1)
      &    = '1110'
-      IF(PROjtype.EQ.'neut' .AND. COLtype.EQ.'neut')ISOspi2p1h(1)
+        IF(PROjtype.EQ.'neut' .AND. COLtype.EQ.'neut')ISOspi2p1h(1)
      &    = '0201'
 C
-      UEX2p1h(1) = ECMproj + SEPproj
-      IF(NEV.EQ.12345678)WRITE(6, *)'ecmproj,sepproj, uex2p1h(1)=',
+        UEX2p1h(1) = ECMproj + SEPproj
+        IF(NEV.EQ.12345678)WRITE(6, *)'ecmproj,sepproj, uex2p1h(1)=',
      &                              ECMproj, SEPproj, UEX2p1h(1)
-      TH2p1h(1) = 0.
+        TH2p1h(1) = 0.
 C     !initial projectile moving along the z-axis
-      PH2p1h(1) = 0.
-      ZK2p1h(1) = DSQRT(2.D0*ZMNuc*(UEX2p1h(1) + VDEp))
+        PH2p1h(1) = 0.
+        ZK2p1h(1) = DSQRT(2.D0*ZMNuc*(UEX2p1h(1) + VDEp))
 C     !init mom rel to well-bottom
+       ENDIF
       END
 C
 C
@@ -1957,7 +2038,7 @@ C
 C     convert spectra from events into ddxs
 C
       nemax = INT(ELAbejecmax/DEBin)
-      numax = INT((ELAbejecmax + SEPproj)/DEBin)
+      numax = INT((ELAbproj + SEPproj)/DEBin)
       DO ne = 0, nemax
 C        write(8,9)(debin*(ne+0.5)),dxsn(ne),dxsp(ne)
 C
@@ -2010,9 +2091,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.12 $')
+99001 FORMAT('  ddhms version: $Revision: 1.13 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.12 2004-11-30 09:53:13 Capote Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.13 2005-01-23 02:41:27 Carlson Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -2637,16 +2718,18 @@ C
 C
       IF(icalled.eq.0) THEN
 
-         PARmas(1) = 1.008665
-        PARmas(2) = 1.007825
-        PARmas(3) = 2.014101
-        PARmas(4) = 3.016049
-        PARmas(5) = 3.016029
-        PARmas(6) = 4.002603
-        PARmas(7) = 0
+        PARmas(1) = 1.008665d0
+        PARmas(2) = 1.007825d0
+        PARmas(3) = 2.014101d0
+        PARmas(4) = 3.016049d0
+        PARmas(5) = 3.016029d0
+        PARmas(6) = 4.002603d0
+        PARmas(7) = 0.0d0
 C
 C       CALL MASSES
         CALL SIGNON  !calculate inv x/s from Kalbach's routines
+C
+      ENDIF
 C
         JATar = NINT(ATAr)
         JZTar = NINT(ZTAr)
@@ -2657,10 +2740,10 @@ C       !initial Z,A bef. emission
         IF(PROjtype.EQ.'prot')JNResid = JNTar
         IF(PROjtype.EQ.'neut')JZResid = JZTar
         IF(PROjtype.EQ.'neut')JNResid = JNTar + 1
+        IF(PROjtype.EQ.'gamm')JZResid = JZTar
+        IF(PROjtype.EQ.'gamm')JNResid = JNTar
         JNInitcn = JNResid
         JZInitcn = JZResid
-
-       ENDIF
 C
       IF(IKIn.EQ.1)THEN
          ECMproj = ELAbproj*RESmas(JZTar, JATar)
@@ -2685,6 +2768,11 @@ C
          amproj = PARmas(2)
          jzproj = 1
          japroj = 1
+      ENDIF
+      IF(PROjtype.EQ.'gamm')THEN
+         amproj = PARmas(7)
+         jzproj = 0
+         japroj = 0
       ENDIF
 C
 C     sepproj = (resmas(jztar,jatar)+amproj )
@@ -2725,13 +2813,13 @@ C
             DO jn = 0, NDIM_NEM
                USPec(jz, jn, nen) = 0
                RESpop(jz, jn) = 0
-C
+C 
                DO jsp = 0, NDIM_JBINS
                   UJSpec(jz, jn, nen, jsp) = 0
                ENDDO
-C
+C 
                DO mem = 0, NDIM_RECBINS
-                  UJSpec(jz, jn, nen, mem) = 0
+                  RECspec(jz, jn, nen, mem) = 0
                ENDDO
             ENDDO
          ENDDO
@@ -2798,17 +2886,25 @@ C     !initial Z,A bef. emission
       IF(PROjtype.EQ.'prot')JNResid = JNTar
       IF(PROjtype.EQ.'neut')JZResid = JZTar
       IF(PROjtype.EQ.'neut')JNResid = JNTar + 1
+      IF(PROjtype.EQ.'gamm')JZResid = JZTar
+      IF(PROjtype.EQ.'gamm')JNResid = JNTar
 C
       IF(IKIn.EQ.1)THEN
 C        define initial composite nucleus recoil parameters
 C        i.e. recoil vel and energy in lab:
 C        note, zmproj,zmfirstcn (masses of proj and 1st cn) defined in sub init0
-         vinc = DSQRT(2.*ELAbproj/ZMProj)
+         IF(PROjtype.EQ.'gamm') THEN
+           XVAdd = 0.
+           YVAdd = 0.
+           ZVAdd = ELAbproj/ZMFirstcn         
+          ELSE
+           vinc = DSQRT(2.*ELAbproj/ZMProj)
 C        !proj velocity
-         XVAdd = 0.
-         YVAdd = 0.
-         ZVAdd = vinc*(ZMProj/ZMFirstcn)
+           XVAdd = 0.
+           YVAdd = 0.
+           ZVAdd = vinc*(ZMProj/ZMFirstcn)
 C        !this is recoil vel.
+          ENDIF
          EREclab = 0.5*ZMFirstcn*ZVAdd*ZVAdd
 C        !this needs to defined in case no emission
          THReclab = 0.
@@ -2819,8 +2915,12 @@ C        ikin2 option:
 C        !before emission, all ejectile running mom. sums=0.
          PYEjec = 0.
          PZEjec = 0.
-         PZProj = DSQRT(2.*ZMProj*ELAbproj)
+         IF(PROjtype.EQ.'gamm') THEN
+           PZProj = ELAbproj
+          ELSE
+           PZProj = DSQRT(2.*ZMProj*ELAbproj)
 C        !projectile momentum along z-axis
+          ENDIF
       ENDIF
 C
 C
@@ -3953,7 +4053,6 @@ C incident projectile. Used in HMS to sample a radius such
 C that the classical am mimicks the OM distributions.
 C subroutines tcread,tcflux, etc adapted from McGNASH f90 versions
 C
-C
 C variables passed to subroutine:
 C    ecmproj  (c.m. energy of projectile)
 C    projtype (neutron or proton)
@@ -4679,36 +4778,44 @@ C
          DO jn = 0, Jnmax
             IF(jz.EQ.0 .AND. jn.EQ.0)THEN   ! 1-st CN
                nucn = EX(NEX(1), 1)/DEBin
-               IF(JMAxujspec(0, 0, nucn).EQ.0)THEN
-                  IF(JMAxujspec(0, 0, nucn + 1).GT.0)THEN
-                     nucn = nucn + 1
-                  ELSEIF(JMAxujspec(0, 0, nucn - 1).GT.0)THEN
-                     nucn = nucn - 1
-                  ELSE
-                     WRITE(6, *)' '
-                     WRITE(6, *)'Got lost! Can not find HMS '
-                     WRITE(6, *)'population of the 1-st CN. '
-                     WRITE(6, *)'Have searched bins ', nucn - 1
-                     WRITE(6, *)'through ', nucn + 1, ' but they'
-                     WRITE(6, *)'seem to contain 0 cross section.'
-                     WRITE(6, *)'I better STOP              '
-                     STOP
-                  ENDIF
+               nucnlo=nucn
+               IF(JMAxujspec(0, 0, nucn - 1).GT.0) nucnlo = nucn - 1
+               nucnhi=nucn
+               IF(JMAxujspec(0, 0, nucn + 1).GT.0) nucnhi = nucn + 1
+               IF((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND. 
+     &            (JMAxujspec(0, 0, nucn).EQ.0))THEN
+C                  WRITE(6, *)' '
+C                  WRITE(6, *)'Got lost! Can not find HMS '
+C                  WRITE(6, *)'population of the 1-st CN. '
+C                  WRITE(6, *)'Have searched bins ', nucn - 1
+C                  WRITE(6, *)'through ', nucn + 1, ' but they'
+C                  WRITE(6, *)'seem to contain 0 cross section.'
+C                  WRITE(6, *)'I better STOP              '
+C                  STOP
+                  WRITE(6, *)' '
+                  WRITE(6, *)'Funny!? The population of '
+                  WRITE(6, *)'the 1-st CN seems to be 0.'
+                  WRITE(6, *)'Have searched bins ', nucn - 1
+                  WRITE(6, *)'through ', nucn + 1, ' but they'
+                  WRITE(6, *)'seem to contain 0 cross section.'
+                  WRITE(6, *)'Check ddhms.out!'
+                  WRITE(6, *)' ' 
                ENDIF
-               DO jsp = 0, JMAxujspec(0, 0, nucn)
-                  POP(NEX(1), jsp + 1, 1, 1)
-     &               = 0.5*UJSpec(0, 0, nucn, jsp)
-                  POP(NEX(1), jsp + 1, 2, 1)
-     &               = 0.5*UJSpec(0, 0, nucn, jsp)
+               DO jsp = 1, NDLW
+                  POP(NEX(1), jsp, 1, 1) = 0
+                  POP(NEX(1), jsp, 2, 1) = 0
                ENDDO
-               DO jsp = JMAxujspec(0, 0, nucn) + 1, NDLW - 1
-                  POP(NEX(1), jsp + 1, 1, 1) = 0
-                  POP(NEX(1), jsp + 1, 2, 1) = 0
-               ENDDO
-               DO jsp = 0, NDLW - 1
+               DO nu = nucnlo, nucnhi
+                 DO jsp = 0, JMAxujspec(0, 0, nu)
+                  POP(NEX(1), jsp + 1, 1, 1) =
+     &            POP(NEX(1), jsp + 1, 1, 1) + 0.5*UJSpec(0, 0, nu, jsp)
+                  POP(NEX(1), jsp + 1, 2, 1) = 
+     &            POP(NEX(1), jsp + 1, 2, 1) + 0.5*UJSpec(0, 0, nu, jsp)
+                 ENDDO
                ENDDO
                GOTO 50
             ENDIF
+            jmax = MIN(NDLW, NDIM_JBINS + 1)
             izar = IZA(1) - 1000*jz - (jn + jz)
             CALL WHERE(izar, nnur, iloc)
             IF(iloc.NE.1)THEN     !ignore population of not considered nuclei
@@ -4726,14 +4833,13 @@ C
                      auxin(nu + 1, jsp + 1) = 0.0
                   ENDDO
                ENDDO
-               jmax = MIN(NDLW, NDIM_JBINS + 1)
 C--------------test output
 C              WRITE(6,*)' '
-C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
+C              WRITE(6,*)'jz,jn,nnur:',jz,jn,nnur
 C              WRITE(6,*)' '
 C              DO nu = 0, numax
 C              WRITE(6,'(12G12.5)') (nu+0.5)*Debin,
-C              &                           (auxin(nu+1,jsp),jsp=1,11)
+C     &                           (auxin(nu+1,jsp),jsp=1,11)
 C              ENDDO
 C              WRITE(6,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
 C              WRITE(6,*)'reqst range ',EX(1,nnur),EMAx(nnur)
@@ -4748,7 +4854,7 @@ C--------------population of continuum
                CALL INTERMAT(DEBin/2, DEBin, auxin, NDIM_EBINS + 1,
      &                       EX(1, nnur), DE, auxout, NDEX,
      &                       NDIM_JBINS + 1, EX(1, nnur), EMAx(nnur))
-               sumcon = 0.0
+               sumcon=0.0d0
                DO nu = 1, NEX(nnur)
                   DO jsp = 1, jmax
                      IF(IDNa(2, 5).EQ.1 .AND. nnur.EQ.mt91)THEN
@@ -4769,12 +4875,12 @@ C--------------population of continuum
                      ENDIF
                      sumcon = sumcon + 2*auxout(nu, jsp)
                      IF(nu.EQ.1 .OR. nu.EQ.NEX(nnur))sumcon = sumcon -
-     &                  auxout(nu, jsp)
+     &                                                 auxout(nu, jsp)
                   ENDDO
                ENDDO
-               sumcon = sumcon*DE
-C              WRITE(6, *)'continuum population = ', sumcon, ' mb'
-C              WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
+              sumcon = sumcon*DE
+              WRITE(28,*)'continuum population = ', sumcon, ' mb'
+              WRITE(28,*)'HMS resid population = ', RESpop(jz, jn),' mb'
                IF(nnur.GT.3 .AND. FIRst_ein)THEN
                   IF(IDNa(2, 5).EQ.0)THEN
                      WRITE(6, *)' '
@@ -4798,12 +4904,12 @@ C              WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
                   ENDIF
                ENDIF
 C--------------test output
-C              WRITE(6,*)' '
-C              WRITE(6,*)'jz,jn,nnur',jz,jn,nnur
-C              WRITE(6,*)' '
-C              DO nu = 1,NEX(nnur)+1
-C              WRITE(6,'(12G12.5)') EX(nu,nnur),
-C              &                           (POP(nu,jsp,1,nnur),jsp=1,11)
+C             WRITE(6, *)' '
+C             WRITE(6, *)'jz,jn,nnur',jz,jn,nnur
+C             WRITE(6, *)' '
+C             DO nu = 1,NEX(nnur)+1
+C               WRITE( 6,'(12G12.5)') EX(nu,nnur),
+C     &                           (POP(nu,jsp,1,nnur),jsp=1,11)
 C              ENDDO
 C--------------test output *** done ***
 C--------------population of discrete levels (evenly distributed)
@@ -4898,3 +5004,751 @@ C     To do:
 C     -  check whether you add LAB or CM spectra
 C
       END
+c
+c------------------------------------------------------------------------------
+c
+      subroutine qdpchoose(eg,e,px,pz,ph)
+c
+c  Uses random values to generate values of e, th, p and ph
+c  consistent with the mechanism for quasideuteron photoabsorption.
+c    px=p*sin(th)   pz=p*cos(th) 
+c  The value for e is determined first, with the aid of the table pex.
+c  The value of th is then determined, using the value of e and the table pthx.
+c  The value of p is then determined, using e, th and the function qdphp.
+c  Finally, a value for ph between 0 and 2*pi is generated.
+c
+c  The array pex contains values of the e distribution integral for qd gamma 
+c  absorption at the values 
+c           e=eg*asin(-1.1+0.1*ind)/pi,    ind=1,...,11
+c
+c  The array pthx contains values of the th distribution integral for qd gamma 
+c  absorption at the values 
+c           e=eg*asin(-1.1+0.1*ind)/pi,    ind=1,...,11
+c  and
+c           th=acos(1.1-0.1*jnd)           jnd=1,...,21
+c
+      implicit double precision (a-h,o-z)
+
+      dimension thx(21)
+
+      common/qdist/pex(11),pthx(21,11)
+
+      data pi/3.14159265359d0/ 
+
+      re=RANG()
+
+      if(re.gt.0.5d0) then
+        re=1.0d0-re
+        imhi=1
+       else
+        imhi=0
+       endif
+
+      ne=int(20*re+1)
+
+      if(pex(ne).gt.re) ne=ne-1
+
+      sne=(re-pex(ne))/(pex(ne+1)-pex(ne))
+
+c      write(*,*) re,ne,sne
+
+      do j=1,21
+        thx(j)=(1.0d0-sne)*pthx(j,ne)+sne*pthx(j,ne+1)
+       end do
+
+c      write(*,*) thx
+
+      sne=0.1d0*(ne-11+sne)
+      e=eg*asin(sne)/pi
+      if(imhi.gt.0) e=-e
+
+c      write(*,*) sne,eg,e
+
+      rth=RANG()
+      if(imhi.gt.0) rth=1.0d0-rth
+      nth=int(20*rth+1)
+
+      if(thx(nth).gt.rth.or.thx(nth+1).lt.rth) 
+     1   nth=nth+int((rth-thx(nth))/(thx(nth+1)-thx(nth)))
+
+c      if(abs((rth-thx(nth))/(thx(nth+1)-thx(nth))).gt.1.0d0) then
+c        write(*,*) 'OOOOOOPS!'
+c        write(*,*) nth,rth
+c        write(*,*) thx
+c       endif
+
+      cth=0.1d0*(11-nth-(rth-thx(nth))/(thx(nth+1)-thx(nth)))
+      th=acos(cth)
+      if(imhi.gt.0) then
+        th=pi-th
+        cth=-cth
+       endif
+
+c      write(*,*) rth,nth,cth,th
+
+      qdpr=qdphp(1.0d4,th,e,eg,plo,phi,dqdp)*RANG()
+      p=0.7*plo+0.3*phi
+
+      do ii=1,4
+
+        qdp=qdphp(p,th,e,eg,plo,phi,dqdp)
+        dp=(qdpr-qdp)/dqdp
+        p=max(min(p+dp,0.25d0*(p+3.0d0*phi)),0.25d0*(p+3.0d0*plo))
+
+c        write(*,*) p,dp,qdp,qdpr,dqdp
+
+       end do
+      pz=p*cth
+      px=p*sin(th)
+
+      ph=2.0d0*pi*RANG()
+
+      return
+
+      end
+c
+c------------------------------------------------------------------------------
+c
+      subroutine qdpinit(egxx)
+c
+c  Initializes the arrays pex and pthx for a given value of the gamma
+c  energy, egxx.
+c  The array pex contains values of the e distribution integral for qd gamma 
+c  absorption at the values 
+c           e=egxx*asin(-1.1+0.1*ind)/pi,  ind=1,...,11
+c
+c  The array pthx contains values of the th distribution integral for qd gamma 
+c  absorption at the values 
+c           e=egxx*asin(-1.1+0.1*ind)/pi,  ind=1,...,11
+c  and
+c           th=acos(1.1-0.1*jnd)           jnd=1,...,21
+c
+c  The arrays are obtained by quadratic interpolation of the values given
+c  in the arrays pe and pth at the 7 gamma energies, eg=20,40,...,140.
+c  These arrays were constructed using the subroutines qdphe and qdphth.
+c  Symmetries of the distributions were used to halve the size of the tables.
+c
+      implicit double precision (a-h,o-z)
+
+      dimension w(3)
+
+      dimension pe(7,11),pth(7,21,11)
+
+      common/qdist/pex(11),pthx(21,11)
+
+      data deg/20.0d0/
+
+      data pe/0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     1        0.05370,0.04545,0.03650,0.03629,0.03922,0.04268,0.04537,
+     2        0.10541,0.09321,0.07627,0.07647,0.08321,0.09086,0.09643,
+     3        0.15609,0.14205,0.11888,0.11988,0.13087,0.14250,0.14975,
+     4        0.20606,0.19168,0.16436,0.16641,0.18173,0.19597,0.20212,
+     5        0.25556,0.24192,0.21281,0.21607,0.23519,0.24860,0.25314,
+     6        0.30477,0.29269,0.26441,0.26885,0.28965,0.30000,0.30333,
+     7        0.35375,0.34401,0.31937,0.32460,0.34295,0.35065,0.35290,
+     8        0.40259,0.39578,0.37772,0.38284,0.39565,0.40061,0.40222,
+     9        0.45133,0.44786,0.43836,0.44169,0.44779,0.45036,0.45107,
+     a        0.50000,0.50000,0.50000,0.50000,0.50000,0.50000,0.50000/
+
+      data ((pth(i,j,1),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04801,0.04672,0.04446,0.04113,0.03614,0.02854,0.01685,
+     *        0.09622,0.09375,0.08949,0.08324,0.07392,0.05978,0.03802,
+     *        0.14464,0.14112,0.13510,0.12631,0.11329,0.09361,0.06333,
+     *        0.19327,0.18881,0.18128,0.17035,0.15421,0.12993,0.09262,
+     *        0.24210,0.23683,0.22804,0.21532,0.19664,0.16865,0.12572,
+     *        0.29115,0.28519,0.27536,0.26122,0.24054,0.20969,0.16247,
+     *        0.34042,0.33389,0.32326,0.30804,0.28589,0.25297,0.20270,
+     *        0.38990,0.38293,0.37173,0.35577,0.33265,0.29842,0.24630,
+     *        0.43959,0.43231,0.42078,0.40442,0.38081,0.34599,0.29312,
+     *        0.48946,0.48205,0.47040,0.45396,0.43034,0.39563,0.34307,
+     *        0.53955,0.53214,0.52061,0.50441,0.48122,0.44729,0.39605,
+     *        0.58985,0.58259,0.57141,0.55575,0.53346,0.50094,0.45196,
+     *        0.64036,0.63341,0.62280,0.60801,0.58703,0.55654,0.51075,
+     *        0.69109,0.68460,0.67479,0.66117,0.64194,0.61408,0.57235,
+     *        0.74203,0.73617,0.72739,0.71526,0.69818,0.67354,0.63673,
+     *        0.79317,0.78812,0.78061,0.77027,0.75577,0.73492,0.70386,
+     *        0.84453,0.84047,0.83447,0.82623,0.81473,0.79824,0.77373,
+     *        0.89612,0.89321,0.88897,0.88316,0.87506,0.86349,0.84635,
+     *        0.94792,0.94638,0.94413,0.94106,0.93680,0.93073,0.92175,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,2),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04833,0.04734,0.04554,0.04267,0.03844,0.03159,0.02143,
+     *        0.09684,0.09495,0.09155,0.08618,0.07828,0.06561,0.04645,
+     *        0.14552,0.14283,0.13805,0.13051,0.11947,0.10198,0.07507,
+     *        0.19439,0.19098,0.18502,0.17565,0.16200,0.14056,0.10717,
+     *        0.24343,0.23942,0.23247,0.22160,0.20584,0.18121,0.14271,
+     *        0.29265,0.28813,0.28038,0.26834,0.25094,0.22391,0.18164,
+     *        0.34205,0.33712,0.32877,0.31586,0.29724,0.26857,0.22337,
+     *        0.39163,0.38640,0.37762,0.36415,0.34476,0.31504,0.26844,
+     *        0.44140,0.43596,0.42694,0.41316,0.39348,0.36338,0.31602,
+     *        0.49134,0.48581,0.47672,0.46292,0.44340,0.41357,0.36664,
+     *        0.54146,0.53594,0.52697,0.51340,0.49437,0.46527,0.41979,
+     *        0.59176,0.58636,0.57768,0.56461,0.54650,0.51857,0.47502,
+     *        0.64223,0.63707,0.62886,0.61656,0.59960,0.57355,0.53325,
+     *        0.69287,0.68807,0.68050,0.66923,0.65372,0.63009,0.59339,
+     *        0.74368,0.73934,0.73260,0.72258,0.70892,0.68830,0.65581,
+     *        0.79461,0.79089,0.78516,0.77665,0.76511,0.74788,0.72097,
+     *        0.84571,0.84274,0.83819,0.83143,0.82239,0.80864,0.78759,
+     *        0.89697,0.89487,0.89167,0.88691,0.88080,0.87090,0.85601,
+     *        0.94839,0.94730,0.94560,0.94307,0.93994,0.93485,0.92735,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,3),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04846,0.04754,0.04584,0.04311,0.03883,0.03146,0.02265,
+     *        0.09710,0.09535,0.09215,0.08706,0.07907,0.06533,0.04823,
+     *        0.14590,0.14343,0.13892,0.13180,0.12064,0.10156,0.07683,
+     *        0.19486,0.19180,0.18615,0.17732,0.16354,0.14008,0.10856,
+     *        0.24400,0.24043,0.23382,0.22360,0.20772,0.18084,0.14344,
+     *        0.29330,0.28933,0.28193,0.27062,0.25312,0.22354,0.18146,
+     *        0.34277,0.33848,0.33049,0.31838,0.29971,0.26826,0.22266,
+     *        0.39240,0.38790,0.37948,0.36687,0.34749,0.31496,0.26690,
+     *        0.44220,0.43758,0.42891,0.41609,0.39646,0.36351,0.31415,
+     *        0.49215,0.48752,0.47877,0.46603,0.44652,0.41376,0.36419,
+     *        0.54227,0.53767,0.52906,0.51664,0.49759,0.46576,0.41716,
+     *        0.59255,0.58808,0.57976,0.56794,0.54957,0.51934,0.47264,
+     *        0.64299,0.63874,0.63089,0.61982,0.60263,0.57446,0.53111,
+     *        0.69358,0.68963,0.68243,0.67231,0.65665,0.63107,0.59137,
+     *        0.74432,0.74078,0.73439,0.72546,0.71164,0.68905,0.65412,
+     *        0.79520,0.79218,0.78674,0.77919,0.76767,0.74856,0.71937,
+     *        0.84622,0.84379,0.83949,0.83355,0.82462,0.80980,0.78639,
+     *        0.89732,0.89564,0.89261,0.88855,0.88218,0.87231,0.85625,
+     *        0.94857,0.94772,0.94612,0.94397,0.94065,0.93539,0.92716,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,4),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04858,0.04776,0.04618,0.04344,0.03880,0.03110,0.02473,
+     *        0.09732,0.09577,0.09279,0.08772,0.07903,0.06451,0.05208,
+     *        0.14621,0.14401,0.13984,0.13282,0.12067,0.10022,0.08212,
+     *        0.19527,0.19250,0.18731,0.17866,0.16364,0.13819,0.11488,
+     *        0.24448,0.24123,0.23520,0.22521,0.20792,0.17840,0.15039,
+     *        0.29384,0.29020,0.28352,0.27247,0.25351,0.22081,0.18868,
+     *        0.34336,0.33942,0.33224,0.32042,0.30029,0.26520,0.22975,
+     *        0.39303,0.38887,0.38137,0.36904,0.34823,0.31168,0.27362,
+     *        0.44286,0.43857,0.43090,0.41834,0.39717,0.36013,0.32026,
+     *        0.49283,0.48851,0.48082,0.46830,0.44725,0.41048,0.36967,
+     *        0.54294,0.53869,0.53114,0.51888,0.49832,0.46270,0.42181,
+     *        0.59320,0.58910,0.58184,0.57011,0.55050,0.51647,0.47663,
+     *        0.64360,0.63975,0.63291,0.62191,0.60379,0.57177,0.53409,
+     *        0.69414,0.69062,0.68435,0.67431,0.65767,0.62899,0.59409,
+     *        0.74482,0.74172,0.73615,0.72728,0.71251,0.68754,0.65654,
+     *        0.79562,0.79298,0.78829,0.78076,0.76833,0.74733,0.72132,
+     *        0.84655,0.84444,0.84074,0.83480,0.82504,0.80894,0.78827,
+     *        0.89760,0.89611,0.89351,0.88941,0.88252,0.87189,0.85721,
+     *        0.94873,0.94794,0.94659,0.94442,0.94074,0.93548,0.92788,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,5),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04870,0.04785,0.04638,0.04367,0.03853,0.03195,0.02779,
+     *        0.09755,0.09596,0.09319,0.08814,0.07859,0.06599,0.05811,
+     *        0.14654,0.14432,0.14044,0.13339,0.12011,0.10213,0.09097,
+     *        0.19569,0.19292,0.18812,0.17938,0.16309,0.14035,0.12638,
+     *        0.24497,0.24178,0.23621,0.22609,0.20745,0.18065,0.16435,
+     *        0.29441,0.29088,0.28472,0.27352,0.25302,0.22300,0.20485,
+     *        0.34398,0.34022,0.33364,0.32163,0.29985,0.26737,0.24787,
+     *        0.39369,0.38979,0.38294,0.37044,0.34786,0.31374,0.29338,
+     *        0.44354,0.43957,0.43260,0.41992,0.39709,0.36207,0.34132,
+     *        0.49352,0.48957,0.48260,0.47001,0.44735,0.41229,0.39165,
+     *        0.54364,0.53978,0.53296,0.52074,0.49860,0.46437,0.44429,
+     *        0.59388,0.59020,0.58364,0.57193,0.55100,0.51822,0.49915,
+     *        0.64425,0.64081,0.63466,0.62372,0.60435,0.57377,0.55613,
+     *        0.69474,0.69161,0.68602,0.67605,0.65870,0.63093,0.61510,
+     *        0.74535,0.74258,0.73766,0.72886,0.71387,0.68959,0.67592,
+     *        0.79607,0.79374,0.78957,0.78222,0.76971,0.74961,0.73840,
+     *        0.84690,0.84506,0.84178,0.83611,0.82646,0.81085,0.80233,
+     *        0.89784,0.89656,0.89426,0.89028,0.88399,0.87314,0.86746,
+     *        0.94887,0.94820,0.94698,0.94492,0.94202,0.93628,0.93349,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,6),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04882,0.04804,0.04663,0.04388,0.03826,0.03426,0.03060,
+     *        0.09778,0.09632,0.09369,0.08861,0.07807,0.07050,0.06362,
+     *        0.14688,0.14481,0.14115,0.13413,0.11939,0.10871,0.09905,
+     *        0.19611,0.19354,0.18900,0.18035,0.16219,0.14885,0.13686,
+     *        0.24548,0.24249,0.23724,0.22728,0.20640,0.19090,0.17703,
+     *        0.29498,0.29166,0.28585,0.27487,0.25193,0.23481,0.21953,
+     *        0.34460,0.34105,0.33483,0.32315,0.29880,0.28054,0.26429,
+     *        0.39436,0.39065,0.38417,0.37208,0.34699,0.32803,0.31125,
+     *        0.44424,0.44047,0.43386,0.42164,0.39636,0.37722,0.36034,
+     *        0.49423,0.49049,0.48390,0.47181,0.44691,0.42803,0.41146,
+     *        0.54435,0.54072,0.53426,0.52253,0.49861,0.48039,0.46451,
+     *        0.59458,0.59113,0.58494,0.57381,0.55140,0.53420,0.51936,
+     *        0.64491,0.64173,0.63592,0.62561,0.60516,0.58934,0.57587,
+     *        0.69535,0.69248,0.68721,0.67795,0.65960,0.64570,0.63386,
+     *        0.74589,0.74339,0.73877,0.73081,0.71489,0.70314,0.69316,
+     *        0.79653,0.79446,0.79059,0.78412,0.77099,0.76149,0.75354,
+     *        0.84727,0.84566,0.84266,0.83777,0.82775,0.82059,0.81473,
+     *        0.89809,0.89700,0.89491,0.89182,0.88498,0.88021,0.87644,
+     *        0.94899,0.94846,0.94735,0.94587,0.94245,0.94011,0.93834,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,7),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04894,0.04817,0.04690,0.04406,0.03945,0.03648,0.03328,
+     *        0.09802,0.09659,0.09420,0.08896,0.08036,0.07483,0.06887,
+     *        0.14723,0.14524,0.14189,0.13463,0.12270,0.11502,0.10673,
+     *        0.19656,0.19412,0.18996,0.18106,0.16641,0.15699,0.14681,
+     *        0.24602,0.24320,0.23840,0.22823,0.21147,0.20070,0.18906,
+     *        0.29560,0.29249,0.28719,0.27612,0.25782,0.24609,0.23341,
+     *        0.34529,0.34198,0.33634,0.32473,0.30541,0.29309,0.27979,
+     *        0.39510,0.39166,0.38583,0.37397,0.35419,0.34163,0.32809,
+     *        0.44501,0.44152,0.43564,0.42385,0.40407,0.39162,0.37822,
+     *        0.49503,0.49157,0.48575,0.47421,0.45501,0.44296,0.43004,
+     *        0.54516,0.54180,0.53613,0.52516,0.50691,0.49555,0.48342,
+     *        0.59538,0.59219,0.58681,0.57661,0.55970,0.54927,0.53819,
+     *        0.64569,0.64275,0.63774,0.62856,0.61327,0.60398,0.59419,
+     *        0.69609,0.69347,0.68893,0.68102,0.66753,0.65954,0.65121,
+     *        0.74658,0.74432,0.74036,0.73377,0.72236,0.71578,0.70902,
+     *        0.79714,0.79528,0.79200,0.78663,0.77762,0.77252,0.76736,
+     *        0.84778,0.84635,0.84382,0.83978,0.83318,0.82954,0.82593,
+     *        0.89849,0.89747,0.89581,0.89314,0.88889,0.88662,0.88444,
+     *        0.94924,0.94868,0.94796,0.94654,0.94454,0.94349,0.94251,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,8),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04909,0.04831,0.04722,0.04431,0.04121,0.03867,0.03592,
+     *        0.09830,0.09685,0.09486,0.08953,0.08377,0.07910,0.07402,
+     *        0.14765,0.14564,0.14289,0.13560,0.12764,0.12122,0.11424,
+     *        0.19711,0.19465,0.19127,0.18240,0.17276,0.16498,0.15653,
+     *        0.24668,0.24389,0.23999,0.22994,0.21908,0.21031,0.20078,
+     *        0.29635,0.29334,0.28904,0.27818,0.26654,0.25714,0.24692,
+     *        0.34613,0.34301,0.33840,0.32712,0.31507,0.30536,0.29483,
+     *        0.39601,0.39283,0.38806,0.37670,0.36460,0.35489,0.34439,
+     *        0.44599,0.44283,0.43801,0.42689,0.41505,0.40561,0.39547,
+     *        0.49605,0.49299,0.48825,0.47755,0.46633,0.45743,0.44790,
+     *        0.54621,0.54330,0.53875,0.52872,0.51835,0.51019,0.50153,
+     *        0.59645,0.59376,0.58951,0.58038,0.57102,0.56377,0.55615,
+     *        0.64676,0.64433,0.64050,0.63237,0.62421,0.61800,0.61157,
+     *        0.69714,0.69501,0.69170,0.68478,0.67780,0.67272,0.66755,
+     *        0.74759,0.74580,0.74302,0.73734,0.73167,0.72773,0.72382,
+     *        0.79810,0.79671,0.79449,0.78998,0.78568,0.78283,0.78011,
+     *        0.84862,0.84766,0.84599,0.84257,0.83966,0.83781,0.83613,
+     *        0.89918,0.89855,0.89717,0.89518,0.89345,0.89242,0.89157,
+     *        0.94962,0.94950,0.94863,0.94769,0.94692,0.94653,0.94625,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,9),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04922,0.04858,0.04759,0.04489,0.04298,0.04088,0.03857,
+     *        0.09857,0.09739,0.09556,0.09067,0.08721,0.08339,0.07919,
+     *        0.14803,0.14641,0.14392,0.13731,0.13262,0.12746,0.12178,
+     *        0.19761,0.19565,0.19265,0.18474,0.17915,0.17301,0.16625,
+     *        0.24730,0.24510,0.24175,0.23291,0.22673,0.21994,0.21248,
+     *        0.29707,0.29474,0.29117,0.28179,0.27529,0.26817,0.26036,
+     *        0.34695,0.34459,0.34091,0.33132,0.32474,0.31758,0.30975,
+     *        0.39691,0.39462,0.39095,0.38145,0.37500,0.36805,0.36051,
+     *        0.44696,0.44481,0.44126,0.43208,0.42598,0.41947,0.41246,
+     *        0.49708,0.49517,0.49181,0.48314,0.47756,0.47169,0.46542,
+     *        0.54728,0.54562,0.54256,0.53461,0.52966,0.52457,0.51920,
+     *        0.59754,0.59618,0.59344,0.58637,0.58214,0.57793,0.57358,
+     *        0.64787,0.64686,0.64450,0.63835,0.63489,0.63161,0.62832,
+     *        0.69826,0.69760,0.69551,0.69051,0.68777,0.68540,0.68315,
+     *        0.74865,0.74831,0.74651,0.74253,0.74064,0.73912,0.73782,
+     *        0.79906,0.79906,0.79752,0.79447,0.79334,0.79256,0.79204,
+     *        0.84939,0.84939,0.84845,0.84633,0.84574,0.84551,0.84557,
+     *        0.89952,0.89952,0.89940,0.89789,0.89773,0.89785,0.89822,
+     *        0.94973,0.94964,0.95008,0.94918,0.94918,0.94940,0.94977,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,10),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04941,0.04898,0.04810,0.04627,0.04481,0.04314,0.04128,
+     *        0.09893,0.09815,0.09658,0.09333,0.09074,0.08778,0.08447,
+     *        0.14856,0.14752,0.14544,0.14114,0.13772,0.13383,0.12946,
+     *        0.19830,0.19708,0.19465,0.18964,0.18568,0.18117,0.17612,
+     *        0.24813,0.24681,0.24417,0.23876,0.23453,0.22971,0.22433,
+     *        0.29805,0.29672,0.29401,0.28846,0.28417,0.27933,0.27393,
+     *        0.34804,0.34678,0.34412,0.33865,0.33453,0.32990,0.32476,
+     *        0.39812,0.39700,0.39447,0.38927,0.38549,0.38128,0.37665,
+     *        0.44826,0.44735,0.44504,0.44024,0.43695,0.43333,0.42939,
+     *        0.49847,0.49784,0.49568,0.49150,0.48879,0.48588,0.48279,
+     *        0.54873,0.54843,0.54641,0.54295,0.54089,0.53878,0.53660,
+     *        0.59905,0.59911,0.59725,0.59450,0.59313,0.59183,0.59060,
+     *        0.64936,0.64975,0.64809,0.64607,0.64536,0.64484,0.64451,
+     *        0.69970,0.70036,0.69898,0.69756,0.69745,0.69763,0.69809,
+     *        0.74995,0.75068,0.74984,0.74887,0.74925,0.74998,0.75107,
+     *        0.80006,0.80082,0.80032,0.79993,0.80066,0.80176,0.80325,
+     *        0.85020,0.85095,0.85065,0.85065,0.85155,0.85281,0.85444,
+     *        0.90018,0.90083,0.90073,0.90095,0.90181,0.90297,0.90444,
+     *        0.95016,0.95070,0.95046,0.95078,0.95136,0.95213,0.95308,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      data ((pth(i,j,11),i=1,7),j=1,21) /
+     *        0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000,
+     *        0.04960,0.04920,0.04873,0.04772,0.04670,0.04550,0.04410,
+     *        0.09931,0.09861,0.09784,0.09612,0.09439,0.09233,0.08994,
+     *        0.14912,0.14823,0.14732,0.14516,0.14299,0.14040,0.13738,
+     *        0.19902,0.19804,0.19713,0.19475,0.19239,0.18957,0.18628,
+     *        0.24902,0.24802,0.24719,0.24484,0.24251,0.23972,0.23647,
+     *        0.29908,0.29815,0.29745,0.29534,0.29324,0.29072,0.28777,
+     *        0.34921,0.34842,0.34789,0.34619,0.34448,0.34241,0.33999,
+     *        0.39940,0.39882,0.39853,0.39730,0.39610,0.39464,0.39293,
+     *        0.44965,0.44935,0.44928,0.44860,0.44798,0.44724,0.44637,
+     *        0.49995,0.49997,0.50009,0.49998,0.50000,0.50003,0.50006,
+     *        0.55023,0.55055,0.55093,0.55137,0.55203,0.55282,0.55375,
+     *        0.60054,0.60121,0.60164,0.60267,0.60392,0.60543,0.60720,
+     *        0.65069,0.65152,0.65231,0.65378,0.65554,0.65766,0.66014,
+     *        0.70079,0.70172,0.70274,0.70463,0.70678,0.70935,0.71236,
+     *        0.75089,0.75192,0.75293,0.75514,0.75751,0.76035,0.76367,
+     *        0.80085,0.80182,0.80310,0.80523,0.80763,0.81051,0.81386,
+     *        0.85080,0.85172,0.85299,0.85484,0.85705,0.85970,0.86277,
+     *        0.90076,0.90166,0.90244,0.90389,0.90567,0.90778,0.91024,
+     *        0.95036,0.95079,0.95157,0.95229,0.95334,0.95459,0.95604,
+     *        1.00000,1.00000,1.00000,1.00000,1.00000,1.00000,1.00000/
+
+      egx=egxx
+      if(egx.lt.deg) egx=deg
+      if(egx.gt.7*deg) egx=7*deg
+      call interp(egx,deg,3,7,nk,w)
+
+      do jj=1,11
+        pex(jj)=w(1)*pe(nk,jj)+w(2)*pe(nk+1,jj)+w(3)*pe(nk+2,jj)
+        do j=1,21
+          pthx(j,jj)=w(1)*pth(nk,j,jj)+w(2)*pth(nk+1,j,jj)
+          pthx(j,jj)=pthx(j,jj)+w(3)*pth(nk+2,j,jj)
+         end do
+       end do
+
+      return
+      end
+c
+c------------------------------------------------------------------------------
+c
+      subroutine interp(ak,dk,nter,nmax,nk,w)
+c
+c  Calculates the interpolation coefficients of order nter-1,
+c      w(1), ...,w(nter), 
+c  for a uniform grid of spacing dk and a given value of ak.
+c  The grid index is assumed to begin with 0 and to have a maximum value nmax.
+c  nk is the first value of the index in the interpolation of the value at ak,
+c     f(ak)=w(1)*f(nk)+w(2)*f(nk+1)+...+w(nter)*f(nk+nter-1).
+c
+      implicit double precision (a-h,o-z)
+
+      dimension w(*)
+c
+      xk=ak/dk
+      if(nter.eq.1) then
+        nk=0
+       else
+        nk=xk
+        nk=min0(max0(nk-(nter-2)/2,0),nmax+1-nter)
+       endif
+      xk=xk-nk+1
+      do n=1,nter
+        w(n)=1.
+        do j=1,nter
+          if(j.ne.n) w(n)=w(n)*(xk-j)/(n-j)
+         end do
+       end do
+      return
+      end
+c
+c------------------------------------------------------------------------------
+c
+      function qdphe(emxx,eg)
+c
+c  For a fixed value of the gamma energy eg, integrates
+c  the momentum-angle integral of the distribution qdph(p,th,e,eg) from 
+c  e=-eg/2 to e=emxx.
+c
+      implicit double precision (a-h,o-z)
+
+c  ne must be odd (Simpson)
+      data ne/17/
+
+      qdphe=0.00
+
+      eg2=0.5d0*eg
+      if(emxx.lt.-eg2) return
+
+      emx=min(emxx,eg2)
+
+      de=(emx+eg2)/(ne-1)
+      wte=2.0d0*de/3.0d0
+      dwte=wte
+
+      e=-eg2-de
+      do je=1,ne
+        e=e+de
+        if(je.gt.1) then
+          wte=wte+dwte
+          dwte=-dwte
+         endif
+
+        if(je.eq.1.or.je.eq.ne) then
+          qdphe=qdphe+0.5d0*wte*qdphth(4.0d0,e,eg)
+         else
+          qdphe=qdphe+wte*qdphth(4.0d0,e,eg)
+         endif
+
+       end do
+
+      return
+      end
+c
+c------------------------------------------------------------------------------
+c
+      function qdphth(thmxx,e,eg)
+c
+c  For fixed values of the gamma energy eg and the energy e, integrates
+c  the momentum integral of the distribution qdph(p,th,e,eg) from 
+c  th=0 to th=thmxx.
+c
+      implicit double precision (a-h,o-z)
+
+c  np must be even (Simpson)
+      data nth/8/
+      data pi/3.14159265359d0/ 
+
+      qdphth=0.0d0
+
+      if(thmxx.le.0.0d0) return
+
+      thmx=min(thmxx,pi)
+
+      dth=thmx/nth
+      wtth=2.0d0*dth/3.0d0
+      dwtth=wtth
+
+      th=0.0d0
+      do jth=1,nth
+        th=th+dth
+        wtth=wtth+dwtth
+        dwtth=-dwtth
+
+        if(jth.eq.nth) then
+          qdphth=qdphth+0.5d0*wtth*sin(th)*qdphp(1.d4,th,e,eg,plo,phi,z)
+         else
+          qdphth=qdphth+wtth*sin(th)*qdphp(1.0d4,th,e,eg,plo,phi,z)
+         endif
+
+       end do
+
+      return
+      end
+c
+c------------------------------------------------------------------------------
+c
+      function qdphp(pmxx,th,e,eg,plo,phi,dqdphp)
+c
+c  For fixed values of the gamma energy eg, the energy e and the angle th, 
+c  determines the minimum and maximum values, plo and phi, for which the 
+c  momentum distribution, qdph(p,th,e,eg), is non-zero and integrates the 
+c  distribution from plo to pmxx.
+c
+      implicit double precision (a-h,o-z)
+
+c akf=sqrt(2*938*35)
+      data akf/256.242d0/,am/938.d0/
+
+c  np must be even (Simpson)
+      data np/16/
+
+      eg2=0.5d0*eg
+      eg2s=(eg2*sin(th))**2
+      eg2c=eg2*cos(th)
+
+      apn=sqrt(akf**2+2.0d0*am*(eg2+e))
+      app=sqrt(akf**2+2.0d0*am*(eg2-e))
+
+      plo=max(sqrt(max((apn-akf)**2-eg2s,0.0d0))-eg2c,
+     1        sqrt(max((app-akf)**2-eg2s,0.0d0))+eg2c)
+      phi=min(sqrt((apn+akf)**2-eg2s)-eg2c,sqrt((app+akf)**2-eg2s)+eg2c)
+
+      qdphp=0.0d0
+      pmx=pmxx
+
+      if(pmx.lt.plo) return
+
+      if(pmx.gt.phi) pmx=phi
+
+      dp=(pmx-plo)/np
+      wtp=2.0d0*dp/3.0d0
+      dwtp=wtp
+
+      p=plo
+      do jp=1,np
+        p=p+dp
+        wtp=wtp+dwtp
+        dwtp=-dwtp
+
+       
+        if(jp.eq.np) then
+          dqdphp=p**2*qdph(p,th,e,eg)
+          qdphp=qdphp+0.5d0*wtp*dqdphp
+         else
+          qdphp=qdphp+wtp*p**2*qdph(p,th,e,eg)
+         endif
+       end do
+
+      return
+      end 
+c
+c------------------------------------------------------------------------------
+c
+      function qdph(p,th,e,eg)
+c
+c Calculates the distribution function (arbitrary normalization) 
+c for creation of a neutron and a proton particle-hole pair of energy-momentum 
+c neutron:     (eg/2+e,0,p*sin(th),eg/2+p*cos(th))
+c and
+c proton:      (eg/2-e,0,-p*sin(th),eg/2-p*cos(th)),
+c eg being the gamma energy,
+c through the qausideuteron mechanism,  
+c following Chadwick et al., PRC44,814 (1991).
+c
+      implicit double precision (a-h,o-z)
+
+c akf=sqrt(2*938*35), alf2=4*(2.23*m)**2
+      data akf/256.242d0/,am/938.d0/,alf2/8366.96d0/
+      data pi/3.14159265359d0/ 
+c  nk must be odd and nph must even (Simpson)
+      data nk/17/,nph/16/
+
+      qdph=0.0d0
+
+      px=p*sin(th)
+      pz=p*cos(th)
+      eg2=0.5d0*eg
+
+      if(abs(e).gt.eg2) return
+
+      pn=sqrt(px**2+(eg2+pz)**2)
+      thn=atan2(px,eg2+pz)
+      en=eg2+e
+
+      pp=sqrt(px**2+(eg2-pz)**2)
+      thp=atan2(-px,eg2-pz)
+      ep=eg2-e
+
+      akf2=akf*akf
+
+      apn=sqrt(2.0d0*am*en+akf2)
+      if(pn.lt.apn-akf.or.pn.gt.apn+akf) return
+
+      app=sqrt(2.0d0*am*ep+akf2)
+      if(pp.lt.app-akf.or.pp.gt.app+akf) return
+
+      aknpar=am*en/pn-0.5d0*pn
+      aknhi=sqrt(akf2-aknpar**2)
+      aknlo=sqrt(max(akf2-(aknpar+pn)**2,0.0d0))
+      dkn=(aknhi-aknlo)/(nk-1)
+
+      wtkn=2.0d0*dkn/3.0d0
+      dwtkn=wtkn
+
+      sthn=sin(thn)
+      cthn=cos(thn)
+      aknpars=aknpar*sthn
+      aknparc=aknpar*cthn
+
+      akppar=am*ep/pp-0.5d0*pp
+      akphi=sqrt(akf2-akppar**2)
+      akplo=sqrt(max(akf2-(akppar+pp)**2,0.0d0))
+      dkp=(akphi-akplo)/(nk-1)
+
+      wtkp=2.0d0*dkp/3.0d0
+      dwtkp=wtkp
+
+      sthp=sin(thp)
+      cthp=cos(thp)
+      akppars=akppar*sthp
+      akpparc=akppar*cthp
+
+      ropar=4.0d0*am*eg+2.0d0*(aknpar**2+akppar**2)
+
+      dph=2.0d0*pi/nph
+      wphn=2.0d0*dph/3.0d0
+      dwphn=wphn
+      wphp=wphn
+      dwphp=dwphn
+
+      dsigkn=0.0d0
+      akn=aknlo-dkn
+      do kn=1,nk
+        akn=akn+dkn
+        if(kn.gt.1) then
+          wtkn=wtkn+dwtkn
+          dwtkn=-dwtkn
+         endif
+
+        akns=akn*sthn
+        aknc=akn*cthn
+        ron=ropar+2.0d0*akn**2
+
+        dsigkp=0.0d0
+        akp=akplo-dkp
+        do kp=1,nk
+          akp=akp+dkp
+          if(kp.gt.1) then
+            wtkp=wtkp+dwtkp
+            dwtkp=-dwtkp
+           endif
+
+          akps=akp*sthp
+          akpc=akp*cthp
+          rop=ron+2.0d0*akp**2
+
+          dsigpn=0.0d0
+          phn=0.0d0
+          do jn=1,nph
+            phn=phn+dph
+            wphn=wphn+dwphn
+            dwphn=-dwphn
+
+            akn1=aknpars+aknc*cos(phn)
+            akn2=akn*sin(phn)
+            akn3=aknparc-akns*cos(phn)
+
+            dsigpp=0.0d0
+            php=0.0d0
+            do jp=1,nph
+              php=php+dph
+              wphp=wphp+dwphp
+              dwphp=-dwphp
+
+              akp1=akppars+akpc*cos(php)
+              akp2=akp*sin(php)
+              akp3=akpparc-akps*cos(php)
+
+              dd=(akn1+akp1)**2+(akn2+akp2)**2+(akn3+akp3+eg)**2
+              dd=sqrt(rop-dd)
+              dd=dd*(alf2+(akn1-akp1)**2+(akn2-akp2)**2+(akn3-akp3)**2)
+
+              dsigpp=dsigpp+wphp/dd
+
+             end do
+
+            dsigpn=dsigpn+wphn*dsigpp
+
+           end do
+
+          if(kp.eq.1.or.kp.eq.nk) then
+            dsigkp=dsigkp+0.5d0*wtkp*akp*dsigpn
+           else
+            dsigkp=dsigkp+wtkp*akp*dsigpn
+           endif
+
+         end do
+
+        if(kn.eq.1.or.kn.eq.nk) then
+          dsigkn=dsigkn+0.5d0*wtkn*akn*dsigkp
+         else
+          dsigkn=dsigkn+wtkn*akn*dsigkp
+         endif
+
+       end do
+
+      qdph=am*dsigkn/(pn*pp)
+
+      return
+      end
+
