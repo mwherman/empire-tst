@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: main.f,v 1.63 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Date: 2005-03-15 23:42:48 $
+Ccc   * $Id: main.f,v 1.64 2005-03-15 23:42:48 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -89,8 +89,6 @@ C-----Get ECIS results
 C-----
 C--------locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
-C--------locate position of the projectile among ejectiles
-      CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
 C     WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
 C    &         INT(ZEJc(0)),INT(AEJc(0)),
@@ -113,6 +111,8 @@ C     TOTcs, ABScs,ELAcs are initialized within MARENG()
          OPEN (46,FILE = (ctldir//ctmp18//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
          READ (46,*,END = 1400)
+C--------locate position of the projectile among ejectiles
+         CALL WHEREJC(IZAejc(0),nejcec,iloc)
                                ! To skip first line <INE.C.S.> ..
 C--------get and add inelastic cross sections (including double-differential)
          DO i = 2, ND_nlv
@@ -224,6 +224,8 @@ C
       ENDDO
       WRITE (6,'(//)')
       IF (ncoll.GT.0) THEN
+C--------locate position of the projectile among ejectiles
+         CALL WHEREJC(IZAejc(0),nejcec,iloc)
          WRITE (6,*) ' '
          gang = 180.0/(NDANG - 1)
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
