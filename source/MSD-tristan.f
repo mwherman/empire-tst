@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-01-24 13:23:52 $
-Ccc   * $Id: MSD-tristan.f,v 1.21 2005-01-24 13:23:52 Capote Exp $
+Ccc   * $Date: 2005-01-31 19:26:20 $
+Ccc   * $Id: MSD-tristan.f,v 1.22 2005-01-31 19:26:20 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -695,14 +695,14 @@ C
             SRNew(lt) = 0.0
             SREwl(lt) = 0.0
             nconf(lt) = 0.0
-            ccr(lt)  = 0.0                                ! new
-            cci(lt)  = 0.0                                ! new
-            dcr(lt)  = 0.0                                ! new
-            dci(lt)  = 0.0                                ! new
-            cr1(lt)  = 0.0                                ! new
-            cr3(lt)  = 0.0                                ! new
-            ccm(lt)  = 0.0                                ! new
-            ccp(lt)  = 0.0                                ! new
+            ccr(lt)  = 0.D0                                ! new
+            cci(lt)  = 0.D0                                ! new
+            dcr(lt)  = 0.D0                                ! new
+            dci(lt)  = 0.D0                                ! new
+            cr1(lt)  = 0.D0                                ! new
+            cr3(lt)  = 0.D0                                ! new
+            ccm(lt)  = 0.D0                                ! new
+            ccp(lt)  = 0.D0                                ! new
         ENDDO
          IF(krt.EQ.1)kmax = 2
          IF(krt.EQ.2)kmax = 1
@@ -896,7 +896,7 @@ C                                                                               
      &                                         (eplsq - dwsx)*pymd**2)*            ! new+
      &                                         umatqq                              ! new+
                                                dci( ltp1)= dci( ltp1) +            ! new+
-     &                                         ((2*wqq + WIDex)*(emi*              ! new+
+     &                                         ((2.D0*wqq + WIDex)*(emi*           ! new+
      &                                         pxmd**2+epl*pymd**2))*              ! new+
      &                                         umatqq                              ! new+
                                             else if (i.eq.3) then                  ! new
