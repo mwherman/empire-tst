@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 16:31:23 $
-Ccc   * $Id: fusion.f,v 1.27 2005-02-04 16:31:23 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-06 14:18:10 $
+Ccc   * $Id: fusion.f,v 1.28 2005-02-06 14:18:10 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -94,9 +94,12 @@ C
          stl(i) = 0.0
       ENDDO
 C
-      WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C     WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C    &         INT(ZEJc(NPRo)),INT(AEJc(NPRo)),
+C    &       SYMb(NTRg),INT(A(NTRg)),INT(EINl*1000)
+      WRITE(ctmp18, '(i2.2,i3.3,1h_,i2.2,i3.3,1h_,i6.6)')
      &         INT(ZEJc(NPRo)),INT(AEJc(NPRo)),
-     &       SYMb(NTRg),INT(A(NTRg)),INT(EINl*1000)
+     &         INT(Z(Ntrg)),   INT(A(NTRg)),   INT(EINl*1000)
 
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
@@ -119,13 +122,13 @@ C-------Here the old calculated files should be readed
           ENDDO
           READ(45,END=25) ELAcs,TOTcs,ABScs,SINl
   20      CLOSE(45)
-          IF(IOUt.EQ.5) WRITE (46,'(1x,A30,3(e12.6,1x))')
+          IF(IOUt.EQ.5) WRITE (46,'(1x,A21,4(e12.6,1x))')
      &        'EL,TOT,ABS,INEL XSs:',ELAcs,TOTcs,ABScs,SINl
           IF(IOUt.EQ.5) CLOSE(46)
           IF(IOUt.EQ.5) THEN
             WRITE(6, *)
      &' Transmission coefficients for incident channel read from file: '
-            WRITE(6, *) '../TL/'//ctmp18//'_INC.BIN'
+            WRITE(6, *) ' ../TL/'//ctmp18//'_INC.BIN'
           ENDIF
 
           GOTO 4000
@@ -573,7 +576,7 @@ C       LINUX
         iwin = PIPE(ctmp)
       ELSE
 C       WINDOWS
-        ctmp = 'move INCIDENT.CS  ..\\TL\\'//ctmp18//'.CS >NUL'
+        ctmp = 'move INCIDENT.CS ..\\TL\\'//ctmp18//'.CS >NUL'
         iwin = PIPE(ctmp)
         IF(DIRECT.GT.0) THEN
           ctmp = 'move INCIDENT.ICS ..\\TL\\'//ctmp18//'.ICS >NUL'
@@ -1079,7 +1082,7 @@ C     Locals
 
       IF(IOPsys.EQ.0)THEN
 C       LINUX
-        ctmp = 'cp ecis03.cs '//outname(1:length)//'.CS'
+        ctmp = 'cp ecis03.cs  '//outname(1:length)//'.CS '
         iwin = PIPE(ctmp)
         if(iret.eq.1) return
         ctmp = 'cp ecis03.tlj '//outname(1:length)//'.TLJ'
@@ -1094,7 +1097,7 @@ C       LINUX
         iwin = PIPE(ctmp)
       ELSE
 C       WINDOWS
-        ctmp = 'copy ecis03.cs '//outname(1:length)//'.CS >NUL'
+        ctmp = 'copy ecis03.cs  '//outname(1:length)//'.CS  >NUL'
         iwin = PIPE(ctmp)
         if(iret.eq.1) return
         ctmp = 'copy ecis03.tlj '//outname(1:length)//'.TLJ >NUL'

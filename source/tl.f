@@ -1346,9 +1346,12 @@ C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C     WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
+C    &         INT(ZEJc(Nejc)),INT(AEJc(Nejc)),
+C    &       SYMb(NNUc),INT(A(NNUc)),INT(EINl*1000)
+      WRITE(ctmp18, '(i2.2,i3.3,1h_,i2.2,i3.3,1h_,i6.6)')
      &         INT(ZEJc(Nejc)),INT(AEJc(Nejc)),
-     &       SYMb(NNUc),INT(A(NNUc)),INT(EINl*1000)
+     &         INT(Z(NNUc)),   INT(A(NNUc)),   INT(EINl*1000)
       IOK=1
       INQUIRE(FILE = ('../TL/'//ctmp18//'.BIN'), EXIST = fexist)
       IF(.NOT.fexist) GOTO 300
