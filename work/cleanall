@@ -1,7 +1,0 @@
-rm *\.lev *-omp\.int *-omp\.ripl *-omp\.dir *\.ps *\.endf *\.c4 *\.exf 
-rm *\.lst *\.out *-f\.endf *-s\.endf *\.x42c4_lst *\.war
-rm *\.col *\.omp *\.res
-rm *\.x42c4_errs
-rm core
-rm fort.10 *\.zvd angdis*
-
