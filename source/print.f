@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: print.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-10-07 16:31:55 $
+Ccc   * $Id: print.f,v 1.4 2004-10-07 16:31:55 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc, Nejc)
 Ccc
@@ -53,6 +53,7 @@ C
       IF(csemax.EQ.0.0D0)RETURN
       kmax = kmax + 2
       kmax = MIN0(NDEX, kmax)
+      kmax = MIN0(kmax,NDECSE) ! RCN
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
@@ -74,6 +75,8 @@ C
      &       //)
       IF(AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0)WRITE(6, 99004)
 99004 FORMAT(1X, ///, 1X, 54('*'), 1X, 'proton spectrum  ', 54('*'), //)
+      IF(AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0)WRITE(6, 99009)
+99009 FORMAT(1X, ///, 1X, 54('*'), 1X, 'alpha  spectrum  ', 54('*'), //)
  100  WRITE(6, 99005)s0, s1, s2, s3
 99005 FORMAT(1X, 'Ener. ', 5X, 'Spectr. ', 4X, E6.1, 25X, E6.1, 25X, 
      &       E6.1, 25X, E6.1)
