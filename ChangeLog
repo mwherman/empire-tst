@@ -1,14 +1,78 @@
 
+             Changes in version 2.18 with respect to 2.17.1
+                      Vienna,   September  2002 
+1. Bug fixed in reading levels file when preparing collective levels for
+   ECIS (R. Capote).
+2. Bug fixed in reading Coulomb parameters of o.m.p. from the RIPL-2 file
+   (affects charged particle channels)(R. Capote).
+3. Relativistic correction in tl.f removed (gamma=1). It is not needed since
+   SCAT2 and ECIS take care of it (R. Capote).
+4. Bug in EMPEND, which caused skipping the last but one energy point fixed
+   (A. Trkov).
+5. EMPEND formats branching ratios in the ENDF file (A. Trkov).
+6. xterm closes when calculations are done as it was in versions 2.17 and 
+   earlier (p.3.iii below removed) since it was inconvenient for running 
+   piece-wise and multiple calculations(M. Herman).
+7. gamma-strength function uses a temperature consistent with the current
+   level densities for the final state (not for the initial one as erroneously
+   coded before) (M. Herman).
+8. Beta version of the new GUI (Xrun.tcl) added (M. Herman).
+9. Corrected renormalization of the absorption cross section in DEGAS 
+   (E. Betak). 
+10.Corrected way of restricting exciton configurations used in DEGAS (E. Betak).
+11.Maximum number of excitons used in DEGAS set to 5 (3 configurations) 
+   (M. Herman).
+12.PLOTC4 updated by A. Trkov to produce gamma-spectra (continuum contribution
+   from the capture reaction has not yet been included).
+13.Bugs in PLOTC4 fixed by A. Trkov. PLOTC4 tested on Linux with g77 and 
+   Absoft90 ver. 7.0 compilers and on Ms Windows with Lahey 75. 
+14.If discrete levels are inconsistent with Gilbert-Cameron level densities
+   and LEVFIT is non-negative calculations are continued using nuclear
+   temperature taken from the systematics. Appropriate massage is printed and
+   cumulative plot displayed (without blocking further calculations) 
+   (M. Herman).
+15.Bug in empire-specific level densities at very high energies (close to 200 MeV)
+   when level density exceeds capacity of the 32-bit word has been fixed by
+   ignoring fit to the discrete levels (unfortunately in all nuclei) 
+   (M. Herman).
+16.File Ko in tl.f is rewound  to avoid messages that particular omp is not
+   found in the local file (M. Herman).
+17.Number of iterations when fitting discrete levels with Gilbert-Cameron level
+   densities limited to 300 to avoid the possibility of infinite loop 
+   (M. Herman).
+18.Z=105 name changed to 'Db'; thanks to Erik Strub for pointing it out
+   (M. Herman).
+19.Problem with the discontinuity of neutron capture cross section when 
+   incident energy becomes lower than the integration bin width has been 
+   solved. Capture cross sections, even at very low energies (<10 keV) can now 
+   be calculated even with as few as 50 energy bins (tested on 193-Ir)
+   (M. Herman).
+20.All collective levels are used in ECIS calculations with DIRECT=1,2, even if
+   they can not be excited because of the too low incident energy. In the 
+   previous versions only open channels were taken into consideration and 
+   coupling to the closed ones was ignored (R. Capote).
+21.Minor corrections of nuclear masses in EMPEND (avoid potentially infinite
+   loop while the ENDF formatted file is processed by SIXTAB) (A. Trkov).
+
+Known bugs:
+
+1. Fission is wrong when HRTW is active
+2. Slight inconsistency with DIRECT=1,2,3 option - last coll. level(s) is 
+   included in the fusion renormalization but may be excluded from 
+   actual calculations as being above the last accepted level.
+
+
              Changes in version 2.17.1 with respect to 2.17
                       Vienna,   April  2002
 
-1. Bug in reading RIPL discrete levels fixed by R. Capote.
-2. All scripts modified: (i) all links made symbolic to allow for using
-   network drives, (ii) ./ added in front of calls (thus ./ is no loger needed 
+1. EXFOR library converted from DOS to UNIX format.
+2. Bug in reading RIPL discrete levels fixed by R. Capote.
+3. All scripts modified: (i) all links made symbolic to allow for using
+   network drives, (ii) ./ added in front of calls (thus ./ is no longer needed 
    in the PATH), (iii) xterm remains open after calculations are completed
    so that runtime messages can be inspected (M. Herman).
-3. GUI backgorund color changed to gray (M. Herman).
-4. guizvv.tcl for graphical comparison of up to three calculations/evaluations 
+4. GUI background color changed to gray (M. Herman).
+5. guizvv.tcl for graphical comparison of up to three calculations/evaluations 
    (already present in 2.17) modified (nonstandard Tcl/Tk widget replaced)
    (M. Herman).
 
@@ -21,9 +85,9 @@
    to V. Plujko for pointing it out.
 2. PLOTC4 updated by A. Trkov to produce spectra (including 
    double-differential ones) for outgoing protons and alphas. Structure 
-   of the PostScript files improved.
+   of  PostScript files improved.
 3. RIPL files placed in the empire/RIPL-2 directory following RIPL-2
-   structure and naming convention (compatibility with the RIPL-2 CD-ROM).
+   structure and naming convention (compatibility with the future RIPL-2 CD-ROM).
 4. Optical model database again updated to the preliminary version form RIPL-2
 5. EXFOR database updated to the version of 18.05.2001 (NOTE: previous EXFOR
    database will NOT work due to a different directory structure).
@@ -60,18 +124,6 @@
 10.List of warnings available through GUI (M. Herman)
 11.Tabulated HFBCS levels densities as provided to RIPL-2 by S. Goriely 
    included as additional level density option (M. Herman)
-
-Known bugs:
-
-1. Fission is wrong when HRTW is active
-2. Slight inconsistency with DIRECT=1,2,3 option - last coll. level(s) is 
-   included in the fusion renormalization but may be excluded from 
-   actual calculations as being above the last accepted level.
-
-To do:
-
-- adjust energy for the ddx spectra in EMPEND to account for the recoils
-- clean mixed character and numerical data in commons in tl.f
 
 
              Changes in version 2.16.2 with respect to 2.16 

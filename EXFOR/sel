@@ -27,7 +27,7 @@ echo "      will retrieve all neutron induced reactions on Fe-56 except"
 echo "      (n,a) and (n,abs)"
 exit
 fi
-grep  $1  REAC_SIG.TXT >temp
+grep  $1  X4-INDEX.TXT >temp
 if [ "$2" != "" ]
    then
 grep  $2 temp >tmp
