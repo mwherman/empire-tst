@@ -1,4 +1,4 @@
-C-----GLOBAL COMMON --------------------------------------------------
+
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
       CHARACTER SYMbe*2, SYMb*2
