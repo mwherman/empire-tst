@@ -16,6 +16,7 @@ C-V  03/06 Define MT numbers for incident protons.
 C-V  03/07 Fix processing of double differential data for protons.
 C-V  04/06 - Process discrete levels flagged with -ve energies.
 C-V        - Let EMPIRE to handle max. outgoing particle energy.
+C-V  04/07 Fix ordering of levels in MF12
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -808,7 +809,7 @@ C-F Check if angles are given (No. of angles KXA=1 if isotropic)
 C-F Read the angles at which the distributions are given (8 per row)
         KXA=8
         J1 =1
-  432   READ (REC,806) (ANG(J),J=J1,KXA)
+  432   READ (REC,806,ERR=802) (ANG(J),J=J1,KXA)
   433   IF(ANG(KXA).EQ.0) THEN
           KXA=KXA-1
           GO TO 433
@@ -842,8 +843,8 @@ C-F Read angular distributions until a blank line is encountered
   450 READ (LIN,891) REC
       IF(REC(1:20).EQ.'                    ') GO TO 700
       JXA=MIN(KXA,8)
-      READ (REC,807) EE,(DST(J),J=1,JXA)
-      IF(KXA.GT.8) READ (LIN,809) (DST(J),J=9,KXA)
+      READ (REC,807,ERR=802) EE,(DST(J),J=1,JXA)
+      IF(KXA.GT.8) READ (LIN,809,ERR=802) (DST(J),J=9,KXA)
 
 c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
 c...        print *,' ee,dst', ee*1.e6,dst(1)
@@ -1026,6 +1027,10 @@ C* Pack the data into compact matrix RWO(LH2,NPT)
       END DO
 C*
   800 RETURN
+C* Error trap reading input record
+  802 WRITE(LTT,912) REC
+      WRITE(LER,912) REC
+      STOP 'EMPEND ERROR - reading file'
 C*
   806 FORMAT(6X,8(5X,F10.4))
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
@@ -1039,6 +1044,8 @@ C*
      1      ,' Ein',1P,E10.3,' bad ang.distr. fit at',I3,' points')
   909 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Eou',1P,E10.3,' > available energy',E10.3)
+  912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
+     !       ' "',A70,'"')
   931 FORMAT('P(',I2.2,') Fit')
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
@@ -2554,10 +2561,13 @@ C* Head record
 C* List record
       DO 110 JT=1,NT
 C* Determine the energy level of the final state
-      LE=LBR(NT+1-JT,LL)
+c... Level energies sorted in descending order (fix error that reappeared?)
+c...  LE=LBR(NT+1-JT,LL)
+      LE=LBR(JT,LL)
       RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
-      RWO(2,JT)=BRR(NT+1-JT,LL)
+c...  RWO(2,JT)=BRR(NT+1-JT,LL)
+      RWO(2,JT)=BRR(JT,LL)
   110 CONTINUE
       CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
 C* Section end
