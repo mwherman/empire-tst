@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-05-14 17:40:03 $
-Ccc   * $Id: main.f,v 1.22 2004-05-14 17:40:03 herman Exp $
+Ccc   * $Date: 2004-05-17 19:12:28 $
+Ccc   * $Id: main.f,v 1.23 2004-05-17 19:12:28 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1948,9 +1948,9 @@ C-----gamma decay to discrete levels (stored with icse=0)
 C-----
 C-----prints recoil spectrum of nnuc residue
 C-----
-      CHARACTER*21 react
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+      CHARACTER*21 react
       IF(CSPrd(nnuc).GT.0.0D0)THEN
 C-------normalize recoil spectra to remove eventual inaccuracy
 C-------due to numerical integration of angular distributions
