@@ -4,7 +4,7 @@
 1. Dispersive optical model potential implemented (SCAT2, ECIS, ORION3)
    by R. Capote.
 2. Optical model database updated to the preliminary version of RIPL-2
-   (including a few dispersive omp) by R. Capote
+   (including 4 dispersive omp) by R. Capote
 3. Discrete levels database updated to the preliminary version of RIPL-2
    (R. Capote)
 4. Number of discrete levels constituting a complete scheme taken from
