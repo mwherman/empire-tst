@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-12-21 23:51:36 $
-Ccc   * $Id: MSD-tristan.f,v 1.17 2004-12-21 23:51:36 herman Exp $
+Ccc   * $Date: 2004-12-23 00:27:04 $
+Ccc   * $Id: MSD-tristan.f,v 1.18 2004-12-23 00:27:04 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3205,6 +3205,7 @@ C--------Normalization factor
             xnor = 0.0
          ENDIF
 C--------Add MSD transitions to discrete levels to the population spectrum   
+C--------used for the ENDF exclusive spectra
          POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) +
      &                            csmsdl*wght(il)/DE
 C--------Store ang. dist.

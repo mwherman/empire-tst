@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 08:39:21 $
-Ccc   * $Id: main.f,v 1.42 2004-11-30 08:39:21 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-12-23 00:27:05 $
+Ccc   * $Id: main.f,v 1.43 2004-12-23 00:27:05 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1488,22 +1488,22 @@ C--------Integrating exclusive population spectra (ENDF)
             ENDIF
          ENDDO
 c        Add contribution from discrete levels for MT=91,649,849
-         IF(nnuc.EQ.mt91) THEN
-            nejc = 1
-            DO ilev = 1, NLV(nnuc)
-               xtotsp = xtotsp + CSDirlev(ilev,nejc)
-            ENDDO
-         ELSEIF(nnuc.EQ.mt649) THEN
-            nejc = 2
-            DO ilev = 1, NLV(nnuc)
-               ptotsp = ptotsp + CSDirlev(ilev,nejc)
-            ENDDO
-         ELSEIF(nnuc.EQ.mt849) THEN
-            nejc = 3
-            DO ilev = 1, NLV(nnuc)
-               atotsp = atotsp + CSDirlev(ilev,nejc)
-            ENDDO
-         ENDIF
+c        IF(nnuc.EQ.mt91) THEN
+c           nejc = 1
+c           DO ilev = 1, NLV(nnuc)
+c              xtotsp = xtotsp + CSDirlev(ilev,nejc)
+c           ENDDO
+c        ELSEIF(nnuc.EQ.mt649) THEN
+c           nejc = 2
+c           DO ilev = 1, NLV(nnuc)
+c              ptotsp = ptotsp + CSDirlev(ilev,nejc)
+c           ENDDO
+c        ELSEIF(nnuc.EQ.mt849) THEN
+c           nejc = 3
+c           DO ilev = 1, NLV(nnuc)
+c              atotsp = atotsp + CSDirlev(ilev,nejc)
+c           ENDDO
+c        ENDIF
          POPCS(0,nnuc) = gtotsp
          POPCS(1,nnuc) = xtotsp
          POPCS(2,nnuc) = ptotsp
@@ -1699,12 +1699,6 @@ C--------
                   IF(POPCS(nejc,nnuc).EQ.0) CYCLE
                   nspec = INT(EMAx(nnuc)/DE) + 2
                   nexrt = INT((EMAx(nnuc) - ECUt(Nnuc))/DE + 1.0001)
-C
-C        Mike, check the lines below
-C        It was a bug before. nexrt could be negative
-C        I intriduced a jump for this case, but may be this is not the proper thing to do !!! (08/2004)
-C
-                if(nexrt.le.1) cycle
                   IF(nejc.EQ.0) THEN
                      cejectile = 'gammas   '
                      iizaejc = 0
@@ -1755,38 +1749,24 @@ C-----------------------(continuum part)
                               CSEa(ie, nang, nejc, 0) = 0.0
                            ENDDO
                         ENDDO
-                        DO ie = 1, nexrt ! reconstruct continuum DDX spectrum
-                           DO nang = 1,NDANG
-                              piece = CSEmsd(ie,nejc)
-                              IF(ie.EQ.NEXr(nejc, 1)) piece = 0.5*piece
-                              CSEa(ie, nang, nejc, 0) =
-     &                        ((POPcse(0,nejc,ie,nnuc) - piece
-     &                        *POPcseaf(0,nejc,ie,Nnuc))
-     &                        /4.0/PI + CSEa(ie, nang, nejc, 1)*
-     &                        POPcseaf(0,nejc,ie,Nnuc))
-c                             WRITE(6,*)'ie,nang,nnuc,nejc',
-c    &                           ie,nang,nnuc,nejc
-c                             WRITE(6,*)'POPcse,piece,POPcseaf',
-c    &                           POPcse(0,nejc,ie,nnuc),piece,
-c    &                           POPcseaf(0,nejc,ie,Nnuc)
+                        IF(nexrt.GE.1) THEN
+                           DO ie = 1, nexrt ! reconstruct continuum DDX spectrum
+                              DO nang = 1,NDANG
+                                 piece = CSEmsd(ie,nejc)
+                                 IF(ie.EQ.NEXr(nejc, 1)) piece=0.5*piece
+                                 CSEa(ie, nang, nejc, 0) =
+     &                           ((POPcse(0,nejc,ie,nnuc) - piece
+     &                           *POPcseaf(0,nejc,ie,Nnuc))
+     &                           /4.0/PI + CSEa(ie, nang, nejc, 1)*
+     &                           POPcseaf(0,nejc,ie,Nnuc))
+c                                WRITE(6,*)'ie,nang,nnuc,nejc',
+c    &                              ie,nang,nnuc,nejc
+c                                WRITE(6,*)'POPcse,piece,POPcseaf',
+c    &                              POPcse(0,nejc,ie,nnuc),piece,
+c    &                              POPcseaf(0,nejc,ie,Nnuc)
+                              ENDDO
                            ENDDO
-                        ENDDO
-                        DO ie = nexrt+1, nspec ! reconstruct discrete DDX spectrum
-                           DO nang = 1,NDANG
-c                             piece = CSEmsd(ie,nejc)
-c                             IF(ie.EQ.NEXr(nejc, 1)) piece = 0.5*piece
-                              CSEa(ie, nang, nejc, 0) =
-     &                           POPcse(0,nejc,ie,nnuc)/4.0/PI
-c                             CSEa(ie, nang, nejc, 0) =
-c    &                        (POPcse(0,nejc,ie,nnuc) - piece
-c    &                        *POPcseaf(0,nejc,ie,Nnuc))/4.0/PI
-c                             WRITE(6,*)'ie,nang,nnuc,nejc',
-c    &                           ie,nang,nnuc,nejc
-c                             WRITE(6,*)'POPcse,piece,POPcseaf',
-c    &                           POPcse(0,nejc,ie,nnuc),piece,
-c    &                           POPcseaf(0,nejc,ie,Nnuc)
-                           ENDDO
-                        ENDDO
+                        ENDIF
                         DO nang = 1,NDANG !double the first bin to preserve integral in EMPEND
                            CSEa(1, nang, nejc, 0) =
      &                     CSEa(1, nang, nejc, 0)*2.0

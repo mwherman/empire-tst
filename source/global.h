@@ -119,7 +119,6 @@ C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
      &                 D_Elv(NDCOLLEV), D_Xjlv(NDCOLLEV),
      &                 D_Lvp(NDCOLLEV), D_Def(NDCOLLEV, NDDEFCC),
      &                 D_Klv(NDCOLLEV), D_Llv(NDCOLLEV)
-C
 C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limited
 C    to 0:1 on the last dimension in order to save memory - anyway, in the
 C    current implementation only first emissions  can be anisotropic (apart

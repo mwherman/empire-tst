@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-08 16:23:10 $
-Ccc   * $Id: HF-comp.f,v 1.33 2004-10-08 16:23:10 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-12-23 00:27:04 $
+Ccc   * $Id: HF-comp.f,v 1.34 2004-12-23 00:27:04 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -303,7 +303,6 @@ C-----Contribution comming straight from the current decay
 C-----Contribution due to feeding spectra from Nnuc 
 C-----DE spectra
       IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas 
-C        RCN 01/2004
          IF(POPbin(Iec, Nnuc).GT.0.) THEN    
           xnor = Popt*DE/POPbin(Iec, Nnuc)
           DO iesp = 1, NDECSE 
@@ -312,7 +311,7 @@ C        RCN 01/2004
      &            POPcse(0,iejc,iesp,Nnur) = POPcse(0,iejc,iesp,Nnur) +
      &            POPcse(Iec,iejc,iesp,Nnuc)*xnor
             ENDDO 
-C--------neutron and proton DDX spectra using portions      
+C-----------neutron and proton DDX spectra using portions      
             DO iejc = 1, NDEJCD
                IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) THEN
                   POPcseaf(0,iejc,iesp,Nnur) = 

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-24 14:59:43 $
-Ccc   * $Id: lev-dens.f,v 1.22 2004-09-24 14:59:43 herman Exp $
+Ccc   * $Date: 2004-12-23 00:27:04 $
+Ccc   * $Id: lev-dens.f,v 1.23 2004-12-23 00:27:04 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -1425,19 +1425,10 @@ C     CALL DAMPKS(A, A2, t, qk)
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
-C     Changed according to Mihaela's recommendation
-C     ROBCS =ROBCS*vibrk*momo*t*qdamp
-      IF(FISCon.EQ.2) THEN
-         ROBCS =ROBCS*vibrk*momort*tcrt*qdamp
-      else
-         ROBCS =ROBCS*vibrk*momo*t*qdamp
-      endif   
-c     IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
-c     IF(iff.eq.3) ROBCS = ROBCS*2
-c     IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
-      IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(Mompar*tcrt)
+      ROBCS =ROBCS*vibrk*momo*t*qdamp
+      IF(iff.eq.2) ROBCS = ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
       IF(iff.eq.3) ROBCS = ROBCS*2
-      IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(Momort*tcrt)
+      IF(iff.eq.4) ROBCS = ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
       END
 C
 C
@@ -1685,6 +1676,7 @@ C
       ig = NEX(Nnuc)
       GOTO 400
  300  ig = i - 1
+C-----constant 2.5066=SQRT(2*pi)
  400  IF(eo.EQ.0.0D0)eo = exl - t*LOG(t*RIVOLI(ux, am)/2.5066/SQRT(sigh)
      &                    )
       eom = eo

@@ -3,7 +3,7 @@
 c      for PCROSS
      *,NDEJC=4
      *,NDAFIS=1
-     *,NDEX= 151
+     *,NDEX= 160
      *,NDLW= 50
      *,NDTL= 30
      *,NDMSCS=4
