@@ -74,16 +74,8 @@ A If no plots are produced  by PLOTC4 there are several possibilities:
 
 Q WHY SCRIPTS DO NOT RUN?
 
-A There might be two reasons:
-
-  1. you have no './' in your path. Add the following line to your
-     .bash_profile (or equivalent) file
-     PATH=./;$PATH
-     then logout and login again or type: 
-     source .bash_profile
-     at command prompt
-
-  2. you don't have bash shell installed. Install bash shell.
+A Check whther you have the bash shell installed (e.g., type 'bash' at
+  command prompt)
 
   NOTE: bash shell is available on most UNIX/LINUX boxes but usually not
   on those running MS Windows (unless Cygnus is being used). All
