@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.9 $
-C $Id: ddhms.f,v 1.9 2004-10-07 16:15:56 Capote Exp $
+C CVS Version Management $Revision: 1.10 $
+C $Id: ddhms.f,v 1.10 2004-10-08 15:52:35 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2010,9 +2010,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.9 $')
+99001 FORMAT('  ddhms version: $Revision: 1.10 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.9 2004-10-07 16:15:56 Capote Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.10 2004-10-08 15:52:35 Capote Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
