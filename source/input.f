@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 08:03:57 $ 
-Ccc   * $Id: input.f,v 1.28 2004-06-08 08:03:57 Capote Exp $ 
+Ccc   * $Date: 2004-06-11 13:48:04 $ 
+Ccc   * $Id: input.f,v 1.29 2004-06-11 13:48:04 Capote Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -291,7 +291,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server 
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C 
 C--------CCFUF parameters 
          DV = 10. 
@@ -780,7 +780,7 @@ C
          IF(DEGa.GT.0)GCAsc = 1. 
          IF(PEQc.GT.0)GCAsc = 1.  ! PCROSS
          IF(MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0  
-     &      .AND.A(NNUc).GT.1.0D0)THEN 
+     &      .AND. A(NNUc).GT.1.0D0 .AND. AEJc(0).LE.1.D0)THEN 
             WRITE(6, *)' ' 
             WRITE(6, *)' WARNING!!!! Normally both MSD and MSC should' 
             WRITE(6, *)' WARNING!!!! be taken into account' 
@@ -1002,8 +1002,8 @@ C--------Capote 2001
 C--------fix-up deformations and discrete levels for ECIS coupled channels 
             ierr = IFINDCOLL() 
             IF(ierr.EQ.1)THEN 
-               WRITE(6, *)' WARNING: SOME DISCRETE LEVELS FOR TARGET',  
-     &                    ' NUCLEUS NOT FOUND' 
+               WRITE(6, *)' WARNING: SOME COLLECTIVE DISCRETE LEVELS',  
+     &                    '  FOR TARGET NUCLEUS NOT FOUND' 
                WRITE(6, *)' WARNING: CHECK TARGET.LEV file ' 
             ELSEIF(ierr.EQ.2)THEN 
                WRITE(6, *)' WARNING: NO DISCRETE LEVELS FOR TARGET',  
@@ -1497,7 +1497,7 @@ C     the fission input is created if it does not exist
 C-------Fission temporary closed to allow standard calculations 
 C-------for nuclei for which no fission barriers are available 
 C-------next line should be deleted to enable fission 
-c        FISsil(nnuc) = .FALSE.  
+c       FISsil(nnuc) = .FALSE.  
 c-------the fissioning condition replaced accordingly to the fission 
 c-------barriers available in RIPL-2  (MS) 
 cc        xfis = 0.0205*Z(nnuc)**2/A(nnuc) 
@@ -1837,6 +1837,12 @@ C
      &                 , KTRlom(3, 1) 
       IF(KTRlom(3, 1).EQ.1)WRITE(6, *) 
      &               ' alpha   o. m. parameters: Mc Fadden and Satchler' 
+      IF(NDEJc.EQ.4) THEN
+	  IF(RIPl_omp(4))WRITE(6, *) 
+     &            ' light ion  o. m. parameters: RIPL catalog number ' 
+     &            , KTRlom(4, 1) 
+      ENDIF
+
       WRITE(6, *) 
 99008 FORMAT(10X, 'B i n d i n g    e n e r g i e s') 
       END 
@@ -1849,10 +1855,11 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ipu* 
 Ccc   *                      P T L E V R E                               * 
 Ccc   *                                                                  * 
-Ccc   *  Reads from OM-DEFORMATIONS.DAT energies of collective 2+ and    * 
-Ccc   *  3- states (if possible). If not it will try to find them out    * 
-Ccc   *  in the file with discrete levls. In any case will take from     * 
-Ccc   *  it ground state spin and parity.                                * 
+Ccc   *  Reads from RIPL-2 OM-DEFORMATIONS.DAT energies of collective 2+ * 
+Ccc   *  and 3- states (Raman & Kibedi values used). If experimental     *
+Ccc   *  is not available, then it will try to find them out in the file * 
+Ccc   *  file with discrete levels. In any case will take from this file * 
+Ccc   *  the ground state spin and parity.                               * 
 Ccc   *                                                                  * 
 Ccc   *                                                                  * 
 Ccc   * input:IA   - A of the nucleus                                    * 
@@ -1889,26 +1896,60 @@ C
       CHARACTER*9 finp 
       DOUBLE PRECISION dum, DEF, elvr, xjlvr 
       INTEGER iar, ilv, izr, nlvr, lvpr 
-      E2p = 0.0 
-      E3m = 0.0 
+	INTEGER nztmp,natmp,iptmp
+      DOUBLE PRECISION etmp, jtmp, betatmp 
+      CHARACTER*6 reftmp 
+
+      E2p = 0.d0 
+      E3m = 0.d0 
+C     Avoiding searching of collective levels of the incident particle
+	IF(IA.EQ.AEJc(0)) GOTO 155
 C-----First try to find 2+ and 3- states in the RIPL om-deformations file 
-      OPEN(47, FILE = '../RIPL-2/optical/om-data/om-deformations.dat',  
-     &     STATUS = 'OLD') 
-      READ(47, '(A80)')ch_iuf 
-      READ(47, '(A80)')ch_iuf 
-      READ(47, '(A80)')ch_iuf 
-      READ(47, '(A80)')ch_iuf 
- 100  READ(47, '(2I4,3x,F11.6,F5.1,I3,2X,F11.6)', END = 200)izr, iar,  
-     &     elvr, xjlvr, lvpr, defr 
-      IF(Ia.NE.iar .OR. Iz.NE.izr)GOTO 100 
-      IF(E2p.EQ.0.0D0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)E2p = elvr 
-      IF(E3m.EQ.0.0D0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.( - 1)) 
-     &   E3m = elvr 
-      IF(E2p.EQ.0.0D0 .OR. E3m.EQ.0.0D0)GOTO 100 
- 200  CLOSE(47) 
+      OPEN(47, FILE = 
+     &       '../RIPL-2/optical/om-data/om-deformations.dat',
+     &       STATUS = 'old',ERR=149)
+	  READ(47,'(///)') ! Skipping first 4 title lines
+        DO i = 1, 1700
+C       README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
+            READ(47,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',  
+     &      END = 150, ERR = 150) 
+     &      nztmp,natmp,etmp,jtmp,iptmp,betatmp,reftmp
+	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+     &            jtmp.eq.2.d0  .AND. iptmp.eq.+1 .AND.
+     &            reftmp.eq.'Raman2') E2p = etmp
+	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+     &            jtmp.eq.3.d0  .AND. iptmp.eq.-1 .AND.
+     &            reftmp.eq.'Kibedi') E3m = etmp
+        ENDDO
+	  GOTO 150
+149     write(6,*) 'WARNING: ',
+     &  '../RIPL-2/optical/om-data/om-deformations.dat file not found ' 
+        write(6,*) 'WARNING: ',
+     &  'E(2+) and E(3-) will be selected from the available target leve
+     &l scheme'
+	  GOTO 155
+150   CLOSE(47)
+C    
+C     IF(E2p.ne.0.d0 .OR. E3m. NE.0.d0) THEN  
+C       write(6,'(/1x,A40/1x,A7,F7.3,A9,F7.4)') 
+C    &  'ENERGY OF THE COLLECTIVE LEVELS (RIPL-2):', 
+C    &  'E(2+) =',E2p, ', E(3-) =', E3m
+C     ENDIF
+C     IF(E2p.NE.0.d0) THEN  
+C       write(6,*) 'WARNING: ',
+C    &  'E(2+) level is not contained in Raman 2001 database (RIPL-2)' 
+C       write(6,*) 'WARNING: ',
+C    &  'E(2+) will be selected from the available target level scheme'
+C     ENDIF
+C     IF(E3m.NE.0.d0) THEN  
+C       write(6,*) 'WARNING: ',
+C    &  'E(3-) level is not contained in Kibedi database (RIPL-2)' 
+C       write(6,*) 'WARNING: ',
+C    &  'E(3-) will be selected from the available target level scheme'
+C	ENDIF
 C-----If missing in the RIPL om-deformations file try discrete levels file 
 C-----constructing input and filenames 
-      IF(.NOT.FILevel)THEN 
+155   IF(.NOT.FILevel)THEN 
          WRITE(ctmp3, '(I3.3)')Iz 
          finp = 'z'//ctmp3//'.dat' 
          OPEN(13, FILE = '../RIPL-2/levels/'//finp, STATUS = 'OLD',  
@@ -2596,7 +2637,7 @@ C           Key_shape =4 --> fE1=EGLO
 C           Key_shape =5 --> fE1=GFL
 C           Key_shape =6 --> fE1=SLO
             Key_shape = val
-            WRITE(6, '(" E1 strength shape key set to ", I3 )')Key_shape
+C           WRITE(6, '(" E1 strength shape key set to ", I3 )')Key_shape
             GOTO 100
          ENDIF
 C--------Plujko_new (End)
@@ -4262,6 +4303,8 @@ Ccc   * return:                                                          *
 Ccc   *   IFindColl = 0 (ALL POSSIBLE LEVELS FOUND)                      * 
 Ccc   *   IFindColl = 1 WARNING: (SOME COLLECTIVE LEVELS NOT FOUND)      * 
 Ccc   *   IFindColl = 2 ERROR: NO DISCRETE LEVEL INFORMATION AVAILABLE   * 
+Ccc   *   IFindColl = 3 SPHERICAL VIBRATIONAL ODD NUCLEUS                * 
+Ccc   *                 No suggestion for collective levels              *
 Ccc   *                                                                  * 
 Ccc   * Creates files TARGET.LEV, COLLECTIVE.LEV and COLLECTIVE.TXT      * 
 Ccc   * COLLECTIVE.LEV   contains all collective  states to be           * 
@@ -4275,6 +4318,9 @@ Ccc   * author: R.Capote                                                 *
 Ccc   * date:   21.Jan.2001                                              * 
 Ccc   * revision:                                                        * 
 Ccc   * date:   07.March.2001                                            * 
+Ccc   * revision:                                                        * 
+Ccc   * date:   07.June.2004(RIPL-2 deformations parameters added)       *
+Ccc   *                     (K=8+ included within the gs rotational band *
 Ccc   *                                                                  * 
 Ccc   ******************************************************************** 
 Ccc 
@@ -4284,15 +4330,16 @@ C
 C     Local variables 
 C 
       DOUBLE PRECISION beta2, beta3, delta_k, dtmp, dum, elvr, ftmp,  
-     &                 gspar, gspin, xjlvr 
+     &                 gspar, gspin, xjlvr, etmp, jtmp, betatmp 
+      CHARACTER*6 reftmp 
       CHARACTER*100 ch_iuf, comment 
       CHARACTER*5 chelem 
       CHARACTER*9 finp 
       CHARACTER*3 ctmp3 
       DOUBLE PRECISION DBLE 
       LOGICAL fexist 
-      INTEGER i, i0p, i20p, i21p, i3m, i4p, i6p, ia, iar, ierr, ilv,  
-     &        itmp, iz, izr, j, lvpr, nlvr 
+      INTEGER i, i0p, i20p, i21p, i3m, i4p, i6p, i8p, ia, iar, ierr,
+     &         ilv, itmp, iz, izr, j, lvpr, nlvr, nztmp ,natmp, iptmp
 C 
       ND_nlv = 0 
       INQUIRE(FILE = 'TARGET_COLL.DAT', EXIST = fexist) 
@@ -4332,9 +4379,9 @@ C-----------Number of collective levels
 C--------if nd_nlv=0 , then no collective levels will be considered 
 C--------setting direct to zero 
          IF(ND_nlv.EQ.0)THEN 
-            WRITE(6, *)' ND_NLV=0 in COLLECTIVE.LEV FILE' 
-            WRITE(6, *)' NO COLLECTIVE LEVELS WILL BE CONSIDERED' 
-            WRITE(6, *)' DIRECT WAS SET TO ZERO' 
+            WRITE(6, *)' WARNING: ND_NLV=0 in COLLECTIVE.LEV FILE' 
+            WRITE(6, *)' WARNING: NO COLLECTIVE LEVELS IS CONSIDERED' 
+            WRITE(6, *)' WARNING: DIRECT WAS SET TO ZERO' 
 C-----------setting direct to zerO 
             DIRect = 0 
             IFINDCOLL = 2 
@@ -4384,6 +4431,7 @@ C     RCN 06/2003.
       i0p = 0 
       i4p = 0 
       i6p = 0 
+      i8p = 0 
       i3m = 0 
       ND_nlv = 0 
       ierr = 1 
@@ -4433,7 +4481,54 @@ C-----levels for target NNUC copied to file TARGET.lev
             D_Def(ilv, j) = 0 
          ENDDO 
       ENDDO 
-      DO ilv = 1, nlvr 
+
+      beta2=0.d0
+      beta3=0.d0
+      OPEN(84, FILE = 
+     &       '../RIPL-2/optical/om-data/om-deformations.dat',
+     &       STATUS = 'old',ERR=189)
+	  READ(84,'(///)') ! Skipping first 4 title lines
+        DO i = 1, 1700
+C       README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
+            READ(84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',  
+     &      END = 190, ERR = 190) 
+     &      nztmp,natmp,etmp,jtmp,iptmp,betatmp,reftmp
+	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+     &            jtmp.eq.2.d0  .AND. iptmp.eq.+1 .AND.
+     &            reftmp.eq.'Raman2') beta2 = betatmp
+	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+     &            jtmp.eq.3.d0  .AND. iptmp.eq.-1 .AND.
+     &            reftmp.eq.'Kibedi') beta3 = betatmp
+        ENDDO
+	  GOTO 190
+189     write(6,*) 'WARNING: ',
+     &  '../RIPL-2/optical/om-data/om-deformations.dat file not found ' 
+        write(6,*) 'WARNING: ',
+     &  'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+	  GOTO 195
+190   CLOSE(84)
+      IF(beta2.ne.0.d0 .OR. beta3. NE.0.d0) THEN  
+        write(6,'(/1x,A34/1x,A11,F7.3,A13,F7.4)') 
+     &  'EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &  'BETA (2+) =',beta2, '  BETA (3-) =', beta3
+	  IF(DEFORMED) then
+	     write(6,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
+	     write(6,*) 
+	  ENDIF
+      ENDIF
+      IF(beta2.EQ.0.d0) THEN  
+        write(6,*) 'WARNING: ',
+     &  'E(2+) level is not contained in Raman 2001 database (RIPL-2)' 
+        write(6,*) 'WARNING: ',
+     &  'Default dynamical deformations 0.15(2+) will be used'
+	ENDIF
+      IF(beta3.EQ.0.d0) THEN  
+        write(6,*) 'WARNING: ',
+     &  'E(3-) level is not contained in Kibedi database (RIPL-2)' 
+        write(6,*) 'WARNING: ',
+     &  'Default dynamical deformations 0.05(3-) will be used'
+	ENDIF
+195   DO ilv = 1, nlvr 
 C        READ(13, 99001)lvpr, elvr, xjlvr 
 C9001    FORMAT(1X, I3, F8.3, 1X, F5.1) 
          READ(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr,  
@@ -4454,9 +4549,11 @@ C           RCN 06/2003
             D_Llv(ND_nlv) = 0 
             D_Klv(ND_nlv) = 0  
             D_Def(ND_nlv, 2) = DEF(1, 0) 
+            if(beta2.gt.0.d0 .AND. DEFORMED) D_Def(ND_nlv, 2) = beta2 
             gspin = xjlvr 
             gspar = DBLE(lvpr) 
          ENDIF 
+
          IF(DEFormed)THEN 
 C-----------deformed nuclei follow 
 C-----------assuming all dynamical deformation equal to static deformation 
@@ -4498,7 +4595,20 @@ C-----------assuming all dynamical deformation equal to static deformation
                   D_Def(ND_nlv, 2) = 0.01 
                   GOTO 200 
                ENDIF 
-               IF(i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0)THEN 
+               IF(i8p.EQ.0 .AND. xjlvr.EQ.(gspin + 4*delta_k) .AND.  
+     &            lvpr.EQ.gspar)THEN 
+                  i8p = ilv 
+                  ND_nlv = ND_nlv + 1 
+                  ICOllev(ND_nlv) = ilv 
+                  D_Elv(ND_nlv) = elvr 
+                  D_Lvp(ND_nlv) = lvpr 
+                  D_Xjlv(ND_nlv) = xjlvr 
+                  IPH(ND_nlv) = 0 
+                  D_Def(ND_nlv, 2) = 0.01 
+                  GOTO 200 
+               ENDIF 
+               IF(i20p.NE.0 .AND. i4p.NE.0 .AND. 
+     &             i6p.NE.0 .AND. i8p.NE.0)THEN 
                   ierr = 0 
                   GOTO 300 
                ENDIF 
@@ -4507,8 +4617,10 @@ C-----------assuming all dynamical deformation equal to static deformation
 C-----------spherical nuclei follow 
 C-----------for spherical target taking dynamical deformation equal to 
 C-----------0.15 (1PH 2+) and 0.05(1PH 3-) arbitrarily 
-            beta2 = 0.15 
-            beta3 = 0.05 
+C           if RIPL-2 deformation file not found OR target nucleus not found in the database
+C           we assume arbitrary dynamical deformations 
+            if(beta2.eq.0.d0) beta2 = 0.15 
+            if(beta3.eq.0.d0) beta3 = 0.05 
             IF(ilv.EQ.1)THEN 
 C              ground state deformation for spherical nucleus is 0.0 
                D_Def(ND_nlv, 1) = 0.0 
@@ -4532,7 +4644,9 @@ C              ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv, 2) = beta2 
                GOTO 200 
             ENDIF 
-            IF(i21p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)THEN 
+C           IF(i21p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1)THEN 
+            IF(i21p.EQ.0 .AND. xjlvr.EQ.2.D0 
+     &  	               .AND. lvpr.EQ.1 .AND. DIRECT.NE.3)THEN 
                i21p = ilv 
                ND_nlv = ND_nlv + 1 
                ICOllev(ND_nlv) = ilv 
@@ -4540,10 +4654,12 @@ C              ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr 
                D_Xjlv(ND_nlv) = xjlvr 
                IPH(ND_nlv) = 2 
-               D_Def(ND_nlv, 2) = beta2 
+               D_Def(ND_nlv, 2) = beta2
                GOTO 200 
             ENDIF 
-            IF(i4p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1)THEN 
+C           IF(i4p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1)THEN
+            IF(i4p.EQ.0 .AND. xjlvr.EQ.4.D0 
+     &  	              .AND. lvpr.EQ.1 .AND. DIRECT.NE.3)THEN 		   
                i4p = ilv 
                ND_nlv = ND_nlv + 1 
                ICOllev(ND_nlv) = ilv 
@@ -4554,7 +4670,9 @@ C              ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv, 2) = beta2 
                GOTO 200 
             ENDIF 
-            IF(i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1)THEN 
+C           IF(i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1)THEN 
+            IF(i0p.EQ.0 .AND. xjlvr.EQ.0.D0 
+     &  	              .AND. lvpr.EQ.1 .AND. DIRECT.NE.3)THEN 		   
                i0p = ilv 
                ND_nlv = ND_nlv + 1 
                ICOllev(ND_nlv) = ilv 
@@ -4575,11 +4693,18 @@ C              ground state deformation for spherical nucleus is 0.0
                IPH(ND_nlv) = 1 
                D_Def(ND_nlv, 2) = beta3 
             ENDIF 
-            IF(i20p.NE.0 .AND. i21p.NE.0 .AND. i4p.NE.0 .AND.  
-     &         i3m.NE.0 .AND. i0p.NE.0)THEN 
-               ierr = 0 
-               GOTO 300 
-            ENDIF 
+            IF(DIRECT.EQ.3) THEN
+               IF(i20p.NE.0 .AND. i3m.NE.0 ) THEN
+                 ierr = 0 
+                 GOTO 300 
+	         ENDIF
+		  ELSE
+               IF(i20p.NE.0 .AND. i21p.NE.0 .AND. i4p.NE.0 .AND.  
+     &           i3m.NE.0 .AND. i0p.NE.0)THEN 
+                 ierr = 0 
+                 GOTO 300 
+               ENDIF 
+		  ENDIF
          ENDIF 
  200  ENDDO 
  300  IFINDCOLL = ierr 
