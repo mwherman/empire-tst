@@ -1,10 +1,28 @@
-
 Title  : EMPEND Program
 Purpose: Convert EMPIRE output into ENDF format
-Author : A.Trkov, ENEA, Bologna, Italy, 1996
-Version: 
-V  98/10 Final version for distribution.
-V  99/11 Minor corrections to fix bugs.
+Author : A.Trkov 
+Version: original code ENEA, Bologna, Italy, 1996
+         current version developed at IAEA, Vienna, Austria
+  98/10 Final version for distribution.
+  99/11 Minor corrections to fix bugs.
+  00/11 Implement formatting of elastic ang.distrib.
+  00/12 Process total cross section.
+  02/05 Fix MF4 processing for discrete levels.
+  02/09 - Fix thresholds for multi-particle emission
+        - Photon branching ratios for the last level (MF12)
+        - Atomic weight ratios for target and recoils.
+  02/11 Implement continuum photon spectra processing.
+  03/06 Define MT numbers for incident protons.
+  03/07 Fix processing of double differential data for protons.
+  04/06 - Process discrete levels flagged with -ve energies.
+        - Let EMPIRE to handle max. outgoing particle energy.
+  04/07 - Fix ordering of levels in MF12,
+        - Read in values in double precision to avoid underflow.
+        - Fix MTs and yields of minor reactions (37, 41, etc).
+  04/07 - Add (n,5n) MT47
+        - Check for absence of distribution data (NP=0 in MF6).
+  04/09 - Check for normalisation overflow in WRIMF4
+  04/10 Implement formatting for incident alphas and photons.
   
   Manual for Program EMPEND
   =========================
