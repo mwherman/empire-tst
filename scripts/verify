@@ -49,4 +49,5 @@ EOF
 ../util/psyche/psyche <INPUT
 
 
+rm -f INPUT
 exit
