@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:36 $
-Ccc   * $Id: HF-comp.f,v 1.25 2004-07-16 12:47:36 herman Exp $
+Ccc   * $Date: 2004-07-26 18:36:47 $
+Ccc   * $Id: HF-comp.f,v 1.26 2004-07-26 18:36:47 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1626,7 +1626,7 @@ C==============continuum contribution====================
 C        SIMPSFIS remains just for testing purposes, is not used anymore
 C        GAUSSFIS is more efficient
 C        However, as for the moment it does not work, SIMPSFIS is used
-         CALL SIMPSFIS(NNUc, IBAr)
+         CALL SIMPSFIS(NNUc, IBAr, ee)
 C        CALL GAUSSFIS(NNUc, IBAr)
          tfcon(IBAr) = TFCc
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr)  
@@ -2170,7 +2170,7 @@ C
 C
 
 C-----------------------------------------------------------
-      SUBROUTINE SIMPSFIS(Nnuc, Ibar)
+      SUBROUTINE SIMPSFIS(Nnuc, Ibar, Ee)
 C-----------------------------------------------------------
 C Simpson integration
       INCLUDE 'dimension.h'
@@ -2184,7 +2184,7 @@ C Simpson integration
          UX1 = XMInn(Ibar) + (i - 1)*destepp
          if(ux1.lt.0.)ux1=0.001
          enh1=enh_ld(1,ibar)+(enh_ld(2,ibar)+enh_ld(3,ibar)*ux1)*ux1
-         arg1=2*PI*(UX1+efb(ibar)-ee)/H(1,ibar)
+         arg1=2*PI*(UX1+efb(ibar)-Ee)/H(1,ibar)
          IF(arg1.GE.EXPmax)arg1=expmax
          IF(FISden(Nnuc).EQ.1.)THEN                 
             dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
