@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: input.f,v 1.90 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Date: 2005-03-15 23:43:32 $
+Ccc   * $Id: input.f,v 1.91 2005-03-15 23:43:32 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1113,7 +1113,7 @@ C-----set o.m.p. for the incident channel
       ENDDO
  
       IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0 ! HI
- 
+      
       IF (KTRompcc.GT.0 .AND. DIRect.EQ.2) THEN
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
@@ -5140,7 +5140,7 @@ C
       ENDDO
       NRBar = 0
       NRWel = 0
-C-----RIPLE-2 ETFSI values2
+C-----RIPLE-2 ETFSI values
       IF (FISbar(Nnuc).EQ.0.) THEN
          OPEN (51,FILE = '../RIPL-2/fission/fis-barrier-etfsi.dat',
      &         STATUS = 'OLD',ERR = 100)
