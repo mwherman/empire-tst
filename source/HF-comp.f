@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 15:30:42 $
-Ccc   * $Id: HF-comp.f,v 1.22 2004-06-08 15:30:42 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-11 22:13:34 $
+Ccc   * $Id: HF-comp.f,v 1.23 2004-06-11 22:13:34 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -84,6 +84,13 @@ C
             icse = MAX0(2, icse)
             AUSpec(icse, Nejc) = AUSpec(icse, Nejc) + pop1 + pop2
             CSE(icse, Nejc, Nnuc) = CSE(icse, Nejc, Nnuc) + pops
+            IF(Nnuc.EQ.1 .AND. ENDf.EQ.2) THEN 
+               piece = pops/4.0/PI
+               DO nang = 1, NDANG
+                  CSEa(icse, nang, nejc, 1) = CSEa(icse, nang, nejc, 1)
+     &                                        + piece
+               ENDDO
+            ENDIF 
             POP(ie, j, 1, Nnur) = POP(ie, j, 1, Nnur) + pop1
             POP(ie, j, 2, Nnur) = POP(ie, j, 2, Nnur) + pop2
             IF(Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie, j, 1, Nnur))
@@ -101,8 +108,10 @@ C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
 C--------distance of the actual energy to the bin energy excluding elastic
 C--------if ENDf.NE.0
-         IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
-     &      .OR. Iec.NE.NEX(1)) THEN 
+cc       IF((il*Nnuc).NE.1 .OR. IZA(Nnur).NE.IZA(0) .OR. ENDf.EQ.0.0D+0
+cc   &      .OR. Iec.NE.NEX(1)) THEN 
+         IF(Nnuc.NE.1 .OR. ENDf.NE.1 .OR. Iec.NE.NEX(1) 
+     &      .OR. Nejc.EQ.0) THEN 
             xcse = eemi/DE + 1.0001
             icsl = INT(xcse)
             icsh = icsl + 1
@@ -1659,7 +1668,7 @@ C
 C
       COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ
-	COMMON /ExcEnergy/ UEXcitt
+      COMMON /ExcEnergy/ UEXcitt
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB)
 C
       DOUBLE PRECISION Ee, H, TFD, VBArex, SMIu, PHAsr,ho
@@ -1923,7 +1932,7 @@ C
       DIMENSION EPSil(NFWELLS), EJOin(2*NFWELLS), VJJ(NFWELLS)
       COMMON /COMFIS5/ EPSil, EJOin, VJJ
       COMMON /CMIU  / SMIu, PHAsr(NFWELLS)
-	COMMON /ExcEnergy/ UEXcit
+      COMMON /ExcEnergy/ UEXcit
 C
       FMOMENT = 2*SMIu*DSQRT(DABS(UEXcit - VDEF(Eps)))
 C

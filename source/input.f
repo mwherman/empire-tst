@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-11 13:48:04 $ 
-Ccc   * $Id: input.f,v 1.29 2004-06-11 13:48:04 Capote Exp $ 
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-11 22:13:34 $ 
+Ccc   * $Id: input.f,v 1.30 2004-06-11 22:13:34 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -1263,6 +1263,8 @@ C-----if these persist increase multiplier
       DERec = DERec*2.00 
 C-----set initial 'recoil spectrum' of CN (CM motion in LAB) 
       irec = (EINl - EIN)/DERec + 1.001 
+C-----setting irec=1 below practically removes CM motion energy from recoils 
+      irec = 1
       RECcse(irec, NEX(1), 1) = 1.0 
 C-----calculate compound nucleus level density 
       ARGred = -1. 

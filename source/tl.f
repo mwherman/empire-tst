@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-07 10:38:57 $
-Ccc   * $Id: tl.f,v 1.22 2004-06-07 10:38:57 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-11 22:13:35 $
+Ccc   * $Id: tl.f,v 1.23 2004-06-11 22:13:35 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -2549,7 +2549,7 @@ C-----Reaction cross section in mb
       ENDDO
       sabs = cte*sabs
 C     OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 300)
-	  OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
+      OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
       READ(45, *, END = 300) ! Skipping one line
       SINl = 0.D0
       DO l = 1, ncoll - 1
@@ -2805,8 +2805,8 @@ C     IF(ND_nlv.GT.0 .AND. DIRect.NE.3)THEN
             IF(IPH(j).NE.2)THEN
                eee = El - D_Elv(j)/xratio
                IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
-	        ELSE
-			   n2ph = n2ph + 1
+            ELSE
+               n2ph = n2ph + 1
             ENDIF
          ENDDO
 C     ENDIF

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: MSD-tristan.f,v 1.9 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Date: 2004-06-11 22:13:35 $
+Ccc   * $Id: MSD-tristan.f,v 1.10 2004-06-11 22:13:35 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -3216,7 +3216,7 @@ C--------used for the ENDF exclusive spectra
 C-----------DDX spectra using portions (exclude ie=nexrt since this was set
 C-----------already by the contiuum)
             IF(ie.NE.nexrt)
-     &      POPcseaf(0,Nejc,ie,Nnur) = 1.0
+     &      POPcseaf(0,Nejc,ie,Nnur) = 0.0
          ENDIF
 C        WRITE(6,'(''il, Elev, J, POP  '',i3,3G12.5)') il,ELV(il, Nnur),
 C        &       XJLV(il,nnur),POPlv(il, Nnur)
