@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-21 21:29:25 $
-Ccc   * $Id: HRTW-comp.f,v 1.14 2005-01-21 21:29:25 herman Exp $
+Ccc   * $Date: 2005-02-15 23:05:35 $
+Ccc   * $Id: HRTW-comp.f,v 1.15 2005-02-15 23:05:35 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -45,7 +45,22 @@ Ccc
       INCLUDE 'global.h'
 C
 C
-C COMMON variables
+C COMMON variable
+      COMMON /COMFIS3/ VBArex(NFPARAB), TFD(NFPARAB)
+      COMMON /COMFIS4/ TFC, TFCc, JCC
+      COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
+      COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23,TG2,tfiso
+      COMMON /FISSMOD/ ROFism(0:NFISENMAX, NDLW, NFMOD), 
+     &                 HM(NFTRANS, NFMOD), EFDism(NFTRANS, NFMOD),
+     &                 UGRidf(0:NFISENMAX,  NFMOD), EFBm(NFMOD),
+     &                 XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD),
+     &                 SHCfism(NFMOD), DELtafism(NFMOD),
+     &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
+     &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
+     &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
+      DOUBLE PRECISION sumfism(3),csfism, 
+     &                 cota,cota1,cotaexp,xminnm,destepm,efbm
+      INTEGER m,bffm,kk,nrbinfis,nrbinfism
 C
       DOUBLE PRECISION H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, H_Sweak, 
      &                 H_Tav, H_Tl(NDHRTW1, 2), H_Tthr, TFIs
@@ -77,7 +92,7 @@ C-----locate residual nuclei
          izares = INT(1000.0*zres + ares)
          CALL WHERE(izares, nnur, iloc)
          IF(iloc.EQ.1)THEN
-            WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=', 
+            WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
      &                 zres, ' HAS NOT BEEN INITIALIZED'
             WRITE(6, *)' EXECUTION STOPPED'
          ENDIF
@@ -138,8 +153,18 @@ C-----------gamma emision
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
-C-----------WARNING!!! MULTIMODAL IS MISSING HERE WARNING!
-            IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip,jcn, sumfis,0)
+            dencomp = H_Sumtl 
+            IF(FISsil(nnuc).AND.(FISSHI(Nnuc).EQ.1.))
+     &            CALL FISSION(nnuc, ke, jcn, sumfis)
+            IF(FISsil(nnuc).AND.(FISSHI(Nnuc).NE.1.))
+     &            CALL FISCROSS(nnuc, ke, ip, jcn, sumfis, 
+     &                            sumfism,dencomp,aafis,0.)
+            IF(FISmod(nnuc).gt.0.)THEN
+               DO m=1,int(Fismod(nnuc))+1
+                  sumfis=sumfis+sumfism(m)
+               ENDDO
+               sumfis=sumfis/(int(Fismod(nnuc))+1)
+            ENDIF
             H_Sumtl = H_Sumtl + sumfis
             H_Sweak = H_Sweak + sumfis
             IF(H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)THEN
@@ -232,19 +257,8 @@ C--------------
 C              stauc = stauc + RO(ke,jcn,nnuc)*xnor
                IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc + 
      &            DENhf*H_Abs(i, 1)/RO(ke, jcn, nnuc)
-C--------------particles
-               DO nejc = 1, NEJcm
-                  nnur = NREs(nejc)
-                  CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
-                  CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
-     &                                 + xnor*SCRtem(nejc)
-               ENDDO
-C--------------gammas
-               CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
-               CSEmis(0, nnuc) = CSEmis(0, nnuc) + xnor*SCRtem(0)
-               POP(ke, jcn, ipar, nnuc) = 0.0
-C--------------fission
-               csfis = csfis + sumfis*xnor
+               CALL XSECt(nnuc, m, xnor, sumfis, sumfism,
+     &                       ke, ipar, jcn, dencomp,aafis)
 C--------------calculate total emission
                DO nejc = 0, NEJcm
                   csemist = csemist + CSEmis(nejc, nnuc)
@@ -312,7 +326,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1, 2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
@@ -327,7 +341,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax, 
+      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
      &                 smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
       REAL FLOAT
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2, 
@@ -1245,7 +1259,7 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1, 2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
@@ -1259,7 +1273,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v, 
+      DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v,
      &                 xjc
 C     DOUBLE PRECISION cor
       DOUBLE PRECISION EEF, VT1
@@ -1358,7 +1372,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1, 2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
@@ -1387,7 +1401,6 @@ C
 C
       el = EINl
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
-
       wf = ak2/10.D0
       coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C
