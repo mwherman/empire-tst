@@ -1,6 +1,6 @@
-Ccc   * $Author: Sin $
-Ccc   * $Date: 2004-10-07 20:40:10 $
-Ccc   * $Id: pcross.f,v 1.14 2004-10-07 20:40:10 Sin Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-11-12 06:21:56 $
+Ccc   * $Id: pcross.f,v 1.15 2004-11-12 06:21:56 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -470,12 +470,12 @@ CRCN           DO ie = iemin(nejc), iemax(nejc)
 c                 icsp = nexrt - ie + 1 
                DO icsp = iemin(nejc), nexrt
                   ie = nexrt - icsp + 1 
-                  POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur)+ 
+                  POPcse(ie,Nejct,icsp,Nnur)=POPcse(ie,Nejct,icsp,Nnur)+ 
      &                                        spec(nejc,icsp) 
 c-----------------Correct last bin (not needed for POP as for this it is  
 C-----------------done at the end)                 
                   IF(ie.EQ.1) 
-     &            POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur)- 
+     &            POPcse(ie,Nejct,icsp,Nnur)=POPcse(ie,Nejct,icsp,Nnur)- 
      &                                        0.5*spec(nejc,icsp) 
 c-----------------DDX using portions                   
 c-----------------for the time being not needed since PCROSS is isotropic 
