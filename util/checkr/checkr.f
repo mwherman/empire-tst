@@ -5,7 +5,7 @@
 ! *   PROGRAM TO CHECK FORMAT VALIDITY OF AN ENDF-5 OR -6 FORMAT
 ! *   EVALUATED DATA FILE
 ! *
-! *         VERSION 7.0    APR 2004     C.L.DUNFORD
+! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
 ! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
 ! *                           MODLIB PROJECT
 ! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
@@ -34,6 +34,11 @@
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
 ! *                           OPTIONS ARE ASSUMED UNLESS THIRD
 ! *                           PARAMETER IS N.
+! *         VERSION 7.01   DECEMBER 2004     C.L.DUNFORD
+! *                        1. CORRECTED CHECKS IN 8-457 FOR NST=1
+! *                        2. ALLOW 0-NN-1 AS A MATERIAL FOR DECAY DATA
+! *                        3. RDTAB1 AND RDTAB2 DID NOT BUFFER ALL
+! *                           PHYSICAL RECORDS
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -89,7 +94,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_CHECKR
-!/      PUBLIC :: INPUT_DATA, CHECKR_DATA, ISUCCESS
+!/      PUBLIC :: CHECKR_INPUT, CHECKR_DATA, CHECKR_SUCCESS
 !...LWI, DVF
 !/      PUBLIC :: IRERUN
 !---MDC---
@@ -98,7 +103,7 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.01'
 !...MOD
 !/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
@@ -162,14 +167,14 @@
       CHARACTER(LEN=100) :: INPAR
       INTEGER(KIND=I4) :: ILENP
 !
-      TYPE INPUT_DATA
+      TYPE CHECKR_INPUT
          CHARACTER(LEN=100) :: INFIL
          CHARACTER(LEN=100) :: OUTFIL
          INTEGER(KIND=I4) :: MATMIN
          INTEGER(KIND=I4) :: MATMAX
-      END TYPE INPUT_DATA
+      END TYPE CHECKR_INPUT
 !
-      TYPE(INPUT_DATA) CHECKR_DATA
+      TYPE(CHECKR_INPUT) CHECKR_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -177,7 +182,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: ISUCCESS, IRERUN
+      INTEGER(KIND=I4) :: CHECKR_SUCCESS, IRERUN
 !
 !     FILE (TAPE) LABEL FROM FIRST RECORD
 !
@@ -368,7 +373,7 @@
 !
 !     TERMINATE JOB
 !
-      IF(ISUCCESS.EQ.0) THEN
+      IF(CHECKR_SUCCESS.EQ.0) THEN
          WRITE(IOUT,'(/A)') '   '
          STOP '     JOB COMPLETED SUCCESSFULLY'
       ELSE
@@ -419,7 +424,7 @@
 !
 !     OUTPUT PROGRAM IDENTIFICATION
 !
-      ISUCCESS = 0
+      CHECKR_SUCCESS = 0
       IF(IMDC.LT.4) THEN
          WRITE(IOUT,'(/2A)') ' PROGRAM CHECKR VERSION ',VERSION
       END IF
@@ -452,7 +457,7 @@
          END IF
          IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
          CLOSE(UNIT=JIN)
-         ISUCCESS = 1
+         CHECKR_SUCCESS = 1
          GO TO 100
       END IF
 !
@@ -1739,7 +1744,11 @@
          IZA = IFIX(ZA+.001)
          IA = MOD(IZA,1000)
          IZ = IZA/1000
-         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+         IF(IZ.EQ.0) THEN
+            WRITE(ZSA,'(I3,A,I3)') IZ,'-nn-',IA
+         ELSE
+            WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+         END IF
          IF(LISO.NE.0) ZSA(11:11) = 'M'
       END IF
 !
@@ -1916,9 +1925,9 @@
       INTEGER(KIND=I4) :: NMAT
       INTEGER(KIND=I4) :: IDIFF
 !
-      INTEGER(KIND=I4), PARAMETER :: NELS = 103
-      INTEGER(KIND=I4), DIMENSION (NELS), PARAMETER ::                   &      
-     &    IMEAN = (/1,3,6,9,10,12,14,16,19,20,23,24,27,28,31,32,        &       
+      INTEGER(KIND=I4), PARAMETER :: NELS = 104
+      INTEGER(KIND=I4), DIMENSION (NELS), PARAMETER ::                  &       
+     &    IMEAN = (/0,1,3,6,9,10,12,14,16,19,20,23,24,27,28,31,32,      &       
      &             35,36,39,40,45,46,50,50,55,54,59,58,63,64,69,        &       
      &             70,75,74,79,78,85,84,89,90,93,92,97,96,103,          &       
      &             102,107,106,113,112,121,120,127,124,133,130,         &       
@@ -1932,7 +1941,7 @@
       DATA ISP/9930,9960,9980,9990/
 !
       MATCHK = 0
-      IDIFF = IA - IMEAN(IZ)
+      IDIFF = IA - IMEAN(IZ+1)
       NMAT = 100*IZ
       IF(IZ.GE.100) NMAT = ISP(IZ-99)
 !
@@ -3468,12 +3477,6 @@
       CALL TEST2(L1H,LIS,'LIS')
       CALL TEST2(L2H,LISO,'LISO')
 !
-      IF(NFOR.GE.6)   THEN
-         IF(STA.LT.0.9999.OR.STA.GT.1.0001)  THEN
-            EMESS = 'PRESENCE OF THIS SECTION REQUIRES STA=1.0 IN 1/451'
-            CALL ERROR_MESSAGE(0)
-         END IF
-      END IF
       NSP = N2H
       NST = N1H
       CALL TEST1(NST,0,1,'NST',1)
@@ -3487,14 +3490,14 @@
             IF (IERX.EQ.1)  GO TO 100
          END IF
       ELSE
-         CALL TEST2(NPL,0,'NI')
+         CALL TEST2(NPL,6,'NI')
       END IF
 !
 !     PROCESS DECAY MODES
 !
       CALL RDLIST
       NDKT = N2L
-      IF(NDKT.LE.0) THEN
+      IF(NDKT.LE.0.AND.STA.EQ.1.0) THEN
          EMESS = 'NO DECAY MODES GIVEN'
          CALL ERROR_MESSAGE(NSEQP)
          IERX = 1
@@ -5313,7 +5316,8 @@
          NF = NI + 2
          ISEQ = ISEQ + 1
          NSEQP = 0
-         READ(JIN,'(6I11,I4,I2,I3,I5)',ERR=40,END=90)                   &       
+         READ(JIN,'(A)',END=90) IFIELD
+         READ(IFIELD,'(6I11,I4,I2,I3,I5)',ERR=40,END=90)                &
      &              (NBT(N),JNT(N),N=NI,NF),MATP,MFP,MTP,NSEQP
          IF(ASEQ.EQ.' ') NSEQP = ISEQ
          GO TO 50
@@ -5337,7 +5341,8 @@
 !
       DO N=1,NP,3
          ISEQ = ISEQ + 1
-         READ(JIN,'(6E11.4,I4,I2,I3,I5)',ERR=70,END=90)                 &       
+         READ(JIN,'(A)',END=90) IFIELD
+         READ(IFIELD,'(6E11.4,I4,I2,I3,I5)',ERR=70,END=90)              &       
      &                            ANT,MATP,MFP,MTP,NSEQP
          GO TO 80
 !
@@ -5406,7 +5411,8 @@
          NF = NI + 2
          ISEQ = ISEQ + 1
          NSEQP = 0
-         READ(JIN,'(6I11,I4,I2,I3,I5)',ERR=60,END=90)                   &       
+         READ(JIN,'(A)',END=90) IFIELD
+         READ(IFIELD,'(6I11,I4,I2,I3,I5)',ERR=60,END=90)                &       
      &             (NBT2(N),JNT2(N),N=NI,NF),MATP,MFP,MTP,NSEQP
          IF(ASEQ.EQ.' ') NSEQP = ISEQ
          GO TO 70
