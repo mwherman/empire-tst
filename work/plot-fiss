@@ -1,0 +1,63 @@
+#! /bin/sh -
+#TEMPORARY SCRIPT TO PLOT FISSION CROSS SECTIONS
+
+MT=18
+work=`pwd`
+file=$1
+
+echo '#zvview.exe'>$file-$MT-calc.zvd
+echo '#begin OUTPUT.RES/u'>>$file-$MT-calc.zvd
+echo '//'>>$file-$MT-calc.zvd 
+awk '/Reaction/ {printf "%12.6e ", $(NF-1)*1000000}
+      /Total fission cross/ {printf "  %12.6e \n",$(NF-1)/1000}' $file.lst \
+     >> $file-$MT-calc.zvd
+echo '//'>> $file-$MT-calc.zvd
+echo '#end OUTPUT.RES/u'>> $file-$MT-calc.zvd
+echo '#begin control.tit/c'>>$file-$MT-calc.zvd
+echo ' '>>$file-$MT-calc.zvd
+echo '[Main]'>> $file-$MT-calc.zvd
+echo 'tit: ZVView v9.4'>> $file-$MT-calc.zvd
+echo 'tit2:'>> $file-$MT-calc.zvd
+echo 'lx-win: 1000'>> $file-$MT-calc.zvd
+echo 'ly-win: 720'>> $file-$MT-calc.zvd
+echo 'x-scale: auto'>> $file-$MT-calc.zvd
+echo 'y-scale: auto'>> $file-$MT-calc.zvd
+# define the energy range 0-10 MeV (adjustable later inside ZVView)
+echo 'x-range: 0 10'>> $file-$MT-calc.zvd
+# define the Y range between 0 and 2 barn (adjustable later inside ZVView)
+echo 'y-range: 0 2'>> $file-$MT-calc.zvd
+echo 'x: E '>> $file-$MT-calc.zvd
+echo 'x-long: Incident Energy'>> $file-$MT-calc.zvd 
+echo 'y: Cross Section '>> $file-$MT-calc.zvd
+echo 'x-units:   MeV '>> $file-$MT-calc.zvd
+echo 'y-units:   barns '>> $file-$MT-calc.zvd
+echo 'noStat: 0'>> $file-$MT-calc.zvd
+echo 'x-grid: 0'>> $file-$MT-calc.zvd
+echo 'y-grid: 0'>> $file-$MT-calc.zvd
+echo 'buttons: 1'>> $file-$MT-calc.zvd
+echo ' '>> $file-$MT-calc.zvd
+echo '[Func]'>> $file-$MT-calc.zvd
+echo 'useIfunc: 0'>> $file-$MT-calc.zvd
+echo 'useFunc: '>> $file-$MT-calc.zvd
+echo 'hide: 0'>> $file-$MT-calc.zvd
+echo 'dash: 0'>> $file-$MT-calc.zvd
+echo 'color: 1'>> $file-$MT-calc.zvd
+echo 'con: 1'>> $file-$MT-calc.zvd
+echo 'dot: 0'>> $file-$MT-calc.zvd
+echo 'bot: 0'>> $file-$MT-calc.zvd
+echo 'thick: 1'>> $file-$MT-calc.zvd
+echo '#end control.tit/c'>>$file-$MT-calc.zvd
+echo 'Calculated fission cross section is in the ZVV file :' $file'-'$MT'-calc.zvd'
+
+#Create zvd file with experimental data if it does not exist
+
+if [ ! -f $file-$MT.zvd ]; then
+    cd ../util/c4zvd/
+    ./c4zvv A $MT $work/$file.c4 Empire $file-$MT.zvd 
+    mv $file-$MT.zvd $work
+    cd $work
+fi
+
+# RUN ZVD
+
+../util/c4zvd/zvv94l.exe $file-$MT.zvd $file-$MT-calc.zvd
