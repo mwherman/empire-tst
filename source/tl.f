@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-28 11:50:26 $
-Ccc   * $Id: tl.f,v 1.20 2004-05-28 11:50:26 Capote Exp $
+Ccc   * $Date: 2004-06-03 21:02:04 $
+Ccc   * $Id: tl.f,v 1.21 2004-06-03 21:02:04 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -2699,7 +2699,7 @@ C
       DOUBLE PRECISION eee, elab, rmatch, xmas_nejc, xmas_nnuc, xratio, 
      &                 zerosp
       INTEGER INT, NINT
-      INTEGER ip, iterm, j, ldwmax, ncoll, nd_nlvop, njmax, npp
+      INTEGER ip, iterm, j, ldwmax, ncoll, nd_nlvop, njmax, npp, n2ph
       INTEGER*4 iwin
       INTEGER*4 PIPE
       INTEGER nwrite
@@ -2799,20 +2799,25 @@ C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
 C     nd_nlvop = 0
       nd_nlvop = 1
-      IF(ND_nlv.GT.0 .AND. DIRect.NE.3)THEN
+      n2ph=0
+C     IF(ND_nlv.GT.0 .AND. DIRect.NE.3)THEN
          DO j = 2, ND_nlv
             IF(IPH(j).NE.2)THEN
                eee = El - D_Elv(j)/xratio
                IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
+	        ELSE
+			   n2ph = n2ph + 1
             ENDIF
          ENDDO
-      ENDIF
+C     ENDIF
 C     iterm = 1
       IF(nd_nlvop.EQ.1)WRITE(6, *)
      &               ' All inelastic channels are closed at this energy'
 C
 C-----Considering even closed channels in calculations
       ncoll = ND_nlv
+C     For DWBA only one phonon channels are considered
+      if(DIRECT.EQ.3) ncoll =  ND_nlv - n2ph
 C     ncoll = nd_nlvop
 C
       iterm = 20
