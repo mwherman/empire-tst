@@ -8,6 +8,7 @@ C-----Plujko_new: variable - SDRead
      &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
       INTEGER D_Klv, D_Llv
 C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
+      DOUBLE PRECISION MFPp 
       INTEGER F_PRINT, Key_shape, Key_GDRGFL
       COMMON /GSA/ Key_shape, Key_GDRGFL
       COMMON /MLO/ F_PRINT
@@ -46,14 +47,16 @@ C
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FITomp,
      &                 FITlev, DV, FCC, STMro, DEGa, GDIvp, TORy, EX1, 
 C                      PEQc is the logical control for PCRoss call, RCN      
-     &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc,
+C                      MFPp is the exciton model mean free path parameter    
+C                      GTILnor() is the normalization factor for p-h LD
+     &                 EX2, GST, XNI, TOTcsfis, CSfis, PEQc, MFPp,
      &                 D1Fra, CSMsc(0:2), CSMsd(NDEJC), QPRod(0:NDNUC), 
      &                 CSHms(NDEJC), A(0:NDNUC), Z(0:NDNUC), ECUt(NDNUC)
      &                 , HIS(0:NDNUC), ATIlnor(0:NDNUC), DOBs(0:NDNUC), 
      &                 BETcc(NDCC), FLAm(NDCC), QCC(NDCC), FCD(NDCC), 
      &                 XN(0:NDNUC), AMAss(0:NDNUC), ANGles(NDANG), 
      &                 AEJc(0:NDEJC), DEF(NDLW, 0:NDNUC), ZEJc(0:NDEJC), 
-     &                 XNEjc(0:NDEJC), POPmax(NDNUC)
+     &                 XNEjc(0:NDEJC), POPmax(NDNUC), GTIlnor(0:NDNUC)
 C
       COMMON /GLOBAL1/ DRTl(NDLW), EMAx(NDNUC), ROPaa(NDNUC),
      &                 ETL(NDETL, NDEJC, NDNUC), SEJc(0:NDEJC),
