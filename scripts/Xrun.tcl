@@ -5767,20 +5767,20 @@ adjourn .top75 }} \
     button $site_9_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/store ../archive/$archdir $file 
+        -command {exec xterm -e ../scripts/store $archdir $file 
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -text {<= Store project} 
     bindtags $site_9_0.but84 "$site_9_0.but84 Button $top all _vTclBalloon"
     bind $site_9_0.but84 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Store current project files in the selected folder (archive)}
+        set ::vTcl::balloon::%W {Store current project in the folder. NOTE: folder name should start with ../ }
     }
     button $site_9_0.but86 \
         -activebackground #ff0000 -activeforeground white -background #dcdcdc \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the archive folder?" "" 0 No Yes ] == 1} {
 exec rm -r -f $archdir
-set archdirlist [glob -nocomplain */]
+set archdirlist [glob -nocomplain ../*/]
 set archfilelist "" }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
