@@ -1304,7 +1304,7 @@ C
 C
 C
 C     --------------------------------------------------------------------
-C     | Calculation of   transmission coefficients using ECIS95          |
+C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
 C     --------------------------------------------------------------------
 C
@@ -1327,7 +1327,7 @@ C
 C     Local variables
 C
       DOUBLE PRECISION culbar, ener
-      LOGICAL fexist
+      LOGICAL fexist, ltmp
       INTEGER i, ien, ien_beg, l, lmax
       INTEGER INT
       REAL SNGL
@@ -1346,20 +1346,15 @@ C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-C
-C-----INQUIRE about file's existence:
       WRITE(ctmp18, '(i2.2,i2.2,1h_,a2,1h-,i3.3,1h_,i6.6)')
      &         INT(ZEJc(Nejc)),INT(AEJc(Nejc)),
      &       SYMb(NNUc),INT(A(NNUc)),INT(EINl*1000)
-      INQUIRE(FILE = ('TL-'//ctmp18//'.bin'), EXIST = fexist)
-      IF(.NOT.fexist)GOTO 300
-C     WRITE(6, *)
-C     WRITE(*, *)'TRANSM.COEFF.FILE WAS FOUND ',
-C    &           ('TL-'//ctmp18//'.bin')
+      IOK=1
+      INQUIRE(FILE = ('../TL/'//ctmp18//'.BIN'), EXIST = fexist)
+      IF(.NOT.fexist) GOTO 300
 C-----Here the old calculated files should be readed
-C
-      OPEN(45, FILE = ('TL-'//ctmp18//'.bin'), FORM = 'UNFORMATTED')
-      IF(IOUt.EQ.5)OPEN(46, FILE = 'TARGET-'//ctmp18//'.LST')
+      OPEN(45, FILE = ('../TL/'//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
+      IF(IOUt.EQ.5)OPEN(46, FILE = '../TL/'//ctmp18//'.LST')
  100  READ(45, END = 200)lmax, ien, ener
       IF(IOUt.EQ.5)WRITE(46, '(A5,2I6,E12.6)')'LMAX:', lmax, ien, ener
 C
@@ -1369,28 +1364,44 @@ C
       IF(ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001)THEN
          CLOSE(45, STATUS = 'DELETE')
          IF(IOUt.EQ.5)CLOSE(46, STATUS = 'DELETE')
-         WRITE(6, *)'ENERGY MISMATCH: ETL(ien=', ien, '...)=',
+         WRITE(6, *)'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
      &              ETL(ien, Nejc, Nnuc), ' REQUESTED ENERGY=',
      &              SNGL(ener)
-         WRITE(6, *)'FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+         WRITE(6, *)'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
          GOTO 300
       ENDIF
       ETL(ien, Nejc, Nnuc) = ener
       MAXl(ien) = lmax
       DO l = 0, lmax
-         READ(45)TTLl(ien, l)
+         READ(45,END=220)TTLl(ien, l)
          IF(IOUt.EQ.5)WRITE(46, *)l, TTLl(ien, l)
       ENDDO
 C     Capote , preeq 01/2005
-      READ(45) SIGabs(ien, Nejc, Nnuc)
+      READ(45,END=220) SIGabs(ien, Nejc, Nnuc)
       GOTO 100
 C
  200  CLOSE(45)
       IF(IOUt.EQ.5) CLOSE(46)
       IF(IOUt.EQ.5)
      &   WRITE(6, *)'Transmission coefficients read from file: ',
-     &           ('TL-'//ctmp18//'.bin')
+     &           ('../TL/'//ctmp18//'.BIN')
       RETURN
+
+ 220  CLOSE(45, STATUS = 'DELETE')
+      IF(IOUt.EQ.5)CLOSE(46, STATUS = 'DELETE')
+      DO i = 1, NDETL
+        MAXl(i) = 0
+        DO l = 0, NDLW
+          TTLl(i, l) = 0.D0
+        ENDDO
+      ENDDO
+      IF(IOUt.GT.0) WRITE(6, *)
+     & 'WARNING: ERROR WHEN READING TLs in ',ctmp18
+      IF(IOUt.EQ.5) THEN
+         WRITE(6, *)'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+         WRITE(6, *)
+     &           'WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
+      ENDIF
 C-----Coulomb barrier (somewhat decreased) setting lower energy limit
 C-----for transsmission coefficient calculations
  300  culbar = 0.8*ZEJc(Nejc)*Z(Nnuc)/(1 + A(Nnuc)**0.6666)
@@ -1408,34 +1419,35 @@ C--------Running ECIS
 C
          IF(IOUt.EQ.5) then
             WRITE(6, *)
-            WRITE(6, *)
-     &          'RUNNING ECIS for transmission coefficient calculation:'
             IF(DIRect.EQ.2 .AND. AEJc(Nejc).LE.1)THEN
-              WRITE(6, *)'CC transmission coefficients used for ',
+              WRITE(6, *)' CC transmission coefficients used for ',
      &                 'outgoing channels'
             ELSE
-              WRITE(6, *)'Spherical OM transmission coefficients',
-     &                 ' used for outgoing channels'
+              WRITE(6, *)' Spherical OM transmission coefficients',
+     &                   ' used for outgoing channels'
             ENDIF
+            WRITE(6, *)
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN(UNIT = 46, STATUS = 'unknown',
-     &        FILE = ('TL-'//ctmp18//'.bin'), FORM = 'UNFORMATTED')
+     &        FILE = ('../TL/'//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
+         ltmp = A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0) .AND.
+     &          DIRect.EQ.2 .AND. AEJc(Nejc).LE.1
+
          DO i = ien_beg, Nen
             ener = ETL(i, Nejc, Nnuc)
-            IF( ener. LE. 0.d0) cycle
+            IF( ener. LE. 0.1d-6) cycle
 
-            IF(DIRect.EQ.2 .AND. AEJc(Nejc).LE.1)THEN
-
+            IF(ltmp) THEN
 C-------------Transmission coefficient matrix for incident channel
 C-------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C             Only coupled levels are considered
               IF(DEFormed)THEN
 C               In this case we need only CC calculation so INLkey=0
-                CALL ECIS_CCVIBROT(Nejc, Nnuc, ener, .TRUE., 0)
+                CALL ECIS_CCVIBROT(Nejc, Nnuc, ener, 0)
                 CALL ECIS2EMPIRE_TR(Nejc, Nnuc, i, .FALSE.)
               ELSE
 C               EXACT (no DWBA) calculation
@@ -1451,10 +1463,11 @@ C
               CALL ECIS2EMPIRE_TR(Nejc, Nnuc, i, .TRUE.)
 
             ENDIF
+
          ENDDO
          CLOSE(46)
          IF(IOUt.EQ.5) WRITE(6, *)' Transm. coeff. written to file:',
-     &              (' TL-'//ctmp18//'.bin')
+     &              (' ../TL/'//ctmp18//'.BIN')
          IF(IOUt.EQ.5) WRITE(6, *)
      &            ' ==================================================='
       ELSEIF(IOUt.EQ.5)THEN
@@ -1468,19 +1481,27 @@ C
          WRITE(6, *)'WARNING: available energy is always '
          WRITE(6, *)'WARNING: below coulomb barrier'
          WRITE(6, *)'WARNING: Calculations are not needed!'
+         WRITE(6, *)
       ENDIF
       RETURN
       END
-C
-C
-C
-      SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc, Nnuc, Maxlw, Stl, LVIbrat)
+
+
+      SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc, Nnuc, Maxlw, stl, LVIbrat)
 C
 C     Process ECIS output to obtain Stl matrix for the incident channel
 C     Reads from unit 45 and writes to unit 6
 C
 C     INPUT:  Nejc,Nnuc ejectile and residual nucleus index
-C     OUTPUT: Maxlw, Stl(1-Maxlw)
+C             LVIbrat = .TRUE. for vibrational model(or spherical OMP)
+C             The implemented model could be applied to even-even nucleus
+C             therefore the ECIS input is always constructed assuming spin 0
+C             So we can not use the real spin
+C             of the given nucleus XJLv(LEVtarg, Nnuc)
+C
+C     OUTPUT: Maxlw and Stl(1-Maxlw) are the maximum angular momentum and Tls
+C             SINl is the total inelastic cross section
+C
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -1489,38 +1510,29 @@ C     Dummy arguments
 C
       INTEGER Maxlw, Nejc, Nnuc
       DOUBLE PRECISION Stl(NDLW)
-      DOUBLE PRECISION p1,r2,rp,s0,s1                              !   cBuc
+      LOGICAL LVIbrat
+C
+C     COMMON
+C
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl
 C
 C     Local variables
 C
-      DOUBLE PRECISION cte, dtmp, elab, jc, jj, RMU, sabs, selecis,
-     &                 sreac, sreacecis, stotecis, xmas_nejc, xmas_nnuc
+      DOUBLE PRECISION cte, dtmp, elab, jc, jj, RMU, sabs,
+     &                 sreac, xmas_nejc, xmas_nnuc,
+     &                 ELAcs, TOTcs, ABScs, SINl
+
       DOUBLE PRECISION DBLE
       INTEGER l, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
-      LOGICAL LVIbrat
       REAL SNGL
-      Maxlw = 0
-      DO l = 1, NDLW
-         Stl(l) = 0.D0
-      ENDDO
-      xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
-C
-      ecms = EIN
-      CALL KINEMA(elab, ecms, xmas_nejc, xmas_nnuc, RMU, ak2, 2, RELkin)
-C
-C     rmu  = reduced mass
-C     rmu = xmas_nejc*xmas_nnuc/(xmas_nejc + xmas_nnuc)
-C     EIN already in CMS
-C     elab = EIN*(1 + xmas_nejc/xmas_nnuc)
-C-----ECIS constant
-      cte = PI/(W2*RMU*EIN)
+
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
 C-----Opening ecis03 output file containing Tlj
-      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
+C     OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
+      OPEN(UNIT = 45, STATUS = 'old', FILE = 'INCIDENT.TLJ')
       READ(45, *, END = 200)  ! To skip first line <TLJs.> ..
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
@@ -1539,87 +1551,119 @@ C--------Selecting only ground state
 C-----------Averaging over particle and target spin, summing over channel spin JC
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
-C           For vibrational model spin is always assumed to be zero
-            IF(.NOT.LVIbrat)
-     &          Stl(l + 1) = Stl(l + 1)/DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
+     &                   /DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
             Maxlw = MAX(Maxlw, l)
          ENDIF
       ENDDO
       GOTO 100
  200  CLOSE(45)
-	Maxlw =  Maxlw + 1
-C-----Reaction cross section in mb
+
+C     For vibrational the Tls must be multiplied by
+      IF(LVIbrat) then
+        DO l = 0, Maxlw
+          Stl(l+1) = Stl(l+1)*DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
+        ENDDO
+      ENDIF
+
+      TOTcs = 0.d0
+      ABScs = 0.d0
+      ELAcs = 0.d0
+C     OPEN(UNIT = 45, FILE = 'ecis03.cs', STATUS = 'old', ERR = 400)
+      OPEN(UNIT = 45, FILE = 'INCIDENT.CS', STATUS = 'old', ERR = 400)
+      READ(45, *, END = 400) ! Skipping first line
+      IF (ZEjc(NEJc).eq.0) READ(45, *) TOTcs
+      READ(45, *) ABScs
+      IF (ZEjc(NEJc).eq.0) READ(45, *) ELAcs
+ 400  CLOSE(45)
+
+      if(ABScs.le.0.d0) return
+C
+C     Estimating absorption cross section from obtained TLs
+C
+C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+      xmas_nejc = EJMass(Nejc)
+C     xmas_nnuc = AMAss(Nnuc)
+      ecms = EIN
+      CALL KINEMA(elab, ecms, xmas_nejc,xmas_nnuc,RMU, ak2, 2, RELkin)
+C
+C     EIN already in CMS
+      cte = PI/(W2*RMU*EIN)
+C-----Absorption cross section in mb
       sabs = 0.D0
-      DO l = 0, Maxlw 
-         sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
+      DO l = 0, Maxlw
+        sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = cte*sabs
 
       if(sabs.le.0.d0) return
 
-      OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
-      READ(45, *, END = 300) ! Skipping first line
       SINl = 0.D0
-      DO l = 1, ncoll - 1
-         READ(45, *, END = 300)dtmp
-         SINl = SINl + dtmp
+
+      OPEN(UNIT = 45, FILE = 'INCIDENT.ICS', STATUS = 'old', ERR= 300)
+      READ(45, *, END = 300) ! Skipping first line
+      DO l = 1, NDCollev
+        READ(45, *, END = 300)dtmp
+        SINl = SINl + dtmp
       ENDDO
  300  CLOSE(45)
-      stotecis = 0.d0
-      selecis = 0.d0
-      OPEN(UNIT = 45, FILE = 'ecis03.cs', STATUS = 'old', ERR = 400)
-      READ(45, *, END = 400) ! Skipping first line
-      IF (ZEjc(NEJc).eq.0) READ(45, *)stotecis
-      READ(45, *)sreacecis
-      IF (ZEjc(NEJc).eq.0) READ(45, *)selecis
- 400  CLOSE(45)
+
+      IF(SINl.GT.ABScs)THEN
+        WRITE(6, *)
+        WRITE(6, *) ' WARNING: LOOK ECIS NON-CONVERGENCE !!'
+        WRITE(6,
+     &   '(5x,''**************************************************'')')
+        WRITE(6,
+     &   '(5x,'' Direct cross section calculation do not converge '')')
+        WRITE(6,'(6x,''Inelastic cross section ='',F8.2,'' mb''/
+     &            6x,''Reaction  cross section ='',F8.2,'' mb''/)')
+     &        SINl, ABScs
+        WRITE(6,
+     &   '(5x,'' Either change OMP or change calculation method   '')')
+        WRITE(6,
+     &   '(5x,''        (DIRPOT)   or   (DIRECT) parameters       '')')
+          WRITE(6,
+     &   '(5x,'' This problem usually happens using DWBA method   '')')
+          WRITE(6,
+     &   '(5x,'' to treat strong coupled nuclei                   '')')
+          WRITE(6,
+     &   '(5x,''            CALCULATION STOPPED                   '')')
+          WRITE(6,
+     &   '(5x,''**************************************************'')')
+          STOP 200
+      ENDIF
+
       sreac = sabs + SINl
 
-      IF(IOUT.EQ.5) then
-        WRITE(6, *)
-        WRITE(6, *)' INCIDENT CHANNEL:'
-        WRITE(6, '(A7,I6,F10.3,A10,F10.3,A10)')'  LMAX:', Maxlw, EIN,
-     &      ' MeV (CMS)', elab, ' MeV (LAB)'
-        WRITE(6, *)' XS calculated using averaged Tl:'
-        WRITE(6, *)' Sabs =', sabs, ' mb '
-        WRITE(6, *)' Sinl =', SINl, ' mb (read from ECIS)'
-        WRITE(6, *)' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)',
-     &           ' ECIS Sreac =', SNGL(sreacecis)
-        WRITE(6, *)' Total XS =', SNGL(stotecis), ' mb (read from ECIS)'
-        WRITE(6, *)' Reaction XS =', SNGL(sreacecis),
-     &           ' mb (read from ECIS)'
-        WRITE(6, *)' Shape Elastic XS =', SNGL(selecis),
-     &           ' mb (read from ECIS)'
-C       WRITE(6, *)
-C    &           ' Reaction cross section and Tls normalized to ECIS XS'
+      IF(IOUT.EQ.5 .AND. sabs.gt.0.d0) then
+          WRITE(6, *)
+          WRITE(6, *)' INCIDENT CHANNEL:'
+          WRITE(6, '(A7,I6,A5,F10.3,A10,F10.3,A10)')'  LMAX:', Maxlw,
+     &                 ' E = ', EIN,' MeV (CMS)', elab, ' MeV (LAB)'
+          WRITE(6, *)' XS calculated using averaged Tls:   Sabs =',
+     &              SNGL(sabs), ' mb '
+          WRITE(6, *)
+     &      ' Reaction XS =', SNGL(ABScs),' mb (read from ECIS)'
+          WRITE(6,*)
+     &      ' ECIS/EMPIRE ratio of reaction cross section =',
+     &              (ABScs-SINl)/sabs
+          IF(SINl.gt.0.d0) THEN
+            WRITE(6, *)' Sinl =',SNGL(SINl),' mb (read from ECIS)'
+            WRITE(6, *)' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+          ENDIF
+          WRITE(6, *)' Total XS =', SNGL(TOTcs),' mb (read from ECIS)'
+          WRITE(6, *)' Shape Elastic XS =', SNGL(ELAcs),
+     &               ' mb (read from ECIS)'
+          WRITE(6,*)
       ENDIF
-C     Cnorm = sreacecis/sabs
-C     DO l = 0, Maxlw
-C        Stl(l + 1)=Stl(l + 1)*Cnorm
-C     ENDDO
-
-C     sabs  = sreacecis
-C     sreac = sabs + SINl
-
-      IF(ELAb.LT.1.0D-01)THEN
 C
-C     Written by V.Avrigeanu, checked by RCN 01/2004
+C     Renormalizing TLs to reproduce ecis_abs cross section
 C
-         s0 = Stl(1)/(2.0D+00*PI*SQRT(1.0D+06*ecms))
-         rp = 1.35*(AMAss(0)**0.333333333)
-         r2 = rp*rp
-         p1 = (ak2*r2)/(1.0D+00 + ak2*r2)
-         s1 = Stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*ecms))
-C        Corrected scattering radius
-         rp = SQRT(selecis/(4.0D+00*PI*10.D+00))
-         WRITE(6, *)
-         WRITE(6, 99005) s0*1D4, s1*1D4, rp
-99005    FORMAT(/
-     &   '  Strength functions S0 =',f6.3,' eV**(-1/2)*10**(-4)' /,
-     &   '                     S1 =',f6.3,' eV**(-1/2)*10**(-4)'  /,
-     &           '  Scattering radius =', f7.3, ' fm')
-      ENDIF
-      WRITE(6, *)
+      DO l = 0, Maxlw
+        Stl(l + 1)=Stl(l + 1)*(ABScs-SINl)/sabs
+      ENDDO
+
+      RETURN
       END
 C
 C
@@ -1649,35 +1693,18 @@ C
 C
 C     Local variables
 C
-      DOUBLE PRECISION cte, dtmp, e1, elab, jc, jj, RMU, sabs, selecis,
+      DOUBLE PRECISION cte, dtmp, ecms, elab, jc, jj, RMU, sabs,selecis,
      &                 sreac, sreacecis, stotecis, xmas_nejc, xmas_nnuc
       DOUBLE PRECISION DBLE
       INTEGER l, lmax, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
       LOGICAL LVIbrat
       REAL SNGL
-C
-C
+
       ecms = ETL(J, Nejc, Nnuc)
-      if (ecms.le.1.d-6) return
-      xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
-      CALL KINEMA(elab, ecms, xmas_nejc, xmas_nnuc, RMU, ak2, 2, RELkin)
-C
-C     RMU  = reduced mass
-C-----ETL is already in CMS
-      e1 = ETL(J, Nejc, Nnuc)
-C-----ECIS constant
-      cte = PI/(W2*RMU*e1)
-      MAXl(J) = 0
-      lmax = 0
-      DO l = 0, NDLW
-         TTLl(J, l) = 0.D0
-      ENDDO
 C-----
 C----- Input of transmission coefficients
 C-----
-C-----Opening ecis03 output file containing Tlj
       OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
       READ(45, *, END = 200) ! Skipping one line
 C-----JC,ParC is the channel spin and parity
@@ -1693,34 +1720,24 @@ C--------(nlev=1 corresponds to the ground state)
      &        jj, dtmp
          ncoll = MAX(nlev, ncoll)
 C--------Selecting only ground state
-C        IF(nlev.EQ.1 .AND. dtmp.GT.1.D-15)THEN
-         IF(nlev.EQ.1)THEN
+         IF(nlev.EQ.1 .AND. dtmp.GT.1.D-15)THEN
 C-----------Averaging over particle and target spin, summing over channel spin JC
             TTLl(J, l) = TTLl(J, l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
-C           For vibrational model spin is always assumed to be zero
-            IF(.NOT.LVIbrat)
-     &          TTLl(J, l)=TTLl(J, l)/DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
+     &                   /DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
             lmax = MAX(lmax, l)
          ENDIF
       ENDDO
       GOTO 100
  200  CLOSE(45)
-C-----Reaction cross section in mb
-      sabs = 0.D0
-      DO l = 0, lmax
-         sabs = sabs + TTLl(J, l)*DBLE(2*l + 1)
-      ENDDO
-      sabs = cte*sabs
-      if(sabs.le.0.d0) RETURN
-      OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
-      READ(45, *, END = 300) ! Skipping one line
-      SINl = 0.D0
-      DO l = 1, ncoll - 1
-         READ(45, *, END = 300)dtmp
-         SINl = SINl + dtmp
-      ENDDO
- 300  CLOSE(45)
+
+C     For vibrational the Tls must be multiplied by
+      IF(LVIbrat) then
+        DO l = 0, lmax
+          TTLl(J, l) = TTLl(J, l)*DBLE(2*XJLv(LEVtarg, Nnuc) + 1)
+        ENDDO
+      ENDIF
+
       stotecis = 0.d0
       selecis = 0.d0
       sreacecis = 0.d0
@@ -1730,38 +1747,63 @@ C-----Reaction cross section in mb
       READ(45, *, END = 400)sreacecis
       IF (ZEjc(NEJc).eq.0) READ(45, *, END = 400)selecis
  400  CLOSE(45)
-      sreac = sabs + SINl
+
+      if(sreacecis.le.0.d0)  RETURN
+
       IF(IOUT.EQ.5) then
-        WRITE(6, *)
-        WRITE(6, '(A7,2I6,E12.6,A10,E12.6,A10)')'  LMAX:', lmax, J, e1,
-     &      ' MeV (CMS)', elab, ' MeV (LAB)'
-        WRITE(6, *)' XS calculated using averaged Tl:'
-        WRITE(6, *)' Sabs =', sabs, ' mb '
-        WRITE(6, *)' Sinl =', SINl, ' mb (read from ECIS)'
-        WRITE(6, *)' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)',
-     &           ' ECIS Sreac =', SNGL(sreacecis)
-C       WRITE(6, *)
-C    &           ' Reaction cross section and Tls normalized to ECIS XS'
-        WRITE(6, *)
+
+C       xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+        xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+        xmas_nejc = EJMass(Nejc)
+C       xmas_nnuc = AMAss(Nnuc)
+        CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc, RMU, ak2, 2, RELkin)
+
+C-------ECIS constant
+        cte = PI/(W2*RMU*ecms)
+
+C-------Reaction cross section in mb
+        sabs = 0.D0
+        DO l = 0, lmax
+          sabs = sabs + TTLl(J, l)*DBLE(2*l + 1)
+        ENDDO
+        sabs = cte*sabs
+
+        OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
+        READ(45, *, END = 300) ! Skipping one line
+        SINl = 0.D0
+        DO l = 1, ncoll - 1
+          READ(45, *, END = 300)dtmp
+          SINl = SINl + dtmp
+        ENDDO
+ 300    CLOSE(45)
+
+        sreac = sabs + SINl
+
+        IF(sabs.gt.0.d0) then
+          WRITE(6, *)
+          WRITE(6, '(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)')'  LMAX:',
+     &                          lmax,' E=', ecms,' MeV (CMS)', elab,
+     &                          ' MeV (LAB); Energy index =',J
+          WRITE(6, *)' XS calculated using averaged Tls:   Sabs =',
+     &                          SNGL(sabs), ' mb '
+          WRITE(6, *)
+     &       ' Reaction XS =', SNGL(sreacecis),' mb (read from ECIS)'
+          IF(SINl.gt.0.d0) THEN
+            WRITE(6, *)' Sinl =', SNGL(SINl), ' mb (read from ECIS)'
+            WRITE(6, *)' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+          ENDIF
+        ENDIF
       ENDIF
-C     Normalizing to ECIS reaction cross section
-C     Cnorm = sreacecis/sabs
-C     sabs  = sreacecis
-C     sreac = sabs + SINl
-C-----Storing transmission coefficients for the input channel
-C     WRITE (46,'(A5,2I6,E12.6)') 'LMAX:' , lmax , J , e1
-      WRITE(46)lmax, J, e1
+
+C-----Storing transmission coefficients for EMPIRE energy grid
+      WRITE(46)lmax, J, ecms
       DO l = 0, lmax
-C        WRITE (46,*) l , TTLl(J,l)
-C
-C        Normalizing to ECIS reaction cross section
-C        TTLl(J, l) = TTLl(J, l) * Cnorm
          WRITE(46)TTLl(J, l)
       ENDDO
-      WRITE(46) sabs
+      WRITE(46) sreacecis
       MAXl(J) = lmax
 C     Capote , preeq 2002
-      SIGabs(J, Nejc, Nnuc) = sabs
+      SIGabs(J, Nejc, Nnuc) = sreacecis
       RETURN
       END
 C
@@ -1881,8 +1923,6 @@ C
      &                 zerosp
       INTEGER INT, NINT
       INTEGER ip, iterm, j, ldwmax, ncoll, nd_nlvop, njmax, npp
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
       INTEGER nwrite
 C
       IF(AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0)ip = 1
@@ -1920,7 +1960,7 @@ C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----penetrabilities punched on cards
       ECIs2(13:13) = 'T'
-C     RCN 01/2005
+C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
       ECIs2(6:6) = 'F'
@@ -1933,7 +1973,8 @@ C        DWBA
          ECIs2(42:42) = 'T'
       ENDIF
 C
-      xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+      xmas_nejc = EJMass(Nejc)
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
 C
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
@@ -2213,30 +2254,17 @@ C
 C-----Running ECIS
 C
       IF(INLkey.eq.0) then
-       IF(IOPsys.EQ.0)THEN
-        iwin = PIPE('../source/ecis03<ecSPH.inp>ECIS_SPH.out#')
-       ELSE
-        iwin = PIPE('ecis03<ecSPH.inp>ECIS_SPH.out#')
-       ENDIF
+       CALL ECIS('ecSPH.inp','ECIS_SPH.out#')
       ELSE
-       IF(IOPsys.EQ.0)THEN
-        iwin = PIPE('../source/ecis03<ecVIB.inp>ECIS_VIB.out#')
-       ELSE
-        iwin = PIPE('ecis03<ecVIB.inp>ECIS_VIB.out#')
-       ENDIF
-       ENDIF
-      IF(.NOT.LDWBA .and. INLkey.GT.0)THEN
-        IF(DIRect.NE.3)THEN
-          CALL WRITEXS(iwin, 'CC vibr. coupling',LDWBA)
-        ELSE
-          CALL WRITEXS(iwin, 'DWBA',LDWBA)
-        ENDIF
+       CALL ECIS('ecVIB.inp','ECIS_VIB.out#')
       ENDIF
+
+      RETURN
       END
 C
 C
 C
-      SUBROUTINE ECIS_CCVIBROT(Nejc, Nnuc, El, Ltlj, INLkey)
+      SUBROUTINE ECIS_CCVIBROT(Nejc, Nnuc, El, INLkey)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS95 for COUPLED CHANNELS     |
@@ -2263,7 +2291,6 @@ C
 C     Dummy arguments
 C
       DOUBLE PRECISION El
-      LOGICAL Ltlj
       INTEGER Nejc, Nnuc, INLkey
 C
 C     Local variables
@@ -2273,8 +2300,6 @@ C
       DOUBLE PRECISION elabe
       INTEGER ip, iterm, j, ldwmax, lev(NDLV), ncoll, nd_nlvop, njmax,
      &        npho, npp, k, ND_cons
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
 C     INTEGER NINT
       INTEGER jdm, nwrite
 C
@@ -2314,14 +2339,12 @@ C-----Shift to coupled equations if convergence is not achieved
 C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----Penetrabilities punched on cards
-      ECIs2(13:13) = 'F'
-      IF(Ltlj)THEN
-         ECIs2(13:13) = 'T'
-C        RCN 01/2005
-         ECIs2(5:5) = 'F'
-C--------Smatrix output
-         ECIs2(6:6) = 'F'
-      ENDIF
+      ECIs2(13:13) = 'T'
+C
+C-----Cmatrix output
+      ECIs2(5:5) = 'F'
+C-----Smatrix output
+      ECIs2(6:6) = 'F'
 C-----DWBA option added
       IF(DIRect.EQ.3)THEN
 C-----Iteration scheme used for DWBA
@@ -2333,7 +2356,8 @@ C--------DWBA
 C-----relativistic kinematics ?
       IF(IRElat(Nejc, Nnuc).GT.0 .OR. FLGrel.EQ.'y')ECIs1(8:8) = 'T'
 C
-      xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+      xmas_nejc = EJMass(Nejc)
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 C
@@ -2612,67 +2636,12 @@ C
       WRITE(1, '(3hFIN)')
       CLOSE(UNIT = 1)
 C-----Running ECIS
-      IF(IOPsys.EQ.0)THEN
-C        LINUX
-         IF(npho.GT.0)THEN
-           iwin = PIPE('../source/ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
-         ELSE
-           iwin = PIPE('../source/ecis03<ecVIBROT.inp>ECIS_ROT.out#')
-         ENDIF
+      IF(npho.GT.0)THEN
+        CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out#')
       ELSE
-C        WINDOWS
-         IF(npho.GT.0)THEN
-           iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
-         ELSE
-           iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_ROT.out#')
-         ENDIF
+        CALL ECIS('ecVIBROT.inp','ECIS_ROT.out#')
       ENDIF
-      IF(.NOT.Ltlj)THEN
-         IF(DIRect.EQ.3)THEN
-            CALL WRITEXS(iwin, 'DWBA',.FALSE.)
-         ELSEIF(npho.GT.0)THEN
-            CALL WRITEXS(iwin, 'CC vib-rot.',.FALSE.)
-         ELSE
-            CALL WRITEXS(iwin, 'CC sym.rot.',.FALSE.)
-         ENDIF
-      ENDIF
-      END
-C
-C
-C
-      SUBROUTINE WRITEXS(Iwin, Sname,LDWBA)
-C
-C     Dummy arguments
-C
-      INTEGER*4 Iwin
-      CHARACTER*(*) Sname
-      LOGICAL LDWBA
-C
-C     Local variables
-C
-      LOGICAL fexist
-C
-      IF(Iwin.EQ.0)THEN
-         INQUIRE(FILE = 'ecis03.cs', EXIST = fexist)
-C        IF ( fexist ) WRITE (6,*)
-C        &                     'Total, reaction and elastic c.s. calculated'
-C        &                     , ' with ' , Sname , ' model'
-         INQUIRE(FILE = 'ecis03.ics', EXIST = fexist)
-         IF(fexist) THEN
-          IF(LDWBA) THEN
-            WRITE(6, *)
-     &      'Inelastic c.s. to non-coupled collective levels calculated'
-     &    , ' with DWBA model'
-          ELSE
-            WRITE(6, *)
-     &      'Inelastic c.s. to coupled collective levels calculated'
-     &    , ' with ', Sname,' model'
-          ENDIF
-         ENDIF
-      ELSE
-         WRITE(6, *)'SYSTEM PROBLEM RUNNING ECIS in', Sname
-         STOP '17'
-      ENDIF
+
       END
 C
       SUBROUTINE SETPOTS(Nejc, Nnuc, Eilab, Eicms, Mi, Mt, Rrmu, Ak2,
@@ -2749,7 +2718,7 @@ C     EA = EEA(Nejc, Nnuc)
       IREl = IRElat(Nejc, Nnuc)
       END
 C
-      SUBROUTINE KINEMA(El, E1, Mi, Mt, Amu, Ak2, Iopt, Relcal)
+      SUBROUTINE KINEMA(EL, E1, Mi, Mt, Amu, Ak2, Iopt, Relcal)
 C
 C     Author: O.Bersillon (SCAT2000)
 C
@@ -2766,21 +2735,17 @@ C  AMU    = reduced mass                                               *
 C  AK2    = CM wave number                                             *
 C  IOPT   = 1   from lab to CM                                         *
 C           2   from CM  to lab                                        *
-C  IRELAT = 0   classical    kinematics                                *
-C           1   relativistic kinematics                                *
+C  Relcal = FALSE classical    kinematics                              *
+C           TRUE  relativistic kinematics                              *
 C----------------------------------------------------------------------*
 C  AMUmev = a.m.u. in MeV                                              *
 C----------------------------------------------------------------------*
-C  Called by MAIN                                                      *
 C***********************************************************************
 C
       IMPLICIT DOUBLE PRECISION(A - H, O - Z)
 C
       DOUBLE PRECISION Mi, Mt, mtot
       LOGICAL Relcal
-C
-C     common /inout/  ie,is,is1,is2,is3,is4
-C     common /physcon/ ampipm,ampi0,amu0c2,e2,hbarc
 C
       COMMON /CONSTANT/ AMUmev, PI, W2L, XNExc, CETa, CSO, RMU, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
@@ -2807,7 +2772,7 @@ C           Classical    kinematics
 C-----------------------------------------------------------------------
 C
             Amu = Mi*Mt/mtot
-            E1 = El*Mt/mtot
+            E1 = EL*Mt/mtot
             w2 = ck2*Amu
             Ak2 = w2*E1
          ELSE
@@ -2816,12 +2781,12 @@ C-----------------------------------------------------------------------
 C           Relativistic kinematics
 C-----------------------------------------------------------------------
 C
-            E1 = DSQRT(mtot*mtot + two*Mt*El) - mtot
+C           E1 = DSQRT(mtot*mtot + two*Mt*El) - mtot
             E1 = AMUmev*mtot*
-     &           (DSQRT(one + two*El/(AMUmev*Mt*((one+Mi/Mt)**2)))
+     &           (DSQRT(one + two*EL/(AMUmev*Mt*((one+Mi/Mt)**2)))
      &           - one)
-            p2 = (El*(El + two*AMUmev*Mi))
-     &           /((one + Mi/Mt)**2 + two*El/(AMUmev*Mt))
+            p2 = (EL*(EL + two*AMUmev*Mi))
+     &           /((one + Mi/Mt)**2 + two*EL/(AMUmev*Mt))
             Ak2 = p2/(HHBarc*HHBarc)
             etoti = DSQRT((AMUmev*Mi)**2 + p2)
             etott = DSQRT((AMUmev*Mt)**2 + p2)
@@ -2842,7 +2807,7 @@ C        Classical    kinematics
 C-----------------------------------------------------------------------
 C
          Amu = Mi*Mt/mtot
-         El = E1*mtot/Mt
+         EL = E1*mtot/Mt
          Ak2 = ck2*Amu*E1
       ELSE
 C
@@ -2850,7 +2815,7 @@ C-----------------------------------------------------------------------
 C        Relativistic kinematics
 C-----------------------------------------------------------------------
 C
-         El = E1*(E1 + two*AMUmev*mtot)/(two*AMUmev*Mt)
+         EL = E1*(E1 + two*AMUmev*mtot)/(two*AMUmev*Mt)
          p2 = E1*(E1 + two*AMUmev*mtot)*(E1 + two*AMUmev*Mi)
      &        *(E1 + two*AMUmev*Mt)/((two*(E1+AMUmev*mtot))**2)
          Ak2 = p2/(HHBarc*HHBarc)
