@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-13 10:57:33 $
-Ccc   * $Id: lev-dens.f,v 1.24 2005-01-13 10:57:33 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-21 21:34:10 $
+Ccc   * $Id: lev-dens.f,v 1.25 2005-01-21 21:34:10 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -1062,6 +1062,7 @@ C-----------dependent factor
                   ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2,
      &                     iff,FISCON)*RORed
                ELSE
+                  i = INT(aj - HIS(Nnuc))   
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort,
      &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred,
      &                     EXPmax, FIScon,iff,tcrt)
