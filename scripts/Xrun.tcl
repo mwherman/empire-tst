@@ -3919,6 +3919,12 @@ if {[file exists ../.Xrunrc] == 1} {
    set rcfl [open ../.Xrunrc a+]
    set workdir [pwd]
    set file ""
+   set editor ""
+   set psviewer ""
+   set wwwviewer ""
+   set pdfviewer ""
+   set compeval ""
+
    }
 close $rcfl
 
@@ -3929,7 +3935,7 @@ set zvfilter $file
 set archfilter $file
 set nsh 1
 set eres 0.02
-if {$editor == ""} {set editor gvim}
+if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
 set modules [list main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  pipe.c dimension.h global.h  io.h ddhms.cmb]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
