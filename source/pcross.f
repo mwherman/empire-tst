@@ -1,3 +1,7 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-06-07 10:31:24 $
+Ccc   * $Id: pcross.f,v 1.6 2004-06-07 10:31:24 Capote Exp $
+C
       SUBROUTINE PCROSS(Sigr)
 C
 C     FORMAL PARAMETERS:
