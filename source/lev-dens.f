@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-21 21:34:10 $
-Ccc   * $Id: lev-dens.f,v 1.25 2005-01-21 21:34:10 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-24 13:21:15 $
+Ccc   * $Id: lev-dens.f,v 1.26 2005-01-24 13:21:15 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -180,9 +180,12 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
                      BF = 2
                   ENDIF
                ENDIF
+C              rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
+C    &                  YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
+C    &                  EXPmax, FIScon,iff,tcrt)
                rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
-     &                  YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
-     &                  EXPmax, FIScon,iff,tcrt)
+     &                  YRAst(i, Nnuc), HIS(Nnuc),     BF, ARGred,
+     &                  EXPmax)
                IF(rotemp.LT.RORed)rotemp = 0.0
                IF(BF.NE.0.0D0)THEN
                   RO(kk, i, Nnuc) = rotemp
@@ -195,8 +198,10 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
       END
 C
 C
+C     DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort,
+C    &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon,iff,tcrt)
       DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort,
-     &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon,iff,tcrt)
+     &           Yrast, Ss, Bf, Argred, Expmax)
 Ccc   *********************************************************************
 Ccc   *                                                         class:ppu *
 Ccc   *                         R O D E F                                 *
@@ -227,8 +232,11 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, A2, Ac, Aj, Argred, Bf, E, Expmax, Momort,
-     &                 Mompar, Ss, Yrast, FIScon
+C     DOUBLE PRECISION A, A2, Ac, Aj, Argred, Bf, E, Expmax, Momort,
+C    &                 Mompar, Ss, Yrast, FIScon, tcrt
+      DOUBLE PRECISION A,     Ac, Aj, Argred, Bf, E, Expmax, Momort,
+     &                 Mompar, Ss, Yrast
+C     INTEGER iff
 C
 C Local variables
 C
@@ -266,8 +274,8 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
       ENDIF
       t = SQRT(e1/Ac)
       con = const/Ac**0.25/SQRT(Mompar*t)
-c      If(FIScon.EQ.2)con = const/Ac**0.25/SQRT(Mompar*tcrt)
-C-----vibrational ehancement factor
+c     If(FIScon.EQ.2)con = const/Ac**0.25/SQRT(Mompar*tcrt)
+C-----vibrational enhancement factor
 C     VIBRK=EXP(4.7957*A**(2./3.)*T**(4./3.)/100.)
       CALL VIBR(A, t, vibrk)
 C-----damping of vibrational effects
@@ -323,9 +331,9 @@ C-----------rotation parallel to the symmetry axis
       ENDDO
  100  RODEF =con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(vibrk - qv*(vibrk - 1.))
-c      IF(iff.eq.2)RODEF = RODEF*2.*sqrt(2.*pi)*sqrt(mompar*tcrt)
-c      IF(iff.eq.3) RODEF = RODEF*2.
-c      IF(iff.eq.4) RODEF = RODEF*4.*sqrt(2.*pi)*sqrt(mompar*tcrt)
+c     IF(iff.eq.2) RODEF = RODEF*2.*sqrt(2.*pi)*sqrt(mompar*tcrt)
+c     IF(iff.eq.3) RODEF = RODEF*2.
+c     IF(iff.eq.4) RODEF = RODEF*4.*sqrt(2.*pi)*sqrt(mompar*tcrt)
       END
 C     C
 C
@@ -347,11 +355,13 @@ C
       Qk = 0.
       dmphalf = 40.
       dmpdiff = 10.
-c      IF(FIScon.eq.2)THEN
-c         write(6,*)'fisc',fiscon
-c         dmphalf = 60.
-c         dmpdiff = 15.
-c      ENDIF
+      IF(FIScon.eq.2)THEN
+c      write(6,*)'fisc',fiscon
+c      dmphalf = 60.
+c      dmpdiff = 15.
+       dmphalf = 40.
+       dmpdiff = 10.
+      ENDIF
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
       END
@@ -406,6 +416,9 @@ C
 C
 C
       pi = 3.14159
+
+      if(A.LE.0.d0) return
+
 C---- YBM : Y di Bohr-Mottelson, vol.2, pag.663
 C     YBM=2.1*AJ**2/A**2.33333
       eta = 1.0 - 1.7826*(A - 2.0*Z)**2/A**2
@@ -705,9 +718,7 @@ C
       ENDIF
       IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0.and.fiscon.lt.1)
 
-
      >   RETURN
-
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
       If(fiscon.lt.1.)then
@@ -770,7 +781,6 @@ C-----45.84 stands for (12/SQRT(pi))**2
       IF(BF.EQ.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
       IF(fiscon.gt.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
       SCR = 2.*ACRt*TCRt
-
       IF(FIScon.lt.1.)THEN
 C-----
 C-----fit level densities to discrete levels applying energy shift
@@ -907,7 +917,6 @@ C-----------integration
              iwin = PIPE('gnuplot fort.35#')
               CLOSE(35)
            ENDIF
-
          ENDIF
 C--------plotting fit of the levels with low energy formula  ***done***
 C
@@ -937,7 +946,6 @@ C-----------clean RO matrix
                CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj,iff)
             ENDIF
          ENDDO
-
          IF(IOUt.EQ.6 .AND. FITlev.GT.0.0D0 .AND. NEX(Nnuc).GT.1) THEN
 C----------plot level density
           write(ctmp,'(I3.3,A1,I2.2)') INT(A(Nnuc)),'_',INT(Z(Nnuc))
@@ -1009,7 +1017,6 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
-
       IF(FIScon.gt.0.)goto 6666
 C-----determination of U for normal states
       IF(BF.NE.0.D0)THEN
@@ -1062,10 +1069,14 @@ C-----------dependent factor
                   ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2,
      &                     iff,FISCON)*RORed
                ELSE
-                  i = INT(aj - HIS(Nnuc))   
+                  i = INT(aj - HIS(Nnuc))
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort,
-     &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred,
-     &                     EXPmax, FIScon,iff,tcrt)
+     &                     YRAst(i, Nnuc), HIS(Nnuc),       BF, ARGred,
+     &                     EXPmax)
+C                 ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort,
+C    &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred,
+C    &                     EXPmax, FIScon,iff,tcrt)
+
                ENDIF
             ENDIF
          ENDIF
@@ -1081,8 +1092,8 @@ C
 C-----a-parameter and U determination for fission channel
 C
          IF(BF.EQ.0.0D0)THEN
-C-----temperature fade-out of the shell correction
-C-----ACCN  servs only to calculate temperature fade-out
+C-----------temperature fade-out of the shell correction
+C-----------ACCN  serves only to calculate temperature fade-out
             IF(EX(Kk, Nnuc).GT.UCRt)THEN
                accn = ATIl*(1 + SHC(Nnuc)
      &                *(1 - EXP((-GAMma*EX(Kk,Nnuc))))/EX(Kk, Nnuc))
@@ -1136,11 +1147,10 @@ C-----------dependent factor
             IF(Asaf.GE.0.D0)ac = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
             IF(Asaf.LT.0.D0)ac = -ATIl*Asaf
             IF(ac.LE.0.D0)GOTO 99999
-         ENDIF
+         ELSE
 C
-C--------Yrast states
+C-----------Yrast states
 C
-         IF(BF.NE.0.0D0)THEN
 C-----------spin  dependent moments of inertia for yrast states by Karwowski
 C-----------(spin dependent deformation beta calculated according to B.-Mot.)
 C-----------temporary value of 'a' parameter needed for ground state deformation
@@ -1171,23 +1181,27 @@ C-----------dependent factor
             ATIl = AP1*A(Nnuc) + AP2*A23*bsq
             ATIl = ATIl*ATIlnor(Nnuc)
             ac = ATIl*FSHELL(u, SHC(Nnuc), GAMma)
-
             IF(ac.LE.0.0D0)RETURN
          ENDIF
+
          IF(bcs)THEN
             rotemp =
      &         ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff,FISCon)*RORed
             IF(i.EQ.1)THEN
-               phi = SQRT(1. - u/UCRt)
-               t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
+               phi = SQRT(1.d0 - u/UCRt)
+               t = 2.0*TCRt*phi/LOG((phi + 1.d0)/(1.d0 - phi))
             ENDIF
          ELSE
+C           rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
+C    &               YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
+C    &               EXPmax, FIScon,iff,tcrt)
+C           01/2005
             rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort,
-     &               YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
-     &               EXPmax, FIScon,iff,tcrt)
-c     &               EXPmax)!  RCN 31/12/2003
+     &               YRAst(i, Nnuc), HIS(Nnuc),     BF, ARGred,
+     &               EXPmax)
             IF(i.EQ.1)t = SQRT(u/ac)
          ENDIF
+
          IF(BF.NE.0.0D0)THEN
             RO(Kk, i, Nnuc) = rotemp
             IF(i.EQ.1)TNUc(Kk, Nnuc) = t
@@ -1432,27 +1446,28 @@ C
 C
 C
 C-----CONST=1/(2*SQRT(2 PI))
-      DATA const/0.199471/,pi/3.1415926d0/
-
-      ROBCS = 0.0
-      phi2 = 1.d0 - U/UCRt
-      phi = SQRT(phi2)
-      t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
-      s = SCR*TCRt*(1. - phi2)/t
-      det = DETcrt*(1. - phi2)*(1. + phi2)**2
-      momp = Mompar*TCRt*(1. - phi2)/t
+      DATA const/0.199471d0/,pi/3.1415926d0/
+      ROBCS = 0.d0
+      dphi2 = U/UCRt
+      phi2 = 1.d0 - dphi2
+      phi = DSQRT(phi2)
+      t = 2.d0*TCRt*phi/LOG((phi + 1.d0)/(1.d0 - phi))
+      s = SCR*TCRt*dphi2/t
+      det = DETcrt*dphi2*(1.d0 + phi2)**2
+      momp = Mompar*TCRt*dphi2/t
       IF(momp.LT.0.0D0)RETURN
-      momo = Momort*0.3333 + 0.6666*Momort*TCRt*(1. - phi2)/t
+      momo = Momort*0.3333d0 + 0.6666d0*Momort*TCRt*dphi2/t
       IF(momo.LT.0.0D0)RETURN
       seff2 = momp*t
-      IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333*momo**0.6666*t
+      IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333d0*momo**0.6666d0*t
 C     arg = s - Aj*(Aj + 1.0)/(2.0*seff2)
-      arg = s - (Aj+0.5)**2/(2.0*seff2)
+      IF(seff2.LE.0.0D0)RETURN
+      arg = s - (Aj+0.5d0)**2/(2.d0*seff2)
       IF(arg.LE.0.0D0)RETURN
 C     CALL DAMPKS(A, A2, t, qk)
       CALL DAMPROT(U, qk,FIScon)
-      qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
-      ROBCS = 0.5*const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
+      qdamp = 1.d0 - qk*(1.d0 - 1.d0/(momo*t))
+      ROBCS = 0.5d0*const*(2*Aj + 1.d0)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational enhancement factor
       CALL VIBR(A, t, vibrk)
 C     Changed according to Mihaela's recommendation
@@ -1460,7 +1475,7 @@ C     ROBCS =ROBCS*vibrk*momo*t*qdamp
       IF(FISCon.EQ.2) THEN
 c         ROBCS =ROBCS*vibrk*momort*tcrt*qdamp
 c      if(a.ne.232)
-         ROBCS =(1.+2.0/(u+2.0))*ROBCS*vibrk*momort*tcrt*qdamp
+         ROBCS =(1.d0+2.d0/(u+2.d0))*ROBCS*vibrk*momort*tcrt*qdamp
 c      if(a.eq.232)ROBCS =(1.+0.1/(u+2.0))*ROBCS*vibrk*momort*tcrt*qdamp
       else
 c      ROBCS =(1.+3.00/(u+0.1))* ROBCS*vibrk*momort*tcrt*qdamp! momo*t*qdamp
@@ -1556,7 +1571,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION am, amas, arg, atil, cf, e, eo, eom, exl,
-     &                 r, rolowint, sigh, sigl, t, tm, u, ux, xj,
+     &                 rolowint, sigh, sigl, t, tm, u, ux, xj,
      &                 efort
       REAL FLOAT
       CHARACTER*6 CTMP
@@ -1564,7 +1579,6 @@ C
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
-      DOUBLE PRECISION RIVOLI
 C
 C
       eom = 0.0
@@ -1580,9 +1594,7 @@ C-----zero potentially undefined variables
 C-----a-parameter given in input
       IF(ROPaa(Nnuc).GT.0.0D0)ROPar(1, Nnuc) = ROPaa(Nnuc)
 C-----Ignatyuk parametrization
-
       Enorm = 5.0
-
       IF(ROPaa(Nnuc).EQ.0.0D0)THEN
          atil = 0.154*A(Nnuc) + 6.3E-5*A(Nnuc)**2
 C--------next line assures normalization to experimental data (on average)
@@ -1797,7 +1809,6 @@ C-----plotting fit of the levels with low energy formula  ***done***
       ROPar(3, Nnuc) = DEL
       ROPar(4, Nnuc) = eo
       ROPar(5, Nnuc) = t
-
       IF(ig.NE.0)THEN
 C--------calculation of level densities below EXL
 C--------(low energy formula)
@@ -1844,17 +1855,13 @@ C-----------Plujko_new
             Uexcit(i, Nnuc) = max(u,0.d0)
 C-----------Plujko_new(End)
             TNUc(i, Nnuc) = SQRT(u/am)
-
 C           RCN 12/2004
 C           IF(Scutf.LT.0.0D0)sigh = could be calculated according to Dilg's recommendations
 C           0.6079 = 6/pi^2          a=6/pi^2*g     sig^2 = <m^2>gt    Scutf = <m^2>
             SIG = Scutf*0.6079*amas**0.6666667*SQRT(u*am)
-
             arg = 2.*SQRT(am*u) - ARGred
             IF(arg.GT. EXPmax) GOTO 9877
-
             RHOU = DEXP(arg)/(12.*SQRT(2*sig))/am**0.25/u**1.25
-
             DO 9879 j = 1, NLW
                xj = j + HIS(Nnuc)
 C              arg = (xj + 1)*xj/(2.*Sig)
@@ -1867,7 +1874,6 @@ C              0.5 coming from parity
 9879        ENDDO
 9877     ENDDO
       ENDIF
-
       IF(IOUt.EQ.6. .AND.  FITlev.GT.0.0D0 .AND. NEX(Nnuc).GT.1)THEN
 C--------plot level density
         write(ctmp,'(I3.3,A1,I2.2)') INT(A(Nnuc)),'_',INT(Z(Nnuc))

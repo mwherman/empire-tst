@@ -17,13 +17,12 @@ c     21     input
 c     22     input
 c     27     ddhms
 c     28     ddhms
-c     31     SCAT2
 c     32     input,tl
 c     34     lev-dens
-c     39     tl    
+c     39     tl
 c     43     SDREAD (Plujko change)
-c     45     tl,fusion,main    
-c     46     tl    
+c     45     tl,fusion,main
+c     46     tl
 c     60     main
 c     62     main
 c     66     MSD-Tristan
@@ -33,14 +32,13 @@ c    134     tl
 c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='NEW')
-      OPEN(UNIT=10,FILE='TAPE10.OUT')  !in SCAT2
 C-----Plujko_new (spin distribution from file SDFILE)
       OPEN(UNIT=43,FILE='SDREAD', STATUS='OLD', ERR=768)
       SDREAD=.TRUE.
       GOTO 869
  768  SDREAD=.FALSE.
  869  CONTINUE
-C-----Plujko_new (END of spin distribution from file SDFILE)    
+C-----Plujko_new (END of spin distribution from file SDFILE)
       OPEN(UNIT=11,FILE='FUSION'   , STATUS='OLD', ERR=778)
       FUSREAD=.TRUE.
       GOTO 889
@@ -56,18 +54,9 @@ C-----Plujko_new (END of spin distribution from file SDFILE)
 C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
       OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
       OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
-      OPEN(UNIT=62,FILE='ECIS_XS.DAT',STATUS='UNKNOWN')      
+      OPEN(UNIT=62,FILE='ECIS_XS.DAT',STATUS='UNKNOWN')
       OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
-      OPEN(UNIT=18,FILE='OMPAR.INT' ,STATUS='OLD', ERR=779)
-C     Added to check if file is not empty
-      READ(18,*,END=781)
-      REWIND(18)
-      OMPARF=.TRUE.
-      GOTO 890
- 781  CLOSE(18,STATUS='DELETE')
- 779  OMPARF=.FALSE.
-      OPEN(UNIT=18, FILE='OMPAR.INT', STATUS='NEW')
- 890  CONTINUE
+      OMPARF=.FALSE.
       OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
 C     Added to check if file is not empty
       READ(33,*,END=881)
@@ -88,15 +77,24 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN(UNIT=29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
+*-IF VMS
+*-    OPEN(UNIT=23,FILE='[-.data]nparac.dat'
+*-   *,STATUS='OLD')
+*-    OPEN(UNIT=24,FILE='[-.data]ldp.dat'
+*-   *,STATUS='OLD')
+*-    OPEN(UNIT=25,FILE='[-.data]nix-moller-audi.dat'
+*-   *,STATUS='OLD')
+*-    OPEN(UNIT=26,FILE='[-.RIPL-2.OPTICAL.OM-DATA]OM-PARAMETER-U.DAT'
+*-   *,STATUS='OLD')
+*-ELSEIF LINUX
       OPEN(UNIT=23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
       OPEN(UNIT=24,FILE='../data/ldp.dat'
      *,STATUS='OLD')
-C     OPEN(UNIT=25,FILE='../data/nix-moller-audi.dat'
-C    *,STATUS='OLD')
       OPEN(UNIT=25,FILE='OMPdata.dat')
       OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
+*-ENDIF
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
 C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')

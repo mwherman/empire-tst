@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-01-23 02:19:00 $
-Ccc   * $Id: input.f,v 1.57 2005-01-23 02:19:00 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-24 13:21:33 $
+Ccc   * $Id: input.f,v 1.58 2005-01-24 13:21:33 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -72,32 +72,13 @@ Ccc   *            SHCFADE                                               *
 Ccc   *            SIGMAK                                                *
 Ccc   *        SMAT                                                      *
 Ccc   *        TLEVAL                                                    *
-Ccc   *            OMTL                                                  *
-Ccc   *                FACT                                              *
-Ccc   *                PREANG                                            *
-Ccc   *                PRIPOT                                            *
-Ccc   *                PRITC                                             *
-Ccc   *                PRITD                                             *
-Ccc   *                SCAT                                              *
-Ccc   *                    INTEG                                         *
-Ccc   *                    RCWFN                                         *
-Ccc   *                SETPOTS                                           *
-Ccc   *                    OMPAR                                         *
-Ccc   *                SHAPEC                                            *
-Ccc   *                    CGAMMA                                        *
-Ccc   *                SHAPEL                                            *
-Ccc   *                    CLEB                                          *
-Ccc   *                    RACAH                                         *
-Ccc   *                SPIN0                                             *
-Ccc   *                SPIN05                                            *
-Ccc   *                SPIN1                                             *
-Ccc   *                                                                  *
+Ccc   *            TRANSINP                                              *
 Ccc   *                                                                  *
 Ccc   * author: M.Herman                                                 *
 Ccc   * date:      Jun.1994                                              *
 Ccc   *      revision by: M.Herman                   November 2000       *
 Ccc   *      revision by: R.Capote                   January  2001       *
-Ccc   *                                                                  *
+Ccc   *      revision by: R.Capote                   January  2005       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
@@ -129,16 +110,14 @@ C
       REAL FLOAT, SNGL
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, iz, izares, izatmp, j, lpar, na, nejc, nema,
-     &        nemn, nemp, netl, nnuc, nnur, itmp1
+     &        nemn, nemp, netl, nnuc, nnur
       INTEGER IFINDCOLL
       INTEGER INDEX, INT
-      LOGICAL nonzero, itmp2
+      LOGICAL nonzero
       CHARACTER*2 SMAT
       CHARACTER*3 atar
-      CHARACTER*1 proj, ctmp1, ctmp2
-      DOUBLE PRECISION stmp1, stmp2
-      CHARACTER*132 x4string,ctmp
-      CHARACTER*80 rstring
+      CHARACTER*1 proj
+      CHARACTER*132 x4string
       INTEGER*4 iwin
       INTEGER*4 PIPE
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
@@ -767,29 +746,36 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
             ILIres = -1
          ENDIF
 C--------inteligent defaults
-C--------By default non RIPL potentials are used
-         DO i = 0, NDEJC
-            RIPl_omp(i) = .FALSE.
-         ENDDO
+
 C--------optical model parameter set selection
          IF(AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0)THEN
 C           INCIDENT GAMMA
             KTRlom(0, 0) = -1
          ELSEIF(AEJc(0).LE.4.0D0)THEN
-            KTRlom(0, 0) = 1
+C           KTRlom(0, 0) = 1   (RCN, Bjorklund OMP must be coded into RIPL)
+            KTRlom(0, 0) = 2405
          ELSE
             KTRlom(0, 0) = 0
          ENDIF
+
          DO i = 1, NDNUC
             IF(EIN.GT.20.0D0)THEN
-               KTRlom(1, i) = 3
+C              KTRlom(1, i) = 3
+               KTRlom(1, i) = 100
             ELSE
-               KTRlom(1, i) = 4
+C              KTRlom(1, i) = 4
+               KTRlom(1, i) = 401
             ENDIF
-            KTRlom(2, i) = 2
-            KTRlom(3, i) = 1
-            IF(NDEJC.GT.3)KTRlom(NDEJC, i) = 1
+C           KTRlom(2, i) = 2
+            KTRlom(2, i) = 4101
+C           KTRlom(3, i) = 1
+            KTRlom(3, i) = 9100
+C           IF(NDEJC.GT.3) KTRlom(NDEJC, i) = 1
+            IF(NDEJC.GT.3) KTRlom(NDEJC, i) = 9100
          ENDDO
+C
+C        It is probably necessary to use Koning's potential as default
+C
 C--------inteligent defaults *** done ***
 C
          CALL READIN   !optional part of the input
@@ -865,8 +851,8 @@ C
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
-C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
-C                        1     2     3      4      5      6
+C        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C        1     2     3      4      5      6
 C        1 neut. disc.   x     x     0      x      x      0
 C        2 neut. cont.   0     x     x      x      x      x
 C        3 prot. disc.   x     x     0      x      x      0
@@ -1143,16 +1129,13 @@ C     RCN 02/2004
          KTRlom(0, 0) = 0
       ELSE
          DO nejc = 1, NDEJC
-            IF(ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))THEN
-               KTRlom(0, 0) = KTRlom(nejc, 1)
-               RIPl_omp(0) = RIPl_omp(nejc)
-            ENDIF
+            IF(ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))
+     &          KTRlom(0, 0) = KTRlom(nejc, 1)
          ENDDO
       ENDIF
       IF(KTRompcc.GT.0 .AND. DIRect.EQ.2)THEN
          KTRlom(0, 0) = KTRompcc
          KTRlom(NPRoject, NTArget) = KTRompcc
-         RIPl_omp(0) = RIPl_ompcc
       ENDIF
 C-----Plujko_new (set giant resonance parameters for target)
       GDRpar(1, 0) = EGDr1
@@ -1282,131 +1265,12 @@ C-----WRITE heading on FILE6
          WRITE(6, '('' Projectile binding energy'',F8.3,'' MeV'')')
      &         Q(0, 1)
       ENDIF
-      IF(DIRect.GT.0)THEN
-         IF(KTRompcc.GT.0)THEN
-C-----------Saving KTRlom(0,0) and RIPl_omp(0)
-            itmp1 = KTRlom(0, 0)
-            itmp2 = RIPl_omp(0)
-            KTRlom(0, 0) = KTRompcc
-            RIPl_omp(0) = RIPl_ompcc
-         ENDIF
-         IF(DIRect.NE.2)CCCalc = .TRUE.
-C--------
-C--------Coupled channel calculation of discrete level inelastic scattering
-C--------NEJC=0 => projectile
-C--------NNUC=0 => target
-C--------EL = EINL => incident energy
-C--------Calling interface subroutine to do ECIS call
 
-C        DWBA calculation for additional collective levels
-         einll = -EINl
-         CALL ECIS_CCVIB(0, 0, einll, .FALSE., .TRUE.)
+c
+c     eLIMINADO EL CALCULO DE direct>0 DE AQUI
+C          (VER mareng)  RCN 01/2005
+c
 
-         IF(DIRECT.NE.3) THEN
-           IF(IOPsys.EQ.0)THEN
-C            LINUX
-             ctmp = 'mv ecis03.cs dwba.cs'
-             iwin = PIPE(ctmp)
-             ctmp = 'mv ecis03.ang dwba.ang'
-             iwin = PIPE(ctmp)
-             ctmp = 'mv ecis03.ics dwba.ics'
-             iwin = PIPE(ctmp)
-C            ctmp = 'mv ecis03.pol dwba.pol'
-C            iwin = PIPE(ctmp)
-           ELSE
-C          WINDOWS
-             iwin = PIPE('move ecis03.cs dwba.cs')
-             iwin = PIPE('move ecis03.ics dwba.ics')
-             iwin = PIPE('move ecis03.ang dwba.ang')
-C            iwin = PIPE('move ecis03.pol dwba.pol')
-           ENDIF
-
-           IF(DEFormed)THEN
-C             CC calculation, only coupled levels are considered
-              CALL ECIS_CCVIBROT(0, 0, einll, .FALSE., 0)
-           ELSE
-C             CC calculation, only coupled levels are considered
-              CALL ECIS_CCVIB(0, 0, einll, .FALSE., .FALSE.)
-           ENDIF
-
-           IF(IOPsys.EQ.0)THEN
-C          LINUX
-             ctmp = 'cp ecis03.cs ccm.cs'
-             iwin = PIPE(ctmp)
-             ctmp = 'mv ecis03.ang ccm.ang'
-             iwin = PIPE(ctmp)
-             ctmp = 'mv ecis03.ics ccm.ics'
-             iwin = PIPE(ctmp)
-C            ctmp = 'mv ecis03.pol ccm.pol'
-C            iwin = PIPE(ctmp)
-           ELSE
-C        WINDOWS
-            iwin = PIPE('copy ecis03.cs ccm.cs>NUL')
-            iwin = PIPE('move ecis03.ics ccm.ics')
-            iwin = PIPE('move ecis03.ang ccm.ang')
-C           iwin = PIPE('move ecis03.pol ccm.pol')
-           ENDIF
-C
-C          Joining both DWBA and CCM files
-C
-C          total, elastic and reaction cross section is from CCM
-C
-C          inelastic cross section
-           OPEN(45, FILE = 'dwba.ics', STATUS = 'OLD', ERR=1000)
-           OPEN(46, FILE = 'ccm.ics' , STATUS = 'OLD')
-           OPEN(47, FILE = 'ecis03.ics' , STATUS = 'UNKNOWN')
-           READ(45, '(A80)', END = 1000) rstring
-           READ(46, '(A80)', END=990) ! first line is taken from dwba
-  990      write(47,'(A80)') rstring
-           DO i = 2, ND_nlv
-             READ(45, '(A80)', END = 1000) rstring
-             READ(46,'(A80)',END=995) rstring
-  995        write(47,'(A80)') rstring
-           ENDDO
- 1000      CLOSE(45, STATUS='DELETE')
-           CLOSE(46, STATUS='DELETE')
-           CLOSE(47)
-C
-C          Renormalization of the reaction cross section to consider
-C          DWBA calculated inelastic cross section should be checked.
-C
-C          angular distribution
-           OPEN(45, FILE = 'dwba.ang', STATUS = 'OLD', ERR=2000)
-           READ(45, '(A80)', END = 2000) rstring
-           OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
-           READ(46, '(A80)', END=1005) ! first line is taken from dwba
- 1005      OPEN(47, FILE = 'ecis03.ang' , STATUS = 'UNKNOWN')
-           write(47,'(A80)') rstring
-           DO i = 1, ND_nlv
-             READ(45, '(5x,F5.1,A1,4x,i5)', END = 2000) stmp1,ctmp1,nang
-             READ(46, '(5x,F5.1,A1)', END = 1010) stmp2,ctmp2
-C            checking the correspondence of the excited states
-             IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
-               write(6,*)
-     &          ' WARNING: DWBA and CCM state order does not coincide'
-             ENDIF
- 1010        BACKSPACE 45
-             READ(45, '(A80)', END = 2000) rstring
-             write(47,'(A80)') rstring
-             DO j = 1, nang
-               READ(45, '(A80)', END = 2000) rstring
-               READ(46,'(A80)' , END = 1015) rstring
- 1015          write(47,'(A80)') rstring
-             ENDDO
-           ENDDO
- 2000      CLOSE(45, STATUS='DELETE')
-           CLOSE(46, STATUS='DELETE')
-           CLOSE(47)
-         ENDIF  ! END of DIRECT.NE.3 case
-
-         IF(KTRompcc.GT.0)THEN
-C           Restoring KTRlom(0,0) and RIPl_omp(0)
-            KTRlom(0, 0) = itmp1
-            RIPl_omp(0) = itmp2
-         ENDIF
-
-         IF(DIRect.NE.2)CCCalc = .FALSE.
-      ENDIF
 C
 C-----determination of excitation energy matrix in cn
 C
@@ -1463,7 +1327,7 @@ C     It should be added <m2> to the input ( to use 0.146 if needed)
          WRITE(6, '(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')ia,
      &         SYMb(nnuc)
          WRITE(6, 99002)(EX(i, nnuc),
-     &         (RO(i,j,nnuc)*EXP(ARGred), j = 1, 12), i = 1, NEX(nnuc))
+     &      (RO(i,j,nnuc)*EXP(ARGred), j = 1, 12), i = 1, NEX(nnuc))
       ENDIF
 C
 C-----other decaying nuclei
@@ -1606,7 +1470,7 @@ Cpr         END DO
 C-----------calculate tramsmission coefficients
             IF(FITlev.EQ.0)THEN
                CALL TLEVAL(nejc, nnur, nonzero)
-C--------------print tramsmission coefficients
+C--------------print transmission coefficients
                IF(nonzero .AND. IOUt.EQ.5)THEN
                   WRITE(6, *)'Transmission coefficients for '
                   WRITE(6, '(1x,A14,I3,A3,I3,A3,F4.1)')'Projectile: A=',
@@ -1673,19 +1537,18 @@ C           IF(ADIv.EQ.2.0D0)CALL ROGC(nnur, 0.146D0)
 C
       IF(FITlev.GT.0.D0)THEN
 C--------remove potentially empty omp files
-C--------OMPAR.INT
-         CLOSE(18, STATUS = 'DELETE')
 C--------OMPAR.DIR
          CLOSE(33, STATUS = 'DELETE')
 C--------OMPAR.RIPL
          CLOSE(29, STATUS = 'DELETE')
          STOP 'PLOTS DONE'
       ENDIF
-C-------- fission input is created if it does not exist and FISSHI=0
+
+C---- fission input is created if it does not exist and FISSHI=0
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
-C-------the fissioning condition replaced according to  fission
-C-------barriers available in RIPL-2  (MS)
+C--------the fissioning condition replaced according to  fission
+C--------barriers available in RIPL-2  (MS)
          IF(Z(nnuc).LT.78.)FISsil(nnuc) = .FALSE.
          IF(FISshi(nnuc).EQ.2.)FISsil(nnuc) = .FALSE.
          IF(FISshi(nnuc).EQ.1.)THEN
@@ -1874,7 +1737,7 @@ C--------------------only gamma decay is considered up to now
                         sum = sum + pelm
                         isum = isum + 1
                         BR(ilv, isum, 1, Nnuc) = ifinal !final level #
-                        BR(ilv, isum, 2, Nnuc) = pelm !branching
+                        BR(ilv, isum, 2, Nnuc) = pelm   !branching
                         BR(ilv, isum, 3, Nnuc) = xicc   !int. convertion coeff.
                      ENDIF
                   ENDDO
@@ -1893,7 +1756,7 @@ C--------------------only gamma decay is considered up to now
       RETURN
  300  WRITE(6,
      &'('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
-     &'' not found in the ripl database'')')ia, iz
+     &'' not found in the RIPL database'')')ia, iz
       IF(.NOT.FILevel)CLOSE(13)
       RETURN
  400  WRITE(6, '('' WARNING: RIPL levels database not found '')')
@@ -1974,70 +1837,19 @@ C
      &                             FISb(1, i)
 99007    FORMAT(1X, I3, '-', A2, '-', I3, 4X, 10F12.3)
       ENDDO
+
       WRITE(6, *)
-      IF(KTRompcc.GT.0 .AND. DIRect.GT.0 .AND. RIPl_ompcc)WRITE(6, *)
-     &   ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-      IF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0)THEN
-         IF(KTRompcc.EQ.1 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Bjorklund-Fernbach 1958'
-         IF(KTRompcc.EQ.2 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Moldauer-1963'
-         IF(KTRompcc.EQ.3 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)
-     &                ' inelastic neutron OMP: Becchetti-Greenlees 1969'
-         IF(KTRompcc.EQ.4 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Wilmore-Hodgson 1964'
-         IF(KTRompcc.EQ.5 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Patterson et al. 1976'
-         IF(KTRompcc.EQ.6 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Rapaport 1979'
-         IF(KTRompcc.EQ.7 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic neutron OMP: Konshin 1988 '
-      ENDIF
-      IF(AEJc(0).EQ.1 .AND. ZEJc(0).EQ.1)THEN
-         IF(KTRompcc.EQ.1 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic proton OMP: Bjorklund-Fernbach 1958'
-         IF(KTRompcc.EQ.2 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic proton OMP: Becchetti-Greenlees 1969'
-         IF(KTRompcc.EQ.3 .AND. DIRect.GT.0 .AND. .NOT.RIPl_ompcc)
-     &      WRITE(6, *)' inelastic proton OMP: Menet et al. 1971 '
-      ENDIF
-      IF(RIPl_omp(1))WRITE(6, *)
-     &                 ' neutron o. m. parameters: RIPL catalog number '
+      IF(KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE(6, *)
+     &  ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
+      WRITE(6, *) ' neutron   o. m. parameters: RIPL catalog number '
      &                 , KTRlom(1, 1)
-      IF(KTRlom(1, 1).EQ.1)WRITE(6, *)
-     &              ' neutron o. m. parameters: Bjorklund-Fernbach 1958'
-      IF(KTRlom(1, 1).EQ.2)WRITE(6, *)
-     &                        ' neutron o. m. parameters: Moldauer-1963'
-      IF(KTRlom(1, 1).EQ.3)WRITE(6, *)
-     &             ' neutron o. m. parameters: Becchetti-Greenlees 1969'
-      IF(KTRlom(1, 1).EQ.4)WRITE(6, *)
-     &                 ' neutron o. m. parameters: Wilmore-Hodgson 1964'
-      IF(KTRlom(1, 1).EQ.5)WRITE(6, *)
-     &                ' neutron o. m. parameters: Patterson et al. 1976'
-      IF(KTRlom(1, 1).EQ.6)WRITE(6, *)
-     &                        ' neutron o. m. parameters: Rapaport 1979'
-      IF(KTRlom(1, 1).EQ.7)WRITE(6, *)
-     &                        ' neutron o. m. parameters: Konshin 1988 '
-      IF(RIPl_omp(2))WRITE(6, *)
-     &                 ' proton  o. m. parameters: RIPL catalog number '
+      WRITE(6, *) ' proton    o. m. parameters: RIPL catalog number '
      &                 , KTRlom(2, 1)
-      IF(KTRlom(2, 1).EQ.1)WRITE(6, *)
-     &              ' proton  o. m. parameters: Bjorklund-Fernbach 1958'
-      IF(KTRlom(2, 1).EQ.2)WRITE(6, *)
-     &             ' proton  o. m. parameters: Becchetti-Greenlees 1969'
-      IF(KTRlom(2, 1).EQ.3)WRITE(6, *)
-     &                   ' proton  o. m. parameters: Menet et al. 1971 '
-      IF(RIPl_omp(3))WRITE(6, *)
-     &                 ' alpha   o. m. parameters: RIPL catalog number '
+      WRITE(6, *) ' alpha     o. m. parameters: RIPL catalog number '
      &                 , KTRlom(3, 1)
-      IF(KTRlom(3, 1).EQ.1)WRITE(6, *)
-     &               ' alpha   o. m. parameters: Mc Fadden and Satchler'
-      IF(NDEJC.EQ.4)THEN
-         IF(RIPl_omp(NDEJC))WRITE(6, *)
-     &              ' light ion  o. m. parameters: RIPL catalog number '
+      IF(NEMc.GT.0)
+     &WRITE(6, *) ' cluster o. m. parameters: RIPL catalog number '
      &              , KTRlom(NDEJC, 1)
-      ENDIF
 C
       WRITE(6, *)
 99008 FORMAT(10X, 'B i n d i n g    e n e r g i e s')
@@ -2334,7 +2146,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b20  |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b22  |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
@@ -2434,30 +2246,29 @@ C--------PCROSS input
 C
 C--------ECIS input
 C
-C--------In the following block two parameters
-C--------are defined, KTRompCC and RIPL_ompCC
+C--------In the following block one parameter -KTRompCC- is defined
 C--------DIRECT is set to 1 if equal zero to allow for ECIS calc.
 C
          IF(name.EQ.'DIRPOT')THEN
-            RIPl_ompcc = .FALSE.
             IF(val.LT.0)THEN
                ki = 26
                ipoten = -INT(val)
-C--------------searching in the RIPL database for i1 catalog number
+C--------------searching in the RIPL database
                CALL FINDPOT(ki, ieof, ipoten)
                IF(ieof.EQ.0)THEN
-                  RIPl_ompcc = .TRUE.
                   val = -val
-C                 WRITE(6, *)
-C                 &       'RIPL OMP will be used for inelastic channel '
                ELSE
-                  WRITE(6, *)'Requested RIPL entry ', ipoten,
-     &                       ' not found, using default '
+                  WRITE(6, *)'WARNING: Requested RIPL entry ', ipoten,
+     &              ' for inelastic scattering not found'
                   GOTO 100
                ENDIF
+            ELSE
+               WRITE(6,
+     &'('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')')
+               STOP
             ENDIF
             WRITE(6,
-     &'('' Optical model parameters for ECIS set to RIPL-2 #'',I4
+     &'('' Optical model parameters for ECIS calculation set to '',I4
      &)')INT(val)
             KTRompcc = INT(val)
             GOTO 100
@@ -2479,7 +2290,7 @@ C                 &       'RIPL OMP will be used for inelastic channel '
             JCUtColl = i1
             IF(JCUtColl.eq.0) JCUtColl=2
             WRITE(6,
-     &       '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' 
+     &       '('' Collective levels up to '',F5.1,'' MeV used in DWBA''
      &)' ) ECUtColl
             WRITE(6,
      &       '('' All levels with spin less or equal to '',I1,
@@ -2589,8 +2400,8 @@ C-----
             IF(ADIv.EQ.0.0D0)WRITE(6,
      &         '('' EMPIRE-specific level densities were selected '')')
             IF(ADIv.EQ.1.0D0)WRITE(6,
-     &   '('' ROCOL level densities with fitted parameters selected '')'
-     &   )
+     &     '('' EMPIRE-specific level densities with fitted parameters w
+     &ere selected'')')
             IF(ADIv.GT.3.0D0)WRITE(6,
      &     '('' ROCOL level densities with a=A/''  ,F5.2,'' selected'')'
      &     )ADIv
@@ -2714,16 +2525,16 @@ C-----
 C-----
          IF(name.EQ.'IOUT  ')THEN
             IOUt = val
-c           WRITE(6,
-c    &            '('' Main calculations output control set to '',I2)')
-c    &            IOUt
+            WRITE(6,
+     &            '('' Main calculations output control set to '',I2)')
+     &            IOUt
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'NOUT  ')THEN
             NOUt = val
-c           WRITE(6, '('' MSC calculation output control set to '',I2)')
-c    &            NOUt
+            WRITE(6, '('' MSC calculation output control set to '',I2)')
+     &            NOUt
             GOTO 100
          ENDIF
 C-----
@@ -2844,7 +2655,7 @@ C-----
          IF(name.EQ.'CSGDR1')THEN
             CSGdr1 = val
             WRITE(6, '('' GDR first hump cross section set to '',F6.2)')
-     &         CSGdr1
+     &      CSGdr1
             GOTO 100
          ENDIF
 C-----
@@ -2863,7 +2674,7 @@ C-----
          IF(name.EQ.'CSGDR2')THEN
             CSGdr2 = val
             WRITE(6,
-     &  '('' GDR second hump peak cross section set to '',        F6.2)'
+     &  '('' GDR second hump cross section set to '',        F6.2)'
      &  )CSGdr2
             GOTO 100
          ENDIF
@@ -2949,7 +2760,7 @@ C-----
          IF(name.EQ.'GDRSPL')THEN
             GDRspl = val
             WRITE(6,
-     &'('' Splitting of GDR humps increased by '',F6.3,'' MEV''
+     &'('' Splitting of GDR peaks increased by '',F6.3,         '' MEV''
      &)')GDRspl
             GOTO 100
          ENDIF
@@ -3033,20 +2844,22 @@ C-----
 C--------------Searching in the RIPL database for i1 catalog number
                CALL FINDPOT(ki, ieof, ipoten)
                IF(ieof.EQ.0)THEN
-                  RIPl_omp(i1) = .TRUE.
                   val = -val
                ELSE
-                  WRITE(6, *)'Requested RIPL entry #', ipoten,
+                  WRITE(6, *)'Requested RIPL entry ', ipoten,
      &                       ' not found, using default choice'
                   GOTO 100
                ENDIF
                WRITE(6,
      &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
      &)')i1, INT(val)
+C              WRITE(6,
+C    &'('' (will be used if not overwritten in the OMPAR.RIPL file)'')
+C    &')
             ELSE
                WRITE(6,
-     &'('' Optical model parameters for ejectile '', I1,'' set to '', I4
-     &)')i1, INT(val)
+     &'('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')')
+               STOP
             ENDIF
 C-----
             DO i = 1, NDNUC
@@ -3111,8 +2924,7 @@ C-----
                   ROPaa(i) = val
                ENDDO
                IF(val.GT.0.0D0)WRITE(6,
-     &       '('' L. d. a-parameter set to '',F6.3,'' for all nuclei'')'
-     &       )val
+     &'('' L.d. a-parameter in all nuclei multiplied by '',F6.1)') val
                IF(val.EQ.0.0D0)WRITE(6,
      &      '('' L. d. a-parameter according to Ignatyuk systematics'')'
      &      )
@@ -3133,7 +2945,7 @@ C-----
             ENDIF
             ROPaa(nnuc) = val
             WRITE(6,
-     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.3)'
+     &'('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3144,7 +2956,7 @@ C-----
                   ATIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' L.d. a-parameter in all nuclei multiplied by '',F6.1)') val
+     &'('' L.d. parameter in all nuclei multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -3168,7 +2980,7 @@ C
                   GTIlnor(i) = val
                ENDDO
                WRITE(6,
-     &'('' Single particle l.d. parameter g multiplied by '',F6.1)') val
+     &'('' Single particle L.D. parameter G multiplied by '',F6.1)') val
                GOTO 100
             ENDIF
             CALL WHERE(izar, nnuc, iloc)
@@ -3180,7 +2992,7 @@ C
             ENDIF
             GTIlnor(nnuc) = val
             WRITE(6,
-     &'('' Single particle l.d. parameter g in '',I3,A2,
+     &'('' Single particle L.D. parameter G in '',I3,A2,
      &  '' multiplied by '',        F6.1)')i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3196,7 +3008,7 @@ C-----
             ENDIF
             ROPar(2, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter Ux in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter Ux  in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -3244,13 +3056,16 @@ C-----
             ENDIF
             ROPar(5, nnuc) = val
             WRITE(6,
-     & '('' L.d. parameter T in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. parameter T   in '',I3,A2,'' set to ''          ,F6.3)'
      & )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
          IF(name.EQ.'FITLEV')THEN
             FITlev = val
+            IF(FITlev.GT.0.0D0)WRITE(6,
+     &                 '('' Cumulative plots of levels will be done '')'
+     &                 )
             GOTO 100
          ENDIF
 C-----
@@ -5062,6 +4877,8 @@ c           beta2 = DEF(1, 0)
                   GOTO 500
                ENDIF
 C              Additional levels are added for DWBA calculations
+               IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
+
                IF(ECUtColl.gt.0. .AND. xjlvr.LE.JCUtColl)THEN
                   ND_nlv = ND_nlv + 1
                   ICOllev(ND_nlv) = ilv+50
@@ -5070,10 +4887,10 @@ C              Additional levels are added for DWBA calculations
                   D_Xjlv(ND_nlv) = xjlvr
                   IPH(ND_nlv) = 0
                   D_Def(ND_nlv, 2) = 0.01
+                  ierr = 0
+                  if(ND_nlv.EQ.NDCOLLEV) goto 600
                   GOTO 500
                ENDIF
-
-               IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
 
                IF(i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
      &            i8p.NE.0  .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
@@ -5190,6 +5007,8 @@ C              ground state deformation for spherical nucleus is 0.0
                GOTO 500
             ENDIF
 
+            IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
+
 C           Additional levels are added for DWBA calculations
             IF(ECUtColl.gt.0. .AND. xjlvr.LE.JCUtColl)THEN
                ND_nlv = ND_nlv + 1
@@ -5197,13 +5016,12 @@ C           Additional levels are added for DWBA calculations
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
-               IPH(ND_nlv) = 0
+               IPH(ND_nlv) = 1
                D_Def(ND_nlv, 2) = 0.1
-                ierr=0
+               ierr = 0
+               if(ND_nlv.EQ.NDCOLLEV) goto 600
                GOTO 500
             ENDIF
-
-            IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
 
             IF(i20p.NE.0 .AND. i3m.NE.0  .AND. i20p.NE.0 .AND.
      &         i21p.NE.0 .AND. i4p.NE.0  .AND. i3m.NE.0 .AND.
@@ -5266,9 +5084,11 @@ C--------------------swapping
             ENDDO
          ENDDO
 
-C-----------Putting one phonon states first for spherical
+C-----------Putting one phonon coupled states first for spherical
          DO i = 2, ND_nlv
+             if(ICOllev(i).GE.50) cycle
             DO j = i + 1, ND_nlv
+                if(ICOllev(j).GE.50) cycle
                IF(IPH(j).LT.IPH(i))THEN
 C-----------------swapping
                      itmp = IPH(i)
@@ -6413,7 +6233,7 @@ C    ********************************************************************
 C
       IMPLICIT NONE
       INTEGER nntmp,natmp,MAXgdr
-      PARAMETER (MAXgdr=5986)
+      PARAMETER (MAXgdr=6000)
       INTEGER  Key_GDRGFL, Key_shape
       INTEGER i, ka, keyload, kz, n, nana, nanz, NG, nna, nng, nnz,
      &        nzram, naram, numram, keyram, keyalpa, kaa, kzz,

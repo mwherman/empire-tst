@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 09:54:08 $
-Ccc   * $Id: fusion.f,v 1.21 2004-11-30 09:54:08 Capote Exp $
+Ccc   * $Date: 2005-01-24 13:22:12 $
+Ccc   * $Id: fusion.f,v 1.22 2005-01-24 13:22:12 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -19,40 +19,11 @@ Ccc   *       NTRG - target index (normally 0)                           *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
-Ccc   * calls: HITL                                                      *
-Ccc   *            BNDG                                                  *
-Ccc   *                WHERE                                             *
-Ccc   *                BAR                                               *
-Ccc   *                    POTENT                                        *
-Ccc   *                        POT                                       *
-Ccc   *                POT                                               *
-Ccc   *            PUSH                                                  *
-Ccc   *                F                                                 *
-Ccc   *                G                                                 *
-Ccc   *                    F                                             *
-Ccc   *                INTGRS                                            *
-Ccc   *            XFUS                                                  *
-Ccc   *        OMTL                                                      *
-Ccc   *            FACT                                                  *
-Ccc   *            PREANG                                                *
-Ccc   *            SCAT                                                  *
-Ccc   *                INTEG                                             *
-Ccc   *                RCWFN                                             *
-Ccc   *            SETPOTS                                               *
-Ccc   *                OMPAR                                             *
-Ccc   *            SHAPEC                                                *
-Ccc   *                CGAMMA                                            *
-Ccc   *            SHAPEL                                                *
-Ccc   *                CLEB                                              *
-Ccc   *                RACAH                                             *
-Ccc   *            SPIN0                                                 *
-Ccc   *            SPIN05                                                *
-Ccc   *            SPIN1                                                 *
-Ccc   *                                                                  *
 Ccc   * author: M.Herman                                                 *
 Ccc   * date:   15.Feb.1993                                              *
 Ccc   * revision:1    by:Herman                   on:  .Oct.1994         *
 Ccc   * revision:2    by:Capote                   on:  .Feb.2001         *
+Ccc   * revision:3    by:Capote                   on:  .Jan.2005         *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -70,21 +41,22 @@ C
 C
 C Local variables
 C
-C-----Plujko_new (new variables for SDREAD - ParcnJ,cnJ )
-C     cnJ    - spin of CN
-C     ParcnJ - parity of CN
       DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, PI, smax,
      &                 smin, stl(NDLW), sum, wf, ParcnJ, cnJ
-C-----Plujko_new (END of new variables for SDREAD - ParcnJ,cnJ )
-
       DOUBLE PRECISION DMAX1
       REAL FLOAT
       INTEGER i, ichsp, ip, ipa, j, k, l, lmax, lmin, maxlw, mul
       INTEGER MIN0
       DOUBLE PRECISION PAR, W2, xmas_npro, xmas_ntrg, RMU
-      LOGICAL tlj_calc
+      INTEGER itmp1
+      CHARACTER*1 ctmp1, ctmp2
+      DOUBLE PRECISION stmp1, stmp2
+      CHARACTER*132 ctmp
+      CHARACTER*80 rstring
+      INTEGER*4 iwin
+      INTEGER*4 PIPE
+
       PAR(i, ipa, l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
-      tlj_calc = .FALSE.
 C
 C-----Reduced mass corrected for proper mass values
 C
@@ -93,11 +65,12 @@ C
       el = EINl
       CALL KINEMA(el, ecms, xmas_npro, xmas_ntrg, RMU, ak2, 1, RELkin)
 C
-C     wf = W2*EIN*rmu
-C     wf = W2*ecms*rmu
+C     wf = W2*EIN*rmu  being EIN the CM energy
+C
       wf = ak2/10.D0
 C
 C  Zero qd fraction of photabsorption before it can do any damage
+C
       QDfrac=0.0d0
 
       IF(INT(AEJC(0)).GT.0)
@@ -105,31 +78,42 @@ C  Zero qd fraction of photabsorption before it can do any damage
       S1 = 0.5
       maxlw = NDLW
       IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) -
-     & SEJc(Npro).EQ.0.0D0)S1 = 1.0
+     & SEJc(Npro).EQ.0.0D0) S1 = 1.0
+
       csmax = 0.0
       CSFus = 0.0
       DO i = 1, NDLW
          stl(i) = 0.0
       ENDDO
 
-C-----Plujko_new(spin distribution from file SDREAD)
-C     If you have file "SDFILE" -> it is possible to use input spin distribution
-C     Format of file:
-C     rows with sequentialy  cnJ - spin of nucleus, ParcnJ - parity, csvalue -
-C     cross-section
-C     limits: cnJ=n*0.5, where n=0,1,2...
-C               A of c.n. /2 = integer --> cnJ=n*1, where n=0,1,2...
-C               A of c.n. /2 = integer+1/2 --> cnJ=n*1/2, where n=0,1,2...
-C             ParcnJ=-1 or 1
-C             csvalue = value in mb
-C     reading no more than 2*NDLW rows
+C-----Calculation of fusion cross section for photon induced reactions
       IF(INT(AEJC(0)).EQ.0)THEN
-        IF(.NOT.SDREAD) GOTO 100
-        WRITE(6, *)
+
+        IF(SDREAD) THEN
+
+C---------Reading of spin distribution from file SDFILE
+C
+C         If you have file "SDFILE" -> it is possible to use
+C         input spin distribution
+C
+C          Format of file:
+C          rows with sequentialy  cnJ, ParcnJ, csvalue
+C          where  cnJ     - spin of nucleus,
+C                 ParcnJ  - parity
+C                 csvalue - cross-section
+C
+C         limits: cnJ=n*0.5, where n=0,1,2...
+C                 A of c.n. /2 = integer --> cnJ=n*1, where n=0,1,2...
+C                 A of c.n. /2 = integer+1/2 --> cnJ=n*1/2, where n=0,1,2...
+C                 ParcnJ=-1 or 1
+C                 csvalue = value in mb
+C
+C         Reading no more than 2*NDLW rows
+          WRITE(6, *)
      &' Spin distribution of fusion cross section read from SDREAD file'
-        WRITE(6, *)
+          WRITE(6, *)
      &' (all previous instructions concerning fusion ignored)'
-        DO i = 1, 2*NDLW
+          DO i = 1, 2*NDLW
             READ(43, *, END = 101) cnJ,ParcnJ,csvalue
 C-----------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             IF(2*cnJ-DINT(2*cnJ).NE.0.00)
@@ -142,14 +126,111 @@ C-----------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             POP(NEX(1), j, ip, 1) = csvalue
             CSFus = CSFus + POP(NEX(1), j, ip, 1)
             csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
-        ENDDO
-      ENDIF
-C-----Plujko_new(END of spin distribution from file SDFILE)
+          ENDDO
 
-C-----if FUSREAD true read l distribution of fusion cross section
-C-----and calculate transmission coefficients
-      IF(FUSread)THEN
-         DO j = 1, NDLW
+101       CONTINUE
+
+C---------END of spin distribution from file SDFILE
+
+        ELSE
+
+          CSFus = 0.0
+          JSTab(1) = NDLW !stability limit not a problem for photoreactions
+          IF(EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
+            WRITE(6,*)'WARNING: '
+            WRITE(6,*)'WARNING: ECN=',EIN,' Elev=',ELV(NLV(Ntrg),Ntrg)
+            WRITE(6,*)'WARNING: CN excitation energy below continuum'
+            WRITE(6,*)'WARNING: cut-off. zero reaction cross section'
+            WRITE(6,*)'WARNING: will result'
+            WRITE(6,*)'WARNING: '
+          ENDIF
+C---------E1
+          IF(IGE1.NE.0)THEN
+C----------factor 10 near HHBarc from fm**2-->mb
+           E1Tmp=10*HHBarc**2*PI*E1(Ntrg,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
+     &          /(2*XJLv(LEVtarg, Ntrg)+1)
+           QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
+C----------do loop over parity
+           DO ip = 1, 2
+C           Quasideuteron contribution QDTmp by Carlson
+            WPARG=PAR(ip, LVP(LEVtarg, 0), 1)*(E1Tmp + QDTmp)
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
+                POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) +
+     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG
+              ENDIF
+            ENDDO
+           ENDDO
+          ENDIF
+C---------end of E1
+
+C---------M1
+          IF(IGM1.NE.0)THEN
+C----------factor 10 near HHBarc from fm**2-->mb
+           E1Tmp=10*HHBarc**2*PI*XM1(EINl)/(2*EINl**2)
+     &          /(2*XJLv(LEVtarg, Ntrg)+1)
+C----------do loop over parity
+           DO ip = 1, 2
+            WPARG=PAR(ip, LVP(LEVtarg, 0), 2)*E1Tmp
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
+                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) +
+     &            (FLOAT(2*j + 1) - 2.0*S1)*WPARG
+              ENDIF
+            ENDDO
+           ENDDO
+          ENDIF
+C---------end of M1
+
+C---------E2
+          IF(IGE2.NE.0)THEN
+C----------factor 10 near HHBarc from fm**2-->mb
+           E1Tmp=10*HHBarc**2*PI*E2(EINl)/(2*EINl**2)
+     &          /(2*XJLv(LEVtarg, Ntrg)+1)
+C----------do loop over parity
+           DO ip = 1, 2
+            WPARG=PAR(ip, LVP(LEVtarg, 0), 2)*E1Tmp
+C-----------do loop over compound nucleus spin
+            DO j = 1, NDLW
+C-------------Spin of c.n. J=j-S1
+              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.2.0.AND.
+     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.2.0) THEN
+C---------------factor 10 near HHBarc from fm**2-->mb
+                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) +
+     &            (FLOAT(2*j + 1) - 2.0*S1)*WPARG
+              ENDIF
+            ENDDO
+           ENDDO
+          ENDIF
+C-------end of E2
+
+         DO ip = 1, 2
+          DO j = 1, NDLW
+              CSFus = CSFus + POP(NEX(1), j, ip, 1)
+              csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+          ENDDO
+        ENDDO
+C                     QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
+        IF(IGE1.NE.0) QDfrac= 3.d0*QDTmp/CSFus
+
+        ENDIF
+C-------END of calculation of fusion cross section
+C                for photon induced reactions
+        RETURN
+
+      ENDIF
+
+      IF(FUSread) THEN
+C
+C-------if FUSREAD true read l distribution of fusion cross section
+C-------and calculate transmission coefficients
+        DO j = 1, NDLW
             READ(11, *, END = 50)csvalue
             stl(j) = csvalue*wf/PI/(2*j - 1)
             IF(stl(j).GT.1.0D0)THEN
@@ -160,177 +241,249 @@ C-----and calculate transmission coefficients
                WRITE(6, *)' EXECUTION STOPPED!!!'
                STOP
             ENDIF
-         ENDDO
- 50      NLW = j - 1
-         WRITE(6, *)
+        ENDDO
+ 50     NLW = j - 1
+        WRITE(6, *)
      &  ' Spin distribution of fusion cross section read from the file '
-         WRITE(6, *)
+        WRITE(6, *)
      &          ' (all previous instructions concerning fusion ignored)'
-         GOTO 100
-      ENDIF
-C-----calculation of o.m. transmission coefficients for absorption
-      IF(KTRlom(Npro, Ntrg).GT.0)THEN
+
+      ELSE
+
+C-------calculation of o.m. transmission coefficients for absorption
+        IF(KTRlom(Npro, Ntrg).GT.0)THEN
 C
-         einlab = -EINl
-         IWArn = 0
-C
-         IF(DIRect.EQ.2 .AND. AEJc(Npro).LE.1)THEN
-C-----------Target nucleus (elastic channel), incident neutron or proton
-            WRITE(6, *)' CC transmission coefficients used for ',
+           einlab = -EINl
+           IWArn = 0
+
+           IF(DIRect.GT.0) THEN
+
+              IF(KTRompcc.GT.0)THEN
+C---------------Saving KTRlom(0,0)
+                itmp1 = KTRlom(0, 0)
+                KTRlom(0, 0) = KTRompcc
+              ENDIF
+
+              IF(DIRect.NE.2) CCCalc = .TRUE.
+
+              CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+
+              IF(DIRECT.NE.3) THEN
+
+               IF(IOPsys.EQ.0)THEN
+C               LINUX
+                ctmp = 'cp ecis03.cs dwba.cs'
+                iwin = PIPE(ctmp)
+                ctmp = 'mv ecis03.ang dwba.ang'
+                iwin = PIPE(ctmp)
+                ctmp = 'mv ecis03.ics dwba.ics'
+                iwin = PIPE(ctmp)
+C               ctmp = 'mv ecis03.pol dwba.pol'
+C               iwin = PIPE(ctmp)
+               ELSE
+C               WINDOWS
+                ctmp = 'copy ecis03.cs dwba.cs>NUL'
+                iwin = PIPE(ctmp)
+                ctmp = 'move ecis03.ang dwba.ang>NUL'
+                iwin = PIPE(ctmp)
+                ctmp = 'move ecis03.ics dwba.ics>NUL'
+                iwin = PIPE(ctmp)
+C               ctmp = 'moveecis03.pol dwba.pol>NUL'
+C               iwin = PIPE(ctmp)
+               ENDIF
+
+              ENDIF
+
+              IF(DIRect.LE.2 .AND. AEJc(Npro).LE.1) THEN
+C--------------Target nucleus (elastic channel), incident neutron or proton
+
+
+               WRITE(6, *)' CC transmission coefficients used for ',
      &                 'fusion determination'
-C-----------Transmission coefficient matrix for incident channel
-C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
-C-----------Preparing INPUT and RUNNING ECIS
-C-----------(or reading already calculated file)
-            IF(DEFormed)THEN
-               CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE., 0)
-            ELSE
-               CALL ECIS_CCVIB(Npro, Ntrg, einlab, .TRUE., .FALSE.)
-            ENDIF
-            CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl)
-            tlj_calc = .TRUE.
-         ENDIF
+C--------------Transmission coefficient matrix for incident channel
+C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
+C--------------Preparing INPUT and RUNNING ECIS
+C--------------(or reading already calculated file)
+               IF(DEFormed)THEN
+                CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE., 0)
+               ELSE
+                CALL ECIS_CCVIB(Npro, Ntrg, einlab, .FALSE., -1)
+               ENDIF
+
+               IF(IOPsys.EQ.0)THEN
+C               LINUX
+                ctmp = 'cp ecis03.cs ccm.cs'
+                iwin = PIPE(ctmp)
+                ctmp = 'mv ecis03.ang ccm.ang'
+                iwin = PIPE(ctmp)
+                ctmp = 'mv ecis03.ics ccm.ics'
+                iwin = PIPE(ctmp)
+C               ctmp = 'mv ecis03.pol ccm.pol'
+C               iwin = PIPE(ctmp)
+               ELSE
+C               WINDOWS
+                iwin = PIPE('copy ecis03.cs ccm.cs>NUL')
+                iwin = PIPE('move ecis03.ics ccm.ics>NUL')
+                iwin = PIPE('move ecis03.ang ccm.ang>NUL')
+C               iwin = PIPE('move ecis03.pol ccm.pol>NUL')
+               ENDIF
 C
-         IF(.NOT.tlj_calc)THEN
-            WRITE(6, *)' Spherical OM transmission coefficients',
-     &                 ' used for fusion determination'
-            IF(MODelecis.EQ.0 .OR. DIRect.EQ.3)THEN
-               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 1)
-            ELSE
-               WRITE(6, *)' Fusion cross section normalized',
-     &                    ' to coupled channel reaction cross section'
-               CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 0)
-            ENDIF
-         ENDIF
-C--------IWARN=0 - 'NO Warnings'
-C--------IWARN=1 - 'A out of the recommended range '
-C--------IWARN=2 - 'Z out of the recommended range '
-C--------IWARN=3 - 'Energy requested lower than recommended for this potential'
-C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
-         IF(IWArn.EQ.1 .AND. FIRst_ein)WRITE(6, *)
+C              Joining both DWBA and CCM files
+C
+C              total, elastic and reaction cross section is from CCM
+C
+C              inelastic cross section
+               OPEN(45, FILE = 'dwba.ics', STATUS = 'OLD', ERR=1000)
+               OPEN(46, FILE = 'ccm.ics' , STATUS = 'OLD')
+               OPEN(47, FILE = 'ecis03.ics' , STATUS = 'UNKNOWN')
+               READ(45, '(A80)', END = 1000) rstring
+               READ(46, '(A80)', END=990) ! first line is taken from dwba
+  990          write(47,'(A80)') rstring
+               DO i = 2, ND_nlv
+                READ(45, '(A80)', END = 1000) rstring
+                READ(46,'(A80)',END=995) rstring
+  995           write(47,'(A80)') rstring
+               ENDDO
+ 1000          CLOSE(45)
+               CLOSE(46)
+C1000          CLOSE(45, STATUS='DELETE')
+C              CLOSE(46, STATUS='DELETE')
+               CLOSE(47)
+C
+C              Renormalization of the reaction cross section to consider
+C              DWBA calculated inelastic cross section should be checked.
+C
+C              angular distribution
+               OPEN(45, FILE = 'dwba.ang', STATUS = 'OLD', ERR=2000)
+               READ(45, '(A80)', END = 2000) rstring
+               OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
+               READ(46, '(A80)', END=1005) ! first line is taken from dwba
+ 1005          OPEN(47, FILE = 'ecis03.ang' , STATUS = 'UNKNOWN')
+               write(47,'(A80)') rstring
+               DO i = 1, ND_nlv
+                READ(45, '(5x,F5.1,A1,4x,i5)', END = 2000) stmp1,
+     &                                                ctmp1,nang
+                READ(46, '(5x,F5.1,A1)', END = 1010) stmp2,ctmp2
+C               checking the correspondence of the excited states
+                IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
+                  write(6,*)
+     >            ' WARNING: DWBA and CCM state order does not coincide'
+                ENDIF
+ 1010           BACKSPACE 45
+                READ(45, '(A80)', END = 2000) rstring
+                write(47,'(A80)') rstring
+                DO j = 1, nang
+                  READ(45, '(A80)', END = 2000) rstring
+                  READ(46,'(A80)' , END = 1015) rstring
+ 1015             write(47,'(A80)') rstring
+                ENDDO
+               ENDDO
+ 2000          CLOSE(45, STATUS='DELETE')
+               CLOSE(46, STATUS='DELETE')
+               CLOSE(47)
+
+
+               IF(DEFormed)THEN
+
+                 CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl,.FALSE.)
+
+               ELSE
+
+                 CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl,.TRUE.)
+
+               ENDIF
+
+
+              ELSE ! DIRECT.GE.2 OR CLUSTER
+
+               WRITE(6, *)' Spherical OM transmission coefficients',
+     &                   ' used for fusion determination'
+
+
+               CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+
+
+               CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl, .TRUE.)
+
+
+               IF(.NOT. (MODelecis.EQ.0 .OR. DIRect.EQ.3))
+     &           WRITE(6, *)' Fusion cross section normalized',
+     &                      ' to coupled channel reaction cross section'
+              ENDIF
+
+
+           ELSE ! DIRECT = 0
+
+
+             WRITE(6, *)' Spherical OM transmission coefficients',
+
+     &                   ' used for fusion determination'
+
+
+
+              CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+
+
+
+              CALL ECIS2EMPIRE_TL_TRG(Npro, Ntrg, maxlw, stl, .TRUE.)
+
+
+           ENDIF
+
+
+
+C----------IWARN=0 - 'NO Warnings'
+C----------IWARN=1 - 'A out of the recommended range '
+C----------IWARN=2 - 'Z out of the recommended range '
+C----------IWARN=3 - 'Energy requested lower than recommended for this potential'
+C----------IWARN=4 - 'Energy requested higher than recommended for this potential'
+           IF(IWArn.EQ.1 .AND. FIRst_ein)WRITE(6, *)
      &      ' WARNING: OMP not recommended for A=', A(Ntrg)
-         IF(IWArn.EQ.2 .AND. FIRst_ein)WRITE(6, *)
+           IF(IWArn.EQ.2 .AND. FIRst_ein)WRITE(6, *)
      &      ' WARNING: OMP not recommended for Z=', Z(Ntrg)
-         IF(IWArn.EQ.3 .OR. IWArn.EQ.4)WRITE(6, *)
+           IF(IWArn.EQ.3 .OR. IWArn.EQ.4)WRITE(6, *)
      &      ' WARNING: OMP not recommended for E=', EINl
-         IWArn = 0
+           IWArn = 0
 C
-         IF(maxlw.GT.NDLW)THEN
-            WRITE(6, *)' '
-            WRITE(6, *)' INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
-            WRITE(6, *)' INCREASE NDLW IN dimension.h UP TO', maxlw + 1
-            WRITE(6, *)' AND RECOMPILE THE CODE'
-            STOP
-         ENDIF
-C
+           IF(maxlw.GT.NDLW)THEN
+              WRITE(6, *)
+     &       ' WARNING: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
+              WRITE(6, *)
+     &       ' WARNING: INCREASE NDLW IN dimension.h UP TO', maxlw + 1
+              WRITE(6, *)
+     &       ' WARNING: AND RECOMPILE THE CODE'
+              STOP
+           ENDIF
+
+        ELSEIF(KTRlom(Npro, Ntrg).EQ.0) THEN
+
+C----------calculation of h.i. transmission coefficients for fusion
+           CALL HITL(stl)
+
+        ENDIF
+
       ENDIF
-C-----calculation of h.i. transmission coefficients for fusion
-      IF(KTRlom(Npro, Ntrg).EQ.0) CALL HITL(stl)
+
 
 C-----calculation of transmission coefficients ----done------
+
       DO i = 1, NDLW
-         ELTl(i) = stl(i)
+
+        ELTl(i) = stl(i)
+
       ENDDO
 
-C-----Plujko_new (calculation CSFus)
- 100  IF(INT(AEJC(0)).EQ.0)THEN
-        CSFus = 0.0
-        JSTab(1) = NDLW !stability limit not a problem for photoreactions
-        IF(EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
-           WRITE(6,*)'WARNING: '
-           WRITE(6,*)'WARNING: ECN=',EIN,' Elev=',ELV(NLV(Ntrg),Ntrg)
-           WRITE(6,*)'WARNING: CN excitation energy below continuum'
-           WRITE(6,*)'WARNING: cut-off. zero reaction cross section'
-           WRITE(6,*)'WARNING: will result'
-           WRITE(6,*)'WARNING: '
-        ENDIF
-C-------E1
-        IF(IGE1.NE.0)THEN
-C---------factor 10 near HHBarc from fm**2-->mb
-C RCN 11/2004   (10*HHBarc**2*PI*E1(0   ,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
-          E1Tmp=10*HHBarc**2*PI*E1(Ntrg,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
-          QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
-C---------do loop over parity
-          DO ip = 1, 2
-C-----------do loop over compound nucleus spin
-            DO j = 1, NDLW
-C-------------Spin of c.n. J=j-S1
-              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
-     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
-                WPARG = PAR(ip, LVP(LEVtarg, 0), 1)
-                POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) +
-C     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*
-C     &          (10*HHBarc**2*PI*E1(0,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)+
-C     &           SIGQD(Z,A,EINl,Lqdfac)/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
-     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*(E1Tmp + QDTmp)
-     &          /(2*XJLv(LEVtarg, Ntrg)+1)
-C  quasideuteron contribution SIGQD added in previous statement -- Carlson
-              ENDIF
-            ENDDO
-          ENDDO
-        ENDIF
-C-------end of E1
 
-C-------M1
-        IF(IGM1.NE.0)THEN
-C---------do loop over parity
-          DO ip = 1, 2
-C-----------do loop over compound nucleus spin
-            DO j = 1, NDLW
-C-------------Spin of c.n. J=j-S1
-              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
-     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
-                WPARG = PAR(ip, LVP(LEVtarg, 0), 2)
-C---------------factor 10 near HHBarc from fm**2-->mb
-                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
-     &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
-     &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*XM1(EINl)
-              ENDIF
-            ENDDO
-          ENDDO
-        ENDIF
-C-------end of M1
-
-C-------E2
-        IF(IGE2.NE.0)THEN
-C---------do loop over parity
-          DO ip = 1, 2
-C-----------do loop over compound nucleus spin
-            DO j = 1, NDLW
-C-------------Spin of c.n. J=j-S1
-              IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.2.0.AND.
-     &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.2.0) THEN
-                WPARG = PAR(ip, LVP(LEVtarg, 0), 2)
-C---------------factor 10 near HHBarc from fm**2-->mb
-                POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
-     &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
-     &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E2(EINl)
-              ENDIF
-            ENDDO
-          ENDDO
-        ENDIF
-C-------end of E2
-        DO ip = 1, 2
-          DO j = 1, NDLW
-              CSFus = CSFus + POP(NEX(1), j, ip, 1)
-              csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
-          ENDDO
-        ENDDO
-        IF(IGE1.NE.0) QDfrac= SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/CSFus
-        GOTO 101
-      ENDIF
-C-----Plujko_new(END of calculation CSFus)
-C
       smin = ABS(SEJc(Npro) - XJLv(LEVtarg, Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
       mul = smax - smin + 1.0001
       CSFus = 0.0
 C-----do loop over parity
       DO ip = 1, 2
-C-----do loop over compound nucleus spin
-         DO j = 1, NDLW
-            sum = 0.0
-            DO ichsp = 1, mul
+C-------do loop over compound nucleus spin
+        DO j = 1, NDLW
+          sum = 0.0
+          DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
                lmin = ABS(j - chsp - S1) + 0.0001
                lmax = j + chsp - S1 + 0.0001
@@ -342,32 +495,26 @@ C-----do loop over compound nucleus spin
                   sum = sum + PAR(ip, LVP(LEVtarg, 0), k - 1)*stl(k)*
      &                  DRTl(k)
                ENDDO
-            ENDDO
-            POP(NEX(1), j, ip, 1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
+          ENDDO
+          POP(NEX(1), j, ip, 1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
      &                              *FUSred
-            CSFus = CSFus + POP(NEX(1), j, ip, 1)
-            csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
-         ENDDO
+          CSFus = CSFus + POP(NEX(1), j, ip, 1)
+          csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+        ENDDO
       ENDDO
-C-----Input gamma E1 channel (label 101)
- 101  CONTINUE
-C-----Input gamma E1 channel (END of label 101)
-C-----CAPOTE 2001
-         IF((DIRect.EQ.1 .OR. DIRect.EQ.3) .AND. AEJc(Npro).LE.1)THEN
+
+      IF(DIRect.GT.0 .AND. AEJc(Npro).LE.1) THEN
+
          ecis_abs = 0.
-C--------read ECIS absorption cross section
-C        ecis03
-C        OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C--------read ECIS03 absorption cross section
          OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
          READ(45, *, END = 150)  ! Skipping first line <CROSS.S>
          IF(ZEJc(0).eq.0) READ(45, *, END = 150)totcs
          READ(45, *, END = 150)ecis_abs
  150     CLOSE(45)
          SINl = 0.d0
-C        ecis03
-C        OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 200)
          OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 200)
-         READ(45, *, END = 150)
+         READ(45, *, END = 200)
          DO l = 1, NDCollev
             READ(45, *, END = 200)dtmp
             SINl = SINl + dtmp
@@ -375,6 +522,8 @@ C        OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 200)
  200     CLOSE(45)
 C
          IF(SINl.GT.ecis_abs)THEN
+            WRITE(6, *)
+     &       ' WARNING: LOOK LONG OUTPUT NON-CONVERGENCE !!'
             WRITE(6,
      &'(///                                                       5x,''*
      &*************************************************'')')
@@ -404,8 +553,8 @@ C
      &     )
             STOP 200
          ENDIF
+
 C--------Renormalizing Tls
-C
          IF(MODelecis.GT.0 .AND. DIRect.EQ.1)THEN
 C-----------for CC OMP renormalizing to reaction XS calculated by ECIS
             DO l = 1, maxlw
@@ -413,13 +562,14 @@ C-----------for CC OMP renormalizing to reaction XS calculated by ECIS
                ELTl(l) = stl(l)
             ENDDO
          ELSE
-C-----------for SOMP including inelastic reaction XS calculated by ECIS
-C-----------in the SCAT2 calculated reaction XS
+C-----------for SOMP including inelastic reaction XS (from ECIS)
+C-----------in the calculated reaction XS
             DO l = 1, maxlw
                stl(l) = stl(l)*(CSFus - SINl)/CSFus
                ELTl(l) = stl(l)
             ENDDO
          ENDIF
+
 C--------channel spin min and max
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg, Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
@@ -447,10 +597,11 @@ C--------channel spin min and max
                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
             ENDDO
          ENDDO
+
 C--------Renormalization of Tls and fusion cros section done for DIRECT.eq.1
 C--------add ECIS inelastic to the fusion cross section
 C        Only needed for non CC OMP potentials
-         IF(DIRect.NE.2)CSFus = CSFus + SINl
+         IF(DIRect.NE.2) CSFus = CSFus + SINl
 C
       ENDIF
 C
@@ -483,6 +634,7 @@ C-----is still stable
          ENDDO
          RETURN
       ENDIF
+
       IF((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
      &   *20.D0.GT.csmax) .AND. NLW.EQ.NDLW)THEN
          WRITE(6, *)'POP1=', POP(NEX(1), NLW, 1, 1), 'POP2=',
@@ -494,6 +646,8 @@ C-----is still stable
      &''D '')')
          STOP
       ENDIF
+
+      RETURN
       END
 C
 C

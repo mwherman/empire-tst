@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-01-07 22:31:20 $
-Ccc   * $Id: MSD-tristan.f,v 1.20 2005-01-07 22:31:20 herman Exp $
+Ccc   * $Date: 2005-01-24 13:23:52 $
+Ccc   * $Id: MSD-tristan.f,v 1.21 2005-01-24 13:23:52 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -395,32 +395,32 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, ANGle(NDANG), AU, AW, BETa(301, 11), 
-     &                 BST(3), BST1(2), CLRn(11), CNOrin(22), DTHeta, 
-     &                 EBCs(500, 2), ECEntr(5), EFItin(22), EOUtmi, 
-     &                 EOUtmx, ESP(500, 2), ESTep, ETMax, ETMin, FACb, 
-     &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2), 
-     &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega, 
-     &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, 
-     &                 QSTep, RAC, RHO(301, 11), RHOb(301, 11, 2), RI, 
+      DOUBLE PRECISION ALSin, ANGle(NDANG), AU, AW, BETa(301, 11),
+     &                 BST(3), BST1(2), CLRn(11), CNOrin(22), DTHeta,
+     &                 EBCs(500, 2), ECEntr(5), EFItin(22), EOUtmi,
+     &                 EOUtmx, ESP(500, 2), ESTep, ETMax, ETMin, FACb,
+     &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
+     &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega,
+     &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2,
+     &                 QSTep, RAC, RHO(301, 11), RHOb(301, 11, 2), RI,
      &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
-     &                 U0, U9, UAMp(500, 2), VAMp(500, 2), VLS(2), W0, 
+     &                 U0, U9, UAMp(500, 2), VAMp(500, 2), VLS(2), W0,
      &                 WIDex, WIDexin
-      INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID, 
-     &        IE, IG, JSP(500, 2), L9(10), LSP(500, 2), NHOle(2), 
-     &        NLEv(301, 11), NQ1x, NQ2x, NRMax(10), NSP(500, 2), 
+      INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID,
+     &        IE, IG, JSP(500, 2), L9(10), LSP(500, 2), NHOle(2),
+     &        NLEv(301, 11), NQ1x, NQ2x, NRMax(10), NSP(500, 2),
      &        NTOtal(2)
       COMMON RHO, SRNew, SREw, SREwl, GSDm, BETa, NLEv
-      COMMON /CCLQ  / IC1max, IC2max, IC1x, IC2x, IC12x, ICMax, NQ1x, 
+      COMMON /CCLQ  / IC1max, IC2max, IC1x, IC2x, IC12x, ICMax, NQ1x,
      &                NQ2x
       COMMON /CRAC  / FAClog, RAC, U9, IA, IB, IC, ID, IE, IG, L9
       COMMON /EVBCS / EBCs, VAMp, UAMp
-      COMMON /INELA / WIDex, ROPt, CLRn, ETMin, ETMax, RHOb, QS1, QS2, 
+      COMMON /INELA / WIDex, ROPt, CLRn, ETMin, ETMax, RHOb, QS1, QS2,
      &                Q0, FACb, FFTot, NRMax
       COMMON /SPPA  / HOMega, VLS, RMS, BST, GAP, NHOle, NTOtal
       COMMON /SPQN  / ESP, NSP, LSP, JSP
       COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin
-      COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr, 
+      COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr,
      &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
      &                FFAc3d
       COMMON /U_OPT / U0, W0, RR, RI, AU, AW
@@ -432,38 +432,38 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, a3, ad, aew, anp(2, 2), anz, api, aqq, bosc, 
-     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),  ! new 
-     &                 ceff, clex(11),                                  
-     &                 clsc(11), cneg, cnorm, cpos, cr1(11), cr2,         ! new  
-     &                 cr3(11), dl, dci(11), dcr(11), ddr(2), de3, deqq,  ! new
-     &                 dnz, dqqst(5000),                                       
-     &                 dr, dwex, dwsx, e, e0, efit(22), efitx, egr, em, 
-     &                 emi, emisq, ep, epl, eplsq, eqq, eqqst(5000), 
-     &                 eqqx, ess(0:10000), est3, ext, f1, fe, ff1, 
-     &                 fltwp1, fourpi, fpi, greenr, greenx, greeny, h, 
-     &                 hat, hcorr, homeb, phtrm, PI, pxmd, pymd, qqi, 
+      DOUBLE PRECISION a1, a3, ad, aew, anp(2, 2), anz, api, aqq, bosc,
+     &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),  ! new
+     &                 ceff, clex(11),
+     &                 clsc(11), cneg, cnorm, cpos, cr1(11), cr2,         ! new
+     &                 cr3(11), dci(11), dcr(11), ddr(2), de3, deqq,      ! new
+     &                 dnz, dqqst(5000),
+     &                 dr, dwex, dwsx, e, e0, efit(22), efitx, egr, em,
+     &                 emi, emisq, ep, epl, eplsq, eqq, eqqst(5000),
+     &                 eqqx, ess(0:10000), est3, ext, f1, fe, ff1,
+     &                 fltwp1, fourpi, fpi, greenr, greenx, greeny, h,
+     &                 hat, hcorr, homeb, phtrm, PI, pxmd, pymd, qqi,
      &                 qqr, qqx, qqy, r, r1, rd, rdopt, rdsq, re1, re2
       DOUBLE PRECISION DWIDTH
       REAL FLOAT
-      INTEGER i, j, jtw1, jtw2, k, kc, kcx, kh, kmax, kp, kqq, krt, 
-     &        krtx, l, l1, l2, lm, lmax, lst, lt, lth, ltmax, ltmaxr, 
-     &        ltmin, ltp, ltp1, ltr, lttw, n, nconf(21), ne, nea, 
-     &        nebinx, nesx, nh, nlhm, nlpm, nos1, nos2, np, np1, nr, 
+      INTEGER i, j, jtw1, jtw2, k, kc, kcx, kh, kmax, kp, kqq, krt,
+     &        krtx, l, l1, l2, lm, lmax, lst, lt, lth, ltmax, ltmaxr,
+     &        ltmin, ltp, ltp1, ltr, lttw, n, nconf(21), ne,
+     &        nebinx, nesx, nh, nlhm, nlpm, nos1, nos2, np, np1, nr,
      &        nxmax
       INTEGER IABS, INT
-      DOUBLE PRECISION re3, reduqq, resid, rfqqr(0:501, 11), 
-     &                 rfqqx(0:501, 11), rfqqy(0:501, 11), rh0, rho1, 
-     &                 rl, rmax, rmosc, rmsgs, rnorm, rnp(3, 2), rp, 
-     &                 rqr, rrr(2), rws, rwsq, t1, t2, umatqq, veff, 
-     &                 vnorm, w, wbcs, we, wex, wgr, widas, 
-     &                 wide(0:10000), widea, widgr, wqa, wqq, 
-     &                 wqqst(5000), wqrex, x, xea(11), xir, xneg, xp, 
+      DOUBLE PRECISION re3, reduqq, resid, rfqqr(0:501, 11),
+     &                 rfqqx(0:501, 11), rfqqy(0:501, 11), rh0, rho1,
+     &                 rl, rmax, rmosc, rmsgs, rnorm, rnp(3, 2), rp,
+     &                 rqr, rrr(2), rws, rwsq, t1, t2, umatqq, veff,
+     &                 vnorm, w, wbcs, we, wgr, widas,
+     &                 wide(0:10000), widea, widgr, wqa, wqq,
+     &                 wqqst(5000), wqrex, x, xea(11), xir, xneg, xp,
      &                 xpos, xqq, yea(11), yqq
 C
 C
       EQUIVALENCE(BST(1), BST1)
-      DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0, 
+      DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
      &     0.8931D0/
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
       DATA eqqx/80.0D0/
@@ -549,7 +549,7 @@ C     RWS=RW0*A3
       IF(ROPt.LE.0.0D0)ROPt = rd
       rdopt = rd/ROPt
       IF(IOUt.GT.3)WRITE(6, 99002)rd, ad, rh0, ROPt, rdopt
-99002 FORMAT(//' ', 'RDENS=', F7.4, 3X, 'ADENS=', F7.4, 3X, 'RH0=', 
+99002 FORMAT(//' ', 'RDENS=', F7.4, 3X, 'ADENS=', F7.4, 3X, 'RH0=',
      &       F7.4/' ', 'ROPT =', F7.4, 3X, 'RATIO=', F7.4)
 C
 C     >>>>> energy dependent width of RPA/QRPA states <<<<<
@@ -576,9 +576,9 @@ C
       widas = widgr*1.11
       IF(IOUt.GT.2)WRITE(6, 99003)egr, wgr, widas, WIDex, e0, aew
 99003 FORMAT(/'  ENERGY DEPENDENT WIDTH OF RPA/QRPA STATES:'/
-     &       '  E(GDR) :', F8.3, '   W(GDR)   :', F8.3, 
-     &       ' [MEV]'/'  WID(AS):', F8.3, '   WID(EXP.):', F8.3, 
-     &       ' [MEV]'/'  E0     :', F8.3, '   AEW      :', F8.3, 
+     &       '  E(GDR) :', F8.3, '   W(GDR)   :', F8.3,
+     &       ' [MEV]'/'  WID(AS):', F8.3, '   WID(EXP.):', F8.3,
+     &       ' [MEV]'/'  E0     :', F8.3, '   AEW      :', F8.3,
      &       ' [MEV]')
       e = ETMin - 2.*ESTep
       DO ne = 0, nebinx + 1
@@ -633,8 +633,8 @@ C
       ENDDO
 C
       IF(IOUt.GT.2)WRITE(6, 99004)
-99004 FORMAT(//8X, ' RADIAL MOMENTS <R**L>/A OF THE G.S. DENSITY'/5X, 
-     &       '           ( UNITS: [FM**L/A] )             '/4X, 'L', 
+99004 FORMAT(//8X, ' RADIAL MOMENTS <R**L>/A OF THE G.S. DENSITY'/5X,
+     &       '           ( UNITS: [FM**L/A] )             '/4X, 'L',
      &       11X, 'L  ', 11X, 'L+1', 11X, 'L+2', 11X, 'L+3', 11X, 'L+4')
       lst = 5
       DO l = 1, lmax, lst
@@ -654,14 +654,14 @@ C
       vnorm = homeb
       IF(IOUt.GT.3)THEN
          WRITE(6, 99006)bosc, BST(3), bosc/BST(3), BST1
-99006    FORMAT(//'  OSCILLATOR LENGTH:'/'  B(DENSITY):', F7.3, 
+99006    FORMAT(//'  OSCILLATOR LENGTH:'/'  B(DENSITY):', F7.3,
      &          '  B(NILSSON):', F7.3, '  RATIO:', F7.4/'  B(PROTON) :',
      &          F7.3, '  B(NEUTRON):', F7.3)
          WRITE(6, 99007)homeb, HOMega, hcorr
-99007    FORMAT(/'  OSCILLATOR ENERGY:'/'  E(DENSITY):', F7.3, 
+99007    FORMAT(/'  OSCILLATOR ENERGY:'/'  E(DENSITY):', F7.3,
      &          '  E(NILSSON):', F7.3, '  RATIO:', F7.4)
          WRITE(6, 99008)(SQRT(RMS(i)), i = 1, 3)
-99008    FORMAT(/'  <R**2> (IN [FM]) :'/'  PROTON    :', F7.3, 
+99008    FORMAT(/'  <R**2> (IN [FM]) :'/'  PROTON    :', F7.3,
      &          '  NEUTRON   :', F7.3, '  TOTAL:', F7.4)
          WRITE(6, 99009)vnorm
 99009    FORMAT(/'   STRENGTH OF THE MULTIPOLE-MULTIPOLE INTERACTION:'/
@@ -770,14 +770,14 @@ C
                               l1 = IABS(ltp - lth)
                               l2 = IABS(jtw1 - jtw2)/2
                               ltmin = MAX(l1, l2)
-                              IF(MOD(ltmin - l1, 2).EQ.1)ltmin = ltmin + 
+                              IF(MOD(ltmin - l1, 2).EQ.1)ltmin = ltmin +
      &                           1
                               ltmin = ltmin + 1
                               ltmax = MIN(ltp + lth, (jtw1 + jtw2)/2)
      &                                + 1
                               ltmax = MIN(ltmax, ltmaxr)
                               IF(ltmin.LE.ltmax)THEN
-99010                            FORMAT(' TRANSITIONS FOR ', 4I3, 
+99010                            FORMAT(' TRANSITIONS FOR ', 4I3,
      &                                  '/2  ', 4I3, '/2:', 10I3)
                                  DO ltp1 = ltmin, ltmax, 2
                                     lttw = 2*(ltp1 - 1)
@@ -800,7 +800,7 @@ C
      &                                 (lttw + 1)
                                     ltr = lttw/2
 C
-                                    CALL RADIAL(bosc, phtrm, nos1, lth, 
+                                    CALL RADIAL(bosc, phtrm, nos1, lth,
      &                                 nos2, ltp, ltr)
 C
                                     IF(ltr.GT.0)
@@ -853,22 +853,22 @@ C                                                                               
                                          i = 1                                     ! new
                                          ext = efit(ltp1)-ESTep/10.D0              ! new+
                                          Do while (i.le.3)                         ! new
-                                            emi = eqq - ext                        ! new 
+                                            emi = eqq - ext                        ! new
                                             epl = eqq + ext                        ! new
                                             emisq = emi*emi                        ! new
                                             eplsq = epl*epl                        ! new
-                                            pxmd = 1./(emisq + dwsx)               ! new 
+                                            pxmd = 1./(emisq + dwsx)               ! new
                                             pymd = 1./(eplsq + dwsx)               ! new
-C                                                                                  ! new 
+C                                                                                  ! new
 C                                           real and imaginary parts of the 2-qp   ! new
 C                                           Green function                         ! new
 C                                                                                  ! new
-                                            greenr = (emi*pxmd +                   ! new 
+                                            greenr = (emi*pxmd +                   ! new
      &                                      epl*pymd)*umatqq                       ! new
                                             greenx = wqq*(pxmd - pymd)             ! new
      &                                      *umatqq                                ! new
                                             greeny=(pxmd - pymd)*umatqq            ! new
-C                                                                                  ! new 
+C                                                                                  ! new
 C                                           real and imaginary parts of the 2-qp   ! new
 C                                           response function                      ! new
                                             if (i .eq. 1) then                     ! new
@@ -877,7 +877,7 @@ C                                           response function                   
                                                ccm( ltp1)                          ! new
      &                                         = ccm( ltp1) + greenx               ! new
      &                                         + 0.5D0*WIDex*greeny                ! new
-                                            else if (i.eq.2)                       ! new 
+                                            else if (i.eq.2)                       ! new
      &                                         then                                ! new
                                                ccr( ltp1)                          ! new
      &                                         = ccr( ltp1) + greenr               ! new
@@ -898,7 +898,7 @@ C                                                                               
                                                dci( ltp1)= dci( ltp1) +            ! new+
      &                                         ((2*wqq + WIDex)*(emi*              ! new+
      &                                         pxmd**2+epl*pymd**2))*              ! new+
-     &                                         umatqq                              ! new+   
+     &                                         umatqq                              ! new+
                                             else if (i.eq.3) then                  ! new
                                                cr3( ltp1)                          ! new
      &                                         = cr3( ltp1) + greenr               ! new
@@ -909,7 +909,7 @@ C                                                                               
                                             endif                                  ! new
                                             ext = ext + ESTep/10.0D0                      ! new
                                             i = i + 1                              ! new
-                                         ENDDO                                     ! new    
+                                         ENDDO                                     ! new
                                       ENDIF                                        ! new
                                     ENDIF
                                  ENDDO
@@ -984,7 +984,7 @@ C              ccp = rfqqx(nea + 1, lt) + wex*rfqqy(nea + 1, lt)
 C              ccm = rfqqx(nea - 1, lt) + wex*rfqqy(nea - 1, lt)
 C              dci = 0.5D0*(ccp - ccm)/ESTep
 C              MH added the following IF  to avoid division by 0
-               IF(dcr(lt).NE.0.0D0)THEN                           ! new 
+               IF(dcr(lt).NE.0.0D0)THEN                           ! new
 C                 xir = dci/dcr
 C                 xpos = cci*xir/(1.D0 + SQRT(1.D0 + xir**2))
 C                 xneg = -cci**2/xpos
@@ -1134,14 +1134,14 @@ C        ENDDO
 99015    FORMAT(F10.5, 10E15.7)
 C
          IF(krt.EQ.1)WRITE(6, 99016)
-99016    FORMAT(//6X, 'COUPLING CONSTANTS AND RENORMALIZATION'/6X, 
-     &          '       ( INELASTIC EXCITATION )      '/3X, 'L', 4X, 
-     &          'EA  ', 2X, 'SELF-CON', 3X, 'EMPIRICAL', 6X, 'RATIO', 
+99016    FORMAT(//6X, 'COUPLING CONSTANTS AND RENORMALIZATION'/6X,
+     &          '       ( INELASTIC EXCITATION )      '/3X, 'L', 4X,
+     &          'EA  ', 2X, 'SELF-CON', 3X, 'EMPIRICAL', 6X, 'RATIO',
      &          7X, 'VEFF', 4X, 'RESIDUE', 6X, 'WIDTH', ' CONFIG.')
          IF(krt.EQ.2)WRITE(6, 99017)
-99017    FORMAT(//6X, 'COUPLING CONSTANTS AND RENORMALIZATION'/6X, 
-     &          '   ( CHARGE EXCHANGE EXCITATION )    '/3X, 'L', 4X, 
-     &          'EA  ', 3X, 'SELF-CON', 3X, 'EMPIRICAL', 6X, 'RATIO', 
+99017    FORMAT(//6X, 'COUPLING CONSTANTS AND RENORMALIZATION'/6X,
+     &          '   ( CHARGE EXCHANGE EXCITATION )    '/3X, 'L', 4X,
+     &          'EA  ', 3X, 'SELF-CON', 3X, 'EMPIRICAL', 6X, 'RATIO',
      &          4X, 'RESIDUE', 6X, 'WIDTH', ' CONFIG.')
          DO l = 1, ICMax
             clsc(l) = 1./clsc(l)
@@ -1154,7 +1154,7 @@ C
                widea = 0.0
             ENDIF
             veff = vnorm*CLRn(l)
-            WRITE(6, 99018)l - 1, efit(l), clsc(l), clex(l), CLRn(l), 
+            WRITE(6, 99018)l - 1, efit(l), clsc(l), clex(l), CLRn(l),
      &                     veff, resid, widea, nconf(l)
 99018       FORMAT(I4, F8.3, 2E11.4, 2F11.4, E11.4, F11.4, I7)
          ENDDO
@@ -3285,7 +3285,7 @@ C--------Normalization factor
          ELSE
             xnor = 0.0
          ENDIF
-C--------Add MSD transitions to discrete levels to the population spectrum   
+C--------Add MSD transitions to discrete levels to the population spectrum
 C--------used for the ENDF exclusive spectra
 C--------This is actually not needed since MSD contribution to discrete levels
 C--------is done through the CSDirlev and CSAlev

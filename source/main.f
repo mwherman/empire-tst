@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-01-23 02:16:46 $
-Ccc   * $Id: main.f,v 1.47 2005-01-23 02:16:46 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-01-24 13:20:38 $
+Ccc   * $Id: main.f,v 1.48 2005-01-24 13:20:38 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -106,25 +106,7 @@ Ccc   *            SHCFADE                                               *
 Ccc   *            SIGMAK                                                *
 Ccc   *        SMAT                                                      *
 Ccc   *        TLEVAL                                                    *
-Ccc   *            OMTL                                                  *
-Ccc   *                FACT                                              *
-Ccc   *                PREANG                                            *
-Ccc   *                PRIPOT                                            *
-Ccc   *                PRITC                                             *
-Ccc   *                PRITD                                             *
-Ccc   *                SCAT                                              *
-Ccc   *                    INTEG                                         *
-Ccc   *                    RCWFN                                         *
-Ccc   *                SETPOTS                                           *
-Ccc   *                    OMPAR                                         *
-Ccc   *                SHAPEC                                            *
-Ccc   *                    CGAMMA                                        *
-Ccc   *                SHAPEL                                            *
-Ccc   *                    CLEB                                          *
-Ccc   *                    RACAH                                         *
-Ccc   *                SPIN0                                             *
-Ccc   *                SPIN05                                            *
-Ccc   *                SPIN1                                             *
+Ccc   *            TRANSINP                                              *
 Ccc   *        WHERE                                                     *
 Ccc   *    MARENG                                                        *
 Ccc   *        HITL                                                      *
@@ -140,7 +122,6 @@ Ccc   *                G                                                 *
 Ccc   *                    F                                             *
 Ccc   *                INTGRS                                            *
 Ccc   *            XFUS                                                  *
-Ccc   *        OMTL (see above)                                          *
 Ccc   *    ORION                                                         *
 Ccc   *        CCCTRL                                                    *
 Ccc   *            FLGLCH                                                *
@@ -263,17 +244,12 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
 C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
       LOGICAL nvwful
       INCLUDE 'io.h'
-C
-C-----Factorial calculations
-C
-      CALL FCT()
-
-
       icalled = 0
 C
 C-----
 C-----Read and prepare input data
 C-----
+      CALL HORA(6)
  1400 CALL INPUT
 C-----
 C-----Print input data
@@ -293,120 +269,122 @@ C-----
 C-----
 C-----Get ECIS results
 C-----
-      IF(DIRect.GT.0)THEN
-C--------Locate position of the target among residues
-         CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
-C--------Locate position of the projectile among ejectiles
-         CALL WHEREJC(IZAejc(0), nejcec, iloc)
+C-----Locate position of the target among residues
+      CALL WHERE(IZA(1) - IZAejc(0), nnurec, iloc)
+C-----Locate position of the projectile among ejectiles
+      CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
-         IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
-C           ECIS03, May 2004
-            OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
-            READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
-            IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
-            READ(45, *, END = 1500)ecisabs
-            IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
-C-----------Checking if CC OMP was used
-            IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR.
-     &      DIRect.EQ.2) ELAcs=ftmp
-            CLOSE(45)
-         ENDIF
-         NELang = 73
-         ecm = EINl - EIN
-         dang = 3.14159/FLOAT(NELang - 1)
-C        OPEN(45, FILE = 'ecis95.ang', STATUS = 'OLD')
-C        ECIS03, May 2004
-         OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD')
-         READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
-         READ(45, *, END = 1500)  ! To skip level identifier line
-         OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD')
-         READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
-C        OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')
-C        READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
-C--------Checking if CC OMP was used
-         DO iang = 1, NELang
-            IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-               READ(45, '(7x,E12.5)', END = 1500)ELAda(iang)
-            ELSE
-C--------------dummy read
-               READ(45, *, END = 1500)
-            ENDIF
-         ENDDO
-C--------get and add inelastic cross sections (including double-differential)
-         ncoll = 0
-         DO i = 2, ND_nlv
-            ilv = ICOller(i)
-            IF(ilv.GT.NLV(nnurec))GOTO 1500
-            echannel = EX(NEX(1), 1) - Q(nejcec, 1) - ELV(ilv, nnurec)
-C-----------avoid reading closed channels
-            IF(echannel.GE.0.0001)THEN
-               xcse = echannel/DE + 1.0001
-               icsl = INT(xcse)
-               icsh = icsl + 1
-C              ECIS03, May 2004, changed to read from file 46
-               READ(46, *, END = 1500)popread
-C              READ(45, *, END = 1500)popread
-               ncoll = i
-               POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
-               CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
-               CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
-C--------------add direct transition to the spectrum
-               popl = popread*(FLOAT(icsh) - xcse)/DE
-               IF(icsl.EQ.1)popl = 2.0*popl
-               poph = popread*(xcse - FLOAT(icsl))/DE
-               CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
-               CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
-               READ(45, *, END = 1500)    ! Skipping level identifier line
-C              READ(47, *, END = 1500)    ! Skipping level identifier line
-C              Empire uses 10 deg grid for inelastic so we have to take
-C              each 4th result from ECIS (2.5 deg grid)
-               DO iang = 1, NDANG - 1
-                  READ(45, '(7x,E12.5)', END = 1500)
-     &                 CSAlev(iang, ilv, nejcec)
-                  READ(45, '(7x,E12.5)', END = 1500)
-                  READ(45, '(7x,E12.5)', END = 1500)
-                  READ(45, '(7x,E12.5)', END = 1500)
-               ENDDO
-               READ(45, '(7x,E12.5)', END = 1500)
-     &              CSAlev(NDANG, ilv, nejcec)
-C--------------construct recoil spectra due to direct transitions
-               IF(ENDf.GT.0)THEN
-                  dang = PI/FLOAT(NDANG - 1)
-                  coef = 2*PI*dang
-C                 check whether integral over angles agrees with x-sec. read from ECIS
-                  csum = 0.0
-                  DO iang = 1, NDANG
-                     csum = csum + CSAlev(iang, ilv, nejcec)*
-     &                      SANgler(iang)*coef
-                  ENDDO
-C                 correct 'coef' for eventual imprecision and include recoil DE
-                  coef = coef*POPlv(ilv, nnurec)/csum/DERec
-                  echannel = echannel*EJMass(0)/AMAss(1)
-                  DO iang = 1, NDANG
-                     erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
-     &                         *CANgler(iang)
-                     irec = erecoil/DERec + 1.001
-                     weight = (erecoil - (irec - 1)*DERec)/DERec
-C                    escape if we go beyond recoil spectrum dimension
-                     IF(irec + 1.GT.NDEREC)GOTO 1450
-                     csmsdl = CSAlev(iang, ilv, nejcec)*SANgler(iang)
-     &                        *coef
-                     RECcse(irec, 0, nnurec) = RECcse(irec, 0, nnurec)
+C     IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
+C       OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+C       READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
+C       IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
+C       READ(45, *, END = 1500)ecisabs
+C       IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
+C-------Checking if CC OMP was used
+C       IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR.
+C    &      DIRect.EQ.2) ELAcs=ftmp
+C       CLOSE(45)
+C     ENDIF
+      OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+      READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..
+      IF (ZEjc(0).eq.0) READ(45, *, END = 1500) TOTcs
+      READ(45, *, END = 1500)ecisabs
+      IF (ZEjc(0).eq.0) READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
+      CLOSE(45)
+      ELAcs=ftmp
+
+      NELang = 73
+      ecm = EINl - EIN
+      dang = 3.14159/FLOAT(NELang - 1)
+      OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD')
+      READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
+      READ(45, *, END = 1500)  ! To skip level identifier line
+C     OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')
+C     READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
+      DO iang = 1, NELang
+        READ(45, '(7x,E12.5)', END = 1500) ELAda(iang)
+      ENDDO
+      OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD')
+      READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
+C-----get and add inelastic cross sections (including double-differential)
+      ncoll = 0
+      DO i = 2, ND_nlv
+        ilv = ICOller(i)
+        IF(ilv.GT.NLV(nnurec))GOTO 1500
+        echannel = EX(NEX(1), 1) - Q(nejcec, 1) - ELV(ilv, nnurec)
+C-------avoid reading closed channels
+        IF(echannel.GE.0.0001)THEN
+           xcse = echannel/DE + 1.0001
+           icsl = INT(xcse)
+           icsh = icsl + 1
+           READ(46, *, END = 1500)popread
+           ncoll = i
+           POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
+           CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
+           CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
+C----------add direct transition to the spectrum
+           popl = popread*(FLOAT(icsh) - xcse)/DE
+           IF(icsl.EQ.1)popl = 2.0*popl
+           poph = popread*(xcse - FLOAT(icsl))/DE
+           CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
+           CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
+           READ(45, *, END = 1500)    ! Skipping level identifier line
+C          Empire uses 10 deg grid for inelastic so we have to take
+C          each 4th result from ECIS (2.5 deg grid)
+           DO iang = 1, NDANG - 1
+            READ(45, '(7x,E12.5)', END = 1500) CSAlev(iang, ilv, nejcec)
+            READ(45, '(7x,E12.5)', END = 1500)
+            READ(45, '(7x,E12.5)', END = 1500)
+            READ(45, '(7x,E12.5)', END = 1500)
+           ENDDO
+           READ(45, '(7x,E12.5)', END = 1500) CSAlev(NDANG, ilv, nejcec)
+C----------construct recoil spectra due to direct transitions
+           IF(ENDf.GT.0)THEN
+              dang = PI/FLOAT(NDANG - 1)
+              coef = 2*PI*dang
+C             check whether integral over angles agrees with x-sec. read from ECIS
+              csum = 0.0
+              DO iang = 1, NDANG
+                csum = csum + CSAlev(iang, ilv, nejcec)*
+     &                        SANgler(iang)*coef
+              ENDDO
+C             correct 'coef' for eventual imprecision and include recoil DE
+              coef = coef*POPlv(ilv, nnurec)/csum/DERec
+              echannel = echannel*EJMass(0)/AMAss(1)
+              DO iang = 1, NDANG
+                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
+     &                     *CANgler(iang)
+                irec = erecoil/DERec + 1.001
+                weight = (erecoil - (irec - 1)*DERec)/DERec
+C               escape if we go beyond recoil spectrum dimension
+                IF(irec + 1.GT.NDEREC)GOTO 1450
+                csmsdl = CSAlev(iang, ilv, nejcec)*SANgler(iang)*coef
+                RECcse(irec, 0, nnurec) = RECcse(irec, 0, nnurec)
      &                  + csmsdl*(1.0 - weight)
-                     RECcse(irec + 1, 0, nnurec)
+                RECcse(irec + 1, 0, nnurec)
      &                  = RECcse(irec + 1, 0, nnurec) + csmsdl*weight
-                  ENDDO
-               ENDIF
-            ENDIF
- 1450    ENDDO
- 1500    CLOSE(45)
-         CLOSE(46)
-C      CLOSE(47)
-C--------print elastic and direct cross sections from ECIS
-         WRITE(6, *)' '
-         WRITE(6, *)' '
-         IF((MODelecis.EQ.0 .AND. DIRect.EQ.1) .OR. DIRect.EQ.3)THEN
+              ENDDO
+           ENDIF
+        ENDIF
+ 1450 ENDDO
+ 1500 CLOSE(45)
+      CLOSE(46)
+C     CLOSE(47)
+      WRITE(6, *)' '
+      WRITE(6, *)' '
+C-----print elastic cross sections from ECIS
+      WRITE(6, 89001)
+      WRITE(6, 89002)
+      gang = 180.0/(NELang - 1)
+      DO iang = 1, NELang/4 + 1
+        imint = 4*(iang - 1) + 1
+        imaxt = MIN0(4*iang, NELang)
+        WRITE(6, 89004)( (j-1)*gang,ELAda(j),j=imint, imaxt)
+      ENDDO
+      WRITE(6, '(//)')
+      if(ncoll.gt.0) then
+C-------print direct cross sections from ECIS
+        IF((MODelecis.EQ.0 .AND. DIRect.EQ.1) .OR. DIRect.EQ.3)THEN
             WRITE(6, *)' '
             IF(ncoll.GT.0)THEN
                IF(DIRect.EQ.1)THEN
@@ -418,109 +396,66 @@ C--------print elastic and direct cross sections from ECIS
                   WRITE(6, *)' Inelastic scattering results provided by'
                   WRITE(6, *)' DWBA calculations with ECIS:'
                ENDIF
-               WRITE(6, *)' '
-               gang = 180.0/(NDANG - 1)
-C
-C              RCN, 08/2004
-C
-               if(CSAlev(1, ICOller(2), nejcec).gt.0) then
-                 WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
-99001            FORMAT('  Angle ', 10(6x, i2, '-level'))
-                 WRITE(6, *)' '
-                 DO iang = 1, NDANG
-                   if(CSAlev(1, ICOller(2), nejcec).gt.0) then
-                    WRITE(6, 99002) (iang - 1)*gang,
-     &               (CSAlev(iang, ICOller(ilv), nejcec),
-     &                       ilv = 2, min(ncoll,10))
-                     endif
-99002              FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
-                 ENDDO
-                 WRITE(6, *)' '
-                 WRITE(6, 99003)
-     &            (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
-99003            FORMAT(6x, 3x, 11(2x, E12.6))
-                 WRITE(6, *)' '
-                 WRITE(6, *)' '
-                 WRITE(6, *)' '
-               endif
             ENDIF
-         ENDIF
-         IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-            WRITE(6, *)' '
-            WRITE(6, *)
-     &               ' Results provided by Coupled Channel calculations'
-     &               , ' with ECIS code:'
+        ENDIF
+        IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
+         WRITE(6, *)' '
+         WRITE(6, *) ' Results provided by Coupled Channel calculations'
+     &             , ' with ECIS code:'
           IF(ZEJc(0).EQ.0) THEN
             WRITE(6, 99004)TOTcs, ecisabs, ELAcs
-99004       FORMAT(/, 2x, 'Total cross section         :', e14.7, ' mb',
-     &             /, 2x, 'Absorption cross section    :', e14.7, ' mb',
-     &             /, 2x, 'Shape elastic cross section :', e14.7, ' mb',
-     &             //)
           ELSE
             WRITE(6, 99005)ecisabs
-99005       FORMAT(/, 2x, 'Absorption cross section    :', e14.7, ' mb',
-     &             //)
           ENDIF
-C           RCN 05/05
-C           The printout below was changed to include the whole angular grid
-C           ala SCAT2000
-C
-89001       FORMAT(' ', 46x, 'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',
-     &        /,' ', 46x, 40('*'), /, ' ', 56x, 'CENTER-OF-MASS SYSTEM',
-     &      ///)
-            WRITE(6, 89001)
-            WRITE(6, 89002)
-89002       FORMAT(' ', 5x, 4('    TETA ', 2x, 'D.SIGMA/D.OMEGA', 6x),
-     &             /)
-            gang = 180.0/(NELang - 1)
-            DO iang = 1, NELang/4 + 1
-               imint = 4*(iang - 1) + 1
-               imaxt = MIN0(4*iang, NELang)
-               WRITE(6, 89004)( (j-1)*gang,ELAda(j),j=imint, imaxt)
-            ENDDO
-89004       FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
-            WRITE(6, '(//)')
-C
-C           RCN, 08/2004
-C
-            if(CSAlev(1, ICOller(2), nejcec).gt.0) then
-              gang = 180.0/(NDANG - 1)
-              WRITE(6, 99001)(ICOller(ilv), ilv = 2,min(ncoll,10))
-              WRITE(6, *)' '
-              DO iang = 1, NDANG
-               if(CSAlev(1, ICOller(2), nejcec).gt.0) then
-                 WRITE(6, 99002)(iang - 1)*gang,
-     &           (CSAlev(iang, ICOller(ilv), nejcec),
-     &            ilv = 2, min(ncoll,10))
-               endif
-              ENDDO
-              WRITE(6, *)' '
-              WRITE(6, 99003)(POPlv(ICOller(ilv), nnurec),
-     &                          ilv = 2,min(ncoll,10))
-            endif
-C=========================================================================
-C           the following ELSE block is to print ECIS calculated XS
-C           (it could be omitted)
-         ELSE
-C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
-C           ecis03
-            OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
-            READ(45, *, END = 1540)  ! To skip first line <CROSS-S.> ..
-            IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)ecistotxs
-            READ(45, *, END = 1540)ecisabsxs
-            IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)eciselaxs
- 1540       CLOSE(45)
-            IF(ZEJc(0).EQ.0) THEN
-              WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
-     &            ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
-            ELSE
-              WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl,
-     &            ecisabsxs/1000.
-            ENDIF
-C
-C=========================================================================
-         ENDIF
-      ENDIF
+C==================================================================
+C       the following ELSE block is to print ECIS calculated XS
+C       (it could be omitted)
+        ELSE
+          OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+          READ(45, *, END = 1540)  ! To skip first line <CROSS-S.> ..
+          IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)ecistotxs
+          READ(45, *, END = 1540)ecisabsxs
+          IF(ZEJc(0).EQ.0) READ(45, *, END = 1540)eciselaxs
+ 1540     CLOSE(45)
+          IF(ZEJc(0).EQ.0) THEN
+            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
+     &        ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
+          ELSE
+            WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl,
+     &        ecisabsxs/1000.
+          ENDIF
+C==================================================================
+        ENDIF
+C      The printout below was changed to include the whole angular grid
+        WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
+        WRITE(6, *)' '
+        gang = 180.0/(NDANG - 1)
+        DO iang = 1, NDANG
+          if(ncoll.gt.0) then
+            WRITE(6, 99002) (iang - 1)*gang,
+     &             (CSAlev(iang, ICOller(ilv), nejcec),
+     &                     ilv = 2, min(ncoll,10))
+          endif
+        ENDDO
+        WRITE(6, *)' '
+        WRITE(6, 99003)
+     &    (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
+        WRITE(6, *)' '
+        WRITE(6, *)' '
+        WRITE(6, *)' '
+      endif
+89001 FORMAT(' ', 46x, 'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',
+     &     /,' ', 46x, 40('*'), /, ' ', 56x, 'CENTER-OF-MASS SYSTEM',
+     &     ///)
+89002 FORMAT(' ', 5x, 4('    TETA ', 2x, 'D.SIGMA/D.OMEGA', 6x),/)
+89004 FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
+99001 FORMAT('  Angle ', 10(6x, i2, '-level'))
+99002 FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
+99003 FORMAT(6x, 3x, 11(2x, E12.6))
+99004 FORMAT(/, 2x, 'Total cross section         :', e14.7, ' mb',
+     &       /, 2x, 'Absorption cross section    :', e14.7, ' mb',
+     &       /, 2x, 'Shape elastic cross section :', e14.7, ' mb',//)
+99005 FORMAT(/, 2x, 'Absorption cross section    :', e14.7, ' mb',//)
 C
 C     Skipping all emission calculations
 C     GOTO 99999
@@ -1012,7 +947,6 @@ C--------
             CALL DDHMS(IZAejc(0), xizat, XJLv(LEVtarg, 0), EINl,
      &        CSFus*corrmsd, CHMs, debinhms, xnhms, 0, 1, 0, QDFrac,
      &        icalled)
-
             icalled = 1
             CSEmis(1, 1) = CSEmis(1, 1) + CSHms(1)
             CSEmis(2, 1) = CSEmis(2, 1) + CSHms(2)
@@ -1058,7 +992,7 @@ C--------
             CSEmis(2, 1) = CSEmis(2, 1) + CSMsc(2)
             IF(nvwful)GOTO 1650
          ENDIF
-         IF(nnuc.EQ.1 .AND. IOUt.GE.3 .AND. 
+         IF(nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
      &      (CSEmis(1, 1)+CSEmis(2, 1)).NE.0) THEN
             WRITE(6, *)' '
             WRITE(6, *)' Preequilibrium spectra (sum of all models):'
@@ -1345,12 +1279,14 @@ C-----------------calculate total emission
  1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF(ENDf.GT.0)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
-            IF(Fismod(nnuc).eq.0.)WRITE(80,*) 'csfis=', csfis, ' mb'
-            IF(Fismod(nnuc).gt.0.)THEN
+             IF(FISsil(nnuc)) then
+             IF(Fismod(nnuc).eq.0.)WRITE(80,*) 'csfis=', csfis, ' mb'
+             IF(Fismod(nnuc).gt.0.)THEN
                write(80,*)'  '
                DO m=1,int(Fismod(nnuc))+1
                   WRITE(80,*)'    Mode=',m,'  csfis=', csfism(m), ' mb'
                ENDDO
+             ENDIF
             ENDIF
          ENDDO                  !loop over c.n. excitation energy
 C--------
@@ -1398,7 +1334,7 @@ c--------------check for the number of branching ratios
      &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
             ENDIF
          ENDDO
-         IF(ENDf.GT.0 .AND. (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. 
+         IF(ENDf.GT.0 .AND. (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR.
      &      nnuc.EQ.mt649 .OR. nnuc.EQ.mt849)) THEN
             WRITE(12, '(1X,/,10X,40(1H-),/)')
             WRITE(12,*)' '
@@ -1476,19 +1412,19 @@ C        Add contributions to discrete levels for MT=91,649,849
 C        (merely for checking purpose)
             IF(nnuc.EQ.mt91) THEN
                nejc = 1
-               WRITE(6,*) 'Sum to continuum',xtotsp 
+               WRITE(6,*) 'Sum to continuum',xtotsp
                DO ilev = 1, NLV(nnuc)
                   xtotsp = xtotsp + CSDirlev(ilev,nejc)
                ENDDO
             ELSEIF(nnuc.EQ.mt649) THEN
                nejc = 2
-               WRITE(6,*) 'Sum to continuum',ptotsp 
+               WRITE(6,*) 'Sum to continuum',ptotsp
                DO ilev = 1, NLV(nnuc)
                   ptotsp = ptotsp + CSDirlev(ilev,nejc)
                ENDDO
             ELSEIF(nnuc.EQ.mt849) THEN
                nejc = 3
-               WRITE(6,*) 'Sum to continuum',atotsp 
+               WRITE(6,*) 'Sum to continuum',atotsp
                DO ilev = 1, NLV(nnuc)
                   atotsp = atotsp + CSDirlev(ilev,nejc)
                ENDDO
@@ -1964,10 +1900,18 @@ C                       to conserve the integral
       WRITE(12, '('' Tot. fission cross section '',G12.4,'' mb'')')
      &      TOTcsfis
       IF(IOUt.GT.1)THEN
-         WRITE(6, '(1X,//,''Inclusive spectra (C.M.)'',//)')
+         csemax = 0.
          DO nejc = 0, NEJcm
-            CALL AUERST(0, nejc)
+           DO i = 1, NDEX
+             csemax = DMAX1(CSE(i, Nejc, 0), csemax)
+           ENDDO
          ENDDO
+          if(csemax.gt.0.d0) then
+           WRITE(6, '(1X,//,''Inclusive spectra (C.M.)'',//)')
+           DO nejc = 0, NEJcm
+             CALL AUERST(0, nejc)
+            ENDDO
+          endif
       ENDIF
 C-----
 C-----ENDF spectra printout (inclusive representation MT = 10 or 5
@@ -2086,11 +2030,14 @@ C-----end of ENDF spectra (inclusive)
          WRITE(12, *)' '
          WRITE(6, *)' '
          WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
-      CLOSE(15,status='delete')
-      CLOSE(16,status='delete')
-      CLOSE(66,status='delete')
-         STOP 'REGULAR STOP'
+         CLOSE(15,status='delete')
+         CLOSE(16,status='delete')
+         CLOSE(66,status='delete')
+           write(*,*) '.'
+         CALL HORA(6)
+         STOP '. REGULAR STOP'
       ENDIF
+      CALL HORA(6)
       FIRst_ein = .FALSE.
       GOTO 1400
 99012 FORMAT(I12, F10.4, I5, F8.1, G15.6, I3,
@@ -2275,4 +2222,41 @@ C--------print end point again with 0 xs for consistency with particle spectra
          ENDIF
       ENDIF
       RETURN
+      END
+
+      SUBROUTINE HORA(IOUT)
+C
+C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL AND SINCE THE LAST CALL
+C              (LAHEY and MS FORTRAN compatible)
+C
+      REAL*8 DIFTIM,BEGTIM,ENDTIM,DIFTI1
+      INTEGER*2 IHR,MIN,ISEC,I110,IH,MIN1,IS,I10
+      INTEGER IOUT
+      LOGICAL NEVER_CALLED
+      DATA NEVER_CALLED/.TRUE./
+      SAVE BEGTIM,NEVER_CALLED
+
+      IF (NEVER_CALLED) then
+        NEVER_CALLED = .FALSE.
+        CALL GETTIM (IHR,MIN,ISEC,I110)
+        BEGTIM=DBLE(IHR*3600.+MIN*60.+ISEC+I110*.01)
+        WRITE(IOUT,1002) IHR,MIN,ISEC,I110
+        WRITE(*,1002) IHR,MIN,ISEC,I110
+      ELSE
+        CALL GETTIM (IH,MIN1,IS,I10)
+        ENDTIM=DBLE(IH*3600.+MIN1*60.+IS+I10*.01)
+        IF(ENDTIM.LT.BEGTIM) ENDTIM = ENDTIM +  86400.D0
+        DIFTIM=(ENDTIM-BEGTIM)/60.
+        DIFTI1=(DIFTIM-INT(DIFTIM))*60.
+        WRITE(IOUT,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
+        WRITE(*,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
+      ENDIF
+
+      RETURN
+ 1001 FORMAT (/15X,' CURRENT TIME: ',
+     1 I2,3H H ,I2,5H MIN ,I2,5H SEC ,I2,5H HUN /
+     1 15X,' CALCULATION TIME: ',I3,' MIN ',I2,' SEC'/)
+ 1002 FORMAT (/15X,' START TIME: ',
+     1 I2,3H H ,I2,5H MIN ,I2,5H SEC ,I2,5H HUN /)
+C====================================================================
       END

@@ -5,8 +5,8 @@ C
       CHARACTER reaction*21
 C-----Plujko_new: variable - SDRead
       LOGICAL FILevel, FUSread, FISsil, OMParf, DEFormed,
-     &        DEFault_energy_functional, OMPar_riplf, RIPl_omp(0:NDEJC),
-     &        RIPl_ompcc, CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
+     &        DEFault_energy_functional, OMPar_riplf,
+     &        CCCalc, OMParfcc, RELkin, FIRst_ein, SDRead
       INTEGER D_Klv, D_Llv
       DOUBLE PRECISION Lqdfac
 C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
@@ -17,8 +17,8 @@ C-----Plujko_new: variables - F_PRINT, Key_shape, Key_GDRGFL
       COMMON /UCOM/ Uexcit(NDEx,NDNuc)
 C-----Plujko_new(End)
       COMMON /GLOBAL_L/ FISsil(NDNUC), FILevel, FUSread, OMParf,
-     &                  DEFormed, DEFault_energy_functional, RIPl_omp,
-     &                  OMPar_riplf, RIPl_ompcc, CCCalc, OMParfcc,
+     &                  DEFormed, DEFault_energy_functional,
+     &                  OMPar_riplf, CCCalc, OMParfcc,
      &                  RELkin, FIRst_ein, SDREAD
 C
       COMMON /GLOBAL_C/ SYMb(0:NDNUC), SYMbe(0:NDEJC), reaction(NDNUC)
@@ -119,6 +119,7 @@ C    &                 EEP(0:NDEJC, 0:NDNUC), EEA(0:NDEJC, 0:NDNUC),
      &                 D_Elv(NDCOLLEV), D_Xjlv(NDCOLLEV),
      &                 D_Lvp(NDCOLLEV), D_Def(NDCOLLEV, NDDEFCC),
      &                 D_Klv(NDCOLLEV), D_Llv(NDCOLLEV)
+C
 C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limited
 C    to 0:1 on the last dimension in order to save memory - anyway, in the
 C    current implementation only first emissions  can be anisotropic (apart
