@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: fusion.f,v 1.11 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-05-28 09:56:04 $
+Ccc   * $Id: fusion.f,v 1.12 2004-05-28 09:56:04 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -371,14 +371,19 @@ C-----CAPOTE 2001
          IF((DIRect.EQ.1 .OR. DIRect.EQ.3) .AND. AEJc(Npro).LE.1)THEN
          ecis_abs = 0.
 C--------read ECIS absorption cross section
-         OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C        ecis03
+C        OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+         OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+         READ(45, *, END = 150)  ! Skipping first line <CROSS.S>
          READ(45, *, END = 150)totcs
          READ(45, *, END = 150)ecis_abs
  150     CLOSE(45)
-         SINl = 0
-         OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 200)
-C--------assuming maximum number of collective states is 100
-         DO l = 1, 100
+         SINl = 0.d0
+C        ecis03
+C        OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 200)
+         OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 200)
+         READ(45, *, END = 150)
+         DO l = 1, NDCollev
             READ(45, *, END = 200)dtmp
             SINl = SINl + dtmp
          ENDDO

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-04-23 05:15:45 $
-Ccc   * $Id: tl.f,v 1.18 2004-04-23 05:15:45 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-05-28 09:51:49 $
+Ccc   * $Id: tl.f,v 1.19 2004-05-28 09:51:49 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -2363,7 +2363,9 @@ C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
 C-----Opening ecis95 output file containing Tlj
-      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+C     OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
+      READ(45, *, END = 200)  ! To skip first line <TLJs.> ..  
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq
@@ -2393,14 +2395,18 @@ C-----Reaction cross section in mb
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = cte*sabs
-      OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 300)
+C     OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 300)
+      OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
+      READ(45, *, END = 300) ! Skipping first line
       SINl = 0.D0
       DO l = 1, ncoll - 1
          READ(45, *, END = 300)dtmp
          SINl = SINl + dtmp
       ENDDO
  300  CLOSE(45)
-      OPEN(UNIT = 45, FILE = 'ecis95.cs', STATUS = 'old', ERR = 400)
+C     OPEN(UNIT = 45, FILE = 'ecis95.cs', STATUS = 'old', ERR = 400)
+      OPEN(UNIT = 45, FILE = 'ecis03.cs', STATUS = 'old', ERR = 400)
+      READ(45, *, END = 400) ! Skipping first line
       READ(45, *)stotecis
       READ(45, *)sreacecis
       READ(45, *)selecis
@@ -2498,7 +2504,9 @@ C-----
 C----- Input of transmission coefficients
 C-----
 C-----Opening ecis95 output file containing Tlj
-      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+C     OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis95.tlj')
+      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
+      READ(45, *, END = 200) ! Skipping one line
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
  100  READ(45, '(1x,f4.1,1x,a1,1x,i4)', END = 200)jc, parc, nceq
@@ -2528,14 +2536,18 @@ C-----Reaction cross section in mb
          sabs = sabs + TTLl(J, l)*DBLE(2*l + 1)
       ENDDO
       sabs = cte*sabs
-      OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 300)
+C     OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 300)
+	  OPEN(UNIT = 45, FILE = 'ecis03.ics', STATUS = 'old', ERR = 300)
+      READ(45, *, END = 300) ! Skipping one line
       SINl = 0.D0
       DO l = 1, ncoll - 1
          READ(45, *, END = 300)dtmp
          SINl = SINl + dtmp
       ENDDO
  300  CLOSE(45)
-      OPEN(UNIT = 45, FILE = 'ecis95.cs', STATUS = 'old', ERR = 400)
+C     OPEN(UNIT = 45, FILE = 'ecis95.cs', STATUS = 'old', ERR = 400)
+      OPEN(UNIT = 45, FILE = 'ecis03.cs', STATUS = 'old', ERR = 400)
+      READ(45, *, END = 400) ! Skipping one line
       READ(45, *)stotecis
       READ(45, *)sreacecis
       READ(45, *)selecis
@@ -2609,7 +2621,9 @@ C     123456789 123456789 123456789 123456789 123456789
       BECis1 = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFTFFFFFFFFFFFFFFFFFFFFFF'
 C     +50     +60        +70      +80        +90
 C     123456789 123456789 123456789 123456789 123456789
-      BECis2 = 'FFFFFFFFFFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+C     BECis2 = 'FFFFFFFFFFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+C     For ecis03   
+      BECis2 = 'FFFFFFFFTFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' 
 C
 C-----*** OPTICAL POTENTIALS ***
 C-----Relativistic kinematics (y/n)
@@ -3003,9 +3017,9 @@ C
 C-----Running ECIS
 C
       IF(IOPsys.EQ.0)THEN
-         iwin = PIPE('../source/ecis<ecVIB.inp>ECIS_VIB.out#')
+         iwin = PIPE('../source/ecis03<ecVIB.inp>ECIS_VIB.out#')
       ELSE
-         iwin = PIPE('ecis<ecVIB.inp>ECIS_VIB.out#')
+         iwin = PIPE('ecis03<ecVIB.inp>ECIS_VIB.out#')
       ENDIF
       IF(.NOT.Ltlj)THEN
          IF(DIRect.NE.3)THEN
@@ -3393,14 +3407,14 @@ C
 C-----Running ECIS
       IF(IOPsys.EQ.0)THEN
          IF(npho.GT.0)THEN
-            iwin = PIPE('../source/ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
+           iwin = PIPE('../source/ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
          ELSE
-            iwin = PIPE('../source/ecis<ecVIBROT.inp>ECIS_ROT.out#')
+           iwin = PIPE('../source/ecis03<ecVIBROT.inp>ECIS_ROT.out#')
          ENDIF
       ELSEIF(npho.GT.0)THEN
-         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_VIBROT.out#')
+         iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
       ELSE
-         iwin = PIPE('ecis<ecVIBROT.inp>ECIS_ROT.out#')
+         iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_ROT.out#')
       ENDIF
       IF(.NOT.Ltlj)THEN
          IF(DIRect.EQ.3)THEN
@@ -3427,11 +3441,11 @@ C
       LOGICAL fexist
 C
       IF(Iwin.EQ.0)THEN
-         INQUIRE(FILE = 'ecis95.cs', EXIST = fexist)
+         INQUIRE(FILE = 'ecis03.cs', EXIST = fexist)
 C        IF ( fexist ) WRITE (6,*)
 C        &                     'Total, reaction and elastic c.s. calculated'
 C        &                     , ' with ' , Sname , ' model'
-         INQUIRE(FILE = 'ecis95.ics', EXIST = fexist)
+         INQUIRE(FILE = 'ecis03.ics', EXIST = fexist)
          IF(fexist)WRITE(6, *)
      &                  'Inelastic c.s. to collective levels calculated'
      &                  , ' with ', Sname, ' model'
