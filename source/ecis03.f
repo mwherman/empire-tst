@@ -7340,12 +7340,7 @@ C  TRANSPOSITION                                                        VICM-095
      1))                                                                VICM-097
     6 GO TO ( 7 , 9 , 10 , 14 , 18 , 24 ) , I                           VICM-098
 C  (0||Q||0)                                                            VICM-099
-C   7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) GO TO 41                VICM-100
-    7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) THEN
-        WRITE(*,*) 'J1=',J1,IPI(3,J1)
-        WRITE(*,*) 'J2=',J2,IPI(3,J2)
-        GO TO 41
-      ENDIF
+    7 IF ((IPI(3,J1).NE.1).OR.(IPI(3,J2).NE.1)) GO TO 41                VICM-100
       IF (LO(102)) GO TO 26                                             VICM-101
       DO 8 L=1,NBT1                                                     VICM-102
       IF (NBTA(18,L).NE.0) GO TO 8                                      VICM-103
@@ -7361,12 +7356,7 @@ C  (IP||Q||0)  WITH IP=J2                                               VICM-112
     9 IF (2*IT.GT.IDT) CALL MEMO('VIBM',IDT,2*IT,2)                     VICM-113
       N2=IPH(2,J2)                                                      VICM-114
       IF (IPH(1,J2).GT.2) N2=NVAR(1,N2+1)                               VICM-115
-      IF ((IPI(3,J2).NE.(2*NBTA(17,N2)+1)).OR.(IPI(3,J1).NE.1)) THEN
-        WRITE(*,*) 'J1=',J1,IPI(3,J1)
-        WRITE(*,*) 'J2=',J2,IPI(3,J2)
-        WRITE(*,*) '2*NBTA(17,N2)+1 =',2*NBTA(17,N2)+1
-        GO TO 41
-      ENDIF
+      IF ((IPI(3,J2).NE.(2*NBTA(17,N2)+1)).OR.(IPI(3,J1).NE.1)) GOTO 41 VICM-116
       IQ(1,IT)=N2                                                       VICM-117
       IQ(2,IT)=NBTA(17,N2)                                              VICM-118
       IQ(3,IT)=NSP                                                      VICM-119
@@ -11952,9 +11942,6 @@ C FOLDING OF CHARGE DISTRIBUTION WITH COULOMB POTENTIAL                 STDP-547
       IF (IDX.GT.2*NX) CALL MEMO('STDF',NX,(IDX+1)/2,2)                 STDP-549
       A7=0.D0                                                           STDP-550
       IF (LT(8)) A7=VA(NMB+4)                                           STDP-551
-C     PAP(1)=AP
-C     CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,PAP(1),A7,CCZ,A6,.TRUE.,
-C    >   .FALSE.)
       CALL COPO(V(1,L1),V(1,L1),X,ISM,HH,L,AP,A7,CCZ,A6,.TRUE.,.FALSE.) STDP-552
       IF (A6.EQ.0.D0) A6=DABS(V(ISM,L1)*DFLOAT(2*L+1)*(ISM*HH)**(L+1)/(CSTDP-553
      1CZ*VA(NMB)))                                                      STDP-554
