@@ -1,0 +1,100 @@
+Directory: densities/fission/
+File:      fis-barrier-etfsi.readme (January 15, 2002)
+******************************************************
+
+
+			fis-barrier-etfsi.dat
+
+    Compilation of fission barriers and saddle point deformations
+		       based on the ETFSI model
+	     (provided by S. Goriely on January 15, 2002)
+    **************************************************************
+
+    LARGE-SCALE FISSION-BARRIER CALCULATIONS WITH THE ETFSI METHOD
+
+			 A. Mamdouh, M. Rayet
+	       Universite Libre de Bruxelles (Belgium)
+			      M. Pearson
+	       Universite de Montreal, Quebec (Canada)
+			      F. Tondeur
+	 Institut Superieur Industriel de Bruxelles (Belgium)
+
+
+Content
+--------
+Predictions of the fission barriers and saddle point deformations
+obtained within the Extended Thomas-Fermi plus Strutinsky Integral
+(ETFSI) method. The ETFSI approach is a semi-classical approximation
+to the Hartree-Fock method in which the shell corrections are
+calculated with the 'integral' version of the Strutinsky theorem. BCS
+corrections are added with a delta-pairing force.  The fission
+barriers are derived with the SkSC4 Skyrme force on which the ETFSI-1
+mass formula is based. The experimental primary barriers can be
+reproduced within 1.5 MeV (except for the elements with Z < 87 having
+barriers above 10 MeV).
+
+The present ETFSI compilation includes 2301 nuclei with Z=78 through
+120.  Their masses range from slightly neutron deficient to very
+neutron rich nuclei (close to or up to the calculated neutron drip
+line), up to A = 318. This compilation contains the nuclei considered
+in [1], for which experimental barriers are known, and a slightly
+extended version of the set published in [2]. Also included are the
+experimental fission barriers compiled in [1] and those originating
+principally from [3].
+
+For each nucleus a maximum of two barriers are given, one "inner" and
+one "outer". They correspond to the highest saddle point among the
+"slightly" and the "strongly" deformed ones. Those two groups of
+saddle points correspond to well separated values of the elongation
+parameter c, cin and cout (see below).  In most cases cin < 1.6 and
+cout > 1.6 (in some cases 1.5 <cout <1.6).
+
+In addition to the calculated inner and outer barriers, the
+deformation parameters at the corresponding saddle points are
+included. The nuclear shapes are limited to axially symmetrical
+deformations. These are described by the so-called Brack
+parametrization (c,h,alpha) where c is the elongation parameter
+(c<1,=1 and >1 for oblate, spherical and prolate shapes, resp.) and h
+is related to the "necking" of the nuclear surface. The shapes
+corresponding to different regions of the (c,h) plane are described in
+detail in [1]. The parameter alpha measures the left-right asymmetry
+(alpha = 0 for symmetric shapes). The asymmetry parameters ain and
+aout listed in the file refer not to alpha but to the quantity
+alphatilda defined in [1] as alpha*c**3. In term of this quantity, the
+mass ratio of the two fission fragments is roughly given by
+(1+3/8*alphatilda)/(1-3/8*alphatilda).
+
+All the calculated barriers have deformation parameters within the
+following domain: 1.00<c<2.36, -0.26<h<+0.22, 0<=alphatilda<0.75 .
+
+
+Format
+------
+Each record of the file contains:
+
+   Z   : charge number
+   A   : mass number
+   El  : element symbol
+   cin : c of the inner barrier
+   hin : h of the inner barrier
+   ain : alphatilda of the inner barrier
+   Bin : inner barrier in MeV
+   Bexp: inner experimental barrier in MeV
+   cout: c of the outer barrier
+   hout: h of the outer barrier
+   aout: alphatilda of the outer barrier
+   Bout: outer barrier in MeV
+   Bexp: outer experimental barrier in MeV
+
+The corresponding FORTRAN format is (2i4,1x,a2,1x,10f9.2)
+
+
+References
+----------
+[1] A. Mamdouh, J. M. Pearson, M. Rayet and F.Tondeur (1998), Nucl. Phys.  A644,
+    389.
+[2] A. Mamdouh, J. M. Pearson, M. Rayet and F.Tondeur (2001), Nucl. Phys. A679,
+    337.
+[3] G. N. Smirenkin (1993) IAEA-Report INDC(CCP)-359.
+
+
