@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-15 22:16:18 $
-Ccc   * $Id: auxiliary.f,v 1.11 2004-06-15 22:16:18 herman Exp $
+Ccc   * $Date: 2005-02-16 05:33:33 $
+Ccc   * $Id: auxiliary.f,v 1.12 2005-02-16 05:33:33 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -81,6 +81,7 @@ C----Plujko_new(End)
          EX(1, nnuc) = 0.0
          JSTab(nnuc) = 0.0
          QPRod(nnuc) = -1000.0
+         FISden(nnuc) = 1.0
          DO j = 1, NDLW
             FISb(j, nnuc) = 0.0
          ENDDO
