@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-06 01:40:03 $
-Ccc   * $Id: HF-comp.f,v 1.36 2005-01-06 01:40:03 herman Exp $
+Ccc   * $Date: 2005-01-06 23:53:06 $
+Ccc   * $Id: HF-comp.f,v 1.37 2005-01-06 23:53:06 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -613,7 +613,18 @@ C
      &                                  *XJLv(l, Nnuc), POPlv(l, Nnuc)
 99002       FORMAT(1X, //, 5X, 'Level of energy  ', F8.4, ' MeV', 
      &             ' and spin ', F6.1, ' with population ', G13.5, 
-     &             ' mb is not depopulated ')
+     &             ' mb is not depopulated (g.s. transition assumed)')
+C-----------Well... let it go down to the ground state
+            gacs = POPlv(l, Nnuc)
+            POPlv(1, Nnuc) = POPlv(1, Nnuc) + gacs
+            POPlv(l, Nnuc) = 0.0
+            egd = ELV(l, Nnuc) 
+            icse = 2.0001 + egd/DE
+            CSE(icse, 0, Nnuc) = CSE(icse, 0, Nnuc) + gacs/DE
+            CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + gacs
+C-----------Add transition to the exclusive gamma spectrum 
+            IF(ENDf.EQ.1) POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse,
+     &         Nnuc)+ gacs/DE
          ELSE
             popl = POPlv(l, Nnuc)
             IF(popl.NE.0.0D0)THEN
