@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-15 23:05:35 $
-Ccc   * $Id: HRTW-comp.f,v 1.15 2005-02-15 23:05:35 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-16 14:00:26 $
+Ccc   * $Id: HRTW-comp.f,v 1.16 2005-02-16 14:00:26 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -58,9 +58,8 @@ C COMMON variable
      &                 GAMmafism(NFMOD),  WFIsm(NFMOD), BFFm(NFMOD),
      &                 NRBinfism(NFMOD),destepm(NFMOD), tfbm(NFMOD),
      &                 tdirm(NFMOD),csfism(NFMOD),tfb,tdirect
-      DOUBLE PRECISION sumfism(3),csfism, 
-     &                 cota,cota1,cotaexp,xminnm,destepm,efbm
-      INTEGER m,bffm,kk,nrbinfis,nrbinfism
+      DOUBLE PRECISION sumfism(3),csfism,xminnm,destepm,efbm
+      INTEGER m,bffm,nrbinfis,nrbinfism
 C
       DOUBLE PRECISION H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, H_Sweak, 
      &                 H_Tav, H_Tl(NDHRTW1, 2), H_Tthr, TFIs
