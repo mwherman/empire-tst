@@ -1,0 +1,103 @@
+    1    1 TOTAL                                   * MT - REACTION              
+    2    2 ELASTIC                                 * EQUIVALENCE TABLE          
+    3    3 NONELASTIC                              *                            
+    4    4 INELASTIC                               *                            
+    6    9 (N,2N) LEVEL                            *                            
+   10   10 (N EMISSION)                            * FORMAT                     
+   11   15 (N,2N) LEVEL                            * ======                     
+   16   16 (N,2N)                                  * COLUMNS DESCRIPTION        
+   17   17 (N,3N)                                  * ======= ===========        
+   18   18 FISSION                                 *   1- 5  LOWER MT           
+   19   19 (N,F) FIRST CHANCE                      *   6-10  UPPER MT           
+   20   20 (N,NF) SECOND CHANCE                    *  12-51  REACTION           
+   21   21 (N,2NF) THIRD CHANCE                    *         DESCRIPTION        
+   22   22 (N,N') A                                *                            
+   23   23 (N,N') 3A                               *  ONLY THE FIRST 50         
+   24   24 (N,2N) A                                *  COLUMNS A LINE ARE        
+   25   25 (N,3N) A                                *  READ. ANY TEXT MAY        
+   26   26 (N,2N) ISOMER                           *  BE ADDED IN COLUMNS       
+   27   27 ABSORPTION                              *  51-80 (E.G. THIS          
+   28   28 (N,N') P                                *  TEXT).                    
+   29   29 (N,N') 2A                               *                            
+   30   30 (N,2N) 2A                               *  ADDING REACTIONS          
+   32   32 (N,N') D                                *  ================          
+   33   33 (N,N') T                                *  TO ADD REACTIONS TO       
+   34   34 (N,N') HE-3                             *  THIS TABLE THEY           
+   35   35 (N,N') D,2A                             *  MUST BE INSERTED IN       
+   36   36 (N,N') T,2A                             *  ASCENDING ORDER AND       
+   37   37 (N,4N)                                  *  MT RANGES MUST NOT        
+   38   38 (N,3NF)                                 *  OVERLAP                   
+   41   50 (N,2N) LEVEL                            *                            
+   51   90 (N,N') LEVEL                            *  MAXIMUM TABLE SIZE        
+   91   91 (N,N') CONTINUUM                        *  ==================        
+  101  101 (N,DISAPPEARENCE)                       *                            
+  102  102 (N,GAMMA)                               *  UP TO 300 REACTIONS       
+  103  103 (N,P)                                   *  MAY BE INCLUDED IN        
+  104  104 (N,D)                                   *  THIS TABLE. IF MORE       
+  105  105 (N,T)                                   *  THAN 300 ONLY THE         
+  106  106 (N,HE-3)                                *  FIRST 300 WILL BE         
+  107  107 (N,A)                                   *  READ AND USED.            
+  108  108 (N,2A)                                  *                            
+  109  109 (N,3A)                                  *  ENDF/B CONVENTIONS        
+  111  111 (N,2P)                                  *  ==================        
+  112  112 (N,P) A                                 *  ARE USED FOR              
+  113  113 (N,T) 2A                                *  MT=1 - 999.               
+  114  114 (N,D) 2A                                *                            
+  120  120 TARGET DESTRUCTION                      *                            
+  203  203 HYDROGEN PRODUCTION                     *                            
+  204  204 DEUTERIUM PRODUCTION                    *                            
+  205  205 TRITIUM PRODUCTION                      *                            
+  206  206 HE-3 PRODUCTION                         *                            
+  207  207 HE-4 PRODUCTION                         *                            
+  251  251 MU-BAR (LAB)                            *                            
+  252  252 XI                                      *                            
+  253  253 GAMMA                                   *                            
+  452  452 TOTAL NU-BAR                            *                            
+  455  455 DELAYED NU-BAR                          *                            
+  456  456 PROMPT NU-BAR                           *                            
+  700  719 (N,P') LEVEL                            *                            
+  720  739 (N,D') LEVEL                            *                            
+  740  759 (N,T') LEVEL                            *                            
+  760  779 (N,HE-3') LEVEL                         *                            
+  780  799 (N,A') LEVEL                            *                            
+  800  800 DAMAGE (ASTM)                           *                            
+  801  801 DAMAGE (EUR)                            *                            
+ 1001 1001 (N,N+P)                                 * COMBINATION REACTION       
+ 1002 1002 (N,N+P)+(N,P)                           * USE MT=1001 - 1999         
+ 1003 1003 (N,N+P)+(N,D)                           *                            
+ 1004 1004 (N,N+A)+(N,A)                           *                            
+ 1016 1016 FISSION FRAGMENTS                       *                            
+ 1018 1018 PHOTOFISSION                            *                            
+ 1019 1019 PHOTOFISSION FRAGMENTS                  *                            
+ 1103 1103 (N,P) LEVEL                             *                            
+ 1104 1104 (N,D) LEVEL                             *                            
+ 1108 1108 (N,2A) LEVEL                            *                            
+ 1113 1113 (N,T) 2A LEVEL                          *                            
+ 1200 1200 (N,3-LI-7)                              *                            
+ 1800 1800                                         * (LEVEL DENSITY)            
+ 2103 2103 (N,P) DIRECT                            *  DIRECT = MT +2000         
+ 3103 3103 (N,P) COMPOUND                          *  COMPOUND = MT +3000       
+ 4002 4002 (G,N)                                   *  PHOTON INCIDENT           
+ 4010 4010 (G,XN)                                  *  DATA (GCP ENEA BO)        
+ 4016 4016 (G,2N)                                  *                            
+ 4017 4017 (G,3N)                                  *                            
+ 4028 4028 (G,N+P)                                 *                            
+ 4041 4041 (G,2N+P)                                *                            
+ 4101 4101 (G,X)                                   *                            
+ 6004 6004 LEVEL SPACING                           *  RESONANCE PARAM.  0       
+ 6010 6010 TOTAL WIDTH                             *  6000 - GENERAL    0       
+ 6021 6021 ELASTIC WIDTH                           * 6010 - TOTAL       0       
+ 6022 6022 G*ELASTIC WIDTH                         * 6020 - ELASTIC     0       
+ 6023 6023 REDUCED ELASTIC WIDTH                   * 6030 - CAPTURE     0       
+ 6024 6024 G*(REDUCED ELASTIC) WIDTH               * 6040 - FISSION     0       
+ 6031 6031 CAPTURE WIDTH                           * 6050 - RATIOS      0       
+ 6032 6032 G*CAPTURE WIDTH                         *                    0       
+ 6051 6051 G*ELASTIC*CAPTURE/TOTAL WIDTH           *                    0       
+ 8001 8001 (P,N)                                   *  CHARGED PARTICLE          
+ 8002 8002 (D,N)                                   *  INDUCED REACTIONS         
+ 8003 8003 (T,N)                                   *  USE MT=8001 - 8999        
+ 8004 8004 (A,N)                                   *                            
+ 8102 8104 ((G,N)+(G,N+P))                         *  ADDED G.C.P. ENEA         
+ 8105 8107 ((G,2N)+(G,2N+P))                       *   "                        
+ 8120 8120 (G,X)                                   *   "                        
+ 9000 9999 PRODUCTION                              *                            

@@ -1,0 +1,9 @@
+#!/bin/bash
+for file in $*
+do
+#gv ${file} &
+#gv std/${file} & 
+#gv om-konshin/${file} &
+#gv om-rapaport/${file} 
+gv om-patterson/${file} 
+done

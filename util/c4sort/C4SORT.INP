@@ -1,0 +1,5 @@
+$* C4SORT
+          Sort the EXFOR file in C4 format overwriting the original file
+   FLC4IN ../x4toc4/c4.out
+   FLC4OU ../x4toc4/c4.out
+   ENDC4S

@@ -1,0 +1,880 @@
+                                                                       
+     PROGRAM PLOTC4                                                    
+
+     VERSION 86-1 (AUGUST 1986)                                        
+     VERSION 87-1 (JUNE 1987)   *SOFTWARE UPPER AND LOWER CASE         
+                                 CHARACTERS                            
+     VERSION 00-1 (NOV. 2000)   *UPGRADE TO COMPARE MEASURED
+                                 DIFFERENTIAL DATA WITH CURVES FROM
+                                 EVALUATED DATA FILES.
+                                *MODIFICATIONS FOR COMPATIBILITY WITH
+                                 CHARACTER PLOTTING PACKAGE OF THE
+                                 PRE-PRO CODES.
+                                                                       
+     OWNED, MAINTAINED AND DISTRIBUTED BY
+     ------------------------------------
+     THE NUCLEAR DATA SECTION
+     INTERNATIONAL ATOMIC ENERGY AGENCY
+     P.O. BOX 100
+     A-1400, VIENNA, AUSTRIA
+     EUROPE
+
+     ORIGINALLY WRITTEN BY
+     ------------------------------------
+     DERMOTT E. CULLEN
+     CURRENT ADDRESS
+     UNIVERSITY OF CALIFORNIA
+     LAWRENCE LIVERMORE NATIONAL LABORATORY
+     L-86
+     P.O. BOX 808
+     LIVERMORE, CA 94550
+     U.S.A.
+     TELEPHONE  925-423-7359
+     E. MAIL    CULLEN1@LLNL.GOV
+     WEBSITE    HTTP://REDDOG1.LLNL.GOV
+
+     VERSION 00-1 IMPLEMENTED BY
+     ANDREJ TRKOV
+     THE NUCLEAR DATA SECTION
+     INTERNATIONAL ATOMIC ENERGY AGENCY
+     P.O. BOX 100
+     A-1400, VIENNA, AUSTRIA
+     EUROPE
+                                                                       
+     PURPOSE                                                           
+     =======                                                           
+     PLOT EVALUATED DATA FROM THE ENDF/B FORMAT AND/OR EXPERIMENTAL    
+     DATA WHICH IS IN A COMPUTATION FORMAT.                            
+                                                                       
+     THIS PROGRAM HAS BEEN DESIGNED TO USE THE COMPUTATION FORMAT      
+     AND CONVENTIONS WHICH ARE USED BY PROGRAM X4TOC4 TO TRANSLATE     
+     EXPERIMENTALLY MEASURED DATA FROM THE EXFOR TO A COMPUTATION      
+     FORMAT.                                                           
+                                                                       
+     GRAPHICS INTERFACE                                                
+     ==================================================================
+     THIS PROGRAM USES A SIMPLE CALCOMP LIKE GRAPHICS INTERFACE WHICH  
+     REQUIRES ONLY 3 SUBROUTINES...PLOTS, PLOT AND PEN (DESCRIBED IN   
+     DETAIL BELOW). ALL CHARACTERS AND SYMBOLS ARE DRAWN USING TABLES  
+     OF PEN STROKES (SUPPLIED WITH THIS PROGRAM). USING THIS METHOD    
+     THE PROGRAM SHOULD BE SIMPLE TO INTERFACE TO VIRTUALLY ANY PLOTTER
+     OR GRAPHICS TERMINAL AND THE APPEARANCE AND LAYOUT OF THE PLOTS   
+     SHOULD BE INDEPENDENT OF WHICH PLOTTER IS USED.                   
+                                                                       
+     WHAT CAN BE PLOTTED                                               
+     ===================                                               
+     AT THE PRESENT TIME THE FOLLOWING TYPES OF DATA CAN BE PLOTTED,   
+                                                                       
+     (1) MF =   3 - CROSS SECTIONS. ENDF/B AND EXFOR DATA CAN BE       
+                    COMPARED (ONLY MF = 3 ENDF/B DATA CAN BE COMPARED).
+     (2) MF =   4 - ANGULAR DISTRIBUTIONS (ONLY EXFOR)                 
+     (3) MF =   5 - ENERGY DISTRIBUTIONS (ONLY EXFOR)                  
+     (4) MF =   6 - DOUBLE DIFFERENTIAL (ONLY EXFOR)                   
+     (5) MF = 154 - LEGENDRE COEFFICENTS (ONLY EXFOR)                  
+     (6) MF = 203 - CROSS SECTION RATIOS (ONLY EXFOR)                  
+     (7) MF = 402 - RESONANCE PARAMETERS (ONLY EXFOR)                  
+     (8) MF = 801 - FISSION YIELD DATA (ONLY EXFOR)                    
+                                                                       
+     ALL OTHER DATA WILL BE SKIPPED                                    
+                                                                       
+     WHAT DATA WILL BE PLOTTED                                         
+     =========================                                         
+     BASED ON INPUT OPTIONS THE USER MAY SPECIFY WHETHER THE PROGRAM   
+     SHOULD PLOT ONLY EXFOR DATA OR EXFOR AND ENDF/B DATA. IN ADDITION 
+     THE USER MAY SPECIFY UP TO 100 ZA/MF/MT RANGES TO SELECT DATA.    
+                                                                       
+     HOW MUCH DATA CAN BE PLOTTED                                      
+     ============================                                      
+     ENDF/B DATA                                                       
+     -----------                                                       
+     EACH SECTION OF ENDF/B CROSS SECTIONS (MF =3, ANY MT) MAY CONTAIN 
+     ANY NUMBER OF DATA POINTS. IF A SECTION CONTAINS 9000 OR FEWER    
+     POINTS ALL OF THE DATA WILL BE IN CORE. IF THE SECTION CONTAINS   
+     MORE THAN 9000 POINTS THE DATA WILL BE WRITTEN TO A SCRATCH FILE  
+     AND READ AS NEEDED.                                               
+...  LIMIT INCREASED TO 90000 POINTS BY TRKOV.
+                                                                       
+     EXFOR DATA                                                        
+     ----------                                                        
+     BASED ON INPUT PARAMETERS THE USER MAY CONTROL HOW MUCH EXFOR DATA
+     WILL APPEAR ON EACH PLOT. THIS PROGRAM ALLOWS THE USER TO SPECIFY 
+     THAT UP TO 1000 DATA POINTS MAY APPEAR ON EACH PLOT. IF THERE ARE 
+     MORE PHYSICALLY COMPARABLE POINTS (E.G., SAME ZA, MF, MT) THAN    
+     SPECIFIED BY THE USER THE PROGRAM WILL CREATE A SERIES OF PLOTS   
+     EACH CONTAINING NOT MORE THAN THE MAXIMUM NUMBER OF POINTS PER    
+     PLOT SPECIFIED BY THE USER.                                       
+...  MAXIMUM NUMBER OF POINTS INCREASED TO 10000 BY TRKOV
+                                                                       
+     WHAT COMPUTERS WILL THE PROGRAM RUN ON                            
+     ======================================                            
+     THE PROGRAM HAS BEEN IMPLEMENTED ON AN IBM MAINFRAME AND AN IBM   
+     PERSONAL COMPUTER. THE PROGRAM IS SMALL ENOUGH TO RUN ON VIRTUALLY
+     ANY COMPUTER. FOR SPECIAL CONSIDERATIONS SEE THE SECTIONS BELOW ON
+     (1) COMPUTER DEPENDENT CODING                                     
+     (2) PLOTTER INTERFACE                                             
+                                                                       
+     THE PROGRAM CAN DETERMINE WHETHER IT IS RUNNING ON A MAINFRAME OR 
+     AN IBM-PC. THE VARIABLE IBMPC IS SET TO -1 IN MAIN. IF RUNNING ON 
+     A MAINFRAME ITS VALUE WILL WILL NOT CHANGE. IF RUNNING ON AN      
+     IBM-PC THE PLOTTER INTERFACE ROUTINE PLOTS WILL RESET IBMPC TO,   
+                                                                       
+     IBMPC = 0 - IBM-PC FULL SIZE PLOTS                                
+     IBMPC = 1 - IBM-PC HALF SIZE PLOTS                                
+                                                                       
+     DUE TO SOME LIMITATIONS OF THE MINIMUM CHARACTER SIZE THAT CAN BE 
+     PLOTTED ON A HEWLETT-PACKARD PLOTTER IT IS IMPORTANT THAT THE     
+     PROGRAM KNOW WHETHER IT IS RUNNING ON A MAINFRAME OR AN IBM-PC.   
+                                                                       
+     COMPUTATION FORMAT                                                
+     ==================                                                
+     THE COMPUTATION FORMAT USES A CLASSIFICATION SYSTEM AND UNITS     
+     WHICH ARE COMPATIBLE WITH ENDF/B. DATA IS CLASSIFIED BY (1) ZA    
+     OF PROJECTILE, (2) ZA OF TARGET, (3) METASTABLE STATE OF TARGET,  
+     (4) MF - TYPE OF DATA, (5) MT - REACTION, (6) METASTABLE STATE    
+     OF RESIDUAL NUCLEUS. TO IDENTIFY THE SOURCE OF THE DATA THE FIRST 
+     AUTHOR AND YEAR AND THE EXFOR ACCESSION AND SUB-ACCESSION NUMBER  
+     ARE INCLUDED IN THE FORMAT. IN ADDITION FIELDS ARE ASSIGNED TO    
+     DEFINE THE STATUS OF THE EXFOR DATA (E.G., S = SUPERCEDED),       
+     WHETHER DATA IS IN THE LABORATORY OR CENTER-OF-MASS FRAME OF      
+     REFERENCE AND THE PHYSICAL SIGNIFICANCE OF THE LAST 2 OUTPUT      
+     FIELDS (LVL = LEVEL ENERGY, HL = HALF-LIFE). FINALLY THE FORMAT   
+     INCLUDES 8 FIELDS IN WHICH THE OUTPUT DATA ARE CONTAINED (E.G.,   
+     INCIDENT ENERGY, DATA, COSINE, UNCERTAINTIES, ETC.)               
+                                                                       
+     COLUMNS   DESCRIPTION                                             
+     -------   -----------                                             
+       1-  5   PROJECTILE ZA (E.G. NEUTRON =1, PROTON =1001)           
+       6- 11   TARGET ZA (E.G. 26-FE-56 =  26056)                      
+          12   TARGET METASTABLE STATE (E.G. 26-FE-56-M = M)           
+      13- 15   MF (ENDF/B CONVENTIONS, PLUS ADDITIONS).                
+      16- 19   MT (ENDF/B CONVENTIONS, PLUS ADDITIONS).                
+          20   PRODUCT METASTABLE STATE (E.G. 26-FE-56-M = M)          
+          21   EXFOR STATUS                                            
+          22   CENTER-OF-MASS FLAG (C=CENTER-OF-MASS, BLANK=LAB)       
+      23- 94   8 DATA FIELDS (EACH IN E9.3 FORMAT). DEFINED BELOW.     
+      95- 97   IDENTIFICATION OF DATA FIELDS 7 AND 8                   
+               (E.G., LVL=LEVEL, HL=HALF-LIFE.ETC.)                    
+      98-122   REFERENCE (FIRST AUTHOR AND YEAR)                       
+     123-127   EXFOR ACCESSION NUMBER                                  
+     128-130   EXFOR SUB-ACCESSION NUMBER                              
+         131   MULTI-DIMENSION TABLE FLAG                              
+                                                                       
+     DEFINITION OF 8 COMPUTATION FORMAT DATA FIELDS                    
+     ==============================================                    
+     IN ORDER TO PLOT DATA THIS PROGRAM ASSUMES THAT THE FOLLOWING     
+     CONVENTIONS HAVE BEEN USED FOR DATA IN THE COMPUTATION FORMAT.    
+                                                                       
+     DATA FIELD   DEFINITION                                           
+     ----------   ----------                                           
+       1          PROJECTILE INCIDENT ENERGY                           
+       2          PROJECTILE INCIDENT ENERGY UNCERTAINTY               
+       3          DATA, E.G., CROSS SECTION, ANGULAR DISTRIBUTION, ETC.
+       4          DATA UNCERTAINTY                                     
+       5          COSINE OR LEGENDRE ORDER                             
+       6          COSINE UNCERTAINTY                                   
+       7          IDENTIFIED BY COLUMNS 95-97 (E.G.,LEVEL E, HALF-LIFE)
+       8          IDENTIFIED BY COLUMNS 95-97 (E.G.,LEVEL E UNCERTANTY)
+                                                                       
+     THE PHYSICAL SIGNIFICANCE OF THE FIRST 6 DATA FIELDS IS DEFINED BY
+     THE MF (DATA TYPE). THE PHYSICAL SIGNIFICANCE OF FIELDS 7 AND 8   
+     ARE DEFINED BY COLUMNS 95 THROUGH 97 (E.G. LVL = LEVEL ENERGY AND 
+     ITS UNCERTAINTY).                                                 
+                                                                       
+     SPECIAL CONVENTIONS                                               
+     ===================                                               
+     THE ABOVE CONVENTIONS ARE APPROPRIATE FOR MOST TYPES OF DATA      
+     IN THE ENDF/B SYSTEM. IN ORDER TO ALLOW THIS PROGRAM TO PLOT      
+     ADDITIONAL TYPES OF DATA THE FOLLOWING SPECIAL CONVENTIONS HAVE   
+     BEEN ADOPTED,                                                     
+                                                                       
+     CROSS SECTION RATIOS  - FIELD 5 = MT OF DENOMINATOR.              
+     (MF = 203)              FIELD 6 = ZA OF DENOMINATOR.              
+     FISSION YIELD DATA    - FIELD 5 = ZA OF FISSION FRAGMENT          
+     (MF = 801)              FIELD 6 = MASS OF FISSION FRAGMENT        
+     PRODUCTION            - FIELD 6 = ZA OF PRODUCT                   
+     (MT = 9000-9999)                                                  
+                                                                       
+     SEE, REMARKS BELOW ON METASTABLE STATE FLAGS.                     
+                                                                       
+     BLANK VS. ZERO DATA FIELDS                                        
+     ==========================                                        
+     THE 8 DATA FIELDS ON EACH COMPUTATION FORMAT LINE ARE READ AS     
+     CHARACTERS AND INTERNALLY CONVERTED TO FLOATING POINT NUMBERS     
+     (SEE, SUBROUTINE FLOAT9). BY TESTING BEFORE CONVERTING THIS       
+     PROGRAM CAN DETERMINE WHETHER ANY GIVEN FIELD IS BLANK (NO DATA   
+     GIVEN) AS OPPOSED TO ZERO. IT IS OFTEN IMPORTANT TO MAKE THIS     
+     DISTINCTION, PARTICULARLY FOR FIELDS 7 AND 8, E.G. THE DIFFERENCE 
+     BETWEEN 0.0 INDICATING GROUND STATE AS OPPOSED TO NO DATA GIVEN.  
+     THE EXFOR TO COMPUTATION FORMAT CONVERSION PROGRAM X4TOC4 ALSO    
+     MAKES THIS DISTINCTION AND LEAVES UNDEFINED FIELDS BLANK (NOT     
+     ZERO). THEREFORE, ANY DATA CONVERTED TO THE COMPUTATION FORMAT    
+     FORMAT USING PROGRAM X4TOC4 WILL FOLLOW THE CORRECT CONVENTIONS.  
+                                                                       
+     HOWEVER, IF THE USER OF THIS PROGRAM DIRECTLY CODES DATA IN THE   
+     COMPUTATION FORMAT IT IS IMPORTANT TO MAINTAIN THIS CONVENTION.   
+     REMEMBER---ANY UNDEFINED FIELDS SHOULD BE LEFT BLANK AND NOT SET  
+     TO ZERO.                                                          
+                                                                       
+     COMPUTATION FORMAT UNITS                                          
+     ========================                                          
+     IN ORDER TO PLOT DATA THIS PROGRAM ASSUMES THAT THE FOLLOWING     
+     UNITS HAVE BEEN USED FOR DATA IN THE COMPUTATION FORMAT.          
+                                                                       
+     EV         = ENERGY                                               
+     BARNS      = CROSS SECTION                                        
+     STERADIANS = SOLID ANGLE                                          
+     SECONDS    = TIME                                                 
+     KELVIN     = TEMPERATURE                                          
+                                                                       
+     FOR EXAMPLE DOUBLE DIFFERENTIAL DATA (MF=6) WILL BE IN,           
+                                                                       
+     BARNS/EV/STERADIAN                                                
+                                                                       
+     METASTABLE STATE                                                  
+     ================                                                  
+     THE COMPUTATION FORMAT ALLOWS THE METASTABLE STATE OF THE TARGET  
+     AND RESIDUAL NUCLEUS TO BE IDENTIFIED. FOR RATIO DATA METASTABLE  
+     STATE OF BOTH NUMERATOR AND DENOMINATOR OF THE RATIO SHOULD BE    
+     DEFINED.                                                          
+                                                                       
+     THE METASTABLE STATE OF THE TARGET IS IDENTIFIED IN COLUMN 12 AND 
+     THE METASTABLE STATE OF THE RESIDUAL NUCLUES IN COLUMN 20. FOR    
+     RATIO DATA THE METASTABLE STATE OF THE DENOMINATOR TARGET AND     
+     RESIDUAL NUCLEUS ARE IDENTIFIED BY HAVING THE DENOMINATOR ZA AND  
+     MT IN THE FORM ZA.M AND MT.M (E.G., 26056.9 AND 102.1). COLUMNS   
+     12 AND 20 MAY COTAIN CHARACTERS SUCH AS M, BUT TO MAINTAIN THE    
+     EIGHT OUTPUT FIELDS IN STRICTLY NUMERICAL FORM THE DENOMINATOR    
+     ZA.M AND MT.M WILL BE IN NUMERICAL FORM. THE POSSIBLE CHARACTERS  
+     THAT MAY APPEAR IN COLUMNS 12 OR 20 AND THEIR NUMERICAL           
+     EQUIVALENTS USED WITH RATIO DENOMINATOR ZA AND MT INCLUDE,        
+                                                                       
+     DEFINITION    COLUMN 12 OR 20     EQUIVALENT   PLOTTED AS         
+     ==========    ===============     ==========   ==========         
+     GROUND              G                0           -G               
+     M1                  1                1           -M1              
+     M2                  2                2           -M2              
+     M3                  3                3           -M3              
+     M4                  4                4           -M4              
+     M5                  5                5           -M5              
+     UNKNOWN             ?                6           -M?              
+     M                   M                7           -M               
+     MORE THAN 1         +                8           -M+              
+     ALL OR TOTAL        T                9           BLANK            
+     ALL OR TOTAL      BLANK              9           BLANK            
+                                                                       
+     BY CONVENTION IF AN EXFOR REACTION DOES NOT SPECIFY A METASTABLE  
+     STATE THE STATE IS DEFINED IN THE COMPUTATION FORMAT TO BE..ALL.. 
+     (I.E., BLANK IN COLUMN 12 OR 20, 9 IN RATIO ZA OR MT).            
+                                                                       
+     FOR EXAMPLE, FOR A RATIO IF THE ZA.M AND MT.M ARE OUTPUT AS       
+     26056.9 AND 102.1, RESPECTIVELY THE RATIO DENOMINATOR TARGET IS   
+     26-FE-56 (ALL) AND THE REACTION IS CAPTURE (MT=102) LEAVING THE   
+     RESIDUAL NUCLUES IN THE M1 STATE.                                 
+                                                                       
+     EXFOR STATUS                                                      
+     ============                                                      
+     COLUMN 21 OF EACH COMPUTATION FORMAT RECORD MAY CONTAIN BLANK     
+     (STATUS NOT SPECIFIED) OR ONE TO THE FOLLOWING CHARACTERS,        
+                                                                       
+     COLUMN 21   DEFINITION                                            
+     ---------   ----------                                            
+        U        UNNORMALIZED (HAS PRIORITY OVER EXFOR STATUS AND IS   
+                 USED TO INDICATE THAT THE DATA IS NOT IN STANDARD     
+                 OUTPUT UNITS. Y AXIS LABEL WILL SAY..UNNORMALIZED..). 
+        A        APPROVED BY AUTHOR                                    
+        C        CORRELATED                                            
+        D        DEPENDENT                                             
+        O        OUTDATED                                              
+        P        PRELIMINARY                                           
+        R        RENORMALIZED                                          
+        S        SUPERCEDED                                            
+                                                                       
+     IF DATA HAS ANY OTHER EXFOR STATUS (E.G., TRANSLATED FROM SCISRS) 
+     THE STATUS FIELD WILL BE BLANK.                                   
+                                                                       
+     CONTROL OF PLOTTING                                               
+     ===================                                               
+     THE USER HAS CONTROL OVER HOW DATA IN THE COMPUTATION FORMAT      
+     IS INTERPRETED BY THIS PROGRAM.                                   
+                                                                       
+     DATA ON EACH PLOT IS IDENTIFIED BY PLOTTING A CHARACTER EQUIVALENT
+     OF TARGET ZA AND METASTABLE STATE (ZA), DATA TYPE (MF), REACTION  
+     (MT) AND RESIDUAL METASTABLE STATE. THE ZA, MF AND MT MAY BE      
+     INTERPRETED IN ANY MANNER THAT THE USER CHOOSES.                  
+                                                                       
+     THIS IS ACCOMPLISHED BY USING THREE DICTIONARIES WHICH CONTROL    
+     THE PLOTTING. ALL THREE OF THESE DICTIONARIES ARE DISTRIBUTED     
+     WITH THIS PROGRAM. EACH DICTIONARY IS A SIMPLE CARD IMAGE FILE    
+     WHICH MAY BE MODIFIED BY THE USER AT ANY TIME TO MEET SPECIFIC    
+     NEEDS. THE THREE DICTIONARIES ARE,                                
+                                                                       
+     (1) INTERPRETATION OF SPECIAL ZA                                  
+         ----------------------------                                  
+         FOR ALL TARGET OR RESIDUAL NUCLEI THIS PROGRAM WILL USE THE   
+         ENDF/B CONVENTION OF ASSUMING ZA = 1000*Z + A. FOR SPECIAL    
+         MATERIALS WHICH DO NOT EASILY FIT INTO THIS SCHEME (E.G.,     
+         WATER) THE ENDF/B CONVENTION IS TO DEFINE Z =0 AND TO ASSIGN  
+         A NUMERICAL EQUIVALENT FOR EACH SPECIAL MATERIAL. FOR NORMAL  
+         MATERIALS THIS PROGRAM WILL USE ZA TO DEFINE THE MATERIAL OR  
+         ISOTOPE. FOR SPECIAL MATERIAL (Z=0) THIS PROGRAM WILL USE THIS
+         DICTIONARY TO DEFINE THE MATERIAL. AS DISTRIBUTED THIS        
+         DICTIONARY CONTAINS ALL OF THE SPECIAL MATERIALS DEFINED IN   
+         THE ENDF/B SYSTEM. THE USER MAY CODE DATA FOR ANY SPECIAL     
+         MATERIAL IN THE COMPUTATION FORMAT AND ASSIGN IT A SPECIAL    
+         ZA. BY ADDING THE DEFINITION TO THIS DICTIONARY THE USER MAY  
+         OBTAIN PLOTS ON WHICH THE SPECIAL MATERIAL IS PROPERLY        
+         IDENTIFIED.                                                   
+                                                                       
+     (2) INTERPRETATION OF MF                                          
+         --------------------                                          
+         THIS DICTIONARY DEFINES THE TITLES THAT WILL APEEAR FOR EACH  
+         MF READ FROM THE COMPUTATION FORMAT. IN ADDITION THIS         
+         DICTIONARY ALLOWS THE USER TO SPECIFY DIFFERENT TITLES FOR    
+         THE SAME MF AND DIFFERENT MT RANGES, E.G.,                    
+                                                                       
+         MF =3, MT =  251 - 253 = PARAMETERS (USED FOR MU, XI, GAMMA)  
+         MF =3, MT = 9000       = NEUTRON INDUCED (USED FOR PRODUCTION)
+         MF =3, MT = OTHER      = CROSS SECTION                        
+                                                                       
+         IF THE USER DOES NOT LIKE THE TITLES NORMALLY OUTPUT BY THIS  
+         PROGRAM IT IS MERELY NECESSARY TO MODIFY THIS DICTIONARY.     
+                                                                       
+     (3) INTERPRETATION OF MT                                          
+         --------------------                                          
+         THIS DICTIONARY DEFINES THE TITLES THAT WILL APPEAR FOR EACH  
+         MT READ FROM THE COMPUTATION FORMAT, E.G.,                    
+                                                                       
+         MT  =    1 = TOTAL                                            
+             = 9000 = PRODUCTION                                       
+                                                                       
+         IF THE USER DOES NOT LIKE THE TITLES NORMALLY OUTPUT BY THIS  
+         PROGRAM IT IS MERELY NECESSARY TO MODIFY THIS DICTIONARY.     
+                                                                       
+     USED IN COMBINATION THE TRANSLATION OF THE ZA, MF AND MT SERVE TO 
+     IDENTIFY THE DATA BEING PLOTTED. BY USING THE DICTIONARIES        
+     DESCRIBED ABOVE THE USER HAS COMPLETE CONTROL OVER HOW ZA, MF AND 
+     MT ARE INTERPRETED AND AS SUCH MAY SELECT ANY FORM TO IDENTIFY    
+     DATA.                                                             
+                                                                       
+     PROGRAM OPERATION                                                 
+     =================                                                 
+     EXFOR DATA INDEX TABLE                                            
+     ----------------------                                            
+     THE ENTIRE COMPUTATION FORMAT FILE WILL FIRST BE READ AND COMPARED
+     TO THE REQUESTED ZA/MF/MT RANGES SPECIFIED BY THE USER. IF NO     
+     COMPARABLE DATA IS FOUND THE PROGRAM WILL TERMINATE EXECUTION. IF 
+     COMPARABLE DATA IS FOUND THE PROGRAM WILL CREATE AN INDEX TABLE   
+     SPECIFYING (1) ZA, (2) MF, (3) MT, (4) STARTING RECORD NUMBER,    
+     (5) ENDING RECORD NUMBER, (6) NUMBER OF DATA POINTS WITH THIS ZA, 
+     MF AND MT. DURING EXECUTION THIS INDEX TABLE WILL BE USED TO,     
+     (1) SELECT THE NEXT ZA, MF, MT TO BE PLOTTED IF ONLY PLOTTING     
+     EXFOR DATA, OR (2) TO DETERMINE WHETHER OR NOT THERE IS COMPARABLE
+     EXFOR DATA (WITHOUT AGAIN SEARCHING THE EXFOR DATA FILE) WHEN     
+     COMPARING EXFOR AND ENDF/B DATA. ONCE IT HAS BEEN DECIDED TO PLOT 
+     EXFOR DATA WHICH HAS A GIVEN ZA, MF AND MT THE STARTING RECORD    
+     INDEX IS USED TO QUICKLY POSITION TO THE FIRST RECORD TO READ AND 
+     THE ENDING RECORD INDEX IS USED TO DEFINE WHEN TO STOP READING    
+     (INSTEAD OF READING THE ENTIRE COMPUTATION FORMAT DATA FILE).     
+                                                                       
+     ONLY PLOTTING EXFOR DATA                                          
+     ------------------------                                          
+     THE PROGRAM WILL USE THE INDEX TABLE TO DEFINE THE ZA, MF AND MT  
+     OF THE NEXT SET OF DATA TO PLOT. BASED ON USER INPUT THE PROGRAM  
+     WILL THEN PLOT EITHER ONE REFERENCE (REFERENCE = AUTHOR, YEAR,    
+     EXFOR ACCESSION AND SUB-ACCESSION NUMBER) PER PLOT OR ALL         
+     COMPARABLE REFERENCES ON THE SAME PLOT. THE CYCLE OF READING DATA 
+     AND PRODUCING PLOTS WILL BE CONTINUED UNTIL ALL DATA DEFINED IN   
+     THE INDEX TABLE HAS BEEN PLOTTED.                                 
+                                                                       
+     COMPARING ENDF/B AND EXFOR DATA                                   
+     -------------------------------                                   
+     IN THE COMPARISON MODE THE PROGRAM WILL ONLY PLOT DATA IF THERE   
+     IS COMPARABLE DATA (SAME ZA, MF, MT) ON BOTH THE ENDF/B FORMATTED 
+     AND COMPUTATION FORMATTED FILES.                                  
+                                                                       
+     BASED ON THE PLOTTING REQUESTS (SEE BELOW) THE PROGRAM WILL FIRST 
+     SEARCH THE ENDF/B DATA FILE TO FIND AN ACCEPTABLE SECTION OF CROSS
+     SECTIONS (MF=3). THE PROGRAM WILL THEN USE THE EXFOR INDEX TO     
+     DETERMINE IF THERE IS COMPARABLE EXFOR DATA (SAME ZA, MF, MT). IF 
+     THERE IS NO COMPARABLE DATA THE PROGRAM WILL IGNOR THE CURRENT    
+     SECTION OF ENDF/B DATA AND SEARCH FOR THE NEXT REQUESTED SECTION  
+     OF ENDF/B DATA. THE CYCLE OF READING ENDF/B DATA AND COMPARING TO 
+     THE EXFOR INDEX TABLE WILL BE CONTINUED UNTIL COMPARABLE ENDF/B   
+     AND EXFOR DATA ARE FOUND. ONLY AFTER THE EXFOR INDEX TABLE SHOWS  
+     THAT THE COMPUTATION FORMAT FILE CONTAINS COMPARABLE DATA WILL    
+     THE FILE BE READ. AS DESCRIBED ABOVE WHILE READING EXFOR DATA THE 
+     PROGRAM WILL USE THE STARTING AND ENDING RECORD NUMBER TO QUICKLY 
+     POSITION TO THE DATA TO READ AND TO STOP READING WHEN ALL REQUIRED
+     DATA HAS BEEN READ.                                               
+                                                                       
+     ONE REFERENCE PER PLOT                                            
+     ----------------------                                            
+     WHEN PLOTTING ONE REFERENCE PER PLOT THE PROGRAM WILL USE THE     
+     EXFOR INDEX TABLE TO DETERMINE WHERE TO START READING. AFTER ONE  
+     DATA POINT HAS BEEN READ THE PROGRAM WILL CONTINUE TO READ DATA   
+     POINTS UNTIL (1) A POINT IS FOUND WITH A DIFFERENT ZA, MF, MT OR  
+     REFERENCE, (2) THE INDEX TABLE LAST RECORD NUMBER INDICATES THAT  
+     THE LAST POINT HAS BEEN READ, OR (3) THE MAXIMUM NUMBER OF POINTS 
+     PER PLOT HAVE BEEN READ.                                          
+                                                                       
+     WARNING...WHEN PLOTTING ONE REFERENCE PER PLOT IN ORDER TO PRODUCE
+     A PLOT THE PROGRAM MUST FIND AT LEAST THE MINIMUM NUMBER OF POINTS
+     REQUIRED (SEE, INPUT DESCRIPTION BELOW) ON SUCEESSIVE RECORDS.    
+     THEREFORE THE COMPUTATION FORMAT SHOULD BE SORTED TO INSURE THAT  
+     ALL DATA WITH THE SAME ZA, MF, MT, REFERENCE APPEAR ON SUCCESSIVE 
+     RECORDS.                                                          
+                                                                       
+     ALL COMPARABLE EXFOR DATA ON SAME PLOT                            
+     --------------------------------------                            
+     WHEN PLOTTING ALL COMPARABLE DATA ON THE SAME PLOT THE PROGRAM    
+     WILL USE THE EXFOR INDEX TABLE TO DEFINE WHERE TO START READING.  
+     THE PROGRAM WILL CONTINUE TO READ DATA UNTIL (1) THE INDEX TABLE  
+     LAST RECORD NUMBER INDICATES THAT THE LAST POINT HAS BEEN READ, OR
+     (2) THE MAXIMUM NUMBER OF POINTS PER PLOT HAVE BEEN READ.         
+                                                                       
+     IN THIS MODE THE EXFOR DATA NEED NOT BE SORTED BY ZA, MF, MT,     
+     REFERENCE SINCE THE EXFOR INDEX TABLE WILL DEFINE WHERE ALL       
+     COMPARABLE DATA ARE LOCATED ON THE COMPUTATION FORMAT DATA FILE.  
+     HOWEVER, TO MINIMIZE THE TIME REQUIRED TO SEARCH THE COMPUTATION  
+     FORMAT FILE THE USER SHOULD SORT THE DATA BY ZA, MF, MT.          
+                                                                       
+     OPTIMIZING PROGRAM OPERATION                                      
+     ============================                                      
+     PROGRAM OPERATION CAN BE OPTIMIZED BY MINIMIZING THE SIZE OF THE  
+     ENDF/B AND COMPUTATION FORMATTED FILES. IF YOU WISH TO COMPARE    
+     A LIMITED NUMBER OF REACTIONS IT IS SUGGESTED THAT YOU FIRST      
+     PREPARE ENDF/B AND COMPUTATION FORMATTED DATA FILES THAT ONLY     
+     CONTAIN THE DATA WHICH WILL BE PLOTTED, I.E., NEVER USE THIS      
+     PROGRAM TO TRY TO COMPARE TWO ENORMOUS FILES OF ENDF/B AND EXFOR  
+     DATA UNLESS YOU ARE WILLING TO SPEND A CORRESPENDINGLY ENORMOUS   
+     AMOUNT OF MONEY ON COMPUTER TIME. IN ADDITION THE EXFOR DATA FILE 
+     SHOULD BE SORTED BY ZA, MF, MT, REFERENCE.                        
+                                                                       
+     SCALING OF PLOTS                                                  
+     ================                                                  
+     ENDF/B AND/OR EXFOR                                               
+     -------------------                                               
+     IF ONLY PLOTTING EXFOR DATA THIS PROGRAM WILL SCALE THE X AND Y   
+     RANGE OF EACH PLOT TO INCLUDE ONLY EXFOR DATA. IF PLOTTING EXFOR  
+     AND ENDF/B DATA THE USER MAY SPECIFY BY INPUT (INPUT DESCRIBED    
+     BELOW) TO SCALE PLOTS TO INCLUDE ALL ENDF/B AND EXFOR DATA OR     
+     ONLY ALL ENDF/B DATA OR ONLY ALL EXFOR DATA. ALTHOUGH THIS OPTION 
+     MAY BE USED FOR SPECIAL PURPOSES TO OBTAIN SPECIAL SCALING IT IS  
+     RECOMMENDED THAT THE USER ALWAYS SCALE PLOTS TO INCLUDE ALL ENDF/B
+     AND EXFOR DATA.                                                   
+                                                                       
+     ENERGY RANGE                                                      
+     ------------                                                      
+     REGARDLESS OF THE ENERGY RANGE SPECIFIED BY PLOTTING REQUESTS     
+     (SEE DESCRIPTION OF REQUESTS BELOW) THIS PROGRAM WILL NEVER EXTEND
+     THE ENERGY RANGE OF PLOTS BEYOND WHERE THERE ARE DATA. FOR EXAMPLE
+     TO PLOT (N,2N) OVER THE ENTIRE ENERGY RANGE WHERE THERE ARE DATA  
+     THE USER CAN SPECIFY 0.0 TO 100 MEV. THIS PROGRAM WILL PRODUCE    
+     PLOTS FROM THRESHOLD UP TO THE HIGHEST ENERGY BELOW 100 MEV WHERE 
+     DATA ARE GIVEN.                                                   
+                                                                       
+     COSINE RANGE                                                      
+     ------------                                                      
+     FOR ANGULAR (MF=4) AND DOUBLE DIFFERENTIAL (MF=6) DISTRIBUTIONS   
+     WHERE THE X VARIABLE IS COSINE PLOTS WILL ALWAYS BE PRODUCED OVER 
+     THE COSINE RANGE -1.0 TO 1.0.                                     
+                                                                       
+     INPUT UNITS                                                       
+     ===========                                                       
+     NOTE, INPUT PARAMETERS ARE ON UNIT 4, RATHER THAN THE NORMAL      
+     FORTRAN UNIT 5. THIS IS TO ALLOW THE PROGRAM TO BE USED ON        
+     AN IBM-PC WHERE UNIT 5 IS RESERVED FOR KEYBOARD INTERACTION.      
+                                                                       
+     UNIT   DESCRIPTION                                                
+     ----   -----------                                                
+       4    INPUT OPTIONS              (BCD - 80 COLUMNS/RECORD)       
+      10    COMPUTATION FORMATTED DATA (BCD - 131 COLUMNS/RECORD)      
+      11    ENDF/B FORMATTED DATA      (BCD - 80 COLUMNS/RECORD)       
+      12    SPECIAL ZA DEFINITIONS     (BCD - 80 COLUMNS/RECORD)       
+      14    MF DEFINITIONS             (BCD - 80 COLUMNS/RECORD)       
+      15    MT DEFINITIONS             (BCD - 80 COLUMNS/RECORD)       
+      17    SOFTWARE CHARACTERS        (BCD - 80 COLUMNS/RECORD)       
+                                                                       
+     OUTPUT UNITS                                                      
+     ============                                                      
+     UNIT   DESCRIPTION                                                
+     ----   -----------                                                
+       6    OUTPUT REPORT              (BCD - 120 COLUMNS/RECORD)      
+                                                                       
+     SCRATCH UNITS                                                     
+     =============                                                     
+     UNIT   DESCRIPTION                                                
+     ----   -----------                                                
+      16    ENDF/B DATA PAGING UNIT    (BINARY - 6000 WORDS/RECORD)    
+                                                                       
+     INPUT CARDS                                                       
+     ===========                                                       
+     THE USER MUST INPUT AT LEAST ONE CARD TO SPECIFY PLOTTING OPTIONS.
+     IN THE SIMPLEST CASE THIS FIRST CARD CAN BE COMPLETELY BLANK (SEE 
+     EXAMPLE INPUT NO. 1 BELOW). TO SELECT DATA BY ZA/MF/MT/INCIDENT   
+     ENERGY RANGE THE USER MAY INPUT UP TO 100 ADDITIONAL CARDS.       
+                                                                       
+     CARD  COLUMNS  FORMAT  DESCRIPTION                                
+     ====  =======  ======  ===========                                
+       1     1- 5     I5    COMPARE EXFOR DATA TO ENDF/B               
+                            0 = NO                                     
+                            1 = YES                                    
+                            2 = YES (IDENTIFY ENDF/B POINTS BY PLOTTING
+                                     A SMALL DIAMOND ROUND EACH POINT).
+                            NOTE 1, IF COMPARING DATA PLOTS WILL ONLY  
+                            BE PRODUCED IF COMPARABLE DATA IS FOUND    
+                            ON BOTH THE ENDF/B AND COMPUTATION FORMAT  
+                            FILES.                                     
+                            NOTE 2, IF COMPARING DATA ONLY MF =3 (CROSS
+                            SECTIONS) WILL BE PLOTTED.                 
+..... REDEFINED BY TRKOV
+             6-10     I5    ALL COMPARABLE EXFOR DATA ON SAME PLOT     
+                            0 = NO, >0 = YES
+                            (0 = EACH REFERENCE ON A SEPERATE PLOT
+                            >O = MAX. NUMBER OF REFERENCES PER PLOT,
+                                 CURRENT UPPER LIMIT=48).
+            11-15     I5    PLOT SCALING                               
+                            0 = ENDF AND EXFOR (RECOMMENDED)           
+                            1 = ENDF                                   
+                            2 = EXFOR                                  
+                            (AUTOMATICALLY SET TO 2 IF NOT COMPARING)  
+            16-20     I5    PLOT X ERROR BARS (ENERGY, COSINE, ETC.)   
+                            0 = NO, 1 = YES                            
+            21-25     I5    PLOT Y ERROR BARS (CROSS SECTION, ETC.)    
+                            0 = NO, 1 = YES                            
+            26-30     I5    IDENTIFY ALL REFERENCES BY SYMBOL          
+                            0 = NO, 1 = YES                            
+                            (0 = IF ONLY ONE REFERENCE ON PLOT DO NOT  
+                            PLOT BOX AND REFERENCE SYMBOL AROUND EACH  
+                            DATA POINT...RECOMMENDED).                 
+            31-35     I5    ALLOW VARIABLE E2 ON SAME PLOT             
+                            0 = NO, 1 = YES                            
+                            (NORMALLY ONLY DATA WITH SAME ZA/MF/MT/E2  
+                            WILL APPEAR ON SAME PLOT. 1 = COLLECT DATA 
+                            FROM 1 REFERENCE FOR SAME ZA/MF/MT AND     
+                            A NUMBER OF VALUES OF E2. IDENTIFY DATA ON 
+                            PLOT BY EACH VALUE OF E2).                 
+            36-40     I5    MINIMUM EXFOR POINTS PER PLOT              
+                            (IF THERE ARE FEWER COMPARABLE EXFOR POINTS
+                            THEY WILL BE SKIPPED...DEFAULT 8).         
+...                         MINIMUM VALID ENTRY IS 2 (NOTE BY TRKOV).
+            41-45     I5    MAXIMUM EXFOR POINTS PER PLOT              
+                            (MINIMUM DEFINED BY COLUMNS 36-40 UP TO    
+                            1000...DEFAULT 1000).                      
+...  MAXIMUM NUMBER OF POINTS INCREASED TO 10000 BY TRKOV
+                            HINT: THE LIMIT APPLIES TO THE TOTAL NUMBER
+                                  OF POINTS EXTRACTED FROM THE EXFOR
+                                  FILE. IF PLOTS ARE DEFINED BY
+                                  EXPLICITLY REQUESTED RANGES (SEE THE
+                                  NEXT INPUT LINE) AND ALL COMPARABLE
+                                  POINTS ARE TO BE DISPLAYED ON THE
+                                  SAME PLOT, USE THE DEFAULT VALUE.
+            46-50     I5    GRID TYPE                                  
+                            = 0 - TICK MARKS ON EACH AXIS..RECOMMENDED.
+                            = 1 - FULL GRID.                           
+            51-55     I5    PLOT SIZE                                  
+                            = 0 - FULL SIZE PLOTS.                     
+                            = 1 - HALF SIZE (4 SUB-PLOTS PER PLOT).    
+            56-70   3A4,A3  ENDF/B LIBRARY IDENTIFICATION.             
+                            E.G., ENDF/B-V (ONLY USED IF COMPARING).   
+     2-N     1- 7     I7    LOWER ZA LIMIT                             
+             8-11     I4    LOWER MF LIMIT                             
+            12-15     I4    LOWER MT LIMIT                             
+            16-26   E11.4   LOWER INCIDENT ENERGY LIMIT (EV)           
+            27-33     I7    UPPER ZA LIMIT                             
+            34-37     I4    UPPER MF LIMIT                             
+            38-41     I4    UPPER MT LIMIT                             
+            42-52   E11.4   UPPER INCIDENT ENERGY LIMIT (EV)           
+..... EXTENSION BY TRKOV:
+            53-55     I3    PLOT SCALES (ENDF CONVENTION):
+                             2  LINEAR ABSCISA AND ORDINATE
+                             3  LOGARITHMIC ABSCISA AND LINEAR ORDINATE
+                             4  LINEAR ABSCISA AND LOGARITHMIC ORDINATE
+                             5  LOGARITHMIC ABSCISA AND ORDINATE
+            56-66   E11.4   SMEARING PARAMETER FOR ELASTIC AND
+                            DISCRETE LEVEL INELASTIC SCATTERING ENERGY
+                            DISTRIBUTIONS GIVEN IN TERMS OF A
+                            FRACTIONAL ENERGY INCREMENT AT WHICH A
+                            GAUSSIAN CURVE IS HALF MAXIMUM. THIS IS
+                            ONLY USED WHEN DOUBLE DIFERENTIAL DATA IN
+                            AN ENDF FILE ARE COMPARED TO MEASUREMENTS.
+
+..... EXTENSION BY TRKOV:
+   * THE REQUEST LIST IS TERMINATED BY A BLANK LINE. THE REMAINDER
+     OF THE INPUT FILE WILL BE IGNORED.
+                                                                       
+   * THERE MAY BE UP TO 100 ZA/MF/MT/ENERGY RANGE REQUESTS. IF THERE   
+     ARE MORE THAN 100 REQUESTS ONLY THE FIRST 100 WILL BE USED.       
+   * EACH REQUEST INDEPENDENTLY SPECIFIES A RANGE OF ZA/MF/MT/ENERGY   
+     TO BE PLOTTED.                                                    
+   * FOR EACH SET OF DATA, ZA MUST BE BETWEEN THE LOWER AND UPPER ZA   
+     LIMIT, MF MUST BE BETWEEN THE LOWER AND UPPER MF LIMIT, MT MUST   
+     BE BETWEEN THE LOWER AND UPPER MT LIMIT AND THE INCIDENT ENERGY   
+     MUST BE BETWEEN THE LOWER AND UPPER ENERGY LIMIT.                 
+   * E.G., Z=1 TO 90000, MF=3 TO 3, MT=1 TO 1, E=0.0 TO 2.0E+7 EV      
+     WILL SELECT ALL ZA BETWEEN 1 TO 90000 WHICH HAVE MF=3 AND MT=1    
+     AND DATA POINTS WITH INCIDENT ENERGY BETWEEN 0 AND 20 MEV.        
+   * IF THERE ARE NO REQUEST CARDS ALL DATA WILL BE PLOTTED.           
+                                                                       
+     EXAMPLE INPUT NO. 1                                               
+     -------------------                                               
+     TO PLOT ALL EXFOR DATA WITHOUT COMPARISON TO ENDF/B AND WITHOUT   
+     ERROR BARS THE USER NEED ONLY ENTER A SINGLE BLANK CARD, OR,      
+                                                                       
+         0    0    0    0    0    0    0    0    0    0    0           
+                                                                       
+     EXAMPLE INPUT NO. 2                                               
+     -------------------                                               
+     PLOT ALL EXFOR DATA 1 REFERENCE PER PLOT WITH X AND Y ERROR BARS. 
+     DO NOT PLOT DATA UNLESS THERE ARE 8 OR MORE POINTS. PLOT A FULL   
+     GRID. INPUT THE FOLLOWING 1 CARD,                                 
+                                                                       
+         0    0    0    1    1    0    1    8    0    1    0           
+                                                                       
+     NOTE, THIS IS A GOOD SET OF INPUT PARAMETERS TO USE IN ORDER TO   
+     PRODUCE ALL POSSIBLE PLOTS OF ALL EXFOR DATA TRANSLATED FROM A    
+     GIVEN EXFOR TAPE. IT IS RECOMMENDED TO SPECIFY 8 AS THE MINIMUM   
+     NUMBER OF POINTS PER PLOT IN ORDER TO AVOID OBTAINING A LARGE     
+     NUMBER OF PLOTS EACH CONTSINING ONLY 1 OR 2 DATA POINTS.          
+                                                                       
+     EXAMPLE INPUT NO. 3                                               
+     -------------------                                               
+     PLOT CO-59 (N,2N) ENDF/B CROSS SECTIONS AND ALL COMPARABLE        
+     EXFOR DATA ON THE SAME PLOT WITH CROSS SECTION ERROR BARS, ONE    
+     PLOT FROM 0.0 EV (SCALED TO THRESHOLD) TO 20.0 MEV AND A SECOND   
+     PLOT FROM 12.0 TO 15.0 MEV. DO NOT PLOT DATA UNLESS THERE ARE AT  
+     LEAST 8 EXPERIMENTAL DATA POINTS. ONLY TICK MARKS ON AXIS. ENDL84 
+     IS THE IDENTIFICATION FOR THE ENDF/B LIBRARY. INPUT THE FOLLOWING 
+     3 CARDS.                                                          
+                                                                       
+         1    1    0    0    1    0    0    8    0    0    0  ENDL84   
+       27059   3  16 0.00000+ 0  27059   3  16 2.00000+ 7              
+       27059   3  16 1.20000+ 7  27059   3  16 1.50000+ 7              
+                                                                       
+     REPORTING ERRORS                                                  
+     ================                                                  
+     IN ORDER TO IMPROVE THIS CODE AND MAKE FUTURE VERSIONS MORE       
+     COMPATIBLE FOR USE ON AS MANY DIFFERENT TYPES OF COMPUTERS AS     
+     POSSIBLE PLEASE REPORT ALL COMPILER DIAGNOSTICS AND/OR OPERATING  
+     PROBLEMS TO THE AUTHOR AT THE ABOVE ADDRESS.                      
+                                                                       
+     PLEASE REMEMBER IF YOU SIMPLY REPORT 'I'VE GOT A PROBLEM' AND DO  
+     NOT ADEQUATELY DESCRIBE EXACTLY HOW YOU WERE USING THE PROGRAM    
+     IT WILL BE IMPOSSIBLE FOR THE AUTHOR TO HELP YOU. WHEN A PROBLEM  
+     ARISES PLEASE WRITE TO THE AUTHOR, DESCRIBE THE PROBLEM IN AS MUCH
+     DETAIL AS POSSIBLE, IDENTIFY THE VERSION OF THE PROGRAM THAT YOU  
+     ARE USING (E.G. VERSION 87-1) AND SEND THE FOLLOWING INFORMATION  
+     ON MAGNETIC TAPE TO THE AUTHOR,                                   
+                                                                       
+     (1) A COPY OF THE PROGRAM YOU ARE USING                           
+     (2) A COPY OF COMPILER DIAGNOSTICS (IF ANY)                       
+     (3) A COPY OF THE JCL DECK YOU USED TO EXECUTE THE PROGRAM        
+     (4) A COPY OF THE 3 TRANSLATION DICTIONARIES YOU ARE USING        
+     (5) A COPY OF THE COMPUTATION FORMAT DATA YOU USING               
+     (6) A COPY OF THE OUTPUT REPORT FROM THE PROGRAM                  
+                                                                       
+     ALSO SEND COPIES OF ANY PLOTS WHICH YOU HAVE OBTAINED AS OUTPUT   
+     FROM THIS PROGRAM.                                                
+                                                                       
+     WITHOUT ALL OF THIS INFORMATION IT IS IMPOSSIBLE TO EXACTLY       
+     SIMULATE THE PROBLEM THAT YOU RAN AND TO DETERMINE THE SOURCE     
+     OF YOUR PROBLEM.                                                  
+                                                                       
+***** COMPUTER DEPENDENT CODING ***************************************
+                                                                       
+   * THIS PROGRAM IS DESIGNED TO BE USED WITH A FORTRAN-77 COMPILER.   
+                                                                       
+   * THE ONLY COMPILER DEPENDENT FORMAT STATEMENTS INVOLVE,            
+     (1) CHARACTER*1 AND CHARACTER*4                                   
+     (2) TESTING FOR ERRORS AND END OF FILE DURING READS.              
+                                                                       
+   * IT IS ASSUMED THAT CHARACTERS ARE STORED IN SUCCESSIVE STORAGE    
+     LOCATIONS AND THAT CHARACTERS MAY BE TREATED AS CONTINUOUS STRINGS
+     OF CHARACTERS IN EITHER CHARACTER*4 OR CHARACTER*1 FORMAT.        
+                                                                       
+   * FOR EXAMPLE, IF ONE SUBROUTINE CONTAINS,                          
+                                                                       
+     CHARACTER*4 BCD                                                   
+     DIMENSION BCD(10)                                                 
+                                                                       
+     THE ARRAY BCD IS ASSUMED TO BE AN ARRAY OF 40 CHARACTERS IN       
+     SUCCESSIVE BYTE LOCATIONS.                                        
+                                                                       
+     IT IS ASSUMED THAT THIS ARRAY CAN BE PASSED AS AN ARGUMENT TO     
+     ANOTHER SUBROUTINE AND USED AS CHARACTER*1,E.G.,                  
+                                                                       
+     CALL DUMMY(BCD)                                                   
+                                                                       
+     SUBROUTINE DUMMY(BCD)                                             
+     CHARACTER*1 BCD                                                   
+     DIMENSION BCD(40)                                                 
+                                                                       
+   * THIS CONVENTION WILL WORK ON ALL 32 BIT PER WORD COMPUTERS (E.G., 
+     IBM OR IBM COMPATIBLE COMPUTERS).                                 
+                                                                       
+   * FOR LONGER WORD LENGTH COMPUTERS (E.G., CDC OR CRAY) IT IS        
+     SUGGESTED THAT BEFORE IMPLEMENTING AND USING THIS PROGRAM THE     
+     USER FIRST VERIFY THAT CHARACTER STRINGS CAN BE TREATED AS        
+     DESCRIBED ABOVE, E.G., WRITE A SIMPLE PROGRAM TO READ A CHARACTER 
+     STRING OF 40 CHARACTERS IN CHARACTER*4 FORMAT, PASS IT TO A       
+     SUBROUTINE WHICH USES THE CHARACTER STRING IN CHARACTER*1 FORMAT  
+     AND PRINT THE CHARACTER STRING IN THE SUBROUTINE. IF THE CHARACTER
+     STRING IS PRINTED AS A CONTINUOUS STRING YOU WILL BE ABLE TO USE  
+     THIS PROGRAM. IF THE CHARACTER STRING IS NOT PRINTED AS A         
+     CONTINUOUS STRING IT IS NOT RECOMMENDED THAT YOU USE THIS PROGRAM.
+                                                                       
+   * THIS PROGRAM USING THE FORTRAN-77 CONVENTION FOR TESTING FOR      
+     READING ERRORS AND END OF FILE DURING READS, E.G.,                
+                                                                       
+     READ(10,1000,END=100,ERR=200) A,B,C,D                             
+                                                                       
+***** COMPUTER DEPENDENT CODING ***************************************
+***** PLOTTER/GRAPHICS TERMINAL INTERFACE *****************************
+                                                                       
+      THIS PROGRAM USES A SIMPLE CALCOMP LIKE INTERFACE INVOLVING      
+      ONLY 3 SUBROUTINES,                                              
+                                                                       
+      PLOTS(BUF,IBUF,IPLOT) - INITIALIZE PLOTTER                       
+            BUF    - PLOTTER BUFFER                                    
+            IBUF   - SIZE OF PLOTTING BUFFER (5000 WORDS USED)         
+            IPLOT  - PLOTTER UNIT (16)...USUALLY A DUMMY UNIT          
+                                                                       
+      PLOT(X,Y,IPEN)        - DRAW OR MOVE FROM LAST LOCATION TO (X,Y),
+                              END OF CURRENT PLOT OR END OF PLOTTING.  
+            IPEN =   2 - DRAW                                          
+                 =   3 - MOVE                                          
+                 =  -1 - END OF CURRENT PLOT...ADVANCE BY X,Y          
+                 = 999 - END OF PLOTTING.                              
+                                                                       
+      PEN(IPEN)             - SELECT COLOR.                            
+           IPEN- COLOR = 1 TO N (N = ANY POSITIVE INTEGER)             
+                                                                       
+     IN ORDER TO INTERFACE THIS PROGRAM FOR USE ON ANY PLOTTER WHICH   
+     DOES NOT USE THE ABOVE CONVENTIONS IT IS MERELY NECESSARY FOR THE 
+     THE USER TO WRITE 3 SUBROUTINES WITH THE NAMES PLOTS, PLOT AND PEN
+     WITH THE SUBROUTINE ARGUMENTS DESCRIBED ABOVE AND TO THEN CALL THE
+     LOCAL EQUIVALENT ROUTINES.                                        
+                                                                       
+     AVAILABLE PLOTTER INTERFACES                                      
+     ==================================================================
+     THIS PROGRAM HAS AVAILABLE PLOTTER INTERFACES TO OPERATE AS       
+     FOLLOWS,                                                          
+     (1) MAINFRAME - HARDCOPY PLOTS IN BLACK AND WHITE.                
+     (2) MAINFRAME - SCREEN PLOTS IN 7 COLORS ON IBM GRAPHICS TERMINAL.
+     (3) IBM-PC    - HARDCOPY PLOTS IN 6 COLORS ON A HEWLETT-PACKARD   
+                     7475A PLOTTER.                                    
+                                                                       
+     CONTACT THE AUTHOR TO OBTAIN COPIES OF ANY OF THE ABOVE PLOTTER   
+     INTERFACES.                                                       
+                                                                       
+     COLOR PLOTS                                                       
+     ==================================================================
+     TO SELECT PLOTTING COLORS SUBROUTINE PEN (DESCRIBED ABOVE) IS USED
+     TO SELECT ONE OF THE AVAILABLE COLORS. WHEN RUNNING ON A MAINFRAME
+     USING AN IBM GRAPHICS TERMINAL OR ON AN IBM-PC USING A HEWLETT-   
+     PACKARD PLOTTER THE GRAPHICS INTERFACE (DESCRIBED ABOVE) WILL     
+     PRODUCE COLOR PLOTS.                                              
+                                                                       
+     BLACK AND WHITE PLOTS                                             
+     ==================================================================
+     WHEN PRODUCING BLACK AND WHITE HARDCOPY ON A MAINFRAME THE USER   
+     SHOULD ADD A DUMMY SUBROUTINE PEN TO THE END OF THE PROGRAM TO    
+     IGNORE ATTEMPTS TO CHANGE COLOR. ADD THE FOLLOWING SUBROUTINE,    
+                                                                       
+     SUBROUTINE PEN(IPEN)                                              
+     RETURN                                                            
+     END                                                               
+                                                                       
+     CHARACTER SET                                                     
+     ==================================================================
+     THIS PROGRAM USES COMPUTER AND PLOTTER DEVICE INDEPENDENT SOFTWARE
+     CHARACTERS. THIS PROGRAM COMES WITH A FILE THAT DEFINES THE PEN   
+     STROKES REQUIRED TO DRAW ALL CHARACTERS ON AN IBM KEYBOARD (UPPER 
+     AND LOWER CASE CHARACTERS, NUMBERS, ETC.) PLUS AN ALTERNATE SET OF
+     ALL UPPER AND LOWER CASE GREEK CHARACTERS AND ADDITIONAL SPECIAL  
+     SYMBOLS.                                                          
+                                                                       
+     THE SOFTWARE CHARACTER TABLE CONTAINS X AND Y AND PEN POSITIONS TO
+     DRAW EACH CHARACTER. IF YOU WISH TO DRAW ANY ADDITIONAL CHARACTERS
+     OR TO MODIFY THE FONT OF THE EXISTING CHARACTERS YOU NEED ONLY    
+     MODIFY THIS TABLE.                                                
+                                                                       
+     CONTROL CHARACTERS                                                
+     ------------------------------------------------------------------
+     IN THE SOFTWARE CHARACTER TABLE ALL CHARACTERS TO BE PLOTTED WILL 
+     HAVE PEN POSITION = 2 (DRAW) OR = 3 (MOVE). IN ADDITION THE TABLE 
+     CURRENTLY CONTAINS 4 CONTROL CHARACTERS,                          
+                                                                       
+     PEN POSITION = 0                                                  
+     ----------------                                                  
+     SHIFT THE NEXT PRINTED CHARACTER BY X AND Y. 3 CONTROL CHARACTERS 
+     ARE PRESENTLY INCLUDED IN THE SOFTWARE CHARACTER TABLE TO ALLOW   
+     SHIFTING.                                                         
+                                                                       
+     {   = SHIFT UP (FOR SUPERSCRIPTS..............X= 0.0, Y= 0.5)     
+     }   = SHIFT DOWN (FOR SUBSCRIPTS..............X= 0.0, Y=-0.5)     
+     \   = SHIFT LEFT 1 CHARACTER (FOR BACKSPACE...X=-1.0, Y= 0.0)     
+                                                                       
+     PEN POSITION =-1                                                  
+     ----------------                                                  
+     SELECT THE NEXT PRINTED CHARACTER FROM THE ALTERNATE CHARACTER    
+     SET. AT PRESENT THIS CONTROL CHARACTER IS,                        
+                                                                       
+     ]   = SWITCH TO ALTERNATE CHARACTER SET                           
+                                                                       
+     THESE 4 CONTROL CHARACTERS ARE ONLY DEFINED BY THE VALUE OF THE   
+     PEN POSITION IN THE SOFTWARE CHARACTER TABLE (I.E., THEY ARE NOT  
+     HARD WIRED INTO THIS PROGRAM). AS SUCH BY MODIFYING THE SOFTWARE  
+     CHARACTER TABLE THE USER HAS THE OPTION OF DEFINING ANY CONTROL   
+     CHARACTERS TO MEET SPECIFIC NEEDS.                                
+                                                                       
+     THESE CHARACTERS MAY BE USED IN CHARACTER STRINGS TO PRODUCE      
+     SPECIAL EFFECTS. FOR EXAMPLE, TO PLOT SUBSCRIPT 5, B, SUPERSCRIPT 
+     10 USE THE STRING,                                                
+                                                                       
+     }5B{1{0                                                           
+                                                                       
+     TO PLOT B, SUBSCRIPT 5 AND SUPERSCRIPT 10 WITH THE 5 DIRECTLY     
+     BELOW THE 1 OF THE 10 USE THE STRING,                             
+                                                                       
+     B}5\{1{0                                                          
+                                                                       
+     TO PLOT UPPER CASE GREEK GAMMA FOLLOWED BY THE WORDS TOTAL WIDTH  
+     USE THE STRING,                                                   
+                                                                       
+     ]G TOTAL WIDTH                                                    
+                                                                       
+     NOTE, WHEN THESE CONTROL CHARACTERS ARE USED THEY ONLY EFFECT THE 
+     NEXT 1 PRINTED CHARACTER (SEE, ABOVE EXAMPLE OF PLOTTING SUPER-   
+     SCRIPT 10 WHERE THE SHIFT UP CONTROL CHARACTER WAS USED BEFORE THE
+     1 AND THEN AGAIN BEFORE THE 0).                                   
+                                                                       
+     IF THESE 4 CONTROL CHARACTERS ARE NOT AVAILABLE ON YOUR COMPUTER  
+     YOU CAN MODIFY THE SOFTWARE CHARACTER TABLE TO USE ANY OTHER 4    
+     CHARACTERS THAT YOU DO NOT NORMALLY USE IN CHARACTER STRINGS (FOR 
+     DETAILS SEE THE SOFTWARE CHARACTER TABLE).                        
+                                                                       
+     STANDARD/ALTERNATE CHARACTER SETS                                 
+     ------------------------------------------------------------------
+     THE SOFTWARE CHARACTER TABLE CONTAINS 2 SETS OF CHARACTERS WHICH  
+     ARE A STANDARD SET (ALL CHARACTERS ON AN IBM KEYBOARD) AND AN     
+     ALTERNATE SET (UPPER AND LOWER CASE GREEK CHARACTERS AND SPECIAL  
+     CHARACTERS). TO DRAW A CHARACTER FROM THE ALTERNATE CHARACTER SET 
+     PUT A VERTICAL STROKE CHARACTER (]) BEFORE A CHARACTER (SEE THE   
+     ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS 
+     CONTROL CHARACTER WILL ONLY EFFECT THE NEXT 1 PLOTTED CHARACTER.  
+                                                                       
+     SUB AND SUPER SCRIPTS                                             
+     ------------------------------------------------------------------
+     TO DRAW SUBSCRIPT PRECEED A CHARACTER BY }. TO DRAW SUPERSCRIPT   
+     PRECEED A CHARACTER BY { (SEE THE ABOVE EXAMPLE AND THE SOFTWARE  
+     CHARACTER TABLE FOR DETAILS). THESE CONTROL CHARACTER WILL ONLY   
+     EFFECT THE NEXT 1 PLOTTED CHARACTER.                              
+                                                                       
+     BACKSPACING                                                       
+     ------------------------------------------------------------------
+     TO BACKSPACE ONE CHARACTER PRECEED A CHARACTER BY \ (SEE, THE     
+     ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS 
+     CONTROL CHARACTER WILL PERFORM A TRUE BACKSPACE AND WILL EFFECT   
+     ALL FOLLOWING CHARACTERS IN THE SAME CHARACTER STRING.            
+                                                                       

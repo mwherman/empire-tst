@@ -1,0 +1,64 @@
+#! /bin/sh -
+#script to run EXFOR grep
+rm EXFOR.DAT x4sel.res 2>/dev/null
+ if [ "$1" = "" ]
+   then
+echo "Usage: "
+echo 'Type up to 7 selection parameters; typically  something like that:'
+echo " "
+echo "'<Fe-56' N,2N"
+echo 'to retrieve all Fe-56(n,2n) reactions or:'
+echo " "
+echo "'>Fe-55' N, "
+echo 'to retrieve all neutron induced reactions leading to Fe-55'
+echo " "
+echo "NOTE: Characters < and > indicate target and product respectively." 
+echo "      In such cases the string must be put between '' to protect it "
+echo "      against the shell."
+echo "      Selection parameters are connected by logical AND. "
+echo "      To use logical OR put strings in a single selection parameter "
+echo "      separating them with \| e.g., "
+echo "      '<Fe-56\|<Mg-24'"
+echo "      will retrieve data for Fe-56 and Mg-24"
+echo "      Any combination of strings existing in REAC_SIG.TXT can be used"
+echo "      To invert selection use -v e.g.,"
+echo "      '<Fe-56' N, '-v N,A'"
+echo "      will retrieve all neutron induced reactions on Fe-56 except"
+echo "      (n,a) and (n,abs)"
+exit
+fi
+grep  $1  REAC_SIG.TXT >temp
+if [ "$2" != "" ]
+   then
+grep  $2 temp >tmp
+mv tmp temp
+fi                        
+if [ "$3" != "" ]
+   then
+grep  $3 temp >tmp
+mv tmp temp
+fi                        
+if [ "$4" != "" ]
+   then
+grep  $4 temp >tmp
+mv tmp temp
+fi                        
+if [ "$5" != "" ]
+   then
+grep  $5 temp >tmp
+mv tmp temp
+fi                        
+if [ "$6" != "" ]
+   then
+grep  $6 temp >tmp
+mv tmp temp
+fi                        
+if [ "$7" != "" ]
+   then
+grep  $7 temp >tmp
+mv tmp temp
+fi                        
+mv temp x4sel.res
+vi x4sel.res
+retrieve
+vi EXFOR.DAT

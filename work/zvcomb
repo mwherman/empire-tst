@@ -1,0 +1,17 @@
+#! /bin/sh -
+#SCRIPT TO COMBINE TWO OR MORE zvd PLOTS INTO A SINGLE ONE
+
+command=../util/c4zvd/zvv93l.exe 
+file=$1
+        if [ "$file" = "" ]
+           then
+            echo 'Plots available for merging:'
+            echo ' '
+            ls *\.zvd
+            echo ' '
+            echo -n 'List files to be merged separating them by a space (include .zvd extention): '
+            read file
+        fi            
+        command=$command" "$file
+$command
+exit

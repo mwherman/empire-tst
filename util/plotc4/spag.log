@@ -1,0 +1,292 @@
+SPAG - Version 6.20Rc
+Copyright (C) Polyhedron Software - 1986-2000 - All rights reserved
+ 
+Licensee : International Atomic Energy Agency
+         : COMMERCIAL SINGLE user Licence (Intel Linux) SN P33471
+ 
+Licence data             read from /home/mike/download/fortran/plusFORT/plusFORT.fig
+This version dated       May 2000
+Maintenance Expiry Date  Jan 2001
+KIND information         read from /home/mike/download/fortran/plusFORT/f77kinds.f90
+INTRINSIC function names read from /home/mike/download/fortran/plusFORT/vaxfunc.txt
+Configuration data       read from /home/mike/download/fortran/plusFORT/spag.fig
+--------------------------------------------------------------------
+Finished reading AA0001 from file plotc4.f
+<>I CHARACTER & Numeric data mixed in COMMON /VERS/
+<>I COMMON block is not used                 /LIBC/
+<>I COMMON block is not used                 /LIBI/
+<>I COMMON block is not used                 /SYSSTA/
+<>I COMMON block is not used                 /WAYS/
+<>I COMMON block is not used                 /XYLIM/
+<>I COMMON block is not used                 /XYREAL/
+<>I Variable declared but not used           FIELDI
+<>W Local variable used but not set          IER
+<>I Variable declared but not used           LAB
+<>I Variable declared but not used           STAT
+No clutter removal attempted
+<>I INTRINSIC functn name used for variable  ICHAR
+Re-structuring..Writing AA0001
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SETUP from file plotc4.f
+<>I CHARACTER & Numeric data mixed in COMMON /VERS/
+<>I Variable declared but not used           BUFF
+Reference to BUFF removed
+Re-structuring..Writing SETUP
+Adding declarations
+--------------------------------------------------------------------
+Finished reading NXTPLT from file plotc4.f
+<>I COMMON block is not used                 /HPINCH/
+<>I COMMON block is not used                 /PAINT/
+<>I COMMON block is not used                 /PLOTN/
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing NXTPLT
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SPOTER from file plotc4.f
+Re-structuring..Writing SPOTER
+Adding declarations
+--------------------------------------------------------------------
+Finished reading READIN from file plotc4.f
+Re-structuring..Writing READIN
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SHIFTY from file plotc4.f
+Re-structuring..Writing SHIFTY
+Adding declarations
+--------------------------------------------------------------------
+Finished reading GETEV from file plotc4.f
+<>I Variable assigned a value but not used   HEADER
+<>I Variable assigned a value but not used   IMF6
+<>I Variable assigned a value but not used   L1
+<>I Variable assigned a value but not used   L2
+<>I Variable assigned a value but not used   MTS
+<>I Variable assigned a value but not used   NBT
+<>I INTRINSIC functn name used for variable  INT
+Re-structuring..Writing GETEV
+Adding declarations
+--------------------------------------------------------------------
+Finished reading X from file plotc4.f
+Re-structuring..Writing X
+Adding declarations
+--------------------------------------------------------------------
+Finished reading Y from file plotc4.f
+Re-structuring..Writing Y
+Adding declarations
+--------------------------------------------------------------------
+Finished reading RQUEST from file plotc4.f
+Re-structuring..Writing RQUEST
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SCALER from file plotc4.f
+<>I Unreliable test for equality of reals    XNOW-ELGET(IGET).EQ.0
+    detected at line   2056 of plotc4.f
+<>I Unreliable test for equality of reals    XLIM(1).EQ.0.0
+    detected at line   2242 of plotc4.f
+<>I Unreliable test for equality of reals    YLIM(1).EQ.0.0
+    detected at line   2257 of plotc4.f
+<>I Variable assigned a value but not used   IMHI
+Re-structuring..Writing SCALER
+Adding declarations
+--------------------------------------------------------------------
+Finished reading UNITED from file plotc4.f
+Re-structuring..Writing UNITED
+Adding declarations
+--------------------------------------------------------------------
+Finished reading WHAT78 from file plotc4.f
+Re-structuring..Writing WHAT78
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SPACER from file plotc4.f
+Re-structuring..Writing SPACER
+Adding declarations
+--------------------------------------------------------------------
+Finished reading BORDER from file plotc4.f
+<>I Subprogram argument inconsistency        arg  4 of SYMBLH       (C4A/C*E)
+<>I COMMON block is not used                 /PLTSIZ/
+<>I Variable declared but not used           BLANK
+<>I Variable declared but not used           DATAO
+<>I Variable declared but not used           MSTATP
+<>I Variable declared but not used           UNITO
+Reference to UNITO removed
+Reference to MSTATP removed
+Re-structuring..   4 duplicated statements inserted
+Re-structuring..Writing BORDER
+Adding declarations
+--------------------------------------------------------------------
+Finished reading EUNIT from file plotc4.f
+<>I Unreliable test for equality of reals    IZWAY.EQ.1.AND.ABS(Z).NE.0.0
+    detected at line   2965 of plotc4.f
+Re-structuring..Writing EUNIT
+Adding declarations
+--------------------------------------------------------------------
+Finished reading HLUNIT from file plotc4.f
+Re-structuring..Writing HLUNIT
+Adding declarations
+--------------------------------------------------------------------
+Finished reading CSUNIT from file plotc4.f
+Re-structuring..Writing CSUNIT
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PERUN from file plotc4.f
+<>I Argument is not used                     IDOUB
+Re-structuring..Writing PERUN
+Adding declarations
+--------------------------------------------------------------------
+Finished reading GRID0 from file plotc4.f
+Re-structuring..Writing GRID0
+Adding declarations
+--------------------------------------------------------------------
+Finished reading GRID1 from file plotc4.f
+Re-structuring..Writing GRID1
+Adding declarations
+--------------------------------------------------------------------
+Finished reading EVALP from file plotc4.f
+<>I COMMON block is not used                 /WAYS/
+<>I COMMON block is not used                 /XYLIM/
+Re-structuring..Writing EVALP
+Adding declarations
+--------------------------------------------------------------------
+Finished reading EXFORP from file plotc4.f
+<>I Subprogram argument inconsistency        arg  4 of SYMBLH       (C4A/C*E)
+<>I COMMON block is not used                 /GETEM/
+<>I COMMON block is not used                 /XYLABC/
+<>I Variable declared but not used           HEADER
+Reference to HEADER removed
+Re-structuring..Writing EXFORP
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PLOTP from file plotc4.f
+Re-structuring..Writing PLOTP
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PLOTI from file plotc4.f
+Re-structuring..Writing PLOTI
+Adding declarations
+--------------------------------------------------------------------
+Finished reading GETEX from file plotc4.f
+<>I Unreliable test for equality of reals    FIELDI(1).EQ.EXTRA(I)
+    detected at line   4028 of plotc4.f
+<>I Unreliable test for equality of reals    FIELDI(1).EQ.ENEX
+    detected at line   4294 of plotc4.f
+<>I Unreliable test for equality of reals    E2T(KREF)-E2(IEX).NE.0
+    detected at line   4371 of plotc4.f
+<>I Unreliable test for equality of reals    E2T(1).NE.E2(IEX)
+    detected at line   4380 of plotc4.f
+<>I Unreliable test for equality of reals    XEX(1)-FIELDI(1).NE.0
+    detected at line   4427 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(1)-FIELDI(7).NE.0
+    detected at line   4429 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(1).NE.FIELDI(5).AND.FIELD
+    detected at line   4469 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(1).NE.FIELDI(5).AND.FIELD
+    detected at line   4469 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(1).EQ.FIELDI(5)
+    detected at line   4470 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(3).NE.FIELDI(7)
+    detected at line   4475 of plotc4.f
+<>I Unreliable test for equality of reals    FIELD4(1).NE.FIELDI(5)
+    detected at line   4479 of plotc4.f
+<>I Variable assigned a value but not used   DUMMY
+Re-structuring..Writing GETEX
+Adding declarations
+--------------------------------------------------------------------
+Finished reading FLOAT9 from file plotc4.f
+<>I Variable declared but not used           OTAPE
+Reference to OTAPE removed
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing FLOAT9
+Adding declarations
+--------------------------------------------------------------------
+Finished reading RQEX from file plotc4.f
+Re-structuring..Writing RQEX
+Adding declarations
+--------------------------------------------------------------------
+Finished reading ZAMFMT from file plotc4.f
+Re-structuring..Writing ZAMFMT
+Adding declarations
+--------------------------------------------------------------------
+Finished reading ZAHOL from file plotc4.f
+Re-structuring..Writing ZAHOL
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PACKZA from file plotc4.f
+<>I Variable declared but not used           DASH
+Re-structuring..Writing PACKZA
+Adding declarations
+--------------------------------------------------------------------
+Finished reading MTHOL from file plotc4.f
+<>I Variable declared but not used           MSTATP
+<>I Variable declared but not used           OUTP
+Reference to OUTP removed
+Reference to MSTATP removed
+Re-structuring..Writing MTHOL
+Adding declarations
+--------------------------------------------------------------------
+Finished reading METAST from file plotc4.f
+Re-structuring..Writing METAST
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SIZER from file plotc4.f
+Re-structuring..Writing SIZER
+Adding declarations
+--------------------------------------------------------------------
+Finished reading LEFTY from file plotc4.f
+<>I INTRINSIC functn name used for variable  ICHAR
+Re-structuring..Writing LEFTY
+Adding declarations
+--------------------------------------------------------------------
+Finished reading MFHOL from file plotc4.f
+Re-structuring..Writing MFHOL
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PAKZAP from file plotc4.f
+Re-structuring..Writing PAKZAP
+Adding declarations
+--------------------------------------------------------------------
+Finished reading COMPND from file plotc4.f
+Re-structuring..Writing COMPND
+Adding declarations
+--------------------------------------------------------------------
+Finished reading META10 from file plotc4.f
+Re-structuring..Writing META10
+Adding declarations
+--------------------------------------------------------------------
+Finished reading NUMBRH from file plotc4.f
+Re-structuring..Writing NUMBRH
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SYMBLH from file plotc4.f
+<>I INTRINSIC functn name used for variable  ICHAR
+Re-structuring..Writing SYMBLH
+Adding declarations
+--------------------------------------------------------------------
+Finished reading SYMIN from file plotc4.f
+<>I INTRINSIC functn name used for variable  ICHAR
+Re-structuring..Writing SYMIN
+Adding declarations
+--------------------------------------------------------------------
+Finished reading PLOTH from file plotc4.f
+Re-structuring..Writing PLOTH
+Adding declarations
+--------------------------------------------------------------------
+ 
+End of input after   43 sub-programs (  5562 lines)
+ 
+  43 were re-structured
+  43 were re-labelled
+  43 were beautified
+ 
+    61 diagnostics generated
+ 
+     2 occurrences of CHARACTER & Numeric data mixed in COMMON
+    15 occurrences of Unreliable test for equality of reals
+     2 occurrences of Subprogram argument inconsistency
+    13 occurrences of Variable declared but not used
+     1 occurrences of Local variable used but not set
+     1 occurrences of Argument is not used
+    14 occurrences of COMMON block is not used
+     8 occurrences of Variable assigned a value but not used
+     5 occurrences of INTRINSIC functn name used for variable
+ 
+SPAG finished normally

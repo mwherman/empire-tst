@@ -1,0 +1,28 @@
+C-Title  : EMPEND Program 
+C-Purpose: Convert EMPIRE output into ENDF format 
+C-M   
+C-M  Manual for Program EMPEND 
+C-M  ========================= 
+C-M   
+C-M  The EMPIRE output is processed and converted into ENDF  
+C-M  format. The data found on the file can be entered into  
+C-M  the output ENDF file directly, or else thay can be  
+C-M  interpolated by fitting a cubic spline to the cross  
+C-M  section points, corrected for the reaction thresholds  
+C-M  and thinned to the specified tolerance. 
+C-M   
+C-M  Instructions: 
+C-M  The filename to be processed and the output filename 
+C-M  are requested from input. Next, the number of subin- 
+C-M  tervals to be inserted in between the tabulated points 
+C-M  is specified. The cross sections are interpolated  
+C-M  using cubic spline interpolation. If zero is entered, 
+C-M  no spline interpolation is performed. Finally, the 
+C-M  thinning tolerance (%) is requested. Data points which 
+C-M  can be reproduced from the neighbouring points by linear  
+C-M  interpolation to within the specified tolerance are  
+C-M  removed. Entering a negative value causes thinning to  
+C-M  be suppressed. 
+C- 
+C-Author : A.Trkov, ENEA, Bologna, Italy, 1996 
+C- 

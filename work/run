@@ -1,0 +1,255 @@
+#! /bin/sh -
+#SCRIPT TO RUN EMPIRE II
+#cat ../util/ausiliary/herewego.au >/dev/audio 2>/dev/null
+echo '                                                           '
+echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      H   H '
+echo '          E      MM  MM  P   P  I  R   R  E          H   H '
+echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H ' 
+echo '          E      M    M  P      I  R  R   E          H   H '
+echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
+echo '                                                           '
+echo '                     V E R S I O N  2.16beta               '
+echo '                              by                           '
+echo '                         M. H e r m a n                    '
+echo '                                                           '
+echo ' '
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+    echo 'Inputs ready to run'
+    echo ' '
+    ls *inp
+    echo ' '
+    echo -n 'Choose one of the above (without .inp extention!): '
+    read file
+fi                          
+if [ -f $file.inp ]; then
+   echo 'Using existing file with input:'  $file.inp
+   else
+   echo 'Input file :' $file.inp ' does not exist'
+   exit
+fi
+#cat ../util/ausiliary/ammo.au >/dev/audio 2>/dev/null
+
+# CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
+
+rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
+rm  OUTPUT.DAT LIST.DAT 2>/dev/null
+rm  OMPAR.OMP OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
+rm  OMPAR.DIR 2>/dev/null
+rm  ecis95.ics ecis95.cs 2>/dev/null
+rm  ecis95.tmp ecis95.ang 2>/dev/null
+rm  ecis95.tlj 2>/dev/null
+rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
+rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out  2>/dev/null
+rm  TARGET_COLL.DAT 2>/dev/null
+rm  TARGET_COLL.RIPL 2>/dev/null
+rm  TARGET-*.tl 2>/dev/null
+
+# COPY INPUT FILES FOR A GIVEN CASE
+
+cp $file.inp INPUT.DAT
+if [ -f $file.lev ]; then
+   cp $file.lev LEVELS
+   echo 'Using existing file with levels:'  $file.lev
+fi
+if [ -f $file-omp.int ]; then
+   cp $file-omp.int OMPAR.INT 
+   echo 'Using existing file with optical model par.:'  $file-omp.int
+fi
+if [ -f $file-omp.ripl ]; then
+   cp $file-omp.ripl OMPAR.RIPL 
+   echo 'Using existing file with optical model par.:'  $file-omp.ripl
+fi
+if [ -f $file-omp.dir ]; then
+   cp $file-omp.dir OMPAR.DIR 
+   echo 'Using existing file with optical model par.:'  $file-omp.dir
+fi
+if [ -f $file-lev.col ]; then
+   cp $file-lev.col TARGET_COLL.DAT 
+   echo 'Using existing file with collective levels:'  $file-lev.col
+fi
+if [ -f $file.fus ]; then
+   cp $file.fus FUSION 
+   echo 'Using existing file with fusion cross sections:'  $file.fus
+fi
+if [ -f $file.exf ]; then
+   cp $file.exf EXFOR.DAT 
+   echo 'Using existing file with EXFOR data:'  $file.exf
+fi
+if [ -f $file-*.tl  ]; then
+   rename $file TARGET $file-*.tl 
+   echo 'Using existing files with ECIS transmission coefficients'
+fi
+echo ' '
+echo $file ' R U N N I N G  !! !  !   !    !     !'
+#cat ../util/ausiliary/missile.au >/dev/audio 2>/dev/null
+time nice ../source/empire
+echo 'DONE !!!'
+#cat ../util/ausiliary/gong.au >/dev/audio 2>/dev/null
+#cat ../util/ausiliary/applause.au >/dev/audio 2>/dev/null
+
+#MOVE CASE-RELATED FILES TO THE RIGHT PALCE
+
+cp OUTPUT.DAT $file.out
+mv LIST.DAT $file.lst
+mv LEVELS $file.lev
+if [ ! -f $file-omp.int ]; then
+   cp OMPAR.INT $file-omp.int  2>/dev/null
+fi
+if [ ! -f $file-omp.ripl ]; then
+   cp OMPAR.RIPL $file-omp.ripl  2>/dev/null
+fi
+if [ ! -f $file-omp.dir ]; then
+   cp OMPAR.DIR $file-omp.dir  2>/dev/null
+fi
+if [ ! -f $file-*.tl  ]; then
+   rename TARGET $file TARGET-*.tl 2>/dev/null
+fi
+if [ ! -f $file-lev.col ]; then
+   if [ -f TARGET_COLL.RIPL ]; then
+      mv TARGET_COLL.RIPL $file-lev.col 2>/dev/null
+      echo ' ' >>$file-lev.col
+      echo ' ' >>$file-lev.col
+      echo ' ' >>$file-lev.col
+      echo 'NOTE: this line and those below will not be used by Empire. ' >>$file-lev.col
+      echo '      The collective levels and ground state band deformation ' >>$file-lev.col
+      echo '      printed below are inferred from the discrete level file   ' >>$file-lev.col
+      echo '      and provided for comparison with the RIPL data above.' >>$file-lev.col
+      echo ' ' >>$file-lev.col
+      echo ' ' >>$file-lev.col
+   fi 
+   if [ -f TARGET_COLL.DAT ]; then
+      cat TARGET_COLL.DAT >>$file-lev.col
+   fi 
+fi
+mv EXFOR.DAT $file.exf
+mv ECIS_ROT.out $file-ecis.out 2>/dev/null
+mv ECIS_VIB.out $file-ecis.out 2>/dev/null
+mv ECIS_VIBROT.out $file-ecis.out 2>/dev/null
+mv ecVIB.inp $file-ecis.in 2>/dev/null
+mv ecROT.inp $file-ecis.in 2>/dev/null
+mv ecVIBROT.inp $file-ecis.in 2>/dev/null
+
+# DELETE TEMPORARY FILES
+
+rm FUSION fort.70 fort.66 fort.16 2>/dev/null
+#rm  ecis95.ics ecis95.cs 2>/dev/null
+#rm  ecis95.tmp ecis95.ang 2>/dev/null
+#rm  ecis95.tlj 2>/dev/null
+rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
+rm ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
+rm OMPAR.INT OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
+# UNCOMMENT THE LINE BELOW TO REMOVE THE FILE WITH LIST OF RETRIEVED EXFOR ENTRIES 
+#rm $file.res 2>/dev/null
+
+#VIEW OUTPUT FILES
+
+#  echo ' '
+#  echo 'Your output is saved on files: '$file.lst '(long)'
+#  echo '                               '$file.out '(short)'
+#  echo 'Discrete levels are stored in: '$file.lev
+#  echo ' '
+#  echo -n 'Want to see long output? (y/n)[n]: '
+#  read replay
+#  if [ "$replay" = "y" ]
+#     then
+#     view $file.lst 
+#  fi
+#  echo ' '
+#  echo -n 'Want to see short output? (y/n)[n]: '
+#  read replay
+#  if [ "$replay" = "y" ]
+#     then
+#     view $file.out 
+#  fi
+#  echo ' '
+
+if  [ -f $file.exf ]; then
+    if  [ ! -f $file.c4 ]; then
+       # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+
+       ln  $file.exf ../util/x4toc4/exfor.in
+       cd ../util/x4toc4
+       x4toc4
+       rm exfor.in
+       # RUN c4sort TO SORT C4 DATA   
+       #cd ../c4sort
+       #c4sort
+       cd $work
+       mv ../util/x4toc4/errors $file.x42c4_errs
+       mv ../util/x4toc4/x4toc4.lst $file.x42c4_lst
+       mv ../util/x4toc4/c4.out $file.c4
+       if [ -f $file.c4 ]; then
+          echo 'EXFOR data in computational format are stored in :'$file.c4
+       fi
+       # COMMENT THE LINE BELOW TO KEEP FILE WITH RETRIEVED EXFOR DATA 
+       #rm $file.exf
+    fi
+
+    #RUN EMPEND TO FORMAT EMPIRE OUTPUT INTO ENDF
+
+    ../util/empend/empend <EMPEND.INP && cp OUTPUT.ENDF $file.endf
+    rm OUTPUT.DAT
+
+    # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+
+    rm $file-f.endf 2>/dev/null
+    cd ../util/fixup/
+    rm OUTPUT.ENDF 2>/dev/null
+    ln $work/$file.endf OUTPUT.ENDF
+    fixup
+    rm OUTPUT.ENDF
+    mv FIXUP.ENDF $work/$file-f.endf
+    cd $work
+
+    # RUN LEGEND
+
+    rm $file-l.endf 2>/dev/null
+    cd ../util/legend/
+    rm LEGEND.OUT 2>/dev/null
+    ln $work/$file-f.endf FIXUP.OUT
+    legend
+    rm FIXUP.OUT
+    mv LEGEND.OUT $work/$file-l.endf
+    cd $work
+
+    # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+    rm $file-s.endf 2>/dev/null
+    cd ../util/sixtab/
+    rm ENDF.IN ENDF.OUT 2>/dev/null
+    ln $work/$file-l.endf ENDF.IN
+    sixtab
+    rm ENDF.IN
+    mv ENDF.OUT $work/$file-s.endf
+    cd $work
+    if  [ -f $file-s.endf ]; then
+       rm $file-f.endf 2>/dev/null
+       rm $file-l.endf 2>/dev/null
+    fi   
+
+    # RUN PLOTC4 TO PRODUCE PLOTS
+
+    cd ../util/plotc4
+    ln $work/$file.c4 C4.DAT  
+    ln $work/$file-s.endf ENDF.DAT 
+    echo ' '
+    echo 'R U N N I G    P L O T C 4'
+    plotc4
+    rm C4.DAT ENDF.DAT 
+    mv plot.ps $work/$file.ps
+    cd $work
+    # ghostview -landscape $file.ps  
+fi
+
+exit
+
+
+
+
+
+
+
+

@@ -1,0 +1,19 @@
+echo '    '
+echo '      E X F O R   T O   C 4   C O N V E R S I O N'
+echo '    '
+ls /data/189/work/
+echo '   '
+echo 'choose one out of the list above'
+read element
+cd  /data/189/work/$element
+pwd
+echo ' '
+echo 'list of EXFOR files'
+echo ' '
+ls /home/mike/exfor
+echo ' '
+echo 'choose name of a file to be converted out of the list above'
+read file
+ln -s /home/mike/exfor/$file exfor.in
+x4toc4
+rm exfor.in

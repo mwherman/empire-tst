@@ -1,0 +1,66 @@
+#! /bin/sh -
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Data ready for plotting:'
+echo ' '
+ls *.endf
+echo ' '
+echo -n 'Choose one of the above (without .inp extention!): '
+read file
+fi                          
+
+# RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+if [ ! -f $file-s.endf ]; then
+   rm $file-f.endf 2>/dev/null
+   cd ../util/fixup/
+   rm OUTPUT.ENDF 2>/dev/null
+   ln $work/$file.endf OUTPUT.ENDF
+   fixup
+   rm OUTPUT.ENDF
+   mv FIXUP.ENDF $work/$file-f.endf
+   cd $work
+
+    # RUN LEGEND
+
+    rm $file-l.endf 2>/dev/null
+    cd ../util/legend/
+    rm LEGEND.OUT 2>/dev/null
+    ln $work/$file-f.endf FIXUP.OUT
+    legend
+    rm FIXUP.OUT
+    mv LEGEND.OUT $work/$file-l.endf
+    cd $work
+
+    # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+    rm $file-s.endf 2>/dev/null
+    cd ../util/sixtab/
+    rm ENDF.IN ENDF.OUT 2>/dev/null
+    ln $work/$file-l.endf ENDF.IN
+    sixtab
+    rm ENDF.IN
+    mv ENDF.OUT $work/$file-s.endf
+    cd $work
+    if  [ -f $file-s.endf ]; then
+       rm $file-f.endf 2>/dev/null
+       rm $file-l.endf 2>/dev/null
+    fi   
+
+
+fi    
+
+# RUN PLOTC4 TO PRODUCE PLOTS
+
+cd ../util/plotc4
+ln $work/$file.c4 C4.DAT  
+ln $work/$file-s.endf ENDF.DAT 
+echo ' '
+echo 'R U N N I G    P L O T C 4'
+plotc4
+rm C4.DAT ENDF.DAT 
+mv plot.ps $work/$file.ps
+cd $work
+ghostview -landscape $file.ps  
+exit

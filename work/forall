@@ -1,0 +1,6 @@
+#!/bin/bash
+for file in $*
+do
+sed s/'OMPOT      1.       1'/'OMPOT      2.       1'/ ${file} >tmp
+mv tmp ${file} 
+done

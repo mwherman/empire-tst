@@ -1,0 +1,529 @@
+
+         Notes on use of Empire: Degas, Ecis and RIPL
+         ============================================
+              P. Oblozinsky (BNL), March 2001
+   updated by R. Capote (Uni Sevilla/CEADEN Havana), May 2001
+         updated by M. Herman (IAEA), June 2001
+
+
+These notes are ment for a user of Empire-2.15-12 interested in
+its two new modules, Degas and Ecis. We do not discuss another
+new module, preequilibrium hybrid Monte Carlo system HMS, of
+primary importance at intermediate energies. An interface to
+RIPL optical model library is also explained.
+
+1. Degas
+========
+
+1.1 Original code
+
+Degas is exciton model code with angular-momentum conservation.
+The code was written by E. Betak (Slovak Acad Sci, Bratislava,
+Slovakia). It is an improved version of the code Pegas by E.
+Betak and P. Oblozinsky. Degas was added to Empire as its new
+module by P. Oblozinsky (BNL) in February 2001.
+
+1.2  Capture
+
+The primary motivation was to improve (n,g) reactions, termed
+capture, for fast neutrons. It was demonstrated by Bratislava-
+Ljubljana collaboration (Betak, Cvelbar, Likar et al) that Degas
+performs well compared to direct-semidirect capture model. This
+was shown by comparing practically all available exper data for
+(n,g) and (p,g) excitation functions with Degas and DSD
+predictions in the incident energy range 8-20 MeV.
+
+These excitation functions show relatively broad bell-shape form
+with peak around giant dipole resonance energy. At GDR energies,
+observed capture cross sections are about 1 mb for (n,g) and
+about 0.6 mb for (p,g). There may be small shift by 1-2 MeV in
+the peak position from Degas compared to exper data. However,
+small shifts cannot be excluded even when DSD model is used.
+
+1.3 Particle emission
+
+Emission of n and p display standard exciton model features.
+Since MSD model used by Empire does not cover charge exchange
+reactions, such as (n,p), Degas provides useful improvement of
+this reaction channel as well. In addition, Degas can be used
+to calculate (n,n') cross sections and to substitute MSD/MSC if
+necessary.
+
+1.4. Input and tuning in Empire
+
+DEGAS     1.
+This input line invokes Degas in Empire. It replaces default
+value DEGAS=0. Empire provides two options for tuning Degas:
+
+GDIV      VAL
+This parameter, used also by the multistep compound model, means
+that the code adopts single-particle level density g=A/VAL rather
+than default value g=A/13. This prescription is used in all
+reaction channels, with A being the mass number.
+
+GDIVP     VAL
+This parameter changes g-value in the proton channel to g=A/VAL.
+In all other channels the default value is used unless changed
+by GDIV.
+
+If necessary, further tuning could be done via matrix element for
+residual nucleon-nucleon interaction (proportional to Kalbach
+constant, presently set to K = 100, see akdegas in degas.f).
+
+1.5 Compatibility
+
+It is important to realize that Empire is a complex code where
+some parts of cross section may be alternatively described by
+different modules. The current version of Empire has 3 modules
+for preequilibrium decay: MSD and MSC, and Degas. While MSD and
+MSC are clearly compatible, none of them is compatible with Degas.
+Therefore, Degas cannot be used together with MSD and MSC. For
+instance, MSC, including its GST option for capture, is not
+compatible with Degas.
+
+However, Degas is compatible with Ecis in the region where the
+two models overlap: (n,n') reactions. The reason is that Degas
+calculates statistical component of cross section and Ecis its
+direct component. Thus, Degas provides statistical contribution
+to discrete levels, in general very small, irrespective of their
+structure. Most of Degas contribution goes to continuum region.
+Ecis covers direct coupled-channels contribution to discrete
+levels, in general very strong for collective levels. We note
+that Ecis is restricted to discrete levels.
+
+
+2. Ecis
+=======
+
+2.1 Original code
+
+Ecis is well known and highly respected code based on generalized
+(deformed) optical model and coupled-channels model (CCM) by J.
+Raynal (CEA Saclay, France). Ecis is important for modelling of
+reactions on deformed nuclei, in particular, for description of
+strong population of collective discrete levels in the (n,n')
+channel. Ecis-95 was added to Empire as its new extensive module
+by R. Capote (CEADEN, Habana, Cuba and University of Seville, Spain)
+in February 2001. Symmetric rotational, vibrational-rotational and
+harmonic vibrational CCM modes are available.
+
+2.2. Input in Empire
+
+Ecis is invoked by the input line DIRECT, with values 1, 2 or 
+3. This will replace the default value DIRECT = 0.
+
+An important feature is an automatized preparation of detailed
+input for Ecis. This is done by using Empire built-in discrete
+level schemes (orsi.liv) and built-in deformation parameters
+(nix-moller-audi.dat, see beta2 for quadrupole deformations).
+Since Empire has no table for vibrational (dynamical) deformations,
+these are defined in a somewhat ad hoc manner (0.15 for quadupole
+and 0.05 for octupole vibrations). 
+
+Majority of deformed nuclei is covered, rotational and vibrational, 
+even-even and even-A with integer spins, as well as odd-A with 
+half-integer spins. Vibrational even-even nuclei and even-A are 
+also covered. Important exception are the vibrational odd-A nuclei. 
+In this case automatic construction of the collective level file 
+is not possible, therefore, user must construct the corresponding 
+file himself (see TARGET_COLL.DAT file description below)
+
+Once Ecis is invoked, the code prepares several interim files
+ecis95.* to be read by Empire. In most cases, the code prepares two 
+additional important files (see Section 4 for further discussion):
+
+- TARGET_COLL.DAT, with collective levels and their deformations
+  to be used by rotational CCM, or their vibrational deformations
+  and phonon structure to be used by vibrational CCM.
+
+- OMPAR.DIR, with parameters of the optical model to be used in
+  the inelastic channel (discrete collective levels). OM parameters 
+  may be selected via new keyword DIRPOT (similar to OMPOT, but only 
+  for the inelastic channel). This information must be supplemented 
+  by parameters from TARGET_COLL.DAT file.
+
+Ecis can be invoked by Empire in three different ways, using input
+DIRECT=1,2 and 3. The default value, DIRECT=0, means that spherical
+optical model SCAT2 will be used and no discrete level excitation
+by direct reactions is considered.
+
+DIRECT    1.
+Population of (n,n') or (p,p') discrete collective levels is calculated 
+by CCM. This gives exact direct cross section. However, spherical
+transmission coefficients Tl provided by SCAT2 are used for whole
+energy grid, that is, for subsequent preequilibrium and HF calculations.
+These results are renormalized at the Tl level by taking into account
+direct component. Elastic, absorption and inelastic total cross 
+sections are taken from the CCM calculations.
+
+The option DIRECT=1 is fairly fast, though some accuracy may be lost. 
+In general, it should perform well for weakly coupled levels. For 
+strong coupling, such as highly deformed rotational bands in heavy 
+nuclei, it should be used with caution. It is recommended option 
+if accuracy is not a must and appropiate coupled-channels optical model 
+parameters are available.
+
+DIRECT    2.
+Population of (n,n') or (p,p') collective levels is calculated by CCM 
+as above. Importantly, CCM is used consistently, considering ground 
+state and coupled levels, to calculate all necessary transmission 
+coefficients for subsequent preequilibrium and HF calculations. These 
+CCM transmission coefficients sum to absorption cross section that is 
+available for preeq + HF decay. This absorption cross section and 
+coupled-channels excitation of collective levels give together reaction
+cross section. This is an exact option, considering flux decrease due 
+to collective excitation at the level of Tl.
+
+In the first run with DIRECT=2, Tl are calculated for whole energy grid 
+(incident energy and below). These values are stored in the file 
+*.tl for further use. Although the first run takes quite a lot of time, 
+all succesive runs are much faster. It should be noted that file *.tl 
+can be used for such runs if no changes in files TARGET_COLL and OMPAR 
+were made. One *.tl set is produced for each incident energy present in 
+the input file. It is the recommended option for very accurate 
+calculation. Appropiate coupled-channels optical model parameters must 
+be available.
+
+DIRECT    3.
+Population of (n,n') or (p,p') collective levels is calculated by
+DWBA. This gives approximate direct cross section. However, spherical
+transmission coefficients Tl provided by SCAT2 are used for whole
+energy grid, that is for subsequent preequilibrium and HF calculations.
+These results are renormalized at the Tl's level by taking into 
+account direct component. Elastic, absorption and inelastic total 
+cross sections are taken from the SCAT2 (Spherical OM) calculations.
+
+The option DIRECT=3 is fairly fast, though some accuracy may be 
+lost. In general, it should perform well for weakly coupled levels. 
+For strong coupling, such as highly deformed rotational bands in 
+heavy nuclei, it should be used with caution. The DWBA option is of 
+advantage if coupled-channels optical model is not available. In this 
+case we can use spherical OM parameters for DWBA calculation tuning 
+inelastic cross section by adjusting dynamical deformations of the 
+collective levels in file TRAGET_COLL.DAT
+
+
+2.3 Tuning in Empire
+
+Tuning is possible by modifying deformation parameters in file
+TARGET_COLL.DAT and optical model parameters in OM files OMPAR.*.
+This should be done by editing these files.
+
+Vibrational-rotational model can be used, but not automatically. 
+User must edit TARGET_COLL.DAT file to add vibrational level and its 
+phonon structure to the already existing (automatically created) ground 
+state band structure.
+
+An example of this latter model is provided in Pu-240 test case. In 
+this example two vibrational levels corresponding to one L=0 and one 
+L=2 phonons with dynamical deformation 0.1 and 0.08 are added at 
+energies of 0.86 and 0.9 MeV respectively to the ground state band of 
+Pu-240. Total number of levels was modified from 4 to 6. Phonon number 
+(column Lph) was changed to 1 in the new levels corresponding to phonon 
+states. The angular momentum of the phonon is calculated by the code as 
+INT(J), and thus it depends on the total angular momentum on the level.
+
+2.4. Compatibility
+
+In addition to total cross sections and elastic scattering, Ecis, as 
+implemented in Empire, calculates inelastic scattering cross sections 
+only. It is in this reaction channel, where questions of compatibility 
+with Degas and MSD/MSC arise.
+
+As explained above, Ecis is compatible with Degas. In addition, Ecis is 
+compatible with MSD and MSC provided that only continuum part of MSD is 
+taken into account. This feature is already implemented in the current 
+version of Empire.
+
+From practical point of view, user interested in good modeling of (n,g) 
+and (n,p) should use Ecis together with Degas. In this case, also 
+(n,n') should be described fairly well by the current version of Empire, 
+by taking cross sections for discrete levels from Ecis and cross 
+sections for continuum from Degas.
+
+However, if one focuses on (n,n') channel, then most likely an option of 
+using Ecis together with MSD/MSC should be preferred.
+
+
+2.5 Model priorities
+
+Starting with 2.15-12 version Empire allows to include different preeq
+models in a single calculation run. This is achieved using standard 
+keywords DIRECT, MSD, MSC, DEGAS, HMS (not implemented yet) and GST. 
+These keywords retain their usual meaning, that is, when they are 
+different from 0 the models are activated. When combining deifferent 
+models the priorities are the following:
+
+ECIS   - Results taken for inelastic scattering to collective levels
+         indepedently of settings for the remaining models.
+
+MSD    - Results for inelastic continuum taken independently of other
+         settings. Inelastic to discrete levels is suppressed if ECIS is
+         active.
+
+MSC    - Results for inelastic and charge-exchange to continuum if not
+         suppressed by DEGAS or HMS. If GST=1, MSC gamma emission is
+         taken independently of other settings.
+
+DEGAS  - Provides inealstic and charge-exchange to continuum and to
+         discrete levels if MSD and MSC are not active. Otherwise only
+         charge-exchange contribution is used. Gamma emission is used
+         if GST=0.
+
+HMS    - Provides inelastic and charge-exchange to continuum and to
+         discrete levels if MSD and MSC are not active. Otherwise only
+         charge-exchange contribution is used. Suppresses DEGAS results
+         for particle emission if DEGAS is active. Does not provide
+         gamma rays, thus DEGAS results are taken if GST=0.
+
+Overlapping contributions are summed up. Also, the Compound Nucleus
+contribution is added in all cases. Concise summary of used models is
+printed as a table at the beginning of long output *.lst. Selecting
+DIRECT =1 (or 2 or 3), MSD=1, MSC=1, DEGAS=1 (or eventually HMS=1) is
+supposed to give best results at low energies (up to 20 MeV).
+    
+
+
+3. RIPL OM interface
+====================
+
+Interface to RIPL optical model segment was added to Empire as its 
+new module by R. Capote in March 2001.
+
+RIPL OM parameters are selected via OMPOT input line. It has the
+same structure as the standard OMPOT line, with two values. The 
+first value must be a negative number, corresponding to the catalog 
+number of the RIPL optical model segment. The second value refers 
+to particle. For example,
+
+OMPOT    -401.     1 
+selects RIPL Wilmore-Hodgson global potential (RIPL number 401) 
+for n, and
+
+OMPOT   -4004.     2 
+selects RIPL CC potential for p (to be used for Au-197 only).
+
+For a given RIPL potential the corresponding OMPAR.RIPL file is 
+created, which corresponds to OMPAR.INT for internal potentials. The
+file OMPAR.RIPL can be edited to change OM parameters from the RIPL 
+recommended values if desired. Note that RIPL CC potentials include 
+information on collective discrete levels, meaning that in this case
+OMPAR.RIPL contains OM parameters as well as collective discrete 
+levels.
+
+Usually both files OMPAR.RIPL and OMPAR.INT will exist for a given
+problem, because not all potentials are specified to be read from
+the RIPL.
+
+
+4. Optical model handling
+=========================
+
+The Ecis module, along with RIPL interface, brought into Empire 
+entirely new complexity of use of optical model potentials. In 
+particular, all related input keywords (DIRECT, DIRPOT and OMPOT) 
+must be used with considerable care. This section explains different 
+combinations of these keywords, focusing on the use of optical model 
+parameters within EMPIRE. 
+
+This will be done by discussing several actual examples of neutron
+induced reactions. As targets we consider spherical nucleus Fe-54 with 
+dynamic deformation (vibrational), and deformed Eu-153 with static 
+deformation (rotational). In general, appropriate input file may 
+contain the following lines:
+
+OMPOT      x.    y               ;Internal OM for particle y
+DIRECT     x.                    ;Ecis: CC, CC full or DWBA
+DIRPOT   -xx.                    ;RIPL OM for direct (inelastic) channel
+OMPOT    -xx.    z               ;RIPL OM for particle z
+
+
+Example a)
+---------- 
+DWBA + internal spherical OM (SOM) on spherical vibrational nucleus 
+(Fe-54). Our goal is to perform calculations using internal EMPIRE 
+potentials for all channels, along with inelastic scattering calculated 
+by ECIS DWBA option using the same internal SOM.
+
+Input file must contain the line:
+DIRECT    3.
+
+Resulting OM files:
+OMPAR.INT   - default internal SOM for all channels used in HF 
+              calculation
+OMPAR.DIR  - OM employed for DWBA calculations to (n,n') discrete 
+              levels. This potential is the same as the one used by 
+              internal SOM (default in this case, since OMPOT was not 
+              invoked at all) for all neutron emissions.
+
+In the subsequent runs one can adjust inelastic scattering cross section
+by changing SOM inside OMPAR.DIR, or by changing dynamical deformations
+inside TARGET_COLL.DAT file (initial deformation values are 0.15 for 
+quadrupole and 0.05 for octupole vibrations)
+
+Example b)
+----------
+DWBA + internal spherical OM (SOM) on spherical vibrational nucleus 
+(Fe54) + RIPL SOM #10 for inelastic channel. Our goal is to perform 
+calculation using internal EMPIRE potentials for all channels, but 
+including inelastic scattering calculated by ECIS DWBA option using 
+the RIPL potential catalog number 10.
+
+Input file must contain two lines:
+DIRECT     3.
+DIRPOT   -10.    
+
+Resulting OM files:
+OMPAR.INT   - default internal SOM for all channels used in HF 
+              calculation
+OMPAR.DIR  - SOM employed for DWBA calculations to collective 
+              discrete levels, in this case RIPL SOM potential #10.
+
+In the subsequent runs we can adjust inelastic scattering cross section
+by changing SOM inside OMPAR.DIR or by changing dynamical deformations
+inside TARGET_COLL.DAT file (initial deformation values are 0.15 for 
+quadrupole and 0.05 for octupole vibrations).
+
+Example c) 
+----------
+Coupled channel method (CCM) + internal spherical OM (SOM) on spherical
+nucleus (Fe54) + RIPL SOM #10 for inelastic channel. Our goal is to 
+perform calculation using internal EMPIRE potentials for all channels, 
+but including inelastic scattering calculated by ECIS CCM option using 
+the RIPL potential catalog number 10.
+
+Input file must contain 2 lines:
+DIRECT     1.
+DIRPOT  - 10.   
+
+Resulting OM files:
+OMPAR.INT   - internal SOM for all channels used in HF calculation
+OMPAR.DIR  - SOM employed for CC calculation to (n,n') collective 
+              discrete levels, in this case RIPL SOM #10.
+
+In the subsequent runs we can adjust inelastic scattering cross section
+by changing SOM inside OMPAR.DIR or by changing dynamical deformations
+inside TARGET_COLL.DAT file as above.
+
+Example d)
+---------- 
+Coupled-channels method (CCM) + RIPL SOM #221 for all neutron emissions
+(except inelastic channel) + RIPL CC OM #2004 for inelastic channel +
+internal spherical OM (SOM) for the rest of channels on deformed 
+nucleus (Eu-153). Our goal is to perform exact calculation using 
+internal EMPIRE potential for all charged particle channels. For the 
+neutron emission the RIPL SOM # 221 (local potential for Eu-153) will 
+be used for all channels, except inelastic one. For the inelastic 
+channel we are going to calculate transmission coefficients consistently 
+by CCM using the RIPL CC OM potential catalog number 2004.
+
+Input file must contain 3 lines:
+DIRECT      2.
+DIRPOT  -2004.   
+OMPOT    -221.   1
+
+Resulting OM files:
+OMPAR.INT   - internal SOM for all charged particle channels used in 
+              HF calculation
+OMPAR.RIPL  - deformed OM employed for CC calculation for fusion and
+              inelastic channel, in this case RIPL potential catalog 
+              number 2004. (Inside this potential the collective levels 
+              and deformation are also stored). Further, the file
+              contains RIPL SOM #221 employed for all neutron emissions
+              except of inelastic. 
+
+OMPAR.DIR is not created in this case. The point is that deformed OM is 
+used exactly and all relevant parameters can be found in OMPAR.RIPL.
+
+In the subsequnet runs we can adjust inelastic scattering cross section
+by changing SOM inside OMPAR.RIPL or by changing static deformation
+of the ground state band inside TARGET_COLL.DAT file (initial value is
+experimental g.s. quadrupole deformation). In this case we are using 
+specially suited CC deformed OM from the RIPL. Thus, collective levels 
+are stored together with potential parameters inside OMPAR.RIPL file 
+(potential used for fusion and inelastic channel).
+
+Example e) 
+----------
+Coupled-channels method (CCM) + RIPL SOM #221 for all neutron emissions
+(except inelastic channel) + RIPL CC OM #2004 for inelastic channel +
+internal spherical OM (SOM) for the rest of channels on deformed nucleus 
+(Eu-153). We want to perform calculation using internal EMPIRE potential 
+for all charged particle channels. For the neutron emission the RIPL SOM 
+#221 (local potential for Eu-153) will be used for all channels, except 
+inelastic one. For the inelastic channel we are going to calculate 
+inelastic scattering by CCM using the RIPL CC OM potential catalog 
+number 2004.
+
+Input file must contain 3 lines:
+DIRECT      1.
+DIRPOT  -2004.   
+OMPOT    -221.   1
+
+Resulting OM files:
+OMPAR.INT   - internal SOM for all charged particle channels,
+              used in HF calculation
+OMPAR.DIR  - deformed OM employed for CC calculation for inelastic 
+              channel, in this case RIPL potential catalog number 2004.
+              (Inside this potential collective levels and deformation
+              are also stored).
+OMPAR.RIPL  - RIPL SOM #221 employed for other neutron emissions
+
+In the subsequnt runs we can adjust inelastic scattering cross section
+by changing SOM inside OMPAR.DIR or by changing static deformation
+of the ground state band inside the same file. In this case we are using 
+specially suited CC deformed OM from the RIPL. Thus, collective levels 
+are stored together with potential parameters inside OMPAR.DIR file.
+
+
+5. Examples
+===========
+
+Empire-2.15-11 package contains 6 examples of the Ecis-Empire use. These
+examples focus on various combinations of input keywords DIRECT, DIRPOT 
+and OMPOT as discussed in Section 4 above.
+
+Fe54DIR3_DEFAULTPOT.zip (example a) 
+ n+Fe-54 at 5 MeV, Ecis: DWBA (vibrational), OM: default internal only
+
+Fe54DIR3_DIRPOT10.zip   (example b) 
+ n+Fe-54 at 5 MeV, Ecis: DWBA (vibrational), OM: RIPL #10 spherical for 
+ inelastic, otherwise default internal
+
+Fe54DIR1_DIRPOT10.zip   (example c) 
+ n+Fe-54 at 5 MeV, Ecis: CCM (vibrational), OM: RIPL #10 spherical for 
+ inelastic, otherwise default internal
+
+Eu153DIR2_DIRPOT2004_OMPOT221.zip (example d) 
+ n+Eu-153 at 5 MeV, Ecis: CCM (rotational), OM: RIPL #2004 deformed for
+ inelastic, RIPL #221 spherical for other neutrons, otherwise default 
+ internal 
+ 
+Eu153DIR1_DIRPOT2004_OMPOT221.zip (example e) 
+ n+Eu-153 at 5 MeV, Ecis: CCM (rotational), OM: RIPL #2004 deformed for
+ inelastic, RIPL #221 spherical for other neutrons, otherwise default 
+ internal
+
+
+6. Conclusions
+==============
+
+The most important new feature of Empire-2.15.11 is its capability to 
+handle deformed nuclei. This was achieved by adding Ecis-95 as its new 
+module. Further, by adding Degas, modelling of fast neutron capture, 
+along with (n,p), was substantially improved. Full interface to RIPL 
+optical model segment is provided, including all 293 RIPL potentials,
+spherical as well as deformed.
+
+Considering other recent improvements, such as width fluctuation
+corrections, Empire becomes a highly competitive tool for evaluation 
+of nuclear reaction data for a broad class of nuclei.
+
+
+
+
+
+
+--------------21D0DD8FFD351DB347002164--
+
+
