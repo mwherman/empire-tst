@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-13 15:30:37 $
-Ccc   * $Id: input.f,v 1.53 2005-01-13 15:30:37 herman Exp $
+Ccc   * $Date: 2005-01-13 20:29:32 $
+Ccc   * $Id: input.f,v 1.54 2005-01-13 20:29:32 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -715,12 +715,12 @@ C--------------retrieval from the remote database
                ENDIF
 C--------------retrieval from the local MySQL database
                IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-                  x4string = './X4retrieve "'//SYMb(0)(1:1)//'-0'//';'//
-     &                       SYMb(0)(1:1)//'-'//atar//'" '//
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
+     &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
      &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
                ELSEIF(IX4ret.EQ.1)THEN
-                  x4string = './X4retrieve "'//SYMb(0)//'-0'//';'//
-     &                       SYMb(0)//'-'//atar//'" '//
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
+     &                       ';'//SYMb(0)//'-'//atar//'" '//
      &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
                ENDIF
                iwin = PIPE(x4string)
