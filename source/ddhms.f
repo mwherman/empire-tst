@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.14 $
-C $Id: ddhms.f,v 1.14 2005-01-23 03:27:30 Carlson Exp $
+C CVS Version Management $Revision: 1.15 $
+C $Id: ddhms.f,v 1.15 2005-01-24 13:23:07 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -141,7 +141,7 @@ C
       REAL*8 ra, radius, ajhms, ajfinal, ajinit
       INTEGER jtrans, nubin, jbin, mrecbin
       REAL*8 avradius, sumav
-      REAL*8 adiffuse, rsample, ajyrast
+      REAL*8 adiffuse, rsample
       REAL*8 EXCessmass, RESmas
       COMMON /XMASS/ EXCessmass(0:130,0:400), RESmas(0:130,0:400)
 C
@@ -835,7 +835,8 @@ C
      &        nthlab, nphlab
 C
       INTEGER jwarning, nebinchan, nebinlab
-      REAL*8 pair, epart, emrate, damprate, probemiss, zran
+C     REAL*8 pair, epart, emrate, damprate, probemiss, zran
+      REAL*8       epart, emrate, damprate, probemiss, zran
       REAL*8 RANG
       CHARACTER*4 rem1h
 C
@@ -912,9 +913,12 @@ C
 C        now test to see if rescattered or emitted:
 C
 C        now select particle energy
-         CALL PAIRING(pair)
-         CALL SELECTEN1P1H(jstudy, pair, epart)
-         IF(NEV.EQ.12345678)WRITE(6, *)'pair,epart=', pair, epart
+C        CALL PAIRING(pair)
+C        RCN, pairing energy is not used here, see comment inside SELECTEN1P1H
+C        CALL SELECTEN1P1H(jstudy, pair, epart)
+         CALL SELECTEN1P1H(jstudy, epart)
+C        IF(NEV.EQ.12345678)WRITE(6, *)'pair,epart=', pair, epart
+         IF(NEV.EQ.12345678)WRITE(6, *)     'epart=',       epart
 C
          IF(IPRintdiag.EQ.1)WRITE(28, *)'jstudy=', jstudy, ' uex1p1h=',
      &                                  UEX1p1h(jstudy), ' epart=',
@@ -1554,13 +1558,16 @@ C     endif
 C
       END
 C
-      SUBROUTINE SELECTEN1P1H(Jstudy, Pair, Epart)
+C     SUBROUTINE SELECTEN1P1H(Jstudy, Pair, Epart)
+C     RCN, pair is not used here, see comment below
+      SUBROUTINE SELECTEN1P1H(Jstudy, Epart)
 C selects 1p energy from 1p1h, from equiprobable distribution,
 C using equidistant s-p model (well-depth restricted Williams)
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
       INTEGER Jstudy
-      REAL*8 Pair, Epart, e, x
+C     REAL*8 Pair, Epart, e, x
+      REAL*8       Epart, e, x
       REAL*8 RANG
 C
 C     see comments for selecten2p1h state. Conclusion - always
@@ -2091,9 +2098,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.14 $')
+99001 FORMAT('  ddhms version: $Revision: 1.15 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.14 2005-01-23 03:27:30 Carlson Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.15 2005-01-24 13:23:07 Capote Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -2813,11 +2820,11 @@ C
             DO jn = 0, NDIM_NEM
                USPec(jz, jn, nen) = 0
                RESpop(jz, jn) = 0
-C 
+C
                DO jsp = 0, NDIM_JBINS
                   UJSpec(jz, jn, nen, jsp) = 0
                ENDDO
-C 
+C
                DO mem = 0, NDIM_RECBINS
                   RECspec(jz, jn, nen, mem) = 0
                ENDDO
@@ -2896,7 +2903,7 @@ C        note, zmproj,zmfirstcn (masses of proj and 1st cn) defined in sub init0
          IF(PROjtype.EQ.'gamm') THEN
            XVAdd = 0.
            YVAdd = 0.
-           ZVAdd = ELAbproj/ZMFirstcn         
+           ZVAdd = ELAbproj/ZMFirstcn
           ELSE
            vinc = DSQRT(2.*ELAbproj/ZMProj)
 C        !proj velocity
@@ -4782,7 +4789,7 @@ C
                IF(JMAxujspec(0, 0, nucn - 1).GT.0) nucnlo = nucn - 1
                nucnhi=nucn
                IF(JMAxujspec(0, 0, nucn + 1).GT.0) nucnhi = nucn + 1
-               IF((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND. 
+               IF((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
      &            (JMAxujspec(0, 0, nucn).EQ.0))THEN
 C                  WRITE(6, *)' '
 C                  WRITE(6, *)'Got lost! Can not find HMS '
@@ -4799,7 +4806,7 @@ C                  STOP
                   WRITE(6, *)'through ', nucn + 1, ' but they'
                   WRITE(6, *)'seem to contain 0 cross section.'
                   WRITE(6, *)'Check ddhms.out!'
-                  WRITE(6, *)' ' 
+                  WRITE(6, *)' '
                ENDIF
                DO jsp = 1, NDLW
                   POP(NEX(1), jsp, 1, 1) = 0
@@ -4809,7 +4816,7 @@ C                  STOP
                  DO jsp = 0, JMAxujspec(0, 0, nu)
                   POP(NEX(1), jsp + 1, 1, 1) =
      &            POP(NEX(1), jsp + 1, 1, 1) + 0.5*UJSpec(0, 0, nu, jsp)
-                  POP(NEX(1), jsp + 1, 2, 1) = 
+                  POP(NEX(1), jsp + 1, 2, 1) =
      &            POP(NEX(1), jsp + 1, 2, 1) + 0.5*UJSpec(0, 0, nu, jsp)
                  ENDDO
                ENDDO
@@ -5011,18 +5018,18 @@ c
 c
 c  Uses random values to generate values of e, th, p and ph
 c  consistent with the mechanism for quasideuteron photoabsorption.
-c    px=p*sin(th)   pz=p*cos(th) 
+c    px=p*sin(th)   pz=p*cos(th)
 c  The value for e is determined first, with the aid of the table pex.
 c  The value of th is then determined, using the value of e and the table pthx.
 c  The value of p is then determined, using e, th and the function qdphp.
 c  Finally, a value for ph between 0 and 2*pi is generated.
 c
-c  The array pex contains values of the e distribution integral for qd gamma 
-c  absorption at the values 
+c  The array pex contains values of the e distribution integral for qd gamma
+c  absorption at the values
 c           e=eg*asin(-1.1+0.1*ind)/pi,    ind=1,...,11
 c
-c  The array pthx contains values of the th distribution integral for qd gamma 
-c  absorption at the values 
+c  The array pthx contains values of the th distribution integral for qd gamma
+c  absorption at the values
 c           e=eg*asin(-1.1+0.1*ind)/pi,    ind=1,...,11
 c  and
 c           th=acos(1.1-0.1*jnd)           jnd=1,...,21
@@ -5033,7 +5040,7 @@ c
 
       common/qdist/pex(11),pthx(21,11)
 
-      data pi/3.14159265359d0/ 
+      data pi/3.14159265359d0/
 
       re=RANG()
 
@@ -5068,7 +5075,7 @@ c      write(*,*) sne,eg,e
       if(imhi.gt.0) rth=1.0d0-rth
       nth=int(20*rth+1)
 
-      if(thx(nth).gt.rth.or.thx(nth+1).lt.rth) 
+      if(thx(nth).gt.rth.or.thx(nth+1).lt.rth)
      1   nth=nth+int((rth-thx(nth))/(thx(nth+1)-thx(nth)))
 
 c      if(abs((rth-thx(nth))/(thx(nth+1)-thx(nth))).gt.1.0d0) then
@@ -5113,12 +5120,12 @@ c
 c
 c  Initializes the arrays pex and pthx for a given value of the gamma
 c  energy, egxx.
-c  The array pex contains values of the e distribution integral for qd gamma 
-c  absorption at the values 
+c  The array pex contains values of the e distribution integral for qd gamma
+c  absorption at the values
 c           e=egxx*asin(-1.1+0.1*ind)/pi,  ind=1,...,11
 c
-c  The array pthx contains values of the th distribution integral for qd gamma 
-c  absorption at the values 
+c  The array pthx contains values of the th distribution integral for qd gamma
+c  absorption at the values
 c           e=egxx*asin(-1.1+0.1*ind)/pi,  ind=1,...,11
 c  and
 c           th=acos(1.1-0.1*jnd)           jnd=1,...,21
@@ -5424,7 +5431,7 @@ c
       subroutine interp(ak,dk,nter,nmax,nk,w)
 c
 c  Calculates the interpolation coefficients of order nter-1,
-c      w(1), ...,w(nter), 
+c      w(1), ...,w(nter),
 c  for a uniform grid of spacing dk and a given value of ak.
 c  The grid index is assumed to begin with 0 and to have a maximum value nmax.
 c  nk is the first value of the index in the interpolation of the value at ak,
@@ -5456,7 +5463,7 @@ c
       function qdphe(emxx,eg)
 c
 c  For a fixed value of the gamma energy eg, integrates
-c  the momentum-angle integral of the distribution qdph(p,th,e,eg) from 
+c  the momentum-angle integral of the distribution qdph(p,th,e,eg) from
 c  e=-eg/2 to e=emxx.
 c
       implicit double precision (a-h,o-z)
@@ -5499,14 +5506,14 @@ c
       function qdphth(thmxx,e,eg)
 c
 c  For fixed values of the gamma energy eg and the energy e, integrates
-c  the momentum integral of the distribution qdph(p,th,e,eg) from 
+c  the momentum integral of the distribution qdph(p,th,e,eg) from
 c  th=0 to th=thmxx.
 c
       implicit double precision (a-h,o-z)
 
 c  np must be even (Simpson)
       data nth/8/
-      data pi/3.14159265359d0/ 
+      data pi/3.14159265359d0/
 
       qdphth=0.0d0
 
@@ -5539,9 +5546,9 @@ c------------------------------------------------------------------------------
 c
       function qdphp(pmxx,th,e,eg,plo,phi,dqdphp)
 c
-c  For fixed values of the gamma energy eg, the energy e and the angle th, 
-c  determines the minimum and maximum values, plo and phi, for which the 
-c  momentum distribution, qdph(p,th,e,eg), is non-zero and integrates the 
+c  For fixed values of the gamma energy eg, the energy e and the angle th,
+c  determines the minimum and maximum values, plo and phi, for which the
+c  momentum distribution, qdph(p,th,e,eg), is non-zero and integrates the
 c  distribution from plo to pmxx.
 c
       implicit double precision (a-h,o-z)
@@ -5580,7 +5587,7 @@ c  np must be even (Simpson)
         wtp=wtp+dwtp
         dwtp=-dwtp
 
-       
+
         if(jp.eq.np) then
           dqdphp=p**2*qdph(p,th,e,eg)
           qdphp=qdphp+0.5d0*wtp*dqdphp
@@ -5590,26 +5597,26 @@ c  np must be even (Simpson)
        end do
 
       return
-      end 
+      end
 c
 c------------------------------------------------------------------------------
 c
       function qdph(p,th,e,eg)
 c
-c Calculates the distribution function (arbitrary normalization) 
-c for creation of a neutron and a proton particle-hole pair of energy-momentum 
+c Calculates the distribution function (arbitrary normalization)
+c for creation of a neutron and a proton particle-hole pair of energy-momentum
 c neutron:     (eg/2+e,0,p*sin(th),eg/2+p*cos(th))
 c and
 c proton:      (eg/2-e,0,-p*sin(th),eg/2-p*cos(th)),
 c eg being the gamma energy,
-c through the qausideuteron mechanism,  
+c through the qausideuteron mechanism,
 c following Chadwick et al., PRC44,814 (1991).
 c
       implicit double precision (a-h,o-z)
 
 c akf=sqrt(2*938*35), alf2=4*(2.23*m)**2
       data akf/256.242d0/,am/938.d0/,alf2/8366.96d0/
-      data pi/3.14159265359d0/ 
+      data pi/3.14159265359d0/
 c  nk must be odd and nph must even (Simpson)
       data nk/17/,nph/16/
 
