@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 18:39:52 $
-Ccc   * $Id: lev-dens.f,v 1.27 2005-01-24 18:39:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-24 20:33:07 $
+Ccc   * $Id: lev-dens.f,v 1.28 2005-01-24 20:33:07 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -711,7 +711,7 @@ C
       ENDIF
       IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0.and.fiscon.lt.1)
 
-     >   RETURN
+     &   RETURN
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
       If(fiscon.lt.1.)then
