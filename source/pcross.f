@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-26 18:37:24 $
-Ccc   * $Id: pcross.f,v 1.12 2004-07-26 18:37:24 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-09-23 18:10:31 $
+Ccc   * $Id: pcross.f,v 1.13 2004-09-23 18:10:31 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -449,9 +449,9 @@ CRCN           DO ie = iemin(nejc), iemax(nejc)
                ie1 =  nexrt - ie + 1
                   POP(ie1, j, 1, Nnur) = POP(ie1, j, 1, Nnur) + pops 
                   POP(ie1, j, 2, Nnur) = POP(ie1, j, 2, Nnur) + pops 
-                  IF(j .EQ.1 )
-     &            WRITE(6, *)'nejc,ie,ie1,spec,pop',nejc,ie,ie1,pops,
-     &            POP(ie1, j, 1, Nnur)  
+C                 IF(j .EQ.1 )
+C    &            WRITE(6, *)'nejc,ie,ie1,spec,pop',nejc,ie,ie1,pops,
+C    &            POP(ie1, j, 1, Nnur)  
                ENDDO 
             ENDDO 
 c-----------add PCROSS contribution to the EMPIRE spectra CSE and  
