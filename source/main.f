@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:34:14 $
-Ccc   * $Id: main.f,v 1.38 2004-09-23 18:34:14 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-24 14:59:43 $
+Ccc   * $Id: main.f,v 1.39 2004-09-24 14:59:43 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -417,7 +417,7 @@ C--------print elastic and direct cross sections from ECIS
                IF(DIRect.EQ.1)THEN
                   WRITE(6, *)' Inelastic scattering results provided by'
                   WRITE(6, *)
-     >			' Coupled Channel + DWBA calculations with ECIS:'
+     >         ' Coupled Channel + DWBA calculations with ECIS:'
                ENDIF
                IF(DIRect.EQ.3)THEN
                   WRITE(6, *)' Inelastic scattering results provided by'
@@ -428,7 +428,7 @@ C--------print elastic and direct cross sections from ECIS
 C
 C              RCN, 08/2004
 C
-	         if(CSAlev(1, ICOller(2), nejcec).gt.0) then
+                 if(CSAlev(1, ICOller(2), nejcec).gt.0) then
                  WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
 99001            FORMAT('  Angle ', 10(6x, i2, '-level'))
                  WRITE(6, *)' '
@@ -437,17 +437,17 @@ C
                     WRITE(6, 99002) (iang - 1)*gang, 
      &               (CSAlev(iang, ICOller(ilv), nejcec),
      &                       ilv = 2, min(ncoll,10))
-	             endif  
+                     endif  
 99002              FORMAT(1x, f5.0, 3x, 11(2x, E12.6))
                  ENDDO
                  WRITE(6, *)' '
                  WRITE(6, 99003)
-     &	          (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
+     &             (POPlv(ICOller(ilv), nnurec),ilv = 2, min(ncoll,10))
 99003            FORMAT(6x, 3x, 11(2x, E12.6))
                  WRITE(6, *)' '
                  WRITE(6, *)' '
                  WRITE(6, *)' '
-	         endif
+                 endif
             ENDIF
          ENDIF
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
@@ -455,17 +455,17 @@ C
             WRITE(6, *)
      &               ' Results provided by Coupled Channel calculations'
      &               , ' with ECIS code:'
-	      IF(ZEJc(0).EQ.0) THEN
+              IF(ZEJc(0).EQ.0) THEN
               WRITE(6, 99004)TOTcs, ecisabs, ELAcs
 99004       FORMAT(/, 2x, 'Total cross section         :', e14.7, ' mb',
      &             /, 2x, 'Absorption cross section    :', e14.7, ' mb',
      &             /, 2x, 'Shape elastic cross section :', e14.7, ' mb',
      &             //)
-	      ELSE
+              ELSE
               WRITE(6, 99005)ecisabs
 99005       FORMAT(/, 2x, 'Absorption cross section    :', e14.7, ' mb',
      &             //)
-	      ENDIF
+              ENDIF
 C           RCN 05/05
 C           The printout below was changed to include the whole angular grid
 C           ala SCAT2000
@@ -497,15 +497,15 @@ C
                  WRITE(6, 99002)(iang - 1)*gang, 
      &           (CSAlev(iang, ICOller(ilv), nejcec),
      &            ilv = 2, min(ncoll,10))
-	         endif
+                 endif
               ENDDO
               WRITE(6, *)' '
               WRITE(6, 99003)(POPlv(ICOller(ilv), nnurec),
-     &               			ilv = 2,min(ncoll,10))
+     &                 ilv = 2,min(ncoll,10))
               WRITE(6, *)' '
               WRITE(6, *)' '
               WRITE(6, *)' '
-	      endif
+              endif
 C=========================================================================
 C           the following ELSE block is to print ECIS calculated XS
 C           (it could be omitted)
@@ -521,10 +521,10 @@ C           ecis03
             IF(ZEJc(0).EQ.0) THEN 
             WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, ecistotxs/1000.,
      &            ecisabsxs/1000., eciselaxs/1000., TOTcs/1000.
-	      ELSE
+              ELSE
             WRITE(62, '(1x,f9.3,3x,4F14.3,1x)')EINl, 
      &            ecisabsxs/1000.
-	      ENDIF
+              ENDIF
 C
 C=========================================================================
          ENDIF
@@ -1710,7 +1710,7 @@ C        Mike, check the lines below
 C        It was a bug before. nexrt could be negative
 C        I intriduced a jump for this case, but may be this is not the proper thing to do !!! (08/2004) 
 C
-	            if(nexrt.le.1) cycle 
+                    if(nexrt.le.1) cycle 
 
                   IF(nejc.EQ.0) THEN 
                      cejectile = 'gammas   '

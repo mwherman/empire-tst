@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-23 19:44:45 $
-Ccc   * $Id: lev-dens.f,v 1.21 2004-09-23 19:44:45 herman Exp $
+Ccc   * $Date: 2004-09-24 14:59:43 $
+Ccc   * $Id: lev-dens.f,v 1.22 2004-09-24 14:59:43 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -1631,7 +1631,7 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                WRITE(6, *)' a=', A(Nnuc), 'Z=', Z(Nnuc)
                WRITE(6, *)' A=', am, ' UX=', ux, ' T=', tm, ' EO=', eo
                WRITE(35, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &			 NLV(Nnuc)
+     &             NLV(Nnuc)
 99001          FORMAT('set title "NO SOLUTION FOR ', I3, '-', A2, '-', 
      &                I3,' Ncut=',I3,'"')
                WRITE(35, *)'set terminal postscript enhanced color'
@@ -1710,7 +1710,7 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE(35, *)'set terminal postscript enhanced color'
          WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
          WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &				   am,t,NLV(Nnuc)
+     &          am,t,NLV(Nnuc)
 99002    FORMAT('set title "Cumul.plot for ', I3, '-', A2, '-', I3, 
      &          ': a=',F4.1,' T=',F4.1,' Ncut=',I3,'"')
          WRITE(35, *)'set logscale y'

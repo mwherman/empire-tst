@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:04:45 $
-Ccc   * $Id: tl.f,v 1.26 2004-09-23 18:04:45 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-24 14:59:43 $
+Ccc   * $Id: tl.f,v 1.27 2004-09-24 14:59:43 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -309,7 +309,7 @@ C        ND_nlv = NCOll(ncalc)
          NLD_cc = 0
          DO k = 1, ND_nlv
           if(icollev(k).LT.50) NLD_cc = NLD_cc +1
-	   ENDDO
+           ENDDO
 
          WRITE(6, *)
          WRITE(6, *)
@@ -320,51 +320,51 @@ C        ND_nlv = NCOll(ncalc)
             D_Def(1, k) = DDEf(ncalc, k)
          ENDDO
 
-	   IF(NLD_cc.NE.NCOll(ncalc)) THEN
+           IF(NLD_cc.NE.NCOll(ncalc)) THEN
           WRITE(6, *)
      >    'WARNING: Default number of coupled levels: ',NLD_cc
           WRITE(6, *) 
      >    'WARNING: is not equal ',NCOll(ncalc),' (used in CC RIPL OMP)'
-	   ENDIF
+           ENDIF
 C
 C        Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN(32, FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN(134, FILE = 'TARGET_COLL.DAT')
-	   OPEN(133, FILE = 'COLL.DAT')
+           OPEN(133, FILE = 'COLL.DAT')
 
          WRITE(6, *)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE(32, *)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
-	   READ(134,'(A80)') ch_iuf    ! FIRST LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf    ! FIRST LINE
+           WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)'Dyn.deformations are not used in symm.rot.model'
          WRITE(32, *)'Dyn.deformations are not used in symm.rot.model'
-	   READ(134,'(A80)') ch_iuf	  ! 2ND LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf	  ! 2ND LINE
+           WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          WRITE(32, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                 ' nucleus is treated as deformed'
-	   READ(134,'(A80)') ch_iuf	  ! 3ER LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf	  ! 3ER LINE
+           WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)
          WRITE(32, *)
-	   READ(134,'(A80)') ch_iuf	  ! EMPTY LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf	  ! EMPTY LINE
+           WRITE(133,'(A80)') ch_iuf
 
-	   DEFORMED=.TRUE.
+           DEFORMED=.TRUE.
          DO n = 1, NISotop
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                WRITE(6, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE(32, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf	  
                WRITE(133, *)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                
@@ -374,19 +374,19 @@ C
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n),
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf	  
                WRITE(133, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &               LMAx(n), IDEf(n), BANdk(n),
      &               (DDEf(n, k), k = 2, IDEf(n), 2)
 
                WRITE(6, *)
                WRITE(32, *)
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf	  
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf	  
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
@@ -472,13 +472,13 @@ C
          NLD_cc = 0
          DO k = 1, ND_nlv
           if(icollev(k).LT.50) NLD_cc = NLD_cc +1
-	   ENDDO
-	   IF(NLD_cc.NE.NVIb(ncalc)) THEN
+           ENDDO
+           IF(NLD_cc.NE.NVIb(ncalc)) THEN
            WRITE(6, *)
      >     'WARNING: Default number of coupled levels: ',NLD_cc
            WRITE(6, *) 
      >     'WARNING: is not equal ',NVIb(ncalc),' (used in CC RIPL OMP)'
-	   ENDIF
+           ENDIF
          WRITE(6, *)
          WRITE(6, *)
 C
@@ -486,56 +486,56 @@ C        Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN(32, FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN(134, FILE = 'TARGET_COLL.DAT')
-	   OPEN(133, FILE = 'COLL.DAT')
+           OPEN(133, FILE = 'COLL.DAT')
          WRITE(6, *)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE(32, *)
      &           'Collective levels from RIPL CC OMP, vibrational model'
-	   READ(134,'(A80)') ch_iuf    ! FIRST LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf    ! FIRST LINE
+           WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)'Dynamical deformations should be adjusted'
          WRITE(32, *)'Dynamical deformations should be adjusted'
-	   READ(134,'(A80)') ch_iuf	  ! 2ND LINE
-	   WRITE(133,'(A80)') 'Dynamical deformations should be adjusted'
+           READ(134,'(A80)') ch_iuf  ! 2ND LINE
+           WRITE(133,'(A80)')'Dynamical deformations should be adjusted'
 
          WRITE(6, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                ' nucleus is treated as spherical'
          WRITE(32, '(1x,i3,1x,i3,a35)')izinp, iainp,
      &                                ' nucleus is treated as spherical'
-	   READ(134,'(A80)') ch_iuf	  ! 3ER LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf  ! 3ER LINE
+           WRITE(133,'(A80)') ch_iuf
 
          WRITE(6, *)
          WRITE(32, *)
-	   READ(134,'(A80)') ch_iuf	  ! EMPTY LINE
-	   WRITE(133,'(A80)') ch_iuf
+           READ(134,'(A80)') ch_iuf  ! EMPTY LINE
+           WRITE(133,'(A80)') ch_iuf
 
-	   DEFORMED=.FALSE.
+           DEFORMED=.FALSE.
          DO n = 1, NISotop
             IF(iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n))THEN
                WRITE(6, *)   '   Ncoll'
                WRITE(32, *)  '   Ncoll'
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf  
                WRITE(133, *) '   Ncoll'
  
                WRITE(6, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
                WRITE(32, '(3x,3I5,1x,F5.1,1x,6(e10.3,1x))')NCOll(n)
-	         READ(134,'(A80)') ch_iuf	  
-               WRITE(133,'(A80)')  ND_nlv	  
+                 READ(134,'(A80)') ch_iuf  
+               WRITE(133,'(A80)')  ND_nlv  
 
                WRITE(6, *)
                WRITE(32, *)
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf  
                WRITE(133, *)
 
                WRITE(6, *) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-	         READ(134,'(A80)') ch_iuf	  
+                 READ(134,'(A80)') ch_iuf  
                WRITE(133, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   70    READ(134,'(A80)',END=80) ch_iuf	          
+   70    READ(134,'(A80)',END=80) ch_iuf          
          WRITE(133,'(A80)') ch_iuf
          GOTO 70
    80    CLOSE(133)   
@@ -2392,7 +2392,7 @@ C     Dummy arguments
 C
       INTEGER Maxlw, Nejc, Nnuc
       DOUBLE PRECISION Stl(NDLW)
-      DOUBLE PRECISION p1,r2,rp,s0,s1					!   cBuc
+      DOUBLE PRECISION p1,r2,rp,s0,s1					!   cBug
 C
 C     Local variables
 C
@@ -2828,10 +2828,10 @@ C
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
       nd_nlvop = 1
-	nd_cons = 1
+        nd_cons = 1
       DO j = 2, ND_nlv
           if(.NOT.LDWBA .AND. icollev(j).GT.50) cycle
-	    nd_cons = nd_cons + 1
+            nd_cons = nd_cons + 1
           eee = El - D_Elv(j)/xratio
           IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
       ENDDO
@@ -2899,14 +2899,14 @@ C--------If channel is closed ground state potential is used for this level
            nwrite = nwrite + 1
            WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0, nwrite, ch,
      &            D_Elv(j)
-	   ELSE
+           ELSE
            WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), 0,      1, ch,
      &            D_Elv(j)
-	   ENDIF
+           ENDIF
          IF(LDWBA .OR. DIRECT.EQ.3) THEN
 C           If DWBA, all states are assumed to be one phonon
-	      WRITE(1, '(3i5)') 1, j - 1, 0
-	   ELSE
+              WRITE(1, '(3i5)') 1, j - 1, 0
+           ELSE
             IF(IPH(j).EQ.1)THEN
                WRITE(1, '(3i5)')IPH(j), j - 1, 0
             ELSE
@@ -2914,7 +2914,7 @@ C--------------two  phonon states if exist are formed from the quadrupole
 C--------------quadrupole phonon spin is equal to 2+ phonon
                WRITE(1, '(3i5)')IPH(j), 1, 1
             ENDIF
-	   ENDIF
+           ENDIF
       ENDDO
 C
 C--------deformations: phonon description
@@ -2929,7 +2929,7 @@ C           If DWBA, all states are assumed to be one phonon
 C           only one phonon states need deformations as input
             IF(IPH(j).EQ.1)WRITE(1, '(i5,5x,6f10.5)')INT(D_Xjlv(j)),
      &                        D_Def(j, 2)
-	   ENDIF
+           ENDIF
       ENDDO
 C
 C-----potential parameters
@@ -3209,13 +3209,13 @@ C-----At least ground state is always open !!, RCN 31/03/2001
 C-----nd_nlvop = 0
       nd_nlvop = 1
       IF(ND_nlv.GT.0)THEN
-	   nd_cons=1
+           nd_cons=1
          DO j = 2, ND_nlv
 C           All levels with icollev(j)>50 should be calculated by DWBA
-	      if(INLkey.eq.0 .AND. icollev(j).gt.50) cycle
+              if(INLkey.eq.0 .AND. icollev(j).gt.50) cycle
 C           All levels with icollev(j)<50 should be calculated by CC
-	      if(INLkey.eq.1 .AND. icollev(j).LT.50) cycle
-	      nd_cons = nd_cons + 1
+              if(INLkey.eq.1 .AND. icollev(j).LT.50) cycle
+              nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF(eee.GT.0.0001)nd_nlvop = nd_nlvop + 1
          ENDDO
@@ -3298,7 +3298,7 @@ C    &         D_Elv(j), SEJc(Nejc), xmas_nejc, xmas_nnuc, Z(Nnuc)
 C    &         *ZEJc(Nejc)
           WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j), nwrite, ch,
      &         D_Elv(j)
-	   ELSE
+           ELSE
           WRITE(1, '(f5.2,2i2,a1,5f10.5)')D_Xjlv(j), IPH(j),      1, ch,
      &         D_Elv(j)
          ENDIF
@@ -3484,12 +3484,12 @@ C        LINUX
          ENDIF
       ELSE
 C        WINDOWS
-	   IF(npho.GT.0)THEN
+           IF(npho.GT.0)THEN
            iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_VIBROT.out#')
          ELSE
            iwin = PIPE('ecis03<ecVIBROT.inp>ECIS_ROT.out#')
          ENDIF
-	ENDIF
+        ENDIF
 
       IF(.NOT.Ltlj)THEN
          IF(DIRect.EQ.3)THEN
@@ -3510,7 +3510,7 @@ C     Dummy arguments
 C
       INTEGER*4 Iwin
       CHARACTER*(*) Sname
-	LOGICAL LDWBA
+        LOGICAL LDWBA
 C
 C     Local variables
 C
@@ -3523,16 +3523,16 @@ C        &                     'Total, reaction and elastic c.s. calculated'
 C        &                     , ' with ' , Sname , ' model'
          INQUIRE(FILE = 'ecis03.ics', EXIST = fexist)
          IF(fexist) THEN
-	    IF(LDWBA) THEN
-	      WRITE(6, *)
+            IF(LDWBA) THEN
+              WRITE(6, *)
      &      'Inelastic c.s. to non-coupled collective levels calculated'
      &    , ' with DWBA model'
-	    ELSE
-	      WRITE(6, *)
+            ELSE
+              WRITE(6, *)
      &      'Inelastic c.s. to coupled collective levels calculated'
      &    , ' with ', Sname,' model'
-	    ENDIF
-	   ENDIF
+            ENDIF
+           ENDIF
       ELSE
          WRITE(6, *)'SYSTEM PROBLEM RUNNING ECIS in', Sname
          STOP '17'

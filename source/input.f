@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-09-23 20:01:06 $
-Ccc   * $Id: input.f,v 1.40 2004-09-23 20:01:06 herman Exp $
+Ccc   * $Date: 2004-09-24 14:59:42 $
+Ccc   * $Id: input.f,v 1.41 2004-09-24 14:59:42 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -136,7 +136,7 @@ C
       CHARACTER*2 SMAT
       CHARACTER*3 atar
       CHARACTER*1 proj, ctmp1, ctmp2
-	DOUBLE PRECISION stmp1, stmp2
+      DOUBLE PRECISION stmp1, stmp2
       CHARACTER*132 x4string,ctmp
       CHARACTER*80 rstring
       INTEGER*4 iwin
@@ -281,8 +281,8 @@ C        Relativistic kinematics
          RELkin = .FALSE.
 C        Maximum energy to assume all levels are collective for DWBA calculations
 C                Default value 0. i.e. none but those selected automatically
-	   ECUtColl = 0.
-	   JCUtColl = 2.
+         ECUtColl = 0.
+         JCUtColl = 2.
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
@@ -1048,8 +1048,8 @@ C--------fix-up deformations and discrete levels for ECIS coupled channels
 
 C           Defining ICOller(i)
             DO i = 2, ND_nlv
-	         itmp=ICOllev(i)
-	         if(itmp.gt.50) itmp = ICOllev(i) - 50
+            itmp=ICOllev(i)
+            if(itmp.gt.50) itmp = ICOllev(i) - 50
                ICOller(i) = itmp
             ENDDO
 
@@ -1274,7 +1274,7 @@ C--------Calling interface subroutine to do ECIS call
 C        DWBA calculation for additional collective levels
          CALL ECIS_CCVIB(0, 0, -EINl, .FALSE., .TRUE.)
 
-	   IF(DIRECT.NE.3) THEN
+         IF(DIRECT.NE.3) THEN
 
            IF(IOPsys.EQ.0)THEN
 C            LINUX
@@ -1329,18 +1329,18 @@ C          inelastic cross section
            OPEN(46, FILE = 'ccm.ics' , STATUS = 'OLD')
            OPEN(47, FILE = 'ecis03.ics' , STATUS = 'UNKNOWN')
            READ(45, '(A80)', END = 1000) rstring
-	     READ(46, '(A80)', END=990) ! first line is taken from dwba
+           READ(46, '(A80)', END=990) ! first line is taken from dwba
   990      write(47,'(A80)') rstring
            DO i = 2, ND_nlv
              READ(45, '(A80)', END = 1000) rstring
              READ(46,'(A80)',END=995) rstring
   995        write(47,'(A80)') rstring
-	     ENDDO
+           ENDDO
 C1000	     CLOSE(45, STATUS='DELETE')
 C	     CLOSE(46, STATUS='DELETE')
- 1000	     CLOSE(45)
- 	     CLOSE(46)
-	     CLOSE(47)
+ 1000     CLOSE(45)
+        CLOSE(46)
+           CLOSE(47)
 C
 C          Renormalization of the reaction cross section to consider
 C          DWBA calculated inelastic cross section should be checked.
@@ -1349,19 +1349,19 @@ C          angular distribution
            OPEN(45, FILE = 'dwba.ang', STATUS = 'OLD', ERR=2000)
            READ(45, '(A80)', END = 2000) rstring
            OPEN(46, FILE = 'ccm.ang' , STATUS = 'OLD')
-	     READ(46, '(A80)', END=1005) ! first line is taken from dwba
+           READ(46, '(A80)', END=1005) ! first line is taken from dwba
  1005      OPEN(47, FILE = 'ecis03.ang' , STATUS = 'UNKNOWN')
-		 write(47,'(A80)') rstring
+           write(47,'(A80)') rstring
            DO i = 1, ND_nlv
              READ(45, '(5x,F5.1,A1,4x,i5)', END = 2000) stmp1,ctmp1,nang
              READ(46, '(5x,F5.1,A1)', END = 1010) stmp2,ctmp2
 C            checking the correspondence of the excited states
              IF(stmp1.ne.stmp2 .OR. ctmp1.ne.ctmp2) THEN
                write(6,*)
-     >	      ' WARNING: DWBA and CCM state order does not coincide'
-	         STOP
+     >       ' WARNING: DWBA and CCM state order does not coincide'
+             STOP
      >          ' WARNING: DWBA and CCM state order does not coincide'
-	       ENDIF
+             ENDIF
  1010        BACKSPACE 45
              READ(45, '(A80)', END = 2000) rstring
              write(47,'(A80)') rstring
@@ -1370,14 +1370,14 @@ C            checking the correspondence of the excited states
                READ(46,'(A80)' , END = 1015) rstring
  1015          write(47,'(A80)') rstring
              ENDDO
-	     ENDDO
+             ENDDO
 C2000	     CLOSE(45, STATUS='DELETE')
 C          CLOSE(46, STATUS='DELETE')
  2000	     CLOSE(45)
            CLOSE(46)
-	     CLOSE(47)
+             CLOSE(47)
 
-	   ENDIF  ! END of DIRECT.NE.3 case
+           ENDIF  ! END of DIRECT.NE.3 case
 
          IF(KTRompcc.GT.0)THEN
 C           Restoring KTRlom(0,0) and RIPl_omp(0)
@@ -1392,12 +1392,12 @@ C-----determination of excitation energy matrix in cn
 C
       ECUt(1) = ELV(NLV(1), 1)
       IF(FITlev.GT.0.0D0) THEN
-	   ECUt(1) = 0.0
+           ECUt(1) = 0.0
 C
 C        RCN, 09/2004 (If ENDF ne 0, then MAx(Ncut)=40 !! (no good option)
 C--------set ENDF flag to 0 (no ENDF file for formatting)
          ENDF=0
-	ENDIF
+        ENDIF
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -1517,7 +1517,7 @@ C              &                       /(amumev + xnexc)
             EMAx(nnur) = DMAX1(emaxr, EMAx(nnur))
             NEX(nnur) = max(INT((EMAx(nnur) - ECUt(nnur))/DE + 1.0),0)
             NEXr(nejc, nnuc) = 
-     &  	              max(INT((emaxr - ECUt(nnur))/DE + 1.0),0)
+     &                max(INT((emaxr - ECUt(nnur))/DE + 1.0),0)
             IF(NEX(nnur).GT.NDEX)THEN
                WRITE(6, *)' NUMBER OF BINS IN RESIDUAL NUCLEUS A=',
      &                    A(nnur), 'AND Z=', Z(nnur),
@@ -1677,8 +1677,7 @@ C-------barriers available in RIPL-2  (MS)
                IF(FISsil(nnuc))CALL INPFIS(nnuc)
             ENDDO
          ENDIF
-       ENDDO
-       CLOSE(79)
+         CLOSE(79)
       ENDIF
 99001 FORMAT(1X, 60('='))
 99002 FORMAT(1X, 13G10.4)
@@ -2310,7 +2309,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b19  |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b20  |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
@@ -2332,9 +2331,9 @@ C           ICOmpff = 0
 C           ENDIF
 C-----------Print some final input options
             IF(DIRect.eq.0) then
-		    ECUtColl = 0.
-			SCUtColl = 0
-	      ENDIF
+             ECUtColl = 0.
+             SCUtColl = 0
+              ENDIF
             IF(KEY_shape.EQ.0)WRITE(6,
      &           '('' E1 strength shape function set to EMPIRE v2.18'')'
      &           )
@@ -2472,8 +2471,8 @@ C                 &       'RIPL OMP will be used for inelastic channel '
          ENDIF
          IF(name.EQ.'EcDWBA')THEN
             ECUtColl = val
-	      JCUtColl = i1
-	      IF(JCUtColl.eq.0) JCUtColl=2
+              JCUtColl = i1
+              IF(JCUtColl.eq.0) JCUtColl=2
             WRITE(6,
      &       '('' Cut-off energy for collective levels for DWBA calculat
      &ions is'',F5.1,'' MeV'')' ) ECUtColl
@@ -4806,12 +4805,12 @@ C
       i4p = 0
       i6p = 0
       i8p = 0
-	i1m = 0
+        i1m = 0
       i3m = 0
-	i5m = 0
-	i22p = 0
-	i41p = 0
-	i31p = 0
+        i5m = 0
+        i22p = 0
+        i41p = 0
+        i31p = 0
       ND_nlv = 0
       ierr = 1
 C
@@ -4834,7 +4833,7 @@ C
          GOTO 100
       ENDIF
       BACKSPACE(13)
-	NLVs=0
+        NLVs=0
       OPEN(UNIT = 32, FILE = 'TARGET.LEV', STATUS = 'UNKNOWN')
       READ(13, '(A80)')ch_iuf
       WRITE(32, '(A80)')ch_iuf
@@ -4843,10 +4842,10 @@ C
      &        xjlvr, lvpr, t12, ndbrlin
 C        RCN 09/2004, NLVs limited by binding energy
          IF(elvr.LT.qn) THEN
-	     NLVs=NLVs+1
+             NLVs=NLVs+1
            WRITE(32, '(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)')itmp, elvr,
      &         xjlvr, lvpr, t12, 0
-	   ENDIF
+           ENDIF
          DO nbr = 1, ndbrlin
             READ(13, '(A1)')dum
          ENDDO
@@ -4855,7 +4854,7 @@ C
 C     Maximum number of levels scanned for collectivity = 49
 C       99 = 50 + 49 which is the maximum number allowed to be printed in I2 format
 C  
-	NLVs=min(NLVs,49)
+        NLVs=min(NLVs,49)
 
       DO ilv = 1, nlvr + ngamr
          BACKSPACE(13)
@@ -4907,14 +4906,14 @@ C        README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
      &    'E(2+) level is not contained in Raman 2001 database (RIPL-2)'
          WRITE(6, *)' WARNING: ',
      &            'Default dynamical deformations 0.15(2+) will be used'
-	   beta2 = 0.15
+           beta2 = 0.15
       ENDIF
       IF(beta3.EQ.0.D0)THEN
          WRITE(6, *)' WARNING: ',
      &        'E(3-) level is not contained in Kibedi database (RIPL-2)'
          WRITE(6, *)' WARNING: ',
      &            'Default dynamical deformations 0.05(3-) will be used'
-	   beta3 = 0.05
+           beta3 = 0.05
       ENDIF
 C400  DO ilv = 1, nlvr
  400  DO ilv = 1, NLVs
@@ -5098,7 +5097,7 @@ C              Additional levels are added for DWBA calculations
                   GOTO 500
                ENDIF
 
-	         IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
+                 IF(ECUtColl.gt.0. .AND. elvr.gt.ECUtColl) GOTO 600
 
                IF(i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
      &            i8p.NE.0  .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
@@ -5335,8 +5334,8 @@ C        ENDIF
          WRITE(32, *)
          WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-		    ftmp = D_Def(i, 2)
-			if(i.eq.1) ftmp = 0.0
+            ftmp = D_Def(i, 2)
+            if(i.eq.1) ftmp = 0.0
             WRITE(32,
      &            '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -5408,8 +5407,8 @@ C--------------------swapping
          WRITE(32, *)
          WRITE(32, *)' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
-		    ftmp = 	D_Def(i, 2)
-			if(i.eq.1) ftmp = 0.01
+             ftmp = D_Def(i, 2)
+             if(i.eq.1) ftmp = 0.01
             WRITE(32,
      &            '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 0,

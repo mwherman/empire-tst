@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:10:41 $
-Ccc   * $Id: gamma-strgth.f,v 1.11 2004-09-23 18:10:41 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-24 14:59:42 $
+Ccc   * $Id: gamma-strgth.f,v 1.12 2004-09-24 14:59:42 herman Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -103,7 +103,7 @@ C-----GDR parameters according to Messina sytematics
          e(2) = 0.
          s(2) = 0.
          g(2) = 1.
-	   NG=1
+           NG=1
       ENDIF
       IF(ABS(DEF(1,Nnuc)).GT.0.064D0)THEN
          IF(e(1) - e(2).LT.GDRspl)THEN
