@@ -13,9 +13,9 @@
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for production compilation with ifort
-FFLAGS = -O2 
+#FFLAGS = -O2 
 #FFLAGS = -fast 
 #----flags for debuging using ifort compiler 
 #FFLAGS =  -g -check bounds -traceback
@@ -31,9 +31,9 @@ FFLAGS = -O2
 #----Fujitsu f90 FORTRAN compiler
 FC	= lf95
 #----flag for Lahey/Fujitsu f95 FORTRAN to optimize
-FFLAGS = --o3 
+#FFLAGS = --o3 
 #----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more
-#FFLAGS = -g --chk
+FFLAGS = -g --chk
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -fs -Qa -g
@@ -42,7 +42,7 @@ FFLAGS = --o3
 OBJF =	HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 	      auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
 	      gamma-strgth.o 	input.o	          lev-dens.o    main.o\
-	      ph-lev-dens.o  	pipe.o	          print.o	OM-scat2.o\
+	      ph-lev-dens.o  	pipe.o	          print.o\
 	      tl.o		scnd-preeq.o      HRTW-comp.o   ddhms.o\
               degas.o           pcross.o          gamma-strength-analytic.o
 
