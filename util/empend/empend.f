@@ -18,6 +18,7 @@ C-V  04/06 - Process discrete levels flagged with -ve energies.
 C-V        - Let EMPIRE to handle max. outgoing particle energy.
 C-V  04/07 - Fix ordering of levels in MF12,
 C-V        - Read in values in double precision to avoid underflow.
+C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -734,9 +735,11 @@ C* Outgoing neutrons
      1    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.45 .OR. MT.EQ.91) YI=1
         IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR. MT.EQ.41) YI=2
         IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
+        IF(MT.EQ.37) YI=4
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
-        IF(MT.EQ.28 .OR. MT.EQ.103 .OR. MT.EQ.649) YI=1
+        IF(MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
+     &     MT.EQ.45  .OR. MT.EQ.103 .OR. MT.EQ.649) YI=1
         IF(MT.EQ.44) YI=2
       ELSE IF(KZAP.EQ.1002) THEN
 C* Outgoing deuterons
