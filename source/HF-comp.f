@@ -1,7 +1,6 @@
-C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:27:33 $
-Ccc   * $Id: HF-comp.f,v 1.31 2004-09-23 18:27:33 Capote Exp $
+Ccc   * $Date: 2004-10-07 16:20:19 $
+Ccc   * $Id: HF-comp.f,v 1.32 2004-10-07 16:20:19 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1496,7 +1495,7 @@ C         light actinides
                   IF(NRBar.EQ.5.and.NRWel.eq.2.)THEN
 c-----------region I
                      IF(ee.le.vbarex(4).and.ee.le.vbarex(5))THEN
-c                        call wkbfisnum(ee,2.) !!!!!
+c                       call wkbfisnum(ee,2.) !!!!!
                         tfd(1)=0.
                         tfd(2)=0.
                         tfd(3)=0.
@@ -1523,7 +1522,6 @@ c-------------region II
                         if(delt.eq.0.)tabss=0.               
                      ENDIF
 c--------------region III 
-
                      efbmin=min(vbarex(2),vbarex(3))
                      efbmax=max(vbarex(2),vbarex(3))
                      IF(ee.lt.vbarex(1).and.ee.gt.vbarex(4).and.
@@ -1642,7 +1640,7 @@ C        CALL GAUSSFIS(NNUc, IBAr)
       ENDIF
 
       IF(FISopt(NNuc).eq.2.)THEN
-c      gamma trensition, eeiso   
+c      gamma transition, eeiso   
          TG2=.00002
       ELSE 
          TG2=0.
@@ -2208,6 +2206,7 @@ c=============================================================
       
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+      character*36 cara1 
 
       COMMON /FISSMOD / rofism(60,30,3), hm(Nftrans,3), 
      &                  efdism(Nftrans,3), UGRidf(0:NFISENMAX, 3),
@@ -2318,8 +2317,8 @@ C
 C
       IF(NRBar.EQ.5)THEN
          WRITE(80, '(a,1x,a)')
-     &'    Va      ha      Vb      hb      Vc       hc      Vi
-     &hi      Vo      ho  (in Mev) '
+     &'    Va      ha      Vb      hb      Vc       hc      Vi      hi  
+     &    Vo      ho  (in Mev) '
          WRITE(80, '(10f8.3,15x)') (EFB(i), H(1,i), i = 1, NRBar)
          WRITE(80, *)' '
          WRITE(80, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)', 
@@ -2341,10 +2340,11 @@ C
       ENDIF
     
       WRITE(80, *)' '
-      WRITE(80,*)'FISOPT=', FISopt(nnuc),
-     &                  'subbarier effects considered'
+      IF(FISopt(Nnuc).EQ.0.)cara1 = ' Subbarrier effects neglected '
+      IF(FISopt(Nnuc).GT.0.)cara1 = ' Subbarrier effects considered'
+      WRITE(80, '(a8,f2.0,a36)')'FISOPT=', FISopt(Nnuc), cara1
 
-      WRITE(80,*)'FISMOD=', FISmod(nnuc)
+      WRITE(80,'(A8,F2.0)')'FISMOD =', FISmod(nnuc)
       WRITE(80, *)' '
       IF(FISopt(Nnuc).gt.0.)THEN
          WRITE(80,*) '  '
@@ -2390,7 +2390,7 @@ C
          WRITE(80, *)'     Veq=',veq, ' MeV     heq=',hoeq,' MeV'
          WRITE(80, *)' '
       endif
-      WRITE(80, *)'FISDEN=', FISden(nnuc)
+      WRITE(80, '(A8,F2.0)')'FISDEN =', FISden(nnuc)
 
       nrbarc1=nrbarc
       IF(nrbarc.eq.3)nrbarc1=2
