@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-11 22:13:35 $
-Ccc   * $Id: fusion.f,v 1.14 2004-06-11 22:13:35 herman Exp $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: fusion.f,v 1.15 2004-07-16 12:47:37 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -73,10 +73,8 @@ C
 C-----Plujko_new (new variables for SDREAD - ParcnJ,cnJ )
 C     cnJ    - spin of CN
 C     ParcnJ - parity of CN
-Cb      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, eee, PI, smax, 
-Cb     &                 smin, stl(NDLW), sum, wf,POPTest 
-      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, eee, PI, smax, 
-     &                 smin, stl(NDLW), sum, wf, POPTest, ParcnJ, cnJ  
+      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, PI, smax, 
+     &                 smin, stl(NDLW), sum, wf, ParcnJ, cnJ  
 C-----Plujko_new (END of new variables for SDREAD - ParcnJ,cnJ )
 
       DOUBLE PRECISION DMAX1
@@ -237,15 +235,17 @@ C-----calculation of transmission coefficients ----done------
       
 C-----Plujko_new (calculation CSFus)
  100  IF(INT(AEJC(0)).EQ.0)THEN
-        WRITE(6,*)'Incident gamma E1+M1+E2 channel ', ' IGE1=',IGE1,'
-     &  IGM1=',IGM1,' IGE2=',IGE2
         CSFus = 0.0     
-
-C       PI = 3.14159D0  already defined in common
-C       chPI=c*h/2/PI [Mev*fm]
-C       chPI=197.3287D0 already defined in common as HHBarc
-
-C-------for E1
+        JSTab(1) = NDLW !stability limit not a problem for photoreactions
+        IF(EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
+           WRITE(6,*)'WARNING: '
+           WRITE(6,*)'WARNING: ECN=',EIN,' Elev=',ELV(NLV(Ntrg),Ntrg)
+           WRITE(6,*)'WARNING: CN excitation energy below continuum' 
+           WRITE(6,*)'WARNING: cut-off. zero reaction cross section' 
+           WRITE(6,*)'WARNING: will result'
+           WRITE(6,*)'WARNING: '
+        ENDIF 
+C-------E1
         IF(IGE1.NE.0)THEN
 C---------do loop over parity
           DO ip = 1, 2
@@ -259,16 +259,13 @@ C---------------factor 10 near HHBarc from fm**2-->mb
                 POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) + 10*
      &          HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
      &          (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E1(0,Z,A,EINl,0.d0,0.d0)
-                POPTest = POP(NEX(1), j, ip, 1)
-                CSFus = CSFus + POP(NEX(1), j, ip, 1)
-                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
               ENDIF
             ENDDO
           ENDDO
         ENDIF
-C-------end for E1
+C-------end of E1
 
-C-------for M1
+C-------M1
         IF(IGM1.NE.0)THEN
 C---------do loop over parity
           DO ip = 1, 2
@@ -282,15 +279,13 @@ C---------------factor 10 near HHBarc from fm**2-->mb
                 POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
      &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
      &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*XM1(EINl)
-                CSFus = CSFus + POP(NEX(1), j, ip, 1)
-                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
               ENDIF
             ENDDO
           ENDDO
         ENDIF
-C-------end for M1
+C-------end of M1
 
-C-------for E2
+C-------E2
         IF(IGE2.NE.0)THEN
 C---------do loop over parity
           DO ip = 1, 2
@@ -304,25 +299,22 @@ C---------------factor 10 near HHBarc from fm**2-->mb
                 POP(NEX(1), j, ip, 1)=POP(NEX(1), j, ip, 1) + 10*
      &            HHBarc**2/EINl**2*(FLOAT(2*j + 1) - 2.0*S1)*PI/2/
      &            (2*XJLv(LEVtarg, Ntrg)+1)*WPARG*E2(EINl)
-                CSFus = CSFus + POP(NEX(1), j, ip, 1)
-                csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
               ENDIF
             ENDDO
           ENDDO
         ENDIF
-C-------end for E2
+C-------end of E2
+        DO ip = 1, 2
+          DO j = 1, NDLW
+              CSFus = CSFus + POP(NEX(1), j, ip, 1)
+              csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
+          ENDDO
+        ENDDO
         GOTO 101
       ENDIF
 C-----Plujko_new(END of calculation CSFus)
 C
-C-----channel spin min and max
-C-----Plujko_new (Cb - blocking comment)
-Cb 100  eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
-C-----Plujko_new (END of blocking comment)
-C-----Plujko_new(operator without label 100)
-       eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
-C-----Plujko_new (END of operator without label 100)       
-      smin = ABS(eee)
+      smin = ABS(SEJc(Npro) - XJLv(LEVtarg, Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
       mul = smax - smin + 1.0001
       CSFus = 0.0
@@ -422,8 +414,7 @@ C-----------in the SCAT2 calculated reaction XS
             ENDDO
          ENDIF
 C--------channel spin min and max
-         eee = SEJc(Npro) - XJLv(LEVtarg, Ntrg)
-         smin = ABS(eee)
+         smin = ABS(SEJc(Npro) - XJLv(LEVtarg, Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg, Ntrg)
          mul = smax - smin + 1.0001
          CSFus = 0.0

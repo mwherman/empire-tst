@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2004-06-15 22:16:18 $
-Ccc   * $Id: MSD-tristan.f,v 1.11 2004-06-15 22:16:18 herman Exp $
+Ccc   * $Date: 2004-07-16 12:47:36 $
+Ccc   * $Id: MSD-tristan.f,v 1.12 2004-07-16 12:47:36 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc, Nnuc, L1maxm, Qm, Qs)
 CCC
@@ -952,11 +952,11 @@ C
                IF(clex(lt).EQ.0.D0)THEN
                   WRITE(6, 99013)lt - 1, efit(lt), ddr
 99013             FORMAT(/
-     &            'WARNING: FROM TRISTAN:' /
-     &            'WARNING: - NO FIT OF RESPONSE FUNCTION FOR J=', I3/
-     &            'WARNING: E(EXP.):', F8.2, '  2ND DERIV.:', 2E13.5/
-     &            'WARNING: ENERGY IS INCONSISTENT WITH 2-QP SPECTRUM!'/
-     &            'WARNING: SELF-CONSISTENT RESPONSE IS USED!')
+     &            'WARNING: From TRISTAN:' /
+     &            'WARNING: - No fit of response function for J=', I3/
+     &            'WARNING: E(EXP.):', F8.2, '  2nd deriv.:', 2E13.5/
+     &            'WARNING: Energy is inconsistent with 2-qp spectrum!'/
+     &            'WARNING: Self-consistent response is used!')
                   efit(lt) = 0.D0
                   clex(lt) = 0.D0
                   xea(lt) = 0.D0
@@ -3178,10 +3178,10 @@ C-----provided by TRISTAN at the closest bin.
       ENDDO
  100  IF(swght.EQ.0.0D0)THEN
          WRITE(6, *)' WARNING:'
-         WRITE(6, *)' WARNING: NO LEVEL TO PUT MSD LEVEL CONTRIBUTION ',
+         WRITE(6, *)' WARNING: No level to put msd level contribution ',
      &              csmsdl, ' mb'
-         WRITE(6, *)' WARNING: LOAD EVERYTHING TO THE GROUND STATE '
-         WRITE(6, *)' WARNING: ANG. DIST. OF DISCRETE LEVELS IGNORED'
+         WRITE(6, *)' WARNING: Load everything to the ground state '
+         WRITE(6, *)' WARNING: Ang. dist. of discrete levels ignored'
          WRITE(6, *)' WARNING:'
          POPlv(1, Nnur) = POPlv(1, Nnur) + csmsdl
          RETURN

@@ -275,7 +275,7 @@ FITLEV   Controls cumulative plots of levels
       > 0 cumulative plots of discrete levels will be displayed. If
 	       LEVDEN=0 the energy range of the plot will extend VAL MeV above the
 	       last discrete level,
-	   = 0 no cumulative plots (default).
+	   = 0 no cumulative plots (default),
       < 0 stop cross section calculations if there is no solution for the
           GC fit of discrete levels (with FITLEV=0 calculations go ahead).
 	
@@ -285,6 +285,32 @@ NIXSH = 0 shell-corrections calculated according to Myers-Swiatecki
 
 Fission
 -------                         
+
+FISSHI   Controls treatment of the fission channel
+      =0 advanced treatment (multi-humped barrier, optical model for
+         fission) recommended for neucleon induced fission (default)
+      =1 simple treatment good only for the Heavy Ion induced reactions
+      =2 fission ignored
+
+FISBAR   Controls origin of fission barrier data
+      =0 Ripl-2 (microscopic calculations by Goriely, default),
+      =1 internal EMPIRE library
+      =2 Ripl-1 (compilation of Maslov, model dependent!)
+
+FISDEN   Controls level densities at saddle points
+      =0 Ripl-2 (microscopic calculations by Goriely)
+      =1 Empire specific 
+
+FISOPT   Controls subbarrier effects
+      =0 no subbarrier effects
+      =1 subbarrier effects considered (only with FISBAR=1)
+      =2 subbarrier effects & isomeric fission considered 
+         (only with FISBAR=1)
+
+FISMOD   Controls multimodality of fission
+      =0 single-modal fission
+      =1 multimodal fission
+      =2 multimodal fission
 
 QFIS 	  Liquid drop fission barriers multiplied by VAL (default: 1.).
 
@@ -309,6 +335,18 @@ DEFGW   Delta J_{G} (width) in the Gaussian term of Eq. 1.113 set to VAL
 
 DEFGP 	J_{G} (position) in the Gaussian term of Eq. 1.113 set to VAL 
         (default: 40.).
+
+Gamma-ray strength functions
+----------------------------
+
+GSTRFN= 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki) 
+          as in the 2.18 version and before
+      = 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2)
+      = 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2)
+      = 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2)
+      = 4 EGLO EGLO enhanced generalized Lorentzian (RIPL-2)
+      = 5 GFL  (Mughabghab)
+      = 6 SLO  standard Lorentzian
 
 GDR parameters
 --------------              

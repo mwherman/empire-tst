@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-03 21:14:09 $
-Ccc   * $Id: lev-dens.f,v 1.16 2004-06-03 21:14:09 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: lev-dens.f,v 1.17 2004-07-16 12:47:37 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -182,8 +182,7 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
                ENDIF
                rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort, 
      &                  YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred, 
-C    &                  EXPmax)   RCN 31/12/2003
-     &                  EXPmax, FIScon)
+     &                  EXPmax, FIScon,iff)
                IF(rotemp.LT.RORed)rotemp = 0.0
                IF(BF.NE.0.0D0)THEN
                   RO(kk, i, Nnuc) = rotemp
@@ -197,7 +196,7 @@ C    &                  EXPmax)   RCN 31/12/2003
 C
 C
       DOUBLE PRECISION FUNCTION RODEF(A, E, Ac, Aj, Mompar, Momort, 
-     &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon)
+     &           Yrast, Ss, A2, Bf, Argred, Expmax, FIScon,iff)
 Ccc   *********************************************************************
 Ccc   *                                                         class:ppu *
 Ccc   *                         R O D E F                                 *
@@ -248,9 +247,10 @@ C-----BF=2. stands for the prolate yrast state  (rot. perpend. to symm.)
 C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
       RODEF = 0.0
       sum = 0.0
+      pi=3.14159
       IF(Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0)THEN
-         WRITE(6, *)'WARNING: NEGATIVE MOMENT OF INERTIA FOR SPIN ', Aj
-         WRITE(6, *)'WARNING: 0 LEVEL DENSITY RETURNED BY RODEF'
+         WRITE(6, *)'WARNING: Negative moment of inertia for spin ', Aj
+         WRITE(6, *)'WARNING: 0 level density returned by rodef'
          RETURN
       ENDIF
       IF(Ac.EQ.0.0D0)THEN
@@ -322,6 +322,9 @@ C-----------rotation parallel to the symmetry axis
       ENDDO
  100  RODEF =con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(vibrk - qv*(vibrk - 1.))
+      IF(iff.eq.2) RODEF = RODEF*2*sqrt(2*pi)*sqrt(mompar*t)
+      IF(iff.eq.3) RODEF = RODEF*2
+      IF(iff.eq.4) RODEF = RODEF*4*sqrt(2*pi)*sqrt(mompar*t)
       END
 C     C
 C
@@ -691,46 +694,51 @@ C     WRITE(6,
 C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
 C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
 C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0.and.fiscon.ne.2)
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0.and.fiscon.lt.1)
      &                     RETURN
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
-      AP1 = 0.94431E-01
-      AP2 = -0.80140E-01
-      GAMma = 0.75594E-01
-      IF(Z(Nnuc).GE.85.D0)THEN
-         AP1 = AP1*1.2402
-         AP2 = AP2*1.2402
-         GAMma = GAMma*1.2494
-      ENDIF
-C-----Empire systematics with M-S shell corrections
-      IF(SHNix.EQ.0.0D0)THEN
-         AP1 = .52268E-01
-         AP2 = .13395E+00
-         GAMma = .93955E-01
+      If(fiscon.lt.1.)then
+         AP1 = 0.94431E-01
+         AP2 = -0.80140E-01
+         GAMma = 0.75594E-01
          IF(Z(Nnuc).GE.85.D0)THEN
-            AP1 = AP1*1.2942
-            AP2 = AP2*1.2942
-            GAMma = GAMma*1.2928
+            AP1 = AP1*1.2402
+            AP2 = AP2*1.2402
+            GAMma = GAMma*1.2494
          ENDIF
+C-----Empire systematics with M-S shell corrections
+         IF(SHNix.EQ.0.0D0)THEN
+            AP1 = .52268E-01
+            AP2 = .13395E+00
+            GAMma = .93955E-01
+            IF(Z(Nnuc).GE.85.D0)THEN
+               AP1 = AP1*1.2942
+               AP2 = AP2*1.2942
+               GAMma = GAMma*1.2928
+            ENDIF    
+         ENDIF
+          DELp = 12./SQRT(A(Nnuc))
+          iff=1
       ENDIF
       IF(BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0)GAMma = Asaf
+      IF(FISCON.gt.0..AND. Asaf.GE.0.0D0)GAMma = 0.4*A(nnuc)**(-1./3.)
 C-----determination of the pairing shift DEL
-      DELp = 12./SQRT(A(Nnuc))
+c      DELp = 12./SQRT(A(Nnuc))
       DEL = 0.
       IF(MOD(in, 2).NE.0)DEL = DELp
-      IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
+      IF(MOD(iz, 2).NE.0)DEL = DEL + DELp     
 C-----determination of the pairing shift --- done -----
 C
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*A(Nnuc) + AP2*A23
-      IF(FISCON.EQ.2.)THEN
-         atil=atil!*0.7
+      IF(FISCON.gt.0.)THEN
+         atil=atil
       ELSE
          ATIl = ATIl*ATIlnor(Nnuc)
       ENDIF   
       TCRt = 0.567*DELp
-      IF(BF.EQ.0.0D0 .AND. Asaf.LT.0.D0)THEN
+      IF(Asaf.LT.0.D0)THEN
          ACRt = -ATIl*Asaf
       ELSE
          ar = ATIl*(1.0 + SHC(Nnuc)*GAMma)
@@ -741,9 +749,9 @@ C-----set Ignatyuk type energy dependence for 'a'
             ar = ACRt
          ENDDO
          WRITE(6, *)
-     &     ' WARNING: SEARCH FOR CRITICAL A-PARAMETER HAS NOT CONVERGED'
-         WRITE(6, *)' WARNING: LAST ITERATION HAS GIVEN ACRT=', ACRt
-         WRITE(6, *)' WARNING: EXECUTION CONTINUES'
+     &     ' WARNING: Search for critical a-parameter has not convergeD'
+         WRITE(6, *)' WARNING: Last iteration has given acrt=', ACRt
+         WRITE(6, *)' WARNING: Execution continues'
       ENDIF
 
  100  IF(ACRt.LT.0.0D0)ACRt = 0.0
@@ -753,9 +761,10 @@ C-----45.84 stands for (12/SQRT(pi))**2
       DETcrt = 45.84*ACRt**3*TCRt**5
       ACR = ATIl*FSHELL(UCRt, SHC(Nnuc), GAMma)
       IF(BF.EQ.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
+      IF(fiscon.gt.0.D0 .AND. Asaf.LT.0.0D0)ACR = ACRt
       SCR = 2.*ACRt*TCRt
       
-      IF(FIScon.NE.2.)THEN
+      IF(FIScon.lt.1.)THEN
 C-----
 C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
@@ -815,7 +824,7 @@ C--------------decrease energy shift above the last level to become 0 at Qn
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf,rotemp,aj)
+               CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf,rotemp,aj,iff)
                DO ij = 1, NLWst
                   IF(kk.GT.1)rocumul = rocumul + 
      &                                 (RO(kk - 1, ij, Nnuc) + RO(kk, 
@@ -880,7 +889,7 @@ C-----------integration
      &                      (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))
      &                      *defit/RORed
                ENDDO
-               WRITE(34, *)defit*FLOAT(kk - 1), max(rocumul,1.d0)
+               WRITE(34, *)defit*FLOAT(kk - 1), rocumul
             ENDDO
             CLOSE(36)
             CLOSE(34)
@@ -912,7 +921,7 @@ C-----------clean RO matrix
                ELSE
                   dshif = 0.0
                ENDIF
-               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj)
+               CALL DAMIRO(kk, Nnuc, dshif, 0.0D0, Asaf,rotemp,aj,iff)
             ENDIF
          ENDDO
       ENDIF
@@ -936,7 +945,7 @@ C
       END
 C
 C
-      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj)
+      SUBROUTINE DAMIRO(Kk, Nnuc, Dshif, Destep, Asaf,rotemp,aj,iff)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -971,7 +980,7 @@ C
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
  
-      IF(FIScon.EQ.2.)goto 6666
+      IF(FIScon.gt.0.)goto 6666
 C-----determination of U for normal states
       IF(BF.NE.0.D0)THEN
          IF(Destep.NE.0.0D0)THEN
@@ -989,12 +998,12 @@ C-----determination of U for normal states
          ENDIF
       ENDIF
 C     fisfis d ===================================
- 6666 IF(FIScon.EQ.2.)THEN
+ 6666 IF(FIScon.gt.0.)THEN
          Bf=0.0D0
          mompar = MOMparcrt
          momort = MOMortcrt
          u=(kk-1)*destepp+dshif+del
-
+c----------------------+.451 th33
          IF(U.GT.UCRt)THEN 
             accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
             u = u -ECOnd
@@ -1016,18 +1025,18 @@ C-----------dependent factor
             ELSE
                bsq = 1.0 + 0.4*(cigor - 1.0)**2
             ENDIF
-            ATIl = AP1*A(Nnuc) + AP2*A23!*bsq
+            IF(FISCON.gt.0.)bsq=1.
+            ATIl = AP1*A(Nnuc) + AP2*A23
             IF(Asaf.GE.0.D0)AC = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
             IF(Asaf.LT.0.D0)AC = -ATIl*Asaf
             IF(AC.GT.0.D0)THEN
                IF(bcs)THEN
-                  ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2)
+                  ROTemp = ROBCS(A(Nnuc), u, aj, mompar, momort, bet2,
+     &                     iff)
                ELSE
                   ROTemp = RODEF(A(Nnuc), u, AC, aj, mompar, momort, 
      &                     YRAst(i, Nnuc), HIS(Nnuc), bet2, BF, ARGred, 
-     &                     EXPmax, FIScon)
-C    &                     EXPmax)  RCN 31/12/2003
-
+     &                     EXPmax, FIScon,iff)
                ENDIF
             ENDIF
          ENDIF
@@ -1138,7 +1147,7 @@ C-----------dependent factor
             IF(ac.LE.0.0D0)RETURN
          ENDIF
          IF(bcs)THEN
-            rotemp = ROBCS(A(Nnuc),u,aj, mompar, momort, A2)*RORed
+            rotemp = ROBCS(A(Nnuc),u,aj, mompar, momort, A2,iff)*RORed
             IF(i.EQ.1)THEN
                phi = SQRT(1. - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
@@ -1146,8 +1155,8 @@ C-----------dependent factor
          ELSE
             rotemp = RODEF(A(Nnuc), u, ac, aj, mompar, momort, 
      &               YRAst(i, Nnuc), HIS(Nnuc), A2, BF, ARGred,
-     &               EXPmax, FIScon)
-C    &               EXPmax)  RCN 31/12/2003
+     &               EXPmax, FIScon,iff)
+c     &               EXPmax)!  RCN 31/12/2003
             IF(i.EQ.1)t = SQRT(u/ac)
          ENDIF
          IF(BF.NE.0.0D0)THEN
@@ -1369,7 +1378,7 @@ C-----setting to 0 level density array ------ done ------
 C
 C
 C
-      DOUBLE PRECISION FUNCTION ROBCS(A, U, Aj, Mompar, Momort, A2)
+      DOUBLE PRECISION FUNCTION ROBCS(A, U, Aj, Mompar, Momort, A2,iff)
 CCC   ********************************************************************
 CCC   *                                                         CLASS:APU*
 CCC   *                        R O B C S                                 *
@@ -1394,6 +1403,7 @@ C
 C
       DATA const/0.199471/
 C-----CONST=1/(2*SQRT(2 PI))
+      pi=3.14159
       ROBCS = 0.0
       phi = SQRT(1. - U/UCRt)
       t = 2.0*TCRt*phi/LOG((phi + 1.0)/(1.0 - phi))
@@ -1413,7 +1423,10 @@ C     CALL DAMPKS(A, A2, t, qk)
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational ehancement factor
       CALL VIBR(A, t, vibrk)
-      ROBCS = ROBCS*vibrk*momo*t*qdamp
+      ROBCS =ROBCS*vibrk*momo*t*qdamp
+      if(iff.eq.2) ROBCS =ROBCS*2*sqrt(2*pi)*sqrt(momp*t)
+      if(iff.eq.3) ROBCS =ROBCS*2
+      if(iff.eq.2) ROBCS =ROBCS*4*sqrt(2*pi)*sqrt(momp*t)
       END
 C
 C
@@ -1582,18 +1595,18 @@ C
  100  IF(am - 6./t.LE.0.0D0 .OR. iter.GT.300)THEN
          WRITE(6, *)'WARNING: '
          IF(iter.LT.301)THEN
-            WRITE(6, *)'WARNING: NUMBER OF ITERATIONS IN ROGC ', 
+            WRITE(6, *)'WARNING: Number of iterations in ROGC ', 
      &                 iter - 1
-            WRITE(6, *)'WARNING: CAN NOT CALCULATE Ux'
+            WRITE(6, *)'WARNING: Can not calculate Ux'
          ELSE
-            WRITE(6, *)'WARNING: MAXIMUM NUMBER IF ITERATIONS IN ROGC'
+            WRITE(6, *)'WARNING: Maximum number if iterations in ROGC'
          ENDIF
-         WRITE(6, *)'WARNING: LEVEL DENSITY PARAMETERS INCONSISTENT'
-         WRITE(6, *)'WARNING: THIS MAY HAPPEN IF YOU HAVE USED DEFAULT'
-         WRITE(6, *)'WARNING: SYSTEMATICS FOR TOO LIGHT NUCLEUS OR '
-         WRITE(6, *)'WARNING: HAVE ALLOWED FOR TOO MANY DISCRETE LEVELS'
-         WRITE(6, *)'WARNING: ENTERING THE REGION WHERE THESE ARE LOST'
-         WRITE(6, *)'WARNING: REANALISE GC L.D. PARAMETERS FOR:'
+         WRITE(6, *)'WARNING: Level density parameters inconsistent'
+         WRITE(6, *)'WARNING: This may happen if you have used default'
+         WRITE(6, *)'WARNING: systematics for too light nucleus or '
+         WRITE(6, *)'WARNING: have allowed for too many discrete levels'
+         WRITE(6, *)'WARNING: entering the region where these are lost'
+         WRITE(6, *)'WARNING: Reanalise GC l.d. parameters for:'
          WRITE(6, *)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
          WRITE(6, *)'WARNING: a=', am, ' T=', t
          WRITE(6, *)'WARNING: '
@@ -1618,7 +1631,7 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                   WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
                   rolowint = EXP(( - eom/tm))
      &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
-                  WRITE(34, *)ELV(il, Nnuc), max(rolowint,1.d0)
+                  WRITE(34, *)ELV(il, Nnuc), rolowint
                ENDDO
                CLOSE(36)
                CLOSE(34)
@@ -1680,22 +1693,20 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE(6, *)' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
          WRITE(35, *)'set terminal postscript enhanced color'
          WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
-         WRITE(35, 99002) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                    t, eo, ux, am      
-99002    FORMAT('set title "N(E) for ', I3, '-', A2, '-', I3, 
-     &          '  T=',f6.3,' E0=',f7.3,' Ux=',f4.1,' a=',f6.2,' "')
+         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
+99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
+     &          '"')
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
-         WRITE(35, *)'set ylabel "Cumulative number of levels" 0,0'
+         WRITE(35, *)'set ylabel "Number of levels" 0,0'
          WRITE(35, *)'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
          CLOSE(35)
          DO il = 2, NLV(Nnuc)
             WRITE(36, *)ELV(il, Nnuc), FLOAT(il - 1)
             WRITE(36, *)ELV(il, Nnuc), FLOAT(il)
             rolowint = EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
-            WRITE(34, *)ELV(il, Nnuc), max(1.d0,rolowint)
+            WRITE(34, *)ELV(il, Nnuc), rolowint
          ENDDO
-
          CLOSE(36)
          CLOSE(34)
          iwin = PIPE('gnuplot fort.35#')

@@ -91,8 +91,12 @@
 41. Printing particle spectra in the *.out output of EMPIRE rearanged
     so that transitions to the discrete levels  are printed first with negative
     energies and end points of the spectra are indicated by repeating the line.
-42. Suite of gamma-strength functions from RIPL-2 coded by Plujko and
-    implemented by R. Capote.
+42. EMPEND adjusted to accept format of p.41 above - improves energy balance
+    above reaction thresholds (A. Trkov).
+43. Suite of gamma-strength functions from RIPL-2 coded by Plujko and
+    implemented by R. Capote and M. Herman.
+44. Reaction/MT-number conversion table for X4TOC4 updated to include gammas
+    in the incident channel (M. Herman).
 
              Changes in version 2.18 with respect to 2.17.1
                       Vienna,   September  2002 

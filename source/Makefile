@@ -3,6 +3,8 @@
 #FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
 #FC     = g77
+#----GNU g95 FORTRAN compiler
+#FC     = g95
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
@@ -17,7 +19,7 @@
 #----Fujitsu f90 FORTRAN compiler
 FC	= lf95
 #----flag for Lahey/Fujitsu f95 FORTRAN to optimize
-FFLAGS = --o3 
+#FFLAGS = --o3 
 #----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more
 #FFLAGS = -g --chk
 #----flags for Fujitsu f90 FORTRAN compiler
@@ -29,8 +31,8 @@ OBJF =	HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 	      auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
 	      gamma-strgth.o 	input.o	          lev-dens.o    main.o\
 	      ph-lev-dens.o  	pipe.o	          print.o	OM-scat2.o\
-	      tl.o		scnd-preeq.o      HRTW-comp.o   ddhms.o\
-              gdrgfldata.o      degas.o           pcross.o  gamma-strength-analytic.o
+	      tl.o        		scnd-preeq.o        HRTW-comp.o   ddhms.o\
+         degas.o           pcross.o           gamma-strength-analytic.o
 
 
 empire:   $(OBJF)

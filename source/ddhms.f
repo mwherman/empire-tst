@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.7 $
-C $Id: ddhms.f,v 1.7 2004-06-15 22:16:18 herman Exp $
+C CVS Version Management $Revision: 1.8 $
+C $Id: ddhms.f,v 1.8 2004-07-16 12:47:36 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -110,9 +110,9 @@ C
       ELSE
          WRITE(6, *)''
          WRITE(6, *)'WARNING'
-         WRITE(6, *)'WARNING: HMS CAN TREAT ONLY NEUTRON OR PROTON'
-         WRITE(6, *)'WARNING: AS PROJECTILES'
-         WRITE(6, *)'WARNING: HMS DISPOSITION IGNORED.'
+         WRITE(6, *)'WARNING: HMS can treat only neutron or proton'
+         WRITE(6, *)'WARNING: as projectiles'
+         WRITE(6, *)'WARNING: HMS disposition ignored.'
          WRITE(6, *)'WARNING'
          WRITE(6, *)''
          RETURN
@@ -2041,9 +2041,9 @@ C
       ENDDO
 C
       WRITE(28, 99001)
-99001 FORMAT('  ddhms version: $Revision: 1.7 $')
+99001 FORMAT('  ddhms version: $Revision: 1.8 $')
       WRITE(28, 99002)
-99002 FORMAT('  $Id: ddhms.f,v 1.7 2004-06-15 22:16:18 herman Exp $')
+99002 FORMAT('  $Id: ddhms.f,v 1.8 2004-07-16 12:47:36 herman Exp $')
 C
       WRITE(28, *)' '
       WRITE(28, *)' ddhms.f code, m.b. chadwick, los alamos'
@@ -4851,22 +4851,22 @@ C              WRITE(6, *)'HMS resid population = ', RESpop(jz, jn), ' mb'
                IF(nnur.GT.3 .AND. FIRst_ein)THEN
                   IF(IDNa(2, 5).EQ.0)THEN
                      WRITE(6, *)' '
-                     WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
-                     WRITE(6, *)'WARNING: HMS EMISSION OF NEUTRONS'
+                     WRITE(6, *)'WARNING: Inconsistent use of HMS.'
+                     WRITE(6, *)'WARNING: HMS emission of neutrons'
                      WRITE(6, *)
-     &                         'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
-                     WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
-                     WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+     &                         'WARNING: to continuum has been blocked.'
+                     WRITE(6, *)'WARNING: However, residues after '
+                     WRITE(6, *)'WARNING: multiple P.E. are populated'
                      WRITE(6, *)' '
                   ENDIF
                   IF(IDNa(4, 5).EQ.0)THEN
                      WRITE(6, *)' '
-                     WRITE(6, *)'WARNING: INCONSISTENT USE OF HMS.'
-                     WRITE(6, *)'WARNING: HMS EMISSION OF PROTONS '
+                     WRITE(6, *)'WARNING: Inconsistent use of HMS.'
+                     WRITE(6, *)'WARNING: HMS emission of protons '
                      WRITE(6, *)
-     &                         'WARNING: TO CONTINUUM HAS BEEN BLOCKED.'
-                     WRITE(6, *)'WARNING: HOWEVER, RESIDUES AFTER '
-                     WRITE(6, *)'WARNING: MULTIPLE P.E. ARE POPULATED'
+     &                         'WARNING: to continuum has been blocked.'
+                     WRITE(6, *)'WARNING: However, residues after '
+                     WRITE(6, *)'WARNING: multiple P.E. are populated'
                      WRITE(6, *)' '
                   ENDIF
                ENDIF

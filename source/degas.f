@@ -90,7 +90,7 @@ C      DOUBLE PRECISION deln(150), delz(98), ee0, GDIvp,
      &                 tmp, totemis, renpop
       REAL FLOAT
       INTEGER i, ie, ie0, ie1, ndisc, ii, il, nnur, j, 
-     &        jparity, jspin, ndexmaximum, lmax, nudim
+     &        jparity, jspin, lmax, nudim
 C    &        nnuc,iii 
 C     INTEGER INT, nextop
       INTEGER INT
@@ -119,7 +119,6 @@ C                                            ! Taken from input.f
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0., 
      &     0.43, 0., 0.50, 0., 0.39/
 C
-      ndexmaximum = NDEXD       ! Maximum energy bin allowed by Degas
 C
       IF(NDLW.GT.25)THEN
          lmax = 25        ! Maximum spin allowed by Degas
@@ -553,107 +552,6 @@ C
 99008 FORMAT(10I6)
       END
 C
-C
-      SUBROUTINE SUBDEGASTEST
-      IMPLICIT REAL*8(A - H, O - Z)
-C
-C COMMON variables
-C
-      REAL*8 ADEgas3, AKDegas, BDEgas(10, 2), BEProjdegas, 
-     &       BRArdegas(10, 10, 9), CJGsdegas, DDDegas(10), EEXc0degas, 
-     &       ENDidegas(10, 10), ESTepdegas, GAQdegas, GGDegas(10), 
-     &       SPIdidegas(10, 10), XCDegas(9)
-      INTEGER IACdegas, IATdegas, IEDegas, INDegas, IZCdegas, IZDegas, 
-     &        KEYdegas0, NBRadegas(10), NEXddegas(10, 10), NOLedegas(9),
-     &        NUDidegas(10)
-      REAL*8 JGSdegas
-      CHARACTER*79 TITdegas
-      COMMON /DEGASINP/ JGSdegas, EEXc0degas, ESTepdegas, AKDegas, 
-     &                  CJGsdegas, BEProjdegas, GAQdegas, ADEgas3, 
-     &                  IEDegas, INDegas, IZDegas, IATdegas, IACdegas, 
-     &                  IZCdegas, KEYdegas0, TITdegas
-      COMMON /DEGASINPUT/ BRArdegas, ENDidegas, SPIdidegas, NEXddegas, 
-     &                    BDEgas, GGDegas, DDDegas, XCDegas, NUDidegas, 
-     &                    NBRadegas, NOLedegas
-C
-C Local variables
-C
-      REAL*8 a3, ak, b(10, 2), bbb, beproj, brar(10, 10, 9), cjgs, 
-     &       dd(10), eexc0, endi(10, 10), estep, gaq, gg(10), 
-     &       spidi(10, 10), xc(9)
-      INTEGER i, iac, iat, ie, in, iw, iz, izc, j, k, key0, nbra(10), 
-     &        nexd(10, 10), nole(9), nudi(10), nudim
-      REAL*8 jgs
-C
-      DO i = 1, 10
-         b(i, 1) = BDEgas(i, 1)
-         b(i, 2) = BDEgas(i, 2)
-         gg(i) = GGDegas(i)
-         dd(i) = DDDegas(i)
-         nudi(i) = NUDidegas(i)
-         nbra(i) = NBRadegas(i)
-         DO j = 1, 10
-            endi(i, j) = ENDidegas(i, j)
-            spidi(i, j) = SPIdidegas(i, j)
-            nexd(i, j) = NEXddegas(i, j)
-            DO k = 1, 9
-               brar(i, j, k) = BRArdegas(i, j, k)
-               nole(k) = NOLedegas(k)
-               xc(k) = XCDegas(k)
-            ENDDO
-         ENDDO
-      ENDDO
-      jgs = JGSdegas
-      eexc0 = EEXc0degas
-      estep = ESTepdegas
-      ak = AKDegas
-      cjgs = CJGsdegas
-      beproj = BEProjdegas
-      gaq = GAQdegas
-      a3 = ADEgas3
-      ie = IEDegas
-      in = INDegas
-      iz = IZDegas
-      iat = IATdegas
-      iac = IACdegas
-      izc = IZCdegas
-      key0 = KEYdegas0
-99001 FORMAT(1X, a79)
-      iw = 6
-      WRITE(iw, 99006)
-C-----write(iw,5)  titdegas
-      WRITE(iw, 99002)in, iz, key0
-99002 FORMAT(4I5, f10.3)
-      WRITE(iw, 99003)eexc0, estep, ak, jgs, cjgs, beproj, gaq
-99003 FORMAT(8F8.2)
-      WRITE(iw, 99007)b   ! binding energies
-      WRITE(iw, 99007)gg  ! single-particle level density g
-      WRITE(iw, 99007)dd  ! pairings
-      WRITE(iw, 99008)nudi ! number of discrete levels
-      WRITE(iw, 99008)nbra ! number of branchings
-      WRITE(iw, 99006)
-      DO j = 1, 10
-         nudim = nudi(j)  ! j=1 means comp nucleus, etc
-         IF(nudim.NE.0)THEN
-            DO i = 1, nudim
-C              ! i=1 means g.s. level, etc
-               WRITE(iw, 99004)endi(j, i), spidi(j, i), nexd(j, i)
-99004          FORMAT(2F6.2, i6)
-               IF(i.LE.nbra(j))THEN
-                  DO ie = 1, 9 ! ie=1 means deay goes to g.s., etc
-                     bbb = brar(j, i, ie)
-                     IF(ie.GT.0 .AND. bbb.GT.0.)WRITE(iw, 99005)ie, bbb
-99005                FORMAT(9(i2, f6.3))
-                  ENDDO
-               ENDIF
-            ENDDO
-            WRITE(iw, 99006)
-         ENDIF
-      ENDDO
-99006 FORMAT(/)
-99007 FORMAT(10F6.2)
-99008 FORMAT(10I6)
-      END
 C
 C
 C
@@ -3279,9 +3177,6 @@ C
       REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DAM   / FFQ, FFPair
       COMMON /DEN   / RFAc, SIGma
-      COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
-     &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
-     &                IE00, IZ, N, IL0, NUDim, NBR
 C
 C Dummy arguments
 C
@@ -3328,9 +3223,6 @@ C
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
       REAL*8 T1111, TC(25, NDEXD, 25)
       COMMON /DEN   / RFAc, SIGma
-      COMMON /GAD   / TC, OMD, ENDi, SPIdi, OM, SG, AF, C2, ESTep, 
-     &                EXCef, T1111, GAQ, G, CJGs0, IJ, I0, IAT, NEStep, 
-     &                IE00, IZ, N, IL0, NUDim, NBR
 C
 C Dummy arguments
 C

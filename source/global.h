@@ -1,5 +1,7 @@
 C-----GLOBAL COMMON --------------------------------------------------C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+
+
       CHARACTER SYMbe*2, SYMb*2
       CHARACTER reaction*21
 C-----Plujko_new: variable - SDRead      
@@ -134,18 +136,22 @@ C
      &                  ELE2, HHBarc
 C
       COMMON /COMFIS_OPT/ FISbar(NDNUC), FISden(NDNUC), FISdis(NDNUC), 
-     &                    SUBeff(NDNUC)
+     &                    FISopt(NDNUC),FISshi(NDNUC),FISmod(NDNUC)
       COMMON /COMFIS_I/ NRBar, NRWel, NRBarc,NRFdis(NFPARAB),
      &                   IPFdis(NFTRANS, NFPARAB)
-      COMMON /COMFIS_R/ EFB(NFPARAB), H(NFPARAB), HJ(NDNUC,NFPARAB), 
-     &                  DEFfis(NFPARAB), EFDis(NFTRANS, NFPARAB), 
+      COMMON /COMFIS_R/ EFB(NFPARAB), H(50,NFPARAB),
+     &                  HJ(NDNUC,NFPARAB), DEFfis(NFPARAB), 
+     &                  EFDis(NFTRANS, NFPARAB), 
      &                  SFDis(NFTRANS, NFPARAB), wimag(3)
       COMMON /COMFIS_CON/ ROFis(0:NFISENMAX, NDLW,NFHUMP),
-     &                   UGRid(0:NFISENMAX), xminn(NFHUMP),
-     &                   destepp, FISCON, NRbinfis(NFHUMP) 
+     &                   UGRid(0:NFISENMAX,NFHUMP),  enh_ld(3,2),
+     &                   shcfis(2),deltafis(2),gammafis(2),
+     &                   NRbinfis(2),xminn(NFHUMP),afis(nfparab),
+     &                   bff(2),destepp, FISCON
 C
+      INTEGER bff
       DOUBLE PRECISION MOMparcrt, MOMortcrt
-      COMMON /MOMENT/ MOMparcrt, MOMortcrt
+      COMMON /MOMENT/ MOMparcrt, MOMortcrt, veq,hoeq,defeq
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
 

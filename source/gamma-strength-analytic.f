@@ -1,6 +1,9 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-11 13:49:24 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.5 2004-06-11 13:49:24 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.6 2004-07-16 12:47:37 herman Exp $
+C
+      DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
+     &   Eexcitf, Temperf, Egamma, Keyshape)
 C
 C     Module "gamma-strength-analytic.f" with
 C     main subroutine "GAMMA_STRENGTH.f"
@@ -11,13 +14,6 @@ C     at fixed both excitation and gamma-ray energies.
 C                (author Vladimir  Plujko)
 C             (adapted to UNIX by Mike Herman)
 C
-C     Typing convention for variables:
-C     local - all lower case
-C     subroutine parameters - first upper case and then lower case
-C     common - first three upper case and then lower case
-C
-      DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
-     &   Eexcitf, Temperf, Egamma, Keyshape)
 C
 C
 C     ******************************************************
@@ -112,11 +108,6 @@ C     *                                                    *
 C     ******************************************************
 C
       IMPLICIT NONE
-C-----Plujko_new   ---replacement function E1 by E1_gsa (conflict with
-C       function E1 in gamma-strength.f )
-C      Replacement of kzz by kzz1 and kaa by kaa1 (conflict with variables for
-C      GDRGFLDATA.f)
-C-----Plujko_new(End)
       DOUBLE PRECISION E1_gsa
       DOUBLE PRECISION Anucleus, Egamma, Znucleus, f0prime, f1prime,
      &                 LMConst, aa, aa3, hh, Temperf, Eexcitf
@@ -127,23 +118,14 @@ C-----Plujko_new(End)
       INTEGER KEYfbc, KEYset, Keyshape,
      &        keyinput, kz, ka, kzz1, kaa1, keglo, NG
 C
-      COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
-C
       COMMON /INPUTKEY/ KEYset, KEYfbc
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
       COMMON /HEGLO / EEGlo0, AK0, ER0
       COMMON /WHELP / EG0, GW0, ALPha, GWAll
       COMMON /INPUTGFL/ LMConst
-C-----Plujko_new
       COMMON /MLOCOM1/ keyinput,kzz1,kaa1
       COMMON /LOCALGSA/ r0, efermi
-C-----Plujko_new(End)
       DATA f0prime/1.49D0/, f1prime/ - 0.04D0/
-C-----Plujko_new
-Cb    DATA keyinput/0/, kzz1/0/, kaa1/0/
-C-----Plujko_new(End)
-
       kz = Znucleus + 0.001
       ka = Anucleus + 0.001
       IF(keyinput.NE.1)THEN
@@ -486,7 +468,6 @@ C
       DOUBLE PRECISION hhh, pi24, DMEf
       INTEGER KEYfbc, KEYset, NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /INPUTKEY/ KEYset, KEYfbc
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
       COMMON /WHELP / EG0, GW0, ALPha, GWAll
       COMMON /HELP  / EGDr, GGDr

@@ -4891,7 +4891,7 @@ adjourn .top75} \
     button $site_9_0.cpd69 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #e6e6e6 \
-        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
+        -command {if {[tk_dialog .dialogsi Confirm "Confirm deleting all selected files" "" 0 No Yes ] == 1} {
 foreach el $seleczvvlist {
    if {$el == ""} continue
    exec rm -f $el

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-15 22:16:19 $
-Ccc   * $Id: main.f,v 1.32 2004-06-15 22:16:19 herman Exp $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: main.f,v 1.33 2004-07-16 12:47:37 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -201,26 +201,38 @@ Ccc
 C
 C     COMMON variables
 C
-      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl,
+     &                bet2
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-      COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
-      INTEGER NRBar, NRFdis
-      DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
+      COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23,TG2
+      COMMON /CRITFIS/acrtf(2), ucrtf(2), tcrtf(2), detcrtf(2),
+     &                scrtf(2),mortcrt(nfparab),mparcrt(nfparab),
+     &                econdf(2)
+      COMMON /FISSMOD / rofism(60,30,3), hm(Nftrans,3), 
+     &                  efdism(Nftrans,3), UGRidf(0:NFISENMAX, 3),
+     &                  efbm(3), xminnm(3),afism(3),
+     &                  defbm(3), shcfism(3), deltafism(3),
+     &                  gammafism(3),wfism(3),bffm(3), nrbinfism(3)
+      COMMON /FIS_ISO / tfiso,tgiso,tiso,rfiso
+C
+      DOUBLE PRECISION  rofism, hm, efdism, efbm, xminnm, defbm, 
+     &                  shcfism, deltafism, gammafism,ugridf,afism,
+     &                  tfiso,tgiso,tiso,rfiso,pfiso,tg2,wfism 
+              
+      INTEGER NRBar, NRFdis, bffm 
+      DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2,mortcrt,tout,
+     &                 mparcrt, sumfism(3), csfism(3),tfbm(3),tfb,
+     &                 tdirm(3),cota,cota1,cotaexp
+  
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-      DOUBLE PRECISION ftmp, G 
+      DOUBLE PRECISION ftmp
       INTEGER NELang
 C     For factorial calculations (SCAT2)
       PARAMETER(LFMAX = 4*NDTL + 2)
-      COMMON /FACT  / G(LFMAX)
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
-C-----Plujko_new
-      INTEGER keyinput, kzz1, kaa1, keyload, keyalpa, kzz, kaa
-      COMMON /MLOCOM1/ keyinput, kzz1, kaa1
-      COMMON /MLOCOM2/ keyload, keyalpa, kzz, kaa
-C-----Plujko_new(End)
 C
 C     Local variables
 C
@@ -243,14 +255,9 @@ C    &        mt91, nang, nbr, nejc, ngspec, nnuc, nnur, nnurn, nnurp,
      &        mt91, nang, nbr, nejc, nnuc, nnur, nnurn, nnurp, 
      &        nspec, irec, icsl, icsh, mt2
       INTEGER INT, MIN0
+C     DOUBLE PRECISION csfit(NDANG),  qq(5),  adum(5, 7)
+
       LOGICAL nvwful
-C-----Plujko_new
-
-      DATA keyinput/0/, kzz1/0/, kaa1/0/
-      DATA  keyload/0/, keyalpa/0/, kzz/0/, kaa/0/
-
-      F_PRINT=1
-C-----Plujko_new(End)
 
       INCLUDE 'io.h'
 C    
@@ -265,7 +272,7 @@ C-----
  1400 CALL INPUT
 C-----
 C-----print input data
-C-----  
+C-----
       IF(IOUt.GT.0)CALL PRINPUT
       WRITE(*, '(''  C.M. incident energy '',G10.5,'' MeV'')')EIN
 C-----Clear CN elastic cross section (1/4*pi)
@@ -722,43 +729,93 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
          ENDDO
       ENDIF
 C     fisfis d
-      OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN') 
+     
+      OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN')
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
          DO kk=0,NFISENMAX
             DO jj=1,NDLW
-cRCN 2004      DO ibars=1,NFPARAB
                DO ibars=1,NFHump
                   rofis(kk,jj,ibars)=0.
                ENDDO
             ENDDO
          ENDDO
-      
-         IF(FISsil(nnuc))THEN
+
+         IF(FISsil(nnuc).and.FISSHI(Nnuc).NE.1.)THEN
             Call READ_INPFIS(Nnuc)
-C-----------moments of inertia for each deformation
-            Call DEFO_FIS(Nnuc)
-            NRbarc=Nrbar-Nrwel
             FIScon = 2.
             adiv1=adiv
             mm2 = 0.24*A(Nnuc)**(2./3.)
             r0 = 1.4
-            DO ibars = 1, NRBar
-               CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
-               MOMparcrt=6*ACRt*mm2*(1. - (2./3.)*
+            nrbarc1=nrbarc
+            IF(nrbarc.eq.3)nrbarc1=2
+
+            DO ibars = 1, NRBarc1
+               IF(FISmod(nnuc).eq.0..or.
+     &              (Fismod(nnuc).gt.0..and.ibars.ne.2))THEN
+                  shc(nnuc)=shcfis(ibars)
+                  delp=deltafis(ibars)
+                  gamma=gammafis(ibars)
+                  CALL ROEMP(Nnuc, 1.0D0,afis(ibars))
+                  acrtf(ibars)=acrt
+                  ucrtf(ibars)=ucrt
+                  tcrtf(ibars)=tcrt
+                  detcrtf(ibars)=detcrt
+                  scrtf(ibars)=scr
+                  econdf(ibars)=econd    
+                  Mparcrt(ibars)=6*ACRt*mm2*(1. - (2./3.)*
      &                           DEFfis(ibars))/PI**2
-               IF(momparcrt.lt.2.)momparcrt=2.  !!!!!!!!!!!
-               MOMortcrt = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &                             *(1. + (1./3.)*DEFfis(ibars))
-               HJ(nnuc,ibars)=0.5*(1.0/Momparcrt-
-     &                    1.0/Momortcrt)
-               IF(HJ(nnuc,ibars).LE.0.)HJ(nnuc,ibars)=0.0001
-               IF(ibars.le.Nrbarc) Call DAMI_ROFIS(Nnuc,ibars)
+                  IF(mparcrt(ibars).lt.2.)mparcrt(ibars)=2. !!!!!!!!!!!
+                  Mortcrt(ibars) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
+     &                             *(1. + (1./3.)*DEFfis(ibars))  
+                  Call DAMI_ROFIS(Nnuc,ibars,0, afis(ibars))
+               ENDIF
+
+               IF(FISmod(nnuc).gt.0..and.ibars.eq.2)THEN
+                  DO m=1,int(FISmod(nnuc))+1
+                     shc(nnuc)=shcfism(m)
+                     delp=deltafism(m)
+                     gamma=gammafism(m)
+                     bff(ibars)=bffm(m)
+                     CALL ROEMP(Nnuc, 1.0D0,afism(m))
+                     acrtf(ibars)=acrt
+                     ucrtf(ibars)=ucrt
+                     tcrtf(ibars)=tcrt
+                     detcrtf(ibars)=detcrt
+                     scrtf(ibars)=scr
+                     econdf(ibars)=econd    
+                     Mparcrt(ibars)=6*ACRt*mm2*(1. - (2./3.)*
+     &                           DEFfis(ibars))/PI**2
+                     IF(mparcrt(ibars).lt.2.)mparcrt(ibars)=2. !!!!!!!!!!!
+                      Mortcrt(ibars) = 0.0095616*r0**2*A(Nnuc)**
+     &                            (5./3.)*(1. + (1./3.)*DEFfis(ibars))
+                     Call DAMI_ROFIS(Nnuc,ibars,m, afism(m))
+                  ENDDO   
+               ENDIF
             ENDDO
+
+            IF(Nrbar.eq.3.and.nrwel.eq.1.and.FISMOD(nnuc).eq.0.)THEN
+               tfiso = 2.86896 * exp( 2. * pi *(efb(2)- 
+     &            (efb(3)+h(1,3)/2.))/ h(1,2))/
+     &            (h(1,3)*10.**21)
+               tgiso= exp( 2. * pi * (efb(1)-(efb(3)+h(1,3)/2.))/
+     &              h(1,1))/10.**14     
+            ENDIF
+            IF(Nrbar.eq.5.and.nrwel.eq.2.and.FISMOD(nnuc).eq.0.)THEN
+               tfiso = 2.86896 * exp( 2. * pi *(veq- 
+     &                 (efb(4)+h(1,4)/2.))/ hoeq)/
+     &                  (h(1,4)*(10.**21))
+               tgiso= exp( 2. * pi * (efb(1)-(efb(4)+h(1,4)/2.))/
+     &              h(1,1))/10.**14
+            ENDIF
+            IF(fismod(nnuc).eq.0..and.nrbar.ge.3)THEN
+               tiso=tfiso*tgiso/(tfiso+tgiso)
+               rfiso=tgiso/(tfiso+tgiso)
+            ENDIF   
             FIScon=0.
             Call WRITE_OUTFIS(Nnuc)
             adiv=adiv1
-         ENDIF   
+         ENDIF
 
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
@@ -766,6 +823,12 @@ C--------reset variables for life-time calculations
          sgamc = 0.0
          csemist = 0.0
          csfis = 0.0
+
+         IF(Fismod(nnuc).gt.0.)THEN
+            Do m=1,int(fismod(nnuc))+1
+               csfism(m)=0.
+            ENDDO   
+         ENDIF   
          sumfis = 0.0
          IF(IOUt.GT.0)THEN
             WRITE(6, *)' '
@@ -801,9 +864,9 @@ C-----------------check for the number of branching ratios
  1565             IF(nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND. 
      &               (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. 
      &               nnuc.EQ.mt849))WRITE(6, *)
-     &               ' WARNING: BRANCHING RATIOS FOR LEVEL ', il, 
+     &               ' WARNING: Branching ratios for level ', il, 
      &               ' IN ', INT(A(nnuc)), '-', SYMb(nnuc), 
-     &               ' ARE MISSING'
+     &               ' are missing'
                   WRITE(12, 99012)il, ELV(il, nnuc), LVP(il, nnuc), 
      &                            XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
      &                            (NINT(BR(il,ib,1,nnuc)), 
@@ -872,7 +935,7 @@ C--------------write elastic to tape 12
      &                            NELang)
 99009            FORMAT(9X, 8E15.5)
                  WRITE(12, *)' '
-                  IF(elcncs.EQ.0) WRITE(6,*)'WARNING: CN ELASTIC IS 0' 
+                  IF(elcncs.EQ.0) WRITE(6,*)'WARNING: CN elastic is 0' 
                ENDIF
             ENDIF
          ENDIF
@@ -887,7 +950,7 @@ C--------prepare gamma transition parameters
          CALL ULM(nnuc)
 C--------calculate compound nucleus level density at saddle point
 C        fisfis
-         GOTO 1600
+         IF(FISSHI(Nnuc).NE.1.)GOTO 1600
 C        fisfis
          IF(FISsil(nnuc))THEN
             IF(ADIv.EQ.0.0D0)CALL ROEMP(nnuc, 1.D0, 0.0D0)
@@ -966,25 +1029,25 @@ C--------
             IF(ENDf.EQ.1 .AND. FIRst_ein)THEN
                WRITE(6, *)' '
                WRITE(6, *)
-     &                'WARNING: HMS INCLUSIVE TOTAL EMISSIONS TREATED  '
+     &                'WARNING: HMS Inclusive total emissions treated  '
                WRITE(6, *)
-     &                'WARNING: AS COMMING FROM THE FIRST CN. ALLOWS   '
+     &                'WARNING: as comming from the first cn. allows   '
                WRITE(6, *)
-     &                'WARNING: TO CHECK FLUX BALANCE AS LONG AS       '
+     &                'WARNING: to check flux balance as long as       '
                WRITE(6, *)
-     &                'WARNING: MULTIPLE P.E. CAN BE NEGLECTED. AT     '
+     &                'WARNING: multiple P.E. can be neglected. At     '
                WRITE(6, *)
-     &                'WARNING: HIGHER ENERGIES THIS DOES NOT HOLD AND '
+     &                'WARNING: higher energies this does not hold and '
                WRITE(6, *)
-     &                'WARNING: BALANCE WILL GET WRONG.  THIS IS OK    '
+     &                'WARNING: balance will get wrong.  This is OK    '
                WRITE(6, *)
-     &                'WARNING: SINCE INCLUSIVE SPECTRA ARE FINE AND   '
+     &                'WARNING: since inclusive spectra are fine and   '
                WRITE(6, *)
-     &                'WARNING: IN ANY CASE THERE ARE NO APPROXIMATIONS'
+     &                'WARNING: in any case there are no approximations'
                WRITE(6, *)
-     &                'WARNING: FOR PRODUCTION CROSS SECTIONS AND      '
+     &                'WARNING: for production cross sections and      '
                WRITE(6, *)
-     &                'WARNING: RECOILS!                               '
+     &                'WARNING: recoils!                               '
                WRITE(6, *)' '
                CLOSE(8)
             ENDIF
@@ -1089,15 +1152,8 @@ C-----------------gamma emision
                   ELSE
                      CALL DECAYT(nnuc, ke, jcn, ip, sum)
                   ENDIF
-C-----------------fission
-c                IF(FISsil(nnuc))CALL FISSION(nnuc, ke, jcn, sumfis)
-C                 fisfis-----------------------------------------------
-                  dencomp = DENhf
-                  aafis = 0.
-                  IF(FISsil(nnuc))CALL FISFIS(nnuc, ke, ip, jcn, sumfis,
-     &               cota)
-C                 fisfis-----------------------------------------------
-C-----------------fission                       ***done***
+
+
 C-----------------distribute yrast population over discrete levels
 C
                   IF(DENhf.EQ.0.0D0)THEN
@@ -1142,52 +1198,135 @@ C------------------------2.19 uses standard approach through the SCRtl matrix
                      ENDDO
                   ENDIF
 C-----------------
+C-----------------fission ()
+                  IF(FISsil(nnuc).AND.(FISSHI(Nnuc).EQ.1.))
+     &            CALL FISSION(nnuc, ke, jcn, sumfis)
+                 
+                  IF(FISsil(nnuc).AND.(FISSHI(Nnuc).NE.1.))THEN
+                     dencomp = DENhf
+                     aafis = 0.
+
+                     IF(FISmod(Nnuc).eq.0.)THEN
+                        CALL FISFIS(nnuc, ke, ip, jcn, sumfis,0)
+                        IF(FISopt(Nnuc).gt.0.)THEN
+                           IF(NRWel.eq.1) cota1 = (TF(1) + TF(2)+TG2)/2
+                           IF(NRWel.eq.2) cota1 = (TF(1) + TDIr23+TG2)/2
+                        ENDIF
+                     ENDIF
+
+                     IF(FISmod(Nnuc).gt.0.)THEN                       
+                        tfb=0.
+                        DO m=1,int(FISmod(Nnuc))+1
+                           efb(2)=efbm(m)
+                           DO k=1,nrfdis(2)
+                              h(k,2)=hm(k,m)
+                              efdis(k,2)=efdism(k,m)
+                           ENDDO   
+                           xminn(2)=xminnm(m)
+                           nrbinfis(2)=nrbinfism(m)
+
+                           DO kk=1,nrbinfis(2)
+                              UGRid(kk,2)=UGRidf(kk,m)
+                           ENDDO
+
+                           DO jj=1,NLW
+                              DO kk=1,nrbinfis(2)
+                                 ROFis(kk,jj,2)= ROFism(kk,jj,m)
+                              ENDDO
+                           ENDDO
+    
+                           CALL FISFIS(nnuc, ke, ip, jcn, sumfis,m)
+                           tfbm(m)=tf(2)
+                           tfb=tfb+tfbm(m)
+                           IF(FISopt(Nnuc).gt.0.)THEN
+                              tdirm(m)=tdir
+                           ENDIF   
+                        ENDDO
+
+                        DO m=1,int(FISmod(Nnuc))+1
+                           IF((tf(1)+tfb).gt.0.)THEN
+                              sumfism(m)=tf(1)*tfbm(m)/(tf(1)+tfb)
+                           ELSE
+                              sumfism(m)=0.
+                           ENDIF 
+                           IF(FISopt(Nnuc).gt.0.)
+     &                          cota1 = (TF(1) + TFb+TG2)/2
+                        ENDDO   
+                     ENDIF
+   
+                     IF(cota1.LE.EXPmax)THEN
+                        cotaexp = EXP( - cota1)
+                     ELSE
+                        cotaexp = 0.d0
+                     ENDIF
+                     Cota = (1 + cotaexp**2)/(1 - cotaexp**2 +
+     &                             0.00000001)
+                  ENDIF
+ 
 C-----------------normalization and accumulation
 C-----------------
                   xnor = POP(ke, jcn, ipar, nnuc)*step/DENhf
                   stauc = stauc + RO(ke, jcn, nnuc)*xnor
-                  IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc + 
+                  IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc +
      &               DENhf*POP(ke, jcn, ipar, nnuc)
      &               *step/RO(ke, jcn, nnuc)
-C                 FISfis d-------------------------------------
-C--------------subbarrier effect--------------------------
-                  IF(FISsil(nnuc) .AND. SUBeff(nnuc).EQ.1.)THEN
-                     IF((dencomp + TDIr).GT.0.)THEN
-                        xnorfis = xnor*DENhf/(dencomp + TDIr)
-                     ELSE
-                        xnorfis=0.
-                     ENDIF   
-                     IF(NRBarc.EQ.2.and.NRwel.eq.1)THEN
-                        IF(TF(2)*Tabs.GT.0.)THEN
-                           bbfis = (TDIr + dencomp)*(TF(1) + TF(2))
-     &                             /(TABs*TF(2))
+C--------------subbarrier effects
+
+                  IF(FISsil(nnuc) .AND. FISOPT(nnuc).gt.0.
+     &               .AND.FISSHI(Nnuc).NE.1.)THEN
+                     IF(FISmod(Nnuc).eq.0.)THEN
+                        IF((dencomp + TDIr).GT.0.)THEN
+                           xnorfis = xnor*DENhf/(dencomp + TDIr)              
+                        ELSE
+                           xnorfis=0.
+                        ENDIF
+                        IF(NRBarc.EQ.2.and.NRwel.eq.1)Tout=tf(2)
+                        IF(NRBar.EQ.5)Tout=Tdir23
+                        IF(Tout*Tabs.GT.0.)THEN
+                           bbfis = (TDIr + dencomp)*(TF(1) + Tout + TG2)
+     &                             /(TABs*(Tout + TG2))
                            aafis = (1. + bbfis**2 + 2*bbfis*cota)
      &                             **( - 0.5)
                         ELSE
                            aafis = 0.
                         ENDIF
+C-----------------------fission                        
+                        pfiso=xnorfis*(tdir+ dencomp)*(Rfiso-1.)*
+     &                        TG2*aafis/(tout+TG2)
+                        csfis = csfis +xnorfis*(tdir+ dencomp*aafis)+
+     &                          pfiso
+c                       IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
+c                        WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis,
+c     &                                ' mb'
                      ENDIF
-C
-                     IF(NRBar.EQ.5)THEN
-                        IF(Tabs*tdir23.gt.0.)THEN
-                           bbfis = (TDIr + dencomp)*(TF(1) + TDIr23)
-     &                             /(TABs * TDIr23)
-                           aafis = 1/sqrt(1. + bbfis**2 + 2*bbfis*cota)
-                        ELSE
-                           aafis = 0.
-                        ENDIF
-                     ENDIF
-C-----------------------fission
-                     csfis = csfis + xnorfis*(TDIr + dencomp*aafis)
-                     IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
-     &                  WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
-     &                        ' mb'
+   
+                     IF(FISmod(Nnuc).gt.0.)THEN
+                        DO m=1,int(FISmod(Nnuc))+1
+                           IF((dencomp + TDIrm(m)).GT.0.)THEN
+                              xnorfis = xnor*DENhf/(dencomp + TDIrm(m))
+                           ELSE
+                              xnorfis=0.
+                           ENDIF
+                           IF(Tf(2)*Tabs.GT.0.)THEN
+                              bbfis = (TDIrm(m) + dencomp)*
+     &                                (TF(1) + Tf(2))/(TABs*Tfbm(m))
+                              aafis = (1. + bbfis**2 + 2*bbfis*cota)
+     &                             **( - 0.5)
+                           ELSE
+                              aafis = 0.
+                           ENDIF
+C-----------------------fission                 
+                           csfism(m) = csfism(m) + xnorfis*
+     &                          (tdirm(m) + dencomp*aafis)
+                        ENDDO  
+                     ENDIF     
+
 C-----------------------particles
                      DO nejc = 1, NEJcm
                         nnur = NREs(nejc)
                         CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
                         CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
-     &                     + xnorfis*SCRtem(nejc)*(1 - aafis)
+     &                     + xnorfis*SCRtem(nejc)*(1 - aafis)           
                      ENDDO
 C-----------------gammas
                      CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
@@ -1196,7 +1335,8 @@ C-----------------gammas
                      POP(ke, jcn, ipar, nnuc) = 0.0
                      GOTO 1605
                   ENDIF
-C                 FISfis u--------------------------
+c---------------------------------------------------------------
+c--------------no subbarrier effects
 C-----------------particles
                   DO nejc = 1, NEJcm
                      nnur = NREs(nejc)
@@ -1208,23 +1348,16 @@ C-----------------gammas
                   CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
                   CSEmis(0, nnuc) = CSEmis(0, nnuc) + xnor*SCRtem(0)
                   POP(ke, jcn, ipar, nnuc) = 0.0
-C-----------------fission
-                  csfis = csfis + sumfis * xnor
-                  IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
-     &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
-     &                     ' mb'
-C                 construct fission related spectra of particles     
-                  IF(POPbin(ke, Nnuc) .GT. 0) THEN 
-                     xnorfispec = sumfis*xnor/POPbin(ke, Nnuc)
-                     DO ie = 1, NDECSE 
-                        DO nejc = 0, NEJcm
-                           CSEfis(ie,nejc) = CSEfis(ie,nejc) +  
-     &                     POPcse(ke,nejc,ie,Nnuc)*xnorfispec 
-                        ENDDO 
-                     ENDDO 
-                  ENDIF 
-C                *** done *** construct fission related spectra 
-
+C-----------------fission                 
+                  IF(FISmod(nnuc).eq.0.)csfis = csfis + sumfis * xnor
+                  IF(FISmod(nnuc).gt.0.)THEN
+                     DO m=1,int(Fismod(nnuc))+1
+                        csfism(m)=csfism(m)+sumfism(m)*xnor
+                     ENDDO   
+                  ENDIF   
+c                  IF(FISsil(nnuc) .AND. jcn.EQ.NLW)
+c     &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis,
+c     &                     ' mb'
 C-----------------calculate total emission
  1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
@@ -1233,15 +1366,25 @@ C-----------------calculate total emission
  1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF(ENDf.GT.0)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
-         ENDDO                  !loop over c.n. excitation energy bins (ke)
+            IF(Fismod(nnuc).eq.0.)WRITE(80, '(10x,a6,f12.5,a3)')
+     &             'csfis=', csfis, ' mb'
+            IF(Fismod(nnuc).gt.0.)THEN
+               write(80,*)'  '
+               DO m=1,int(Fismod(nnuc))+1
+                  WRITE(80,*)'    Mode=',m,'  csfis=', csfism(m), ' mb'
+               ENDDO
+            ENDIF
+         ENDDO                  !loop over c.n. excitation energy
+
+cccc!!!!!! csemist multimodal
 C--------
 C--------Hauser-Feshbach decay of nnuc  ***done***
 C--------
 C--------printout of results for the decay of NNUC nucleus
-         IF(IOUt.GT.0)WRITE(6, 
+         IF(IOUt.GT.0)WRITE(6,
      &          '(1X,/,'' Population left because too small '',G12.5,/)'
      &          )popleft*DE
- 1650    IF(IOUt.GT.0)WRITE(6, 
+ 1650    IF(IOUt.GT.0)WRITE(6,
      &                      '(1X,/,10X,''Discrete level population'')')
          IF(IOUt.GT.0 .AND. kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1)WRITE(6, 
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
@@ -1270,9 +1413,9 @@ c--------------check for the number of branching ratios
                   nbr = ib
                ENDDO
                IF(nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein )WRITE(6, *)
-     &            ' WARNING: BRANCHING RATIOS FOR LEVEL ', il, 
-     &            ' IN ', INT(A(nnuc)), '-', SYMb(nnuc), 
-     &            ' ARE MISSING'
+     &            ' WARNING: Branching ratios for level ', il, 
+     &            ' in ', INT(A(nnuc)), '-', SYMb(nnuc), 
+     &            ' are missing'
                WRITE(12,99012)il, ELV(il, nnuc), LVP(il, nnuc),
      &                      XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
      &                      (NINT(BR(il,ib,1,nnuc)), 
@@ -1429,6 +1572,17 @@ C              1       '' s'')') TAUT
      &  )gamfis
             ENDIF
 C-----------life-times and widths  *** done ***
+            IF(FISmod(Nnuc).gt.0)THEN
+               DO m=1,int(FISmod(nnuc))+1
+                  csfis=csfis+csfism(m)
+               ENDDO  
+               DO m=1,int(FISmod(nnuc))+1
+                  IF (csfis.gt.0.)wfism(m)=csfism(m)/csfis
+                  write(80,*)'    Mode=',m, '   weight=',wfism(m)
+               ENDDO  
+               write(80,*)'   Fission cross section=',csfis,' mb'
+            ENDIF   
+
             WRITE(6, *)' '
             WRITE(6, '('' Fission    cross section    '',G12.5,'' mb'')'
      &            )csfis
@@ -1436,7 +1590,7 @@ C-----------life-times and widths  *** done ***
          TOTcsfis = TOTcsfis + csfis
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
-         IF(nnuc.EQ.1)THEN
+         IF(nnuc.EQ.1 .AND. INT(AEJC(0)).NE.0)THEN
             WRITE(6,*) 
             WRITE(6,*) ' SHAPE ELASTIC :', ELAcs,' mb'
             WRITE(6,*) ' CN ELASTIC    :', POPlv(1, mt2),' mb'

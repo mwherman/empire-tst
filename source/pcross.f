@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-15 22:16:19 $
-Ccc   * $Id: pcross.f,v 1.10 2004-06-15 22:16:19 herman Exp $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: pcross.f,v 1.11 2004-07-16 12:47:37 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C 
@@ -50,7 +50,7 @@ C
 C     INTEGER VARIABLES 
 C 
       INTEGER*4 ac, ao, ar, p, hh, h1, i, ienerg, NHEq, icon, j,  
-     &          icon3, zc, zr, ap, zp, ihmax, ien
+     &          icon3, zc, zr, ap, ihmax, ien
       INTEGER*2 iemin(NDEJC + 1), iemax(NDEJC + 1), nures(NDEJC + 1) 
 C 
 C====================================================================== 
@@ -62,9 +62,8 @@ C     NPRoject - projectile nejc number
 C 
 C     INITIALIZATION 
           
-C 	Projectile mass and charge numbers 
+C 	Projectile mass number 
       ap = AEJc(NPRoject) 
-      zp = ZEJc(NPRoject) 
 C 
       cme = MFPp/1.4D21 
 C 

@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 15:33:37 $
-Ccc   * $Id: gamma-strgth.f,v 1.8 2004-06-08 15:33:37 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: gamma-strgth.f,v 1.9 2004-07-16 12:47:37 herman Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -57,7 +57,6 @@ C ------Plujko_new
      &                 EG1, GW1, CS1, EG2, GW2, CS2
       INTEGER  NG
       COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
 C ------Plujko_new (End)
 
       DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
@@ -371,7 +370,6 @@ C
 C
 C
 C-----Plujko_new
-Cb    DOUBLE PRECISION FUNCTION E1(Eg, T)
       DOUBLE PRECISION FUNCTION E1(Nnuc,Z,A,Eg, T,Uex)
 C-----Plujko_new(End)
 Ccc
@@ -433,8 +431,6 @@ C-----Plujko_new
       DOUBLE PRECISION  Temperf, Eexcitf, Uex
 
       COMMON /GSA/ Key_shape, Key_GDRGFL
-      COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
 C-----Plujko_new(End)
 C
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 

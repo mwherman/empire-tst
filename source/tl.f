@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-11 22:13:35 $
-Ccc   * $Id: tl.f,v 1.23 2004-06-11 22:13:35 herman Exp $
+Ccc   * $Date: 2004-07-16 12:47:37 $
+Ccc   * $Id: tl.f,v 1.24 2004-07-16 12:47:37 herman Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
@@ -247,7 +247,7 @@ C-----IF ( IMOdel.EQ.1 ) model = 'coupled-channels rotational model'
 C-----IF ( IMOdel.EQ.2 ) model = 'vibrational model'
 C-----IF ( IMOdel.EQ.3 ) model = 'non-axial deformed model'
       IF(IMOdel.EQ.3 .AND. FIRst_ein)THEN
-         WRITE(6, *)'WARNING: NON-AXIAL DEFORMED MODEL NOT IMPLEMENTED'
+         WRITE(6, *)'WARNING: Non-axial deformed model not implemented'
          IWArn = 5
          GOTO 200
       ENDIF
@@ -267,11 +267,11 @@ c     IF (ND_nlv.GT.0) coll_defined=.TRUE.
 C--------model = 'coupled-channels rotational model'
          coll_defined = .TRUE.
          IF(NISotop.EQ.0 .AND. FIRst_ein)THEN
-            WRITE(6, *)'WARNING: NONE OF THE REQUESTED ISOTOPES IS '
-            WRITE(6, *)'WARNING: INCLUDED IN THE SELECTED POTENTIAL.'
-            WRITE(6, *)'WARNING: FILE WITH RIPL DISCRETE LEVELS CAN NOT'
-            WRITE(6, *)'WARNING: BE CREATED.                    '
-            WRITE(6, *)'WARNING: DEFAULT COLLECTIVE LEVELS WILL BE USED'
+            WRITE(6, *)'WARNING: None of the requested isotopes is '
+            WRITE(6, *)'WARNING: included in the selected potential.'
+            WRITE(6, *)'WARNING: File with RIPL discrete levels can not'
+            WRITE(6, *)'WARNING: be created.                    '
+            WRITE(6, *)'WARNING: Default collective levels will be used'
             GOTO 200
          ENDIF
          ncalc = 0
@@ -403,11 +403,11 @@ C           RCN 01/2004
 C--------model = 'vibrational model'
          coll_defined = .TRUE.
          IF(NISotop.EQ.0)THEN
-            WRITE(6, *)'WARNING: NONE OF THE REQUESTED ISOTOPES IS '
-            WRITE(6, *)'WARNING: INCLUDED IN THE SELECTED POTENTIAL.'
-            WRITE(6, *)'WARNING: FILE WITH RIPL DISCRETE LEVELS CAN NOT'
-            WRITE(6, *)'WARNING: BE CREATED.                    '
-            WRITE(6, *)'WARNING: DEFAULT COLLECTIVE LEVELS WILL BE USED'
+            WRITE(6, *)'WARNING: None of the requested isotopes is '
+            WRITE(6, *)'WARNING: Included in the selected potential.'
+            WRITE(6, *)'WARNING: File with RIPL discrete levels can not'
+            WRITE(6, *)'WARNING: be created.                    '
+            WRITE(6, *)'WARNING: Default collective levels will be used'
             GOTO 200
          ENDIF
          ncalc = 0
@@ -2318,10 +2318,10 @@ C
          WRITE(6, '(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)')'RESIDUAL: A=', 
      &         INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=', 
      &         SNGL(XJLv(LEVtarg, Nnuc)), ' P=', INT(LVP(LEVtarg, Nnuc))
-         WRITE(6, *)'WARNING: FOR THIS RESIDUAL NUCLEUS'
-         WRITE(6, *)'WARNING: AVAILABLE ENERGY IS ALWAYS '
-         WRITE(6, *)'WARNING: BELOW COULOMB BARRIER'
-         WRITE(6, *)'WARNING: CALCULATIONS ARE NOT NEEDED!'
+         WRITE(6, *)'WARNING: For this residual nucleus'
+         WRITE(6, *)'WARNING: available energy is always '
+         WRITE(6, *)'WARNING: below coulomb barrier'
+         WRITE(6, *)'WARNING: Calculations are not needed!'
       ENDIF
       END
 C

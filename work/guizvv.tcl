@@ -715,6 +715,11 @@ proc vTclWindow.topwindow {base} {
         -background #dcdcdc -foreground black -highlightbackground #dcdcdc \
         -highlightcolor #ffffff -justify left -offvalue {} -onvalue 17 \
         -text { 17 (x,3n)} -variable n3n 
+    checkbutton $site_3_0.chkbnfis \
+        -activebackground #609498 -activeforeground #ffffff \
+        -background #dcdcdc -foreground black -highlightbackground #dcdcdc \
+        -highlightcolor #ffffff -justify left -offvalue {} -onvalue 18 \
+        -text { 18 (x,f)} -variable nf 
     checkbutton $site_3_0.chkbnna \
         -activebackground #609498 -activeforeground #ffffff \
         -background #dcdcdc -foreground black -highlightbackground #dcdcdc \
@@ -762,20 +767,22 @@ proc vTclWindow.topwindow {base} {
         -in $site_3_0 -column 0 -row 4 -columnspan 1 -rowspan 1 -sticky w 
     grid $site_3_0.chkbn3n \
         -in $site_3_0 -column 0 -row 5 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbnna \
+    grid $site_3_0.chkbnfis \
         -in $site_3_0 -column 0 -row 6 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbnnp \
+    grid $site_3_0.chkbnna \
         -in $site_3_0 -column 0 -row 7 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbnnpa \
+    grid $site_3_0.chkbnnp \
         -in $site_3_0 -column 0 -row 8 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbng \
+    grid $site_3_0.chkbnnpa \
         -in $site_3_0 -column 0 -row 9 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbnp \
+    grid $site_3_0.chkbng \
         -in $site_3_0 -column 0 -row 10 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbna \
+    grid $site_3_0.chkbnp \
         -in $site_3_0 -column 0 -row 11 -columnspan 1 -rowspan 1 -sticky w 
-    grid $site_3_0.chkbnpa \
+    grid $site_3_0.chkbna \
         -in $site_3_0 -column 0 -row 12 -columnspan 1 -rowspan 1 -sticky w 
+    grid $site_3_0.chkbnpa \
+        -in $site_3_0 -column 0 -row 13 -columnspan 1 -rowspan 1 -sticky w 
     grid $site_3_0.selectmt \
         -in $site_3_0 -column 0 -row 0 -columnspan 1 -rowspan 1 
     button $top.show \
@@ -785,7 +792,7 @@ proc vTclWindow.topwindow {base} {
 set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
@@ -800,7 +807,7 @@ exec xterm -e ./showzvd $zvd} \
 set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
@@ -840,7 +847,7 @@ exit} \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
         -command {set suff -$suf
-set mts [list $tot $el $inel $n2n $n3n $nna $nnp $nnpa $ng $np $na $npa]
+set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa]
 foreach i $mts {
 if {$i != ""} {exec xterm -e ./mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
 }} \
@@ -860,7 +867,7 @@ if {$i != ""} {exec xterm -e ./mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 
         -command {set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list 1 2 4 16 17 22 28 45 102 103 107 112]
+set mts [list 1 2 4 16 17 18 22 28 45 102 103 107 112]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
