@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: main.f,v 1.15 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Date: 2003-12-18 00:15:55 $
+Ccc   * $Id: main.f,v 1.16 2003-12-18 00:15:55 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -651,8 +651,8 @@ C-----start DO loop over decaying nuclei
       
          IF(FISsil(nnuc))THEN
             Call READ_INPFIS(Nnuc)
+C-----------moments of inertia for each deformation
             Call DEFO_FIS(Nnuc)
-C------------moments of inertia for each deformation
             NRbarc=Nrbar-Nrwel
             FIScon = 2.
             mm2 = 0.24*A(Nnuc)**(2./3.)
@@ -666,9 +666,9 @@ C------------moments of inertia for each deformation
                HJ(nnuc,ibars)=0.5*(1.0/Momparcrt(nnuc,ibars)-
      &                    1.0/Momortcrt(nnuc,ibars))
                IF(ibars.gt.Nrbarc)goto 3031
-               IF(FISDEN(Nnuc).EQ.0.)Call DAMI_ROFIS(Nnuc,ibars)
+               IF(FISDEN(Nnuc).EQ.0.)Call DAMIROFIS(Nnuc,ibars)
  3031       ENDDO
-            IF(FISDEN(Nnuc).EQ.1) Call Dami_rofis(Nnuc,1)
+            IF(FISDEN(Nnuc).EQ.1) Call DAMIROFIS(Nnuc,1)
             FISCON=0.
             Call WRITE_OUTFIS(Nnuc) 
          ENDIF   

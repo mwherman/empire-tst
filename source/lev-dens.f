@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: lev-dens.f,v 1.10 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Date: 2003-12-18 00:15:55 $
+Ccc   * $Id: lev-dens.f,v 1.11 2003-12-18 00:15:55 herman Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -925,7 +925,6 @@ C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C COMMON variables
 C
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
@@ -936,7 +935,7 @@ C
       COMMON /PARFIS/ ROTemp, AC, AAJ,  IBAr1
       DOUBLE PRECISION  AAJ
       INTEGER IBAr1
-
+C
 C Dummy arguments
 C
       DOUBLE PRECISION Asaf, Destep, Dshif
@@ -958,7 +957,6 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
- 
 ccc      write(6,*)'all-del', nnuc,a(nnuc),z(nnuc),del,bf
       IF(FIScon.EQ.2.)goto 6666
 C-----determination of U for normal states
@@ -988,7 +986,6 @@ C     fisfis d ===================================
        DEL = 0.
        IF(MOD(in, 2).NE.0)DEL = DELp
        IF(MOD(iz, 2).NE.0)DEL = DEL + DELp
-
        ap1 = 0.94431E-01
        ap2 = -0.80140E-01
        gamma = 0.75594E-01
@@ -997,45 +994,29 @@ C     fisfis d ===================================
           ap2 = ap2*1.2402
           gamma = gamma*1.2494
        ENDIF
-
-
        ATIl = AP1*A(Nnuc) + AP2*A23
        ATIl = ATIl*ATIlnor(Nnuc)
-
-        ECOnd = 1.5*ACRt*DELp**2/(pi*pi)
-
-
-
+       ECOnd = 1.5*ACRt*DELp**2/(pi*pi)
 c      write(6,*)'saddle', nnuc,z(nnuc),a(nnuc),in,iz,del,atil,!,atilnor
 c     &  atilnor(nnuc),gamma,acrt,econd
          mompar = MOMparcrt(nnuc,IBAr1)
          momort = MOMortcrt(nnuc,IBAr1)
-         
          u=(kk-1)*destep+dshif+del   
-
          IF(U.GT.UCRt)THEN 
             accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
          ELSE
             accn = ACRt
          ENDIF
          temp = 0.
-
-
-
-
          shredt = 1.
-
 C--------temperature fade-out of the shell correction  --- done ----
-
          IF(u.GT.UCRt)THEN
             u = u - ECOnd
             bcs = .FALSE.
          ELSE
             bcs = .TRUE.
          ENDIF
-        
          IF(u.GT.0.0D0)THEN
-C
 C-----------calculation of level density parameter 'a' including surface
 C-----------dependent factor
             qigor = ( - 0.00246 + 0.3912961*cigor - 
@@ -1050,7 +1031,6 @@ C-----------dependent factor
             ATIl = ATIl*ATIlnor(Nnuc)
             IF(Asaf.GE.0.D0)AC = ATIl*FSHELL(u, SHC(Nnuc), Asaf)
             IF(Asaf.LT.0.D0)AC = -ATIl*Asaf
-
 c            write(6,*)'a-saddle',nnuc,z(nnuc),a(nnuc),ac
             IF(AC.GT.0.D0)THEN
                IF(bcs)THEN
@@ -2003,13 +1983,13 @@ C
             GOTO 450
          ENDIF
  500     hhh = uugrid(khi) - uugrid(klo)
-         c1 = (UGRid(khi) - u)/hhh
-         c2 = (u - UGRid(klo))/hhh
+         c1 = (UUGRid(khi) - u)/hhh
+         c2 = (u - UUGRid(klo))/hhh
          DO j = 1, jmaxl
             r1 = rhogrid(klo, j)
             r2 = rhogrid(khi, j)
             IF(r1.GT.0 .AND. r2.GT.0)THEN
-               RO(kk, j, Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
+               RO(kk, j, Nnuc) = 10.0D+0**(c1*DLOG10(r1)+c2*DLOG10(r2))
             ELSE
                RO(kk, j, Nnuc) = c1*r1 + c2*r2
             ENDIF

@@ -14,8 +14,8 @@ echo #!zvview.exe >$3
 cat pnt.zvd >>$3
 cat cur.zvd >>$3
 if [ "$4" = "" ]; then
-   ./zvv95l.exe $3 
+   ./zvv97l.exe $3 
    exit
 fi
 #next line makes use of the ddx.tit file with plot settings        
-  ./zvv95l.exe $3 ddx.tit
+  ./zvv97lm.exe -p:tmp $3 ddx.tit

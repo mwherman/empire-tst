@@ -1,694 +1,751 @@
-                                                                       
-     PROGRAM X4TOC4                                                    
-
-     VERSION 86-1 (AUGUST 1986)                                        
-     VERSION 87-1 (JUNE 1987)    *IMPROVED BASED ON USER COMMENTS      
-     VERSION 93-1 (JANUARY 1993) *UPDATED TO ALWAYS OUTPUT YEAR IN     
-                                  STANDARD COLUMNS = THE LAST 4 COLUMNS
-                                  OF THE AUTHOR FIELD AS 2 INTEGERS    
-                                  ENCLOSED IN PARENTHESIS - THEREFORE  
-                                  THE 2 DIGIT YEAR WILL ALWAYS BE IN   
-                                  COLUMNS 120-121 AND THESE CAN BE USED
-                                  TO EASILY SORT DATA BY YEAR.         
-                                                                       
-     WRITTEN BY DERMOTT E. CULLEN                                      
-                UNIVERSITY OF CALIFORNIA                               
-                LAWRENCE LIVERMORE NATIONAL LABORATORY                 
-                L-298                                                  
-                P.O. BOX 808                                           
-                LIVERMORE, CA 94550                                    
-                U.S.A                                                  
-     TELEPHONE  510-423-7359                                           
-                                                                       
-     PURPOSE                                                           
-     =======                                                           
-     THIS PROGRAM IS DESIGNED TO TRANSLATE EXPERIMENTAL DATA FROM THE  
-     EXFOR FORMAT TO A COMPUTATION FORMAT.                             
-                                                                       
-     WHAT COMPUTERS WILL THE PROGRAM RUN ON                            
-     ======================================                            
-     THE PROGRAM HAS BEEN IMPLEMENTED ON AN IBM MAINFRAME AND AN IBM   
-     PERSONAL COMPUTER. THE PROGRAM IS SMALL ENOUGH TO RUN ON VIRTUALLY
-     ANY COMPUTER. FOR SPECIAL CONSIDERATIONS SEE THE SECTION BELOW ON 
-     COMPUTER DEPENDENT CODING.                                        
-                                                                       
-     EXFOR FORMAT                                                      
-     ============                                                      
-     THE EXFOR FORMAT IS DESIGNED TO ALLOW EXPERIMENTALLY MEASURED DATA
-     TO BE CODED IN A COMPUTER READABLE FORMAT IN A VERY FLEXIBLE FORM.
-     IN PARTICULAR THE DATA CAN BE ENTERED IN ESSENTIALLY ANY SET OF   
-     UNITS (E.G., EV VS. BARNS OR KEV VS. MILLI-BARNS) AND IN ANY TABLE
-     FORMAT; ESSENTIALLY THE TABLE MAY BE ENTERED EXACTLY AS PUBLISHED 
-     BY AN AUTHOR (E.G., ENERGY FOLLOWED BY COLUMNS OF CROSS SECTIONS  
-     IN ANY ORDER).                                                    
-                                                                       
-     THE EXFOR FORMAT IS TABLE ORIENTED IN THE SENSE THAT DATA FROM A  
-     GIVEN MEASUREMENT ARE COLLECTED TOGETHER AND CAN BE PRESENTED IN  
-     A SINGLE, OR AS A SERIES OF TABLES.                               
-                                                                       
-     THE ADVANTAGE OF THE EXFOR FORMAT IS THAT SINCE DATA CAN BE CODED 
-     ESSENTIALLY AS PUBLISHED BY AN AUTHOR PROBLEMS OF UNIT CONVERSION 
-     AND RE-FORMATTING TABLES PRIOR TO CODING ARE AVOIDED AND THE      
-     AUTHOR CAN EASILY CHECK THE CODED DATA. THE RESULT IS A GREATLY   
-     IMPROVED RELIABILITY OF THE CODED DATA.                           
-                                                                       
-     THE DISADVANTAGE OF THE EXFOR FORMAT IS THAT SINCE PHYSICALLY     
-     COMPARABLE DATA FROM DIFFERENT MEASUREMENTS (E.G. FE-56 TOTAL     
-     CROSS SECTIONS) MAY BE GIVEN IN A VARIETY OF DIFFERENT UNITS AND  
-     FORMATS IT IS VERY DIFFICULT TO USE IN APPLICATIONS. IN ADDITION  
-     THE TABLE ORIENTED EXFOR SYSTEM MAKES IT DIFFICULT TO COLLECT     
-     TOGETHER PHYSICALLY COMPARABLE DATA FROM DIFFERENT MEASUREMENTS.  
-                                                                       
-     COMPUTATION FORMAT                                                
-     ==================                                                
-     THE COMPUTATION FORMAT USED BY THIS PROGRAM IS DESIGNED TO PRESENT
-     EXPERIMENTAL DATA IN A FIXED SET OF UNITS AND COLUMN ORDER. BY    
-     STARTING FROM DATA IN THE EXFOR FORMAT AND TRANSLATING DATA TO    
-     THE COMPUTATION FORMAT IT IS POSSIBLE TO COMBINE THE ADVANTAGES   
-     OF THE IMPROVED RELIABILITY OF THE DATA CODED IN THE EXFOR FORMAT 
-     WITH THE ADVANTAGES OF A FIXED UNIT AND COLUMN ORDER FORMAT FOR   
-     USE IN SUBSEQUENT APPLICATIONS.                                   
-                                                                       
-     IN ADDITION THE COMPUTATION FORMAT IS POINT ORIENTED (AS OPPOSED  
-     THE TABLE ORIENTED EXFOR FORMAT). EACH LINE OF THE COMPUTATION    
-     FORMAT REPRESENTS A SINGLE DATA POINT. THIS MAKES IT POSSIBLE TO  
-     SORT DATA IN THE COMPUTATION FORMAT INTO ANY DESIRED ORDER FOR USE
-     IN APPLICATION, E.G., SORT 26-FE-26 (N,2N) DATA FROM A NUMBER OF  
-     MEASUREMENTS TOGETHER INTO ENERGY ORDER TO SIMPLIFY COMPARISONS.  
-                                                                       
-     EXFOR VS. COMPUTATION FORMAT                                      
-     ============================                                      
-     THE COMPUTATION FORMAT IS NOT INTENTED AS A SUBSTITUTE FOR THE    
-     EXFOR FORMAT, RATHER THE TWO ARE COMPLEMENTARY. THE EXFOR FORMAT  
-     CONTAINS MUCH MORE INFORMATION THAN CAN BE INCLUDED IN COMPUTATION
-     FORMATS AND THIS INFORMATION SHOULD BE CONSULTED AND USED DURING  
-     EVALUATION. THE COMPUTATION FORMAT IS ONLY INTENDED TO SIMPLIFY   
-     USE OF THE DATA DURING EVALUATION, OR OTHER APPLICATIONS.         
-                                                                       
-     RELATIONSHIP TO ENDF/B                                            
-     ======================                                            
-     IT IS ASSUMED THAT ONE OF THE MAJOR USES OF THIS PROGRAM WILL BE  
-     TO PREPARE DATA FOR SUBSEQUENT USE IN EVALUATION AND/OR TO COMPARE
-     AVAILABLE EVALUATED AND EXPERIMENTAL DATA. AS SUCH THE COMPUTATION
-     FORMAT HAS BEEN DESIGNED TO ALLOW DATA TO BE REDUCED TO A FORM IN 
-     WHICH DATA ARE CLASSIFIED IN A MANNER SIMILAR TO ENDF/B DATA.     
-                                                                       
-     IN PARTICULAR THE EXFOR CLASSIFICATION OF DATA BY THE EXFOR       
-     KEYWORD REACTION (OR ISO-QUANT, ETC.) IS REPLACED BY CLASSIFYING  
-     THE DATA BY (1) PROJECTILE, (2) TARGET - ZA, (3) TYPE OF DATA -   
-     ENDF/B - MF, (4) REACTION - ENDF/B MT. IN ADDITION THE STANDARD   
-     UNITS USED BY THE TRANSLATION PROGRAM WERE SELECTED TO BE THE     
-     SAME AS THE UNITS USED BY ENDF/B (E.G., EV, BARNS, ETC.).         
-                                                                       
-     THE RESULT OF PUTTING DATA INTO THE COMPUTATION FORMAT IS THAT IT 
-     IS EASY TO DECIDE IF THE DATA IS COMPARABLE TO EVALUATED DATA     
-     (E.G. SAME ZA, MF, MT) AND ONCE IT IS DECIDED THAT DATA IS        
-     COMPARABLE, EVALUATION AND/OR COMPARISON IS SIMPLIFIED BECAUSE THE
-     DATA IS IN THE SAME UNITS AS ENDF/B (E.G., EV VS. BARNS).         
-                                                                       
-     EXTENSIONS OF ENDF/B CONVENTIONS                                  
-     ================================                                  
-     FOR ALL TYPES OF DATA WHICH ARE PHYSICALLY COMPARABLE TO DATA     
-     WHICH CAN BE INCLUDED IN THE ENDF/B DATA THIS PROGRAM USING THE   
-     ENDF/B DEFINITIONS OF (1) TYPE OF DATA - ENDF/B MF, (2) REACTION -
-     ENDF/B MT. FOR EXAMPLE ALL CROSS SECTIONS (MF=3), ANGULAR (MF=4)  
-     AND ENERGY (MF=5) AND DOUBLE DIFFERENTIAL (MF=6) DISTRIBUTIONS    
-     DATA ARE TRANSLATED TO MF =3 TO 6. SIMILARLY FOR SIMPLE REACTIONS 
-     SUCH AS TOTAL (MT=1), ELASTIC (MT=2), ETC. THE DATA ARE TRANSLATED
-     TO THE CORRESPONDING ENDF/B MT.                                   
-                                                                       
-     SINCE MANY TYPES OF DATA WHICH APPEAR IN EXFOR DO NOT HAVE A ONE  
-     TO ONE CORRESPONDENCE TO DATA WHICH APPEARS IN ENDF/B THE ENDF/B  
-     CLASSIFICATION OF TYPE OF DATA (MF) AND REACTION (MT) HAVE BEEN   
-     EXTENDED TO ALLOW ADDITIONAL TYPES OF DATA AND REACTIONS TO BE    
-     TRANSLATED (E.G., DEFINE MF NUMBERS FOR RATIOS, DEFINE MT NUMBERS 
-     FOR (N,NP)+(N,NA)).                                               
-                                                                       
-     THE ENDF/B MF IS A 2 DIGIT NUMBER AND THE MT IS A 3 DIGIT NUMBER. 
-     IN THE COMPUTATION FORMAT MF HAS BEEN EXTENDED TO 3 DIGITS AND THE
-     MT HAS BEEN EXPANDED TO 4 DIGITS. THESE EXTENSIONS ALLOW THE USER 
-     THE FLEXIBILITY TO TRANSLATE VIRTUALLY ANY EXFOR DATA TO A FIXED  
-     SET OF UNITS AND COLUMN ORDER FOR SUBSEQUENT USE IN APPLICATIONS. 
-                                                                       
-     SOME EXTENSIONS OF MF AND MT HAVE ALREADY BEEN ESTABLISHED (FOR,  
-     DETAILS SEE THE INPUT DICTIONARIES DESCRIBED BELOW) AND IF AT ALL 
-     POSSIBLE THESE CONVENTIONS SHOULD BE FOLLOWED BY THE USER. THE    
-     USER HAS THE FLEXIBILITY OF ESTABLISHING ANY CONVENTIONS THAT MAY 
-     BE REQUIRED TO MEET HIS OR HER NEEDS, BUT IN THIS CASE IT IS THE  
-     RESPONSIBILITY OF THE USER TO PROPERLY INTERPRET AND USE THE      
-     TRANSLATED DATA.                                                  
-                                                                       
-     DIRECT COMPARISON TO ENDF/B DATA                                  
-     ================================                                  
-     ALTHOUGH THE ENDF/B CLASSIFICATION SYSTEM OF MF AND MT IS USED FOR
-     TRANSLATION, GENERALLY VERY LITTLE OF THE EXFOR DATA IS DIRECTLY  
-     COMPARABLE TO ENDF/B DATA. GENERALLY CROSS SECTIONS (MF=3) ARE    
-     DIRECTLY COMPARABLE. HOWEVER, IT MUST BE REALIZED THAT ANGULAR    
-     (MF=4) AND ENERGY (MF=5) AND DOUBLE DIFFERENTIAL (MF=6) DATA ARE  
-     GIVEN IN ENDF/B IN A NORMALIZED (I.E., NORMALIZED TO UNITY WHEN   
-     INTERGRATED) FORM, WHEREAS DATA IN EXFOR ARE GENERALLY GIVEN IN AN
-     UNNORMALIZED FORM (E.G.,ANGULAR DISTRIBUTIONS IN BARNS/STERADIAN).
-                                                                       
-     AFTER THIS PROGRAM HAS BEEN USED TO TRANSLATE EXFOR DATA TO THE   
-     COMPUTATION FORMAT THE USER MAY MAKE ADDITIONAL DATA DIRECTLY     
-     COMPARABLE TO THE CORRESPONDING ENDF/B DATA BY EITHER,            
-     (1) NORMALIZING THE DATA IN THE COMPUTATION FORMAT, OR,           
-     (2) CONVERTING ENDF/B DATA TO UNNORMALIZED FORM.                  
-     THIS INVOLVES SELECTING AN INTGRATED CROSS SECTION AS A STANDARD  
-     TO USE FOR THE COMPARISON (E.G., FOR A 14.2 MEV ELASTIC ANGULAR   
-     DISTRIBUTION USE THE 14.2 MEV ENDF/B ELASTIC CROSS SECTION).      
-                                                                       
-     SINCE THE SELECTION OF A STANDARD TO USE FOR COMPARISON IN HIGHLY 
-     APPLICATION DEPENDENT IT HAS BEEN DECIDED THAT IT IS BETTER TO USE
-     THIS PROGRAM TO TRANSLATE DATA EXACTLY AS GIVEN IN EXFOR (EXCEPT  
-     FOR CONVERSION TO A STANDARD SET OF UNITS) AND TO ALLOW THE USER  
-     TO SUBSEQUENTLY SELECT A STANDARD FOR RENORMALIZATION.            
-                                                                       
-     CONTROL OF TRANSLATION                                            
-     ======================                                            
-     THE USER HAS COMPLETE CONTROL OVER WHAT DATA IS TRANSLATED, WHERE 
-     GIVEN TYPES OF DATA APPEAR IN THE COMPUTATION FORMAT AND THE UNITS
-     OF THE DATA IN THE COMPUTATION FORMAT.                            
-                                                                       
-     THIS IS ACCOMPLISHED BY USING THREE DICTIONARIES WHICH CONTROL    
-     THE TRANSLATION. ALL THREE OF THESE DICTIONARIES ARE DISTRIBUTED  
-     WITH THIS PROGRAM. EACH DICTIONARY IS A SIMPLE CARD IMAGE FILE    
-     WHICH MAY BE MODIFIED BY THE USER AT ANY TIME TO MEET SPECIFIC    
-     NEEDS. THE THREE DICTIONARIES ARE,                                
-                                                                       
-     (1) EXFOR REACTION - PROJECTILE, MF, MT EQUIVALENCE               
-         -----------------------------------------------               
-         THIS DICTIONARY TELLS THE PROGRAM FOR EACH EXFOR REACTION     
-         WHAT PROJECTILE, MF AND MT TO OUTPUT IN THE COMPUTATION FORMAT
-         (E.G.,(N,TOT) = NEUTRON, MF =3 (CROSS SECTION),MT =1 (TOTAL)).
-         IF A REACTION READ FROM THE EXFOR FORMAT IS NOT FOUND IN THIS 
-         DICTIONARY, OR THE ASSIGNED MF OR MT IS NOT POSITIVE THE EXFOR
-         DATA WILL SIMPLY BE SKIPPED AND NOT TRANSLATED. USING THIS    
-         DICTIONARY THE USER HAS CONTROL OVER WHICH DATA IS TRANSLATED 
-         AND WHAT MF AND MT ARE ASSIGNED TO EACH EXFOR REACTION.       
-                                                                       
-     (2) EXFOR COLUMN TITLE - COMPUTATION FORMAT OUTPUT FIELD          
-         ----------------------------------------------------          
-         ONCE THE EXFOR REACTION HAS BEEN TRANSLATED AND ASSIGNED AN   
-         EQUIVALENT MF AND MT THIS DICTIONARY TELLS THE PROGRAM WHERE  
-         TO PLACE EACH EXFOR COLUMN IN THE COMPUTATION FORMAT. THE     
-         ASSIGNED MF NUMBER CAN BE USED TO OUTPUT AN EXFOR COLUMN      
-         WITH THE SAME TITLE INTO DIFFERENT COLUMNS OF THE COMPUTATION 
-         FORMAT BASED ON DIFFERENT MF NUMBERS. FOR EXAMPLE, FOR CROSS  
-         SECTIONS (MF=3) THE USER MAY USE EN-MIN AND EN-MAX TO DEFINE  
-         AN AVERAGE INCIDENT ENERGY TO BE OUTPUT IN THE FIRST FIELD    
-         OF THE COMPUTATION FORMAT AND AN EQUIVALENT ENERGY UNCERTAINTY
-         IN THE SECOND FIELD OF THE COMPUTATION FORMAT. ALTERNATIVELY  
-         FOR RESONANCE INTEGRALS (MF=213) THE USER MAY DECIDE TO OUTPUT
-         EN-MIN AND EN-MAX IN THE FIRST TWO FIELDS OF THE COMPUTATION  
-         FORMAT TO DEFINE THE ENERGY RANGE OF THE RESONANCE INTEGRAL.  
-                                                                       
-         THERE ARE 8 OUTPUT FIELDS IN THE COMPUTATION FORMAT AND FOR   
-         ANY GIVEN MF NUMBER THE USER MAY OUTPUT ANY EXFOR COLUMN      
-         INTO ANY OF THESE FIELDS. ANY EXFOR TITLE WHICH IS NOT        
-         ASSIGNED TO AN OUTPUT FIELD 1 TO 8 WILL BE IGNORED AND NOT    
-         OUTPUT. THIS ALLOWS THE USER TO SELECTIVELY TRANSLATE PORTIONS
-         OF EXFOR DATA TABLES TO MEET ANY GIVEN NEED. FOR EXAMPLE, BY  
-         SIMPLY MODIFYING THIS DICTIONARY THE USER HAS CONTROL OVER    
-         WHETHER AN EXFOR COLUMN DATA-ERR3 IS TRANSLATED OR IGNORED,   
-         AND IF TRANSLATED THE USER HAS CONTROL OVER WHICH OF THE 8    
-         COMPUTATION FORMAT DATA FIELDS DATA-ERR3 WILL APPEAR IN.      
-                                                                       
-     (3) EXFOR COLUMN UNITS - COMPUTATION FORMAT UNITS                 
-         ---------------------------------------------                 
-         THIS DICTIONARY TELLS THE PROGRAM HOW TO CONVERT EACH EXFOR   
-         UNIT INTO STANDARD UNITS. AS DISTRIBUTED THIS DICTIONARY WILL 
-         CONVERT ALL EXFOR UNITS TO ENDF/B COMPATIBLE UNITS. HOWEVER,  
-         THE USER HAS THE OPTION TO CHANGE THIS DICTIONARY AT ANY TIME 
-         TO OBTAIN ANY OUTPUT UNITS TO MEET HIS OR HER NEEDS. FOR      
-         EXAMPLE IF THE USER WOULD LIKE OUTPUT IN MEV VS. MILLI-BARNS  
-         INSTEAD OF EV VS. BARNS IT IS MERELY NECESSARY TO MODIFY THIS 
-         DICTIONARY.                                                   
-                                                                       
-     OPERATIONS ON DATA                                                
-     ==================                                                
-     IN ADDITION TO THE INFORMATION DESCRIBED ABOVE EACH OF THE THREE  
-     DICTIONARIES ALLOWS THE USER TO SELECT FROM A MENU OF OPERATIONS  
-     WHICH MAY BE PERFORMED ON THE DATA (FOR A COMPLETE AND UP-TO-DATE 
-     LIST OF AVAILABLE OPERATIONS SEE THE DICTIONARIES). FOR EXAMPLE,  
-     THE REACTION DICTIONARY ALLOWS THE USER TO SPECIFY THAT LEGENDRE  
-     COEFFICENTS MAY BE RE-NORMALIZED, THE TITLE DICTIONARY ALLOWS THE 
-     USER TO SPECIFY THAT EN-MIN AND EN-MAX ARE TO BE CONVERTED TO AN  
-     AVERAGE ENERGY AND ASSOCIATED ENERGY UNCERTAINTY AND THE UNITS    
-     DICTIONARY ALLOWS THE USER TO SPECIFY THAT ANGLES SHOULD BE       
-     CONVERTED TO COSINES.                                             
-                                                                       
-     THESE OPERATIONS ARE COMPLETELY UNDER THE CONTROL OF THE USER AND 
-     BY SIMPLY MODIFYING THE DICTIONARIES THE USER CAN CONTROL WHETHER 
-     OR NOT EACH OPERATION IS PERFORMED (E.G., IF YOU WANT TO OUTPUT   
-     ANGLES INSTEAD OF COSINES MODIFY THE UNITS DICTIONARY BY REMOVING 
-     THE OPTION TO CONVERT FROM ANGLE TO COSINE FROM THE EXFOR UNITS   
-     ASEC, AMIN AND ADEG).                                             
-                                                                       
-     COMPUTATION FORMAT UNITS                                          
-     ========================                                          
-     AS DISTRIBUTED THE UNITS DICTIONARY WILL CONVERT ALL EXFOR UNITS  
-     TO ENDF/B UNITS,                                                  
-                                                                       
-     EV         = ENERGY                                               
-     BARNS      = CROSS SECTION                                        
-     STERADIANS = SOLID ANGLE                                          
-     SECONDS    = TIME                                                 
-     KELVIN     = TEMPERATURE                                          
-                                                                       
-     IF THE USER WOULD LIKE TO OBTAIN ANY OTHER OUTPUT UNITS IT IS     
-     MERELY NECESSARY TO MODIFY THE UNITS DICTIONARY (SEE UNITS        
-     DICTIONARY FOR DETAILS).                                          
-                                                                       
-     A LEARNING PROGRAM                                                
-     ==================                                                
-     AS DISTRIBUTED THE THREE TRANSLATION DICTIONARIES DO NOT CONTAIN  
-     DEFINITIONS OF HOW TO TRANSLATE ALL EXFOR REACTIONS, TITLES AND   
-     UNITS. AT THE PRESENT TIME THIS PROGRAM HAS ONLY BEEN USED TO     
-     TRANSLATE A SMALL PORTION OF THE DATA INCLUDED IN THE EXFOR SYSTEM
-     AND THE DICTIONARIES ONLY CONTAIN SUFFICIENT INFORMATION TO       
-     TRANSLATE THE EXFOR DATA WHICH HAS BEEN ENCOUNTERED TO DATE.      
-                                                                       
-     IT IS DIFFICULT AND DANGEROUS TO TRY TO DEFINE TRANSLATION RULES  
-     FOR ALL TYPES OF EXFOR DATA WITHOUT EXAMINING ACTUAL EXFOR DATA.  
-     THEREFORE ONLY WHEN A NEW REACTION, TITLE OR UNIT IS ENCOUNTERED  
-     DURING TRANSLATION WILL THE ACTUAL EXFOR DATA BE EXAMINED, A      
-     DECISION MADE AS TO HOW TO BEST TRANSLATE THE DATA AND THE        
-     DICTIONARIES UPDATED.                                             
-                                                                       
-     GENERALLY ONCE A GIVEN TYPE OF EXFOR DATA HAS BEEN ENCOUNTERED AND
-     THE DICTIONARIES UPDATED TO DEFINE HOW TO TRANSLATE THE DATA THE  
-     SAME RULES CAN BE USED TO TRANSLATE ALL SIMILAR DATA. THEREFORE   
-     OVER A PERIOD OF TIME USER EXPERIENCE WILL BE ACCUMULATED IN THE  
-     TRANSLATION DICTIONARIES AND THE PROGRAM WILL LEARN TO PROPERLY   
-     TRANSLATE MORE AND MORE TYPES OF EXFOR DATA.                      
-                                                                       
-     UNDEFINED EXFOR REACTIONS, TITLES AND UNITS                       
-     ===========================================                       
-     IN ORDER TO ASSIST THE USER TO DEFINE NEW TYPES OF EXFOR DATA AS  
-     THEY ARE ENCOUNTERED DURING TRANSLATION THE OUTPUT REPORT FROM    
-     THIS PROGRAM WILL INDICATE THE NUMBER OF EXFOR REACTIONS, TITLES  
-     AND UNITS WHICH HAVE BEEN ENCOUNTERED DURING TRANSLATION WHICH ARE
-     NOT DEFINED IN THE TRANSLATION DICTIONARIES. IN ADDITIONAL ALL    
-     UNDEFINED REACTIONS, TITLES AND UNITS WILL BE WRITTEN TO OUTPUT   
-     UNIT 4 (NEWX4).                                                   
-                                                                       
-     BASED ON COMPARISON TO THE REACTION, TITLE AND UNITS DICTIONARIES 
-     IF AN EXFOR REACTION, TITLE OR UNITS IS ENCOUNTERED DURING        
-     TRANSLATION THAT IS NOT DEFINED IN THE DICTIONARIES IT WILL BE    
-     WRITTEN TO UNIT 4 (NEWX4). THIS INFORMATION IS WRITTEN IN A FORM  
-     THAT CAN BE EASILY EDITED AND ADDED TO A TRANSLATION DICTIONARY.  
-     AFTER UPDATING THE DICTIONARIES IF THIS PROGRAM IS THEN RUN A     
-     SECOND TIME USING THE SAME EXFOR DATA ALL OF THE EXFOR DATA CAN   
-     BE TRANSLATED.                                                    
-                                                                       
-     COMPUTATION FORMAT                                                
-     ==================                                                
-     THE COMPUTATION FORMAT USES A CLASSIFICATION SYSTEM AND UNITS     
-     WHICH ARE COMPATIBLE WITH ENDF/B. DATA IS CLASSIFIED BY (1) ZA    
-     OF PROJECTILE, (2) ZA OF TARGET, (3) METASTABLE STATE OF TARGET,  
-     (4) MF - TYPE OF DATA, (5) MT - REACTION, (6) METASTABLE STATE    
-     OF RESIDUAL NUCLEUS. TO IDENTIFY THE SOURCE OF THE DATA THE FIRST 
-     AUTHOR AND YEAR AND THE EXFOR ACCESSION AND SUB-ACCESSION NUMBER  
-     ARE INCLUDED IN THE FORMAT. IN ADDITION FIELDS ARE ASSIGNED TO    
-     DEFINE THE STATUS OF THE EXFOR DATA (E.G., S = SUPERCEDED),       
-     WHETHER DATA IS IN THE LABORATORY OR CENTER-OF-MASS FRAME OF      
-     REFERENCE AND THE PHYSICAL SIGNIFICANCE OF THE LAST 2 OUTPUT      
-     FIELDS (LVL = LEVEL ENERGY, HL = HALF-LIFE). FINALLY THE FORMAT   
-     INCLUDES 8 FIELDS INTO WHICH THE USER MAY OUTPUT DATA (E.G., DATA,
-     INCIDENT ENERGY, COSINE, UNCERTAINTIES, ETC.).                    
-                                                                       
-     COLUMNS   DESCRIPTION                                             
-     -------   -----------                                             
-       1-  5   PROJECTILE ZA (E.G. NEUTRON =1, PROTON =1001)           
-               (DEFINED BY REACTION DICTIONARY)                        
-       6- 11   TARGET ZA (E.G. 26-FE-56 =  26056)                      
-               (DEFINED BY EXFOR REACTION)                             
-          12   TARGET METASTABLE STATE (E.G. 26-FE-56-M = M)           
-               (DEFINED BY EXFOR REACTION)                             
-      13- 15   MF (ENDF/B CONVENTIONS, PLUS ADDITIONS).                
-               (DEFINED BY REACTION DICTIONARY)                        
-      16- 19   MT (ENDF/B CONVENTIONS, PLUS ADDITIONS).                
-               (DEFINED BY REACTION DICTIONARY)                        
-          20   PRODUCT METASTABLE STATE (E.G. 26-FE-56-M = M)          
-               (DEFINED BY EXFOR REACTION)                             
-          21   EXFOR STATUS                                            
-               (DEFINED BY EXFOR KEYWORD STATUS)                       
-          22   CENTER-OF-MASS FLAG (C=CENTER-OF-MASS, BLANK=LAB)       
-               (DEFINED BY EXFOR TITLE DICTIONARY)                     
-      23- 94   8 DATA FIELDS (EACH IN E9.3 FORMAT). DEFINED BELOW.     
-               (DEFINED BY MF AND TITLE DICTIONARY)                    
-      95- 97   IDENTIFICATION OF DATA FIELDS 7 AND 8                   
-               (E.G., LVL=LEVEL, HL=HALF-LIFE.ETC.)                    
-               FOR A COMPLETE LIST OF CODES SEE TITLE DICTIONARY.      
-               (DEFINED BY MF AND TITLE DICTIONARY)                    
-      98-118   REFERENCE (FIRST AUTHOR)                                
-               (DEFINED BY EXFOR KEYWORDS TITLE AND REFERENCE)         
-     119-122   YEAR AS 2 DIGITS ENCLOSED IN PARENTHESIS, E.G.,         
-               1991 = (91)                                             
-     123-127   EXFOR ACCESSION NUMBER                                  
-               (DEFINED BY EXFOR FORMAT)                               
-     128-130   EXFOR SUB-ACCESSION NUMBER                              
-               (DEFINED BY EXFOR FORMAT)                               
-         131   MULTI-DIMENSION TABLE FLAG                              
-               (DEFINED BY EXFOR KEYWORD REACTION OR COMMON FIELDS)    
-                                                                       
-     PRECISION OF THE 8 DATA FIELDS                                    
-     ==============================                                    
-     IF WRITTEN IN NORMAL FORMAT E9.2 FORMAT THE OUTPUT FROM THIS      
-     THIS PROGRAM WOULD GIVE DATA TO ONLY 2 OR 3 DIGITS OF ACCURACY,   
-     DEPENDING ON THE COMPUTER USED (E.G., 0.23E+02 OR 2.34E+01), WHICH
-     IS NOT SUFFICIENT FOR MANY APPLICATIONS (E.G., ENERGY OF CROSS    
-     SECTION POINTS IN THE RESONANCE REGION).                          
-                                                                       
-     IN ORDER TO AVOID THIS PROBLEM THIS PROGRAM WILL OUTPUT DATA IN   
-     A SPECIAL, FORMAT COMPATIBLE FORMAT TO ALLOW UP TO 7 DIGITS OF    
-     ACCURACY (I.E.,MORE THAN THE FULL WORD ACCURACY OF IBM COMPUTERS).
-                                                                       
-     NUMBERS BETWEEN 0.01 AND LESS THAN 10 MILLION WILL BE OUTPUT IN F 
-     (RATHER THAN E FORMAT). FOR EXAMPLE, THE ENERGY 12.3456 KEV WILL  
-     BE OUTPUT AS 123456.0. NUMBERS LESS THAN 0.01 OR GREATER THAN     
-     10 MILLION WILL BE OUTPUT IN E FORMAT, BUT WITHOUT AS E AND AN    
-     EXPONENT OF 1 OR 2 DIGITS. FOR EXAMPLE 14.123 MEV WILL BE OUTPUT  
-     AS 1.4123+7                                                       
-                                                                       
-     THESE OUTPUT CONVENTIONS HAVE BEEN USED FOR MANY YEARS WITH ENDF/B
-     RELATED PROGRAMS AND HAVE BEEN PROVEN TO BE FORTRAN COMPATIBLE FOR
-     USE ON VIRTUALLY ANY COMPUTER. FOR EXAMPLE, ANY FORTRAN PROGRAM   
-     WHICH IS WRITTEN TO READ THIS DATA USING AN E9.2 FORMAT WILL READ 
-     THE DATA PROPERLY WHETHER THE DATA IS ACTUALLY IN E OR F FORMAT.  
-                                                                       
-     GENERALLY MAINTAINING HIGH PRECISION IN THE DATA IS MOST IMPORTANT
-     FOR THE INDEPENDENT VARIABLE, PARTICULARLY INCIDENT ENERGY. SINCE 
-     WE DO NOT EXPECT VERY NARROW RESONANCE STRUCTURE BELOW 0.01 EV OR 
-     ABOVE 10 MEV GENERALLY THESE OUTPUT CONVENTIONS WILL MAINTAIN THE 
-     ACCURACY OF THE EXFOR DATA TO MEET REQUIREMENTS.                  
-                                                                       
-     DEFINITION OF 8 COMPUTATION FORMAT DATA FIELDS                    
-     ==============================================                    
-     THE USER MAY USE THE TITLE DICTIONARY TO OUTPUT ANY EXFOR COLUMN  
-     INTO ANY COMPUTATION FORMAT DATA FIELD. AS DISTRIBUTED THE TITLE  
-     DICTIONARY CONTAINS A NUMBER OF CONVENTIONS WHICH IF AT ALL       
-     POSSIBLE SHOULD BE FOLLOWED BY THE USERS. THE GENERAL DEFINITIONS 
-     OF THE 8 COMPUTATION FORMAT DATA FIELDS ARE,                      
-                                                                       
-     DATA FIELD   DEFINITION                                           
-     ----------   ----------                                           
-       1          PROJECTILE INCIDENT ENERGY                           
-       2          PROJECTILE INCIDENT ENERGY UNCERTAINTY               
-       3          DATA (E.G., CROSS SECTION)                           
-       4          DATA UNCERTAINTY                                     
-       5          COSINE OR LEGENDRE ORDER                             
-       6          COSINE UNCERTAINTY                                   
-       7          IDENTIFIED BY COLUMNS 95-97 (E.G.,LEVEL E, HALF-LIFE)
-       8          IDENTIFIED BY COLUMNS 95-97 (E.G.,LEVEL E UNCERTANTY)
-                                                                       
-                                                                       
-     THE PHYSICAL SIGNIFICANCE OF EACH FIELD IS DEFINED BY THE ASSIGNED
-     MF NUMBER. FOR EXAMPLE, FOR MF =3 (CROSS SECTIONS), COLUMNS 1 AND 
-     2 CONTAIN THE INCIDENT PROJECTILE ENERGY AND ITS UNCERTAINTY IN   
-     EV, RESPECTIVELY AND COLUMNS 3 - 4 CONTAIN THE CROSS SECTION AND  
-     ITS UNCERTAINTY IN BARNS, RESPECTIVELY AND COLUMNS 7 AND 8 MAY    
-     CONTAIN A LEVEL ENERGY AND ITS UNCERTAINTY IN EV OR A HALF-LIFE   
-     AND ITS UNCERTAINTY IN SECONDS.                                   
-                                                                       
-     SPECIAL CONVENTIONS                                               
-     ===================                                               
-     THE ABOVE CONVENTIONS ARE APPROPRIATE FOR MOST TYPES OF DATA      
-     IN THE ENDF/B SYSTEM. IN ORDER TO ALLOW THIS PROGRAM TO TRANSLATE 
-     ADDITIONAL TYPES OF DATA THE FOLLOWING SPECIAL CONVENTIONS HAVE   
-     BEEN ADOPTED,                                                     
-                                                                       
-     CROSS SECTION RATIOS  - FIELD 5 = MT OF DENOMINATOR.              
-     (MF = 203)              FIELD 6 = ZA OF DENOMINATOR.              
-     RESONANCE INTEGRALS   - FIELD 1 = LOWER ENERGY LIMIT.             
-     (MF = 213)              FIELD 2 = UPPER ENERGY LIMIT.             
-     SPECTRUM AVERAGES     - FIELD 1 = LOWER ENERGY LIMIT.             
-     (MF = 223)              FIELD 2 = UPPER ENERGY LIMIT.             
-     FISSION YIELD DATA    - FIELD 5 = ZA OF FISSION FRAGMENT          
-     (MF = 801)              FIELD 6 = MASS OF FISSION FRAGMENT        
-     PRODUCTION            - FIELD 6 = ZA OF PRODUCT                   
-     (MT = 9000)                                                       
-                                                                       
-     REQUIRED DATA FIELDS                                              
-     ====================                                              
-     FOR VARIOUS TYPES OF DATA THE PROGRAM WILL CHECK IF ALL REQUIRED  
-     FIELDS ARE DEFINED AND NON-BLANK. IF THEY ARE NOT WARNING MESSAGES
-     WILL BE PRINTED. IF THE DATA FIELD (FIELD 3) IS NOT DEFINED OR    
-     BLANK THE DATA POINT WILL NOT BE OUTPUT. IF THE DATA FIELD IS NOT 
-     DEFINED THIS USUALLY INDICATES AN ERROR IN THE EXFOR DATA. BLANK  
-     DATA FIELDS ARE QUITE COMMON IN MULTI-DIMENSIONAL TABLES AND A    
-     WARNING MAY OR MAY NOT INDICATE AN ERROR (CHECK THE EXFOR DATA TO 
-     SEE IF IT IS CORRECT).                                            
-                                                                       
-     THE PROGRAM CONSIDERS THAT THE FOLLOWING FIELDS ARE REQUIRED,     
-                                                                       
-      MF (DATA TYPE)         DATA FIELD (X = REQUIRED)                 
-     =====================   =========================                 
-                              1  2  3  4  5  6  7  8                   
-     =====================   =========================                 
-       3 (CROSS SECTIONS)     X     X                                  
-       4 (ANGULAR DIST.)      X     X     X                            
-       5 (ENERGY DIST.)       X     X           X                      
-       6 (DOUBLE DIFF.)       X     X     X     X                      
-     154 (LEGENDRE COEFF.)    X     X     X                            
-     203 (RATIOS)             X     X     X  X                         
-     801 (YIELD DATA).        X     X     X  X                         
-                                                                       
-     (SEE, THE ABOVE DEFINITION OF THE 8 DATA FIELDS)                  
-                                                                       
-     MULTI-DIMENSIONAL TABLES                                          
-     ========================                                          
-     THE PROGRAM CAN TRANSLATE MULTI-DIMENSIONAL EXFOR TABLES FOR,     
-     (1) MULTIPLE REACTIONS FOLLOWING THE EXFOR KEYWORD REACTION       
-         (ISO-QUANT, ETC.) WITH EACH REACTION IDENTIFIED BY A CHARACTER
-         IN COLUMN 11.                                                 
-     (2) SINGLE REACTIONS WITH MULTIPLE COMMON FIELDS EACH IDENTIFIED  
-         BY A CHARACTER IN THE ELEVENTH COLUMN OF EACH FIELD.          
-     (3) THE OLD ISO-QUANT, ETC. CONVENTION OF REACTIONS SEPARATED BY  
-         COMMAS, E.G., ((90-TH-232,NG)/(29-CU-0,NG)),(29-CU-0,NG))     
-                                                                       
-     TRANSLATION OF EXFOR REACTIONS                                    
-     ==============================                                    
-     NOT ALL EXFOR REACTIONS (ISO-QUANT, ETC.) CAN BE TRANSLATED BY    
-     THIS PROGRAM. IN ORDER TO TRANSLATE EACH REACTION THE PROGRAM WILL
-     FIRST BREAK EACH REACTION INTO A SERIES OF SIMPLE REACTIONS AND   
-     REMOVE AND SAVE THE TARGET AND RESIDUAL ZA, E.G.,                 
-                                                                       
-     ((26-FE-56(N,G)26-FE-57-M1,,SIG)/(26-FE-56(N,G)26-FE-57-G,,SIG))  
-                                                                       
-     IS BROKEN DOWN TO DEFINE                                          
-                                                                       
-     ZA-TARGET = 26056 , ZA-RESIDUAL = 260571, REACTION = (N,G),SIG    
-     ZA-TARGET = 26056 , ZA-RESIDUAL = 260570, REACTION = (N,G),SIG    
-                                                                       
-     (NOTE, RESIDUAL METASTABLE STATE FLAGS. SEE EXPLANATION BELOW).   
-                                                                       
-     THE PROGRAM WILL THEN DEFINE AN EQUIVALENT MF, MT FOR EACH        
-     REACTION.                                                         
-                                                                       
-     THE PROGRAM WILL NEXT TRANSLATE THE FOLLOWING TYPES OF            
-     REACTIONS,                                                        
-     (1) SIMPLE REACTIONS                                              
-         (N,G),SIG                                                     
-     (2) EQUIVALENT REACTIONS                                          
-         ((N,G),SIG)=...ANYTHING ELSE....                              
-         AFTER DECODING THE FIRST SIMPLE REACTION THE PROGRAM ASSUMES  
-         THAT THE FIRST SIMPLE REACTION IS TRUELY EQUIVALENT TO THE    
-         REMAINDER OF THE REACTION AND DEFINES ZA, MF AND MT BASED ON  
-         THE FIRST SIMPLE REACTION.                                    
-     (3) SIMPLE RATIOS                                                 
-         ((N,G)M1/G,,SIG/RAT) OR ((N,G)M1,SIG)/((N,G)G,SIG)            
-     (4) COMPLEX REACTIONS - ALL WITH THE SAME EQUIVALENT ZA           
-         ((N,EL),WID,,G)*((N,G),WID)/((N,TOT),WID)                     
-     (5) OTHER REACTIONS                                               
-         (((N,G),SIG)/((N,G),SIG),(N,G),SIG))                          
-         IF THE REACTION IS NOT ONE OF THE ABOVE TYPES THE PROGRAM WILL
-         TRY TO USE THE ENTIRE EXFOR REACTION, INCLUDING TARGET AND    
-         RESIDUAL ZA AND SEE IF IT IS DEFINED IN REACTION EQUIVALENT   
-         DICTIONARY. IF AN MF, MT IS DEFINED FOR THE ENTIRE REACTION   
-         THE PROGRAM WILL USE THE TARGET AND RESIDUAL ZA FROM THE FIRST
-         SIMPLE REACTION TO TRANSLATE THE DATA. THIS LAST FORM MAY BE  
-         USED TO INSURE THAT ALMOST ALL EXFOR REACTION CAN BE          
-         TRANSLATED, REGARDLESS OF HOW COMPLICATED IT IS (FOR EXAMPLES 
-         SEE REACTION DICTIONARY) HOWEVER THE USER SHOULD CAREFULLY    
-         CHECK THE OUTPUT TO INSURE THAT THE DATA HAS BEEN TRANSLATED  
-         AS INTENDED.                                                  
-                                                                       
-     THE ONLY REACTIONS THAT HAVE SO FAR BEEN FOUND THAT CANNOT BE     
-     CORRECTLY TRANSLATED ARE RATIOS OF PRODUCTION CROSS SECTIONS,     
-     E.G., (29-CU-0(P,X)26-FE-56)/(28-NI-0(P,X)26-FE-58)               
-     BECAUSE RATIO DATA REQUIRES FIELDS 5 AND 6 FOR THE DENOMINATOR    
-     MT AND ZA AND RATIO DATA REQUIRES FIELD 5 FOR THE PRODUCT ZA.     
-     WHEN THIS CASE IS ENCOUNTERED THE PROGRAM WILL PRINT AN ERROR     
-     MESSAGE AND OUTPUT THE DENOMINATOR MT AND ZA IN FIELDS 5 AND 6.   
-     IN THIS CASE THE OUTPUT WILL IDENTIFY THE NUMERATOR AS ZA=29000,  
-     MT=9001 AND THE DENOMINATOR AS ZA=28000, MT=9001. ONE SOLUTION    
-     IS TO MODIFY THE OUTPUT OF THIS PROGRAM BY DEFINING TWO REACTIONS,
-     E.G., MT = 8001 = (P,X) 26-FE-56 AND MT = 8002 = (P,X) 26-FE-58,  
-     MODIFY THE NUMERATOR MT TO 8001 AND DENOMINATOR MT TO 8002 AND    
-     THEN PROPERLY INTERPRETING THE DATA USING THESE DEFINITION IN ALL 
-     APPLICATIONS (FOR EXAMPLES, SEE PROGRAM PLOTC4 INPUT DIRECTIONARY 
-     FOR PROTON INDUCED REACTIONS).                                    
-                                                                       
-     OUTPUT REPORT                                                     
-     =============                                                     
-     THIS PROGRAM WILL WRITE A REPORT ON UNIT 6 (OUTP) TO ALLOW THE    
-     USER TO MONITOR THE TRANSLATION OF THE EXFOR DATA. IT IS EXTREMELY
-     IMPORTANT THAT THE USER READ THIS REPORT AND NOT SIMPLY ASSUME    
-     THAT ALL OF THE DATA HAS BEEN PROPERLY TRANSLATED.                
-                                                                       
-     AFTER IDENTIFYING EACH EXFOR ACCESSION, SUB-ACCESSION NUMBER,     
-     ZA, MF, MT AND REACTION THE PROGRAM CAN PRINT TWO TYPES OF        
-     MESSAGES,                                                         
-                                                                       
-     WARNING    = SOMETHING UNUSUAL HAS OCCURRED. THE USER SHOULD      
-                  CAREFULLY CHECK TO INSURE THAT THE OUTPUT DATA HAS   
-                  BEEN PROPERLY TRANSLATED.                            
-     OPERATION  = ONE OF THE DEFINED REACTION, TITLE OR UNIT OPERATIONS
-                  HAS BEEN PERFORMED ON THE DATA. THE USER SHOULD      
-                  CAREFULLY CHECK TO INSURE THAT THE PROPER OPERATION  
-                  HAS BEEN PERFORMED.                                  
-                                                                       
-     IF THE USER DOES NOT AGREE WITH HOW THE DATA HAS BEEN TRANSLATED  
-     THE THREE DICTIONARIES MAY TO BE MODIFIED AND THE PROGRAM RE-RUN. 
-     FOR EXAMPLE, IF THE PROGRAM PRINTS A WARNING THAT THE TITLE       
-     DICTIONARY TELLS IT TO OUTPUT E-ERR1, E-ERR2, E-ERR3 ALL IN THE   
-     SAME COMPUTATION FORMAT FIELD, FOLLOWED BY AN OPERATION THAT SAYS 
-     THE PROGRAM WILL ONLY OUTPUT E-ERR1 AND IGNOR THE OTHER 2 EXFOR   
-     FIELDS, IF THE USER WOULD RATHER OUTPUT E-ERR2 AND IGNOR E-ERR1   
-     AND E-ERR3 IT IS MERELY NECESSARY TO MODIFY THE TITLE DICTIONARY  
-     TO IGNOR E-ERR1 AND E-ERR3 AND SELECT E-ERR2 AND THEN RE-RUN THE  
-     PROGRAM.                                                          
-                                                                       
-     METASTABLE STATE                                                  
-     ================                                                  
-     THE COMPUTATION FORMAT ALLOWS THE METASTABLE STATE OF THE TARGET  
-     AND RESIDUAL NUCLEUS TO BE IDENTIFIED. FOR RATIO DATA METASTABLE  
-     STATE OF BOTH NUMERATOR AND DENOMINATOR OF THE RATIO MAY BE       
-     DEFINED.                                                          
-                                                                       
-     THE METASTABLE STATE OF THE TARGET IS IDENTIFIED IN COLUMN 12 AND 
-     THE METASTABLE STATE OF THE RESIDUAL NUCLUES IN COLUMN 20. FOR    
-     RATIO DATA THE METASTABLE STATE OF THE DENOMINATOR TARGET AND     
-     RESIDUAL NUCLEUS ARE IDENTIFIED BY OUTPUT THE DENOMINATOR ZA AND  
-     MT IN THE FORM ZA.M AND MT.M (E.G., 26056.9 AND 102.1). COLUMNS   
-     12 AND 20 MAY CONTAIN CHARACTERS SUCH AS M, BUT TO MAINTAIN THE   
-     EIGHT OUTPUT FIELDS IN STRICTLY NUMERICAL FORM THE DENOMINATOR    
-     ZA.M AND MT.M WILL BE OUTPUT IN NUMERICAL FORM. THE POSSIBLE      
-     CHARACTERS THAT MAY APPEAR IN COLUMNS 12 OR 20 AND THEIR NUMERICAL
-     EQUIVALENTS USED WITH RATIO DENOMINATOR ZA AND MT INCLUDE,        
-                                                                       
-     DEFINITION    COLUMN 12 OR 20     EQUIVALENT                      
-     ==========    ===============     ==========                      
-     GROUND              G                0                            
-     M1                  1                1                            
-     M2                  2                2                            
-     M3                  3                3                            
-     M4                  4                4                            
-     M5                  5                5                            
-     UNKNOWN             ?                6                            
-     M                   M                7                            
-     MORE THAN 1         +                8                            
-     ALL OR TOTAL        T                9                            
-     ALL OR TOTAL      BLANK              9                            
-                                                                       
-     BY CONVENTION IF AN EXFOR REACTION DOES NOT SPECIFY A METASTABLE  
-     STATE THE STATE IS DEFINED IN THE COMPUTATION FORMAT TO BE..ALL.. 
-     (I.E., BLANK IN COLUMN 12 OR 20, 9 IN RATIO ZA OR MT).            
-                                                                       
-     FOR EXAMPLE, FOR A RATIO IF THE ZA.M AND MT.M ARE OUTPUT AS       
-     26056.9 AND 102.1, RESPECTIVELY THE RATIO DENOMINATOR TARGET WAS  
-     26-FE-56 (ALL) AND THE REACTION WAS CAPTURE (MT=102) LEAVING THE  
-     RESIDUAL NUCLEUS IN THE M1 STATE.                                 
-                                                                       
-     NOTE, SINCE MOST DATA WILL NOT CONTAIN A METASTABLE STATE FLAG    
-     THE ABOVE CONVENTION TO OUTPUT THE ZA AND MT OF THE DENOMINATOR   
-     OF RATIOS ALLOWS THE USER TO READ AND USE THE DENOMINATOR ZA AND  
-     MT AS INTEGERS (EFFECTIVELY IGNORING ANY METASTABLE STATE FLAG) OR
-     IF NECESSARY TO DETERMINE THE METASTABLE STATE.                   
-                                                                       
-     EXFOR STATUS                                                      
-     ============                                                      
-     COLUMN 21 OF EACH COMPUTATION FORMAT RECORD MAY CONTAIN BLANK     
-     (STATUS NOT SPECIFIED) OR ONE TO THE FOLLOWING CHARACTERS,        
-                                                                       
-     COLUMN 21   DEFINITION                                            
-     ---------   ----------                                            
-        U        UNNORMALIZED (INDICATED BY UNIT TRANSLATION DICTIONARY
-                 THIS CONDITION HAS PRIORITY OVER THE EXFOR STATUS AND 
-                 IS USED TO INDICATE THAT THE DATA IS NOT IN STANDARD  
-                 OUTPUT UNITS).                                        
-        A        APPROVED BY AUTHOR                                    
-        C        CORRELATED                                            
-        D        DEPENDENT                                             
-        O        OUTDATED                                              
-        P        PRELIMINARY                                           
-        R        RENORMALIZED                                          
-        S        SUPERCEDED                                            
-                                                                       
-     IF DATA HAS ANY OTHER EXFOR STATUS (E.G., TRANSLATED FROM SCISRS) 
-     IT WILL BE IGNORED AND THE STATUS FIELD WILL BE OUTPUT AS BLANK.  
-                                                                       
-     INPUT FILES                                                       
-     ===========                                                       
-     UNIT  DESCRIPTION                                                 
-     ====  ===========                                                 
-      10   EXFOR DATA (TO BE TRANSLATED) (BCD - 80 CHARACTERS/RECORD)  
-      12   EXFOR REACTION DICTIONARY     (BCD - 80 CHARACTERS/RECORD)  
-      14   EXFOR TITLE DICTIONARY        (BCD - 80 CHARACTERS/RECORD)  
-      15   EXFOR UNITS DICTIONARY        (BCD - 80 CHARACTERS/RECORD)  
-                                                                       
-     OUTPUT FILES                                                      
-     ============                                                      
-     UNIT  DESCRIPTION                                                 
-     ====  ===========                                                 
-       4   LIST OF ALL UNDEFINED EXFOR REACTIONS, TITLES AND UNITS     
-           FOUND DURING THE TRANSLATION (IF ANY).(BCD -  80 CHARACTERS)
-       6   OUTPUT REPORT                         (BCD - 132 CHARACTERS)
-      11   COMPUTATION FORMAT EXPERIMENTAL DATA  (BCD - 131 CHARACTERS)
-                                                                       
-     SCRATCH FILES                                                     
-     =============                                                     
-     NONE                                                              
-                                                                       
-     INPUT PARAMETERS                                                  
-     ================                                                  
-     NONE                                                              
-                                                                       
-     REPORTING ERRORS                                                  
-     ================                                                  
-     IN ORDER TO IMPROVE THIS CODE AND MAKE FUTURE VERSIONS MORE       
-     COMPATIBLE FOR USE ON AS MANY DIFFERENT TYPES OF COMPUTERS AS     
-     POSSIBLE PLEASE REPORT ALL COMPILER DIAGNOSTICS AND/OR OPERATING  
-     PROBLEMS TO THE AUTHOR AT THE ABOVE ADDRESS.                      
-                                                                       
-     PLEASE REMEMBER IF YOU SIMPLY REPORT 'I'VE GOT A PROBLEM' AND DO  
-     NOT ADEQUATELY DESCRIBE EXACTLY HOW YOU WERE USING THE PROGRAM    
-     IT WILL BE IMPOSSIBLE FOR THE AUTHOR TO HELP YOU. WHEN A PROBLEM  
-     ARISES PLEASE WRITE TO THE AUTHOR, DESCRIBE THE PROBLEM IN AS MUCH
-     DETAIL AS POSSIBLE, IDENTIFY THE VERSION OF THE PROGRAM THAT YOU  
-     ARE USING (E.G. VERSION 93-1) AND SEND THE FOLLOWING INFORMATION  
-     ON MAGNETIC TAPE TO THE AUTHOR,                                   
-                                                                       
-     (1) A COPY OF THE PROGRAM YOU ARE USING                           
-     (2) A COPY OF COMPILER DIAGNOSTICS (IF ANY)                       
-     (3) A COPY OF THE JCL DECK YOU USED TO EXECUTE THE PROGRAM        
-     (4) A COPY OF THE 3 TRANSLATION DICTIONARIES YOU ARE USING        
-     (5) A COPY OF THE EXFOR FORMAT DATA YOU USING                     
-     (6) A COPY OF THE COMPUTATION FORMAT DATA YOU USING               
-     (7) A COPY OF THE OUTPUT REPORT FROM THE PROGRAM                  
-                                                                       
-     WITHOUT ALL OF THIS INFORMATION IT IS IMPOSSIBLE TO EXACTLY       
-     SIMULATE THE PROBLEM THAT YOU RAN AND TO DETERMINE THE SOURCE     
-     OF YOUR PROBLEM.                                                  
-                                                                       
-***** COMPUTER DEPENDENT CODING ******                                 
-                                                                       
-   * CHARACTER/INTEGER                                                 
-     THIS PROGRAM CAN TREAT CHARACTERS EITHER AS CHARACTERS (FORTRAN-77
-     CONVENTION) OR INTEGERS (FORTRAN-H) CONVENTION.                   
-                                                                       
-     PROGRAM CONVERT CAN BE USED TO AUTOMATICALLY CONVERT THIS PROGRAM 
-     BACK AND FORTH BETWEEN THESE CONVENTIONS.                         
-                                                                       
+  Title  : Program PLOTC4
+  Version: 86-1 (August 1986)
+  V      2001-3 (March 2001)  *Minor corrections
+  V      2002/10 Read sample thickness, convert transmission to x-sect.
+  Purpose: Translate Data from EXFOR to Computational Format
+  Author :
+     OWNED, MAINTAINED AND DISTRIBUTED BY:
+     -------------------------------------
+     The Nuclear Data Section
+     International Atomic Energy Agency
+     P.O. Box 100
+     A-1400, VIENNA, AUSTRIA
+     EUROPE
+   
+     ORIGINALLY WRITTEN BY:
+     ----------------------
+     Dermott E. Cullen
+     University of California
+     Lawrence Livermore National Laboratory
+     L-86
+     P.O. Box 808
+     Livermore, CA 94550
+     U.S.A.
+     Telephone  925-423-7359
+     e-mail     CULLEN1@LLNL.GOV
+     Website    HTTP://REDDOG1.LLNL.GOV
+   
+     VERSION 2001-3 IMPLEMENTED BY:
+     ------------------------------
+     Andrej Trkov
+     The Nuclear Data Section
+     International Atomic Energy Agency
+     P.O. Box 100
+     A-1400, VIENNA, AUSTRIA
+     EUROPE
+     e-mail     A.Trkov@iaea.org
+  
+   
+     USERS' GUIDE FOR PROGRAM X4TOC4
+     ===============================
+   
+     PURPOSE
+     -------
+     This program is designed to translate experimental data from the
+     EXFOR format to a computation format.
+   
+     WHAT COMPUTERS WILL THE PROGRAM RUN ON
+     --------------------------------------
+     The program has been implemented on a variety of computers from
+     Cray and IBM mainframe to Sun workstations to a PC. The
+     program is small enough to run on virtually any computer.
+   
+     EXFOR FORMAT
+     ------------
+     The EXFOR format is designed to allow experimentally measured data
+     to be coded in a computer readable format in a very flexible form.
+     In particular the data can be entered in essentially any set of
+     units (e.g., eV vs. barns or KeV vs. milli-barns) and in any table
+     format; essentially the table may be entered exactly as published
+     by an author (e.g., energy followed by columns of cross sections
+     in any order).
+   
+     The EXFOR format is table oriented in the sense that data from a
+     given measurement are collected together and can be presented in
+     a single, or as a series of tables.
+   
+     The advantage of the EXFOR format is that since data can be coded
+     essentially as published by an author problems of unit conversion
+     and re-formatting tables prior to coding are avoided and the
+     author can easily check the coded data. The result is a greatly
+     improved reliability of the coded data.
+   
+     The disadvantage of the EXFOR format is that since physically
+     comparable data from different measurements (e.g. Fe-56 total
+     cross sections) may be given in a variety of different units and
+     formats it is very difficult to use in applications. In addition
+     the table oriented EXFOR system makes it difficult to collect
+     together physically comparable data from different measurements.
+   
+     COMPUTATION FORMAT
+     ------------------
+     The computation format used by this program is designed to present
+     experimental data in a fixed set of units and column order. By
+     starting from data in the EXFOR format and translating data to
+     the computation format it is possible to combine the advantages
+     of the improved reliability of the data coded in the EXFOR format
+     with the advantages of a fixed unit and column order format for
+     use in subsequent applications.
+   
+     In addition the computation format is point oriented (as opposed
+     the table oriented EXFOR format). Each line of the computation
+     format represents a single data point. This makes it possible to
+     sort data in the computation format into any desired order for use
+     in application, e.g., sort 26-Fe-26 (n,2n) data from a number of
+     measurements together into energy order to simplify comparisons.
+   
+     EXFOR VS. COMPUTATION FORMAT
+     ----------------------------
+     The computation format is not intented as a substitute for the
+     EXFOR format, rather the two are complementary. The EXFOR format
+     contains much more information than can be included in computation
+     formats and this information should be consulted and used during
+     evaluation. The computation format is only intended to simplify
+     use of the data during evaluation, or other applications.
+   
+     RELATIONSHIP TO ENDF
+     --------------------
+     It is assumed that one of the major uses of this program will be
+     to prepare data for subsequent use in evaluation and/or to compare
+     available evaluated and experimental data. As such the computation
+     format has been designed to allow data to be reduced to a form in
+     which data are classified in a manner similar to ENDF data.
+   
+     In particular the EXFOR classification of data by the EXFOR
+     keyword reaction (or ISO-QUANT, etc.) is replaced by classifying
+     the data by (1) projectile, (2) target - ZA, (3) type of data
+     (ENDF MF number), (4) reaction (ENDF MT number). In addition the
+     standard units used by the translation program were selected to
+     be the same as the units used by ENDF (e.g., eV, barns, etc.).
+   
+     The result of putting data into the computation format is that it
+     is easy to decide if the data is comparable to evaluated data
+     (e.g. same ZA, MF, MT) and once it is decided that data is
+     comparable, evaluation and/or comparison is simplified because the
+     data is in the same units as ENDF (e.g., eV vs. barns).
+   
+     EXTENSIONS OF ENDF CONVENTIONS
+     ------------------------------
+     For all types of data which are physically comparable to data,
+     which can be included in the ENDF data, this program uses
+     the ENDF definitions of (1) type of data (ENDF MF number),
+     (2) reaction (ENDF MT number). For example all cross sections
+     are represented by MF=3, angular distributions by MF=4, energy
+     distributions by MF=5 and double differential distributions
+     by MF=6. Similarly for simple reactions such as total, elastic
+     etc., the data are translated into corresponding MT=1,2, etc.,
+     respectively.
+   
+     Since many types of data which appear in EXFOR do not have a one
+     to one correspondence to data which appears in ENDF the ENDF
+     classification of type of data (MF) and reaction (MT) have been
+     extended to allow additional types of data and reactions to be
+     translated (e.g., define MF numbers for ratios, define MT numbers
+     for (n,np)+(n,na) reactions).
+   
+     The ENDF MF is a 2 digit number and the MT is a 3 digit number.
+     In the computation format MF has been extended to 3 digits and the
+     MT has been expanded to 4 digits. These extensions allow the user
+     the flexibility to translate virtually any EXFOR data to a fixed
+     set of units and column order for subsequent use in applications.
+   
+     Some extensions of MF and MT have already been established (for,
+     details see the input dictionaries described below) and if at all
+     possible these conventions should be followed by the user. The
+     user has the flexibility of establishing any conventions that may
+     be required to meet his or her needs, but in this case it is the
+     responsibility of the user to properly interpret and use the
+     translated data.
+   
+     DIRECT COMPARISON TO ENDF DATA
+     ------------------------------
+     Although the ENDF classification system of MF and MT is used for
+     translation, generally very little of the EXFOR data is directly
+     comparable to ENDF data. Generally cross sections (MF=3) are
+     directly comparable. However, it must be realized that angular
+     (MF=4) and energy (MF=5) and double differential (MF=6) data are
+     given in ENDF in a normalized (i.e., normalized to unity when
+     intergrated) form, whereas data in EXFOR are generally given in an
+     unnormalized form (e.g.,angular distributions in barns/steradian).
+   
+     After this program has been used to translate EXFOR data to the
+     computation format the user may make additional data directly
+     comparable to the corresponding ENDF data by either,
+     (1) Normalizing the data in the computation format, or,
+     (2) Converting ENDF data to unnormalized form.
+     This involves selecting an intgrated cross section as a standard
+     to use for the comparison (e.g., for a 14.2 MeV elastic angular
+     distribution use the 14.2 MeV ENDF elastic cross section).
+   
+     Since the selection of a standard to use for comparison in highly
+     application dependent it has been decided that it is better to use
+     this program to translate data exactly as given in EXFOR (except
+     for conversion to a standard set of units) and to allow the user
+     to subsequently select a standard for renormalization.
+   
+     CONTROL OF TRANSLATION
+     ----------------------
+     The user has complete control over what data is translated, where
+     given types of data appear in the computation format and the units
+     of the data in the computation format.
+   
+     This is accomplished by using three dictionaries which control
+     the translation. All three of these dictionaries are distributed
+     with this program. Each dictionary is a simple card image file
+     which may be modified by the user at any time to meet specific
+     needs. The three dictionaries are:
+   
+     (1) EXFOR REACTION - PROJECTILE, MF, MT EQUIVALENCE
+         This dictionary tells the program for each EXFOR reaction
+         what projectile, MF and MT to output in the computation format
+         (e.g.,(n,tot) = neutron, MF =3 (cross section),MT =1 (total)).
+         If a reaction read from the EXFOR format is not found in this
+         dictionary, or the assigned MF or MT is not positive the EXFOR
+         data will simply be skipped and not translated. Using this
+         dictionary the user has control over which data is translated
+         and what MF and MT are assigned to each EXFOR reaction.
+   
+     (2) EXFOR COLUMN TITLE - COMPUTATION FORMAT OUTPUT FIELD
+         Once the EXFOR reaction has been translated and assigned an
+         equivalent MF and MT this dictionary tells the program where
+         to place each EXFOR column in the computation format. The
+         assigned MF number can be used to output an EXFOR column
+         with the same title into different columns of the computation
+         format based on different mf numbers. For example, for cross
+         sections (MF=3) the user may use EN-MIN and EN-MAX to define
+         an average incident energy to be output in the first field
+         of the computation format and an equivalent energy uncertainty
+         in the second field of the computation format. Alternatively,
+         for resonance integrals (MF=213) the user may decide to output
+         EN-MIN and EN-MAX in the first two fields of the computation
+         format to define the energy range of the resonance integral.
+   
+         There are 8 output fields in the computation format and for
+         any given MF number the user may output any EXFOR column
+         into any of these fields. Any EXFOR title which is not
+         assigned to an output field 1 to 8 will be ignored and not
+         output. This allows the user to selectively translate portions
+         of EXFOR data tables to meet any given need. For example, by
+         simply modifying this dictionary the user has control over
+         whether an EXFOR column DATA-ERR3 is translated or ignored,
+         and if translated the user has control over which of the 8
+         computation format data fields DATA-ERR3 will appear in.
+   
+     (3) EXFOR COLUMN UNITS - COMPUTATION FORMAT UNITS
+         This dictionary tells the program how to convert each EXFOR
+         unit into standard units. As distributed this dictionary will
+         convert all EXFOR units to ENDF compatible units. However,
+         the user has the option to change this dictionary at any time
+         to obtain any output units to meet his or her needs. For
+         example if the user would like output in MeV vs. milli-barns
+         instead of eV vs. barns it is merely necessary to modify this
+         dictionary.
+   
+     OPERATIONS ON DATA
+     ------------------
+     In addition to the information described above each of the three
+     dictionaries allows the user to select from a menu of operations
+     which may be performed on the data (for a complete and up-to-date
+     list of available operations see the dictionaries). For example,
+     the reaction dictionary allows the user to specify that legendre
+     coefficents may be re-normalized, the title dictionary allows the
+     user to specify that EN-MIN and EN-MAX are to be converted to an
+     average energy and associated energy uncertainty and the units
+     dictionary allows the user to specify that angles should be
+     converted to cosines.
+   
+     These operations are completely under the control of the user and
+     by simply modifying the dictionaries the user can control whether
+     or not each operation is performed (e.g., if you want to output
+     angles instead of cosines modify the units dictionary by removing
+     the option to convert from angle to cosine from the EXFOR units
+     ASEC, AMIN and ADEG).
+   
+     COMPUTATION FORMAT UNITS
+     ------------------------
+     As distributed the Units dictionary will convert all EXFOR units
+     to ENDF units:
+   
+     eV         = energy
+     barns      = cross section
+     steradians = solid angle
+     seconds    = time
+     kelvin     = temperature
+   
+     If the user would like to obtain any other output units it is
+     merely necessary to modify the units dictionary (see units
+     dictionary for details).
+   
+     A LEARNING PROGRAM
+     ------------------
+     As distributed the three translation dictionaries do not contain
+     definitions of how to translate all EXFOR reactions, titles and
+     units. At the present time this program has only been used to
+     translate a small portion of the data included in the EXFOR system
+     and the dictionaries only contain sufficient information to
+     translate the EXFOR data which has been encountered to date.
+   
+     It is difficult and dangerous to try to define translation rules
+     for all types of EXFOR data without examining actual EXFOR data.
+     therefore only when a new reaction, title or unit is encountered
+     during translation will the actual EXFOR data be examined, a
+     decision made as to how to best translate the data and the
+     dictionaries updated.
+   
+     Generally once a given type of EXFOR data has been encountered and
+     the dictionaries updated to define how to translate the data the
+     same rules can be used to translate all similar data. Therefore
+     over a period of time user experience will be accumulated in the
+     translation dictionaries and the program will learn to properly
+     translate more and more types of EXFOR data.
+   
+     UNDEFINED EXFOR REACTIONS, TITLES AND UNITS
+     -------------------------------------------
+     In order to assist the user to define new types of EXFOR data as
+     they are encountered during translation the output report from
+     this program will indicate the number of EXFOR reactions, titles
+     and units which have been encountered during translation which are
+     not defined in the translation dictionaries. In additional all
+     undefined reactions, titles and units will be written to output
+     Unit 4 (NEWX4).
+   
+     Based on comparison to the reaction, title and units dictionaries
+     if an EXFOR reaction, title or units is encountered during
+     translation that is not defined in the dictionaries it will be
+     written to Unit 4 (NEWX4). This information is written in a form
+     that can be easily edited and added to a translation dictionary.
+     After updating the dictionaries if this program is then run a
+     second time using the same EXFOR data all of the EXFOR data can
+     be translated.
+   
+     COMPUTATION FORMAT
+     ------------------
+     The computation format uses a classification system and units
+     which are compatible with ENDF. Data is classified by (1) ZA
+     of projectile, (2) ZA of target, (3) metastable state of target,
+     (4) MF - type of data, (5) MT - reaction, (6) metastable state
+     of residual nucleus. To identify the source of the data the first
+     author and year and the EXFOR accession and sub-accession number
+     are included in the format. In addition, fields are assigned to
+     define the status of the EXFOR data (e.g., S = superceded),
+     whether data is in the laboratory or center-of-mass frame of
+     reference and the physical significance of the last 2 output
+     fields (LVL = level energy, HL = half-life). Finally the format
+     includes 8 fields in which the output data are contained (e.g.,
+     incident energy, data, cosine, uncertainties, etc.)
+   
+     Columns   Description
+     -------   -----------
+       1-  5   Projectile ZA (e.g. neutron =1, proton =1001)
+               (defined by reaction dictionary).
+       6- 11   Target ZA (e.g. 26-Fe-56 =  26056)
+               (defined by EXFOR reaction).
+          12   Target metastable state (e.g. 26-FE-56m = M)
+               (defined by EXFOR reaction).
+      13- 15   MF (ENDF conventions, plus additions)
+               (defined by reaction dictionary).
+      16- 19   MT (ENDF conventions, plus additions)
+               (defined by reaction dictionary).
+          20   Product metastable state (e.g. 26-FE-56M = M)
+               (defined by EXFOR reaction).
+          21   EXFOR status
+               (defined by EXFOR keyword status).
+          22   Center-of-mass flag (C=center-of-mass, blank=lab)
+               (defined by EXFOR title dictionary).
+      23- 94   8 data fields (each in E9.3 format defined below)
+               (defined by MF and title dictionary).
+      95- 97   Identification of data fields 7 and 8
+               (e.g., LVL=level, HL=half-life, etc.).
+               For a complete list of codes see title dictionary
+               (defined by MF and title dictionary).
+      98-122   Reference (first author and year)
+               (defined by EXFOR keywords title and reference).
+     123-127   EXFOR accession number
+               (defined by EXFOR format).
+     128-130   EXFOR sub-accession number
+               (defined by EXFOR format).
+         131   Multi-dimension table flag
+               (defined by EXFOR keyword reaction or common fields).
+   
+     PRECISION OF THE 8 DATA FIELDS
+     ------------------------------
+     If written in normal format E9.2 format the output from this
+     this program would give data to only 2 or 3 digits of accuracy,
+     depending on the computer used (e.g., 0.23E+02 or 2.34E+01), which
+     is not sufficient for many applications (e.g., energy of cross
+     section points in the resonance region).
+   
+     In order to avoid this problem this program will output data in
+     a special compatible format to allow up to 7 digits of accuracy
+     (i.e.,more than the full word accuracy of IBM computers).
+   
+     Numbers between 0.01 and less than 10 million will be output in F
+     (rather than E format). For example, the energy 12.3456 KeV will
+     be output as 123456.0. Numbers less than 0.01 or greater than
+     10 million will be output in E format, but without as E and an
+     exponent of 1 or 2 digits. For example 14.123 MeV will be output
+     as "1.4123+7".
+   
+     These output conventions have been used for many years with ENDF
+     related programs and have been proven to be FORTRAN compatible forx
+     use on virtually any computer. For example, any fortran program
+     which is written to read this data using an E9.2 format will read
+     the data properly whether the data is actually in E or F format.
+   
+     Generally maintaining high precision in the data is most important
+     for the independent variable, particularly incident energy. Since
+     we do not expect very narrow resonance structure below 0.01 eV or
+     above 10 MeV generally these output conventions will maintain the
+     accuracy of the EXFOR data to meet requirements.
+   
+     DEFINITION OF 8 COMPUTATION FORMAT DATA FIELDS
+     ----------------------------------------------
+     The user may use the title dictionary to output any EXFOR column
+     into any computation format data field. As distributed the title
+     dictionary contains a number of conventions which if at all
+     possible should be followed by the users. The general definitions
+     of the 8 computation format data fields are:
+   
+     Data field   Definition
+     ----------   ----------
+       1          Projectile incident energy
+       2          Projectile incident energy uncertainty
+       3          Data, e.g., cross section, angular distribution, etc.
+       4          Data uncertainty
+       5          Cosine or legendre order
+       6          Cosine uncertainty
+       7          Identified by columns 95-97 (e.g.,level E, half-life)
+       8          Identified by columns 95-97 (e.g.,level E, uncertainty)
+   
+     The physical significance of each field is defined by the assigned
+     MF number. For example, for MF =3 (cross sections), columns 1 and
+     2 contain the incident projectile energy and its uncertainty in
+     eV, respectively and columns 3 - 4 contain the cross section and
+     its uncertainty in barns, respectively and columns 7 and 8 may
+     contain a level energy and its uncertainty in eV or a half-life
+     and its uncertainty in seconds.
+   
+     SPECIAL CONVENTIONS
+     The above conventions are appropriate for most types of data
+     in the ENDF system. In order to allow this program to plot
+     additional types of data the following special conventions have
+     been adopted,
+   
+     Cross section ratios  - Field 5 = MT of denominator.
+     (MF = 203)              Field 6 = ZA of denominator.
+     Resonance integrals   - Field 1 = lower energy limit.
+     (MF = 213)              Field 2 = upper energy limit.
+     Spectrum averages     - Field 1 = lower energy limit.
+     (MF = 223)              Field 2 = upper energy limit.
+     Fission yield data    - Field 5 = ZA of fission fragment.
+     (MF = 801)              Field 6 = mass of fission fragment.
+     Production            - Field 6 = ZA of product.
+     (MT = 9000-9999)
+   
+     See, remarks below on metastable state flags.
+   
+     REQUIRED DATA FIELDS
+     --------------------
+     For various types of data the program will check if all required
+     fields are defined and non-blank. If they are not warning messages
+     will be printed. If the data field (Field 3) is not defined or
+     blank the data point will not be output. If the data field is not
+     defined this usually indicates an error in the EXFOR data. Blank
+     data fields are quite common in multi-dimensional tables and a
+     warning may or may not indicate an error (check the EXFOR data to
+     see if it is correct).
+   
+     The program considers that the following fields are required:
+   
+      MF (Data type)         Data field (X = Required)
+     ---------------------   -------------------------
+                              1  2  3  4  5  6  7  8
+     ---------------------   -------------------------
+       3 (Cross sections)     X     X
+       4 (Angular dist.)      X     X     X
+       5 (Energy dist.)       X     X           X
+       6 (Double diff.)       X     X     X     X
+     154 (Legendre coeff.)    X     X     X
+     203 (Ratios)             X     X     X  X
+     801 (Yield data).        X     X     X  X
+   
+     (See the above definition of the 8 data fields).
+   
+     MULTI-DIMENSIONAL TABLES
+     ------------------------
+     The program can translate multi-dimensional EXFOR tables for:
+     (1) Multiple reactions following the EXFOR keyword reaction
+         (ISO-QUANT, etc.) with each reaction identified by a character
+         in column 11.
+     (2) Single reactions with multiple common fields each identified
+         by a character in the eleventh column of each field.
+     (3) The old ISO-QUANT, etc. convention of reactions separated by
+         commas, e.g., ((90-TH-232,NG)/(29-CU-0,NG)),(29-CU-0,NG)).
+   
+     TRANSLATION OF EXFOR REACTIONS
+     ------------------------------
+     Not all EXFOR reactions (ISO-QUANT, etc.) can be translated by
+     this program. In order to translate each reaction the program will
+     first break each reaction into a series of simple reactions and
+     remove and save the target and residual ZA, E.G.:
+   
+     ((26-FE-56(N,G)26-FE-57-M1,,SIG)/(26-FE-56(N,G)26-FE-57-G,,SIG))
+   
+     is broken down to define
+   
+     ZA-target = 26056 , ZA-residual = 260571, reaction = (N,G),SIG
+   
+     Note residual metastable state flags. See explanation below.
+   
+     The program will then define an equivalent MF, MT for each
+     reaction.
+   
+     The program will next translate the following types of
+     reactions:
+     (1) Simple reactions
+         (N,G),SIG
+     (2) Equivalent reactions
+         ((N,G),SIG)=...anything else....
+         After decoding the first simple reaction the program assumes
+         that the first simple reaction is truely equivalent to the
+         remainder of the reaction and defines ZA, MF and MT based on
+         the first simple reaction.
+     (3) Simple ratios
+         ((N,G)M1/G,,SIG/RAT) or ((N,G)M1,SIG)/((N,G)G,SIG)
+     (4) Complex reactions - all with the same equivalent ZA
+         ((N,EL),WID,,G)*((N,G),WID)/((N,TOT),WID)
+     (5) Other reactions
+         (((N,G),SIG)/((N,G),SIG),(N,G),SIG))
+   
+         If the reaction is not one of the above types the program will
+         try to use the entire EXFOR reaction, including target and
+         residual ZA and see if it is defined in reaction equivalent
+         dictionary. If an MF, MT is defined for the entire reaction
+         the program will use the target and residual ZA from the first
+         simple reaction to translate the data. This last form may be
+         used to insure that almost all EXFOR reaction can be
+         translated, regardless of how complicated it is (for examples
+         see reaction dictionary) however the user should carefully
+         check the output to insure that the data has been translated
+         as intended.
+   
+     The only reactions that have so far been found that cannot be
+     correctly translated are ratios of production cross sections,
+     e.g., (29-CU-0(P,X)26-FE-56)/(28-NI-0(P,X)26-FE-58)
+     because ratio data requires fields 5 and 6 for the denominator
+     MT and ZA and ratio data requires field 5 for the product ZA.
+     When this case is encountered the program will print an error
+     message and output the denominator MT and ZA in fields 5 and 6.
+     In this case the output will identify the numerator as ZA=29000,
+     MT=9001 and the denominator as ZA=28000, MT=9001. One solution
+     is to modify the output of this program by defining two reactions,
+     e.g., MT = 8001 = (p,x) 26-Fe-56 and MT = 8002 = (p,x) 26-Fe-58,
+     modify the numerator MT to 8001 and denominator MT to 8002 and
+     then properly interpreting the data using these definition in all
+     applications (for examples, see program PLOTC4 input directionary
+     for proton induced reactions).
+   
+     OUTPUT REPORT
+     -------------
+     This program will write a report on Unit 6 (OUTP) to allow the
+     user to monitor the translation of the EXFOR data. It is extremely
+     important that the user read this report and not simply assume
+     that all of the data has been properly translated.
+   
+     After identifying each EXFOR accession, sub-accession number,
+     ZA, MF, MT and reaction the program can print two types of
+     messages:
+   
+     WARNING    = Something unusual has occurred. The user should
+                  carefully check to insure that the output data has
+                  been properly translated.
+     OPERATION  = One of the defined reaction, title or unit operations
+                  has been performed on the data. The user should
+                  carefully check to insure that the proper operation
+                  has been performed.
+   
+     If the user does not agree with how the data has been translated
+     the three dictionaries may to be modified and the program re-run.
+     For example, if the program prints a warning that the title
+     dictionary tells it to output E-ERR1, E-ERR2, E-ERR3 all in the
+     same computation format field, followed by an operation that says
+     the program will only output E-ERR1 and ignore the other 2 EXFOR
+     fields, if the user would rather output E-ERR2 and ignore E-ERR1
+     and E-ERR3 it is merely necessary to modify the title dictionary
+     to ignore E-ERR1 and E-ERR3 and select E-ERR2 and then re-run the
+     program.
+   
+     METASTABLE STATE
+     ----------------
+     The computation format allows the metastable state of the target
+     and residual nucleus to be identified. For ratio data metastable
+     state of both numerator and denominator of the ratio may be
+     defined.
+   
+     The metastable state of the target is identified in column 12 and
+     the metastable state of the residual nuclues in column 20. For
+     ratio data the metastable state of the denominator target and
+     residual nucleus are identified by output the denominator ZA and
+     MT in the form ZA.M and MT.M (e.g., 26056.9 and 102.1). Columns
+     12 and 20 could contain characters such as M, but to maintain the
+     eight output fields in strictly numerical form the denominator
+     ZA.M and MT.M will be output in numerical form. The possible
+     characters that may appear in columns 12 or 20 and their numerical
+     equivalents used with ratio denominator ZA and MT include:
+   
+     Definition    Column 12 or 20     Equivalent
+     ----------    ---------------     ----------
+     ground              G                0
+     m1                  1                1
+     m2                  2                2
+     m3                  3                3
+     m4                  4                4
+     m5                  5                5
+     unknown             ?                6
+     m                   M                7
+     more than 1         +                8
+     all or total        T                9
+     all or total      blank              9
+   
+     By convention if an EXFOR reaction does not specify a metastable
+     state the state is defined in the computation format to be..ALL..
+     (i.e., blank in column 12 or 20, 9 in ratio ZA or MT).
+   
+     For example, for a ratio if the ZA.m and MT.m are output as
+     26056.9 and 102.1, respectively the ratio denominator target is
+     26-Fe-56 (all) and the reaction is capture (MT=102) leaving the
+     residual nucleus in the m1 state.
+   
+     NOTE: Since most data will not contain a metastable state flag
+     the above convention to output the ZA and MT of the denominator
+     of ratios allows the user to read and use the denominator ZA and
+     MT as integers (effectively ignoring any metastable state flag) or
+     if necessary to determine the metastable state.
+   
+     EXFOR STATUS
+     ------------
+     Column 21 of each computation format record may contain blank
+     (status not specified) or one to the following characters:
+   
+     Column 21   Definition
+     ---------   ----------
+        U        Unnormalized (indicated by unit translation dictionary)
+                 This condition has priority over the EXFOR status and
+                 is used to indicate that the data is not in standard
+                 output units).
+        A        Approved by author
+        C        Correlated
+        D        Dependent
+        O        Outdated
+        P        Preliminary
+        R        Renormalized
+        S        Superceded
+   
+     If data has any other EXFOR status (e.g., translated from SCISRS)
+     it will be ignored and the status field will be output as blank.
+   
+     INPUT FILES
+     -----------
+     Unit  Description
+     ----  -----------
+      10   EXFOR data (to be translated) (BCD - 80 characters/record)
+      12   EXFOR reaction dictionary     (BCD - 80 characters/record)
+      14   EXFOR title dictionary        (BCD - 80 characters/record)
+      15   EXFOR units dictionary        (BCD - 80 characters/record)
+   
+     OUTPUT FILES
+     ------------
+     Unit  Description
+     ----  -----------
+       4   List of all undefined EXFOR reactions, titles and units
+           found during the translation (if any).(BCD -  80 characters)
+       6   Output report                         (BCD - 132 characters)
+      11   Computation format experimental data  (BCD - 131 characters)
+   
+     SCRATCH FILES
+     -------------
+     NONE
+   
+     INPUT PARAMETERS
+     ----------------
+     None
+   
+     REPORTING ERRORS
+     ----------------
+     In order to improve this code and make future versions more
+     compatible for use on as many different types of computers as
+     possible please report all compiler diagnostics and/or operating
+     problems to the author at the above address.
+   
+     Please remember if you simply report "I'VE GOT A PROBLEM" and do
+     not adequately describe exactly how you were using the program
+     it will be impossible for the author to help you. When a problem
+     arises please write to the author, describe the problem in as much
+     detail as possible, identify the version of the program that you
+     are using (e.g. Version 2001-3) and send the following information
+     in computer-readable form (e-mail, floppy disc, etc.) to the author:
+   
+     (1) A copy of the program you are using
+     (2) A copy of compiler diagnostics (if any)
+     (3) A copy of the JCL deck you used to execute the program
+     (4) A copy of the 3 translation dictionaries you are using
+     (5) A copy of the EXFOR format data you using
+     (6) A copy of the computation format data you produce
+     (7) A copy of the output report from the program.
+   
+     Without all of this information it is impossible to exactly
+     simulate the problem that you ran and to determine the source
+     of your problem.
+   
+   *** COMPUTER DEPENDENT CODING ******
+   
+    COMPUTER DEPENDENT CODING
+    -------------------------
+   
+    * This program is designed to be used with a Fortran-77 or
+     Fortran-90 compiler.
+   
+    * The only compiler dependent format statements involve,
+     (1) CHARACTER*1 and CHARACTER*4
+     (2) Testing for errors and end of file during reads.
+   
+    * It is assumed that characters are stored in successive storage
+      locations and that characters may be treated as continuous strings
+      of characters in either CHARACTER*4 or CHARACTER*1 format.
+   
+    * For example, if one subroutine contains,
+   
+      CHARACTER*4 BCD
+      DIMENSION BCD(10)
+   
+     the array BCD is assumed to be an array of 40 characters in
+     successive byte locations.
+   
+     It is assumed that this array can be passed as an argument to
+     another subroutine and used as CHARACTER*1, e.g.,
+   
+      CALL DUMMY(BCD)
+   
+      SUBROUTINE DUMMY(BCD)
+      CHARACTER*1 BCD
+      DIMENSION BCD(40)
+   
+    * This convention will work on all 32 bit per word computers (e.g.,
+      IBM or IBM compatible computers).
+   
+    * For longer word length computers (e.g., CDC or CRAY) it is
+      suggested that before implementing and using this program the
+      user first verify that character strings can be treated as
+      described above, e.g., write a simple program to read a character
+      string of 40 characters in CHARACTER*4 format, pass it to a
+      subroutine which uses the character string in CHARACTER*1 format
+      and print the character string in the subroutine. If the character
+      string is printed as a continuous string you will be able to use
+      this program. If the character string is not printed as a
+      continuous string it is not recommended that you use this program.
+   
+    * This program using the Fortran-77 convention for testing for
+      reading errors and end of file during reads, e.g.,
+   
+      READ(10,1000,END=100,ERR=200) A,B,C,D
+   

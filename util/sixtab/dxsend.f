@@ -299,6 +299,11 @@ C*
 C* All processing completed
    90 CONTINUE
       IF(ML.GT.0 .AND. LOOP.GT.0) WRITE(LTT,904) ML,LOOP
+c...
+C...      print *,'nen',nen
+C...      print *,enr(1),dxs(1)
+C...      print *,enr(nen),dxs(nen)
+c...
       RETURN
 C*
   903 FORMAT(A40,I4)
@@ -320,6 +325,7 @@ C-V  02/05 - Fix processing of MT600,600 series angular distributions.
 C-V        - Provisionally add photon spectra (assumed isotropic).
 C-V  02/10 - Add photon spectra from (n,gamma)
 C-V          WARNING: Photon emission assumed isotropic.
+C-V  03/11 - Guard cross section retrieval against overflow.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -529,6 +535,10 @@ C* Case: Required point is below thershold or above last point
 C* Case: Cross section is required on output - finish processing
       IF(KEA.EQ.0) THEN
         NEN=NP
+        IF(NEN.GT.MEN) THEN
+          PRINT *,' WARNING - Arry limit MEN exceeded, output first',MEN
+          NEN=MEN
+        END IF
         DO 32 I=1,NEN
         ENR(I)=RWO(     I)
         DXS(I)=RWO(LX-1+I)
@@ -671,6 +681,9 @@ C* Integrate over cosine
       EB=ENR(NE1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INR)
 C* Convert to Lab coordinate system if necessary
+C* Ref: R.F. Berland, CHAD Code to Handle Angular Data, NAA-SR-11231 (1965)
+C*   XCM - cosine os scattering angle in CM system
+C*   XLB - cosine os scattering angle in Lab system
       IF(LCT.EQ.2) THEN
         GAM=SQRT( EIN/ (EIN*AWR*AWR+QI*AWR*(AWR+1) ) )
         DO 46 I=1,NE1
@@ -1186,7 +1199,7 @@ C* Normalised tabulated function given in file MF15
           MF=15
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
           IF(IER.NE.0) THEN
-            PRINT *,'WARNING - No abulated data for MF15 MT',MT0
+            PRINT *,'WARNING - No tabulated data for MF15 MT',MT0
             GO TO 800
           END IF
 C* Only one section for tabulated distributions is allowed at present
@@ -1194,7 +1207,7 @@ C* Only one section for tabulated distributions is allowed at present
             PRINT *,'DXSEN1 WARNING >1 section for MF/MT',MF,MT
             STOP 'DXSEN1 ERROR >1 section for MF 15'
           END IF
-C* Read the fractional contribution of the section 
+C* Read the fractional contribution of the section
           CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
      1               ,RWO(LE),RWO(LX),KX,IER)
           YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR,IER)
@@ -1288,6 +1301,11 @@ C* Scale the distribution by the cross section
       DO 804 I=1,NEN
       DXS(I)=SS*DXS(I)
   804 CONTINUE
+c...
+c...      print *,'nen',nen
+c...      print *,enr(1),dxs(1)
+c...      print *,enr(nen),dxs(nen)
+c...
 C*
   900 RETURN
 C*
@@ -1646,14 +1664,24 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
+      DOUBLE PRECISION RR(6)
       DIMENSION    VK(1)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
-      IF(N1.GT.MVK) THEN
+      IF(N1+5.GT.MVK) THEN
         IER=-1
         RETURN
       END IF
-      IF(N1.GT.0) READ (LEF,903) (VK(J),J=1,N1)
+      IF(N1.EQ.0) RETURN
+C* Read the LIST2 entries, watch for underflow
+      DO J=1,N1,6
+        READ (LEF,903) (RR(K),K=1,6)
+        DO K=1,6
+          IF(RR(K).NE.0 .AND. ABS(RR(K)).LT.1.E-30)
+     1      PRINT *,' RDTAB2 WARNING - Reading ',RR(K)
+          VK(J-1+K)=RR(K)
+        END DO
+      END DO
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
@@ -2361,20 +2389,32 @@ C* Update the interpolation range information
       FUNCTION FINEND(INT,EE,E1,X1,E2,X2)
 C-Title  : Function FINEND
 C-Purpose: Interpolate between two points according to ENDF interp.flags
+      ZERO  =0
+      FINEND=X1
+C* Histogram interpolation or flat function
+      IF(INT.EQ.1 .OR. X1.EQ.X2 .OR. EE.EQ.E1) RETURN
+C* Other ENDF interpolation laws
       IF     (INT.EQ.2) THEN
+C* Linear
         FINEND=X1+(EE-E1)*(X2-X1)/(E2-E1)
+        RETURN
       ELSE IF(INT.EQ.3) THEN
+C* Linear in ln(x)
+        IF(E1*E2.LE.ZERO) RETURN
         FINEND=X1+(X2-X1)*LOG(EE/E1)/LOG(E2/E1)
+        RETURN
       ELSE IF(INT.EQ.4) THEN
-C...
-C...      PRINT *,'EE,E1,E2,U',EE,E1,E2,(EE-E1)/(E2-E1)
-C...
+C* Linear in ln(y)
         FINEND=X1*(X2/X1)**((EE-E1)/(E2-E1))
+        RETURN
       ELSE IF(INT.EQ.5) THEN
-        FINEND=X1*(EE/E1)**(LOG(X2/X1)/LOG(E2/E1))
+C* Log-log
+        IF (X1*X2.LE.ZERO) RETURN
+        IF (E1*E2.LE.ZERO) RETURN
+        FINEND=X1*(X2/X1)**(LOG(EE/E1)/LOG(E2/E1))
+        RETURN
       ELSE
         PRINT *,'FINEND ERROR - Illegal interpolation flag request',INT
         STOP 'FINEND ERROR - Illegal interpolation flag'
       END IF
-      RETURN
       END

@@ -59,12 +59,17 @@
 23. On-line retrival of the EXFOR data from the remote database implemented.
     At the moment works only at nuclear data centers but will be extended
     to reading from the EXFOR CD-ROM (V. Zerkin & M. Herman).
-24. Spctra for the ENDF formatting printed also for the proton induced 
+24. Spectra for the ENDF formatting printed also for the proton induced 
     reactions (M. Herman).
 25. File 'titles' in x4toc4 modified to treat properly min and max bin
-    energies in the emission spectra. 
-26. ZVView updated to version 9.5
+    energies in the emission spectra (M. Herman).
+26. ZVView updated to version 9.5 (V. Zerkin)
 27. Correction to DEGAS regarding flux conservation (E. Betak)
+28. X4TOC4 replaced with the version available from ENDVER (version
+    2001-8) (A. Trkov).
+29. sixtab.f and dxsend.f modified to enable processing of more 
+    advanced formatting used in the recent LANL evaluations (discrete 
+    gamma's are still not processed correctly in such cases) (A. Trkov).
 
 
              Changes in version 2.18 with respect to 2.17.1

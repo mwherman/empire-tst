@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: HF-comp.f,v 1.13 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Date: 2003-12-18 00:15:54 $
+Ccc   * $Id: HF-comp.f,v 1.14 2003-12-18 00:15:54 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1305,8 +1305,8 @@ C     RCN comment : We are not dealing with LDM barriers,
 C     so it is difficult to justify the barrier heigth dependence
 C     on the shell correction
 C     Therefore for the time being we are setting SHCtemp =0.d0
-C     so no barrier´s shell correction dependence and therefore
-C     barrier´s heigths are temperature independent
+C     so no barrier's shell correction dependence and therefore
+C     barrier heigths are temperature independent
 C
 C-----temperature fade-out of the shell correction (to be tested)
       temp = 0.
@@ -2186,7 +2186,7 @@ C
 C
 C***********************************************************************
 C***********************************************************************
-C     FUNCTIONS BELOW ARE NOT USED NOW; LEAVED FOR TESTING PURPOSES
+C     FUNCTIONS BELOW ARE NOT USED NOW; LEFT FOR TESTING PURPOSES
 C
 C===================================================================
       SUBROUTINE WKBFIS(Ee)
@@ -2375,7 +2375,6 @@ C-----------------------------------------------------------
 C Simpson integration
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-c      COMMON /PARFIS/ ROTemp, AC, AAJ, UX, IBAr1
       COMMON /COMFIS4/ TFC, TFCc,jcc
        COMMON /ROFI1/ enh_ld(3, NFhump)
 C

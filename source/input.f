@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-10-30 18:45:18 $
-Ccc   * $Id: input.f,v 1.19 2003-10-30 18:45:18 herman Exp $
+Ccc   * $Date: 2003-12-18 00:15:54 $
+Ccc   * $Id: input.f,v 1.20 2003-12-18 00:15:54 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -576,7 +576,7 @@ C--------------------------set reaction string
                               reaction(nnuc)(iend+1:iend+1) = 'a'
                               iend = iend+1
                            ENDIF 
-                           IF(NDEIC.GT.0 .AND. iac.NE.0) THEN
+                           IF(NDEJC.GT.3 .AND. iac.NE.0) THEN
                               WRITE(cnejec,'(I1)') iac 
                               IF(in.GT.1) THEN  
                                  reaction(nnuc)(iend+1:iend+1) = cnejec
@@ -740,8 +740,8 @@ C
             WRITE(6, *)' '
          ENDIF 
 C--------setup model matrix (IDNa) defining which model is used where
-C        ECIS   MSD   MSC   DEGAS   HMS
-C        1     2     3      4      5
+C                      ECIS   MSD   MSC   DEGAS   HMS
+C                        1     2     3      4      5
 C        1 neut. disc.   x     x     x      x      x
 C        2 neut. cont.   x     x     x      x      x
 C        3 prot. disc.   x     x     x      x      x
@@ -1370,7 +1370,8 @@ c-------the fissioning condition replaced accordingly to the fission
 c-------barriers available in RIPL-2  (MS)
 cc        xfis = 0.0205*Z(nnuc)**2/A(nnuc)
 cc        IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
-        IF(Z(Nnuc).LT.78.)FISsil(nnuc) = .FALSE.
+cc      IF(Z(Nnuc).LT.78.)FISsil(nnuc) = .FALSE.
+        IF(Z(Nnuc).LT.84.)FISsil(nnuc) = .FALSE.
       ENDDO
       INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
       IF(.NOT.gexist)THEN
@@ -1970,7 +1971,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta7|'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta9|'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
@@ -4769,8 +4770,8 @@ C
 C================  level densities at saddles  ===============================
 
       IF(FISden(Nnuc).EQ.1.)THEN
-          cara2 = 'Level densities at the saddle points taken from
-     &             RIPL-2'
+          cara2 = 'Level densities at the saddle points taken from RIPL-
+     &2'
          WRITE(79, *)
          WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
          WRITE(79, *)
@@ -5028,31 +5029,27 @@ C
 
 
 c--------------------------------------------
-      SUBROUTINE DAMI_ROFIS(Nnuc,ibars)
+      SUBROUTINE DAMIROFIS(Nnuc,ibars)
 C-----continuum, level densities at saddle points
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      COMMON /PARFIS/ ROTemp, AC, AAJ,IBAr
+      COMMON /PARFIS/ ROTemp, AC, AAJ,IBAr 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
       DOUBLE PRECISION rotemp,rofis
-c-------------------
-
       DOUBLE PRECISION efdis,efb,ugrid,xminn,xmax
-c----------------------
       CHARACTER*2 simb, symma, symmb
       CHARACTER*20 cara
       CHARACTER*33 cara1
       CHARACTER*55 cara2
       CHARACTER*50 filename
 C
-      ibar=ibars
       NRbarc=NRbar-NRwel
       destepp=(excn+5.0D+0)/200
-      xminn(ibar)=0.001
+      ibar = ibars
       DO nr=1,NRfdis(ibar)
-         IF(EFDis(nr,ibar).GT.xminn(ibar))xminn(ibar)=EFDis(nr, ibar)
+         xminn(ibar)= MAX(EFDis(nr, ibar), 1.0D-3)
       ENDDO   
       xmax=excn-(efb(ibar)+xminn(ibar))+5.
       nrbinfis(ibar)=int((xmax-xminn(ibar))/destepp)

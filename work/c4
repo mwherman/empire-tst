@@ -3,13 +3,13 @@
 
 file=$1
 cd ../util/x4toc4
-ln  -sf ../../work/$file.exf exfor.in
+ln  -sf $work/$file.exf X4.DAT
 ./x4toc4
-rm exfor.in
-cd ../../work
-mv ../util/x4toc4/errors $file.x42c4_errs
-mv ../util/x4toc4/x4toc4.lst $file.x42c4_lst
-mv ../util/x4toc4/c4.out $file.c4
+rm X4.DAT
+cd $work
+mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
+mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
+mv ../util/x4toc4/C4.DAT $file.c4
 if [ -s $file.c4 ]; then
    echo 'EXFOR data in computational format are stored in: '$file.c4
    else
