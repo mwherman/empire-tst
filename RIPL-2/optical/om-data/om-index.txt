@@ -1,0 +1,538 @@
+Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First 
+ No. Part.   Type   Pot   Pot                      (MeV)      No.   Author 
+
+neutrons 
+--------
+ 200   n    spher.   no   no    0-69    0-146   0.0- 20.0     1  S.Igarasi
+ 240   n    spher.   no   no    0-69    0-146   0.0- 20.0     2  S.Igarasi
+2001   n    spher.   no   yes   6-82   12-208  50.0-400.0     4  D.G.Madland
+ 101   n    spher.   no   no   12-83   24-209  11.0- 11.0     5  J.C.Ferrer
+2405   n    spher.   no   yes  13-83   27-209   0.0-200.0    10  A.J.Koning
+ 116   n    spher.   no   no   20-83   40-209   0.0-  5.0    12  P.A.Moldauer
+ 401   n    spher.   no   no   20-92   40-238   0.0- 25.0    13  D.Wilmore
+2100   n    spher.   no   no   20-83   40-209  10.0- 26.0    14  R.L.Varner
+ 100   n    spher.   no   no   20-92   40-238  10.0- 50.0    15  F.D.Becchetti
+ 800   n    spher.   no   no   20-83   40-210   0.0-155.0    16  C.A.Engelbrecht
+ 404   n    spher.   no   no   23-41   50- 95   0.0- 30.0    17  B.Strohmaier
+ 600   n    CC rot.  no   no   90-103 227-260   0.0- 20.0    56  G.Vladuca
+
+  15   n    spher.   no   no    6- 6   12- 12   0.0- 65.0     3  M.B.Chadwick
+  16   n    spher.   no   no    7- 7   14- 14   0.0- 60.0     3  M.B.Chadwick
+  17   n    spher.   no   no    8- 8   16- 16   0.0- 50.0     3  M.B.Chadwick
+1400   n    spher.   no   yes  12-12   24- 24   0.0-200.0     6  A.J.Koning
+1401   n    spher.   no   yes  12-12   26- 26   0.0-200.0     6  A.J.Koning
+  18   n    spher.   no   no   13-13   27- 27   0.0- 20.0     7  R.C.Harper
+ 117   n    spher.   no   no   13-13   27- 27   0.0- 60.0     8  J.Petler
+ 419   n    spher.   yes  no   13-13   27- 27   0.0-150.0     9  Molina
+1402   n    spher.   no   yes  13-13   27- 27   0.0-200.0     6  A.J.Koning
+ 242   n    spher.   no   no   13-13   27- 27   0.0-250.0    11  Lee
+ 418   n    spher.   yes  yes  13-13   27- 27   0.0-250.0     9  Molina
+1403   n    spher.   no   yes  14-14   28- 28   0.0-200.0     6  A.J.Koning
+1404   n    spher.   no   yes  15-15   31- 31   0.0-200.0     6  A.J.Koning
+1405   n    spher.   no   yes  16-16   32- 32   0.0-200.0     6  A.J.Koning
+1406   n    spher.   no   yes  17-17   35- 35   0.0-200.0     6  A.J.Koning
+1408   n    spher.   no   yes  18-18   40- 40   0.0-200.0     6  A.J.Koning
+1407   n    spher.   no   yes  19-19   39- 39   0.0-200.0     6  A.J.Koning
+1409   n    spher.   no   yes  20-20   40- 40   0.0-200.0     6  A.J.Koning
+1410   n    spher.   no   yes  21-21   45- 45   0.0-200.0     6  A.J.Koning
+1411   n    spher.   no   yes  22-22   48- 48   0.0-200.0     6  A.J.Koning
+1412   n    spher.   no   yes  23-23   51- 51   0.0-200.0     6  A.J.Koning
+ 112   n    spher.   no   no   24-24   50- 50   0.0-100.0    18  A.Prince
+ 114   n    spher.   no   no   24-24   52- 52   0.0-100.0    18  A.Prince
+1413   n    spher.   no   yes  24-24   52- 52   0.0-200.0     6  A.J.Koning
+ 113   n    spher.   no   no   24-24   53- 53   0.0-100.0    18  A.Prince
+ 115   n    spher.   no   no   24-24   54- 54   0.0-100.0    18  A.Prince
+1415   n    spher.   no   yes  25-25   55- 55   0.0-200.0     6  A.J.Koning
+  10   n    spher.   no   no   26-26   54- 56   0.0- 52.0    19  E.D.Arthur
+2101   n    spher.   no   no   26-82   54-208  10.0- 80.0    20  R.L.Walter
+ 104   n    spher.   no   no   26-26   54- 54   0.0-100.0    18  A.Prince
+1414   n    spher.   no   yes  26-26   54- 54   0.0-200.0     6  A.J.Koning
+ 103   n    spher.   no   no   26-26   56- 56   0.0-100.0    18  A.Prince
+1416   n    spher.   no   yes  26-26   56- 56   0.0-200.0     6  A.J.Koning
+ 105   n    spher.   no   no   26-26   57- 57   0.0-100.0    18  A.Prince
+ 106   n    spher.   no   no   26-26   58- 58   0.0-100.0    18  A.Prince
+  11   n    spher.   no   no   27-27   59- 59   0.0- 27.5    21  E.D.Arthur
+1419   n    spher.   no   yes  27-27   59- 59   0.0-200.0     6  A.J.Koning
+  19   n    spher.   no   no   28-28   58- 58   0.0- 20.0     7  R.C.Harper
+ 107   n    spher.   no   no   28-28   58- 58   0.0-100.0    18  A.Prince
+1417   n    spher.   no   yes  28-28   58- 58   0.0-200.0     6  A.J.Koning
+ 108   n    spher.   no   no   28-28   60- 60   0.0-100.0    18  A.Prince
+1418   n    spher.   no   yes  28-28   60- 60   0.0-200.0     6  A.J.Koning
+ 109   n    spher.   no   no   28-28   61- 61   0.0-100.0    18  A.Prince
+ 110   n    spher.   no   no   28-28   62- 62   0.0-100.0    18  A.Prince
+ 111   n    spher.   no   no   28-28   64- 64   0.0-100.0    18  A.Prince
+1420   n    spher.   no   yes  29-29   63- 63   0.0-200.0     6  A.J.Koning
+1421   n    spher.   no   yes  29-29   65- 65   0.0-200.0     6  A.J.Koning
+  12   n    spher.   no   no   30-30   57- 81   0.0- 20.0    22  P.G.Young
+ 500   n    spher.   no   no   31-31   69- 69   0.1- 20.0    23  Zhang
+1422   n    spher.   no   yes  31-31   69- 69   0.0-200.0     6  A.J.Koning
+1423   n    spher.   no   yes  32-32   74- 74   0.0-200.0     6  A.J.Koning
+ 202   n    spher.   no   no   33-37   61-107   0.0- 20.0    24  Japan
+1424   n    spher.   no   yes  33-33   75- 75   0.0-200.0     6  A.J.Koning
+1425   n    spher.   no   yes  33-33   79- 79   0.0-200.0     6  A.J.Koning
+1426   n    spher.   no   yes  34-34   80- 80   0.0-200.0     6  A.J.Koning
+ 501   n    spher.   no   no   36-36   83- 83   0.1- 20.0    25  Cai
+ 502   n    spher.   no   no   36-36   86- 86   0.1- 20.0    26  Cai
+ 503   n    spher.   no   no   37-37   85- 85   0.1- 20.0    25  Cai
+1427   n    spher.   no   yes  37-37   85- 85   0.0-200.0     6  A.J.Koning
+ 203   n    spher.   no   no   38-42   69-116   0.0- 20.0    24  Japan
+ 504   n    spher.   no   no   38-38   88- 88   0.1- 20.0    25  Cai
+1428   n    spher.   no   yes  38-38   88- 88   0.0-200.0     6  A.J.Koning
+ 118   n    spher.   no   no   39-51   85-125   0.0-  5.0    27  A.B.Smith
+ 505   n    spher.   no   no   39-39   89- 89   0.1- 20.0    25  Cai
+  13   n    spher.   no   no   39-39   89- 89   0.0- 21.0    28  E.D.Arthur
+1429   n    spher.   no   yes  39-39   89- 89   0.0-200.0     6  A.J.Koning
+ 506   n    spher.   no   no   39-39   91- 91   0.1- 20.0    29  Cai
+  14   n    spher.   no   no   40-40   90- 90   0.0- 20.0    30  E.D.Arthur
+1430   n    spher.   no   yes  40-40   90- 90   0.0-200.0     6  A.J.Koning
+2404   n    spher.   no   no   40-40   90- 90   0.0-200.0    31  A.J.Koning
+1431   n    spher.   no   yes  40-40   91- 91   0.0-200.0     6  A.J.Koning
+1432   n    spher.   no   yes  40-40   92- 92   0.0-200.0     6  A.J.Koning
+1435   n    spher.   no   yes  40-40   94- 94   0.0-200.0     6  A.J.Koning
+  20   n    spher.   no   no   41-41   93- 93   0.0- 20.0     7  R.C.Harper
+ 507   n    spher.   no   no   41-41   93- 93   0.1- 20.0    32  Rong
+1434   n    spher.   no   yes  41-41   93- 93   0.0-200.0     6  A.J.Koning
+ 508   n    spher.   no   no   41-41   95- 95   0.1- 20.0    32  Rong
+1433   n    spher.   no   yes  42-42   92- 92   0.0-200.0     6  A.J.Koning
+1436   n    spher.   no   yes  42-42   94- 94   0.0-200.0     6  A.J.Koning
+ 509   n    spher.   no   no   42-42   95- 95   0.1- 20.0    33  Cai
+1437   n    spher.   no   yes  42-42   96- 96   0.0-200.0     6  A.J.Koning
+ 510   n    spher.   no   no   42-42   97- 97   0.1- 20.0    34  Cai
+ 511   n    spher.   no   no   42-42   98- 98   0.1- 20.0    34  Cai
+1438   n    spher.   no   yes  42-42   98- 98   0.0-200.0     6  A.J.Koning
+ 512   n    spher.   no   no   42-42  100-100   0.1- 20.0    26  Cai
+1440   n    spher.   no   yes  42-42  100-100   0.0-200.0     6  A.J.Koning
+ 204   n    spher.   no   no   43-45   80-125   0.0- 20.0    24  Japan
+ 513   n    spher.   no   no   43-43   99- 99   0.1- 20.0    29  Cai
+1439   n    spher.   no   yes  43-43   99- 99   0.0-200.0     6  A.J.Koning
+ 514   n    spher.   no   no   44-44   99- 99   0.1- 20.0    35  Zhang
+ 515   n    spher.   no   no   44-44  100-100   0.1- 20.0    35  Zhang
+ 516   n    spher.   no   no   44-44  101-101   0.1- 20.0    36  Zhang
+ 517   n    spher.   no   no   44-44  102-102   0.1- 20.0    35  Zhang
+ 518   n    spher.   no   no   44-44  103-103   0.1- 20.0    36  Zhang
+ 519   n    spher.   no   no   44-44  104-104   0.1- 20.0    35  Zhang
+ 520   n    spher.   no   no   44-44  105-105   0.1- 20.0    35  Zhang
+ 521   n    spher.   no   no   45-45  103-103   0.1- 20.0    35  Zhang
+1441   n    spher.   no   yes  45-45  103-103   0.0-200.0     6  A.J.Koning
+ 522   n    spher.   no   no   45-45  105-105   0.1- 20.0    35  Zhang
+ 205   n    spher.   no   no   46-48   89-134   0.0- 20.0    24  Japan
+ 523   n    spher.   no   no   46-46  105-105   0.1- 20.0    37  Zhang
+1442   n    spher.   no   yes  46-46  106-106   0.0-200.0     6  A.J.Koning
+ 524   n    spher.   no   no   46-46  108-108   0.1- 20.0    37  Zhang
+1443   n    spher.   no   yes  47-47  107-107   0.0-200.0     6  A.J.Koning
+ 525   n    spher.   no   no   48-48  113-113   0.1- 20.0    38  Zhang
+1444   n    spher.   no   yes  48-48  114-114   0.0-200.0     6  A.J.Koning
+ 206   n    spher.   no   no   49-51   97-141   0.0- 20.0    24  Japan
+ 526   n    spher.   no   no   49-49  115-115   0.1- 20.0    38  Zhang
+1445   n    spher.   no   yes  49-49  115-115   0.0-200.0     6  A.J.Koning
+1446   n    spher.   no   yes  50-50  116-116   0.0-200.0     6  A.J.Koning
+1447   n    spher.   no   yes  50-50  118-118   0.0-200.0     6  A.J.Koning
+1448   n    spher.   no   yes  50-50  120-120   0.0-200.0     6  A.J.Koning
+1450   n    spher.   no   yes  50-50  122-122   0.0-200.0     6  A.J.Koning
+1452   n    spher.   no   yes  50-50  124-124   0.0-200.0     6  A.J.Koning
+ 527   n    spher.   no   no   51-51  121-121   0.1- 20.0    38  Zhang
+1449   n    spher.   no   yes  51-51  121-121   0.0-200.0     6  A.J.Koning
+ 528   n    spher.   no   no   51-51  123-123   0.1- 20.0    38  Zhang
+1451   n    spher.   no   yes  51-51  123-123   0.0-200.0     6  A.J.Koning
+ 207   n    spher.   no   no   52-54  103-150   0.0- 20.0    24  Japan
+1454   n    spher.   no   yes  52-52  128-128   0.0-200.0     6  A.J.Koning
+ 529   n    spher.   no   no   52-52  130-130   0.1- 20.0    37  Zhang
+ 530   n    spher.   no   no   53-53  127-127   0.1- 20.0    37  Zhang
+1453   n    spher.   no   yes  53-53  127-127   0.0-200.0     6  A.J.Koning
+ 531   n    spher.   no   no   53-53  135-135   0.1- 20.0    37  Zhang
+ 532   n    spher.   no   no   54-54  123-123   0.1- 20.0    39  Shen
+ 533   n    spher.   no   no   54-54  124-124   0.1- 20.0    39  Shen
+ 534   n    spher.   no   no   54-54  129-129   0.1- 20.0    40  Shen
+ 535   n    spher.   no   no   54-54  131-131   0.1- 20.0    40  Shen
+ 536   n    spher.   no   no   54-54  132-132   0.1- 20.0    40  Shen
+ 537   n    spher.   no   no   54-54  134-134   0.1- 20.0    40  Shen
+ 538   n    spher.   no   no   54-54  135-135   0.1- 20.0    40  Shen
+ 539   n    spher.   no   no   54-54  136-136   0.1- 20.0    40  Shen
+ 208   n    spher.   no   no   55-55  111-153   0.0- 20.0    24  Japan
+ 540   n    spher.   no   no   55-55  133-133   0.1- 20.0    35  Zhang
+1455   n    spher.   no   yes  55-55  133-133   0.0-200.0     6  A.J.Koning
+ 541   n    spher.   no   no   55-55  134-134   0.1- 20.0    35  Zhang
+ 542   n    spher.   no   no   55-55  135-135   0.1- 20.0    35  Zhang
+ 543   n    spher.   no   no   55-55  137-137   0.1- 20.0    35  Zhang
+ 209   n    spher.   no   no   56-56  112-154   0.0- 20.0    24  Japan
+ 544   n    spher.   no   no   56-56  135-135   0.1- 20.0    35  Zhang
+ 545   n    spher.   no   no   56-56  136-136   0.1- 20.0    35  Zhang
+ 546   n    spher.   no   no   56-56  137-137   0.1- 20.0    35  Zhang
+ 547   n    spher.   no   no   56-56  138-138   0.1- 20.0    35  Zhang
+1456   n    spher.   no   yes  56-56  138-138   0.0-200.0     6  A.J.Koning
+ 210   n    spher.   no   no   57-58  117-156   0.0- 20.0    24  Japan
+ 548   n    spher.   no   no   57-57  139-139   0.1- 20.0    35  Zhang
+1457   n    spher.   no   yes  57-57  139-139   0.0-200.0     6  A.J.Koning
+ 549   n    spher.   no   no   58-58  140-140   0.1- 20.0    35  Zhang
+1458   n    spher.   no   yes  58-58  140-140   0.0-200.0     6  A.J.Koning
+ 550   n    spher.   no   no   58-58  141-141   0.1- 20.0    35  Zhang
+ 551   n    spher.   no   no   58-58  142-142   0.1- 20.0    35  Zhang
+ 552   n    spher.   no   no   58-58  144-144   0.1- 20.0    35  Zhang
+ 211   n    spher.   no   no   59-59  119-160   0.0- 20.0    24  Japan
+ 553   n    spher.   no   no   59-59  141-141   0.1- 20.0    39  Shen
+1459   n    spher.   no   yes  59-59  141-141   0.0-200.0     6  A.J.Koning
+ 212   n    spher.   no   no   60-60  141-143   0.0- 20.0    24  Japan
+ 554   n    spher.   no   no   60-60  142-142   0.1- 20.0    39  Shen
+1460   n    spher.   no   yes  60-60  142-142   0.0-200.0     6  A.J.Koning
+ 555   n    spher.   no   no   60-60  143-143   0.1- 20.0    39  Shen
+ 213   n    spher.   no   no   60-60  144-148   0.0- 20.0    24  Japan
+ 556   n    spher.   no   no   60-60  144-144   0.1- 20.0    39  Shen
+1461   n    spher.   no   yes  60-60  144-144   0.0-200.0     6  A.J.Koning
+ 557   n    spher.   no   no   60-60  145-145   0.1- 20.0    39  Shen
+ 558   n    spher.   no   no   60-60  146-146   0.1- 20.0    39  Shen
+ 559   n    spher.   no   no   60-60  147-147   0.1- 20.0    39  Shen
+ 560   n    spher.   no   no   60-60  148-148   0.1- 20.0    39  Shen
+ 214   n    spher.   no   no   60-60  150-999   0.0- 20.0    24  Japan
+ 561   n    spher.   no   no   60-60  150-150   0.1- 20.0    39  Shen
+ 215   n    spher.   no   no   61-61  147-999   0.0- 20.0    24  Japan
+ 562   n    spher.   no   no   61-61  147-147   0.1- 20.0    39  Shen
+ 563   n    spher.   no   no   61-61  148-148   0.1- 20.0    39  Shen
+ 564   n    spher.   no   no   61-61  149-149   0.1- 20.0    39  Shen
+ 216   n    spher.   no   no   62-62  144-144   0.0- 20.0    24  Japan
+ 565   n    spher.   no   no   62-62  144-144   0.1- 20.0    39  Shen
+ 217   n    spher.   no   no   62-62  147-147   0.0- 20.0    24  Japan
+ 566   n    spher.   no   no   62-62  147-147   0.1- 20.0    39  Shen
+ 218   n    spher.   no   no   62-62  148-148   0.0- 20.0    24  Japan
+ 567   n    spher.   no   no   62-62  148-148   0.1- 20.0    39  Shen
+1462   n    spher.   no   yes  62-62  148-148   0.0-200.0     6  A.J.Koning
+ 219   n    spher.   no   no   62-62  149-149   0.0- 20.0    24  Japan
+ 568   n    spher.   no   no   62-62  149-149   0.1- 20.0    39  Shen
+ 220   n    spher.   no   no   62-62  150-150   0.0- 20.0    24  Japan
+ 569   n    spher.   no   no   62-62  150-150   0.1- 20.0    39  Shen
+ 570   n    spher.   no   no   62-62  151-151   0.1- 20.0    39  Shen
+ 571   n    spher.   no   no   62-62  152-152   0.1- 20.0    39  Shen
+ 572   n    spher.   no   no   62-62  154-154   0.1- 20.0    39  Shen
+ 221   n    spher.   no   no   63-63  151-999   0.0- 20.0    24  Japan
+ 573   n    spher.   no   no   63-63  151-151   0.1- 20.0    41  Ge
+2004   n    CC rot.  no   no   63-63  151-153   0.0- 20.0    42  R.Macklin
+ 574   n    spher.   no   no   63-63  153-153   0.1- 20.0    41  Ge
+ 575   n    spher.   no   no   63-63  154-154   0.1- 20.0    41  Ge
+ 576   n    spher.   no   no   63-63  155-155   0.1- 20.0    41  Ge
+ 222   n    spher.   no   no   64-64  133-171   0.0- 20.0    24  Japan
+ 577   n    spher.   no   no   64-64  152-152   0.1- 20.0    39  Shen
+ 578   n    spher.   no   no   64-64  154-154   0.1- 20.0    39  Shen
+ 579   n    spher.   no   no   64-64  155-155   0.1- 20.0    39  Shen
+ 580   n    spher.   no   no   64-64  156-156   0.1- 20.0    39  Shen
+ 581   n    spher.   no   no   64-64  157-157   0.1- 20.0    39  Shen
+ 582   n    spher.   no   no   64-64  158-158   0.1- 20.0    39  Shen
+ 583   n    spher.   no   no   64-64  160-160   0.1- 20.0    39  Shen
+ 223   n    spher.   no   no   65-65  138-175   0.0- 20.0    24  Japan
+ 584   n    spher.   no   no   66-66  164-164   0.1- 20.0    43  Ge
+ 119   n    CC rot.  no   no   67-67  165-165   0.0- 30.0    44  A.B.Smith
+ 120   n    CC rot.  yes  no   67-67  165-165   0.0- 30.0    44  A.B.Smith
+2007   n    CC rot.  no   no   67-69  165-169   0.0- 30.0    45  P.G.Young
+2003   n    CC rot.  no   no   67-69  165-169   0.0-100.0    46  E.D.Arthur
+ 201   n    spher.   no   no   69-95  147-999   0.0- 20.0     1  S.Igarasi
+ 241   n    spher.   no   no   69-95  147-999   0.0- 20.0     2  S.Igarasi
+ 585   n    spher.   no   no   69-69  169-169   0.1- 20.0    43  Ge
+ 586   n    spher.   no   no   71-71  174-174   0.1- 20.0    47  Han
+ 587   n    spher.   no   no   71-71  175-175   0.1- 20.0    47  Han
+ 403   n    spher.   no   no   74-74  182-186   0.0- 30.0    48  J.P.Delaroche
+2002   n    CC rot.  no   no   74-74  182-186   0.0-100.0    49  P.G.Young
+2005   n    CC rot.  no   no   75-75  185-187   0.0- 20.0    50  R.Macklin
+1463   n    spher.   no   yes  78-78  194-194   0.0-200.0     6  A.J.Koning
+  21   n    spher.   no   no   79-79  197-197   0.0- 20.0     7  R.C.Harper
+ 400   n    CC rot.  no   no   79-79  197-197   0.0- 57.0    51  J.P.Delaroche
+1464   n    spher.   no   yes  79-79  197-197   0.0-200.0     6  A.J.Koning
+1465   n    spher.   no   yes  80-80  202-202   0.0-200.0     6  A.J.Koning
+ 102   n    spher.   no   no   82-82  206-208   5.0- 50.0    52  R.W.Finlay
+ 121   n    spher.   yes  yes  82-82  208-208   0.0- 80.0    53  Weisel
+   2   n    vibra.   no   no   82-82  208-208   0.0-200.0    54  H.Vonach
+1466   n    spher.   no   yes  82-82  208-208   0.0-200.0     6  A.J.Koning
+ 402   n    spher.   no   no   83-83  209-209   0.0- 30.0    55  O.Bersillon
+ 122   n    spher.   yes  yes  83-83  209-209   0.0- 80.0    53  Weisel
+1467   n    spher.   no   yes  83-83  209-209   0.0-200.0     6  A.J.Koning
+   9   n    spher.   no   no   90-95  230-250   0.0- 10.0    57  D.G.Madland
+ 408   n    CC rot.  no   no   90-90  230-232   0.0- 20.0    58  Ch.Lagrange
+ 414   n    CC rot.  no   no   90-90  232-232   0.0- 20.0    59  G.Haouat
+ 409   n    CC rot.  no   no   92-92  234-234   0.0- 20.0    58  Ch.Lagrange
+ 415   n    CC rot.  no   no   92-92  235-235   0.0- 20.0    59  G.Haouat
+   3   n    CC rot.  no   no   92-92  235-235   0.0- 30.0    60  P.G.Young
+   4   n    CC rot.  no   no   92-92  237-237   0.0- 30.0    61  P.G.Young
+ 410   n    CC rot.  no   no   92-92  238-238   0.0- 20.0    58  Ch.Lagrange
+ 416   n    CC rot.  no   no   92-94  238-239   0.0- 20.0    59  G.Haouat
+   5   n    CC rot.  no   no   92-92  238-238   0.0- 30.0    61  P.G.Young
+2006   n    CC rot.  no   no   92-92  238-238   0.0-200.0    62  P.G.Young
+   1   n    CC rot.  no   no   93-93  237-237   0.0- 30.0    60  P.G.Young
+ 406   n    CC rot.  no   no   94-94  236-244   0.0- 20.0    63  Ch.Lagrange
+   7   n    CC rot.  no   no   94-94  239-239   0.0- 30.0    61  P.G.Young
+   6   n    CC rot.  no   no   94-94  242-242   0.0- 20.0    64  D.G.Madland
+ 411   n    CC rot.  no   no   94-94  242-242   0.0- 20.0    58  Ch.Lagrange
+ 417   n    CC rot.  no   no   94-94  242-242   0.0- 20.0    59  G.Haouat
+   8   n    CC rot.  no   no   95-95  241-243   0.0- 30.0    65  P.G.Young
+ 412   n    CC rot.  no   no   96-96  246-246   0.0- 20.0    58  Ch.Lagrange
+ 413   n    CC rot.  no   no   98-98  252-252   0.0- 20.0    58  Ch.Lagrange
+
+protons 
+------- 
+4102   p    spher.   no   no    6-82   12-208  30.0- 60.0    66  J.J.H.Menet
+5001   p    spher.   no   yes   6-82   12-208  50.0-400.0     4  D.G.Madland
+5405   p    spher.   no   yes  13-83   27-209   0.0-200.0    10  A.J.Koning
+4100   p    spher.   no   no   16-49   30-100   0.0- 22.0    68  F.G.Perey
+4101   p    spher.   no   no   20-83   40-209  10.0- 50.0    70  F.D.Becchetti
+5100   p    spher.   no   no   20-83   40-209  16.0- 65.0    14  R.L.Varner
+4108   p    spher.   no   no   20-82   48-208  25.0- 45.0    72  D.M.Patterson
+5101   p    spher.   no   no   26-82   54-208  10.0- 80.0    73  R.L.Walter
+
+4015   p    spher.   no   no    6- 6   12- 12   0.0- 65.0    67  M.B.Chadwick
+4016   p    spher.   no   no    7- 7   14- 14   0.0- 70.0    67  M.B.Chadwick
+4017   p    spher.   no   no    8- 8   16- 16   0.0- 50.0    67  M.B.Chadwick
+4018   p    spher.   no   no   13-13   27- 27   0.1- 20.0     7  R.C.Harper
+4416   p    spher.   no   yes  13-13   27- 27   0.0-200.0     6  A.J.Koning
+4417   p    spher.   no   yes  14-14   28- 28   0.0-200.0     6  A.J.Koning
+4660   p    spher.   no   no   19-19   41- 41   1.0-  7.0    69  Y.P.Viyogi
+4418   p    spher.   no   yes  20-20   40- 40   0.0-200.0     6  A.J.Koning
+4651   p    spher.   no   no   20-20   48- 48   3.0-  5.0    71  S.Kailas
+4662   p    spher.   no   no   20-20   48- 48   1.0-  7.0    69  Y.P.Viyogi
+4650   p    spher.   no   no   21-21   45- 45   3.0-  5.0    71  S.Kailas
+4661   p    spher.   no   no   21-21   45- 45   1.0-  7.0    69  Y.P.Viyogi
+4663   p    spher.   no   no   22-22   49- 49   1.0-  7.0    69  Y.P.Viyogi
+4652   p    spher.   no   no   23-23   51- 51   3.0-  5.0    71  S.Kailas
+4664   p    spher.   no   no   23-23   51- 51   1.0-  7.0    69  Y.P.Viyogi
+4653   p    spher.   no   no   24-24   54- 54   3.0-  5.0    71  S.Kailas
+4000   p    spher.   no   no   25-26   54- 56   0.0- 28.0    19  E.D.Arthur
+4665   p    spher.   no   no   25-25   55- 55   1.0-  7.0    69  Y.P.Viyogi
+4419   p    spher.   no   yes  26-26   54- 54   0.0-200.0     6  A.J.Koning
+4420   p    spher.   no   yes  26-26   56- 56   0.0-200.0     6  A.J.Koning
+4001   p    spher.   no   no   26-27   59- 59   0.0- 23.0    74  E.D.Arthur
+4654   p    spher.   no   no   27-27   59- 59   3.0-  5.0    71  S.Kailas
+4666   p    spher.   no   no   27-27   59- 59   1.0-  7.0    69  Y.P.Viyogi
+4019   p    spher.   no   no   28-28   58- 58   0.1- 20.0     7  R.C.Harper
+4421   p    spher.   no   yes  28-28   58- 58   0.0-200.0     6  A.J.Koning
+4422   p    spher.   no   yes  28-28   60- 60   0.0-200.0     6  A.J.Koning
+4655   p    spher.   no   no   28-28   61- 61   3.0-  5.0    71  S.Kailas
+4667   p    spher.   no   no   28-28   61- 61   1.0-  7.0    69  Y.P.Viyogi
+4423   p    spher.   no   yes  28-28   62- 62   0.0-200.0     6  A.J.Koning
+4425   p    spher.   no   yes  28-28   64- 64   0.0-200.0     6  A.J.Koning
+4424   p    spher.   no   yes  29-29   63- 63   0.0-200.0     6  A.J.Koning
+4656   p    spher.   no   no   29-29   65- 65   3.0-  5.0    71  S.Kailas
+4668   p    spher.   no   no   29-29   65- 65   1.0-  7.0    69  Y.P.Viyogi
+4669   p    spher.   no   no   30-30   68- 68   1.0-  7.0    69  Y.P.Viyogi
+4657   p    spher.   no   no   31-31   71- 71   3.0-  5.0    71  S.Kailas
+4670   p    spher.   no   no   31-31   71- 71   1.0-  7.0    69  Y.P.Viyogi
+4658   p    spher.   no   no   33-33   75- 75   3.0-  5.0    71  S.Kailas
+4671   p    spher.   no   no   33-33   75- 75   1.0-  7.0    69  Y.P.Viyogi
+4659   p    spher.   no   no   34-34   80- 80   3.0-  5.0    71  S.Kailas
+4672   p    spher.   no   no   34-34   80- 80   1.0-  7.0    69  Y.P.Viyogi
+4002   p    spher.   no   no   38-38   88- 89   0.0- 21.0    28  E.D.Arthur
+4109   p    spher.   no   no   39-39   89- 89   1.0-  7.0    75  C.H.Johnson
+4673   p    spher.   no   no   39-39   89- 89   1.0-  7.0    69  Y.P.Viyogi
+4003   p    spher.   no   no   39-39   89- 89   0.0- 21.0    28  E.D.Arthur
+4426   p    spher.   no   yes  40-40   90- 90   0.0-200.0     6  A.J.Koning
+5404   p    spher.   no   no   40-40   90- 90   0.0-200.0    31  A.J.Koning
+4125   p    spher.   no   no   40-40   92- 92   2.0-  7.0    76  D.S.Flynn
+4126   p    spher.   no   no   40-40   94- 94   2.0-  7.0    76  D.S.Flynn
+4127   p    spher.   no   no   40-40   96- 96   2.0-  7.0    76  D.S.Flynn
+4110   p    spher.   no   no   41-41   93- 93   1.0-  7.0    75  C.H.Johnson
+4674   p    spher.   no   no   41-41   93- 93   1.0-  7.0    69  Y.P.Viyogi
+4020   p    spher.   no   no   41-41   93- 93   0.1- 20.0     7  R.C.Harper
+4128   p    spher.   no   no   42-42   95- 95   2.0-  7.0    76  D.S.Flynn
+4675   p    spher.   no   no   42-42   96- 96   1.0-  7.0    69  Y.P.Viyogi
+4129   p    spher.   no   no   42-42   98- 98   2.0-  7.0    76  D.S.Flynn
+4676   p    spher.   no   no   42-42   98- 98   1.0-  7.0    69  Y.P.Viyogi
+4130   p    spher.   no   no   42-42  100-100   2.0-  7.0    76  D.S.Flynn
+4111   p    spher.   no   no   45-45  103-103   1.0-  7.0    75  C.H.Johnson
+4677   p    spher.   no   no   45-45  103-103   1.0-  7.0    69  Y.P.Viyogi
+4112   p    spher.   no   no   46-46  105-105   1.0-  7.0    75  C.H.Johnson
+4678   p    spher.   no   no   46-46  105-105   1.0-  7.0    69  Y.P.Viyogi
+4113   p    spher.   no   no   47-47  107-107   1.0-  7.0    75  C.H.Johnson
+4679   p    spher.   no   no   47-47  107-107   1.0-  7.0    69  Y.P.Viyogi
+4114   p    spher.   no   no   47-47  109-109   1.0-  7.0    75  C.H.Johnson
+4680   p    spher.   no   no   47-47  109-109   1.0-  7.0    69  Y.P.Viyogi
+4115   p    spher.   no   no   48-48  110-110   1.0-  7.0    75  C.H.Johnson
+4681   p    spher.   no   no   48-48  110-110   1.0-  7.0    69  Y.P.Viyogi
+4116   p    spher.   no   no   48-48  111-111   1.0-  7.0    75  C.H.Johnson
+4117   p    spher.   no   no   48-48  113-113   1.0-  7.0    75  C.H.Johnson
+4118   p    spher.   no   no   48-48  114-114   1.0-  7.0    75  C.H.Johnson
+4119   p    spher.   no   no   49-49  115-115   1.0-  7.0    75  C.H.Johnson
+4682   p    spher.   no   no   49-49  115-115   1.0-  7.0    69  Y.P.Viyogi
+4120   p    spher.   no   no   50-50  116-116   1.0-  7.0    75  C.H.Johnson
+4683   p    spher.   no   no   50-50  120-120   1.0-  7.0    69  Y.P.Viyogi
+4427   p    spher.   no   yes  50-50  120-120   0.0-200.0     6  A.J.Koning
+4121   p    spher.   no   no   50-50  122-122   1.0-  7.0    75  C.H.Johnson
+4122   p    spher.   no   no   50-50  124-124   1.0-  7.0    75  C.H.Johnson
+4684   p    spher.   no   no   50-50  124-124   1.0-  7.0    69  Y.P.Viyogi
+4123   p    spher.   no   no   52-52  128-128   1.0-  7.0    75  C.H.Johnson
+4685   p    spher.   no   no   52-52  128-128   1.0-  7.0    69  Y.P.Viyogi
+4124   p    spher.   no   no   52-52  130-130   1.0-  7.0    75  C.H.Johnson
+4686   p    spher.   no   no   52-52  130-130   1.0-  7.0    69  Y.P.Viyogi
+5004   p    CC rot.  no   no   63-63  151-153   0.0- 20.0    42  R.Macklin
+5003   p    CC rot.  no   no   67-69  165-169   0.0-100.0    46  E.D.Arthur
+5002   p    CC rot.  no   no   74-74  182-186   0.0-100.0    49  P.G.Young
+5005   p    CC rot.  no   no   75-75  185-187   0.0- 20.0    50  R.Macklin
+4004   p    CC rot.  no   no   79-79  197-197   0.0- 57.0    77  P.G.Young
+4428   p    spher.   no   yes  82-82  208-208   0.0-200.0     6  A.J.Koning
+4429   p    spher.   no   yes  83-83  209-209   0.0-200.0     6  A.J.Koning
+5006   p    CC rot.  no   no   92-92  238-238   0.0-200.0    62  P.G.Young
+
+deuterons 
+--------- 
+6400   d    spher.   no   no    6-82   12-208  20.0-100.0    78  J.Bojowald
+6100   d    spher.   no   no   20-83   40-209   8.0- 13.0    79  J.M.Lohr
+6101   d    spher.   no   no   20-82   40-208  11.0- 27.0    80  C.M.Perey
+
+6112   d    spher.   no   no   20-20   40- 40  11.8- 90.0    81  W.W.Daehnick
+6113   d    spher.   no   no   28-28   58- 58  11.8- 90.0    81  W.W.Daehnick
+6114   d    spher.   no   no   40-40   90- 90  11.8- 90.0    81  W.W.Daehnick
+6115   d    spher.   no   no   50-50  120-120  11.8- 90.0    81  W.W.Daehnick
+6116   d    spher.   no   no   82-82  208-208  11.8- 90.0    81  W.W.Daehnick
+
+tritons 
+------- 
+7100   t    spher.   no   no   20-82   40-208   1.0- 40.0    82  F.D.Becchetti
+
+3-He 
+------- 
+8100  3He   spher.   no   no   20-82   40-208   1.0- 40.0    82  F.D.Becchetti
+
+8101  3He   spher.   no   no   20-20   40- 40  21.0- 84.0    83  H.H.Chang
+8102  3He   spher.   no   no   28-28   58- 58  22.0- 84.0    83  H.H.Chang
+
+4-He 
+------- 
+9100  4He   spher.   no   no    8-82   16-208   1.0- 25.0    84  L.McFadden
+9600  4He   spher.   no   no    8-96   16-250   1.0- 73.0    85  V.Avrigeanu
+9101  4He   spher.   no   no   10-92   20-235   1.0- 46.0    86  J.R.Huizenga
+9000  4He   spher.   no   no   13-26   27- 56   1.0-100.0    87  E.D.Arthur
+9400  4He   spher.   no   no   20-45   40-100   1.0- 30.0    88  B.Strohmaier
+
+9018  4He   spher.   no   no   13-13   27- 27   0.1- 20.0     7  R.C.Harper
+9401  4He   spher.   no   no   22-30   37- 86  20.0- 30.0    89  O.F.Lemos
+9001  4He   spher.   no   no   27-27   59- 59   1.0-100.0    90  E.D.Arthur
+9019  4He   spher.   no   no   28-28   58- 58   0.1- 20.0     7  R.C.Harper
+9020  4He   spher.   no   no   41-41   93- 93   0.1- 20.0     7  R.C.Harper
+
+                      REFERENCES
+
+  1.  S.Igarasi, Japan At.Ener.Res. Insti. 1228 , 41 (1973)
+  2.  S.Igarasi, JAERI-M 5752 (1974)
+  3.  M.B.Chadwick and P.G.Young, Nucl.Sci.Eng. 123, 17 (1996)
+  4.  D.G.Madland, OECD/NEA Specialists Mtg. on Opt.Mod.to 200 MeV,Paris
+      ,1997
+  5.  J.C.Ferrer,J.D.Carlson, and J.Rapaport, Nucl. Phys. A275,325 (1977
+      )
+  6.  A.J.Koning, J.P.Delaroche, To be published, 2002.
+  7.  R.C.Harper and W.L.Alford, J.Phys.G:Nucl.Phys. 8, 153(1982)
+  8.  J.Petler,M.S.Islam, and R.W.Finlay, Phys. Rev. C 32 ,673 (1985)
+  9.  Molina A., Capote R., Quesada J.M., Lozano M., Universidad de Sevi
+      lla, Accepted by Phys.Rev.C (to be published in march 2002).
+ 10.  A.J.Koning, J.P.Delaroche, Phys. Rev. C, submitted for publication
+      , July,2001
+ 11.  Lee Y.O. et al., J. Nucl. Sci. Eng. 36 (1999) 1125-1134
+ 12.  P.A.Moldauer, Nucl. Phys. 47,65(1963)
+ 13.  D.Wilmore and P.E.Hodgson, Nucl. Phys. 55,673 (1964)
+ 14.  R.L.Varner,W.J.Thompson,T.L.McAbee,E.J.Ludwig,T.B.Clegg, Phys. Rep
+      . 201,57 (1991)
+ 15.  F.D.Becchetti, Jr. and G.W.Greenlees, Phys. Rev. 182,1190 (1969)
+ 16.  C.A.Engelbrecht and H.Fiedeldey,  Ann. Phys. 42,262-295 (1967)
+ 17.  B.Strohmaier et al, IAEA Advisory Group Meeting, Rad. Damage ,1981
+
+ 18.  A.Prince, Int. Conf. on Nucl. Data, Antwerp ,1982
+ 19.  E.D.Arthur and P.G.Young, LA-UR-95-3654 (1995),BNL-NCS-51245 (1980
+      ) p.731, LA-8626-MS (1980)
+ 20.  R.L.Walter and P.P.Guss,  Rad. Effects 92, 1079 (1985) [1985 Santa
+       Fe Conf. Proc.]
+ 21.  E.D.Arthur, P.G.Young, and W.Matthes, BNL-51245,p.751 (1980); Nucl
+      .Sci.Eng.124,271(1996)
+ 22.  P.G.Young and D.Rutherford, Report IAEA-TECDOC-483,167 (1988)
+ 23.  Zhang Songbai (China Nuclear Data Center), Communication of Nuclea
+      r Data Progress, No.21(1999)52
+ 24.  Japan At.Ener.Res. Insti., JNDC FP Nucl. Data WG
+ 25.  Cai Chonghai (Nankai University, Tianjin, P.R.China), Communicatio
+      n of Nuclear Data Progress, No.21(1999)40
+ 26.  Cai Chonghai (Nankai University, Tainjin, P.R.China), to be publis
+      hed
+ 27.  A.B.Smith,P.T.Guenther,J.F.Whalen,  Nucl. Phys. A415,1 (1984)
+ 28.  E.D.Arthur, Nucl.Sci.Eng. 76,137 1980)
+ 29.  Cai Chonghai (Nankai University, Tianjin, P.R.China), to be publis
+      hed
+ 30.  E.D.Arthur, Nucl.Sci.Eng. 76,137(1980); LA-UR-94-3104 (1994)
+ 31.  A.J.Koning, J.J.van Wijk, J.P.Delaroche, OECD/NEA Specialists Mtg.
+       on Opt.Mod.to 200 MeV,Paris,1997
+ 32.  Rong Jian, Zhang Zhengjun (China Nuclear Data Center), to be publi
+      shed
+ 33.  Cai Chonghai, to be published
+ 34.  Cai Chonghai, Ge Zhigang (China Nuclear Data Center), to be publis
+      hed
+ 35.  Zhang Zhengjun  (Phys. Dept. of Northwest Univ., Xian), to be publ
+      ished
+ 36.  Zhang Zhengjun, Ge Zhigang (China Nuclear Data Center), to be publ
+      ished
+ 37.  Zhang Zhengjun et al., to be published
+ 38.  Zhang Zhengjun et al., Communication of Nuclear Data Progress, No.
+       20(1998)77.
+ 39.  Shen Qingbiao  (China Nuclear Data Center), to be published
+ 40.  Shen Qingbiao, Zhang Zhengjun  (China Nuclear Data Center), to be 
+      published
+ 41.  Ge Zhigang (China Nuclear Data Center), Communication of Nuclear D
+      ata Progress, No.21(1999)35
+ 42.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 95,189(1987)
+ 43.  Ge Zhigang (China Nuclear Data Center), to be published
+ 44.  A.B.Smith, Report ANL/NDM-151 (December, 2000)
+ 45.  P.G.Young, Report LA-UR (1997)
+ 46.  E.D.Arthur and C.Philis, Report LA-8630-PR,p2 (1980)
+ 47.  Han Yinlu (China Nuclear Data Center), to be published
+ 48.  J.P.Delaroche et al., Int. Conf. on Nucl. Data, Knoxville,TN,1979
+ 49.  P.G.Young,E.D.Arthur,M.Bozian,T.R.England,G.M.Hale,R.J.LaBauve,R.C
+      .Little,et al., LANL Report LA-11753-MS (1990); see also LA-8630-P
+      R,p2      (1980)
+ 50.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 97,239(1987)
+ 51.  J.P.Delaroche, Proc.Int.Conf.on Neut.Phys. for Reactors, Harwell(1
+      978)
+ 52.  R.W.Finlay et al., Phys. Rev. C 30, 796 (1984)
+ 53.  Weisel G. J., Tornow W et al, Phys.Rev.C54 (1996) 2410-2428
+ 54.  H.Vonach,A.Pavlik,M.B.Chadwick,R.C.Haight,R.O.Nelson,S.A.Wender,P.
+      G.Young, Phys. Rev. C 50, 1952 (1994)
+ 55.  O.Bersillon, CEA Report CEA-N-2284 (1982) p.130; see also NEANDC-2
+      22U
+ 56.  G.Vladuca, A.Tudora, and M.Sin, Rom. J. Phys.,tome 41, no. 7-8 (19
+      96) 515-526
+ 57.  D.G.Madland and P.G.Young, Int. Conf. ,Harwell ,UK  ,Sept. 25-29,1
+      978
+ 58.  Ch.Lagrange, NEANDC(E)228 "L", INDC(FR) 56/L (1982)
+ 59.  G.Haouat,J.Lachkar,Ch.Lagrange, Nucl.Sci.Engr.81,491(1982)
+ 60.  P.G.Young and E.D.Arthur, Proc.Int.Conf.Nucl.Data Sci.and Tech.,Ju
+      lich (1992) p894
+ 61.  P.G.Young and E.D.Arthur, LANL Report LA-UR-91-1424,894(1992)
+ 62.  P.G.Young, LANL Progress Report LA-11972-PR (1990) p.9
+ 63.  Ch.Lagrange, CEA-N-1970, NEANDC(E) 179 "L", INDC(FR) 16/L (1977)
+ 64.  D.G.Madland and P.G.Young, Report LA-7533-MS (1978)
+ 65.  P.G.Young and E.D.Arthur, LANL Report LA-UR-95-3654, paper at RIPL
+       CRP Mtg., Vienna,  Oct.30-Nov.3,1995.
+ 66.  J.J.H.Menet,E.E.Gross,J.J.Malanify, and A.Zucker, Phys. Rev. C4,11
+      14 (1971)
+ 67.  M.B.Chadwick and P.G.Young, Proc.Int. Particle Therapy Mtg. and PT
+      COG XXIV, 24-26 Apr. 1996,Detroit,Mich.
+ 68.  F.G.Perey, Phys. Rev. 131,745 (1963)
+ 69.  Y.P.Viyogi,  Ph.D Thesis  (Calcutta University 1983)
+ 70.  F.D.Becchetti Jr. and G.W.Greenlees, Phys. Rev. 182,1190 (1969)
+ 71.  S.Kailas et al, Phys. Rev. C 20, 1272(1979); Pramana.J.Phys.27, 13
+      9(1986)
+ 72.  D.M.Patterson et al,  Nucl. Phys. A263,261 (1976)
+ 73.  R.L.Walter and P.P.Guss, Rad. Effects 92, 1079 (1985) [1985 Santa 
+      Fe Conf. Proc.]
+ 74.  E.D.Arthur,P.G.Young,W.Matthes, BNL-51245,p.751 (1980); Nucl.Sci.E
+      ng.124,271(1996)
+ 75.  C.H.Johnson et al, Phys. Rev. Lett.39,1604(1977); Phys. Rev. C20,2
+      052(1979)
+ 76.  D.S.Flynn et al, Phys. Rev. C. 31, 87 (1985)
+ 77.  P.G.Young and E.D.Arthur, LA-UR-84-2767 (1984); LA-UR-94-3104 (199
+      4)
+ 78.  J.Bojowald et al,   Phys. Rev. C 38,1153(1988)
+ 79.  J.M.Lohr and W.Haeberli, Nucl. Phys. A232,381(1974)
+ 80.  C.M.Perey and F.G.Perey, Phys. Rev. 132,755 (1963)
+ 81.  W.W.Daehnick, J.D.Childs, and Z.Vrcelj, Phys. Rev. C21,2253 (1980)
+
+ 82.  F.D.Becchetti Jr. and G.W.Greenlees, Ann. Rept. J.H.Williams Lab.,
+       Univ. Minnesota (1969)
+ 83.  H.H.Chang et al, Nucl. Phys. A297,105 (1978)
+ 84.  L.McFadden and G.R.Satchler, Nucl. Phys. 84, 177 (1966)
+ 85.  V.Avrigeanu,P.E.Hodgson, and M.Avrigeanu, Report OUNP-94-02 (1994)
+       , Phys. Rev. C49,2136 (1994)
+ 86.  J.R.Huizenga and G.Igo, Nucl. Phys. 29,462 (1962)
+ 87.  E.D.Arthur and P.G.Young, Report LA-8636-MS(ENDF-304) (1980)
+ 88.  B.Strohmaier et al, Paper at the IAEA Advisory Group Meeting ,1981
+
+ 89.  O.F.Lemos, Orsay, Series A ,No.136 (1972)
+ 90.  E.D.Arthur,P.G.Young,W.Matthes, Report BNL-51245,751(1980)
+ 
