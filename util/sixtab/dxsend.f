@@ -667,6 +667,8 @@ C-V          MT number.
 C-V        - Fix spectra of charged particles.
 C-V        - Add photon spectra.
 C-V  04/01 Improved diagnostics.
+C-V  04/09 - Allow discrete level matching for cross sections
+C-V        - Redefine the requested level energy the nearest actual level
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
@@ -717,13 +719,16 @@ c...
 c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
-      IF(ELV.GT.0 .AND.
-     1  (MF0.EQ.4 .AND. (MT0.GE.51 .AND. MT0.LT.91) ) ) THEN
+      IF(ELV.GT.0 .AND. (MF0.EQ.3 .OR. MF0.EQ.4) .AND.
+     &  ( (MT0.GE. 51 .AND. MT0.LT. 91) .OR.
+     &    (MT0.GE.600 .AND. MT0.LT.649) .OR.
+     &    (MT0.GE.800 .AND. MT0.LT.849) ) ) THEN
 C* Find the matching energy level for discrete inelastic ang.distr.
         REWIND LEF
         CALL SKIPSC(LEF)
         MF=3
         DE=ELV
+        EL1=ELV
    12   MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(MT.GT.90 .OR. IER.NE.0) THEN
@@ -743,9 +748,13 @@ C* Inelastic level found, check energy level
         IF(ABS(EE-ELV).LT.DE) THEN
           MT0=MT
           DE =ABS(EE-ELV)
+          EL1=EE
         END IF
         IF(EE.LT.ELV) GO TO 12
-        MT=MT0
+C* Assign MT number corresponding to the level nearest to requested
+        MT =MT0
+C* Redefine the requested level energy with the actual
+        ELV=EL1
       END IF
 C*
 C* Check if reaction summation is required

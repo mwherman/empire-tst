@@ -3,8 +3,12 @@ C-Title  : Program LSTTAB
 C-Purpose: Tabulate ENDF and EXFOR data in PLOTTAB format
 C-Author : A.Trkov, IAEA-NDS.
 C-Version: 00/12 Original code
-C-V  02/06 - Fix formal parameters calling DXSEND (A.Trkov).
-C-V  02/12 - Fix DXSEXF retrieval of elastic angular distrib (Trkov).
+C-V  02/06  Fix formal parameters calling DXSEND (A.Trkov).
+C-V  02/12  Fix DXSEXF retrieval of elastic angular distrib (Trkov).
+C-V  03/11  Increase limit on MXP from 100000 to 200000 (Trkov).
+C-V  03/12  Upgrade to DXSELM for reconstructing element data (Trkov).
+C-V  04/01  Write LSTTAB.LOG with messages and warnings (Trkov).
+C-V  04/09  Discrete levels x-sect. request by level energy (Trkov)
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -38,24 +42,26 @@ C-M   FLEF LEF=2  ENDF source file.
 C-M   FLC4 LC4=3  EXFOR source file in computational format.
 C-M   FLPN LPN=7  Selected experimental points (PLOTTAB points fmt).
 C-M   FLCU LCU=8  Selected curve from ENDF file (PLOTTAB points fmt).
+C-M   FLLG LLG=9  Log-file for error messages and warnings.
 C-M
-C-Extern.: DXSEND,DXSEXF,COMCUR
+C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=100000,MXR=400000,MXEN=8)
+      PARAMETER   (MPT=1000,MXP=200000,MXR=600000,MXEN=5,MXIS=10)
       CHARACTER*1  CM
-      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU
+      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG
      1            ,FLEF(MXEN),COM(MXEN)
       CHARACTER*80 COM1,COM2
       CHARACTER*80 C80,RFX(MPT)
-      DIMENSION    ES(MXP),SG(MXP),RWO(MXR)
+      DIMENSION    ES(MXP),SG(MXP),RWO(MXR),ZEL(MXIS),FRC(MXIS)
 C* Default logical file units
-      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN
-     1    /  1,  2,  3,  5,  6, 7, 8 /
+      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG
+     1    /  1,  2,  3,  5,  6, 7, 8, 9 /
       DATA BLNK/'                                        '/
      1     FLLS/'PLOTC4.LST'/
      3     FLC4/'C4.DAT'/
      7     FLPN/'LSTTAB.PNT'/
      8     FLCU/'LSTTAB.CUR'/
+     9     FLLG/'LSTTAB.LST'/
      2     FLEF(1)/'ENDF.DAT'/
 C*
       DATA PI/3.14159265/
@@ -92,32 +98,55 @@ C* Define the ENDF files
       OPEN (UNIT=LEF,FILE=FLNM,STATUS='OLD',ERR=24)
       CLOSE(UNIT=LEF)
       NEN=NEN+1
-      COM(NEN)=BLNK
+      COM(NEN)=FLNM
       FLEF(NEN)=FLNM
       GO TO 25
    30 CONTINUE
 C...  IF(NEN.LE.1) GO TO 40
       WRITE(LTT,95) ' Total number of ENDF files entered     ',NEN
+C* Redefine labels if necessary
       DO 32 I=1,NEN
       WRITE(LTT,91) ' ENDF file                            : ',FLEF(I)
       WRITE(LTT,91) '$  Enter new label to redefine default: '
-      READ (LKB,91) COM(I)
+      READ (LKB,91) FLNM
+      IF(FLNM.NE.BLNK) COM(I)=FLNM
    32 CONTINUE
-C* Redefine labels if necessary
-   40 CONTINUE
+C*
+   40 WRITE(LTT,91) '$Enter the resol.broadening fraction  : '
+      READ (LKB,98) DMY
+      IF(DMY.GT.0.1) THEN
+        WRITE(LTT,91) ' ERROR: Range 0<ep6<0.1 - Redo          '
+        GO TO 40
+      ELSE IF(DMY.GT.0) THEN
+        EP6=DMY
+      END IF
 C*
 C* Open the output files
       OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
       OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
-C*
-   42 WRITE(LTT,91) '$Enter the resol.broadening fraction  : '
-      READ (LKB,98) DMY
-      IF(DMY.GT.0.1) THEN
-        WRITE(LTT,91) ' ERROR: Range 0<ep6<0.1 - Redo          '
-        GO TO 42
-      ELSE IF(DMY.GT.0) THEN
-        EP6=DMY
-      END IF
+      OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
+C* Print input specifications to terminal
+      WRITE(LTT,91) ' PLOTC4 list file                     : ',FLLS
+      WRITE(LTT,91) ' C4 file of EXFOR data                : ',FLC4
+      WRITE(LTT,91) ' List of ENDF files                     '
+     &             ,'Labels                                  '
+      DO I=1,NEN
+        WRITE(LTT,91) '   '//FLEF(I),COM(I)
+      END DO
+      WRITE(LTT,93) ' Resolution broadening fraction       : ',EP6
+C* Write banner to log file
+      WRITE(LLG,91)
+      WRITE(LLG,91) ' LSTTAB - Extract Data from ENDF / C4   '
+      WRITE(LLG,91) ' ------------------------------------   '
+      WRITE(LLG,91)
+      WRITE(LLG,91) ' PLOTC4 list file                     : ',FLLS
+      WRITE(LLG,91) ' C4 file of EXFOR data                : ',FLC4
+      WRITE(LLG,91) ' List of ENDF files                     '
+     &             ,'Labels                                  '
+      DO I=1,NEN
+        WRITE(LLG,91) '   '//FLEF(I),COM(I)
+      END DO
+      WRITE(LLG,93) ' Resolution broadening fraction       : ',EP6
 C*
 C* Select the PLOTC4 list entry index
    50 WRITE(LTT,91) '$Enter entry index number             : '
@@ -136,18 +165,23 @@ C* Process the index entry
       READ (C80,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
 C*
       COM2=C80(1:11)//C80(19:22)//C80(23:27)
-C     IF(MF.NE.3) COM2=COM2(1:20)//'E_inc='//C80(46:49)//C80(52:55)//
-c    1" eV"
-c     IF(C80(56:59).NE.'    ')
-c    1 COM2=COM2(1:30)//'An'//C80(56:59)
-c     IF(C80(63:67).NE.'    ')
-c    1 COM2=COM2(1:30)//'Eo'//C80(64:67)//C80(70:72)
-      IF(MF.NE.3) COM2=COM2(1:20)//C80(46:49)//C80(52:55)//
-     1" eV"
-      IF(C80(56:59).NE.'    ')
-     1 COM2=COM2(1:30)//C80(56:59)//" deg"
-      IF(C80(63:67).NE.'    ')
-     1 COM2=COM2(1:30)//C80(64:67)//C80(70:72)//" eV"
+      IF(MF.EQ.3) THEN
+        IF(C80(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
+      ELSE
+        WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+        IF(C80(56:59).NE.'    ')
+     &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        IF(C80(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
+      END IF
+C*
+C* Log the start of request
+      WRITE(LLG,91)
+      WRITE(LLG,95) ' Processing list index                : ',IDX
+      WRITE(LLG,93) ' Scaling factor                       : ',SCL
+      WRITE(LLG,95) ' Emitted particle ZA                  : ',IZP
+      WRITE(LLG,91) COM2
 C*
       IF(C80(55:62).EQ.'        '  ) DEG=-2
       IF(C80(63:72).EQ.'          ') EOU=-2
@@ -159,6 +193,8 @@ C*
       IF     (MF.EQ.3) THEN
         KEA=0
         PAR=0
+C*        Discrete energy level (if applicable)
+        IF(EOU.GT.0) ELV=EOU
       ELSE IF(MF.EQ.4) THEN
 C* Angular distributions (outg. particle energy-integrated)
         KEA=1
@@ -186,22 +222,32 @@ C* Extract the data from the ENDF file
       ZA =ZA0
       MTE=MT
       IF(MT.EQ.9000) MTE=5
-c...
-      print *,'DXSEND file: ',FLEF(M)
-      print *,'zap,mf,mt,kea,ein,par,elv',izp,mf,mte,kea,ein,par,elv
-c...
+      IF(NEN.GT.1) 
+     &WRITE(LLG,91) ' ------------------------------ File  : ',FLEF(M)
       OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD')
-      CALL DXSEND(LEF,ZA,ZAP,MF ,MTE,KEA,EIN,PAR,EP6,ES,SG
-     1           ,RWO,NP,MXP,MXR,LTT,ELV)
+      NUC=0
+      EL1=ELV
+      ZEL(1)=ZA
+      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PAR,EP6,ES,SG
+     1           ,RWO,NP,MXP,MXR,LLG,EL1)
       IF(NP.LE.0) THEN
-        PRINT *,'DXSEND ERROR - No matching curves for'
+        PRINT *,'LSTTAB ERROR - No matching curves for',NINT(ZA)
         PRINT *,'       mt,kea,ein,par',mt,kea,ein,par
+        WRITE(LLG,95)' LSTTAB ERROR - No matching curve for ZA',NINT(ZA)
+        WRITE(LLG, *)' zap,mf,mt,kea,ein,par',izp,mf,mt,kea,ein,par
       END IF
       CLOSE(UNIT=LEF)
 C* Prepare the ENDF comment header for the PLOTTAB curves file
-      COM1=COM(M)
-      MAT =IZ*100+(IA-100*(IA/100))
-      IF(COM(M).EQ.BLNK) CALL COMCUR(MAT,MF,MTE,KEA,EIN,PAR,COM1)
+      IF(COM(M).EQ.BLNK) THEN
+        MAT =IZ*100+(IA-100*(IA/100))
+        CALL COMCUR(MAT,MF,MTE,KEA,EIN,PAR,COM1)
+      ELSE
+        COM1=COM(M)
+      END IF
+
+      print *,'par,eou,elv,el1',par,eou,elv,el1
+
+      IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,91) COM1,COM2
       DO 82 I=1,NP
@@ -216,7 +262,7 @@ C* Suppress printing negative or zero points
    86 CONTINUE
 C*
 C* Extract the data from the C4 file
-      IF(MF.EQ.4 .AND. ELV.GT.0) PAR=ELV
+      IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) PAR=ELV
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
      1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
       CALL DXSEXF(LC4,LPN,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NP,NS,SCL,COM2)
@@ -234,6 +280,7 @@ C* All processing completed
 C*
    91 FORMAT(2A40)
    92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,1P,E10.3,0P,F8.2,1P,E10.3,I4)
+   93 FORMAT(A40,F10.3)
    94 FORMAT(1P,3(E11.5E1,E11.4))
    95 FORMAT(A40,I6)
    96 FORMAT(A80)
@@ -391,6 +438,9 @@ C* Test for matching data request
       IF(CM  .NE.MM(IM)) GO TO 20
       IF(MF  .NE.MF0   ) GO TO 20
       IF(MT  .NE.MT0   ) GO TO 20
+C* Test outgoing particle and discrete level energy
+      IF(MF.EQ.3 .AND.
+     &    (PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) ) GO TO 20
       IF(MF.GE.4 .AND. MF.LE.6) THEN
 C* Test outgoing particle
         IF(MT.GE.9000) THEN
