@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: MSC-NVWY.f,v 1.4 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: MSC-NVWY.f,v 1.5 2002-10-01 16:20:10 mike Exp $
 C
 C
       SUBROUTINE DECHMS(Jc, Ipc, Nnur, Nejc)
@@ -85,10 +85,10 @@ C-----clear scratch matrix
       itlc = iexc - 5
       iermax = NEX(1) - iexc
       IF(iermax.GE.1)THEN
-C-----
-C-----decay to the continuum
-C-----
-C-----do loop over r.n. spins
+C--------
+C--------decay to the continuum
+C--------
+C--------do loop over r.n. spins
          DO jr = 1, NLW, LTUrbo
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
@@ -846,22 +846,6 @@ C-----
 99006       FORMAT(I3, 7G11.3)
          ENDDO
       ENDIF
-C-----
-C-----estimate of the sd transmission coeff. (to be deleted)
-C-----
-C     RHO3=WT(3,2,1,EXCN)
-C     RHO5=WT(5,3,2,EXCN)
-C     WRITE(6,'('' ROPH3'',G12.5)') RHO3
-C     WRITE(6,'('' RO5'',G12.5)') RHO5
-C-----t particle,particle
-C-----propagator
-C     CONST = .75
-C     GNOT = GDRW*(1 - D1FRA)*CONST + GDRW*D1FRA
-C     PROP=1./(EGDRR**2+0.25*GNOT**2)
-C-----end of estimates
-C-----
-C-----do loops over spin and parity of c.n.
-C-----
       DO i = 1, 2
          ipii = -( - 1.0)**i
          ie1 = 2
@@ -1105,9 +1089,9 @@ C-----------------ereasing PIG matrix
                            pig(ix, jx) = 0.0
                         ENDDO
                      ENDDO
-C-----------------calculate nuclear temperature for the generalized Lorenzian to be
-C-----------------used for E1 strength function determination. NOTE: this temperature
-C-----------------is not consistent with the actual level densities.
+C--------------------calculate nuclear temperature for the generalized Lorenzian to be
+C--------------------used for E1 strength function determination. NOTE: this temperature
+C--------------------is not consistent with the actual level densities.
                      t = 0.
                      iec = NEX(1)
                      atil = 0.073*A(1) + 0.115*A(1)**0.666667
@@ -1117,7 +1101,7 @@ C-----------------is not consistent with the actual level densities.
                      IF(EX(iec, 1).GE.YRAst(j, 1))
      &                  t = SQRT((EX(iec,1) - YRAst(j,1))/accn)
 C
-C-----------------calculation of state densities in all substages of c.n.
+C--------------------calculation of state densities in all substages of c.n.
 C
                      DO kg = 1, NDMSCS
 C                       DO KG = 1, NC2
@@ -1141,10 +1125,10 @@ C                       DO KG = 1, NC2
      &                              + roph(kg, 3)
                         roph(kg, 4) = ropht(kg) - roph3(kg)
                      ENDDO
-C-----------------
-C-----------------construction of the PIG matrix (contains no gamma contribution !)
-C-----------------
-C-----------------particle emission in diagonal elements
+C--------------------
+C--------------------construction of the PIG matrix (contains no gamma contribution !)
+C--------------------
+C--------------------particle emission in diagonal elements
                      npigzero = 0
                      IF(ISD.EQ.1)pig(1, 1) = pimem(1)
                      IF(pig(1, 1).EQ.0.0D0)npigzero = 1
@@ -1159,45 +1143,45 @@ C-----------------particle emission in diagonal elements
      &                        npigzero = npigzero + 1
                         ENDDO
                      ENDDO
-C-----------------skip gamma emission if there are more than one 0's on the PIG diagonal
+C--------------------skip gamma emission if there are more than one 0's on the PIG diagonal
                      IF(npigzero.LE.1)THEN
-C-----------------
-C-----------------offdiagonal elements
-C-----------------
+C-----------------------
+C-----------------------offdiagonal elements
+C-----------------------
                         IF(ISD.NE.0)THEN
-C--------------------(1,4)->(2,1-3) creation of GDR
+C-------------------------(1,4)->(2,1-3) creation of GDR
                            ecor = ((ip(1)**2 + ih(1)**2)
      &                            /4.0 + (ip(1) - ih(1))/4.0 - ih(1)
      &                            /2.0)/G
-C--------------------probability for one hole to have enough energy to create GDR
+C--------------------------probability for one hole to have enough energy to create GDR
                            xxxx = WOBL(ip(1), ih(1) - 1, EXCn - ecor, 0)
                            ygdr = WOBL(ip(1), ih(1) - 1, egdrr - ecor, 
      &                            0)/xxxx
-C--------------------using full spreading width of the GDR
+C--------------------------using full spreading width of the GDR
                            ccre = -6.28319*roph(1, 4)
      &                            *ygdr*gdrw*D1Fra/roph3(2)
-C--------------------using spreading width of the GDR split among three classes
+C--------------------------using spreading width of the GDR split among three classes
 C                          CCRE=-6.28319*ROPH(1,4)*YGDR*GDRW*D1FRA*ROPHT(1)
 C                          CCRE=CCRE/(ROPHT(1)+ROPHT(2)+ROPHT(3))/ROPH3(2)
-C--------------------using single particl matrix element with analogy to
+C--------------------------using single particl matrix element with analogy to
 C                          (1,4)-->(2,4) CALL GDOWN(Y,IP(1),IH(1),EXCN-ECOR)
 C                          YSP=Y/AW(1)
 C                          CCRE=-6.28319*ROPH(1,4)*YGDR*VMN*YSP/ROPH3(2)
-C--------------------
+C--------------------------
                            pig(1, 2) = ccre*roph(2, 1)
                            pig(2, 1) = pig(1, 2)
                            pig(1, 3) = ccre*roph(2, 2)
                            pig(3, 1) = pig(1, 3)
                            pig(1, 4) = ccre*roph(2, 3)
                            pig(4, 1) = pig(1, 4)
-C-------------------       (1,4)->(2,4) use s.p. matrix element
+C--------------------------(1,4)->(2,4) use s.p. matrix element
                            CALL GDOWN(y, ip(1), ih(1), EXCn - ecor)
                            ysp = y/aw(1)
                            cgd = -6.28319*vmn*ysp
                            pig(1, 5) = cgd*roph(1, 4)*roph(2, 4)
      &                                 /ropht(2)
                            pig(5, 1) = pig(1, 5)
-C--------------------summing the matrix elements on the right
+C--------------------------summing the matrix elements on the right
                            pig(1, 1) = pig(1, 1) - pig(1, 2) - pig(1, 3)
      &                                 - pig(1, 4) - pig(1, 5)
                            pig(2, 2) = pig(2, 2) - pig(2, 1)
@@ -1206,16 +1190,16 @@ C--------------------summing the matrix elements on the right
                            pig(5, 5) = pig(5, 5) - pig(5, 1)
                         ENDIF
                         DO kg = kgin, ncm
-C--------------------next  4 lines calculate interstage rate VMN calculated
-C--------------------ang.  from o.m. mom. coeff. being neglected as they nearly
-C--------------------(m,4)->(m+1,4) use s.p. matrix element
-C                          cancel out
+C--------------------------next  4 lines calculate interstage rate VMN calculated
+C--------------------------ang.  from o.m. mom. coeff. being neglected as they nearly
+C--------------------------(m,4)->(m+1,4) use s.p. matrix element
+C--------------------------cancel out
                            ecor = ((ip(kg)**2 + ih(kg)**2)
      &                            /4.0 + (ip(kg) - ih(kg))/4.0 - ih(kg)
      &                            /2.0)/G
                            CALL GDOWN(y, ip(kg), ih(kg), EXCn - ecor)
-C--------------------Y     should be multiplied by G**3 but omitted since
-C                          omitted in VMN
+C--------------------------Y should be multiplied by G**3 but omitted since
+C--------------------------omitted in VMN
                            ysp = y/aw(kg)
                            cgd = -3.14159*2.*vmn*ysp
                            ix = (kg - kgin + 1)*4 + ISD
@@ -1233,8 +1217,8 @@ C                          omitted in VMN
      &                            /4.0 - (ih(kg) - 1)/2.0)/G
                            CALL GDOWN(y, ip(kg) - 1, ih(kg) - 1, 
      &                                egdrr - ecor)
-C--------------------Y     should be multiplied by G**3 but omitted since
-C                          omitted in VMN
+C--------------------------Y should be multiplied by G**3 but omitted since
+C--------------------------omitted in VMN
                            IF(kg.GT.1)THEN
                               ysp = y/aw(kg - 1)
                            ELSE
@@ -1242,27 +1226,27 @@ C                             e = egdrr -
 C                             &
 C                             (((ip(kg)-1)**2+(ih(kg)-1)**2)/4.0+ &
 C                             (ip(kg)-ih(kg)-2)/4.0-(ih(kg)-1)/2.0)/G ysp =
-C--------------------------set 1p-0h level density to G to avoid 0 at energies
-C--------------------------above neutron binding (it would be more physical
-C--------------------------to y/W(ip(kg)-1,ih(kg)-1,e) ignore MSC gamma
-C--------------------------is emission in such cases but it small anyway)
+C-----------------------------set 1p-0h level density to G to avoid 0 at energies
+C-----------------------------above neutron binding (it would be more physical
+C-----------------------------to y/W(ip(kg)-1,ih(kg)-1,e) ignore MSC gamma
+C-----------------------------is emission in such cases but it small anyway)
                               ysp = y/G
                            ENDIF
                            cgd = -6.28319*vmn*ysp
                            DO kc1 = 1, 3
-C--------------------
-C--------------------(m,4)->(m+1,1-3) creation of GDR
-C--------------------
-C--------------------using    full spreading width of the GDR
+C-----------------------------
+C-----------------------------(m,4)->(m+1,1-3) creation of GDR
+C-----------------------------
+C-----------------------------using full spreading width of the GDR
                               ccre = -6.28319*roph(kg, 4)
      &                               *ygdr*gdrw*D1Fra/roph3(kg + 1)
-C-----------------------using spreading width of the GDR split among three
-C                             classes
+C-----------------------------using spreading width of the GDR split among three
+C-----------------------------classes
 C                             CCRE=-6.28319*ROPH(KG,4)*YGDR*GDRW*D1FRA*ROPHT 1
 C                             (KG)
 C                             CCRE=CCRE/(ROPHT(KG)+ROPHT(KG+1)+ROPHT(KG+2))/ 1
-C-----------------------using ROPH3(KG+1) single particl matrix element with
-C                             analogy to (1,4)-->(2,4) CALL
+C-----------------------------using ROPH3(KG+1) single particl matrix element with
+C-----------------------------analogy to (1,4)-->(2,4) CALL
 C                             GDOWN(Y,IP(KG),IH(KG),EXCN-ECOR) YSP=Y/AW(KG)
 C                             CCRE=-6.28319*ROPH(KG,4)*YGDR*VMN*YSP/ROPH3
 C                             1                     (KG+1)
@@ -1274,9 +1258,9 @@ C-----
                               pig(ix + kc1, ix + kc1)
      &                           = pig(ix + kc1, ix + kc1)
      &                           - pig(ix, ix + kc1)
-C-----------------------
-C-----------------------(m,1-3)->(m+1,4) use GDR spreading width, GDR distruction
-C-----------------------
+C-----------------------------
+C-----------------------------(m,1-3)->(m+1,4) use GDR spreading width, GDR distruction
+C-----------------------------
                               pig(ix + kc1 - 4, jx)
      &                           = -6.28319*roph(kg, kc1)*gdrw*D1Fra
                               pig(ix + kc1 - 4, ix + kc1 - 4)
@@ -1286,10 +1270,10 @@ C-----------------------
      &                           = pig(ix + kc1 - 4, jx)
                               pig(jx, jx) = pig(jx, jx)
      &                           - pig(jx, ix + kc1 - 4)
-C-----------------------
-C-----------------------(m,1-3)->(m+1,1-3) use s.p. matrix element and accessible
-C-----------------------state densities for the m-1 class, diagonal in
-C-----------------------      off-diagonal block
+C----------------------------
+C----------------------------(m,1-3)->(m+1,1-3) use s.p. matrix element and accessible
+C----------------------------state densities for the m-1 class, diagonal in
+C----------------------------off-diagonal block
                               pig(ix + kc1 - 4, jx + kc1 - 4)
      &                           = cgd*roph(kg, kc1)
                               pig(ix + kc1 - 4, ix + kc1 - 4)
@@ -1302,17 +1286,17 @@ C-----------------------      off-diagonal block
      &                           - pig(jx + kc1 - 4, ix + kc1 - 4)
                            ENDDO
                         ENDDO
-C-----------------
-C-----------------include coupling to the nc+1 class in PIG (when .not.nvwful)
-C-----------------
+C-----------------------
+C-----------------------include coupling to the nc+1 class in PIG (when .not.nvwful)
+C-----------------------
                         IF(.NOT.Nvwful)THEN
                            ecor = ((ip(NDMSCS)**2 + ih(NDMSCS)**2)
      &                            /4.0 + (ip(NDMSCS) - ih(NDMSCS))
      &                            /4.0 - ih(NDMSCS)/2.0)/G
                            CALL GDOWN(y, ip(NDMSCS), ih(NDMSCS), 
      &                                EXCn - ecor)
-C--------------------Yd    should be multiplied by G**3 but omitted since
-C                          omitted in VMN
+C--------------------------Yd should be multiplied by G**3 but omitted since
+C--------------------------omitted in VMN
                            ysp = y/aw(NDMSCS)
                            cgd = -3.14159*2.*vmn*ysp
                            ix = (NDMSCS - kgin + 1)*4 + ISD
@@ -1328,8 +1312,8 @@ C                          omitted in VMN
      &                            /4.0 - ih(NDMSCS - 1)/2.0)/G
                            CALL GDOWN(y, ip(NDMSCS) - 1, ih(NDMSCS) - 1, 
      &                                egdrr - ecor)
-C--------------------Yd    should be multiplied by G**3 but omitted since
-C                          omitted in VMN
+C--------------------------Yd should be multiplied by G**3 but omitted since
+C--------------------------omitted in VMN
                            ysp = y/aw(NDMSCS - 1)
                            cgd = -6.28319*vmn*ysp
                            DO kc1 = 1, 3
@@ -1344,9 +1328,9 @@ C                          omitted in VMN
      &                           - cgd*roph(NDMSCS, kc1)
                            ENDDO
                         ENDIF
-C-----------------
-C-----------------inclusion of semi-direct into the PIG matrix
-C-----------------
+C-----------------------
+C-----------------------inclusion of semi-direct into the PIG matrix
+C-----------------------
                         IF(ISD.EQ.1)THEN
                            ecor = 1./G
                            spw = vmn*WT(3, 2, 1, egdrr - ecor)
@@ -1374,7 +1358,7 @@ C                          WRITE(6,'('' 2,.-->2,., DIAGONAL'',G12.5)') PROPT
                            pig(3, 3) = pig(3, 3) + propt
                            pig(4, 4) = pig(4, 4) + propt
                         ENDIF
-C-----------------setting to zero matrix elem. where GDR is built on j=-1 states
+C-----------------------setting to zero matrix elem. where GDR is built on j=-1 states
                         IF(j.EQ.1)THEN
                            DO k1 = 1, ncm
                               DO k2 = 1, NG
@@ -1383,13 +1367,13 @@ C-----------------setting to zero matrix elem. where GDR is built on j=-1 states
                               ENDDO
                            ENDDO
                         ENDIF
-C-----------------memorize PIG matrix
+C-----------------------memorize PIG matrix
                         DO k1 = 1, NG
                            DO k2 = 1, NG
                               apig(k1, k2) = pig(k1, k2)
                            ENDDO
                         ENDDO
-C-----------------printout of the PIG matrix
+C-----------------------printout of the PIG matrix
                         IF(NG.LE.12 .AND. NOUt.GT.2)THEN
                            WRITE(6, 99013)j, i
 99013                      FORMAT(1X, 'PIG matrix   J=', I2, ' I=', I2)
@@ -1398,9 +1382,9 @@ C-----------------printout of the PIG matrix
                            ENDDO
                            WRITE(6, 99022)
                         ENDIF
-C-----------------
-C-----------------invertion of the PIG matrix
-C-----------------
+C-----------------------
+C-----------------------invertion of the PIG matrix
+C-----------------------
 C                       DO inc = 1, NG
 C                       ggg(inc) = 0.0
 C                       ENDDO
@@ -1413,7 +1397,7 @@ C                       CALL MATIN1(pig,ggg,NG,1,det)
      &                     ' PIG-matrix in MSC gamma emission singular '
                            GOTO 20
                         ENDIF
-C-----------------printout of the inverted PIG matrix
+C-----------------------printout of the inverted PIG matrix
                         IF(NG.LE.12 .AND. NOUt.GT.2)THEN
                            WRITE(6, 99014)j, i
 99014                      FORMAT(1X, 'Inverse PIG matrix   J=', I2, 
@@ -1423,9 +1407,9 @@ C-----------------printout of the inverted PIG matrix
                            ENDDO
                            WRITE(6, 99022)
                         ENDIF
-C-----------------
-C-----------------check of the invertion and printout
-C-----------------
+C-----------------------
+C-----------------------check of the invertion and printout
+C-----------------------
                         IF(NOUt.GT.2)THEN
                            DO k1 = 1, NG
                               DO k2 = 1, NG
@@ -1453,10 +1437,10 @@ C-----------------
                            ENDIF
                            WRITE(6, 99022)
                         ENDIF
-C-----------------
-C-----------------normalization of the inverted PIG matrix with the initial
-C-----------------population for gamma emission
-C-----------------
+C-----------------------
+C-----------------------normalization of the inverted PIG matrix with the initial
+C-----------------------population for gamma emission
+C-----------------------
                         DO k1 = 1, NG
                            spr(k1) = 0.0
                            IF(ISD.EQ.1)pig(1, k1) = pig(1, k1)
@@ -1484,26 +1468,26 @@ C-----------------
      &                            (1X, 12E11.4))
                            WRITE(6, 99022)
                         ENDIF
-C-----------------
-C-----------------do    loop over c.n. excitation energy (after gamma emission)
-C------------------
+C-----------------------
+C-----------------------do loop over c.n. excitation energy (after gamma emission)
+C-----------------------
                         sumtlg = 0.0
                         DO kcn = 1, NEX(1) - 1
                            ew = EX(kcn, 1)
                            eg = EXCn - ew
                            ks = NEX(1) - kcn + 1
-C--------------------gamma transmission coefficient
+C--------------------------gamma transmission coefficient
                            tg = E1(eg, TNUc(kcn, 1))
-C--------------------
-C--------------------SD    contribution
-C--------------------
+C--------------------------
+C--------------------------SD contribution
+C--------------------------
                            IF(ISD.EQ.1)THEN
                               IF(kcn.EQ.1)THEN
-C--------------------------propagator
+C--------------------------------propagator
                                  prop = 1./
      &                                  (egdrr**2 + 0.25*(gdrw*D1Fra + 
      &                                  gdrw*(1-D1Fra)*.75)**2)
-C--------------------------absorption cross section times propagator
+C--------------------------------absorption cross section times propagator
                                  sdabs = popart(1)
      &                              *prop*POP(NEX(1), j, i, 1)
      &                              *0.25/awj(1, j)
@@ -1516,7 +1500,7 @@ C--------------------------absorption cross section times propagator
                               ELSE
                                  rog = ROPHM(10100, ini, ew, DE)
                               ENDIF
-C-----------------------GAMMA GAMMA / ((2 PI G)*(1+X)**2) *G
+C-----------------------------GAMMA GAMMA / ((2 PI G)*(1+X)**2) *G
                               xga = (2.0 - tg - 2.0*SQRT(1.0 - tg))/tg
                               tlg = tg/(1 + xga)**2/(6.28*OMJd(1, j))
 C                             TLG = TG/4./ROPH3(1)
@@ -1526,18 +1510,18 @@ C                             TLG = TG/4./ROPH3(1)
                               tl3 = OMJd(1, j + 1)
                               tls = rog*(tl1 + tl2 + tl3)*sdabs*tlg
                               sumtlg = sumtlg + tls/sdabs
-C-----------------------n     o t e  ! ! ! x-section is not distributed over CN
-C                             bins
+C-----------------------------n o t e  ! ! ! x-section is not distributed over CN
+C-----------------------------bins
                               sdsp(ks) = sdsp(ks) + tls
                               GSP(ks) = GSP(ks) + tls
                            ENDIF
 C
-C--------------------SD    contribution done
+C--------------------------SD contribution done
 C
-C--------------------do    loop over stages and substages
+C--------------------------do loop over stages and substages
                            DO kg = kgin, NDMSCS
                               IF(rophc(kg).NE.0.0D0)THEN
-C--------------------------state density for gamma emission
+C--------------------------------state density for gamma emission
                                  IF(STMro.EQ.0.D0)THEN
                                     ecor = 
      &                                 (((ip(kg)-1)**2 + (ih(kg)-1)**2)
@@ -1603,7 +1587,7 @@ C--------------------------state density for gamma emission
                            ENDDO
                         ENDDO
 C                       WRITE(6,'('' SD GAMMA GAMMA ='',G12.5)') SUMTLG
-C-----------------T     GAMMA GAMMA ESTIMATE
+C-----------------------T GAMMA GAMMA ESTIMATE
 C                       DO LE = 1, 21, 2
 C                       ENG = LE
 C                       TG = E1(ENG,T)
@@ -1614,11 +1598,11 @@ C                       TLG1 = GNOT*PROP*SUMTLG*(1 + XGA)/2.
 Ccc                     TLG2 = PROP*TG/(6.28*OMJ(1,1,0,J,HIS(1),0))
 C                       1                  /(1+XGA)**2
 C                       TLG2 = PROP*SUMTLG
-C--------------------coupling to 1,2,3 subclasses
+C-----------------------coupling to 1,2,3 subclasses
 C                       TLG3 = TLG2*VMN*G/G**3
-C--------------------coupling to 4-th subclass
+C-----------------------coupling to 4-th subclass
 C                       END DO
-C-----------------t     gamma gamma estimate done
+C-----------------------t gamma gamma estimate done
                         IF(NOUt.GT.0)THEN
                            WRITE(6, 99022)
                            IF(ISD.EQ.1)WRITE(6, 99018)j, i, spr

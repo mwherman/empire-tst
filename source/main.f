@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: main.f,v 1.7 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: main.f,v 1.8 2002-10-01 16:20:10 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -401,10 +401,6 @@ C
 C=========================================================================
          ENDIF
       ENDIF
-C
-C     Skipping all emission calculations
-C     GOTO 99999
-C
 C-----locate postions of ENDF MT-numbers 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
       CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
@@ -832,7 +828,7 @@ C--------
 C--------start nnuc nucleus decay
 C--------
          popleft = 0.0
-C--------assure that full gamma cascade in the first CN is
+C--------ensure that full gamma cascade in the first CN is
 C--------accounted for in the case of ENDF calculations
          IF(ENDf.GT.0.0D0)GCAsc = 1.0
 C--------turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
@@ -991,7 +987,6 @@ C--------printout of results for the decay of NNUC nucleus
      &'(10X,''NOTE: due to ENDF option direct particle contribution was 
      &shifted to the g.s.'')')
          IF(IOUt.GT.0)WRITE(6, '(1X,/,10X,40(1H-),/)')
-C here HERE I have commented temporarily
          IF(ENDf.NE.0 .AND. nnuc.EQ.1)THEN
             WRITE(12, '(1X,/,10X,''Discrete level population '',
      &      ''before gamma cascade'')')
@@ -1002,7 +997,6 @@ C here HERE I have commented temporarily
             IF(IOUt.GT.0)WRITE(6, 99012)il, ELV(il, nnuc), LVP(il, nnuc)
      &                                  , XJLv(il, nnuc), 
      &                                  POPlv(il, nnuc)
-C here HERE I have commented temporarily
             IF(ENDf.NE.0 .AND. nnuc.EQ.1) THEN
 c--------------check for the number of branching ratios
                nbr = 0
@@ -1020,7 +1014,6 @@ c--------------check for the number of branching ratios
      &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
             ENDIF
          ENDDO
-C        here HERE I have commented temporarily
          WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
@@ -1947,9 +1940,17 @@ C-----end of ENDF spectra (inclusive)
       ENDIF
       FIRst_ein = .FALSE.
       GOTO 1400
+
+
+
+               WRITE(12,99012)il, ELV(il, nnuc), LVP(il, nnuc),
+     &                      XJLv(il, nnuc), POPlv(il, nnuc), nbr, 
+     &                      (NINT(BR(il,ib,1,nnuc)), 
+     &                      BR(il, ib, 2, nnuc), ib = 1, nbr)
+
+
 99012 FORMAT(10X, I2, F10.4, I5, F8.1, G15.6, I3, 1x, 
-C    &       30(I3, 1x, F6.4, 1x))
-     &       7(I3, 1x, F6.4, 1x), (:/, 53X, 1x, 7(I3,1x,F6.4,1x)))
+     &       7(I3, 1x, F6.4, 1x), :/, (53X, 1x, 7(I3,1x,F6.4,1x)))
 99013 FORMAT(1X, F5.2, 12G10.3)
       END
 C

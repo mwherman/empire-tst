@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: gamma-strgth.f,v 1.4 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: gamma-strgth.f,v 1.5 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -114,7 +114,7 @@ C-----GDR parameters according to Messina sytematics
       D2 = 5.46E-7*GDRpar(6, Nnuc)*GDRpar(5, Nnuc)**2
 C
 C-----GQR parameters due to: Z.Phys.A 315(1984)103 (width and peak c.s)
-C-----                       Rep. Prog. Phys. 44(1981)719 (energy)
+C                            Rep. Prog. Phys. 44(1981)719 (energy)
 C
       IF(GQRpar(1, Nnuc).EQ.0.0D0)THEN
          GQRpar(1, Nnuc) = 63.0/A(Nnuc)**0.3333
@@ -228,7 +228,7 @@ C
       tgscr = 1.0
       damp = 1.0/(1.0 + EXP((t-tgscr)/dt))
       defexc = DEF(Jcn, Nnuc) - DEF(1, Nnuc)*(1. - damp)
-C     GDR parameters according to Messina systematics
+C-----GDR parameters according to Messina systematics
       esys2 = 50.0*A(Nnuc)**( - 0.232)
       IF(ABS(defexc).GE.0.064D0)THEN
          e(2) = esys2 + GDResh
@@ -322,6 +322,9 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION XM1(Eg)
+C
+C-----calculates transmission coefficients for M1 gammas /Eqs. 17,18,19/
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -339,10 +342,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION ed, gmr
-C
-C
-C
-C-----calculates transmission coefficients for M1 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
       IF(TM1.NE.0.D0)gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)

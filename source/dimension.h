@@ -2,8 +2,8 @@
      * NDNUC= 50                   
      *,NDEJC=4 
      *,NDAFIS=1
-     *,NDEX=100
-     *,NDLW= 50
+     *,NDEX=200
+     *,NDLW= 30
      *,NDTL= 30
      *,NDMSCS=3 
      *,NDLV=50
@@ -15,7 +15,7 @@
      *,NDRWOM=3
      *,NDRVSO=3
      *,NDHRTW1=500         
-     *,NDHRTW2=10         
+     *,NDHRTW2=15         
      *,NDETL=NDEX+5
      *,NDECSE=NDEX+10
      *,NDEREC=NDECSE

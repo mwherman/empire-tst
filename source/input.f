@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: input.f,v 1.9 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: input.f,v 1.10 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -179,17 +179,17 @@ C     CORRESPOND TO THE FOLLOWING CONSTANT VALUES
 C     AMUmev=931.5017646d0                                              calc-088
 C     hhbarc = 197.328604d0                                             calc-089
       XNExc = 8.071323D0
-C     From SCAT2000
+C-----From SCAT2000
       ampipm = 1.395688D+02
       ampi0 = 1.349645D+02
-C     AMUmev = 9.3149386D+02
-C     according to the ENDF-6 manual (April 2001)
+C-----AMUmev = 9.3149386D+02
+C-----according to the ENDF-6 manual (April 2001)
       AMUmev = 9.31494013D+02
       AMPi = (2.D0*ampipm + ampi0)/3.D0
       ELE2 = 1.4399652D+00
       HHBarc = 1.97327053D+02
 C
-C     already converted to mb
+C-----already converted to mb
 C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
       W2 = 2.D0*AMUmev/HHBarc**2/10.D0
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
@@ -198,9 +198,9 @@ C     w2 = 2.d0*931.49386/(197.327053)**2 = 0,047845019
 C
 C
       IF(EIN.EQ.0.0D0)THEN
-C--------
+C        
 C--------default input parameters (skipped in non-first-energy calculation)
-C--------
+C        
          FIRst_ein = .TRUE.   
 C--------select Meyers-Swiatecki shell corrections
          SHNix = 0.0
@@ -272,6 +272,7 @@ C        IOPSYS = 1 WINDOWS (only needed for DEBUG purposes)
          IOPsys = 0
 C
 C--------CCFUF parameters
+C
          DV = 10.
          FCC = 1.
          NSCc = 4
@@ -302,22 +303,22 @@ C--------IOUt=4 as IOUt=2 + residual nuclei continuum population
 C--------       (up to spin 12)
 C--------IOUt=5 as IOUt=2 + transmission coefficients (up to l=12)
 C--------IOUt=6 as IOUt=2 + level densities (up to spin 12)
-C--------
+C        
 C--------default input parameters for HMS
-C--------
+C        
          LHMs = 0 !controls HMS (must be different from 0 for HMS to be used)
          NHMs = 100000   !number of events for Monte Carlo
          CHMs = 1.0      ! mult. default damp rate (for eval work to scale preq)
-C--------
+C        
 C--------default input parameters for MSD
-C--------
+C        
          MSD = 0
 C        ICOmpff must be off for DOM potential
          ICOmpff = 0  !compressional form factor off
 C        ICOmpff = 1  !compressional form factor on
-C--------
+C        
 C--------default input parameters for Heidelberg MSC
-C--------
+C        
          MSC = 0
 C--------STMro selects p-h densities: 0 for closed form, 1 for microscopic
          STMro = 0.0
@@ -358,9 +359,9 @@ C--------set ENDF flag to 0 (no ENDF file for formatting)
          ENDf = 0.0
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident)
          LHRtw = 1
-C--------
+C        
 C--------default input parameters    *** done ***
-C--------
+C        
 C--------ejectile neutron
          AEJc(1) = 1.
          ZEJc(1) = 0.
@@ -496,10 +497,10 @@ C--------set CN  for EXFOR retrieval
             RESidue(nnuc)(iend + 1:iend + 4) = ca1(1:3)
          ENDIF
 C--------other decaying nuclei
-C--------
+C        
 C--------NNUcd number of decaying nuclei
 C--------NNUct total number of nuclei considered
-C--------
+C        
          NEJcm = NDEJC
          IF(aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0)NEJcm = 3
 C--------correct ejectiles symbols
@@ -567,7 +568,7 @@ C--------retrieve of EXFOR data *** done ***
          DO nnuc = 1, NNUcd
             IF(A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc))NTArget = nnuc
             DO nejc = 1, NEJcm
-C              To find inelastic channel
+C--------------To find inelastic channel
                IF(AEJc(0).EQ.AEJc(nejc) .AND. ZEJc(0).EQ.ZEJc(nejc))
      &            NPRoject = nejc
                ares = A(nnuc) - AEJc(nejc)
@@ -602,7 +603,7 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
             ILIres = -1
          ENDIF
 C--------inteligent defaults
-C        By default non RIPL potentials are used
+C--------By default non RIPL potentials are used
          DO i = 0, NDEJC
             RIPl_omp(i) = .FALSE.
          ENDDO
@@ -653,7 +654,8 @@ C        3 prot. disc.   x     x     x      x      x
 C        4 prot. cont.   x     x     x      x      x
 C        5 gamma         x     x     x      x      x
 C
-C        with x=1 if used and x=0 if not.
+C--------with x=1 if used and x=0 if not.
+C
 C--------initialize matrix with 0's
          DO i = 1, NDREGIONS !over ejectiles/regions
             DO j = 1, NDMODELS !over models in the order as above
@@ -1033,9 +1035,9 @@ C-----calculate compound nucleus level density
          WRITE(6, 99002)(EX(i, nnuc), (RO(i,j,nnuc), j = 1, 12), i = 1, 
      &                  NEX(nnuc))
       ENDIF
-C-----
+C     
 C-----other decaying nuclei
-C-----
+C     
       DO nnuc = 1, NNUcd
          DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
@@ -3721,20 +3723,12 @@ C-----constant parameters for EXFOR retrieval
       DATA reaction/'N,F       ', 'N,TOT     '/
       DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
 C-----open local file for storing retrieved EXFOR data
-C-----check whether the existing one is not empty
-C-----commented since it CAN BE empty
-C     OPEN(UNIT = 19, FILE = 'EXFOR.DAT', STATUS = 'OLD', ERR = 50)
-C     READ(19,*,END=25)
-C     CLOSE(19)
-C     GOTO 99999
-C 25  CLOSE(19, STATUS = 'DELETE')
-C 50  CONTINUE
       OPEN(UNIT = 19, FILE = 'EXFOR.DAT', STATUS = 'NEW', ERR = 99999)
 C-----open EXFOR index
       OPEN(UNIT = 20, FILE = '../EXFOR/X4-INDEX.TXT', STATUS = 'OLD')
-C-----
+C     
 C-----scan EXFOR index for relevant subentries
-C-----
+C     
  100  READ(20, '(A115)', END = 500)indexrec
       IF(indexrec(1:10).NE.TARget)GOTO 100
       IF(NCHr.EQ.2 .AND. indexrec(11:12).NE.PROjec(1:2))GOTO 100
@@ -3757,9 +3751,9 @@ C-----
          ENDIF
       ENDIF
       subent = indexrec(70:77)
-C-----
+C     
 C-----retrive EXFOR entry including top subentry 001
-C-----
+C     
       toplast = ' '
       filename = '../EXFOR/subent'//'/'//subent(1:2)//'/'//subent(1:4)//
      &'/'//subent(1:8)//'.txt'
@@ -3897,7 +3891,7 @@ C-----------setting direct to zerO
 C--------empty line
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
-C--------'     collective levels:'
+C--------'collective levels:'
          READ(32, '(a100)')comment
          WRITE(6, '(a100)')comment
 C--------Reading ground state infomation (to avoid overwriting deformation)
@@ -4141,7 +4135,7 @@ C              ground state deformation for spherical nucleus is 0.0
          WRITE(32, '(1x,i3,1x,i3,a35)')iz, ia, 
      &                                ' nucleus is treated as spherical'
          IF(D_Xjlv(2).EQ.3 .AND. D_Lvp(2).EQ. - 1)THEN
-C           1st state is 3-, deleting all other collectives
+C-----------1st state is 3-, deleting all other collectives
             ND_nlv = 2
          ELSE
 C-----------Putting one phonon states first for spherical
@@ -4237,7 +4231,7 @@ C
 C
       SUBROUTINE FINDPOT(Ki, Ieof, Ipoten)
 C
-C     routine to find IPOTEN entry in the RIPL optical model database
+C-----routine to find IPOTEN entry in the RIPL optical model database
 C
 C
 C Dummy arguments

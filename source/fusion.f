@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:52 $
-Ccc   * $Id: fusion.f,v 1.4 2002-09-20 14:16:52 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: fusion.f,v 1.5 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -81,7 +81,7 @@ C
       PAR(i, ipa, l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
       tlj_calc = .FALSE.
 C
-C     Reduced mass corrected for proper mass values
+C-----Reduced mass corrected for proper mass values
 C
 C     xmas_Npro = ((AEJc(Npro)*amumev+XMAss_ej(Npro))/(amumev+xnexc))
 C     xmas_Ntrg = ((A(Ntrg)*amumev+XMAss(Ntrg))/(amumev+xnexc))
@@ -135,13 +135,13 @@ C
          IWArn = 0
 C
          IF(DIRect.EQ.2 .AND. AEJc(Npro).LE.1)THEN
-C           Target nucleus (elastic channel), incident neutron or proton
+C-----------Target nucleus (elastic channel), incident neutron or proton
             WRITE(6, *)' CC transmission coefficients used for ', 
      &                 'fusion determination'
-C------     Transmission coefficient matrix for incident channel
-C           is calculated (DIRECT = 2 (CCM)) using ECIS code.
-C           Preparing INPUT and RUNNING ECIS
-C           (or reading already calculated file)
+C-----------Transmission coefficient matrix for incident channel
+C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
+C-----------Preparing INPUT and RUNNING ECIS
+C-----------(or reading already calculated file)
             IF(DEFormed)THEN
                CALL ECIS_CCVIBROT(Npro, Ntrg, einlab, .TRUE.)
             ELSE
@@ -162,11 +162,11 @@ C
                CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, 0)
             ENDIF
          ENDIF
-C        IWARN=0 - 'NO Warnings'
-C        IWARN=1 - 'A out of the recommended range '
-C        IWARN=2 - 'Z out of the recommended range '
-C        IWARN=3 - 'Energy requested lower than recommended for this potential'
-C        IWARN=4 - 'Energy requested higher than recommended for this potential'
+C--------IWARN=0 - 'NO Warnings'
+C--------IWARN=1 - 'A out of the recommended range '
+C--------IWARN=2 - 'Z out of the recommended range '
+C--------IWARN=3 - 'Energy requested lower than recommended for this potential'
+C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
          IF(IWArn.EQ.1 .AND. FIRst_ein)WRITE(6, *)
      &      ' WARNING: OMP not recommended for A=', A(Ntrg)
          IF(IWArn.EQ.2 .AND. FIRst_ein)WRITE(6, *)
@@ -269,14 +269,14 @@ C
 C--------Renormalizing Tls
 C
          IF(MODelecis.GT.0 .AND. DIRect.EQ.1)THEN
-C           for CC OMP renormalizing to reaction XS calculated by ECIS
+C-----------for CC OMP renormalizing to reaction XS calculated by ECIS
             DO l = 1, maxlw
                stl(l) = stl(l)*(ecis_abs - SINl)/CSFus
                ELTl(l) = stl(l)
             ENDDO
          ELSE
-C           for SOMP including inelastic reaction XS calculated by ECIS
-C           in the SCAT2 calculated reaction XS
+C-----------for SOMP including inelastic reaction XS calculated by ECIS
+C-----------in the SCAT2 calculated reaction XS
             DO l = 1, maxlw
                stl(l) = stl(l)*(CSFus - SINl)/CSFus
                ELTl(l) = stl(l)
@@ -661,7 +661,7 @@ C
       DOUBLE PRECISION FUNCTION G(X)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
-C Capote 2001, added common variables
+C     Capote 2001, added common variables
 C
 C COMMON variables
 C

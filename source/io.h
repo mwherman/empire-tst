@@ -100,9 +100,3 @@ C     Added to check if file is not empty
 C     OPEN(UNIT=30,FILE='GAMMA.DAT')
       OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
-
-
-
-
-
-

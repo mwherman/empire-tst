@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: scnd-preeq.f,v 1.4 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: scnd-preeq.f,v 1.5 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc, Nnur, Nejc, Last)
 Ccc
@@ -95,8 +95,7 @@ C--------calculation of factorial      ***** done *******
          welld = 35.0 ! potential well depth (for p-h state densiies)
 C--------divide single nucleon in the continuum into neutron and proton components
 C--------assume TORY ratio between unlike and like interaction
-         pnratio = TORy/(TORy + 1.0)
-C        !unlike
+         pnratio = TORy/(TORy + 1.0) !unlike
          IF(ZEJc(0).EQ.0.0D0 .AND. Nejc.EQ.1)pnratio = 1.0 - pnratio
          IF(ZEJc(0).EQ.1.0D0 .AND. Nejc.EQ.2)pnratio = 1.0 - pnratio
 C--------do loop over 1-st residue excitation energy

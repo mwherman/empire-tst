@@ -421,8 +421,7 @@ C-----CN, continuum:
 C
       IF(IDNa(5, 4).EQ.1)THEN
          ie1 = iemaxdiscrete + 1
-         nextop = ie1 + NEX(1) - 2
-C        !highest bin excluding top CN energy
+         nextop = ie1 + NEX(1) - 2 !highest bin excluding top CN energy
          DO ie0 = ie1, nextop     ! over excitation energy
             DO jspin = 1, ndlwmaximum  ! over spin (parity populated evenly)
                tmp = populdegas(1, ie0, jspin)*0.5*renorm/DE
@@ -516,12 +515,12 @@ C
      &                      POP(ie0, 4, 2, nnur), popminus
          ENDDO
       ENDIF
-C
-C     CN-p, discrete levels
-C
+C-----
+C-----CN-p, discrete levels
+C-----
       IF(IDNa(3, 4).EQ.1)THEN
          nnur = NREs(2)
-C        Number of bins in discrete region
+C--------Number of bins in discrete region
          iemaxdiscrete = ELV(NLV(nnur), nnur)/DE + 0.5
          iemaxdiscrete = iemaxdiscrete - 1
          popdiscrete = 0.0
@@ -550,9 +549,9 @@ C-----------Add isotropic DEGAS contribution to direct ang. distributions
             WRITE(42, 99003)il, ELV(il, nnur), POPlv(il, nnur)
          ENDDO
       ENDIF
-C
-C     CN-p, continuum:
-C
+C-----
+C-----CN-p, continuum:
+C-----
       IF(IDNa(4, 4).EQ.1)THEN
          ie1 = iemaxdiscrete + 1
          DO ie0 = ie1, ndexmaximum     ! Excitation energy bin
@@ -583,11 +582,10 @@ C
      &                      POP(ie0, 4, 2, nnur), popminus
          ENDDO
       ENDIF
-C
-C
-C     As a next step in creating residual population, we check new
-C     CN population integral:
-C
+C-----
+C-----As a next step in creating residual population, we check new
+C-----CN population integral:
+C-----
       poptotallv = 0.0
       DO il = 1, NLV(1)
          poptotallv = poptotallv + POPlv(il, 1)
@@ -615,12 +613,12 @@ C
       WRITE(42, *)' New pop Empire discrete   (mb) =', poptotallv
       WRITE(42, *)' New pop Empire continuum  (mb) =', poptotalcont
       WRITE(42, *)' New pop Empire all        (mb) =', poptotalall
-C
-C     Now we update CSEmis(0,1), where 0 = g, 1 = CN
-C     CSEmis(1,1), where 1 = n, 1 = CN
-C     CSEmis(2,1), where 2 = p, 1 = CN:
-C
-C     Gamma
+C-----
+C-----Now we update CSEmis(0,1), where 0 = g, 1 = CN
+C-----CSEmis(1,1), where 1 = n, 1 = CN
+C-----CSEmis(2,1), where 2 = p, 1 = CN:
+C-----
+C-----Gamma
       csemispoplv = 0.0
       DO il = 1, NLV(1)
          csemispoplv = csemispoplv + POPlv(il, 1)
@@ -630,9 +628,9 @@ C     Gamma
       WRITE(42, *)'CSEmis(0,1), gamma from CN in mb:'
       WRITE(42, *)'Discrete =', csemispoplv
       WRITE(42, *)'All      =', CSEmis(0, 1)
-C
-C     Neutrons
-C
+C-----
+C-----Neutrons
+C-----
       nnur = NREs(1)
       csemispoplv = 0.0
       DO il = 1, NLV(nnur)
@@ -643,9 +641,9 @@ C
       WRITE(42, *)'CSEmis(1,1), neutrons from CN in mb:'
       WRITE(42, *)'Discrete =', csemispoplv
       WRITE(42, *)'All      =', CSEmis(1, 1)
-C
-C     Protons
-C
+C-----
+C-----Protons
+C-----
       nnur = NREs(2)
       csemispoplv = 0.0
       DO il = 1, NLV(nnur)
@@ -656,11 +654,11 @@ C
       WRITE(42, *)'CSEmis(2,1), protons from CN in mb:'
       WRITE(42, *)'Discrete =', csemispoplv
       WRITE(42, *)'All      =', CSEmis(2, 1)
-C     Summary of CN energy bins
+C-----Summary of CN energy bins
       WRITE(42, 99005)
       WRITE(42, *)'Summary of CN energy bins:'
       WRITE(42, 99005)
-C     Number of bins in CN discrete region
+C-----Number of bins in CN discrete region
       iemaxdiscrete = ELV(NLV(1), 1)/DE + 0.5
       iemaxdiscrete = iemaxdiscrete - 1
       WRITE(42, *)'Eexc  (MeV) =', EXCn
@@ -688,11 +686,11 @@ C     Number of bins in CN discrete region
 C
 C
       SUBROUTINE DEGASREAD
-C
-C     Reads input for Degas in its original format.
-C     To be used for testing purposes only. If used, then all input via
-C     Empire will be replaced by data taken from degasinput.dat file.
-C
+C-----
+C-----Reads input for Degas in its original format.
+C-----To be used for testing purposes only. If used, then all input via
+C-----Empire will be replaced by data taken from degasinput.dat file.
+C-----
       IMPLICIT REAL*8(A - H, O - Z)
 C
 C COMMON variables
@@ -761,30 +759,30 @@ C     IN+IZ = 0 ==> STOP OF THE PROGRAM
       A3 = FLOAT(IAT)**0.3333333
       READ(ir, 99003)EEXc0, ESTep, AK, JGS, CJGs, BEProj, GAQ
 99003 FORMAT(8F8.2)
-C     (FMT 7F8.)     EXC. ENERGY (MEV), EN. STEP (MEV),
-C     MATRIX ELEMENT CONSTANT (MEV**3),
-C     G.S. SPIN OF THE TARGET,
-C     G.S. SPIN OF THE COMPOSITE SYSTEM,
-C     BINDING EN. OF PROJECTILE, IF NOT N OR P (MEV),
-C     QUADRUPOLE FRACTION (DEFAULT=0.001)
+C-----(FMT 7F8.)     EXC. ENERGY (MEV), EN. STEP (MEV),
+C-----MATRIX ELEMENT CONSTANT (MEV**3),
+C-----G.S. SPIN OF THE TARGET,
+C-----G.S. SPIN OF THE COMPOSITE SYSTEM,
+C-----BINDING EN. OF PROJECTILE, IF NOT N OR P (MEV),
+C-----QUADRUPOLE FRACTION (DEFAULT=0.001)
       IF(GAQ.EQ.0.)GAQ = 0.001
       READ(ir, 99006)B
-C     (FMT 2*(10F6.))  BINDING ENERGIES FOR NEUTRONS (NUCLEI ACCORDING
-C     THEIR KEYS :  0, 1, ... , 9),
-C     LATER FOR PROTONS (0 TO 9)
+C-----(FMT 2*(10F6.))  BINDING ENERGIES FOR NEUTRONS (NUCLEI ACCORDING
+C-----THEIR KEYS :  0, 1, ... , 9),
+C-----LATER FOR PROTONS (0 TO 9)
       READ(ir, 99006)GG
-C     (FMT 10F6.)    SINGLE-PARTICLE LEVEL DENSITIES (1/MEV)
-C     BLANK LINE ON INPUT ==>  ALL G=A/13
+C-----(FMT 10F6.)    SINGLE-PARTICLE LEVEL DENSITIES (1/MEV)
+C-----BLANK LINE ON INPUT ==>  ALL G=A/13
       READ(ir, 99006)DD
-C     (FMT 10F6.)    PAIRING ENERGIES (MEV)
+C-----(FMT 10F6.)    PAIRING ENERGIES (MEV)
       READ(ir, 99007)NUDi
-C     (FMT 10I6)     NUMBER OF DISCRETE LEVELS ENTERED FOR
-C     EACH NUCLEUS
-C     (PRESENT LIMIT: .LE. 10)
+C-----(FMT 10I6)     NUMBER OF DISCRETE LEVELS ENTERED FOR
+C-----EACH NUCLEUS
+C-----(PRESENT LIMIT: .LE. 10)
       READ(ir, 99007)NBRa
-C     (FMT 10I6)     NUMBER OF DISCRETE LEVELS SUPPLIED FOR
-C     EACH NUCLEUS TOGETHER WITH THEIR BRANCHING RATIOS
-C     (LIMIT: .LE. NUDI)
+C-----(FMT 10I6)     NUMBER OF DISCRETE LEVELS SUPPLIED FOR
+C-----EACH NUCLEUS TOGETHER WITH THEIR BRANCHING RATIOS
+C-----(LIMIT: .LE. NUDI)
       DO j = 1, 10
          nudim = NUDi(j)
          IF(nudim.NE.0)THEN
@@ -826,17 +824,17 @@ C              I.E. GROUND STATE OR ISOMER
       ENDDO
 99006 FORMAT(10F6.2)
 99007 FORMAT(10I6)
-C
-C     INPUT PARAMETERS READ IN
-C
+C-----
+C-----INPUT PARAMETERS READ IN
+C-----
       END
 C
 C
       SUBROUTINE DEGASWRITE
-C
-C Writes all input data needed by Degas.
-C For testing purposes only.
-C
+C-----
+C-----Writes all input data needed by Degas.
+C-----For testing purposes only.
+C-----
       IMPLICIT REAL*8(A - H, O - Z)
 C
 C COMMON variables
@@ -869,21 +867,17 @@ C
       WRITE(iw, 99007)B    ! binding energies
       WRITE(iw, 99007)GG   ! single-particle level density g
       WRITE(iw, 99007)DD   ! pairing energies
-      WRITE(iw, 99008)NUDi
-C     ! number of discrete levels
-      WRITE(iw, 99008)NBRa
-C     ! number of branchings
+      WRITE(iw, 99008)NUDi ! number of discrete levels
+      WRITE(iw, 99008)NBRa ! number of branchings
       WRITE(iw, 99006)
       DO j = 1, 10
          nudim = NUDi(j)  ! j=1 means comp nucleus, etc
          IF(nudim.NE.0)THEN
-            DO i = 1, nudim
-C              ! i=1 means g.s. level, etc
+            DO i = 1, nudim ! i=1 means g.s. level, etc
                WRITE(iw, 99004)ENDi(j, i), SPIdi(j, i), NEXd(j, i)
 99004          FORMAT(2F6.2, i6)
                IF(i.LE.NBRa(j))THEN
-                  DO IE = 1, 9
-C                    ! ie=1 means deay goes to g.s., etc
+                  DO IE = 1, 9 ! ie=1 means deay goes to g.s., etc
                      bbb = BRAr(j, i, IE)
                      IF(IE.GT.0 .AND. bbb.GT.0.)WRITE(iw, 99005)IE, bbb
 99005                FORMAT(9(i2, f6.3))
@@ -966,7 +960,7 @@ C
 99001 FORMAT(1X, a79)
       iw = 6
       WRITE(iw, 99006)
-C     write(iw,5)  titdegas
+C-----write(iw,5)  titdegas
       WRITE(iw, 99002)in, iz, key0
 99002 FORMAT(4I5, f10.3)
       WRITE(iw, 99003)eexc0, estep, ak, jgs, cjgs, beproj, gaq
@@ -974,10 +968,8 @@ C     write(iw,5)  titdegas
       WRITE(iw, 99007)b   ! binding energies
       WRITE(iw, 99007)gg  ! single-particle level density g
       WRITE(iw, 99007)dd  ! pairings
-      WRITE(iw, 99008)nudi
-C     ! number of discrete levels
-      WRITE(iw, 99008)nbra
-C     ! number of branchings
+      WRITE(iw, 99008)nudi ! number of discrete levels
+      WRITE(iw, 99008)nbra ! number of branchings
       WRITE(iw, 99006)
       DO j = 1, 10
          nudim = nudi(j)  ! j=1 means comp nucleus, etc
@@ -987,8 +979,7 @@ C              ! i=1 means g.s. level, etc
                WRITE(iw, 99004)endi(j, i), spidi(j, i), nexd(j, i)
 99004          FORMAT(2F6.2, i6)
                IF(i.LE.nbra(j))THEN
-                  DO ie = 1, 9
-C                    ! ie=1 means deay goes to g.s., etc
+                  DO ie = 1, 9 ! ie=1 means deay goes to g.s., etc
                      bbb = brar(j, i, ie)
                      IF(ie.GT.0 .AND. bbb.GT.0.)WRITE(iw, 99005)ie, bbb
 99005                FORMAT(9(i2, f6.3))
@@ -1419,8 +1410,8 @@ Coblo    IF (SGR.LE.0.d0) STOP       ! Degas stop replaced by return
                ENDDO
             ENDDO
          ENDDO
-C        THE MAXIMUM EXCITATION ENERGIES FOR A GIVEN CHAIN OF NUCLEI ARE
-C        ESTABLISHED
+C--------THE MAXIMUM EXCITATION ENERGIES FOR A GIVEN CHAIN OF NUCLEI ARE
+C--------ESTABLISHED
          xc(1) = eexc0 - b(1, 1)
          xc(2) = eexc0 - b(1, 2)
          xc(3) = xc(1) - b(2, 1)
@@ -1449,14 +1440,14 @@ C        e=10.*(ie-1) + 5
                RFAc(i, il) = RFA(i, jc)
             ENDDO
          ENDDO
-C        subscripts: EXCITON NUMBER (exact!), (2*J+1)
+C--------subscripts: EXCITON NUMBER (exact!), (2*J+1)
          DO i = 1, 3
             DO ie = 1, NDEXD
                Se(i, ie) = 0.
             ENDDO
          ENDDO
 C        write(iw,83) ii0
-C        NEXT NUCLEUS IN THE CHAIN
+C--------NEXT NUCLEUS IN THE CHAIN
          DO i = 1, 25
             DO il = 1, 25
                tf0(i, il) = 0.
@@ -1527,7 +1518,7 @@ C        IZC=IZ-1                 Corrected 14 Sept. 2000
          gf = G*EF
          c0 = 6.58195E-22*IAT**3./(2.*pi*G*ak)
          c = c0*eexc
-C        NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
+C--------NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
          DO i = 1, 2
             KEY = i
             DO ie = 1, NDEXD
@@ -1538,7 +1529,7 @@ C        NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
                ENDDO
             ENDDO
          ENDDO
-C        GAMMA INVERSE CROSS SECTIONS (GDR FORM)
+C--------GAMMA INVERSE CROSS SECTIONS (GDR FORM)
          KEY = 0
          DO ie = 1, NDEXD
             engy = FLOAT(ie)*ESTep
@@ -1557,7 +1548,7 @@ C        GAMMA INVERSE CROSS SECTIONS (GDR FORM)
             IF(sum.LE.1.E-9)GOTO 200
          ENDIF
 C
-C        R-FACTOR CALCULATION FOR SUBSEQUENT NUCLEI
+C--------R-FACTOR CALCULATION FOR SUBSEQUENT NUCLEI
 C
          IF(II0.EQ.1 .OR. II0.EQ.3 .OR. II0.EQ.6)THEN
             DO i = 1, 25
@@ -1581,9 +1572,9 @@ C
             ENDDO
          ENDIF
 C
-C        END OF R-FACTOR FOR SUBSEQUENT NUCLEI
+C--------END OF R-FACTOR FOR SUBSEQUENT NUCLEI
 C
-C        SET ENERGY LIMITS
+C--------SET ENERGY LIMITS
 C
          IF(II0.NE.0)THEN
             eexc = xc(II0)
@@ -1783,7 +1774,7 @@ C
                      cp = c0*CFA(e, N)*e/N
                      cm = 1.
                      IF(N.GT.2)cm = c0*CFA(e, N - 2)*e/(N - 2)
-C                    DENSITY AND TRANSITION RATES CALCULATION
+C--------------------DENSITY AND TRANSITION RATES CALCULATION
                      ge = G*e
                      hlp3 = 0.
                      IF(ge - a1 - gf.GE..01)hlp3 = (ih - 1)
@@ -1847,7 +1838,7 @@ C                    DENSITY AND TRANSITION RATES CALCULATION
                   ENDDO
                ENDDO
 C
-C              INTRANUCLEAR TRANSITION RATES ESTABLISHED
+C--------------INTRANUCLEAR TRANSITION RATES ESTABLISHED
 C
                DO IJ = 1, 25
                   alms(1, IJ) = 0.
@@ -1861,8 +1852,8 @@ Coblo          NN = 25       ! Excitons, original value
                   ENDIF
                ENDDO
                IF(ie.EQ.NEStep)nn0 = nn
-C              DENSITIES AND TRANSITION RATES CALCULATION
-C              INITIAL EXCITON CONFIGURATION
+C--------------DENSITIES AND TRANSITION RATES CALCULATION
+C--------------INITIAL EXCITON CONFIGURATION
                DO i = 1, nn
                   DO il = 1, 25
                      emp(i, il) = 0.
@@ -1870,7 +1861,7 @@ C              INITIAL EXCITON CONFIGURATION
                      tau(i, il) = 0.
                   ENDDO
                ENDDO
-C              EMISSION RATES CALCULATIONS FOR GIVEN NUCLEI
+C--------------EMISSION RATES CALCULATIONS FOR GIVEN NUCLEI
                DO i = 1, nn
                   ip = i - IIA + m00
                   ih = i - 1
@@ -1993,8 +1984,7 @@ C                                                     (EOM-EEO, SU)
                            ENDDO
                         ENDIF
                         t11 = 0.
-                        IF(ie.EQ.NEStep)THEN
-C                          ! Gamma cascade not allowed
+                        IF(ie.EQ.NEStep)THEN !Gamma cascade not allowed
                            IF(ie.GT.NBR)THEN
                               IF(ie.NE.1 .AND. ro1.NE.0.)THEN
                                  ie1 = INT(e/ESTep + 0.5)
@@ -2123,14 +2113,14 @@ C                                   IER = IE-IGM
      &                     WRITE(iw, 99006)ie, il, IJ, alps(i, il), 
      &                           alms(i, il), emp(i, il), emg(i, il)
 99006                   FORMAT(1X, 3I4, 2X, 3E12.4, 3X, E12.4)
-C                       IF DESIRED, OUTPUT OF INTRANUCLEAR TRANSITION RATES
+C-----------------------IF DESIRED, OUTPUT OF INTRANUCLEAR TRANSITION RATES
                      ENDDO
                   ENDIF
                ENDDO
 C
-C              END OF EMISSION RATES CALCULATIONS
+C--------------END OF EMISSION RATES CALCULATIONS
 C
-C              MASTER EQ. SOLUTION FOR ONE NUCLEUS WITHIN THE CHAIN
+C--------------MASTER EQ. SOLUTION FOR ONE NUCLEUS WITHIN THE CHAIN
 C
                IF(ie0.EQ.1)WRITE(iw, 99007)II0
 99007          FORMAT(/' Solutions for nucleus of key ', i2//3x, 'E ', 
@@ -2180,19 +2170,19 @@ C                             TF(I) + TM(II0,I,IE,IL)
                            ENDDO
                            IF(ie.GT.NUDim .OR. nexd(IIP, ie).LT.0)THEN
                               IF(feed.LE.1.E-9)GOTO 180
-C                             CHATTERJEE AND GUPTA ALGORITHM
+C-----------------------------CHATTERJEE AND GUPTA ALGORITHM
                               f(nne) = 0.
                               sci(nne) = 1.
                               IF(nne1.NE.0)THEN
-C                                IF THE COMPUTER SKIPS FOLLOWING 2 DO-LOOPS,
-C                                THIS IF CAN BE DELETED
+C--------------------------------IF THE COMPUTER SKIPS FOLLOWING 2 DO-LOOPS,
+C--------------------------------THIS IF CAN BE DELETED
                                  DO j = 1, nne1
                                     i = nne - j
                                     f(i) = alps(i, il)*tau(i, il)
      &                                 *alms(i + 1, il)*tau(i + 1, il)
                                     IF(f(i).EQ.1.)GOTO 176
-C                                   SOLUTION WITH NO EMISSION, NOT ALLOWED
-C                                   BY CH.+G. ALGORITHM
+C-----------------------------------SOLUTION WITH NO EMISSION, NOT ALLOWED
+C-----------------------------------BY CH.+G. ALGORITHM
                                  ENDDO
                                  DO j = 1, nne1
                                     i = nne - j
@@ -2235,8 +2225,8 @@ C                                   BY CH.+G. ALGORITHM
      &                              = tf(i)/emg(i, il)
                               ENDDO
                            ENDIF
-C                          END OF MAST. EQ. SOLUTION (FOR ONE NUCLEUS AND
-C                          ONE EXC. ENERGY)
+C--------------------------END OF MAST. EQ. SOLUTION (FOR ONE NUCLEUS AND
+C--------------------------ONE EXC. ENERGY)
  176                       emtg = 0.
                            emtp = 0.
                            DO i = 1, nn
@@ -2267,8 +2257,8 @@ C                          ONE EXC. ENERGY)
                            uvgam = uvgam + emtg
                            IF(feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
      &                        THEN
+C-----------------------------CN residual population
                               sigmacn(il) = feed - emtp - emtg
-C                             ! CN residual population
                               sigmacntot = sigmacntot + sigmacn(il)
 C                             write(iw,51) e,cj,sigmacn(il),sigmacntot
                            ENDIF
@@ -2279,12 +2269,12 @@ C                             write(iw,51) e,cj,sigmacn(il),sigmacntot
      &                            g11.4, 2x, 3E9.2)
                         ENDIF
                      ENDIF
-C                    OUTPUT: EXCITATION ENERGY; SPIN; PARTICLE, GAMMA &
-C                    TOTAL EMISSION; TIME INTEGRALS OF THE EXCITON STATES
-C                    (N=1-7*)
+C--------------------OUTPUT: EXCITATION ENERGY; SPIN; PARTICLE, GAMMA &
+C--------------------TOTAL EMISSION; TIME INTEGRALS OF THE EXCITON STATES
+C--------------------(N=1-7*)
  180              ENDDO
 C
-C                 Gamma de-excitation population will be calculated
+C-----------------Gamma de-excitation population will be calculated
 C
                   IF(ie.NE.1)THEN
 C
@@ -2297,8 +2287,7 @@ C                    possible excitation energy, you can skip all these
 C                    lines (including the line 4400 TF0(I,IL)=T1111).
 C
                      ie = ie - 1
-                     DO il = 1, 25
-C                       ! Spins
+                     DO il = 1, 25 ! Spins
 Ceb                     DO i = 1, nn
                         DO i = 1, 3
 Coblo                      do 4401 i=1,4    ! Excitons limited to i=1,4
@@ -2327,8 +2316,8 @@ Coblo                      do 4401 i=1,4    ! Excitons limited to i=1,4
             ENDIF
 C           4402 write(*,*) ie,il,popul(1,ie,il),popultot1
 Ceb         ENDDO
-Coblo       Now residual population of CN at the initial
-C           excitation energy, ie=nestep.
+Coblo-------Now residual population of CN at the initial
+C-----------excitation energy, ie=nestep.
             DO iloblo = 1, 25
                Popul(1, NEStep, iloblo) = sigmacn(iloblo)
             ENDDO
@@ -2388,9 +2377,9 @@ C              de-excitation of discrete levels according to branchings
                ENDDO
             ENDIF
 C
-C           MASTER EQ. FINISHED
+C-----------MASTER EQ. FINISHED
 C
-C           NEUTRON, PROTON AND GAMMA SPECTRA CALCULATION
+C-----------NEUTRON, PROTON AND GAMMA SPECTRA CALCULATION
 C
 Ceb         DO ie = 1, nesteu
             ie = nesteu              ! Highest energy only!
@@ -2414,7 +2403,7 @@ Coblo             do 5800 i=1,4
      &                  ro1 = 0.
                      IF(ro1.NE.0.D0)THEN
 C
-C                       LOOP OVER N (J=1), P (J=2) AND GAMMA (J=3)
+C-----------------------LOOP OVER N (J=1), P (J=2) AND GAMMA (J=3)
 C
                         DO j = 1, 3
                            iiir = indexe + j
@@ -2537,8 +2526,7 @@ C                                         ale pre kazdy pripad ...
                                          IF(N.GT.0)THEN
                                          DO iis = 1, 25
                                          t111 = 0.
-C                                                  Emission (E, CJ) --->
-C                                                  (EOM-EEO, SU)
+C----------------------------------------Emission(E, CJ)--->(EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
@@ -2577,8 +2565,7 @@ C                                                  (EOM-EEO, SU)
                                          t111 = 0.
                                          ier = INT(ENDi(iiir, iid)
      &                                      /ESTep + 0.5)
-C                                                     Emission (E, CJ) --->
-C                                                     (EOM-EEO, SU)
+C----------------------------------------Emission(E, CJ)--->(EOM-EEO, SU)
                                          IF(CJGs0.EQ.0.D0)su = 0.5 + 
      &                                      iis - 1
                                          IF(CJGs0.EQ.0.5D0)su = iis - 1
@@ -2634,7 +2621,7 @@ C                                                     (EOM-EEO, SU)
             ENDDO
 Ceb         ENDDO
 C
-C           SPECTRA OUTPUT
+C-----------SPECTRA OUTPUT
 C
             WRITE(iw, 99012)II0
 99012       FORMAT(/' SPECTRA (in mb/MeV) from nucleus of key ', 
@@ -2658,7 +2645,7 @@ C
          GOTO 100
       ENDIF
 C
-C     NEXT NUCLEUS
+C-----NEXT NUCLEUS
 C
  200  II0 = IIP
 C
@@ -2684,10 +2671,8 @@ C
       ENDDO
       DO iipnuc = 2, 3    ! 2: residual after (n,n'), 3: after (n,p)
          DO i = 1, 25     ! Excitons
-            DO il = 1, 25
-C              ! Spins
-               DO ie = 1, NDEXD
-C                 ! Energy
+            DO il = 1, 25 ! Spins
+               DO ie = 1, NDEXD ! Energy
                   Popul(iipnuc, ie, il) = Popul(iipnuc, ie, il)
      &               + tm(iipnuc - 1, i, ie, il)
                ENDDO
@@ -2795,9 +2780,9 @@ C
       END
 C
       SUBROUTINE GAMMD
-C     GAMMA EMISSION CALCULATION, DISCRETE LEVELS INCLUDED
-C     (feeding of states with energy IE*ESTEP and spin index IL0
-C     from all higher states by the gamma de-excitation)
+C-----GAMMA EMISSION CALCULATION, DISCRETE LEVELS INCLUDED
+C-----(feeding of states with energy IE*ESTEP and spin index IL0
+C-----from all higher states by the gamma de-excitation)
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(A - H, O - Z)
@@ -2831,9 +2816,10 @@ C
       il = IL0
       cj = CJGs0 + IL0 - 1
       ijc = 2*cj + 1
-C     CJ - spin of state which is calculated within this subroutine
-C     The spin, wherefrom the gamma emission proceeds, is given by IS
-C     This spin is SP
+C
+C-----CJ - spin of state which is calculated within this subroutine
+C-----The spin, wherefrom the gamma emission proceeds, is given by IS
+C-----This spin is SP
 C
       IF(ie.GT.NUDim)eem = EXCef + (ie - NUDim)*ESTep
       IF(ie.LE.NUDim)eem = ENDi(IIP, ie)
@@ -2964,7 +2950,7 @@ C     ******************************************************************
       z = FLOAT(IZC - IZO)
       a3 = a**0.3333333
       IF(IAO.EQ.0)THEN
-C        GAMMAS
+C--------GAMMAS
          egr = 29.*SQRT((1. + 2./a3)/a3)
          gam = 5.
          sgm = 53.2*FLOAT((IAC - IZC)*IZC)/FLOAT(IAC)
@@ -2978,41 +2964,41 @@ C        GAMMAS
          xi = MAX(En, ec)
          em = MIN(En, 61.D0)
          IF(KEY.EQ.2)THEN
-C           PROTONS
+C-----------PROTONS
             p = 82.12/ec + 2.39*a23/ec
             ala = -0.521*a23 - 3.43
             amu = 150.2*a**0.59 + 946.3*(a - 2.*z)/a
             anu = a23*( - 43.9 - 76.25*ec)
          ELSEIF(KEY.EQ.3)THEN
-C           DEUTERONS
+C-----------DEUTERONS
             p = -38.21 + 922.6/ec - 2804./ec2
             ala = -0.0323*a - 5.48
             am = a**0.48
             amu = 336.1*am
             anu = am*(524.3 - 371.8*ec + 5.924*ec2)
          ELSEIF(KEY.EQ.4)THEN
-C           TRITONS
+C-----------TRITONS
             p = -11.04 + 619.1/ec - 2147./ec2
             ala = -0.0426*a - 10.33
             am = a**0.37
             amu = 601.9*am
             anu = am*(583.0 - 546.2*ec + 1.718*ec2)
          ELSEIF(KEY.EQ.5)THEN
-C           HELIUM-3
+C-----------HELIUM-3
             p = -3.06 + 278.5/ec - 1389./ec2
             ala = -0.00535*a - 11.16
             am = a**0.40
             amu = 555.5*am
             anu = am*(687.4 - 476.3*ec + 0.509*ec2)
          ELSEIF(KEY.EQ.6)THEN
-C           ALPHAS
+C-----------ALPHAS
             p = 10.95 - 85.2/ec + 1146./ec2
             ala = 0.0643*a - 13.96
             am = a**0.29
             amu = 781.2*am
             anu = am*( - 304.7 - 470.0*ec - 8.580*ec2)
          ELSE
-C           NEUTRONS
+C-----------NEUTRONS
             p = 0.
             ala = 31.05/a3 - 25.91
             amu = 342.4*a3 + 21.89*a23
@@ -3039,7 +3025,7 @@ C           NEUTRONS
       END
 C
       SUBROUTINE MASCHA
-C     MASS AND CHARGE SELECTION ACCORDING TO THE KEY
+C-----MASS AND CHARGE SELECTION ACCORDING TO THE KEY
       IMPLICIT REAL*8(A - H, O - Z)
 C
 C COMMON variables
@@ -3056,7 +3042,7 @@ C
       END
 C
       SUBROUTINE SPPRO
-C     SPIN OF THE PROJECTILE
+C-----SPIN OF THE PROJECTILE
       IMPLICIT REAL*8(A - H, O - Z)
 C
 C COMMON variables
@@ -3085,7 +3071,8 @@ C
       REAL*8 c, en
       REAL FLOAT
 C
-C     ENERGY-DEPENDENT AND EXCITON-NUMBER DEPENDENT M.E. CONSTANT
+C-----ENERGY-DEPENDENT AND EXCITON-NUMBER DEPENDENT M.E. CONSTANT
+C
       en = E/FLOAT(Nn)
       c = 0.
       IF(E.GT.0.)THEN
@@ -3098,8 +3085,8 @@ C     ENERGY-DEPENDENT AND EXCITON-NUMBER DEPENDENT M.E. CONSTANT
       END
 C
       DOUBLE PRECISION FUNCTION CLEBSH(A, A1, B, B1, C, C1)
-C	CALCULATES CLEBSH-GORDAN COEFFICIENTS
-C            (J1 M1 J2 M2!J M)
+C-----CALCULATES CLEBSH-GORDAN COEFFICIENTS
+C-----         (J1 M1 J2 M2!J M)
 C
       IMPLICIT REAL*8(A - H, O - Z)
 C
@@ -3202,9 +3189,9 @@ C
 C
       DOUBLE PRECISION FUNCTION SIXJ(A, B, C, A1, B1, C1)
 C
-C     CALCULATES 6-J SYMBOLS
-C         ( A  B  C)
-C         ( A1 B1 C1)
+C-----CALCULATES 6-J SYMBOLS
+C-----    ( A  B  C)
+C-----    ( A1 B1 C1)
 C
       IMPLICIT REAL*8(A - H, O - Z)
 C
@@ -3315,10 +3302,10 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION THREEJ(A, A1, B, B1, C, C1)
-C     CALCULATES 3-J SYMBOLS
-C          (J1 J2 J
-C          (M1 M2 M)
-C     M1+M2+M=0
+C-----CALCULATES 3-J SYMBOLS
+C-----     (J1 J2 J
+C-----     (M1 M2 M)
+C-----M1+M2+M=0
 C
       IMPLICIT REAL*8(A - H, O - Z)
 C
@@ -3369,7 +3356,7 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION X0(S, J)
-C     Eq. (16) of the Report
+C-----Eq. (16) of the Report
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3456,7 +3443,7 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION X2(S, J)
-C       Eq. (17) of the Report
+C-----Eq. (17) of the Report
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3517,8 +3504,8 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION XDAMP(J)
-C     Eq. (10) of the Report
-C     New changes 26 Oct., 1994
+C-----Eq. (10) of the Report
+C-----New changes 26 Oct., 1994
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3607,7 +3594,7 @@ C           J half-integer  =>  j4=0,  Q=J
 C
 C
       DOUBLE PRECISION FUNCTION FQ(Q)
-C       Eq. (11) of the Report
+C-----Eq. (11) of the Report
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3657,7 +3644,7 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION FPAIR(J3)
-C       Eq. (12) of the Report
+C-----Eq. (12) of the Report
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3796,7 +3783,7 @@ C     if (KEY.EQ.1)  VC= 0.
 C
 C
       DOUBLE PRECISION FUNCTION X02(S, J)
-C     Analog of Eq. (16) of the Report for E2
+C-----Analog of Eq. (16) of the Report for E2
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)
@@ -3882,7 +3869,7 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION X22(S, J)
-C     Analog of  Eq. (17) of the Report for E2
+C-----Analog of  Eq. (17) of the Report for E2
       INCLUDE 'dimension.h'
       PARAMETER(NDEXD = NDEX + 11)
       IMPLICIT REAL*8(a - H, O - Z)

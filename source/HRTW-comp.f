@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: HRTW-comp.f,v 1.4 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: HRTW-comp.f,v 1.5 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -175,9 +175,9 @@ C           WRITE(6,*)'number of strong Tls for this state ' , NH_lch
 C           WRITE(6,*)'average Tl for this state ' , H_Tav
 C           WRITE(6,*)'strong Tls from this state ' , H_Tl
 C           WRITE(6,*)'first entry DENhf=',denhf
-C--------------
-C--------------the first HRTW run completed
-C--------------
+C-----------
+C-----------the first HRTW run completed
+C-----------
 C-----------calculate V's for the strong channels (iteration)
 C           WRITE(6,*)'  '
             IF(NH_lch.LE.NDHRTW1)
@@ -199,7 +199,7 @@ C              WRITE(6,*)' '
 C              WRITE(6,*)'HRTW entry=',i
 C              WRITE(6,*)' '
                NSCh = 0
-C-----------do loop over ejectiles (fission is not repeated)
+C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
                DENhf = 0.0
                DO nejc = 1, NEJcm
@@ -210,40 +210,40 @@ C                 WRITE(6,*)'second entry with ejec ' , nejc
      &                            nhrtw)
 C                 WRITE(6,*)'sum for ejec=' ,nejc, sum
                ENDDO
-C-----------do loop over ejectiles       ***done***
+C--------------do loop over ejectiles       ***done***
 C              CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
                DENhf = DENhf + sumg + sumfis
 C              WRITE(6,*)'second entry DENhf=',denhf
 C              WRITE(6,*)'second entry sumg=',sumg
-C-----------
-C-----------correct scratch matrix for enhancement of the elastic channels
-C-----------
+C--------------
+C--------------correct scratch matrix for enhancement of the elastic channels
+C--------------
                DO nejc = 1, NEJcm
                   nnur = NREs(nejc)
                   IF(IZA(nnur).EQ.IZA(0))
      &               CALL ELCORR(nnuc, ke, jcn, ip, nnur, nejc, nhrtw)
                ENDDO
-C-----------
-C-----------normalization and accumulation
-C-----------
+C--------------
+C--------------normalization and accumulation
+C--------------
                xnor = H_Abs(i, 1)/DENhf
 C              stauc = stauc + RO(ke,jcn,nnuc)*xnor
                IF(RO(ke, jcn, nnuc).NE.0.0D0)sgamc = sgamc + 
      &            DENhf*H_Abs(i, 1)/RO(ke, jcn, nnuc)
-C-----------particles
+C--------------particles
                DO nejc = 1, NEJcm
                   nnur = NREs(nejc)
                   CALL ACCUM(ke, nnuc, nnur, nejc, xnor)
                   CSEmis(nejc, nnuc) = CSEmis(nejc, nnuc)
      &                                 + xnor*SCRtem(nejc)
                ENDDO
-C-----------gammas
+C--------------gammas
                CALL ACCUM(ke, nnuc, nnuc, 0, xnor)
                CSEmis(0, nnuc) = CSEmis(0, nnuc) + xnor*SCRtem(0)
                POP(ke, jcn, ipar, nnuc) = 0.0
-C-----------fission
+C--------------fission
                csfis = csfis + sumfis*xnor
-C-----------calculate total emission
+C--------------calculate total emission
                DO nejc = 0, NEJcm
                   csemist = csemist + CSEmis(nejc, nnuc)
                ENDDO
@@ -354,9 +354,9 @@ C     NSCh = 0
       itlc = iexc - 5
       iermax = Iec - iexc
       IF(iermax.GE.1)THEN
-C-----
-C-----decay to the continuum
-C-----
+C--------
+C--------decay to the continuum
+C--------
          DO jr = 1, NLW, LTUrbo            ! do loop over r.n. spins
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
@@ -854,7 +854,7 @@ C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
       IF(RORed.NE.0.0D0)THEN
-C-----do loop over discrete levels -----------------------------------
+C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
             lmin = ABS(xjc - XJLv(i, Nnuc)) + 0.001
             lmax = xjc + XJLv(i, Nnuc) + 0.001
@@ -967,6 +967,30 @@ C        WRITE(6,*)'weak T,Rho,H_Sweak ',T,Rho,H_Sweak
       END
 C
       DOUBLE PRECISION FUNCTION VT(Tl)
+C
+Ccc   *********************************************************************
+CCc   *                                                          Class:PPu*
+CCc   *                            V T                                    *
+Ccc   *                                                                   *
+Ccc   * Returns value of the HRTW quantity V corresponding to the         *
+Ccc   * provided transmission coefficient (if the                         *
+Ccc   * latter is below the threshold value H_Tthr or total number        *
+Ccc   * of strong channels is bigger that NDHRTW1). If number of          *
+Ccc   * strong channels is lower than NDHRTW1 and Tl is above the         *
+Ccc   * threshold value H_Tthr then precalculated H_Tl(nsch) is returned. *
+Ccc   * Note that VT keeps track of the number of processed strong        *
+Ccc   * channels in the variable NSCh.                                    *
+Ccc   *                                                                   *
+Ccc   * input: Tl    - transmission coefficient                           *
+Ccc   *                                                                   *
+Ccc   * output: Tl                                                        *
+Ccc   *                                                                   *
+Ccc   * author: M.Herman                                                  *
+Ccc   * date:   10.Sept.2000                                              *
+Ccc   * revision:#    by:name                     on:xx.mon.199x          *
+Ccc   *                                                                   *
+Ccc   *********************************************************************
+C
       INCLUDE 'dimension.h'
 C
 C
@@ -986,23 +1010,6 @@ C
 C Local variables
 C
       DOUBLE PRECISION VT1
-C
-C
-C
-C     Returns value of the HRTW quantity V corresponding to the
-C     provided transmission coefficient (if the
-C     latter is below the threshold value H_Tthr or total number
-C     of strong channels is bigger that NDHRTW1). If number of
-C     strong channels is lower than NDHRTW1 and Tl is above the
-C     threshold value H_Tthr then precalculated H_Tl(nsch) is returned.
-C     Note that VT keeps track of the number of processed strong
-C     channels in the variable NSCh.
-C
-C     input: Tl    - transmission coefficient
-C
-C     output: Tl
-C
-C
       IF(NH_lch.GT.NDHRTW1)THEN
          VT = VT1(Tl, H_Tav, H_Sumtl)
       ELSEIF(Tl.LT.H_Tthr)THEN
@@ -1017,28 +1024,33 @@ C
 C
       DOUBLE PRECISION FUNCTION VT1(Tl, Tav, Sumtl)
 C
-C
-C Dummy arguments
+Ccc   *****************************************************************
+Ccc   *                                                      Class:PPu*
+Ccc   *                          V T 1                                *
+Ccc   *                                                               *
+Ccc   * calculates V quantities replacing Tl's in the HRTW theory.    *
+Ccc   * Performs just one iteration. To be used when number of        *
+Ccc   * strong channels is bigger than NDRTW1.                        *
+Ccc   *                                                               *
+Ccc   * input: Tl    - transmission coefficient                       *
+Ccc   * Tav   - average transmission coefficeint                      *
+Ccc   * Sumtl - sum of transmission coefficients                      *
+Ccc   *                                                               *
+Ccc   * output: VT1                                                   *
+Ccc   *                                                               *
+Ccc   * Dummy arguments                                               *
+Ccc   *                                                               *
+Ccc   * author: M.Herman                                              *
+Ccc   * date:   10.Sept.2000                                          *
+Ccc   * revision:#    by:name                     on:xx.mon.199x      *
+Ccc   *                                                               *
+Ccc   *****************************************************************
 C
       DOUBLE PRECISION Sumtl, Tav, Tl
 C
 C Local variables
 C
       DOUBLE PRECISION EEF
-C
-C
-C
-C     calculates V quantities replacing Tl's in the HRTW theory.
-C     Performs just one iteration. To be used when number of
-C     strong channels is bigger than NDRTW1.
-C
-C     input: Tl    - transmission coefficient
-C     Tav   - average transmission coefficeint
-C     Sumtl - sum of transmission coefficients
-C
-C     output: VT1
-C
-C
       VT1 = 0.0
       IF(Sumtl.EQ.0.0D0)RETURN
       VT1 = Tl/Sumtl
@@ -1050,24 +1062,31 @@ C
 C
       DOUBLE PRECISION FUNCTION EEF(Tl, Tav, Sumtl)
 C
-C
-C Dummy arguments
+Ccc   *****************************************************************
+Ccc   *                                                      Class:PPu*
+Ccc   *                          E E F                                *
+Ccc   *                                                               *
+Ccc   * Calculates elastic enhancement factor for HRTW theory         *
+Ccc   *                                                               *
+Ccc   * input: Tl     - transmission coefficient                      *
+Ccc   * Tav    - average of all transmission coefficients             *
+Ccc   * Sumtl  - sum of transmission coefficients                     *
+Ccc   *                                                               *
+Ccc   * output: Eef - elastic enhancement factor                      *
+Ccc   *                                                               *
+Ccc   * Dummy arguments                                               *
+Ccc   *                                                               *
+Ccc   * author: M.Herman                                              *
+Ccc   * date:   10.Sept.2000                                          *
+Ccc   * revision:#    by:name                     on:xx.mon.199x      *
+Ccc   *                                                               *
+Ccc   *****************************************************************
 C
       DOUBLE PRECISION Sumtl, Tav, Tl
 C
 C Local variables
 C
       DOUBLE PRECISION a, al
-C
-C
-C
-C     calculates elastic enhancement factor for HRTW theory
-C
-C     input: Tl     - transmission coefficient
-C     Tav    - average of all transmission coefficients
-C     Sumtl  - sum of transmission coefficients
-C
-C     output: Eef - elastic enhancement factor
 C
       IF(Tl.LT.1.0D-10)THEN
          EEF = 3.0
@@ -1079,23 +1098,33 @@ C
       END
 C
 C
+C
       SUBROUTINE AUSTER(V, Tav, Sumtl, Sweak, Lch, Ndhrtw1)
 C
-C
-C     iterates for V quantities in HRTW theory assuming that weak
-C     transmission coefficients remain constant and therefore are
-C     not iterated.
-C
-C     input: Tav   - average transmission coefficient
-C     Sumtl - sum of all transmission coefficients
-C     Sweak - sum of weak (Tl<H_Tthr) transmission coefficients
-C     Lch   - number of strong (Tl>H_Tthr) channels
-C
-C     input/output: V    - matrix of Tl's (input) or V's (output)
-C
-C
-C
-C Dummy arguments
+Ccc   *****************************************************************
+Ccc   *                                                      Class:PPu*
+Ccc   *                      A U S T E R                              *
+Ccc   *                                                               *
+Ccc   * Iterates for V quantities in HRTW theory assuming that weak   *
+Ccc   * transmission coefficients remain constant and therefore are   *
+Ccc   * not iterated.                                                 *
+Ccc   *                                                               *
+Ccc   * input: Tav   - average transmission coefficient               *
+Ccc   * Sumtl - sum of all transmission coefficients                  *
+Ccc   * Sweak - sum of weak (Tl<H_Tthr) transmission coefficients     *
+Ccc   * Lch   - number of strong (Tl>H_Tthr) channels                 *
+Ccc   *                                                               *
+Ccc   * input/output: V    - matrix of Tl's (input) or V's (output)   *
+Ccc   *                                                               *
+Ccc   *                                                               *
+Ccc   *                                                               *
+Ccc   * Dummy arguments                                               *
+Ccc   *                                                               *
+Ccc   * author: M.Herman                                              *
+Ccc   * date:   10.Sept.2000                                          *
+Ccc   * revision:#    by:name                     on:xx.mon.199x      *
+Ccc   *                                                               *
+Ccc   *****************************************************************
 C
       INTEGER Lch, Ndhrtw1
       DOUBLE PRECISION Sumtl, Sweak, Tav
@@ -1141,8 +1170,8 @@ C     WRITE(6,*)'Sumtl, sum AUSTER ',Sumtl,sum
 C     WRITE(6,*)'AUSTER iteration ',(vp(i),i=1,Lch)
       DO i = 1, Lch
 C
-C        relative accuracy of V is set below and may be altered
-C        to any resonable value.  1.D-99 avoids division by 0.
+C--------relative accuracy of V is set below and may be altered
+C--------to any resonable value.  1.D-99 avoids division by 0.
 C
          IF((ABS(vd(i)-vp(i))/(vp(i)+1.D-99)).GT.1.0D-6)GOTO 200
       ENDDO
@@ -1192,7 +1221,6 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C
 C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2, 3), H_Sumtl, H_Sumtls, 
@@ -1221,9 +1249,9 @@ C
 C
 C     WRITE(6,*)'  '
       xjc = FLOAT(Jc) + HIS(Nnuc)
-C--------
-C--------decay to discrete levels
-C--------
+C-----
+C-----decay to discrete levels
+C-----
       IF(RORed.NE.0.0D0)THEN
          eoutc = EX(Iec, Nnuc) - Q(Nejc, Nnuc)
 C--------only ground state considered
@@ -1376,9 +1404,8 @@ C        WRITE(6,*)'channel spin ',chsp
                   WRITE(6, *)'E R R O R !'
                   WRITE(6, *)
      &                    'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
-                  WRITE(6, *)'INCREASE NDHRTW2 IN THE dimension.h'
-                  WRITE(6, *)'AND RECOMPILE THE CODE.'
-                  WRITE(6, *)'TRY NDHRTW2=', mul**2 + 1
+                  WRITE(6, *)'INCREASE NDHRTW2 IN THE dimension.h',
+     &                       ' AND RECOMPILE.'
                   STOP
                ENDIF
                IF(NH_lch.GT.NDHRTW1)THEN
@@ -1405,12 +1432,6 @@ C                    ',k,INT(2.0*chsp+0.001)
                      STOP
                   ENDIF
                   vl = H_Tl(kel, 1)
-C--------------these two if's are to be removed
-C                 IF(PAR(ip,LVP(1,0),k-1) .NE.0.0d0 )
-C                 &         WRITE(6,*) 'Found strong VL for Mareng'
-C                 IF(PAR(ip,LVP(1,0),k-1) .NE.0.0d0 )
-C                 &         WRITE(6,*) 'Tl, VL, kel, l, 2*chsp  ',ELTL(k),
-C                 &           VL, kel, k, int(2.0*chsp)
                ENDIF
                IF(vl.NE.0.0D0)THEN
                   H_Abs(Ich, 1) = vl*coef*(FLOAT(2*Jcn + 1) - 2.0*s1)

@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2002-09-20 14:16:53 $
-Ccc   * $Id: lev-dens.f,v 1.6 2002-09-20 14:16:53 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: lev-dens.f,v 1.7 2002-10-01 16:20:10 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -88,8 +88,6 @@ C
       INTEGER i, ia, iz, kk
       DOUBLE PRECISION RODEF
 C
-C
-C
       ia = A(Nnuc)
       iz = Z(Nnuc)
       A23 = A(Nnuc)**0.666667
@@ -102,7 +100,7 @@ C-----next call prepares for lev. dens. calculations
       ac = A(Nnuc)/ADIv
       IF(Gcc.EQ.2.D0)THEN
          CALL ALIT(iz, ia, x1, x2, x3, dumm, Gcc)
-C-----------check whether a-parameter determined from the shell-model s.p.s. exists
+C--------check whether a-parameter determined from the shell-model s.p.s. exists
          IF(x1 + x2 + x3.EQ.0.0D0)THEN
             WRITE(6, *)' '
             WRITE(6, *)' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -127,7 +125,7 @@ C--------------normal states
             ENDIF
          ENDIF
          IF(ac.GT.0.D0)THEN
-C--------set nuclear temperature (spin independent taken at J=0 or 1/2)
+C-----------set nuclear temperature (spin independent taken at J=0 or 1/2)
             IF(BF.EQ.0.0D0)THEN
                              !saddle point
                u = EX(kk, Nnuc) - DEL - FISb(1, Nnuc)
@@ -136,7 +134,7 @@ C--------set nuclear temperature (spin independent taken at J=0 or 1/2)
                !normal states
                IF(u.GT.0.0D0)TNUc(kk, Nnuc) = SQRT(u/ac)
             ENDIF
-C--------set nuclear temperature  *** done ***
+C-----------set nuclear temperature  *** done ***
             DO i = 1, NLWst
                aj = FLOAT(i) + HIS(Nnuc)
 C--------------saddle point
@@ -294,10 +292,10 @@ C-----damping ***** done *********
       DO k = kmin, i
          ak = k + Ss
          IF(Bf.NE.1.0D0)THEN
-C-----rotation perpendicular to the symmetry axis
+C-----------rotation perpendicular to the symmetry axis
             u = e1 - 0.5*ak**2*seff
          ELSE
-C-----rotation parallel to the symmetry axis
+C-----------rotation parallel to the symmetry axis
             u = e1 - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
          ENDIF
          IF(u.LE.0.0D0)GOTO 100
@@ -528,13 +526,13 @@ C-----calculation of delta def. param from a2 def. param.
       delta = 3.0*(r - 1.0)/2./(2.0 + r)
       delta = ABS(delta)
       IF(DMPc.GT.0.0D0)THEN
-C-----slow damping
+C--------slow damping
          arg = 74.0
          IF(T.NE.0.0D0)arg = d*delta*41.0/A**0.3333/T
          IF(arg.GT.74.D0)arg = 74.
          Q = 2.0/(EXP(arg) + 1.0)
       ELSE
-C-----fast damping
+C--------fast damping
          arg = 5.0*(1.0 - T*A**0.3333/(d*delta*41.0))
          IF(arg.LT.( - 74.D0))arg = -74.
          Q = 1/(EXP(arg) + 1)
@@ -781,7 +779,7 @@ C-----can not be taken into account (RORed=0)
          kkl = 0
          kku = 0
          DO kk = 1, NDEX
-C--------------clean RO matrix
+C-----------clean RO matrix
             IF(BF.NE.0.0D0)THEN
                DO i = 1, NDLW
                   RO(kk, i, Nnuc) = 0.0
@@ -877,7 +875,7 @@ C-----
       ENDIF
       ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
       DO kk = 1, NEX(Nnuc)
-C-----------clean RO matrix
+C--------clean RO matrix
          IF(BF.NE.0.0D0)THEN
             DO i = 1, NDLW
                RO(kk, i, Nnuc) = 0.0
@@ -963,14 +961,14 @@ C-----determination of U for normal states
             bcs = .TRUE.
          ENDIF
       ENDIF
-C-----
+C     
 C-----do loop over angular momentum
-C-----
+C     
       DO i = 1, NLWst
          aj = FLOAT(i) + HIS(Nnuc)
-C-----
+C     
 C-----a-parameter and U determination for fission channel
-C-----
+C     
          IF(BF.EQ.0.0D0)THEN
 C-----temperature fade-out of the shell correction
 C-----ACCN  servs only to calculate temperature fade-out
@@ -997,7 +995,7 @@ C-----temperature fade-out of the shell correction  --- done ----
             ENDIF
             IF(u.LE.0.0D0)GOTO 99999
             IF(Z(Nnuc).LT.102.0D0 .AND. Z(Nnuc).GE.19.0D0)THEN
-C-----next     line is to calculate deformation parameter A2 only
+C--------------next line is to calculate deformation parameter A2 only
                CALL SIGMAK(A(Nnuc), Z(Nnuc), DEF(1, Nnuc), 0.0D0, u, 
      &                     accn, aj, mompar, momort, A2, stab, cigor, 
      &                     DEFpar, DEFga, DEFgw, DEFgp)
@@ -1009,8 +1007,8 @@ C-----next     line is to calculate deformation parameter A2 only
      &                     accn, aj, mompar, momort, A2, stab, cigor, 
      &                     DEFpar, DEFga, DEFgw, DEFgp)
             ENDIF
-C-----calculation of level density parameter 'a' including surface
-C-----dependent factor
+C-----------calculation of level density parameter 'a' including surface
+C-----------dependent factor
             qigor = ( - 0.00246 + 0.3912961*cigor - 
      &              0.00536399*cigor**2 - 0.051313*cigor**3 + 
      &              0.043075445*cigor**4) - 0.375
@@ -1025,9 +1023,9 @@ C-----dependent factor
             IF(Asaf.LT.0.D0)ac = -ATIl*Asaf
             IF(ac.LE.0.D0)GOTO 99999
          ENDIF
-C--------
+C        
 C--------Yrast states
-C--------
+C        
          IF(BF.NE.0.0D0)THEN
 C-----------spin  dependent moments of inertia for yrast states by Karwowski
 C-----------(spin dependent deformation beta calculated according to B.-Mot.)
@@ -1288,7 +1286,12 @@ C-----setting to 0 level density array ------ done ------
       END
 C
 C
+C
       DOUBLE PRECISION FUNCTION ROBCS(A, U, Aj, Mompar, Momort, A2)
+CCC   ********************************************************************
+CCC   *                                                         CLASS:APU*
+CCC   *                        R O B C S                                 *
+CCC   ********************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -1331,9 +1334,19 @@ C-----vibrational ehancement factor
       ROBCS = ROBCS*vibrk*momo*t*qdamp
       END
 C
+C
+C
       DOUBLE PRECISION FUNCTION SHCFADE(J, Shrj, Shrd)
-C-----calculates angular momentum (J) fade-out of the shell
-C-----correction to the fission barrier
+C
+Ccc   ********************************************************************
+Ccc   *                                                         CLASS:PPU*
+Ccc   *                      S H C F A D E                               *
+Ccc   *                                                                  *
+Ccc   * calculates angular momentum (J) fade-out of the shell            *
+Ccc   * correction to the fission barrier                                *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -1346,43 +1359,44 @@ C Local variables
 C
       REAL FLOAT
 C
-C
       SHCFADE = 1.
       IF(Shrd.NE.0.D0)SHCFADE = 1.0/(1.0 + EXP((FLOAT(J)-Shrj)/Shrd))
       END
 C
+C
+C
       SUBROUTINE ROGC(Nnuc, Scutf)
-CCC
-CCC   ********************************************************************
-CCC   *                                                         CLASS:PPU*
-CCC   *                         R O G C                                  *
-CCC   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
-CCC   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
-CCC   *                                                                  *
-CCC   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
-CCC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
-CCC   *                                                                  *
-CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
-CCC   *                                                                  *
-CCC   * CALLS:RIVOLI                                                     *
-CCC   *                                                                  *
-CCC   * AUTHOR: M.HERMAN                                                 *
-CCC   * DATE:   18.FEB.1993                                              *
-CCC   * REVISION:1    BY:M.Herman                 ON:29.Apr.1996         *
-CCC   * REVISION:2    BY:M.Herman                 ON:29.Oct.1996         *
-CCC   *   Automatic fit of nuclear temperature, Ux, and Eo to            *
-CCC   *   the discrete level scheme added. GNU-plots of the cumulative   *
-CCC   *   number of levels compared to the low energy GC formula         *
-CCC   *   provided.                                                      *
-CCC   * REVISION:3    BY:M.Herman                 ON:14.Jul.1997         *
-CCC   *   Table with a-parameters resulting from Mebel's analysis        *
-CCC   *   added as default.                                              *
-CCC   *                                                                  *
-CCC   * REVISION:4    BY:M.Herman                 ON:07.Feb.2000         *
-CCC   *   Structure simplified by adding a call to PRERO                 *
-CCC   *                                                                  *
-CCC   ********************************************************************
-CCC
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         CLASS:PPU*
+Ccc   *                         R O G C                                  *
+Ccc   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
+Ccc   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
+Ccc   *                                                                  *
+Ccc   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
+Ccc   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
+Ccc   *                                                                  *
+Ccc   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
+Ccc   *                                                                  *
+Ccc   * CALLS:RIVOLI                                                     *
+Ccc   *                                                                  *
+Ccc   * AUTHOR: M.HERMAN                                                 *
+Ccc   * DATE:   18.FEB.1993                                              *
+Ccc   * REVISION:1    BY:M.Herman                 ON:29.Apr.1996         *
+Ccc   * REVISION:2    BY:M.Herman                 ON:29.Oct.1996         *
+Ccc   *   Automatic fit of nuclear temperature, Ux, and Eo to            *
+Ccc   *   the discrete level scheme added. GNU-plots of the cumulative   *
+Ccc   *   number of levels compared to the low energy GC formula         *
+Ccc   *   provided.                                                      *
+Ccc   * REVISION:3    BY:M.Herman                 ON:14.Jul.1997         *
+Ccc   *   Table with a-parameters resulting from Mebel's analysis        *
+Ccc   *   added as default.                                              *
+Ccc   *                                                                  *
+Ccc   * REVISION:4    BY:M.Herman                 ON:07.Feb.2000         *
+Ccc   *   Structure simplified by adding a call to PRERO                 *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1609,8 +1623,8 @@ C-----plotting fit of the levels with low energy formula  ***done***
       ROPar(4, Nnuc) = eo
       ROPar(5, Nnuc) = t
       IF(ig.NE.0)THEN
-C-----calculation of level densities below EXL
-C-----/  low energy formula /
+C--------calculation of level densities below EXL
+C--------/  low energy formula /
 C
          DO i = 1, ig
             e = EX(i, Nnuc)
@@ -1671,13 +1685,14 @@ C
       ROPar(2, Nnuc) = ux
       END
 C
+C
+C
       DOUBLE PRECISION FUNCTION RIVOLI(Ux, Am)
 C
 C-----fermi gas level density formula
 C-----(note no numerical scaling)
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -1687,12 +1702,13 @@ C
       RIVOLI = 0.1477044*EXP(2.*SQRT(Am*Ux))/Am**0.25/Ux**1.25
       END
 C
+C
+C
       DOUBLE PRECISION FUNCTION ESSLIN(Xj, Sig)
 C
 C-----Bethe spin distribution formula
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -1703,9 +1719,17 @@ C
      &         *EXP(( - (Xj+1.)*Xj/2.0/Sig))
       END
 C
-      SUBROUTINE ALIT(Iz, Ia, X1, X2, X3, B, Gcc)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+C
+      SUBROUTINE ALIT(Iz, Ia, X1, X2, X3, B, Gcc)
+C
+C-------------------------------------------------------------class:au
+C-----reads fit parameters to calculate a-parameter in level densities
+C-----and ground state nuclear deformation 'B'
+C-----input IZ and IA of the nucleus and level density control variable
+C-----GCC.
+C
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C Dummy arguments
 C
@@ -1717,12 +1741,6 @@ C
       REAL FLOAT
       INTEGER izia, iziar
 C
-C
-C-------------------------------------------------------------class:au
-C-----reads fit parameters to calculate a-parameter in level densities
-C-----and ground state nuclear deformation 'B'
-C-----input IZ and IA of the nucleus and level density control variable
-C-----GCC.
       REWIND 23
       izia = Iz*1000 + Ia
  100  READ(23, *, END = 200)iziar, B, X1, X2, X3
@@ -1747,34 +1765,34 @@ C
 C
 C
       SUBROUTINE ROHFBCS(Nnuc)
-CCC
-CCC   *********************************************************************
-CCC   *                                                         CLASS:PPU *
-CCC   *                      R O H F B C S                                *
-CCC   *                                                                   *
-CCC   *  Reads level densities calculated in the frame of the Hartree-    *
-CCC   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
-CCC   *  them linearily in log to the EMPIRE energy grid.                 *
-CCC   *  level densities were generated and provided to RIPL-2 by         *
-CCC   *  S. Goriely.                                                      *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   *  INPUT:                                                           *
-CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   * OUTPUT:NONE                                                       *
-CCC   *                                                                   *
-CCC   * CALLS:ALIT                                                        *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   * AUTHOR: M. HERMAN (BASED ON THE ORGINAL ROUTINE BY S. GORIELI)    *
-CCC   * DATE:   November 14, 2001                                         *
-CCC   *                                                                   *
-CCC   *                                                                   *
-CCC   *********************************************************************
-CCC
+Ccc
+Ccc   *********************************************************************
+Ccc   *                                                         CLASS:PPU *
+Ccc   *                      R O H F B C S                                *
+Ccc   *                                                                   *
+Ccc   *  Reads level densities calculated in the frame of the Hartree-    *
+Ccc   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
+Ccc   *  them linearily in log to the EMPIRE energy grid.                 *
+Ccc   *  level densities were generated and provided to RIPL-2 by         *
+Ccc   *  S. Goriely.                                                      *
+Ccc   *                                                                   *
+Ccc   *                                                                   *
+Ccc   *                                                                   *
+Ccc   *  INPUT:                                                           *
+Ccc   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
+Ccc   *                                                                   *
+Ccc   *                                                                   *
+Ccc   * OUTPUT:NONE                                                       *
+Ccc   *                                                                   *
+Ccc   * CALLS:ALIT                                                        *
+Ccc   *                                                                   *
+Ccc   *                                                                   *
+Ccc   * AUTHOR: M. HERMAN (BASED ON THE ORGINAL ROUTINE BY S. GORIELI)    *
+Ccc   * DATE:   November 14, 2001                                         *
+Ccc   *                                                                   *
+Ccc   *                                                                   *
+Ccc   *********************************************************************
+Ccc
       PARAMETER(NLDGRID = 55, JMAX = 30)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -1784,10 +1802,6 @@ CCC
       DIMENSION rhouj(JMAX)
       CHARACTER*56 filename
       CHARACTER*2 car2
-C
-C
-C COMMON variables
-C
 C
 C Dummy arguments
 C
@@ -1830,9 +1844,9 @@ C-------------------------------------------------------------------
 99002 FORMAT(23x, a2, i3, 3x, i3)
       IF(car2.NE.'Z=')GOTO 100
       IF(iar.NE.ia)GOTO 100
-C-----
+C     
 C-----reading microscopic lev. dens. from the RIPL-2 file
-C-----
+C     
       READ(34, *)
       READ(34, *)
       i = 1
@@ -1860,9 +1874,9 @@ C-----
             WRITE(6, *)' EXECUTION STOPPED'
             STOP 'TOO HIGH ENERGY FOR HFBCS LEV. DENS.'
          ENDIF
-C--------
+C        
 C--------interpolation in the level density tables
-C--------
+C        
          klo = 1
          khi = iugrid
          IF(u.LE.ugrid(klo))THEN

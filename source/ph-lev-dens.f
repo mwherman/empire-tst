@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: ph-lev-dens.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2002-10-01 16:20:10 $
+Ccc   * $Id: ph-lev-dens.f,v 1.4 2002-10-01 16:20:10 mike Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In, Ip, Ih, X)
 C
@@ -13,7 +13,6 @@ C     X  - excitation energy
 C     G  - single particle density
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C COMMON variables
 C
@@ -77,14 +76,14 @@ C
             W = W2(Ip, 0, ix, X)
             GOTO 99999
          ELSE
-C--------check of the E>PB condition
+C-----------check of the E>PB condition
             IF(ix.LT.Ip)THEN
-C-----------W2 is eq.7a of reference above without g**(p+h)/p!/h! factor
+C--------------W2 is eq.7a of reference above without g**(p+h)/p!/h! factor
                W = W2(Ip, Ih, ix, X)
                RETURN
             ENDIF
             IF(Ip.GE.Ih)THEN
-C-----------W1 is eq.7b of reference above without g**(p+h)/p!/h! factor
+C--------------W1 is eq.7b of reference above without g**(p+h)/p!/h! factor
                W = W1(Ip, Ih, Ih - 1, X)
                RETURN
             ENDIF
@@ -372,9 +371,14 @@ C-----seems to be second part of 7c
       END
 C
 C
-      DOUBLE PRECISION FUNCTION WOBL(Ip, Ih, U, Ni)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+      DOUBLE PRECISION FUNCTION WOBL(Ip, Ih, U, Ni)
+C
+C     calculates conditional state densities according to Oblozinsky
+C     Nucl. Phys. A453(1986)127 formula 13; without factor
+C     g**(p+h)/p!h!(n-1)! and neglecting well depth
+C
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C COMMON variables
 C
@@ -390,13 +394,6 @@ C Local variables
 C
       INTEGER i, ii, ipm, n
       DOUBLE PRECISION s, w
-C
-C
-C
-C     calculates conditional state densities according to Oblozinsky
-C     Nucl. Phys. A453(1986)127 formula 13; without factor
-C     g**(p+h)/p!h!(n-1)! and neglecting well depth
-C
       WOBL = 0.0
       IF(U.LE.0.0D0)RETURN
       n = Ip + Ih + Ni
@@ -421,7 +418,13 @@ C
       END
 C
 C
+C
       SUBROUTINE BACK(Yb, Ip, Ih)
+C
+C     calculates density of accessible states (conditional) for internal
+C     backward transitions  (without g/w(p,h,e,-1) factor)
+C     using Oblozinsky's formula for cond. st. den.
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -442,11 +445,6 @@ C
       DOUBLE PRECISION WOBL
 C
 C
-C
-C     calculates density of accessible states (conditional) for internal
-C     backward transitions  (without g/w(p,h,e,-1) factor)
-C     using Oblozinsky's formula for cond. st. den.
-C
       Yb = 0.0
       n1 = Ip + Ih - 1
       n2 = n1 - 1
@@ -463,6 +461,11 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION VQ(Ip, Ih, U)
+C
+C     calculates avrage of imaginary part of o.m. pot. given as W=C*E**2
+C     exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
+C     weighting funtion in the case of particles (analogous for holes)
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -482,11 +485,6 @@ C
       INTEGER ih1, ip1, n
       DOUBLE PRECISION WOBL
 C
-C
-C
-C     calculates avrage of imaginary part of o.m. pot. given as W=C*E**2
-C     exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
-C     weighting funtion in the case of particles (analogous for holes)
 C
       VQ = 0.0
       IF(Ip.NE.0 .OR. Ih.NE.0)THEN
@@ -543,6 +541,10 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION WILLI(N, X)
+C
+C     calculates p-h state densities according to williams formula
+C     (without g**n/p!h! factor which is contained in omj)
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -557,10 +559,6 @@ C
       DOUBLE PRECISION X
 C
 C
-C
-C     calculates p-h state densities according to williams formula
-C     (without g**n/p!h! factor which is contained in omj)
-C
       WILLI = 0.0
       IF(X.LT.0.D0 .OR. N.LE.0)RETURN
       WILLI = X**(N - 1)/FACt(N)
@@ -568,6 +566,12 @@ C
 C
 C
       DOUBLE PRECISION FUNCTION OMJ(N, Ip, Ih, J, S, Ngs)
+C
+C     calculates spin dependent factor in state density including
+C     1/2 for parity and g**n/p!h! missing in w function
+C     the latter factor is set to 1 when microscopic densities are
+C     used (ngs=1)
+C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
@@ -586,12 +590,6 @@ C Local variables
 C
       DOUBLE PRECISION sig, w, xj
 C
-C
-C
-C     calculates spin dependent factor in state density including
-C     1/2 for parity and g**n/p!h! missing in w function
-C     the latter factor is set to 1 when microscopic densities are
-C     used (ngs=1)
 C
       OMJ = 0.
       IF(N.LE.0 .OR. Ip.LT.0 .OR. Ih.LT.0)RETURN
