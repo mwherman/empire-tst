@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-06-15 22:16:18 $ 
-Ccc   * $Id: input.f,v 1.31 2004-06-15 22:16:18 herman Exp $ 
+Ccc   * $Date: 2004-06-30 19:48:10 $ 
+Ccc   * $Id: input.f,v 1.32 2004-06-30 19:48:10 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -1840,7 +1840,7 @@ C
       IF(KTRlom(3, 1).EQ.1)WRITE(6, *) 
      &               ' alpha   o. m. parameters: Mc Fadden and Satchler' 
       IF(NDEJc.EQ.4) THEN
-	  IF(RIPl_omp(4))WRITE(6, *) 
+         IF(RIPl_omp(4))WRITE(6, *) 
      &            ' light ion  o. m. parameters: RIPL catalog number ' 
      &            , KTRlom(4, 1) 
       ENDIF
@@ -1898,38 +1898,38 @@ C
       CHARACTER*9 finp 
       DOUBLE PRECISION dum, DEF, elvr, xjlvr 
       INTEGER iar, ilv, izr, nlvr, lvpr 
-	INTEGER nztmp,natmp,iptmp
+      INTEGER nztmp,natmp,iptmp
       DOUBLE PRECISION etmp, jtmp, betatmp 
       CHARACTER*6 reftmp 
 
       E2p = 0.d0 
       E3m = 0.d0 
 C     Avoiding searching of collective levels of the incident particle
-	IF(IA.EQ.AEJc(0)) GOTO 155
+      IF(IA.EQ.AEJc(0)) GOTO 155
 C-----First try to find 2+ and 3- states in the RIPL om-deformations file 
       OPEN(47, FILE = 
      &       '../RIPL-2/optical/om-data/om-deformations.dat',
      &       STATUS = 'old',ERR=149)
-	  READ(47,'(///)') ! Skipping first 4 title lines
+      READ(47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 1700
 C       README file format (2i4,1x,a2,1x,f10.6,1x,f4.1,i3,i2,1x,f10.6,2x,a13)
             READ(47,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',  
      &      END = 150, ERR = 150) 
      &      nztmp,natmp,etmp,jtmp,iptmp,betatmp,reftmp
-	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+        if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
      &            jtmp.eq.2.d0  .AND. iptmp.eq.+1 .AND.
      &            reftmp.eq.'Raman2') E2p = etmp
-	      if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
+        if(   nztmp.eq.iz   .AND. natmp.eq.ia .AND.
      &            jtmp.eq.3.d0  .AND. iptmp.eq.-1 .AND.
      &            reftmp.eq.'Kibedi') E3m = etmp
         ENDDO
-	  GOTO 150
+      GOTO 150
 149     write(6,*) 'WARNING: ',
      &  '../RIPL-2/optical/om-data/om-deformations.dat file not found ' 
         write(6,*) 'WARNING: ',
      &  'E(2+) and E(3-) will be selected from the available target leve
      &l scheme'
-	  GOTO 155
+      GOTO 155
 150   CLOSE(47)
 C    
 C     IF(E2p.ne.0.d0 .OR. E3m. NE.0.d0) THEN  
