@@ -3783,10 +3783,11 @@ global file zvfilter zvvplots profilter filelist archfilter workdir
     }
      
 set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project input file"]
-set workdir [file dirname $defile]
-set pdir [lindex [file split $workdir] end-1]  
+set workdirt [file dirname $defile]
+set pdir [lindex [file split $workdirt] end-1]  
 if { $pdir != "empire" } {
-  if {[tk_dialog .dialogsi Confirm "Requested directory is in a wrong level. You will be able to view files but to run calculations. Is it OK?" "" 0 No Yes ] == 1} {
+  if {[tk_dialog .dialogsi Confirm "Requested directory is in a wrong level. You will be able to view files but not to run calculations. Is it OK?" "" 0 No Yes ] == 1} {
+    set workdir $workdirt
     cd $workdir
     set dfile [file rootname $defile]
     set file [file tail $dfile]
@@ -3800,6 +3801,7 @@ if { $pdir != "empire" } {
     adjourn .top75
   }
 } else {
+    set workdir $workdirt
     cd $workdir
     set dfile [file rootname $defile]
     set file [file tail $dfile]
