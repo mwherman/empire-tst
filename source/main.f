@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-28 09:53:16 $
-Ccc   * $Id: main.f,v 1.26 2004-05-28 09:53:16 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-01 22:01:36 $
+Ccc   * $Id: main.f,v 1.27 2004-06-01 22:01:36 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -210,7 +210,7 @@ C     INTEGER NRBar, NRFdis, ibaro
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
-	DOUBLE PRECISION ftmp
+      DOUBLE PRECISION ftmp
       INTEGER NELang
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
@@ -289,7 +289,7 @@ C           ECIS03, May 2004
             READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
 C-----------Checking if CC OMP was used
             IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. 
-     &		  DIRect.EQ.2) ELAcs=ftmp
+     &      DIRect.EQ.2) ELAcs=ftmp
             CLOSE(45)
          ENDIF
 
@@ -444,7 +444,7 @@ C
 89002       FORMAT(' ', 5x, 4('    TETA ', 2x, 'D.SIGMA/D.OMEGA', 6x), 
      &             /)
 
-	      gang = 180.0/(NELang - 1)
+            gang = 180.0/(NELang - 1)
             DO iang = 1, NELang/4 + 1
                imint = 4*(iang - 1) + 1
                imaxt = MIN0(4*iang, NELang)
@@ -452,7 +452,6 @@ C
             ENDDO
 89004       FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
             WRITE(6, '(//)')
-		   
             gang = 180.0/(NDANG - 1)
             WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
             WRITE(6, *)' '
@@ -1045,16 +1044,14 @@ C--------do loop over c.n. excitation energy
             IF(ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1)step = 1.0
             IF(ENDf.GT.0)THEN
 C--------------clean auxiliary particle spectra for calculation of recoils
-               IF(DEGa.NE.1 .OR. ke.NE.kemax .OR. nnuc.NE.1)THEN
-                  DO nejc = 0, NEJcm
-                     DO il = 1, NDLV
-                        REClev(il, nejc) = 0.0
-                     ENDDO
-                     DO ie = 1, NDECSE
-                        AUSpec(ie, nejc) = 0.0
-                     ENDDO
+               DO nejc = 0, NEJcm
+                  DO il = 1, NDLV
+                     REClev(il, nejc) = 0.0
                   ENDDO
-               ENDIF
+                  DO ie = 1, NDECSE
+                     AUSpec(ie, nejc) = 0.0
+                  ENDDO
+               ENDDO
 C--------------calculate population in the energy bin ke
                pope = 0.0
                DO jcn = 1, NLW, LTUrbo
@@ -1880,9 +1877,9 @@ C-----end of ENDF spectra (inclusive)
          WRITE(12, *)' '
          WRITE(6, *)' '
          WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
-	   CLOSE(15,status='delete')
-	   CLOSE(16,status='delete')
-	   CLOSE(66,status='delete')
+      CLOSE(15,status='delete')
+      CLOSE(16,status='delete')
+      CLOSE(66,status='delete')
          STOP 'REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
@@ -2039,7 +2036,8 @@ C-------and find last non-zero cross section for printing
             corr = corr + RECcse(ie, 0, nnuc)
             IF(RECcse(ie, 0, nnuc).NE.0)ilast = ie
          ENDDO
-C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
+         IF(corr.EQ.0) RETURN
+c        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
          corr = CSPrd(nnuc)/corr/DERec
          ilast = MIN(ilast + 1, NDEREC)
          DO ie = 1, ilast
@@ -2056,12 +2054,14 @@ C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
             WRITE(12, '(F9.4,E15.5)')FLOAT(ie - 1)*DERec,
      &            RECcse(ie, 0, nnuc)
          ENDDO
-         IF(ABS(1.0 - corr).GT.0.01D0)THEN
+         IF(ABS(1.0 - corr).GT.0.01D0 .AND. CSPrd(nnuc).GT.0.001D0)THEN
             WRITE(6, *)' '
-            WRITE(6, *)'WARNING: ZAP= ', IZA(nnuc)
+            WRITE(6, *)'WARNING:  Ein = ', EIN, ' MeV ZAP = ', IZA(nnuc)
+     &                 ,' from ',react
             WRITE(6, *)'WARNING: x-section balance in recoils '
             WRITE(6, *)'WARNING: difference = ', (1.0 - corr)
      &                 *100.0, '%'
+            WRITE(6,*)'WARNING: production cross section = ',CSPrd(nnuc)
             WRITE(6, *)' '
          ENDIF
       ENDIF
