@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-02-04 16:31:24 $
-Ccc   * $Id: lev-dens.f,v 1.29 2005-02-04 16:31:24 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-02-06 14:17:24 $
+Ccc   * $Id: lev-dens.f,v 1.30 2005-02-06 14:17:24 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
@@ -716,7 +716,7 @@ C--------Empire systematics with M-S shell corrections
                GAMma = GAMma*1.2928
             ENDIF
          ENDIF
-      IF(BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0)GAMma = Asaf     
+      IF(BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0)GAMma = Asaf
 C-----determination of the pairing shift DEL
       DELp = 12./SQRT(A(Nnuc))
       DEL = 0.
@@ -1002,7 +1002,7 @@ C-----determination of U for normal states
          ENDIF
       ENDIF
 C     fisfis d ===================================
-  
+
 C-----
 C-----do loop over angular momentum
 C
@@ -1357,9 +1357,8 @@ C
       DOUBLE PRECISION arg, const, det, momo, momp, phi, qdamp, qk, s,
      &                 seff2, t, vibrk
 C
-C
 C-----CONST=1/(2*SQRT(2 PI))
-      DATA const/0.199471d0/,pi/3.1415926d0/
+      DATA const/0.199471d0/
       ROBCS = 0.d0
       dphi2 = U/UCRt
       phi2 = 1.d0 - dphi2
