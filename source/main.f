@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-25 13:03:56 $
-Ccc   * $Id: main.f,v 1.50 2005-01-25 13:03:56 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-01-25 15:33:45 $
+Ccc   * $Id: main.f,v 1.51 2005-01-25 15:33:45 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -381,7 +381,7 @@ C-----print elastic and direct cross sections from ECIS
      &     ' Results provided by Spherical Optical Model calculations'
         WRITE(6, *)' '
       ELSEIF(DIRect.EQ.1)THEN
-        IF((MODelecis.GT.0) THEN
+        IF(MODelecis.GT.0)THEN
           WRITE(6, *)
      &     ' Results provided by Coupled Channel calculations'
         ELSE
