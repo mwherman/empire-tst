@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-11-30 08:32:19 $
-Ccc   * $Id: pcross.f,v 1.16 2004-11-30 08:32:19 Capote Exp $
+Ccc   * $Date: 2005-01-24 13:20:14 $
+Ccc   * $Id: pcross.f,v 1.17 2005-01-24 13:20:14 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
 C
