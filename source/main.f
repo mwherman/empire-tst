@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 15:29:34 $
-Ccc   * $Id: main.f,v 1.29 2004-06-08 15:29:34 Capote Exp $
+Ccc   * $Date: 2004-06-11 13:56:32 $
+Ccc   * $Id: main.f,v 1.30 2004-06-11 13:56:32 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -505,7 +505,8 @@ C-----
 C-----calculate MSD contribution
 C-----
       corrmsd = 1.0
-      IF(MSD.NE.0 .AND. EIN.GT.5.D0)THEN
+      IF(NNUC.EQ.1 .AND. MSD.NE.0 .AND. 
+     & 	   EIN.GT.5.D0 .AND. AEJC(0).EQ.1 )THEN
 C--------call ORION
          REWIND 15
          WRITE(6, *)' '
@@ -921,7 +922,7 @@ C--------locate residual nuclei
 C--------
 C-------- DEGAS exciton model calculations of preequilibrium contribution
 C--------
-         IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. DEGa.GT.0)THEN
+         IF(NNUc.EQ.1 .AND. EIN.GT.5.D0 .AND. DEGa.GT.0)THEN
             CALL EMPIREDEGAS
             WRITE(6, *)' '
             WRITE(6, *)' Start of summary from DEGAS'
@@ -939,14 +940,14 @@ C--------
 C--------
 C-------- PCROSS exciton model calculations of preequilibrium contribution
 C-------- including cluster emission by Iwamoto-Harada model 
-         IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. PEQc.GT.0)THEN
+         IF(NNUc.EQ.1 .AND. EIN.GT.5.D0 .AND. PEQc.GT.0)THEN
             ftmp=CSFus*corrmsd
             CALL PCRoss(ftmp)
          ENDIF          ! PCRoss done
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
-         IF(nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. LHMs.NE.0)THEN
+         IF(NNUc.EQ.1 .AND. EIN.GT.5.D0 .AND. LHMs.NE.0)THEN
             CLOSE(8)
             xizat = IZA(0)
             xnhms = NHMs
@@ -991,14 +992,14 @@ C--------
 C--------
 C--------Heidelberg Multistep Compound calculations
 C--------
-         IF(nnuc.EQ.1 .AND. MSC.NE.0)THEN
+         IF(NNUc.EQ.1 .AND. MSC.NE.0)THEN
             CALL HMSC(nvwful)
             CSEmis(0, 1) = CSEmis(0, 1) + CSMsc(0)
             CSEmis(1, 1) = CSEmis(1, 1) + CSMsc(1)
             CSEmis(2, 1) = CSEmis(2, 1) + CSMsc(2)
             IF(nvwful)GOTO 1650
          ENDIF
-         IF(nnuc.EQ.1 .AND. IOUt.GE.3)THEN
+         IF(NNUc.EQ.1 .AND. IOUt.GE.3)THEN
             WRITE(6, *)' '
             WRITE(6, *)' Preequilibrium spectra (sum of all models):'
             CALL AUERST(1, 0)
