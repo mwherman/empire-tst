@@ -11,7 +11,7 @@ NEX       60.
 MSD        1.
 MSC        1.
 ENDF       1.
-DEGAS      1.
+DEGAS      0.
 PCROSS     1.
 GDIVP     10.
 *OMPOT  -2405.       1
