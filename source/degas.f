@@ -132,12 +132,16 @@ C
       WRITE(42, *)'- Printout of input data'
       WRITE(42, *)'- Output from Degas in its original format'
       WRITE(42, *)'- Output from Empire: Results transfered from Degas'
+
+      DO i=1,10
+        NUDidegas(i)=0
+       end do
 C
 C     unit = 41: degasinput.dat, input via subroutine degasread,
 C     to be used for test purposes only
 C     unit = 42: degasresult.dat, output from Degas
 C
-C
+C      CALL DEGASREAD
 C
 C     Input parameters needed for Degas are taken from Empire:
 C
