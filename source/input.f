@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-19 18:54:34 $ 
-Ccc   * $Id: input.f,v 1.26 2004-05-19 18:54:34 Capote Exp $ 
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-06-01 22:00:45 $ 
+Ccc   * $Id: input.f,v 1.27 2004-06-01 22:00:45 herman Exp $ 
 C 
       SUBROUTINE INPUT 
 Ccc 
@@ -236,7 +236,7 @@ C--------set level density parameters
             ROPar(4, nnuc) = 0. 
             ROPar(5, nnuc) = 0. 
             ATIlnor(nnuc) = 0.
-		  GTILnor(nnuc) = 1. 
+            GTILnor(nnuc) = 1. 
             LVP(1, nnuc) = 0 
          ENDDO 
          IZA(0) = 0 
@@ -378,7 +378,7 @@ C--------set options for DEGAS (exciton preequilibrium)
          GDIvp = 13.0 
 C--------set options for PCROSS (exciton preequilibrium + cluster emission) 
          PEQc = 0.0 
-	   MFPp = 1.3
+         MFPp = 1.3
 C--------set ENDF flag to 0 (no ENDF file for formatting) 
          ENDf = 0.0 
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident) 
@@ -840,7 +840,7 @@ C-----------stop MSC charge-exchange if DEGAS,DDHMS or PCROSS active
                ENDIF 
             ENDIF 
          ENDIF 
-C--------set DEGAS  (.,4) 
+C--------set DEGAS  (.,4) (nucleons to discrete levels NOT blocked)
          IF(DEGa.GT.0)THEN 
             IDNa(1, 4) = 1 
             IDNa(2, 4) = 1 
