@@ -4,8 +4,8 @@ c      for PCROSS
      *,NDEJC=3 
      *,NDAFIS=1
      *,NDEX= 150
-     *,NDLW= 30
-     *,NDTL= 30 
+     *,NDLW= 50
+     *,NDTL= 50 
      *,NDMSCS=4 
      *,NDLV=60 
      *,NDBR=30
