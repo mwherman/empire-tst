@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-06 01:40:03 $
-Ccc   * $Id: main.f,v 1.45 2005-01-06 01:40:03 herman Exp $
+Ccc   * $Date: 2005-01-12 01:20:22 $
+Ccc   * $Id: main.f,v 1.46 2005-01-12 01:20:22 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1466,9 +1466,6 @@ C--------Integrating exclusive population spectra (ENDF)
          POPCS(3,nnuc) = atotsp
          IF(NDEJC.EQ.4) POPCS(NDEJC,nnuc) = htotsp
          IF(gtotsp .NE. 0) emedg=emedg/gtotsp
-c        the line below may replace the one above to get average gamma energy times
-c        gamma multiplictiy in the case of (n,p) reaction (for comparison with PSYCHE)
-c        IF(ptotsp .NE. 0) emedg=emedg/ptotsp
          IF(xtotsp .NE. 0) emedn=emedn/xtotsp
          IF(ptotsp .NE. 0) emedp=emedp/ptotsp
          IF(atotsp .NE. 0) emeda=emeda/atotsp
