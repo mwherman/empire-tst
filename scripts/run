@@ -50,6 +50,7 @@ rm  TARGET_COLL.DAT 2>/dev/null
 rm  TARGET_COLL.RIPL 2>/dev/null
 rm  TARGET-*.tl 2>/dev/null
 rm  warnings 2>/dev/null
+rm  INPUT 2>/dev/null
 
 # COPY INPUT FILES FOR A GIVEN CASE
 
@@ -108,7 +109,7 @@ echo 'DONE !!!'
 
 #MOVE CASE-RELATED FILES TO THE RIGHT PALCE
 
-cp OUTPUT.DAT $file.out
+mv OUTPUT.DAT $file.out
 mv LIST.DAT $file.lst
 mv LEVELS $file.lev
 if [ ! -s $file-omp.int ]; then
@@ -162,12 +163,30 @@ grep WARNING $file.lst >$file.war
 # DELETE TEMPORARY FILES
 
 rm FUSION fort.70 fort.66 fort.16 2>/dev/null
-#rm  ecis95.ics ecis95.cs 2>/dev/null
-#rm  ecis95.tmp ecis95.ang 2>/dev/null
-#rm  ecis95.tlj 2>/dev/null
 rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
 rm ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
 rm OMPAR.INT OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
+rm INPUT  2>/dev/null
+rm TAPE15 2>/dev/null
+rm TAPE16 2>/dev/null
+rm TAPE66 2>/dev/null
+rm file99 2>/dev/null
+rm DEGASRESULT 2>/dev/null
+rm angdis.pnt 2>/dev/null
+rm angdis.cur 2>/dev/null
+rm ECIS_SPH.out 2>/dev/null
+rm ECIS_XS.DAT 2>/dev/null
+rm ccm.ics 2>/dev/null
+rm ccm.cs 2>/dev/null
+rm dwba.cs 2>/dev/null
+rm dwba.ics 2>/dev/null
+rm ecis03.ang 2>/dev/null
+rm ecis03.cs 2>/dev/null
+rm ecis03.dat 2>/dev/null
+rm ecis03.ics 2>/dev/null
+rm ecis03.pol 2>/dev/null
+rm ecis03.tlj 2>/dev/null
+rm ecSPH.inp 2>/dev/null
 
 #VIEW OUTPUT FILES
 
@@ -231,7 +250,7 @@ fi
 
 ../scripts/process $file 1
  
-# RUN PLOTC4 (unabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
+# RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
 
 #../scripts/plot $file 1
 
@@ -243,6 +262,7 @@ rm $work/$file-f.endf   2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
 rm $work/$file-e.endf   2>/dev/null
 #rm $work/$file-s.endf   2>/dev/null
+
 
 # REMOVE EMPTY FILES
 

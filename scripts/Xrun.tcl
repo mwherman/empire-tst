@@ -3003,50 +3003,39 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_10_0.but101 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_8_0.lab102 {
-        array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
+    namespace eval ::widgets::$site_8_0.lab70 {
+        array set save {-labelfont 1 -labelpos 1 -labeltext 1}
     }
-    set site_10_0 [$site_8_0.lab102 childsite]
+    set site_10_0 [$site_8_0.lab70 childsite]
     namespace eval ::widgets::$site_10_0 {
-        array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
+        array set save {-background 1 -highlightcolor 1}
     }
     set site_10_0 $site_10_0
-    namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
-    }
-    namespace eval ::widgets::$site_10_0.but93 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
-    }
-    namespace eval ::widgets::$site_10_0.but101 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.lab103 {
-        array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
-    }
-    set site_10_0 [$site_8_0.lab103 childsite]
-    namespace eval ::widgets::$site_10_0 {
+    namespace eval ::widgets::$site_10_0.cpd71 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
-    set site_10_0 $site_10_0
-    namespace eval ::widgets::$site_10_0.but92 {
+    set site_11_0 $site_10_0.cpd71
+    namespace eval ::widgets::$site_11_0.but92 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_10_0.but93 {
+    namespace eval ::widgets::$site_11_0.but93 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_10_0.but101 {
+    namespace eval ::widgets::$site_11_0.but101 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_8_0.cpd67 {
-        array set save {-ipadx 1 -ipady 1 -labelfont 1 -labelpos 1 -labeltext 1}
-    }
-    set site_10_0 [$site_8_0.cpd67 childsite]
-    namespace eval ::widgets::$site_10_0 {
+    namespace eval ::widgets::$site_10_0.cpd72 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
-    set site_10_0 $site_10_0
-    namespace eval ::widgets::$site_10_0.but92 {
-        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1 -wraplength 1}
+    set site_11_0 $site_10_0.cpd72
+    namespace eval ::widgets::$site_11_0.but93 {
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+    }
+    namespace eval ::widgets::$site_11_0.but101 {
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
+    }
+    namespace eval ::widgets::$site_11_0.cpd67 {
+        array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
     set site_8_1 [lindex [$base.tab88 childsite] 1]
     namespace eval ::widgets::$site_8_1 {
@@ -3999,7 +3988,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -background #ffffff -highlightcolor black -menu "$top.m88" 
     wm focusmodel $top passive
-    wm geometry $top 873x299+13+652; update
+    wm geometry $top 873x299+10+654; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -4387,127 +4376,111 @@ ddlist} \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     pack $site_10_0.but101 \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    ::iwidgets::labeledframe $site_8_0.lab102 \
-        -ipadx 5 -ipady 5 \
-        -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Out/In: Levels} 
-    vTcl:DefineAlias "$site_8_0.lab102" "Labeledframe4" vTcl:WidgetProc "Toplevel1" 1
-    set site_10_0 [$site_8_0.lab102 childsite]
-    button $site_10_0.but92 \
+    ::iwidgets::labeledframe $site_8_0.lab70 \
+        -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
+        -labeltext Output/Input 
+    vTcl:DefineAlias "$site_8_0.lab70" "Labeledframe1" vTcl:WidgetProc "Toplevel1" 1
+    set site_10_0 [$site_8_0.lab70 childsite]
+    frame $site_10_0.cpd71 \
+        -background #e6e6e6 -highlightbackground #d9d9d9 \
+        -highlightcolor black 
+    bindtags $site_10_0.cpd71 "itk-destroy-.top75.tab88.canvas.notebook.cs.page1.cs.lab102.childsite $site_10_0.cpd71 Frame $top all"
+    set site_11_0 $site_10_0.cpd71
+    button $site_11_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file.lev &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text All 
-    vTcl:DefineAlias "$site_10_0.but92" "Button22" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but92 "$site_10_0.but92 Button $top all _vTclBalloon"
-    bind $site_10_0.but92 <<SetBalloon>> {
+        -relief raised -text {Discrete levels} 
+    vTcl:DefineAlias "$site_11_0.but92" "Button25" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.but92 "$site_11_0.but92 Button $top all _vTclBalloon"
+    bind $site_11_0.but92 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit discrete levels for all nuclei involved in the calculation}
     }
-    button $site_10_0.but93 \
+    button $site_11_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-lev.col &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text Collective 
-    vTcl:DefineAlias "$site_10_0.but93" "Button23" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but93 "$site_10_0.but93 Button $top all _vTclBalloon"
-    bind $site_10_0.but93 <<SetBalloon>> {
+        -relief raised -text {Collective levels} 
+    vTcl:DefineAlias "$site_11_0.but93" "Button42" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
+    bind $site_11_0.but93 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit collective levels used for direct calculations with ECIS}
     }
-    button $site_10_0.but101 \
+    button $site_11_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $psviewer $file-cum.ps &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Cumul. plot} 
-    vTcl:DefineAlias "$site_10_0.but101" "Button24" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but101 "$site_10_0.but101 Button $top all _vTclBalloon"
-    bind $site_10_0.but101 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_11_0.but101" "Button49" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
+    bind $site_11_0.but101 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View cumulative plots of discrete levels along with lev. dens.}
     }
-    pack $site_10_0.but92 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    pack $site_10_0.but93 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    pack $site_10_0.but101 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    ::iwidgets::labeledframe $site_8_0.lab103 \
-        -ipadx 5 -ipady 5 \
-        -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Out/In: OMP} 
-    vTcl:DefineAlias "$site_8_0.lab103" "Labeledframe5" vTcl:WidgetProc "Toplevel1" 1
-    set site_10_0 [$site_8_0.lab103 childsite]
-    button $site_10_0.but92 \
-        -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file-omp.int &} \
-        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text Internal 
-    vTcl:DefineAlias "$site_10_0.but92" "Button25" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but92 "$site_10_0.but92 Button $top all _vTclBalloon"
-    bind $site_10_0.but92 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Edit optical model parameters from potentials coded inside EMPIRE}
-    }
-    button $site_10_0.but93 \
+    pack $site_11_0.but92 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $site_11_0.but93 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $site_11_0.but101 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    frame $site_10_0.cpd72 \
+        -background #e6e6e6 -highlightbackground #d9d9d9 \
+        -highlightcolor black 
+    bindtags $site_10_0.cpd72 "itk-destroy-.top75.tab88.canvas.notebook.cs.page1.cs.lab103.childsite $site_10_0.cpd72 Frame $top all"
+    set site_11_0 $site_10_0.cpd72
+    button $site_11_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.ripl &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text RIPL 
-    vTcl:DefineAlias "$site_10_0.but93" "Button26" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but93 "$site_10_0.but93 Button $top all _vTclBalloon"
-    bind $site_10_0.but93 <<SetBalloon>> {
+        -relief raised -text {OM parameters} 
+    vTcl:DefineAlias "$site_11_0.but93" "Button50" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
+    bind $site_11_0.but93 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit optical model parameters taken from RIPL}
     }
-    button $site_10_0.but101 \
+    button $site_11_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-omp.dir &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text Direct 
-    vTcl:DefineAlias "$site_10_0.but101" "Button27" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but101 "$site_10_0.but101 Button $top all _vTclBalloon"
-    bind $site_10_0.but101 <<SetBalloon>> {
+        -relief raised -text {OMP for direct} 
+    vTcl:DefineAlias "$site_11_0.but101" "Button54" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
+    bind $site_11_0.but101 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit optical model parameters used for direct calculations with ECIS}
     }
-    pack $site_10_0.but92 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    pack $site_10_0.but93 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    pack $site_10_0.but101 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
-    ::iwidgets::labeledframe $site_8_0.cpd67 \
-        -ipadx 5 -ipady 5 \
-        -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Out/In: Fiss} 
-    vTcl:DefineAlias "$site_8_0.cpd67" "Labeledframe9" vTcl:WidgetProc "Toplevel1" 1
-    set site_10_0 [$site_8_0.cpd67 childsite]
-    button $site_10_0.but92 \
+    button $site_11_0.cpd67 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-inp.fis &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Fission input} -wraplength 40 
-    vTcl:DefineAlias "$site_10_0.but92" "Button30" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_10_0.but92 "$site_10_0.but92 Button $top all _vTclBalloon"
-    bind $site_10_0.but92 <<SetBalloon>> {
+        -relief raised -text {Fission input} 
+    vTcl:DefineAlias "$site_11_0.cpd67" "Button55" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_11_0.cpd67 "$site_11_0.cpd67 Button $top all _vTclBalloon"
+    bind $site_11_0.cpd67 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit fission input created by EMPIRE in the first run}
     }
-    pack $site_10_0.but92 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 34 -side top 
+    pack $site_11_0.but93 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $site_11_0.but101 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $site_11_0.cpd67 \
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $site_10_0.cpd71 \
+        -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
+        -side left 
+    pack $site_10_0.cpd72 \
+        -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
+        -side right 
     pack $site_8_0.lab69 \
         -in $site_8_0 -anchor center -expand 0 -fill none -side left 
     pack $site_8_0.lab100 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
         -pady 2 -side left 
-    pack $site_8_0.lab102 \
-        -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
-        -pady 2 -side left 
-    pack $site_8_0.lab103 \
-        -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
-        -pady 2 -side left 
-    pack $site_8_0.cpd67 \
+    pack $site_8_0.lab70 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
         -pady 2 -side left 
     set site_8_1 [lindex [$top.tab88 childsite] 1]
@@ -4832,7 +4805,7 @@ adjourn .top75} \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -padx 5 \
         -pady 2 -side left 
     pack $site_8_1.lab71 \
-        -in $site_8_1 -anchor center -expand 1 -fill none -side left 
+        -in $site_8_1 -anchor center -expand 0 -fill none -side left 
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -activebackground #dcdcdc \
@@ -5444,6 +5417,20 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .c4 -selectcolor orange \
         -text {C4 file} -variable ckc4 
+    $site_8_4.che119 add chk7 \
+        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -disabledforeground #a3a3a3 \
+        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
+        -foreground #000000 -highlightcolor black -highlightthickness 0 \
+        -justify left -offvalue 0 -onvalue 1 -selectcolor #b03060 \
+        -text {neutron Tl's} -variable ctln 
+    $site_8_4.che119 add chk8 \
+        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -disabledforeground #a3a3a3 \
+        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
+        -foreground #000000 -highlightcolor black -highlightthickness 0 \
+        -justify left -offvalue 0 -onvalue 1 -selectcolor #b03060 \
+        -text {proton Tl's} -variable ctlp 
     ::iwidgets::checkbox $site_8_4.che120 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -5454,57 +5441,64 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -omp.int -padx 1 \
-        -selectcolor orange -text {internal omp} -variable ckintomp 
+        -justify left -offvalue { } -onvalue -omp.ripl -padx 1 \
+        -selectcolor orange -text {OM parameters} -variable ckriplomp 
     $site_8_4.che120 add chk1 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
-        -justify left -offvalue { } -onvalue -omp.ripl -padx 1 \
-        -selectcolor orange -text {RIPL omp} -variable ckriplomp 
-    $site_8_4.che120 add chk2 \
-        -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
-        -disabledforeground #a1a4a1 \
-        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -omp.dir -padx 1 \
-        -selectcolor orange -text {direct omp} -variable ckdiromp 
-    $site_8_4.che120 add chk3 \
+        -selectcolor orange -text {OMP for direct} -variable ckdiromp 
+    $site_8_4.che120 add chk2 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue *.zvd -padx 1 \
         -selectcolor orange -text {ZVV plots} -variable ckzvv 
-    $site_8_4.che120 add chk4 \
+    $site_8_4.che120 add chk3 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .lev -padx 1 -selectcolor red \
         -text levels -variable cklev 
-    $site_8_4.che120 add chk5 \
+    $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -lev.col -padx 1 \
         -selectcolor red -text {collective levels} -variable ckcollev 
-    $site_8_4.che120 add chk6 \
+    $site_8_4.che120 add chk5 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .inp -padx 1 -selectcolor red \
         -text {EMPIRE input} -variable ckinp 
-    $site_8_4.che120 add chk7 \
+    $site_8_4.che120 add chk6 \
         -activebackground #f6f7f6 -activeforeground black -anchor w \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -inp.fis -padx 1 \
         -selectcolor red -text {fission input} -variable ckfisinp 
+    $site_8_4.che120 add chk7 \
+        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -disabledforeground #a3a3a3 \
+        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
+        -foreground #000000 -highlightcolor black -highlightthickness 0 \
+        -justify left -offvalue 0 -onvalue 1 -padx 1 -selectcolor #b03060 \
+        -text {alpha Tl's} -variable ctla 
+    $site_8_4.che120 add chk8 \
+        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -disabledforeground #a3a3a3 \
+        -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
+        -foreground #000000 -highlightcolor black -highlightthickness 0 \
+        -justify left -offvalue 0 -onvalue 1 -padx 1 -selectcolor #b03060 \
+        -text {L.I. Tl's} -variable ctli 
     frame $site_8_4.fra122 \
         -background #e6e6e6 -height 75 -highlightbackground #dcdcdc \
         -width 125 
@@ -5513,7 +5507,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #dcdcdc \
-        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \$ckinp\ \$ckfisinp\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ ../scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nadjourn\ .top75\n\} \
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckintomp\ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \nset\ detlist\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\ \$ctli\n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ ../scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ exec\ rm\ -f\ \$file-tl/*\$el*\n\}\n\nadjourn\ .top75\n\} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -text {Delete selected files} -wraplength 60 
@@ -6007,6 +6001,7 @@ close $mulfile} \
     $site_11_0.opt86 insert 47 {PLOTC4-plots}
     $site_11_0.opt86 insert 48 {PLOTC4-plots}
     $site_11_0.opt86 insert 49 {PLOTC4-plots}
+    $site_11_0.opt86 insert 50 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6139,7 +6134,7 @@ ddlist} \
         -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top 
     ::iwidgets::labeledframe $site_11_0.lab79 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Folder
+        -labeltext Folder 
     vTcl:DefineAlias "$site_11_0.lab79" "Labeledframe14" vTcl:WidgetProc "Toplevel1" 1
     set site_13_0 [$site_11_0.lab79 childsite]
     entry $site_13_0.ent77 \
@@ -6230,10 +6225,11 @@ cd $workdir} -cursor hand2 \
     }
     button $site_10_0.but81 \
         -activebackground #eccceccceccc -activeforeground red \
-        -background #dcdcdc -command {cd ../
+        -background #dcdcdc \
+        -command {cd ../
 exec xterm -e ./Compile
-cd $workdir} \
-        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+cd $workdir} -cursor hand2 \
+        -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
     bindtags $site_10_0.but81 "$site_10_0.but81 Button $top all _vTclBalloon"
     bind $site_10_0.but81 <<SetBalloon>> {
@@ -6359,23 +6355,21 @@ set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu92 add command \
         -command {exec {cp skelet.inp
-$file.inp &}} -label Create 
+$file.inp &}} -label {Create input} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.inp &} -label Edit 
+        -command {exec $editor $file.inp &} -label {Edit input} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.int &} -label {Internal omp} 
+        -command {exec $editor $file-omp.ripl &} -label {OM parameters} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.ripl &} -label {RIPL omp} 
-    $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.dir &} -label {Direct omp} 
+        -command {exec $editor $file-omp.dir &} -label {OM par. for direct} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.lev &} -label {All levels} 
+        -command {exec $editor $file.lev &} -label {Discrete levels} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-lev.col &} -label {Coll. levels} 
+        -command {exec $editor $file-lev.col &} -label {Collective levels} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
