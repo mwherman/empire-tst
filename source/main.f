@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-25 15:33:45 $
-Ccc   * $Id: main.f,v 1.51 2005-01-25 15:33:45 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-01-30 12:35:15 $
+Ccc   * $Id: main.f,v 1.52 2005-01-30 12:35:15 Carlson Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -266,7 +266,7 @@ C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
       CALL MARENG(0, 0)
-
+      IF(IZAejc(0).eq.0) go to 1234
 C-----
 C-----Get ECIS results
 C-----
@@ -460,6 +460,7 @@ C     Skipping all emission calculations
 C     GOTO 99999
 C
 C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
+ 1234 CONTINUE
       CALL WHERE(IZA(1) - IZAejc(0), mt2, iloc)
       CALL WHERE(IZA(1) - IZAejc(1), mt91, iloc)
       CALL WHERE(IZA(1) - IZAejc(2), mt649, iloc)
@@ -2237,18 +2238,42 @@ C
 
       IF (NEVER_CALLED) then
         NEVER_CALLED = .FALSE.
-        CALL GETTIM (IHR,MIN,ISEC,I110)
-        BEGTIM=DBLE(IHR*3600.+MIN*60.+ISEC+I110*.01)
+C begin MS-Fortran
+C        CALL GETTIM (IHR,MIN,ISEC,I110)
+C        BEGTIM=DBLE(IHR*3600.+MIN*60.+ISEC+I110*.01)
+C end MS-Fortran
+C begin g77
+        BEGTIM=SECOND()
+        I110=100*BEGTIM+0.5
+        ISEC=BEGTIM
+        I110=I110-100*ISEC
+        MIN=ISEC/60
+        ISEC=ISEC-60*MIN
+        IHR=MIN/60
+        MIN=MIN-60*IHR
+C end g77
         WRITE(IOUT,1002) IHR,MIN,ISEC,I110
-        WRITE(*,1002) IHR,MIN,ISEC,I110
+C        WRITE(*,1002) IHR,MIN,ISEC,I110
       ELSE
-        CALL GETTIM (IH,MIN1,IS,I10)
-        ENDTIM=DBLE(IH*3600.+MIN1*60.+IS+I10*.01)
+C begin MS-Fortran
+C        CALL GETTIM (IH,MIN1,IS,I10)
+C        ENDTIM=DBLE(IH*3600.+MIN1*60.+IS+I10*.01)
+C end MS-Fortran
+C begin g77
+        ENDTIM=SECOND()
+        I10=100*ENDTIM+0.5
+        IS=ENDTIM
+        I10=I10-100*IS
+        MIN1=IS/60
+        IS=IS-60*MIN1
+        IH=MIN1/60
+        MIN1=MIN1-60*IH
+C end g77
         IF(ENDTIM.LT.BEGTIM) ENDTIM = ENDTIM +  86400.D0
         DIFTIM=(ENDTIM-BEGTIM)/60.
         DIFTI1=(DIFTIM-INT(DIFTIM))*60.
         WRITE(IOUT,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
-        WRITE(*,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
+C        WRITE(*,1001) IH,MIN1,IS,I10,INT(DIFTIM),NINT(DIFTI1)
       ENDIF
 
       RETURN
