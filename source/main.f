@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:20:38 $
-Ccc   * $Id: main.f,v 1.48 2005-01-24 13:20:38 Capote Exp $
+Ccc   * $Date: 2005-01-25 00:00:20 $
+Ccc   * $Id: main.f,v 1.49 2005-01-25 00:00:20 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -304,10 +304,11 @@ C     READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..
       DO iang = 1, NELang
         READ(45, '(7x,E12.5)', END = 1500) ELAda(iang)
       ENDDO
-      OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD')
+
+      ncoll = 0
+      OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD',ERR=1500)
       READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..
 C-----get and add inelastic cross sections (including double-differential)
-      ncoll = 0
       DO i = 2, ND_nlv
         ilv = ICOller(i)
         IF(ilv.GT.NLV(nnurec))GOTO 1500
@@ -426,7 +427,7 @@ C       (it could be omitted)
           ENDIF
 C==================================================================
         ENDIF
-C      The printout below was changed to include the whole angular grid
+C       The printout below was changed to include the whole angular grid
         WRITE(6, 99001)(ICOller(ilv), ilv = 2, min(ncoll,10))
         WRITE(6, *)' '
         gang = 180.0/(NDANG - 1)
