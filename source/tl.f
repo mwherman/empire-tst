@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 22:24:37 $
-Ccc   * $Id: tl.f,v 1.49 2005-03-16 22:24:37 Capote Exp $
+Ccc   * $Date: 2005-04-01 12:12:06 $
+Ccc   * $Id: tl.f,v 1.50 2005-04-01 12:12:06 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2378,20 +2378,37 @@ C--------All levels with icollev(j)<50 should be calculated by CC
          IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.50) GOTO 100
          ch = '-'
          IF (D_Lvp(j).GT.0) ch = '+'
-         nwrite = nwrite + 1
 C--------If channel is closed ground state potential is used for this level
          eee = El - D_Elv(j)/xratio
+C
+C        Vibrational-rotational model modified as proposed
+C        by Harm Wienke, March 31, 2005 (vibrational bands can be included)
+C
+C--------In vibrational-rotational model IPH(j) is phonon number
          IF (eee.GE.0.0001) THEN
-            WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), IPH(j), nwrite,
+           nwrite = nwrite + 1
+           IF(IPH(j).ge.1) then
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 1, nwrite,
      &             ch, D_Elv(j)
+            ELSE
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, nwrite,
+     &             ch, D_Elv(j)
+            ENDIF
          ELSE
-            WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), IPH(j), 1, ch,
+           IF(IPH(j).ge.1) then
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 1, 1, ch,
      &             D_Elv(j)
+            ELSE
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, 1, ch,
+     &             D_Elv(j)
+            ENDIF
          ENDIF
          IF (IPH(j).NE.0) THEN
-            npho = npho + 1
-            lev(npho) = j
-            WRITE (1,'(10i5)') 1, npho
+           if(IPH(j).ne.IPH(j-1)) then
+               npho = npho + 1
+               lev(npho) = j
+           endif
+            WRITE (1,'(10i5)') 1, IPH(j)
          ENDIF
   100 ENDDO
 C-----Description of phonons
@@ -2404,8 +2421,8 @@ C--------assumed to be zero !!!!
 C--------L_PHO(lev(j))  = IPH(j)
 C--------L3_pho(lev(j)) = 0
          DO j = 1, npho
-            WRITE (1,'(2i5,6f10.5)') INT(D_Xjlv(lev(j)) + 0.1), 0,
-     &                               D_Def(lev(j),2)
+            WRITE (1,'(2i5,6f10.5)') INT(D_Llv(lev(j)) + 0.1),
+     &      INT(D_Klv(lev(j))+ 0.1),D_Def(lev(j),2)
          ENDDO
       ENDIF
 C-----Deformation of rotational band (only ground state band is present)
@@ -2564,7 +2581,6 @@ C-----Running ECIS
          CALL ECIS('ecVIBROT.inp','ECIS_ROT.out')
       ENDIF
       END
-
 
       SUBROUTINE SETPOTS(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Rrmu,Ak2,Ikey)
 C
