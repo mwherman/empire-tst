@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-02-11 00:42:52 $
-Ccc   * $Id: input.f,v 1.73 2005-02-11 00:42:52 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-11 21:07:45 $
+Ccc   * $Id: input.f,v 1.74 2005-02-11 21:07:45 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -690,14 +690,25 @@ C--------------retrieval from the remote database
      &t:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -React:"'//proj//
      &',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
                ENDIF
-C--------------retrieval from the local MySQL database
+C--------------retrieval from the local MySQL database 
+C--------------including data for the natural element
+C              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
+C                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
+C    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
+C    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+C              ELSEIF(IX4ret.EQ.1)THEN
+C                 x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
+C    &                       ';'//SYMb(0)//'-'//atar//'" '//
+C    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+C              ENDIF
+C--------------data for the target isotop only
                IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
-     &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
+                  x4string = '../scripts/X4retrieve "'
+     &                       //SYMb(0)(1:1)//'-'//atar//'" '//
      &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
                ELSEIF(IX4ret.EQ.1)THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
-     &                       ';'//SYMb(0)//'-'//atar//'" '//
+                  x4string = '../scripts/X4retrieve "'
+     &                       //SYMb(0)//'-'//atar//'" '//
      &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
                ENDIF
                iwin = PIPE(x4string)
@@ -856,6 +867,12 @@ C
             WRITE(6, *)'FATAL: HMS allowed only for incident nucleons'
             WRITE(6, *)'FATAL: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
+         ENDIF
+         IF(LHMs.NE.0 .AND. ENDF.EQ.1.D0)THEN
+            WRITE(6, *)' '
+            WRITE(6, *)'WARNING: HMS is incompatible with ENDF=1 option'
+            WRITE(6, *)'WARNING: and has been turned off'
+            LHMs = 0
          ENDIF
          IF(FISBAR(nnuc).NE.1 .AND. FISopt(nnuc).NE. 0)THEN
             FISopt(nnuc) = 0
@@ -2179,7 +2196,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b22  |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b23  |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
