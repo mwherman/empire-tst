@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 1.4 $
-c $Id: ddhms.cmb,v 1.4 2004-10-07 16:13:47 Capote Exp $
+c CVS Version Management $Revision: 1.5 $
+c $Id: ddhms.cmb,v 1.5 2005-01-23 02:39:25 Carlson Exp $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 500)    !must be >  emax=einc+Q /debin
@@ -24,6 +24,10 @@ c
 c input flags controling print of history file and recoil information in o/p
       common/iflagprint/ ihistlab, irecprint, iomlread
       integer ihistlab,irecprint, iomlread
+
+c quasideuteron frac. of photoabsorption cross section -- used in SETUPINITPH
+      common/qdsetup/ QDFrax
+      real*8 QDFrax
 
 c /nstates/  nexist = number of 2p1h,1p1h,1h states excited and need to decay
 c            ntot = total # 2p1h,1p1h,1h states that have been created
