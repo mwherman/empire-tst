@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-19 17:26:31 $
-Ccc   * $Id: input.f,v 1.55 2005-01-19 17:26:31 herman Exp $
+Ccc   * $Date: 2005-01-21 21:32:43 $
+Ccc   * $Id: input.f,v 1.56 2005-01-21 21:32:43 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1299,7 +1299,8 @@ C--------EL = EINL => incident energy
 C--------Calling interface subroutine to do ECIS call
 
 C        DWBA calculation for additional collective levels
-         CALL ECIS_CCVIB(0, 0, -EINl, .FALSE., .TRUE.)
+         einll = -EINl
+         CALL ECIS_CCVIB(0, 0, einll, .FALSE., .TRUE.)
 
          IF(DIRECT.NE.3) THEN
            IF(IOPsys.EQ.0)THEN
@@ -1322,10 +1323,10 @@ C            iwin = PIPE('move ecis03.pol dwba.pol')
 
            IF(DEFormed)THEN
 C             CC calculation, only coupled levels are considered
-              CALL ECIS_CCVIBROT(0, 0, -EINl, .FALSE., 0)
+              CALL ECIS_CCVIBROT(0, 0, einll, .FALSE., 0)
            ELSE
 C             CC calculation, only coupled levels are considered
-              CALL ECIS_CCVIB(0, 0, -EINl, .FALSE., .FALSE.)
+              CALL ECIS_CCVIB(0, 0, einll, .FALSE., .FALSE.)
            ENDIF
 
            IF(IOPsys.EQ.0)THEN
@@ -6412,7 +6413,7 @@ C    ********************************************************************
 C
       IMPLICIT NONE
       INTEGER nntmp,natmp,MAXgdr
-      PARAMETER (MAXgdr=6000)
+      PARAMETER (MAXgdr=5986)
       INTEGER  Key_GDRGFL, Key_shape
       INTEGER i, ka, keyload, kz, n, nana, nanz, NG, nna, nng, nnz,
      &        nzram, naram, numram, keyram, keyalpa, kaa, kzz,
