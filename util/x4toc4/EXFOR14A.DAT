@@ -273,6 +273,11 @@ FIELD 6.                                                                       1
 (N,X)EM,DA/DE                                       1  69000  0
 (N,X),SIG                                           1  39000  0
 (N,X)CN,SIG                                         1  39000  0
+(P,X),SIG                                           1  39001  0
+(D,X),SIG                                           1  39002  0
+(T,X),SIG                                           1  39003  0
+(HE-3,X),SIG                                        1  39004  0
+(A,X),SIG                                           1  39005  0
 (N,X),DA                                            1  49000  0
 (N,X)PAR,DA                                         1  49000  0
 (P,X),DE                                         1001  59000  0
