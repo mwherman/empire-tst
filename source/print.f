@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:19 $
-Ccc   * $Id: print.f,v 1.6 2005-03-04 17:21:19 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-03-18 23:47:26 $
+Ccc   * $Id: print.f,v 1.7 2005-03-18 23:47:26 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -44,10 +44,12 @@ C
       csemax = 0.
       kmax = 1
       DO i = 1, NDEX
-         IF (CSE(i,Nejc,Nnuc).GT.0.0D0) kmax = i
+C        IF (CSE(i,Nejc,Nnuc).GT.0.0D0) kmax = i
+         IF (CSE(i,Nejc,Nnuc).GT.1.d-15) kmax = i
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
-      IF (csemax.EQ.0.0D0) RETURN
+C     IF (csemax.eq.0.d0) RETURN
+      IF (csemax.lt.1.d-16) RETURN
       kmax = kmax + 2
       kmax = MIN0(NDEX,kmax)
       kmax = MIN0(kmax,NDECSE) ! RCN
