@@ -15,10 +15,7 @@ already be compiled.
 
 Running:
 
-Use lrun.tcl script in the empire/work directory. This needs Tcl/Tk
-and bash shell installed. 
-
-Try also beta version of the new GUI (Xrun.tcl in the work directory).
+Try the new GUI (Xrun.tcl in the work directory).
 Although not fully completed, this interface provides all functionalities
 of the previous 'lrun.tcl' and much more (e.g., ZVV plotting of double
 differential and single spectra, file managment features, and multiple
