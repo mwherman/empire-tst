@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-01-06 23:53:06 $
-Ccc   * $Id: HF-comp.f,v 1.37 2005-01-06 23:53:06 herman Exp $
+Ccc   * $Date: 2005-01-21 21:27:27 $
+Ccc   * $Id: HF-comp.f,v 1.38 2005-01-21 21:27:27 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -1297,6 +1297,7 @@ Ccc   * input:NNUC-decaying nucleus index                                *
 Ccc   *       IEC -decaying state excitation energy index                *
 Ccc   *       IP  -decaying state parity                                 *
 Ccc   *       JC  -decaying state spin index                             *
+Ccc   *       nmod-number of modes (multimodal fission)                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
@@ -1602,6 +1603,9 @@ c-------------region VI
                         tdirr=0.
                         tabss=tfd(1)
                      ENDIF
+CMH--------setting tdirr23 to 0 added since it is undefined for 2 humps
+                 ELSE
+                    tdirr23 = 0.0d0
                  ENDIF    
 c-------------------------
                  if(tabss+tdirr.GT.1.) tdirr=0. !!!!!!!!!!!
