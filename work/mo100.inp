@@ -5,14 +5,16 @@
 1                    ;NUMBER OF PROTONS  TO BE EMITTED
 1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
-IOUT       3.                                               
-LEVDEN     0.                                              
+IOUT       1.                                               
+LEVDEN     3.                                              
 NEX      100.                                                   
 MSD        1.                                                     
 MSC        1.                                                         
 ENDF       1.                     
-OMPOT      4.       1
-GST        1.
+OMPOT  -2405.       1
+OMPOT  -5405.       2
+GST        0.
+DEGAS      1.
 GO
 0.002
 0.005

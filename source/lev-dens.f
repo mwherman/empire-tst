@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 08:50:34 $
-Ccc   * $Id: lev-dens.f,v 1.3 2001-11-06 08:50:34 mike Exp $
+Ccc   * $Date: 2001-11-27 17:47:41 $
+Ccc   * $Id: lev-dens.f,v 1.4 2001-11-27 17:47:41 mike Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -214,8 +214,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak, arg, con, const, dmpdiff, dmphalf, e1, qk, 
-     &                 qv, seff, sort2, sum, t, u, vibrk
+      DOUBLE PRECISION ak, arg, con, const, e1, qk, qv, seff, sort2, 
+     &                 sum, t, u, vibrk
       INTEGER i, k, kmin
 C
 C
@@ -230,12 +230,12 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
       RODEF = 0.0
       sum = 0.0
       IF(Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0)THEN
-         WRITE(6, *)'NEGATIVE MOMENT OF INERTIA FOR SPIN ', Aj
-         WRITE(6, *)'0 LEVEL DENSITY RETURNED BY RODEF'
+         WRITE(6, *)'WARNING: NEGATIVE MOMENT OF INERTIA FOR SPIN ', Aj
+         WRITE(6, *)'WARNING: 0 LEVEL DENSITY RETURNED BY RODEF'
          RETURN
       ENDIF
       IF(Ac.EQ.0.0D0)THEN
-         WRITE(6, '('' LEVEL DENSITY PARAMETER a=0 IN RODEF'')')
+         WRITE(6, '('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
          STOP
       ENDIF
       seff = 1.0/Mompar - 1.0/Momort
@@ -261,11 +261,7 @@ C-----(NOT consistent with the builtin systematics)
 C     CALL DAMPKS(A,A2,T,QK)
 C-----damping of rotational  effects with Fermi function independent
 C-----of deformation and mass number (consistent with the builtin systematics)
-      qk = 0.
-      dmphalf = 40.
-      dmpdiff = 10.
-      qk = 1/(1. + EXP((-dmphalf/dmpdiff)))
-     &     - 1./(1. + EXP((e1-dmphalf)/dmpdiff))
+      CALL DAMPROT(e1, qk)
 C-----damping ***** done *********
       sort2 = Momort*t
       IF(Ss.EQ.( - 1.0D0))THEN
@@ -309,6 +305,31 @@ C-----rotation parallel to the symmetry axis
       END
 C
 C
+C
+      SUBROUTINE DAMPROT(E1, Qk)
+CCCC  *****************************************************************
+CCCC  * damping of rotational  effects with Fermi function independent
+CCCC  * of deformation and mass number (consistent with the builtin systematics)
+CCCC  *****************************************************************
+      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION E1, Qk
+C
+C Local variables
+C
+      DOUBLE PRECISION dmphalf, dmpdiff 
+C
+      Qk = 0.
+      dmphalf = 40.
+      dmpdiff = 10.
+      Qk = 1/(1. + EXP((-dmphalf/dmpdiff)))
+     &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
+      END
+C
+C
+C
       SUBROUTINE VIBR(A, T, Vibrk)
 CCCC  *****************************************************************
 CCCC  *  Calculates vibrational enhancement of level densities
@@ -332,6 +353,7 @@ C
       END
 C
 C
+C
       SUBROUTINE SIGMAK(A, Z, B, Bf, E, Ac, Aj, Mompar, Momort, A2, 
      &                  Stab, Cigor, Defpar, Defga, Defgw, Defgp)
 Cccc  *****************************************************************
@@ -341,7 +363,6 @@ Cccc  *  Calculates also def. parameter alpha2 (leg. pol. expansion)
 Cccc  *  in function of spin in terms of the ldm + dampped g.s. defor.
 Cccc  *****************************************************************
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
 C
 C Dummy arguments
 C
@@ -633,7 +654,7 @@ C
      &                 pshift, rocumul, rocumuld, rodif, xr
       REAL FLOAT
       DOUBLE PRECISION FSHELL
-      INTEGER i, ia, ij, il, in, iter, ix, iz, kk, nlevfit
+      INTEGER i, ia, ij, il, in, iter, ix, iz, kk, nlevfit, kkl, kku 
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
@@ -651,7 +672,7 @@ C     WRITE(6,
 C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
 C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
 C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)RETURN
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0)RETURN
       CALL PRERO(Nnuc, Cf)
 C-----Empire systematics with Nix-Moeller shell corrections
       AP1 = 0.94431E-01
@@ -695,9 +716,10 @@ C-----set Ignatyuk type energy dependence for 'a'
             IF(ABS(ACRt - ar)/ACRt.LE.0.001D0)GOTO 100
             ar = ACRt
          ENDDO
-         WRITE(6, *)' SEARCH FOR CRITICAL A-PARAMETER HAS NOT CONVERGED'
-         WRITE(6, *)' LAST ITERATION HAS GIVEN ACRT=', ACRt
-         WRITE(6, *)' EXECUTION CONTINUES'
+         WRITE(6, *)
+     &     ' WARNING: SEARCH FOR CRITICAL A-PARAMETER HAS NOT CONVERGED'
+         WRITE(6, *)' WARNING: LAST ITERATION HAS GIVEN ACRT=', ACRt
+         WRITE(6, *)' WARNING: EXECUTION CONTINUES'
       ENDIF
  100  IF(ACRt.LT.0.0D0)ACRt = 0.0
       ECOnd = 1.5*ACRt*DELp**2/pi2
@@ -711,47 +733,80 @@ C-----
 C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
 C-----
+      IF(FITlev.GT.0 .AND. RORed.EQ.0)THEN
+         WRITE(6, *)' '
+         WRITE(6, *)' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
+         WRITE(6, *)' CHECK WHETHER YOU CAN INCREASE EXPdec in input.f'
+         WRITE(6, *)' (MAXIMUM EXPONENT ON 10 ALLOWED)'
+         WRITE(6, *)
+     &             ' IF YOUR SYSTEM ALLOWS FOR THIS DO IT AND RECOMPILE'
+         WRITE(6, *)' OTHERWISE YOU CAN NOT ASK FOR SO HIGH ENERGY'
+         WRITE(6, *)' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
+         WRITE(6, *)' FOR THE TIME BEING EXECUTION TERMINATED'
+         STOP
+      ENDIF
+      IF(Q(1, Nnuc).EQ.0.0D0)THEN
+         REWIND 25
+         CALL BNDG(1, Nnuc, Q(1, Nnuc))
+      ENDIF
+C-----get distance between Qn and the last level
+      ellq = Q(1, Nnuc) - ELV(NLV(Nnuc), Nnuc)
       dshift = 0.0
       iter = 0
       IF(NLV(Nnuc).GT.3)THEN
          IF(FITlev.GT.0.0D0)THEN
             WRITE(6, *)' '
             WRITE(6, *)' Fitting l.d. to discrete levels'
-            WRITE(6, *)' ITER,   SHIFT,    ROCUMUL, No of levels = ', 
-     &                 NLV(Nnuc)
+            WRITE(6, *) NLV(Nnuc), ' levels at ',
+     &            ELV(NLV(Nnuc), Nnuc), ' MeV'
          ENDIF
-         defit = (ELV(NLV(Nnuc), Nnuc) + FITlev)/FLOAT(NEX(1))
-         nlevfit = ELV(NLV(Nnuc), Nnuc)/defit
+         defit = (ELV(NLV(Nnuc), Nnuc)+MAX(FITlev,4.0D0))/FLOAT(NDEX-1)
+         nplot = (ELV(NLV(Nnuc), Nnuc) + FITlev)/defit
  150     rocumul = 1.0
          iter = iter + 1
-         DO kk = 1, NEX(1)
+         kkl = 0
+         kku = 0
+         DO kk = 1, NDEX
 C--------------clean RO matrix
             IF(BF.NE.0.0D0)THEN
                DO i = 1, NDLW
                   RO(kk, i, Nnuc) = 0.0
                ENDDO
             ENDIF
-            CALL DAMIRO(kk, Nnuc, dshift, defit, Asaf)
+C-----------decrease energy shift above the last level to become 0 at Qn
+            exkk = FLOAT(kk - 1)*defit
+            IF(exkk.LE.ELV(NLV(Nnuc), Nnuc))THEN
+               dshif = dshift
+            ELSEIF(exkk.LT.Q(1, Nnuc) .AND. ellq.NE.0.0D0)THEN
+               dshif = dshift*(Q(1, Nnuc) - exkk)/ellq
+            ELSE
+               dshif = 0.0
+            ENDIF
+            CALL DAMIRO(kk, Nnuc, dshif, defit, Asaf)
             DO ij = 1, NLWst
                IF(kk.GT.1)rocumul = rocumul + 
      &                              (RO(kk - 1, ij, Nnuc) + RO(kk, ij, 
-     &                              Nnuc))*defit
+     &                              Nnuc))*defit/RORed
             ENDDO
-            IF(kk.EQ.nlevfit - 1)grad = LOG(rocumul)
-            IF(kk.EQ.nlevfit)rocumuld = rocumul
+            IF(rocumul.LE.FLOAT(NLV(Nnuc))) THEN
+               kkl = kk
+               rocumd = rocumul
+            ELSEIF(kku.EQ.0)THEN
+               kku = kk
+               rocumu = rocumul
+            ENDIF 
          ENDDO
-         IF(ABS(rocumuld - FLOAT(NLV(Nnuc)) + 0.5D0).GT.0.5D0)THEN
-            IF(FITlev.GT.0.0D0)WRITE(6, '(I3,4X,2G12.5)')iter, dshift, 
-     &                               rocumuld
-            rocumuld = LOG(rocumuld)
-            grad = rocumuld - grad
-            grad = grad*2.0
-            rodif = LOG(FLOAT(NLV(Nnuc)) - 0.5D0) - rocumuld
-            pshift = rodif*defit/grad
-            pshift = MIN(1.0D0, pshift)
-            pshift = MAX( - 1.0D0, pshift)
-            dshift = dshift + pshift
-            IF(iter.LE.20)GOTO 150
+         rocumd = LOG(rocumd)
+         rocumu = LOG(rocumu)
+         rolev = LOG(FLOAT(NLV(Nnuc)))
+         dshi = (rolev - rocumd)/(rocumu - rocumd)
+         dshi = (kkl - 1 + dshi)*defit
+         dshi = dshi - ELV(NLV(Nnuc), Nnuc)
+         dshift = dshift + dshi
+         IF(FITlev.GT.0.0D0)WRITE(6, '(I3,4X,3G12.5)')iter, dshi, 
+     &                      dshift 
+         IF(ABS(dshi).GT.0.01D0) THEN 
+            IF(iter.le.20)GO TO 150 
          ENDIF
       ENDIF
 C-------cumulative plot of levels along with the l.d. formula
@@ -760,9 +815,13 @@ C-------cumulative plot of levels along with the l.d. formula
      &                  ATIlnor(Nnuc)
 99001    FORMAT('Cumulative plot for ', I3, '-', A2, '-', I3, ' norm=', 
      &          F6.4)
-         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
-99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
-     &          '"')
+         WRITE(35, *)'set terminal postscript enhanced color'
+         WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
+         WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), dshift,
+     &                   UCRt - DEL - dshift, Q(1, Nnuc), DEF(1, Nnuc)
+99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3,
+     &          '   U shift = ', F6.3, ' Ucrt = ', F5.2, ' Qn = ', F5.2,
+     &          ' Def = ', F6.2, '"')
          WRITE(35, *)'set logscale y'
          WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
          WRITE(35, *)'set ylabel "Number of levels" 0,0'
@@ -777,19 +836,20 @@ C-------cumulative plot of levels along with the l.d. formula
          ENDDO
          rocumul = 1.0
          WRITE(34, *)'0.0  ', rocumul
-         DO kk = 2, NEX(1)
+         DO kk = 2, nplot
 C-----integration over energy. There should be factor 2 because of the
 C-----parity but it cancels with the 1/2 steming from the trapezoid
 C-----integration
             DO ij = 1, NLWst
                rocumul = rocumul + 
-     &                   (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))*defit
+     &                   (RO(kk - 1, ij, Nnuc) + RO(kk, ij, Nnuc))
+     &                   *defit/RORed
             ENDDO
             WRITE(34, *)defit*FLOAT(kk - 1), rocumul
          ENDDO
          CLOSE(36)
          CLOSE(34)
-         iwin = PIPE('gnuplot -persist fort.35#')
+         iwin = PIPE('gnuplot fort.35#')
          CLOSE(35)
       ENDIF
 C-------plotting fit of the levels with low energy formula  ***done***
@@ -952,14 +1012,14 @@ C-----dependent factor
             IF(Asaf.LT.0.D0)ac = -ATIl*Asaf
             IF(ac.LE.0.D0)GOTO 99999
          ENDIF
-C-----
-C-----yrast states
-C-----
+C--------
+C--------Yrast states
+C--------
          IF(BF.NE.0.0D0)THEN
-C-----spin  dependent moments of inertia for yrast states by Karwowski
-C-----(spin dependent deformation beta calculated according to B.-Mot.)
-C-----temporary value of A parameter needed for ground state deformation
-C-----damping (no surface correction)
+C-----------spin  dependent moments of inertia for yrast states by Karwowski
+C-----------(spin dependent deformation beta calculated according to B.-Mot.)
+C-----------temporary value of A parameter needed for ground state deformation
+C-----------damping (no surface correction)
             ATIl = AP1*A(Nnuc) + AP2*A23
             ATIl = ATIl*ATIlnor(Nnuc)
             ac = ATIl*FSHELL(u, SHC(Nnuc), GAMma)
@@ -973,8 +1033,8 @@ C-----------HERE here FSHELL can become negative
             ELSE
                BF = 2
             ENDIF
-C-----calculation of level density parameter 'a' including surface
-C-----dependent factor
+C-----------calculation of level density parameter 'a' including surface
+C-----------dependent factor
             qigor = ( - 0.00246 + 0.3912961*cigor - 
      &              0.00536399*cigor**2 - 0.051313*cigor**3 + 
      &              0.043075445*cigor**4) - 0.375
@@ -1078,9 +1138,9 @@ C-----check of the input data ---------------------------------------
       IF(Nnuc.GT.NDNUC)THEN
          WRITE(6, 
      &'('' PRERO  CALLED FOR A NUCLEUS INDEX NNUC=''                   ,
-     &I3,'' WHICHEXCEEDS DIMENSIONS'',/,                               '
+     &I3,'' WHICH EXCEEDS DIMENSIONS'',/,                              '
      &' CHECK THIS CALL OR INCREASE NDNUC TO'',I4,                     '
-     &' IN ALL PARAMETER CARDS AND RECOMPILE'',//,                     '
+     &' IN dimension.h AND RECOMPILE'',//,                             '
      &'EXECUTION STOPPED'')')Nnuc, Nnuc
          STOP
       ENDIF
@@ -1088,7 +1148,7 @@ C     WRITE(6,
 C     &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,           ''
 C     &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO''                 ,//
 C     &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')')ia, iz
-      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0)RETURN
+      IF(EX(NEX(Nnuc), Nnuc).LE.0.0D0 .AND. FITlev.EQ.0)RETURN
 C-----check of the input data ---- done -----------------------------
 C-----check whether the nucleus is fissile
       FISsil(Nnuc) = .TRUE.
@@ -1242,7 +1302,8 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF(ABS(A2).GT.0.005D0)seff2 = momp**0.333*momo**0.6666*t
       arg = s - Aj*(Aj + 1.0)/(2.0*seff2)
       IF(arg.LE.0.0D0)RETURN
-      CALL DAMPKS(A, A2, t, qk)
+C     CALL DAMPKS(A, A2, t, qk)
+      CALL DAMPROT(U, qk)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
       ROBCS = const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
 C-----vibrational ehancement factor
@@ -1419,6 +1480,8 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                WRITE(35, 99001)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
 99001          FORMAT('set title "NO SOLUTION FOR ', I3, '-', A2, '-', 
      &                I3, '"')
+               WRITE(35, *)'set terminal postscript enhanced color'
+               WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
                WRITE(35, *)'set logscale y'
                WRITE(35, *)'set xlabel "Energy (MeV)" 0,0'
                WRITE(35, *)'set ylabel "Number of levels" 0,0'
@@ -1434,11 +1497,13 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                ENDDO
                CLOSE(36)
                CLOSE(34)
-               iwin = PIPE('gnuplot -persist fort.35#')
+               iwin = PIPE('gnuplot fort.35#')
             ENDIF
             GOTO 500
 C-------plotting fit of the levels with low energy formula  ***done***
          ELSEIF(FITlev.LT.0.0D0)THEN
+            WRITE(6, *)' ERROR IN DISCRETE LEVEL FITTING'
+            WRITE(6, *)' BECAUSE OF FITLEV<0 OPTION EXECUTION STOPPED'
             STOP 'ERROR IN DISCRETE LEVEL FITTING (GC)'
          ENDIF
       ENDIF
@@ -1483,6 +1548,8 @@ C-----plot fit of the levels with the low energy l.d. formula
       IF(FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3)THEN
          WRITE(6, *)' A=', A(Nnuc), 'Z=', Z(Nnuc)
          WRITE(6, *)' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
+         WRITE(35, *)'set terminal postscript enhanced color'
+         WRITE(35, *)'set output "|cat >>CUMULPLOT.PS"'
          WRITE(35, 99002)INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc))
 99002    FORMAT('set title "Cumulative plot for ', I3, '-', A2, '-', I3, 
      &          '"')
@@ -1499,7 +1566,7 @@ C-----plot fit of the levels with the low energy l.d. formula
          ENDDO
          CLOSE(36)
          CLOSE(34)
-         iwin = PIPE('gnuplot -persist fort.35#')
+         iwin = PIPE('gnuplot fort.35#')
       ENDIF
 C-----plotting fit of the levels with low energy formula  ***done***
  500  ROPar(1, Nnuc) = am
@@ -1639,3 +1706,158 @@ C-----GCC.
          B = 0.
       ENDIF
       END
+C
+C
+C
+      SUBROUTINE ROHFBCS(Nnuc)
+CCC
+CCC   *********************************************************************
+CCC   *                                                         CLASS:PPU *
+CCC   *                      R O H F B C S                                *
+CCC   *                                                                   *
+CCC   *  READS LEVEL DENSITIES CALCULATED IN THE FRAME OF THE HARTREE-    *
+CCC   *  FOCK-BCS MODEL AND STORED IN THE TABLES (RIPL-2) AND INTERPOLATES*
+CCC   *  THEM LINEARILY IN LOG TO THE EMPIRE ENERGY GRID.                 *
+CCC   *  LEVEL DENSITIES WERE GENERATED AND PROVIDED TO RIPL-2 BY         * 
+CCC   *  S. GORIELY.                                                      *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *  INPUT:                                                           *
+CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   * OUTPUT:NONE                                                       *
+CCC   *                                                                   *
+CCC   * CALLS:ALIT                                                        *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   * AUTHOR: M. HERMAN (BASED ON THE ORGINAL ROUTINE BY S. GORIELI)    *
+CCC   * DATE:   November 14, 2001                                         *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   *********************************************************************
+CCC
+      PARAMETER(NLDGRID = 55, JMAX = 30)
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      DIMENSION ugrid(0:NLDGRID), tgrid(0:NLDGRID), cgrid(0:NLDGRID)
+      DIMENSION rhoogrid(0:NLDGRID), rhotgrid(0:NLDGRID)
+      DIMENSION rhogrid(0:NLDGRID, JMAX)
+      DIMENSION Rhouj(JMAX)
+      CHARACTER*50 filename
+      CHARACTER*2 car2
+C
+C
+C COMMON variables
+C
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION cf, u, r1, r2, c1, c2, rhogrid, rhoogrid, ugrid, 
+     &                 rhotgrid, cgrid
+      INTEGER kk, ia, iz, j, JMAX1, izr, iar, k, khi, khlo
+C
+C
+      cf = 0
+      ia = A(Nnuc)
+      iz = Z(Nnuc)
+C-----next call prepares for lev. dens. calculations
+      CALL PRERO(Nnuc, cf)
+C-------------------------------------------------------------------
+C     initialization
+C-------------------------------------------------------------------
+      JMAX1 = MIN(NDLW,JMAX)
+      DO i = 0, NLDGRID
+         ugrid(i) = 0.
+         tgrid(i) = 0.
+         cgrid(i) = 1.
+         rhoogrid(i) = 1.E-20
+         rhotgrid(i) = 1.E-20
+         DO j = 1, JMAX1
+            rhogrid(i, j) = 1.E-20
+         ENDDO
+      ENDDO
+      DO j = 1, JMAX1
+         Rhouj(j) = 0.
+      ENDDO
+      WRITE(filename, 99001)iz
+99001 FORMAT('../data/RIPL/densities/total/HFBCS/Z', i3.3, '.DAT')
+      OPEN(UNIT = 34, FILE = filename)
+ 100  READ(34, 99002, ERR = 100, END = 300)car2, izr, iar
+99002 FORMAT(23x, a2, i3, 3x, i3)
+      IF(car2.NE.'Z=')GOTO 100
+      IF(iar.NE.ia)GOTO 100
+C-----
+C-----reading microscopic lev. dens. from the RIPL-2 file
+C-----
+      READ(34, *)
+      READ(34, *)
+      i = 1
+ 200  READ(34, 99003, END = 400)ugrid(i), tgrid(i), cgrid(i), 
+     &                          rhoogrid(i), rhotgrid(i), 
+     &                          (rhogrid(i, j), j = 1, JMAX1)
+99003 FORMAT(1x, f6.2, f7.3, 1x, 1p, 33E9.2, 0p)
+      IF(ugrid(i).LE.0.001)GOTO 400
+      IF(i.EQ.NLDGRID)GOTO 400
+      i = i + 1
+      GOTO 200
+ 300  WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
+      WRITE(6, *)' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED ' 
+      STOP 'HFBCS lev dens. missing'
+ 400  CLOSE(34)
+      iugrid = i - 1
+      DO kk = 1, NEX(Nnuc)
+         u = EX(kk, Nnuc)
+         IF(U.LT.0.)RETURN
+         IF(U.GT.150.0D0)THEN
+            WRITE(6,*)' '
+            WRITE(6,*)' HFBCS LEV. DENS. DEFINED UP TO 150 MeV ONLY'
+            WRITE(6,*)' REQUESTED ENERY IS ',U,' MeV'
+            WRITE(6,*)' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
+            WRITE(6,*)' EXECUTION STOPPED'
+            STOP 'TOO HIGH ENERGY FOR HFBCS LEV. DENS.'
+         ENDIF
+C--------
+C--------interpolation in the level density tables
+C--------
+         klo = 1
+         khi = iugrid
+         IF(U.LE.ugrid(klo))THEN
+            klo = 0
+            khi = 1
+            GOTO 600
+         ENDIF
+         IF(U.GE.ugrid(khi))THEN
+            klo = iugrid - 1
+            GOTO 600
+         ENDIF
+ 500     IF(khi - klo.GT.1)THEN
+            k = (khi + klo)/2.
+            IF(ugrid(k).GT.U)THEN
+               khi = k
+            ELSE
+               klo = k
+            ENDIF
+            GOTO 500
+         ENDIF
+ 600     h = ugrid(khi) - ugrid(klo)
+         c1 = (ugrid(khi) - U)/h
+         c2 = (U - ugrid(klo))/h
+         DO j = 1, JMAX1
+            r1 = rhogrid(klo, j)
+            r2 = rhogrid(khi, j)
+            IF(r1.GT.0 .AND. r2.GT.0)THEN
+               RO(kk, j, Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
+            ELSE
+              RO(kk, j, Nnuc)  = c1*r1 + c2*r2
+            ENDIF
+            IF(RO(kk, j, Nnuc).LT.0)RO(kk, j, Nnuc) = 0.
+         ENDDO
+      ENDDO
+      END
+

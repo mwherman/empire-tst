@@ -1,6 +1,6 @@
 #! /bin/sh -
 #SCRIPT TO RUN EMPIRE II
-cat ../util/auxiliary/herewego.au >/dev/audio 2>/dev/null
+#cat ../util/auxiliary/herewego.au >/dev/audio 2>/dev/null
 echo '                                                           '
 echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      H   H '
 echo '          E      MM  MM  P   P  I  R   R  E          H   H '
@@ -40,6 +40,7 @@ rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
 rm  OUTPUT.DAT LIST.DAT 2>/dev/null
 rm  OMPAR.OMP OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
 rm  OMPAR.DIR 2>/dev/null
+rm  CUMULPLOT.PS 2>/dev/null
 rm  ecis95.ics ecis95.cs 2>/dev/null
 rm  ecis95.tmp ecis95.ang 2>/dev/null
 rm  ecis95.tlj 2>/dev/null
@@ -90,7 +91,7 @@ echo $file ' R U N N I N G  !! !  !   !    !     !'
 time nice ../source/empire
 echo 'DONE !!!'
 #cat ../util/auxiliary/gong.au >/dev/audio 2>/dev/null
-cat ../util/auxiliary/applause.au >/dev/audio 2>/dev/null
+#cat ../util/auxiliary/applause.au >/dev/audio 2>/dev/null
 
 #MOVE CASE-RELATED FILES TO THE RIGHT PALCE
 
@@ -127,6 +128,11 @@ if [ ! -f $file-lev.col ]; then
       cat TARGET_COLL.DAT >>$file-lev.col
    fi 
 fi
+if [ -f CUMULPLOT.PS ]; then
+   ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
+   gv $file-cum.ps
+fi
+
 mv EXFOR.DAT $file.exf
 mv ECIS_ROT.out $file-ecis.out 2>/dev/null
 mv ECIS_VIB.out $file-ecis.out 2>/dev/null
@@ -135,10 +141,9 @@ mv ecVIB.inp $file-ecis.in 2>/dev/null
 mv ecROT.inp $file-ecis.in 2>/dev/null
 mv ecVIBROT.inp $file-ecis.in 2>/dev/null
 
-# SHOW WARNINGS
+# EXTRACT WARNINGS
 
-grep WARNING $file.lst >warnings
-#xterm -bg darkorange -title WARNINGS -e vi warnings    
+grep WARNING $file.lst >$file.war
 
 # DELETE TEMPORARY FILES
 
@@ -183,8 +188,8 @@ if  [ -f $file.exf ]; then
         x4toc4
         rm exfor.in
         # RUN c4sort TO SORT C4 DATA   
-        #cd ../c4sort
-        #c4sort
+        cd ../c4sort
+        c4sort
         cd $work
         mv ../util/x4toc4/errors $file.x42c4_errs
         mv ../util/x4toc4/x4toc4.lst $file.x42c4_lst

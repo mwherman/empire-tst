@@ -14,8 +14,9 @@ C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
 C-M
-C-M  The C4SORT program belongs to a group of codes, which form
-C-M  a supplement to the IAEA sequence of ENDF Pre-Processing codes
+C-M  The C4SORT program belongs to the ENDVER group of codes in
+C-M  support of nuclear data evaluation. The ENDVER package
+C-M  requires the the IAEA sequence of ENDF Pre-Processing codes
 C-M  (PrePro) by D.E.Cullen [1], which are designed to perform
 C-M  various operations on the basic ENDF-formatted evaluated nuclear
 C-M  data files. They provide basic tools to the user for simple,
@@ -85,12 +86,22 @@ C-M  '   ALIAS  ' Equivalent ZA/MF/MT identifiers can be defined;
 C-M               for example, to force experimental data measured
 C-M               for a natural element to apply to an isotope.
 C-M               Additional information is read from columns:
-C-M                11-20  ZA designation on the source file.
-C-M                21-25  MF designation on the source file.
-C-M                26-30  MT designation on the source file.
-C-M                41-50  ZA designation on the sorted file.
-C-M                51-55  MF designation on the sorted file.
-C-M                56-60  MT designation on the sorted file.
+C-M                11-20  ZA1 designation on the source file.
+C-M                21-25  MF1 designation on the source file.
+C-M                26-30  MT1 designation on the source file.
+C-M                31-40  ZA2 designation on the sorted file.
+C-M                41-45  MF2 designation on the sorted file.
+C-M                46-50  MT2 designation on the sorted file.
+C-M               WARNING: Material substitution for comparison
+C-M                        is strictly incorrect and potentially
+C-M                        misleading. For this reason the use of
+C-M                        ALIAS has been restricted in the sense
+C-M                        that the user requires to define
+C-M                        explicitly the ZA/MF/MT numbers to be
+C-M                        equivalenced (i.e. no implicit assumptions
+C-M                        are allowed, all entries ZA1,MF1,MT1 and
+C-M                        ZA2,MF2,MT2 must be specified for the
+C-M                        conversion to take place).
 C-M               NOTE: This option is available only in the
 C-M                     keyword-oriented input.
 C-M  '   ENDC4S ' This keyword signals the end of C4SORT input. All
@@ -385,7 +396,8 @@ C...
       M(I)= 0
       J   = 1
 C...8 IF(X(I).GT.X(J)) GO TO 15
-    8 IF(X(1,I)(1:K).GT.X(1,J)(1:K)) GO TO 15
+C...8 IF(X(1,I)(1:K).GT.X(1,J)(1:K)) GO TO 15
+    8 IF(X(1,I)(1:K).GE.X(1,J)(1:K)) GO TO 15
 C...
       IF(L(J).EQ.0)    GO TO 12
       J = L(J)

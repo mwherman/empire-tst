@@ -20,9 +20,6 @@ if {![info exists vTcl(sourcing)]} {
 # VTCL LIBRARY PROCEDURES
 #
 
-global editor
-set editor gvim
-
 if {![info exists vTcl(sourcing)]} {
 proc Window {args} {
     global vTcl
@@ -169,7 +166,7 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
     }
     namespace eval ::widgets::.srun.input.viewlong {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1 -width 1}
     }
     namespace eval ::widgets::.srun.input.but27 {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
@@ -184,7 +181,7 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
     }
     namespace eval ::widgets::.srun.input.but25 {
-        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1 -width 1}
     }
     namespace eval ::widgets::.srun.input.but21 {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
@@ -271,6 +268,12 @@ proc vTcl:project:info {} {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
     }
     namespace eval ::widgets::.srun.input.but40 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::.srun.input.button53 {
+        array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -height 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1 -width 1}
+    }
+    namespace eval ::widgets::.srun.input.button54 {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -command 1 -font 1 -foreground 1 -highlightbackground 1 -highlightcolor 1 -padx 1 -pady 1 -text 1}
     }
     namespace eval ::widgets::.srun.cpd32 {
@@ -364,7 +367,7 @@ proc vTclWindow.srun {base {container 0}} {
         -background #4b7b82 -highlightbackground #4b7b82 \
         -highlightcolor #ffffff -menu "$base.m17" 
     wm focusmodel $base passive
-    wm geometry $base 211x947+12+68; update
+    wm geometry $base 211x947+0+46; update
     wm maxsize $base 1265 994
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -425,7 +428,7 @@ exec $editor $file.inp &} \
         -background #005a00 -command {exec $editor $file.lst &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -padx 9 -pady 3 -text Emp-full 
+        -highlightcolor #ffffff -padx 9 -pady 3 -text Emp-full -width 0 
     button $base.input.but27 \
         -activebackground #007900 -activeforeground #ffffff \
         -background #005a00 -command {exec $editor $file.out  &} \
@@ -452,10 +455,10 @@ exec $editor $file.inp &} \
         -highlightcolor #ffffff -padx 9 -pady 3 -text ENDF 
     button $base.input.but25 \
         -activebackground #007900 -activeforeground #ffffff \
-        -background #005a00 -command {exec gv $file.ps &} \
+        -background #005a00 -command {exec gv $file-cum.ps &} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
-        -highlightcolor #ffffff -padx 9 -pady 3 -text Plotc4 
+        -highlightcolor #ffffff -padx 9 -pady 3 -text Levels -width 0 
     button $base.input.but21 \
         -activebackground #f00000 -activeforeground #fffefe \
         -background #860000 -command {exec clean $file core ../util/*/core &} \
@@ -583,7 +586,6 @@ exec $editor $file.inp &} \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor ../source/scnd-preeq.f &} \
         -font {} -foreground {} -image {} -label Scnd-preeq 
-    $base.input.sourcemenu.m add separator
     $base.input.sourcemenu.m add command \
         -activebackground {} -activeforeground {} -accelerator {} \
         -background {} -command {exec $editor ../source/global.h &} -font {} \
@@ -786,6 +788,19 @@ set file [file tail $dfile]} \
         -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
         -foreground #ffffff -highlightbackground #4b7b82 \
         -highlightcolor #ffffff -padx 9 -pady 3 -text {Merge ZVV} 
+    button $base.input.button53 \
+        -activebackground #007900 -activeforeground orange \
+        -background #005a00 \
+        -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
+        -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
+        -foreground orange -height 26 -highlightbackground #4b7b82 \
+        -highlightcolor #ffffff -padx 9 -pady 3 -text Warnings -width 73 
+    button $base.input.button54 \
+        -activebackground #007900 -activeforeground #ffffff \
+        -background #005a00 -command {exec gv $file.ps &} \
+        -font -adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1 \
+        -foreground #ffffff -highlightbackground #4b7b82 \
+        -highlightcolor #ffffff -padx 9 -pady 3 -text Plotc4 
     frame $base.cpd32 \
         -background #4b7b82 -borderwidth 1 -height 30 \
         -highlightbackground #4b7b82 -highlightcolor #ffffff -width 30 
@@ -953,6 +968,7 @@ exec $editor listpro &} \
         -activeforeground {} -accelerator {} -background {} \
         -command {set editor {gxedit}} -font {} -foreground {} -image {} \
         -label GXedit 
+    $base.cpd32.men40.01.02 invoke 0
     menu $base.cpd32.men40.01.men41 \
         -activebackground #4b7b82 -activeforeground #ffffff \
         -background #4b7b82 \
@@ -988,7 +1004,6 @@ exec $editor listpro &} \
         -activeforeground {} -accelerator {} -background {} \
         -command {set editor {gxedit}} -font {} -foreground {} -image {} \
         -label GXedit 
-    $base.cpd32.men40.01.men41 invoke 0
     ###################
     # SETTING GEOMETRY
     ###################
@@ -1009,7 +1024,7 @@ exec $editor listpro &} \
     place $base.input.but20 \
         -x 93 -y 235 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.viewlong \
-        -x 20 -y 440 -width 146 -height 26 -anchor nw -bordermode ignore 
+        -x 20 -y 440 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.but27 \
         -x 20 -y 465 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.but22 \
@@ -1019,7 +1034,7 @@ exec $editor listpro &} \
     place $base.input.but28 \
         -x 93 -y 490 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.but25 \
-        -x 20 -y 555 -width 146 -height 26 -anchor nw -bordermode ignore 
+        -x 20 -y 555 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.but21 \
         -x 70 -y 675 -width 53 -height 53 -anchor nw -bordermode ignore 
     place $base.input.titel \
@@ -1070,6 +1085,10 @@ exec $editor listpro &} \
         -x 20 -y 605 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.input.but40 \
         -x 93 -y 605 -width 73 -height 26 -anchor nw -bordermode ignore 
+    place $base.input.button53 \
+        -x 93 -y 440 -width 73 -height 26 -anchor nw -bordermode ignore 
+    place $base.input.button54 \
+        -x 93 -y 555 -width 73 -height 26 -anchor nw -bordermode ignore 
     place $base.cpd32 \
         -x 5 -y 5 -width 197 -height 26 -anchor nw 
     pack $base.cpd32.05 \

@@ -268,11 +268,13 @@ GCROE0 	Level density parameter E_{0} in Gilbert-Cameron approach for
 GCROT 	Level density parameter T in Gilbert-Cameron approach for nucleus
          Z=I1, A=I2 set to VAL (default calculated internally).
 
-FITLEV  Controls cumulative plots of levels
+FITLEV   Controls cumulative plots of levels
       > 0 cumulative plots of discrete levels will be displayed. If
 	       LEVDEN=0 the energy range of the plot will extend VAL MeV above the
 	       last discrete level,
 	   = 0 no cumulative plots (default).
+      < 0 stop cross section calculations if there is no solution for the
+          GC fit of discrete levels (with FITLEV=0 calculations go ahead).
 	
 NIXSH = 0 shell-corrections calculated according to Myers-Swiatecki
 	       (default),

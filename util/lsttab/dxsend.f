@@ -4,6 +4,8 @@ C-Title  : Subroutine DXSEND
 C-Purpose: Extract double differential cross sections from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
 C-Version: 15-Dec-2000 (Original code).
+C-V  01/03 - Correct trapping of unknown MF4 data representation.
+C-V        - Add MT5 to sumation list for input MT0=5.
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
@@ -37,18 +39,19 @@ C* Prepare reaction list for neutron emission
       IF(IER.NE.0) GO TO 30
       CALL SKIPSC(LEF)
 C* Select contributiong reactions
+      IF(MT.EQ. 5) GO TO 22
       IF(MT.EQ.11) GO TO 22
       IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
-      IF(MT.GE.22 .AND. MT.LE.25) GO TO 22
+      IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
+      IF(MT.EQ.18) GO TO 22
       IF(MT.GE.28 .AND. MT.LE.30) GO TO 22
       IF(MT.GE.32 .AND. MT.LE.37) GO TO 22
       IF(MT.GE.41 .AND. MT.LE.45) GO TO 22
       IF(MT.EQ.91) GO TO 22
 C* Process elastic and discrete inelastic only if requesting
 C* energy distributions or aver. energy ang.distrib.
-      IF( (KEA.EQ.2  .OR. (KEA.EQ.1 .AND. PAR.LE.0)) .AND.
-     1  ( MT.EQ. 2   .OR. ( MT.GE.50 .AND. MT.LE.90)) ) GO TO 22
-C...  IF(MT.EQ. 2 .OR. (MT.GE.50 .AND. MT.LE.90) ) GO TO 22
+      IF( (KEA.EQ.2 .OR. (KEA.EQ. 1 .AND. PAR.LE.0) ) .AND.
+     1  (   MT.EQ.2 .OR. ( MT.GE.50 .AND. MT.LE.90) ) ) GO TO 22
       GO TO 20
    22 LOOP=LOOP+1
       LST(LOOP)=MT
@@ -74,7 +77,10 @@ C* Retrieve the double differential cross section energy distribution
       END IF
       IF(LOOP.EQ.0) GO TO 90
       IF( NE1.EQ.0) GO TO 50
-      IF( NEN.EQ.0) GO TO 54
+      IF( NEN.EQ.0) THEN
+        NEN=NE1
+        GO TO 54
+      END IF
 C* Move the previously saved distribution in the work field
       LX=MRW/2
       DO 42 I=1,NE1
@@ -122,7 +128,8 @@ C*
 C-Title  : Subroutine DXSEN1
 C-Purpose: Extract cross sect. and differential cross sect. from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
-C-Version: 15-Dec-2000 (Original code).
+C-Version: 18-May-2001 (Original code).
+C-V        19-Jul-2001 Fix neutron multiplicity for MF 4/5
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -170,7 +177,17 @@ C-D         vector.
 C-D  MEN  - Available size of ENR and DXS arrays.
 C-D  MRW  - Available size of the RWO work array.
 C-D  IER  - Error flag, which is zero on exit if data assembly is
-C-D         completed successfully.
+C-D         completed successfully. Currently defined error flags
+C-D         include the following:
+C-D          1  Specified material not found.
+C-D          2  End-of-file before material found.
+C-D          3  General read error.
+C-D         21  Multiple interpolation ranges and/or law other
+C-M             than lin-lin encountered.
+C-D         22  Array limit MRW exceeded.
+C-D         23  Correlated energy-angle distributions not in Law-7
+C-D             representation.
+C-D         31  Processing not coded for specified reaction.
 C-D
 C-Extern.: SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,FINT2D,YTGEOU,FNGAUS,
 C-E        FYTG2D,UNIGRD,FITGRD
@@ -180,9 +197,10 @@ C-
       DIMENSION    NBT(100),INR(100)
       DIMENSION    AMU(100),PMU(100)
 C*
-      DATA PI/3.14159266/
+      DATA PI/3.14159265/
 C*
 C* Check the requested type of output
+      NEN= 0
       AIN=-2
       EOU=-2
       IF     (KEA.EQ.2) THEN
@@ -197,8 +215,48 @@ C* Cosine of the scattering angle
 C*
       REWIND LEF
       CALL SKIPSC(LEF)
+C*
+C* Define multiplicity for the neutron emission reactions
+      YL =1
+      IF(KEA.EQ.0 .OR. NINT(ZAP0).NE.1) GO TO 30
+      IF(MT0.EQ.19) GO TO 90
+C* (n,2n+x)
+      IF(MT0.EQ.11 .OR.
+     &   MT0.EQ.16 .OR.
+     &   MT0.EQ.21 .OR.
+     &   MT0.EQ.24 .OR.
+     &   MT0.EQ.30 .OR.
+     &   MT0.EQ.41) YL=2
+C* (n,3n+x)
+      IF(MT0.EQ.17 .OR.
+     &   MT0.EQ.25 .OR.
+     &   MT0.EQ.38 .OR.
+     &   MT0.EQ.42) YL=3
+C* (n,fission)
+      IF(MT0.NE.18) GO TO 30
+      MF =1
+      MT =452
+      CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
+      IF(IER.NE.0) GO TO 90
+      READ (C66,902) C1,AWR,IDMY,LNU
+      IF     (LNU.EQ.1) THEN
+        CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,IER)
+        NN=NC-1
+        YL=POLYNX(EIN,RWO,NN)
+      ELSE IF(LNU.EQ.2) THEN
+        NX=MRW/2
+        LX=NX+1
+        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        IF(IER.NE.0) GO TO 90
+        YL=FINTXS(EIN,RWO,RWO(LX),NP,INR,IER)
+      ELSE
+        PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
+        STOP    'DXSEN1 ERROR - Invalid LNU for NuBar representation'
+      END IF
+C*
 C* Retrieve the cross section on MF3
-      MF =3
+   30 MF =3
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
       IF(IER.NE.0) GO TO 90
@@ -208,10 +266,12 @@ C* Retrieve the cross section on MF3
       CALL RDTAB1(LEF,C1,QQ,L1,L2,NR,NP,NBT,INR
      1           ,RWO,RWO(LX),NX,IER)
       IF(IER.NE.0) GO TO 90
-      IF(EIN.GT.0 .AND. EIN.LT.RWO(1)) THEN
-C* Case: Required point is below thershold
-        NEN=0
-        GO TO 90
+      IF(EIN.GT.0) THEN
+        IF(EIN.LT.RWO(1) .OR. EIN.GT.RWO(NP)) THEN
+C* Case: Required point is below thershold or above last point
+          NEN=0
+          GO TO 90
+        END IF
       END IF
       IF(NR.NE.1 .OR. INR(1).GT.2) THEN
         IER=21
@@ -227,8 +287,12 @@ C* Case: Cross section is required
         GO TO 90
       END IF
 C* Case: Proceed with the retrieval of differential data
+      ETOP=RWO(NP)
       XS=FINTXS(EIN,RWO,RWO(LX),NP,INR,IER)
-      IF(IER.NE.0) RETURN
+      IF(IER.NE.0 .OR. XS .LE.0) THEN
+        NEN=0
+        GO TO 90
+      END IF
 C*
 C* Find the energy/angle distribution data
       MF =0
@@ -250,20 +314,29 @@ C* Preset isotropic CM angular distribution for this MT
       ENR(NE1)=1
       IF(IER.NE.0) THEN
 C* Check for error condition
-        PRINT *,' WARNING - CM isotropic ang.distrib.assumed'
+        PRINT *,'WARNING - CM isotropic ang.distrib.assumed'
         GO TO 45
       END IF
 C*
 C* Process angular distribution data in MF 4
    42 READ (C66,902) C1,AWR,LVT,LTT,N1,N2
       IF(LTT.EQ.0) GO TO 45
-      IF(LTT.EQ.1) THEN
-        PRINT *,' WARNING - Processing not coded for MF4 LTT',LTT
+      IF(LTT.NE.2) THEN
+        PRINT *,'WARNING - Can not process MF4 LTT',LTT
+        PRINT *,'          Distributions should be linearised'
         IER=41
         GO TO 45
       END IF
 C* Secondary particle angular distributions MF4 processing
-      CALL RDLIST(LEF,C1,C2,LI,LCT,NK,NM,RWO,IER)
+      IF     (LVT.EQ.0) THEN
+        READ (LEF,902)  C1,C2,LI,LCT,N1,N2
+      ELSE IF(LVT.EQ.1) THEN
+        CALL RDLIST(LEF,C1,C2,LI,LCT,NK,NM,RWO,IER)
+      ELSE
+        PRINT *,'WARNING - Illegal value for MF4       LVT=',LVT
+        IER=41
+        GO TO 45
+      END IF
 C* Split the work array RWO to operate on function and argument
 C* LXE - argument
 C* LXX - function
@@ -286,7 +359,7 @@ C* For each incident energy read the angular distribution
       IF(IER.NE.0) STOP 'DENXS1 ERROR reading ang.distributions'
 C...  IF(NRP.GT.1)
 C... 1 PRINT *,' WARNING - Multiple A interp.ranges for MF 4, MT',MT
-C* Lin-interpolate outgoing particle energy distributions
+C* Lin-interpolate angular distributions over incident energies
       INE=2
       CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR(NM)
      1               ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,KX)
@@ -307,20 +380,19 @@ C* Convert to Lab coordinate system if necessary
         DXS(I)=DXS(I)*DMC
    46   CONTINUE
       END IF
-      YL=1
       IF(KEA.EQ.1) THEN
 C* Case: Angular distribution
-        YL=1/SS
-        GO TO 80
+        YL=YL/SS
+        IF(EOU.LT.0) GO TO 80
       END IF
       INA=2
       IF(ALB.GE.-1) THEN
 C* Case: Specified outgoing particle cosine
-        YL=FINTXS(ALB,ENR,DXS,NE1,INA,IER)/SS
+        YL=YL*FINTXS(ALB,ENR,DXS,NE1,INA,IER)/SS
         XLB=ALB
       ELSE
 C* Case: Angle-integrated energy distribution
-        YL =0.5
+        YL =YL/2
         DO 47 I=1,NE1
         DXS(I)=DXS(I)*ENR(I)
    47   CONTINUE
@@ -347,11 +419,113 @@ C* Process energy distribution data in MF 5
         MT =MT0
         CALL FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
       END IF
-C...
-C... Secondary particle energy distributions MF 5 not coded
-      PRINT *,' WARNING - Processing not coded for MF5 MT',MT0
-      IER=31
-      GO TO 90
+      NX=MRW/2
+      LX=NX+1
+      READ (C66,902) C1,C2,L1,L2,NK,N2
+      IF(NK.GT.1) THEN
+C...    No multiple representations are allowed
+        PRINT *,'WARNING - No mult.represent.allowed for MF5 MT',MT0
+        IER=31
+        GO TO 90
+      END IF
+C... Dummy read - Pk(e) is assumed equal 1 for a single representation
+      CALL RDTAB1(LEF,UPEN,C2,L1,LF,NR,NP,NBT,INR
+     1           ,RWO,RWO(LX),NX,IER)
+C* Process the distributions
+      IF(LF.EQ.1) THEN
+C* Pointwise representation (Law 1)
+        LEP=1
+        LPP=LX
+        LXE=LEP+NP
+        LXX=LPP+NP
+        KX =NX -NP
+        CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+        NM=2
+        Y1=0
+        EI1=0
+        NE1=0
+        DO 54 IE=1,NE
+C* For each incident energy read the outg.particle energy distribution
+        CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
+     1             ,RWO(LXE),RWO(LXX),KX,IER)
+        IF(IER.NE.0) STOP 'DENXS1 ERROR reading energy.distrib.'
+        IF(NRP.GT.1)
+     1   PRINT *,'WARNING - Multiple E interp.ranges for MF 5, MT',MT
+        INE=INR(NM)
+        IF(INE.GT.2) THEN
+          PRINT *,'WARNING - Non-linear interpolation for MF 5, MT',MT
+          INE=2
+        END IF
+        IF(KEA.EQ.2) THEN
+Case: Interpolate outgoing particle energy distributions
+          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
+     1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
+        ELSE
+Case: Interpolate values to a given outgoing particle energy
+          EA=RWO(LXE)
+          EB=RWO(LXE-1+NF)
+          CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
+          Y2=FINTXS(EOU,RWO(LXE),RWO(LXX),NF,INE,IER)/SS
+          IF(EIN.GE.EI1 .AND. EIN.LE.EI2) THEN
+            YL=YL*( Y1 + (Y2-Y1)*(EIN-EI1)/(EI2-EI1) )
+            GO TO 80
+          END IF
+        END IF
+   54   CONTINUE
+      ELSE IF(LF.EQ.11) THEN
+C* Energy dependent Watt spectrum (Law 11)
+        NX=MRW/2
+        LX=NX+1
+        IF(EIN-UPEN.LE.0) THEN
+          NEN=0
+          GO TO 90
+        END IF
+C* Read and interpolate Watt parameter Wa
+        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        INE=INR(1)
+        IF(NR.GT.1) THEN
+          PRINT *,'WARNING - Multiple interp. ranges in MF5 MT',MT0
+        END IF
+        IF(INE.GT.2) THEN
+          PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
+        END IF
+        WA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
+C* Read and interpolate Watt parameter Wb
+        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        INE=INR(1)
+        IF(NR.GT.1) THEN
+          PRINT *,'WARNING - Multiple interp. ranges in MF5 MT',MT0
+        END IF
+        IF(INE.GT.2) THEN
+          PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
+        END IF
+        WB=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
+        IF(KEA.EQ.2) THEN
+Case: Generate outgoing particle energy distributions
+          NE1=101
+C*         Limit the table to the upper energy on the ENDF file
+          EE =MIN(ETOP,EIN-UPEN)
+          DE =EE/(NE1-1)
+          DO 58 I=1,NE1
+          EE =(I-1)*DE
+          ENR(I)=EE
+          DXS(I)=SPWATT(EE,EIN,UPEN,WA,WB)
+   58     CONTINUE
+        ELSE
+Case: Calculate values at the given outgoing particle energy
+          YL=YL*SPWATT(EOU,EIN,UPEN,WA,WB)
+          GO TO 80
+        END IF
+      ELSE
+C...    Secondary particle energy distributions MF 5 not coded
+        PRINT *,'WARNING - Processing not coded for MF5 MT',MT0
+        PRINT *,'                                      Law',LF
+        IER=31
+        GO TO 90
+      END IF
+      GO TO 80
 C*
 C* Process coupled energy/angle distributions MF6 (first particle only)
    60 READ (C66,902) C1,AWR, L1,LCT,NK,N2
@@ -375,7 +549,9 @@ C* Retrieve the neutron yield
       CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
      1           ,RWO,RWO(LX),KX,IER)
       IF(LAW.NE.7) THEN
-        STOP 'DENXS1 ERROR - Not Law-7 in MF 6'
+C*        Set IER to flag error and terminate if not Law-7 in MF 6
+        IER=23
+        GO TO 90
       END IF
       IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
         IF(JNK.GE.NK) STOP 'DENXS1 ERROR - Particle not found'
@@ -489,6 +665,24 @@ C*
 C*
   902 FORMAT(2F11.0,4I11)
       END
+      FUNCTION SPWATT(EE,EI,EU,WA,WB)
+C-Title  : Function SPWATT
+C-Purpose: Calculate the Watt fission spectrum value at energy EE
+      DATA PI/3.1415926/
+C* Upper limit of the final particle energy
+      EPF=EI-EU
+C* Normalisation constant
+      E0=SQRT(PI*WA*WA*WA*WB/4)*EXP(WA*WB/4)/2
+      E1=SQRT(EPF/WA)
+      E2=SQRT(WA*WB/4)
+      E3=ERRFN1(E1-E2)
+      E4=ERRFN1(E1+E2)
+      E5=WA*EXP(-EPF/WA)*SINH(SQRT(EPF*WB))
+      CNRM=E0*(E3+E4)-E3
+C* Spectrum
+      SPWATT=EXP(-EE/WA)*SINH(SQRT(EE*WB))/CNRM
+      RETURN
+      END
       SUBROUTINE FINDMT(LEF,ZA0,ZA,MAT,MF,MT,C66,IER)
 C-Title  : Subroutine FINDMT
 C-Purpose: Find specified reaction in an ENDF file
@@ -600,6 +794,11 @@ C*
       SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
 C-Title  : Subroutine RDTAB1
 C-Purpose: Read an ENDF TAB1 record
+C-Description:
+C-D  The TAB1 record of an ENDF-formatted file is read.
+C-D  Error condition:
+C-D    IER=22 on exit if available field length NMX is exceeded.
+C-
       DIMENSION    NBT(100),INR(100)
       DIMENSION    EN(NMX), XS(NMX)
 C*
@@ -665,6 +864,180 @@ C-Purpose: Interpolate the cross section table to EIN
       END IF
       FINTXS=FF
       RETURN
+      END
+      SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
+C-Title  : WRTEXT Subroutine
+C-Purpose: Write a text record to an ENDF file
+      CHARACTER*66  REC
+      NS=NS+1
+      WRITE(LIB,40) REC,MAT,MF,MT,NS
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
+C-Title  : WRCONT Subroutine
+C-Purpose: Write a CONT record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DATA BLN/'           '/
+      DO 10 I=1,6
+      REC(I)=BLN
+   10 CONTINUE
+      IF( (C1.EQ.0. .AND. C2.EQ.0.) .AND.
+     1    (L1.EQ.0  .AND. L2.EQ.0 ) .AND.
+     2    (N1.EQ.0  .AND. N2.EQ.0 ) ) GO TO 12
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),20) L1
+      WRITE(REC(4),20) L2
+      WRITE(REC(5),20) N1
+      WRITE(REC(6),20) N2
+   12 NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      RETURN
+   20 FORMAT(I11)
+   40 FORMAT(6A11,I4,I2,I3,I5)
+      END
+      SUBROUTINE WRTAB1(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
+     1                 ,NR,NP,NBT,INT,X,Y)
+C-Title  : WRTAB1 Subroutine
+C-Purpose: Write a TAB1 record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     NBT(1),INT(1),X(1),Y(1)
+      DATA BLN/'           '/
+C* First line of the TAB1 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NR
+      WRITE(REC(6),42) NP
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+C* Write interpolation data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NR) GO TO 24
+      N =N+1
+      WRITE(REC(I+1),42) NBT(N)
+      WRITE(REC(I+2),42) INT(N)
+   24 I =I +2
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NR) GO TO 20
+C* Loop for all argument&function pairs
+      N =0
+   30 I =0
+   32 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NP) GO TO 34
+      N =N+1
+      CALL CHENDF(X(N),REC(I+1))
+      CALL CHENDF(Y(N),REC(I+2))
+   34 I =I+2
+      IF(I.LT.6) GO TO 32
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NP) GO TO 30
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE WRTAB2(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
+     1                 ,NR,NZ,NBT,INT)
+C-Title  : WRTAB2 Subroutine
+C-Purpose: Write a TAB2 record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     NBT(1),INT(1)
+      DATA BLN/'           '/
+C* First line of the TAB2 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NR
+
+      WRITE(REC(6),42) NZ
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+C* Write interpolation data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      REC(I+2)=BLN
+      IF(N.GE.NR) GO TO 24
+      N =N+1
+      WRITE(REC(I+1),42) NBT(N)
+      WRITE(REC(I+2),42) INT(N)
+   24 I =I +2
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NR) GO TO 20
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE WRLIST(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,NPL,N2,BN)
+C-Title  : WRLIST Subroutine
+C-Purpose: Write a LIST record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DIMENSION     BN(1)
+      DATA BLN/'           '/
+C* First line of the TAB2 record
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),42) L1
+      WRITE(REC(4),42) L2
+      WRITE(REC(5),42) NPL
+      WRITE(REC(6),42) N2
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(NPL.EQ.0) RETURN
+C* Write data
+      N =0
+   20 I =0
+   22 REC(I+1)=BLN
+      IF(N.GE.NPL) GO TO 24
+      N =N+1
+      CALL CHENDF(BN(N),REC(I+1))
+   24 I =I +1
+      IF(I.LT.6) GO TO 22
+      NS=NS+1
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(N.LT.NPL) GO TO 20
+      RETURN
+   40 FORMAT(6A11,I4,I2,I3,I5)
+   42 FORMAT(I11)
+      END
+      SUBROUTINE CHENDF(FF,CH)
+C-Title  : CHENDF Subroutine
+C-Purpose: Pack value into 11-character string
+      CHARACTER*1  SN
+      CHARACTER*11 CH
+      CH=' 0.00000+00'
+      FA=ABS(FF)
+      IA=0
+   20 IF(FA.LT.1.0E-30 ) RETURN
+      IF(FA.LT.9.999950) GO TO 40
+      FA=FA*0.1
+      IA=IA+1
+      GO TO 20
+   40 IF(FA.GE.0.999995) GO TO 50
+      FA=FA*10.
+      IA=IA-1
+      GO TO 40
+   50 SN='+'
+      IF(IA.LT.0) THEN
+        SN='-'
+        IA=-IA
+      END IF
+      IF(FF.LT.0) FA=-FA
+      WRITE(CH,80) FA,SN,IA
+      RETURN
+   80 FORMAT(F8.5,A1,I2.2)
       END
       SUBROUTINE FINT2D(AI, AI1,NEP1,EN1,XS1 ,INR
      1                    , AI2,NEP2,EN2,XS2 ,INE, MEP2)
@@ -920,6 +1293,7 @@ C* Define range of tabulation +/- 5*EPS*ELV
       DE =ELV*EPS*5
       EB =ELV+DE
       EA =ELV-DE
+      EA =MAX(1.E-5,EA)
 C* Normalisation constant is the integral
       SS=0
       DE =(EB-EA)/(NEN-1)
@@ -1054,4 +1428,32 @@ C* Add the contribution to the integral
       NEP0=NEU
 C* Integration completed
    40 RETURN
+      END
+      FUNCTION ERRFN1(X)
+C-Title  : ERRFN1 function
+C-Purpose: Calculate the Error function
+C-Description:
+C-D calculate the error function with accuracy better than 2.5e-5
+C-D Ref.:Handbook of Math.Funct...,Abramowitz,Stegun
+C-D
+C-Author : A.Trkov, J.Stefan Institute,Ljubljana,Slovenia, 1985
+      DATA P,A1,A2,A3/ .47047, .3480242, -.0958798, .7478556/
+      ERRFN1=1.
+      IF(X.GT.4.) RETURN
+      T=1./(1.+P*X)
+      ERRFN1=1.-T*(A1+T*(A2+T*A3))*EXP(-X*X)
+      RETURN
+      END
+      FUNCTION POLYNX(X,C,NC)
+C-Title  : POLINX function
+C-Purpose: Polynomial Pn(x) of order NC with NC+1 coefficients C(i)
+      DIMENSION C(1)
+      NC1=NC+1
+      F  =C(NC1)
+      IF(NC.LT.1) GO TO 20
+      DO 10 I=1,NC
+      F  =F*X + C(NC1-I)
+   10 CONTINUE
+   20 POLYNX = F
+      RETURN
       END

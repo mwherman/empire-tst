@@ -1,6 +1,6 @@
 Ccc   * $Author: mike $
-Ccc   * $Date: 2001-11-06 15:57:54 $
-Ccc   * $Id: main.f,v 1.4 2001-11-06 15:57:54 mike Exp $
+Ccc   * $Date: 2001-11-27 17:47:41 $
+Ccc   * $Id: main.f,v 1.5 2001-11-27 17:47:41 mike Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1948,9 +1948,8 @@ C-----end of ENDF spectra (inclusive)
       ENDIF
       GOTO 1400
 99012 FORMAT(10X, I2, F10.4, I5, F8.1, G15.6, I3, 1x, 
-     &       30(I3, 1x, F6.4, 1x))
-C    &       10(I3, 1x, F6.4, 1x), (/, 53X, 1x, 10(I3,1x,F6.4,1x)), 
-C    &       (/, 53X, 1x, 10(I3,1x,F6.4,1x)))
+C    &       30(I3, 1x, F6.4, 1x))
+     &       7(I3, 1x, F6.4, 1x), (:/, 53X, 1x, 7(I3,1x,F6.4,1x)))
 99013 FORMAT(1X, F5.2, 12G10.3)
       END
 C

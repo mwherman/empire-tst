@@ -15,11 +15,18 @@ Version: 00/12 Original code
   Instructions:
   Input parameters can be entered interactively in response to
   the prompts on the screen:
-  - PLOTC4 list file.
-  - ENDF source file.
-  - EXFOR source file in computational format.
-  - Index number from the PLOTC4 list file to be processed.
-    NOTE: Several entries may be chosen, terminated by blank.
+  1  PLOTC4 list file.
+  2  EXFOR source file in computational C4 format.
+  3a ENDF source file.
+  3b Label to appear on the plot for this source file.
+     NOTE: Up to MXEN files can be specified.
+  4  Resolution broadening fraction (0<Ep6<0.1)
+  5a Index number from the PLOTC4 list file to be processed.
+  5b Scaling factor for this set (default scaling factor=1,
+     an arbitrary factor may be assigned, for example to
+     differentiate between data sets on the same plot).
+     NOTE: Several pairs of entries may be chosen, terminated
+     by blank.
 
   Files used:
    Name Unit   Description

@@ -3,13 +3,13 @@ FC     = g77
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
-#FFLAGS =  -fno-underscoring  -g -C
+#FFLAGS =  -g -C
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
 #----standard f77 FORTRAN compiler
 #FC	= f77
 #----Absoft f90 FORTRAN compiler
-#FC	= f90
+#FC	= /usr/absoft/bin/f90
 #FFLAGS = -g
 #----Fujitsu f90 FORTRAN compiler
 #FC	= frt

@@ -1,10 +1,10 @@
-run p31
+#run p31
 run ca40
 run ti47
 run cr52
 run mn55
 run ni58
-run cu63
+#run cu63
 run ga71
 run se80
 run mo92
@@ -21,4 +21,4 @@ run tm169
 run w186
 run au197
 run pb208
-run u238
+#run u238

@@ -1,15 +1,30 @@
 
-             Changes in version 2.16.3 with respect to 2.16.2 
+             Changes in version 2.17beta with respect to 2.16.2 
                       Vienna,   November  2001
 
 1. Dispersive optical model potential implemented (SCAT2, ECIS, ORION3)
-   by R. Capote.
+   (R. Capote)
 2. Optical model database updated to the preliminary version of RIPL-2
-   (including 4 dispersive omp) by R. Capote
+   (including 4 dispersive omp) (R. Capote)
 3. Discrete levels database updated to the preliminary version of RIPL-2
    (R. Capote)
 4. Number of discrete levels constituting a complete scheme taken from
    the preliminary version of RIPL-2 (R. Capote)
+5. In all cases elastic is calculated on the 2.5 deg grid while all the
+   rest on the 10 deg grid. Previous inconsistency in elastic transfer
+   when DIRECT>0 was used removed (M. Herman)
+6. GUI starts with gvim editor selected by default (M. Herman)
+7. Two compilation warnings in tl.f fixed (M. Herman)
+8. Cumulative plots of discrete levels created as a PostScript file rather
+   than being dumpped onto the screen. Stored as *-cum.ps and available 
+   through GUI (M. Herman)
+9. Damping of the rotational level density ehancement below BCS critical
+   energy made consistent with the one above critical energy. Removes 
+   discontinuity at critical energy for perfectly spherical nuclei (def=0)
+   (M. Herman)
+10.List of warnings available through GUI (M. Herman)
+11.Tabulated HFBCS levels densities as provided to RIPL-2 by S. Goriely 
+   included as additional level density option (M. Herman)
 
 Known bugs:
 
