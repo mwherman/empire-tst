@@ -1616,7 +1616,7 @@ C
                         IF(nudim1.NE.0)rexc = rexc + ENDi(iiir, nudim1)
                         IF(iiir.LE.10 .AND. ie.GT.nudi(iiir))
      &                     omr(j, i, ie)
-     &                     = RO(rexc - dd(IIP), gg(iiir), ip - 1, ih)
+     &                     = RO(rexc - dd(iiir), gg(iiir), ip - 1, ih)
                         IF(iiir.GT.10)omr(j, i, ie)
      &                     = RO(rexc, (IAT - 4.)*G/IAC, ip - 1, ih)
                      ENDDO
@@ -1782,6 +1782,9 @@ C
                      IF(N.GT.2)cm = c0*CFA(e, N - 2)*e/(N - 2)
 C--------------------DENSITY AND TRANSITION RATES CALCULATION
                      ge = G*e
+C                    Next line is not recommended by Betak although
+c                    it might seem resonable
+c                    ge = G*(e-dd(iip)) 
                      hlp3 = 0.
                      IF(ge - a1 - gf.GE..01)hlp3 = (ih - 1)
      &                  *((ge - a1 - gf)/(ge - a1))**(N - 3)
@@ -1795,6 +1798,8 @@ C--------------------DENSITY AND TRANSITION RATES CALCULATION
                         IF(cp.NE.0.)alp(i)
      &                     = 0.5*(EXP((N+1)*DLOG(ge-a2) - (N-1)
      &                     *DLOG(ge-a0)) - hlp3)/(cp*(N + 1))
+                        IF(i.eq.25 .AND. om(i+1,ie).eq.0.0D+0)
+     &                     alp(i)=0. 
                      ENDIF
                   ENDIF
                   DO IJ = 1, 25

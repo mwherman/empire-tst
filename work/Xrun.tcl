@@ -4485,8 +4485,7 @@ adjourn .top75} \
     button $site_10_0.but82 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e ../source/ecis <$file-ecis.in >$file-ecis.out &
-adjourn .top75} \
+        -command {exec ../source/ecis <$file-ecis.in >$file-ecis.out } \
         -disabledforeground #a1a4a1 -font {Helvetica -12} -foreground darkred \
         -highlightbackground #dcdcdc -highlightcolor #000000 -text {Run ECIS} 
     bindtags $site_10_0.but82 "$site_10_0.but82 Button $base all _vTclBalloon"

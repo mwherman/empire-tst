@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: main.f,v 1.13 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Date: 2003-10-14 17:14:39 $
+Ccc   * $Id: main.f,v 1.14 2003-10-14 17:14:39 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -203,9 +203,9 @@ C     COMMON variables
 C
 C fisfis d---------------------------
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
-      COMMON /IMAG  / TF(NFWELLS), WIMag, TDIr, TABs, TDIr23
+      COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23
       INTEGER NRBar, NRFdis, ibaro
-      DOUBLE PRECISION TF, WIMag, TDIr, TABs, TDIr23
+      DOUBLE PRECISION TF, TDIr, TABs, TDIr23
       CHARACTER*40 line
       CHARACTER*2 carz, cara
       CHARACTER*8 cara1
@@ -253,7 +253,7 @@ C-----
  1400 CALL INPUT
 C-----
 C-----print input data
-C-----
+C-----  
       IF(IOUt.GT.0)CALL PRINPUT
       WRITE(*, '(''  C.M. incident energy '',G10.5,'' MeV'')')EIN
 C-----Clear CN elastic cross section (1/4*pi)
@@ -543,10 +543,8 @@ C--------add MSD contribution to energy spectra (angle int.)
 C-----------add MSD contribution to the total NEJC emission
             CSEmis(nejc, 1) = CSEmis(nejc, 1) + CSMsd(nejc)
          ENDDO
-         
 C--------second chance preequilibrium emission after MSD emission
 C--------neutron emission
- 
          izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
          CALL WHERE(izares, nnurn, iloc)
          IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
@@ -650,187 +648,16 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
          ENDDO
       ENDIF
 C     fisfis d
-      OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
-      OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN')
-C     fisfis u
+       write(6,*)'hello0'
+      OPEN(80, FILE = 'FISSION.OUT', STATUS = 'UNKNOWN') 
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
 C        fisfis d
          IF(FISsil(nnuc))THEN
-            READ(79, '(a40)')line
- 1560       READ(79, '(4x,a2,i3,2x,a2,i3)')carz, iz, cara, ia
-            IF(carz.NE.'Z=')GOTO 1560
-            IF(carz.EQ.'Z=' .AND. iz.NE.Z(nnuc) .OR. ia.NE.A(nnuc))
-     &         GOTO 1560
-            READ(79, '(a40)')line
-            READ(79, '(a8,f2.0,a28,a20)')cara1, FISbar(nnuc), cara2, 
-     &           cara3
-            READ(79, '(a15,i1)')cara4, NRBar
-            READ(79, *)
-            READ(79, *)
-            IF(NRBar.EQ.1)READ(79, '(2f8.3)')EFB(1), H(1)
-            IF(NRBar.EQ.2)READ(79, '(4f8.3)')
-     &                         (EFB(i), H(i), i = 1, NRBar)
-            IF(NRBar.EQ.3)READ(79, '(6f8.3,15x,f8.3)')
-     &                         (EFB(i), H(i), i = 1, NRBar), 
-     &                         CNOrm_im_well
-            IF(NRBar.EQ.5)READ(79, '(10f8.3,15x,f8.3)')
-     &                         (EFB(i), H(i), i = 1, NRBar), 
-     &                         CNOrm_im_well
-            READ(79, *)
-            READ(79, *)
-            READ(79, '(5f9.4)')(HJ(i), i = 1, NRBar)
-            READ(79, *)
-            READ(79, *)
-            READ(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
-            READ(79, *)
-            READ(79, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
-            READ(79, *)
-            DO ibar = 1, NRBar
-               READ(79, '(a39,I2,a2,I2)')cara7, ibaro, cara8, 
-     &              NRFdis(ibar)
-               READ(79, *)
-               DO nr = 1, NRFdis(ibar)
-                  READ(79, '(1x,1f5.3,1f6.1,1i4)')EFDis(nr, ibar), 
-     &                 SFDis(nr, ibar), IPFdis(nr, ibar)
-               ENDDO
-            ENDDO
-            READ(79, *)
-C
-            nrbarc = NRBar
-C           ! To be changed for the 3-humped barrier
-            IF(NRBar.EQ.3)nrbarc = 2
-            IF(NRBar.EQ.5)nrbarc = 3
-C
-            READ(79, '(a7,f2.0,a55)')cara9, FISden(nnuc), cara10
-            IF(FISden(nnuc).EQ.0.)THEN
-C              RIPL-2 LD
-               UGRid(0) = 0
-               DO ibar = 1, nrbarc
-                  READ(79, *)
-                  DO i = 1, NFISEN
-                     READ(79, '(f7.2,30e9.2,0px)')UGRid(i), 
-     &                    (ROFi(ibar, i, j), j = 1, NFISJ)
-                  ENDDO
-                  DO j = 1, NFISJ
-                     ROFi(ibar, 0, j) = 0
-                  ENDDO
-               ENDDO
-            ENDIF
-C
-            IF(FISden(nnuc).EQ.1.)THEN
-               READ(79, '(3(A9,f9.5),a9,f11.5)')cara, ACRt, cara, UCRt, 
-     &              cara, ECOnd, cara, DETcrt
-               READ(79, '(2(A9,f9.5))')cara, TCRt, cara, SCR
-               DO i = 1, nrbarc
-                  READ(79, '(i3,A10,f11.6,a10,f11.6)')ii, cara, 
-     &                 MOMparcrt(i), cara, MOMortcrt(i)
-               ENDDO
-            ENDIF
-C
-            WRITE(80, '(a40)')line
-            WRITE(80, '(4x,a2,i3,2x,a2,i3)')'Z=', INT(Z(nnuc)), 'A=', 
-     &            INT(A(nnuc))
-            WRITE(80, '(a40)')line
-            WRITE(80, '(a8,f2.0,a28,a20)')cara1, FISbar(nnuc), cara2, 
-     &            cara3
-            WRITE(80, '(a15,i1)')cara4, NRBar
-            WRITE(80, *)'  '
-C
-            IF(NRBar.EQ.1)THEN
-               WRITE(80, '(a)')'    Va      ha    (in Mev) '
-               WRITE(80, '(2f8.3)')EFB(1), H(1)
-               WRITE(80, *)' '
-               WRITE(80, '(2a10)')'h2/2J(A)', '(in MeV)'
-               WRITE(80, '(f9.4)')HJ(1)
-               WRITE(80, *)' '
-               WRITE(80, '(a10)')'Beta2(A)'
-               WRITE(80, '(f9.4)')DEFfis(1)
-               WRITE(80, *)' '
-            ENDIF
-C
-            IF(NRBar.EQ.2)THEN
-               WRITE(80, '(a)')
-     &                    '    Va      ha      Vb      hb     (in Mev) '
-               WRITE(80, '(4f8.3)')(EFB(i), H(i), i = 1, NRBar)
-               WRITE(80, *)' '
-               WRITE(80, '(3a10)')'h2/2J(A)', 'h2/2J(B)', '(in MeV)'
-               WRITE(80, '(2f9.4)')(HJ(i), i = 1, NRBar)
-               WRITE(80, *)' '
-               WRITE(80, '(2a10)')'Beta2(A)', 'Beta2(B)'
-               WRITE(80, '(2f9.4)')(DEFfis(i), i = 1, NRBar)
-               WRITE(80, *)' '
-            ENDIF
-C
-            IF(NRBar.EQ.3)THEN
-               WRITE(80, '(a,1x,a)')
-     &       '    Va      ha      Vb      hb      Vi      hi  (in Mev) '
-     &       , '   Normal. Coeff for Wi'
-               WRITE(80, '(6f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar)
-     &               , CNOrm_im_well
-               WRITE(80, *)' '
-               WRITE(80, '(4a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(I)', 
-     &                            '(in MeV)'
-               WRITE(80, '(3f9.4)')(HJ(i), i = 1, NRBar)
-               WRITE(80, *)' '
-               WRITE(80, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(I)'
-               WRITE(80, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
-               WRITE(80, *)' '
-            ENDIF
-C
-            IF(NRBar.EQ.5)THEN
-               WRITE(80, '(a,1x,a)')
-     &'    Va      ha      Vb      hb      Va      ha      Vc hc      Vi
-     &      hi      Vo      ho  (in Mev) ', '   Normal. Coeff for Wi'
-               WRITE(80, '(10f8.3,15x,f8.3)')
-     &               (EFB(i), H(i), i = 1, NRBar), CNOrm_im_well
-               WRITE(80, *)' '
-               WRITE(80, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)', 
-     &                            'h2/2J(I)', 'h2/2J(O)', '(in MeV)'
-               WRITE(80, '(5f9.4)')(HJ(i), i = 1, NRBar)
-               WRITE(80, *)' '
-               WRITE(80, '(6a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)', 
-     &                            'Beta2(I)', 'Beta2(O)', '        '
-               WRITE(80, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
-               WRITE(80, *)' '
-            ENDIF
-C
-            WRITE(80, *)' '
-            WRITE(80, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
-            WRITE(80, *)' '
-C
-            DO ibar = 1, NRBar
-               IF(ibar.LT.3)WRITE(80, '(a39,I2,a2,I2)')
-     &                            'Number of discrete states at barrier'
-     &                            , ibar, '=', NRFdis(ibar)
-               IF(NRBar.EQ.3 .AND. ibar.EQ.3)WRITE(80, '(a48,I2,a2,I2)')
-     &            'Number of discrete states at isomeric valley', ibar, 
-     &            '=', NRFdis(ibar)
-               IF(NRBar.EQ.5 .AND. (ibar.EQ.3 .OR. ibar.EQ.5))
-     &            WRITE(80, '(a48,I2,a2,I2)')
-     &            'Number of discrete states at isomeric valley', ibar, 
-     &            '=', NRFdis(ibar)
-               WRITE(80, *)'Edis   Jdis  Pidis'
-               DO nr = 1, NRFdis(ibar)
-                  WRITE(80, '(1x,1f5.3,1f6.1,1i4)')EFDis(nr, ibar), 
-     &                  SFDis(nr, ibar), IPFdis(nr, ibar)
-               ENDDO
-            ENDDO
-            WRITE(80, *)'  '
-C
-C
-            WRITE(80, '(a7,f2.0,a55)')cara9, FISden(nnuc), cara10
-            IF(FISden(nnuc).EQ.1.)THEN
-               WRITE(80, '(3(A9,f9.5),a9,f11.5)')'Acrt=', ACRt, 'Ucrt=',
-     &               UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
-               WRITE(80, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
-               DO i = 1, nrbarc
-                  WRITE(80, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
-     &                  MOMparcrt(i), ' Momort=', MOMortcrt(i)
-               ENDDO
-            ENDIF
-         ENDIF
-C        fisfis u
+            Call READ_INPFIS(Nnuc)
+            Call Dami_rofis(Nnuc)
+            Call WRITE_OUTFIS(Nnuc)
+         ENDIF   
          ia = INT(A(nnuc))
 C--------reset variables for life-time calculations
          stauc = 0.0
@@ -1215,13 +1042,17 @@ C-----------------
 C                 FISfis d-------------------------------------
 C--------------subbarrier effect--------------------------
                   IF(FISsil(nnuc) .AND. SUBbar(nnuc).EQ.1.)THEN
-                     xnorfis = xnor*DENhf/(dencomp + TDIr)
+                     if((dencomp + TDIr).gt.0.)then
+                        xnorfis = xnor*DENhf/(dencomp + TDIr)
+                     else
+                        xnorfis=0.
+                     endif   
 C                    fis1
-                     IF(NRBar.EQ.3)THEN
-                        IF(TF(1).GT.0. .AND. TF(2).GT.0.)THEN
+                     IF(NRBar.EQ.3.and.NRwel.eq.1)THEN
+                      IF(TF(1).GT.0..AND.TF(2).GT.0..and.Tabs.gt.0.)THEN
                            bbfis = (TDIr + dencomp)*(TF(1) + TF(2))
      &                             /(TABs*TF(2))
-                           aafis = (1 + bbfis**2 + 2*bbfis*cota)
+                           aafis = (1. + bbfis**2 + 2*bbfis*cota)
      &                             **( - 0.5)
                         ELSE
                            aafis = 0.
@@ -1230,11 +1061,10 @@ C                    fis1
 C
                      IF(NRBar.EQ.5)THEN
                         IF(TF(1).GT.0. .AND. TF(2).GT.0. .AND. 
-     &                     TF(3).GT.0.)THEN
+     &                  TF(3).GT.0..and.Tabs.gt.0..and.tdir23.gt.0.)THEN
                            bbfis = (TDIr + dencomp)*(TF(1) + TDIr23)
-     &                             /(TABs*TDIr23)
-                           aafis = (1 + bbfis**2 + 2*bbfis*cota)
-     &                             **( - 0.5)
+     &                             /(TABs * TDIr23)
+                           aafis = 1/sqrt(1. + bbfis**2 + 2*bbfis*cota)
                         ELSE
                            aafis = 0.
                         ENDIF
@@ -1276,6 +1106,7 @@ C-----------------fission
                   IF(FISsil(nnuc) .AND. jcn.EQ.NLW .AND. ip.EQ. - 1)
      &               WRITE(80, '(10x,a6,f12.5,a3)')'csfis=', csfis, 
      &                     ' mb'
+                   WRITE(80,*)'csfis=', csfis,sumfis,xnor 
 C-----------------calculate total emission
  1605             DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc, nnuc)
@@ -1284,7 +1115,6 @@ C-----------------calculate total emission
  1610          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF(ENDf.EQ.2)CALL RECOIL(ke, nnuc)  !recoil spectrum for ke bin
-
          ENDDO                  !loop over c.n. excitation energy
 C--------
 C--------Hauser-Feshbach decay of nnuc  ***done***

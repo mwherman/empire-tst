@@ -98,7 +98,7 @@ C
 C
 C    In the above list CSEa(NDECSE, NDANG, 0:NDEJC, 0:NDNUC) was limitted
 C    to 0:1 on the last dimension in order to save memory - anyway, in the 
-C    current implementation first emissions only can be anisotropic (apart 
+C    current implementation only first emissions  can be anisotropic (apart 
 C    of DDHMS which provides inclusive spectra in any case)
 
       COMMON /DEPTH / POTe(7)
@@ -117,16 +117,17 @@ C
 C
       COMMON /COMFIS_OPT/ FISbar(NDNUC), FISden(NDNUC), FISdis(NDNUC), 
      &                    SUBbar(NDNUC)
-      COMMON /COMFIS_I/ NRBar, NRFdis(NFWELLS), IPFdis(NFTRANS, NFWELLS)
-      COMMON /COMFIS_R/ EFB(NFWELLS), H(NFWELLS), HJ(NFWELLS), 
-     &                  DEFfis(NFWELLS), EFDis(NFTRANS, NFWELLS), 
-     &                  SFDis(NFTRANS, NFWELLS), CNOrm_im_well
-C
-      COMMON /COMFIS_CON/ UGRid(0:NFISEN), 
-     &                    ROFi(NFWELLS, 0:NFISEN, NFISJ), JCC
+      COMMON /COMFIS_I/ NRBar, NRWel, NRFdis(NFPARAB),
+     &                   IPFdis(NFTRANS, NFPARAB)
+      COMMON /COMFIS_R/ EFB(NFPARAB), H(NFPARAB), HJ(NFPARAB), 
+     &                  DEFfis(NFPARAB), EFDis(NFTRANS, NFPARAB), 
+     &                  SFDis(NFTRANS, NFPARAB), wimag(3)
+      COMMON /COMFIS_CON/ ROFis(0:NFISENMAX, NDLW,NFHUMP),
+     &                   UGRid(0:NFISENMAX), xminn(NFHUMP),
+     &                   NRbinfis(NFHUMP),JCC,destepp
 C
       DOUBLE PRECISION MOMparcrt, MOMortcrt
-      COMMON /MOMENT/ MOMparcrt(NFWELLS), MOMortcrt(NFWELLS)
+      COMMON /MOMENT/ MOMparcrt(NFPARAB), MOMortcrt(NFPARAB)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
 

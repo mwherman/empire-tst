@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2003-09-25 21:16:57 $
-Ccc   * $Id: input.f,v 1.17 2003-09-25 21:16:57 herman Exp $
+Ccc   * $Date: 2003-10-14 17:14:39 $
+Ccc   * $Id: input.f,v 1.18 2003-10-14 17:14:39 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -111,10 +111,9 @@ C
       CHARACTER*1 cnejec
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
-C fisfis--------------------------
+
       DOUBLE PRECISION xfis
       LOGICAL gexist
-C fisfis-------------------------------
 C
 C Local variables
 C
@@ -1243,7 +1242,7 @@ C              CALL CLEAR
             ENDIF
             IF(Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0)ECUt(nnur)
      &         = EX(1, nnur)
-C-----------determination of Q-value for isotop prodiction
+C-----------determination of Q-value for isotop production
             qtmp = QPRod(nnuc) - Q(nejc, nnuc)
             IF(qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
             IF(FITlev.GT.0.0D0)ECUt(nnur) = 0.0
@@ -1359,27 +1358,29 @@ C--------OMPAR.RIPL
          CLOSE(29, STATUS = 'DELETE')
          STOP 'PLOTS DONE'
       ENDIF
-C     fisfis d --------------------
 C     the fission input is created if it does not exist
       DO nnuc = 1, NNUct
         FISsil(nnuc) = .TRUE.
-        xfis = 0.0205*Z(nnuc)**2/A(nnuc)
-        IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
-C       RCN 06/2003
-        IF(FISbar(nnuc).LT.0.) FISsil(nnuc) = .FALSE.
+C-------Fission temporary closed to allow standard calculations
+C-------for nuclei for which no fission barriers are available
+C-------next line should be deleted to enable fission
+c        FISsil(nnuc) = .FALSE.
+
+c-------the fissioning condition replaced accordingly to the fission
+c-------barriers available in RIPL-2  (MS)
+cc        xfis = 0.0205*Z(nnuc)**2/A(nnuc)
+cc        IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
+        IF(Z(Nnuc).LT.78.)FISsil(nnuc) = .FALSE.
       ENDDO
       INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
       IF(.NOT.gexist)THEN
          OPEN(79, FILE = 'FISSION.INP', STATUS = 'UNKNOWN')
-         DO nnuc = 1, NNUct
-C           FISsil(nnuc) = .TRUE.
-C           xfis = 0.0205*Z(nnuc)**2/A(nnuc)
-C           IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
+         DO nnuc = 1, NNUcd
             IF(FISsil(nnuc))CALL INPFIS(nnuc)
          ENDDO
          CLOSE(79)
       ENDIF
-C     fisfis u -------------------
+
 99001 FORMAT(1X, 60('='))
 99002 FORMAT(1X, 13G10.4)
       END
@@ -1969,7 +1970,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta5|'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.beta7|'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
@@ -4130,7 +4131,7 @@ C    &           D_Def(i, 2)
          ENDDO
          CLOSE(32)
          IFINDCOLL = 0
-         RETURN
+         RETURN 
       ENDIF
       ia = A(0)
       iz = Z(0)
@@ -4505,10 +4506,10 @@ C
 C
 C
 C
-C fisfis d ------------------------------------------------
+
       SUBROUTINE INPFIS(Nnuc)
 C
-C This subroutine creates the fission.inp  which contain all the fission
+C This subroutine creates the fission.inp  which contains all the fission
 C parameters independent of energy.
 C
       INCLUDE 'dimension.h'
@@ -4517,13 +4518,19 @@ C
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /FISC  / FIScon
-C
-      DOUBLE PRECISION r0, mm2
+
+      COMMON /ROFI1/ enh_ld(2, NFHUMP)
+
+
+      DOUBLE PRECISION r0, mm2,enh_ldm
       DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
      &                 DELp, DETcrt, ECOnd, GAMma, SCR, TCRt, UCRt
-C
-C
+
+      DOUBLE PRECISION ho(NFPARAB), epsil(NFPARAB),ejoin(2*NFPARAB),
+     &                 vjj(NFPARAB),smiu
+
       INTEGER ka, kz, NLWst, nrbarc
+      REAL Fiscon
       CHARACTER*2 simb, symma, symmb
       CHARACTER*20 cara
       CHARACTER*33 cara1
@@ -4531,7 +4538,8 @@ C
       CHARACTER*50 filename
 C
 C-----fundamental fission barrier
-C-----FISBAR=0 RIPL-2 theoretical values
+C-----FISBAR=0 RIPL-2; HF-BCS theoretical heights for simple and double barriers,
+c              no information about curvatures or wells;
       IF(FISbar(Nnuc).EQ.0.)THEN
          OPEN(51, FILE = '../RIPL-2/fission/fis-barrier-etfsi.dat', 
      &        STATUS = 'OLD')
@@ -4549,19 +4557,20 @@ C-----FISBAR=0 RIPL-2 theoretical values
            WRITE(6, *)' Setting the number of fission barriers equal 1'
            NRBar = 1
         ENDIF
-C        default vakues for curvature
-C        IF(NRBar.EQ.1)H(1) = 1.
+        NRWel=0
+C        default values for curvatures
+        IF(NRBar.EQ.1)H(1) = 1.
 C        Lynn values
-         IF(NRBar.EQ.2)THEN
-            IF(ka/2.EQ.INT(ka/2) .AND. kz/2.EQ.INT(kz/2))THEN
+        IF(NRBar.EQ.2)THEN
+            IF(ka/2.EQ.INT(ka/2) .AND. kz/2.EQ.INT(kz/2))THEN  ! even-even
                H(1) = 1.04
                H(2) = 0.6
             ENDIF
-            IF(ka/2.NE.INT(ka/2))THEN
+            IF(ka/2.NE.INT(ka/2))THEN  ! odd A
                H(1) = 0.8
                H(2) = 0.52
             ENDIF
-            IF(ka/2.EQ.INT(ka/2) .AND. kz/2.NE.INT(kz/2))THEN
+            IF(ka/2.EQ.INT(ka/2) .AND. kz/2.NE.INT(kz/2))THEN  ! odd-odd
                H(1) = 0.65
                H(2) = 0.45
             ENDIF
@@ -4591,60 +4600,24 @@ C     To be used with care, model dependent !!!!!
            WRITE(6, *)' Setting the number of fission barriers equal 1'
            NRBar = 1
          ENDIF
+         NRWel=0
          GOTO 400
  300     WRITE(6, *)' NO EXPERIMENTAL FISSION BARRIER FOR Z=', 
      &              INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
          WRITE(6, *)' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
          STOP 'Fission barrier missing'
       ENDIF
-C     These deformations are estimates
-C     Deformations from RIPL are unusable since Bragg deformation parameters
-C     are used. For a specific calculation these deformations can be edited in
-C     the FISSION.INP file
-      DEFfis(1) = 0.5
-      DEFfis(2) = 0.7
-      DEFfis(3) = 0.6
-      DEFfis(4)=0.7
-      DEFfis(5)=0.6
-C     the next inertial parameters entering in the rotational levels (hbar/2j)
-C     should be calculated starting from deformations; not done yet; the
-C     following values seems good enough for actinides.
-      HJ(1) = 0.005
-      HJ(2) = 0.002
-      HJ(3) = 0.003
-      HJ(4) = 0.001
-      HJ(5) = 0.001
-C----FISBAR(Nnuc)=3. internal library
+
+C----FISBAR(Nnuc)=2. internal library
  400  IF(FISbar(Nnuc).EQ.2.)THEN
-         OPEN(81, FILE = 'barfis.fnd', STATUS = 'OLD')
-C 450    READ(81, *, END = 500)kz, ka, NRBar, 
-C     &                         (EFB(i), H(i), i = 1, NRBar), 
-C     &                         CNOrm_im_well
- 450     READ(81, *, END = 500)kz, ka, NRBar 
-         READ(81, *, END = 500)(EFB(i), i = 1, NRBar) 
-         READ(81, *, END = 500)(H(i), i = 1, NRBar) 
-         READ(81, *, END = 500)(DEFfis(i), i = 1, NRBar) 
-         READ(81, *, END = 500)(HJ(i), i = 1, NRBar) 
-         READ(81, *, END = 500) CNOrm_im_well
-         IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 450
-         IF(NRBar.gt.3 .AND. EFB(3).EQ.0.) THEN
-           WRITE(6, *)' 3rd FISSION BARRIER ENERGY = 0 in barfis.fnd'
-           WRITE(6, *)' Setting the number of fission barrier equal 2 '
-           NRBar = 3
-           EFB(3)=EFB(4)
-           H(3)=H(4)
-           DEFfis(3)=DEFfis(4)
-           HJ(3)=HJ(4)
-         ENDIF
-         IF(NRBar.gt.1 .AND. EFB(2).EQ.0.) THEN
-           WRITE(6, *)' 2nd FISSION BARRIER ENERGY = 0 in barfis.fnd'
-           WRITE(6, *)' Setting the number of fission barrier equal 1 '
-           NRBar = 1
-         ENDIF
+         OPEN(81, FILE = 'fisbar.dat', STATUS = 'OLD')
+ 450        READ(81, *, END = 500)kz, ka, NRBar, NRWel,
+     &                         (EFB(i), H(i), i = 1, NRBar) 
+            IF(kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 450
          CLOSE(81)
          GOTO 600
  500     WRITE(6, *)' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=', 
-     &              INT(A(Nnuc)), ' IN INTERNAL LIBRARY (barfis.fnd)'
+     &              INT(A(Nnuc)), ' IN INTERNAL LIBRARY (fisbar.dat)'
          WRITE(6, *)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
          STOP 'Fission barrier missing'
       ENDIF
@@ -4653,22 +4626,105 @@ C     Default value for curvatures and protection !!
         IF(H(I).EQ.0) H(I) = 1.
       ENDDO
 C
-      IF(NRBar.LT.3) SUBbar(Nnuc) = 0.
-C----------------------input fundamental fission barrier *** done
+      IF(NRWel.NE.(NRBar-1)/2) SUBbar(Nnuc) = 0.
+      NRBarc=NRBar-NRWel
+
+
+C-----deformations at saddles and wells and matching points--------------------
+C     Fission barriers are modelled by NRBar parabols
+C     EPSil(i) are the parabols vortex
+C     EJOin(i) are the corresponding deformation at which parabols join
+
+      SMIu = 0.1643167*A(Nnuc)**(5./6.)
+      IF(NRBar.eq.1) THEN
+         deffis(1)=SQRT(efb(1))/(SMIu*H(1))+2*def(1,Nnuc)
+         Goto 7692
+      ENDIF
+
+      IF(NRBarc.eq.2) THEN
+          NRbarm=3
+         If(NRwel.eq.0)THEN
+            efb(3)=2.
+            h(3) = 1.
+         ENDIF   
+         VJJ(1) = efb(1)
+         VJJ(2) = efb(3)
+         VJJ(3) = efb(2)
+         ho(1)=h(1)
+         ho(2)=h(3)
+         ho(3)=h(2)
+      ENDIF
+      IF(NRBarc.eq.3) THEN
+         NRbarm=5
+         If(NRwel.eq.0)THEN
+            efb(4)=2.
+            h(4) = 1.
+            efb(5)=5.
+            h(5) = 1.2
+         ENDIF
+         If(NRwel.eq.2)THEN
+            VJJ(1) = efb(1)
+            VJJ(2) = efb(4)
+            VJJ(3) = efb(2)
+            VJJ(4) = efb(5)
+            VJJ(5) = efb(3)
+            ho(1)=h(1)
+            ho(2)=h(4)
+            ho(3)=h(2)
+            ho(4)=h(5)
+            ho(5)=h(3)
+         ENDIF
+      ENDIF
+
+      DO i=1,nrbarm
+         epsil(i)=0.
+         ejoin(i)=0.
+c         ejoin(2*i)=0.
+      ENDDO   
+
+      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))+2*def(1,Nnuc)
+      EJOin(2) = EPSil(1)
+     &          + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
+     &           /(SMIu*HO(1))
+      EJOin(1) = 2*EPSil(1) - EJOin(2)
 C
+      DO k = 2, NRBarm
+         EJOin(2*k - 1) = EJOin(2*(k - 1))
+         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
+     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
+C
+         IF(k.LT.NRBarm)EJOin(2*k) = EPSil(k)
+     &               + SQRT(ABS(( - 1)**k*((VJJ(k+1) - VJJ(k)))
+     &                              /(1.D0 + (HO(k)/HO(k+1))**2)))
+     &                              /(SMIu*HO(k))
+
+      ENDDO
+     
+
+      IF(NRBarc.eq.2.and.NRWel.eq.1) THEN
+         deffis(1) = epsil(1)
+         deffis(2) = epsil(3)
+         deffis(3) = epsil(2)
+      ENDIF
+      IF(NRBarc.eq.3) THEN
+         deffis(1) = epsil(1)
+         deffis(2) = epsil(3)
+         deffis(3) = epsil(5)
+         deffis(4) = epsil(2)
+         deffis(5) = epsil(4)        
+      ENDIF
+
+C----------------------input fundamental fission barrier *** done
 C     discrete barriers---------------------------------------
-      DO ibar = 1, NRBar
+ 7692 DO ibar = 1, NRBar
          EFDis(1, ibar) = 0.
          SFDis(1, ibar) = XJLv(1, Nnuc)
          IPFdis(1, ibar) = LVP(1, Nnuc)
+         IF(FISDIS(Nnuc).EQ.0.)NRFdis(ibar) = 1
       ENDDO
 C
-      IF(FISdis(Nnuc).EQ.0.)THEN
-         DO ibar = 1, NRBar
-            NRFdis(ibar) = 1
-         ENDDO
-      ENDIF
-C
+c     the values below are not physical, they only enter the fission input
+c     file to help the user to edit and introduce his own values 
       IF(FISdis(Nnuc).EQ.1.)THEN
          IF(A(Nnuc)/2.EQ.INT(A(Nnuc)/2))THEN
             DO ibar = 1, NRBar
@@ -4715,79 +4771,26 @@ C
             EFDis(4, 3) = 0.3
          ENDIF
       ENDIF
-C
-C-----continuum, level densities at saddle points
-C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
-      IF(FISden(Nnuc).EQ.0.)THEN
-         iz = INT(Z(Nnuc))
-         ia = INT(A(Nnuc))
-         WRITE(filename, 99001)iz
-99001    FORMAT('../RIPL-2/fission/fis-levden-hfbcs-inner/z', i3.3, 
-     &          '.dat')
-         OPEN(UNIT = 81, FILE = filename)
-         READ(81, *)
- 650     READ(81, 99002, ERR = 650, END = 750)simb, izr, iar
-99002    FORMAT(23x, a2, i3, 3x, i3)
-         IF(simb.NE.'Z=')GOTO 650
-         IF(iar.NE.ia)GOTO 650
-         READ(81, *)
-         READ(81, *)
-         i = 1
- 700     READ(81, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
-     &        (ROFi(1, i, j), j = 1, NFISJ)
-         IF(UGRid(i).LE.0.001)GOTO 800
-         IF(i.EQ.NFISEN)GOTO 800
-         i = i + 1
-         GOTO 700
- 750     WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
-         WRITE(6, *)' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
-         STOP 'HFBCS lev dens. at the inner saddle point missing'
- 800     CLOSE(81)
-         IF(NRBar.GT.1)THEN
-            WRITE(filename, 99003)iz
-99003       FORMAT('../RIPL-2/fission/fis-levden-hfbcs-outer/z', i3.3, 
-     &             '.dat')
-            OPEN(UNIT = 82, FILE = filename)
-            READ(82, *)
- 820        READ(82, 99004, ERR = 820, END = 860)simb, izr, iar
-99004       FORMAT(23x, a2, i3, 3x, i3)
-            IF(simb.NE.'Z=')GOTO 820
-            IF(iar.NE.ia)GOTO 820
-            READ(82, *)
-            READ(82, *)
-            i = 1
- 840        READ(82, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
-     &           (ROFi(2, i, j), j = 1, NFISJ)
-            IF(UGRid(i).LE.0.001)GOTO 880
-            IF(i.EQ.NFISEN)GOTO 880
-            i = i + 1
-            GOTO 840
- 860        WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, 
-     &                 ' IN HFBSC'
-            WRITE(6, *)
-     &                ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED'
-            STOP 'HFBCS lev dens. at the ouetr saddle-point missing'
- 880        CLOSE(82)
-         ENDIF
-      ENDIF
-C--------FISDEN(Nnuc)=1. EMPIRE specific
-      IF(FISden(Nnuc).EQ.1.)THEN
+
+
+C----moments of inertia for each deformation
          FIScon = 2.
          CALL ROEMP(Nnuc, 1.0D0, 0.0D0)
          mm2 = 0.24*A(Nnuc)**(2./3.)
          r0 = 1.4
-         nrbarc = NRBar
-         IF(NRBar.GT.2)nrbarc = 2
-         DO i = 1, nrbarc
-            MOMparcrt(i) = 6*ACRt*mm2*(1 - (2./3.)*DEFfis(i))/PI**2
+         DO i = 1, nrbar
+
+      write(6,*)'mom',acrt,mm2,deffis(i),momparcrt(i),momortcrt(i)      
+            MOMparcrt(i) = 6*ACRt*mm2*(1. - (2./3.)*DEFfis(i))/PI**2
             MOMortcrt(i) = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &                     *(1 + (1./3.)*DEFfis(i))
+     &                     *(1. + (1./3.)*DEFfis(i))
+           write(6,*)'orto',a(nnuc),momortcrt(i),deffis(i)
+            HJ(i) = 0.5*(1.0/Momparcrt(i) - 1.0/Momortcrt(i))
          ENDDO
-      ENDIF
-C----------------input level densities at saddle points ***done***
 C
 C
-C======================================================================
+C------- writing data in FISSION.INP
+      WRITE(79, '(a8)')'Isotope:'
       WRITE(79, '(a40)')'----------------------------------------'
       WRITE(79, '(4x,a2,i3,2x,a2,i3)')'Z=', INT(Z(Nnuc)), 'A=', 
      &                                INT(A(Nnuc))
@@ -4797,7 +4800,8 @@ C======================================================================
       IF(FISbar(Nnuc).EQ.2.)cara = 'Internal library'
       WRITE(79, '(a8,f2.0,a28,a20)')'FISBAR =', FISbar(Nnuc), 
      &                              '  Fundamental barriers from ', cara
-      WRITE(79, '(a15,i1)')' Nr.parabolas =', NRBar
+      WRITE(79, '(a15,i1,a15,i1)')' Nr.parabolas =', NRBar,
+     &          '      Nr.wells=', NRWel
       WRITE(79, *)'  '
 
       IF(NRBar.EQ.1) THEN
@@ -4826,12 +4830,10 @@ C======================================================================
          WRITE(79, *)' '
       ENDIF
 
-      IF(NRBar.EQ.3) THEN
+      IF(NRBar.EQ.3.and.NRWel.EQ.1) THEN
          WRITE(79, '(a,1x,a)')
      &       '    Va      ha      Vb      hb      Vi      hi  (in Mev) '
-     &       , '   Normal. Coeff for Wi'
-         WRITE(79, '(6f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar), 
-     &                               CNOrm_im_well
+         WRITE(79, '(6f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar)
          WRITE(79, *)' '
          WRITE(79, '(4a10)')'h2/2J(A)', 'h2/2J(B)','h2/2J(I)','(in MeV)'
          WRITE(79, '(3f9.4)')(HJ(i), i = 1, NRBar)
@@ -4841,13 +4843,23 @@ C======================================================================
          WRITE(79, *)' '
       ENDIF
 
-      IF(NRBar.EQ.5) THEN
+      IF(NRBar.EQ.3.and.NRWel.EQ.0) THEN
          WRITE(79, '(a,1x,a)')
-     &       '    Va      ha      Vb      hb      Va      ha      Vc   
-     &hc      Vi      hi      Vo      ho  (in Mev) '
-     &       , '   Normal. Coeff for Wi'
-         WRITE(79, '(10f8.3,15x,f8.3)')(EFB(i), H(i), i = 1, NRBar), 
-     &                               CNOrm_im_well
+     &       '    Va      ha      Vb      hb      Vc      hc  (in Mev) '
+         WRITE(79, '(6f8.3,15x)')(EFB(i), H(i), i = 1, NRBar)
+         WRITE(79, *)' '
+         WRITE(79, '(4a10)')'h2/2J(A)', 'h2/2J(B)','h2/2J(C)','(in MeV)'
+         WRITE(79, '(3f9.4)')(HJ(i), i = 1, NRBar)
+         WRITE(79, *)' '
+         WRITE(79, '(3a10)')'Beta2(A)', 'Beta2(B)', 'Beta2(C)'
+         WRITE(79, '(3f9.4)')(DEFfis(i), i = 1, NRBar)
+         WRITE(79, *)' '
+      ENDIF
+
+      IF(NRBar.EQ.5) THEN
+         WRITE(79, '(a,1x,a)') '    Va      ha      Vb      hb      Vc
+     &    hc      Vi      hi      Vo      ho        (in Mev) '
+         WRITE(79, '(10f8.3,15x)')(EFB(i), H(i), i = 1, NRBar)
          WRITE(79, *)' '
          WRITE(79, '(6a10)')'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)',
      &                      'h2/2J(I)', 'h2/2J(O)', '(in MeV)'
@@ -4864,6 +4876,20 @@ C
       IF(SUBbar(Nnuc).EQ.1.)cara1 = 'Subbarrier effects considered'
       WRITE(79, '(a8,f2.0,a36)')'SUBBAR=', SUBbar(Nnuc), cara1
       WRITE(79, *)' '
+
+
+      IF(SUBbar(Nnuc).EQ.1.)THEN
+         WRITE(79,*) '  '
+         WRITE(79,*) 'Parabolic energy dependent imaginary potential in 
+     &the isomeric well   Wimag = W0 + W1*E + W2*E^2, where E is
+     &excitation energy with respect to the isomeric well'         
+         wimag(1)=1.
+         wimag(2)=0.
+         wimag(3)=0.
+         WRITE(79,*) '      W0         W1         W2'
+         WRITE(79, '(3f11.4)')(wimag(i), i=1,3)
+         WRITE(79,*)
+      ENDIF   
 C
 C
       DO ibar = 1, NRBar
@@ -4877,37 +4903,319 @@ C
          ENDDO
       ENDDO
       WRITE(79, *)'  '
-C
-      IF(FISden(Nnuc).EQ.0.)cara2 = 
-     &          'Level densities at the saddle points taken from RIPL-2'
-      IF(FISden(Nnuc).EQ.1.)cara2 = 
-     &            'Level densities at the saddle points EMPIRE specific'
-      WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
-C
+C================  level densities at saddles  ===============================
+
+      IF(FISden(Nnuc).EQ.1.)THEN
+          cara2 = 'Level densities at the saddle points taken from
+     &             RIPL-2'
+         WRITE(79, *)
+         WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
+         WRITE(79, *)
+      ENDIF   
 C
       IF(FISden(Nnuc).EQ.0.)THEN
-         WRITE(79, *)' '
-         DO i = 1, NFISEN
-            WRITE(79, '(f7.2,30e9.2,0p)')UGRid(i), 
-     &            (ROFi(1, i, j), j = 1, NFISJ)
-         ENDDO
-         IF(NRBar.GT.1)THEN
-            WRITE(79, *)' '
-            DO i = 1, NFISEN
-               WRITE(79, '(f7.2,30e9.2)')UGRid(i), 
-     &               (ROFi(2, i, j), j = 1, NFISJ)
-            ENDDO
-         ENDIF
-      ENDIF
-C
-      IF(FISden(Nnuc).EQ.1.)THEN
+         cara2 = 'Level densities at the saddle points EMPIRE specific'
+         WRITE(79,*) '  '
+         WRITE(79, '(a7,f2.0,a55)')'FISDEN=', FISden(Nnuc), cara2
+         WRITE(79,*) '  '
          WRITE(79, '(A9,f9.5,a9,f9.5, A9,f9.5,a9,f11.5)')'Acrt=', ACRt, 
      &         'Ucrt=', UCRt, 'Econd=', ECOnd, 'DETcrt=', DETcrt
          WRITE(79, '(A9,f9.5,A9,f9.5)')'Tcrt=', TCRt, 'Scrt=', SCR
+         WRITE(79,*) '  '
          DO i = 1, nrbarc
             WRITE(79, '(i3,A10,f11.6,a10,f11.6)')i, ' Mompar=', 
      &            MOMparcrt(i), ' Momort=', MOMortcrt(i)
          ENDDO
       ENDIF
+
+c-------- the coefficients of a linear energy dependent factor adjusting 
+c         the fission level densities; 
+
+      DO nr=1, NRBarc
+         enh_ld(1,nr)=1.
+         enh_ld(2,nr)=0.
+      ENDDO         
+
+      WRITE(79,*) '   '     
+      WRITE(79,*) 'Coefficients of a linear energy dependent factor
+     & adjusting the fission level densities'
+      WRITE(79,*)'(a0 + a1*E) * rho(E,J) where E stands for incident
+     &energy'
+      WRITE(79,*) '                a0       a1  '
+      DO nr=1, NRBarc
+         WRITE(79,'(1x, A8, 1x, I1, 2f9.3)') 'Barrier', nr,
+     &           enh_ld(1,nr),enh_ld(2,nr)
+         
+      ENDDO   
 C
+      END
+
+c----------------------------------------------------------------------
+      SUBROUTINE READ_INPFIS(Nnuc)
+      
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C     
+      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
+      COMMON /FISC  / FIScon
+      COMMON /ROFI1/ enh_ld(2, NFHUMP)
+C     
+
+
+c      DOUBLE PRECISION enh_ld
+      DOUBLE PRECISION r0, mm2
+      DOUBLE PRECISION A2, A23, ACR, ACRt, AP1, AP2, ATIl, BF, DEL, 
+     &     DELp, DETcrt, ECOnd, enh_ld, GAMma, SCR, TCRt, UCRt
+      
+
+      INTEGER ka, kz, NLWst, nrbarc,iz,ia
+      CHARACTER*2 simb, symma, symmb,carz,cara3
+      CHARACTER*8 cara8
+      CHARACTER*20 cara
+      CHARACTER*33 cara1
+      CHARACTER*55 cara2
+      CHARACTER*50 filename
+
+      REAL FISCON
+C     
+     
+      OPEN(79, FILE = 'FISSION.INP', STATUS = 'OLD')
+ 1560 READ(79,'(A8)')cara8
+      IF(cara8.eq.'Isotope:')THEN 
+         READ(79, '(a40)')line
+         READ(79, '(4x,a2,i3,2x,a2,i3)')carz, iz, cara3, ia
+         IF(carz.EQ.'Z=' .AND. iz.NE.INT(Z(nnuc)) .OR. 
+     &        ia.NE.INT(A(nnuc)))  GOTO 1560
+         
+         READ(79, '(a40)')line
+         READ(79, '(a8,f2.0,a28,a20)')cara1, FISbar(nnuc), cara2, 
+     &        cara3
+
+         READ(79, '(15x,i1,15x,i1)')NRBar,NRWel
+         READ(79, *)
+         READ(79, *)
+         
+         IF(NRBar.EQ.1)READ(79, '(2f8.3)')EFB(1), H(1)
+         IF(NRBar.EQ.2)READ(79, '(4f8.3)')
+     &        (EFB(i), H(i), i = 1, NRBar)
+         IF(NRBar.EQ.3)READ(79, '(6f8.3)')
+     &        (EFB(i), H(i), i = 1, NRBar) 
+         IF(NRBar.EQ.5)READ(79, '(10f8.3,15x)')
+     &        (EFB(i), H(i), i = 1, NRBar) 
+         READ(79, *)
+         READ(79, *)
+         READ(79, '(5f9.4)')(HJ(i), i = 1, NRBar)
+         READ(79, *)
+         READ(79, *)
+         READ(79, '(5f9.4)')(DEFfis(i), i = 1, NRBar)
+         READ(79, *)
+         READ(79, '(a8,f2.0,a36)')cara5, SUBbar(nnuc), cara6
+         READ(79, *)
+C     
+         IF(SUBbar(Nnuc).EQ.1.)THEN
+            READ(79,*) 
+            READ(79,*) 
+            READ(79,*)               
+            READ(79, '(3f11.4)')(wimag(i), i=1,3)
+            READ(79,*)
+         ENDIF   
+         
+         DO ibar = 1, NRBar
+            READ(79, '(a39,I2,a2,I2)')cara7, ibaro, cara8, 
+     &           NRFdis(ibar)
+            READ(79, *)
+            DO nr = 1, NRFdis(ibar)
+               READ(79, '(1x,1f5.3,1f6.1,1i4)')EFDis(nr, ibar), 
+     &              SFDis(nr, ibar), IPFdis(nr, ibar)
+            ENDDO
+         ENDDO
+         READ(79, *)
+         READ(79, *)
+         nrbarc = NRBar-NRWel         
+C     
+         READ(79, '(a7,f2.0,a55)')cara9, FISden(nnuc), cara10
+              
+         IF(FISden(nnuc).EQ.0.)THEN
+            READ(79,*)  
+            READ(79, '(3(A9,f9.5),a9,f11.5)')cara, ACRt, cara, UCRt, 
+     &           cara, ECOnd, cara, DETcrt
+            READ(79, '(2(A9,f9.5))')cara, TCRt, cara, SCR
+            READ(79,*)  
+            DO i = 1, nrbarc
+               READ(79, '(i3,A10,f11.6,a10,f11.6)')ii, cara, 
+     &              MOMparcrt(i), cara, MOMortcrt(i)
+            ENDDO
+         ENDIF
+         READ(79, *)    
+         READ(79,*)cara1      
+         READ(79,*)cara1
+         READ(79,*)cara1
+
+         DO nr=1, NRBarc
+            READ(79,'(1x, A8, 1x, I1, 2f9.3)') cara5, i, 
+     &           enh_ld(1,nr),enh_ld(2,nr)                          
+         ENDDO
+      ELSE
+         GOTO 1560        
+      ENDIF
+      CLOSE(79)
+      
+      END
+c--------------------------------------------
+      SUBROUTINE DAMI_ROFIS(Nnuc)
+C-----continuum, level densities at saddle points
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      COMMON /FISC  / FIScon
+      COMMON /PARFIS/ ROTemp, AC, AAJ,IBAr
+      COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
+      COMMON /ROFI1/ enh_ld(2, NFHUMP)
+
+      REAL FIScon
+      DOUBLE PRECISION rotemp,rofis
+c-------------------
+
+      DOUBLE PRECISION enh_ld,efdis,efb,ugrid,xminn,xmax
+c----------------------
+      CHARACTER*2 simb, symma, symmb
+      CHARACTER*20 cara
+      CHARACTER*33 cara1
+      CHARACTER*55 cara2
+      CHARACTER*50 filename
+C
+      NRbarc=NRbar-NRwel
+      destepp=(excn+5.0D+0)/200
+c      destepp=0.1
+
+
+      DO ibar=1,NRBarc
+         xminn(ibar)=0.01
+         DO nr=1,NRfdis(ibar)
+            IF(EFDis(nr,ibar).GT.xminn(ibar))xminn(ibar)=EFDis(nr, ibar)
+         ENDDO   
+         xmax=excn-(efb(ibar)+xminn(ibar))+5.
+         nrbinfis(ibar)=int((xmax-xminn(ibar))/destepp)
+      ENDDO
+
+      IF(FISDEN(Nnuc).EQ.0.)THEN
+         FISCON=2.
+         DO ibar=1,NRBarc
+            DO jj=1,NLW
+               AAJ = FLOAT(jj) + HIS(Nnuc)
+               DO kk=1,nrbinfis(ibar)
+                  Call DAMIRO(kk,Nnuc,xminn(ibar),destepp,0.)
+                  rofis(kk,jj,ibar)=rotemp
+c         write(80,*)'ROFIS',kk,ROFis(kk, jj,1),ROFis(kk, jj,2),
+c     &                      ROFis(kk, jj,3)
+               ENDDO
+            ENDDO  
+         ENDDO   
+      ENDIF
+
+      
+      if(nnuc.eq.1) then
+         DO kk=1,nrbinfis(3)
+            enerfist=xminn(3)+(kk-1)*destepp                
+            write(57,*)enerfist,ROFis(kk, 1,1),ROFis(kk, 1,2),
+     &                      ROFis(kk, 1,3)
+         ENDDO
+       endif
+
+      FISCON=0.
+C-----FISDEN(Nnuc)=1 reading microscopic lev. dens. from the RIPL-2 file
+      IF(FISden(Nnuc).EQ.1.)THEN
+         iz = INT(Z(Nnuc))
+         ia = INT(A(Nnuc))
+         WRITE(filename, 99001)iz
+99001    FORMAT('../RIPL-2/fission/fis-levden-hfbcs-inner/z', i3.3, 
+     &          '.dat')
+         OPEN(UNIT = 81, FILE = filename)
+         READ(81, *)
+ 650     READ(81, 99002, ERR = 650, END = 750)simb, izr, iar
+99002    FORMAT(23x, a2, i3, 3x, i3)
+         IF(simb.NE.'Z=')GOTO 650
+         IF(iar.NE.ia)GOTO 650
+         READ(81, *)
+         READ(81, *)
+         i = 1
+ 700     READ(81, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
+     &        (ROFis(i, j, 1), j = 1, NFISJ)
+         IF(UGRid(i).LE.0.001)GOTO 800
+         IF(i.EQ.NFISEN)GOTO 800
+         i = i + 1
+         GOTO 700
+
+        
+ 750     WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
+         WRITE(6, *)' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
+         STOP 'HFBCS lev dens. at the inner saddle point missing'
+ 800     CLOSE(81)
+
+
+         IF(NRBar.GT.1)THEN
+            WRITE(filename, 99003)iz
+99003       FORMAT('../RIPL-2/fission/fis-levden-hfbcs-outer/z', i3.3, 
+     &             '.dat')
+            OPEN(UNIT = 82, FILE = filename)
+            READ(82, *)
+ 820        READ(82, 99004, ERR = 820, END = 860)simb, izr, iar
+99004       FORMAT(23x, a2, i3, 3x, i3)
+            IF(simb.NE.'Z=')GOTO 820
+            IF(iar.NE.ia)GOTO 820
+            READ(82, *)
+            READ(82, *)
+            i = 1
+ 840        READ(82, '(f7.2,f7.3,1x,33e9.2)')UGRid(i), t, t, t, t, 
+     &           (ROFis(i, j,2), j = 1, NFISJ)
+            IF(UGRid(i).LE.0.001)GOTO 880
+            IF(i.EQ.NFISEN)GOTO 880
+            i = i + 1
+            GOTO 840
+ 860        WRITE(6, *)' NO LEV. DENS. FOR Z=', iz, ' A=', ia, 
+     &                 ' IN HFBSC'
+            WRITE(6, *)
+     &                ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED'
+            STOP 'HFBCS lev dens. at the ouetr saddle-point missing'
+ 880        CLOSE(82)
+         ENDIF         
+
+         IF(NRBarc.EQ.3)THEN
+            DO i = 1, NFISEN
+               DO j=1,NFISJ
+                  ROFis(i, j,3)=ROFis(i, j,2)
+               ENDDO   
+            ENDDO
+         ENDIF
+
+         UGRid(0) = 0.
+         DO ibar=1,NRBarc
+            DO j = 1, NFISJ
+               ROFis(0, j,ibar) = 0.
+            ENDDO
+         ENDDO
+         
+         IF(NFISJ.LT.NLW)THEN
+            DO ibar=1,NRBarc
+               DO j = NFISJ+1,NLW
+                  Do i=1,NFISen
+                     ROFis(i, j,ibar) = 0.
+                  ENDDO   
+               ENDDO
+            ENDDO  
+         ENDIF   
+      ENDIF
+
+      write(6,*)'fisden',nnuc,fisden(nnuc)
+      DO i = 1, NFISEN              
+c         write(6,*)'ROFIS',ROFis(i, 1,1), ROFis(i, 1,2),ROFis(i, 1,3)       
+      ENDDO
+      Do ibar=1,nrbarc
+         Do i=1,nrbinfis(ibar)
+            write(6,*)'rofiss',ibar,i,rofis(i,3,ibar)
+
+            ENDDO
+            ENDDO
+
       END

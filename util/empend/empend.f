@@ -2198,7 +2198,7 @@ c...
 c...            print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
 c...
            DFP=100*(XSP-XS3)/XS3
-           IF(ABS(DFP).GT.1.) THEN
+           IF(ABS(DFP).GT.2.) THEN
              WRITE(LTT,909) MT,EE,XS3,DFP
              WRITE(LER,909) MT,EE,XS3,DFP
            END IF
@@ -2838,10 +2838,10 @@ C* Head record
 C* List record
       DO 110 JT=1,NT
 C* Determine the energy level of the final state
-      LE=LBR(JT,LL)
+      LE=LBR(NT+1-JT,LL)
       RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
-      RWO(2,JT)=BRR(JT,LL)
+      RWO(2,JT)=BRR(NT+1-JT,LL)
   110 CONTINUE
       CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
 C* Section end

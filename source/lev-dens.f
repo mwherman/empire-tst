@@ -1,6 +1,6 @@
-Ccc   * $Author: mike $
-Ccc   * $Date: 2002-11-29 15:27:24 $
-Ccc   * $Id: lev-dens.f,v 1.8 2002-11-29 15:27:24 mike Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2003-10-14 17:14:39 $
+Ccc   * $Id: lev-dens.f,v 1.9 2003-10-14 17:14:39 herman Exp $
 C
       SUBROUTINE ROCOL(Nnuc, Cf, Gcc)
 CCC
@@ -937,8 +937,8 @@ C
 C
 C fisfis d
       COMMON /FISC  / FIScon
-      COMMON /PARFIS/ ROTemp, AC, AAJ, UX, IBAr1
-      DOUBLE PRECISION UX, AAJ
+      COMMON /PARFIS/ ROTemp, AC, AAJ,  IBAr1
+      DOUBLE PRECISION  AAJ
       INTEGER IBAr1
       REAL FIScon
 C fisfis u
@@ -963,6 +963,7 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
+      IF(FIScon.EQ.2.)goto 6666
 C-----determination of U for normal states
       IF(BF.NE.0.D0)THEN
          IF(Destep.NE.0.0D0)THEN
@@ -980,13 +981,17 @@ C-----determination of U for normal states
          ENDIF
       ENDIF
 C     fisfis d ===================================
-      IF(FIScon.EQ.2.)THEN
-         aj = AAJ
+ 6666 IF(FIScon.EQ.2.)THEN
+         Bf=0.0D0
+         aj = aaj
+      
          mompar = MOMparcrt(IBAr1)
          momort = MOMortcrt(IBAr1)
-C        goto 45192
-         IF(UX.GT.UCRt)THEN
-            accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*UX)))/UX)
+         
+         u=(kk-1)*destep+dshif+del   
+
+         IF(U.GT.UCRt)THEN 
+            accn = ATIl*(1 + SHC(Nnuc)*(1 - EXP((-GAMma*U)))/U)
          ELSE
             accn = ACRt
          ENDIF
@@ -998,16 +1003,14 @@ Cc       ampl = EXP(TEMp0*SHRt)
          shredt = 1.
 Cc       IF(temp.GE.TEMp0)shredt = ampl*EXP(( - SHRt*temp))
 C--------temperature fade-out of the shell correction  --- done ----
-         u = UX + DEL
-C        ! - FISb(i, Nnuc) + SHC(Nnuc)
-C        &          *shredt*SHCjf(i, Nnuc)
+
          IF(u.GT.UCRt)THEN
             u = u - ECOnd
             bcs = .FALSE.
          ELSE
             bcs = .TRUE.
          ENDIF
-C        goto 45192
+        
          IF(u.GT.0.0D0)THEN
 C
 C-----------calculation of level density parameter 'a' including surface
@@ -1357,6 +1360,7 @@ C-----set to 0 level density array
             ELSE
                ROF(i, k, Nnuc) = 0.0
             ENDIF
+             ROFis(i, k, Nnuc) = 0.0
          ENDDO
       ENDDO
 C-----setting to 0 level density array ------ done ------

@@ -1,5 +1,5 @@
 
-             Changes in version 2.19beta2 with respect to 2.18  
+             Changes in version 2.19beta5 with respect to 2.18  
                       Brookhaven, June 30  2003
 
 1.  Error in the Wilmore-Hodgson omp corrected.
@@ -63,7 +63,8 @@
     reactions (M. Herman).
 25. File 'titles' in x4toc4 modified to treat properly min and max bin
     energies in the emission spectra. 
-26. ZVView updated to version 9.5    
+26. ZVView updated to version 9.5
+27. Correction to DEGAS regarding flux conservation (E. Betak)
 
 
              Changes in version 2.18 with respect to 2.17.1

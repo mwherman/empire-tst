@@ -31,6 +31,6 @@
      *,NDGDRPM=10
      *,NDGQRPM=8,NDGMRPM=8,NDKNTR=3,NDREGIONS=5
      *,NDMODELS=5,NDDEFCC=6,NDCOLLEV=35
-     *,NFwells=5,NFsadles=NFwells-NFwells/2,NFtrans=5
-     *,NFisEN=55,NFisJ=30)
+     *,NFwells=5,NFsadles=5,NFtrans=50
+     *,NFisEN=55,NFisJ=30,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
 
