@@ -46,10 +46,10 @@ C====================================================================
       END
 
 
-      SUBROUTINE THORA(IOUT,IOPsys)
-      INTEGER IOUT,IOPsys
-      IF(IOPsys.EQ.1) CALL HORA_WIN(IOUT)
-      IF(IOPsys.EQ.0) CALL HORA_LIN(IOUT)
-      RETURN
-      END
+c     SUBROUTINE THORA(IOUT,IOPsys)
+c     INTEGER IOUT,IOPsys
+c     IF(IOPsys.EQ.1) CALL HORA_WIN(IOUT)
+c     IF(IOPsys.EQ.0) CALL HORA_LIN(IOUT)
+c     RETURN
+c     END
 

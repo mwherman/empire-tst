@@ -1355,13 +1355,13 @@ C    &       SYMb(NNUc),INT(A(NNUc)),INT(EINl*1000)
       IOK=1
       INQUIRE(FILE = ('../TL/'//ctmp18//'.BIN'), EXIST = fexist)
       IF(.NOT.fexist) GOTO 300
-C-----Here the old calculated files should be readed
+C-----Here the previously calculated files should be read
       OPEN(45, FILE = ('../TL/'//ctmp18//'.BIN'), FORM = 'UNFORMATTED')
       IF(IOUt.EQ.5)OPEN(46, FILE = '../TL/'//ctmp18//'.LST')
  100  READ(45, END = 200)lmax, ien, ener
       IF(IOUt.EQ.5)WRITE(46, '(A5,2I6,E12.6)')'LMAX:', lmax, ien, ener
 C
-C-----If (energy read from file do not coincide
+C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
       IF(ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001)THEN
@@ -1530,6 +1530,7 @@ C
       CHARACTER*1 parc
       REAL SNGL
 
+      Maxlw = 0
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
@@ -1704,6 +1705,7 @@ C
       LOGICAL LVIbrat
       REAL SNGL
 
+      lmax = 0
       ecms = ETL(J, Nejc, Nnuc)
 C-----
 C----- Input of transmission coefficients

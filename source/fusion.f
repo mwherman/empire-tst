@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-02-06 14:18:10 $
-Ccc   * $Id: fusion.f,v 1.28 2005-02-06 14:18:10 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-07 22:36:02 $
+Ccc   * $Id: fusion.f,v 1.29 2005-02-07 22:36:02 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -323,6 +323,7 @@ C
             if(icollev(l).LT.50) cycle   ! Skipping coupled levels
             DOdwba = .TRUE.
           ENDDO
+          IF(DIRECT.EQ.3) DOdwba = .TRUE.
 
           IF(DOdwba .AND. DIRect.GT.0 .and.  ( .NOT.DEFORMED .OR.
      &          (MOD(NINT(A(Ntrg)),2).eq.0.and.
@@ -487,7 +488,7 @@ C               checking the correspondence of the excited states
 
               IF(IOPsys.EQ.0)THEN
 C               LINUX
-                ctmp = 'rm ccm.CS ccm.CS dwba.CS dwba.TLJ'
+                ctmp = 'rm ccm.CS ccm.CS dwba.CS dwba.TLJ 2>/dev/null'
                 iwin = PIPE(ctmp)
               ELSE
 C               WINDOWS
