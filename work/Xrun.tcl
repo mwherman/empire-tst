@@ -6480,5 +6480,4 @@ bind "_TopLevel" <Destroy> {
 
 Window show .
 Window show .top75
-
 main $argc $argv
