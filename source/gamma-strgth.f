@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-04-21 03:39:53 $
-Ccc   * $Id: gamma-strgth.f,v 1.7 2004-04-21 03:39:53 Capote Exp $
+Ccc   * $Date: 2004-06-08 15:33:37 $
+Ccc   * $Id: gamma-strgth.f,v 1.8 2004-06-08 15:33:37 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -144,17 +144,17 @@ C
 C-----printout of gamma transition parameters
 C
 C-----Kyiv.Photonuclear channel, Plujko_new
-C     IF(Key_GDRGFL.EQ.0)THEN
-C        EG1 = GDRpar(1, Nnuc)
-C        GW1 = GDRpar(2, Nnuc)
-C        CS1 = GDRpar(3, Nnuc)
-C        EG2 = GDRpar(4, Nnuc)
-C        GW2 = GDRpar(5, Nnuc)
-C        CS2 = GDRpar(6, Nnuc)
-C      ELSE
+      IF(Key_GDRGFL.EQ.0)THEN
+         EG1 = GDRpar(1, Nnuc)
+         GW1 = GDRpar(2, Nnuc)
+         CS1 = GDRpar(3, Nnuc)
+         EG2 = GDRpar(4, Nnuc)
+         GW2 = GDRpar(5, Nnuc)
+         CS2 = GDRpar(6, Nnuc)
+       ELSE
 C        init GDRGFL parametrs
-C        CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
-C      ENDIF
+         CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
+      ENDIF
 C-----Kyiv.Photonuclear channel, Plujko_new(End)
       IF(IOUt.GT.1)THEN
          WRITE(6, 99001)
