@@ -33,11 +33,11 @@ C Local variables
 C
       DOUBLE PRECISION deln(150), delz(98), excnq, popdiscang, 
      &                 popdiscrete, poptotal, populdegas(3,NDEXD,25), 
-     &                 renorm, renpop, specdegas(3,NDEXD), spectot(0:2), 
+     &                 renorm, renpop, specdegas(3,NDEXD), spectot(0:2),
      &                 sumtmp, tmp, totemis
       REAL FLOAT
       INTEGER i, idnacont, idnadisc, ie, ie0, ie1, ii, il, ipop, ispec, 
-     &        j, jparity, jspin, lmax, na, ndisc, nejc, nejcdegas, nnur, 
+     &        j, jparity, jspin, lmax, na, ndisc, nejc, nejcdegas, nnur,
      &        nnurdegas, nudim
       INTEGER INT
 C
@@ -361,10 +361,6 @@ C-----other reaction mechanisms)
      &         *renpop
          ENDDO
       ENDDO
-99010 FORMAT (1x,f5.2,5E9.2,2E11.4)
-99015 FORMAT (1x,f5.2,5E10.3,2E11.4)
-99020 FORMAT (1x,i4,f7.3,5E11.4,2E11.4)
-99025 FORMAT (1x,f5.2,1x,4(f9.3,1x))
       END               ! empiredegas
 C
 C
@@ -535,7 +531,6 @@ C Local variables
 C
       REAL*8 bbb
       INTEGER i, iw, j, nudim
-99005 FORMAT (1X,a79)
       iw = 42
       WRITE (iw,99030)
       WRITE (iw,*) ' Printout of input data by degaswrite:'
@@ -694,11 +689,11 @@ C
      &       EEXc0degas, EF, ENDi(10,10), ENDidegas(10,10), ESTep, 
      &       ESTepdegas, EXCef, FAL(140), FFPair(40), FFQ(40), G, GAQ, 
      &       GAQdegas, GGDegas(10), JGS, JGSdegas, OM(25,NDEXD), 
-     &       OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, SPIdi(10,10), 
+     &       OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, SPIdi(10,10),
      &       SPIdidegas(10,10), SPP, T1111, TC(25,NDEXD,25), TL(25), 
      &       TLP(2,NDEXD,25), XCDegas(9), XP(3,25), XX0(25,3,25), 
      &       XX02(25,5,25), XX2, XX22
-      INTEGER I0, IAC, IACdegas, IAO, IAT, IATdegas, IE00, IEDegas, II0, 
+      INTEGER I0, IAC, IACdegas, IAO, IAT, IATdegas, IE00, IEDegas, II0,
      &        IIA, IIP, IJ, IL0, INDegas, ITJgs, ITSpp, IZ, IZC, 
      &        IZCdegas, IZDegas, IZO, KEY, KEYdegas0, N, NBR, 
      &        NBRadegas(10), NEStep, NEXddegas(10,10), NOLedegas(9), 
@@ -731,31 +726,31 @@ C
 C
 C Local variables
 C
-      REAL*8 a0, a1, a2, a3, aj, ak, akfc, alm(25), alms(25,25), alp(25)
+      REAL*8 a0, a1, a2, a3, aj, ak, akfc, alms(25,25), alp(25)
      &       , alps(25,25), ared, aver, b(10,2), b0, b0q, beproj, bm, 
-     &       bmq, br, brar(10,10,9), c, c0, cj, cjgs, cjgs1, cm, cp, 
+     &       bmq, br, brar(10,10,9), c0, cj, cjgs, cjgs1, cm, cp, 
      &       dd(10), e, eeo, eer, eexc, eexc0, eg1, egm, emg(25,25), 
-     &       emgg(25,25,60), emp(25,25), emtg, emtp, endim, endir, engy, 
-     &       eom, eomm, epmxef(2), estep2, f(25), feebr2(10), feebra(10)
+     &       emp(25,25), emtg, emtp, endim, endir, engy,
+     &       eom, epmxef(2), estep2, f(25), feebr2(10), feebra(10)
      &       , feed, feepar(10), flip, fsci, ga1, gae(2,90), ge, geg, 
      &       gf, gg(10), hlp3, jc, jc0, omd1(10,10,10), omd2(10,10,10), 
-     &       omr(2,25,NDEXD), pi, pin0(25), popultot1, pro, q, 
+     &       omr(2,25,NDEXD), pi, pin0(25), pro, q, 
      &       r(2,25,10), rexc, rl, ro1, ro2, s, sci(25), sg1
       REAL*8 CFA, CHAGUG, FPAIR, FQ, RFA, RO, X0, X02, X2, X22, XDAMP
       DOUBLE PRECISION DABS, DLOG, DMOD
       REAL FLOAT
       INTEGER i, iatx, ie, ie0, ie1, ieo, ieoblo, ieom, ier, igm, ih, 
      &        ii1, iid, iiir, iipnuc, iis, ijc, ik, il, ilis, ilma, 
-     &        iloblo, in, indexe, inx, ip, ip1, ir, is, isu, iw, izx, j, 
-     &        jav, k, key0, kna, l, m, m00, nbr1, nbra(10), ndi, nestdi, 
-     &        neste1, nestem, nesteu, nexd(10,10), nn, nn0, nne, nne1, 
-     &        nole(9), nudi(10), nudi1, nudim1
+     &        iloblo, in, indexe, inx, ip, ip1, ir, is, isu, iw, izx, j,
+     &        jav, k, key0, kna, l, m, m00, nbr1, nbra(10), ndi, nestdi,
+     &        neste1, nestem, nesteu, nexd(10,10), nn, nne, nne1, 
+     &        nudi(10), nudi1, nudim1
       INTEGER INT, MAX0, MIN0
-      REAL*8 sgi, sgiq, sgir, sgr, sigf, sigfc, sigmacn(25), sigmacntot, 
-     &       st(3,NDEXD), su, sum, sumpro, t(25), t00, t0001, t11, t111, 
+      REAL*8 sgi, sgiq, sgir, sgr, sigf, sigfc, sigmacn(25), sigmacntot,
+     &       st(3,NDEXD), su, sum, sumpro, t(25), t00, t0001, t11, t111,
      &       tau(25,25), tf(25), tf0(25,25), tm(9,25,NDEXD,25), xc(9), 
      &       xde(25,25), xdea
-C
+
       DO j = 1, 25            ! CN cross section as function of spin
          sigmacn(j) = 0.0
       ENDDO
@@ -776,7 +771,6 @@ C
             nexd(i,j) = NEXddegas(i,j)
             DO k = 1, 9
                brar(i,j,k) = BRArdegas(i,j,k)
-               nole(k) = NOLedegas(k)
                xc(k) = XCDegas(k)
             ENDDO
          ENDDO
@@ -967,7 +961,7 @@ Coblo    IF (SGR.LE.0.d0) STOP       ! Degas stop replaced by return
          eg1 = 29.*SQRT((1. + 2./a3)/a3)
          ga1 = 5.
          sg1 = 10.64*FLOAT(in*IZ)/FLOAT(IAT)
-         WRITE (iw,99015) IAT, eexc0, ESTep, sgr, ak, eg1, ga1, sg1, gg, 
+         WRITE (iw,99015) IAT, eexc0, ESTep, sgr, ak, eg1, ga1, sg1, gg,
      &                    b, nudi, nbra
 99015    FORMAT (/' A = ',I3,'    Eexc = ',F5.2,
      &           ' MeV      energy step = ',F4.2,
@@ -1098,7 +1092,6 @@ C        IZC=IZ-1                 Corrected 14 Sept. 2000
          G = gg(IIP)
          gf = G*EF
          c0 = 6.58195E-22*IAT**3./(2.*pi*G*ak)
-         c = c0*eexc
 C--------NEUTRON AND PROTON TRANSMISSION COEFFICIENTS
          DO i = 1, 2
             KEY = i
@@ -1315,7 +1308,6 @@ C           gamma
                   Popul(1,ieoblo,iloblo) = 0.0
                ENDDO
             ENDDO
-            popultot1 = 0.0
 Ceb         DO ie0 = 1, NEStep
             ie0 = 1
             ie = NEStep + 1 - ie0
@@ -1337,7 +1329,6 @@ C              Angular part of the density of states
 C
                DO i = 1, 25
                   alp(i) = 0.
-                  alm(i) = 0.
                   IF (ie.GT.nudi(IIP) .OR. nexd(IIP,ie).LE.0) THEN
                      ih = i - 1
                      ip = i - IIA + m00
@@ -1361,8 +1352,6 @@ C                    ge = G*(e-dd(iip))
                      hlp3 = 0.
                      IF (ge - a1 - gf.GE..01) hlp3 = (ih - 1)
      &                   *((ge - a1 - gf)/(ge - a1))**(N - 3)
-                     IF (cm.NE.0.) alm(i) = 0.5*ip*ih*(N - 2)
-     &                   *(1. - hlp3)/cm
                      IF (ge.GE.a3) THEN
                         hlp3 = 0.
                         IF (ge - a2 - gf.GE..01) hlp3 = (ih + 1)
@@ -1441,7 +1430,6 @@ Coblo          NN = 25       ! Excitons, original value
                      IF (i.LE.nn) nn = i
                   ENDIF
                ENDDO
-               IF (ie.EQ.NEStep) nn0 = nn
 C--------------DENSITIES AND TRANSITION RATES CALCULATION
 C--------------INITIAL EXCITON CONFIGURATION
                DO i = 1, nn
@@ -1514,7 +1502,7 @@ C                                                  (EOM-EEO, SU)
                                          IF (s.LE.(su + 0.5)) GOTO 162
                                          t11 = t11 + 
      &                                      sum*ro2*RFAc(N - 1,isu)
-                                         IF (N.EQ.1) WRITE (iw,99025) j, 
+                                         IF (N.EQ.1) WRITE (iw,99025) j,
      &                                      iis, ieo, eeo, t11, sum, ro2
 99025                                    FORMAT (' part-c  j,iis',i2,i3,
      &                                      '  ieo,eeo',i2,f4.1,'  t11',
@@ -1582,9 +1570,6 @@ C                                                     (EOM-EEO, SU)
                            IF (ie.GT.NBR) THEN
                               IF (ie.NE.1 .AND. ro1.NE.0.) THEN
                                  ie1 = INT(e/ESTep + 0.5)
-                                 DO igm = 1, 60
-                                    emgg(i,il,igm) = 0.
-                                 ENDDO
                                  DO igm = 1, ie1
                                     egm = igm*ESTep
                                     geg = G*egm
@@ -1680,15 +1665,6 @@ C                                   IER = IE-IGM
                                          t0001 = t0001 + T1111
                                          ENDIF
   172                                  ENDDO
-                                       IF (igm.LE.60) THEN
-                                         IF (ie.GT.NUDim .AND. N.GT.0)
-     &                                      emgg(i,il,igm)
-     &                                      = t0001*C2/(ro1*RFAc(N,ijc))
-                                         IF (ie.LE.NUDim .AND. 
-     &                                      il.LE.10 .AND. i.LE.10)
-     &                                      emgg(i,il,igm)
-     &                                      = t0001*C2/ro1
-                                       ENDIF
                                     ENDIF
                                  ENDDO
                               ENDIF
@@ -1843,7 +1819,7 @@ C-----------------------------CN residual population
 C                             write(iw,51) e,cj,sigmacn(il),sigmacntot
                            ENDIF
                            IF (feed.GE.1.E-3 .AND. ie.GE.(NEStep - 1))
-     &                         WRITE (iw,99040) e, cj, emtp, emtg, feed, 
+     &                         WRITE (iw,99040) e, cj, emtp, emtg, feed,
      &                                (TC(i,ie,il),i = 1,3)
 99040                      FORMAT (1X,f5.2,1x,f4.1,1x,2G11.4,2x,g11.4,
      &                             2x,3E9.2)
@@ -1894,8 +1870,6 @@ Coblo                      do 4401 i=1,4    ! Excitons limited to i=1,4
                   ENDIF
                ENDIF
             ENDIF
-C           4402 write(*,*) ie,il,popul(1,ie,il),popultot1
-Ceb         ENDDO
 Coblo-------Now residual population of CN at the initial
 C-----------excitation energy, ie=nestep.
 CMH         DO iloblo = 1, 25
@@ -1992,7 +1966,6 @@ C
                            IF (ie.GT.NUDim) eom = EXCef + (ie - NUDim)
      &                         *ESTep
                            IF (ie.LE.NUDim) eom = ENDi(IIP,ie)
-                           eomm = eom
                            IF (j.LE.2) eom = eom - b(IIP,j)
                            ieom = INT(eom/ESTep + 0.5)
                            IF (eom.GE.estep2 .AND. ieom.GT.0) THEN
@@ -2134,7 +2107,7 @@ C----------------------------------------Emission(E, CJ)--->(EOM-EEO, SU)
      &                                      isu)*r(j,i,IIP)*akfc/ro1
                                          t11 = t11 + t111
                                          ii1 = II0 + IIA + j
-                                         IF (II0.LE.5 .AND. j.LE.2 .AND. 
+                                         IF (II0.LE.5 .AND. j.LE.2 .AND.
      &                                      ii1.LE.9) tm(ii1,i,ier,iis)
      &                                      = tm(ii1,i,ier,iis) + t111
                                          ENDDO
@@ -2184,7 +2157,7 @@ C----------------------------------------Emission(E, CJ)--->(EOM-EEO, SU)
      &                                      t111 = t00*sum*omd2(i,iis,
      &                                      iid)*r(j,i,IIP)*akfc/ro1
                                          ii1 = II0 + IIA + j
-                                         IF (II0.LE.5 .AND. j.LE.2 .AND. 
+                                         IF (II0.LE.5 .AND. j.LE.2 .AND.
      &                                      ii1.LE.9) tm(ii1,i,iid,iis)
      &                                      = tm(ii1,i,iid,iis) + t111
                                          t11 = t11 + t111
@@ -2275,7 +2248,6 @@ C     If you need the population prior to particle emission (but
 C     after gammas), you have to change the above line
 C     to 6850 POPUL(IE,IL)=POPUL(IE,IL)+TC(I,IE,IL)
 C
-C     WRITE(IW,74)
       DO ieo = 1, nestem
          eeo = ESTep*ieo
          IF (ieo.NE.nestem) THEN
@@ -2283,28 +2255,12 @@ C     WRITE(IW,74)
                st(j,nestem) = st(j,nestem) + st(j,ieo)
             ENDDO
          ENDIF
-C        WRITE (IW,71) EEO,(ST(J,IEO),J=1,3)
          IF (ieo.EQ.nestem) THEN
             DO j = 1, 3
                st(j,ieo) = ESTep*st(j,ieo)
             ENDDO
          ENDIF
-C        WRITE (IW,72)     (ST(J,IEO),J=1,3)
       ENDDO
-99075 FORMAT (1X,a79)
-99080 FORMAT (4I5,F10.3)
-99085 FORMAT (8F8.1)
-99090 FORMAT (10I6)
-99095 FORMAT (2F6.2,i6)
-99100 FORMAT (9(I2,F6.3))
-99105 FORMAT (1X,f5.1,1x,f4.1,1x,2G11.4,2x,g11.4,2x,2E10.3//8E10.3)
-99110 FORMAT (1X,I2,2X,3E12.4,3X,E12.4)
-99115 FORMAT (/' SUMMED SPECTRA (in mb/MeV)'/'  Energy',7X,'neutrons',
-     &        8X,'protons',9X,'gammas')
-99120 FORMAT (5E22.15)
-99125 FORMAT (f5.1,$)
-99130 FORMAT (2x)
-99135 FORMAT (' PEGAS',12x,'cycle = ',i1,'          (maximum = 9)')
       END                  ! subdegas
 C
       DOUBLE PRECISION FUNCTION RO(E,G,P,H)
@@ -2336,7 +2292,7 @@ C
          IF (n.GT.0) THEN
             clfa = FAL(P + 3) + FAL(H + 3) + FAL(n + 2)
             r = EXP((n - 1)*LOG(ge) - clfa)
-            IF (G*E - al.GT.G*EF) r = r - H*EXP((n - 1)*LOG(ge - G*EF) - 
+            IF (G*E - al.GT.G*EF) r = r - H*EXP((n - 1)*LOG(ge - G*EF) -
      &                                clfa)
             r = G*r
          ENDIF
@@ -2356,7 +2312,7 @@ C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10,10), ESTep, EXCef, G, GAQ, 
-     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, 
+     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma,
      &       SPIdi(10,10), T0(25,NDEXD,25), T1111, XP(3,25), 
      &       XX0(25,3,25), XX02(25,5,25), XX2, XX22
       INTEGER I0, IAT, IE0, II0, IIA, IIP, IJ, IL0, IZ, N, NBR, NEStep, 
@@ -2507,7 +2463,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a, a23, a3, ala, am, amu, anu, d, del, e0, e1, e2, ec, ec2, 
+      REAL*8 a, a23, a3, ala, am, amu, anu, d, del, e0, e1, e2, ec, ec2,
      &       egr, em, gam, p, q, r, sgm, sig, xi, z
       REAL FLOAT
 C
@@ -2976,7 +2932,7 @@ C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10,10), ESTep, EXCef, G, GAQ, JGS, 
-     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, 
+     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma,
      &       SPIdi(10,10), SPP, T1111, TC(25,NDEXD,25)
       INTEGER I0, IAO, IAT, IE00, IJ, IL0, ITJgs, ITSpp, IZ, IZO, KEY, 
      &        NBR, NEStep, NN, NUDim
@@ -3075,7 +3031,7 @@ C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10,10), ESTep, EXCef, G, GAQ, 
-     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, 
+     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma,
      &       SPIdi(10,10), T1111, TC(25,NDEXD,25)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
       COMMON /DEN   / RFAc, SIGma
@@ -3156,7 +3112,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a, ffi, j4, q, q1, r, r001, r1, rn, rn1, sum, sumb
+      REAL*8 a, j4, q, q1, r, r1, rn, sum, sumb
       INTEGER ij4, ijj, ijjm, ijq, iq, iq1
       INTEGER INT
 C
@@ -3201,14 +3157,11 @@ C           J half-integer  =>  j4=0,  Q=J
          ENDIF
       ENDIF
   100 ij4 = 2*j4 + 1
-      rn1 = RFAc(N - 1,ij4)
       a = RFAc(N - 1,ij4)/RFAc(N,ijj)
       q = ABS(j4 - J)
       iq = INT(q + 0.5)
       sumb = 0.
   200 ijq = 2*q + 1
-      ffi = FFQ(iq)
-      r001 = RFAc(1,ijq)
       sumb = sumb + FFQ(iq)*RFAc(1,ijq)
       q = q + 1.
       iq = INT(q + 0.5)
@@ -3406,7 +3359,7 @@ C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10,10), ESTep, EXCef, G, GAQ, JGS, 
-     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, 
+     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma,
      &       SPIdi(10,10), SPP, T1111, TC(25,NDEXD,25)
       INTEGER I0, IAO, IAT, IE00, IJ, IL0, ITJgs, ITSpp, IZ, IZO, KEY, 
      &        NBR, NEStep, NN, NUDim
@@ -3494,7 +3447,7 @@ C
 C COMMON variables
 C
       REAL*8 AF, C2, CJGs0, ENDi(10,10), ESTep, EXCef, G, GAQ, 
-     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma, 
+     &       OM(25,NDEXD), OMD(10,10,10), RFAc(50,90), SG(NDEXD), SIGma,
      &       SPIdi(10,10), T1111, TC(25,NDEXD,25)
       INTEGER I0, IAT, IE00, IJ, IL0, IZ, N, NBR, NEStep, NUDim
       COMMON /DEN   / RFAc, SIGma

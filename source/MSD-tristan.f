@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-03-07 22:31:08 $
-Ccc   * $Id: MSD-tristan.f,v 1.26 2005-03-07 22:31:08 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: MSD-tristan.f,v 1.27 2005-03-11 17:22:13 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
 CCC
@@ -77,7 +77,7 @@ C
       REAL FLOAT
       INTEGER i1, i2, ic, ic1, ic12, ic1xr, ic2, ic2xr, icp, icpx, 
      &        iout2, ka, kb, kread, l1, l12x, l1maxr, l2, l2maxm, 
-     &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr, 
+     &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr,
      &        nnb, np, npb, nq, nq12x, nwr1, nwr2, nzb
       INTEGER INT
 C
@@ -98,9 +98,6 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
          fn = fn + 1.D0
          FAClog(n) = FAClog(n - 1) + LOG(fn)
       ENDDO
-99005 FORMAT (24I3)
-99010 FORMAT (10F7.3)
-99015 FORMAT (7(I3,F7.2))
       NCHanl = 3
       KRType = 1
       NFAc12 = 1
@@ -218,7 +215,6 @@ CCCCCC
                   READ (15,*) (WR1(n),n = 1,nwr1)
 C                 modiffication to run formated orion output
 C                 READ(15,3434)(WR1(N),N=1,NWR1)
-99025             FORMAT (5E16.9)
                   IF (ne.LE.NQ1x) THEN
                      n1 = 0
                      DO ic = 1, IC1x
@@ -721,8 +717,6 @@ C
                               ltmax = MIN(ltp + lth,(jtw1 + jtw2)/2) + 1
                               ltmax = MIN(ltmax,ltmaxr)
                               IF (ltmin.LE.ltmax) THEN
-99050                            FORMAT (' TRANSITIONS FOR ',4I3,'/2  ',
-     &                              4I3,'/2:',10I3)
                                  DO ltp1 = ltmin, ltmax, 2
                                     lttw = 2*(ltp1 - 1)
 C
@@ -886,7 +880,6 @@ C
                   ENDIF
                ENDDO
             ENDDO
-99055       FORMAT (I4,F10.5,2E12.4)
          ENDIF
 C
 C
@@ -942,8 +935,6 @@ C                 cr3 = rfqqr(nea + 1, lt)
                      IF (rrr(1).GT.rrr(2)) clex(lt) = ccpm(1)
                      IF (rrr(2).GT.rrr(1)) clex(lt) = ccpm(2)
                   ENDIF
-99060             FORMAT ('  C(+),R(+):',2E13.5/'  C(-),R(-):',2E13.5,
-     &                    '  CPL:',F10.5)
 C                 cr1 = rfqqr(nea - 1, lt)
                   cr2 = ccr(lt)
 C                 cr3 = rfqqr(nea + 1, lt)
@@ -1020,13 +1011,7 @@ C
                rqr = ceff - qqr
                rho1 = rnorm*qqi/(rqr**2 + qqi**2)
                RHO(ne,lt) = rho1/PI
-C
-C--------------write response function on tape17
-C--------------(presently not activated)
-C
-C              WRITE(17,*)EST(NE),RHO(NE,LT)
             ENDDO
-99070       FORMAT (F8.3,5E11.4,F8.3)
 C
 C-----------calculate RPA-deformation parameters beta
 C-----------(integrated over an energy interval of 2*ESTEP )
@@ -1049,7 +1034,6 @@ C
 C        DO NE=1,NEBINX
 C        WRITE(17,1400)EST(NE),(RHO(NE,I),I=1,MIN(10,ICMAX))
 C        ENDDO
-99075    FORMAT (F10.5,10E15.7)
 C
          IF (krt.EQ.1) WRITE (6,99080)
 99080    FORMAT (//6X,'COUPLING CONSTANTS AND RENORMALIZATION'/6X,
@@ -1614,7 +1598,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALSin, BST(3), CNOrin(22), EBCs(500,2), 
-     &                 EFItin(22), ESP(500,2), GAP(2), GAPin(2), HOMega, 
+     &                 EFItin(22), ESP(500,2), GAP(2), GAPin(2), HOMega,
      &                 HOMin, RMS(3), RST(201), UAMp(500,2), VAMp(500,2)
      &                 , VLS(2), WIDexin
       INTEGER IBLk(2), JBL(2), JSP(500,2), LBL(2), LSP(500,2), NBL(2), 
@@ -1635,7 +1619,7 @@ C Local variables
 C
       DOUBLE PRECISION a3, ad, all, als, anp(2,2), bcsrerun, chemic, 
      &                 dnz, e0, espx, hhh, hom, pi, pqn, r, rd, rde, 
-     &                 rmsd, rnp(3,2), rw0, rws, uscal, uvec, vll(16,2), 
+     &                 rmsd, rnp(3,2), rw0, rws, uscal, uvec, vll(16,2),
      &                 w, xnp
       DOUBLE PRECISION EHO
       REAL FLOAT
@@ -2051,7 +2035,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALPha(11,6), AN(6), ANGle(NDANG), BST(3), 
-     &                 CLRn(11), DTHeta, DUMmy(1041), ECEntr(5), EOUtmi, 
+     &                 CLRn(11), DTHeta, DUMmy(1041), ECEntr(5), EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin, 
      &                 EXTcom(10), FACb, FAClog(500), FFAc1d(2), 
      &                 FFAc2d(2), FFAc3d(2), FFTot(10), FNOrm(6), 
@@ -2060,13 +2044,13 @@ C
      &                 RHO(301,11), RHOb(301,11,2), RMS(3), ROPt, 
      &                 SREw(21), SREwl(21), SRNew(21), THEta1, THEta2, 
      &                 U9, VLS(2), WIDex
-      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x, 
+      INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
      &        ICC, ICMax, ID, IE, IG, JSP(500,2), KDEnvi, KEX3, 
      &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), LSP(500,2), 
      &        NAVerg, NCHanl, NEBinx, NFAc12, NHOle(2), NLEv(301,11), 
      &        NN, NQ1x, NQ2x, NRMax(10), NSP(500,2), NTHeta, NTOtal(2), 
      &        NZ
-      COMMON  RHO, SRNew, SREw, SREwl, AN, FNQ, FQ, FNOrm, ALPha, DUMmy, 
+      COMMON  RHO, SRNew, SREw, SREwl, AN, FNQ, FQ, FNOrm, ALPha, DUMmy,
      &        NLEv
       COMMON /CC    / THEta1, THEta2, NCHanl, NN, NZ, IC1mxr, IC2mxr, 
      &                KRType, KRTmax, KDEnvi, NTHeta, NEBinx, NAVerg, 
@@ -2080,14 +2064,14 @@ C
       COMMON /SPPA  / HOMega, VLS, RMS, BST, GAP, NHOle, NTOtal
       COMMON /SPQN  / ESP, NSP, LSP, JSP
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr, 
-     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d, 
+     &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
      &                FFAc3d
 C
 C Local variables
 C
       DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:501), hhh
       REAL FLOAT
-      INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb, 
+      INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb,
      &        nlmax
 C
 C-----in RHO,NLEV,RHOB etc the increased argument NEB corresponds to
@@ -2171,9 +2155,7 @@ C
 99040    FORMAT (///' ','SRNEW:',11E11.4)
          WRITE (6,99045) (SREw(lt),lt = 1,ltmaxr)
 99045    FORMAT (' ','SREW :',11E11.4)
-C        WRITE(6,974) (SREWL(LT),LT=1,LTMAXR)
          IF (KTRl(8).EQ.( - 1)) GOTO 99999
-99050    FORMAT (' ','SREWL:',11E11.4)
       ENDIF
       e1 = ETMin + ESTep
       DO ic = 1, ICMax
@@ -2924,7 +2906,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil, 
+      DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight, 
      &                 wght(NDLV), xj, xnor
       REAL FLOAT
@@ -2944,7 +2926,6 @@ C-----
 C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
 C-----total number of bins
-C     WRITE(6,*)'nexrt=',nexrt
       next = INT(excnq/DE + 1.0001)
 C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667
@@ -3115,15 +3096,5 @@ C--------Store ang. dist.
             CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc)
      &                           + xnor*CSEa(ie,na,Nejc,1)
          ENDDO
-C--------add MSD discrete level contribution to the population spectrum (DDX)
-C--------used for the ENDF exclusive spectra
-C        IF(ENDf.EQ.1) THEN
-C-----------DDX spectra using portions (exclude ie=nexrt since this was set
-C-----------already by the contiuum)
-C-----------Actually not needed since done through the CSDirlev and CSAlev
-C           IF(ie.NE.nexrt) POPcseaf(0,Nejc,ie,Nnur) = 1.0
-C        ENDIF
-C        WRITE(6,'(''il, Elev, J, POP  '',i3,3G12.5)') il,ELV(il, Nnur),
-C        &       XJLV(il,nnur),POPlv(il, Nnur)
       ENDDO
       END

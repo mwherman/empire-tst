@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:19 $
-Ccc   * $Id: scnd-preeq.f,v 1.11 2005-03-04 17:21:19 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: scnd-preeq.f,v 1.12 2005-03-11 17:22:13 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -58,7 +58,7 @@ C
      &                 popsub(NDEX,NDLW,2), ratioro, sum, sumem, 
      &                 sumpopsub, welld
       REAL FLOAT, REAL
-      INTEGER i, icse, ie, iec, iejc, ier, iermax, ietl, iexc, ip, itlc, 
+      INTEGER i, icse, ie, iec, iejc, ier, iermax, ietl, iexc, ip, itlc,
      &        j, jc, nh, np
       INTEGER MAX0
       DOUBLE PRECISION WOB1

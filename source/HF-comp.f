@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-09 20:01:50 $
-Ccc   * $Id: HF-comp.f,v 1.47 2005-03-09 20:01:50 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:12 $
+Ccc   * $Id: HF-comp.f,v 1.48 2005-03-11 17:22:12 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -489,7 +489,6 @@ C-----------do loop over channel spins ***done***
          ENDDO
 C--------do loop over and r.n. spins ***done***
 C--------decay to the continuum ------ done -----------------------------
-99005    FORMAT (1X,F5.2,12G10.3)
 C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
          DO j = 1, NLW, LTUrbo
             DO i = 1, iermax
@@ -642,7 +641,7 @@ C-----------------NOTE: internal conversion taken into account
                   IF (ENDf.EQ.1) POPcse(0,0,icse,Nnuc)
      &                = POPcse(0,0,icse,Nnuc) + gacs/DE
                   IF (IOUt.GT.2) WRITE (6,99025) ELV(j1,Nnuc), 
-     &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd, 
+     &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
                ENDDO
@@ -809,7 +808,6 @@ C--------decaying state spin index = NLW
   100 ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------
-99005 FORMAT (1X,F5.2,12G10.3)
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
@@ -1015,7 +1013,6 @@ C-----------decaying state spin index = NLW
   100 ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------
-99005 FORMAT (1X,F5.2,12G10.3)
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO i = 1, Iec - 1
          Sum = Sum + SCRt(i,Jc,1,0) + SCRt(i,Jc,2,0)
@@ -2164,7 +2161,7 @@ C
      &                 DEStepm(2), DETcrtf(2), ECOndf(2), EFBm(3), 
      &                 EFDism(NFTRANS,3), GAMmafism(3), HM(NFTRANS,3), 
      &                 MORtcrt(NFPARAB), MPArcrt(NFPARAB), RFIso, 
-     &                 ROFism(160,30,3), SCRtf(2), SHCfism(3), TCRtf(2), 
+     &                 ROFism(160,30,3), SCRtf(2), SHCfism(3), TCRtf(2),
      &                 TDIrect, TDIrm(3), TFB, TFBm(3), TFIso, TGIso, 
      &                 TISo, UCRtf(2), UGRidf(0:NFISENMAX,3), WFIsm(3), 
      &                 XMInnm(3)
@@ -2320,11 +2317,11 @@ C
      &          H(nr,ibar)
             IF (FISmod(Nnuc).EQ.1. .AND. ibar.EQ.2)
      &           WRITE (80,'(1x, 1f3.1, 1x, 1i4,1x, 4f9.3)')
-     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1), 
+     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2)
             IF (FISmod(Nnuc).EQ.2. .AND. ibar.EQ.2)
      &           WRITE (80,'(1x, 1f3.1, 1x, 1i4,1x, 6f9.3)')
-     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1), 
+     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
       ENDDO

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:20 $
-Ccc   * $Id: tl.f,v 1.44 2005-03-04 17:21:20 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:14 $
+Ccc   * $Id: tl.f,v 1.45 2005-03-11 17:22:14 herman Exp $
  
       SUBROUTINE HITL(Stl)
 Ccc
@@ -306,7 +306,7 @@ C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             k, EEX(k,ncalc), SPIn(k,ncalc), FLOAT(IPAr(k,ncalc)), 
+     &             k, EEX(k,ncalc), SPIn(k,ncalc), FLOAT(IPAr(k,ncalc)),
      &             0, 0, 0, 0.01
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) k, EEX(k,ncalc), SPIn(k,ncalc), 
@@ -680,7 +680,7 @@ C--------komp = 29 OR 33
          ipoten = KTRlom(Nejc,Nnuc)
          CALL FINDPOT(ki,ieof,ipoten)
          IF (ieof.GT.0) THEN
-            WRITE (6,*) 'ERROR: PROBLEM with OMPAR.RIPL library,RIPL #', 
+            WRITE (6,*) 'ERROR: PROBLEM with OMPAR.RIPL library,RIPL #',
      &                  ipoten
             STOP 'ERROR: PROBLEM with OMPAR.RIPL library'
          ENDIF
@@ -725,7 +725,6 @@ C-----omp file
 C
       DATA potnam/' Real vol.', ' Imag vol.', ' Real surf', 
      &     ' Imag surf', ' Real SO  ', ' Imag SO  '/
-99005 FORMAT (80A1)
       Ieof = 0
       READ (Ki,*) IREf
       WRITE (Komp,'(3I5,4x,I3,''-'',A2,'' +'',I3,''-'',A2)') IREf, 
@@ -829,7 +828,6 @@ C
 C
 C-----Read RIPL optical model parameters from the local OMPAR.RIPL file
 C
-99005 FORMAT (10A8)
       Ierr = 0
       READ (Ko,'(I5)',ERR = 200) IREf
       READ (Ko,99050,ERR = 200) AUThor
@@ -917,7 +915,7 @@ C--------------Reading depths
       ELSEIF (IMOdel.EQ.3) THEN
          READ (Ko,99020,ERR = 200) NISotop
          DO n = 1, NISotop
-            READ (Ko,99015,ERR = 200) IZ(n), IA(n), BETa0(n), GAMma0(n), 
+            READ (Ko,99015,ERR = 200) IZ(n), IA(n), BETa0(n), GAMma0(n),
      &                                XMUbeta(n)
 99015       FORMAT (2I5,1p,3(1x,e11.4))
          ENDDO
@@ -947,8 +945,9 @@ C
 C
 C Local variables
 C
-      INTEGER i, idum, j, k, krange, n
+      INTEGER i, j, k, krange, n
       INTEGER IABS
+      CHARACTER*80 idum
       Ieof = 0
       READ (Ki,*,END = 100) IREf
       READ (Ki,99005) (AUThor(i),i = 1,80)
@@ -1027,7 +1026,6 @@ C
       INTEGER INT, MIN0
       CHARACTER*8 ldum, proj
       CHARACTER*40 model
-99005 FORMAT (' IREF=',i5,2x,a8,' incident, ',a40)
       DATA ldum/'++++++++'/
       IF (IZProj.EQ.0 .AND. IAProj.EQ.1) proj = ' Neutron'
       IF (IZProj.EQ.1 .AND. IAProj.EQ.1) proj = '  Proton'
@@ -1342,7 +1340,7 @@ C
       IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
-         WRITE (6,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=', 
+         WRITE (6,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
      &               ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=', 
      &               SNGL(ener)
          WRITE (6,*) 
@@ -2013,7 +2011,7 @@ C-----so we are using zero spin here
 C-----NOT TRUE for rotational model calculations (see ecis_CCrot)
 C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(LEVtarg,NNUC),0,1, ch, elab,
       WRITE (1,'(f5.2,2i2,a1,5f10.5)') zerosp, 0, 1, '+', elab, 
-     &                                 SEJc(Nejc), xmas_nejc, xmas_nnuc, 
+     &                                 SEJc(Nejc), xmas_nejc, xmas_nnuc,
      &                                 Z(Nnuc)*ZEJc(Nejc)
 C-----0 phonon involved
       WRITE (1,'( )')
@@ -2549,7 +2547,7 @@ C-----------write(1,'(3f10.5)') vvso,rrvso,aavso
             ENDIF
 C-----------write(1,'(3f10.5)') wwso,rwso,awso
             IF (WSO(1,Nejc,Nnuc).NE.0.) THEN
-               WRITE (1,'(3f10.5)') WSO(1,Nejc,Nnuc), RVSo(1,Nejc,Nnuc), 
+               WRITE (1,'(3f10.5)') WSO(1,Nejc,Nnuc), RVSo(1,Nejc,Nnuc),
      &                              AVSo(Nejc,Nnuc)
             ELSE
                WRITE (1,'(3f10.5)') 0., 0., 0.
@@ -2776,9 +2774,9 @@ C
 C Local variables
 C
       REAL*8 aavso, alphav, alpha_pb, beta_pb, bvso, derdws, derdwv, 
-     &       dtmp, dws, dwv, dwvso, ea, gamma_pb, vdcoul, vnonl, vscoul, 
+     &       dtmp, dws, dwv, dwvso, ea, gamma_pb, vdcoul, vnonl, vscoul,
      &       vvcoul
-      REAL ac, b(6,NDIM1,15), dtmp1, dwmin, dwplus, dwsm, dwsp, elf, 
+      REAL b(6,NDIM1,15), dtmp1, dwmin, dwplus, dwsm, dwsp, elf, 
      &     encoul2, pi, t12der, t1der, t1m, t1p, t2der, t2m, t2p, vc, 
      &     vhfnum, vnonlm, vnonlp
       DOUBLE PRECISION DBLE
@@ -2805,7 +2803,6 @@ C
          jc = MIN0(jc,JCOul)
          RC = RCOul0(jc)*ATAr**( - 1./3.) + RCOul(jc) + RCOul1(jc)
      &        *ATAr**( - 2./3.) + RCOul2(jc)*ATAr**( - 5./3.)
-         ac = ACOul(jc)
       ENDIF
       encoul2 = 0.
       IF (RC.GT.0.) encoul2 = 1.73*ZTAr/(RC*ATAr**(1./3.))
@@ -3230,9 +3227,7 @@ C
       INTEGER niter
       REAL SNGL
       REAL XKINE
-      REAL xtmp
 C-----getting amu
-      xtmp = XKINE(SNGL(Einp),amu)
       miu_sur_hbar2 = amu/HBArc**2
       coef1 = -0.5D0*Beta_pb**2*miu_sur_hbar2
       coef2 = 4.0D0*(Gamma_pb*miu_sur_hbar2)**2

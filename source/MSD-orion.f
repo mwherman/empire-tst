@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: MSD-orion.f,v 1.10 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: MSD-orion.f,v 1.11 2005-03-11 17:22:13 herman Exp $
 C
 C
 C
@@ -105,7 +105,7 @@ C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), C1Mem(2), CE(4), 
      &                 CFUnir(4), CHArgr(4), CONst1, CONst2, DFNf(4), 
      &                 DFNr(4), DFNsf(4), DFNsir(4), DFNspf(4), 
-     &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DVXf(4), 
+     &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DVXf(4),
      &                 DVXr(4), DZEro(4), ECM(4), EGS(4), ELAb, ETA, 
      &                 ETUnit, EXTcom(50), EXTcom2(10), FAClm(NGLXX), 
      &                 FAClog(500), P(975,NGLXX), PLM10m(NGLXX), 
@@ -114,7 +114,7 @@ C
      &                 RZEcr(4), RZEf(4), RZEr(4), RZEsf(4), RZEsir(4), 
      &                 RZEspf(4), RZEspr(4), RZEsr(4), RZEwf(4), 
      &                 RZEwr(4), SGMa(25,NGLXX,2), SGMat(NGLXX,2), 
-     &                 SGMaz, SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4), 
+     &                 SGMaz, SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4),
      &                 U9, VSOf(4), VSOr(4), VSXf(4), VSXr(4), WN(4), 
      &                 WNIni(4), WNUnit, WR1(1000,2), WR2(5000,2), 
      &                 WSFf(4), WSFr(4), WSOr(4), WSXf(4), WSXr(4), 
@@ -128,7 +128,7 @@ C
       COMMON /BRMH  / WR1, WR2, SGMa, SGMat, P, CSUm2, XAMp, PLM10m, 
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1, 
      &                CONst2
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -409,7 +409,7 @@ C
 99015       FORMAT (/21X,'CHANNEL NO.',I1,6X,'TMAS=',F5.1,2X,'PMAS=',
      &              F5.1,2X,'ZT=',F5.1,'  ZP=',F5.1,3X,'LDWMX=',I2,3X,
      &              'ISTW=',I1/)
-            WRITE (6,99070) VSXr(n), DVXr(n), WSXr(n), WSFr(n), VSOr(n), 
+            WRITE (6,99070) VSXr(n), DVXr(n), WSXr(n), WSFr(n), VSOr(n),
      &                      WSOr(n), DFNr(n), DFNwr(n), DFNsr(n), 
      &                      DFNspr(n), RZEr(n), RZEwr(n), RZEsr(n), 
      &                      RZEspr(n), RZEcr(n)
@@ -424,7 +424,7 @@ C
       ENDIF
       DO n = 1, JLSmax
          IF (LBTrf(n).GE.0) THEN
-            IF (Iout.GT.3) WRITE (6,99030) n, LBTrf(n), NODf(n), EGS(n), 
+            IF (Iout.GT.3) WRITE (6,99030) n, LBTrf(n), NODf(n), EGS(n),
      &                            DZEro(n)
 99030       FORMAT (/21X,'JLS=',I1/21X,'LBTR=',I2,2X,'NOD=',I2,2X,
      &              'B.E.=',F7.4,3X,'DZERO=',F7.1)
@@ -577,7 +577,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Ad, Ai, As, Atar, Av, Aw, Dvs, E, Mi, Mt, Rc, Rd, 
+      DOUBLE PRECISION Ad, Ai, As, Atar, Av, Aw, Dvs, E, Mi, Mt, Rc, Rd,
      &                 Ri, Rs, Rv, Rw, V, Vi, Vs, W, Wd, Ztar
       INTEGER Nejc
 C
@@ -651,7 +651,7 @@ C
      &        LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NNDim(4), NXCple, 
      &        NXMax
       COMMON  F, FD, G, GD
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -670,7 +670,7 @@ C Local variables
 C
       DOUBLE PRECISION a1, aovb, charge, denom, dx, e1, einv1, einv2, 
      &                 einv3, einv5, einv7, einv9, eta2, eta6, etasq, 
-     &                 fl, fmodtp, fnxmax, pmas, rmas, sg, sigma0, tmas, 
+     &                 fl, fmodtp, fnxmax, pmas, rmas, sg, sigma0, tmas,
      &                 vsx, x
       INTEGER i1, l, lmaxm1, modtpi, n
 C
@@ -816,7 +816,7 @@ C
      &                 G(70), GP(70), RD, RHOmx, SGMaz, THEta(NGLXX), 
      &                 W(70), WNUnit, XBAr, XMAx, XMEs
       DOUBLE COMPLEX EXSg(70), TTI, TTR, ZERo
-      INTEGER LDWmxr(4), LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NXCple, 
+      INTEGER LDWmxr(4), LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NXCple,
      &        NXMax
       COMMON  F, FP, G, GP, W, EXSg
       COMMON /PARAMT/ NCHanl, MXRow, NXMax, NXCple, NANglr, LMAx, 
@@ -826,14 +826,14 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION accy, an, bn, denom, dvcf(7), eta2, etac, ff, fn, 
-     &                 fo, fpn, fpo, gn, go, gpn, gpo, gs, gs1, gt, gt1, 
+      DOUBLE PRECISION accy, an, bn, denom, dvcf(7), eta2, etac, ff, fn,
+     &                 fo, fpn, fpo, gn, go, gpn, gpo, gs, gs1, gt, gt1,
      &                 h, hinc, hsq, ps, ps1, pt, pt1, r2, r4, ro, ro2, 
      &                 roincx, s, s12, s3, s4, sf, sg, sigmao, sp, spf, 
      &                 spg, sum, sump, t3, t4, test, tetao, tra, trb, 
      &                 wr, z1, z2, z3, zl
       DOUBLE COMPLEX exsgo
-      INTEGER i, inc, inci, irol, j, j2, l, l1, l2, lf, ll, n, n1, ninc, 
+      INTEGER i, inc, inci, irol, j, j2, l, l1, l2, lf, ll, n, n1, ninc,
      &        nstep
       INTEGER MIN0
 C
@@ -1077,7 +1077,7 @@ C
      &        LMAx, LTRamx(4), MXRow, NANglr, NCHanl, NNDim(4), NXCple, 
      &        NXMax
       DOUBLE COMPLEX TTI, TTR, ZERo
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -1094,7 +1094,7 @@ C Local variables
 C
       DOUBLE PRECISION charge, dfn, dfns, dfnsp, dfnspi, dfnw, dvx, dx, 
      &                 pform(3,5), rzero, rzeroc, rzeros, rzerow, 
-     &                 rzrosi, rzrosp, tmas, vclfc1, vclfc2, vso, vspfc, 
+     &                 rzrosi, rzrosp, tmas, vclfc1, vclfc2, vso, vspfc,
      &                 vsx, wsf, wso, wspfc, wsx, x, xbarc, xbars, 
      &                 xbarsi, xbarsp, xbarw, xbfac, xmem(4000)
       INTEGER k, n, nx
@@ -1192,8 +1192,8 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), CE(4), CFUnir(4), 
-     &                 CHArgr(4), DFNf(4), DFNr(4), DFNsf(4), DFNspf(4), 
-     &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DVXf(4), 
+     &                 CHArgr(4), DFNf(4), DFNr(4), DFNsf(4), DFNspf(4),
+     &                 DFNspr(4), DFNsr(4), DFNwf(4), DFNwr(4), DVXf(4),
      &                 DVXr(4), DZEro(4), ECM(4), EGS(4), ELAb, ETA, 
      &                 ETUnit, EXTcom(50), PMAsr(4), QVAlue(4), RD, 
      &                 RHOmx, RMAsr(4), RZEcf(4), RZEcr(4), RZEf(4), 
@@ -1208,7 +1208,7 @@ C
      &        LBTrf(4), LDWmxr(4), LLRow(120), LMAx, LTRamx(4), MXRow, 
      &        NANglr, NCHanl, NNDim(4), NODf(4), NXCple, NXMax
       DOUBLE COMPLEX TTI, TTR, ZERo
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -1229,7 +1229,7 @@ C
       DOUBLE PRECISION dfn, dfns, dfnw, dvc1, dvc2, dvx, dx, dzr, exr, 
      &                 exs, exw, fehler, t1, t2, t3, t4, tmas, vfac1, 
      &                 vfac2, vsx, wdfc1, wfac1, wsf, wsx, x, xbars, 
-     &                 xbarw, xbfac, xmem(MAXX), xmest, z1, z2
+     &                 xbarw, xbfac, xmem(MAXX), xmest
       INTEGER i, iffpr, kder, n, n1, n2, nt, nx
       NXMax = KEXcom(2)
       DO nx = 1, NXMax
@@ -1242,8 +1242,6 @@ C
          n2 = n1 + 1
          t1 = TMAsr(n1)
          t2 = TMAsr(n2)
-         z1 = ZTR(n1)
-         z2 = ZTR(n2)
          IF (t1.GT.t2) THEN
             t4 = t2
             nt = n1
@@ -1419,8 +1417,8 @@ C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), CE(4), CFUnir(4), 
      &                 CHArgr(4), DFNr(4), DFNspr(4), DFNsr(4), DFNwr(4)
      &                 , ECM(4), ELAb, ETA, ETUnit, EXTcom(50), H, HSQ, 
-     &                 HTWelv, PMAsr(4), QVAlue(4), RD, RHOmx, RMAsr(4), 
-     &                 RZEcr(4), RZEr(4), RZEspr(4), RZEsr(4), RZEwr(4), 
+     &                 HTWelv, PMAsr(4), QVAlue(4), RD, RHOmx, RMAsr(4),
+     &                 RZEcr(4), RZEr(4), RZEspr(4), RZEsr(4), RZEwr(4),
      &                 SGMaz, SGMazz(4), THEta(NGLXX), TMAsr(4), 
      &                 VINti(MAXX,2), VINtr(MAXX,2), VSOr(4), VSXr(4), 
      &                 WN(4), WNIni(4), WNUnit, WSFr(4), WSXr(4), XBAr, 
@@ -1431,7 +1429,7 @@ C
      &        LLRow(120), LMAx, LTRamx(4), MXRow, NANglr, NCHanl, 
      &        NNDim(4), NRX, NXCple, NXMax
       COMMON  CFOrm, XSQiv
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -1448,12 +1446,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION bova2, drsqd(3), dx, pi, wn1, x
+      DOUBLE PRECISION bova2, drsqd(3), dx, x
       DOUBLE COMPLEX cmat0
       INTEGER ii1, ii2, ii3, istp(3), jatw, jbtw, jbtwmn, jbtwmx, jctw, 
      &        jctwmn, jctwmx, kheq, kieq, l1trx, l1twx, l2trx, l2twx, 
      &        la, latw, lb, lbmax, lbmin, lbtw, lc, lcmax, lcmin, lctw, 
-     &        ldwmxa, ldwmxb, ldwmxc, m1, m2, m3, mb, mc, n, n1, n2, n3, 
+     &        ldwmxa, ldwmxb, ldwmxc, m1, m2, m3, mb, mc, n, n1, n2, n3,
      &        na, namx, nb, nbmin, nbmx, nc, ncmin, ncmx, nct, nx
 C
 C
@@ -1503,7 +1501,6 @@ C
 C
 C     PREPARE FORM FACTORS
 C
-      wn1 = WN(1)
       DO nct = 1, NCHanl
          bova2 = 1.0/ARAtio(nct)**2
          drsqd(nct) = bova2*RMAsr(1)/RMAsr(nct)
@@ -1519,7 +1516,6 @@ CB    FORMFACTOR MULTIPLIED BY 2*RMAS/HBAR**2 (=1/CFUNIR)
          IF (NCHanl.EQ.3) CFOrm(nx,2) = DCMPLX(VINtr(nx,2),VINti(nx,2))
      &                                  /CFUnir(3)
       ENDDO
-      pi = 4.*ATAN(1.D0)
       DO n = 1, NCHanl
          istp(n) = 1
          IF (ISTw(n).EQ.1 .OR. ISTw(n).EQ.2) istp(n) = 2
@@ -1630,12 +1626,6 @@ Cmh               IF(KTLOUT(3).NE.0) WRITE(6,6010)LA,JATW,SMAT(LA,N1,II1),RMAT
             ENDIF
          ENDDO
       ENDDO
-C
-CBF   REACXS(1)=REACXS(1)*RCONST(1)
-CBF   WRITE(6,6020)REACXS(1)
-C
-99015 FORMAT (/'LA=',I2,'  JA=',I3,'/2  SMAT=(',2E13.5,')  RMAT=',E13.5)
-C
       END
 C
 C
@@ -1652,7 +1642,7 @@ C COMMON variables
 C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), CE(4), CFUnir(4), 
      &                 CHArgr(4), DFNr(4), DFNspr(4), DFNsr(4), DFNwr(4)
-     &                 , ECM(4), ELAb, ETA, ETUnit, FC(50,3), FDC(50,3), 
+     &                 , ECM(4), ELAb, ETA, ETUnit, FC(50,3), FDC(50,3),
      &                 GC(50,3), GDC(50,3), H, HSQ, HTWelv, PMAsr(4), 
      &                 QVAlue(4), RD, RHOmx, RMAsr(4), RZEcr(4), RZEr(4)
      &                 , RZEspr(4), RZEsr(4), RZEwr(4), SGMaz, SGMazz(4)
@@ -1667,7 +1657,7 @@ C
       INTEGER LDWmxr(4), LLRow(120), LMAx, LTRamx(4), MXRow, NANglr, 
      &        NCHanl, NNDim(4), NRX, NXCple, NXMax
       COMMON  CFOrm, XSQiv
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -1830,16 +1820,16 @@ C COMMON variables
 C
       DOUBLE PRECISION ANGler(NGLXX), ARAtio(4), C1Mem(2), CE(4), 
      &                 CFUnir(4), CHArgr(4), CONst1, CONst2, DFNr(4), 
-     &                 DFNspr(4), DFNsr(4), DFNwr(4), ECM(4), ELAb, ETA, 
+     &                 DFNspr(4), DFNsr(4), DFNwr(4), ECM(4), ELAb, ETA,
      &                 ETUnit, EXTcom(50), FAClm(NGLXX), FAClog(500), 
      &                 P(975,NGLXX), PL(30), PLM10, PLM10m(NGLXX), 
      &                 PLM20, PLM20m(NGLXX), PMAsr(4), QVAlue(4), RAC, 
-     &                 RACie(50), RADian, RD, RHOmx, RMAsr(4), RZEcr(4), 
+     &                 RACie(50), RADian, RD, RHOmx, RMAsr(4), RZEcr(4),
      &                 RZEr(4), RZEspr(4), RZEsr(4), RZEwr(4), 
      &                 SGMa(25,NGLXX,2), SGMat(NGLXX,2), SGMaz, 
      &                 SGMazz(4), SQRt10, THEta(NGLXX), TMAsr(4), U9, 
      &                 VSOr(4), VSXr(4), WN(4), WNIni(4), WNUnit, 
-     &                 WR1(1000,2), WR2(5000,2), WSFr(4), WSXr(4), XBAr, 
+     &                 WR1(1000,2), WR2(5000,2), WSFr(4), WSXr(4), XBAr,
      &                 XMAx, XMEs
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300,4), ZERo
       INTEGER ISTw(3), ISTw1, ISTw2, ISTw3, J12mxt, J1Tw, J2Tw, JAS, 
@@ -1855,7 +1845,7 @@ C
       COMMON /BRMH  / WR1, WR2, SGMa, SGMat, P, CSUm2, XAMp, PLM10m, 
      &                PLM20m, FAClm, RACie, C1Mem, SQRt10, CONst1, 
      &                CONst2
-      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr, 
+      COMMON /CHANEL/ TMAsr, PMAsr, RMAsr, CHArgr, ARAtio, CFUnir, VSXr,
      &                WSXr, WSFr, VSOr, DFNr, DFNwr, DFNsr, DFNspr, 
      &                RZEr, RZEwr, RZEsr, RZEspr, RZEcr, LLRow, NNDim, 
      &                QVAlue, ECM, CE, WN, WNIni, SGMazz
@@ -2131,12 +2121,12 @@ C
       DOUBLE PRECISION ANGler(NGLXX), C1Mem(2), CLEbmm(250), CONst1, 
      &                 CONst2, ELAb, ETA, ETUnit, EXTcom(50), 
      &                 FAClm(NGLXX), FAClog(500), P(975,NGLXX), 
-     &                 PLM10m(NGLXX), PLM20m(NGLXX), RAC, RACie(50), RD, 
+     &                 PLM10m(NGLXX), PLM20m(NGLXX), RAC, RACie(50), RD,
      &                 RHOmx, SGMa(25,NGLXX,2), SGMat(NGLXX,2), SGMaz, 
      &                 SQRt10, THEta(NGLXX), U9, WNUnit, WR1(1000,2), 
      &                 WR2(5000,2), XBAr, XMAx, XMEs
       DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300,4), ZERo
-      INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw, 
+      INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw,
      &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe, 
      &        KEXcom(50), KTLout(50), KTRl(30), L12mxm, L1Maxm, L1Tr, 
      &        L1Tw, L2Maxm, L2Tr, L2Tw, L9(9), LDWmxa, LDWmxb, LDWmxc, 
@@ -2169,8 +2159,8 @@ C
       INTEGER IABS, MIN0
       INTEGER ii, iimax, iimin, is3ke3, ji, jl, jla, jlamx, jlb, jlbmi, 
      &        jlbmx, jlmod, jlmttl, jlr, jlrg, jltohf, jx, kaspar, ke3, 
-     &        l1, l1p1, l1p1mx, l2, l2p1, l2p1mx, lap1mx, lbp1mx, m, mm, 
-     &        mmmax, mrg, ms, n, n1, n1mx, n2, na, namp, nampmi, nampmx, 
+     &        l1, l1p1, l1p1mx, l2, l2p1, l2p1mx, lap1mx, lbp1mx, m, mm,
+     &        mmmax, mrg, ms, n, n1, n1mx, n2, na, namp, nampmi, nampmx,
      &        njl1, njl1mx, njl2, njl2mx, nlr, nrun, nrun0
       DOUBLE COMPLEX phlr, xss1, xss2
       lap1mx = LDWmxa + 1
@@ -2370,7 +2360,6 @@ C
      &                           = 0.5*(SGMat(na,1) + SGMat(na,2))
                            ENDDO
                         ENDIF
-99010                   FORMAT (5X,8E11.4)
                      ENDIF
                   ENDDO
 C<<<<<<<<<<<<<    variant A
@@ -2427,10 +2416,10 @@ C
      &                 WR2(5000,2), XBAr, XMAx, XMEs
       DOUBLE COMPLEX CMAt1(42,61), CMAt2(42,42,61), CSUm2(NGLXX), TTI, 
      &               TTR, XAMp(8300,4), ZERo
-      INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw, 
-     &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe, L12mxm, 
+      INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw,
+     &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe, L12mxm,
      &        L1Maxm, L1Tr, L1Tw, L2Maxm, L2Tr, L2Tw, L9(9), LDWmxa, 
-     &        LDWmxb, LDWmxc, LDWmxr(4), LMAx, LTRamx(4), MXRow, NANglr, 
+     &        LDWmxb, LDWmxc, LDWmxr(4), LMAx, LTRamx(4), MXRow, NANglr,
      &        NBSamp(40), NCHanl, NXCple, NXMax
       COMMON /BIMH  / ISTw1, ISTw2, ISTw3, JAS, JBS, JCS, L1Maxm, 
      &                L2Maxm, L12mxm, J12mxt, LDWmxa, LDWmxb, LDWmxc, 
@@ -2450,7 +2439,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, a2, ab, b1, b12sjc, b1b2, b2, c1, c2, c3, c5, 
+      DOUBLE PRECISION a1, a2, ab, b1, b12sjc, b1b2, b2, c1, c2, c3, c5,
      &                 h12, h1p, h2p, hatac1, hatbc2, hatj1, hatj2, 
      &                 hatja, hatjb, hatjc, hatl1, hatl2, hatla, hatlb, 
      &                 hatlc, s1, s1p, s2, s2p, s5, sga, sjc
@@ -2458,10 +2447,10 @@ C
       REAL FLOAT
       INTEGER IABS, MAX0, MIN0
       INTEGER ie1, ie1max, ie1min, ii, iimax, iimin, ja, jadpmx, jami, 
-     &        jamit8, jamitw, jamx, jamx8, jamxp1, jamxt8, jamxtw, jatw, 
-     &        jb, jbmx, jbtw, jc, jcmi, jcmitw, jcmx, jcmxtw, jctw, jj1, 
+     &        jamit8, jamitw, jamx, jamx8, jamxp1, jamxt8, jamxtw, jatw,
+     &        jb, jbmx, jbtw, jc, jcmi, jcmitw, jcmx, jcmxtw, jctw, jj1,
      &        jj2, jl, jlmmmm, jltohf, jtl, jtwmi, jtwmx, kaspar, ktr, 
-     &        la, latw, lb, lbtw, lc, lctw, legbas, ll, ll1, ll2, lmpos, 
+     &        la, latw, lb, lbtw, lc, lctw, legbas, ll, ll1, ll2, lmpos,
      &        loccbc, mbast, mjlbtw, mjtw, mlb, mm, mmmax, ms, msmsp, 
      &        msp, msprg, msptw, msrg, mstw, n1, n2, na, namp, njla, 
      &        njlb, njlb0, njlc, njlc0, nla, nlb, nlc
@@ -3111,7 +3100,7 @@ C
       INTEGER i1, i2, i3, i4, iabcd1, iabe, iabep, iabtw, iacf, iacfp, 
      &        iadftw, ibcftw, ibdf, ibdfp, ibea, icde, icdep, icdtw, 
      &        icfa, idec, idfb, ieab, iecd, ieloc, iemax, iemin, ier, 
-     &        ierang, ifac, ifbd, nez, nezitw, nezr, nezrag, nezxtw, nz, 
+     &        ierang, ifac, ifbd, nez, nezitw, nezr, nezrag, nezxtw, nz,
      &        nzmax, nzmin, nzp1x2
       INTEGER IABS, MAX0, MIN0
 C

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: auxiliary.f,v 1.14 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:12 $
+Ccc   * $Id: auxiliary.f,v 1.15 2005-03-11 17:22:12 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -510,7 +510,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a(NDMSCS,NDMSCS), amax, b(NDMSCS), pivot(NDMSCS), 
+      DOUBLE PRECISION a(NDMSCS,NDMSCS), amax, b(NDMSCS), pivot(NDMSCS),
      &                 sog, swap, t
       INTEGER i, icolum, indeks(NDMSCS,2), ipivot(NDMSCS), irow, j, 
      &        jcolum, jrow, k, l, l1, nnn

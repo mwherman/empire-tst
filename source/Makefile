@@ -5,6 +5,11 @@
 #----flags for debuging using g77 compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
+#----GNU g95 FORTRAN compiler
+FC     =  g95
+#----flags for detailed warnings
+FFLAGS = -Wall
+
 #----INTEL f95 compiler
 #FC     =  ifort
 #FFLAGS =  -check all
@@ -25,7 +30,7 @@
 #FC   = f77
 
 #----Lahey/Fujitsu f95 FORTRAN compiler
-FC    = lf95
+#FC    = lf95
 #----flag for Lahey/Fujitsu to optimize
 #FFLAGS = --o3
 #----flag for Lahey/Fujitsu to check boundaries and more
@@ -38,7 +43,6 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       subecis03.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-            hora_win.o
 
 
 empire:   $(OBJF)

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-09 20:02:24 $
-Ccc   * $Id: input.f,v 1.89 2005-03-09 20:02:24 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: input.f,v 1.90 2005-03-11 17:22:13 herman Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -32,7 +32,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da, 
-     &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin, 
+     &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &                 qtmp, xfis, zclu, zres, ztmp
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
@@ -1056,7 +1056,7 @@ C-----------Defining ICOller(i)
             ELSEIF (ierr.EQ.2) THEN
                WRITE (6,*) ' WARNING: No discrete levels for target', 
      &                     ' nucleus found'
-               WRITE (6,*) ' WARNING: Direct cross section will not be', 
+               WRITE (6,*) ' WARNING: Direct cross section will not be',
      &                     ' calculated'
                WRITE (6,*) ' WARNING: Setting DIRECT to 0 '
                DIRect = 0
@@ -1935,7 +1935,7 @@ C--------create file with levels xxx.lev
          ENDIF
 C--------levels for nucleus NNUC copied to file xxx.lev
          DO ilv = 1, nlvr
-            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr, 
+            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
      &            xjlvr, lvpr, t12, ndbrlin
             IF (ilv.EQ.1) THEN
                Gspin = xjlvr
@@ -2092,7 +2092,6 @@ C-----initialization of TRISTAN input parameters
          CNOrin(i) = 1.0
       ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
-99005 FORMAT (1X,80('_'))
       WRITE (6,*) '                        ____________________________'
       WRITE (6,*) 
      &           '                       |                            |'
@@ -3540,7 +3539,7 @@ Ccc
 C
 C Local variables
 C
-      DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil, 
+      DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma, 
      &                 pi2, qn, tcrt, uexc, xr
       REAL FLOAT
@@ -3687,9 +3686,6 @@ C     CALL TZTN
 C-----DL and DW are Cameron mass and shell correction respectively
 C-----DL=DELCAM(FLOAT(IA),FLOAT(IZ))
 C-----DW=TZ(IZ)+TN(NN)
-99005 FORMAT (//20X,'Z =',I2,'  A=',I3)
-99010 FORMAT (/1X,'SHELL CORRECTION   M.-SW=',E10.3,'  CAMERON=',E10.3)
-99015 FORMAT (/1X,'MASS               M.-SW=',E10.3,'  CAMERON=',E10.3)
       Shllc = SHLl
       END
 C
@@ -3865,9 +3861,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION a, a1, a2, a2rt, a3, a3rt, a3rt2, acor, alevel, 
-     &                 ampar, c, c2, c2d2, cay1, cay2, cay3, cay4, cay5, 
-     &                 cay6, coulmb, d, ee, em(10), emp(10), eps, exmt2, 
-     &                 ext2, f(2), ff, fuzsur, gamma, gl, oddev, parmas, 
+     &                 ampar, c, c2, c2d2, cay1, cay2, cay3, cay4, cay5,
+     &                 cay6, coulmb, d, ee, em(10), emp(10), eps, exmt2,
+     &                 ext2, f(2), ff, fuzsur, gamma, gl, oddev, parmas,
      &                 s, smalc, spw, sshell, sufnuc, sym, t, t2, test, 
      &                 to, to2, tsq, un, v, volnuc, wotnuc, wterm, x, 
      &                 xk(10), y(2), z, zsq, zt, ztt, zvt
@@ -4106,7 +4102,7 @@ C
       INTEGER IFIX
       INTEGER m
       DATA y/0.12200, 0.12100, 0.11980, 0.11830, 0.11690, 0.11520, 
-     &     0.1133, 0.11130, 0.10900, 0.10670, 0.10420, 0.10150, 0.09850, 
+     &     0.1133, 0.11130, 0.10900, 0.10670, 0.10420, 0.10150, 0.09850,
      &     0.09540, 0.09180, 0.08780, 0.08350, 0.07900, 0.07460, 
      &     0.06960, 0.06470, 0.05960, 0.05420, 0.04880, 0.04350, 
      &     0.03880, 0.03400, 0.02920, 0.02460, 0.02020, 0.01580, 
@@ -4181,14 +4177,10 @@ C
 C
 C Local variables
 C
-      INTEGER ar, iapro, iatar, izpro, iztar, zr
+      INTEGER ar, zr
       DOUBLE PRECISION b1, b2, b3
       zr = Z(Nnuc) - ZEJc(Nejc)
       ar = A(Nnuc) - AEJc(Nejc)
-      iztar = Z(Nnuc)
-      iatar = A(Nnuc)
-      izpro = ZEJc(Nejc)
-      iapro = AEJc(Nejc)
       b1 = A(Nnuc)*AMUmev + XMAss(Nnuc)
       b2 = ar*AMUmev + EXCessmass(zr,ar)
       b3 = AEJc(Nejc)*AMUmev + XMAss_ej(Nejc)
@@ -4355,8 +4347,8 @@ C
       LOGICAL fexist
       CHARACTER*9 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m, 
-     &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp, 
-     &        itmp, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin, ngamr, 
+     &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp,
+     &        itmp, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin, ngamr,
      &        nlvr, nlvs, nmax, nnurec, nztmp
       INTEGER NINT
       CHARACTER*6 reftmp
@@ -5045,7 +5037,7 @@ C-----------------swapping
             IF (i.EQ.1) ftmp = 0.01
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 0, 
+     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 0,
      &             0, ftmp
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 
@@ -5109,12 +5101,12 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION A2, A23, ACR, ACRt, ACRtf(2), AFIsm(NFMOD), AP1, 
-     &                 AP2, ATIl, BET2, BF, CSFism(NFMOD), DEFbm(NFMOD), 
+     &                 AP2, ATIl, BET2, BF, CSFism(NFMOD), DEFbm(NFMOD),
      &                 DEL, DELp, DELtafism(NFMOD), DEStepm(NFMOD), 
      &                 DETcrt, DETcrtf(2), ECOnd, ECOndf(2), EFBm(NFMOD)
-     &                 , EFDism(NFTRANS,NFMOD), GAMma, GAMmafism(NFMOD), 
+     &                 , EFDism(NFTRANS,NFMOD), GAMma, GAMmafism(NFMOD),
      &                 HM(NFTRANS,NFMOD), MORtcrt(NFPARAB), 
-     &                 MPArcrt(NFPARAB), ROFism(0:NFISENMAX,NDLW,NFMOD), 
+     &                 MPArcrt(NFPARAB), ROFism(0:NFISENMAX,NDLW,NFMOD),
      &                 SCR, SCRtf(2), SHCfism(NFMOD), TCRt, TCRtf(2), 
      &                 TDIrect, TDIrm(NFMOD), TFB, TFBm(NFMOD), UCRt, 
      &                 UCRtf(2), UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD)
@@ -5242,7 +5234,7 @@ C-----FISBAR(Nnuc)=1. internal library
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 350
          CLOSE (81)
          GOTO 500
-  400    WRITE (6,*) ' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=', 
+  400    WRITE (6,*) ' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=',
      &               INT(A(Nnuc)), ' IN INTERNAL LIBRARY (fisbar.dat)'
          WRITE (6,*) 
      &              ' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
@@ -5663,10 +5655,10 @@ C
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDis(nr,ibar), 
      &          H(nr,ibar)
             IF (FISmod(Nnuc).EQ.1. .AND. ibar.EQ.2) READ (79,*)
-     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1), 
+     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2)
             IF (FISmod(Nnuc).EQ.2. .AND. ibar.EQ.2) READ (79,*)
-     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1), 
+     &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
       ENDDO
@@ -5687,12 +5679,12 @@ C
             IF (FISmod(Nnuc).EQ.0. .OR. 
      &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2))
      &           READ (79,'(1x, A8, 1x, I1,4x, I1, 4f9.3)') cara8, i, 
-     &          BFF(ibar), SHCfis(ibar), DELtafis(ibar), GAMmafis(ibar), 
+     &          BFF(ibar), SHCfis(ibar), DELtafis(ibar), GAMmafis(ibar),
      &          AFIs(ibar)
             IF (FISmod(Nnuc).GT.0. .AND. ibar.EQ.2) THEN
                DO m = 1, nrmod
                   READ (79,'(10x, I1, 2x, I1, 1x, I1, 4f9.3)') i, mm, 
-     &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m), 
+     &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
      &                  AFIsm(m)
                ENDDO
             ENDIF

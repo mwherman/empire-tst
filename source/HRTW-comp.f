@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: HRTW-comp.f,v 1.18 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:12 $
+Ccc   * $Id: HRTW-comp.f,v 1.19 2005-03-11 17:22:12 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -321,7 +321,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax, 
+      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
      &                 smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
       REAL FLOAT
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2, 
@@ -1228,7 +1228,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION EEF, VT1
-      DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v, 
+      DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v,
      &                 xjc
       REAL FLOAT
       INTEGER i, iel, il, ipar, kel, l, lmax, lmin

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-07 14:32:29 $
-Ccc   * $Id: lev-dens.f,v 1.34 2005-03-07 14:32:29 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: lev-dens.f,v 1.35 2005-03-11 17:22:13 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -182,7 +182,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar, 
+      DOUBLE PRECISION A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
      &                 Ss, Yrast
 C
 C Local variables
@@ -327,12 +327,12 @@ Cccc  *****************************************************************
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, A2, Ac, Aj, B, Bf, Cigor, Defga, Defgp, Defgw, 
+      DOUBLE PRECISION A, A2, Ac, Aj, B, Bf, Cigor, Defga, Defgp, Defgw,
      &                 Defpar, E, Momort, Mompar, Stab, Z
 C
 C Local variables
 C
-      DOUBLE PRECISION a2y, a4, arg, betaf, betay, bt, c1, c2, c3, damp, 
+      DOUBLE PRECISION a2y, a4, arg, betaf, betay, bt, c1, c2, c3, damp,
      &                 dt, eta, gammaf, gammay, gauss, pi, r1f, r1y, 
      &                 r2f, r2y, r3f, r3y, rbmsph, rf, t, tgscr, x, y, 
      &                 ycrit
@@ -1334,7 +1334,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION am, amas, arg, atil, cf, e, efort, enorm, eo, 
-     &                 eom, exl, rhou, rjj, rolowint, sigh, sigl, t, tm, 
+     &                 eom, exl, rhou, rjj, rolowint, sigh, sigl, t, tm,
      &                 u, ux, xj
       CHARACTER*6 ctmp
       DOUBLE PRECISION DEXP
@@ -1536,7 +1536,7 @@ C-----plot fit of the levels with the low energy l.d. formula
          OPEN (35,FILE = 'fort.35')
          WRITE (35,*) 'set terminal postscript enhanced color'
          WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
-         WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), am, t, 
+         WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), am, t,
      &                    eo, NLV(Nnuc)
 99010    FORMAT ('set title "Cumul.plot for ',I3,'-',A2,'-',I3,': a=',
      &           F4.1,' T=',F4.1,' E0=',F4.1,' Ncut=',I3,'"')

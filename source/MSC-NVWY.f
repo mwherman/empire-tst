@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:18 $
-Ccc   * $Id: MSC-NVWY.f,v 1.10 2005-03-04 17:21:18 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: MSC-NVWY.f,v 1.11 2005-03-11 17:22:13 herman Exp $
 C
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
@@ -264,7 +264,6 @@ C--------decay to the continuum ------ done -----------------------------
      &                    )
             ENDDO
          ENDDO
-99005    FORMAT (1X,F5.2,12G10.3)
       ENDIF
       END
  
@@ -329,7 +328,7 @@ C
      &                 popars, popart(NDMSCS), popt, prop, propt, rbu, 
      &                 rog, rop, roph(NC2,4), roph3(NC2), rophc(NC2), 
      &                 ropht(NC2), sdabs, sdsp(NDEX), sp, spg(NDMSCS), 
-     &                 spr(NG), spw, sumtlg, t, tg, tg1, tg2, tg3, tgc, 
+     &                 spr(NG), spw, sumtlg, tg, tg1, tg2, tg3, tgc, 
      &                 tl1, tl2, tl3, tlg, tls, tx, undeg(NG,NG), 
      &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2), 
      &                 xga, xxxx, y, yd, ygdr
@@ -1049,14 +1048,11 @@ C-----------------ereasing PIG matrix
 C--------------------calculate nuclear temperature for the generalized Lorenzian to be
 C--------------------used for E1 strength function determination. NOTE: this temperature
 C--------------------is not consistent with the actual level densities.
-                     t = 0.
                      iec = NEX(1)
                      atil = 0.073*A(1) + 0.115*A(1)**0.666667
                      gamma = 0.40/A(1)**0.33333
                      accn = atil*(1 + SHC(1)
      &                      *(1 - EXP((-gamma*EX(iec,1))))/EX(iec,1))
-                     IF (EX(iec,1).GE.YRAst(j,1))
-     &                   t = SQRT((EX(iec,1) - YRAst(j,1))/accn)
 C
 C--------------------calculation of state densities in all substages of c.n.
 C
@@ -1067,7 +1063,7 @@ C                       DO KG = 1, NC2
                            ecor = (((ip(kg)-1)**2 + (ih(kg)-1)**2)
      &                            /4.0 + (ip(kg) - ih(kg))
      &                            /4.0 - (ih(kg) - 1)/2.0)/G
-                           rophc(kg) = WT(IE(kg) - 2,ip(kg) - 1,ih(kg) - 
+                           rophc(kg) = WT(IE(kg) - 2,ip(kg) - 1,ih(kg) -
      &                                 1,egdrr - ecor)
                         ELSE
                            ncont = 10000 + (ip(kg) - 1)*100 + ih(kg) - 1

@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 1.5 $
-c $Id: ddhms.cmb,v 1.5 2005-01-23 02:39:25 Carlson Exp $
+c CVS Version Management $Revision: 1.6 $
+c $Id: ddhms.cmb,v 1.6 2005-03-11 17:22:12 herman Exp $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 500)    !must be >  emax=einc+Q /debin
@@ -97,7 +97,7 @@ c /energies/
 c binding = sepn energy if particle emitted;sepproj=binding en for proj in CN
 c ucndump = energy to CN after preq,convmass=energy converted to mass in an event
 c ecmproj,elabproj =projectile k.e. in cm and lab frames
-      common/energies/binding,sepproj,ucndump,convmass,ecmproj,elabproj, 
+      common/energies/binding,sepproj,ucndump,convmass,ecmproj,elabproj,
      +                 elabejecmax 
       real*8 binding,sepproj,ucndump,convmass,ecmproj,elabproj,
      +                 elabejecmax

@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:19 $
-Ccc   * $Id: ph-lev-dens.f,v 1.7 2005-03-04 17:21:19 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: ph-lev-dens.f,v 1.8 2005-03-11 17:22:13 herman Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
@@ -483,10 +483,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a
 C     Just dummy line to avoid compiler warning
-      a = N + I + E + G
-C     Just dummy line to avoid compiler warning
+      ROPHM = N + I + E + G
       WRITE (6,*) 'MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
       ROPHM = 0.0
       END

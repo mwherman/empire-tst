@@ -292,14 +292,14 @@ C COMMON variables
 C
       REAL*8 ACN(20), ACOnv, BJM, CCZ, CHB, CHI2, CHI2m, CK, CM, CMB, 
      &       CONj, EITer, H, YY(3)
-      INTEGER IDMt, IMAx, INLs, INSl, INTc, INTv, INVc, INVd, INVt, IPK, 
-     &        IPM, IQM, IQMax, ISM, ITEmm, ITErm, ITX(16), ITXm, ITY(8), 
+      INTEGER IDMt, IMAx, INLs, INSl, INTc, INTv, INVc, INVd, INVt, IPK,
+     &        IPM, IQM, IQMax, ISM, ITEmm, ITErm, ITX(16), ITXm, ITY(8),
      &        JDM, JIT, JTH, JTX, KAB, KBA, KBC, KCC, KE, KMAx, KMIn, 
-     &        KXT, LMAx1, LMAx2, LMAx3, LMD, LMX, MCC, MCM(2), MIPi, MR, 
-     &        MS, MS1, MS2, MW, MWV, NAM1, NBEt, NBEta, NBT1, NCC, NCOi, 
+     &        KXT, LMAx1, LMAx2, LMAx3, LMD, LMX, MCC, MCM(2), MIPi, MR,
+     &        MS, MS1, MS2, MW, MWV, NAM1, NBEt, NBEta, NBT1, NCC, NCOi,
      &        NCOj, NCOll, NCOlr, NCOls, NCOlt, NCOlx, NCOns, NCOnt, 
      &        NCT(6), NCX, NDE, NDOnn, NDP, NDQ, NFA, NFAc, NFAm, NFG, 
-     &        NFIs, NFIss, NFM, NGAm, NIE, NIPh, NIPp, NISe, NIVq, NIVy, 
+     &        NFIs, NFIss, NFM, NGAm, NIE, NIPh, NIPp, NISe, NIVq, NIVy,
      &        NIVz
       INTEGER NIW, NIXt, NJC, NJIt, NJMax, NLT, NNC, NNIv, NNVi, NNWi, 
      &        NPAa, NPAd, NPAr, NPLace, NPOt, NPP, NPX, NRC, NRCo, NRD, 
@@ -313,7 +313,7 @@ C
      &                NFIs, NGAm, NPOt, NBEta, NFM, NTGx, NDOnn, NRC, 
      &                NIW, NDE, NISe, NNVi, NNWi, NCC, MCC, NXA, NAM1, 
      &                NFAc, NFAm, NPAd, NFG, NXG, NSM, NREs, NXX, NT, 
-     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY, 
+     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY,
      &                NTX, NRY, NRCo, NRDo, NVC1, NVC2, NNC, NCX, IDMt, 
      &                NCOll, NJMax, ITErm, NPP, JDM, JIT, NSEc, LMD, 
      &                MCM, NCOls, NCOlt, KMAx, KMIn, NVA, NBEt, NBT1, 
@@ -717,7 +717,7 @@ C
      &        LMAx2, LMAx3, LMD, LMX, MCC, MCM(2), MIPi, MR, MS, MS1, 
      &        MS2, MSEc, MW, MWV, NAM1, NBEt, NBEta, NBT1, NCC, NCJ, 
      &        NCOi, NCOj, NCOll, NCOlr, NCOls, NCOlt, NCOlx, NCOns, 
-     &        NCOnt, NCT(6), NCX, NDE, NDOnn, NDP, NDQ, NFA, NFAc, NFAm, 
+     &        NCOnt, NCT(6), NCX, NDE, NDOnn, NDP, NDQ, NFA, NFAc, NFAm,
      &        NFG, NFIs, NFIss, NFM, NGAm, NIE, NIPh, NIPp, NISe, NIVq, 
      &        NIVy, NIVz, NIW, NIXt, NJC, NJIt, NJMax, NL(3), NLT, NNC, 
      &        NNIv
@@ -734,7 +734,7 @@ C
      &                NFIs, NGAm, NPOt, NBEta, NFM, NTGx, NDOnn, NRC, 
      &                NIW, NDE, NISe, NNVi, NNWi, NCC, MCC, NXA, NAM1, 
      &                NFAc, NFAm, NPAd, NFG, NXG, NSM, NREs, NXX, NT, 
-     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY, 
+     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY,
      &                NTX, NRY, NRCo, NRDo, NVC1, NVC2, NNC, NCX, IDMt, 
      &                NCOll, NJMax, ITErm, NPP, JDM, JIT, NSEc, LMD, 
      &                MCM, NCOls, NCOlt, KMAx, KMIn, NVA, NBEt, NBT1, 
@@ -1073,7 +1073,7 @@ C COMPOUND NUCLEUS DATA                                                 CALX-309
                IF (Lo(186)) NRD = 0
                IF (NFIss.EQ.0) Lo(85) = .FALSE.
                Lo(185) = .NOT.Lo(85)
-               IF (Lo(84) .OR. Lo(85) .OR. Lo(86)) WRITE (MW,99120) NSP, 
+               IF (Lo(84) .OR. Lo(85) .OR. Lo(86)) WRITE (MW,99120) NSP,
      &             NFIss, NRD, NCOnt
 99120          FORMAT (/' COMPOUND NUCLEUS INPUT:',I5,
      &                 ' UNCOUPLED STATES',I4,
@@ -4194,7 +4194,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ACN1, ACN2, AZ(6), BN, BZ(5), DTHe, DTHeta, EGD, FNUg, GGD, 
+      REAL*8 ACN1, ACN2, AZ(6), BN, BZ(5), DTHe, DTHeta, EGD, FNUg, GGD,
      &       SGSq, TG0, TG1, THEta1, THEta2
       INTEGER MR, MS, MW, NCOj, NCOlx, NCOns, NCOnt, NDP, NDQ, NFIss, 
      &        NIE, NRD, NSP(3)
@@ -4772,25 +4772,25 @@ C
 C
       DATA pz/0., 5.05, 0., 4.50, 0., 3.95, 0., 3.40, 0., 2.90, 0., 
      &     2.46, 0., 2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 
-     &     1.35, 0., 1.54, 0., 1.28, 0.26, 0.88, 0.19, 1.35, -.05, 1.52, 
+     &     1.35, 0., 1.54, 0., 1.28, 0.26, 0.88, 0.19, 1.35, -.05, 1.52,
      &     -.09, 1.17, .04, 1.24, 0.29, 1.09, .26, 1.17, .23, 1.15, 
      &     -.08, 1.35, 0.34, 1.05, .28, 1.27, 0., 1.05, 0., 1., .09, 
      &     1.2, .2, 1.4, .93, 1., -.2, 1.19, .09, .97, 0., .92, .11, 
      &     .68, .05, .68, -.22, .79, .09, .69, .01, .72, 0., .4, .16, 
-     &     .73, 0., .46, .17, .89, 0., .79, 0., .89, 0., .81, -.06, .69, 
+     &     .73, 0., .46, .17, .89, 0., .79, 0., .89, 0., .81, -.06, .69,
      &     -.2, .71, -.12, .72, 0., .77, 2*0./
       DATA pn/0., 5.25, 0., 4.70, 0., 4.15, 0., 3.58, 0., 3.05, 0., 
      &     2.67, 0., 1.8, 0., 1.67, 0., 1.86, 0., 2.04, 0., 1.64, 0., 
-     &     1.44, 0., 1.54, 0., 1.3, 0., 1.27, 0., 1.29, .08, 1.41, -.08, 
+     &     1.44, 0., 1.54, 0., 1.3, 0., 1.27, 0., 1.29, .08, 1.41, -.08,
      &     1.5, -.05, 2.24, -.47, 1.43, -.15, 1.44, .06, 1.56, .25, 
      &     1.57, -.16, 1.46, 0., .93, .01, .62, -.5, 1.42, .13, 1.52, 
-     &     -.65, .8, -.08, 1.29, -.47, 1.25, -.44, .97, .08, 1.65, -.11, 
+     &     -.65, .8, -.08, 1.29, -.47, 1.25, -.44, .97, .08, 1.65, -.11,
      &     1.26, -.46, 1.06, 0.22, 1.55, -.07, 1.37, 0.1, 1.2, -.27, 
      &     .92, -.35, 1.19, 0., 1.05, -.25, 1.61, -.21, .9, -.21, .74, 
      &     -.38, .72, -.34, .92, -.26, .94, .01, .65, -.36, .83, .11, 
      &     .67, .05, 1., .51, 1.04, .33, .68, -.27, .81, .09, .75, .17, 
-     &     .86, .14, 1.1, -.22, .84, -.47, .48, .02, .88, .24, .52, .27, 
-     &     .41, -.05, .38, .15, .67, 0., .61, 0., .78, 0., .67, 0., .67, 
+     &     .86, .14, 1.1, -.22, .84, -.47, .48, .02, .88, .24, .52, .27,
+     &     .41, -.05, .38, .15, .67, 0., .61, 0., .78, 0., .67, 0., .67,
      &     0., .79, 0., .6, .04, .64, -.06, .45, .05, .26, -.22, .39, 
      &     0., .39/
       DATA sz/.19, .38, .57, .75, .94, 1.13, 1.32, 1.51, 1.70, 2.10, 
@@ -4798,8 +4798,8 @@ C
      &     12.55, 13.24, 13.93, 14.71, 15.53, 16.37, 17.36, 18.6, 18.7, 
      &     18.01, 17.87, 17.08, 16.6, 16.75, 16.5, 16.35, 16.22, 16.41, 
      &     16.89, 16.43, 16.68, 16.73, 17.45, 17.29, 17.44, 17.82, 
-     &     18.62, 18.27, 19.39, 19.91, 19.14, 18.26, 17.4, 16.42, 15.77, 
-     &     14.37, 13.91, 13.1, 13.11, 11.43, 10.89, 10.75, 10.62, 10.41, 
+     &     18.62, 18.27, 19.39, 19.91, 19.14, 18.26, 17.4, 16.42, 15.77,
+     &     14.37, 13.91, 13.1, 13.11, 11.43, 10.89, 10.75, 10.62, 10.41,
      &     10.21, 9.85, 9.47, 9.03, 8.61, 8.13, 7.46, 7.48, 7.2, 7.13, 
      &     7.06, 6.78, 6.64, 6.64, 7.68, 7.89, 8.41, 8.49, 7.88, 6.3, 
      &     5.47, 4.78, 4.37, 4.17, 4.13, 4.32, 4.55, 5.04, 5.28, 6.06, 
@@ -4807,17 +4807,17 @@ C
       DATA sn/0.62, 1.24, 1.85, 2.47, 3.09, 3.71, 4.33, 4.95, 5.56, 
      &     6.18, 6.8, 7.53, 7.55, 7.21, 7.44, 8.07, 8.94, 9.81, 10.6, 
      &     11.39, 12.54, 13.68, 14.34, 14.19, 13.83, 13.5, 13., 12.13, 
-     &     12.6, 13.26, 14.13, 14.92, 15.52, 16.38, 17.16, 17.55, 18.03, 
-     &     17.59, 19.03, 18.71, 18.8, 18.99, 18.46, 18.25, 17.76, 17.38, 
-     &     16.72, 15.62, 14.38, 12.88, 13.23, 13.81, 14.9, 14.86, 15.76, 
-     &     16.2, 17.62, 17.73, 18.16, 18.67, 19.69, 19.51, 20.17, 19.48, 
+     &     12.6, 13.26, 14.13, 14.92, 15.52, 16.38, 17.16, 17.55, 18.03,
+     &     17.59, 19.03, 18.71, 18.8, 18.99, 18.46, 18.25, 17.76, 17.38,
+     &     16.72, 15.62, 14.38, 12.88, 13.23, 13.81, 14.9, 14.86, 15.76,
+     &     16.2, 17.62, 17.73, 18.16, 18.67, 19.69, 19.51, 20.17, 19.48,
      &     19.98, 19.83, 20.2, 19.72, 19.87, 19.24, 18.44, 17.61, 17.1, 
      &     16.16, 15.9, 15.33, 14.76, 13.54, 12.63, 10.65, 10.1, 8.89, 
-     &     10.25, 9.79, 11.39, 11.72, 12.43, 12.96, 13.43, 13.37, 12.96, 
+     &     10.25, 9.79, 11.39, 11.72, 12.43, 12.96, 13.43, 13.37, 12.96,
      &     12.11, 11.92, 11., 10.8, 10.42, 10.39, 9.69, 9.27, 8.93, 
      &     8.57, 8.02, 7.59, 7.33, 7.23, 7.05, 7.42, 6.75, 6.6, 6.38, 
      &     6.36, 6.49, 6.25, 5.85, 5.48, 4.53, 4.3, 3.39, 2.35, 1.66, 
-     &     .81, 0.46, -.96, -1.69, -2.53, -3.16, -1.87, -.41, .71, 1.66, 
+     &     .81, 0.46, -.96, -1.69, -2.53, -3.16, -1.87, -.41, .71, 1.66,
      &     2.62, 3.22, 3.76, 4.1, 4.46, 4.83, 5.09, 5.18, 5.17, 5.1, 
      &     5.01, 4.97, 5.09, 5.03, 4.93, 5.28, 5.49, 5.50, 5.37, 5.30/
       nz = IDINT(Scn(7) + .1D0)
@@ -5526,20 +5526,20 @@ C
      &     2* - 1.4142136573791504D0, 3*.5D0, 1.4142136999999999D0, 
      &     2* - 1.D0, 1.D0, -1.D0, 1.D0, 2* - 1.4142136573791504D0/
       DATA mx, jts/8*0, 2*1, 10*0, 2*1, 2*0, 2, 7*0, 2, 1, 6*0, 2*2, 
-     &     6*0, 2*1, 2*0, 2*1, 2*0, 2*1, 2*0, 1, -1, 2*0, 2*1, 2*0, 2*1, 
+     &     6*0, 2*1, 2*0, 2*1, 2*0, 2*1, 2*0, 1, -1, 2*0, 2*1, 2*0, 2*1,
      &     2*0, 2*1, 2*0, 1, -1, 2*0, 1, 3*0, 1, 3*0, 2*1, 2*0, 1, 3*0, 
      &     1, 3*0, 2*1, 10*0, 2*1, 2*0, 2*1, 2*0, 2*1, 2*0, 1, -1, 4*0, 
      &     2*1, 4*0, 4*1, 4*0, 3*1, -1, 4*0, 4*1, 4*0, 3*1, -1, 4*0, 1, 
      &     0, 1, 5*0, 3*1, 5*0, 1, 0, 2*1, 5*0/
       DATA iz/'   C', 'ROSS', '-SEC', 'TION', '    ', '   C', '. S.', 
      &     '/RUT', 'HER.', '    ', '   A', 'SYM.', ' OR ', 'IT11', 
-     &     2*'    ', 'VECT', '. PO', 'LAR.', 4*'    ', ' T20', 4*'    ', 
+     &     2*'    ', 'VECT', '. PO', 'LAR.', 4*'    ', ' T20', 4*'    ',
      &     ' T21', 4*'    ', ' T22', 3*'    ', 'KYY', 'OR D', 3*'    ', 
      &     'KXX ', 'OR R', 2*'    ', '   K', 'ZZ O', 'R A''', 3*'', 
      &     'KZX ', 'OR A', 2*'    ', '   K', 'XZ O', 'R R''', 2*'    ', 
      &     '   S', 'PIN-', 'FLIP', 2*'    ', 'TARG', 'ET A', 'SYM.', 
      &     4*'    ', ' AYY', 4*'    ', ' AXX', 4*'    ', ' AZZ', 
-     &     4*'    ', ' AXZ', 4*'    ', ' AZX', 2*'    ', ' TOT', 'AL C', 
+     &     4*'    ', ' AXZ', 4*'    ', ' AZX', 2*'    ', ' TOT', 'AL C',
      &     '.-S.', '    '/
       IF (Jtn.LT.270) CALL MEMO('OBSE',Jtn,270,2)
 C TRANSFER OF STANDARD DESCRIPTIONS                                     OBSE-067
@@ -6564,7 +6564,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a, b, etac, f1, fact, factp, fi, fl, fp1, fpi, fpl, fptest, 
+      REAL*8 a, b, etac, f1, fact, factp, fi, fl, fp1, fpi, fpl, fptest,
      &       ftest, g1, gp1, roinf, sigma1, xm, zag, zig
       DOUBLE PRECISION DABS, DLOG10, DSQRT
       INTEGER i1, i2, iexp1, ind, indice, j, l1, lin, linf, lmax
@@ -6869,8 +6869,8 @@ C
      &       etr0, fi, fip, g61, g610, g611, g62, g63, g64, g65, g66, 
      &       g67, g68, g69, g81, g810, g811, g812, g813, g814, g815, 
      &       g82, g83, g84, g85, g86, g87, g88, g89, gp61, gp62, gp63, 
-     &       gp64, gp65, gp66, gp81, gp82, gp83, gp84, gp85, gp86, gp87, 
-     &       gp88, ho, hpo, psi, psip, q(5), qp(5), rau0, ro, ru, rx, s, 
+     &       gp64, gp65, gp66, gp81, gp82, gp83, gp84, gp85, gp86, gp87,
+     &       gp88, ho, hpo, psi, psip, q(5), qp(5), rau0, ro, ru, rx, s,
      &       t, tr1, tr2, tr3, tr4, tr5, tr6, tr7, tr8, tra, trb, trc, 
      &       trd, tre, u
       INTEGER IDINT
@@ -6902,7 +6902,7 @@ C        COEFFICIENTS RICCATI                                           YFRI-004
      &     34.787109375D0, 50.203125D0, 78.75D0/
       DATA q/0.4959570165D-1, 0.8888888889D-2, 0.2455199181D-2, 
      &     0.9108958061D-3, 0.2534684115D-3/
-      DATA qp, ho, hpo/0.1728260369D0, 0.3174603174D-3, 0.3581214850D-2, 
+      DATA qp, ho, hpo/0.1728260369D0, 0.3174603174D-3, 0.3581214850D-2,
      &     0.3117824680D-3, 0.9073966427D-3, 2*0.D0/
       etac = Eta*Eta
       eta2 = Eta + Eta
@@ -8039,7 +8039,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a1, a2, a3, a4, a5, a6, a7, a8, a9, absc(20), b(7), b1, b2, 
+      REAL*8 a1, a2, a3, a4, a5, a6, a7, a8, a9, absc(20), b(7), b1, b2,
      &       b3, b4, b5, b6, b7, b8, b9, c(2,2,2), c1, c2, c3, c4, 
      &       p(20), pi, x1(4), x2(4), x3(4), x4(4), x5(4), y(4,4)
       DOUBLE PRECISION DABS, DATAN, DCOS, DEXP, DLOG, DMAX1, DMIN1, 
@@ -9390,7 +9390,7 @@ C  (L3,L4,IP||Q||L1,L2,I)                                               VICM-191
                      IF (ja1.EQ.ja2) THEN
                         tkq = 0.D0
                         IF ((lb1.EQ.lb3) .AND. (lb2.EQ.lb4)) tkq = 1.D0
-                        IF ((lb1.EQ.lb4) .AND. (lb2.EQ.lb3)) tkq = tkq + 
+                        IF ((lb1.EQ.lb4) .AND. (lb2.EQ.lb3)) tkq = tkq +
      &                      DFLOAT(1 - 2*MOD(ja1 + ia(1,1) + ia(1,2),2))
                         IF (tkq.NE.0.D0) THEN
                            IF (lb1.EQ.lb2) tkq = 0.5D0*tkq
@@ -9970,7 +9970,7 @@ C
       REAL*8 a1, a2, a4
       DOUBLE PRECISION DEXP, DSQRT
       INTEGER i, i1, i2, iq, ix1, ix2, ix3, iy1, iy2, iy3, iz1, iz2, 
-     &        iz3, k, k1, k2, k3, k4, kc, l1, l2, l3, l4, lw1, lw2, lz1, 
+     &        iz3, k, k1, k2, k3, k4, kc, l1, l2, l3, l4, lw1, lw2, lz1,
      &        lz2, m3, n1, n2, n3, n4, n5, nx, nxy
       INTEGER IABS, MAX0, MIN0
 C
@@ -10925,14 +10925,14 @@ C STANDARD FORM FACTORS                                                 EXTP-270
                            Nva(2*nmb) = nma
                            Ll(1,ityp,lz) = nmb + 1
                            IF (.NOT.(Lo(73))) THEN
-                              IF (itypy.GE.9) WRITE (MW,99110) nma, nmb, 
+                              IF (itypy.GE.9) WRITE (MW,99110) nma, nmb,
      &                            (Nva(nna + i - 1),i = 1,9)
 99110                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
      &                                ' TO STORE:'/I5,3X,'TYPE:',I2,3X,
      &                                'FOLD:',I2,3X,'INTG:',I2,3X,
      &                                'STEP:',I2,I6,' FUNCTIONS  L:',I3,
      &                                I4,' DERIVATIONS  START:',I5)
-                              IF (itypy.EQ.6) WRITE (MW,99115) nma, nmb, 
+                              IF (itypy.EQ.6) WRITE (MW,99115) nma, nmb,
      &                            (Nva(nna + i - 1),i = 1,9)
 99115                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
      &                                ' TO STORE:'/I5,3X,'TYPE:',I2,3X,
@@ -10940,14 +10940,14 @@ C STANDARD FORM FACTORS                                                 EXTP-270
      &                                'STEP:',I2,I6,
      &                                ' DEFORMATIONS   LBET:',I5,5X,
      &                                'KBET:',I5,5X,'START:',I5)
-                              IF (itypy.EQ.5) WRITE (MW,99120) nma, nmb, 
+                              IF (itypy.EQ.5) WRITE (MW,99120) nma, nmb,
      &                            (Nva(nna + i - 1),i = 1,7)
 99120                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
      &                                ' TO STORE:'/I5,3X,'TYPE:',I2,3X,
      &                                'FOLD:',I2,3X,'INTG:',I2,3X,
      &                                'STEP:',I2,I6,' DEFORMATIONS',5X,
      &                                'START:',I5)
-                              IF (itypy.LT.5) WRITE (MW,99125) nma, nmb, 
+                              IF (itypy.LT.5) WRITE (MW,99125) nma, nmb,
      &                            (Nva(nna + i - 1),i = 1,6)
 99125                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
      &                                ' TO STORE:',I4,3X,'TYPE:',I2,3X,
@@ -11018,7 +11018,7 @@ C STANDARD FORM FACTORS                                                 EXTP-270
                               ENDDO
                            ENDIF
                            IF (.NOT.(Lo(73))) THEN
-                              IF (itypy.GE.9) WRITE (MW,99145) nma, nmb, 
+                              IF (itypy.GE.9) WRITE (MW,99145) nma, nmb,
      &                            Va(nma), Va(nma + 1), l2x, 
      &                            (i,Va(i),i = nmc,nmb)
 99145                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
@@ -11026,7 +11026,7 @@ C STANDARD FORM FACTORS                                                 EXTP-270
      &                                'SCALE:',F12.6/' AND TO STORE',I5,
      &          ' BESSEL FUNCTION OR LEGENDRE POLYNOMIALS COEFFICIENTS:'
      &          /(6(3X,I5,F10.5)))
-                              IF (itypy.LT.9) WRITE (MW,99150) nma, nmb, 
+                              IF (itypy.LT.9) WRITE (MW,99150) nma, nmb,
      &                            l2x, (i,Va(i),i = nma,nmb)
 99150                         FORMAT (' USING PARAMETERS',I6,' TO',I6,
      &                                ' FOR',I5,
@@ -11159,7 +11159,7 @@ C USE OF ALREADY STORED FORM FACTOR/TEST EXISTENCE OF COPIED FORM FACTOREXTP-197
      &                                  lxx = Ivy(ityp - 3,lxx)
                                  ENDIF
                                  lzx = lxx + Npp
-                                 IF (Lo(173)) WRITE (MW,99195) l1x, l2x, 
+                                 IF (Lo(173)) WRITE (MW,99195) l1x, l2x,
      &                               mlx, itypx, l1, l2, ml
 99195                            FORMAT (' TRANSITION POTENTIAL L1(',I2,
      &                              ') L2(',I2,') ML(',I2,') TYP(',I2,
@@ -11597,7 +11597,7 @@ C
 C Local variables
 C
       REAL*8 a3, av(2,2,3), ax, ay, az, b, b0, b1, b2, bb(2), bi, br, 
-     &       bt, bx, ci, cn, cr, cs, dc, dd, de, df, di, dr, e0, e1, e2, 
+     &       bt, bx, ci, cn, cr, cs, dc, dd, de, df, di, dr, e0, e1, e2,
      &       ea, ef, el, ell, eo, ep, f, fe, ff, g1, g2, h(2), p, p2, 
      &       p4, pi, vv(3), ww(6), xi, xr, xx, y, yc, yd, ye, yi, yr, 
      &       yy, zf, zi, zr, zt, zz
@@ -12126,7 +12126,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ACN(20), ACOnv, BJM, CCZ, CHB, CK, CM, CMB, CONj, EITer, H, 
+      REAL*8 ACN(20), ACOnv, BJM, CCZ, CHB, CK, CM, CMB, CONj, EITer, H,
      &       R1(2), XE, XM, XN, XZ
       INTEGER IDMt, INSl, INTv, INVt, IPJ, IPK, IPM, IQM, IQMax, ISM, 
      &        ITEmm, ITErm, ITY(8), JDM, JIT, JPI, JTH, JTX, KAB, KBA, 
@@ -12138,7 +12138,7 @@ C
      &        NFM, NGAm, NIC, NIN, NIPh, NIPp, NISe, NIVq, NIVy, NIVz, 
      &        NIW
       INTEGER NIXt, NJC, NJIt, NJMax, NLT, NNC, NNIv, NNVi, NNWi, NPAa, 
-     &        NPAd, NPAr, NPLace, NPOt, NPP, NPX, NRC, NRCo, NRDo, NREc, 
+     &        NPAd, NPAr, NPLace, NPOt, NPP, NPX, NRC, NRCo, NRDo, NREc,
      &        NREs, NRY, NRZ, NSCn, NSEc, NSM, NSP(5), NSPin, NT, NTGx, 
      &        NTOt, NTX, NTY, NTZ, NVA, NVC1, NVC2, NWV, NXA, NXD, NXG, 
      &        NXX
@@ -12148,7 +12148,7 @@ C
      &                NFIs, NGAm, NPOt, NBEta, NFM, NTGx, NDOnn, NRC, 
      &                NIW, NDE, NISe, NNVi, NNWi, NCC, MCC, NXA, NAM1, 
      &                NFAc, NFAm, NPAd, NFG, NXG, NSM, NREs, NXX, NT, 
-     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY, 
+     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY,
      &                NTX, NRY, NRCo, NRDo, NVC1, NVC2, NNC, NCX, IDMt, 
      &                NCOll, NJMax, ITErm, NPP, JDM, JIT, NSEc, LMD, 
      &                MCM, NCOls, NCOlt, KMAx, KMIn, NVA, NBEt, NBT1, 
@@ -12506,7 +12506,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, p, pgn(10), rm, 
+      REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, p, pgn(10), rm,
      &       rr, w(24), wvx(18), xgn(10), xp, xq
       CHARACTER*8 aa(3,8)
       CHARACTER*4 bb(2)
@@ -13644,7 +13644,7 @@ C COULOMB POTENTIALS WITH DIFFUSE CHARGE DISTRIBUTION                   ROTP-337
                      i1 = n + ITX(i + 8)
                      IF (Lo(100)) i1 = IT5 + 11*j + i
                      i2 = i1
-                     IF (Lo(200) .AND. (i.EQ.8) .AND. Lo(117)) i2 = i2 + 
+                     IF (Lo(200) .AND. (i.EQ.8) .AND. Lo(117)) i2 = i2 +
      &                   INVd
                      CALL COPO(V(1,i2),V(1,i1),P,Ism,H,l,Val(3*i - 2),
      &                         Val(25),Ccz,zt,.FALSE.,.TRUE.)
@@ -14396,7 +14396,7 @@ C
 C
 C Local variables
 C
-      REAL*8 bi, br, c, c0, c1, c1r, c2, c2r, c3, c3r, c4, c4r, c5, c5r, 
+      REAL*8 bi, br, c, c0, c1, c1r, c2, c2r, c3, c3r, c4, c4r, c5, c5r,
      &       c6, c6r, c7, c8, c9, cc, ci, cir, cr, crr, d1, d1r, d2, 
      &       d2r, dd, di, dir, dr, drr, ei, eir, er, err
       DOUBLE PRECISION DATAN2, DLOG
@@ -14645,7 +14645,7 @@ C
 C
 C COMMON variables
 C
-      INTEGER IMAx, INLs, INTc, INVc, INVd, IT0, ITC, ITE, ITF, ITX(16), 
+      INTEGER IMAx, INLs, INTc, INVc, INVd, IT0, ITC, ITE, ITF, ITX(16),
      &        ITXm, MR, MS, MW
       COMMON /INOUT / MR, MW, MS
       COMMON /POTE1 / ITX, IMAx, INTc, INLs, INVc, INVd, ITXm
@@ -14660,7 +14660,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a1, a2, a3, a4, a5, a6, a7, an, ap, cl(8), h, hh, hm, pis2, 
+      REAL*8 a1, a2, a3, a4, a5, a6, a7, an, ap, cl(8), h, hh, hm, pis2,
      &       rr, sep, vr(5,2), vs(4), y(3), zb(77), zb1(40), zb2(37)
       DOUBLE PRECISION DABS, DCOS, DEXP, DLOG, DMAX1, DMIN1, DSIN, DSQRT
       INTEGER i, i1, idy, ii, ij, inl, iq, iqm, is, ist, itt, itv, 
@@ -15445,10 +15445,10 @@ C
 C
 C Local variables
 C
-      REAL*8 a1, a2, a3, a4, a5, a6, rr, x1, x2, x3, x4, x5, y1, y2, y3, 
+      REAL*8 a1, a2, a3, a4, a5, a6, rr, x1, x2, x3, x4, x5, y1, y2, y3,
      &       y4, y5, z1, z2, z3, z4
       DOUBLE PRECISION DABS, DATAN2, DEXP, DLOG, DSQRT
-      INTEGER i, ig, ik, in1, in2, in3, ireb, is, ist, j, jg, jl, k, kn, 
+      INTEGER i, ig, ik, in1, in2, in3, ireb, is, ist, j, jg, jl, k, kn,
      &        kr, ks, l, m, n
       INTEGER IDINT, MAX0, MIN0
 C
@@ -16662,7 +16662,7 @@ C
      &       g2, sj, smatel
       DOUBLE PRECISION DABS, DSQRT
       REAL*8 DCGS, DJ6J, DJ9J
-      INTEGER i, i1, i2, iai, iaip, ib, ibb, iij, iiq, iis, ij, il, ilp, 
+      INTEGER i, i1, i2, iai, iaip, ib, ibb, iij, iiq, iis, ij, il, ilp,
      &        invz, is, isi, isj, isjp, isp, it1, it2, iti, ix, j, j1, 
      &        j2, ja, k, k1, k2, kk, l, l1, l2, lm, lp, m, m1, m2, n, 
      &        ni, nj, nj1, nj2, nl, nmi, nmr, nsb, nsm
@@ -18207,7 +18207,7 @@ C MULTIPOLE LQ=6 L1=L2-4                                                CORA1288
                   c1 = (2.D0*a + 5.D0)
      &                 *(u**2 - (10.D0*a + 20.D0)*(u - (14.D0*a+42.D0)
      &                 /x)/x)
-                  C(3) = -(240.D0 - (66.D0*a + 84.D0)*u + 180.D0*(a**2 - 
+                  C(3) = -(240.D0 - (66.D0*a + 84.D0)*u + 180.D0*(a**2 -
      &                   4.D0)/x + (6.D0*a + 9.D0)*c1)/(y*x*V)
                   C(4) = ((a - 2.D0)*(180.D0 - (72.D0*a+108.D0)*u)
      &                   + (6.D0*a + 9.D0)
@@ -18597,7 +18597,7 @@ C MULTIPOLE LQ=4 L1=L2-4                                                CORA-314
      &                    *u-((57.D0*a+24.D0)*a-36.D0)
      &                    *u**2-x**2*(28.D0-(36.D0*a+20.D0)*u+4.D0*x**2)
      &                    ))))
-                     b4 = b4 + x*(x*(a*(2.D0*a+1.D0)*(30.D0*a+20.D0)*u - 
+                     b4 = b4 + x*(x*(a*(2.D0*a+1.D0)*(30.D0*a+20.D0)*u -
      &                    24.D0*q) - (8.D0*a + 4.D0)
      &                    *(F*(27.D0-(29.D0*a+6.D0)*u)
      &                    + x*(7.D0*a+3.D0*F*x+a*x**2)))
@@ -18773,7 +18773,7 @@ C MULTIPOLE LQ=5 L1=L2-1                                                CORA-401
      &                         *((2.D0*a - 3.D0)*F + (a + 1.D0)
      &                         *(x + (5.D0*a+10.D0)/W))/W
                         C(4) = C(4)
-     &                         + 6.D0*x*((a - 2.D0)*(a - 3.D0)*(2.D0*a - 
+     &                         + 6.D0*x*((a - 2.D0)*(a - 3.D0)*(2.D0*a -
      &                         3.D0)*q + (2.D0*a + 1.D0)
      &                         *(((8.D0*a-12.D0)*a+40.D0)
      &                         *a + ((2.D0*a-2.D0)*a+6.D0)
@@ -18907,7 +18907,7 @@ C MULTIPOLE LQ=5 L1=L2-3                                                CORA-496
      &                    *(((5.D0*a-53.D0)*a-70.D0)*F*u - (8.D0*a+2.D0)
      &                    *F*x**2 - (a+1.D0)*(a+2.D0)
      &                    *((15.D0*a+25.D0)*u-2.D0*x**2)*x))
-                     b2 = b2 - x*6.D0*q*((((8.D0*a+372.D0)*a+696.D0)*a + 
+                     b2 = b2 - x*6.D0*q*((((8.D0*a+372.D0)*a+696.D0)*a +
      &                    360.D0) + (70.D0*a + 42.D0)
      &                    *q - (2.D0*a + 3.D0)
      &                    *((10.D0*a+6.D0)*F*x + (a+1.D0)*(a+2.D0)
@@ -19038,7 +19038,7 @@ C MULTIPOLE LQ=5 L1=L2-4                                                CORA-579
                   bd = 10080.D0*den*a**2*(2.D0*a + 5.D0)*(a + 2.D0)
      &                 *s**2*DSQRT(q*((a+1.D0)**2 + F**2)
      &                 *((a+2.D0)**2 + F**2)*((a-1.D0)**2 + E**2))
-                  b1 = q*(((336.D0*q+48.D0*((8.D0*a+22.D0)*a+47.D0))*q - 
+                  b1 = q*(((336.D0*q+48.D0*((8.D0*a+22.D0)*a+47.D0))*q -
      &                 96.D0*(2.D0*a-1.D0)*(a+2.D0)*(2.D0*a+5.D0)
      &                 *(3.D0*a-7.D0))/((a-1.D0)*(2.D0*a-3.D0))
      &                 + (4.D0*(((162.D0*a+683.D0)*a+538.D0)*a-280.D0)
@@ -19053,7 +19053,7 @@ C MULTIPOLE LQ=5 L1=L2-4                                                CORA-579
      &                 *a-280.D0)+(a-2.D0)*(4.D0*a-19.D0)*q)*u)
      &                 /(2.D0*a + 3.D0) + 35.D0*(a**2 - 1.D0)*(a + 2.D0)
      &                 **2*u**2)
-                  b3 = (((1008.D0*q+144.D0*((4.D0*a+28.D0)*a+47.D0))*q + 
+                  b3 = (((1008.D0*q+144.D0*((4.D0*a+28.D0)*a+47.D0))*q +
      &                 288.D0*((((12.D0*a+56.D0)*a+29.D0)*a-70.D0)
      &                 *a-70.D0))*q/(2.D0*a - 3.D0)
      &                 - 12.D0*(((((178.D0*a+967.D0)*a+1410.D0)
@@ -20371,7 +20371,7 @@ C
       REAL*8 Acnv, Eiter, H
       INTEGER Ism, Iterm, Iterr, Kab, Nc, Ncin, Nni, Npx
       REAL*8 Ag(Kab,Kab,4), At(2,1), Fam(Kab,8), Fr(Ism,4,1), 
-     &       Gr(2,Ism,1), Pad(2,Iterm,1), V(Ism,9), Vi(Ism,9), W(Ism,1), 
+     &       Gr(2,Ism,1), Pad(2,Iterm,1), V(Ism,9), Vi(Ism,9), W(Ism,1),
      &       Wre(2,1), X(1)
       INTEGER Ipe(Nc,2), Mc(Kab,6), Nat(4,1), Nvi(Kab,Kab,4)
       LOGICAL Lo(250)
@@ -21531,7 +21531,7 @@ C COMPUTATION OF IRREGULAR SOLUTION                                     INRH-113
      &                          (is+2,l) - P(is-2,l)) + P(is + 3,l)
      &                          - P(is - 3,l))/hh
                ELSEIF (is - Ism + 1.LT.0) THEN
-                  P(Ism - 2,l + 4) = (P(Ism - 6,l) - 8.D0*P(Ism - 5,l) + 
+                  P(Ism - 2,l + 4) = (P(Ism - 6,l) - 8.D0*P(Ism - 5,l) +
      &                               30.D0*P(Ism - 4,l)
      &                               - 80.D0*P(ism3,l)
      &                               + 35.D0*P(Ism - 2,l)
@@ -22351,7 +22351,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ACN(8), BN, BZ1, BZ2, BZ3, BZ4, BZ5, EGD, FNUg, GGD, R1(2), 
+      REAL*8 ACN(8), BN, BZ1, BZ2, BZ3, BZ4, BZ5, EGD, FNUg, GGD, R1(2),
      &       SGSq, TG0, TG1
       INTEGER IPJ, JPI, MR, MS, MW, NAJ, NC, NCI, NCIn, NCOj, NCOlx, 
      &        NCOns, NCOnt, NCXn, NDP, NDQ, NFIss, NIC, NIE, NIN, NRD, 
@@ -22382,8 +22382,8 @@ C
       DOUBLE PRECISION DABS, DATAN2, DEXP, DMAX1, DSQRT
       INTEGER i, i1, i2, ia, ib, ic, icp, id, ierr, ii, ii1, iii, iiv, 
      &        ij, ikm, ikp, it, iv, ivq, ivs, j, j1, j2, ja, jb, jc, 
-     &        jcx, ji, jj, jl, k, k1, k2, kk, kn, l, l1, l2, la, lb, lj, 
-     &        ll, m, mcx(4,2), mm, mn, n, n1, n2, nc1, ncx, ni, njc, nm, 
+     &        jcx, ji, jj, jl, k, k1, k2, kk, kn, l, l1, l2, la, lb, lj,
+     &        ll, m, mcx(4,2), mm, mn, n, n1, n2, nc1, ncx, ni, njc, nm,
      &        nn, ns, nsp1, nss, nsy, nt, nxx, nz
       INTEGER IABS, IDINT, MIN0
       INTEGER IK
@@ -23245,7 +23245,7 @@ C LOOP ON S MATRIX ELEMENTS                                             SCHE-103
                         iv = Mc(i6,j,1)
                         ji3 = (3 + MAX0(Ipi(3,iv) - 1 - iaj - Mc(i6,j,3)
      &                        ,Ipi(2,iv) - 1 - Mc(i6,j,2) - Mc(i6,j,3),
-     &                        - 2*Mc(i6,j,2), - 2*Mc(i6,j,3)))/4 - ipd + 
+     &                        - 2*Mc(i6,j,2), - 2*Mc(i6,j,3)))/4 - ipd +
      &                        1
                         ji1 = MAX0(ji3,ji4)
                         jt1 = MIN0(Ipj,Ipi(10,1) - Mc(k,j,2)/2,
@@ -23681,12 +23681,12 @@ C TRANSFORMATION                                                        SCHE-370
      &                                    - pi
                                        lc = lcp - 1
                                        bj = 0.5D0*DFLOAT(Mc(icp,ji,3))
-                                       IF (Lo(56)) WRITE (MW,99010) nc1, 
+                                       IF (Lo(56)) WRITE (MW,99010) nc1,
      &                                    nc2, iv, lc, bj, b1, b2, b3, 
      &                                    d1, d2
 99010                                  FORMAT (1X,3I3,I5,F7.1,4X,1P,
      &                                    2D15.7,' I',4X,0P,3F11.8)
-                                       IF (Lo(60)) WRITE (99,99050) nc1, 
+                                       IF (Lo(60)) WRITE (99,99050) nc1,
      &                                    nc2, iv, lc, bj, b1, b2, b3
                                     ENDIF
                                  ENDIF
@@ -24498,7 +24498,7 @@ C CALCULATION AT EXPERIMENTAL ANGLES                                    RESU-111
       KLT = 1
       CHI2 = 0.D0
       NOUt = 0
-      IF (Lo(64)) WRITE (64,99005) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1), 
+      IF (Lo(64)) WRITE (64,99005) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncolr
 99005 FORMAT ('<EXP.DAT.>',F10.2,F10.5,F10.2,2I5)
       ki = Ipi(9,Ncoll)
@@ -24683,11 +24683,11 @@ C IF THE CHI2 DECREASED, SAVE THE SCATTERING COEFFICIENTS               RESU-275
 C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
       WRITE (MW,99180) TITle
       jg = IDINT((THEta2 - THEta1)/DTHeta + 1.5D0)
-      IF (Lo(64)) WRITE (66,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1), 
+      IF (Lo(64)) WRITE (66,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncols
-      IF (Lo(64)) WRITE (85,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1), 
+      IF (Lo(64)) WRITE (85,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncols
-      IF (Lo(64)) WRITE (86,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1), 
+      IF (Lo(64)) WRITE (86,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncols
       IF (.NOT.(Lo(159))) THEN
          nd = 1
@@ -25976,7 +25976,7 @@ C
      &        NCOi, NCOll, NCOlr, NCOls, NCOlt, NCOns, NCOnt, NCT(6), 
      &        NCX, NDE, NDOnn, NFA, NFAc, NFAm, NFG, NFIs, NFIss, NFM, 
      &        NGAm, NIPh, NIPp, NISe, NIVq, NIVy, NIVz, NIW, NIXt, NJC, 
-     &        NJIt, NJMax, NLT, NNC, NNIv, NNVi, NNWi, NPAa, NPAd, NPAr, 
+     &        NJIt, NJMax, NLT, NNC, NNIv, NNVi, NNWi, NPAa, NPAd, NPAr,
      &        NPLace
       INTEGER NPOt, NPP, NRC, NRCo, NRD, NRDo, NREc, NREs, NRY, NRZ, 
      &        NSCn, NSEc, NSM, NSP(3), NSPin, NT, NTGx, NTOt, NTX, NTY, 
@@ -25986,7 +25986,7 @@ C
      &                NFIs, NGAm, NPOt, NBEta, NFM, NTGx, NDOnn, NRC, 
      &                NIW, NDE, NISe, NNVi, NNWi, NCC, MCC, NXA, NAM1, 
      &                NFAc, NFAm, NPAd, NFG, NXG, NSM, NREs, NXX, NT, 
-     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY, 
+     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY,
      &                NTX, NRY, NRCo, NRDo, NVC1, NVC2, NNC, NCX, IDMt, 
      &                NCOll, NJMax, ITErm, NPP, JDM, JIT, NSEc, LMD, 
      &                MCM, NCOls, NCOlt, KMAx, KMIn, NVA, NBEt, NBT1, 
@@ -26184,7 +26184,7 @@ C  DEFORMATIONS FOR A GIVEN POTENTIAL                                   VARI-109
                         ENDIF
                      ENDDO
                      WRITE (MW,99010) i, 
-     &                                Nw(2 - MOD(k,2),NISe + (k - 1)/2), 
+     &                                Nw(2 - MOD(k,2),NISe + (k - 1)/2),
      &                                j
 99010                FORMAT (' THE VARIABLE',I3,
      &                       ' CANNOT BE USED BECAUSE ',I5,
@@ -26452,7 +26452,7 @@ C OUTPUT OF FINAL PARAMETERS                                            VARI-266
             ENDDO
          ENDIF
          IF (lx(1)) THEN
-            WRITE (MW,99130) (i,Nw(1,NBEta + 9*i - 1),Nw(2,NBEta + 9*i - 
+            WRITE (MW,99130) (i,Nw(1,NBEta + 9*i - 1),Nw(2,NBEta + 9*i -
      &                       1),(Dw(NBEta+9*i+j-10),j = 1,8),i = 1,NBEt)
 99130       FORMAT (/' BETA(I,J) FOR  L   K',9X,'V',9X,'W',8X,'VS',8X,
      &              'WS',7X,'VSO',7X,'WSO',6X,
@@ -26612,7 +26612,7 @@ C
      &        MS2, MW, MWV, NAM1, NBEt, NBEta, NBT1, NCC, NCJ, NCO, 
      &        NCOi, NCOll, NCOlr, NCOls, NCOlt, NCOlx, NCOns, NCOnt, 
      &        NCT(6), NCX, NDE, NDOnn, NFA, NFAc, NFAm, NFG, NFIs, 
-     &        NFIss, NFM, NGAm, NIPh, NIPp, NISe, NIVq, NIVy, NIVz, NIW, 
+     &        NFIss, NFM, NGAm, NIPh, NIPp, NISe, NIVq, NIVy, NIVz, NIW,
      &        NIXt, NJC, NJIt, NJMax, NLT, NNC, NNIv, NNVi, NNWi, NPAa, 
      &        NPAd, NPAr
       INTEGER NPLace, NPOt, NPP, NR(2), NRC, NRCo, NRD, NRDo, NREc, 
@@ -26625,7 +26625,7 @@ C
      &                NFIs, NGAm, NPOt, NBEta, NFM, NTGx, NDOnn, NRC, 
      &                NIW, NDE, NISe, NNVi, NNWi, NCC, MCC, NXA, NAM1, 
      &                NFAc, NFAm, NPAd, NFG, NXG, NSM, NREs, NXX, NT, 
-     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY, 
+     &                NIVq, NIVy, NIVz, NCOi, MIPi, NXD, MWV, NIXt, NTY,
      &                NTX, NRY, NRCo, NRDo, NVC1, NVC2, NNC, NCX, IDMt, 
      &                NCOll, NJMax, ITErm, NPP, JDM, JIT, NSEc, LMD, 
      &                MCM, NCOls, NCOlt, KMAx, KMIn, NVA, NBEt, NBT1, 
@@ -27063,7 +27063,7 @@ C
 C
 C COMMON variables
 C
-      INTEGER MR, MS, MW, N0(8), N1(8), N2(10), N3(115), N4(52), N5(22), 
+      INTEGER MR, MS, MW, N0(8), N1(8), N2(10), N3(115), N4(52), N5(22),
      &        N6(12), N7(4), N8(2), N9(10)
       CHARACTER*4 TITle(18)
       COMMON /ANGL  / N1

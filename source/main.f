@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-09 20:03:15 $
-Ccc   * $Id: main.f,v 1.62 2005-03-09 20:03:15 herman Exp $
+Ccc   * $Date: 2005-03-11 17:22:13 $
+Ccc   * $Id: main.f,v 1.63 2005-03-11 17:22:13 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -17,7 +17,7 @@ Ccc   ********************************************************************
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, AFIsm(NFMOD), CSFism(NFMOD), DEFbm(NFMOD), 
+      DOUBLE PRECISION ABScs, AFIsm(NFMOD), CSFism(NFMOD), DEFbm(NFMOD),
      &                 DELtafism(NFMOD), DEStepm(NFMOD), EFBm(NFMOD), 
      &                 EFDism(NFTRANS,NFMOD), ELAcs, GAMmafism(NFMOD), 
      &                 HM(NFTRANS,NFMOD), PFIso, RFIso, 
@@ -642,7 +642,7 @@ C--------locate residual nuclei
             izares = INT(1000.0*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (6,*) ' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=', 
+               WRITE (6,*) ' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
      &                     zres, ' HAS NOT BEEN INITIALIZED'
                WRITE (6,*) ' EXECUTION STOPPED'
             ENDIF
@@ -799,7 +799,6 @@ C--------------calculate population in the energy bin ke
                ip = INT(( - 1.0)**(ipar + 1))
                DO jcn = 1, NLW, LTUrbo !over decaying nucleus spin
                   IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
-99060             FORMAT (1X,'J,DEF ',I3,F9.4)
                   DENhf = 0.0
                   IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
                      popleft = popleft + POP(ke,jcn,ipar,nnuc)*DE
@@ -889,7 +888,7 @@ C-----------------calculate total emission
                IF (FISmod(nnuc).GT.0.) THEN
                   WRITE (80,*) '  '
                   DO m = 1, INT(FISmod(nnuc)) + 1
-                     WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m), 
+                     WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),
      &                            ' mb'
                   ENDDO
                ENDIF
@@ -934,7 +933,7 @@ C--------------check for the number of branching ratios
                   nbr = ib
                ENDDO
  1510          IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein) WRITE (6,*)
-     &              ' WARNING: Branching ratios for level ', il, ' in ', 
+     &              ' WARNING: Branching ratios for level ', il, ' in ',
      &             INT(A(nnuc)), '-', SYMb(nnuc), ' are missing'
                WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc), 
      &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr, 
@@ -1380,7 +1379,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                 ! MT=849 exact endpoint
-                           WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
+                           WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                            POPcse(0,nejc,ie,nnuc)*recorp
                         ENDDO
                      ELSE  !all other emissions (continnum and levels together)
@@ -1391,7 +1390,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                 ! exact endpoint
-                           WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
+                           WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                            POPcse(0,nejc,ie,nnuc)*recorp
                         ENDDO
                      ENDIF
@@ -1840,7 +1839,7 @@ C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
             RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
          ENDDO
          WRITE (12,*) ' '
-         WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ', 
+         WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
      &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
          WRITE (12,*) ' '
          WRITE (12,'('' Energy    mb/MeV'')')
@@ -1881,7 +1880,7 @@ C
      &                 HM(NFTRANS,NFMOD), PFIso, RFIso, 
      &                 ROFism(0:NFISENMAX,NDLW,NFMOD), SHCfism(NFMOD), 
      &                 TABs, TDIr, TDIr23, TDIrect, TDIrm(NFMOD), 
-     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso, 
+     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso,
      &                 TISo, UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD), 
      &                 XMInnm(NFMOD)
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
@@ -1992,7 +1991,7 @@ C
      &                 HM(NFTRANS,NFMOD), PFIso, RFIso, 
      &                 ROFism(0:NFISENMAX,NDLW,NFMOD), SHCfism(NFMOD), 
      &                 TABs, TDIr, TDIr23, TDIrect, TDIrm(NFMOD), 
-     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso, 
+     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso,
      &                 TISo, UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD), 
      &                 XMInnm(NFMOD)
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
@@ -2012,10 +2011,9 @@ C
 C Local variables
 C
       INTEGER INT
-      INTEGER ip, nejc, nnur
+      INTEGER nejc, nnur
       DOUBLE PRECISION xnorfis
  
-      ip = INT(( - 1.0)**(Ipar + 1))
       Dencomp = DENhf - Sumfis
       IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
      &    .NE.1.) THEN

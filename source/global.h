@@ -7,7 +7,7 @@
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc), 
      &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
      &                 , CANgler(ndang), CETa, CHMs, CRL, 
-     &                 CSAlev(ndang,ndlv,ndejc), CSDirlev(ndlv,0:ndejc), 
+     &                 CSAlev(ndang,ndlv,ndejc), CSDirlev(ndlv,0:ndejc),
      &                 CSE(ndecse,0:ndejc,0:ndnuc), 
      &                 CSEa(ndecse,ndang,0:ndejc,0:1), 
      &                 CSEahms(ndecse,ndang,ndejc), 
@@ -27,7 +27,7 @@
      &                 EJMass(0:ndejc)
       INTEGER BFF(2), D_Klv(ndcollev), D_Llv(ndcollev), F_Print, IARes, 
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc, 
-     &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1, ILIres, 
+     &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1, ILIres,
      &        INRes, IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, 
      &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev), IPRes, 
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc), 
@@ -36,7 +36,7 @@
      &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), LTUrbo, 
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, NACc, 
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMc, NEX(ndnuc), 
-     &        NEXr(ndejc,ndnuc), NEXreq, NHMs, NLV(0:ndnuc), NLW, NNUcd, 
+     &        NEXr(ndejc,ndnuc), NEXreq, NHMs, NLV(0:ndnuc), NLW, NNUcd,
      &        NNUct, NOUt, NPRoject, NRBar, NRBarc, NRBinfis(2), 
      &        NREs(ndejc), NRFdis(nfparab), NRWel, NSCc, NTArget
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel, 
@@ -53,11 +53,11 @@
      &                 FUSred, GAMmafis(2), GCAsc, GDIv, GDIvp, GDRdyn, 
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1, 
      &                 GDRwa2, GDRweis, GGDr1, GGDr2, 
-     &                 GMRpar(ndgmrpm,0:ndnuc), GQRpar(ndgqrpm,0:ndnuc), 
+     &                 GMRpar(ndgmrpm,0:ndnuc), GQRpar(ndgqrpm,0:ndnuc),
      &                 GST, GTIlnor(0:ndnuc), H(50,nfparab), HHBarc, 
      &                 HIS(0:ndnuc), HJ(ndnuc,nfparab), HOEq, LQDfac, 
      &                 MFPp, MOMortcrt, MOMparcrt, 
-     &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc), 
+     &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),
      &                 PEQc, PI, POP(ndex,ndlw,2,ndnuc), 
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,ndnucd), 
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,ndnucd), 
@@ -85,7 +85,7 @@
      &                 SIGabs(ndetl,ndejc + 1,ndnuc), STMro, TEMp0, 
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc), 
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc, 
-     &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc), 
+     &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
      &                 UGRid(0:nfisenmax,nfhump), VEQ, 
      &                 VOM(ndvom,0:ndejc,0:ndnuc), 
      &                 VOMs(ndvom,0:ndejc,0:ndnuc), 
@@ -93,12 +93,12 @@
      &                 WOMs(ndwom,0:ndejc,0:ndnuc), 
      &                 WOMv(ndwom,0:ndejc,0:ndnuc), 
      &                 WSO(ndvso,0:ndejc,0:ndnuc), XJLv(ndlv,0:ndnuc), 
-     &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump), 
+     &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNExc, XNI, 
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, UGRid, ENH_ld, SHCfis, DELtafis, 
-     &                    GAMmafis, NRBinfis, XMInn, AFIs, BFF, DEStepp, 
+     &                    GAMmafis, NRBinfis, XMInn, AFIs, BFF, DEStepp,
      &                    FIScon
       COMMON /COMFIS_I/ NRBar, NRWel, NRBarc, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
@@ -127,7 +127,7 @@
      &                 REDmsc, TUNe, EJMass, SIGabs
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar, 
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF, 
-     &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd, 
+     &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
      &                 CSEhms, CSEfis, CSE, CSEa, CSEahms, RECcse, 
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs, 
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo, 
@@ -136,9 +136,9 @@
      &                 D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, 
-     &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq, 
+     &                  LHMs, NHMs, INRes, IPRes, IARes, ILIres, NEXreq,
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX, IX4ret, 
-     &                  JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, LEVtarg, 
+     &                  JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, LEVtarg,
      &                  KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, NEXr, 
      &                  IDNa, ND_nlv, IPH, LMAxcc, IDEfcc, IOPsys, 
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject, 

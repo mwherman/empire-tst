@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.16 $
-C $Id: ddhms.f,v 1.16 2005-03-04 17:21:18 herman Exp $
+C CVS Version Management $Revision: 1.17 $
+C $Id: ddhms.f,v 1.17 2005-03-11 17:22:12 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -443,7 +443,7 @@ C
       CALL OUTPUTPRINT
 C
       IF (IKIn.EQ.2) WRITE (6,*) '*WARNING:', NBAd, 
-     &                           ' events had -ve ucndump, worst case=', 
+     &                           ' events had -ve ucndump, worst case=',
      &                           UBAd
 99005 FORMAT (i9,4x,i5,5x,1p,1E10.4,2x,1p,1E10.4,2x,1p,1E10.4,2x,1p,
      &        1E10.4,1x,1p,1E10.1)
@@ -648,7 +648,7 @@ C           ! this is the angle in the proj coord system
 C           !dumps particle energy into c.n. excitation
 C
             IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h, 
-     &                                  ' uex1p1h=', UEX1p1h(index1p1h), 
+     &                                  ' uex1p1h=', UEX1p1h(index1p1h),
      &                                  'trapped 1p energy=', epart
             GOTO 100
          ENDIF
@@ -1302,7 +1302,7 @@ C        determine what type of particle this is:
          IF (ISOspi1p2h(jstudy).EQ.'0102' .OR. ISOspi1p2h(jstudy)
      &       .EQ.'0111') SELtype = 'neut'
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, ' uex1h=', 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, ' uex1h=',
      &                               UEX1h(jstudy), ' epart=', epart
 C
 C        jflagem=1,0
@@ -1779,7 +1779,7 @@ C
 C
 C Local variables
 C
-      REAL*8 beta, c, cons, echan, efermin, efermip, gfree, glev, rmass, 
+      REAL*8 beta, c, cons, echan, efermin, efermip, gfree, glev, rmass,
      &       siginv, spin, vd
       DOUBLE PRECISION DSQRT
       INTEGER NINT
@@ -2121,7 +2121,7 @@ C
 C
 C Local variables
 C
-      REAL*8 anorm, dph, dth, ecount(0:10), restot, sumn, sumnlab, sump, 
+      REAL*8 anorm, dph, dth, ecount(0:10), restot, sumn, sumnlab, sump,
      &       sumplab, th, thet, zjadd
       DOUBLE PRECISION DSIN
       REAL FLOAT
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.16 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.17 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.16 2005-03-04 17:21:18 herman Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.17 2005-03-11 17:22:12 herman Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -4664,7 +4664,7 @@ C
       REAL*8 adum(5,7), csfit(NDANG), qq(5)
       DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1), 
      &                 auxout(NDEX,NDIM_JBINS + 1), 
-     &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon, 
+     &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon,
      &                 xmre, xnor, zero
       REAL FLOAT
       INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre, 
@@ -4779,12 +4779,12 @@ C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       ENDDO
 C-----interpolate in energy
 C-----to continuum
-      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS + 
+      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
      &                                  NDECSE,19,zero,(NEX(nnur) - 1)
      &                                  *DE)
 C-----to discrte levels
-      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS + 
+      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
      &                                  NDECSE,19,NEX(nnur)*DE,
      &                                  EMAx(nnur))
@@ -4832,12 +4832,12 @@ C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       ENDDO
 C-----interpolate in energy
 C-----to continuum
-      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS + 
+      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
      &                                  NDECSE,19,zero,(NEX(nnur) - 1)
      &                                  *DE)
 C-----to discrte levels
-      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS + 
+      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
      &                                  NDECSE,19,NEX(nnur)*DE,
      &                                  EMAx(nnur))
@@ -4967,7 +4967,7 @@ C--------------population of continuum
      &                     + auxout(nu,jsp)
                      ENDIF
                      sumcon = sumcon + 2*auxout(nu,jsp)
-                     IF (nu.EQ.1 .OR. nu.EQ.NEX(nnur)) sumcon = sumcon - 
+                     IF (nu.EQ.1 .OR. nu.EQ.NEX(nnur)) sumcon = sumcon -
      &                   auxout(nu,jsp)
                   ENDDO
                ENDDO
@@ -5746,7 +5746,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION akf, akf2, akn, akn1, akn2, akn3, aknc, aknhi, 
-     &                 aknlo, aknpar, aknparc, aknpars, akns, akp, akp1, 
+     &                 aknlo, aknpar, aknparc, aknpars, akns, akp, akp1,
      &                 akp2, akp3, akpc, akphi, akplo, akppar, akpparc, 
      &                 akppars, akps, alf2, am, apn, app, cthn, cthp, 
      &                 dd, dkn, dkp, dph, dsigkn, dsigkp, dsigpn, 
