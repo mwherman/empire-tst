@@ -158,6 +158,7 @@ rm FISSION.INP  2>/dev/null
 #rm FISSION.OUT  2>/dev/null
 rm OMPAR.DIR  2>/dev/null
 rm OMPdata.dat  2>/dev/null
+rm mt_x4r.txt  2>/dev/null
 rm 'ECIS_SPH.out#'  2>/dev/null
 rm TAPE15 2>/dev/null
 rm TAPE16 2>/dev/null
@@ -214,6 +215,9 @@ if [ ! -s $file-ecis.out ]; then
 fi
 if [ ! -s $file-inp.fis ]; then 
        rm $file-inp.fis  2>/dev/null
+fi
+if [ ! -s FISSION.OUT ]; then 
+       rm FISSION.OUT  2>/dev/null
 fi
 
 exit
