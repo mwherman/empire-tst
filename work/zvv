@@ -1,0 +1,9 @@
+#!/bin/bash
+blank=" "
+list=""
+for file in $*
+do
+list=$list$file$blank
+done
+../util/c4zvd/zvv94l.exe $list 
+exit

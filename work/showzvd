@@ -1,0 +1,6 @@
+#!/bin/bash
+for file in $*
+do
+../util/c4zvd/zvv94l.exe $file
+done
+exit
