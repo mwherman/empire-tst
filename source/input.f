@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: herman $
-Ccc   * $Date: 2004-08-02 16:19:26 $
-Ccc   * $Id: input.f,v 1.37 2004-08-02 16:19:26 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-08-30 13:29:18 $
+Ccc   * $Id: input.f,v 1.38 2004-08-30 13:29:18 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -286,7 +286,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 2
+         IX4ret = 1
 C
 C--------CCFUF parameters
          DV = 10.
@@ -5689,8 +5689,11 @@ C
          DEFfis(5) = epsil(4)
       ENDIF
 C-------parameters of the equivalent outer barrier
- 100  XMInn(ibars) = 0.0001
-      DO ibars = 1, NRBarc
+C     Bug found, RCN 08/2004
+C 100  XMInn(ibars) = 0.0001
+C     DO ibars = 1, NRBarc
+100   DO ibars = 1, NRBarc
+         XMInn(ibars) = 0.0001
          DO nr = 1, NRFdis(ibars)
             IF(EFDis(nr, ibars).GT.XMInn(ibars))XMInn(ibars)
      &         = EFDis(nr, ibars)
