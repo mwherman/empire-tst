@@ -150,7 +150,7 @@ C
      &                   UGRid(0:NFISENMAX,NFHUMP),  enh_ld(3,2),
      &                   shcfis(2),deltafis(2),gammafis(2),
      &                   NRbinfis(2),xminn(NFHUMP),afis(nfparab),
-     &                   bff(2),destepp, FISCON
+     &                   bff(2),destepp(2), FISCON
 C
       INTEGER bff
       DOUBLE PRECISION MOMparcrt, MOMortcrt

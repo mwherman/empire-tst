@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-24 13:21:52 $
-Ccc   * $Id: HF-comp.f,v 1.39 2005-01-24 13:21:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-04 16:31:23 $
+Ccc   * $Id: HF-comp.f,v 1.40 2005-02-04 16:31:23 herman Exp $
 C
       SUBROUTINE ACCUM(Iec, Nnuc, Nnur, Nejc, Xnor)
 Ccc
@@ -43,7 +43,6 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C Dummy arguments
 C
@@ -220,7 +219,6 @@ C
 C-----Contribution comming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       POPcse(Ief,Nejc,icsp,Nnur) =  POPcse(Ief,Nejc,icsp,Nnur) + Popt
-
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF(Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
@@ -242,11 +240,7 @@ C--------neutron and proton DDX spectra using portions
             ENDDO
          ENDDO
       ENDIF
-
-
       END
-
-
       SUBROUTINE EXCLUSIVEL(Iec, Ie, Nejc, Nnuc, Nnur, Popt)
 Ccc
 Ccc   ********************************************************************
@@ -325,11 +319,7 @@ C-----------neutron and proton DDX spectra using portions
           ENDDO
          ENDIF
       ENDIF
-
-
       END
-
-
 C
       SUBROUTINE DECAY(Nnuc, Iec, Jc, Ipc, Nnur, Nejc, Sum)
 Ccc
@@ -763,7 +753,6 @@ c     ENDIF
 c     F_PRINT = 100
 c 250 CONTINUE
 C-----Plujko_new(End)
-
       Sum = 0.0
       SCRtem(0) = 0.0
       xjc = FLOAT(Jc) + HIS(Nnuc)
@@ -1301,9 +1290,9 @@ Ccc   *       mmod-number of modes (multimodal fission)                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
-Ccc   * output:SUMFIS-integral of the Tf for discrete and continuum over *
-Ccc   *            the kinetic energy of fission fragments (to be added  *
-Ccc   *            to the Hauser-Feshbach denominator DENHF)             *
+Ccc   * output:SUMFIS - total fission transmission coefficient (to be 
+Ccc                     added to the Hauser-Feshbach denominator DENHF)  *
+Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * calls:...                                                        *
 Ccc   *                                                                  *
@@ -1322,7 +1311,6 @@ C
       COMMON /COMFIS4/ TFC, TFCc, JCC
       COMMON /CMIU  / SMIu, PHAsr(NFPARAB), ho(nfparab)
       COMMON /IMAG  / TF(NFPARAB), TDIr, TABs, TDIr23,TG2,tfiso
-
       DOUBLE PRECISION PHAsr, delt, tdir1, tdirr, TDIr, tabss, ho,tg2,
      &                 TABs, TDIr23, tdirr23, tdir231, TF, atal, btal,
      &                 ctal, dtal, etal, aral, bral, cral, dral, eral,
@@ -1476,17 +1464,16 @@ C
                      IF(arg.GT.EXPmax)arg=expmax
                      TFD(IBAr) = 1./(1. + EXP(arg))
                   ENDDO
-
-                  tdirr23 = 0.d0
-                  tdirr = 0.d0
-                  tabss = 0.d0
-
-C---------------- Penetrability calculations for double-humped case
-                  IF(NRBar.EQ.3.and.NRWel.eq.1.)THEN
-c--------------------region I
-                     IF(ee.le.vbarex(3)) tdirr=tfd(1)*tfd(2)
-c                    call wkbfisnum(ee,3.)!!!!!!!!!!!!!!
-c--------------------region II
+C
+C----------- Penetrability calculations for double-humped case 
+                  IF(NRBar.EQ.3.and.NRWel.eq.1.)THEN                 
+c------------region I 
+                     IF(ee.le.vbarex(3))THEN 
+c                        call wkbfisnum(ee,3.)
+                        tdirr=tfd(1)*tfd(2)
+                        tabss=0. 
+                     ENDIF   
+c-----------region II
                      IF(ee.LT.vbarex(1).AND.ee.LT.vbarex(2))THEN
                         delt = WIMagg*PHAsr(3)
                         IF(delt.GT.EXPmax)delt=EXPmax
@@ -1494,43 +1481,53 @@ c--------------------region II
                         tdirr = TFD(1)*TFD(2)
      &                          /(EXP(delt) + 2*SQRT(ABS(tdir1))
      &                          *COS(PHAsr(3)) + tdir1*EXP( - delt))
-                        IF(TFD(2).GT.0.)
-     &                  tabss = tdirr*(EXP(delt)/TFD(2)
+                        IF(TFD(2).GT.0.)THEN
+                           tabss = tdirr*(EXP(delt)/TFD(2)
      &                             - (1 - TFD(2))*EXP( - delt)/TFD(2)
      &                             - 1)
+                        ELSE
+                           tabss = 0.
+                        ENDIF
                      ENDIF
-c--------------------region III
-                     IF(ee.GE.min(vbarex(1),vbarex(2))) tabss = TFD(1)
-                  ENDIF
-
-C---------------- Penetrability calculations for triple-humped barrier
+c-----------region III
+                     IF(ee.GE.min(vbarex(1),vbarex(2)))THEN
+                        tdirr = 0.
+                        tabss = TFD(1) 
+                     ENDIF
+                  ENDIF   
+C----------------------------------------------------------------  
+C-------- Penetrability calculations for triple-humped barrier for
+C         light actinides 
                   IF(NRBar.EQ.5.and.NRWel.eq.2.)THEN
-c--------------------region I
+c-----------region I
                      IF(ee.le.vbarex(4).and.ee.le.vbarex(5))THEN
 c                       call wkbfisnum(ee,2.) !!!!!
                         tfd(1)=0.
                         tfd(2)=0.
                         tfd(3)=0.
+                        tdirr=0.
+                        tabss=0.
+                        tdirr23=0. 
                      ENDIF
-c--------------------region II
+c-------------region II
                      IF(ee.le.vbarex(1).and.ee.le.vbarex(5).and.
      &                  ee.gt.vbarex(4))THEN
                         delt = WIMagg*PHAsr(4)
                         IF(delt.GT.EXPmax)delt=EXPmax
                         call wkbfisnum(ee,1.)
-                        if(phasr(2).ge.0.)
-     &                  tdirr23 = 1./(1. + EXP(phasr(2)))
+                         tdirr23 =0.
+                         if(phasr(2).ge.0.)
+     &                   tdirr23 = 1./(1. + EXP(phasr(2))) 
                         tdir1 = (1. - TFD(1))*(1. - Tdirr23)
                         tdirr = TFD(1)*Tdirr23
      &                          /(EXP(delt) + 2*SQRT(ABS(tdir1))
      &                          *COS(PHAsr(4)) + tdir1*EXP( - delt))
-
-                        if(delt.NE.0.)
-     &                  tabss = tdirr*(EXP(delt)/Tdirr23
+                        tabss = tdirr*(EXP(delt)/Tdirr23
      &                             - (1. - Tdirr23)*EXP( - delt)/Tdirr23
      &                             - 1.)
+                        if(delt.eq.0.)tabss=0.               
                      ENDIF
-c--------------------region III
+c--------------region III 
                      efbmin=min(vbarex(2),vbarex(3))
                      efbmax=max(vbarex(2),vbarex(3))
                      IF(ee.lt.vbarex(1).and.ee.gt.vbarex(4).and.
@@ -1575,34 +1572,35 @@ c--------------------region III
      &                      /(1. + 2*SQRT(ABS(tdir231))*COS(1.*PHAsr(5))
      &                           + tdir231)
                      ENDIF
-c--------------------region IV
-                     IF(ee.gt.vbarex(1).and.ee.le.vbarex(5))THEN
-                        call wkbfisnum(ee,1.)
+c-------------region IV
+                     IF(ee.gt.vbarex(1).and.ee.le.vbarex(5))THEN 
+                        call wkbfisnum(ee,1.)                     
                         tdirr23 = 1./(1. + EXP(phasr(2)))
+                        tdirr=0.
                         tabss=tfd(1)
-                     ENDIF
-c--------------------region V
+                     ENDIF   
+c-------------region V
                      IF(ee.gt.vbarex(1).and.ee.gt.vbarex(5).and.
      &                  ee.lt.efbmin)THEN
                         tdir231 = (1. - TFD(2))*(1. - TFD(3))
                         tdirr23 = TFD(2)*TFD(3)
      &                    /(1. + 2.*SQRT(ABS(tdir231))*COS(PHAsr(5))
      &                         + tdir231)
+                        tdirr=0.
                         tabss=tfd(1)
                      ENDIF
-c--------------------region VI
-                     IF(ee.ge.efbmin)THEN
-                        tdirr23 = tfd(2)*tfd(3)
+c-------------region VI                  
+                     IF(ee.ge.efbmin)THEN 
+                        tdirr23 = tfd(2)*tfd(3) 
+                        tdirr=0.
                         tabss=tfd(1)
                      ENDIF
-
-                 ENDIF
-
-                 if(tabss+tdirr.GT.1.) tdirr=0. !!!!!!!!!!!
+                 ENDIF    
+c-------------------------
+                 if(tabss+tdirr.GT.1.) tdirr=0. 
                  TDIr = TDIr + tdirr
                  TABs = TABs + tabss
-                 TDIr23 = TDIr23 + tdirr23
-
+                 IF(nrbarc.eq.3)TDIr23 = TDIr23 + tdirr23
                  DO IBAr = 1, NRBarc
                     tfdis(IBAr) = tfdis(IBAr) + TFD(IBAr)
                  ENDDO
@@ -1617,10 +1615,8 @@ C==============continuum contribution====================
          nrbarc1=2
          hh2=h(1,2)
          vv2=efb(2)
-         h(1,2)=hoeq
-c        Msin 08/2004
-c        efb(2)=veq
-         efb(2)=veq+jc*0.017
+         h(1,2)=hoeq 
+         efb(2)=veq
       ENDIF
 
       DO IBAr = 1, NRBarc1
@@ -1639,15 +1635,15 @@ C        CALL GAUSSFIS(NNUc, IBAr)
          TF(IBAr) = tfdis(IBAr) + tfcon(IBAr)
       ENDDO
       TABs = TABs + tfcon(1)
-      Tdir23=Tdir23 + tfcon(2)
-
+      
       IF(nrbarc.eq.3)THEN
+         Tdir23=Tdir23 + tfcon(2)
          h(1,2)=hh2
          efb(2)=vv2
       ENDIF
 
       IF(FISopt(NNuc).eq.2.)THEN
-c      gamma transition, eeiso
+c      gamma transition in isomeric well, not calculated yet   
          TG2=.00002
       ELSE
          TG2=0.
@@ -1667,17 +1663,21 @@ c-----double-humped
          IF(tnumm.EQ.0.0)THEN
             Sumfis = 0.
          ELSE
-            Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))
-            IF(FISopt(Nnuc).EQ.0.)
-     &         WRITE(80, '(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')'Mode='
-     &                    ,mmod, 'J=',
-     &                    aj, 'Pi=', Ip, tfdis(1), tfdis(2),
-     &                    tfcon(1), tfcon(2), SUMfis
-            IF(NRWel.eq.1.and.FISopt(Nnuc).gt.0.)
-     &         WRITE(80, '(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')'Mode='
-     &                    ,mmod, 'J=',aj, 'Pi=', Ip, tfdis(1), tfdis(2),
-     &                    tfcon(1), tfcon(2), SUMfis, TDIr, TABs
-         ENDIF
+           
+            IF(FISopt(Nnuc).EQ.0.)THEN
+               Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))     
+               WRITE(80, '(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
+     &                   'Mode=', mmod, 'J=', aj, 'Pi=', Ip, tfdis(1), 
+     &                     tfdis(2), tfcon(1), tfcon(2), SUMfis
+            ENDIF
+            IF(NRWel.eq.1.and.FISopt(Nnuc).gt.0.)THEN
+              sumfis=tdir+tabs*tf(2)/(tf(1)+tdir+tg2) 
+              WRITE(80, '(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)') 
+     &                  'Mode=',mmod, 'J=',aj, 'Pi=', Ip, tfdis(1), 
+     &                   tfdis(2), tfcon(1), tfcon(2), SUMfis, TDIr, 
+     &                   TABs
+           ENDIF    
+         ENDIF        
       ENDIF
 C----triple-humped
       IF(NRBarc.EQ.3)THEN
@@ -1910,8 +1910,7 @@ C     Passing parameters to the integrand function Fdensity
       TFCc = 0.D0
 C
       XMIn = XMInn(Ibar)
-      XMAx = XMInn(Ibar) + (nrbinfis(ibar) - 1)*destepp
-
+      XMAx = XMInn(Ibar) + (nrbinfis(ibar) - 1)*destepp(ibar)
       TFCc = GAUSS_INT(FDENSITY, xmin, xmax, abserr)
 C
 C     If Relative Error for Gaussian Integration > 1 %
@@ -1999,9 +1998,6 @@ C
       ENDIF
 C
       IF(subwell1.eq.1.)THEN
-c             write(6,*)'dang',uexcit, vjj(4)
-c              if(eps.lt.ejoin(3).and.eps.gt.ejoin(1))
-c     &            VDEF = VJJ(1) - (SMIu*Ho(1)*(Eps - EPSil(1)))**2
              if(eps.lt.ejoin(4).and.eps.gt.ejoin(3))
      &            VDEF = VJJ(2) + (SMIu*Ho(2)*(Eps - EPSil(2)))**2
              if(eps.lt.ejoin(6).and.eps.gt.ejoin(5))
@@ -2188,14 +2184,16 @@ C Simpson integration
 
       TFCc = 0.
       DO i = 1, nrbinfis(ibar)
-         UX1 = XMInn(Ibar) + (i - 1)*destepp
-         if(ux1.lt.0.)ux1=0.001
+         UX1 = XMInn(Ibar) + (i - 1)*destepp(ibar)
+         if(ux1.lt.0.)ux1=0.0001
          enh1=enh_ld(1,ibar)+(enh_ld(2,ibar)+enh_ld(3,ibar)*ux1)*ux1
          arg1=2*PI*(UX1+efb(ibar)-Ee)/H(1,ibar)
          IF(arg1.GE.EXPmax)arg1=expmax
-         IF(FISden(Nnuc).EQ.1.)THEN
+           
+         IF(FISden(Nnuc).EQ.1.)THEN                 
             dens =enh1*ROfis(i,jcc,ibar)/(1. + EXP(arg1))
          ENDIF
+         
          IF(FISden(Nnuc).EQ.0.)THEN
             dens = enh1* FISINT(Ibar, UX1,jcc,nnuc)/(1. +EXP(arg1))
          ENDIF
@@ -2205,7 +2203,7 @@ C Simpson integration
          dens = nn*dens
          TFCc = TFCc + dens
       ENDDO
-      TFCc = TFCc*destepp
+      TFCc = TFCc*destepp(ibar)
       END
 C
 c=============================================================
@@ -2213,13 +2211,14 @@ c=============================================================
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      character*36 cara1
-
-      COMMON /FISSMOD / rofism(60,30,3), hm(Nftrans,3),
+      character*36 cara1 
+      COMMON /FISSMOD / rofism(160,30,3), hm(Nftrans,3), 
      &                  efdism(Nftrans,3), UGRidf(0:NFISENMAX, 3),
      &                  efbm(3), xminnm(3),afism(3),
      &                  defbm(3), shcfism(3), deltafism(3),
-     &                  gammafism(3),wfism(3), bffm(3), nrbinfism(3)
+     &                  gammafism(3),wfism(3), bffm(3), nrbinfism(3),
+     &                  destepm(2),
+     &                 tfbm(3),tdirm(3),tfb,tdirect
       COMMON /CRITFIS/acrtf(2), ucrtf(2), tcrtf(2), detcrtf(2),
      &                scrtf(2),mortcrt(nfparab),mparcrt(nfparab),
      &                econdf(2)
@@ -2229,8 +2228,6 @@ C
      &                  shcfism, deltafism, gammafism,afism,
      &                  tfiso,tgiso,tiso,rfiso,wfism
       DOUBLE PRECISION  mortcrt,mparcrt
-C     DOUBLE PRECISION  ACR, ACRt, ATIl,mortcrt,mparcrt,
-C    &                 DETcrt, ECOnd, SCR, TCRt, UCRt
       INTEGER bffm
 C
       WRITE(80, '(a40)')'----------------------------------------'
@@ -2417,9 +2414,9 @@ C
       WRITE(80,*)'  '
 
       IF(FISden(nnuc).eq.1.)THEN
-         WRITE(80,*) 'Nuclear shape asymmetry at saddles, shell correct,
-     &    delta, gamma, asaf '
-
+         WRITE(80,*)
+     &   '  Asymmetry  shell-corr  delta    gamma    atilf/atil ' 
+         
          DO nr=1, NRBarc1
             IF(FISmod(Nnuc).eq.0..or.
      &           (Fismod(nnuc).gt.0..and.nr.ne.2)) THEN

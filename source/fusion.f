@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-01-31 01:12:17 $
-Ccc   * $Id: fusion.f,v 1.26 2005-01-31 01:12:17 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-02-04 16:31:23 $
+Ccc   * $Id: fusion.f,v 1.27 2005-02-04 16:31:23 herman Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -573,15 +573,15 @@ C       LINUX
         iwin = PIPE(ctmp)
       ELSE
 C       WINDOWS
-        ctmp = 'move INCIDENT.CS  ..\TL\'//ctmp18//'.CS >NUL'
+        ctmp = 'move INCIDENT.CS  ..\\TL\\'//ctmp18//'.CS >NUL'
         iwin = PIPE(ctmp)
         IF(DIRECT.GT.0) THEN
-          ctmp = 'move INCIDENT.ICS ..\TL\'//ctmp18//'.ICS >NUL'
+          ctmp = 'move INCIDENT.ICS ..\\TL\\'//ctmp18//'.ICS >NUL'
           iwin = PIPE(ctmp)
         ENDIF
-        ctmp = 'move INCIDENT.ANG ..\TL\'//ctmp18//'.ANG >NUL'
+        ctmp = 'move INCIDENT.ANG ..\\TL\\'//ctmp18//'.ANG >NUL'
         iwin = PIPE(ctmp)
-        ctmp = 'move INCIDENT.TLJ ..\TL\'//ctmp18//'.TLJ >NUL'
+        ctmp = 'move INCIDENT.TLJ ..\\TL\\'//ctmp18//'.TLJ >NUL'
         iwin = PIPE(ctmp)
         ctmp = 'del ecis03.tlj >NUL'
         iwin = PIPE(ctmp)
