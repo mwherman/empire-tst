@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-09-23 18:08:48 $
-Ccc   * $Id: input.f,v 1.39 2004-09-23 18:08:48 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2004-09-23 20:01:06 $
+Ccc   * $Id: input.f,v 1.40 2004-09-23 20:01:06 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -822,7 +822,7 @@ C
             WRITE(6, *)' '
             WRITE(6, *)' WARNING!!!! Subbarrier effects in the fission'
             WRITE(6, *)' WARNING!!!! channel allowed only for FISBAR=1'
-            WRITE(6, *)' WARNING!!!! FISopt has been set to 0 '
+            WRITE(6, *)' WARNING!!!! FISOPT has been set to 0 '
             WRITE(6, *)' '
          ENDIF
          IF(DIRect.GT.0 .AND. INT(AEJC(0)).EQ.0)THEN
@@ -1669,13 +1669,12 @@ C-------barriers available in RIPL-2  (MS)
             IF(xfis.LT.0.3D0)FISsil(nnuc) = .FALSE.
          ENDIF
       ENDDO
-      INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
-      IF(.NOT.gexist)THEN
-        OPEN(79, FILE = 'FISSION.INP', STATUS = 'UNKNOWN')
-        DO nnuc = 1, NNUct
-          IF(FISshi(nnuc).NE.1.)THEN
-            DO nnuc1 = 1, NNUcd
-              IF(FISsil(nnuc1))CALL INPFIS(nnuc1)
+      IF(FISshi(nnuc).EQ.0)THEN
+         INQUIRE(FILE = 'FISSION.INP', EXIST = gexist)
+         IF(.NOT.gexist)THEN
+            OPEN(79, FILE = 'FISSION.INP', STATUS = 'UNKNOWN')
+            DO nnuc = 1, NNUcd
+               IF(FISsil(nnuc))CALL INPFIS(nnuc)
             ENDDO
          ENDIF
        ENDDO
@@ -2296,6 +2295,7 @@ C
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc
       INTEGER INT
       CHARACTER*6 name
+      CHARACTER*40 fstring
       DOUBLE PRECISION val
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
@@ -3419,6 +3419,22 @@ C        fisfis d --------------
 C        checking for fission data in the optional input
          IF(name.EQ.'FISSHI')THEN
             izar = i1*1000 + i2
+            IF(val.EQ.0) THEN
+               fstring = 'advanced treatment of fission'
+            ELSEIF(val.EQ.1) THEN
+               fstring = 'fission over single-humped barrier'
+            ELSEIF(val.EQ.2) THEN
+               fstring = 'fission ignored'
+            ELSE
+               fstring = 'illegal value for FISSHI'
+            ENDIF
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISshi(nnuc) = val
+               ENDDO
+               WRITE(6,*) 'For all nuclei: ', fstring
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3427,14 +3443,21 @@ C        checking for fission data in the optional input
                GOTO 100
             ENDIF
             FISshi(nnuc) = val
-            WRITE(6,
-     &            '('' FISSHI  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            )i2, SYMb(nnuc), val
+            WRITE(6,*) 'For ',i2,'-',SYMb(nnuc),' ', fstring
             GOTO 100
          ENDIF
 C-------------------------------------------------------------------------
          IF(name.EQ.'FISMOD')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISmod(nnuc) = val
+               ENDDO
+               WRITE(6, 
+     &               '('' FISMOD  in all nuclei set to '',F6.3)'
+     &               ) val
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3451,6 +3474,15 @@ C-------------------------------------------------------------------------
 C-------------------------------------------------------------------------
          IF(name.EQ.'FISOPT')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISopt(nnuc) = val
+               ENDDO
+               WRITE(6, 
+     &               '('' FISOPT  in all nuclei set to '',F6.3)'
+     &               ) val
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3467,6 +3499,15 @@ C-------------------------------------------------------------------------
 C-------------------------------------------------------------------------
          IF(name.EQ.'FISBAR')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISbar(nnuc) = val
+               ENDDO
+               WRITE(6, 
+     &               '('' FISBAR  in all nuclei set to '',F6.3)'
+     &               ) val
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3483,6 +3524,15 @@ C-------------------------------------------------------------------------
 C-------------------------------------------------------------------------
          IF(name.EQ.'FISDEN')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISden(nnuc) = val
+               ENDDO
+               WRITE(6, 
+     &               '('' FISDEN  in all nuclei set to '',F6.3)'
+     &               ) val
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3499,6 +3549,15 @@ C-------------------------------------------------------------------------
 C-------------------------------------------------------------------------
          IF(name.EQ.'FISDIS')THEN
             izar = i1*1000 + i2
+            IF(izar.EQ.0)THEN
+               DO nnuc = 1, NDNUC
+                  FISdis(nnuc) = val
+               ENDDO
+               WRITE(6, 
+     &               '('' FISDIS  in all nuclei set to '',F6.3)'
+     &               ) val
+               GOTO 100
+               ENDIF
             CALL WHERE(izar, nnuc, iloc)
             IF(iloc.EQ.1)THEN
                WRITE(6, '('' NUCLEUS '',I3,A2,'' NOT NEEDED'')')i2,
@@ -3512,6 +3571,7 @@ C-------------------------------------------------------------------------
      &            )i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
+C-------------------------------------------------------------------------
 C        fisfis u ----------------------------------------------------
          WRITE(6, '('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
      &         name
