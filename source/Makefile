@@ -43,10 +43,10 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       subecis03.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-
+            thora.o
 
 empire:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+       $(FC) -o $@ $(OBJF)
 
 
 $(OBJF) : global.h dimension.h
