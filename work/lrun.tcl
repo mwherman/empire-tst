@@ -988,6 +988,7 @@ exec $editor listpro &} \
         -activeforeground {} -accelerator {} -background {} \
         -command {set editor {gxedit}} -font {} -foreground {} -image {} \
         -label GXedit 
+    $base.cpd32.men40.01.men41 invoke 0
     ###################
     # SETTING GEOMETRY
     ###################

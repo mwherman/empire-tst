@@ -403,6 +403,10 @@ EANONL   Threshold energy for nonlocality in dispersive omp (default: 60 MeV)
 
 ALPHA    Mahaux nonlocality parameter in dispersive omp (default: 1.65)
 
+RELKIN   Controls kinematics
+       = 0 classical
+       = 1 relativistic
+
 
 
 
@@ -426,7 +430,7 @@ JSTAB 	Stability limit with respect to spin in nucleus Z=I1 and A=I2,
                          D I M E S I O N S
                          -----------------             
 
-Those dimensions which may require modifications in everday use of the 
+These dimensions which may require modifications in everyday use of the 
 code are listed below:
 
 NDNUC    maximum number of nuclei involved in the calculation

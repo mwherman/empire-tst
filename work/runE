@@ -138,7 +138,7 @@ mv ecVIBROT.inp $file-ecis.in 2>/dev/null
 # SHOW WARNINGS
 
 grep WARNING $file.lst >warnings
-#xterm -bg darkorange -title WARNINGS -e vi warnings  
+#xterm -bg darkorange -title WARNINGS -e vi warnings    
 
 # DELETE TEMPORARY FILES
 
