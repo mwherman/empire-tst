@@ -11,7 +11,7 @@ lsttab <LSTTAB.INP
 mv LSTTAB.CUR ../c4zvd/LSTTAB.CUR
 mv LSTTAB.PNT ../c4zvd/LSTTAB.PNT
 cd ../c4zvd
-pntzvdl.bat LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+./pntzvdl.bat LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
 mv DDXPLOT.zvd ../../work/$file-$2.zvd
 rm LSTTAB.CUR LSTTAB.PNT  2>/dev/null
 cd $work
