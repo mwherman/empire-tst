@@ -2414,7 +2414,7 @@ C           All levels with icollev(j)<50 should be calculated by CC
          ENDDO
       ENDIF
       IF(nd_nlvop.EQ.1)WRITE(6, *)
-     &                'All inelastic channels are closed at this energy'
+     &               ' All inelastic channels are closed at this energy'
 C-----ncoll = nd_nlvop
 C-----Considering even closed channels in calculations
 C     ncoll = ND_nlv
@@ -3209,8 +3209,8 @@ c       Adding real spin orbit dispersive contribution to the real spin orbit po
 c       Geometry parameters are the same as for the imaginary spin orbit
 c       potential(imag and real)
         vlib(5) = vlib(5) + DWVso
-        write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
-     &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)
+C       write (25,'(1x,I3,1x,I2,1x,F7.3,3x,6(f6.3,1x,f4.2,1x,f4.2))')
+C    &      nint(atar),nint(ztar), el, (vlib(i),rlib(i),alib(i),i=1,6)
       endif
       return
       end
