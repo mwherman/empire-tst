@@ -83,12 +83,21 @@ SAME AS ENDF/B                        1- 999                                   1
 (D,N)                                   8002   NEUTRON PRODUCTION MT =         1
 (T,N)                                   8003   8000 + ASSIGNED MT              1
 (A,N)                                   8004                                   1
-(N,X)                                   9000 PARTICLE/ISOTOPE PRODUCTION       1
-(P,X)                                   9001 (PRODUCT DEFINED BY               1
-(D,X)                                   9002  FIELD 6 =ZA)                     1
-(T,X)                                   9003                                   1
-(HE-3,X)                                9004                                   1
-(A,X)                                   9005                                   1
+Change convention to identify outgoing particle (A.Trkov, Sep.2004)            1
+*(N,X)                                  9000 PARTICLE/ISOTOPE PRODUCTION       1
+*(P,X)                                  9001 (PRODUCT DEFINED BY               1
+*(D,X)                                  9002  FIELD 6 =ZA)                     1
+*(T,X)                                  9003                                   1
+*(HE-3,X)                               9004                                   1
+*(A,X)                                  9005                                   1
+* New convention when outgoing particle is not defined:                        1
+(z,X)0-G-0                              9000                                   1
+(z,X)0-NN-1                             9001 PARTICLE/ISOTOPE PRODUCTION       1
+(z,X)1-H-1                              9002 (PRODUCT DEFINED BY               1
+(z,X)1-H-2                              9003  FIELD 6 =ZA)                     1
+(z,X)1-H-3                              9004                                   1
+(z,X)2-HE-3                             9005                                   1
+(z,X)2-HE-4                             9006                                   1
                                                                                1
 DEFINITION OF 8 COMPUTATION FORMAT DATA FIELDS                                 1
 ==============================================                                 1
@@ -151,6 +160,7 @@ TOT                                                 1  3   1  0
 Corrected (remove one comma) 14 Jun 2004, A. Trkov                             1
 (N,NON),SIG                                         1  3   3  0
 (N,INL),SIG                                         1  3   4  0
+(N,2N+D),SIG                                        1  3  11  0
 (N,2N),SIG                                          1  3  16  0
 Added 13 Sep 2004                                                             1
 (N,3N),SIG                                          1  3  17  0
@@ -165,8 +175,10 @@ Added 14 Jun 2004, A. Trkov                                                   1
 (N,ABS),SIG                                         1  3 101  0
 (N,G),SIG                                           1  3 102  0
 NG                                                  1  3 102  0
+                                                                              1
 Include bin-averaged values as average cross sections (2 Aug. 2004)           1
 (N,G),SIG,,AV                                       1  3 102  0
+                                                                              1
 Include raw measured values (M. Herman, 20 Sep. 2004)                         1
 (N,G),SIG,,RAW                                      1  3 102  0
 (N,P),SIG                                           1  3 103  0
@@ -194,6 +206,7 @@ Add proton-induced reactions (M. Herman, A.Trkov, Sep.2004)                    1
 (P,NON),,SIG                                     1001  3   3  0
 (P,N),SIG                                        1001  3   4  0
 (P,N),SIG,,,EXP                                  1001  3   4  0
+(P,2N+D),SIG                                     1001  3  11  0
 (P,2N),SIG                                       1001  3  16  0
 (P,3N),SIG                                       1001  3  17  0
 (P,F),SIG                                        1001  3  18  0
@@ -248,6 +261,7 @@ Add alpha-induced reactions (M. Herman, A.Trkov, Sep.2004)                     1
 (A,EL),SIG                                       2004  3   2  0
 (A,NON),,SIG                                     2004  3   3  0
 (A,N),SIG                                        2004  3   4  0
+(A,2N+D),SIG                                     2004  3  11  0
 (A,2N),SIG                                       2004  3  16  0
 (A,3N),SIG                                       2004  3  17  0
 (A,F),SIG                                        2004  3  18  0
@@ -295,14 +309,49 @@ Non-standard extensions (M. Herman, A.Trkov, Sep.2004)                         1
 ((A,N+P),SIG)+((A,D),SIG)                        2004  31003  0
 (A,3-LI-7)PAR,SIG                                2004  31200  0
 (A,P)DI,SIG                                      2004  32103  0
-(A,2P),CUM,SIG                                   2004  3 111  0
-(A,2P),CUM,SIG,,,EXP                             2004  3 111  0
-(A,2P),,SIG                                      2004  3 111  0
-(A,2P),CUM,SIG,,,EXP                             2004  3 111  0
-(A,2N+P),SIG,,,EXP                               2004  3  41  0
-(A,3N+P),SIG,,,EXP                               2004  3  42  0
-(A,2N),SIG,,,EXP                                 2004  3  16  0
-(A,T),IND,SIG,,,EXP                              2004  3 105  0
+                                                                               1
+Add photon-induced reactions (M. Herman, A.Trkov, Oct.2004)                    1
+(G,EL),SIG                                          0  3   2  0
+(G,ABS),SIG                                         0  3   3  0
+(G,ABS),SIG,,,EXP                                   0  3   3  0
+(G,N),SIG                                           0  3   4  0
+(G,2N+D),SIG                                        0  3  11  0
+(G,2N),SIG                                          0  3  16  0
+(G,3N),SIG                                          0  3  17  0
+(G,F),SIG                                           0  3  18  0
+(G,F),SIG,,,EXP                                     0  3  18  0
+(G,N+A),SIG                                         0  3  22  0
+(G,N+3A),SIG                                        0  3  23  0
+(G,2N+A),SIG                                        0  3  24  0
+(G,3N+A),SIG                                        0  3  25  0
+(G,N+P),SIG                                         0  3  28  0
+(G,N+2A),SIG                                        0  3  29  0
+(G,2N+2A),SIG                                       0  3  30  0
+(G,N+D),SIG                                         0  3  32  0
+(G,N+T),SIG                                         0  3  33  0
+(G,N+HE3),SIG                                       0  3  34  0
+(G,N+D+2A),SIG                                      0  3  35  0
+(G,N+T+2A),SIG                                      0  3  36  0
+(G,4N),SIG                                          0  3  37  0
+(G,2N+P),SIG                                        0  3  41  0
+(G,3N+P),SIG                                        0  3  42  0
+(G,N+2P),SIG                                        0  3  44  0
+(G,N+P+A),SIG                                       0  3  45  0
+(G,P),SIG                                           0  3 103  0
+(G,P),SIG,,A                                        0  3 103  0
+(G,D),SIG                                           0  3 104  0
+(G,T),SIG                                           0  3 105  0
+(G,HE3),SIG                                         0  3 106  0
+(G,INL),SIG                                         0  3 107  0
+(G,2A),SIG                                          0  3 108  0
+(G,3A),SIG                                          0  3 109  0
+(G,2P),SIG                                          0  3 111  0
+(G,P+A),SIG                                         0  3 112  0
+(G,T+2A),SIG                                        0  3 113  0
+(G,D+2A),SIG                                        0  3 114  0
+(G,P+D),SIG                                         0  3 115  0
+(G,P+T),SIG                                         0  3 116  0
+(G,D+A),SIG                                         0  3 117  0
                                                                                1
 ANGULAR DISTRIBUTIONS                                                          1
                                                                                1
@@ -321,7 +370,8 @@ Added 14 Jun 2004 A. Trkov                                                     1
 (N,T),DA                                            1  4 105  0
 Added 14 Jun 2004 A. Trkov                                                     1
 (N,A),DA                                            1  4 107  0
-
+Add photon scattering (M. Herman, A.Trkov, Oct.2004)                           1
+(G,EL),DA                                           0  4   2  0
                                                                                1
 DIFFERENTIAL DATA (ENERGY SPECTRA)                                             1
                                                                                1
@@ -343,11 +393,11 @@ Added 14 Jun 2004 A. Trkov                                                     1
 ((N,P),DA/DE)+((N,N+P),DA/DE,P)                     1  61002  0
 ((N,A),DA/DE,,REL)+((N,N+A),DA/DE,A,REL)            1  61004  0
 Added thermal scattering and inelastic 20 Sep 2004 (M.Herman)                  1
-(N,SCT),DA/DE                                       1  69000  0
-(N,SCT),DA/DE,,RAW                                  1  69000  0
-(N,SCT),DAE                                         1  69000  0
-(N,INL),DAE                                         1  69000  0
-(N,INL),DA/DE                                       1  69000  0
+(N,SCT),DA/DE                                       1  69001  0
+(N,SCT),DA/DE,,RAW                                  1  69001  0
+(N,SCT),DAE                                         1  69001  0
+(N,INL),DAE                                         1  69001  0
+(N,INL),DA/DE                                       1  69001  0
                                                                                1
 PARTICLE/ISOTOPE PRODUCTION                                                    1
                                                                                1
@@ -361,6 +411,8 @@ FIELD 6.                                                                       1
 (T,X),SIG                                        1003  39000  0
 (HE-3,X),SIG                                     2003  39000  0
 (A,X),SIG                                        2004  39000  0
+Add photon-induced reactions (M. Herman, A.Trkov, Oct.2004)                    1
+(G,X),SIG                                           0  39000  0
                                                                                1
 ANGULAR DISTRIBUTIONS                                                          1
 (N,X),DA                                            1  49000  0
