@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-05-19 18:56:16 $
-Ccc   * $Id: main.f,v 1.25 2004-05-19 18:56:16 Capote Exp $
+Ccc   * $Date: 2004-05-28 09:53:16 $
+Ccc   * $Id: main.f,v 1.26 2004-05-28 09:53:16 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -209,8 +209,8 @@ C     INTEGER NRBar, NRFdis, ibaro
       DOUBLE PRECISION TF, TDIr, TABs, TDIr23,mm2
       CHARACTER*9 cejectile
       CHARACTER*21 reactionx
-C
       DOUBLE PRECISION ELAcs, ELAda(101), TOTcs
+	DOUBLE PRECISION ftmp
       INTEGER NELang
 C-----next COMMON is to transfer elastic ddx from Scat-2
       COMMON /ELASCAT/ ELAda, TOTcs, ELAcs, NELang
@@ -280,27 +280,38 @@ C--------locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0), nejcec, iloc)
 C
          IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-            OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C           ECIS03, May 2004  
+            OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+            READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..  
             READ(45, *, END = 1500)TOTcs
             READ(45, *, END = 1500)ecisabs
+            READ(45, *, END = 1500)ftmp   ! reading this line here in ecis03
+C-----------Checking if CC OMP was used
+            IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. 
+     &		  DIRect.EQ.2) ELAcs=ftmp
             CLOSE(45)
          ENDIF
+
          NELang = 73
          ecm = EINl - EIN
          dang = 3.14159/FLOAT(NELang - 1)
-         OPEN(45, FILE = 'ecis95.ang', STATUS = 'OLD')
-         IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-            READ(45, *, END = 1500)ELAcs
-         ELSE
-            READ(45, *, END = 1500)
-         ENDIF
+C        OPEN(45, FILE = 'ecis95.ang', STATUS = 'OLD')
+C        ECIS03, May 2004  
+         OPEN(45, FILE = 'ecis03.ang', STATUS = 'OLD')            
+         READ(45, *, END = 1500)  ! To skip first line <ANG.DIS.> ..  
+         READ(45, *, END = 1500)  ! To skip level identifier line 
+         OPEN(46, FILE = 'ecis03.ics', STATUS = 'OLD')
+         READ(46, *, END = 1500)  ! To skip first line <INE.C.S.> ..  
+C        OPEN(47, FILE = 'ecis03.pol', STATUS = 'OLD')            
+C        READ(47, *, END = 1500)  ! To skip first line <ANG.DIS.> ..  
 C--------Checking if CC OMP was used
          DO iang = 1, NELang
             IF((MODelecis.GT.0 .AND. DIRect.NE.3) .OR. DIRect.EQ.2)THEN
-               READ(45, '(15x,E12.5)', END = 1500)ELAda(iang)
+               READ(45, '(7x,E12.5)', END = 1500)ELAda(iang)
             ELSE
 C--------------dummy read
-               READ(45, '(15x,E12.5)', END = 1500)
+               READ(45, *, END = 1500)
             ENDIF
          ENDDO
 C--------get and add inelastic cross sections (including double-differential)
@@ -314,7 +325,9 @@ C-----------avoid reading closed channels
                xcse = echannel/DE + 1.0001
                icsl = INT(xcse)
                icsh = icsl + 1
-               READ(45, *, END = 1500)popread
+C              ECIS03, May 2004, changed to read from file 46  
+               READ(46, *, END = 1500)popread
+C              READ(45, *, END = 1500)popread
                ncoll = i
                POPlv(ilv, nnurec) = POPlv(ilv, nnurec) + popread
                CSEmis(nejcec, 1) = CSEmis(nejcec, 1) + popread
@@ -324,17 +337,22 @@ C--------------add direct transition to the spectrum
                poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl, nejcec, 1) = CSE(icsl, nejcec, 1) + popl
                CSE(icsh, nejcec, 1) = CSE(icsh, nejcec, 1) + poph
+
+               READ(45, *, END = 1500)    ! Skipping level identifier line
+C              READ(47, *, END = 1500)    ! Skipping level identifier line
+
 C              Empire uses 10 deg grid for inelastic so we have to take
 C              each 4th result from ECIS (2.5 deg grid)
                DO iang = 1, NDANG - 1
-                  READ(45, '(15x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
      &                 CSAlev(iang, ilv, nejcec)
-                  READ(45, '(15x,E12.5)', END = 1500)
-                  READ(45, '(15x,E12.5)', END = 1500)
-                  READ(45, '(15x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
+                  READ(45, '(7x,E12.5)', END = 1500)
                ENDDO
-               READ(45, '(15x,E12.5)', END = 1500)
+               READ(45, '(7x,E12.5)', END = 1500)
      &              CSAlev(NDANG, ilv, nejcec)
+
 C--------------construct recoil spectra due to direct transitions
                IF(ENDf.GT.0)THEN
                   dang = PI/FLOAT(NDANG - 1)
@@ -366,6 +384,9 @@ C                    escape if we go beyond recoil spectrum dimension
                ENDIF
             ENDIF
  1450    ENDDO
+         CLOSE(45)
+         CLOSE(46)
+C	     CLOSE(47)
 C--------print elastic and direct cross sections from ECIS
  1500    WRITE(6, *)' '
          WRITE(6, *)' '
@@ -410,20 +431,39 @@ C--------print elastic and direct cross sections from ECIS
      &             /, 2x, 'Absorption cross section    :', e14.7, ' mb', 
      &             /, 2x, 'Shape elastic cross section :', e14.7, ' mb', 
      &             //)
+
+C           RCN 05/05
+C           The printout below was changed to include the whole angular grid
+C           ala SCAT2000
+C 
+89001       FORMAT(' ', 46x, 'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',
+     &        /,' ', 46x, 40('*'), /, ' ', 56x, 'CENTER-OF-MASS SYSTEM', 
+     &      ///)
+            WRITE(6, 89001)
+            WRITE(6, 89002)
+89002       FORMAT(' ', 5x, 4('    TETA ', 2x, 'D.SIGMA/D.OMEGA', 6x), 
+     &             /)
+
+	      gang = 180.0/(NELang - 1)
+            DO iang = 1, NELang/4 + 1
+               imint = 4*(iang - 1) + 1
+               imaxt = MIN0(4*iang, NELang)
+               WRITE(6, 89004)( (j-1)*gang,ELAda(j),j=imint, imaxt)
+            ENDDO
+89004       FORMAT(' ', 5x, 4(1p, e12.5, 2x, e12.5, 6x))
+            WRITE(6, '(//)')
+		   
             gang = 180.0/(NDANG - 1)
-            WRITE(6, 99005)(ICOllev(ilv), ilv = 2, ncoll)
-99005       FORMAT('  Angle    Elastic', 10(6x, i2, '-level'))
+            WRITE(6, 99001)(ICOllev(ilv), ilv = 2, ncoll)
             WRITE(6, *)' '
             DO iang = 1, NDANG
-               WRITE(6, 99006)(iang - 1)*gang, ELAda(iang), 
-     &                        (CSAlev(iang, ICOllev(ilv), nejcec), 
-     &                        ilv = 2, ncoll)
-99006          FORMAT(1x, f5.0, 11(2x, E12.6))
+               WRITE(6, 99002)(iang - 1)*gang, 
+     &                      (CSAlev(iang, ICOllev(ilv), nejcec), 
+     &                       ilv = 2, ncoll)
             ENDDO
             WRITE(6, *)' '
-            WRITE(6, 99007)ELAcs, 
-     &                     (POPlv(ICOllev(ilv), nnurec), ilv = 2, ncoll)
-99007       FORMAT(6x, 11(2x, E12.6))
+            WRITE(6, 99003)(POPlv(ICOllev(ilv), nnurec), ilv = 2, 
+     &                        ncoll)
             WRITE(6, *)' '
             WRITE(6, *)' '
             WRITE(6, *)' '
@@ -431,7 +471,10 @@ C=========================================================================
 C           the following ELSE block is to print ECIS calculated XS
 C           (it could be omitted)
          ELSE
-            OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C           OPEN(45, FILE = 'ecis95.cs', STATUS = 'OLD')
+C           ecis03
+            OPEN(45, FILE = 'ecis03.cs', STATUS = 'OLD')
+            READ(45, *, END = 1500)  ! To skip first line <CROSS-S.> ..  
             READ(45, *, END = 1500)ecistotxs
             READ(45, *, END = 1500)ecisabsxs
             READ(45, *, END = 1500)eciselaxs
@@ -806,21 +849,26 @@ C--------------temporary output *** done ***
                WRITE(12, '(1X,/,10X,40(1H-),/)')
 C--------------write elastic to tape 12
                IF(nnuc.EQ.mt2)THEN
-                  WRITE(12, *)' '
-                  WRITE(12, 
+C RCN 05/04  TO MIKE:
+C I am not sure that CN elastic contribution elcncs is already calculated here
+                 WRITE(12, *)' '
+                 WRITE(12, 
      &                  '('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
      &                  ELAcs
-                  WRITE(12, *)' '
-                  WRITE(12, *)' Elastic angular distribution '
-                  WRITE(12, *)' '
-                  delang = 180./FLOAT(NELang - 1)
-                  WRITE(12, 99008)(FLOAT(iang - 1)*delang, iang = 1, 
+                 WRITE(12, *)' '
+                 WRITE(12, *)' Elastic angular distribution '
+                 WRITE(12, *)' '
+                 delang = 180./FLOAT(NELang - 1)
+                 WRITE(12, 99008)(FLOAT(iang - 1)*delang, iang = 1, 
      &                            NELang)
-99008             FORMAT(10X, 8G15.5)
-                  WRITE(12, 99009)(ELAda(iang) + elcncs, iang = 1, 
+99008            FORMAT(10X, 8G15.5)
+                 WRITE(12, 99009)(ELAda(iang) + elcncs, iang = 1, 
      &                            NELang)
-99009             FORMAT(9X, 8E15.5)
-                  WRITE(12, *)' '
+99009            FORMAT(9X, 8E15.5)
+                 WRITE(12, *)' '
+C                WRITE(6, 
+C    &             '('' CN ELASTIC CROSS SECTION ='',G12.5,
+C    &             '' mb/str'')') elcncs
                   IF(elcncs.EQ.0) WRITE(6,*)'WARNING: CN ELASTIC IS 0' 
                ENDIF
             ENDIF
@@ -1371,9 +1419,36 @@ C-----------life-times and widths  *** done ***
 C--------add compound elastic to shape elastic before everything falls
 C--------down on the ground state
          IF(nnuc.EQ.1)THEN
+            WRITE(6,*) 
+            WRITE(6,*) ' SHAPE ELASTIC :', ELAcs,' mb'
+            WRITE(6,*) ' CN ELASTIC    :', POPlv(1, mt2),' mb'
             ELAcs = ELAcs + POPlv(1, mt2)
 C-----------CN contribution to elastic ddx
             elcncs = POPlv(1, mt2)/4.0/PI
+            WRITE(6,*) ' CN ELASTIC    :', elcncs,' mb/str'
+            WRITE(6,*) 
+
+C		  DO iang=1,NELang
+C	        ELAda(iang) = ELAda(iang) + elcncs
+C	      ENDDO
+
+C           IF(ENDf.NE.0.0D0)THEN
+C             WRITE(12, '(1X,/,10X,40(1H-),/)')
+C-------------write elastic to tape 12
+C             WRITE(12, *)' '
+C             WRITE(12,'('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
+C    &           ELAcs
+C             WRITE(12, *)' '
+C             WRITE(12, *)' Elastic angular distribution '
+C             WRITE(12, *)' '
+C             delang = 180./FLOAT(NELang - 1)
+C             WRITE(12, 99008)(FLOAT(iang - 1)*delang, iang = 1,NELang)
+C99008         FORMAT(10X, 8G15.5)
+C             WRITE(12, 99009)(ELAda(iang), iang = 1,NELang)
+C99009         FORMAT(9X, 8E15.5)
+C             WRITE(12, *)' '
+C	      ENDIF
+
          ENDIF
          WRITE(12, 
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,'' 
@@ -1805,6 +1880,9 @@ C-----end of ENDF spectra (inclusive)
          WRITE(12, *)' '
          WRITE(6, *)' '
          WRITE(6, *)'CALCULATIONS COMPLETED SUCCESSFULLY'
+	   CLOSE(15,status='delete')
+	   CLOSE(16,status='delete')
+	   CLOSE(66,status='delete')
          STOP 'REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
