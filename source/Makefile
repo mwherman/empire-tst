@@ -1,4 +1,4 @@
-#FC     =  g77
+FC     =  g77
 #FFLAGS =  -static
 #FFLAGS =  -ffortran-bounds-check
 #----GNU g77 FORTRAN compiler
@@ -17,7 +17,7 @@
 #FC	= /usr/absoft/bin/f90
 #FFLAGS = -g
 #----Fujitsu f90 FORTRAN compiler
-FC	= lf95
+#FC	= lf95
 #----flag for Lahey/Fujitsu f95 FORTRAN to optimize
 #FFLAGS = --o3 
 #----flag for Lahey/Fujitsu f95 FORTRAN to check boundaries and more

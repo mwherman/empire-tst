@@ -1,7 +1,7 @@
 C*==input.spg  processed by SPAG 6.20Rc at 12:14 on  7 Jul 2004
 Ccc   * $Author: herman $
-Ccc   * $Date: 2004-07-16 12:47:37 $
-Ccc   * $Id: input.f,v 1.34 2004-07-16 12:47:37 herman Exp $
+Ccc   * $Date: 2004-07-19 19:06:06 $
+Ccc   * $Id: input.f,v 1.35 2004-07-19 19:06:06 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2202,7 +2202,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 99001 FORMAT(1X, 80('_'))
       WRITE(6, *)'                        ____________________________'
       WRITE(6, *)'                       |                            |'
-      WRITE(6, *)'                       |  E M P I R E  -  2.19.b18  |'
+      WRITE(6, *)'                       |  E M P I R E  -  2.19.b19  |'
       WRITE(6, *)'                       |                            |'
       WRITE(6, *)'                       |  marching towards LODI ;-) |'
       WRITE(6, *)'                       |____________________________|'
