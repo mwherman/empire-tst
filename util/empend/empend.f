@@ -22,6 +22,7 @@ C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
 C-V  04/07 - Add (n,5n) MT47
 C-V        - Check for absence of distribution data (NP=0 in MF6).
 C-V  04/09 - Check for normalisation overflow in WRIMF4
+C-V  04/10 Implement formatting for incident alphas and photons.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -233,7 +234,7 @@ C* Write the ENDF file-1 data
 C* Write the ENDF file-3 data
       CALL WRIMF3(LOU,MXE,MXT,LXR
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
-     1           ,MAT,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
       WRITE(LTT,991)
       WRITE(LTT,995) ' Processed reaction cross sections    : ',NXS
       WRITE(LTT,995) '        Number of input energy points : ',NEN
@@ -436,7 +437,123 @@ C-Title  : Subroutine EMTIZA
 C-Purpose: For projectile IZI assign MT from target and residual ZA
       MT =0
 C*
-      IF(IZI.EQ.1) THEN
+      IF(IZI.EQ.0) THEN
+C* INCIDENT PHOTONS
+        IF     (JZA  .EQ. IZA+IZI-   1) THEN
+C* (g,n)
+          MT = 50
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (g,2nd) cross section
+          MT = 11
+        ELSE IF(JZA  .EQ. IZA+IZI-   2) THEN
+C* (g,2n) cross section
+          MT = 16
+        ELSE IF(JZA  .EQ. IZA+IZI-   3) THEN
+C* (g,3n) cross section
+          MT = 17
+        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
+C* (g,na) cross section
+          MT = 22
+        ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
+C* (g,n3a) cross section
+          MT = 23
+        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
+C* (g,2na) cross section
+          MT = 24
+        ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
+C* (g,3na) cross section
+          MT = 25
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C* (g,np) cross section
+          MT = 28
+        ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
+C* (g,n2a) cross section
+          MT = 29
+        ELSE IF(JZA  .EQ. IZA+IZI-4010) THEN
+C* (g,2n2a) cross section
+          MT = 30
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (g,nd) cross section
+          MT = 32
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (g,nt) cross section
+          MT = 33
+c... Conflicts with (a,a) reaction
+c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+c...C* (g,n+He3) cross section
+c...          MT = 34
+        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
+C* (g,nd2a) cross section
+          MT = 35
+        ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
+C* (g,nt2a) cross section
+          MT = 36
+        ELSE IF(JZA  .EQ. IZA+IZI-   4) THEN
+C* (g,4n) cross section
+          MT = 37
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (g,2np) cross section
+          MT = 41
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (g,3np) cross section
+          MT = 42
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (g,n2p) cross section
+          MT = 44
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C* (g,npa) cross section
+          MT = 45
+        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
+C* (g,4n) cross section
+          MT = 47
+        ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
+C* (g,g') radiative capture cross section
+          MT =102
+c...      MT =  3
+        ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
+C* (g,p) cross section
+          MT =103
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C* (g,d) cross section
+          MT =104
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (g,t) cross section
+          MT =105
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (g,He3) cross section
+          MT =106
+        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+C* (g,a) cross section
+          MT =107
+        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
+C* (g,2a) cross section
+          MT =108
+        ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
+C* (g,3a) cross section
+          MT =109
+        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
+C* (g,2p) cross section
+          MT =111
+        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
+C* (g,pa) cross section
+          MT =112
+        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
+C* (g,t2a) cross section
+          MT =113
+        ELSE IF(JZA  .EQ. IZA+IZI-5010) THEN
+C* (g,d2a) cross section
+          MT =114
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (g,pd) cross section
+          MT =115
+        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+C* (g,pt) cross section
+          MT =116
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C* (g,da) cross section
+          MT =117
+        END IF
+      ELSE IF(IZI.EQ.1) THEN
 C* INCIDENT NEUTRONS
         IF     (JZA  .EQ. IZA+   1) THEN
 C* Radiative capture cross section
@@ -505,6 +622,9 @@ C* (p,2nd) cross section
         ELSE IF(JZA  .EQ. IZA+ 999) THEN
 C* (p,2n) cross section
           MT =16
+        ELSE IF(JZA  .EQ. IZA+ 999) THEN
+C* (p,3n) cross section
+          MT =17
         ELSE IF(JZA  .EQ. IZA-1004) THEN
 C* (p,na) cross section
           MT =22
@@ -617,6 +737,9 @@ C* (a,2nd) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-   2) THEN
 C* (a,2n) cross section
           MT =16
+        ELSE IF(JZA  .EQ. IZA+IZI-   3) THEN
+C* (a,3n) cross section
+          MT =17
         ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
 C* (a,na) cross section
           MT =22
@@ -740,10 +863,29 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,3np)') MT= 42
         IF(PTST.EQ.' (z,5n) ') MT= 47
         IF(PTST.EQ.' (z,n)  ') MT= 91
+c...        IF(PTST.EQ.' (z,n)  ') THEN
+c...          IF(IZI.EQ.1) THEN
+c...            MT= 91
+c...          ELSE
+c...            MT=  4
+c...          END IF
+c...        END IF
         IF(PTST.EQ.' (z,gamm') MT=102
         IF(PTST.EQ.' (z,2p) ') MT=111
-        IF(PTST.EQ.' (z,p)  ') MT=649
-        IF(PTST.EQ.' (z,a)  ') MT=849
+        IF(PTST.EQ.' (z,p)  ') THEN
+          IF(IZI.EQ.1) THEN
+            MT=649
+          ELSE
+            MT=103
+          END IF
+        END IF
+        IF(PTST.EQ.' (z,a)  ') THEN
+          IF(IZI.EQ.1) THEN
+            MT=849
+          ELSE
+            MT=107
+          END IF
+        END IF
       RETURN
       END
       SUBROUTINE QVALUE(IMT,MT,IZA,IZB,BEN,QQM)
@@ -822,19 +964,20 @@ C-
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
 C*
-      IF      (PTST.EQ.'neutrons' .OR. KZAK.EQ.   1) THEN
+      IZAK=KZAK
+      IF      (PTST.EQ.'neutrons' .OR. IZAK.EQ.   1) THEN
         KZAK=1
         AWP =1.
-      ELSE IF (PTST.EQ.'gammas  ' .OR. KZAK.EQ.   0) THEN
+      ELSE IF (PTST.EQ.'gammas  ' .OR. IZAK.EQ.   0) THEN
         KZAK=0
         AWP =0.
-      ELSE IF (PTST.EQ.'protons ' .OR. KZAK.EQ.1001) THEN
+      ELSE IF (PTST.EQ.'protons ' .OR. IZAK.EQ.1001) THEN
         KZAK=1001
         AWP =AWH/AWN
-      ELSE IF (PTST.EQ.' 2-d    ' .OR. KZAK.EQ.1002) THEN
+      ELSE IF (PTST.EQ.' 2-d    ' .OR. IZAK.EQ.1002) THEN
         KZAK=1002
         AWP =AWD/AWN
-      ELSE IF (PTST.EQ.'alphas  ' .OR. KZAK.EQ.2004) THEN
+      ELSE IF (PTST.EQ.'alphas  ' .OR. IZAK.EQ.2004) THEN
         KZAK=2004
         AWP =AWA/AWN
       ELSE IF (PTST.EQ.'recoils ') THEN
@@ -1296,7 +1439,7 @@ C* Search EMPIRE output for specific strings
       IF(REC(1:10).EQ.' TOTAL  CR'                  ) GO TO 290
 c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
       IF(REC(2:19).EQ.'Tot. fission cross'          ) THEN
-        QQ=0
+        QQ=2.0E8
         MT=18
         READ(REC,809) XS
         GO TO 312
@@ -1305,7 +1448,8 @@ c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
 C* Identify projectile, target and energy
   200 READ (REC(11:20),802) KZ,CH,KA
       IZI=KZ*1000+KA
-      IF(IZI.NE.1 .AND. IZI.NE.1001 .AND. IZI.NE.2004) THEN
+      IF(IZI.NE.   0 .AND. IZI.NE.   1 .AND.
+     &   IZI.NE.1001 .AND. IZI.NE.2004) THEN
         WRITE(LTT,904) ' EMPEND ERROR - Invalid projectile ZA   ',IZI
 c...    STOP 'EMPEND ERROR - Invalid projectile'
       END IF
@@ -1496,12 +1640,16 @@ C* Reconstruct Q values from MT and the binding energies
       QQM(IXS)=0.
       DO 358 I=1,IMT
       KZA=IZB(I)
-      IF(KZA.EQ.IZA+1 .AND.(MT0.EQ.600.OR.MT0.EQ.800) )
-     1                                 QQM(IXS)=QQM(IXS)+1.E6*BEN(1,I)
-      IF(KZA.EQ.IZA+1 .AND.(MT0.EQ.600) )
-     1                                 QQM(IXS)=QQM(IXS)-1.E6*BEN(2,I)
-      IF(KZA.EQ.IZA+1 .AND.(MT0.EQ.800) )
-     1                                 QQM(IXS)=QQM(IXS)-1.E6*BEN(3,I)
+      IF(KZA.EQ.IZA+IZI .AND. QQ.EQ.0) THEN
+
+        print *,' Q-value calculated brom binding energies for MT',MT0
+
+        IF(MT0.EQ.600.OR.MT0.EQ.800) QQM(IXS)=QQM(IXS)+1.E6*BEN(1,I)
+        IF(MT0.EQ.600)               QQM(IXS)=QQM(IXS)-1.E6*BEN(2,I)
+        IF(MT0.EQ.800)               QQM(IXS)=QQM(IXS)-1.E6*BEN(3,I)
+      ELSE
+        QQM(IXS)=QQ
+      END IF
   358 CONTINUE
   360 QM =QQM(IXS)
       QI =QM-1.E6*EL
@@ -1625,6 +1773,8 @@ C* NE6 counts the Number of energy points
       NK =0
 c...      NP =0
 c...      IT =0
+      PTST='        '
+      CALL POUCHR(PTST,IZI,AWI)
 C*
 C* For elastic angular distributions define reaction and particles
       IF(MT6.EQ.-2) THEN
@@ -1736,7 +1886,7 @@ c...      NE6N=0
 C* Find the cross section index
       DO 204 I=1,NXS
       IF(MTH(I).EQ.MTC) THEN
-        ETH=MAX(-QQI(I)*(AWR+1)/AWR, ELO )
+        ETH=MAX(-QQI(I)*(AWR+AWI)/AWR, ELO )
 c...
 c...        print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo
 c...
@@ -1869,8 +2019,8 @@ c...      print *,'mt,ne6,kzak,yl0',mt,ne6,kzak,yl0
 c...
       IF(YL0.GT.0) THEN
         NP=2
-        YLD(1)=YL0
-        YLD(2)=YL0
+        YLD( 1)=YL0
+        YLD(NP)=YL0
       ELSE
         NP=0
       END IF
@@ -1921,7 +2071,7 @@ C* Define the order LOR of Legendre expansion (=NA in ENDF)
       READ (LIN,891)
 C* Set the available outgoing particle energy
 C...      EMP=EMX
-C...      EMP=EMX* (AWR+1.-AWP)/(AWR+1.)
+C...      EMP=EMX* (AWR+AWI-AWP)/(AWR+AWI)
 C... Maximum particle energy should be set within the EMPIRE code!!!
 C... Set EMP=0 to skip testing in RDANG
 C...
@@ -2110,8 +2260,8 @@ c...
       ELSE IF(NP.EQ.2) THEN
         RWO(LAE  )=E1
         RWO(LAE+1)=E2
-        RWO(LAG  )=YLD(1)
-        RWO(LAG+1)=YLD(2)
+        RWO(LAG  )=YLD( 1)
+        RWO(LAG+1)=YLD(NP)
       ELSE
         DO 702 I=1,NP
         RWO(LAE-1+I)=EIS(I)
@@ -2292,7 +2442,9 @@ C*
       NFOR= 6
 C*
       CALL POUCHR(PTST,IZI,AWI)
-      IF     (IZI.EQ.   1) THEN
+      IF     (IZI.EQ.   0) THEN
+        NSUB=    0
+      ELSE IF(IZI.EQ.   1) THEN
         NSUB=   10
       ELSE IF(IZI.EQ.1001) THEN
         NSUB=10010
@@ -2323,16 +2475,19 @@ C*
       END
       SUBROUTINE WRIMF3(LOU,MXE,MXT,MXR
      1                 ,EIN,XSC,QQM,QQI,MTH,RWO
-     1                 ,MAT,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+     1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
 C-Title  : WRIMF3 Subroutine
 C-Purpose: Write cross section (file MF3) data in ENDF-6 format
+      CHARACTER*8  PTST
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),NBT(1),INT(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
       DATA SMALL,ZRO/-34., 0./
+      DATA PTST/'        '/
 C* Initialize constants
       QM=0.
       QI=0.
+      CALL POUCHR(PTST,IZI,AWI)
 C*
 C* Write file MF3 (cross section data)
       MF =3
@@ -2349,13 +2504,6 @@ C* Select MT numbers in ascending order
       MT =MTH(IT)
   302 CONTINUE
       IF(IT.EQ.0) GO TO 360
-C* Define the thresholdand max. energy
-c     ETH=MAX((-QQI(IT))*(AWR+1.)/AWR , EIN(1) )
-c     EMX=EIN(NEN)
-c     IF(ETH.GE.EMX) THEN
-c       MTH(IT)=MTH(IT)+10000
-c       GO TO 360
-c     END IF
 C* Consider the output energy mesh
       IF(NEP.GT.0) GO TO 320
 C* Case: Enter original points
@@ -2379,7 +2527,7 @@ C* Case: Expand the cross section set by spline interpolation
       IF(LS+3*NEN+MAX(NEN,NEO).GT.MXR)
      1 STOP 'EMPEND ERROR - MXR limit exceeded in WRIMF3'
 C* Define the threshold
-      ETH=MAX((-QQI(IT))*(AWR+1.)/AWR , EIN(1) )
+      ETH=MAX((-QQI(IT))*(AWR+AWI)/AWR , EIN(1) )
       XSL=SMALL
 C* Define the input energy points for the spline fit
       ME =0
@@ -2489,12 +2637,16 @@ C*
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=80)
+      CHARACTER*8  PTST
       DIMENSION    RWO(1),QQM(1),QQI(1),MTH(1),NBT(1),INT(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
       DATA DLVL/1.E3/
 C*
       DATA ZRO/0./
+      DATA PTST/'        '/
+C*
+      CALL POUCHR(PTST,IZI,AWI)
 C* Find the appropriate discrete level MT number
       IF(MT6.EQ. 91 .OR.
      1   MT6.EQ.  5) MT=MAX(MT, 50)
@@ -2527,7 +2679,7 @@ C* Write file MF4 angular distributions (first outgoing particle)
       JE =NE
       J2 =0
       INT(1)= 2
-      ETH=MAX((-QQI(IT))*(AWR+1.)/AWR, RWO(LL))
+      ETH=MAX((-QQI(IT))*(AWR+AWI)/AWR, RWO(LL))
 C*
 C* Loop over the incident particle energies
       DO 40 IE=1,NE
@@ -2545,7 +2697,7 @@ C*      Process all energies for elastic
         EOU=0
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
-        EOU=(EIN*AWR/(AWR+1)+QQI(IT)) * ((AWR+1-AWP)/(AWR+1))
+        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT)) * ((AWR+AWI-AWP)/(AWR+AWI))
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
@@ -3305,7 +3457,8 @@ C-
       DIMENSION PL(1)
       PL(1)=1.
       IF(NL.LT.1) RETURN
-      PL(2)=UU
+      L2=2
+      PL(L2)=UU
       IF(NL.LT.2) RETURN
       DO 20 L=2,NL
       PL(L+1)=(PL(L)*UU*FLOAT(2*L-1)-PL(L-1)*FLOAT(L-1))/FLOAT(L)
