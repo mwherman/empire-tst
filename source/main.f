@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-17 10:44:16 $
-Ccc   * $Id: main.f,v 1.66 2005-03-17 10:44:16 Capote Exp $
+Ccc   * $Date: 2005-03-17 19:51:26 $
+Ccc   * $Id: main.f,v 1.67 2005-03-17 19:51:26 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -202,6 +202,8 @@ C-----print elastic and direct cross sections from ECIS
 C
 C-----ABScs = CSfus  always  !!!
 C
+      IF (KTRlom(0,0).GT.0) THEN
+
       IF (ZEJc(0).EQ.0 .AND. AEJc(0).GT.0) THEN
          WRITE (6,99005) TOTcs, CSFus, ELAcs
 99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',/,2x,
@@ -213,7 +215,6 @@ C
 99010    FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',//)
       ENDIF
 
-      IF (KTRlom(0,0).GT.0) THEN
       WRITE (6,99015)
 99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
@@ -227,7 +228,6 @@ C
 99025    FORMAT (' ',5x,4(1p,e12.5,2x,e12.5,6x))
       ENDDO
       WRITE (6,'(//)')
-      ENDIF
 
       IF (ncoll.GT.0) THEN
 C--------locate position of the projectile among ejectiles
@@ -255,6 +255,10 @@ C--------locate position of the projectile among ejectiles
             WRITE (6,*) ' '
          ENDIF
       ENDIF
+
+      ENDIF
+
+
 C
 C     Skipping all emission calculations
 C     GOTO 99999
