@@ -3,11 +3,11 @@
 if [ -d $1 ]; then
    echo 'O.K. directory:'  $1 ' exists'
    else
-   mkdir $1              
+   mkdir ../$1              
    echo 'Have created directory:'  $1
 fi                          
 file=$2
 
-mv -f za*$file* $1/ 2>/dev/null
+mv -f za*$file* ../$1/ 2>/dev/null
 
 exit
