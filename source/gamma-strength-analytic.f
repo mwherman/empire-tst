@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-10-08 16:21:12 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.10 2004-10-08 16:21:12 Capote Exp $
+Ccc   * $Date: 2004-11-30 08:35:52 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.11 2004-11-30 08:35:52 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus, Anucleus,
      &   Eexcitf, Temperf, Egamma, Keyshape)
@@ -349,10 +349,10 @@ C        *************************************************
             e11 = siggam*MLO3(ttf, ee)
          ELSEIF(Keyshape.EQ.4)THEN
             e11 = siggam*EGLO(ttf, ee)
-C-----Plujko_new(for some nuclei (some A with Z=62,64-68) EGLO<0 
+C-----Plujko_new(for some nuclei (some A with Z=62,64-68) EGLO<0
 C      - problem of this model)
             IF(e11.LT.0)e11=0.0
-C-----Plujko_new(END for some nuclei (some A with Z=62,64-68) EGLO<0 
+C-----Plujko_new(END for some nuclei (some A with Z=62,64-68) EGLO<0
 C     - problem of this model)
          ELSEIF(Keyshape.EQ.5)THEN
             e11 = siggam*GFL(ttf, ee)
@@ -501,10 +501,13 @@ C
       MLO1 = 0.d0
       If(Egamma.LE.0.d0) return
       MLO1 = SPECRALF(U, Egamma)
-C     Underflow and Egamma = 0 protections introduced, RCN, 2004
+C     Protection against T=0 introduced, RCN 11/2004
+      if(T.EQ.0.d0) return
       phi=1.d0
-      hh = Egamma/T
-      IF(hh.LE.15.) phi = 1.d0/(1.d0 - EXP( - hh))
+      if(T.GT.0.00001d0) then
+        hh = Egamma/T
+        IF(hh.LE.15.) phi = 1.d0/(1.d0 - EXP( - hh))
+      endif
       MLO1 = phi*MLO1
       END
 C

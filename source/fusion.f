@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2004-10-19 02:35:32 $
-Ccc   * $Id: fusion.f,v 1.19 2004-10-19 02:35:32 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2004-11-30 08:36:06 $
+Ccc   * $Id: fusion.f,v 1.20 2004-11-30 08:36:06 Capote Exp $
 C
       SUBROUTINE MARENG(Npro, Ntrg)
 C
@@ -73,8 +73,8 @@ C
 C-----Plujko_new (new variables for SDREAD - ParcnJ,cnJ )
 C     cnJ    - spin of CN
 C     ParcnJ - parity of CN
-      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, PI, smax, 
-     &                 smin, stl(NDLW), sum, wf, ParcnJ, cnJ  
+      DOUBLE PRECISION chsp, coef, csmax, csvalue, dtmp, PI, smax,
+     &                 smin, stl(NDLW), sum, wf, ParcnJ, cnJ
 C-----Plujko_new (END of new variables for SDREAD - ParcnJ,cnJ )
 
       DOUBLE PRECISION DMAX1
@@ -100,11 +100,11 @@ C
 C  Zero qd fraction of photabsorption before it can do any damage
       QDfrac=0.0d0
 
-      IF(INT(AEJC(0)).GT.0) 
+      IF(INT(AEJC(0)).GT.0)
      & coef = PI/wf/(2*XJLv(LEVtarg, Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       S1 = 0.5
       maxlw = NDLW
-      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) - 
+      IF(AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg, Ntrg) -
      & SEJc(Npro).EQ.0.0D0)S1 = 1.0
       csmax = 0.0
       CSFus = 0.0
@@ -122,7 +122,7 @@ C               A of c.n. /2 = integer --> cnJ=n*1, where n=0,1,2...
 C               A of c.n. /2 = integer+1/2 --> cnJ=n*1/2, where n=0,1,2...
 C             ParcnJ=-1 or 1
 C             csvalue = value in mb
-C     reading no more than 2*NDLW rows   
+C     reading no more than 2*NDLW rows
       IF(INT(AEJC(0)).EQ.0)THEN
         IF(.NOT.SDREAD) GOTO 100
         WRITE(6, *)
@@ -132,18 +132,18 @@ C     reading no more than 2*NDLW rows
         DO i = 1, 2*NDLW
             READ(43, *, END = 101) cnJ,ParcnJ,csvalue
 C-----------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
-            IF(2*cnJ-DINT(2*cnJ).NE.0.00) 
+            IF(2*cnJ-DINT(2*cnJ).NE.0.00)
      >               STOP 'cnJ!=n*1/2, n=0,+-1...  in SDREAD file'
             j=IDNINT(cnJ+S1)
             IF(ParcnJ.EQ.1.) ip = 1
             IF(ParcnJ.EQ.-1.)ip = 2
-            IF(ParcnJ.NE.1.AND.ParcnJ.NE.-1) 
+            IF(ParcnJ.NE.1.AND.ParcnJ.NE.-1)
      >               STOP 'ParcnJ!=+-1 in SDREAD file'
             POP(NEX(1), j, ip, 1) = csvalue
             CSFus = CSFus + POP(NEX(1), j, ip, 1)
             csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
         ENDDO
-      ENDIF  
+      ENDIF
 C-----Plujko_new(END of spin distribution from file SDFILE)
 
 C-----if FUSREAD true read l distribution of fusion cross section
@@ -154,7 +154,7 @@ C-----and calculate transmission coefficients
             stl(j) = csvalue*wf/PI/(2*j - 1)
             IF(stl(j).GT.1.0D0)THEN
                WRITE(6, *)' '
-               WRITE(6, 
+               WRITE(6,
      &'(''TOO LARGE INPUT FUSION CROSS SECTION'',              '' FOR l=
      &'',I3,'' RESULTING Tl>1'')')j - 1
                WRITE(6, *)' EXECUTION STOPPED!!!'
@@ -176,7 +176,7 @@ C
 C
          IF(DIRect.EQ.2 .AND. AEJc(Npro).LE.1)THEN
 C-----------Target nucleus (elastic channel), incident neutron or proton
-            WRITE(6, *)' CC transmission coefficients used for ', 
+            WRITE(6, *)' CC transmission coefficients used for ',
      &                 'fusion determination'
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
@@ -192,12 +192,12 @@ C-----------(or reading already calculated file)
          ENDIF
 C
          IF(.NOT.tlj_calc)THEN
-            WRITE(6, *)' Spherical OM transmission coefficients', 
+            WRITE(6, *)' Spherical OM transmission coefficients',
      &                 ' used for fusion determination'
             IF(MODelecis.EQ.0 .OR. DIRect.EQ.3)THEN
                CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 1)
             ELSE
-               WRITE(6, *)' Fusion cross section normalized', 
+               WRITE(6, *)' Fusion cross section normalized',
      &                    ' to coupled channel reaction cross section'
                CALL OMTL(Npro, Ntrg, einlab, maxlw, stl, srr, 0)
             ENDIF
@@ -231,21 +231,25 @@ C-----calculation of transmission coefficients ----done------
       DO i = 1, NDLW
          ELTl(i) = stl(i)
       ENDDO
-      
+
 C-----Plujko_new (calculation CSFus)
  100  IF(INT(AEJC(0)).EQ.0)THEN
-        CSFus = 0.0     
+        CSFus = 0.0
         JSTab(1) = NDLW !stability limit not a problem for photoreactions
         IF(EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
            WRITE(6,*)'WARNING: '
            WRITE(6,*)'WARNING: ECN=',EIN,' Elev=',ELV(NLV(Ntrg),Ntrg)
-           WRITE(6,*)'WARNING: CN excitation energy below continuum' 
-           WRITE(6,*)'WARNING: cut-off. zero reaction cross section' 
+           WRITE(6,*)'WARNING: CN excitation energy below continuum'
+           WRITE(6,*)'WARNING: cut-off. zero reaction cross section'
            WRITE(6,*)'WARNING: will result'
            WRITE(6,*)'WARNING: '
-        ENDIF 
+        ENDIF
 C-------E1
         IF(IGE1.NE.0)THEN
+C---------factor 10 near HHBarc from fm**2-->mb
+C RCN 11/2004   (10*HHBarc**2*PI*E1(0   ,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
+          E1Tmp=10*HHBarc**2*PI*E1(Ntrg,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)
+          QDTmp=SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/3.0d0
 C---------do loop over parity
           DO ip = 1, 2
 C-----------do loop over compound nucleus spin
@@ -254,11 +258,12 @@ C-------------Spin of c.n. J=j-S1
               IF(ABS(j-S1-XJLv(LEVtarg, Ntrg)).LE.1.0.AND.
      &              (j-S1+XJLv(LEVtarg, Ntrg)).GE.1.0) THEN
                 WPARG = PAR(ip, LVP(LEVtarg, 0), 1)
-C---------------factor 10 near HHBarc from fm**2-->mb
                 POP(NEX(1), j, ip, 1) = POP(NEX(1), j, ip, 1) +
-     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*
-     &          (10*HHBarc**2*PI*E1(0,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)+
-     &           SIGQD(Z,A,EINl,Lqdfac)/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
+C     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*
+C     &          (10*HHBarc**2*PI*E1(0,Z,A,EINl,0.d0,0.d0)/(2*EINl**2)+
+C     &           SIGQD(Z,A,EINl,Lqdfac)/3.0d0)/(2*XJLv(LEVtarg, Ntrg)+1)
+     &          (FLOAT(2*j + 1) - 2.0*S1)*WPARG*(E1Tmp + QDTmp)
+     &          /(2*XJLv(LEVtarg, Ntrg)+1)
 C  quasideuteron contribution SIGQD added in previous statement -- Carlson
               ENDIF
             ENDDO
@@ -311,7 +316,7 @@ C-------end of E2
               csmax = DMAX1(POP(NEX(1), j, ip, 1), csmax)
           ENDDO
         ENDDO
-        IF(IGE1.NE.0) QDfrac= SIGQD(Z,A,EINl,Lqdfac)/CSFus
+        IF(IGE1.NE.0) QDfrac= SIGQD(Z(Ntrg),A(Ntrg),EINl,Lqdfac)/CSFus
         GOTO 101
       ENDIF
 C-----Plujko_new(END of calculation CSFus)
@@ -370,31 +375,31 @@ C        OPEN(UNIT = 45, FILE = 'ecis95.ics', STATUS = 'old', ERR = 200)
  200     CLOSE(45)
 C
          IF(SINl.GT.ecis_abs)THEN
-            WRITE(6, 
+            WRITE(6,
      &'(///                                                       5x,''*
      &*************************************************'')')
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,'' Direct cross section calculation do not converge '')'
      &     )
-            WRITE(6, 
-     &'(6x,''Inelastic cross section ='',F8.2,'' mb''/                  
+            WRITE(6,
+     &'(6x,''Inelastic cross section ='',F8.2,'' mb''/
      &  6x,''Reaction  cross section ='',F8.2,'' mb''/)')SINl, ecis_abs
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,'' Either change OMP or change calculation method   '')'
      &     )
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,''        (DIRPOT)   or   (DIRECT) parameters       '')'
      &     )
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,'' This problem usually happens using DWBA method   '')'
      &     )
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,'' to treat strong coupled nuclei                   '')'
      &     )
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,''            CALCULATION STOPPED                   '')'
      &     )
-            WRITE(6, 
+            WRITE(6,
      &     '(5x,''**************************************************'')'
      &     )
             STOP 200
@@ -454,7 +459,7 @@ C
          IF(POP(NEX(1), j, 1, 1)*10000.D0.GT.csmax)GOTO 300
          IF(POP(NEX(1), j, 2, 1)*10000.D0.GT.csmax)GOTO 300
       ENDDO
-  300 CONTINUE      
+  300 CONTINUE
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
       NLW = NLW + 3
@@ -465,9 +470,9 @@ C-----is still stable
          IF(IOUt.GT.0)THEN
             WRITE(6, '('' Maximum spin to preserve stability is'',I4)')
      &            JSTab(1)
-            WRITE(6, 
+            WRITE(6,
      &            '('' Calculations will be truncated at this limit'')')
-            WRITE(6, 
+            WRITE(6,
      &            '('' part of the fusion cross section will be lost'')'
      &            )
          ENDIF
@@ -480,12 +485,12 @@ C-----is still stable
       ENDIF
       IF((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
      &   *20.D0.GT.csmax) .AND. NLW.EQ.NDLW)THEN
-         WRITE(6, *)'POP1=', POP(NEX(1), NLW, 1, 1), 'POP2=', 
+         WRITE(6, *)'POP1=', POP(NEX(1), NLW, 1, 1), 'POP2=',
      &              POP(NEX(1), NLW, 2, 1), 'NLW=', NLW
-         WRITE(6, 
-     &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',      
-     &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',       
-     &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',      
+         WRITE(6,
+     &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
+     &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
+     &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
      &''D '')')
          STOP
       ENDIF
@@ -538,7 +543,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, d, dfu, e2, ee2, f, ht, le1, le2, m0, m1, 
+      DOUBLE PRECISION arg, d, dfu, e2, ee2, f, ht, le1, le2, m0, m1,
      &                 m2, p, t, vc, vmax, vmm, vn, x, y
       INTEGER INT
       INTEGER j, jl
@@ -717,7 +722,7 @@ C
       END
 C
 C
-      SUBROUTINE PUSH(Ecm, A, Ap, At, Bas, Expush, Sigi, Trunc, Stl, 
+      SUBROUTINE PUSH(Ecm, A, Ap, At, Bas, Expush, Sigi, Trunc, Stl,
      &                Nlw, Ndlw)
 Ccc ********************************************************************
 Ccc *                                                         class:ppu*
