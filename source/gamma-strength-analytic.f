@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 08:07:21 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.4 2004-06-08 08:07:21 Capote Exp $
+Ccc   * $Date: 2004-06-11 13:49:24 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.5 2004-06-11 13:49:24 Capote Exp $
 C
 C     Module "gamma-strength-analytic.f" with
 C     main subroutine "GAMMA_STRENGTH.f"

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-08 08:07:00 $
-Ccc   * $Id: OM-scat2.f,v 1.10 2004-06-08 08:07:00 Capote Exp $
+Ccc   * $Date: 2004-06-11 13:48:57 $
+Ccc   * $Id: OM-scat2.f,v 1.11 2004-06-11 13:48:57 Capote Exp $
 C
       SUBROUTINE OMTL(Nejc, Nnuc, Energ, Lmax, Stl, Srr, Ipr)
 Ccc
