@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2004-06-03 21:02:04 $
-Ccc   * $Id: tl.f,v 1.21 2004-06-03 21:02:04 Capote Exp $
+Ccc   * $Date: 2004-06-07 10:38:57 $
+Ccc   * $Id: tl.f,v 1.22 2004-06-07 10:38:57 Capote Exp $
 C
 C        ND_NLV,IPH(NDLV),LMaxCC,IDefCC,IOPSYS
 C        ND_NLV - Number of discrete levels to be included in the
