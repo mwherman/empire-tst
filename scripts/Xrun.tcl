@@ -5120,7 +5120,9 @@ foreach el $ddx {
    incr i +1
 }
 
-if {$compeval != ""} {file copy -force $compeval ../util/lsttab/COMPARE.DAT }
+#if {$compeval != ""} {file copy -force $compeval ../util/lsttab/COMPARE.DAT }
+if {$compeval != ""} {file delete ../util/lsttab/COMPARE.DAT 
+file link -symbolic ../util/lsttab/COMPARE.DAT $compeval }
 
 set lsttab [open LSTTAB.INP w+]
 puts $lsttab ""
