@@ -1,9 +1,9 @@
       PARAMETER(
-     * NDNUC= 50                   
+     * NDNUC= 100                   
 c      for PCROSS
      *,NDEJC=4 
      *,NDAFIS=1
-     *,NDEX= 150
+     *,NDEX= 101
      *,NDLW= 50
      *,NDTL= 30
      *,NDMSCS=4 
