@@ -752,7 +752,7 @@ C
 C Dummy arguments
 C
       CHARACTER*4 Cw(2,1)
-      REAL*8 Dw(1)
+      REAL*8 Dw(*)
       LOGICAL Lo(250)
       INTEGER Nw(2,5)
 C
