@@ -82,7 +82,7 @@ C
 	   if(GTIlnor(1).GT.0.) gc = ac/13.*GTIlnor(1)
 	   ftmp=0.
 	   if(ac.gt.0.d0) ftmp= 12./sqrt(dble(float(ac)))
-       pc = ftmp                                           ! odd  
+           pc = ftmp                                           ! odd  
 	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.0) pc = 2*ftmp ! e-e
 	   if(mod(ac,2).eq.0 .and. mod(zc,2).eq.1) pc = 0      ! o-o
       ENDIF
@@ -138,12 +138,12 @@ C        By setting GTIlnor(nnur) to zero we are setting g(nejc)=A/13 !!
 C
          IF(g(nejc).EQ.0.)THEN
             g(nejc) = ar/13.
- 	        if(GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur)
-	        ftmp=0.
-	        if(ar.gt.0.d0) ftmp= 12./sqrt(dble(float(ar)))
+ 	    if(GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur)
+	    ftmp=0.
+	    if(ar.gt.0.d0) ftmp= 12./sqrt(dble(float(ar)))
             pair(nejc) = ftmp                                           ! odd  
-	        if(mod(ar,2).eq.0 .and. mod(zr,2).eq.0) pair(nejc) = 2*ftmp ! e-e
-   	        if(mod(ar,2).eq.0 .and. mod(zr,2).eq.1) pair(nejc) = 0      ! o-o
+	    if(mod(ar,2).eq.0 .and. mod(zr,2).eq.0) pair(nejc) = 2*ftmp ! e-e
+   	    if(mod(ar,2).eq.0 .and. mod(zr,2).eq.1) pair(nejc) = 0      ! o-o
          ENDIF
 C        Maximum and minimum energy bin
          DO  ienerg = 2, NEX(nnur)
