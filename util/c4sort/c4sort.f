@@ -152,7 +152,7 @@ C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-
-      PARAMETER       (MXEN=40000,MXAL=20,LCH=52,MXIR=12000,MXEL=800)
+      PARAMETER       (MXEN=60000,MXAL=20,LCH=52,MXIR=12000,MXEL=800)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*40     FLIN,FLC4,FLOU,FLSC
       CHARACTER*35     REF
@@ -526,7 +526,7 @@ C* Rewind if next entry ILN appears before the current buffer
           JJ=JLN-I1+1
 c...          print *,'i1,i2,jln',i1,i2,jln,JJ
           REC=RC6(JJ)
-CMH Move year to adjucent to the accession number
+CMH Move year adjacent to the accession number
           DO ichar=98,122
              IF(REC(ichar:ichar) .EQ.'(' ) THEN
                 char1=REC(ichar+1:ichar+1)

@@ -1,4 +1,5 @@
-FC     =  g77
+#FC     =  g77
+FC     =  ifort
 #FFLAGS =  -g
 #----GNU g77 FORTRAN compiler
 #FC     = g77

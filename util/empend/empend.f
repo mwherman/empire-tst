@@ -1678,6 +1678,9 @@ C* Positioned to read continuum cross section (subtract discrete levels)
   390 CONTINUE
       READ (REC,803) XC
       XS=XC-XI
+cMH   write(LER, *) '                      Incident energy : ',EE
+cMH   write(LER, *)'                  Total cross section : ',XC
+cMH   write(LER, *)'       Sum of discrete cross sections : ',XI
       IF(XC.GT.0 .AND. XS/XC.LT.2.E-5) THEN
 c...        CPC=100*XS/XC
 c...        print *
