@@ -236,7 +236,7 @@ C
       CETal = CETa
       CSOl = CSO
 C     Capote Preeq 2002
-	SRR = 0.
+      SRR = 0.
 C
       ida = 1
       iba = 0
