@@ -158,6 +158,6 @@ C
 C
 C     Storing masses and mass excess for all nuclei (RIPL-2)
 C
-      COMMON /XMASS/ EXCessmass(0:130,400), RESmas(0:130,400)
+      COMMON /XMASS/ EXCessmass(0:130,0:400), RESmas(0:130,0:400)
 C
 C-----GLOBAL COMMON ---END-----------------------------------------
