@@ -36,7 +36,7 @@ c     62     ecis03,main
 c     63     ecis03
 c     64     ecis03
 c     65     ecis03
-c     66     ecis03,MSD-Tristan
+c     66     ecis03
 c     75     ecis03
 c     76     ecis03
 c     77     input
@@ -53,6 +53,8 @@ c     87     ecis03
 c     88     ecis03
 c     89     ecis03
 c     90     ecis03
+c     91     MSD-Tristan
+c     94     input.f
 c     99     ecis03
 c    133     tl
 c    134     tl
