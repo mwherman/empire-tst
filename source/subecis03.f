@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-01 12:10:29 $
-Ccc   * $Id: subecis03.f,v 1.6 2005-04-01 12:10:29 Capote Exp $
+Ccc   * $Date: 2005-04-10 21:46:58 $
+Ccc   * $Id: subecis03.f,v 1.7 2005-04-10 21:46:58 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
@@ -51,7 +51,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN (63,FILE = 'ecis03.tlj')
       OPEN (64,FILE = 'file64')
       OPEN (65,FILE = 'file65')
-      OPEN (66,FILE = 'file66')
+      OPEN (91,FILE = 'file91')
       OPEN (85,FILE = 'ecis03.ang')
       OPEN (86,FILE = 'file86')
       OPEN (87,FILE = 'file87')
@@ -72,7 +72,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (63)
       CLOSE (64,STATUS = 'delete')
       CLOSE (65,STATUS = 'delete')
-      CLOSE (66,STATUS = 'delete')
+      CLOSE (91,STATUS = 'delete')
       CLOSE (85)
       CLOSE (86,STATUS = 'delete')
       CLOSE (87,STATUS = 'delete')
@@ -12197,11 +12197,18 @@ C COMPUTATION OF POTENTIALS AND FORM FACTORS                            CAL1-038
          DO i = NRCo, n
             Dw(i) = 0.D0
          ENDDO
+C        CALL POTE(Dw(NBEta),Nw(1,NBEta),Dw(NVC1),Nw(1,NIVq),Nw(1,NIVy),
+C    &             Nw(1,NIVz),Dw(NCX),Nw(1,NCX),Dw(NPOt),Nw(1,NPOt),
+C    &             Dw(NRCo),Dw(NRDo),Dw(NWV),Dw(MWV),ACOnv,ISM,NCOll,
+C    &             NCOlx - NCOnt,NCOlt,id1,Nw,Nw(1,MIPi),Nw(1,NIPp),
+C    &             Dw(NIXt),IQM,NPP,NBT1,MCM,CHB,CCZ,Lo)
+C--------Plujko_new-2005
          CALL POTE(Dw(NBEta),Nw(1,NBEta),Dw(NVC1),Nw(1,NIVq),Nw(1,NIVy),
-     &             Nw(1,NIVz),Dw(NCX),Nw(1,NCX),Dw(NPOt),Nw(1,NPOt),
+     &             Nw(1,NIVz),Nw(1,NCX),Dw(NCX),Dw(NPOt),Nw(1,NPOt),
      &             Dw(NRCo),Dw(NRDo),Dw(NWV),Dw(MWV),ACOnv,ISM,NCOll,
      &             NCOlx - NCOnt,NCOlt,id1,Nw,Nw(1,MIPi),Nw(1,NIPp),
      &             Dw(NIXt),IQM,NPP,NBT1,MCM,CHB,CCZ,Lo)
+C--------Plujko_new-2005
       ENDIF
       IF (Lo(220)) GOTO 800
       NPLace = MAX0(NPLace,nxc + id1)
@@ -12503,15 +12510,18 @@ C
       REAL*8 Aconv, Ccz, Chb
       INTEGER Idt, Iqm, Ism, Nbt1, Ncold, Ncoll, Ncolt, Npp
       REAL*8 Beta(9,1), Q(1), Tl(1), V(Ism,1), Val(34,1), Vco(2,1),
-     &       Vdo(2,1), Wv(18,1), Wvm(18,1)
+     &       Vdo(2,1), Wv(18,1), Wvm(18,1)  
       INTEGER Ipi(11,1), Ipim(11,1), Ipp(30,1), Ivq(3,1), Ivy(7,1),
      &        Ivz(4,1), Mcm(2), Nbta(18,1), Np(1), Nval(1)
       LOGICAL Lo(250)
 C
 C Local variables
 C
-      REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, p, pgn(10), rm,
-     &       rr, w(24), wvx(18), xgn(10), xp, xq
+C-----Plujko_new-2005            
+C     REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, p, pgn(10), rm,
+C    &       rr, w(24), wvx(18), xgn(10), xp, xq
+      REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, pgn(10), rm,
+     &       rr, w(24), wvx(18), xgn(10), xp, xq, p(Ism)
       CHARACTER*8 aa(3,8)
       CHARACTER*4 bb(2)
       DOUBLE PRECISION DABS, DATAN2, DCOS, DSIN, DSQRT
@@ -14575,7 +14585,9 @@ C
       REAL*8 Ccz, H, Vac, Zt
       INTEGER Ism, L
       LOGICAL Lt, Lz
-      REAL*8 Q(Ism,5), V(Ism), Val(1), W(Ism)
+C-----Plujko_new-2005      
+C     REAL*8 Q(Ism,5), V(Ism), Val(1), W(Ism)
+      REAL*8 Q(Ism,5), V(Ism),         W(Ism)
 C
 C Local variables
 C
@@ -14605,7 +14617,9 @@ C
          c = DFLOAT(2*L + 1)
          zz = 1.D0/c
          IF (.NOT.(Lt)) THEN
-            IF (.NOT.(L.NE.0 .OR. Lz)) Zt = Ccz*Val(1)/Q(Ism,1)
+C-----------Plujko_new-2005         
+C           IF (.NOT.(L.NE.0 .OR. Lz)) Zt = Ccz*Val(1)/Q(Ism,1)
+            IF (.NOT.(L.NE.0 .OR. Lz)) Zt = Ccz*Val   /Q(Ism,1)
             zz = Zt*zz
          ENDIF
          c = c*H/12.D0
@@ -24687,7 +24701,7 @@ C IF THE CHI2 DECREASED, SAVE THE SCATTERING COEFFICIENTS               RESU-275
 C COMPUTATION AT EQUIDISTANT ANGLES                                     RESU-281
       WRITE (MW,99180) TITle
       jg = IDINT((THEta2 - THEta1)/DTHeta + 1.5D0)
-      IF (Lo(64)) WRITE (66,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
+      IF (Lo(64)) WRITE (91,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncols
       IF (Lo(64)) WRITE (85,99190) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1),
      &                             Ncols
@@ -24865,7 +24879,7 @@ C1033 FORMAT (D12.5,I3)                                                 RESU-585
       ELSE
          WRITE (MW,99135) iniv
 99135    FORMAT (//' CLOSED CHANNEL FOR THE TARGET STATE',I3)
-         IF (Lo(64)) WRITE (66,99140) iniv, sp2, sigm(Ipi(1,iniv) + 1)
+         IF (Lo(64)) WRITE (91,99140) iniv, sp2, sigm(Ipi(1,iniv) + 1)
 99140    FORMAT (I5,F5.1,A1,3X,'0',5X,'CLOSED CHANNEL')
          GOTO 1300
       ENDIF
@@ -24905,13 +24919,13 @@ C FOR EQUIDISTANT ANGLES                                                RESU-456
          GOTO 1100
       ENDIF
  1200 IF (.NOT.(Lo(164))) THEN
-         WRITE (66,99155) (Mf(2,NIX + k - 2),theta,Ex(k,1),(Cm(l,NIX+k-2
+         WRITE (91,99155) (Mf(2,NIX + k - 2),theta,Ex(k,1),(Cm(l,NIX+k-2
      &                    ),l = 6,10),k = 2,i3)
 99155    FORMAT (I3,2D12.5,5X,4A4,A2)
          DO k = 2, i3
             WRITE (83 + k,'(1x,F5.1,1x,e12.6)') theta, Ex(k,1)
          ENDDO
-         IF (Lo(81)) WRITE (66,99160) theta, Ex(i3 + 1,1),
+         IF (Lo(81)) WRITE (91,99160) theta, Ex(i3 + 1,1),
      &                                (lg(k),k = 1,5), theta, Ex(i4,1),
      &                                (lg(k),k = 6,10)
 99160    FORMAT (' -4',2D12.5,5X,4A4,A2/' -5',2D12.5,5X,4A4,A2)
@@ -25015,7 +25029,7 @@ C FOR EQUIDISTANT ANGLES                                                RESU-481
             ngx = MIN0(NFX,NIX + 5)
             WRITE (MW,99215) ((Cm(l,k),l = 6,10),k = NIX,ngx)
          ENDIF
- 1950    IF (Lo(64)) WRITE (66,99220) iniv, sp2, sigm(Ipi(1,iniv) + 1),
+ 1950    IF (Lo(64)) WRITE (91,99220) iniv, sp2, sigm(Ipi(1,iniv) + 1),
      &                                i8, jg
          IF (Lo(64)) WRITE (85,99220) iniv, sp2, sigm(Ipi(1,iniv) + 1),
      &                                i8, jg
