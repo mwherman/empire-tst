@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-01 12:12:06 $
-Ccc   * $Id: tl.f,v 1.50 2005-04-01 12:12:06 Capote Exp $
+Ccc   * $Date: 2005-04-10 21:45:39 $
+Ccc   * $Id: tl.f,v 1.51 2005-04-10 21:45:39 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -568,9 +568,11 @@ C-----Erasing parameters of O.M.P.
       RVOm(Nejc,Nnuc) = 0.D0
       RWOm(Nejc,Nnuc) = 0.D0
       RVSo(Nejc,Nnuc) = 0.D0
+      RWSo(Nejc,Nnuc) = 0.D0
       AVOm(Nejc,Nnuc) = 0.D0
       AWOm(Nejc,Nnuc) = 0.D0
       AVSo(Nejc,Nnuc) = 0.D0
+      AWSo(Nejc,Nnuc) = 0.D0
 C-----set nonlocality range to 0. (as usually is the case)
       RNOnl(Nejc,Nnuc) = 0.0
 C-----set validity range to any energy (can be modified later)
