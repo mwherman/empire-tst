@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:57:00 $
-Ccc   * $Id: input.f,v 1.95 2005-04-10 21:57:00 Capote Exp $
+Ccc   * $Date: 2005-04-10 22:03:26 $
+Ccc   * $Id: input.f,v 1.96 2005-04-10 22:03:26 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -210,7 +210,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
@@ -6308,8 +6308,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.95 $
-C $Date: 2005-04-10 21:57:00 $
+C $Revision: 1.96 $
+C $Date: 2005-04-10 22:03:26 $
 C
 C ===================================================================
 C
