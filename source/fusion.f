@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 18:34:27 $
-Ccc   * $Id: fusion.f,v 1.38 2005-03-16 18:34:27 Capote Exp $
+Ccc   * $Date: 2005-04-10 21:56:04 $
+Ccc   * $Id: fusion.f,v 1.39 2005-04-10 21:56:04 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -646,8 +646,9 @@ C
       ENDDO
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
+C-----Plujko_new-2005
 C 400 NLW = NLW + 3
-  400 CONTINUE
+  400 NLW = NLW + 1 + MAXmult
 C-----check whether NLW is not larger then max spin at which nucleus
 C-----is still stable
       IF (NLW.GT.JSTab(1)) THEN

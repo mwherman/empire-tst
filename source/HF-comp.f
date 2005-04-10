@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:12 $
-Ccc   * $Id: HF-comp.f,v 1.48 2005-03-11 17:22:12 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-10 21:54:21 $
+Ccc   * $Id: HF-comp.f,v 1.49 2005-04-10 21:54:21 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -683,6 +683,32 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+C ****************************************************************************
+C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
+C *          calculations of gamma-transitions both between states in        *
+C *          continuum and from continuum states to discrete levels;         *
+C *          variable 'MAXmult' is transmitted in 'global.h';                *
+C *          a value of 'MAXmult' is set in modul 'input.f';                 *
+C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
+C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
+C ****************************************************************************
+C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
+C ****************************************************************************
+C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
+C * are calculated with the use of the relationships between                 *
+C * single-particle radiative strength functions in the Weisskopf form.      *
+C *                                                                          *
+C *   Electric transitions:                                                  *
+C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
+C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
+C *   xle(i) = f_Ei                                                          *
+C *                                                                          *
+C *   Magnetic transitions:                                                  *
+C *   f_M(L+1)/f_E(L+1) = cme,                                               *
+C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
+C *   xlm(i) = f_Mi                                                          *
+C *                                                                          *
+C ****************************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -696,18 +722,38 @@ C
 C Local variables
 C
       DOUBLE PRECISION E1, E2, XM1
-      DOUBLE PRECISION eg, se1, se2, se2m1, sm1, xjc
+      DOUBLE PRECISION eg, xjc
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
 C
+C-----Plujko_new-2005
+      INTEGER Jr,lamb, lambmin, lambmax
+      DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
+     &                 scrtpos, scrtneg, hscrtl
+      DIMENSION xle(10),xlm(10)
 C
-      Sum = 0.0
-      SCRtem(0) = 0.0
+C-----MAXmult - maximal gamma-ray multipolarity
+      DO i = 1, MAXmult
+         xle(i) = 0.0D0
+         xlm(i) = 0.0D0
+      ENDDO
+      IF (MAXmult.GT.2) THEN
+         ha = A(Nnuc)**0.666666666666D0
+         cee = 3.7D-5*ha
+         cme = 0.307D0/ha
+      ENDIF
+C
+Cp    jmin = MAX0(1, Jc - 2)
+Cp    jmax = MIN0(NLW, Jc + 2)
+      jmin = 1
+Cp    jmin = MAX0(1, Jc - MAXmult)
+      jmax = MIN0(NLW, Jc + MAXmult)
+C
+      Sum = 0.d0
+      SCRtem(0) = 0.d0
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C     WRITE(6,*) ' decaying state spin=',xjc,' and parity=',ipc
-      jmin = MAX0(1,Jc - 2)
-      jmax = MIN0(NLW,Jc + 2)
 C-----clear scratch matrix (continuum)
       DO j = 1, NLW
          DO i = 1, NEX(Nnuc)
@@ -737,77 +783,45 @@ C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-C--------next 3 lines could be replaced with the matrix
-         se1 = E1(Nnuc,Z,A,eg,TNUc(ier,Nnuc),UEXcit(ier,Nnuc))
-     &         *TUNe(0,Nnuc)
-         se2 = E2(eg)*TUNe(0,Nnuc)
-         sm1 = XM1(eg)*TUNe(0,Nnuc)
-         se2m1 = se2 + sm1
-         IF (Jc.GT.2) THEN
-            IF (Jc.GE.NLW - 1) GOTO 50
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            GOTO 100
+C--------Plujko_new-2005
+         xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
+     &            TUNe(0, Nnuc)
+         xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+         xle(2) = E2(eg)*TUNe(0, Nnuc)
+         IF(MAXmult.GT.2) THEN
+            xlm(2) = xle(2)*cme
+            DO i = 3, MAXmult
+             xle(i) = xle(i-1)*eg**2*cee
+     &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
+             xlm(i) = xle(i)*cme
+            ENDDO
          ENDIF
-C--------decaying state spin index = 2
-         IF (Jc.EQ.2) THEN
-            IF (ABS(xjc - 1.5).LT.0.001D0) THEN
-               SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            ELSE
-               SCRt(ier,Jc - 1,ipos,0) = sm1*RO(ier,Jc - 1,Nnuc)
+C
+         DO Jr = 1, jmax
+            xjr = FLOAT(Jr) + HIS(Nnuc)
+            lambmin = MAX0(1,IABS(Jc-Jr))
+            lambmax = xjc + xjr + 0.001
+            lambmax = MIN0(lambmax,MAXmult)
+            IF(lambmin.LE.lambmax)THEN
+	         scrtpos = 0.0
+               scrtneg = 0.0
+               DO lamb = lambmin, lambmax
+                 IF(lamb/2*2.EQ.lamb)THEN
+                   scrtpos = scrtpos + xle(lamb)
+                   scrtneg = scrtneg + xlm(lamb)
+                 ELSE
+                   scrtpos = scrtpos + xlm(lamb)
+                   scrtneg = scrtneg + xle(lamb)
+                 ENDIF
+               ENDDO
+               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
+               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
             ENDIF
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            GOTO 100
-         ENDIF
-C--------decaying state spin = 1/2
-         IF (ABS(xjc - 0.5).LT.0.001D0) THEN
-            SCRt(ier,Jc,ipos,0) = sm1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            GOTO 100
-         ENDIF
-C--------decaying state spin = 0
-         IF (ABS(xjc - 0.).LT.0.001D0) THEN
-            SCRt(ier,Jc + 1,ipos,0) = sm1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            GOTO 100
-         ENDIF
-C--------decaying state spin index = NLW-1
-   50    IF (Jc.EQ.NLW - 1) THEN
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            GOTO 100
-         ENDIF
-C--------decaying state spin index = NLW
-         IF (Jc.EQ.NLW) THEN
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-         ENDIF
-  100 ENDDO
+	   ENDDO
+      ENDDO
 C-----do loop over c.n. energies ***done***
-C-----decay to the continuum ----** done***---------------------------
+C-----decay to the continuum ----** done***-----------------------
+C
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
@@ -825,21 +839,37 @@ C-----do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
             lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
             lmax = xjc + XJLv(i,Nnuc) + 0.001
-            IF (lmin.LE.2 .AND. lmax.NE.0) THEN
-               eg = EX(Iec,Nnuc) - ELV(i,Nnuc)
-               ipar = (1 + LVP(i,Nnuc)*Ipc)/2
-               iodd = 1 - ipar
-               IF (lmin.EQ.2) THEN
-                  SCRtl(i,0) = SCRtl(i,0) + E2(eg)*FLOAT(ipar)
+C-----------Plujko_new-2005
+          lambmin = MAX0(1,lmin)
+          lambmax = MIN0(lmax,MAXmult)
+          IF(lambmin.LE.lambmax)THEN
+             eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
+             ipar = (1 + LVP(i, Nnuc)*Ipc)/2
+             iodd = 1 - ipar
+             xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
+             xlm(1) = XM1(eg)
+             IF(lambmax.GE.2) xle(2) = E2(eg)
+             IF(lambmax.GT.2) THEN
+              xlm(2) = xle(2)*cme
+              DO j = 3, lambmax
+               xle(j) = xle(j-1)*eg**2*cee
+     &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
+               xlm(j) = xle(j)*cme
+              ENDDO
+             ENDIF
+             hscrtl = 0.0D0
+             DO lamb = lambmin, lambmax
+              IF(lamb/2*2.EQ.lamb)THEN
+               hscrtl = hscrtl +
+     &                  xle(lamb)*ipar + xlm(lamb)*iodd
                ELSE
-                  SCRtl(i,0) = E1(Nnuc,Z,A,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc
-     &                         ))*iodd + XM1(eg)*ipar
-                  IF (lmax.NE.1) SCRtl(i,0) = SCRtl(i,0) + E2(eg)
-     &                *FLOAT(ipar)
-               ENDIF
-               SCRtl(i,0) = SCRtl(i,0)*RORed*TUNe(0,Nnuc)
-               Sum = Sum + SCRtl(i,0)
-            ENDIF
+               hscrtl = hscrtl +
+     &                  xlm(lamb)*ipar + xle(lamb)*iodd
+              ENDIF
+             ENDDO
+          SCRtl(i, 0) = hscrtl*RORed*TUNe(0, Nnuc)
+          Sum = Sum + SCRtl(i, 0)
+          ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
       ENDIF
@@ -881,6 +911,32 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+C ****************************************************************************
+C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
+C *          calculations of gamma-transitions both between states in        *
+C *          continuum and from continuum states to discrete levels;         *
+C *          variable 'MAXmult' is transmitted in 'global.h';                *
+C *          a value of 'MAXmult' is set in modul 'input.f';                 *
+C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
+C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
+C ****************************************************************************
+C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
+C ****************************************************************************
+C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
+C * are calculated with the use of the relationships between                 *
+C * single-particle radiative strength functions in the Weisskopf form.      *
+C *                                                                          *
+C *   Electric transitions:                                                  *
+C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
+C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
+C *   xle(i) = f_Ei                                                          *
+C *                                                                          *
+C *   Magnetic transitions:                                                  *
+C *   f_M(L+1)/f_E(L+1) = cme,                                               *
+C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
+C *   xlm(i) = f_Mi                                                          *
+C *                                                                          *
+C ****************************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -894,10 +950,23 @@ C
 C Local variables
 C
       DOUBLE PRECISION E1, E2, XM1
-      DOUBLE PRECISION eg, se1, se2, se2m1, sm1, sumn, sump, xjc
+      DOUBLE PRECISION eg, sumn, sump, xjc
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, lmax, lmin
-C
+C-----Plujko_new-2005
+      INTEGER Jr, lamb, lambmin, lambmax
+      DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr, hscrtl
+      DIMENSION xle(10),xlm(10)
+C-----MAXmult - maximal gamma-ray multipolarity
+      DO i = 1, MAXmult
+         xle(i) = 0.0D0
+         xlm(i) = 0.0D0
+      ENDDO
+      IF (MAXmult.GT.2) THEN
+         ha = A(Nnuc)**0.666666666666D0
+         cee = 3.7D-5*ha
+         cme = 0.307D0/ha
+      ENDIF
 C
       Sum = 0.0
       SCRtem(0) = 0.0
@@ -905,13 +974,13 @@ C
 C-----clear scratch matrix (continuum)
       DO j = 1, NLW
          DO i = 1, NEX(Nnuc)
-            SCRt(i,j,1,0) = 0.0
-            SCRt(i,j,2,0) = 0.0
+            SCRt(i,j,1,0) = 0.d0
+            SCRt(i,j,2,0) = 0.d0
          ENDDO
       ENDDO
 C-----clear scratch matrix (discrete levels)
       DO i = 1, NLV(Nnuc)
-         SCRtl(i,0) = 0.0
+         SCRtl(i,0) = 0.d0
       ENDDO
 C-----IPOS is a parity-index of final states reached by gamma
 C-----transitions which do not change parity (E2 and M1)
@@ -930,87 +999,43 @@ C-----decay to the continuum
 C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
-         IF (RO(ier,Jc,Nnuc).NE.0.D0) THEN
-            eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-C-----------next 3 lines should be replaced with the matrix
-            se1 = E1(Nnuc,Z,A,eg,TNUc(ier,Nnuc),UEXcit(ier,Nnuc))
-     &            *TUNe(0,Nnuc)
-            se2 = E2(eg)*TUNe(0,Nnuc)
-            sm1 = XM1(eg)*TUNe(0,Nnuc)
-            se2m1 = se2 + sm1
-            IF (Jc.GT.2) THEN
-               IF (Jc.GE.NLW - 1) GOTO 20
-               sump = se2*RO(ier,Jc - 2,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc - 1,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc + 1,Nnuc)
-               sump = sump + se2*RO(ier,Jc + 2,Nnuc)
-               SCRt(ier,Jc,ipos,0) = sump
-               sumn = se1*RO(ier,Jc - 1,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc + 1,Nnuc)
-               SCRt(ier,Jc,ineg,0) = sumn
-               GOTO 100
+        IF (RO(ier,Jc,Nnuc).NE.0.D0) THEN
+           eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
+           xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
+     &            TUNe(0, Nnuc)
+           xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+           xle(2) = E2(eg)*TUNe(0, Nnuc)
+           IF(MAXmult.GT.2) THEN
+             xlm(2) = xle(2)*cme
+             DO i = 3, MAXmult
+               xle(i) = xle(i-1)*eg**2*cee
+     &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
+               xlm(i) = xle(i)*cme
+             ENDDO
+           ENDIF
+           sump = 0.0D0
+           sumn = 0.0D0
+           DO Jr=1, NLW
+            xjr = FLOAT(Jr) + HIS(Nnuc)
+            lambmin = MAX0(1,IABS(Jc-Jr))
+            lambmax = xjc + xjr + 0.001
+            lambmax = MIN0(lambmax,MAXmult)
+            IF(lambmin.LE.lambmax)THEN
+               DO lamb = lambmin, lambmax
+                 IF(lamb/2*2.EQ.lamb)THEN
+                   sump = sump + xle(lamb)*RO(ier, Jr, Nnuc)
+                   sumn = sumn + xlm(lamb)*RO(ier, Jr, Nnuc)
+                 ELSE
+                   sump = sump + xlm(lamb)*RO(ier, Jr, Nnuc)
+                   sumn = sumn + xle(lamb)*RO(ier, Jr, Nnuc)
+                 ENDIF
+               ENDDO
             ENDIF
-C-----------decaying state spin index = 2
-            IF (Jc.EQ.2) THEN
-               IF (ABS(xjc - 1.5).LT.0.001D0) THEN
-                  sump = se2m1*RO(ier,Jc - 1,Nnuc)
-               ELSE
-                  sump = sm1*RO(ier,Jc - 1,Nnuc)
-               ENDIF
-               sump = sump + se2m1*RO(ier,Jc,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc + 1,Nnuc)
-               sump = sump + se2*RO(ier,Jc + 2,Nnuc)
-               SCRt(ier,Jc,ipos,0) = sump
-               sumn = se1*RO(ier,Jc - 1,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc + 1,Nnuc)
-               SCRt(ier,Jc,ineg,0) = sumn
-               GOTO 100
-            ENDIF
-C-----------decaying state spin = 1/2
-            IF (ABS(xjc - 0.5).LT.0.001D0) THEN
-               sump = sm1*RO(ier,Jc,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc + 1,Nnuc)
-               sump = sump + se2*RO(ier,Jc + 2,Nnuc)
-               SCRt(ier,Jc,ipos,0) = sump
-               sumn = se1*RO(ier,Jc,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc + 1,Nnuc)
-               SCRt(ier,Jc,ineg,0) = sumn
-               GOTO 100
-            ENDIF
-C-----------decaying state spin = 0
-            IF (ABS(xjc - 0.).LT.0.001D0) THEN
-               SCRt(ier,Jc,ipos,0) = sm1*RO(ier,Jc + 1,Nnuc)
-     &                               + se2*RO(ier,Jc + 2,Nnuc)
-               SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-               GOTO 100
-            ENDIF
-C-----------decaying state spin index = NLW-1
-   20       IF (Jc.EQ.NLW - 1) THEN
-               sump = se2*RO(ier,Jc - 2,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc - 1,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc + 1,Nnuc)
-               SCRt(ier,Jc,ipos,0) = sump
-               sumn = se1*RO(ier,Jc - 1,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc,Nnuc)
-               sumn = sumn + se1*RO(ier,Jc + 1,Nnuc)
-               SCRt(ier,Jc,ineg,0) = sumn
-               GOTO 100
-            ENDIF
-C-----------decaying state spin index = NLW
-            IF (Jc.EQ.NLW) THEN
-               sump = se2*RO(ier,Jc - 2,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc - 1,Nnuc)
-               sump = sump + se2m1*RO(ier,Jc,Nnuc)
-               SCRt(ier,Jc,ipos,0) = sump
-               SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-     &                               + se1*RO(ier,Jc - 1,Nnuc)
-            ENDIF
-         ENDIF
-  100 ENDDO
+	   ENDDO
+           SCRt(ier, Jc, ipos, 0) = sump
+           SCRt(ier, Jc, ineg, 0) = sumn
+        ENDIF
+      ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
@@ -1026,23 +1051,39 @@ C-----
       IF (RORed.NE.0.0D0) THEN
 C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
-            lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
-            lmax = xjc + XJLv(i,Nnuc) + 0.001
-            IF (lmin.LE.2 .AND. lmax.NE.0) THEN
-               eg = EX(Iec,Nnuc) - ELV(i,Nnuc)
-               ipar = (1 + LVP(i,Nnuc)*Ipc)/2
-               iodd = 1 - ipar
-               IF (lmin.EQ.2) THEN
-                  SCRtl(i,0) = SCRtl(i,0) + E2(eg)*FLOAT(ipar)
-               ELSE
-                  SCRtl(i,0) = E1(Nnuc,A,Z,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc
-     &                         ))*iodd + XM1(eg)*ipar
-                  IF (lmax.NE.1) SCRtl(i,0) = SCRtl(i,0) + E2(eg)
-     &                *FLOAT(ipar)
-               ENDIF
-               SCRtl(i,0) = SCRtl(i,0)*RORed*TUNe(0,Nnuc)
-               Sum = Sum + SCRtl(i,0)
+          lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
+          lmax = xjc + XJLv(i,Nnuc) + 0.001
+C---------Plujko_new-2005          
+          lambmin = MAX0(1,lmin)
+          lambmax = MIN0(lmax,MAXmult)
+          IF(lambmin.LE.lambmax)THEN
+            eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
+            ipar = (1 + LVP(i, Nnuc)*Ipc)/2
+            iodd = 1 - ipar
+            xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
+            xlm(1) = XM1(eg)
+            IF(lambmax.GE.2) xle(2) = E2(eg)
+            IF(lambmax.GT.2) THEN
+              xlm(2) = xle(2)*cme
+              DO j = 3, lambmax
+               xle(j) = xle(j-1)*eg**2*cee
+     &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
+               xlm(j) = xle(j)*cme
+              ENDDO
             ENDIF
+            hscrtl = 0.0D0
+            DO lamb = lambmin, lambmax
+              IF(lamb/2*2.EQ.lamb)THEN
+               hscrtl = hscrtl +
+     &                  xle(lamb)*ipar + xlm(lamb)*iodd
+              ELSE
+               hscrtl = hscrtl +
+     &                  xlm(lamb)*ipar + xle(lamb)*iodd
+              ENDIF
+            ENDDO
+            SCRtl(i, 0) = hscrtl*RORed*TUNe(0, Nnuc)
+            Sum = Sum + SCRtl(i, 0)
+          ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
       ENDIF

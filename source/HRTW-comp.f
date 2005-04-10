@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:12 $
-Ccc   * $Id: HRTW-comp.f,v 1.19 2005-03-11 17:22:12 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-10 21:54:43 $
+Ccc   * $Id: HRTW-comp.f,v 1.20 2005-04-10 21:54:43 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -630,6 +630,32 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+C ****************************************************************************
+C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
+C *          calculations of gamma-transitions both between states in        *
+C *          continuum and from continuum states to discrete levels;         *
+C *          variable 'MAXmult' is transmitted in 'global.h';                *
+C *          a value of 'MAXmult' is set in modul 'input.f';                 *
+C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
+C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
+C ****************************************************************************
+C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
+C ****************************************************************************
+C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
+C * are calculated with the use of the relationships between                 *
+C * single-particle radiative strength functions in the Weisskopf form.      *
+C *                                                                          *
+C *   Electric transitions:                                                  *
+C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
+C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
+C *   xle(i) = f_Ei                                                          *
+C *                                                                          *
+C *   Magnetic transitions:                                                  *
+C *   f_M(L+1)/f_E(L+1) = cme,                                               *
+C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
+C *   xlm(i) = f_Mi                                                          *
+C *                                                                          *
+C ****************************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -649,12 +675,33 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION corr, e1t, e2t, eg, se1, se1s, se2, se2m1, 
-     &                 se2m1s, se2s, sm1, sm1s, xjc, xm1t
+      DOUBLE PRECISION corr, eg, xjc
       DOUBLE PRECISION E1, E2, VT1, XM1
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
+C-----Plujko_new-2005
+      INTEGER Jr, lamb, lambmin, lambmax
+      DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
+     &                 scrtpos, scrtneg, hsumtls,  hscrtl
+      DIMENSION xle(10),xlm(10)
+      
+C----MAXmult - maximal gamma-ray multipolarity
+      DO i = 1, MAXmult
+         xle(i) = 0.0D0
+         xlm(i) = 0.0D0
+      ENDDO
+      IF (MAXmult.GT.2) THEN
+         ha = A(Nnuc)**0.666666666666D0
+         cee = 3.7D-5*ha
+         cme = 0.307D0/ha
+      ENDIF
+C
+Cp    jmin = MAX0(1, Jc - 2)
+Cp    jmax = MIN0(NLW, Jc + 2)
+      jmin = 1
+Cp    jmin = MAX0(1, Jc - MAXmult)
+      jmax = MIN0(NLW, Jc + MAXmult)
 C
 C
       Sum = 0.0
@@ -696,137 +743,64 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
             corr = 1.0
          ENDIF
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-         IF (Nhrtw.EQ.0) THEN
-            se1 = E1(Nnuc,Z,A,eg,TNUc(ier,Nnuc),UEXcit(1,Nnuc))
-     &            *TUNe(0,Nnuc)
-            se2 = E2(eg)*TUNe(0,Nnuc)
-            sm1 = XM1(eg)*TUNe(0,Nnuc)
-            se2m1 = se2 + sm1
-            se1s = se1**2
-            se2s = se2**2
-            sm1s = sm1**2
-            se2m1s = se2**2 + sm1**2
+C--------Plujko_new-2005
+         xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
+         xlm(1) = XM1(eg)
+         xle(2) = E2(eg)
+         IF(MAXmult.GT.2) THEN
+            xlm(2) = xle(2)*cme
+            DO i = 3, MAXmult
+             xle(i) = xle(i-1)*eg**2*cee
+     &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
+             xlm(i)= xle(i)*cme
+            ENDDO
+         ENDIF        
+         IF(Nhrtw.EQ.0)THEN
+            DO i = 1, MAXmult
+             xle(i) = xle(i)*TUNe(0, Nnuc)
+             xlm(i) = xlm(i)*TUNe(0, Nnuc)
+            ENDDO
          ELSE
-            se1 = VT1(E1(Nnuc,Z,A,eg,TNUc(ier,Nnuc),UEXcit(ier,Nnuc))
-     &            *TUNe(0,Nnuc),H_Tav,H_Sumtl)
-            se2 = VT1(E2(eg)*TUNe(0,Nnuc),H_Tav,H_Sumtl)
-            sm1 = VT1(XM1(eg)*TUNe(0,Nnuc),H_Tav,H_Sumtl)
-            se2m1 = se2 + sm1
-         ENDIF
-         IF (Jc.GT.2) THEN
-            IF (Jc.GE.NLW - 1) GOTO 50
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-C-----------first entry with HRTW
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc - 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc + 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc + 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc + 1,Nnuc)*corr
-            ENDIF    !first HRTW entry done
-            GOTO 100
-         ENDIF
-C--------decaying state spin index = 2
-         IF (Jc.EQ.2) THEN
-            IF (ABS(xjc - 1.5).LT.0.001D0) THEN
-               SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-               IF (Nhrtw.EQ.0) H_Sumtls = H_Sumtls + 
-     &             se2m1s*RO(ier,Jc - 1,Nnuc)*corr
+            IF(MAXmult.EQ.2) THEN
+              xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+              xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+              xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
             ELSE
-               SCRt(ier,Jc - 1,ipos,0) = sm1*RO(ier,Jc - 1,Nnuc)
-               IF (Nhrtw.EQ.0) H_Sumtls = H_Sumtls + 
-     &             sm1s*RO(ier,Jc - 1,Nnuc)*corr
-            ENDIF
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc + 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc + 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc + 1,Nnuc)*corr
-            ENDIF
-            GOTO 100
-         ENDIF
-C--------decaying state spin = 1/2
-         IF (ABS(xjc - 0.5).LT.0.001D0) THEN
-            SCRt(ier,Jc,ipos,0) = sm1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + sm1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc + 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc + 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc + 1,Nnuc)*corr
-            ENDIF
-            GOTO 100
-         ENDIF
-C--------decaying state spin = 0
-         IF (ABS(xjc - 0.).LT.0.001D0) THEN
-            SCRt(ier,Jc + 1,ipos,0) = sm1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc + 2,ipos,0) = se2*RO(ier,Jc + 2,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + sm1s*RO(ier,Jc + 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc + 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc + 1,Nnuc)*corr
-            ENDIF
-            GOTO 100
-         ENDIF
-C--------decaying state spin index = NLW-1
-   50    IF (Jc.EQ.NLW - 1) THEN
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ipos,0) = se2m1*RO(ier,Jc + 1,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc + 1,ineg,0) = se1*RO(ier,Jc + 1,Nnuc)
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc - 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc + 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc + 1,Nnuc)*corr
-            ENDIF
-            GOTO 100
-         ENDIF
-C--------decaying state spin index = NLW
-         IF (Jc.EQ.NLW) THEN
-            SCRt(ier,Jc - 2,ipos,0) = se2*RO(ier,Jc - 2,Nnuc)
-            SCRt(ier,Jc - 1,ipos,0) = se2m1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ipos,0) = se2m1*RO(ier,Jc,Nnuc)
-            SCRt(ier,Jc - 1,ineg,0) = se1*RO(ier,Jc - 1,Nnuc)
-            SCRt(ier,Jc,ineg,0) = se1*RO(ier,Jc,Nnuc)
-            IF (Nhrtw.EQ.0) THEN
-               H_Sumtls = H_Sumtls + se2s*RO(ier,Jc - 2,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se2m1s*RO(ier,Jc,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc - 1,Nnuc)*corr
-               H_Sumtls = H_Sumtls + se1s*RO(ier,Jc,Nnuc)*corr
+              DO i = 1, MAXmult
+                xle(i) = VT1(xle(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                xlm(i) = VT1(xlm(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+              ENDDO
             ENDIF
          ENDIF
-  100 ENDDO
+         DO Jr = 1, jmax
+            xjr = FLOAT(Jr) + HIS(Nnuc)
+            lambmin = MAX0(1,ABS(Jc-Jr))
+            lambmax = xjc + xjr + 0.001
+            lambmax = MIN0(lambmax,MAXmult)
+            IF(lambmin.LE.lambmax)THEN
+	       scrtpos = 0.0D0
+	       scrtneg = 0.0D0
+	       hsumtls =0.0D0
+               DO lamb = lambmin, lambmax
+                 IF(lamb/2*2.EQ.lamb)THEN
+                   scrtpos = scrtpos + xle(lamb)
+                   scrtneg = scrtneg + xlm(lamb)
+                 ELSE
+                   scrtpos = scrtpos + xlm(lamb)
+                   scrtneg = scrtneg + xle(lamb)
+                 ENDIF
+                 IF(Nhrtw.EQ.0)THEN
+                   hsumtls = hsumtls + xle(lamb)**2 + xlm(lamb)**2
+                 ENDIF    !first HRTW entry done
+	       ENDDO
+               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
+               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
+               H_Sumtls = H_Sumtls + hsumtls*RO(ier, Jr, Nnuc)*corr
+            ENDIF
+	 ENDDO
+      ENDDO
+C-----do loop over c.n. energies ***done***
+C-----decay to the continuum ----** done***---------------------------      
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
@@ -842,48 +816,67 @@ C-----
       IF (RORed.NE.0.0D0) THEN
 C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
-            lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
-            lmax = xjc + XJLv(i,Nnuc) + 0.001
-            IF (lmin.LE.2 .AND. lmax.NE.0) THEN
-               eg = EX(Iec,Nnuc) - ELV(i,Nnuc)
-               ipar = (1 + LVP(i,Nnuc)*Ipc)/2
-               iodd = 1 - ipar
-               IF (Nhrtw.EQ.0) THEN
-                  e2t = E2(eg)*TUNe(0,Nnuc)
-                  e1t = E1(Nnuc,Z,A,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc))
-     &                  *TUNe(0,Nnuc)
-                  xm1t = XM1(eg)*TUNe(0,Nnuc)
-               ELSE
-                  e2t = VT1(E2(eg)*TUNe(0,Nnuc),H_Tav,H_Sumtl)
-                  e1t = VT1(E1(Nnuc,Z,A,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc))
-     &                  *TUNe(0,Nnuc),H_Tav,H_Sumtl)
-                  xm1t = VT1(XM1(eg)*TUNe(0,Nnuc),H_Tav,H_Sumtl)
-               ENDIF
-               IF (lmin.EQ.2) THEN
-                  SCRtl(i,0) = SCRtl(i,0) + e2t*FLOAT(ipar)
-                  IF (Nhrtw.EQ.0) H_Sumtls = H_Sumtls + 
-     &                e2t**2*FLOAT(ipar)
-               ELSE
-                  SCRtl(i,0) = E1(Nnuc,Z,A,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc
-     &                         ))*iodd + XM1(eg)*ipar
-                  IF (Nhrtw.EQ.0) H_Sumtls = H_Sumtls + e1t**2*iodd + 
-     &                xm1t**2*ipar
-                  IF (lmax.NE.1) THEN
-                     SCRtl(i,0) = SCRtl(i,0) + e2t*FLOAT(ipar)
-                     IF (Nhrtw.EQ.0) H_Sumtls = H_Sumtls + 
-     &                   e2t**2*FLOAT(ipar)
-                  ENDIF
-               ENDIF
-               SCRtl(i,0) = SCRtl(i,0)*RORed
-               Sum = Sum + SCRtl(i,0)
-            ENDIF
+          lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
+          lmax = xjc + XJLv(i,Nnuc) + 0.001
+C---------Plujko_new-2005
+          lambmin = MAX0(1,lmin)
+          lambmax = MIN0(lmax,MAXmult)
+          IF(lambmin.LE.lambmax)THEN
+             eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
+             ipar = (1 + LVP(i, Nnuc)*Ipc)/2
+             iodd = 1 - ipar
+             xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
+             xlm(1) = XM1(eg)
+             IF(lambmax.GE.2) xle(2) = E2(eg)
+             IF(lambmax.GT.2) THEN
+              xlm(2) = xle(2)*cme
+              DO j = 3, lambmax
+               xle(j) = xle(j-1)*eg**2*cee
+     &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
+               xlm(j) = xle(j)*cme
+              ENDDO
+             ENDIF
+             IF(Nhrtw.EQ.0)THEN
+              DO j = 1, lambmax
+               xle(j) = xle(j)*TUNe(0, Nnuc)
+               xlm(j) = xlm(j)*TUNe(0, Nnuc)
+              ENDDO
+             ELSE
+              IF(lambmax.EQ.2) THEN
+                xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+              ELSE
+                DO j = 1, lambmax
+                 xle(j) = VT1(xle(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                 xlm(j) = VT1(xlm(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+                ENDDO
+              ENDIF
+             ENDIF
+             hscrtl = 0.0D0
+             hsumtls = 0.0D0
+             DO lamb = lambmin, lambmax
+              IF(lamb/2*2.EQ.lamb)THEN
+                 hscrtl = hscrtl +
+     &                    xle(lamb)*ipar + xlm(lamb)*iodd
+                 IF(Nhrtw.EQ.0)hsumtls = hsumtls +
+     &                         xle(lamb)**2*ipar + xlm(lamb)**2*iodd
+              ELSE
+                 hscrtl = hscrtl +
+     &                    xlm(lamb)*ipar + xle(lamb)*iodd
+                 IF(Nhrtw.EQ.0)hsumtls = hsumtls +
+     &                         xlm(lamb)**2*ipar + xle(lamb)**2*iodd
+              ENDIF
+             ENDDO
+             IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + hsumtls
+             SCRtl(i, 0) = hscrtl*RORed
+             Sum = Sum + SCRtl(i, 0)
+          ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
       ENDIF
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
-C-----do loop over c.n. energies ***done***
-C-----decay to the continuum ----** done***---------------------------
       END
 C
 C

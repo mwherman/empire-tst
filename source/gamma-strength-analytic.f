@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-14 20:41:32 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.15 2005-03-14 20:41:32 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-10 21:55:47 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.16 2005-04-10 21:55:47 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
      &   Eexcitf,Temperf,Egamma,Keyshape)
@@ -414,8 +414,9 @@ C
 C
       egamma2 = Egamma**2
       gamma = WIDTHGFL(T,Egamma)
-      GFL = LMConst*EGDr*gamma/((EGDr*EGDr - egamma2)
-     &      **2 + (Egamma*gamma)**2)
+      GFL = LMConst*EGDr*gamma/
+C     Plujko 2005      
+     &  ((EGDr*EGDr - egamma2)**2 + LMConst*(Egamma*gamma)**2)           
       END
  
  
