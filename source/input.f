@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-18 23:46:09 $
-Ccc   * $Id: input.f,v 1.94 2005-03-18 23:46:09 Capote Exp $
+Ccc   * $Date: 2005-04-10 21:57:00 $
+Ccc   * $Id: input.f,v 1.95 2005-04-10 21:57:00 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -24,10 +24,12 @@ C COMMON variables
 C
       INTEGER KAA, KAA1, KEYalpa, KEYinput, KEYload, KZZ, KZZ1, NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
+      INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
       COMMON /MLOCOM2/ KEYload, KEYalpa, KZZ, KAA
+      COMMON /R250COM/ INDexf,INDexb,BUFfer
 C
 C Local variables
 C
@@ -39,12 +41,12 @@ C
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit
       REAL FLOAT, SNGL
-      LOGICAL gexist, nonzero
+      LOGICAL gexist, nonzero, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        nema, nemn, nemp, netl, nnuc, nnur
       INTEGER IFINDCOLL
-      INTEGER INDEX, INT, NINT
+      INTEGER INDEX, INT, ISEED, NINT
       INTEGER*4 iwin
       INTEGER*4 PIPE
       CHARACTER*2 SMAT
@@ -116,6 +118,21 @@ C-----already converted to mb
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
+
+      INQUIRE(file='R250SEED.DAT',exist=fexist)
+      if(fexist) then
+        OPEN(94,file='R250SEED.DAT',status='OLD')
+        read(94,*)  indexf, indexb
+        Do i = 1, 250
+          read(94,*) buffer(i)
+        ENDDO 
+        CLOSE(94) 
+      else
+C       If the file R250SEED.DATdoes not exist, then DEFAULT
+C       starting seed is used
+        iseed = 1234567
+        Call R250Init(iseed)
+      endif  
       IF (EIN.EQ.0.0D0) THEN
 C
 C--------default input parameters (skipped in non-first-energy calculation)
@@ -319,7 +336,8 @@ C--------ejectile alpha
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.0
-C--------default values for  Key_shape and Key_GDRGFL
+C        Default values for keys (Key_shape, Key_GDRGFL) to set
+C        shape of E1 strength function and GDR parameters
          KEY_shape = 0
          KEY_gdrgfl = 1
          KEYinput = 0
@@ -333,6 +351,13 @@ C--------default values for  Key_shape and Key_GDRGFL
          LQDfac = 1.0D0
          IGM1 = 0
          IGE2 = 0
+C        Set by default 'MAXmult'
+C         - maximal value (=< 10) of gamma-ray multipolarity in
+C           calculations of gamma-transitions both between states in
+C           continuum and from continuum states to discrete levels;
+C           can be changed by input in SUBROUTINE READIN;
+C           name of input variable is 'GRMULT'
+         MAXmult = 2        
 C--------read entire input for the first energy calculations
 C--------mandatory part of the input
 C--------incident energy (in LAB)
@@ -1123,13 +1148,22 @@ C-----set o.m.p. for the incident channel
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
-      GDRpar(1,0) = EGDr1
-      GDRpar(2,0) = GGDr1
-      GDRpar(3,0) = CSGdr1
-      GDRpar(4,0) = EGDr2
-      GDRpar(5,0) = GGDr2
-      GDRpar(6,0) = CSGdr2
-      GDRpar(7,0) = GDRweis
+      
+C-----set giant resonance parameters for target      
+C     GDRpar(1,0) = EGDr1
+C     GDRpar(2,0) = GGDr1
+C     GDRpar(3,0) = CSGdr1
+C     GDRpar(4,0) = EGDr2
+C     GDRpar(5,0) = GGDr2
+C     GDRpar(6,0) = CSGdr2
+C     GDRpar(7,0) = GDRweis
+      GDRpar(1,0) = 0.0
+      GDRpar(2,0) = 0.0
+      GDRpar(3,0) = 0.0
+      GDRpar(4,0) = 0.0
+      GDRpar(5,0) = 0.0
+      GDRpar(6,0) = 0.0
+      GDRpar(7,0) = 0.0
       GDRpar(8,0) = 0.0
       GQRpar(1,0) = 0.0
       GQRpar(2,0) = 0.0
@@ -1340,13 +1374,21 @@ C--------------determination of discrete levels and pairing shifts for rn
                   ENDIF
                ENDIF
 C--------------determination of giant resonance parameters for residual nuclei
-               GDRpar(1,nnur) = EGDr1
-               GDRpar(2,nnur) = GGDr1
-               GDRpar(3,nnur) = CSGdr1
-               GDRpar(4,nnur) = EGDr2
-               GDRpar(5,nnur) = GGDr2
-               GDRpar(6,nnur) = CSGdr2
-               GDRpar(7,nnur) = GDRweis
+C              GDRpar(1,nnur) = EGDr1
+C              GDRpar(2,nnur) = GGDr1
+C              GDRpar(3,nnur) = CSGdr1
+C              GDRpar(4,nnur) = EGDr2
+C              GDRpar(5,nnur) = GGDr2
+C              GDRpar(6,nnur) = CSGdr2
+C              GDRpar(7,nnur) = GDRweis
+               GDRpar(1,nnur) = 0.0
+               GDRpar(2,nnur) = 0.0
+               GDRpar(3,nnur) = 0.0
+               GDRpar(4,nnur) = 0.0
+               GDRpar(5,nnur) = 0.0
+               GDRpar(6,nnur) = 0.0
+               GDRpar(7,nnur) = 0.0
+
                GDRpar(8,nnur) = 0.0
                GQRpar(1,nnur) = 0.0
                GQRpar(2,nnur) = 0.0
@@ -2016,6 +2058,7 @@ C
       n = ia - iz
       ncor = 0
       izcor = 0
+C-----define Gspin, Gspar, E2p, E3m for gamma      
       IF (ia.EQ.0) THEN
          E2p = 0.D0
          E3m = 0.D0
@@ -2077,16 +2120,20 @@ C COMMON variables
 C
       DOUBLE PRECISION ALSin, CNOrin(22), EFItin(22), GAPin(2), HOMin,
      &                 WIDexin
+      INTEGER*4 INDexf, INDexb, BUFfer(250)
+      COMMON /R250COM/ INDexf,INDexb,BUFfer
       COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin
 C
 C Local variables
 C
       REAL FLOAT
+	DOUBLE PRECISION GRAND
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc
+	INTEGER IPArCOV 
       INTEGER INT
       CHARACTER*6 name
-      DOUBLE PRECISION val
+      DOUBLE PRECISION val,sigma
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -2097,11 +2144,16 @@ C-----initialization of TRISTAN input parameters
          CNOrin(i) = 1.0
       ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
+C
+C	By default, no covariance calculation is done
+C
+	IPArCOV = 0
+      OPEN(95,FILE='COVAR.DAT',ACCESS='APPEND',STATUS='UNKNOWN')
       WRITE (6,*) '                        ____________________________'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b24  |'
+     &           '                       |  E M P I R E  -  2.19.b25  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -2119,6 +2171,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
          BACKSPACE (5)
          READ (5,'(A6,G10.5,4I5)',ERR = 200) name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
+	      CLOSE(95)
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
@@ -2145,12 +2198,20 @@ C-----------Print some final input options
             IF (KEY_shape.EQ.6) WRITE (6,
      &                    '('' E1 strength shape function set to SLO'')'
      &                    )
-            IF (KEY_gdrgfl.EQ.0) WRITE (6,
-     &                  '('' GDR parameters from Messina systematics'')'
-     &                  )
-            IF (KEY_gdrgfl.NE.0) WRITE (6,
-     &            '('' GDR parameters from RIPL-2/Plujko systematics'')'
-     &            )
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(6,
+     &         '('' GDR parameters from Messina systematics'')')
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(6,
+     &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
+            IF(Key_gdrgfl.EQ.1)WRITE(6,
+     &         '('' GDR parameters from RIPL-2/Exp.data+'',
+     &           ''Plujko systematics'')')
+            IF(Key_gdrgfl.EQ.2)WRITE(6,
+     &          '('' GDR parameters from RIPL-2/Exp.data+'',
+     &           ''Goriely calc.'')')
+C-----   print  maximal gamma-ray multipolarity  'MAXmult'
+            IF(MAXmult.GT.2)WRITE(6,
+     &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+     
             WRITE (6,*) ' '
             IF (OMPar_riplf .OR. OMParfcc) THEN
                WRITE (6,*) 'Existing, case specific, o.m.p. files: '
@@ -2349,11 +2410,25 @@ C--------CCFUS input  ** done ***
 
 C-----
          IF (name.EQ.'GDRGFL') THEN
-            KEY_gdrgfl = val
+            Key_GDRGFL = val + 0.001
             GOTO 100
          ENDIF
-C        Key_GDRGFL = 0 -  GDR parameters from Messina systematics
-C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f
+C        Key_GDRGFL = 0 and Key_shape =0 -  GDR parameters from Messina systematics
+C        Key_GDRGFL > = 0 and and Key_shape > 0 -  GDR parameters of RIPL-2 introduced;
+C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f;
+C                          experimental values or systematics of GDR parameters are set.
+C        Key_GDRGFL = 2 -  GDR parameters and other data determined by gdrgfldata.f;
+C                          if experimantal values of GDR parameters not found and Key_GDRGFL=2
+C                          they are going to be retrieved from the RIPL-2 Goriely theoretical
+C                          values and then from systematics.
+C
+C--------input MAXmult - maximal value (=< 10) of gamma-ray multipolarity for GSA
+         IF(name.EQ.'GRMULT')THEN
+            MAXmult = val + 0.001
+            IF(MAXmult.GT.10) MAXmult = 10
+            IF(MAXmult.LT.2) MAXmult = 2
+            GOTO 100
+         ENDIF
 C-----
          IF (name.EQ.'QFIS  ') THEN
             QFIs = val
@@ -2613,8 +2688,20 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'EGDR1 ') THEN
-            EGDr1 = val
-            WRITE (6,'('' GDR first hump energy set to '',F5.2)') EGDr1
+            if(i1.ne.0) then
+              WRITE (6,
+     &		'('' GDR first hump energy uncertainty is '',i1)') i1
+	        sigma = val*i1*0.01
+	        EGDr1 = val + grand()*sigma
+              WRITE (6,'('' GDR first hump sampled energy is '',F5.2)')
+     &        EGDr1
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, EGDr1,INDexf,INDexb  
+            else
+              EGDr1 = val
+              WRITE (6,'('' GDR first hump energy set to '',F5.2)')EGDr1
+	      endif
             GOTO 100
          ENDIF
 C-----
@@ -2929,6 +3016,7 @@ C-----
      & ) i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
+
          IF (name.EQ.'ATILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
@@ -2947,10 +3035,26 @@ C-----
                WRITE (6,'('' NORMALIZATION OF a-tilde IGNORED'')')
                GOTO 100
             ENDIF
-            ATIlnor(nnuc) = val
-            WRITE (6,
+
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' L.d. a-parameter uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        ATIlnor(nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' L.d. a-parameter sampled value : '',f8.3)') 
+     &        ATIlnor(nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, ATIlnor(nnuc),INDexf,INDexb  
+            else
+              ATIlnor(nnuc) = val
+              WRITE (6,
      &      '('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
-     &      ) i2, SYMb(nnuc), val
+     &        ) i2, SYMb(nnuc), val	   
+	      endif
+
             GOTO 100
          ENDIF
 C-----
@@ -2972,10 +3076,25 @@ C-----
                WRITE (6,'('' NORMALIZATION OF G-tilde IGNORED'')')
                GOTO 100
             ENDIF
-            GTIlnor(nnuc) = val
-            WRITE (6,
+
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' Single particle l.d. parameter g uncertainty in '',
+     &        I3,A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GTIlnor(nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' Single particle l.d. parameter g sampled value : '', 
+     &        f8.3)') GTIlnor(nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GTIlnor(nnuc),INDexf,INDexb  
+            else
+              GTIlnor(nnuc) = val
+              WRITE (6,
      &'('' Single particle l.d. parameter g in '',I3,A2,
      &  '' multiplied by '',        F6.1)') i2, SYMb(nnuc), val
+	      endif
             GOTO 100
          ENDIF
 C-----
@@ -5952,7 +6071,7 @@ C
      &                 etat(MAXGDR), etmp, fjtmp, gw0, he1t(MAXGDR),
      &                 he2t(MAXGDR), hgw1t(MAXGDR), hgw2t(MAXGDR), pi,
      &                 zz
-      INTEGER i, ka, keyram, kz, n, natmp, nnat(MAXGDR), nngt(MAXGDR),
+      INTEGER i, ka, kz, n, natmp, nnat(MAXGDR), nngt(MAXGDR),
      &        nntmp, nnzt(MAXGDR)
       DATA pi/3.141592654D0/
       kz = Znucleus + 0.001
@@ -6044,11 +6163,20 @@ C-----------Selecting only 2+ states
                EG2 = HE2(i)
                CS2 = HCS2(i)
                GW2 = HGW2(i)
+C--------------Plujko_new-2005               
+               IF(Key_shape.NE.5) RETURN               
                GOTO 900
             ENDIF
          ENDDO
-C-------If GDR parameters not found they are going to be retrieved from
-C-------the RIPL-2 Goriely theoretical values
+C-----Plujko_new-2005
+      ENDIF        
+      
+C-----Plujko_new-2005
+C     If experimantal values of GDR parameters not found and Key_GDRGFL=2
+C     they are going to be retrieved from the RIPL-2 Goriely theoretical
+C     values. Note that in accordance with Goriely data-file all nuclei are
+C     ELONGATED!?
+      IF (Key_GDRGFL.EQ.2)THEN
          DO i = 1, MAXGDR
             IF (kz.EQ.nnzt(i) .AND. ka.EQ.nnat(i)) THEN
                NG = nngt(i)
@@ -6065,6 +6193,9 @@ C--------------(classical sum rule with correction)
                   CS1 = cs0/3.
                   CS2 = cs0*2./3.
                ENDIF
+C--------------Plujko_new-2005
+               IF(Key_shape.NE.5)RETURN
+               GOTO 900               
             ENDIF
          ENDDO
       ENDIF
@@ -6112,13 +6243,13 @@ C--------( classical sum rule with correction)
          GW2 = 0.
          CS2 = 0.
       ENDIF
+C-----Plujko_new-2005
+      IF(Key_shape.NE.5)RETURN     
 C-----Setting the GFL parameters '|beta|' from "defeff.dat"
 C-----and 'S2Plus=(E2+)*beta**2'
   900 DO i = 1, NUMram
-         keyram = 0
          IF (kz.EQ.NZRam(i) .AND. ka.EQ.NARam(i)) THEN
             IF (HBEtagfl(i).GT.0.) THEN
-               keyram = 1
                betagfl = HBEtagfl(i)
 C--------------'BETagfl2=beta**2' and  'S2Plus=(E2+)*beta**2'  -------
 C--------------parameters of the GFL model[BETagfl2=beta; ENErgygfl=E2+(MeV)]
@@ -6127,9 +6258,10 @@ C--------------energygfl = henergygfl(i)*0.001
                energygfl = HENergygfl(i)
 C--------------RIPL-2 energies in MeV, RCN 06/2004
                S2Plusgfl = BETagfl2*energygfl
+C--------------Plujko_new-2005
+               RETURN              
             ENDIF
          ENDIF
-         IF (keyram.EQ.1) RETURN
       ENDDO
 C-----Global parametrization for 'S2Plus=(E2+)*beta**2'
 C-----and setting the '|beta2|' from "deflib.dat" file
@@ -6150,3 +6282,154 @@ C-----absent ('keyalpa=0')
       BETagfl2 = betagfl**2
       S2Plusgfl = 217.156/aann**2
       END
+
+C R250.F77     The R250 Pseudo-random number generator
+C
+C algorithm from:       
+C Kirkpatrick, S., and E. Stoll, 1981; A Very Fast Shift-Register
+C Sequence Random Number Generator, Journal of Computational Physics,
+C V. 40. p. 517
+C 
+C see also:
+C Maier, W.L., 1991; A Fast Pseudo Random Number Generator,
+C                    Dr. Dobb's Journal, May, pp. 152 - 157
+C
+C 
+C Uses the Linear Congruential Method,
+C the "minimal standard generator"
+C Park & Miller, 1988, Comm of the ACM, 31(10), pp. 1192-1201
+C for initialization
+C
+C
+C For a review of BOTH of these generators, see:
+C Carter, E.F, 1994; Generation and Application of Random Numbers,
+C Forth Dimensions, Vol. XVI, Numbers 1,2 May/June, July/August
+C
+C
+C $Author: Capote $
+C $Workfile:   r250.f  $
+C $Revision: 1.95 $
+C $Date: 2005-04-10 21:57:00 $
+C
+C ===================================================================
+C
+      Function lcmrand(ix)
+C     The minimal standard PRNG for 31 bit unsigned integers
+C     designed with automatic overflow protection  
+C     uses ix as the seed value if it is greater than zero
+C     otherwise it is ignored
+      Integer*4 ix
+      Integer*4 a, b, m, q, r
+      Integer*4 hi, lo, test
+      Integer*4 x
+      SAVE x
+      Parameter (a = 16807, b = 0, m = 2147483647)
+      Parameter (q = 127773, r = 2836)
+C
+      If ( ix .gt. 0 ) x = ix
+      
+      hi = x / q
+      lo = mod( x, q )
+      test = a * lo - r * hi
+      if ( test .gt. 0 ) then
+          x = test
+      else
+          x = test + m
+      endif
+      
+      lcmrand = x
+      return
+      End
+  
+
+C ===================================================================
+C
+C  R250, call R250Init with the desired initial seed BEFORE
+C  the first invocation of IRAND()
+C
+C ===================================================================
+
+      Subroutine R250Init(iseed)
+      Integer*4 k, mask, msb
+      Integer*4 indexf, indexb, buffer(250)
+      Common/R250COM/indexf,indexb,buffer
+      Integer ms_bit, all_bits, half_range, step
+      Parameter ( ms_bit = #40000000)
+      Parameter ( half_range = #20000000 )
+      Parameter ( all_bits = #7FFFFFFF )
+      Parameter ( step = 7 )
+C
+      indexf = 1
+      indexb = 104
+      k = iseed
+      Do i = 1, 250
+        buffer(i) = lcmrand( k )
+        k = -1
+      EndDo
+      Do i = 1, 250
+       if ( lcmrand( -1 ) .gt. half_range ) then
+           buffer(i) = ior( buffer(i), ms_bit )
+       endif
+      EndDo
+
+      msb = ms_bit
+      mask = all_bits
+
+      Do i = 0,30
+        k = step * i + 4
+        buffer(k) = iand( buffer(k), mask )
+        buffer(k) = ior( buffer(k), msb )
+        msb = msb / 2
+        mask = mask / 2
+      EndDo
+      
+      Return
+      END
+
+      Function drand()
+C     R250 PRNG, run after R250_Init
+      Integer*4 newrand
+      Integer*4 indexf, indexb, buffer(250)
+      REAL*8 drand, m
+      Parameter (m = 2147483648.D0)
+      Common/R250COM/indexf,indexb,buffer
+
+      newrand = ieor( buffer(indexf), buffer(indexb) )
+      buffer(indexf) = newrand
+
+      indexf = indexf + 1
+      if ( indexf .gt. 250 ) indexf = 1
+
+      indexb = indexb + 1
+      if ( indexb .gt. 250 ) indexb = 1
+
+      drand = dble(newrand)/m
+
+      return
+      End
+
+      Function grand()
+C     Generator of normally distributed random numbers based on R250
+      Integer*4 newrand
+      Integer*4 indexf, indexb, buffer(250)
+	Integer i
+      REAL*8 grand, m
+      Parameter (m = 2147483648.D0)
+      Common/R250COM/indexf,indexb,buffer
+
+      grand = -6.d0
+	do i=1,12
+        newrand = ieor( buffer(indexf), buffer(indexb) )
+        buffer(indexf) = newrand
+
+        indexf = indexf + 1
+        if ( indexf .gt. 250 ) indexf = 1
+
+        indexb = indexb + 1
+        if ( indexb .gt. 250 ) indexb = 1
+     
+        grand = grand + dble(newrand)/m
+	enddo
+
+      return
+      End

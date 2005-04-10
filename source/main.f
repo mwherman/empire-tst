@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-17 19:51:26 $
-Ccc   * $Id: main.f,v 1.67 2005-03-17 19:51:26 Capote Exp $
+Ccc   * $Date: 2005-04-10 21:56:31 $
+Ccc   * $Id: main.f,v 1.68 2005-04-10 21:56:31 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -27,12 +27,14 @@ C
      &                 UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD),
      &                 XMInnm(NFMOD)
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
+      INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
      &                 TFB, TDIrect
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+      COMMON /R250COM/ INDexf,INDexb,BUFfer
 C
 C Local variables
 C
@@ -1676,6 +1678,14 @@ C-----end of ENDF spectra (inclusive)
          CLOSE (66,STATUS = 'delete')
          WRITE (*,*) '.'
          CALL THORA(6)
+C        SAVING RANDOM SEEDS
+         ftmp = grand()
+	 OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
+	 write(94,*)  indexf, indexb
+         Do i = 1, 250
+          write(94,*) buffer(i)
+         ENDDO 
+ 	 CLOSE(94) 
          STOP '.REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
