@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:53:45 $
-Ccc   * $Id: gamma-strgth.f,v 1.20 2005-04-10 21:53:45 Capote Exp $
+Ccc   * $Date: 2005-04-12 05:34:15 $
+Ccc   * $Id: gamma-strgth.f,v 1.21 2005-04-12 05:34:15 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -117,7 +117,7 @@ C-------Plujko_new-2005
       ELSE
 C-------GDR parameters according to RIPL-2
         CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
-C       Transferring to EMPIRE arrays (RCN, 09/2004
+C       Transferring to EMPIRE arrays 
         IF(GDRpar(1, Nnuc).EQ.0.0D0)GDRpar(1, Nnuc) = EG1
         IF(GDRpar(2, Nnuc).EQ.0.0D0)GDRpar(2, Nnuc) = GW1
         IF(GDRpar(3, Nnuc).EQ.0.0D0)GDRpar(3, Nnuc) = CS1

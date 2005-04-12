@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-04 17:21:19 $
-Ccc   * $Id: pcross.f,v 1.20 2005-03-04 17:21:19 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-12 05:33:56 $
+Ccc   * $Id: pcross.f,v 1.21 2005-04-12 05:33:56 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
       INCLUDE 'dimension.h'
@@ -192,12 +192,6 @@ C-----EMISSION RATES CALCULATIONS FOLLOWS
 C
 C-----PRIMARY PARTICLE LOOP
 C
-C-----IF(Key_shape.NE.0) THEN
-C--------Should be already available
-C--------Set GDRGFL parameters
-C--------CALL GDRGFLDATA(zc, ac)
-C-----ENDIF
- 
       DO nejc = 1, NEJcm + 1
          nnur = nures(nejc)
          IF (nejc.NE.NEJcm + 1) THEN
