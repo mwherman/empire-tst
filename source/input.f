@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 22:03:26 $
-Ccc   * $Id: input.f,v 1.96 2005-04-10 22:03:26 Capote Exp $
+Ccc   * $Date: 2005-04-12 05:33:39 $
+Ccc   * $Id: input.f,v 1.97 2005-04-12 05:33:39 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -167,6 +167,16 @@ C--------set level density parameters
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 0
          ENDDO
+C--------set gamma-strength parameters
+         DO nnuc = 1, NDNUC
+            GDRpar(1,nnuc) = 0.0
+            GDRpar(2,nnuc) = 0.0
+            GDRpar(3,nnuc) = 0.0
+            GDRpar(4,nnuc) = 0.0
+            GDRpar(5,nnuc) = 0.0
+            GDRpar(6,nnuc) = 0.0
+            GDRpar(7,nnuc) = 1.0
+         ENDDO
          IZA(0) = 0
          LVP(1,0) = 0
          NNUcd = 0
@@ -210,7 +220,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
@@ -1149,14 +1159,7 @@ C-----set o.m.p. for the incident channel
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
       
-C-----set giant resonance parameters for target      
-C     GDRpar(1,0) = EGDr1
-C     GDRpar(2,0) = GGDr1
-C     GDRpar(3,0) = CSGdr1
-C     GDRpar(4,0) = EGDr2
-C     GDRpar(5,0) = GGDr2
-C     GDRpar(6,0) = CSGdr2
-C     GDRpar(7,0) = GDRweis
+C-----set giant resonance parameters for target     
       GDRpar(1,0) = 0.0
       GDRpar(2,0) = 0.0
       GDRpar(3,0) = 0.0
@@ -1207,13 +1210,6 @@ C-----determination of discrete levels and pairing shift for cn
          ENDIF
       ENDIF
 C-----set giant resonance parameters for CN
-      GDRpar(1,nnuc) = EGDr1
-      GDRpar(2,nnuc) = GGDr1
-      GDRpar(3,nnuc) = CSGdr1
-      GDRpar(4,nnuc) = EGDr2
-      GDRpar(5,nnuc) = GGDr2
-      GDRpar(6,nnuc) = CSGdr2
-      GDRpar(7,nnuc) = GDRweis
       GDRpar(8,nnuc) = 0.0
       GQRpar(1,nnuc) = 0.0
       GQRpar(2,nnuc) = 0.0
@@ -1374,21 +1370,6 @@ C--------------determination of discrete levels and pairing shifts for rn
                   ENDIF
                ENDIF
 C--------------determination of giant resonance parameters for residual nuclei
-C              GDRpar(1,nnur) = EGDr1
-C              GDRpar(2,nnur) = GGDr1
-C              GDRpar(3,nnur) = CSGdr1
-C              GDRpar(4,nnur) = EGDr2
-C              GDRpar(5,nnur) = GGDr2
-C              GDRpar(6,nnur) = CSGdr2
-C              GDRpar(7,nnur) = GDRweis
-               GDRpar(1,nnur) = 0.0
-               GDRpar(2,nnur) = 0.0
-               GDRpar(3,nnur) = 0.0
-               GDRpar(4,nnur) = 0.0
-               GDRpar(5,nnur) = 0.0
-               GDRpar(6,nnur) = 0.0
-               GDRpar(7,nnur) = 0.0
-
                GDRpar(8,nnur) = 0.0
                GQRpar(1,nnur) = 0.0
                GQRpar(2,nnur) = 0.0
@@ -2688,53 +2669,242 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'EGDR1 ') THEN
-            if(i1.ne.0) then
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(1,i) = val
+              ENDDO
               WRITE (6,
-     &		'('' GDR first hump energy uncertainty is '',i1)') i1
-	        sigma = val*i1*0.01
-	        EGDr1 = val + grand()*sigma
-              WRITE (6,'('' GDR first hump sampled energy is '',F5.2)')
-     &        EGDr1
+     &        '('' GDR first hump energy in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR first hump energy uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(1,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR first hump energy sampled value : '',f5.2)') 
+     &        GDRpar(1,nnuc)
 	        IPArCOV = IPArCOV +1
 	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, EGDr1,INDexf,INDexb  
+     &		      IPArCOV, GDRpar(1,nnuc), INDexf,INDexb  
             else
-              EGDr1 = val
-              WRITE (6,'('' GDR first hump energy set to '',F5.2)')EGDr1
+              GDRpar(1,nnuc) = val
+              WRITE (6,
+     &      '('' GDR first hump energy in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val	   
+	      endif
+            GOTO 100                                 
+         ENDIF
+C-----
+         IF (name.EQ.'GGDR1 ') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(2,i) = val
+              ENDDO
+              WRITE (6,
+     &        '('' GDR first hump width in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR first hump width uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(2,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR first hump width sampled value : '',f5.2)') 
+     &        GDRpar(2,nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GDRpar(2,nnuc), INDexf,INDexb  
+            else
+              GDRpar(2,nnuc) = val
+              WRITE (6,
+     &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val	   
 	      endif
             GOTO 100
          ENDIF
 C-----
-         IF (name.EQ.'GGDR1 ') THEN
-            GGDr1 = val
-            WRITE (6,'('' GDR first hump width set to '',F5.2)') GGDr1
-            GOTO 100
-         ENDIF
-C-----
          IF (name.EQ.'CSGDR1') THEN
-            CSGdr1 = val
-            WRITE (6,'('' GDR first hump cross section set to '',F6.2)')
-     &             CSGdr1
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(3,i) = val
+              ENDDO
+              WRITE (6,
+     &        '('' GDR first hump cross section in all nuclei set to ''
+     &        ,F5.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR first hump cross section uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(3,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR first hump cross section sampled value : ''
+     &        ,f5.2)') GDRpar(3,nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GDRpar(3,nnuc), INDexf,INDexb  
+            else
+              GDRpar(3,nnuc) = val
+              WRITE (6,
+     &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
+     &      ,F5.2)') i2, SYMb(nnuc), val	   
+	      endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'EGDR2 ') THEN
-            EGDr2 = val
-            WRITE (6,'('' GDR second hump energy set to '',F5.2)') EGDr2
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(4,i) = val
+              ENDDO
+              WRITE (6,
+     &       '('' GDR second hump energy in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		 '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR second hump energy uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(4,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR second hump energy sampled value : '',f5.2)') 
+     &        GDRpar(4,nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GDRpar(4,nnuc), INDexf,INDexb  
+            else
+              GDRpar(4,nnuc) = val
+              WRITE (6,
+     &      '('' GDR second hump energy in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val	   
+	      endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'GGDR2 ') THEN
-            GGDr2 = val
-            WRITE (6,'('' GDR second hump width set to '',F5.2)') GGDr2
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(5,i) = val
+              ENDDO
+              WRITE (6,
+     &        '('' GDR second hump width in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR second hump width uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(5,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR second hump width sampled value : '',f5.2)') 
+     &        GDRpar(5,nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GDRpar(5,nnuc), INDexf,INDexb  
+            else
+              GDRpar(5,nnuc) = val
+              WRITE (6,
+     &      '('' GDR second hump width in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val	   
+	      endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CSGDR2') THEN
-            CSGdr2 = val
-            WRITE (6,
-     &       '('' GDR second hump cross section set to '',        F6.2)'
-     &       ) CSGdr2
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(6,i) = val
+              ENDDO
+              WRITE (6,
+     &        '('' GDR second hump cross section in all nuclei set to ''
+     &        ,F5.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.ne.0) then
+              WRITE (6,
+     &        '('' GDR second hump cross section uncertainty in '',I3,A2
+     &        ,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+	        sigma = val*i3*0.01
+	        GDRpar(6,nnuc) = val + grand()*sigma
+              WRITE (6,
+     &        '('' GDR second hump cross section sampled value : ''
+     &        ,f5.2)') GDRpar(6,nnuc)
+	        IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, GDRpar(6,nnuc), INDexf,INDexb  
+            else
+              GDRpar(6,nnuc) = val
+              WRITE (6,
+     &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
+     &      ,F5.2)') i2, SYMb(nnuc), val	   
+	      endif
             GOTO 100
          ENDIF
 C-----
@@ -5973,9 +6143,9 @@ C
       SUBROUTINE GDRGFLDATA(Znucleus,Anucleus)
 C
 Ccc  ********************************************************************
-Ccc  *                                                                  *
+Ccc  * Assignment of GGexp and D0exp for gamma-strength normalization   *
 Ccc  * Assignment of the GDR and GFL model parameters                   *
-Ccc  * to nucleus with atomic number 'Znucleus'and mass number'Anucleus'*  .                                                   *
+Ccc  * to nucleus with atomic number 'Znucleus'and mass number'Anucleus'*
 Ccc  *                                                                  *
 Ccc  *  The parameters are put in the following COMMON's:               *
 Ccc  *   -----------------------------------------------                *
@@ -6090,6 +6260,15 @@ C
      &            HE2(i), HCS2(i), HGW2(i)
          ENDDO
    50    CLOSE (81)
+C        OPEN (81,FILE = '../RIPL-2/resonances/resonances0.dat',
+C    &         STATUS = 'old',ERR = 450)
+C        READ (81,'(///)') ! Skipping first 4 title lines
+C        DO i = 1, 270
+C           READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
+C    &            NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
+C    &            HE2(i), HCS2(i), HGW2(i)
+C        ENDDO
+C  50    CLOSE (81)
   100    OPEN (81,FILE = '../RIPL-2/gamma/gdr-parameters-theor.dat',
      &         STATUS = 'old',ERR = 500)
          READ (81,'(///)') ! Skipping first 4 title lines
@@ -6308,8 +6487,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.96 $
-C $Date: 2005-04-10 22:03:26 $
+C $Revision: 1.97 $
+C $Date: 2005-04-12 05:33:39 $
 C
 C ===================================================================
 C
