@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:54:43 $
-Ccc   * $Id: HRTW-comp.f,v 1.20 2005-04-10 21:54:43 Capote Exp $
+Ccc   * $Date: 2005-04-13 16:42:18 $
+Ccc   * $Id: HRTW-comp.f,v 1.21 2005-04-13 16:42:18 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -48,7 +48,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak, 
-     &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
+     &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
@@ -56,8 +56,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, ares, csemist, dencomp, sgamc, sum, 
-     &                 sumfis, sumfism(3), sumg, tlump, xnor, zres
+      DOUBLE PRECISION aafis, ares, csemist, cnspin, dencomp, sgamc, sum 
+     &                 , sumfis, sumfism(3), sumg, tlump, xnor, zres
       REAL FLOAT
       INTEGER i, ich, iloc, ip, ipar, izares, jcn, ke, m, nejc, nhrtw, 
      &        nnuc, nnur
@@ -70,6 +70,7 @@ C-----threshold for considering channel as a 'strong' one
       H_Tthr = 0.0001
 C-----set CN nucleus
       nnuc = 1
+
 C-----locate residual nuclei
       DO nejc = 1, NEJcm
          ares = A(nnuc) - AEJc(nejc)
@@ -92,6 +93,8 @@ C-----assure that full gamma cascade in the first CN is
 C-----accounted for when width fluctuation (HRTW) is selected
       GCAsc = 1.0
       ke = NEX(nnuc)
+
+      sumGg = 0.d0
 C-----
 C-----start CN nucleus decay
 C-----
@@ -142,7 +145,7 @@ C-----------fission
      &          CALL FISSION(nnuc,ke,jcn,sumfis)
             IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
      &          CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,dencomp,
-     &          aafis,0.)
+     &          aafis,1)
             IF (FISmod(nnuc).GT.0.) THEN
                DO m = 1, INT(FISmod(nnuc)) + 1
                   sumfis = sumfis + sumfism(m)
@@ -248,6 +251,18 @@ C--------------calculate total emission
                ENDDO
                csemist = csemist + CSFis
             ENDDO    !loop over partial wave contributions to CN state
+C
+C           Gamma width calculation
+C
+            cnspin = jcn - 0.5
+            if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn 
+            if( ip.eq.LVP(LEVtarg,0) .AND. 
+     >            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
+     >              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
+                 write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)') 
+     >             'CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
+     >             sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)  
+            endif
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
       END
