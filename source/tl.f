@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:45:39 $
-Ccc   * $Id: tl.f,v 1.51 2005-04-10 21:45:39 Capote Exp $
+Ccc   * $Date: 2005-04-14 07:20:41 $
+Ccc   * $Id: tl.f,v 1.52 2005-04-14 07:20:41 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -230,28 +230,28 @@ C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
-         OPEN (134,FILE = 'TARGET_COLL.DAT')
-         OPEN (133,FILE = 'COLL.DAT')
+         OPEN (97,FILE = 'TARGET_COLL.DAT')
+         OPEN (96,FILE = 'COLL.DAT')
          WRITE (6,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE (32,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
-         READ (134,'(A80)') ch_iuf   ! FIRST LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf   ! FIRST LINE
+         WRITE (96,'(A80)') ch_iuf
          WRITE (6,*) 'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,*) 'Dyn.deformations are not used in symm.rot.model'
-         READ (134,'(A80)') ch_iuf       ! 2ND LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf       ! 2ND LINE
+         WRITE (96,'(A80)') ch_iuf
          WRITE (6,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
-         READ (134,'(A80)') ch_iuf       ! 3ER LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf       ! 3ER LINE
+         WRITE (96,'(A80)') ch_iuf
          WRITE (6,*)
          WRITE (32,*)
-         READ (134,'(A80)') ch_iuf       ! EMPTY LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf       ! EMPTY LINE
+         WRITE (96,'(A80)') ch_iuf
          DEFormed = .TRUE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
@@ -259,8 +259,8 @@ C
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE (32,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*)
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
      &                LMAx(n), IDEf(n), BANdk(n),
@@ -268,25 +268,25 @@ C
                WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
                WRITE (6,*)
                WRITE (32,*)
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*)
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*)
                WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   50    READ (134,'(A80)',END = 100) ch_iuf
-         WRITE (133,'(A80)') ch_iuf
+   50    READ (97,'(A80)',END = 100) ch_iuf
+         WRITE (96,'(A80)') ch_iuf
          GOTO 50
-  100    CLOSE (133)
-         CLOSE (134,STATUS = 'DELETE')
+  100    CLOSE (96)
+         CLOSE (97,STATUS = 'DELETE')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
@@ -375,54 +375,54 @@ C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
-         OPEN (134,FILE = 'TARGET_COLL.DAT')
-         OPEN (133,FILE = 'COLL.DAT')
+         OPEN (97,FILE = 'TARGET_COLL.DAT')
+         OPEN (96,FILE = 'COLL.DAT')
          WRITE (6,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE (32,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
-         READ (134,'(A80)') ch_iuf   ! FIRST LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf   ! FIRST LINE
+         WRITE (96,'(A80)') ch_iuf
          WRITE (6,*) 'Dynamical deformations should be adjusted'
          WRITE (32,*) 'Dynamical deformations should be adjusted'
-         READ (134,'(A80)') ch_iuf       ! 2ND LINE
-         WRITE (133,'(A80)') 'Dynamical deformations should be adjusted'
+         READ (97,'(A80)') ch_iuf       ! 2ND LINE
+         WRITE (96,'(A80)') 'Dynamical deformations should be adjusted'
          WRITE (6,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
-         READ (134,'(A80)') ch_iuf       ! 3ER LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf       ! 3ER LINE
+         WRITE (96,'(A80)') ch_iuf
          WRITE (6,*)
          WRITE (32,*)
-         READ (134,'(A80)') ch_iuf       ! EMPTY LINE
-         WRITE (133,'(A80)') ch_iuf
+         READ (97,'(A80)') ch_iuf       ! EMPTY LINE
+         WRITE (96,'(A80)') ch_iuf
          DEFormed = .FALSE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
                WRITE (6,*) '   Ncoll'
                WRITE (32,*) '   Ncoll'
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*) '   Ncoll'
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*) '   Ncoll'
                WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
                WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,'(A80)') ND_nlv
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,'(A80)') ND_nlv
                WRITE (6,*)
                WRITE (32,*)
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*)
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*)
                WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-               READ (134,'(A80)') ch_iuf
-               WRITE (133,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+               READ (97,'(A80)') ch_iuf
+               WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-  150    READ (134,'(A80)',END = 200) ch_iuf
-         WRITE (133,'(A80)') ch_iuf
+  150    READ (97,'(A80)',END = 200) ch_iuf
+         WRITE (96,'(A80)') ch_iuf
          GOTO 150
-  200    CLOSE (133)
-         CLOSE (134,STATUS = 'DELETE')
+  200    CLOSE (96)
+         CLOSE (97,STATUS = 'DELETE')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
