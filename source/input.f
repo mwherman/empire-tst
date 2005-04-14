@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-12 05:33:39 $
-Ccc   * $Id: input.f,v 1.97 2005-04-12 05:33:39 Capote Exp $
+Ccc   * $Date: 2005-04-14 08:17:41 $
+Ccc   * $Id: input.f,v 1.98 2005-04-14 08:17:41 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6487,8 +6487,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.97 $
-C $Date: 2005-04-12 05:33:39 $
+C $Revision: 1.98 $
+C $Date: 2005-04-14 08:17:41 $
 C
 C ===================================================================
 C
@@ -6533,9 +6533,9 @@ C ===================================================================
       Integer*4 indexf, indexb, buffer(250)
       Common/R250COM/indexf,indexb,buffer
       Integer ms_bit, all_bits, half_range, step
-      Parameter ( ms_bit = #40000000)
-      Parameter ( half_range = #20000000 )
-      Parameter ( all_bits = #7FFFFFFF )
+      Parameter ( ms_bit = Z'40000000')
+      Parameter ( half_range = Z'20000000' )
+      Parameter ( all_bits = Z'7FFFFFFF' )
       Parameter ( step = 7 )
 C
       indexf = 1
