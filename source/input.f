@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:21:01 $
-Ccc   * $Id: input.f,v 1.99 2005-04-15 18:21:01 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:24:23 $
+Ccc   * $Id: input.f,v 1.100 2005-04-15 18:24:23 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -717,7 +717,8 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
 C--------Set exclusive and inclusive ENDF foratting flags
          IF(ENDfn.GT.0) THEN
             DO nnuc = 1, NNUcd !first set all to inclusive
-                ENDf(nnuc) = 2.0
+C               ENDf(nnuc) = 2.0
+                ENDf(nnuc) = 1.0
             ENDDO
 C-----------Next set some nuclei to exclusive
             ENDf(1) = 1.0
@@ -6564,8 +6565,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.99 $
-C $Date: 2005-04-15 18:21:01 $
+C $Revision: 1.100 $
+C $Date: 2005-04-15 18:24:23 $
 C
 C ===================================================================
 C
