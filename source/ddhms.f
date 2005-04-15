@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.17 $
-C $Id: ddhms.f,v 1.17 2005-03-11 17:22:12 herman Exp $
+C CVS Version Management $Revision: 1.18 $
+C $Id: ddhms.f,v 1.18 2005-04-15 18:21:01 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.17 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.18 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.17 2005-03-11 17:22:12 herman Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.18 2005-04-15 18:21:01 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -4712,7 +4712,7 @@ C-----to discrte levels
      &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
      &                                  NEX(nnur)*DE,EMAx(nnur))
       DO ne = 1, NDECSE
-         IF (ENDf.EQ.1) THEN
+         IF (ENDf(1).EQ.1) THEN
             CSE(ne,1,1) = CSE(ne,1,1) + CSEhms(ne,1)
          ELSE
             CSE(ne,1,0) = CSE(ne,1,0) + CSEhms(ne,1)
@@ -4737,7 +4737,7 @@ C-----to discrte levels
      &                                  1,0.0D0,DE,CSEhms(1,2),NDECSE,1,
      &                                  NEX(nnur)*DE,EMAx(nnur))
       DO ne = 1, NDECSE
-         IF (ENDf.EQ.1) THEN
+         IF (ENDf(1).EQ.1) THEN
             CSE(ne,2,1) = CSE(ne,2,1) + CSEhms(ne,2)
          ELSE
             CSE(ne,2,0) = CSE(ne,2,0) + CSEhms(ne,2)
@@ -4800,7 +4800,7 @@ C-----finally store ddx on Empire array CSEa
             xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
-               IF (ENDf.EQ.1) THEN
+               IF (ENDf(1).EQ.1) THEN
                   CSEa(ne,na,nejc,1) = CSEa(ne,na,nejc,1)
      &                                 + CSEahms(ne,na,nejc)
                ELSE
@@ -4853,7 +4853,7 @@ C-----finally store ddx on Empire array CSEa
             xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
-               IF (ENDf.EQ.1) THEN
+               IF (ENDf(1).EQ.1) THEN
                   CSEa(ne,na,nejc,1) = CSEa(ne,na,nejc,1)
      &                                 + CSEahms(ne,na,nejc)
                ELSE
@@ -5026,7 +5026,7 @@ C
 C--------------transfer excitation energy dependent recoil spectra
 C
 C--------------clean auxiliary auxrec1 matrix
-               IF (ENDf.GT.0) THEN
+               IF (ENDf(1).GT.0) THEN
                   DO nu = 1, NDIM_EBINS + 1
                      DO mrec = 1, NDIM_RECBINS + 1
                         auxrec1(mrec,nu) = 0.0

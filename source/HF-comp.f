@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:54:21 $
-Ccc   * $Id: HF-comp.f,v 1.49 2005-04-10 21:54:21 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:21:01 $
+Ccc   * $Id: HF-comp.f,v 1.50 2005-04-15 18:21:01 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -68,7 +68,7 @@ C-----
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + pop1 + pop2
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pops
-            IF (Nnuc.EQ.1 .AND. ENDf.EQ.2) THEN
+            IF (Nnuc.EQ.1 .AND. ENDf(Nnuc).EQ.2) THEN
                piece = pops/4.0/PI
                DO nang = 1, NDANG
                   CSEa(icse,nang,Nejc,1) = CSEa(icse,nang,Nejc,1)
@@ -80,7 +80,7 @@ C-----
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
-         IF (ENDf.EQ.1 .AND. popt.NE.0.0D+0)
+         IF (ENDf(Nnuc).EQ.1 .AND. popt.NE.0.0D+0)
      &       CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
          popt = popt*DE
       ENDDO !over residual energies in continuum
@@ -100,8 +100,8 @@ C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversly proportional to the
 C--------distance of the actual energy to the bin energy
 C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
-         IF (Nnuc.NE.1 .OR. ENDf.NE.1 .OR. Iec.NE.NEX(1) .OR. Nejc.EQ.0)
-     &       THEN
+         IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR. 
+     &       Nejc.EQ.0) THEN
             xcse = eemi/DE + 1.0001
             icsl = INT(xcse)
             icsh = icsl + 1
@@ -111,12 +111,12 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
             poph = pop1*(xcse - FLOAT(icsl))/DE
             IF (icsl.LE.NDECSE) THEN
                CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
-               IF (ENDf.EQ.1 .AND. popll.NE.0.0D+0)
+               IF (ENDf(Nnuc).EQ.1 .AND. popll.NE.0.0D+0)
      &             CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
             ENDIF
             IF (icsh.LE.NDECSE) THEN
                CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
-               IF (ENDf.EQ.1 .AND. poph.NE.0.0D+0)
+               IF (ENDf(Nnuc).EQ.1 .AND. poph.NE.0.0D+0)
      &             CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
             ELSE
                WRITE (6,*) ' '
@@ -603,8 +603,8 @@ C-----------Well... let it go down to the ground state
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive gamma spectrum
-            IF (ENDf.EQ.1) POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse,Nnuc)
-     &          + gacs/DE
+            IF (ENDf(Nnuc).EQ.1) POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse
+     &          ,Nnuc) + gacs/DE
          ELSE
             popl = POPlv(l,Nnuc)
             IF (popl.NE.0.0D0) THEN
@@ -638,7 +638,7 @@ C-----------Add transition to the exclusive gamma spectrum
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
-                  IF (ENDf.EQ.1) POPcse(0,0,icse,Nnuc)
+                  IF (ENDf(Nnuc).EQ.1) POPcse(0,0,icse,Nnuc)
      &                = POPcse(0,0,icse,Nnuc) + gacs/DE
                   IF (IOUt.GT.2) WRITE (6,99025) ELV(j1,Nnuc), 
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,

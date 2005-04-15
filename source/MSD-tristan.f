@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-04-10 21:55:22 $
-Ccc   * $Id: MSD-tristan.f,v 1.29 2005-04-10 21:55:22 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:21:02 $
+Ccc   * $Id: MSD-tristan.f,v 1.30 2005-04-15 18:21:02 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
 CCC
@@ -2954,7 +2954,7 @@ C-----ground state target spin XJLV(1,0)
          ENDDO
 C--------add MSD contribution to the population spectra
 C--------used for ENDF exclusive spectra
-         IF (ENDf.EQ.1) THEN
+         IF (ENDf(1).EQ.1) THEN
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
 C--------------DE
@@ -2971,7 +2971,7 @@ C--------------Bin population by MSD (spin/parity integrated)
             ENDDO
          ENDIF
 C--------storing continuum recoils
-         IF (ENDf.GT.0) THEN
+         IF (ENDf(1).GT.0) THEN
             nangle = NDANG
             dang = 3.14159/FLOAT(nangle - 1)
             coef = 2*3.14159*dang/DERec
@@ -3004,7 +3004,7 @@ C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
       IF (nexrt.LE.0) nexrt = 1
-      IF (ENDf.GT.0) THEN
+      IF (ENDf(1).GT.0) THEN
          nangle = NDANG
          DO ie = nexrt, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)

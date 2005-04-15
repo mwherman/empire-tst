@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: scnd-preeq.f,v 1.12 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-15 18:21:02 $
+Ccc   * $Id: scnd-preeq.f,v 1.13 2005-04-15 18:21:02 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -159,7 +159,7 @@ C--------------------probability *** done ***
                      pop1 = popp*TL(ietl,1,Nejc,Nnur)*ratioro*TURbo
                      POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                      CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
-                     IF (ENDf.EQ.1.D0)
+                     IF (ENDf(Nnuc).EQ.1.D0)
      &                   CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                      sumem = sumem + pop1
                   ENDDO         !end do on 2-nd residue excitation energy

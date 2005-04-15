@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-12 05:33:56 $
-Ccc   * $Id: pcross.f,v 1.21 2005-04-12 05:33:56 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:21:02 $
+Ccc   * $Id: pcross.f,v 1.22 2005-04-15 18:21:02 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr)
       INCLUDE 'dimension.h'
@@ -448,7 +448,7 @@ C-----------add PCROSS contribution to the total ejectile emission
             CSEmis(nejct,1) = CSEmis(nejct,1) + cross(nejc)
 C-----------add PCROSS to the population spectra used for deconvolution
 C-----------of the EMPIRE spectra into ENDF exclusive spectra
-            IF (ENDf.EQ.1) THEN
+            IF (ENDf(1).EQ.1) THEN
                DO ie = iemin(nejc), iemax(nejc)
                   icsp = nexrt - ie + 1
 C              DO icsp = iemin(nejc), nexrt

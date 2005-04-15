@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-14 08:17:41 $
-Ccc   * $Id: input.f,v 1.98 2005-04-14 08:17:41 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:21:01 $
+Ccc   * $Id: input.f,v 1.99 2005-04-15 18:21:01 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -155,9 +155,9 @@ C--------neutralize tuning factors
                TUNe(nejc,nnuc) = 1.0
             ENDDO
          ENDDO
-C--------set level density parameters
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
+C-----------set level density parameters
             ROPaa(nnuc) = -2.0
             ROPar(1,nnuc) = 0.
             ROPar(2,nnuc) = 0.
@@ -166,6 +166,8 @@ C--------set level density parameters
             ATIlnor(nnuc) = 0.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 0
+C-----------set ENDF flag to 0 (no ENDF formatting)
+            ENDf(nnuc) = 0.0
          ENDDO
 C--------set gamma-strength parameters
          DO nnuc = 1, NDNUC
@@ -220,13 +222,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -315,8 +317,6 @@ C--------set options for DEGAS (exciton preequilibrium)
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQc = 0.0
          MFPp = 1.3
-C--------set ENDF flag to 0 (no ENDF file for formatting)
-         ENDf = 0.0
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident)
          LHRtw = 1
 C
@@ -361,12 +361,12 @@ C        shape of E1 strength function and GDR parameters
          LQDfac = 1.0D0
          IGM1 = 0
          IGE2 = 0
-C        Set by default 'MAXmult'
+C        Set default 'MAXmult'
 C         - maximal value (=< 10) of gamma-ray multipolarity in
-C           calculations of gamma-transitions both between states in
-C           continuum and from continuum states to discrete levels;
-C           can be changed by input in SUBROUTINE READIN;
-C           name of input variable is 'GRMULT'
+C           calculation of gamma-transitions both between states in
+C           continuum and from continuum to discrete levels;
+C           can be changed in the optional input
+C           (keyword 'GRMULT')
          MAXmult = 2        
 C--------read entire input for the first energy calculations
 C--------mandatory part of the input
@@ -714,6 +714,16 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
          ELSE
             ILIres = -1
          ENDIF
+C--------Set exclusive and inclusive ENDF foratting flags
+         IF(ENDfn.GT.0) THEN
+            DO nnuc = 1, NNUcd !first set all to inclusive
+                ENDf(nnuc) = 2.0
+            ENDDO
+C-----------Next set some nuclei to exclusive
+            ENDf(1) = 1.0
+            ENDf(2) = 1.0
+c           ENDf(3) = 1.0
+         ENDIF
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
 C--------optical model parameter set selection
@@ -830,7 +840,7 @@ C
             WRITE (6,*) 'FATAL: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
-         IF (LHMs.NE.0 .AND. ENDf.EQ.1.D0) THEN
+         IF (LHMs.NE.0 .AND. ENDf(1).EQ.1) THEN
             WRITE (6,*) ' '
             WRITE (6,*)
      &                 'WARNING: HMS is incompatible with ENDF=1 option'
@@ -1059,7 +1069,9 @@ C--------reset some options if OMP fitting option selected
             IOUt = 1
             NEXreq = 10
             GCAsc = 1
-            ENDf = 1
+            ENDf(1) = 1
+            ENDf(2) = 1
+            ENDf(3) = 1
             MSD = 0
             MSC = 0
             LHMs = 0
@@ -1242,11 +1254,18 @@ C-----WRITE heading on FILE12
       ia = INT(A(0))
       iae = INT(AEJc(0))
       WRITE (12,*) ' '
+      IF(LEVtarg.GT.1) THEN
+      WRITE (12,
+     &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
+     &I3,''m INCIDENT ENERGY ''                                ,G9.3,''
+     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+      ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
      &I3,'' INCIDENT ENERGY  ''                                ,G9.3,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
-      IF (ENDf.EQ.0.0D0) THEN
+      ENDIF
+      IF (ENDf(1).EQ.0.0D0) THEN
 Cpr      WRITE (12,
 Cpr      1'('' QFIS= '',F4.2,'' BETAV='',F5.2,'' J(1/2)='',F5.2,   '' DeltaJ
 Cpr      2='',F4.2)') QFIS, BETAV, SHRJ, SHRD
@@ -1282,12 +1301,13 @@ C-----determination of excitation energy matrix in cn
 C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
-      IF (FITlev.GT.0.0D0) THEN
-         ECUt(1) = 0.0
+CMH---The following block was commented since it should be moved 
+C     IF (FITlev.GT.0.0D0) THEN
+C        ECUt(1) = 0.0
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
-         ENDf = 0
-      ENDIF
+C        ENDf(1) = 0
+C     ENDIF
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -1650,7 +1670,7 @@ C
             IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc)
      &          = MIN(NDLV,nmax)
 C-----------limit to max. of 40 levels if ENDF active
-            IF (ENDf.NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+            IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
             IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
             IF (.NOT.FILevel) THEN
@@ -1796,7 +1816,7 @@ C
      &                   (Q(j,i),j = 1,NEJcm)
 99010    FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
       ENDDO
-      IF (ENDf.NE.0.0D0) THEN
+      IF (ENDf(i).NE.0.0D0) THEN
          WRITE (12,*)
          WRITE (12,99050)
          WRITE (12,*)
@@ -1847,6 +1867,21 @@ C
      &               ' cluster   o. m. parameters: RIPL catalog number '
      &               , KTRlom(NDEJC,1)
       WRITE (6,*)
+C-----print the same to the LIST.OUT for ENDF file
+      WRITE (12,*)
+      IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
+     &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
+      WRITE (12,*) ' neutron   o. m. parameters: RIPL catalog number ',
+     &            KTRlom(1,1)
+      WRITE (12,*) ' proton    o. m. parameters: RIPL catalog number ',
+     &            KTRlom(2,1)
+      WRITE (12,*) ' alpha     o. m. parameters: RIPL catalog number ',
+     &            KTRlom(3,1)
+      IF (NEMc.GT.0) WRITE (12,*)
+     &               ' cluster   o. m. parameters: RIPL catalog number '
+     &               , KTRlom(NDEJC,1)
+      WRITE (12,*)
+C-----printing to the LIST.OUT for ENDF file ****** DONE *****
 99045 FORMAT (1X,I3,'-',A2,'-',I3,4X,10F12.3)
 99050 FORMAT (10X,'B i n d i n g    e n e r g i e s')
       END
@@ -2128,7 +2163,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 C
 C	By default, no covariance calculation is done
 C
-	IPArCOV = 0
+      IPArCOV = 0
       OPEN(95,FILE='COVAR.DAT',ACCESS='APPEND',STATUS='UNKNOWN')
       WRITE (6,*) '                        ____________________________'
       WRITE (6,*)
@@ -2146,13 +2181,15 @@ C
       WRITE (6,*) 'Following options/parameters have been used'
       WRITE (6,*) '-------------------------------------------'
       WRITE (6,*) ' '
+      WRITE (12,*)
+     &           'Calculations run with  E M P I R E  -  2.19.b25  '
   100 READ (5,'(A1)') name(1:1)
       IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
      &    .NE.'!') THEN
          BACKSPACE (5)
          READ (5,'(A6,G10.5,4I5)',ERR = 200) name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
-	      CLOSE(95)
+            CLOSE(95)
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
@@ -2203,6 +2240,52 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
      &'' parameters '')')
             IF (OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3)) WRITE (6,
      &'('' Input file OMPAR.DIR with optical model'',
+     &'' parameters to be used in inelastic scattering'')')
+            IF (KEY_shape.EQ.0) WRITE (12,
+     &           '('' E1 strength function as in EMPIRE v2.18 (EGLO)'')'
+     &           )
+            IF (KEY_shape.EQ.1) WRITE (12,
+     &                         '('' E1 strength function set to MLO1'')'
+     &                         )
+            IF (KEY_shape.EQ.2) WRITE (12,
+     &                         '('' E1 strength function set to MLO2'')'
+     &                         )
+            IF (KEY_shape.EQ.3) WRITE (12,
+     &                         '('' E1 strength function set to MLO3'')'
+     &                         )
+            IF (KEY_shape.EQ.4) WRITE (12,
+     &                         '('' E1 strength function set to EGLO'')'
+     &                         )
+            IF (KEY_shape.EQ.5) WRITE (12,
+     &                          '('' E1 strength function set to GFL'')'
+     &                          )
+            IF (KEY_shape.EQ.6) WRITE (12,
+     &                    '('' E1 strength shape function set to SLO'')'
+     &                    )
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
+     &         '('' GDR parameters from Messina systematics'')')
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
+     &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
+            IF(Key_gdrgfl.EQ.1)WRITE(12,
+     &         '('' GDR parameters from RIPL-2/Exp.data+'',
+     &           ''Plujko systematics'')')
+            IF(Key_gdrgfl.EQ.2)WRITE(12,
+     &          '('' GDR parameters from RIPL-2/Exp.data+'',
+     &           ''Goriely calc.'')')
+C-----   print  maximal gamma-ray multipolarity  'MAXmult'
+            IF(MAXmult.GT.2)WRITE(12,
+     &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+     
+            WRITE (12,*) ' '
+            IF (OMPar_riplf .OR. OMParfcc) THEN
+               WRITE (12,*) 'Existing, case specific, o.m.p. files: '
+               WRITE (12,*) '-------------------------------------'
+            ENDIF
+            IF (OMPar_riplf) WRITE (12,
+     &'('' Input file OMPAR.RIPL with RIPL optical model'',
+     &'' parameters '')')
+            IF (OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3)) WRITE (12
+     &,'('' Input file OMPAR.DIR with optical model'',
      &'' parameters to be used in inelastic scattering'')')
             IF (DIRect.EQ.0 .AND. KTRompcc.NE.0) THEN
                WRITE (6,
@@ -3057,22 +3140,16 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-            ENDf = val
-            IF (ENDf.EQ.1.0D0) WRITE (6,
-     &               '('' Exclusive spectra representation selected '')'
-     &               )
-            IF (ENDf.EQ.2.0D0) WRITE (6,
-     &               '('' Inclusive spectra representation selected '')'
-     &               )
+            ENDfn = val
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'OMPOT ') THEN
             IF (i1.LT.1 .OR. i1.GT.NEJcm) THEN
                WRITE (6,
-     &                '('' EJECTILE IDENTIFICATION '',I2,'' UNKNOWN'')')
-     &                i1
-               WRITE (6,'('' OPTICAL MODEL  SETTING IGNORED'')')
+     &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &                  '' UNKNOWN'')') i1
+               WRITE (6,'('' WARNING: OPTICAL MODEL SETTING IGNORED'')')
                GOTO 100
             ENDIF
 C-----
@@ -6487,8 +6564,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.98 $
-C $Date: 2005-04-14 08:17:41 $
+C $Revision: 1.99 $
+C $Date: 2005-04-15 18:21:01 $
 C
 C ===================================================================
 C

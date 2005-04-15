@@ -293,7 +293,7 @@ C
                   AUSpec(ispec,nejc) = AUSpec(ispec,nejc) + sumtmp
                ENDIF
                spectot(nejc) = spectot(nejc) + sumtmp
-               IF (ENDf.EQ.1) THEN
+               IF (ENDf(1).EQ.1) THEN
                   POPcse(ipop,nejc,ispec,nnur)
      &               = POPcse(ipop,nejc,ispec,nnur) + sumtmp
 C-----------------Correct last bin (not needed for POP as for this it is
@@ -334,7 +334,7 @@ C--------------store population of discrete levels for recoils' calculations
 C-----------------add DEGAS discrete level contribution to the population
 C-----------------spectrum used for the ENDF exclusive spectra
  
-               IF (ENDf.EQ.1) POPcse(0,nejc,ie,nnur)
+               IF (ENDf(1).EQ.1) POPcse(0,nejc,ie,nnur)
      &             = POPcse(0,nejc,ie,nnur) + popdiscrete/DE
 C--------------Add isotropic DEGAS contribution to direct ang. distributions
                IF (nejc.NE.0) THEN

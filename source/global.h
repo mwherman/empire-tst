@@ -42,8 +42,8 @@
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead
-      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), ENDf,
-     &                 ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc), EWSr1,
+      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),ENDf(ndnuc),
+     &                 ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc), EWSr1,ENDfn,
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1, EX2,
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),

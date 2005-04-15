@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:56:31 $
-Ccc   * $Id: main.f,v 1.68 2005-04-10 21:56:31 Capote Exp $
+Ccc   * $Date: 2005-04-15 18:21:02 $
+Ccc   * $Id: main.f,v 1.69 2005-04-15 18:21:02 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -66,7 +66,7 @@ C
       INCLUDE 'io.h'
       DATA ctldir/'../TL/'/
       icalled = 0
-      cALL THORA(6)
+      CALL THORA(6)
 C-----
 C-----Read and prepare input data
 C-----
@@ -76,6 +76,7 @@ C-----Print input data
 C-----
       IF (IOUt.GT.0) CALL PRINPUT
       WRITE (*,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
+      WRITE (6,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----
@@ -148,7 +149,7 @@ C--------------each 4th result from ECIS (2.5 deg grid)
                READ (45,'(7x,E12.5)',END = 1400)
      &               CSAlev(NDANG,ilv,nejcec)
 C--------------construct recoil spectra due to direct transitions
-               IF (ENDf.GT.0) THEN
+               IF (ENDf(nnurec).GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
                   coef = 2*PI*dang
 C-----------------check whether integral over angles agrees with x-sec. read from ECIS
@@ -448,7 +449,7 @@ C-----
      &  '' DWBA inelastic contribution '')')
          ENDIF
       ENDIF
-      IF (ENDf.EQ.0.0D0) THEN
+      IF (ENDf(1).EQ.0.0D0) THEN
          WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
      &          CSFus
       ELSE
@@ -539,14 +540,14 @@ C--------reset variables for life-time calculations
             WRITE (6,*) ' -------------------------------------'
             WRITE (6,*) ' '
          ENDIF
-         IF (ENDf.NE.0.0D0) THEN
+         IF (ENDf(nnuc).NE.0.0D0) THEN
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
-     &                           AMAss(nnuc), QPRod(nnuc)
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF (nnuc.NE.1) THEN
@@ -709,7 +710,7 @@ C--------
             WRITE (6,
      &'('' HMS inclusive prot. emission ='',G12.5,
      &  ''mb'')') CSHms(2)
-            IF (ENDf.EQ.1 .AND. FIRst_ein) THEN
+            IF (ENDf(1).EQ.1 .AND. FIRst_ein) THEN
                WRITE (6,*) ' '
                WRITE (6,*)
      &                'WARNING: HMS Inclusive total emissions treated  '
@@ -754,7 +755,7 @@ C--------
             CALL AUERST(1,2)
 C           IF(PEQc.GT.0) CALL AUERST(1, 3)
             WRITE (6,*) ' '
-            IF (LHMs.NE.0 .AND. ENDf.NE.1) THEN
+            IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
                WRITE (6,*) ' HMS spectra stored as inclusive:'
                CALL AUERST(0,1)
                CALL AUERST(0,2)
@@ -767,7 +768,7 @@ C--------
          popleft = 0.0
 C--------ensure that full gamma cascade in the first CN is
 C--------accounted for in the case of ENDF calculations
-         IF (ENDf.GT.0.0D0) GCAsc = 1.0
+         IF (ENDf(1).GT.0.0D0) GCAsc = 1.0
 C--------turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
 C--------in the first CN
          kemin = 1
@@ -783,7 +784,7 @@ C--------account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.5.0D+0) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
             CALL HRTW
-            IF (ENDf.GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
+            IF (ENDf(1).GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
             kemax = NEX(nnuc) - 1
             GCAsc = 1.0
          ENDIF
@@ -792,7 +793,7 @@ C--------do loop over c.n. excitation energy
             step = DE
             IF (ke.EQ.NEX(nnuc) .OR. ke.EQ.1) step = 0.5*DE
             IF (ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1) step = 1.0
-            IF (ENDf.GT.0) THEN
+            IF (ENDf(1).GT.0) THEN
 C--------------clean auxiliary particle spectra for calculation of recoils
                DO nejc = 0, NEJcm
                   DO il = 1, NDLV
@@ -895,7 +896,7 @@ C-----------------calculate total emission
                   csemist = csemist + CSFis
  1470          ENDDO                   !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
-            IF (ENDf.GT.0) CALL RECOIL(ke,nnuc) !recoil spectrum for ke bin
+            IF (ENDf(nnuc).GT.0) CALL RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc)) THEN
                IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
      &             ' mb'
@@ -922,13 +923,13 @@ C--------printout of results for the decay of NNUC nucleus
      &       WRITE (6,
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
-         IF (IOUt.GT.0 .AND. ENDf.NE.0.0D0 .AND.
+         IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0.0D0 .AND.
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (6,
      &'(10X,''NOTE: due to ENDF option direct particle contribution was
      &shifted to the g.s.'')')
          IF (IOUt.GT.0) WRITE (6,'(1X,/,10X,40(1H-),/)')
-         IF (ENDf.NE.0 .AND. nnuc.EQ.1) THEN
+         IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
             WRITE (12,
      &'(1X,/,10X,''Discrete level population '',              ''before g
      &amma cascade'')')
@@ -939,7 +940,7 @@ C--------printout of results for the decay of NNUC nucleus
             IF (IOUt.GT.0) WRITE (6,99070) il, ELV(il,nnuc),
      &                            LVP(il,nnuc), XJLv(il,nnuc),
      &                            POPlv(il,nnuc)
-            IF (ENDf.NE.0 .AND. nnuc.EQ.1) THEN
+            IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
 C--------------check for the number of branching ratios
                nbr = 0
                DO ib = 1, NDBR
@@ -955,7 +956,7 @@ C--------------check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-         IF (ENDf.GT.0 .AND.
+         IF (ENDf(nnuc).GT.0 .AND.
      &       (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &       nnuc.EQ.mt849)) THEN
             WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1146,9 +1147,9 @@ C--------down on the ground state
             WRITE (6,*) 'Shape elastic cross section', ELAcs, ' mb'
             WRITE (6,*) 'CN elastic cross section   ', POPlv(1,mt2),
      &                  ' mb'
-            ELAcs = ELAcs + POPlv(1,mt2)
+            ELAcs = ELAcs + POPlv(LEVtarg,mt2)
 C-----------CN contribution to elastic ddx
-            elcncs = POPlv(1,mt2)/4.0/PI
+            elcncs = POPlv(LEVtarg,mt2)/4.0/PI
             WRITE (6,*) 'CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
          ENDIF
@@ -1235,11 +1236,11 @@ C--------
       ENDDO     !over decaying nuclei
       CLOSE (80)
       CLOSE (79)
-      IF (ENDf.EQ.1) THEN
 C--------
 C--------ENDF spectra printout (exclusive representation)
 C--------
-         DO nnuc = 1, NNUcd               !loop over decaying nuclei
+      DO nnuc = 1, NNUcd               !loop over decaying nuclei
+         IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF (POPcs(nejc,nnuc).EQ.0) GOTO 1530
@@ -1411,10 +1412,13 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                      ENDIF
                   ENDIF
  1530          ENDDO  ! over ejectiles
+c              we have recoils printed later in the inclusive section
+c              IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc)) 
             ENDIF
-            IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc))
-         ENDDO  ! over decaying nuclei
-C--------Fission related spectra of particles and gammas
+         ENDIF
+      ENDDO  ! over decaying nuclei
+C-----Fission related spectra of particles and gammas
+      IF (ENDf(nnuc).GT.0) THEN
          IF (TOTcsfis.GT.0.0D0) THEN
             DO nejc = 0, NDEJC         !loop over ejectiles
 C              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
@@ -1470,8 +1474,8 @@ C-----and store them on the 0 nucleus (target)
 C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
-      IF (ENDf.EQ.2.0D0) THEN
-         DO nnuc = 1, NNUcd
+      DO nnuc = 1, NNUcd               !loop over decaying nuclei
+         IF (ENDf(nnuc).EQ.2.0D0) THEN
             DO nejc = 0, NEJcm
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
@@ -1529,8 +1533,8 @@ C-----------------------to conserve the integral
                   ENDIF
                ENDDO
             ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
+      ENDDO
       WRITE (6,*) ' '
       WRITE (6,'(''  Total fission cross section '',G12.5,'' mb'')')
      &       TOTcsfis
@@ -1552,9 +1556,9 @@ C-----------------------to conserve the integral
          ENDIF
       ENDIF
 C-----
-C-----ENDF spectra printout (inclusive representation MT = 10 or 5
+C-----ENDF spectra printout (inclusive representation) 
 C-----
-      IF (ENDf.EQ.2.0D0) THEN
+      IF (ENDf(1).NE.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1564,7 +1568,7 @@ C--------print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
          WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of gammas   (n,x) ZAP=     0'
+         WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
          WRITE (12,*) ' '
          WRITE (12,'('' Energy    mb/MeV'')')
          WRITE (12,*) ' '
@@ -1581,7 +1585,7 @@ C--------neutrons
          nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
          WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of neutrons (n,x) ZAP=     1'
+         WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
          WRITE (12,'(30X,''A      n      g      l      e      s '')')
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
@@ -1598,7 +1602,7 @@ C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
          WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of protons  (n,x) ZAP=  1001'
+         WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
          WRITE (12,'(30X,''A      n      g      l      e      s '')')
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
@@ -1615,7 +1619,7 @@ C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
          WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of alphas   (n,x) ZAP=  2004'
+         WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
          WRITE (12,'(30X,''A      n      g      l      e      s '')')
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
@@ -1652,7 +1656,7 @@ C--------light ions
          ENDIF
       ENDIF
 C-----end of ENDF spectra (inclusive)
-      IF (ENDf.GT.4) THEN
+      IF (ENDf(1).GT.0) THEN
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
          WRITE (6,'('' Energy'',12x,''neutron'',10x,''proton'')')
@@ -1680,12 +1684,12 @@ C-----end of ENDF spectra (inclusive)
          CALL THORA(6)
 C        SAVING RANDOM SEEDS
          ftmp = grand()
-	 OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
-	 write(94,*)  indexf, indexb
+         OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
+         write(94,*)  indexf, indexb
          Do i = 1, 250
           write(94,*) buffer(i)
          ENDDO 
- 	 CLOSE(94) 
+         CLOSE(94) 
          STOP '.REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
@@ -2049,7 +2053,7 @@ C
 C-----------fission
             CSFis = CSFis + xnorfis*(TDIr + Dencomp*Aafis)
      &              + xnorfis*PFIso
-            IF (ENDf.EQ.1 .AND. CSFis.NE.0.0D+0)
+            IF (ENDf(Nnuc).EQ.1 .AND. CSFis.NE.0.0D+0)
      &          CALL EXCLUSIVEC(Ke,0, - 1,Nnuc,0,CSFis)
 
          ENDIF
