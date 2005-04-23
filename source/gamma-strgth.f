@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-12 05:34:15 $
-Ccc   * $Id: gamma-strgth.f,v 1.21 2005-04-12 05:34:15 Capote Exp $
+Ccc   * $Date: 2005-04-23 17:02:59 $
+Ccc   * $Id: gamma-strgth.f,v 1.22 2005-04-23 17:02:59 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -313,6 +313,7 @@ C Local variables
 C
       DOUBLE PRECISION ed, gqr
       ed = Eg*Eg
+	gqr = 0.d0
       IF (TE2.NE.0.D0) gqr = DE2*ed*ed/((ed - EE2)**2 + WE2*ed)
       E2 = (1 - TE2)*CE2*3.54E-13*A4*ed*ed*Eg + TE2*gqr
       END
@@ -337,6 +338,7 @@ C Local variables
 C
       DOUBLE PRECISION ed, gmr
       ed = Eg*Eg
+	gmr = 0.d0
       IF (TM1.NE.0.D0) gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)
       XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
       END
@@ -412,6 +414,7 @@ C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
       gred = (ed + 39.478351*T**2)/ED1
 C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
 C     GRED = 1.
+      gdr = 0.d0
  
       IF (KEY_shape.NE.0) THEN
          temperf = T
@@ -423,7 +426,7 @@ C        init GDRGFL parametrs
      &        Eg,KEY_shape)
          RETURN
       ENDIF
- 
+
       IF (TE1.NE.0.0D0) THEN
          gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
      &         + 0.7*D1*39.478351*T**2*ed*Eg/ED1/ED1/SQRT(ED1)
