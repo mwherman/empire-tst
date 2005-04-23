@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:21:02 $
-Ccc   * $Id: main.f,v 1.69 2005-04-15 18:21:02 Capote Exp $
+Ccc   * $Date: 2005-04-23 17:08:32 $
+Ccc   * $Id: main.f,v 1.70 2005-04-23 17:08:32 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -87,6 +87,11 @@ C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
       CALL MARENG(0,0)
+C
+C     On request, total cross section is set to absorption cross section
+C                      for photon induced reactions 
+C        
+      IF (INT(AEJc(0)).EQ.0) TOTcs = CSFus
 
 C-----locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
