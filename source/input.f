@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:24:23 $
-Ccc   * $Id: input.f,v 1.100 2005-04-15 18:24:23 Capote Exp $
+Ccc   * $Date: 2005-04-23 17:13:17 $
+Ccc   * $Id: input.f,v 1.101 2005-04-23 17:13:17 Capote Exp $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -22,13 +22,13 @@ Ccc
 C
 C COMMON variables
 C
-      INTEGER KAA, KAA1, KEYalpa, KEYinput, KEYload, KZZ, KZZ1, NCHr
+      INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1, NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
-      COMMON /MLOCOM2/ KEYload, KEYalpa, KZZ, KAA
+      COMMON /MLOCOM2/ KEYload, KZZ, KAA
       COMMON /R250COM/ INDexf,INDexb,BUFfer
 C
 C Local variables
@@ -149,10 +149,20 @@ C--------set angles for MSD calculations
             CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
             SANgler(na) = SQRT(1.0 - CANgler(na)**2)
          ENDDO
-C--------neutralize tuning factors
+C--------neutralize tuning factors and OMP normalization factors 
          DO nnuc = 0, NDNUC
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.0
+C--------------Volume real potential
+C              VOM(Nejc,Nnuc) = vlib(1)*FNvromp(Nejc,Nnuc)
+C              AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
+  	         FNvvomp(Nejc,Nnuc)	= 1.0
+	         FNavomp(Nejc,Nnuc) = 1.0
+C--------------Volume imaginary potential
+	         FNwvomp(Nejc,Nnuc) = 1.0
+C--------------Surface imaginary potential:
+	         FNwsomp(Nejc,Nnuc) = 1.0 
+	         FNasomp(Nejc,Nnuc) = 1.0 
             ENDDO
          ENDDO
          DO nnuc = 1, NDNUC
@@ -163,11 +173,13 @@ C-----------set level density parameters
             ROPar(2,nnuc) = 0.
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
-            ATIlnor(nnuc) = 0.
+            ATIlnor(nnuc) = 1.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 0
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0.0
+c-----------set Levels flag to 0 (no levels stored)        
+            NSTOred(nnuc) = 0
          ENDDO
 C--------set gamma-strength parameters
          DO nnuc = 1, NDNUC
@@ -180,6 +192,7 @@ C--------set gamma-strength parameters
             GDRpar(7,nnuc) = 1.0
          ENDDO
          IZA(0) = 0
+         ENDf(0) = 1.0	 
          LVP(1,0) = 0
          NNUcd = 0
          NEJcm = 0
@@ -222,13 +235,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -354,7 +367,6 @@ C        shape of E1 strength function and GDR parameters
          KZZ1 = 0
          KAA1 = 0
          KEYload = 0
-         KEYalpa = 0
          KZZ = 0
          KAA = 0
          IGE1 = 1
@@ -471,6 +483,7 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
+         ENDf(1) = 1.0	 
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -516,6 +529,10 @@ C--------correct ejectiles symbols
      &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
                         IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
      &                      *ZEJc(NDEJC)
+
+C                       EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+                        if(atmp.le.4 . or. ztmp.le.2) cycle 
+
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
                         IF (iloc.EQ.1) THEN
@@ -685,6 +702,10 @@ C--------------To find inelastic channel
      &             NPRoject = nejc
                ares = A(nnuc) - AEJc(nejc)
                zres = Z(nnuc) - ZEJc(nejc)
+
+C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+               if(ares.le.4 . or. zres.le.2) cycle 
+
                izares = INT(1000*zres + ares)
                CALL WHERE(izares,nnur,iloc)
                IF (iloc.EQ.1) THEN
@@ -713,17 +734,6 @@ C--------next finds indexes of residues that might be needed for ENDF formatting
             IF (iloc.EQ.1) ILIres = -1
          ELSE
             ILIres = -1
-         ENDIF
-C--------Set exclusive and inclusive ENDF foratting flags
-         IF(ENDfn.GT.0) THEN
-            DO nnuc = 1, NNUcd !first set all to inclusive
-C               ENDf(nnuc) = 2.0
-                ENDf(nnuc) = 1.0
-            ENDDO
-C-----------Next set some nuclei to exclusive
-            ENDf(1) = 1.0
-            ENDf(2) = 1.0
-c           ENDf(3) = 1.0
          ENDIF
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
@@ -783,6 +793,19 @@ C        Key_shape =3 --> fE1=MLO3
 C        Key_shape =4 --> fE1=EGLO
 C        Key_shape =5 --> fE1=GFL
 C        Key_shape =6 --> fE1=SLO
+C
+C--------Set exclusive and inclusive ENDF foratting flags
+C
+         IF(ENDFn.GT.0) then 
+           DO nnuc = 1, NNUcd !first set all to inclusive
+C            ENDf(nnuc) = 2.0
+             ENDf(nnuc) = 1.0
+           ENDDO
+C----------Next set some nuclei to exclusive
+           ENDf(1) = 1.0
+           ENDf(2) = 1.0
+           ENDf(3) = 1.0
+         ENDIF
 C
 C--------check input for consistency
 C
@@ -1179,7 +1202,7 @@ C-----set giant resonance parameters for target
       GDRpar(4,0) = 0.0
       GDRpar(5,0) = 0.0
       GDRpar(6,0) = 0.0
-      GDRpar(7,0) = 0.0
+      GDRpar(7,0) = 1.0
       GDRpar(8,0) = 0.0
       GQRpar(1,0) = 0.0
       GQRpar(2,0) = 0.0
@@ -1361,10 +1384,13 @@ C
          DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+            if(ares.le.4 . or. zres.le.2) cycle 
+
             izares = INT(1000*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (6,'('' NO LOCATION ASCRIBED TO NUCLEUS '')')
+               WRITE (6,'('' NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
      &                izares
                STOP
             ENDIF
@@ -1372,7 +1398,7 @@ C-----------Mass of the residual nnclei
 C           AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
-               IF (LVP(1,nnur).EQ.0) CALL LEVREAD(nnur)
+               CALL LEVREAD(nnur) 
                IF (ROPar(3,nnur).EQ.0.0D0) THEN
                   IF (Z(nnur).GT.98.0D0 .OR. ROPaa(nnur).LE.0.0D0) THEN
                      delp = 12.0/SQRT(A(nnur))
@@ -1625,8 +1651,9 @@ C
       CHARACTER*9 finp
       CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
-     &        ndb, ndbrlin, ngamr, nlvr, nmax
+     &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
+      LOGICAL LREad
 C-----set ground state in case nucleus not in file
       NLV(Nnuc) = 1
       NCOmp(Nnuc) = 1
@@ -1637,44 +1664,66 @@ C-----set ground state in case nucleus not in file
 C-----set ground state *** done ***
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
-      IF (.NOT.FILevel) THEN
-C--------constructing input and filenames
-         WRITE (ctmp3,'(I3.3)') iz
-         finp = 'z'//ctmp3//'.dat'
-         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-     &         ERR = 400)
+      
+      LREad = .TRUE. 
+      izatmp = INT(1000*iz + ia)
+      DO itmp = 0,NDNuc
+         IF(NSTOred(itmp).eq.izatmp) THEN
+           LREad = .FALSE.
+           GOTO 50
+         ENDIF
+      ENDDO
+      
+   50 IF(.NOT.LREAD) then 
+          NLV(Nnuc) = NLV(itmp)
+          NCOmp(Nnuc) = NCOmp(itmp)
+          DO ilv = 1, NLV(Nnuc)
+            DO nbr = 1, NDBR
+               BR(ilv,nbr,1,Nnuc) = BR(ilv,nbr,1,itmp)
+               BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,itmp)
+               BR(ilv,nbr,3,Nnuc) = BR(ilv,nbr,3,itmp)
+            ENDDO
+          ENDDO
       ELSE
-         REWIND 13
-      ENDIF
-  100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
+        IF(.NOT.FILevel) THEN
+C---------constructing input and filenames
+           WRITE (ctmp3,'(I3.3)') iz
+           finp = 'z'//ctmp3//'.dat'
+           OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
+     &         ERR = 400)
+           NSTored(nnuc) = izatmp
+        ELSE
+           REWIND 13
+        ENDIF
+  100   READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
 C-----nmax is a number of levels that constitute a complete scheme as
 C-----estimated by Belgya for RIPL-2.
 C-----It is used, but a visual check with FITLEV is always recommended.
-      IF (ia.NE.iar .OR. iz.NE.izr) THEN
-         DO ilv = 1, nlvr + ngamr
-            READ (13,'(A1)') dum
-         ENDDO
-         GOTO 100
-      ELSE
+        IF (ia.NE.iar .OR. iz.NE.izr) THEN
+           DO ilv = 1, nlvr + ngamr
+             READ (13,'(A1)') dum
+           ENDDO
+           GOTO 100
+        ELSE
 C--------create file with levels (*.lev)
 C--------NLV   number of levels with unique spin and parity
 C--------NCOMP number of levels up to which the level scheme is estimated
 C--------to be complete
 C
-         IF (.NOT.FILevel) THEN
-            BACKSPACE (13)
-            READ (13,'(A110)') ch_iuf
-            WRITE (14,'(A110)') ch_iuf
-         ENDIF
-         IF (nlvr.NE.0) THEN
-            IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc)
+           IF (.NOT.FILevel) THEN
+             BACKSPACE (13)
+             READ (13,'(A110)') ch_iuf
+             WRITE (14,'(A110)') ch_iuf
+           ENDIF
+           IF (nlvr.NE.0) THEN
+             IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc)
      &          = MIN(NDLV,nmax)
-C-----------limit to max. of 40 levels if ENDF active
-            IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
-            IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
+C------------limit to max. of 40 levels if ENDF active
+             IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+             IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
-            IF (.NOT.FILevel) THEN
+             IF (.NOT.FILevel) THEN
                DO ilv = 1, nlvr + ngamr
                   READ (13,'(A110)') ch_iuf
                   WRITE (14,'(A110)') ch_iuf
@@ -1682,14 +1731,14 @@ C-----------limit to max. of 40 levels if ENDF active
                DO ilv = 1, nlvr + ngamr
                   BACKSPACE (13)
                ENDDO
-            ENDIF
-C-----------levels for nucleus NNUC copied to file *.lev
-            DO ilv = 1, NLV(Nnuc)
+             ENDIF
+C------------levels for nucleus NNUC copied to file *.lev
+             DO ilv = 1, NLV(Nnuc)
                READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
                IF (ELV(ilv,Nnuc).GT.qn) THEN
-                  NLV(Nnuc) = ilv - 1
+                  NLV(Nnuc) = max(ilv - 1,1)
                   WRITE (6,'('' WARNING:'')')
                   WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                   chelem, izr
@@ -1762,6 +1811,7 @@ C--------------------only gamma decay is considered up to now
          ENDIF
       ENDIF
   200 IF (.NOT.FILevel) CLOSE (13)
+      ENDIF 
       RETURN
   300 WRITE (6,
      &'('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
@@ -1980,7 +2030,7 @@ C-----constructing input and filenames
      &      ngamr, nmax, itmp2
       IF (Ia.NE.iar .OR. Iz.NE.izr) THEN
          DO ilv = 1, nlvr + ngamr
-            READ (13,'(A1)') dum
+            READ (13,'(A1)',END = 500) dum
          ENDDO
          GOTO 400
       ELSE
@@ -1988,10 +2038,12 @@ C--------create file with levels xxx.lev
          IF (.NOT.FILevel) THEN
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
-            WRITE (14,'(A110)') ch_iuf
+C           RCN, 04/2005  duplicate levels found !!
+C           WRITE (14,'(A110)') ch_iuf
             DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
-               WRITE (14,'(A110)') ch_iuf
+C              RCN, 04/2005  duplicate levels found !!
+C              WRITE (14,'(A110)') ch_iuf
             ENDDO
             DO ilv = 1, nlvr + ngamr
                BACKSPACE (13)
@@ -2183,7 +2235,7 @@ C
       WRITE (6,*) '-------------------------------------------'
       WRITE (6,*) ' '
       WRITE (12,*)
-     &           'Calculations run with  E M P I R E  -  2.19.b25  '
+     &           'Calculations run with  E M P I R E  -  2.19.b26  '
   100 READ (5,'(A1)') name(1:1)
       IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
      &    .NE.'!') THEN
@@ -2310,26 +2362,53 @@ C--------DEGAS input
             GOTO 100
          ENDIF
          IF (name.EQ.'GDIVP ') THEN
-            GDIvp = val
-            WRITE (6,
-     &'('' Proton s.p.l. density set to A/'',f5.2,'' in'',
+            if(i1.ne.0) then
+                WRITE (6,
+     &          '('' DEGAS proton s.p.l. density uncertainty '',
+     &          '' is equal to '',i2,''%'')') i1
+	          sigma = val*i1*0.01
+	          GDIvp = val + grand()*sigma
+                WRITE (6,
+     &       '('' DEGAS proton s.p.l. density sampled value is A/: ''
+     &          ,f5.2)') GDIvp
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, MFPp, INDexf,INDexb  
+            else
+              GDIvp = val
+              WRITE (6,
+     &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
      &'' code DEGAS '')') GDIvp
+            endif
             GOTO 100
          ENDIF
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
-            IF (val.GT.0) THEN
-               WRITE (6,
+            PEQc = 0.
+            IF (val.GE.0.8 .AND. val.LE.2.D0) THEN 
+              PEQc = 1.
+	        MFPp = val
+              WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
-               IF (val.GT.1.05 .AND. val.LE.2.D0) MFPp = val
-               WRITE (6,
+              if(i1.ne.0) then
+                WRITE (6,
+     &          '('' Mean free path parameter uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+	          sigma = val*i1*0.01
+	          MFPp = val + grand()*sigma
+                WRITE (6,
+     &          '('' Mean free path parameter sampled value : '',f5.2)') 
+     &          MFPp
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, MFPp, INDexf,INDexb  
+              else
+                WRITE (6,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Default value: 1.3)'')') MFPp
-               PEQc = 1.
-            ELSE
-               PEQc = 0.
-            ENDIF
+	        endif
+	      ENDIF
             GOTO 100
          ENDIF
 C
@@ -2750,6 +2829,180 @@ C-----
      &                       '('' Deformation dependent GDR selected'')'
      &                       )
             GOTO 100
+         ENDIF
+C-----
+C        SAMPLING OF OMP PARAMETERS FOR COVARIANCE
+C
+C        VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
+C
+         IF (name.EQ.'UOMPVV') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     &'('' Real volume potential depth uncertainty ignored'')')
+               GOTO 100
+            ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,
+     &'('' Real volume potential depth uncertainty ignored'')')
+               GOTO 100
+		  ENDIF
+            if(val.gt.0.) then
+              WRITE (6,
+     &        '('' Real volume potential depth uncertainty in '',I3,A2,
+     &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
+	          sigma = val*0.01
+	          FNvvomp(i3,nnuc) = 1. + grand()*sigma
+              WRITE (6,
+     &        '('' Real volume potential depth sampled norm.factor : '',
+     &        f5.2)') FNvvomp(i3,nnuc)
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb  
+            endif
+            GOTO 100                                 
+         ENDIF
+C----
+C        AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
+C        AWOm(Nejc,Nnuc) = alib(3)*FNavomp(Nejc,Nnuc)
+C
+         IF (name.EQ.'UOMPAV') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' Volume potential diffuseness uncertainty ignored'')')
+               GOTO 100
+            ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,
+     & 		  '('' Volume potential diffuseness uncertainty ignored'')')
+               GOTO 100
+		  ENDIF
+            if(val.gt.0.) then
+              WRITE (6,
+     &        '('' Volume potential diffuseness uncertainty in '',I3,
+     &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
+	          sigma = val*0.01
+	          FNavomp(i3,nnuc) = 1. + grand()*sigma
+              WRITE (6,
+     &        '('' Volume potential diffuseness sampled norm.factor : ''
+     &        ,f5.2)') FNavomp(i3,nnuc)
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb  
+            endif
+            GOTO 100                                 
+         ENDIF
+
+C--------Volume imaginary potential
+C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
+         IF (name.EQ.'UOMPWV') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' Imag. potential depth uncertainty ignored'')')
+               GOTO 100
+            ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,
+     & 		  '('' Imag. potential depth uncertainty ignored'')')
+               GOTO 100
+		  ENDIF
+            if(val.gt.0.) then
+              WRITE (6,
+     &        '('' Imag. potential depth uncertainty in '',I3,A2,
+     &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
+	          sigma = val*0.01
+	          FNwvomp(i3,nnuc) = 1. + grand()*sigma
+              WRITE (6,
+     &        '('' Imag. potential depth sampled norm.factor : ''
+     &        ,f5.2)') FNwvomp(i3,nnuc)
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb  
+            endif
+            GOTO 100                                 
+         ENDIF
+
+C--------Surface imaginary potential:
+C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
+         IF (name.EQ.'UOMPWS') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & 		  '('' Surface potential depth uncertainty ignored'')')
+               GOTO 100
+            ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,
+     & 		  '('' Surface potential depth uncertainty ignored'')')
+               GOTO 100
+		  ENDIF
+            if(val.gt.0.) then
+              WRITE (6,
+     &        '('' Surface potential depth uncertainty in '',I3,A2,
+     &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
+	          sigma = val*0.01
+	          FNwsomp(i3,nnuc) = 1. + grand()*sigma
+              WRITE (6,
+     &        '('' Surface potential depth sampled norm.factor : '',
+     &        f5.2)') FNwsomp(i3,nnuc)
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb  
+            endif
+            GOTO 100                                 
+         ENDIF
+C----
+C
+C        FNasomp(Nejc,Nnuc) = 1.0 
+C
+         IF (name.EQ.'UOMPAS') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,
+     & '('' Surface potential diffuseness uncertainty ignored'')')
+               GOTO 100
+            ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,
+     & '('' Surface potential diffuseness uncertainty ignored'')')
+               GOTO 100
+		  ENDIF
+            if(val.gt.0.) then
+              WRITE (6,
+     &        '('' Surface potential diffuseness uncertainty in '',I3,
+     &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
+	          sigma = val*0.01
+	          FNasomp(i3,nnuc) = 1. + grand()*sigma
+              WRITE (6,
+     &        '('' Surface potential diffuseness sampled norm.factor :''
+     &        ,f5.2)') FNasomp(i3,nnuc)
+	          IPArCOV = IPArCOV +1
+	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &		      IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb  
+            endif
+            GOTO 100                                 
          ENDIF
 C-----
          IF (name.EQ.'EGDR1 ') THEN
@@ -3422,6 +3675,7 @@ C-----
      & '' (will reset several options'')')
             GOTO 100
          ENDIF
+
 C--------Tuning factors
          IF (name.EQ.'TUNE  ') THEN
             izar = i1*1000 + i2
@@ -3432,6 +3686,10 @@ C--------Tuning factors
                WRITE (6,'('' TUNING IGNORED'')')
                GOTO 100
             ENDIF
+		  IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
+               GOTO 100
+		  ENDIF
             TUNe(i3,nnuc) = val
             WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
@@ -3864,10 +4122,12 @@ C-----Fermi energies calculated for all nuclei and projectile combinations
          DO ii = 0, NDEJC
             izpro = ZEJc(ii)
             iapro = AEJc(ii)
-            efermi = -0.5*(EXCessmass(iztar - izpro,iatar - iapro)
+    	    if((iztar - izpro).ge.0 .and. (iatar - iapro).ge.0) then 	    
+              efermi = -0.5*(EXCessmass(iztar - izpro,iatar - iapro)
      &               - EXCessmass(iztar + izpro,iatar + iapro)
      &               + 2.*EXCessmass(izpro,iapro))
-            EEFermi(ii,nnuc) = efermi
+              EEFermi(ii,nnuc) = efermi
+	    endif 
          ENDDO
       ENDDO
       RETURN
@@ -6297,12 +6557,12 @@ C
      &                 HALpha2(9000), HBEtagfl(700), HCS1(300),
      &                 HCS2(300), HE1(300), HE2(300), HENergygfl(700),
      &                 HGW1(300), HGW2(300), S2Plusgfl
-      INTEGER KAA, KEYalpa, KEYload, KEY_gdrgfl, KEY_shape, KZZ,
+      INTEGER KAA, KEYload, KEY_gdrgfl, KEY_shape, KZZ,
      &        NANa(9000), NANz(9000), NARam(700), NG, NNA(300), NNG(300)
      &        , NNZ(300), NUMram, NZRam(700)
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
-      COMMON /MLOCOM2/ KEYload, KEYalpa, KZZ, KAA
+      COMMON /MLOCOM2/ KEYload, KZZ, KAA
       COMMON /MLOCOM3/ NNZ, NNA, NNG, HE1, HCS1, HGW1, HE2, HCS2, HGW2,
      &                 NANz, NANa, HALpha2, HBEtagfl, HENergygfl, NZRam,
      &                 NARam, NUMram
@@ -6458,7 +6718,6 @@ C--------------Plujko_new-2005
       ENDIF
 C-----Setting the deformation parameter from "deflib.dat" file
 C-----for calculation of the GDR energies and widths
-      KEYalpa = 1
       DO i = 1, 9000
          IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
             alpha2 = HALpha2(i)
@@ -6524,17 +6783,14 @@ C-----Global parametrization for 'S2Plus=(E2+)*beta**2'
 C-----and setting the '|beta2|' from "deflib.dat" file
 C-----as 'beta' of the GFL model.
 C-----Setting the deformation parameter from "deflib.dat" file
-C-----for  calculation  of  the  GFL model parameter  if it is
-C-----absent ('keyalpa=0')
-      IF (KEYalpa.EQ.0) THEN
-         DO i = 1, 9000
-            IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
-               alpha2 = HALpha2(i)
-               GOTO 1000
-            ENDIF
-         ENDDO
-         alpha2 = 0.
-      ENDIF
+C-----for  calculation  of  the  GFL model parameter
+      DO i = 1, 9000
+         IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
+            alpha2 = HALpha2(i)
+            GOTO 1000
+         ENDIF
+      ENDDO
+      alpha2 = 0.
  1000 betagfl = 1.5853*ABS(alpha2)
       BETagfl2 = betagfl**2
       S2Plusgfl = 217.156/aann**2
@@ -6565,8 +6821,8 @@ C
 C
 C $Author: Capote $
 C $Workfile:   r250.f  $
-C $Revision: 1.100 $
-C $Date: 2005-04-15 18:24:23 $
+C $Revision: 1.101 $
+C $Date: 2005-04-23 17:13:17 $
 C
 C ===================================================================
 C
@@ -6611,9 +6867,11 @@ C ===================================================================
       Integer*4 indexf, indexb, buffer(250)
       Common/R250COM/indexf,indexb,buffer
       Integer ms_bit, all_bits, half_range, step
-      Parameter ( ms_bit = Z'40000000')
-      Parameter ( half_range = Z'20000000' )
-      Parameter ( all_bits = Z'7FFFFFFF' )
+
+	DATA ms_bit/Z'40000000'/
+	DATA half_range/Z'20000000'/
+	DATA all_bits/Z'7FFFFFFF'/
+
       Parameter ( step = 7 )
 C
       indexf = 1
