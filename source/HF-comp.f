@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:21:01 $
-Ccc   * $Id: HF-comp.f,v 1.50 2005-04-15 18:21:01 Capote Exp $
+Ccc   * $Date: 2005-04-23 17:07:18 $
+Ccc   * $Id: HF-comp.f,v 1.51 2005-04-23 17:07:18 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -599,7 +599,8 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
-            icse = 2.0001 + egd/DE
+C           icse = 2.0001 + egd/DE	    
+            icse = min(NINT(1 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive gamma spectrum
@@ -633,7 +634,8 @@ C-----------Add transition to the exclusive gamma spectrum
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-                  icse = 2.0001 + egd/DE
+C                 icse = 2.0001 + egd/DE
+                  icse = min(NINT(1 + egd/DE),ndecse)		  
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
