@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-23 17:10:06 $
-Ccc   * $Id: tl.f,v 1.53 2005-04-23 17:10:06 Capote Exp $
+Ccc   * $Date: 2005-04-24 20:23:09 $
+Ccc   * $Id: tl.f,v 1.54 2005-04-24 20:23:09 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -559,12 +559,12 @@ C
 C-----komp   = 29 (usually), 33(for the inelastic channel)
 C
 C-----Erasing parameters of O.M.P.
-      VOM(Nejc,Nnuc) = 0.0
-      VOMs(Nejc,Nnuc) = 0.0
-      WOMv(Nejc,Nnuc) = 0.0
-      WOMs(Nejc,Nnuc) = 0.0
-      WSO(Nejc,Nnuc) = 0.0
-      VSO(Nejc,Nnuc) = 0.0
+      VOM(Nejc,Nnuc)  = 0.D0
+      VOMs(Nejc,Nnuc) = 0.D0
+      WOMv(Nejc,Nnuc) = 0.D0
+      WOMs(Nejc,Nnuc) = 0.D0
+      WSO(Nejc,Nnuc)  = 0.D0
+      VSO(Nejc,Nnuc)  = 0.D0
       RVOm(Nejc,Nnuc) = 0.D0
       RWOm(Nejc,Nnuc) = 0.D0
       RVSo(Nejc,Nnuc) = 0.D0
@@ -574,10 +574,10 @@ C-----Erasing parameters of O.M.P.
       AVSo(Nejc,Nnuc) = 0.D0
       AWSo(Nejc,Nnuc) = 0.D0
 C-----set nonlocality range to 0. (as usually is the case)
-      RNOnl(Nejc,Nnuc) = 0.0
+      RNOnl(Nejc,Nnuc) = 0.D0
 C-----set validity range to any energy (can be modified later)
-      OMEmin(Nejc,Nnuc) = 0.0
-      OMEmax(Nejc,Nnuc) = 1000.0
+      OMEmin(Nejc,Nnuc) = 0.D0
+      OMEmax(Nejc,Nnuc) = 1000.D0
 C-----set relativistic calculation key to 0
       IRElat(Nejc,Nnuc) = 0
       fexist = OMPar_riplf
