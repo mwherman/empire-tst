@@ -243,13 +243,17 @@ C-----Transfer to Empire
 C
       DO nejcdegas = 1, 3 !over ejectiles
          IF (nejcdegas.EQ.1) THEN
-                                 !neutron
+                                     !neutron
             nejc = 1
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+            if(NRES(1).lt.0) cycle
             nnur = NREs(1)
             nnurdegas = 2
          ELSEIF (nejcdegas.EQ.2) THEN
                                      !proton
             nejc = 2
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+            if(NRES(2).lt.0) cycle
             nnur = NREs(2)
             nnurdegas = 3
          ELSEIF (nejcdegas.EQ.3) THEN
