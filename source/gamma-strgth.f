@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-23 17:02:59 $
-Ccc   * $Id: gamma-strgth.f,v 1.22 2005-04-23 17:02:59 Capote Exp $
+Ccc   * $Date: 2005-04-24 20:12:06 $
+Ccc   * $Id: gamma-strgth.f,v 1.23 2005-04-24 20:12:06 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -152,7 +152,7 @@ C-----printout of gamma transition parameters
 C
       IF (IOUt.GT.1) THEN
          WRITE (6,99005)
-99005    FORMAT (1X,'Gamma transitions parameters',//10X,'E1 ',11X,
+99005    FORMAT (1X,' Gamma transitions parameters',//10X,'E1 ',11X,
      &           'E2 ',11X,'M1 '/)
          WRITE (6,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
      &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
