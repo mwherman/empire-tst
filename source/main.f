@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-23 17:08:32 $
-Ccc   * $Id: main.f,v 1.70 2005-04-23 17:08:32 Capote Exp $
+Ccc   * $Date: 2005-04-24 20:20:05 $
+Ccc   * $Id: main.f,v 1.71 2005-04-24 20:20:05 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -123,10 +123,11 @@ C--------locate position of the projectile among ejectiles
 C--------get and add inelastic cross sections (including double-differential)
          DO i = 2, ND_nlv
             ilv = ICOller(i)
-            IF (ilv.GT.NLV(nnurec)) GOTO 1350
-            echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
-C-----------avoid reading closed channels
-            IF (echannel.GE.0.0001) THEN
+            IF (ilv.LE.NLV(nnurec)) THEN
+C            ADDING INELASTIC TO DISCRETE LEVELS 
+             echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
+C------------avoid reading closed channels
+             IF (echannel.GE.0.0001) THEN
                xcse = echannel/DE + 1.0001
                icsl = INT(xcse)
                icsh = icsl + 1
@@ -180,7 +181,48 @@ C--------------------escape if we go beyond recoil spectrum dimension
      &                  = RECcse(irec + 1,0,nnurec) + csmsdl*weight
                   ENDDO
                ENDIF
-            ENDIF
+             ENDIF
+           ELSE
+C            D_Lvp(ND_nlv) = lvpr
+C            D_Xjlv(ND_nlv) = xjlvr
+C            IPH(ND_nlv) = 0
+C
+C            ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
+             echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
+C------------number of spectrum bins to continuum WARNING! might be negative!
+             nexrt = INT((echannel - ECUt(nnurec))/DE + 1.0001)
+C------------total number of bins
+C            next = INT(excnq/DE + 1.0001)
+
+C------------avoid reading closed channels
+             IF (echannel.GE.0.0001 .and. nexrt.gt.0 .and. nejcec.le.2) 
+     &       THEN
+               icsl = INT(echannel/DE + 1.0001)
+               READ (46,*,END = 1400) popread
+               ncoll = i
+               if(nejcec.eq.1) CSMsd(1) = CSMsd(1) + popread
+               if(nejcec.eq.2) CSMsd(2) = CSMsd(2) + popread
+
+               CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
+
+               READ (45,*,END = 1400)     ! Skipping level identifier line
+C--------------Empire uses 10 deg grid for inelastic so we have to take
+C--------------each 4th result from ECIS (2.5 deg grid)
+               DO iang = 1, NDANG - 1
+                  ftmp = 0.d0
+                  READ (45,'(7x,E12.5)',END = 1400) ftmp
+                  CSEa(icsl,iang,nejcec,nnurec) = 
+     &               CSEa(icsl,iang,nejcec,nnurec) + ftmp/DE
+                  READ (45,'(7x,E12.5)',END = 1400)
+                  READ (45,'(7x,E12.5)',END = 1400)
+                  READ (45,'(7x,E12.5)',END = 1400)
+               ENDDO
+               READ (45,'(7x,E12.5)',END = 1400) ftmp
+                 CSEa(icsl,NDAng,nejcec,nnurec) =
+     &               CSEa(icsl,NDAng,nejcec,nnurec) + ftmp/DE
+             ENDIF
+C            END OF ADDING INELASTIC TO CONTINUUM
+           ENDIF
  1350    ENDDO
       ENDIF
  1400 CLOSE (45)
@@ -314,7 +356,9 @@ C-----------set to Q's to 0 if negative due to rounding error
          WRITE (6,*) ' '
          CALL ULM(1)
          CALL TRISTAN(0,0,ltrmax,qmax,qstep)
-C        CLOSE (15)
+      ENDIF
+
+      IF (CSMsd(1) + CSMsd(2).GT.0) THEN
 C--------print MSD double differential cross sections
          nejc = 1
          IF (ZEJc(0).EQ.1.0D0) nejc = 2
@@ -657,8 +701,11 @@ Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=49,60),i=1,nex(nnuc))
          ENDIF
 C--------locate residual nuclei
          DO nejc = 1, NEJcm
+	      NREs(nejc) = -1
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+	      if(ares.le.4. and. zres.le.2.) cycle
             izares = INT(1000.0*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) THEN
@@ -825,6 +872,8 @@ C--------------calculate population in the energy bin ke
                      GOTO 1470
                   ENDIF
                   DO nejc = 1, NEJcm !over ejectiles
+C                    EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+	               if(NRES(nejc).lt.0) cycle
                      nnur = NREs(nejc)
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
                   ENDDO
@@ -1169,6 +1218,8 @@ C-----------CN contribution to elastic ddx
          WRITE (12,'('' g  emission cross section'',G12.5,'' mb'')')
      &          CSEmis(0,nnuc)
          DO nejc = 1, NEJcm
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+            if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
             IF (IOUt.GT.0) WRITE (6,
@@ -1179,7 +1230,6 @@ C-----------CN contribution to elastic ddx
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
 C-----------print residual nucleus population
             IF (IOUt.EQ.4) THEN
-               nnur = NREs(nejc)
                ia = INT(A(nnur))
                WRITE (6,'('' Residual nucleus '',I3,''-'',A2,/)') ia,
      &                SYMb(nnur)
@@ -1210,7 +1260,7 @@ C-----------print residual nucleus population
                WRITE (6,*) ' '
             ENDIF
 C-----------This block should go away with the new way of treating exclusive
-C-----------spectra. We do not want to rpint them as they are identical to
+C-----------spectra. We do not want to print them as they are identical to
 C-----------those printed already before for pure MSD (no CN is added)
 C-----------print double differential cross sections
 C           IF(CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3 .AND. nnuc.EQ.1)THEN
@@ -1563,7 +1613,8 @@ C-----------------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation) 
 C-----
-      IF (ENDf(1).NE.0) THEN
+      IF (ENDf(1).EQ.2) THEN
+C     IF (ENDf(1).EQ.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1605,59 +1656,64 @@ C--------neutrons
          ENDDO
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
-         IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-         WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
-         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-         WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
-         DO ie = 1, nspec - 1
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+	   IF(nspec.gt.0) then
+           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+           WRITE (12,*) ' '
+           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
+           WRITE (12,'(30X,''A      n      g      l      e      s '')')
+           WRITE (12,*) ' '
+           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+           DO ie = 1, nspec - 1
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &             (CSEa(ie,nang,2,0),nang = 1,NDANG)
-         ENDDO
-         DO ie = nspec, nspec + 1
+           ENDDO
+           DO ie = nspec, nspec + 1
                                 ! exact endpoint
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
      &             (CSEa(ie,nang,2,0),nang = 1,NDANG)
-         ENDDO
+           ENDDO
+	   ENDIF
 C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
-         IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-         WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
-         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-         WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
-         DO ie = 1, nspec - 1
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+	   IF(nspec.gt.0) then
+           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+           WRITE (12,*) ' '
+           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
+           WRITE (12,'(30X,''A      n      g      l      e      s '')')
+           WRITE (12,*) ' '
+           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+           DO ie = 1, nspec - 1
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &             (CSEa(ie,nang,3,0),nang = 1,NDANG)
-         ENDDO
-         DO ie = nspec, nspec + 1
+           ENDDO
+           DO ie = nspec, nspec + 1
                                 ! exact endpoint
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
      &             (CSEa(ie,nang,3,0),nang = 1,NDANG)
-         ENDDO
+           ENDDO
+         ENDIF
 C--------light ions
          IF (NDEJC.EQ.4 .AND. NEMc.GT.0) THEN
-            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
-            IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-            WRITE (12,*) ' '
-            WRITE (12,
+           nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
+	     IF(nspec.gt.0) then
+             IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+             WRITE (12,*) ' '
+             WRITE (12,
      &'(''  Spectrum of  '',I1,''-'',A2,4X,                          ''(
      &n,x)'')') INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
-            WRITE (12,'(30X,''A      n      g      l      e      s '')')
-            WRITE (12,*) ' '
-            WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
-            DO ie = 1, nspec - 1
+             WRITE(12,'(30X,''A      n      g      l      e      s '')')
+             WRITE (12,*) ' '
+             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+             DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
-     &                *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
-            ENDDO
-            DO ie = nspec, nspec + 1
+     &                *DE, (CSEa(ie,nang,4,0),nang = 1,NDANG)
+             ENDDO
+             DO ie = nspec, nspec + 1
                                    ! exact endpoint
-               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
-     &                - Q(NDEJC,1),
-     &                (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
-            ENDDO
+               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)- Q(4,1),
+     &                (CSEa(ie,nang,4,0),nang = 1,NDANG)
+             ENDDO
+	     ENDIF
          ENDIF
       ENDIF
 C-----end of ENDF spectra (inclusive)
@@ -1755,8 +1811,10 @@ C-----normalize recoil spectrum of the parent
       dang = 3.14159/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
-C--------decay to continuum
+C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+         if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
+C--------decay to continuum
 C--------recorr is a recoil correction factor that
 C--------divides outgoing energies
          recorr = AMAss(Nnuc)/EJMass(nejc)
@@ -2076,6 +2134,8 @@ C-----------fission
          ENDIF
 C------------particles
          DO nejc = 1, NEJcm
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+            if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
             CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + xnorfis*SCRtem(nejc)
@@ -2090,6 +2150,8 @@ C------------gammas
 C--------------no subbarrier effects
 C--------particles
       DO nejc = 1, NEJcm
+C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+         if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
          CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
          CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + Xnor*SCRtem(nejc)
