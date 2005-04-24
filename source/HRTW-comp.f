@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-13 16:42:18 $
-Ccc   * $Id: HRTW-comp.f,v 1.21 2005-04-13 16:42:18 Capote Exp $
+Ccc   * $Date: 2005-04-24 20:15:34 $
+Ccc   * $Id: HRTW-comp.f,v 1.22 2005-04-24 20:15:34 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -56,11 +56,10 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, ares, csemist, cnspin, dencomp, sgamc, sum 
-     &                 , sumfis, sumfism(3), sumg, tlump, xnor, zres
+      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, sum 
+     &                 , sumfis, sumfism(3), sumg, tlump, xnor
       REAL FLOAT
-      INTEGER i, ich, iloc, ip, ipar, izares, jcn, ke, m, nejc, nhrtw, 
-     &        nnuc, nnur
+      INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       DOUBLE PRECISION VT1
 C
@@ -71,19 +70,10 @@ C-----threshold for considering channel as a 'strong' one
 C-----set CN nucleus
       nnuc = 1
 
-C-----locate residual nuclei
-      DO nejc = 1, NEJcm
-         ares = A(nnuc) - AEJc(nejc)
-         zres = Z(nnuc) - ZEJc(nejc)
-         izares = INT(1000.0*zres + ares)
-         CALL WHERE(izares,nnur,iloc)
-         IF (iloc.EQ.1) THEN
-            WRITE (6,*) ' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=', 
-     &                  zres, ' HAS NOT BEEN INITIALIZED'
-            WRITE (6,*) ' EXECUTION STOPPED'
-         ENDIF
-         NREs(nejc) = nnur
-      ENDDO
+C-----locate residual nuclei (RCN, 
+C     The block missing below was deleted by RCN
+C     NRES() already available from input.f
+C
 C-----reset variables
       sgamc = 0.0
       csemist = 0.0
@@ -127,6 +117,8 @@ C-----------start the first HRTW run
 C-----------
 C-----------do loop over ejectiles
             DO nejc = 1, NEJcm
+C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+               if(NRES(nejc).lt.0) cycle
                nnur = NREs(nejc)
 C              WRITE(6,*)'emitting ejectile=', nejc
                CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
@@ -217,6 +209,8 @@ C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
                DENhf = 0.0
                DO nejc = 1, NEJcm
+C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+                  if(NRES(nejc).lt.0) cycle
                   nnur = NREs(nejc)
 C                 WRITE(6,*)'  '
 C                 WRITE(6,*)'second entry with ejec ' , nejc
@@ -232,6 +226,8 @@ C--------------
 C--------------correct scratch matrix for enhancement of the elastic channels
 C--------------
                DO nejc = 1, NEJcm
+C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+                  if(NRES(nejc).lt.0) cycle
                   nnur = NREs(nejc)
                   IF (IZA(nnur).EQ.IZA(0))
      &                CALL ELCORR(nnuc,ke,jcn,ip,nnur,nejc,nhrtw)
@@ -254,15 +250,17 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            cnspin = jcn - 0.5
-            if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn 
-            if( ip.eq.LVP(LEVtarg,0) .AND. 
+            IF(EIN.LE.0.1) THEN
+              cnspin = jcn - 0.5
+              if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn 
+              if( ip.eq.LVP(LEVtarg,0) .AND. 
      >            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
      >              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                  write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)') 
      >             'CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
      >             sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)  
-            endif
+              endif
+	      ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
       END
