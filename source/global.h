@@ -24,10 +24,10 @@
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,
      &                 EEFermi(0:ndejc,0:ndnuc), EFB(nfparab),
      &                 EFDis(nftrans,nfparab), EGDr1, EGDr2, EIN, EINl,
-     &                 EJMass(0:ndejc), 
+     &                 EJMass(0:ndejc),
      &                 FNvvomp(0:ndejc,0:ndnuc),
      &                 FNwvomp(0:ndejc,0:ndnuc),
-     &                 FNavomp(0:ndejc,0:ndnuc), 
+     &                 FNavomp(0:ndejc,0:ndnuc),
      &                 FNwsomp(0:ndejc,0:ndnuc),
      &                 FNasomp(0:ndejc,0:ndnuc)
       INTEGER BFF(2), D_Klv(ndcollev), D_Llv(ndcollev), F_Print, IARes,
@@ -44,7 +44,7 @@
      &        NEXr(ndejc,ndnuc), NEXreq, NHMs, NLV(0:ndnuc), NLW, NNUcd,
      &        NNUct, NOUt, NPRoject, NRBar, NRBarc, NRBinfis(2),
      &        NREs(ndejc), NRFdis(nfparab), NRWel, NSCc, NTArget,
-     &        NSTored(0:ndnuc) 
+     &        NSTored(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead
@@ -128,7 +128,7 @@
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
      &                 DOBs, BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor,
-     &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp  
+     &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, EJMass, SIGabs
