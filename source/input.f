@@ -1,6 +1,7 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-23 17:13:17 $
-Ccc   * $Id: input.f,v 1.101 2005-04-23 17:13:17 Capote Exp $
+Ccc   * $Date: 2005-04-24 20:26:24 $
+Ccc   * $Id: input.f,v 1.102 2005-04-24 20:26:24 Capote Exp $
+C
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -128,11 +129,12 @@ C-----already converted to mb
         ENDDO 
         CLOSE(94) 
       else
-C       If the file R250SEED.DATdoes not exist, then DEFAULT
+C       If the file R250SEED.DAT does not exist, then DEFAULT
 C       starting seed is used
         iseed = 1234567
         Call R250Init(iseed)
       endif  
+
       IF (EIN.EQ.0.0D0) THEN
 C
 C--------default input parameters (skipped in non-first-energy calculation)
@@ -235,13 +237,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1176,18 +1178,34 @@ C--------fix-up deformations for coupled channels *** done ***
                IOMwrite(nejc,nnuc) = 0
             ENDDO
          ENDDO
-      ENDIF
+
+      ENDIF  ! END of EIN endif block
+
       NLW = NDLW
       CSFus = CSRead
 
 C-----KTRLOM Optical Model control
 C-----set o.m.p. for the incident channel
       DO nejc = 1, NDEJC
-         IF (ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc))
-     &       KTRlom(0,0) = KTRlom(nejc,1)
+C        Selecting projectile from ejectiles	 
+         IF (ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc)) then
+           DO i = 1, NDNUC
+C            Selecting target from residuals
+             IF (Z(0).EQ.Z(i) .AND. A(0).EQ.A(i)) then
+                KTRlom(0,0) = KTRlom(nejc,i)
+C               Setting the normalization factor for OMP (used in covariance calculation)
+                FNvvomp(0,0) = FNvvomp(Nejc,i)
+                FNwvomp(0,0) = FNwvomp(Nejc,i)
+                FNwsomp(0,0) = FNwsomp(Nejc,i)
+                FNavomp(0,0) = FNavomp(Nejc,i)
+                FNasomp(0,0) = FNasomp(Nejc,i)
+	          GOTO 11
+             ENDIF
+	     ENDDO
+	   ENDIF  
       ENDDO
 
-      IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0  ! HI
+11    IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0  ! HI
       IF (AEJc(0).EQ.0.0D0) KTRlom(0,0) = -1 ! photons
 
       IF (KTRompcc.GT.0 .AND. DIRect.EQ.2) THEN
@@ -1325,13 +1343,14 @@ C-----determination of excitation energy matrix in cn
 C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
-CMH---The following block was commented since it should be moved 
-C     IF (FITlev.GT.0.0D0) THEN
-C        ECUt(1) = 0.0
+      IF (FITlev.GT.0.0D0) THEN
+         ECUt(1) = 0.0
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
-C        ENDf(1) = 0
-C     ENDIF
+         Do i = 0,NDNuc
+           ENDf(i) = 0
+	   Enddo
+      ENDIF
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -2196,12 +2215,13 @@ C
 C Local variables
 C
       REAL FLOAT
-	DOUBLE PRECISION GRAND
+	DOUBLE PRECISION GRAND,DRAND
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc
 	INTEGER IPArCOV 
       INTEGER INT
       CHARACTER*6 name
+	LOGICAL fexist
       DOUBLE PRECISION val,sigma
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
@@ -2218,6 +2238,8 @@ C	By default, no covariance calculation is done
 C
       IPArCOV = 0
       OPEN(95,FILE='COVAR.DAT',ACCESS='APPEND',STATUS='UNKNOWN')
+      INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
+
       WRITE (6,*) '                        ____________________________'
       WRITE (6,*)
      &           '                       |                            |'
@@ -2367,7 +2389,8 @@ C--------DEGAS input
      &          '('' DEGAS proton s.p.l. density uncertainty '',
      &          '' is equal to '',i2,''%'')') i1
 	          sigma = val*i1*0.01
-	          GDIvp = val + grand()*sigma
+C	          GDIvp = val + grand()*sigma
+ 	          GDIvp = val + (2*drand()-1.)*sigma
                 WRITE (6,
      &       '('' DEGAS proton s.p.l. density sampled value is A/: ''
      &          ,f5.2)') GDIvp
@@ -2396,7 +2419,8 @@ C--------PCROSS input
      &          '('' Mean free path parameter uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
 	          sigma = val*i1*0.01
-	          MFPp = val + grand()*sigma
+C	          MFPp = val + grand()*sigma
+ 	          MFPp = val + (2*drand()-1.)*sigma
                 WRITE (6,
      &          '('' Mean free path parameter sampled value : '',f5.2)') 
      &          MFPp
@@ -2456,6 +2480,8 @@ C--------------searching in the RIPL database
             GOTO 100
          ENDIF
          IF (name.EQ.'EcDWBA') THEN
+C           EcDWBA meaningless if Collective level file exists
+	      IF(fexist) goto 100  
             ECUtcoll = val
             JCUtcoll = i1
             IF (JCUtcoll.EQ.0) JCUtcoll = 2
@@ -2831,7 +2857,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-C        SAMPLING OF OMP PARAMETERS FOR COVARIANCE
+C        SAMPLING OF OMP PARAMETERS FOR COVARIANCE CALCULATION
 C
 C        VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
 C
@@ -2856,7 +2882,8 @@ C
      &        '('' Real volume potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
 	          sigma = val*0.01
-	          FNvvomp(i3,nnuc) = 1. + grand()*sigma
+C	          FNvvomp(i3,nnuc) = 1. + grand()*sigma
+	          FNvvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Real volume potential depth sampled norm.factor : '',
      &        f5.2)') FNvvomp(i3,nnuc)
@@ -2891,7 +2918,8 @@ C
      &        '('' Volume potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
 	          sigma = val*0.01
-	          FNavomp(i3,nnuc) = 1. + grand()*sigma
+C	          FNavomp(i3,nnuc) = 1. + grand()*sigma
+	          FNavomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Volume potential diffuseness sampled norm.factor : ''
      &        ,f5.2)') FNavomp(i3,nnuc)
@@ -2925,7 +2953,8 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '('' Imag. potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
 	          sigma = val*0.01
-	          FNwvomp(i3,nnuc) = 1. + grand()*sigma
+C	          FNwvomp(i3,nnuc) = 1. + grand()*sigma
+	          FNwvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Imag. potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
@@ -2959,7 +2988,8 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &        '('' Surface potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
 	          sigma = val*0.01
-	          FNwsomp(i3,nnuc) = 1. + grand()*sigma
+C	          FNwsomp(i3,nnuc) = 1. + grand()*sigma
+	          FNwsomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Surface potential depth sampled norm.factor : '',
      &        f5.2)') FNwsomp(i3,nnuc)
@@ -2994,7 +3024,8 @@ C
      &        '('' Surface potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
 	          sigma = val*0.01
-	          FNasomp(i3,nnuc) = 1. + grand()*sigma
+C	          FNasomp(i3,nnuc) = 1. + grand()*sigma
+	          FNasomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Surface potential diffuseness sampled norm.factor :''
      &        ,f5.2)') FNasomp(i3,nnuc)
@@ -3542,7 +3573,8 @@ C-----
      &        '('' L.d. a-parameter uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
 	        sigma = val*i3*0.01
-	        ATIlnor(nnuc) = val + grand()*sigma
+C	        ATIlnor(nnuc) = val + grand()*sigma
+	        ATIlnor(nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' L.d. a-parameter sampled value : '',f8.3)') 
      &        ATIlnor(nnuc)
@@ -3583,7 +3615,8 @@ C-----
      &        '('' Single particle l.d. parameter g uncertainty in '',
      &        I3,A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
 	        sigma = val*i3*0.01
-	        GTIlnor(nnuc) = val + grand()*sigma
+C	        GTIlnor(nnuc) = val + grand()*sigma
+	        GTIlnor(nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Single particle l.d. parameter g sampled value : '', 
      &        f8.3)') GTIlnor(nnuc)
@@ -3690,10 +3723,26 @@ C--------Tuning factors
                WRITE (6,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
                GOTO 100
 		  ENDIF
-            TUNe(i3,nnuc) = val
-            WRITE (6,
+            if(i4.gt.0.) then
+              WRITE (6,
+     &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
+     &         '' uncertainty is equal to '',i2,'' %'')') 
+     &        i3, i2, SYMb(nnuc), i4
+	        sigma = val*0.01*i4
+C	        TUNe(i3,nnuc) = val + grand()*sigma
+	        TUNe(i3,nnuc) = val + (2*drand()-1.)*sigma
+              WRITE (6,
+     &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
+     &  '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
+              IPArCOV = IPArCOV +1
+	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
+     &	      IPArCOV, TUNe(i3,nnuc), INDexf,INDexb  
+	      else
+              TUNe(i3,nnuc) = val
+              WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), val
+            endif
             GOTO 100
          ENDIF
 C--------input for TRISTAN (MSD)
@@ -6640,7 +6689,7 @@ C-----------Selecting only 2+ states
             HENergygfl(NUMram) = etmp
             HBEtagfl(NUMram) = btmp
   350    ENDDO
-         WRITE (6,*) 'RIPL-2 GDR parameters used'
+         WRITE (6,*) ' RIPL-2 GDR parameters used'
          GOTO 700
   400    CLOSE (84)
   450    WRITE (6,'(1x,A14,A39,A43)') ' WARNING: File ',
@@ -6818,12 +6867,6 @@ C For a review of BOTH of these generators, see:
 C Carter, E.F, 1994; Generation and Application of Random Numbers,
 C Forth Dimensions, Vol. XVI, Numbers 1,2 May/June, July/August
 C
-C
-C $Author: Capote $
-C $Workfile:   r250.f  $
-C $Revision: 1.101 $
-C $Date: 2005-04-23 17:13:17 $
-C
 C ===================================================================
 C
       Function lcmrand(ix)
@@ -6868,9 +6911,9 @@ C ===================================================================
       Common/R250COM/indexf,indexb,buffer
       Integer ms_bit, all_bits, half_range, step
 
-	DATA ms_bit/Z'40000000'/
-	DATA half_range/Z'20000000'/
-	DATA all_bits/Z'7FFFFFFF'/
+      DATA ms_bit/Z'40000000'/
+      DATA half_range/Z'20000000'/
+      DATA all_bits/Z'7FFFFFFF'/
 
       Parameter ( step = 7 )
 C
@@ -6927,7 +6970,7 @@ C     R250 PRNG, run after R250_Init
 C     Generator of normally distributed random numbers based on R250
       Integer*4 newrand
       Integer*4 indexf, indexb, buffer(250)
-	Integer i
+      Integer i
       REAL*8 grand, m
       Parameter (m = 2147483648.D0)
       Common/R250COM/indexf,indexb,buffer
@@ -6948,3 +6991,4 @@ C     Generator of normally distributed random numbers based on R250
 
       return
       End
+
