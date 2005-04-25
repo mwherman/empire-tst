@@ -15,7 +15,7 @@ C-V  02/11 Implement continuum photon spectra processing.
 C-V  03/06 Define MT numbers for incident protons.
 C-V  03/07 Fix processing of double differential data for protons.
 C-V  04/06 - Process discrete levels flagged with -ve energies.
-C-V        - Let EMPIRE to handle max. outgoing particle energy.
+C-V        - Let EMPIRE handle the max. outgoing particle energy.
 C-V  04/07 - Fix ordering of levels in MF12,
 C-V        - Read in values in double precision to avoid underflow.
 C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
@@ -23,6 +23,9 @@ C-V  04/07 - Add (n,5n) MT47
 C-V        - Check for absence of distribution data (NP=0 in MF6).
 C-V  04/09 - Check for normalisation overflow in WRIMF4
 C-V  04/10 Implement formatting for incident alphas and photons.
+C-V  05/04 - Copy comments to MF1/MT451.
+C-V        - Upgrade to proces partially exclusive/inclusive spectra.
+C-V        - Allow metastable targets.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -207,11 +210,17 @@ C* Write the input options to Log-file
       WRITE(LER,996) ' Interp. thinning tolerance limit [%] : ',ERR*100.
       WRITE(LER,991)
 C*
+C* Process cross section data
+      WRITE (LTT,991)
+      WRITE (LTT,991) ' BEGIN PROCESSING CROSS SECTION DATA   '
+      WRITE (LER,991)
+      WRITE (LER,991) ' BEGIN PROCESSING CROSS SECTION DATA   '
 C* Define work array addresses
       MTH=1
       IZB=MTH+MXT
       LBI=IZB+MXM
-      IF(LBI.GT.MXI) STOP 'EMPEND ERROR - MXI limit exceeded'
+      LSI=LBI+MXT
+      IF(LSI.GT.MXI) STOP 'EMPEND ERROR - MXI limit exceeded'
       LXS=1
       LBE=LXS+MXE*MXT
       LSC=LBE+3*MXM
@@ -221,16 +230,21 @@ C*
 C* Read the EMPIRE output file to extract the cross sections
       CALL REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(IZB),RWO(LBE)
-     1           ,IZI,IZA,AWR,NEN,NXS)
-C* Summ MF 5 contributions if necessary
-      CALL SUMMF5(NXS,NEN,IWO(MTH),RWO(LXS),MXE,MXT)
+     1           ,IZI,IZA,LISO,AWR,NEN,NXS)
+C*
+C* Scan the EMPIRE output for all reactions with energy/angle distrib.
+      REWIND LIN
+      JT6=MXI-LBI
+      CALL SCNMF6(LIN,NT6,IWO(LBI),JT6,IZI)
+C* Summ MF 5 contributions as necessary
+      CALL SUMMF5(NXS,NEN,IWO(MTH),NT6,IWO(LBI),RWO(LXS),MXE,MXT)
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
       NS =-1
       CALL WRTEXT(LOU, 0, 0, 0,NS,REC)
 C* Write the ENDF file-1 data
       EMX=EIN(NEN)
-      CALL WRIMF1(LOU,MAT,IZI,IZA,AWR,EMX,NS)
+      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,AWR,EMX,NS)
 C* Write the ENDF file-3 data
       CALL WRIMF3(LOU,MXE,MXT,LXR
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
@@ -254,23 +268,28 @@ C* Write the ENDF file-3 data
       ELO=EIN(1)
 c...
       print *,'List of MT numbers for MF3'
-      print *,(iwo(j),j=1,nxs)
+      print *,(iwo(mth-1+j),j=1,nxs)
+      print *,'List of MT numbers for MF4/MF6'
+      print *,(iwo(LBI-1+j),j=1,nT6)
+c...
 c...
 C*
-C* Scan the EMPIRE output for all reactions with energy/angle distrib.
-      REWIND LIN
-      JT6=MXI-LBI
-      CALL SCNMF6(LIN,NT6,IWO(LBI),JT6,IZI)
+C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 880
       JT4=0
       JT6=0
+C*
+C* Process angular distribution data
+      WRITE (LTT,991)
+      WRITE (LTT,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA '
+      WRITE (LER,991)
+      WRITE (LER,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA '
 C*
 C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
       MT6=IWO(LBI-1+JT6)
 C* Process discrete levels if continuum reactions present
       IF(MT6.NE.  2 .AND.
-     1   MT6.NE.  5 .AND.
      1   MT6.NE. 91 .AND.
      1   MT6.NE.649 .AND.
      1   MT6.NE.849) GO TO 490
@@ -283,6 +302,9 @@ C* Process discrete levels if continuum reactions present
       JPRNT=-1
       IF(MT6.EQ.2) JPRNT=IPRNT
 C* Reading angular distributions - MF6 flagged negative
+c...
+c...      print *,'processing',MT6
+c...
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),NEN,RWO(LE),RWO(LG),RWO(LA)
      1           ,IWO(MTH),-MT6,IZI,QQM,QQI,AWR,ELO,NXS,NK,LCT,MXE,LX
      2           ,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2)
@@ -307,6 +329,12 @@ C* Angular distribution data processed
       DO 492 I=1,NXS
       IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
   492 CONTINUE
+C*
+C* Process souble differential data
+      WRITE (LTT,991)
+      WRITE (LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA'
+      WRITE (LER,991)
+      WRITE (LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA'
 C* Read the EMPIRE output file to extract energy/angle distrib.
   600 LE=LBE
       LG=LE+NEN+2
@@ -1025,28 +1053,72 @@ C* Recoils
       END IF
       RETURN
       END
-      SUBROUTINE SUMMF5(NXS,NPT,MTH,XSR,MXE,MXT)
+      SUBROUTINE SUMMF5(NXS,NPT,MTH,NT6,MT6,XSR,MXE,MXT)
 C-Title  : Subroutine SUMMF5
 C-Purpose: Sum reactions contributing to MT 5
-      DIMENSION  MTH(MXT),XSR(MXE,MXT)
-C* Check if MT 5 is defined
-      DO 20 IX=1,NXS
-      I5=IX
-      IF(MTH(IX).EQ.5) GO TO 30
-   20 CONTINUE
-      RETURN
-C* Clear the MT 5 cross section array
-   30 DO 40 J=1,NPT
-      XSR(J,I5)=0
-   40 CONTINUE
-C* Add contributing x-sect identified by MT<0
-      DO 60 IX=1,NXS
-      IF(MTH(IX).GE.0) GO TO 60
-C* Loop over all energy points
-      DO 50 J=1,NPT
-      XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
-   50 CONTINUE
-   60 CONTINUE
+      DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT)
+C* Small cross section criterion (rel. to total)
+      DATA SMALL/ 5.E-5 /
+C* Process only if NT6>0
+      IF(NT6.LE.0) RETURN
+C* Find indices of MT 1, 5
+      I1=0
+      I5=0
+      DO IX=1,NXS
+        IF(MTH(IX).EQ.1) I1=IX
+        IF(MTH(IX).EQ.5) I5=IX
+      END DO
+C* Reactions MT 1 and MT 5 must both be present
+      IF(I1.LE.0) RETURN
+      IF(I5.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=5
+        I5 =NXS
+        DO J=1,NPT
+          XSR(J,I5)=0
+        END DO
+      END IF
+C* Preset printout suppression for all reactions
+      DO IX=1,NXS
+        MM=ABS(MTH(IX))
+        IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR.
+     &     (MM.GE. 50 .AND. MM.LT. 91) .OR.
+     &     (MM.GE.600 .AND. MM.LT.649) .OR.
+     &     (MM.GE.700 .AND. MM.LT.749) .OR.
+     &     (MM.GE.800 .AND. MM.LT.849)) THEN
+          MTH(IX)= MM
+        ELSE
+          MTH(IX)=-MM
+        END IF
+      END DO
+C* Preset MT 5  as total minus present MT 5 cross section
+   30 DO J=1,NPT
+        XSR(J,I5)=XSR(J,I1)-XSR(J,I5)
+      END DO
+C* Subtract other explicitly represented cross sections
+      DO IX=1,NXS
+C* Flag reactions with exclusive spectra for MF3 subtraction
+        MM=MTH(IX)
+        DO I6=1,NT6
+          IF(-MM.EQ.MT6(I6)) MM=ABS(MTH(IX))
+        END DO
+        MTH(IX)=MM
+        IF(MM.GT.0 .AND. MM.NE.1 .AND. MM.NE.5) THEN
+C* Subtract contribution from MT 5, loop over all energy points
+          DO J=1,NPT
+            XSR(J,I5)=XSR(J,I5)-XSR(J,IX)
+          END DO
+        END IF
+      END DO
+C* Suppress small numbers (compared to the total)
+      DO J=1,NPT
+        S1=XSR(J,I1)
+        S5=XSR(J,I5)
+        IF(S5/S1.LT.SMALL) THEN
+          S5=0
+          XSR(J,I5)=S5
+        END IF
+      END DO
       RETURN
       END
       SUBROUTINE SCNMF6(LIN,NT6,MTH,MXI,IZI)
@@ -1060,34 +1132,38 @@ C*
 C* Test for elastic angular distributions of neutral particles
       IF(IZI.LT.1000 .AND. REC(1:14).EQ.'  Elastic angu'    ) THEN
         MT=2
-        GO TO 112
+        GO TO 120
       END IF
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C* Identify the reaction and assign the MT number
       CALL EMTCHR(REC(23:30),MT,IZI)
       IF(MT .EQ.0) GO TO 110
-  112 IF(NT6.GT.0) THEN
+C* Spectrum printout encountered - begin processing
+  120 IF(NT6.GT.0) THEN
 C* Check if already processed
-        DO 120 I=1,NT6
-        IF(MTH(I).EQ.MT) GO TO 110
-  120   CONTINUE
+        DO I=1,NT6
+          IF(MTH(I).EQ.MT) GO TO 110
+        END DO
       END IF
       NT6=NT6+1
       IF(NT6.GT.MXI) STOP 'SCNMF6 ERROR - MXI limit exceeded'
       MTH(NT6)=MT
       GO TO 110
-C* Sort in ascending order
+C*
+C* File processed - sort MT numbers in ascending order
   200 IF(NT6.LT.2) RETURN
   210 ISW=0
-      DO 220 I=2,NT6
-      IF(MTH(I-1).LT.MTH(I)) GO TO 220
-      MM=MTH(I)
-      MTH(I  )=MTH(I-1)
-      MTH(I-1)=MM
-      ISW=1
-  220 CONTINUE
+      DO I=2,NT6
+        IF(MTH(I-1).GT.MTH(I)) THEN
+          MM=MTH(I)
+          MTH(I  )=MTH(I-1)
+          MTH(I-1)=MM
+          ISW=1
+        END IF
+      END DO
       IF(ISW.NE.1) RETURN
       GO TO 210
+C*
   802 FORMAT(I3,1X,A2,1X,I3)
   891 FORMAT(A136)
       END
@@ -1199,11 +1275,6 @@ C* Read distribution in double precision to avoid underflow
       DO J=1,KXA
         DST(J)=DD(J)
       END DO
-
-c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-c...        print *,' ee,dst', ee*1.e6,dst(1)
-c...      end if
-
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
@@ -1222,11 +1293,6 @@ C* Convert to Legendre polynomials and store
       LHI=MAX(LHI,LOO)
       LO1=LOO+1
       RWO(LL)=EOU
-
-c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-c...        print *,' err', err
-c...      end if
-
 C*
 C-F Check the distribution for consistency and print warnings
 C*
@@ -1309,11 +1375,6 @@ C...      EOU=EMP
         END IF
       END IF
 C* Save the outgoing particle energy
-
-c...      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-c...        print *,' save outgoing energy', eou,npt
-c...      end if
-
       RWO(LL)=EOU
 C* Remove point at EOL if it is linearly interpolable between EO3, EOU
       IF(NPT.GT.1 .AND. EOU.GT.0) THEN
@@ -1340,11 +1401,6 @@ C*      Thinning flag set - rplace point at EOL with EOU
         END IF
       END IF
 C* Increment indices in the storage array and loop to next point
-
-      if(mt.eq.5 .and. nint(ein).eq.4000000) then
-        print *,' after thinning eou,npt', eou,npt,emp
-      end if
-
       NPT=NPT+1
       NW =NW+LOR+2
       LL =LL+LOR+2
@@ -1406,13 +1462,13 @@ C*
       END
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1                 ,EIN,XSC,QQM,QQI,MTH,IZB,BEN
-     1                 ,IZI,IZA,AWR,NEN,NXS)
+     1                 ,IZI,IZA,LISO,AWR,NEN,NXS)
 C-Title  : REAMF3 Subroutine
 C-Purpose: Read EMPIRE output to be converted into ENDF format
 C-Description:
 C-D  MTH  Array contains MT numbers of identified reactions. The MT
 C-D       numbers of reactions contributing to MT 5 in the high-energy
-C-D       type of file is flagged by adding MT+1000.
+C-D       type of file is flagged by adding MT+10000.
 C-D  NEN  Counts the Number of energy points
 C-D  NXS  Counts the Number of reaction types
 C-
@@ -1435,7 +1491,6 @@ C* Search EMPIRE output for specific strings
   110 READ (LIN,891,END=700) REC
       IF(REC(1:10).EQ.' REACTION '                  ) GO TO 200
       IF(REC(1:18).EQ.'  Decaying nucleus'          ) GO TO 210
-      IF(REC(1:28).EQ.'  Spectrum of recoils  (n,x)') GO TO 220
       IF(REC(1:10).EQ.' TOTAL  CR'                  ) GO TO 290
 c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
       IF(REC(2:19).EQ.'Tot. fission cross'          ) THEN
@@ -1456,6 +1511,18 @@ c...    STOP 'EMPEND ERROR - Invalid projectile'
       READ (REC(24:33),802) IZ,CH,IA
       IZA=IZ*1000+IA
       AWR=IA
+C* Allow for metastable targets
+      IF     (REC(34:34).EQ.' ') THEN
+        LISO=0
+      ELSE IF(REC(34:34).EQ.'m') THEN
+        LISO=1
+      ELSE IF(REC(34:34).EQ.'n') THEN
+        LISO=2
+      ELSE
+        WRITE(LTT,891) ' EMPEND WARNING - Invalid metastable sta'//
+     &                 'te of target '//REC(24:34)//'                '
+        LISO=0
+      END IF
 C* Read and check the energy
   201 READ (REC(51:60),994) EE
       EE = EE*1.E6
@@ -1500,19 +1567,19 @@ C* Read the reaction Q-value
 C* Assign MT number from residual ZA
       CALL EMTIZA(IZI,IZA,JZA,MT)
       IF(MT.EQ.0) THEN
-C* For unidentified products with non-zero x-sect. print warning
+C* Add to MT5 unidentified products with non-zero x-sect., print warning
   212   READ (LIN,891) REC
         IF(REC(13:22).NE.'production') GO TO 212
         READ (REC,803) XS
         IF(XS.GT.0) THEN
-          COM=' WARNING - Skip'//REC(2:22)//REC(37:52)//' at'//CHEN
+          COM=' WARNING >>MT 5'//REC(2:22)//REC(37:52)//' at'//CHEN
           WRITE(LTT,891) COM
           WRITE(LER,891) COM
+          MT=5
+          GO TO 310
         END IF
         GO TO 110
       END IF
-C* Test for radiative capture cross section
-      IF(MT.EQ.102) GO TO 310
 C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
       IF(MT.EQ. 50 .OR. MT.EQ.600 .OR. MT.EQ.800) THEN
         MT0=MT
@@ -1520,46 +1587,6 @@ C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
       END IF
 C* All other cross sections are processed in the same way
       GO TO 310
-C* High energy format MT5 - identify contributing reaction
-  220 READ (REC(35:40),995) JZA
-      CALL EMTIZA(IZI,IZA,JZA,MTK)
-      IF(MTK.LE.0) THEN
-        WRITE(LTT,904) ' EMPEND WARNING - Processing target ZA  ',IZA
-        WRITE(LTT,904) '        Could not define MT for residue ',JZA
-        WRITE(LER,904) ' EMPEND WARNING - Processing target ZA  ',IZA
-        WRITE(LER,904) '        Could not define MT for residue ',JZA
-        GO TO 110
-      END IF
-      IF(IZI.EQ.1) THEN
-C* Incident neutrons: Exclude MT 600, 800 and redefine 50 to 91
-        IF(MTK.EQ.600 .OR. MTK.EQ.800) GO TO 110
-        IF(MTK.EQ.50) MTK=91
-      ELSE IF(IZI.EQ.1001) THEN
-C* Incident protons: Exclude MT 50, 800 and redefine 600 to 649
-        IF(MTK.EQ. 50 .OR. MTK.EQ.800) GO TO 110
-        IF(MTK.EQ.600) MTK=649
-      ELSE IF(IZI.EQ.2004) THEN
-C* Incident alphas: Exclude MT 50, 800 and redefine 800 to 849
-        IF(MTK.EQ. 50 .OR. MTK.EQ.600) GO TO 110
-        IF(MTK.EQ.800) MTK=849
-      END IF
-      M5=0
-      DO 222 I=1,NXS
-      MTI=MTH(I)
-
-      IF(MTI.EQ.MTK)
-     1   write(ler,*)' Added to MT 5: MT,IZA,JZA',MTK,IZA,JZA
-
-      IF(MTI.EQ.MTK) MTH(I)=-MTI
-      IF(MTI.EQ. 5 ) M5=1
-  222 CONTINUE
-      IF(M5.EQ.0) THEN
-        NXS=NXS+1
-        MTH(NXS)=5
-        QQM(NXS)=0
-        QQI(NXS)=0
-      END IF
-      GO TO 110
 C*
 C* Read the total cross section but exclude incident charged particles
   290 IF(IZI.GE.1000) GO TO 110
@@ -1570,11 +1597,14 @@ C* Read the total cross section but exclude incident charged particles
       QM=0
       GO TO 392
 C*
-C* Read capture and multiple particle emission cross sections
+C* General processing of cross sections
   310 READ (LIN,891) REC
       IF(REC(13:22).NE.'production') GO TO 310
+C* Read the cross section
   311 READ (REC,803) XS
       IF(XS.LE.0) GO TO 110
+C* Reconstruct Q-values from MT and the binding energies
+      IF(QQ.EQ.0 .AND. MT.NE.50) CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
 C* Test if reaction is already registered
   312 IF(NXS.LE.0) GO TO 314
       DO 313 I=1,NXS
@@ -1586,18 +1616,10 @@ C* Test if reaction is already registered
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
-C*
-C* Reconstruct Q-values from MT and the binding energies
-      IF(QQ.EQ.0) CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
-c...
-c...      qq0=qq
-c...      CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
-c...      print *,'   Q-value: mt,qqm,qq',mt,qq,qq0
-c...
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
       QQI(IXS)=QQM(IXS)
-  320 XSC(NEN,IXS)=XS*1.E-3
+  320 XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
       GO TO 110
 C*
 C* Process discrete levels - (n,n'), (n,p), (n,a)
@@ -1620,18 +1642,30 @@ C* Positioned to read discrete levels
       READ (LIN,891)
       READ (LIN,891)
       XI=0.
+      JL=0
+C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,XS
-      XI=XI+XS
-      MT=MT0-1+IL
-      IF(IZI.EQ.1 .AND. MT.EQ.50) GO TO 352
+C* Test for last level (IL=0 from reading blank line)
       IF(IL.LE.0 ) GO TO 351
-C     IF(XS.LE.0 ) GO TO 352
+      EL=EL*1.E6
+      XI=XI+XS
+c...
+c...  if(izi.eq.1 .and. nint(el/1000).eq.nint(qq/1000))
+c... 1    print *,' discrete level il,el,xs,jl',il,xs,jl,qq
+c...
+C* Exclude level that results in the same energy state (=elastic by def.)
+      IF(IZI.EQ.1 .AND. NINT(EL/1000).EQ.NINT(QQ/1000)) GO TO 352
+c... Inelastic scattering on metastable target to ground is MT51, not 50
+c...  MT=MT0-1+IL
+      JL=JL+1
+      MT=MT0+JL
+C* Check if level alredy registered
       IF(NXS.LE.0) GO TO 354
-      DO 353 I=1,NXS
-      IXS=I
-      MTI=ABS(MTH(I))
-      IF(MTI.EQ.MT) GO TO 360
-  353 CONTINUE
+      DO I=1,NXS
+        IXS=I
+        MTI=ABS(MTH(I))
+        IF(MTI.EQ.MT) GO TO 360
+      END DO
   354 NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
@@ -1640,7 +1674,7 @@ C* Reconstruct Q values from MT and the binding energies
       QQM(IXS)=0.
       DO 358 I=1,IMT
       KZA=IZB(I)
-      IF(KZA.EQ.IZA+IZI .AND. QQ.EQ.0) THEN
+      IF(KZA.EQ.IZA+IZI .AND. (QQ.EQ.0 .AND. MT0.NE.50) ) THEN
 
         print *,' Q-value calculated brom binding energies for MT',MT0
 
@@ -1652,7 +1686,7 @@ C* Reconstruct Q values from MT and the binding energies
       END IF
   358 CONTINUE
   360 QM =QQM(IXS)
-      QI =QM-1.E6*EL
+      QI =QM-EL
       QQI(IXS)=QI
       XSC(NEN,IXS)=XS*1.E-3
       GO TO 352
@@ -1660,6 +1694,9 @@ C* Read the elastic cross section but exclude incident charged particles
   370 IF(IZI.GE.1000) GO TO 351
       MT=2
       READ (REC,808) XE
+c...C* Read the level energy in the case of a metastable target
+c...      READ (REC(52:61),994) QQ
+c...      QQ=QQ*1.0E6
       DO 373 I=1,NXS
       IXS=I
       MTI=ABS(MTH(I))
@@ -1669,18 +1706,15 @@ C* Read the elastic cross section but exclude incident charged particles
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
-C* Q value is zero for elastic
-      QQM(IXS)=0.
-      QQI(IXS)=0.
+C* Q value for elastic scattering may be non-zero for metastable targets
+      QQM(IXS)=QQ
+      QQI(IXS)=QQ
   376 XSC(NEN,IXS)=XE*1.E-3
       GO TO 351
 C* Positioned to read continuum cross section (subtract discrete levels)
   390 CONTINUE
       READ (REC,803) XC
       XS=XC-XI
-cMH   write(LER, *) '                      Incident energy : ',EE
-cMH   write(LER, *)'                  Total cross section : ',XC
-cMH   write(LER, *)'       Sum of discrete cross sections : ',XI
       IF(XC.GT.0 .AND. XS/XC.LT.2.E-5) THEN
 c...        CPC=100*XS/XC
 c...        print *
@@ -2080,11 +2114,6 @@ C... Set EMP=0 to skip testing in RDANG
 C...
       EMP=0
       LMX=MXR-LL
-
-c...      if(nint(ee).eq.4000000 .and. kzak.eq.26057) then
-c...        print *,'ee,emp',ee,emp
-c...      end if
-
       CALL RDANGD(LIN,LOR,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,LCU,LPT
      2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C* Calculate the integral of the spectrum
@@ -2099,11 +2128,6 @@ C* Calculate the integral of the spectrum
         EOU=RWO(LI)
         PEU=RWO(LI+1)
         SPC=SPC+(PEU+PEL)*(EOU-EOL)/2
-
-      if(nint(ee).eq.4000000 .and. kzak.eq.26057) then
-        print *,'e1,p1,e2,p2,int',eol,pel,eou,peu,spc
-      end if
-
       END DO
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
@@ -2405,12 +2429,15 @@ C*
   912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
      1       '                  Transfer to ground state assumed')
       END
-      SUBROUTINE WRIMF1(LOU,MAT,IZI,IZA,AWR,EMX,NS)
+      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,AWR,EMX,NS)
 C-Title  : WRIMF1 Subroutine
 C-Purpose: Write comment section (file-1) data in ENDF-6 format
       CHARACTER*66 REC
+      CHARACTER*40 FLSC
+      CHARACTER*11 BL11
       CHARACTER*8  PTST
       CHARACTER*2  C2,CH(100)
+      CHARACTER*1  ST
       DATA CH
      1 /' H','He','Li','Be',' B',' C',' N',' O',' F','Ne'
      2 ,'Na','Mg','Al','Si',' P',' S','Cl','Ar',' K','Ca'
@@ -2423,12 +2450,32 @@ C-Purpose: Write comment section (file-1) data in ENDF-6 format
      9 ,'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th'
      * ,'Pa',' U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm'/
       DATA PTST/'        '/
+      DATA BL11/'           '/
+      DATA FLSC/'empmf1.tmp'/
+      DATA LSC / 21 /
+C* Process comments from the EMPIRE output file
+      OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
+      REWIND LIN
+      NTXT= 0
+   12 READ (LIN,93) REC
+      IF(REC(1:10).NE.' REACTION ') THEN
+        WRITE(LSC,93) REC
+        NTXT=NTXT+1
+        GO TO 12
+      END IF
 C*
       IZ  = IZA/1000
       IA  = IZA-1000*IZ
       C2  ='??'
       IF(IZ.GT.0 .AND.IZ.LE.100) C2=CH(IZ)
-      WRITE(REC,92) IZ,C2,IA
+      IF(LISO.EQ.1) THEN
+        ST='m'
+      ELSE IF(LISO.EQ.2) THEN
+        ST='n'
+      ELSE
+        ST=' '
+      END IF
+      WRITE(REC,92) IZ,C2,IA,ST
 C*
       MF  = 1
       MT  = 451
@@ -2440,8 +2487,7 @@ C*
 C*
       ELIS= 0.
       STA = 0.
-      LIS = 0
-      LISO= 0
+      LIS = LISO
       NFOR= 6
 C*
       CALL POUCHR(PTST,IZI,AWI)
@@ -2461,7 +2507,7 @@ C*
 C*
       TEMP= 0.
       LDRV= 0
-      NWD = 1
+      NWD = NTXT+2
       NXC = 0
 C*
       CALL WRCONT(LOU,MAT,MF,MT,NS,  ZA,AWR,LRP,LFI,NLIB,NMOD)
@@ -2469,23 +2515,37 @@ C*
       CALL WRCONT(LOU,MAT,MF,MT,NS,AWI ,EMX,  0,  0,NSUB,NVER)
       CALL WRCONT(LOU,MAT,MF,MT,NS,TEMP, 0.,LDRV, 0, NWD, NXC)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
+      REC=BL11//BL11//BL11//BL11//BL11//BL11
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
+      REWIND LSC
+      DO I=1,NTXT
+        READ (LSC,93) REC
+        CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
+      END DO
+      CLOSE(UNIT=LSC)
       CALL WRCONT(LOU,MAT,MF, 0,NS, 0. , 0., 0, 0, 0, 0)
       CALL WRCONT(LOU,MAT, 0, 0,NS, 0. , 0., 0, 0, 0, 0)
 C*
       RETURN
 C*
-   92 FORMAT(I3,'-',A2,'-',I3,' EMPIRE Calculation ',36X)
+   92 FORMAT(I3,'-',A2,'-',I3,A1,' EMPIRE Calculation',36X)
+   93 FORMAT(A66)
       END
       SUBROUTINE WRIMF3(LOU,MXE,MXT,MXR
      1                 ,EIN,XSC,QQM,QQI,MTH,RWO
      1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
 C-Title  : WRIMF3 Subroutine
 C-Purpose: Write cross section (file MF3) data in ENDF-6 format
+C-Description:
+C-D  Sort printout in ascending order of MT numbers
+C-D  Skip reactions flagged -ve
+C-D  Processed reactions are flagged by adding 10000 to MT
+C-
       CHARACTER*8  PTST
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),NBT(1),INT(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
-      DATA SMALL,ZRO/-34., 0./
+      DATA XSMALL,SMALL,ZRO/ 1.0E-34, -34., 0./
       DATA PTST/'        '/
 C* Initialize constants
       QM=0.
@@ -2615,8 +2675,24 @@ C* Thin the cross section to ERR lin.interp. tolerance limit
       NEO=NE1
       IF(ERR.GT.0)
      1CALL THINXS(RWO(LX),RWO(LY),NE1,RWO(LX),RWO(LY),NEO,ERR)
+C* Check fitted data and remove zero x-sect points below threshold
+  350 KX=1
+C* Find pseudo-threshold
+      DO WHILE (KX.LT.NEN .AND. XSC(KX+1,IT).LT.XSMALL)
+        KX=KX+1
+      END DO
+      EPT=EIN(KX)
+C* Remove redundant zeroes below pseudo-threshold
+      DO WHILE (RWO(LX+1).LT.EPT)
+        NEO=NEO-1
+        LX=LX+1
+        LY=LY+1
+        RWO(LX  )=RWO(LX-1)
+        RWO(LY  )=0
+        RWO(LY+1)=0
+      END DO
 C* Write HEAD record
-  350 CALL WRCONT(LOU,MAT,MF,MTH(IT),NS, ZA,AWR, 0, 0, 0, 0)
+      CALL WRCONT(LOU,MAT,MF,MTH(IT),NS, ZA,AWR, 0, 0, 0, 0)
 C* Write TAB1 record
       NR    =1
       INT(1)=2
@@ -2627,11 +2703,14 @@ C* Write CONT record - end of data set
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       MTH(IT)=MTH(IT)+10000
   360 CONTINUE
+C* All cross sections processed
       CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C* Change back the MT numbers that were flagged "+10000"
-      DO 362 I=1,NXS
-      IF(MTH(I).GT.1000) MTH(I)=MTH(I)-10000
-  362 CONTINUE
+      DO I=1,NXS
+        DO WHILE (MTH(I).GT.1000)
+          MTH(I)=MTH(I)-10000
+        END DO
+      END DO
 C*
       RETURN
       END
