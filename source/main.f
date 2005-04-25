@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-24 20:20:05 $
-Ccc   * $Id: main.f,v 1.71 2005-04-24 20:20:05 Capote Exp $
+Ccc   * $Date: 2005-04-25 15:46:57 $
+Ccc   * $Id: main.f,v 1.72 2005-04-25 15:46:57 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -183,23 +183,15 @@ C--------------------escape if we go beyond recoil spectrum dimension
                ENDIF
              ENDIF
            ELSE
-C            D_Lvp(ND_nlv) = lvpr
-C            D_Xjlv(ND_nlv) = xjlvr
-C            IPH(ND_nlv) = 0
 C
 C            ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
-C------------number of spectrum bins to continuum WARNING! might be negative!
-             nexrt = INT((echannel - ECUt(nnurec))/DE + 1.0001)
-C------------total number of bins
-C            next = INT(excnq/DE + 1.0001)
-
+             icsl = INT(echannel/DE + 1.0001)
 C------------avoid reading closed channels
-             IF (echannel.GE.0.0001 .and. nexrt.gt.0 .and. nejcec.le.2) 
+             IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2) 
      &       THEN
-               icsl = INT(echannel/DE + 1.0001)
                READ (46,*,END = 1400) popread
-               ncoll = i
+C              ncoll = i
                if(nejcec.eq.1) CSMsd(1) = CSMsd(1) + popread
                if(nejcec.eq.2) CSMsd(2) = CSMsd(2) + popread
 
@@ -211,15 +203,15 @@ C--------------each 4th result from ECIS (2.5 deg grid)
                DO iang = 1, NDANG - 1
                   ftmp = 0.d0
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
-                  CSEa(icsl,iang,nejcec,nnurec) = 
-     &               CSEa(icsl,iang,nejcec,nnurec) + ftmp/DE
+                  CSEa(icsl,iang,nejcec,1) = 
+     &               CSEa(icsl,iang,nejcec,1) + ftmp/DE
                   READ (45,'(7x,E12.5)',END = 1400)
                   READ (45,'(7x,E12.5)',END = 1400)
                   READ (45,'(7x,E12.5)',END = 1400)
                ENDDO
                READ (45,'(7x,E12.5)',END = 1400) ftmp
-                 CSEa(icsl,NDAng,nejcec,nnurec) =
-     &               CSEa(icsl,NDAng,nejcec,nnurec) + ftmp/DE
+                 CSEa(icsl,NDAng,nejcec,1) =
+     &               CSEa(icsl,NDAng,nejcec,1) + ftmp/DE
              ENDIF
 C            END OF ADDING INELASTIC TO CONTINUUM
            ENDIF
@@ -240,12 +232,16 @@ C-----print elastic and direct cross sections from ECIS
          WRITE (6,*) ' Results provided by Coupled Channel calculations'
          WRITE (6,*) ' Inelastic scattering results provided by'
          WRITE (6,*) ' Coupled Channel + DWBA calculations'
+         if(CSMsd(1)+CSMsd(2).NE.0.)   
+     >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ELSEIF (DIRect.EQ.3) THEN
          WRITE (6,*)
      &       ' Results provided by Spherical Optical Model calculations'
          WRITE (6,*)
      &     ' Inelastic scattering results provided by DWBA calculations'
+         if(CSMsd(1)+CSMsd(2).NE.0.)   
+     >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ENDIF
       ENDIF
