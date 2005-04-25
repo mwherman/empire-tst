@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-24 20:23:09 $
-Ccc   * $Id: tl.f,v 1.54 2005-04-24 20:23:09 Capote Exp $
+Ccc   * $Date: 2005-04-25 15:47:49 $
+Ccc   * $Id: tl.f,v 1.55 2005-04-25 15:47:49 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1474,7 +1474,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, cte, dtmp, ecms, elab, jc, jj, sabs, sreac,
-     &                 xmas_nejc, xmas_nnuc
+     &                 xmas_nejc, xmas_nnuc, sinlcont
       DOUBLE PRECISION DBLE
       INTEGER l, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
@@ -1547,11 +1547,20 @@ C-----Absorption cross section in mb
       sabs = cte*sabs
       IF (sabs.LE.0.D0) RETURN
       SINl = 0.D0
+      sinlcont = 0.D0
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
-      DO l = 1, NDCOLLEV
-         READ (45,*,END = 400) dtmp
-         SINl = SINl + dtmp
+      DO l = 1, NDCOLLEV     ! number of inelastic level
+         ilv = ICOller(l+1)
+         IF (ilv.LE.NLV(nnuc)) then
+C          Discrete level scattering 
+           READ (45,*,END = 400) dtmp
+           SINl = SINl + dtmp
+         ELSE
+C          Scattering into continuum 
+           READ (45,*,END = 400) dtmp
+           sinlcont = sinlcont + dtmp
+         ENDIF
       ENDDO
   400 CLOSE (45)
       IF (SINl.EQ.0.D0) RETURN
@@ -1587,6 +1596,10 @@ C-----Absorption cross section in mb
      &     )
          STOP 200
       ENDIF
+C
+C     Absorption cross section includes inelastic scattering cross section to discrete levels
+C     XS going into continuum is not considered (It will be renormalized when MSD is processed)
+C
       sreac = sabs + SINl
       IF (IOUt.EQ.5 .AND. sabs.GT.0.D0) THEN
          WRITE (6,*)
@@ -1599,6 +1612,8 @@ C-----Absorption cross section in mb
      &               ' mb (read from ECIS)'
          WRITE (6,*) ' ECIS/EMPIRE ratio of reaction cross section =',
      &               (ABScs - SINl)/sabs
+         WRITE (6,*) ' Inelastic XS to the continuum Sinl(cont) =',
+     &               SNGL(sinlcont), ' mb '
          IF (SINl.GT.0.D0) THEN
             WRITE (6,*) ' Sinl =', SNGL(SINl), ' mb (read from ECIS)'
             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
