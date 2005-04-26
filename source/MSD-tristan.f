@@ -1,8 +1,8 @@
 Ccc
-Ccc   * $Date: 2005-04-15 18:21:02 $
-Ccc   * $Id: MSD-tristan.f,v 1.30 2005-04-15 18:21:02 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:34:29 $
+Ccc   * $Id: MSD-tristan.f,v 1.31 2005-04-26 17:34:29 Capote Exp $
 C
-      SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs)
+      SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
 CCC   ******************************************************************
 CCC   *                                                       class:fpu*
@@ -18,7 +18,7 @@ CCC   *       NNUC   - target nucleus index (actually 0)               *
 CCC   *       L1MAXM - maximum l transfer                              *
 CCC   *       QM     - maximum energy loss                             *
 CCC   *       QS     - step in energy loss triangle                    *
-CCC   *                                                                *
+CCC   *       XSinl  - Calculated inelastic cross section              *
 CCC   *       TAPE15 - ORION results                                   *
 CCC   *                                                                *
 CCC   *                                                                *
@@ -43,7 +43,7 @@ C
      &                 FFTot(10), GAPin(2), HOMin, Q0, QGRand, QMAx, 
      &                 QMIna, QMInb, QS1, QS2, QSTep, RAC, 
      &                 RHOb(301,11,2), RI, ROPt, RR, THEta1, THEta2, U0,
-     &                 U9, W0, WIDex, WIDexin, WR1(12*NDANG), 
+     &                 U9, XSinl, W0, WIDex, WIDexin, WR1(12*NDANG), 
      &                 WR2(144*NDANG)
       INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
      &        ICC, ICMax, ID, IE, IG, KDEnvi, KEX3, KEXcom(10), KRTmax, 
@@ -80,6 +80,8 @@ C
      &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr,
      &        nnb, np, npb, nq, nq12x, nwr1, nwr2, nzb
       INTEGER INT
+
+      XSinl = 0.d0
 C
 C-----L1MAXM - maximum l transfer
 C-----QM - maximum energy loss
@@ -2864,6 +2866,7 @@ C-----if ECIS active use only continuum part of the MSD spectrum
          CALL LSQLEG(CANgler,csfit,nangle,qq,5,adum,ier)
          piece = 4.0*3.14159*qq(1)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
+         XSinl = XSinl + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
       ENDDO
 C-----angular distributions integration *** done ***
