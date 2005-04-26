@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-24 20:26:24 $
-Ccc   * $Id: input.f,v 1.102 2005-04-24 20:26:24 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:36:24 $
+Ccc   * $Id: input.f,v 1.103 2005-04-26 17:36:24 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -126,14 +126,14 @@ C-----already converted to mb
         read(94,*)  indexf, indexb
         Do i = 1, 250
           read(94,*) buffer(i)
-        ENDDO 
-        CLOSE(94) 
+        ENDDO
+        CLOSE(94)
       else
 C       If the file R250SEED.DAT does not exist, then DEFAULT
 C       starting seed is used
         iseed = 1234567
         Call R250Init(iseed)
-      endif  
+      endif
 
       IF (EIN.EQ.0.0D0) THEN
 C
@@ -151,20 +151,20 @@ C--------set angles for MSD calculations
             CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
             SANgler(na) = SQRT(1.0 - CANgler(na)**2)
          ENDDO
-C--------neutralize tuning factors and OMP normalization factors 
+C--------neutralize tuning factors and OMP normalization factors
          DO nnuc = 0, NDNUC
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.0
 C--------------Volume real potential
 C              VOM(Nejc,Nnuc) = vlib(1)*FNvromp(Nejc,Nnuc)
 C              AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
-  	         FNvvomp(Nejc,Nnuc)	= 1.0
-	         FNavomp(Nejc,Nnuc) = 1.0
+                FNvvomp(Nejc,Nnuc) = 1.0
+                FNavomp(Nejc,Nnuc) = 1.0
 C--------------Volume imaginary potential
-	         FNwvomp(Nejc,Nnuc) = 1.0
+                FNwvomp(Nejc,Nnuc) = 1.0
 C--------------Surface imaginary potential:
-	         FNwsomp(Nejc,Nnuc) = 1.0 
-	         FNasomp(Nejc,Nnuc) = 1.0 
+                FNwsomp(Nejc,Nnuc) = 1.0
+                FNasomp(Nejc,Nnuc) = 1.0
             ENDDO
          ENDDO
          DO nnuc = 1, NDNUC
@@ -180,7 +180,7 @@ C-----------set level density parameters
             LVP(1,nnuc) = 0
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0.0
-c-----------set Levels flag to 0 (no levels stored)        
+c-----------set Levels flag to 0 (no levels stored)
             NSTOred(nnuc) = 0
          ENDDO
 C--------set gamma-strength parameters
@@ -194,7 +194,7 @@ C--------set gamma-strength parameters
             GDRpar(7,nnuc) = 1.0
          ENDDO
          IZA(0) = 0
-         ENDf(0) = 1.0	 
+         ENDf(0) = 1.0
          LVP(1,0) = 0
          NNUcd = 0
          NEJcm = 0
@@ -381,7 +381,7 @@ C           calculation of gamma-transitions both between states in
 C           continuum and from continuum to discrete levels;
 C           can be changed in the optional input
 C           (keyword 'GRMULT')
-         MAXmult = 2        
+         MAXmult = 2
 C--------read entire input for the first energy calculations
 C--------mandatory part of the input
 C--------incident energy (in LAB)
@@ -485,7 +485,7 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
-         ENDf(1) = 1.0	 
+         ENDf(1) = 1.0
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -532,8 +532,8 @@ C--------correct ejectiles symbols
                         IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
      &                      *ZEJc(NDEJC)
 
-C                       EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
-                        if(atmp.le.4 . or. ztmp.le.2) cycle 
+C                       EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+                        if(atmp.le.4 . or. ztmp.le.2) cycle
 
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
@@ -705,8 +705,8 @@ C--------------To find inelastic channel
                ares = A(nnuc) - AEJc(nejc)
                zres = Z(nnuc) - ZEJc(nejc)
 
-C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
-               if(ares.le.4 . or. zres.le.2) cycle 
+C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+               if(ares.le.4 . or. zres.le.2) cycle
 
                izares = INT(1000*zres + ares)
                CALL WHERE(izares,nnur,iloc)
@@ -798,7 +798,7 @@ C        Key_shape =6 --> fE1=SLO
 C
 C--------Set exclusive and inclusive ENDF foratting flags
 C
-         IF(ENDFn.GT.0) then 
+         IF(ENDFn.GT.0) then
            DO nnuc = 1, NNUcd !first set all to inclusive
 C            ENDf(nnuc) = 2.0
              ENDf(nnuc) = 1.0
@@ -1187,7 +1187,7 @@ C--------fix-up deformations for coupled channels *** done ***
 C-----KTRLOM Optical Model control
 C-----set o.m.p. for the incident channel
       DO nejc = 1, NDEJC
-C        Selecting projectile from ejectiles	 
+C        Selecting projectile from ejectiles
          IF (ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc)) then
            DO i = 1, NDNUC
 C            Selecting target from residuals
@@ -1199,10 +1199,10 @@ C               Setting the normalization factor for OMP (used in covariance cal
                 FNwsomp(0,0) = FNwsomp(Nejc,i)
                 FNavomp(0,0) = FNavomp(Nejc,i)
                 FNasomp(0,0) = FNasomp(Nejc,i)
-	          GOTO 11
+                 GOTO 11
              ENDIF
-	     ENDDO
-	   ENDIF  
+            ENDDO
+          ENDIF
       ENDDO
 
 11    IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0  ! HI
@@ -1212,8 +1212,8 @@ C               Setting the normalization factor for OMP (used in covariance cal
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
-      
-C-----set giant resonance parameters for target     
+
+C-----set giant resonance parameters for target
       GDRpar(1,0) = 0.0
       GDRpar(2,0) = 0.0
       GDRpar(3,0) = 0.0
@@ -1349,7 +1349,7 @@ C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
          Do i = 0,NDNuc
            ENDf(i) = 0
-	   Enddo
+          Enddo
       ENDIF
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
@@ -1403,8 +1403,8 @@ C
          DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
-            if(ares.le.4 . or. zres.le.2) cycle 
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+            if(ares.le.4 . or. zres.le.2) cycle
 
             izares = INT(1000*zres + ares)
             CALL WHERE(izares,nnur,iloc)
@@ -1417,7 +1417,7 @@ C-----------Mass of the residual nnclei
 C           AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
-               CALL LEVREAD(nnur) 
+               CALL LEVREAD(nnur)
                IF (ROPar(3,nnur).EQ.0.0D0) THEN
                   IF (Z(nnur).GT.98.0D0 .OR. ROPaa(nnur).LE.0.0D0) THEN
                      delp = 12.0/SQRT(A(nnur))
@@ -1683,8 +1683,8 @@ C-----set ground state in case nucleus not in file
 C-----set ground state *** done ***
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
-      
-      LREad = .TRUE. 
+
+      LREad = .TRUE.
       izatmp = INT(1000*iz + ia)
       DO itmp = 0,NDNuc
          IF(NSTOred(itmp).eq.izatmp) THEN
@@ -1692,8 +1692,8 @@ C-----set ground state *** done ***
            GOTO 50
          ENDIF
       ENDDO
-      
-   50 IF(.NOT.LREAD) then 
+
+   50 IF(.NOT.LREAD) then
           NLV(Nnuc) = NLV(itmp)
           NCOmp(Nnuc) = NCOmp(itmp)
           DO ilv = 1, NLV(Nnuc)
@@ -1830,7 +1830,7 @@ C--------------------only gamma decay is considered up to now
          ENDIF
       ENDIF
   200 IF (.NOT.FILevel) CLOSE (13)
-      ENDIF 
+      ENDIF
       RETURN
   300 WRITE (6,
      &'('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
@@ -2146,7 +2146,7 @@ C
       n = ia - iz
       ncor = 0
       izcor = 0
-C-----define Gspin, Gspar, E2p, E3m for gamma      
+C-----define Gspin, Gspar, E2p, E3m for gamma
       IF (ia.EQ.0) THEN
          E2p = 0.D0
          E3m = 0.D0
@@ -2215,13 +2215,13 @@ C
 C Local variables
 C
       REAL FLOAT
-	DOUBLE PRECISION GRAND,DRAND
+       DOUBLE PRECISION GRAND,DRAND
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc
-	INTEGER IPArCOV 
+       INTEGER IPArCOV
       INTEGER INT
       CHARACTER*6 name
-	LOGICAL fexist
+       LOGICAL fexist
       DOUBLE PRECISION val,sigma
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
@@ -2234,7 +2234,7 @@ C-----initialization of TRISTAN input parameters
       ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
 C
-C	By default, no covariance calculation is done
+C      By default, no covariance calculation is done
 C
       IPArCOV = 0
       OPEN(95,FILE='COVAR.DAT',ACCESS='APPEND',STATUS='UNKNOWN')
@@ -2304,7 +2304,7 @@ C-----------Print some final input options
 C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(6,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
-     
+
             WRITE (6,*) ' '
             IF (OMPar_riplf .OR. OMParfcc) THEN
                WRITE (6,*) 'Existing, case specific, o.m.p. files: '
@@ -2350,7 +2350,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
 C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(12,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
-     
+
             WRITE (12,*) ' '
             IF (OMPar_riplf .OR. OMParfcc) THEN
                WRITE (12,*) 'Existing, case specific, o.m.p. files: '
@@ -2388,15 +2388,15 @@ C--------DEGAS input
                 WRITE (6,
      &          '('' DEGAS proton s.p.l. density uncertainty '',
      &          '' is equal to '',i2,''%'')') i1
-	          sigma = val*i1*0.01
-C	          GDIvp = val + grand()*sigma
- 	          GDIvp = val + (2*drand()-1.)*sigma
+                 sigma = val*i1*0.01
+C                GDIvp = val + grand()*sigma
+                 GDIvp = val + (2*drand()-1.)*sigma
                 WRITE (6,
      &       '('' DEGAS proton s.p.l. density sampled value is A/: ''
      &          ,f5.2)') GDIvp
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, MFPp, INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, MFPp, INDexf,INDexb
             else
               GDIvp = val
               WRITE (6,
@@ -2408,9 +2408,9 @@ C	          GDIvp = val + grand()*sigma
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.8 .AND. val.LE.2.D0) THEN 
+            IF (val.GE.0.8 .AND. val.LE.2.D0) THEN
               PEQc = 1.
-	        MFPp = val
+               MFPp = val
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
@@ -2418,21 +2418,21 @@ C--------PCROSS input
                 WRITE (6,
      &          '('' Mean free path parameter uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
-	          sigma = val*i1*0.01
-C	          MFPp = val + grand()*sigma
- 	          MFPp = val + (2*drand()-1.)*sigma
+                 sigma = val*i1*0.01
+C                MFPp = val + grand()*sigma
+                 MFPp = val + (2*drand()-1.)*sigma
                 WRITE (6,
-     &          '('' Mean free path parameter sampled value : '',f5.2)') 
+     &          '('' Mean free path parameter sampled value : '',f5.2)')
      &          MFPp
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, MFPp, INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, MFPp, INDexf,INDexb
               else
                 WRITE (6,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Default value: 1.3)'')') MFPp
-	        endif
-	      ENDIF
+               endif
+             ENDIF
             GOTO 100
          ENDIF
 C
@@ -2481,7 +2481,7 @@ C--------------searching in the RIPL database
          ENDIF
          IF (name.EQ.'EcDWBA') THEN
 C           EcDWBA meaningless if Collective level file exists
-	      IF(fexist) goto 100  
+             IF(fexist) goto 100
             ECUtcoll = val
             JCUtcoll = i1
             IF (JCUtcoll.EQ.0) JCUtcoll = 2
@@ -2871,27 +2871,27 @@ C
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
-		  ENDIF
+                ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Real volume potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-	          sigma = val*0.01
-C	          FNvvomp(i3,nnuc) = 1. + grand()*sigma
-	          FNvvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
+                 sigma = val*0.01
+C                FNvvomp(i3,nnuc) = 1. + grand()*sigma
+                 FNvvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Real volume potential depth sampled norm.factor : '',
      &        f5.2)') FNvvomp(i3,nnuc)
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb
             endif
-            GOTO 100                                 
+            GOTO 100
          ENDIF
 C----
 C        AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
@@ -2904,30 +2904,30 @@ C
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' Volume potential diffuseness uncertainty ignored'')')
+     &                 '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     & 		  '('' Volume potential diffuseness uncertainty ignored'')')
+     &                 '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
-		  ENDIF
+                ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Volume potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-	          sigma = val*0.01
-C	          FNavomp(i3,nnuc) = 1. + grand()*sigma
-	          FNavomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
+                 sigma = val*0.01
+C                FNavomp(i3,nnuc) = 1. + grand()*sigma
+                 FNavomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Volume potential diffuseness sampled norm.factor : ''
      &        ,f5.2)') FNavomp(i3,nnuc)
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb
             endif
-            GOTO 100                                 
+            GOTO 100
          ENDIF
 
 C--------Volume imaginary potential
@@ -2939,30 +2939,30 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' Imag. potential depth uncertainty ignored'')')
+     &                 '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     & 		  '('' Imag. potential depth uncertainty ignored'')')
+     &                 '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
-		  ENDIF
+                ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Imag. potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-	          sigma = val*0.01
-C	          FNwvomp(i3,nnuc) = 1. + grand()*sigma
-	          FNwvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
+                 sigma = val*0.01
+C                FNwvomp(i3,nnuc) = 1. + grand()*sigma
+                 FNwvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Imag. potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb
             endif
-            GOTO 100                                 
+            GOTO 100
          ENDIF
 
 C--------Surface imaginary potential:
@@ -2974,34 +2974,34 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' Surface potential depth uncertainty ignored'')')
+     &                 '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     & 		  '('' Surface potential depth uncertainty ignored'')')
+     &                 '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
-		  ENDIF
+                ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Surface potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-	          sigma = val*0.01
-C	          FNwsomp(i3,nnuc) = 1. + grand()*sigma
-	          FNwsomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
+                 sigma = val*0.01
+C                FNwsomp(i3,nnuc) = 1. + grand()*sigma
+                 FNwsomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Surface potential depth sampled norm.factor : '',
      &        f5.2)') FNwsomp(i3,nnuc)
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb
             endif
-            GOTO 100                                 
+            GOTO 100
          ENDIF
 C----
 C
-C        FNasomp(Nejc,Nnuc) = 1.0 
+C        FNasomp(Nejc,Nnuc) = 1.0
 C
          IF (name.EQ.'UOMPAS') THEN
             izar = i1*1000 + i2
@@ -3013,27 +3013,27 @@ C
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
-		  ENDIF
+                ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Surface potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-	          sigma = val*0.01
-C	          FNasomp(i3,nnuc) = 1. + grand()*sigma
-	          FNasomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
+                 sigma = val*0.01
+C                FNasomp(i3,nnuc) = 1. + grand()*sigma
+                 FNasomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
      &        '('' Surface potential diffuseness sampled norm.factor :''
      &        ,f5.2)') FNasomp(i3,nnuc)
-	          IPArCOV = IPArCOV +1
-	          write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb  
+                 IPArCOV = IPArCOV +1
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb
             endif
-            GOTO 100                                 
+            GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'EGDR1 ') THEN
@@ -3052,28 +3052,28 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
+     &                 '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR first hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(1,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(1,nnuc) = val + grand()*sigma
               WRITE (6,
-     &        '('' GDR first hump energy sampled value : '',f5.2)') 
+     &        '('' GDR first hump energy sampled value : '',f5.2)')
      &        GDRpar(1,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(1,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(1,nnuc), INDexf,INDexb
             else
               GDRpar(1,nnuc) = val
               WRITE (6,
      &      '('' GDR first hump energy in '',I3,A2,'' set to '',F5.2)'
-     &        ) i2, SYMb(nnuc), val	   
-	      endif
-            GOTO 100                                 
+     &        ) i2, SYMb(nnuc), val
+             endif
+            GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'GGDR1 ') THEN
@@ -3092,27 +3092,27 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &                 '('' NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR first hump width uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(2,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(2,nnuc) = val + grand()*sigma
               WRITE (6,
-     &        '('' GDR first hump width sampled value : '',f5.2)') 
+     &        '('' GDR first hump width sampled value : '',f5.2)')
      &        GDRpar(2,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(2,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(2,nnuc), INDexf,INDexb
             else
               GDRpar(2,nnuc) = val
               WRITE (6,
      &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
-     &        ) i2, SYMb(nnuc), val	   
-	      endif
+     &        ) i2, SYMb(nnuc), val
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3132,27 +3132,27 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &                 '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR first hump cross section uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(3,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(3,nnuc) = val + grand()*sigma
               WRITE (6,
      &        '('' GDR first hump cross section sampled value : ''
      &        ,f5.2)') GDRpar(3,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(3,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(3,nnuc), INDexf,INDexb
             else
               GDRpar(3,nnuc) = val
               WRITE (6,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val	   
-	      endif
+     &      ,F5.2)') i2, SYMb(nnuc), val
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3172,27 +3172,27 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		 '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
+     &                '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR second hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(4,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(4,nnuc) = val + grand()*sigma
               WRITE (6,
-     &        '('' GDR second hump energy sampled value : '',f5.2)') 
+     &        '('' GDR second hump energy sampled value : '',f5.2)')
      &        GDRpar(4,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(4,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(4,nnuc), INDexf,INDexb
             else
               GDRpar(4,nnuc) = val
               WRITE (6,
      &      '('' GDR second hump energy in '',I3,A2,'' set to '',F5.2)'
-     &        ) i2, SYMb(nnuc), val	   
-	      endif
+     &        ) i2, SYMb(nnuc), val
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3212,27 +3212,27 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &                 '('' NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR second hump width uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(5,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(5,nnuc) = val + grand()*sigma
               WRITE (6,
-     &        '('' GDR second hump width sampled value : '',f5.2)') 
+     &        '('' GDR second hump width sampled value : '',f5.2)')
      &        GDRpar(5,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(5,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(5,nnuc), INDexf,INDexb
             else
               GDRpar(5,nnuc) = val
               WRITE (6,
      &      '('' GDR second hump width in '',I3,A2,'' set to '',F5.2)'
-     &        ) i2, SYMb(nnuc), val	   
-	      endif
+     &        ) i2, SYMb(nnuc), val
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3252,27 +3252,27 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     & 		  '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &                 '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
               WRITE (6,
      &        '('' GDR second hump cross section uncertainty in '',I3,A2
      &        ,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-	        GDRpar(6,nnuc) = val + grand()*sigma
+               sigma = val*i3*0.01
+               GDRpar(6,nnuc) = val + grand()*sigma
               WRITE (6,
      &        '('' GDR second hump cross section sampled value : ''
      &        ,f5.2)') GDRpar(6,nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GDRpar(6,nnuc), INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GDRpar(6,nnuc), INDexf,INDexb
             else
               GDRpar(6,nnuc) = val
               WRITE (6,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val	   
-	      endif
+     &      ,F5.2)') i2, SYMb(nnuc), val
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3572,21 +3572,21 @@ C-----
               WRITE (6,
      &        '('' L.d. a-parameter uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-C	        ATIlnor(nnuc) = val + grand()*sigma
-	        ATIlnor(nnuc) = val + (2*drand()-1.)*sigma
+               sigma = val*i3*0.01
+C              ATIlnor(nnuc) = val + grand()*sigma
+               ATIlnor(nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
-     &        '('' L.d. a-parameter sampled value : '',f8.3)') 
+     &        '('' L.d. a-parameter sampled value : '',f8.3)')
      &        ATIlnor(nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, ATIlnor(nnuc),INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, ATIlnor(nnuc),INDexf,INDexb
             else
               ATIlnor(nnuc) = val
               WRITE (6,
      &      '('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
-     &        ) i2, SYMb(nnuc), val	   
-	      endif
+     &        ) i2, SYMb(nnuc), val
+             endif
 
             GOTO 100
          ENDIF
@@ -3614,21 +3614,21 @@ C-----
               WRITE (6,
      &        '('' Single particle l.d. parameter g uncertainty in '',
      &        I3,A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-	        sigma = val*i3*0.01
-C	        GTIlnor(nnuc) = val + grand()*sigma
-	        GTIlnor(nnuc) = val + (2*drand()-1.)*sigma
+               sigma = val*i3*0.01
+C              GTIlnor(nnuc) = val + grand()*sigma
+               GTIlnor(nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
-     &        '('' Single particle l.d. parameter g sampled value : '', 
+     &        '('' Single particle l.d. parameter g sampled value : '',
      &        f8.3)') GTIlnor(nnuc)
-	        IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &		      IPArCOV, GTIlnor(nnuc),INDexf,INDexb  
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, GTIlnor(nnuc),INDexf,INDexb
             else
               GTIlnor(nnuc) = val
               WRITE (6,
      &'('' Single particle l.d. parameter g in '',I3,A2,
      &  '' multiplied by '',        F6.1)') i2, SYMb(nnuc), val
-	      endif
+             endif
             GOTO 100
          ENDIF
 C-----
@@ -3719,25 +3719,25 @@ C--------Tuning factors
                WRITE (6,'('' TUNING IGNORED'')')
                GOTO 100
             ENDIF
-		  IF (i3.GT.NDEJC) THEN
+                IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
                GOTO 100
-		  ENDIF
+                ENDIF
             if(i4.gt.0.) then
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
-     &         '' uncertainty is equal to '',i2,'' %'')') 
+     &         '' uncertainty is equal to '',i2,'' %'')')
      &        i3, i2, SYMb(nnuc), i4
-	        sigma = val*0.01*i4
-C	        TUNe(i3,nnuc) = val + grand()*sigma
-	        TUNe(i3,nnuc) = val + (2*drand()-1.)*sigma
+               sigma = val*0.01*i4
+C              TUNe(i3,nnuc) = val + grand()*sigma
+               TUNe(i3,nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
               IPArCOV = IPArCOV +1
-	        write(95,'(1x,i5,1x,d12.6,1x,2i13)') 
-     &	      IPArCOV, TUNe(i3,nnuc), INDexf,INDexb  
-	      else
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb
+             else
               TUNe(i3,nnuc) = val
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
@@ -4171,12 +4171,12 @@ C-----Fermi energies calculated for all nuclei and projectile combinations
          DO ii = 0, NDEJC
             izpro = ZEJc(ii)
             iapro = AEJc(ii)
-    	    if((iztar - izpro).ge.0 .and. (iatar - iapro).ge.0) then 	    
+           if((iztar - izpro).ge.0 .and. (iatar - iapro).ge.0) then
               efermi = -0.5*(EXCessmass(iztar - izpro,iatar - iapro)
      &               - EXCessmass(iztar + izpro,iatar + iapro)
      &               + 2.*EXCessmass(izpro,iapro))
               EEFermi(ii,nnuc) = efermi
-	    endif 
+           endif
          ENDDO
       ENDDO
       RETURN
@@ -6729,14 +6729,14 @@ C-----------Selecting only 2+ states
                EG2 = HE2(i)
                CS2 = HCS2(i)
                GW2 = HGW2(i)
-C--------------Plujko_new-2005               
-               IF(Key_shape.NE.5) RETURN               
+C--------------Plujko_new-2005
+               IF(Key_shape.NE.5) RETURN
                GOTO 900
             ENDIF
          ENDDO
 C-----Plujko_new-2005
-      ENDIF        
-      
+      ENDIF
+
 C-----Plujko_new-2005
 C     If experimantal values of GDR parameters not found and Key_GDRGFL=2
 C     they are going to be retrieved from the RIPL-2 Goriely theoretical
@@ -6761,7 +6761,7 @@ C--------------(classical sum rule with correction)
                ENDIF
 C--------------Plujko_new-2005
                IF(Key_shape.NE.5)RETURN
-               GOTO 900               
+               GOTO 900
             ENDIF
          ENDDO
       ENDIF
@@ -6809,7 +6809,7 @@ C--------( classical sum rule with correction)
          CS2 = 0.
       ENDIF
 C-----Plujko_new-2005
-      IF(Key_shape.NE.5)RETURN     
+      IF(Key_shape.NE.5)RETURN
 C-----Setting the GFL parameters '|beta|' from "defeff.dat"
 C-----and 'S2Plus=(E2+)*beta**2'
   900 DO i = 1, NUMram
@@ -6824,7 +6824,7 @@ C--------------energygfl = henergygfl(i)*0.001
 C--------------RIPL-2 energies in MeV, RCN 06/2004
                S2Plusgfl = BETagfl2*energygfl
 C--------------Plujko_new-2005
-               RETURN              
+               RETURN
             ENDIF
          ENDIF
       ENDDO
@@ -6847,16 +6847,16 @@ C-----for  calculation  of  the  GFL model parameter
 
 C R250.F77     The R250 Pseudo-random number generator
 C
-C algorithm from:       
+C algorithm from:
 C Kirkpatrick, S., and E. Stoll, 1981; A Very Fast Shift-Register
 C Sequence Random Number Generator, Journal of Computational Physics,
 C V. 40. p. 517
-C 
+C
 C see also:
 C Maier, W.L., 1991; A Fast Pseudo Random Number Generator,
 C                    Dr. Dobb's Journal, May, pp. 152 - 157
 C
-C 
+C
 C Uses the Linear Congruential Method,
 C the "minimal standard generator"
 C Park & Miller, 1988, Comm of the ACM, 31(10), pp. 1192-1201
@@ -6871,7 +6871,7 @@ C ===================================================================
 C
       Function lcmrand(ix)
 C     The minimal standard PRNG for 31 bit unsigned integers
-C     designed with automatic overflow protection  
+C     designed with automatic overflow protection
 C     uses ix as the seed value if it is greater than zero
 C     otherwise it is ignored
       Integer*4 ix
@@ -6883,7 +6883,7 @@ C     otherwise it is ignored
       Parameter (q = 127773, r = 2836)
 C
       If ( ix .gt. 0 ) x = ix
-      
+
       hi = x / q
       lo = mod( x, q )
       test = a * lo - r * hi
@@ -6892,11 +6892,11 @@ C
       else
           x = test + m
       endif
-      
+
       lcmrand = x
       return
       End
-  
+
 
 C ===================================================================
 C
@@ -6940,7 +6940,7 @@ C
         msb = msb / 2
         mask = mask / 2
       EndDo
-      
+
       Return
       END
 
@@ -6976,7 +6976,7 @@ C     Generator of normally distributed random numbers based on R250
       Common/R250COM/indexf,indexb,buffer
 
       grand = -6.d0
-	do i=1,12
+       do i=1,12
         newrand = ieor( buffer(indexf), buffer(indexb) )
         buffer(indexf) = newrand
 
@@ -6985,9 +6985,9 @@ C     Generator of normally distributed random numbers based on R250
 
         indexb = indexb + 1
         if ( indexb .gt. 250 ) indexb = 1
-     
+
         grand = grand + dble(newrand)/m
-	enddo
+       enddo
 
       return
       End
