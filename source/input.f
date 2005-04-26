@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 17:36:24 $
-Ccc   * $Id: input.f,v 1.103 2005-04-26 17:36:24 Capote Exp $
+Ccc   * $Date: 2005-04-26 19:55:12 $
+Ccc   * $Id: input.f,v 1.104 2005-04-26 19:55:12 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2904,13 +2904,13 @@ C
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' Volume potential diffuseness uncertainty ignored'')')
+     &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     &                 '('' Volume potential diffuseness uncertainty ignored'')')
+     &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
                 ENDIF
             if(val.gt.0.) then
@@ -2939,13 +2939,13 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' Imag. potential depth uncertainty ignored'')')
+     &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     &                 '('' Imag. potential depth uncertainty ignored'')')
+     &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
                 ENDIF
             if(val.gt.0.) then
@@ -2974,13 +2974,13 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' Surface potential depth uncertainty ignored'')')
+     &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
                WRITE (6,
-     &                 '('' Surface potential depth uncertainty ignored'')')
+     &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
                 ENDIF
             if(val.gt.0.) then
@@ -3052,7 +3052,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
+     &          '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3092,7 +3092,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &          '('' NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3132,7 +3132,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &          '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3172,7 +3172,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
+     &         '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3212,7 +3212,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &          '('' NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3252,7 +3252,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &                 '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &          '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
