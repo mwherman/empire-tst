@@ -1,8 +1,8 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:21:02 $
-Ccc   * $Id: pcross.f,v 1.22 2005-04-15 18:21:02 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:28:20 $
+Ccc   * $Id: pcross.f,v 1.23 2005-04-26 17:28:20 Capote Exp $
 C
-      SUBROUTINE PCROSS(Sigr)
+      SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -15,32 +15,32 @@ C
 C
 C COMMON variables
 C
-      REAL*8 L(NDEJC + 1,PMAX)
+      REAL*8 L(0:NDEJC,PMAX)
       INTEGER*4 NHEq
       COMMON /CALC5 / L, NHEq
 C
 C Dummy arguments
 C
-      REAL*8 Sigr
+      REAL*8 Sigr, Totemis
 C
 C Local variables
 C
-      REAL*8 aat, azt, cme, cross(NDEJC + 1), ec, eee, eint(NDEX), 
-     &       em(PMAX), emaxi, emini, emis, er, ff, ff1, ff2, ff3, 
-     &       fint(NDEX), flm(4,4), fr, ftmp, g(NDEJC + 1), gc, hlp1, 
-     &       pair(NDEJC + 1), pc, phdj(NDLW), r(4,PMAX,NDEJC), sg, 
-     &       spec(NDEJC + 1,NDEX), totemis, wb, wda, 
-     &       we(NDEJC + 1,PMAX,NDEX)
-      INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg, 
+      DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
+     &       emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
+     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc,
+     &       r(4,PMAX,NDEJC), sg, wb, wda , zo
+
+      DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
+     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX)
+
+      INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
      &          ihmax, j, p, zc, zr
+
       LOGICAL callpcross
-      DOUBLE PRECISION DBLE
-      REAL*8 DENSW
-      DOUBLE PRECISION excnq, pops, renpop, somj, w, xj, xnor, zo
+      DOUBLE PRECISION DBLE, DENSW
       REAL FLOAT
-      INTEGER icsp, ie, ie1, iloc, izares, jparity, jspin, nejc, nejct, 
-     &        nexrt, nnur
-      INTEGER*2 iemax(NDEJC + 1), iemin(NDEJC + 1), nures(NDEJC + 1)
+      INTEGER ie, iloc, izares, nejc, nexrt, nnur
+      INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC), nures(0:NDEJC)
       INTEGER INT, NINT
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
@@ -68,13 +68,13 @@ C
 C     NPRoject - projectile nejc number
 C
 C     INITIALIZATION
- 
+
 C      Projectile mass number
       ap = AEJc(NPRoject)
       cme = MFPp/1.4D21
       fr = 0.D0
       totemis = 0.D0
-      DO i = 1, NDEJC + 1
+      DO i = 0, NDEJC
          cross(i) = 0.
       ENDDO
       DO hh = 1, PMAX
@@ -102,14 +102,14 @@ C
          IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
       ENDIF
 C-----NEJcm + 1 correspond to the compound gamma emitting nucleus
-      g(NEJcm + 1) = gc
-      pair(NEJcm + 1) = pc
+      g(0) = gc
+      pair(0) = pc
 C
 C-----EXCITON EQUILIBRIUM NUMBER NHEq
 C
       NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
 C-----ZERO ARRAY INITIALIZATION
-      DO nejc = 1, NDEJC + 1
+      DO nejc = 0, NDEJC
          iemin(nejc) = 2
          iemax(nejc) = NDEX
          nures(nejc) = 1
@@ -159,13 +159,13 @@ C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C--------last continuum energy bin is calculated, RCN 11/2004
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
- 
+
          DO ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
 C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             IF (iemax(nejc).GE.nexrt) iemax(nejc) = nexrt
- 
+
             IF (ETL(5,nejc,nnur).EQ.0) THEN
                sg = SIGabs(ienerg + 5,nejc,nnur)
             ELSE
@@ -176,14 +176,14 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
       ENDDO
       izares = INT(1000*zc + ac)
       CALL WHERE(izares,nnur,iloc)
-      nures(NEJcm + 1) = nnur
+      nures(0) = nnur
 C-----Maximum and minimum energy bin for gamma emission
 C-----Last continuum energy bin is calculated, RCN 11/2004
       nexrt = MAX(INT((EXCn-ECUt(nnur))/DE + 1.0001),1)
       DO ienerg = 2, NDEX
          eee = DE*(ienerg - 1)
-         IF (ec.GT.eee) iemax(NEJcm + 1) = ienerg
-         IF (iemax(NEJcm + 1).GE.nexrt) iemax(NEJcm + 1) = nexrt
+         IF (ec.GT.eee) iemax(0) = ienerg
+         IF (iemax(0).GE.nexrt) iemax(0) = nexrt
       ENDDO
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
@@ -192,9 +192,9 @@ C-----EMISSION RATES CALCULATIONS FOLLOWS
 C
 C-----PRIMARY PARTICLE LOOP
 C
-      DO nejc = 1, NEJcm + 1
+      DO nejc = 0, NEJcm
          nnur = nures(nejc)
-         IF (nejc.NE.NEJcm + 1) THEN
+         IF (nejc.NE.0) THEN
             ao = AEJc(nejc)
             zo = ZEJc(nejc)
             ar = ac - ao
@@ -222,7 +222,7 @@ C
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
-            IF (hh.EQ.0 .AND. nejc.NE.NEJcm + 1) GOTO 50
+            IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
             ff2 = DENSW(gc,pc,p,hh,ec)
             IF (ff2.EQ.0.) GOTO 50
@@ -232,7 +232,7 @@ C
             DO ienerg = iemin(nejc), iemax(nejc)
                eee = DE*(ienerg - 1)
 C--------------Inverse cross section
-               IF (nejc.EQ.NEJcm + 1) THEN
+               IF (nejc.EQ.0) THEN
                   aat = ac
                   azt = zc
                   sg = SGAM(aat,azt,eee)
@@ -246,11 +246,11 @@ C--------------Inverse cross section
                IF (er.LE.EPS) GOTO 20
                hlp1 = 0.D0
 C--------------PREEQ n & p EMISSION
-               IF (nejc.LE.2) THEN
+               IF (nejc.gt.0 .and. nejc.LE.2) THEN
                   wda = DENSW(g(nejc),pair(nejc),p - ao,hh,er)
                   IF (wda.GT.0.) hlp1 = wda*r(1,h1,nejc)
 C--------------PREEQ CLUSTER EMISSION
-               ELSEIF (nejc.GT.2 .AND. nejc.LT.NEJcm + 1) THEN
+               ELSEIF (nejc.GT.2 .AND. nejc.LE.NEJcm) THEN
                   CALL PREFORMATION(flm,eee)
                   DO j = 1, ao
                      wda = DENSW(g(nejc),pair(nejc),p - j,hh,er)
@@ -258,16 +258,16 @@ C--------------PREEQ CLUSTER EMISSION
      &                   *wda*r(j,h1,nejc)
                   ENDDO
 C--------------PREEQ GAMMA EMISSION
-               ELSEIF (nejc.EQ.NEJcm + 1) THEN
+               ELSEIF (nejc.EQ.0) THEN
                   hlp1 = DENSW(gc,pc,p,hh,er)*DBLE(p + hh)
      &                   /(DBLE(p + hh) + eee*gc)
-                  IF (hh.GE.1) hlp1 = hlp1 + 
+                  IF (hh.GE.1) hlp1 = hlp1 +
      &                                gc*eee*DENSW(gc,pc,p - 1,hh - 1,
      &                                er)/(DBLE(p + hh - 2) + eee*gc)
                ENDIF
                IF (hlp1.EQ.0.) GOTO 20
                ff3 = hlp1*eee*sg
-               IF (nejc.EQ.NEJcm + 1) ff3 = ff3*eee
+               IF (nejc.EQ.0) ff3 = ff3*eee
                ff = ff1*ff3/ff2
                we(nejc,h1,ienerg) = ff*C1
                icon = icon + 1
@@ -280,7 +280,7 @@ C
 C-----------INTEGRATION PROCEDURE #1 (EMISSION RATES)
 C
             IF (icon.GT.0) THEN
-               IF (nejc.NE.NEJcm + 1) THEN
+               IF (nejc.NE.0) THEN
                   emaxi = EMAx(nnur)
                   IF (DE*icon3.LT.emaxi) emaxi = DE*icon3
                   emini = 0.D0
@@ -291,7 +291,7 @@ C
                   hlp1 = fint(1)*eint(1) + fint(icon)
      &                   *(EMAx(nnur) - eint(icon))
                ENDIF
- 
+
                DO ien = 2, icon
                   hlp1 = hlp1 + (eint(ien) - eint(ien - 1))
      &                   *(fint(ien - 1) + fint(ien))
@@ -314,7 +314,7 @@ C
 C-----PARTICLE LOOP FOR EMISSION SPECTRA CALCULATIONS
 C
       totemis = 0.D0
-      DO nejc = 1, NEJcm + 1
+      DO nejc = 0, NEJcm
          hlp1 = 0.D0
          DO ienerg = iemin(nejc), iemax(nejc)
             emis = 0.D0
@@ -328,22 +328,22 @@ C
          totemis = totemis + hlp1
          cross(nejc) = hlp1
       ENDDO
- 
+
       IF (IOUt.GE.1) THEN
-         DO nejc = 1, NEJcm + 1
-            IF (nejc.LE.3) THEN !nucleons and alpha
+         DO nejc = 0, NEJcm
+            IF (nejc.gt.0 .and. nejc.LE.3) THEN !nucleons and alpha
                IF (IDNa(2*nejc,6).EQ.0) THEN
                   status = "  (ignored) "
                ELSE
                   status = "  (accepted)"
                ENDIF
                WRITE (6,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,                 
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSEIF (nejc.EQ.4 .AND. NEJcm.NE.3) THEN !light ion (always accepted)
                status = "  (accepted)"
                WRITE (6,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,                 
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSE !gamma
                IF (IDNa(5,6).EQ.0) THEN
@@ -352,7 +352,7 @@ C
                   status = "  (accepted)"
                ENDIF
                WRITE (6,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,                 
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') 'g ', cross(nejc), status
             ENDIF
 C---------We don't need this spectrum printout any more but I leave it
@@ -364,125 +364,50 @@ C         ENDDO
 C         WRITE(6, *)'==========================='
          ENDDO
       ENDIF
+
       fr = totemis/Sigr
       WRITE (6,99015) totemis, fr
-99015 FORMAT (/1X,'Preequilibrium total cross section   =',F8.2,
-     &        ' mb'/1X,'Preequilibrium fraction              =',F8.2)
+99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
+     &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
 C
-C-----Transfer PCROSS results into EMPIRE. This part is based on a
-C-----similar piece of code used for the MSD transfer. Note, that PCROSS
-C-----only calculates emission into the continuum
-C
-C-----calculate spin distribution for 1p-1h states (as for MSD)
-      SIG = 2*0.26*A(nnur)**0.66666667
-      somj = 0.0
-      DO j = 1, NLW, LTUrbo
-         xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
-         phdj(j) = 0.0
-         w = (xj + 1.0)*xj/2./SIG
-         IF (w.LE.50.D0) THEN
-            phdj(j) = (2*xj + 1.)*EXP(( - w))
-            somj = somj + phdj(j)
-         ENDIF
-      ENDDO
-C-----distribution of the continuum PCROSS contribution -
-C-----proportional to the 1p-1h spin distribution shifted by the target
-C-----ground state target spin XJLv(LEVtarg,0)
-C-----WARNING: while this is fine for nucleons might not be adequate for
-C-----clusters
-C-----NOTE to Roberto: convention NEJcm+1 for gamma is odd - it would be
-C-----better to use 0 for gamma as in the rest of the code, the part below
-C-----would then be easier to follow (nejct would simply become nejc)
-C-----However, I admit that AEJc(0) and ZEJc(0) refer to projectile not
-C-----to gamma. We've got this slight inconsistency here - it regards A,Z, and
-C-----Tl's (as far as I recall) since projectile does not need anything more.
-C-----Therefore, in all spectra, populations etc., 0 stands for gamma.
-C-----May be we should introduce APRo, ZPRo, ... for the projectile and get
-C-----the code cleaner - ejectile 0 would only stand for gamma.
+C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
+C     Note, that PCROSS only calculates emission into the continuum
       totemis = 0.D0
-      DO nejc = 1, NEJcm + 1  ! over ejectiles
-         IF (nejc.LE.NEJcm) THEN
-                                !particle
-            IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) GOTO 100
-            IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) GOTO 100
-            IF (nejc.EQ.3 .AND. IDNa(6,6).EQ.0) GOTO 100
-            totemis = totemis + cross(nejc)
-            nejct = nejc
-            ar = ac - AEJc(nejc)
-            zr = zc - ZEJc(nejc)
-            izares = INT(1000*zr + ar)
-            CALL WHERE(izares,nnur,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (6,'('' NO LOCATION ASCRIBED TO NUCLEUS '')')
-     &                izares
-               STOP 'EXCITON 2'
-            ENDIF
+      DO nejc = 0, NEJcm  ! over ejectiles
+         nnur = nures(nejc)
+         IF (nejc.gt.0) THEN !particle
+            IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) cycle
+            IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle
+            IF (nejc.EQ.3 .AND. IDNa(6,6).EQ.0) cycle
 C-----------number of spectrum bins to continuum WARNING! might be negative!
             excnq = EXCn - Q(nejc,1)
          ELSE !gamma
-            IF (IDNa(5,6).EQ.0) GOTO 100
-            totemis = totemis + cross(nejc)
-            nejct = 0
+            IF (IDNa(5,6).EQ.0) cycle
             nnur = 1
             excnq = EXCn
          ENDIF
+         CSMsd(nejc) = CSMsd(nejc) + cross(nejc)
+         totemis = totemis + cross(nejc)
 C--------number of spectrum bins to continuum WARNING! might be negative!
          nexrt = INT((excnq - ECUt(nnur))/DE + 1.0001)
-         IF (nexrt.GT.iemin(nejc)) THEN
-            DO j = 1, NLW, LTUrbo
-               xnor = 0.5*phdj(j)/somj
-               DO ie = iemin(nejc), iemax(nejc)
-                  pops = xnor*spec(nejc,ie)
-                  ie1 = nexrt - ie + 1
-                  POP(ie1,j,1,nnur) = POP(ie1,j,1,nnur) + pops
-                  POP(ie1,j,2,nnur) = POP(ie1,j,2,nnur) + pops
-               ENDDO
-            ENDDO
-C-----------add PCROSS contribution to the EMPIRE spectra CSE and
-C-----------auxiliary AUSpec matrix for determination of recoil spectra
-            DO ie = iemin(nejc), iemax(nejc)
-               CSE(ie,nejct,1) = CSE(ie,nejct,1) + spec(nejc,ie)
-               AUSpec(ie,1) = AUSpec(ie,1) + spec(nejc,ie)
-            ENDDO
-C-----------add PCROSS contribution to the total ejectile emission
-            CSEmis(nejct,1) = CSEmis(nejct,1) + cross(nejc)
-C-----------add PCROSS to the population spectra used for deconvolution
-C-----------of the EMPIRE spectra into ENDF exclusive spectra
-            IF (ENDf(1).EQ.1) THEN
-               DO ie = iemin(nejc), iemax(nejc)
-                  icsp = nexrt - ie + 1
-C              DO icsp = iemin(nejc), nexrt
-C                 ie = nexrt - icsp + 1
-                  POPcse(ie,nejct,icsp,nnur)
-     &               = POPcse(ie,nejct,icsp,nnur) + spec(nejc,icsp)
-C-----------------Correct last bin (not needed for POP as for this it is
-C-----------------done at the end)
-                  IF (ie.EQ.1) POPcse(ie,nejct,icsp,nnur)
-     &                = POPcse(ie,nejct,icsp,nnur) - 0.5*spec(nejc,icsp)
-C-----------------DDX using portions
-C-----------------for the time being not needed since PCROSS is isotropic
-C                 POPcseaf(Ie,Nejc,icsp,Nnur) = 1.0
-C-----------------Bin population by PE (spin/parity integrated)
-                  POPbin(ie,nnur) = spec(nejc,icsp)
-               ENDDO
-            ENDIF
-         ENDIF
-  100 ENDDO  !over ejectiles
-C-----Renormalize EMPIRE fusion distribution to account for loss due to
-C-----accepted PCROSS emission (note that there is no competition with
-C-----other reaction mechanisms)
-      renpop = (Sigr - totemis)/Sigr
-      DO jspin = 1, NDLW
-         DO jparity = 1, 2
-            POP(NEX(1),jspin,jparity,1) = POP(NEX(1),jspin,jparity,1)
-     &         *renpop
+         DO ie = iemin(nejc), nexrt
+            ftmp = spec(nejc,ie)
+            CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
+            DO iang = 1, NDANG
+C             Using fr = totemis/Sigr it should be quite easy to implement
+C             Kalbach systematic for PE DDX calculations here
+C             (for the time being isotropic distribution is assumed)
+              CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1)
+     &                             + ftmp/(4.*PI)
+             ENDDO
          ENDDO
-      ENDDO
+       ENDDO
+
       WRITE (6,99020)
 99020 FORMAT (/' ',57('-')/)
       END
- 
- 
+
+
       SUBROUTINE RQFACT(Heq,R)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -619,9 +544,9 @@ C
          ENDDO
       ENDDO
       END
- 
- 
- 
+
+
+
       SUBROUTINE TRANSIT(E,Gc,Ap,Nheq)
       IMPLICIT LOGICAL*1(A - Z)
 C
@@ -674,8 +599,8 @@ C
 C     END OF TRANSITION RATES CALCULATIONS [ NORMALIZED TO CME ]
 C
       END
- 
- 
+
+
       SUBROUTINE RESOL(Em,Ih2,Ap,Cme)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -687,7 +612,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 L(NDEJC + 1,PMAX), LM(PMAX), LP(PMAX)
+      REAL*8 L(0:NDEJC,PMAX), LM(PMAX), LP(PMAX)
       INTEGER*4 NHEq, NMAx
       COMMON /CALC3 / LP, LM, NMAx
       COMMON /CALC5 / L, NHEq
@@ -700,7 +625,7 @@ C
 C
 C Local variables
 C
-      REAL*8 b(PMAX), c(PMAX), e(PMAX), hlp1, hlp2, hlp4, ln(PMAX), 
+      REAL*8 b(PMAX), c(PMAX), e(PMAX), hlp1, hlp2, hlp4, ln(PMAX),
      &       ls(PMAX)
       INTEGER*4 h1, hhh, i, ij, n
       DO i = 1, PMAX
@@ -709,11 +634,11 @@ C
       n = NMAx
       IF (n.GT.PMAX) n = PMAX
       DO h1 = 1, n
-         DO i = 1, NEJcm + 1
+         DO i = 0, NEJcm
             ln(h1) = ln(h1) + L(i,h1)
          ENDDO
 C-----------------------------------------
-C--------NEVER COME BACK ASUMPTION 
+C--------NEVER COME BACK ASUMPTION
          LM(h1) = LM(h1)*1.D-7
 C-----------------------------------------
          ls(h1) = Cme*ln(h1) + LP(h1) + LM(h1)
@@ -734,9 +659,8 @@ C-----------------------------------------
          hlp1 = LP(h1)/Cme
          hlp2 = LM(h1)/Cme
          hlp4 = hlp1 + hlp2
-         IF (IOUt.GE.3) WRITE (6,99015) ij, hlp1, hlp2, hlp4, ln(h1), 
-     &                                  L(NEJcm + 1,h1), 
-     &                                  (L(i,h1),i = 1,NEJcm)
+         IF (IOUt.GE.3) WRITE (6,99015) ij, hlp1, hlp2, hlp4, ln(h1),
+     &                                            (L(i,h1),i = 0,NEJcm)
 99015    FORMAT (I3,3E10.3,10X,6E10.3)
       ENDDO
 C
@@ -775,8 +699,8 @@ C--------------------------------------------------------------------
          WRITE (6,*)
       ENDIF
       END
- 
- 
+
+
       SUBROUTINE MASTER(Subd,Diag,Superd,B,N,Ndim)
       IMPLICIT LOGICAL(A - Z)
 C
@@ -812,7 +736,7 @@ C
                B(kp1) = B(k)
                B(k) = t
             ENDIF
-            IF (Subd(k).EQ.0.0D0) STOP 
+            IF (Subd(k).EQ.0.0D0) STOP
      &            ' DIAGONAL ELEMENT = 0 in SOLUTION of MASTER equation'
             t = -Subd(kp1)/Subd(k)
             Subd(kp1) = Diag(kp1) + t*Diag(k)
@@ -839,8 +763,8 @@ C
          ENDIF
       ENDIF
       END
- 
- 
+
+
       SUBROUTINE PREFORMATION(Flm,E)
 C
 C IWAMOTO,HARADA COALESCENCE PICK-UP MODEL, PHYS.REV.1982,V.26,P.1821
@@ -921,8 +845,8 @@ C-----ALPHA PARTICLES (M=4)
          Flm(4,3) = 0.D0
       ENDIF
       END
- 
- 
+
+
       FUNCTION DENSW(G,D,P,H,E)
 C
 C  WILLIAMS FORMULATION, PAULI CORRECTION BY KALBACH
@@ -962,29 +886,6 @@ C
       IF (u.LE.0.) RETURN
       DENSW = G*(DEXP((n-1)*DLOG(u) - fac))
       END
- 
- 
-      FUNCTION SGAM_OLD(A,Z,Eg)
-C [1] S.A.FAYANS
-C     "Lectures,DUBNA,feb.1982"
-C SGAM = GAMMA ABSORPTION CROSS SECTION in mb
-C
-C Dummy arguments
-C
-      REAL*8 A, Eg, Z
-      REAL*8 SGAM_OLD
-C
-C Local variables
-C
-      REAL*8 a3, egr, gam, sgm
-      DOUBLE PRECISION DSQRT
-      a3 = A**(.3333333333333333D0)
-      egr = 29.*DSQRT((1.D0 + 2.D0/a3)/a3)
-      gam = 5.D0
-      sgm = 53.2*(A - Z)*Z/A
-      SGAM_OLD = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
-      END
-
 
       FUNCTION SGAM(A,Z,Eg)
 C
