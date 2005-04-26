@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-24 20:15:34 $
-Ccc   * $Id: HRTW-comp.f,v 1.22 2005-04-24 20:15:34 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-04-26 21:27:22 $
+Ccc   * $Id: HRTW-comp.f,v 1.23 2005-04-26 21:27:22 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -254,13 +254,13 @@ C
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn 
               if( ip.eq.LVP(LEVtarg,0) .AND. 
-     >            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
-     >              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
+     &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
+     &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                  write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)') 
-     >             'CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
-     >             sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)  
+     &             'CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
+     &             sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)  
               endif
-	      ENDIF
+            ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
       END
@@ -791,9 +791,9 @@ C--------Plujko_new-2005
             lambmax = xjc + xjr + 0.001
             lambmax = MIN0(lambmax,MAXmult)
             IF(lambmin.LE.lambmax)THEN
-	       scrtpos = 0.0D0
-	       scrtneg = 0.0D0
-	       hsumtls =0.0D0
+               scrtpos = 0.0D0
+               scrtneg = 0.0D0
+               hsumtls =0.0D0
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
                    scrtpos = scrtpos + xle(lamb)
@@ -805,12 +805,12 @@ C--------Plujko_new-2005
                  IF(Nhrtw.EQ.0)THEN
                    hsumtls = hsumtls + xle(lamb)**2 + xlm(lamb)**2
                  ENDIF    !first HRTW entry done
-	       ENDDO
+               ENDDO
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
                H_Sumtls = H_Sumtls + hsumtls*RO(ier, Jr, Nnuc)*corr
             ENDIF
-	 ENDDO
+         ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***---------------------------      

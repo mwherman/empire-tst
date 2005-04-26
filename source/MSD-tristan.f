@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-04-26 17:34:29 $
-Ccc   * $Id: MSD-tristan.f,v 1.31 2005-04-26 17:34:29 Capote Exp $
+Ccc   * $Date: 2005-04-26 21:27:22 $
+Ccc   * $Id: MSD-tristan.f,v 1.32 2005-04-26 21:27:22 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2852,7 +2852,7 @@ C-----------------constructed out of discrte levels
             ENDDO
    50    ENDDO
       ENDDO
-	CLOSE(66)
+      CLOSE(66)
       REWIND 14
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
