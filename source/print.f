@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-01 12:09:25 $
-Ccc   * $Id: print.f,v 1.9 2005-04-01 12:09:25 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:34:47 $
+Ccc   * $Id: print.f,v 1.10 2005-04-26 17:34:47 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -50,33 +50,43 @@ C
       IF (csemax.LE.1.D-15) RETURN
       kmax = kmax + 2
       kmax = MIN0(NDEX,kmax,NDECSE)
-C     kmax = MIN0(kmax,NDECSE) ! RCN
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
       s1 = s2*0.1
       s0 = s1*0.1
+
+      ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
          WRITE (6,99005)
-99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
-         GOTO 100
-      ENDIF
-      ia = AEJc(Nejc)
-      IF (AEJc(Nejc).GT.1.0D0 .AND. Nejc.NE.0) WRITE (6,99010) ia,
-     &    SYMbe(Nejc)
-99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
-      IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) WRITE (6,99015)
+99005    FORMAT (1X,///,1X,54('*'),1X,'Gamma spectrum  ',54('*'),//)
+      ELSE
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
+           WRITE (6,99015)
 99015 FORMAT (1X,///,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
-      IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) WRITE (6,99020)
+          ENDIF
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
+           WRITE (6,99020)
 99020 FORMAT (1X,///,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
-      IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) WRITE (6,99025)
+         ENDIF
+         IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
+           WRITE (6,99025)
 99025 FORMAT (1X,///,1X,54('*'),1X,'alpha  spectrum  ',54('*'),//)
-  100 WRITE (6,99030) s0, s1, s2, s3
+         ENDIF
+         IF ( AEJc(Nejc).GT.1.0D0 .AND.
+     &    .NOT.(AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) ) THEN
+          WRITE (6,99010) ia, SYMbe(Nejc)
+99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
+         ENDIF
+      ENDIF
+
+      WRITE (6,99030) s0, s1, s2, s3
 99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
      &        E6.1)
       WRITE (6,99035)
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (6,99045)
+
       totspec = 0.0
       DO i = 1, kmax
          totspec = totspec + CSE(i,Nejc,Nnuc)
