@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-25 15:46:57 $
-Ccc   * $Id: main.f,v 1.72 2005-04-25 15:46:57 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:31:54 $
+Ccc   * $Id: main.f,v 1.73 2005-04-26 17:31:54 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -47,8 +47,9 @@ C
      &                 poph, popl, popleft, poplev, popread, poptot,
      &                 ptotsp, q2, q3, qmax, qstep, recorp, recorr,
      &                 sgamc, spdif, spdiff, stauc, step, sum, sumfis,
-     &                 sumfism(NFMOD), tauf, taut, weight, xccm, xcse,
-     &                 xizat, xnhms, xnl, xnor, xtotsp, zres
+     &                 sumfism(NFMOD), tauf, taut, totemis, weight,
+     &                 xccm, xcse, xizat, xnhms, xnl, xnor, xtotsp,
+     &                 xsinlcont, xsinl, zres
       CHARACTER*9 cejectile
       CHARACTER*6 ctldir
       CHARACTER*20 ctmp20
@@ -89,8 +90,8 @@ C-----
       CALL MARENG(0,0)
 C
 C     On request, total cross section is set to absorption cross section
-C                      for photon induced reactions 
-C        
+C                      for photon induced reactions
+C
       IF (INT(AEJc(0)).EQ.0) TOTcs = CSFus
 
 C-----locate position of the target among residues
@@ -99,6 +100,8 @@ C
       WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000)
 C     TOTcs, ABScs,ELAcs are initialized within MARENG()
+      xsinlcont = 0.d0
+
       ncoll = 0
       nelang = 73
       ecm = EINl - EIN
@@ -124,7 +127,7 @@ C--------get and add inelastic cross sections (including double-differential)
          DO i = 2, ND_nlv
             ilv = ICOller(i)
             IF (ilv.LE.NLV(nnurec)) THEN
-C            ADDING INELASTIC TO DISCRETE LEVELS 
+C            ADDING INELASTIC TO DISCRETE LEVELS
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
 C------------avoid reading closed channels
              IF (echannel.GE.0.0001) THEN
@@ -188,13 +191,14 @@ C            ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0001)
 C------------avoid reading closed channels
-             IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2) 
+             IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
      &       THEN
                READ (46,*,END = 1400) popread
 C              ncoll = i
-               if(nejcec.eq.1) CSMsd(1) = CSMsd(1) + popread
-               if(nejcec.eq.2) CSMsd(2) = CSMsd(2) + popread
-
+C              if(nejcec.eq.1) CSMsd(1) = CSMsd(1) + popread
+C              if(nejcec.eq.2) CSMsd(2) = CSMsd(2) + popread
+               CSMsd(nejcec) = CSMsd(nejcec) + popread
+               xsinlcont = xsinlcont + popread
                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
 
                READ (45,*,END = 1400)     ! Skipping level identifier line
@@ -203,7 +207,7 @@ C--------------each 4th result from ECIS (2.5 deg grid)
                DO iang = 1, NDANG - 1
                   ftmp = 0.d0
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
-                  CSEa(icsl,iang,nejcec,1) = 
+                  CSEa(icsl,iang,nejcec,1) =
      &               CSEa(icsl,iang,nejcec,1) + ftmp/DE
                   READ (45,'(7x,E12.5)',END = 1400)
                   READ (45,'(7x,E12.5)',END = 1400)
@@ -232,7 +236,7 @@ C-----print elastic and direct cross sections from ECIS
          WRITE (6,*) ' Results provided by Coupled Channel calculations'
          WRITE (6,*) ' Inelastic scattering results provided by'
          WRITE (6,*) ' Coupled Channel + DWBA calculations'
-         if(CSMsd(1)+CSMsd(2).NE.0.)   
+         if(CSMsd(1)+CSMsd(2).NE.0.)
      >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ELSEIF (DIRect.EQ.3) THEN
@@ -240,7 +244,7 @@ C-----print elastic and direct cross sections from ECIS
      &       ' Results provided by Spherical Optical Model calculations'
          WRITE (6,*)
      &     ' Inelastic scattering results provided by DWBA calculations'
-         if(CSMsd(1)+CSMsd(2).NE.0.)   
+         if(xsinlcont.NE.0.)
      >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ENDIF
@@ -351,38 +355,52 @@ C-----------set to Q's to 0 if negative due to rounding error
          WRITE (6,*) ' '
          WRITE (6,*) ' '
          CALL ULM(1)
-         CALL TRISTAN(0,0,ltrmax,qmax,qstep)
+         CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
+
       ENDIF
 
-      IF (CSMsd(1) + CSMsd(2).GT.0) THEN
-C--------print MSD double differential cross sections
+C-------- PCROSS exciton model calculations of preequilibrium contribution
+C-------- including cluster emission by Iwamoto-Harada model
+C--------
+      totemis = 0.d0
+      IF (EIN.GT.0.1D0 .AND. PEQc.GT.0) THEN
+         ftmp = CSFus - xsinl - xsinlcont
+         CALL PCROSS(ftmp,totemis)
+      ENDIF          ! PCRoss done
+
+      IF ((xsinl + xsinlcont + totemis).gt.0.) THEN
+C--------print PE double differential cross sections
+C        DO nejc = 0,NDEjc
          nejc = 1
-         IF (ZEJc(0).EQ.1.0D0) nejc = 2
-         IF (CSMsd(1).GT.0.D0 .AND. IOUt.GE.3) THEN
+         IF (CSMsd(nejc).GT.0.1D0 .AND. IOUt.GE.3) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
             DO its = 1, itimes
-               iad = 1 + (its - 1)*11
-               iam = 11 + (its - 1)*11
-               iam = MIN0(NDANG,iam)
-               WRITE (6,*) ' '
-               WRITE (6,
+              iad = 1 + (its - 1)*11
+              iam = 11 + (its - 1)*11
+              iam = MIN0(NDANG,iam)
+              WRITE (6,
+     &                '(//30X,''     N  E  U  T  R  O  N  S ''/)')
+              WRITE (6,
      &                '(30X,''A      n      g      l      e      s '')')
-               WRITE (6,*) ' '
-               WRITE (6,'('' Energy  '',11(4X,F5.1,2X))')
+              WRITE (6,*) ' '
+              WRITE (6,'('' Energy  '',11(4X,F5.1,2X))')
      &                (ANGles(ia),ia = iad,iam)
-               WRITE (6,*) ' '
-               DO i = 1, NEX(1)
-                  WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
+              WRITE (6,*) ' '
+              DO i = 1, NEX(1)
+                WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
      &                   (CSEa(i,iang,nejc,1),iang = iad,iam)
-               ENDDO
-               WRITE (6,*) ' '
+              ENDDO
+              WRITE (6,*) ' '
             ENDDO
          ENDIF
-         WRITE (6,*) ' n MSD emission cross section ', CSMsd(1), ' mb'
-         WRITE (6,*) ' p MSD emission cross section ', CSMsd(2), ' mb'
+C         ENDDO
+         WRITE (6,*) ' g PE emission cross section ', CSMsd(0), ' mb'
+         WRITE (6,*) ' n PE emission cross section ', CSMsd(1), ' mb'
+         WRITE (6,*) ' p PE emission cross section ', CSMsd(2), ' mb'
+         WRITE (6,*) ' a PE emission cross section ', CSMsd(3), ' mb'
          WRITE (6,*) ' '
-C--------correct CN population for the MSD emission
-         corrmsd = (CSFus - CSMsd(1) - CSMsd(2))/CSFus
+C--------correct CN population for the PE emission
+         corrmsd = (CSFus - (xsinl + xsinlcont + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
             WRITE (6,*) ' '
             WRITE (6,*) 'MSD EMISSION LARGER THEN FUSION CROSS SECTION'
@@ -407,25 +425,30 @@ C--------correct CN population for the MSD emission
 C--------TRISTAN *** done ***
 C--------add MSD contribution to the residual nucleus population
 C--------locate residual nucleus after MSD emission
-         ares = A(1) - AEJc(nejc)
-         zres = Z(1) - ZEJc(nejc)
+         DO nejc = 0, NDEjc
+           ares = A(1) - AEJc(nejc)
+           zres = Z(1) - ZEJc(nejc)
+           izares = INT(1000.0*zres + ares)
+           CALL WHERE(izares,nnur,iloc)
+           IF (iloc.EQ.1) THEN
+             WRITE (6,*) ' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
+     &                  zres, ' HAS NOT BEEN INITIALIZED'
+             WRITE (6,*) ' EXECUTION STOPPED'
+             STOP
+           ENDIF
+           IF (CSMsd(nejc).NE.0.0D0) CALL ACCUMSD(1,nnur,nejc)
+C----------add PE contribution to energy spectra (angle int.)
+           DO ie = 1, NEX(1)
+              CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
+           ENDDO
+C----------add PE contribution to the total NEJC emission
+           CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
+         ENDDO
+C        Skipping all emitted but neutrons and protons
+         ares = A(1) - AEJc(1)
+         zres = Z(1) - ZEJc(1)
          izares = INT(1000.0*zres + ares)
          CALL WHERE(izares,nnur,iloc)
-         IF (iloc.EQ.1) THEN
-            WRITE (6,*) ' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
-     &                  zres, ' HAS NOT BEEN INITIALIZED'
-            WRITE (6,*) ' EXECUTION STOPPED'
-            STOP
-         ENDIF
-         IF (CSMsd(nejc).NE.0.0D0) CALL ACCUMSD(1,nnur,nejc)
-C--------add MSD contribution to energy spectra (angle int.)
-         DO nejc = 1, 2
-            DO ie = 1, NEX(1)
-               CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
-            ENDDO
-C-----------add MSD contribution to the total NEJC emission
-            CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
-         ENDDO
 C--------second chance preequilibrium emission after MSD emission
 C--------neutron emission
          izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
@@ -436,12 +459,12 @@ C--------proton emission
          izares = izares - 1000
          CALL WHERE(izares,nnurp,iloc)
          IF (iloc.EQ.0) THEN
-            CALL SCNDPREEQ(nnur,nnurp,2,1)
-            IF (IOUt.GT.3) CALL AUERST(nnur,2)
+           CALL SCNDPREEQ(nnur,nnurp,2,1)
+           IF (IOUt.GT.3) CALL AUERST(nnur,2)
          ELSE
             CALL SCNDPREEQ(nnur,nnurp,2,2)
          ENDIF
-C--------second chance preequilibrium *** done ***
+C----------second chance preequilibrium *** done ***
       ENDIF
 C-----
 C-----MSD *** done ***
@@ -471,7 +494,10 @@ C-----
          IF (DIRect.EQ.0) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
-     &  '' mb '')') CSFus
+     &  '' mb including'')') CSFus
+            WRITE (6,
+     &'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
@@ -479,6 +505,9 @@ C-----
             WRITE (6,
      &'(''   CC+DWBA inelastic to discrete levels = '',
      &  G13.6,'' mb'')') SINl
+            WRITE (6,
+     &'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
             WRITE (6,
      &'(''   Spin distribution calculated using '',
      &  ''CC transmission coefficients'')')
@@ -489,6 +518,9 @@ C-----
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
      &  G13.6,'' mb'')') SINl
+            WRITE (6,
+     &'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
             WRITE (6,
      &'(''   Spin distribution does NOT contain'',
      &  '' DWBA inelastic contribution '')')
@@ -697,11 +729,11 @@ Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=49,60),i=1,nex(nnuc))
          ENDIF
 C--------locate residual nuclei
          DO nejc = 1, NEJcm
-	      NREs(nejc) = -1
+             NREs(nejc) = -1
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
-	      if(ares.le.4. and. zres.le.2.) cycle
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+             if(ares.le.4. and. zres.le.2.) cycle
             izares = INT(1000.0*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) THEN
@@ -730,13 +762,6 @@ C--------
             WRITE (6,*) ' '
          ENDIF          ! Degas done
 C--------
-C-------- PCROSS exciton model calculations of preequilibrium contribution
-C-------- including cluster emission by Iwamoto-Harada model
-C--------
-         IF (nnuc.EQ.1 .AND. EIN.GT.0.1D0 .AND. PEQc.GT.0) THEN
-            ftmp = CSFus*corrmsd
-            CALL PCROSS(ftmp)
-         ENDIF          ! PCRoss done
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
@@ -784,6 +809,25 @@ C--------
                CLOSE (8)
             ENDIF
          ENDIF
+
+         IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
+     &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1) + CSEmis(3,1))
+     &       .NE.0) THEN
+            WRITE (6,*) ' '
+            WRITE (6,*) ' Preequilibrium spectra (sum of all models):'
+            CALL AUERST(1,0)
+            CALL AUERST(1,1)
+            CALL AUERST(1,2)
+            CALL AUERST(1,3)
+            WRITE (6,*) ' '
+            IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
+               WRITE (6,*) ' HMS spectra stored as inclusive:'
+               CALL AUERST(0,1)
+               CALL AUERST(0,2)
+               WRITE (6,*) ' '
+            ENDIF
+         ENDIF
+
 C--------
 C--------Heidelberg Multistep Compound calculations
 C--------
@@ -793,22 +837,6 @@ C--------
             CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
             CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
             IF (nvwful) GOTO 1500
-         ENDIF
-         IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND. (CSEmis(1,1) + CSEmis(2,1))
-     &       .NE.0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) ' Preequilibrium spectra (sum of all models):'
-            CALL AUERST(1,0)
-            CALL AUERST(1,1)
-            CALL AUERST(1,2)
-C           IF(PEQc.GT.0) CALL AUERST(1, 3)
-            WRITE (6,*) ' '
-            IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
-               WRITE (6,*) ' HMS spectra stored as inclusive:'
-               CALL AUERST(0,1)
-               CALL AUERST(0,2)
-               WRITE (6,*) ' '
-            ENDIF
          ENDIF
 C--------
 C--------start Hauser-Feshbach nnuc nucleus decay
@@ -868,8 +896,8 @@ C--------------calculate population in the energy bin ke
                      GOTO 1470
                   ENDIF
                   DO nejc = 1, NEJcm !over ejectiles
-C                    EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
-	               if(NRES(nejc).lt.0) cycle
+C                    EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+                      if(NRES(nejc).lt.0) cycle
                      nnur = NREs(nejc)
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
                   ENDDO
@@ -1214,7 +1242,7 @@ C-----------CN contribution to elastic ddx
          WRITE (12,'('' g  emission cross section'',G12.5,'' mb'')')
      &          CSEmis(0,nnuc)
          DO nejc = 1, NEJcm
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
             if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
@@ -1464,7 +1492,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                   ENDIF
  1530          ENDDO  ! over ejectiles
 c              we have recoils printed later in the inclusive section
-c              IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc)) 
+c              IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc))
             ENDIF
          ENDIF
       ENDDO  ! over decaying nuclei
@@ -1607,7 +1635,7 @@ C-----------------------to conserve the integral
          ENDIF
       ENDIF
 C-----
-C-----ENDF spectra printout (inclusive representation) 
+C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (ENDf(1).EQ.2) THEN
 C     IF (ENDf(1).EQ.0) THEN
@@ -1652,7 +1680,7 @@ C--------neutrons
          ENDDO
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
-	   IF(nspec.gt.0) then
+          IF(nspec.gt.0) then
            IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
            WRITE (12,*) ' '
            WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
@@ -1668,10 +1696,10 @@ C--------protons
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
      &             (CSEa(ie,nang,2,0),nang = 1,NDANG)
            ENDDO
-	   ENDIF
+          ENDIF
 C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
-	   IF(nspec.gt.0) then
+          IF(nspec.gt.0) then
            IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
            WRITE (12,*) ' '
            WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
@@ -1691,7 +1719,7 @@ C--------alphas
 C--------light ions
          IF (NDEJC.EQ.4 .AND. NEMc.GT.0) THEN
            nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
-	     IF(nspec.gt.0) then
+            IF(nspec.gt.0) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
              WRITE (12,
@@ -1709,7 +1737,7 @@ C--------light ions
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)- Q(4,1),
      &                (CSEa(ie,nang,4,0),nang = 1,NDANG)
              ENDDO
-	     ENDIF
+            ENDIF
          ENDIF
       ENDIF
 C-----end of ENDF spectra (inclusive)
@@ -1745,8 +1773,8 @@ C        SAVING RANDOM SEEDS
          write(94,*)  indexf, indexb
          Do i = 1, 250
           write(94,*) buffer(i)
-         ENDDO 
-         CLOSE(94) 
+         ENDDO
+         CLOSE(94)
          STOP '.REGULAR STOP'
       ENDIF
       FIRst_ein = .FALSE.
@@ -1807,7 +1835,7 @@ C-----normalize recoil spectrum of the parent
       dang = 3.14159/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
-C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
          if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
 C--------decay to continuum
@@ -2130,7 +2158,7 @@ C-----------fission
          ENDIF
 C------------particles
          DO nejc = 1, NEJcm
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
             if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
@@ -2146,7 +2174,7 @@ C------------gammas
 C--------------no subbarrier effects
 C--------particles
       DO nejc = 1, NEJcm
-C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
          if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
          CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
