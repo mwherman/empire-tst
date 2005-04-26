@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-25 15:47:49 $
-Ccc   * $Id: tl.f,v 1.55 2005-04-25 15:47:49 Capote Exp $
+Ccc   * $Date: 2005-04-26 17:35:42 $
+Ccc   * $Id: tl.f,v 1.56 2005-04-26 17:35:42 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1553,11 +1553,11 @@ C-----Absorption cross section in mb
       DO l = 1, NDCOLLEV     ! number of inelastic level
          ilv = ICOller(l+1)
          IF (ilv.LE.NLV(nnuc)) then
-C          Discrete level scattering 
+C          Discrete level scattering
            READ (45,*,END = 400) dtmp
            SINl = SINl + dtmp
          ELSE
-C          Scattering into continuum 
+C          Scattering into continuum
            READ (45,*,END = 400) dtmp
            sinlcont = sinlcont + dtmp
          ENDIF
