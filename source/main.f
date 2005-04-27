@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-27 19:05:33 $
-Ccc   * $Id: main.f,v 1.74 2005-04-27 19:05:33 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-04-27 19:35:05 $
+Ccc   * $Id: main.f,v 1.75 2005-04-27 19:35:05 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -353,7 +353,7 @@ C        REWIND 15
          IF (NLW.LE.8) ltrmax = 2
          IF (NLW.LE.6) ltrmax = 1
 
-    	   WRITE(15,*) qmax,qstep,ltrmax
+         WRITE(15,*) qmax,qstep,ltrmax
 
          IF (MSD.NE.2) THEN
             q2 = qmax
@@ -375,12 +375,12 @@ C-----------set to Q's to 0 if negative due to rounding error
             GOTO 1420
          ENDIF
  1450    REWIND 15
-     	   READ(15,*) qmax,qstep,ltrmax
+         READ(15,*) qmax,qstep,ltrmax
          WRITE (6,*) ' '
          WRITE (6,*) ' '
          CALL ULM(1)
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
-	   CLOSE(15)
+         CLOSE(15)
       ENDIF
 
 C-------- PCROSS exciton model calculations of preequilibrium contribution
@@ -425,7 +425,7 @@ C         ENDDO
          WRITE (6,*) ' n PE emission cross section ', CSMsd(1), ' mb'
          WRITE (6,*) ' p PE emission cross section ', CSMsd(2), ' mb'
          WRITE (6,*) ' a PE emission cross section ', CSMsd(3), ' mb'
-	   IF(NEMc.GT.0) WRITE (6,*)
+         IF(NEMc.GT.0) WRITE (6,*)
      &     ' Cluster PE emission cross section ', CSMsd(ndejc), ' mb'
          WRITE (6,*) ' '
 C--------correct CN population for the PE emission
