@@ -9,6 +9,8 @@ c      8     MSD-Orion
 c      9     ddhms
 c     10     ddhms
 c     13     input
+c     15     MSD-Orion,MSD-Tristan
+c     16     MSD-Tristan
 c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
@@ -82,7 +84,7 @@ C-----fusion transmission coefficients from file FUSION
       OPEN(UNIT=14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
 C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
-      OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
+C     OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
       OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
       OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
       OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
