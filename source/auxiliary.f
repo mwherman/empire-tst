@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:12 $
-Ccc   * $Id: auxiliary.f,v 1.15 2005-03-11 17:22:12 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-27 19:08:25 $
+Ccc   * $Id: auxiliary.f,v 1.16 2005-04-27 19:08:25 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -41,24 +41,22 @@ C
       TOTcsfis = 0.0
       CRL = 0.0
       DENhf = 0.0
-      CSMsd(1) = 0.0
-      CSMsd(2) = 0.0
-      CSHms(1) = 0.0
-      CSHms(2) = 0.0
       DO nejc = 0, NDEJC
          CSEmis(nejc,0) = 0.0
+         CSMsd(nejc) = 0.0
+         CSHms(nejc) = 0.0
+         if (nejc.le.2) CSMsc(nejc) = 0.0
          DO necse = 1, NDECSE
             CSE(necse,nejc,0) = 0.0
+            CSEmsd(necse,nejc) = 0.0
+            CSEhms(necse,nejc) = 0.0
             CSEfis(necse,nejc) = 0.0
+            AUSpec(necse,nejc) = 0.0
             DO nang = 1, NDANG
                CSEa(necse,nang,nejc,0) = 0.0
+               CSEa(necse,nang,nejc,1) = 0.0
+               CSEahms(necse,nang,nejc) = 0.0
             ENDDO
-         ENDDO
-      ENDDO
-      DO necse = 1, NDECSE
-         DO nang = 1, NDANG
-            CSEahms(necse,nang,1) = 0.0
-            CSEahms(necse,nang,2) = 0.0
          ENDDO
       ENDDO
       DO nejc = 0, NEJcm
@@ -128,7 +126,7 @@ C
       DO nnuc = 1, NDNUCD
          DO necse = 0, NDEX_D
             DO inecse = 1, NDECSED
-               DO nejcd = 1, NDEJCD
+               DO nejcd = 0, NDEJCD
                   POPcseaf(necse,nejcd,inecse,nnuc) = 0.0
                ENDDO
                DO nejc = 0, NDEJC
@@ -149,18 +147,9 @@ C
             SCRtl(nnlv,nejc) = 0.0
          ENDDO
       ENDDO
-      DO necse = 1, NDECSE
-         CSEmsd(necse,1) = 0.0
-         CSEmsd(necse,2) = 0.0
-         CSEhms(necse,1) = 0.0
-         CSEhms(necse,2) = 0.0
-         DO nejc = 0, NDEJC
-            AUSpec(necse,nejc) = 0.0
-         ENDDO
-      ENDDO
       DO nang = 1, NDANG
          DO nnlv = 1, NDLV
-            DO nejc = 1, NDEJC
+            DO nejc = 0, NDEJC
                CSAlev(nang,nnlv,nejc) = 0.0
             ENDDO
          ENDDO
