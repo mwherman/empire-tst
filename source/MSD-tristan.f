@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-04-26 21:27:22 $
-Ccc   * $Id: MSD-tristan.f,v 1.32 2005-04-26 21:27:22 herman Exp $
+Ccc   * $Date: 2005-04-27 19:09:41 $
+Ccc   * $Id: MSD-tristan.f,v 1.33 2005-04-27 19:09:41 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -337,7 +337,7 @@ C
       ENDIF
       CALL RESPNS
       IF (KTRl(3).EQ.0) CALL SPECTR(nangle,2,nangle,nq12x,NEBinx,l12x,
-     &                              CROs2,crose,Nejc)
+     &                              CROs2,crose,Nejc,XSInl)
       CLOSE (16)
 99065 FORMAT ('1')
       END
@@ -2382,7 +2382,7 @@ C
 99999 END
 C
       SUBROUTINE SPECTR(Idimm,Kdim,Ngle,Nq12x,Nbinx,Lc12x,Cros,Crose,
-     &                  Nejc)
+     &                  Nejc, Xsinl)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2393,7 +2393,8 @@ C
      &                 EOUtmi, EOUtmx, ESTep, ETMax, ETMin, EXTcom(10), 
      &                 FAC1d(2), FAC2d(2), FAC3d(2), FACb, FFTot(10), 
      &                 Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, QSTep, 
-     &                 RHOb(301,11,2), ROPt, THEta1, THEta2, WIDex
+     &                 RHOb(301,11,2), ROPt, THEta1, THEta2, WIDex,
+     &                 Xsinl
       INTEGER IC12x, IC1mx, IC1mxr, IC2mx, IC2mxr, ICMax, KDEnvi, KEX3, 
      &        KEXcom(10), KRTmax, KRType, KTRl(10), LC1mx, LC2mx, 
      &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10),
@@ -2843,7 +2844,7 @@ C-----------------store ddx to continuum
      &                THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
 C-----------------discrete level region is not needed since spectra are
-C-----------------constructed out of discrte levels
+C-----------------constructed out of discrete levels
                   ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
      &                    ) THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
@@ -2866,8 +2867,8 @@ C-----if ECIS active use only continuum part of the MSD spectrum
          CALL LSQLEG(CANgler,csfit,nangle,qq,5,adum,ier)
          piece = 4.0*3.14159*qq(1)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
-         XSinl = XSinl + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
+         Xsinl = Xsinl + piece*DE
       ENDDO
 C-----angular distributions integration *** done ***
 99020 FORMAT (' ',F6.2,6E11.4,4X,6F9.4)
@@ -2883,11 +2884,11 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
 Ccc   *                         A C C U M S D                            *
 Ccc   *                                                                  *
-Ccc   * Distributes MSD spectrum over the residual nucleus continuum     *
+Ccc   * Distributes PE spectrum over the residual nucleus continuum     *
 Ccc   * assuming that the spin distribution is proportional to the       *
 Ccc   * spin distribution of the 2-exciton states.                       *
 Ccc   *                                                                  *
-Ccc   * It distributes also MSD contribution over the discrete levels    *
+Ccc   * It distributes also PE contribution over the discrete levels    *
 Ccc   * in a very crude and arbitrary way, feeding essentially 2+ and    *
 Ccc   * 3- (also 4+) states possibly close to the collective states      *
 Ccc   * of these multipolarities.                                        *
@@ -2928,7 +2929,7 @@ C----- CONTINUUM
 C-----
       excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
 C-----number of spectrum bins to continuum WARNING! might be negative!
-      nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
+      nexrt = MIN(INT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C-----total number of bins
       next = INT(excnq/DE + 1.0001)
 C-----calculate spin distribution for 1p-1h states
@@ -3002,7 +3003,9 @@ C-----
 C----- DISCRETE LEVELS
 C-----
 C-----return if MSD to discrte levels not used (matrix IDNa)
-      IF (IDNa(2*Nejc - 1,2).EQ.0) RETURN
+      IF (Nejc.eq.0 .or. Nejc.gt.2) return
+      IF (Nejc.eq.1 .and. IDNa(1,2).EQ.0) return
+      IF (Nejc.eq.2 .and. IDNa(3,2).EQ.0) return
 C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
