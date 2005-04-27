@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 17:31:54 $
-Ccc   * $Id: main.f,v 1.73 2005-04-26 17:31:54 Capote Exp $
+Ccc   * $Date: 2005-04-27 19:05:33 $
+Ccc   * $Id: main.f,v 1.74 2005-04-27 19:05:33 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -62,7 +62,7 @@ C
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec
       INTEGER INT, MIN0, NINT
-      LOGICAL nvwful
+      LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
       DATA ctldir/'../TL/'/
@@ -194,13 +194,14 @@ C------------avoid reading closed channels
              IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
      &       THEN
                READ (46,*,END = 1400) popread
+C
+C              This level is not counted as a discrete one
+C              but it is embedded in the continuum
+C
 C              ncoll = i
-C              if(nejcec.eq.1) CSMsd(1) = CSMsd(1) + popread
-C              if(nejcec.eq.2) CSMsd(2) = CSMsd(2) + popread
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
-
                READ (45,*,END = 1400)     ! Skipping level identifier line
 C--------------Empire uses 10 deg grid for inelastic so we have to take
 C--------------each 4th result from ECIS (2.5 deg grid)
@@ -323,8 +324,27 @@ C-----calculate MSD contribution
 C-----
       corrmsd = 1.0
       IF (MSD.NE.0 .AND. EIN.GT.1.D0) THEN
+C
 C--------call ORION
-         REWIND 15
+C
+C--------This part prompts for the name of a data file. The INQUIRE
+C--------statement then determines whether or not the file exists.
+C--------If it does not, the program start new calculations
+         WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)')
+     &       INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
+     &       INT(A(0)), INT(EINl*1000)
+         INQUIRE (FILE = (ctldir//ctmp20//'.MSD'),EXIST = fexist)
+         IF (.NOT.fexist) THEN
+           OPEN (15,FILE = (ctldir//ctmp20//'.MSD'),STATUS='NEW')
+         ELSE
+           OPEN (15,FILE = (ctldir//ctmp20//'.MSD'),STATUS='OLD')
+           WRITE (6,*) ' '
+           WRITE (6,*) 
+     &       ' Using precalculated ORION results for E=',EINl,' MeV'
+           WRITE (6,*) ' '
+           GOTO 1450
+         ENDIF 
+C        REWIND 15
          WRITE (6,*) ' '
          qmax = 0.99*EIN
          qstep = qmax/3.0
@@ -332,6 +352,9 @@ C--------call ORION
          IF (NLW.LE.10) ltrmax = 3
          IF (NLW.LE.8) ltrmax = 2
          IF (NLW.LE.6) ltrmax = 1
+
+    	   WRITE(15,*) qmax,qstep,ltrmax
+
          IF (MSD.NE.2) THEN
             q2 = qmax
             q3 = qmax
@@ -352,11 +375,12 @@ C-----------set to Q's to 0 if negative due to rounding error
             GOTO 1420
          ENDIF
  1450    REWIND 15
+     	   READ(15,*) qmax,qstep,ltrmax
          WRITE (6,*) ' '
          WRITE (6,*) ' '
          CALL ULM(1)
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
-
+	   CLOSE(15)
       ENDIF
 
 C-------- PCROSS exciton model calculations of preequilibrium contribution
@@ -386,7 +410,10 @@ C        DO nejc = 0,NDEjc
               WRITE (6,'('' Energy  '',11(4X,F5.1,2X))')
      &                (ANGles(ia),ia = iad,iam)
               WRITE (6,*) ' '
-              DO i = 1, NEX(1)
+C-------------Maximum and minimum energy bin
+              echannel = EX(NEX(1),1) - Q(nejc,1)
+C-------------last continuum energy bin is calculated
+              DO i = 1, MAX( INT(echannel/DE + 1.0001),1)
                 WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
      &                   (CSEa(i,iang,nejc,1),iang = iad,iam)
               ENDDO
@@ -398,6 +425,8 @@ C         ENDDO
          WRITE (6,*) ' n PE emission cross section ', CSMsd(1), ' mb'
          WRITE (6,*) ' p PE emission cross section ', CSMsd(2), ' mb'
          WRITE (6,*) ' a PE emission cross section ', CSMsd(3), ' mb'
+	   IF(NEMc.GT.0) WRITE (6,*)
+     &     ' Cluster PE emission cross section ', CSMsd(ndejc), ' mb'
          WRITE (6,*) ' '
 C--------correct CN population for the PE emission
          corrmsd = (CSFus - (xsinl + xsinlcont + totemis))/CSFus
@@ -495,9 +524,10 @@ C-----
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
      &  '' mb including'')') CSFus
-            WRITE (6,
-     &'(''   PE inelastic to continuum = '',
-     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
+            WRITE (6,'(''   DWBA to continuum = '',
+     &  G13.6,'' mb'')') xsinlcont
+            WRITE (6,'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + totemis
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
@@ -505,9 +535,10 @@ C-----
             WRITE (6,
      &'(''   CC+DWBA inelastic to discrete levels = '',
      &  G13.6,'' mb'')') SINl
-            WRITE (6,
-     &'(''   PE inelastic to continuum = '',
-     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
+            WRITE (6,'(''   DWBA to continuum = '',
+     &  G13.6,'' mb'')') xsinlcont
+            WRITE (6,'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + totemis
             WRITE (6,
      &'(''   Spin distribution calculated using '',
      &  ''CC transmission coefficients'')')
@@ -518,9 +549,10 @@ C-----
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
      &  G13.6,'' mb'')') SINl
-            WRITE (6,
-     &'(''   PE inelastic to continuum = '',
-     &  G13.6,'' mb'')') xsinl + xsinlcont + totemis
+            WRITE (6,'(''   DWBA to continuum = '',
+     &  G13.6,'' mb'')') xsinlcont
+            WRITE (6,'(''   PE inelastic to continuum = '',
+     &  G13.6,'' mb'')') xsinl + totemis
             WRITE (6,
      &'(''   Spin distribution does NOT contain'',
      &  '' DWBA inelastic contribution '')')
