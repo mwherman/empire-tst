@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-04-26 21:27:22 $
-Ccc   * $Id: HRTW-comp.f,v 1.23 2005-04-26 21:27:22 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-04-27 19:07:24 $
+Ccc   * $Id: HRTW-comp.f,v 1.24 2005-04-27 19:07:24 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1371,7 +1371,7 @@ C-----channel spin min and max
          lmax = MIN0(NDLW,lmax)
          lmax = MIN0(maxlw,lmax)
          DO k = lmin, lmax
-            IF (PAR(Ip,LVP(LEVtarg,0),k - 1).NE.0.0D0) THEN
+            IF (PAR(Ip,LVP(LEVtarg,Ntrg),k - 1).NE.0.0D0) THEN
                IF (Ich.GT.NDHRTW2) THEN
                   WRITE (6,*) ' '
                   WRITE (6,*) 'E R R O R !'
