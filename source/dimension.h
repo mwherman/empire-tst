@@ -1,5 +1,5 @@
       PARAMETER(
-     * NDNUC= 100
+     * NDNUC= 70
      *,NDEJC=4
      *,NDAFIS=1
      *,NDEX= 101
@@ -14,7 +14,7 @@
      *,NDECSED=NDECSE
      *,NDANGD=NDANG
      *,NDEX_D=NDEX
-     *,NDEJCD=2
+     *,NDEJCD=NDEJC
      *,NDVOM=7
      *,NDWOM=7
      *,NDVSO=7
