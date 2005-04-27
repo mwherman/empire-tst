@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 19:55:12 $
-Ccc   * $Id: input.f,v 1.104 2005-04-26 19:55:12 Capote Exp $
+Ccc   * $Date: 2005-04-27 19:03:04 $
+Ccc   * $Id: input.f,v 1.105 2005-04-27 19:03:04 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -175,7 +175,7 @@ C-----------set level density parameters
             ROPar(2,nnuc) = 0.
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
-            ATIlnor(nnuc) = 1.
+            ATIlnor(nnuc) = 0.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 0
 C-----------set ENDF flag to 0 (no ENDF formatting)
@@ -1687,16 +1687,19 @@ C-----set ground state *** done ***
       LREad = .TRUE.
       izatmp = INT(1000*iz + ia)
       DO itmp = 0,NDNuc
-         IF(NSTOred(itmp).eq.izatmp) THEN
-           LREad = .FALSE.
-           GOTO 50
-         ENDIF
+          IF(NSTOred(itmp).eq.izatmp) THEN
+            LREad = .FALSE.
+            GOTO 50
+          ENDIF
       ENDDO
 
    50 IF(.NOT.LREAD) then
           NLV(Nnuc) = NLV(itmp)
           NCOmp(Nnuc) = NCOmp(itmp)
           DO ilv = 1, NLV(Nnuc)
+            ELV(ilv,Nnuc) = ELV(ilv,itmp)
+            XJLv(ilv,Nnuc) = XJLv(ilv,itmp)
+            LVP(ilv,Nnuc) = LVP(ilv,itmp)
             DO nbr = 1, NDBR
                BR(ilv,nbr,1,Nnuc) = BR(ilv,nbr,1,itmp)
                BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,itmp)
@@ -2058,11 +2061,11 @@ C--------create file with levels xxx.lev
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
 C           RCN, 04/2005  duplicate levels found !!
-C           WRITE (14,'(A110)') ch_iuf
+            WRITE (14,'(A110)') ch_iuf
             DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
 C              RCN, 04/2005  duplicate levels found !!
-C              WRITE (14,'(A110)') ch_iuf
+               WRITE (14,'(A110)') ch_iuf
             ENDDO
             DO ilv = 1, nlvr + ngamr
                BACKSPACE (13)
@@ -4192,9 +4195,9 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
 Ccc   *                         R E A D L D P                            *
 Ccc   *                                                                  *
-Ccc   *     Reads level density paprameter according to Mebel and        *
+Ccc   *     Reads level density parameter according to Mebel and         *
 Ccc   *     the discrete level below which the decay scheme is complete  *
-Ccc   *     as determined by Mollnar (see RIPL CRP) from file 24         *
+Ccc   *     as determined by Molnar-Belgya (see RIPL CRP) from file 24   *
 Ccc   *     File 24 is organized in the following way:                   *
 Ccc   *     Z*1000+A                                                     *
 Ccc   *     NLEVC number of the level (NLEVC=1 for g.s.)                 *
