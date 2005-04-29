@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-23 17:07:18 $
-Ccc   * $Id: HF-comp.f,v 1.51 2005-04-23 17:07:18 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-04-29 17:39:27 $
+Ccc   * $Id: HF-comp.f,v 1.52 2005-04-29 17:39:27 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -805,7 +805,7 @@ C
             lambmax = xjc + xjr + 0.001
             lambmax = MIN0(lambmax,MAXmult)
             IF(lambmin.LE.lambmax)THEN
-	         scrtpos = 0.0
+               scrtpos = 0.0
                scrtneg = 0.0
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
@@ -819,7 +819,7 @@ C
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
             ENDIF
-	   ENDDO
+      ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***-----------------------
@@ -1033,7 +1033,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
                  ENDIF
                ENDDO
             ENDIF
-	   ENDDO
+          ENDDO
            SCRt(ier, Jc, ipos, 0) = sump
            SCRt(ier, Jc, ineg, 0) = sumn
         ENDIF
