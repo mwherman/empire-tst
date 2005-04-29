@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-03-11 17:22:13 $
-Ccc   * $Id: lev-dens.f,v 1.35 2005-03-11 17:22:13 herman Exp $
+Ccc   * $Date: 2005-04-29 17:40:27 $
+Ccc   * $Id: lev-dens.f,v 1.36 2005-04-29 17:40:27 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -272,7 +272,7 @@ C-----------rotation parallel to the symmetry axis
          ENDIF
       ENDDO
   100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
-     &        *(vibrk - qv*(vibrk - 1.))
+     &        *(qv - vibrk*(qv - 1.))
       END
  
  
@@ -2205,7 +2205,7 @@ C        u = e - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
          ENDIF
       ENDDO
   100 RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
-     &         *(vibrk - qv*(vibrk - 1.))
+     &         *(qv - vibrk*(qv - 1.))
       IF (Iff.EQ.2) RODEFF = RODEFF*2.*SQRT(2.*pi)*SQRT(Mompar*t)
       IF (Iff.EQ.3) RODEFF = RODEFF*2.
       IF (Iff.EQ.4) RODEFF = RODEFF*4.*SQRT(2.*pi)*SQRT(Mompar*t)
