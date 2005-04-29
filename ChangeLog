@@ -1,5 +1,13 @@
+1. Bug in print.f fixed (R. Capote)
+2. Correction to the vibrational-rotational input model routine 
+   preparing ECIS input inside tl.f (H. Wienke)
+3. Vibrational enhancement in level densities and its damping corrected
+   (M. Herman).
 
-             Changes in version 2.19beta12 with respect to 2.18  
+        
+        
+        
+        Changes in version 2.19beta12 with respect to 2.18  
                       Brookhaven, February  2004
 
 1.  Error in the Wilmore-Hodgson omp corrected.
