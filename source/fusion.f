@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:56:04 $
-Ccc   * $Id: fusion.f,v 1.39 2005-04-10 21:56:04 Capote Exp $
+Ccc   * $Date: 2005-05-01 21:14:02 $
+Ccc   * $Id: fusion.f,v 1.40 2005-05-01 21:14:02 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -474,12 +474,11 @@ C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
 C--------IWARN=3 - 'Energy requested lower than recommended for this potential'
 C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
-         IF (IWArn.EQ.1 .AND. FIRst_ein) WRITE (6,*)
-     &        ' WARNING: OMP not recommended for A=', A(Ntrg)
-         IF (IWArn.EQ.2 .AND. FIRst_ein) WRITE (6,*)
-     &        ' WARNING: OMP not recommended for Z=', Z(Ntrg)
-         IF (IWArn.EQ.3 .OR. IWArn.EQ.4) WRITE (6,*)
-     &        ' WARNING: OMP not recommended for E=', EINl
+         IF ((IWArn.EQ.1 .or. IWArn.EQ.2) .AND. FIRst_ein 
+     &       .AND. IOUt.GE.5) WRITE (6,*) ' WARNING: ',KTRlom(0,0), 
+     &   ' OMP not recommended for target Z,A=', Z(Ntrg),'-',(Ntrg)
+         IF ((IWArn.EQ.3 .OR. IWArn.EQ.4) .AND. IOUt.GE.5) WRITE (6,*)
+     &      ' WARNING: ',KTRlom(0,0),' OMP not recommended for E=', EINl
          IWArn = 0
       ELSEIF (KTRlom(Npro,Ntrg).EQ.0) THEN
 C--------calculation of h.i. transmission coefficients for fusion
