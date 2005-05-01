@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-04-27 19:09:41 $
-Ccc   * $Id: MSD-tristan.f,v 1.33 2005-04-27 19:09:41 Capote Exp $
+Ccc   * $Date: 2005-05-01 21:15:53 $
+Ccc   * $Id: MSD-tristan.f,v 1.34 2005-05-01 21:15:53 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2927,7 +2927,11 @@ C
 C-----
 C----- CONTINUUM
 C-----
-      excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
+      IF (Nnuc.EQ.Nnur) THEN
+         excnq = EX(NEX(Nnuc),Nnuc)
+      ELSE
+         excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
+      ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = MIN(INT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C-----total number of bins
@@ -3003,7 +3007,8 @@ C-----
 C----- DISCRETE LEVELS
 C-----
 C-----return if MSD to discrte levels not used (matrix IDNa)
-      IF (Nejc.eq.0 .or. Nejc.gt.2) return
+C     IF (Nejc.eq.0 .or. Nejc.gt.2) return
+      IF (Nejc.eq.0 .or. Nejc.gt.3) return
       IF (Nejc.eq.1 .and. IDNa(1,2).EQ.0) return
       IF (Nejc.eq.2 .and. IDNa(3,2).EQ.0) return
 C-----discrete level contribution to recoil spectra
