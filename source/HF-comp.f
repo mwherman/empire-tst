@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-04-29 17:39:27 $
-Ccc   * $Id: HF-comp.f,v 1.52 2005-04-29 17:39:27 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-01 21:17:29 $
+Ccc   * $Id: HF-comp.f,v 1.53 2005-05-01 21:17:29 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -11,7 +11,7 @@ Ccc   *                                                         class:mpu*
 Ccc   *                         A C C U M                                *
 Ccc   *                                                                  *
 Ccc   * Normalizes scratch arrays SCRT and SCRTL with the population     *
-Ccc   * divided by the H-F denominator and accumulates the rsult on the  *
+Ccc   * divided by the H-F denominator and accumulates the result on the *
 Ccc   * population array POP for a given nucleus NNUR                    *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
@@ -46,7 +46,7 @@ C
      &                 popll, pops, popt, xcse
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, na, nang, nexrt
-      INTEGER INT, MAX0
+      INTEGER INT
 C-----
 C-----Continuum
 C-----
@@ -55,11 +55,12 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-      nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
-      DO ie = 1, nexrt                      !loop over residual energies (continuum)
-         icse = (excnq - EX(ie,Nnur))/DE + 1.0001
+C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
+      nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
+	DO ie = 1, nexrt          !loop over residual energies (continuum)
+         icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)	    
          popt = 0.0
-         DO j = 1, NLW, LTUrbo              !loop over residual spins
+         DO j = 1, NLW, LTUrbo  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
             pop2 = Xnor*SCRt(ie,j,2,Nejc)
             pops = pop1 + pop2
@@ -97,33 +98,24 @@ C--------Add contribution to recoils auxiliary matrix for discrete levels
          REClev(il,Nejc) = REClev(il,Nejc) + pop1
 C--------Add contribution of discrete levels to emission spectra
 C--------Transitions to discrete levels are distributed
-C--------between the nearest spectrum bins (inversly proportional to the
+C--------between the nearest spectrum bins (inversely proportional to the
 C--------distance of the actual energy to the bin energy
 C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR. 
      &       Nejc.EQ.0) THEN
             xcse = eemi/DE + 1.0001
-            icsl = INT(xcse)
+            icsl = min(INT(xcse),NDECSE-1)
             icsh = icsl + 1
             popl = pop1*(FLOAT(icsh) - xcse)/DE
             popll = popl            !we also need popl not multiplied by 2
             IF (icsl.EQ.1) popl = 2.0*popl
             poph = pop1*(xcse - FLOAT(icsl))/DE
-            IF (icsl.LE.NDECSE) THEN
-               CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
-               IF (ENDf(Nnuc).EQ.1 .AND. popll.NE.0.0D+0)
-     &             CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
-            ENDIF
-            IF (icsh.LE.NDECSE) THEN
-               CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
-               IF (ENDf(Nnuc).EQ.1 .AND. poph.NE.0.0D+0)
-     &             CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
-            ELSE
-               WRITE (6,*) ' '
-               WRITE (6,*) 
-     &                    ' OOPS! I AM OUT OF NDECSE DIMENSION IN ACCUM'
-               STOP
-            ENDIF
+            CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
+            IF (ENDf(Nnuc).EQ.1 .AND. popll.NE.0.0D+0)
+     &          CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
+            CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
+            IF (ENDf(Nnuc).EQ.1 .AND. poph.NE.0.0D+0)
+     &          CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
          ENDIF
 C--------Add isotropic CN contribution to direct ang. distributions
          IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
@@ -231,8 +223,9 @@ C-----DE spectra
      &             POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &             + POPcse(Iec,iejc,ie,Nnuc)*xnor
             ENDDO
-C--------neutron and proton DDX spectra using portions
-            DO iejc = 1, NDEJCD
+C-----------DDX spectra using portions
+C           DO iejc = 1, NDEJCD
+            DO iejc = 0, NDEJCD
                IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
      &             POPcseaf(Ief,iejc,ie,Nnur)
      &             = POPcseaf(Ief,iejc,ie,Nnur)
@@ -311,8 +304,9 @@ C-----DE spectra
      &                = POPcse(0,iejc,iesp,Nnur)
      &                + POPcse(Iec,iejc,iesp,Nnuc)*xnor
                ENDDO
-C-----------neutron and proton DDX spectra using portions
-               DO iejc = 1, NDEJCD
+C--------------DDX spectra using portions
+C              DO iejc = 1, NDEJCD
+               DO iejc = 0, NDEJCD
                   IF (POPcseaf(Iec,iejc,iesp,Nnuc).NE.0)
      &                POPcseaf(0,iejc,iesp,Nnur)
      &                = POPcseaf(0,iejc,iesp,Nnur)
@@ -599,8 +593,7 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
-C           icse = 2.0001 + egd/DE	    
-            icse = min(NINT(1 + egd/DE),ndecse)
+            icse = min(INT(2.0001 + egd/DE),ndecse)	    
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive gamma spectrum
@@ -634,8 +627,7 @@ C-----------Add transition to the exclusive gamma spectrum
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-C                 icse = 2.0001 + egd/DE
-                  icse = min(NINT(1 + egd/DE),ndecse)		  
+                  icse = min(INT(2.0001 + egd/DE),ndecse)		  
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
@@ -805,7 +797,7 @@ C
             lambmax = xjc + xjr + 0.001
             lambmax = MIN0(lambmax,MAXmult)
             IF(lambmin.LE.lambmax)THEN
-               scrtpos = 0.0
+	         scrtpos = 0.0
                scrtneg = 0.0
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
@@ -819,7 +811,7 @@ C
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
             ENDIF
-      ENDDO
+	   ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***-----------------------
@@ -839,9 +831,9 @@ C-----
       IF (RORed.NE.0.0D0) THEN
 C-----do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
-            lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
-            lmax = xjc + XJLv(i,Nnuc) + 0.001
-C-----------Plujko_new-2005
+          lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
+          lmax = xjc + XJLv(i,Nnuc) + 0.001
+C---------Plujko_new-2005
           lambmin = MAX0(1,lmin)
           lambmax = MIN0(lmax,MAXmult)
           IF(lambmin.LE.lambmax)THEN
@@ -1033,7 +1025,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
                  ENDIF
                ENDDO
             ENDIF
-          ENDDO
+	   ENDDO
            SCRt(ier, Jc, ipos, 0) = sump
            SCRt(ier, Jc, ineg, 0) = sumn
         ENDIF

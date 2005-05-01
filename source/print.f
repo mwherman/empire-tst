@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 17:34:47 $
-Ccc   * $Id: print.f,v 1.10 2005-04-26 17:34:47 Capote Exp $
+Ccc   * $Date: 2005-05-01 21:12:46 $
+Ccc   * $Id: print.f,v 1.11 2005-05-01 21:12:46 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -47,8 +47,8 @@ C
          IF (CSE(i,Nejc,Nnuc).GT.1.D-15) kmax = i
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
-      IF (csemax.LE.1.D-15) RETURN
-      kmax = kmax + 2
+      IF (csemax.LE.1.D-06) RETURN
+      kmax = kmax + 1
       kmax = MIN0(NDEX,kmax,NDECSE)
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
@@ -59,7 +59,7 @@ C
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
          WRITE (6,99005)
-99005    FORMAT (1X,///,1X,54('*'),1X,'Gamma spectrum  ',54('*'),//)
+99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
       ELSE
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (6,99015)
@@ -114,6 +114,7 @@ C
       WRITE (6,99045)
       totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
-      WRITE (6,*) ' Integrated spectrum ', totspec, ' mb'
+      WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
+     &          totspec
 99045 FORMAT (24X,93('-'))
       END
