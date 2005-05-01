@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 17:35:42 $
-Ccc   * $Id: tl.f,v 1.56 2005-04-26 17:35:42 Capote Exp $
+Ccc   * $Date: 2005-05-01 21:13:26 $
+Ccc   * $Id: tl.f,v 1.57 2005-05-01 21:13:26 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1169,13 +1169,11 @@ C-----IWARN=1 - 'A out of the recommended range '
 C-----IWARN=2 - 'Z out of the recommended range '
 C-----IWARN=3 - 'Energy requested lower than recommended for this potential'
 C-----IWARN=4 - 'Energy requested higher than recommended for this potential'
-      IF (IWArn.EQ.1 .AND. IOUt.GE.3) WRITE (6,*)
-     &     ' WARNING: OMP not recommended for A=', A(Nnuc)
-      IF (IWArn.EQ.2 .AND. IOUt.GE.3) WRITE (6,*)
-     &     ' WARNING: OMP not recommended for Z=', Z(Nnuc)
-      IF (IWArn.EQ.3 .AND. IOUt.GE.3) WRITE (6,*)
+      IF ((IWArn.EQ.1 .OR. IWArn.EQ.2) .AND. IOUt.GE.5) WRITE (6,*)
+     &  ' WARNING: OMP not recommended for Z,A=', Z(Nnuc),'-',A(Nnuc)
+      IF (IWArn.EQ.3 .AND. IOUt.GE.5) WRITE (6,*)
      &     ' WARNING: OMP not recommended for low energies in Tl calc'
-      IF (IWArn.EQ.4 .AND. IOUt.GE.3) WRITE (6,*)
+      IF (IWArn.EQ.4 .AND. IOUt.GE.5) WRITE (6,*)
      &     ' WARNING: OMP not recommended for high energies in Tl calc'
       IWArn = 0
 C--------transfer of the calculated transmission coeff. onto TL matrix
