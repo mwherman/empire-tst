@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-01 21:16:50 $
-Ccc   * $Id: main.f,v 1.76 2005-05-01 21:16:50 Capote Exp $
+Ccc   * $Date: 2005-05-02 06:27:53 $
+Ccc   * $Id: main.f,v 1.77 2005-05-02 06:27:53 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1293,6 +1293,10 @@ C-----------CN contribution to elastic ddx
 C----------------------------------------------------------------------
          DO nejc = 1, NEJcm
 C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+            WRITE (12,
+     &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
+     &             SYMbe(nejc), CSEmis(nejc,nnuc)
+
             if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             IF( CSEmis(nejc,nnuc).lt.1.e-6) cycle 
@@ -1300,9 +1304,6 @@ C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
             IF (IOUt.GT.0) WRITE (6,
      &               '(2X,A2,'' emission cross section'',G12.5,'' mb'')'
      &               ) SYMbe(nejc), CSEmis(nejc,nnuc)
-            WRITE (12,
-     &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
-     &             SYMbe(nejc), CSEmis(nejc,nnuc)
 C-----------print residual nucleus population
             IF (IOUt.EQ.4) THEN
                ia = INT(A(nnur))
@@ -1421,7 +1422,7 @@ C-----------------multiplies cross sections and divides outgoing energies
                   recorp = 1.0
                   IF (nejc.GT.0) recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 C-----------------Exclusive DDX spectra (neutrons & protons)
-                  IF (nejc.GE.1 .AND. nejc.LE.NDEJCD) THEN
+                  IF (nejc.GE.1 .AND. nejc.LE.2) THEN
                      WRITE (12,
      &                      '(30X,''A     n     g     l     e     s '')'
      &                      )
@@ -1520,8 +1521,10 @@ C-----------------------remaining n- or p-emissions (continnum and levels togeth
      &     (CSEa(ie,nang,nejc,0)*recorp,nang = 1,NDANG)
                         ENDDO
                      ENDIF
-C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
+
                   ELSE
+C--------------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
+C
 C--------------------double the first bin x-sec to preserve integral in EMPEND
                      POPcse(0,nejc,1,nnuc) = POPcse(0,nejc,1,nnuc)*2
                      WRITE (12,*) ' '
@@ -1625,7 +1628,7 @@ C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
-         IF (ENDf(nnuc).EQ.2.0D0) THEN
+         IF (ENDf(nnuc).GT.0.0D0) THEN
             DO nejc = 0, NEJcm
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
