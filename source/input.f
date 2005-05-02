@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-02 00:56:15 $
-Ccc   * $Id: input.f,v 1.106 2005-05-02 00:56:15 herman Exp $
+Ccc   * $Date: 2005-05-02 01:03:08 $
+Ccc   * $Id: input.f,v 1.107 2005-05-02 01:03:08 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2911,7 +2911,7 @@ C
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
                WRITE (6,
      &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
@@ -2946,7 +2946,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
                WRITE (6,
      &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
@@ -2981,7 +2981,7 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
                WRITE (6,
      &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
@@ -3017,7 +3017,7 @@ C
                GOTO 100
             ENDIF
                 IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
                WRITE (6,
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
