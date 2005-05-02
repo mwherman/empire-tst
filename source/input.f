@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-27 19:03:04 $
-Ccc   * $Id: input.f,v 1.105 2005-04-27 19:03:04 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-02 00:56:15 $
+Ccc   * $Id: input.f,v 1.106 2005-05-02 00:56:15 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2874,12 +2874,12 @@ C
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2,)') i3
+            IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
                WRITE (6,
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
-                ENDIF
+            ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Real volume potential depth uncertainty in '',I3,A2,
