@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-02 06:27:53 $
-Ccc   * $Id: main.f,v 1.77 2005-05-02 06:27:53 Capote Exp $
+Ccc   * $Date: 2005-05-02 07:29:34 $
+Ccc   * $Id: main.f,v 1.78 2005-05-02 07:29:34 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -101,6 +101,7 @@ C
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000)
 C     TOTcs, ABScs,ELAcs are initialized within MARENG()
       xsinlcont = 0.d0
+      xsinl = 0.d0
 
       ncoll = 0
       nelang = 73
@@ -2101,6 +2102,7 @@ C
       INTEGER k, kk, m
       IF (Ifluct.EQ.0) Dencomp = DENhf
       Aafis = 0.
+      cota1 = 0.d0 
       IF (FISmod(Nnuc).EQ.0.) THEN
          CALL FISFIS(Nnuc,Ke,Ip,Jcn,Sumfis,0)
          IF (FISopt(Nnuc).GT.0.) THEN

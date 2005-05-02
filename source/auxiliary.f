@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-27 19:08:25 $
-Ccc   * $Id: auxiliary.f,v 1.16 2005-04-27 19:08:25 Capote Exp $
+Ccc   * $Date: 2005-05-02 07:29:25 $
+Ccc   * $Id: auxiliary.f,v 1.17 2005-05-02 07:29:25 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -111,15 +111,6 @@ C
             CSEmis(nejc,nnuc) = 0.0
             DO necse = 1, NDECSE
                CSE(necse,nejc,nnuc) = 0.0
-            ENDDO
-         ENDDO
-      ENDDO
-      DO nnuc = 0, NDEJCD - 1
-         DO nejc = 0, NDEJC
-            DO necse = 1, NDECSE
-               DO nang = 1, NDANG
-                  CSEa(necse,nang,nejc,nnuc) = 0.0
-               ENDDO
             ENDDO
          ENDDO
       ENDDO
