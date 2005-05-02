@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-01 21:13:26 $
-Ccc   * $Id: tl.f,v 1.57 2005-05-01 21:13:26 Capote Exp $
+Ccc   * $Date: 2005-05-02 07:30:03 $
+Ccc   * $Id: tl.f,v 1.58 2005-05-02 07:30:03 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3597,17 +3597,18 @@ C
       END
 
 
-      REAL*8 FUNCTION WVF(A,B,Ep,Ef,E,N)
+      REAL*8 FUNCTION WVF(A,B,Ep,Ef,Er,N)
 C
 C Dummy arguments
 C
-      REAL*8 A, B, E, Ef, Ep
+      REAL*8 A, B, Er, Ef, Ep
       INTEGER N
 C
 C Local variables
 C
-      REAL ee
+      REAL ee,E
       WVF = 0.D0
+      E = Er 
       IF (E.LE.Ef) E = 2.D0*Ef - E
       IF (E.LE.Ep) RETURN
       ee = (E - Ep)**N
