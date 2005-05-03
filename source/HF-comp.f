@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-01 21:17:29 $
-Ccc   * $Id: HF-comp.f,v 1.53 2005-05-01 21:17:29 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-03 16:09:58 $
+Ccc   * $Id: HF-comp.f,v 1.54 2005-05-03 16:09:58 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -57,8 +57,8 @@ C-----
       ENDIF
 C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
-	DO ie = 1, nexrt          !loop over residual energies (continuum)
-         icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)	    
+      DO ie = 1, nexrt          !loop over residual energies (continuum)
+         icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)    
          popt = 0.0
          DO j = 1, NLW, LTUrbo  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
@@ -593,7 +593,7 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
-            icse = min(INT(2.0001 + egd/DE),ndecse)	    
+            icse = min(INT(2.0001 + egd/DE),ndecse)    
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive gamma spectrum
@@ -627,7 +627,7 @@ C-----------Add transition to the exclusive gamma spectrum
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-                  icse = min(INT(2.0001 + egd/DE),ndecse)		  
+                  icse = min(INT(2.0001 + egd/DE),ndecse)  
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
@@ -797,7 +797,7 @@ C
             lambmax = xjc + xjr + 0.001
             lambmax = MIN0(lambmax,MAXmult)
             IF(lambmin.LE.lambmax)THEN
-	         scrtpos = 0.0
+            scrtpos = 0.0
                scrtneg = 0.0
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
@@ -811,7 +811,7 @@ C
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
             ENDIF
-	   ENDDO
+           ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***-----------------------
@@ -1025,7 +1025,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
                  ENDIF
                ENDDO
             ENDIF
-	   ENDDO
+           ENDDO
            SCRt(ier, Jc, ipos, 0) = sump
            SCRt(ier, Jc, ineg, 0) = sumn
         ENDIF

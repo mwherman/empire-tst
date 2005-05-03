@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-27 19:07:24 $
-Ccc   * $Id: HRTW-comp.f,v 1.24 2005-04-27 19:07:24 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-03 16:09:58 $
+Ccc   * $Id: HRTW-comp.f,v 1.25 2005-05-03 16:09:58 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -256,9 +256,10 @@ C
               if( ip.eq.LVP(LEVtarg,0) .AND. 
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
+                 WRITE(6,*) ' '
                  write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)') 
-     &             'CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
-     &             sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)  
+     &          'CN state : (J =',cnspin,', Par =',ip,') Gamma Width =',
+     &             sumg*1000,' meV,  Tune =',TUNe(0, Nnuc)  
               endif
             ENDIF
          ENDDO       !loop over decaying nucleus spin

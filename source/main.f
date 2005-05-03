@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-02 07:29:34 $
-Ccc   * $Id: main.f,v 1.78 2005-05-02 07:29:34 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-03 16:09:58 $
+Ccc   * $Id: main.f,v 1.79 2005-05-03 16:09:58 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -437,7 +437,7 @@ C        ENDDO
          WRITE (6,*) ' n PE emission cross section ', CSMsd(1), ' mb'
          WRITE (6,*) ' p PE emission cross section ', CSMsd(2), ' mb'
          WRITE (6,*) ' a PE emission cross section ', CSMsd(3), ' mb'
-	   IF(NEMc.GT.0) WRITE (6,*)
+      IF(NEMc.GT.0) WRITE (6,*)
      &     ' Cluster PE emission cross section ', CSMsd(ndejc), ' mb'
          WRITE (6,*) ' '
 C--------correct CN population for the PE emission
@@ -1313,21 +1313,21 @@ C-----------print residual nucleus population
      &                SYMb(nnur)
                WRITE (6,'('' Positive parities population'',/)')
                do i = NEX(nnur),1,-1
-	           ftmp = 0.0
-	           do j = 1,12
-  	             ftmp = ftmp + POP(i,j,1,nnur)
-	           enddo
-	           if(ftmp.gt.0.0)
+              ftmp = 0.0
+              do j = 1,12
+                  ftmp = ftmp + POP(i,j,1,nnur)
+              enddo
+              if(ftmp.gt.0.0)
      &             WRITE (6,99075) EX(i,nnur),(POP(i,j,1,nnur),j = 1,12)
                enddo
                WRITE (6,*) ' '
                WRITE (6,'('' Negative parities population'',/)')
                do i = NEX(nnur),1,-1
-	           ftmp = 0.0
-	           do j = 1,12
-  	             ftmp = ftmp + POP(i,j,2,nnur)
-	           enddo
-	           if(ftmp.gt.0.0)
+              ftmp = 0.0
+              do j = 1,12
+                  ftmp = ftmp + POP(i,j,2,nnur)
+              enddo
+              if(ftmp.gt.0.0)
      &             WRITE (6,99075) EX(i,nnur),(POP(i,j,2,nnur),j = 1,12)
                enddo
                WRITE (6,'('' '')')
