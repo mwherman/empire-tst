@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-03 16:09:58 $
-Ccc   * $Id: HRTW-comp.f,v 1.25 2005-05-03 16:09:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-05 15:05:44 $
+Ccc   * $Id: HRTW-comp.f,v 1.26 2005-05-05 15:05:44 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -47,16 +47,16 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak, 
+      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, sum 
+      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, sum
      &                 , sumfis, sumfism(3), sumg, tlump, xnor
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
@@ -70,7 +70,7 @@ C-----threshold for considering channel as a 'strong' one
 C-----set CN nucleus
       nnuc = 1
 
-C-----locate residual nuclei (RCN, 
+C-----locate residual nuclei (RCN,
 C     The block missing below was deleted by RCN
 C     NRES() already available from input.f
 C
@@ -117,7 +117,7 @@ C-----------start the first HRTW run
 C-----------
 C-----------do loop over ejectiles
             DO nejc = 1, NEJcm
-C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
                if(NRES(nejc).lt.0) cycle
                nnur = NREs(nejc)
 C              WRITE(6,*)'emitting ejectile=', nejc
@@ -209,7 +209,7 @@ C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
                DENhf = 0.0
                DO nejc = 1, NEJcm
-C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
                   if(NRES(nejc).lt.0) cycle
                   nnur = NREs(nejc)
 C                 WRITE(6,*)'  '
@@ -226,7 +226,7 @@ C--------------
 C--------------correct scratch matrix for enhancement of the elastic channels
 C--------------
                DO nejc = 1, NEJcm
-C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)     
+C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
                   if(NRES(nejc).lt.0) cycle
                   nnur = NREs(nejc)
                   IF (IZA(nnur).EQ.IZA(0))
@@ -237,7 +237,7 @@ C--------------normalization and accumulation
 C--------------
                xnor = H_Abs(i,1)/DENhf
 C              stauc = stauc + RO(ke,jcn,nnuc)*xnor
-               IF (RO(ke,jcn,nnuc).NE.0.0D0) sgamc = sgamc + 
+               IF (RO(ke,jcn,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*H_Abs(i,1)/RO(ke,jcn,nnuc)
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
      &                    dencomp,aafis)
@@ -252,14 +252,16 @@ C           Gamma width calculation
 C
             IF(EIN.LE.0.1) THEN
               cnspin = jcn - 0.5
-              if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn 
-              if( ip.eq.LVP(LEVtarg,0) .AND. 
-     &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR. 
+              if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn
+              if( ip.eq.LVP(LEVtarg,0) .AND.
+     &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
-                 WRITE(6,*) ' '
-                 write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)') 
-     &          'CN state : (J =',cnspin,', Par =',ip,') Gamma Width =',
-     &             sumg*1000,' meV,  Tune =',TUNe(0, Nnuc)  
+                write(6,*)
+                write(6,*) ' GAMMA WIDTH CALCULATION:'
+                write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)')
+     &            ' CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
+     &            sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)
+                write(6,*)
               endif
             ENDIF
          ENDDO       !loop over decaying nucleus spin
@@ -320,12 +322,12 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -338,7 +340,7 @@ C
       DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
      &                 smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
       REAL FLOAT
-      INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2, 
+      INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2,
      &        ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
       INTEGER INT, MIN0
       DOUBLE PRECISION VT
@@ -577,7 +579,7 @@ C--------------------entry with nhrtw=0
                      CALL TL2VL(tld,cor)
                      sumdl = sumdl + tld*cor
 C                    WRITE(6,*)'sumdl,tld,cor ',sumdl,tld,cor
-                     IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0) .AND. 
+                     IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0) .AND.
      &                   tld.GT.H_Tthr) THEN
 C-----------------------case of a strong elastic channel
 C-----------------------record position of Tl, l and channel spin
@@ -677,9 +679,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak, 
+      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -699,7 +701,7 @@ C-----Plujko_new-2005
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
      &                 scrtpos, scrtneg, hsumtls,  hscrtl
       DIMENSION xle(10),xlm(10)
-      
+
 C----MAXmult - maximal gamma-ray multipolarity
       DO i = 1, MAXmult
          xle(i) = 0.0D0
@@ -768,7 +770,7 @@ C--------Plujko_new-2005
      &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
              xlm(i)= xle(i)*cme
             ENDDO
-         ENDIF        
+         ENDIF
          IF(Nhrtw.EQ.0)THEN
             DO i = 1, MAXmult
              xle(i) = xle(i)*TUNe(0, Nnuc)
@@ -814,7 +816,7 @@ C--------Plujko_new-2005
          ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
-C-----decay to the continuum ----** done***---------------------------      
+C-----decay to the continuum ----** done***---------------------------
 C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
@@ -932,11 +934,11 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak, 
+      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -956,19 +958,19 @@ C        !strong or weak
          H_Sweak = H_Sweak + T*Rho
       ENDIF
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION VT(Tl)
       INCLUDE 'dimension.h'
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak, 
+      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -1019,8 +1021,8 @@ C
          VT = H_Tl(NSCh,1)
       ENDIF
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION VT1(Tl,Tav,Sumtl)
 C
 C
@@ -1062,8 +1064,8 @@ C
       VT1 = 1 + VT1*(EEF(Tl,Tav,Sumtl) - 1.0)
       VT1 = Tl/VT1
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION EEF(Tl,Tav,Sumtl)
 C
 C
@@ -1101,8 +1103,8 @@ Ccc   *****************************************************************
       a = 87.0*(Tl - Tav)**2*Tl**5/Sumtl**7
       EEF = 1.0 + 2.0/(1.0 + Tl**al) + a
       END
- 
- 
+
+
       SUBROUTINE AUSTER(V,Tav,Sumtl,Sweak,Lch,Ndhrtw1)
 Ccc   *****************************************************************
 Ccc   *                                                      Class:PPu*
@@ -1142,7 +1144,7 @@ C
 C
 C
       IF (Lch.GT.Ndhrtw1) THEN
-         WRITE (6,*) 
+         WRITE (6,*)
      &             'ERROR in AUSTER: Lch bigger than allowed by NDHRTW1'
          WRITE (6,*) 'If you see this printed it means a BUG!'
          STOP
@@ -1185,8 +1187,8 @@ C
       ENDDO
       GOTO 100
       END
- 
- 
+
+
       SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
 Ccc
 Ccc   ********************************************************************
@@ -1220,12 +1222,12 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -1272,7 +1274,7 @@ C--------do loop over l ------------------------------------------------
 C--------------got a true elastic channel
                IF (tld.GT.H_Tthr .AND. NH_lch.LE.NDHRTW1) THEN
                   DO iel = 1, NDHRTW2
-                     IF (MEMel(iel,3).EQ.INT(2.0*s + 0.001) .AND. 
+                     IF (MEMel(iel,3).EQ.INT(2.0*s + 0.001) .AND.
      &                   MEMel(iel,2).EQ.l) THEN
                         kel = MEMel(iel,1)
                         v = H_Tl(kel,1)
@@ -1292,8 +1294,8 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
       ENDIF
 99999 END
- 
- 
+
+
       SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
 Ccc
 Ccc   ********************************************************************
@@ -1321,12 +1323,12 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, 
+      DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, 
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Dummy arguments
@@ -1335,7 +1337,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, chsp, coef, ecms, eee, el, s1, smax, smin, 
+      DOUBLE PRECISION ak2, chsp, coef, ecms, eee, el, s1, smax, smin,
      &                 vl, wf, xmas_npro, xmas_ntrg
       REAL FLOAT
       INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, maxlw, mul
@@ -1376,9 +1378,9 @@ C-----channel spin min and max
                IF (Ich.GT.NDHRTW2) THEN
                   WRITE (6,*) ' '
                   WRITE (6,*) 'E R R O R !'
-                  WRITE (6,*) 
+                  WRITE (6,*)
      &                    'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
-                  WRITE (6,*) 'INCREASE NDHRTW2 IN THE dimension.h', 
+                  WRITE (6,*) 'INCREASE NDHRTW2 IN THE dimension.h',
      &                        ' AND RECOMPILE.'
                   STOP
                ENDIF
@@ -1389,7 +1391,7 @@ C-----channel spin min and max
                ELSE
                   kel = 0
                   DO iel = 1, NDHRTW2
-                     IF (MEMel(iel,3).EQ.INT(2.0*chsp + 0.001) .AND. 
+                     IF (MEMel(iel,3).EQ.INT(2.0*chsp + 0.001) .AND.
      &                   MEMel(iel,2).EQ.k) kel = MEMel(iel,1)
                   ENDDO
                   IF (kel.EQ.0) THEN

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-05-01 21:15:53 $
-Ccc   * $Id: MSD-tristan.f,v 1.34 2005-05-01 21:15:53 Capote Exp $
+Ccc   * $Date: 2005-05-05 15:05:45 $
+Ccc   * $Id: MSD-tristan.f,v 1.35 2005-05-05 15:05:45 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -92,6 +92,7 @@ C
       QMAx = Qm
       QSTep = Qs
       OPEN (16,FILE = 'TAPE16',STATUS = 'UNKNOWN',FORM = 'UNFORMATTED')
+      IF (IOUt.GT.3) OPEN (66,FILE = 'TAPE66',STATUS = 'UNKNOWN')
 C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       FAClog(1) = 0.0D0
       FAClog(2) = 0.0D0
@@ -2853,7 +2854,7 @@ C-----------------constructed out of discrete levels
             ENDDO
    50    ENDDO
       ENDDO
-      CLOSE(66)
+      IF(IOUT.GT.3) CLOSE(66)
       REWIND 14
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)

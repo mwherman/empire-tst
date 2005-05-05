@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-02 07:30:03 $
-Ccc   * $Id: tl.f,v 1.58 2005-05-02 07:30:03 Capote Exp $
+Ccc   * $Date: 2005-05-05 15:05:44 $
+Ccc   * $Id: tl.f,v 1.59 2005-05-05 15:05:44 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1280,7 +1280,7 @@ C
       CHARACTER*20 ctmp20
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp
-      INTEGER i, ien, ien_beg, l, lmax
+      INTEGER i, ilv, ien, ien_beg, l, lmax
       INTEGER INT
       REAL SNGL
 C     --------------------------------------------------------------------
@@ -1317,7 +1317,7 @@ C
 C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
-      IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
+      IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.001) THEN
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          WRITE (6,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
@@ -1427,9 +1427,11 @@ C--------------EXACT (no DWBA) calculation
          WRITE (6,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
      &          INT(AEJc(Nejc)), ' Z=', INT(ZEJc(Nejc)), ' S=',
      &          SEJc(Nejc)
+         ilv = 1
+         If(Nnuc.eq.0) ilv = Levtarg
          WRITE (6,'(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)') 'RESIDUAL: A=',
      &          INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=',
-     &          SNGL(XJLv(LEVtarg,Nnuc)), ' P=', INT(LVP(LEVtarg,Nnuc))
+     &          SNGL(XJLv(ilv,Nnuc)), ' P=', INT(LVP(ilv,Nnuc))
          WRITE (6,*) 'WARNING: For this residual nucleus'
          WRITE (6,*) 'WARNING: available energy is always '
          WRITE (6,*) 'WARNING: below coulomb barrier'
@@ -1448,8 +1450,7 @@ C     INPUT:  Nejc,Nnuc ejectile and residual nucleus index
 C             LVIbrat = .TRUE. for vibrational model(or spherical OMP)
 C             The implemented model could be applied to even-even nucleus
 C             therefore the ECIS input is always constructed assuming spin 0
-C             So we can not use the real spin
-C             of the given nucleus XJLv(LEVtarg, Nnuc)
+C             So we can not use the real spin of the given nucleus XJLv(1, Nnuc)
 C
 C     OUTPUT: Maxlw and Stl(1-Maxlw) are the maximum angular momentum and Tls
 C             SINl is the total inelastic cross section
@@ -1474,11 +1475,13 @@ C
       DOUBLE PRECISION ak2, cte, dtmp, ecms, elab, jc, jj, sabs, sreac,
      &                 xmas_nejc, xmas_nnuc, sinlcont
       DOUBLE PRECISION DBLE
-      INTEGER l, nc, nceq, ncoll, nlev
+      INTEGER ilv, l, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
       REAL SNGL
       Maxlw = 0
       ncoll = 0
+      ilv = 1
+      If(Nnuc.eq.0) ilv = Levtarg
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
@@ -1499,10 +1502,10 @@ C--------(nlev=1 corresponds to the ground state)
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15) THEN
-C-----------Averaging over particle and target spin, summing over channel spin JC
+C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
-     &                   /DBLE(2*XJLv(LEVtarg,Nnuc) + 1)
+     &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
             Maxlw = MAX(Maxlw,l)
          ENDIF
       ENDDO
@@ -1511,7 +1514,7 @@ C-----------Averaging over particle and target spin, summing over channel spin J
 C-----For vibrational the Tls must be multiplied by
       IF (Lvibrat) THEN
          DO l = 0, Maxlw
-            Stl(l + 1) = Stl(l + 1)*DBLE(2*XJLv(LEVtarg,Nnuc) + 1)
+            Stl(l + 1) = Stl(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
          ENDDO
       ENDIF
 
@@ -1687,7 +1690,7 @@ C--------Selecting only ground state
 C-----------Averaging over particle and target spin, summing over channel spin JC
             TTLl(J,l) = TTLl(J,l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*SEJc(Nejc) + 1)
-     &                  /DBLE(2*XJLv(LEVtarg,Nnuc) + 1)
+     &                  /DBLE(2*XJLv(1,Nnuc) + 1)
             lmax = MAX(lmax,l)
          ENDIF
       ENDDO
@@ -1696,7 +1699,7 @@ C-----------Averaging over particle and target spin, summing over channel spin J
 C-----For vibrational the Tls must be multiplied by
       IF (Lvibrat) THEN
          DO l = 0, lmax
-            TTLl(J,l) = TTLl(J,l)*DBLE(2*XJLv(LEVtarg,Nnuc) + 1)
+            TTLl(J,l) = TTLl(J,l)*DBLE(2*XJLv(1,Nnuc) + 1)
          ENDDO
       ENDIF
       stotecis = 0.D0
@@ -1952,8 +1955,6 @@ C-----At least ground state is always open !!, RCN 31/03/2001
      &               ' All inelastic channels are closed at this energy'
       ENDIF
 C
-C-----Considering even closed channels in calculations
-C     ncoll = ND_nlv
 C-----Considering only coupled levels if CC calculation
       ncoll = nd_cons
 C
@@ -2002,9 +2003,9 @@ C     IF ( LVP(LEVtarg,Nnuc).GT.0 ) ch = '+'
 C-----Important: Instead of using TARGET SPIN (XJLV(1,NNUC)) and PARITY(ch)
 C-----A.Koning always used in PREGNASH SPIN=0, ch='+'
 C-----It is justified for vibrational model and DWBA calculations
-C-----so we are using zero spin here
+C-----so we are using zero spin and positive parity herehere
 C-----NOT TRUE for rotational model calculations (see ecis_CCrot)
-C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(LEVtarg,NNUC),0,1, ch, elab,
+C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(1,NNUC),0,1, ch, elab,
       WRITE (1,'(f5.2,2i2,a1,5f10.5)') zerosp, 0, 1, '+', elab,
      &                                 SEJc(Nejc), xmas_nejc, xmas_nnuc,
      &                                 Z(Nnuc)*ZEJc(Nejc)
@@ -2337,9 +2338,7 @@ C-----------All levels with icollev(j)<50 should be calculated by CC
       ENDIF
       IF (nd_nlvop.EQ.1) WRITE (6,*)
      &               ' All inelastic channels are closed at this energy'
-C-----ncoll = nd_nlvop
 C-----Considering even closed channels in calculations
-C     ncoll = ND_nlv
       ncoll = nd_cons
 C
       iterm = 20
@@ -2366,7 +2365,9 @@ C-----CARD 3
       WRITE (1,'(a50)') ECIs2
 C-----CARD 4
 C-----make sure that all contributions to s-wave scattering are included
-      jdm = XJLv(LEVtarg,Nnuc) + SEJc(Nejc) + 0.6
+      ilv = 1
+      If(Nnuc.eq.0) ilv = Levtarg
+      jdm = XJLv(ilv,Nnuc) + SEJc(Nejc) + 0.5
       WRITE (1,'(4i5,30x,i5)') ncoll, njmax, iterm, npp, jdm
 C-----CARD 5
       rmatch = 20.D0
@@ -2374,13 +2375,8 @@ C-----CARD 5
 C-----Matching radius calculated within ECIS
 C     WRITE(1, *)
       ch = '-'
-      IF (LVP(LEVtarg,Nnuc).GT.0) ch = '+'
-C
-C-----Important: Instead of using TARGET SPIN (XJLV(1,NNUC)) and PARITY(ch)
-C-----A.Koning always used in PREGNASH SPIN=0, ch='+'
-C-----This is not TRUE for rotational model so we are using the target spin here
-C------groundstate
-      WRITE (1,'(f5.2,2i2,a1,5f10.5)') XJLv(LEVtarg,Nnuc), 0, 1, ch,
+      IF (LVP(ilv,Nnuc).GT.0) ch = '+'
+      WRITE (1,'(f5.2,2i2,a1,5f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
      &                                 elab, SEJc(Nejc), xmas_nejc,
      &                                 xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
 C-----Discrete levels
@@ -3606,9 +3602,9 @@ C
 C
 C Local variables
 C
-      REAL ee,E
+      REAL ee, E
       WVF = 0.D0
-      E = Er 
+      E = Er
       IF (E.LE.Ef) E = 2.D0*Ef - E
       IF (E.LE.Ep) RETURN
       ee = (E - Ep)**N

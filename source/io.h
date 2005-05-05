@@ -38,7 +38,7 @@ c     62     ecis03,main
 c     63     ecis03
 c     64     ecis03
 c     65     ecis03
-c     66     ecis03
+c     66     ecis03, MSD-Tristan
 c     75     ecis03
 c     76     ecis03
 c     77     input
@@ -83,10 +83,6 @@ C-----fusion transmission coefficients from file FUSION
  777  FILEVEL=.FALSE.
       OPEN(UNIT=14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
-C     OPEN(UNIT=15,FILE='TAPE15',FORM='UNFORMATTED')
-C     OPEN(UNIT=15,FILE='TAPE15',STATUS='UNKNOWN')
-      OPEN(UNIT=16,FILE='TAPE16',STATUS='UNKNOWN',FORM='UNFORMATTED')
-      OPEN(UNIT=66,FILE='TAPE66',STATUS='UNKNOWN')
       OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
 C     Added to check if file is not empty
       READ(33,*,END=881)

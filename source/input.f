@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-02 01:03:08 $
-Ccc   * $Id: input.f,v 1.107 2005-05-02 01:03:08 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-05 15:05:44 $
+Ccc   * $Id: input.f,v 1.108 2005-05-05 15:05:44 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -177,12 +177,13 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
             GTIlnor(nnuc) = 1.
-            LVP(1,nnuc) = 0
+            LVP(1,nnuc) = 1
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0.0
-c-----------set Levels flag to 0 (no levels stored)
-            NSTOred(nnuc) = 0
+c-----------set Levels flag to -1 (no levels stored)
+            NSTOred(nnuc) = -1
          ENDDO
+         NSTOred(0) = -1
 C--------set gamma-strength parameters
          DO nnuc = 1, NDNUC
             GDRpar(1,nnuc) = 0.0
@@ -195,7 +196,7 @@ C--------set gamma-strength parameters
          ENDDO
          IZA(0) = 0
          ENDf(0) = 1.0
-         LVP(1,0) = 0
+         LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
          DEFpar = 1.
@@ -237,13 +238,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -428,7 +429,8 @@ C-----------GAMMA EMISSION
             CALL PTLEVSET(AEJc(0),ZEJc(0),SEJc(0),lpar,e2p,e3m)
          ENDIF
 C--------product of target and projectile parities
-         LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
+C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
+C        RCN, We assume is only the target parity !!!
          XNEjc(0) = AEJc(0) - ZEJc(0)
          IZAejc(0) = INT(1000.*ZEJc(0) + AEJc(0))
          iz = INT(ZEJc(0))
@@ -892,13 +894,12 @@ C
          ENDIF
          IF (DIRect.EQ.3 .AND.
      &       (MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0)) THEN
-            DIRect = 0
+            DIRect = 1
             WRITE (6,*) ' '
             WRITE (6,*) ' WARNING!!!! DWBA mechanism is not supported'
             WRITE (6,*) ' WARNING!!!! for reactions on odd nuclei    '
-            WRITE (6,*) ' WARNING!!!! and has been turned off        '
-            WRITE (6,*) ' WARNING!!!! You could try DIRECT 1 or 2    '
-            WRITE (6,*) ' WARNING!!!! assuming levels can be coupled '
+            WRITE (6,*) ' WARNING!!!! DIRECT 1 has been set to 1     '
+            WRITE (6,*) ' WARNING!!!! Small deformation is assumed   '
             WRITE (6,*) ' '
          ENDIF
          IF (DIRect.GT.0 .AND. KTRompcc.EQ.0) THEN
@@ -1543,8 +1544,8 @@ C--------------print transmission coefficients
      &                   INT(ZEJc(nejc)), ' S=', SEJc(nejc)
                   WRITE (6,'(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
      &                    ' TARGET: A=', INT(A(nnur)), ' Z=',
-     &                   INT(Z(nnur)), ' S=', SNGL(XJLv(LEVtarg,nnur)),
-     &                   ' P=', INT(LVP(LEVtarg,nnur))
+     &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
+     &                   ' P=', INT(LVP(1,nnur))
                   DO i = 1, netl
                      IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (6,99010)
      &                   ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
@@ -1673,14 +1674,7 @@ C
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
       LOGICAL LREad
-C-----set ground state in case nucleus not in file
-      NLV(Nnuc) = 1
-      NCOmp(Nnuc) = 1
-      ELV(1,Nnuc) = 0.0
-      LVP(1,Nnuc) = 1
-      XJLv(1,Nnuc) = 0.0
-      IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
-C-----set ground state *** done ***
+
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
@@ -1707,6 +1701,15 @@ C-----set ground state *** done ***
             ENDDO
           ENDDO
       ELSE
+C-------set ground state in case nucleus not in file
+        NLV(Nnuc) = 1
+        NCOmp(Nnuc) = 1
+        ELV(1,Nnuc) = 0.0
+        LVP(1,Nnuc) = 1
+        XJLv(1,Nnuc) = 0.0
+        IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
+C-------set ground state *** done ***
+
         IF(.NOT.FILevel) THEN
 C---------constructing input and filenames
            WRITE (ctmp3,'(I3.3)') iz
@@ -2061,11 +2064,11 @@ C--------create file with levels xxx.lev
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
 C           RCN, 04/2005  duplicate levels found !!
-            WRITE (14,'(A110)') ch_iuf
+C           WRITE (14,'(A110)') ch_iuf
             DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
 C              RCN, 04/2005  duplicate levels found !!
-               WRITE (14,'(A110)') ch_iuf
+C              WRITE (14,'(A110)') ch_iuf
             ENDDO
             DO ilv = 1, nlvr + ngamr
                BACKSPACE (13)
@@ -2875,7 +2878,7 @@ C
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPVV '',I2,)') i3
                WRITE (6,
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
@@ -2910,12 +2913,12 @@ C
      &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
+            IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAV '',I2,)') i3
                WRITE (6,
      &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
-                ENDIF
+            ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Volume potential diffuseness uncertainty in '',I3,
@@ -2945,12 +2948,12 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
+            IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWV '',I2,)') i3
                WRITE (6,
      &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
-                ENDIF
+            ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Imag. potential depth uncertainty in '',I3,A2,
@@ -2980,12 +2983,12 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
+            IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWS '',I2,)') i3
                WRITE (6,
      &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
-                ENDIF
+            ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Surface potential depth uncertainty in '',I3,A2,
@@ -3016,12 +3019,12 @@ C
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UVREAL '',I2)') i3
+            IF (i3.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAS '',I2,)') i3
                WRITE (6,
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
-                ENDIF
+            ENDIF
             if(val.gt.0.) then
               WRITE (6,
      &        '('' Surface potential diffuseness uncertainty in '',I3,
@@ -5038,7 +5041,7 @@ C
       CHARACTER*100 ch_iuf, comment
       CHARACTER*3 ctmp3
       DOUBLE PRECISION DBLE
-      LOGICAL fexist
+      LOGICAL fexist,odd
       CHARACTER*9 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp,
@@ -5070,7 +5073,13 @@ C--------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
          DEFormed = .FALSE.
-         IF (DEF(1,0).NE.0.D0) DEFormed = .TRUE.
+         IF (ABS(DEF(1,0)).GT.0.1D0) DEFormed = .TRUE.
+C
+C        If odd nucleus, then rotational model is always used
+C        It could be a bad approximation for a quasispherical nucleus
+         IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0)
+     &     DEFormed = .TRUE.
+
          IF (DEFormed) THEN
 C-----------Number of collective levels
             READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
@@ -5123,6 +5132,15 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
       iz = Z(0)
       DEFormed = .FALSE.
       IF (ABS(DEF(1,0)).GT.0.1) DEFormed = .TRUE.
+C
+      odd = .FALSE.
+      IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0) THEN
+C       If odd nucleus, then rotational model is always used
+C       It could be a bad approximation for a quasispherical nucleus
+        DEFormed = .TRUE.
+        odd = .TRUE.
+       ENDIF
+
       i20p = 0
       i21p = 0
       i0p = 0
@@ -5229,8 +5247,8 @@ c            CCFUS deformations
       GOTO 300
   200 WRITE (6,*) ' WARNING: ',
      &   '../RIPL-2/optical/om-data/om-deformations.dat file not found '
-      WRITE (6,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+C     WRITE (6,*) ' WARNING: ',
+C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       GOTO 400
   300 CLOSE (84)
       IF (beta2.NE.0.D0 .OR. beta3.NE.0.D0) THEN
@@ -5245,9 +5263,16 @@ c            CCFUS deformations
       IF (beta2.EQ.0.D0) THEN
          WRITE (6,*) ' WARNING: ',
      &    'E(2+) level is not contained in Raman 2001 database (RIPL-2)'
-         WRITE (6,*) ' WARNING: ',
-     &            'Default dynamical deformations 0.15(2+) will be used'
-         beta2 = 0.15
+         IF(odd) then
+            WRITE (6,*) ' WARNING: Odd nucleus, ',
+     &            'FRDM deformation will be used for the gs band'
+            WRITE (6,*) ' BETA2 = ',DEF(1,0)
+            beta2 = DEF(1,0)
+         ELSE
+            WRITE (6,*) ' WARNING: FRDM deformation will be used'
+            WRITE (6,*) ' BETA2 = ',DEF(1,0)
+            beta2 = DEF(1,0)
+         ENDIF
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          WRITE (6,*) ' WARNING: ',
@@ -5282,21 +5307,19 @@ C--------Skipping levels in continuum
             gspar = DBLE(lvpr)
          ENDIF
          IF (.NOT.(DEFormed)) THEN
-C-----------spherical nuclei follow
-C-----------for spherical target taking dynamical deformation equal to
-C-----------0.15 (1PH 2+) and 0.05(1PH 3-) arbitrarily
-C-----------if RIPL-2 deformation file not found OR target nucleus not found in
-C-----------the database we assume arbitrary dynamical deformations
+C-----------spherical even-even nuclei follow
+C-----------for spherical target taking dynamical deformation equal to RIPL-2 values.
+C-----------If RIPL-2 deformation file not found OR target nucleus not found in
+C-----------the database we take FRDM deformations
             IF (ilv.EQ.1) THEN
 C--------------ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv,1) = 0.0
                IF (gspin.NE.0.D0) THEN
                   ICOllev(ND_nlv) = ilv + 50
                   WRITE (6,*)
-     &                     'WARNING: ONLY DWBA CALCULATIONS ALLOWED FOR'
+     &                     'ERROR: ONLY DWBA CALCULATIONS ALLOWED FOR'
                   WRITE (6,*) 'WARNING: ODD SPHERICAL NUCLEUS'
-                  WRITE (6,*) 'WARNING: SETTING DIRECT key to 3'
-                  DIRect = 3
+                  DIRect = 0
                ENDIF
                GOTO 500
             ENDIF
@@ -5397,7 +5420,7 @@ C-----------Additional levels are added for DWBA calculations
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.1
+               D_Def(ND_nlv,2) = 0.05
                ierr = 0
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
@@ -5409,9 +5432,7 @@ C-----------Additional levels are added for DWBA calculations
                ierr = 0
                GOTO 600
             ENDIF
-C-----------deformed nuclei follow
-C-----------assuming all dynamical deformation equal to static deformation
-C           beta2 = DEF(1, 0)
+C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
          ELSEIF (ilv.NE.1) THEN
             IF (i20p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
      &          lvpr.EQ.gspar) THEN
@@ -5447,10 +5468,11 @@ C           beta2 = DEF(1, 0)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
+               IF(odd) goto 600
                GOTO 500
             ENDIF
             IF (i8p.EQ.0 .AND. xjlvr.EQ.(gspin + 4*delta_k) .AND.
-     &          lvpr.EQ.gspar) THEN
+     &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
                i8p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
@@ -5462,7 +5484,7 @@ C           beta2 = DEF(1, 0)
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
-     &          lvpr.EQ.gspar) THEN
+     &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
                i10p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5474,7 +5496,7 @@ C           beta2 = DEF(1, 0)
                GOTO 500
             ENDIF
             IF (i12p.EQ.0 .AND. xjlvr.EQ.(gspin + 6*delta_k) .AND.
-     &          lvpr.EQ.gspar) THEN
+     &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
                i12p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5485,7 +5507,8 @@ C           beta2 = DEF(1, 0)
                D_Def(ND_nlv,2) = beta2*0.25
                GOTO 500
             ENDIF
-            IF (i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1) THEN
+            IF (i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1
+     &          .AND. .NOT.odd) THEN
                i0p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5497,7 +5520,7 @@ C           beta2 = DEF(1, 0)
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.(gspin + NINT(delta_k)/2) .AND.
-     &          lvpr.EQ. - 1*gspar) THEN
+     &          lvpr.EQ. - 1*gspar  .AND. .NOT.odd ) THEN
                i1m = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5508,7 +5531,7 @@ C           beta2 = DEF(1, 0)
                D_Def(ND_nlv,2) = beta3
                GOTO 500
             ENDIF
-            IF (i3m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND.
+            IF (i3m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + delta_k)) THEN
                i3m = ilv
                ND_nlv = ND_nlv + 1
@@ -5520,7 +5543,7 @@ C           beta2 = DEF(1, 0)
                D_Def(ND_nlv,2) = beta3
                GOTO 500
             ENDIF
-            IF (i5m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND.
+            IF (i5m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 2*delta_k)) THEN
                i5m = ilv
                ND_nlv = ND_nlv + 1
@@ -5533,7 +5556,7 @@ C           beta2 = DEF(1, 0)
                GOTO 500
             ENDIF
             IF (i21p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
-     &          lvpr.EQ.gspar) THEN
+     &          lvpr.EQ.gspar .AND. .NOT.odd) THEN
                i21p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5545,7 +5568,7 @@ C           beta2 = DEF(1, 0)
                GOTO 500
             ENDIF
             IF (i22p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
-     &          lvpr.EQ.gspar) THEN
+     &          lvpr.EQ.gspar .AND. .NOT.odd) THEN
                i22p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
@@ -5558,7 +5581,8 @@ C           beta2 = DEF(1, 0)
             ENDIF
 C--------------Additional levels are added for DWBA calculations
             IF (ECUtcoll.GT.0. .AND. elvr.GT.ECUtcoll) GOTO 600
-            IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll) THEN
+            IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll .AND.
+     &                               .NOT.odd) THEN
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + 50
                D_Elv(ND_nlv) = elvr
@@ -5686,7 +5710,7 @@ C-----------------swapping
       ELSE
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
-     &evels (symm.rotational model)       '
+     &evels (rigid rotor assumed)       '
          WRITE (32,*)
      &'Dyn.deformations are not used in symm.rot.model ( N < 50 for coup
      &led levels )'
@@ -5695,7 +5719,7 @@ C-----------------swapping
          WRITE (6,*)
          WRITE (6,99005)
      &' Collective levels selected automatically from available target l
-     &evels (symm.rotational model)       '
+     &evels (rigid rotor assumed)       '
          WRITE (6,*)
      &'Dyn.deformations are not used in symm.rot.model (  N < 50 for cou
      &pled levels )'

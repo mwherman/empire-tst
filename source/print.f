@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-01 21:12:46 $
-Ccc   * $Id: print.f,v 1.11 2005-05-01 21:12:46 Capote Exp $
+Ccc   * $Date: 2005-05-05 15:05:44 $
+Ccc   * $Id: print.f,v 1.12 2005-05-05 15:05:44 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -89,7 +89,7 @@ C
 
       totspec = 0.0
       DO i = 1, kmax
-         totspec = totspec + CSE(i,Nejc,Nnuc)
+         totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
@@ -111,10 +111,10 @@ C
   150    WRITE (6,99040) e, CSE(i,Nejc,Nnuc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-      WRITE (6,99045)
       totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
+      WRITE (6,99045)
       WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec
+     &          totspec 
 99045 FORMAT (24X,93('-'))
       END

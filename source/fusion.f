@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-01 21:14:02 $
-Ccc   * $Id: fusion.f,v 1.40 2005-05-01 21:14:02 Capote Exp $
+Ccc   * $Date: 2005-05-05 15:05:45 $
+Ccc   * $Id: fusion.f,v 1.41 2005-05-05 15:05:45 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -49,7 +49,7 @@ C
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
      &        nang
-      INTEGER IDNINT, INT, MIN0, NINT
+      INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
       INTEGER*4 PIPE
@@ -202,7 +202,7 @@ C-----------factor 10 near HHBarc from fm**2-->mb
 C--------------do loop over parity
                DO ip = 1, 2
 C-----------------Quasideuteron contribution QDTmp by Carlson
-                  wparg = PAR(ip,LVP(LEVtarg,0),1)*e1tmp
+                  wparg = PAR(ip,LVP(LEVtarg,Ntrg),1)*e1tmp
 C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C--------------------Spin of c.n. J=j-S1
@@ -222,7 +222,7 @@ C--------------factor 10 near HHBarc from fm**2-->mb
      &                 /(2*XJLv(LEVtarg,Ntrg) + 1)
 C--------------do loop over parity
                DO ip = 1, 2
-                  wparg = PAR(ip,LVP(LEVtarg,0),2)*e1tmp
+                  wparg = PAR(ip,LVP(LEVtarg,Ntrg),2)*e1tmp
 C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C--------------------Spin of c.n. J=j-S1
@@ -242,7 +242,7 @@ C-----------factor 10 near HHBarc from fm**2-->mb
      &                 /(2*XJLv(LEVtarg,Ntrg) + 1)
 C--------------do loop over parity
                DO ip = 1, 2
-                  wparg = PAR(ip,LVP(LEVtarg,0),2)*e1tmp
+                  wparg = PAR(ip,LVP(LEVtarg,Ntrg),2)*e1tmp
 C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C-----------------Spin of c.n. J=j-S1
@@ -301,9 +301,7 @@ C--------calculation of o.m. transmission coefficients for absorption
             dodwba = .TRUE.
   200    ENDDO
          IF (DIRect.EQ.3) dodwba = .TRUE.
-         IF (dodwba .AND. DIRect.GT.0 .AND.
-     &       (.NOT.DEFormed .OR. (MOD(NINT(A(Ntrg)),2).EQ.0.AND.
-     &       MOD(NINT(Z(Ntrg)),2).EQ.0))) THEN
+         IF (dodwba .AND. DIRect.GT.0 ) THEN
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
 C--------------Saving KTRlom(0,0)
                itmp1 = KTRlom(0,0)
@@ -503,7 +501,7 @@ C--------channel spin min and max
                lmax = MIN0(NDLW,lmax)
                lmax = MIN0(maxlw,lmax)
                DO k = lmin, lmax
-                  sum = sum + PAR(ip,LVP(LEVtarg,0),k - 1)*stl(k)
+                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
      &                  *DRTl(k)
                ENDDO
             ENDDO
@@ -600,7 +598,7 @@ C-----channel spin min and max
                lmax = MIN0(NDLW,lmax)
                lmax = MIN0(maxlw,lmax)
                DO k = lmin, lmax
-                  sum = sum + PAR(ip,LVP(LEVtarg,0),k - 1)*stl(k)
+                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
      &                  *DRTl(k)
                ENDDO
             ENDDO
