@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:44 $
-Ccc   * $Id: input.f,v 1.108 2005-05-05 15:05:44 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-05 19:11:11 $
+Ccc   * $Id: input.f,v 1.109 2005-05-05 19:11:11 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2878,7 +2878,7 @@ C
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UOMPVV '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPVV '',I2)') i3
                WRITE (6,
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
@@ -2914,7 +2914,7 @@ C
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAV '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAV '',I2)') i3
                WRITE (6,
      &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
@@ -2949,7 +2949,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWV '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWV '',I2)') i3
                WRITE (6,
      &          '('' Imag. potential depth uncertainty ignored'')')
                GOTO 100
@@ -2984,7 +2984,7 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWS '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPWS '',I2)') i3
                WRITE (6,
      &          '('' Surface potential depth uncertainty ignored'')')
                GOTO 100
@@ -3020,7 +3020,7 @@ C
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAS '',I2,)') i3
+               WRITE (6,'('' UNKNOWN EJECTILE in UOMPAS '',I2)') i3
                WRITE (6,
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
