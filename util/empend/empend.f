@@ -266,13 +266,17 @@ C* Write the ENDF file-3 data
         END IF
       END DO
       ELO=EIN(1)
-c...
-      print *,'List of MT numbers for MF3'
-      print *,(iwo(mth-1+j),j=1,nxs)
-      print *,'List of MT numbers for MF4/MF6'
-      print *,(iwo(LBI-1+j),j=1,nT6)
-c...
-c...
+C*
+      WRITE(LTT,991)
+      WRITE(LTT,991) ' List of MT numbers for MF3             '
+      WRITE(LTT,998) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LTT,991) ' List of MT numbers for MF4/MF6         '
+      WRITE(LTT,998) (IWO(LBI-1+J),J=1,NT6)
+      WRITE(LER,991)
+      WRITE(LER,991) ' List of MT numbers for MF3             '
+      WRITE(LER,998) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
+      WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
 C*
 C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 880
@@ -281,9 +285,9 @@ C* Stop processing if no energy/angle distributions present
 C*
 C* Process angular distribution data
       WRITE (LTT,991)
-      WRITE (LTT,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA '
+      WRITE (LTT,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA  '
       WRITE (LER,991)
-      WRITE (LER,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA '
+      WRITE (LER,991) ' BEGIN PROCESSING ANGULAR DISTRIB.DATA  '
 C*
 C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
@@ -303,7 +307,7 @@ C* Process discrete levels if continuum reactions present
       IF(MT6.EQ.2) JPRNT=IPRNT
 C* Reading angular distributions - MF6 flagged negative
 c...
-c...      print *,'processing',MT6
+c...      print *,'processing MT',MT6
 c...
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),NEN,RWO(LE),RWO(LG),RWO(LA)
      1           ,IWO(MTH),-MT6,IZI,QQM,QQI,AWR,ELO,NXS,NK,LCT,MXE,LX
@@ -330,11 +334,11 @@ C* Angular distribution data processed
       IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
   492 CONTINUE
 C*
-C* Process souble differential data
+C* Process double differential data
       WRITE (LTT,991)
-      WRITE (LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA'
+      WRITE (LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
       WRITE (LER,991)
-      WRITE (LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA'
+      WRITE (LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
 C* Read the EMPIRE output file to extract energy/angle distrib.
   600 LE=LBE
       LG=LE+NEN+2
@@ -414,13 +418,13 @@ C* Process photon angular distribution for discrete levels (isotropic)
       LV600=0
       LV800=0
       DO 892 I=1,NXS
-      IF     (IWO(MTH-1+I).GE. 51 .AND. IWO(MTH-1+I).LT. 91) THEN
+      IF     (IWO(MTH-1+I).GE. 50 .AND. IWO(MTH-1+I).LT. 91) THEN
 C* Count levels of the MT50 series
         LV50=LV50+1
-      ELSE IF(IWO(MTH-1+I).GE.601 .AND. IWO(MTH-1+I).LT.649) THEN
+      ELSE IF(IWO(MTH-1+I).GE.600 .AND. IWO(MTH-1+I).LT.649) THEN
 C* Count levels of the MT800 series
         LV600=LV600+1
-      ELSE IF(IWO(MTH-1+I).GE.801 .AND. IWO(MTH-1+I).LT.849) THEN
+      ELSE IF(IWO(MTH-1+I).GE.800 .AND. IWO(MTH-1+I).LT.849) THEN
 C* Count levels of the MT800 series
         LV800=LV800+1
       ELSE
@@ -459,6 +463,7 @@ C*
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,4I5)
   996 FORMAT(A40,F10.4)
+  998 FORMAT(10I5)
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine EMTIZA
@@ -1078,10 +1083,11 @@ C* Reactions MT 1 and MT 5 must both be present
           XSR(J,I5)=0
         END DO
       END IF
-C* Preset printout suppression for all reactions
+C* Suppression summation of MT 1, 5, discrete (and fission)
       DO IX=1,NXS
         MM=ABS(MTH(IX))
-        IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR.
+C...    IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR.
+        IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR. MM.EQ. 18 .OR.
      &     (MM.GE. 50 .AND. MM.LT. 91) .OR.
      &     (MM.GE.600 .AND. MM.LT.649) .OR.
      &     (MM.GE.700 .AND. MM.LT.749) .OR.
@@ -1606,13 +1612,14 @@ C* Read the cross section
 C* Reconstruct Q-values from MT and the binding energies
       IF(QQ.EQ.0 .AND. MT.NE.50) CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
 C* Test if reaction is already registered
-  312 IF(NXS.LE.0) GO TO 314
-      DO 313 I=1,NXS
-      IXS=I
-      MTI=ABS(MTH(I))
-      IF(MTI.EQ.MT) GO TO 320
-  313 CONTINUE
-  314 NXS=NXS+1
+  312 IF(NXS.GT.0) THEN
+        DO I=1,NXS
+          IXS=I
+          MTI=ABS(MTH(I))
+          IF(MTI.EQ.MT) GO TO 320
+        END DO
+      END IF
+      NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
@@ -1643,6 +1650,12 @@ C* Positioned to read discrete levels
       READ (LIN,891)
       XI=0.
       JL=0
+C* For incident neutrons allow ground state for other particles
+      IF(IZI.EQ.   1 .AND. MT0.NE. 50) JL=-1
+C* For incident protons allow ground state for other particles
+      IF(IZI.EQ.1001 .AND. MT0.NE.600) JL=-1
+C* For incident alphas allow ground state for other particles
+      IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,XS
 C* Test for last level (IL=0 from reading blank line)
@@ -1660,35 +1673,37 @@ c...  MT=MT0-1+IL
       JL=JL+1
       MT=MT0+JL
 C* Check if level alredy registered
-      IF(NXS.LE.0) GO TO 354
-      DO I=1,NXS
-        IXS=I
-        MTI=ABS(MTH(I))
-        IF(MTI.EQ.MT) GO TO 360
-      END DO
-  354 NXS=NXS+1
+      IF(NXS.GT.0) THEN
+        DO I=1,NXS
+          IXS=I
+          MTI=ABS(MTH(I))
+          IF(MTI.EQ.MT) GO TO 360
+        END DO
+      END IF
+C* Enter new discrete level for this reaction
+      NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
-C* Reconstruct Q values from MT and the binding energies
-      QQM(IXS)=0.
-      DO 358 I=1,IMT
-      KZA=IZB(I)
-      IF(KZA.EQ.IZA+IZI .AND. (QQ.EQ.0 .AND. MT0.NE.50) ) THEN
-
-        print *,' Q-value calculated brom binding energies for MT',MT0
-
-        IF(MT0.EQ.600.OR.MT0.EQ.800) QQM(IXS)=QQM(IXS)+1.E6*BEN(1,I)
-        IF(MT0.EQ.600)               QQM(IXS)=QQM(IXS)-1.E6*BEN(2,I)
-        IF(MT0.EQ.800)               QQM(IXS)=QQM(IXS)-1.E6*BEN(3,I)
-      ELSE
-        QQM(IXS)=QQ
+      QM=QQ
+C* Reconstruct Q values from MT and the binding energies if necessary
+      IF(QQ.EQ.0 .AND. MT0.NE.50) THEN
+        QM=0
+        DO I=1,IMT
+          KZA=IZB(I)
+          IF(KZA.EQ.IZA+IZI) THEN
+            print *,' Q-value calc. brom binding energies for MT',MT
+            IF(MT0.EQ.600.OR.MT0.EQ.800) QM=QM+1.E6*BEN(1,I)
+            IF(MT0.EQ.600)               QM=QM-1.E6*BEN(2,I)
+            IF(MT0.EQ.800)               QM=QM-1.E6*BEN(3,I)
+          END IF
+        END DO
       END IF
-  358 CONTINUE
-  360 QM =QQM(IXS)
-      QI =QM-EL
+      QI      =QM-EL
+      QQM(IXS)=QM
       QQI(IXS)=QI
-      XSC(NEN,IXS)=XS*1.E-3
+C* Enter cross section for this discrete level
+  360 XSC(NEN,IXS)=XS*1.E-3
       GO TO 352
 C* Read the elastic cross section but exclude incident charged particles
   370 IF(IZI.GE.1000) GO TO 351
