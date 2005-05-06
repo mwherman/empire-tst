@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-05 19:11:11 $
-Ccc   * $Id: input.f,v 1.109 2005-05-05 19:11:11 herman Exp $
+Ccc   * $Date: 2005-05-06 17:38:24 $
+Ccc   * $Id: input.f,v 1.110 2005-05-06 17:38:24 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -238,7 +238,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (to become 2.19 default)
