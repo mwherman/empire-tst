@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:44 $
-Ccc   * $Id: main.f,v 1.80 2005-05-05 15:05:44 Capote Exp $
+Ccc   * $Date: 2005-05-06 16:12:09 $
+Ccc   * $Id: main.f,v 1.81 2005-05-06 16:12:09 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1084,7 +1084,7 @@ C--------------check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-         IF (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.1.e-7 .AND.
+         IF (ENDf(nnuc).GT.0 .AND.
      &      (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &      nnuc.EQ.mt849)) THEN
 
@@ -1111,7 +1111,7 @@ C99065        FORMAT (I12,F10.4,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
 C    &                 (53X,7(I4,E11.4)))
             ENDDO
             WRITE (12,'(1X,/,10X,40(1H-),/)')
-          ENDIF
+         ENDIF
 C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
          ia = INT(A(nnuc))
@@ -1289,7 +1289,7 @@ C-----------CN contribution to elastic ddx
             WRITE (6,*) 'CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
          ENDIF
-
+         WRITE (12,*) ' '
          WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,''
      &mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
@@ -1405,9 +1405,9 @@ C--------
       ENDDO     !over decaying nuclei
       CLOSE (80)
       CLOSE (79)
-C--------
-C--------ENDF spectra printout (exclusive representation)
-C--------
+C----
+C---- ENDF spectra printout (exclusive representation)
+C----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
@@ -1583,13 +1583,13 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                      ENDIF
                   ENDIF
  1530          ENDDO  ! over ejectiles
-c              we have recoils printed later in the inclusive section
                IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc))
             ENDIF
          ENDIF
       ENDDO  ! over decaying nuclei
 C-----Fission related spectra of particles and gammas
-      IF (ENDf(nnuc).GT.0) THEN
+C     IF (ENDf(nnuc).GT.0) THEN
+      IF (ENDf(nnuc).EQ.-1.) THEN
          IF (TOTcsfis.GT.0.0D0) THEN
             DO nejc = 0, NDEJC         !loop over ejectiles
 C              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
@@ -1646,7 +1646,7 @@ C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
-         IF (ENDf(nnuc).GT.0.0D0) THEN
+         IF (ENDf(nnuc).EQ.2.D0) THEN
             DO nejc = 0, NEJcm
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
@@ -1720,19 +1720,21 @@ C-----------------------to conserve the integral
             ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
-            WRITE (6,'(//,11X,''**************************'')')
-            WRITE (6,'(   11x,'' Inclusive spectra (C.M.)'')')
-            WRITE (6,'(   11x,''**************************''/)')
-            DO nejc = 0, NEJcm
+            IF(ENDF(1).EQ.2) THEN
+              WRITE (6,'(//,11X,''**************************'')')
+              WRITE (6,'(   11x,'' Inclusive spectra (C.M.)'')')
+              WRITE (6,'(   11x,''**************************''/)')
+              DO nejc = 0, NEJcm
                CALL AUERST(0,nejc)
-            ENDDO
+              ENDDO
+            ENDIF
          ENDIF
       ENDIF
-C-----
-C-----ENDF spectra printout (inclusive representation)
-C-----
-C     IF (ENDf(1).EQ.2) THEN
-      IF (ENDf(1).GT.0) THEN
+C----
+C---- ENDF spectra printout (inclusive representation)
+C----
+      IF (ENDf(1).EQ.2) THEN
+C     IF (ENDf(1).GT.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
