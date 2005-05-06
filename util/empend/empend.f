@@ -1532,7 +1532,8 @@ C* Allow for metastable targets
 C* Read and check the energy
   201 READ (REC(51:60),994) EE
       EE = EE*1.E6
-      IF(NEN.LE.0 .OR. EE.GT.EIN(NEN)) GO TO 206
+      IF(NEN.LE.0) GO TO 206
+      IF(EE.GT.EIN(NEN)) GO TO 206
 C* Skip double energy points
       WRITE(LTT,902) ' EMPEND WARNING - Double energy point eV',EE
   202 READ (LIN,891,END=700) REC
