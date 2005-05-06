@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-06 16:12:09 $
-Ccc   * $Id: main.f,v 1.81 2005-05-06 16:12:09 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-06 17:39:02 $
+Ccc   * $Id: main.f,v 1.82 2005-05-06 17:39:02 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1646,7 +1646,7 @@ C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
-         IF (ENDf(nnuc).EQ.2.D0) THEN
+         IF (ENDf(nnuc).EQ.2) THEN
             DO nejc = 0, NEJcm
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
@@ -1730,11 +1730,10 @@ C-----------------------to conserve the integral
             ENDIF
          ENDIF
       ENDIF
-C----
-C---- ENDF spectra printout (inclusive representation)
-C----
+C-----
+C-----ENDF spectra printout (inclusive representation)
+C-----
       IF (ENDf(1).EQ.2) THEN
-C     IF (ENDf(1).GT.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
