@@ -45,12 +45,12 @@
      &        NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NLV(0:ndnuc), NLW,
      &        NNUcd, NNUct, NOUt, NPRoject, NRBar, NRBarc, NRBinfis(2),
      &        NREs(0:ndejc), NRFdis(nfparab), NRWel, NSCc, NTArget,
-     &        NSTored(0:ndnuc)
+     &        NSTored(0:ndnuc), NENdf
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),
-     &                 ENDfn, ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc),EWSr1,
+     &                 ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc),EWSr1,
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,ENDf(0:ndnuc),
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
@@ -118,7 +118,7 @@
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
      &                 DENhf, GCAsc, BFUs, GDIv, GDRweis, CHMs, DERec,
-     &                 ENDf, ENDfn, SHNix, TEMp0, SHRt, QFIs, SHRj,SHRd,
+     &                 ENDf, SHNix, TEMp0, SHRt, QFIs, SHRj,SHRd,
      &                 SIG, TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1,
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
@@ -151,7 +151,8 @@
      &                  IDNa, ND_nlv, IPH, LMAxcc, IDEfcc, IOPsys,
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
-     &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored
+     &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
+     &                  NENdf
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead

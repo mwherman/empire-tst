@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-06 17:39:02 $
-Ccc   * $Id: main.f,v 1.82 2005-05-06 17:39:02 herman Exp $
+Ccc   * $Date: 2005-05-09 05:31:44 $
+Ccc   * $Id: main.f,v 1.83 2005-05-09 05:31:44 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -782,7 +782,7 @@ C--------locate residual nuclei
             NREs(nejc) = -1
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C           emitted nuclei must be heavier than alpha
             if(ares.le.4. and. zres.le.2.) cycle
             izares = INT(1000.0*zres + ares)
             CALL WHERE(izares,nnur,iloc)
@@ -946,7 +946,7 @@ C--------------calculate population in the energy bin ke
                      GOTO 1470
                   ENDIF
                   DO nejc = 1, NEJcm !over ejectiles
-C                    EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C--------------------emitted nuclei must be heavier than alpha
                      if(NRES(nejc).lt.0) cycle
                      nnur = NREs(nejc)
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
@@ -1306,8 +1306,8 @@ C-----------CN contribution to elastic ddx
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.) THEN
             DO nejc = 1, NEJcm
-C            EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
-             if(NRES(nejc).lt.0) cycle
+C------------emitted nuclei must be heavier than alpha
+             IF(NRES(nejc).LT.0) CYCLE
              WRITE (12,
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
@@ -1588,8 +1588,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
          ENDIF
       ENDDO  ! over decaying nuclei
 C-----Fission related spectra of particles and gammas
-C     IF (ENDf(nnuc).GT.0) THEN
-      IF (ENDf(nnuc).EQ.-1.) THEN
+      IF (ENDf(1).GT.0) THEN
          IF (TOTcsfis.GT.0.0D0) THEN
             DO nejc = 0, NDEJC         !loop over ejectiles
 C              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
@@ -1733,7 +1732,8 @@ C-----------------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF (ENDf(1).EQ.2) THEN
+         
+      IF (ENDf(NNUcd).EQ.2) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1943,7 +1943,7 @@ C-----normalize recoil spectrum of the parent
       dang = 3.14159/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
-C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C        emitted nuclei must be heavier than alpha 
          if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
 C--------decay to continuum
@@ -2267,7 +2267,7 @@ C-----------fission
          ENDIF
 C------------particles
          DO nejc = 1, NEJcm
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C           emitted nuclei must be heavier than alpha
             if(NRES(nejc).lt.0) cycle
             nnur = NREs(nejc)
             CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
@@ -2283,7 +2283,7 @@ C------------gammas
 C--------------no subbarrier effects
 C--------particles
       DO nejc = 1, NEJcm
-C        EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C           emitted nuclei must be heavier than alpha
          if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
          CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)

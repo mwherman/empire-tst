@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-06 17:38:24 $
-Ccc   * $Id: input.f,v 1.110 2005-05-06 17:38:24 herman Exp $
+Ccc   * $Date: 2005-05-09 05:31:44 $
+Ccc   * $Id: input.f,v 1.111 2005-05-09 05:31:44 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -45,7 +45,7 @@ C
       LOGICAL gexist, nonzero, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        nema, nemn, nemp, netl, nnuc, nnur
+     &        nema, nemn, nemp, netl, nnuc, nnur, mulem
       INTEGER IFINDCOLL
       INTEGER INDEX, INT, ISEED, NINT
       INTEGER*4 iwin
@@ -241,7 +241,7 @@ C        IOPSYS = 1 WINDOWS
          IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
-C        IX4ret = 1 local MySQL server (to become 2.19 default)
+C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 0
@@ -534,7 +534,7 @@ C--------correct ejectiles symbols
                         IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
      &                      *ZEJc(NDEJC)
 
-C                       EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C                       residues must be heavier than alpha !! (RCN)
                         if(atmp.le.4 . or. ztmp.le.2) cycle
 
                         izatmp = INT(1000*ztmp + atmp)
@@ -789,6 +789,37 @@ C
 C--------inteligent defaults *** done ***
 C
          CALL READIN   !optional part of the input
+C--------Set exclusive and inclusive ENDF formatting flags
+         IF(NENdf.GT.0) THEN 
+            DO iac = 0, NEMc
+               DO ia = 0, nema
+                  DO ip = 0, nemp
+                     DO in = 0, nemn
+                        mulem = iac + ia + ip + in
+                        atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
+     &                         *AEJc(2) - FLOAT(ia)*AEJc(3)
+                        IF (NDEJC.GT.3) atmp = atmp - FLOAT(iac)
+     &                      *AEJc(NDEJC)
+                        ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)
+     &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
+                        IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
+     &                      *ZEJc(NDEJC)
+C                       residues must be heavier than alpha !! (RCN)
+                        if(atmp.le.4 . or. ztmp.le.2) cycle
+                        izatmp = INT(1000*ztmp + atmp)
+                        CALL WHERE(izatmp,nnuc,iloc)
+                        IF(mulem.LT.NENdf) THEN 
+                           ENDf(nnuc) = 1
+                        ELSEIF(mulem.EQ.NENdf) THEN
+                           ENDf(nnuc) = 1
+                        ELSE 
+                           ENDf(nnuc) = 2
+                        ENDIF 
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
 C
 C        Key_shape =0 --> original (up to 2.18) EMPIRE E1 stength-function
 C        Key_shape =1 --> fE1=MLO1
@@ -798,18 +829,6 @@ C        Key_shape =4 --> fE1=EGLO
 C        Key_shape =5 --> fE1=GFL
 C        Key_shape =6 --> fE1=SLO
 C
-C--------Set exclusive and inclusive ENDF foratting flags
-C
-         IF(ENDFn.GT.0) then
-           DO nnuc = 1, NNUcd !first set all to inclusive
-C            ENDf(nnuc) = 2.0
-             ENDf(nnuc) = 1.0
-           ENDDO
-C----------Next set some nuclei to exclusive
-           ENDf(1) = 1.0
-           ENDf(2) = 1.0
-           ENDf(3) = 1.0
-         ENDIF
 C
 C--------check input for consistency
 C
@@ -823,12 +842,11 @@ C
             WRITE (6,*) ' '
          ENDIF
          IF (DEGa.GT.0) GCAsc = 1.
-         IF (PEQc.GT.0) GCAsc = 1.
-                                  ! PCROSS
+         IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
             WRITE (6,*) ' '
-            WRITE (6,*) ' WARNING: Normally both MSD and MSC should'
+            WRITE (6,*) ' WARNING: Usually MSD and MSC should both '
             WRITE (6,*) ' WARNING: be taken into account'
             WRITE (6,*) ' '
          ENDIF
@@ -1096,9 +1114,6 @@ C--------reset some options if OMP fitting option selected
             IOUt = 1
             NEXreq = 10
             GCAsc = 1
-            ENDf(1) = 1
-            ENDf(2) = 1
-            ENDf(3) = 1
             MSD = 0
             MSC = 0
             LHMs = 0
@@ -3431,7 +3446,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-            ENDfn = val
+            NENdf = INT(val)
             GOTO 100
          ENDIF
 C-----

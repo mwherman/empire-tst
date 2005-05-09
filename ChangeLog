@@ -3,6 +3,7 @@
    preparing ECIS input inside tl.f (H. Wienke)
 3. Vibrational enhancement in level densities and its damping corrected
    (M. Herman).
+4. Mixed (exclusive/inclusive) ENDF-6 formatting implemented.
 
         
         

@@ -1,5 +1,5 @@
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
@@ -15,9 +15,24 @@ FC     =  g77
 #FFLAGS =  -check all
 #FFLAGS =  -static
 #FFLAGS =  -ffortran-bounds-check
+
+#----GNU g77 FORTRAN compiler
+#FC     = g77
+#----flags for production compilation with g77
+#FFLAGS = -O3 
+#----flags for debuging using g77 compiler 
+#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
+
+#----INTEL f95 compiler
+FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -check bounds -traceback
 #----flags for production compilation with ifort
+#FFLAGS = -O2 
+#FFLAGS = -fast 
+#----flags for debuging using ifort compiler 
+#FFLAGS =  -g -check bounds -traceback
+#----flags for profiling using ifort compiler 
 #FFLAGS = -O2
 #FFLAGS = -fast
 #----flags for profiling using ifort compiler
