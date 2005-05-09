@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:43 $
-Ccc   * $Id: HF-comp.f,v 1.55 2005-05-05 15:05:43 Capote Exp $
+Ccc   * $Date: 2005-05-09 15:03:27 $
+Ccc   * $Id: HF-comp.f,v 1.56 2005-05-09 15:03:27 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -583,7 +583,7 @@ C
      &        1X,27('*'),//)
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0.) THEN
+         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).gt.0. ) THEN
             IF (IOUt.GT.2) WRITE (6,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99010       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',

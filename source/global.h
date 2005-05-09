@@ -118,7 +118,7 @@
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
      &                 DENhf, GCAsc, BFUs, GDIv, GDRweis, CHMs, DERec,
-     &                 ENDf, SHNix, TEMp0, SHRt, QFIs, SHRj,SHRd,
+     &                 ENDf, SHNix, TEMp0, SHRt, QFIs, SHRj, SHRd,
      &                 SIG, TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1,
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-09 05:31:44 $
-Ccc   * $Id: main.f,v 1.83 2005-05-09 05:31:44 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-09 15:03:27 $
+Ccc   * $Id: main.f,v 1.84 2005-05-09 15:03:27 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -684,11 +684,11 @@ C--------reset variables for life-time calculations
                   GOTO 1460
                ENDIF
 
-                dtmp = 0.d0
+               dtmp = 0.d0
                DO il = 1, NLV(nnuc)
                  dtmp = dtmp + CSDirlev(il,nejc)
                ENDDO
-               IF(dtmp.LE.1.e-10) GOTO 1460
+               IF(dtmp.LE.0.0) GOTO 1460
 
                WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
@@ -782,7 +782,7 @@ C--------locate residual nuclei
             NREs(nejc) = -1
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
-C           emitted nuclei must be heavier than alpha
+C           residual nuclei must be heavier than alpha
             if(ares.le.4. and. zres.le.2.) cycle
             izares = INT(1000.0*zres + ares)
             CALL WHERE(izares,nnur,iloc)
@@ -946,7 +946,7 @@ C--------------calculate population in the energy bin ke
                      GOTO 1470
                   ENDIF
                   DO nejc = 1, NEJcm !over ejectiles
-C--------------------emitted nuclei must be heavier than alpha
+C------------------- residual nuclei must be heavier than alpha
                      if(NRES(nejc).lt.0) cycle
                      nnur = NREs(nejc)
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
@@ -1044,7 +1044,13 @@ C--------printout of results for the decay of NNUC nucleus
          IF (IOUt.GT.0) WRITE (6,
      &          '(1X,/,'' Population left because too small '',G12.5,/)'
      &          ) popleft*DE
- 1500    IF (IOUt.GT.0) WRITE (6,
+ 1500    dtmp = 0.d0
+         DO il = 1, NLV(nnuc)
+           dtmp = dtmp + POPlv(il,nnuc)
+         ENDDO
+         IF(dtmp.LE.0.0) GOTO 1525
+
+         IF (IOUt.GT.0) WRITE (6,
      &                        '(1X,/,10X,''Discrete level population'')'
      &                        )
          IF (IOUt.GT.0 .AND. kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1)
@@ -1084,7 +1090,7 @@ C--------------check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-         IF (ENDf(nnuc).GT.0 .AND.
+         IF (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0. .AND.
      &      (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &      nnuc.EQ.mt849)) THEN
 
@@ -1114,7 +1120,7 @@ C    &                 (53X,7(I4,E11.4)))
          ENDIF
 C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
-         ia = INT(A(nnuc))
+1525     ia = INT(A(nnuc))
          iz = INT(Z(nnuc))
          IF (IOUt.GT.0) THEN
             WRITE (6,'(1X,/,10X,40(1H-),/)')
@@ -1187,16 +1193,18 @@ C--------------(merely for checking purpose)
                      atotsp = atotsp + CSDirlev(ilev,nejc)
                   ENDDO
                ENDIF
-               WRITE (6,*) ' '
-               WRITE (6,*)
+C              Execcution of the folowing print block is suspended (RCN)
+               IF(nnuc.eq.-1) then
+                 WRITE (6,*) ' '
+                 WRITE (6,*)
      &                  '----------------------------------------------'
-               WRITE (6,*) 'Test printout (exclusive spectra)'
-               WRITE (6,
+                 WRITE (6,*) 'Test printout (exclusive spectra)'
+                 WRITE (6,
      &'('' Energy'',14x,''gamma'',9x,''neutron'',8x,           ''proton
      &'',10x,''alpha'',9x,''l. ion'')')
-               WRITE (6,*)
+                 WRITE (6,*)
      &                  '----------------------------------------------'
-               DO ispec = 1, NEX(1) + 10
+                 DO ispec = 1, NEX(1) + 10
                   IF (NDEJC.EQ.4) THEN
                      WRITE (6,'(6g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,nnuc),
@@ -1211,38 +1219,42 @@ C--------------(merely for checking purpose)
      &                      POPcse(0,2,ispec,nnuc),
      &                      POPcse(0,3,ispec,nnuc)
                   ENDIF
-               ENDDO
-               WRITE (6,*) '-----------------------------------------'
-               WRITE (6,'(15X,5g15.5)') gtotsp, xtotsp, ptotsp, atotsp,
+                 ENDDO
+                 WRITE (6,*) '-----------------------------------------'
+                 WRITE (6,'(15X,5g15.5)')gtotsp, xtotsp, ptotsp, atotsp,
      &                                  htotsp
-               WRITE (6,'(''E-aver.'',8X,6g15.5)') emedg, emedn, emedp,
+                 WRITE (6,'(''E-aver.'',8X,6g15.5)')emedg, emedn, emedp,
      &                emeda, emedh, emedg + emedn + emedp + emeda +
      &                emedh
-               WRITE (6,*) '-----------------------------------------'
-               WRITE (6,*) ' '
-               WRITE (6,*)
+                 WRITE (6,*) '-----------------------------------------'
+                 WRITE (6,*) ' '
+                 WRITE (6,*)
      &                  '----------------------------------------------'
-               WRITE (6,*) 'Test printout (portions of DDX spectra)'
-               WRITE (6,'(''     Energy'',8x,'' gamma '',9x,''neutron'',
+
+                 WRITE (6,*) 'Test printout (portions of DDX spectra)'
+                 WRITE (6,
+     &                '(''     Energy'',8x,'' gamma '',9x,''neutron'',
      &                                9x,''proton '',7x,'' alpha'')')
-               DO ispec = 1, NEX(1) + 10
+                 DO ispec = 1, NEX(1) + 10
                   WRITE (6,'(5g15.5)') (ispec - 1)*DE,
      &                                 POPcseaf(0,0,ispec,nnuc),
      &                                 POPcseaf(0,1,ispec,nnuc),
      &                                 POPcseaf(0,2,ispec,nnuc),
      &                                 POPcseaf(0,3,ispec,nnuc)
-               ENDDO
-               WRITE (6,*) ' '
+                 ENDDO
+                 WRITE (6,*) ' '
+               ENDIF
          ENDIF
 C--------calculate life-times and widths
          IF (IOUt.GT.0) THEN
             IF (csemist.NE.0.0D0) THEN
                taut = stauc*6.589E-22*2.0*PI/csemist
-               WRITE (6,'('' Average total   life-time'',G12.5,'' s'')')
+               WRITE(6,
+     &               '(/''  Average total   life-time'',G12.5,'' s'')')
      &                taut
                gamt = sgamc/2.0/PI/csemist
-               WRITE (6,
-     &                '('' Average total   width    '',G12.5,'' MeV'')')
+               WRITE(6,
+     &               '(''  Average total   width    '',G12.5,'' MeV'')')
      &                gamt
 C              TAUT=6.589E-22/GAMT
 C              WRITE(6,'('' Average total life-time 1/width'',g12.5,
@@ -1250,12 +1262,11 @@ C              1       '' s'')') TAUT
             ENDIF
             IF (CSFis.NE.0.0D0) THEN
                tauf = stauc*6.589E-22*2.0*PI/CSFis
-               WRITE (6,'('' Average fission life-time'',G12.5,'' s'')')
+               WRITE(6,'(''  Average fission life-time'',G12.5,'' s'')')
      &                tauf
                gamfis = gamt*CSFis/csemist
                WRITE (6,
-     &  '('' Average fission width    '',G12.5,'' MeV'')               '
-     &  ) gamfis
+     &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
             ENDIF
 C-----------life-times and widths  *** done ***
             IF (FISmod(nnuc).GT.0) THEN
@@ -1267,10 +1278,12 @@ C-----------life-times and widths  *** done ***
                   WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
                ENDDO
                WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
-               WRITE (6,*) ' '
-               WRITE (6,
+               IF (CSFis.GT.0.) THEN
+                 WRITE (6,*) ' '
+                 WRITE (6,
      &            '('' Fission    cross section    '',G12.5,'' mb'')'
      &             ) CSFis
+               ENDIF
             ENDIF
          ENDIF
          TOTcsfis = TOTcsfis + CSFis
@@ -1279,14 +1292,15 @@ C--------down on the ground state
 9876     IF (nnuc.EQ.1 .AND. INT(AEJc(0)).NE.0
      &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
             WRITE (6,*)
-            WRITE (6,*) 'Incident energy (CMS)      ', EIN, ' MeV'
-            WRITE (6,*) 'Shape elastic cross section', ELAcs, ' mb'
-            WRITE (6,*) 'CN elastic cross section   ', POPlv(1,mt2),
+            WRITE (6,*) ' Incident energy (CMS)      ', EIN, ' MeV'
+            WRITE (6,*) ' Shape elastic cross section', ELAcs, ' mb'
+            WRITE (6,*) ' CN elastic cross section   ', POPlv(1,mt2),
      &                  ' mb'
             ELAcs = ELAcs + POPlv(LEVtarg,mt2)
 C-----------CN contribution to elastic ddx
             elcncs = POPlv(LEVtarg,mt2)/4.0/PI
-            WRITE (6,*) 'CN elastic angular distrib.', elcncs, ' mb/str'
+            WRITE (6,*)
+     &          ' CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
          ENDIF
          WRITE (12,*) ' '
@@ -1306,8 +1320,9 @@ C-----------CN contribution to elastic ddx
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.) THEN
             DO nejc = 1, NEJcm
-C------------emitted nuclei must be heavier than alpha
+C----------- residual nuclei must be heavier than alpha
              IF(NRES(nejc).LT.0) CYCLE
+             IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
@@ -1732,7 +1747,7 @@ C-----------------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-         
+
       IF (ENDf(NNUcd).EQ.2) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
@@ -1943,7 +1958,7 @@ C-----normalize recoil spectrum of the parent
       dang = 3.14159/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
-C        emitted nuclei must be heavier than alpha 
+C        emitted nuclei must be heavier than alpha
          if(NRES(nejc).lt.0) cycle
          nnur = NREs(nejc)
 C--------decay to continuum

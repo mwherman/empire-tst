@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-09 14:06:30 $
-Ccc   * $Id: input.f,v 1.112 2005-05-09 14:06:30 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-09 15:03:26 $
+Ccc   * $Id: input.f,v 1.113 2005-05-09 15:03:26 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -457,7 +457,7 @@ C--------NEMP  number of protons  emitted
          READ (5,*) nemp
 C--------NEMA  number of alphas   emitted
          READ (5,*) nema
-C--------NEMC  number of clusters  emitted
+C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
          IF (NDEJC.LT.4) NEMc = 0
 C--------cluster ejectile
@@ -707,7 +707,7 @@ C--------------To find inelastic channel
                ares = A(nnuc) - AEJc(nejc)
                zres = Z(nnuc) - ZEJc(nejc)
 
-C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C              residual nuclei must be heavier than alpha
                if(ares.le.4 . or. zres.le.2) cycle
 
                izares = INT(1000*zres + ares)
@@ -790,7 +790,7 @@ C--------inteligent defaults *** done ***
 C
          CALL READIN   !optional part of the input
 C--------Set exclusive and inclusive ENDF formatting flags
-         IF(NENdf.GT.0) THEN 
+         IF(NENdf.GT.0) THEN
             DO iac = 0, NEMc
                DO ia = 0, nema
                   DO ip = 0, nemp
@@ -808,13 +808,13 @@ C                       residues must be heavier than alpha !! (RCN)
                         if(atmp.le.4 . or. ztmp.le.2) cycle
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
-                        IF(mulem.LT.NENdf) THEN 
+                        IF(mulem.LT.NENdf) THEN
                            ENDf(nnuc) = 1
                         ELSEIF(mulem.EQ.NENdf) THEN
                            ENDf(nnuc) = 1
-                        ELSE 
+                        ELSE
                            ENDf(nnuc) = 2
-                        ENDIF 
+                        ENDIF
                      ENDDO
                   ENDDO
                ENDDO
@@ -1419,7 +1419,7 @@ C
          DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
-C           EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
+C           residual nuclei must be heavier than alpha
             if(ares.le.4 . or. zres.le.2) cycle
 
             izares = INT(1000*zres + ares)
@@ -1947,30 +1947,17 @@ C
       ENDIF
       WRITE (6,*)
       IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (6,*)
-     &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-      WRITE (6,*) ' neutron   o. m. parameters: RIPL catalog number ',
+     &     'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
+      WRITE (6,*) 'Neutron   o. m. parameters: RIPL catalog number ',
      &            KTRlom(1,1)
-      WRITE (6,*) ' proton    o. m. parameters: RIPL catalog number ',
+      WRITE (6,*) 'Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-      WRITE (6,*) ' alpha     o. m. parameters: RIPL catalog number ',
+      WRITE (6,*) 'Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
       IF (NEMc.GT.0) WRITE (6,*)
-     &               ' cluster   o. m. parameters: RIPL catalog number '
+     &               'Cluster   o. m. parameters: RIPL catalog number '
      &               , KTRlom(NDEJC,1)
       WRITE (6,*)
-C-----print the same to the LIST.OUT for ENDF file
-      WRITE (12,*)
-      IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
-     &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-      WRITE (12,*) ' neutron   o. m. parameters: RIPL catalog number ',
-     &            KTRlom(1,1)
-      WRITE (12,*) ' proton    o. m. parameters: RIPL catalog number ',
-     &            KTRlom(2,1)
-      WRITE (12,*) ' alpha     o. m. parameters: RIPL catalog number ',
-     &            KTRlom(3,1)
-      IF (NEMc.GT.0) WRITE (12,*)
-     &               ' cluster   o. m. parameters: RIPL catalog number '
-     &               , KTRlom(NDEJC,1)
       WRITE (12,*)
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
 99045 FORMAT (1X,I3,'-',A2,'-',I3,4X,10F12.3)
@@ -2265,7 +2252,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b25  |'
+     &           '                       |  E M P I R E  -  2.19.b27  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -2278,7 +2265,7 @@ C
       WRITE (6,*) '-------------------------------------------'
       WRITE (6,*) ' '
       WRITE (12,*)
-     &           'Calculations run with  E M P I R E  -  2.19.b26  '
+     &           'Calculations run with  E M P I R E  -  2.19.b27  '
   100 READ (5,'(A1)') name(1:1)
       IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
      &    .NE.'!') THEN
@@ -2368,7 +2355,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(Key_gdrgfl.EQ.2)WRITE(12,
      &          '('' GDR parameters from RIPL-2/Exp.data+'',
      &           ''Goriely calc.'')')
-C-----   print  maximal gamma-ray multipolarity  'MAXmult'
+C-----      print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(12,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
@@ -2392,6 +2379,23 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
      &ntribution.'')')
                KTRompcc = 0
             ENDIF
+
+            IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
+     &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
+            WRITE (12,*)
+     &        ' neutron   o. m. parameters: RIPL catalog number ',
+     &        KTRlom(1,1)
+            WRITE (12,*)
+     &        ' proton    o. m. parameters: RIPL catalog number ',
+     &        KTRlom(2,1)
+            WRITE (12,*)
+     &        ' alpha     o. m. parameters: RIPL catalog number ',
+     &        KTRlom(3,1)
+            IF (NEMc.GT.0) WRITE (12,*)
+     &        ' cluster   o. m. parameters: RIPL catalog number ',
+     &        KTRlom(NDEJC,1)
+            WRITE (12,*) ' '
+
             WRITE (6,*) ' '
 C-----------Printout of some final input options   *** done ***
             RETURN
