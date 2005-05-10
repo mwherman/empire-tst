@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-16 22:24:14 $
-Ccc   * $Id: MSD-orion.f,v 1.13 2005-03-16 22:24:14 Capote Exp $
+Ccc   * $Date: 2005-05-10 07:14:46 $
+Ccc   * $Id: MSD-orion.f,v 1.14 2005-05-10 07:14:46 Capote Exp $
 C
 C
 C
@@ -598,6 +598,13 @@ C
 C
 C     Using settings for inelastic channel
 C
+C     IF (CCCalc) THEN
+C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
+C       komp = 33
+C     ELSE
+C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
+C        komp = 29
+C     ENDIF
       komp = 29
 C     E is always in lab system => IKEY = -1
       CALL OMPAR(Nejc,nnuc,E,eicms,Mi,Mt,RMU,ak2,komp, - 1)
