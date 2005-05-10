@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-10 05:43:19 $
-Ccc   * $Id: input.f,v 1.114 2005-05-10 05:43:19 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-10 07:24:14 $
+Ccc   * $Id: input.f,v 1.115 2005-05-10 07:24:14 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -804,7 +804,7 @@ C--------Set exclusive and inclusive ENDF formatting flags
      &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
                         IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
      &                      *ZEJc(NDEJC)
-C                       residues must be heavier than alpha 
+C                       residues must be heavier than alpha
                         if(atmp.le.4 . or. ztmp.le.2) cycle
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
@@ -925,6 +925,9 @@ C
             WRITE (6,*)
      &' WARNING: DIRPOT keyword is not specified, but DIRECT keyword > 0
      &'
+            WRITE (6,*)
+     &' WARNING: Please add line: DIRPOT ',-KTRompcc,
+     &' to your INPUT file'
             WRITE (6,
      &'(''  Optical model parameters for direct inelastic scattering set
      & to RIPL #'',I4)') KTRompcc
