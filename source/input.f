@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-10 07:24:14 $
-Ccc   * $Id: input.f,v 1.115 2005-05-10 07:24:14 Capote Exp $
+Ccc   * $Date: 2005-05-10 07:34:40 $
+Ccc   * $Id: input.f,v 1.116 2005-05-10 07:34:40 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -238,13 +238,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -3026,28 +3026,37 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &          '('' Imag. potential depth uncertainty ignored'')')
+     &        '('' Imag. volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UOMPWV '',I2)') i3
                WRITE (6,
-     &          '('' Imag. potential depth uncertainty ignored'')')
+     &        '('' Imag. volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0.) then
               WRITE (6,
-     &        '('' Imag. potential depth uncertainty in '',I3,A2,
+     &        '('' Imag. volume potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
 C                FNwvomp(i3,nnuc) = 1. + grand()*sigma
                  FNwvomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
-     &        '('' Imag. potential depth sampled norm.factor : ''
+     &        '('' Imag. volume potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb
+            endif
+            if(val.lt.0.) then
+              FNwvomp(i3,nnuc) = abs(val)
+              WRITE (6,
+     &        '('' Imag. volume potential depth scaling factor : ''
+     &        ,f5.2)') FNwvomp(i3,nnuc)
+              WRITE (12,
+     &        '('' Imag. volume potential depth scaling factor : ''
+     &        ,f5.2)') FNwvomp(i3,nnuc)
             endif
             GOTO 100
          ENDIF
@@ -3061,28 +3070,37 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &          '('' Surface potential depth uncertainty ignored'')')
+     &      '('' Imag. surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in UOMPWS '',I2)') i3
                WRITE (6,
-     &          '('' Surface potential depth uncertainty ignored'')')
+     &      '('' Imag. surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0.) then
               WRITE (6,
-     &        '('' Surface potential depth uncertainty in '',I3,A2,
+     &      '('' Imag. surface potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
 C                FNwsomp(i3,nnuc) = 1. + grand()*sigma
                  FNwsomp(i3,nnuc) = 1. + (2*drand()-1.)*sigma
               WRITE (6,
-     &        '('' Surface potential depth sampled norm.factor : '',
+     &      '('' Imag. surface potential depth sampled norm.factor : '',
      &        f5.2)') FNwsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb
+            endif
+            if(val.lt.0.) then
+              FNwsomp(i3,nnuc) = abs(val)
+              WRITE (6,
+     &        '('' Imag. surface potential depth scaling factor : ''
+     &        ,f5.2)') FNwsomp(i3,nnuc)
+              WRITE (12,
+     &        '('' Imag. surface potential depth scaling factor : ''
+     &        ,f5.2)') FNwsomp(i3,nnuc)
             endif
             GOTO 100
          ENDIF
