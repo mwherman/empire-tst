@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-10 13:27:51 $
-Ccc   * $Id: input.f,v 1.117 2005-05-10 13:27:51 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-10 15:33:49 $
+Ccc   * $Id: input.f,v 1.118 2005-05-10 15:33:49 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -45,7 +45,7 @@ C
       LOGICAL gexist, nonzero, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        nema, nemn, nemp, netl, nnuc, nnur, mulem
+     &        netl, nnuc, nnur, mulem
       INTEGER IFINDCOLL
       INTEGER INDEX, INT, ISEED, NINT
       INTEGER*4 iwin
@@ -813,7 +813,9 @@ C                       residues must be heavier than alpha
                         ELSEIF(mulem.EQ.NENdf) THEN
                            ENDf(nnuc) = 1
                         ELSE
+C    Comment the following line and uncommment the one after for all exclusive spectra
                            ENDf(nnuc) = 2
+C                          ENDf(nnuc) = 1
                         ENDIF
                      ENDDO
                   ENDDO

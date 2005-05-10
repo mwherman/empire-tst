@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-05-09 15:03:27 $
-Ccc   * $Id: MSD-tristan.f,v 1.36 2005-05-09 15:03:27 Capote Exp $
+Ccc   * $Date: 2005-05-10 15:27:02 $
+Ccc   * $Id: MSD-tristan.f,v 1.37 2005-05-10 15:27:02 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2431,8 +2431,9 @@ C
       INTEGER i, ic, icp, icpmx, icpx, ier, iloc, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1,
      &        lc, lc1, lcp1, ln, m2, m2n, mx, my, n, n0, n1, n2, n2n,
-     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, nemn,
-     &        nemx, nep, nepp, nmax, nnur, np, npx, nq, nqx, nx, ny
+     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, 
+     &        nemnt, nemx, nep, nepp, nmax, nnur, np, npx, nq, nqx, nx,
+     &        ny
       INTEGER MAX0, MIN0
       EQUIVALENCE (f2(1),f21)
       EQUIVALENCE (f1(1),f11)
@@ -2761,12 +2762,12 @@ C
                   DO icp = 1, icpmx
                      kcp = kcp + 1
                      DO ne = 1, Nbinx
-                        nemn = MAX0(1,ne - NAVerg)
-                        nemx = MIN0(Nbinx,nemn + NAVerg)
+                        nemnt = MAX0(1,ne - NAVerg)
+                        nemx = MIN0(Nbinx,nemnt + NAVerg)
                         sum = 0.
-                        DO neb = nemn, nemx
+                        DO neb = nemnt, nemx
                            hhh = ESTep
-                           IF (neb.EQ.nemn .OR. neb.EQ.nemx)
+                           IF (neb.EQ.nemnt .OR. neb.EQ.nemx)
      &                         hhh = 0.5*hhh
                            sum = sum + hhh*Crose(neb,na,kcp)
                         ENDDO

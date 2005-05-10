@@ -41,11 +41,11 @@
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
      &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), LTUrbo,
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,
-     &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMc, NEX(ndnuc),
-     &        NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NLV(0:ndnuc), NLW,
-     &        NNUcd, NNUct, NOUt, NPRoject, NRBar, NRBarc, NRBinfis(2),
-     &        NREs(0:ndejc), NRFdis(nfparab), NRWel, NSCc, NTArget,
-     &        NSTored(0:ndnuc), NENdf
+     &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc, 
+     &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, 
+     &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar, 
+     &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab), 
+     &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead
@@ -152,7 +152,7 @@
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf
+     &                  NENdf, NEMn, NEMp, NEMa
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead

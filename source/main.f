@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-09 15:03:27 $
-Ccc   * $Id: main.f,v 1.84 2005-05-09 15:03:27 Capote Exp $
+Ccc   * $Date: 2005-05-10 15:26:52 $
+Ccc   * $Id: main.f,v 1.85 2005-05-10 15:26:52 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -159,7 +159,8 @@ C--------------each 4th result from ECIS (2.5 deg grid)
                READ (45,'(7x,E12.5)',END = 1400)
      &               CSAlev(NDANG,ilv,nejcec)
 C--------------construct recoil spectra due to direct transitions
-               IF (ENDf(nnurec).GT.0) THEN
+C              IF (ENDf(nnurec).GT.0) THEN
+               IF (ENDf(nnurec).EQ.1) THEN
                   dang = PI/FLOAT(NDANG - 1)
                   coef = 2*PI*dang
 C-----------------check whether integral over angles agrees with x-sec. read from ECIS
@@ -1022,7 +1023,7 @@ C-----------------calculate total emission
                      csemist = csemist + CSEmis(nejc,nnuc)
                   ENDDO
                   csemist = csemist + CSFis
- 1470          ENDDO                   !loop over decaying nucleus spin
+ 1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
             IF (ENDf(nnuc).GT.0) CALL RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc)) THEN
@@ -1113,8 +1114,6 @@ C-------------check for the number of branching ratios
      &                          ,ib = 1,nbr)
 99065         FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
      &                 (53X,7(I4,E11.4)))
-C99065        FORMAT (I12,F10.4,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
-C    &                 (53X,7(I4,E11.4)))
             ENDDO
             WRITE (12,'(1X,/,10X,40(1H-),/)')
          ENDIF
@@ -1606,6 +1605,10 @@ C-----Fission related spectra of particles and gammas
       IF (ENDf(1).GT.0) THEN
          IF (TOTcsfis.GT.0.0D0) THEN
             DO nejc = 0, NDEJC         !loop over ejectiles
+               IF(NEMn.eq.0 .and. nejc.eq.1) cycle
+               IF(NEMp.eq.0 .and. nejc.eq.2) cycle
+               IF(NEMa.eq.0 .and. nejc.eq.3) cycle
+               IF (NDEjc.EQ.4 .AND. NEMc.eq.0 .AND. nejc.eq.4) cycle               
 C              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
                IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
@@ -1734,7 +1737,7 @@ C-----------------------to conserve the integral
             ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
-            IF(ENDF(1).EQ.2) THEN
+            IF (ENDf(NNUcd).EQ.2) THEN
               WRITE (6,'(//,11X,''**************************'')')
               WRITE (6,'(   11x,'' Inclusive spectra (C.M.)'')')
               WRITE (6,'(   11x,''**************************''/)')
@@ -1747,12 +1750,11 @@ C-----------------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-
       IF (ENDf(NNUcd).EQ.2) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-            CALL PRINT_RECOIL(nnuc,reactionx)
+          IF (ENDf(nnuc).NE.1) CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C--------print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
@@ -1772,24 +1774,27 @@ C--------print inclusive gamma spectrum
          ENDDO
 C--------print inclusive spectra of ejectiles
 C--------neutrons
-         nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
-         IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-         WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
-         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-         WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
-         DO ie = 1, nspec - 1
+         IF(nemn.GT.0) THEN            
+          nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
+          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
+          WRITE (12,'(30X,''A      n      g      l      e      s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+          DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &             (CSEa(ie,nang,1,0),nang = 1,NDANG)
-         ENDDO
-         DO ie = nspec, nspec + 1
+          ENDDO
+          DO ie = nspec, nspec + 1
                                  ! exact endpoint
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &             (CSEa(ie,nang,1,0),nang = 1,NDANG)
-         ENDDO
+          ENDDO
+	   ENDIF
 C--------protons
-         nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
+         IF(nemp.GT.0) THEN
+          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
           IF(nspec.gt.0) then
            IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
            WRITE (12,*) ' '
@@ -1807,8 +1812,10 @@ C--------protons
      &             (CSEa(ie,nang,2,0),nang = 1,NDANG)
            ENDDO
           ENDIF
+	   ENDIF
 C--------alphas
-         nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
+         IF(nema.GT.0) THEN
+          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
           IF(nspec.gt.0) then
            IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
            WRITE (12,*) ' '
@@ -1825,7 +1832,8 @@ C--------alphas
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
      &             (CSEa(ie,nang,3,0),nang = 1,NDANG)
            ENDDO
-         ENDIF
+          ENDIF
+	   ENDIF
 C--------light ions
          IF (NDEJC.EQ.4 .AND. NEMc.GT.0) THEN
            nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
