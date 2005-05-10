@@ -231,6 +231,11 @@ C* Read the EMPIRE output file to extract the cross sections
       CALL REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(IZB),RWO(LBE)
      1           ,IZI,IZA,LISO,AWR,NEN,NXS)
+      WRITE(LTT,995) ' EMPEND ERROR - Number of energy points:',NEN
+      WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
+      IF(NEN.LE.0) THEN
+        STOP 'EMPEND ERROR - Zero energy entries in EMPIRE output'
+      END IF
 C*
 C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       REWIND LIN
@@ -365,7 +370,12 @@ C* Write the ENDF file-6 data
 C* Energy/angle distribution data processed
   800 IF(JT6.GT.0)
      1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+C*
 C* Process discrete level photon production
+      WRITE (LTT,991)
+      WRITE (LTT,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA '
+      WRITE (LER,991)
+      WRITE (LER,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA '
 C*   MXLI - maximum number of discrete levels
 C*   MXLJ - maximum number of transitions from a level
       MXLI=100
@@ -1824,6 +1834,7 @@ C* NE6 counts the Number of energy points
       LBL=1
       IK =0
       NK =0
+      NSK=0
 c...      NP =0
 c...      IT =0
       PTST='        '
@@ -1892,26 +1903,23 @@ C...
       AWPK(NK)=AWP
       IF(NK.LE.1) GO TO 110
 C* Sort in ascending ZA order but placing gamma last
-      DO 124 I=2,NK
-      K=NK+2-I
-      IF((IZAK(K-1) .GT.0 .AND. KZAK.GE.IZAK(K-1)) .OR.
-     &    KZAK.EQ.0) GO TO 110
-      POUT(K)=POUT(K-1)
-      IZAK(K)=IZAK(K-1)
-      AWPK(K)=AWPK(K-1)
-      POUT(K-1)=PTST
-      IZAK(K-1)=KZAK
-      AWPK(K-1)=AWP
-  124 CONTINUE
+      DO I=2,NK
+        K=NK+2-I
+        IF((IZAK(K-1) .GT.0 .AND. KZAK.GE.IZAK(K-1)) .OR.
+     &      KZAK.EQ.0) GO TO 110
+        POUT(K)=POUT(K-1)
+        IZAK(K)=IZAK(K-1)
+        AWPK(K)=AWPK(K-1)
+        POUT(K-1)=PTST
+        IZAK(K-1)=KZAK
+        AWPK(K-1)=AWP
+      END DO
       GO TO 110
 C* File scanned for particles - eliminate unknown particles
   140 IK=0
       JK=NK
       NK=0
       DO 142 J=1,JK
-c...
-           print *,'Identified particle: ',POUT(J),' for mtc',mtc
-c...
       IF(IZAK(J).GE.0) THEN
         NK=NK+1
         POUT(NK)=POUT(J)
@@ -1919,17 +1927,16 @@ c...
         AWPK(NK)=AWPK(J)
       ELSE
 C* Unidentified outgoing particle
-        WRITE(LTT,910) POUT(IK),MTC
-        WRITE(LER,910) POUT(IK),MTC
+        WRITE(LTT,910) POUT(J),MTC
+        WRITE(LER,910) POUT(J),MTC
       END IF
   142 CONTINUE
 C*
 C* Process the spectra - Search for the reaction header cards
   200 IK=IK+1
       REWIND LIN
-c...
-c...      print *,'processing ',pout(ik),' ZAP',izak(ik),' for mt',mtc
-c...
+      WRITE(LTT,921) POUT(IK),IZAK(IK),MTC
+      WRITE(LER,921) POUT(IK),IZAK(IK),MTC
 c...      NE6N=0
       NE6= 0
       MTX= 0
@@ -2078,7 +2085,8 @@ c...
         NP=0
       END IF
 C*
-C      print *,'particle ZAP,AWP',Kzak,awp
+
+c...      print *,'particle ZAP,AWP',Kzak,awp
 
       IZAP=KZAK
       ZAP=KZAK
@@ -2219,7 +2227,7 @@ C*
 C* Distributions for one incident energy processed - Normalize 
       NE6=NE6+1
 
-C...        print *,'      ne6',ne6,ee
+c...        print *,'      ne6',ne6,ee
 
       LO1=LHI+1
       LL =L6 +4
@@ -2281,7 +2289,7 @@ c...        PRINT *,'REAMF6 IK,LXA',IK,LXA
       LAG=LAE+NP
       LA1=LAG+NP
 
-C...        print *,'np,ne6',np,ne6
+c...        print *,'np,ne6',np,ne6
 
       IF(NP.EQ.0) THEN
         IF(IZAP.EQ.0) THEN
@@ -2293,11 +2301,7 @@ C...        print *,'np,ne6',np,ne6
           WRITE(LTT,995) '      No distribution data for particle ',IZAP
           WRITE(LER,995) ' EMPEND WARNING - Reaction MT           ',JT6
           WRITE(LER,995) '      No distribution data for particle ',IZAP
-c...
-          NK=0
-          RETURN
-c...
-          NK=NK-1
+          NSK=NSK+1
           GO TO 704
         END IF
       ELSE IF(NP.EQ.2) THEN
@@ -2306,10 +2310,10 @@ c...
         RWO(LAG  )=YLD( 1)
         RWO(LAG+1)=YLD(NP)
       ELSE
-        DO 702 I=1,NP
-        RWO(LAE-1+I)=EIS(I)
-        RWO(LAG-1+I)=YLD(I)
-  702   CONTINUE
+        DO I=1,NP
+          RWO(LAE-1+I)=EIS(I)
+          RWO(LAG-1+I)=YLD(I)
+        END DO
       END IF
       RWO(LA1   )=LANG
       RWO(LA1+ 1)=LEP
@@ -2338,12 +2342,10 @@ C* Reaction data read - check for next outgoing particle
       END IF
 C
 C* All data for a reaction processed
-C+++ ???
-c  720 MT     =-MTH(IT)
-c      MTH(IT)= MT
-C+++ ??? end
   720 MT     = MTH(IT)
       MTH(IT)=-MT
+C* Check for skipped particles
+      NK=NK-NSK
       RETURN
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
@@ -2361,6 +2363,7 @@ C*
      1      ,A8,' MT',I8)
   912 FORMAT(' EMPEND WARNING - Spectrum not processed for MT',I6/
      1       '                  No cross section data available')
+  921 FORMAT(' Processing outgoing ',A8,' ZAP',I6,' for MT',I4)
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,I4)
       END
@@ -2924,6 +2927,9 @@ C* Loop over outgoing particles
       LAW=RWO(LL+3)+0.1
       NR =RWO(LL+4)+0.1
       NP =RWO(LL+5)+0.1
+c...
+c...      print *,'mf,mt,np,zap,awp',mf,mt,np,zap,awp
+c...
       NBT(1)=NP
       INT(1)=2
       LAE=LL+6
