@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:55:47 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.16 2005-04-10 21:55:47 Capote Exp $
+Ccc   * $Date: 2005-05-10 07:14:25 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.17 2005-05-10 07:14:25 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
      &   Eexcitf,Temperf,Egamma,Keyshape)
@@ -105,7 +105,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AK0, AKS0, ALPha, BC, DEG, DMEf, EEGlo0, EFErmi, 
+      DOUBLE PRECISION AK0, AKS0, ALPha, BC, DEG, DMEf, EEGlo0, EFErmi,
      &                 EG0, ER0, FACtor, GW0, GWAll, LMConst, R0
       INTEGER KAA1, KEYfbc, KEYinput, KEYset, KZZ1
       COMMON /HEGLO / EEGlo0, AK0, ER0
@@ -123,7 +123,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aa, aa3, alpfree, f0prime, f1prime, hh, rnucl, 
+      DOUBLE PRECISION aa, aa3, alpfree, f0prime, f1prime, hh, rnucl,
      &                 sigmapn
       DOUBLE PRECISION E1_GSA
       INTEGER ka, keglo, kz
@@ -135,12 +135,12 @@ C
          KAA1 = ka
          KEYinput = 1
 C
-C        Default assignments  and  brief description of 
-C        some input parameters are given below.         
-C        The  parameters  are fixed at first call,      
+C        Default assignments  and  brief description of
+C        some input parameters are given below.
+C        The  parameters  are fixed at first call,
 C        when  'keyinput=0'; if  parameters dependent on
-C        nuclear mass and charge they are recalculated  
-C        at next call with others Anucleus and Znucleus 
+C        nuclear mass and charge they are recalculated
+C        at next call with others Anucleus and Znucleus
 C
          EFErmi = 37.
          R0 = 1.27
@@ -150,54 +150,54 @@ C
          KEYset = 1
 C        KEYset = 2
 C        KEYset = 3
-C         'KEYset' is key for choise of the input parameters        
-C         to calculate the width of the MLO response function.      
-C         It specifies the input parameters in  the following way:  
-C                                                                   
-C            KEYset= 1 --> FACtor =1 (KEYfbc=1)                     
+C         'KEYset' is key for choise of the input parameters
+C         to calculate the width of the MLO response function.
+C         It specifies the input parameters in  the following way:
+C
+C            KEYset= 1 --> FACtor =1 (KEYfbc=1)
 C                          k_{s}= k_{s}(Egamma)[power approximation]
-C                          with AKS0=k_{s}(0)=0.3;   DEG=n_{s}=1.   
-C                                                                   
-C            KEYset= 2 --> BC = 0.7 (KEYfbc=2)                      
+C                          with AKS0=k_{s}(0)=0.3;   DEG=n_{s}=1.
+C
+C            KEYset= 2 --> BC = 0.7 (KEYfbc=2)
 C                          k_{s}= k_{s}(Egamma)[power approximation]
-C                          with AKS0=k_{s}(0)=0.7;   DEG=n_{s}=3.   
-C                                                                   
-C            KEYset= 3 --> FACtor =0.5 (KEYfbc=1)                   
+C                          with AKS0=k_{s}(0)=0.7;   DEG=n_{s}=3.
+C
+C            KEYset= 3 --> FACtor =0.5 (KEYfbc=1)
 C                          k_{s}= k_{s}(Egamma)[power approximation]
-C                          with AKS0=k_{s}(0)=0.1;   DEG=n_{s}=3.   
-C                                                                   
-C                          (see below, for comments)                
+C                          with AKS0=k_{s}(0)=0.1;   DEG=n_{s}=3.
+C
+C                          (see below, for comments)
 C
          IF (KEYset.EQ.1) THEN
             KEYfbc = 1
-C           'KEYfbc' is  key  to specify calculation  of the two-body    
-C           component of the relaxation time of MLO approach.           
-C                                                                        
-C              KEYfbc=1 -> Calculations at given value of the            
-C                          in-medium cross section                       
-C                          SIGMA_PN(in-medium)=SIGmapn:                  
-C                                                                        
-C                          SIGMA_PN(in-medium)=SIGMA_PN(free)*FACtor     
-C                                                                        
+C           'KEYfbc' is  key  to specify calculation  of the two-body
+C           component of the relaxation time of MLO approach.
+C
+C              KEYfbc=1 -> Calculations at given value of the
+C                          in-medium cross section
+C                          SIGMA_PN(in-medium)=SIGmapn:
+C
+C                          SIGMA_PN(in-medium)=SIGMA_PN(free)*FACtor
+C
 C              KEYfbc=2 -> Calculations at fixed relative two-body contr-
-C                          ibution,BC,to the GDR width in cold nuclei    
+C                          ibution,BC,to the GDR width in cold nuclei
 C                          [within extended Steinwedel-Jensen(ESJ) model]
-C                                                                          
+C
             FACtor = 1.
-C           'FACtor' determines (n,p)in-medium cross-section         
-C           in comparison with free one                              
-C           [SIGMA_PN(in-medium)=SIGMA_PN(free)*FACtor]              
+C           'FACtor' determines (n,p)in-medium cross-section
+C           in comparison with free one
+C           [SIGMA_PN(in-medium)=SIGMA_PN(free)*FACtor]
             DEG = 1.
 C           'DEG =n_{s}' is exponent of the gamma-ray energy dependence
-C           of the  one-body contribution  [k_{s}(Egamma)] to the MLO  
-C           response function width.                                   
+C           of the  one-body contribution  [k_{s}(Egamma)] to the MLO
+C           response function width.
             AKS0 = 0.3
-C           'AKS0' specifies one-body contribution to the MLO response   
-C           fuction width at zero gamma-ray energy 'Egamma'              
+C           'AKS0' specifies one-body contribution to the MLO response
+C           fuction width at zero gamma-ray energy 'Egamma'
          ELSEIF (KEYset.EQ.2) THEN
             KEYfbc = 2
 C           KEYfbc=2 -> Calculations at fixed relative two-body contr-
-C                       ibution,BC,to the GDR width in cold nuclei    
+C                       ibution,BC,to the GDR width in cold nuclei
 C                       [within extended Steinwedel-Jensen(ESJ) model]
             BC = 0.7
             DEG = 3.
@@ -208,26 +208,26 @@ C                       [within extended Steinwedel-Jensen(ESJ) model]
             DEG = 3.
             AKS0 = 0.1
          ENDIF
-C        Calculations of the 'ALPha' if 'FACtor' is input  
+C        Calculations of the 'ALPha' if 'FACtor' is input
          IF (KEYfbc.EQ.1) THEN
             alpfree = 23.514/DMEf/sigmapn
             ALPha = alpfree/FACtor
          ENDIF
-C        Calculation of normalization constant 'LMconst'   
-C        of the GFL model                                  
+C        Calculation of normalization constant 'LMconst'
+C        of the GFL model
          LMConst = SQRT((1.D0 + f1prime/3.D0)/(1.D0 + f0prime))
 C
-C        'GWAll' is "wall" width 
+C        'GWAll' is "wall" width
          aa = ka
          aa3 = aa**0.3333333
          rnucl = R0*aa3
          GWAll = 6.857764*SQRT(EFErmi*DMEf)/rnucl
          ER0 = 41.0/aa3
-C        Systematics of GDR parameters in approximation  
-C        of spherical nucleus                            
+C        Systematics of GDR parameters in approximation
+C        of spherical nucleus
          EG0 = 31.2/aa3 + 20.6/SQRT(aa3)
          GW0 = 0.026*EG0**1.91
-C        Parameters of EGLO model    
+C        Parameters of EGLO model
          keglo = 1
          IF (keglo.GT.1) THEN
             hh = aa - 145
@@ -242,7 +242,7 @@ C        Parameters of EGLO model
       ENDIF
       IF (kz.NE.KZZ1 .OR. ka.NE.KAA1) THEN
 C        Recalculation of the parameters dependent on
-C        mass and charge of nucleus                  
+C        mass and charge of nucleus
          aa = ka
          aa3 = aa**0.3333333
          EG0 = 31.2/aa3 + 20.6/SQRT(aa3)
@@ -265,15 +265,15 @@ C        mass and charge of nucleus
       ENDIF
       GAMMA_STRENGTH = E1_GSA(Egamma,Eexcitf,Temperf,Keyshape)
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION E1_GSA(Egamma,Eexcitf,Temperf,Keyshape)
-C     Calculation of the E1 strength function shape  
+C     Calculation of the E1 strength function shape
       IMPLICIT NONE
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AKS0, ALPha, BC, CS1, CS2, DEG, DMEf, EG0, EG1, 
+      DOUBLE PRECISION AKS0, ALPha, BC, CS1, CS2, DEG, DMEf, EG0, EG1,
      &                 EG2, EGDr, FACtor, GGDr, GW0, GW1, GW2, GWAll
       INTEGER KEYfbc, KEYset, NG
       COMMON /HELP  / EGDr, GGDr
@@ -289,11 +289,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cross(2), e10, e11, ee, ef, egiant(2), er2, 
+      DOUBLE PRECISION cross(2), e10, e11, ee, ef, egiant(2), er2,
      &                 gamwidth(2), pi24, siggam, sigma0, ttf
       DOUBLE PRECISION EGLO, GFL, MLO1, MLO2, MLO3, SLO
       INTEGER nreson
       DATA pi24/39.47841761D0/
+      save pi24
       egiant(1) = EG1
       cross(1) = CS1
       gamwidth(1) = GW1
@@ -310,7 +311,7 @@ C
          sigma0 = cross(nreson)
          er2 = EGDr*EGDr
          siggam = GGDr*sigma0
-C        *  Calculations of the 'ALPha' if 'BC' is input 
+C        *  Calculations of the 'ALPha' if 'BC' is input
          IF (KEYfbc.NE.1) THEN
             IF (NG.EQ.1) THEN
                ALPha = (DMEf/pi24)*er2/GGDr/BC
@@ -338,8 +339,8 @@ C        - problem in the EGLO model
       ENDDO
       E1_GSA = 8.674D-08*e10
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION SLO(Egamma)
       IMPLICIT NONE
 C
@@ -373,7 +374,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ceglo1, ceglo2, egamma2, er2, gel, gel0, hh, 
+      DOUBLE PRECISION ceglo1, ceglo2, egamma2, er2, gel, gel0, hh,
      &                 pi24, t2
 C
 C
@@ -390,8 +391,8 @@ C
       hh = Egamma*gel/((er2 - egamma2)**2 + (Egamma*gel)**2)
       EGLO = hh + ceglo2*gel0
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION GFL(T,Egamma)
       IMPLICIT NONE
 C
@@ -415,11 +416,11 @@ C
       egamma2 = Egamma**2
       gamma = WIDTHGFL(T,Egamma)
       GFL = LMConst*EGDr*gamma/
-C     Plujko 2005      
-     &  ((EGDr*EGDr - egamma2)**2 + LMConst*(Egamma*gamma)**2)           
+C     Plujko 2005
+     &  ((EGDr*EGDr - egamma2)**2 + LMConst*(Egamma*gamma)**2)
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION WIDTHGFL(T,Egamma)
       IMPLICIT NONE
 C
@@ -440,14 +441,15 @@ C
 C
 C
       DATA pi24/39.47841761D0/, const1/1.05D0/
+      save pi24,const1
       egamma2 = Egamma**2
       gdq0 = const1*SQRT(BETagfl2*EGDr**2 + EGDr*S2Plusgfl)
       gdq = const1*SQRT(BETagfl2*egamma2 + Egamma*S2Plusgfl)
       const2 = (GGDr - gdq0)/(EGDr**2)
       WIDTHGFL = const2*(egamma2 + pi24*T**2) + gdq
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION MLO3(T,Egamma)
       IMPLICIT NONE
 C
@@ -481,15 +483,15 @@ C
       ENDIF
       MLO3 = phi*amlo3
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION WIDTH(T,Egamma)
       IMPLICIT NONE
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALPha, CS1, CS2, EG0, EG1, EG2, EGDr, GGDr, GW0, 
+      DOUBLE PRECISION ALPha, CS1, CS2, EG0, EG1, EG2, EGDr, GGDr, GW0,
      &                 GW1, GW2, GWAll
       INTEGER NG
       COMMON /HELP  / EGDr, GGDr
@@ -513,15 +515,15 @@ C
       g2body = (Egamma**2 + pi24*T**2)/ALPha/pi24
       WIDTH = g1body + g2body
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION AKSET(Egamma)
       IMPLICIT NONE
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AKS0, ALPha, BC, CS1, CS2, DEG, DMEf, EG0, EG1, 
+      DOUBLE PRECISION AKS0, ALPha, BC, CS1, CS2, DEG, DMEf, EG0, EG1,
      &                 EG2, EGDr, FACtor, GGDr, GW0, GW1, GW2, GWAll
       INTEGER NG
       COMMON /HELP  / EGDr, GGDr
@@ -560,8 +562,8 @@ C
       ENDIF
       AKSET = aksr
 99999 END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION MLO1(T,U,Egamma)
       IMPLICIT NONE
 C
@@ -580,7 +582,6 @@ C
       IF (Egamma.LE.0.D0) RETURN
       MLO1 = SPECRALF(U,Egamma)
 C     Protection against T=0
-      IF (T.EQ.0.D0) RETURN
       phi = 1.D0
       IF (T.GT.0.00001D0) THEN
          hh = Egamma/T
@@ -588,8 +589,8 @@ C     Protection against T=0
       ENDIF
       MLO1 = phi*MLO1
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION SPECRALF(U,Egamma)
       IMPLICIT NONE
 C
@@ -606,7 +607,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION alphaphi, egsq, er0sq, er0sq1, ersq, eta, etar0, 
+      DOUBLE PRECISION alphaphi, egsq, er0sq, er0sq1, ersq, eta, etar0,
      &                 g, g0, hhh, hhh1, hhh2, hhh3, hhh4
       DOUBLE PRECISION RATEEXCC
 C
@@ -627,8 +628,8 @@ C
       g = 2.*hhh4*alphaphi*hhh1/((hhh2 - er0sq1)**2 + 4.*hhh3*hhh4**2)
       SPECRALF = Egamma*g/((ersq - egsq)**2 + egsq*g**2)
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION RATEKINC(T,Egamma)
       IMPLICIT NONE
 C
@@ -650,8 +651,8 @@ C
       DATA pi24/39.47841761D0/
       RATEKINC = (Egamma**2 + pi24*T**2)/ALPha/pi24
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION RATEEXCC(U,Egamma)
       IMPLICIT NONE
 C
@@ -676,8 +677,8 @@ C
       alphae = ALPha/EGDr
       RATEEXCC = ei/alphae/pi24
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION MLO2(T,U,Egamma)
       IMPLICIT NONE
 C
@@ -711,15 +712,15 @@ C
       ENDIF
       MLO2 = phi*tpa0
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION WIDTHEXC(U,Egamma)
       IMPLICIT NONE
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALPha, CS1, CS2, EG0, EG1, EG2, EGDr, GGDr, GW0, 
+      DOUBLE PRECISION ALPha, CS1, CS2, EG0, EG1, EG2, EGDr, GGDr, GW0,
      &                 GW1, GW2, GWAll
       INTEGER NG
       COMMON /HELP  / EGDr, GGDr
@@ -743,4 +744,4 @@ C
       g1body = AKSET(Egamma)*GWAll*d
       WIDTHEXC = g1body + g2body
       END
- 
+
