@@ -3998,7 +3998,7 @@ proc vTclWindow.top75 {base} {
     # CREATING WIDGETS
     ###################
     vTcl:toplevel $top -class Toplevel \
-        -background #ffffff -highlightcolor black -menu "$top.m88" 
+        -menu "$top.m88" -background #ffffff -highlightcolor black 
     wm focusmodel $top passive
     wm geometry $top 862x296+11+657; update
     wm maxsize $top 1265 994
@@ -4013,8 +4013,8 @@ proc vTclWindow.top75 {base} {
     wm protocol $top WM_DELETE_WINDOW "vTcl:FireEvent $top <<DeleteWindow>>"
 
     frame $top.fra77 \
-        -background #dcdcdc -borderwidth 2 -height 75 \
-        -highlightbackground #dcdcdc -relief groove -width 125 
+        -borderwidth 2 -relief groove -background #dcdcdc -height 75 \
+        -highlightbackground #dcdcdc -width 125 
     vTcl:DefineAlias "$top.fra77" "Frame2" vTcl:WidgetProc "Toplevel1" 1
     set site_3_0 $top.fra77
     button $site_3_0.but78 \
@@ -4262,7 +4262,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_8_0.lab69" "Labeledframe15" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab69 childsite]
     frame $site_10_0.fra70 \
-        -background #e6e6e6 -borderwidth 2 -height 75 -width 125 
+        -borderwidth 2 -background #e6e6e6 -height 75 -width 125 
     vTcl:DefineAlias "$site_10_0.fra70" "Frame6" vTcl:WidgetProc "Toplevel1" 1
     set site_11_0 $site_10_0.fra70
     button $site_11_0.cpd72 \
@@ -4622,7 +4622,8 @@ adjourn .top75} \
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/run $file 
+        -command {exec rm -r $file-tl
+exec xterm -e ../scripts/run $file 
 adjourn .top75
 # create list of possible ddx plots 
 ddlist
@@ -4678,7 +4679,6 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec gvim LSTTAB.INP
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
 exec xterm -e ../scripts/zvvddx $file omp2 1
 exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
@@ -4842,7 +4842,7 @@ adjourn .top75} \
         -selectmode extended -textbackground #ffffff \
         -textfont {Helvetica -12 } -vscrollmode dynamic -width 170 
     frame $site_8_2.fra84 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc 
     set site_9_0 $site_8_2.fra84
     ::iwidgets::entryfield $site_9_0.ent85 \
@@ -4851,7 +4851,7 @@ adjourn .top75} \
         -textvariable zvfilter -width 15 
     vTcl:DefineAlias "$site_9_0.ent85" "Entryfield1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra90 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     set site_10_0 $site_9_0.fra90
     menubutton $site_10_0.men91 \
@@ -5002,7 +5002,7 @@ adjourn .top75} \
     pack $site_9_0.but89 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -side left 
     frame $site_8_2.fra76 \
-        -background #dcdcdc -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #dcdcdc -height 75 \
         -highlightbackground #dcdcdc -width 227 
     vTcl:DefineAlias "$site_8_2.fra76" "Frame13" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_2.fra76
@@ -5067,7 +5067,7 @@ lappend dd} \
     pack $site_9_0.scr80 \
         -in $site_9_0 -anchor center -expand 1 -fill y -side right 
     frame $site_8_2.fra79 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     vTcl:DefineAlias "$site_8_2.fra79" "Frame14" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_2.fra79
@@ -5135,7 +5135,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -textbackground #ffffff -textvariable multi -unique 1 -width 10 
     vTcl:DefineAlias "$site_9_0.com77" "Combobox1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra69 \
-        -background #e6e6e6 -borderwidth 2 -height 85 -relief groove \
+        -borderwidth 2 -relief groove -background #e6e6e6 -height 85 \
         -width 131 
     vTcl:DefineAlias "$site_9_0.fra69" "Frame1" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 $site_9_0.fra69
@@ -5198,7 +5198,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -wraplength 200 
     vTcl:DefineAlias "$site_8_3.lab111" "Label3" vTcl:WidgetProc "Toplevel1" 1
     frame $site_8_3.fra112 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 250 
     vTcl:DefineAlias "$site_8_3.fra112" "Frame3" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra112
@@ -5246,7 +5246,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     frame $site_8_3.fra71 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -highlightcolor #000000 -width 250 
     vTcl:DefineAlias "$site_8_3.fra71" "Frame18" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra71
@@ -5285,7 +5285,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     frame $site_8_3.fra117 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 250 
     vTcl:DefineAlias "$site_8_3.fra117" "Frame4" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra117
@@ -5333,7 +5333,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
         -side top 
     frame $site_8_3.frame77 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -highlightcolor #000000 -width 250 
     vTcl:DefineAlias "$site_8_3.frame77" "Frame12" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.frame77
@@ -5722,7 +5722,7 @@ set archfile [lindex $selarchfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
         -textfont {Helvetica -12 } -vscrollmode dynamic -width 150 
     frame $site_8_5.fra78 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     set site_9_0 $site_8_5.fra78
     ::iwidgets::entryfield $site_9_0.ent79 \
@@ -5782,7 +5782,7 @@ adjourn .top75 }} \
         -in $site_9_0 -anchor ne -expand 1 -fill y -ipady 5 -padx 5 -pady 5 \
         -side top 
     frame $site_8_5.fra82 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     set site_9_0 $site_8_5.fra82
     button $site_9_0.but84 \
@@ -5840,7 +5840,7 @@ set archfilelist "" }} \
     vTcl:DefineAlias "$site_9_0.lab84" "Labeledframe12" vTcl:WidgetProc "Toplevel1" 1
     set site_11_0 [$site_9_0.lab84 childsite]
     frame $site_11_0.fra86 \
-        -background #dcdcdc -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #dcdcdc -height 75 \
         -highlightbackground #dcdcdc -width 125 
     vTcl:DefineAlias "$site_11_0.fra86" "Frame15" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra86
@@ -5879,7 +5879,7 @@ lappend stablist [lindex $elf 0]
     pack $site_12_0.but76 \
         -in $site_12_0 -anchor w -expand 0 -fill x -side left 
     frame $site_11_0.fra89 \
-        -background #dcdcdc -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #dcdcdc -height 75 \
         -highlightbackground #dcdcdc -width 125 
     vTcl:DefineAlias "$site_11_0.fra89" "Frame16" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra89
@@ -5912,7 +5912,7 @@ ddlist} \
     pack $site_12_0.ent90 \
         -in $site_12_0 -anchor center -expand 0 -fill both -side left 
     frame $site_11_0.fra76 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     vTcl:DefineAlias "$site_11_0.fra76" "Frame17" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra76
@@ -6186,7 +6186,7 @@ adjourn .top75} \
         -labeltext {Double click to edit} -listvariable modules \
         -textbackground #ffffff -textfont {Helvetica -12 } -width 180 
     frame $site_9_0.fra79 \
-        -background #e6e6e6 -borderwidth 2 -height 75 \
+        -borderwidth 2 -background #e6e6e6 -height 75 \
         -highlightbackground #dcdcdc -width 125 
     set site_10_0 $site_9_0.fra79
     button $site_10_0.but80 \
@@ -6276,6 +6276,9 @@ exit} \
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/empend/EMPEND.INP &} \
         -label {EMPEND input} 
+    $site_3_0.menu90 add command \
+        -command {exec $editor ../util/endres/ENDRES.INP &} \
+        -label {ENDRES input} 
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/plotc4/PLOTC4.INP &} \
         -label {PLOTC4 input} 
@@ -6378,7 +6381,8 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/format $file &} -label Format 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/addresonances $file &} -label {Add resonances}
+        -command {exec xterm -e ../scripts/addresonances $file &} \
+        -label {Add resonances} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
@@ -6393,6 +6397,10 @@ $file.inp &}} -label {Create input}
         
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/stanef $file &} -label STANEF 
+    $site_3_0.menu93 add separator \
+        
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -6427,6 +6435,16 @@ $file.inp &}} -label {Create input}
         -command {exec $editor $file-s.endf &} -label {ENDF plotted} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file-e.endf &} -label {ENDF empend} 
+    $site_3_0.menu94 add separator \
+        
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file-njoy.out &} -label {NJOY output} 
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file.ace &} -label {NJOY/ACER file} 
+    $site_3_0.menu94 add command \
+        -command {exec $psviewer $file-njoy.ps &} -label {NJOY plots} 
+    $site_3_0.menu94 add command \
+        -command {exec $psviewer $file-acer.ps &} -label {NJOY/ACER plots} 
     $top.m88 add cascade \
         -menu "$top.m88.menu95" -label Plots 
     set site_3_0 $top.m88
