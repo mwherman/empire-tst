@@ -45,7 +45,8 @@
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, 
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar, 
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab), 
-     &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf
+     &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
+     &        INExc(ndexclus)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead
@@ -67,8 +68,8 @@
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),
      &                 PEQc, PI, POP(ndex,ndlw,2,ndnuc),
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,ndnucd),
-     &                 POPcse(0:ndex_d,0:ndejc,ndecsed,ndnucd),
-     &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,ndnucd),
+     &                 POPcse(0:ndex_d,0:ndejc,ndecsed,ndexclus),
+     &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc),
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc),
@@ -152,7 +153,7 @@
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf, NEMn, NEMp, NEMa
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead

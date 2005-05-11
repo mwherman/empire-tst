@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-10 15:33:49 $
-Ccc   * $Id: input.f,v 1.118 2005-05-10 15:33:49 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-11 05:44:10 $
+Ccc   * $Id: input.f,v 1.119 2005-05-11 05:44:10 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -790,6 +790,7 @@ C--------inteligent defaults *** done ***
 C
          CALL READIN   !optional part of the input
 C--------Set exclusive and inclusive ENDF formatting flags
+         NEXclusive = 0
          IF(NENdf.GT.0) THEN
             DO iac = 0, NEMc
                DO ia = 0, nema
@@ -808,10 +809,15 @@ C                       residues must be heavier than alpha
                         if(atmp.le.4 . or. ztmp.le.2) cycle
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
-                        IF(mulem.LT.NENdf) THEN
+                        IF(mulem.LE.NENdf) THEN
                            ENDf(nnuc) = 1
-                        ELSEIF(mulem.EQ.NENdf) THEN
-                           ENDf(nnuc) = 1
+                           NEXclusive = NEXclusive + 1
+                           INExc(nnuc) = NEXclusive
+                           IF(NEXclusive.GT.NDExclus) THEN 
+                             WRITE(6,*)'INSUFFICIENT DIMENSION NDExclus'
+                             WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
+                             STOP 'INSUFFICIENT DIMENSION NDExclus'
+                           ENDIF 
                         ELSE
 C    Comment the following line and uncommment the one after for all exclusive spectra
                            ENDf(nnuc) = 2
