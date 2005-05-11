@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-10 15:26:52 $
-Ccc   * $Id: main.f,v 1.85 2005-05-10 15:26:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-11 14:51:42 $
+Ccc   * $Id: main.f,v 1.86 2005-05-11 14:51:42 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -159,8 +159,7 @@ C--------------each 4th result from ECIS (2.5 deg grid)
                READ (45,'(7x,E12.5)',END = 1400)
      &               CSAlev(NDANG,ilv,nejcec)
 C--------------construct recoil spectra due to direct transitions
-C              IF (ENDf(nnurec).GT.0) THEN
-               IF (ENDf(nnurec).EQ.1) THEN
+               IF (ENDf(nnurec).GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
                   coef = 2*PI*dang
 C-----------------check whether integral over angles agrees with x-sec. read from ECIS
@@ -240,7 +239,7 @@ C-----print elastic and direct cross sections from ECIS
          WRITE (6,*) ' Inelastic scattering results provided by'
          WRITE (6,*) ' Coupled Channel + DWBA calculations'
          if(CSMsd(1)+CSMsd(2).NE.0.)
-     >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
+     &   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ELSEIF (DIRect.EQ.3) THEN
          WRITE (6,*)
@@ -248,7 +247,7 @@ C-----print elastic and direct cross sections from ECIS
          WRITE (6,*)
      &     ' Inelastic scattering results provided by DWBA calculations'
          if(xsinlcont.NE.0.)
-     >   WRITE (6,*) ' Some discrete levels are embedded into continuum'
+     &   WRITE (6,*) ' Some discrete levels are embedded into continuum'
          WRITE (6,*) ' '
       ENDIF
       ENDIF
@@ -1608,7 +1607,7 @@ C-----Fission related spectra of particles and gammas
                IF(NEMn.eq.0 .and. nejc.eq.1) cycle
                IF(NEMp.eq.0 .and. nejc.eq.2) cycle
                IF(NEMa.eq.0 .and. nejc.eq.3) cycle
-               IF (NDEjc.EQ.4 .AND. NEMc.eq.0 .AND. nejc.eq.4) cycle               
+               IF (NDEjc.EQ.4 .AND. NEMc.eq.0 .AND. nejc.eq.4) cycle    
 C              IF(POPCS(nejc,nnuc).EQ.0) CYCLE
                IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
@@ -1791,7 +1790,7 @@ C--------neutrons
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &             (CSEa(ie,nang,1,0),nang = 1,NDANG)
           ENDDO
-	   ENDIF
+         ENDIF
 C--------protons
          IF(nemp.GT.0) THEN
           nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
@@ -1812,7 +1811,7 @@ C--------protons
      &             (CSEa(ie,nang,2,0),nang = 1,NDANG)
            ENDDO
           ENDIF
-	   ENDIF
+         ENDIF
 C--------alphas
          IF(nema.GT.0) THEN
           nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
@@ -1833,7 +1832,7 @@ C--------alphas
      &             (CSEa(ie,nang,3,0),nang = 1,NDANG)
            ENDDO
           ENDIF
-	   ENDIF
+         ENDIF
 C--------light ions
          IF (NDEJC.EQ.4 .AND. NEMc.GT.0) THEN
            nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
