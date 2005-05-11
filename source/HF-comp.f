@@ -1,6 +1,7 @@
+$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-09 15:03:27 $
-Ccc   * $Id: HF-comp.f,v 1.56 2005-05-09 15:03:27 Capote Exp $
+Ccc   * $Date: 2005-05-11 16:11:11 $
+Ccc   * $Id: HF-comp.f,v 1.57 2005-05-11 16:11:11 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'

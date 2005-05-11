@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-11 14:51:42 $
-Ccc   * $Id: main.f,v 1.86 2005-05-11 14:51:42 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-11 16:11:11 $
+Ccc   * $Id: main.f,v 1.87 2005-05-11 16:11:11 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -777,7 +777,7 @@ Cpr            WRITE(6,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=49,60),i=1,nex(nnuc))
                ENDIF
             ENDIF
          ENDIF
-C--------locate residual nuclei
+C--------locate residual nuclei (NRES() contains the corresponding residual nuclei from CN !!)
          DO nejc = 0, NEJcm
             NREs(nejc) = -1
             ares = A(nnuc) - AEJc(nejc)
@@ -946,9 +946,13 @@ C--------------calculate population in the energy bin ke
                      GOTO 1470
                   ENDIF
                   DO nejc = 1, NEJcm !over ejectiles
-C------------------- residual nuclei must be heavier than alpha
-                     if(NRES(nejc).lt.0) cycle
-                     nnur = NREs(nejc)
+                     ares = A(nnuc) - AEJc(nejc)
+                     zres = Z(nnuc) - ZEJc(nejc)
+C                    residual nuclei must be heavier than alpha
+                     if(ares.le.4. and. zres.le.2.) cycle
+                     izares = INT(1000.0*zres + ares)
+                     CALL WHERE(izares,nnur,iloc)
+                     if(iloc.eq.1) CYCLE
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
                   ENDDO
 C-----------------do loop over ejectiles       ***done***
@@ -1318,13 +1322,17 @@ C-----------CN contribution to elastic ddx
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.) THEN
             DO nejc = 1, NEJcm
-C----------- residual nuclei must be heavier than alpha
-             IF(NRES(nejc).LT.0) CYCLE
+             ares = A(nnuc) - AEJc(nejc)
+             zres = Z(nnuc) - ZEJc(nejc)
+C            residual nuclei must be heavier than alpha
+             if(ares.le.4. and. zres.le.2.) cycle
+             izares = INT(1000.0*zres + ares)
+             CALL WHERE(izares,nnur,iloc)
+	       if(iloc.eq.1) CYCLE
              IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             nnur = NREs(nejc)
              IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
              IF (IOUt.GT.0) WRITE (6,
      &               '(2X,A2,'' emission cross section'',G12.5,'' mb'')'
@@ -1947,9 +1955,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION coef, dang, erecejc, erecod, erecoil, erecpar,
-     &                 exqcut, recorr, sumnor, weight
+     &                 exqcut, recorr, sumnor, weight, ares, zres
       REAL FLOAT
-      INTEGER icse, ie, il, ire, irec, na, nejc, nnur
+      INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
 C
 C
 C-----normalize recoil spectrum of the parent
@@ -1965,9 +1973,13 @@ C-----normalize recoil spectrum of the parent
       dang = 3.14159/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
-C        emitted nuclei must be heavier than alpha
-         if(NRES(nejc).lt.0) cycle
-         nnur = NREs(nejc)
+         ares = A(nnuc) - AEJc(nejc)
+         zres = Z(nnuc) - ZEJc(nejc)
+C        residual nuclei must be heavier than alpha
+         if(ares.le.4. and. zres.le.2.) cycle
+         izares = INT(1000.0*zres + ares)
+         CALL WHERE(izares,nnur,iloc)
+         if(iloc.eq.1) CYCLE
 C--------decay to continuum
 C--------recorr is a recoil correction factor that
 C--------divides outgoing energies
@@ -2256,8 +2268,8 @@ C
 C Local variables
 C
       INTEGER INT
-      INTEGER nejc, nnur
-      DOUBLE PRECISION xnorfis
+      INTEGER nejc, nnur, izares, iloc
+      DOUBLE PRECISION xnorfis, ares, zres
 
       Dencomp = DENhf - Sumfis
       IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
@@ -2289,9 +2301,13 @@ C-----------fission
          ENDIF
 C------------particles
          DO nejc = 1, NEJcm
-C           emitted nuclei must be heavier than alpha
-            if(NRES(nejc).lt.0) cycle
-            nnur = NREs(nejc)
+            ares = A(nnuc) - AEJc(nejc)
+            zres = Z(nnuc) - ZEJc(nejc)
+C           residual nuclei must be heavier than alpha
+            if(ares.le.4. and. zres.le.2.) cycle
+            izares = INT(1000.0*zres + ares)
+            CALL WHERE(izares,nnur,iloc)
+            if(iloc.eq.1) CYCLE
             CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
             CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + xnorfis*SCRtem(nejc)
      &                          *(1 - Aafis)
@@ -2300,14 +2316,18 @@ C------------gammas
          CALL ACCUM(Ke,Nnuc,Nnuc,0,Xnor)
          CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + xnorfis*SCRtem(0)*(1 - Aafis)
          POP(Ke,Jcn,Ipar,Nnuc) = 0.0
-         GOTO 99999
+         RETURN
       ENDIF
 C--------------no subbarrier effects
 C--------particles
       DO nejc = 1, NEJcm
-C           emitted nuclei must be heavier than alpha
-         if(NRES(nejc).lt.0) cycle
-         nnur = NREs(nejc)
+         ares = A(nnuc) - AEJc(nejc)
+         zres = Z(nnuc) - ZEJc(nejc)
+C        residual nuclei must be heavier than alpha
+         if(ares.le.4. and. zres.le.2.) cycle
+         izares = INT(1000.0*zres + ares)
+         CALL WHERE(izares,nnur,iloc)
+         if(iloc.eq.1) CYCLE
          CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
          CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + Xnor*SCRtem(nejc)
       ENDDO
@@ -2322,4 +2342,4 @@ C--------fission
             CSFism(M) = CSFism(M) + Sumfism(M)*Xnor
          ENDDO
       ENDIF
-99999 END
+      END

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-26 17:28:20 $
-Ccc   * $Id: pcross.f,v 1.23 2005-04-26 17:28:20 Capote Exp $
+Ccc   * $Date: 2005-05-11 16:11:11 $
+Ccc   * $Id: pcross.f,v 1.24 2005-05-11 16:11:11 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -39,8 +39,8 @@ C
       LOGICAL callpcross
       DOUBLE PRECISION DBLE, DENSW
       REAL FLOAT
-      INTEGER ie, iloc, izares, nejc, nexrt, nnur
-      INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC), nures(0:NDEJC)
+      INTEGER ie, nejc, nexrt, nnur
+      INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
       INTEGER INT, NINT
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
@@ -112,7 +112,6 @@ C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
          iemin(nejc) = 2
          iemax(nejc) = NDEX
-         nures(nejc) = 1
          DO ienerg = 1, NDEX
             spec(nejc,ienerg) = 0.D0
             DO hh = 1, PMAX
@@ -132,15 +131,7 @@ C
 C-----NEJcm is the maximum number of particles emitted
 C
       DO nejc = 1, NEJcm
-         ar = ac - AEJc(nejc)
-         zr = zc - ZEJc(nejc)
-         izares = INT(1000*zr + ar)
-         CALL WHERE(izares,nnur,iloc)
-         IF (iloc.EQ.1) THEN
-            WRITE (6,'('' NO LOCATION ASCRIBED TO NUCLEUS '')') izares
-            STOP 'EXCITON'
-         ENDIF
-         nures(nejc) = nnur
+         nnur = NREs(nejc)
          g(nejc) = ROPar(1,nnur)/PI26*GTIlnor(nnur)
          pair(nejc) = ROPar(3,nnur)
 C
@@ -159,7 +150,6 @@ C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C--------last continuum energy bin is calculated, RCN 11/2004
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
-
          DO ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
@@ -174,9 +164,7 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             IF (sg.LT.1.D-6) iemin(nejc) = ienerg
          ENDDO
       ENDDO
-      izares = INT(1000*zc + ac)
-      CALL WHERE(izares,nnur,iloc)
-      nures(0) = nnur
+      nnur = NREs(0)
 C-----Maximum and minimum energy bin for gamma emission
 C-----Last continuum energy bin is calculated, RCN 11/2004
       nexrt = MAX(INT((EXCn-ECUt(nnur))/DE + 1.0001),1)
@@ -193,7 +181,7 @@ C
 C-----PRIMARY PARTICLE LOOP
 C
       DO nejc = 0, NEJcm
-         nnur = nures(nejc)
+         nnur = NREs(nejc)
          IF (nejc.NE.0) THEN
             ao = AEJc(nejc)
             zo = ZEJc(nejc)
@@ -374,7 +362,7 @@ C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
 C     Note, that PCROSS only calculates emission into the continuum
       totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
-         nnur = nures(nejc)
+         nnur = NREs(nejc)
          IF (nejc.gt.0) THEN !particle
             IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) cycle
             IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle

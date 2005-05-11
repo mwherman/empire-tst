@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-05-10 15:27:02 $
-Ccc   * $Id: MSD-tristan.f,v 1.37 2005-05-10 15:27:02 Capote Exp $
+Ccc   * $Date: 2005-05-11 16:11:11 $
+Ccc   * $Id: MSD-tristan.f,v 1.38 2005-05-11 16:11:11 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2428,7 +2428,7 @@ C
      &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15)
       REAL FLOAT
       REAL hhh
-      INTEGER i, ic, icp, icpmx, icpx, ier, iloc, j, jx, k, k1, k2, k2n,
+      INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1,
      &        lc, lc1, lcp1, ln, m2, m2n, mx, my, n, n0, n1, n2, n2n,
      &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, 
@@ -2445,8 +2445,7 @@ C
      &E AS NEUTRON OR PROTON IN THE INCOMMING CHANNEL'
          STOP
       ENDIF
-C-----locate residue
-      CALL WHERE(IZA(1) - IZAejc(Nejc),nnur,iloc)
+      nnur = NREs(nej)
       icpx = KTRl(1)
       icpmx = icpx + KTRl(7)
       kcpmx = icpmx + 1

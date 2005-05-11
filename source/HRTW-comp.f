@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:44 $
-Ccc   * $Id: HRTW-comp.f,v 1.26 2005-05-05 15:05:44 Capote Exp $
+Ccc   * $Date: 2005-05-11 16:11:11 $
+Ccc   * $Id: HRTW-comp.f,v 1.27 2005-05-11 16:11:11 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -69,11 +69,6 @@ C-----threshold for considering channel as a 'strong' one
       H_Tthr = 0.0001
 C-----set CN nucleus
       nnuc = 1
-
-C-----locate residual nuclei (RCN,
-C     The block missing below was deleted by RCN
-C     NRES() already available from input.f
-C
 C-----reset variables
       sgamc = 0.0
       csemist = 0.0
@@ -117,8 +112,8 @@ C-----------start the first HRTW run
 C-----------
 C-----------do loop over ejectiles
             DO nejc = 1, NEJcm
-C              EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
-               if(NRES(nejc).lt.0) cycle
+C              emitted nuclei must be heavier than alpha
+               if(NREs(nejc).lt.0) cycle
                nnur = NREs(nejc)
 C              WRITE(6,*)'emitting ejectile=', nejc
                CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
@@ -209,8 +204,8 @@ C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
                DENhf = 0.0
                DO nejc = 1, NEJcm
-C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
-                  if(NRES(nejc).lt.0) cycle
+C                 emitted nuclei must be heavier than alpha
+                  if(NREs(nejc).lt.0) cycle
                   nnur = NREs(nejc)
 C                 WRITE(6,*)'  '
 C                 WRITE(6,*)'second entry with ejec ' , nejc
@@ -226,8 +221,8 @@ C--------------
 C--------------correct scratch matrix for enhancement of the elastic channels
 C--------------
                DO nejc = 1, NEJcm
-C                 EMITTED NUCLEI MUST BE HEAVIER THAN ALPHA !! (RCN)
-                  if(NRES(nejc).lt.0) cycle
+C                 emitted nuclei must be heavier than alpha
+                  if(NREs(nejc).lt.0) cycle
                   nnur = NREs(nejc)
                   IF (IZA(nnur).EQ.IZA(0))
      &                CALL ELCORR(nnuc,ke,jcn,ip,nnur,nejc,nhrtw)
