@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-11 05:44:10 $
-Ccc   * $Id: input.f,v 1.119 2005-05-11 05:44:10 herman Exp $
+Ccc   * $Date: 2005-05-11 14:20:06 $
+Ccc   * $Id: input.f,v 1.120 2005-05-11 14:20:06 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -819,9 +819,7 @@ C                       residues must be heavier than alpha
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF 
                         ELSE
-C    Comment the following line and uncommment the one after for all exclusive spectra
                            ENDf(nnuc) = 2
-C                          ENDf(nnuc) = 1
                         ENDIF
                      ENDDO
                   ENDDO
@@ -1119,6 +1117,22 @@ C--------print IDNa matrix
          WRITE (6,'('' gammas      '',8I10)') (IDNa(5,j),j = 1,NDMODELS)
          WRITE (6,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
          WRITE (6,*) ' '
+         WRITE(12,*) ' '
+         WRITE(12,*)
+     &            '                      Use of preequilibrium models '
+         WRITE(12,*)
+     &            '                      ---------------------------- '
+         WRITE(12,*) ' '
+         WRITE(12,*) 'Exit channel    ECIS    MSD    MSC',
+     &              '   DEGAS   HMS   PCROSS'
+         WRITE(12,*) ' '
+         WRITE(12,'('' neut. disc. '',8I7)') (IDNa(1,j),j = 1,NDMODELS)
+         WRITE(12,'('' neut. cont. '',8I7)') (IDNa(2,j),j = 1,NDMODELS)
+         WRITE(12,'('' prot. disc. '',8I7)') (IDNa(3,j),j = 1,NDMODELS)
+         WRITE(12,'('' prot. cont. '',8I7)') (IDNa(4,j),j = 1,NDMODELS)
+         WRITE(12,'('' gammas      '',8I7)') (IDNa(5,j),j = 1,NDMODELS)
+         WRITE(12,'('' alpha cont. '',8I7)') (IDNa(6,j),j = 1,NDMODELS)
+         WRITE(12,*) ' '
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
          IF (FITomp.GT.0) THEN
@@ -2378,19 +2392,19 @@ C-----      print  maximal gamma-ray multipolarity  'MAXmult'
 
             IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
      &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-            WRITE (12,*)
+            WRITE(12,*)
      &        ' neutron   o. m. parameters: RIPL catalog number ',
      &        KTRlom(1,1)
-            WRITE (12,*)
+            WRITE(12,*)
      &        ' proton    o. m. parameters: RIPL catalog number ',
      &        KTRlom(2,1)
-            WRITE (12,*)
+            WRITE(12,*)
      &        ' alpha     o. m. parameters: RIPL catalog number ',
      &        KTRlom(3,1)
             IF (NEMc.GT.0) WRITE (12,*)
      &        ' cluster   o. m. parameters: RIPL catalog number ',
      &        KTRlom(NDEJC,1)
-            WRITE (12,*) ' '
+            WRITE(12,*) ' '
 
             WRITE (6,*) ' '
 C-----------Printout of some final input options   *** done ***
@@ -2399,10 +2413,10 @@ C-----------Printout of some final input options   *** done ***
 C--------DEGAS input
          IF (name.EQ.'DEGAS ') THEN
             DEGa = val
-            IF (val.GT.0) WRITE (6,
+            IF (val.GT.0) WRITE(6,
      &              '('' Exciton model calculations with code DEGAS '')'
      &              )
-            IF (val.GT.0) WRITE (12,
+            IF (val.GT.0) WRITE(12,
      &              '('' Exciton model calculations with code DEGAS '')'
      &              )
             GOTO 100
@@ -2423,10 +2437,10 @@ C                GDIvp = val + grand()*sigma
      &              IPArCOV, MFPp, INDexf,INDexb
             else
               GDIvp = val
-              WRITE (6,
+              WRITE(6,
      &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
      &'' code DEGAS '')') GDIvp
-              WRITE (12,
+              WRITE(12,
      &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
      &'' code DEGAS '')') GDIvp
             endif
@@ -2460,10 +2474,10 @@ C                MFPp = val + grand()*sigma
               else
                 WRITE (6,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Default value: 1.3)'')') MFPp
+     &  '' (Default: 1.3)'')') MFPp
                 WRITE (12,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Default value: 1.3)'')') MFPp
+     &  '' (Default: 1.3)'')') MFPp
                endif
              ENDIF
             GOTO 100
@@ -2676,19 +2690,17 @@ C-----
      &          '('' Microscopic HFBCS level densities were selected'')'
      &          )
             IF (ADIv.EQ.0.0D0) WRITE (12,
-     &           '('' EMPIRE-specific level densities were selected '')'
+     &           '('' EMPIRE-specific level densities '')'
      &           )
             IF (ADIv.EQ.1.0D0) WRITE (12,
-     &'('' EMPIRE-specific level densities with fitted parameters were s
-     &elected'')')
+     &'('' EMPIRE-specific level densities with fitted parameters'')')
             IF (ADIv.GT.3.0D0) WRITE (12,
-     &     '('' ROCOL level densities with a=A/''  ,F5.2,'' selected'')'
-     &     ) ADIv
+     &     '('' ROCOL level densities with a=A/''  ,F5.2)') ADIv
             IF (ADIv.EQ.2.0D0) WRITE (12,
-     &           '('' Gilbert-Cameron level densities were selected '')'
+     &           '('' Gilbert-Cameron level densities '')'
      &           )
             IF (ADIv.EQ.3.0D0) WRITE (12,
-     &          '('' Microscopic HFBCS level densities were selected'')'
+     &          '('' Microscopic HFBCS level densities '')'
      &          )
             GOTO 100
          ENDIF
@@ -2834,7 +2846,7 @@ C-----
          IF (name.EQ.'XNI   ') THEN
             XNI = val
             WRITE (6,'('' Initial exciton number set to '',F4.1)') XNI
-            WRITE (12,'('' Initial exciton number set to '',F4.1)') XNI
+            WRITE (12,'('' Initial exciton number '',F4.1)') XNI
             GOTO 100
          ENDIF
 C-----
@@ -2844,7 +2856,7 @@ C-----
      &       '(''(n-p)/(n-n) interaction strength ratio set to '',F5.2)'
      &       ) TORy
             WRITE (12,
-     &       '(''(n-p)/(n-n) interaction strength ratio set to '',F5.2)'
+     &       '(''(n-p)/(n-n) interaction strength ratio '',F5.2)'
      &       ) TORy
             GOTO 100
          ENDIF
@@ -2855,8 +2867,7 @@ C-----
      &    '('' Initial nuber of excitons being neutrons set to '',F6.3)'
      &    ) EX1
             WRITE (12,
-     &    '('' Initial nuber of excitons being neutrons set to '',F6.3)'
-     &    ) EX1
+     &    '('' Initial nuber of excitons being neutrons '',F6.3)') EX1
             GOTO 100
          ENDIF
 C-----
@@ -2866,8 +2877,7 @@ C-----
      &    '('' Initial nuber of excitons being protons set to  '',F6.3)'
      &    ) EX2
             WRITE (12,
-     &    '('' Initial nuber of excitons being protons set to  '',F6.3)'
-     &    ) EX2
+     &    '('' Initial nuber of excitons being protons '',F6.3)') EX2
             GOTO 100
          ENDIF
 C-----
@@ -2877,8 +2887,7 @@ C-----
      &                            '('' Gamma emission in MSC allowed'')'
      &                            )
             IF (GST.EQ.1.0D0) WRITE (12,
-     &                            '('' Gamma emission in MSC allowed'')'
-     &                            )
+     &                       '('' Gamma emission in MSC considered'')')
             GOTO 100
          ENDIF
 C-----
@@ -3352,7 +3361,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &          '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &          '('' NORMALIZATION OF GDR FIRST HUMP WIDTH IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3398,7 +3407,7 @@ C-----
                WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
      &                SYMb(nnuc)
                WRITE (6,
-     &          '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &          '('' NORMALIZATION OF GDR FIRST HUMP XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0) then
@@ -3431,8 +3440,7 @@ C-----
      &'('' MSD calculations with ORION+TRISTAN were selected'')
      &   ')
             IF (MSD.EQ.1) WRITE (12,
-     &'('' MSD calculations with ORION+TRISTAN were selected'')
-     &   ')
+     &'('' MSD calculations with ORION+TRISTAN were used'')')
             IF (MSD.EQ.2) WRITE (6,
      &         '('' MSD calculations will use previous ORION results'')'
      &         )
@@ -3445,8 +3453,7 @@ C-----
      &                '('' Heidelberg MSC calculations were selected'')'
      &                )
             IF (MSC.NE.0) WRITE (12,
-     &                '('' Heidelberg MSC calculations were selected'')'
-     &                )
+     &                '('' Heidelberg MSC calculations were used'')')
             GOTO 100
          ENDIF
 C-----
@@ -3456,8 +3463,7 @@ C-----
      &            '('' HMS preequilibrium calculations were selected'')'
      &            )
             IF (LHMs.NE.0) WRITE (12,
-     &            '('' HMS preequilibrium calculations were selected'')'
-     &            )
+     &            '('' HMS preequilibrium calculations were used'')')
             GOTO 100
          ENDIF
 C-----
@@ -3466,8 +3472,7 @@ C-----
                NHMs = val
                WRITE (6,'('' Number of events in HMS set to '',I10)')
      &                NHMs
-               WRITE (12,'('' Number of events in HMS set to '',I10)')
-     &                NHMs
+               WRITE (12,'('' Number of events in HMS '',I10)') NHMs
             ENDIF
             GOTO 100
          ENDIF
@@ -3491,7 +3496,7 @@ C-----
      &           '('' HRTW width fluctuation correction was selected'')'
      &           )
             IF (LHRtw.NE.0) WRITE (12,
-     &           '('' HRTW width fluctuation correction was selected'')'
+     &           '('' Width fluctuations calculated within HRTW '')'
      &           )
             GOTO 100
          ENDIF
@@ -5344,18 +5349,22 @@ C
 C--------Collective levels automatically selected, pls check
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
+         WRITE (12,*)' Collective levels used in direct calcualtions'
 C--------2nd line
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
 C--------82 208    nucleus is treated as spherical
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
+         WRITE (12,'(a100)') comment
 C--------empty line
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
+         WRITE (12,'(a100)') comment
 C--------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
+         WRITE (12,'(a100)') comment
          DEFormed = .FALSE.
          IF (ABS(DEF(1,0)).GT.0.1D0) DEFormed = .TRUE.
 C
@@ -5370,9 +5379,12 @@ C-----------Number of collective levels
      &            IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
             WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
+            WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
+     &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
          ELSE
             READ (32,'(3x,3I5)') ND_nlv
             WRITE (6,'(3x,3I5)') ND_nlv
+            WRITE (12,'(3x,3I5)') ND_nlv
          ENDIF
 C--------if nd_nlv=0 , then no collective levels will be considered
 C--------setting direct to zero
@@ -5391,11 +5403,16 @@ C--------empty line
 C--------'collective levels:'
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
+         WRITE (12,*)' '
+         WRITE (12,*)' N  E[MeV]   J  pi  Nph L  K  Dyn. Def.'
 C--------Reading ground state infomation (to avoid overwriting deformation)
          READ (32,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &         D_Llv(1), D_Klv(1)
          WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+     &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &          D_Llv(1), D_Klv(1), 0.01
+         WRITE (12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
          DO i = 2, ND_nlv
@@ -5404,6 +5421,10 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
      &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &            D_Llv(i), D_Klv(i), D_Def(i,2)
             WRITE (6,
+     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             D_Llv(i), D_Klv(i), D_Def(i,2)
+            WRITE (12,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), D_Def(i,2)
@@ -5980,6 +6001,13 @@ C-----------------swapping
          WRITE (32,'(3x,3I5)') ND_nlv
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+         WRITE (12,*)
+         WRITE (12,*) 'Collective levels used in direct calculations' 
+         WRITE (12,*)
+         WRITE (12,*) '   Ncoll  '
+         WRITE (12,'(3x,3I5)') ND_nlv
+         WRITE (12,*)
+         WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.0
@@ -5987,6 +6015,11 @@ C-----------------swapping
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), ftmp
+            WRITE (12,
+     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             D_Llv(i), D_Klv(i), ftmp
+            WRITE(12,*) ' '
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &               D_Llv(i), D_Klv(i), ftmp
@@ -6053,6 +6086,13 @@ C-----------------swapping
      &          IDEfcc, D_Xjlv(1), (D_Def(1,j),j = 2,IDEfcc,2)
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+         WRITE (12,*)
+         WRITE (12,*) 'Collective levels used in direct calculations' 
+         WRITE (12,*)
+         WRITE (12,*) '   Ncoll  '
+         WRITE (12,'(3x,3I5)') ND_nlv
+         WRITE (12,*)
+         WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.01
@@ -6063,6 +6103,11 @@ C-----------------swapping
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &               0, 0, ftmp
+            WRITE (12,
+     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             D_Llv(i), D_Klv(i), ftmp
+            WRITE(12,*) ' '
          ENDDO
       ENDIF
       CLOSE (32)
