@@ -1,7 +1,6 @@
-$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-11 16:11:11 $
-Ccc   * $Id: input.f,v 1.121 2005-05-11 16:11:11 Capote Exp $
+Ccc   * $Date: 2005-05-12 11:59:09 $
+Ccc   * $Id: input.f,v 1.122 2005-05-12 11:59:09 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -239,13 +238,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -814,13 +813,15 @@ C                       residues must be heavier than alpha
                            ENDf(nnuc) = 1
                            NEXclusive = NEXclusive + 1
                            INExc(nnuc) = NEXclusive
-                           IF(NEXclusive.GT.NDExclus) THEN 
+                           IF(NEXclusive.GT.NDExclus) THEN
                              WRITE(6,*)'INSUFFICIENT DIMENSION NDExclus'
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
-                           ENDIF 
+                           ENDIF
                         ELSE
-                           ENDf(nnuc) = 2
+C                          Comment the following line and uncommment the one after for all exclusive spectra
+C                          ENDf(nnuc) = 2
+                           ENDf(nnuc) = 1
                         ENDIF
                      ENDDO
                   ENDDO
@@ -1337,18 +1338,18 @@ C-----set Q-value for CN production
 C-----WRITE heading on FILE12
       ia = INT(A(0))
       iae = INT(AEJc(0))
-      WRITE (12,*) ' '
-      IF(LEVtarg.GT.1) THEN
-      WRITE (12,
-     &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,''m INCIDENT ENERGY ''                                ,G9.3,''
-     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
-      ELSE
-      WRITE (12,
-     &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,'' INCIDENT ENERGY  ''                                ,G9.3,''
-     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
-      ENDIF
+C     WRITE (12,*) ' '
+C     IF(LEVtarg.GT.1) THEN
+C     WRITE (12,
+C    &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
+C    &I3,''m INCIDENT ENERGY ''                                ,G9.3,''
+C    &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+C     ELSE
+C     WRITE (12,
+C    &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
+C    &I3,'' INCIDENT ENERGY  ''                                ,G9.3,''
+C    &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+C     ENDIF
       IF (ENDf(1).EQ.0.0D0) THEN
 Cpr      WRITE (12,
 Cpr      1'('' QFIS= '',F4.2,'' BETAV='',F5.2,'' J(1/2)='',F5.2,   '' DeltaJ
@@ -1360,7 +1361,7 @@ Cpr      WRITE (12, '('' DEFPAR='',F7.3)') DEFPAR
 C        WRITE(12,'('' SIG='',F5.1,'' TRUNC='',F5.1,'' EXPUSH='',F6.2)')
 C        *SIG, TRUNC,EXPUSH
       ENDIF
-      WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
+C     WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
          WRITE (6,*) ' '
@@ -1376,10 +1377,6 @@ C-----WRITE heading on FILE6
          WRITE (6,'('' Projectile binding energy'',F8.3,'' MeV'')')
      &          Q(0,1)
       ENDIF
-C********************************************************************
-C     DIRECT.GT.0 block eliminated RCN, 01/2005
-C          (transferred to fusion.f)
-C********************************************************************
 C
 C-----determination of excitation energy matrix in cn
 C
@@ -1918,7 +1915,7 @@ Ccc
 C
 C Local variables
 C
-      INTEGER i, j
+      INTEGER i, j, ia, iae, iexclus
       INTEGER IFIX
       REAL SNGL
       WRITE (6,*)
@@ -1928,25 +1925,54 @@ C
       WRITE (6,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
 99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
       WRITE (6,*)
-      DO i = 1, NNUcd
-         WRITE (6,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-99010    FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-      ENDDO
-      IF (ENDf(i).NE.0.0D0) THEN
-         WRITE (12,*)
-         WRITE (12,99050)
-         WRITE (12,*)
-         WRITE (12,99015) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
-99015    FORMAT ('    Nucleus   ',12(6X,I2,A2))
-         WRITE (12,*)
-         DO i = 1, NNUcd
-            WRITE (12,99020) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i)))
-     &                       , (Q(j,i),j = 1,NEJcm)
-99020       FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-         ENDDO
+      IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
+        WRITE (12,*) ' '
+        IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
+     &     'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
+        WRITE (12,*) 'Neutron   o. m. parameters: RIPL catalog number ',
+     &            KTRlom(1,1)
+        WRITE (12,*) 'Proton    o. m. parameters: RIPL catalog number ',
+     &            KTRlom(2,1)
+        WRITE (12,*) 'Alpha     o. m. parameters: RIPL catalog number ',
+     &            KTRlom(3,1)
+        IF (NEMc.GT.0) WRITE (12,*)
+     &               'Cluster   o. m. parameters: RIPL catalog number ',
+     &            KTRlom(NDEJC,1)
+        WRITE (12,*)
+        WRITE (12,99050)
+        WRITE (12,*)
+        WRITE (12,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+        WRITE (12,*)
       ENDIF
-      WRITE (6,*)
+      iexclus = 0
+      DO i = 1, NNUcd
+99010   FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
+99015   FORMAT (1X,I3,'-',A2,'-',I3,2X,'E',1x,12F10.3)
+        IF (ENDf(i).EQ.1.0D0) THEN
+            IF(FIRst_ein)
+     &    WRITE (12,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+          WRITE ( 6,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+          ENDIF
+        IF (ENDf(i).EQ.2.0D0) THEN
+            iexclus = 1
+            IF(FIRst_ein)
+     &    WRITE (12,99015) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+          WRITE ( 6,99015) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+          ENDIF
+      ENDDO
+      IF (iexclus.EQ.1) THEN
+          IF(FIRst_ein) THEN
+              WRITE(12,*)
+              WRITE(12,*) ' E means only inclusive spectra is available'
+            ENDIF
+            WRITE( 6,*)
+            WRITE( 6,*) ' E means only inclusive spectra is available'
+      ENDIF
+      IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) WRITE (12,*)
       WRITE (6,*)
       IF (FISshi(1).NE.0) THEN
          WRITE (6,99025)
@@ -1981,10 +2007,29 @@ C
       WRITE (6,*) 'Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
       IF (NEMc.GT.0) WRITE (6,*)
-     &               'Cluster   o. m. parameters: RIPL catalog number '
-     &               , KTRlom(NDEJC,1)
+     &            'Cluster   o. m. parameters: RIPL catalog number ',
+     &            KTRlom(NDEJC,1)
       WRITE (6,*)
+
+      WRITE (12,*) ' '
+      WRITE (12,*) ' '
+C-----WRITE heading on FILE12
+      ia = INT(A(0))
+      iae = INT(AEJc(0))
+      IF(LEVtarg.GT.1) THEN
+      WRITE (12,
+     &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
+     &I3,''m INCIDENT ENERGY ''                                ,G9.3,''
+     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+      ELSE
+      WRITE (12,
+     &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
+     &I3,'' INCIDENT ENERGY  ''                                ,G9.3,''
+     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+      ENDIF
+      WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
       WRITE (12,*)
+
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
 99045 FORMAT (1X,I3,'-',A2,'-',I3,4X,10F12.3)
 99050 FORMAT (10X,'B i n d i n g    e n e r g i e s')
@@ -2390,23 +2435,6 @@ C-----      print  maximal gamma-ray multipolarity  'MAXmult'
      &ntribution.'')')
                KTRompcc = 0
             ENDIF
-
-            IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
-     &     ' inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-            WRITE(12,*)
-     &        ' neutron   o. m. parameters: RIPL catalog number ',
-     &        KTRlom(1,1)
-            WRITE(12,*)
-     &        ' proton    o. m. parameters: RIPL catalog number ',
-     &        KTRlom(2,1)
-            WRITE(12,*)
-     &        ' alpha     o. m. parameters: RIPL catalog number ',
-     &        KTRlom(3,1)
-            IF (NEMc.GT.0) WRITE (12,*)
-     &        ' cluster   o. m. parameters: RIPL catalog number ',
-     &        KTRlom(NDEJC,1)
-            WRITE(12,*) ' '
-
             WRITE (6,*) ' '
 C-----------Printout of some final input options   *** done ***
             RETURN
@@ -2865,20 +2893,20 @@ C-----
          IF (name.EQ.'EX1   ') THEN
             EX1 = val
             WRITE (6,
-     &    '('' Initial nuber of excitons being neutrons set to '',F6.3)'
+     &   '('' Initial number of excitons being neutrons set to '',F6.3)'
      &    ) EX1
             WRITE (12,
-     &    '('' Initial nuber of excitons being neutrons '',F6.3)') EX1
+     &    '('' Initial number of excitons being neutrons '',F6.3)') EX1
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'EX2   ') THEN
             EX2 = val
             WRITE (6,
-     &    '('' Initial nuber of excitons being protons set to  '',F6.3)'
+     &   '('' Initial number of excitons being protons set to  '',F6.3)'
      &    ) EX2
             WRITE (12,
-     &    '('' Initial nuber of excitons being protons '',F6.3)') EX2
+     &    '('' Initial number of excitons being protons '',F6.3)') EX2
             GOTO 100
          ENDIF
 C-----
@@ -6003,7 +6031,7 @@ C-----------------swapping
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          WRITE (12,*)
-         WRITE (12,*) 'Collective levels used in direct calculations' 
+         WRITE (12,*) 'Collective levels used in direct calculations'
          WRITE (12,*)
          WRITE (12,*) '   Ncoll  '
          WRITE (12,'(3x,3I5)') ND_nlv
@@ -6088,7 +6116,7 @@ C-----------------swapping
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
          WRITE (12,*)
-         WRITE (12,*) 'Collective levels used in direct calculations' 
+         WRITE (12,*) 'Collective levels used in direct calculations'
          WRITE (12,*)
          WRITE (12,*) '   Ncoll  '
          WRITE (12,'(3x,3I5)') ND_nlv
