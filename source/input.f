@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-12 11:59:09 $
-Ccc   * $Id: input.f,v 1.122 2005-05-12 11:59:09 Capote Exp $
+Ccc   * $Date: 2005-05-12 13:17:47 $
+Ccc   * $Id: input.f,v 1.123 2005-05-12 13:17:47 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -820,8 +820,8 @@ C                       residues must be heavier than alpha
                            ENDIF
                         ELSE
 C                          Comment the following line and uncommment the one after for all exclusive spectra
-C                          ENDf(nnuc) = 2
-                           ENDf(nnuc) = 1
+                           ENDf(nnuc) = 2
+C                          ENDf(nnuc) = 1
                         ENDIF
                      ENDDO
                   ENDDO
@@ -5363,8 +5363,8 @@ C
       CHARACTER*9 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp,
-     &        itmp, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin, ngamr,
-     &        nlvr, nlvs, nmax, nnurec, nztmp, iccfus
+     &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
+     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus
       INTEGER NINT
       CHARACTER*6 reftmp
       ND_nlv = 0
@@ -5453,11 +5453,14 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), D_Def(i,2)
+             itmp1 = ICOllev(i)
+             if(itmp1.gt.50) itmp1 = itmp1 -50
             WRITE (12,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), D_Def(i,2)
          ENDDO
+         WRITE(12,*) ' '
          CLOSE (32)
          IFINDCOLL = 0
          RETURN
@@ -6044,15 +6047,17 @@ C-----------------swapping
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), ftmp
+             itmp1 = ICOllev(i)
+             if(itmp1.gt.50) itmp1 = itmp1 -50
             WRITE (12,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), ftmp
-            WRITE(12,*) ' '
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &               D_Llv(i), D_Klv(i), ftmp
          ENDDO
+         WRITE(12,*) ' '
       ELSE
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
@@ -6132,12 +6137,14 @@ C-----------------swapping
             WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &               0, 0, ftmp
+             itmp1 = ICOllev(i)
+             if(itmp1.gt.50) itmp1 = itmp1 -50
             WRITE (12,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &             itmp1 , D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &             D_Llv(i), D_Klv(i), ftmp
-            WRITE(12,*) ' '
          ENDDO
+         WRITE(12,*) ' '
       ENDIF
       CLOSE (32)
       RETURN
