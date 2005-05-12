@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-15 18:21:02 $
-Ccc   * $Id: scnd-preeq.f,v 1.13 2005-04-15 18:21:02 Capote Exp $
+Ccc   * $Date: 2005-05-12 17:55:46 $
+Ccc   * $Id: scnd-preeq.f,v 1.14 2005-05-12 17:55:46 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -157,11 +157,14 @@ C--------------------probability of finding a particle at energy ...
 C--------------------probability *** done ***
                      ietl = iec - ier - itlc
                      pop1 = popp*TL(ietl,1,Nejc,Nnur)*ratioro*TURbo
-                     POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
-                     CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
-                     IF (ENDf(Nnuc).EQ.1.D0)
+	               IF (pop1.GT.0) THEN
+                       POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
+                       CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
+C                      IF (ENDf(Nnuc).EQ.1.D0)
+                       IF (ENDf(Nnuc).GT.0.D0)
      &                   CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
-                     sumem = sumem + pop1
+                       sumem = sumem + pop1
+	               ENDIF
                   ENDDO         !end do on 2-nd residue excitation energy
                   popsub(iec,jc,ip) = popsub(iec,jc,ip) + sumem
                ENDDO            !end do on 1-st residue spins
