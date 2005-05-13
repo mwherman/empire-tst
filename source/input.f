@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-13 12:59:43 $
-Ccc   * $Id: input.f,v 1.124 2005-05-13 12:59:43 herman Exp $
+Ccc   * $Date: 2005-05-13 19:11:56 $
+Ccc   * $Id: input.f,v 1.125 2005-05-13 19:11:56 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1125,15 +1125,15 @@ C--------print IDNa matrix
          WRITE(12,*)
      &            '                      ---------------------------- '
          WRITE(12,*) ' '
-         WRITE(12,*) 'Exit channel    ECIS    MSD    MSC',
+         WRITE(12,*) 'Exit channel      ECIS    MSD    MSC',
      &              '   DEGAS   HMS   PCROSS'
          WRITE(12,*) ' '
-         WRITE(12,'('' neut. disc. '',8I7)') (IDNa(1,j),j = 1,NDMODELS)
-         WRITE(12,'('' neut. cont. '',8I7)') (IDNa(2,j),j = 1,NDMODELS)
-         WRITE(12,'('' prot. disc. '',8I7)') (IDNa(3,j),j = 1,NDMODELS)
-         WRITE(12,'('' prot. cont. '',8I7)') (IDNa(4,j),j = 1,NDMODELS)
-         WRITE(12,'('' gammas      '',8I7)') (IDNa(5,j),j = 1,NDMODELS)
-         WRITE(12,'('' alpha cont. '',8I7)') (IDNa(6,j),j = 1,NDMODELS)
+         WRITE(12,'('' n to levels   '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
+         WRITE(12,'('' n to continuum'',8I7)')(IDNa(2,j),j = 1,NDMODELS)
+         WRITE(12,'('' p to levels   '',8I7)')(IDNa(3,j),j = 1,NDMODELS)
+         WRITE(12,'('' p to continuum'',8I7)')(IDNa(4,j),j = 1,NDMODELS)
+         WRITE(12,'('' g             '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
+         WRITE(12,'('' a             '',8I7)')(IDNa(6,j),j = 1,NDMODELS)
          WRITE(12,*) ' '
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
@@ -2004,15 +2004,18 @@ C
         WRITE (12,*) '   eds. N.Paver, M. Herman and A.Gandini, ICTP  '
         WRITE (12,*) '   Lecture Notes 5 (ICTP Trieste, 2001) pp.137. ' 
         WRITE (12,*) '                                                '
-        WRITE (12,*) '[He02] M.Herman, R.Capote, P.Oblozinsky, A.Trkov'
-        WRITE (12,*) '   and V.Zerkin,                                '
+        WRITE (12,*) '[He02] Recent Development of the Nuclear        '
+        WRITE (12,*) '   Reaction Model Code Empire, M. Herman,       '
+        WRITE (12,*) '   R. Capote, P. Oblozinsky, M. Sin, A. Trkov,  '
+        WRITE (12,*) '   A. Ventura, V. Zerkin, International         '
+        WRITE (12,*) '   Conference on Nuclear Data for Science &     '
+        WRITE (12,*) '   Technology - ND2004 September 26 - October 1,'
+        WRITE (12,*) '   2004, Santa Fe, New Mexico.                  '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[Ri03] RIPL-2: Reference Input Parameter Library'
         WRITE (12,*) '   to be published, see www-nds.iaea.org/RIPL-2/'
         WRITE (12,*) '                                                '
-        WRITE (12,*) '                                                '
-        WRITE (12,*) '                                                '
-        WRITE (12,*) '                                                '
+        WRITE (12,*) '************************************************'
         WRITE (12,*) '                                                '
       ENDIF
       IF (iexclus.EQ.1) THEN
@@ -2632,9 +2635,6 @@ C--------------searching in the RIPL database
                STOP
             ENDIF
             WRITE (6,
-     &'('' Optical model parameters for direct inelastic scattering set
-     & to RIPL #'',I4)') INT(val)
-            WRITE (12,
      &'('' Optical model parameters for direct inelastic scattering set
      & to RIPL #'',I4)') INT(val)
             KTRompcc = INT(val)
