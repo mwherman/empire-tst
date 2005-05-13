@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-12 13:17:47 $
-Ccc   * $Id: input.f,v 1.123 2005-05-12 13:17:47 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-13 12:59:43 $
+Ccc   * $Id: input.f,v 1.124 2005-05-13 12:59:43 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1943,12 +1943,13 @@ C
         WRITE (12,*)
         WRITE (12,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
         WRITE (12,*)
+        
       ENDIF
       iexclus = 0
       DO i = 1, NNUcd
 99010   FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015   FORMAT (1X,I3,'-',A2,'-',I3,2X,'E',1x,12F10.3)
-        IF (ENDf(i).EQ.1.0D0) THEN
+        IF (ENDf(1).EQ.1) THEN
             IF(FIRst_ein)
      &    WRITE (12,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
@@ -1964,6 +1965,56 @@ C
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
       ENDDO
+      IF (ENDf(1).EQ.1) THEN
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'RESULTS                                         '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'MF=3 Neutron cross sections                     '
+        WRITE (12,*) '     EMPIRE calculations were adopted for:      '
+        WRITE (12,*) '   MT=1 Total                                   '
+        WRITE (12,*) '   MT=2 Elastic scattering                      '
+        WRITE (12,*) '   MT=4, 51-91 Inelastic scattering             '
+        WRITE (12,*) '   MT=102 Capture                               '
+        WRITE (12,*) '   MT=16   (n,2n)                               '
+        WRITE (12,*) '   MT=22   (n,na)                               '
+        WRITE (12,*) '   MT=24   (n,2na)                              '
+        WRITE (12,*) '   MT=28   (n,np)                               '
+        WRITE (12,*) '   MT=45   (n,npa)                              '
+        WRITE (12,*) '   MT=103, 600-649 (n,p)                        '
+        WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
+        WRITE (12,*) '   MT=112  (n,pa                                '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'MF=4 Angular distributions of secondary neutrons'
+        WRITE (12,*) '     EMPIRE calculations were adopted           '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
+        WRITE (12,*) '     products; EMPIRE calculations were adopted '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'MF=12 Transition probablility arrays for photon '
+        WRITE (12,*) '      production; taken from the RIPL-2         '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'MF=14 Photon angular distributions              '
+        WRITE (12,*) '      isotropic distributions were assumed      '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) 'REFERENCES                                      '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '[He01] M. Herman  EMPIRE-II Statistical Model   '
+        WRITE (12,*) '   Code for Nuclear Reaction Calculations, in   '
+        WRITE (12,*) '   Nuclear Reaction Data and Nuclear Reactors,  '
+        WRITE (12,*) '   eds. N.Paver, M. Herman and A.Gandini, ICTP  '
+        WRITE (12,*) '   Lecture Notes 5 (ICTP Trieste, 2001) pp.137. ' 
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '[He02] M.Herman, R.Capote, P.Oblozinsky, A.Trkov'
+        WRITE (12,*) '   and V.Zerkin,                                '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '[Ri03] RIPL-2: Reference Input Parameter Library'
+        WRITE (12,*) '   to be published, see www-nds.iaea.org/RIPL-2/'
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '                                                '
+      ENDIF
       IF (iexclus.EQ.1) THEN
           IF(FIRst_ein) THEN
               WRITE(12,*)
@@ -2335,12 +2386,56 @@ C
       WRITE (6,*) 'Following options/parameters have been used'
       WRITE (6,*) '-------------------------------------------'
       WRITE (6,*) ' '
-      WRITE (12,*) '---------------------------------------------------'
-      WRITE (12,*) '    Fast neutron region'
-      WRITE (12,*) '---------------------------------------------------'
-      WRITE (12,*) 'Based on calculations with  EMPIRE-2.19.b27 using  '
-      WRITE (12,*) 'following nuclear models and input parameters:'
+      WRITE (12,*) '***************************************************'
+      WRITE (12,*) 'FAST ENERGY REGION'
+      WRITE (12,*) 'Authors:'
       WRITE (12,*) ''
+      WRITE (12,*) 'EVALUATION PROCEDURE                               '
+      WRITE (12,*) ''
+      WRITE (12,*) 'Adopted procedure is based on careful theoretical  '
+      WRITE (12,*) 'analysis  utilizing available experimental data and'
+      WRITE (12,*) 'nuclear reaction model calculations.               '
+      WRITE (12,*) '                                                   '
+      WRITE (12,*) 'Available experimental data were interpreted  using'
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b27 by      '
+      WRITE (12,*) 'M. Herman et al [He01, He02]. This code integrates '
+      WRITE (12,*) 'into a single system a number of important modules '
+      WRITE (12,*) 'and features:                                      '
+      WRITE (12,*) '                                                   '
+      WRITE (12,*) '- Spherical and deformed Optical Model including   '
+      WRITE (12,*) '  including coupled-channels (ECIS03 by J. Raynal) '
+      WRITE (12,*) '- Hauser-Feshbach statistical model including      '
+      WRITE (12,*) '  HRTW width fluctuation correction                '
+      WRITE (12,*) '- Qauntum-mechanical MSD TUL model (codes ORION &  '
+      WRITE (12,*) '  TRISTAN by H.Lenske),  and MSC NVWY model        '
+      WRITE (12,*) '- Exciton model with angular momentum coupling     '
+      WRITE (12,*) '  (code DEGAS by E. Betak and P. Oblozinsky) that  '
+      WRITE (12,*) '  represents a good approximation to the DSD model '
+      WRITE (12,*) '- Exciton model with Iwamoto-Harada cluster        '
+      WRITE (12,*) '  emission (PCROSS)                                '
+      WRITE (12,*) '- Complete gamma-ray cascade after emission of     '
+      WRITE (12,*) '  each particle,  including realistic treatment    '
+      WRITE (12,*) '  of discrete transitions                          '
+      WRITE (12,*) '- Access to OM segment of the RIPL-2 library [Ri03]'
+      WRITE (12,*) '- Built-in input parameter files, such as masses,  '
+      WRITE (12,*) '  level density, discrete levels, OM parameters    '
+      WRITE (12,*) '  and gamma strength functions  based on the RIPL-2'
+      WRITE (12,*) '  library [Ri03]                                   '
+      WRITE (12,*) '- Automatic retrieval of experimental data from the'
+      WRITE (12,*) '  EXFOR/CSISRS library                             '
+      WRITE (12,*) '- ENDF-6 formatting (utility code EMPEND), coupled '
+      WRITE (12,*) '  to grahpical presentation (utility code ZVView)  '
+      WRITE (12,*) '  through the chain of PrePro codes by D. Cullen   '
+      WRITE (12,*) '- Checking codes (CHECKR, FIZCON, PSYCHE)          '
+      WRITE (12,*) '- Support for NJOY                                 '
+      WRITE (12,*) '                                                   '
+      WRITE (12,*) 'PARAMETERIZATION'
+      WRITE (12,*) '                                                   '
+      WRITE (12,*) 'Following models and parameters were used in the   '
+      WRITE (12,*) 'current evaluation:                                '
+      WRITE (12,*) '                                                   '
+      WRITE (12,*) 'Discrete levels were taken from the RIPL-2 level   '
+      WRITE (12,*) 'file,  based on the 1998 version of ENSDF.         '
   100 READ (5,'(A1)') name(1:1)
       IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
      &    .NE.'!') THEN
