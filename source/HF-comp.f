@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-11 21:23:08 $
-Ccc   * $Id: HF-comp.f,v 1.58 2005-05-11 21:23:08 herman Exp $
+Ccc   * $Date: 2005-05-16 06:55:27 $
+Ccc   * $Id: HF-comp.f,v 1.59 2005-05-16 06:55:27 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -142,7 +142,11 @@ Ccc   * Deconvolutes inclusive spectra calculated by the statistical     *
 Ccc   * model into spectra for individual reactions (exclusive) as       *
 Ccc   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
 Ccc   * to continuum.                                                    *
-Ccc   *                                                                  *
+Ccc   * Particualar treatment is reserved for the case when the final    *
+Ccc   * nucleus is treated as inclusive (ENDf(Nnur)=2). Storing spectra  *
+Ccc   * on POPcse and POPcseaf is avoided since these would not be       *
+Ccc   * considered  for nucleus with inclusive option and relative       *
+Ccc   * contribution would be lost.                                      *
 Ccc   *                                                                  *
 Ccc   * input:Iec  - energy index of the decaying state                  *
 Ccc   *       Ief  - energy index of the final state (irrel. for fission)*
@@ -211,28 +215,49 @@ C-----
       ENDIF
 C-----Contribution comming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
+      IF(ENDf(Nnur).EQ.1) THEN !Nnur nucleus treated as exclusive
+         POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
+      ELSEIF(ENDf(Nnur).EQ.2) THEN !Nnur nucleus treated as inclusive
+C--------emission was from Nnuc but we put this contribution into Nnur spectrum      
+         CSE(icsp,Nejc,Nnur) = CSE(icsp,Nejc,Nnur) + Popt
+      ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN
                                         !skip the first CN except gammas
          IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
-         DO ie = 1, NDECSE
-            DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,Nnuc).NE.0)
-     &             POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
-     &             + POPcse(Iec,iejc,ie,Nnuc)*xnor
+         IF(ENDf(Nnur).EQ.1) THEN !Nnur nucleus treated as exclusive
+            DO ie = 1, NDECSE
+               DO iejc = 0, NDEJC
+                  IF (POPcse(Iec,iejc,ie,Nnuc).NE.0)
+     &               POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
+     &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
+               ENDDO
+C--------------DDX spectra using portions
+               DO iejc = 0, NDEJCD
+                  IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
+     &                POPcseaf(Ief,iejc,ie,Nnur)
+     &                = POPcseaf(Ief,iejc,ie,Nnur)
+     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+               ENDDO
             ENDDO
-C-----------DDX spectra using portions
-C           DO iejc = 1, NDEJCD
-            DO iejc = 0, NDEJCD
-               IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
-     &             POPcseaf(Ief,iejc,ie,Nnur)
-     &             = POPcseaf(Ief,iejc,ie,Nnur)
-     &             + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+         ELSEIF(ENDf(Nnur).EQ.2) THEN !Nnur nucleus treated as inclusive
+            DO ie = 1, NDECSE
+               DO iejc = 0, NDEJC
+                  IF (POPcse(Iec,iejc,ie,Nnuc).NE.0)
+     &               CSE(ie,iejc,0) = CSE(ie,iejc,0)
+     &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
+               ENDDO
+C--------------DDX spectra using portions
+               DO iejc = 0, NDEJCD
+                  IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
+     &                POPcseaf(Ief,iejc,ie,Nnur)
+     &                = POPcseaf(Ief,iejc,ie,Nnur)
+     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+               ENDDO
             ENDDO
-         ENDDO
+         ENDIF 
       ENDIF
       END
 
