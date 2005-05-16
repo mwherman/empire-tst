@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-11 16:11:11 $
-Ccc   * $Id: main.f,v 1.87 2005-05-11 16:11:11 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-16 06:54:43 $
+Ccc   * $Id: main.f,v 1.88 2005-05-16 06:54:43 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1328,7 +1328,7 @@ C            residual nuclei must be heavier than alpha
              if(ares.le.4. and. zres.le.2.) cycle
              izares = INT(1000.0*zres + ares)
              CALL WHERE(izares,nnur,iloc)
-	       if(iloc.eq.1) CYCLE
+             IF(iloc.eq.1) CYCLE
              IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
