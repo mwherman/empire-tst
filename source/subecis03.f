@@ -1,13 +1,13 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-10 21:46:58 $
-Ccc   * $Id: subecis03.f,v 1.7 2005-04-10 21:46:58 Capote Exp $
+Ccc   * $Date: 2005-05-18 14:15:14 $
+Ccc   * $Id: subecis03.f,v 1.8 2005-05-18 14:15:14 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
 C PARAMETER definitions
 C
       INTEGER IDMX
-      PARAMETER (IDMX = 4000000)
+      PARAMETER (IDMX = 8000000)
 C
 C COMMON variables
 C
