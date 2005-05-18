@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-10 15:28:45 $
-Ccc   * $Id: lev-dens.f,v 1.38 2005-05-10 15:28:45 Capote Exp $
+Ccc   * $Date: 2005-05-18 14:12:16 $
+Ccc   * $Id: lev-dens.f,v 1.39 2005-05-18 14:12:16 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -634,6 +634,7 @@ C--------Empire systematics with M-S shell corrections
       IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) GAMma = Asaf
 C-----determination of the pairing shift DEL
       DELp = 12./SQRT(A(Nnuc))
+c      IF(A(nnuc).eq.231.)delp=0.8
       DEL = 0.
       IF (MOD(in,2).NE.0) DEL = DELp
       IF (MOD(iz,2).NE.0) DEL = DEL + DELp
@@ -1946,7 +1947,7 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
      &           '.dat')
          OPEN (UNIT = 81,FILE = filename,ERR = 150)
          READ (81,*,END = 150)
-   50    READ (81,99010,ERR = 150,END = 150) simb, izr, iar
+   50    READ (81,99010,ERR = 50,END = 150) simb, izr, iar
 99010    FORMAT (23x,a2,i3,3x,i3)
          IF (simb.NE.'Z=') GOTO 50
          IF (iar.NE.ia .OR. izr.NE.iz) GOTO 50
@@ -1971,7 +1972,7 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
      &              '.dat')
             OPEN (UNIT = 82,FILE = filename,ERR = 260)
             READ (82,*,END = 260)
-  220       READ (82,99020,ERR = 260,END = 260) simb, izr, iar
+  220       READ (82,99020,ERR = 220,END = 260) simb, izr, iar
 99020       FORMAT (23x,a2,i3,3x,i3)
             IF (simb.NE.'Z=') GOTO 220
             IF (iar.NE.ia .OR. izr.NE.iz) GOTO 220
@@ -2055,10 +2056,10 @@ C        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
 C--------45.84 stands for (12/SQRT(pi))**2
          DETcrt = (12./SQRT(PI))**2*ACRt**3*TCRt**5
          SCR = 2.*ACRt*TCRt
-         MOMparcrt = 6*ACRt*mm2*(1. - (2./3.)*DEFfis(Ib))/PI**2
+         MOMparcrt = 6*ACRt*mm2*(1. - (2./3.)*bet2)/PI**2
          IF (MOMparcrt.LT.2.) MOMparcrt = 2.
          MOMortcrt = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &               *(1. + (1./3.)*DEFfis(Ib))
+     &               *(1. + (1./3.)*bet2)!DEFfis(Ib))
          DEL = 0.
          IF (MOD(in,2).NE.0) DEL = DELp
          IF (MOD(iz,2).NE.0) DEL = DEL + DELp
@@ -2071,11 +2072,11 @@ C--------45.84 stands for (12/SQRT(pi))**2
                   u = u - ECOnd
                   accn = ATIl*(1 + shcf*(1 - EXP((-GAMma*u)))/u)
                   rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMparcrt,
-     &                     MOMortcrt,HIS(Nnuc),ARGred,EXPmax,iff)
+     &                     MOMortcrt,HIS(Nnuc),ARGred,EXPmax,iff,bet2)
                ELSE
                   accn = ACRt
                   rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
-     &                     BET2,iff)*RORed
+     &                     iff)*RORed
                ENDIF
                IF (Mmod.EQ.0) ROFis(kk,jj,Ib) = rotemp
                IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp
@@ -2091,7 +2092,7 @@ C--------45.84 stands for (12/SQRT(pi))**2
       END
 C
 C
-      DOUBLE PRECISION FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,A2,Iff)
+      DOUBLE PRECISION FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Iff)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C COMMON variables
@@ -2103,7 +2104,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, A2, Aj, Momort, Mompar, U
+      DOUBLE PRECISION A, Aj, Momort, Mompar, U
       INTEGER Iff
 C
 C Local variables
@@ -2124,11 +2125,11 @@ C-----CONST=1/(2*SQRT(2 PI))
       momo = Momort*0.3333 + 0.6666*Momort*TCRt*(1. - phi2)/t
       IF (momo.LT.0.0D0) RETURN
       seff2 = momp*t
-      IF (ABS(A2).GT.0.005D0) seff2 = momp**0.333*momo**0.6666*t
+      IF (ABS(BET2).GT.0.005D0) seff2 = momp**0.333*momo**0.6666*t
       arg = s - (Aj + 0.5)**2/(2.0*seff2)
       IF (arg.LE.0.0D0) RETURN
       robcs = 0.5*const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
-      CALL DAMPROTVIB(U,qk,t,qv,A,vibrk)
+      CALL DAMPROTVIB(U,qk,t,qv,A,vibrk,BET2)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
       ROBCSF = robcs*vibrk*momo*t*qdamp
       IF (Iff.EQ.2) ROBCSF = ROBCSF*2.*SQRT(2.*pi)*SQRT(momp*t)
@@ -2138,12 +2139,13 @@ C-----CONST=1/(2*SQRT(2 PI))
 C
 C
       DOUBLE PRECISION FUNCTION RODEFF(A,E,Ac,Aj,Mompar,Momort,Ss,
-     &                                 Argred,Expmax,Iff)
+     &                                 Argred,Expmax,Iff,bet2)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss
+      DOUBLE PRECISION A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
+     &                 bet2
       INTEGER Iff
 C
 C Local variables
@@ -2155,7 +2157,6 @@ C
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
       RODEFF = 0.D0
       sum = 0.D0
-
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
          WRITE (6,*) 'WARNING: Negative moment of inertia for spin ', Aj
          WRITE (6,*) 'WARNING: 0 level density returned by rodef'
@@ -2169,7 +2170,7 @@ C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
       t = SQRT(E/Ac)
       con = const/Ac**0.25/SQRT(Mompar*t)
 C-----vibrational ehancement, vib+rot damping
-      CALL DAMPROTVIB(E,qk,t,qv,A,vibrk)
+      CALL DAMPROTVIB(E,qk,t,qv,A,vibrk,BET2)
       IF (qv.GE.0.999D0) vibrk = 1.0
       sort2 = Momort*t
       IF (Ss.EQ.( - 1.0D0)) THEN
@@ -2205,30 +2206,29 @@ C        u = e - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
             ENDIF
          ENDIF
       ENDDO
-  100 RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))!*vibrk
+  100 RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &         *(qv - vibrk*(qv - 1.))
-c      if(a.eq.231)
-c     & write(6,'(a3,4(f12.5,1x))')'qv', vibrk,qv,(qv - vibrk*(qv - 1.)),
-c     &  (1.0 - qk*(1.0 - 1.0/sort2))
       IF (Iff.EQ.2) RODEFF = RODEFF*2.*SQRT(2.*pi)*SQRT(Mompar*t)
       IF (Iff.EQ.3) RODEFF = RODEFF*2.
       IF (Iff.EQ.4) RODEFF = RODEFF*4.*SQRT(2.*pi)*SQRT(Mompar*t)
       END
 C
 C
-      SUBROUTINE DAMPROTVIB(E1,Qk,T,Q,A,Vibrk)
+      SUBROUTINE DAMPROTVIB(E1,Qk,T,Q,A,Vibrk,BET2)
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, E1, Q, Qk, T, Vibrk
+      DOUBLE PRECISION A, E1, Q, Qk, T, Vibrk,BET2
 C
 C Local variables
 C
       DOUBLE PRECISION arg, cost, dmpdiff, dmphalf, dt, ht, m0, pi, r0,
      &                 sdrop, thalf
       Qk = 0.
-      dmphalf = 20.
-      dmpdiff = 7.
+c      dmphalf = 20.
+c      dmpdiff = 7.
+      dmphalf = 120.*A**0.333*bet2**2         !according to RIPL-2
+      dmpdiff = 1400.*A**(-0.666)*bet2**2
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
       thalf = 1.
@@ -2236,10 +2236,9 @@ C
       arg = (T - thalf)/dt
       Q = 1.0/(EXP((-arg)) + 1.0)
       DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
-C     DATA m0, pi, r0, ht/1.044, 3.141592, 1.526, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-c     Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
+c      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
       Vibrk = EXP(0.06*A**(2./3.)*T**(4./3.))
       END
 C
