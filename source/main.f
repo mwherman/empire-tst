@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-20 09:59:12 $
-Ccc   * $Id: main.f,v 1.89 2005-05-20 09:59:12 Capote Exp $
+Ccc   * $Date: 2005-05-20 17:22:36 $
+Ccc   * $Id: main.f,v 1.90 2005-05-20 17:22:36 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -42,7 +42,7 @@ C
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
      &                 ecm, elada(101), elcncs, emeda, emedg, emedh,
-     &                 emedn, emedp, erecoil, espec, espmax, ftmp,
+     &                 emedn, emedp, erecoil, espec, espmax, epre, ftmp,
      &                 gamfis, gamt, gang, gtotsp, htotsp, piece, pope,
      &                 poph, popl, popleft, poplev, popread, poptot,
      &                 ptotsp, q2, q3, qmax, qstep, recorp, recorr,
@@ -65,7 +65,7 @@ C
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
-      DATA ctldir/'../TL/'/
+      DATA ctldir/'../TL/'/,epre/0.0/
       icalled = 0
       CALL THORA(6)
 C-----
@@ -322,7 +322,8 @@ C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)
 
 C-----locate residual nuclei after CN decay
-      DO nejc = 0, NEJcm
+      NREs(0) = 1
+      DO nejc = 1, NEJcm
          NREs(nejc) = -1
          ares = A(1) - AEJc(nejc)
          zres = Z(1) - ZEJc(nejc)
@@ -1920,6 +1921,14 @@ C        SAVING RANDOM SEEDS
          CLOSE(94)
          STOP '.REGULAR STOP'
       ENDIF
+	IF(EIN.LT.epre) THEN
+	  WRITE(6,*) 'FATAL: Input energies are not ordered !!'
+	  WRITE(6,*) 'FATAL: Check your input file'
+	  PAUSE 'FATAL: Input energies are not ordered !!'
+	  STOP
+	ENDIF
+      epre = EIN 
+
       FIRst_ein = .FALSE.
       GOTO 1300
 C
