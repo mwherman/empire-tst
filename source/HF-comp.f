@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-20 09:56:04 $
-Ccc   * $Id: HF-comp.f,v 1.60 2005-05-20 09:56:04 Capote Exp $
+Ccc   * $Date: 2005-05-20 10:19:33 $
+Ccc   * $Id: HF-comp.f,v 1.61 2005-05-20 10:19:33 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -240,16 +240,14 @@ C-----DE spectra
                      POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
                    ENDIF
-               ENDIF
-C--------------DDX spectra using portions
-               DO iejc = 0, NDEJCD
-                  IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
+C-----------------DDX spectra using portions
+                   IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
      &                POPcseaf(Ief,iejc,ie,Nnur)
      &                = POPcseaf(Ief,iejc,ie,Nnur)
      &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
-               ENDDO
+               ENDIF
             ENDDO
-         ENDIF
+         ENDDO
       ENDIF
       END
 
