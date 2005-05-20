@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-18 14:41:20 $
-Ccc   * $Id: input.f,v 1.127 2005-05-18 14:41:20 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-20 10:14:09 $
+Ccc   * $Id: input.f,v 1.128 2005-05-20 10:14:09 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1965,7 +1965,7 @@ C
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
       ENDDO
-      IF (ENDf(1).EQ.1) THEN
+      IF (FIRst_ein .AND. ENDf(1).EQ.1) THEN
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS                                         '
         WRITE (12,*) '                                                '
@@ -1982,7 +1982,7 @@ C
         WRITE (12,*) '   MT=45   (n,npa)                              '
         WRITE (12,*) '   MT=103, 600-649 (n,p)                        '
         WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
-        WRITE (12,*) '   MT=112  (n,pa                                '
+        WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=4 Angular distributions of secondary neutrons'
         WRITE (12,*) '     EMPIRE calculations were adopted           '
