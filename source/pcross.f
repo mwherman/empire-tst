@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-11 16:11:11 $
-Ccc   * $Id: pcross.f,v 1.24 2005-05-11 16:11:11 Capote Exp $
+Ccc   * $Date: 2005-05-20 17:28:31 $
+Ccc   * $Id: pcross.f,v 1.25 2005-05-20 17:28:31 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -131,6 +131,8 @@ C
 C-----NEJcm is the maximum number of particles emitted
 C
       DO nejc = 1, NEJcm
+         ar = ac - AEJc(nejc)
+         zr = zc - ZEJc(nejc)
          nnur = NREs(nejc)
          g(nejc) = ROPar(1,nnur)/PI26*GTIlnor(nnur)
          pair(nejc) = ROPar(3,nnur)
