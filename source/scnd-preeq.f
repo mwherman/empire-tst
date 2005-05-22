@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-12 17:55:46 $
-Ccc   * $Id: scnd-preeq.f,v 1.14 2005-05-12 17:55:46 Capote Exp $
+Ccc   * $Date: 2005-05-22 15:57:37 $
+Ccc   * $Id: scnd-preeq.f,v 1.15 2005-05-22 15:57:37 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -157,14 +157,14 @@ C--------------------probability of finding a particle at energy ...
 C--------------------probability *** done ***
                      ietl = iec - ier - itlc
                      pop1 = popp*TL(ietl,1,Nejc,Nnur)*ratioro*TURbo
-	               IF (pop1.GT.0) THEN
+                      IF (pop1.GT.0) THEN
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
 C                      IF (ENDf(Nnuc).EQ.1.D0)
                        IF (ENDf(Nnuc).GT.0.D0)
      &                   CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                        sumem = sumem + pop1
-	               ENDIF
+                      ENDIF
                   ENDDO         !end do on 2-nd residue excitation energy
                   popsub(iec,jc,ip) = popsub(iec,jc,ip) + sumem
                ENDDO            !end do on 1-st residue spins
@@ -180,13 +180,12 @@ C--------trapezoidal integration of continuum population for ejectile nejc
          sum = sum*DE
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          WRITE (6,*) ' '
-         WRITE (6,*) ' '
          IF (Nejc.EQ.1) THEN
-            WRITE (6,*) ' n second-chance preequilibrium emission ', 
-     &                  'crosss section ', sum, ' mb'
+            WRITE (6,*) ' n second-chance PE emission ', 
+     &                  'cross section ', sum, ' mb'
          ELSEIF (Nejc.EQ.2) THEN
-            WRITE (6,*) ' p second-chance preequilibrium emission ', 
-     &                  'crosss section ', sum, ' mb'
+            WRITE (6,*) ' p second-chance PE emission ', 
+     &                  'cross section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc,Nnuc) = CSEmis(Nejc,Nnuc) + sum
