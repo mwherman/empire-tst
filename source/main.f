@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-20 17:22:36 $
-Ccc   * $Id: main.f,v 1.90 2005-05-20 17:22:36 Capote Exp $
+Ccc   * $Date: 2005-05-22 16:03:17 $
+Ccc   * $Id: main.f,v 1.91 2005-05-22 16:03:17 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -440,16 +440,20 @@ C-------------last continuum energy bin is calculated
               WRITE (6,*) ' '
             ENDDO
          ENDIF
+
+         if(xsinlcont.gt.0) write(6,*) 
+     &   ' DWBA to continuum XS for inelastic channel ',xsinlcont
          if(CSMsd(0).gt.0.) WRITE (6,*)
-     &          ' g PE emission cross section ', CSMsd(0), ' mb'
+     &       ' g PE emission cross section ',   CSMsd(0), ' mb'
          if(CSMsd(1).gt.0.) WRITE (6,*)
-     &          ' n PE emission cross section ', CSMsd(1), ' mb'
+     &       ' n PE emission cross section ',   CSMsd(1), ' mb'
          if(CSMsd(2).gt.0.) WRITE (6,*)
-     &          ' p PE emission cross section ', CSMsd(2), ' mb'
+     &       ' p PE emission cross section ',   CSMsd(2), ' mb'
          if(CSMsd(3).gt.0.) WRITE (6,*)
-     &          ' a PE emission cross section ', CSMsd(3), ' mb'
+     &       ' a PE emission cross section ',   CSMsd(3), ' mb'
          if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (6,*)
-     &     ' Cluster PE emission cross section ', CSMsd(ndejc), ' mb'
+     &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
+
          WRITE (6,*) ' '
 C--------correct CN population for the PE emission
          corrmsd = (CSFus - (xsinl + xsinlcont + totemis))/CSFus
@@ -474,9 +478,9 @@ C--------correct CN population for the PE emission
                WRITE (6,*) 'THIS MAY HAPPEN IF TOO MANY DISCRETE LEVELS'
                WRITE (6,*) 'ARE EMBEDDED INTO CONTINUUM OR HAVE TOO BIG'
                WRITE (6,*) 'DYNAMICAL DEFORMATIONS SPECIFIED IN THE    '
-               WRITE (6,*) 'CPLLECTIVE LEVEL FILE '
+               WRITE (6,*) 'COLLECTIVE LEVEL FILE.'
                WRITE (6,*)
-     &                  'TRY TO REDUCE THE NUMBER OF COLLECTIVE LEVELS '
+     &                  'TRY TO REDUCE THE NUMBER OF COLLECTIVE LEVELS.'
                STOP
             ENDIF
          ENDIF
@@ -501,8 +505,8 @@ C----------add PE contribution to the total NEJC emission
 C        Skipping all emitted but neutrons and protons
 C        Secondary emission was not tested for proton induced reactions
          nnur = NREs(nejcec)
-C        IF(nnur.GE.0) THEN
-         IF(nnur.GE.2000) THEN
+         IF(nnur.GE.0) THEN
+C        IF(nnur.GE.2000) THEN
 C----------second chance preequilibrium emission after MSD emission
 C----------neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
@@ -1852,8 +1856,8 @@ C--------alphas
           ENDDO
          ENDIF
 C--------light ions
-         IF (NDEJC.EQ.4 .AND. NEMc.GT.0) THEN
-           nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
+         IF (NDEJC.EQ.4) THEN
+           nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
            IF(nspec.gt.0) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
@@ -1865,12 +1869,12 @@ C--------light ions
              WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
              DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
-     &                *DE, (CSEa(ie,nang,4,0),nang = 1,NDANG)
+     &                *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
              ENDDO
              DO ie = nspec, nspec + 1
                                    ! exact endpoint
-               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)- Q(4,1),
-     &                (CSEa(ie,nang,4,0),nang = 1,NDANG)
+               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - 
+     &                Q(NDEJC,1),(CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
              ENDDO
            ENDIF
          ENDIF
@@ -1921,12 +1925,12 @@ C        SAVING RANDOM SEEDS
          CLOSE(94)
          STOP '.REGULAR STOP'
       ENDIF
-	IF(EIN.LT.epre) THEN
-	  WRITE(6,*) 'FATAL: Input energies are not ordered !!'
-	  WRITE(6,*) 'FATAL: Check your input file'
-	  PAUSE 'FATAL: Input energies are not ordered !!'
-	  STOP
-	ENDIF
+       IF(EIN.LT.epre) THEN
+         WRITE(6,*) 'FATAL: Input energies are not ordered !!'
+         WRITE(6,*) 'FATAL: Check your input file'
+         PAUSE 'FATAL: Input energies are not ordered !!'
+         STOP
+       ENDIF
       epre = EIN 
 
       FIRst_ein = .FALSE.
