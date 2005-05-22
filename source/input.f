@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-20 10:14:09 $
-Ccc   * $Id: input.f,v 1.128 2005-05-20 10:14:09 Capote Exp $
+Ccc   * $Date: 2005-05-22 15:59:39 $
+Ccc   * $Id: input.f,v 1.129 2005-05-22 15:59:39 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2396,7 +2396,7 @@ C
       WRITE (12,*) 'EVALUATION PROCEDURE                               '
       WRITE (12,*) ''
       WRITE (12,*) 'Adopted procedure is based on careful theoretical  '
-      WRITE (12,*) 'analysis  utilizing available experimental data and'
+      WRITE (12,*) 'analysis utilizing available experimental data and '
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
@@ -2421,13 +2421,13 @@ C
       WRITE (12,*) '  of discrete transitions                          '
       WRITE (12,*) '- Access to OM segment of the RIPL-2 library [Ri03]'
       WRITE (12,*) '- Built-in input parameter files, such as masses,  '
-      WRITE (12,*) '  level density, discrete levels, OM parameters    '
+      WRITE (12,*) '  level density, discrete levels, fission barriers '
       WRITE (12,*) '  and gamma strength functions  based on the RIPL-2'
       WRITE (12,*) '  library [Ri03]                                   '
       WRITE (12,*) '- Automatic retrieval of experimental data from the'
       WRITE (12,*) '  EXFOR/CSISRS library                             '
       WRITE (12,*) '- ENDF-6 formatting (utility code EMPEND), coupled '
-      WRITE (12,*) '  to grahpical presentation (utility code ZVView)  '
+      WRITE (12,*) '  to graphical presentation (utility code ZVView)  '
       WRITE (12,*) '  through the chain of PrePro codes by D. Cullen   '
       WRITE (12,*) '- Checking codes (CHECKR, FIZCON, PSYCHE)          '
       WRITE (12,*) '- Support for NJOY                                 '
@@ -2576,9 +2576,9 @@ C                GDIvp = val + grand()*sigma
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.8 .AND. val.LE.2.D0) THEN
+            IF (val.GE.0.8 .AND. val.LE.3.D0) THEN
               PEQc = 1.
-               MFPp = val
+              MFPp = val
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
