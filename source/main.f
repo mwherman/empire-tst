@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-22 16:03:17 $
-Ccc   * $Id: main.f,v 1.91 2005-05-22 16:03:17 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-23 07:14:36 $
+Ccc   * $Id: main.f,v 1.92 2005-05-23 07:14:36 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -950,7 +950,7 @@ C--------------calculate population in the energy bin ke
                   DO nejc = 1, NEJcm !over ejectiles
                      ares = A(nnuc) - AEJc(nejc)
                      zres = Z(nnuc) - ZEJc(nejc)
-C                    residual nuclei must be heavier than alpha
+C--------------------residual nuclei must be heavier than alpha
                      if(ares.le.4. and. zres.le.2.) cycle
                      izares = INT(1000.0*zres + ares)
                      CALL WHERE(izares,nnur,iloc)
@@ -993,12 +993,6 @@ C--------------------look for the discrete level with the closest spin
                         spdif = ABS(FLOAT(jcn) + HIS(nnur)
      &                          - XJLv(il,nnuc))
                         IF (spdif.EQ.spdiff) THEN
-C-----------------------below is a 2.18 version approach (straight to the level)
-C                          POPlv(il, nnuc) = POPlv(il, nnuc)
-C    &                        + POP(ke, jcn, ipar, nnuc)*ded/xnl
-C                          REClev(il, 0) = REClev(il, 0)
-C    &                        + POP(ke, jcn, ipar, nnuc)*ded/xnl
-C------------------------2.19 uses standard approach through the SCRtl matrix
                            SCRtl(il,0) = 1.0D0/xnl
                            DENhf = DENhf + SCRtl(il,0)
                            IF (IOUt.GT.1) WRITE (6,
@@ -1197,7 +1191,7 @@ C--------------(merely for checking purpose)
                      atotsp = atotsp + CSDirlev(ilev,nejc)
                   ENDDO
                ENDIF
-C              Execcution of the folowing print block is suspended (RCN)
+C--------------Execution of the folowing print block is suspended (RCN)
                IF(nnuc.eq.-1) then
                  WRITE (6,*) ' '
                  WRITE (6,*)
@@ -1326,7 +1320,7 @@ C----------------------------------------------------------------------
             DO nejc = 1, NEJcm
              ares = A(nnuc) - AEJc(nejc)
              zres = Z(nnuc) - ZEJc(nejc)
-C            residual nuclei must be heavier than alpha
+C------------residual nuclei must be heavier than alpha
              if(ares.le.4. and. zres.le.2.) cycle
              izares = INT(1000.0*zres + ares)
              CALL WHERE(izares,nnur,iloc)
@@ -1548,7 +1542,7 @@ C--------------------double the first bin x-sec to preserve integral in EMPEND
                      WRITE (12,'('' Energy    mb/MeV'')')
                      WRITE (12,*) ' '
                      IF (nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN
-                                                            ! first emission (z,a) reaction
+                                        ! first emission (z,a) reaction
                         DO il = 1, NLV(nnuc) ! MT=801,802,... (levels)
 C--------------------------Although DDX spectra are available for a-emission
 C--------------------------they are isotropic and only ang. integrated are
@@ -1589,7 +1583,8 @@ C
 C        Printing is not allowed in the following loop
 C        It is just intended to complete inclusive DDX
 C
-         IF (ENDf(nnuc).EQ.2) THEN
+C        Should be disabled MH 
+         IF (ENDf(nnuc).EQ.9) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF (POPcs(nejc,nnuc).EQ.0) CYCLE
@@ -1691,7 +1686,7 @@ C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
-            DO nejc = 0, NEJcm
+            DO nejc = 0, NEJcm  !loop over ejectiles
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
                ELSE
@@ -1714,8 +1709,7 @@ C-----------------to conserve the integral
                   CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
      &                                + CSE(icse,nejc,nnuc)*weight
 C-----------------double-differential spectra
-                  IF (nnuc.EQ.1) THEN
-                                     !CN with possibly anisotropic distr.
+                  IF (nnuc.EQ.1) THEN !CN (possibly anisotropic)
                      DO nang = 1, NDANG
                         CSEa(iccml,nang,nejc,0)
      &                     = CSEa(iccml,nang,nejc,0)
@@ -1781,7 +1775,7 @@ C-----
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-          IF (ENDf(nnuc).NE.1) CALL PRINT_RECOIL(nnuc,reactionx)
+          IF (ENDf(nnuc).EQ.2) CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C--------print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
