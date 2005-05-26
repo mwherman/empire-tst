@@ -1,6 +1,6 @@
 #!/bin/sh
 # the next line restarts using wish\
-exec wish "$0" "$@" 
+exec wish "$0" "$@"
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -10,17 +10,17 @@ if {![info exists vTcl(sourcing)]} {
 
     package require Tk
     switch $tcl_platform(platform) {
-	windows {
+       windows {
             option add *Button.padY 0
-	}
-	default {
+       }
+       default {
             option add *Scrollbar.width 10
             option add *Scrollbar.highlightThickness 0
             option add *Scrollbar.elementBorderWidth 2
             option add *Scrollbar.borderWidth 2
-	}
+       }
     }
-    
+
     # Needs Itcl
     package require Itcl
 
@@ -31,19 +31,19 @@ if {![info exists vTcl(sourcing)]} {
     package require Iwidgets
 
     switch $tcl_platform(platform) {
-	windows {
+       windows {
             option add *Pushbutton.padY         0
-	}
-	default {
-	    option add *Scrolledhtml.sbWidth    10
-	    option add *Scrolledtext.sbWidth    10
-	    option add *Scrolledlistbox.sbWidth 10
-	    option add *Scrolledframe.sbWidth   10
-	    option add *Hierarchy.sbWidth       10
+       }
+       default {
+           option add *Scrolledhtml.sbWidth    10
+           option add *Scrolledtext.sbWidth    10
+           option add *Scrolledlistbox.sbWidth 10
+           option add *Scrolledframe.sbWidth   10
+           option add *Hierarchy.sbWidth       10
             option add *Pushbutton.padY         2
         }
     }
-    
+
 }
 
 #############################################################################
@@ -537,51 +537,51 @@ proc AdjustColumns {w {height {}}} {
     upvar ::mclistbox::${w}::misc    misc
 
     if {[string length $height] == 0} {
-	set height [winfo height $widgets(text)]
+       set height [winfo height $widgets(text)]
     }
 
     # resize the height of each column so it matches the height
-    # of the text widget, minus a few pixels. 
+    # of the text widget, minus a few pixels.
     incr height -4
     foreach id $misc(columns) {
-	$widgets(frame$id) configure -height $height
+       $widgets(frame$id) configure -height $height
     }
-    
+
     # if we have a fillcolumn, change its width accordingly
     if {$options(-fillcolumn) != ""} {
 
-	# make sure the column has been defined. If not, bail (?)
-	if {![info exists widgets(frame$options(-fillcolumn))]} {
-	    return
-	}
-	set frame $widgets(frame$options(-fillcolumn))
-	set minwidth $misc(min-$frame)
+       # make sure the column has been defined. If not, bail (?)
+       if {![info exists widgets(frame$options(-fillcolumn))]} {
+           return
+       }
+       set frame $widgets(frame$options(-fillcolumn))
+       set minwidth $misc(min-$frame)
 
-	# compute current width of all columns
-	set colwidth 0
-	set col 0
-	foreach id $misc(columns) {
-	    if {![ColumnIsHidden $w $id] && $id != $options(-fillcolumn)} {
-		incr colwidth [winfo reqwidth $widgets(frame$id)]
-	    }
-	}
+       # compute current width of all columns
+       set colwidth 0
+       set col 0
+       foreach id $misc(columns) {
+           if {![ColumnIsHidden $w $id] && $id != $options(-fillcolumn)} {
+              incr colwidth [winfo reqwidth $widgets(frame$id)]
+           }
+       }
 
-	# this is just shorthand for later use...
-	set id $options(-fillcolumn)
+       # this is just shorthand for later use...
+       set id $options(-fillcolumn)
 
-	# compute optimal width
-	set optwidth [expr {[winfo width $widgets(text)] -  (2 * [$widgets(text) cget -padx])}]
+       # compute optimal width
+       set optwidth [expr {[winfo width $widgets(text)] -  (2 * [$widgets(text) cget -padx])}]
 
-	# compute the width of our fill column
-	set newwidth [expr {$optwidth - $colwidth}]
+       # compute the width of our fill column
+       set newwidth [expr {$optwidth - $colwidth}]
 
-	if {$newwidth < $minwidth} {
-	    set newwidth $minwidth
-	}
+       if {$newwidth < $minwidth} {
+           set newwidth $minwidth
+       }
 
-	# adjust the width of our fill column frame
-	$widgets(frame$id) configure -width $newwidth
-	    
+       # adjust the width of our fill column frame
+       $widgets(frame$id) configure -width $newwidth
+
     }
     InvalidateScrollbars $w
 }
@@ -597,9 +597,9 @@ proc Build {w args} {
     # variables
     namespace eval ::mclistbox::$w {
 
-	variable options
-	variable widgets
-	variable misc 
+       variable options
+       variable widgets
+       variable misc
     }
 
     # this gives us access to the namespace variables within
@@ -621,19 +621,19 @@ proc Build {w args} {
     # value is a list of length one it is an alias to another
     # option, so we just ignore it
     foreach name [array names widgetOptions] {
-	if {[llength $widgetOptions($name)] == 1} continue
-	set optName  [lindex $widgetOptions($name) 0]
-	set optClass [lindex $widgetOptions($name) 1]
-	set options($name) [option get $w $optName $optClass]
+       if {[llength $widgetOptions($name)] == 1} continue
+       set optName  [lindex $widgetOptions($name) 0]
+       set optClass [lindex $widgetOptions($name) 1]
+       set options($name) [option get $w $optName $optClass]
     }
 
     # now apply any of the options supplied on the command
     # line. This may overwrite our defaults, which is OK
     if {[llength $args] > 0} {
-	array set options $args
+       array set options $args
     }
-    
-    # the columns all go into a text widget since it has the 
+
+    # the columns all go into a text widget since it has the
     # ability to scroll.
     set widgets(text) [text $w.text  -width 0  -height 0  -padx 0  -pady 0  -wrap none  -borderwidth 0  -highlightthickness 0  -takefocus 0  -cursor {}  ]
 
@@ -642,7 +642,7 @@ proc Build {w args} {
     # here's the tricky part (shhhh... don't tell anybody!)
     # we are going to create column that completely fills
     # the base frame. We will use it to control the sizing
-    # of the widget. The trick is, we'll pack it in the frame 
+    # of the widget. The trick is, we'll pack it in the frame
     # and then place the text widget over it so it is never
     # seen.
 
@@ -652,7 +652,7 @@ proc Build {w args} {
     set widgets(hiddenLabel)   [lindex $columnWidgets 2]
 
     # by default geometry propagation is turned off, but for this
-    # super-secret widget we want it turned on. The idea is, we 
+    # super-secret widget we want it turned on. The idea is, we
     # resize the listbox which resizes the frame which resizes the
     # whole shibang.
     pack propagate $widgets(hiddenFrame) on
@@ -673,12 +673,12 @@ proc Build {w args} {
     # now, create our widget proc. Obviously (?) it goes in
     # the global namespace. All mclistbox widgets will actually
     # share the same widget proc to cut down on the amount of
-    # bloat. 
+    # bloat.
     proc ::$w {command args}  "eval ::mclistbox::WidgetProc {$w} \$command \$args"
 
-    # ok, the thing exists... let's do a bit more configuration. 
+    # ok, the thing exists... let's do a bit more configuration.
     if {[catch "Configure $widgets(this) [array get options]" error]} {
-	catch {destroy $w}
+       catch {destroy $w}
     }
 
     # and be prepared to handle selections.. (this, for -exportselection
@@ -700,114 +700,114 @@ proc Canonize {w object opt} {
     variable labelCommands
 
     switch $object {
-	command {
-	    if {[lsearch -exact $widgetCommands $opt] >= 0} {
-		return $opt
-	    }
+       command {
+           if {[lsearch -exact $widgetCommands $opt] >= 0} {
+              return $opt
+           }
 
-	    # command names aren't stored in an array, and there
-	    # isn't a way to get all the matches in a list, so
-	    # we'll stuff the columns in a temporary array so
-	    # we can use [array names]
-	    set list $widgetCommands
-	    foreach element $list {
-		set tmp($element) ""
-	    }
-	    set matches [array names tmp ${opt}*]
-	}
+           # command names aren't stored in an array, and there
+           # isn't a way to get all the matches in a list, so
+           # we'll stuff the columns in a temporary array so
+           # we can use [array names]
+           set list $widgetCommands
+           foreach element $list {
+              set tmp($element) ""
+           }
+           set matches [array names tmp ${opt}*]
+       }
 
-	{label command} {
-	    if {[lsearch -exact $labelCommands $opt] >= 0} {
-		return $opt
-	    }
+       {label command} {
+           if {[lsearch -exact $labelCommands $opt] >= 0} {
+              return $opt
+           }
 
-	    # command names aren't stored in an array, and there
-	    # isn't a way to get all the matches in a list, so
-	    # we'll stuff the columns in a temporary array so
-	    # we can use [array names]
-	    set list $labelCommands
-	    foreach element $list {
-		set tmp($element) ""
-	    }
-	    set matches [array names tmp ${opt}*]
-	}
+           # command names aren't stored in an array, and there
+           # isn't a way to get all the matches in a list, so
+           # we'll stuff the columns in a temporary array so
+           # we can use [array names]
+           set list $labelCommands
+           foreach element $list {
+              set tmp($element) ""
+           }
+           set matches [array names tmp ${opt}*]
+       }
 
-	{column command} {
-	    if {[lsearch -exact $columnCommands $opt] >= 0} {
-		return $opt
-	    }
+       {column command} {
+           if {[lsearch -exact $columnCommands $opt] >= 0} {
+              return $opt
+           }
 
-	    # command names aren't stored in an array, and there
-	    # isn't a way to get all the matches in a list, so
-	    # we'll stuff the columns in a temporary array so
-	    # we can use [array names]
-	    set list $columnCommands
-	    foreach element $list {
-		set tmp($element) ""
-	    }
-	    set matches [array names tmp ${opt}*]
-	}
+           # command names aren't stored in an array, and there
+           # isn't a way to get all the matches in a list, so
+           # we'll stuff the columns in a temporary array so
+           # we can use [array names]
+           set list $columnCommands
+           foreach element $list {
+              set tmp($element) ""
+           }
+           set matches [array names tmp ${opt}*]
+       }
 
-	option {
-	    if {[info exists widgetOptions($opt)]  && [llength $widgetOptions($opt)] == 3} {
-		return $opt
-	    }
-	    set list [array names widgetOptions]
-	    set matches [array names widgetOptions ${opt}*]
-	}
+       option {
+           if {[info exists widgetOptions($opt)]  && [llength $widgetOptions($opt)] == 3} {
+              return $opt
+           }
+           set list [array names widgetOptions]
+           set matches [array names widgetOptions ${opt}*]
+       }
 
-	{column option} {
-	    if {[info exists columnOptions($opt)]} {
-		return $opt
-	    }
-	    set list [array names columnOptions]
-	    set matches [array names columnOptions ${opt}*]
-	}
+       {column option} {
+           if {[info exists columnOptions($opt)]} {
+              return $opt
+           }
+           set list [array names columnOptions]
+           set matches [array names columnOptions ${opt}*]
+       }
 
-	column {
-	    upvar ::mclistbox::${w}::misc    misc
+       column {
+           upvar ::mclistbox::${w}::misc    misc
 
-	    if {[lsearch -exact $misc(columns) $opt] != -1} {
-		return $opt
-	    }
-	    
-	    # column names aren't stored in an array, and there
-	    # isn't a way to get all the matches in a list, so
-	    # we'll stuff the columns in a temporary array so
-	    # we can use [array names]
-	    set list $misc(columns)
-	    foreach element $misc(columns) {
-		set tmp($element) ""
-	    }
-	    set matches [array names tmp ${opt}*]
-	}
+           if {[lsearch -exact $misc(columns) $opt] != -1} {
+              return $opt
+           }
+
+           # column names aren't stored in an array, and there
+           # isn't a way to get all the matches in a list, so
+           # we'll stuff the columns in a temporary array so
+           # we can use [array names]
+           set list $misc(columns)
+           foreach element $misc(columns) {
+              set tmp($element) ""
+           }
+           set matches [array names tmp ${opt}*]
+       }
     }
     if {[llength $matches] == 0} {
-	set choices [HumanizeList $list]
-	return -code error "unknown $object \"$opt\"; must be one of $choices"
+       set choices [HumanizeList $list]
+       return -code error "unknown $object \"$opt\"; must be one of $choices"
 
     } elseif {[llength $matches] == 1} {
-	# deal with option aliases
-	set opt [lindex $matches 0]
-	switch $object {
-	    option {
-		if {[llength $widgetOptions($opt)] == 1} {
-		    set opt $widgetOptions($opt)
-		}
-	    }
+       # deal with option aliases
+       set opt [lindex $matches 0]
+       switch $object {
+           option {
+              if {[llength $widgetOptions($opt)] == 1} {
+                  set opt $widgetOptions($opt)
+              }
+           }
 
-	    {column option} {
-		if {[llength $columnOptions($opt)] == 1} {
-		    set opt $columnOptions($opt)
-		}
-	    }
-	}
+           {column option} {
+              if {[llength $columnOptions($opt)] == 1} {
+                  set opt $columnOptions($opt)
+              }
+           }
+       }
 
-	return $opt
+       return $opt
 
     } else {
-	set choices [HumanizeList $list]
-	return -code error "ambiguous $object \"$opt\"; must be one of $choices"
+       set choices [HumanizeList $list]
+       return -code error "ambiguous $object \"$opt\"; must be one of $choices"
     }
 }
 }
@@ -839,12 +839,12 @@ proc Column-add {w args} {
     # if the first argument doesn't have a "-" as the first
     # character, it is an id to associate with this column
     if {![string match {-*} [lindex $args 0]]} {
-	# the first arg must be an id.
-	set id [lindex $args 0]
-	set args [lrange $args 1 end]
-	if {[lsearch -exact $misc(columns) $id] != -1} {
-	    return -code error "column \"$id\" already exists"
-	}
+       # the first arg must be an id.
+       set id [lindex $args 0]
+       set args [lrange $args 1 end]
+       if {[lsearch -exact $misc(columns) $id] != -1} {
+           return -code error "column \"$id\" already exists"
+       }
     }
 
     # define some reasonable defaults, then add any specific
@@ -862,21 +862,21 @@ proc Column-add {w args} {
     set opts(-label)      $id
 
     if {[expr {[llength $args]%2}] == 1} {
-	# hmmm. An odd number of elements in args
-	# if the last item is a valid option we'll give a different
-	# error than if its not
-	set option [::mclistbox::Canonize $w "column option" [lindex $args end]]
-	return -code error "value for \"[lindex $args end]\" missing"
+       # hmmm. An odd number of elements in args
+       # if the last item is a valid option we'll give a different
+       # error than if its not
+       set option [::mclistbox::Canonize $w "column option" [lindex $args end]]
+       return -code error "value for \"[lindex $args end]\" missing"
     }
     array set opts $args
 
     # figure out if we have any data in the listbox yet; we'll need
     # this information in a minute...
     if {[llength $misc(columns)] > 0} {
-	set col0 [lindex $misc(columns) 0]
-	set existingRows [$widgets(listbox$col0) size]
+       set col0 [lindex $misc(columns) 0]
+       set existingRows [$widgets(listbox$col0) size]
     } else {
-	set existingRows 0
+       set existingRows 0
     }
 
     # create the widget and assign the associated paths to our array
@@ -885,7 +885,7 @@ proc Column-add {w args} {
     set widgets(frame$id)   [lindex $widgetlist 0]
     set widgets(listbox$id) [lindex $widgetlist 1]
     set widgets(label$id)   [lindex $widgetlist 2]
-    
+
     # add this column to the list of known columns
     lappend misc(columns) $id
 
@@ -897,11 +897,11 @@ proc Column-add {w args} {
     # add a corresponding number of blank items. At least, I *think*
     # that's the right thing to do.
     if {$existingRows > 0} {
-	set blanks {}
-	for {set i 0} {$i < $existingRows} {incr i} {
-	    lappend blanks {}
-	}
-	eval {$widgets(listbox$id)} insert end $blanks
+       set blanks {}
+       for {set i 0} {$i < $existingRows} {incr i} {
+           lappend blanks {}
+       }
+       eval {$widgets(listbox$id)} insert end $blanks
     }
 
     InvalidateScrollbars $w
@@ -929,158 +929,158 @@ proc Column-configure {w id args} {
     set label   $widgets(label$id)
 
     if {[llength $args] == 0} {
-	# hmmm. User must be wanting all configuration information
-	# note that if the value of an array element is of length
-	# one it is an alias, which needs to be handled slightly
-	# differently
-	set results {}
-	foreach opt [lsort [array names columnOptions]] {
-	    if {[llength $columnOptions($opt)] == 1} {
-		set alias $columnOptions($opt)
-		set optName $columnOptions($alias)
-		lappend results [list $opt $optName]
-	    } else {
-		set optName  [lindex $columnOptions($opt) 0]
-		set optClass [lindex $columnOptions($opt) 1]
-		set default [option get $frame $optName $optClass]
-		lappend results [list $opt $optName $optClass  $default $options($id:$opt)]
-	    }
-	}
+       # hmmm. User must be wanting all configuration information
+       # note that if the value of an array element is of length
+       # one it is an alias, which needs to be handled slightly
+       # differently
+       set results {}
+       foreach opt [lsort [array names columnOptions]] {
+           if {[llength $columnOptions($opt)] == 1} {
+              set alias $columnOptions($opt)
+              set optName $columnOptions($alias)
+              lappend results [list $opt $optName]
+           } else {
+              set optName  [lindex $columnOptions($opt) 0]
+              set optClass [lindex $columnOptions($opt) 1]
+              set default [option get $frame $optName $optClass]
+              lappend results [list $opt $optName $optClass  $default $options($id:$opt)]
+           }
+       }
 
-	return $results
+       return $results
 
 
     } elseif {[llength $args] == 1} {
 
-	# the user must be querying something... I need to get this
-	# to return a bona fide list like the "real" configure 
-	# command, but it's not a priority at the moment. I still
-	# have to work on the option database support foo.
-	set option [::mclistbox::Canonize $w "column option" [lindex $args 0]]
+       # the user must be querying something... I need to get this
+       # to return a bona fide list like the "real" configure
+       # command, but it's not a priority at the moment. I still
+       # have to work on the option database support foo.
+       set option [::mclistbox::Canonize $w "column option" [lindex $args 0]]
 
-	set value $options($id:$option)
-	set optName  [lindex $columnOptions($option) 0]
-	set optClass [lindex $columnOptions($option) 1]
-	set default  [option get $frame $optName $optClass]
-	set results  [list $option $optName $optClass $default $value]
-	return $results
+       set value $options($id:$option)
+       set optName  [lindex $columnOptions($option) 0]
+       set optClass [lindex $columnOptions($option) 1]
+       set default  [option get $frame $optName $optClass]
+       set results  [list $option $optName $optClass $default $value]
+       return $results
 
     }
 
-    # if we have an odd number of values, bail. 
+    # if we have an odd number of values, bail.
     if {[expr {[llength $args]%2}] == 1} {
-	# hmmm. An odd number of elements in args
-	return -code error "value for \"[lindex $args end]\" missing"
+       # hmmm. An odd number of elements in args
+       return -code error "value for \"[lindex $args end]\" missing"
     }
-    
-    # Great. An even number of options. Let's make sure they 
+
+    # Great. An even number of options. Let's make sure they
     # are all valid before we do anything. Note that Canonize
     # will generate an error if it finds a bogus option; otherwise
     # it returns the canonical option name
     foreach {name value} $args {
-	set name [::mclistbox::Canonize $w "column option" $name]
-	set opts($name) $value
+       set name [::mclistbox::Canonize $w "column option" $name]
+       set opts($name) $value
     }
 
     # if we get to here, the user is wanting to set some options
     foreach option [array names opts] {
-	set value $opts($option)
-	set options($id:$option) $value
+       set value $opts($option)
+       set options($id:$option) $value
 
-	switch -- $option {
-	    -label {
-		$label configure -text $value
-	    }
-	    
-	    -image -
-	    -bitmap {
-		$label configure $option $value
-	    }
+       switch -- $option {
+           -label {
+              $label configure -text $value
+           }
 
-	    -width {
-		set font [$listbox cget -font]
-		set factor [font measure $options(-font) "0"]
-		set width [expr {$value * $factor}]
+           -image -
+           -bitmap {
+              $label configure $option $value
+           }
 
-		$widgets(frame$id) configure -width $width
-		set misc(min-$widgets(frame$id)) $width
-		AdjustColumns $w
-	    }
-	    -font -
-	    -foreground -
-	    -background {
-		if {[string length $value] == 0} {set value $options($option)}
-		$listbox configure $option $value
-	    }
+           -width {
+              set font [$listbox cget -font]
+              set factor [font measure $options(-font) "0"]
+              set width [expr {$value * $factor}]
 
-	    -labelrelief {
-		$widgets(label$id) configure -relief $value
-	    }
+              $widgets(frame$id) configure -width $width
+              set misc(min-$widgets(frame$id)) $width
+              AdjustColumns $w
+           }
+           -font -
+           -foreground -
+           -background {
+              if {[string length $value] == 0} {set value $options($option)}
+              $listbox configure $option $value
+           }
 
-	    -resizable {
-		if {[catch {
-		    if {$value} {
-			set options($id:-resizable) 1
-		    } else {
-			set options($id:-resizable) 0
-		    }
-		} msg]} {
-		    return -code error "expected boolean but got \"$value\""
-		}
-	    }
+           -labelrelief {
+              $widgets(label$id) configure -relief $value
+           }
 
-	    -visible {
-		if {[catch {
-		    if {$value} {
-			set options($id:-visible) 1
-			$widgets(text) configure -state normal
-			$widgets(text) window configure 1.$index -window $frame
-			$widgets(text) configure -state disabled
+           -resizable {
+              if {[catch {
+                  if {$value} {
+                     set options($id:-resizable) 1
+                  } else {
+                     set options($id:-resizable) 0
+                  }
+              } msg]} {
+                  return -code error "expected boolean but got \"$value\""
+              }
+           }
 
-		    } else {
-			set options($id:-visible) 0
-			$widgets(text) configure -state normal
-			$widgets(text) window configure 1.$index -window {}
-			$widgets(text) configure -state disabled
-		    }
-		    InvalidateScrollbars $w
-		} msg]} {
-		    return -code error "expected boolean but got \"$value\""
-		}
+           -visible {
+              if {[catch {
+                  if {$value} {
+                     set options($id:-visible) 1
+                     $widgets(text) configure -state normal
+                     $widgets(text) window configure 1.$index -window $frame
+                     $widgets(text) configure -state disabled
 
-	    }
+                  } else {
+                     set options($id:-visible) 0
+                     $widgets(text) configure -state normal
+                     $widgets(text) window configure 1.$index -window {}
+                     $widgets(text) configure -state disabled
+                  }
+                  InvalidateScrollbars $w
+              } msg]} {
+                  return -code error "expected boolean but got \"$value\""
+              }
 
-	    -position {
-		if {[string compare $value "start"] == 0} {
-		    set position 0
+           }
 
-		} elseif {[string compare $value "end"] == 0} {
+           -position {
+              if {[string compare $value "start"] == 0} {
+                  set position 0
 
-		    set position [expr {[llength $misc(columns)] -1}]
-		} else {
+              } elseif {[string compare $value "end"] == 0} {
 
-		    # ought to check for a legal value here, but I'm 
-		    # lazy
-		    set position $value
-		}
+                  set position [expr {[llength $misc(columns)] -1}]
+              } else {
 
-		if {$position >= [llength $misc(columns)]} {
-		    set max [expr {[llength $misc(columns)] -1}]
-		    return -code error "bad position; must be in the range of 0-$max"
-		}
+                  # ought to check for a legal value here, but I'm
+                  # lazy
+                  set position $value
+              }
 
-		# rearrange misc(columns) to reflect the new ordering
-		set current [lsearch -exact $misc(columns) $id]
-		set misc(columns) [lreplace $misc(columns) $current $current]
-		set misc(columns) [linsert $misc(columns) $position $id]
-		
-		set frame $widgets(frame$id)
-		$widgets(text) configure -state normal
-		$widgets(text) window create 1.$position  -window $frame -stretch 1
-		$widgets(text) configure -state disabled
- 	    }
+              if {$position >= [llength $misc(columns)]} {
+                  set max [expr {[llength $misc(columns)] -1}]
+                  return -code error "bad position; must be in the range of 0-$max"
+              }
 
-	}
+              # rearrange misc(columns) to reflect the new ordering
+              set current [lsearch -exact $misc(columns) $id]
+              set misc(columns) [lreplace $misc(columns) $current $current]
+              set misc(columns) [linsert $misc(columns) $position $id]
+
+              set frame $widgets(frame$id)
+              $widgets(text) configure -state normal
+              $widgets(text) window create 1.$position  -window $frame -stretch 1
+              $widgets(text) configure -state disabled
+           }
+
+       }
     }
 }
 }
@@ -1091,18 +1091,18 @@ namespace eval ::mclistbox {
 proc ColumnIsHidden {w id} {
     upvar ::mclistbox::${w}::widgets widgets
     upvar ::mclistbox::${w}::misc    misc
-    
+
     set retval 1
     set col [lsearch -exact $misc(columns) $id]
 
     if {$col != ""} {
-	set index "1.$col"
-	catch {
-	    set window [$widgets(text) window cget $index -window]
-	    if {[string length $window] > 0 && [winfo exists $window]} {
-		set retval 0
-	    }
-	}
+       set index "1.$col"
+       catch {
+           set window [$widgets(text) window cget $index -window]
+           if {[string length $window] > 0 && [winfo exists $window]} {
+              set retval 0
+           }
+       }
     }
     return $retval
 }
@@ -1117,228 +1117,228 @@ proc Configure {w args} {
     upvar ::mclistbox::${w}::widgets widgets
     upvar ::mclistbox::${w}::options options
     upvar ::mclistbox::${w}::misc    misc
-    
-    if {[llength $args] == 0} {
-	# hmmm. User must be wanting all configuration information
-	# note that if the value of an array element is of length
-	# one it is an alias, which needs to be handled slightly
-	# differently
-	set results {}
-	foreach opt [lsort [array names widgetOptions]] {
-	    if {[llength $widgetOptions($opt)] == 1} {
-		set alias $widgetOptions($opt)
-		set optName $widgetOptions($alias)
-		lappend results [list $opt $optName]
-	    } else {
-		set optName  [lindex $widgetOptions($opt) 0]
-		set optClass [lindex $widgetOptions($opt) 1]
-		set default [option get $w $optName $optClass]
-		lappend results [list $opt $optName $optClass  $default $options($opt)]
-	    }
-	}
 
-	return $results
+    if {[llength $args] == 0} {
+       # hmmm. User must be wanting all configuration information
+       # note that if the value of an array element is of length
+       # one it is an alias, which needs to be handled slightly
+       # differently
+       set results {}
+       foreach opt [lsort [array names widgetOptions]] {
+           if {[llength $widgetOptions($opt)] == 1} {
+              set alias $widgetOptions($opt)
+              set optName $widgetOptions($alias)
+              lappend results [list $opt $optName]
+           } else {
+              set optName  [lindex $widgetOptions($opt) 0]
+              set optClass [lindex $widgetOptions($opt) 1]
+              set default [option get $w $optName $optClass]
+              lappend results [list $opt $optName $optClass  $default $options($opt)]
+           }
+       }
+
+       return $results
     }
-    
+
     # one argument means we are looking for configuration
     # information on a single option
     if {[llength $args] == 1} {
-	set opt [::mclistbox::Canonize $w option [lindex $args 0]]
+       set opt [::mclistbox::Canonize $w option [lindex $args 0]]
 
-	set optName  [lindex $widgetOptions($opt) 0]
-	set optClass [lindex $widgetOptions($opt) 1]
-	set default [option get $w $optName $optClass]
-	set results [list $opt $optName $optClass  $default $options($opt)]
-	return $results
+       set optName  [lindex $widgetOptions($opt) 0]
+       set optClass [lindex $widgetOptions($opt) 1]
+       set default [option get $w $optName $optClass]
+       set results [list $opt $optName $optClass  $default $options($opt)]
+       return $results
     }
 
-    # if we have an odd number of values, bail. 
+    # if we have an odd number of values, bail.
     if {[expr {[llength $args]%2}] == 1} {
-	# hmmm. An odd number of elements in args
-	return -code error "value for \"[lindex $args end]\" missing"
+       # hmmm. An odd number of elements in args
+       return -code error "value for \"[lindex $args end]\" missing"
     }
-    
-    # Great. An even number of options. Let's make sure they 
+
+    # Great. An even number of options. Let's make sure they
     # are all valid before we do anything. Note that Canonize
     # will generate an error if it finds a bogus option; otherwise
     # it returns the canonical option name
     foreach {name value} $args {
-	set name [::mclistbox::Canonize $w option $name]
-	set opts($name) $value
+       set name [::mclistbox::Canonize $w option $name]
+       set opts($name) $value
     }
 
     # process all of the configuration options
     foreach option [array names opts] {
 
-	set newValue $opts($option)
-	if {[info exists options($option)]} {
-	    set oldValue $options($option)
-#	    set options($option) $newValue
-	}
+       set newValue $opts($option)
+       if {[info exists options($option)]} {
+           set oldValue $options($option)
+#          set options($option) $newValue
+       }
 
-	switch -- $option {
-	    -exportselection {
-		if {$newValue} {
-		    SelectionHandler $w own
-		    set options($option) 1
-		} else {
-		    set options($option) 0
-		}
-	    }
+       switch -- $option {
+           -exportselection {
+              if {$newValue} {
+                  SelectionHandler $w own
+                  set options($option) 1
+              } else {
+                  set options($option) 0
+              }
+           }
 
-	    -fillcolumn {
-		# if the fill column changed, we need to adjust
-		# the columns.
-		AdjustColumns $w
-		set options($option) $newValue
-	    }
+           -fillcolumn {
+              # if the fill column changed, we need to adjust
+              # the columns.
+              AdjustColumns $w
+              set options($option) $newValue
+           }
 
-	    -takefocus {
-		$widgets(frame) configure -takefocus $newValue
-		set options($option) [$widgets(frame) cget $option]
-	    }
+           -takefocus {
+              $widgets(frame) configure -takefocus $newValue
+              set options($option) [$widgets(frame) cget $option]
+           }
 
-	    -background {
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) configure -background $newValue
-		    $widgets(frame$id) configure   -background $newValue
-		}
-		$widgets(frame) configure -background $newValue
+           -background {
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) configure -background $newValue
+                  $widgets(frame$id) configure   -background $newValue
+              }
+              $widgets(frame) configure -background $newValue
 
-		$widgets(text) configure -background $newValue
-		set options($option) [$widgets(frame) cget $option]
-	    }
+              $widgets(text) configure -background $newValue
+              set options($option) [$widgets(frame) cget $option]
+           }
 
-	    # { the following all must be applied to each listbox }
-	    -foreground -
-	    -font -
-	    -selectborderwidth -
-	    -selectforeground -
-	    -selectbackground -
-	    -setgrid {
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) configure $option $newValue
-		}
-		$widgets(hiddenListbox) configure $option $newValue
-		set options($option) [$widgets(hiddenListbox) cget $option]
-	    }
+           # { the following all must be applied to each listbox }
+           -foreground -
+           -font -
+           -selectborderwidth -
+           -selectforeground -
+           -selectbackground -
+           -setgrid {
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) configure $option $newValue
+              }
+              $widgets(hiddenListbox) configure $option $newValue
+              set options($option) [$widgets(hiddenListbox) cget $option]
+           }
 
-	    # { the following all must be applied to each listbox and frame }
-	    -cursor {
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) configure $option $newValue
-		    $widgets(frame$id) configure -cursor $newValue
-		}
+           # { the following all must be applied to each listbox and frame }
+           -cursor {
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) configure $option $newValue
+                  $widgets(frame$id) configure -cursor $newValue
+              }
 
-		# -cursor also needs to be applied to the 
-		# frames of each column
-		foreach id $misc(columns) {
-		    $widgets(frame$id) configure -cursor $newValue
-		}
+              # -cursor also needs to be applied to the
+              # frames of each column
+              foreach id $misc(columns) {
+                  $widgets(frame$id) configure -cursor $newValue
+              }
 
-		$widgets(hiddenListbox) configure $option $newValue
-		set options($option) [$widgets(hiddenListbox) cget $option]
-	    }
+              $widgets(hiddenListbox) configure $option $newValue
+              set options($option) [$widgets(hiddenListbox) cget $option]
+           }
 
-	    # { this just requires to pack or unpack the labels }
-	    -labels {
-		if {$newValue} {
-		    set newValue 1
-		    foreach id $misc(columns) {
-			pack $widgets(label$id)  -side top -fill x -expand n  -before $widgets(listbox$id)
-		    }
-		    pack $widgets(hiddenLabel)  -side top -fill x -expand n  -before $widgets(hiddenListbox)
+           # { this just requires to pack or unpack the labels }
+           -labels {
+              if {$newValue} {
+                  set newValue 1
+                  foreach id $misc(columns) {
+                     pack $widgets(label$id)  -side top -fill x -expand n  -before $widgets(listbox$id)
+                  }
+                  pack $widgets(hiddenLabel)  -side top -fill x -expand n  -before $widgets(hiddenListbox)
 
-		} else {
-		    set newValue 
-		    foreach id $misc(columns) {
-			pack forget $widgets(label$id)
-		    }
-		    pack forget $widgets(hiddenLabel)
-		}
-		set options($option) $newValue
-	    }
+              } else {
+                  set newValue
+                  foreach id $misc(columns) {
+                     pack forget $widgets(label$id)
+                  }
+                  pack forget $widgets(hiddenLabel)
+              }
+              set options($option) $newValue
+           }
 
-	    -height {
-		$widgets(hiddenListbox) configure -height $newValue
-		InvalidateScrollbars $w
-		set options($option) [$widgets(hiddenListbox) cget $option]
-	    }
+           -height {
+              $widgets(hiddenListbox) configure -height $newValue
+              InvalidateScrollbars $w
+              set options($option) [$widgets(hiddenListbox) cget $option]
+           }
 
-	    -width {
-		if {$newValue == 0} {
-		    return -code error "a -width of zero is not supported. "
-		}
+           -width {
+              if {$newValue == 0} {
+                  return -code error "a -width of zero is not supported. "
+              }
 
-		$widgets(hiddenListbox) configure -width $newValue
-		InvalidateScrollbars $w
-		set options($option) [$widgets(hiddenListbox) cget $option]
-	    }
+              $widgets(hiddenListbox) configure -width $newValue
+              InvalidateScrollbars $w
+              set options($option) [$widgets(hiddenListbox) cget $option]
+           }
 
-	    # { the following all must be applied to each column frame }
-	    -columnborderwidth -
-	    -columnrelief {
-		regsub {column} $option {} listboxoption
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) configure $listboxoption $newValue
-		}
-		$widgets(hiddenListbox) configure $listboxoption $newValue
-		set options($option) [$widgets(hiddenListbox) cget  $listboxoption]
-	    }
+           # { the following all must be applied to each column frame }
+           -columnborderwidth -
+           -columnrelief {
+              regsub {column} $option {} listboxoption
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) configure $listboxoption $newValue
+              }
+              $widgets(hiddenListbox) configure $listboxoption $newValue
+              set options($option) [$widgets(hiddenListbox) cget  $listboxoption]
+           }
 
-	    -resizablecolumns {
-		if {$newValue} {
-		    set options($option) 1
-		} else {
-		    set options($option) 0
-		}
-	    }
-	    
-	    # { the following all must be applied to each column header }
-	    -labelimage -
-	    -labelheight -
-	    -labelrelief -
-	    -labelfont -
-	    -labelanchor -
-	    -labelbackground -
-	    -labelforeground -
-	    -labelborderwidth {
-		regsub {label} $option {} labeloption
-		foreach id $misc(columns) {
-		    $widgets(label$id) configure $labeloption $newValue
-		}
-		$widgets(hiddenLabel) configure $labeloption $newValue
-		set options($option) [$widgets(hiddenLabel) cget $labeloption]
-	    }
+           -resizablecolumns {
+              if {$newValue} {
+                  set options($option) 1
+              } else {
+                  set options($option) 0
+              }
+           }
 
-	    # { the following apply only to the topmost frame}
-	    -borderwidth -
-	    -highlightthickness -
-	    -highlightcolor -
-	    -highlightbackground -
-	    -relief {
-		$widgets(frame) configure $option $newValue
-		set options($option) [$widgets(frame) cget $option]
-	    }
+           # { the following all must be applied to each column header }
+           -labelimage -
+           -labelheight -
+           -labelrelief -
+           -labelfont -
+           -labelanchor -
+           -labelbackground -
+           -labelforeground -
+           -labelborderwidth {
+              regsub {label} $option {} labeloption
+              foreach id $misc(columns) {
+                  $widgets(label$id) configure $labeloption $newValue
+              }
+              $widgets(hiddenLabel) configure $labeloption $newValue
+              set options($option) [$widgets(hiddenLabel) cget $labeloption]
+           }
 
-	    -selectmode {
-		set options($option) $newValue
-	    }
+           # { the following apply only to the topmost frame}
+           -borderwidth -
+           -highlightthickness -
+           -highlightcolor -
+           -highlightbackground -
+           -relief {
+              $widgets(frame) configure $option $newValue
+              set options($option) [$widgets(frame) cget $option]
+           }
 
-	    -selectcommand {
-		set options($option) $newValue
-	    }
+           -selectmode {
+              set options($option) $newValue
+           }
 
-	    -xscrollcommand {
-		InvalidateScrollbars $w
-		set options($option) $newValue
-	    }
+           -selectcommand {
+              set options($option) $newValue
+           }
 
-	    -yscrollcommand {
-		InvalidateScrollbars $w
-		set options($option) $newValue
-	    }
-	}
+           -xscrollcommand {
+              InvalidateScrollbars $w
+              set options($option) $newValue
+           }
+
+           -yscrollcommand {
+              InvalidateScrollbars $w
+              set options($option) $newValue
+           }
+       }
     }
 }
 }
@@ -1350,19 +1350,19 @@ proc DestroyHandler {w} {
 
     # kill off any idle event we might have pending
     if {[info exists ::mclistbox::${w}::misc(afterid)]} {
-	catch {
-	    after cancel $::mclistbox::${w}::misc(afterid)
-	    unset ::mclistbox::${w}::misc(afterid)
-	}
+       catch {
+           after cancel $::mclistbox::${w}::misc(afterid)
+           unset ::mclistbox::${w}::misc(afterid)
+       }
     }
 
     # if the widget actually being destroyed is of class Mclistbox,
-    # crush the namespace and kill the proc. Get it? Crush. Kill. 
+    # crush the namespace and kill the proc. Get it? Crush. Kill.
     # Destroy. Heh. Danger Will Robinson! Oh, man! I'm so funny it
     # brings tears to my eyes.
     if {[string compare [winfo class $w] "Mclistbox"] == 0} {
-	namespace delete ::mclistbox::$w
-	rename $w {}
+       namespace delete ::mclistbox::$w
+       rename $w {}
     }
 
 }
@@ -1378,20 +1378,20 @@ proc FindResizableNeighbor {w id {direction right}} {
 
 
     if {$direction == "right"} {
-	set incr 1
-	set stop [llength $misc(columns)]
-	set start [expr {[lsearch -exact $misc(columns) $id] + 1}]
+       set incr 1
+       set stop [llength $misc(columns)]
+       set start [expr {[lsearch -exact $misc(columns) $id] + 1}]
     } else {
-	set incr -1
-	set stop -1
-	set start [expr {[lsearch -exact $misc(columns) $id] - 1}]
-    } 
+       set incr -1
+       set stop -1
+       set start [expr {[lsearch -exact $misc(columns) $id] - 1}]
+    }
 
     for {set i $start} {$i != $stop} {incr i $incr} {
-	set col [lindex $misc(columns) $i]
-	if {![ColumnIsHidden $w $col] && $options($col:-resizable)} {
-	    return $col
-	}
+       set col [lindex $misc(columns) $i]
+       if {![ColumnIsHidden $w $col] && $options($col:-resizable)} {
+           return $col
+       }
     }
     return ""
 }
@@ -1403,14 +1403,14 @@ namespace eval ::mclistbox {
 proc HumanizeList {list} {
 
     if {[llength $list] == 1} {
-	return [lindex $list 0]
+       return [lindex $list 0]
     } else {
-	set list [lsort $list]
-	set secondToLast [expr {[llength $list] -2}]
-	set most [lrange $list 0 $secondToLast]
-	set last [lindex $list end]
+       set list [lsort $list]
+       set secondToLast [expr {[llength $list] -2}]
+       set most [lrange $list 0 $secondToLast]
+       set last [lindex $list end]
 
-	return "[join $most {, }] or $last"
+       return "[join $most {, }] or $last"
     }
 }
 }
@@ -1434,16 +1434,16 @@ proc Init {} {
 
     array set widgetOptions [list  -background          {background          Background}  -bd                  -borderwidth  -bg                  -background  -borderwidth         {borderWidth         BorderWidth}  -columnbd            -columnborderwidth  -columnborderwidth   {columnBorderWidth   BorderWidth}  -columnrelief        {columnRelief        Relief}  -cursor              {cursor              Cursor}  -exportselection     {exportSelection     ExportSelection}  -fg                  -foreground  -fillcolumn          {fillColumn          FillColumn}  -font                {font                Font}  -foreground          {foreground          Foreground}  -height              {height              Height}  -highlightbackground {highlightBackground HighlightBackground}  -highlightcolor      {highlightColor      HighlightColor}  -highlightthickness  {highlightThickness  HighlightThickness}  -labelanchor         {labelAnchor         Anchor}  -labelbackground     {labelBackground     Background}  -labelbd             -labelborderwidth  -labelbg             -labelbackground  -labelborderwidth    {labelBorderWidth    BorderWidth}  -labelfg             -labelforeground  -labelfont           {labelFont           Font}  -labelforeground     {labelForeground     Foreground}  -labelheight         {labelHeight         Height}  -labelimage          {labelImage          Image}  -labelrelief         {labelRelief         Relief}  -labels              {labels              Labels}  -relief              {relief              Relief}  -resizablecolumns    {resizableColumns    ResizableColumns}  -selectbackground    {selectBackground    Foreground}  -selectborderwidth   {selectBorderWidth   BorderWidth}  -selectcommand       {selectCommand       Command}  -selectforeground    {selectForeground    Background}  -selectmode          {selectMode          SelectMode}  -setgrid             {setGrid             SetGrid}  -takefocus           {takeFocus           TakeFocus}  -width               {width               Width}  -xscrollcommand      {xScrollCommand      ScrollCommand}  -yscrollcommand      {yScrollCommand      ScrollCommand}  ]
 
-    # and likewise for column-specific stuff. 
-    array set columnOptions [list  -background         {background           Background}  -bitmap		{bitmap               Bitmap}  -font               {font                 Font}  -foreground         {foreground           Foreground}  -image              {image                Image}  -label 		{label                Label}  -position           {position             Position}  -labelrelief        {labelrelief          Labelrelief}  -resizable          {resizable            Resizable}  -visible            {visible              Visible}  -width              {width                Width}  ]
+    # and likewise for column-specific stuff.
+    array set columnOptions [list  -background         {background           Background}  -bitmap        {bitmap               Bitmap}  -font               {font                 Font}  -foreground         {foreground           Foreground}  -image              {image                Image}  -label            {label                Label}  -position           {position             Position}  -labelrelief        {labelrelief          Labelrelief}  -resizable          {resizable            Resizable}  -visible            {visible              Visible}  -width              {width                Width}  ]
 
-    # and likewise for item-specific stuff. 
+    # and likewise for item-specific stuff.
     array set itemConfigureOptions [list  -background         {background           Background}  -foreground         {foreground           Foreground}  -selectbackground   {selectbackground     SelectBackground}  -selectforeground   {selectforeground     SelectForeground}  ]
-	    
+
     # this defines the valid widget commands. It's important to
     # list them here; we use this list to validate commands and
     # expand abbreviations.
-    set widgetCommands [list  activate	 bbox       cget     column    configure   curselection delete     get      index     insert	itemconfigure  label        nearest    scan     see       selection   size         xview      yview
+    set widgetCommands [list  activate     bbox       cget     column    configure   curselection delete     get      index     insert      itemconfigure  label        nearest    scan     see       selection   size         xview      yview
     ]
 
     set columnCommands [list add cget configure delete names nearest]
@@ -1451,80 +1451,80 @@ proc Init {} {
 
     ######################################################################
     #- this initializes the option database. Kinda gross, but it works
-    #- (I think). 
+    #- (I think).
     ######################################################################
 
     set packages [package names]
 
-    # why check for the Tk package? This lets us be sourced into 
+    # why check for the Tk package? This lets us be sourced into
     # an interpreter that doesn't have Tk loaded, such as the slave
     # interpreter used by pkg_mkIndex. In theory it should have no
-    # side effects when run 
+    # side effects when run
     if {[lsearch -exact [package names] "Tk"] != -1} {
 
-	# compute a widget name we can use to create a temporary widget
-	set tmpWidget ".__tmp__"
-	set count 0
-	while {[winfo exists $tmpWidget] == 1} {
-	    set tmpWidget ".__tmp__$count"
-	    incr count
-	}
+       # compute a widget name we can use to create a temporary widget
+       set tmpWidget ".__tmp__"
+       set count 0
+       while {[winfo exists $tmpWidget] == 1} {
+           set tmpWidget ".__tmp__$count"
+           incr count
+       }
 
-	# steal options from the listbox
-	# we want darn near all options, so we'll go ahead and do
-	# them all. No harm done in adding the one or two that we
-	# don't use.
-	listbox $tmpWidget
-		
-	foreach foo [$tmpWidget configure] {
-	    if {[llength $foo] == 5} {
-		set option [lindex $foo 1]
-		set value [lindex $foo 4]
-				
-		option add *Mclistbox.$option $value widgetDefault
+       # steal options from the listbox
+       # we want darn near all options, so we'll go ahead and do
+       # them all. No harm done in adding the one or two that we
+       # don't use.
+       listbox $tmpWidget
 
-		# these options also apply to the individual columns...
-		if {[string compare $option "foreground"] == 0  || [string compare $option "background"] == 0  || [string compare $option "font"] == 0} {
-		    option add *Mclistbox*MclistboxColumn.$option $value  widgetDefault
-		}
-	    }
-	}
-	destroy $tmpWidget
+       foreach foo [$tmpWidget configure] {
+           if {[llength $foo] == 5} {
+              set option [lindex $foo 1]
+              set value [lindex $foo 4]
 
-	# steal some options from label widgets; we only want a subset
-	# so we'll use a slightly different method. No harm in *not*
-	# adding in the one or two that we don't use... :-)
-	label $tmpWidget
-	foreach option [list Anchor Background Font  Foreground Height Image  ] {
-	    set values [$tmpWidget configure -[string tolower $option]]
-	    option add *Mclistbox.label$option [lindex $values 3]
-	}
-	destroy $tmpWidget
+              option add *Mclistbox.$option $value widgetDefault
 
-	# these are unique to us...
-	option add *Mclistbox.columnBorderWidth   0      widgetDefault
-	option add *Mclistbox.columnRelief        flat   widgetDefault
-	option add *Mclistbox.labelBorderWidth    1      widgetDefault
-	option add *Mclistbox.labelRelief         raised widgetDefault
-	option add *Mclistbox.labels              1      widgetDefault
-	option add *Mclistbox.resizableColumns    1      widgetDefault
-	option add *Mclistbox.selectcommand       {}     widgetDefault
-	option add *Mclistbox.fillcolumn          {}     widgetDefault
+              # these options also apply to the individual columns...
+              if {[string compare $option "foreground"] == 0  || [string compare $option "background"] == 0  || [string compare $option "font"] == 0} {
+                  option add *Mclistbox*MclistboxColumn.$option $value  widgetDefault
+              }
+           }
+       }
+       destroy $tmpWidget
 
-	# column options
-	option add *Mclistbox*MclistboxColumn.visible       1      widgetDefault
-	option add *Mclistbox*MclistboxColumn.resizable     1      widgetDefault
-	option add *Mclistbox*MclistboxColumn.position      end    widgetDefault
-	option add *Mclistbox*MclistboxColumn.label         ""     widgetDefault
-	option add *Mclistbox*MclistboxColumn.width         0      widgetDefault
-	option add *Mclistbox*MclistboxColumn.bitmap        ""     widgetDefault
-	option add *Mclistbox*MclistboxColumn.image         ""     widgetDefault
+       # steal some options from label widgets; we only want a subset
+       # so we'll use a slightly different method. No harm in *not*
+       # adding in the one or two that we don't use... :-)
+       label $tmpWidget
+       foreach option [list Anchor Background Font  Foreground Height Image  ] {
+           set values [$tmpWidget configure -[string tolower $option]]
+           option add *Mclistbox.label$option [lindex $values 3]
+       }
+       destroy $tmpWidget
+
+       # these are unique to us...
+       option add *Mclistbox.columnBorderWidth   0      widgetDefault
+       option add *Mclistbox.columnRelief        flat   widgetDefault
+       option add *Mclistbox.labelBorderWidth    1      widgetDefault
+       option add *Mclistbox.labelRelief         raised widgetDefault
+       option add *Mclistbox.labels              1      widgetDefault
+       option add *Mclistbox.resizableColumns    1      widgetDefault
+       option add *Mclistbox.selectcommand       {}     widgetDefault
+       option add *Mclistbox.fillcolumn          {}     widgetDefault
+
+       # column options
+       option add *Mclistbox*MclistboxColumn.visible       1      widgetDefault
+       option add *Mclistbox*MclistboxColumn.resizable     1      widgetDefault
+       option add *Mclistbox*MclistboxColumn.position      end    widgetDefault
+       option add *Mclistbox*MclistboxColumn.label         ""     widgetDefault
+       option add *Mclistbox*MclistboxColumn.width         0      widgetDefault
+       option add *Mclistbox*MclistboxColumn.bitmap        ""     widgetDefault
+       option add *Mclistbox*MclistboxColumn.image         ""     widgetDefault
     }
 
     ######################################################################
     # define the class bindings
     ######################################################################
-    
+
     SetClassBindings
 
 }
@@ -1540,30 +1540,30 @@ proc Insert {w index arglist} {
     upvar ::mclistbox::${w}::misc    misc
 
     foreach list $arglist {
-	# make sure we have enough elements for each column
-	for {set i [llength $list]} {$i < [llength $misc(columns)]} {incr i} {
-	    lappend list {}
-	}
+       # make sure we have enough elements for each column
+       for {set i [llength $list]} {$i < [llength $misc(columns)]} {incr i} {
+           lappend list {}
+       }
 
-	set column 0
-	foreach id $misc(columns) {
-	    $widgets(listbox$id) insert $index [lindex $list $column]
-	    incr column
-	}
+       set column 0
+       foreach id $misc(columns) {
+           $widgets(listbox$id) insert $index [lindex $list $column]
+           incr column
+       }
 
-	# we also want to add a bogus item to the hidden listbox. Why?
-	# For standard listboxes, if you specify a height of zero the
-	# listbox will resize to be just big enough to hold all the lines.
-	# Since we use a hidden listbox to regulate the size of the widget
-	# and we want this same behavior, this listbox needs the same number
-	# of elements as the visible listboxes
-	#
-	# (NB: we might want to make this listbox contain the contents
-	# of all columns as a properly formatted list; then the get 
-	# command can query this listbox instead of having to query
-	# each individual listbox. The disadvantage is that it doubles
-	# the memory required to hold all the data)
-	$widgets(hiddenListbox) insert $index "x"
+       # we also want to add a bogus item to the hidden listbox. Why?
+       # For standard listboxes, if you specify a height of zero the
+       # listbox will resize to be just big enough to hold all the lines.
+       # Since we use a hidden listbox to regulate the size of the widget
+       # and we want this same behavior, this listbox needs the same number
+       # of elements as the visible listboxes
+       #
+       # (NB: we might want to make this listbox contain the contents
+       # of all columns as a properly formatted list; then the get
+       # command can query this listbox instead of having to query
+       # each individual listbox. The disadvantage is that it doubles
+       # the memory required to hold all the data)
+       $widgets(hiddenListbox) insert $index "x"
     }
     return ""
 }
@@ -1579,7 +1579,7 @@ proc InvalidateScrollbars {w} {
     upvar ::mclistbox::${w}::misc    misc
 
     if {![info exists misc(afterid)]} {
-	set misc(afterid)  [after idle "catch {::mclistbox::UpdateScrollbars $w}"]
+       set misc(afterid)  [after idle "catch {::mclistbox::UpdateScrollbars $w}"]
     }
 }
 }
@@ -1593,95 +1593,95 @@ proc ItemConfigure {w args} {
     upvar ::mclistbox::${w}::widgets widgets
     upvar ::mclistbox::${w}::options options
     upvar ::mclistbox::${w}::misc    misc
-    
+
     if {[llength $args] == 0} {
-	# hmmm. User must be wanting all configuration information
-	# note that if the value of an array element is of length
-	# one it is an alias, which needs to be handled slightly
-	# differently
-	#
-	# Broken! This seems to return options from hidden listbox. Not the
-	# changed item. 
-	#
-	set results {}
-	foreach opt [lsort [array names itemConfigureOptions]] {
-	    if {[llength $itemConfigureOptions($opt)] == 1} {
-		set alias $itemConfigureOptions($opt)
-		set optName $itemConfigureOptions($alias)
-		lappend results [list $opt $optName]
-	    } else {
-		set optName  [lindex $itemConfigureOptions($opt) 0]
-		set optClass [lindex $itemConfigureOptions($opt) 1]
-		set default [option get $w $optName $optClass]
-		lappend results [list $opt $optName $optClass  $default $options($opt)]
-	    }
-	}
-	return $results
+       # hmmm. User must be wanting all configuration information
+       # note that if the value of an array element is of length
+       # one it is an alias, which needs to be handled slightly
+       # differently
+       #
+       # Broken! This seems to return options from hidden listbox. Not the
+       # changed item.
+       #
+       set results {}
+       foreach opt [lsort [array names itemConfigureOptions]] {
+           if {[llength $itemConfigureOptions($opt)] == 1} {
+              set alias $itemConfigureOptions($opt)
+              set optName $itemConfigureOptions($alias)
+              lappend results [list $opt $optName]
+           } else {
+              set optName  [lindex $itemConfigureOptions($opt) 0]
+              set optClass [lindex $itemConfigureOptions($opt) 1]
+              set default [option get $w $optName $optClass]
+              lappend results [list $opt $optName $optClass  $default $options($opt)]
+           }
+       }
+       return $results
     }
-    
+
     # one argument means we are looking for configuration
     # information on a single option
     #
     # Broken! This seems to return options from hidden listbox. Not the
-    # changed item. 
+    # changed item.
     #
     if {[llength $args] == 2} {
-	set opt [::mclistbox::Canonize $w option [lindex $args 1]]
+       set opt [::mclistbox::Canonize $w option [lindex $args 1]]
 
-	set optName  [lindex $itemConfigureOptions($opt) 0]
-	set optClass [lindex $itemConfigureOptions($opt) 1]
-	set default [option get $w $optName $optClass]
-	set results [list $opt $optName $optClass  $default $options($opt)]
-	return $results
+       set optName  [lindex $itemConfigureOptions($opt) 0]
+       set optClass [lindex $itemConfigureOptions($opt) 1]
+       set default [option get $w $optName $optClass]
+       set results [list $opt $optName $optClass  $default $options($opt)]
+       return $results
     }
 
-    # The itemconfigure option should have an odd number of options. 
+    # The itemconfigure option should have an odd number of options.
     if {[expr {[llength $args]%2}] == 1} {
-	# hmmm. An odd number of elements in args
-	
-	set itemIndex [lindex $args 0 ]
-	set newArgs [ lrange $args 1 end ]
+       # hmmm. An odd number of elements in args
+
+       set itemIndex [lindex $args 0 ]
+       set newArgs [ lrange $args 1 end ]
     }
-    
-    # Great. An odd number of options. Let's make sure they 
+
+    # Great. An odd number of options. Let's make sure they
     # are all valid before we do anything. Note that Canonize
     # will generate an error if it finds a bogus option; otherwise
     # it returns the canonical option name
     foreach {name value} $newArgs {
-	set name [::mclistbox::Canonize $w option $name]
-	set opts($name) $value
+       set name [::mclistbox::Canonize $w option $name]
+       set opts($name) $value
     }
 
     # process all of the configuration options
     foreach option [array names opts] {
 
-	set newValue $opts($option)
-	if {[info exists options($option)]} {
-	    set oldValue $options($option)
-	}
+       set newValue $opts($option)
+       if {[info exists options($option)]} {
+           set oldValue $options($option)
+       }
 
-	switch -- $option {
-	    -exportselection {
-		if {$newValue} {
-		    SelectionHandler $w own
-		    set options($option) 1
-		} else {
-		    set options($option) 0
-		}
-	    }
+       switch -- $option {
+           -exportselection {
+              if {$newValue} {
+                  SelectionHandler $w own
+                  set options($option) 1
+              } else {
+                  set options($option) 0
+              }
+           }
 
-	    # { the following all must be applied to each listbox }
-	    -background -
-	    -foreground -
-	    -selectforeground -
-	    -selectbackground {
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) itemconfigure $itemIndex $option $newValue
-		}
-		$widgets(hiddenListbox) itemconfigure $itemIndex $option $newValue
-		set options($option) [$widgets(hiddenListbox) cget $option]
-	    }
-	}
+           # { the following all must be applied to each listbox }
+           -background -
+           -foreground -
+           -selectforeground -
+           -selectbackground {
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) itemconfigure $itemIndex $option $newValue
+              }
+              $widgets(hiddenListbox) itemconfigure $itemIndex $option $newValue
+              set options($option) [$widgets(hiddenListbox) cget $option]
+           }
+       }
     }
 }
 }
@@ -1697,7 +1697,7 @@ proc LabelEvent {w id code} {
     # (ie: if we aren't in a "resize zone")
     set cursor [$widgets(label$id) cget -cursor]
     if {[string compare $cursor $options(-cursor)] == 0} {
-	uplevel \#0 $code
+       uplevel \#0 $code
     }
 }
 }
@@ -1710,14 +1710,14 @@ proc MassageIndex {w index} {
     upvar ::mclistbox::${w}::misc      misc
 
     if {[regexp {@([0-9]+),([0-9]+)} $index matchvar x y]} {
-	set id [lindex $misc(columns) 0]
-	
-	incr y -[winfo y $widgets(listbox$id)]
-	incr y -[winfo y $widgets(frame$id)]
-	incr x [winfo x $widgets(listbox$id)]
-	incr x [winfo x $widgets(frame$id)]
+       set id [lindex $misc(columns) 0]
 
-	set index @${x},${y}
+       incr y -[winfo y $widgets(listbox$id)]
+       incr y -[winfo y $widgets(frame$id)]
+       incr x [winfo x $widgets(listbox$id)]
+       incr x [winfo x $widgets(frame$id)]
+
+       set index @${x},${y}
     }
 
     return $index
@@ -1733,7 +1733,7 @@ proc NewColumn {w id} {
     upvar ::mclistbox::${w}::misc      misc
     upvar ::mclistbox::${w}::columnID  columnID
 
-    # the columns are all children of the text widget we created... 
+    # the columns are all children of the text widget we created...
     set frame      [frame $w.frame$id  -takefocus 0  -highlightthickness 0  -class MclistboxColumn  -background $options(-background)  ]
 
     set listbox    [listbox $frame.listbox  -takefocus 0  -bd 0  -setgrid $options(-setgrid)  -exportselection false  -selectmode $options(-selectmode)  -highlightthickness 0  ]
@@ -1749,23 +1749,23 @@ proc NewColumn {w id} {
     # handle our resize bindings. Why? We want the bindings to
     # be specific to this widget but we don't want to use the
     # widget name. If we use the widget name then the bindings
-    # could get mixed up with user-supplied bindigs (via the 
-    # "label bind" command). 
+    # could get mixed up with user-supplied bindigs (via the
+    # "label bind" command).
     set tag MclistboxLabel
     bindtags $label  [list MclistboxMouseBindings $label]
 
     # reconfigure the label based on global options
     foreach option [list bd image height relief font anchor  background foreground borderwidth] {
-	if {[info exists options(-label$option)]  && $options(-label$option) != ""} {
-	    $label configure -$option $options(-label$option)
-	}
+       if {[info exists options(-label$option)]  && $options(-label$option) != ""} {
+           $label configure -$option $options(-label$option)
+       }
     }
 
     # reconfigure the column based on global options
     foreach option [list borderwidth relief] {
-	if {[info exists options(-column$option)]  && $options(-column$option) != ""} {
-	    $frame configure -$option $options(-column$option)
-	}
+       if {[info exists options(-column$option)]  && $options(-column$option) != ""} {
+           $frame configure -$option $options(-column$option)
+       }
     }
 
     # geometry propagation must be off so we can control the size
@@ -1776,7 +1776,7 @@ proc NewColumn {w id} {
     pack $listbox -side top -fill both -expand y -pady 2
 
     # any events that happen in the listbox gets handled by the class
-    # bindings. This has the unfortunate side effect 
+    # bindings. This has the unfortunate side effect
     bindtags $listbox [list $w Mclistbox all]
 
     # return a list of the widgets we created.
@@ -1797,7 +1797,7 @@ proc ResizeEvent {w type widget x X Y} {
     # if the widget doesn't allow resizable cursors, there's
     # nothing here to do...
     if {!$options(-resizablecolumns)} {
-	return
+       return
     }
 
     # this lets us keep track of some internal state while
@@ -1805,7 +1805,7 @@ proc ResizeEvent {w type widget x X Y} {
     variable drag
 
     # this lets us define a small window around the edges of
-    # the column. 
+    # the column.
     set threshold [expr {$options(-labelborderwidth) + 4}]
 
     # this is what we use for the "this is resizable" cursor
@@ -1813,7 +1813,7 @@ proc ResizeEvent {w type widget x X Y} {
 
     # if we aren't over an area that we care about, bail.
     if {![info exists columnID($widget)]} {
-	return
+       return
     }
 
     # id refers to the column name
@@ -1821,119 +1821,119 @@ proc ResizeEvent {w type widget x X Y} {
 
     switch $type {
 
-	buttonpress {
-	    # we will do all the work of initiating a drag only if
-	    # the cursor is not the defined cursor. In theory this
-	    # will only be the case if the mouse moves over the area
-	    # in which a drag can happen.
-	    if {[$widgets(label$id) cget -cursor] == $resizeCursor} {
-		if {$x <= $threshold} {
-		    set lid [::mclistbox::FindResizableNeighbor $w $id left]
-		    if {$lid == ""} return
-		    set drag(leftFrame)  $widgets(frame$lid)
-		    set drag(rightFrame) $widgets(frame$id)
+       buttonpress {
+           # we will do all the work of initiating a drag only if
+           # the cursor is not the defined cursor. In theory this
+           # will only be the case if the mouse moves over the area
+           # in which a drag can happen.
+           if {[$widgets(label$id) cget -cursor] == $resizeCursor} {
+              if {$x <= $threshold} {
+                  set lid [::mclistbox::FindResizableNeighbor $w $id left]
+                  if {$lid == ""} return
+                  set drag(leftFrame)  $widgets(frame$lid)
+                  set drag(rightFrame) $widgets(frame$id)
 
-		    set drag(leftListbox)  $widgets(listbox$lid)
-		    set drag(rightListbox) $widgets(listbox$id)
+                  set drag(leftListbox)  $widgets(listbox$lid)
+                  set drag(rightListbox) $widgets(listbox$id)
 
-		} else {
-		    set rid [::mclistbox::FindResizableNeighbor $w $id right]
-		    if {$rid == ""} return
-		    set drag(leftFrame)  $widgets(frame$id)
-		    set drag(rightFrame) $widgets(frame$rid)
+              } else {
+                  set rid [::mclistbox::FindResizableNeighbor $w $id right]
+                  if {$rid == ""} return
+                  set drag(leftFrame)  $widgets(frame$id)
+                  set drag(rightFrame) $widgets(frame$rid)
 
-		    set drag(leftListbox)  $widgets(listbox$id)
-		    set drag(rightListbox) $widgets(listbox$rid)
+                  set drag(leftListbox)  $widgets(listbox$id)
+                  set drag(rightListbox) $widgets(listbox$rid)
 
-		}
-		
+              }
 
-		set drag(leftWidth)  [winfo width $drag(leftFrame)]
-		set drag(rightWidth) [winfo width $drag(rightFrame)]
 
-		# it seems to be a fact that windows can never be 
-		# less than one pixel wide. So subtract that one pixel
-		# from our max deltas...
-		set drag(maxDelta)   [expr {$drag(rightWidth) - 1}]
-		set drag(minDelta)  -[expr {$drag(leftWidth) - 1}]
+              set drag(leftWidth)  [winfo width $drag(leftFrame)]
+              set drag(rightWidth) [winfo width $drag(rightFrame)]
 
-		set drag(x) $X
-	    }
-	}
+              # it seems to be a fact that windows can never be
+              # less than one pixel wide. So subtract that one pixel
+              # from our max deltas...
+              set drag(maxDelta)   [expr {$drag(rightWidth) - 1}]
+              set drag(minDelta)  -[expr {$drag(leftWidth) - 1}]
 
-	motion {
-	    if {[info exists drag(x)]} {return}
+              set drag(x) $X
+           }
+       }
 
-	    # this is just waaaaay too much work for a motion 
-	    # event, IMO.
+       motion {
+           if {[info exists drag(x)]} {return}
 
-	    set resizable 0
+           # this is just waaaaay too much work for a motion
+           # event, IMO.
 
-	    # is the column the user is over resizable?
-	    if {!$options($id:-resizable)} {return}
+           set resizable 0
 
-	    # did the user click on the left of a column? 
-	    if {$x < $threshold} {
-		set leftColumn [::mclistbox::FindResizableNeighbor $w $id left]
-		if {$leftColumn != ""} {
-		    set resizable 1
-		}
+           # is the column the user is over resizable?
+           if {!$options($id:-resizable)} {return}
 
-	    } elseif {$x > [winfo width $widget] - $threshold} {
-		set rightColumn [::mclistbox::FindResizableNeighbor $w $id  right]
-		if {$rightColumn != ""} {
-		    set resizable 1
-		}
-	    }
+           # did the user click on the left of a column?
+           if {$x < $threshold} {
+              set leftColumn [::mclistbox::FindResizableNeighbor $w $id left]
+              if {$leftColumn != ""} {
+                  set resizable 1
+              }
 
-	    # if it's resizable, change the cursor 
-	    set cursor [$widgets(label$id) cget -cursor]
-	    if {$resizable && $cursor != $resizeCursor} {
-		$widgets(label$id) configure -cursor $resizeCursor
+           } elseif {$x > [winfo width $widget] - $threshold} {
+              set rightColumn [::mclistbox::FindResizableNeighbor $w $id  right]
+              if {$rightColumn != ""} {
+                  set resizable 1
+              }
+           }
 
-	    } elseif {!$resizable && $cursor == $resizeCursor} {
-		$widgets(label$id) configure -cursor $options(-cursor)
-	    }
-	}
+           # if it's resizable, change the cursor
+           set cursor [$widgets(label$id) cget -cursor]
+           if {$resizable && $cursor != $resizeCursor} {
+              $widgets(label$id) configure -cursor $resizeCursor
 
-	drag {
-	    # if the state is set up, do the drag...
-	    if {[info exists drag(x)]} {
+           } elseif {!$resizable && $cursor == $resizeCursor} {
+              $widgets(label$id) configure -cursor $options(-cursor)
+           }
+       }
 
-		set delta [expr {$X - $drag(x)}]
-		if {$delta >= $drag(maxDelta)} {
-		    set delta $drag(maxDelta)
+       drag {
+           # if the state is set up, do the drag...
+           if {[info exists drag(x)]} {
 
-		} elseif {$delta <= $drag(minDelta)} {
-		    set delta $drag(minDelta)
-		}
+              set delta [expr {$X - $drag(x)}]
+              if {$delta >= $drag(maxDelta)} {
+                  set delta $drag(maxDelta)
 
-		set lwidth [expr {$drag(leftWidth) + $delta}]
-		set rwidth [expr {$drag(rightWidth) - $delta}]
+              } elseif {$delta <= $drag(minDelta)} {
+                  set delta $drag(minDelta)
+              }
 
-		$drag(leftFrame)   configure -width $lwidth
-		$drag(rightFrame)  configure -width $rwidth
+              set lwidth [expr {$drag(leftWidth) + $delta}]
+              set rwidth [expr {$drag(rightWidth) - $delta}]
 
-	    }
-	}
+              $drag(leftFrame)   configure -width $lwidth
+              $drag(rightFrame)  configure -width $rwidth
 
-	buttonrelease {
-	    set fillColumnID $options(-fillcolumn)
-	    if {[info exists drag(x)] && $fillColumnID != {}} {
-		set fillColumnFrame $widgets(frame$fillColumnID)
-		if {[string compare $drag(leftFrame) $fillColumnFrame] == 0  || [string compare $drag(rightFrame) $fillColumnFrame] == 0} {
-		    set width [$fillColumnFrame cget -width]
-		    set misc(minFillColumnSize) $width
-		}
-		set misc(min-$drag(leftFrame))  [$drag(leftFrame) cget -width]
-		set misc(min-$drag(rightFrame)) [$drag(rightFrame) cget -width]
-	    }
+           }
+       }
 
-	    # reset the state and the cursor
-	    catch {unset drag}
-	    $widgets(label$id) configure -cursor $options(-cursor)
+       buttonrelease {
+           set fillColumnID $options(-fillcolumn)
+           if {[info exists drag(x)] && $fillColumnID != {}} {
+              set fillColumnFrame $widgets(frame$fillColumnID)
+              if {[string compare $drag(leftFrame) $fillColumnFrame] == 0  || [string compare $drag(rightFrame) $fillColumnFrame] == 0} {
+                  set width [$fillColumnFrame cget -width]
+                  set misc(minFillColumnSize) $width
+              }
+              set misc(min-$drag(leftFrame))  [$drag(leftFrame) cget -width]
+              set misc(min-$drag(rightFrame)) [$drag(rightFrame) cget -width]
+           }
 
-	}
+           # reset the state and the cursor
+           catch {unset drag}
+           $widgets(label$id) configure -cursor $options(-cursor)
+
+       }
     }
 }
 }
@@ -1948,37 +1948,37 @@ proc SelectionHandler {w type {offset {}} {length {}}} {
 
     switch -exact $type {
 
-	own {
-	    selection own  -command [list ::mclistbox::SelectionHandler $w lose]  -selection PRIMARY  $w
-	}
+       own {
+           selection own  -command [list ::mclistbox::SelectionHandler $w lose]  -selection PRIMARY  $w
+       }
 
-	lose {
-	    if {$options(-exportselection)} {
-		foreach id $misc(columns) {
-		    $widgets(listbox$id) selection clear 0 end
-		}
-	    }
-	}
+       lose {
+           if {$options(-exportselection)} {
+              foreach id $misc(columns) {
+                  $widgets(listbox$id) selection clear 0 end
+              }
+           }
+       }
 
-	get {
-	    set end [expr {$length + $offset - 1}]
+       get {
+           set end [expr {$length + $offset - 1}]
 
-	    set column [lindex $misc(columns) 0]
-	    set curselection [$widgets(listbox$column) curselection]
+           set column [lindex $misc(columns) 0]
+           set curselection [$widgets(listbox$column) curselection]
 
-	    # this is really, really slow (relatively speaking).
-	    # but the only way I can think of to speed this up
-	    # is to duplicate all the data in our hidden listbox,
-	    # which I really don't want to do because of memory
-	    # considerations.
-	    set data ""
-	    foreach index $curselection {
-		set rowdata [join [::mclistbox::WidgetProc-get $w $index]  "\t"]
-		lappend data $rowdata
-	    }
-	    set data [join $data "\n"]
-	    return [string range $data $offset $end]
-	}
+           # this is really, really slow (relatively speaking).
+           # but the only way I can think of to speed this up
+           # is to duplicate all the data in our hidden listbox,
+           # which I really don't want to do because of memory
+           # considerations.
+           set data ""
+           foreach index $curselection {
+              set rowdata [join [::mclistbox::WidgetProc-get $w $index]  "\t"]
+              lappend data $rowdata
+           }
+           set data [join $data "\n"]
+           return [string range $data $offset $end]
+       }
 
     }
 }
@@ -2009,14 +2009,14 @@ proc SetClassBindings {} {
     # steal all of the standard listbox bindings. Note that if a user
     # clicks in a column, %W will return that column. This is bad,
     # so we have to make a substitution in all of the bindings to
-    # compute the real widget name (ie: the name of the topmost 
+    # compute the real widget name (ie: the name of the topmost
     # frame)
     foreach event [bind Listbox] {
-	set binding [bind Listbox $event]
-	regsub -all {%W} $binding {[::mclistbox::convert %W -W]} binding
-	regsub -all {%x} $binding {[::mclistbox::convert %W -x %x]} binding
-	regsub -all {%y} $binding {[::mclistbox::convert %W -y %y]} binding
-	bind Mclistbox $event $binding
+       set binding [bind Listbox $event]
+       regsub -all {%W} $binding {[::mclistbox::convert %W -W]} binding
+       regsub -all {%x} $binding {[::mclistbox::convert %W -x %x]} binding
+       regsub -all {%y} $binding {[::mclistbox::convert %W -y %y]} binding
+       bind Mclistbox $event $binding
     }
 
     # these define bindings for the column labels for resizing. Note
@@ -2043,23 +2043,23 @@ proc UpdateScrollbars {w} {
     upvar ::mclistbox::${w}::misc    misc
 
     if {![winfo ismapped $w]} {
-	catch {unset misc(afterid)}
-	return
+       catch {unset misc(afterid)}
+       return
     }
 
     update idletasks
     if {[llength $misc(columns)] > 0} {
-	if {[string length $options(-yscrollcommand)] != 0} {
-	    set col0 [lindex $misc(columns) 0]
-	    set yview [$widgets(listbox$col0) yview]
-	    uplevel #0 $options(-yscrollcommand) $yview
-	}
+       if {[string length $options(-yscrollcommand)] != 0} {
+           set col0 [lindex $misc(columns) 0]
+           set yview [$widgets(listbox$col0) yview]
+           uplevel #0 $options(-yscrollcommand) $yview
+       }
 
-	if {[string length $options(-xscrollcommand)] != 0} {
-	    set col0 [lindex $misc(columns) 0]
-	    set xview [$widgets(text) xview]
-	    uplevel #0 $options(-xscrollcommand) $xview
-	}
+       if {[string length $options(-xscrollcommand)] != 0} {
+           set col0 [lindex $misc(columns) 0]
+           set xview [$widgets(text) xview]
+           uplevel #0 $options(-xscrollcommand) $xview
+       }
     }
     catch {unset misc(afterid)}
 }
@@ -2078,18 +2078,18 @@ proc WidgetProc {w command args} {
 
     set command [::mclistbox::Canonize $w command $command]
 
-    # some commands have subcommands. We'll check for that here 
-    # and mung the command and args so that we can treat them as 
+    # some commands have subcommands. We'll check for that here
+    # and mung the command and args so that we can treat them as
     # distinct commands in the following switch statement
     if {[string compare $command "column"] == 0} {
-	set subcommand [::mclistbox::Canonize $w "column command"  [lindex $args 0]]
-	set command "$command-$subcommand"
-	set args [lrange $args 1 end]
+       set subcommand [::mclistbox::Canonize $w "column command"  [lindex $args 0]]
+       set command "$command-$subcommand"
+       set args [lrange $args 1 end]
 
     } elseif {[string compare $command "label"] == 0} {
-	set subcommand [::mclistbox::Canonize $w "label command"  [lindex $args 0]]
-	set command "$command-$subcommand"
-	set args [lrange $args 1 end]
+       set subcommand [::mclistbox::Canonize $w "label command"  [lindex $args 0]]
+       set command "$command-$subcommand"
+       set args [lrange $args 1 end]
     }
 
     set result ""
@@ -2097,477 +2097,477 @@ proc WidgetProc {w command args} {
 
     # here we go. Error checking be damned!
     switch $command {
-	xview {
-	    # note that at present, "xview <index>" is broken. I'm
-	    # not even sure how to do it. Unless I attach our hidden
-	    # listbox to the scrollbar and use it. Hmmm..... I'll
-	    # try that later. (FIXME)
-	    set result [eval {$widgets(text)} xview $args]
-	    InvalidateScrollbars $w
-	}
-
-	yview {
-	    if {[llength $args] == 0} {
-		# length of zero means to fetch the yview; we can
-		# get this from a single listbox
-		set result [$widgets(hiddenListbox) yview]
-
-	    } else {
-
-		# if it's one argument, it's an index. We'll pass that 
-		# index through the index command to properly translate
-		# @x,y indicies, and place the value back in args
-		if {[llength $args] == 1} {
-		    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-		    set args [list $index]
-		}
-
-		# run the yview command on every column.
-		foreach id $misc(columns) {
-		    eval {$widgets(listbox$id)} yview $args
-		}
-		eval {$widgets(hiddenListbox)} yview $args
-
-		InvalidateScrollbars $w
-
-		set result ""
-	    }
-	}
-
-	activate {
-	    if {[llength $args] != 1} {
-		return -code error "wrong \# of args: should be $w activate index"
-	    }
-	    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-
-	    foreach id $misc(columns) {
-		$widgets(listbox$id) activate $index
-	    }
-	    set result ""
-	}
-
-	bbox {
-	    if {[llength $args] != 1} {
-		return -code error "wrong \# of args: should be $w bbox index"
-	    }
-	    # get a real index. This will adjust @x,y indicies
-	    # to account for the label, if any.
-	    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-
-	    set id [lindex $misc(columns) 0]
-
-	    # we can get the x, y, and height from the first 
-	    # column.
-	    set bbox [$widgets(listbox$id) bbox $index]
-	    if {[string length $bbox] == 0} {return ""}
-
-	    foreach {x y w h} $bbox {}
-	    
-	    # the x and y coordinates have to be adjusted for the
-	    # fact that the listbox is inside a frame, and the 
-	    # frame is inside a text widget. All of those add tiny
-	    # offsets. Feh.
-	    incr y [winfo y $widgets(listbox$id)]
-	    incr y [winfo y $widgets(frame$id)]
-	    incr x [winfo x $widgets(listbox$id)]
-	    incr x [winfo x $widgets(frame$id)]
-
-	    # we can get the width by looking at the relative x 
-	    # coordinate of the right edge of the last column
-	    set id [lindex $misc(columns) end]
-	    set w [expr {[winfo width $widgets(frame$id)] +  [winfo x $widgets(frame$id)]}]
-	    set bbox [list $x $y [expr {$x + $w}] $h]
-	    set result $bbox
-	}
-
-	label-bind {
-	    # we are just too clever for our own good. (that's a 
-	    # polite way of saying this is more complex than it
-	    # needs to be)
-
-	    set id [lindex $args 0]
-	    set index [CheckColumnID $w $id]
-
-	    set args [lrange $args 1 end]
-	    if {[llength $args] == 0} {
-		set result [bind $widgets(label$id)]
-	    } else {
-
-		# when we create a binding, we'll actually have the 
-		# binding run our own command with the user's command
-		# as an argument. This way we can do some sanity checks
-		# before running the command. So, when querying a binding
-		# we need to only return the user's code
-		set sequence [lindex $args 0]
-		if {[llength $args] == 1} {
-		    set result [lindex [bind $widgets(label$id) $sequence] end]
-		} else {
-		
-		    # replace %W with our toplevel frame, then
-		    # do the binding
-		    set code [lindex $args 1]
-		    regsub -all {%W} $code $w code
-		    
-		    set result [bind $widgets(label$id) $sequence  [list ::mclistbox::LabelEvent $w $id $code]]
-		}
-	    }
-	}
-
-	column-add {
-	    eval ::mclistbox::Column-add {$w} $args
-	    AdjustColumns $w
-	    set result ""
-	}
-
-	column-delete {
-	    foreach id $args {
-		set index [CheckColumnID $w $id]
-
-		# remove the reference from our list of columns
-		set misc(columns) [lreplace $misc(columns) $index $index]
-
-		# whack the widget
-		destroy $widgets(frame$id)
-
-		# clear out references to the individual widgets
-		unset widgets(frame$id)
-		unset widgets(listbox$id)
-		unset widgets(label$id)
-	    }
-	    InvalidateScrollbars $w
-	    set result ""
-	}
-
-	column-cget {
-	    if {[llength $args] != 2} {
-		return -code error "wrong # of args: should be \"$w column cget name option\""
-	    }
-	    set id [::mclistbox::Canonize $w column [lindex $args 0]]
-	    set option [lindex $args 1]
-	    set data [::mclistbox::Column-configure $w $id $option]
-	    set result [lindex $data 4]
-	}
-
-	column-configure {
-	    set id [::mclistbox::Canonize $w column [lindex $args 0]]
-	    set args [lrange $args 1 end]
-	    set result [eval ::mclistbox::Column-configure {$w} {$id} $args]
-	}
-
-	column-names {
-	    if {[llength $args] != 0} {
-		return -code error "wrong # of args: should be \"$w column names\""
-	    }
-	    set result $misc(columns)
-	}
-
-	column-nearest {
-	    if {[llength $args] != 1} {
-		return -code error "wrong # of args: should be \"$w column nearest x\""
-	    }
-
-	    set x [lindex $args 0]
-	    set tmp [$widgets(text) index @$x,0]
-	    set tmp [split $tmp "."]
-	    set index [lindex $tmp 1]
-
-	    set result [lindex $misc(columns) $index]
-	}
-
-	cget {
-	    if {[llength $args] != 1} {
-		return -code error "wrong # args: should be $w cget option"
-	    }
-	    set opt [::mclistbox::Canonize $w option [lindex $args 0]]
-
-	    set result $options($opt)
-	}
-
-
-	configure {
-	    set result [eval ::mclistbox::Configure {$w} $args]
-
-	}
-	
-	itemconfigure {
-	    set result [eval ::mclistbox::ItemConfigure {$w} $args]
-	    
-	}
-
-	curselection {
-	    set id [lindex $misc(columns) 0]
-	    set result [$widgets(listbox$id) curselection]
-	}
-
-	delete {
-	    if {[llength $args] < 1 || [llength $args] > 2} {
-		return -code error "wrong \# of args: should be $w delete first ?last?"
-	    }
-
-	    # it's possible that the selection will change because
-	    # of something we do. So, grab the current selection before
-	    # we do anything. Just before returning we'll see if the
-	    # selection has changed. If so, we'll call our selectcommand
-	    if {$options(-selectcommand) != ""} {
-		set col0 [lindex $misc(columns) 0]
-		set priorSelection [$widgets(listbox$col0) curselection]
-	    }
-
-	    set index1 [::mclistbox::MassageIndex $w [lindex $args 0]]
-	    if {[llength $args] == 2} {
-		set index2 [::mclistbox::MassageIndex $w [lindex $args 1]]
-	    } else {
-		set index2 ""
-	    }
-
-	    # note we do an eval here to make index2 "disappear" if it
-	    # is set to an empty string.
-	    foreach id $misc(columns) {
-		eval {$widgets(listbox$id)} delete $index1 $index2
-	    }
-	    eval {$widgets(hiddenListbox)} delete $index1 $index2
-
-	    InvalidateScrollbars $w
-
-	    set result ""
-	}
-
-	get {
-	    if {[llength $args] < 1 || [llength $args] > 2} {
-		return -code error "wrong \# of args: should be $w get first ?last?"
-	    }
-	    set index1 [::mclistbox::MassageIndex $w [lindex $args 0]]
-	    if {[llength $args] == 2} {
-		set index2 [::mclistbox::MassageIndex $w [lindex $args 1]]
-	    } else {
-		set index2 ""
-	    }
-
-	    set result [eval ::mclistbox::WidgetProc-get {$w} $index1 $index2]
-
-	}
-
-	index {
-
-	    if {[llength $args] != 1} {
-		return -code error "wrong \# of args: should be $w index index"
-	    }
-
-	    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-	    set id [lindex $misc(columns) 0]
-
-	    set result [$widgets(listbox$id) index $index]
-	}
-
-	insert {
-	    if {[llength $args] < 1} {
-		return -code error "wrong \# of args: should be $w insert ?element  element...?"
-	    }
-
-	    # it's possible that the selection will change because
-	    # of something we do. So, grab the current selection before
-	    # we do anything. Just before returning we'll see if the
-	    # selection has changed. If so, we'll call our selectcommand
-	    if {$options(-selectcommand) != ""} {
-		set col0 [lindex $misc(columns) 0]
-		set priorSelection [$widgets(listbox$col0) curselection]
-	    }
-
-	    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-
-	    ::mclistbox::Insert $w $index [lrange $args 1 end]
-
-	    InvalidateScrollbars $w
-	    set result ""
-	}
-
-	nearest {
-	    if {[llength $args] != 1} {
-		return -code error "wrong \# of args: should be $w nearest y"
-	    }
-
-	    # translate the y coordinate into listbox space
-	    set id [lindex $misc(columns) 0]
-	    set y [lindex $args 0]
-	    incr y -[winfo y $widgets(listbox$id)]
-	    incr y -[winfo y $widgets(frame$id)]
-
-	    set col0 [lindex $misc(columns) 0]
-
-	    set result [$widgets(listbox$col0) nearest $y]
-	}
-
-	scan {
-	    foreach {subcommand x y} $args {}
-	    switch $subcommand {
-		mark {
-		    # we have to treat scrolling in x and y differently;
-		    # scrolling in the y direction affects listboxes and
-		    # scrolling in the x direction affects the text widget.
-		    # to facilitate that, we need to keep a local copy
-		    # of the scan mark.
-		    set misc(scanmarkx) $x
-		    set misc(scanmarky) $y
-		    
-		    # set the scan mark for each column
-		    foreach id $misc(columns) {
-			$widgets(listbox$id) scan mark $x $y
-		    }
-
-		    # we can't use the x coordinate given us, since it 
-		    # is relative to whatever column we are over. So,
-		    # we'll just usr the results of [winfo pointerx].
-		    $widgets(text) scan mark [winfo pointerx $w]  $y
-		}
-		dragto {
-		    # we want the columns to only scan in the y direction,
-		    # so we'll force the x componant to remain constant
-		    foreach id $misc(columns) {
-			$widgets(listbox$id) scan dragto $misc(scanmarkx) $y
-		    }
-
-		    # since the scan mark of the text widget was based
-		    # on the pointer location, so must be the x
-		    # coordinate to the dragto command. And since we
-		    # want the text widget to only scan in the x
-		    # direction, the y componant will remain constant
-		    $widgets(text) scan dragto  [winfo pointerx $w] $misc(scanmarky)
-
-		    # make sure the scrollbars reflect the changes.
-		    InvalidateScrollbars $w
-		}
-
-		set result ""
-	    }
-	}
-
-	see {
-	    if {[llength $args] != 1} {
-		return -code error "wrong \# of args: should be $w see index"
-	    }
-	    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-
-	    foreach id $misc(columns) {
-		$widgets(listbox$id) see $index
-	    }
-	    InvalidateScrollbars $w
-	    set result {}
-	}
-
-	selection {
-	    # it's possible that the selection will change because
-	    # of something we do. So, grab the current selection before
-	    # we do anything. Just before returning we'll see if the
-	    # selection has changed. If so, we'll call our selectcommand
-	    if {$options(-selectcommand) != ""} {
-		set col0 [lindex $misc(columns) 0]
-		set priorSelection [$widgets(listbox$col0) curselection]
-	    }
-
-	    set subcommand [lindex $args 0]
-	    set args [lrange $args 1 end]
-
-	    set prefix "wrong \# of args: should be $w"
-	    switch $subcommand {
-		includes {
-		    if {[llength $args] != 1} {
-			return -code error "$prefix selection $subcommand index"
-		    }
-		    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-		    set id [lindex $misc(columns) 0]
-		    set result [$widgets(listbox$id) selection includes $index]
-		}
-
-		set {
-		    switch [llength $args] {
-			1 {
-			    set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
-			    set index2 ""
-			}
-			2 {
-			    set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
-			    set index2 [::mclistbox::MassageIndex $w  [lindex $args 1]]
-			}
-			default {
-			    return -code error "$prefix selection clear first ?last?"
-			}
-		    }
-
-		    if {$options(-exportselection)} {
-			SelectionHandler $w own
-		    }
-		    if {$index1 != ""} {
-			foreach id $misc(columns) {
-			    eval {$widgets(listbox$id)} selection set  $index1 $index2
-			}
-		    }
-
-		    set result ""
-		}
-
-		anchor {
-		    if {[llength $args] != 1} {
-			return -code error "$prefix selection $subcommand index"
-		    }
-		    set index [::mclistbox::MassageIndex $w [lindex $args 0]]
-
-		    if {$options(-exportselection)} {
-			SelectionHandler $w own
-		    }
-		    foreach id $misc(columns) {
-			$widgets(listbox$id) selection anchor $index
-		    }
-		    set result ""
-		}
-
-		clear {
-		    switch [llength $args] {
-			1 {
-			    set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
-			    set index2 ""
-			}
-			2 {
-			    set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
-			    set index2 [::mclistbox::MassageIndex $w  [lindex $args 1]]
-			}
-			default {
-			    return -code error "$prefix selection clear first ?last?"
-			}
-		    }
-
-		    if {$options(-exportselection)} {
-			SelectionHandler $w own
-		    }
-		    foreach id $misc(columns) {
-			eval {$widgets(listbox$id)} selection clear  $index1 $index2
-		    }
-		    set result ""
-		}
-	    }
-	}
-
-	size {
-	    set id [lindex $misc(columns) 0]
-	    set result [$widgets(listbox$id) size]
-	}
+       xview {
+           # note that at present, "xview <index>" is broken. I'm
+           # not even sure how to do it. Unless I attach our hidden
+           # listbox to the scrollbar and use it. Hmmm..... I'll
+           # try that later. (FIXME)
+           set result [eval {$widgets(text)} xview $args]
+           InvalidateScrollbars $w
+       }
+
+       yview {
+           if {[llength $args] == 0} {
+              # length of zero means to fetch the yview; we can
+              # get this from a single listbox
+              set result [$widgets(hiddenListbox) yview]
+
+           } else {
+
+              # if it's one argument, it's an index. We'll pass that
+              # index through the index command to properly translate
+              # @x,y indicies, and place the value back in args
+              if {[llength $args] == 1} {
+                  set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+                  set args [list $index]
+              }
+
+              # run the yview command on every column.
+              foreach id $misc(columns) {
+                  eval {$widgets(listbox$id)} yview $args
+              }
+              eval {$widgets(hiddenListbox)} yview $args
+
+              InvalidateScrollbars $w
+
+              set result ""
+           }
+       }
+
+       activate {
+           if {[llength $args] != 1} {
+              return -code error "wrong \# of args: should be $w activate index"
+           }
+           set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+
+           foreach id $misc(columns) {
+              $widgets(listbox$id) activate $index
+           }
+           set result ""
+       }
+
+       bbox {
+           if {[llength $args] != 1} {
+              return -code error "wrong \# of args: should be $w bbox index"
+           }
+           # get a real index. This will adjust @x,y indicies
+           # to account for the label, if any.
+           set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+
+           set id [lindex $misc(columns) 0]
+
+           # we can get the x, y, and height from the first
+           # column.
+           set bbox [$widgets(listbox$id) bbox $index]
+           if {[string length $bbox] == 0} {return ""}
+
+           foreach {x y w h} $bbox {}
+
+           # the x and y coordinates have to be adjusted for the
+           # fact that the listbox is inside a frame, and the
+           # frame is inside a text widget. All of those add tiny
+           # offsets. Feh.
+           incr y [winfo y $widgets(listbox$id)]
+           incr y [winfo y $widgets(frame$id)]
+           incr x [winfo x $widgets(listbox$id)]
+           incr x [winfo x $widgets(frame$id)]
+
+           # we can get the width by looking at the relative x
+           # coordinate of the right edge of the last column
+           set id [lindex $misc(columns) end]
+           set w [expr {[winfo width $widgets(frame$id)] +  [winfo x $widgets(frame$id)]}]
+           set bbox [list $x $y [expr {$x + $w}] $h]
+           set result $bbox
+       }
+
+       label-bind {
+           # we are just too clever for our own good. (that's a
+           # polite way of saying this is more complex than it
+           # needs to be)
+
+           set id [lindex $args 0]
+           set index [CheckColumnID $w $id]
+
+           set args [lrange $args 1 end]
+           if {[llength $args] == 0} {
+              set result [bind $widgets(label$id)]
+           } else {
+
+              # when we create a binding, we'll actually have the
+              # binding run our own command with the user's command
+              # as an argument. This way we can do some sanity checks
+              # before running the command. So, when querying a binding
+              # we need to only return the user's code
+              set sequence [lindex $args 0]
+              if {[llength $args] == 1} {
+                  set result [lindex [bind $widgets(label$id) $sequence] end]
+              } else {
+
+                  # replace %W with our toplevel frame, then
+                  # do the binding
+                  set code [lindex $args 1]
+                  regsub -all {%W} $code $w code
+
+                  set result [bind $widgets(label$id) $sequence  [list ::mclistbox::LabelEvent $w $id $code]]
+              }
+           }
+       }
+
+       column-add {
+           eval ::mclistbox::Column-add {$w} $args
+           AdjustColumns $w
+           set result ""
+       }
+
+       column-delete {
+           foreach id $args {
+              set index [CheckColumnID $w $id]
+
+              # remove the reference from our list of columns
+              set misc(columns) [lreplace $misc(columns) $index $index]
+
+              # whack the widget
+              destroy $widgets(frame$id)
+
+              # clear out references to the individual widgets
+              unset widgets(frame$id)
+              unset widgets(listbox$id)
+              unset widgets(label$id)
+           }
+           InvalidateScrollbars $w
+           set result ""
+       }
+
+       column-cget {
+           if {[llength $args] != 2} {
+              return -code error "wrong # of args: should be \"$w column cget name option\""
+           }
+           set id [::mclistbox::Canonize $w column [lindex $args 0]]
+           set option [lindex $args 1]
+           set data [::mclistbox::Column-configure $w $id $option]
+           set result [lindex $data 4]
+       }
+
+       column-configure {
+           set id [::mclistbox::Canonize $w column [lindex $args 0]]
+           set args [lrange $args 1 end]
+           set result [eval ::mclistbox::Column-configure {$w} {$id} $args]
+       }
+
+       column-names {
+           if {[llength $args] != 0} {
+              return -code error "wrong # of args: should be \"$w column names\""
+           }
+           set result $misc(columns)
+       }
+
+       column-nearest {
+           if {[llength $args] != 1} {
+              return -code error "wrong # of args: should be \"$w column nearest x\""
+           }
+
+           set x [lindex $args 0]
+           set tmp [$widgets(text) index @$x,0]
+           set tmp [split $tmp "."]
+           set index [lindex $tmp 1]
+
+           set result [lindex $misc(columns) $index]
+       }
+
+       cget {
+           if {[llength $args] != 1} {
+              return -code error "wrong # args: should be $w cget option"
+           }
+           set opt [::mclistbox::Canonize $w option [lindex $args 0]]
+
+           set result $options($opt)
+       }
+
+
+       configure {
+           set result [eval ::mclistbox::Configure {$w} $args]
+
+       }
+
+       itemconfigure {
+           set result [eval ::mclistbox::ItemConfigure {$w} $args]
+
+       }
+
+       curselection {
+           set id [lindex $misc(columns) 0]
+           set result [$widgets(listbox$id) curselection]
+       }
+
+       delete {
+           if {[llength $args] < 1 || [llength $args] > 2} {
+              return -code error "wrong \# of args: should be $w delete first ?last?"
+           }
+
+           # it's possible that the selection will change because
+           # of something we do. So, grab the current selection before
+           # we do anything. Just before returning we'll see if the
+           # selection has changed. If so, we'll call our selectcommand
+           if {$options(-selectcommand) != ""} {
+              set col0 [lindex $misc(columns) 0]
+              set priorSelection [$widgets(listbox$col0) curselection]
+           }
+
+           set index1 [::mclistbox::MassageIndex $w [lindex $args 0]]
+           if {[llength $args] == 2} {
+              set index2 [::mclistbox::MassageIndex $w [lindex $args 1]]
+           } else {
+              set index2 ""
+           }
+
+           # note we do an eval here to make index2 "disappear" if it
+           # is set to an empty string.
+           foreach id $misc(columns) {
+              eval {$widgets(listbox$id)} delete $index1 $index2
+           }
+           eval {$widgets(hiddenListbox)} delete $index1 $index2
+
+           InvalidateScrollbars $w
+
+           set result ""
+       }
+
+       get {
+           if {[llength $args] < 1 || [llength $args] > 2} {
+              return -code error "wrong \# of args: should be $w get first ?last?"
+           }
+           set index1 [::mclistbox::MassageIndex $w [lindex $args 0]]
+           if {[llength $args] == 2} {
+              set index2 [::mclistbox::MassageIndex $w [lindex $args 1]]
+           } else {
+              set index2 ""
+           }
+
+           set result [eval ::mclistbox::WidgetProc-get {$w} $index1 $index2]
+
+       }
+
+       index {
+
+           if {[llength $args] != 1} {
+              return -code error "wrong \# of args: should be $w index index"
+           }
+
+           set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+           set id [lindex $misc(columns) 0]
+
+           set result [$widgets(listbox$id) index $index]
+       }
+
+       insert {
+           if {[llength $args] < 1} {
+              return -code error "wrong \# of args: should be $w insert ?element  element...?"
+           }
+
+           # it's possible that the selection will change because
+           # of something we do. So, grab the current selection before
+           # we do anything. Just before returning we'll see if the
+           # selection has changed. If so, we'll call our selectcommand
+           if {$options(-selectcommand) != ""} {
+              set col0 [lindex $misc(columns) 0]
+              set priorSelection [$widgets(listbox$col0) curselection]
+           }
+
+           set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+
+           ::mclistbox::Insert $w $index [lrange $args 1 end]
+
+           InvalidateScrollbars $w
+           set result ""
+       }
+
+       nearest {
+           if {[llength $args] != 1} {
+              return -code error "wrong \# of args: should be $w nearest y"
+           }
+
+           # translate the y coordinate into listbox space
+           set id [lindex $misc(columns) 0]
+           set y [lindex $args 0]
+           incr y -[winfo y $widgets(listbox$id)]
+           incr y -[winfo y $widgets(frame$id)]
+
+           set col0 [lindex $misc(columns) 0]
+
+           set result [$widgets(listbox$col0) nearest $y]
+       }
+
+       scan {
+           foreach {subcommand x y} $args {}
+           switch $subcommand {
+              mark {
+                  # we have to treat scrolling in x and y differently;
+                  # scrolling in the y direction affects listboxes and
+                  # scrolling in the x direction affects the text widget.
+                  # to facilitate that, we need to keep a local copy
+                  # of the scan mark.
+                  set misc(scanmarkx) $x
+                  set misc(scanmarky) $y
+
+                  # set the scan mark for each column
+                  foreach id $misc(columns) {
+                     $widgets(listbox$id) scan mark $x $y
+                  }
+
+                  # we can't use the x coordinate given us, since it
+                  # is relative to whatever column we are over. So,
+                  # we'll just usr the results of [winfo pointerx].
+                  $widgets(text) scan mark [winfo pointerx $w]  $y
+              }
+              dragto {
+                  # we want the columns to only scan in the y direction,
+                  # so we'll force the x componant to remain constant
+                  foreach id $misc(columns) {
+                     $widgets(listbox$id) scan dragto $misc(scanmarkx) $y
+                  }
+
+                  # since the scan mark of the text widget was based
+                  # on the pointer location, so must be the x
+                  # coordinate to the dragto command. And since we
+                  # want the text widget to only scan in the x
+                  # direction, the y componant will remain constant
+                  $widgets(text) scan dragto  [winfo pointerx $w] $misc(scanmarky)
+
+                  # make sure the scrollbars reflect the changes.
+                  InvalidateScrollbars $w
+              }
+
+              set result ""
+           }
+       }
+
+       see {
+           if {[llength $args] != 1} {
+              return -code error "wrong \# of args: should be $w see index"
+           }
+           set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+
+           foreach id $misc(columns) {
+              $widgets(listbox$id) see $index
+           }
+           InvalidateScrollbars $w
+           set result {}
+       }
+
+       selection {
+           # it's possible that the selection will change because
+           # of something we do. So, grab the current selection before
+           # we do anything. Just before returning we'll see if the
+           # selection has changed. If so, we'll call our selectcommand
+           if {$options(-selectcommand) != ""} {
+              set col0 [lindex $misc(columns) 0]
+              set priorSelection [$widgets(listbox$col0) curselection]
+           }
+
+           set subcommand [lindex $args 0]
+           set args [lrange $args 1 end]
+
+           set prefix "wrong \# of args: should be $w"
+           switch $subcommand {
+              includes {
+                  if {[llength $args] != 1} {
+                     return -code error "$prefix selection $subcommand index"
+                  }
+                  set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+                  set id [lindex $misc(columns) 0]
+                  set result [$widgets(listbox$id) selection includes $index]
+              }
+
+              set {
+                  switch [llength $args] {
+                     1 {
+                         set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
+                         set index2 ""
+                     }
+                     2 {
+                         set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
+                         set index2 [::mclistbox::MassageIndex $w  [lindex $args 1]]
+                     }
+                     default {
+                         return -code error "$prefix selection clear first ?last?"
+                     }
+                  }
+
+                  if {$options(-exportselection)} {
+                     SelectionHandler $w own
+                  }
+                  if {$index1 != ""} {
+                     foreach id $misc(columns) {
+                         eval {$widgets(listbox$id)} selection set  $index1 $index2
+                     }
+                  }
+
+                  set result ""
+              }
+
+              anchor {
+                  if {[llength $args] != 1} {
+                     return -code error "$prefix selection $subcommand index"
+                  }
+                  set index [::mclistbox::MassageIndex $w [lindex $args 0]]
+
+                  if {$options(-exportselection)} {
+                     SelectionHandler $w own
+                  }
+                  foreach id $misc(columns) {
+                     $widgets(listbox$id) selection anchor $index
+                  }
+                  set result ""
+              }
+
+              clear {
+                  switch [llength $args] {
+                     1 {
+                         set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
+                         set index2 ""
+                     }
+                     2 {
+                         set index1 [::mclistbox::MassageIndex $w  [lindex $args 0]]
+                         set index2 [::mclistbox::MassageIndex $w  [lindex $args 1]]
+                     }
+                     default {
+                         return -code error "$prefix selection clear first ?last?"
+                     }
+                  }
+
+                  if {$options(-exportselection)} {
+                     SelectionHandler $w own
+                  }
+                  foreach id $misc(columns) {
+                     eval {$widgets(listbox$id)} selection clear  $index1 $index2
+                  }
+                  set result ""
+              }
+           }
+       }
+
+       size {
+           set id [lindex $misc(columns) 0]
+           set result [$widgets(listbox$id) size]
+       }
     }
 
     # if the user has a selectcommand defined and the selection changed,
     # run the selectcommand
     if {[info exists priorSelection] && $options(-selectcommand) != ""} {
-	set column [lindex $misc(columns) 0]
-	set currentSelection [$widgets(listbox$column) curselection]
-	if {[string compare $priorSelection $currentSelection] != 0} {
-	    # this logic keeps us from getting into some sort of
-	    # infinite loop of the selectcommand changes the selection
-	    # (not particularly well tested, but it seems like the
-	    # right thing to do...)
-	    if {![info exists misc(skipRecursiveCall)]} {
-		set misc(skipRecursiveCall) 1
-		uplevel \#0 $options(-selectcommand) $currentSelection
-		catch {unset misc(skipRecursiveCall)}
-	    }
-	}
+       set column [lindex $misc(columns) 0]
+       set currentSelection [$widgets(listbox$column) curselection]
+       if {[string compare $priorSelection $currentSelection] != 0} {
+           # this logic keeps us from getting into some sort of
+           # infinite loop of the selectcommand changes the selection
+           # (not particularly well tested, but it seems like the
+           # right thing to do...)
+           if {![info exists misc(skipRecursiveCall)]} {
+              set misc(skipRecursiveCall) 1
+              uplevel \#0 $options(-selectcommand) $currentSelection
+              catch {unset misc(skipRecursiveCall)}
+           }
+       }
     }
 
     return $result
@@ -2589,34 +2589,34 @@ proc WidgetProc-get {w args} {
     # arg which in turn forces the listbox to return a list,
     # even if its a list of one element
     if {[llength $args] == 1} {
-	lappend args [lindex $args 0]
-	set returnType "listOfLists"
+       lappend args [lindex $args 0]
+       set returnType "listOfLists"
     }
 
     # get all the data from each column
     foreach id $misc(columns) {
-	set data($id) [eval {$widgets(listbox$id)} get $args]
+       set data($id) [eval {$widgets(listbox$id)} get $args]
     }
 
     # now join the data together one row at a time. Ugh.
     set result {}
     set rows [llength $data($id)]
     for {set i 0} {$i < $rows} {incr i} {
-	set this {}
-	foreach column $misc(columns) {
-	    lappend this [lindex $data($column) $i]
-	}
-	lappend result $this
+       set this {}
+       foreach column $misc(columns) {
+           lappend this [lindex $data($column) $i]
+       }
+       lappend result $this
     }
-    
+
     # now to unroll the list if necessary. If the user gave
     # us only one indicie we want to return a single list
     # of values. If they gave use two indicies we want to return
     # a list of lists.
     if {[string compare $returnType "list"] == 0} {
-	return $result
+       return $result
     } else {
-	return [lindex $result 0]
+       return [lindex $result 0]
     }
 }
 }
@@ -2627,48 +2627,48 @@ namespace eval ::mclistbox {
 proc convert {w args} {
     set result {}
     if {![winfo exists $w]} {
-	return -code error "window \"$w\" doesn't exist"
+       return -code error "window \"$w\" doesn't exist"
     }
 
     while {[llength $args] > 0} {
-	set option [lindex $args 0]
-	set args [lrange $args 1 end]
+       set option [lindex $args 0]
+       set args [lrange $args 1 end]
 
-	switch -exact -- $option {
-	    -x {
-		set value [lindex $args 0]
-		set args [lrange $args 1 end]
-		set win $w
-		while {[winfo class $win] != "Mclistbox"} {
-		    incr value [winfo x $win]
-		    set win [winfo parent $win]
-		    if {$win == "."} break
-		}
-		lappend result $value
-	    }
+       switch -exact -- $option {
+           -x {
+              set value [lindex $args 0]
+              set args [lrange $args 1 end]
+              set win $w
+              while {[winfo class $win] != "Mclistbox"} {
+                  incr value [winfo x $win]
+                  set win [winfo parent $win]
+                  if {$win == "."} break
+              }
+              lappend result $value
+           }
 
-	    -y {
-		set value [lindex $args 0]
-		set args [lrange $args 1 end]
-		set win $w
-		while {[winfo class $win] != "Mclistbox"} {
-		    incr value [winfo y $win]
-		    set win [winfo parent $win]
-		    if {$win == "."} break
-		}
-		lappend result $value
-	    }
+           -y {
+              set value [lindex $args 0]
+              set args [lrange $args 1 end]
+              set win $w
+              while {[winfo class $win] != "Mclistbox"} {
+                  incr value [winfo y $win]
+                  set win [winfo parent $win]
+                  if {$win == "."} break
+              }
+              lappend result $value
+           }
 
-	    -w -
-	    -W {
-		set win $w
-		while {[winfo class $win] != "Mclistbox"} {
-		    set win [winfo parent $win]
-		    if {$win == "."} break;
-		}
-		lappend result $win
-	    }
-	}
+           -w -
+           -W {
+              set win $w
+              while {[winfo class $win] != "Mclistbox"} {
+                  set win [winfo parent $win]
+                  if {$win == "."} break;
+              }
+              lappend result $win
+           }
+       }
     }
     return $result
 }
@@ -2683,22 +2683,22 @@ proc mclistbox {args} {
     # perform a one time initialization
     if {![info exists widgetOptions]} {
       __mclistbox_Setup
-	Init
+       Init
     }
 
     # make sure we at least have a widget name
     if {[llength $args] == 0} {
-	return -code error "wrong # args: should be \"mclistbox pathName ?options?\""
+       return -code error "wrong # args: should be \"mclistbox pathName ?options?\""
     }
 
     # ... and make sure a widget doesn't already exist by that name
     if {[winfo exists [lindex $args 0]]} {
-	return -code error "window name \"[lindex $args 0]\" already exists"
+       return -code error "window name \"[lindex $args 0]\" already exists"
     }
 
     # and check that all of the args are valid
     foreach {name value} [lrange $args 1 end] {
-	Canonize [lindex $args 0] option $name
+       Canonize [lindex $args 0] option $name
     }
 
     # build it...
@@ -2724,7 +2724,7 @@ proc ::__mclistbox_Setup {} {
         # these contain references to available options
         variable widgetOptions
         variable columnOptions
-	variable itemConfigureOptions
+       variable itemConfigureOptions
 
         # these contain references to available commands and subcommands
         variable widgetCommands
@@ -3644,9 +3644,9 @@ adjourn .top75
 
 proc ::ViewAll {} {
    global widget editor stablist mulstname psviewer
-   
+
    set what [Optionmenu3 get]
-   if {$what == "View:"} return 
+   if {$what == "View:"} return
 
    set suf(View:) " "
    set suf(inputs) .inp
@@ -3664,9 +3664,9 @@ proc ::ViewAll {} {
    set suf(short-outputs) .out
    set suf(full-outputs) .lst
    set suf(PLOTC4-plots) .ps
-   
 
-   
+
+
    foreach el $stablist {
       if {$el == ""} continue
       set elspl [split $el -]
@@ -3688,7 +3688,7 @@ proc ::ViewAll {} {
 proc ::adjourn {w} {
 global widget filelist archdirlist archfilelist zvvplots profilter zvfilter archfilter archdir
 
-# list of zvv plots 
+# list of zvv plots
 set zvvplots [glob -nocomplain *$zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 
@@ -3745,24 +3745,24 @@ global widget file
    set ein [string range $line 45 53]
    set ang [string range $line 56 58]
    set elv [string range $line 63 72]
-   if { $ej == " 0" } {set ejc g     
-   } elseif {$ej == "   1"} {set ejc n 
+   if { $ej == " 0" } {set ejc g
+   } elseif {$ej == "   1"} {set ejc n
    } elseif {$ej == "1001"} {set ejc p
    } elseif {$ej == "2004"} {set ejc a
    } else {set ejc ""
-   } 
-   if { $mtt == "   2" } {set mt ELAS    
+   }
+   if { $mtt == "   2" } {set mt ELAS
    } elseif {$mtt == "   4"} {set mt INEL
    } elseif {$mtt == "  51"} {set mt INEL
    } elseif {$mtt >= 9000} {set mt PROD
    } else {set mt $mtt
-   } 
-   if { $mff == "  3" } {set mf XS    
-   } elseif {$mff == "  4"} {set mf DA 
+   }
+   if { $mff == "  3" } {set mf XS
+   } elseif {$mff == "  4"} {set mf DA
    } elseif {$mff == " 5"} {set mf DE
    } elseif {$mff == "  6"} {set mf DD
    } else {set mf $mff
-   } 
+   }
    if { $mff == "  3" } {set ejc " "}
    Mclistbox1 insert end [list $num  $mf $ejc $mt $ein $elv $ang "#" ]
    }
@@ -3775,17 +3775,17 @@ proc ::fileDialog {w} {
 global widget
 global file zvfilter zvvplots profilter filelist archfilter workdir
 
-    #   Type names		Extension(s)	Mac File Type(s)
+    #   Type names          Extension(s)  Mac File Type(s)
     #
     #---------------------------------------------------------
     set types {
-	{"Input Files"		{.inp}		}
-	{"All   Files"		{*}		}
+       {"Input Files"              {.inp}        }
+       {"All   Files"              {*}           }
     }
-     
+
 set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project directory and input file"]
 set workdirt [file dirname $defile]
-set pdir [lindex [file split $workdirt] end-1]  
+set pdir [lindex [file split $workdirt] end-1]
 if { $pdir != "empire" } {
   if {[tk_dialog .dialogsi Confirm "Requested directory is in a wrong level. You will be able to view files but not to run calculations. Is it OK?" "" 0 No Yes ] == 1} {
     set workdir $workdirt
@@ -3794,9 +3794,9 @@ if { $pdir != "empire" } {
     set file [file tail $dfile]
     set zvfilter $file
     set profilter $file
-    set archfilter $file 
+    set archfilter $file
     Combobox1 clear
-    # create list of possible ddx plots 
+    # create list of possible ddx plots
     ddlist
     # update all file lists
     adjourn .top75
@@ -3808,9 +3808,9 @@ if { $pdir != "empire" } {
     set file [file tail $dfile]
     set zvfilter $file
     set profilter $file
-    set archfilter $file 
+    set archfilter $file
     Combobox1 clear
-    # create list of possible ddx plots 
+    # create list of possible ddx plots
     ddlist
     # update all file lists
     adjourn .top75
@@ -3998,7 +3998,7 @@ proc vTclWindow.top75 {base} {
     # CREATING WIDGETS
     ###################
     vTcl:toplevel $top -class Toplevel \
-        -menu "$top.m88" -background #ffffff -highlightcolor black 
+        -menu "$top.m88" -background #ffffff -highlightcolor black
     wm focusmodel $top passive
     wm geometry $top 862x296+11+657; update
     wm maxsize $top 1265 994
@@ -4014,7 +4014,7 @@ proc vTclWindow.top75 {base} {
 
     frame $top.fra77 \
         -borderwidth 2 -relief groove -background #dcdcdc -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     vTcl:DefineAlias "$top.fra77" "Frame2" vTcl:WidgetProc "Toplevel1" 1
     set site_3_0 $top.fra77
     button $site_3_0.but78 \
@@ -4024,7 +4024,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects fileopen.gif]] \
-        -relief flat -text Project: 
+        -relief flat -text Project:
     vTcl:DefineAlias "$site_3_0.but78" "Button1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but78 "$site_3_0.but78 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but78 <<SetBalloon>> {
@@ -4032,7 +4032,7 @@ adjourn .top75} \
     }
     entry $site_3_0.ent79 \
         -background #ffffff -font {Helvetica -12 bold} -foreground #0000ff \
-        -justify right -textvariable file -validate focus -vcmd {} 
+        -justify right -textvariable file -validate focus -vcmd {}
     vTcl:DefineAlias "$site_3_0.ent79" "Entry1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.ent79 "$site_3_0.ent79 Entry $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.ent79 <<SetBalloon>> {
@@ -4044,7 +4044,7 @@ adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects edit.gif]] \
-        -relief flat -text Input 
+        -relief flat -text Input
     vTcl:DefineAlias "$site_3_0.but80" "Button2" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but80 "$site_3_0.but80 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but80 <<SetBalloon>> {
@@ -4058,7 +4058,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects launch.gif]] \
-        -relief flat -text R+F+P 
+        -relief flat -text R+F+P
     vTcl:DefineAlias "$site_3_0.but86" "Button8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but86 "$site_3_0.but86 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but86 <<SetBalloon>> {
@@ -4072,7 +4072,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects mini-run.gif]] \
-        -relief flat -text Run 
+        -relief flat -text Run
     vTcl:DefineAlias "$site_3_0.but87" "Button9" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but87 "$site_3_0.but87 Button $top all _vTclBalloon _vTclBalloon"
     bind $site_3_0.but87 <<SetBalloon>> {
@@ -4084,7 +4084,7 @@ adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects editcopy.gif]] \
-        -relief flat -text Output 
+        -relief flat -text Output
     vTcl:DefineAlias "$site_3_0.but81" "Button3" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but81 "$site_3_0.but81 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but81 <<SetBalloon>> {
@@ -4096,7 +4096,7 @@ adjourn .top75} \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects shortout.gif]] \
-        -relief flat -text Output 
+        -relief flat -text Output
     vTcl:DefineAlias "$site_3_0.but77" "Button133" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but77 "$site_3_0.but77 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but77 <<SetBalloon>> {
@@ -4108,7 +4108,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects kthememgr.gif]] \
-        -relief flat -text ENDF 
+        -relief flat -text ENDF
     vTcl:DefineAlias "$site_3_0.but82" "Button4" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but82 "$site_3_0.but82 Button $top all _vTclBalloon _vTclBalloon"
     bind $site_3_0.but82 <<SetBalloon>> {
@@ -4120,7 +4120,7 @@ adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects x4.gif]] \
-        -relief flat -text EXFOR 
+        -relief flat -text EXFOR
     vTcl:DefineAlias "$site_3_0.but83" "Button5" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but83 "$site_3_0.but83 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but83 <<SetBalloon>> {
@@ -4132,7 +4132,7 @@ adjourn .top75} \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects stop.gif]] \
-        -relief flat -text {C4 file} 
+        -relief flat -text {C4 file}
     vTcl:DefineAlias "$site_3_0.but84" "Button6" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but84 "$site_3_0.but84 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but84 <<SetBalloon>> {
@@ -4144,7 +4144,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects imagegallery.gif]] \
-        -relief flat -text Plots 
+        -relief flat -text Plots
     vTcl:DefineAlias "$site_3_0.but85" "Button7" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but85 "$site_3_0.but85 Button $top all _vTclBalloon _vTclBalloon"
     bind $site_3_0.but85 <<SetBalloon>> {
@@ -4157,7 +4157,7 @@ ddlist} -cursor hand2 \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects reload.gif]] \
-        -relief flat -text Update 
+        -relief flat -text Update
     vTcl:DefineAlias "$site_3_0.but76" "Button132" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but76 "$site_3_0.but76 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but76 <<SetBalloon>> {
@@ -4177,7 +4177,7 @@ adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects fileopen.gif]] \
-        -relief flat -text Project: 
+        -relief flat -text Project:
     vTcl:DefineAlias "$site_3_0.cpd68" "Button11" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.cpd68 "$site_3_0.cpd68 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.cpd68 <<SetBalloon>> {
@@ -4186,7 +4186,7 @@ adjourn .top75} \
     entry $site_3_0.cpd67 \
         -background #e6e6e6 -borderwidth 0 -font {Helvetica -12 bold} \
         -foreground #333333 -relief flat -state disabled \
-        -textvariable workdir -validate none -vcmd {} -width 0 
+        -textvariable workdir -validate none -vcmd {} -width 0
     vTcl:DefineAlias "$site_3_0.cpd67" "Entry3" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.cpd67 "$site_3_0.cpd67 Entry $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.cpd67 <<SetBalloon>> {
@@ -4194,86 +4194,86 @@ adjourn .top75} \
     }
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
-        -command {exec ../scripts/clean $file 
+        -command {exec ../scripts/clean $file
 adjourn .top75} \
         -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
         -highlightcolor #000000 \
         -image [vTcl:image:get_image [file join / home herman empire work Projects kleandisk.gif]] \
-        -relief flat -text Clean 
+        -relief flat -text Clean
     bindtags $site_3_0.button77 "$site_3_0.button77 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.button77 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Clean project (delete all project files except input)}
     }
     pack $site_3_0.but78 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -side left
     pack $site_3_0.ent79 \
-        -in $site_3_0 -anchor center -expand 0 -fill y -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill y -side left
     pack $site_3_0.but80 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.but86 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left
     pack $site_3_0.but87 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.but81 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.but77 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.but82 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.but83 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left
     pack $site_3_0.but84 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left
     pack $site_3_0.but85 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 5 -side left
     pack $site_3_0.but76 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -ipadx 3 -side left
     pack $site_3_0.cpd68 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -side left
     pack $site_3_0.cpd67 \
-        -in $site_3_0 -anchor center -expand 1 -fill both -padx 5 -side left 
+        -in $site_3_0 -anchor center -expand 1 -fill both -padx 5 -side left
     pack $site_3_0.button77 \
-        -in $site_3_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_3_0 -anchor center -expand 0 -fill none -side left
     ::iwidgets::tabnotebook $top.tab88 \
         -angle 20 -backdrop #dcdcdc -bevelamount 2 -raiseselect 0 \
-        -tabborders 1 -tabforeground #666666 -tabpos n 
+        -tabborders 1 -tabforeground #666666 -tabpos n
     vTcl:DefineAlias "$top.tab88" "Tabnotebook1" vTcl:WidgetProc "Toplevel1" 1
     $top.tab88 add \
-        -command {} -label {Main 1} -width 0 
+        -command {} -label {Main 1} -width 0
     $top.tab88 add \
-        -command {} -label {Main 2} -width 0 
+        -command {} -label {Main 2} -width 0
     $top.tab88 add \
-        -command {} -label {ZVV plots} -width 0 
+        -command {} -label {ZVV plots} -width 0
     $top.tab88 add \
-        -command {} -label Logs -width 0 
+        -command {} -label Logs -width 0
     $top.tab88 add \
-        -command {} -label Files -width 0 
+        -command {} -label Files -width 0
     $top.tab88 add \
-        -command {} -label Folders -width 0 
+        -command {} -label Folders -width 0
     $top.tab88 add \
-        -command {} -label Multi-run -width 0 
+        -command {} -label Multi-run -width 0
     $top.tab88 add \
-        -command {} -label Source -width 0 
+        -command {} -label Source -width 0
     set site_8_0 [lindex [$top.tab88 childsite] 0]
     ::iwidgets::labeledframe $site_8_0.lab69 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Execute 
+        -labeltext Execute
     vTcl:DefineAlias "$site_8_0.lab69" "Labeledframe15" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab69 childsite]
     frame $site_10_0.fra70 \
-        -borderwidth 2 -background #e6e6e6 -height 75 -width 125 
+        -borderwidth 2 -background #e6e6e6 -height 75 -width 125
     vTcl:DefineAlias "$site_10_0.fra70" "Frame6" vTcl:WidgetProc "Toplevel1" 1
     set site_11_0 $site_10_0.fra70
     button $site_11_0.cpd72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {exec xterm -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i ../scripts/skel.inp $file.inp 
+        -command {exec xterm -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i ../scripts/skel.inp $file.inp
 adjourn .top75
 exec $editor $file.inp &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
-        -relief raised -text {Create input} 
+        -relief raised -text {Create input}
     vTcl:DefineAlias "$site_11_0.cpd72" "Button28" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd72 "$site_11_0.cpd72 Button $top all _vTclBalloon"
     bind $site_11_0.cpd72 <<SetBalloon>> {
@@ -4284,7 +4284,7 @@ exec $editor $file.inp &} \
         -background #dcdcdc -command {exec $editor $file.inp &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
-        -relief raised -text {Edit input} 
+        -relief raised -text {Edit input}
     vTcl:DefineAlias "$site_11_0.cpd73" "Button29" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd73 "$site_11_0.cpd73 Button $top all _vTclBalloon"
     bind $site_11_0.cpd73 <<SetBalloon>> {
@@ -4293,19 +4293,19 @@ exec $editor $file.inp &} \
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e ../scripts/runE $file} 
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e ../scripts/format $file} 
-if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/verify $file} 
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file 1} 
-if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e ../scripts/plot $file} 
+        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e ../scripts/runE $file}
+if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e ../scripts/format $file}
+if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/verify $file}
+if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file 1}
+if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e ../scripts/plot $file}
 
-# create list of possible ddx plots 
+# create list of possible ddx plots
 ddlist
 
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Run selected ->} 
+        -relief raised -text {Run selected ->}
     vTcl:DefineAlias "$site_11_0.cpd75" "Button32" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd75 "$site_11_0.cpd75 Button $top all _vTclBalloon"
     bind $site_11_0.cpd75 <<SetBalloon>> {
@@ -4313,45 +4313,45 @@ adjourn .top75} \
     }
     pack $site_11_0.cpd72 \
         -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_11_0.cpd73 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -side top
     pack $site_11_0.cpd75 \
         -in $site_11_0 -anchor center -expand 1 -fill both -padx 5 -pady 5 \
-        -side top 
+        -side top
     ::iwidgets::checkbox $site_10_0.che77 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* \
-        -labeltext {Select for running} -relief flat 
+        -labeltext {Select for running} -relief flat
     vTcl:DefineAlias "$site_10_0.che77" "Checkbox5" vTcl:WidgetProc "Toplevel1" 1
     $site_10_0.che77 add chk0 \
         -anchor w -background #e6e6e6 -highlightbackground #e6e6e6 \
         -justify left -selectcolor #00ff00 -text EMPIRE -textvariable {} \
-        -variable cempire 
+        -variable cempire
     $site_10_0.che77 add chk1 \
         -anchor w -background #e6e6e6 -highlightbackground #e6e6e6 \
         -justify left -selectcolor #00ff00 -text {Formatting (EMPEND)} \
-        -textvariable {} -variable cformat 
+        -textvariable {} -variable cformat
     $site_10_0.che77 add chk2 \
         -anchor w -background #e6e6e6 -highlightbackground #e6e6e6 \
         -justify left -selectcolor #00ff00 -text Verification \
-        -textvariable {} -variable cverify 
+        -textvariable {} -variable cverify
     $site_10_0.che77 add chk3 \
         -anchor w -background #e6e6e6 -highlightbackground #e6e6e6 \
         -justify left -selectcolor #00ff00 -text PreProcessing \
-        -textvariable {} -variable cprepro 
+        -textvariable {} -variable cprepro
     $site_10_0.che77 add chk4 \
         -anchor w -background #e6e6e6 -highlightbackground #e6e6e6 \
         -justify left -selectcolor #00ff00 -text {Plotting (PLOTC4)} \
-        -textvariable {} -variable cplot 
+        -textvariable {} -variable cplot
     pack $site_10_0.fra70 \
-        -in $site_10_0 -anchor center -expand 1 -fill both -side left 
+        -in $site_10_0 -anchor center -expand 1 -fill both -side left
     pack $site_10_0.che77 \
-        -in $site_10_0 -anchor center -expand 1 -fill none -side right 
+        -in $site_10_0 -anchor center -expand 1 -fill none -side right
     ::iwidgets::labeledframe $site_8_0.lab100 \
         -ipadx 5 -ipady 5 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext Output 
+        -labelpos nw -labeltext Output
     vTcl:DefineAlias "$site_8_0.lab100" "Labeledframe3" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab100 childsite]
     button $site_10_0.but92 \
@@ -4359,7 +4359,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.lst &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text Full 
+        -relief raised -text Full
     vTcl:DefineAlias "$site_10_0.but92" "Button19" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but92 "$site_10_0.but92 Button $top all _vTclBalloon"
     bind $site_10_0.but92 <<SetBalloon>> {
@@ -4370,7 +4370,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.out &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text Short 
+        -relief raised -text Short
     vTcl:DefineAlias "$site_10_0.but93" "Button20" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but93 "$site_10_0.but93 Button $top all _vTclBalloon"
     bind $site_10_0.but93 <<SetBalloon>> {
@@ -4381,26 +4381,26 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.endf &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text ENDF 
+        -relief raised -text ENDF
     vTcl:DefineAlias "$site_10_0.but101" "Button21" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but101 "$site_10_0.but101 Button $top all _vTclBalloon"
     bind $site_10_0.but101 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View ENDF-6 file}
     }
     pack $site_10_0.but92 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but93 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but101 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     ::iwidgets::labeledframe $site_8_0.lab70 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Output/Input 
+        -labeltext Output/Input
     vTcl:DefineAlias "$site_8_0.lab70" "Labeledframe1" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab70 childsite]
     frame $site_10_0.cpd71 \
         -background #e6e6e6 -highlightbackground #d9d9d9 \
-        -highlightcolor black 
+        -highlightcolor black
     bindtags $site_10_0.cpd71 "itk-destroy-.top75.tab88.canvas.notebook.cs.page1.cs.lab102.childsite $site_10_0.cpd71 Frame $top all"
     set site_11_0 $site_10_0.cpd71
     button $site_11_0.but92 \
@@ -4408,7 +4408,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.lev &} -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Discrete levels} 
+        -relief raised -text {Discrete levels}
     vTcl:DefineAlias "$site_11_0.but92" "Button25" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but92 "$site_11_0.but92 Button $top all _vTclBalloon"
     bind $site_11_0.but92 <<SetBalloon>> {
@@ -4419,7 +4419,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-lev.col &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Collective levels} 
+        -relief raised -text {Collective levels}
     vTcl:DefineAlias "$site_11_0.but93" "Button42" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
     bind $site_11_0.but93 <<SetBalloon>> {
@@ -4430,21 +4430,21 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $psviewer $file-cum.ps &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Cumul. plot} 
+        -relief raised -text {Cumul. plot}
     vTcl:DefineAlias "$site_11_0.but101" "Button49" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
     bind $site_11_0.but101 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View cumulative plots of discrete levels along with lev. dens.}
     }
     pack $site_11_0.but92 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_11_0.but93 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_11_0.but101 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     frame $site_10_0.cpd72 \
         -background #e6e6e6 -highlightbackground #d9d9d9 \
-        -highlightcolor black 
+        -highlightcolor black
     bindtags $site_10_0.cpd72 "itk-destroy-.top75.tab88.canvas.notebook.cs.page1.cs.lab103.childsite $site_10_0.cpd72 Frame $top all"
     set site_11_0 $site_10_0.cpd72
     button $site_11_0.but93 \
@@ -4452,7 +4452,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-omp.ripl &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {OM parameters} 
+        -relief raised -text {OM parameters}
     vTcl:DefineAlias "$site_11_0.but93" "Button50" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
     bind $site_11_0.but93 <<SetBalloon>> {
@@ -4463,7 +4463,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-omp.dir &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {OMP for direct} 
+        -relief raised -text {OMP for direct}
     vTcl:DefineAlias "$site_11_0.but101" "Button54" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
     bind $site_11_0.but101 <<SetBalloon>> {
@@ -4474,24 +4474,24 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-inp.fis &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Fission input} 
+        -relief raised -text {Fission input}
     vTcl:DefineAlias "$site_11_0.cpd67" "Button55" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd67 "$site_11_0.cpd67 Button $top all _vTclBalloon"
     bind $site_11_0.cpd67 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit fission input created by EMPIRE in the first run}
     }
     pack $site_11_0.but93 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_11_0.but101 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_11_0.cpd67 \
-        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_11_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.cpd71 \
         -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
-        -side left 
+        -side left
     pack $site_10_0.cpd72 \
         -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
-        -side right 
+        -side right
     button $site_8_0.cpd67 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
         -command {set rcfl [open ../.Xrunrc w+]
@@ -4508,27 +4508,27 @@ close $rcfl
 exit} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text Exit -width 10 -wraplength 60 
+        -pady 2m -relief raised -text Exit -width 10 -wraplength 60
     vTcl:DefineAlias "$site_8_0.cpd67" "Button56" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_8_0.cpd67 "$site_8_0.cpd67 Button $top all _vTclBalloon"
     bind $site_8_0.cpd67 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Close GUI}
     }
     pack $site_8_0.lab69 \
-        -in $site_8_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_8_0 -anchor center -expand 0 -fill none -side left
     pack $site_8_0.lab100 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
-        -pady 2 -side left 
+        -pady 2 -side left
     pack $site_8_0.lab70 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
-        -pady 2 -side left 
+        -pady 2 -side left
     pack $site_8_0.cpd67 \
-        -in $site_8_0 -anchor center -expand 0 -fill none -pady 100 -side top 
+        -in $site_8_0 -anchor center -expand 0 -fill none -pady 100 -side top
     set site_8_1 [lindex [$top.tab88 childsite] 1]
     ::iwidgets::labeledframe $site_8_1.lab106 \
         -ipadx 5 -ipady 5 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Piece-wise run} 
+        -labelpos nw -labeltext {Piece-wise run}
     vTcl:DefineAlias "$site_8_1.lab106" "Labeledframe8" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab106 childsite]
     button $site_10_0.cpd67 \
@@ -4539,7 +4539,7 @@ exec cp $file.inp $file-b.inp
 exec cp $file.inp $file-c.inp} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
-        -text {Create 3 piece-wise input templates} -wraplength 70 
+        -text {Create 3 piece-wise input templates} -wraplength 70
     vTcl:DefineAlias "$site_10_0.cpd67" "Button167" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd67 "$site_10_0.cpd67 Button $top all _vTclBalloon"
     bind $site_10_0.cpd67 <<SetBalloon>> {
@@ -4550,7 +4550,7 @@ exec cp $file.inp $file-c.inp} \
         -background #dcdcdc -command {exec $editor $file-a.inp &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {Edit  input a} 
+        -text {Edit  input a}
     vTcl:DefineAlias "$site_10_0.but72" "Button158" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but72 "$site_10_0.but72 Button $top all _vTclBalloon"
     bind $site_10_0.but72 <<SetBalloon>> {
@@ -4561,7 +4561,7 @@ exec cp $file.inp $file-c.inp} \
         -background #dcdcdc -command {exec $editor $file-b.inp &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {Edit  input b} 
+        -text {Edit  input b}
     vTcl:DefineAlias "$site_10_0.but73" "Button159" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but73 "$site_10_0.but73 Button $top all _vTclBalloon"
     bind $site_10_0.but73 <<SetBalloon>> {
@@ -4572,7 +4572,7 @@ exec cp $file.inp $file-c.inp} \
         -background #dcdcdc -command {exec $editor $file-c.inp &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {Edit  input c} 
+        -text {Edit  input c}
     vTcl:DefineAlias "$site_10_0.but74" "Button160" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but74 "$site_10_0.but74 Button $top all _vTclBalloon"
     bind $site_10_0.but74 <<SetBalloon>> {
@@ -4581,11 +4581,11 @@ exec cp $file.inp $file-c.inp} \
     button $site_10_0.but71 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/run-piece-wise $file 
+        -command {exec xterm -e ../scripts/run-piece-wise $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
-        -text {Run piece-wise} 
+        -text {Run piece-wise}
     vTcl:DefineAlias "$site_10_0.but71" "Button157" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but71 "$site_10_0.but71 Button $top all _vTclBalloon"
     bind $site_10_0.but71 <<SetBalloon>> {
@@ -4593,19 +4593,19 @@ adjourn .top75} \
     }
     pack $site_10_0.cpd67 \
         -in $site_10_0 -anchor center -expand 0 -fill x -ipadx 5 -ipady 15 \
-        -padx 5 -pady 5 -side left 
+        -padx 5 -pady 5 -side left
     pack $site_10_0.but72 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but73 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but74 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but71 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     ::iwidgets::labeledframe $site_8_1.lab105 \
         -ipadx 5 -ipady 5 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {OMP fit} 
+        -labelpos nw -labeltext {OMP fit}
     vTcl:DefineAlias "$site_8_1.lab105" "Labeledframe7" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab105 childsite]
     button $site_10_0.but74 \
@@ -4613,7 +4613,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-omp.ripl &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {Edit RIPL OMP} 
+        -text {Edit RIPL OMP}
     vTcl:DefineAlias "$site_10_0.but74" "Button155" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but74 "$site_10_0.but74 Button $top all _vTclBalloon"
     bind $site_10_0.but74 <<SetBalloon>> {
@@ -4623,11 +4623,11 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {exec rm -r $file-tl
-exec xterm -e ../scripts/run $file 
+exec xterm -e ../scripts/run $file
 adjourn .top75
-# create list of possible ddx plots 
+# create list of possible ddx plots
 ddlist
-set ddx $memlist(omp1) 
+set ddx $memlist(omp1)
 set ddxsh ""
 set i 0
 foreach el $ddx {
@@ -4651,12 +4651,12 @@ foreach el $ddx {
 puts $lsttab ""
 close $lsttab
 #exec gvim LSTTAB.INP
-exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
+exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
 exec xterm -e ../scripts/zvvddx $file omp1 1
 exec xterm -e ../scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
 
 
-set ddx $memlist(omp2) 
+set ddx $memlist(omp2)
 set ddxsh ""
 set i 0
 foreach el $ddx {
@@ -4679,13 +4679,13 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
+exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
 exec xterm -e ../scripts/zvvddx $file omp2 1
 exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
-        -text {Run fit + Plot} 
+        -text {Run fit + Plot}
     vTcl:DefineAlias "$site_10_0.but73" "Button154" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but73 "$site_10_0.but73 Button $top all _vTclBalloon"
     bind $site_10_0.but73 <<SetBalloon>> {
@@ -4699,21 +4699,21 @@ exec mv $file-omp2.zvd $file-omp2R.zvd
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
-        -text {Store as ref.} 
+        -text {Store as ref.}
     vTcl:DefineAlias "$site_10_0.but71" "Button156" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but71 "$site_10_0.but71 Button $top all _vTclBalloon"
     bind $site_10_0.but71 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Store last result as a reference for further plots }
     }
     pack $site_10_0.but74 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but73 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_10_0.but71 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top
     ::iwidgets::labeledframe $site_8_1.lab71 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext EXFOR 
+        -labeltext EXFOR
     vTcl:DefineAlias "$site_8_1.lab71" "Labeledframe6" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab71 childsite]
     button $site_10_0.cpd81 \
@@ -4723,7 +4723,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {GUI interface} -width 26 
+        -pady 1m -relief raised -text {GUI interface} -width 26
     vTcl:DefineAlias "$site_10_0.cpd81" "Button40" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd81 "$site_10_0.cpd81 Button $top all _vTclBalloon"
     bind $site_10_0.cpd81 <<SetBalloon>> {
@@ -4736,7 +4736,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {Run X4TOC4} -width 12 
+        -pady 1m -relief raised -text {Run X4TOC4} -width 12
     vTcl:DefineAlias "$site_10_0.cpd82" "Button34" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd82 "$site_10_0.cpd82 Button $top all _vTclBalloon"
     bind $site_10_0.cpd82 <<SetBalloon>> {
@@ -4747,7 +4747,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.exf &} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {View EXFOR} -width 12 
+        -text {View EXFOR} -width 12
     vTcl:DefineAlias "$site_10_0.cpd83" "Button171" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd83 "$site_10_0.cpd83 Button $top all _vTclBalloon"
     bind $site_10_0.cpd83 <<SetBalloon>> {
@@ -4760,7 +4760,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {Sort C4} -width 12 
+        -pady 1m -relief raised -text {Sort C4} -width 12
     vTcl:DefineAlias "$site_10_0.cpd84" "Button37" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd84 "$site_10_0.cpd84 Button $top all _vTclBalloon"
     bind $site_10_0.cpd84 <<SetBalloon>> {
@@ -4771,25 +4771,25 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file.c4 &} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {View C4} -width 12 
+        -text {View C4} -width 12
     vTcl:DefineAlias "$site_10_0.cpd85" "Button173" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd85 "$site_10_0.cpd85 Button $top all _vTclBalloon"
     bind $site_10_0.cpd85 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View experimental data in computational format}
     }
     grid $site_10_0.cpd81 \
-        -in $site_10_0 -column 0 -row 0 -columnspan 2 -rowspan 1 -pady 5 
+        -in $site_10_0 -column 0 -row 0 -columnspan 2 -rowspan 1 -pady 5
     grid $site_10_0.cpd82 \
-        -in $site_10_0 -column 0 -row 2 -columnspan 1 -rowspan 1 -pady 5 
+        -in $site_10_0 -column 0 -row 2 -columnspan 1 -rowspan 1 -pady 5
     grid $site_10_0.cpd83 \
-        -in $site_10_0 -column 0 -row 1 -columnspan 1 -rowspan 1 -pady 5 
+        -in $site_10_0 -column 0 -row 1 -columnspan 1 -rowspan 1 -pady 5
     grid $site_10_0.cpd84 \
-        -in $site_10_0 -column 1 -row 1 -columnspan 1 -rowspan 1 -pady 5 
+        -in $site_10_0 -column 1 -row 1 -columnspan 1 -rowspan 1 -pady 5
     grid $site_10_0.cpd85 \
-        -in $site_10_0 -column 1 -row 2 -columnspan 1 -rowspan 1 -pady 5 
+        -in $site_10_0 -column 1 -row 2 -columnspan 1 -rowspan 1 -pady 5
     ::iwidgets::labeledframe $site_8_1.lab75 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext ECIS 
+        -labeltext ECIS
     vTcl:DefineAlias "$site_8_1.lab75" "Labeledframe11" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab75 childsite]
     button $site_10_0.but81 \
@@ -4797,7 +4797,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-ecis.in &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -text {Edit input} 
+        -highlightcolor #000000 -text {Edit input}
     vTcl:DefineAlias "$site_10_0.but81" "Button161" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but81 "$site_10_0.but81 Button $top all _vTclBalloon"
     bind $site_10_0.but81 <<SetBalloon>> {
@@ -4808,7 +4808,7 @@ adjourn .top75} \
         -background #dcdcdc -command {exec $editor $file-ecis.out &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -text {View output} 
+        -highlightcolor #000000 -text {View output}
     vTcl:DefineAlias "$site_10_0.but83" "Button163" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but83 "$site_10_0.but83 Button $top all _vTclBalloon"
     bind $site_10_0.but83 <<SetBalloon>> {
@@ -4816,22 +4816,22 @@ adjourn .top75} \
     }
     pack $site_10_0.but81 \
         -in $site_10_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_10_0.but83 \
         -in $site_10_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_8_1.lab106 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -padx 5 \
-        -pady 2 -side left 
+        -pady 2 -side left
     pack $site_8_1.lab105 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -padx 5 \
-        -pady 2 -side left 
+        -pady 2 -side left
     pack $site_8_1.lab71 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 5 -padx 5 \
-        -pady 2 -side left 
+        -pady 2 -side left
     pack $site_8_1.lab75 \
         -in $site_8_1 -anchor center -expand 0 -fill none -ipadx 10 -ipady 20 \
-        -padx 5 -pady 2 -side left 
+        -padx 5 -pady 2 -side left
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -activebackground #dcdcdc \
@@ -4840,25 +4840,25 @@ adjourn .top75} \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \
         -selectmode extended -textbackground #ffffff \
-        -textfont {Helvetica -12 } -vscrollmode dynamic -width 170 
+        -textfont {Helvetica -12 } -vscrollmode dynamic -width 170
     frame $site_8_2.fra84 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc 
+        -highlightbackground #dcdcdc
     set site_9_0 $site_8_2.fra84
     ::iwidgets::entryfield $site_9_0.ent85 \
         -command {set zvvplots [glob -nocomplain *$zvfilter*.zvd]} \
         -labelfont {Helvetica -12 } -labeltext Filter: -textbackground white \
-        -textvariable zvfilter -width 15 
+        -textvariable zvfilter -width 15
     vTcl:DefineAlias "$site_9_0.ent85" "Entryfield1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra90 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     set site_10_0 $site_9_0.fra90
     menubutton $site_10_0.men91 \
         -activebackground #dcdcdc -background #e6e6e6 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} -indicatoron 1 \
         -menu "$site_10_0.men91.m" -padx 5 -pady 2 -relief raised \
-        -textvariable mt -width 3 
+        -textvariable mt -width 3
     vTcl:DefineAlias "$site_10_0.men91" "Menubutton1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.men91 "$site_10_0.men91 Menubutton $top all _vTclBalloon"
     bind $site_10_0.men91 <<SetBalloon>> {
@@ -4866,73 +4866,73 @@ adjourn .top75} \
     }
     menu $site_10_0.men91.m \
         -activebackground #f7fbf7 -activeforeground black \
-        -disabledforeground #a1a4a1 -foreground black -tearoff 0 
+        -disabledforeground #a1a4a1 -foreground black -tearoff 0
     vTcl:DefineAlias "$site_10_0.men91.m" "Menu14" vTcl:WidgetProc "" 1
     $site_10_0.men91.m add radiobutton \
         -value 1 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=1 (total)} 
+        -label {MT=1 (total)}
     $site_10_0.men91.m add radiobutton \
         -value 2 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=2 (elastic)} 
+        -label {MT=2 (elastic)}
     $site_10_0.men91.m add radiobutton \
         -value 4 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=4 (inelastic)} 
+        -label {MT=4 (inelastic)}
     $site_10_0.men91.m add radiobutton \
         -value 16 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=16 (x,2n)} 
+        -label {MT=16 (x,2n)}
     $site_10_0.men91.m add radiobutton \
         -value 17 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=17 (x,3n)} 
+        -label {MT=17 (x,3n)}
     $site_10_0.men91.m add radiobutton \
         -value 18 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=18 (x,f)} 
+        -label {MT=18 (x,f)}
     $site_10_0.men91.m add radiobutton \
         -value 22 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=22 (x,na)} 
+        -label {MT=22 (x,na)}
     $site_10_0.men91.m add radiobutton \
         -value 28 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=28 (x,np)} 
+        -label {MT=28 (x,np)}
     $site_10_0.men91.m add radiobutton \
         -value 45 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=45 (x,npa)} 
+        -label {MT=45 (x,npa)}
     $site_10_0.men91.m add radiobutton \
         -value 102 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=102 (x,g)} 
+        -label {MT=102 (x,g)}
     $site_10_0.men91.m add radiobutton \
         -value 103 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=103 (x,p)} 
+        -label {MT=103 (x,p)}
     $site_10_0.men91.m add radiobutton \
         -value 107 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=107 (x,a)} 
+        -label {MT=107 (x,a)}
     $site_10_0.men91.m add radiobutton \
         -value 112 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=112 (n,pa)} 
+        -label {MT=112 (n,pa)}
     entry $site_10_0.ent92 \
-        -background #ffffff -insertbackground black -textvariable mt -width 5 
+        -background #ffffff -insertbackground black -textvariable mt -width 5
     vTcl:DefineAlias "$site_10_0.ent92" "Entry2" vTcl:WidgetProc "Toplevel1" 1
     label $site_10_0.lab95 \
         -activebackground #dcdcdc -background #e6e6e6 \
-        -disabledforeground #a1a4a1 -font {Helvetica -12 } -text {Select MT:} 
+        -disabledforeground #a1a4a1 -font {Helvetica -12 } -text {Select MT:}
     vTcl:DefineAlias "$site_10_0.lab95" "Label7" vTcl:WidgetProc "Toplevel1" 1
     pack $site_10_0.men91 \
-        -in $site_10_0 -anchor center -expand 0 -fill none -side right 
+        -in $site_10_0 -anchor center -expand 0 -fill none -side right
     pack $site_10_0.ent92 \
-        -in $site_10_0 -anchor center -expand 0 -fill none -side right 
+        -in $site_10_0 -anchor center -expand 0 -fill none -side right
     pack $site_10_0.lab95 \
-        -in $site_10_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_10_0 -anchor center -expand 0 -fill none -side left
     button $site_9_0.but96 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
@@ -4940,7 +4940,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -text {Plot  selected MT} -wraplength 120 
+        -text {Plot  selected MT} -wraplength 120
     vTcl:DefineAlias "$site_9_0.but96" "Button122" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but96 "$site_9_0.but96 Button $top all _vTclBalloon"
     bind $site_9_0.but96 <<SetBalloon>> {
@@ -4957,7 +4957,7 @@ foreach el $seleczvvlist {
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {<= Delete selected} -wraplength 120 
+        -text {<= Delete selected} -wraplength 120
     vTcl:DefineAlias "$site_9_0.cpd69" "Button123" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd69 "$site_9_0.cpd69 Button $top all _vTclBalloon"
     bind $site_9_0.cpd69 <<SetBalloon>> {
@@ -4970,7 +4970,7 @@ adjourn .top75 }} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -text {Launch ZVV interface } -wraplength 72 
+        -text {Launch ZVV interface } -wraplength 72
     vTcl:DefineAlias "$site_9_0.but88" "Button129" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but88 "$site_9_0.but88 Button $top all _vTclBalloon"
     bind $site_9_0.but88 <<SetBalloon>> {
@@ -4983,33 +4983,33 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -text {ZVV plot from EMPIRE} -wraplength 72 
+        -text {ZVV plot from EMPIRE} -wraplength 72
     vTcl:DefineAlias "$site_9_0.but89" "Button130" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but89 "$site_9_0.but89 Button $top all _vTclBalloon"
     bind $site_9_0.but89 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Any excitation function can be plotted; no need for the ENDF file}
     }
     pack $site_9_0.ent85 \
-        -in $site_9_0 -anchor nw -expand 0 -fill x -pady 20 -side top 
+        -in $site_9_0 -anchor nw -expand 0 -fill x -pady 20 -side top
     pack $site_9_0.fra90 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -side top
     pack $site_9_0.but96 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -side top
     pack $site_9_0.cpd69 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -pady 3 -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -pady 3 -side top
     pack $site_9_0.but88 \
-        -in $site_9_0 -anchor ne -expand 0 -fill none -side right 
+        -in $site_9_0 -anchor ne -expand 0 -fill none -side right
     pack $site_9_0.but89 \
-        -in $site_9_0 -anchor nw -expand 0 -fill none -side left 
+        -in $site_9_0 -anchor nw -expand 0 -fill none -side left
     frame $site_8_2.fra76 \
         -borderwidth 2 -background #dcdcdc -height 75 \
-        -highlightbackground #dcdcdc -width 227 
+        -highlightbackground #dcdcdc -width 227
     vTcl:DefineAlias "$site_8_2.fra76" "Frame13" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_2.fra76
     label $site_9_0.lab81 \
         -activebackground #e6e6e6 -anchor w -background #e6e6e6 \
         -font {Helvetica -12 } -justify left \
-        -text {Select data for ZVV plotting (multiple allowed)} 
+        -text {Select data for ZVV plotting (multiple allowed)}
     vTcl:DefineAlias "$site_9_0.lab81" "Label8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.lab81 "$site_9_0.lab81 Label $top all _vTclBalloon"
     bind $site_9_0.lab81 <<SetBalloon>> {
@@ -5028,61 +5028,61 @@ foreach el $ddxlist {
    if { $prev == $last } {
    lappend ddx $el
    }
-   set prev $el 
+   set prev $el
 }
 lappend dd} \
-        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
+        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set}
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
         -background #ffffff -font {Helvetica -10} -label # \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -labelrelief raised -resizable 1 -visible 1 -width 5
     $site_9_0.mcl78 column add col2 \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -labelrelief raised -resizable 1 -visible 1 -width 5
     $site_9_0.mcl78 column add col3 \
         -background #ffffff -font {Helvetica -10} -label p \
-        -labelrelief raised -resizable 1 -visible 1 -width 3 
+        -labelrelief raised -resizable 1 -visible 1 -width 3
     $site_9_0.mcl78 column add col4 \
         -background #f999f999f999 -font {Helvetica -10} -label MT \
-        -labelrelief raised -resizable 1 -visible 1 -width 6 
+        -labelrelief raised -resizable 1 -visible 1 -width 6
     $site_9_0.mcl78 column add col5 \
         -background #ffffff -font {Helvetica -10} -label Einc \
-        -labelrelief raised -resizable 1 -visible 1 -width 10 
+        -labelrelief raised -resizable 1 -visible 1 -width 10
     $site_9_0.mcl78 column add col6 \
         -background #f999f999f999 -font {Helvetica -10 } -label Elev \
-        -labelrelief raised -resizable 1 -visible 1 -width 10 
+        -labelrelief raised -resizable 1 -visible 1 -width 10
     $site_9_0.mcl78 column add col7 \
         -background #ffffff -font {Helvetica -10} -label Ang \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -labelrelief raised -resizable 1 -visible 1 -width 5
     $site_9_0.mcl78 column add col8 \
         -background #ffffff -font {Helvetica -10} -label init \
-        -labelrelief raised -resizable 0 -visible 0 -width 3 
+        -labelrelief raised -resizable 0 -visible 0 -width 3
     scrollbar $site_9_0.scr80 \
-        -command {Mclistbox1 yview} 
+        -command {Mclistbox1 yview}
     vTcl:DefineAlias "$site_9_0.scr80" "Scrollbar1" vTcl:WidgetProc "Toplevel1" 1
     pack $site_9_0.lab81 \
-        -in $site_9_0 -anchor n -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor n -expand 0 -fill x -side top
     pack $site_9_0.mcl78 \
-        -in $site_9_0 -anchor w -expand 0 -fill y -side left 
+        -in $site_9_0 -anchor w -expand 0 -fill y -side left
     pack $site_9_0.scr80 \
-        -in $site_9_0 -anchor center -expand 1 -fill y -side right 
+        -in $site_9_0 -anchor center -expand 1 -fill y -side right
     frame $site_8_2.fra79 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     vTcl:DefineAlias "$site_8_2.fra79" "Frame14" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_2.fra79
     ::iwidgets::entryfield $site_9_0.ent80 \
         -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List of selected } -textbackground #ffffff \
-        -textvariable ddx -width 0 
+        -textvariable ddx -width 0
     vTcl:DefineAlias "$site_9_0.ent80" "Entryfield3" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_9_0.ent82 \
         -justify right -labelfont {Helvetica -12 } -labeltext {Shift 10**} \
-        -textbackground #ffffff -textvariable nsh 
+        -textbackground #ffffff -textvariable nsh
     vTcl:DefineAlias "$site_9_0.ent82" "Entryfield4" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_9_0.ent83 \
         -justify right -labelfont {Helvetica -12 } -labeltext {Eres (rel)} \
-        -textbackground #ffffff -textvariable eres 
+        -textbackground #ffffff -textvariable eres
     vTcl:DefineAlias "$site_9_0.ent83" "Entryfield5" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -5097,7 +5097,7 @@ foreach el $ddx {
 }
 
 #if {$compeval != ""} {file copy -force $compeval ../util/lsttab/COMPARE.DAT }
-if {$compeval != ""} {file delete ../util/lsttab/COMPARE.DAT 
+if {$compeval != ""} {file delete ../util/lsttab/COMPARE.DAT
 file link -symbolic ../util/lsttab/COMPARE.DAT $compeval }
 
 set lsttab [open LSTTAB.INP w+]
@@ -5118,10 +5118,10 @@ foreach el $ddx {
 puts $lsttab ""
 close $lsttab
 #exec gvim LSTTAB.INP
-exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP 
+exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
 exec xterm -e ../scripts/zvvddx $file $multi &} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Plot the list } 
+        -highlightbackground #dcdcdc -text {Plot the list }
     vTcl:DefineAlias "$site_9_0.but81" "Button131" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but81 "$site_9_0.but81 Button $top all _vTclBalloon"
     bind $site_9_0.but81 <<SetBalloon>> {
@@ -5132,29 +5132,29 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
         -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page3.cs.fra79.com77 _addToList}} \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name} -selectioncommand {set ddx $memlist($multi)} \
-        -textbackground #ffffff -textvariable multi -unique 1 -width 10 
+        -textbackground #ffffff -textvariable multi -unique 1 -width 10
     vTcl:DefineAlias "$site_9_0.com77" "Combobox1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra69 \
         -borderwidth 2 -relief groove -background #e6e6e6 -height 85 \
-        -width 131 
+        -width 131
     vTcl:DefineAlias "$site_9_0.fra69" "Frame1" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 $site_9_0.fra69
     button $site_10_0.cpd70 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
-        -command {#   Type names		Extension(s)	Mac File Type(s)
+        -command {#   Type names          Extension(s)  Mac File Type(s)
     #
     #---------------------------------------------------------
     set types {
-	{"Input Files"		{.endf}		}
-	{"All   Files"		{*}		}
+       {"Input Files"              {.endf}              }
+       {"All   Files"              {*}           }
     }
-     
+
 set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select ENDF file to be compared"]} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects fileopen.gif]] \
-        -relief flat -text Project: 
+        -relief flat -text Project:
     vTcl:DefineAlias "$site_10_0.cpd70" "Button10" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd70 "$site_10_0.cpd70 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_10_0.cpd70 <<SetBalloon>> {
@@ -5162,44 +5162,44 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     }
     ::iwidgets::entryfield $site_10_0.cpd71 \
         -labelfont {Helvetica -12 } -labelpos nw -labeltext {Compare to:} \
-        -textbackground #ffffff -textvariable compeval -width 0 
+        -textbackground #ffffff -textvariable compeval -width 0
     vTcl:DefineAlias "$site_10_0.cpd71" "Entryfield7" vTcl:WidgetProc "Toplevel1" 1
     pack $site_10_0.cpd70 \
-        -in $site_10_0 -anchor center -expand 0 -fill none -side left 
+        -in $site_10_0 -anchor center -expand 0 -fill none -side left
     pack $site_10_0.cpd71 \
-        -in $site_10_0 -anchor center -expand 1 -fill x -padx 5 -side right 
+        -in $site_10_0 -anchor center -expand 1 -fill x -padx 5 -side right
     pack $site_9_0.ent80 \
-        -in $site_9_0 -anchor nw -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor nw -expand 0 -fill x -side top
     pack $site_9_0.ent82 \
-        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top
     pack $site_9_0.ent83 \
-        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top
     pack $site_9_0.but81 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -side top
     pack $site_9_0.com77 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -side top
     pack $site_9_0.fra69 \
-        -in $site_9_0 -anchor center -expand 1 -fill x -pady 5 -side left 
+        -in $site_9_0 -anchor center -expand 1 -fill x -pady 5 -side left
     pack $site_8_2.scr82 \
         -in $site_8_2 -anchor nw -expand 0 -fill both -padx 10 -pady 5 \
-        -side left 
+        -side left
     pack $site_8_2.fra84 \
         -in $site_8_2 -anchor nw -expand 0 -fill y -padx 5 -pady 10 \
-        -side left 
+        -side left
     pack $site_8_2.fra76 \
-        -in $site_8_2 -anchor center -expand 0 -fill both -side left 
+        -in $site_8_2 -anchor center -expand 0 -fill both -side left
     pack $site_8_2.fra79 \
-        -in $site_8_2 -anchor w -expand 1 -fill both -padx 5 -side left 
+        -in $site_8_2 -anchor w -expand 1 -fill both -padx 5 -side left
     set site_8_3 [lindex [$top.tab88 childsite] 3]
     label $site_8_3.lab111 \
         -activebackground #e6e6e6 -background #e6e6e6 -font {Helvetica -12 } \
         -justify left -padx 1 -pady 1 -relief ridge \
         -text {Outputs and log files produced by EMPIRE and utility codes. These files should be checked for possible problems during the execution.} \
-        -wraplength 200 
+        -wraplength 200
     vTcl:DefineAlias "$site_8_3.lab111" "Label3" vTcl:WidgetProc "Toplevel1" 1
     frame $site_8_3.fra112 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 250 
+        -highlightbackground #dcdcdc -width 250
     vTcl:DefineAlias "$site_8_3.fra112" "Frame3" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra112
     button $site_9_0.but113 \
@@ -5208,7 +5208,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {EMPIRE warnings} 
+        -relief raised -text {EMPIRE warnings}
     vTcl:DefineAlias "$site_9_0.but113" "Button43" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but113 "$site_9_0.but113 Button $top all _vTclBalloon"
     bind $site_9_0.but113 <<SetBalloon>> {
@@ -5219,7 +5219,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file.x42c4_lst &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {X4TOC4 log} 
+        -relief raised -text {X4TOC4 log}
     vTcl:DefineAlias "$site_9_0.but114" "Button44" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but114 "$site_9_0.but114 Button $top all _vTclBalloon"
     bind $site_9_0.but114 <<SetBalloon>> {
@@ -5230,7 +5230,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file.x42c4_errs &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {X4TOC4 errors} 
+        -relief raised -text {X4TOC4 errors}
     vTcl:DefineAlias "$site_9_0.but115" "Button45" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but115 "$site_9_0.but115 Button $top all _vTclBalloon"
     bind $site_9_0.but115 <<SetBalloon>> {
@@ -5238,16 +5238,16 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     }
     pack $site_9_0.but113 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but114 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but115 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     frame $site_8_3.fra71 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -highlightcolor #000000 -width 250 
+        -highlightbackground #dcdcdc -highlightcolor #000000 -width 250
     vTcl:DefineAlias "$site_8_3.fra71" "Frame18" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra71
     button $site_9_0.but71 \
@@ -5255,14 +5255,14 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file-log.checkr &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -state normal -text {CHECKR log} 
+        -highlightcolor #000000 -padx 1m -state normal -text {CHECKR log}
     vTcl:DefineAlias "$site_9_0.but71" "Button165" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but116 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.fizcon &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -state normal -text {FIZCON log} 
+        -highlightcolor #000000 -padx 1m -state normal -text {FIZCON log}
     vTcl:DefineAlias "$site_9_0.but116" "Button166" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but116 "$site_9_0.but116 Button $top all _vTclBalloon"
     bind $site_9_0.but116 <<SetBalloon>> {
@@ -5273,20 +5273,20 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file-log.psyche &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -text {PSYCHE log} 
+        -highlightcolor #000000 -padx 1m -text {PSYCHE log}
     vTcl:DefineAlias "$site_9_0.but115" "Button164" vTcl:WidgetProc "Toplevel1" 1
     pack $site_9_0.but71 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but116 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but115 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     frame $site_8_3.fra117 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 250 
+        -highlightbackground #dcdcdc -width 250
     vTcl:DefineAlias "$site_8_3.fra117" "Frame4" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.fra117
     button $site_9_0.button78 \
@@ -5295,7 +5295,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
-        -text {EMPEND log} 
+        -text {EMPEND log}
     vTcl:DefineAlias "$site_9_0.button78" "Button46" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.button78 "$site_9_0.button78 Button $top all _vTclBalloon"
     bind $site_9_0.button78 <<SetBalloon>> {
@@ -5306,7 +5306,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file-log.fixup &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {FIXUP log} 
+        -relief raised -text {FIXUP log}
     vTcl:DefineAlias "$site_9_0.but113" "Button47" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but113 "$site_9_0.but113 Button $top all _vTclBalloon"
     bind $site_9_0.but113 <<SetBalloon>> {
@@ -5317,7 +5317,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -background #dcdcdc -command {exec $editor $file-log.legend &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {LEGEND log} 
+        -relief raised -text {LEGEND log}
     vTcl:DefineAlias "$site_9_0.but114" "Button48" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but114 "$site_9_0.but114 Button $top all _vTclBalloon"
     bind $site_9_0.but114 <<SetBalloon>> {
@@ -5325,16 +5325,16 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     }
     pack $site_9_0.button78 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but113 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but114 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     frame $site_8_3.frame77 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -highlightcolor #000000 -width 250 
+        -highlightbackground #dcdcdc -highlightcolor #000000 -width 250
     vTcl:DefineAlias "$site_8_3.frame77" "Frame12" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_3.frame77
     button $site_9_0.but115 \
@@ -5343,14 +5343,14 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
-        -text {LINEAR log} 
+        -text {LINEAR log}
     vTcl:DefineAlias "$site_9_0.but115" "Button69" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but71 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $file-log.recent &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -padx 1m -text {RECENT log} 
+        -highlightcolor #000000 -padx 1m -text {RECENT log}
     vTcl:DefineAlias "$site_9_0.but71" "Button151" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but116 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -5358,7 +5358,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -image {} -padx 1m -relief raised \
-        -text {PLOTC4 log} 
+        -text {PLOTC4 log}
     vTcl:DefineAlias "$site_9_0.but116" "Button70" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but116 "$site_9_0.but116 Button $top all _vTclBalloon"
     bind $site_9_0.but116 <<SetBalloon>> {
@@ -5366,33 +5366,33 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     }
     pack $site_9_0.but115 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but71 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.but116 \
         -in $site_9_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_8_3.lab111 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 5 \
-        -padx 15 -pady 10 -side left 
+        -padx 15 -pady 10 -side left
     pack $site_8_3.fra112 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 2 \
-        -padx 2 -pady 2 -side left 
+        -padx 2 -pady 2 -side left
     pack $site_8_3.fra71 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 2 \
-        -padx 2 -pady 2 -side left 
+        -padx 2 -pady 2 -side left
     pack $site_8_3.fra117 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 2 \
-        -padx 2 -pady 2 -side left 
+        -padx 2 -pady 2 -side left
     pack $site_8_3.frame77 \
         -in $site_8_3 -anchor center -expand 0 -fill none -ipadx 2 -ipady 2 \
-        -padx 2 -pady 2 -side left 
+        -padx 2 -pady 2 -side left
     set site_8_4 [lindex [$top.tab88 childsite] 4]
     ::iwidgets::checkbox $site_8_4.che119 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos n -labeltext {Select file types:} -relief flat 
+        -labelpos n -labeltext {Select file types:} -relief flat
     vTcl:DefineAlias "$site_8_4.che119" "Checkbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_8_4.che119 add chk0 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
@@ -5400,67 +5400,67 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .lst -selectcolor green \
-        -text {full output} -variable cklo 
+        -text {full output} -variable cklo
     $site_8_4.che119 add chk1 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .out -selectcolor green \
-        -text {short output} -variable cksh 
+        -text {short output} -variable cksh
     $site_8_4.che119 add chk2 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -log* -selectcolor green \
-        -text {log files} -variable cklog 
+        -text {log files} -variable cklog
     $site_8_4.che119 add chk3 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue *.endf -selectcolor green \
-        -text ENDF -variable ckendf 
+        -text ENDF -variable ckendf
     $site_8_4.che119 add chk4 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .ps -selectcolor green \
-        -text {PLOTC4 plots} -variable ckplots 
+        -text {PLOTC4 plots} -variable ckplots
     $site_8_4.che119 add chk5 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .exf -selectcolor orange \
-        -text EXFOR -variable ckx4 
+        -text EXFOR -variable ckx4
     $site_8_4.che119 add chk6 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .c4 -selectcolor orange \
-        -text {C4 file} -variable ckc4 
+        -text {C4 file} -variable ckc4
     $site_8_4.che119 add chk7 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue n -onvalue 0001_ -selectcolor green \
-        -text {neutron Tl's} -variable ctln 
+        -justify left -offvalue n -onvalue 000001_ -selectcolor green \
+        -text {neutron Tl's} -variable ctln
     $site_8_4.che119 add chk8 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue n -onvalue 0101_ -selectcolor green \
-        -text {proton Tl's} -variable ctlp 
+        -justify left -offvalue n -onvalue 001001_ -selectcolor green \
+        -text {proton Tl's} -variable ctlp
     ::iwidgets::checkbox $site_8_4.che120 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -relief flat 
+        -relief flat
     vTcl:DefineAlias "$site_8_4.che120" "Checkbox2" vTcl:WidgetProc "Toplevel1" 1
     $site_8_4.che120 add chk0 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
@@ -5468,66 +5468,66 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -omp.ripl -padx 1 -relief flat \
-        -selectcolor orange -text {OM parameters} -variable ckriplomp 
+        -selectcolor orange -text {OM parameters} -variable ckriplomp
     $site_8_4.che120 add chk1 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -omp.dir -padx 1 -relief flat \
-        -selectcolor orange -text {OMP for direct} -variable ckdiromp 
+        -selectcolor orange -text {OMP for direct} -variable ckdiromp
     $site_8_4.che120 add chk2 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue *.zvd -padx 1 -relief flat \
-        -selectcolor orange -text {ZVV plots} -variable ckzvv 
+        -selectcolor orange -text {ZVV plots} -variable ckzvv
     $site_8_4.che120 add chk3 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .lev -padx 1 -relief flat \
-        -selectcolor red -text levels -variable cklev 
+        -selectcolor red -text levels -variable cklev
     $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -lev.col -padx 1 -relief flat \
-        -selectcolor red -text {collective levels} -variable ckcollev 
+        -selectcolor red -text {collective levels} -variable ckcollev
     $site_8_4.che120 add chk5 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .inp -padx 1 -relief flat \
-        -selectcolor red -text {EMPIRE input} -variable ckinp 
+        -selectcolor red -text {EMPIRE input} -variable ckinp
     $site_8_4.che120 add chk6 \
         -activebackground #f6f7f6 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -inp.fis -padx 1 -relief flat \
-        -selectcolor red -text {fission input} -variable ckfisinp 
+        -selectcolor red -text {fission input} -variable ckfisinp
     $site_8_4.che120 add chk7 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
-        -justify left -offvalue n -onvalue 0204_ -padx 1 -relief flat \
-        -selectcolor green -text {alpha Tl's} -variable ctla 
+        -justify left -offvalue n -onvalue 002004_ -padx 1 -relief flat \
+        -selectcolor green -text {alpha Tl's} -variable ctla
     $site_8_4.che120 add chk8 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue 0 -onvalue 1 -padx 1 -relief flat \
-        -selectcolor green -text {Tl directory} -variable ctldir 
+        -selectcolor green -text {Tl directory} -variable ctldir
     frame $site_8_4.fra122 \
         -background #e6e6e6 -height 75 -highlightbackground #dcdcdc \
-        -width 125 
+        -width 125
     vTcl:DefineAlias "$site_8_4.fra122" "Frame5" vTcl:WidgetProc "Toplevel1" 1
     set site_9_0 $site_8_4.fra122
     button $site_9_0.but123 \
@@ -5537,7 +5537,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -state normal -text {Delete selected files} \
-        -wraplength 60 
+        -wraplength 60
     vTcl:DefineAlias "$site_9_0.but123" "Button51" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but123 "$site_9_0.but123 Button $top all _vTclBalloon"
     bind $site_9_0.but123 <<SetBalloon>> {
@@ -5552,7 +5552,7 @@ adjourn .top75
 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {Clean project} -wraplength 60 
+        -pady 2m -relief raised -text {Clean project} -wraplength 60
     vTcl:DefineAlias "$site_9_0.but124" "Button52" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but124 "$site_9_0.but124 Button $top all _vTclBalloon"
     bind $site_9_0.but124 <<SetBalloon>> {
@@ -5566,18 +5566,18 @@ exec rm -f $file.inp
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {Remove project} -wraplength 60 
+        -pady 2m -relief raised -text {Remove project} -wraplength 60
     vTcl:DefineAlias "$site_9_0.but125" "Button53" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but125 "$site_9_0.but125 Button $top all _vTclBalloon"
     bind $site_9_0.but125 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Delete all project related files (including input)}
     }
     pack $site_9_0.but123 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top
     pack $site_9_0.but124 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top
     pack $site_9_0.but125 \
-        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill x -pady 4 -side top
     ::iwidgets::scrolledlistbox $site_8_4.scr77 \
         -activebackground #dcdcdc \
         -dblclickcommand {set selecfilelist [selection get]
@@ -5597,23 +5597,23 @@ if {$exten == ".ps"} {
         -selectioncommand {set selecfilelist [selection get]
 set selecfile [lindex $selecfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
-        -textfont {Helvetica -12 } -vscrollmode dynamic -width 150 
+        -textfont {Helvetica -12 } -vscrollmode dynamic -width 150
     vTcl:DefineAlias "$site_8_4.scr77" "Scrolledlistbox1" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_8_4.ent78 \
         \
         -command {#set filelist [glob -nocomplain *$profilter*]
 adjourn .top75} \
         -labelfont {Helvetica -12 } -labeltext Filter: -textbackground white \
-        -textvariable profilter -width 14 
+        -textvariable profilter -width 14
     vTcl:DefineAlias "$site_8_4.ent78" "Entryfield2" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::labeledframe $site_8_4.lab81 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Selected file} 
+        -labelpos nw -labeltext {Selected file}
     vTcl:DefineAlias "$site_8_4.lab81" "Labeledframe10" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_4.lab81 childsite]
     entry $site_10_0.ent82 \
         -background #ffffff -insertbackground black -textvariable selecfile \
-        -width 15 
+        -width 15
     vTcl:DefineAlias "$site_10_0.ent82" "Entry7" vTcl:WidgetProc "Toplevel1" 1
     button $site_10_0.but83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -5624,11 +5624,11 @@ set profilter $file
 set archfilter $file
 adjourn .top75
 Combobox1 clear
-# create list of possible ddx plots 
+# create list of possible ddx plots
 ddlist} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {Change to its project} 
+        -text {Change to its project}
     vTcl:DefineAlias "$site_10_0.but83" "Button126" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but83 "$site_10_0.but83 Button $top all _vTclBalloon"
     bind $site_10_0.but83 <<SetBalloon>> {
@@ -5638,7 +5638,7 @@ ddlist} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $selecfile &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
-        -foreground darkgreen -highlightbackground #dcdcdc -text Edit 
+        -foreground darkgreen -highlightbackground #dcdcdc -text Edit
     vTcl:DefineAlias "$site_10_0.but84" "Button127" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but84 "$site_10_0.but84 Button $top all _vTclBalloon"
     bind $site_10_0.but84 <<SetBalloon>> {
@@ -5656,35 +5656,35 @@ set selecfile ""
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {Delete all selected} 
+        -text {Delete all selected}
     vTcl:DefineAlias "$site_10_0.but85" "Button128" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but85 "$site_10_0.but85 Button $top all _vTclBalloon"
     bind $site_10_0.but85 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Delete ALL selected files}
     }
     pack $site_10_0.ent82 \
-        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -side top 
+        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -side top
     pack $site_10_0.but83 \
-        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top 
+        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top
     pack $site_10_0.but84 \
-        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top 
+        -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top
     pack $site_10_0.but85 \
         -in $site_10_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 \
-        -side bottom 
+        -side bottom
     pack $site_8_4.che119 \
-        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 2 -side left 
+        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 2 -side left
     pack $site_8_4.che120 \
-        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 2 -side left 
+        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 2 -side left
     pack $site_8_4.fra122 \
         -in $site_8_4 -anchor nw -expand 0 -fill none -ipadx 2 -ipady 2 \
-        -padx 10 -pady 10 -side left 
+        -padx 10 -pady 10 -side left
     pack $site_8_4.scr77 \
         -in $site_8_4 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
-        -side left 
+        -side left
     pack $site_8_4.ent78 \
-        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 10 -side top 
+        -in $site_8_4 -anchor nw -expand 0 -fill none -pady 10 -side top
     pack $site_8_4.lab81 \
-        -in $site_8_4 -anchor nw -expand 1 -fill y -side top 
+        -in $site_8_4 -anchor nw -expand 1 -fill y -side top
     set site_8_5 [lindex [$top.tab88 childsite] 5]
     ::iwidgets::scrolledlistbox $site_8_5.scr77 \
         -activebackground #dcdcdc -hscrollmode dynamic \
@@ -5700,7 +5700,7 @@ foreach el $archfiletmp {
 }
 set archfile ""} \
         -selectmode single -textbackground #ffffff -textfont {Helvetica -12 } \
-        -vscrollmode dynamic -width 150 
+        -vscrollmode dynamic -width 150
     ::iwidgets::scrolledlistbox $site_8_5.scr78 \
         -activebackground #dcdcdc \
         -dblclickcommand {set selarchfilelist [selection get]
@@ -5720,31 +5720,31 @@ if {$archexten == ".ps"} {
         -selectioncommand {set selarchfilelist [selection get]
 set archfile [lindex $selarchfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
-        -textfont {Helvetica -12 } -vscrollmode dynamic -width 150 
+        -textfont {Helvetica -12 } -vscrollmode dynamic -width 150
     frame $site_8_5.fra78 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     set site_9_0 $site_8_5.fra78
     ::iwidgets::entryfield $site_9_0.ent79 \
         -command {adjourn .top75} -labelfont {Helvetica -12 } \
         -labeltext Folder: -textbackground white -textvariable archdir \
-        -width 14 
+        -width 14
     ::iwidgets::entryfield $site_9_0.ent80 \
         -command {adjourn .top75} -labelfont {Helvetica -12 } \
         -labeltext Filter: -textbackground white -textvariable archfilter \
-        -width 14 
+        -width 14
     ::iwidgets::labeledframe $site_9_0.lab81 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Selected file} 
+        -labelpos nw -labeltext {Selected file}
     set site_11_0 [$site_9_0.lab81 childsite]
     entry $site_11_0.ent82 \
         -background #ffffff -insertbackground black -textvariable archfile \
-        -width 15 
+        -width 15
     button $site_11_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {exec $editor $archdir/$archfile &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
-        -foreground darkgreen -highlightbackground #dcdcdc -text {Edit file} 
+        -foreground darkgreen -highlightbackground #dcdcdc -text {Edit file}
     bindtags $site_11_0.but84 "$site_11_0.but84 Button $top all _vTclBalloon"
     bind $site_11_0.but84 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit selected file with the default editor}
@@ -5761,38 +5761,38 @@ set archfile ""
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {Delete selected} 
+        -text {Delete selected}
     bindtags $site_11_0.but85 "$site_11_0.but85 Button $top all _vTclBalloon"
     bind $site_11_0.but85 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Delete all selected files}
     }
     pack $site_11_0.ent82 \
-        -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -side top 
+        -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -side top
     pack $site_11_0.but84 \
-        -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top 
+        -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 -side top
     pack $site_11_0.but85 \
         -in $site_11_0 -anchor nw -expand 0 -fill x -padx 5 -pady 2 \
-        -side bottom 
+        -side bottom
     pack $site_9_0.ent79 \
         -in $site_9_0 -anchor ne -expand 0 -fill none -padx 10 -pady 15 \
-        -side top 
+        -side top
     pack $site_9_0.ent80 \
-        -in $site_9_0 -anchor ne -expand 0 -fill none -padx 10 -side top 
+        -in $site_9_0 -anchor ne -expand 0 -fill none -padx 10 -side top
     pack $site_9_0.lab81 \
         -in $site_9_0 -anchor ne -expand 1 -fill y -ipady 5 -padx 5 -pady 5 \
-        -side top 
+        -side top
     frame $site_8_5.fra82 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     set site_9_0 $site_8_5.fra82
     button $site_9_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/store $archdir $file 
+        -command {exec xterm -e ../scripts/store $archdir $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -text {<= Store project} 
+        -text {<= Store project}
     bindtags $site_9_0.but84 "$site_9_0.but84 Button $top all _vTclBalloon"
     bind $site_9_0.but84 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Store current project in the folder. NOTE: folder name should start with ../ }
@@ -5805,30 +5805,30 @@ set archdirlist [glob -nocomplain ../*/]
 set archfilelist "" }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {Delete folder} 
+        -text {Delete folder}
     bindtags $site_9_0.but86 "$site_9_0.but86 Button $top all _vTclBalloon"
     bind $site_9_0.but86 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Delete folder including its content}
     }
     pack $site_9_0.but84 \
-        -in $site_9_0 -anchor nw -expand 0 -fill x -padx 5 -pady 12 -side top 
+        -in $site_9_0 -anchor nw -expand 0 -fill x -padx 5 -pady 12 -side top
     pack $site_9_0.but86 \
         -in $site_9_0 -anchor nw -expand 0 -fill x -padx 5 -pady 17 \
-        -side bottom 
+        -side bottom
     pack $site_8_5.scr77 \
         -in $site_8_5 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
-        -side left 
+        -side left
     pack $site_8_5.scr78 \
         -in $site_8_5 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
-        -side left 
+        -side left
     pack $site_8_5.fra78 \
-        -in $site_8_5 -anchor nw -expand 0 -fill y -side left 
+        -in $site_8_5 -anchor nw -expand 0 -fill y -side left
     pack $site_8_5.fra82 \
-        -in $site_8_5 -anchor ne -expand 1 -fill y -side top 
+        -in $site_8_5 -anchor ne -expand 1 -fill y -side top
     set site_8_6 [lindex [$top.tab88 childsite] 6]
     frame $site_8_6.fra83 \
         -background #dcdcdc -highlightbackground #dcdcdc \
-        -highlightcolor black 
+        -highlightcolor black
     bindtags $site_8_6.fra83 "itk-destroy-.top75.tab88.canvas.notebook.cs.page9.cs.fra83 .top75.tab88.canvas.notebook.cs.page6.cs Frame $top all"
     bind $site_8_6.fra83 <Configure> {
         namespace inscope ::iwidgets::Tabnotebook {::.top75.tab88 _pageReconfigure .top75.tab88.canvas.notebook.cs.page9.cs.fra83 5 %w %h}
@@ -5836,12 +5836,12 @@ set archfilelist "" }} \
     set site_9_0 $site_8_6.fra83
     ::iwidgets::labeledframe $site_9_0.lab84 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext {Multiple run} 
+        -labeltext {Multiple run}
     vTcl:DefineAlias "$site_9_0.lab84" "Labeledframe12" vTcl:WidgetProc "Toplevel1" 1
     set site_11_0 [$site_9_0.lab84 childsite]
     frame $site_11_0.fra86 \
         -borderwidth 2 -background #dcdcdc -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     vTcl:DefineAlias "$site_11_0.fra86" "Frame15" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra86
     ::iwidgets::scrolledlistbox $site_12_0.scr87 \
@@ -5853,7 +5853,7 @@ set elf [split $el =]
 lappend stablist [lindex $elf 0]
 }} \
         -selectmode extended -textbackground #ffffff \
-        -textfont {Helvetica -12} -visibleitems 20x8 
+        -textfont {Helvetica -12} -visibleitems 20x8
     vTcl:DefineAlias "$site_12_0.scr87" "Scrolledlistbox2" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.scr87 "itk-delete-.top75.tab88.canvas.notebook.cs.page7.cs.fra83.lab84.childsite.fra86.scr87 $site_12_0.scr87 Scrolledlistbox $top all _vTclBalloon"
     bind $site_12_0.scr87 <<SetBalloon>> {
@@ -5863,69 +5863,69 @@ lappend stablist [lindex $elf 0]
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {readabun } -cursor hand2 \
         -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -state disabled -text {Load all} 
+        -highlightbackground #dcdcdc -state disabled -text {Load all}
     vTcl:DefineAlias "$site_12_0.but88" "Button139" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
         -command {readabun ../RIPL-2/masses/abundance.dat} -cursor hand2 \
         -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Load stable} 
+        -highlightbackground #dcdcdc -text {Load stable}
     vTcl:DefineAlias "$site_12_0.but76" "Button142" vTcl:WidgetProc "Toplevel1" 1
     pack $site_12_0.scr87 \
-        -in $site_12_0 -anchor n -expand 1 -fill y -side top 
+        -in $site_12_0 -anchor n -expand 1 -fill y -side top
     pack $site_12_0.but88 \
-        -in $site_12_0 -anchor e -expand 0 -fill x -side right 
+        -in $site_12_0 -anchor e -expand 0 -fill x -side right
     pack $site_12_0.but76 \
-        -in $site_12_0 -anchor w -expand 0 -fill x -side left 
+        -in $site_12_0 -anchor w -expand 0 -fill x -side left
     frame $site_11_0.fra89 \
         -borderwidth 2 -background #dcdcdc -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     vTcl:DefineAlias "$site_11_0.fra89" "Frame16" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra89
     ::iwidgets::scrolledlistbox $site_12_0.scr87 \
         -activebackground #dcdcdc \
-        -dblclickcommand {setmulpro $selmulitem $mulstname 
-adjourn .top75 
+        -dblclickcommand {setmulpro $selmulitem $mulstname
+adjourn .top75
 ddlist} \
         -hscrollmode none -labelfont {Helvetica -12 } -labelpos nw \
         -listvariable stablist \
         -selectioncommand {set selmulitem [selection get]} -selectmode single \
-        -textbackground #ffffff -textfont {Helvetica -12 } -visibleitems 10x8 
+        -textbackground #ffffff -textfont {Helvetica -12 } -visibleitems 10x8
     vTcl:DefineAlias "$site_12_0.scr87" "Scrolledlistbox3" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but88 \
         -activebackground #eccceccceccc -background #dcdcdc \
         -command {lappend stablist $adnuc} -cursor hand2 \
-        -font {Helvetica -12 } -highlightbackground #dcdcdc -text ^ 
+        -font {Helvetica -12 } -highlightbackground #dcdcdc -text ^
     vTcl:DefineAlias "$site_12_0.but88" "Button140" vTcl:WidgetProc "Toplevel1" 1
     entry $site_12_0.ent90 \
-        -background white -textvariable adnuc -width 8 
+        -background white -textvariable adnuc -width 8
     vTcl:DefineAlias "$site_12_0.ent90" "Entry8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.ent90 "$site_12_0.ent90 Entry $top all _vTclBalloon"
     bind $site_12_0.ent90 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Additional nucleus (e.g., 26-Fe-56) to be included in the list}
     }
     pack $site_12_0.scr87 \
-        -in $site_12_0 -anchor n -expand 1 -fill y -side top 
+        -in $site_12_0 -anchor n -expand 1 -fill y -side top
     pack $site_12_0.but88 \
-        -in $site_12_0 -anchor center -expand 0 -fill none -side right 
+        -in $site_12_0 -anchor center -expand 0 -fill none -side right
     pack $site_12_0.ent90 \
-        -in $site_12_0 -anchor center -expand 0 -fill both -side left 
+        -in $site_12_0 -anchor center -expand 0 -fill both -side left
     frame $site_11_0.fra76 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     vTcl:DefineAlias "$site_11_0.fra76" "Frame17" vTcl:WidgetProc "Toplevel1" 1
     set site_12_0 $site_11_0.fra76
     button $site_12_0.but77 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command { set stablist "" } -cursor hand2 \
         -font {Helvetica -12 } -foreground darkred \
-        -highlightbackground #dcdcdc -text {Clear list} 
+        -highlightbackground #dcdcdc -text {Clear list}
     vTcl:DefineAlias "$site_12_0.but77" "Button141" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_12_0.ent77 \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name:} -textbackground #ffffff \
-        -textvariable mulstname -width 12 
+        -textvariable mulstname -width 12
     vTcl:DefineAlias "$site_12_0.ent77" "Entryfield6" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -5936,7 +5936,7 @@ puts $mulfile $el
 }
 close $mulfile} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Save list} 
+        -highlightbackground #dcdcdc -text {Save list}
     vTcl:DefineAlias "$site_12_0.but78" "Button144" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but78 "$site_12_0.but78 Button $top all _vTclBalloon"
     bind $site_12_0.but78 <<SetBalloon>> {
@@ -5947,11 +5947,11 @@ close $mulfile} \
         -background #dcdcdc \
         -command {set mulfile [open $mulstname.mulst r]
 while {[gets $mulfile line] >= 0} {
-lappend  stablist $line 
+lappend  stablist $line
 }
 close $mulfile} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Load list} 
+        -highlightbackground #dcdcdc -text {Load list}
     vTcl:DefineAlias "$site_12_0.but79" "Button145" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but79 "$site_12_0.but79 Button $top all _vTclBalloon"
     bind $site_12_0.but79 <<SetBalloon>> {
@@ -5961,25 +5961,25 @@ close $mulfile} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command {runlist $stablist $mulstname} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkred \
-        -highlightbackground #dcdcdc -text {Run list} 
+        -highlightbackground #dcdcdc -text {Run list}
     vTcl:DefineAlias "$site_12_0.but76" "Button143" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but76 "$site_12_0.but76 Button $top all _vTclBalloon"
     bind $site_12_0.but76 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Launch full sequence of calculations for each element of the list}
     }
     pack $site_12_0.but77 \
-        -in $site_12_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
     pack $site_12_0.ent77 \
-        -in $site_12_0 -anchor center -expand 0 -fill none -side top 
+        -in $site_12_0 -anchor center -expand 0 -fill none -side top
     pack $site_12_0.but78 \
-        -in $site_12_0 -anchor center -expand 0 -fill x -pady 5 -side top 
+        -in $site_12_0 -anchor center -expand 0 -fill x -pady 5 -side top
     pack $site_12_0.but79 \
-        -in $site_12_0 -anchor center -expand 0 -fill x -side top 
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
     pack $site_12_0.but76 \
-        -in $site_12_0 -anchor center -expand 0 -fill x -side bottom 
+        -in $site_12_0 -anchor center -expand 0 -fill x -side bottom
     ::iwidgets::optionmenu $site_11_0.opt86 \
         -activeforeground limegreen -command ViewAll -font {Helvetica -12 } \
-        -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {} 
+        -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {}
     vTcl:DefineAlias "$site_11_0.opt86" "Optionmenu3" vTcl:WidgetProc "Toplevel1" 1
     $site_11_0.opt86 insert 1 {View:}
     $site_11_0.opt86 insert 2 {inputs}
@@ -6001,7 +6001,7 @@ close $mulfile} \
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos n -labeltext {Keep only:} -relief flat 
+        -labelpos n -labeltext {Keep only:} -relief flat
     vTcl:DefineAlias "$site_11_0.che79" "Checkbox3" vTcl:WidgetProc "Toplevel1" 1
     $site_11_0.che79 add chk0 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
@@ -6009,53 +6009,53 @@ close $mulfile} \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .lst -onvalue {} -selectcolor #00ff00 \
-        -text {full output} -variable ckmlo 
+        -text {full output} -variable ckmlo
     $site_11_0.che79 add chk1 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .out -onvalue {} -selectcolor #00ff00 \
-        -text {short output} -variable ckmsh 
+        -text {short output} -variable ckmsh
     $site_11_0.che79 add chk2 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -log* -onvalue {} -selectcolor #ffff00 \
-        -text {log files} -variable ckmlog 
+        -text {log files} -variable ckmlog
     $site_11_0.che79 add chk3 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue *.endf -onvalue {} -selectcolor #00ff00 \
-        -text ENDF -variable ckmendf 
+        -text ENDF -variable ckmendf
     $site_11_0.che79 add chk4 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .ps -onvalue {} -selectcolor #00ff00 \
-        -text {PLOTC4 plots} -variable ckmplots 
+        -text {PLOTC4 plots} -variable ckmplots
     $site_11_0.che79 add chk5 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .exf -onvalue {} -selectcolor #ffff00 \
-        -text EXFOR -variable ckmx4 
+        -text EXFOR -variable ckmx4
     $site_11_0.che79 add chk6 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .c4 -onvalue {} -selectcolor #ffff00 \
-        -text {C4 file} -variable ckmc4 
+        -text {C4 file} -variable ckmc4
     ::iwidgets::checkbox $site_11_0.che76 \
         -background #e6e6e6 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos n -labeltext {  (need green)} -relief flat 
+        -labelpos n -labeltext {  (need green)} -relief flat
     vTcl:DefineAlias "$site_11_0.che76" "Checkbox4" vTcl:WidgetProc "Toplevel1" 1
     $site_11_0.che76 add chk0 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
@@ -6063,42 +6063,42 @@ close $mulfile} \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.ripl -onvalue {} -selectcolor #ffff00 \
-        -text {RIPL omp} -variable ckmriplomp 
+        -text {RIPL omp} -variable ckmriplomp
     $site_11_0.che76 add chk1 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.dir -onvalue {} -selectcolor #ffff00 \
-        -text {direct omp} -variable ckmdiromp 
+        -text {direct omp} -variable ckmdiromp
     $site_11_0.che76 add chk2 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .lev -onvalue {} -selectcolor #ffff00 \
-        -text levels -variable ckmlev 
+        -text levels -variable ckmlev
     $site_11_0.che76 add chk3 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -lev.col -onvalue {} -selectcolor #ffff00 \
-        -text {coll. levels} -variable ckmcollev 
+        -text {coll. levels} -variable ckmcollev
     $site_11_0.che76 add chk4 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground #000000 -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .inp -onvalue {} -selectcolor #ffff00 \
-        -text input -variable ckminp 
+        -text input -variable ckminp
     ::iwidgets::labeledframe $site_11_0.lab76 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext {Selected item} 
+        -labeltext {Selected item}
     vTcl:DefineAlias "$site_11_0.lab76" "Labeledframe13" vTcl:WidgetProc "Toplevel1" 1
     set site_13_0 [$site_11_0.lab76 childsite]
     entry $site_13_0.ent77 \
-        -background white -textvariable selmulitem -width 15 
+        -background white -textvariable selmulitem -width 15
     vTcl:DefineAlias "$site_13_0.ent77" "Entry9" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.ent77 "$site_13_0.ent77 Entry $top all _vTclBalloon"
     bind $site_13_0.ent77 <<SetBalloon>> {
@@ -6107,27 +6107,27 @@ close $mulfile} \
     button $site_13_0.but78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {setmulpro $selmulitem $mulstname 
-adjourn .top75 
+        -command {setmulpro $selmulitem $mulstname
+adjourn .top75
 ddlist} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Set as project} 
+        -highlightbackground #dcdcdc -text {Set as project}
     vTcl:DefineAlias "$site_13_0.but78" "Button149" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
     bind $site_13_0.but78 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Make the selected list item the current project}
     }
     pack $site_13_0.ent77 \
-        -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top 
+        -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top
     pack $site_13_0.but78 \
-        -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top 
+        -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top
     ::iwidgets::labeledframe $site_11_0.lab79 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Folder 
+        -labeltext Folder
     vTcl:DefineAlias "$site_11_0.lab79" "Labeledframe14" vTcl:WidgetProc "Toplevel1" 1
     set site_13_0 [$site_11_0.lab79 childsite]
     entry $site_13_0.ent77 \
-        -background white -textvariable archdir -width 15 
+        -background white -textvariable archdir -width 15
     vTcl:DefineAlias "$site_13_0.ent77" "Entry10" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.ent77 "$site_13_0.ent77 Entry $top all _vTclBalloon"
     bind $site_13_0.ent77 <<SetBalloon>> {
@@ -6139,41 +6139,41 @@ ddlist} \
         -command {ArchiveList $archdir $stablist $mulstname
 adjourn .top75} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Store list results} 
+        -highlightbackground #dcdcdc -text {Store list results}
     vTcl:DefineAlias "$site_13_0.but78" "Button150" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
     bind $site_13_0.but78 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Store all files related to the list in the folder specified above }
     }
     pack $site_13_0.ent77 \
-        -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top 
+        -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top
     pack $site_13_0.but78 \
-        -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top 
+        -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top
     pack $site_11_0.fra86 \
-        -in $site_11_0 -anchor center -expand 0 -fill y -padx 2 -side left 
+        -in $site_11_0 -anchor center -expand 0 -fill y -padx 2 -side left
     pack $site_11_0.fra89 \
-        -in $site_11_0 -anchor center -expand 0 -fill y -side left 
+        -in $site_11_0 -anchor center -expand 0 -fill y -side left
     pack $site_11_0.fra76 \
         -in $site_11_0 -anchor center -expand 0 -fill y -ipadx 2 -padx 2 \
-        -side left 
+        -side left
     pack $site_11_0.opt86 \
-        -in $site_11_0 -anchor w -expand 0 -fill none -side bottom 
+        -in $site_11_0 -anchor w -expand 0 -fill none -side bottom
     pack $site_11_0.che79 \
-        -in $site_11_0 -anchor nw -expand 0 -fill none -side left 
+        -in $site_11_0 -anchor nw -expand 0 -fill none -side left
     pack $site_11_0.che76 \
-        -in $site_11_0 -anchor ne -expand 0 -fill none -side left 
+        -in $site_11_0 -anchor ne -expand 0 -fill none -side left
     pack $site_11_0.lab76 \
-        -in $site_11_0 -anchor n -expand 0 -fill none -ipady 3 -side top 
+        -in $site_11_0 -anchor n -expand 0 -fill none -ipady 3 -side top
     pack $site_11_0.lab79 \
-        -in $site_11_0 -anchor n -expand 0 -fill none -ipady 5 -side top 
+        -in $site_11_0 -anchor n -expand 0 -fill none -ipady 5 -side top
     pack $site_9_0.lab84 \
-        -in $site_9_0 -anchor center -expand 1 -fill both -side left 
+        -in $site_9_0 -anchor center -expand 1 -fill both -side left
     pack $site_8_6.fra83 \
-        -in $site_8_6 -anchor center -expand 1 -fill both -side top 
+        -in $site_8_6 -anchor center -expand 1 -fill both -side top
     set site_8_7 [lindex [$top.tab88 childsite] 7]
     frame $site_8_7.fra84 \
         -background #e6e6e6 -highlightbackground #dcdcdc \
-        -highlightcolor black 
+        -highlightcolor black
     bindtags $site_8_7.fra84 "itk-destroy-.top75.tab88.canvas.notebook.cs.page10.cs.fra84 .top75.tab88.canvas.notebook.cs.page7.cs Frame $top all"
     bind $site_8_7.fra84 <Configure> {
         namespace inscope ::iwidgets::Tabnotebook {::.top75.tab88 _pageReconfigure .top75.tab88.canvas.notebook.cs.page10.cs.fra84 6 %w %h}
@@ -6184,17 +6184,17 @@ adjourn .top75} \
         -dblclickcommand {exec $editor ../source/[selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Double click to edit} -listvariable modules \
-        -textbackground #ffffff -textfont {Helvetica -12 } -width 180 
+        -textbackground #ffffff -textfont {Helvetica -12 } -width 180
     frame $site_9_0.fra79 \
         -borderwidth 2 -background #e6e6e6 -height 75 \
-        -highlightbackground #dcdcdc -width 125 
+        -highlightbackground #dcdcdc -width 125
     set site_10_0 $site_9_0.fra79
     button $site_10_0.but80 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc -command {exec $editor ../source/dimension.h &} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
-        -text {Edit dimensions} -wraplength 70 
+        -text {Edit dimensions} -wraplength 70
     bindtags $site_10_0.but80 "$site_10_0.but80 Button $top all _vTclBalloon"
     bind $site_10_0.but80 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit dimension.h file setting dimensions in EMPIRE}
@@ -6206,7 +6206,7 @@ adjourn .top75} \
 exec xterm -e make
 cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
-        -foreground darkred -highlightbackground #dcdcdc -text Make 
+        -foreground darkred -highlightbackground #dcdcdc -text Make
     vTcl:DefineAlias "$site_10_0.but79" "Button135" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but79 "$site_10_0.but79 Button $top all _vTclBalloon"
     bind $site_10_0.but79 <<SetBalloon>> {
@@ -6219,37 +6219,37 @@ cd $workdir} -cursor hand2 \
 exec xterm -e ./Compile
 cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
-        -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
+        -foreground darkred -highlightbackground #dcdcdc -text {Make all}
     bindtags $site_10_0.but81 "$site_10_0.but81 Button $top all _vTclBalloon"
     bind $site_10_0.but81 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Compile whole the package (including utility codes)}
     }
     pack $site_10_0.but80 \
         -in $site_10_0 -anchor center -expand 0 -fill x -ipady 5 -pady 5 \
-        -side top 
+        -side top
     pack $site_10_0.but79 \
-        -in $site_10_0 -anchor center -expand 0 -fill x -ipady 10 -side top 
+        -in $site_10_0 -anchor center -expand 0 -fill x -ipady 10 -side top
     pack $site_10_0.but81 \
         -in $site_10_0 -anchor center -expand 0 -fill x -ipady 10 -pady 5 \
-        -side top 
+        -side top
     pack $site_9_0.scrolledlistbox83 \
         -in $site_9_0 -anchor nw -expand 0 -fill y -padx 10 -pady 5 \
-        -side left 
+        -side left
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
-        -pady 27 -side left 
+        -pady 27 -side left
     pack $site_8_7.fra84 \
-        -in $site_8_7 -anchor center -expand 1 -fill both -side top 
+        -in $site_8_7 -anchor center -expand 1 -fill both -side top
     $top.tab88 select 0
     menu $top.m88 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -cursor {} -foreground #000000 
+        -background #dcdcdc -cursor {} -foreground #000000
     $top.m88 add cascade \
-        -menu "$top.m88.menu89" -label File 
+        -menu "$top.m88.menu89" -label File
     set site_3_0 $top.m88
     menu $site_3_0.menu89 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu89 add command \
         \
         -command {set rcfl [open ../.Xrunrc w+]
@@ -6264,281 +6264,281 @@ close $rcfl
 
 
 exit} \
-        -label Exit 
+        -label Exit
     $top.m88 add cascade \
-        -menu "$top.m88.menu90" -label Options 
+        -menu "$top.m88.menu90" -label Options
     set site_3_0 $top.m88
     menu $site_3_0.menu90 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu90 add command \
-        -command {exec $editor ../scripts/skel.inp &} -label {Default input} 
+        -command {exec $editor ../scripts/skel.inp &} -label {Default input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/empend/EMPEND.INP &} \
-        -label {EMPEND input} 
+        -label {EMPEND input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/endres/ENDRES.INP &} \
-        -label {ENDRES input} 
+        -label {ENDRES input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/plotc4/PLOTC4.INP &} \
-        -label {PLOTC4 input} 
+        -label {PLOTC4 input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/fixup/FIXUP.INP &} \
-        -label {FIXUP input} 
+        -label {FIXUP input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/c4sort/C4SORT.INP &} \
-        -label {C4SORT input} 
+        -label {C4SORT input}
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/x4toc4/reaction &} \
-        -label {X4TOC4 table} 
+        -label {X4TOC4 table}
     $site_3_0.menu90 add command \
-        -command {exec $editor ../source/Makefile &} -label {Edit Makefile} 
+        -command {exec $editor ../source/Makefile &} -label {Edit Makefile}
     $site_3_0.menu90 add cascade \
-        -menu "$site_3_0.menu90.menu97" -command {} -label {Select editor} 
+        -menu "$site_3_0.menu90.menu97" -command {} -label {Select editor}
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.menu97 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_4_0.menu97 add radiobutton \
-        -value gvim -variable editor -command {} -label gvim 
+        -value gvim -variable editor -command {} -label gvim
     $site_4_0.menu97 add radiobutton \
-        -value emacs -variable editor -command {} -label emacs 
+        -value emacs -variable editor -command {} -label emacs
     $site_4_0.menu97 add radiobutton \
-        -value xemacs -variable editor -command {} -label xemacs 
+        -value xemacs -variable editor -command {} -label xemacs
     $site_4_0.menu97 add radiobutton \
-        -value kedit -variable editor -command {} -label kedit 
+        -value kedit -variable editor -command {} -label kedit
     $site_4_0.menu97 add radiobutton \
-        -value kate -variable editor -command {} -label kate 
+        -value kate -variable editor -command {} -label kate
     $site_4_0.menu97 add radiobutton \
-        -value nedit -variable editor -command {} -label nedit 
+        -value nedit -variable editor -command {} -label nedit
     $site_4_0.menu97 add radiobutton \
-        -value gedit -variable editor -command {} -label gedit 
+        -value gedit -variable editor -command {} -label gedit
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
         -command {set types {
-	{"All   Files"		{*}		}
+       {"All   Files"              {*}           }
     }
 set editor [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select editor"]} \
-        -label other 
+        -label other
     $site_3_0.menu90 add cascade \
-        -menu "$site_3_0.menu90.men87" -command {} -label {Select PS viewer} 
+        -menu "$site_3_0.menu90.men87" -command {} -label {Select PS viewer}
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.men87 \
-        -tearoff 0 
+        -tearoff 0
     $site_4_0.men87 add radiobutton \
-        -value kghostview -variable psviewer -command {} -label kghostview 
+        -value kghostview -variable psviewer -command {} -label kghostview
     $site_4_0.men87 add radiobutton \
-        -value gv -variable psviewer -command {} -label gv 
+        -value gv -variable psviewer -command {} -label gv
     $site_4_0.men87 add radiobutton \
         -value ggv -variable psviewer \
-        -command {# TODO: Your menu handler here} -label ggv 
+        -command {# TODO: Your menu handler here} -label ggv
     $site_4_0.men87 add radiobutton \
         -value gotfile -variable psviewer \
         -command {set types {
-	{"All   Files"		{*}		}
+       {"All   Files"              {*}           }
     }
 set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS viewer"]} \
-        -label other 
+        -label other
     $top.m88 add cascade \
-        -menu "$top.m88.menu92" -label Inputs 
+        -menu "$top.m88.menu92" -label Inputs
     set site_3_0 $top.m88
     menu $site_3_0.menu92 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu92 add command \
         -command {exec {cp skelet.inp
-$file.inp &}} -label {Create input} 
+$file.inp &}} -label {Create input}
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.inp &} -label {Edit input} 
+        -command {exec $editor $file.inp &} -label {Edit input}
     $site_3_0.menu92 add separator \
-        
+
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.ripl &} -label {OM parameters} 
+        -command {exec $editor $file-omp.ripl &} -label {OM parameters}
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.dir &} -label {OM par. for direct} 
+        -command {exec $editor $file-omp.dir &} -label {OM par. for direct}
     $site_3_0.menu92 add separator \
-        
+
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.lev &} -label {Discrete levels} 
+        -command {exec $editor $file.lev &} -label {Discrete levels}
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-lev.col &} -label {Collective levels} 
+        -command {exec $editor $file-lev.col &} -label {Collective levels}
     $site_3_0.menu92 add separator \
-        
+
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-inp.fis &} -label {Fission input} 
+        -command {exec $editor $file-inp.fis &} -label {Fission input}
     $top.m88 add cascade \
-        -menu "$top.m88.menu93" -label Execute 
+        -menu "$top.m88.menu93" -label Execute
     set site_3_0 $top.m88
     menu $site_3_0.menu93 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/run $file &} -label {Full run} 
+        -command {exec xterm -e ../scripts/run $file &} -label {Full run}
     $site_3_0.menu93 add separator \
-        
+
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/runE $file &} -label EMPIRE 
+        -command {exec xterm -e ../scripts/runE $file &} -label EMPIRE
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/format $file &} -label Format 
+        -command {exec xterm -e ../scripts/format $file &} -label Format
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/addresonances $file &} \
-        -label {Add resonances} 
+        -label {Add resonances}
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/verify $file &} -label Verify 
+        -command {exec xterm -e ../scripts/verify $file &} -label Verify
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/process $file 1 &} \
-        -label PreProcess 
+        -label PreProcess
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/plotlst $file &} \
-        -label {Plot list} 
+        -label {Plot list}
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4 
+        -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4
     $site_3_0.menu93 add separator \
-        
+
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/stanef $file &} -label STANEF 
+        -command {exec xterm -e ../scripts/stanef $file &} -label STANEF
     $site_3_0.menu93 add separator \
-        
+
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY 
+        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY
     $site_3_0.menu93 add separator \
-        
+
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4 
+        -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4 
+        -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4
     $top.m88 add cascade \
-        -menu "$top.m88.menu94" -label Outputs 
+        -menu "$top.m88.menu94" -label Outputs
     set site_3_0 $top.m88
     menu $site_3_0.menu94 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.lst &} -label {EMPIRE full} 
+        -command {exec $editor $file.lst &} -label {EMPIRE full}
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.out &} -label {EMPIRE short} 
+        -command {exec $editor $file.out &} -label {EMPIRE short}
     $site_3_0.menu94 add separator \
-        
+
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-ecis.out &} -label {ECIS } 
+        -command {exec $editor $file-ecis.out &} -label {ECIS }
     $site_3_0.menu94 add separator \
-        
+
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.exf &} -label EXFOR 
+        -command {exec $editor $file.exf &} -label EXFOR
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.c4 &} -label {C4 file} 
+        -command {exec $editor $file.c4 &} -label {C4 file}
     $site_3_0.menu94 add separator \
-        
+
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.endf &} -label {ENDF final} 
+        -command {exec $editor $file.endf &} -label {ENDF final}
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-s.endf &} -label {ENDF plotted} 
+        -command {exec $editor $file-s.endf &} -label {ENDF plotted}
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-e.endf &} -label {ENDF empend} 
+        -command {exec $editor $file-e.endf &} -label {ENDF empend}
     $site_3_0.menu94 add separator \
-        
+
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-njoy.out &} -label {NJOY output} 
+        -command {exec $editor $file-njoy.out &} -label {NJOY output}
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.ace &} -label {NJOY/ACER file} 
+        -command {exec $editor $file.ace &} -label {NJOY/ACER file}
     $site_3_0.menu94 add command \
-        -command {exec $psviewer $file-njoy.ps &} -label {NJOY plots} 
+        -command {exec $psviewer $file-njoy.ps &} -label {NJOY plots}
     $site_3_0.menu94 add command \
-        -command {exec $psviewer $file-acer.ps &} -label {NJOY/ACER plots} 
+        -command {exec $psviewer $file-acer.ps &} -label {NJOY/ACER plots}
     $top.m88 add cascade \
-        -menu "$top.m88.menu95" -label Plots 
+        -menu "$top.m88.menu95" -label Plots
     set site_3_0 $top.m88
     menu $site_3_0.menu95 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu95 add command \
-        -command {exec $psviewer $file.ps &} -label {PLOTC4 plots} 
+        -command {exec $psviewer $file.ps &} -label {PLOTC4 plots}
     $site_3_0.menu95 add separator \
-        
+
     $site_3_0.menu95 add command \
         -command {exec xterm -e ../scripts/zvpl $file &} \
-        -label {Create ZVV plot} 
+        -label {Create ZVV plot}
     $site_3_0.menu95 add command \
-        -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots} 
+        -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots}
     $site_3_0.menu95 add command \
-        -command {exec ../scripts/guizvv.tcl $file &} -label {Compare ZVV} 
+        -command {exec ../scripts/guizvv.tcl $file &} -label {Compare ZVV}
     $site_3_0.menu95 add separator \
-        
+
     $site_3_0.menu95 add command \
-        -command {exec $psviewer $file-cum.ps &} -label {Cumul. levels} 
+        -command {exec $psviewer $file-cum.ps &} -label {Cumul. levels}
     $top.m88 add cascade \
-        -menu "$top.m88.men77" -label Clean 
+        -menu "$top.m88.men77" -label Clean
     set site_3_0 $top.m88
     menu $site_3_0.men77 \
-        -disabledforeground #a1a4a1 -tearoff 0 
+        -disabledforeground #a1a4a1 -tearoff 0
     $site_3_0.men77 add command \
-        -command {exec ../scripts/clean $file &} -label {Clean project} 
+        -command {exec ../scripts/clean $file &} -label {Clean project}
     $site_3_0.men77 add command \
         -command {exec ../scripts/clean $file
 exec rm -f $file.inp} \
-        -label {Delete project} 
+        -label {Delete project}
     $top.m88 add cascade \
-        -menu "$top.m88.men78" -label Source 
+        -menu "$top.m88.men78" -label Source
     set site_3_0 $top.m88
     menu $site_3_0.men78 \
-        -disabledforeground #a1a4a1 -tearoff 0 
+        -disabledforeground #a1a4a1 -tearoff 0
     $site_3_0.men78 add command \
-        -command {exec $editor ../source/dimension.h &} -label Dimensions 
+        -command {exec $editor ../source/dimension.h &} -label Dimensions
     $site_3_0.men78 add command \
         -command {cd ../source
 exec xterm -e make &
 cd $workdir} \
-        -label Compile 
+        -label Compile
     $top.m88 add separator \
-        
+
     $top.m88 add cascade \
-        -menu "$top.m88.menu96" -label Help 
+        -menu "$top.m88.menu96" -label Help
     set site_3_0 $top.m88
     menu $site_3_0.menu96 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 0
     $site_3_0.menu96 add command \
-        -command {exec $editor ../doc/inplist.txt &} -label {EMPIRE input} 
+        -command {exec $editor ../doc/inplist.txt &} -label {EMPIRE input}
     $site_3_0.menu96 add command \
         -command {exec $editor ../RIPL-2/optical/om-data/om-index.txt &} \
-        -label {RIPL omp} 
+        -label {RIPL omp}
     $site_3_0.menu96 add command \
-        -command {exec $editor ../doc/hints.txt &} -label FAQ 
+        -command {exec $editor ../doc/hints.txt &} -label FAQ
     $site_3_0.menu96 add command \
-        -command {exec $psviewer ../doc/empire.ps &} -label {EMPIRE manual} 
+        -command {exec $psviewer ../doc/empire.ps &} -label {EMPIRE manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/empend/manual.txt &} \
-        -label {EMPEND manual} 
+        -label {EMPEND manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/c4sort/manual.txt &} \
-        -label {C4SORT manual} 
+        -label {C4SORT manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/legend/manual.txt &} \
-        -label {LEGEND manual} 
+        -label {LEGEND manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/plotc4/manual.txt &} \
-        -label {PLOTC4 manual} 
+        -label {PLOTC4 manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/x4toc4/manual.txt &} \
-        -label {X4TOC4 manual} 
+        -label {X4TOC4 manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/fixup/manual.txt &} \
-        -label {FIXUP manual} 
+        -label {FIXUP manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/lsttab/manual.txt &} \
-        -label {LSTTAB manual} 
+        -label {LSTTAB manual}
     $site_3_0.menu96 add command \
         -command {exec $editor ../util/sixtab/manual.txt &} \
-        -label {SIXTAB manual} 
+        -label {SIXTAB manual}
     menu $top.m76 \
-        -disabledforeground #a1a4a1 -tearoff 1 
+        -disabledforeground #a1a4a1 -tearoff 1
     ###################
     # SETTING GEOMETRY
     ###################
     pack $top.fra77 \
-        -in $top -anchor center -expand 0 -fill x -side top 
+        -in $top -anchor center -expand 0 -fill x -side top
     pack $top.tab88 \
-        -in $top -anchor center -expand 1 -fill both -side top 
+        -in $top -anchor center -expand 1 -fill both -side top
 
     vTcl:FireEvent $base <<Ready>>
 }
