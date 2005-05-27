@@ -231,9 +231,9 @@ C* Read the EMPIRE output file to extract the cross sections
       CALL REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(IZB),RWO(LBE)
      1           ,IZI,IZA,LISO,AWR,NEN,NXS)
-      WRITE(LTT,995) ' EMPEND ERROR - Number of energy points:',NEN
-      WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
       IF(NEN.LE.0) THEN
+        WRITE(LTT,995) ' EMPEND ERROR - Number of energy points:',NEN
+        WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
         STOP 'EMPEND ERROR - Zero energy entries in EMPIRE output'
       END IF
 C*
@@ -1071,20 +1071,35 @@ C* Recoils
       SUBROUTINE SUMMF5(NXS,NPT,MTH,NT6,MT6,XSR,MXE,MXT)
 C-Title  : Subroutine SUMMF5
 C-Purpose: Sum reactions contributing to MT 5
+C-Description:
+C-D Scan all MT reaction values in MTH for MT>5
+C-D Compare with MT values in MT6 for reactions having differential data
+C-D Flag eligible reactions with -ve MT; eligible reactions are:
+C-D MT>5, excluding fission and discrete level reactions.
       DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT)
-C* Small cross section criterion (rel. to total)
-      DATA SMALL/ 5.E-5 /
 C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
-C* Find indices of MT 1, 5
-      I1=0
-      I5=0
+      MT5 =0
+      I5  =0
       DO IX=1,NXS
-        IF(MTH(IX).EQ.1) I1=IX
-        IF(MTH(IX).EQ.5) I5=IX
+        MM=MTH(IX)
+        IF(MM.EQ.  5) I5  =IX
+C* Consider eligible reactions
+        IF((MM.GT.  5 .AND. MM.LT. 50 .AND. MM.NE.18) .OR.
+     &     (MM.GE. 91 .AND. MM.LT.200) .OR.
+     &     (MM.EQ.649 .OR.  MM.EQ.849) ) THEN
+C* Compare MT values in MT6 for reactions having differential data
+          DO J6=1,NT6
+            IF(MM.EQ.MT6(J6)) MM=-MM
+          END DO
+          MM=-MM
+C* Reactions without differential data are flagged MT-negative and counted
+          IF(MM.LT.0) MT5=MT5+1
+          MTH(IX)=MM
+        END IF
       END DO
-C* Reactions MT 1 and MT 5 must both be present
-      IF(I1.LE.0) RETURN
+      IF(MT5.LE.0) RETURN
+C* Create MT 5 if not present
       IF(I5.LE.0) THEN
         NXS=NXS+1
         MTH(NXS)=5
@@ -1093,46 +1108,13 @@ C* Reactions MT 1 and MT 5 must both be present
           XSR(J,I5)=0
         END DO
       END IF
-C* Suppression summation of MT 1, 5, discrete (and fission)
+C* Add contribution of reactions without differential data to MT5
       DO IX=1,NXS
-        MM=ABS(MTH(IX))
-C...    IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR.
-        IF( MM.EQ.  1 .OR.  MM.EQ.  5  .OR. MM.EQ. 18 .OR.
-     &     (MM.GE. 50 .AND. MM.LT. 91) .OR.
-     &     (MM.GE.600 .AND. MM.LT.649) .OR.
-     &     (MM.GE.700 .AND. MM.LT.749) .OR.
-     &     (MM.GE.800 .AND. MM.LT.849)) THEN
-          MTH(IX)= MM
-        ELSE
-          MTH(IX)=-MM
-        END IF
-      END DO
-C* Preset MT 5  as total minus present MT 5 cross section
-   30 DO J=1,NPT
-        XSR(J,I5)=XSR(J,I1)-XSR(J,I5)
-      END DO
-C* Subtract other explicitly represented cross sections
-      DO IX=1,NXS
-C* Flag reactions with exclusive spectra for MF3 subtraction
         MM=MTH(IX)
-        DO I6=1,NT6
-          IF(-MM.EQ.MT6(I6)) MM=ABS(MTH(IX))
-        END DO
-        MTH(IX)=MM
-        IF(MM.GT.0 .AND. MM.NE.1 .AND. MM.NE.5) THEN
-C* Subtract contribution from MT 5, loop over all energy points
+        IF(MM.LT.0) THEN
           DO J=1,NPT
-            XSR(J,I5)=XSR(J,I5)-XSR(J,IX)
+            XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
           END DO
-        END IF
-      END DO
-C* Suppress small numbers (compared to the total)
-      DO J=1,NPT
-        S1=XSR(J,I1)
-        S5=XSR(J,I5)
-        IF(S5/S1.LT.SMALL) THEN
-          S5=0
-          XSR(J,I5)=S5
         END IF
       END DO
       RETURN
@@ -1537,6 +1519,8 @@ C* Allow for metastable targets
       ELSE
         WRITE(LTT,891) ' EMPEND WARNING - Invalid metastable sta'//
      &                 'te of target '//REC(24:34)//'                '
+        WRITE(LER,891) ' EMPEND WARNING - Invalid metastable sta'//
+     &                 'te of target '//REC(24:34)//'                '
         LISO=0
       END IF
 C* Read and check the energy
@@ -1545,7 +1529,8 @@ C* Read and check the energy
       IF(NEN.LE.0) GO TO 206
       IF(EE.GT.EIN(NEN)) GO TO 206
 C* Skip double energy points
-      WRITE(LTT,902) ' EMPEND WARNING - Double energy point eV',EE
+      WRITE(LTT,902) ' EMPEND WARNING - Non-monotonic point eV',EE
+      WRITE(LER,902) ' EMPEND WARNING - Non-monotonic point eV',EE
   202 READ (LIN,891,END=700) REC
       IF(REC(1:10).NE.' REACTION '        ) GO TO 202
       GO TO 201
@@ -1593,7 +1578,7 @@ C* Add to MT5 unidentified products with non-zero x-sect., print warning
           WRITE(LTT,891) COM
           WRITE(LER,891) COM
           MT=5
-          GO TO 310
+          GO TO 312
         END IF
         GO TO 110
       END IF
@@ -1651,7 +1636,7 @@ C* Special case when no discrete levels are given
         GO TO 311
       END IF
 C* Next could be elastic, discrete level or continuum cross section
-  351 READ (LIN,891) REC
+  351 READ (LIN,891,END=710) REC
       IF(REC( 1:10).EQ.' ELASTIC C') GO TO 370
       IF(REC(13:22).EQ.'production') GO TO 390
       IF(REC(11:30).NE.'Discrete level popul') GO TO 351
@@ -1723,11 +1708,11 @@ C* Read the elastic cross section but exclude incident charged particles
 c...C* Read the level energy in the case of a metastable target
 c...      READ (REC(52:61),994) QQ
 c...      QQ=QQ*1.0E6
-      DO 373 I=1,NXS
-      IXS=I
-      MTI=ABS(MTH(I))
-      IF(MTI.EQ.MT) GO TO 376
-  373 CONTINUE
+      DO I=1,NXS
+        IXS=I
+        MTI=ABS(MTH(I))
+        IF(MTI.EQ.MT) GO TO 376
+      END DO
       NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
@@ -1774,7 +1759,12 @@ C* Reaction QM and QI values from the last discrete level
   396 XSC(NEN,IXS)=XS*1.E-3
       GO TO 110
 C* All data read
- 700  RETURN
+  700 RETURN
+C*
+C* Error traps
+  710 WRITE(LTT,904) ' EMPEND ERROR - REAMF3 processing MT    ',MT0
+      WRITE(LTT,902) '                              at energy ',EE
+      STOP 'EMPEND ERROR - Reading MF3 data'
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   803 FORMAT(37X,F12.0)
@@ -2476,12 +2466,13 @@ C* Process comments from the EMPIRE output file
       OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
       REWIND LIN
       NTXT= 0
-   12 READ (LIN,93) REC
-      IF(REC(1:10).NE.' REACTION ') THEN
+      REC='                                 '//
+     &    '                                 '
+      DO WHILE (REC(1:10).NE.' REACTION ')
         WRITE(LSC,93) REC
         NTXT=NTXT+1
-        GO TO 12
-      END IF
+        READ (LIN,93) REC
+      END DO
 C*
       IZ  = IZA/1000
       IA  = IZA-1000*IZ
