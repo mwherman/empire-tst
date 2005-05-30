@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:22 $
-Ccc   * $Id: pcross.f,v 1.27 2005-05-30 14:08:22 Capote Exp $
+Ccc   * $Date: 2005-05-30 20:02:44 $
+Ccc   * $Id: pcross.f,v 1.28 2005-05-30 20:02:44 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -112,13 +112,12 @@ C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
 C
-C-----EXCITON EQUILpcross.fIBRIUM NUMBER NHEq
+C-----EXCITON EQUILIBRIUM NUMBER NHEq
 C
       NHEq = MIN(PMAX - 1,NINT(0.20*SQRT(gc*ec))) + 1
-C     NHEq = MIN(PMAX - 1,NINT(0.30*SQRT(gc*ec))) + 1      
-C     NHEq = MIN(PMAX - 1,NINT(0.78*SQRT(gc*ec))) + 1
 C     NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
 C     NHEq = MIN(PMAX - 1,NINT(SQRT(2.0*gc*ec))) + 1
+
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
          iemin(nejc) = 2
@@ -156,7 +155,7 @@ C          pair(nejc) = ftmp
 C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
 C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
 C        ENDIF
-         pair(nejc) = 0.d0	 
+         pair(nejc) = 0.d0   
 C--------Maximum and minimum energy bin
          excnq = EXCn -Q(nejc,1) 
 C--------last continuum energy bin is calculated, RCN 11/2004
@@ -1065,11 +1064,11 @@ C
       a = .5D0*(P*P + H*H)
       sum = 0.d0   
       DO j = 0,H
-	  fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
+         fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
         u = G*(E - D - j*VV) - a 
         IF (u.LE.0.) GOTO 100
-	  sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
-	ENDDO               
+         sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
+       ENDDO               
 100   DENSW = sum
       RETURN
       END
