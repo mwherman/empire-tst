@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-22 16:04:49 $
-Ccc   * $Id: pcross.f,v 1.26 2005-05-22 16:04:49 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:22 $
+Ccc   * $Id: pcross.f,v 1.27 2005-05-30 14:08:22 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -29,10 +29,11 @@ C
 C
 C COMMON variables
 C
-      REAL*8 L(0:NDEJC,PMAX), ddxs(NDAng), xcos(NDAng) 
-      INTEGER*4 NHEq, jang(NDAng)
+      REAL*8 L(0:NDEJC,PMAX), XCOs(NDAng), VV
+      INTEGER*4 NHEq, JANg(NDAng)
       COMMON /CALC5 / L, NHEq
-       COMMON /KALB/ xcos, jang
+      COMMON /KALB/ XCOs, JANg
+      COMMON /VWELL / VV
 C
 C Dummy arguments
 C
@@ -43,10 +44,10 @@ C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc,
-     &       r(4,PMAX,NDEJC), sg, theta, wb, wda 
+     &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
-     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX)
+     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX), ddxs(NDAng)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
      &          ihmax, j, p, zc, zp, zr, zo
@@ -72,6 +73,21 @@ C     Projectile mass and charge number
       ap = AEJc(NPRoject)
       zp = ZEJc(NPRoject)
       cme = MFPp/1.4D21
+C-----Excitation energy (MeV)
+      ec = EXCn
+C-----Compound nucleus
+      ac = A(1)
+      zc = Z(1)
+C
+C     Parametrization of the well depth for p-h LD calculations
+C     According to TALYS manual,v.0.64 (2004) A.Koning et al,
+C
+      vvf = 38.d0
+      IF(ap.eq.1 .and. zp.eq.1) vsurf = 22.d0 +
+     &   16.d0*EINl**4/(EINL**4+(450.d0/FLOAT(ac)**0.333333d0)**4)
+      IF(ap.eq.1 .and. zp.eq.0) vsurf = 12.d0 +
+     &   26.d0*EINl**4/(EINL**4+(245.d0/FLOAT(ac)**0.333333d0)**4)
+
       fr = 0.D0
       totemis = 0.D0
       DO i = 0, NDEJC
@@ -82,31 +98,26 @@ C     Projectile mass and charge number
       ENDDO
       em(1) = 1.D0 - QDFrac
       em(2) = QDFrac
-C-----Excitation energy (MeV)
-      ec = EXCn
-C-----Compound nucleus
-      ac = A(1)
-      zc = Z(1)
-C     ROPar(1,*) are not initialized yet (RCN)
-C     gc = ROPar(1,1)/PI26*GTIlnor(1)
-C---- gc=A/13 !!
-      gc = ac/13.
-      IF (GTIlnor(1).GT.0.) gc = ac/13.*GTIlnor(1)
-C     pc = ROPar(3,1)      
-C     IF( pc.eq.0.) then
+C
+      gc = FLOAT(ac)/13.*GTIlnor(1)
+      pc = ROPar(3,1)
+      IF(pc.eq.0.) then
         ftmp = 0.
         IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
         pc = ftmp                                             ! odd
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
-C     ENDIF	
+      ENDIF
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
 C
-C-----EXCITON EQUILIBRIUM NUMBER NHEq
+C-----EXCITON EQUILpcross.fIBRIUM NUMBER NHEq
 C
-      NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
+      NHEq = MIN(PMAX - 1,NINT(0.20*SQRT(gc*ec))) + 1
+C     NHEq = MIN(PMAX - 1,NINT(0.30*SQRT(gc*ec))) + 1      
+C     NHEq = MIN(PMAX - 1,NINT(0.78*SQRT(gc*ec))) + 1
+C     NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
 C     NHEq = MIN(PMAX - 1,NINT(SQRT(2.0*gc*ec))) + 1
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
@@ -135,19 +146,19 @@ C
          zr = zc - ZEJc(nejc)
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
-C        g(nejc) = ROPar(1,nnur)/PI26*GTIlnor(nnur)
-         g(nejc) = ar/13.
-         IF (GTIlnor(nnur).GT.0.) g(nejc) = ar/13.*GTIlnor(nnur)
+         g(nejc) = FLOAT(ar)/13.*GTIlnor(nnur)
+C        Empirically found that it is better not to use pairing correction here   
 C        pair(nejc) = ROPar(3,nnur)
 C        IF( pair(nejc).eq.0.) THEN
-           ftmp = 0.
-           IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
-           pair(nejc) = ftmp
-           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
-C        ENDIF	   
+C          ftmp = 0.
+C          IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
+C          pair(nejc) = ftmp
+C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
+C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
+C        ENDIF
+         pair(nejc) = 0.d0	 
 C--------Maximum and minimum energy bin
-         excnq = EXCn - Q(nejc,1)
+         excnq = EXCn -Q(nejc,1) 
 C--------last continuum energy bin is calculated, RCN 11/2004
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
          DO ienerg = 2, NEX(nnur)
@@ -155,7 +166,6 @@ C--------last continuum energy bin is calculated, RCN 11/2004
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
 C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             IF (iemax(nejc).GE.nexrt) iemax(nejc) = nexrt
-
             IF (ETL(5,nejc,nnur).EQ.0) THEN
                sg = SIGabs(ienerg + 5,nejc,nnur)
             ELSE
@@ -164,16 +174,16 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             IF (sg.LT.1.D-6) iemin(nejc) = ienerg
          ENDDO
       ENDDO
-      nnur = NREs(0)
 C-----Maximum and minimum energy bin for gamma emission
-C-----Last continuum energy bin is calculated, RCN 11/2004
-      nexrt = MAX(INT((EXCn-ECUt(nnur))/DE + 1.0001),1)
+      nnur = NREs(0)
+C-----Last continuum energy bin is calculated
+      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
       DO ienerg = 2, NDEX
          eee = DE*(ienerg - 1)
          IF (ec.GT.eee) iemax(0) = ienerg
          IF (iemax(0).GE.nexrt) iemax(0) = nexrt
       ENDDO
- 
+
       IF (.NOT.callpcross) THEN
          do i=1,NDAng
            theta=i*10-10
@@ -181,8 +191,8 @@ C-----Last continuum energy bin is calculated, RCN 11/2004
            theta=theta*pi/180.d0
            xcos(i)=cos(theta)
          enddo
-          CALL RQFACT(NHEq,r)
-       ENDIF
+         CALL RQFACT(NHEq,r)
+      ENDIF
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS
@@ -191,22 +201,18 @@ C-----PRIMARY PARTICLE LOOP
 C
       DO nejc = 0, NEJcm
          nnur = NREs(nejc)
-          IF (nnur.lt.0) cycle
+         IF (nnur.lt.0) cycle
          IF (nejc.NE.0) THEN
             ao = AEJc(nejc)
             zo = ZEJc(nejc)
             ar = ac - ao
             zr = zc - zo
-            IF (ao.EQ.1 .AND. zo.EQ.0) ff1 = 2.0173*ar/(ar + 1.0087)
-                                                                   ! n
-            IF (ao.EQ.1 .AND. zo.EQ.1) ff1 = 2.0145*ar/(ar + 1.0073)
-                                                                   ! p
-            IF (ao.EQ.4 .AND. zo.EQ.2) ff1 = 4.0015*ar/(ar + 4.0015)
-                                                                   ! alpha
-            IF (ao.EQ.3 .AND. zo.EQ.1) ff1 = 6.0298*ar/(ar + 3.0149)
-                                                                   ! t
-            IF (ao.EQ.2 .AND. zo.EQ.1) ff1 = 6.0408*ar/(ar + 2.0136)
-                                                                   ! d
+            IF (ao.EQ.1 .AND. zo.EQ.0) ff1 = 2.0173*ar/(ar + 1.0087) ! n
+            IF (ao.EQ.1 .AND. zo.EQ.1) ff1 = 2.0145*ar/(ar + 1.0073) ! p
+            IF (ao.EQ.4 .AND. zo.EQ.2) ff1 = 4.0015*ar/(ar + 4.0015) ! alpha
+            IF (ao.EQ.3 .AND. zo.EQ.2) ff1 = 6.0298*ar/(ar + 3.0149) ! He-3
+            IF (ao.EQ.2 .AND. zo.EQ.1) ff1 = 6.0408*ar/(ar + 2.0136) ! d
+            IF (ao.EQ.3 .AND. zo.EQ.1) ff1 = 6.0312*ar/(ar + 3.0156) ! t
          ELSE
             ar = ac
             zr = zc
@@ -222,6 +228,15 @@ C
             hh = h1 - 1
             IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
+C
+C           Defining well depth for p-h LD calculations
+C
+            VV = vvf
+C           hh .eq. 1 is recommended in the TALYS manual
+C           I use hh .LE. 1 to enhance PE photon emission
+C           if (hh.eq.1) VV = vsurf
+            if (hh.le.1) VV = vsurf
+C
             ff2 = DENSW(gc,pc,p,hh,ec)
             IF (ff2.EQ.0.) GOTO 50
 C
@@ -289,7 +304,6 @@ C
                   hlp1 = fint(1)*eint(1) + fint(icon)
      &                   *(EMAx(nnur) - eint(icon))
                ENDIF
-
                DO ien = 2, icon
                   hlp1 = hlp1 + (eint(ien) - eint(ien - 1))
      &                   *(fint(ien - 1) + fint(ien))
@@ -321,7 +335,7 @@ C
                IF (wb.GT.0.) emis = emis + wb*em(h1)
             ENDDO
             spec(nejc,ienerg) = Sigr*emis
-            hlp1 = hlp1 + spec(nejc,ienerg)*DE
+            hlp1 = hlp1 + Sigr*emis*DE
          ENDDO
          totemis = totemis + hlp1
          cross(nejc) = hlp1
@@ -381,18 +395,16 @@ C     Note, that PCROSS only calculates emission into the continuum
             IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle
             IF (nejc.EQ.3 .AND. IDNa(6,6).EQ.0) cycle
             excnq = EXCn - Q(nejc,1)
-             ebind = Q(nejc,1)
+            ebind = Q(nejc,1)
          ELSE !gamma
             IF (IDNa(5,6).EQ.0) cycle
             nnur = 1
             excnq = EXCn
-             ebind = 0.d0
+            ebind = 0.d0
          ENDIF
          CSMsd(nejc) = CSMsd(nejc) + cross(nejc)
          totemis = totemis + cross(nejc)
-C--------number of spectrum bins to continuum WARNING! might be negative!
-         nexrt = INT((excnq - ECUt(nnur))/DE + 1.0001)
-         DO ie = iemin(nejc), nexrt
+         DO ie = iemin(nejc), iemax(nejc)
             eee = DE*(ie - 1)
             ftmp = spec(nejc,ie)
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
@@ -404,7 +416,7 @@ C
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
             ENDDO
-C           fmsd = 1.d0 
+C           fmsd = 1.d0
 C           If fmsd is changed to 0.d0 means isotropic distribution
             Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
      >              ebind, eee, ftmp, 1.d0, ddxs)
@@ -418,10 +430,16 @@ C           If fmsd is changed to 0.d0 means isotropic distribution
 99020 FORMAT (/' ',57('-')/)
       END
 
-       subroutine Kalbach(jcom,jzcom,jpin,jnin,jpout,jnout,elab,esys,
+      subroutine Kalbach(jcom,jzcom,jpin,jnin,jpout,jnout,elab,esys,
      >bin, eps, total, fmsd, sigma)
-c     
+c
 c     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
+
+
+c
+
+
+c     Taken from RIPL-1 files
 c
 c     Compound nucleus mass and charge (ac,zc) -> jcom,jzcom
 c     Projectile charge and neutron numbers    -> jpin,jnin
@@ -441,7 +459,7 @@ c     ANGEL92
 c     continuum angular distributions
 c     from empirical systematics based on exponentials of cos theta
 c          see Phys. Rev. C 37 (1988) 2350
-c                    
+c
 c     Written by C. Kalbach
 c          April 1987
 c     Revised February 1992 to give a smooth transitions
@@ -462,10 +480,10 @@ c
       implicit integer*4 (I-N)
       INCLUDE 'dimension.h'
       REAL*8 arg, a, xnorm, eps,total,fmsd, bin, elab, esys
-      REAL*8 sigma(NDAng), xcos(NDAng) 
+      REAL*8 sigma(NDAng), xcos(NDAng)
       INTEGER*4 jang(NDAng)
-       COMMON /KALB/ xcos, jang
-       SAVE /KALB/
+      COMMON /KALB/ xcos, jang
+      SAVE /KALB/
 c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
@@ -527,7 +545,7 @@ c     er = Et1/130.
         xmb=1
         if(jout.eq.4) xmb=2.
         if(jpout.eq.0)xmb=0.5
-       endif
+      endif
 c
 c     energy dependent input
 c     calculate and print angular distributions
@@ -539,7 +557,7 @@ c
       if (jin.le.3) then
         y = epscm*e3 / (esys*35.)
         a = a + 1.9*y*y*y*y*xmb
-       endif
+      endif
       xnorm = a*total / (12.5664*sinh(a))
 
       do i=1,NDAng
@@ -705,8 +723,6 @@ C
       ENDDO
       END
 
-
-
       SUBROUTINE TRANSIT(E,Gc,Ap,Nheq)
       IMPLICIT LOGICAL*1(A - Z)
 C
@@ -846,9 +862,9 @@ C--------------------------------------------------------------------
          Em(h1) = b(h1)*Cme
          IF (Em(h1).NE.0.) Ih2 = h1
       ENDDO
-      Ih2 = MIN(Ih2,NHEq)      
+      Ih2 = MIN(Ih2,NHEq)
       IF (IOUt.GE.3) WRITE (6,99018) IH2
-99018 FORMAT (/3X,'Nequil =',I3/) 
+99018 FORMAT (/3X,'Nequil =',I3/)
       IF (IOUt.GE.3) WRITE (6,99020)
 99020 FORMAT (/3X,'TIME INTEGRALS OF TAU(N)'/3X,
      &        ' N   UP TO Nequil       ')
@@ -1011,12 +1027,12 @@ C-----ALPHA PARTICLES (M=4)
 
       FUNCTION DENSW(G,D,P,H,E)
 C
-C  WILLIAMS FORMULATION, PAULI CORRECTION BY KALBACH
+C  RIPL-2 FORMULATION
 C
 C  G - LEVEL DENSITY PARAMETER
 C  D - PAIRING CORRECTION
 C  P(H) - PARTICLE(HOLE) NUMBER
-C  E - ENERGIA DE EXCITACION
+C  E - EXCITATION ENERGY
 C
 C PARAMETER definitions
 C
@@ -1025,8 +1041,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
+      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3), VV
       COMMON /PFACT / FA, LFA
+      COMMON /VWELL / VV
 C
 C Dummy arguments
 C
@@ -1036,17 +1053,25 @@ C
 C
 C Local variables
 C
-      REAL*8 a, fac, u
+      REAL*8 a, fac, u, sum
       DOUBLE PRECISION DEXP, DLOG
-      INTEGER*4 n
+      INTEGER*4 n, j
       DENSW = 0.D0
       n = P + H
       IF (n.LE.0) RETURN
-      fac = LFA(P + 3) + LFA(H + 3) + LFA(n + 2)
-      a = .25D0*(P*(P - 1) + H*(H - 1))
-      u = G*(E - D) - a
-      IF (u.LE.0.) RETURN
-      DENSW = G*(DEXP((n-1)*DLOG(u) - fac))
+C
+C     Following RIPL-2 TECDOC (LD chapter)
+C
+      a = .5D0*(P*P + H*H)
+      sum = 0.d0   
+      DO j = 0,H
+	  fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
+        u = G*(E - D - j*VV) - a 
+        IF (u.LE.0.) GOTO 100
+	  sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
+	ENDDO               
+100   DENSW = sum
+      RETURN
       END
 
       FUNCTION SGAM(A,Z,Eg)

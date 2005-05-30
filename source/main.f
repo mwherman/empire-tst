@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-23 07:14:36 $
-Ccc   * $Id: main.f,v 1.92 2005-05-23 07:14:36 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-30 14:08:22 $
+Ccc   * $Id: main.f,v 1.93 2005-05-30 14:08:22 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -49,7 +49,7 @@ C
      &                 sgamc, spdif, spdiff, stauc, step, sum, sumfis,
      &                 sumfism(NFMOD), tauf, taut, totemis, weight,
      &                 xccm, xcse, xizat, xnhms, xnl, xnor, xtotsp,
-     &                 xsinlcont, xsinl, zres
+     &                 xsinlcont, xsinl, zres, deform(NDCOLLEV)
       CHARACTER*9 cejectile
       CHARACTER*6 ctldir
       CHARACTER*20 ctmp20
@@ -60,7 +60,7 @@ C
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
-     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec
+     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,itemp(NDCOLLEV)
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -104,9 +104,10 @@ C
 C     TOTcs, ABScs,ELAcs are initialized within MARENG()
       xsinlcont = 0.d0
       xsinl = 0.d0
-
+C     For resolution function (Spreading levels in the continuum)
+      isigma = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
       ncoll = 0
-      nelang = 73
+      nelang = NDAng
       ecm = EINl - EIN
       dang = 3.14159/FLOAT(nelang - 1)
 C-----
@@ -147,17 +148,11 @@ C--------------add direct transition to the spectrum
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
                READ (45,*,END = 1400)     ! Skipping level identifier line
-C--------------Empire uses 10 deg grid for inelastic so we have to take
-C--------------each 4th result from ECIS (2.5 deg grid)
-               DO iang = 1, NDANG - 1
+               DO iang = 1, NDANG
+                  ftmp = 0.d0
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
-                  READ (45,'(7x,E12.5)',END = 1400)
-                  READ (45,'(7x,E12.5)',END = 1400)
-                  READ (45,'(7x,E12.5)',END = 1400)
-               ENDDO
-               READ (45,'(7x,E12.5)',END = 1400) ftmp
-               CSAlev(NDANG,ilv,nejcec) = CSAlev(NDANG,ilv,nejcec) +ftmp
+                ENDDO
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
@@ -199,25 +194,45 @@ C
 C              This level is not counted as a discrete one
 C              but it is embedded in the continuum
 C
-C              ncoll = i
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
-               CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
+C
+C              Spreading it using resolution function 0.01 + sqrt(E)*0.015
+C              SQRT(2*PI) = 2.5066
+C
+C              iang below means energy variable
+               dtmp = 0.d0
+               do ie = max(icsl - 3*isigma,1) ,
+     &                   min(NDEcse,icsl + 3*isigma)
+                 dtmp = dexp(-dble(ie-icsl)**2/(2.*isigma*isigma))/
+     &                  (2.5066d0*isigma) + dtmp
+               enddo
+               if(isigma.gt.0 .and. dtmp.gt.0.) then
+                 do ie = max(icsl - 3*isigma,1) ,
+     &                     min(NDEcse,icsl + 3*isigma)
+                   CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) + popread/DE
+     &                   * dexp(-dble(ie-icsl)**2/(2.*isigma*isigma))
+     &                 /(2.5066d0*isigma*dtmp)
+                 enddo
+               else
+                 CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
+               endif
                READ (45,*,END = 1400)     ! Skipping level identifier line
-C--------------Empire uses 10 deg grid for inelastic so we have to take
-C--------------each 4th result from ECIS (2.5 deg grid)
-               DO iang = 1, NDANG - 1
+               DO iang = 1, NDANG
                   ftmp = 0.d0
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
-                  CSEa(icsl,iang,nejcec,1) =
-     &               CSEa(icsl,iang,nejcec,1) + ftmp/DE
-                  READ (45,'(7x,E12.5)',END = 1400)
-                  READ (45,'(7x,E12.5)',END = 1400)
-                  READ (45,'(7x,E12.5)',END = 1400)
-               ENDDO
-               READ (45,'(7x,E12.5)',END = 1400) ftmp
-                 CSEa(icsl,NDAng,nejcec,1) =
-     &               CSEa(icsl,NDAng,nejcec,1) + ftmp/DE
+                 if(isigma.gt.0 .and. dtmp.gt.0.) then
+                    do ie = max(icsl - 3*isigma,1) ,
+     &                    min(NDEcse,icsl + 3*isigma)
+                      CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) +
+     &                ftmp/DE * dexp(-dble(ie-icsl)**2/
+     &              (2.*isigma*isigma))/(2.5066d0*isigma*dtmp)
+                    enddo
+                  else
+                    CSEa(icsl,iang,nejcec,1) =  CSEa(icsl,iang,nejcec,1)
+     &                                     + ftmp/DE
+                  endif
+              ENDDO
              ENDIF
 C            END OF ADDING INELASTIC TO CONTINUUM
            ENDIF
@@ -268,17 +283,30 @@ C
       ENDIF
 
       WRITE (6,99015)
-99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
-     &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
       WRITE (6,99020)
-99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
       gang = 180.0/(nelang - 1)
       DO iang = 1, nelang/4 + 1
          imint = 4*(iang - 1) + 1
          imaxt = MIN0(4*iang,nelang)
          WRITE (6,99025) ((j - 1)*gang,elada(j),j = imint,imaxt)
-99025    FORMAT (' ',5x,4(1p,e12.5,2x,e12.5,6x))
       ENDDO
+
+99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
+     &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
+99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
+99025 FORMAT (' ',5x,4(1p,e12.5,2x,e12.5,6x))
+99029 FORMAT (' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',//,
+     &              ' ',46x,'  (only discrete levels are listed)',/,' '
+     &                 ,46x,36('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',
+     &      ///)
+99030 FORMAT ('  Angle ',10(6x,i2,'-level'))
+99031 FORMAT ('        ',9(5x,'E=',f7.4))
+99032 FORMAT ('        ',10(5x,'E=',f7.4))
+99033 FORMAT ('        ',9(4x,f4.1,'/',f5.4))
+99034 FORMAT ('        ',10(4x,f4.1,'/',f5.4))
+99035 FORMAT (1x,f5.0,3x,11(2x,E12.6))
+99040 FORMAT (6x,3x,11(2x,E12.6))
+
       WRITE (6,'(//)')
 
       IF (ncoll.GT.0) THEN
@@ -286,22 +314,86 @@ C--------locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0),nejcec,iloc)
          WRITE (6,*) ' '
          gang = 180.0/(NDANG - 1)
-         IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-            WRITE (6,99030) (ICOller(ilv),ilv = 2,MIN(ncoll,10))
-99030       FORMAT ('  Angle ',10(6x,i2,'-level'))
-            WRITE (6,*) ' '
-            DO iang = 1, NDANG
-               IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-                  WRITE (6,99035) (iang - 1)*gang,
-     &                            (CSAlev(iang,ICOller(ilv),nejcec),
-     &                            ilv = 2,MIN(ncoll,10))
-99035             FORMAT (1x,f5.0,3x,11(2x,E12.6))
-               ENDIF
+          its = 2
+          DO ilv = 2,ncoll
+            DO iang= ilv+1,ncoll
+              if(ICOller(iang).eq.ICOller(ilv)) goto 99027
             ENDDO
-            WRITE (6,*) ' '
-            WRITE (6,99040) (POPlv(ICOller(ilv),nnurec),ilv = 2,
-     &                      MIN(ncoll,10))
-99040       FORMAT (6x,3x,11(2x,E12.6))
+            itemp(its) = ICOller(ilv)
+            deform(its)   = D_DEF(ilv,2)
+            its = its +1
+99027     ENDDO
+         its = its -1
+         IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
+           WRITE (6,99029)
+           WRITE (6,99030) (itemp(ilv),ilv = 2,MIN(its,10))
+           WRITE (6,99031) (ELV(itemp(ilv),nnurec),ilv = 2,MIN(its,10))
+           WRITE (6,99033) (XJLv(itemp(ilv),nnurec)*
+     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv = 2,MIN(its,10))
+           WRITE (6,*) ' '
+           DO iang = 1, NDANG
+             WRITE (6,99035) (iang - 1)*gang,
+     &         (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+           ENDDO
+           WRITE (6,*) ' '
+           WRITE (6,99040)(POPlv(itemp(ilv),nnurec),ilv = 2,MIN(its,10))
+
+          IF(its.gt.10) THEN
+              WRITE (6,*) ' '
+              WRITE (6,*) ' '
+              WRITE (6,99030) (itemp(ilv),ilv = 11,MIN(its,20))
+              WRITE (6,99032)(ELV(itemp(ilv),nnurec),ilv=11,MIN(its,20))
+              WRITE (6,99034)(XJLv(itemp(ilv),nnurec)*
+     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =11,MIN(its,20))
+              WRITE (6,*) ' '
+              DO iang = 1, NDANG
+                WRITE (6,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 11,MIN(its,20))
+              ENDDO
+              WRITE (6,*) ' '
+              WRITE (6,99040) (POPlv(itemp(ilv),nnurec),ilv = 11,
+     &                      MIN(its,20))
+          ENDIF
+
+          IF(its.gt.20) THEN
+              WRITE (6,*) ' '
+              WRITE (6,*) ' '
+              WRITE (6,99030) (itemp(ilv),ilv = 21,MIN(its,30))
+              WRITE (6,99032)(ELV(itemp(ilv),nnurec),ilv=21,MIN(its,30))
+              WRITE (6,99034)(XJLv(itemp(ilv),nnurec)*
+     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =21,MIN(its,30))
+              WRITE (6,*) ' '
+              DO iang = 1, NDANG
+                WRITE (6,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 21,MIN(its,30))
+              ENDDO
+              WRITE (6,*) ' '
+              WRITE (6,99040) (POPlv(itemp(ilv),nnurec),ilv = 21,
+     &                      MIN(its,30))
+          ENDIF
+
+C
+C           Because of the ENDF format restrictions the maximum
+C           number of discrete levels is limited to 40
+C
+           IF(its.gt.30) THEN
+              WRITE (6,*) ' '
+              WRITE (6,*) ' '
+              WRITE (6,99030)(itemp(ilv),ilv = 31,MIN(its,40))
+              WRITE (6,99032)(ELV(itemp(ilv),nnurec),ilv=31,MIN(its,40))
+              WRITE (6,99034)(XJLv(itemp(ilv),nnurec)*
+     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =31,MIN(its,40))
+              WRITE (6,*) ' '
+              DO iang = 1, NDANG
+                WRITE (6,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 31,MIN(its,40))
+              ENDDO
+              WRITE (6,*) ' '
+              WRITE (6,99040) (POPlv(itemp(ilv),nnurec),ilv = 31,
+     &                      MIN(its,40))
+           ENDIF
+
+
             WRITE (6,*) ' '
             WRITE (6,*) ' '
             WRITE (6,*) ' '
@@ -309,8 +401,6 @@ C--------locate position of the projectile among ejectiles
       ENDIF
 
       ENDIF
-
-
 C
 C     Skipping all emission calculations
 C     GOTO 99999
@@ -441,8 +531,9 @@ C-------------last continuum energy bin is calculated
             ENDDO
          ENDIF
 
-         if(xsinlcont.gt.0) write(6,*) 
+         if(xsinlcont.gt.0) write(6,*)
      &   ' DWBA to continuum XS for inelastic channel ',xsinlcont
+               WRITE (6,*)
          if(CSMsd(0).gt.0.) WRITE (6,*)
      &       ' g PE emission cross section ',   CSMsd(0), ' mb'
          if(CSMsd(1).gt.0.) WRITE (6,*)
@@ -505,8 +596,8 @@ C----------add PE contribution to the total NEJC emission
 C        Skipping all emitted but neutrons and protons
 C        Secondary emission was not tested for proton induced reactions
          nnur = NREs(nejcec)
-         IF(nnur.GE.0) THEN
-C        IF(nnur.GE.2000) THEN
+C        IF(nnur.GE.0) THEN
+         IF(nnur.GE.2000) THEN
 C----------second chance preequilibrium emission after MSD emission
 C----------neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
@@ -589,14 +680,32 @@ C-----
          ENDIF
       ENDIF
       IF (ENDf(1).EQ.0.0D0) THEN
+
+
          WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
+
+
      &          CSFus
+
+
       ELSE
+
+
          WRITE (12,*) ' '
+
+
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
+
+
          WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') TOTcs
+
+
          WRITE (12,*) ' '
+
+
       ENDIF
+
+
       POPmax(1) = CSFus*1.0E-25
 C-----renormalization of CN spin distribution if TURBO mode invoked
       IF (LTUrbo.NE.1) THEN
@@ -672,23 +781,57 @@ C--------reset variables for life-time calculations
          sumfis = 0.0
          IF (IOUt.GT.0) THEN
             WRITE (6,*) ' '
+
+
             WRITE (6,*) ' '
+
+
             WRITE (6,*) ' -------------------------------------'
+
+
             WRITE (6,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)') nnuc,
+
+
      &             ia, SYMb(nnuc)
+
+
             WRITE (6,*) ' -------------------------------------'
+
+
             WRITE (6,*) ' '
+
+
          ENDIF
          IF (ENDf(nnuc).NE.0.0D0) THEN
+
+
             WRITE (12,*) ' '
+
+
             WRITE (12,*)
+
+
      &' ---------------------------------------------------------------'
+
+
             WRITE (12,
+
+
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+
+
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
+
+
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+
+
             WRITE (12,*)
+
+
      &' ---------------------------------------------------------------'
+
+
             IF (nnuc.NE.1) THEN
                IF (nnuc.EQ.mt91) THEN
                  nejc = 1
@@ -916,6 +1059,11 @@ C--------account for widths fluctuations (HRTW)
             kemax = NEX(nnuc) - 1
             GCAsc = 1.0
          ENDIF
+
+
+
+
+
 C--------do loop over c.n. excitation energy
          DO ke = kemax, kemin, -1
             step = DE
@@ -1191,7 +1339,7 @@ C--------------(merely for checking purpose)
                      atotsp = atotsp + CSDirlev(ilev,nejc)
                   ENDDO
                ENDIF
-C--------------Execution of the folowing print block is suspended (RCN)
+C              Execution of the following print block is suspended (RCN)
                IF(nnuc.eq.-1) then
                  WRITE (6,*) ' '
                  WRITE (6,*)
@@ -1583,8 +1731,8 @@ C
 C        Printing is not allowed in the following loop
 C        It is just intended to complete inclusive DDX
 C
-C        Should be disabled MH 
-         IF (ENDf(nnuc).EQ.9) THEN
+C        Should be disabled MH
+         IF (ENDf(nnuc).EQ.20) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF (POPcs(nejc,nnuc).EQ.0) CYCLE
@@ -1686,7 +1834,7 @@ C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
-            DO nejc = 0, NEJcm  !loop over ejectiles
+            DO nejc = 0, NEJcm         !loop over ejectiles
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
                ELSE
@@ -1867,7 +2015,7 @@ C--------light ions
              ENDDO
              DO ie = nspec, nspec + 1
                                    ! exact endpoint
-               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - 
+               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) -
      &                Q(NDEJC,1),(CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
              ENDDO
            ENDIF
@@ -1925,7 +2073,7 @@ C        SAVING RANDOM SEEDS
          PAUSE 'FATAL: Input energies are not ordered !!'
          STOP
        ENDIF
-      epre = EIN 
+      epre = EIN
 
       FIRst_ein = .FALSE.
       GOTO 1300
@@ -1991,7 +2139,7 @@ C-----normalize recoil spectrum of the parent
       DO nejc = 1, NEJcm   !over ejectiles
          ares = A(nnuc) - AEJc(nejc)
          zres = Z(nnuc) - ZEJc(nejc)
-C        residual nuclei must be heavier than alpha
+C--------residual nuclei must be heavier than alpha
          if(ares.le.4. and. zres.le.2.) cycle
          izares = INT(1000.0*zres + ares)
          CALL WHERE(izares,nnur,iloc)

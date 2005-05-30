@@ -1,7 +1,7 @@
 C
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-11 16:11:11 $
-Ccc   * $Id: HRTW-comp.f,v 1.27 2005-05-11 16:11:11 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:23 $
+Ccc   * $Id: HRTW-comp.f,v 1.28 2005-05-30 14:08:23 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -56,8 +56,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, sum
-     &                 , sumfis, sumfism(3), sumg, tlump, xnor
+      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, ggexper, sgamc,
+     &                 sum, sumfis, sumfism(3), sumg, tlump, xnor
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
@@ -245,19 +245,73 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(EIN.LE.0.1) THEN
+            IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
-                write(6,*)
-                write(6,*) ' GAMMA WIDTH CALCULATION:'
-                write(6,'(1x,A14,f4.1,A5,I2,A14,f7.2,A12,f6.3)')
-     &            ' CN state : (J=',cnspin,',Par=',ip,') Gamma Width=',
-     &            sumg*1000,' meV,  Tune=',TUNe(0, Nnuc)
-                write(6,*)
-              endif
+                WRITE( 6,'(/1x,71(1h*))') 
+                WRITE(12,'(/7x,71(1h*))') 
+                WRITE(6,'(1x,
+     &            ''RENORMALIZATION OF GAMMA-RAY STRENGTH FUNCTION'')')
+                WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
+     &           'CN state (J=',cnspin,',Par=',ip,
+     &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
+                WRITE(12,'(7x,
+     &            ''RENORMALIZATION OF GAMMA-RAY STRENGTH FUNCTION'')')
+                WRITE(12,'(7x,A12,f4.1,A5,I2,A36,d12.6)')
+     &           'CN state (J=',cnspin,',Par=',ip,
+     &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
+                
+                IF(Gg_obs.GT.0. AND. D0_obs.GT.0.) THEN
+                   
+                   ggexper = 2*pi*Gg_obs/D0_obs/1.E6
+                   
+                   WRITE(6,'(1x,
+     &             ''EXPERIMENTAL INFORMATION from capture channel'')')
+                   WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
+                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A5)') 
+     &                 'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)') 
+     &                 'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
+                   WRITE(6,'(1x,''Normalization factor = '',F7.3)')
+     &                  ggexper/sumg
+
+                   WRITE(12,'(7x,
+     &             ''EXPERIMENTAL INFORMATION from capture channel'')')
+                   WRITE(12,'(7x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
+                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A5)') 
+     &                 'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A4)') 
+     &                 'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
+                   WRITE(12,'(7x,''Normalization factor = '',F7.3)')
+     &                  ggexper/sumg
+
+                   IF(TUNe(0, Nnuc).eq.1.) THEN
+                     TUNe(0, Nnuc) = ggexper/sumg
+                     WRITE(6 ,
+     &              '(1x,''Gamma emission width multiplied by '',F7.3)') 
+     &                TUNe(0, Nnuc)
+                     WRITE(12,
+     &              '(7x,''Gamma emission width multiplied by '',F7.3)') 
+     &                TUNe(0, Nnuc)
+                   ELSE
+                     WRITE(6,
+     &                '(1x,''Gamma emission is not normalized''/  
+     &                  1x,''TUNE(0,Nnuc)set in input to '',F7.3)') 
+     &                TUNe(0, Nnuc)
+                     WRITE(12,
+     &                '(7x,''Gamma emission is not normalized''/  
+     &                  7x,''TUNE(0,Nnuc)set in input to '',F7.3)') 
+     &                TUNe(0, Nnuc)
+                   ENDIF
+                   WRITE( 6,'(1x,71(1h*))') 
+                   WRITE(12,'(7x,71(1h*))') 
+                ENDIF
+                WRITE(6,*)
+                WRITE(12,*)
+              ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
@@ -746,7 +800,7 @@ C-----transitions which do change parity (E1)
 C-----
 C-----decay to the continuum
 C-----
-C-----do loop over c.n. energies (loops over spins and parities expanded
+C-----do loop over c.n. energies (loops over spins and parities expanded)
       DO ier = Iec - 1, 1, -1
          IF (ier.EQ.1) THEN
             corr = 0.5

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-22 15:59:39 $
-Ccc   * $Id: input.f,v 1.129 2005-05-22 15:59:39 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:22 $
+Ccc   * $Id: input.f,v 1.130 2005-05-30 14:08:22 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1159,37 +1159,6 @@ C--------set projectile/ejectile masses
 C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
          CALL READLDP
-         IF (DIRect.GT.0) THEN
-                              ! Inelastic scattering by DWBA for all particles
-C--------fix-up deformations and discrete levels for ECIS coupled channels
-            ierr = IFINDCOLL()
-C-----------Defining ICOller(i)
-            DO i = 2, ND_nlv
-               itmp = ICOllev(i)
-               IF (itmp.GT.50) itmp = ICOllev(i) - 50
-               ICOller(i) = itmp
-            ENDDO
-            IF (ierr.EQ.1) THEN
-               WRITE (6,*) ' WARNING: Some collective discrete levels',
-     &                     '  for target nucleus not found'
-               WRITE (6,*) ' WARNING: check TARGET.LEV file '
-            ELSEIF (ierr.EQ.2) THEN
-               WRITE (6,*) ' WARNING: No discrete levels for target',
-     &                     ' nucleus found'
-               WRITE (6,*) ' WARNING: Direct cross section will not be',
-     &                     ' calculated'
-               WRITE (6,*) ' WARNING: Setting DIRECT to 0 '
-               DIRect = 0
-            ELSEIF (ierr.EQ.3) THEN
-               WRITE (6,*) ' WARNING: Spherical odd nuclei, no hints',
-     &                     ' for collective states'
-               WRITE (6,*) ' WARNING:  Check directly TARGET.LEV file '
-               WRITE (6,*) ' WARNING:  Direct cross section will not',
-     &                     ' be calculated'
-               WRITE (6,*) ' WARNING:  setting DIRECT to 0 '
-               DIRect = 0
-            ENDIF
-         ENDIF
 C--------fix-up deformations for CCFUS coupled channels
          IF (CSRead.EQ.( - 2.0D0) .AND. AEJc(0).GT.4.0D0) THEN
             DO j = 1, NSCc
@@ -1331,6 +1300,32 @@ C-----set giant resonance parameters for CN
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),RMU,ak2,1,RELkin)
       CALL LEVREAD(0)
+
+      IF (DIRect.GT.0 .AND. FIRst_ein) THEN
+C     IF (DIRect.GT.0                ) THEN
+                              ! Inelastic scattering by DWBA for all particles
+C--------fix-up deformations and discrete levels for ECIS coupled channels
+            ierr = IFINDCOLL()
+C-----------Defining ICOller(i)
+            DO i = 2, ND_nlv
+               itmp = ICOllev(i)
+               IF (itmp.GT.20) itmp = ICOllev(i) - 20
+               ICOller(i) = itmp
+            ENDDO
+            IF (ierr.EQ.1) THEN
+               WRITE (6,*) ' WARNING: Some collective discrete levels',
+     &                     '  for target nucleus not found'
+               WRITE (6,*) ' WARNING: check TARGET.LEV file '
+            ELSEIF (ierr.EQ.2) THEN
+               WRITE (6,*) ' WARNING: No discrete levels for target',
+     &                     ' nucleus found'
+               WRITE (6,*) ' WARNING: Direct cross section will not be',
+     &                     ' calculated'
+               WRITE (6,*) ' WARNING: Setting DIRECT to 0 '
+               DIRect = 0
+            ENDIF
+      ENDIF
+
       EXCn = EIN + Q(0,1) + ELV(LEVtarg,0)
       EMAx(1) = EXCn
 C-----set Q-value for CN production
@@ -1616,7 +1611,7 @@ C-----calculate residual nucleus level density
             IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)
 C-----------<m2> could be added to the input ( to use 0.124 if needed)
             IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
-C           IF(ADIv.EQ.2.0D0)CALL ROGC(nnur, 0.146D0)
+C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.EQ.3.0D0) CALL ROHFBCS(nnur)
             IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0,1.D0)
             IF (IOUt.EQ.6) THEN
@@ -1706,6 +1701,11 @@ C
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
       DOUBLE PRECISION egamma, pelm, pgamma, qn, sum, t12, xicc
+
+
+
+
+      DOUBLE PRECISION dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
       CHARACTER*9 finp
       CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
@@ -1716,7 +1716,35 @@ C
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
-      LREad = .TRUE.
+C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
+      IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
+        OPEN (47,FILE = '../RIPL-2/resonances/resonances0.dat',
+     &      STATUS = 'old',ERR = 65)
+        READ (47,'(///)') ! Skipping first 4 title lines
+        DO i = 1, 296
+          READ (47,'(2i4,  17x,2(e9.2,2x),2(f4.2,2x),2(F5.1,1x))',
+
+
+
+     &     END = 60, ERR = 60) nztmp, natmp,
+     &         dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
+          IF (nztmp.NE.Iz .OR. natmp.NE.Ia) CYCLE
+          D0_obs = dd0tmp
+          D0_unc = dd0_unc
+          S0_obs = ss0tmp
+          S0_unc = ss0_unc
+          Gg_obs = gggtmp
+          Gg_unc = ggg_unc
+        ENDDO
+   60   CLOSE (47)
+        GOTO 70
+   65   WRITE (6,*) ' WARNING: ',
+     &   '../RIPL-2/resonances/resonances0.dat file not found '
+        WRITE (6,*) ' WARNING: D0 and gamma width are not available '
+C       We could put here whatever systematics for D0 or Gg we want
+      ENDIF
+
+   70 LREad = .TRUE.
       izatmp = INT(1000*iz + ia)
       DO itmp = 0,NDNuc
           IF(NSTOred(itmp).eq.izatmp) THEN
@@ -1747,7 +1775,6 @@ C-------set ground state in case nucleus not in file
         XJLv(1,Nnuc) = 0.0
         IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
 C-------set ground state *** done ***
-
         IF(.NOT.FILevel) THEN
 C---------constructing input and filenames
            WRITE (ctmp3,'(I3.3)') iz
@@ -1943,7 +1970,7 @@ C
         WRITE (12,*)
         WRITE (12,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
         WRITE (12,*)
-        
+
       ENDIF
       iexclus = 0
       DO i = 1, NNUcd
@@ -2002,7 +2029,7 @@ C
         WRITE (12,*) '   Code for Nuclear Reaction Calculations, in   '
         WRITE (12,*) '   Nuclear Reaction Data and Nuclear Reactors,  '
         WRITE (12,*) '   eds. N.Paver, M. Herman and A.Gandini, ICTP  '
-        WRITE (12,*) '   Lecture Notes 5 (ICTP Trieste, 2001) pp.137. ' 
+        WRITE (12,*) '   Lecture Notes 5 (ICTP Trieste, 2001) pp.137. '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[He02] Recent Development of the Nuclear        '
         WRITE (12,*) '   Reaction Model Code Empire, M. Herman,       '
@@ -2279,14 +2306,30 @@ C
       n = ia - iz
       ncor = 0
       izcor = 0
-C-----define Gspin, Gspar, E2p, E3m for gamma
-      IF (ia.EQ.0) THEN
+C-----define Gspin, Gspar, E2p, E3m for gamma/deuterium
+      IF ( (ia.EQ.0 .and. iz.eq.0) .OR. (ia.EQ.2 .and. iz.eq.1)) THEN
          E2p = 0.D0
          E3m = 0.D0
          Gspin = 1
          Gspar = 1
          RETURN
       ENDIF
+C-----define Gspin, Gspar, E2p, E3m for neutron/proton
+      IF (ia.EQ.1 .or. ia.eq.3) THEN
+         E2p = 0.D0
+         E3m = 0.D0
+         Gspin = 0.5
+         Gspar = 1
+         RETURN
+      ENDIF
+      IF (ia.EQ.4 .and. iz.eq.2) THEN
+         E2p = 0.D0
+         E3m = 0.D0
+         Gspin = 0.
+         Gspar = 1
+         RETURN
+      ENDIF
+
       IF (FLOAT(n/2).NE.FLOAT(n)/2.0) ncor = 1
       IF (FLOAT(iz/2).NE.FLOAT(iz)/2.0) izcor = 1
       IF (ia.LE.4) THEN
@@ -2664,7 +2707,7 @@ C--------------searching in the RIPL database
          ENDIF
          IF (name.EQ.'EcDWBA') THEN
 C           EcDWBA meaningless if Collective level file exists
-             IF(fexist) goto 100
+            IF(fexist) goto 100
             ECUtcoll = val
             JCUtcoll = i1
             IF (JCUtcoll.EQ.0) JCUtcoll = 2
@@ -2674,6 +2717,18 @@ C           EcDWBA meaningless if Collective level file exists
             WRITE (6,
      &'('' All levels with spin less or equal to '',I1,           '' con
      &sidered in DWBA'')') JCUtcoll
+            GOTO 100
+         ENDIF
+C
+         IF (name.EQ.'RESOLF') THEN
+            IF(val.gt.0.) THEN
+              WIDcoll = val
+              WRITE (6,
+     &     '('' Collective levels in continuum will be spread using'')')
+              WRITE (6,
+     &     '('' gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
+     &       ''R = '',F6.3, '' keV'' )') WIDcoll*1000
+             ENDIF
             GOTO 100
          ENDIF
 C
@@ -4638,7 +4693,7 @@ Ccc   * date:   12.Jul.1997                                              *
 Ccc   * revision:1    by:M. Herman                on:11.07.1998          *
 Ccc   *               EMPIRE systematics for level density parameter 'a' *
 Ccc   *               introduced, 'a' values compatible with the dynamic *
-Ccc   *               level density model read in form file ldp.dat,     *
+Ccc   *               level density model read in from file ldp.dat,     *
 Ccc   *               local normalization of the systematics to the exp. *
 Ccc   *               data introduced for the dynamic and Gilbert-       *
 Ccc   *               Cameron level densities.                           *
@@ -4672,6 +4727,7 @@ C
          IF (iloc.EQ.0) THEN
             NLV(nnuc) = nlevc
             DOBs(nnuc) = dob
+            if(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
 C-----------set up normalization factors for level density parameter 'a'
             IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. arogc.NE.0.0D0) THEN
@@ -4687,6 +4743,11 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   IF (ATIlnor(nnuc).EQ.0.D0) ATIlnor(nnuc) = arogc/asys
+C
+C                 Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
+C
+                  ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+                  ROPar(3,nnuc) = del
                ENDIF
                IF (ADIv.EQ.0.0D0) THEN
                   del = 0.
@@ -4716,10 +4777,10 @@ C-----------------EMPIRE systematics with M-S shell corrections
                   atil = ap1*A(nnuc) + ap2*a23
                   tcrt = 0.567*delp
                   ar = atil*(1.0 + SHC(nnuc)*gamma)
-                  DO ix = 1, 10
+                  DO ix = 1, 20
                      xr = ar*tcrt**2
                      acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
-                     IF (ABS(acrt - ar)/acrt.LE.0.001D0) GOTO 105
+                     IF (ABS(acrt - ar).LE.0.001D0*acrt) GOTO 105
                      ar = acrt
                   ENDDO
   105             econd = 1.5*acrt*delp**2/pi2
@@ -4728,6 +4789,11 @@ C-----------------EMPIRE systematics with M-S shell corrections
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   IF (ATIlnor(nnuc).EQ.0.0D0) ATIlnor(nnuc) = aroc/asys
+C
+C                 Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
+C
+                  ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+                  ROPar(3,nnuc) = del
                ENDIF
                atilsum = atilsum + ATIlnor(nnuc)
                nexp = nexp + 1
@@ -4737,7 +4803,7 @@ C-----------------EMPIRE systematics with M-S shell corrections
      &                        INT(Z(nnuc))
                   IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.3.0D0) WRITE (6,*)
      &                 'SHC=', SHC(nnuc), ' U=', uexc, ' DELTA=', del,
-     &                ' asys=', asys, ' aexp=', aroc
+     &                ' asys=', asys, ' aexp=', aroc,' Dobs=',dob
                   IF (ADIv.EQ.2.0D0) WRITE (6,*) 'SHC=', SHC(nnuc),
      &                ' U=', uexc, ' DELTA=', del, ' asys=', asys,
      &                ' aexp=', arogc
@@ -5422,15 +5488,13 @@ Ccc   * output: (through COMMON)                                         *
 Ccc   *        ND_NLV- number of collective states to be considered      *
 Ccc   *        D_ELV(ND_NLV) - energy of each proposed collective state  *
 Ccc   *        D_LVP(ND_NLV) - parity of each proposed collective state  *
-Ccc   *        D_ELV(ND_NLV) - spin   of each proposed collective state  *
+Ccc   *        D_Xjlv(ND_NLV) - spin  of each proposed collective state  *
 Ccc   *        D_DEF(ND_NLV) - dynamical deformations for each level     *
 Ccc   *        DEFORMED - .TRUE. if nucleus has static deformation >0.15 *
 Ccc   * return:                                                          *
 Ccc   *   IFindColl = 0 (ALL POSSIBLE LEVELS FOUND)                      *
 Ccc   *   IFindColl = 1 WARNING: (SOME COLLECTIVE LEVELS NOT FOUND)      *
 Ccc   *   IFindColl = 2 ERROR: NO DISCRETE LEVEL INFORMATION AVAILABLE   *
-Ccc   *   IFindColl = 3 SPHERICAL VIBRATIONAL ODD NUCLEUS                *
-Ccc   *                 No suggestion for collective levels              *
 Ccc   *                                                                  *
 Ccc   * Creates files TARGET.LEV, COLLECTIVE.LEV and COLLECTIVE.TXT      *
 Ccc   * TARGET_COLL.DAT   contains all collective  states to be          *
@@ -5444,6 +5508,10 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+
+      DOUBLE PRECISION drand
+      Integer*4 indexf, indexb, buffer(250)
+      Common/R250COM/indexf,indexb,buffer
 C
 C Local variables
 C
@@ -5453,15 +5521,17 @@ C
       CHARACTER*5 chelem
       CHARACTER*100 ch_iuf, comment
       CHARACTER*3 ctmp3
+      CHARACTER*5 ctmp5
       DOUBLE PRECISION DBLE
       LOGICAL fexist,odd
       CHARACTER*9 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
-     &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, iloc, ilv, iptmp,
+     &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, ilv, iptmp,
      &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
-     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus
+     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus, ncont
       INTEGER NINT
       CHARACTER*6 reftmp
+
       ND_nlv = 0
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
       IF (fexist) THEN
@@ -5541,19 +5611,19 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
      &          D_Llv(1), D_Klv(1), 0.01
          DO i = 2, ND_nlv
             READ (32,
-     &            '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
-     &            ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &            D_Llv(i), D_Klv(i), D_Def(i,2)
+     &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
             WRITE (6,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &             D_Llv(i), D_Klv(i), D_Def(i,2)
-             itmp1 = ICOllev(i)
-             if(itmp1.gt.50) itmp1 = itmp1 -50
+     &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+            itmp1 = ICOllev(i)
+            if(itmp1.gt.20) itmp1 = itmp1 -20
             WRITE (12,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
-     &             itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &             D_Llv(i), D_Klv(i), D_Def(i,2)
+     &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
          ENDDO
          WRITE(12,*) ' '
          CLOSE (32)
@@ -5627,10 +5697,6 @@ C--------NLVs limited by binding energy
          ENDDO
       ENDDO
 C
-C-----Maximum number of levels scanned for collectivity = 49
-C-----99 = 50 + 49 which is the maximum number allowed to be printed in I2 format
-C
-      nlvs = MIN(nlvs,49)
       DO ilv = 1, nlvr + ngamr
          BACKSPACE (13)
       ENDDO
@@ -5715,15 +5781,29 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ENDIF
       NScc = max(iccfus-1,NScc,0)
 
-C--------locate position of the target among residues
-      CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+C-----Target corresponds to nnucrec = 0
+C     CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+      nnurec = 0
+
   400 DO ilv = 1, nlvs
          READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') itmp, elvr,
      &         xjlvr, lvpr, t12, ndbrlin
-C--------Skipping levels in continuum (not anymore)
-C        IF (ilv.GT.NLV(nnurec)) GOTO 600
-C--------Skipping levels with unknown spin
-         IF (xjlvr.LT.0.) cycle        
+C--------Skipping levels with unknown spin in the discrete level region
+         IF (xjlvr.LT.0. .AND. ilv.LE.NLV(nnurec)) CYCLE
+         IF (xjlvr.LT.0.) THEN ! unknown spin in continuum
+C                                assigning randomly 2+,4+,3- spin
+            ftmp = drand()
+           xjlvr = 2
+           lvpr  = 1
+            if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
+             xjlvr = 4
+             lvpr  = 1
+            endif
+            if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
+             xjlvr = 3
+             lvpr  = -1
+            endif
+         ENDIF
          IF (ilv.EQ.1) THEN
             delta_k = 2.D0
             IF (xjlvr.NE.0.D0) delta_k = 1.D0
@@ -5749,10 +5829,11 @@ C-----------the database we take FRDM deformations
 C--------------ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv,1) = 0.0
                IF (gspin.NE.0.D0) THEN
-                  ICOllev(ND_nlv) = ilv + 50
+                  ICOllev(ND_nlv) = ilv + 20
                   WRITE (6,*)
-     &                     'ERROR: ONLY DWBA CALCULATIONS ALLOWED FOR'
+     &                     'WARNING: ONLY DWBA CALCULATIONS ALLOWED FOR'
                   WRITE (6,*) 'WARNING: ODD SPHERICAL NUCLEUS'
+                  WRITE (6,*) 'WARNING: DIRECT reset to zero'
                   DIRect = 0
                ENDIF
                GOTO 500
@@ -5804,7 +5885,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
             IF (i22p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1) THEN
                i22p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5826,7 +5907,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
             IF (i41p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1) THEN
                i41p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5837,7 +5918,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
             IF (i31p.EQ.0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.1) THEN
                i31p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5845,11 +5926,11 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv,2) = 0.05
                GOTO 500
             ENDIF
-            IF (ECUtcoll.GT.0. .AND. elvr.GT.ECUtcoll) GOTO 600
+            IF (ECUtcoll.GT.0. .AND. elvr.GE.ECUtcoll) GOTO 600
 C-----------Additional levels are added for DWBA calculations
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll) THEN
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5877,7 +5958,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.(gspin + 2*delta_k) .AND.
@@ -5889,7 +5970,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
             IF (i6p.EQ.0 .AND. xjlvr.EQ.(gspin + 3*delta_k) .AND.
@@ -5901,7 +5982,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                IF(odd) goto 600
                GOTO 500
             ENDIF
@@ -5914,14 +5995,14 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
      &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
                i10p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5933,7 +6014,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
      &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
                i12p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5945,19 +6026,19 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
      &          .AND. .NOT.odd) THEN
                i0p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.(gspin + NINT(delta_k)/2) .AND.
      &          lvpr.EQ. - 1*gspar  .AND. .NOT.odd ) THEN
                i1m = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5969,7 +6050,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + delta_k)) THEN
                i3m = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5981,7 +6062,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 2*delta_k)) THEN
                i5m = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -5993,41 +6074,43 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
      &          lvpr.EQ.gspar .AND. .NOT.odd) THEN
                i21p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
             IF (i22p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
      &          lvpr.EQ.gspar .AND. .NOT.odd) THEN
                i22p = ilv
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                GOTO 500
             ENDIF
 C--------------Additional levels are added for DWBA calculations
             IF (ECUtcoll.GT.0. .AND. elvr.GT.ECUtcoll) GOTO 600
+
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll .AND.
      &                               .NOT.odd) THEN
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + 50
+               ICOllev(ND_nlv) = ilv + 20
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.01
+               D_Def(ND_nlv,2) = 0.02
                ierr = 0
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
             ENDIF
+            IF (ECUtcoll.GT.0. .AND. xjlvr.GT.JCUtcoll) cycle
             IF (i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
      &          i8p.NE.0 .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
      &          i3m.NE.0 .AND. i5m.NE.0 .AND. i21p.NE.0 .AND.
@@ -6045,13 +6128,13 @@ C--------------Additional levels are added for DWBA calculations
          WRITE (6,99005)
      &' Collective levels selected automatically from available target l
      &evels (vibrational model)           '
-         WRITE (6,*) ' N < 50 for coupled levels in CC calculation'
+         WRITE (6,*) ' N < 20 for coupled levels in CC calculation'
          WRITE (6,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
      &evels (vibrational model)'
-         WRITE (32,*) ' N < 50 for coupled levels in CC calculation'
+         WRITE (32,*) ' N < 20 for coupled levels in CC calculation'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
 C--------Putting Coupled levels first
@@ -6088,9 +6171,9 @@ C-----------------swapping
          ENDDO
 C--------Putting one phonon coupled states first for spherical
          DO i = 2, ND_nlv
-            IF (ICOllev(i).GE.50) GOTO 650
+            IF (ICOllev(i).GE.20) GOTO 650
             DO j = i + 1, ND_nlv
-               IF (ICOllev(j).GE.50) GOTO 620
+               IF (ICOllev(j).GE.20) GOTO 620
                IF (IPH(j).LT.IPH(i)) THEN
 C-----------------swapping
                   itmp = IPH(i)
@@ -6137,39 +6220,52 @@ C-----------------swapping
          WRITE (12,'(3x,3I5)') ND_nlv
          WRITE (12,*)
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+
+          ncont = NLV(nnurec) + 20
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.0
-            WRITE (32,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &             D_Llv(i), D_Klv(i), ftmp
-             itmp1 = ICOllev(i)
-             if(itmp1.gt.50) itmp1 = itmp1 -50
-            WRITE (12,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &             D_Llv(i), D_Klv(i), ftmp
-            WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
-     &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &               D_Llv(i), D_Klv(i), ftmp
+
+            itmp1 = ICOllev(i)
+            if(itmp1.gt.20) itmp1 = itmp1 - 20
+            IF (itmp1.LE.NLV(nnurec)) THEN
+              WRITE (32,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp
+              WRITE (12,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp
+            ELSE
+              ncont = ncont + 1
+               IF(ncont.GT.99) GOTO 653
+              WRITE (32,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp,' cont'
+              WRITE (12,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp,' cont'
+            ENDIF
          ENDDO
-         WRITE(12,*) ' '
+ 653     WRITE(12,*) ' '
       ELSE
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
-     &evels (rigid rotor assumed)       '
+     &evels (rigid rotor)       '
          WRITE (32,*)
-     &'Dyn.deformations are not used in symm.rot.model ( N < 50 for coup
+     &'Dyn.deformations are not used in symm.rot.model ( N < 20 for coup
      &led levels )'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                 ' nucleus is treated as deformed'
          WRITE (6,*)
          WRITE (6,99005)
      &' Collective levels selected automatically from available target l
-     &evels (rigid rotor assumed)       '
+     &evels (rigid rotor)       '
          WRITE (6,*)
-     &'Dyn.deformations are not used in symm.rot.model (  N < 50 for cou
+     &'Dyn.deformations are not used in symm.rot.model (  N < 20 for cou
      &pled levels )'
          WRITE (6,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                 ' nucleus is treated as deformed'
@@ -6224,24 +6320,46 @@ C-----------------swapping
          WRITE (12,'(3x,3I5)') ND_nlv
          WRITE (12,*)
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+
+          ncont = NLV(nnurec) + 20
+
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.01
-            WRITE (32,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i), 0,
-     &             0, ftmp
-            WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
-     &             ) ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &               0, 0, ftmp
-             itmp1 = ICOllev(i)
-             if(itmp1.gt.50) itmp1 = itmp1 -50
-            WRITE (12,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             itmp1 , D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &             D_Llv(i), D_Klv(i), ftmp
+
+            itmp1 = ICOllev(i)
+            if(itmp1.gt.20) itmp1 = itmp1 - 20
+            IF (itmp1.LE.NLV(nnurec)) THEN
+              WRITE (32,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           0, 0, ftmp
+              WRITE (6,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           0, 0, ftmp
+              WRITE (12,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           0, 0, ftmp
+            ELSE
+              ncont = ncont + 1
+               IF(ncont.GT.99) GOTO 99004
+              WRITE (32,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp,' cont'
+              WRITE (6,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp,' cont'
+              WRITE (12,
+     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
+     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), ftmp,' cont'
+            ENDIF
          ENDDO
-         WRITE(12,*) ' '
+99004    WRITE(12,*) ' '
       ENDIF
       CLOSE (32)
       RETURN
@@ -7480,4 +7598,3 @@ C     Generator of normally distributed random numbers based on R250
 
       return
       End
-

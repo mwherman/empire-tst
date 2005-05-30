@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:44 $
-Ccc   * $Id: tl.f,v 1.59 2005-05-05 15:05:44 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:24 $
+Ccc   * $Id: tl.f,v 1.60 2005-05-30 14:08:24 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -210,7 +210,7 @@ C
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.50) nld_cc = nld_cc + 1
+            IF (ICOllev(k).LT.20) nld_cc = nld_cc + 1
          ENDDO
          WRITE (6,*)
          WRITE (6,*)
@@ -361,7 +361,7 @@ C
          ENDIF
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.50) nld_cc = nld_cc + 1
+            IF (ICOllev(k).LT.20) nld_cc = nld_cc + 1
          ENDDO
          IF (nld_cc.NE.NVIb(ncalc)) THEN
             WRITE (6,*) 'WARNING: Default number of coupled levels: ',
@@ -1885,7 +1885,8 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0) ip = 8
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
-      angstep = 2.5
+C     angstep = 2.5
+      angstep = 10.
       CALL INIT(Nejc,Nnuc)
       ECIs1 = BECis1
 C-----Deformation read instead of deformation lengths
@@ -1945,11 +1946,11 @@ C-----At least ground state is always open !!, RCN 31/03/2001
       nd_cons = 1
       IF (Inlkey.NE.0) THEN
          DO j = 2, ND_nlv
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.50) GOTO 50
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) CYCLE
             nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
-   50    ENDDO
+         ENDDO
          IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
      &       WRITE (6,*)
      &               ' All inelastic channels are closed at this energy'
@@ -2015,8 +2016,8 @@ C-----0 phonon involved
 C--------discrete levels
          nwrite = 1
          DO j = 2, ND_nlv
-C--------All levels with icollev(j)>50 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.50) GOTO 100
+C--------All levels with icollev(j)>20 should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) GOTO 100
             ch = '-'
             IF (D_Lvp(j).GT.0) ch = '+'
 C-----------If channel is closed ground state potential is used for this level
@@ -2044,8 +2045,8 @@ C
 C--------deformations: phonon description
 C
          DO j = 2, ND_nlv
-C-----------All levels with icollev(j)>50 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.50) GOTO 150
+C-----------All levels with icollev(j)>20 should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) CYCLE
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
                WRITE (1,'(i5,5x,6f10.5)') INT(D_Xjlv(j)), D_Def(j,2)
@@ -2054,7 +2055,7 @@ C--------------only one phonon states need deformations as input
                IF (IPH(j).EQ.1) WRITE (1,'(i5,5x,6f10.5)')
      &                                 INT(D_Xjlv(j)), D_Def(j,2)
             ENDIF
-  150    ENDDO
+         ENDDO
       ENDIF
 C
 C-----potential parameters
@@ -2123,8 +2124,8 @@ C-----write(1,'(3f10.5)') rc,0.,0.
 C
 C------2) discrete levels
          DO j = 2, ND_nlv
-C           All levels with icollev(j)>50 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.50) GOTO 200
+C           All levels with icollev(j)>20 should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) GOTO 200
             eee = El - D_Elv(j)/xratio
 C-----------If channel is closed ground state potential is used for this level
             IF (eee.GE.0.0001) THEN
@@ -2258,7 +2259,8 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0) ip = 8
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
-      angstep = 2.5
+C     angstep = 2.5
+      angstep = 10.
       CALL INIT(Nejc,Nnuc)
       ECIs1 = BECis1
 C-----Rotational model
@@ -2327,14 +2329,14 @@ C-----nd_nlvop = 0
       IF (ND_nlv.GT.0) THEN
          nd_cons = 1
          DO j = 2, ND_nlv
-C-----------All levels with icollev(j)>50 should be calculated by DWBA
-            IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.50) GOTO 50
-C-----------All levels with icollev(j)<50 should be calculated by CC
-            IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.50) GOTO 50
+C-----------All levels with icollev(j)>20 should be calculated by DWBA
+            IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
+C-----------All levels with icollev(j)<20 should be calculated by CC
+            IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
             nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
-   50    ENDDO
+         ENDDO
       ENDIF
       IF (nd_nlvop.EQ.1) WRITE (6,*)
      &               ' All inelastic channels are closed at this energy'
@@ -2383,10 +2385,10 @@ C-----Discrete levels
       npho = 0
       nwrite = 1
       DO j = 2, ND_nlv
-C--------All levels with icollev(j)>50 should be calculated by DWBA
-         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.50) GOTO 100
-C--------All levels with icollev(j)<50 should be calculated by CC
-         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.50) GOTO 100
+C--------All levels with icollev(j)>20 should be calculated by DWBA
+         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
+C--------All levels with icollev(j)<20 should be calculated by CC
+         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
          ch = '-'
          IF (D_Lvp(j).GT.0) ch = '+'
 C--------If channel is closed ground state potential is used for this level
@@ -2421,7 +2423,7 @@ C--------In vibrational-rotational model IPH(j) is phonon number
            endif
             WRITE (1,'(10i5)') 1, IPH(j)
          ENDIF
-  100 ENDDO
+      ENDDO
 C-----Description of phonons
       IF (npho.GT.0) THEN
 C--------In vibrational rotational model the IPH(j) array contains the
@@ -2506,10 +2508,10 @@ C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') 0., 0., 0.
 C-----2) discrete levels
       DO j = 2, ND_nlv
-C--------All levels with icollev(j)>50 should be calculated by DWBA
-         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.50) GOTO 200
-C--------All levels with icollev(j)<50 should be calculated by CC
-         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.50) GOTO 200
+C--------All levels with icollev(j)>20 should be calculated by DWBA
+         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
+C--------All levels with icollev(j)<20 should be calculated by CC
+         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
 C--------If channel is closed ground state potential is used for this level
          eee = El - D_Elv(j)/xratio
          IF (eee.GE.0.0001) THEN
@@ -2578,7 +2580,7 @@ C-----------write(1,'(3f10.5)') rc,0.,0.
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
          ENDIF
-  200 ENDDO
+      ENDDO
 C
 C-----Angular distribution step
 C

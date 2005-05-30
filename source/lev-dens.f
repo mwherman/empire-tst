@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-18 14:12:16 $
-Ccc   * $Id: lev-dens.f,v 1.39 2005-05-18 14:12:16 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:24 $
+Ccc   * $Id: lev-dens.f,v 1.40 2005-05-30 14:08:24 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -634,7 +634,7 @@ C--------Empire systematics with M-S shell corrections
       IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) GAMma = Asaf
 C-----determination of the pairing shift DEL
       DELp = 12./SQRT(A(Nnuc))
-c      IF(A(nnuc).eq.231.)delp=0.8
+
       DEL = 0.
       IF (MOD(in,2).NE.0) DEL = DELp
       IF (MOD(iz,2).NE.0) DEL = DEL + DELp
@@ -651,7 +651,7 @@ C-----set Ignatyuk type energy dependence for 'a'
          DO ix = 1, 20
             xr = ar*TCRt**2
             ACRt = ATIl*FSHELL(xr,SHC(Nnuc),GAMma)
-            IF (ABS(ACRt - ar)/ACRt.LE.0.001D0) GOTO 100
+            IF (ABS(ACRt - ar).LE.0.001D0*ACRt) GOTO 100
             ar = ACRt
          ENDDO
          WRITE (6,*)
@@ -665,6 +665,14 @@ C-----set Ignatyuk type energy dependence for 'a'
 C-----45.84 stands for (12/SQRT(pi))**2
       DETcrt = 45.84*ACRt**3*TCRt**5
       ACR = ATIl*FSHELL(UCRt,SHC(Nnuc),GAMma)
+
+C
+C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
+C
+C     IF(ROPar(1,nnuc).EQ.0. .AND. CF.EQ.0.) ROPar(1,nnuc) = ACR
+      IF(CF.EQ.0.) ROPar(1,nnuc) = ACR
+      IF(CF.EQ.0.) ROPar(3,nnuc) = del
+
       IF (BF.EQ.0.D0 .AND. Asaf.LT.0.0D0) ACR = ACRt
       SCR = 2.*ACRt*TCRt
 C-----

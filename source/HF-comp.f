@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-05-23 07:14:36 $
-Ccc   * $Id: HF-comp.f,v 1.62 2005-05-23 07:14:36 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-05-30 14:08:22 $
+Ccc   * $Id: HF-comp.f,v 1.63 2005-05-30 14:08:22 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -234,7 +234,6 @@ C-----DE spectra
             DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
                    IF(ENDF(Nnur).EQ.2) THEN
-C                    Nnur nucleus treated as inclusive
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
                    ELSE !Nnur nucleus treated as exclusive
@@ -243,24 +242,24 @@ C                    Nnur nucleus treated as inclusive
                    ENDIF
 C-----------------DDX spectra using portions
                    IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
-                      IF(ENDF(Nnur).EQ.2) THEN
-C                     Nnur nucleus treated as inclusive
-C                     we convert POPcseaf back into cross section and add
-C                     this contribution to the total ddx spectrum stored on
-C                     CSEa(ie,nang,nejc,1)
-                          DO nang = 1, NDANG
-                            piece = CSEmsd(ie,iejc)
-                            IF (ie.EQ.NEXr(iejc,1)) piece = 0.5*piece
-                            CSEa(ie,nang,iejc,1) = CSEa(ie,nang,iejc,1)
-     &                              + ((POPcse(Iec,iejc,ie,Nnuc)
-     &                              - piece*POPcseaf(Iec,iejc,ie,Nnuc))
-     &                              /4.0/PI + CSEa(ie,nang,iejc,1)
-     &                              *POPcseaf(Iec,iejc,ie,Nnuc))
-                          ENDDO
+                      IF(ENDF(Nnur).EQ.2) THEN ! TO be checked !!!!!
+C                       Nnur nucleus treated as inclusive
+C                       we convert POPcseaf back into cross section and add
+C                       this contribution to the total ddx spectrum stored on
+C                       CSEa(ie,nang,nejc,0)
+C                       DO nang = 1, NDANG
+C                         piece = CSEmsd(ie,iejc)
+C                         IF (ie.EQ.NEXr(iejc,1)) piece = 0.5*piece
+C                         CSEa(ie,nang,iejc,0) = CSEa(ie,nang,iejc,0)
+C    &                              + ((POPcse(Iec,iejc,ie,Nnur)
+C    &                              - piece*POPcseaf(Iec,iejc,ie,Nnuc))
+C    &                              /4.0/PI + CSEa(ie,nang,iejc,1)
+C    &                              *POPcseaf(Iec,iejc,ie,Nnuc))
+C                       ENDDO
                       ELSE !Nnur nucleus treated as exclusive
-                         POPcseaf(Ief,iejc,ie,Nnur)
-     &                   = POPcseaf(Ief,iejc,ie,Nnur)
-     &                   + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+                        POPcseaf(Ief,iejc,ie,Nnur)
+     &                  = POPcseaf(Ief,iejc,ie,Nnur)
+     &                  + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
                       ENDIF
                    ENDIF
                ENDIF

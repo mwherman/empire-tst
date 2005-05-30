@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-05 15:05:45 $
-Ccc   * $Id: fusion.f,v 1.41 2005-05-05 15:05:45 Capote Exp $
+Ccc   * $Date: 2005-05-30 14:08:24 $
+Ccc   * $Id: fusion.f,v 1.42 2005-05-30 14:08:24 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -565,7 +565,7 @@ C-----Storing transmission coefficients for the incident channel
       WRITE (45) ELAcs, TOTcs, ABScs, SINl
       CLOSE (45)
 
-  300 IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0) THEN
+  300 IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0 .AND. FIRST_ein) THEN
          s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
          r2 = rp*rp
@@ -574,12 +574,25 @@ C-----Storing transmission coefficients for the incident channel
 C--------Corrected scattering radius
          rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
-         WRITE (6,99005) s0*1D4, s1a*1D4, rp
-99005    FORMAT (/'  Strength functions S0 =',f6.3,
-     &           ' eV**(-1/2)*10**(-4)'/,'                     S1 =',
-     &           f6.3,' eV**(-1/2)*10**(-4)'/,'  Scattering radius =',
-     &           f7.3,' fm')
-         WRITE (6,*)
+         IF(S0_obs.GT.0.)   THEN 
+            WRITE ( 6,99004) S0_obs,S0_unc
+           WRITE (12,99004) S0_obs,S0_unc
+          ELSE
+            WRITE ( 6,'(7x,49(1h*)/
+     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
+            WRITE (12,'(7x,49(1h*)/ 
+     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
+          ENDIF
+99004    FORMAT (7x,49(1h*)/
+     &           6x,' LOW ENERGY NEUTRON SCATTERING:'/ 
+     &           6x,' Exp.  Strength functions S0 =',f6.3,' (',f6.4,')')
+         WRITE ( 6,99005) s0*1D4, s1a*1D4, rp
+         WRITE (12,99005) s0*1D4, s1a*1D4, rp
+99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,/
+     &           6x,'                          S1 =',f6.3,/
+     &           6x,' Scattering radius =',f7.3,' fm'/7x,49(1h*))
+         WRITE ( 6,*)
+         WRITE (12,*)
       ENDIF
 C-----channel spin min and max
       smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
