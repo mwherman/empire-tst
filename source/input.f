@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:22 $
-Ccc   * $Id: input.f,v 1.130 2005-05-30 14:08:22 Capote Exp $
+Ccc   * $Date: 2005-05-31 12:02:09 $
+Ccc   * $Id: input.f,v 1.131 2005-05-31 12:02:09 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1330,6 +1330,8 @@ C-----------Defining ICOller(i)
       EMAx(1) = EXCn
 C-----set Q-value for CN production
       QPRod(1) = Q(0,1)
+
+      AMAss(1) = (A(1)*AMUmev + XMAss(1))/AMUmev
 C-----WRITE heading on FILE12
       ia = INT(A(0))
       iae = INT(AEJc(0))
@@ -1448,7 +1450,7 @@ C           residual nuclei must be heavier than alpha
                STOP
             ENDIF
 C-----------Mass of the residual nnclei
-C           AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
+            AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
                CALL LEVREAD(nnur)
