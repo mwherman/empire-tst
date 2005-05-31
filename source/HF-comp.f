@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:22 $
-Ccc   * $Id: HF-comp.f,v 1.63 2005-05-30 14:08:22 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-05-31 06:43:58 $
+Ccc   * $Id: HF-comp.f,v 1.64 2005-05-31 06:43:58 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -242,20 +242,21 @@ C-----DE spectra
                    ENDIF
 C-----------------DDX spectra using portions
                    IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
-                      IF(ENDF(Nnur).EQ.2) THEN ! TO be checked !!!!!
-C                       Nnur nucleus treated as inclusive
-C                       we convert POPcseaf back into cross section and add
-C                       this contribution to the total ddx spectrum stored on
-C                       CSEa(ie,nang,nejc,0)
-C                       DO nang = 1, NDANG
-C                         piece = CSEmsd(ie,iejc)
-C                         IF (ie.EQ.NEXr(iejc,1)) piece = 0.5*piece
-C                         CSEa(ie,nang,iejc,0) = CSEa(ie,nang,iejc,0)
-C    &                              + ((POPcse(Iec,iejc,ie,Nnur)
-C    &                              - piece*POPcseaf(Iec,iejc,ie,Nnuc))
-C    &                              /4.0/PI + CSEa(ie,nang,iejc,1)
-C    &                              *POPcseaf(Iec,iejc,ie,Nnuc))
-C                       ENDDO
+                      IF(ENDF(Nnur).EQ.2) THEN
+C                     Nnur nucleus treated as inclusive
+C                     we convert POPcseaf back into cross section and add
+C                     this contribution to the total ddx spectrum stored on
+C                     CSEa(ie,nang,nejc,0)
+C WARNING! WE HAVE TO CHANGE IT SINCE CSEa(ie,nang,iejc,0) IS BEING SET TO ZERO!
+                          DO nang = 1, NDANG
+                            piece = CSEmsd(ie,iejc)
+                            IF (ie.EQ.NEXr(iejc,1)) piece = 0.5*piece
+                            CSEa(ie,nang,iejc,0) = CSEa(ie,nang,iejc,0)
+     &                              + ((POPcse(Iec,iejc,ie,Nnuc)
+     &                              - piece*POPcseaf(Iec,iejc,ie,Nnuc))
+     &                              /4.0/PI + CSEa(ie,nang,iejc,1)
+     &                              *POPcseaf(Iec,iejc,ie,Nnuc))
+                          ENDDO
                       ELSE !Nnur nucleus treated as exclusive
                         POPcseaf(Ief,iejc,ie,Nnur)
      &                  = POPcseaf(Ief,iejc,ie,Nnur)
