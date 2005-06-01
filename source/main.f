@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:22 $
-Ccc   * $Id: main.f,v 1.93 2005-05-30 14:08:22 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-01 06:38:54 $
+Ccc   * $Id: main.f,v 1.94 2005-06-01 06:38:54 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -56,7 +56,7 @@ C
       DOUBLE PRECISION DMAX1
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, ib, icalled, iccmh, iccml, icse,
-     &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
+     &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt, iadd,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
@@ -1616,11 +1616,13 @@ C-----------------------(continuum part)
      &                              - piece*POPcseaf(0,nejc,ie,nnuc))
      &                              /4.0/PI + CSEa(ie,nang,nejc,1)
      &                              *POPcseaf(0,nejc,ie,nnuc))
-C                                WRITE(6,*)'ie,nang,nnuc,nejc',
-C    &                              ie,nang,nnuc,nejc
-C                                WRITE(6,*)'POPcse,piece,POPcseaf',
-C    &                              POPcse(0,nejc,ie,nnuc),piece,
-C    &                              POPcseaf(0,nejc,ie,Nnuc)
+c                                WRITE(6,*)'ie,nang,nnuc,nejc',
+c    &                              ie,nang,nnuc,nejc
+c                                WRITE(6,*)'CSEa1 ',CSEa(ie,nang,nejc,1)
+c                                WRITE(6,*)'CSEa  ',CSEa(ie,nang,nejc,0)
+c                                WRITE(6,*)'POPcse,piece,POPcseaf',
+c    &                              POPcse(0,nejc,ie,nnuc),piece,
+c    &                              POPcseaf(0,nejc,ie,Nnuc)
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1659,6 +1661,12 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
      &                           - piece*POPcseaf(0,nejc,ie,nnuc))
      &                           /4.0/PI + CSEa(ie,nang,nejc,1)
      &                           *POPcseaf(0,nejc,ie,nnuc))
+                                 WRITE(6,*)'ie,nang,nnuc,nejc',
+     &                              ie,nang,nnuc,nejc
+                                 WRITE(6,*)'CSEa ',CSEa(ie,nang,nejc,0)
+                                 WRITE(6,*)'POPcse,piece,POPcseaf',
+     &                              POPcse(0,nejc,ie,nnuc),piece,
+     &                              POPcseaf(0,nejc,ie,Nnuc)
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1747,10 +1755,10 @@ C------------------- CN with possibly anisotropic distr. (continuum and levels t
                        DO nang = 1, NDANG
                          piece = CSEmsd(ie,nejc)
                          IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
-C                        Directly adding to the corresponding exclusive spectra
-C                        Exclusive spectra were already printed in the loop above , therefore
-C                        this addition is only meaningful for the last loop used to
-C                        calculate and print inclusive spectra (RCN)
+C------------------------Directly adding to the corresponding exclusive spectra
+C------------------------Exclusive spectra were already printed in the loop above , therefore
+C------------------------this addition is only meaningful for the last loop used to
+C------------------------calculate and print inclusive spectra (RCN)
                          CSEa(ie,nang,nejc,1) = CSEa(ie,nang,nejc,1)
      &                           + ((POPcse(0,nejc,ie,nnuc)
      &                           - piece*POPcseaf(0,nejc,ie,nnuc))
@@ -1832,6 +1840,10 @@ C-----and store them on the 0 nucleus (target)
 C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
+C-----iadd is used to ensure that adding inclusive/exclusive border 
+C-----contribution is done once only 
+C-----
+      iadd = 1
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
             DO nejc = 0, NEJcm         !loop over ejectiles
@@ -1878,7 +1890,7 @@ C-----------------------to conserve the integral
                         CSEa(iccml,nang,nejc,0)
      &                     = CSEa(iccml,nang,nejc,0)
      &                     + piece*(1.0 - weight)
-C-----------------------double contribution to the first energy bin to
+C-----------------------double contribution to the first energy bin
 C-----------------------to conserve the integral
                         IF (iccml.EQ.1 .AND. icse.NE.1)
      &                      CSEa(iccml,nang,nejc,0)
@@ -1887,6 +1899,27 @@ C-----------------------to conserve the integral
                         CSEa(iccmh,nang,nejc,0)
      &                     = CSEa(iccmh,nang,nejc,0) + piece*weight
                      ENDDO
+C--------------------Add ddx spectra from the inclusive/exclusive border 
+C--------------------stored on CSEa(ie,nang,nejc,Ndnuc)
+                     IF(iadd.EQ.1) THEN 
+                        DO nang = 1, NDANG
+                           CSEa(iccml,nang,nejc,0)
+     &                     = CSEa(iccml,nang,nejc,0)
+     &                     + CSEa(icse,nang,nejc,Ndnuc)*(1.0 - weight)
+C-------------------------double contribution to the first energy bin 
+C-------------------------to conserve the integral
+                          IF (iccml.EQ.1 .AND. icse.NE.1)
+     &                     CSEa(iccml,nang,nejc,0)
+     &                     = CSEa(iccml,nang,nejc,0)
+     &                     + CSEa(icse,nang,nejc,Ndnuc)*(1.0 - weight)
+                           CSEa(iccmh,nang,nejc,0)
+     &                     = CSEa(iccmh,nang,nejc,0)
+     &                     + CSEa(icse,nang,nejc,Ndnuc)*weight
+                        ENDDO
+                     ENDIF 
+C--------------------set iadd to zero to avoid multiple adding of the 
+C--------------------inclusive/exclusive border contribution 
+                     iadd = 0
                   ENDIF
                ENDDO
             ENDDO
