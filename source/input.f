@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-31 12:02:09 $
-Ccc   * $Id: input.f,v 1.131 2005-05-31 12:02:09 Capote Exp $
+Ccc   * $Date: 2005-06-01 09:16:53 $
+Ccc   * $Id: input.f,v 1.132 2005-06-01 09:16:53 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1330,8 +1330,6 @@ C-----------Defining ICOller(i)
       EMAx(1) = EXCn
 C-----set Q-value for CN production
       QPRod(1) = Q(0,1)
-
-      AMAss(1) = (A(1)*AMUmev + XMAss(1))/AMUmev
 C-----WRITE heading on FILE12
       ia = INT(A(0))
       iae = INT(AEJc(0))
@@ -1449,8 +1447,6 @@ C           residual nuclei must be heavier than alpha
      &                izares
                STOP
             ENDIF
-C-----------Mass of the residual nnclei
-            AMAss(nnur) = (A(nnur)*AMUmev + XMAss(nnur))/AMUmev
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
                CALL LEVREAD(nnur)
@@ -4624,6 +4620,7 @@ C-----prvisouly i had a problem for be6 => be5 +n since mass be5 undefined
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
                DEF(1,nnuc) = beta2x(k)
                XMAss(nnuc) = EXCessmass(iz,ia)
+               AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
             ENDIF
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
