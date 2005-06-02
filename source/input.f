@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-01 09:16:53 $
-Ccc   * $Id: input.f,v 1.132 2005-06-01 09:16:53 Capote Exp $
+Ccc   * $Date: 2005-06-02 13:58:19 $
+Ccc   * $Id: input.f,v 1.133 2005-06-02 13:58:19 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -238,13 +238,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -2076,18 +2076,21 @@ C
      &          SYMb(i), IFIX(SNGL(A(i))), SHC(i), DEF(1,i)
          ENDDO
       ENDIF
-      WRITE (6,*)
-      IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (6,*)
-     &     'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
-      WRITE (6,*) 'Neutron   o. m. parameters: RIPL catalog number ',
+
+      IF (KTRompcc.GT.0 .AND. DIRect.GT.0  .AND. FIRst_ein) THEN
+        WRITE (6,*)
+        WRITE (6,*) ' Inelastic o. m. parameters: RIPL catalog number ',
+     &            KTRompcc
+        WRITE (6,*) ' Neutron   o. m. parameters: RIPL catalog number ',
      &            KTRlom(1,1)
-      WRITE (6,*) 'Proton    o. m. parameters: RIPL catalog number ',
+        WRITE (6,*) ' Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-      WRITE (6,*) 'Alpha     o. m. parameters: RIPL catalog number ',
+        WRITE (6,*) ' Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
-      IF (NEMc.GT.0) WRITE (6,*)
-     &            'Cluster   o. m. parameters: RIPL catalog number ',
+        IF (NEMc.GT.0) WRITE (6,*)
+     &            ' Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)
+      ENDIF
       WRITE (6,*)
 
       WRITE (12,*) ' '

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-02 06:41:39 $
-Ccc   * $Id: pcross.f,v 1.29 2005-06-02 06:41:39 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-02 13:58:19 $
+Ccc   * $Id: pcross.f,v 1.30 2005-06-02 13:58:19 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -112,7 +112,7 @@ C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
 C
-C-----EXCITON EQUILIBRIUM NUMBER NHEq
+C-----MAXIMUM EXCITON NUMBER NHEq
 C
       NHEq = MIN(PMAX - 1,NINT(0.20*SQRT(gc*ec))) + 1
 C     NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
@@ -146,7 +146,7 @@ C
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
          g(nejc) = FLOAT(ar)/13.*GTIlnor(nnur)
-C        Empirically found that it is better not to use pairing correction here   
+C        Empirically found that it is better not to use pairing correction here
 C        pair(nejc) = ROPar(3,nnur)
 C        IF( pair(nejc).eq.0.) THEN
 C          ftmp = 0.
@@ -155,9 +155,9 @@ C          pair(nejc) = ftmp
 C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
 C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
 C        ENDIF
-         pair(nejc) = 0.d0   
+         pair(nejc) = 0.d0
 C--------Maximum and minimum energy bin
-         excnq = EXCn -Q(nejc,1) 
+         excnq = EXCn -Q(nejc,1)
 C--------last continuum energy bin is calculated, RCN 11/2004
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
          DO ienerg = 2, NEX(nnur)
@@ -408,7 +408,7 @@ C     Note, that PCROSS only calculates emission into the continuum
             ftmp = spec(nejc,ie)
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
 C
-C           Kalbach systematic for PCROSS DDX calculations 
+C           Kalbach systematic for PCROSS DDX calculations
 C           fmsd is assumed 1, i.e. pure PE emission
 C
             DO iang = 1, NDANG
@@ -1057,13 +1057,13 @@ C
 C     Following RIPL-2 TECDOC (LD chapter)
 C
       a = .5D0*(P*P + H*H)
-      sum = 0.d0   
+      sum = 0.d0
       DO j = 0,H
-         fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
-        u = G*(E - D - j*VV) - a 
+        fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
+        u = G*(E - D - j*VV) - a
         IF (u.LE.0.) GOTO 100
-         sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
-       ENDDO               
+        sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
+       ENDDO
 100   DENSW = sum
       RETURN
       END

@@ -1,13 +1,13 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:23 $
-Ccc   * $Id: subecis03.f,v 1.9 2005-05-30 14:08:23 Capote Exp $
+Ccc   * $Date: 2005-06-02 13:58:19 $
+Ccc   * $Id: subecis03.f,v 1.10 2005-06-02 13:58:19 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
 C PARAMETER definitions
 C
       INTEGER IDMX
-      PARAMETER (IDMX = 19000000)
+      PARAMETER (IDMX = 12000000)
 C
 C COMMON variables
 C
@@ -12510,14 +12510,14 @@ C
       REAL*8 Aconv, Ccz, Chb
       INTEGER Idt, Iqm, Ism, Nbt1, Ncold, Ncoll, Ncolt, Npp
       REAL*8 Beta(9,1), Q(1), Tl(1), V(Ism,1), Val(34,1), Vco(2,1),
-     &       Vdo(2,1), Wv(18,1), Wvm(18,1)  
+     &       Vdo(2,1), Wv(18,1), Wvm(18,1)
       INTEGER Ipi(11,1), Ipim(11,1), Ipp(30,1), Ivq(3,1), Ivy(7,1),
      &        Ivz(4,1), Mcm(2), Nbta(18,1), Np(1), Nval(1)
       LOGICAL Lo(250)
 C
 C Local variables
 C
-C-----Plujko_new-2005            
+C-----Plujko_new-2005
 C     REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, p, pgn(10), rm,
 C    &       rr, w(24), wvx(18), xgn(10), xp, xq
       REAL*8 a1, a2, ai, ar, bi, br, ci, cr, dd, ei, er, pgn(10), rm,
@@ -14585,7 +14585,7 @@ C
       REAL*8 Ccz, H, Vac, Zt
       INTEGER Ism, L
       LOGICAL Lt, Lz
-C-----Plujko_new-2005      
+C-----Plujko_new-2005
 C     REAL*8 Q(Ism,5), V(Ism), Val(1), W(Ism)
       REAL*8 Q(Ism,5), V(Ism),         W(Ism)
 C
@@ -14617,7 +14617,7 @@ C
          c = DFLOAT(2*L + 1)
          zz = 1.D0/c
          IF (.NOT.(Lt)) THEN
-C-----------Plujko_new-2005         
+C-----------Plujko_new-2005
 C           IF (.NOT.(L.NE.0 .OR. Lz)) Zt = Ccz*Val(1)/Q(Ism,1)
             IF (.NOT.(L.NE.0 .OR. Lz)) Zt = Ccz*Val   /Q(Ism,1)
             zz = Zt*zz

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-02 06:41:39 $
-Ccc   * $Id: HF-comp.f,v 1.66 2005-06-02 06:41:39 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-02 13:58:19 $
+Ccc   * $Id: HF-comp.f,v 1.67 2005-06-02 13:58:19 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -42,7 +42,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION eemi, excnq, piece, pop1, pop2, poph, popl,
+      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
      &                 popll, pops, popt, xcse
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, na, nang, nexrt
@@ -225,7 +225,7 @@ C-----DE spectra
                      POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
 C-----------------DDX spectra using portions
-                   IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) 
+                   IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
      &                POPcseaf(Ief,iejc,ie,Nnur)
      &                = POPcseaf(Ief,iejc,ie,Nnur)
      &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
