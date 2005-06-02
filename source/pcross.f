@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 20:02:44 $
-Ccc   * $Id: pcross.f,v 1.28 2005-05-30 20:02:44 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-02 06:41:39 $
+Ccc   * $Id: pcross.f,v 1.29 2005-06-02 06:41:39 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -408,19 +408,20 @@ C     Note, that PCROSS only calculates emission into the continuum
             ftmp = spec(nejc,ie)
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
 C
-C           Kalbach systematic for PCROSS DDX calculations is used
-C
-C                fmsd is assumed 1, i.e. pure PE emission
+C           Kalbach systematic for PCROSS DDX calculations 
+C           fmsd is assumed 1, i.e. pure PE emission
 C
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
             ENDDO
 C           fmsd = 1.d0
-C           If fmsd is changed to 0.d0 means isotropic distribution
+C           fmsd set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     >              ebind, eee, ftmp, 1.d0, ddxs)
+     &              ebind, eee, ftmp, 1.d0, ddxs)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
+C-------------use CSEa(,,,0) to built up inclusive ddx
+              CSEa(ie,iang,nejc,0) = CSEa(ie,iang,nejc,0) + ddxs(iang)
             ENDDO
          ENDDO
        ENDDO
@@ -429,52 +430,48 @@ C           If fmsd is changed to 0.d0 means isotropic distribution
 99020 FORMAT (/' ',57('-')/)
       END
 
-      subroutine Kalbach(jcom,jzcom,jpin,jnin,jpout,jnout,elab,esys,
-     >bin, eps, total, fmsd, sigma)
-c
-c     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
-
-
-c
-
-
-c     Taken from RIPL-1 files
-c
-c     Compound nucleus mass and charge (ac,zc) -> jcom,jzcom
-c     Projectile charge and neutron numbers    -> jpin,jnin
-c     Ejectile charge and neutron numbers      -> jpout,jnout
-c     Incident energy in MeV [lab system]      -> elab
-c      Excitation energy in MeV [cms]           -> esys
-c     Binding energy of the ejectile in MeV    -> bin
-c     Emission energy in MeV                   -> eps
-c     Emitted cross section [mb/MeV]           -> total
-c     Prequilibrium fraction of total          -> fmsd (assumed pure PE here)
-c     sigma(NDAng)                             -> DDXS(angle) [mb/MeV/str]
-c
-c     MB Chadwick modified angel92 to include photuclear reactions,
-c     Oct 95, according to the paper to be published in J. Nucl.
-c     Sci Eng. (Japan), Nov 1995.  Changes labeled with "cmbc"
-c     ANGEL92
-c     continuum angular distributions
-c     from empirical systematics based on exponentials of cos theta
-c          see Phys. Rev. C 37 (1988) 2350
-c
-c     Written by C. Kalbach
-c          April 1987
-c     Revised February 1992 to give a smooth transitions
-c     Single formulae for E1 and E3.
-c          see Nucl. Sci. Eng. 115 (1993) 43
-c
-c     Third term in 'a' needed for incident N and d but not alpha.
-c          Tentatively used for incident t and He-3
-c     Transition energies tentatively set at
-c          Et1 = 130 MeV (a=n,p,d,t,He3) or 260 MeV (a=alpha)
-c          Et3 = 35 MeV (a=n,p,d,t,He3)
-c     (only nucleon values of Et1; N and d values of Et3 known)
-c
-c     *The angel of the Lord encampeth round about them that fear him,
-c     *and delivereth them.  (Psalm 34.7)
-c
+      SUBROUTINE KALBACH(Jcom,Jzcom,Jpin,Jnin,Jpout,Jnout,Elab,Esys,
+     &Bin, Eps, Total, Fmsd, Sigma)
+C
+C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
+C
+C     Taken from RIPL-1 files
+C
+C     Compound nucleus mass and charge (ac,zc) -> jcom,jzcom
+C     Projectile charge and neutron numbers    -> jpin,jnin
+C     Ejectile charge and neutron numbers      -> jpout,jnout
+C     Incident energy in MeV [lab system]      -> elab
+C      Excitation energy in MeV [cms]           -> esys
+C     Binding energy of the ejectile in MeV    -> bin
+C     Emission energy in MeV                   -> eps
+C     Emitted cross section [mb/MeV]           -> total
+C     Prequilibrium fraction of total          -> fmsd (assumed pure PE here)
+C     sigma(NDAng)                             -> DDXS(angle) [mb/MeV/str]
+C
+C     MB Chadwick modified angel92 to include photuclear reactions,
+C     Oct 95, according to the paper to be published in J. Nucl.
+C     Sci Eng. (Japan), Nov 1995.  Changes labeled with "cmbc"
+C     ANGEL92
+C     continuum angular distributions
+C     from empirical systematics based on exponentials of cos theta
+C          see Phys. Rev. C 37 (1988) 2350
+C
+C     Written by C. Kalbach
+C          April 1987
+C     Revised February 1992 to give a smooth transitions
+C     Single formulae for E1 and E3.
+C          see Nucl. Sci. Eng. 115 (1993) 43
+C
+C     Third term in 'a' needed for incident N and d but not alpha.
+C          Tentatively used for incident t and He-3
+C     Transition energies tentatively set at
+C          Et1 = 130 MeV (a=n,p,d,t,He3) or 260 MeV (a=alpha)
+C          Et3 = 35 MeV (a=n,p,d,t,He3)
+C     (only nucleon values of Et1; N and d values of Et3 known)
+C
+C     *The angel of the Lord encampeth round about them that fear him,
+C     *and delivereth them.  (Psalm 34.7)
+C
       implicit real*8 (A-H,O-Z)
       implicit integer*4 (I-N)
       INCLUDE 'dimension.h'
@@ -483,40 +480,39 @@ c
       INTEGER*4 jang(NDAng)
       COMMON /KALB/ xcos, jang
       SAVE /KALB/
-c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
+Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
       if(jpin.eq.0.and.jnin.eq.0)then
-c        the following is a modification for photonuclear reactions
+C        the following is a modification for photonuclear reactions
          jflagph=1
          jcom=jcom+1
          jnin=1
       endif
-cmbc  I follow the prescription in the paper "Photonuclear angular
-cmbc  distribution systematics in the quasideuteron regime", MB Chadwick,
-cmbc  PG Young, and S Chiba, to be published in the Nov 1995 issue of
-cmbc  the Journal of Nucl. Sci and Tech. (Japan). The basic idea is
-cmbc  to first calculate the Kalbach MSD a-parameter assuming a neutron
-cmbc  projectile instead of a photon, and the modify a to account for
-cmbc  (a) reduced forwward peaking since a photon carries less momentum;
-cmbc  (b) less diffraction/refraction effects since the photon is undistorted.
-cmbc  end of mbc code (more later)
-c%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-c
-c     calculate energy independent quantities
-c     and print headings
-c
+Cmbc  I follow the prescription in the paper "Photonuclear angular
+Cmbc  distribution systematics in the quasideuteron regime", MB Chadwick,
+Cmbc  PG Young, and S Chiba, to be published in the Nov 1995 issue of
+Cmbc  the Journal of Nucl. Sci and Tech. (Japan). The basic idea is
+Cmbc  to first calculate the Kalbach MSD a-parameter assuming a neutron
+Cmbc  projectile instead of a photon, and the modify a to account for
+Cmbc  (a) reduced forwward peaking since a photon carries less momentum;
+Cmbc  (b) less diffraction/refraction effects since the photon is undistorted.
+Cmbc  end of mbc code (more later)
+C%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+C
+C     Calculate energy independent quantities
+C     and print headings
+C
       acom=jcom
       azcom=jzcom
       jin=jpin+jnin
       xin=jin
       jout=jpout+jnout
-c
-c     Start of parametrization
-c
+C
+C     Start of parametrization
+C
       er=1.
       if (jin.gt.3) er=2.
-c     er = Et1/130.
+C     er = Et1/130.
       esysr = esys / er
       e1 = esys
       if (esysr.gt.190.) then
@@ -545,10 +541,10 @@ c     er = Et1/130.
         if(jout.eq.4) xmb=2.
         if(jpout.eq.0)xmb=0.5
       endif
-c
-c     energy dependent input
-c     calculate and print angular distributions
-c
+C
+C     energy dependent input
+C     calculate and print angular distributions
+C
       if(fmsd.le.0.)fmsd=1.
       epscm=eps+bin
       y = epscm*e1 / (esys*130.)
@@ -562,10 +558,10 @@ c
       do i=1,NDAng
         arg=a*xcos(i)
         sig=fmsd*dsinh(arg)+dcosh(arg)
-cmbc%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cmbc    added code for photonuclear reactions. Modify
-cmbc    a which was calculated for a neutron, to be valid for a
-cmbc    photon projectile:
+Cmbc%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Cmbc    added code for photonuclear reactions. Modify
+Cmbc    a which was calculated for a neutron, to be valid for a
+Cmbc    photon projectile:
         if(jflagph.eq.1) then
           facmom=sqrt(elab/(2.*939))
           facrefr=9.3/sqrt(eps)
@@ -574,12 +570,11 @@ cmbc    photon projectile:
           aphnuc=a*facmom*facrefr
           gth=((2.*aphnuc)/(exp(aphnuc)-exp(-aphnuc)))
           gth=gth*(1./(12.5664))*exp(aphnuc*xcos(i))
-cmbc      Now put in MSC as isotropic, giving:
+Cmbc      Now put in MSC as isotropic, giving:
           sigma(i)=((1.-fmsd)/(12.5664))+(fmsd*gth)
           sigma(i)=sigma(i)*total
           cycle
         endif
-cmbc%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         sigma(i)=sig*xnorm
       enddo
       return

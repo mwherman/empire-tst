@@ -1,7 +1,7 @@
 C
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:23 $
-Ccc   * $Id: HRTW-comp.f,v 1.28 2005-05-30 14:08:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-02 06:41:39 $
+Ccc   * $Id: HRTW-comp.f,v 1.29 2005-06-02 06:41:39 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -14,29 +14,6 @@ Ccc   *  terms of the HRTW theory (width fluctuation correction).        *
 Ccc   *  Uses modified routines of standard Hauser-Feshbach (DECAY,      *
 Ccc   *  DECAYG, FISSION) and HRTW_MARENG to decompose capture           *
 Ccc   *  cross sections into partial wave components.                    *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *  CALLS:                                                          *
-Ccc   *    HRTW_MARENG                                                   *
-Ccc   *             OMTL                                                 *
-Ccc   *    ULMDYN                                                        *
-Ccc   *    HRTW_DECAY                                                    *
-Ccc   *             TLLOC                                                *
-Ccc   *             TL2VL                                                *
-Ccc   *    HRTW_DECAYG                                                   *
-Ccc   *             E1                                                   *
-Ccc   *             E2                                                   *
-Ccc   *             XM1                                                  *
-Ccc   *    HRTW_FISSION                                                  *
-Ccc   *             TL2VL                                                *
-Ccc   *             TLF                                                  *
-Ccc   *    ACCUM                                                         *
-Ccc   *        BELLAC                                                    *
-Ccc   *                                                                  *
-Ccc   * author: M.Herman                                                 *
-Ccc   * date:  10 Sept. 2000                                             *
-Ccc   * last revision by:                              on:               *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************

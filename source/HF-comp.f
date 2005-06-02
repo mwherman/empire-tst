@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-01 06:38:54 $
-Ccc   * $Id: HF-comp.f,v 1.65 2005-06-01 06:38:54 herman Exp $
+Ccc   * $Date: 2005-06-02 06:41:39 $
+Ccc   * $Id: HF-comp.f,v 1.66 2005-06-02 06:41:39 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -55,7 +55,6 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
@@ -71,6 +70,10 @@ C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pops
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
+            DO nang = 1, NDANG
+               CSEa(icse,nang,Nejc,0) = CSEa(icse,nang,Nejc,0)
+     &                                + pops/4.0/PI
+            ENDDO
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
@@ -207,12 +210,7 @@ C-----
       ENDIF
 C-----Contribution comming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      IF(ENDF(Nnur).EQ.2) THEN
-C       Nnur nucleus treated as inclusive
-        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
-      ELSE
-        POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
-      ENDIF
+      POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
 
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
@@ -224,36 +222,13 @@ C-----DE spectra
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
-                   IF(ENDF(Nnur).EQ.2) THEN
-                     CSE(ie,iejc,0) = CSE(ie,iejc,0)
-     &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
-                   ELSE !Nnur nucleus treated as exclusive
                      POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
-                   ENDIF
 C-----------------DDX spectra using portions
-                   IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
-                      IF(ENDF(Nnur).EQ.2) THEN
-C                     Nnur nucleus treated as inclusive
-C                     we convert POPcseaf back into cross section and add
-C                     this contribution to the ddx spectrum for the residual
-C                     CSEa(ie,nang,nejc,Nnur)
-                          DO nang = 1, NDANG
-                            piece = CSEmsd(ie,iejc)
-                            IF (ie.EQ.NEXr(iejc,1)) piece = 0.5*piece
-                            CSEa(ie,nang,iejc,Ndnuc) = 
-     &                                CSEa(ie,nang,iejc,Ndnuc)
-     &                              + ((POPcse(Iec,iejc,ie,Nnuc)
-     &                              - piece*POPcseaf(Iec,iejc,ie,Nnuc))
-     &                              /4.0/PI + CSEa(ie,nang,iejc,1)
-     &                              *POPcseaf(Iec,iejc,ie,Nnuc))
-                          ENDDO
-                      ELSE !Nnur nucleus treated as exclusive
-                        POPcseaf(Ief,iejc,ie,Nnur)
-     &                  = POPcseaf(Ief,iejc,ie,Nnur)
-     &                  + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
-                      ENDIF
-                   ENDIF
+                   IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) 
+     &                POPcseaf(Ief,iejc,ie,Nnur)
+     &                = POPcseaf(Ief,iejc,ie,Nnur)
+     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
                ENDIF
             ENDDO
          ENDDO
@@ -331,28 +306,10 @@ C-----DE spectra
                ENDDO
 C--------------DDX spectra using portions
                DO iejc = 0, NDEJCD
-                  IF (POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) THEN
-                      IF(ENDF(Nnur).EQ.2) THEN
-C------------------------Nnur nucleus treated as inclusive
-C------------------------we convert POPcseaf back into cross section and add
-C------------------------this contribution to the ddx spectrum for the residual
-C------------------------CSEa(ie,nang,nejc,Nnur)
-                         DO nang = 1, NDANG
-                           piece = CSEmsd(iesp,iejc)
-                           IF (iesp.EQ.NEXr(iejc,1)) piece = 0.5*piece
-                           CSEa(iesp,nang,iejc,Ndnuc) = 
-     &                               CSEa(iesp,nang,iejc,Ndnuc)
-     &                             + ((POPcse(Iec,iejc,iesp,Nnuc)
-     &                             - piece*POPcseaf(Iec,iejc,iesp,Nnuc))
-     &                             /4.0/PI + CSEa(iesp,nang,iejc,1)
-     &                             *POPcseaf(Iec,iejc,iesp,Nnuc))
-                         ENDDO
-                      ELSE !Nnur nucleus treated as exclusive
-                         POPcseaf(0,iejc,iesp,Nnur)
-     &                   = POPcseaf(0,iejc,iesp,Nnur)
-     &                   + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
-                      ENDIF
-                  ENDIF
+                  IF (POPcseaf(Iec,iejc,iesp,Nnuc).NE.0)
+     &               POPcseaf(0,iejc,iesp,Nnur)
+     &               = POPcseaf(0,iejc,iesp,Nnur)
+     &               + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
                ENDDO
             ENDDO
          ENDIF
