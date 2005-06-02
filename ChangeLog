@@ -24,13 +24,14 @@
     could be added to continuum. Corresponding "discrete levels" are marked
     "cont" in the discrete level file. The inelastic contribution to the
     continuum is spread over several emission energy bins using gaussian
-    distribution with sigma given in input RESOLF (new keyword)
+    distribution with sigma given in input (new input keyword RESOLF)
 12. Additional dummy levels can be placed in the discrete level region in the
     collective level file. The inelastic cross section calculated by DBWA
     to this level is added to the nearest discrete level (R. Capote)
-13. Detail printing of the angular distribution for all collective discrete
+13. Detailed printing of the angular distribution for all collective discrete
     levels implemented in long output (R. Capote)
-14.
+14. Particle-hole LD formula employed in PCROSS taken from RIPL-2 LD chapter.
+    Potential depth considered.
 
         Changes in version 2.19beta12 with respect to 2.18
                       Brookhaven, February  2004
