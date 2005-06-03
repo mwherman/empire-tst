@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-02 13:58:18 $
-Ccc   * $Id: main.f,v 1.96 2005-06-02 13:58:18 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-03 22:32:00 $
+Ccc   * $Id: main.f,v 1.97 2005-06-03 22:32:00 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -154,16 +154,13 @@ C--------------add direct transition to the spectrum
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
 C-----------------add direct transition to the inclusive spectrum CSEa(,,,0)
-C-----------------However,we don't need them since they are always exclusive
-C-----------------and we can forget about them if we don't try to subtract them
-C-----------------when reconstructing remaining inclusive part
-C                 popl = ftmp*(FLOAT(icsh) - xcse)/DE
-C                 IF (icsl.EQ.1) popl = 2.0*popl
-C                 CSEa(icsl,iang,nejcec,0) = CSEa(icsl,iang,nejcec,0) +
-C    &            popl
-C                 poph = ftmp*(xcse - FLOAT(icsl))/DE
-C                 CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
-C    &            poph
+                  popl = ftmp*(FLOAT(icsh) - xcse)/DE
+                  IF (icsl.EQ.1) popl = 2.0*popl
+                  CSEa(icsl,iang,nejcec,0) = CSEa(icsl,iang,nejcec,0) +
+     &            popl
+                  poph = ftmp*(xcse - FLOAT(icsl))/DE
+                  CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
+     &            poph
                 ENDDO
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
@@ -1539,7 +1536,6 @@ C                 POPcse(0, nejc, 1, nnuc) =  POPcse(0, nejc, 1, nnuc)*2
      &                         REAction(nnuc), ' ZAP= ', iizaejc
 C-----------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C-----------------multiplies cross sections and divides outgoing energies
-                  recorp = 1.0
                   IF (nejc.GT.0) recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 C-----------------Exclusive DDX spectra (neutrons & protons)
                   IF (nejc.GE.1 .AND. nejc.LE.2) THEN
@@ -1579,9 +1575,10 @@ C-----------------------(continuum part)
      &                              *POPcseaf(0,nejc,ie,nnuc))
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
-c                                CSEa(ie,nang,nejc,0)
-c    &                              = CSEa(ie,nang,nejc,0)
-c    &                              - cseaprnt(ie,nang)
+c HERE
+                                 CSEa(ie,nang,nejc,0)
+     &                              = CSEa(ie,nang,nejc,0)
+     &                              - cseaprnt(ie,nang)
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1622,9 +1619,10 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
      &                           *POPcseaf(0,nejc,ie,nnuc))
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
-c                                CSEa(ie,nang,nejc,0)
-c    &                              = CSEa(ie,nang,nejc,0)
-c    &                              - cseaprnt(ie,nang)
+c HERE
+                                 CSEa(ie,nang,nejc,0)
+     &                              = CSEa(ie,nang,nejc,0)
+     &                              - cseaprnt(ie,nang)
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1667,6 +1665,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         ENDDO
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
+c HERE
                         DO ie = 1, nspec
                            DO nang = 1, NDANG
                                  CSEa(ie,nang,nejc,0)
@@ -1688,6 +1687,7 @@ C-----------------------subtracting exclusive parts from the total
                      ELSE  !all other emissions (continnum and levels together)
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
+c HERE
                         DO ie = 1, nspec
                            DO nang = 1, NDANG
                                  CSEa(ie,nang,nejc,0)
@@ -1776,6 +1776,8 @@ C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
+c HERE
+c        IF (ENDf(nnuc).gt.0) THEN
             DO nejc = 0, NEJcm         !loop over ejectiles
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
@@ -1829,7 +1831,9 @@ C-----------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF (ENDf(NNUcd).EQ.2) THEN
+c     IF (ENDf(NNUcd).EQ.2) THEN
+c HERE
+      IF (ENDf(NNUcd).gt.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
