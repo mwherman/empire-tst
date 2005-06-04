@@ -1,11 +1,11 @@
       PARAMETER(
-     * NDNUC= 60
-     *,NDEXCLUS = 60
+     * NDNUC= 70
+     *,NDEXCLUS = 70
      *,NDEJC=3
      *,NDAFIS=1
      *,NDEX= 101
-     *,NDLW= 35
-     *,NDTL= 35
+     *,NDLW= 40
+     *,NDTL= 40
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
