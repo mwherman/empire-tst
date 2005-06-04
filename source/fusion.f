@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:24 $
-Ccc   * $Id: fusion.f,v 1.42 2005-05-30 14:08:24 Capote Exp $
+Ccc   * $Date: 2005-06-04 15:23:50 $
+Ccc   * $Id: fusion.f,v 1.43 2005-06-04 15:23:50 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -296,10 +296,9 @@ C--------calculation of o.m. transmission coefficients for absorption
          ltlj = .FALSE.
          dodwba = .FALSE.
          DO l = 1, NDCOLLEV
-            IF (ICOllev(l).LT.50) GOTO 200
-                                         ! Skipping coupled levels
+            IF (ICOllev(l).LT.20) CYCLE ! Skipping coupled levels
             dodwba = .TRUE.
-  200    ENDDO
+         ENDDO
          IF (DIRect.EQ.3) dodwba = .TRUE.
          IF (dodwba .AND. DIRect.GT.0 ) THEN
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
@@ -347,7 +346,7 @@ C
      &                  'fusion determination'
 
             IF (DIRect.EQ.1) THEN
-C-------------Saving KTRlom(0,0)
+C--------------Saving KTRlom(0,0)
                itmp1 = KTRlom(0,0)
                KTRlom(0,0) = KTRompcc
                CCCalc = .TRUE.
@@ -575,14 +574,14 @@ C--------Corrected scattering radius
          rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
          IF(S0_obs.GT.0.)   THEN 
-            WRITE ( 6,99004) S0_obs,S0_unc
+           WRITE ( 6,99004) S0_obs,S0_unc
            WRITE (12,99004) S0_obs,S0_unc
-          ELSE
-            WRITE ( 6,'(7x,49(1h*)/
+         ELSE
+           WRITE ( 6,'(7x,49(1h*)/
      &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
-            WRITE (12,'(7x,49(1h*)/ 
+           WRITE (12,'(7x,49(1h*)/ 
      &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
-          ENDIF
+         ENDIF
 99004    FORMAT (7x,49(1h*)/
      &           6x,' LOW ENERGY NEUTRON SCATTERING:'/ 
      &           6x,' Exp.  Strength functions S0 =',f6.3,' (',f6.4,')')
