@@ -1,8 +1,8 @@
-NAME   = pntdat
+NAME   = curzvd
 O      = obj
 O      = o
 NAMEOBJ= $(NAME).$(O)
-NAMEEXE= $(NAME)l.exe
+NAMEEXE= $(NAME).exe
 NAMEMAK= $(NAME)l.mak
 LH     = ../
 
@@ -20,7 +20,7 @@ LINK   = cc
 OPT    =
 LIBS   =
 LFLAGS = /out:$(NAMEEXE)
-LFLAGS = -o $(NAMEEXE) -static
+LFLAGS = -o$(NAMEEXE)
 
 $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 	$(LINK) $(OBJS) $(LFLAGS)

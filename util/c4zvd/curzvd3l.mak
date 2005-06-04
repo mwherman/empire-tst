@@ -2,7 +2,7 @@ NAME   = curzvd3
 O      = obj
 O      = o
 NAMEOBJ= $(NAME).$(O)
-NAMEEXE= $(NAME).exe
+NAMEEXE= $(NAME)l.exe
 NAMEMAK= $(NAME)l.mak
 LH     = ../
 
@@ -20,7 +20,7 @@ LINK   = cc
 OPT    =
 LIBS   =
 LFLAGS = /out:$(NAMEEXE)
-LFLAGS = -o$(NAMEEXE)
+LFLAGS = -o$(NAMEEXE)  -static
 
 $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 	$(LINK) $(OBJS) $(LFLAGS)

@@ -25,6 +25,8 @@ struct SubentInfo {
     float   enMax;
     int     iReaction;
     int     lData;
+    int     mf;
+    int     mt;
 };
 
 struct  SubentInfo info;
@@ -78,6 +80,9 @@ struct  Xref *xref;
     int     iReaction;
     int     numInGroup;
     char   *firstReactionCode;
+
+int firstMT=0;
+int firstMF=0;
 
 int  checkEnoughMemry(char *mem, char *msg, int lx, int ly);
 
@@ -253,6 +258,8 @@ char    **argv;
             info.lData=0;
             info.enMin=-1;
             info.enMax=-1;
+            info.mt=0;
+            info.mf=0;
             continue;
         }
 
@@ -337,6 +344,28 @@ char    **argv;
             continue;
         }
 
+        if (strncmp(str0,"MT",2)==0) {
+            strcpy(str1,&str0[2]);
+            delLiderSpace(str1);
+            delEndSpace(str1);
+            ii=sscanf(str1,"%g",&rr);
+            if (ii==1) info.mt=rr;
+	    if (info.mt!=0)
+	    if (firstMT==0) firstMT=info.mt;
+            continue;
+        }
+
+        if (strncmp(str0,"MF",2)==0) {
+            strcpy(str1,&str0[2]);
+            delLiderSpace(str1);
+            delEndSpace(str1);
+            ii=sscanf(str1,"%g",&rr);
+            if (ii==1) info.mf=rr;
+	    if (info.mf!=0)
+	    if (firstMF==0) firstMF=info.mf;
+            continue;
+        }
+
         if (strncmp(str0,"DATA ",5)==0) {
             ii=sscanf(str0,"%s%d",str1,&ld);
             if (ii!=2) continue;
@@ -365,14 +394,14 @@ char    **argv;
                 else
                 if (xx>=data[dataIndex[nData-1]].xx) ii=nData;
                 else {
-                    
+		/*                    
                     // sipmle search
                     for (ii=0; ii<nData; ii++) {
                         if (xx<data[dataIndex[ii]].xx) break;
                     }
-                    
+		*/                    
 
-                    /*
+                    
                     // fast search
                     i0=0;   i1=nData-1;
                     for (ii=(i0+i1)/2; ; ) {
@@ -383,7 +412,7 @@ char    **argv;
                         //printf(" i0=%d, ii=%d, i1=%d\n",i0,ii,i1); getch();
                         if (i1-i0<=1) {ii=i1; break;}
                     }
-                    */
+                    
                 }
                 for (iii=nData-1; iii>=ii; iii--) {
                     dataIndex[iii+1]=dataIndex[iii];
@@ -508,11 +537,44 @@ char    **argv;
         }
     }
     fprintf(outFile,"#end   %s.xre/r\n",strName);
-    fprintf(outFile,"#begin %s.tit/c\n",strName);
-    fprintf(outFile,"tit: %s\n",firstReactionCode);
-    fprintf(outFile,"x-scale: auto\n");
-    fprintf(outFile,"y-scale: auto\n");
-    fprintf(outFile,"#end   %s.tit/c\n",strName);
+
+    if (nData>0) {
+        fprintf(outFile,"#begin %s.tit/c\n",strName);
+        fprintf(outFile,"tit: %s\n",firstReactionCode);
+        fprintf(outFile,"x-scale: auto\n");
+        fprintf(outFile,"y-scale: auto\n");
+        printf ("firstMF=%d...",firstMF); //getch();
+        if (firstMF==4) {
+            fprintf(outFile,"x: Ang.\n");
+            fprintf(outFile,"x-long: Angle\n");
+            fprintf(outFile,"x-unit: 1, (deg)\n");
+            fprintf(outFile,"ix-unit: 1\n");
+        }
+        if (firstMF==4) {
+            fprintf(outFile,"y: {|s}/d{|q}\n");
+            fprintf(outFile,"y-unit: 1, (b/sr)\n");
+            fprintf(outFile,"y-unit: 1e-3, (mb/sr)\n");
+            fprintf(outFile,"iy-unit: 1\n");
+        }
+        if (firstMF==5) {
+            fprintf(outFile,"x-long: Energy\n");
+            fprintf(outFile,"y: d{|s}/dE\n");
+            fprintf(outFile,"y-unit: 1, (b/eV)\n");
+            fprintf(outFile,"y-unit: 1e-3, (mb/eV)\n");
+            fprintf(outFile,"iy-unit: 1\n");
+            fprintf(outFile,"//\n"); //end mark
+        }
+        if (firstMF==6) {
+            fprintf(outFile,"x-long: Energy\n");
+            fprintf(outFile,"y: d{+2}{|s}/dE/d{|q}\n");
+            fprintf(outFile,"y-unit: 1, (b/eV/sr)\n");
+            fprintf(outFile,"y-unit: 1e-9, (mb/MeV/sr)\n");
+            fprintf(outFile,"iy-unit: 1\n");
+            fprintf(outFile,"//\n"); //end mark
+        }
+        fprintf(outFile,"#end   %s.tit/c\n",strName);
+    }
+    fclose(outFile);
 }
 
 mystrcat(char *so, char *si, int ll)

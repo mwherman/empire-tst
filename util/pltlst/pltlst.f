@@ -5,6 +5,8 @@ C-Author : A. Trkov, International Atomic Energy Agency, Vienna, Austria
 C-Version: 2004/01 original code
 C-V  2004/07 Fix format for metastable targets (A.Trkov)
 C-V  2004/09 Include inelastic discrete level x-sect. (A.Trkov)
+C-V  2005/02 - Deactivate limit of 2 points minimum (A.Trkov)
+C-V          - Add projectile ZA in columns
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -34,7 +36,7 @@ C-
       CHARACTER*26 REF
       CHARACTER*40 BLNK,FLNM,FLEX,FLLS,FLIN
       CHARACTER*80 RC1,RC2
-      CHARACTER*120     REC
+      CHARACTER*120    REC
       DATA BLNK/'                                        '/
      &     FLEX/'C4.DAT'/
      &     FLLS/'PLOTC4.LST'/
@@ -131,7 +133,7 @@ C* - MT out of range
       IF(MT0.GT.999 .AND. MT0.NE.9000) GO TO 60
 C* - Insufficient number of points (this also excludes distributions
 C*   which are not suitably sorted and would result in excessive output)
-      IF(IEX.LE.2) GO TO 60
+c...  IF(IEX.LE.2) GO TO 60
 C*
 C* Printout conditions satisfied - prepare output record
       IZ=IZA1/1000
@@ -176,7 +178,7 @@ C* Check for close-lying discrete levels
       END IF
 C* Write a record to output list file
       IDX=IDX+1
-      WRITE(LLS,914) IZ,CH(IZ),IA,MST,IZP0,MF0,MT0,IEX,CH10,IDX
+      WRITE(LLS,914) IZ,CH(IZ),IA,MST,IZP0,MF0,MT0,IEX,CH10,IDX,IZI0
 c*
 C* Reset parameters
    60 IEX=1
@@ -209,10 +211,10 @@ C*
   903 FORMAT(2A40)
   904 FORMAT(BN,F10.0)
   910 FORMAT(' ======================================='
-     &      ,'====================================')
-  912 FORMAT(' MATERIAL     ZAP  MF   MT  EVAL. EXPR. '
-     &      ,'EXPR.    E-INC ANG-OUT ELV/E-OUT IDX'/
+     &      ,'====================================  ======')
+  912 FORMAT(' MATERIAL   ZAOUT  MF   MT  EVAL. EXPR. '
+     &      ,'EXPR.    E-INC ANG-OUT ELV/E-OUT IDX    PROJ'/
      &       '                            PNTS. PNTS. '
      &      ,' REF.       EV     DEG        EV    ')
-  914 FORMAT(I3,'-',A2,'-',I3,A1,I6,I4,I5,6X,I6,6X,A10,A8,A10,I4)
+  914 FORMAT(I3,'-',A2,'-',I3,A1,I6,I4,I5,6X,I6,6X,A10,A8,A10,I4,I8)
       END

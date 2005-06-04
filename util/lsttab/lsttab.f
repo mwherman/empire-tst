@@ -8,7 +8,11 @@ C-V  02/12  Fix DXSEXF retrieval of elastic angular distrib (Trkov).
 C-V  03/11  Increase limit on MXP from 100000 to 200000 (Trkov).
 C-V  03/12  Upgrade to DXSELM for reconstructing element data (Trkov).
 C-V  04/01  Write LSTTAB.LOG with messages and warnings (Trkov).
-C-V  04/09  Discrete levels x-sect. request by level energy (Trkov)
+C-V  04/09  - Discrete levels x-sect. request by level energy (Trkov)
+C-V         - Fix conversion from CM to lab for natural elements.
+C-V  05/02  - Read projectile ZA from columns 79-84 (Trkov)
+C-V         - Fix DXSEXF routine to test for projectile.
+C-V  05/04  Increase limit on MXP from 200000 to 300000 (Trkov).
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -46,12 +50,12 @@ C-M   FLLG LLG=9  Log-file for error messages and warnings.
 C-M
 C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=200000,MXR=600000,MXEN=5,MXIS=10)
+      PARAMETER   (MPT=1000,MXP=300000,MXR=600000,MXEN=5,MXIS=10)
       CHARACTER*1  CM
       CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG
      1            ,FLEF(MXEN),COM(MXEN)
-      CHARACTER*80 COM1,COM2
-      CHARACTER*80 C80,RFX(MPT)
+      CHARACTER*84 COM1,COM2
+      CHARACTER*84 C84,RFX(MPT)
       DIMENSION    ES(MXP),SG(MXP),RWO(MXR),ZEL(MXIS),FRC(MXIS)
 C* Default logical file units
       DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG
@@ -161,30 +165,32 @@ C* Select the PLOTC4 list entry index
       IF(SCL.EQ.0) SCL=1
 C*
 C* Process the index entry
-      C80=RFX(IDX)
-      READ (C80,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
+      C84=RFX(IDX)
+      READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
+      ZAI=IZI
 C*
-      COM2=C80(1:11)//C80(19:22)//C80(23:27)
+      COM2=C84(1:11)//C84(19:21)//C84(22:26)//' '
       IF(MF.EQ.3) THEN
-        IF(C80(63:67).NE.'    ')
+        IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
       ELSE
         WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
-        IF(C80(56:59).NE.'    ')
+        IF(C84(56:59).NE.'    ')
      &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
-        IF(C80(63:67).NE.'    ')
+        IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
       END IF
+      WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C*
 C* Log the start of request
       WRITE(LLG,91)
       WRITE(LLG,95) ' Processing list index                : ',IDX
       WRITE(LLG,93) ' Scaling factor                       : ',SCL
       WRITE(LLG,95) ' Emitted particle ZA                  : ',IZP
-      WRITE(LLG,91) COM2
+      WRITE(LLG,99) COM2
 C*
-      IF(C80(55:62).EQ.'        '  ) DEG=-2
-      IF(C80(63:72).EQ.'          ') EOU=-2
+      IF(C84(55:62).EQ.'        '  ) DEG=-2
+      IF(C84(63:72).EQ.'          ') EOU=-2
       ZA0=IZ*1000+IA
       IF(CM.NE.' ') ZA0=ZA0+0.1
       ELV=0
@@ -244,9 +250,6 @@ C* Prepare the ENDF comment header for the PLOTTAB curves file
       ELSE
         COM1=COM(M)
       END IF
-
-      print *,'par,eou,elv,el1',par,eou,elv,el1
-
       IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,91) COM1,COM2
@@ -262,10 +265,14 @@ C* Suppress printing negative or zero points
    86 CONTINUE
 C*
 C* Extract the data from the C4 file
-      IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) PAR=ELV
+      IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) THEN
+        PAR=ELV
+        WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') ELV
+      END IF
+      WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
      1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
-      CALL DXSEXF(LC4,LPN,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NP,NS,SCL,COM2)
+      CALL DXSEXF(LC4,LPN,ZAI,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NP,NS,SCL,COM2)
       IF(NP.LE.0) THEN
         PRINT *,'DXSEXF ERROR: No matching points'
       ELSE
@@ -279,62 +286,63 @@ C* All processing completed
    90 STOP 'LSTTAB Completed'
 C*
    91 FORMAT(2A40)
-   92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,1P,E10.3,0P,F8.2,1P,E10.3,I4)
+   92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,1P,E10.3,0P,F8.2,1P,E10.3,6X,I8)
    93 FORMAT(A40,F10.3)
    94 FORMAT(1P,3(E11.5E1,E11.4))
    95 FORMAT(A40,I6)
-   96 FORMAT(A80)
+   96 FORMAT(A84)
    97 FORMAT(BN,I10)
    98 FORMAT(BN,F10.0)
+   99 FORMAT(A70)
       END
       SUBROUTINE RDC4LS(LLS,NID,RFX)
 C-Title  : Subroutine RDC4LS
 C-Purpose: Read the PLOTC4 list file
-      CHARACTER*80 C80,RFX(1)
+      CHARACTER*84 C84,RFX(1)
       CHARACTER*1  CM
 C*
       NID=0
-      READ (LLS,96,END=20) C80
+      READ (LLS,96,END=20) C84
 C* Test for partial list file beginning with " MATERIAL "
-      IF(C80(1:10).EQ.' MATERIAL ') GO TO 15
-      IF(C80(1:10).NE.' PLOT ENDF') THEN
+      IF(C84(1:10).EQ.' MATERIAL ') GO TO 15
+      IF(C84(1:10).NE.' PLOT ENDF') THEN
 C* Test for partial list file beginning with the items list directly
 C* (dummy read)
-        READ (C80,92,ERR=14) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
+        READ (C84,92,ERR=14) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
         GO TO 17
       END IF
 C* Search for the " MATERIAL " string
-   14 READ (LLS,96,END=20) C80
-      IF(C80(1:10).NE.' MATERIAL ') GO TO 14
-   15 READ (LLS,96) C80
-      READ (LLS,96) C80
+   14 READ (LLS,96,END=20) C84
+      IF(C84(1:10).NE.' MATERIAL ') GO TO 14
+   15 READ (LLS,96) C84
+      READ (LLS,96) C84
 C* Read the items into RFX array
-   16 READ (LLS,96,END=20) C80
-   17 IF(C80(1:10).EQ.' =========') GO TO 20
+   16 READ (LLS,96,END=20) C84
+   17 IF(C84(1:10).EQ.' =========') GO TO 20
 C* Move any "metastable" nuclide flag for easier reading
-      IF(C80(9:9).EQ.'M') THEN
-        C80( 9: 9)=' '
-        C80(11:11)='M'
+      IF(C84(9:9).EQ.'M') THEN
+        C84( 9: 9)=' '
+        C84(11:11)='M'
       END IF
-      IF(C80(10:10).EQ.'M') THEN
-        C80(10:10)=' '
-        C80(11:11)='M'
+      IF(C84(10:10).EQ.'M') THEN
+        C84(10:10)=' '
+        C84(11:11)='M'
       END IF
 C* Save the record
       NID=NID+1
-      RFX(NID)=C80
+      RFX(NID)=C84
       GO TO 16
 C* File processed
    20 CLOSE(UNIT=LLS)
       IF(NID.LT.1) STOP ' LSTTAB ERROR - Invalid PLOTC4 list'
       RETURN
    92 FORMAT(I3,4X,I1,2X,A1,2X,I4,I4,I5,3I6,F10.0,F8.2,F10.0,I4)
-   96 FORMAT(A80)
+   96 FORMAT(A84)
       END
       SUBROUTINE COMCUR(MAT,MF,MT,KEA,EIN,PAR,COM)
 C-Title  : CURCOM Subroutine
 C-Purpose: Construct comment headed for the "curves" file
-      CHARACTER*80  COM
+      CHARACTER*84  COM
       CHARACTER*1   UN,UO
       DATA PI/3.14159265/
 C*
@@ -379,7 +387,7 @@ c...        DEG=ACOS(PAR)*180/PI
   924 FORMAT('MT',I3,1X,A1,'eV',F5.1,:,'  Deg',I3)
   925 FORMAT(' MAT',I4,' MF',I2,' MT',I3,:,20X,' EI',1P,E10.3)
       END
-      SUBROUTINE DXSEXF(LC4,LPN,ZA0,ZAP0,MF0,MT0,KEA,EI0,PR0
+      SUBROUTINE DXSEXF(LC4,LPN,ZAI,ZA0,ZAP0,MF0,MT0,KEA,EI0,PR0
      1                 ,NPP,NS,SCL,COM2)
 C-Title  : Subroutine DXSEXF
 C-Purpose: Extract data from EXFOR computational format file
@@ -389,6 +397,7 @@ C-D  format)
 C-D   LC4   - Unit number of the C4 file (input).
 C-D   LPN   - Unit number of the output discrete points file in
 C-D           PLOTTAB format.
+C-D   ZAI   - Projectile ZA designation.
 C-D   ZA0   - Target nucleus ZA designation.
 C-D   ZAP0  - Outgoing particle ZA designation.
 C-D   MF0   - Requested MF number (ENDF format conventions)
@@ -411,7 +420,7 @@ C-
       CHARACTER*1  MM(3),CM,C1,C2,C3
       CHARACTER*11 REC(6)
       CHARACTER*25 REF,RF0
-      CHARACTER*40 COM2
+      CHARACTER*60 COM2
       DATA MM/' ','M','N'/
 C* Fractional tolerance to identify "equal" arguments
 C* For best results the tolerance limits should be consistent with
@@ -421,6 +430,7 @@ C*
       DATA PI/3.14159265/
 C*
       RF0='                         '
+      IZAI=ZAI
       IZA0=ZA0
       IZAP0=ZAP0
       IM   =10*(ZA0-IZA0)+1.1
@@ -434,6 +444,7 @@ C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF
 C* Test for matching data request
+      IF(IZAI.NE. IZAI ) GO TO 20
       IF(IZA0.GT.0 .AND. IZA .NE.IZA0  ) GO TO 20
       IF(CM  .NE.MM(IM)) GO TO 20
       IF(MF  .NE.MF0   ) GO TO 20
@@ -492,15 +503,31 @@ C* Angular distributions
       ELSE IF(MF.EQ.4 .OR.(MF.EQ.6 .AND. KEA.EQ.1) ) THEN
 C* Convert elastic ang.distrib. from CM to Lab if necessary
         IF((MF.EQ.4 .AND. MT.EQ.2) .AND. C3.NE.' ') THEN
-          EIN=F1
-          AIN=F5
-          QQ =0
+C* Definitions:
+C*  XCM - cosine os scattering angle in CM system
+C*  XLB - cosine os scattering angle in Lab system
+C*  AWR - mass ratio of target and projectile (=A)
+C*  AWP - mass ratio of ejectile and projectile (=A-dash)
+C* Kinematics equations for 2-body problem form ENDF-102 Appendix E
+C* Equation (E.3)
+C* Use approximate target mass
           AWR=IZA-1000*(IZA/1000)
-          GAM=SQRT( EIN/ (EIN*AWR*AWR+QQ*AWR*(AWR+1) ) )
-          DMC=2*GAM*AIN + SQRT(1-GAM*GAM*(1-AIN*AIN))
-     1       +(GAM*AIN)**2 / SQRT(1-GAM*GAM*(1-AIN*AIN))
-          F3=F3*DMC
-          F5=(AIN+GAM)/SQRT(1+GAM*(GAM+2*AIN))
+          IF(AWR.LT.0.1) AWR=2.1*(IZA/1000)
+          AWP=1
+          QI =0
+          EIN=F1
+          XCM=F5
+C*
+          BET=(AWR*(AWR+1-AWP)/AWP)*( 1+(1+AWR)*QI/(AWR*EIN) )
+          BET=SQRT(BET)
+C*          Lab cosine of scattering: equation (E.11)
+          SBT= BET*BET + 1 + 2*XCM*BET
+          QBT= SQRT( SBT )
+          XLB=(1+BET*XCM)/QBT
+C*          Jacobian of the transformation dXCM/dXLB (derivative of E.11)
+          DCM=(SBT*QBT)/(BET*BET*(BET+XCM))
+          F3=F3*DCM
+          F5=XLB
         END IF
 C* Convert cosine (and uncertainty) to degrees
         A6=F5+F6
@@ -550,7 +577,7 @@ C* End of data set
       RETURN
 C*
   901 FORMAT(I5,I6,A1,I3,I4,3A1,8F9.0,A3,A25)
-  902 FORMAT(A25,15X,A40)
+  902 FORMAT(A25,15X,A60)
   911 FORMAT(1P,E11.4E1)
   912 FORMAT(1P,E11.3)
   920 FORMAT(6A11)

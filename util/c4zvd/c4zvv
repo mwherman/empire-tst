@@ -3,7 +3,7 @@ echo c4zvv ZA MT file.c4 file.endf file.zvd
 echo $1 $2 $3 $4 $5
 rm tmp.dat c4.zvd end.zvd $5
 ./c4dat.exe $1 $2 $3 tmp.dat
-./datzvd.exe tmp.dat c4.zvd
+./datzvdl.exe tmp.dat c4.zvd
 ./endzvd.exe $1 $2 $4 end.zvd
 echo #!zvview.exe >$5
 cat c4.zvd >>$5
