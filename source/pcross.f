@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-02 13:58:19 $
-Ccc   * $Id: pcross.f,v 1.30 2005-06-02 13:58:19 Capote Exp $
+Ccc   * $Date: 2005-06-04 15:26:12 $
+Ccc   * $Id: pcross.f,v 1.31 2005-06-04 15:26:12 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -114,9 +114,19 @@ C-----Compound gamma emitting nucleus
 C
 C-----MAXIMUM EXCITON NUMBER NHEq
 C
-      NHEq = MIN(PMAX - 1,NINT(0.20*SQRT(gc*ec))) + 1
-C     NHEq = MIN(PMAX - 1,NINT(SQRT(1.4*gc*ec))) + 1
-C     NHEq = MIN(PMAX - 1,NINT(SQRT(2.0*gc*ec))) + 1
+C     CHMax determines the maximum allowable HOLE number 
+C     for exciton model emission spectra calculations 
+C
+C     It is much better aproximation than using fixed
+C     exciton number as the emission loops increase 
+C     with energy as it is expected on physical basis.
+C
+C     Nmax = Aproj + NHEq -1 (is equal to NHEq for nucleon induced reactions)
+C
+C     Chinese group uses CHMax = 0.88, but it gives to hard PE spectrum in Th232
+C
+      IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value 
+      NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
 
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
@@ -747,7 +757,7 @@ C
       DO i = 1, PMAX
          LP(i) = 0.
          LM(i) = 0.
-      ENDDO
+      ENDDO     
       NMAx = Nheq
       DO h1 = 1, Nheq
          h = h1 - 1
@@ -800,9 +810,9 @@ C
       INTEGER*4 h1, hhh, i, ij, n
       DO i = 1, PMAX
          ln(i) = 0.
-      ENDDO
-      n = NMAx
-      IF (n.GT.PMAX) n = PMAX
+      ENDDO    
+      n = NMAx    
+      IF (n.GT.PMAX) n = PMAX   
       DO h1 = 1, n
          DO i = 0, NEJcm
             ln(h1) = ln(h1) + L(i,h1)
@@ -857,11 +867,11 @@ C--------------------------------------------------------------------
          IF (Em(h1).NE.0.) Ih2 = h1
       ENDDO
       Ih2 = MIN(Ih2,NHEq)
-      IF (IOUt.GE.3) WRITE (6,99018) IH2
-99018 FORMAT (/3X,'Nequil =',I3/)
+      IF (IOUt.GE.3) WRITE (6,99018)  2*(Ih2-1) + Ap, Ih2, CHMax
+99018 FORMAT (/3X,'Nmax',I3,' Hmax =',I3,' Coeff. CHMax =',F4.2/)
       IF (IOUt.GE.3) WRITE (6,99020)
 99020 FORMAT (/3X,'TIME INTEGRALS OF TAU(N)'/3X,
-     &        ' N   UP TO Nequil       ')
+     &        ' N   UP TO Nmax       ')
       IF (IOUt.GE.3) THEN
          DO h1 = 1, Ih2
             hhh = 2*(h1 - 1) + Ap
