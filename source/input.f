@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-02 13:58:19 $
-Ccc   * $Id: input.f,v 1.133 2005-06-02 13:58:19 Capote Exp $
+Ccc   * $Date: 2005-06-04 15:27:20 $
+Ccc   * $Id: input.f,v 1.134 2005-06-04 15:27:20 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -288,7 +288,7 @@ C
 C--------default input parameters for MSD
 C
          MSD = 0
-C--------ICOmpff must be off for DOM potential
+C--------ICOmpff must be off for DOM potentials
          ICOmpff = 0  !compressional form factor off
 C        ICOmpff = 1  !compressional form factor on
 C
@@ -333,8 +333,11 @@ C--------set options for DEGAS (exciton preequilibrium)
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQc = 0.0
          MFPp = 1.3
+          CHMax = 0.d0 ! set default to 0.2 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident)
          LHRtw = 1
+C--------ENDF global setting initialized to zero (no formatting) 
+         Nendf = 0
 C
 C--------default input parameters    *** done ***
 C
@@ -810,7 +813,13 @@ C                       residues must be heavier than alpha
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
                         IF(mulem.LE.NENdf) THEN
-                           ENDf(nnuc) = 1
+                           IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
+                        ELSE
+C                          Comment the following line and uncommment the one after for all exclusive spectra
+                           IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 2
+C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
+                        ENDIF
+                        IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
                            INExc(nnuc) = NEXclusive
                            IF(NEXclusive.GT.NDExclus) THEN
@@ -818,11 +827,7 @@ C                       residues must be heavier than alpha
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
-                        ELSE
-C                          Comment the following line and uncommment the one after for all exclusive spectra
-                           ENDf(nnuc) = 2
-C                          ENDf(nnuc) = 1
-                        ENDIF
+                         ENDIF
                      ENDDO
                   ENDDO
                ENDDO
@@ -1499,15 +1504,38 @@ C-----------determination of excitation energy matrix in res. nuclei
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
+C           IF (NEX(nnur).GT.NDEX) THEN
+C              WRITE (6,*) ' NUMBER OF BINS IN RESIDUAL NUCLEUS A=',
+C    &                     A(nnur), 'AND Z=', Z(nnur),
+C    &                     ' EXCEEDS DIMENSIONS'
+C              WRITE (6,*)
+C    &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
+C              NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
+C              STOP
+C           ENDIF
             IF (NEX(nnur).GT.NDEX) THEN
-               WRITE (6,*) ' NUMBER OF BINS IN RESIDUAL NUCLEUS A=',
-     &                     A(nnur), 'AND Z=', Z(nnur),
-     &                     ' EXCEEDS DIMENSIONS'
                WRITE (6,*)
-     &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
-               NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
-               STOP
+               WRITE (6,'('' WARNING: NUMBER OF BINS IN RESIDUAL NUCLEUS
+     & A='',I3,'' AND Z='',I3,'' EXCEEDS DIMENSIONS'')')
+     &         NINT(A(nnur)), NINT(Z(nnur))
+               WRITE (6,*) 'WARNING: RESIDUAL NUCLEUS SKIPPED' 
+               WRITE (6,*)
+     &          'WARNING: TO CONSIDER IT, YOU HAVE TO DECREASE ',
+     &          ' NEX IN THE INPUT AND RESTART'
+               WRITE (6,*)
+                EMAx(nnur) = 0.d0
+                NEX(nnur) = 0
+                NEXr(nejc,nnuc) = 0
+                Q(nejc,nnuc) = 99.d0
+                CYCLE
             ENDIF
+C    &                     ' EXCEEDS DIMENSIONS'
+C              WRITE (6,*)
+C    &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
+C              NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
+C              STOP
+C           ENDIF
+
             IF (NEX(nnur).GT.0) THEN
                DO i = 1, NEX(nnur)
                   IF (Z(1).EQ.Z(nnur) .AND. FITlev.EQ.0.0D0) THEN
@@ -1721,9 +1749,6 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
           READ (47,'(2i4,  17x,2(e9.2,2x),2(f4.2,2x),2(F5.1,1x))',
-
-
-
      &     END = 60, ERR = 60) nztmp, natmp,
      &         dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
           IF (nztmp.NE.Iz .OR. natmp.NE.Ia) CYCLE
@@ -1970,27 +1995,35 @@ C
         WRITE (12,*)
 
       ENDIF
-      iexclus = 0
-      DO i = 1, NNUcd
-99010   FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-99015   FORMAT (1X,I3,'-',A2,'-',I3,2X,'E',1x,12F10.3)
-        IF (ENDf(1).EQ.1) THEN
-            IF(FIRst_ein)
-     &    WRITE (12,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+
+99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
+99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'E',1x,12F10.3)
+
+      IF (FIRst_ein) THEN
+        iexclus = 0
+        DO i = 1, NNUcd
+          IF (ENDf(i).EQ.1.0D0) THEN
+            WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-          WRITE ( 6,99010) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+            WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-          ENDIF
-        IF (ENDf(i).EQ.2.0D0) THEN
+           ENDIF 
+          IF (ENDf(i).EQ.2.0D0) THEN
             iexclus = 1
-            IF(FIRst_ein)
-     &    WRITE (12,99015) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+            WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-          WRITE ( 6,99015) IFIX(SNGL(Z(i))), SYMb(i), IFIX(SNGL(A(i))),
+            WRITE ( 6,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
-      ENDDO
-      IF (FIRst_ein .AND. ENDf(1).EQ.1) THEN
+        ENDDO
+        
+         IF (iexclus.EQ.1) THEN
+          WRITE( 6,*)
+          WRITE( 6,*) ' E means only inclusive spectra is available'
+          WRITE(12,*)
+          WRITE(12,*) ' E means only inclusive spectra is available'
+        ENDIF
+ 
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS                                         '
         WRITE (12,*) '                                                '
@@ -2001,6 +2034,7 @@ C
         WRITE (12,*) '   MT=4, 51-91 Inelastic scattering             '
         WRITE (12,*) '   MT=102 Capture                               '
         WRITE (12,*) '   MT=16   (n,2n)                               '
+        WRITE (12,*) '   MT=17   (n,3n)                               '
         WRITE (12,*) '   MT=22   (n,na)                               '
         WRITE (12,*) '   MT=24   (n,2na)                              '
         WRITE (12,*) '   MT=28   (n,np)                               '
@@ -2042,17 +2076,13 @@ C
         WRITE (12,*) '                                                '
         WRITE (12,*) '************************************************'
         WRITE (12,*) '                                                '
+        WRITE (12,*)
+
+        WRITE (6,*)
+        WRITE (6,*)
+
       ENDIF
-      IF (iexclus.EQ.1) THEN
-          IF(FIRst_ein) THEN
-              WRITE(12,*)
-              WRITE(12,*) ' E means only inclusive spectra is available'
-            ENDIF
-            WRITE( 6,*)
-            WRITE( 6,*) ' E means only inclusive spectra is available'
-      ENDIF
-      IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) WRITE (12,*)
-      WRITE (6,*)
+
       IF (FISshi(1).NE.0) THEN
          WRITE (6,99025)
 99025    FORMAT ('    Nucleus   ',6X,'Shell Corr.  Deform.',
@@ -2450,19 +2480,20 @@ C
       WRITE (12,*) 'and features:                                      '
       WRITE (12,*) '                                                   '
       WRITE (12,*) '- Spherical and deformed Optical Model including   '
-      WRITE (12,*) '  including coupled-channels (ECIS03 by J. Raynal) '
+      WRITE (12,*) '  coupled-channels (ECIS03 by J. Raynal)           '
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
       WRITE (12,*) '  HRTW width fluctuation correction                '
-      WRITE (12,*) '- Qauntum-mechanical MSD TUL model (codes ORION &  '
-      WRITE (12,*) '  TRISTAN by H.Lenske),  and MSC NVWY model        '
+      WRITE (12,*) '- Quantum-mechanical MSD TUL model (codes ORION &  '
+      WRITE (12,*) '  TRISTAN by H. Lenske), and MSC NVWY model        '
       WRITE (12,*) '- Exciton model with angular momentum coupling     '
       WRITE (12,*) '  (code DEGAS by E. Betak and P. Oblozinsky) that  '
       WRITE (12,*) '  represents a good approximation to the DSD model '
       WRITE (12,*) '- Exciton model with Iwamoto-Harada cluster        '
-      WRITE (12,*) '  emission (PCROSS)                                '
+      WRITE (12,*) '  emission and Kalbach systematic angular distr.   '
+      WRITE (12,*) '  (code PCROSS by R.Capote et al)                  '
       WRITE (12,*) '- Complete gamma-ray cascade after emission of     '
-      WRITE (12,*) '  each particle,  including realistic treatment    '
-      WRITE (12,*) '  of discrete transitions                          '
+      WRITE (12,*) '  each particle, including realistic treatment of  '
+      WRITE (12,*) '  discrete transitions                             '
       WRITE (12,*) '- Access to OM segment of the RIPL-2 library [Ri03]'
       WRITE (12,*) '- Built-in input parameter files, such as masses,  '
       WRITE (12,*) '  level density, discrete levels, fission barriers '
@@ -2470,19 +2501,20 @@ C
       WRITE (12,*) '  library [Ri03]                                   '
       WRITE (12,*) '- Automatic retrieval of experimental data from the'
       WRITE (12,*) '  EXFOR/CSISRS library                             '
-      WRITE (12,*) '- ENDF-6 formatting (utility code EMPEND), coupled '
-      WRITE (12,*) '  to graphical presentation (utility code ZVView)  '
-      WRITE (12,*) '  through the chain of PrePro codes by D. Cullen   '
+      WRITE (12,*) '- ENDF-6 formatting (code EMPEND by A. Trkov)      '
+      WRITE (12,*) '  coupled to graphical presentation capabilities   '
+      WRITE (12,*) '  (code ZVView by V. Zerkin) through the chain of  '
+      WRITE (12,*) '  PrePro codes by R. Cullen                        '
       WRITE (12,*) '- Checking codes (CHECKR, FIZCON, PSYCHE)          '
       WRITE (12,*) '- Support for NJOY                                 '
       WRITE (12,*) '                                                   '
-      WRITE (12,*) 'PARAMETERIZATION'
+      WRITE (12,*) 'PARAMETERIZATIONS                                  '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Following models and parameters were used in the   '
       WRITE (12,*) 'current evaluation:                                '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Discrete levels were taken from the RIPL-2 level   '
-      WRITE (12,*) 'file,  based on the 1998 version of ENSDF.         '
+      WRITE (12,*) 'file, based on the 1998 version of ENSDF.          '
   100 READ (5,'(A1)') name(1:1)
       IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
      &    .NE.'!') THEN
@@ -2625,10 +2657,12 @@ C--------PCROSS input
               MFPp = val
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
-     &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
+     &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
+     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')         
               WRITE (12,
      &'('' Exciton model calculations with code PCROSS'',/,
-     &  '' Cluster emission in terms of the Iwamoto-Harada model'')')
+     &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
+     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')         
               if(i1.ne.0) then
                 WRITE (6,
      &          '('' Mean free path parameter uncertainty '',
@@ -2650,6 +2684,23 @@ C                MFPp = val + grand()*sigma
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Default: 1.3)'')') MFPp
                endif
+             ENDIF
+            GOTO 100
+         ENDIF
+         IF (name.EQ.'MAXHOL') THEN
+            CHMax = 0.2
+            IF (val.GE.0.1 .AND. val.LE.1.5D0) THEN
+              CHMax = val
+              WRITE (6,
+     &'('' Max hole number in PCROSS set to'',F4.2,
+     &        ''*sqrt(g*U)'')') CHMax
+              WRITE (6,
+     &'(''    being U the CN excitation energy '')')
+              WRITE (12,
+     &'('' Max hole number in PCROSS set to'',F4.2,
+     &        ''*sqrt(g*U)'')') CHMax
+              WRITE (12,
+     &'(''    being U the CN excitation energy '')')
              ENDIF
             GOTO 100
          ENDIF
@@ -3798,7 +3849,50 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-            NENdf = INT(val)
+             IF(i1.eq.0 .OR. i2.eq.0) THEN
+C             Setting ENDF for all emission loops
+              NENdf = INT(val)
+              WRITE (6,'('' ENDF formatting enabled'')')
+              WRITE (6,'(
+     &         '' Exclusive spectra available up to'',
+     &         '' emission loop # '',I2)') NENdf
+              WRITE (12,'(
+     &         '' Exclusive spectra available up to'',
+     &         '' emission loop # '',I2)') NENdf
+                  GOTO 100
+             ENDIF
+             IF(val.LT.0. .or. val.GT.2.2) THEN
+               WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)') 
+     &                i2, SYMb(nnuc)
+               WRITE (6,'('' SETTING IGNORED'')')
+               GOTO 100
+             ENDIF
+C           Setting ENDF for a single nucleus
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,'('' ENDF SETTING IGNORED'')')
+               GOTO 100
+            ENDIF
+            ENDF(nnuc) = INT(val)
+            IF (ENDF(nnuc).EQ.1) THEN
+              WRITE (6,
+     &       '('' Exclusive spectra will be available for emission'',
+     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+              WRITE (12,
+     &       '('' Exclusive spectra will be available for emission'',
+     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+            ENDIF
+            IF (ENDF(nnuc).EQ.2) THEN
+              WRITE (6,
+     &       '('' Emission spectra from nucleus '',I3,A2,
+     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+              WRITE (12,
+     &       '('' Emission spectra from nucleus '',I3,A2,
+     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+            ENDIF
             GOTO 100
          ENDIF
 C-----
