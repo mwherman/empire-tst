@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-03 22:32:00 $
-Ccc   * $Id: main.f,v 1.97 2005-06-03 22:32:00 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-04 15:25:35 $
+Ccc   * $Id: main.f,v 1.98 2005-06-04 15:25:35 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1536,6 +1536,7 @@ C                 POPcse(0, nejc, 1, nnuc) =  POPcse(0, nejc, 1, nnuc)*2
      &                         REAction(nnuc), ' ZAP= ', iizaejc
 C-----------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C-----------------multiplies cross sections and divides outgoing energies
+                  recorp = 1.0
                   IF (nejc.GT.0) recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 C-----------------Exclusive DDX spectra (neutrons & protons)
                   IF (nejc.GE.1 .AND. nejc.LE.2) THEN
