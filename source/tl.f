@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:24 $
-Ccc   * $Id: tl.f,v 1.60 2005-05-30 14:08:24 Capote Exp $
+Ccc   * $Date: 2005-06-05 19:43:46 $
+Ccc   * $Id: tl.f,v 1.61 2005-06-05 19:43:46 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -592,26 +592,28 @@ C-----------Reading potential parameters from OMPAR.RIPL(OMPAR.DIR) file
             CALL READ_OMPAR_RIPL(Komp,ierr,irel)
             IF (ierr.EQ.0) GOTO 100
          ENDIF
-C-----------ieof<>0 or ierr<>0
-         WRITE (6,*) ' '
-         IF (CCCalc) THEN
-            WRITE (6,
+C--------ieof<>0 or ierr<>0
+         IF (IOUT.EQ.5) THEN
+           WRITE (6,*) ' '
+           IF (CCCalc) THEN
+             WRITE (6,
      &'('' OM parameters for '',I3,''-'',A2,'' +'',I2,''-''        ,A2,'
      &' not found in the OMPAR.DIR file'')') INT(A(Nnuc)), SYMb(Nnuc),
      &INT(AEJc(Nejc)), SYMbe(Nejc)
-         ELSE
-            WRITE (6,
+           ELSE
+             WRITE (6,
      &'('' OM parameters for '',I3,''-'',A2,'' +'',I2,''-''        ,A2,'
      &' not found in the OMPAR.RIPL file'')') INT(A(Nnuc)), SYMb(Nnuc),
      &INT(AEJc(Nejc)), SYMbe(Nejc)
+           ENDIF 
+           WRITE (6,*) 'I will resort to parameters from RIPL database'
+           WRITE (6,*) ' '
          ENDIF
-         WRITE (6,*) 'I will resort to parameters from RIPL database'
-         WRITE (6,*) ' '
       ENDIF
 C
-C--------OMPAR.RIPL(OMPAR.DIR) file does not exists
-C--------or reading error happened
-C--------(reading from the RIPL database)
+C-----OMPAR.RIPL(OMPAR.DIR) file does not exists
+C-----or reading error happened
+C-----(reading from the RIPL database)
 C
       ipoten = KTRlom(Nejc,Nnuc)
       ki = 26
@@ -1320,11 +1322,13 @@ C
       IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.001) THEN
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
+         IF (IOUt.EQ.5) THEN
          WRITE (6,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
      &               ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=',
      &               SNGL(ener)
          WRITE (6,*)
      &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+          ENDIF
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
