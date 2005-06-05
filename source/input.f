@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-04 15:27:20 $
-Ccc   * $Id: input.f,v 1.134 2005-06-04 15:27:20 Capote Exp $
+Ccc   * $Date: 2005-06-05 19:42:55 $
+Ccc   * $Id: input.f,v 1.135 2005-06-05 19:42:55 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1516,9 +1516,14 @@ C           ENDIF
             IF (NEX(nnur).GT.NDEX) THEN
                WRITE (6,*)
                WRITE (6,'('' WARNING: NUMBER OF BINS IN RESIDUAL NUCLEUS
-     & A='',I3,'' AND Z='',I3,'' EXCEEDS DIMENSIONS'')')
-     &         NINT(A(nnur)), NINT(Z(nnur))
-               WRITE (6,*) 'WARNING: RESIDUAL NUCLEUS SKIPPED' 
+     & '',I3,A1,A2,'' EXCEEDS DIMENSIONS'')')  NINT(A(nnur)),'-',
+     &         SYMb(nnur)
+               WRITE (6,
+     &         '('' WARNING: Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
+     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')') 
+     &          NINT(A(nnuc)),'-',SYMb(nnuc),
+     &          NINT(ares),   '-',SYMb(nnur), 
+     &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (6,*)
      &          'WARNING: TO CONSIDER IT, YOU HAVE TO DECREASE ',
      &          ' NEX IN THE INPUT AND RESTART'
