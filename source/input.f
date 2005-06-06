@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-05 19:42:55 $
-Ccc   * $Id: input.f,v 1.135 2005-06-05 19:42:55 Capote Exp $
+Ccc   * $Date: 2005-06-06 06:39:23 $
+Ccc   * $Id: input.f,v 1.136 2005-06-06 06:39:23 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -155,14 +155,12 @@ C--------neutralize tuning factors and OMP normalization factors
          DO nnuc = 0, NDNUC
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.0
-C--------------Volume real potential
-C              VOM(Nejc,Nnuc) = vlib(1)*FNvromp(Nejc,Nnuc)
-C              AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
+C---------------Volume real potential
                 FNvvomp(Nejc,Nnuc) = 1.0
                 FNavomp(Nejc,Nnuc) = 1.0
-C--------------Volume imaginary potential
+C---------------Volume imaginary potential
                 FNwvomp(Nejc,Nnuc) = 1.0
-C--------------Surface imaginary potential:
+C---------------Surface imaginary potential:
                 FNwsomp(Nejc,Nnuc) = 1.0
                 FNasomp(Nejc,Nnuc) = 1.0
             ENDDO
@@ -229,6 +227,7 @@ C
          CCCalc = .FALSE.
          IOMwritecc = 0
          MODelecis = 0
+         EXClusiv = .TRUE.
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -827,11 +826,12 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
-                         ENDIF
+                        ENDIF
                      ENDDO
                   ENDDO
                ENDDO
             ENDDO
+            IF(NEXclusive.GT.0) EXClusiv = .FALSE.
          ENDIF
 C
 C        Key_shape =0 --> original (up to 2.18) EMPIRE E1 stength-function
@@ -1931,9 +1931,15 @@ C--------------------only gamma decay is considered up to now
   200 IF (.NOT.FILevel) CLOSE (13)
       ENDIF
       RETURN
-  300 WRITE (6,
-     &'('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
-     &'' not found in the RIPL database'')') ia, iz
+  300 IF(FILevel) THEN
+        WRITE (6,
+     &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
+     &  '' not found in local levels file (...lev) '')') ia, iz
+      ELSE 
+        WRITE (6,
+     &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
+     &  '' not found in RIPL database '')') ia, iz
+      ENDIF 
       IF (.NOT.FILevel) CLOSE (13)
       RETURN
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')

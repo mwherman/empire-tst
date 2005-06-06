@@ -49,7 +49,7 @@
      &        INExc(ndexclus)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead
+     &        RELkin, SDRead, EXClusiv
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),
      &                 ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc),EWSr1,
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,ENDf(0:ndnuc),
@@ -157,7 +157,7 @@
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
-     &                  OMParfcc, RELkin, FIRst_ein, SDRead
+     &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt, VEQ, HOEq, DEFeq

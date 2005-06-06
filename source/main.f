@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-04 15:25:35 $
-Ccc   * $Id: main.f,v 1.98 2005-06-04 15:25:35 Capote Exp $
+Ccc   * $Date: 2005-06-06 06:39:24 $
+Ccc   * $Id: main.f,v 1.99 2005-06-06 06:39:24 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -509,7 +509,7 @@ C-----including cluster emission by Iwamoto-Harada model and angular
 C-----distributions according to Kalbach systematics
 C-----
       totemis = 0.d0
-      IF (EIN.GT.0.1D0 .AND. PEQc.GT.0) THEN
+      IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
          ftmp = CSFus - xsinl - xsinlcont
          CALL PCROSS(ftmp,totemis)
       ENDIF          ! PCRoss done
@@ -1407,6 +1407,11 @@ C-----------CN contribution to elastic ddx
             WRITE (6,*)
      &          ' CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
+
+
+
+
+
          ENDIF
          WRITE (12,*) ' '
          WRITE (12,
@@ -1819,12 +1824,12 @@ C-----------------to conserve the integral
             ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
-            IF (ENDf(NNUcd).EQ.2) THEN
+            IF (.NOT.EXClusiv) THEN
               WRITE (6,'(//,11X,''**************************'')')
               WRITE (6,'(   11x,'' Inclusive spectra (C.M.)'')')
               WRITE (6,'(   11x,''**************************''/)')
               DO nejc = 0, NEJcm
-               CALL AUERST(0,nejc)
+                CALL AUERST(0,nejc)
               ENDDO
             ENDIF
          ENDIF
@@ -1832,9 +1837,9 @@ C-----------------to conserve the integral
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-c     IF (ENDf(NNUcd).EQ.2) THEN
+      IF (.NOT.EXClusiv) THEN
 c HERE
-      IF (ENDf(NNUcd).gt.0) THEN
+C     IF (ENDf(NNUcd).gt.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1937,7 +1942,7 @@ C--------light ions
       ENDIF
 C-----end of ENDF spectra (inclusive)
 
-      IF (ENDf(1).GT.0) THEN
+      IF (ENDf(1).GT.0. AND. EINl.GE.1) THEN
          WRITE (6,*)
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'

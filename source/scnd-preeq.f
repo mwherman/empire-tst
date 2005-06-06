@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-22 15:57:37 $
-Ccc   * $Id: scnd-preeq.f,v 1.15 2005-05-22 15:57:37 Capote Exp $
+Ccc   * $Date: 2005-06-06 06:39:24 $
+Ccc   * $Id: scnd-preeq.f,v 1.16 2005-06-06 06:39:24 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -160,8 +160,7 @@ C--------------------probability *** done ***
                       IF (pop1.GT.0) THEN
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
-C                      IF (ENDf(Nnuc).EQ.1.D0)
-                       IF (ENDf(Nnuc).GT.0.D0)
+                       IF (ENDf(Nnuc).EQ.1.D0)
      &                   CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                        sumem = sumem + pop1
                       ENDIF
