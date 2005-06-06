@@ -1,5 +1,5 @@
 #!/bin/bash
-#Script to produce ZVV plots comparing three sets of calculations
+#Script to produce ZVV plots comparing four sets of calculations
 #with experimental data
 
 MT=$1
@@ -11,6 +11,8 @@ dir2=$6
 name2=$7
 dir3=$8
 name3=$9
+dir4=${10}
+name4=${11}
 
 
 if [ $suf == "-" ]; then
@@ -79,6 +81,23 @@ if [ "$name3" != "" ]; then
       cat end3.zvd >>$root-$MT$suf.zvd
    fi
    rm $name3 2>/dev/null
+fi
+
+#     FOURTH ENDF SET 
+if [ "$name4" != "" ]; then
+   rm $name4 end4.zvd  2>/dev/null
+   ln -sf $dir4 $name4
+   ../util/c4zvd/endzvd.exe A $MT $name4 end4.zvd
+   if [ -s end4.zvd ]; then
+      echo '#begin aa.tit' >>end4.zvd
+      echo '[func]' >>end4.zvd
+      echo 'color:  5' >>end4.zvd
+      echo 'thick: 2' >>end4.zvd
+      echo 'set: apply' >>end4.zvd
+      echo '#end aa.tit' >>end4.zvd
+      cat end4.zvd >>$root-$MT$suf.zvd
+   fi
+   rm $name4 2>/dev/null
 fi
 
 #Run ZVV (uncomment the line below to see plots as they are produced)

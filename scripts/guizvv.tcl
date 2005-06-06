@@ -507,6 +507,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$base.label54 {
         array set save {-anchor 1 -background 1 -foreground 1 -text 1 -width 1}
     }
+    namespace eval ::widgets::$base.label55 {
+        array set save {-activebackground 1 -activeforeground 1 -anchor 1 -background 1 -foreground 1 -highlightcolor 1 -text 1 -width 1}
+    }
     namespace eval ::widgets::$base.curv1-ent {
         array set save {-background 1 -foreground 1 -selectbackground 1 -textvariable 1 -width 1}
     }
@@ -516,6 +519,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$base.entry56 {
         array set save {-background 1 -foreground 1 -textvariable 1 -width 1}
     }
+    namespace eval ::widgets::$base.entry57 {
+        array set save {-background 1 -foreground 1 -highlightcolor 1 -insertbackground 1 -selectbackground 1 -selectforeground 1 -textvariable 1 -width 1}
+    }
     namespace eval ::widgets::$base.ent67 {
         array set save {-background 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
     }
@@ -523,6 +529,9 @@ proc vTcl:project:info {} {
         array set save {-background 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$base.cpd69 {
+        array set save {-background 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
+    }
+    namespace eval ::widgets::$base.cpd70 {
         array set save {-background 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$base.but70 {
@@ -536,6 +545,12 @@ proc vTcl:project:info {} {
     }
     namespace eval ::widgets::$base.m67 {
         array set save {-disabledforeground 1 -tearoff 1}
+    }
+    namespace eval ::widgets::$base.cpd74 {
+        array set save {-activeforeground 1 -command 1 -disabledforeground 1 -font 1 -image 1 -text 1}
+    }
+    namespace eval ::widgets::$base.cpd76 {
+        array set save {-background 1 -foreground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets_bindings {
         set tagslist {_TopLevel _vTclBalloon}
@@ -590,7 +605,7 @@ set file [tk_getOpenFile -filetypes $types  -parent $w -title "Select ENDF file"
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global root suf name1 dir1 name2 dir2 name3 dir3
+global root suf name1 dir1 name2 dir2 name3 dir3 name4 dir4
 set rcfl [open ../.guizvvrc r+]
 gets $rcfl root
 gets $rcfl suf
@@ -600,6 +615,8 @@ gets $rcfl name2
 gets $rcfl dir2
 gets $rcfl name3 
 gets $rcfl dir3
+gets $rcfl name4 
+gets $rcfl dir4
 close $rcfl
 set dir1 ""
 if {$argc > 0} {set root [lindex $argv 0]}
@@ -654,10 +671,10 @@ proc vTclWindow.topwindow {base} {
     # CREATING WIDGETS
     ###################
     vTcl:toplevel $top -class Toplevel \
-        -background #dcdcdc -highlightbackground #dcdcdc \
-        -highlightcolor #000000 -menu "$top.m67" 
+        -menu "$top.m67" -background #dcdcdc -highlightbackground #dcdcdc \
+        -highlightcolor #000000 
     wm focusmodel $top passive
-    wm geometry $top 331x747+115+113; update
+    wm geometry $top 332x758+315+233; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -679,7 +696,7 @@ proc vTclWindow.topwindow {base} {
     entry $top.project \
         -background white -textvariable root -width 17 
     frame $top.mtframe \
-        -background #dcdcdc -borderwidth 1 -relief groove 
+        -borderwidth 1 -relief groove -background #dcdcdc 
     set site_3_0 $top.mtframe
     checkbutton $site_3_0.chkbtot \
         -activebackground #609498 -activeforeground white -background #dcdcdc \
@@ -827,6 +844,8 @@ puts $rcfl "$name2"
 puts $rcfl "$dir2"
 puts $rcfl "$name3" 
 puts $rcfl "$dir3"
+puts $rcfl "$name4" 
+puts $rcfl "$dir4"
 # Flush and close the file
 flush $rcfl
 close $rcfl
@@ -848,7 +867,7 @@ exit} \
         -command {set suff -$suf
 set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any]
 foreach i $mts {
-if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3}
+if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4}
 }} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -pady 1m \
@@ -856,7 +875,7 @@ if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir
     button $top.creatazvd \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
-        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ ../scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\} \
+        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ ../scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Create all} \
         -width 15 
@@ -866,7 +885,7 @@ if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir
         -command {set zvd ""
 set suff ""
 if {$suf != ""} {set suff -$suf}
-set mts [list 1 2 4 16 17 18 22 28 45 102 103 107 112]
+set mts [list 1 2 4 16 17 18 22 28 45 102 103 107 112 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70]
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
@@ -885,6 +904,10 @@ exec xterm -e ../scripts/showzvd $zvd} \
     label $top.label54 \
         -anchor w -background #dcdcdc -foreground black \
         -text {Label for curve 3:} -width 17 
+    label $top.label55 \
+        -activebackground #f9f9f9 -activeforeground black -anchor w \
+        -background #dcdcdc -foreground black -highlightcolor black \
+        -text {Label for curve 4:} -width 17 
     entry $top.curv1-ent \
         -background #ffffff -foreground darkgreen -selectbackground #cccccc \
         -textvariable name1 -width 17 
@@ -893,6 +916,10 @@ exec xterm -e ../scripts/showzvd $zvd} \
     entry $top.entry56 \
         -background #ffffff -foreground darkblue -textvariable name3 \
         -width 17 
+    entry $top.entry57 \
+        -background #ffffff -foreground black -highlightcolor black \
+        -insertbackground black -selectbackground #c4c4c4 \
+        -selectforeground black -textvariable name4 -width 17 
     ::iwidgets::entryfield $top.ent67 \
         -background #dcdcdc -labeltext {File 1:} -textbackground #ffffff \
         -textvariable dir1 -width 29 
@@ -905,6 +932,10 @@ exec xterm -e ../scripts/showzvd $zvd} \
         -background #dcdcdc -labeltext {File 3:} -textbackground #ffffff \
         -textvariable dir3 -width 29 
     vTcl:DefineAlias "$top.cpd69" "Entryfield3" vTcl:WidgetProc "$top" 1
+    ::iwidgets::entryfield $top.cpd70 \
+        -background #dcdcdc -labeltext {File 4:} -textbackground #ffffff \
+        -textvariable dir4 -width 29 
+    vTcl:DefineAlias "$top.cpd70" "Entryfield4" vTcl:WidgetProc "$top" 1
     button $top.but70 \
         -activeforeground #666666 \
         -command {fileDialog .topwindow 
@@ -931,6 +962,16 @@ set dir3 $file} \
     vTcl:DefineAlias "$top.cpd72" "Button3" vTcl:WidgetProc "$top" 1
     menu $top.m67 \
         -disabledforeground #a1a1a1 -tearoff 1 
+    button $top.cpd74 \
+        -activeforeground #666666 \
+        -command {fileDialog .topwindow 
+set dir4 $file} \
+        -disabledforeground #a1a1a1 -font {Helvetica -12} \
+        -image [vTcl:image:get_image [file join / usr lib vtcl-1.6.0 images edit open.gif]] \
+        -text button 
+    vTcl:DefineAlias "$top.cpd74" "Button4" vTcl:WidgetProc "$top" 1
+    entry $top.cpd76 \
+        -background #ffffff -foreground black -textvariable name4 -width 17 
     ###################
     # SETTING GEOMETRY
     ###################
@@ -941,14 +982,14 @@ set dir3 $file} \
     grid $top.project \
         -in $top -column 1 -row 1 -columnspan 1 -rowspan 1 -pady 5 -sticky w 
     grid $top.mtframe \
-        -in $top -column 0 -row 12 -columnspan 1 -rowspan 6 -ipadx 10 \
+        -in $top -column 0 -row 14 -columnspan 1 -rowspan 6 -ipadx 10 \
         -ipady 20 -padx 5 -sticky w 
     grid $top.show \
-        -in $top -column 1 -row 14 -columnspan 1 -rowspan 1 -sticky s 
+        -in $top -column 1 -row 16 -columnspan 1 -rowspan 1 -sticky s 
     grid $top.merge \
-        -in $top -column 1 -row 16 -columnspan 1 -rowspan 1 
+        -in $top -column 1 -row 18 -columnspan 1 -rowspan 1 
     grid $top.exit \
-        -in $top -column 1 -row 17 -columnspan 1 -rowspan 1 
+        -in $top -column 1 -row 19 -columnspan 1 -rowspan 1 
     grid $top.suf-lab \
         -in $top -column 0 -row 3 -columnspan 1 -rowspan 1 -sticky w 
     grid $top.sufix \
@@ -956,11 +997,11 @@ set dir3 $file} \
     grid $top.dir-lab \
         -in $top -column 0 -row 4 -columnspan 2 -rowspan 1 -pady 10 -sticky w 
     grid $top.creatszvd \
-        -in $top -column 1 -row 12 -columnspan 1 -rowspan 1 -sticky s 
+        -in $top -column 1 -row 14 -columnspan 1 -rowspan 1 -sticky s 
     grid $top.creatazvd \
-        -in $top -column 1 -row 13 -columnspan 1 -rowspan 1 -sticky n 
-    grid $top.showall \
         -in $top -column 1 -row 15 -columnspan 1 -rowspan 1 -sticky n 
+    grid $top.showall \
+        -in $top -column 1 -row 17 -columnspan 1 -rowspan 1 -sticky n 
     grid $top.sep-lab \
         -in $top -column 0 -row 11 -columnspan 2 -rowspan 1 
     grid $top.curv1-lab \
@@ -969,6 +1010,8 @@ set dir3 $file} \
         -in $top -column 0 -row 8 -columnspan 1 -rowspan 1 -sticky e 
     grid $top.label54 \
         -in $top -column 0 -row 10 -columnspan 1 -rowspan 1 -sticky e 
+    grid $top.label55 \
+        -in $top -column 0 -row 12 -columnspan 1 -rowspan 1 -sticky e 
     grid $top.curv1-ent \
         -in $top -column 1 -row 6 -columnspan 1 -rowspan 1 
     grid $top.entry55 \
@@ -981,12 +1024,18 @@ set dir3 $file} \
         -in $top -column 0 -row 7 -columnspan 2 -rowspan 1 
     grid $top.cpd69 \
         -in $top -column 0 -row 9 -columnspan 2 -rowspan 1 
+    grid $top.cpd70 \
+        -in $top -column 0 -row 11 -columnspan 2 -rowspan 1 
     grid $top.but70 \
         -in $top -column 2 -row 5 -columnspan 1 -rowspan 1 
     grid $top.cpd71 \
         -in $top -column 2 -row 7 -columnspan 1 -rowspan 1 
     grid $top.cpd72 \
         -in $top -column 2 -row 9 -columnspan 1 -rowspan 1 
+    grid $top.cpd74 \
+        -in $top -column 2 -row 11 -columnspan 1 -rowspan 1 
+    grid $top.cpd76 \
+        -in $top -column 1 -row 12 -columnspan 1 -rowspan 1 
 
     vTcl:FireEvent $base <<Ready>>
 }
