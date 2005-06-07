@@ -55,13 +55,15 @@ FC     =  ifort
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
             gamma-strgth.o    input.o           lev-dens.o    main.o\
-            ph-lev-dens.o     pipe.o            print.o       subecis03.o\
+            ph-lev-dens.o     pipe.o            print.o       \
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o
 
-empire:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+OBJE =      subecis03.o
+
+empire:   $(OBJF) $(OBJE)
+	$(FC) -o $@ $(OBJF) $(OBJE)
 
 
 $(OBJF) : global.h dimension.h
