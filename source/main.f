@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-06 06:39:24 $
-Ccc   * $Id: main.f,v 1.99 2005-06-06 06:39:24 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-07 06:21:50 $
+Ccc   * $Id: main.f,v 1.100 2005-06-07 06:21:50 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -154,13 +154,13 @@ C--------------add direct transition to the spectrum
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
 C-----------------add direct transition to the inclusive spectrum CSEa(,,,0)
-                  popl = ftmp*(FLOAT(icsh) - xcse)/DE
-                  IF (icsl.EQ.1) popl = 2.0*popl
-                  CSEa(icsl,iang,nejcec,0) = CSEa(icsl,iang,nejcec,0) +
-     &            popl
-                  poph = ftmp*(xcse - FLOAT(icsl))/DE
-                  CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
-     &            poph
+C                 popl = ftmp*(FLOAT(icsh) - xcse)/DE
+C                 IF (icsl.EQ.1) popl = 2.0*popl
+C                 CSEa(icsl,iang,nejcec,0) = CSEa(icsl,iang,nejcec,0) +
+C    &            popl
+C                 poph = ftmp*(xcse - FLOAT(icsl))/DE
+C                 CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
+C    &            poph
                 ENDDO
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
@@ -238,15 +238,15 @@ C              iang below means energy variable
                       CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) +
      &                popl
 C---------------------add direct transition to the inclusive spectrum CSEa(,,,0)
-                      CSEa(ie,iang,nejcec,0) =  CSEa(ie,iang,nejcec,0) +
-     &                popl
+C                     CSEa(ie,iang,nejcec,0) =  CSEa(ie,iang,nejcec,0) +
+C    &                popl
                     enddo
                   else
                     CSEa(icsl,iang,nejcec,1) =  CSEa(icsl,iang,nejcec,1)
      &                                     + ftmp/DE
 C-------------------add direct transition to the inclusive spectrum CSEa(,,,0)
-                    CSEa(icsl,iang,nejcec,0) =  CSEa(icsl,iang,nejcec,0)
-     &                                     + ftmp/DE
+C                   CSEa(icsl,iang,nejcec,0) =  CSEa(icsl,iang,nejcec,0)
+C    &                                     + ftmp/DE
                   endif
               ENDDO
              ENDIF
@@ -1298,8 +1298,6 @@ C--------------(merely for checking purpose)
                      atotsp = atotsp + CSDirlev(ilev,nejc)
                   ENDDO
                ENDIF
-C              Execution of the following print block is suspended (RCN)
-               IF(nnuc.eq.-1) then
                  WRITE (6,*) ' '
                  WRITE (6,*)
      &                  '----------------------------------------------'
@@ -1348,7 +1346,6 @@ C              Execution of the following print block is suspended (RCN)
      &                                 POPcseaf(0,3,ispec,nnuc)
                  ENDDO
                  WRITE (6,*) ' '
-               ENDIF
          ENDIF
 C--------calculate life-times and widths
          IF (IOUt.GT.0) THEN
@@ -1582,9 +1579,9 @@ C-----------------------(continuum part)
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
 c HERE
-                                 CSEa(ie,nang,nejc,0)
-     &                              = CSEa(ie,nang,nejc,0)
-     &                              - cseaprnt(ie,nang)
+C                                CSEa(ie,nang,nejc,0)
+C    &                              = CSEa(ie,nang,nejc,0)
+C    &                              - cseaprnt(ie,nang)
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1626,9 +1623,9 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
 c HERE
-                                 CSEa(ie,nang,nejc,0)
-     &                              = CSEa(ie,nang,nejc,0)
-     &                              - cseaprnt(ie,nang)
+C                                CSEa(ie,nang,nejc,0)
+C    &                              = CSEa(ie,nang,nejc,0)
+C    &                              - cseaprnt(ie,nang)
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1672,13 +1669,13 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
 c HERE
-                        DO ie = 1, nspec
-                           DO nang = 1, NDANG
-                                 CSEa(ie,nang,nejc,0)
-     &                              = CSEa(ie,nang,nejc,0)
-     &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
-                           ENDDO
-                        ENDDO
+C                       DO ie = 1, nspec
+C                          DO nang = 1, NDANG
+C                                CSEa(ie,nang,nejc,0)
+C    &                              = CSEa(ie,nang,nejc,0)
+C    &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
+C                          ENDDO
+C                       ENDDO
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
@@ -1694,13 +1691,13 @@ c HERE
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
 c HERE
-                        DO ie = 1, nspec
-                           DO nang = 1, NDANG
-                                 CSEa(ie,nang,nejc,0)
-     &                              = CSEa(ie,nang,nejc,0)
-     &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
-                           ENDDO
-                        ENDDO
+C                       DO ie = 1, nspec
+C                          DO nang = 1, NDANG
+C                                CSEa(ie,nang,nejc,0)
+C    &                              = CSEa(ie,nang,nejc,0)
+C    &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
+C                          ENDDO
+C                       ENDDO
                         DO ie = 1, nspec - 1
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                            *DE/recorp, POPcse(0,nejc,ie,nnuc)
@@ -1782,7 +1779,7 @@ C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
-c HERE
+C HERE
 c        IF (ENDf(nnuc).gt.0) THEN
             DO nejc = 0, NEJcm         !loop over ejectiles
                IF (nejc.GT.0) THEN
@@ -1806,6 +1803,38 @@ C-----------------to conserve the integral
      &                *(1.0 - weight)
                   CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
      &                                + CSE(icse,nejc,nnuc)*weight
+C-----------------double-differential spectra
+                  IF (nnuc.EQ.1) THEN !CN (possibly anisotropic)
+                     DO nang = 1, NDANG
+                        CSEa(iccml,nang,nejc,0)
+     &                     = CSEa(iccml,nang,nejc,0)
+     &                     + CSEa(icse,nang,nejc,1)*(1.0 - weight)
+C-----------------------double contribution to the first energy bin
+C-----------------------to conserve the integral
+                        IF (iccml.EQ.1 .AND. icse.NE.1)
+     &                      CSEa(iccml,nang,nejc,0)
+     &                      = CSEa(iccml,nang,nejc,0)
+     &                      + CSEa(icse,nang,nejc,1)*(1.0 - weight)
+                        CSEa(iccmh,nang,nejc,0)
+     &                     = CSEa(iccmh,nang,nejc,0)
+     &                     + CSEa(icse,nang,nejc,1)*weight
+                     ENDDO
+                  ELSE !other residues with isotropic ang. distributions
+                     piece = CSE(icse,nejc,nnuc)/4.0/PI
+                     DO nang = 1, NDANG
+                        CSEa(iccml,nang,nejc,0)
+     &                     = CSEa(iccml,nang,nejc,0)
+     &                     + piece*(1.0 - weight)
+C-----------------------double contribution to the first energy bin to
+C-----------------------to conserve the integral
+                        IF (iccml.EQ.1 .AND. icse.NE.1)
+     &                      CSEa(iccml,nang,nejc,0)
+     &                      = CSEa(iccml,nang,nejc,0)
+     &                      + piece*(1.0 - weight)
+                        CSEa(iccmh,nang,nejc,0)
+     &                     = CSEa(iccmh,nang,nejc,0) + piece*weight
+                     ENDDO
+                  ENDIF
                ENDDO
             ENDDO
          ENDIF
@@ -1839,7 +1868,7 @@ C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
 c HERE
-C     IF (ENDf(NNUcd).gt.0) THEN
+c     IF (ENDf(NNUcd).gt.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1856,8 +1885,7 @@ C--------print inclusive gamma spectrum
          DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE, CSE(ie,0,0)
          ENDDO
-C        CSE(nspec + 1,0,0) = 0.0D0
-                                 ! exact endpoint
+C--------exact endpoint
          WRITE (12,'(F9.4,E15.5)') EMAx(1), CSE(nspec,0,0)
          WRITE (12,'(F9.4,E15.5)') EMAx(1), 0.d0
 C--------print inclusive spectra of ejectiles
@@ -1873,7 +1901,7 @@ C--------neutrons
            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
          ENDDO
-                                                ! exact endpoint
+C--------exact endpoint
          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &            (CSEa(nspec,nang,1,0),nang = 1,NDANG)
          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
@@ -1891,7 +1919,7 @@ C--------protons
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
           ENDDO
-                                                 ! exact endpoint
+C--------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
      &            (CSEa(nspec,nang,2,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
