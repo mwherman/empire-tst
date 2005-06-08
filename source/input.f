@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-06 06:39:23 $
-Ccc   * $Id: input.f,v 1.136 2005-06-06 06:39:23 Capote Exp $
+Ccc   * $Date: 2005-06-08 23:15:53 $
+Ccc   * $Id: input.f,v 1.137 2005-06-08 23:15:53 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -155,14 +155,14 @@ C--------neutralize tuning factors and OMP normalization factors
          DO nnuc = 0, NDNUC
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.0
-C---------------Volume real potential
-                FNvvomp(Nejc,Nnuc) = 1.0
-                FNavomp(Nejc,Nnuc) = 1.0
-C---------------Volume imaginary potential
-                FNwvomp(Nejc,Nnuc) = 1.0
-C---------------Surface imaginary potential:
-                FNwsomp(Nejc,Nnuc) = 1.0
-                FNasomp(Nejc,Nnuc) = 1.0
+C--------------Volume real potential
+               FNvvomp(Nejc,Nnuc) = 1.0
+               FNavomp(Nejc,Nnuc) = 1.0
+C--------------Volume imaginary potential
+               FNwvomp(Nejc,Nnuc) = 1.0
+C--------------Surface imaginary potential:
+               FNwsomp(Nejc,Nnuc) = 1.0
+               FNasomp(Nejc,Nnuc) = 1.0
             ENDDO
          ENDDO
          DO nnuc = 1, NDNUC
@@ -228,6 +228,13 @@ C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.
+C        Starting value (NANgela must be less than NDANgecis !! in dimension.h)
+         NANgela = 19
+         IF(NANgela.GT.NDAngecis) THEN
+            WRITE(6,*)
+     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+            STOP 'FATAL: increase NDAngecis in dimension.h'
+         ENDIF
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -237,13 +244,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -332,10 +339,11 @@ C--------set options for DEGAS (exciton preequilibrium)
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQc = 0.0
          MFPp = 1.3
-          CHMax = 0.d0 ! set default to 0.2 inside PCROSS
-C--------HRTW control (0 no HRTW, 1 HRTW up to 5 MeV incident)
+         CHMax = 0.d0 ! set default to 0.2 inside PCROSS
+C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 1
-C--------ENDF global setting initialized to zero (no formatting) 
+         EHRtw = 5.d0
+C--------ENDF global setting initialized to zero (no formatting)
          Nendf = 0
 C
 C--------default input parameters    *** done ***
@@ -1520,9 +1528,9 @@ C           ENDIF
      &         SYMb(nnur)
                WRITE (6,
      &         '('' WARNING: Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
-     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')') 
+     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
-     &          NINT(ares),   '-',SYMb(nnur), 
+     &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (6,*)
      &          'WARNING: TO CONSIDER IT, YOU HAVE TO DECREASE ',
@@ -1935,11 +1943,11 @@ C--------------------only gamma decay is considered up to now
         WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in local levels file (...lev) '')') ia, iz
-      ELSE 
+      ELSE
         WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in RIPL database '')') ia, iz
-      ENDIF 
+      ENDIF
       IF (.NOT.FILevel) CLOSE (13)
       RETURN
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
@@ -2018,7 +2026,7 @@ C
      &                   (Q(j,i),j = 1,NEJcm)
             WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-           ENDIF 
+           ENDIF
           IF (ENDf(i).EQ.2.0D0) THEN
             iexclus = 1
             WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
@@ -2027,14 +2035,14 @@ C
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
         ENDDO
-        
+
          IF (iexclus.EQ.1) THEN
           WRITE( 6,*)
           WRITE( 6,*) ' E means only inclusive spectra is available'
           WRITE(12,*)
           WRITE(12,*) ' E means only inclusive spectra is available'
         ENDIF
- 
+
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS                                         '
         WRITE (12,*) '                                                '
@@ -2669,11 +2677,11 @@ C--------PCROSS input
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
-     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')         
+     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')
               WRITE (12,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
-     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')         
+     &  '' Kalbach systematics angular distributions (see RIPL-1)'')')
               if(i1.ne.0) then
                 WRITE (6,
      &          '('' Mean free path parameter uncertainty '',
@@ -3733,13 +3741,17 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'HRTW  ') THEN
-            LHRtw = val
-            IF (LHRtw.NE.0) WRITE (6,
-     &           '('' HRTW width fluctuation correction was selected'')'
-     &           )
-            IF (LHRtw.NE.0) WRITE (12,
-     &           '('' Width fluctuations calculated within HRTW '')'
-     &           )
+            IF (val.GT.0.) THEN
+              LHRtw = 1
+              EHRtw = 5.d0
+              IF (val.gt.1.1d0) EHRtw = val
+              IF (LHRtw.NE.0) WRITE (6,
+     &           '('' HRTW width fluctuation correction was selected'',
+     &             '' up to '',f4.2,'' MeV'')') EHRtw
+              IF (LHRtw.NE.0) WRITE (12,
+     &           '('' Width fluctuations calculated within HRTW '',
+     &             '' up to '',f4.2,'' MeV'')') EHRtw
+            ENDIF
             GOTO 100
          ENDIF
 C-----
@@ -3873,7 +3885,7 @@ C             Setting ENDF for all emission loops
                   GOTO 100
              ENDIF
              IF(val.LT.0. .or. val.GT.2.2) THEN
-               WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)') 
+               WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)')
      &                i2, SYMb(nnuc)
                WRITE (6,'('' SETTING IGNORED'')')
                GOTO 100

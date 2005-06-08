@@ -11,6 +11,7 @@
      *,NDBR=40
      *,NDECSE=NDEX+10
      *,NDANG=19
+     *,NDANGecis=91
      *,NDNUCD=NDNUC
      *,NDECSED=NDECSE
      *,NDANGD=NDANG

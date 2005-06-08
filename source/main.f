@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-08 06:25:54 $
-Ccc   * $Id: main.f,v 1.101 2005-06-08 06:25:54 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-08 23:15:52 $
+Ccc   * $Id: main.f,v 1.102 2005-06-08 23:15:52 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -41,23 +41,23 @@ C
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
-     &                 ecm, elada(101), elcncs, emeda, emedg, emedh,
-     &                 emedn, emedp, erecoil, espec, espmax, epre, ftmp,
-     &                 gamfis, gamt, gang, gtotsp, htotsp, piece, pope,
-     &                 poph, popl, popleft, poplev, popread, poptot,
-     &                 ptotsp, q2, q3, qmax, qstep, recorp, recorr,
-     &                 sgamc, spdif, spdiff, stauc, step, sum, sumfis,
-     &                 sumfism(NFMOD), tauf, taut, totemis, weight,
-     &                 xccm, xcse, xizat, xnhms, xnl, xnor, xtotsp,
-     &                 xsinlcont, xsinl, zres, deform(NDCOLLEV),
-     &                 cseaprnt(ndecse,ndang)
+     &                 ecm, elada(NDAngecis), elcncs, emeda, emedg, 
+     &                 emedh, emedn, emedp, erecoil, espec, espmax, 
+     &                 epre, ftmp, gamfis, gamt, gang, gtotsp, htotsp,
+     &                 piece, pope, poph, popl, popleft, poplev, 
+     &                 popread, poptot, ptotsp, q2, q3, qmax, qstep,
+     &                 recorp, recorr, sgamc, spdif, spdiff, stauc, 
+     &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
+     &                 totemis, weight, xccm, xcse, xizat, xnhms, xnl,
+     &                 xnor, xtotsp, xsinlcont, xsinl, zres, angstep,
+     &                 deform(NDCOLLEV), cseaprnt(ndecse,ndang)
       CHARACTER*9 cejectile
       CHARACTER*6 ctldir
       CHARACTER*20 ctmp20
       DOUBLE PRECISION DMAX1
       REAL FLOAT
-      INTEGER i, ia, iad, iam, iang, ib, icalled, iccmh, iccml, icse,
-     &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
+      INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, iccmh, iccml, 
+     &        icse, icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
@@ -108,9 +108,11 @@ C     TOTcs, ABScs,ELAcs are initialized within MARENG()
 C     For resolution function (Spreading levels in the continuum)
       isigma = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
       ncoll = 0
-      nelang = NDAng
+      nelang = NANgela
       ecm = EINl - EIN
-      dang = 3.14159/FLOAT(nelang - 1)
+      dang = PI/FLOAT(nelang - 1)
+      angstep = 180.d0/(NANgela-1)
+      gang = 180.d0/(NDAng-1)
 C-----
 C-----Get ECIS results
 C-----
@@ -124,13 +126,12 @@ C-----
       IF (DIRect.NE.0) THEN
          OPEN (46,FILE = (ctldir//ctmp20//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
-         READ (46,*,END = 1400)
-                               ! To skip first line <INE.C.S.> ..
+         READ (46,*,END = 1400) ! To skip first line <INE.C.S.> ..
 C--------get and add inelastic cross sections (including double-differential)
          DO i = 2, ND_nlv
             ilv = ICOller(i)
             IF (ilv.LE.NLV(nnurec)) THEN
-C            ADDING INELASTIC TO DISCRETE LEVELS
+C------------ADDING INELASTIC TO DISCRETE LEVELS
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
 C------------avoid reading closed channels
              IF (echannel.GE.0.0001) THEN
@@ -149,9 +150,12 @@ C--------------add direct transition to the spectrum
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
                READ (45,*,END = 1400)     ! Skipping level identifier line
-               DO iang = 1, NDANG
-                  ftmp = 0.d0
+               iang = 0 
+               DO iang1 = 1, NANgela
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
+C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS  
+                  if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
+                  iang = iang +1
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
 C-----------------add direct transition to the inclusive spectrum CSEa(,,,0)
 C                 popl = ftmp*(FLOAT(icsh) - xcse)/DE
@@ -161,7 +165,7 @@ C    &            popl
 C                 poph = ftmp*(xcse - FLOAT(icsl))/DE
 C                 CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
 C    &            poph
-                ENDDO
+               ENDDO
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
@@ -192,7 +196,7 @@ C--------------------escape if we go beyond recoil spectrum dimension
              ENDIF
            ELSE
 C
-C--------------DING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
+C------------ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0001)
 C------------avoid reading closed channels
@@ -208,8 +212,6 @@ C
 C
 C--------------Spreading it using resolution function 0.01 + sqrt(E)*0.015
 C--------------SQRT(2*PI) = 2.5066
-C
-C--------------iang below means energy variable
                dtmp = 0.d0
                do ie = max(icsl - 3*isigma,1) ,
      &                   min(NDEcse,icsl + 3*isigma)
@@ -227,9 +229,12 @@ C--------------iang below means energy variable
                  CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
                endif
                READ (45,*,END = 1400)     ! Skipping level identifier line
-               DO iang = 1, NDANG
-                  ftmp = 0.d0
+               iang = 0
+               DO iang1 = 1, NANgela
                   READ (45,'(7x,E12.5)',END = 1400) ftmp
+C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS  
+                  if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
+                  iang = iang + 1
                   if(isigma.gt.0 .and. dtmp.gt.0.) then
                     do ie = max(icsl - 3*isigma,1) ,
      &                    min(NDEcse,icsl + 3*isigma)
@@ -300,11 +305,12 @@ C
 
       WRITE (6,99015)
       WRITE (6,99020)
-      gang = 180.0/(nelang - 1)
+      gang = 180.0/(NDAng - 1)
+      angstep = 180.0/(nelang - 1)
       DO iang = 1, nelang/4 + 1
          imint = 4*(iang - 1) + 1
          imaxt = MIN0(4*iang,nelang)
-         WRITE (6,99025) ((j - 1)*gang,elada(j),j = imint,imaxt)
+         WRITE (6,99025) ((j - 1)*angstep,elada(j),j = imint,imaxt)
       ENDDO
 
 99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
@@ -329,16 +335,16 @@ C
 C--------locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0),nejcec,iloc)
          WRITE (6,*) ' '
-         gang = 180.0/(NDANG - 1)
-          its = 2
-          DO ilv = 2,ncoll
+         gang = 180.d0/(NDANG - 1)
+         its = 2
+         DO ilv = 2,ncoll
             DO iang= ilv+1,ncoll
               if(ICOller(iang).eq.ICOller(ilv)) goto 99027
             ENDDO
             itemp(its) = ICOller(ilv)
             deform(its)   = D_DEF(ilv,2)
             its = its +1
-99027     ENDDO
+99027    ENDDO
          its = its -1
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
            WRITE (6,99029)
@@ -354,7 +360,7 @@ C--------locate position of the projectile among ejectiles
            WRITE (6,*) ' '
            WRITE (6,99040)(POPlv(itemp(ilv),nnurec),ilv = 2,MIN(its,10))
 
-          IF(its.gt.10) THEN
+           IF(its.gt.10) THEN
               WRITE (6,*) ' '
               WRITE (6,*) ' '
               WRITE (6,99030) (itemp(ilv),ilv = 11,MIN(its,20))
@@ -369,9 +375,9 @@ C--------locate position of the projectile among ejectiles
               WRITE (6,*) ' '
               WRITE (6,99040) (POPlv(itemp(ilv),nnurec),ilv = 11,
      &                      MIN(its,20))
-          ENDIF
+           ENDIF
 
-          IF(its.gt.20) THEN
+           IF(its.gt.20) THEN
               WRITE (6,*) ' '
               WRITE (6,*) ' '
               WRITE (6,99030) (itemp(ilv),ilv = 21,MIN(its,30))
@@ -386,11 +392,11 @@ C--------locate position of the projectile among ejectiles
               WRITE (6,*) ' '
               WRITE (6,99040) (POPlv(itemp(ilv),nnurec),ilv = 21,
      &                      MIN(its,30))
-          ENDIF
+           ENDIF
 
 C
-C-----------Because of the ENDF format restrictions the maximum
-C-----------number of discrete levels is limited to 40
+C----------Because of the ENDF format restrictions the maximum
+C----------number of discrete levels is limited to 40
 C
            IF(its.gt.30) THEN
               WRITE (6,*) ' '
@@ -410,16 +416,16 @@ C
            ENDIF
 
 
-            WRITE (6,*) ' '
-            WRITE (6,*) ' '
-            WRITE (6,*) ' '
+           WRITE (6,*) ' '
+           WRITE (6,*) ' '
+           WRITE (6,*) ' '
          ENDIF
       ENDIF
 
       ENDIF
 C
-C-----Skipping all emission calculations
-C-----GOTO 99999
+C     Skipping all emission calculations
+C     GOTO 99999
 C
 C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
@@ -925,7 +931,7 @@ C--------
 C--------
 C--------HMS Monte Carlo preequilibrium emission
 C--------
-         IF (nnuc.EQ.1 .AND. EIN.GT.0.1D0 .AND. LHMs.NE.0) THEN
+         IF (nnuc.EQ.1 .AND. EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
             CLOSE (8)
             xizat = IZA(0)
             xnhms = NHMs
@@ -1017,7 +1023,7 @@ C--------turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
-         IF (LHRtw.EQ.1 .AND. EIN.GT.5.0D+0) LHRtw = 0
+         IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
             CALL HRTW
             IF (ENDf(1).GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
@@ -1298,54 +1304,54 @@ C--------------(merely for checking purpose)
                      atotsp = atotsp + CSDirlev(ilev,nejc)
                   ENDDO
                ENDIF
-                 WRITE (6,*) ' '
-                 WRITE (6,*)
+               WRITE (6,*) ' '
+               WRITE (6,*)
      &                  '----------------------------------------------'
-                 WRITE (6,*) 'Test printout (exclusive spectra)'
-                 WRITE (6,
+               WRITE (6,*) 'Test printout (exclusive spectra)'
+               WRITE (6,
      &'('' Energy'',14x,''gamma'',9x,''neutron'',8x,           ''proton
      &'',10x,''alpha'',9x,''l. ion'')')
-                 WRITE (6,*)
+               WRITE (6,*)
      &                  '----------------------------------------------'
-                 DO ispec = 1, NEX(1) + 10
-                  IF (NDEJC.EQ.4) THEN
+               DO ispec = 1, NEX(1) + 10
+                 IF (NDEJC.EQ.4) THEN
                      WRITE (6,'(6g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,nnuc),
      &                      POPcse(0,1,ispec,nnuc),
      &                      POPcse(0,2,ispec,nnuc),
      &                      POPcse(0,3,ispec,nnuc),
      &                      POPcse(0,NDEJC,ispec,nnuc)
-                  ELSE
+                 ELSE
                      WRITE (6,'(5g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,nnuc),
      &                      POPcse(0,1,ispec,nnuc),
      &                      POPcse(0,2,ispec,nnuc),
      &                      POPcse(0,3,ispec,nnuc)
-                  ENDIF
-                 ENDDO
-                 WRITE (6,*) '-----------------------------------------'
-                 WRITE (6,'(15X,5g15.5)')gtotsp, xtotsp, ptotsp, atotsp,
+                 ENDIF
+               ENDDO
+               WRITE (6,*) '-----------------------------------------'
+               WRITE (6,'(15X,5g15.5)')gtotsp, xtotsp, ptotsp, atotsp,
      &                                  htotsp
-                 WRITE (6,'(''E-aver.'',8X,6g15.5)')emedg, emedn, emedp,
+               WRITE (6,'(''E-aver.'',8X,6g15.5)')emedg, emedn, emedp,
      &                emeda, emedh, emedg + emedn + emedp + emeda +
      &                emedh
-                 WRITE (6,*) '-----------------------------------------'
-                 WRITE (6,*) ' '
-                 WRITE (6,*)
-     &                  '----------------------------------------------'
+               WRITE (6,*) '-----------------------------------------'
+               WRITE (6,*) ' '
+               WRITE (6,*)
+     &                '----------------------------------------------'
 
-                 WRITE (6,*) 'Test printout (portions of DDX spectra)'
-                 WRITE (6,
+               WRITE (6,*) 'Test printout (portions of DDX spectra)'
+               WRITE (6,
      &                '(''     Energy'',8x,'' gamma '',9x,''neutron'',
      &                                9x,''proton '',7x,'' alpha'')')
-                 DO ispec = 1, NEX(1) + 10
+               DO ispec = 1, NEX(1) + 10
                   WRITE (6,'(5g15.5)') (ispec - 1)*DE,
      &                                 POPcseaf(0,0,ispec,nnuc),
      &                                 POPcseaf(0,1,ispec,nnuc),
      &                                 POPcseaf(0,2,ispec,nnuc),
      &                                 POPcseaf(0,3,ispec,nnuc)
-                 ENDDO
-                 WRITE (6,*) ' '
+               ENDDO
+               WRITE (6,*) ' '
          ENDIF
 C--------calculate life-times and widths
          IF (IOUt.GT.0) THEN
@@ -1404,11 +1410,6 @@ C-----------CN contribution to elastic ddx
             WRITE (6,*)
      &          ' CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
-
-
-
-
-
          ENDIF
          WRITE (12,*) ' '
          WRITE (12,
@@ -1578,7 +1579,7 @@ C-----------------------(continuum part)
      &                              *POPcseaf(0,nejc,ie,nnuc))
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
-c HERE
+C HERE
 C                                CSEa(ie,nang,nejc,0)
 C    &                              = CSEa(ie,nang,nejc,0)
 C    &                              - cseaprnt(ie,nang)
@@ -1622,7 +1623,7 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
      &                           *POPcseaf(0,nejc,ie,nnuc))
 C--------------------------------Calculate inclusive part of the spectrum by
 C--------------------------------subtracting exclusive parts from the total
-c HERE
+C HERE
 C                                CSEa(ie,nang,nejc,0)
 C    &                              = CSEa(ie,nang,nejc,0)
 C    &                              - cseaprnt(ie,nang)
@@ -1668,7 +1669,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         ENDDO
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
-c HERE
+C HERE
 C                       DO ie = 1, nspec
 C                          DO nang = 1, NDANG
 C                                CSEa(ie,nang,nejc,0)
@@ -1690,7 +1691,7 @@ C                       ENDDO
                      ELSE  !all other emissions (continnum and levels together)
 C-----------------------Calculate inclusive part of the spectrum by
 C-----------------------subtracting exclusive parts from the total
-c HERE
+C HERE
 C                       DO ie = 1, nspec
 C                          DO nang = 1, NDANG
 C                                CSEa(ie,nang,nejc,0)
@@ -1803,7 +1804,7 @@ C-----------------to conserve the integral
      &                                + CSE(icse,nejc,nnuc)*weight
 C-----------------double-differential spectra
                   IF (nnuc.EQ.1) THEN !CN (possibly anisotropic)
-                     DO nang = 1, NDANG
+                     DO nang = 1, NDAng
                         CSEa(iccml,nang,nejc,0)
      &                     = CSEa(iccml,nang,nejc,0)
      &                     + CSEa(icse,nang,nejc,1)*(1.0 - weight)
@@ -1819,12 +1820,10 @@ C-----------------------to conserve the integral
                      ENDDO
                   ELSE !other residues with isotropic ang. distributions
                      piece = CSE(icse,nejc,nnuc)/4.0/PI
-              WRITE(6,*)'piece=',piece,'CSEA',CSEa(iccml,1,nejc,0)
                      DO nang = 1, NDANG
                         CSEa(iccml,nang,nejc,0)
      &                     = CSEa(iccml,nang,nejc,0)
      &                     + piece*(1.0 - weight)
-                     WRITE(6,*)'CSEa=',nang,CSEa(iccml,nang,nejc,0) 
 C-----------------------double contribution to the first energy bin to
 C-----------------------to conserve the integral
                         IF (iccml.EQ.1 .AND. icse.NE.1)
@@ -1834,7 +1833,7 @@ C-----------------------to conserve the integral
                         CSEa(iccmh,nang,nejc,0)
      &                     = CSEa(iccmh,nang,nejc,0) + piece*weight
                      ENDDO
-                  ENDIF
+                  ENDIF   
                ENDDO
             ENDDO
          ENDIF
@@ -1868,7 +1867,7 @@ C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
 c HERE
-c     IF (ENDf(NNUcd).gt.0) THEN
+C     IF (ENDf(NNUcd).gt.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -1919,7 +1918,7 @@ C--------protons
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
           ENDDO
-C--------exact endpoint
+C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
      &            (CSEa(nspec,nang,2,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
@@ -1938,7 +1937,7 @@ C--------alphas
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
           ENDDO
-                                                 ! exact endpoint
+C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
      &            (CSEa(nspec,nang,3,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
@@ -1960,7 +1959,7 @@ C--------light ions
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
      &                *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
              ENDDO
-                                                    ! exact endpoint
+C------------exact endpoint
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
      &           - Q(NDEJC,1), (CSEa(nspec,nang,NDEJC,0),nang = 1,NDANG)
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
@@ -1970,7 +1969,7 @@ C--------light ions
       ENDIF
 C-----end of ENDF spectra (inclusive)
 
-      IF (ENDf(1).GT.0. AND. EINl.GE.1) THEN
+      IF (ENDf(1).GT.0  AND. EINl.GE.1) THEN
          WRITE (6,*)
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
@@ -2021,6 +2020,16 @@ C        SAVING RANDOM SEEDS
          STOP
        ENDIF
       epre = EIN
+
+      NANgela = 19 
+      IF(EIN.GT.10. .AND. EIN.LE.20.) NANgela = 37
+      IF(EIN.GT.20. .AND. EIN.LE.50.) NANgela = 73
+      IF(EIN.GT.50.) NANgela = 91
+      IF(NANgela.GT.NDAngecis) THEN
+         WRITE(6,*) 
+     &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
+         STOP 'FATAL: increase NANgecis in dimension.h'
+      ENDIF
 
       FIRst_ein = .FALSE.
       GOTO 1300
@@ -2081,7 +2090,7 @@ C-----normalize recoil spectrum of the parent
             RECcse(ire,Ke,Nnuc) = RECcse(ire,Ke,Nnuc)/sumnor
          ENDDO
       ENDIF
-      dang = 3.14159/FLOAT(NDANG - 1)
+      dang = PI/FLOAT(NDANG - 1)
       coef = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
          ares = A(nnuc) - AEJc(nejc)

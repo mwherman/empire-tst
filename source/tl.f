@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-05 19:43:46 $
-Ccc   * $Id: tl.f,v 1.61 2005-06-05 19:43:46 Capote Exp $
+Ccc   * $Date: 2005-06-08 23:15:54 $
+Ccc   * $Id: tl.f,v 1.62 2005-06-08 23:15:54 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1890,7 +1890,7 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
 C     angstep = 2.5
-      angstep = 10.
+      angstep = 180.d0/(NAngela-1)
       CALL INIT(Nejc,Nnuc)
       ECIs1 = BECis1
 C-----Deformation read instead of deformation lengths
@@ -2264,7 +2264,7 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
 C     angstep = 2.5
-      angstep = 10.
+      angstep = 180.d0/(NANgela-1)
       CALL INIT(Nejc,Nnuc)
       ECIs1 = BECis1
 C-----Rotational model

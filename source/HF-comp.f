@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-08 06:25:54 $
-Ccc   * $Id: HF-comp.f,v 1.69 2005-06-08 06:25:54 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-08 23:15:52 $
+Ccc   * $Id: HF-comp.f,v 1.70 2005-06-08 23:15:52 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -55,7 +55,6 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
@@ -76,7 +75,7 @@ C-----------Add isotropic contribution to the inclusive spectrum if ENDf=2
                   CSEa(icse,nang,Nejc,0) = CSEa(icse,nang,Nejc,0)
      &               + piece
                ENDDO
-            ENDIF
+            ENDIF           
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
@@ -230,7 +229,7 @@ C-----DE spectra
                    ELSE
                      POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
-                   ENDIF
+                   ENDIF     
                ENDIF
             ENDDO
 C-----------DDX spectra using portions
@@ -239,7 +238,7 @@ C-----------DDX spectra using portions
      &             POPcseaf(Ief,iejc,ie,Nnur)
      &             = POPcseaf(Ief,iejc,ie,Nnur)
      &             + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
-            ENDDO
+            ENDDO           
          ENDDO
       ENDIF
       END
@@ -325,9 +324,9 @@ C-----DE spectra
 C--------------DDX spectra using portions
                DO iejc = 0, NDEJCD
                   IF (POPcseaf(Iec,iejc,iesp,Nnuc).NE.0)
-     &                POPcseaf(0,iejc,iesp,Nnur)
-     &                = POPcseaf(0,iejc,iesp,Nnur)
-     &                + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+     &               POPcseaf(0,iejc,iesp,Nnur)
+     &               = POPcseaf(0,iejc,iesp,Nnur)
+     &               + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
                ENDDO
             ENDDO
          ENDIF

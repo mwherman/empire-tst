@@ -42,7 +42,7 @@
      &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), LTUrbo,
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
-     &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs,
+     &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
@@ -50,7 +50,7 @@
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
-      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),
+      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,2), ETL(ndetl,ndejc,ndnuc),EWSr1,
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,ENDf(0:ndnuc),
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,
@@ -129,7 +129,7 @@
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
-     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor,
+     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
@@ -154,7 +154,8 @@
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
+     &                  NANgela 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
