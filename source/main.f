@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-07 06:21:50 $
-Ccc   * $Id: main.f,v 1.100 2005-06-07 06:21:50 herman Exp $
+Ccc   * $Date: 2005-06-08 06:25:54 $
+Ccc   * $Id: main.f,v 1.101 2005-06-08 06:25:54 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -192,7 +192,7 @@ C--------------------escape if we go beyond recoil spectrum dimension
              ENDIF
            ELSE
 C
-C            ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
+C--------------DING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0001)
 C------------avoid reading closed channels
@@ -200,16 +200,16 @@ C------------avoid reading closed channels
      &       THEN
                READ (46,*,END = 1400) popread
 C
-C              This level is not counted as a discrete one
-C              but it is embedded in the continuum
+C--------------This level is not counted as a discrete one
+C--------------but it is embedded in the continuum
 C
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
 C
-C              Spreading it using resolution function 0.01 + sqrt(E)*0.015
-C              SQRT(2*PI) = 2.5066
+C--------------Spreading it using resolution function 0.01 + sqrt(E)*0.015
+C--------------SQRT(2*PI) = 2.5066
 C
-C              iang below means energy variable
+C--------------iang below means energy variable
                dtmp = 0.d0
                do ie = max(icsl - 3*isigma,1) ,
      &                   min(NDEcse,icsl + 3*isigma)
@@ -250,7 +250,7 @@ C    &                                     + ftmp/DE
                   endif
               ENDDO
              ENDIF
-C            END OF ADDING INELASTIC TO CONTINUUM
+C------------END OF ADDING INELASTIC TO CONTINUUM
            ENDIF
  1350    ENDDO
       ENDIF
@@ -389,8 +389,8 @@ C--------locate position of the projectile among ejectiles
           ENDIF
 
 C
-C           Because of the ENDF format restrictions the maximum
-C           number of discrete levels is limited to 40
+C-----------Because of the ENDF format restrictions the maximum
+C-----------number of discrete levels is limited to 40
 C
            IF(its.gt.30) THEN
               WRITE (6,*) ' '
@@ -418,8 +418,8 @@ C
 
       ENDIF
 C
-C     Skipping all emission calculations
-C     GOTO 99999
+C-----Skipping all emission calculations
+C-----GOTO 99999
 C
 C-----locate postions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
@@ -1779,8 +1779,6 @@ C-----stored in CSE(.,x,0) array
 C-----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
          IF (ENDf(nnuc).EQ.2) THEN
-C HERE
-c        IF (ENDf(nnuc).gt.0) THEN
             DO nejc = 0, NEJcm         !loop over ejectiles
                IF (nejc.GT.0) THEN
                   recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
@@ -1821,10 +1819,12 @@ C-----------------------to conserve the integral
                      ENDDO
                   ELSE !other residues with isotropic ang. distributions
                      piece = CSE(icse,nejc,nnuc)/4.0/PI
+              WRITE(6,*)'piece=',piece,'CSEA',CSEa(iccml,1,nejc,0)
                      DO nang = 1, NDANG
                         CSEa(iccml,nang,nejc,0)
      &                     = CSEa(iccml,nang,nejc,0)
      &                     + piece*(1.0 - weight)
+                     WRITE(6,*)'CSEa=',nang,CSEa(iccml,nang,nejc,0) 
 C-----------------------double contribution to the first energy bin to
 C-----------------------to conserve the integral
                         IF (iccml.EQ.1 .AND. icse.NE.1)

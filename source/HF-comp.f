@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-07 06:21:50 $
-Ccc   * $Id: HF-comp.f,v 1.68 2005-06-07 06:21:50 herman Exp $
+Ccc   * $Date: 2005-06-08 06:25:54 $
+Ccc   * $Id: HF-comp.f,v 1.69 2005-06-08 06:25:54 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -69,11 +69,11 @@ C     nexrt = (excnq - ECUt(Nnur))/DE + 2.0001
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + pop1 + pop2
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pops
-C           The condition below usually is false, RCN
-            IF (ENDf(1).EQ.2) THEN
+C-----------Add isotropic contribution to the inclusive spectrum if ENDf=2             
+            IF (ENDf(Nnuc).EQ.2) THEN
                piece = pops/4.0/PI
                DO nang = 1, NDANG
-                  CSEa(icse,nang,Nejc,1) = CSEa(icse,nang,Nejc,1)
+                  CSEa(icse,nang,Nejc,0) = CSEa(icse,nang,Nejc,0)
      &               + piece
                ENDDO
             ENDIF
@@ -83,9 +83,7 @@ C           The condition below usually is false, RCN
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
          IF (ENDf(Nnuc).EQ.1 .AND. popt.NE.0.0D+0)
-C        IF (ENDf(Nnuc).GT.0 .AND. popt.NE.0.0D+0)
      &       CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
-         popt = popt*DE
       ENDDO !over residual energies in continuum
 C-----
 C-----Discrete levels
@@ -236,7 +234,6 @@ C-----DE spectra
                ENDIF
             ENDDO
 C-----------DDX spectra using portions
-C           DO iejc = 1, NDEJCD
             DO iejc = 0, NDEJCD
                IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
      &             POPcseaf(Ief,iejc,ie,Nnur)
@@ -302,11 +299,11 @@ C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
-C     IF(ENDF(Nnur).EQ.2) THEN
-C        CSE(Ie,Nejc,0) = CSE(Ie,Nejc,0) + Popt
-C     ELSE
+      IF(ENDF(Nnur).EQ.2) THEN
+         CSE(Ie,Nejc,0) = CSE(Ie,Nejc,0) + Popt
+      ELSE
          POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
-C     ENDIF
+      ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
