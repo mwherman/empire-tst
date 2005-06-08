@@ -2,8 +2,9 @@
 2.  Correction to the vibrational-rotational input model routine
     preparing ECIS input inside tl.f (H. Wienke)
 3.  Vibrational enhancement in level densities and its damping corrected
-    (M. Herman).
-4.  Mixed (exclusive/inclusive) ENDF-6 formatting implemented.
+    (M. Herman)
+4.  Mixed (exclusive/inclusive) ENDF-6 reactions classification implemented
+    (M. Herman)
 5.  Support for NJOY added to GUI (M. Herman)
 6.  Random sampling (among 2+,3-,4+) for high lying levels with unknown
     spin implemented. These levels could be used for DWBA calculations
@@ -31,7 +32,12 @@
 13. Detailed printing of the angular distribution for all collective discrete
     levels implemented in long output (R. Capote)
 14. Particle-hole LD formula employed in PCROSS taken from RIPL-2 LD chapter.
-    Potential depth considered.
+    Potential depth considered  (R. Capote)
+15. EMPEND algorithm for DDXS fitting improved to accurately fit calculated
+    EMPIRE results for elastic and inelastic XS (A. Trkov)
+16. Separate energy dependent angular grid for elastic scattering implemented,
+    allowing to use any number of points for accurate description of angular 
+    distributions at energies above 10 MeV (R. Capote)
 
         Changes in version 2.19beta12 with respect to 2.18
                       Brookhaven, February  2004
