@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:15:52 $
-Ccc   * $Id: main.f,v 1.102 2005-06-08 23:15:52 Capote Exp $
+Ccc   * $Date: 2005-06-08 23:24:10 $
+Ccc   * $Id: main.f,v 1.103 2005-06-08 23:24:10 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1969,7 +1969,7 @@ C------------exact endpoint
       ENDIF
 C-----end of ENDF spectra (inclusive)
 
-      IF (ENDf(1).GT.0  AND. EINl.GE.1) THEN
+      IF (ENDf(1).GT.0. .AND. EINl.GE.1.d0) THEN
          WRITE (6,*)
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
