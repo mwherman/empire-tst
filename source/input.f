@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:15:53 $
-Ccc   * $Id: input.f,v 1.137 2005-06-08 23:15:53 Capote Exp $
+Ccc   * $Date: 2005-06-08 23:40:52 $
+Ccc   * $Id: input.f,v 1.138 2005-06-08 23:40:52 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -825,6 +825,7 @@ C                       residues must be heavier than alpha
 C                          Comment the following line and uncommment the one after for all exclusive spectra
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 2
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
+                           EXClusiv = .FALSE.
                         ENDIF
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
@@ -839,7 +840,6 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                   ENDDO
                ENDDO
             ENDDO
-            IF(NEXclusive.GT.0) EXClusiv = .FALSE.
          ENDIF
 C
 C        Key_shape =0 --> original (up to 2.18) EMPIRE E1 stength-function
