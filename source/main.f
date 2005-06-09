@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:24:10 $
-Ccc   * $Id: main.f,v 1.103 2005-06-08 23:24:10 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-09 12:54:36 $
+Ccc   * $Id: main.f,v 1.104 2005-06-09 12:54:36 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1577,12 +1577,6 @@ C-----------------------(continuum part)
      &                              - piece*POPcseaf(0,nejc,ie,nnuc))
      &                              /4.0/PI + CSEa(ie,nang,nejc,1)
      &                              *POPcseaf(0,nejc,ie,nnuc))
-C--------------------------------Calculate inclusive part of the spectrum by
-C--------------------------------subtracting exclusive parts from the total
-C HERE
-C                                CSEa(ie,nang,nejc,0)
-C    &                              = CSEa(ie,nang,nejc,0)
-C    &                              - cseaprnt(ie,nang)
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1621,12 +1615,6 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
      &                           - piece*POPcseaf(0,nejc,ie,nnuc))
      &                           /4.0/PI + CSEa(ie,nang,nejc,1)
      &                           *POPcseaf(0,nejc,ie,nnuc))
-C--------------------------------Calculate inclusive part of the spectrum by
-C--------------------------------subtracting exclusive parts from the total
-C HERE
-C                                CSEa(ie,nang,nejc,0)
-C    &                              = CSEa(ie,nang,nejc,0)
-C    &                              - cseaprnt(ie,nang)
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1667,16 +1655,6 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                            IF (espec.GE.0) WRITE (12,'(F10.5,E14.5)')
      &                         -espec, CSAlev(1,il,3)*4.0*PI*recorp/DE
                         ENDDO
-C-----------------------Calculate inclusive part of the spectrum by
-C-----------------------subtracting exclusive parts from the total
-C HERE
-C                       DO ie = 1, nspec
-C                          DO nang = 1, NDANG
-C                                CSEa(ie,nang,nejc,0)
-C    &                              = CSEa(ie,nang,nejc,0)
-C    &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
-C                          ENDDO
-C                       ENDDO
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
@@ -1689,16 +1667,6 @@ C                       ENDDO
                         WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                            0.d0
                      ELSE  !all other emissions (continnum and levels together)
-C-----------------------Calculate inclusive part of the spectrum by
-C-----------------------subtracting exclusive parts from the total
-C HERE
-C                       DO ie = 1, nspec
-C                          DO nang = 1, NDANG
-C                                CSEa(ie,nang,nejc,0)
-C    &                              = CSEa(ie,nang,nejc,0)
-C    &                              - POPcse(0,nejc,ie,nnuc)/4.0/PI
-C                          ENDDO
-C                       ENDDO
                         DO ie = 1, nspec - 1
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                            *DE/recorp, POPcse(0,nejc,ie,nnuc)
@@ -1866,12 +1834,10 @@ C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
-c HERE
-C     IF (ENDf(NNUcd).gt.0) THEN
 C--------print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-          IF (ENDf(nnuc).EQ.2) CALL PRINT_RECOIL(nnuc,reactionx)
+            IF (ENDf(nnuc).EQ.2) CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C--------print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
