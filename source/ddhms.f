@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.18 $
-C $Id: ddhms.f,v 1.18 2005-04-15 18:21:01 Capote Exp $
+C CVS Version Management $Revision: 1.19 $
+C $Id: ddhms.f,v 1.19 2005-06-09 07:54:34 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -78,7 +78,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Ajtarr, Amultdamp, Debinr, Elabprojr, Qdfracr, Readnevr, 
+      REAL*8 Ajtarr, Amultdamp, Debinr, Elabprojr, Qdfracr, Readnevr,
      &       Sigreacr, Tartyper
       INTEGER Icalled, Ihistlabr, Iomlreadr, Irecprintr, Izaproj
 C
@@ -125,7 +125,7 @@ C
          RETURN
       ENDIF
 C
-      IF (IHIstlab.NE.0) OPEN (UNIT = 4,FILE = 'HISTORY',STATUS = 
+      IF (IHIstlab.NE.0) OPEN (UNIT = 4,FILE = 'HISTORY',STATUS =
      &                         'unknown')                     !big file
 C
       CALL HMS(Icalled)
@@ -148,8 +148,8 @@ C
 C
 C Local variables
 C
-      REAL*8 adiffuse, ajfinal, ajhms, ajinit, amrec, avradius, c, 
-     &       etotemiss, event, prec, pxrec, pyrec, pzrec, ra, radius, 
+      REAL*8 adiffuse, ajfinal, ajhms, ajinit, amrec, avradius, c,
+     &       etotemiss, event, prec, pxrec, pyrec, pzrec, ra, radius,
      &       rsample, sumav, test
       DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
       INTEGER i, jbin, jsweep, jtrans, mrecbin, n, nem, nubin
@@ -170,7 +170,7 @@ C     ! factor 10 prevents this becoming too small
       IDUm = -1  !starting value to call to ran0c random number function
 C
       CALL CONSTANTS  ! defines constants
- 
+
       CALL INIT0(Icalled)
 C
       IF (IOMlread.NE.0) CALL OM_INCANGMOM
@@ -242,7 +242,7 @@ C
          jsweep = 0
    50    jsweep = jsweep + 1
          IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                ' SWEEP of 2p1h states NUMBER', 
+     &                                ' SWEEP of 2p1h states NUMBER',
      &                               jsweep
 C
   100    IF (NEXist2p1h.NE.0) CALL DEEXCITE2P1H
@@ -288,7 +288,7 @@ C
 C
 C
 C        print out ejectile information:
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'number of ejectiles=', 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'number of ejectiles=',
      &                               NEMiss
          IF (IPRintdiag.EQ.1) WRITE (28,*) ' energies are:'
          etotemiss = 0.
@@ -303,7 +303,7 @@ C        write(8,*)'total ejectile k.e.=',etotemiss
 C        write(8,*)'total c.n. energy dumped=',ucndump
 C        write(8,*)'total energy converted to mass=',convmass
          IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                'ejectile energy + c.n. energy=', 
+     &                                'ejectile energy + c.n. energy=',
      &                               etotemiss + UCNdump
          IF (IKIn.EQ.1) THEN
             test = DABS(((etotemiss+UCNdump+CONvmass)/(ECMproj)) - 1.)
@@ -312,15 +312,15 @@ C           for ikin=2
             test = DABS(((etotemiss+UCNdump+CONvmass+EREclab)/(ELAbproj)
      &             ) - 1.)
          ENDIF
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'etotemiss+ucndump=', 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'etotemiss+ucndump=',
      &                               etotemiss + UCNdump, test
          IF (test.GE.0.001D0) THEN
-            WRITE (28,*) 'etotemiss,ucndump,convmass,ecmproj:', 
+            WRITE (28,*) 'etotemiss,ucndump,convmass,ecmproj:',
      &                   etotemiss, UCNdump, CONvmass, ECMproj
             STOP ' no energy balance'
          ENDIF
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'residual nucleus z and n=', 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'residual nucleus z and n=',
      &                               JNResid, JZResid
 C
 C        ---- coding for calc angmom transfer, so far just
@@ -350,7 +350,7 @@ C        !this is really an l-transfer
 C
 C
          CALL BOOSTSPIN(ajhms,ajfinal)
-         IF (IPRintdiag.EQ.1) WRITE (28,*) ' prec,jtrans,ajfinal:', 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) ' prec,jtrans,ajfinal:',
      &                               prec, jtrans, ajfinal
 C        !couples to target spin ajtar
 C
@@ -363,14 +363,14 @@ C        spins of projectile and ejectile(s). However, this is probably
 C        accurate enough for now.
 C
 C        simple algorithm to account for half-integral spins
-         IF ((JNResid + JZResid).NE.(2*((JNResid+JZResid)/2)) .AND. 
+         IF ((JNResid + JZResid).NE.(2*((JNResid+JZResid)/2)) .AND.
      &       (ajfinal - INT(ajfinal)).LT.0.01D0) THEN
             ajinit = ajfinal
             CALL FOLDHALFSPIN(ajinit,ajfinal)
 C           (done if A-odd and ajfinal even)
          ENDIF
 C
-         IF ((JNResid + JZResid).EQ.(2*((JNResid+JZResid)/2)) .AND. 
+         IF ((JNResid + JZResid).EQ.(2*((JNResid+JZResid)/2)) .AND.
      &       (ajfinal - INT(ajfinal)).GT.0.01D0) THEN
             ajinit = ajfinal
             CALL FOLDHALFSPIN(ajinit,ajfinal)
@@ -403,11 +403,11 @@ C           write out HISTORY FILE info corresponding to this event.
             DO n = 1, NEMiss
                IF (IHIstlab.EQ.1) THEN
 C                 !lab frame
-                  WRITE (4,99005) NEV, IZAemiss(n), EEMissl(n), 
+                  WRITE (4,99005) NEV, IZAemiss(n), EEMissl(n),
      &                            THEmissl(n)*c, PHEmissl(n)*c
                ELSEIF (IHIstlab.EQ.2) THEN
 C                 !channel energy frame
-                  WRITE (4,99005) NEV, IZAemiss(n), EEMiss(n), 
+                  WRITE (4,99005) NEV, IZAemiss(n), EEMiss(n),
      &                            THEmiss(n)*c, PHEmiss(n)*c
                ENDIF
             ENDDO
@@ -424,8 +424,8 @@ C           for recoil) IF(nemiss .EQ. 0)THEN
 C           write(4,98)nev,1000*jzresid+(jzresid+jnresid),ereclab,threclab*c,
 C           +           phreclab*c,dmax1(ucndump,0.d0)  !no -ve ucndump
 C           ELSE
-            WRITE (4,99005) NEV, 1000*JZResid + (JZResid + JNResid), 
-     &                      EREclab, THReclab*c, PHReclab*c, 
+            WRITE (4,99005) NEV, 1000*JZResid + (JZResid + JNResid),
+     &                      EREclab, THReclab*c, PHReclab*c,
      &                      DMAX1(UCNdump,0.D0), ajfinal  !no -ve ucndump
 C           ENDIF
 C
@@ -442,7 +442,7 @@ C     write(7,*)'  ' !insert blank line at end of hist file
 C
       CALL OUTPUTPRINT
 C
-      IF (IKIn.EQ.2) WRITE (6,*) '*WARNING:', NBAd, 
+      IF (IKIn.EQ.2) WRITE (6,*) '*WARNING:', NBAd,
      &                           ' events had -ve ucndump, worst case=',
      &                           UBAd
 99005 FORMAT (i9,4x,i5,5x,1p,1E10.4,2x,1p,1E10.4,2x,1p,1E10.4,2x,1p,
@@ -494,8 +494,8 @@ C
 C Local variables
 C
       REAL*8 damprate, emrate, epart, pair, probemiss, zran
-      INTEGER index1p1h, index2p1h, jflagem, jstudy, jwarning, n, 
-     &        nebinchan, nebinlab, nexist1p1horig, nexist2p1horig, 
+      INTEGER index1p1h, index2p1h, jflagem, jstudy, jwarning, n,
+     &        nebinchan, nebinlab, nexist1p1horig, nexist2p1horig,
      &        nhresid, nph, nphlab, npresid, nth, nthlab
       INTEGER INT
       REAL*8 RANG
@@ -519,7 +519,7 @@ C
 C     write(8,*)'number of 2p1h states to consider=',nexist2p1horig
       DO n = 1, nexist2p1horig
 C
-         IF (NEV.EQ.12345678) WRITE (6,*) 'n=', n, ' of ', 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'n=', n, ' of ',
      &                               nexist2p1horig
 C
 C
@@ -589,8 +589,8 @@ C        now sample particle energy
          CALL SELECTEN2P1H(jstudy,pair,epart)
          IF (NEV.EQ.12345678) WRITE (6,*) 'pair=', pair, 'epart=', epart
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, 
-     &                               ' uex2p1h=', UEX2p1h(jstudy), 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
+     &                               ' uex2p1h=', UEX2p1h(jstudy),
      &                               ' epart=', epart
 C
 C        jflagem=1,0
@@ -622,7 +622,7 @@ C
 C
 C
 C        first check to see if particle is trapped:
-         IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart, 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
      &                               BINding
 C
          IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -647,7 +647,7 @@ C           ! this is the angle in the proj coord system
             UCNdump = UCNdump + epart
 C           !dumps particle energy into c.n. excitation
 C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h, 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
      &                                  ' uex1p1h=', UEX1p1h(index1p1h),
      &                                  'trapped 1p energy=', epart
             GOTO 100
@@ -667,13 +667,13 @@ C        +' damprate=',damprate,' probemiss=',probemiss
 C        zran=ranf(0)
          zran = RANG()
          IF (zran.LE.probemiss) jflagem = 1
-         IF (NEV.EQ.12345678) WRITE (6,*) 'zran,probemiss=', zran, 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'zran,probemiss=', zran,
      &                               probemiss
 C
 C
 C
          IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ',
      &                                  SELtype
 C           emission occurs
 C           1p1h state created with a certain energy
@@ -760,7 +760,7 @@ C
             ENDIF
 C
 C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h, 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
      &                                  ' uex1p1h=', UEX1p1h(index1p1h)
 C
          ELSE
@@ -771,7 +771,7 @@ C
 C           now select a collision partner (=> returns "coltype")
             CALL SELCOLTYPE(epart)
             IF (IPRintdiag.EQ.1) WRITE (28,'(a4,a4)') SELtype, COLtype
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 
+            IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                      '***rescattering of 1p of 2p1h state, of a '
      &                      , SELtype, ' with a coll partner=', COLtype
 C
@@ -792,7 +792,7 @@ C           ! this is the momentum rel to well-bottom
             TH1p1h(index1p1h) = TH1rem
 C           ! this is the angle in the proj coord system
             PH1p1h(index1p1h) = PH1rem
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h, 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
      &                                  ' uex1p1h=', UEX1p1h(index1p1h)
 C
 C           next the created 2p1h state:
@@ -818,9 +818,9 @@ C           ! this is the momentum rel to well-bottom
             TH2p1h(index2p1h) = TH1p
 C           ! this is the angle in the proj coord system
             PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h, 
-     &                                  'uex2p1h=', UEX2p1h(index2p1h), 
-     &                                  ' isospin structure=', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
+     &                                  'uex2p1h=', UEX2p1h(index2p1h),
+     &                                  ' isospin structure=',
      &                                  ISOspi2p1h(index2p1h)
 C
          ENDIF
@@ -853,8 +853,8 @@ C
 C Local variables
 C
       REAL*8 damprate, emrate, epart, probemiss, zran
-      INTEGER index1h, index2p1h, jflagem, jstudy, jwarning, n, 
-     &        nebinchan, nebinlab, nexist1horig, nexist1p1horig, 
+      INTEGER index1h, index2p1h, jflagem, jstudy, jwarning, n,
+     &        nebinchan, nebinlab, nexist1horig, nexist1p1horig,
      &        nexist2p1horig, nhresid, nph, nphlab, npresid, nth, nthlab
       INTEGER INT
       REAL*8 RANG
@@ -884,7 +884,7 @@ C     write(8,*)'number of 1p1h states to consider=',nexist1p1horig
       IF (NEV.EQ.12345678) WRITE (6,*) '**** called deexcite1p1h'
 C
       DO n = 1, nexist1p1horig
-         IF (NEV.EQ.12345678) WRITE (6,*) 'n=', n, ' of ', 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'n=', n, ' of ',
      &                               nexist1p1horig
 C
 C
@@ -946,8 +946,8 @@ C        CALL SELECTEN1P1H(jstudy, pair, epart)
 C        IF(NEV.EQ.12345678)WRITE(6, *)'pair,epart=', pair, epart
          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, 
-     &                               ' uex1p1h=', UEX1p1h(jstudy), 
+         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
+     &                               ' uex1p1h=', UEX1p1h(jstudy),
      &                               ' epart=', epart
 C
 C
@@ -971,7 +971,7 @@ C        !remaining state = 1h here
 C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
 C
 C
-         IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart, 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
      &                               BINding
 C        first check to see if particle is trapped:
          IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -994,8 +994,8 @@ C           ! this is the angle in the proj coord system
             PH1h(index1h) = PH1rem
             UCNdump = UCNdump + epart
 C           !dumps particle energy into c.n. excitation
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h, 
-     &                                  ' uex1h=', UEX1h(index1h), 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
+     &                                  ' uex1h=', UEX1h(index1h),
      &                                  'trapped 1p energy=', epart
             GOTO 100
          ENDIF
@@ -1012,11 +1012,11 @@ C        +' damprate=',damprate,' probemiss=',probemiss
 C        zran=ranf(0)
          zran = RANG()
          IF (zran.LE.probemiss) jflagem = 1
-         IF (NEV.EQ.12345678) WRITE (6,*) 'zran,probemiss=', zran, 
+         IF (NEV.EQ.12345678) WRITE (6,*) 'zran,probemiss=', zran,
      &                               probemiss
 C
          IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ',
      &                                  SELtype
 C           emission occurs
 C           1h state created with a certain energy
@@ -1037,7 +1037,7 @@ C           ! this is the momentum rel to well-bottom
 C           ! this is the angle in the proj coord system
             PH1h(index1h) = PH1rem
 C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h, 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
      &                                  ' uex1h=', UEX1h(index1h)
             NEMiss = NEMiss + 1 ! an extra particle has been emitted
             EEM = epart - BINding !the emission energy reduced by b.e.
@@ -1111,7 +1111,7 @@ C
 C
 C           now select a collision partner (=> returns "coltype")
             CALL SELCOLTYPE(epart)
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 
+            IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                        '***rescattering  1p of 1p1h state, of a '
      &                        , SELtype, ' with coll partner=', COLtype
 C
@@ -1132,7 +1132,7 @@ C           ! this is the momentum rel to well-bottom
             TH1h(index1h) = TH1rem
 C           ! this is the angle in the proj coord system
             PH1h(index1h) = PH1rem
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h, 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
      &                                  ' uex1h=', UEX1h(index1h)
 C
 C           next the created 2p1h state:
@@ -1158,9 +1158,9 @@ C           ! this is the momentum rel to well-bottom
             TH2p1h(index2p1h) = TH1p
 C           ! this is the angle in the proj coord system
             PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h, 
-     &                                  'uex2p1h=', UEX2p1h(index2p1h), 
-     &                                  'isospin struc=', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
+     &                                  'uex2p1h=', UEX2p1h(index2p1h),
+     &                                  'isospin struc=',
      &                                  ISOspi2p1h(index2p1h)
 C
          ENDIF
@@ -1194,8 +1194,8 @@ C
 C Local variables
 C
       REAL*8 damprate, emrate, epart, pair, probemiss, zran
-      INTEGER index2p1h, jflagem, jstudy, jwarning, n, nebinchan, 
-     &        nebinlab, nexist1horig, nexist1p1horig, nexist2p1horig, 
+      INTEGER index2p1h, jflagem, jstudy, jwarning, n, nebinchan,
+     &        nebinlab, nexist1horig, nexist1p1horig, nexist2p1horig,
      &        nhresid, nph, nphlab, npresid, nth, nthlab
       INTEGER INT
       REAL*8 RANG
@@ -1286,7 +1286,7 @@ C
 C
 C        now select a particle energy from converted hole =>1p2h
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 
+         IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                          'hole conversion from 1h => 1p2h occurs'
 C
 C        now test to see if rescattered or emitted:
@@ -1337,7 +1337,7 @@ C           put all energy into c.n. excitation
 C           !dumps particle energy into c.n. excitation
 C
             IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                   'trapped 1p (and 2h) energy=', 
+     &                                   'trapped 1p (and 2h) energy=',
      &                                  UEX1h(jstudy)
             GOTO 100
          ENDIF
@@ -1356,7 +1356,7 @@ C        zran=ranf(0)
          IF (zran.LE.probemiss) jflagem = 1
 C
          IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 
+            IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                           '*****emission of 1p of 1p2h state, of'
      &                           , SELtype
 C           emission occurs
@@ -1368,7 +1368,7 @@ C           ! an extra particle has been emitted
 C           !the emission energy reduced by b.e.
             CONvmass = CONvmass + BINding
             IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                   'BINding,CONvmass,epart,EEM:', 
+     &                                   'BINding,CONvmass,epart,EEM:',
      &                                  BINding, CONvmass, epart, EEM
 C           ! add to buffer energy converted to mass
             EEMiss(NEMiss) = EEM
@@ -1435,7 +1435,7 @@ C
             UCNdump = UCNdump + (UEX1h(jstudy) - epart)
 C           !dumps 2h energy in c.n. excitation
 C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=',
      &                                  UEX1h(jstudy) - epart
 C
          ELSE
@@ -1448,7 +1448,7 @@ C           particle
 C
 C
 C           2h state created (ignore) , and a new 2p1h state made
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 
+            IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                         '***rescattering of 1p of 1p2h state, of'
      &                         , SELtype, ' coll partner=', COLtype
 C           next the created 2p1h state:
@@ -1474,15 +1474,15 @@ C           ! this is the momentum rel to well-bottom
             TH2p1h(index2p1h) = TH1p
 C           ! this is the angle in the proj coord system
             PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h, 
-     &                                  'uex2p1h=', UEX2p1h(index2p1h), 
-     &                                  ' isospin structure=', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
+     &                                  'uex2p1h=', UEX2p1h(index2p1h),
+     &                                  ' isospin structure=',
      &                                  ISOspi2p1h(index2p1h)
             UCNdump = UCNdump + (UEX1h(jstudy) - epart)
 C           !dumps 2h energy in c.n. excitation
 C
 C           ignore for now the 2 holes left (dump energy into c.n.)
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=',
      &                                  UEX1h(jstudy) - epart
 C
          ENDIF
@@ -1516,7 +1516,7 @@ C
 C
       WRITE (28,*) '**************************************************'
       WRITE (28,*) 'isospin (prot-part neut-part prot-hole neut-hole:'
-      WRITE (28,*) 
+      WRITE (28,*)
      &           '    1     2     3     4     5     6     7     8     9'
       WRITE (28,99005) (ISOspi2p1h(i),i = 1,9)
 99005 FORMAT ('2p1h:',9(a4,2x))
@@ -1528,7 +1528,7 @@ C
 99020 FORMAT ('1p2h:',9(a4,2x))
 C
       WRITE (28,*) 'iexist vals followed by energies'
-      WRITE (28,*) 
+      WRITE (28,*)
      &           '    1     2     3     4     5     6     7     8     9'
       WRITE (28,99025) (UEX2p1h(i),i = 1,9)
 99025 FORMAT ('2p1h:',9(f5.1,1x))
@@ -1742,7 +1742,7 @@ C     now calculate nucleon nucleon scattering cross sections:
 C
       signnpp = 10.63/(beta*beta) - 29.92/beta + 42.9
       signp = 34.1/(beta*beta) - 82.2/beta + 82.2
-      IF (NEV.EQ.12345678) WRITE (6,*) 'epart,beta,signnpp,signp=', 
+      IF (NEV.EQ.12345678) WRITE (6,*) 'epart,beta,signnpp,signp=',
      &                                 Epart, beta, signnpp, signp
       IF (SELtype.EQ.'neut') THEN
          probnn = signnpp*ANTar/(signnpp*ANTar + signp*ZTAr)
@@ -1762,7 +1762,7 @@ C        c=ranf(0)
       ENDIF
       IF (NEV.EQ.12345678) WRITE (6,*) 'coltype=', COLtype
 C
-      IF (IPRintdiag.EQ.1) WRITE (28,*) ' selcol subroutine: sel col=', 
+      IF (IPRintdiag.EQ.1) WRITE (28,*) ' selcol subroutine: sel col=',
      &                                  SELtype, COLtype
       END
 C
@@ -1862,7 +1862,7 @@ C
 C
 C Local variables
 C
-      REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pauli, r0, 
+      REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pauli, r0,
      &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z
       DOUBLE PRECISION DEXP, DLOG, DSQRT
 C
@@ -1979,9 +1979,9 @@ C     GR excitation
             NEXist1p1h = 1
             NTOt1p1h = 1
             IEXist1p1h(1) = 1
- 
+
             c = RANG()
- 
+
             IF (c.GT.ZTAr/ATAr) THEN
 C     ! neutron particle-hole
                ISOspi1p1h(1) = '0101'
@@ -1989,15 +1989,15 @@ C     ! neutron particle-hole
 C     ! proton particle-hole
                ISOspi1p1h(1) = '1010'
             ENDIF
- 
+
             UEX1p1h(1) = ECMproj
-            IF (NEV.EQ.12345678) WRITE (6,*) 'ecmproj, uex2p1h(1)=', 
+            IF (NEV.EQ.12345678) WRITE (6,*) 'ecmproj, uex2p1h(1)=',
      &                                  ECMproj, UEX1p1h(1)
             TH1p1h(1) = 0.
 C     !initial projectile moving along the z-axis
             PH1p1h(1) = 0.
             ZK1p1h(1) = ECMproj
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' GD:ex,p,th,ph', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) ' GD:ex,p,th,ph',
      &                                  UEX1p1h(1), ZK1p1h(1), TH1p1h(1)
      &                                  , PH1p1h(1)
 C     !init mom of gamma
@@ -2018,7 +2018,7 @@ C neutron p-h
             ZK1p1h(1) = DSQRT((eg2 + pz)**2 + px**2)
             TH1p1h(1) = DACOS((eg2 + pz)/ZK1p1h(1))
             PH1p1h(1) = ph
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-n:ex,p,th,ph', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-n:ex,p,th,ph',
      &                                  UEX1p1h(1), ZK1p1h(1), TH1p1h(1)
      &                                  , PH1p1h(1)
 C proton p-h
@@ -2030,10 +2030,10 @@ C proton p-h
             ELSE
                PH1p1h(2) = ph + PI_g
             ENDIF
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-p:ex,p,th,ph', 
+            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-p:ex,p,th,ph',
      &                                  UEX1p1h(2), ZK1p1h(2), TH1p1h(2)
      &                                  , PH1p1h(2)
- 
+
          ENDIF
       ELSE
 C     here, for starts, we assume 2p1h
@@ -2058,7 +2058,7 @@ C
 C
          UEX2p1h(1) = ECMproj + SEPproj
          IF (NEV.EQ.12345678) WRITE (6,*)
-     &                               'ecmproj,sepproj, uex2p1h(1)=', 
+     &                               'ecmproj,sepproj, uex2p1h(1)=',
      &                               ECMproj, SEPproj, UEX2p1h(1)
          TH2p1h(1) = 0.
 C     !initial projectile moving along the z-axis
@@ -2126,9 +2126,9 @@ C
       DOUBLE PRECISION DSIN
       REAL FLOAT
       INTEGER INT, NINT
-      INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne, 
+      INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
      &        nemax, norder, nph, nth, nu, numax
- 
+
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
 C
@@ -2188,14 +2188,14 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.18 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.19 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.18 2005-04-15 18:21:01 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.19 2005-06-09 07:54:34 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
       WRITE (28,*) ' contact: mbchadwick@lanl.gov'
-      WRITE (28,*) 
+      WRITE (28,*)
      &          ' calculates preequilibrium reactions using Monte Carlo'
       WRITE (28,*) ' see phys rev c57, 233 (1998), blann and chadwick'
       WRITE (28,*) ' ang. mom. transfer model developed with oblozinsky'
@@ -2203,33 +2203,33 @@ C
       WRITE (28,*) ' '
       WRITE (28,*) ' this output includes information concerning:'
       WRITE (28,*) ' - summary of input info'
-      WRITE (28,*) 
+      WRITE (28,*)
      &' - inclusive  n and p emission energy-spectra in channel & lab fr
      &ames'
       WRITE (28,*) ' - summary of n and p production cross sections'
-      WRITE (28,*) 
+      WRITE (28,*)
      &          ' - summary of resid. nucleus production cross sections'
-      WRITE (28,*) 
+      WRITE (28,*)
      &    ' - inclusive  n and p emission ddxs-spectra in channel frame'
-      WRITE (28,*) 
+      WRITE (28,*)
      &        ' - inclusive  n and p emission ddxs-spectra in lab frame'
-      WRITE (28,*) 
+      WRITE (28,*)
      &  ' - energy-dependent populations of residual nuclei after preeq'
-      WRITE (28,*) 
+      WRITE (28,*)
      &' - energy-and spin-dependent populations of residual nuclei after
      & preeq'
-      WRITE (28,*) 
+      WRITE (28,*)
      &' - recoil kinetic energy angle-integrated spectra of residuals af
      &ter preeq'
       WRITE (28,*) ' '
-      WRITE (28,*) 
+      WRITE (28,*)
      &' * NOTE: history file contains complete information for each even
      &t, i.e.:'
-      WRITE (28,*) 
+      WRITE (28,*)
      &        '     - for light ejectiles, the kinetic energy and angle'
-      WRITE (28,*) 
+      WRITE (28,*)
      &         '     - for heavy recoil, the kinetic energy, angle, and'
-      WRITE (28,*) 
+      WRITE (28,*)
      &'       the excitation energy and spin (assume 50:50 parity ratio)
      &'
 C
@@ -2287,17 +2287,17 @@ C
 C
       IF (IOMlread.EQ.1) THEN
          WRITE (28,*) ' '
-         WRITE (28,*) 
+         WRITE (28,*)
      &              ' -------------------------------------------------'
-         WRITE (28,*) 
+         WRITE (28,*)
      &              ' optical model l-dist from tape10 for inc channel:'
          WRITE (28,*) ' l   probability   T_l'
          WRITE (28,*) '--   -----------   -----------'
          DO llll = 0, LMAx_om
-            WRITE (28,'(i3,2x,1p1e10.3,4x,1p1e10.3)') llll, 
+            WRITE (28,'(i3,2x,1p1e10.3,4x,1p1e10.3)') llll,
      &             OM_ldist(llll), TCInc_splined(llll)
          ENDDO
-         WRITE (28,*) 
+         WRITE (28,*)
      &              ' -------------------------------------------------'
       ENDIF
 C
@@ -2309,7 +2309,7 @@ C
       WRITE (28,*) ' '
       WRITE (28,*) ' '
 C
-      WRITE (28,*) 
+      WRITE (28,*)
      &'inclusive angle-integrated emission spectra of neutrons and proto
      &ns:'
       WRITE (28,99170) DEBin
@@ -2318,16 +2318,16 @@ C
       sumnlab = 0.
       sumplab = 0.
       WRITE (28,*) ' '
-      WRITE (28,*) 
+      WRITE (28,*)
      &'  kinetic       channel-energy frame            laboratory-frame'
-      WRITE (28,*) 
+      WRITE (28,*)
      &'   energy       neutrons     protons            neutrons     prot
      &ons'
-      WRITE (28,*) 
+      WRITE (28,*)
      &'    (MeV)       (mb/MeV)     (mb/MeV)           (mb/MeV)     (mb/
      &MeV)'
       DO ne = 0, nemax
-         WRITE (28,99175) (DEBin*(ne + 0.5)), DXSn(ne), DXSp(ne), 
+         WRITE (28,99175) (DEBin*(ne + 0.5)), DXSn(ne), DXSp(ne),
      &                    DXSnlab(ne), DXSplab(ne)
          sumn = sumn + DXSn(ne)*DEBin
          sump = sump + DXSp(ne)*DEBin
@@ -2367,10 +2367,10 @@ C     determine the max number of protons and neutrons emitted
          ENDDO
       ENDDO
 C
-      WRITE (28,*) 
+      WRITE (28,*)
      &'production cross sections of heavy residuals following preequilib
      &rium emission:'
-      WRITE (28,*) 
+      WRITE (28,*)
      &          '(1000Z+A is given, below which is given the x/s in mb)'
       WRITE (28,99120) (jn,jn = jnmax,0, - 1)
 99120 FORMAT ('          # n emiss ->',9(i10))
@@ -2429,21 +2429,21 @@ C
 C
 C     ---- channel energy ddxs spectra -------------------------------------
       WRITE (28,*) ' '
-      WRITE (28,*) 
+      WRITE (28,*)
      &   'ddxs spectra in channel-energy frame follow (units=mb/MeVsr):'
 C
       DO norder = 0, INT(ELAbejecmax/(DEBin*10.))
          DO jen = 0, 9
             ecount(jen) = norder*10 + jen
          ENDDO
-         WRITE (28,*) 
+         WRITE (28,*)
      &' Angle       channel energy (mev) [histogram mid-pt. of bin is gi
      &ven] '
          WRITE (28,99185) ((ecount(j) + 0.5)*DEBin,j = 0,9)
          DO nth = 1, 36
             thet = FLOAT(nth)*5. - 2.5
-            WRITE (28,99190) thet, 
-     &                       (DDXsn(ne,nth),ne = norder*10,norder*10 + 
+            WRITE (28,99190) thet,
+     &                       (DDXsn(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
          WRITE (28,99195) (DXSn1(ne),ne = norder*10,norder*10 + 9)
@@ -2454,14 +2454,14 @@ C
          DO jen = 0, 9
             ecount(jen) = norder*10 + jen
          ENDDO
-         WRITE (28,*) 
+         WRITE (28,*)
      &' Angle       channel energy (mev) [histogram mid-pt. of bin is gi
      &ven] '
          WRITE (28,99200) ((ecount(j) + 0.5)*DEBin,j = 0,9)
          DO nth = 1, 36
             thet = FLOAT(nth)*5. - 2.5
-            WRITE (28,99190) thet, 
-     &                       (DDXsp(ne,nth),ne = norder*10,norder*10 + 
+            WRITE (28,99190) thet,
+     &                       (DDXsp(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
          WRITE (28,99195) (DXSp1(ne),ne = norder*10,norder*10 + 9)
@@ -2470,7 +2470,7 @@ C     ---- end channel energy ddxs spectra -------------------------------------
 C
 C     ---- lab frame ddxs spectra -------------------------------------
       WRITE (28,*) ' '
-      WRITE (28,*) 
+      WRITE (28,*)
      &'ddxs spectra in lab frame (lab angle & energy) follow (units=mb/M
      &eVsr)'
 C
@@ -2478,14 +2478,14 @@ C
          DO jen = 0, 9
             ecount(jen) = norder*10 + jen
          ENDDO
-         WRITE (28,*) 
+         WRITE (28,*)
      &' Angle       lab energy (mev) [histogram mid-pt. of bin is given]
      & '
 C
          WRITE (28,99185) ((ecount(j) + 0.5)*DEBin,j = 0,9)
          DO nth = 1, 36
             thet = FLOAT(nth)*5. - 2.5
-            WRITE (28,99190) thet, 
+            WRITE (28,99190) thet,
      &                       (DDXsnlab(ne,nth),ne = norder*10,norder*10
      &                       + 9)
 C
@@ -2498,13 +2498,13 @@ C
          DO jen = 0, 9
             ecount(jen) = norder*10 + jen
          ENDDO
-         WRITE (28,*) 
+         WRITE (28,*)
      &' Angle       lab energy (mev) [histogram mid-pt. of bin is given]
      & '
          WRITE (28,99200) ((ecount(j) + 0.5)*DEBin,j = 0,9)
          DO nth = 1, 36
             thet = FLOAT(nth)*5. - 2.5
-            WRITE (28,99190) thet, 
+            WRITE (28,99190) thet,
      &                       (DDXsplab(ne,nth),ne = norder*10,norder*10
      &                       + 9)
          ENDDO
@@ -2514,12 +2514,12 @@ C     ---- end lab-frame ddxs spectra -------------------------------------
 C
 C
       WRITE (28,99180)
-      WRITE (28,*) 
+      WRITE (28,*)
      &       'residual nucleus populations after preequilibrium follow:'
 C
 C     write residual nucleus populations
       WRITE (28,*) ' '
-      WRITE (28,*) 
+      WRITE (28,*)
      &          'excitation-energy-dependent resid nucleus populations:'
       WRITE (28,99170) DEBin
 C
@@ -2528,8 +2528,8 @@ C
 C
             IF (RESpop(jz,jn).GT.0.D0) THEN
                WRITE (28,*) ' '
-               WRITE (28,99205) JZInitcn - jz, JZInitcn - jz + 
-     &                          JNInitcn - jn, RESpop(jz,jn), 
+               WRITE (28,99205) JZInitcn - jz, JZInitcn - jz +
+     &                          JNInitcn - jn, RESpop(jz,jn),
      &                          100*RESpop(jz,jn)/SIGreac
                WRITE (28,*) 'excitation      population'
                WRITE (28,*) '   energy       cross section'
@@ -2547,11 +2547,11 @@ C
 C
       WRITE (28,99180)
 C     prints of u and j populations (spin distributions& u-populations)
-      WRITE (28,*) 
+      WRITE (28,*)
      &'excitation-energy and spin-dependent residual nucleus populations
      & follow:'
       WRITE (28,*) 'note: spin-distributions are normalized to unity'
-      WRITE (28,*) 
+      WRITE (28,*)
      &'note: values only tabulated for excitation-energy bins that are p
      &opulated (non-zero x/s)'
 C
@@ -2567,13 +2567,13 @@ C
             IF (RESpop(jz,jn).GT.0.D0) THEN
                WRITE (28,*) ' '
 C
-               WRITE (28,99205) JZInitcn - jz, JZInitcn - jz + 
-     &                          JNInitcn - jn, RESpop(jz,jn), 
+               WRITE (28,99205) JZInitcn - jz, JZInitcn - jz +
+     &                          JNInitcn - jn, RESpop(jz,jn),
      &                          100*RESpop(jz,jn)/SIGreac
                DO nu = 0, numax
                   IF (USPec(jz,jn,nu).GT.1.D-10) THEN
                      WRITE (28,99145) DEBin*(nu + 0.5), USPec(jz,jn,nu)
-     &                                *DEBin, zjadd, 
+     &                                *DEBin, zjadd,
      &                                FLOAT(JMAxujspec(jz,jn,nu))
      &                                + zjadd
 99145                FORMAT ('u= ',1p,1E10.3,
@@ -2594,12 +2594,12 @@ C
       IF (IREcprint.NE.0) THEN
 C        prints of recoil kinetic energy distributions
          WRITE (28,99180)
-         WRITE (28,*) 
+         WRITE (28,*)
      &  'recoil kinetic energy (angle-integrated) distributions follow:'
-         WRITE (28,*) 
+         WRITE (28,*)
      &'note: values only tabulated for excitation-energy bins that are p
      &opulated (non-zero x/s)'
-         WRITE (28,*) 
+         WRITE (28,*)
      &     'note: see recoil information for each event in history file'
 C
          WRITE (28,99155) DEBinrec
@@ -2613,12 +2613,12 @@ C
                IF (RESpop(jz,jn).GT.0.D0) THEN
                   WRITE (28,*) ' '
 C
-                  WRITE (28,99205) JZInitcn - jz, JZInitcn - jz + 
-     &                             JNInitcn - jn, RESpop(jz,jn), 
+                  WRITE (28,99205) JZInitcn - jz, JZInitcn - jz +
+     &                             JNInitcn - jn, RESpop(jz,jn),
      &                             100*RESpop(jz,jn)/SIGreac
                   DO nu = 0, numax
                      IF (USPec(jz,jn,nu).GT.1.D-10) THEN
-                        WRITE (28,99160) DEBin*(nu + 0.5), 
+                        WRITE (28,99160) DEBin*(nu + 0.5),
      &                         USPec(jz,jn,nu)*DEBin
 99160                   FORMAT ('u= ',1p,1E10.3,
      &                          ' MeV; x/s in this excit-energy bin= ',
@@ -2629,7 +2629,7 @@ C
                         WRITE (28,*) '    (MeV)       (mb/MeV)'
 C
                         DO mrec = 0, MAXerecspec(jz,jn,nu)
-                           WRITE (28,99165) (mrec + 0.5)*DEBinrec, 
+                           WRITE (28,99165) (mrec + 0.5)*DEBinrec,
      &                            RECspec(jz,jn,nu,mrec)
 99165                      FORMAT (1p,1E10.3,2x,1E10.3)
                         ENDDO
@@ -2678,15 +2678,15 @@ C
 C
 C Local variables
 C
-      REAL*8 a(21), a5, dfn, dfz, e0, edef, esh, esh1, f1, f2, f3, f4, 
-     &       pn, pz, ron, roz, s, t, txxx, txxz, tzzx, tzzz, u, v, x, 
+      REAL*8 a(21), a5, dfn, dfz, e0, edef, esh, esh1, f1, f2, f3, f4,
+     &       pn, pz, ron, roz, s, t, txxx, txxz, tzzx, tzzz, u, v, x,
      &       xmag(6), xx, z, zmag(5), zz
       DOUBLE PRECISION DABS
       INTEGER k, kl, l, nn2, nz2
       DATA zmag/14., 28., 50., 82., 114./
       DATA xmag/14., 28., 50., 82., 126., 184./
-      DATA a/16.178, 18.422, 120.146, 202.305, 12.454, 0.73598, 5.204, 
-     &     1.0645, 1.4206, 0.0548, 0.1786, .6181, .0988, .0265, -.1537, 
+      DATA a/16.178, 18.422, 120.146, 202.305, 12.454, 0.73598, 5.204,
+     &     1.0645, 1.4206, 0.0548, 0.1786, .6181, .0988, .0265, -.1537,
      &     .3113, -.6650, -.0553, -.0401, .1774, .4523/
       x = Nn
       z = Nz
@@ -2828,7 +2828,7 @@ C
       INTEGER japroj, jn, jsp, jz, jzproj, mem, nen, nph, nth
       INTEGER NINT
       IF (Icalled.EQ.0) THEN
- 
+
          PARmas(1) = 1.008665D0
          PARmas(2) = 1.007825D0
          PARmas(3) = 2.014101D0
@@ -2943,14 +2943,14 @@ C        history file header print:
          IF (IHIstlab.EQ.1) THEN
             WRITE (4,*) 'Lab frame for light ejectiles and recoil'
          ELSEIF (IHIstlab.EQ.2) THEN
-            WRITE (4,*) 
-     &'Channel-energy frame for light ejectiles but recoil in lab (only 
+            WRITE (4,*)
+     &'Channel-energy frame for light ejectiles but recoil in lab (only
      &sensible frame)'
          ENDIF
-         WRITE (4,*) 
+         WRITE (4,*)
      &'Note: if no preq emission, better to obtain spin from Hauser-Fesh
      &bach theory'
-         WRITE (4,99005) PROjtype, NINT(1000*ZTAr + ATAr), ELAbproj, 
+         WRITE (4,99005) PROjtype, NINT(1000*ZTAr + ATAr), ELAbproj,
      &                   NEVents, SIGreac
 99005    FORMAT ('HISTORY FILE:  ',a4,' + ',i5,', Einc=',f5.1,
      &           ' mev, Events=',i9,', Reac xs=',f6.1,' mb',/)
@@ -3225,7 +3225,7 @@ C
 C
 C Local variables
 C
-      REAL*8 aa, arg, eemchan, er, ph1, ph2, ph2rem, r, rotphi, 
+      REAL*8 aa, arg, eemchan, er, ph1, ph2, ph2rem, r, rotphi,
      &       rottheta, th1, th2, th2rem, zkinit, zkrem2
       DOUBLE PRECISION DABS, DACOS, DCOS, DEXP, DLOG, DSIN, DSQRT
       INTEGER nh, np
@@ -3284,7 +3284,7 @@ C     !particle's mom rel to well bottom
       IF (eemchan.LT.0.1D0) eemchan = 0.1
 C     prevents eemchan going -ve. this variable is used in the ang-dis
 C     expression to approx quantum effects. meaningless if <= 0.
-      IF (eemchan.LE.0.D0) WRITE (6,*) 'eemchan,epart,binding=', 
+      IF (eemchan.LE.0.D0) WRITE (6,*) 'eemchan,epart,binding=',
      &                                 eemchan, Epart, BINding
       CALL AANG(zkinit,eemchan,np,nh,er,aa)
 C     aa value is returned. Then sample distribution function:
@@ -3303,7 +3303,7 @@ C        PRC57,233(1998))
          PH1p = rotphi
 C        rotates th2,ph2 into projectile's coordinate system; answer=th1p,ph1p
 C        now determine the angle and momentum of remaining p-h state:
-         zkrem2 = zkinit*zkinit + ZKScat*ZKScat - 
+         zkrem2 = zkinit*zkinit + ZKScat*ZKScat -
      &            2.*zkinit*ZKScat*DCOS(th2)
          ZKRem = DSQRT(zkrem2)
          IF (th2.LT.1.D-4) ZKRem = DABS(zkinit - ZKScat)
@@ -3315,15 +3315,15 @@ C
          IF (DABS(arg).GT.1.D0) arg = arg/DABS(arg)
          th2rem = DACOS(arg)
          IF (ZKRem.EQ.0.D0 .OR. th2rem.LT.0.D0 .OR. th2rem.GT.PI_g) THEN
-            WRITE (28,*) '** dcos(th2),1.e-4,zkrem,zkinit,zkscat=', 
+            WRITE (28,*) '** dcos(th2),1.e-4,zkrem,zkinit,zkscat=',
      &                   DCOS(th2), 1.E-4, ZKRem, zkinit, ZKScat
             WRITE (28,*) 'zkrem,zkinit,zkscat,th2,cth2,sth2,arg,th2rem='
-     &                   , ZKRem, zkinit, ZKScat, th2, DCOS(th2), 
+     &                   , ZKRem, zkinit, ZKScat, th2, DCOS(th2),
      &                   DSIN(th2), arg, th2rem
             WRITE (28,*) 'np,nh=', np, nh, 'er=', er
-            WRITE (28,*) 'zkinit*zkinit', zkinit*zkinit, 
-     &                   'zkscat*zkscat=', ZKScat*ZKScat, 
-     &                   '2.*zkinit*zkscat*dcos(th2)=', 
+            WRITE (28,*) 'zkinit*zkinit', zkinit*zkinit,
+     &                   'zkscat*zkscat=', ZKScat*ZKScat,
+     &                   '2.*zkinit*zkscat*dcos(th2)=',
      &                   2.*zkinit*ZKScat*DCOS(th2)
          ENDIF
          ph2rem = ph2 + PI_g
@@ -3334,10 +3334,10 @@ C        these values need to be rotated into projectile's coordinate system:
          PH1rem = rotphi
          GOTO 99999
       ENDIF
-      WRITE (6,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit, 
+      WRITE (6,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit,
      &            eemchan, np, nh, er, aa
-      WRITE (6,*) 'r=', r, 'arg=', 
-     &            (DLOG(DEXP(aa) - r*(DEXP(aa)-DEXP(-aa))))/aa, 'th2=', 
+      WRITE (6,*) 'r=', r, 'arg=',
+     &            (DLOG(DEXP(aa) - r*(DEXP(aa)-DEXP(-aa))))/aa, 'th2=',
      &            th2
       STOP 'something screwy'
 C
@@ -3367,10 +3367,10 @@ C
 C COMMON variables
 C
       REAL*8 ACOm(3), BEN(3,7), E, EPS(2001), RZZ, SIGin(7,2001)
-      INTEGER INOut(3), IPOut(3), IWRi, JIN, JNIn, JNOut(7), JPIn, 
+      INTEGER INOut(3), IPOut(3), IWRi, JIN, JNIn, JNOut(7), JPIn,
      &        JPOut(7), NEPs1(3,7), NPHd(3,7,2), NSD(6)
       COMMON /ENERGY/ ACOm, BEN, E, EPS, RZZ, SIGin
-      COMMON /IENERGY/ INOut, IPOut, IWRi, JIN, JNIn, JPIn, JNOut, 
+      COMMON /IENERGY/ INOut, IPOut, IWRi, JIN, JNIn, JPIn, JNOut,
      &                 JPOut, NEPs1, NSD, NPHd
 C
 C Local variables
@@ -3450,15 +3450,15 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ACOm(3), BEN(3,7), E, ECUt, EPS(2001), RZZ, SIGin(7,2001), 
-     &       XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6), XN2(6), 
+      REAL*8 ACOm(3), BEN(3,7), E, ECUt, EPS(2001), RZZ, SIGin(7,2001),
+     &       XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6), XN2(6),
      &       XP0(6), XP1(6), XP2(6)
-      INTEGER INOut(3), IPOut(3), IWRi, JIN, JNIn, JNOut(7), JPIn, 
+      INTEGER INOut(3), IPOut(3), IWRi, JIN, JNIn, JNOut(7), JPIn,
      &        JPOut(7), NEPs1(3,7), NPHd(3,7,2), NSD(6)
       COMMON /ENERGY/ ACOm, BEN, E, EPS, RZZ, SIGin
-      COMMON /IENERGY/ INOut, IPOut, IWRi, JIN, JNIn, JPIn, JNOut, 
+      COMMON /IENERGY/ INOut, IPOut, IWRi, JIN, JNIn, JPIn, JNOut,
      &                 JPOut, NEPs1, NSD, NPHd
-      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2, 
+      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2,
      &                ECUt
 C
 C Dummy arguments
@@ -3467,8 +3467,8 @@ C
 C
 C Local variables
 C
-      REAL*8 a, ares, athrd, b, c, cut, ec, ecsq, ecut2, elab, etest, 
-     &       flow, geom, p, ra, rz, sig, signor, signor2, spill, w, 
+      REAL*8 a, ares, athrd, b, c, cut, ec, ecsq, ecut2, elab, etest,
+     &       flow, geom, p, ra, rz, sig, signor, signor2, spill, w,
      &       xlamb, xmu, xnu, xnulam, xout, xpout
       DOUBLE PRECISION DEXP, DSQRT
       INTEGER jout, ne
@@ -3611,9 +3611,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ECUt, XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6), 
+      REAL*8 ECUt, XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6),
      &       XN2(6), XP0(6), XP1(6), XP2(6)
-      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2, 
+      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2,
      &                ECUt
 C     n from mani, melkanoff and iori
       XP0(1) = -312.
@@ -3692,7 +3692,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION DACOS, DATAN2, DCOS, DSIN, DSQRT
-      REAL*8 eempcm, vpcm, vplab, vreclab, xvpcm, xvplab, xvreccm, 
+      REAL*8 eempcm, vpcm, vplab, vreclab, xvpcm, xvplab, xvreccm,
      &       yvpcm, yvplab, yvreccm, zvpcm, zvplab, zvreccm
 C
 C
@@ -3818,9 +3818,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2, HHBarc, PI, 
+      REAL*8 AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2, HHBarc, PI,
      &       RMU, W2, XNExc
-      COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi, 
+      COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
       ZMNuc = 939.D0
 C     PI_g = DACOS( - 1.D0)
@@ -4044,14 +4044,14 @@ C     rngb and rngs are the upper and lower 24 bits of rnmult.
       IF (RSEt(3) + RSEt(4).GT.0.D0) THEN
          IF (RSEt(4).GT.0.D0) RNMult = RSEt(4)
          IF (AINT((RNMult+.5)*.5).EQ.AINT((RNMult+1.5)*.5)) THEN
-            WRITE (IUO,*) 'random number multiplier ', RSEt(4), 
+            WRITE (IUO,*) 'random number multiplier ', RSEt(4),
      &                    ' is even.'
             STOP
          ENDIF
          RNGb = AINT(RNMult*Q)
          RNGs = RNMult - RNGb*P
          IF (RNGb + RNGs.GE.P) THEN
-            WRITE (IUO,*) 'random number multiplier ', RSEt(4), 
+            WRITE (IUO,*) 'random number multiplier ', RSEt(4),
      &                    ' rejected.'
             STOP
          ENDIF
@@ -4172,7 +4172,7 @@ C    om_ldist() array - function of l
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
-      DATA PARticle/'neutron ', 'proton  ', 'deuteron', 'triton  ', 
+      DATA PARticle/'neutron ', 'proton  ', 'deuteron', 'triton  ',
      &     'he-3    ', 'alpha   ', 'gammaray', 'fission '/
       DATA XSPin/0.5, 0.5, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0/
 C     !note d xspin(3)=>0 in tcread
@@ -4229,9 +4229,9 @@ C
 C
 C Local variables
 C
-      REAL*8 du1elab, du2sigr, du3sige, du4sigt, ratio, tdum(NDIM_LJTC), 
+      REAL*8 du1elab, du2sigr, du3sige, du4sigt, ratio, tdum(NDIM_LJTC),
      &       xl
-      INTEGER id, jcomnuc, jj, kdum, l, ladjacent, ll, lpmax, n, ne, 
+      INTEGER id, jcomnuc, jj, kdum, l, ladjacent, ll, lpmax, n, ne,
      &        nen, nn, npart
       CHARACTER*8 partid
 C
@@ -4406,7 +4406,7 @@ C
 C
 C Local variables
 C
-      REAL*8 a5, a6, aa, edumarray(NDIM_ETC), ek, sumtl, 
+      REAL*8 a5, a6, aa, edumarray(NDIM_ETC), ek, sumtl,
      &       tcdumarray(NDIM_ETC), x, y, y2derivs(NDIM_ETC)
       INTEGER ISERCH
       INTEGER ke, l, ne, nedum
@@ -4598,7 +4598,7 @@ C
       IF ((X.LT.Ee(1)) .OR. (X.GT.Ee(Ne))) THEN
          IF (X.GT.Ee(Ne)) k = 999
 C        !mbc put this code here for f90 compatability
-         IF (X.GE.Ee(Ne)) STOP 
+         IF (X.GE.Ee(Ne)) STOP
      &                     'mbc. check  since ke+1 index used by lmaxtc'
 C        write(4,1) k,ne
          ISERCH = k
@@ -4662,13 +4662,13 @@ C
 C Local variables
 C
       REAL*8 adum(5,7), csfit(NDANG), qq(5)
-      DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1), 
-     &                 auxout(NDEX,NDIM_JBINS + 1), 
+      DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1),
+     &                 auxout(NDEX,NDIM_JBINS + 1),
      &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon,
      &                 xmre, xnor, zero
       REAL FLOAT
-      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre, 
-     &        mrec, mt649, mt91, na, ndiscmax, ne, nejc, nempmax(2), 
+      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre,
+     &        mrec, mt649, mt91, na, ndiscmax, ne, nejc, nempmax(2),
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
       INTEGER INT
 C
@@ -4681,11 +4681,11 @@ C
       IF (DE.GT.DEBin) THEN
          WRITE (6,*) ' '
          WRITE (6,*) ' Energy grid in EMPIRE must be at least as dense'
-         WRITE (6,*) 
+         WRITE (6,*)
      &              ' as in HMS to avoid going out of memory boundaries'
-         WRITE (6,*) 
+         WRITE (6,*)
      &              ' You have to increase NEX in the optional input to'
-         WRITE (6,*) MAX(Nemax,Numax) + 3, 
+         WRITE (6,*) MAX(Nemax,Numax) + 3,
      &               ' or more. Ensure that this    '
          WRITE (6,*) ' number fits NDEX value in the dimension.h file.'
          WRITE (6,*) ' EXECUTION STOPPED ! ! !'
@@ -4704,11 +4704,11 @@ C
       izar = IZA(1) - 1000*jz - (jn + jz)
       CALL WHERE(izar,nnur,iloc)
 C-----to continuum
-      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS + 
+      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
      &                                  zero,(NEX(nnur) - 1)*DE)
 C-----to discrte levels
-      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS + 
+      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
      &                                  NEX(nnur)*DE,EMAx(nnur))
       DO ne = 1, NDECSE
@@ -4729,11 +4729,11 @@ C
       izar = IZA(1) - 1000*jz - (jn + jz)
       CALL WHERE(izar,nnur,iloc)
 C-----to continuum
-      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS + 
+      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,2),NDECSE,1,
      &                                  zero,(NEX(nnur) - 1)*DE)
 C-----to discrte levels
-      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS + 
+      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,2),NDECSE,1,
      &                                  NEX(nnur)*DE,EMAx(nnur))
       DO ne = 1, NDECSE
@@ -4756,37 +4756,57 @@ C
       CALL WHERE(izar,nnur,iloc)
 C-----TEMPORARY: assume that NDANG in EMPIRE is 19. If not stop.
 C-----           This makes transition from 5 deg grid to 10 deg trivial.
-      IF (NDANG.NE.19) THEN
+      IF (NDANG.NE.19 .AND. NDANG.NE.37) THEN
          WRITE (6,*) ' '
-         WRITE (6,*) 'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19'
          WRITE (6,*) 
-     &              'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
-         WRITE (6,*) 
-     &             'SET NDANG TO 19 AND RECOMPILE OR GIVE UP HMS OPTION'
+
+     &    'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19 or 37'
+         WRITE (6,*)
+     &    'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+         WRITE (6,*)
+     &    'SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
          STOP
       ENDIF
 C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       DO ne = 0, Nemax
-         DDXsn(ne,1) = DDXsn(ne,1) + (DDXsn(ne,1) - DDXsn(ne,2))/2.0
-         IF (DDXsn(ne,1).LT.0.0D+0) DDXsn(ne,1) = 0.0
-         DO nth = 2, NDANG - 1
-            DDXsn(ne,nth) = (DDXsn(ne,2*(nth-1)) + DDXsn(ne,2*nth - 1))
+
+         IF(NDAng.eq.19) THEN
+
+C          Converting to 10 degree EMPIRE grid
+
+           DDXsn(ne,1)=DDXsn(ne,1) + (DDXsn(ne,1) - DDXsn(ne,2))/2.0
+           IF (DDXsn(ne,1).LT.0.0D+0) DDXsn(ne,1) = 0.0
+           DO nth = 2, NDANG - 1
+             DDXsn(ne,nth) = (DDXsn(ne,2*(nth-1)) + DDXsn(ne,2*nth - 1))
      &                      /2.
-         ENDDO
-         DDXsn(ne,NDANG) = DDXsn(ne,36) + (DDXsn(ne,36) - DDXsn(ne,35))
+           ENDDO
+           DDXsn(ne,NDANG)=DDXsn(ne,36) + (DDXsn(ne,36) - DDXsn(ne,35))
      &                     /2.
-         IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
+           IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
+
+         ENDIF
+
+C        IF(NDAng.eq.37) THEN
+
+C          No conversion is needed, both grids coincide
+
+C        ENDIF
+
       ENDDO
 C-----interpolate in energy
 C-----to continuum
       IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                  NDECSE,19,zero,(NEX(nnur) - 1)
+C    &                                  NDECSE,19,zero,(NEX(nnur)-1)
+
+     &                                  NDECSE,NDAng,zero,(NEX(nnur)-1)
      &                                  *DE)
 C-----to discrte levels
       IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                  NDECSE,19,NEX(nnur)*DE,
+C    &                                  NDECSE,19,NEX(nnur)*DE,
+
+     &                                  NDECSE,NDAng,NEX(nnur)*DE,
      &                                  EMAx(nnur))
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
 C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
@@ -4797,7 +4817,7 @@ C-----finally store ddx on Empire array CSEa
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
+            xnor = CSEhms(ne,nejc)/(4.0*PI*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
                IF (ENDf(1).EQ.1) THEN
@@ -4820,26 +4840,36 @@ C
       CALL WHERE(izar,nnur,iloc)
 C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       DO ne = 0, Nemax
-         DDXsp(ne,1) = DDXsp(ne,1) + (DDXsp(ne,1) - DDXsp(ne,2))/2.0
-         IF (DDXsp(ne,1).LT.0.0D+0) DDXsp(ne,1) = 0.0
-         DO nth = 2, NDANG - 1
-            DDXsp(ne,nth) = (DDXsp(ne,2*(nth-1)) + DDXsp(ne,2*nth - 1))
+         IF(NDAng.eq.19) THEN
+
+C          Converting to 10 degree EMPIRE grid
+
+           DDXsp(ne,1)=DDXsp(ne,1) + (DDXsp(ne,1) - DDXsp(ne,2))/2.0
+           IF (DDXsp(ne,1).LT.0.0D+0) DDXsp(ne,1) = 0.0
+           DO nth = 2, NDANG - 1
+             DDXsp(ne,nth)=(DDXsp(ne,2*(nth-1)) + DDXsp(ne,2*nth - 1))
      &                      /2.
-         ENDDO
-         DDXsp(ne,NDANG) = DDXsp(ne,36) + (DDXsp(ne,36) - DDXsp(ne,35))
+           ENDDO
+           DDXsp(ne,NDANG)=DDXsp(ne,36) + (DDXsp(ne,36) - DDXsp(ne,35))
      &                     /2.
-         IF (DDXsp(ne,NDANG).LT.0.0D+0) DDXsp(ne,NDANG) = 0.0
+           IF (DDXsp(ne,NDANG).LT.0.0D+0) DDXsp(ne,NDANG) = 0.0
+
+         ENDIF
       ENDDO
 C-----interpolate in energy
 C-----to continuum
       IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                  NDECSE,19,zero,(NEX(nnur) - 1)
+C    &                                  NDECSE,19,zero,(NEX(nnur)-1)
+
+     &                                  NDECSE,NDAng,zero,(NEX(nnur)-1)
      &                                  *DE)
-C-----to discrte levels
+C-----to discrete levels
       IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                  NDECSE,19,NEX(nnur)*DE,
+C    &                                  NDECSE,19,NEX(nnur)*DE,
+
+     &                                  NDECSE,NDAng,NEX(nnur)*DE,
      &                                  EMAx(nnur))
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
 C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
@@ -4850,7 +4880,7 @@ C-----finally store ddx on Empire array CSEa
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
+            xnor = CSEhms(ne,nejc)/(4.0*PI*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
                IF (ENDf(1).EQ.1) THEN
@@ -4876,7 +4906,7 @@ C
                IF (JMAxujspec(0,0,nucn - 1).GT.0) nucnlo = nucn - 1
                nucnhi = nucn
                IF (JMAxujspec(0,0,nucn + 1).GT.0) nucnhi = nucn + 1
-               IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND. 
+               IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
      &             (JMAxujspec(0,0,nucn).EQ.0)) THEN
 C                  WRITE(6, *)' '
 C                  WRITE(6, *)'Got lost! Can not find HMS '
@@ -4979,7 +5009,7 @@ C              WRITE(6 ,*)'HMS resid population = ', RESpop(jz, jn),' mb'
                      WRITE (6,*) ' '
                      WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
                      WRITE (6,*) 'WARNING: HMS emission of neutrons'
-                     WRITE (6,*) 
+                     WRITE (6,*)
      &                         'WARNING: to continuum has been blocked.'
                      WRITE (6,*) 'WARNING: However, residues after '
                      WRITE (6,*) 'WARNING: multiple P.E. are populated'
@@ -4989,7 +5019,7 @@ C              WRITE(6 ,*)'HMS resid population = ', RESpop(jz, jn),' mb'
                      WRITE (6,*) ' '
                      WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
                      WRITE (6,*) 'WARNING: HMS emission of protons '
-                     WRITE (6,*) 
+                     WRITE (6,*)
      &                         'WARNING: to continuum has been blocked.'
                      WRITE (6,*) 'WARNING: However, residues after '
                      WRITE (6,*) 'WARNING: multiple P.E. are populated'
@@ -5133,7 +5163,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cth, dp, dqdp, p, phi, pi, plo, qdp, qdpr, re, 
+      DOUBLE PRECISION cth, dp, dqdp, p, phi, pi, plo, qdp, qdpr, re,
      &                 rth, sne, th, thx(21)
       INTEGER ii, imhi, j, ne, nth
       INTEGER INT
@@ -5161,7 +5191,7 @@ C      write(*,*) sne,eg,e
       rth = RANG()
       IF (imhi.GT.0) rth = 1.0D0 - rth
       nth = INT(20*rth + 1)
-      IF (thx(nth).GT.rth .OR. thx(nth + 1).LT.rth) nth = nth + 
+      IF (thx(nth).GT.rth .OR. thx(nth + 1).LT.rth) nth = nth +
      &    INT((rth - thx(nth))/(thx(nth+1) - thx(nth)))
 C      if(abs((rth-thx(nth))/(thx(nth+1)-thx(nth))).gt.1.0d0) then
 C        write(*,*) 'OOOOOOPS!'
@@ -5226,312 +5256,312 @@ C
       DOUBLE PRECISION deg, egx, pe(7,11), pth(7,21,11), w(3)
       INTEGER i, j, jj, nk
       DATA deg/20.0D0/
- 
-      DATA pe/0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 
-     &     0.00000, 0.05370, 0.04545, 0.03650, 0.03629, 0.03922, 
-     &     0.04268, 0.04537, 0.10541, 0.09321, 0.07627, 0.07647, 
-     &     0.08321, 0.09086, 0.09643, 0.15609, 0.14205, 0.11888, 
-     &     0.11988, 0.13087, 0.14250, 0.14975, 0.20606, 0.19168, 
-     &     0.16436, 0.16641, 0.18173, 0.19597, 0.20212, 0.25556, 
-     &     0.24192, 0.21281, 0.21607, 0.23519, 0.24860, 0.25314, 
-     &     0.30477, 0.29269, 0.26441, 0.26885, 0.28965, 0.30000, 
-     &     0.30333, 0.35375, 0.34401, 0.31937, 0.32460, 0.34295, 
-     &     0.35065, 0.35290, 0.40259, 0.39578, 0.37772, 0.38284, 
-     &     0.39565, 0.40061, 0.40222, 0.45133, 0.44786, 0.43836, 
-     &     0.44169, 0.44779, 0.45036, 0.45107, 0.50000, 0.50000, 
+
+      DATA pe/0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
+     &     0.00000, 0.05370, 0.04545, 0.03650, 0.03629, 0.03922,
+     &     0.04268, 0.04537, 0.10541, 0.09321, 0.07627, 0.07647,
+     &     0.08321, 0.09086, 0.09643, 0.15609, 0.14205, 0.11888,
+     &     0.11988, 0.13087, 0.14250, 0.14975, 0.20606, 0.19168,
+     &     0.16436, 0.16641, 0.18173, 0.19597, 0.20212, 0.25556,
+     &     0.24192, 0.21281, 0.21607, 0.23519, 0.24860, 0.25314,
+     &     0.30477, 0.29269, 0.26441, 0.26885, 0.28965, 0.30000,
+     &     0.30333, 0.35375, 0.34401, 0.31937, 0.32460, 0.34295,
+     &     0.35065, 0.35290, 0.40259, 0.39578, 0.37772, 0.38284,
+     &     0.39565, 0.40061, 0.40222, 0.45133, 0.44786, 0.43836,
+     &     0.44169, 0.44779, 0.45036, 0.45107, 0.50000, 0.50000,
      &     0.50000, 0.50000, 0.50000, 0.50000, 0.50000/
- 
-      DATA ((pth(i,j,1),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04801, 0.04672, 
-     &      0.04446, 0.04113, 0.03614, 0.02854, 0.01685, 0.09622, 
-     &      0.09375, 0.08949, 0.08324, 0.07392, 0.05978, 0.03802, 
-     &      0.14464, 0.14112, 0.13510, 0.12631, 0.11329, 0.09361, 
-     &      0.06333, 0.19327, 0.18881, 0.18128, 0.17035, 0.15421, 
-     &      0.12993, 0.09262, 0.24210, 0.23683, 0.22804, 0.21532, 
-     &      0.19664, 0.16865, 0.12572, 0.29115, 0.28519, 0.27536, 
-     &      0.26122, 0.24054, 0.20969, 0.16247, 0.34042, 0.33389, 
-     &      0.32326, 0.30804, 0.28589, 0.25297, 0.20270, 0.38990, 
-     &      0.38293, 0.37173, 0.35577, 0.33265, 0.29842, 0.24630, 
-     &      0.43959, 0.43231, 0.42078, 0.40442, 0.38081, 0.34599, 
-     &      0.29312, 0.48946, 0.48205, 0.47040, 0.45396, 0.43034, 
-     &      0.39563, 0.34307, 0.53955, 0.53214, 0.52061, 0.50441, 
-     &      0.48122, 0.44729, 0.39605, 0.58985, 0.58259, 0.57141, 
-     &      0.55575, 0.53346, 0.50094, 0.45196, 0.64036, 0.63341, 
-     &      0.62280, 0.60801, 0.58703, 0.55654, 0.51075, 0.69109, 
-     &      0.68460, 0.67479, 0.66117, 0.64194, 0.61408, 0.57235, 
-     &      0.74203, 0.73617, 0.72739, 0.71526, 0.69818, 0.67354, 
-     &      0.63673, 0.79317, 0.78812, 0.78061, 0.77027, 0.75577, 
-     &      0.73492, 0.70386, 0.84453, 0.84047, 0.83447, 0.82623, 
-     &      0.81473, 0.79824, 0.77373, 0.89612, 0.89321, 0.88897, 
-     &      0.88316, 0.87506, 0.86349, 0.84635, 0.94792, 0.94638, 
-     &      0.94413, 0.94106, 0.93680, 0.93073, 0.92175, 1.00000, 
+
+      DATA ((pth(i,j,1),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04801, 0.04672,
+     &      0.04446, 0.04113, 0.03614, 0.02854, 0.01685, 0.09622,
+     &      0.09375, 0.08949, 0.08324, 0.07392, 0.05978, 0.03802,
+     &      0.14464, 0.14112, 0.13510, 0.12631, 0.11329, 0.09361,
+     &      0.06333, 0.19327, 0.18881, 0.18128, 0.17035, 0.15421,
+     &      0.12993, 0.09262, 0.24210, 0.23683, 0.22804, 0.21532,
+     &      0.19664, 0.16865, 0.12572, 0.29115, 0.28519, 0.27536,
+     &      0.26122, 0.24054, 0.20969, 0.16247, 0.34042, 0.33389,
+     &      0.32326, 0.30804, 0.28589, 0.25297, 0.20270, 0.38990,
+     &      0.38293, 0.37173, 0.35577, 0.33265, 0.29842, 0.24630,
+     &      0.43959, 0.43231, 0.42078, 0.40442, 0.38081, 0.34599,
+     &      0.29312, 0.48946, 0.48205, 0.47040, 0.45396, 0.43034,
+     &      0.39563, 0.34307, 0.53955, 0.53214, 0.52061, 0.50441,
+     &      0.48122, 0.44729, 0.39605, 0.58985, 0.58259, 0.57141,
+     &      0.55575, 0.53346, 0.50094, 0.45196, 0.64036, 0.63341,
+     &      0.62280, 0.60801, 0.58703, 0.55654, 0.51075, 0.69109,
+     &      0.68460, 0.67479, 0.66117, 0.64194, 0.61408, 0.57235,
+     &      0.74203, 0.73617, 0.72739, 0.71526, 0.69818, 0.67354,
+     &      0.63673, 0.79317, 0.78812, 0.78061, 0.77027, 0.75577,
+     &      0.73492, 0.70386, 0.84453, 0.84047, 0.83447, 0.82623,
+     &      0.81473, 0.79824, 0.77373, 0.89612, 0.89321, 0.88897,
+     &      0.88316, 0.87506, 0.86349, 0.84635, 0.94792, 0.94638,
+     &      0.94413, 0.94106, 0.93680, 0.93073, 0.92175, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,2),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04833, 0.04734, 
-     &      0.04554, 0.04267, 0.03844, 0.03159, 0.02143, 0.09684, 
-     &      0.09495, 0.09155, 0.08618, 0.07828, 0.06561, 0.04645, 
-     &      0.14552, 0.14283, 0.13805, 0.13051, 0.11947, 0.10198, 
-     &      0.07507, 0.19439, 0.19098, 0.18502, 0.17565, 0.16200, 
-     &      0.14056, 0.10717, 0.24343, 0.23942, 0.23247, 0.22160, 
-     &      0.20584, 0.18121, 0.14271, 0.29265, 0.28813, 0.28038, 
-     &      0.26834, 0.25094, 0.22391, 0.18164, 0.34205, 0.33712, 
-     &      0.32877, 0.31586, 0.29724, 0.26857, 0.22337, 0.39163, 
-     &      0.38640, 0.37762, 0.36415, 0.34476, 0.31504, 0.26844, 
-     &      0.44140, 0.43596, 0.42694, 0.41316, 0.39348, 0.36338, 
-     &      0.31602, 0.49134, 0.48581, 0.47672, 0.46292, 0.44340, 
-     &      0.41357, 0.36664, 0.54146, 0.53594, 0.52697, 0.51340, 
-     &      0.49437, 0.46527, 0.41979, 0.59176, 0.58636, 0.57768, 
-     &      0.56461, 0.54650, 0.51857, 0.47502, 0.64223, 0.63707, 
-     &      0.62886, 0.61656, 0.59960, 0.57355, 0.53325, 0.69287, 
-     &      0.68807, 0.68050, 0.66923, 0.65372, 0.63009, 0.59339, 
-     &      0.74368, 0.73934, 0.73260, 0.72258, 0.70892, 0.68830, 
-     &      0.65581, 0.79461, 0.79089, 0.78516, 0.77665, 0.76511, 
-     &      0.74788, 0.72097, 0.84571, 0.84274, 0.83819, 0.83143, 
-     &      0.82239, 0.80864, 0.78759, 0.89697, 0.89487, 0.89167, 
-     &      0.88691, 0.88080, 0.87090, 0.85601, 0.94839, 0.94730, 
-     &      0.94560, 0.94307, 0.93994, 0.93485, 0.92735, 1.00000, 
+
+      DATA ((pth(i,j,2),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04833, 0.04734,
+     &      0.04554, 0.04267, 0.03844, 0.03159, 0.02143, 0.09684,
+     &      0.09495, 0.09155, 0.08618, 0.07828, 0.06561, 0.04645,
+     &      0.14552, 0.14283, 0.13805, 0.13051, 0.11947, 0.10198,
+     &      0.07507, 0.19439, 0.19098, 0.18502, 0.17565, 0.16200,
+     &      0.14056, 0.10717, 0.24343, 0.23942, 0.23247, 0.22160,
+     &      0.20584, 0.18121, 0.14271, 0.29265, 0.28813, 0.28038,
+     &      0.26834, 0.25094, 0.22391, 0.18164, 0.34205, 0.33712,
+     &      0.32877, 0.31586, 0.29724, 0.26857, 0.22337, 0.39163,
+     &      0.38640, 0.37762, 0.36415, 0.34476, 0.31504, 0.26844,
+     &      0.44140, 0.43596, 0.42694, 0.41316, 0.39348, 0.36338,
+     &      0.31602, 0.49134, 0.48581, 0.47672, 0.46292, 0.44340,
+     &      0.41357, 0.36664, 0.54146, 0.53594, 0.52697, 0.51340,
+     &      0.49437, 0.46527, 0.41979, 0.59176, 0.58636, 0.57768,
+     &      0.56461, 0.54650, 0.51857, 0.47502, 0.64223, 0.63707,
+     &      0.62886, 0.61656, 0.59960, 0.57355, 0.53325, 0.69287,
+     &      0.68807, 0.68050, 0.66923, 0.65372, 0.63009, 0.59339,
+     &      0.74368, 0.73934, 0.73260, 0.72258, 0.70892, 0.68830,
+     &      0.65581, 0.79461, 0.79089, 0.78516, 0.77665, 0.76511,
+     &      0.74788, 0.72097, 0.84571, 0.84274, 0.83819, 0.83143,
+     &      0.82239, 0.80864, 0.78759, 0.89697, 0.89487, 0.89167,
+     &      0.88691, 0.88080, 0.87090, 0.85601, 0.94839, 0.94730,
+     &      0.94560, 0.94307, 0.93994, 0.93485, 0.92735, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,3),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04846, 0.04754, 
-     &      0.04584, 0.04311, 0.03883, 0.03146, 0.02265, 0.09710, 
-     &      0.09535, 0.09215, 0.08706, 0.07907, 0.06533, 0.04823, 
-     &      0.14590, 0.14343, 0.13892, 0.13180, 0.12064, 0.10156, 
-     &      0.07683, 0.19486, 0.19180, 0.18615, 0.17732, 0.16354, 
-     &      0.14008, 0.10856, 0.24400, 0.24043, 0.23382, 0.22360, 
-     &      0.20772, 0.18084, 0.14344, 0.29330, 0.28933, 0.28193, 
-     &      0.27062, 0.25312, 0.22354, 0.18146, 0.34277, 0.33848, 
-     &      0.33049, 0.31838, 0.29971, 0.26826, 0.22266, 0.39240, 
-     &      0.38790, 0.37948, 0.36687, 0.34749, 0.31496, 0.26690, 
-     &      0.44220, 0.43758, 0.42891, 0.41609, 0.39646, 0.36351, 
-     &      0.31415, 0.49215, 0.48752, 0.47877, 0.46603, 0.44652, 
-     &      0.41376, 0.36419, 0.54227, 0.53767, 0.52906, 0.51664, 
-     &      0.49759, 0.46576, 0.41716, 0.59255, 0.58808, 0.57976, 
-     &      0.56794, 0.54957, 0.51934, 0.47264, 0.64299, 0.63874, 
-     &      0.63089, 0.61982, 0.60263, 0.57446, 0.53111, 0.69358, 
-     &      0.68963, 0.68243, 0.67231, 0.65665, 0.63107, 0.59137, 
-     &      0.74432, 0.74078, 0.73439, 0.72546, 0.71164, 0.68905, 
-     &      0.65412, 0.79520, 0.79218, 0.78674, 0.77919, 0.76767, 
-     &      0.74856, 0.71937, 0.84622, 0.84379, 0.83949, 0.83355, 
-     &      0.82462, 0.80980, 0.78639, 0.89732, 0.89564, 0.89261, 
-     &      0.88855, 0.88218, 0.87231, 0.85625, 0.94857, 0.94772, 
-     &      0.94612, 0.94397, 0.94065, 0.93539, 0.92716, 1.00000, 
+
+      DATA ((pth(i,j,3),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04846, 0.04754,
+     &      0.04584, 0.04311, 0.03883, 0.03146, 0.02265, 0.09710,
+     &      0.09535, 0.09215, 0.08706, 0.07907, 0.06533, 0.04823,
+     &      0.14590, 0.14343, 0.13892, 0.13180, 0.12064, 0.10156,
+     &      0.07683, 0.19486, 0.19180, 0.18615, 0.17732, 0.16354,
+     &      0.14008, 0.10856, 0.24400, 0.24043, 0.23382, 0.22360,
+     &      0.20772, 0.18084, 0.14344, 0.29330, 0.28933, 0.28193,
+     &      0.27062, 0.25312, 0.22354, 0.18146, 0.34277, 0.33848,
+     &      0.33049, 0.31838, 0.29971, 0.26826, 0.22266, 0.39240,
+     &      0.38790, 0.37948, 0.36687, 0.34749, 0.31496, 0.26690,
+     &      0.44220, 0.43758, 0.42891, 0.41609, 0.39646, 0.36351,
+     &      0.31415, 0.49215, 0.48752, 0.47877, 0.46603, 0.44652,
+     &      0.41376, 0.36419, 0.54227, 0.53767, 0.52906, 0.51664,
+     &      0.49759, 0.46576, 0.41716, 0.59255, 0.58808, 0.57976,
+     &      0.56794, 0.54957, 0.51934, 0.47264, 0.64299, 0.63874,
+     &      0.63089, 0.61982, 0.60263, 0.57446, 0.53111, 0.69358,
+     &      0.68963, 0.68243, 0.67231, 0.65665, 0.63107, 0.59137,
+     &      0.74432, 0.74078, 0.73439, 0.72546, 0.71164, 0.68905,
+     &      0.65412, 0.79520, 0.79218, 0.78674, 0.77919, 0.76767,
+     &      0.74856, 0.71937, 0.84622, 0.84379, 0.83949, 0.83355,
+     &      0.82462, 0.80980, 0.78639, 0.89732, 0.89564, 0.89261,
+     &      0.88855, 0.88218, 0.87231, 0.85625, 0.94857, 0.94772,
+     &      0.94612, 0.94397, 0.94065, 0.93539, 0.92716, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,4),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04858, 0.04776, 
-     &      0.04618, 0.04344, 0.03880, 0.03110, 0.02473, 0.09732, 
-     &      0.09577, 0.09279, 0.08772, 0.07903, 0.06451, 0.05208, 
-     &      0.14621, 0.14401, 0.13984, 0.13282, 0.12067, 0.10022, 
-     &      0.08212, 0.19527, 0.19250, 0.18731, 0.17866, 0.16364, 
-     &      0.13819, 0.11488, 0.24448, 0.24123, 0.23520, 0.22521, 
-     &      0.20792, 0.17840, 0.15039, 0.29384, 0.29020, 0.28352, 
-     &      0.27247, 0.25351, 0.22081, 0.18868, 0.34336, 0.33942, 
-     &      0.33224, 0.32042, 0.30029, 0.26520, 0.22975, 0.39303, 
-     &      0.38887, 0.38137, 0.36904, 0.34823, 0.31168, 0.27362, 
-     &      0.44286, 0.43857, 0.43090, 0.41834, 0.39717, 0.36013, 
-     &      0.32026, 0.49283, 0.48851, 0.48082, 0.46830, 0.44725, 
-     &      0.41048, 0.36967, 0.54294, 0.53869, 0.53114, 0.51888, 
-     &      0.49832, 0.46270, 0.42181, 0.59320, 0.58910, 0.58184, 
-     &      0.57011, 0.55050, 0.51647, 0.47663, 0.64360, 0.63975, 
-     &      0.63291, 0.62191, 0.60379, 0.57177, 0.53409, 0.69414, 
-     &      0.69062, 0.68435, 0.67431, 0.65767, 0.62899, 0.59409, 
-     &      0.74482, 0.74172, 0.73615, 0.72728, 0.71251, 0.68754, 
-     &      0.65654, 0.79562, 0.79298, 0.78829, 0.78076, 0.76833, 
-     &      0.74733, 0.72132, 0.84655, 0.84444, 0.84074, 0.83480, 
-     &      0.82504, 0.80894, 0.78827, 0.89760, 0.89611, 0.89351, 
-     &      0.88941, 0.88252, 0.87189, 0.85721, 0.94873, 0.94794, 
-     &      0.94659, 0.94442, 0.94074, 0.93548, 0.92788, 1.00000, 
+
+      DATA ((pth(i,j,4),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04858, 0.04776,
+     &      0.04618, 0.04344, 0.03880, 0.03110, 0.02473, 0.09732,
+     &      0.09577, 0.09279, 0.08772, 0.07903, 0.06451, 0.05208,
+     &      0.14621, 0.14401, 0.13984, 0.13282, 0.12067, 0.10022,
+     &      0.08212, 0.19527, 0.19250, 0.18731, 0.17866, 0.16364,
+     &      0.13819, 0.11488, 0.24448, 0.24123, 0.23520, 0.22521,
+     &      0.20792, 0.17840, 0.15039, 0.29384, 0.29020, 0.28352,
+     &      0.27247, 0.25351, 0.22081, 0.18868, 0.34336, 0.33942,
+     &      0.33224, 0.32042, 0.30029, 0.26520, 0.22975, 0.39303,
+     &      0.38887, 0.38137, 0.36904, 0.34823, 0.31168, 0.27362,
+     &      0.44286, 0.43857, 0.43090, 0.41834, 0.39717, 0.36013,
+     &      0.32026, 0.49283, 0.48851, 0.48082, 0.46830, 0.44725,
+     &      0.41048, 0.36967, 0.54294, 0.53869, 0.53114, 0.51888,
+     &      0.49832, 0.46270, 0.42181, 0.59320, 0.58910, 0.58184,
+     &      0.57011, 0.55050, 0.51647, 0.47663, 0.64360, 0.63975,
+     &      0.63291, 0.62191, 0.60379, 0.57177, 0.53409, 0.69414,
+     &      0.69062, 0.68435, 0.67431, 0.65767, 0.62899, 0.59409,
+     &      0.74482, 0.74172, 0.73615, 0.72728, 0.71251, 0.68754,
+     &      0.65654, 0.79562, 0.79298, 0.78829, 0.78076, 0.76833,
+     &      0.74733, 0.72132, 0.84655, 0.84444, 0.84074, 0.83480,
+     &      0.82504, 0.80894, 0.78827, 0.89760, 0.89611, 0.89351,
+     &      0.88941, 0.88252, 0.87189, 0.85721, 0.94873, 0.94794,
+     &      0.94659, 0.94442, 0.94074, 0.93548, 0.92788, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,5),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04870, 0.04785, 
-     &      0.04638, 0.04367, 0.03853, 0.03195, 0.02779, 0.09755, 
-     &      0.09596, 0.09319, 0.08814, 0.07859, 0.06599, 0.05811, 
-     &      0.14654, 0.14432, 0.14044, 0.13339, 0.12011, 0.10213, 
-     &      0.09097, 0.19569, 0.19292, 0.18812, 0.17938, 0.16309, 
-     &      0.14035, 0.12638, 0.24497, 0.24178, 0.23621, 0.22609, 
-     &      0.20745, 0.18065, 0.16435, 0.29441, 0.29088, 0.28472, 
-     &      0.27352, 0.25302, 0.22300, 0.20485, 0.34398, 0.34022, 
-     &      0.33364, 0.32163, 0.29985, 0.26737, 0.24787, 0.39369, 
-     &      0.38979, 0.38294, 0.37044, 0.34786, 0.31374, 0.29338, 
-     &      0.44354, 0.43957, 0.43260, 0.41992, 0.39709, 0.36207, 
-     &      0.34132, 0.49352, 0.48957, 0.48260, 0.47001, 0.44735, 
-     &      0.41229, 0.39165, 0.54364, 0.53978, 0.53296, 0.52074, 
-     &      0.49860, 0.46437, 0.44429, 0.59388, 0.59020, 0.58364, 
-     &      0.57193, 0.55100, 0.51822, 0.49915, 0.64425, 0.64081, 
-     &      0.63466, 0.62372, 0.60435, 0.57377, 0.55613, 0.69474, 
-     &      0.69161, 0.68602, 0.67605, 0.65870, 0.63093, 0.61510, 
-     &      0.74535, 0.74258, 0.73766, 0.72886, 0.71387, 0.68959, 
-     &      0.67592, 0.79607, 0.79374, 0.78957, 0.78222, 0.76971, 
-     &      0.74961, 0.73840, 0.84690, 0.84506, 0.84178, 0.83611, 
-     &      0.82646, 0.81085, 0.80233, 0.89784, 0.89656, 0.89426, 
-     &      0.89028, 0.88399, 0.87314, 0.86746, 0.94887, 0.94820, 
-     &      0.94698, 0.94492, 0.94202, 0.93628, 0.93349, 1.00000, 
+
+      DATA ((pth(i,j,5),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04870, 0.04785,
+     &      0.04638, 0.04367, 0.03853, 0.03195, 0.02779, 0.09755,
+     &      0.09596, 0.09319, 0.08814, 0.07859, 0.06599, 0.05811,
+     &      0.14654, 0.14432, 0.14044, 0.13339, 0.12011, 0.10213,
+     &      0.09097, 0.19569, 0.19292, 0.18812, 0.17938, 0.16309,
+     &      0.14035, 0.12638, 0.24497, 0.24178, 0.23621, 0.22609,
+     &      0.20745, 0.18065, 0.16435, 0.29441, 0.29088, 0.28472,
+     &      0.27352, 0.25302, 0.22300, 0.20485, 0.34398, 0.34022,
+     &      0.33364, 0.32163, 0.29985, 0.26737, 0.24787, 0.39369,
+     &      0.38979, 0.38294, 0.37044, 0.34786, 0.31374, 0.29338,
+     &      0.44354, 0.43957, 0.43260, 0.41992, 0.39709, 0.36207,
+     &      0.34132, 0.49352, 0.48957, 0.48260, 0.47001, 0.44735,
+     &      0.41229, 0.39165, 0.54364, 0.53978, 0.53296, 0.52074,
+     &      0.49860, 0.46437, 0.44429, 0.59388, 0.59020, 0.58364,
+     &      0.57193, 0.55100, 0.51822, 0.49915, 0.64425, 0.64081,
+     &      0.63466, 0.62372, 0.60435, 0.57377, 0.55613, 0.69474,
+     &      0.69161, 0.68602, 0.67605, 0.65870, 0.63093, 0.61510,
+     &      0.74535, 0.74258, 0.73766, 0.72886, 0.71387, 0.68959,
+     &      0.67592, 0.79607, 0.79374, 0.78957, 0.78222, 0.76971,
+     &      0.74961, 0.73840, 0.84690, 0.84506, 0.84178, 0.83611,
+     &      0.82646, 0.81085, 0.80233, 0.89784, 0.89656, 0.89426,
+     &      0.89028, 0.88399, 0.87314, 0.86746, 0.94887, 0.94820,
+     &      0.94698, 0.94492, 0.94202, 0.93628, 0.93349, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,6),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04882, 0.04804, 
-     &      0.04663, 0.04388, 0.03826, 0.03426, 0.03060, 0.09778, 
-     &      0.09632, 0.09369, 0.08861, 0.07807, 0.07050, 0.06362, 
-     &      0.14688, 0.14481, 0.14115, 0.13413, 0.11939, 0.10871, 
-     &      0.09905, 0.19611, 0.19354, 0.18900, 0.18035, 0.16219, 
-     &      0.14885, 0.13686, 0.24548, 0.24249, 0.23724, 0.22728, 
-     &      0.20640, 0.19090, 0.17703, 0.29498, 0.29166, 0.28585, 
-     &      0.27487, 0.25193, 0.23481, 0.21953, 0.34460, 0.34105, 
-     &      0.33483, 0.32315, 0.29880, 0.28054, 0.26429, 0.39436, 
-     &      0.39065, 0.38417, 0.37208, 0.34699, 0.32803, 0.31125, 
-     &      0.44424, 0.44047, 0.43386, 0.42164, 0.39636, 0.37722, 
-     &      0.36034, 0.49423, 0.49049, 0.48390, 0.47181, 0.44691, 
-     &      0.42803, 0.41146, 0.54435, 0.54072, 0.53426, 0.52253, 
-     &      0.49861, 0.48039, 0.46451, 0.59458, 0.59113, 0.58494, 
-     &      0.57381, 0.55140, 0.53420, 0.51936, 0.64491, 0.64173, 
-     &      0.63592, 0.62561, 0.60516, 0.58934, 0.57587, 0.69535, 
-     &      0.69248, 0.68721, 0.67795, 0.65960, 0.64570, 0.63386, 
-     &      0.74589, 0.74339, 0.73877, 0.73081, 0.71489, 0.70314, 
-     &      0.69316, 0.79653, 0.79446, 0.79059, 0.78412, 0.77099, 
-     &      0.76149, 0.75354, 0.84727, 0.84566, 0.84266, 0.83777, 
-     &      0.82775, 0.82059, 0.81473, 0.89809, 0.89700, 0.89491, 
-     &      0.89182, 0.88498, 0.88021, 0.87644, 0.94899, 0.94846, 
-     &      0.94735, 0.94587, 0.94245, 0.94011, 0.93834, 1.00000, 
+
+      DATA ((pth(i,j,6),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04882, 0.04804,
+     &      0.04663, 0.04388, 0.03826, 0.03426, 0.03060, 0.09778,
+     &      0.09632, 0.09369, 0.08861, 0.07807, 0.07050, 0.06362,
+     &      0.14688, 0.14481, 0.14115, 0.13413, 0.11939, 0.10871,
+     &      0.09905, 0.19611, 0.19354, 0.18900, 0.18035, 0.16219,
+     &      0.14885, 0.13686, 0.24548, 0.24249, 0.23724, 0.22728,
+     &      0.20640, 0.19090, 0.17703, 0.29498, 0.29166, 0.28585,
+     &      0.27487, 0.25193, 0.23481, 0.21953, 0.34460, 0.34105,
+     &      0.33483, 0.32315, 0.29880, 0.28054, 0.26429, 0.39436,
+     &      0.39065, 0.38417, 0.37208, 0.34699, 0.32803, 0.31125,
+     &      0.44424, 0.44047, 0.43386, 0.42164, 0.39636, 0.37722,
+     &      0.36034, 0.49423, 0.49049, 0.48390, 0.47181, 0.44691,
+     &      0.42803, 0.41146, 0.54435, 0.54072, 0.53426, 0.52253,
+     &      0.49861, 0.48039, 0.46451, 0.59458, 0.59113, 0.58494,
+     &      0.57381, 0.55140, 0.53420, 0.51936, 0.64491, 0.64173,
+     &      0.63592, 0.62561, 0.60516, 0.58934, 0.57587, 0.69535,
+     &      0.69248, 0.68721, 0.67795, 0.65960, 0.64570, 0.63386,
+     &      0.74589, 0.74339, 0.73877, 0.73081, 0.71489, 0.70314,
+     &      0.69316, 0.79653, 0.79446, 0.79059, 0.78412, 0.77099,
+     &      0.76149, 0.75354, 0.84727, 0.84566, 0.84266, 0.83777,
+     &      0.82775, 0.82059, 0.81473, 0.89809, 0.89700, 0.89491,
+     &      0.89182, 0.88498, 0.88021, 0.87644, 0.94899, 0.94846,
+     &      0.94735, 0.94587, 0.94245, 0.94011, 0.93834, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,7),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04894, 0.04817, 
-     &      0.04690, 0.04406, 0.03945, 0.03648, 0.03328, 0.09802, 
-     &      0.09659, 0.09420, 0.08896, 0.08036, 0.07483, 0.06887, 
-     &      0.14723, 0.14524, 0.14189, 0.13463, 0.12270, 0.11502, 
-     &      0.10673, 0.19656, 0.19412, 0.18996, 0.18106, 0.16641, 
-     &      0.15699, 0.14681, 0.24602, 0.24320, 0.23840, 0.22823, 
-     &      0.21147, 0.20070, 0.18906, 0.29560, 0.29249, 0.28719, 
-     &      0.27612, 0.25782, 0.24609, 0.23341, 0.34529, 0.34198, 
-     &      0.33634, 0.32473, 0.30541, 0.29309, 0.27979, 0.39510, 
-     &      0.39166, 0.38583, 0.37397, 0.35419, 0.34163, 0.32809, 
-     &      0.44501, 0.44152, 0.43564, 0.42385, 0.40407, 0.39162, 
-     &      0.37822, 0.49503, 0.49157, 0.48575, 0.47421, 0.45501, 
-     &      0.44296, 0.43004, 0.54516, 0.54180, 0.53613, 0.52516, 
-     &      0.50691, 0.49555, 0.48342, 0.59538, 0.59219, 0.58681, 
-     &      0.57661, 0.55970, 0.54927, 0.53819, 0.64569, 0.64275, 
-     &      0.63774, 0.62856, 0.61327, 0.60398, 0.59419, 0.69609, 
-     &      0.69347, 0.68893, 0.68102, 0.66753, 0.65954, 0.65121, 
-     &      0.74658, 0.74432, 0.74036, 0.73377, 0.72236, 0.71578, 
-     &      0.70902, 0.79714, 0.79528, 0.79200, 0.78663, 0.77762, 
-     &      0.77252, 0.76736, 0.84778, 0.84635, 0.84382, 0.83978, 
-     &      0.83318, 0.82954, 0.82593, 0.89849, 0.89747, 0.89581, 
-     &      0.89314, 0.88889, 0.88662, 0.88444, 0.94924, 0.94868, 
-     &      0.94796, 0.94654, 0.94454, 0.94349, 0.94251, 1.00000, 
+
+      DATA ((pth(i,j,7),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04894, 0.04817,
+     &      0.04690, 0.04406, 0.03945, 0.03648, 0.03328, 0.09802,
+     &      0.09659, 0.09420, 0.08896, 0.08036, 0.07483, 0.06887,
+     &      0.14723, 0.14524, 0.14189, 0.13463, 0.12270, 0.11502,
+     &      0.10673, 0.19656, 0.19412, 0.18996, 0.18106, 0.16641,
+     &      0.15699, 0.14681, 0.24602, 0.24320, 0.23840, 0.22823,
+     &      0.21147, 0.20070, 0.18906, 0.29560, 0.29249, 0.28719,
+     &      0.27612, 0.25782, 0.24609, 0.23341, 0.34529, 0.34198,
+     &      0.33634, 0.32473, 0.30541, 0.29309, 0.27979, 0.39510,
+     &      0.39166, 0.38583, 0.37397, 0.35419, 0.34163, 0.32809,
+     &      0.44501, 0.44152, 0.43564, 0.42385, 0.40407, 0.39162,
+     &      0.37822, 0.49503, 0.49157, 0.48575, 0.47421, 0.45501,
+     &      0.44296, 0.43004, 0.54516, 0.54180, 0.53613, 0.52516,
+     &      0.50691, 0.49555, 0.48342, 0.59538, 0.59219, 0.58681,
+     &      0.57661, 0.55970, 0.54927, 0.53819, 0.64569, 0.64275,
+     &      0.63774, 0.62856, 0.61327, 0.60398, 0.59419, 0.69609,
+     &      0.69347, 0.68893, 0.68102, 0.66753, 0.65954, 0.65121,
+     &      0.74658, 0.74432, 0.74036, 0.73377, 0.72236, 0.71578,
+     &      0.70902, 0.79714, 0.79528, 0.79200, 0.78663, 0.77762,
+     &      0.77252, 0.76736, 0.84778, 0.84635, 0.84382, 0.83978,
+     &      0.83318, 0.82954, 0.82593, 0.89849, 0.89747, 0.89581,
+     &      0.89314, 0.88889, 0.88662, 0.88444, 0.94924, 0.94868,
+     &      0.94796, 0.94654, 0.94454, 0.94349, 0.94251, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,8),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04909, 0.04831, 
-     &      0.04722, 0.04431, 0.04121, 0.03867, 0.03592, 0.09830, 
-     &      0.09685, 0.09486, 0.08953, 0.08377, 0.07910, 0.07402, 
-     &      0.14765, 0.14564, 0.14289, 0.13560, 0.12764, 0.12122, 
-     &      0.11424, 0.19711, 0.19465, 0.19127, 0.18240, 0.17276, 
-     &      0.16498, 0.15653, 0.24668, 0.24389, 0.23999, 0.22994, 
-     &      0.21908, 0.21031, 0.20078, 0.29635, 0.29334, 0.28904, 
-     &      0.27818, 0.26654, 0.25714, 0.24692, 0.34613, 0.34301, 
-     &      0.33840, 0.32712, 0.31507, 0.30536, 0.29483, 0.39601, 
-     &      0.39283, 0.38806, 0.37670, 0.36460, 0.35489, 0.34439, 
-     &      0.44599, 0.44283, 0.43801, 0.42689, 0.41505, 0.40561, 
-     &      0.39547, 0.49605, 0.49299, 0.48825, 0.47755, 0.46633, 
-     &      0.45743, 0.44790, 0.54621, 0.54330, 0.53875, 0.52872, 
-     &      0.51835, 0.51019, 0.50153, 0.59645, 0.59376, 0.58951, 
-     &      0.58038, 0.57102, 0.56377, 0.55615, 0.64676, 0.64433, 
-     &      0.64050, 0.63237, 0.62421, 0.61800, 0.61157, 0.69714, 
-     &      0.69501, 0.69170, 0.68478, 0.67780, 0.67272, 0.66755, 
-     &      0.74759, 0.74580, 0.74302, 0.73734, 0.73167, 0.72773, 
-     &      0.72382, 0.79810, 0.79671, 0.79449, 0.78998, 0.78568, 
-     &      0.78283, 0.78011, 0.84862, 0.84766, 0.84599, 0.84257, 
-     &      0.83966, 0.83781, 0.83613, 0.89918, 0.89855, 0.89717, 
-     &      0.89518, 0.89345, 0.89242, 0.89157, 0.94962, 0.94950, 
-     &      0.94863, 0.94769, 0.94692, 0.94653, 0.94625, 1.00000, 
+
+      DATA ((pth(i,j,8),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04909, 0.04831,
+     &      0.04722, 0.04431, 0.04121, 0.03867, 0.03592, 0.09830,
+     &      0.09685, 0.09486, 0.08953, 0.08377, 0.07910, 0.07402,
+     &      0.14765, 0.14564, 0.14289, 0.13560, 0.12764, 0.12122,
+     &      0.11424, 0.19711, 0.19465, 0.19127, 0.18240, 0.17276,
+     &      0.16498, 0.15653, 0.24668, 0.24389, 0.23999, 0.22994,
+     &      0.21908, 0.21031, 0.20078, 0.29635, 0.29334, 0.28904,
+     &      0.27818, 0.26654, 0.25714, 0.24692, 0.34613, 0.34301,
+     &      0.33840, 0.32712, 0.31507, 0.30536, 0.29483, 0.39601,
+     &      0.39283, 0.38806, 0.37670, 0.36460, 0.35489, 0.34439,
+     &      0.44599, 0.44283, 0.43801, 0.42689, 0.41505, 0.40561,
+     &      0.39547, 0.49605, 0.49299, 0.48825, 0.47755, 0.46633,
+     &      0.45743, 0.44790, 0.54621, 0.54330, 0.53875, 0.52872,
+     &      0.51835, 0.51019, 0.50153, 0.59645, 0.59376, 0.58951,
+     &      0.58038, 0.57102, 0.56377, 0.55615, 0.64676, 0.64433,
+     &      0.64050, 0.63237, 0.62421, 0.61800, 0.61157, 0.69714,
+     &      0.69501, 0.69170, 0.68478, 0.67780, 0.67272, 0.66755,
+     &      0.74759, 0.74580, 0.74302, 0.73734, 0.73167, 0.72773,
+     &      0.72382, 0.79810, 0.79671, 0.79449, 0.78998, 0.78568,
+     &      0.78283, 0.78011, 0.84862, 0.84766, 0.84599, 0.84257,
+     &      0.83966, 0.83781, 0.83613, 0.89918, 0.89855, 0.89717,
+     &      0.89518, 0.89345, 0.89242, 0.89157, 0.94962, 0.94950,
+     &      0.94863, 0.94769, 0.94692, 0.94653, 0.94625, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,9),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04922, 0.04858, 
-     &      0.04759, 0.04489, 0.04298, 0.04088, 0.03857, 0.09857, 
-     &      0.09739, 0.09556, 0.09067, 0.08721, 0.08339, 0.07919, 
-     &      0.14803, 0.14641, 0.14392, 0.13731, 0.13262, 0.12746, 
-     &      0.12178, 0.19761, 0.19565, 0.19265, 0.18474, 0.17915, 
-     &      0.17301, 0.16625, 0.24730, 0.24510, 0.24175, 0.23291, 
-     &      0.22673, 0.21994, 0.21248, 0.29707, 0.29474, 0.29117, 
-     &      0.28179, 0.27529, 0.26817, 0.26036, 0.34695, 0.34459, 
-     &      0.34091, 0.33132, 0.32474, 0.31758, 0.30975, 0.39691, 
-     &      0.39462, 0.39095, 0.38145, 0.37500, 0.36805, 0.36051, 
-     &      0.44696, 0.44481, 0.44126, 0.43208, 0.42598, 0.41947, 
-     &      0.41246, 0.49708, 0.49517, 0.49181, 0.48314, 0.47756, 
-     &      0.47169, 0.46542, 0.54728, 0.54562, 0.54256, 0.53461, 
-     &      0.52966, 0.52457, 0.51920, 0.59754, 0.59618, 0.59344, 
-     &      0.58637, 0.58214, 0.57793, 0.57358, 0.64787, 0.64686, 
-     &      0.64450, 0.63835, 0.63489, 0.63161, 0.62832, 0.69826, 
-     &      0.69760, 0.69551, 0.69051, 0.68777, 0.68540, 0.68315, 
-     &      0.74865, 0.74831, 0.74651, 0.74253, 0.74064, 0.73912, 
-     &      0.73782, 0.79906, 0.79906, 0.79752, 0.79447, 0.79334, 
-     &      0.79256, 0.79204, 0.84939, 0.84939, 0.84845, 0.84633, 
-     &      0.84574, 0.84551, 0.84557, 0.89952, 0.89952, 0.89940, 
-     &      0.89789, 0.89773, 0.89785, 0.89822, 0.94973, 0.94964, 
-     &      0.95008, 0.94918, 0.94918, 0.94940, 0.94977, 1.00000, 
+
+      DATA ((pth(i,j,9),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04922, 0.04858,
+     &      0.04759, 0.04489, 0.04298, 0.04088, 0.03857, 0.09857,
+     &      0.09739, 0.09556, 0.09067, 0.08721, 0.08339, 0.07919,
+     &      0.14803, 0.14641, 0.14392, 0.13731, 0.13262, 0.12746,
+     &      0.12178, 0.19761, 0.19565, 0.19265, 0.18474, 0.17915,
+     &      0.17301, 0.16625, 0.24730, 0.24510, 0.24175, 0.23291,
+     &      0.22673, 0.21994, 0.21248, 0.29707, 0.29474, 0.29117,
+     &      0.28179, 0.27529, 0.26817, 0.26036, 0.34695, 0.34459,
+     &      0.34091, 0.33132, 0.32474, 0.31758, 0.30975, 0.39691,
+     &      0.39462, 0.39095, 0.38145, 0.37500, 0.36805, 0.36051,
+     &      0.44696, 0.44481, 0.44126, 0.43208, 0.42598, 0.41947,
+     &      0.41246, 0.49708, 0.49517, 0.49181, 0.48314, 0.47756,
+     &      0.47169, 0.46542, 0.54728, 0.54562, 0.54256, 0.53461,
+     &      0.52966, 0.52457, 0.51920, 0.59754, 0.59618, 0.59344,
+     &      0.58637, 0.58214, 0.57793, 0.57358, 0.64787, 0.64686,
+     &      0.64450, 0.63835, 0.63489, 0.63161, 0.62832, 0.69826,
+     &      0.69760, 0.69551, 0.69051, 0.68777, 0.68540, 0.68315,
+     &      0.74865, 0.74831, 0.74651, 0.74253, 0.74064, 0.73912,
+     &      0.73782, 0.79906, 0.79906, 0.79752, 0.79447, 0.79334,
+     &      0.79256, 0.79204, 0.84939, 0.84939, 0.84845, 0.84633,
+     &      0.84574, 0.84551, 0.84557, 0.89952, 0.89952, 0.89940,
+     &      0.89789, 0.89773, 0.89785, 0.89822, 0.94973, 0.94964,
+     &      0.95008, 0.94918, 0.94918, 0.94940, 0.94977, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,10),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04941, 0.04898, 
-     &      0.04810, 0.04627, 0.04481, 0.04314, 0.04128, 0.09893, 
-     &      0.09815, 0.09658, 0.09333, 0.09074, 0.08778, 0.08447, 
-     &      0.14856, 0.14752, 0.14544, 0.14114, 0.13772, 0.13383, 
-     &      0.12946, 0.19830, 0.19708, 0.19465, 0.18964, 0.18568, 
-     &      0.18117, 0.17612, 0.24813, 0.24681, 0.24417, 0.23876, 
-     &      0.23453, 0.22971, 0.22433, 0.29805, 0.29672, 0.29401, 
-     &      0.28846, 0.28417, 0.27933, 0.27393, 0.34804, 0.34678, 
-     &      0.34412, 0.33865, 0.33453, 0.32990, 0.32476, 0.39812, 
-     &      0.39700, 0.39447, 0.38927, 0.38549, 0.38128, 0.37665, 
-     &      0.44826, 0.44735, 0.44504, 0.44024, 0.43695, 0.43333, 
-     &      0.42939, 0.49847, 0.49784, 0.49568, 0.49150, 0.48879, 
-     &      0.48588, 0.48279, 0.54873, 0.54843, 0.54641, 0.54295, 
-     &      0.54089, 0.53878, 0.53660, 0.59905, 0.59911, 0.59725, 
-     &      0.59450, 0.59313, 0.59183, 0.59060, 0.64936, 0.64975, 
-     &      0.64809, 0.64607, 0.64536, 0.64484, 0.64451, 0.69970, 
-     &      0.70036, 0.69898, 0.69756, 0.69745, 0.69763, 0.69809, 
-     &      0.74995, 0.75068, 0.74984, 0.74887, 0.74925, 0.74998, 
-     &      0.75107, 0.80006, 0.80082, 0.80032, 0.79993, 0.80066, 
-     &      0.80176, 0.80325, 0.85020, 0.85095, 0.85065, 0.85065, 
-     &      0.85155, 0.85281, 0.85444, 0.90018, 0.90083, 0.90073, 
-     &      0.90095, 0.90181, 0.90297, 0.90444, 0.95016, 0.95070, 
-     &      0.95046, 0.95078, 0.95136, 0.95213, 0.95308, 1.00000, 
+
+      DATA ((pth(i,j,10),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04941, 0.04898,
+     &      0.04810, 0.04627, 0.04481, 0.04314, 0.04128, 0.09893,
+     &      0.09815, 0.09658, 0.09333, 0.09074, 0.08778, 0.08447,
+     &      0.14856, 0.14752, 0.14544, 0.14114, 0.13772, 0.13383,
+     &      0.12946, 0.19830, 0.19708, 0.19465, 0.18964, 0.18568,
+     &      0.18117, 0.17612, 0.24813, 0.24681, 0.24417, 0.23876,
+     &      0.23453, 0.22971, 0.22433, 0.29805, 0.29672, 0.29401,
+     &      0.28846, 0.28417, 0.27933, 0.27393, 0.34804, 0.34678,
+     &      0.34412, 0.33865, 0.33453, 0.32990, 0.32476, 0.39812,
+     &      0.39700, 0.39447, 0.38927, 0.38549, 0.38128, 0.37665,
+     &      0.44826, 0.44735, 0.44504, 0.44024, 0.43695, 0.43333,
+     &      0.42939, 0.49847, 0.49784, 0.49568, 0.49150, 0.48879,
+     &      0.48588, 0.48279, 0.54873, 0.54843, 0.54641, 0.54295,
+     &      0.54089, 0.53878, 0.53660, 0.59905, 0.59911, 0.59725,
+     &      0.59450, 0.59313, 0.59183, 0.59060, 0.64936, 0.64975,
+     &      0.64809, 0.64607, 0.64536, 0.64484, 0.64451, 0.69970,
+     &      0.70036, 0.69898, 0.69756, 0.69745, 0.69763, 0.69809,
+     &      0.74995, 0.75068, 0.74984, 0.74887, 0.74925, 0.74998,
+     &      0.75107, 0.80006, 0.80082, 0.80032, 0.79993, 0.80066,
+     &      0.80176, 0.80325, 0.85020, 0.85095, 0.85065, 0.85065,
+     &      0.85155, 0.85281, 0.85444, 0.90018, 0.90083, 0.90073,
+     &      0.90095, 0.90181, 0.90297, 0.90444, 0.95016, 0.95070,
+     &      0.95046, 0.95078, 0.95136, 0.95213, 0.95308, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
-      DATA ((pth(i,j,11),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000, 
-     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04960, 0.04920, 
-     &      0.04873, 0.04772, 0.04670, 0.04550, 0.04410, 0.09931, 
-     &      0.09861, 0.09784, 0.09612, 0.09439, 0.09233, 0.08994, 
-     &      0.14912, 0.14823, 0.14732, 0.14516, 0.14299, 0.14040, 
-     &      0.13738, 0.19902, 0.19804, 0.19713, 0.19475, 0.19239, 
-     &      0.18957, 0.18628, 0.24902, 0.24802, 0.24719, 0.24484, 
-     &      0.24251, 0.23972, 0.23647, 0.29908, 0.29815, 0.29745, 
-     &      0.29534, 0.29324, 0.29072, 0.28777, 0.34921, 0.34842, 
-     &      0.34789, 0.34619, 0.34448, 0.34241, 0.33999, 0.39940, 
-     &      0.39882, 0.39853, 0.39730, 0.39610, 0.39464, 0.39293, 
-     &      0.44965, 0.44935, 0.44928, 0.44860, 0.44798, 0.44724, 
-     &      0.44637, 0.49995, 0.49997, 0.50009, 0.49998, 0.50000, 
-     &      0.50003, 0.50006, 0.55023, 0.55055, 0.55093, 0.55137, 
-     &      0.55203, 0.55282, 0.55375, 0.60054, 0.60121, 0.60164, 
-     &      0.60267, 0.60392, 0.60543, 0.60720, 0.65069, 0.65152, 
-     &      0.65231, 0.65378, 0.65554, 0.65766, 0.66014, 0.70079, 
-     &      0.70172, 0.70274, 0.70463, 0.70678, 0.70935, 0.71236, 
-     &      0.75089, 0.75192, 0.75293, 0.75514, 0.75751, 0.76035, 
-     &      0.76367, 0.80085, 0.80182, 0.80310, 0.80523, 0.80763, 
-     &      0.81051, 0.81386, 0.85080, 0.85172, 0.85299, 0.85484, 
-     &      0.85705, 0.85970, 0.86277, 0.90076, 0.90166, 0.90244, 
-     &      0.90389, 0.90567, 0.90778, 0.91024, 0.95036, 0.95079, 
-     &      0.95157, 0.95229, 0.95334, 0.95459, 0.95604, 1.00000, 
+
+      DATA ((pth(i,j,11),i = 1,7),j = 1,21)/0.00000, 0.00000, 0.00000,
+     &      0.00000, 0.00000, 0.00000, 0.00000, 0.04960, 0.04920,
+     &      0.04873, 0.04772, 0.04670, 0.04550, 0.04410, 0.09931,
+     &      0.09861, 0.09784, 0.09612, 0.09439, 0.09233, 0.08994,
+     &      0.14912, 0.14823, 0.14732, 0.14516, 0.14299, 0.14040,
+     &      0.13738, 0.19902, 0.19804, 0.19713, 0.19475, 0.19239,
+     &      0.18957, 0.18628, 0.24902, 0.24802, 0.24719, 0.24484,
+     &      0.24251, 0.23972, 0.23647, 0.29908, 0.29815, 0.29745,
+     &      0.29534, 0.29324, 0.29072, 0.28777, 0.34921, 0.34842,
+     &      0.34789, 0.34619, 0.34448, 0.34241, 0.33999, 0.39940,
+     &      0.39882, 0.39853, 0.39730, 0.39610, 0.39464, 0.39293,
+     &      0.44965, 0.44935, 0.44928, 0.44860, 0.44798, 0.44724,
+     &      0.44637, 0.49995, 0.49997, 0.50009, 0.49998, 0.50000,
+     &      0.50003, 0.50006, 0.55023, 0.55055, 0.55093, 0.55137,
+     &      0.55203, 0.55282, 0.55375, 0.60054, 0.60121, 0.60164,
+     &      0.60267, 0.60392, 0.60543, 0.60720, 0.65069, 0.65152,
+     &      0.65231, 0.65378, 0.65554, 0.65766, 0.66014, 0.70079,
+     &      0.70172, 0.70274, 0.70463, 0.70678, 0.70935, 0.71236,
+     &      0.75089, 0.75192, 0.75293, 0.75514, 0.75751, 0.76035,
+     &      0.76367, 0.80085, 0.80182, 0.80310, 0.80523, 0.80763,
+     &      0.81051, 0.81386, 0.85080, 0.85172, 0.85299, 0.85484,
+     &      0.85705, 0.85970, 0.86277, 0.90076, 0.90166, 0.90244,
+     &      0.90389, 0.90567, 0.90778, 0.91024, 0.95036, 0.95079,
+     &      0.95157, 0.95229, 0.95334, 0.95459, 0.95604, 1.00000,
      &      1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000/
- 
+
       egx = Egxx
       IF (egx.LT.deg) egx = deg
       IF (egx.GT.7*deg) egx = 7*deg
       CALL INTERP(egx,deg,3,7,nk,w)
- 
+
       DO jj = 1, 11
          PEX(jj) = w(1)*pe(nk,jj) + w(2)*pe(nk + 1,jj) + w(3)
      &             *pe(nk + 2,jj)
@@ -5540,7 +5570,7 @@ C
             PTHx(j,jj) = PTHx(j,jj) + w(3)*pth(nk + 2,j,jj)
          ENDDO
       ENDDO
- 
+
       END
 C
 C
@@ -5686,7 +5716,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION akf, am, apn, app, dp, dwtp, eg2, eg2c, eg2s, p, 
+      DOUBLE PRECISION akf, am, apn, app, dp, dwtp, eg2, eg2c, eg2s, p,
      &                 pmx, wtp
       INTEGER jp, np
       DOUBLE PRECISION QDPH
@@ -5745,13 +5775,13 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION akf, akf2, akn, akn1, akn2, akn3, aknc, aknhi, 
+      DOUBLE PRECISION akf, akf2, akn, akn1, akn2, akn3, aknc, aknhi,
      &                 aknlo, aknpar, aknparc, aknpars, akns, akp, akp1,
-     &                 akp2, akp3, akpc, akphi, akplo, akppar, akpparc, 
-     &                 akppars, akps, alf2, am, apn, app, cthn, cthp, 
-     &                 dd, dkn, dkp, dph, dsigkn, dsigkp, dsigpn, 
-     &                 dsigpp, dwphn, dwphp, dwtkn, dwtkp, eg2, en, ep, 
-     &                 phn, php, pi, pn, pp, px, pz, ron, rop, ropar, 
+     &                 akp2, akp3, akpc, akphi, akplo, akppar, akpparc,
+     &                 akppars, akps, alf2, am, apn, app, cthn, cthp,
+     &                 dd, dkn, dkp, dph, dsigkn, dsigkp, dsigpn,
+     &                 dsigpp, dwphn, dwphp, dwtkn, dwtkp, eg2, en, ep,
+     &                 phn, php, pi, pn, pp, px, pz, ron, rop, ropar,
      &                 sthn, sthp, thn, thp, wphn, wphp, wtkn, wtkp
       INTEGER jn, jp, kn, kp, nk, nph
 C akf=sqrt(2*938*35), alf2=4*(2.23*m)**2
@@ -5864,4 +5894,3 @@ C  nk must be odd and nph must even (Simpson)
       ENDDO
       QDPH = am*dsigkn/(pn*pp)
       END
- 
