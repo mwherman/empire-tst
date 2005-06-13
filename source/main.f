@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-09 12:54:36 $
-Ccc   * $Id: main.f,v 1.104 2005-06-09 12:54:36 herman Exp $
+Ccc   * $Date: 2005-06-13 06:32:18 $
+Ccc   * $Id: main.f,v 1.105 2005-06-13 06:32:18 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1770,6 +1770,8 @@ C-----------------to conserve the integral
      &                *(1.0 - weight)
                   CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
      &                                + CSE(icse,nejc,nnuc)*weight
+               ENDDO
+               DO icse = 1, NDEX
 C-----------------double-differential spectra
                   IF (nnuc.EQ.1) THEN !CN (possibly anisotropic)
                      DO nang = 1, NDAng
@@ -1777,7 +1779,7 @@ C-----------------double-differential spectra
      &                     = CSEa(iccml,nang,nejc,0)
      &                     + CSEa(icse,nang,nejc,1)*(1.0 - weight)
 C-----------------------double contribution to the first energy bin
-C-----------------------to conserve the integral
+C-----------------------to conserve integral
                         IF (iccml.EQ.1 .AND. icse.NE.1)
      &                      CSEa(iccml,nang,nejc,0)
      &                      = CSEa(iccml,nang,nejc,0)
@@ -1787,19 +1789,11 @@ C-----------------------to conserve the integral
      &                     + CSEa(icse,nang,nejc,1)*weight
                      ENDDO
                   ELSE !other residues with isotropic ang. distributions
-                     piece = CSE(icse,nejc,nnuc)/4.0/PI
+                     piece = CSE(icse,nejc,0)/4.0/PI
                      DO nang = 1, NDANG
-                        CSEa(iccml,nang,nejc,0)
-     &                     = CSEa(iccml,nang,nejc,0)
-     &                     + piece*(1.0 - weight)
-C-----------------------double contribution to the first energy bin to
-C-----------------------to conserve the integral
-                        IF (iccml.EQ.1 .AND. icse.NE.1)
-     &                      CSEa(iccml,nang,nejc,0)
-     &                      = CSEa(iccml,nang,nejc,0)
-     &                      + piece*(1.0 - weight)
-                        CSEa(iccmh,nang,nejc,0)
-     &                     = CSEa(iccmh,nang,nejc,0) + piece*weight
+c                       CSEa(icse,nang,nejc,0) = CSEa(icse,nang,nejc,0) 
+c    &                     + piece
+                        CSEa(icse,nang,nejc,0) = piece
                      ENDDO
                   ENDIF   
                ENDDO

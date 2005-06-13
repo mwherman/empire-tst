@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:15:52 $
-Ccc   * $Id: HF-comp.f,v 1.70 2005-06-08 23:15:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-13 06:32:18 $
+Ccc   * $Id: HF-comp.f,v 1.71 2005-06-13 06:32:18 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -68,21 +68,18 @@ C-----
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + pop1 + pop2
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pops
-C-----------Add isotropic contribution to the inclusive spectrum if ENDf=2             
-            IF (ENDf(Nnuc).EQ.2) THEN
-               piece = pops/4.0/PI
-               DO nang = 1, NDANG
-                  CSEa(icse,nang,Nejc,0) = CSEa(icse,nang,Nejc,0)
-     &               + piece
-               ENDDO
-            ENDIF           
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
-         IF (ENDf(Nnuc).EQ.1 .AND. popt.NE.0.0D+0)
-     &       CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
+         IF (popt.NE.0.0D+0) THEN
+            IF (ENDf(Nnuc).EQ.1) THEN
+               CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
+            ELSEIF (ENDf(Nnuc).EQ.2) THEN
+               CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
+            ENDIF
+         ENDIF
       ENDDO !over residual energies in continuum
 C-----
 C-----Discrete levels
@@ -111,11 +108,21 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
             IF (icsl.EQ.1) popl = 2.0*popl
             poph = pop1*(xcse - FLOAT(icsl))/DE
             CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
-            IF (ENDf(Nnuc).EQ.1 .AND. popll.NE.0.0D+0)
-     &          CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
-            IF (ENDf(Nnuc).EQ.1 .AND. poph.NE.0.0D+0)
-     &          CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
+            IF (popll.NE.0.0D+0) THEN
+               IF (ENDf(Nnuc).EQ.1) THEN
+                  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
+               ELSEIF (ENDf(Nnuc).EQ.2) THEN
+                  CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
+               ENDIF
+            ENDIF
+            IF (poplh.NE.0.0D+0) THEN
+               IF (ENDf(Nnuc).EQ.1) THEN
+                  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
+               ELSEIF (ENDf(Nnuc).EQ.2) THEN
+                  CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
+               ENDIF
+            ENDIF
          ENDIF
 C--------Add isotropic CN contribution to direct ang. distributions
          IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
@@ -208,7 +215,7 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-C-----Contribution comming straight from the current decay
+C-----Contribution coming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       IF(ENDF(Nnur).EQ.2) THEN
         CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
