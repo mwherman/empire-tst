@@ -7,9 +7,9 @@ rm $3 2>/dev/null
 rm tmp.dat 2>/dev/null
 rm pnt.zvd 
 rm cur.zvd 
-./pntdat.exe $1 tmp.dat
-./datzvd.exe tmp.dat pnt.zvd
-./curzvd3.exe $2 cur.zvd
+./pntdatl.exe $1 tmp.dat
+./datzvdl.exe tmp.dat pnt.zvd
+./curzvd3l.exe $2 cur.zvd
 echo #!zvview.exe >$3
 cat pnt.zvd >>$3
 cat cur.zvd >>$3
