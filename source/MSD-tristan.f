@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-06-02 06:41:39 $
-Ccc   * $Id: MSD-tristan.f,v 1.39 2005-06-02 06:41:39 herman Exp $
+Ccc   * $Date: 2005-06-13 16:00:24 $
+Ccc   * $Id: MSD-tristan.f,v 1.40 2005-06-13 16:00:24 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2431,7 +2431,7 @@ C
       INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1,
      &        lc, lc1, lcp1, ln, m2, m2n, mx, my, n, n0, n1, n2, n2n,
-     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej, 
+     &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej,
      &        nemnt, nemx, nep, nepp, nmax, nnur, np, npx, nq, nqx, nx,
      &        ny
       INTEGER MAX0, MIN0
@@ -2957,6 +2957,10 @@ C-----distribution of the continuum MSD contribution -
 C-----proportional to the p-h spin distribution shifted by the target
 C-----ground state target spin XJLV(1,0)
       IF (nexrt.GT.0) THEN
+          ftmp = 0.d0
+         DO j = 1, NLW, LTUrbo
+            ftmp = ftmp + 0.5*phdj(j)/somj
+         ENDDO
          DO j = 1, NLW, LTUrbo
             xnor = 0.5*phdj(j)/somj
             DO ie = 1, nexrt

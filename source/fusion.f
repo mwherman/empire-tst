@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-04 15:23:50 $
-Ccc   * $Id: fusion.f,v 1.43 2005-06-04 15:23:50 Capote Exp $
+Ccc   * $Date: 2005-06-13 16:00:24 $
+Ccc   * $Id: fusion.f,v 1.44 2005-06-13 16:00:24 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -24,8 +24,8 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW), S1, SINl, TOTcs
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl
+      DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW), S1, SINl, TOTcs, SINlcc
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc
       COMMON /ELASTIC/ ELTl
       COMMON /WAN   / S1
 C
@@ -38,13 +38,13 @@ C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ctmp1,
      &                 ctmp2, e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 stmp1, stmp2, sum, wf, wparg, xmas_npro,
-     &                 xmas_ntrg
+     &                 stmp1, stmp2, sum, wparg, xmas_npro,
+     &                 xmas_ntrg, wf
       CHARACTER*6 ctldir
       CHARACTER*132 ctmp
       CHARACTER*20 ctmp20
       DOUBLE PRECISION DMAX1
-      LOGICAL dodwba, fexist, ldbwacalc, ltlj
+      LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
@@ -70,14 +70,9 @@ C
 C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       xmas_npro = EJMass(Npro)
-      el = EINl
-      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,RMU,ak2,1,RELkin)
-C
-C     wf = 10*W2*RMU*ecms
-C
-      wf = ak2/10.D0
-      IF (INT(AEJc(0)).GT.0) coef = PI/wf/(2*XJLv(LEVtarg,Ntrg) + 1.0)
-     &                              /(2*SEJc(Npro) + 1.0)
+      el   = EINl
+       ecms = EIN
+
       S1 = 0.5
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
      &    - SEJc(Npro).EQ.0.0D0) S1 = 1.0
@@ -98,13 +93,13 @@ C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      INQUIRE (FILE = (ctldir//ctmp20//'_INC.BIN'),EXIST = fexist)
+      INQUIRE (FILE = (ctldir//ctmp20//'.INC'),EXIST = fexist)
       IF (fexist) THEN
 C--------Here the old calculated files should be read
-         OPEN (45,FILE = (ctldir//ctmp20//'_INC.BIN'),
+         OPEN (45,FILE = (ctldir//ctmp20//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp20//'_INC.LST')
-         READ (45,END = 50) lmax, ener
+         READ (45,END = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
          IF (ABS(ener - EINl).LT.0.0001D0) THEN
@@ -113,16 +108,16 @@ C--------Here the old calculated files should be read
                READ (45,END = 50) stl(l + 1)
                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
             ENDDO
-            READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl
+            READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             CLOSE (45)
-            IF (IOUt.EQ.5) WRITE (46,'(1x,A21,4(e12.6,1x))')
-     &                             'EL,TOT,ABS,INEL XSs:', ELAcs, TOTcs,
-     &                            ABScs, SINl
+            IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
+     &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
+     &                    ABScs, SINl, SINlcc, CSFus
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.EQ.5) THEN
                WRITE (6,*)
      &' Transmission coefficients for incident channel read from file: '
-               WRITE (6,*) ' ', ctldir//ctmp20//'_INC.BIN'
+               WRITE (6,*) ' ', ctldir//ctmp20//'.INC'
             ENDIF
 
             GOTO 300
@@ -163,7 +158,7 @@ C           Reading no more than 2*NDLW rows
             WRITE (6,*)
      &          ' (all previous instructions concerning fusion ignored)'
             DO i = 1, 2*NDLW
-               READ (43,*,END = 100) cnj, parcnj, csvalue
+               READ (43,*,END = 60) cnj, parcnj, csvalue
 C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                IF (2*cnj - DINT(2*cnj).NE.0.00)
      &              STOP 'cnJ!=n*1/2, n=0,+-1...  in SDREAD file'
@@ -176,7 +171,9 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                CSFus = CSFus + POP(NEX(1),j,ip,1)
                csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
             ENDDO
-
+   60       ABScs=CSFus
+             SINlcc=0.d0
+             SINl  =0.d0
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -270,6 +267,9 @@ C--------for photon induced reactions
       IF (FUSread) THEN
 C--------if FUSREAD true read l distribution of fusion cross section
 C--------and calculate transmission coefficients
+         el = EINl
+         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,.FALSE.)
+         wf = ak2/10.D0
          DO j = 1, NDLW
             READ (11,*,END = 150) csvalue
             stl(j) = csvalue*wf/PI/(2*j - 1)
@@ -283,7 +283,14 @@ C--------and calculate transmission coefficients
             ENDIF
          ENDDO
   150    NLW = j - 1
+          CSFus = 0.d0
+         DO j = 1, NLW
+            CSFus = CSFus + (2*j - 1)*stl(j)
+          ENDDO
          maxlw = NLW
+         ABScs = CSFus
+          SINlcc=0.d0
+          SINl=0.d0
          WRITE (6,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (6,*)
@@ -345,6 +352,7 @@ C
             WRITE (6,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
 
+                einlab = -EINl
             IF (DIRect.EQ.1) THEN
 C--------------Saving KTRlom(0,0)
                itmp1 = KTRlom(0,0)
@@ -471,8 +479,8 @@ C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
 C--------IWARN=3 - 'Energy requested lower than recommended for this potential'
 C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
-         IF ((IWArn.EQ.1 .or. IWArn.EQ.2) .AND. FIRst_ein 
-     &       .AND. IOUt.GE.5) WRITE (6,*) ' WARNING: ',KTRlom(0,0), 
+         IF ((IWArn.EQ.1 .or. IWArn.EQ.2) .AND. FIRst_ein
+     &       .AND. IOUt.GE.5) WRITE (6,*) ' WARNING: ',KTRlom(0,0),
      &   ' OMP not recommended for target Z,A=', Z(Ntrg),'-',(Ntrg)
          IF ((IWArn.EQ.3 .OR. IWArn.EQ.4) .AND. IOUt.GE.5) WRITE (6,*)
      &      ' WARNING: ',KTRlom(0,0),' OMP not recommended for E=', EINl
@@ -484,6 +492,11 @@ C--------calculation of h.i. transmission coefficients for fusion
          if(NLW.GT.0) maxlw = min(NLW,maxlw)
          NLW = maxlw
 C--------channel spin min and max
+         el = EINl
+          relcal = .FALSE.
+         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+         IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
+       &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
          mul = smax - smin + 1.0001
@@ -511,6 +524,8 @@ C--------channel spin min and max
           ENDDO
          ENDDO
          ABScs = CSFus
+          SINlcc=0.d0
+          SINl=0.d0
       ENDIF ! END of FUSREAD block
 C
 C-----Moving incident channel results to ../TL directory
@@ -549,19 +564,19 @@ C-----Storing transmission coefficients for the incident channel
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp20//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-         DO l = 0, maxlw
+         DO l = 0, maxlw-1
             WRITE (46,*) l, SNGL(stl(l + 1))
          ENDDO
-         WRITE (46,'(1x,A30,4(e12.6,1x))') 'EL,TOT,REAC,INEL XS:',
-     &          ELAcs, TOTcs, ABScs, SINl
+         WRITE (46,'(1x,A30,6(e12.6,1x))') 'EL,TOT,REAC,INEL,CC,CSFus:',
+     &          ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
          CLOSE (46)
       ENDIF
-      OPEN (45,FILE = (ctldir//ctmp20//'_INC.BIN'),FORM = 'UNFORMATTED')
-      WRITE (45) maxlw, EINl
+      OPEN (45,FILE = (ctldir//ctmp20//'.INC'),FORM = 'UNFORMATTED')
+      WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
-         WRITE (45) stl(l + 1)
+         WRITE (45) stl(l+1)
       ENDDO
-      WRITE (45) ELAcs, TOTcs, ABScs, SINl
+      WRITE (45) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
       CLOSE (45)
 
   300 IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0 .AND. FIRST_ein) THEN
@@ -573,17 +588,17 @@ C-----Storing transmission coefficients for the incident channel
 C--------Corrected scattering radius
          rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
-         IF(S0_obs.GT.0.)   THEN 
+         IF(S0_obs.GT.0.)   THEN
            WRITE ( 6,99004) S0_obs,S0_unc
            WRITE (12,99004) S0_obs,S0_unc
          ELSE
            WRITE ( 6,'(7x,49(1h*)/
-     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
-           WRITE (12,'(7x,49(1h*)/ 
-     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')') 
+     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')')
+           WRITE (12,'(7x,49(1h*)/
+     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')')
          ENDIF
 99004    FORMAT (7x,49(1h*)/
-     &           6x,' LOW ENERGY NEUTRON SCATTERING:'/ 
+     &           6x,' LOW ENERGY NEUTRON SCATTERING:'/
      &           6x,' Exp.  Strength functions S0 =',f6.3,' (',f6.4,')')
          WRITE ( 6,99005) s0*1D4, s1a*1D4, rp
          WRITE (12,99005) s0*1D4, s1a*1D4, rp
@@ -593,6 +608,14 @@ C--------Corrected scattering radius
          WRITE ( 6,*)
          WRITE (12,*)
       ENDIF
+
+       el = EINl
+       relcal = .FALSE.
+      IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
+      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+      IF (INT(AEJc(0)).GT.0)
+     &        coef = 10.d0*PI/ak2/
+     &           (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
 C-----channel spin min and max
       smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
@@ -620,6 +643,7 @@ C-----channel spin min and max
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
          ENDDO
       ENDDO
+
       IF (ldbwacalc .AND. CSFus.GT.0.D0 .AND. SINl.GT.0.D0) THEN
          IF (DIRect.EQ.3) THEN
             WRITE (6,*) ' SOMP TLs normalized to substract',
@@ -627,18 +651,20 @@ C-----channel spin min and max
          ELSE
 C-----------DIRECT=1 or DIRECT=2
             WRITE (6,*) ' CC OMP TLs normalized to substract DWBA',
-     &                  ' contribution to un-coupled levels'
+     &                  ' contribution to un-coupled discrete levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN
          WRITE (6,*)
-         WRITE (6,*) ' CSFus(SUM_Tl)   CSFus + SINl   ABScs(ECIS)'
-         WRITE (6,'(1x,3(D12.6,2x))') SNGL(CSFus), SNGL(CSFus + SINl),
-     &                                SNGL(ABScs)
+         WRITE (6,*) ' CSFus(SUM_Tl)   CSFus+SINl+CC    ABScs(ECIS)'
+         WRITE (6,'(1x,3(D12.6,2x))')
+     &      SNGL(CSFus), SNGL(CSFus + SINl + SINlcc), SNGL(ABScs)
          WRITE (6,*)
       ENDIF
+
 C
-      CSFus = CSFus + SINl
+C     CSFus contains only the reaction cross section to be distributed
+C     Continuum inelastic scattering by DWBA was not substracted yet.
 C
 C-----calculation/reading of transmission coefficients for input channel done ------
 C

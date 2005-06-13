@@ -1,7 +1,6 @@
-C
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-02 06:41:39 $
-Ccc   * $Id: HRTW-comp.f,v 1.29 2005-06-02 06:41:39 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-13 16:00:24 $
+Ccc   * $Id: HRTW-comp.f,v 1.30 2005-06-13 16:00:24 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -228,8 +227,8 @@ C
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
-                WRITE( 6,'(/1x,71(1h*))') 
-                WRITE(12,'(/7x,71(1h*))') 
+                WRITE( 6,'(/1x,71(1h*))')
+                WRITE(12,'(/7x,71(1h*))')
                 WRITE(6,'(1x,
      &            ''RENORMALIZATION OF GAMMA-RAY STRENGTH FUNCTION'')')
                 WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
@@ -240,17 +239,17 @@ C
                 WRITE(12,'(7x,A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
-                
+
                 IF(Gg_obs.GT.0. AND. D0_obs.GT.0.) THEN
-                   
+
                    ggexper = 2*pi*Gg_obs/D0_obs/1.E6
-                   
+
                    WRITE(6,'(1x,
      &             ''EXPERIMENTAL INFORMATION from capture channel'')')
                    WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
-                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A5)') 
+                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A5)')
      &                 'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)') 
+                   WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
      &                 'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
                    WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &                  ggexper/sumg
@@ -258,9 +257,9 @@ C
                    WRITE(12,'(7x,
      &             ''EXPERIMENTAL INFORMATION from capture channel'')')
                    WRITE(12,'(7x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
-                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A5)') 
+                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A5)')
      &                 'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A4)') 
+                   WRITE(12,'(7x,A5,F8.3,A5,F8.3,A4)')
      &                 'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
                    WRITE(12,'(7x,''Normalization factor = '',F7.3)')
      &                  ggexper/sumg
@@ -268,23 +267,23 @@ C
                    IF(TUNe(0, Nnuc).eq.1.) THEN
                      TUNe(0, Nnuc) = ggexper/sumg
                      WRITE(6 ,
-     &              '(1x,''Gamma emission width multiplied by '',F7.3)') 
+     &              '(1x,''Gamma emission width multiplied by '',F7.3)')
      &                TUNe(0, Nnuc)
                      WRITE(12,
-     &              '(7x,''Gamma emission width multiplied by '',F7.3)') 
+     &              '(7x,''Gamma emission width multiplied by '',F7.3)')
      &                TUNe(0, Nnuc)
                    ELSE
                      WRITE(6,
-     &                '(1x,''Gamma emission is not normalized''/  
-     &                  1x,''TUNE(0,Nnuc)set in input to '',F7.3)') 
+     &                '(1x,''Gamma emission is not normalized''/
+     &                  1x,''TUNE(0,Nnuc)set in input to '',F7.3)')
      &                TUNe(0, Nnuc)
                      WRITE(12,
-     &                '(7x,''Gamma emission is not normalized''/  
-     &                  7x,''TUNE(0,Nnuc)set in input to '',F7.3)') 
+     &                '(7x,''Gamma emission is not normalized''/
+     &                  7x,''TUNE(0,Nnuc)set in input to '',F7.3)')
      &                TUNe(0, Nnuc)
                    ENDIF
-                   WRITE( 6,'(1x,71(1h*))') 
-                   WRITE(12,'(7x,71(1h*))') 
+                   WRITE( 6,'(1x,71(1h*))')
+                   WRITE(12,'(7x,71(1h*))')
                 ENDIF
                 WRITE(6,*)
                 WRITE(12,*)
@@ -1366,6 +1365,7 @@ C
       DOUBLE PRECISION ak2, chsp, coef, ecms, eee, el, s1, smax, smin,
      &                 vl, wf, xmas_npro, xmas_ntrg
       REAL FLOAT
+       LOGICAL relcal
       INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, maxlw, mul
       INTEGER INT, MIN0
       DOUBLE PRECISION PAR
@@ -1376,7 +1376,9 @@ C
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       el = EINl
-      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,RMU,ak2,1,RELkin)
+       relcal = .FALSE.
+      IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
+      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
       wf = ak2/10.D0
       coef = PI/wf/(2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       maxlw = NDLW

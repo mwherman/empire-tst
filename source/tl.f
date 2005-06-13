@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:15:54 $
-Ccc   * $Id: tl.f,v 1.62 2005-06-08 23:15:54 Capote Exp $
+Ccc   * $Date: 2005-06-13 16:00:23 $
+Ccc   * $Id: tl.f,v 1.63 2005-06-13 16:00:23 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -461,7 +461,7 @@ C
       ENDIF
       OMEmin(Nejc,Nnuc) = EEMin
       OMEmax(Nejc,Nnuc) = EEMax
-      IRElat(Nejc,Nnuc) = IREl
+C     IRElat(Nejc,Nnuc) = IREl
       xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
 C
@@ -529,7 +529,7 @@ C-----****
       END
 
 
-      SUBROUTINE OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Rrmu,Ak2,Komp,Ikey)
+      SUBROUTINE OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,Komp,Ikey)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -540,7 +540,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Ak2, Eicms, Eilab, Mi, Mt, Rrmu
+      DOUBLE PRECISION Ak2, Eicms, Eilab, Mi, Mt
       INTEGER Ikey, Komp, Nejc, Nnuc
 C
 C Local variables
@@ -579,7 +579,7 @@ C-----set validity range to any energy (can be modified later)
       OMEmin(Nejc,Nnuc) = 0.D0
       OMEmax(Nejc,Nnuc) = 1000.D0
 C-----set relativistic calculation key to 0
-      IRElat(Nejc,Nnuc) = 0
+C     IRElat(Nejc,Nnuc) = 0
       fexist = OMPar_riplf
       IF (CCCalc) fexist = OMParfcc
 C-----OMPAR.RIPL file exists ?
@@ -590,6 +590,8 @@ C--------komp = 29 OR 33
          IF (ieof.EQ.0) THEN
 C-----------Reading potential parameters from OMPAR.RIPL(OMPAR.DIR) file
             CALL READ_OMPAR_RIPL(Komp,ierr,irel)
+             IRElat(Nejc,Nnuc) = irel
+             IF(Komp.eq.33) IRElat(0,0) = irel
             IF (ierr.EQ.0) GOTO 100
          ENDIF
 C--------ieof<>0 or ierr<>0
@@ -605,7 +607,7 @@ C--------ieof<>0 or ierr<>0
      &'('' OM parameters for '',I3,''-'',A2,'' +'',I2,''-''        ,A2,'
      &' not found in the OMPAR.RIPL file'')') INT(A(Nnuc)), SYMb(Nnuc),
      &INT(AEJc(Nejc)), SYMbe(Nejc)
-           ENDIF 
+           ENDIF
            WRITE (6,*) 'I will resort to parameters from RIPL database'
            WRITE (6,*) ' '
          ENDIF
@@ -627,17 +629,17 @@ C-----Here ieof must be 0 always because we checked in input.f
       ENDIF
 C-----Reading o.m.  potential parameters for IPOTEN catalog number
       CALL OMIN(ki,ieof,irel)
+       IRElat(Nejc,Nnuc) = irel
 C
 C-----Ener must be in LAB system
 C
-  100 IRElat(Nejc,Nnuc) = irel
-      relcal = .FALSE.
-      IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
+  100 relcal = .FALSE.
+      IF (irel.GT.0) relcal = .TRUE.
       IF (Ikey.LT.0) THEN
          ener = Eilab
-         CALL KINEMA(Eilab,Eicms,Mi,Mt,Rrmu,Ak2,1,relcal)
+         CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,1,relcal)
       ELSE
-         CALL KINEMA(Eilab,Eicms,Mi,Mt,Rrmu,Ak2,2,relcal)
+         CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,2,relcal)
          ener = Eilab
       ENDIF
       CALL RIPL2EMPIRE(Nejc,Nnuc,ener)
@@ -1312,7 +1314,7 @@ C-----If it does not, the program calculates new transmission coeff.
 C-----Here the previously calculated files should be read
       OPEN (45,FILE = (ctldir//ctmp20//'.BIN'),FORM = 'UNFORMATTED')
       IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp20//'.LST')
-  100 READ (45,END = 200) lmax, ien, ener
+  100 READ (45,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:', lmax, ien,
      &                      ener
 C
@@ -1465,8 +1467,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, ELAcs, SINl, TOTcs
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl
+      DOUBLE PRECISION ABScs, ELAcs, SINl, TOTcs, SINlcc
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc
 C
 C Dummy arguments
 C
@@ -1476,14 +1478,20 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, cte, dtmp, ecms, elab, jc, jj, sabs, sreac,
+      DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
      &                 xmas_nejc, xmas_nnuc, sinlcont
       DOUBLE PRECISION DBLE
       INTEGER ilv, l, nc, nceq, ncoll, nlev
+      LOGICAL relcal
       CHARACTER*1 parc
       REAL SNGL
       Maxlw = 0
       ncoll = 0
+
+      DO l = 1, NDLW
+       Stl(l) = 0.d0
+      ENDDO
+
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
 C------------------------------------------
@@ -1511,6 +1519,7 @@ C-----------Averaging over particle and target spin, summing over channel spin j
      &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
             Maxlw = MAX(Maxlw,l)
+             if(Maxlw.GE.NDLW) Maxlw = NDLW - 1
          ENDIF
       ENDDO
       GOTO 100
@@ -1525,6 +1534,9 @@ C-----For vibrational the Tls must be multiplied by
       TOTcs = 0.D0
       ABScs = 0.D0
       ELAcs = 0.D0
+      SINl = 0.D0
+      SINlcc = 0.D0
+      sinlcont = 0.D0
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*) TOTcs
@@ -1540,36 +1552,44 @@ C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xmas_nejc = EJMass(Nejc)
 C     xmas_nnuc = AMAss(Nnuc)
-      ecms = EIN
-      CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,RMU,ak2,2,RELkin)
-C-----EIN already in CMS
-      cte = PI/(W2*RMU*EIN)
+C     ecms = EIN
+      elab = EINl
+      relcal = .FALSE.
+      IF (IRElat(Nejc,Nnuc).GT.0) relcal = .TRUE.
+      CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
 C-----Absorption cross section in mb
       sabs = 0.D0
       DO l = 0, Maxlw
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
-      sabs = cte*sabs
+      sabs = 10.d0*PI/ak2*sabs
       IF (sabs.LE.0.D0) RETURN
-      SINl = 0.D0
-      sinlcont = 0.D0
+
+       CSFus = ABScs
+
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
-         ilv = ICOller(l+1)
-         IF (ilv.LE.NLV(nnuc)) then
+         READ (45,*,END = 400) dtmp
+          IF (ICOller(l+1).LE.NLV(nnuc)) THEN
 C          Discrete level scattering
-           READ (45,*,END = 400) dtmp
-           SINl = SINl + dtmp
+           IF (ICOllev(l+1).LT.20) THEN
+C             Coupled levels
+                  SINlcc = SINlcc + dtmp
+            ELSE
+C             Uncoupled discrete levels
+              SINl = SINl + dtmp
+            ENDIF
          ELSE
 C          Scattering into continuum
-           READ (45,*,END = 400) dtmp
            sinlcont = sinlcont + dtmp
+C          Not included into inelastic as it is renormalized in ACCUMsd as PE spectra
+C           SINl = SINl + dtmp
          ENDIF
       ENDDO
   400 CLOSE (45)
-      IF (SINl.EQ.0.D0) RETURN
-      IF (SINl.GT.ABScs) THEN
+      IF (SINl+SINlcc.EQ.0.D0) RETURN
+      IF (SINlcc.GT.ABScs) THEN
          WRITE (6,*)
          WRITE (6,*) ' WARNING: LOOK ECIS NON-CONVERGENCE !!'
          WRITE (6,
@@ -1602,10 +1622,9 @@ C          Scattering into continuum
          STOP 200
       ENDIF
 C
-C     Absorption cross section includes inelastic scattering cross section to discrete levels
-C     XS going into continuum is not considered (It will be renormalized when MSD is processed)
+C     Absorption cross section includes inelastic scattering cross section to coupled levels
 C
-      sreac = sabs + SINl
+      sreac = sabs + SINlcc
       IF (IOUt.EQ.5 .AND. sabs.GT.0.D0) THEN
          WRITE (6,*)
          WRITE (6,*) ' INCIDENT CHANNEL:'
@@ -1616,12 +1635,17 @@ C
          WRITE (6,*) ' Reaction XS =', SNGL(ABScs),
      &               ' mb (read from ECIS)'
          WRITE (6,*) ' ECIS/EMPIRE ratio of reaction cross section =',
-     &               (ABScs - SINl)/sabs
-         WRITE (6,*) ' Inelastic XS to the continuum Sinl(cont) =',
+     &               (ABScs - SINlcc)/sabs
+         WRITE (6,*) ' Inelastic XS to coupled levels (SINlcc) =',
+     &               SNGL(SINlcc), ' mb '
+         WRITE (6,*)
+     &      ' Inelastic XS to uncoupled discrete levels (DWBA) =',
+     &               SNGL(SINl), ' mb '
+         WRITE (6,*) ' Inelastic XS to the continuum (sinlcont) =',
      &               SNGL(sinlcont), ' mb '
-         IF (SINl.GT.0.D0) THEN
-            WRITE (6,*) ' Sinl =', SNGL(SINl), ' mb (read from ECIS)'
-            WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+         IF (SINlcc.GT.0.D0) THEN
+            WRITE (6,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
+            WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
          WRITE (6,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (6,*) ' Shape Elastic XS =', SNGL(ELAcs),
@@ -1629,11 +1653,16 @@ C
          WRITE (6,*)
       ENDIF
 C
-C-----Renormalizing TLs to reproduce ecis_abs cross section
+C-----Renormalizing TLs to correct very small difference
+C     between calculated and read ECIS XS
+C     Discrete level inelastic scattering (not coupled levels) also included
 C
       DO l = 0, Maxlw
-         Stl(l + 1) = Stl(l + 1)*(ABScs - SINl)/sabs
+         Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc- SINl)/sabs
       ENDDO
+       CSFus = ABScs - SINlcc - SINl
+
+       RETURN
       END
 
 
@@ -1646,6 +1675,15 @@ C     INPUT:  Nejc  ejectile nucleus index
 C             Nnuc  residual nucleus index
 C             J     energy index
 C     OUTPUT: TTLl(NDETL,0:NDLW),MaxL(NDETL) for all energies from 1 to NDETL
+C
+C==========================================================================
+C     ncoll - number of collective coupled levels
+C
+C     Process file ecis03.tlj
+C     Average of Tlj,c(J) coefficients over J for c = gs
+C     to obtain usual T(L)
+C     Sigma_abs = pi/k**2 * suma [(2*L+1) T(L)]
+C     Sigma_reacc = Sigma_abs(c=gs) + Sigma_inl(c = other coupled channels)
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -1663,10 +1701,11 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, cte, dtmp, ecms, elab, jc, jj, sabs,
+      DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
      &                 selecis, sinl, sreac, sreacecis, stotecis,
      &                 xmas_nejc, xmas_nnuc
       DOUBLE PRECISION DBLE
+      LOGICAL relcal
       INTEGER l, lmax, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
       REAL SNGL
@@ -1721,15 +1760,15 @@ C-----For vibrational the Tls must be multiplied by
       IF (IOUt.EQ.5) THEN
          xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
          xmas_nejc = EJMass(Nejc)
-         CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,RMU,ak2,2,RELkin)
-C-------ECIS constant
-         cte = PI/(W2*RMU*ecms)
-C-------Reaction cross section in mb
+         relcal = .FALSE.
+         IF (IRElat(Nejc,Nnuc).GT.0) relcal = .TRUE.
+         CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
+C--------Reaction cross section in mb
          sabs = 0.D0
          DO l = 0, lmax
             sabs = sabs + TTLl(J,l)*DBLE(2*l + 1)
          ENDDO
-         sabs = cte*sabs
+         sabs = 10.*PI/ak2*sabs
          OPEN (UNIT = 45,FILE = 'ecis03.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinl = 0.D0
@@ -1748,6 +1787,8 @@ C-------Reaction cross section in mb
      &                  SNGL(sabs), ' mb '
             WRITE (6,*) ' Reaction XS =', SNGL(sreacecis),
      &                  ' mb (read from ECIS)'
+            WRITE (6,*) ' ECIS/EMPIRE ratio of reaction XS =',
+     &                    SNGL(sreacecis/sreac)
             IF (sinl.GT.0.D0) THEN
                WRITE (6,*) ' Sinl =', SNGL(sinl), ' mb (read from ECIS)'
                WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
@@ -1755,7 +1796,7 @@ C-------Reaction cross section in mb
          ENDIF
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
-      WRITE (46) lmax, J, ecms
+      WRITE (46) lmax, J, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
          WRITE (46) TTLl(J,l)
       ENDDO
@@ -1814,6 +1855,7 @@ C     For ecis03
 C
 C-----*** OPTICAL POTENTIALS ***
 C-----Relativistic kinematics (y/n)
+      IF(IRElat(Nejc,Nnuc).GT.0) RELkin = .TRUE.
       IF (RELkin) THEN
          FLGrel = 'y'
       ELSE
@@ -1941,9 +1983,10 @@ C
 C-----Transformation of energies from laboratory to center-of-mass if needed
 C-----is done inside SETPOTS() -> OMPAR()
 C
-      CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,RMU,ak2,ikey)
+      CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,ak2,ikey)
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
+
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
       nd_nlvop = 1
@@ -1970,11 +2013,11 @@ C-----Defining one potential for each collective level
 C-----If channel is closed ground state potential is used for this level
       npp = nd_nlvop
 C
-      zerosp = 0.0
+      zerosp = 0.d0
       ldwmax = 2.4*1.25*A(Nnuc)
      &         **0.33333333*0.22*SQRT((xmas_nejc + xmas_nnuc)*elab)
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
-      njmax = MAX(ldwmax,20)
+      njmax = MAX(ldwmax,30)
       IF (Inlkey.EQ.0) THEN
 C-------writing input
          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
@@ -2141,7 +2184,7 @@ C--------------Transformation of energies from laboratory to center-of-mass
 C--------------if needed is done inside SETPOTS() -> OMPAR()
 C
                CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,
-     &                      RMU,ak2,ikey)
+     &                      ak2,ikey)
 C
 C--------------potential parameters
 C--------------write(1,'(3f10.5)') v,rv,av
@@ -2304,8 +2347,6 @@ C--------ECIs1(23:23) = 'F'
 C--------DWBA
          ECIs2(42:42) = 'T'
       ENDIF
-C-----relativistic kinematics ?
-      IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
       xmas_nejc = EJMass(Nejc)
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
@@ -2322,7 +2363,7 @@ C
 C-----Transformation of energies from laboratory to center-of-mass if needed
 C-----is done inside SETPOTS() -> OMPAR()
 C
-      CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,RMU,ak2,ikey)
+      CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,ak2,ikey)
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
 C
@@ -2358,7 +2399,7 @@ C
       ldwmax = 2.4*1.25*A(Nnuc)
      &         **0.33333333*0.22*SQRT((xmas_nejc + xmas_nnuc)*elab)
 C-----Maximum number of channel spin
-      njmax = MAX(ldwmax,20)
+      njmax = MAX(ldwmax,30)
 C-----Writing input
       OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
 C-----CARD 1 : Title
@@ -2527,7 +2568,7 @@ C
 C-----------Transformation of energies from laboratory to center-of-mass if
 C-----------needed is done inside SETPOTS() -> OMPAR()
 C
-            CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,RMU,
+            CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,
      &                   ak2,ikey)
 C
 C-----------potential parameters
@@ -2599,7 +2640,7 @@ C-----Running ECIS
       ENDIF
       END
 
-      SUBROUTINE SETPOTS(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Rrmu,Ak2,Ikey)
+      SUBROUTINE SETPOTS(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,Ikey)
 C
 C     Transfers o.m. parameters to ECIS
 C
@@ -2612,7 +2653,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Ak2, Eicms, Eilab, Mi, Mt, Rrmu
+      DOUBLE PRECISION Ak2, Eicms, Eilab, Mi, Mt
       INTEGER Ikey, Nejc, Nnuc
 C
 C Local variables
@@ -2621,16 +2662,16 @@ C
       IF (CCCalc) THEN
 C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          komp = 33
-         CALL OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Rrmu,Ak2,komp,Ikey)
+         CALL OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,komp,Ikey)
       ELSE
 C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          komp = 29
-         CALL OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Rrmu,Ak2,komp,Ikey)
+         CALL OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,komp,Ikey)
       ENDIF
       END
 
 
-      SUBROUTINE KINEMA(El,E1,Mi,Mt,Amu,Ak2,Iopt,Relcal)
+      SUBROUTINE KINEMA(El,E1,Mi,Mt,Ak2,Iopt,Relcal)
 C
 C     Author: O.Bersillon (SCAT2000)
 C
@@ -2643,7 +2684,6 @@ C  EL     = current lab kinetic energy                                 *
 C  E1     = current  CM kinetic energy                                 *
 C  MI     = incident particle rest mass (in a.m.u.)                    *
 C  MT     = target   nucleus  rest mass (in a.m.u.)                    *
-C  AMU    = reduced mass                                               *
 C  AK2    = CM wave number                                             *
 C  IOPT   = 1   from lab to CM                                         *
 C           2   from CM  to lab                                        *
@@ -2657,19 +2697,19 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2,
-     &                 HHBarc, PI, RMU, W2L, XNExc
-      COMMON /CONSTANT/ AMUmev, PI, W2L, XNExc, CETa, CSO, RMU, AMPi,
+     &                 HHBarc, PI, XNExc
+      COMMON /CONSTANT/ AMUmev, PI, XNExc, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Ak2, Amu, E1, El, Mi, Mt
+      DOUBLE PRECISION Ak2, E1, El, Mi, Mt
       INTEGER Iopt
       LOGICAL Relcal
 C
 C Local variables
 C
-      DOUBLE PRECISION ck2, etoti, etott, mtot, one, p2, two, w2
+      DOUBLE PRECISION ck2, mtot, one, p2, two
       DOUBLE PRECISION DSQRT
       DATA one/1.0D+00/
       DATA two/2.0D+00/
@@ -2683,10 +2723,8 @@ C
 C
 C-----------Classical    kinematics
 C
-            Amu = Mi*Mt/mtot
             E1 = El*Mt/mtot
-            w2 = ck2*Amu
-            Ak2 = w2*E1
+            Ak2 = ck2*Mi*Mt/mtot*E1
          ELSE
 C
 C-----------Relativistic kinematics
@@ -2697,10 +2735,10 @@ C
             p2 = (El*(El + two*AMUmev*Mi))
      &           /((one + Mi/Mt)**2 + two*El/(AMUmev*Mt))
             Ak2 = p2/(HHBarc*HHBarc)
-            etoti = DSQRT((AMUmev*Mi)**2 + p2)
-            etott = DSQRT((AMUmev*Mt)**2 + p2)
-            Amu = etoti*etott/(etoti + etott)
-            Amu = Amu/AMUmev
+C           etoti = DSQRT((AMUmev*Mi)**2 + p2)
+C           etott = DSQRT((AMUmev*Mt)**2 + p2)
+C           Amu = etoti*etott/(etoti + etott)
+C           Amu = Amu/AMUmev
          ENDIF
 C
 C--------From  CM to lab (the input quantity is Ecm)
@@ -2709,9 +2747,8 @@ C
 C
 C--------Classical    kinematics
 C
-         Amu = Mi*Mt/mtot
          El = E1*mtot/Mt
-         Ak2 = ck2*Amu*E1
+         Ak2 = ck2*Mi*Mt/mtot*E1
       ELSE
 C
 C--------Relativistic kinematics
@@ -2720,10 +2757,10 @@ C
          p2 = E1*(E1 + two*AMUmev*mtot)*(E1 + two*AMUmev*Mi)
      &        *(E1 + two*AMUmev*Mt)/((two*(E1+AMUmev*mtot))**2)
          Ak2 = p2/(HHBarc*HHBarc)
-         etoti = DSQRT((AMUmev*Mi)**2 + p2)
-         etott = DSQRT((AMUmev*Mt)**2 + p2)
-         Amu = etoti*etott/(etoti + etott)
-         Amu = Amu/AMUmev
+C        etoti = DSQRT((AMUmev*Mi)**2 + p2)
+C        etott = DSQRT((AMUmev*Mt)**2 + p2)
+C        Amu = etoti*etott/(etoti + etott)
+C        Amu = Amu/AMUmev
 C
 C
       ENDIF

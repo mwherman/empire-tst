@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-08 23:40:52 $
-Ccc   * $Id: input.f,v 1.138 2005-06-08 23:40:52 Capote Exp $
+Ccc   * $Date: 2005-06-13 16:00:23 $
+Ccc   * $Id: input.f,v 1.139 2005-06-13 16:00:23 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -101,7 +101,7 @@ C-----CM=931.494013 +/- 0.000037 MeV
 C-----The above value is the one used also in the ENDF-6 manual (April 2001)
       AMUmev = 9.31494013D+02
 C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
-      HHBarc = 197.32696801D0
+      HHBarc = 197.3269601D0
 C-----HHBarc = 1.97327053D+02  (EMPIRE v 2.18)
       XNExc = 8.071323D0
 C-----From SCAT2000
@@ -115,7 +115,7 @@ C-----Neutron mass = 1.008 664 915 60(55) u
 C-----Proton mass = 1.007 276 466 88(13) u
       AMUpro = 1.007276D0
 C-----already converted to mb
-      W2 = 2.D0*AMUmev/HHBarc**2/10.D0
+C     W2 = 2.D0*AMUmev/HHBarc**2/10.D0
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
@@ -1311,7 +1311,8 @@ C-----set giant resonance parameters for CN
          AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       ENDIF
       EINl = EIN
-      CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),RMU,ak2,1,RELkin)
+
+      CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
 
       IF (DIRect.GT.0 .AND. FIRst_ein) THEN
@@ -1320,9 +1321,10 @@ C     IF (DIRect.GT.0                ) THEN
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
 C-----------Defining ICOller(i)
+            ICOller(1) = ICOllev(1)
             DO i = 2, ND_nlv
                itmp = ICOllev(i)
-               IF (itmp.GT.20) itmp = ICOllev(i) - 20
+               IF (itmp.GE.20) itmp = ICOllev(i) - 20
                ICOller(i) = itmp
             ENDDO
             IF (ierr.EQ.1) THEN

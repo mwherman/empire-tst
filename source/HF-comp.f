@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-13 06:32:18 $
-Ccc   * $Id: HF-comp.f,v 1.71 2005-06-13 06:32:18 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-13 16:00:23 $
+Ccc   * $Id: HF-comp.f,v 1.72 2005-06-13 16:00:23 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -42,10 +42,10 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION eemi, excnq, piece, pop1, pop2, poph, popl,
+      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
      &                 popll, pops, popt, xcse
       REAL FLOAT
-      INTEGER icse, icsh, icsl, ie, il, j, na, nang, nexrt
+      INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER INT
 C-----
 C-----Continuum
@@ -116,7 +116,7 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
-            IF (poplh.NE.0.0D+0) THEN
+            IF (poph.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -215,7 +215,7 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-C-----Contribution coming straight from the current decay
+C-----Contribution comming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       IF(ENDF(Nnur).EQ.2) THEN
         CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
@@ -236,7 +236,7 @@ C-----DE spectra
                    ELSE
                      POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
-                   ENDIF     
+                   ENDIF
                ENDIF
             ENDDO
 C-----------DDX spectra using portions
@@ -245,7 +245,7 @@ C-----------DDX spectra using portions
      &             POPcseaf(Ief,iejc,ie,Nnur)
      &             = POPcseaf(Ief,iejc,ie,Nnur)
      &             + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
-            ENDDO           
+            ENDDO
          ENDDO
       ENDIF
       END

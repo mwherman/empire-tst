@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.19 $
-C $Id: ddhms.f,v 1.19 2005-06-09 07:54:34 Capote Exp $
+C CVS Version Management $Revision: 1.20 $
+C $Id: ddhms.f,v 1.20 2005-06-13 16:00:23 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.19 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.20 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.19 2005-06-09 07:54:34 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.20 2005-06-13 16:00:23 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -3819,8 +3819,8 @@ C
 C COMMON variables
 C
       REAL*8 AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2, HHBarc, PI,
-     &       RMU, W2, XNExc
-      COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
+     &       XNExc
+      COMMON /CONSTANT/ AMUmev, PI, XNExc, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
       ZMNuc = 939.D0
 C     PI_g = DACOS( - 1.D0)
@@ -4756,57 +4756,37 @@ C
       CALL WHERE(izar,nnur,iloc)
 C-----TEMPORARY: assume that NDANG in EMPIRE is 19. If not stop.
 C-----           This makes transition from 5 deg grid to 10 deg trivial.
-      IF (NDANG.NE.19 .AND. NDANG.NE.37) THEN
+      IF (NDANG.NE.19) THEN
          WRITE (6,*) ' '
-         WRITE (6,*) 
-
-     &    'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19 or 37'
+         WRITE (6,*) 'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19'
          WRITE (6,*)
-     &    'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+     &              'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
          WRITE (6,*)
-     &    'SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+     &             'SET NDANG TO 19 AND RECOMPILE OR GIVE UP HMS OPTION'
          STOP
       ENDIF
 C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       DO ne = 0, Nemax
-
-         IF(NDAng.eq.19) THEN
-
-C          Converting to 10 degree EMPIRE grid
-
-           DDXsn(ne,1)=DDXsn(ne,1) + (DDXsn(ne,1) - DDXsn(ne,2))/2.0
-           IF (DDXsn(ne,1).LT.0.0D+0) DDXsn(ne,1) = 0.0
-           DO nth = 2, NDANG - 1
-             DDXsn(ne,nth) = (DDXsn(ne,2*(nth-1)) + DDXsn(ne,2*nth - 1))
+         DDXsn(ne,1) = DDXsn(ne,1) + (DDXsn(ne,1) - DDXsn(ne,2))/2.0
+         IF (DDXsn(ne,1).LT.0.0D+0) DDXsn(ne,1) = 0.0
+         DO nth = 2, NDANG - 1
+            DDXsn(ne,nth) = (DDXsn(ne,2*(nth-1)) + DDXsn(ne,2*nth - 1))
      &                      /2.
-           ENDDO
-           DDXsn(ne,NDANG)=DDXsn(ne,36) + (DDXsn(ne,36) - DDXsn(ne,35))
+         ENDDO
+         DDXsn(ne,NDANG) = DDXsn(ne,36) + (DDXsn(ne,36) - DDXsn(ne,35))
      &                     /2.
-           IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
-
-         ENDIF
-
-C        IF(NDAng.eq.37) THEN
-
-C          No conversion is needed, both grids coincide
-
-C        ENDIF
-
+         IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
       ENDDO
 C-----interpolate in energy
 C-----to continuum
       IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-C    &                                  NDECSE,19,zero,(NEX(nnur)-1)
-
-     &                                  NDECSE,NDAng,zero,(NEX(nnur)-1)
+     &                                  NDECSE,19,zero,(NEX(nnur) - 1)
      &                                  *DE)
 C-----to discrte levels
       IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-C    &                                  NDECSE,19,NEX(nnur)*DE,
-
-     &                                  NDECSE,NDAng,NEX(nnur)*DE,
+     &                                  NDECSE,19,NEX(nnur)*DE,
      &                                  EMAx(nnur))
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
 C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
@@ -4817,7 +4797,7 @@ C-----finally store ddx on Empire array CSEa
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*PI*qq(1))
+            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
                IF (ENDf(1).EQ.1) THEN
@@ -4840,36 +4820,26 @@ C
       CALL WHERE(izar,nnur,iloc)
 C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
       DO ne = 0, Nemax
-         IF(NDAng.eq.19) THEN
-
-C          Converting to 10 degree EMPIRE grid
-
-           DDXsp(ne,1)=DDXsp(ne,1) + (DDXsp(ne,1) - DDXsp(ne,2))/2.0
-           IF (DDXsp(ne,1).LT.0.0D+0) DDXsp(ne,1) = 0.0
-           DO nth = 2, NDANG - 1
-             DDXsp(ne,nth)=(DDXsp(ne,2*(nth-1)) + DDXsp(ne,2*nth - 1))
+         DDXsp(ne,1) = DDXsp(ne,1) + (DDXsp(ne,1) - DDXsp(ne,2))/2.0
+         IF (DDXsp(ne,1).LT.0.0D+0) DDXsp(ne,1) = 0.0
+         DO nth = 2, NDANG - 1
+            DDXsp(ne,nth) = (DDXsp(ne,2*(nth-1)) + DDXsp(ne,2*nth - 1))
      &                      /2.
-           ENDDO
-           DDXsp(ne,NDANG)=DDXsp(ne,36) + (DDXsp(ne,36) - DDXsp(ne,35))
+         ENDDO
+         DDXsp(ne,NDANG) = DDXsp(ne,36) + (DDXsp(ne,36) - DDXsp(ne,35))
      &                     /2.
-           IF (DDXsp(ne,NDANG).LT.0.0D+0) DDXsp(ne,NDANG) = 0.0
-
-         ENDIF
+         IF (DDXsp(ne,NDANG).LT.0.0D+0) DDXsp(ne,NDANG) = 0.0
       ENDDO
 C-----interpolate in energy
 C-----to continuum
       IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-C    &                                  NDECSE,19,zero,(NEX(nnur)-1)
-
-     &                                  NDECSE,NDAng,zero,(NEX(nnur)-1)
+     &                                  NDECSE,19,zero,(NEX(nnur) - 1)
      &                                  *DE)
-C-----to discrete levels
+C-----to discrte levels
       IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
      &                                  1,0.D0,DE,CSEahms(1,1,nejc),
-C    &                                  NDECSE,19,NEX(nnur)*DE,
-
-     &                                  NDECSE,NDAng,NEX(nnur)*DE,
+     &                                  NDECSE,19,NEX(nnur)*DE,
      &                                  EMAx(nnur))
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
 C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
@@ -4880,7 +4850,7 @@ C-----finally store ddx on Empire array CSEa
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*PI*qq(1))
+            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
             DO na = 1, NDANG
                CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
                IF (ENDf(1).EQ.1) THEN
@@ -5894,3 +5864,4 @@ C  nk must be odd and nph must even (Simpson)
       ENDDO
       QDPH = am*dsigkn/(pn*pp)
       END
+
