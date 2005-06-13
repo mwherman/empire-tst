@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:24 $
-Ccc   * $Id: fusion.f,v 1.44 2005-06-13 16:00:24 Capote Exp $
+Ccc   * $Date: 2005-06-13 16:02:58 $
+Ccc   * $Id: fusion.f,v 1.45 2005-06-13 16:02:58 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -496,7 +496,7 @@ C--------channel spin min and max
           relcal = .FALSE.
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
          IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
-       &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+     &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
          mul = smax - smin + 1.0001

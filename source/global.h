@@ -74,7 +74,7 @@
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc),
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
-     &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), RMU,
+     &                 , REDmsc(ndlw,2), RESmas(0:130,0:400),
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc)
       CHARACTER*21 REAction(ndnuc)
       DOUBLE PRECISION RO(ndex,ndlw,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -97,7 +97,7 @@
      &                 UGRid(0:nfisenmax,nfhump), VEQ,
      &                 VOM(0:ndejc,0:ndnuc),
      &                 VOMs(0:ndejc,0:ndnuc),
-     &                 VSO(0:ndejc,0:ndnuc), W2, WIMag(3),
+     &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
      &                 WOMs(0:ndejc,0:ndnuc),
      &                 WOMv(0:ndejc,0:ndnuc),
      &                 WSO(0:ndejc,0:ndnuc), XJLv(ndlv,0:ndnuc),
@@ -111,7 +111,7 @@
       COMMON /COMFIS_I/ NRBar, NRWel, NRBarc, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
-      COMMON /CONSTANT/ AMUmev, PI, W2, XNExc, CETa, CSO, RMU, AMPi,
+      COMMON /CONSTANT/ AMUmev, PI, XNExc, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro
       COMMON /DEPTH / POTe
       COMMON /ENDFEA/ POPcseaf
@@ -155,7 +155,7 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela 
+     &                  NANgela
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
