@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:23 $
-Ccc   * $Id: main.f,v 1.106 2005-06-13 16:00:23 Capote Exp $
+Ccc   * $Date: 2005-06-13 16:57:51 $
+Ccc   * $Id: main.f,v 1.107 2005-06-13 16:57:51 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1419,9 +1419,7 @@ C-----------CN contribution to elastic ddx
             WRITE (6,*)
      &          ' CN elastic angular distrib.', elcncs, ' mb/str'
             WRITE (6,*)
-            checkXS = checkXS + POPlv(LEVtarg,mt2)
          ENDIF
-
          checkXS = checkXS + CSPrd(nnuc)
          WRITE (12,*) ' '
          WRITE (12,
