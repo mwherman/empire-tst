@@ -26,6 +26,7 @@ C-V  04/10 Implement formatting for incident alphas and photons.
 C-V  05/04 - Copy comments to MF1/MT451.
 C-V        - Upgrade to proces partially exclusive/inclusive spectra.
 C-V        - Allow metastable targets.
+C-V  05/06 Increase MXR from 200K to 300K.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -128,7 +129,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=200000,MXI=8000)
+      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=300000,MXI=8000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -308,8 +309,8 @@ C* Process discrete levels if continuum reactions present
       LX=MXR-LA
       IF(LA.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
       REWIND LIN
-      JPRNT=-1
-      IF(MT6.EQ.2) JPRNT=IPRNT
+      JPRNT=IPRNT
+c...      IF(MT6.NE.2) JPRNT=-1
 C* Reading angular distributions - MF6 flagged negative
 c...
 c...      print *,'processing MT',MT6
@@ -332,8 +333,10 @@ C* Write the ENDF file-4 data
       GO TO 420
   490 IF(JT6.LT.NT6) GO TO 400
 C* Angular distribution data processed
-      IF(JT4.GT.0)
-     1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      IF(JT4.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
       JT6=0
       DO 492 I=1,NXS
       IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
@@ -344,6 +347,22 @@ C* Process double differential data
       WRITE (LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
       WRITE (LER,991)
       WRITE (LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
+C* Check if yields for unassigned reactions need to be printed
+      NK=0
+      DO I=1,NT6
+        IF(IWO(LBI-1+I).EQ.5) GO TO 600
+        IF(IWO(LBI-1+I).EQ.203) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.207) NK=NK+1
+      END DO
+      CALL WRMF6Y(LOU,MXE,MXT,LXR
+     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+      WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',5
+      WRITE(LTT,995) '         Number of outgoing particles : ',NK
+      WRITE(LTT,991)
+      WRITE(LER,995) ' Processed energ./ang. distrib. for MT: ',5
+      WRITE(LER,995) '         Number of outgoing particles : ',NK
+      WRITE(LER,991)
 C* Read the EMPIRE output file to extract energy/angle distrib.
   600 LE=LBE
       LG=LE+NEN+2
@@ -368,8 +387,10 @@ C* Write the ENDF file-6 data
   620 JT6=JT6+1
       IF(JT6.LT.NT6) GO TO 600
 C* Energy/angle distribution data processed
-  800 IF(JT6.GT.0)
-     1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+  800 IF(JT6.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
 C*
 C* Process discrete level photon production
       WRITE (LTT,991)
@@ -420,8 +441,10 @@ C*   MXLJ - maximum number of transitions from a level
       IF(NLV.GT.0) JPP=JPP+1
   890 CONTINUE
 C* Photon production data from discrete levels processed
-      IF(JPP.GT.0)
-     1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      IF(JPP.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
 C* Process photon angular distribution for discrete levels (isotropic)
       JPP  =0
       LV50 =0
@@ -460,12 +483,16 @@ C* Write photon distributions for MT800 series
         CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV800,NS)
       END IF
 C* Photon angular distributions from discrete levels processed
-      IF(JPP.GT.0)
-     1CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      IF(JPP.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
 C* Write the ENDF material and file SEND records
+      NS=0
       CALL WRCONT(LOU,  0, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C*
-  880 CALL WRCONT(LOU, -1, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+  880 NS=0
+      CALL WRCONT(LOU, -1, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       STOP 'EMPEND Completed'
 C*
   991 FORMAT(2A40)
@@ -994,11 +1021,12 @@ C*      Alpha emission (n,p+a)
       END
       SUBROUTINE POUCHR(PTST,KZAK,AWP)
 C-Title  : Subroutine POUCHR
-C-Purpose: Assign outgoing particle ZAP from character string
+C-Purpose: Assign particle ZA and AWR from character string
 C-Description:
 C-D  The input string PTST identifies the outgoing particle.
+C-D  If KZAK>0, it identifies the particle ZA.
 C-D  On output KZAK is the particle ZA designation and AWP is its
-C-D  atomic weight ratio relative to the projectile.
+C-D  atomic weight ratio relative to the neutron.
 C-D  Special cases:
 C-D    KZAP=999999  for recoils (data must be define externally)
 C-D    KZAP<0       for unrecognised particles.
@@ -1036,32 +1064,53 @@ C* Unidentified outgoing particle
       SUBROUTINE YLDPOU(YI,MT,KZAP)
 C-Title  : Subroutine YLDPOU
 C-Purpose: Define yield YI of particla KZAP in reaction MT
-      YI=0
+C-Author : A. Trkov
+C-Reference: Common routine to EMPEND and DXSEND
+C-Description:
+C-D  Multiplicity YI of the particle with ZA designation KZAP for a
+C-D  reaction MT is given with the following convention:
+C-D    YI > 0  Multiplicity for the reaction is fixed and equal to YI
+C-D       = 0  Particles may be produced by the reaction, but the
+C-D            multiplicity has to be obtained from other sources
+C-D       < 0  Particle cannot be produced from this reaction
+C-D  
+      YI=-1
       IF     (KZAP.EQ.   1) THEN
 C* Outgoing neutrons
-        IF(MT.EQ.22 .OR. MT.EQ.23 .OR. MT.EQ.28 .OR.
-     1    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.45 .OR. MT.EQ.91) YI=1
-        IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR. MT.EQ.41) YI=2
+        IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
+     &    (MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=0
+        IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.22 .OR. MT.EQ.23 .OR.
+     &    (MT.GE.28.AND. MT.LE.29).OR.
+     &    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.44 .OR. MT.EQ.45 .OR.
+     &    (MT.GE.50.AND.MT.LE.91)) YI=1
+        IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR.
+     &     MT.EQ.30 .OR. MT.EQ.41) YI=2
         IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
         IF(MT.EQ.37) YI=4
         IF(MT.EQ.47) YI=5
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
+        IF(MT.EQ. 5) YI=0
         IF(MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
-     &     MT.EQ.45  .OR. MT.EQ.103 .OR. MT.EQ.649) YI=1
-        IF(MT.EQ.44) YI=2
+     &     MT.EQ.45  .OR. MT.EQ.103 .OR. MT.EQ.112 .OR.
+     &    (MT.GE.600.AND. MT.LE.649)) YI=1
+        IF(MT.EQ.44 .OR. MT.EQ.111) YI=2
       ELSE IF(KZAP.EQ.1002) THEN
 C* Outgoing deuterons
+        IF(MT.EQ. 5) YI=0
         IF(MT.EQ.11 .OR. MT.EQ.32 .OR. MT.EQ.35 .OR. MT.EQ.104) YI=1
       ELSE IF(KZAP.EQ.2003) THEN
 C* Outgoing He-3
+        IF(MT.EQ. 5) YI=0
         IF(MT.EQ.34 .OR. MT.EQ.106) YI=1
       ELSE IF(KZAP.EQ.2004) THEN
 C* Outgoing alphas
+        IF(MT.EQ. 5) YI=0
         IF(MT.EQ. 22 .OR. MT.EQ.24 .OR. MT.EQ.25 .OR. MT.EQ.45 .OR.
-     &     MT.EQ.107 .OR. MT.EQ.849) YI=1
+     &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849)) YI=1
         IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
      &     MT.EQ.108) YI=2
+        IF(MT.EQ.109) YI=3
       ELSE
 C* Recoils
         YI=1
@@ -1075,7 +1124,7 @@ C-Description:
 C-D Scan all MT reaction values in MTH for MT>5
 C-D Compare with MT values in MT6 for reactions having differential data
 C-D Flag eligible reactions with -ve MT; eligible reactions are:
-C-D MT>5, excluding fission and discrete level reactions.
+C-D all 5<MT<600,649,849 excluding fission and discrete level reactions.
       DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT)
 C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
@@ -1086,7 +1135,7 @@ C* Process only if NT6>0
         IF(MM.EQ.  5) I5  =IX
 C* Consider eligible reactions
         IF((MM.GT.  5 .AND. MM.LT. 50 .AND. MM.NE.18) .OR.
-     &     (MM.GE. 91 .AND. MM.LT.200) .OR.
+     &     (MM.GE. 91 .AND. MM.LT.600) .OR.
      &     (MM.EQ.649 .OR.  MM.EQ.849) ) THEN
 C* Compare MT values in MT6 for reactions having differential data
           DO J6=1,NT6
@@ -1276,10 +1325,28 @@ C* Read distribution in double precision to avoid underflow
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
-C* Suppress negative distributions
+C* Suppress negative distributions to 2% of average of the neighbours
+      NEG=0
       DO J=1,KXA
-        IF(DST(J).LT.0) DST(J)=0
+        IF(DST(J).LT.0) THEN
+          NEG=NEG+1
+          DJ=0
+          NJ=0
+          IF(J.GT.1) THEN
+            DJ=DST(J-1)
+            NJ=1
+          END IF
+          IF(J.LT.KXA) THEN
+            DJ=DJ+DST(J+1)
+            NJ=NJ+1
+          END IF
+          DST(J)=0.02*DJ/NJ
+        END IF
       END DO
+      IF(NEG.GT.0) THEN
+        WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU
+        WRITE(LER,906) MT,NINT(ZAP),EIN,EOU
+      END IF
 C* Convert to Legendre polynomials and store
       LPU=LL+1
       LS =LPU+LOR+2
@@ -1307,47 +1374,44 @@ C* Check for specific reaction printout
      3  (  EOU.GE.EO1 .AND. EOU.LE.EO2)) THEN
         JPRNT=1
       END IF
-C* Check for differences in the fitted angular distributions
-C* Fine angular mesh includes midpoints and endpoints at +/- 1
-      KZXA=2*KXA+1
-      ZANG(1)= 1.
-      IF(KXA*2.GT.MXZ) STOP 'EMPEND ERROR - MXZ limit exceeded'
-      NEG=0
-      DO I=1,KXA
-      IF(I.GT.1)
-     1  ZANG(2*I-1)=0.5*(ANG(I)+ANG(I-1))
-        ZANG(2*I  )=     ANG(I)
-        ZLEG(2*I-1)=POLLG1(ZANG(2*I-1),RWO(LPU),LOO)
-        ZLEG(2*I  )=POLLG1(ZANG(2*I  ),RWO(LPU),LOO)
-        EL=ABS(DST(I)-ZLEG(2*I))
-        IF(ZLEG(2*I-1).LT.0 .OR. ZLEG(2*I).LT.0) NEG=NEG+1
-        IF(EL .GT. 40.*ETOL*DST(I)) THEN
-          NOFIT=NOFIT+1
-          IF(IPRNT.GE.0) JPRNT=1
-        END IF
-      END DO
-      ZANG(KZXA)=-1.
-      ZLEG(KZXA)=POLLG1(ZANG(KZXA),RWO(LPU),LOO)
-      IF(NEG.NE.0) THEN
-        IF(IPRNT.EQ.0) JPRNT=1
-        WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU
-        WRITE(LER,906) MT,NINT(ZAP),EIN,EOU
-      END IF
 C* Check for isotropic distributions (suppress printout)
       IF(LOR.LT.1) JPRNT=0
-C* Execute test printout
+C* Check for differences in the fitted angular distributions
+C* at meshpoints and midpoints
       IF(JPRNT.NE.0) THEN
-C*      Fitted values to the "curves" file
-        WRITE(LCU,931) LOO
-        DO I=1,KZXA
-          WRITE(LCU,934) ZANG(I),ZLEG(I)
-        END DO
-        WRITE(LCU,934)
 C*      Original values to the "points" file
-        WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
-        DO I=1,KXA
+C*      Fitted values to the "curves" file
+        IF(EOU.GE.0) THEN
+          WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
+        ELSE
+          WRITE(LPT,933) EIN,EOU,MT,IFIX(ZAP+0.1)
+        END IF
+        WRITE(LCU,931) LOO
+        DO K=2,KXA
+          I=KXA+2-K
           WRITE(LPT,934) ANG(I),0.,0.,DST(I)
+C* Function at mesh point
+          ANI=ANG(I)
+          DSI=POLLG1(ANI,RWO(LPU),LOO)
+          WRITE(LCU,934) ANI,DSI
+C* Function at 1/4 to the next mesh point
+          ANI=(3*ANG(I)+  ANG(I-1))/4
+          DSI=POLLG1(ANI,RWO(LPU),LOO)
+          WRITE(LCU,934) ANI,DSI
+C* Function at 2/4 to the next mesh point
+          ANI=(2*ANG(I)+2*ANG(I-1))/4
+          DSI=POLLG1(ANI,RWO(LPU),LOO)
+          WRITE(LCU,934) ANI,DSI
+C* Function at 3/4 to the next mesh point
+          ANI=(  ANG(I)+3*ANG(I-1))/4
+          DSI=POLLG1(ANI,RWO(LPU),LOO)
+          WRITE(LCU,934) ANI,DSI
         END DO
+        ANI=ANG(1)
+        DSI=POLLG1(ANI,RWO(LPU),LOO)
+        WRITE(LPT,934) ANI,0.,0.,DST(1)
+        WRITE(LCU,934) ANI,DSI
+        WRITE(LCU,934)
         WRITE(LPT,934)
       END IF
 C*
@@ -1445,7 +1509,7 @@ C*
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
   906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.distrib. -ve')
+     1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.dist.Inp.-ve')
   907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
   908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
@@ -1456,6 +1520,7 @@ C*
      !       ' "',A70,'"')
   931 FORMAT('P(',I2.2,') Fit')
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
+  933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
       END
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
@@ -1619,10 +1684,40 @@ C* Test if reaction is already registered
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
       MTH(IXS)=MT
+      IF(MT.EQ.5) THEN
+C* Reserve space for proton and alpha production of unidentified reactions
+        IF(NXS+2.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
+        MT203=IXS+1
+        MT207=IXS+2
+        NXS  =NXS+2
+        MTH(MT203)=203
+        MTH(MT207)=207
+
+        PRINT *,'MT,JZA,IZA',MT,JZA,IZA
+
+      END IF
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
       QQI(IXS)=QQM(IXS)
-  320 XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
+C* Special treatment for MT5 (separating out proton and alpha prod.
+  320 IF(MT.EQ.5) THEN
+C* Save proton and alpha production of unidentified reactions
+        IF     ((JZA.LE.IZA+1-1001 .AND. JZA.GT.IZA-1099) .OR.
+     &          (JZA.LE.IZA+1-3005 .AND. JZA.GT.IZA-3099)) THEN
+C*                (n,p+xn) + (n,p+a+xn)
+          XSC(NEN,MT203)=XSC(NEN,MT203)+XS*1.E-3
+        ELSE IF((JZA.LE.IZA+1-2004 .AND. JZA.GT.IZA-2099) .OR.
+     &          (JZA.LE.IZA+1-3005 .AND. JZA.GT.IZA-3099)) THEN
+C*                (n,a+xn) + (n,p+a+xn)
+          XSC(NEN,MT207)=XSC(NEN,MT207)+XS*1.E-3
+        ELSE
+          XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
+        END IF
+        QQM(IXS)=MAX(QQ,QQM(IXS))
+        QQI(IXS)=QQM(IXS)
+      ELSE
+        XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
+      END IF
       GO TO 110
 C*
 C* Process discrete levels - (n,n'), (n,p), (n,a)
@@ -2533,7 +2628,9 @@ C*
         CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
       END DO
       CLOSE(UNIT=LSC)
+      NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS, 0. , 0., 0, 0, 0, 0)
+      NS=-1
       CALL WRCONT(LOU,MAT, 0, 0,NS, 0. , 0., 0, 0, 0, 0)
 C*
       RETURN
@@ -2710,10 +2807,13 @@ C* Write TAB1 record
       CALL WRTAB1(LOU,MAT,MF,MTH(IT),NS,QQM(IT),QQI(IT), 0, 0
      1           ,NR,NEO,NBT,INT,RWO(LX),RWO(LY))
 C* Write CONT record - end of data set
+      NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      NS=0
       MTH(IT)=MTH(IT)+10000
   360 CONTINUE
 C* All cross sections processed
+      NS=-1
       CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C* Change back the MT numbers that were flagged "+10000"
       DO I=1,NXS
@@ -2888,8 +2988,11 @@ C* Reduce the trailing zero Legendre coefficients
       CALL WRLIST(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0,NL, 0,QQ(2))
       LL  =LL+NW
    40 CONTINUE
-      IF(J2.GT.0)
-     1CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      IF(J2.GT.0) THEN
+        NS=99998
+        CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+        NS=0
+      END IF
       RETURN
 C* All discrete levels processed - nothing to write
    80 MT=0
@@ -2898,6 +3001,123 @@ C* All discrete levels processed - nothing to write
      &      ,I3,I4,1P,3E11.3/
      &       '                  Distribution interpolated between    '
      &      ,2E11.3)
+      END
+      SUBROUTINE WRMF6Y(LOU,MXE,MXT,MXR
+     1                 ,EIN,XSC,QQM,QQI,MTH,RWO
+     1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+C-Title  : WRMF6Y Subroutine
+C-Purpose: Write unassigned react.yields (MF6) data in ENDF-6 format
+C-Description:
+C-D  Proton and alpha producing reaction cross sections that do not
+C-D  have distributions given or do not have MT numbers are stored
+C-D  separately. If partly-inclusive spectra are not given, the
+C-D  yields for proton and alpha production are given in MF6.
+C-
+      CHARACTER*8  PTST
+      DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
+     1            ,RWO(MXR),NBT(1),INT(1)
+      DATA PTST/'        '/
+C* Initialize constants
+      QM=0.
+      QI=0.
+      CALL POUCHR(PTST,IZI,AWI)
+C* Identify indices of MT 5,203,207
+      NK =0
+      MT5=0
+      MT203=0
+      MT207=0
+      DO I=1,NXS
+        IF(IABS(MTH(I)).EQ.  5) MT5  =I
+        IF(IABS(MTH(I)).EQ.203) MT203=I
+        IF(IABS(MTH(I)).EQ.207) MT207=I
+      END DO
+      IF(MT5.LE.0) RETURN
+      IF(MT203.GT.0) THEN
+        JK203=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X203=XSC(I,MT203)
+          IF(X203.GT.0) THEN
+            XSC(I,MT203)=X203/X5
+            JK203=1
+          END IF
+        END DO
+        NK=NK+JK203
+      END IF
+      IF(MT207.GT.0) THEN
+        JK207=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X207=XSC(I,MT207)
+          IF(X207.GT.0) THEN
+            XSC(I,MT207)=X207/X5
+            JK207=1
+          END IF
+        END DO
+        NK=NK+JK207
+      END IF
+C*
+C* Write file MF6/MT5 (proton and alpha yield data only)
+      MF =6
+      MT =5
+      ZA =IZA
+      LCT=1
+      LIP=1
+      LAW=0
+C* Write HEAD record
+      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,LCT,NK, 0)
+C*
+      LE  =1
+      LX  =MXR/2
+      ETH =-QQI(MT5)*(AWR+AWI)/AWR
+C* Write the yield for protons and alphas
+      IZAP=1001
+      IXS =MT203
+      JK  =JK203
+  200 IF(JK.GT.0) THEN
+        CALL POUCHR(PTST,IZAP,AWP)
+C* Remove duplicate points
+        NP  =2
+        IF(ETH.GE.EIN(1)) THEN
+          RWO(LE  )=ETH
+          RWO(LX  )=0
+          I1=1
+          DO WHILE (I1.LT.NEN .AND. ETH.GE.EIN(I1))
+            I1=I1+1
+          END DO
+        ELSE
+          RWO(LE  )=EIN(1)
+          RWO(LX  )=XSC(1,IXS)
+          I1=2
+        END IF
+        RWO(LE+1)=EIN(I1)
+        RWO(LX+2)=XSC(I1,IXS)
+        I1=I1+1
+        DO I=I1,NEN
+          IF(XSC(I,IXS).NE.XSC(I-1,IXS)) NP=NP+1
+          RWO(LE-1+NP)=EIN(I)
+          RWO(LX-1+NP)=XSC(I,IXS)
+        END DO
+C* Write TAB1 record
+        ZAP   =IZAP
+        NR    =1
+        INT(1)=2
+        NBT(1)=NP
+        CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
+     1             ,NR,NP,NBT,INT,RWO(LE),RWO(LX))
+      END IF
+      IF(IZAP.EQ.1001) THEN
+        IZAP=2004
+        IXS=MT207
+        JK =JK207
+        GO TO 200
+      END IF
+C* Write CONT record - end of data set
+      NS=99998
+      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      NS=0
+C*
+      RETURN
       END
       SUBROUTINE WRIMF6(LOU,RWO,MT,MAT,IZA,AWR,NK,LCT,NS)
 C-Title  : WRIMF6 Subroutine
@@ -2949,7 +3169,9 @@ C* Loop over the incident particle energies
       LL  =LL+NW
    40 CONTINUE
    60 CONTINUE
+      NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      NS=0
 C*
       RETURN
       END
@@ -2991,7 +3213,9 @@ c...  RWO(2,JT)=BRR(NT+1-JT,LL)
   110 CONTINUE
       CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
 C* Section end
+      NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      NS=0
 C*
   120 CONTINUE
       RETURN
@@ -3009,7 +3233,9 @@ C* Define reaction type MT number
 C* Assume isotropic photon distribution
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 1, 0, 1, 0)
 C* Section end
+      NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      NS=0
   140 CONTINUE
       RETURN
       END
@@ -3412,74 +3638,157 @@ C-D  Legendre polynomial order to fit a set of NP data points YP(i)
 C-D  given at argument values XP(i), which must be in monotonic order
 C-D  and in the range X:[-1,1].
 C-D    The search for an adequate polynomial order starts at LMI and
-C-D  proceeds up to LMX or NP-2, whichever is smaller. If LMX is
+C-D  proceeds up to LMX or NP*2/3, whichever is smaller. If LMX is
 C-D  smaller or equal to LMI, the second condition prevails. The
 C-D  procedure is terminated earlier if the maximum relative difference
 C-D  between an input and a calculated point value is smaller than EMM.
 C-D  On exit, ERR contains the actual max.relative difference between
 C-D  the input and the fitted data.
 C-D    A scratch array RWO of length MXR is needed, where the value of
-C-D  MXR does not exceed (LMX+4)*(LMX+1) .
+C-D  MXR does not exceed LP*4+(LMX+4)*(LMX+1) .
 C-D    On output, the Legendre coefficients are stored in QQ. The actual
 C-D  order of Legendre polynomials used is contained in LMX.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
-      ERR=0.
+      ERR=0
       NLG=0
-      LMX=MIN(LMX,NP-1)
+c...
+c...      LMX=MIN(LMX,NP-1)
+c...
 C* Check if zero-order
       QQ(1)=YP(1)
       IF(NP.LT.2) GO TO 40
       SY =0.
-      DO 14 I=2,NP
-      SY =SY + 0.5*(YP(I)+YP(I-1))*(XP(I)-XP(I-1))
-   14 CONTINUE
+      DO I=2,NP
+        SY =SY + 0.5*(YP(I)+YP(I-1))*(XP(I)-XP(I-1))
+      END DO
       QQ(1)=SY/(XP(NP)-XP(1))
-      IF(LMX.LT.1) GO TO 22
+      IF(LMX.LT.1) GO TO 30
 C* Clear the coefficients field
-      DO 16 L=1,LMX
-      QQ(L+1)=0.
-   16 CONTINUE
+      DO L=1,LMX
+        QQ(L+1)=0.
+      END DO
+C* Save the input points, allow for doubling the mesh
+      MXP=4*NP
+      NNP=NP
+      LXP=1
+      LYP=LXP+MXP
+      LLG=LYP+MXP
+      DO I=1,NP
+        RWO(LXP-1+I)=XP(I)
+        RWO(LYP-1+I)=YP(I)
+      END DO
 C*
 C* Loop to find the appropriate Legendre order
-      L1=MAX(1,LMI)
-      LL=LMX+2
-      L =L1
+      L1 =MAX(1,LMI)
+      LL =LLG+LMX+2
+      L  =L1
    20 NLG=L
       N1 =NLG+1
+      LMM=MIN(LMX,NNP*2/3)
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
-      CALL LSQLEG(XP,YP,NP,RWO,N1,RWO(LL),JER)
+      CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
 C* Trap zero-determinant
       IF(JER.NE.0) THEN
         NLG=NLG-1
-        GO TO 22
+        GO TO 30
       END IF
-      DO 21 I=1,N1
-      QQ(I)=RWO(I)
-   21 CONTINUE
+      DO I=1,N1
+        QQ(I)=RWO(LLG-1+I)
+      END DO
 C* Check absolute difference between input and calculated points ERR
-C* Check for negative distributions ( ENE < -EPZER0 )
-   22 ERR=0.
-      ENE=0.
-      EPZERO=1.E-10
-      DO 24 IP=1,NP
-      YCI=POLLG1(XP(IP),QQ,NLG)
-      IF(YCI.EQ.0) GO TO 24
-C     RER=ABS((YCI-YP(IP))/YCI)
-      RER=ABS((YCI-YP(IP))/QQ(1))
-      IF(RER.GT.ERR) ERR=RER
-      IF(YCI+EPZERO.LT.ENE) ENE=YCI
-   24 CONTINUE
-      IF(ENE*QQ(1).LT.0) ERR=ENE
-C* Try next L
-      L =L+1
-      IF(L.GT.LMX) GO TO 40
-      IF(JER.EQ.0 .AND.
-     1  (ERR.GT.EMM .OR. ERR.LT.0)) GO TO 20
+C* Check for negative distributions
+   30 ERR=0
+      YNP=YP(1)
+      YNM=YP(1)
+      KNP=0
+      KNM=0
+      JNP=0
+      JNM=0
+      DO IP=1,NNP
+        YCI=POLLG1(RWO(LXP-1+IP),QQ,NLG)
+C       RER=ABS((YCI-RWO(LYP-1+IP))/YCI)
+        RER=ABS((YCI-RWO(LYP-1+IP))/QQ(1))
+        IF(RER.GT.ERR) ERR=RER
+C* Test distribution at mesh point
+        IF(YCI.LT.YNP) THEN
+          IF(YCI.LT.0) KNP=KNP+1
+          JNP=IP
+          YNP=YCI
+        END IF
+C* Test distribution at midpoint
+        IF(IP.LT.NNP) THEN
+          XPI=(RWO(LXP-1+IP)+RWO(LXP+IP))/2
+          YCI=POLLG1(XPI,QQ,NLG)
+          IF(YCI.LT.YNM) THEN
+            IF(YCI.LT.0) KNM=KNM+1
+            JNM=IP
+            YNM=YCI
+          END IF
+        END IF
+      END DO
+c...
+c...      PRINT *,EMM,ERR,YNP,YNM,JNM,L,JER
+c...
+      YNP=YNP/QQ(1)
+      YNM=YNM/QQ(1)
+      IF(-YNP.GT.ABS(ERR)) ERR=YNP
+      IF(-YNM.GT.ABS(ERR)) ERR=YNM
 C*
+C* Take corrective action
+      IF(KNP.GT. 0 ) THEN
+C* Case: Distribution negative at mesh point
+        IF(L.LT.LMM) THEN
+          L=L+1
+          GO TO 20
+        END IF
+      END IF
+      IF(ERR.GT.EMM) THEN
+C* Case: Tolerance limit not satisfied
+        IF(L.LT.LMM .AND. JER.EQ.0) THEN
+          L =L+1
+          GO TO 20
+        END IF
+      END IF
+C* Case: Distribution is negative at midpoint
+      IF((KNM.GT.0 .OR. KNP.GT.0) .AND. NNP.LT.MXP) THEN
+C*    Force extra point if distribution negative at midpoint
+        IF(YNP.LT.YNM) THEN
+          IP=JNP
+        ELSE
+          IP=JNM
+        END IF
+        K=NNP-IP
+        DO J=1,K
+          RWO(LXP+NNP+1-J)=RWO(LXP+NNP-J)
+          RWO(LYP+NNP+1-J)=RWO(LYP+NNP-J)
+        END DO
+        RWO(LXP+IP)=(RWO(LXP-1+IP)+RWO(LXP+1+IP))/2
+        YP1=RWO(LYP-1+IP)
+        YP2=RWO(LYP+1+IP)
+C*      Assign average value to midpoint
+C...        YPA=(YP1+YP2)/2
+C*      Assign log-average value to midpoint
+        YPA=SQRT(YP1*YP2)
+        RWO(LYP+IP)=YPA
+        NNP=NNP+1
+C...
+c...        print *,'insert',ip,rwo(lyp+ip),yp1,yp2
+c...     1         ,' at',rwo(lxp+ip),rwo(lxp-1+ip),rwo(lxp+1+ip)
+c...
+c...        print *,(rwo(lxp-1+j),j=1,nnp)
+c...        print *,(rwo(lyp-1+j),j=1,nnp)
+c...
+        GO TO 20
+      END IF
+C*
+C* Terminate
    40 LMX=NLG
+c...
+c...      print *,'jnm',jnm,NP,nnp,LMI,LMX,EMM,ERR,ynp,ynm
+c...
       RETURN
       END
       SUBROUTINE LSQLEG(XP,YP,NP,QQ,N1,AA,IER)
@@ -3493,25 +3802,27 @@ C* Perform linear transformation of the coordinate system
       LF=N1+1
       LP=LF+1
 C* Clear the matrix
-      DO 22 I=1,N1
-      AA(I,LF)=0.
-      DO 22 J=1,N1
-      AA(J,I)=0.
-   22 CONTINUE
+      DO I=1,N1
+        AA(I,LF)=0
+        DO J=1,N1
+          AA(J,I)=0
+        END DO
+      END DO
 C* Set up the matrix
       NLG=N1-1
-      DO 40 M=1,NP
+      DO M=1,NP
 C* Calculate Legendre polynomials
-      CALL PLNLEG(XP(M),AA(1,LP),NLG)
-      DO 30 I=1,N1
-      PI=AA(I,LP)
-      AA(I,LF)=AA(I,LF)+YP(M)*PI
-      DO 30 J=I,N1
-      PJ=AA(J,LP)
-      AA(J,I)=AA(J,I)+PI*PJ
-      AA(I,J)=AA(J,I)
-   30 CONTINUE
-   40 CONTINUE
+        CALL PLNLEG(XP(M),AA(1,LP),NLG)
+        DO I=1,N1
+          PI=AA(I,LP)
+          AA(I,LF)=AA(I,LF)+YP(M)*PI
+          DO J=I,N1
+            PJ=AA(J,LP)
+            AA(J,I)=AA(J,I)+PI*PJ
+            AA(I,J)=AA(J,I)
+          END DO
+        END DO
+      END DO
 C* Solve the system of equations
       CALL MTXGUP(AA,AA(1,LF),QQ,N1,LDIG,DET)
       IF(DET.EQ.0) GO TO 80

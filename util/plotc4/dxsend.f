@@ -213,26 +213,66 @@ C-V 04/11 Add data A>60
 C* Main array containing the abundances
       DIMENSION ZAB(MXIZ,MXEL),ZEL(1),FRC(1)
 C* Equivalenced fields for the data statement
-      DIMENSION Z00(MXIZ,  9 )
-      DIMENSION Z10(MXIZ, 10 )
-      DIMENSION Z20(MXIZ, 10 )
-      DIMENSION Z30(MXIZ, 10 )
-      DIMENSION Z40(MXIZ, 10 )
-      DIMENSION Z50(MXIZ, 10 )
-      DIMENSION Z60(MXIZ, 10 )
-      DIMENSION Z70(MXIZ, 10 )
-      DIMENSION Z80(MXIZ, 10 )
-      DIMENSION Z90(MXIZ, 10 )
+      DIMENSION Z00(MXIZ,  4 )
+      DIMENSION Z05(MXIZ,  3 )
+      DIMENSION Z08(MXIZ,  2 )
+      DIMENSION Z10(MXIZ,  4 )
+      DIMENSION Z14(MXIZ,  4 )
+      DIMENSION Z18(MXIZ,  2 )
+      DIMENSION Z20(MXIZ,  4 )
+      DIMENSION Z24(MXIZ,  4 )
+      DIMENSION Z28(MXIZ,  2 )
+      DIMENSION Z30(MXIZ,  4 )
+      DIMENSION Z34(MXIZ,  4 )
+      DIMENSION Z38(MXIZ,  2 )
+      DIMENSION Z40(MXIZ,  4 )
+      DIMENSION Z44(MXIZ,  4 )
+      DIMENSION Z48(MXIZ,  2 )
+      DIMENSION Z50(MXIZ,  4 )
+      DIMENSION Z54(MXIZ,  4 )
+      DIMENSION Z58(MXIZ,  2 )
+      DIMENSION Z60(MXIZ,  4 )
+      DIMENSION Z64(MXIZ,  4 )
+      DIMENSION Z68(MXIZ,  2 )
+      DIMENSION Z70(MXIZ,  4 )
+      DIMENSION Z74(MXIZ,  4 )
+      DIMENSION Z78(MXIZ,  2 )
+      DIMENSION Z80(MXIZ,  4 )
+      DIMENSION Z84(MXIZ,  4 )
+      DIMENSION Z88(MXIZ,  2 )
+      DIMENSION Z90(MXIZ,  4 )
+      DIMENSION Z94(MXIZ,  4 )
+      DIMENSION Z98(MXIZ,  2 )
       EQUIVALENCE ( ZAB(1,  1 ), Z00(1,1) )
+      EQUIVALENCE ( ZAB(1,  5 ), Z05(1,1) )
+      EQUIVALENCE ( ZAB(1,  8 ), Z08(1,1) )
       EQUIVALENCE ( ZAB(1, 10 ), Z10(1,1) )
+      EQUIVALENCE ( ZAB(1, 14 ), Z14(1,1) )
+      EQUIVALENCE ( ZAB(1, 18 ), Z18(1,1) )
       EQUIVALENCE ( ZAB(1, 20 ), Z20(1,1) )
+      EQUIVALENCE ( ZAB(1, 24 ), Z24(1,1) )
+      EQUIVALENCE ( ZAB(1, 28 ), Z28(1,1) )
       EQUIVALENCE ( ZAB(1, 30 ), Z30(1,1) )
+      EQUIVALENCE ( ZAB(1, 34 ), Z34(1,1) )
+      EQUIVALENCE ( ZAB(1, 38 ), Z38(1,1) )
       EQUIVALENCE ( ZAB(1, 40 ), Z40(1,1) )
+      EQUIVALENCE ( ZAB(1, 44 ), Z44(1,1) )
+      EQUIVALENCE ( ZAB(1, 48 ), Z48(1,1) )
       EQUIVALENCE ( ZAB(1, 50 ), Z50(1,1) )
+      EQUIVALENCE ( ZAB(1, 54 ), Z54(1,1) )
+      EQUIVALENCE ( ZAB(1, 58 ), Z58(1,1) )
       EQUIVALENCE ( ZAB(1, 60 ), Z60(1,1) )
+      EQUIVALENCE ( ZAB(1, 64 ), Z64(1,1) )
+      EQUIVALENCE ( ZAB(1, 68 ), Z68(1,1) )
       EQUIVALENCE ( ZAB(1, 70 ), Z70(1,1) )
+      EQUIVALENCE ( ZAB(1, 74 ), Z74(1,1) )
+      EQUIVALENCE ( ZAB(1, 78 ), Z78(1,1) )
       EQUIVALENCE ( ZAB(1, 80 ), Z80(1,1) )
+      EQUIVALENCE ( ZAB(1, 84 ), Z84(1,1) )
+      EQUIVALENCE ( ZAB(1, 88 ), Z88(1,1) )
       EQUIVALENCE ( ZAB(1, 90 ), Z90(1,1) )
+      EQUIVALENCE ( ZAB(1, 94 ), Z94(1,1) )
+      EQUIVALENCE ( ZAB(1, 98 ), Z98(1,1) )
 C*
       DATA Z00/
      &  1001.,0.999885, 1002.,0.000115,     0.,0.,
@@ -250,7 +290,8 @@ C*
      &  4009.,1.0,         0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z05/
      &  5010.,0.199,    5011.,0.801,        0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -262,7 +303,8 @@ C*
      &  7014.,0.99632,  7015.,0.00368,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z08/
      &  8016.,0.99757,  8017.,0.00038,   8018.,0.00205,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -287,7 +329,8 @@ C*
      & 13027.,1.0,         0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z14/
      & 14028.,0.922297,14029.,0.046832,     0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -303,7 +346,8 @@ C*
      & 17035.,0.7578,  17037.,0.2422,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z18/
      & 18036.,0.003365,18038.,0.000632, 18040.,0.996003,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -328,7 +372,8 @@ C*
      & 23050.,0.0025,  23051.,0.9975,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+       DATA Z24/
      & 24050.,0.04345, 24052.,0.83789,  24053.,0.09501,
      & 24054.,0.02365,     0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -344,7 +389,8 @@ C*
      & 27059.,1.0,         0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+       DATA Z28/
      & 28058.,0.680769,28060.,0.262231, 28061.,0.011399,
      & 28062.,0.036345,28064.,0.009256,     0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -369,7 +415,8 @@ C*
      & 33075.,1.0,         0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z34/
      & 34074.,0.0089,  34076.,0.0937,   34077.,0.0763,
      & 34078.,0.2377,  34080.,0.4961,   34082.,0.0873,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -385,7 +432,8 @@ C*
      & 37085.,0.7217,  37087.,0.2783,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z38/
      & 38084.,0.0056,  38086.,0.0986,   38087.,0.070,
      & 38088.,0.8258,      0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -410,7 +458,8 @@ C*
      & 43000.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z44/
      & 44096.,0.0554,  44098.,0.0187,   44099.,0.1276,
      & 44100.,0.1260,  44101.,0.1706,   44102.,0.3155,
      & 44104.,0.1862,      0.,0.,           0.,0.,
@@ -426,7 +475,8 @@ C*
      & 47107.,0.51839, 47109.,0.48161,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z48/
      & 48106.,0.0125,  48108.,0.0089,   48110.,0.1280,
      & 48111.,0.1280,  48112.,0.2413,   48113.,0.1222,
      & 48114.,0.2873,  48116.,0.0749,       0.,0.,
@@ -451,7 +501,8 @@ C*
      & 53127.,1.0,         0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z54/
      & 54124.,0.009,   54126.,0.0009,   54128.,0.0192,
      & 54129.,0.2644,  54130.,0.0408,   54131.,0.2118,
      & 54132.,0.2689,  54134.,0.1044,   54136.,0.0887,
@@ -467,7 +518,8 @@ C*
      & 57138.,0.00090, 57139.,0.99910,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z58/
      & 58136.,0.00185, 58138.,0.00251,  58140.,0.88450,
      & 58142.,0.11114,     0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -492,7 +544,8 @@ C*
      & 63151.,0.4781,  63153.,0.5219,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z64/
      & 64152.,0.0020,  64154.,0.0218,   64155.,0.1480,
      & 64156.,0.2047,  64157.,0.1565,   64158.,0.2484,
      & 64160.,0.2186,      0.,0.,           0.,0.,
@@ -508,7 +561,8 @@ C*
      & 67165.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z68/
      & 68162.,0.0014,  68164.,0.0161,   68166.,0.3361,
      & 68167.,0.2293,  68168.,0.2678,   68170.,0.1493,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -533,7 +587,8 @@ C*
      & 73180.,0.00012, 73181.,0.99988,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z74/
      & 74180.,0.0012,  74182.,0.2650,   74183.,0.1431,
      & 74184.,0.3064,  74186.,0.2842,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -549,7 +604,8 @@ C*
      & 77191.,0.373,   77193.,0.627,        0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z78/
      & 78190.,0.00014, 78191.,0.00782,  78194.,0.32967,
      & 78195.,0.33832, 78196.,0.25242,  78198.,0.07163,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -574,6 +630,8 @@ C*
      & 83209.,1.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z84/
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -589,8 +647,8 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z88/
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -615,6 +673,8 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z94/
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -630,8 +690,8 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
+     &     0.,0.,          0.,0.,           0.,0./
+      DATA Z98/
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -653,7 +713,7 @@ c...
       END DO
       RETURN
       END
-      SUBROUTINE DXSEND(LEF,ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
+      SUBROUTINE DXSEND(LEF,ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
      1                 ,RWO,NEN,MEN,MRW,LTT,ELV)
 C-Title  : Subroutine DXSEND
 C-Purpose: Extract double differential cross sections from ENDF
@@ -671,12 +731,14 @@ C-V        - Add photon spectra.
 C-V  04/01 Improved diagnostics.
 C-V  04/09 - Allow discrete level matching for cross sections
 C-V        - Redefine the requested level energy the nearest actual level
+C-V  05/09 Implement coding for particle production cross sections
+C-V        (except photon production).
 C-Description:
 C-D  The function of this routine is an extension of DXSEN1, which
 C-D  retrieves the differential cross section at a specified incident
 C-D  particle energy and scattering angle. If a special MT number
 C-D  is specified (for example, MT=5 for particle emission where
-C-D  particle is defined by its ZA designation in ZAP), DXSEN1
+C-D  particle is defined by its ZA designation in ZAP0), DXSEN1
 C-D  is called recursively for all neutron emission reactions and
 C-D  all contributions are summed.
 C-D  For details see the description of the DXSEN1 routine.
@@ -715,9 +777,11 @@ C*
       MINL=0
       M600=0
       M800=0
+      YIELD=1
+      ZAP =-1
 c...
-      print *,'DXSEND: ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS'
-      print *,         ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS
+      print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS'
+      print *,         ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
 c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
@@ -765,82 +829,29 @@ C* Check if reaction summation is required
 C* Find particle emission reactions
       REWIND LEF
       CALL SKIPSC(LEF)
+      ZAP =ZAP0
       IZAP=ZAP+0.1
-      IF(IZAP.EQ.1) THEN
+C* Flag yields to be included in particle production cross sections
+      IF(MF.EQ.3) YIELD=0
 C*
-C* Neutron emission: prepare reaction list
+C* Prepare reaction list for light particles
+C*
+      IF(IZAP.GE.1 .AND.IZAP.LE.2004) THEN
    20   MF=3
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
 C* Select contributing reactions
-        IF(MT.EQ. 5) GO TO 22
-        IF(MT.EQ.11) GO TO 22
-        IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
-        IF(MT.GE.16 .AND. MT.LE.17) GO TO 22
-        IF(MT.EQ.18) GO TO 22
-        IF(MT.GE.28 .AND. MT.LE.30) GO TO 22
-        IF(MT.GE.32 .AND. MT.LE.37) GO TO 22
-        IF(MT.GE.41 .AND. MT.LE.45) GO TO 22
-        IF(MT.EQ.91) GO TO 22
-C* Process elastic and discrete inelastic only if requesting
-C* energy distributions or aver. energy ang.distrib.
-        IF( ( KEA.EQ.2 .OR.
-     &       (KEA.EQ.1 .AND. PAR.LT.0) ) .AND.
-     &      (  MT.EQ.2 .OR.
-     &       ( MT.GE.50.AND. MT.LE.90) ) ) GO TO 22
-        GO TO 20
-   22   LOOP=LOOP+1
-        IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
-        LST(LOOP)=MT
-        GO TO 20
-C*
-      ELSE IF(IZAP.EQ.1001) THEN
-C*
-C* Proton emission: prepare reaction list
-   24   MF=3
-        MT=0
-        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
-        IF(IER.NE.0) GO TO 50
-        CALL SKIPSC(LEF)
-C* Select contributing reactions
-        IF( MT.EQ.  5                  .OR.
-     &      MT.EQ. 28                  .OR.
-     &     (MT.GE. 41 .AND. MT.LE. 42) .OR.
-     &     (MT.EQ. 44 .AND. MT.LE. 45) .OR.
-     &      MT.EQ.103                  .OR.
-     &     (MT.GE.111 .AND. MT.LE.112) .OR.
-     &     (MT.GE.115 .AND. MT.LE.116) .OR.
-     &     (MT.GE.600 .AND. MT.LE.649)) THEN
+        CALL  YLDPOU(YI,MT,IZAP)
+        IF(YI.GE.0) THEN
           LOOP=LOOP+1
+          IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
           LST(LOOP)=MT
-          IF(MT.GE.600 .AND. MT.LE.649) I600=1
         END IF
-        GO TO 24
-      ELSE IF(IZAP.EQ.2004) THEN
-C*
-C* Alpha emission: prepare reaction list
-   34   MF=3
-        MT=0
-        CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
-        IF(IER.NE.0) GO TO 50
-        CALL SKIPSC(LEF)
-C* Select contributing reactions
-        IF( MT.EQ.  5                  .OR.
-     &     (MT.GE. 22 .AND. MT.LE. 25) .OR.
-     &     (MT.GE. 29 .AND. MT.LE. 30) .OR.
-     &     (MT.GE. 35 .AND. MT.LE. 36) .OR.
-     &      MT.EQ. 45                  .OR.
-     &     (MT.GE.107 .AND. MT.LE.109) .OR.
-     &     (MT.GE.112 .AND. MT.LE.114) .OR.
-     &      MT.EQ.117                  .OR.
-     &     (MT.GE.800 .AND. MT.LE.849)) THEN
-          LOOP=LOOP+1
-          LST(LOOP)=MT
-          IF(MT.GE.800 .AND. MT.LE.849) I800=1
-        END IF
-        GO TO 34
+        IF(MT.EQ.103) M600=1
+        IF(MT.EQ.107) M800=1
+        GO TO 20
       ELSE IF(IZAP.EQ.0) THEN
 C*
 C* Gamma emission: suppress angular distributions
@@ -906,15 +917,15 @@ C* All reactions found - begin processing
       END IF
 C* Exclude cumulative reactions if discrete levels present
       IL=0
-      DO 52 I=1,LOOP
-      IL=IL+1
-      LST(IL)=LST(I)
-      IF(LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
-      IF(LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
-      IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
-      IF((LST(I).GT.600 .AND. LST(I).LE.649) .AND. M600.EQ.1) IL=IL-1
-      IF((LST(I).GT.800 .AND. LST(I).LE.849) .AND. M800.EQ.1) IL=IL-1
-   52 CONTINUE
+      DO I=1,LOOP
+        IL=IL+1
+        LST(IL)=LST(I)
+        IF(LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
+        IF(LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
+        IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
+        IF((LST(I).GT.600 .AND. LST(I).LE.649) .AND. M600.EQ.1) IL=IL-1
+        IF((LST(I).GT.800 .AND. LST(I).LE.849) .AND. M800.EQ.1) IL=IL-1
+      END DO
       LOOP=IL
       IL=1
       ML=0
@@ -949,9 +960,9 @@ C* Retrieve the double differential cross section energy distribution
       END IF
 C* Move the previously saved distribution in the work field
       LX=MRW/2
-      DO 62 I=1,NE1
-      RWO(LX-1+I)=RWO(NE1+I)
-   62 CONTINUE
+      DO I=1,NE1
+        RWO(LX-1+I)=RWO(NE1+I)
+      END DO
 C* Generate the union grid
       LUE= 1+NE1
       LUX=LX+NE1
@@ -960,29 +971,35 @@ C* Generate the union grid
 C* Interpolate current distribution to the union grid
       CALL FITGRD(NEN,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
       NEN=NE2
-      DO 64 I=1,NEN
-      ENR(I)=RWO(LUE-1+I)
-      DXS(I)=RWO(LUX-1+I)
-   64 CONTINUE
+      DO I=1,NEN
+        ENR(I)=RWO(LUE-1+I)
+        DXS(I)=RWO(LUX-1+I)
+      END DO
 C* Interpolate saved distribution to the union grid
       CALL FITGRD(NE1,RWO,RWO(LX),NE2,RWO(LUE),RWO(LUX))
 C* Add the current to the saved distribution
-      DO 66 I=1,NEN
-      DXS(I)=DXS(I)+RWO(LUX-1+I)
-   66 CONTINUE
+      IF(YIELD.GT.0) THEN
+         YLD=1
+      ELSE
+        CALL YLDPOU(YLD,MT,IZAP)
+      END IF
+      DO I=1,NEN
+        DXS(I)=DXS(I)+YLD*RWO(LUX-1+I)
+      END DO
 C* Save the summed distribution 
    70 LX=1+NEN*2
       KRW=MRW-LX
       NE1=NEN
-      DO 72 I=1,NEN
-      RWO(I    )=ENR(I)
-      RWO(I+NEN)=DXS(I)
-   72 CONTINUE
+      DO I=1,NEN
+        RWO(I    )=ENR(I)
+        RWO(I+NEN)=DXS(I)
+      END DO
 C* Select next reaction
-   74 IF(IL.GE.LOOP) GO TO 90
-      IL=IL+1
-      MT=LST(IL)
-      GO TO 60
+   74 IF(IL.LT.LOOP) THEN
+        IL=IL+1
+        MT=LST(IL)
+        GO TO 60
+      END IF
 C*
 C* All processing completed
    90 CONTINUE
@@ -1037,6 +1054,8 @@ C-D         given in terms of Z*1000+A+LIS0/10 where Z is the atomic
 C-D         number, A the mass number and LIS0 the metastable state
 C-D         number. When ZA<0 it implies the ENDF material MAT number.
 C-D  ZAP0 - Outgoing particle ZA designation (ZAP0=1 for neutrons).
+C-D           ZAP0 >= 0 particle multiplicities are calculated,
+C-D                <  0 only cross sections are given.
 C-D  MF0  - Requested file number (ENDF conventions).
 C-D  MT0  - Requested reaction number. Broadly this follows the ENDF
 C-D         conventions.
@@ -1105,6 +1124,7 @@ C* Check the requested type of output
       SAN= 1/(2*PI)
       MST= 1+NINT(PAR)
       AWP=-1
+      IZAP0=NINT(ZAP0)
       IF     (KEA.EQ.2) THEN
 C* Case: Energy spectrum at fixed scattering angle requested
         MST=1
@@ -1124,25 +1144,10 @@ C*
       CALL SKIPSC(LEF)
 C*
 C* Define particle multiplicities
-      YL =1
       IF(KEA.EQ.0) GO TO 30
-      IZAP0=NINT(ZAP0)
+      CALL YLDPOU(YL,MT0,IZAP0)
+C* Special treatment for neutron-induced fission
       IF(IZAP0.EQ.1) THEN
-C* Neutron emission reactions
-C*        (n,2n+x)
-        IF(MT0.EQ.11 .OR.
-     &     MT0.EQ.16 .OR.
-     &     MT0.EQ.21 .OR.
-     &     MT0.EQ.24 .OR.
-     &     MT0.EQ.30 .OR.
-     &     MT0.EQ.41) YL=2
-C*        (n,3n+x)
-        IF(MT0.EQ.17 .OR.
-     &     MT0.EQ.25 .OR.
-     &     MT0.EQ.38 .OR.
-     &     MT0.EQ.42) YL=3
-C*        (n,fission)
-C*        Ignore second chance fission (use total fission only)
         IF(MT0.EQ.19) GO TO 900
         IF(MT0.EQ.18) THEN
           MF =1
@@ -1165,19 +1170,6 @@ C*        Ignore second chance fission (use total fission only)
             STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
           END IF
         END IF
-      ELSE IF(IZAP0.EQ.1001) THEN
-C* Proton emission reactions
-        IF(MT0.EQ. 44 .OR.
-     &     MT0.EQ.111       ) YL=2
-      ELSE IF(IZAP0.EQ.2004) THEN
-C* Alpha emission reactions
-        IF(MT0.EQ. 29 .OR.
-     &     MT0.EQ. 30 .OR.
-     &     MT0.EQ. 35 .OR.
-     &     MT0.EQ. 36 .OR.
-     &     MT0.EQ.108 .OR.
-     &     MT0.EQ.113 .OR.
-     &     MT0.EQ.114       ) YL=2
       END IF
 C*
 C* Retrieve the cross section on MF3
@@ -1232,10 +1224,98 @@ C* Case: Cross section is required on output - finish processing
           PRINT *,' WARNING - Arry limit MEN exceeded, output first',MEN
           NEN=MEN
         END IF
-        DO 32 I=1,NEN
-        ENR(I)=RWO(     I)
-        DXS(I)=RWO(LX-1+I)
-   32   CONTINUE
+        DO I=1,NEN
+          ENR(I)=RWO(     I)
+          DXS(I)=RWO(LX-1+I)
+        END DO
+
+        print *,'    mf/mt/izap0',mf,mt,zap0,izap0
+
+        IF(MT0.NE.5 .AND. IZAP0.NE.0) GO TO 900
+C* Find particle yields for MT 5 (all particles) and other MT (gamma only)
+        MF=6
+        CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+C* Error trapping when no data found in the ENDF file
+        IF(IER.NE.0) THEN
+          PRINT *,'WARNING - No differential data for MT',MT
+          GO TO 900
+        END IF
+        LCT=L2
+        NK =N1
+        JNK=0
+C* Split the work array RWO to operate on function and argument
+C* 1   - First argument
+C* LX  - First function
+C* LXE - Second argument
+C* LXX - Second function
+        KX =MRW/2
+        LX =KX+1
+        LD =KX/2
+        LXE= 1+LD
+        LXX=LX+LD
+C* Loop over particles
+   31   JNK=JNK+1
+C* Retrieve the particle yield
+        CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
+     &             ,RWO,RWO(LX),KX,IER)
+C* Check for matching particle - else skip section
+        IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
+c...
+c...        print *,'Skipping particle/mf/mt/law',nint(zap),mf,mt,law
+c...
+          IF(JNK.GE.NK) THEN
+C* Particle not found - yield assumed zero
+            NEN=0
+            PRINT *,'WARNING - Zero yield for MT',MT0, ' particle',IZAP0
+            GO TO 900
+          END IF
+C* Skip he subsection for this particle
+          IF     (LAW.EQ.0) THEN
+C*         No subsection for Law 0
+          ELSE IF(LAW.EQ.2) THEN
+C*         Skip subsection for Law 2
+           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+           MX=MRW-LXX
+           DO IE=1,NE
+             CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO(LXX),MX,IER)
+             IF(IER.NE.0) THEN
+               STOP 'DXSEN1 ERROR - Skipping MF6 Law 2 data in RDLIST'
+             END IF
+           END DO
+          ELSE IF(LAW.EQ.3) THEN
+C*         No subsection for Law 3
+          ELSE IF(LAW.EQ.4) THEN
+C*         No subsection for Law 4
+          ELSE IF(LAW.EQ.7) THEN
+C*         Skip subsection for Law 7
+            CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+            NM=NR+1
+            DO IE=1,NE
+              CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU
+     &                   ,NBT(NM),INR(NM),IER)
+              NO=NM+NMU
+              LXE=1
+              LXX=LX
+              DO IM=1,NMU
+                CALL RDTAB1(LEF,C1,AI2,L1,L2,NRP,NEP2
+     &                     ,NBT(NO),INR(NO)
+     &                     ,RWO(LXE),RWO(LXX),KX,IER)
+              END DO
+            END DO
+          ELSE
+C*           Unsupported Law - cannot skip the section for this particle
+C*           Set IER to flag error and terminate
+            PRINT *,'DXSEND ERROR - Skipping MF/MT/Law',MF,MT,LAW
+            IER=12
+            GO TO 900
+          END IF
+          GO TO 31
+        END IF
+C* Interpolate yields to the cross section grid
+        CALL FITGRD(NP,RWO,RWO(LX),NEN,ENR,RWO(LXX))
+        DO I=1,NEN
+          DXS(I)=DXS(I)*RWO(LXX-1+I)
+        END DO
         GO TO 900
       END IF
 C* Case: Proceed with the retrieval of differential data
@@ -1707,7 +1787,9 @@ c...
           GO TO 900
         END IF
 C* Skip the subsection for this particle
-        IF     (LAW.EQ.2) THEN
+        IF     (LAW.EQ.0) THEN
+C*       No subsection for Law 0
+        ELSE IF(LAW.EQ.2) THEN
 C*        Skip subsection for Law 2
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
           MX=MRW-LXX
@@ -2129,6 +2211,62 @@ C*
   900 RETURN
 C*
   902 FORMAT(2F11.0,4I11)
+      END
+      SUBROUTINE YLDPOU(YI,MT,KZAP)
+C-Title  : Subroutine YLDPOU
+C-Purpose: Define yield YI of particla KZAP in reaction MT
+C-Author : A. Trkov
+C-Reference: Common routine to EMPEND and DXSEND
+C-Description:
+C-D  Multiplicity YI of the particle with ZA designation KZAP for a
+C-D  reaction MT is given with the following convention:
+C-D    YI > 0  Multiplicity for the reaction is fixed and equal to YI
+C-D       = 0  Particles may be produced by the reaction, but the
+C-D            multiplicity has to be obtained from other sources
+C-D       < 0  Particle cannot be produced from this reaction
+C-D  
+      YI=-1
+      IF     (KZAP.EQ.   1) THEN
+C* Outgoing neutrons
+        IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
+     &    (MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=0
+        IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.22 .OR. MT.EQ.23 .OR.
+     &    (MT.GE.28.AND. MT.LE.29).OR.
+     &    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.44 .OR. MT.EQ.45 .OR.
+     &    (MT.GE.50.AND.MT.LE.91)) YI=1
+        IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR.
+     &     MT.EQ.30 .OR. MT.EQ.41) YI=2
+        IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
+        IF(MT.EQ.37) YI=4
+        IF(MT.EQ.47) YI=5
+      ELSE IF(KZAP.EQ.1001) THEN
+C* Outgoing protons
+        IF(MT.EQ. 5) YI=0
+        IF(MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
+     &     MT.EQ.45  .OR. MT.EQ.103 .OR. MT.EQ.112 .OR.
+     &    (MT.GE.600.AND. MT.LE.649)) YI=1
+        IF(MT.EQ.44 .OR. MT.EQ.111) YI=2
+      ELSE IF(KZAP.EQ.1002) THEN
+C* Outgoing deuterons
+        IF(MT.EQ. 5) YI=0
+        IF(MT.EQ.11 .OR. MT.EQ.32 .OR. MT.EQ.35 .OR. MT.EQ.104) YI=1
+      ELSE IF(KZAP.EQ.2003) THEN
+C* Outgoing He-3
+        IF(MT.EQ. 5) YI=0
+        IF(MT.EQ.34 .OR. MT.EQ.106) YI=1
+      ELSE IF(KZAP.EQ.2004) THEN
+C* Outgoing alphas
+        IF(MT.EQ. 5) YI=0
+        IF(MT.EQ. 22 .OR. MT.EQ.24 .OR. MT.EQ.25 .OR. MT.EQ.45 .OR.
+     &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849)) YI=1
+        IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
+     &     MT.EQ.108) YI=2
+        IF(MT.EQ.109) YI=3
+      ELSE
+C* Recoils
+        YI=1
+      END IF
+      RETURN
       END
       SUBROUTINE SUMYLG(LV,LG,ID,RWO,GTO,NG,LW,GAM)
 C-Title  : Subroutine SUMYLG

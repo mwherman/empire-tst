@@ -13,6 +13,7 @@ C-V         - Fix conversion from CM to lab for natural elements.
 C-V  05/02  - Read projectile ZA from columns 79-84 (Trkov)
 C-V         - Fix DXSEXF routine to test for projectile.
 C-V  05/04  Increase limit on MXP from 200000 to 300000 (Trkov).
+C-V  05/06  Check residual production for MF3/MT9000 (Trkov).
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -450,13 +451,15 @@ C* Test for matching data request
       IF(MF  .NE.MF0   ) GO TO 20
       IF(MT  .NE.MT0   ) GO TO 20
 C* Test outgoing particle and discrete level energy
-      IF(MF.EQ.3 .AND.
-     &    (PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) ) GO TO 20
-      IF(MF.GE.4 .AND. MF.LE.6) THEN
+      IF(MF.EQ.3) THEN
+        IF(PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
+          IF6=F6
+        IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
+      ELSE IF(MF.GE.4 .AND. MF.LE.6) THEN
 C* Test outgoing particle
         IF(MT.GE.9000) THEN
           IF6=F6
-          IF(F6.EQ.0) IF6=1
+c...      IF(F6.EQ.0) IF6=1
           IF(IZAP0.NE.IF6) GO TO 20
         END IF
 C* Test incident energy
@@ -470,6 +473,9 @@ C* Test outgoing particle energy for correl.ang.distributions
 C* Test outgoing particle scattering angle for correal.ang.distrib.
         IF((MF.EQ.6 .AND. KEA.EQ.2) .AND.
      &     ABS(COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
+      ELSE
+C* Ignore other MF cases
+        GO TO 20
       END IF
 C* Identify next set of points if author changes
       IF(REF.NE.RF0) THEN

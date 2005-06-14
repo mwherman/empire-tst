@@ -12,6 +12,10 @@ C-Version: Original code March 2001
 C-V  03/01 Copy Law-7 data unchanged (A.Trkov).
 C-V  03/02 Use FINEND function for interpolation (A.Trkov).
 C-V  03/12 - Fix discrete energy (isotropic) particles in MF6 (A.Trkov).
+C-V        - Generalise CM-Lab conversion for all particles
+C-V        - Convert MF6 Law 2 Legendre (LANG=2) to pointwise (LANG=12).
+C-V  05/06 Open scratch file once in the main program and rewind
+C-V        (problem with too many OPEN statements with Lahey compiler).
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -42,8 +46,9 @@ C-M     not coded at present:
 C-M      - Only Law 1 Legendre (LANG=1,2) or tabulated (LANG>10)
 C-M        representations are allowed. Laws 0, 3 and 4 have the
 C-M        distributions defined by kinematics and are not affected.
-C-M        Data for Laws 2 and 3 are not converted. They are copied
-C-M        as they are.
+C-M        Data for Laws 2 are considered acceptable. Only the
+C-M        conversion from Legendre representation (LANG=0) to
+C-M        pointwise form (LANG=12) is performed.
 C-M      - Conversion to Lab from CM co-ordinate system is done
 C-M        only for neutrons, which is assumed to be the first
 C-M        outgoing particle.
@@ -117,6 +122,7 @@ C-
       PARAMETER    (NCM=2, MXMT=400)
       CHARACTER*66  C66,CMT(NCM)
       CHARACTER*40  FLIN,FLEN,FLOU
+      CHARACTER*40  FLSC
       DIMENSION     MTI(MXMT),QQI(MXMT)
       LOGICAL       EXST
 C*
@@ -124,6 +130,10 @@ C*
      2     FLEN/'ENDF.DAT'/
      3     FLOU/'ENDFNEW.DAT'/
       DATA LIN,LEN,LOU,LKB,LTT/ 1, 2, 3, 5, 6 /
+C* Scratch file unit number and name
+      DATA LSC/19/
+      DATA FLSC/'SIXTAB.TMP'/
+      OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
 C*
 C* Default number of angles
       NCS=33
@@ -222,7 +232,7 @@ C* Process the ENDF file MF6
       DO I=1,NQI
         IF(MTH.EQ.MTI(I)) QI=QQI(I)
       END DO
-      CALL MF6LW7(LEN,LOU,LTT,QI,NCS,C66,MATH,MFH,MTH,IER)
+      CALL MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,C66,MATH,MFH,MTH,IER)
       IF(IER.NE.0) THEN
         READ (LEN,901) C66,MATH,MFH,MTH
         IF(MFH.EQ.0) GO TO 50
@@ -341,18 +351,19 @@ C*
   902 FORMAT(BN,I10)
   904 FORMAT(' Unrecognised keyword "',A10,'"')
       END
-      SUBROUTINE MF6LW7(LEN,LOU,LTT,QI,NCS,C66,MAT0,MF0,MT0,IER)
+      SUBROUTINE MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,C66,MAT0,MF0,MT0,IER)
 C-Title  : Subroutine MF6LW7
 C-Purpose: Adapted fix6 routine of NJOY
+C-Author : A. Trkov, International Atomic Energy Agency, Vienna
 C-Dscription:
 C-D A section of file 6 using legendre or tabulated angular distributions
 C-D is converted into Law 7 format with NCS angles. Intermediate results
 C-D are written to scratch file on unit LSC.
 C-
-      PARAMETER      (MXMU=50, MXPL=20, MXRW=10000)
-      CHARACTER*66    B66,C66
-      CHARACTER*40    FLSC
-      CHARACTER*8     CLANG
+      PARAMETER       (MXMU=50, MXPL=20, MXRW=10000)
+      CHARACTER*66     B66,C66
+      CHARACTER*8      CLANG
+      DOUBLE PRECISION PAR,CLB,P1,P2,PP
       DIMENSION RWO(MXRW),NBT(20),INT(20)
       DIMENSION AMU(MXMU),PLL(MXPL)
 C*
@@ -366,21 +377,19 @@ C* Masses of primary light particles
       DATA AHE4/4.001505/
 C* Atomic mass constant (amu to eV)
       DATA AMUEV/931.494013E6/
-C* Scratch file unit number and name
-      DATA LSC/19/
-      DATA FLSC/'SIXTAB.TMP'/
 C*
       B66='                                 '
      1  //'                                 '
       ZERO=0
       NS  =0
-      OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
+      REWIND LSC
 C* Assume the projectile is neutron
       IZPR=1
 C* Define cosines for NCS angle intervals
-      DO 110 I=1,NCS
-      AMU(I)=COS(PI-(I-1)*PI/(NCS-1))
-  110 CONTINUE
+      DPI=PI/(NCS-1)
+      DO I=1,NCS
+        AMU(I)=COS(PI-(I-1)*DPI)
+      END DO
 C*
 C* Interpret the header CONT record
       READ(C66,902) ZA,AWR, L1,LCT, NK, N2
@@ -393,6 +402,8 @@ C* Start the conversion process
       IF(LTT.GT.0) WRITE(LTT,960) MT0
 C* Begin loop over all outgoing particles
       DO 800 IK=1,NK
+      NSIG=0
+      SIGMX=0
       LXE=1
       LXS=LXE+(MXRW-LXE)/2
       KX =MXRW-LXS
@@ -416,12 +427,31 @@ C* Redefine the desired Law for data representation
 C* Redefine co-ordinate system to Lab
         LCT1=1
       END IF
+C* Define the mass of the incident particle
+      IF     (IZPR.EQ.   1) THEN
+        AM1=ANEU
+      ELSE IF(IZPR.EQ.1001) THEN
+        AM1=APRO
+      ELSE IF(IZPR.EQ.1002) THEN
+        AM1=ADEU
+      ELSE IF(IZPR.EQ.1003) THEN
+        AM1=ATRI
+      ELSE IF(IZPR.EQ.2003) THEN
+        AM1=AHE3
+      ELSE IF(IZPR.EQ.2004) THEN
+        AM1=AHE4
+      ELSE
+        STOP 'SIXTAB ERROR - Unknown incident particle'
+      END IF
+C* Mass of the target nucleus
+      AM2=AWR*ANEU
+C* Mass of the primary outgoing particle
+      AM3=AWP*ANEU
+C* Mass ratios: AMR=target/projectile; ADS=ejectile/projectile
+      AMR=AM2/AM1
+      ADS=AM3/AM1
+C*
       IF(IK.EQ.1) THEN
-C* Check that neutron is the first particle
-        IF(IZAP.NE.1) THEN
-          IF(LTT.GT.0)
-     1    WRITE(LTT,900) ' WARNING - Neutron not first particle   '
-        END IF
 C* Write the header CONT record if processing the first particle
         CALL WRCONT(LOU,MAT0,MF0,MT0,NS,ZA,AWR,L1,LCT1,NK,N2)
       END IF
@@ -436,18 +466,43 @@ C* Copy other format representations
       ELSE IF(LAW0.EQ.0 .OR. LAW0.EQ.3 .OR. LAW0.EQ.4) THEN
 C*      No action necessary for Law 0, 3, 4
         GO TO 800
-      ELSE IF(LAW0.EQ.2 .OR. LAW0.EQ.5 .OR. LAW.EQ.7) THEN
-C*      Copy the data for Law 2, 5, 7
-        IF(LAW .NE.7 .AND. LTT.GT.0)
+      ELSE IF(LAW0.EQ.2 .OR. LAW0.EQ.5 ) THEN
+C*      Copy the data for Law 2, 5
+        IF(LAW0.EQ.5 .AND. LTT.GT.0)
      1    WRITE(LTT,900) ' WARNING - Conversion not done for Law  ',LAW0
         CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
      1             ,NR,NE,NBT,INT)
         NMX=MXRW
-        DO 120 IE=1,NE
-        CALL RDLIST(LEN,C1,C2,L1,L2,N1,N2,RWO,NMX,IER)
-        CALL WRLIST(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2,N1,N2,RWO)
-  120   CONTINUE
+        DO IE=1,NE
+          CALL RDLIST(LEN,C1,EI,LANG,L2,NW,NL,RWO,NMX,IER)
+          IF(LAW0.EQ.2 .AND. LANG.EQ.0) THEN
+C*        Convert Legendre to pointwise distribution if necessary
+            CALL LEGPNT(NW,NL,RWO,MXRW)
+            LANG=12
+          END IF
+          CALL WRLIST(LOU,MAT0,MF0,MT0,NS,C1,EI,LANG,L2,NW,NL,RWO)
+        END DO
+        GO TO 800
+      ELSE IF(LAW.EQ.7) THEN
+C*      Copy the data for Law 7
+        CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
+        CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
+     1             ,NR,NE,NBT,INT)
+        NMX=MXRW
+        DO IE=1,NE
+          CALL RDTAB2(LEN,C1,C2,L1,L2,NRM,NMU,NBT,INT,IER)
+          CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
+     1               ,NRM,NMU,NBT,INT)
+          KX=NMX/2
+          LX=1+KX
+          DO IM=1,NMU
+            CALL RDTAB1(LEN,C1,ACOS,L1,L2,NRP,NEP,NBT,INT
+     &                 ,RWO,RWO(LX),KX,IER)
+            CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
+     1                 ,NRP,NEP,NBT,INT,RWO,RWO(LX))
+          END DO
+        END DO
         GO TO 800
       ELSE
 C*      Don't know how to process - file incomplete - terminate.
@@ -515,24 +570,27 @@ C* Process the continuum contribution (if present)
             RWO(LXE-1+IP)=RWO(LX1+(NA+2)*(ND+IP-1)  )
             RWO(LXS-1+IP)=RWO(LX1+(NA+2)*(ND+IP-1)+1)
           END DO
+C*        Linearise the continuum distribution
+          NR=1
+          NBT(1)=NEPP
+          INT(1)=LEP
+          EPS=0.005
+          CALL VECLIN(NR,NEPP,NBT,INT,RWO(LXE),RWO(LXS),NXS,EPS)
         ELSE
+C* If only discrete lines present, preset the range to zero
           NEPP=2
-          RWO(LXE  )=RWO(LX1)
+          RWO(LXE  )=ABS(RWO(LX1+(NA+2)*(ND-1)))
           RWO(LXS  )=0
-          RWO(LXE+1)=RWO(LX1+(NA+2)*(ND-1))
+          RWO(LXE+1)=ABS(RWO(LX1))
           RWO(LXS+1)=0
+          IF(RWO(LXE).GT.RWO(LXE+1)) THEN
+            PRINT *,'SIXTAB WARNING - Discrete points'
+     &             ,' not in descending order'
+            XE=RWO(LXE)
+            RWO(LXE  )=RWO(LXE+1)
+            RWO(LXE+1)=XE
+          END IF
         END IF
-C* Linearise the continuum distribution
-        NR=1
-        NBT(1)=NEPP
-        INT(1)=LEP
-        EPS=0.005
-        CALL VECLIN(NR,NEPP,NBT,INT,RWO(LXE),RWO(LXS),NXS,EPS)
-
-c...        do k=1,nepp
-c...          print *,rwo(lxe-1+k),rwo(lxs-1+k)
-c...        end do
-
 C* Add contributions from discrete lines (Gaussian NEP1=21 points)
         DO IP=1,ND
           EPS=0.02
@@ -575,20 +633,15 @@ C* Normalise the distribution
           YTG=YTG+(E2-E1)*(F2+F1)/2
         END DO
 C* Check the integral normalisation factor
-        IF(LTT.GT.0 .AND. ABS(YTG-1).GT.1.E-4) THEN
-          WRITE(LTT,900) ' WARNING - Discrete particle energies  '
-          WRITE(LTT,901) '                    at incident energy ',EIN
-          WRITE(LTT,901) '         Spectrum normalisation factor ',YTG
+        IF(LTT.GT.0 .AND. ABS(YTG-1).GT.5.E-3) THEN
+          WRITE(LTT,900) ' WARNING - Discrete particle energies   '
+          WRITE(LTT,901) '                     at incident energy ',EIN
+          WRITE(LTT,901) '          Spectrum normalisation factor ',YTG
         END IF
         YTG=YTG*2
         DO K=1,NEPP
           RWO(LXS-1+K)=RWO(LXS-1+K)/YTG
         END DO
-
-c...          print *,nepp
-c...          print *,(rwo(lxe-1+k),k=1,nepp)
-c...          print *,(rwo(lxs-1+k),k=1,nepp)
-
 C* Write the distribution for extreme cosines (-1, +1)
         NRP= 1
         NBT(1)=NEPP
@@ -612,15 +665,8 @@ C* Case: Normal Law-1 distribution with angular dependence
       NL  =NA+1
       NMU =NCS
       IF( NL.LE.1) NMU=2
-      IF(LCT.EQ.1) THEN
 C* Linear interpolation between cosines
-        INTM=2
-      ELSE
-C* If converting from lab, force unit base interpolation for cosines
-C... But CHECKR doesn't like it (???)
-C...    INTM=22
-        INTM=2
-      END IF
+      INTM=2
 C* Write the TAB2 record with incident energy and the cosine grid
       C1  =0.
       L1  =0
@@ -646,81 +692,53 @@ C* Reconstruct the energy distribution for this cosine
       JP =0
       SEN=0
 C* Begin loop over secondary particle energies
-      EP0=0
+      ECM0=0
   200 IP=IP+1
-      EP=RWO(LX1+NCYC*(IP-1))
+      ECM=RWO(LX1+NCYC*(IP-1))
 C* Check that outgoing particle energies are monotonic increasing
-      IF(EP.LT.EP0) THEN
-        IF(LTT.GT.0) WRITE(LTT,964) IZAP,EIN,EP
+      IF(ECM.LT.ECM0) THEN
+        IF(LTT.GT.0) WRITE(LTT,964) IZAP,EIN,ECM
         GO TO 408
       END IF
-      EP0=EP
+      ECM0=ECM
       CSN=ACOS
-      ELB=EP
+      ELB=ECM
       DRV=1
-      IF (LCT.NE.1 .AND. EP.GT.0 .AND. IZAP.EQ.1) THEN
-C...  IF (LCT.NE.1 .AND. EP.GT.0 ) THEN
-C* Convert CM to Lab co-ordinate system assuming incident neutrons
-C* WARNING: applied to outgoing neutrons only
-        AW1=AWR+1
-        CLB=CSN
-C* Minimum lab cosine
-        CMN=-1
-C...    QQ=1-AW1*AW1*EP/EIN
-        QQ=1-DBLE(AW1*AW1*EP/EIN)
-        IF (QQ.GT.0) CMN=-SQRT(QQ)
-        IF (CLB.LT.CMN) THEN
-C* Zero distribution when far outside valid cosine range
-          CLB=CMN
-          IF(IMU.LT.NMU .AND. AMU(IMU+1).LE.CMN) DRV=0
+      IF (LCT.NE.1 .AND. ECM.GT.0 ) THEN
+C* Convert CM to Lab co-ordinate system
+C* Coding from NJOY-99 manual for GROUPR page VII-35
+C* Input cosine grid is defined to be the in Lab system
+        CLB=DBLE(ACOS)
+C* Equation (125) c = PAR * sqrt( EIN / ELB)
+        PAR=SQRT(DBLE(ADS))/DBLE(AMR+1)
+C* From Equations (123) and (125) solve quadratic for the squareroot of
+C* the outgoing particle energy SQRT(ELB) in the Lab system
+        P1=PAR*CLB*SQRT(DBLE(EIN))
+        P2=DBLE(ECM)-PAR*PAR*DBLE(EIN)*(1-CLB**2)
+C* Test for cosine values below minimum
+        IF(P2.LT.0) THEN
+          P2 =0
+          DRV=0
+c...      IF(IMU.LT.NMU .AND. AMU(IMU+1).LE.CMN) DRV=0
         END IF
-C* Outgoing particle energy in the laboratory system
-C...    QQ=EP-EIN*(1-CLB*CLB)/(AW1*AW1)
-        QQ=EP-EIN*(1-DBLE(CLB)**2)/(AW1*AW1)
-        IF (QQ.LT.0) QQ=0
-        ELB=CLB*SQRT(EIN)/AW1+SQRT(QQ)
-        ELB=ELB*ELB
-C* Calculate corresponding cosine in the CM system
-        CSN=CLB*SQRT(ELB/EP)-SQRT(EIN/EP)/AW1
+C* Square the components to get the outgoing particle energy ELB
+        P2 =SQRT(P2)
+        PP =P1*P1+P2*P2
+        P2 =2*P1*P2
+        P1 =PP
+C* Mathematical constraint is on CLB^2 (absolute value of cosine).
+C* P2 has same sign as CLB. For backward scattering CLB<0, so the
+C* smaller root should be taken --> use +P2
+        ELB=P1+P2
+C* Calculate corresponding cosine in the CM system from Equation (124)
+        CSN=SQRT(ELB/ECM)*(CLB-PAR*SQRT(DBLE(EIN/ELB)))
 C* Check the limits
         QQ=-1
         IF (CSN.LT.QQ) CSN=QQ
         QQ=1
         IF (CSN.GT.QQ) CSN=QQ
 C* Add jacobian for the CM-to-Lab transformation
-        DRV=DRV*SQRT(ELB/EP)
-C...
-C...C* Coding from ENDF-102 manual Appendix E
-C...C* Define the mass of the incident particle
-C...          IF     (IZPR.EQ.   1) THEN
-C...            AM1=ANEU
-C...          ELSE IF(IZPR.EQ.1001) THEN
-C...            AM1=APRO
-C...          ELSE IF(IZPR.EQ.1002) THEN
-C...            AM1=ADEU
-C...          ELSE IF(IZPR.EQ.1003) THEN
-C...            AM1=ATRI
-C...          ELSE IF(IZPR.EQ.2003) THEN
-C...            AM1=AHE3
-C...          ELSE IF(IZPR.EQ.2004) THEN
-C...            AM1=AHE4
-C...          ELSE
-C...            STOP 'SIXTAB ERROR - Unknown incident particle'
-C...        END IF
-C...C* Mass of the target nucleus
-C...        AM2=AWR*ANEU
-C...C* Mass of the primary outgoing particle
-C...        AM3=AWP*ANEU
-C...C* Mass ratios
-C...        AMR=AM2/AM1
-C...        ADS=AM3/AM1
-C...C* Auxilliary factor BETA (imaginary below threshold)
-C...        BET=(AMR(AMR+1-ADS)/ADS) * (1+(1+AMR)*QI/(AMR*EIN))
-C...        BET=MAX(ZERO,BET)
-C...        BET=SQRT(BET)
-C...C* Minimum lab cosine at cos(CM)=-1
-C...        ??? Independent of beta, always equal -1 ???
-C...        CMN=-1
+        DRV=DRV*SQRT(ELB/ECM)
       END IF
 C*
 C* Process the angular distributions
@@ -737,7 +755,7 @@ C*
 C* Calculate the probability from Kalbach-Mann representation
         SS=RWO(LX1+NCYC*(IP-1)+1)
         RR=RWO(LX1+NCYC*(IP-1)+2)
-        AA=BACH(IZPR,IZAP,IZA,EIN,EP)
+        AA=BACH(IZPR,IZAP,IZA,EIN,ECM)
         FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
       ELSE IF(LANG.GT.10) THEN
 C*
@@ -760,23 +778,11 @@ C* Processing of distribution for one outgoing energy point completed
   400 CONTINUE
 C*
 C* Enter energy point - skip if energy less then previous point
-      IF(IP.GT.1 .AND. ELB.LT.RWO(LXE+JP-1)) GO TO 407
-      FMU1=FMU*DRV
+      IF(IP.GT.1 .AND. ELB.LT.RWO(LXE+JP-1)) GO TO 408
       RWO(LXE+JP)=ELB
-      RWO(LXX+JP)=FMU1
+      RWO(LXX+JP)=FMU*DRV
       JP=JP+1
-C* Integrate over outgoing particle energy for normalisation
-      IF(JP.GT.1) THEN
-        IF(LEP.EQ.2) THEN
-          FMUJ=0.5*(FMU1+FMU0)
-        ELSE
-          FMUJ=FMU0
-        END IF
-        SEN=SEN + FMUJ*(ELB-ELB0)
-      END IF
-      FMU0=FMU1
-      ELB0=ELB
-  407 IF(JP.GE.KX) STOP 'MF6LW7 ERROR - MXRW capacity exceeded'
+      IF(JP.GE.KX) STOP 'MF6LW7 ERROR - MXRW capacity exceeded'
 C* Continue with the secondary energy loop
   408 IF(IP.LT.NEP) GO TO 200
 C*
@@ -788,37 +794,39 @@ C* Check if single point
         RWO(LXE+JP)=ELB*(1+EPS)
         RWO(LXX+JP)=0
         JP=JP+1
-        IF(LEP.EQ.2) THEN
-          FMUJ=0.5*FMU1
-        ELSE
-          FMUJ=FMU1
-        END IF
-        SEN=SEN + FMUJ*ELB*EPS
       END IF
       NRP=1
       C1 =0
       L1 =0
       L2 =0
       NS0=0
-C* Linearise the spectrum distribution for this cosine
-C... Not necessary
-C...      NBT(1)=JP
-C...      INT(1)=LEP
-C...      EPS=0.005
-C...      CALL VECLIN(NRP,JP,NBT,INT,RWO(LXE),RWO(LXX),KX,EPS)
-C...      INT(1)=2
 C* Write the spectrum distribution for this cosine
       CALL WRTAB1(LSC,MAT0,MF0,MT0,NS0,C1,ACOS,L1,L2
      1           , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
 C* Add contribution to the integral
+      SEN=0
+      E1 =RWO(LXE)
+      F1 =RWO(LXX)
+      DO J=2,JP
+        E2=RWO(LXE-1+J)
+        F2=RWO(LXX-1+J)
+        IF(LEP.EQ.1) THEN
+          FF=F1
+        ELSE
+          FF=(F1+F2)/2
+        END IF
+        SEN=SEN+FF*(E2-E1)
+        F1=F2
+        E1=E2
+      END DO
       IF(IMU.GT.1) THEN
         JNTM=INTM-10*(INTM/10)
-        IF(JNTM.EQ.2) THEN
-          SENJ=0.5*(SEN+SEN0)
+        IF(JNTM.EQ.1) THEN
+          FF=SEN0
         ELSE
-          SENJ=SEN0
+          FF=(SEN+SEN0)/2
         END IF
-        SIG = SIG + SENJ*(ACOS-ACOS0)
+        SIG = SIG + FF*(ACOS-ACOS0)
       END IF
       ACOS0= ACOS
       SEN0 = SEN
@@ -826,8 +834,11 @@ C* Continue with the cosine loop
   500 CONTINUE
 C* Check the integral normalisation factor
         IF(LTT.GT.0 .AND. ABS(SIG-1).GT.1.E-2) THEN
-          WRITE(LTT,901) ' WARNING -          at incident energy ',EIN
-          WRITE(LTT,901) '         Spectrum normalisation factor ',SIG
+          NSIG=NSIG+1
+          IF(ABS(SIG-1).GT.SIGMX) THEN
+            SIGMX=SIG-1
+            EINMX=EIN
+          END IF
         END IF
 C* Copy from scratch to output and normalise distributions
       REWIND LSC
@@ -843,21 +854,76 @@ C* Copy from scratch to output and normalise distributions
       REWIND LSC
 C* Continue with the incident energy loop
   600 CONTINUE
+C* Print cumulative error message for spectrum normalisation
+      IF(LTT.GT.0 .AND. NSIG.GT.0) THEN
+        SIGMX=SIGMX*100
+        WRITE(LTT,900) ' WARNING - Spectrum normalis. at points ',NSIG
+        WRITE(LTT,903) '            Max normalisation dif. [%]  ',SIGMX
+        WRITE(LTT,901) '                    at incident energy  ',EINMX
+      END IF
 C* Continue with the particle loop
   800 CONTINUE
 C* Section processed - write SEND record
       NS=99998
       CALL WRTEXT(LOU,MAT0,MF0,  0,NS,B66)
-      CLOSE(UNIT=LSC)
       RETURN
 C*
   900 FORMAT(A40,I6)
   901 FORMAT(A40,1P,E11.3)
   902 FORMAT(2F11.0,4I11,I4,I2,I3,I5)
+  903 FORMAT(A40,F11.1)
   960 FORMAT(/' Converting MF=6, MT=',I3,' to Law 7 format')
   961 FORMAT(' SIXTAB ERROR - Can not process Law',I3,' for ZAP',I6)
   962 FORMAT(12X,A8,' Representation for particle IZAP',I6)
   964 FORMAT(' SIXTAB WARNING - Format error ZAP,Ein,Ep',I6,1P,2E10.3)
+      END
+      SUBROUTINE LEGPNT(NW,NL,RWO,MXRW)
+C-Title  : Subroutine LEGPNT
+C-Purpose: Convert Legendre distribution to pointwise form
+      DIMENSION  RWO(MXRW)
+      NW0=NW
+      NL0=NL
+C* NXP - number of angular points
+C* LXC - address of Legendre components
+C* LXP - address of the angle/distribution pairs
+      NXP=2*NL+2
+      LXC=NW+2
+      LXP=LXC+NL+1
+      IF(LXP+2*NXP.GT.MXRW) STOP 'LEGPNT ERROR - MXRW limit exceeded'
+C* Insert the implied P0 Legendre component
+      DO L=1,NL
+        RWO(LXC-L)=RWO(LXC-1-L)
+      END DO
+      RWO(1)=0.5
+C* Angular cosine increment
+      DCS=2
+      DCS=DCS/(NXP-1)
+C* loop over output points
+      DO I=1,NXP
+C*      Cosine point
+        AC=-1+(I-1)*DCS
+        IF(I.EQ.  1) AC=-1
+        IF(I.EQ.NXP) AC= 1
+C*      Legendre components for this cosine
+        CALL PLNLEG(AC,RWO(LXC),NL)
+C*      Distribution value at this cosine
+        FF=RWO(1)*RWO(LXC)
+        DO L=1,NL
+          FF=FF+(2*L-1)*RWO(1+L)*RWO(LXC+L)/2
+        END DO
+C*      Save the cosine and the distribution
+        RWO(LXP+2*(I-1)  )=AC
+        RWO(LXP+2*(I-1)+1)=FF
+      END DO
+C* Define new field parameters for pointwise data
+      NL=NXP
+      NW=NL*2
+C* Move the pointwise data
+      DO I=1,NW
+        RWO(I)=RWO(LXP-1+I)
+      END DO
+C*
+      RETURN
       END
       FUNCTION BACH(IZA1,IZA2,IZAT,E,EP)
 C     ******************************************************************
