@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:57:51 $
-Ccc   * $Id: fusion.f,v 1.46 2005-06-13 16:57:51 Capote Exp $
+Ccc   * $Date: 2005-06-14 16:37:40 $
+Ccc   * $Id: fusion.f,v 1.47 2005-06-14 16:37:40 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -583,7 +583,7 @@ C-----Storing transmission coefficients for the incident channel
       relcal = .FALSE.
       IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-       
+
       IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
@@ -596,20 +596,25 @@ C--------Corrected scattering radius
          IF(S0_obs.GT.0.)   THEN
            WRITE ( 6,99004) S0_obs,S0_unc
            WRITE (12,99004) S0_obs,S0_unc
-         ELSE
-           WRITE ( 6,'(7x,49(1h*)/
-     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')')
-           WRITE (12,'(7x,49(1h*)/
-     &                 7x,''LOW ENERGY NEUTRON SCATTERING:'')')
-         ENDIF
-99004    FORMAT (7x,49(1h*)/
+99004      FORMAT (7x,54(1h*)/
      &           6x,' LOW ENERGY NEUTRON SCATTERING:'/
      &           6x,' Exp.  Strength functions S0 =',f6.3,' (',f6.4,')')
-         WRITE ( 6,99005) s0*1D4, stl(1), s1a*1D4, stl(2), rp
-         WRITE (12,99005) s0*1D4, stl(1), s1a*1D4, stl(2), rp
+         ELSE
+           WRITE ( 6,'(7x,54(1h*)/
+     &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
+           WRITE (12,'(7x,54(1h*)/
+     &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
+         ENDIF
+         WRITE ( 6,99005)
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), EINl*1.D3, TOTcs, rp
+         WRITE (12,99005)
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), EINl*1.D3, TOTcs, rp
+
 99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,' T0=',d12.6/
      &           6x,'                          S1 =',f6.3,' T1=',d12.6/
-     &           6x,' Scattering radius =',f7.3,' fm'/7x,49(1h*))
+     &           6x,' Elab = ',F6.1,' keV',
+     &              '        Total XS = ',F9.2,' mb'/
+     &           6x,' Scattering radius =',f7.3,' fm'/7x,54(1h*))
          WRITE ( 6,*)
          WRITE (12,*)
       ENDIF
