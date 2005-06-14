@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-04 15:26:12 $
-Ccc   * $Id: pcross.f,v 1.31 2005-06-04 15:26:12 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-14 06:44:40 $
+Ccc   * $Id: pcross.f,v 1.32 2005-06-14 06:44:40 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -430,8 +430,6 @@ C           fmsd set to 0.d0 means isotropic distribution
      &              ebind, eee, ftmp, 1.d0, ddxs)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
-C-------------use CSEa(,,,0) to built up inclusive ddx
-              CSEa(ie,iang,nejc,0) = CSEa(ie,iang,nejc,0) + ddxs(iang)
             ENDDO
          ENDDO
        ENDDO

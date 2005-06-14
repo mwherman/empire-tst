@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-06-13 16:00:24 $
-Ccc   * $Id: MSD-tristan.f,v 1.40 2005-06-13 16:00:24 Capote Exp $
+Ccc   * $Date: 2005-06-14 06:44:40 $
+Ccc   * $Id: MSD-tristan.f,v 1.41 2005-06-14 06:44:40 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2844,15 +2844,11 @@ C-----------------store ddx to continuum
                   IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
      &                THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
-C--------------------use CSEa(,,,0) to built up inclusive ddx
-                     CSEa(necs,na,nej,0) = CSEa(necs,na,nej,0) + sigm
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
                   ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
      &                    ) THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
-C--------------------use CSEa(,,,0) to built up inclusive ddx
-                     CSEa(necs,na,nej,0) = CSEa(necs,na,nej,0) + sigm
                   ENDIF
                ENDIF
             ENDDO

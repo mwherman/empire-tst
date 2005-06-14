@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:23 $
-Ccc   * $Id: input.f,v 1.139 2005-06-13 16:00:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-14 06:44:40 $
+Ccc   * $Id: input.f,v 1.140 2005-06-14 06:44:40 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2018,7 +2018,7 @@ C
       ENDIF
 
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'E',1x,12F10.3)
+99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'I',1x,12F10.3)
 
       IF (FIRst_ein) THEN
         iexclus = 0
@@ -2040,9 +2040,9 @@ C
 
          IF (iexclus.EQ.1) THEN
           WRITE( 6,*)
-          WRITE( 6,*) ' E means only inclusive spectra is available'
+          WRITE( 6,*) ' I means only inclusive spectra are available'
           WRITE(12,*)
-          WRITE(12,*) ' E means only inclusive spectra is available'
+          WRITE(12,*) ' I means only inclusive spectra are available'
         ENDIF
 
         WRITE (12,*) '                                                '

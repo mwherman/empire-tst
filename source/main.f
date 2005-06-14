@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:57:51 $
-Ccc   * $Id: main.f,v 1.107 2005-06-13 16:57:51 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-14 06:44:40 $
+Ccc   * $Id: main.f,v 1.108 2005-06-14 06:44:40 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1801,9 +1801,8 @@ C-----------------------to conserve the integral
                   ELSE !other residues with isotropic ang. distributions
                      piece = CSE(icse,nejc,0)/4.0/PI
                      DO nang = 1, NDANG
-c                       CSEa(icse,nang,nejc,0) = CSEa(icse,nang,nejc,0)
-c    &                     + piece
-                        CSEa(icse,nang,nejc,0) = piece
+                        CSEa(icse,nang,nejc,0) = CSEa(icse,nang,nejc,0)
+     &                     + piece
                      ENDDO
                   ENDIF
                ENDDO

@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:23 $
-Ccc   * $Id: HF-comp.f,v 1.72 2005-06-13 16:00:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-14 06:44:40 $
+Ccc   * $Id: HF-comp.f,v 1.73 2005-06-14 06:44:40 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -319,6 +319,18 @@ C-----DE spectra
                DO iejc = 0, NDEJC
                   IF (POPcse(Iec,iejc,iesp,Nnuc).NE.0) THEN
                     IF(ENDF(Nnur).EQ.2) THEN
+                           
+                       DO nang = 1, NDANG
+                          piece = CSEmsd(iesp,iejc)
+                          IF (iesp.EQ.NEXr(iejc,1)) piece = 0.5*piece
+                          CSEa(iesp,nang,iejc,0)
+     &                       =  CSEa(iesp,nang,iejc,0)
+     &                       + ((POPcse(0,iejc,iesp,Nnuc)
+     &                       - piece*POPcseaf(0,iejc,iesp,Nnuc))
+     &                       /4.0/PI + CSEa(iesp,nang,iejc,1)
+     &                       *POPcseaf(0,iejc,iesp,Nnuc))
+                       ENDDO
+
                       CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
      &                + POPcse(Iec,iejc,iesp,Nnuc)*xnor
                     ELSE
