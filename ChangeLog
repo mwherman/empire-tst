@@ -38,6 +38,13 @@
 16. Separate energy dependent angular grid for elastic scattering implemented,
     allowing to use any number of points for accurate description of angular 
     distributions at energies above 10 MeV (R. Capote)
+17. Mixed (exclusive/inclusive) ENDF-6 cross sections and spectra calculations
+    implemented (M. Herman). Formatting needs to be tested.
+18. Unitarity problem for DIRECT<>0 cases identified and corrected. Unitarity
+    check introduced (R. Capote).
+19. EMPEND was extended to calculate total production cross section, including 
+    MT=5 contributions (A. Trkov) 
+    
 
         Changes in version 2.19beta12 with respect to 2.18
                       Brookhaven, February  2004
