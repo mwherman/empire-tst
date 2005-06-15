@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-15 13:57:30 $
-Ccc   * $Id: input.f,v 1.143 2005-06-15 13:57:30 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-15 16:36:04 $
+Ccc   * $Id: input.f,v 1.144 2005-06-15 16:36:04 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -229,7 +229,7 @@ C
          MODelecis = 0
          EXClusiv = .TRUE.
 C        Starting value (NANgela must be less than NDANgecis !! in dimension.h)
-         NANgela = 19
+         NANgela = NDAng
          IF(NANgela.GT.NDAngecis) THEN
             WRITE(6,*)
      &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
@@ -244,13 +244,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1045,13 +1045,13 @@ C-----------stop DEGAS particle channels if HMS active
                IDNa(3,4) = 0
                IDNa(4,4) = 0
             ENDIF
-C-----------stop DEGAS completely if PCROSS is active
-CMH---------but leave  DEGAS for gamma emission 
+C-----------stop DEGAS particle channels if PCROSS active
+CMH---------but leave  DEGAS for gamma emission
             IF(PEQc.GT.0)THEN
-            IDNa(1, 4) = 0
-            IDNa(2, 4) = 0
-            IDNa(3, 4) = 0
-            IDNa(4, 4) = 0
+               IDNa(1, 4) = 0
+               IDNa(2, 4) = 0
+               IDNa(3, 4) = 0
+               IDNa(4, 4) = 0
             ENDIF
          ENDIF
 C--------set HMS  (.,5)
@@ -1090,10 +1090,10 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
                IF (NPRoject.EQ.2) THEN
 C                 IDNa(3, 6) = 0
-                  IDNa(4,6) = 0
+                  IDNa(4, 6) = 0
                ELSEIF (NPRoject.EQ.1) THEN
 C                 IDNa(1, 6) = 0
-                  IDNa(2,6) = 0
+                  IDNa(2, 6) = 0
                ELSE
                   WRITE (6,*) ''
                   WRITE (6,*)
@@ -1107,12 +1107,8 @@ C-----------stop PCROSS nucleon channels if HMS active
                IDNa(2,6) = 0
                IDNa(4,6) = 0
             ENDIF
-C-----------stop PCROSS nucleon and gamma channels if DEGAS active
-            IF (DEGa.GT.0) THEN
-               IDNa(2,6) = 0
-               IDNa(4,6) = 0
-               IDNa(5,6) = 0
-            ENDIF
+C-----------stop PCROSS gamma channel if DEGAS active
+            IF (DEGa.GT.0) IDNa(5,6) = 0
          ENDIF
 C--------print IDNa matrix
          WRITE (6,*) ' '
@@ -1516,20 +1512,12 @@ C-----------determination of excitation energy matrix in res. nuclei
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
-C           IF (NEX(nnur).GT.NDEX) THEN
-C              WRITE (6,*) ' NUMBER OF BINS IN RESIDUAL NUCLEUS A=',
-C    &                     A(nnur), 'AND Z=', Z(nnur),
-C    &                     ' EXCEEDS DIMENSIONS'
-C              WRITE (6,*)
-C    &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
-C              NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
-C              STOP
-C           ENDIF
             IF (NEX(nnur).GT.NDEX) THEN
                WRITE (6,*)
-               WRITE (6,'('' WARNING: NUMBER OF BINS IN RESIDUAL NUCLEUS
-     & '',I3,A1,A2,'' EXCEEDS DIMENSIONS'')')  NINT(A(nnur)),'-',
-     &         SYMb(nnur)
+               WRITE (6,'('' WARNING: NUMBER OF BINS '',I3,
+     &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
+     &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
+     &         '-',SYMb(nnur),NDEX
                WRITE (6,
      &         '('' WARNING: Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
      &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
@@ -1538,7 +1526,9 @@ C           ENDIF
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (6,*)
      &          'WARNING: TO CONSIDER IT, YOU HAVE TO DECREASE ',
-     &          ' NEX IN THE INPUT AND RESTART'
+     &          ' NEX IN THE INPUT '
+               WRITE (6,*)
+     &          'WARNING: OR INCREASE NDEX PARAMETER IN Dimension.h'
                WRITE (6,*)
                 EMAx(nnur) = 0.d0
                 NEX(nnur) = 0
@@ -1546,12 +1536,6 @@ C           ENDIF
                 Q(nejc,nnuc) = 99.d0
                 CYCLE
             ENDIF
-C    &                     ' EXCEEDS DIMENSIONS'
-C              WRITE (6,*)
-C    &               ' YOU HAVE TO DECREASE NUMBER OF STEPS AND RESTART'
-C              NEX(1) = INT(NEX(1)*FLOAT(NDEX)/FLOAT(NEX(nnur))) - 1
-C              STOP
-C           ENDIF
 
             IF (NEX(nnur).GT.0) THEN
                DO i = 1, NEX(nnur)
@@ -2018,29 +2002,34 @@ C
         WRITE (12,*)
 
       ENDIF
-
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'I',1x,12F10.3)
-
       IF (FIRst_ein) THEN
         iexclus = 0
         DO i = 1, NNUcd
-          IF (ENDf(i).EQ.1.0D0) THEN
+           IF(ENDf(i).GT.0.D0) THEN
+            IF (ENDf(i).EQ.1.0D0) THEN
             WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
             WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-           ENDIF
-          IF (ENDf(i).EQ.2.0D0) THEN
+            ENDIF
+            IF (ENDf(i).EQ.2.0D0) THEN
             iexclus = 1
             WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
             WRITE ( 6,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-          ENDIF
+            ENDIF
+           ELSE
+            WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+            WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
+           ENDIF
         ENDDO
 
-         IF (iexclus.EQ.1) THEN
+        IF (iexclus.EQ.1) THEN
           WRITE( 6,*)
           WRITE( 6,*) ' I means only inclusive spectra are available'
           WRITE(12,*)
@@ -2272,15 +2261,27 @@ C--------create file with levels xxx.lev
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
 C           RCN, 04/2005  duplicate levels found !!
-C           WRITE (14,'(A110)') ch_iuf
+            IF(IA.eq.A(0) .AND. IZ.EQ. Z(0)) WRITE (14,'(A110)') ch_iuf
             DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
 C              RCN, 04/2005  duplicate levels found !!
-C              WRITE (14,'(A110)') ch_iuf
+
+               IF(IA.eq.A(0) .AND. IZ.eq. Z(0))
+     &                      WRITE (14,'(A110)') ch_iuf
             ENDDO
             DO ilv = 1, nlvr + ngamr
                BACKSPACE (13)
             ENDDO
+
+C           RCN, June 15
+
+            IF(IA.eq.A(0) .AND. IZ.eq. Z(0)) THEN
+
+              izatmp = INT(1000*iz + ia)
+
+              NSTored(0) = izatmp
+
+            ENDIF
          ENDIF
 C--------levels for nucleus NNUC copied to file xxx.lev
          DO ilv = 1, nlvr
