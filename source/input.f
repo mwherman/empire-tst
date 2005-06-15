@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-15 08:36:43 $
-Ccc   * $Id: input.f,v 1.141 2005-06-15 08:36:43 Capote Exp $
+Ccc   * $Date: 2005-06-15 08:42:30 $
+Ccc   * $Id: input.f,v 1.142 2005-06-15 08:42:30 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1400,8 +1400,8 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
            ENDf(i) = 0
           Enddo
       ENDIF
-C-----Energy step defined according to the CN excitation energy        
-      DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)      
+C-----Energy step defined according to the CN excitation energy
+      DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -4051,10 +4051,10 @@ C-----
             ENDIF
             ROPaa(nnuc) = val
             WRITE (6,
-     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
      & ) i2, SYMb(nnuc), val
             WRITE (12,
-     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.3)'
+     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
      & ) i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
@@ -4066,10 +4066,10 @@ C-----
                   ATIlnor(i) = val
                ENDDO
                WRITE (6,
-     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.1)'
+     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
                WRITE (12,
-     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.1)'
+     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
                GOTO 100
             ENDIF
@@ -4097,7 +4097,7 @@ C              ATIlnor(nnuc) = val + grand()*sigma
             else
               ATIlnor(nnuc) = val
               WRITE (6,
-     &      '('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.1)'
+     &      '('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.2)'
      &        ) i2, SYMb(nnuc), val
              endif
 
@@ -4111,10 +4111,10 @@ C-----
                   GTIlnor(i) = val
                ENDDO
                WRITE (6,
-     &     '('' Single particle l.d. parameter g multiplied by '',F6.1)'
+     &     '('' Single particle l.d. parameter g multiplied by '',F6.2)'
      &     ) val
                WRITE (12,
-     &     '('' Single particle l.d. parameter g multiplied by '',F6.1)'
+     &     '('' Single particle l.d. parameter g multiplied by '',F6.2)'
      &     ) val
                GOTO 100
             ENDIF
@@ -4143,7 +4143,7 @@ C              GTIlnor(nnuc) = val + grand()*sigma
               GTIlnor(nnuc) = val
               WRITE (6,
      &'('' Single particle l.d. parameter g in '',I3,A2,
-     &  '' multiplied by '',        F6.1)') i2, SYMb(nnuc), val
+     &  '' multiplied by '',        F6.2)') i2, SYMb(nnuc), val
              endif
             GOTO 100
          ENDIF
