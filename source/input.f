@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-14 06:44:40 $
-Ccc   * $Id: input.f,v 1.140 2005-06-14 06:44:40 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-15 08:36:43 $
+Ccc   * $Id: input.f,v 1.141 2005-06-15 08:36:43 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1400,6 +1400,8 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
            ENDf(i) = 0
           Enddo
       ENDIF
+C-----Energy step defined according to the CN excitation energy        
+      DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)      
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
       DO i = 1, NDEJC
@@ -1407,10 +1409,11 @@ C-----check whether any residue excitation is higher than CN
          IF (qtmp.LT.qmin) qmin = qtmp
       ENDDO
       IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
+C--------Energy redefined
          DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
+C--------Number of steps in CN outgoing energy grid redefined
          NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
       ENDIF
-      DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
