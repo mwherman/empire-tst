@@ -24,7 +24,7 @@
 11. DWBA calculated inelastic scattering cross sections for selected levels
     could be added to continuum. Corresponding "discrete levels" are marked
     "cont" in the discrete level file. The inelastic contribution to the
-    continuum is spread over several emission energy bins using gaussian
+    continuum is spread over several emission energy bins using Gaussian
     distribution with sigma given in input (new input keyword RESOLF)
 12. Additional dummy levels can be placed in the discrete level region in the
     collective level file. The inelastic cross section calculated by DBWA
@@ -43,10 +43,13 @@
 18. Unitarity problem for DIRECT<>0 cases identified and corrected. Unitarity
     check introduced (R. Capote).
 19. EMPEND was extended to calculate total production cross section, including 
-    MT=5 contributions (A. Trkov) 
+    MT=5 contributions (A. Trkov)
+20. PCROSS is given precedence over DEGAS for PE particle emission (M. Herman)
     
 
-        Changes in version 2.19beta12 with respect to 2.18
+         
+        
+        Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
 
 1.  Error in the Wilmore-Hodgson omp corrected.
@@ -446,7 +449,7 @@ Known bugs:
 18. OMPAR (.omp) file with optical model parameters produced and used for
     input
 
-            Changes in version 2.12.2 with respect to 2.12.1
+      Changes in version 2.12.2 with respect to 2.12.1
                       Vienna,  11 April 1999
 
 1. energy shift used to fit low energy discrete levels gradually decreased
@@ -457,7 +460,7 @@ Known bugs:
 4. entire code consistently indented.
 
 
-            Changes in version 2.12.1 with respect to 2.12
+      Changes in version 2.12.1 with respect to 2.12
                       Vienna,  07 Dec. 1998
 
 1. dsource directory added with explicit double precision source (no compiler
@@ -468,7 +471,7 @@ Known bugs:
    with Dobs at neutron binding.
 
 
-            Changes in version 2.12 with respect to 2.11
+      Changes in version 2.12 with respect to 2.11
                       Vienna,  15 Sept. 1998
 
 1. Error in the determination of pairing corrections in readnix.f (in the
