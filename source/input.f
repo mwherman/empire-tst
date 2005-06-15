@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-15 08:42:30 $
-Ccc   * $Id: input.f,v 1.142 2005-06-15 08:42:30 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-15 13:57:30 $
+Ccc   * $Id: input.f,v 1.143 2005-06-15 13:57:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1046,14 +1046,13 @@ C-----------stop DEGAS particle channels if HMS active
                IDNa(4,4) = 0
             ENDIF
 C-----------stop DEGAS completely if PCROSS is active
-CMH---------NO, lets' leave it so that we can have DEGAS and PCROSS clusters
-C           IF(PEQc.GT.0)THEN
-C           IDNa(1, 4) = 0
-C           IDNa(2, 4) = 0
-C           IDNa(3, 4) = 0
-C           IDNa(4, 4) = 0
-C           IDNa(5, 4) = 0
-C           ENDIF
+CMH---------but leave  DEGAS for gamma emission 
+            IF(PEQc.GT.0)THEN
+            IDNa(1, 4) = 0
+            IDNa(2, 4) = 0
+            IDNa(3, 4) = 0
+            IDNa(4, 4) = 0
+            ENDIF
          ENDIF
 C--------set HMS  (.,5)
          IF (LHMs.GT.0) THEN
