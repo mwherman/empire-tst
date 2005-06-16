@@ -14,7 +14,7 @@
      &                 CSEhms(ndecse,0:ndejc), CSHms(0:ndejc),
      &                 CSEfis(ndecse,0:ndejc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
-     &                 CSFis, CSFus, CSGdr1, CSGdr2,
+     &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),
      &                 CSRead, D1Fra, DE, DEF(ndlw,0:ndnuc), DEFeq,
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,
@@ -131,7 +131,7 @@
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
-     &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc
+     &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc, ELCncs
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, EJMass, SIGabs, WIDcoll

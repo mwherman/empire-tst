@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:23 $
-Ccc   * $Id: tl.f,v 1.63 2005-06-13 16:00:23 Capote Exp $
+Ccc   * $Date: 2005-06-16 16:16:55 $
+Ccc   * $Id: tl.f,v 1.64 2005-06-16 16:16:55 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1548,11 +1548,9 @@ C-----For vibrational the Tls must be multiplied by
 C
 C-----Estimating absorption cross section from obtained TLs
 C
-C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
       xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xmas_nejc = EJMass(Nejc)
 C     xmas_nnuc = AMAss(Nnuc)
-C     ecms = EIN
       elab = EINl
       relcal = .FALSE.
       IF (IRElat(Nejc,Nnuc).GT.0) relcal = .TRUE.
@@ -1565,26 +1563,26 @@ C-----Absorption cross section in mb
       sabs = 10.d0*PI/ak2*sabs
       IF (sabs.LE.0.D0) RETURN
 
-       CSFus = ABScs
+      CSFus = ABScs
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-          IF (ICOller(l+1).LE.NLV(nnuc)) THEN
+         IF (ICOller(l+1).LE.NLV(nnuc)) THEN
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.20) THEN
 C             Coupled levels
-                  SINlcc = SINlcc + dtmp
-            ELSE
+              SINlcc = SINlcc + dtmp
+           ELSE
 C             Uncoupled discrete levels
               SINl = SINl + dtmp
-            ENDIF
+           ENDIF
          ELSE
 C          Scattering into continuum
            sinlcont = sinlcont + dtmp
-C          Not included into inelastic as it is renormalized in ACCUMsd as PE spectra
-C           SINl = SINl + dtmp
+C          Not included into inelastic as it is renormalized in main.f
+C          SINl = SINl + dtmp
          ENDIF
       ENDDO
   400 CLOSE (45)
@@ -1647,10 +1645,13 @@ C
             WRITE (6,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
+         WRITE (6,*) ' Sreac - SINl (renormalized by DWBA) =', 
+     &         SNGL(ABScs - SINlcc - SINl), ' mb (Sabs - SINl)'
          WRITE (6,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (6,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
          WRITE (6,*)
+
       ENDIF
 C
 C-----Renormalizing TLs to correct very small difference
@@ -1658,11 +1659,11 @@ C     between calculated and read ECIS XS
 C     Discrete level inelastic scattering (not coupled levels) also included
 C
       DO l = 0, Maxlw
-         Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc- SINl)/sabs
+         Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl)/sabs
       ENDDO
-       CSFus = ABScs - SINlcc - SINl
+      CSFus = ABScs - SINlcc - SINl
 
-       RETURN
+      RETURN
       END
 
 

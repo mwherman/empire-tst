@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-14 16:37:40 $
-Ccc   * $Id: fusion.f,v 1.47 2005-06-14 16:37:40 Capote Exp $
+Ccc   * $Date: 2005-06-16 16:16:54 $
+Ccc   * $Id: fusion.f,v 1.48 2005-06-16 16:16:54 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -71,8 +71,7 @@ C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       xmas_npro = EJMass(Npro)
       el   = EINl
-       ecms = EIN
-
+      ecms = EIN
       S1 = 0.5
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
      &    - SEJc(Npro).EQ.0.0D0) S1 = 1.0
@@ -318,8 +317,8 @@ C-----------DWBA calculation. All collective levels considered
             IF (DIRect.EQ.3) THEN
                WRITE (6,*) ' DWBA calculations for inelastic scattering'
             ELSE
-               WRITE (6,*) ' DWBA calculations for inelastic scattering'
-     &                     , ' to uncoupled collective levels'
+               WRITE (6,*)' DWBA calculations for inelastic scattering'
+               WRITE (6,*)'             to uncoupled collective levels'
             ENDIF
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
             IF (DIRect.NE.3) THEN
@@ -352,7 +351,7 @@ C
             WRITE (6,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
 
-                einlab = -EINl
+            einlab = -EINl
             IF (DIRect.EQ.1) THEN
 C--------------Saving KTRlom(0,0)
                itmp1 = KTRlom(0,0)
@@ -493,7 +492,7 @@ C--------calculation of h.i. transmission coefficients for fusion
          NLW = maxlw
 C--------channel spin min and max
          el = EINl
-          relcal = .FALSE.
+         relcal = .FALSE.
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
          IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
      &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
@@ -524,8 +523,8 @@ C--------channel spin min and max
           ENDDO
          ENDDO
          ABScs = CSFus
-          SINlcc=0.d0
-          SINl=0.d0
+         SINlcc = 0.d0
+         SINl = 0.d0
       ENDIF ! END of FUSREAD block
 C
 C-----Moving incident channel results to ../TL directory
@@ -564,7 +563,7 @@ C-----Storing transmission coefficients for the incident channel
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp20//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-         DO l = 0, maxlw-1
+         DO l = 0, maxlw
             WRITE (46,*) l, SNGL(stl(l + 1))
          ENDDO
          WRITE (46,'(1x,A30,6(e12.6,1x))') 'EL,TOT,REAC,INEL,CC,CSFus:',
@@ -652,12 +651,16 @@ C-----channel spin min and max
 
       IF (ldbwacalc .AND. CSFus.GT.0.D0 .AND. SINl.GT.0.D0) THEN
          IF (DIRect.EQ.3) THEN
-            WRITE (6,*) ' SOMP TLs normalized to substract',
-     &                  ' DWBA contribution to collective levels'
+            WRITE (6,*)
+     &         ' SOMP TLs normalized to substract DWBA contribution'
+            WRITE (6,*)
+     &         '                               to collective levels'
          ELSE
 C-----------DIRECT=1 or DIRECT=2
-            WRITE (6,*) ' CC OMP TLs normalized to substract DWBA',
-     &                  ' contribution to un-coupled discrete levels'
+            WRITE (6,*)
+     &         ' CC OMP TLs normalized to substract DWBA contribution'
+            WRITE (6,*)
+     &         '             to discrete un-coupled collective levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN

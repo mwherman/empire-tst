@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-15 16:36:04 $
-Ccc   * $Id: input.f,v 1.144 2005-06-15 16:36:04 Capote Exp $
+Ccc   * $Date: 2005-06-16 16:16:54 $
+Ccc   * $Id: input.f,v 1.145 2005-06-16 16:16:54 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -228,6 +228,7 @@ C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.
+         WIDcoll = 0.d0
 C        Starting value (NANgela must be less than NDANgecis !! in dimension.h)
          NANgela = NDAng
          IF(NANgela.GT.NDAngecis) THEN
@@ -1089,11 +1090,11 @@ C-----------stop PCROSS gammas if calculated within MSC
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
                IF (NPRoject.EQ.2) THEN
-C                 IDNa(3, 6) = 0
-                  IDNa(4, 6) = 0
+C                 IDNa(3,6) = 0
+                  IDNa(4,6) = 0
                ELSEIF (NPRoject.EQ.1) THEN
-C                 IDNa(1, 6) = 0
-                  IDNa(2, 6) = 0
+C                 IDNa(1,6) = 0
+                  IDNa(2,6) = 0
                ELSE
                   WRITE (6,*) ''
                   WRITE (6,*)
@@ -1399,16 +1400,26 @@ C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether any residue excitation is higher than CN
       qmin = 0.0
-      DO i = 1, NDEJC
-         CALL BNDG(i,1,qtmp)
-         IF (qtmp.LT.qmin) qmin = qtmp
-      ENDDO
-      IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
+C
+C     The block below is what it should be, but it does HRTW routine crash !!!!
+C     i.e. DE can not be changed for the time being, this part should be revised
+C     together with width fluctuation routine
+C     RCN, 14 June 2005
+C
+C     DO i = 1, NDEJC
+C        CALL BNDG(i,1,qtmp)
+C        IF (qtmp.LT.qmin) qmin = qtmp
+C     ENDDO
+C     IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
 C--------Energy redefined
-         DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
+C        DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
 C--------Number of steps in CN outgoing energy grid redefined
-         NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
-      ENDIF
+C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
+C     ENDIF
+
+      WRITE( 6,*) 'Energy step in calculations = ',DE*1000.d0,' keV'
+      WRITE(12,*) 'Energy step in calculations = ',DE*1000.d0,' keV'
+
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
@@ -2002,12 +2013,14 @@ C
         WRITE (12,*)
 
       ENDIF
+
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'I',1x,12F10.3)
+
       IF (FIRst_ein) THEN
         iexclus = 0
         DO i = 1, NNUcd
-           IF(ENDf(i).GT.0.D0) THEN
+          IF(ENDf(i).GT.0.D0) THEN
             IF (ENDf(i).EQ.1.0D0) THEN
             WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
@@ -2021,12 +2034,12 @@ C
             WRITE ( 6,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
             ENDIF
-           ELSE
+          ELSE
             WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
             WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
-           ENDIF
+          ENDIF
         ENDDO
 
         IF (iexclus.EQ.1) THEN
@@ -2261,27 +2274,15 @@ C--------create file with levels xxx.lev
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
 C           RCN, 04/2005  duplicate levels found !!
-            IF(IA.eq.A(0) .AND. IZ.EQ. Z(0)) WRITE (14,'(A110)') ch_iuf
+C           WRITE (14,'(A110)') ch_iuf
             DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
 C              RCN, 04/2005  duplicate levels found !!
-
-               IF(IA.eq.A(0) .AND. IZ.eq. Z(0))
-     &                      WRITE (14,'(A110)') ch_iuf
+C              WRITE (14,'(A110)') ch_iuf
             ENDDO
             DO ilv = 1, nlvr + ngamr
                BACKSPACE (13)
             ENDDO
-
-C           RCN, June 15
-
-            IF(IA.eq.A(0) .AND. IZ.eq. Z(0)) THEN
-
-              izatmp = INT(1000*iz + ia)
-
-              NSTored(0) = izatmp
-
-            ENDIF
          ENDIF
 C--------levels for nucleus NNUC copied to file xxx.lev
          DO ilv = 1, nlvr
@@ -4017,7 +4018,7 @@ C-----
                   ROPaa(i) = val
                ENDDO
                IF (val.GT.0.0D0) WRITE (6,
-     &       '('' L. d. a-parameter set to '',F6.3,'' for all nuclei'')'
+     &       '('' L. d. a-parameter set to '',F6.2,'' for all nuclei'')'
      &       ) val
                IF (val.EQ.0.0D0) WRITE (6,
      &      '('' L. d. a-parameter according to Ignatyuk systematics'')'
@@ -4029,7 +4030,7 @@ C-----
      &         '('' L. d. a-parameter according to Mebel systematics'')'
      &         )
                IF (val.GT.0.0D0) WRITE (12,
-     &       '('' L. d. a-parameter set to '',F6.3,'' for all nuclei'')'
+     &       '('' L. d. a-parameter set to '',F6.2,'' for all nuclei'')'
      &       ) val
                IF (val.EQ.0.0D0) WRITE (12,
      &      '('' L. d. a-parameter according to Ignatyuk systematics'')'

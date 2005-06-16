@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-14 06:44:40 $
-Ccc   * $Id: main.f,v 1.108 2005-06-14 06:44:40 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-16 16:16:55 $
+Ccc   * $Id: main.f,v 1.109 2005-06-16 16:16:55 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -41,7 +41,7 @@ C
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
-     &                 ecm, elada(NDAngecis), elcncs, emeda, emedg,
+     &                 ecm, elada(NDAngecis), emeda, emedg,
      &                 emedh, emedn, emedp, erecoil, espec, espmax,
      &                 epre, ftmp, gamfis, gamt, gang, gtotsp, htotsp,
      &                 piece, pope, poph, popl, popleft, poplev,
@@ -62,7 +62,8 @@ C
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
-     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,itemp(NDCOLLEV)
+     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,
+     &        itemp(NDCOLLEV)
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -108,7 +109,9 @@ C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       xsinl = 0.d0
       checkXS = 0.d0
 C     For resolution function (Spreading levels in the continuum)
-      isigma = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
+      isigma = 0
+      IF(WIDcoll.GT.0.d0)
+     &   isigma = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
       ncoll = 0
       nelang = NANgela
       ecm = EINl - EIN
@@ -211,22 +214,22 @@ C--------------but it is embedded in the continuum
 C
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
-C
-C--------------Spreading it using resolution function 0.01 + sqrt(E)*0.015
-C--------------SQRT(2*PI) = 2.5066
-               dtmp = 0.d0
-               do ie = max(icsl - 3*isigma,1) ,
-     &                   min(NDEcse,icsl + 3*isigma)
-                 dtmp = dexp(-dble(ie-icsl)**2/(2.*isigma*isigma))/
-     &                  (2.5066d0*isigma) + dtmp
-               enddo
-               if(isigma.gt.0 .and. dtmp.gt.0.) then
+C--------------Spreading it using resolution function (SQRT(2*PI) = 2.5066)
+               if(isigma.gt.0) then
+                 dtmp = 0.d0
                  do ie = max(icsl - 3*isigma,1) ,
+     &                   min(NDEcse,icsl + 3*isigma)
+                   dtmp = dexp(-dble(ie-icsl)**2/(2.*isigma*isigma))/
+     &                  (2.5066d0*isigma) + dtmp
+                 enddo
+                 if(dtmp.gt.0.d0) then
+                   do ie = max(icsl - 3*isigma,1) ,
      &                     min(NDEcse,icsl + 3*isigma)
-                   CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) + popread/DE
+                     CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) + popread/DE
      &                   * dexp(-dble(ie-icsl)**2/(2.*isigma*isigma))
      &                 /(2.5066d0*isigma*dtmp)
-                 enddo
+                   enddo
+                 endif
                else
                  CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
                endif
@@ -527,7 +530,8 @@ C-----
 C--------print inelastic PE double differential cross sections
          nejc = nejcec
          nnur = NREs(nejc)
-         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
+C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
+         IF (IOUt.GE.3) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
             DO its = 1, itimes
               iad = 1 + (its - 1)*11
@@ -1816,29 +1820,33 @@ C-----------------------to conserve the integral
       WRITE (12,'('' Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
 
-       WRITE (6,*)
+      WRITE (6,*)
       checkXS = checkXS + TOTcsfis
-       IF(ABScs.GT.0.) THEN
-         WRITE (6,'('' *******************************************'',
+      IF(ABScs.GT.0.) THEN
+        WRITE (6,'('' *******************************************'',
      &           23(1H*))')
-        WRITE (6,'('' * Reaction cross section '',G12.5,'' mb  '')')
-     &           ABScs
+        WRITE (6,'('' * Compound elastic cross section (CE) '',G12.5,
+     &              '' mb  '')') 4.*PI*ELCncs
+        WRITE (6,'('' * Reaction cross section - CE '',G12.5,
+     &              '' mb  '')') ABScs - 4.*PI*ELCncs
         WRITE (6,'('' * Production cross section + fission '',
-     &           G12.5,'' mb'')')  checkXS
+     &           G12.5,'' mb'')')  checkXS - 4.*PI*ELCncs
         WRITE (6,'('' * Difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs - checkXS)/ABScs)
+     &            100.d0*abs((ABScs - checkXS))/
+     &                    (ABScs - 4.*PI*ELCncs)
          WRITE (6,'('' *******************************************'',
      &           23(1H*))')
-       ENDIF
-      IF(abs(ABScs - checkXS).GT.0.003*ABScs) THEN
+      ENDIF
+      IF(abs(ABScs - checkXS).GT.0.01*ABScs) THEN
          WRITE (6,*)
         WRITE (6,'('' WARNING: Sum of production XS and fission XS'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
         WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs - checkXS)/ABScs)
-       ENDIF
+     &            100.d0*abs((ABScs - 4.*PI*ELCncs - checkXS))/
+     &                    (ABScs - 4.*PI*ELCncs)
+      ENDIF
 
-       WRITE (6,*)
+      WRITE (6,*)
 
       IF (IOUt.GT.1) THEN
          csemax = 0.
@@ -2015,7 +2023,7 @@ C        SAVING RANDOM SEEDS
        ENDIF
       epre = EIN
 
-      NANgela = 19
+      NANgela = NDAng
       IF(EIN.GT.10. .AND. EIN.LE.20.) NANgela = 37
       IF(EIN.GT.20. .AND. EIN.LE.50.) NANgela = 73
       IF(EIN.GT.50.) NANgela = 91
