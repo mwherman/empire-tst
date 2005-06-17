@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-16 16:16:54 $
-Ccc   * $Id: input.f,v 1.145 2005-06-16 16:16:54 Capote Exp $
+Ccc   * $Date: 2005-06-17 08:11:14 $
+Ccc   * $Id: input.f,v 1.146 2005-06-17 08:11:14 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1417,8 +1417,8 @@ C--------Number of steps in CN outgoing energy grid redefined
 C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
 C     ENDIF
 
-      WRITE( 6,*) 'Energy step in calculations = ',DE*1000.d0,' keV'
-      WRITE(12,*) 'Energy step in calculations = ',DE*1000.d0,' keV'
+      WRITE( 6,'(1x,A30,F6.1,A4)')
+     &       'Energy step in calculations = ',DE*1000.d0,' keV'
 
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
@@ -1986,13 +1986,7 @@ C
       INTEGER i, j, ia, iae, iexclus
       INTEGER IFIX
       REAL SNGL
-      WRITE (6,*)
-      WRITE (6,*)
-      WRITE (6,99050)
-      WRITE (6,*)
-      WRITE (6,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
-99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
-      WRITE (6,*)
+
       IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
         WRITE (12,*) ' '
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
@@ -2014,37 +2008,55 @@ C
 
       ENDIF
 
+99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'I',1x,12F10.3)
 
+      WRITE (6,*)
+      WRITE (6,*)
+      WRITE (6,99050)
+      WRITE (6,*)
+      WRITE (6,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+      WRITE (6,*)
+
+      iexclus = 0
+      DO i = 1, NNUcd
+        IF(ENDf(i).GT.0.D0) THEN
+          IF (ENDf(i).EQ.1.0D0)
+     &      WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),
+     &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
+          IF (ENDf(i).EQ.2.0D0) THEN
+            iexclus = 1
+            WRITE ( 6,99015) IFIX(SNGL(Z(i))),SYMb(i),
+     &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
+          ENDIF
+        ELSE
+          WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),
+     &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
+        ENDIF
+      ENDDO
+
+      IF (iexclus.EQ.1) THEN
+        WRITE( 6,*)
+        WRITE( 6,*) ' I means only inclusive spectra are available'
+      ENDIF
+
       IF (FIRst_ein) THEN
-        iexclus = 0
         DO i = 1, NNUcd
           IF(ENDf(i).GT.0.D0) THEN
-            IF (ENDf(i).EQ.1.0D0) THEN
-            WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-            WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-            ENDIF
-            IF (ENDf(i).EQ.2.0D0) THEN
-            iexclus = 1
-            WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-            WRITE ( 6,99015) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-            ENDIF
+            IF (ENDf(i).EQ.1.0D0)
+     &        WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),
+     &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
+            IF (ENDf(i).EQ.2.0D0)
+     &        WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),
+     &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
           ELSE
             WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-     &                   (Q(j,i),j = 1,NEJcm)
-            WRITE ( 6,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
         ENDDO
 
         IF (iexclus.EQ.1) THEN
-          WRITE( 6,*)
-          WRITE( 6,*) ' I means only inclusive spectra are available'
           WRITE(12,*)
           WRITE(12,*) ' I means only inclusive spectra are available'
         ENDIF
@@ -2132,7 +2144,7 @@ C
          ENDDO
       ENDIF
 
-      IF (KTRompcc.GT.0 .AND. DIRect.GT.0  .AND. FIRst_ein) THEN
+      IF (KTRompcc.GT.0 .AND. DIRect.GT.0) THEN
         WRITE (6,*)
         WRITE (6,*) ' Inelastic o. m. parameters: RIPL catalog number ',
      &            KTRompcc
