@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-14 06:44:40 $
-Ccc   * $Id: pcross.f,v 1.32 2005-06-14 06:44:40 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-17 13:57:45 $
+Ccc   * $Id: pcross.f,v 1.33 2005-06-17 13:57:45 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -114,18 +114,18 @@ C-----Compound gamma emitting nucleus
 C
 C-----MAXIMUM EXCITON NUMBER NHEq
 C
-C     CHMax determines the maximum allowable HOLE number 
-C     for exciton model emission spectra calculations 
+C     CHMax determines the maximum allowable HOLE number
+C     for exciton model emission spectra calculations
 C
 C     It is much better aproximation than using fixed
-C     exciton number as the emission loops increase 
+C     exciton number as the emission loops increase
 C     with energy as it is expected on physical basis.
 C
 C     Nmax = Aproj + NHEq -1 (is equal to NHEq for nucleon induced reactions)
 C
 C     Chinese group uses CHMax = 0.88, but it gives to hard PE spectrum in Th232
 C
-      IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value 
+      IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
       NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
 
 C-----ZERO ARRAY INITIALIZATION
@@ -561,7 +561,7 @@ C
         y = epscm*e3 / (esys*35.)
         a = a + 1.9*y*y*y*y*xmb
       endif
-      xnorm = a*total / (12.5664*sinh(a))
+      xnorm = a*total / (12.5664*dsinh(a))
 
       do i=1,NDAng
         arg=a*xcos(i)
@@ -571,13 +571,13 @@ Cmbc    added code for photonuclear reactions. Modify
 Cmbc    a which was calculated for a neutron, to be valid for a
 Cmbc    photon projectile:
         if(jflagph.eq.1) then
-          facmom=sqrt(elab/(2.*939))
-          facrefr=9.3/sqrt(eps)
+          facmom=dsqrt(elab/(2.d0*939))
+          facrefr=9.3/dsqrt(eps)
           if(facrefr.lt.1.)facrefr=1.
           if(facrefr.gt.4.)facrefr=4.
           aphnuc=a*facmom*facrefr
-          gth=((2.*aphnuc)/(exp(aphnuc)-exp(-aphnuc)))
-          gth=gth*(1./(12.5664))*exp(aphnuc*xcos(i))
+          gth=((2.*aphnuc)/(dexp(aphnuc)-dexp(-aphnuc)))
+          gth=gth*(1./(12.5664))*dexp(aphnuc*xcos(i))
 Cmbc      Now put in MSC as isotropic, giving:
           sigma(i)=((1.-fmsd)/(12.5664))+(fmsd*gth)
           sigma(i)=sigma(i)*total
@@ -755,7 +755,7 @@ C
       DO i = 1, PMAX
          LP(i) = 0.
          LM(i) = 0.
-      ENDDO     
+      ENDDO
       NMAx = Nheq
       DO h1 = 1, Nheq
          h = h1 - 1
@@ -808,9 +808,9 @@ C
       INTEGER*4 h1, hhh, i, ij, n
       DO i = 1, PMAX
          ln(i) = 0.
-      ENDDO    
-      n = NMAx    
-      IF (n.GT.PMAX) n = PMAX   
+      ENDDO
+      n = NMAx
+      IF (n.GT.PMAX) n = PMAX
       DO h1 = 1, n
          DO i = 0, NEJcm
             ln(h1) = ln(h1) + L(i,h1)

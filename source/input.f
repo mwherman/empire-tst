@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-17 08:11:14 $
-Ccc   * $Id: input.f,v 1.146 2005-06-17 08:11:14 Capote Exp $
+Ccc   * $Date: 2005-06-17 13:57:44 $
+Ccc   * $Id: input.f,v 1.147 2005-06-17 13:57:44 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1417,8 +1417,8 @@ C--------Number of steps in CN outgoing energy grid redefined
 C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
 C     ENDIF
 
-      WRITE( 6,'(1x,A30,F6.1,A4)')
-     &       'Energy step in calculations = ',DE*1000.d0,' keV'
+      WRITE( 6,'(1x,A28,F6.1,A4)')
+     &       'Energy step in calculations ',DE*1000.d0,' keV'
 
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
@@ -1513,10 +1513,12 @@ C--------------determination of giant resonance parameters for residual nuclei
 C-----------determination of excitation energy matrix in res. nuclei
             ECUt(nnur) = ELV(NLV(nnur),nnur)
             IF (FITlev.GT.0.0D0) ECUt(nnur) = 0.0
-            IF (Q(nejc,nnuc).EQ.0.0D0) THEN
-               CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
-               AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
-            ENDIF
+            IF (Q(nejc,nnuc).EQ.0.0D0 .OR. Q(nejc,nnuc).EQ.99)
+     &                           CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
+C           IF (Q(nejc,nnuc).EQ.0.0D0) THEN
+C              CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
+C              AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
+C           ENDIF
             emaxr = 0.0
             IF (NEX(nnuc).GT.0) emaxr = EX(NEX(nnuc),nnuc)
      &                                  - Q(nejc,nnuc)

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-13 16:00:24 $
-Ccc   * $Id: HRTW-comp.f,v 1.30 2005-06-13 16:00:24 Capote Exp $
+Ccc   * $Date: 2005-06-17 13:57:45 $
+Ccc   * $Id: HRTW-comp.f,v 1.31 2005-06-17 13:57:45 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1362,11 +1362,11 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, chsp, coef, ecms, eee, el, s1, smax, smin,
-     &                 vl, wf, xmas_npro, xmas_ntrg
+      DOUBLE PRECISION ak2, chsp, coef, ecms, el, s1, smax, smin,
+     &                 vl, xmas_npro, xmas_ntrg
       REAL FLOAT
        LOGICAL relcal
-      INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, maxlw, mul
+      INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, mul
       INTEGER INT, MIN0
       DOUBLE PRECISION PAR
       DOUBLE PRECISION VT1
@@ -1376,22 +1376,20 @@ C
       xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       el = EINl
-       relcal = .FALSE.
+      relcal = .FALSE.
       IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-      wf = ak2/10.D0
-      coef = PI/wf/(2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
-      maxlw = NDLW
+      coef = 10.d0*PI/ak2/
+     &    (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       s1 = 0.5
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
      &    - SEJc(Npro).EQ.0.0D0) s1 = 1.0
-      CSFus = 0.0
+
 C-----channel spin min and max
-      eee = SEJc(Npro) - XJLv(LEVtarg,Ntrg)
-      smin = ABS(eee)
+      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
       mul = smax - smin + 1.0001
-      CSFus = 0.0
+
       Ich = 1
       DO ichsp = 1, mul
          chsp = smin + FLOAT(ichsp - 1)
@@ -1400,7 +1398,6 @@ C-----channel spin min and max
          lmin = lmin + 1
          lmax = lmax + 1
          lmax = MIN0(NDLW,lmax)
-         lmax = MIN0(maxlw,lmax)
          DO k = lmin, lmax
             IF (PAR(Ip,LVP(LEVtarg,Ntrg),k - 1).NE.0.0D0) THEN
                IF (Ich.GT.NDHRTW2) THEN
