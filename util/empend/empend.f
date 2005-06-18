@@ -1130,9 +1130,13 @@ C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
       MT5 =0
       I5  =0
+      I203=0
+      I207=0
       DO IX=1,NXS
         MM=MTH(IX)
         IF(MM.EQ.  5) I5  =IX
+        IF(MM.EQ.203) I203=IX
+        IF(MM.EQ.207) I207=IX
 C* Consider eligible reactions
         IF((MM.GT.  5 .AND. MM.LT. 50 .AND. MM.NE.18) .OR.
      &     (MM.GE. 91 .AND. MM.LT.600) .OR.
@@ -1148,6 +1152,7 @@ C* Reactions without differential data are flagged MT-negative and counted
         END IF
       END DO
       IF(MT5.LE.0) RETURN
+      IF(NXS+3.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
 C* Create MT 5 if not present
       IF(I5.LE.0) THEN
         NXS=NXS+1
@@ -1157,6 +1162,24 @@ C* Create MT 5 if not present
           XSR(J,I5)=0
         END DO
       END IF
+C* Create MT 203 if not present (flagged -ve for no spectra
+      IF(I203.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-203
+        I203=NXS
+        DO J=1,NPT
+          XSR(J,I203)=0
+        END DO
+      END IF
+C* Create MT 207 if not present (flagged -ve for no spectra
+      IF(I207.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-207
+        I207=NXS
+        DO J=1,NPT
+          XSR(J,I207)=0
+        END DO
+      END IF
 C* Add contribution of reactions without differential data to MT5
       DO IX=1,NXS
         MM=MTH(IX)
@@ -1164,6 +1187,25 @@ C* Add contribution of reactions without differential data to MT5
           DO J=1,NPT
             XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
           END DO
+C* Add proton production to MT203
+          IF(MM.EQ.-28 .OR. MM.EQ.-41 .OR. MM.EQ.-42 .OR.
+     &       MM.EQ.-44 .OR. MM.EQ.-45 .OR.
+     &       MM.EQ.-103.OR. MM.EQ.-111.OR. MM.EQ.-112.OR.
+     &       MM.EQ.-115.OR. MM.EQ.-116) THEN
+            DO J=1,NPT
+              XSR(J,I203)=XSR(J,I203)+XSR(J,IX)
+            END DO
+          END IF
+C* Add alpha production to MT207
+          IF(MM.EQ.-22 .OR. MM.EQ.-23 .OR. MM.EQ.-24 .OR.
+     &       MM.EQ.-25 .OR. MM.EQ.-29 .OR. MM.EQ.-30 .OR.
+     &       MM.EQ.-35 .OR. MM.EQ.-36 .OR. MM.EQ.-45 .OR.
+     &       MM.EQ.-107.OR. MM.EQ.-108.OR. MM.EQ.-109.OR.
+     &       MM.EQ.-112) THEN
+            DO J=1,NPT
+              XSR(J,I207)=XSR(J,I207)+XSR(J,IX)
+            END DO
+          END IF
         END IF
       END DO
       RETURN
@@ -1531,7 +1573,7 @@ C-Purpose: Read EMPIRE output to be converted into ENDF format
 C-Description:
 C-D  MTH  Array contains MT numbers of identified reactions. The MT
 C-D       numbers of reactions contributing to MT 5 in the high-energy
-C-D       type of file is flagged by adding MT+10000.
+C-D       type of file is flagged by adding MT+1000.
 C-D  NEN  Counts the Number of energy points
 C-D  NXS  Counts the Number of reaction types
 C-
@@ -2646,7 +2688,7 @@ C-Purpose: Write cross section (file MF3) data in ENDF-6 format
 C-Description:
 C-D  Sort printout in ascending order of MT numbers
 C-D  Skip reactions flagged -ve
-C-D  Processed reactions are flagged by adding 10000 to MT
+C-D  Processed reactions are flagged by adding 1000 to MT
 C-
       CHARACTER*8  PTST
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
@@ -2721,9 +2763,9 @@ C* Normal case
   322 CONTINUE
 C* Check that there are NON-ZERO points above threshold
       IF(ME.LT.2 .OR.
-C*        Flag MT "+20000" to prevent processing double differential data
+C*        Flag MT "+2000" to prevent processing double differential data
      1  (ME.EQ.2 .AND.XSL.LE.SMALL)) THEN
-        MTH(IT)=MTH(IT)+20000
+        MTH(IT)=MTH(IT)+2000
         GO TO 360
       END IF
 C* Define the output grid for spline interpolated function
@@ -2810,16 +2852,17 @@ C* Write CONT record - end of data set
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       NS=0
-      MTH(IT)=MTH(IT)+10000
+      MTH(IT)=MTH(IT)+1000
   360 CONTINUE
 C* All cross sections processed
       NS=-1
       CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
-C* Change back the MT numbers that were flagged "+10000"
+C* Change back the MT numbers that were flagged "+1000"
       DO I=1,NXS
-        DO WHILE (MTH(I).GT.1000)
-          MTH(I)=MTH(I)-10000
-        END DO
+c...        DO WHILE (MTH(I).GT.1000)
+c...          MTH(I)=MTH(I)-1000
+c...        END DO
+        IF(MTH(I).GT.1000) MTH(I)=MTH(I)-1000
       END DO
 C*
       RETURN
