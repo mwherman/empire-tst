@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-17 13:57:45 $
-Ccc   * $Id: pcross.f,v 1.33 2005-06-17 13:57:45 Capote Exp $
+Ccc   * $Date: 2005-06-19 18:19:53 $
+Ccc   * $Id: pcross.f,v 1.34 2005-06-19 18:19:53 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -108,6 +108,8 @@ C
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
       ENDIF
+C     Empirically found that it is better not to use pairing correction 
+      pc = 0.d0     
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -229,6 +231,8 @@ C
             zo = 0
             ff1 = 1.D0/AMUmev
          ENDIF
+C        EMPIRE tuning factor is used (important to describe capture) RCN, june 2005 	       
+         ff1 = ff1*TUNE(nejc,1)
 C
 C--------PARTICLE-HOLE LOOP
 C
