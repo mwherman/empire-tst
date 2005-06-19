@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-30 14:08:24 $
-Ccc   * $Id: lev-dens.f,v 1.40 2005-05-30 14:08:24 Capote Exp $
+Ccc   * $Date: 2005-06-19 18:28:12 $
+Ccc   * $Id: lev-dens.f,v 1.41 2005-06-19 18:28:12 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -620,7 +620,7 @@ C-----Empire systematics with Nix-Moeller shell corrections
          AP2 = AP2*1.2402
          GAMma = GAMma*1.2494
       ENDIF
-C--------Empire systematics with M-S shell corrections
+C-----Empire systematics with M-S shell corrections
       IF (SHNix.EQ.0.0D0) THEN
          AP1 = .52268E-01
          AP2 = .13395E+00
@@ -901,6 +901,7 @@ C
       rbmsph = 0.01448*A(Nnuc)**1.6667
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
+      A23 = A(Nnuc)**0.666667
 C-----determination of U for normal states
       IF (BF.NE.0.D0) THEN
          IF (Destep.NE.0.0D0) THEN
@@ -1946,6 +1947,7 @@ C-----where continuum starts,ends,steps in between
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
       in = ia - iz
+      A23 = A(Nnuc)**0.666667
 C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
       IF (FISden(Nnuc).EQ.0.) THEN
          iz = INT(Z(Nnuc))
@@ -2016,7 +2018,7 @@ C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
 C
 C-----Empire specific
 C
-         mm2 = 0.24*A(Nnuc)**(2./3.)
+         mm2 = 0.24*A23
          r0 = 1.4
          iff = 1
          AP1 = .52268E-01
