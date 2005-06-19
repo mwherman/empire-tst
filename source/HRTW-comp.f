@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-17 22:22:17 $
-Ccc   * $Id: HRTW-comp.f,v 1.32 2005-06-17 22:22:17 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-19 18:20:16 $
+Ccc   * $Id: HRTW-comp.f,v 1.33 2005-06-19 18:20:16 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -260,7 +260,7 @@ C
             ELSE
               WRITE(6,
      &         '(1x,''Gamma emission is not normalized''/
-     &           1x,''TUNE(0,Nnuc)set in input to '',F7.3)')
+     &           1x,''TUNE(0,Nnuc) set in input to '',F7.3)')
      &         TUNe(0, Nnuc)
             ENDIF
             WRITE(6,*)
