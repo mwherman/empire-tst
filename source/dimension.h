@@ -1,16 +1,16 @@
       PARAMETER(
-     * NDNUC= 35
-     *,NDEXCLUS = 35
+     * NDNUC= 75
+     *,NDEXCLUS = 75
      *,NDEJC=3
      *,NDAFIS=1
-     *,NDEX= 101
+     *,NDEX= 151
      *,NDLW= 40
      *,NDTL= 40
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
      *,NDECSE=NDEX+10
-     *,NDANG=19
+     *,NDANG=37
      *,NDANGecis=91
      *,NDNUCD=NDNUC
      *,NDECSED=NDECSE
@@ -24,8 +24,8 @@
      *,NDRWOM=3
      *,NDRVSO=3
      *,NDHRTW1=500
-     *,NDHRTW2=10
-     *,NDETL=NDEX+5
+     *,NDHRTW2=20
+     *,NDETL=NDEX+6
      *,NDEREC=NDECSE
      *,NDERO=NDEX
      *,NDCC=10
