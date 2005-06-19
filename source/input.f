@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-17 13:57:44 $
-Ccc   * $Id: input.f,v 1.147 2005-06-17 13:57:44 Capote Exp $
+Ccc   * $Date: 2005-06-19 18:27:11 $
+Ccc   * $Id: input.f,v 1.148 2005-06-19 18:27:11 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -245,13 +245,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -823,10 +823,12 @@ C                       residues must be heavier than alpha
                         IF(mulem.LE.NENdf) THEN
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
-C                          Comment the following line and uncommment the one after for all exclusive spectra
-                           IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 2
+C                          Comment the following block and uncommment the line after for all exclusive spectra
+                           IF (ENDf(nnuc).EQ.0) THEN
+                              ENDf(nnuc) = 2
+                              EXClusiv = .FALSE.                     
+                           ENDIF                             
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
-                           EXClusiv = .FALSE.
                         ENDIF
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
@@ -1562,6 +1564,7 @@ C           ENDIF
             ENDIF
             IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) ECUt(nnur)
      &          = EX(1,nnur)
+            IF(Q(nejc,nnuc).GE.98.5d0) CYCLE
 C-----------determination of Q-value for isotop production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
             IF (qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
@@ -1572,9 +1575,11 @@ C-----------precise grid at low energies. from the 5-th element on the step
 C-----------is de (bin width).
 C-----------determination of etl matrix
             netl = 6
-            IF (NEX(nnuc).GT.0) netl = INT((EX(NEX(nnuc),nnuc) - Q(nejc,
-     &                                 nnuc))/DE) + 6
+            IF (NEX(nnuc).GT.0) netl = 
+     &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6     
             IF (netl.GT.NDETL) THEN
+               WRITE (6,*)
+     &             ' netl = ',netl,' > NDETL = ',NDETL
                WRITE (6,*)
      &             ' OUT OF BOUNDARY; DECREASE NEX IN INPUT OR INCREASE'
      &             , ' NDEX IN dimension.h AND RECOMPILE'
