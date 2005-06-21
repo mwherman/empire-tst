@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-06-14 06:44:40 $
-Ccc   * $Id: MSD-tristan.f,v 1.41 2005-06-14 06:44:40 herman Exp $
+Ccc   * $Date: 2005-06-21 22:32:12 $
+Ccc   * $Id: MSD-tristan.f,v 1.42 2005-06-21 22:32:12 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -143,7 +143,9 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       ENDDO
       elab = EIN*(A(Nnuc) + AEJc(Nejc))/A(Nnuc)
 C-----energy step in spectra
-      ESTep = DE
+c     ESTep = DE
+C-----Use half of the step in MSD calculations to reduce fluctuations
+      ESTep = DE/2.0
 C-----experimental energy resolution
       WIDex = WIDexin
       QMIna = 0.
@@ -2839,7 +2841,10 @@ C
      &                               a2, a3, ay, f21
                      WRITE (66,99020) eout, s1, s2, sigm
                   ENDIF
-                  necs = Nbinx - ne + 2
+C                 necs = Nbinx - ne + 2
+C-----------------recover from the more dense energy grid in MSD
+                  necs = (Nbinx - ne)/2 + 2
+                  sigm = sigm/2.0
 C-----------------store ddx to continuum
                   IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
      &                THEN
