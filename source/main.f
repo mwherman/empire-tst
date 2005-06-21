@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-16 16:16:55 $
-Ccc   * $Id: main.f,v 1.109 2005-06-16 16:16:55 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-21 20:27:10 $
+Ccc   * $Id: main.f,v 1.110 2005-06-21 20:27:10 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -81,6 +81,10 @@ C-----
       IF (IOUt.GT.0) CALL PRINPUT
       WRITE (*,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
       WRITE (6,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
+C-----
+C-----Print results of the systematics
+C-----
+      CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1) 
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----

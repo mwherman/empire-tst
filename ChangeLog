@@ -45,6 +45,8 @@
 19. EMPEND was extended to calculate total production cross section, including 
     MT=5 contributions (A. Trkov)
 20. PCROSS is given precedence over DEGAS for PE particle emission (M. Herman)
+21. Some  systematics from EAF-3.0 included and made available from 
+    GUI->Outputs->x-sec systematics (M. Herman)
     
 
          

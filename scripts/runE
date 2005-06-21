@@ -133,6 +133,9 @@ if [ -s CUMULPLOT.PS ]; then
    ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
    gv -landscape $file-cum.ps &
 fi
+if [ -s SYSTEMATICS.TXT ]; then
+   mv  SYSTEMATICS.TXT $file.sys
+fi
 
 mv EXFOR.dat $file.exf
 mv ECIS_ROT.out $file-ecis.out 2>/dev/null

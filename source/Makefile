@@ -10,12 +10,6 @@
 #----flags for detailed warnings
 #FFLAGS = -Wall
 
-#----INTEL f95 compiler
-#FC     =  ifort
-#FFLAGS =  -check all
-#FFLAGS =  -static
-#FFLAGS =  -ffortran-bounds-check
-
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----flags for production compilation with g77
@@ -26,17 +20,7 @@
 #----INTEL f95 compiler
 FC     =  ifort
 #----flags for debuging using ifort compiler
-#FFLAGS =  -g -check bounds -traceback
-#----flags for production compilation with ifort
-#FFLAGS = -O2 
-#FFLAGS = -fast 
-#----flags for debuging using ifort compiler 
-#FFLAGS =  -g -check bounds -traceback
-#----flags for profiling using ifort compiler 
-#FFLAGS = -O2
-#FFLAGS = -fast
-#----flags for profiling using ifort compiler
-#FFLAGS =  -pg
+#FFLAGS =  -g -C
 
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
@@ -60,7 +44,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o
 
-OBJE =      subecis03.o
+OBJE =      subecis03.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
 	$(FC) -o $@ $(OBJF) $(OBJE)

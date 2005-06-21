@@ -3940,7 +3940,7 @@ set nsh 1
 set eres 0.02
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c dimension.h global.h  io.h ddhms.cmb Makefile]
+set modules [list main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h  io.h ddhms.cmb Makefile]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -5096,9 +5096,9 @@ foreach el $ddx {
    incr i +1
 }
 
-#if {$compeval != ""} {file copy -force $compeval ../util/lsttab/COMPARE.DAT }
 if {$compeval != ""} {file delete ../util/lsttab/COMPARE.DAT
-file link -symbolic ../util/lsttab/COMPARE.DAT $compeval }
+if {$compeval != ""} {file copy -force $compeval ../util/lsttab/COMPARE.DAT }
+#file link -symbolic ../util/lsttab/COMPARE.DAT $compeval }
 
 set lsttab [open LSTTAB.INP w+]
 puts $lsttab ""
@@ -6417,6 +6417,8 @@ $file.inp &}} -label {Create input}
         -command {exec $editor $file.lst &} -label {EMPIRE full}
     $site_3_0.menu94 add command \
         -command {exec $editor $file.out &} -label {EMPIRE short}
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file.sys &} -label {x-sec systematics}
     $site_3_0.menu94 add separator \
 
     $site_3_0.menu94 add command \
