@@ -57,8 +57,8 @@ C------20.0 MeV
 C
        IF(Atrg.GT.40) THEN
 C------(n,np) at 20 MeV according to Konobeyev
-       csnnp2 = 53.066*(Atrg**0.3333 + 1.0)**2*(Atrg**-0.3333*(-2.7098*
-     &    (s+1.5/Atrg)+0.67115)**2 + EXP(-496.74*(s+1.5/Atrg)**2 + 
+       csnnp2 = 53.066*(Atrg**0.3333 + 1.0)**2*(Atrg**(-0.3333)*(-2.7098
+     &    *(s+1.5/Atrg)+0.67115)**2 + EXP(-496.74*(s+1.5/Atrg)**2 + 
      &    48.162*(s+1.5/Atrg)-1.6714))
 C------(n,p) at 20 MeV according to Konobeyev
        IF(Ztrg.LT.50) THEN
