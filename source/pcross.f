@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-22 20:15:22 $
-Ccc   * $Id: pcross.f,v 1.35 2005-06-22 20:15:22 Capote Exp $
+Ccc   * $Date: 2005-06-22 23:26:54 $
+Ccc   * $Id: pcross.f,v 1.36 2005-06-22 23:26:54 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C Local variables
 C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
-     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc,
+     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc, angstep,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
@@ -196,8 +196,10 @@ C-----Last continuum energy bin is calculated
       ENDDO
 
       IF (.NOT.callpcross) THEN
+
+          angstep = 180.d0/DBLE(NDAng-1)
          do i=1,NDAng
-           theta=i*10-10
+           theta=(i-1)*angstep
            jang(i)=theta
            theta=theta*pi/180.d0
            xcos(i)=cos(theta)
@@ -485,7 +487,7 @@ C     *The angel of the Lord encampeth round about them that fear him,
 C     *and delivereth them.  (Psalm 34.7)
 C
       implicit real*8 (A-H,O-Z)
-      implicit integer*4 (I-N)
+      implicit integer (I-N)
       INCLUDE 'dimension.h'
       REAL*8 arg, a, xnorm, eps,total,fmsd, bin, elab, esys
       REAL*8 sigma(NDAng), xcos(NDAng)
@@ -494,10 +496,11 @@ C
       SAVE /KALB/
 Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
+      jcomt = Jcom
       if(jpin.eq.0.and.jnin.eq.0)then
 C        the following is a modification for photonuclear reactions
          jflagph=1
-         jcom=jcom+1
+         jcomt = Jcom+1
          jnin=1
       endif
 Cmbc  I follow the prescription in the paper "Photonuclear angular
@@ -514,7 +517,7 @@ C
 C     Calculate energy independent quantities
 C     and print headings
 C
-      acom=jcom
+      acom=jcomt
       azcom=jzcom
       jin=jpin+jnin
       xin=jin
@@ -557,7 +560,7 @@ C
 C     energy dependent input
 C     calculate and print angular distributions
 C
-      if(fmsd.le.0.)fmsd=1.
+      if(fmsd.le.0.)fmsd=1.d0
       epscm=eps+bin
       y = epscm*e1 / (esys*130.)
       a = 5.2*y + 4.*y*y*y
