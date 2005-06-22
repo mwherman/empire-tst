@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-22 20:15:21 $
-Ccc   * $Id: main.f,v 1.111 2005-06-22 20:15:21 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-22 20:22:54 $
+Ccc   * $Id: main.f,v 1.112 2005-06-22 20:22:54 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -85,8 +85,7 @@ C-----
 C-----
 C-----Print results of the systematics
 C-----
-      CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1) 
-      
+      IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1) 
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----
