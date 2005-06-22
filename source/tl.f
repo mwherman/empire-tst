@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-16 16:16:55 $
-Ccc   * $Id: tl.f,v 1.64 2005-06-16 16:16:55 Capote Exp $
+Ccc   * $Date: 2005-06-22 20:15:22 $
+Ccc   * $Id: tl.f,v 1.65 2005-06-22 20:15:22 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1645,7 +1645,7 @@ C
             WRITE (6,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (6,*) ' Sreac - SINl (renormalized by DWBA) =', 
+         WRITE (6,*) ' Sreac - SINl (renormalized by DWBA) =',
      &         SNGL(ABScs - SINlcc - SINl), ' mb (Sabs - SINl)'
          WRITE (6,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (6,*) ' Shape Elastic XS =', SNGL(ELAcs),
@@ -2698,9 +2698,9 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2,
-     &                 HHBarc, PI, XNExc
-      COMMON /CONSTANT/ AMUmev, PI, XNExc, CETa, CSO, AMPi,
-     &                  ELE2, HHBarc, AMUneu, AMUpro
+     &                 HHBarc, PI, AMUele
+      COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
+     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 C
 C Dummy arguments
 C

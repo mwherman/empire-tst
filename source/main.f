@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-21 20:27:10 $
-Ccc   * $Id: main.f,v 1.110 2005-06-21 20:27:10 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-22 20:15:21 $
+Ccc   * $Id: main.f,v 1.111 2005-06-22 20:15:21 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -81,10 +81,12 @@ C-----
       IF (IOUt.GT.0) CALL PRINPUT
       WRITE (*,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
       WRITE (6,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
+      
 C-----
 C-----Print results of the systematics
 C-----
       CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1) 
+      
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----
@@ -558,7 +560,7 @@ C-------------Maximum and minimum energy bin
 C-------------last continuum energy bin is calculated
               DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
                 WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
-     &                   (CSEa(i,iang,nejc,1),iang = iad,iam)
+     &           (max(CSEa(i,iang,nejc,1),0.d0),iang = iad,iam)
               ENDDO
               WRITE (6,*) ' '
             ENDDO
@@ -747,6 +749,7 @@ C-----renormalization of CN spin distribution if TURBO mode invoked
       OPEN (80,FILE = 'FISSION.OUT',STATUS = 'UNKNOWN')
 C-----start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
+         IF(QPRod(nnuc).LT.-999.d0) CYCLE
          DO kk = 0, NFISENMAX
             DO jj = 1, NDLW
                DO i = 1, NFHUMP
@@ -801,6 +804,7 @@ C--------reset variables for life-time calculations
             ENDDO
          ENDIF
          sumfis = 0.0
+
          IF (IOUt.GT.0) THEN
             WRITE (6,*) ' '
             WRITE (6,*) ' '
@@ -1575,7 +1579,8 @@ C-----------------------(discrete levels part)
                            espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                            IF (espec.GE.0) WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                       (9X,
-     &8E15.5))') -espec, (CSAlev(nang,il,nejc)*recorp/DE,nang = 1,NDANG)
+     &8E15.5))') -espec, (max(CSAlev(nang,il,nejc)*recorp/DE,0.d0),
+     &nang = 1,NDANG)
                         ENDDO
 C-----------------------(continuum part)
                         DO ie = 1, nspec + 1
@@ -1607,7 +1612,7 @@ C-----------------------(continuum part)
                            WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                 (9X,8E15.5
      &))') FLOAT(ie - 1)*DE/recorp,
-     &     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+     &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
@@ -1644,14 +1649,14 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
                            WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                 (9X,8E15.5
      &))') FLOAT(ie - 1)*DE/recorp,
-     &     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+     &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
                            WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                 (9X,8E15.5
      &))') EMAx(nnuc)/recorp,
-     &     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+     &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
                         ENDDO
                      ENDIF
 
@@ -1829,6 +1834,8 @@ C-----------------------to conserve the integral
       IF(ABScs.GT.0.) THEN
         WRITE (6,'('' *******************************************'',
      &           23(1H*))')
+        WRITE (6,'('' * Incident energy (LAB): '',G12.5,
+     &              '' MeV  '')') EINl    
         WRITE (6,'('' * Compound elastic cross section (CE) '',G12.5,
      &              '' mb  '')') 4.*PI*ELCncs
         WRITE (6,'('' * Reaction cross section - CE '',G12.5,

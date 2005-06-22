@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-19 18:27:11 $
-Ccc   * $Id: input.f,v 1.148 2005-06-19 18:27:11 Capote Exp $
+Ccc   * $Date: 2005-06-22 20:15:21 $
+Ccc   * $Id: input.f,v 1.149 2005-06-22 20:15:21 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -36,7 +36,7 @@ C Local variables
 C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
-     &                 qtmp, xfis, zclu, zres, ztmp
+     &                 qtmp, xfis, zclu, zres, ztmp, culbar
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
@@ -74,8 +74,6 @@ C
      &     0.71, 0., 0.41, 0., 0.38, 0., 0.67, 0., 0.61, 0., 0.78, 0.,
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0.,
      &     0.43, 0., 0.50, 0., 0.39/
-C-----Capote 2001, redefined below and using globally
-C-----DATA xnexc, amumev/8.071323, 931.1494/
       DATA deut, trit, gamma/'d ', 't ', 'g '/
       ARGred = -1.
 C-----maximum argument of EXP function supported by the computer (for real*8)
@@ -114,8 +112,9 @@ C-----Neutron mass = 1.008 664 915 60(55) u
       AMUneu = 1.008665D0
 C-----Proton mass = 1.007 276 466 88(13) u
       AMUpro = 1.007276D0
-C-----already converted to mb
-C     W2 = 2.D0*AMUmev/HHBarc**2/10.D0
+C-----Electron mass = 5.485 799 0945 x 10-4 u
+      AMUele = 5.4857990945D-4
+
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
@@ -152,6 +151,9 @@ C--------set angles for MSD calculations
             SANgler(na) = SQRT(1.0 - CANgler(na)**2)
          ENDDO
 C--------neutralize tuning factors and OMP normalization factors
+         DO nejc = 0, NDEJC
+           TUNEpe(nejc) = 1.0
+         ENDDO
          DO nnuc = 0, NDNUC
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.0
@@ -737,19 +739,7 @@ C              residual nuclei must be heavier than alpha
             ENDDO
          ENDDO
 C--------end ascribing location to each nucleus
-C--------next finds indexes of residues that might be needed for ENDF formatting
-         CALL WHERE(IZA(1) - 1,INRes,iloc)
-         IF (iloc.EQ.1) INRes = -1
-         CALL WHERE(IZA(1) - 1001,IPRes,iloc)
-         IF (iloc.EQ.1) IPRes = -1
-         CALL WHERE(IZA(1) - 2004,IARes,iloc)
-         IF (iloc.EQ.1) IARes = -1
-         IF (NDEJC.EQ.4) THEN
-            CALL WHERE(IZA(1) - IZAejc(NDEJC),ILIres,iloc)
-            IF (iloc.EQ.1) ILIres = -1
-         ELSE
-            ILIres = -1
-         ENDIF
+
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
 C--------optical model parameter set selection
@@ -820,15 +810,16 @@ C                       residues must be heavier than alpha
                         if(atmp.le.4 . or. ztmp.le.2) cycle
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
+
                         IF(mulem.LE.NENdf) THEN
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
-C                          Comment the following block and uncommment the line after for all exclusive spectra
-                           IF (ENDf(nnuc).EQ.0) THEN
-                              ENDf(nnuc) = 2
-                              EXClusiv = .FALSE.                     
-                           ENDIF                             
-C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
+C                          Comment the following line and uncommment the one after for all exclusive spectra
+C                          IF (ENDf(nnuc).EQ.0) THEN
+C                             ENDf(nnuc) = 2
+C                             EXClusiv = .FALSE.
+C                       ENDIF
+                           IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
@@ -844,15 +835,6 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                ENDDO
             ENDDO
          ENDIF
-C
-C        Key_shape =0 --> original (up to 2.18) EMPIRE E1 stength-function
-C        Key_shape =1 --> fE1=MLO1
-C        Key_shape =2 --> fE1=MLO2
-C        Key_shape =3 --> fE1=MLO3
-C        Key_shape =4 --> fE1=EGLO
-C        Key_shape =5 --> fE1=GFL
-C        Key_shape =6 --> fE1=SLO
-C
 C
 C--------check input for consistency
 C
@@ -1165,7 +1147,8 @@ C--------read nuclear deformations and masses
          CALL READNIX
 C--------set projectile/ejectile masses
          DO nejc = 0, NDEJC
-            EJMass(nejc) = (AEJc(nejc)*AMUmev + XMAss_ej(nejc))/AMUmev
+            EJMass(nejc) = (AEJc(nejc)*AMUmev
+     &                     -ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
          ENDDO
 C--------read number of reasonably known levels and level density parameter 'a'
 C--------according to Mebel (GC) or EMPIRE systematics (dynamic l.d.)
@@ -1304,17 +1287,14 @@ C-----set giant resonance parameters for CN
       GMRpar(6,nnuc) = 0.0
       GMRpar(7,nnuc) = 1.0
       GMRpar(8,nnuc) = 0.0
-      IF (Q(0,1).EQ.0.0D0) THEN
-         CALL BNDG(0,1,Q(0,1))
-         AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
-      ENDIF
-      EINl = EIN
+      AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev      
+      IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
+      EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
 
       IF (DIRect.GT.0 .AND. FIRst_ein) THEN
-C     IF (DIRect.GT.0                ) THEN
                               ! Inelastic scattering by DWBA for all particles
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
@@ -1396,7 +1376,7 @@ C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
          Do i = 0,NDNuc
            ENDf(i) = 0
-          Enddo
+         Enddo
       ENDIF
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
@@ -1473,6 +1453,7 @@ C           residual nuclei must be heavier than alpha
      &                izares
                STOP
             ENDIF
+
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
                CALL LEVREAD(nnur)
@@ -1517,16 +1498,18 @@ C-----------determination of excitation energy matrix in res. nuclei
             IF (FITlev.GT.0.0D0) ECUt(nnur) = 0.0
             IF (Q(nejc,nnuc).EQ.0.0D0 .OR. Q(nejc,nnuc).EQ.99)
      &                           CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
-C           IF (Q(nejc,nnuc).EQ.0.0D0) THEN
-C              CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
-C              AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
-C           ENDIF
             emaxr = 0.0
             IF (NEX(nnuc).GT.0) emaxr = EX(NEX(nnuc),nnuc)
      &                                  - Q(nejc,nnuc)
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
+
+C-----------Coulomb barrier (20% decreased) setting lower energy limit
+            culbar = 0.d0
+            IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
+     &         /(1.3d0*(AEJc(Nejc)**0.3333334 + A(Nnur)**0.3333334))
+
             IF (NEX(nnur).GT.NDEX) THEN
                WRITE (6,*)
                WRITE (6,'('' WARNING: NUMBER OF BINS '',I3,
@@ -1534,22 +1517,24 @@ C           ENDIF
      &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
      &         '-',SYMb(nnur),NDEX
                WRITE (6,
-     &         '('' WARNING: Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
+     &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
      &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (6,*)
-     &          'WARNING: TO CONSIDER IT, YOU HAVE TO DECREASE ',
+     &          '         TO CONSIDER IT, YOU HAVE TO DECREASE ',
      &          ' NEX IN THE INPUT '
                WRITE (6,*)
-     &          'WARNING: OR INCREASE NDEX PARAMETER IN Dimension.h'
+     &          '         OR INCREASE NDEX PARAMETER IN Dimension.h'
+               WRITE (6,'('' WARNING: EMAXr : '',F7.2,
+     &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
                WRITE (6,*)
-                EMAx(nnur) = 0.d0
-                NEX(nnur) = 0
-                NEXr(nejc,nnuc) = 0
-                Q(nejc,nnuc) = 99.d0
-                CYCLE
+               EMAx(nnur) = 0.d0
+               NEX(nnur) = 0
+               NEXr(nejc,nnuc) = 0
+               Q(nejc,nnuc) = 99.d0
+               CYCLE
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
@@ -1564,6 +1549,7 @@ C           ENDIF
             ENDIF
             IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) ECUt(nnur)
      &          = EX(1,nnur)
+
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE
 C-----------determination of Q-value for isotop production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
@@ -1575,15 +1561,29 @@ C-----------precise grid at low energies. from the 5-th element on the step
 C-----------is de (bin width).
 C-----------determination of etl matrix
             netl = 6
-            IF (NEX(nnuc).GT.0) netl = 
-     &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6     
+            IF (NEX(nnuc).GT.0) netl =
+     &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
             IF (netl.GT.NDETL) THEN
                WRITE (6,*)
-     &             ' netl = ',netl,' > NDETL = ',NDETL
-               WRITE (6,*)
+     &             ' WARNING: netl = ',netl,' > NDETL = ',NDETL
+               WRITE (6,
+     &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
+     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
+     &          NINT(A(nnuc)),'-',SYMb(nnuc),
+     &          NINT(ares),   '-',SYMb(nnur),
+     &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
+               IF((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).LT.culbar) THEN
+                 EMAx(nnur) = 0.d0
+                 NEX(nnur) = 0
+                 NEXr(nejc,nnuc) = 0
+                 Q(nejc,nnuc) = 99.d0
+                 CYCLE
+               ELSE
+                 WRITE (6,*)
      &             ' OUT OF BOUNDARY; DECREASE NEX IN INPUT OR INCREASE'
      &             , ' NDEX IN dimension.h AND RECOMPILE'
-               STOP 10
+                 STOP 10
+               ENDIF
             ENDIF
             IF (NEXr(nejc,nnuc).GT.0 .AND. NEX(nnuc).GT.0) THEN
                ETL(5,nejc,nnur) = EX(NEX(nnuc),nnuc)
@@ -1603,7 +1603,6 @@ Cpr         WRITE(6,*) 'etlmax',etlmax
             DO ietl = 6, netl
                ETL(ietl,nejc,nnur) = ETL(ietl - 1,nejc,nnur) + DE
             ENDDO
-C
 Cpr         WRITE(6,*)
 Cpr         >        'TL ENERGIES FOR TARGET A=',A(NNUR),' PROJECTILE A=',
 Cpr         >        AEJC(NEJC),' Z=',ZEJC(NEJC)
@@ -1746,10 +1745,6 @@ C
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
       DOUBLE PRECISION egamma, pelm, pgamma, qn, sum, t12, xicc
-
-
-
-
       DOUBLE PRECISION dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
       CHARACTER*9 finp
       CHARACTER*1 dum
@@ -1789,25 +1784,25 @@ C       We could put here whatever systematics for D0 or Gg we want
    70 LREad = .TRUE.
       izatmp = INT(1000*iz + ia)
       DO itmp = 0,NDNuc
-          IF(NSTOred(itmp).eq.izatmp) THEN
-            LREad = .FALSE.
-            GOTO 50
-          ENDIF
+        IF(NSTOred(itmp).eq.izatmp) THEN
+          LREad = .FALSE.
+          GOTO 50
+        ENDIF
       ENDDO
 
    50 IF(.NOT.LREAD) then
-          NLV(Nnuc) = NLV(itmp)
-          NCOmp(Nnuc) = NCOmp(itmp)
-          DO ilv = 1, NLV(Nnuc)
-            ELV(ilv,Nnuc) = ELV(ilv,itmp)
-            XJLv(ilv,Nnuc) = XJLv(ilv,itmp)
-            LVP(ilv,Nnuc) = LVP(ilv,itmp)
-            DO nbr = 1, NDBR
-               BR(ilv,nbr,1,Nnuc) = BR(ilv,nbr,1,itmp)
-               BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,itmp)
-               BR(ilv,nbr,3,Nnuc) = BR(ilv,nbr,3,itmp)
-            ENDDO
+        NLV(Nnuc) = NLV(itmp)
+        NCOmp(Nnuc) = NCOmp(itmp)
+        DO ilv = 1, NLV(Nnuc)
+          ELV(ilv,Nnuc) = ELV(ilv,itmp)
+          XJLv(ilv,Nnuc) = XJLv(ilv,itmp)
+          LVP(ilv,Nnuc) = LVP(ilv,itmp)
+          DO nbr = 1, NDBR
+            BR(ilv,nbr,1,Nnuc) = BR(ilv,nbr,1,itmp)
+            BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,itmp)
+            BR(ilv,nbr,3,Nnuc) = BR(ilv,nbr,3,itmp)
           ENDDO
+        ENDDO
       ELSE
 C-------set ground state in case nucleus not in file
         NLV(Nnuc) = 1
@@ -4258,6 +4253,37 @@ C-----
          ENDIF
 
 C--------Tuning factors
+         IF (name.EQ.'TUNEPE') THEN
+            IF (i1.GT.NDEJC) THEN
+               WRITE (6,'('' UNKNOWN EJECTILE in PE TUNE '',I2)') i3
+               GOTO 100
+            ENDIF
+            if(i2.gt.0.) then
+              WRITE (6,
+     &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
+     &         '' uncertainty is equal to '',i2,'' %'')')
+     &        i1, A(1), SYMb(1), i2
+               sigma = val*0.01*i2
+C              TUNEpe(i1) = val + grand()*sigma
+               TUNEpe(i1) = val + (2*drand()-1.)*sigma
+              WRITE (6,
+     &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
+     &  '' multiplied by '',F6.3)') i1, A(1), SYMb(1), TUNEpe(i1)
+              IPArCOV = IPArCOV +1
+              WRITE(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &           IPArCOV, TUNEpe(i1), INDexf,INDexb
+            else
+              TUNEpe(i1) = val
+              WRITE (6,
+     &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
+     &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), val
+              WRITE (12,
+     &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
+     &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), val
+            endif
+            GOTO 100
+         ENDIF
+
          IF (name.EQ.'TUNE  ') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
@@ -4267,10 +4293,10 @@ C--------Tuning factors
                WRITE (6,'('' TUNING IGNORED'')')
                GOTO 100
             ENDIF
-                IF (i3.GT.NDEJC) THEN
+            IF (i3.GT.NDEJC) THEN
                WRITE (6,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
                GOTO 100
-                ENDIF
+            ENDIF
             if(i4.gt.0.) then
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,

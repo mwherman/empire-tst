@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.20 $
-C $Id: ddhms.f,v 1.20 2005-06-13 16:00:23 Capote Exp $
+C CVS Version Management $Revision: 1.21 $
+C $Id: ddhms.f,v 1.21 2005-06-22 20:15:22 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.20 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.21 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.20 2005-06-13 16:00:23 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.21 2005-06-22 20:15:22 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -3819,10 +3819,11 @@ C
 C COMMON variables
 C
       REAL*8 AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2, HHBarc, PI,
-     &       XNExc
-      COMMON /CONSTANT/ AMUmev, PI, XNExc, CETa, CSO, AMPi,
-     &                  ELE2, HHBarc, AMUneu, AMUpro
-      ZMNuc = 939.D0
+     &       AMUele
+      COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
+     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
+C     ZMNuc = 939.D0
+      ZMNuc = AMUpro
 C     PI_g = DACOS( - 1.D0)
       PI_g = PI
 C     HBArc = 197.D0
