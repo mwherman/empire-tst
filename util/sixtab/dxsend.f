@@ -777,8 +777,12 @@ C*
       MINL=0
       M600=0
       M800=0
-      YIELD=1
-      ZAP =-1
+      IF(KEA.EQ.0) THEN
+C* Do not include particle multiplicities for cross sections
+        ZAP =-1
+      ELSE
+        ZAP=ZAP0
+      END IF
 c...
       print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS'
       print *,         ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
@@ -831,8 +835,6 @@ C* Find particle emission reactions
       CALL SKIPSC(LEF)
       ZAP =ZAP0
       IZAP=ZAP+0.1
-C* Flag yields to be included in particle production cross sections
-      IF(MF.EQ.3) YIELD=0
 C*
 C* Prepare reaction list for light particles
 C*
@@ -849,8 +851,9 @@ C* Select contributing reactions
           IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
           LST(LOOP)=MT
         END IF
-        IF(MT.EQ.103) M600=1
-        IF(MT.EQ.107) M800=1
+        IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
+        IF(MT.GE.600 .AND. MT.LE.649) I600=1
+        IF(MT.GE.800 .AND. MT.LE.849) I800=1
         GO TO 20
       ELSE IF(IZAP.EQ.0) THEN
 C*
@@ -883,6 +886,7 @@ C* Select contributiong reactions
      &     (MT.GT.800 .AND. MT.LE.849)) THEN
           LOOP=LOOP+1
           LST(LOOP)=MT
+          IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
           IF(MT.GE.600 .AND. MT.LE.649) I600=1
           IF(MT.GE.800 .AND. MT.LE.849) I800=1
         END IF
@@ -920,8 +924,9 @@ C* Exclude cumulative reactions if discrete levels present
       DO I=1,LOOP
         IL=IL+1
         LST(IL)=LST(I)
-        IF(LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
-        IF(LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
+        IF( LST(I).EQ.  4 .AND. IINL.EQ.1) IL=IL-1
+        IF( LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
+        IF( LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
         IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
         IF((LST(I).GT.600 .AND. LST(I).LE.649) .AND. M600.EQ.1) IL=IL-1
         IF((LST(I).GT.800 .AND. LST(I).LE.849) .AND. M800.EQ.1) IL=IL-1
@@ -978,13 +983,8 @@ C* Interpolate current distribution to the union grid
 C* Interpolate saved distribution to the union grid
       CALL FITGRD(NE1,RWO,RWO(LX),NE2,RWO(LUE),RWO(LUX))
 C* Add the current to the saved distribution
-      IF(YIELD.GT.0) THEN
-         YLD=1
-      ELSE
-        CALL YLDPOU(YLD,MT,IZAP)
-      END IF
       DO I=1,NEN
-        DXS(I)=DXS(I)+YLD*RWO(LUX-1+I)
+        DXS(I)=DXS(I)+RWO(LUX-1+I)
       END DO
 C* Save the summed distribution 
    70 LX=1+NEN*2
@@ -1111,8 +1111,8 @@ C-
 C*
       DATA PI/3.14159265/
 C...
-C...      PRINT *,'ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-C...     1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+c...      PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+c...     1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -1124,6 +1124,7 @@ C* Check the requested type of output
       SAN= 1/(2*PI)
       MST= 1+NINT(PAR)
       AWP=-1
+      ZAP= ZAP0
       IZAP0=NINT(ZAP0)
       IF     (KEA.EQ.2) THEN
 C* Case: Energy spectrum at fixed scattering angle requested
@@ -1144,7 +1145,8 @@ C*
       CALL SKIPSC(LEF)
 C*
 C* Define particle multiplicities
-      IF(KEA.EQ.0) GO TO 30
+      YL=1
+      IF(IZAP0.LT.0) GO TO 30
       CALL YLDPOU(YL,MT0,IZAP0)
 C* Special treatment for neutron-induced fission
       IF(IZAP0.EQ.1) THEN
@@ -1224,15 +1226,22 @@ C* Case: Cross section is required on output - finish processing
           PRINT *,' WARNING - Arry limit MEN exceeded, output first',MEN
           NEN=MEN
         END IF
+        YY=1
+        IF(YL.GT.0) YY=YL
         DO I=1,NEN
           ENR(I)=RWO(     I)
-          DXS(I)=RWO(LX-1+I)
+          DXS(I)=RWO(LX-1+I)*YY
         END DO
-
-        print *,'    mf/mt/izap0',mf,mt,zap0,izap0
-
-        IF(MT0.NE.5 .AND. IZAP0.NE.0) GO TO 900
-C* Find particle yields for MT 5 (all particles) and other MT (gamma only)
+c...
+c        print *,'    mf/mt/izap0',mf,mt,zap0,izap0
+c...
+        IF(IZAP0.LT.0 .OR. YL.GT.0) GO TO 900
+C* Find particle yields when these are not implicit in MT
+c...
+        IF(IZAP0.EQ.0) THEN
+          print *,'WARNING - photon multiplicities not coded (only MF6)'
+        END IF
+c...
         MF=6
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 C* Error trapping when no data found in the ENDF file
@@ -1779,7 +1788,7 @@ C* Retrieve the particle yield
 C* Check for matching particle - else skip section
       IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
 c...
-c...        print *,'Skipping particle/mf/mt/law',nint(zap),mf,mt,law
+        print *,'Skipping particle/mf/mt/law',nint(zap),mf,mt,law
 c...
         IF(JNK.GE.NK) THEN
           PRINT *,'DXSEN1 WARNING - Particle not found',NINT(ZAP0)

@@ -27,11 +27,11 @@ C-V  05/04 - Copy comments to MF1/MT451.
 C-V        - Upgrade to proces partially exclusive/inclusive spectra.
 C-V        - Allow metastable targets.
 C-V  05/06 Increase MXR from 200K to 300K.
-C-M  
+C-M
 C-M  Manual for Program EMPEND
 C-M  =========================
-C-M  
-C-M  The EMPIRE output is processed and converted into ENDF 
+C-M
+C-M  The EMPIRE output is processed and converted into ENDF
 C-M  format. The ENDF formatted output file has to obey the
 C-M  rule of ordering the reactions in increasing order by
 C-M  the reaction MT number, so several sweeps of the EMPIRE
@@ -49,7 +49,7 @@ C-M   - Finally, a sweep is made for the remaining reactions,
 C-M     particularly the (n,gamma) reaction, for which the
 C-M     particle distributions are coded in ENDF Files-12, 14
 C-M     and 15.
-C-M  
+C-M
 C-M  The cross section data found on the file are fitted by
 C-M  a cubic spline and entered into the output ENDF file on
 C-M  a user-defined dense energy grid, thinned to the specified
@@ -57,7 +57,7 @@ C-M  tolerance and taking reaction thresholds into account.
 C-M  If desired, the spline interpolation may be suppressed
 C-M  and the energy points found on the file are entered
 C-M  directly into the ENDF formatted file.
-C-M  
+C-M
 C-M  The angular distributions for discrete level reactions
 C-M  that appear in the ENDF file-4 sections are extracted from
 C-M  the spectra on the EMPIRE output file, interpolated to
@@ -73,7 +73,7 @@ C-M  reduced accordingly.
 C-M
 C-M  Photon production reactions, which remain to be specified,
 C-M  particularly the (n,gamma) reaction, are given in the ENDF
-C-M  files-12, 14 and 15. Photon multiplicity is stored in 
+C-M  files-12, 14 and 15. Photon multiplicity is stored in
 C-M  file-12. Isotropic angular distribution is assumed and
 C-M  written to file 14. The particle energy distribution is
 C-M  written to file15.
@@ -84,15 +84,15 @@ C-M  screen. The required input is entered in response to the
 C-M  prompts, which are the following:
 C-M   - The name of the EMPIRE output file to be processed.
 C-M   - The name of the ENDF formatted file to be written.
-C-M   - Number of subintervals per incident neutron energy 
+C-M   - Number of subintervals per incident neutron energy
 C-M     interval on the EMPIRE output file. The subintervals
 C-M     define the fine energy mesh on the ENDF formatted
 C-M     file. If zero is entered, only the points on the
 C-M     EMPIRE output are entered to the ENDF formatted file.
 C-M   - Thinning tolerance limit [%] to reduce the number of
 C-M     cross section points. Data points which, can be
-C-M     reproduced from the neighbouring points by linear 
-C-M     interpolation to within the specified tolerance, are 
+C-M     reproduced from the neighbouring points by linear
+C-M     interpolation to within the specified tolerance, are
 C-M     removed. Entering a negative value for the thinning
 C-M     tolerance limit causes thinning to be suppressed.
 C-M   - ENDF material number identifier.
@@ -129,7 +129,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=300000,MXI=8000)
+      PARAMETER   (MXE=200,MXT=200,MXM=100,MXR=300000,MXI=8000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -147,12 +147,20 @@ C* Default cross section linear interpolation tolerance limit 0%
       DATA ZRO/0./,RWO/MXR*0./
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
 C* ENDF-6 Formats Manual App. H.4, april 2001
+C...  AWN = 1.008664916
+C...  AWH = 1.007276467
+C...  AWD = 2.013553213
+C...  AWT = 3.016049268
+C...  AW3 = 3.014932235
+C...  AWA = 4.001506175
+C* AMDC Audi-Wapstra mass tables 2003 "http://www-nds.iaea.org/amdc/"
+C* Subtract electron mass and add ionisation energy defect
       AWN = 1.008664916
-      AWH = 1.007276467
-      AWD = 2.013553213
-      AWT = 3.016049268
-      AW3 = 3.014932235
-      AWA = 4.001506175
+      AWH = 1.007825032 -   0.00054857991 + 0.000000015
+      AWD = 2.014101778 -   0.00054857991 + 0.000000015
+      AWT = 3.016049278 -   0.00054857991 + 0.000000015
+      AW3 = 3.016029319 - 2*0.00054857991 + 0.000000085
+      AWA = 4.002603254 - 2*0.00054857991 + 0.000000085
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -1073,7 +1081,7 @@ C-D    YI > 0  Multiplicity for the reaction is fixed and equal to YI
 C-D       = 0  Particles may be produced by the reaction, but the
 C-D            multiplicity has to be obtained from other sources
 C-D       < 0  Particle cannot be produced from this reaction
-C-D  
+C-D
       YI=-1
       IF     (KZAP.EQ.   1) THEN
 C* Outgoing neutrons
@@ -1361,8 +1369,14 @@ C-F Read angular distributions until a blank line is encountered
 C* Read distribution in double precision to avoid underflow
       READ (REC,807,ERR=802) EE,(DD(J),J=1,JXA)
       IF(KXA.GT.8) READ (LIN,809,ERR=802) (DD(J),J=9,KXA)
+      IF(KXA.EQ.1) THEN
+C* Convert spectra to double differential
+        FF=4*PI
+      ELSE
+        FF=1
+      END IF
       DO J=1,KXA
-        DST(J)=DD(J)
+        DST(J)=DD(J)*FF
       END DO
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
@@ -1559,7 +1573,7 @@ C*
   909 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Eou',1P,E10.3,' > available energy',E10.3)
   912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
-     !       ' "',A70,'"')
+     1       ' "',A70,'"')
   931 FORMAT('P(',I2.2,') Fit')
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
@@ -2244,7 +2258,7 @@ C      print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
 c
 C*
 C* Process correlated energy/angle distribution for this energy
-  630 L6 =LB1
+      L6 =LB1
       LL =L6 + 4
       NW =0
       NEP=0
@@ -2351,7 +2365,7 @@ C*        Save the energy and the yield
         ETEF=0
       END IF
 C*
-C* Distributions for one incident energy processed - Normalize 
+C* Distributions for one incident energy processed - Normalize
       NE6=NE6+1
 
 c...        print *,'      ne6',ne6,ee
@@ -2370,14 +2384,15 @@ C*
       RWO(L6 + 1)=LHI
       RWO(L6 + 2)=NEP*(LHI+2)
       RWO(L6 + 3)=NEP
+C* Scale distribution integral by 4*Pi to get the cross section
+C* Scale by 1.E-9 to change mb/MeV into b/eV
+      SPC=SPC*4.E-9*PI
       IF(MT6.LT.0) GO TO 210
-C* Particle multiplicity for MT5 of gamma from integral/x.s. ratio
+C* Particle multiplicity for MT5 or gamma from integral/x.s. ratio
       IF(JT6.EQ.5 .OR. IZAP.EQ.0) THEN
         NP=NE6
         EIS(NE6)=EE
-C* For GAMMAs the angle integrated distribution is given
-C* No need to multiply by 4Pi
-        YLD(NE6)=SPC*1.E-9/XS3
+        YLD(NE6)=SPC/XS3
 c...
 c...        print *,'zap,ee,spc,xs3,ne6',izap,ee,spc,xs3,ne6
 c...
@@ -2385,7 +2400,7 @@ c...
 C* Check for consistency (neutrons only)
         IF(IZAP.EQ.1 .AND.XS3.GT.0 ) THEN
            IF(YL0.GT.1E-12) THEN
-             XSP=SPC*4.E-9*PI/YL0
+             XSP=SPC/YL0
            ELSE
              XSP=0
            END IF
@@ -2813,7 +2828,7 @@ C* Spline fit log of the cross section (oner non-zero range)
   330 F1=0.
       F2=0.
       CALL FINSP3(RWO(JX),RWO(JY),JE
-     1           ,RWO(KX),RWO(KY),RWO(KY),KE,F1,F2,RWO(LS)) 
+     1           ,RWO(KX),RWO(KY),RWO(KY),KE,F1,F2,RWO(LS))
 C* Convert back to cross sections from log
   332 DO 336 J=1,NE1
       R=RWO(LY-1+J)
@@ -2997,11 +3012,15 @@ C...          read (*,'(a1)') yes
 C* Try next point or linearly interpolate
           IF(E2.LT.EOU) GO TO 38
           CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
-          IF(ABS(EOU-E1).GT.DLVL/2) THEN
+          IF(ABS(EOU-E1).GT.DLVL) THEN
 C*          If Eout equals first point, the distribution is also
 C*          interpolated to simplify coding - suppress printout
             WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
             WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+c...
+c...            print *,'eou,e1,e2',eou,e1,e2
+c...            print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
+c...
           END IF
 C...          print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
 c... 1               ,QQM(IT)-QQI(IT)
@@ -3462,7 +3481,7 @@ C-Purpose: Interpolate a set of points using cubic spline
 C-Description:
 C-D  Interpolate a set of points using cubic splines. The parameters
 C-D  are the following:
-C-D    N   number of points on input argument mesh 
+C-D    N   number of points on input argument mesh
 C-D   XI   input argument mesh (array of N values in momotonic order)
 C-D   YI   function values corresponding to XI(i)
 C-D    M   number of points in the output mesh
@@ -3629,7 +3648,7 @@ C-Description:
 C-D  Excessive data points need to be removed such that the remaining
 C-D  points can be linearly interpolated to within the specified
 C-D  tolerance. The formal parameters are:
-C-D    N   number of points on input argument mesh 
+C-D    N   number of points on input argument mesh
 C-D   XI   input argument mesh (array of N values in momotonic order)
 C-D   YI   function values corresponding to XI(i)
 C-D    M   number of points in the output mesh
@@ -3730,7 +3749,7 @@ C* Loop to find the appropriate Legendre order
    20 NLG=L
       N1 =NLG+1
       LMM=MIN(LMX,NNP*2/3)
-      IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
+      IF(LL+(NLG+1)*(NLG+3).GT.MXR)
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
       CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
 C* Trap zero-determinant
@@ -3878,7 +3897,7 @@ C* Trap zero determinant
 C-Title  : POLLG1 Function
 C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
 C-Description:
-C-D  Evaluate Legendre polynomial expansion of order NL with 
+C-D  Evaluate Legendre polynomial expansion of order NL with
 C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
@@ -3918,8 +3937,8 @@ C-
 C-Title  : MTXGUP subroutine
 C-Purpose: Matrix solver, Gauss elimination, part.pivoting
 C-Description:
-C-D Decompose matrix A, calculate determinant and/or solve a set of 
-C-D linear simultaneous equations  A x = F  (order n) using Gauss 
+C-D Decompose matrix A, calculate determinant and/or solve a set of
+C-D linear simultaneous equations  A x = F  (order n) using Gauss
 C-D elimination technique with partial pivoting by rows.
 C-Author : A.Trkov , Institute J.Stefan, Ljubljana, Slovenia
 C-Version: 1984 Original coding
