@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-22 20:22:54 $
-Ccc   * $Id: main.f,v 1.112 2005-06-22 20:22:54 herman Exp $
+Ccc   * $Date: 2005-06-23 06:26:43 $
+Ccc   * $Id: main.f,v 1.113 2005-06-23 06:26:43 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1761,66 +1761,51 @@ C-----ENDF spectra inclusive representation
 C-----
 C-----
 C-----
-C-----sum exclusive energy spectra (double-differential already
-C-----done) into inclusive ones transforming them into CM
+C-----NOTE: transformation into CM
 C-----(reduce channel energy to account for recoils)
-C-----and store them on the 0 nucleus (target)
+C-----is not yet done! Should be performed in ACCUM and EXCLUSIVEC/L
 C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
-      DO nnuc = 1, NNUcd               !loop over decaying nuclei
-         IF (ENDf(nnuc).EQ.2) THEN
-            DO nejc = 0, NEJcm         !loop over ejectiles
-               IF (nejc.GT.0) THEN
-                  recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
-               ELSE
-                  recorr = 1.0
-               ENDIF
-               DO icse = 1, NDEX
-                  xccm = (icse - 1)*recorr + 1.0000001
-                  iccml = xccm
-                  iccmh = MIN(NDEX,iccml + 1)
-                  weight = xccm - iccml
-C-----------------energy spectra
-                  CSE(iccml,nejc,0) = CSE(iccml,nejc,0)
-     &                                + CSE(icse,nejc,nnuc)
-     &                                *(1.0 - weight)
-C-----------------double contribution to the first energy bin to
-C-----------------to conserve the integral
-                  IF (iccml.EQ.1 .AND. icse.NE.1) CSE(iccml,nejc,0)
-     &                = CSE(iccml,nejc,0) + CSE(icse,nejc,nnuc)
-     &                *(1.0 - weight)
-                  CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
-     &                                + CSE(icse,nejc,nnuc)*weight
-               ENDDO
-               DO icse = 1, NDEX
-C-----------------double-differential spectra
-                  IF (nnuc.EQ.1) THEN !CN (possibly anisotropic)
-                     DO nang = 1, NDAng
-                        CSEa(iccml,nang,nejc,0)
-     &                     = CSEa(iccml,nang,nejc,0)
-     &                     + CSEa(icse,nang,nejc,1)*(1.0 - weight)
-C-----------------------double contribution to the first energy bin
-C-----------------------to conserve the integral
-                        IF (iccml.EQ.1 .AND. icse.NE.1)
-     &                      CSEa(iccml,nang,nejc,0)
-     &                      = CSEa(iccml,nang,nejc,0)
-     &                      + CSEa(icse,nang,nejc,1)*(1.0 - weight)
-                        CSEa(iccmh,nang,nejc,0)
-     &                     = CSEa(iccmh,nang,nejc,0)
-     &                     + CSEa(icse,nang,nejc,1)*weight
-                     ENDDO
-                  ELSE !other residues with isotropic ang. distributions
-                     piece = CSE(icse,nejc,0)/4.0/PI
-                     DO nang = 1, NDANG
-                        CSEa(icse,nang,nejc,0) = CSEa(icse,nang,nejc,0)
-     &                     + piece
-                     ENDDO
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDIF
-      ENDDO
+C------double-differential spectra
+       DO iesp = 1, NDECSE
+          DO nejc = 0, NDEJC
+             DO nang = 1, NDANG
+                piece = CSEmsd(iesp,nejc)
+                IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
+                CSEa(iesp,nang,nejc,0)
+     &             = ((CSE(iesp,nejc,0)
+     &             - piece*POPcseaf(0,nejc,iesp,0))
+     &             /4.0/PI + CSEa(iesp,nang,nejc,1)
+     &             *POPcseaf(0,nejc,iesp,0))
+             ENDDO
+          ENDDO
+       ENDDO
+
+
+c     DO nnuc = 1, NNUcd               !loop over decaying nuclei
+c        IF (ENDf(nnuc).EQ.2) THEN
+c           DO nejc = 0, NEJcm         !loop over ejectiles
+c              IF (nejc.GT.0) THEN
+c                 recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
+c              ELSE
+c                 recorr = 1.0
+c              ENDIF
+c              DO icse = 1, NDEX
+c                 xccm = (icse - 1)*recorr + 1.0000001
+c                 iccml = xccm
+c                 iccmh = MIN(NDEX,iccml + 1)
+c                 weight = xccm - iccml
+c-----------------energy spectra
+c                 CSE(iccml,nejc,0) = CSE(iccml,nejc,0)
+c    &                                + CSE(icse,nejc,nnuc)
+c    &                                *(1.0 - weight)
+c                 CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
+c    &                                + CSE(icse,nejc,nnuc)*weight
+c              ENDDO
+c           ENDDO
+c        ENDIF
+c     ENDDO
       WRITE (6,*) ' '
       WRITE (6,'(''  Total fission cross section '',G12.5,'' mb'')')
      &       TOTcsfis

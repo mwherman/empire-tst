@@ -69,7 +69,7 @@
      &                 PEQc, PI, POP(ndex,ndlw,2,ndnuc),
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,ndexclus),
-     &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,ndexclus),
+     &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc),

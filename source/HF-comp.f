@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-14 06:44:40 $
-Ccc   * $Id: HF-comp.f,v 1.73 2005-06-14 06:44:40 herman Exp $
+Ccc   * $Date: 2005-06-23 06:26:43 $
+Ccc   * $Id: HF-comp.f,v 1.74 2005-06-23 06:26:43 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -58,6 +58,7 @@ C-----
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
+         icse = MAX0(2,icse)
          popt = 0.0
          DO j = 1, NLW, LTUrbo  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
@@ -65,15 +66,14 @@ C-----
             pops = pop1 + pop2
             IF (ie.EQ.1) pops = pops*0.5
             popt = popt + pops !sum over spin/pi at a given energy bin
-            icse = MAX0(2,icse)
-            AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + pop1 + pop2
-            CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pops
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
+            AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
+            CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             IF (ENDf(Nnuc).EQ.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -215,13 +215,11 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-C-----Contribution comming straight from the current decay
+C-----Contribution coming straight from the current decay
+C-----(ignore if residue is inclusive since summation already done in ACCUM) 
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      IF(ENDF(Nnur).EQ.2) THEN
-        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
-      ELSE
-        POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
-      ENDIF
+      IF(ENDF(Nnur).EQ.1) 
+     &POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
@@ -230,7 +228,9 @@ C-----DE spectra
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
+                   WRITE(6,*)'ENDF-stat',nnur,ENDF(Nnur)
                    IF(ENDF(Nnur).EQ.2) THEN
+                   WRITE(6,*)'adding',nnur,POPcse(Iec,iejc,ie,Nnuc)*xnor
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
                    ELSE
@@ -241,10 +241,17 @@ C-----DE spectra
             ENDDO
 C-----------DDX spectra using portions
             DO iejc = 0, NDEJCD
-               IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0)
-     &             POPcseaf(Ief,iejc,ie,Nnur)
-     &             = POPcseaf(Ief,iejc,ie,Nnur)
-     &             + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+               IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
+                   IF(ENDF(Nnur).EQ.2) THEN
+                      POPcseaf(Ief,iejc,ie,0)
+     &                = POPcseaf(Ief,iejc,ie,0)
+     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+                   ELSE
+                      POPcseaf(Ief,iejc,ie,Nnur)
+     &                = POPcseaf(Ief,iejc,ie,Nnur)
+     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+                   ENDIF
+               ENDIF
             ENDDO
          ENDDO
       ENDIF
@@ -305,11 +312,9 @@ C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
-      IF(ENDF(Nnur).EQ.2) THEN
-         CSE(Ie,Nejc,0) = CSE(Ie,Nejc,0) + Popt
-      ELSE
-         POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
-      ENDIF
+C-----(ignore if residue is inclusive since summation already done in ACCUM) 
+      IF(ENDF(Nnur).EQ.1)
+     &   POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
@@ -319,18 +324,6 @@ C-----DE spectra
                DO iejc = 0, NDEJC
                   IF (POPcse(Iec,iejc,iesp,Nnuc).NE.0) THEN
                     IF(ENDF(Nnur).EQ.2) THEN
-                           
-                       DO nang = 1, NDANG
-                          piece = CSEmsd(iesp,iejc)
-                          IF (iesp.EQ.NEXr(iejc,1)) piece = 0.5*piece
-                          CSEa(iesp,nang,iejc,0)
-     &                       =  CSEa(iesp,nang,iejc,0)
-     &                       + ((POPcse(0,iejc,iesp,Nnuc)
-     &                       - piece*POPcseaf(0,iejc,iesp,Nnuc))
-     &                       /4.0/PI + CSEa(iesp,nang,iejc,1)
-     &                       *POPcseaf(0,iejc,iesp,Nnuc))
-                       ENDDO
-
                       CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
      &                + POPcse(Iec,iejc,iesp,Nnuc)*xnor
                     ELSE
@@ -342,10 +335,17 @@ C-----DE spectra
                ENDDO
 C--------------DDX spectra using portions
                DO iejc = 0, NDEJCD
-                  IF (POPcseaf(Iec,iejc,iesp,Nnuc).NE.0)
-     &               POPcseaf(0,iejc,iesp,Nnur)
-     &               = POPcseaf(0,iejc,iesp,Nnur)
-     &               + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+                  IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) THEN
+                     IF(ENDF(Nnur).EQ.2) THEN
+                        POPcseaf(0,iejc,iesp,0)
+     &                  = POPcseaf(0,iejc,iesp,0)
+     &                  + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+                     ELSE
+                        POPcseaf(0,iejc,iesp,Nnur)
+     &                  = POPcseaf(0,iejc,iesp,Nnur)
+     &                  + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+                     ENDIF
+                  ENDIF
                ENDDO
             ENDDO
          ENDIF
