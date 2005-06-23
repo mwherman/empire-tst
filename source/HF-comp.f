@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-23 06:26:43 $
-Ccc   * $Id: HF-comp.f,v 1.74 2005-06-23 06:26:43 herman Exp $
+Ccc   * $Date: 2005-06-23 06:29:29 $
+Ccc   * $Id: HF-comp.f,v 1.75 2005-06-23 06:29:29 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -228,9 +228,7 @@ C-----DE spectra
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
-                   WRITE(6,*)'ENDF-stat',nnur,ENDF(Nnur)
                    IF(ENDF(Nnur).EQ.2) THEN
-                   WRITE(6,*)'adding',nnur,POPcse(Iec,iejc,ie,Nnuc)*xnor
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
                    ELSE
