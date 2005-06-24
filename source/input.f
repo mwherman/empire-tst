@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-22 20:15:21 $
-Ccc   * $Id: input.f,v 1.149 2005-06-22 20:15:21 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-06-24 06:48:55 $
+Ccc   * $Id: input.f,v 1.150 2005-06-24 06:48:55 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -815,11 +815,11 @@ C                       residues must be heavier than alpha
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
 C                          Comment the following line and uncommment the one after for all exclusive spectra
-C                          IF (ENDf(nnuc).EQ.0) THEN
-C                             ENDf(nnuc) = 2
-C                             EXClusiv = .FALSE.
-C                       ENDIF
-                           IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
+                           IF (ENDf(nnuc).EQ.0) THEN
+                              ENDf(nnuc) = 2
+                              EXClusiv = .FALSE.
+                           ENDIF
+C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
