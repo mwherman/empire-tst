@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-23 06:29:29 $
-Ccc   * $Id: HF-comp.f,v 1.75 2005-06-23 06:29:29 herman Exp $
+Ccc   * $Date: 2005-06-27 05:41:16 $
+Ccc   * $Id: HF-comp.f,v 1.76 2005-06-27 05:41:16 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -218,8 +218,11 @@ C-----
 C-----Contribution coming straight from the current decay
 C-----(ignore if residue is inclusive since summation already done in ACCUM) 
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      IF(ENDF(Nnur).EQ.1) 
-     &POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
+      IF(ENDF(Nnur).EQ.1) THEN
+         POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
+      ELSE
+         CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
+      ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
@@ -311,8 +314,11 @@ C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
 C-----(ignore if residue is inclusive since summation already done in ACCUM) 
-      IF(ENDF(Nnur).EQ.1)
-     &   POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
+      IF(ENDF(Nnur).EQ.1) THEN
+         POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
+      ELSE
+         CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
+      ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
