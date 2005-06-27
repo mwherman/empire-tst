@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-23 06:26:43 $
-Ccc   * $Id: main.f,v 1.113 2005-06-23 06:26:43 herman Exp $
+Ccc   * $Date: 2005-06-27 05:38:24 $
+Ccc   * $Id: main.f,v 1.114 2005-06-27 05:38:24 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1768,8 +1768,11 @@ C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
 C------double-differential spectra
-       DO iesp = 1, NDECSE
-          DO nejc = 0, NDEJC
+       DO nejc = 0, NDEJC
+          sumtst=0
+          DO iesp = 1, NDECSE
+C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc  
+             sumtst=sumtst+CSE(iesp,nejc,0)
              DO nang = 1, NDANG
                 piece = CSEmsd(iesp,nejc)
                 IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
@@ -1780,6 +1783,7 @@ C------double-differential spectra
      &             *POPcseaf(0,nejc,iesp,0))
              ENDDO
           ENDDO
+          WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE 
        ENDDO
 
 
