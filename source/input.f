@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-24 06:48:55 $
-Ccc   * $Id: input.f,v 1.150 2005-06-24 06:48:55 herman Exp $
+Ccc   * $Date: 2005-06-28 20:26:43 $
+Ccc   * $Id: input.f,v 1.151 2005-06-28 20:26:43 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -195,7 +195,7 @@ C--------set gamma-strength parameters
             GDRpar(7,nnuc) = 1.0
          ENDDO
          IZA(0) = 0
-         ENDf(0) = 1.0
+         ENDf(0) = 0.0
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
@@ -500,7 +500,7 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
-         ENDf(1) = 1.0
+C        ENDf(1) = 1.0
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -789,7 +789,7 @@ C-----------(McFadden global potential 9100 could be used)
 C
 C--------inteligent defaults *** done ***
 C
-         CALL READIN   !optional part of the input
+         CALL READIN(0)   !optional part of the input
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
@@ -2012,7 +2012,7 @@ C
 
 99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'I',1x,12F10.3)
+99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F10.3)
 
       WRITE (6,*)
       WRITE (6,*)
@@ -2040,7 +2040,7 @@ C
 
       IF (iexclus.EQ.1) THEN
         WRITE( 6,*)
-        WRITE( 6,*) ' I means only inclusive spectra are available'
+        WRITE( 6,*) ' < indicates inclusive spectra only'
       ENDIF
 
       IF (FIRst_ein) THEN
@@ -2060,7 +2060,7 @@ C
 
         IF (iexclus.EQ.1) THEN
           WRITE(12,*)
-          WRITE(12,*) ' I means only inclusive spectra are available'
+          WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
 
         WRITE (12,*) '                                                '
@@ -2421,7 +2421,7 @@ C-----define Gspin, Gspar, E2p, E3m for neutron/proton
       END
 C
 C
-      SUBROUTINE READIN
+      SUBROUTINE READIN(Irun)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -2436,7 +2436,8 @@ Ccc   *     value for the array element is entered - FORMAT(A6,G10.5,3I3)*
 Ccc   *     Example of the input record for scalar variable:             *
 Ccc   *     QFIS   0.92                                                  *
 Ccc   *                                                                  *
-Ccc   * input:none                                                       *
+Ccc   * input:Irun = 0 for normal call from INPUT                        *
+Ccc   *              1 for call initiated from within incident energies  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
@@ -2461,14 +2462,14 @@ C
 C Local variables
 C
       REAL FLOAT
-       DOUBLE PRECISION GRAND,DRAND
+      DOUBLE PRECISION GRAND,DRAND
       CHARACTER*40 fstring
-      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc
-       INTEGER IPArCOV
+      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
+      INTEGER IPArCOV
       INTEGER INT
-      CHARACTER*6 name
-       LOGICAL fexist
-      DOUBLE PRECISION val,sigma
+      CHARACTER*6 name, namee
+      LOGICAL fexist
+      DOUBLE PRECISION val,vale,sigma
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -2554,9 +2555,11 @@ C
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Discrete levels were taken from the RIPL-2 level   '
       WRITE (12,*) 'file, based on the 1998 version of ENSDF.          '
-  100 READ (5,'(A1)') name(1:1)
-      IF (name(1:1).NE.'*' .AND. name(1:1).NE.'#' .AND. name(1:1)
-     &    .NE.'!') THEN
+      irun = 0
+  100 IF(irun.EQ.1) RETURN 
+      READ (5,'(A1)') name(1:1)
+      IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
+     &    .EQ.'!') GOTO 100
          BACKSPACE (5)
          READ (5,'(A6,G10.5,4I5)',ERR = 200) name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
@@ -2652,6 +2655,18 @@ C-----      print  maximal gamma-ray multipolarity  'MAXmult'
 C-----------Printout of some final input options   *** done ***
             RETURN
          ENDIF
+         ENTRY OPTIONS(namee, vale, i1e, i2e, i3e, i4e, irun)
+         IF(irun.EQ.1) THEN
+         name = namee
+         val = vale
+         WRITE(6,*) 'vale',vale
+         WRITE(6,*) 'val',val
+         i1 = i1e
+         i2 = i2e
+         i3 = i3e
+         i4 = i4e
+         ENDIF
+          
 C--------DEGAS input
          IF (name.EQ.'DEGAS ') THEN
             DEGa = val
@@ -3904,7 +3919,7 @@ C             Setting ENDF for all emission loops
      &         '' emission loop # '',I2)') NENdf
                   GOTO 100
              ENDIF
-             IF(val.LT.0. .or. val.GT.2.2) THEN
+             IF(val.LT.0) THEN
                WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)')
      &                i2, SYMb(nnuc)
                WRITE (6,'('' SETTING IGNORED'')')
@@ -3919,8 +3934,8 @@ C           Setting ENDF for a single nucleus
                WRITE (6,'('' ENDF SETTING IGNORED'')')
                GOTO 100
             ENDIF
-            ENDF(nnuc) = INT(val)
-            IF (ENDF(nnuc).EQ.1) THEN
+            ENDf(nnuc) = INT(val)
+            IF (ENDf(nnuc).EQ.1) THEN
               WRITE (6,
      &       '('' Exclusive spectra will be available for emission'',
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
@@ -3928,7 +3943,7 @@ C           Setting ENDF for a single nucleus
      &       '('' Exclusive spectra will be available for emission'',
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
             ENDIF
-            IF (ENDF(nnuc).EQ.2) THEN
+            IF (ENDf(nnuc).EQ.2) THEN
               WRITE (6,
      &       '('' Emission spectra from nucleus '',I3,A2,
      &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
@@ -3994,7 +4009,7 @@ C-----
             ENDIF
             Q(i3,nnuc) = val
             WRITE (6,
-     & '('' Binding energy of '',A2,'' in '',I3,A2,'' set to ''  ,F6.3)'
+     & '('' Binding energy of '',A2,'' in '',I3,A2,'' set to ''  ,F7.3)'
      & ) SYMbe(i3), i2, SYMb(nnuc), val
             IF (nnuc.EQ.1 .AND. IZAejc(0).EQ.IZAejc(i3)) Q(0,1) = val
             GOTO 100
@@ -4307,7 +4322,7 @@ C              TUNe(i3,nnuc) = val + grand()*sigma
                TUNe(i3,nnuc) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
-     &  '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
+     &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
               IPArCOV = IPArCOV +1
                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb
@@ -4315,10 +4330,10 @@ C              TUNe(i3,nnuc) = val + grand()*sigma
               TUNe(i3,nnuc) = val
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
-     &         '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), val
+     &         '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), val
               WRITE (12,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
-     &  '' multiplied by '',F6.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
+     &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
             endif
             GOTO 100
          ENDIF
@@ -4673,7 +4688,6 @@ C-----
 C-----
          WRITE (6,'('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
      &          name
-      ENDIF
       GOTO 100
   200 WRITE (6,
      &'('' FATAL: INVALID FORMAT in KEY: '',A6,

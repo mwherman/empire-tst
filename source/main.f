@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-27 05:38:24 $
-Ccc   * $Id: main.f,v 1.114 2005-06-27 05:38:24 herman Exp $
+Ccc   * $Date: 2005-06-28 20:26:43 $
+Ccc   * $Id: main.f,v 1.115 2005-06-28 20:26:43 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -53,9 +53,10 @@ C
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndang),
      &                 checkXS
       CHARACTER*9 cejectile
-      CHARACTER*6 ctldir
+      CHARACTER*6 ctldir, keyname
       CHARACTER*20 ctmp20
-      DOUBLE PRECISION DMAX1
+      CHARACTER*36 nextenergy
+      DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, iccmh, iccml,
      &        icse, icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
@@ -63,7 +64,7 @@ C
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,
-     &        itemp(NDCOLLEV)
+     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -460,7 +461,7 @@ C-----
 C-----calculate MSD contribution
 C-----
       corrmsd = 1.0
-      IF (MSD.NE.0 .AND. EIN.GT.1.D0) THEN
+      IF (MSD.NE.0 .AND. EIN.GT.3.D0) THEN
 C
 C--------call ORION
 C
@@ -492,25 +493,22 @@ C        REWIND 15
 
          WRITE(15,*) qmax,qstep,ltrmax
 
-         IF (MSD.NE.2) THEN
-            q2 = qmax
-            q3 = qmax
- 1420       CALL ORION(q2,q3,1,EIN,NLW,1,ltrmax,A(0),Z(0),AEJc(0),
-     &                 ZEJc(0),IOUt,ANGles,NDANG,ICOmpff)
-            WRITE (6,
-     &'('' ORION calculated for Q2='', F7.3, '' and Q3='',            F7
-     &.3)') q2, q3
-            q2 = q2 - qstep
-            IF (q2.LT.( - 0.0001D0)) THEN
-               q3 = q3 - qstep
-               IF (q3.LT.( - 0.0001D0)) GOTO 1450
-               q2 = q3
-            ENDIF
-C-----------set to Q's to 0 if negative due to rounding error
-            IF (q2.LT.0.0D0) q2 = 0.0
-            IF (q3.LT.0.0D0) q3 = 0.0
-            GOTO 1420
+         q2 = qmax
+         q3 = qmax
+ 1420    CALL ORION(q2,q3,1,EIN,NLW,1,ltrmax,A(0),Z(0),AEJc(0),
+     &              ZEJc(0),IOUt,ANGles,NDANG,ICOmpff)
+         WRITE (6,
+     &'('' ORION calculated for Q2='', F7.3, '' and Q3='',F7.3)') q2, q3
+         q2 = q2 - qstep
+         IF (q2.LT.( - 0.0001D0)) THEN
+            q3 = q3 - qstep
+            IF (q3.LT.( - 0.0001D0)) GOTO 1450
+            q2 = q3
          ENDIF
+C--------set to Q's to 0 if negative due to rounding error
+         IF (q2.LT.0.0D0) q2 = 0.0
+         IF (q3.LT.0.0D0) q3 = 0.0
+         GOTO 1420
  1450    REWIND 15
          READ(15,*) qmax,qstep,ltrmax
          WRITE (6,*) ' '
@@ -1769,10 +1767,10 @@ C-----stored in CSE(.,x,0) array
 C-----
 C------double-differential spectra
        DO nejc = 0, NDEJC
-          sumtst=0
+c         sumtst=0
           DO iesp = 1, NDECSE
 C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc  
-             sumtst=sumtst+CSE(iesp,nejc,0)
+c            sumtst=sumtst+CSE(iesp,nejc,0)
              DO nang = 1, NDANG
                 piece = CSEmsd(iesp,nejc)
                 IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
@@ -1783,7 +1781,7 @@ C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc
      &             *POPcseaf(0,nejc,iesp,0))
              ENDDO
           ENDDO
-          WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE 
+c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE 
        ENDDO
 
 
@@ -1971,7 +1969,7 @@ C------------exact endpoint
 C-----end of ENDF spectra (inclusive)
 
       IF (ENDf(1).GT.0. .AND. EINl.GE.1.d0) THEN
-         WRITE (6,*)
+         WRITE (6,*) ' '
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
          WRITE (6,'('' Energy'',12x,'' gamma '',9x,''neutron'',
@@ -1993,7 +1991,16 @@ C-----end of ENDF spectra (inclusive)
          ENDDO
       ENDIF
 
-      READ (5,*) EIN
+ 1155 READ (5,'(A36)') nextenergy
+      IF(nextenergy(1:1).EQ.'$') THEN
+         READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1, 
+     &       ikey2, ikey3, ikey4 
+         CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
+         GO TO 1155
+      ELSE
+         READ(nextenergy,'(G15.5)') EIN
+      ENDIF
+       
       IF (EIN.LT.0.0D0) THEN
          IF (FILevel) CLOSE (14)
          WRITE (12,*) ' '
