@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-29 18:25:08 $
-Ccc   * $Id: MSD-orion.f,v 1.16 2005-06-29 18:25:08 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-30 18:17:04 $
+Ccc   * $Id: MSD-orion.f,v 1.17 2005-06-30 18:17:04 Capote Exp $
 C
 C
 C
@@ -351,6 +351,15 @@ C
             CALL OPMPARN(Atar,Ztar,nejc,e,v,dvs,w,wd,vs,vi,av,aw,ad,as,
      &                   ai,rv,rw,RD,rs,ri,rc,mi,mt)
             IF (KTRl(4).EQ.1) vs = 0.0
+C
+C           RCN, June 30, 2005 
+C           Added control to avoid division by zero
+C
+            IF(av.eq.0.d0) av=1.d0
+            IF(aw.eq.0.d0) aw=1.d0
+            IF(ad.eq.0.d0) ad=1.d0
+            IF(as.eq.0.d0) as=1.d0
+            IF(ai.eq.0.d0) ai=1.d0
             VSXr(n) = v
             DVXr(n) = dvs
             WSXr(n) = w
@@ -615,13 +624,13 @@ C     E is always in lab system => IKEY = -1
       Wd = WOMs(Nejc,nnuc)
       Vs = VSO(Nejc,nnuc)
 C     Corrected by Capote, March 2005
-C     Vi = WSO(Nejc,nnuc)
-C     Ri = RWSO(Nejc,nnuc)
-C     Ai = AWSO(Nejc,nnuc)
-C     Corrected back by Herman, June 2005
       Vi = WSO(Nejc,nnuc)
-      Ri = Rs
-      Ai = As
+      Ri = RWSO(Nejc,nnuc)
+      Ai = AWSO(Nejc,nnuc)
+C     Corrected back by Herman, June 2005
+C     Vi = WSO(Nejc,nnuc)
+C     Ri = Rs
+C     Ai = As
       END
 
 
