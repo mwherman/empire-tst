@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-22 23:26:54 $
-Ccc   * $Id: pcross.f,v 1.36 2005-06-22 23:26:54 Capote Exp $
+Ccc   * $Date: 2005-06-30 18:19:33 $
+Ccc   * $Id: pcross.f,v 1.37 2005-06-30 18:19:33 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -30,9 +30,9 @@ C
 C COMMON variables
 C
       REAL*8 L(0:NDEJC,PMAX), XCOs(NDAng), VV
-      INTEGER*4 NHEq, JANg(NDAng)
+      INTEGER*4 NHEq
       COMMON /CALC5 / L, NHEq
-      COMMON /KALB/ XCOs, JANg
+      COMMON /KALB/ XCOs
       COMMON /VWELL / VV
 C
 C Dummy arguments
@@ -43,7 +43,7 @@ C Local variables
 C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
-     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc, angstep,
+     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
@@ -196,12 +196,8 @@ C-----Last continuum energy bin is calculated
       ENDDO
 
       IF (.NOT.callpcross) THEN
-
-          angstep = 180.d0/DBLE(NDAng-1)
          do i=1,NDAng
-           theta=(i-1)*angstep
-           jang(i)=theta
-           theta=theta*pi/180.d0
+           theta=DBLE(i-1)/DBLE(NDAng-1)*pi
            xcos(i)=cos(theta)
          enddo
          CALL RQFACT(NHEq,r)
@@ -491,8 +487,7 @@ C
       INCLUDE 'dimension.h'
       REAL*8 arg, a, xnorm, eps,total,fmsd, bin, elab, esys
       REAL*8 sigma(NDAng), xcos(NDAng)
-      INTEGER*4 jang(NDAng)
-      COMMON /KALB/ xcos, jang
+      COMMON /KALB/ xcos
       SAVE /KALB/
 Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
