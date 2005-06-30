@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-28 20:26:43 $
-Ccc   * $Id: main.f,v 1.115 2005-06-28 20:26:43 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-06-30 18:18:06 $
+Ccc   * $Id: main.f,v 1.116 2005-06-30 18:18:06 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -46,9 +46,9 @@ C
      &                 epre, ftmp, gamfis, gamt, gang, gtotsp, htotsp,
      &                 piece, pope, poph, popl, popleft, poplev,
      &                 popread, poptot, ptotsp, q2, q3, qmax, qstep,
-     &                 recorp, recorr, sgamc, spdif, spdiff, stauc,
+     &                 recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
-     &                 totemis, weight, xccm, xcse, xizat, xnhms, xnl,
+     &                 totemis, weight, xcse, xizat, xnhms, xnl,
      &                 xnor, xtotsp, xsinlcont, xsinl, zres, angstep,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndang),
      &                 checkXS
@@ -58,8 +58,8 @@ C
       CHARACTER*36 nextenergy
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
-      INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, iccmh, iccml,
-     &        icse, icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
+      INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, 
+     &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
