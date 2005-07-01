@@ -10,7 +10,7 @@
 ! *     CONVERTING INTEGER AND FLOATING POINT FIELDS TO STANDARD FORM,
 ! *     RESEQUENCING THE MATERIALS AND CONVERSION TO BINARY
 ! *
-! *         VERSION 7.0    APR 2004     C.L.DUNFORD
+! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
 ! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
 ! *                           MODLIB PRODULE
 ! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
@@ -24,6 +24,16 @@
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
 ! *                           OPTIONS ARE ASSUMED UNLESS THIRD
 ! *                           PARAMETER IS N.
+! *         VERSION 7.01   FEBRUARY 2005     C.L.DUNFORD
+! *                        1. SET SUCCESS FLAG WHEN DONE
+! *                        2. ADD NEW ELEMENT rOENTGENIUM (Rg)
+! *                        3. CORRECTED SYMBOL GENERATION FOR SECOND
+! *                            THIRD METASTABLE STATE (KELLETT, NEA)
+! *                        4. ADDED SYMBOL NN FOR NEUTRON IN SYMBOL
+! *                            GENERATION AND XX FOR UNNAMED ELEMENTS
+! *                        5. CORRECTIONS FOR FACT THAT SOME COMPILERS
+! *                            DO NOT RECOGNIZE THE INTRINSIC FUNCTION
+! *                            JFIX
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -79,7 +89,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_STANEF
-!/      PUBLIC :: INPUT_DATA, STANEF_DATA, ISUCCESS
+!/      PUBLIC :: STANEF_INPUT, STANEF_DATA, STANEF_SUCCESS
 !/!
 !...LWI, DVF
 !/        PUBLIC :: IRERUN
@@ -89,7 +99,7 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.01'
 !...MOD
 !/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
@@ -97,7 +107,7 @@
 !     DEFINE VARIABLE PRECISION
 !
       INTEGER(KIND=4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
-      INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
+      INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(15,307)
       INTEGER(KIND=4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
 !
 !     STANDARD FORTRAN INPUT AND OUTPUT UNITS
@@ -156,7 +166,7 @@
 !
 !     INPUT DEFINED DATA TYPE
 !
-      TYPE INPUT_DATA
+      TYPE STANEF_INPUT
          CHARACTER(LEN=100) :: INFIL
          CHARACTER(LEN=100) :: OUTFIL
          INTEGER(KIND=I4) :: MODE
@@ -165,9 +175,9 @@
          CHARACTER(LEN=1) :: INDX
          CHARACTER(LEN=1) :: IDLTES
          CHARACTER(LEN=1) :: I151
-      END TYPE INPUT_DATA
+      END TYPE STANEF_INPUT
 !
-      TYPE(INPUT_DATA) STANEF_DATA
+      TYPE(STANEF_INPUT) STANEF_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -175,7 +185,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: ISUCCESS, IRERUN
+      INTEGER(KIND=I4) :: STANEF_SUCCESS, IRERUN
 !
 !     FORMAT OF MATERIAL BEING PROCESSED
 !
@@ -210,7 +220,7 @@
 !
 !     TERMINATE JOB
 !
-      IF(ISUCCESS.EQ.0) THEN
+      IF(STANEF_SUCCESS.EQ.0) THEN
          WRITE(OUTPUT,'(/A)') '   '
          STOP '     JOB COMPLETED SUCCESSFULLY'
       ELSE
@@ -269,7 +279,7 @@
 !
 !     OUTPUT PROGRAM IDENTIFICATION
 !
-      ISUCCESS = 0
+      STANEF_SUCCESS = 0
       IF(IMDC.LT.4) THEN
          WRITE(OUTPUT,'(/2A)') ' PROGRAM STANEF VERSION ',VERSION
       END IF
@@ -334,8 +344,10 @@
 !
 !     SEE IF INPUT INDICATES FILE TERMINATION
 !
-      IF(STANEF_DATA%INFIL.EQ.' '.OR.STANEF_DATA%INFIL.EQ.'DONE')       &       
-     &             GO TO 100
+      IF(STANEF_DATA%INFIL.EQ.' '.OR.STANEF_DATA%INFIL.EQ.'DONE') THEN
+         IF(IONEPASS.EQ.1) STANEF_SUCCESS = 1
+         GO TO 100
+      END IF
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
@@ -350,7 +362,7 @@
             CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
          END SELECT
-         ISUCCESS = 0
+         STANEF_SUCCESS = 1
          GO TO 90
       END IF
 !
@@ -888,7 +900,7 @@
       CHARACTER(LEN=66), DIMENSION(6) :: TEXTS
       CHARACTER(LEN=11) :: ZSA
       INTEGER(KIND=I4) :: NMOD,NLIB,NSUB,NVER
-      INTEGER(KIND=I4) :: IZA,IZ,IA,IMETA
+      integer(kind=i4) :: iza,iz,ia,imeta,iz1
       INTEGER(KIND=I4) :: NCDS,NXC,N2
       INTEGER(KIND=I4) :: L1,L2,N1
       INTEGER(KIND=I4) :: MATD,NTRD,NPROC,KL,NB,NDIF,NSEC
@@ -896,15 +908,16 @@
       INTEGER(KIND=I4) :: MFTC,MFC,MTC
       INTEGER(KIND=I4) :: K,N,NN
       REAL(KIND=R4) :: C1,C2,ZA
+      REAL(KIND=4) ::ZZA
 !
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
       INTEGER(KIND=I4), DIMENSION(NSECMAX) :: MFTD,NCD,SMODD
 !
 !     DEFINE ELEMENT SYMBOLS
 !
-      INTEGER(KIND=I4), PARAMETER :: IELM=110
+      INTEGER(KIND=I4), PARAMETER :: IELM=113
       CHARACTER(LEN=2), DIMENSION(IELM), PARAMETER ::                   &       
-     &   ELEMNT = (/                                                    &       
+     &   ELEMNT = (/'nn',                                               &       
      &       'H ','He','Li','Be','B ','C ','N ','O ','F ','Ne',         &       
      &       'Na','Mg','Al','Si','P ','S ','Cl','Ar','K ','Ca',         &       
      &       'Sc','Ti','V ','Cr','Mn','Fe','Co','Ni','Cu','Zn',         &       
@@ -915,7 +928,8 @@
      &       'Lu','Hf','Ta','W ','Re','Os','Ir','Pt','Au','Hg',         &       
      &       'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',         &       
      &       'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',         &       
-     &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds'/)
+     &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',         &       
+     &       'Rg','XX'/)
 !
       IF(IMDC.LT.4) WRITE(OUTPUT,'(/)')
       CALL OUT_STATUS
@@ -936,11 +950,19 @@
 !
       IF(NSUB.NE.12) THEN
          ZSA = ' '
-         IZA = IFIX(ZA+.001)
+         ZZA = ZA
+         IZA = IFIX(ZZA+.001)
          IA = MOD(IZA,1000)
          IZ = IZA/1000
-         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
-         IF(IMETA.NE.0) ZSA(11:11) = 'M'
+         IZ1 = MIN0((IZ+1),IELM)
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
+         IF(IMETA.GE.3) THEN
+            ZSA(11:11) = 'O'
+         ELSE IF(IMETA.GE.2) THEN
+            ZSA(11:11) = 'N'
+         ELSE IF(IMETA.GE.1) THEN
+           ZSA(11:11) = 'M'
+         END IF
       END IF
 !
 !     READ THIRD CONT RECORD IF ENDF-6 OR LATER
@@ -1312,7 +1334,7 @@
 !     BCD   =RESULTING ALPHANUMERIC EQUIVALENT.
 !     NCBCD  =NUMBER OF CHARACTERS IN BCD STRING
 !     IERR  =ERROR INDICATOR. SET EQUAL TO ONE IF IZ IS NOT IN THE RANGE
-!            1 TO 110, OR IA IS NOT IN THE RANGE 1 TO 999. IT IS
+!            1 TO 111, OR IA IS NOT IN THE RANGE 1 TO 999. IT IS
 !            SET EQUAL TO ZERO IF BOTH ARE IN ACCEPTABLE RANGE.
 !
 !     THE NAME OF THE ELEMENT FOLLOWED BY ITS ATOMIC NUMBER IS LEFT
@@ -1334,7 +1356,7 @@
 !
 !     DEFINE ELEMENT NAMES
 !
-      INTEGER(KIND=I4), PARAMETER :: IELM=110
+      INTEGER(KIND=I4), PARAMETER :: IELM=111
       CHARACTER(LEN=13), DIMENSION(IELM) :: ELEMNT
       DATA (ELEMNT(IJK),IJK=1,10)/   'Hydrogen    ',                    &       
      &                               'Helium      ',                    &       
@@ -1445,7 +1467,8 @@
      &                               'Bohrium     ',                    &       
      &                               'Hassium     ',                    &       
      &                               'Meitnerium  ',                    &       
-     &                               'Darmstadtium'/
+     &                               'Darmstadtium',                    &       
+     &                               'Roentgenium '/
 !
 !     INITIALIZE
 !
@@ -2879,8 +2902,8 @@
 !
 !     SPECIAL PROCESSING FOR FILE 2 WHEN DATA NOT TO BE REFORMATED
 !
-      IF(STANEF_DATA%I151.NE.'Y'.AND.MT.EQ.151.                         &       
-     &             AND.STANEF_DATA%MODE.EQ.0) THEN
+      IF(STANEF_DATA%I151.NE.'Y'.AND.MT.EQ.151                          &       
+     &             .AND.STANEF_DATA%MODE.EQ.0) THEN
          NCS = (N1+5)/6
          DO N=1,NCS
             READ(ITAPE,'(A)')  RECORD
@@ -3076,6 +3099,7 @@
       INTEGER(KIND=I4) :: IPOW
       REAL(KIND=R4) :: POWER
       REAL(KIND=R8) :: FNUM
+      REAL(KIND=4) :: SPOWER
 !
 !     INITIALIZE
 !
@@ -3083,8 +3107,9 @@
 !
 !        FIND POWER OF NUMBER
 !
-         POWER = ALOG10(ABS(X)) + .000002
-         IPOW = IFIX(POWER)
+         POWER = DLOG10(ABS(X)) + .000002
+         SPOWER = POWER
+         IPOW = IFIX(SPOWER)
          IF(POWER.LT.0.0)   THEN
             CSIGN = '-'
             IPOW = IPOW - 1

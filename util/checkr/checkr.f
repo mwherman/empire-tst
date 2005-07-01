@@ -34,11 +34,21 @@
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
 ! *                           OPTIONS ARE ASSUMED UNLESS THIRD
 ! *                           PARAMETER IS N.
-! *         VERSION 7.01   DECEMBER 2004     C.L.DUNFORD
+! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
 ! *                        1. CORRECTED CHECKS IN 8-457 FOR NST=1
-! *                        2. ALLOW 0-NN-1 AS A MATERIAL FOR DECAY DATA
+! *                        2. ALLOW 0-nn-1 AS A MATERIAL FOR DECAY DATA
 ! *                        3. RDTAB1 AND RDTAB2 DID NOT BUFFER ALL
 ! *                           PHYSICAL RECORDS
+! *                        4. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
+! *                        5. ALLOW NVER TO BE A YEAR 1990 TO CURRENT
+! *                        6. CORRECTED SYMBOL GENERATION FOR SECOND
+! *                            THIRD METASTABLE STATE (Kellett, NEA)
+! *                        7. ADDED SYMBOL XX FOR UNNAMED ELEMENTS
+! *                        8. ALLOW SECTION TO BE CHECKED EVEN IF MT
+! *                            NUMBER WRONG
+! *                        9. REMOVE ERRONEOUS ERROR CHECK ON ELFS
+! *                       10. ALLOWED EMAX DOWN TO 1.0 MEV FOR OTHER
+! *                           THAN INCIDENT NEUTRONS.
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -302,6 +312,10 @@
       INTEGER(KIND=I4), DIMENSION(5) :: IBR1
       DATA IBR1/67,71,73,76,81/
 !
+!     CURRENT YEAR
+!
+      INTEGER(KIND=I4) :: IYR
+!
 !     ERROR FLAG
 !
       INTEGER(KIND=I4) :: IERX
@@ -437,7 +451,10 @@
 !     INITIALIZE RUN
 !
    10 CALL BEGIN(IQUIT)
-      IF(IQUIT.GT.0)  GO TO 100
+      IF(IQUIT.GT.0)  THEN
+         IF(IONEPASS.EQ.1) CHECKR_SUCCESS = 1
+         GO TO 100
+      END IF
 !
 !     CHECK LABEL AND FIND STARTING MATERIAL
 !
@@ -645,8 +662,10 @@
 !
 !     SEE IF INPUT INDICATES JOB TERMINATION
 !
-      IF(CHECKR_DATA%INFIL.EQ.' '.OR.CHECKR_DATA%INFIL.EQ.'DONE')       &       
-     &             GO TO 90
+      IF(CHECKR_DATA%INFIL.EQ.' '.OR.CHECKR_DATA%INFIL.EQ.'DONE') THEN
+         IQUIT = 1
+         GO TO 100
+      END IF
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
@@ -659,7 +678,9 @@
             CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
          END SELECT
-         GO TO 90
+         IQUIT = 1
+         CHECKR_SUCCESS = 1
+         GO TO 100
       END IF
 !
 !     GET OUTPUT FILE SPECIFICATION
@@ -734,11 +755,6 @@
      &        'Check Materials---------------------------------',       &       
      &             CHECKR_DATA%MATMIN,' to ',CHECKR_DATA%MATMAX
       END IF
-      GO TO 100
-!
-!     SIGNAL TO QUIT
-!
-   90 IQUIT = 1
 !
   100 RETURN
       END SUBROUTINE BEGIN
@@ -1528,10 +1544,10 @@
       IMPLICIT NONE
 !
       CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD
+      INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
       CHARACTER(LEN=11) :: ZSA
-      INTEGER(KIND=I4) :: IZ,IA,ISTA,IZA
+      INTEGER(KIND=I4) :: IZ,IA,ISTA,IZA,IZ1
       INTEGER(KIND=I4) :: NREL
       INTEGER(KIND=I4) :: NCD,NID
       INTEGER(KIND=I4) :: MATCHK
@@ -1548,9 +1564,9 @@
 !
 !     DEFINE ELEMENT SYMBOLS
 !
-      INTEGER(KIND=I4), PARAMETER :: IELM=110
+      INTEGER(KIND=I4), PARAMETER :: IELM=113
       CHARACTER(LEN=2), DIMENSION(IELM), PARAMETER ::                   &       
-     &  ELEMNT = (/                                                     &       
+     &  ELEMNT = (/'nn',                                                &       
      &       'H ','He','Li','Be','B ','C ','N ','O ','F ','Ne',         &       
      &       'Na','Mg','Al','Si','P ','S ','Cl','Ar','K ','Ca',         &       
      &       'Sc','Ti','V ','Cr','Mn','Fe','Co','Ni','Cu','Zn',         &       
@@ -1561,7 +1577,8 @@
      &       'Lu','Hf','Ta','W ','Re','Os','Ir','Pt','Au','Hg',         &       
      &       'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',         &       
      &       'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',         &       
-     &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds'/)
+     &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',         &       
+     &       'Rg','XX'/)
 !
 !     SET CONTROL PARAMETERS FROM THE FIRST MATERIAL RECORD
 !
@@ -1641,12 +1658,14 @@
 !     CHECK EMAX
 !
       SELECT CASE (NSUB)
+         CASE (10)
+            CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
          CASE (4,6)
             CALL TEST2F(EMAX,0.,'EMAX')
          CASE DEFAULT
-            CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
+            CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
       END SELECT
 !
 !     CHECK MAT NUMBER AGAINST ZA FOR ENDF/B
@@ -1675,11 +1694,12 @@
 !
 !     CHECK VALUES OF CONTROL VARIABLES
 !
-  10  CALL TEST1(NVER,0,99,'NVER',1)
+  10  IF(NVER.GE.1990.AND.NVER.LE.IYR) GO TO 15
+      CALL TEST1(NVER,0,99,'NVER',1)
 !
 !     CHECK FOR A VALID SUB LIBRARY NUMBER
 !
-      NSEQP1 = NSEQP1 + 1
+  15  NSEQP1 = NSEQP1 + 1
       JPART = NSUB/10
       JTYPE = MOD(NSUB,10)
       DO K=1,NPARTS
@@ -1744,12 +1764,15 @@
          IZA = IFIX(ZA+.001)
          IA = MOD(IZA,1000)
          IZ = IZA/1000
-         IF(IZ.EQ.0) THEN
-            WRITE(ZSA,'(I3,A,I3)') IZ,'-nn-',IA
-         ELSE
-            WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ),'-',IA
+         IZ1 = MIN0((IZ+1),IELM)
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
+         IF(LISO.GE.3) THEN
+            ZSA(11:11) = 'O'
+         ELSE IF(LISO.GE.2) THEN
+            ZSA(11:11) = 'N'
+         ELSE IF(LISO.GE.1) THEN
+           ZSA(11:11) = 'M'
          END IF
-         IF(LISO.NE.0) ZSA(11:11) = 'M'
       END IF
 !
 !     READ IN COMMENT RECORDS
@@ -1771,7 +1794,6 @@
             END IF
          END IF
          IF(NC.LE.NID)   THEN
-            IF(NC.EQ.1) CALL OUT_STATUS
             IF(IMDC.LT.4)  WRITE(IOUT,'(1X,A66)')   TEXT
             IF(NOUT.NE.IOUT)   WRITE(NOUT,'(5X,A66)')   TEXT
          END IF
@@ -2730,8 +2752,9 @@
       LVT = L1H
       CALL TEST1(LVT,0,1,'LVT',2)
       IF(LVT.EQ.1) THEN
-         WRITE(EMESS,'(A)')                                             &       
-     &       ' THE ELASTIC TRANSFORMATION MATRIX IS NO LONGER SUPPORTED'
+         EMESS = ' THE ELASTIC TRANSFORMATION MATRIX IS NO '
+         CALL ERROR_MESSAGE(0)
+         EMESS = '      LONGER SUPPORTED'
          CALL ERROR_MESSAGE(NSEQP)
       END IF
 !*****TEST ANGULAR REPRESENTATION FLAG
@@ -3423,11 +3446,6 @@
 !***********CHECK THAT ZAP IS NOT ZERO
             IF(ZAP.EQ.0.0) THEN
                EMESS = 'ZAP CANNOT BE 0.0'
-               CALL ERROR_MESSAGE(NSEQP1)
-            ENDIF
-!***********CHECK THAT ELFS IS ZERO, USE IS OBSOLETE
-            IF(ELFS.NE.0.0) THEN
-               EMESS = 'ELFS IS OBSOLETE, SHOULD BE SET TO 0.0'
                CALL ERROR_MESSAGE(NSEQP1)
             ENDIF
 !***********CHECK THAT MATP IS ZERO, USE IS OBSOLETE
@@ -5317,7 +5335,7 @@
          ISEQ = ISEQ + 1
          NSEQP = 0
          READ(JIN,'(A)',END=90) IFIELD
-         READ(IFIELD,'(6I11,I4,I2,I3,I5)',ERR=40,END=90)                &
+         READ(IFIELD,'(6I11,I4,I2,I3,I5)',ERR=40,END=90)                &       
      &              (NBT(N),JNT(N),N=NI,NF),MATP,MFP,MTP,NSEQP
          IF(ASEQ.EQ.' ') NSEQP = ISEQ
          GO TO 50
@@ -6032,6 +6050,7 @@
       MTCAT = 0
       MTT = MTT0
       MFT = MFT0
+      IERX = 0
 !
 !     CONVERT MT IF INPUT FILE IS IN ENDF-V FORMAT
 !
@@ -6068,7 +6087,6 @@
       IF(MTCAT.EQ.0)   THEN
          WRITE(EMESS,'(A,I4,A)') 'MT=',MTT0,' INVALID'
          CALL ERROR_MESSAGE(NSEQP1)
-         IERX = 1
          GO TO 100
       END IF
 !
@@ -6109,7 +6127,6 @@
          WRITE(EMESS,'(A,I4,A,I6,A)')                                   &       
      &           'MT=',MTT0,' FOR NSUB=',NSUB,' INVALID'
          CALL ERROR_MESSAGE(NSEQP1)
-         IERX = 1
       ELSE IF(IEVAL.EQ.2) THEN
 !
 !     MT IS VALID BUT NOT FOR FILE MF
@@ -6117,7 +6134,6 @@
          WRITE(EMESS,'(A,I4,A,I3,A)')                                   &       
      &           'MT=',MTT0,' FOR MF=',MFT0,' INVALID'
          CALL ERROR_MESSAGE(NSEQP1)
-         IERX = 0
       END IF
 !
   100 RETURN
@@ -6668,6 +6684,7 @@
       CALL DATE_AND_TIME(PDATE)
       READ(PDATE,'(A4,I2,A2)') YR,MON,DD
       ADATE = DD//'-'//MONTHS(MON)//'-'//YR
+      READ(YR,'(I4)') IYR
 !
       RETURN
       END SUBROUTINE DATE
