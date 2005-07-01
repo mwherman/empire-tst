@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-20 07:41:56 $
-Ccc   * $Id: lev-dens.f,v 1.42 2005-06-20 07:41:56 Capote Exp $
+Ccc   * $Date: 2005-07-01 09:36:18 $
+Ccc   * $Id: lev-dens.f,v 1.43 2005-07-01 09:36:18 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -2019,7 +2019,7 @@ C
          mm2 = 0.24*A(Nnuc)**0.666667
          r0 = 1.4
          iff = 1
- 
+
 C--------Empire systematics with Nix-Moeller shell corrections
          AP1 = 0.94431E-01
          AP2 = -0.80140E-01
@@ -2055,7 +2055,7 @@ C        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             iff = BFFm(Mmod)
             desteppp = DEStepm(Mmod)
          ENDIF
-         TCRt = 0.87*0.567*DELp
+         TCRt = 0.9*0.567*DELp
          ar = ATIl*(1.0 + shcf*GAMma)
          DO ix = 1, 20
             xr = ar*TCRt**2
@@ -2259,7 +2259,7 @@ c      dmpdiff = 7.
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
 c      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
-      Vibrk = EXP(0.06*A**(2./3.)*T**(4./3.))
+      Vibrk = EXP(0.086*A**(2./3.)*T**(4./3.))
       END
 C
 C
