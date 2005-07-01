@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-19 18:20:16 $
-Ccc   * $Id: HRTW-comp.f,v 1.33 2005-06-19 18:20:16 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-01 14:30:41 $
+Ccc   * $Id: HRTW-comp.f,v 1.34 2005-07-01 14:30:41 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -252,7 +252,7 @@ C
      &          'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
-            IF(TUNe(0, Nnuc).eq.1) THEN
+            IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               TUNe(0, Nnuc) = ggexper/sumGg
               WRITE(6 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')

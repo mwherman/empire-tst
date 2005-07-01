@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-01 09:36:18 $
-Ccc   * $Id: lev-dens.f,v 1.43 2005-07-01 09:36:18 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-01 14:30:41 $
+Ccc   * $Id: lev-dens.f,v 1.44 2005-07-01 14:30:41 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -370,10 +370,10 @@ C-----yrast states
          r2y = 1. + SQRT(5./4./pi)*betay*COS(gammay - 4.*pi/3.)
          r1y = 1. + SQRT(5./4./pi)*betay*COS(gammay - 2.*pi/3.)
          Cigor = MAX(r1y,r2y,r3y)
-C        RY=R2Y/R1Y
+C        ry=r2y/r1y
 C-----next line neglects dynamic deformation for yrast states
-C        RY=1.
-C        A2Y=(RY-1.0)/(1.0+0.5*RY)
+C        ry=1.
+C        a2y=(ry-1.0)/(1.0+0.5*ry)
 C-----adding static deformation damped with energy
          dt = 0.1
          t = SQRT(E/Ac)

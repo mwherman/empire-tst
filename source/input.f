@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-28 20:26:43 $
-Ccc   * $Id: input.f,v 1.151 2005-06-28 20:26:43 herman Exp $
+Ccc   * $Date: 2005-07-01 14:30:41 $
+Ccc   * $Id: input.f,v 1.152 2005-07-01 14:30:41 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -167,6 +167,9 @@ C--------------Surface imaginary potential:
                FNasomp(Nejc,Nnuc) = 1.0
             ENDDO
          ENDDO
+C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
+C--------to turn off normalization to experimental Gg
+         TUNe(0,1) = 0.999
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
 C-----------set level density parameters
@@ -2659,8 +2662,6 @@ C-----------Printout of some final input options   *** done ***
          IF(irun.EQ.1) THEN
          name = namee
          val = vale
-         WRITE(6,*) 'vale',vale
-         WRITE(6,*) 'val',val
          i1 = i1e
          i2 = i2e
          i3 = i3e
