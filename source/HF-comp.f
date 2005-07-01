@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-06-27 05:41:16 $
-Ccc   * $Id: HF-comp.f,v 1.76 2005-06-27 05:41:16 herman Exp $
+Ccc   * $Date: 2005-07-01 14:29:18 $
+Ccc   * $Id: HF-comp.f,v 1.77 2005-07-01 14:29:18 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -218,7 +218,7 @@ C-----
 C-----Contribution coming straight from the current decay
 C-----(ignore if residue is inclusive since summation already done in ACCUM) 
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      IF(ENDF(Nnur).EQ.1) THEN
+      IF(ENDf(Nnur).EQ.1) THEN 
          POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
       ELSE
          CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
@@ -231,7 +231,7 @@ C-----DE spectra
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
-                   IF(ENDF(Nnur).EQ.2) THEN
+                   IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
                    ELSE
@@ -243,7 +243,7 @@ C-----DE spectra
 C-----------DDX spectra using portions
             DO iejc = 0, NDEJCD
                IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
-                   IF(ENDF(Nnur).EQ.2) THEN
+                   IF(ENDf(Nnur).EQ.2) THEN
                       POPcseaf(Ief,iejc,ie,0)
      &                = POPcseaf(Ief,iejc,ie,0)
      &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
