@@ -6,7 +6,7 @@
 ! *   EVALUATED DATA FILE
 ! *
 ! *
-! *         VERSION 7.0    APR 2004     C.L.DUNFORD
+! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
 ! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
 ! *                           MODLIB PROJECT
 ! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
@@ -19,6 +19,22 @@
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
 ! *                           OPTIONS ARE ASSUMED UNLES THIRD
 ! *                           PARAMETER IS N.
+! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
+! *                        1. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
+! *                        2. FIXED VALID LEVEL CHECK FOR AN ISOMER
+! *                        3. FIX SUBSECTION ENERGY RANGE TEST IN CKF9
+! *                        4. CHANGED LOWER LIMIT ON POTENTIAL
+! *                           SCATTERING TEST
+! *                        5. FIXED ERROR IN J-VALUE TEST WHEN L=0 AND I=0      
+! *                        6. ADDED ONE MORE SIGNIFICANT FIGURE TO UNION
+! *                           GRID CHECK AND SUM MUP OUTPUT MESSAGES
+! *                        7. PARTIAL FISSION CROSS SECTIONS MT=19,20,21
+! *                           AND 38 DO NOT REQIRE SECONDARY ENERGY
+! *                           DISTRIBUTIONS IN FILE 5.
+! *                        8. CORRECT PRODUCT TEST FOR ELASTIC SCATTERING       
+! *                        9. MOVE POTENTIAL SCATTERING TEST TO PSYCHE.
+! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
+! *                        1. FIX RESONANCE PARAMETER SUM TEST
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -75,7 +91,7 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_FIZCON
-!/      PUBLIC :: INPUT_DATA, FIZCON_DATA, ISUCCESS
+!/      PUBLIC :: FIZCON_INPUT, FIZCON_DATA, FIZCON_SUCCESS
 !...LWI, DVF
 !/      PUBLIC :: Default_epsiln, epsiln3, IRERUN
 !---MDC---
@@ -84,7 +100,7 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
 !...MOD
 !/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
@@ -155,7 +171,7 @@
 !
 !     INPUT DATA STRUCTURE
 !
-      TYPE INPUT_DATA
+      TYPE FIZCON_INPUT
          CHARACTER(LEN=100) :: INFIL
          CHARACTER(LEN=100) :: OUTFIL
          INTEGER(KIND=I4) :: MATMIN
@@ -163,9 +179,9 @@
          INTEGER(KIND=I4) :: ICKT
          INTEGER(KIND=I4) :: ISUM
          REAL(KIND=R4) :: EPSILN
-      END TYPE INPUT_DATA
+      END TYPE FIZCON_INPUT
 !
-      TYPE(INPUT_DATA) :: FIZCON_DATA
+      TYPE(FIZCON_INPUT) :: FIZCON_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -173,7 +189,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: ISUCCESS, IRERUN
+      INTEGER(KIND=I4) :: FIZCON_SUCCESS, IRERUN
 !
 !     END OF FILE FLAG
 !
@@ -293,7 +309,7 @@
 !     SCATTERING RADIUS CHECKING DATA
 !
       INTEGER(KIND=I4) :: NRO
-      REAL(KIND=R4) :: APLO,APHI,AWRI1,AWRI2
+      REAL(KIND=R4) :: AWRI1,AWRI2
 !
 !     FLAG INDICATING THE PRESENCE OF FILE 3
 !
@@ -757,7 +773,7 @@
 !
 !     TERMINATE JOB
 !
-      IF(ISUCCESS.EQ.0) THEN
+      IF(FIZCON_SUCCESS.EQ.0) THEN
          WRITE(IOUT,'(/A)') '   '
          STOP '     JOB COMPLETED SUCCESSFULLY'
       ELSE
@@ -786,7 +802,7 @@
 !
 !     OUTPUT PROGRAM IDENTIFICATION
 !
-      ISUCCESS = 0
+      FIZCON_SUCCESS = 0
       IF(IMDC.LT.4) THEN
          WRITE(IOUT,'(/2A)') ' PROGRAM FIZCON VERSION ',VERSION
       END IF
@@ -799,7 +815,10 @@
 !     INITIALIZE RUN
 !
    10 CALL BEGIN(IQUIT)
-      IF(IQUIT.GT.0)    GO TO 100
+      IF(IQUIT.GT.0)    THEN
+         IF(IONEPASS.EQ.1) FIZCON_SUCCESS = 1
+         GO TO 100
+      END IF
 !
 !     CHECK LABEL AND FIND STARTING MATERIAL
 !
@@ -819,7 +838,7 @@
          END IF
          IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
          CLOSE(UNIT=JIN)
-         ISUCCESS = 1
+         FIZCON_SUCCESS = 1
          GO TO 100
       END IF
 !
@@ -1070,8 +1089,10 @@
 !
 !     SEE IF INPUT INDICATES FILE TERMINATION
 !
-      IF(FIZCON_DATA%INFIL.EQ.' '.OR.FIZCON_DATA%INFIL.EQ.'DONE')       &       
-     &               GO TO 90
+      IF(FIZCON_DATA%INFIL.EQ.' '.OR.FIZCON_DATA%INFIL.EQ.'DONE') THEN
+         IQUIT = 1
+         GO TO 100
+      END IF
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
@@ -1084,7 +1105,9 @@
             CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
          END SELECT
-         GO TO 90
+         IQUIT = 1
+         FIZCON_SUCCESS = 1
+         GO TO 100
       END IF
 !
 !     GET OUTPUT FILE SPECIFICATION
@@ -1237,11 +1260,6 @@
          WRITE(NOUT,'(A)')                                              &       
      &       'Consecutive Equal Value Check will be Omitted'
       END IF
-      GO TO 100
-!
-!     SIGNAL TO QUIT
-!
-   90 IQUIT = 1
 !
   100 RETURN
       END SUBROUTINE BEGIN
@@ -1574,7 +1592,7 @@
       LISO = L2H
       NFOR = N2H
       IF(LIS.NE.0.AND.ELIS.EQ.0.0)  THEN
-         EMESS = 'ELIS SHOULD not  BE ZERO FOR A METASTABLE STATE'
+         EMESS = 'ELIS SHOULD NOT BE ZERO FOR A METASTABLE STATE'
          CALL ERROR_MESSAGE(NSEQP)
       END IF
 !
@@ -1650,7 +1668,6 @@
       DO NC=1,NCD
          CALL RDTEXT
          IF(NC.LE.NID)   THEN
-            IF(NC.EQ.1) CALL OUT_STATUS
             IF(IMDC.LT.4) WRITE(IOUT,'(1X,A66)')   TEXT
             IF(NOUT.NE.IOUT)   WRITE(NOUT,'(5X,A66)')   TEXT
          END IF
@@ -1850,7 +1867,6 @@
       INTEGER(KIND=I4) :: NUMSQ1
       INTEGER(KIND=I4) :: NE,NI,NER
       REAL(KIND=R4) :: ZAH,AWRH,ABNTOT,SPI
-      REAL(KIND=R4) :: AHI
       REAL(KIND=R4) :: AWRIT
       REAL(KIND=R4) :: ABNM
       REAL(KIND=R4) :: EL,EH,EUBN1,ELB,EUB
@@ -1882,17 +1898,6 @@
       DO NI=1,NIS
          CALL RDCONT
          ABNTOT = ABNTOT + C2H
-!
-!        SET LIMITS ON SCATTERING LENGTH
-!
-         IF(LRP.EQ.0) THEN
-            AHI = AWRH*FACTOR
-         ELSE
-            AHI = AMOD(C1H,1000.)
-         END IF
-         APLO = AHI**OTHIRD
-         APHI = APLO*0.17
-         APLO = APLO*0.10
 !
 !        SET LIMITS ON AWRI
 !
@@ -1972,7 +1977,6 @@
                CALL RDCONT
                SPI = C1H
                CALL TESTSP(SPI)
-               CALL TEST6(C2H,APLO,APHI,'AP')
             ELSE IF(LRU.EQ.1) THEN
                IF((LRF.GE.1.AND.LRF.LE.3).OR.LRF.EQ.5) THEN
                   CALL CHKBW(LRF)
@@ -2040,7 +2044,6 @@
 !
       IF(NRO.NE.0)   THEN
          CALL RDTAB1
-         CALL TEST6Y(APLO,APHI,'AP')
       END IF
 !
 !     CHECK SPIN AND ENERGY INDEPENDENT SCATTERING LENGTH
@@ -2049,7 +2052,6 @@
       NLS = N1H
       SPI = C1H
       CALL TESTSP(SPI)
-      IF(NRO.EQ.0)  CALL TEST6(C2H,APLO,APHI,'AP')
 !
 !     PROCESS PARAMETERS FOR ALL L VALUES
 !
@@ -2072,7 +2074,7 @@
 !********TEST THAT RESONANCE ENERGIES ARE IN INCREASING ORDER
          CALL TEST5Y(1,NPL,NREP,1)
 !********TEST IF PARTIAL WIDTHS ADD UP TO TOTAL
-         IF(LRF.NE.3)   CALL TESTW(NPL,3,NREP)
+         IF(LRF.LT.3)   CALL TESTW(1,NPL,NREP)
 !
 !        TEST ON INDIVIDUAL PARAMETERS
 !
@@ -2081,7 +2083,7 @@
             AJ = Y(I-2)
             IF(AJ.LT.0.0.AND.LRF.EQ.3) THEN
                AJ = - AJ
-               IF(FL.EQ.0.0.OR.SPI.EQ.0.0) THEN
+               IF(FL.EQ.0.0.AND.SPI.EQ.0.0) THEN
                   ISEQ = NSEQP1 + (I+2)/NREP
                   EMESS = 'AJ CANNOT BE NEGATIVE FOR L AND SPI '//      &       
      &                    'EQUAL ZERO '
@@ -2128,7 +2130,6 @@
 !
       IF(NRO.NE.0)   THEN
          CALL RDTAB1
-         CALL TEST6Y(APLO,APHI,'AP')
       END IF
 !
 !     CHECK SPIN AND ENERGY INDEPENDENT SCATTERING LENGTH
@@ -2137,7 +2138,6 @@
       NLS = N1H
       SPI = C1H
       CALL TESTSP(SPI)
-      IF(NRO.EQ.0)  CALL TEST6(C2H,APLO,APHI,'AP')
 !
 !     PROCESS PARAMETERS FOR ALL L VALUES
 !
@@ -2207,7 +2207,6 @@
 !
       IF(NRO.NE.0)   THEN
          CALL RDTAB1
-         CALL TEST6Y(APLO,APHI,'AP')
       END IF
 !
 !     TEST SPIN
@@ -2338,9 +2337,6 @@
                END IF
 !**************POSSIBLE J-VALUE?
                CALL TEST6(AJ,AJLO,AJHI,'AJ')
-!**************CHECK CHANNEL RADIUS
-               AC = C2L
-               CALL TEST6(AC,APLO,APHI,'AC')
                LBK = L1L
                LPS = L2L
                NLSJ = N2L
@@ -2422,7 +2418,6 @@
          CALL RDCONT
          SPI = C1H
          CALL TESTSP(SPI)
-         IF(NRO.EQ.0)   CALL TEST6(C2H,APLO,APHI,'AP')
 !
 !        PROCESS ALL L VALUES
 !
@@ -2465,7 +2460,6 @@
             CALL RDCONT
             SPI = C1H
             CALL TESTSP(SPI)
-            CALL TEST6(C2H,APLO,APHI,'AP')
 !
 !           PROCESS ALL L VALUES
 !
@@ -2570,10 +2564,10 @@
 !     PROCESS EACH SET OF PARAMETERS
 !
       DO K=NBEG,NVALS,NSTEP
-         K0 = K
-         K1 = K + 1
-         K2 = K + NSTEP - NVALS
-         KK = K - 2
+         K0 = K + 2
+         K1 = K + 3
+         K2 = K + NSTEP - 1
+         KK = K
          TOT = Y(K0)
 !********ERROR IF TOTAL IS ZERO
          IF(TOT.LE.0.0)  THEN
@@ -3006,7 +3000,7 @@
             GO TO 100
          END IF
       END IF
-      ELEV = EXL - ELIS
+      ELEV = EXL + ELIS
       IF(IEQU.EQ.0.OR.ELEV.NE.ELIS)  THEN
          IF(ELEV.EQ.0..OR.(ELEV.GE.QLLOW.AND.ELEV.LE.QLHIGH)) GO TO 100
       END IF
@@ -3868,7 +3862,9 @@
          ZAP = C1
          IF(MT.EQ.2) THEN
             ZAPT = FLOAT(NSUB/10)
-            CALL TEST3F(ZAP,ZAPT,'ZAP')
+            IF (ZAP.NE.ZA.AND.ZAP.NE.ZAPT) THEN
+               CALL TEST3F(ZAP,ZAPT,'ZAP')
+            END IF
          END IF
          ELOS = X(1)
          IF(ELO.GT.ELOS) ELO = ELOS
@@ -5935,7 +5931,11 @@
 !
          CALL RDTAB1
          Q = C2
-         IF(NFOR.GE.6) QM = C1
+         IF(NFOR.GE.6) then
+            QM = C1
+         ELSE
+            QM = Q
+         END IF
          IZAP = L1
 !
 !        TEST PRODUCT SPECIFICATION
@@ -6018,29 +6018,29 @@
 !
 !***********************************************************************
 !
-      INTEGER(KIND=4) FUNCTION GET_IZAP(IZ,IA,IPZA,MT)
+      INTEGER(KIND=I4) FUNCTION GET_IZAP(IZ,IA,IPZA,MT)
 !
 !     FUNCTION TO CALCULATE THE PRODUCT IZA FROM THE TARGET, PROJECTILE
 !       AND REACTION (MT).
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=4) :: MT,IZ,IA,IPZA
+      INTEGER(KIND=I4) :: MT,IZ,IA,IPZA
 !
-      INTEGER(KIND=4) :: N
+      INTEGER(KIND=I4) :: N
 !
 !     REACTION PRODUCTS
 !
-      INTEGER(KIND=4), PARAMETER :: NRECS=36
-      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: MTS =             &       
+      INTEGER(KIND=I4), PARAMETER :: NRECS=36
+      INTEGER(KIND=I4), PARAMETER, DIMENSION(NRECS) :: MTS =            &       
      &       (/ 4,11,16,17,22, 23,24,25,28,29, 30,32,33,34, 35, 36,37,  &       
      &         41,42,44,45,102,103,104,105,106,107,108,109,111,112,113, &       
      &         114,115,116,117/)
-      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: DZ =              &       
+      INTEGER(KIND=I4), PARAMETER, DIMENSION(NRECS) :: DZ =             &       
      &       (/ 0,-1, 0, 0,-2, -6,-2,-2,-1,-4, -4,-1,-1,-2, -5, -5, 0,  &       
      &         -1,-1,-2,-3,  0, -1, -1, -1, -2, -2, -4, -6, -2, -3, -5, &       
      &         -5, -2, -2, -3/)
-      INTEGER(KIND=4), PARAMETER, DIMENSION(NRECS) :: DA =              &       
+      INTEGER(KIND=I4), PARAMETER, DIMENSION(NRECS) :: DA =             &       
      &       (/-1,-4,-2,-3,-5,-13,-6,-7,-2,-9,-10,-3,-4,-4,-11,-12, -4, &       
      &         -3,-5,-3,-6,  0, -1, -2, -3, -3, -4, -8,-12, -2, -5,-11, &       
      &         -10, -3, -4, -6/)
@@ -6691,7 +6691,7 @@
             CALL ERROR_MESSAGE(NSEQP1)
          END IF
          IF(C2.GT.C1) THEN
-            EMESS = 'FLUORESCENCE YIELD CANNOUT EXCEDE THE P.E. EDGE'
+            EMESS = 'FLUORESCENCE YIELD CANNOT EXCEDE THE P.E. EDGE'
             CALL ERROR_MESSAGE(NSEQP1)
          END IF
       END IF
@@ -8448,7 +8448,7 @@
             WRITE(EMESS,'(A,I4,A)')                                     &       
      &           'MT=',ITFLE,' PARTIALS ARE NOT PRESENT -- NO TEST'
             CALL ERROR_MESSAGE(0)
-         ELSE IF(MTFLGS(JJ).GE.1) THEN
+         ELSE IF(MTFLGS(JJ).GT.1) THEN
 !
 !           LOCATE SUM IN SCRATCH FILE
 !
@@ -8792,7 +8792,7 @@
       INTEGER(KIND=I4) :: I,N,IK
       REAL(KIND=R4) :: XONE,XN,XA,YA
 !
-      INTEGER(KIND=I4), PARAMETER :: NPLIM=100
+      INTEGER(KIND=I4), PARAMETER :: NPLIM=500
       REAL(KIND=R4), DIMENSION(NPLIM) :: XPART
 !
 !     INITIALIZE
@@ -8889,7 +8889,7 @@
    60    FORMAT(14X,'POINTS IN PARTIAL, NOT IN TOTAL'/                  &       
      &          14X,2(7X,'X',13X,'X',4X),7X,'X')
          NPR = MIN0(NPART,NPLIM)
-         WRITE(NOUT,'((13X,5(1PE13.5)))')  (XPART(I),I=1,NPR)
+         WRITE(NOUT,'((8X,5(1PE14.6)))')  (XPART(I),I=1,NPR)
          IF(NPR.LT.NPART) THEN
             EMESS = '         AND MORE'
             CALL ERROR_MESSAGE(0)
@@ -9135,10 +9135,10 @@
      &                    E1T,' TO ',E2T,XINT,DIFF,DELTA
          ELSE
             IF(ABS(DELTA).GT.10.) THEN
-               WRITE(NOUT,'(3(1PE15.5,5X),3X,A)')                       &       
+               WRITE(NOUT,'(3(1PE15.6,5X),3X,A)')                       &       
      &                   XT(J),YTOJ,YT(J),'GREATER THAN 10'
             ELSE
-               WRITE(NOUT,'(3(1PE15.5,5X),5X,0PF10.6)')                 &       
+               WRITE(NOUT,'(3(1PE15.6,5X),5X,0PF10.6)')                 &       
      &                   XT(J),YTOJ,YT(J),DELTA
             end if
          END IF
@@ -9723,8 +9723,10 @@
                WRITE(NOUT,15)  M
             END IF
             WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
-            CALL MISFIL(M,5,26,NMISS)
-            CALL MISFIL(M,28,42,NMISS)
+            CALL MISFIL(M,5,17,NMISS)
+            CALL MISFIL(M,22,26,NMISS)
+            CALL MISFIL(M,28,37,NMISS)
+            CALL MISFIL(M,39,42,NMISS)
             CALL MISFIL(M,91,91,NMISS)
          END IF
 !

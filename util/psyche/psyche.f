@@ -6,7 +6,7 @@
 ! *   FORMAT EVALUATED DATA FILE
 ! *
 ! *
-! *         VERSION 7.0    APR 2004     C.L.DUNFORD
+! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
 ! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
 ! *                           MODLIB PROJECT
 ! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
@@ -17,8 +17,14 @@
 ! *                        6. ADDED COMMAND LINE INPUT TO UNIX AND
 ! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
 ! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
-! *                           OPTIONS ARE ASSUMED UNLES THIRD
+! *                           OPTIONS ARE ASSUMED UNLESS THIRD
 ! *                           PARAMETER IS N.
+! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
+! *                        1. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
+! *                        2. ADD POTENTIAL SCATTERING TEST FORMERLY IN
+! *                           FIZCON
+! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
+! *                        1. Fixed bug in calculation of L=2 penetrability
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -76,18 +82,18 @@
 !/      PRIVATE
 !/!
 !/      PUBLIC :: RUN_PSYCHE
-!/      PUBLIC :: INPUT_DATA, I_DATA, ISUCCESS
+!/      PUBLIC :: PSYCHE_INPUT, PSYCHE_DATA, PSYCHE_SUCCESS
 !...LWI, DVF
 !/      PUBLIC :: IRERUN
 !---MDC---
 !
 !     PSYCHE VERSION NUMBER
 !
-!/!+++MDC+++
+!+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.0'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '0.1'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -95,6 +101,9 @@
       INTEGER(KIND=4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
       INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
       INTEGER(KIND=4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
+!
+      REAL(KIND=R4), PARAMETER :: FACTOR=1.008665
+      REAL(KIND=R4), PARAMETER :: OTHIRD=1./3.
 !
 !     STANDARD FORTRAN INPUT AND OUTPUT UNITS
 !
@@ -152,14 +161,14 @@
 !
 !     INPUT DATA STRUCTURE
 !
-      TYPE INPUT_DATA
+      TYPE PSYCHE_INPUT
          CHARACTER(LEN=100) :: INFIL
          CHARACTER(LEN=100) :: OUTFIL
          INTEGER(KIND=I4) :: MATMIN
          INTEGER(KIND=I4) :: MATMAX
-      END TYPE INPUT_DATA
+      END TYPE PSYCHE_INPUT
 !
-      TYPE(INPUT_DATA) I_DATA
+      TYPE(PSYCHE_INPUT) PSYCHE_DATA
 !
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
@@ -167,7 +176,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: ISUCCESS, IRERUN
+      INTEGER(KIND=I4) :: PSYCHE_SUCCESS, IRERUN
 !
 !     FILE (TAPE) LABEL FROM FIRST RECORD
 !
@@ -288,6 +297,11 @@
       INTEGER(KIND=I4), DIMENSION(INTABMAX,NREGMAX) ::  NBTED,JNTED
       REAL(KIND=R4), DIMENSION(100,NREGMAX) :: EP,APED
 !
+!     POTENTIAL SCATTERING RADIUS LIMITS
+!
+      INTEGER(KIND=4) :: NRO
+      REAL(KIND=I4) :: APLO,APHI
+!
 !     RESONANCE PARAMETER STORAGE
 !
       INTEGER(KIND=I4) :: IPT
@@ -319,7 +333,7 @@
       INTEGER(KIND=I4), DIMENSION(10) :: MTSCR
       REAL(KIND=R4) :: ENERGY
       INTEGER(KIND=I4), DIMENSION(50) :: MTBAR
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=350
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
       INTEGER(KIND=I4) :: MTTOT  ! SECTIONS WITH PHOTONS
       INTEGER(KIND=I4), DIMENSION(NSECMAX) :: MTDCT
       INTEGER(KIND=I4), PARAMETER :: NSMF5=NSECMAX
@@ -372,7 +386,7 @@
 !
 !     TERMINATE JOB
 !
-      IF(ISUCCESS.EQ.0) THEN
+      IF(PSYCHE_SUCCESS.EQ.0) THEN
          WRITE(IOUT,'(/A)') '   '
          STOP '     JOB COMPLETED SUCCESSFULLY'
       ELSE
@@ -399,7 +413,7 @@
 !
 !     OUTPUT PROGRAM IDENTIFICATION
 !
-      ISUCCESS = 0
+      PSYCHE_SUCCESS = 0
       IF(IMDC.LT.4) THEN
          WRITE(IOUT,'(/2A)')' PROGRAM PSYCHE VERSION ',VERSION
       END IF
@@ -412,7 +426,10 @@
 !     INITIALIZE RUN
 !
    10 CALL BEGIN(IQUIT)
-      IF(IQUIT.GT.0) GO TO 100
+      IF(IQUIT.GT.0) THEN
+         IF(IONEPASS.EQ.1) PSYCHE_SUCCESS = 1
+         GO TO 100
+      END IF
 !
 !     CHECK LABEL AND FIND STARTING MATERIAL
 !
@@ -432,14 +449,15 @@
          END IF
          IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
          CLOSE(UNIT=JIN)
-         ISUCCESS = 1
+         PSYCHE_SUCCESS = 1
          GO TO 100
       END IF
 !
 !     SET UP TO PROCESS NEXT SECTION
 !
       IF(MAT.NE.MATO) THEN
-         IF(I_DATA%MATMAX.NE.0.AND.MAT.GT.I_DATA%MATMAX)   GO TO 60
+         IF(PSYCHE_DATA%MATMAX.NE.0.AND.MAT.GT.PSYCHE_DATA%MATMAX)      &       
+     &            GO TO 60
          NSEQP1 = NSEQP
          MATO = MAT
          NMT3 = 0
@@ -531,7 +549,8 @@
 !     CHECK END OF TAPE FLAG
 !
    57 IF(IFIN.EQ.0) THEN
-        IF(I_DATA%MATMAX.EQ.0.OR.MAT.LE.I_DATA%MATMAX)   GO TO 20
+        IF(PSYCHE_DATA%MATMAX.EQ.0.OR.MAT.LE.PSYCHE_DATA%MATMAX)        &       
+     &                 GO TO 20
       END IF
 !
 !     CLOSE FILES
@@ -583,19 +602,19 @@
 !     INITIALIZE TO STANDARD OPTIONS
 !
       IF(IMDC.LT.4) THEN
-         I_DATA%INFIL = '*'
-         I_DATA%OUTFIL = '*'
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+         PSYCHE_DATA%INFIL = '*'
+         PSYCHE_DATA%OUTFIL = '*'
+         PSYCHE_DATA%MATMIN = 0
+         PSYCHE_DATA%MATMAX = 0
       END IF
       SELECT CASE (IMDC)
          CASE (0)
             IW = 'N'
             IONEPASS = 0
-         CASE(1)
+         CASE(1,2,3)
             IF(ILENP.NE.0)  THEN
-               CALL TOKEN(INPAR,'%',1,I_DATA%INFIL)
-               CALL TOKEN(INPAR,'%',2,I_DATA%OUTFIL)
+               CALL TOKEN(INPAR,'%',1,PSYCHE_DATA%INFIL)
+               CALL TOKEN(INPAR,'%',2,PSYCHE_DATA%OUTFIL)
                CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
                IF(IC.GT.96.AND.IC.LT.123)  IW = CHAR(IC-32)
@@ -609,9 +628,6 @@
                IW = '*'
                IONEPASS = 0
             END IF
-         CASE (2,3)
-            IW = '*'
-            IONEPASS = 0
          CASE (4,5,6)
             IW = 'N'
             IONEPASS = 1
@@ -620,51 +636,56 @@
 !     GET INPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%INFIL.EQ.'*') THEN
+         IF(PSYCHE_DATA%INFIL.EQ.'*') THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &             ' Input File Specification             - '
             END IF
-            READ(NIN,'(A)') I_DATA%INFIL
+            READ(NIN,'(A)') PSYCHE_DATA%INFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Input file - ', TRIM(I_DATA%INFIL)
+            WRITE(IOUT,'(/2A)') ' Input file - ',                       &       
+     &                 TRIM(PSYCHE_DATA%INFIL)
          END IF
       END IF
 !
 !     SEE IF INPUT INDICATES FILE TERMINATION
 !
-      IF(I_DATA%INFIL.EQ.' '.OR.I_DATA%INFIL.EQ.'DONE') GO TO 90
+      IF(PSYCHE_DATA%INFIL.EQ.' '.OR.PSYCHE_DATA%INFIL.EQ.'DONE') THEN
+         IQUIT = 1
+         GO TO 100
+      END IF
 !
 !     MAKE SURE INPUT FILE EXISTS
 !
-      INQUIRE(FILE=I_DATA%INFIL,EXIST=IEXIST)
+      INQUIRE(FILE=PSYCHE_DATA%INFIL,EXIST=IEXIST)
       IF(.NOT.IEXIST)  THEN
          IF(IMDC.LT.4) THEN
-            WRITE(IOUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
+            WRITE(IOUT,'(/7X,A/)')  'COULD NOT FIND INPUT FILE'
          END IF
          SELECT CASE (IMDC)
-            CASE (1)
+            CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
-            CASE (2,3)
-               GO TO 10
          END SELECT
-         GO TO 90
+         IQUIT = 1
+         PSYCHE_SUCCESS = 1
+         GO TO 100
       END IF
 !
 !     GET OUTPUT FILE SPECIFICATION
 !
       IF(IMDC.LT.4) THEN
-         IF(I_DATA%OUTFIL.EQ.'*' ) THEN
+         IF(PSYCHE_DATA%OUTFIL.EQ.'*' ) THEN
             IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &           ' Output Message File Specification    - '
             END IF
-            READ(NIN,'(A)') I_DATA%OUTFIL
+            READ(NIN,'(A)') PSYCHE_DATA%OUTFIL
          ELSE
-            WRITE(IOUT,'(/2A)') ' Output file - ', TRIM(I_DATA%OUTFIL)
+            WRITE(IOUT,'(/2A)') ' Output file - ',                      &       
+     &                   TRIM(PSYCHE_DATA%OUTFIL)
          END IF
       END IF
-      IF(I_DATA%OUTFIL.NE.' ')  THEN
+      IF(PSYCHE_DATA%OUTFIL.NE.' ')  THEN
          NOUT = JOUT             ! SETS FORTRAN OUTPUT UNIT IF DISK FILE
       END IF
 !
@@ -690,16 +711,16 @@
 !
 !     OPEN INPUT AND OUTPUT FILES
 !
-      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',FILE=I_DATA%INFIL, &       
-     &         ACTION='READ')
+      OPEN(UNIT=JIN,ACCESS='SEQUENTIAL',STATUS='OLD',                   &       
+     &               FILE=PSYCHE_DATA%INFIL,ACTION='READ')
       IF(NOUT.NE.6) THEN
 !+++MDC+++
 !...VMS
 !/         OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,           &       
-!/     &       FILE=I_DATA%OUTFIL,CARRIAGECONTROL='LIST')
+!/     &       FILE=PSYCHE_DATA%OUTFIL,CARRIAGECONTROL='LIST')
 !...WIN, DVF, UNX, LWI, ANS, MOD
          OPEN(UNIT=NOUT,ACCESS='SEQUENTIAL',STATUS=OSTATUS,             &       
-     &       FILE=I_DATA%OUTFIL)
+     &       FILE=PSYCHE_DATA%OUTFIL)
 !---MDC---
       END IF
 !
@@ -721,19 +742,14 @@
       END IF
       WRITE(NOUT,'(2A)')                                                &       
      &   'Input File Specification------------------------',            &       
-     &   TRIM(I_DATA%INFIL)
-      IF(I_DATA%MATMIN.EQ.0.AND.I_DATA%MATMAX.EQ.0)   THEN
+     &   TRIM(PSYCHE_DATA%INFIL)
+      IF(PSYCHE_DATA%MATMIN.EQ.0.AND.PSYCHE_DATA%MATMAX.EQ.0)   THEN
          WRITE(NOUT,'(A)')  'Check the Entire File'
       ELSE
          WRITE(NOUT,'(A,I4,A,I4)')                                      &       
      &        'Check Materials---------------------------------',       &       
-     &             I_DATA%MATMIN,' to ',I_DATA%MATMAX
+     &             PSYCHE_DATA%MATMIN,' to ',PSYCHE_DATA%MATMAX
       END IF
-      GO TO 100
-!
-!     SIGNAL TO QUIT
-!
-   90 IQUIT = 1
 !
   100 RETURN
       END SUBROUTINE BEGIN
@@ -765,8 +781,8 @@
 !     BLANK RESPONSE IS THE SAME AS SELECTING ALL
 !
       IF(MATSIN.EQ.' ')  THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+         PSYCHE_DATA%MATMIN = 0
+         PSYCHE_DATA%MATMAX = 0
          GO TO 100
       END IF
 !
@@ -793,22 +809,22 @@
 !
 !     CONVERT FROM ASCII
 !
-      I_DATA%MATMIN = 1
-      I_DATA%MATMAX = 9999
-      READ(BUF1,'(BN,I4)',ERR=20) I_DATA%MATMIN
-   20 READ(BUF2,'(BN,I4)',ERR=25) I_DATA%MATMAX
+      PSYCHE_DATA%MATMIN = 1
+      PSYCHE_DATA%MATMAX = 9999
+      READ(BUF1,'(BN,I4)',ERR=20) PSYCHE_DATA%MATMIN
+   20 READ(BUF2,'(BN,I4)',ERR=25) PSYCHE_DATA%MATMAX
 !
 !     SET THE MATERIAL NUMBER LIMITS
 !
-   25 IF(I_DATA%MATMIN.LE.0) THEN
-         I_DATA%MATMIN = 1
+   25 IF(PSYCHE_DATA%MATMIN.LE.0) THEN
+         PSYCHE_DATA%MATMIN = 1
       END IF
-      IF(I_DATA%MATMAX.LT.I_DATA%MATMIN)  THEN
-         I_DATA%MATMAX = I_DATA%MATMIN
+      IF(PSYCHE_DATA%MATMAX.LT.PSYCHE_DATA%MATMIN)  THEN
+         PSYCHE_DATA%MATMAX = PSYCHE_DATA%MATMIN
       END IF
-      IF(I_DATA%MATMIN.EQ.1.AND.I_DATA%MATMAX.EQ.9999) THEN
-         I_DATA%MATMIN = 0
-         I_DATA%MATMAX = 0
+      IF(PSYCHE_DATA%MATMIN.EQ.1.AND.PSYCHE_DATA%MATMAX.EQ.9999) THEN
+         PSYCHE_DATA%MATMIN = 0
+         PSYCHE_DATA%MATMAX = 0
       END IF
 !
   100 RETURN
@@ -871,29 +887,30 @@
 !
 !     LOOK FOR BEGINNING OF FIRST MATERIAL REQUESTED
 !
-   60 IF(I_DATA%MATMIN.GT.0)   THEN
-         DO WHILE(MAT.LT.I_DATA%MATMIN)
+   60 IF(PSYCHE_DATA%MATMIN.GT.0)   THEN
+         DO WHILE(MAT.LT.PSYCHE_DATA%MATMIN)
             READ(JIN,'(A)',END=90)  IFIELD
             READ(IFIELD,'(66X,I4,I2,I3,I5)',ERR=65) MAT,MF,MT,NSEQ
    65       IF(MAT.LT.0) GO TO 70
          END DO
-         IF(MAT.GT.I_DATA%MATMAX) GO TO 70
+         IF(MAT.GT.PSYCHE_DATA%MATMAX) GO TO 70
       END IF
       GO TO 75
 !
 !     FAILED TO FIND A MATERIAL
 !
-   70 IF(I_DATA%MATMIN.EQ.I_DATA%MATMAX) THEN
-         IF(I_DATA%MATMIN.EQ.0) THEN
+   70 IF(PSYCHE_DATA%MATMIN.EQ.PSYCHE_DATA%MATMAX) THEN
+         IF(PSYCHE_DATA%MATMIN.EQ.0) THEN
             EMESS = 'INPUT FILE DOES NOT CONTAIN ANY ENDF EVALUATIONS'
          ELSE
             WRITE(EMESS,'(A,I5)')                                       &       
-     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',I_DATA%MATMIN
+     &           'INPUT FILE DOES NOT CONTAIN MATERIAL',                &       
+     &                   PSYCHE_DATA%MATMIN
          END IF
       ELSE
          WRITE(EMESS,'(A,I5,A,I5)')                                     &       
      &        'INPUT FILE DOES NOT CONTAIN ANY MATERIALS',              &       
-     &         I_DATA%MATMIN,' TO',I_DATA%MATMAX
+     &         PSYCHE_DATA%MATMIN,' TO',PSYCHE_DATA%MATMAX
       END IF
       WRITE(NOUT,'(/A)')  EMESS
       IF(NOUT.NE.IOUT) THEN
@@ -1109,21 +1126,22 @@
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: LFW,LRU,LRF
-      INTEGER(KIND=I4) :: NER,NRO,NAPS
+      INTEGER(KIND=I4) :: NER,NAPS
       INTEGER(KIND=I4) :: IZ,IA
       INTEGER(KIND=I4) :: NI,NRE,ILI
       REAL(KIND=R4) :: EL,EU
-      REAL(KIND=R4) :: AWREL,DIFF
+      REAL(KIND=R4) :: AWRH,AHI,AWREL,DIFF
 !
-!     TEST ABUNDANCE WEIGHTED MASS OF ELEMENT
+!     TEST ABUNDANCE WEIGHTED MASS OF A NATURAL ELEMENT
 !
-      IZ = INT(ZA/1000)
-      AWREL = AWRN(IZ)
-      IF(NISN.EQ.N1H)   THEN
-         DIFF = ABS(1.-AWR/AWREL)
-         IF(DIFF.GT.EPI4)   THEN
-            WRITE(EMESS,'(A,F9.4)')  'AWR SHOULD BE ',AWREL
-            CALL ERROR_MESSAGE(0)
+      IF(N1H.GT.1) THEN
+         AWREL = AWRN(IZ)
+         IF(NISN.EQ.N1H)   THEN
+            DIFF = ABS(1.-AWR/AWREL)
+            IF(DIFF.GT.EPI4)   THEN
+               WRITE(EMESS,'(A,F9.4)')  'AWR SHOULD BE ',AWREL
+               CALL ERROR_MESSAGE(0)
+            END IF
          END IF
       END IF
 !
@@ -1133,6 +1151,7 @@
       E2 = ENMIN
       NBOUND = 0
       NIS = N1H
+      AWRH = C2H
       DO NI=1,NIS
 !
 !        INITIALIZE
@@ -1150,6 +1169,17 @@
          IA = MOD(IFIX(ZAIS(NI)),1000)
          ABNS(NI) = C2H
          LFW = L2H
+!
+!        SET LIMITS ON SCATTERING LENGTH
+!
+         IF(LRP.EQ.0) THEN
+            AHI = AWRH*FACTOR
+         ELSE
+            AHI = AMOD(C1H,1000.)
+         END IF
+         APLO = AHI**OTHIRD
+         APHI = APLO*0.17
+         APLO = APLO*0.07
 !
 !        PROCESS EACH ENERGY RANGE
 !
@@ -1185,7 +1215,7 @@
             NRO = N1H
             NAPS = N2H
 !
-!        ISOTOPE WITH NO RESONANCE PARAMETERS
+!           ISOTOPE WITH NO RESONANCE PARAMETERS
 !
             IF(LRU.EQ.0)   THEN
                CALL RDCONT
@@ -1195,6 +1225,7 @@
                END IF
                SPINS(NI) = C1H
                EMIDLE(NI) = EU
+               CALL TESTAP(C2H,APLO,APHI)
                IF(IA.GT.0)  THEN
                   EMESS = ' '
                   CALL ERROR_MESSAGE(0)
@@ -1208,7 +1239,7 @@
 !           RESOLVED RESONANCE REGION
 !
             ELSE IF(LRU.EQ.1)   THEN
-               CALL CHKRR(IA,NI,NAPS,NRO,LRF,NRE,EL,EU)
+               CALL CHKRR(IA,NI,NAPS,LRF,NRE,EL,EU)
 !
 !           UNRESOLVED REGION
 !
@@ -1241,13 +1272,13 @@
 !
 !***********************************************************************
 !
-      SUBROUTINE CHKRR(IA,NI,NAPS,NRO,LRF,NRE,EL,EU)
+      SUBROUTINE CHKRR(IA,NI,NAPS,LRF,NRE,EL,EU)
 !
 !     ROUTINE TO CHECK RESOLVED ENERGY REGIONS
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: IA,NI,NAPS,NRO,LRF,NRE
+      INTEGER(KIND=I4) :: IA,NI,NAPS,LRF,NRE
       REAL(KIND=R4) :: EL,EU
 !
       REAL(KIND=R4), INTRINSIC :: ABS, SQRT
@@ -1273,6 +1304,7 @@
             JNTED(III,NRE) = JNT(III)
          END DO
          DO III=1,NP
+            CALL TESTAP(Y(III),APLO,APHI)
             EP(III,NRE) = X(III)
             APED(III,NRE) = Y(III)
          END DO
@@ -1286,6 +1318,7 @@
       SPINS(NI) = SPI
       CALL STOFP(SPI)
       CALL STOFP(AP)
+      IF(NRO.EQ.0)  CALL TESTAP(C2H,APLO,APHI)
       NLS = N1H
       CALL STOFP(FLOAT(NLS))
 !
@@ -1421,7 +1454,7 @@
          CALL STOFP(FLOAT(N1H))
          CALL STOFP(FLOAT(N2H))
 !********READ REACION CHANNEL Q-VALUES
-         CALL RDCONT
+         CALL RDLIST
          CALL PAKLIS(JIN,1)
          IPT = IPT - 2
          IRBEG = IPT
@@ -1460,11 +1493,12 @@
                CALL STOFP(FLOAT(NJS))
 !**************TOTAL SPIN
                DO NJ=1,NJS
-                  CALL RDCONT
-                  AJ = C1H
+                  CALL RDLIST
+                  AJ = C1L
                   CALL STOFP(AJ)
-                  AC = C2H
+                  AC = C2L
                   CALL STOFP(AC)
+                  CALL TESTAP(C2L,APLO,APHI)
                   R = AC
                   LBK = L1H
                   CALL STOFP(FLOAT(LBK))
@@ -1532,6 +1566,7 @@
          CALL STOFP(FLOAT(LSSF))
          A = C2H
          CALL STOFP(A)
+         CALL TESTAP(C2H,APLO,APHI)
          NLS = N1H
          CALL STOFP(FLOAT(NLS))
 !
@@ -1579,6 +1614,7 @@
             CALL STOFP(FLOAT(LSSF))
             A = C2H
             CALL STOFP(A)
+            CALL TESTAP(C2H,APLO,APHI)
             NE = 0
             CALL STOFP(FLOAT(NE))
             NLS = N1H
@@ -1651,6 +1687,28 @@
 !
       RETURN
       END SUBROUTINE CHKURR
+!
+!***********************************************************************
+!
+      SUBROUTINE TESTAP(Z,A,B)
+!
+!     CHECK THAT POTENTIAL SCATTERING RADIUS LIES BETWEEN A AND B
+!
+      IMPLICIT NONE
+!
+      REAL(KIND=R4) :: Z,A,B
+!
+      IF(Z.LT.A.OR.Z.GT.B)   THEN
+!
+!        ERROR MESSAGE
+!
+         WRITE(EMESS,'(A,1PE13.5,A,1PE13.5)')                           &       
+     &               '  AP NOT IN RANGE',A,' TO',B
+         CALL ERROR_MESSAGE(NSEQP)
+      END IF
+!
+      RETURN
+      END SUBROUTINE TESTAP
 !
 !***********************************************************************
 !
@@ -6365,7 +6423,7 @@
 !        D-WAVE
          R2 = RHO*RHO
          RR4 = R2*R2
-         VL = AMUN*R4/(9.0+3.0*R2+RR4)
+         VL = AMUN*RR4/(9.0+3.0*R2+RR4)
          PS = RHOC - ATAN(3.0*RHOC/(3.0-RHOC*RHOC))
       END IF
 !
