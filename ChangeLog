@@ -39,7 +39,7 @@
     allowing to use any number of points for accurate description of angular 
     distributions at energies above 10 MeV (R. Capote)
 17. Mixed (exclusive/inclusive) ENDF-6 cross sections and spectra calculations
-    implemented (M. Herman). Formatting needs to be tested.
+    implemented (M. Herman). 
 18. Unitarity problem for DIRECT<>0 cases identified and corrected. Unitarity
     check introduced (R. Capote).
 19. EMPEND was extended to calculate total production cross section, including 
@@ -47,6 +47,16 @@
 20. PCROSS is given precedence over DEGAS for PE particle emission (M. Herman)
 21. Some  systematics from EAF-3.0 included and made available from 
     GUI->Outputs->x-sec systematics (M. Herman)
+22. Energy grid in MSD-Tristan increased by factor of 2 to reduce 
+    fluctuations (M. Herman)
+23. Optional parameters can be placed within incident energies (line must 
+    start with $). The change affects only incident energies that come 
+    after (M. Herman).
+24. If TUNE for gammas in CN is not specified calculations are done with
+    0.999 and Gamma_gamma is renormalized to available experimental data; 
+    setting TUNE to 1 turns off normalization (M. Herman).
+25. ENDF utility codes (CHECKR, FIZCON, STANEF, PSYCHE) updated to the 7.02
+    version (M. Herman)
     
 
          
