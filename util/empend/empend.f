@@ -19,7 +19,7 @@ C-V        - Let EMPIRE handle the max. outgoing particle energy.
 C-V  04/07 - Fix ordering of levels in MF12,
 C-V        - Read in values in double precision to avoid underflow.
 C-V        - Fix MTs and yields of minor reactions (37, 41, etc).
-C-V  04/07 - Add (n,5n) MT47
+C-V  04/07 - Add (n,5n) MT47 (temporarily deactivated 23jun05)
 C-V        - Check for absence of distribution data (NP=0 in MF6).
 C-V  04/09 - Check for normalisation overflow in WRIMF4
 C-V  04/10 Implement formatting for incident alphas and photons.
@@ -129,7 +129,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=100,MXR=300000,MXI=8000)
+      PARAMETER   (MXE=200,MXT=200,MXM=80,MXR=350000,MXI=10000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -256,9 +256,11 @@ C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
       NS =-1
       CALL WRTEXT(LOU, 0, 0, 0,NS,REC)
+C* Check if nuclide is fissile
+      CALL CHKFIS(NXS,NEN,IWO(MTH),RWO(LXS),MXE,MXT,LFI)
 C* Write the ENDF file-1 data
       EMX=EIN(NEN)
-      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,AWR,EMX,NS)
+      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,AWR,EMX,NS)
 C* Write the ENDF file-3 data
       CALL WRIMF3(LOU,MXE,MXT,LXR
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
@@ -420,33 +422,33 @@ C*   MXLJ - maximum number of transitions from a level
       IF(LSC+MXLI*2.GT.MXR)
      1STOP 'EMPEND ERROR - MXR limit exceeded'
       DO 890 I=1,NXS
-      IF     (IWO(MTH-1+I).EQ. 51) THEN
-        JZA=IZA
-        MT =50
-        MT0=MT
-      ELSE IF(IWO(MTH-1+I).EQ.600) THEN
-        JZA=IZA-1000
-        MT =600
-        MT0=MT
-      ELSE IF(IWO(MTH-1+I).EQ.800) THEN
-        JZA=IZA-2003
-        MT =800
-        MT0=MT
-      ELSE
-        GO TO 890
-      END IF
-      REWIND LIN
-      CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
-     1           ,RWO(LBR),MXLI,MXLJ)
-      CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
-     1           ,RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
-      WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT
-      WRITE(LTT,995) '                     Number of levels : ',NLV
-      WRITE(LTT,991)
-      WRITE(LER,995) ' Processed discrete level photon prod.: ',MT
-      WRITE(LER,995) '                     Number of levels : ',NLV
-      WRITE(LER,991)
-      IF(NLV.GT.0) JPP=JPP+1
+        IF     (IWO(MTH-1+I).EQ. 51) THEN
+          JZA=IZA
+          MT =50
+          MT0=MT
+        ELSE IF(IWO(MTH-1+I).EQ.600) THEN
+          JZA=IZA-1000
+          MT =600
+          MT0=MT
+        ELSE IF(IWO(MTH-1+I).EQ.800) THEN
+          JZA=IZA-2003
+          MT =800
+          MT0=MT
+        ELSE
+          GO TO 890
+        END IF
+        REWIND LIN
+        CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
+     1             ,RWO(LBR),MXLI,MXLJ)
+        CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
+     1             ,RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
+        WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT
+        WRITE(LTT,995) '                     Number of levels : ',NLV
+        WRITE(LTT,991)
+        WRITE(LER,995) ' Processed discrete level photon prod.: ',MT
+        WRITE(LER,995) '                     Number of levels : ',NLV
+        WRITE(LER,991)
+        IF(NLV.GT.0) JPP=JPP+1
   890 CONTINUE
 C* Photon production data from discrete levels processed
       IF(JPP.GT.0) THEN
@@ -481,13 +483,13 @@ C* Write photon distributions for MT50 series
       IF(LV600.GT.0) THEN
 C* Write photon distributions for MT600 series
         JPP=JPP+1
-        MT0=600
+        MT0=600-1
         CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV600,NS)
       END IF
       IF(LV800.GT.0) THEN
 C* Write photon distributions for MT800 series
         JPP=JPP+1
-        MT0=800
+        MT0=800-1
         CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV800,NS)
       END IF
 C* Photon angular distributions from discrete levels processed
@@ -581,9 +583,9 @@ C* (g,n2p) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (g,npa) cross section
           MT = 45
-        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
-C* (g,4n) cross section
-          MT = 47
+        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
+C* (g,5n) cross section
+c...          MT = 47
         ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
 C* (g,g') radiative capture cross section
           MT =102
@@ -633,77 +635,77 @@ C* (g,da) cross section
         END IF
       ELSE IF(IZI.EQ.1) THEN
 C* INCIDENT NEUTRONS
-        IF     (JZA  .EQ. IZA+   1) THEN
+        IF     (JZA  .EQ. IZA+IZI     ) THEN
 C* Radiative capture cross section
           MT =102
-        ELSE IF(JZA  .EQ. IZA     ) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI   -1) THEN
 C* Discrete levels inelastic scattering cross section
           MT =50
-        ELSE IF(JZA  .EQ. IZA-1000) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
 C* Discrete levels (n,p) cross section
           MT =600
-        ELSE IF(JZA  .EQ. IZA-2003) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
 C* Discrete levels (n,a) cross section
           MT =800
-        ELSE IF(JZA  .EQ. IZA-1   ) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI   -2) THEN
 C* (n,2n) cross section
           MT =   16
-        ELSE IF(JZA  .EQ. IZA-2   ) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI   -3) THEN
 C* (n,3n) cross section
           MT =   17
-        ELSE IF(JZA  .EQ. IZA-2004) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
 C* (n,na) cross section
           MT =   22
-        ELSE IF(JZA  .EQ. IZA-2005) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
 C* (n,2na) cross section
           MT =   24
-        ELSE IF(JZA  .EQ. IZA-2006) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
 C* (n,3na) cross section
           MT =   25
-        ELSE IF(JZA  .EQ. IZA-1001) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
 C* (n,np) cross section
           MT =   28
-        ELSE IF(JZA  .EQ. IZA-3   ) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
 C* (n,4n) cross section
           MT =   37
-        ELSE IF(JZA  .EQ. IZA-1002) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
 C* (n,2np) cross section
           MT =   41
-        ELSE IF(JZA  .EQ. IZA-1003) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
 C* (n,3np) cross section
           MT =   42
-        ELSE IF(JZA  .EQ. IZA-3005) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (n,npa) cross section
           MT =   45
-        ELSE IF(JZA  .EQ. IZA-4   ) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
 C* (n,5n) cross section
-          MT =   47
-        ELSE IF(JZA  .EQ. IZA-4007) THEN
+C...          MT =   47
+        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
 C* (n,2a) cross section
           MT =  108
-        ELSE IF(JZA  .EQ. IZA-2001) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
 C* (n,2p) cross section
           MT =  111
-        ELSE IF(JZA  .EQ. IZA-3004) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
 C* (n,pa) cross section
           MT =  112
         END IF
 C*
       ELSE IF(IZI.EQ.1001) THEN
 C* INCIDENT PROTONS
-        IF     (JZA  .EQ. IZA+1000) THEN
+        IF     (JZA  .EQ. IZA+IZI  -1) THEN
 C* Discrete level (p,n) cross section
           MT =50
-        ELSE IF(JZA  .EQ. IZA-   3) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI  -2) THEN
 C* (p,2nd) cross section
           MT =11
-        ELSE IF(JZA  .EQ. IZA+ 999) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI  -2) THEN
 C* (p,2n) cross section
           MT =16
-        ELSE IF(JZA  .EQ. IZA+ 999) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI  -3) THEN
 C* (p,3n) cross section
           MT =17
-        ELSE IF(JZA  .EQ. IZA-1004) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
 C* (p,na) cross section
           MT =22
         ELSE IF(JZA  .EQ. IZA-5012) THEN
@@ -756,8 +758,8 @@ C* (p,n2p) cross section
 C* (p,npa) cross section
           MT =45
         ELSE IF(JZA  .EQ. IZA+IZI-5) THEN
-C* (p,4n) cross section
-          MT =   47
+C* (p,5n) cross section
+C...          MT =   47
         ELSE IF(JZA  .EQ. IZA+1001) THEN
 C* Radiative capture cross section
           MT =102
@@ -939,7 +941,7 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,4n) ') MT= 37
         IF(PTST.EQ.' (z,2np)') MT= 41
         IF(PTST.EQ.' (z,3np)') MT= 42
-        IF(PTST.EQ.' (z,5n) ') MT= 47
+c...        IF(PTST.EQ.' (z,5n) ') MT= 47
         IF(PTST.EQ.' (z,n)  ') MT= 91
 c...        IF(PTST.EQ.' (z,n)  ') THEN
 c...          IF(IZI.EQ.1) THEN
@@ -1123,6 +1125,22 @@ C* Outgoing alphas
 C* Recoils
         YI=1
       END IF
+      RETURN
+      END
+      SUBROUTINE CHKFIS(NXS,NEN,MTH,XSR,MXE,MXT,LFI)
+C-T
+C-P
+      DIMENSION  MTH(MXT),XSR(MXE,MXT)
+      LFI=0
+      DO I=1,NXS
+        IF(MTH(I).NE.18) THEN
+C*        Fission reaction found
+          DO J=1,NEN
+C*          Check for non-zero fission cross section
+            IF(XSR(J,I).GT.0) LFI=1
+          END DO
+        END IF
+      END DO
       RETURN
       END
       SUBROUTINE SUMMF5(NXS,NPT,MTH,NT6,MT6,XSR,MXE,MXT)
@@ -1370,8 +1388,8 @@ C* Read distribution in double precision to avoid underflow
       READ (REC,807,ERR=802) EE,(DD(J),J=1,JXA)
       IF(KXA.GT.8) READ (LIN,809,ERR=802) (DD(J),J=9,KXA)
       IF(KXA.EQ.1) THEN
-C* Convert spectra to double differential
-        FF=4*PI
+C* Convert isotropic (angle-integrated) spectra to double differential
+        FF=1/(4*PI)
       ELSE
         FF=1
       END IF
@@ -1381,24 +1399,48 @@ C* Convert spectra to double differential
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
-C* Suppress negative distributions to 2% of average of the neighbours
+C* Check that the average is positive
       NEG=0
-      DO J=1,KXA
-        IF(DST(J).LT.0) THEN
-          NEG=NEG+1
-          DJ=0
-          NJ=0
-          IF(J.GT.1) THEN
-            DJ=DST(J-1)
-            NJ=1
+      IF(KXA.GT.1) THEN
+        AV=0
+        F2=DST(1)
+        A2=ANG(1)
+        DO J=2,KXA
+          A1=A2
+          F1=F2
+          A2=ANG(J)
+          F2=DST(J)
+          AV=AV+(A2-A1)*(F2+F1)/2
+        END DO
+        AV=AV/(ANG(KXA)-ANG(1))
+      ELSE
+        AV=DST(1)
+      END IF
+      IF(AV.LT.0) THEN
+        NEG=1
+        DO J=1,KXA
+          DST(J)=1.E-30
+        END DO
+      END IF
+C* Suppress negative distributions to 2% of average of the neighbours
+      IF(NEG.EQ.0) THEN
+        DO J=1,KXA
+          IF(DST(J).LT.0) THEN
+            NEG=NEG+1
+            DJ=0
+            NJ=0
+            IF(J.GT.1) THEN
+              DJ=DST(J-1)
+              NJ=1
+            END IF
+            IF(J.LT.KXA) THEN
+              DJ=DJ+DST(J+1)
+              NJ=NJ+1
+            END IF
+            DST(J)=0.02*DJ/NJ
           END IF
-          IF(J.LT.KXA) THEN
-            DJ=DJ+DST(J+1)
-            NJ=NJ+1
-          END IF
-          DST(J)=0.02*DJ/NJ
-        END IF
-      END DO
+        END DO
+      END IF
       IF(NEG.GT.0) THEN
         WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU
         WRITE(LER,906) MT,NINT(ZAP),EIN,EOU
@@ -1894,13 +1936,14 @@ C* Add continuum to the list
       IF(MT0.EQ.600) MT=649
       IF(MT0.EQ.800) MT=849
 C* Test if reaction is already registered
-  392 IF(NXS.LE.0  ) GO TO 394
-      DO 393 I=1,NXS
-      IXS=I
-      MTI=ABS(MTH(I))
-      IF(MTI.EQ.MT) GO TO 396
-  393 CONTINUE
-  394 NXS=NXS+1
+  392 IF(NXS.GT.0  ) THEN
+        DO I=1,NXS
+          IXS=I
+          MTI=ABS(MTH(I))
+          IF(MTI.EQ.MT) GO TO 396
+        END DO
+      END IF
+      NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
 C* Reaction QM and QI values from the last discrete level
@@ -1909,6 +1952,7 @@ C* Reaction QM and QI values from the last discrete level
       QQI(IXS)=QI
   396 XSC(NEN,IXS)=XS*1.E-3
       GO TO 110
+C*
 C* All data read
   700 RETURN
 C*
@@ -2296,10 +2340,8 @@ C* Calculate the integral of the spectrum
       END DO
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
-
-        print *,'EMPEND WARNING - skip mt',jt6,' Zap',izap,' Ein',ee
-     1         ,' Intg.=0 xs=',XS3
-c...    print *,'     emp,eou,nep',emp,eou,nep
+        WRITE(LTT,914) JT6,IZAP,EE,XS3,SPC
+        WRITE(LER,914) JT6,IZAP,EE,XS3,SPC
         IF(NE6.EQ.0) ETEF=EE
         GO TO 210
       END IF
@@ -2505,6 +2547,8 @@ C*
      1      ,A8,' MT',I8)
   912 FORMAT(' EMPEND WARNING - Spectrum not processed for MT',I6/
      1       '                  No cross section data available')
+  914 FORMAT(' EMPEND WARNING - skip MT',I4,' Zap',I6,' Ein'
+     1      ,1P,E10.3,' xs',E9.2,' Intg.=',E9.2)
   921 FORMAT(' Processing outgoing ',A8,' ZAP',I6,' for MT',I4)
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,I4)
@@ -2526,7 +2570,7 @@ C* Test for discrete levels inelastic scattering cross section
       IF(JZA  .NE. IZA    ) GO TO 20
 C* Process discrete levels
    35 READ (LIN,891) REC
-      IF(REC(13:22).EQ.'production') GO TO 90
+      IF(REC(13:22).EQ.'production') GO TO 20
       IF(REC(11:30).NE.'Discrete level popul') GO TO 35
 C* Positioned to read discrete levels
       READ (LIN,891)
@@ -2590,7 +2634,7 @@ C*
   912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
      1       '                  Transfer to ground state assumed')
       END
-      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,AWR,EMX,NS)
+      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,AWR,EMX,NS)
 C-Title  : WRIMF1 Subroutine
 C-Purpose: Write comment section (file-1) data in ENDF-6 format
       CHARACTER*66 REC
@@ -2643,7 +2687,6 @@ C*
       MT  = 451
       ZA  = IZA
       LRP =-1
-      LFI = 0
       NLIB= 8
       NMOD= 0
 C*
@@ -3731,7 +3774,7 @@ C* Clear the coefficients field
       DO L=1,LMX
         QQ(L+1)=0.
       END DO
-C* Save the input points, allow for doubling the mesh
+C* Save the input points, allow for quadrupling the mesh
       MXP=4*NP
       NNP=NP
       LXP=1
@@ -3810,8 +3853,22 @@ C* Case: Distribution negative at mesh point
       IF(ERR.GT.EMM) THEN
 C* Case: Tolerance limit not satisfied
         IF(L.LT.LMM .AND. JER.EQ.0) THEN
+C*        Increase order of approximation
           L =L+1
           GO TO 20
+        ELSE
+C*        Double the mesh
+          IF(NNP.LE.MXP/3) THEN
+            JNP=1+(NNP-1)*2
+            DO J=2,NNP
+              RWO(LXP+JNP+3-2*J)= RWO(LXP+NNP+1-J)
+              RWO(LXP+JNP+2-2*J)=(RWO(LXP+NNP+1-J)+RWO(LXP+NNP  -J))/2
+              RWO(LYP+JNP+3-2*J)= RWO(LYP+NNP+1-J)
+              RWO(LYP+JNP+2-2*J)=(RWO(LYP+NNP+1-J)+RWO(LYP+NNP  -J))/2
+            END DO
+            NNP=JNP
+            GO TO 20
+          END IF
         END IF
       END IF
 C* Case: Distribution is negative at midpoint
