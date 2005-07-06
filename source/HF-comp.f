@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-01 14:29:18 $
-Ccc   * $Id: HF-comp.f,v 1.77 2005-07-01 14:29:18 herman Exp $
+Ccc   * $Date: 2005-07-06 05:44:42 $
+Ccc   * $Id: HF-comp.f,v 1.78 2005-07-06 05:44:42 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -313,8 +313,7 @@ C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
-C-----(ignore if residue is inclusive since summation already done in ACCUM) 
-      IF(ENDF(Nnur).EQ.1) THEN
+      IF(ENDf(Nnur).EQ.1) THEN
          POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
       ELSE
          CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
@@ -635,9 +634,13 @@ C-----------Well... let it go down to the ground state
             icse = min(INT(2.0001 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-C-----------Add transition to the exclusive gamma spectrum
-            IF (ENDf(Nnuc).EQ.1) POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse
+C-----------Add transition to the exclusive or inclusive gamma spectrum
+            IF (ENDf(Nnuc).EQ.1) THEN
+               POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse
      &          ,Nnuc) + gacs/DE
+            ELSEIF(ENDf(Nnuc).EQ.2) THEN
+               CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
+            ENDIF
          ELSE
             popl = POPlv(l,Nnuc)
             IF (popl.NE.0.0D0) THEN
@@ -671,8 +674,12 @@ C-----------Add transition to the exclusive gamma spectrum
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
-                  IF (ENDf(Nnuc).EQ.1) POPcse(0,0,icse,Nnuc)
+                  IF (ENDf(Nnuc).EQ.1) THEN
+                     POPcse(0,0,icse,Nnuc)
      &                = POPcse(0,0,icse,Nnuc) + gacs/DE
+                  ELSEIF(ENDf(Nnuc).EQ.2) THEN
+                     CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
+                  ENDIF
                   IF (IOUt.GT.2) WRITE (6,99025) ELV(j1,Nnuc),
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
