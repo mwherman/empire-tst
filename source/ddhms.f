@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.22 $
-C $Id: ddhms.f,v 1.22 2005-06-30 18:17:44 Capote Exp $
+C CVS Version Management $Revision: 1.23 $
+C $Id: ddhms.f,v 1.23 2005-07-06 20:04:55 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.22 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.23 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.22 2005-06-30 18:17:44 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.23 2005-07-06 20:04:55 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -4662,7 +4662,7 @@ C
 C
 C Local variables
 C
-      REAL*8 adum(5,7), csfit(NDANG), qq(5)
+      REAL*8 adum(5,7), csfit(NDANGecis), qq(5)
       DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1),
      &                 auxout(NDEX,NDIM_JBINS + 1),
      &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon,
@@ -4708,7 +4708,7 @@ C-----to continuum
       IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
      &                                  zero,(NEX(nnur) - 1)*DE)
-C-----to discrte levels
+C-----to discrete levels
       IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
      &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
      &                                  NEX(nnur)*DE,EMAx(nnur))
@@ -4755,18 +4755,6 @@ C
       jn = 1
       izar = IZA(1) - 1000*jz - (jn + jz)
       CALL WHERE(izar,nnur,iloc)
-C-----TEMPORARY: assume that NDANG in EMPIRE is 19. If not stop.
-C-----           This makes transition from 5 deg grid to 10 deg trivial.
-      IF (NDANG.NE.19 .OR. NDANG.NE.37) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 
-     &         'TEMPORARY LIMIT.: NDANG IN dimension.h MUST BE 19 or 37'
-         WRITE (6,*)
-     &              'FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
-         WRITE (6,*)
-     &       'SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-         STOP
-      ENDIF
       IF (NDANG.EQ.19) THEN
 C------convert HMS 5 deg grid into 10 deg grid of EMPIRE
        DO ne = 0, Nemax

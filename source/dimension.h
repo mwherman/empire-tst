@@ -1,6 +1,6 @@
       PARAMETER(
-     * NDNUC= 75
-     *,NDEXCLUS = 75
+     * NDNUC= 50
+     *,NDEXCLUS = 50
      *,NDEJC=3
      *,NDAFIS=1
      *,NDEX= 151
@@ -10,11 +10,10 @@
      *,NDLV=40
      *,NDBR=40
      *,NDECSE=NDEX+10
-     *,NDANG=37
      *,NDANGecis=91
      *,NDNUCD=NDNUC
      *,NDECSED=NDECSE
-     *,NDANGD=NDANG
+     *,NDANGD=NDANGecis
      *,NDEX_D=NDEX
      *,NDEJCD=NDEJC
      *,NDVOM=7

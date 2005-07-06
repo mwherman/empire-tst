@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-01 14:30:41 $
-Ccc   * $Id: input.f,v 1.152 2005-07-01 14:30:41 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-06 20:04:55 $
+Ccc   * $Id: input.f,v 1.153 2005-07-06 20:04:55 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -141,6 +141,14 @@ C
          FIRst_ein = .TRUE.
 C--------select Meyers-Swiatecki shell corrections
          SHNix = 0.0
+C        Starting value of the number of angular points
+         NANgela = 37
+         NDAng   = 19
+         IF(NANgela.GT.NDAngecis) THEN
+            WRITE(6,*)
+     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+            STOP 'FATAL: increase NDAngecis in dimension.h'
+         ENDIF
 C--------set angles for MSD calculations
          da = 180.0/(NDANG - 1)
          DO na = 1, NDANG
@@ -234,13 +242,6 @@ C
          MODelecis = 0
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
-C        Starting value (NANgela must be less than NDANgecis !! in dimension.h)
-         NANgela = NDAng
-         IF(NANgela.GT.NDAngecis) THEN
-            WRITE(6,*)
-     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-            STOP 'FATAL: increase NDAngecis in dimension.h'
-         ENDIF
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -889,12 +890,7 @@ C
             WRITE (6,*) 'FATAL: Execution STOPPED'
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
-         IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) 'FATAL: HMS allowed only for incident nucleons'
-            WRITE (6,*) 'FATAL: and gammas -  Execution STOPPED'
-            STOP ' HMS allowed only for incident nucleons and gammas'
-         ENDIF
+C--------------------------------------------------------------------------
          IF (LHMs.NE.0 .AND. ENDf(1).EQ.1) THEN
             WRITE (6,*) ' '
             WRITE (6,*)
@@ -902,6 +898,22 @@ C
             WRITE (6,*) 'WARNING: and has been turned off'
             LHMs = 0
          ENDIF
+         IF (LHMs.NE.0 .AND. (NDANG.NE.19 .OR. NDANG.NE.37)) THEN
+            WRITE (6,*) ' '
+            WRITE (6,*) 'FATAL: NDANG IN dimension.h MUST BE 19 or 37'
+            WRITE (6,*)
+     &'FATAL: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+            WRITE (6,*)
+     &'FATAL: SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+            STOP 'FATAL: NDANG IN dimension.h MUST BE 19 or 37 for HMS'
+         ENDIF
+         IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
+            WRITE (6,*) ' '
+            WRITE (6,*) 'FATAL: HMS allowed only for incident nucleons'
+            WRITE (6,*) 'FATAL: and gammas -  Execution STOPPED'
+            STOP ' HMS allowed only for incident nucleons and gammas'
+         ENDIF
+C--------------------------------------------------------------------------
          IF (FISbar(nnuc).NE.1 .AND. FISopt(nnuc).NE.0) THEN
             FISopt(nnuc) = 0
             WRITE (6,*) ' '

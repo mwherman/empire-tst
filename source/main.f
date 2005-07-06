@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-30 18:18:06 $
-Ccc   * $Id: main.f,v 1.116 2005-06-30 18:18:06 Capote Exp $
+Ccc   * $Date: 2005-07-06 20:04:56 $
+Ccc   * $Id: main.f,v 1.117 2005-07-06 20:04:56 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -50,7 +50,7 @@ C
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
      &                 totemis, weight, xcse, xizat, xnhms, xnl,
      &                 xnor, xtotsp, xsinlcont, xsinl, zres, angstep,
-     &                 deform(NDCOLLEV), cseaprnt(ndecse,ndang),
+     &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
      &                 checkXS
       CHARACTER*9 cejectile
       CHARACTER*6 ctldir, keyname
@@ -1567,7 +1567,7 @@ C-----------------Exclusive DDX spectra (neutrons & protons)
      &                      )
                      WRITE (12,*) ' '
                      WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      ANGles
+     &                      (ANGles(nang),nang=1,NDANG)
                      IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1) .OR.
      &                   (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
                                                               ! first emission reactions
@@ -1894,7 +1894,8 @@ C--------neutrons
          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
          WRITE (12,'(30X,''A      n      g      l      e      s '')')
          WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+     &            (ANGles(nang),nang=1,NDANG)
          DO ie = 1, nspec - 1
            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
@@ -1912,7 +1913,8 @@ C--------protons
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
           WRITE (12,'(30X,''A      n      g      l      e      s '')')
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+     &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
@@ -1931,7 +1933,8 @@ C--------alphas
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
           WRITE (12,'(30X,''A      n      g      l      e      s '')')
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+     &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
@@ -1953,7 +1956,8 @@ C--------light ions
      &n,x)'')') INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
              WRITE(12,'(30X,''A      n      g      l      e      s '')')
              WRITE (12,*) ' '
-             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') ANGles
+             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+     &           (ANGles(nang),nang=1,NDANG)
              DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
      &                *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
@@ -2029,16 +2033,28 @@ C        SAVING RANDOM SEEDS
        ENDIF
       epre = EIN
 
-      NANgela = NDAng
-      IF(EIN.GT.10. .AND. EIN.LE.20.) NANgela = 37
-      IF(EIN.GT.20. .AND. EIN.LE.50.) NANgela = 73
-      IF(EIN.GT.50.) NANgela = 91
+C-----
+C-----Initialized in input.f
+C     NANgela = 19
+C     NDAng   = 19
+C-----
+      IF(EIN.GT.10. .AND. EIN.LE.20.) THEN
+        NANgela = 37
+        NDAng   = 37
+      ENDIF 
+      IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+        NANgela = 73
+        NDAng   = 73
+      ENDIF 
+      IF(EIN.GT.50.) THEN
+        NANgela = 91
+        NDAng   = 91
+      ENDIF
       IF(NANgela.GT.NDAngecis) THEN
          WRITE(6,*)
      &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
          STOP 'FATAL: increase NANgecis in dimension.h'
       ENDIF
-
       FIRst_ein = .FALSE.
       GOTO 1300
 C

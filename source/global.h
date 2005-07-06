@@ -1,16 +1,16 @@
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
-     &                 ANGles(ndang), ARGred, ATIlnor(0:ndnuc), AMUele,
+     &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc), 
      &                 AUSpec(ndecse,0:ndejc), AVOm(0:ndejc,0:ndnuc),
      &                 AVSo(0:ndejc,0:ndnuc), AWOm(0:ndejc,0:ndnuc),
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc),
      &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
-     &                 , CANgler(ndang), CETa, CHMs, CRL, CHMax,
-     &                 CSAlev(ndang,ndlv,0:ndejc),
+     &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL, 
+     &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
      &                 CSDirlev(ndlv,0:ndejc),
      &                 CSE(ndecse,0:ndejc,0:ndnuc),
-     &                 CSEa(ndecse,ndang,0:ndejc,0:1),
-     &                 CSEahms(ndecse,ndang,0:ndejc),
+     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),
+     &                 CSEahms(ndecse,ndangecis,0:ndejc),
      &                 CSEhms(ndecse,0:ndejc), CSHms(0:ndejc),
      &                 CSEfis(ndecse,0:ndejc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
@@ -46,7 +46,7 @@
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
-     &        INExc(ndexclus),ISProd(0:ndnuc)
+     &        INExc(ndexclus),ISProd(0:ndnuc), NDAng
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
@@ -84,7 +84,7 @@
      &                 RVSo(0:ndejc,0:ndnuc),
      &                 RWOm(0:ndejc,0:ndnuc),
      &                 RWOmv(0:ndejc,0:ndnuc),
-     &                 RWSo(0:ndejc,0:ndnuc), SANgler(ndang),
+     &                 RWSo(0:ndejc,0:ndnuc), SANgler(ndangecis),
      &                 SCRt(ndex,ndlw,2,0:ndejc), SCRtem(0:ndejc),
      &                 SCRtl(ndlv,0:ndejc), SEJc(0:ndejc),
      &                 SFDis(nftrans,nfparab), SFIom(0:ndejc,0:ndnuc),
@@ -155,7 +155,7 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela, ISProd
+     &                  NANgela, NDAng, ISProd
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv

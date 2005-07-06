@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-30 18:19:33 $
-Ccc   * $Id: pcross.f,v 1.37 2005-06-30 18:19:33 Capote Exp $
+Ccc   * $Date: 2005-07-06 20:04:56 $
+Ccc   * $Id: pcross.f,v 1.38 2005-07-06 20:04:56 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -29,7 +29,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 L(0:NDEJC,PMAX), XCOs(NDAng), VV
+      REAL*8 L(0:NDEJC,PMAX), XCOs(NDAngecis), VV
       INTEGER*4 NHEq
       COMMON /CALC5 / L, NHEq
       COMMON /KALB/ XCOs
@@ -47,7 +47,7 @@ C
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
-     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX), ddxs(NDAng)
+     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
      &          ihmax, j, p, zc, zp, zr, zo
@@ -429,7 +429,7 @@ C
 C           fmsd = 1.d0
 C           fmsd set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     &              ebind, eee, ftmp, 1.d0, ddxs)
+     &              ebind, eee, ftmp, 1.d0, ddxs, NDAng)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
@@ -441,7 +441,7 @@ C           fmsd set to 0.d0 means isotropic distribution
       END
 
       SUBROUTINE KALBACH(Jcom,Jzcom,Jpin,Jnin,Jpout,Jnout,Elab,Esys,
-     &Bin, Eps, Total, Fmsd, Sigma)
+     &Bin, Eps, Total, Fmsd, Sigma, NDang)
 C
 C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
 C
@@ -451,7 +451,7 @@ C     Compound nucleus mass and charge (ac,zc) -> jcom,jzcom
 C     Projectile charge and neutron numbers    -> jpin,jnin
 C     Ejectile charge and neutron numbers      -> jpout,jnout
 C     Incident energy in MeV [lab system]      -> elab
-C      Excitation energy in MeV [cms]           -> esys
+C     Excitation energy in MeV [cms]           -> esys
 C     Binding energy of the ejectile in MeV    -> bin
 C     Emission energy in MeV                   -> eps
 C     Emitted cross section [mb/MeV]           -> total
@@ -486,8 +486,8 @@ C
       implicit integer (I-N)
       INCLUDE 'dimension.h'
       REAL*8 arg, a, xnorm, eps,total,fmsd, bin, elab, esys
-      REAL*8 sigma(NDAng), xcos(NDAng)
-      COMMON /KALB/ xcos
+      REAL*8 Sigma(NDAngecis), XCOs(NDAngecis)
+      COMMON /KALB/ XCOs
       SAVE /KALB/
 Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0

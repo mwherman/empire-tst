@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-06-21 22:32:12 $
-Ccc   * $Id: MSD-tristan.f,v 1.42 2005-06-21 22:32:12 herman Exp $
+Ccc   * $Date: 2005-07-06 20:04:56 $
+Ccc   * $Id: MSD-tristan.f,v 1.43 2005-07-06 20:04:56 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -35,16 +35,17 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AI, ALSin, ANGle(NDANG), AR, CLRn(11), CNOrin(22)
-     &                 , CROs1(30,49,2*NDANG), CROs2(30,49,2*NDANG),
+      DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(11), 
+     &                 CNOrin(22), CROs1(30,49,2*NDANGecis), 
+     &                 CROs2(30,49,2*NDANGecis),
      &                 DTHeta, ECEntr(5), EFItin(22), EOUtmi, EOUtmx,
      &                 ESTep, ETMax, ETMin, EXTcom(10), FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAPin(2), HOMin, Q0, QGRand, QMAx,
      &                 QMIna, QMInb, QS1, QS2, QSTep, RAC,
      &                 RHOb(301,11,2), RI, ROPt, RR, THEta1, THEta2, U0,
-     &                 U9, XSinl, W0, WIDex, WIDexin, WR1(12*NDANG),
-     &                 WR2(144*NDANG)
+     &                 U9, XSinl, W0, WIDex, WIDexin, WR1(12*NDANGecis),
+     &                 WR2(144*NDANGecis)
       INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
      &        ICC, ICMax, ID, IE, IG, KDEnvi, KEX3, KEXcom(10), KRTmax,
      &        KRType, KTRl(10), L9(10), NAVerg, NCHanl, NEBinx, NFAc12,
@@ -72,8 +73,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a3, ap, at, crose(NDEX,NDANG,NDANG), eccm, elab,
-     &                 fn, q1, q2, ri0, rr0
+      DOUBLE PRECISION a3, ap, at, crose(NDEX,NDANGecis,NDANGecis), 
+     &                 eccm, elab, fn, q1, q2, ri0, rr0
       REAL FLOAT
       INTEGER i1, i2, ic, ic1, ic12, ic1xr, ic2, ic2xr, icp, icpx,
      &        iout2, ka, kb, kread, l1, l12x, l1maxr, l2, l2maxm,
@@ -352,8 +353,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, ANGle(NDANG), AU, AW, BETa(301,11), BST(3)
-     &                 , BST1(2), CLRn(11), CNOrin(22), DTHeta,
+      DOUBLE PRECISION ALSin, ANGle(NDANGecis), AU, AW, BETa(301,11),
+     &                 BST1(2), CLRn(11), CNOrin(22), DTHeta, BST(3),
      &                 EBCs(500,2), ECEntr(5), EFItin(22), EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin, FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
@@ -2039,7 +2040,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALPha(11,6), AN(6), ANGle(NDANG), BST(3),
+      DOUBLE PRECISION ALPha(11,6), AN(6), ANGle(NDANGecis), BST(3),
      &                 CLRn(11), DTHeta, DUMmy(1041), ECEntr(5), EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin,
      &                 EXTcom(10), FACb, FAClog(500), FFAc1d(2),
@@ -2392,7 +2393,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ANGle(NDANG), CLRn(11), DTHeta, ECEntr(5),
+      DOUBLE PRECISION ANGle(NDANGecis), CLRn(11), DTHeta, ECEntr(5),
      &                 EOUtmi, EOUtmx, ESTep, ETMax, ETMin, EXTcom(10),
      &                 FAC1d(2), FAC2d(2), FAC3d(2), FACb, FFTot(10),
      &                 Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, QSTep,
@@ -2422,12 +2423,12 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a2, a3, adum(5,7), al1l2(7,7), amat(15,15),
-     &                 an, ay, aynorm, csfit(NDANG), delta, eout, f1(15)
-     &                 , f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
+     &                 an, ay, aynorm, csfit(NDANGecis), delta, eout, 
+     &                 f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6),
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2,
      &                 qq(5), rb12, s1, s2, s3, sg(301), sigm, sn, sum,
-     &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15)
+     &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15), f1(15)
       REAL FLOAT
       REAL hhh
       INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
