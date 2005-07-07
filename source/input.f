@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-06 20:04:55 $
-Ccc   * $Id: input.f,v 1.153 2005-07-06 20:04:55 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-07 21:17:31 $
+Ccc   * $Id: input.f,v 1.154 2005-07-07 21:17:31 Carlson Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -793,7 +793,8 @@ C-----------(McFadden global potential 9100 could be used)
 C
 C--------inteligent defaults *** done ***
 C
-         CALL READIN(0)   !optional part of the input
+         Irun = 0
+         CALL READIN(Irun)   !optional part of the input
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
