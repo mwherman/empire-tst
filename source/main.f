@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-07 21:47:45 $
-Ccc   * $Id: main.f,v 1.118 2005-07-07 21:47:45 Capote Exp $
+Ccc   * $Date: 2005-07-07 23:10:29 $
+Ccc   * $Id: main.f,v 1.119 2005-07-07 23:10:29 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -168,14 +168,6 @@ C-----------------To use only those values corresponding to EMPIRE grid for inel
                   if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                   iang = iang +1
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
-C-----------------add direct transition to the inclusive spectrum CSEa(,,,0)
-C                 popl = ftmp*(FLOAT(icsh) - xcse)/DE
-C                 IF (icsl.EQ.1) popl = 2.0*popl
-C                 CSEa(icsl,iang,nejcec,0) = CSEa(icsl,iang,nejcec,0) +
-C    &            popl
-C                 poph = ftmp*(xcse - FLOAT(icsl))/DE
-C                 CSEa(icsh,iang,nejcec,0) = CSEa(icsh,iang,nejcec,0) +
-C    &            poph
                ENDDO
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
@@ -253,16 +245,10 @@ C-----------------To use only those values corresponding to EMPIRE grid for inel
      &                    (2.*isigma*isigma))/(2.5066d0*isigma*dtmp)
                       CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) +
      &                popl
-C---------------------add direct transition to the inclusive spectrum CSEa(,,,0)
-C                     CSEa(ie,iang,nejcec,0) =  CSEa(ie,iang,nejcec,0) +
-C    &                popl
                     enddo
                   else
                     CSEa(icsl,iang,nejcec,1) =  CSEa(icsl,iang,nejcec,1)
      &                                     + ftmp/DE
-C-------------------add direct transition to the inclusive spectrum CSEa(,,,0)
-C                   CSEa(icsl,iang,nejcec,0) =  CSEa(icsl,iang,nejcec,0)
-C    &                                     + ftmp/DE
                   endif
               ENDDO
              ENDIF
@@ -1774,40 +1760,19 @@ c            sumtst=sumtst+CSE(iesp,nejc,0)
              DO nang = 1, NDANG
                 piece = CSEmsd(iesp,nejc)
                 IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
+C               RCN, Added to compensate the doubling in exclusive (from check vs exclusive)
+                ftmp = 1.d0 
+                 IF (iesp.EQ.1) ftmp = 2.d0
                 CSEa(iesp,nang,nejc,0)
      &             = ((CSE(iesp,nejc,0)
      &             - piece*POPcseaf(0,nejc,iesp,0))
-     &             /4.0/PI + CSEa(iesp,nang,nejc,1)
+     &             /4.0/PI*ftmp + CSEa(iesp,nang,nejc,1)
      &             *POPcseaf(0,nejc,iesp,0))
              ENDDO
           ENDDO
 c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE 
        ENDDO
 
-
-c     DO nnuc = 1, NNUcd               !loop over decaying nuclei
-c        IF (ENDf(nnuc).EQ.2) THEN
-c           DO nejc = 0, NEJcm         !loop over ejectiles
-c              IF (nejc.GT.0) THEN
-c                 recorr = (AMAss(nnuc) - EJMass(nejc))/AMAss(nnuc)
-c              ELSE
-c                 recorr = 1.0
-c              ENDIF
-c              DO icse = 1, NDEX
-c                 xccm = (icse - 1)*recorr + 1.0000001
-c                 iccml = xccm
-c                 iccmh = MIN(NDEX,iccml + 1)
-c                 weight = xccm - iccml
-c-----------------energy spectra
-c                 CSE(iccml,nejc,0) = CSE(iccml,nejc,0)
-c    &                                + CSE(icse,nejc,nnuc)
-c    &                                *(1.0 - weight)
-c                 CSE(iccmh,nejc,0) = CSE(iccmh,nejc,0)
-c    &                                + CSE(icse,nejc,nnuc)*weight
-c              ENDDO
-c           ENDDO
-c        ENDIF
-c     ENDDO
       WRITE (6,*) ' '
       WRITE (6,'(''  Total fission cross section '',G12.5,'' mb'')')
      &       TOTcsfis
