@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-07 21:17:31 $
-Ccc   * $Id: input.f,v 1.154 2005-07-07 21:17:31 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-07 21:48:42 $
+Ccc   * $Id: input.f,v 1.155 2005-07-07 21:48:42 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -141,23 +141,6 @@ C
          FIRst_ein = .TRUE.
 C--------select Meyers-Swiatecki shell corrections
          SHNix = 0.0
-C        Starting value of the number of angular points
-         NANgela = 37
-         NDAng   = 19
-         IF(NANgela.GT.NDAngecis) THEN
-            WRITE(6,*)
-     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-            STOP 'FATAL: increase NDAngecis in dimension.h'
-         ENDIF
-C--------set angles for MSD calculations
-         da = 180.0/(NDANG - 1)
-         DO na = 1, NDANG
-            ANGles(na) = (na - 1)*da
-         ENDDO
-         DO na = 1, NDANG
-            CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
-            SANgler(na) = SQRT(1.0 - CANgler(na)**2)
-         ENDDO
 C--------neutralize tuning factors and OMP normalization factors
          DO nejc = 0, NDEJC
            TUNEpe(nejc) = 1.0
@@ -404,6 +387,33 @@ C--------read entire input for the first energy calculations
 C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
+C        Starting value of the number of angular points
+         NANgela = 37
+         NDAng   = 19
+         IF(EIN.GT.10. .AND. EIN.LE.20.) THEN
+           NANgela = 37
+           NDAng   = 37
+         ELSEIF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+           NANgela = 73
+           NDAng   = 73
+         ELSEIF(EIN.GT.50.) THEN
+           NANgela = 91
+           NDAng   = 91
+         ENDIF
+         IF(NANgela.GT.NDAngecis) THEN
+           WRITE(6,*)
+     &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
+           STOP 'FATAL: increase NANgecis in dimension.h'
+         ENDIF
+C--------set angles for inelastic calculations
+         da = 180.0/(NDANG - 1)
+         DO na = 1, NDANG
+           ANGles(na) = (na - 1)*da
+         ENDDO
+         DO na = 1, NDANG
+           CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
+           SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
+         ENDDO
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN

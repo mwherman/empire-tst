@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-06 20:04:56 $
-Ccc   * $Id: main.f,v 1.117 2005-07-06 20:04:56 Capote Exp $
+Ccc   * $Date: 2005-07-07 21:47:45 $
+Ccc   * $Id: main.f,v 1.118 2005-07-07 21:47:45 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -2025,17 +2025,16 @@ C        SAVING RANDOM SEEDS
          CLOSE(94)
          STOP '.REGULAR STOP'
       ENDIF
-       IF(EIN.LT.epre) THEN
+      IF(EIN.LT.epre) THEN
          WRITE(6,*) 'FATAL: Input energies are not ordered !!'
          WRITE(6,*) 'FATAL: Check your input file'
          PAUSE 'FATAL: Input energies are not ordered !!'
          STOP
-       ENDIF
+      ENDIF
       epre = EIN
-
 C-----
 C-----Initialized in input.f
-C     NANgela = 19
+C     NANgela = 37
 C     NDAng   = 19
 C-----
       IF(EIN.GT.10. .AND. EIN.LE.20.) THEN
@@ -2055,6 +2054,15 @@ C-----
      &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
          STOP 'FATAL: increase NANgecis in dimension.h'
       ENDIF
+C-----set angles for inelastic calculations
+      da = 180.0/(NDANG - 1)
+      DO na = 1, NDANG
+        ANGles(na) = (na - 1)*da
+      ENDDO
+      DO na = 1, NDANG
+        CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
+        SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
+      ENDDO
       FIRst_ein = .FALSE.
       GOTO 1300
 C
