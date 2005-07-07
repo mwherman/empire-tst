@@ -5,8 +5,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.23 $
-C $Id: ddhms.f,v 1.23 2005-07-06 20:04:55 Capote Exp $
+C CVS Version Management $Revision: 1.24 $
+C $Id: ddhms.f,v 1.24 2005-07-07 21:47:29 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -615,7 +615,7 @@ C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
          npresid = 1
 C        !remaining state = 1p1h here
          nhresid = 1
-         CALL ANGLES(jstudy,npresid,nhresid,epart)
+         CALL DANGLES(jstudy,npresid,nhresid,epart)
 C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
          IF (NEV.EQ.12345678) WRITE (6,*) 'th1p,ph1p=', TH1p, PH1p
 C
@@ -967,7 +967,7 @@ C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
          npresid = 0
 C        !remaining state = 1h here
          nhresid = 1
-         CALL ANGLES(jstudy,npresid,nhresid,epart)
+         CALL DANGLES(jstudy,npresid,nhresid,epart)
 C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
 C
 C
@@ -1325,7 +1325,7 @@ C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
          npresid = 0
 C        !remaining state = 2h here
          nhresid = 2
-         CALL ANGLES(jstudy,npresid,nhresid,epart)
+         CALL DANGLES(jstudy,npresid,nhresid,epart)
 C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
 C
 C
@@ -2188,9 +2188,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.23 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.24 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.23 2005-07-06 20:04:55 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.24 2005-07-07 21:47:29 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -3214,7 +3214,7 @@ C21   continue
 C
 C
 C
-      SUBROUTINE ANGLES(Jstudy,Npresid,Nhresid,Epart)
+      SUBROUTINE DANGLES(Jstudy,Npresid,Nhresid,Epart)
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -4768,7 +4768,7 @@ C------convert HMS 5 deg grid into 10 deg grid of EMPIRE
      &                     /2.
          IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
        ENDDO
-	ENDIF
+       ENDIF
 C-----interpolate in energy
 C-----to continuum
       IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
