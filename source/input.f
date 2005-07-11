@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-07 21:48:42 $
-Ccc   * $Id: input.f,v 1.155 2005-07-07 21:48:42 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-11 05:50:19 $
+Ccc   * $Id: input.f,v 1.156 2005-07-11 05:50:19 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -994,13 +994,21 @@ C--------set ECIS (.,1)
                IDNa(3,1) = 1
             ENDIF
          ENDIF
-C--------set MSD  (.,2) (discrete only if ECIS not used)
-         IF (MSD.GT.0) THEN
+C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
+         IF (MSD.EQ.1) THEN
             IF (NPRoject.EQ.1) THEN
                IF (DIRect.EQ.0) IDNa(1,2) = 1
                IDNa(2,2) = 1
             ELSEIF (NPRoject.EQ.2) THEN
                IF (DIRect.EQ.0) IDNa(3,2) = 1
+               IDNa(4,2) = 1
+            ENDIF
+         ELSEIF(MSD.EQ.2) THEN
+            IF (NPRoject.EQ.1) THEN
+               IDNa(1,2) = 1
+               IDNa(2,2) = 1
+            ELSEIF (NPRoject.EQ.2) THEN
+               IDNa(3,2) = 1
                IDNa(4,2) = 1
             ENDIF
          ENDIF
@@ -3751,8 +3759,9 @@ C-----
             IF (MSD.EQ.1) WRITE (12,
      &'('' MSD calculations with ORION+TRISTAN were used'')')
             IF (MSD.EQ.2) WRITE (6,
-     &         '('' MSD calculations will use previous ORION results'')'
-     &         )
+     &         '('' including contribution to discrete levels'')')
+            IF (MSD.EQ.2) WRITE (12,
+     &         '('' including contribution to discrete levels'')')
             GOTO 100
          ENDIF
 C-----
