@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-11 05:50:58 $
-Ccc   * $Id: main.f,v 1.120 2005-07-11 05:50:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-11 16:05:36 $
+Ccc   * $Id: main.f,v 1.121 2005-07-11 16:05:36 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -58,7 +58,7 @@ C
       CHARACTER*36 nextenergy
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
-      INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, 
+      INTEGER i, ia, iad, iam, iang, iang1, ib, icalled,
      &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
@@ -82,11 +82,11 @@ C-----
       IF (IOUt.GT.0) CALL PRINPUT
       WRITE (*,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
       WRITE (6,'(''  C.M. incident energy '',G10.5,'' MeV'')') EIN
-      
+
 C-----
 C-----Print results of the systematics
 C-----
-      IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1) 
+      IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
 C-----
@@ -1647,7 +1647,7 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
 C--------------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
 C
 C--------------------double the first bin x-sec to preserve integral in EMPEND
-                     POPcse(0,nejc,1,INExc(nnuc)) = 
+                     POPcse(0,nejc,1,INExc(nnuc)) =
      &                  POPcse(0,nejc,1,INExc(nnuc))*2
                      WRITE (12,*) ' '
                      WRITE (12,'('' Energy    mb/MeV'')')
@@ -1665,7 +1665,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
-     &                            *DE/recorp, 
+     &                            *DE/recorp,
      &                            POPcse(0,nejc,ie,INExc(nnuc))*recorp
                         ENDDO
                                           ! MT=849 exact endpoint
@@ -1756,13 +1756,13 @@ C------double-differential spectra
        DO nejc = 0, NDEJC
 c         sumtst=0
           DO iesp = 1, NDECSE
-C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc  
+C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc
 c            sumtst=sumtst+CSE(iesp,nejc,0)
              DO nang = 1, NDANG
                 piece = CSEmsd(iesp,nejc)
                 IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
 C               RCN, Added to compensate the doubling in exclusive (from check vs exclusive)
-                ftmp = 1.d0 
+                ftmp = 1.d0
                  IF (iesp.EQ.1) ftmp = 2.d0
                 CSEa(iesp,nang,nejc,0)
      &             = ((CSE(iesp,nejc,0)
@@ -1771,7 +1771,7 @@ C               RCN, Added to compensate the doubling in exclusive (from check v
      &             *POPcseaf(0,nejc,iesp,0))
              ENDDO
           ENDDO
-c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE 
+c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
        ENDDO
 
       WRITE (6,*) ' '
@@ -1787,7 +1787,7 @@ c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
         WRITE (6,'('' *******************************************'',
      &           23(1H*))')
         WRITE (6,'('' * Incident energy (LAB): '',G12.5,
-     &              '' MeV  '')') EINl    
+     &              '' MeV  '')') EINl
         WRITE (6,'('' * Compound elastic cross section (CE) '',G12.5,
      &              '' mb  '')') 4.*PI*ELCncs
         WRITE (6,'('' * Reaction cross section - CE '',G12.5,
@@ -1860,7 +1860,7 @@ C--------neutrons
          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
          WRITE (12,'(30X,''A      n      g      l      e      s '')')
          WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
          DO ie = 1, nspec - 1
            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
@@ -1879,7 +1879,7 @@ C--------protons
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
           WRITE (12,'(30X,''A      n      g      l      e      s '')')
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
@@ -1899,7 +1899,7 @@ C--------alphas
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
           WRITE (12,'(30X,''A      n      g      l      e      s '')')
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
@@ -1922,7 +1922,7 @@ C--------light ions
      &n,x)'')') INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
              WRITE(12,'(30X,''A      n      g      l      e      s '')')
              WRITE (12,*) ' '
-             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))') 
+             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &           (ANGles(nang),nang=1,NDANG)
              DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
@@ -1963,14 +1963,14 @@ C-----end of ENDF spectra (inclusive)
 
  1155 READ (5,'(A36)') nextenergy
       IF(nextenergy(1:1).EQ.'$') THEN
-         READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1, 
-     &       ikey2, ikey3, ikey4 
+         READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1,
+     &       ikey2, ikey3, ikey4
          CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
          GO TO 1155
       ELSE
          READ(nextenergy,'(G15.5)') EIN
       ENDIF
-       
+
       IF (EIN.LT.0.0D0) THEN
          IF (FILevel) CLOSE (14)
          WRITE (12,*) ' '
@@ -2001,16 +2001,12 @@ C        SAVING RANDOM SEEDS
 C-----
 C-----Initialized in input.f
 C     NANgela = 37
-C     NDAng   = 19
+C     NDAng   = 37
 C-----
-      IF(EIN.GT.10. .AND. EIN.LE.20.) THEN
-        NANgela = 37
-        NDAng   = 37
-      ENDIF 
       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
         NANgela = 73
         NDAng   = 73
-      ENDIF 
+      ENDIF
       IF(EIN.GT.50.) THEN
         NANgela = 91
         NDAng   = 91

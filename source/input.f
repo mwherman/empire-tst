@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-11 05:50:19 $
-Ccc   * $Id: input.f,v 1.156 2005-07-11 05:50:19 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-11 16:05:36 $
+Ccc   * $Id: input.f,v 1.157 2005-07-11 16:05:36 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -389,11 +389,8 @@ C--------incident energy (in LAB)
          READ (5,*) EIN
 C        Starting value of the number of angular points
          NANgela = 37
-         NDAng   = 19
-         IF(EIN.GT.10. .AND. EIN.LE.20.) THEN
-           NANgela = 37
-           NDAng   = 37
-         ELSEIF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+         NDAng   = 37
+         IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
            NANgela = 73
            NDAng   = 73
          ELSEIF(EIN.GT.50.) THEN
@@ -1321,7 +1318,7 @@ C-----set giant resonance parameters for CN
       GMRpar(6,nnuc) = 0.0
       GMRpar(7,nnuc) = 1.0
       GMRpar(8,nnuc) = 0.0
-      AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev      
+      AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
       EINl = EIN
@@ -2590,7 +2587,7 @@ C
       WRITE (12,*) 'Discrete levels were taken from the RIPL-2 level   '
       WRITE (12,*) 'file, based on the 1998 version of ENSDF.          '
       irun = 0
-  100 IF(irun.EQ.1) RETURN 
+  100 IF(irun.EQ.1) RETURN
       READ (5,'(A1)') name(1:1)
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
@@ -2698,7 +2695,7 @@ C-----------Printout of some final input options   *** done ***
          i3 = i3e
          i4 = i4e
          ENDIF
-          
+
 C--------DEGAS input
          IF (name.EQ.'DEGAS ') THEN
             DEGa = val

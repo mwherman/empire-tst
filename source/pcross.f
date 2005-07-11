@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-06 20:04:56 $
-Ccc   * $Id: pcross.f,v 1.38 2005-07-06 20:04:56 Capote Exp $
+Ccc   * $Date: 2005-07-11 16:05:36 $
+Ccc   * $Id: pcross.f,v 1.39 2005-07-11 16:05:36 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -195,13 +195,7 @@ C-----Last continuum energy bin is calculated
          IF (iemax(0).GE.nexrt) iemax(0) = nexrt
       ENDDO
 
-      IF (.NOT.callpcross) THEN
-         do i=1,NDAng
-           theta=DBLE(i-1)/DBLE(NDAng-1)*pi
-           xcos(i)=cos(theta)
-         enddo
-         CALL RQFACT(NHEq,r)
-      ENDIF
+      IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS
@@ -395,6 +389,11 @@ C         WRITE(6, *)'==========================='
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
 C     Note, that PCROSS only calculates emission into the continuum
+      do i=1,NDAng
+         theta=DBLE(i-1)/DBLE(NDAng-1)*pi
+         xcos(i)=cos(theta)
+      enddo
+
       totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
