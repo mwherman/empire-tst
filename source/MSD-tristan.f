@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-07-06 20:04:56 $
-Ccc   * $Id: MSD-tristan.f,v 1.43 2005-07-06 20:04:56 Capote Exp $
+Ccc   * $Date: 2005-07-11 05:50:58 $
+Ccc   * $Id: MSD-tristan.f,v 1.44 2005-07-11 05:50:58 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2977,13 +2977,15 @@ C--------used for ENDF exclusive spectra
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
 C--------------DE
-               POPcse(ie,Nejc,icsp,Nnur) = POPcse(ie,Nejc,icsp,Nnur)
+               POPcse(ie,Nejc,icsp,INExc(Nnur)) = 
+     &            POPcse(ie,Nejc,icsp,INExc(Nnur))
      &            + CSEmsd(icsp,Nejc)
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
-               IF (ie.EQ.1) POPcse(ie,Nejc,icsp,Nnur)
-     &             = POPcse(ie,Nejc,icsp,Nnur) - 0.5*CSEmsd(icsp,Nejc)
+               IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
+     &             = POPcse(ie,Nejc,icsp,INExc(Nnur)) 
+     &             - 0.5*CSEmsd(icsp,Nejc)
 C--------------DDX using portions
-               POPcseaf(ie,Nejc,icsp,Nnur) = 1.0
+               POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
                POPbin(ie,Nnur) = CSEmsd(icsp,Nejc)
@@ -3116,7 +3118,7 @@ C--------Add MSD transitions to discrete levels to the population spectrum
 C--------used for the ENDF exclusive spectra
 C--------This is actually not needed since MSD contribution to discrete levels
 C--------is done through the CSDirlev and CSAlev
-C        POPcse(0,nejc,ie,Nnur) = POPcse(0,nejc,ie,Nnur) +
+C        POPcse(0,nejc,ie,INExc(Nnur)) = POPcse(0,nejc,ie,INExc(Nnur)) +
 C    &                            csmsdl*wght(il)/DE
 C--------Store ang. dist.
          DO na = 1, NDANG

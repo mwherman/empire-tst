@@ -298,17 +298,17 @@ C
                ENDIF
                spectot(nejc) = spectot(nejc) + sumtmp
                IF (ENDf(1).EQ.1) THEN
-                  POPcse(ipop,nejc,ispec,nnur)
-     &               = POPcse(ipop,nejc,ispec,nnur) + sumtmp
+                  POPcse(ipop,nejc,ispec,INExc(nnur))
+     &               = POPcse(ipop,nejc,ispec,INExc(nnur)) + sumtmp
 C-----------------Correct last bin (not needed for POP as for this it is
 C-----------------done at the end)
-                  IF (ipop.EQ.1) POPcse(ipop,nejc,ispec,nnur)
-     &                = POPcse(ipop,nejc,ispec,nnur) - 0.5*sumtmp
+                  IF (ipop.EQ.1) POPcse(ipop,nejc,ispec,INExc(nnur))
+     &                = POPcse(ipop,nejc,ispec,INExc(nnur)) - 0.5*sumtmp
 C-----------------Bin population by PE (spin/parity integrated)
                   POPbin(ipop,nnur) = sumtmp
 C-----------------DDX using portions
 C-----------------for the time being not needed since DEGAS is isotropic
-C                 POPcseaf(Ie,nejc,icsp,nnur) = 1.0
+C                 POPcseaf(Ie,nejc,icsp,INExc(nnur)) = 1.0
                ENDIF
             ENDDO
 C-----------Continuum exclusive spectra *** done ***
@@ -338,8 +338,8 @@ C--------------store population of discrete levels for recoils' calculations
 C-----------------add DEGAS discrete level contribution to the population
 C-----------------spectrum used for the ENDF exclusive spectra
  
-               IF (ENDf(1).EQ.1) POPcse(0,nejc,ie,nnur)
-     &             = POPcse(0,nejc,ie,nnur) + popdiscrete/DE
+               IF (ENDf(1).EQ.1) POPcse(0,nejc,ie,INExc(nnur))
+     &             = POPcse(0,nejc,ie,INExc(nnur)) + popdiscrete/DE
 C--------------Add isotropic DEGAS contribution to direct ang. distributions
                IF (nejc.NE.0) THEN
                                   !only for particle ejectiles

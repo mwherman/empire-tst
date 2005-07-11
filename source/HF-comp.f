@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-06 05:44:42 $
-Ccc   * $Id: HF-comp.f,v 1.78 2005-07-06 05:44:42 herman Exp $
+Ccc   * $Date: 2005-07-11 05:50:58 $
+Ccc   * $Id: HF-comp.f,v 1.79 2005-07-11 05:50:58 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -186,7 +186,7 @@ C
 C
 C
 C
-C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
+C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
@@ -201,8 +201,9 @@ C-----DE spectra (DDX are not done for fission although they could be)
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) CSEfis(ie,iejc)
-     &             = CSEfis(ie,iejc) + POPcse(Iec,iejc,ie,Nnuc)*xnor
+               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) CSEfis(ie,iejc)
+     &             = CSEfis(ie,iejc) + POPcse(Iec,iejc,ie,INExc(Nnuc))
+     &               *xnor
             ENDDO
          ENDDO
          RETURN   !if fission
@@ -219,7 +220,8 @@ C-----Contribution coming straight from the current decay
 C-----(ignore if residue is inclusive since summation already done in ACCUM) 
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       IF(ENDf(Nnur).EQ.1) THEN 
-         POPcse(Ief,Nejc,icsp,Nnur) = POPcse(Ief,Nejc,icsp,Nnur) + Popt
+         POPcse(Ief,Nejc,icsp,INExc(Nnur)) = 
+     &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt
       ELSE
          CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
       ENDIF
@@ -230,27 +232,28 @@ C-----DE spectra
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,Nnuc).NE.0) THEN
+               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
-     &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
+     &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ELSE
-                     POPcse(Ief,iejc,ie,Nnur) = POPcse(Ief,iejc,ie,Nnur)
-     &               + POPcse(Iec,iejc,ie,Nnuc)*xnor
+                     POPcse(Ief,iejc,ie,INExc(Nnur)) = 
+     &                 POPcse(Ief,iejc,ie,INExc(Nnur))
+     &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
                ENDIF
             ENDDO
 C-----------DDX spectra using portions
             DO iejc = 0, NDEJCD
-               IF (POPcseaf(Iec,iejc,ie,Nnuc).NE.0) THEN
+               IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                       POPcseaf(Ief,iejc,ie,0)
      &                = POPcseaf(Ief,iejc,ie,0)
-     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+     &                + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ELSE
-                      POPcseaf(Ief,iejc,ie,Nnur)
-     &                = POPcseaf(Ief,iejc,ie,Nnur)
-     &                + POPcseaf(Iec,iejc,ie,Nnuc)*xnor
+                      POPcseaf(Ief,iejc,ie,INExc(Nnur))
+     &                = POPcseaf(Ief,iejc,ie,INExc(Nnur))
+     &                + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
                ENDIF
             ENDDO
@@ -307,14 +310,15 @@ C
       DOUBLE PRECISION xnor
 C
 C
-C     POPcse(Ief,Nejc,icsp,Nnuc)  - spectrum for the population of the
+C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
       IF(ENDf(Nnur).EQ.1) THEN
-         POPcse(0,Nejc,Ie,Nnur) = POPcse(0,Nejc,Ie,Nnur) + Popt
+         POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur)) 
+     &       + Popt
       ELSE
          CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
       ENDIF
@@ -325,28 +329,28 @@ C-----DE spectra
             xnor = Popt*DE/POPbin(Iec,Nnuc)
             DO iesp = 1, NDECSE
                DO iejc = 0, NDEJC
-                  IF (POPcse(Iec,iejc,iesp,Nnuc).NE.0) THEN
+                  IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                     IF(ENDF(Nnur).EQ.2) THEN
                       CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
-     &                + POPcse(Iec,iejc,iesp,Nnuc)*xnor
+     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                     ELSE
-                      POPcse(0,iejc,iesp,Nnur)
-     &                = POPcse(0,iejc,iesp,Nnur)
-     &                + POPcse(Iec,iejc,iesp,Nnuc)*xnor
+                      POPcse(0,iejc,iesp,INExc(Nnur))
+     &                = POPcse(0,iejc,iesp,INExc(Nnur))
+     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                     ENDIF
                   ENDIF
                ENDDO
 C--------------DDX spectra using portions
                DO iejc = 0, NDEJCD
-                  IF(POPcseaf(Iec,iejc,iesp,Nnuc).NE.0) THEN
+                  IF(POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                      IF(ENDF(Nnur).EQ.2) THEN
                         POPcseaf(0,iejc,iesp,0)
      &                  = POPcseaf(0,iejc,iesp,0)
-     &                  + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+     &                  + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
                      ELSE
-                        POPcseaf(0,iejc,iesp,Nnur)
-     &                  = POPcseaf(0,iejc,iesp,Nnur)
-     &                  + POPcseaf(Iec,iejc,iesp,Nnuc)*xnor
+                        POPcseaf(0,iejc,iesp,INExc(Nnur))
+     &                  = POPcseaf(0,iejc,iesp,INExc(Nnur))
+     &                  + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
                      ENDIF
                   ENDIF
                ENDDO
@@ -636,8 +640,8 @@ C-----------Well... let it go down to the ground state
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
             IF (ENDf(Nnuc).EQ.1) THEN
-               POPcse(0,0,icse,Nnuc) = POPcse(0,0,icse
-     &          ,Nnuc) + gacs/DE
+               POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
+     &          ,INExc(Nnuc)) + gacs/DE
             ELSEIF(ENDf(Nnuc).EQ.2) THEN
                CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
             ENDIF
@@ -675,8 +679,8 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
                   IF (ENDf(Nnuc).EQ.1) THEN
-                     POPcse(0,0,icse,Nnuc)
-     &                = POPcse(0,0,icse,Nnuc) + gacs/DE
+                     POPcse(0,0,icse,INExc(Nnuc))
+     &                = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
                   ELSEIF(ENDf(Nnuc).EQ.2) THEN
                      CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
                   ENDIF

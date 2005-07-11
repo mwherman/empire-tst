@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-07 23:10:29 $
-Ccc   * $Id: main.f,v 1.119 2005-07-07 23:10:29 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-11 05:50:58 $
+Ccc   * $Id: main.f,v 1.120 2005-07-11 05:50:58 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1259,25 +1259,25 @@ C--------Integrating exclusive population spectra (ENDF)
          emeda = 0
          emedh = 0
          DO ispec = 1, NEX(1) + 10
-            gtotsp = gtotsp + POPcse(0,0,ispec,nnuc)*DE
-            xtotsp = xtotsp + POPcse(0,1,ispec,nnuc)*DE
-            ptotsp = ptotsp + POPcse(0,2,ispec,nnuc)*DE
-            atotsp = atotsp + POPcse(0,3,ispec,nnuc)*DE
-            emedg = emedg + POPcse(0,0,ispec,nnuc)*DE*(ispec - 1)*DE
-            emedn = emedn + POPcse(0,1,ispec,nnuc)*DE*(ispec - 1)*DE
-            emedp = emedp + POPcse(0,2,ispec,nnuc)*DE*(ispec - 1)*DE
-            emeda = emeda + POPcse(0,3,ispec,nnuc)*DE*(ispec - 1)*DE
+            gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
+            xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
+            ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
+            atotsp = atotsp + POPcse(0,3,ispec,INExc(nnuc))*DE
+            emedg = emedg+POPcse(0,0,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            emedn = emedn+POPcse(0,1,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            emedp = emedp+POPcse(0,2,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            emeda = emeda+POPcse(0,3,ispec,INExc(nnuc))*DE*(ispec-1)*DE
             IF (NDEJC.EQ.4) THEN
-               htotsp = htotsp + POPcse(0,NDEJC,ispec,nnuc)*DE
-               emedh = emedh + POPcse(0,NDEJC,ispec,nnuc)
+               htotsp = htotsp + POPcse(0,NDEJC,ispec,INExc(nnuc))*DE
+               emedh = emedh + POPcse(0,NDEJC,ispec,INExc(nnuc))
      &                    *DE*(ispec - 1)*DE
             ENDIF
          ENDDO
-         POPcs(0,nnuc) = gtotsp
-         POPcs(1,nnuc) = xtotsp
-         POPcs(2,nnuc) = ptotsp
-         POPcs(3,nnuc) = atotsp
-         IF (NDEJC.EQ.4) POPcs(NDEJC,nnuc) = htotsp
+         POPcs(0,INExc(nnuc)) = gtotsp
+         POPcs(1,INExc(nnuc)) = xtotsp
+         POPcs(2,INExc(nnuc)) = ptotsp
+         POPcs(3,INExc(nnuc)) = atotsp
+         IF (NDEJC.EQ.4) POPcs(NDEJC,INExc(nnuc)) = htotsp
          IF (gtotsp.NE.0) emedg = emedg/gtotsp
          IF (xtotsp.NE.0) emedn = emedn/xtotsp
          IF (ptotsp.NE.0) emedp = emedp/ptotsp
@@ -1320,17 +1320,17 @@ C--------------(merely for checking purpose)
                DO ispec = 1, NEX(1) + 10
                  IF (NDEJC.EQ.4) THEN
                      WRITE (6,'(6g15.5)') (ispec - 1)*DE,
-     &                      POPcse(0,0,ispec,nnuc),
-     &                      POPcse(0,1,ispec,nnuc),
-     &                      POPcse(0,2,ispec,nnuc),
-     &                      POPcse(0,3,ispec,nnuc),
-     &                      POPcse(0,NDEJC,ispec,nnuc)
+     &                      POPcse(0,0,ispec,INExc(nnuc)),
+     &                      POPcse(0,1,ispec,INExc(nnuc)),
+     &                      POPcse(0,2,ispec,INExc(nnuc)),
+     &                      POPcse(0,3,ispec,INExc(nnuc)),
+     &                      POPcse(0,NDEJC,ispec,INExc(nnuc))
                  ELSE
                      WRITE (6,'(5g15.5)') (ispec - 1)*DE,
-     &                      POPcse(0,0,ispec,nnuc),
-     &                      POPcse(0,1,ispec,nnuc),
-     &                      POPcse(0,2,ispec,nnuc),
-     &                      POPcse(0,3,ispec,nnuc)
+     &                      POPcse(0,0,ispec,INExc(nnuc)),
+     &                      POPcse(0,1,ispec,INExc(nnuc)),
+     &                      POPcse(0,2,ispec,INExc(nnuc)),
+     &                      POPcse(0,3,ispec,INExc(nnuc))
                  ENDIF
                ENDDO
                WRITE (6,*) '-----------------------------------------'
@@ -1350,10 +1350,10 @@ C--------------(merely for checking purpose)
      &                                9x,''proton '',7x,'' alpha'')')
                DO ispec = 1, NEX(1) + 10
                   WRITE (6,'(5g15.5)') (ispec - 1)*DE,
-     &                                 POPcseaf(0,0,ispec,nnuc),
-     &                                 POPcseaf(0,1,ispec,nnuc),
-     &                                 POPcseaf(0,2,ispec,nnuc),
-     &                                 POPcseaf(0,3,ispec,nnuc)
+     &                                 POPcseaf(0,0,ispec,INExc(nnuc)),
+     &                                 POPcseaf(0,1,ispec,INExc(nnuc)),
+     &                                 POPcseaf(0,2,ispec,INExc(nnuc)),
+     &                                 POPcseaf(0,3,ispec,INExc(nnuc))
                ENDDO
                WRITE (6,*) ' '
          ENDIF
@@ -1519,7 +1519,7 @@ C----
          IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
-                  IF (POPcs(nejc,nnuc).EQ.0) CYCLE
+                  IF (POPcs(nejc,INExc(nnuc)).EQ.0) CYCLE
                   nspec = INT(EMAx(nnuc)/DE) + 2
                   IF (nejc.EQ.0) THEN
                      cejectile = 'gammas   '
@@ -1538,7 +1538,7 @@ C----
                      iizaejc = IZAejc(nejc)
                   ENDIF
 C-----------------double the first bin x-sec to preserve integral in EMPEND
-C                 POPcse(0, nejc, 1, nnuc) =  POPcse(0, nejc, 1, nnuc)*2
+C                 POPcse(0, nejc, 1, INExc(nnuc)) =  POPcse(0, nejc, 1, INExc(nnuc))*2
                   WRITE (12,*) ' '
                   WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
@@ -1579,10 +1579,10 @@ C-----------------------(continuum part)
                                  IF (ie.EQ.NEXr(nejc,1))
      &                               piece = 0.5*piece
                                  cseaprnt(ie,nang)
-     &                              = ((POPcse(0,nejc,ie,nnuc)
-     &                              - piece*POPcseaf(0,nejc,ie,nnuc))
+     &                              = ((POPcse(0,nejc,ie,INExc(nnuc))
+     &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
      &                              /4.0/PI + CSEa(ie,nang,nejc,1)
-     &                              *POPcseaf(0,nejc,ie,nnuc))
+     &                              *POPcseaf(0,nejc,ie,INExc(nnuc)))
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1617,10 +1617,10 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
                               piece = CSEmsd(ie,nejc)
                               IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
                               cseaprnt(ie,nang)
-     &                           = ((POPcse(0,nejc,ie,nnuc)
-     &                           - piece*POPcseaf(0,nejc,ie,nnuc))
-     &                           /4.0/PI + CSEa(ie,nang,nejc,1)
-     &                           *POPcseaf(0,nejc,ie,nnuc))
+     &                           = ((POPcse(0,nejc,ie,INExc(nnuc))
+     &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
+     &                           /4.0/PI + CSEa(ie,nang,nejc,INExc(1))
+     &                           *POPcseaf(0,nejc,ie,INExc(nnuc)))
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1647,7 +1647,8 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
 C--------------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
 C
 C--------------------double the first bin x-sec to preserve integral in EMPEND
-                     POPcse(0,nejc,1,nnuc) = POPcse(0,nejc,1,nnuc)*2
+                     POPcse(0,nejc,1,INExc(nnuc)) = 
+     &                  POPcse(0,nejc,1,INExc(nnuc))*2
                      WRITE (12,*) ' '
                      WRITE (12,'('' Energy    mb/MeV'')')
                      WRITE (12,*) ' '
@@ -1664,23 +1665,23 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
-     &                            *DE/recorp, POPcse(0,nejc,ie,nnuc)
-     &                            *recorp
+     &                            *DE/recorp, 
+     &                            POPcse(0,nejc,ie,INExc(nnuc))*recorp
                         ENDDO
                                           ! MT=849 exact endpoint
                         WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                            POPcse(0,nejc,nspec,nnuc)*recorp
+     &                           POPcse(0,nejc,nspec,INExc(nnuc))*recorp
                         WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                            0.d0
                      ELSE  !all other emissions (continuum and levels together)
                         DO ie = 1, nspec - 1
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
-     &                            *DE/recorp, POPcse(0,nejc,ie,nnuc)
-     &                            *recorp
+     &                         *DE/recorp, POPcse(0,nejc,ie,INExc(nnuc))
+     &                         *recorp
                         ENDDO
                                                  ! exact endpoint
                         WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                            POPcse(0,nejc,nspec,nnuc)*recorp
+     &                           POPcse(0,nejc,nspec,INExc(nnuc))*recorp
                         WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                            0.d0
                      ENDIF
@@ -1950,10 +1951,10 @@ C-----end of ENDF spectra (inclusive)
             controlp = 0
             controla = 0
             DO nnuc = 1, NNUcd
-               controlg = controlg + POPcseaf(0,0,ispec,nnuc)
-               controln = controln + POPcseaf(0,1,ispec,nnuc)
-               controlp = controlp + POPcseaf(0,2,ispec,nnuc)
-               controla = controla + POPcseaf(0,3,ispec,nnuc)
+               controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
+               controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
+               controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
+               controla = controla + POPcseaf(0,3,ispec,INExc(nnuc))
             ENDDO
             WRITE (6,'(5g15.5)') (ispec - 1)*DE, controlg,
      &                       controln, controlp, controla

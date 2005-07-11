@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-17 19:48:56 $
-Ccc   * $Id: MSC-NVWY.f,v 1.12 2005-03-17 19:48:56 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-11 05:50:58 $
+Ccc   * $Id: MSC-NVWY.f,v 1.13 2005-07-11 05:50:58 herman Exp $
 C
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
@@ -974,8 +974,9 @@ C--------------neutron emission (if accepted, note IF on IDNA)
      &                              + popt
                                  AUSpec(icse,nejc) = AUSpec(icse,nejc)
      &                              + popt
-                                 POPcse(ke,nejc,icse,nnur)
-     &                              = POPcse(ke,nejc,icse,nnur) + popt
+                                 POPcse(ke,nejc,icse,INExc(nnur))
+     &                              = POPcse(ke,nejc,icse,INExc(nnur))
+     &                              + popt
 
                               ENDIF
                               POP(ke,jr,1,nnur) = POP(ke,jr,1,nnur)
@@ -1012,8 +1013,9 @@ C--------------proton emission (if accepted, note IF on IDNA)
      &                              + popt
                                  AUSpec(icse,nejc) = AUSpec(icse,nejc)
      &                              + popt
-                                 POPcse(ke,nejc,icse,nnur)
-     &                              = POPcse(ke,nejc,icse,nnur) + popt
+                                 POPcse(ke,nejc,icse,INExc(nnur))
+     &                              = POPcse(ke,nejc,icse,INExc(nnur)) 
+     &                              + popt
                               ENDIF
                               POP(ke,jr,1,nnur) = POP(ke,jr,1,nnur)
      &                           + pop1
@@ -1501,8 +1503,9 @@ C--------------------------------state density for gamma emission
                                     IF (ks.GT.1) THEN
                                        CSE(ks,0,1) = CSE(ks,0,1) + sp
                                        AUSpec(ks,0) = AUSpec(ks,0) + sp
-                                       POPcse(kcn,0,ks,1)
-     &                                    = POPcse(kcn,0,ks,1) + sp
+                                       POPcse(kcn,0,ks,INExc(1))
+     &                                    = POPcse(kcn,0,ks,INExc(1)) 
+     &                                    + sp
                                     ENDIF
                                     gspmsc(kg,ks) = gspmsc(kg,ks) + sp
                                     IF (j.GT.1) POP(kcn,j - 1,ie1,1)
@@ -1514,8 +1517,9 @@ C--------------------------------state density for gamma emission
                                     IF (ks.GT.1) THEN
                                        CSE(ks,0,1) = CSE(ks,0,1) + sp
                                        AUSpec(ks,0) = AUSpec(ks,0) + sp
-                                       POPcse(kcn,0,ks,1)
-     &                                    = POPcse(kcn,0,ks,1) + sp
+                                       POPcse(kcn,0,ks,INExc(1))
+     &                                    = POPcse(kcn,0,ks,INExc(1)) 
+     &                                    + sp
                                     ENDIF
                                     gspmsc(kg,ks) = gspmsc(kg,ks) + sp
                                     POP(kcn,j,ie1,1) = POP(kcn,j,ie1,1)
@@ -1527,8 +1531,9 @@ C--------------------------------state density for gamma emission
                                     IF (ks.GT.1) THEN
                                        CSE(ks,0,1) = CSE(ks,0,1) + sp
                                        AUSpec(ks,0) = AUSpec(ks,0) + sp
-                                       POPcse(kcn,0,ks,1)
-     &                                    = POPcse(kcn,0,ks,1) + sp
+                                       POPcse(kcn,0,ks,INExc(1))
+     &                                    = POPcse(kcn,0,ks,INExc(1)) 
+     &                                    + sp
                                     ENDIF
                                     gspmsc(kg,ks) = gspmsc(kg,ks) + sp
                                     POP(kcn,j + 1,ie1,1)

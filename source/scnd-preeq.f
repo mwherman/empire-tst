@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-06 06:39:24 $
-Ccc   * $Id: scnd-preeq.f,v 1.16 2005-06-06 06:39:24 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-11 05:50:58 $
+Ccc   * $Id: scnd-preeq.f,v 1.17 2005-07-11 05:50:58 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -206,8 +206,8 @@ C-----------reduce 1-st residue population DDX spectra (using portions)
 C-----------on the last entry
                DO ie = 1, NDECSE
                   DO iejc = 1, NDEJCD
-                     POPcseaf(iec,iejc,ie,Nnuc)
-     &                  = POPcseaf(iec,iejc,ie,Nnuc)
+                     POPcseaf(iec,iejc,ie,INExc(Nnuc))
+     &                  = POPcseaf(iec,iejc,ie,INExc(Nnuc))
      &                  *(1 - sumpopsub/POPbin(iec,Nnuc))
                   ENDDO
                ENDDO
