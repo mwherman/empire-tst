@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-11 16:05:36 $
-Ccc   * $Id: input.f,v 1.157 2005-07-11 16:05:36 Capote Exp $
+Ccc   * $Date: 2005-07-12 13:37:20 $
+Ccc   * $Id: input.f,v 1.158 2005-07-12 13:37:20 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -745,6 +745,7 @@ C              residual nuclei must be heavier than alpha
                   SYMb(nnur) = SMAT(iz)
                   HIS(nnur) = -1.
                   IF (A(nnur)*0.5.NE.AINT(A(nnur)*0.5)) HIS(nnur) = -0.5
+                  ENDf(nnur) = 2 ! RCN, July 2005
                   NNUct = NNUct + 1
                ENDIF
             ENDDO
