@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-22 20:15:22 $
-Ccc   * $Id: tl.f,v 1.65 2005-06-22 20:15:22 Capote Exp $
+Ccc   * $Date: 2005-07-14 11:07:57 $
+Ccc   * $Id: tl.f,v 1.66 2005-07-14 11:07:57 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1280,7 +1280,7 @@ C
 C
 C Local variables
 C
-      CHARACTER*6 ctldir
+      CHARACTER*3 ctldir
       CHARACTER*20 ctmp20
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp
@@ -1291,7 +1291,7 @@ C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
 C     --------------------------------------------------------------------
-      DATA ctldir/'../TL/'/
+      DATA ctldir/'TL/'/
 
 C-----data initialization
       CALL INIT(Nejc,Nnuc)

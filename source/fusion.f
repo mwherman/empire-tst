@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-16 16:16:54 $
-Ccc   * $Id: fusion.f,v 1.48 2005-06-16 16:16:54 Capote Exp $
+Ccc   * $Date: 2005-07-14 11:07:57 $
+Ccc   * $Id: fusion.f,v 1.49 2005-07-14 11:07:57 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -40,7 +40,7 @@ C
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
      &                 stmp1, stmp2, sum, wparg, xmas_npro,
      &                 xmas_ntrg, wf
-      CHARACTER*6 ctldir
+      CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*20 ctmp20
       DOUBLE PRECISION DMAX1
@@ -54,7 +54,7 @@ C
       DOUBLE PRECISION PAR
       INTEGER*4 PIPE
       CHARACTER*120 rstring
-      DATA ctldir/'../TL/'/
+      DATA ctldir/'TL/'/
       PAR(i,ipa,l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
 C
 C-----Zero qd fraction of photabsorption before it can do any damage
@@ -527,7 +527,7 @@ C--------channel spin min and max
          SINl = 0.d0
       ENDIF ! END of FUSREAD block
 C
-C-----Moving incident channel results to ../TL directory
+C-----Moving incident channel results to TL/ directory
 C
       IF (KTRlom(Npro,Ntrg).GT.0) THEN
       IF (IOPsys.EQ.0) THEN
@@ -544,15 +544,15 @@ C--------LINUX
          iwin = PIPE(ctmp)
       ELSE
 C--------WINDOWS
-         ctmp = 'move INCIDENT.CS ..\\TL\\'//ctmp20//'.CS >NUL'
+         ctmp = 'move INCIDENT.CS '//ctldir//ctmp20//'.CS >NUL'
          iwin = PIPE(ctmp)
          IF (DIRect.GT.0) THEN
-            ctmp = 'move INCIDENT.ICS ..\\TL\\'//ctmp20//'.ICS >NUL'
+            ctmp = 'move INCIDENT.ICS '//ctldir//ctmp20//'.ICS >NUL'
             iwin = PIPE(ctmp)
          ENDIF
-         ctmp = 'move INCIDENT.ANG ..\\TL\\'//ctmp20//'.ANG >NUL'
+         ctmp = 'move INCIDENT.ANG '//ctldir//ctmp20//'.ANG >NUL'
          iwin = PIPE(ctmp)
-         ctmp = 'move INCIDENT.TLJ ..\\TL\\'//ctmp20//'.TLJ >NUL'
+         ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp20//'.TLJ >NUL'
          iwin = PIPE(ctmp)
       ENDIF
       ENDIF

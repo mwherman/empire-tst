@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-12 13:37:20 $
-Ccc   * $Id: main.f,v 1.122 2005-07-12 13:37:20 Capote Exp $
+Ccc   * $Date: 2005-07-14 11:07:57 $
+Ccc   * $Id: main.f,v 1.123 2005-07-14 11:07:57 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -53,7 +53,8 @@ C
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
      &                 checkXS
       CHARACTER*9 cejectile
-      CHARACTER*6 ctldir, keyname
+      CHARACTER*3 ctldir
+      CHARACTER*6 keyname
       CHARACTER*20 ctmp20
       CHARACTER*36 nextenergy
        CHARACTER*1 opart(3)
@@ -70,7 +71,7 @@ C
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
-      DATA ctldir/'../TL/'/,epre/0.0/
+      DATA ctldir/'TL/'/,epre/0.0/
        DATA opart/1hn,1hp,1ha/
       icalled = 0
       CALL THORA(6)
