@@ -66,12 +66,12 @@ if [ -s $file-omp.dir ]; then
 fi
 if [ -d $file-tl ]; then
    cd ../
-   ln -sf $work/$file-tl TL
+   ln -sf $work/$file-tl $work/TL
    cd $work
    echo 'Using transmission coefficients stored in:'  $file-tl
 else
-   rm -r TL/ 2>/dev/null
-   mkdir TL
+   rm -r $work/TL/ 2>/dev/null
+   mkdir $work/TL
 fi
 if [ -s $file-lev.col ]; then
    cp $file-lev.col TARGET_COLL.DAT
