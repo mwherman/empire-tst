@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-01 14:30:41 $
-Ccc   * $Id: lev-dens.f,v 1.44 2005-07-01 14:30:41 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-14 07:14:52 $
+Ccc   * $Id: lev-dens.f,v 1.45 2005-07-14 07:14:52 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -779,7 +779,7 @@ C--------cumulative plot of levels along with the l.d. formula
          WRITE (35,*) 'set ylabel "Number of levels" 0,0'
          WRITE (35,*)
      &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
-C        CLOSE (35)
+         CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
          WRITE (36,*) '0.0 1.0'
