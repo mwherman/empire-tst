@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-09 10:50:20 $
-Ccc   * $Id: auxiliary.f,v 1.18 2005-07-09 10:50:20 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-15 18:23:47 $
+Ccc   * $Id: auxiliary.f,v 1.19 2005-07-15 18:23:47 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -871,7 +871,7 @@ C
 C
 C
       Iloc = 0
-      DO Nejc = 1, NDEJC
+      DO Nejc = 0, NDEJC
          IF (IZAejc(Nejc).EQ.Izaf) RETURN
       ENDDO
       Iloc = 1
