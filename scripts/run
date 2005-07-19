@@ -2,6 +2,7 @@
 #SCRIPT TO RUN FULL EMPIRE PACKAGE
 
 file=$1
+mat=$2
 work=`pwd`
 
 # RUN X-SEC CALCULATIONS & EXFOR PROCESSING
@@ -10,7 +11,7 @@ work=`pwd`
 
 # RUN EMPEND, & ENDRES (ENDF FORMATING) 
 
-../scripts/format $file  
+../scripts/format $file $mat 
 
 # RUN ENDF-6 CHECKING CODES
 
@@ -19,7 +20,7 @@ work=`pwd`
 # RUN PREPROCESSING CODES IN PREPRATION FOR PLOTTING 
 # PLOTC4 IS RUN IF THE LAST PRAMETER BELOW IS SET TO 2
 
-../scripts/process $file $2
+../scripts/process $file $mat
  
 # RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
 

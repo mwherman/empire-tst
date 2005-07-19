@@ -15,6 +15,14 @@ fi
 #run EMPEND to format EMPIRE output into ENDF
 
 cp $file.out OUTPUT.DAT
+rm -f EMPEND.INP
+cat >../util/empend/EMPEND.INP <<EOF
+OUTPUT.DAT
+OUTPUT.ENDF
+1 
+0.1
+$2
+EOF
 ../util/empend/empend <../util/empend/EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
 mv empend.log $file-log.empend
 rm OUTPUT.DAT
@@ -26,7 +34,38 @@ rm $file-f.endf 2>/dev/null
 cd ../util/fixup/
 rm OUTPUT.ENDF 2>/dev/null
 ln -sf $work/$file-e.endf OUTPUT.ENDF
-cp FIXUP1.INP FIXUP.INP
+rm -f FIXUP.INP
+cat >FIXUP.INP <<EOF
+12101011111001                                                              
+OUTPUT.ENDF                                                                        
+FIXUP.ENDF  
+S  4=+( 50, 91)
+S103=+(600,649)
+S104=+(650,699)
+S105=+(700,749)
+S106=+(750,799)
+S107=+(800,849)
+S101=+(102,117)
+S 27=+( 18, 18)+(101,101)
+S  3=+(  4,  5)+( 11, 17)+( 22, 37)+( 41, 45)
+S  2=+(  1,  1)-(  4,  4)-( 11, 25)-( 28, 45)-(102,117)
+
+ 0.00000+ 0 0.00000+00          0          0${2}  4
+
+ 0.00000+ 0 0.00000+00          0          0${2}103
+
+ 0.00000+ 0 0.00000+00          0          0${2}107
+
+
+
+
+
+
+
+                                                                      
+                                                                      
+EOF
+#cp FIXUP1.INP FIXUP.INP
 ./fixup
 rm OUTPUT.ENDF
 mv FIXUP.ENDF $work/$file-f.endf

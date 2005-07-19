@@ -528,6 +528,1622 @@ proc ::Window {args} {
     }
 }
 #############################################################################
+## Library Procedure:  ::combobox2::Build
+
+namespace eval ::combobox2 {
+proc Build {w args} {
+    variable widgetOptions
+
+    if {[winfo exists $w]} {
+	error "window name \"$w\" already exists"
+    }
+
+    # create the namespace for this instance, and define a few
+    # variables
+    namespace eval ::combobox2::$w {
+
+	variable ignoreTrace 0
+	variable oldFocus    {}
+	variable oldGrab     {}
+	variable oldValue    {}
+	variable options
+	variable this
+	variable widgets
+
+	set widgets(foo) foo  ;# coerce into an array
+	set options(foo) foo  ;# coerce into an array
+
+	unset widgets(foo)
+	unset options(foo)
+    }
+
+    # import the widgets and options arrays into this proc so
+    # we don't have to use fully qualified names, which is a
+    # pain.
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    # this is our widget -- a frame of class Combobox2. Naturally,
+    # it will contain other widgets. We create it here because
+    # we need it to be able to set our default options.
+    set widgets(this)   [frame  $w -class Combobox2 -takefocus 0]
+    set widgets(entry)  [entry  $w.entry -takefocus 1 -width 8]
+    set widgets(button) [label  $w.button -takefocus 0] 
+
+    # this defines all of the default options. We get the
+    # values from the option database. Note that if an array
+    # value is a list of length one it is an alias to another
+    # option, so we just ignore it
+    foreach name [array names widgetOptions] {
+	if {[llength $widgetOptions($name)] == 1} continue
+	set optName  [lindex $widgetOptions($name) 0]
+	set optClass [lindex $widgetOptions($name) 1]
+	set value [option get $w $optName $optClass]
+	set options($name) $value
+    }
+
+    # if -value is set to null, we'll remove it from our
+    # local array. The assumption is, if the user sets it from
+    # the option database, they will set it to something other
+    # than null (since it's impossible to determine the difference
+    # between a null value and no value at all).
+    if {[info exists options(-value)]  && [string length $options(-value)] == 0} {
+	unset options(-value)
+    }
+
+    # we will later rename the frame's widget proc to be our
+    # own custom widget proc. We need to keep track of this
+    # new name, so we'll define and store it here...
+    set widgets(frame) ::combobox2::${w}::$w
+
+    # gotta do this sooner or later. Might as well do it now
+    pack $widgets(entry)  -side left  -fill both -expand yes
+    pack $widgets(button) -side right -fill y    -expand no
+
+    # I should probably do this in a catch, but for now it's
+    # good enough... What it does, obviously, is put all of
+    # the option/values pairs into an array. Make them easier
+    # to handle later on...
+    array set options $args
+
+    # now, the dropdown list... the same renaming nonsense
+    # must go on here as well...
+    set widgets(popup)   [toplevel  $w.top]
+    set widgets(listbox) [listbox   $w.top.list]
+    set widgets(vsb)     [scrollbar $w.top.vsb]
+
+    pack $widgets(listbox) -side left -fill both -expand y
+
+    # fine tune the widgets based on the options (and a few
+    # arbitrary values...)
+
+    # NB: we are going to use the frame to handle the relief
+    # of the widget as a whole, so the entry widget will be 
+    # flat. This makes the button which drops down the list
+    # to appear "inside" the entry widget.
+
+    $widgets(vsb) configure  -command "$widgets(listbox) yview"  -highlightthickness 0
+
+    $widgets(button) configure  -highlightthickness 0  -borderwidth 1  -relief raised  -width [expr {[winfo reqwidth $widgets(vsb)] - 2}]
+
+    $widgets(entry) configure  -borderwidth 0  -relief flat  -highlightthickness 0 
+
+    $widgets(popup) configure  -borderwidth 1  -relief sunken
+
+    $widgets(listbox) configure  -selectmode browse  -background [$widgets(entry) cget -bg]  -yscrollcommand "$widgets(vsb) set"  -exportselection false  -borderwidth 0
+
+
+#    trace variable ::combobox2::${w}::entryTextVariable w  #	    [list ::combobox2::EntryTrace $w]
+	
+    # do some window management foo on the dropdown window
+    wm overrideredirect $widgets(popup) 1
+    wm transient        $widgets(popup) [winfo toplevel $w]
+    wm group            $widgets(popup) [winfo parent $w]
+    wm resizable        $widgets(popup) 0 0
+    wm withdraw         $widgets(popup)
+    
+    # this moves the original frame widget proc into our
+    # namespace and gives it a handy name
+    rename ::$w $widgets(frame)
+
+    # now, create our widget proc. Obviously (?) it goes in
+    # the global namespace. All combobox2 widgets will actually
+    # share the same widget proc to cut down on the amount of
+    # bloat. 
+    proc ::$w {command args}  "eval ::combobox2::WidgetProc $w \$command \$args"
+
+
+    # ok, the thing exists... let's do a bit more configuration. 
+    if {[catch "::combobox2::Configure $widgets(this) [array get options]" error]} {
+	catch {destroy $w}
+	error $error
+    }
+
+    return ""
+
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::CallCommand
+
+namespace eval ::combobox2 {
+proc CallCommand {w newValue} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+    
+    # call the associated command, if defined and -commandstate is
+    # set to "normal"
+    if {$options(-commandstate) == "normal" &&  [string length $options(-command)] > 0} {
+	set args [list $widgets(this) $newValue]
+	uplevel \#0 $options(-command) $args
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::Canonize
+
+namespace eval ::combobox2 {
+proc Canonize {w object opt} {
+    variable widgetOptions
+    variable columnOptions
+    variable widgetCommands
+    variable listCommands
+    variable scanCommands
+
+    switch $object {
+	command {
+	    if {[lsearch -exact $widgetCommands $opt] >= 0} {
+		return $opt
+	    }
+
+	    # command names aren't stored in an array, and there
+	    # isn't a way to get all the matches in a list, so
+	    # we'll stuff the commands in a temporary array so
+	    # we can use [array names]
+	    set list $widgetCommands
+	    foreach element $list {
+		set tmp($element) ""
+	    }
+	    set matches [array names tmp ${opt}*]
+	}
+
+	{list command} {
+	    if {[lsearch -exact $listCommands $opt] >= 0} {
+		return $opt
+	    }
+
+	    # command names aren't stored in an array, and there
+	    # isn't a way to get all the matches in a list, so
+	    # we'll stuff the commands in a temporary array so
+	    # we can use [array names]
+	    set list $listCommands
+	    foreach element $list {
+		set tmp($element) ""
+	    }
+	    set matches [array names tmp ${opt}*]
+	}
+
+	{scan command} {
+	    if {[lsearch -exact $scanCommands $opt] >= 0} {
+		return $opt
+	    }
+
+	    # command names aren't stored in an array, and there
+	    # isn't a way to get all the matches in a list, so
+	    # we'll stuff the commands in a temporary array so
+	    # we can use [array names]
+	    set list $scanCommands
+	    foreach element $list {
+		set tmp($element) ""
+	    }
+	    set matches [array names tmp ${opt}*]
+	}
+
+	option {
+	    if {[info exists widgetOptions($opt)]  && [llength $widgetOptions($opt)] == 2} {
+		return $opt
+	    }
+	    set list [array names widgetOptions]
+	    set matches [array names widgetOptions ${opt}*]
+	}
+
+    }
+
+    if {[llength $matches] == 0} {
+	set choices [HumanizeList $list]
+	error "unknown $object \"$opt\"; must be one of $choices"
+
+    } elseif {[llength $matches] == 1} {
+	set opt [lindex $matches 0]
+
+	# deal with option aliases
+	switch $object {
+	    option {
+		set opt [lindex $matches 0]
+		if {[llength $widgetOptions($opt)] == 1} {
+		    set opt $widgetOptions($opt)
+		}
+	    }
+	}
+
+	return $opt
+
+    } else {
+	set choices [HumanizeList $list]
+	error "ambiguous $object \"$opt\"; must be one of $choices"
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::ComputeGeometry
+
+namespace eval ::combobox2 {
+proc ComputeGeometry {w} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    if {$options(-height) == 0 && $options(-maxheight) != "0"} {
+	# if this is the case, count the items and see if
+	# it exceeds our maxheight. If so, set the listbox
+	# size to maxheight...
+	set nitems [$widgets(listbox) size]
+	if {$nitems > $options(-maxheight)} {
+	    # tweak the height of the listbox
+	    $widgets(listbox) configure -height $options(-maxheight)
+	} else {
+	    # un-tweak the height of the listbox
+	    $widgets(listbox) configure -height 0
+	}
+	update idletasks
+    }
+
+    # compute height and width of the dropdown list
+    set bd [$widgets(popup) cget -borderwidth]
+    set height [expr {[winfo reqheight $widgets(popup)] + $bd + $bd}]
+    set width [winfo width $widgets(this)]
+
+    # figure out where to place it on the screen, trying to take into
+    # account we may be running under some virtual window manager
+    set screenWidth  [winfo screenwidth $widgets(this)]
+    set screenHeight [winfo screenheight $widgets(this)]
+    set rootx        [winfo rootx $widgets(this)]
+    set rooty        [winfo rooty $widgets(this)]
+    set vrootx       [winfo vrootx $widgets(this)]
+    set vrooty       [winfo vrooty $widgets(this)]
+
+    # the x coordinate is simply the rootx of our widget, adjusted for
+    # the virtual window. We won't worry about whether the window will
+    # be offscreen to the left or right -- we want the illusion that it
+    # is part of the entry widget, so if part of the entry widget is off-
+    # screen, so will the list. If you want to change the behavior,
+    # simply change the if statement... (and be sure to update this
+    # comment!)
+    set x  [expr {$rootx + $vrootx}]
+    if {0} { 
+	set rightEdge [expr {$x + $width}]
+	if {$rightEdge > $screenWidth} {
+	    set x [expr {$screenWidth - $width}]
+	}
+	if {$x < 0} {set x 0}
+    }
+
+    # the y coordinate is the rooty plus vrooty offset plus
+    # the height of the static part of the widget plus 1 for a 
+    # tiny bit of visual separation...
+    set y [expr {$rooty + $vrooty + [winfo reqheight $widgets(this)] + 1}]
+    set bottomEdge [expr {$y + $height}]
+
+    if {$bottomEdge >= $screenHeight} {
+	# ok. Fine. Pop it up above the entry widget isntead of
+	# below.
+	set y [expr {($rooty - $height - 1) + $vrooty}]
+
+	if {$y < 0} {
+	    # this means it extends beyond our screen. How annoying.
+	    # Now we'll try to be real clever and either pop it up or
+	    # down, depending on which way gives us the biggest list. 
+	    # then, we'll trim the list to fit and force the use of
+	    # a scrollbar
+
+	    # (sadly, for windows users this measurement doesn't
+	    # take into consideration the height of the taskbar,
+	    # but don't blame me -- there isn't any way to detect
+	    # it or figure out its dimensions. The same probably
+	    # applies to any window manager with some magic windows
+	    # glued to the top or bottom of the screen)
+
+	    if {$rooty > [expr {$screenHeight / 2}]} {
+		# we are in the lower half of the screen -- 
+		# pop it up. Y is zero; that parts easy. The height
+		# is simply the y coordinate of our widget, minus
+		# a pixel for some visual separation. The y coordinate
+		# will be the topof the screen.
+		set y 1
+		set height [expr {$rooty - 1 - $y}]
+
+	    } else {
+		# we are in the upper half of the screen --
+		# pop it down
+		set y [expr {$rooty + $vrooty +  [winfo reqheight $widgets(this)] + 1}]
+		set height [expr {$screenHeight - $y}]
+
+	    }
+
+	    # force a scrollbar
+	    HandleScrollbar $widgets(this) crop
+	}
+    }
+
+    if {$y < 0} {
+	# hmmm. Bummer.
+	set y 0
+	set height $screenheight
+    }
+
+    set geometry [format "=%dx%d+%d+%d" $width $height $x $y]
+
+    return $geometry
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::Configure
+
+namespace eval ::combobox2 {
+proc Configure {w args} {
+    variable widgetOptions
+    variable defaultEntryCursor
+
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    if {[llength $args] == 0} {
+	# hmmm. User must be wanting all configuration information
+	# note that if the value of an array element is of length
+	# one it is an alias, which needs to be handled slightly
+	# differently
+	set results {}
+	foreach opt [lsort [array names widgetOptions]] {
+	    if {[llength $widgetOptions($opt)] == 1} {
+		set alias $widgetOptions($opt)
+		set optName $widgetOptions($alias)
+		lappend results [list $opt $optName]
+	    } else {
+	    	# modif by Christian Gavin 08/02/2000
+	    	# if an option has been removed from the list
+	    	# (e.g. -value), don't try to access it
+	    	if [info exists options($opt)] {
+		    set optName  [lindex $widgetOptions($opt) 0]
+		    set optClass [lindex $widgetOptions($opt) 1]
+		    set default [option get $w $optName $optClass]
+		    lappend results [list $opt $optName $optClass  $default $options($opt)]
+		}
+	    }
+	}
+
+	return $results
+    }
+    
+    # one argument means we are looking for configuration
+    # information on a single option
+    if {[llength $args] == 1} {
+	set opt [::combobox2::Canonize $w option [lindex $args 0]]
+
+	set optName  [lindex $widgetOptions($opt) 0]
+	set optClass [lindex $widgetOptions($opt) 1]
+	set default [option get $w $optName $optClass]
+	set results [list $opt $optName $optClass  $default $options($opt)]
+	return $results
+    }
+
+    # if we have an odd number of values, bail. 
+    if {[expr {[llength $args]%2}] == 1} {
+	# hmmm. An odd number of elements in args
+	error "value for \"[lindex $args end]\" missing"
+    }
+    
+    # Great. An even number of options. Let's make sure they 
+    # are all valid before we do anything. Note that Canonize
+    # will generate an error if it finds a bogus option; otherwise
+    # it returns the canonical option name
+    foreach {name value} $args {
+	set name [::combobox2::Canonize $w option $name]
+	set opts($name) $value
+    }
+
+    # process all of the configuration options
+    # some (actually, most) options require us to
+    # do something, like change the attributes of
+    # a widget or two. Here's where we do that...
+    foreach option [array names opts] {
+	set newValue $opts($option)
+	if {[info exists options($option)]} {
+	    set oldValue $options($option)
+	}
+
+	switch -- $option {
+	    -background {
+		$widgets(frame)   configure -background $newValue
+		$widgets(entry)   configure -background $newValue
+		$widgets(listbox) configure -background $newValue
+		# let's keep the scrollbar good-looking
+		# $widgets(vsb)     configure -background $newValue
+		# $widgets(vsb)     configure -troughcolor $newValue
+		set options($option) $newValue
+	    }
+
+	    -borderwidth {
+		$widgets(frame) configure -borderwidth $newValue
+		set options($option) $newValue
+	    }
+
+	    -command {
+		# nothing else to do...
+		set options($option) $newValue
+	    }
+
+	    -commandstate {
+		# do some value checking...
+		if {$newValue != "normal" && $newValue != "disabled"} {
+		    set options($option) $oldValue
+		    set message "bad state value \"$newValue\";"
+		    append message " must be normal or disabled"
+		    error $message
+		}
+		set options($option) $newValue
+	    }
+
+	    -cursor {
+		$widgets(frame) configure -cursor $newValue
+		$widgets(entry) configure -cursor $newValue
+		$widgets(listbox) configure -cursor $newValue
+		set options($option) $newValue
+	    }
+
+	    -editable {
+		if {$newValue} {
+		    # it's editable...
+		    $widgets(entry) configure  -state normal  -cursor $defaultEntryCursor
+		} else {
+		    $widgets(entry) configure  -state disabled  -cursor $options(-cursor)
+		}
+		set options($option) $newValue
+	    }
+
+	    -font {
+		$widgets(entry) configure -font $newValue
+		$widgets(listbox) configure -font $newValue
+		set options($option) $newValue
+	    }
+
+	    -foreground {
+		$widgets(entry)   configure -foreground $newValue
+		$widgets(button)  configure -foreground $newValue
+		$widgets(listbox) configure -foreground $newValue
+		set options($option) $newValue
+	    }
+
+	    -height {
+		$widgets(listbox) configure -height $newValue
+		HandleScrollbar $w
+		set options($option) $newValue
+	    }
+
+	    -highlightbackground {
+		$widgets(frame) configure -highlightbackground $newValue
+		set options($option) $newValue
+	    }
+
+	    -highlightcolor {
+		$widgets(frame) configure -highlightcolor $newValue
+		set options($option) $newValue
+	    }
+
+	    -highlightthickness {
+		$widgets(frame) configure -highlightthickness $newValue
+		set options($option) $newValue
+	    }
+	    
+	    -image {
+		if {[string length $newValue] > 0} {
+		    $widgets(button) configure -image $newValue
+		} else {
+		    $widgets(button) configure -image ::combobox2::bimage
+		}
+		set options($option) $newValue
+	    }
+
+	    -maxheight {
+		# ComputeGeometry may dork with the actual height
+		# of the listbox, so let's undork it
+		$widgets(listbox) configure -height $options(-height)
+		HandleScrollbar $w
+		set options($option) $newValue
+	    }
+
+	    -relief {
+		$widgets(frame) configure -relief $newValue
+		set options($option) $newValue
+	    }
+
+	    -selectbackground {
+		$widgets(entry) configure -selectbackground $newValue
+		$widgets(listbox) configure -selectbackground $newValue
+		set options($option) $newValue
+	    }
+
+	    -selectborderwidth {
+		$widgets(entry) configure -selectborderwidth $newValue
+		$widgets(listbox) configure -selectborderwidth $newValue
+		set options($option) $newValue
+	    }
+
+	    -selectforeground {
+		$widgets(entry) configure -selectforeground $newValue
+		$widgets(listbox) configure -selectforeground $newValue
+		set options($option) $newValue
+	    }
+
+	    -state {
+		if {$newValue == "normal"} {
+		    # it's enabled
+		    set editable [::combobox2::GetBoolean  $options(-editable)]
+		    if {$editable} {
+			$widgets(entry) configure -state normal
+			$widgets(entry) configure -takefocus 1
+		    }
+		} elseif {$newValue == "disabled"}  {
+		    # it's disabled
+		    $widgets(entry) configure -state disabled
+		    $widgets(entry) configure -takefocus 0
+
+		} else {
+		    set options($option) $oldValue
+		    set message "bad state value \"$newValue\";"
+		    append message " must be normal or disabled"
+		    error $message
+		}
+
+		set options($option) $newValue
+	    }
+
+	    -takefocus {
+		$widgets(entry) configure -takefocus $newValue
+		set options($option) $newValue
+	    }
+
+	    -textvariable {
+		$widgets(entry) configure -textvariable $newValue
+		set options($option) $newValue
+	    }
+
+	    -value {
+		::combobox2::SetValue $widgets(this) $newValue
+		set options($option) $newValue
+	    }
+
+	    -width {
+        $widgets(frame) configure -width $newValue
+		$widgets(listbox) configure -width $newValue
+		set options($option) $newValue
+	    }
+
+	    -xscrollcommand {
+		$widgets(entry) configure -xscrollcommand $newValue
+		set options($option) $newValue
+	    }
+
+	}
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::DestroyHandler
+
+namespace eval ::combobox2 {
+proc DestroyHandler {w} {
+
+    # If the widget actually being destroyed is of class Combobox2,
+    # crush the namespace and kill the proc. Get it? Crush. Kill. 
+    # Destroy. Heh. Danger Will Robinson! Oh, man! I'm so funny it
+    # brings tears to my eyes.
+    if {[string compare [winfo class $w] "Combobox2"] == 0} {
+	upvar ::combobox2::${w}::widgets  widgets
+	upvar ::combobox2::${w}::options  options
+
+	# delete the namespace and the proc which represents
+	# our widget
+	namespace delete ::combobox2::$w
+	rename ::$w {}
+    }   
+    return
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::DoInternalWidgetCommand
+
+namespace eval ::combobox2 {
+proc DoInternalWidgetCommand {w subwidget command args} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    set subcommand $command
+    set command [concat $widgets($subwidget) $command $args]
+    if {[catch $command result]} {
+	# replace the subwidget name with the megawidget name
+	regsub $widgets($subwidget) $result $widgets(this) result
+
+	# replace specific instances of the subwidget command
+	# with out megawidget command
+	switch $subwidget,$subcommand {
+	    listbox,index  {regsub "index"  $result "list index"  result}
+	    listbox,insert {regsub "insert" $result "list insert" result}
+	    listbox,delete {regsub "delete" $result "list delete" result}
+	    listbox,get    {regsub "get"    $result "list get"    result}
+	    listbox,size   {regsub "size"   $result "list size"   result}
+	}
+	error $result
+
+    } else {
+	return $result
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::Find
+
+namespace eval ::combobox2 {
+proc Find {w {exact 0}} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    ## *sigh* this logic is rather gross and convoluted. Surely
+    ## there is a more simple, straight-forward way to implement
+    ## all this. As the saying goes, I lack the time to make it
+    ## shorter...
+
+    # use what is already in the entry widget as a pattern
+    set pattern [$widgets(entry) get]
+
+    if {[string length $pattern] == 0} {
+	# clear the current selection
+	$widgets(listbox) see 0
+	$widgets(listbox) selection clear 0 end
+	$widgets(listbox) selection anchor 0
+	$widgets(listbox) activate 0
+	return
+    }
+
+    # we're going to be searching this list...
+    set list [$widgets(listbox) get 0 end]
+
+    # if we are doing an exact match, try to find,
+    # well, an exact match
+    set exactMatch -1
+    if {$exact} {
+	set exactMatch [lsearch -exact $list $pattern]
+    }
+
+    # search for it. We'll try to be clever and not only
+    # search for a match for what they typed, but a match for
+    # something close to what they typed. We'll keep removing one
+    # character at a time from the pattern until we find a match
+    # of some sort.
+    set index -1
+    while {$index == -1 && [string length $pattern]} {
+	set index [lsearch -glob $list "$pattern*"]
+	if {$index == -1} {
+	    regsub {.$} $pattern {} pattern
+	}
+    }
+
+    # this is the item that most closely matches...
+    set thisItem [lindex $list $index]
+
+    # did we find a match? If so, do some additional munging...
+    if {$index != -1} {
+
+	# we need to find the part of the first item that is 
+	# unique WRT the second... I know there's probably a
+	# simpler way to do this... 
+
+	set nextIndex [expr {$index + 1}]
+	set nextItem [lindex $list $nextIndex]
+
+	# we don't really need to do much if the next
+	# item doesn't match our pattern...
+	if {[string match $pattern* $nextItem]} {
+	    # ok, the next item matches our pattern, too
+	    # now the trick is to find the first character
+	    # where they *don't* match...
+	    set marker [string length $pattern]
+	    while {$marker <= [string length $pattern]} {
+		set a [string index $thisItem $marker]
+		set b [string index $nextItem $marker]
+		if {[string compare $a $b] == 0} {
+		    append pattern $a
+		    incr marker
+		} else {
+		    break
+		}
+	    }
+	} else {
+	    set marker [string length $pattern]
+	}
+	
+    } else {
+	set marker end
+	set index 0
+    }
+
+    # ok, we know the pattern and what part is unique;
+    # update the entry widget and listbox appropriately
+    if {$exact && $exactMatch == -1} {
+	# this means we didn't find an exact match
+	$widgets(listbox) selection clear 0 end
+	$widgets(listbox) see $index
+
+    } elseif {!$exact}  {
+	# this means we found something, but it isn't an exact
+	# match. If we find something that *is* an exact match we
+	# don't need to do the following, since it would merely 
+	# be replacing the data in the entry widget with itself
+	set oldstate [$widgets(entry) cget -state]
+	$widgets(entry) configure -state normal
+	$widgets(entry) delete 0 end
+	$widgets(entry) insert end $thisItem
+	$widgets(entry) selection clear
+	$widgets(entry) selection range $marker end
+	$widgets(listbox) activate $index
+	$widgets(listbox) selection clear 0 end
+	$widgets(listbox) selection anchor $index
+	$widgets(listbox) selection set $index
+	$widgets(listbox) see $index
+	$widgets(entry) configure -state $oldstate
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::GetBoolean
+
+namespace eval ::combobox2 {
+proc GetBoolean {value {errorValue 1}} {
+    if {[catch {expr {([string trim $value])?1:0}} res]} {
+	return $errorValue
+    } else {
+	return $res
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::HandleEvent
+
+namespace eval ::combobox2 {
+proc HandleEvent {w event} {
+    upvar ::combobox2::${w}::widgets  widgets
+    upvar ::combobox2::${w}::options  options
+    upvar ::combobox2::${w}::oldValue oldValue
+
+    # for all of these events, if we have a special action we'll
+    # do that and do a "return -code break" to keep additional
+    # bindings from firing. Otherwise we'll let the event fall
+    # on through.
+    switch $event {
+
+	"<Any-KeyPress>" {
+	    # if the widget is editable, clear the selection. 
+	    # this makes it more obvious what will happen if the 
+	    # user presses <Return> (and helps our code know what
+	    # to do if the user presses return)
+	    if {$options(-editable)} {
+		$widgets(listbox) see 0
+		$widgets(listbox) selection clear 0 end
+		$widgets(listbox) selection anchor 0
+		$widgets(listbox) activate 0
+	    }
+	}
+
+	"<FocusIn>" {
+	    set oldValue [$widgets(entry) get]
+	}
+
+	"<FocusOut>" {
+	    if {![winfo ismapped $widgets(popup)]} {
+		# did the value change?
+#		set newValue [set ::combobox2::${w}::entryTextVariable]
+		set newValue [$widgets(entry) get]
+		if {$oldValue != $newValue} {
+		    CallCommand $widgets(this) $newValue
+		}
+	    }
+	}
+
+	"<1>" {
+	    set editable [::combobox2::GetBoolean $options(-editable)]
+	    if {!$editable} {
+		if {[winfo ismapped $widgets(popup)]} {
+		    $widgets(this) close
+		    return -code break;
+
+		} else {
+		    if {$options(-state) != "disabled"} {
+			$widgets(this) open
+			return -code break;
+		    }
+		}
+	    }
+	}
+
+	"<Double-1>" {
+	    if {$options(-state) != "disabled"} {
+		$widgets(this) toggle
+		return -code break;
+	    }
+	}
+
+	"<Tab>" {
+	    if {[winfo ismapped $widgets(popup)]} {
+		::combobox2::Find $widgets(this) 0
+		return -code break;
+	    } else {
+		::combobox2::SetValue $widgets(this) [$widgets(this) get]
+	    }
+	}
+
+	"<Escape>" {
+#	    $widgets(entry) delete 0 end
+#	    $widgets(entry) insert 0 $oldValue
+	    if {[winfo ismapped $widgets(popup)]} {
+		$widgets(this) close
+		return -code break;
+	    }
+	}
+
+	"<Return>" {
+	    # did the value change?
+#	    set newValue [set ::combobox2::${w}::entryTextVariable]
+	    set newValue [$widgets(entry) get]
+	    if {$oldValue != $newValue} {
+		CallCommand $widgets(this) $newValue
+	    }
+
+	    if {[winfo ismapped $widgets(popup)]} {
+		::combobox2::Select $widgets(this)  [$widgets(listbox) curselection]
+		return -code break;
+	    } 
+
+	}
+
+	"<Next>" {
+	    $widgets(listbox) yview scroll 1 pages
+	    set index [$widgets(listbox) index @0,0]
+	    $widgets(listbox) see $index
+	    $widgets(listbox) activate $index
+	    $widgets(listbox) selection clear 0 end
+	    $widgets(listbox) selection anchor $index
+	    $widgets(listbox) selection set $index
+
+	}
+
+	"<Prior>" {
+	    $widgets(listbox) yview scroll -1 pages
+	    set index [$widgets(listbox) index @0,0]
+	    $widgets(listbox) activate $index
+	    $widgets(listbox) see $index
+	    $widgets(listbox) selection clear 0 end
+	    $widgets(listbox) selection anchor $index
+	    $widgets(listbox) selection set $index
+	}
+
+	"<Down>" {
+	    if {[winfo ismapped $widgets(popup)]} {
+		tkListboxUpDown $widgets(listbox) 1
+		return -code break;
+
+	    } else {
+		if {$options(-state) != "disabled"} {
+		    $widgets(this) open
+		    return -code break;
+		}
+	    }
+	}
+	"<Up>" {
+	    if {[winfo ismapped $widgets(popup)]} {
+		tkListboxUpDown $widgets(listbox) -1
+		return -code break;
+
+	    } else {
+		if {$options(-state) != "disabled"} {
+		    $widgets(this) open
+		    return -code break;
+		}
+	    }
+	}
+    }
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::HandleScrollbar
+
+namespace eval ::combobox2 {
+proc HandleScrollbar {w {action unknown}} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    if {$options(-height) == 0} {
+	set hlimit $options(-maxheight)
+    } else {
+	set hlimit $options(-height)
+    }
+
+    switch $action {
+	"grow" {
+	    if {$hlimit > 0 && [$widgets(listbox) size] > $hlimit} {
+		pack $widgets(vsb) -side right -fill y -expand n
+	    }
+	}
+
+	"shrink" {
+	    if {$hlimit > 0 && [$widgets(listbox) size] <= $hlimit} {
+		pack forget $widgets(vsb)
+	    }
+	}
+
+	"crop" {
+	    # this means the window was cropped and we definitely 
+	    # need a scrollbar no matter what the user wants
+	    pack $widgets(vsb) -side right -fill y -expand n
+	}
+
+	default {
+	    if {$hlimit > 0 && [$widgets(listbox) size] > $hlimit} {
+		pack $widgets(vsb) -side right -fill y -expand n
+	    } else {
+		pack forget $widgets(vsb)
+	    }
+	}
+    }
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::HumanizeList
+
+namespace eval ::combobox2 {
+proc HumanizeList {list} {
+
+    if {[llength $list] == 1} {
+	return [lindex $list 0]
+    } else {
+	set list [lsort $list]
+	set secondToLast [expr {[llength $list] -2}]
+	set most [lrange $list 0 $secondToLast]
+	set last [lindex $list end]
+
+	return "[join $most {, }] or $last"
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::Init
+
+namespace eval ::combobox2 {
+proc Init {} {
+    variable widgetOptions
+    variable widgetCommands
+    variable scanCommands
+    variable listCommands
+    variable defaultEntryCursor
+
+    array set widgetOptions [list  -background          {background          Background}  -bd                  -borderwidth  -bg                  -background  -borderwidth         {borderWidth         BorderWidth}  -command             {command             Command}  -commandstate        {commandState        State}  -cursor              {cursor              Cursor}  -editable            {editable            Editable}  -fg                  -foreground  -font                {font                Font}  -foreground          {foreground          Foreground}  -height              {height              Height}  -highlightbackground {highlightBackground HighlightBackground}  -highlightcolor      {highlightColor      HighlightColor}  -highlightthickness  {highlightThickness  HighlightThickness}  -image               {image               Image}  -maxheight           {maxHeight           Height}  -relief              {relief              Relief}  -selectbackground    {selectBackground    Foreground}  -selectborderwidth   {selectBorderWidth   BorderWidth}  -selectforeground    {selectForeground    Background}  -state               {state               State}  -takefocus           {takeFocus           TakeFocus}  -textvariable        {textVariable        Variable}  -value               {value               Value}  -width               {width               Width}  -xscrollcommand      {xScrollCommand      ScrollCommand}  ]
+
+
+    set widgetCommands [list  bbox      cget     configure    curselection  delete    get      icursor      index         insert    list     scan         selection     xview     select   toggle       open          close  ]
+
+    set listCommands [list  delete       get       index        insert       size  ]
+
+    set scanCommands [list mark dragto]
+
+    # why check for the Tk package? This lets us be sourced into 
+    # an interpreter that doesn't have Tk loaded, such as the slave
+    # interpreter used by pkg_mkIndex. In theory it should have no
+    # side effects when run
+    if {[lsearch -exact [package names] "Tk"] != -1} {
+
+	##################################################################
+	#- this initializes the option database. Kinda gross, but it works
+	#- (I think). 
+	##################################################################
+
+	# the image used for the button...
+	if {$::tcl_platform(platform) == "windows"} {
+	    image create bitmap ::combobox2::bimage -data {
+		#define down_arrow_width 12
+		#define down_arrow_height 12
+		static char down_arrow_bits[] = {
+		    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		    0xfc,0xf1,0xf8,0xf0,0x70,0xf0,0x20,0xf0,
+		    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00;
+		}
+	    }
+	} else {
+	    image create bitmap ::combobox2::bimage -data  {
+		#define down_arrow_width 15
+		#define down_arrow_height 15
+		static char down_arrow_bits[] = {
+		    0x00,0x80,0x00,0x80,0x00,0x80,0x00,0x80,
+		    0x00,0x80,0xf8,0x8f,0xf0,0x87,0xe0,0x83,
+		    0xc0,0x81,0x80,0x80,0x00,0x80,0x00,0x80,
+		    0x00,0x80,0x00,0x80,0x00,0x80
+		}
+	    }
+	}
+
+	# compute a widget name we can use to create a temporary widget
+	set tmpWidget ".__tmp__"
+	set count 0
+	while {[winfo exists $tmpWidget] == 1} {
+	    set tmpWidget ".__tmp__$count"
+	    incr count
+	}
+
+	# get the scrollbar width. Because we try to be clever and draw our
+	# own button instead of using a tk widget, we need to know what size
+	# button to create. This little hack tells us the width of a scroll
+	# bar.
+	#
+	# NB: we need to be sure and pick a window  that doesn't already
+	# exist... 
+	scrollbar $tmpWidget
+	set sb_width [winfo reqwidth $tmpWidget]
+	destroy $tmpWidget
+
+	# steal options from the entry widget
+	# we want darn near all options, so we'll go ahead and do
+	# them all. No harm done in adding the one or two that we
+	# don't use.
+	entry $tmpWidget 
+	foreach foo [$tmpWidget configure] {
+	    # the cursor option is special, so we'll save it in
+	    # a special way
+	    if {[lindex $foo 0] == "-cursor"} {
+		set defaultEntryCursor [lindex $foo 4]
+	    }
+	    if {[llength $foo] == 5} {
+		set option [lindex $foo 1]
+		set value [lindex $foo 4]
+		option add *Combobox2.$option $value widgetDefault
+
+		# these options also apply to the dropdown listbox
+		if {[string compare $option "foreground"] == 0  || [string compare $option "background"] == 0  || [string compare $option "font"] == 0} {
+		    option add *Combobox2*ComboboxListbox.$option $value  widgetDefault
+		}
+	    }
+	}
+	destroy $tmpWidget
+
+	# these are unique to us...
+	option add *Combobox2.cursor              {}
+	option add *Combobox2.commandState        normal widgetDefault
+	option add *Combobox2.editable            1      widgetDefault
+	option add *Combobox2.maxHeight           10     widgetDefault
+	option add *Combobox2.height              0
+    }
+
+    # set class bindings
+    SetClassBindings
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::Select
+
+namespace eval ::combobox2 {
+proc Select {w index} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+
+    catch {
+	set data [$widgets(listbox) get [lindex $index 0]]
+	::combobox2::SetValue $widgets(this) $data
+
+	$widgets(listbox) selection clear 0 end
+	$widgets(listbox) selection anchor $index
+	$widgets(listbox) selection set $index
+
+	$widgets(entry) selection range 0 end
+    }
+
+    $widgets(this) close
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::SetBindings
+
+namespace eval ::combobox2 {
+proc SetBindings {w} {
+    upvar ::combobox2::${w}::widgets  widgets
+    upvar ::combobox2::${w}::options  options
+
+    # juggle the bindtags. The basic idea here is to associate the
+    # widget name with the entry widget, so if a user does a bind
+    # on the combobox2 it will get handled properly since it is
+    # the entry widget that has keyboard focus.
+    bindtags $widgets(entry)  [concat $widgets(this) [bindtags $widgets(entry)]]
+
+    bindtags $widgets(button)  [concat $widgets(this) [bindtags $widgets(button)]]
+
+    # override the default bindings for tab and shift-tab. The
+    # focus procs take a widget as their only parameter and we
+    # want to make sure the right window gets used (for shift-
+    # tab we want it to appear as if the event was generated
+    # on the frame rather than the entry. I
+
+    bind $widgets(entry) <Tab>  "::combobox2::tkTabToWindow \[tk_focusNext $widgets(entry)\]; break"
+    bind $widgets(entry) <Shift-Tab>  "::combobox2::tkTabToWindow \[tk_focusPrev $widgets(this)\]; break"
+    
+    # this makes our "button" (which is actually a label)
+    # do the right thing
+    bind $widgets(button) <ButtonPress-1> [list $widgets(this) toggle]
+
+    # this lets the autoscan of the listbox work, even if they
+    # move the cursor over the entry widget.
+    bind $widgets(entry) <B1-Enter> "break"
+
+    bind $widgets(listbox) <ButtonRelease-1>  "::combobox2::Select $widgets(this) \[$widgets(listbox) nearest %y\]; break"
+
+    bind $widgets(vsb) <ButtonPress-1>   {continue}
+    bind $widgets(vsb) <ButtonRelease-1> {continue}
+
+    bind $widgets(listbox) <Any-Motion> {
+	%W selection clear 0 end
+	%W activate @%x,%y
+	%W selection anchor @%x,%y
+	%W selection set @%x,%y @%x,%y
+	# need to do a yview if the cursor goes off the top
+	# or bottom of the window... (or do we?)
+    }
+
+    # these events need to be passed from the entry
+    # widget to the listbox, or need some sort of special
+    # handling....
+    foreach event [list <Up> <Down> <Tab> <Return> <Escape>  <Next> <Prior> <Double-1> <1> <Any-KeyPress>  <FocusIn> <FocusOut>] {
+	bind $widgets(entry) $event  "::combobox2::HandleEvent $widgets(this) $event"
+    }
+
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::SetClassBindings
+
+namespace eval ::combobox2 {
+proc SetClassBindings {} {
+
+    # make sure we clean up after ourselves...
+    bind Combobox2 <Destroy> [list ::combobox2::DestroyHandler %W]
+
+    # this will (hopefully) close (and lose the grab on) the
+    # listbox if the user clicks anywhere outside of it. Note
+    # that on Windows, you can click on some other app and
+    # the listbox will still be there, because tcl won't see
+    # that button click
+    set this {[::combobox2::convert %W -W]}
+    bind Combobox2 <Any-ButtonPress>   "$this close"
+    bind Combobox2 <Any-ButtonRelease> "$this close"
+
+    # this helps (but doesn't fully solve) focus issues. The general
+    # idea is, whenever the frame gets focus it gets passed on to
+    # the entry widget
+    bind Combobox2 <FocusIn> {::combobox2::tkTabToWindow [::combobox2::convert %W -W].entry}
+
+    # this closes the listbox if we get hidden
+    bind Combobox2 <Unmap> {[::combobox2::convert %W -W] close}
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::SetValue
+
+namespace eval ::combobox2 {
+proc SetValue {w newValue} {
+
+    upvar ::combobox2::${w}::widgets     widgets
+    upvar ::combobox2::${w}::options     options
+    upvar ::combobox2::${w}::ignoreTrace ignoreTrace
+    upvar ::combobox2::${w}::oldValue    oldValue
+
+    if {[info exists options(-textvariable)]  && [string length $options(-textvariable)] > 0} {
+	set variable ::$options(-textvariable)
+	set $variable $newValue
+    } else {
+	set oldstate [$widgets(entry) cget -state]
+	$widgets(entry) configure -state normal
+	$widgets(entry) delete 0 end
+	$widgets(entry) insert 0 $newValue
+	$widgets(entry) configure -state $oldstate
+    }
+
+    # set our internal textvariable; this will cause any public
+    # textvariable (ie: defined by the user) to be updated as
+    # well
+#    set ::combobox2::${w}::entryTextVariable $newValue
+
+    # redefine our concept of the "old value". Do it before running
+    # any associated command so we can be sure it happens even
+    # if the command somehow fails.
+    set oldValue $newValue
+
+
+    # call the associated command. The proc will handle whether or 
+    # not to actually call it, and with what args
+    CallCommand $w $newValue
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::VTrace
+
+namespace eval ::combobox2 {
+proc VTrace {w args} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+    upvar ::combobox2::${w}::ignoreTrace ignoreTrace
+
+    if {[info exists ignoreTrace]} return
+    ::combobox2::SetValue $widgets(this) [set ::$options(-textvariable)]
+
+    return ""
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::WidgetProc
+
+namespace eval ::combobox2 {
+proc WidgetProc {w command args} {
+    upvar ::combobox2::${w}::widgets widgets
+    upvar ::combobox2::${w}::options options
+    upvar ::combobox2::${w}::oldFocus oldFocus
+    upvar ::combobox2::${w}::oldFocus oldGrab
+
+    set command [::combobox2::Canonize $w command $command]
+
+    # this is just shorthand notation...
+    set doWidgetCommand  [list ::combobox2::DoInternalWidgetCommand $widgets(this)]
+
+    if {$command == "list"} {
+	# ok, the next argument is a list command; we'll 
+	# rip it from args and append it to command to
+	# create a unique internal command
+	#
+	# NB: because of the sloppy way we are doing this,
+	# we'll also let the user enter our secret command
+	# directly (eg: listinsert, listdelete), but we
+	# won't document that fact
+	set command "list-[lindex $args 0]"
+	set args [lrange $args 1 end]
+    }
+
+    set result ""
+
+    # many of these commands are just synonyms for specific
+    # commands in one of the subwidgets. We'll get them out
+    # of the way first, then do the custom commands.
+    switch $command {
+	bbox -
+	delete -
+	get -
+	icursor -
+	index -
+	insert -
+	scan -
+	selection -
+	xview {
+	    set result [eval $doWidgetCommand entry $command $args]
+	}
+	list-get 	{set result [eval $doWidgetCommand listbox get $args]}
+	list-index 	{set result [eval $doWidgetCommand listbox index $args]}
+	list-size 	{set result [eval $doWidgetCommand listbox size $args]}
+
+	select {
+	    if {[llength $args] == 1} {
+		set index [lindex $args 0]
+		set result [Select $widgets(this) $index]
+	    } else {
+		error "usage: $w select index"
+	    }
+	}
+
+	subwidget {
+	    set knownWidgets [list button entry listbox popup vsb]
+	    if {[llength $args] == 0} {
+		return $knownWidgets
+	    }
+
+	    set name [lindex $args 0]
+	    if {[lsearch $knownWidgets $name] != -1} {
+		set result $widgets($name)
+	    } else {
+		error "unknown subwidget $name"
+	    }
+	}
+
+	curselection {
+	    set result [eval $doWidgetCommand listbox curselection]
+	}
+
+	list-insert {
+	    eval $doWidgetCommand listbox insert $args
+	    set result [HandleScrollbar $w "grow"]
+	}
+
+	list-delete {
+	    eval $doWidgetCommand listbox delete $args
+	    set result [HandleScrollbar $w "shrink"]
+	}
+
+	toggle {
+	    # ignore this command if the widget is disabled...
+	    if {$options(-state) == "disabled"} return
+
+	    # pops down the list if it is not, hides it
+	    # if it is...
+	    if {[winfo ismapped $widgets(popup)]} {
+		set result [$widgets(this) close]
+	    } else {
+		set result [$widgets(this) open]
+	    }
+	}
+
+	open {
+
+	    # if this is an editable combobox2, the focus should
+	    # be set to the entry widget
+	    if {$options(-editable)} {
+		focus $widgets(entry)
+		$widgets(entry) select range 0 end
+		$widgets(entry) icur end
+	    }
+
+	    # if we are disabled, we won't allow this to happen
+	    if {$options(-state) == "disabled"} {
+		return 0
+	    }
+
+	    # compute the geometry of the window to pop up, and set
+	    # it, and force the window manager to take notice
+	    # (even if it is not presently visible).
+	    #
+	    # this isn't strictly necessary if the window is already
+	    # mapped, but we'll go ahead and set the geometry here
+	    # since its harmless and *may* actually reset the geometry
+	    # to something better in some weird case.
+	    set geometry [::combobox2::ComputeGeometry $widgets(this)]
+	    wm geometry $widgets(popup) $geometry
+	    update idletasks
+
+	    # if we are already open, there's nothing else to do
+	    if {[winfo ismapped $widgets(popup)]} {
+		return 0
+	    }
+
+	    # save the widget that currently has the focus; we'll restore
+	    # the focus there when we're done
+	    set oldFocus [focus]
+
+	    # ok, tweak the visual appearance of things and 
+	    # make the list pop up
+	    $widgets(button) configure -relief sunken
+	    raise $widgets(popup) [winfo parent $widgets(this)]
+	    wm deiconify $widgets(popup)
+
+	    # force focus to the entry widget so we can handle keypress
+	    # events for traversal
+	    focus -force $widgets(entry)
+
+	    # select something by default, but only if its an
+	    # exact match...
+	    ::combobox2::Find $widgets(this) 1
+
+	    # save the current grab state for the display containing
+	    # this widget. We'll restore it when we close the dropdown
+	    # list
+	    set status "none"
+	    set grab [grab current $widgets(this)]
+	    if {$grab != ""} {set status [grab status $grab]}
+	    set oldGrab [list $grab $status]
+	    unset grab status
+
+	    # *gasp* do a global grab!!! Mom always told not to
+	    # do things like this, but these are desparate times.
+	    grab -global $widgets(this)
+
+	    # fake the listbox into thinking it has focus. This is 
+	    # necessary to get scanning initialized properly in the
+	    # listbox.
+	    event generate $widgets(listbox) <B1-Enter>
+
+	    return 1
+	}
+
+	close {
+	    # if we are already closed, don't do anything...
+	    if {![winfo ismapped $widgets(popup)]} {
+		return 0
+	    }
+
+	    # restore the focus and grab, but ignore any errors...
+	    # we're going to be paranoid and release the grab before
+	    # trying to set any other grab because we really really
+	    # really want to make sure the grab is released.
+	    catch {focus $oldFocus} result
+	    catch {grab release $widgets(this)}
+	    catch {
+		set status [lindex $oldGrab 1]
+		if {$status == "global"} {
+		    grab -global [lindex $oldGrab 0]
+		} elseif {$status == "local"} {
+		    grab [lindex $oldGrab 0]
+		}
+		unset status
+	    }
+
+	    # hides the listbox
+	    $widgets(button) configure -relief raised
+	    wm withdraw $widgets(popup) 
+
+	    # select the data in the entry widget. Not sure
+	    # why, other than observation seems to suggest that's
+	    # what windows widgets do.
+	    set editable [::combobox2::GetBoolean $options(-editable)]
+	    if {$editable} {
+		$widgets(entry) selection range 0 end
+		$widgets(button) configure -relief raised
+	    }
+
+
+	    # magic tcl stuff (see tk.tcl in the distribution 
+	    # lib directory)
+	    tkCancelRepeat
+
+	    return 1
+	}
+
+	cget {
+	    if {[llength $args] != 1} {
+		error "wrong # args: should be $w cget option"
+	    }
+	    set opt [::combobox2::Canonize $w option [lindex $args 0]]
+
+	    if {$opt == "-value"} {
+		set result [$widget(entry) get]
+	    } else {
+		set result $options($opt)
+	    }
+	}
+
+	configure {
+	    set result [eval ::combobox2::Configure {$w} $args]
+	}
+
+	default {
+	    error "bad option \"$command\""
+	}
+    }
+
+    return $result
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::combobox2
+
+namespace eval ::combobox2 {
+proc combobox2 {w args} {
+    variable widgetOptions
+    variable widgetCommands
+    variable scanCommands
+    variable listCommands
+
+    # perform a one time initialization
+    if {![info exists widgetOptions]} {
+	__combobox2_Setup
+        Init
+    }
+
+    # build it...
+    eval Build $w $args
+
+    # set some bindings...
+    SetBindings $w
+
+    # and we are done!
+    return $w
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::convert
+
+namespace eval ::combobox2 {
+proc convert {w args} {
+    set result {}
+    if {![winfo exists $w]} {
+	error "window \"$w\" doesn't exist"
+    }
+
+    while {[llength $args] > 0} {
+	set option [lindex $args 0]
+	set args [lrange $args 1 end]
+
+	switch -exact -- $option {
+	    -x {
+		set value [lindex $args 0]
+		set args [lrange $args 1 end]
+		set win $w
+		while {[winfo class $win] != "Combobox2"} {
+		    incr value [winfo x $win]
+		    set win [winfo parent $win]
+		    if {$win == "."} break
+		}
+		lappend result $value
+	    }
+
+	    -y {
+		set value [lindex $args 0]
+		set args [lrange $args 1 end]
+		set win $w
+		while {[winfo class $win] != "Combobox2"} {
+		    incr value [winfo y $win]
+		    set win [winfo parent $win]
+		    if {$win == "."} break
+		}
+		lappend result $value
+	    }
+
+	    -w -
+	    -W {
+		set win $w
+		while {[winfo class $win] != "Combobox2"} {
+		    set win [winfo parent $win]
+		    if {$win == "."} break;
+		}
+		lappend result $win
+	    }
+	}
+    }
+    return $result
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::tkCancelRepeat
+
+namespace eval ::combobox2 {
+proc tkCancelRepeat {} {
+    global tk_version
+    if {$tk_version >= 8.4} {
+        ::tk::CancelRepeat
+    } else {
+        ::tkCancelRepeat
+    }
+}
+}
+#############################################################################
+## Library Procedure:  ::combobox2::tkTabToWindow
+
+namespace eval ::combobox2 {
+proc tkTabToWindow {w} {
+    global tk_version
+    if {$tk_version >= 8.4} {
+        ::tk::TabToWindow $w
+    } else {
+        ::tkTabToWindow $w
+    }
+}
+}
+#############################################################################
 ## Library Procedure:  ::mclistbox::AdjustColumns
 
 namespace eval ::mclistbox {
@@ -2712,6 +4328,25 @@ proc mclistbox {args} {
 }
 }
 #############################################################################
+## Library Procedure:  __combobox2_Setup
+
+proc ::__combobox2_Setup {} {
+
+    namespace eval ::combobox2 {
+
+        # this is the public interface
+        namespace export combobox2
+
+        # these contain references to available options
+        variable widgetOptions
+
+        # these contain references to available commands and subcommands
+        variable widgetCommands
+        variable scanCommands
+        variable listCommands
+    }
+}
+#############################################################################
 ## Library Procedure:  __mclistbox_Setup
 
 proc ::__mclistbox_Setup {} {
@@ -2977,6 +4612,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_11_0.cpd73 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -pady 1 -relief 1 -text 1}
     }
+    namespace eval ::widgets::$site_11_0.cpd78 {
+        array set save {-labelfont 1 -labeltext 1 -textvariable 1 -width 1}
+    }
     namespace eval ::widgets::$site_11_0.cpd75 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
@@ -3037,7 +4675,14 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_11_0.cpd67 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -relief 1 -text 1}
     }
-    namespace eval ::widgets::$site_8_0.cpd67 {
+    namespace eval ::widgets::$site_8_0.fra69 {
+        array set save {-background 1 -borderwidth 1 -height 1 -width 1}
+    }
+    set site_9_0 $site_8_0.fra69
+    namespace eval ::widgets::$site_9_0.fra76 {
+        array set save {-background 1 -borderwidth 1 -height 1 -width 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd73 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -image 1 -padx 1 -pady 1 -relief 1 -text 1 -width 1 -wraplength 1}
     }
     set site_8_1 [lindex [$base.tab88 childsite] 1]
@@ -3190,6 +4835,32 @@ proc vTcl:project:info {} {
     set site_8_3 [lindex [$base.tab88 childsite] 3]
     namespace eval ::widgets::$site_8_3 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
+    }
+    set site_8_0 $site_8_3
+    namespace eval ::widgets::$site_8_0.cpd70 {
+        array set save {-background 1 -font 1 -height 1 -highlightbackground 1 -labelbackground 1 -labelfont 1 -selectborderwidth 1 -selectcommand 1 -selectmode 1 -width 1 -yscrollcommand 1}
+        namespace eval subOptions {
+            array set save {-background 1 -font 1 -label 1 -labelrelief 1 -resizable 1 -visible 1 -width 1}
+        }
+    }
+    namespace eval ::widgets::$site_8_0.fra71 {
+        array set save {-borderwidth 1 -height 1 -relief 1 -width 1}
+    }
+    set site_9_0 $site_8_0.fra71
+    namespace eval ::widgets::$site_9_0.lab72 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd77 {
+        array set save {-clientdata 1 -command 1 -editable 1 -justify 1 -labelpos 1 -labeltext 1 -width 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd75 {
+        array set save {-command 1 -justify 1 -labelpos 1 -labeltext 1 -width 1}
+    }
+    namespace eval ::widgets::$site_9_0.com81 {
+        array set save {-command 1 -editable 1 -labeltext 1}
+    }
+    namespace eval ::widgets::$site_9_0.com82 {
+        array set save {-textvariable 1}
     }
     set site_8_4 [lindex [$base.tab88 childsite] 4]
     namespace eval ::widgets::$site_8_4 {
@@ -3838,7 +5509,7 @@ global widget file profilter zvfilter archfilter
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval
+global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat
 
 if {[file exists ../.Xrunrc] == 1} {
    set rcfl [open ../.Xrunrc r+]
@@ -3849,7 +5520,8 @@ if {[file exists ../.Xrunrc] == 1} {
    gets $rcfl pdfviewer
    gets $rcfl wwwviewer
    gets $rcfl compeval
-   } else {
+   gets $rcfl mat
+      } else {
    set rcfl [open ../.Xrunrc a+]
    set workdir [pwd]
    set file ""
@@ -3858,6 +5530,7 @@ if {[file exists ../.Xrunrc] == 1} {
    set wwwviewer ""
    set pdfviewer ""
    set compeval ""
+   set mat 1111
 
    }
 close $rcfl
@@ -3869,6 +5542,7 @@ set zvfilter $file
 set archfilter $file
 set nsh 1
 set eres 0.02
+if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
 set modules [list main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h  io.h ddhms.cmb Makefile]
@@ -3931,7 +5605,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -menu "$top.m88" -background #ffffff -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 862x296+24+650; update
+    wm geometry $top 854x315+0+599; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -3984,7 +5658,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e ../scripts/run $file 1 &
+        -command {exec xterm -e ../scripts/run $file $mat &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -4177,7 +5851,7 @@ adjourn .top75} \
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
     $top.tab88 add \
-        -command {} -label Logs -width 0 
+        -command {} -label {DDX plots} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -4221,13 +5895,16 @@ exec $editor $file.inp &} \
     bind $site_11_0.cpd73 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit input file}
     }
+    ::iwidgets::entryfield $site_11_0.cpd78 \
+        -labelfont {Helvetica -12} -labeltext MAT -textvariable mat -width 4 
+    vTcl:DefineAlias "$site_11_0.cpd78" "Entryfield9" vTcl:WidgetProc "Toplevel1" 1
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e ../scripts/runE $file}
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e ../scripts/format $file}
+if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e ../scripts/format $file $mat }
 if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/verify $file}
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file 1}
+if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file $mat }
 if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e ../scripts/plot $file}
 
 # create list of possible ddx plots
@@ -4247,6 +5924,8 @@ adjourn .top75} \
         -side top 
     pack $site_11_0.cpd73 \
         -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -side top 
+    pack $site_11_0.cpd78 \
+        -in $site_11_0 -anchor center -expand 0 -fill none -pady 3 -side top 
     pack $site_11_0.cpd75 \
         -in $site_11_0 -anchor center -expand 1 -fill both -padx 5 -pady 5 \
         -side top 
@@ -4423,7 +6102,14 @@ adjourn .top75} \
     pack $site_10_0.cpd72 \
         -in $site_10_0 -anchor center -expand 0 -fill none -padx 5 -pady 5 \
         -side right 
-    button $site_8_0.cpd67 \
+    frame $site_8_0.fra69 \
+        -borderwidth 2 -background #e6e6e6 -height 75 -width 125 
+    vTcl:DefineAlias "$site_8_0.fra69" "Frame4" vTcl:WidgetProc "Toplevel1" 1
+    set site_9_0 $site_8_0.fra69
+    frame $site_9_0.fra76 \
+        -borderwidth 2 -background #e6e6e6 -height 74 -width 125 
+    vTcl:DefineAlias "$site_9_0.fra76" "Frame7" vTcl:WidgetProc "Toplevel1" 1
+    button $site_9_0.cpd73 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
         -command {set rcfl [open ../.Xrunrc w+]
 puts $rcfl $file
@@ -4433,6 +6119,7 @@ puts $rcfl $psviewer
 puts $rcfl $pdfviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
+puts $rcfl $mat
 close $rcfl
 
 
@@ -4440,11 +6127,15 @@ exit} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
         -pady 2m -relief raised -text Exit -width 10 -wraplength 60 
-    vTcl:DefineAlias "$site_8_0.cpd67" "Button56" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.cpd67 "$site_8_0.cpd67 Button $top all _vTclBalloon"
-    bind $site_8_0.cpd67 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_9_0.cpd73" "Button58" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.cpd73 "$site_9_0.cpd73 Button $top all _vTclBalloon"
+    bind $site_9_0.cpd73 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Close GUI}
     }
+    pack $site_9_0.fra76 \
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+    pack $site_9_0.cpd73 \
+        -in $site_9_0 -anchor center -expand 0 -fill none -pady 10 -side top 
     pack $site_8_0.lab69 \
         -in $site_8_0 -anchor center -expand 0 -fill none -side left 
     pack $site_8_0.lab100 \
@@ -4453,8 +6144,8 @@ exit} \
     pack $site_8_0.lab70 \
         -in $site_8_0 -anchor center -expand 0 -fill none -ipadx 15 -padx 2 \
         -pady 2 -side left 
-    pack $site_8_0.cpd67 \
-        -in $site_8_0 -anchor center -expand 0 -fill none -pady 100 -side top 
+    pack $site_8_0.fra69 \
+        -in $site_8_0 -anchor center -expand 0 -fill none -side left 
     set site_8_1 [lindex [$top.tab88 childsite] 1]
     ::iwidgets::labeledframe $site_8_1.lab105 \
         -ipadx 5 -ipady 5 \
@@ -4722,7 +6413,7 @@ adjourn .top75} \
     $site_10_0.men91.m add radiobutton \
         -value 1 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
-        -label {MT=1 (total)} 
+        -label {MT=1 (total)} -state active 
     $site_10_0.men91.m add radiobutton \
         -value 2 -variable mt -command {# TODO: Your menu handler here} \
         -font [vTcl:font:getFontFromDescr "-family times -size 12"] \
@@ -4885,29 +6576,29 @@ lappend dd} \
         -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
-        -background #ffffff -font {Helvetica -10} -label # \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
+        -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col2 \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -labelrelief flat -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col3 \
-        -background #ffffff -font {Helvetica -10} -label p \
-        -labelrelief raised -resizable 1 -visible 1 -width 3 
+        -background #ffffff -font {Helvetica -10} -label p -labelrelief flat \
+        -resizable 1 -visible 1 -width 3 
     $site_9_0.mcl78 column add col4 \
         -background #f999f999f999 -font {Helvetica -10} -label MT \
-        -labelrelief raised -resizable 1 -visible 1 -width 6 
+        -labelrelief flat -resizable 1 -visible 1 -width 6 
     $site_9_0.mcl78 column add col5 \
         -background #ffffff -font {Helvetica -10} -label Einc \
-        -labelrelief raised -resizable 1 -visible 1 -width 10 
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col6 \
         -background #f999f999f999 -font {Helvetica -10 } -label Elev \
-        -labelrelief raised -resizable 1 -visible 1 -width 10 
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col7 \
         -background #ffffff -font {Helvetica -10} -label Ang \
-        -labelrelief raised -resizable 1 -visible 1 -width 5 
+        -labelrelief flat -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col8 \
         -background #ffffff -font {Helvetica -10} -label init \
-        -labelrelief raised -resizable 0 -visible 0 -width 3 
+        -labelrelief flat -resizable 0 -visible 0 -width 3 
     scrollbar $site_9_0.scr80 \
         -command {Mclistbox1 yview} 
     vTcl:DefineAlias "$site_9_0.scr80" "Scrollbar1" vTcl:WidgetProc "Toplevel1" 1
@@ -5042,6 +6733,90 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     pack $site_8_2.fra79 \
         -in $site_8_2 -anchor w -expand 1 -fill both -padx 5 -side left 
     set site_8_3 [lindex [$top.tab88 childsite] 3]
+    ::mclistbox::mclistbox $site_8_3.cpd70 \
+        -background #ffffff -font {Helvetica -10} -height 0 \
+        -highlightbackground #dcdcdc -labelbackground #dcdcdc \
+        -labelfont {Helvetica -10} -selectborderwidth 0 \
+        -selectcommand {set dd ""
+set ddxlist [selection get]
+set ddx ""
+set prev "#"
+set last "#"
+foreach el $ddxlist {
+   if { $prev == $last } {
+   lappend ddx $el
+   }
+   set prev $el
+}
+lappend dd} \
+        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
+    vTcl:DefineAlias "$site_8_3.cpd70" "Mclistbox2" vTcl:WidgetProc "Toplevel1" 1
+    $site_8_3.cpd70 column add col1 \
+        -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
+        -resizable 1 -visible 1 -width 5 
+    $site_8_3.cpd70 column add col2 \
+        -background #f999f999f999 -font {Helvetica -10 } -label MF \
+        -labelrelief flat -resizable 1 -visible 1 -width 5 
+    $site_8_3.cpd70 column add col3 \
+        -background #ffffff -font {Helvetica -10} -label p -labelrelief flat \
+        -resizable 1 -visible 1 -width 3 
+    $site_8_3.cpd70 column add col4 \
+        -background #f999f999f999 -font {Helvetica -10} -label MT \
+        -labelrelief flat -resizable 1 -visible 1 -width 6 
+    $site_8_3.cpd70 column add col5 \
+        -background #ffffff -font {Helvetica -10} -label Einc \
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
+    $site_8_3.cpd70 column add col6 \
+        -background #f999f999f999 -font {Helvetica -10 } -label Elev \
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
+    $site_8_3.cpd70 column add col7 \
+        -background #ffffff -font {Helvetica -10} -label Ang \
+        -labelrelief flat -resizable 1 -visible 1 -width 5 
+    $site_8_3.cpd70 column add col8 \
+        -background #ffffff -font {Helvetica -10} -label init \
+        -labelrelief flat -resizable 0 -visible 0 -width 3 
+    frame $site_8_3.fra71 \
+        -borderwidth 2 -relief groove -height 75 -width 125 
+    vTcl:DefineAlias "$site_8_3.fra71" "Frame3" vTcl:WidgetProc "Toplevel1" 1
+    set site_9_0 $site_8_3.fra71
+    label $site_9_0.lab72 \
+        -text {Add plots to the list} 
+    vTcl:DefineAlias "$site_9_0.lab72" "Label1" vTcl:WidgetProc "Toplevel1" 1
+    ::iwidgets::combobox $site_9_0.cpd77 \
+        -clientdata klapa \
+        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com74 _addToList}} \
+        -editable 1 -justify right -labelpos w -labeltext {MF      } \
+        -width 10 
+    vTcl:DefineAlias "$site_9_0.cpd77" "Combobox4" vTcl:WidgetProc "Toplevel1" 1
+    ::iwidgets::combobox $site_9_0.cpd75 \
+        \
+        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com74 _addToList}} \
+        -justify right -labelpos w -labeltext Ejectile -width 10 
+    vTcl:DefineAlias "$site_9_0.cpd75" "Combobox3" vTcl:WidgetProc "Toplevel1" 1
+    ::iwidgets::combobox $site_9_0.com81 \
+        \
+        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com81 _addToList}} \
+        -editable 0 -labeltext {E inc} 
+    vTcl:DefineAlias "$site_9_0.com81" "Combobox2" vTcl:WidgetProc "Toplevel1" 1
+    ::combobox2::combobox2 $site_9_0.com82 \
+        -textvariable "$top\::com82" 
+    vTcl:DefineAlias "$site_9_0.com82" "Combo1" vTcl:WidgetProc "Toplevel1" 1
+    pack $site_9_0.lab72 \
+        -in $site_9_0 -anchor e -expand 0 -fill none -side top 
+    pack $site_9_0.cpd77 \
+        -in $site_9_0 -anchor e -expand 0 -fill none -padx 5 -pady 2 \
+        -side top 
+    pack $site_9_0.cpd75 \
+        -in $site_9_0 -anchor e -expand 0 -fill none -padx 5 -pady 2 \
+        -side top 
+    pack $site_9_0.com81 \
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+    pack $site_9_0.com82 \
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+    pack $site_8_3.cpd70 \
+        -in $site_8_3 -anchor w -expand 0 -fill y -side left 
+    pack $site_8_3.fra71 \
+        -in $site_8_3 -anchor w -expand 1 -fill both -side left 
     set site_8_4 [lindex [$top.tab88 childsite] 4]
     ::iwidgets::checkbox $site_8_4.che119 \
         -background #e6e6e6 \
@@ -6027,7 +7802,8 @@ $file.inp &}} -label {Create input}
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/run $file &} -label {Full run} 
+        -command {exec xterm -e ../scripts/run $file $mat &} \
+        -label {Full run} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -6054,7 +7830,7 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY 
+        -command {exec xterm -e ../scripts/runjoy $file $mat &} -label NJOY 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
