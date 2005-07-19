@@ -26,12 +26,12 @@ C-V  04/10 Implement formatting for incident alphas and photons.
 C-V  05/04 - Copy comments to MF1/MT451.
 C-V        - Upgrade to proces partially exclusive/inclusive spectra.
 C-V        - Allow metastable targets.
-C-V  05/06 Increase MXR from 200K to 300K.
-C-M
+C-V  05/06 Increase MXR from 200K to 800K.
+C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
-C-M
-C-M  The EMPIRE output is processed and converted into ENDF
+C-M  
+C-M  The EMPIRE output is processed and converted into ENDF 
 C-M  format. The ENDF formatted output file has to obey the
 C-M  rule of ordering the reactions in increasing order by
 C-M  the reaction MT number, so several sweeps of the EMPIRE
@@ -49,7 +49,7 @@ C-M   - Finally, a sweep is made for the remaining reactions,
 C-M     particularly the (n,gamma) reaction, for which the
 C-M     particle distributions are coded in ENDF Files-12, 14
 C-M     and 15.
-C-M
+C-M  
 C-M  The cross section data found on the file are fitted by
 C-M  a cubic spline and entered into the output ENDF file on
 C-M  a user-defined dense energy grid, thinned to the specified
@@ -57,7 +57,7 @@ C-M  tolerance and taking reaction thresholds into account.
 C-M  If desired, the spline interpolation may be suppressed
 C-M  and the energy points found on the file are entered
 C-M  directly into the ENDF formatted file.
-C-M
+C-M  
 C-M  The angular distributions for discrete level reactions
 C-M  that appear in the ENDF file-4 sections are extracted from
 C-M  the spectra on the EMPIRE output file, interpolated to
@@ -73,7 +73,7 @@ C-M  reduced accordingly.
 C-M
 C-M  Photon production reactions, which remain to be specified,
 C-M  particularly the (n,gamma) reaction, are given in the ENDF
-C-M  files-12, 14 and 15. Photon multiplicity is stored in
+C-M  files-12, 14 and 15. Photon multiplicity is stored in 
 C-M  file-12. Isotropic angular distribution is assumed and
 C-M  written to file 14. The particle energy distribution is
 C-M  written to file15.
@@ -84,15 +84,15 @@ C-M  screen. The required input is entered in response to the
 C-M  prompts, which are the following:
 C-M   - The name of the EMPIRE output file to be processed.
 C-M   - The name of the ENDF formatted file to be written.
-C-M   - Number of subintervals per incident neutron energy
+C-M   - Number of subintervals per incident neutron energy 
 C-M     interval on the EMPIRE output file. The subintervals
 C-M     define the fine energy mesh on the ENDF formatted
 C-M     file. If zero is entered, only the points on the
 C-M     EMPIRE output are entered to the ENDF formatted file.
 C-M   - Thinning tolerance limit [%] to reduce the number of
 C-M     cross section points. Data points which, can be
-C-M     reproduced from the neighbouring points by linear
-C-M     interpolation to within the specified tolerance, are
+C-M     reproduced from the neighbouring points by linear 
+C-M     interpolation to within the specified tolerance, are 
 C-M     removed. Entering a negative value for the thinning
 C-M     tolerance limit causes thinning to be suppressed.
 C-M   - ENDF material number identifier.
@@ -129,7 +129,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=80,MXR=350000,MXI=10000)
+      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=800000,MXI=8000)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -423,25 +423,25 @@ C*   MXLJ - maximum number of transitions from a level
      1STOP 'EMPEND ERROR - MXR limit exceeded'
       DO 890 I=1,NXS
         IF     (IWO(MTH-1+I).EQ. 51) THEN
-          JZA=IZA
+          JZA=IZA+IZI-1
           MT =50
-          MT0=MT
         ELSE IF(IWO(MTH-1+I).EQ.600) THEN
-          JZA=IZA-1000
+          JZA=IZA+IZI-1001
           MT =600
-          MT0=MT
         ELSE IF(IWO(MTH-1+I).EQ.800) THEN
-          JZA=IZA-2003
+          JZA=IZA+IZI-2004
           MT =800
-          MT0=MT
         ELSE
           GO TO 890
         END IF
+        NL1=0
+        IF(JZA.EQ.IZA) NL1=1
+        MT0=MT
         REWIND LIN
         CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
      1             ,RWO(LBR),MXLI,MXLJ)
-        CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
-     1             ,RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
+        CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,RWO(LEL)
+     1             ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
         WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT
         WRITE(LTT,995) '                     Number of levels : ',NLV
         WRITE(LTT,991)
@@ -483,14 +483,16 @@ C* Write photon distributions for MT50 series
       IF(LV600.GT.0) THEN
 C* Write photon distributions for MT600 series
         JPP=JPP+1
-        MT0=600-1
-        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV600,NS)
+        MT0=600
+        JV =LV600-1
+        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JV,NS)
       END IF
       IF(LV800.GT.0) THEN
 C* Write photon distributions for MT800 series
         JPP=JPP+1
-        MT0=800-1
-        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV800,NS)
+        MT0=800
+        JV =LV800-1
+        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JV,NS)
       END IF
 C* Photon angular distributions from discrete levels processed
       IF(JPP.GT.0) THEN
@@ -935,13 +937,15 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,x)  ') MT=  5
         IF(PTST.EQ.' (z,2n) ') MT= 16
         IF(PTST.EQ.' (z,3n) ') MT= 17
+c... Fix fission spectrum in EMPIRE output before activating MT=18
+c...    IF(PTST.EQ.' (z,fiss') MT= 18
         IF(PTST.EQ.' (z,np) ') MT= 28
         IF(PTST.EQ.' (z,na) ') MT= 22
         IF(PTST.EQ.' (z,2na)') MT= 24
         IF(PTST.EQ.' (z,4n) ') MT= 37
         IF(PTST.EQ.' (z,2np)') MT= 41
         IF(PTST.EQ.' (z,3np)') MT= 42
-c...        IF(PTST.EQ.' (z,5n) ') MT= 47
+c...    IF(PTST.EQ.' (z,5n) ') MT= 47
         IF(PTST.EQ.' (z,n)  ') MT= 91
 c...        IF(PTST.EQ.' (z,n)  ') THEN
 c...          IF(IZI.EQ.1) THEN
@@ -1083,7 +1087,7 @@ C-D    YI > 0  Multiplicity for the reaction is fixed and equal to YI
 C-D       = 0  Particles may be produced by the reaction, but the
 C-D            multiplicity has to be obtained from other sources
 C-D       < 0  Particle cannot be produced from this reaction
-C-D
+C-D  
       YI=-1
       IF     (KZAP.EQ.   1) THEN
 C* Outgoing neutrons
@@ -1323,8 +1327,8 @@ C-D  EO2
 C-D  NZA1
 C-D  NZA2
 C-
-C* Maximum number of angles
-      PARAMETER     (MXA=80,MXZ=160)
+C* Maximum number of angles MXA, fine grid MXZ
+      PARAMETER     (MXA=120,MXZ=240)
       DOUBLE PRECISION DD(MXA)
       CHARACTER*136  REC
       DIMENSION      ANG(MXA),DST(MXA)
@@ -1393,40 +1397,25 @@ C* Convert isotropic (angle-integrated) spectra to double differential
       ELSE
         FF=1
       END IF
+C* Check for zero or negative distributions
+      NEG=0
+      NEP=0
       DO J=1,KXA
-        DST(J)=DD(J)*FF
+        DDJ=DD(J)
+        IF(DDJ.GT.0) NEP=NEP+1
+        IF(DDJ.LT.0) THEN
+          IF(DDJ.LT.-1.E-20) NEG=NEG+1
+          DDJ=0
+        END IF
+        DST(J)=DDJ*FF
       END DO
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
-C* Check that the average is positive
-      NEG=0
-      IF(KXA.GT.1) THEN
-        AV=0
-        F2=DST(1)
-        A2=ANG(1)
-        DO J=2,KXA
-          A1=A2
-          F1=F2
-          A2=ANG(J)
-          F2=DST(J)
-          AV=AV+(A2-A1)*(F2+F1)/2
-        END DO
-        AV=AV/(ANG(KXA)-ANG(1))
-      ELSE
-        AV=DST(1)
-      END IF
-      IF(AV.LT.0) THEN
-        NEG=1
-        DO J=1,KXA
-          DST(J)=1.E-30
-        END DO
-      END IF
 C* Suppress negative distributions to 2% of average of the neighbours
-      IF(NEG.EQ.0) THEN
+      IF(NEG.GT.0 .AND. NEP.GT.0) THEN
         DO J=1,KXA
-          IF(DST(J).LT.0) THEN
-            NEG=NEG+1
+          IF(DST(J).LE.0) THEN
             DJ=0
             NJ=0
             IF(J.GT.1) THEN
@@ -1442,8 +1431,8 @@ C* Suppress negative distributions to 2% of average of the neighbours
         END DO
       END IF
       IF(NEG.GT.0) THEN
-        WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU
-        WRITE(LER,906) MT,NINT(ZAP),EIN,EOU
+        WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
+        WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
       END IF
 C* Convert to Legendre polynomials and store
       LPU=LL+1
@@ -1462,8 +1451,11 @@ C*
       JPRNT=0
 C* Check for printout on exceeding tolerance limits
       IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
-        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
-        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+C*      Count the number of points with convergence problems
+        NOFIT=NOFIT+1
+C*      Print a warning when convergence problems are encountered
+C...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+C...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
         IF(IPRNT.EQ.0) JPRNT=1
 C* Check for specific reaction printout
       ELSE IF
@@ -1484,7 +1476,7 @@ C*      Fitted values to the "curves" file
         ELSE
           WRITE(LPT,933) EIN,EOU,MT,IFIX(ZAP+0.1)
         END IF
-        WRITE(LCU,931) LOO
+        WRITE(LCU,931) LOO,ERR*100,NOFIT
         DO K=2,KXA
           I=KXA+2-K
           WRITE(LPT,934) ANG(I),0.,0.,DST(I)
@@ -1567,7 +1559,7 @@ C* Increment indices in the storage array and loop to next point
       IF(EMP.LE.0 .OR. EOU.LT.EMP) GO TO 440
 C*
 C* All spectrum data read
-C* Print warning if negative distributions present
+C* Print warning in case of badly fitted distributions
   700 IF(NOFIT.GT.0) THEN
         WRITE(LTT,908) MT,NINT(ZAP),EIN,NOFIT
         WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
@@ -1607,7 +1599,9 @@ C*
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
   906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.dist.Inp.-ve')
+     1      ,' Ein',1P,E10.3,' Eou',E10.3/17X
+     2      ,' Input angular distribution negative at',I3
+     3      ,' out of',I3,' angle(s)')
   907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
   908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
@@ -1616,7 +1610,7 @@ C*
      1      ,' Eou',1P,E10.3,' > available energy',E10.3)
   912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
      1       ' "',A70,'"')
-  931 FORMAT('P(',I2.2,') Fit')
+  931 FORMAT('P(',I2.2,') Fit,Dmx%',F5.0,I3)
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
@@ -1790,9 +1784,6 @@ C* Reserve space for proton and alpha production of unidentified reactions
         NXS  =NXS+2
         MTH(MT203)=203
         MTH(MT207)=207
-
-        PRINT *,'MT,JZA,IZA',MT,JZA,IZA
-
       END IF
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
@@ -2308,8 +2299,6 @@ C* Process correlated energy/angle distribution for this energy
       NEP=0
       E1 =MIN(E1,EE)
       E2 =MAX(E2,EE)
-C* Define the order LOR of Legendre expansion (=NA in ENDF)
-      LOR=22
       LHI=0
       KXA=1
       JXA=1
@@ -2323,7 +2312,7 @@ C... Set EMP=0 to skip testing in RDANG
 C...
       EMP=0
       LMX=MXR-LL
-      CALL RDANGD(LIN,LOR,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,LCU,LPT
+      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,LCU,LPT
      2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C* Calculate the integral of the spectrum
       SPC=0
@@ -2407,7 +2396,7 @@ C*        Save the energy and the yield
         ETEF=0
       END IF
 C*
-C* Distributions for one incident energy processed - Normalize
+C* Distributions for one incident energy processed - Normalize 
       NE6=NE6+1
 
 c...        print *,'      ne6',ne6,ee
@@ -2566,7 +2555,7 @@ C* Search for the product nucleus data
       IF(REC(1:18).NE.'  Decaying nucleus') GO TO 20
       READ (REC(20:29),802) JZ,CH,JA
       JZA=JZ*1000+JA
-C* Test for discrete levels inelastic scattering cross section
+C* Test for discrete levels cross section
       IF(JZA  .NE. IZA    ) GO TO 20
 C* Process discrete levels
    35 READ (LIN,891) REC
@@ -2583,15 +2572,15 @@ C* Positioned to read discrete levels
       IF(IL.GT.MXLI) STOP 'REMF12 ERROR - MXLI Limit exceeded'
       IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - MXLJ Limit exceeded'
       IF(JL.LE.0) THEN
-        IF(IL.GT.1) THEN
 C* Trap levels with no branching ratios given
+        IF(IL.GT.1) THEN
+C* Assume 100% transition to ground level
           WRITE(LTT,912) IL
           WRITE(LER,912) IL
+          JL=1
+          LBR(1,IL)=EL
+          BRR(1,IL)=1
         END IF
-C* Assume 100% transition to ground level
-        JL=1
-        LBR(1,IL)=EL
-        BRR(1,IL)=1
         GO TO 39
       END IF
 C* Read the branching ratios
@@ -2871,7 +2860,7 @@ C* Spline fit log of the cross section (oner non-zero range)
   330 F1=0.
       F2=0.
       CALL FINSP3(RWO(JX),RWO(JY),JE
-     1           ,RWO(KX),RWO(KY),RWO(KY),KE,F1,F2,RWO(LS))
+     1           ,RWO(KX),RWO(KY),RWO(KY),KE,F1,F2,RWO(LS)) 
 C* Convert back to cross sections from log
   332 DO 336 J=1,NE1
       R=RWO(LY-1+J)
@@ -3041,8 +3030,9 @@ C* Linearly interpolate Legendre coefficients to EOU
         E1  =E2
         L2  =L1+NA+2
         E2  =RWO(L2)
-        IF(ABS(EOU-E2).LT.DLVL .OR.
-     1    (E2.LT.EOU .AND. IEP.GE.NEP) ) THEN
+        TST =DLVL*EIN*1E-6
+        IF(ABS(EOU-E2).LT.TST .OR.
+     &    (E2.LT.EOU .AND. IEP.GE.NEP) ) THEN
 C* Last point or matching level to within tolerance
             CALL FLDMOV(NA1,RWO(L2+1),QQ)
 C...          print *,'Match MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
@@ -3055,13 +3045,12 @@ C...          read (*,'(a1)') yes
 C* Try next point or linearly interpolate
           IF(E2.LT.EOU) GO TO 38
           CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
-          IF(ABS(EOU-E1).GT.DLVL) THEN
-C*          If Eout equals first point, the distribution is also
-C*          interpolated to simplify coding - suppress printout
+C...      IF(ABS(EOU-E1).GT.DLVL) THEN
+          IF(ABS(EOU-E1).GT.TST) THEN
+C*          If Eout equals 1-st point, interpolate but suppress printout
             WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
             WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
 c...
-c...            print *,'eou,e1,e2',eou,e1,e2
 c...            print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
 c...
           END IF
@@ -3103,9 +3092,9 @@ C* All discrete levels processed - nothing to write
    80 MT=0
       RETURN
   910 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Eout'
-     &      ,I3,I4,1P,3E11.3/
-     &       '                  Distribution interpolated between    '
-     &      ,2E11.3)
+     &      ,I3,I4,1P,E10.3E1,2E12.5E1/
+     &       '                  Distribution interpolated between   '
+     &      ,2E12.5E1)
       END
       SUBROUTINE WRMF6Y(LOU,MXE,MXT,MXR
      1                 ,EIN,XSC,QQM,QQI,MTH,RWO
@@ -3280,7 +3269,7 @@ C* Loop over the incident particle energies
 C*
       RETURN
       END
-      SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,ENL,NBR,LBR,BRR
+      SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,ENL,NBR,LBR,BRR
      1                 ,RWO,MXLI,MXLJ,NS)
 C-Title  : WRMF12 Subroutine
 C-Purpose: Write MF 12 data in ENDF-6 format
@@ -3293,36 +3282,43 @@ C*
       L0 =2
       LG =1
       LP =0
-C* Loop over all discrete levels above ground state
-      DO 120 LL=2,NLV
-C* Define reaction type MT number
-      MT=MT0+LL-1
+C* Loop over all discrete levels
+      DO LL=1,NLV
 C* Number of levels below the present one
-      NS=LL-1
+        NS=NL1+LL-1
+C* Define reaction type MT number
+C...    MT=MT0+NS
+        MT=MT0+LL-1
 C* Energy of the level
-      ES=ENL(LL)
+C...    ES=ENL(NS+1)
+        ES=ENL(LL)
 C* Number of levels with non-zero branching ratio
-      NT=NBR(LL)
+C...    NT=NBR(NS+1)
+        NT=NBR(LL)
+        IF(NT.GT.0) THEN
 C* Head record
-      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, L0, LG, NS,  0)
+          CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, L0, LG, NS,  0)
 C* List record
-      DO 110 JT=1,NT
-C* Determine the energy level of the final state
+          DO JT=1,NT
+C* Determine the energy level of the final state (sort in descending order)
 c... Level energies sorted in descending order (fix error that reappeared?)
-c...  LE=LBR(NT+1-JT,LL)
-      LE=LBR(JT,LL)
-      RWO(1,JT)=ENL(LE)
+c...        LE=LBR(NT+1-JT,LL)
+C...        LE=LBR(JT,NS+1)
+            LE=LBR(JT,LL)
+            RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
-c...  RWO(2,JT)=BRR(NT+1-JT,LL)
-      RWO(2,JT)=BRR(JT,LL)
-  110 CONTINUE
-      CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
+c...        RWO(2,JT)=BRR(NT+1-JT,LL)
+C...        RWO(2,JT)=BRR(JT,NS+1)
+            RWO(2,JT)=BRR(JT,LL)
+          END DO
+          CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
 C* Section end
-      NS=99998
-      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
-      NS=0
+          NS=99998
+          CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+          NS=0
+        END IF
 C*
-  120 CONTINUE
+      END DO
       RETURN
       END
       SUBROUTINE WRMF14(LOU,MAT,MT0,IZA,AWR,NLV,NS)
@@ -3524,7 +3520,7 @@ C-Purpose: Interpolate a set of points using cubic spline
 C-Description:
 C-D  Interpolate a set of points using cubic splines. The parameters
 C-D  are the following:
-C-D    N   number of points on input argument mesh
+C-D    N   number of points on input argument mesh 
 C-D   XI   input argument mesh (array of N values in momotonic order)
 C-D   YI   function values corresponding to XI(i)
 C-D    M   number of points in the output mesh
@@ -3691,7 +3687,7 @@ C-Description:
 C-D  Excessive data points need to be removed such that the remaining
 C-D  points can be linearly interpolated to within the specified
 C-D  tolerance. The formal parameters are:
-C-D    N   number of points on input argument mesh
+C-D    N   number of points on input argument mesh 
 C-D   XI   input argument mesh (array of N values in momotonic order)
 C-D   YI   function values corresponding to XI(i)
 C-D    M   number of points in the output mesh
@@ -3747,17 +3743,19 @@ C-D  proceeds up to LMX or NP*2/3, whichever is smaller. If LMX is
 C-D  smaller or equal to LMI, the second condition prevails. The
 C-D  procedure is terminated earlier if the maximum relative difference
 C-D  between an input and a calculated point value is smaller than EMM.
-C-D  On exit, ERR contains the actual max.relative difference between
-C-D  the input and the fitted data.
 C-D    A scratch array RWO of length MXR is needed, where the value of
 C-D  MXR does not exceed LP*4+(LMX+4)*(LMX+1) .
 C-D    On output, the Legendre coefficients are stored in QQ. The actual
 C-D  order of Legendre polynomials used is contained in LMX.
+C-D  On exit, ERR contains the actual max.relative difference between
+C-D  the input and the fitted data. If negative distributions arise
+C-D  from the fit, ERR contains the most negative value.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
       ERR=0
       NLG=0
+      LM0=LMX
 c...
 c...      LMX=MIN(LMX,NP-1)
 c...
@@ -3791,8 +3789,8 @@ C* Loop to find the appropriate Legendre order
       L  =L1
    20 NLG=L
       N1 =NLG+1
-      LMM=MIN(LMX,NNP*2/3)
-      IF(LL+(NLG+1)*(NLG+3).GT.MXR)
+      LMM=MIN(LM0,NNP*2/3)
+      IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
       CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
 C* Trap zero-determinant
@@ -3812,20 +3810,24 @@ C* Check for negative distributions
       KNM=0
       JNP=0
       JNM=0
-      DO IP=1,NNP
-        YCI=POLLG1(RWO(LXP-1+IP),QQ,NLG)
-C       RER=ABS((YCI-RWO(LYP-1+IP))/YCI)
-        RER=ABS((YCI-RWO(LYP-1+IP))/QQ(1))
-        IF(RER.GT.ERR) ERR=RER
-C* Test distribution at mesh point
+      JRE=0
+      DO IP=1,NP
+        YCI=POLLG1(XP(IP),QQ,NLG)
+C       RER=ABS((YCI-YP(IP))/YCI)
+        RER=ABS((YCI-YP(IP))/QQ(1))
+        IF(RER.GT.ERR) THEN
+          ERR=RER
+          JRE=IP
+        END IF
+C* Test minimum value of the distribution at mesh point
         IF(YCI.LT.YNP) THEN
           IF(YCI.LT.0) KNP=KNP+1
           JNP=IP
           YNP=YCI
         END IF
-C* Test distribution at midpoint
+C* Test minimum value of the distribution at midpoint
         IF(IP.LT.NNP) THEN
-          XPI=(RWO(LXP-1+IP)+RWO(LXP+IP))/2
+          XPI=(XP(IP)+XP(IP+1))/2
           YCI=POLLG1(XPI,QQ,NLG)
           IF(YCI.LT.YNM) THEN
             IF(YCI.LT.0) KNM=KNM+1
@@ -3858,7 +3860,7 @@ C*        Increase order of approximation
           GO TO 20
         ELSE
 C*        Double the mesh
-          IF(NNP.LE.MXP/3) THEN
+          IF(NNP.LE.MXP/3 .AND. ERR.GT.EMM*2) THEN
             JNP=1+(NNP-1)*2
             DO J=2,NNP
               RWO(LXP+JNP+3-2*J)= RWO(LXP+NNP+1-J)
@@ -3954,7 +3956,7 @@ C* Trap zero determinant
 C-Title  : POLLG1 Function
 C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
 C-Description:
-C-D  Evaluate Legendre polynomial expansion of order NL with
+C-D  Evaluate Legendre polynomial expansion of order NL with 
 C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
@@ -3994,8 +3996,8 @@ C-
 C-Title  : MTXGUP subroutine
 C-Purpose: Matrix solver, Gauss elimination, part.pivoting
 C-Description:
-C-D Decompose matrix A, calculate determinant and/or solve a set of
-C-D linear simultaneous equations  A x = F  (order n) using Gauss
+C-D Decompose matrix A, calculate determinant and/or solve a set of 
+C-D linear simultaneous equations  A x = F  (order n) using Gauss 
 C-D elimination technique with partial pivoting by rows.
 C-Author : A.Trkov , Institute J.Stefan, Ljubljana, Slovenia
 C-Version: 1984 Original coding
