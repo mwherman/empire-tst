@@ -19,6 +19,10 @@ C-V        - Paging buffer for sorting to increase efficiency
 C-V        - Sort by outgoing particles. (A.Trkov)
 C-V  04/07 Fix format reading metastable targets (A.Trkov)
 C-V  04/09 Sort discrete level angular distributions by level E (A.Trkov)
+C-V  05/07 - Major reorganisation of coding, blocking separately the coding
+C-V          for discrete level processing and for sorting the double
+C-V          differential data.
+C-V        - Match discrete level energies to RIPL database (A.Trkov).
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -71,9 +75,11 @@ C-M       WARNING: To use this feature make sure that C4SORT.INP file
 C-M                does not exist on the default directory.
 C-M
 C-M  Old-style input instructions format:
-C-M  Two records are expected from input:
+C-M  Three records are expected from input:
 C-M  - Name of the source EXFOR file in C4 format.
 C-M  - Name of the sorted EXFOR file to be written.
+C-M  - Full path to the nuclide level files, including the directory
+C-M    delimiter at the end (\ on Windows, / on Linux, etc).
 C-M
 C-M  Keyword-oriented input instructions:
 C-M  The format follows a few simple rules, which are worth noting
@@ -126,6 +132,9 @@ C-M                11-20  ZA1 designation on the source file.
 C-M                21-30  Level energy in the source file.
 C-M                31-40  ZA2 designation on the sorted file.
 C-M                41-50  Level energy in the sorted file.
+C-M  '   DPATH  ' Full path to the nuclide level files, including the
+C-M               directory delimiter at the end
+C-M               (\ on Windows, / on Linux, etc).
 C-M  '   ENDC4S ' This keyword signals the end of C4SORT input. All
 C-M               instructions that follow are ignored.
 C-M
@@ -152,16 +161,19 @@ C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-
-      PARAMETER       (MXEN=60000,MXAL=20,LCH=52,MXIR=12000,MXEL=800)
+      PARAMETER       (MXEN=40000,MXAL=20,LCH=52,MXIR=12000,MXEL=800)
+      PARAMETER       (MEL1=20)
       CHARACTER*132    REC,RC1,RC6(MXIR)
+      CHARACTER*80     DPATH
       CHARACTER*40     FLIN,FLC4,FLOU,FLSC
       CHARACTER*35     REF
-      CHARACTER*20     ZAMT
+      CHARACTER*20     ZAMT,CH20,EL1(MXEL)
       CHARACTER*15     EIN
       CHARACTER*14     ALIA(4,MXAL)
       CHARACTER*(LCH)  ENT(MXEN)
-      CHARACTER*9      POU,ELV,EL1(MXEL)
-      CHARACTER*1      EN1(LCH,MXEN), char1, char2
+      CHARACTER*9      POU,ELV,ELW
+      CHARACTER*3      LB3
+      CHARACTER*1      EN1(LCH,MXEN)
       LOGICAL          EXST
       DIMENSION        IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
      &                ,NSE(MXEN),ID3(MXEL),ID4(MXEL)
@@ -179,6 +191,12 @@ C* Files and logical file unit numbers
       MPG =20000
       FLV =-1
 C*
+C* Default path to RIPL nuclide level energy files
+      DPATH='..\Sources\Inputs\Levels\'
+      LPATH=25
+C*
+C* Process the input
+C*
 C* Check for the existence of the input file
       INQUIRE(FILE=FLIN,EXIST=EXST)
       IF(EXST) GO TO 14
@@ -189,13 +207,13 @@ C* C4SORT Input exists -Process the input file
    14 OPEN(UNIT=LIN,FILE=FLIN,STATUS='OLD')
       IER=0
       NALI=MXAL
-      CALL C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,IER)
+      CALL C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
       CLOSE(UNIT=LIN)
       IF(IER.EQ.0) GO TO 16
 C* Remedial action if fatal error on input is encountered:
 C* Print a warning to default output and try reading default input
    15 NALI=MXAL
-      CALL C4SINP(LKB,LTT,FLC4,FLOU,NALI,ALIA,IER)
+      CALL C4SINP(LKB,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
       FLIN='Keyboard'
       IF(IER.EQ.0) GO TO 16
 C* Try input/output ENDF files from default input/output
@@ -205,7 +223,7 @@ C* Try input/output ENDF files from default input/output
       MATH=0
       GO TO 17
 C*
-C* Input instructions processed
+C* Input instructions processed - start processing the C4 file
    16 OPEN (UNIT=LC4,FILE=FLC4,STATUS='OLD')
       OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
 C* Write the banner to output
@@ -215,6 +233,8 @@ C* Write the banner to output
       WRITE(LTT,900) '              Input instructions file : ',FLIN
       WRITE(LTT,900) '       Source EXFOR file in C4 format : ',FLC4
       WRITE(LTT,900) '       Sorted EXFOR file in C4 format : ',FLOU
+      WRITE(LTT,900) ' Directory path to nuclear level files: ',DPATH
+
       WRITE(LTT,900)
       IF(NALI.GT.0) THEN
         WRITE(LTT,900) ' Aliased quantities:                    '
@@ -231,214 +251,69 @@ C* Begin processing the source file
       JLN=0
       MLN=0
       MOU=0
-      IEN=0
 C* Copy records to scratch until the reference changes
    20 READ (LC4,901,END=200) REC
-      IF(REC(2:20).EQ.'                   ') GO TO 200
+      NSET=NSET+1
+   24 IF(REC(2:20).EQ.'                   ') GO TO 200
 C* Change any alias ZA/MF/MT designations
       CALL CALIAS(NALI,ALIA,REC)
 C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
 C* Decode the incident particle energy
-      READ (REC(23:31),931) FIN
+      READ (REC(23:31),931,ERR=801) FIN
 C* Decode secondary or discrete level energy
-      READ(REC(77:85),931) FLV
-C* Check for change in IZI, IZA, MF, MT
-      IF(REC(1:20).NE.ZAMT) GO TO 40
-C* Check for change in reference
-      IF(REC(98:132).NE.REF) GO TO 40
-C* Process discrete level reactions
-      IF     (MF.EQ.3 .AND. NINT(FLV).GT.0) THEN
-C* Re-sequence MF3 data, grouping by level energy
-        MF1=MF
-        IR =0
-   22   IR =IR+1
-        IF(IR.GT.MXEL) STOP 'C4SORT ERROR - MXEL limit exceeded'
+      READ (REC(77:85),931,ERR=801) FLV
+C* Adjust the level energy if necessary (and possible)
+      LB3=REC(95:97)
+      IF(FLV.GT.0) THEN
+        IF(LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') THEN
+          READ (REC(1:20),902,ERR=801) IZA
+          FLV0=FLV
+          CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
 c...
-c...          print *,ir,rec
+c...          print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
-        READ(REC(86:94),931) FLD
-C* If range of levels is given, redefine level energy to average
-        IF(NINT(FLD).GE.NINT(FLV)) THEN
-          FL1=FLV
-          FLV=(FLD+FL1)/2
-          FLD=(FLD-FL1)/2
-          WRITE(ELV,931) FLD
-          REC(86:94)=ELV
         END IF
-        WRITE(ELV,931) FLV
-        REC(77:85)=ELV
-        RC6(IR)=REC
-        EL1(IR)=ELV
-        READ (LC4,901,END=200) REC
-        IF(REC(1:20).EQ.'                    ') GO TO 24
-C* Decode the MF number
-        READ (REC(13:15), * ,END=801,ERR=801) MF
-C* Check for change in IZI, IZA, MF, MT
-        IF(MF       .NE. MF1) GO TO 24
-        IF(REC(1:20).NE.ZAMT) GO TO 24
-C* Check for change in reference
-        IF(REC(98:132).NE.REF) GO TO 24
-C* Decode the level energy
-        READ(REC(77:85),931) FLV
-        IF(FLV.EQ.0) GO TO 24
-        GO TO 22
-C* Block for one level energy read - Sort the data
-   24   LEL=9
-        CALL SRTTCH(IR,LEL,ID3,ID4,EL1)
-C* Write the sorted set
-        L  =ID4(1)
-        ELV=EL1(L)
-        RC1=RC6(L)
-        READ (RC1(23:31),931) FIN
-        WRITE(EIN,932) FIN
-C* Redefine the first level sorting string
-        ENT(NEN)=RC1(1:19)//RC1(68:76)//ELV//EIN
-        DO I=1,IR
-          L=ID4(I)
-C* If Elv changes, make a new record entry
-          IF(EL1(L).NE.ELV) THEN
-C* Save the number of points for the previous entry
-            IF(NEN.GT.0) NSE(NEN)=NSET
-C* Save the new entry data
-            IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
-            NEN=NEN+1
-            LNE(NEN)=JLN
-            RC1 =RC6(L)
-            REF =RC1(98:132)
-            ZAMT=RC1(1:20)
-            READ (RC1(23:31),931) FIN
-            WRITE(EIN,932) FIN
-            ELV=EL1(L)
-            IFIN=NINT(FIN)
-            IFLV=NINT(FLV)
-            ENT(NEN)=RC1(1:19)//RC1(68:76)//ELV//EIN
-c...            print *,nen,ien,ent(nen),' ',ref
-            NSET=0
-          END IF
-          WRITE(LSC,901) RC6(L)
-          JLN =JLN+1
-          NSET=NSET+1
-          JSET=JSET+1
-        END DO
-c
-c      WRITE(41,*) 'i,lne,nse,id2,ent'
-c      DO I=1,NEN
-c        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
-c      END DO
-c      STOP
-c
-        IF(REC(1:20).EQ.'                    ') GO TO 200
-        GO TO 40
-C* Process differential and double differential data
-      ELSE IF(MF.EQ.4) THEN
-C* Check for change in level energy for angular distributions
-        READ(REC(77:85),931) FLV
-        IF(NINT(FLV).NE.IFLV) GO TO 40
-C* Check for change in incident particle energy
-        IF(NINT(FIN).NE.IFIN) GO TO 40
-      ELSE IF(MF.GT.4 .AND. MF.LE.6) THEN
-C* Check for change in incident particle energy
-        IF(NINT(FIN).NE.IFIN) GO TO 40
-C* Re-sequence double differential ang.distrib to spectra
-        IR  =0
-   32   IR=IR+1
-        IF(IR.GT.MXIR) STOP 'C4SORT ERROR - MXIR limit exceeded'
-        RC6(IR)=REC
-        READ (LC4,901,END=200) REC
-        IF(REC(1:20).EQ.'                    ') GO TO 34
-C* Change any alias ZA/MF/MT designations
-        CALL CALIAS(NALI,ALIA,REC)
-C* Decode the MF number
-        READ (REC(13:15), * ,END=801,ERR=801) MF1
-C* Decode the incident particle energy
-        READ (REC(23:31),931) FIN
-C* Check for change in IZI, IZA, MF, MT
-        IF(MF1      .NE.  MF) GO TO 34
-        IF(NINT(FIN).NE.IFIN) GO TO 34
-        IF(REC(1:20).NE.ZAMT) GO TO 34
-C* Check for change in reference
-        IF(REC(98:132).NE.REF) GO TO 34
-        GO TO 32
-C*
-C* Block for one incident energy read - Sort the data
-   34   CONTINUE
-C*
-C* Write the sorted double differential block - set first angle
-        II =1
-        RC1=RC6(II)
-   36   II =II+1
-        READ (RC1(59:67),931) ANG
-        IAN=NINT(ANG*100000)
-        RC1(59:67)='#########'
-        JSET=1
-C* Find and print all other entries at this angle
-          DO J=II,IR
-            RC1=RC6(J)
-C...            PRINT *,'   ',IAN,RC1(59:67),J,II
-C* Ignore records that are already processed
-            IF (RC1(59:67).NE.'#########') THEN
-              READ (RC1(59:67),931) ANG
-              JAN=NINT(ANG*100000)
-              IF(JAN.EQ.IAN) THEN
-C...                PRINT *,'Duplicate ',RC1(1:70)
-                WRITE(LSC,901) RC1
-                JLN=JLN+1
-                NSET=NSET+1
-                JSET=JSET+1
-                RC1(59:67)='#########'
-                RC6(J)=RC1
-              END IF
-            END IF
-          END DO
-C* Find the next angle
-          I=II
-          DO J=I,IR
-            RC1=RC6(J)
-            IF (RC1(59:67).NE.'#########') THEN
-C...                PRINT *,'Printing ',RC1(1:70)
-              WRITE(LSC,901) RC1
-              JLN=JLN+1
-              NSET=NSET+1
-              II=J
-              GO TO 36
-            END IF
-          END DO
-        IF(REC(1:20).EQ.'                    ') GO TO 200
-        GO TO 40
+        WRITE(ELW,931) FLV
+        REC(77:85)=ELW
       END IF
+C* Special treatment discrete level and secondary energy reactions
+      IF(MF.EQ.3 .AND. NINT(FLV).GT.0) GO TO 30
+      IF(MF.EQ.4 .AND. NINT(FLV).GT.0) GO TO 30
+      IF(MF.GE.4 .AND. MF.LE.6) GO TO 60
 C*
+      IF(REC( 1: 20).EQ.ZAMT .AND. REC(98:132).EQ. REF) THEN
 C* Record identified to belong to the same set - process next record
-      WRITE(LSC,901) REC
-      JLN=JLN+1
-      NSET=NSET+1
-      GO TO 20
-C*
-C* Make a new record entry - save the incident particle energy
-   40 READ (REC(23:31),931) FIN
-      WRITE(EIN,932) FIN
-C* If range of levels is given, redefine level energy to average
-      READ (REC(77:85),931) FLV
-      IF(MF.EQ.3 .AND. NINT(FLV).GT.0) THEN
-        READ(REC(86:94),931) FLD
-        IF(NINT(FLD).GE.NINT(FLV)) THEN
-          FL1=FLV
-          FLV=(FLD+FL1)/2
-          FLD=(FLD-FL1)/2
-          WRITE(ELV,931) FLD
-          REC(86:94)=ELV
-        END IF
-        WRITE(ELV,931) FLV
-        REC(77:85)=ELV
+        WRITE(LSC,901) REC
+        JLN=JLN+1
+        GO TO 20
       END IF
+C* On change in ZA, MF, MT or reference - make an index entry
+C* Save the incident particle energy
+      READ (REC(23:31),931,ERR=801) FIN
+      WRITE(EIN,932) FIN
+C...C* If range of levels is given, redefine level energy to average
+C...      READ (REC(77:85),931,ERR=801) FLV
+C...      IF(MF.EQ.3 .AND. NINT(FLV).GT.0) THEN
+C...        READ(REC(86:94),931,ERR=801) FLD
+C...        IF(NINT(FLD).GE.NINT(FLV)) THEN
+C...          FL1=FLV
+C...          FLV=(FLD+FL1)/2
+C...          FLD=(FLD-FL1)/2
+C...          WRITE(ELV,931) FLD
+C...          REC(86:94)=ELV
+C...        END IF
+C...        WRITE(ELV,931) FLV
+C...        REC(77:85)=ELV
+C...      END IF
 C* Save the number of points for the previous entry
-      IR =1
-      RC6(IR)=REC
+      IF(NEN.GT.0) NSE(NEN)=NSET
+C...
+C...      if(nen.gt.0) print *,'      at20 nen,nset',nen,nset
+C...
+C* Save the new record entry
       WRITE(LSC,901) REC
       JLN=JLN+1
-      NSET=NSET+1
-      IF(NEN.GT.0) NSE(NEN)=NSET
-C* Save the new entry data
       IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
       NEN=NEN+1
       LNE(NEN)=JLN
@@ -446,9 +321,10 @@ C* Modify "gamma" flag so that gamma distributions appear last
       IF(REC(73:76).EQ.' 0.9') REC(68:76)='   9999.9'
 C* Define level energies for discrete level reactions (if given)
       ELV='         '
+      LB3=REC(95:97)
       IF((MF.EQ.3 .OR. MF.EQ.4) .AND.
-     &   (REC(95:97).EQ.'LVL' .OR. REC(95:97).EQ.'DE2') ) THEN
-        READ(REC(77:85),931) DMY
+     &   (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') ) THEN
+        READ(REC(77:85),931,ERR=801) DMY
         WRITE(ELV,931) DMY
       END IF
 C* Identify outgoing particle (if relevant)
@@ -466,13 +342,248 @@ C* Identify outgoing particle (if relevant)
       ZAMT=REC(1:20)
       IFIN=NINT(FIN)
       IFLV=NINT(FLV)
-c...      print *,nen,ien,ent(nen),' ',ref
+c...
+c...      print '(i5,3a)',nen,ent(nen),' ',ref//' in30'
+c...
       NSET=0
 C* Proceed to next record
-      IF(IEN.EQ.0) GO TO 20
+      GO TO 20
+C*
+C* Special treatment discrete level and secondary energy reactions
+C* Re-sequence MF3 data of same type and author by level energy
+   30 MF1 =MF
+      REF =REC(98:132)
+      ZAMT=REC(1:20)
+      IFIN=NINT(FIN)
+      IFLV=NINT(FLV)
+      IR  =0
+   32 IR  =IR+1
+      IF(IR.GT.MXEL) STOP 'C4SORT ERROR - MXEL limit exceeded'
+c...
+c...        print *,ir,rec
+c...
+C* If range of levels/energies is given, redefine
+C...      READ(REC(86:94),931,ERR=801) FLD
+C...      IF(NINT(FLD).GE.NINT(FLV)) THEN
+C...        FL1=FLV
+C...        FLV=(FLD+FL1)/2
+C...        FLD=(FLD-FL1)/2
+C...        WRITE(ELW,931) FLD
+C...        REC(86:94)=ELW
+C...      END IF
+C...      WRITE(ELV,931) FLV
+C...      REC(77:85)=ELV
+C*
+C* Standardise level/secondary energy format
+      WRITE(ELW,931) FLV
+      WRITE(POU,938) MIN(999999999,NINT(FIN))
+C* Save record to RC6 field and sorting string to EL1
+      REC(77:85)=ELW
+      RC6(IR)=REC
+      EL1(IR)=ELW//POU//'  '
+C*
+C* Read a new record from the C4 file
+      READ (LC4,901,END=200) REC
+      IF(REC(1:20).EQ.'                    ') GO TO 34
+C* Decode the MF number
+      READ (REC(13:15), * ,END=801,ERR=801) MF
+C* Decode the incident particle energy
+      READ (REC(23:31),931,ERR=801) FIN
+C* Adjust the level energy if necessary (and possible)
+      READ(REC(77:85),931,ERR=801) FLV
+      LB3=REC(95:97)
+      IF(FLV.GT.0 .AND. (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC')) THEN
+        READ (REC(1:20),902,ERR=801) IZA
+        FLV0=FLV
+        CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
+c...
+c...          print *,'"',rec(1:20),'"',iza,flv0,flv,ier
+c...
+        WRITE(ELW,931) FLV
+        REC(77:85)=ELW
+      END IF
+C* Check for change in IZA, MF, MT
+      IF(REC( 1: 20).NE.ZAMT) GO TO 34
+C* Check for change in reference
+      IF(REC(98:132).NE. REF) GO TO 34
+C* Check for change in incident energy (if MF4)
+      IF(MF.NE.3 .AND. NINT(FIN)  .NE.IFIN) GO TO 34
+C* Check for the presence of level or secondary energy
+      IF(MF.EQ.3 .AND. FLV.EQ.0) GO TO 34
+      GO TO 32
+C*
+C* Block for one data type/author read - Sort by level
+   34 CALL SRTTCH(IR,MEL1,ID3,ID4,EL1)
+C* Write the sorted set from saver record sequence in RC6
+      ELV='#########'
+c...
+c...      do j=1,ir
+c...         print *,rc6(j)
+c...      end do
+c...
+      DO I=1,IR
+        L=ID4(I)
+        RC1 =RC6(L)
+C* Add record to scratch file
+        WRITE(LSC,901) RC1
+        JLN =JLN+1
+C* If Elv changes, make a new record entry
+        CH20=EL1(L)
+c...
+c...        print *,'ch20,elv',ch20,elv
+c...
+        IF(CH20(1:9).NE.ELV) THEN
+C* Save the number of points for the previous entry
+          IF(NEN.GT.0) NSE(NEN)=NSET
+c...
+c...          if(nen.gt.0) print *,'      at34 nen,nset',nen,nset
+c...
+C* Save the new entry data
+          IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
+          NEN=NEN+1
+          LNE(NEN)=JLN
+          REF =RC1(98:132)
+          ZAMT=RC1(1:20)
+          READ (RC1(23:31),931) FIN
+          READ (RC1(77:85),931) FLV
+          WRITE(EIN,932) FIN
+          CH20=EL1(L)
+          ELV =CH20(1:9)
+          IFIN=NINT(FIN)
+          IFLV=NINT(FLV)
+          ENT(NEN)=RC1(1:19)//RC1(68:76)//ELV//EIN
+c...
+c...            print '(i5,3a)',nen,ent(nen),' ',ref//' in24'//EL1(L)
+c...
+          NSET=0
+        END IF
+        NSET=NSET+1
+        JSET=JSET+1
+      END DO
+c
+c      WRITE(41,*) 'i,lne,nse,id2,ent'
+c      DO I=1,NEN
+c        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
+c      END DO
+c      STOP
+c
+      IF(REC(1:20).EQ.'                    ') GO TO 200
+      GO TO 24
+C*
+C* Re-sequence double differential data by angles/incident energies
+   60 CONTINUE
+      REF =REC(98:132)
+      ZAMT=REC(1:20)
+      IFIN=NINT(FIN)
+c...
+c...        if(nen.gt.0) print *,'      at60 nen,nset',nen,nset
+c...
+      IR  =0
+   62 IR  =IR+1
+      IF(IR.GT.MXIR) STOP 'C4SORT ERROR - MXIR limit exceeded'
+C* Save record to RC6 field and sorting string to EL1
+      ELW=REC(59:67)
+      IF(ELW.NE.'         ') THEN
+        READ (ELW,931) ANG
+        WRITE(ELW,936) ANG
+        REC(59:67)=ELW
+        WRITE(ELW,936) ANG+1
+      END IF
+      RC6(IR)=REC
+      IF(MF.EQ.4) THEN
+C* Sort MF4 by incident energy and angle
+        WRITE(POU,938) MIN(999999999,NINT(FIN))
+        EL1(IR)=POU//ELW//'  '
+      ELSE
+C* Sort MF6 by angle and outgoing energy
+        READ (RC1(77:85),931) FLV
+        WRITE(POU,938) MIN(999999999,NINT(FLV))
+        EL1(IR)=ELW//POU//'  '
+      END IF
+C* Read the next record
+      READ (LC4,901,END=200) REC
+      IF(REC(1:20).EQ.'                    ') GO TO 64
+C* Change any alias ZA/MF/MT designations
+      CALL CALIAS(NALI,ALIA,REC)
+C* Decode the MF number
+      READ (REC(13:15), * ,END=801,ERR=801) MF
+C* Decode the incident particle energy
+      READ (REC(23:31),931,ERR=801) FIN
+C* Check for change in IZI, IZA, MF, MT, reference or incident energy
+      IF(REC( 1: 20).NE.ZAMT) GO TO 64
+      IF(REC(98:132).NE. REF) GO TO 64
+      IF(MF.NE.4 .AND. NINT(FIN)  .NE.IFIN) GO TO 64
+      GO TO 62
+C*
+C* Block for one data type/author read - Sort by level
+   64 CALL SRTTCH(IR,MEL1,ID3,ID4,EL1)
+C* Write the sorted set from saver record sequence in RC6
+      POU='#########'
+c...
+c...      do j=1,ir
+c...         print *,rc6(j)
+c...      end do
+c...
+      DO I=1,IR
+        L=ID4(I)
+        RC1 =RC6(L)
+C* Add record to scratch file
+        WRITE(LSC,901) RC1
+        JLN =JLN+1
+C* On change of incident energy(MF4) of angle(MF6), make a new record entry
+        CH20=EL1(L)
+        IF(CH20(1:9).NE.POU) THEN
+C* Save the number of points for the previous entry
+          IF(NEN.GT.0) NSE(NEN)=NSET
+c...
+c...          if(nen.gt.0) print *,'      at64 nen,nset',nen,nset
+c...          print *,'el1,pou',ch20,pou
+c...
+C* Save the new entry data
+          IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
+          NEN=NEN+1
+          LNE(NEN)=JLN
+          RC1 =RC6(L)
+          REF =RC1(98:132)
+          ZAMT=RC1(1:20)
+          EIN =RC1(23:31)
+          READ (EIN,931) FIN
+          IF(MF.EQ.4) THEN
+            WRITE(EIN,932) FIN
+            ENT(NEN)=RC1(1:19)//'         '//EIN//'         '
+            WRITE(POU,938) MIN(999999999,NINT(FIN))
+          ELSE
+            WRITE(EIN,932) FIN
+            POU=RC1(59:67)
+            READ (POU,931) ANG
+            WRITE(POU,936) ANG+1
+            ENT(NEN)=RC1(1:19)//RC1(68:76)//EIN//POU
+          END IF
+          CH20=EL1(L)
+          IFIN=NINT(FIN)
+c...
+c...          print '(i5,3a)',nen,ent(nen),' ',ref//' in64'
+c...
+          NSET=0
+        END IF
+        NSET=NSET+1
+        JSET=JSET+1
+      END DO
+c
+c      WRITE(41,*) 'i,lne,nse,id2,ent'
+c      DO I=1,NEN
+c        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
+c      END DO
+c      STOP
+c
+      IF(REC(1:20).EQ.'                    ') GO TO 200
+      GO TO 24
+C*
 C* Source C4 file processed
-  200 NSET=NSET+1
-      IF(NEN.GT.0) NSE(NEN)=NSET
+  200 IF(NEN.GT.0) NSE(NEN)=NSET
+c...
+c...        if(nen.gt.0) print *,'      at200 nen,nset',nen,nset
+c...
       WRITE(LTT,921) ' Number of EXFOR entries to sort      : ',NEN
       WRITE(LTT,921) ' Total number of records              : ',JLN
       CLOSE(UNIT=LC4)
@@ -480,11 +591,14 @@ C*
 C* Sort the entries
       CALL SRTTCH(NEN,LCH,ID1,ID2,EN1)
 C...
-      PRINT *,'Writing sorted entry list to c4sort.scr'
+c...      PRINT *,'Writing sorted entry list to c4sort.scr'
       OPEN (UNIT=41,FILE='c4sort.scr',STATUS='UNKNOWN')
-      WRITE(41,*) 'i,lne,nse,id2,ent'
+      WRITE(41,*) 'i,id2,lne,nse,ent'
+
       DO I=1,NEN
-        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
+        J=I
+        J=ID2(I)
+        WRITE(41,'(4I6,A52)') I,J,LNE(J),NSE(J),ENT(J)
       END DO
       CLOSE(UNIT=41)
 C...
@@ -499,8 +613,10 @@ C* Loop over different entries
         J   =ID2(I)
         ILN =LNE(J)
         NSET=NSE(J)
+c...
 c...          print *,'Sorted',j
 c...          print *,'I,I1,Iln,Nset',I,I1,Iln,Nset
+c...
 C* If indexing is correct, this should not happen
         IF( ( ILN.LE. 0 .OR. ILN.GT.KLN) .OR.
      &      (NSET.LE. 0 .OR. ILN+NSET-1.GT.KLN) ) THEN
@@ -526,26 +642,8 @@ C* Rewind if next entry ILN appears before the current buffer
           JJ=JLN-I1+1
 c...          print *,'i1,i2,jln',i1,i2,jln,JJ
           REC=RC6(JJ)
-CMH Move year adjacent to the accession number
-          DO ichar=98,122
-             IF(REC(ichar:ichar) .EQ.'(' ) THEN
-                char1=REC(ichar+1:ichar+1)
-                char2=REC(ichar+2:ichar+2)
-                REC(ichar:ichar)=' '
-                REC(ichar+1:ichar+1)=' '
-                REC(ichar+2:ichar+2)=' '
-                REC(ichar+3:ichar+3)=' '
-                REC(119:119)='('
-                REC(120:120)=char1
-                REC(121:121)=char2
-                REC(122:122)=')'
-                GOTO 599
-             ENDIF
-          ENDDO
-  599     CONTINUE        
-          
 C* Suppress printout of negative cross sections
-          READ (REC,941) MF,XS
+          READ (REC,941,ERR=801) MF,XS
           IF(MF.NE.3 .OR. XS.GT.0) WRITE(LOU,901) REC
 C* Print a message after every MPG sorted records
           MLN=MLN+1
@@ -557,6 +655,7 @@ C* Print a message after every MPG sorted records
         END DO
 C* Proceed to the next data set
   420 CONTINUE
+      WRITE(LTT,921)'                       Sorted records : ',KLN
 C*
 C* All data processed
   600 CLOSE(UNIT=LOU)
@@ -568,22 +667,26 @@ C* Error trap
 C*
   900 FORMAT(2A40)
   901 FORMAT(A132)
+  902 FORMAT(5X,I6)
   921 FORMAT(A40,I6)
   931 FORMAT(BN,F9.0)
   932 FORMAT(F15.3)
+  936 FORMAT(F9.6)
+  938 FORMAT(I9)
   941 FORMAT(12X,I3,25X,F9.0)
       END
-      SUBROUTINE C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,IER)
+      SUBROUTINE C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
 C-Title  : Subroutine C4SINP
 C-Purpose: Process input instructions for C4SORT
       PARAMETER    (MXKW=10)
+      CHARACTER*80  DPATH
       CHARACTER*40  FLC4,FLOU
       CHARACTER*14  WORD,ALIA(4,1)
       CHARACTER*10  KWRD(MXKW),REC(8),C10
 C*
       DATA KWRD
      1/'$* C4SORT ','   FLC4IN ','   FLC4OU ','          ','          '
-     1,'   ALIAS  ','   ALIASLV','          ','          ','   ENDC4S '/
+     1,'   ALIAS  ','   ALIASLV','   DPATH  ','          ','   ENDC4S '/
 C* Set upper limit on alias and preset actual number
       MXAL=NALI
       NALI=0
@@ -600,6 +703,22 @@ C* Define input and output ENDF files
       FLC4=REC(1)//REC(2)//REC(3)//REC(4)
       READ (LIN,901,ERR=800) REC
       FLOU=REC(1)//REC(2)//REC(3)//REC(4)
+      READ (LIN,901,END=200) REC
+      DPATH=REC(1)//REC(2)//REC(3)//REC(4)
+     &    //REC(5)//REC(6)//REC(7)//REC(8)
+C* Determine the length of the directory path string
+      IF(DPATH(1:1).EQ.'-') THEN
+        LPATH=-1
+        RETURN
+      END IF
+      LPATH=80
+      DO WHILE (LPATH.GT.1 .AND. DPATH(LPATH:LPATH).EQ.' ')
+        LPATH=LPATH-1
+      END DO
+      IF(LPATH.EQ.0) THEN
+        DPATH='.\'
+        LPATH=2
+      END IF
       RETURN
 C*
 C* Keyword-oriented input
@@ -666,7 +785,22 @@ C* '   ALIASLV'
       WRITE(ALIA(3,NALI),963) ELV1
       WRITE(ALIA(4,NALI),963) ELV2
       GO TO 90
-  180 CONTINUE
+C* '   DPATH  '
+  180 DPATH=REC(1)//REC(2)//REC(3)//REC(4)//REC(5)//REC(6)//REC(7)
+      IF(DPATH(1:1).EQ.'-') THEN
+        LPATH=-1
+        GO TO 90
+      END IF
+      LPATH=70
+      DO WHILE (LPATH.GT.1 .AND. DPATH(LPATH:LPATH).EQ.' ')
+        LPATH=LPATH-1
+      END DO
+      IF(LPATH.EQ.0) THEN
+        DPATH='.\'
+        LPATH=2
+      END IF
+      GO TO 90
+C* Unused
   190 CONTINUE
       GO TO 90
 C* '   ENDSIX '
@@ -795,3 +929,126 @@ C...
    38 CONTINUE
       RETURN
       END
+      SUBROUTINE MCHLVL(IZA,FLVL,DPATH,LPATH,IER)
+C-Title  : Subroutine MCHLVL
+C-Purpose: Redefine level energy that most closely matches RIPL
+C-D
+C-D INPUT:  IZA   integer ZA designation (1000*Z+A)
+C-D         FLVL  initial level energy (to be matched)
+C-D OUTPUT: FLVL  most closely matching level energy
+C-
+      PARAMETER       (MXLVL=200)
+      DOUBLE PRECISION ELVL
+      CHARACTER*80     DPATH
+      DIMENSION        ELVL(MXLVL)
+C*
+      SAVE IZA0,IFND,ELVL
+C*
+      DATA IZA0,IFND/ -1, 0 /
+C*
+      IF(IZA.NE.IZA0) THEN
+        IZ=IZA/1000
+        IA=IZA-IZ*1000
+        CALL read_levels_RIPL(IA,IZ,ELVL,NLVL,DPATH,LPATH,IER)
+        IFND=0
+        IF(NLVL.GT.MXLVL) STOP 'MCHLVL ERROR - MXLVL limit exceeded'
+        IF(IER.NE.0) THEN
+          PRINT *,'ERROR Reading RIPL energy level file for ZA',IZA
+          STOP    'ERROR Reading RIPL energy level file'
+        END IF
+        IFND=1
+      END IF
+      IZA0=IZA
+      IF(IFND.NE.1) THEN
+        IER=1
+        RETURN
+      END IF
+C* Find the closest match
+      FI=FLVL*1E-6
+      DL=FI
+      JL=1
+      DO I=1,NLVL
+        EI=ELVL(I)
+        DD=ABS(EI-FI)
+        IF(DD.LT.DL) THEN
+          JL=I
+          DL=DD
+        END IF
+      END DO
+      FLVL=ELVL(JL)*1E6
+      RETURN
+      END
+      subroutine read_levels_RIPL(ia,iz,elev,nlev,dpath,lpath,ierr)
+C-Title  : Subroutine read_levels_RIPL
+C-Purpose: Read the nuclear level files from the RIPL database
+C-Author : R. Capote Noy, IAEA, Vienna, Austria
+C-Version: 2005/07 (original code)
+C-D
+C-D INPUT:  IA,IZ are the mass and atomic number
+C-D         dpath             path to the RIPL level directory files
+C-D         lpath             length of the RIPL level directory path
+C-D OUTPUT: elev(i),i=1,nlev  Array containing the levels' energies for nlev levels
+C-D         ierr              Error flag
+C-D                       0 = no error
+C-D                       1 = Levels file not found
+C-D                       2 = Isotope not found
+C-
+      implicit none
+c
+c     dummy arguments
+c
+      character*80 dpath
+      integer ia,iz, nlev, lpath, ierr
+      double precision elev(*)
+c   
+c     local variables
+c
+      character*1 cdum
+      character*3 ctmp3
+      character*8 cinp
+      character*5 chelem
+      integer iar,izr,nlvr,ngamr,lvpr,ndbrlin,ilv,nbr
+      integer itmp,itmp1,itmp2
+      double precision qn, elvr,xjlvr,t12
+
+      WRITE (ctmp3,'(I3.3)') iz
+      cinp = 'z'//ctmp3//'.dat'
+      OPEN (13,FILE = dpath(1:lpath)//cinp,STATUS = 'OLD',
+     &         ERR = 200)
+
+  100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
+     &      ngamr, itmp1, itmp2, qn
+      IF (ia.NE.iar .OR. iz.NE.izr) THEN
+         DO ilv = 1, nlvr + ngamr
+            READ (13,'(A1)') cdum
+         ENDDO
+         GOTO 100
+      ENDIF
+      nlev = 0
+      DO ilv = 1, nlvr
+         READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)',END = 300) 
+     &         itmp, elvr,xjlvr, lvpr, t12, ndbrlin
+C--------Number of levels limited by binding energy
+         IF (elvr.LT.qn) THEN
+            nlev = nlev + 1
+            elev(nlev) = elvr
+         ENDIF
+         DO nbr = 1, ndbrlin
+            READ (13,'(A1)') cdum
+         ENDDO
+      ENDDO
+      CLOSE (13)
+C     Proper return
+      ierr = 0
+      return
+C Error traps
+C     Levels' file not found
+  200 ierr = 1
+
+      print *,'ERROR opening file',dpath(1:lpath)//cinp
+
+      return
+C     Isotope not found
+  300 ierr = 2
+      return
+      end
