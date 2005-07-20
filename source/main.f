@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-14 11:07:57 $
-Ccc   * $Id: main.f,v 1.123 2005-07-14 11:07:57 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-20 14:35:08 $
+Ccc   * $Id: main.f,v 1.124 2005-07-20 14:35:08 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -713,7 +713,8 @@ C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
      &          CSFus + SINl + SINlcc
-         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') TOTcs
+         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') 
+     &         TOTcs*TOTred
          WRITE (12,*) ' '
       ENDIF
       POPmax(1) = CSFus*1.0E-25

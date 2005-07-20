@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-12 13:37:20 $
-Ccc   * $Id: input.f,v 1.158 2005-07-12 13:37:20 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-20 14:35:08 $
+Ccc   * $Id: input.f,v 1.159 2005-07-20 14:35:08 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -214,6 +214,7 @@ C--------fusion parameters
          CRL = 0.0
          DFUs = 1.
          FUSred = 1.
+         TOTred = 1.
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -3055,10 +3056,19 @@ C-----
 C-----
          IF (name.EQ.'FUSRED') THEN
             FUSred = val
-            WRITE (6,'('' Fusion cross section was reduced by '',F6.3)')
-     &             FUSred
-            WRITE (12,'('' Fusion cross section was reduced by '',F6.3)'
-     &             ) FUSred
+            WRITE (6,'('' Fusion cross section was scaled by factor'',
+     &             F6.3)') FUSred
+            WRITE (12,'('' Fusion cross section was scaled by factor '',
+     &             F6.3)') FUSred
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'TOTRED') THEN
+            TOTred = val
+            WRITE (6,'('' Total cross section was scaled by factor '',
+     &             F6.3)') TOTred
+            WRITE (12,'('' Total cross section was scaled by factor '',
+     &             F6.3)') TOTred
             GOTO 100
          ENDIF
 C-----
