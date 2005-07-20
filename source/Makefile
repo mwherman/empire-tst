@@ -10,13 +10,6 @@
 #----flags for detailed warnings
 #FFLAGS = -Wall
 
-#----GNU g77 FORTRAN compiler
-#FC     = g77
-#----flags for production compilation with g77
-#FFLAGS = -O3 
-#----flags for debuging using g77 compiler 
-#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
-
 #----INTEL f95 compiler
 FC     =  ifort
 #----flags for debuging using ifort compiler
