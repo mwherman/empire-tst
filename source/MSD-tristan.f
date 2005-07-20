@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-07-14 07:10:58 $
-Ccc   * $Id: MSD-tristan.f,v 1.45 2005-07-14 07:10:58 Capote Exp $
+Ccc   * $Date: 2005-07-20 14:35:59 $
+Ccc   * $Id: MSD-tristan.f,v 1.46 2005-07-20 14:35:59 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -1532,7 +1532,6 @@ C--------L=INDEKS(N)
             ip = NN(np,I3)
             jp = LL(np,I3)
             kp = JJ(np,I3)
-C           RCN, bug found by H. Wienke on july 2005  
             up = UAMp(np,I3)
             vp = VAMp(np,I3)
 C-----------LP=INDEKS(NP)
