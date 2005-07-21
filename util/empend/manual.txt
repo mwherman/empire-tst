@@ -1,8 +1,7 @@
 Title  : EMPEND Program
 Purpose: Convert EMPIRE output into ENDF format
-Author : A.Trkov 
-Version: original code ENEA, Bologna, Italy, 1996
-         current version developed at IAEA, Vienna, Austria
+Author : A.Trkov
+Version: 1996 Original code (ENEA, Bologna, Italy)
   98/10 Final version for distribution.
   99/11 Minor corrections to fix bugs.
   00/11 Implement formatting of elastic ang.distrib.
@@ -15,7 +14,7 @@ Version: original code ENEA, Bologna, Italy, 1996
   03/06 Define MT numbers for incident protons.
   03/07 Fix processing of double differential data for protons.
   04/06 - Process discrete levels flagged with -ve energies.
-        - Let EMPIRE to handle max. outgoing particle energy.
+        - Let EMPIRE handle the max. outgoing particle energy.
   04/07 - Fix ordering of levels in MF12,
         - Read in values in double precision to avoid underflow.
         - Fix MTs and yields of minor reactions (37, 41, etc).
@@ -23,6 +22,10 @@ Version: original code ENEA, Bologna, Italy, 1996
         - Check for absence of distribution data (NP=0 in MF6).
   04/09 - Check for normalisation overflow in WRIMF4
   04/10 Implement formatting for incident alphas and photons.
+  05/04 - Copy comments to MF1/MT451.
+        - Upgrade to proces partially exclusive/inclusive spectra.
+        - Allow metastable targets.
+  05/06 Increase MXR from 200K to 300K.
   
   Manual for Program EMPEND
   =========================
@@ -81,7 +84,7 @@ Version: original code ENEA, Bologna, Italy, 1996
    - The name of the EMPIRE output file to be processed.
    - The name of the ENDF formatted file to be written.
    - Number of subintervals per incident neutron energy 
-     interval on the EMPIRE output file. The dubintervals
+     interval on the EMPIRE output file. The subintervals
      define the fine energy mesh on the ENDF formatted
      file. If zero is entered, only the points on the
      EMPIRE output are entered to the ENDF formatted file.
@@ -117,3 +120,11 @@ Version: original code ENEA, Bologna, Italy, 1996
      file.
   Additional messages monitor the progress of the data
   formatting process.
+
+
+ Limits on array sizes:
+ MXE - Maximum number of incident particle energy points.
+ MXT - Maximum number of reactions (including discrete levels).
+ MXM - Maximum number of residual nuclei.
+ MXR - Lengrh of the real work array RWO.
+ MXI - Length of the integer work array IWO.
