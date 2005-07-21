@@ -9,6 +9,7 @@
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
+     *,LEVcc=20
      *,NDECSE=NDEX+10
      *,NDANGecis=91
      *,NDNUCD=NDNUC

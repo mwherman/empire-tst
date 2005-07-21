@@ -35,7 +35,7 @@
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc,
      &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys,
-     &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev),
+     &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev), LEVcc,
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
@@ -131,12 +131,11 @@
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
-     &                 TOTred
-     &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc, ELCncs
+     &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs 
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
-     &                 WIDcoll
+     &                 WIDcoll, TOTred
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,

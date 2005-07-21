@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-20 14:35:08 $
-Ccc   * $Id: main.f,v 1.124 2005-07-20 14:35:08 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-21 14:01:06 $
+Ccc   * $Id: main.f,v 1.125 2005-07-21 14:01:06 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -55,7 +55,7 @@ C
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
-      CHARACTER*20 ctmp20
+      CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
        CHARACTER*1 opart(3)
       DOUBLE PRECISION DMAX1, val
@@ -111,8 +111,8 @@ C-----locate position of the target among residues
 C-----locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-      WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)') INT(ZEJc(0)),
-     &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000)
+      WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
+     &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
 C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       xsinlcont = 0.d0
       xsinl = 0.d0
@@ -130,7 +130,7 @@ C     For resolution function (Spreading levels in the continuum)
 C-----
 C-----Get ECIS results
 C-----
-      OPEN (45,FILE = (ctldir//ctmp20//'.ANG'),STATUS = 'OLD',
+      OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
      &      ERR = 1400)
       READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
       READ (45,*,END = 1400)   ! To skip level identifier line
@@ -138,7 +138,7 @@ C-----
          READ (45,'(7x,E12.5)',END = 1400) elada(iang)
       ENDDO
       IF (DIRect.NE.0) THEN
-         OPEN (46,FILE = (ctldir//ctmp20//'.ICS'),STATUS = 'OLD',
+         OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
          READ (46,*,END = 1400) ! To skip first line <INE.C.S.> ..
 C--------get and add inelastic cross sections (including double-differential)
@@ -457,14 +457,14 @@ C
 C--------This part prompts for the name of a data file. The INQUIRE
 C--------statement then determines whether or not the file exists.
 C--------If it does not, the program start new calculations
-         WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)')
+         WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
-     &       INT(A(0)), INT(EINl*1000)
-         INQUIRE (FILE = (ctldir//ctmp20//'.MSD'),EXIST = fexist)
+     &       INT(A(0)), INT(EINl*1000000)
+         INQUIRE (FILE = (ctldir//ctmp23//'.MSD'),EXIST = fexist)
          IF (.NOT.fexist) THEN
-           OPEN (15,FILE = (ctldir//ctmp20//'.MSD'),STATUS='NEW')
+           OPEN (15,FILE = (ctldir//ctmp23//'.MSD'),STATUS='NEW')
          ELSE
-           OPEN (15,FILE = (ctldir//ctmp20//'.MSD'),STATUS='OLD')
+           OPEN (15,FILE = (ctldir//ctmp23//'.MSD'),STATUS='OLD')
            WRITE (6,*) ' '
            WRITE (6,*)
      &       ' Using precalculated ORION results for E=',EINl,' MeV'

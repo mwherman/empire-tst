@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-30 18:17:04 $
-Ccc   * $Id: MSD-orion.f,v 1.17 2005-06-30 18:17:04 Capote Exp $
+Ccc   * $Date: 2005-07-21 14:01:06 $
+Ccc   * $Id: MSD-orion.f,v 1.18 2005-07-21 14:01:06 Capote Exp $
 C
 C
 C
@@ -623,14 +623,9 @@ C     E is always in lab system => IKEY = -1
       W = WOMv(Nejc,nnuc)
       Wd = WOMs(Nejc,nnuc)
       Vs = VSO(Nejc,nnuc)
-C     Corrected by Capote, March 2005
       Vi = WSO(Nejc,nnuc)
       Ri = RWSO(Nejc,nnuc)
       Ai = AWSO(Nejc,nnuc)
-C     Corrected back by Herman, June 2005
-C     Vi = WSO(Nejc,nnuc)
-C     Ri = Rs
-C     Ai = As
       END
 
 

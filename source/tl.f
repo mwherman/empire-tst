@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-14 11:07:57 $
-Ccc   * $Id: tl.f,v 1.66 2005-07-14 11:07:57 Capote Exp $
+Ccc   * $Date: 2005-07-21 14:01:06 $
+Ccc   * $Id: tl.f,v 1.67 2005-07-21 14:01:06 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -210,7 +210,7 @@ C
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.20) nld_cc = nld_cc + 1
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
          WRITE (6,*)
          WRITE (6,*)
@@ -361,7 +361,7 @@ C
          ENDIF
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.20) nld_cc = nld_cc + 1
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
          IF (nld_cc.NE.NVIb(ncalc)) THEN
             WRITE (6,*) 'WARNING: Default number of coupled levels: ',
@@ -1281,7 +1281,7 @@ C
 C Local variables
 C
       CHARACTER*3 ctldir
-      CHARACTER*20 ctmp20
+      CHARACTER*23 ctmp23
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp
       INTEGER i, ilv, ien, ien_beg, l, lmax
@@ -1306,14 +1306,14 @@ C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)')
+      WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Nejc)), INT(AEJc(Nejc)), INT(Z(Nnuc)),
-     &       INT(A(Nnuc)), INT(EINl*1000)
-      INQUIRE (FILE = (ctldir//ctmp20//'.BIN'),EXIST = fexist)
+     &       INT(A(Nnuc)), INT(EINl*1000000)
+      INQUIRE (FILE = (ctldir//ctmp23//'.BIN'),EXIST = fexist)
       IF (.NOT.fexist) GOTO 400
 C-----Here the previously calculated files should be read
-      OPEN (45,FILE = (ctldir//ctmp20//'.BIN'),FORM = 'UNFORMATTED')
-      IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp20//'.LST')
+      OPEN (45,FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+      IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
   100 READ (45,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:', lmax, ien,
      &                      ener
@@ -1321,7 +1321,7 @@ C
 C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
-      IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.001) THEN
+      IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          IF (IOUt.EQ.5) THEN
@@ -1345,7 +1345,7 @@ C
       IF (IOUt.EQ.5) CLOSE (46)
       IF (IOUt.EQ.5) WRITE (6,*)
      &                      'Transmission coefficients read from file: '
-     &                      , (ctldir//ctmp20//'.BIN')
+     &                      , (ctldir//ctmp23//'.BIN')
       RETURN
 
   300 CLOSE (45,STATUS = 'DELETE')
@@ -1357,7 +1357,7 @@ C
          ENDDO
       ENDDO
       IF (IOUt.GT.0) WRITE (6,*) 'WARNING: ERROR WHEN READING TLs in ',
-     &                           ctmp20
+     &                           ctmp23
       IF (IOUt.EQ.5) THEN
          WRITE (6,*)
      &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
@@ -1391,7 +1391,7 @@ C
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN (UNIT = 46,STATUS = 'unknown',
-     &         FILE = (ctldir//ctmp20//'.BIN'),FORM = 'UNFORMATTED')
+     &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
@@ -1426,7 +1426,7 @@ C--------------EXACT (no DWBA) calculation
 
          CLOSE (46)
          IF (IOUt.EQ.5) WRITE (6,*) ' Transm. coeff. written to file:',
-     &                              (ctldir//ctmp20//'.BIN')
+     &                              (ctldir//ctmp23//'.BIN')
          IF (IOUt.EQ.5) WRITE (6,*)
      &            ' ==================================================='
       ELSEIF (IOUt.EQ.5) THEN
@@ -1571,7 +1571,7 @@ C-----Absorption cross section in mb
          READ (45,*,END = 400) dtmp
          IF (ICOller(l+1).LE.NLV(nnuc)) THEN
 C          Discrete level scattering
-           IF (ICOllev(l+1).LT.20) THEN
+           IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
               SINlcc = SINlcc + dtmp
            ELSE
@@ -1994,7 +1994,7 @@ C-----At least ground state is always open !!, RCN 31/03/2001
       nd_cons = 1
       IF (Inlkey.NE.0) THEN
          DO j = 2, ND_nlv
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) CYCLE
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
             nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
@@ -2064,8 +2064,8 @@ C-----0 phonon involved
 C--------discrete levels
          nwrite = 1
          DO j = 2, ND_nlv
-C--------All levels with icollev(j)>20 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) GOTO 100
+C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) GOTO 100
             ch = '-'
             IF (D_Lvp(j).GT.0) ch = '+'
 C-----------If channel is closed ground state potential is used for this level
@@ -2093,8 +2093,8 @@ C
 C--------deformations: phonon description
 C
          DO j = 2, ND_nlv
-C-----------All levels with icollev(j)>20 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) CYCLE
+C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
                WRITE (1,'(i5,5x,6f10.5)') INT(D_Xjlv(j)), D_Def(j,2)
@@ -2172,8 +2172,8 @@ C-----write(1,'(3f10.5)') rc,0.,0.
 C
 C------2) discrete levels
          DO j = 2, ND_nlv
-C           All levels with icollev(j)>20 should be calculated by DWBA
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.20) GOTO 200
+C           All levels with icollev(j)>LEVcc should be calculated by DWBA
+            IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) GOTO 200
             eee = El - D_Elv(j)/xratio
 C-----------If channel is closed ground state potential is used for this level
             IF (eee.GE.0.0001) THEN
@@ -2375,10 +2375,10 @@ C-----nd_nlvop = 0
       IF (ND_nlv.GT.0) THEN
          nd_cons = 1
          DO j = 2, ND_nlv
-C-----------All levels with icollev(j)>20 should be calculated by DWBA
-            IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
-C-----------All levels with icollev(j)<20 should be calculated by CC
-            IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
+C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
+            IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.LEVcc) CYCLE
+C-----------All levels with icollev(j)<LEVcc should be calculated by CC
+            IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.LEVcc) CYCLE
             nd_cons = nd_cons + 1
             eee = El - D_Elv(j)/xratio
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
@@ -2431,10 +2431,10 @@ C-----Discrete levels
       npho = 0
       nwrite = 1
       DO j = 2, ND_nlv
-C--------All levels with icollev(j)>20 should be calculated by DWBA
-         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
-C--------All levels with icollev(j)<20 should be calculated by CC
-         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
+C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
+         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.LEVcc) CYCLE
+C--------All levels with icollev(j)<LEVcc should be calculated by CC
+         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.LEVcc) CYCLE
          ch = '-'
          IF (D_Lvp(j).GT.0) ch = '+'
 C--------If channel is closed ground state potential is used for this level
@@ -2554,10 +2554,10 @@ C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') 0., 0., 0.
 C-----2) discrete levels
       DO j = 2, ND_nlv
-C--------All levels with icollev(j)>20 should be calculated by DWBA
-         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.20) CYCLE
-C--------All levels with icollev(j)<20 should be calculated by CC
-         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.20) CYCLE
+C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
+         IF (Inlkey.EQ.0 .AND. ICOllev(j).GT.LEVcc) CYCLE
+C--------All levels with icollev(j)<LEVcc should be calculated by CC
+         IF (Inlkey.EQ.1 .AND. ICOllev(j).LT.LEVcc) CYCLE
 C--------If channel is closed ground state potential is used for this level
          eee = El - D_Elv(j)/xratio
          IF (eee.GE.0.0001) THEN

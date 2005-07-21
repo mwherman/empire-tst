@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-14 11:07:57 $
-Ccc   * $Id: fusion.f,v 1.49 2005-07-14 11:07:57 Capote Exp $
+Ccc   * $Date: 2005-07-21 14:01:05 $
+Ccc   * $Id: fusion.f,v 1.50 2005-07-21 14:01:05 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -42,7 +42,7 @@ C
      &                 xmas_ntrg, wf
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
-      CHARACTER*20 ctmp20
+      CHARACTER*23 ctmp23
       DOUBLE PRECISION DMAX1
       LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal
       DOUBLE PRECISION E1, E2, SIGQD, XM1
@@ -85,19 +85,19 @@ C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       DO i = 1, NDLW
          stl(i) = 0.0
       ENDDO
-      WRITE (ctmp20,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i6.6)')
+      WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
-     &       INT(A(Ntrg)), INT(EINl*1000)
+     &       INT(A(Ntrg)), INT(EINl*1000000)
 
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      INQUIRE (FILE = (ctldir//ctmp20//'.INC'),EXIST = fexist)
+      INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
       IF (fexist) THEN
 C--------Here the old calculated files should be read
-         OPEN (45,FILE = (ctldir//ctmp20//'.INC'),
+         OPEN (45,FILE = (ctldir//ctmp23//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
-         IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp20//'_INC.LST')
+         IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          READ (45,END = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
@@ -116,7 +116,7 @@ C--------Here the old calculated files should be read
             IF (IOUt.EQ.5) THEN
                WRITE (6,*)
      &' Transmission coefficients for incident channel read from file: '
-               WRITE (6,*) ' ', ctldir//ctmp20//'.INC'
+               WRITE (6,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
 
             GOTO 300
@@ -302,7 +302,7 @@ C--------calculation of o.m. transmission coefficients for absorption
          ltlj = .FALSE.
          dodwba = .FALSE.
          DO l = 1, NDCOLLEV
-            IF (ICOllev(l).LT.20) CYCLE ! Skipping coupled levels
+            IF (ICOllev(l).LT.LEVcc) CYCLE ! Skipping coupled levels
             dodwba = .TRUE.
          ENDDO
          IF (DIRect.EQ.3) dodwba = .TRUE.
@@ -532,27 +532,27 @@ C
       IF (KTRlom(Npro,Ntrg).GT.0) THEN
       IF (IOPsys.EQ.0) THEN
 C--------LINUX
-         ctmp = 'mv INCIDENT.CS '//ctldir//ctmp20//'.CS'
+         ctmp = 'mv INCIDENT.CS '//ctldir//ctmp23//'.CS'
          iwin = PIPE(ctmp)
          IF (DIRect.GT.0) THEN
-            ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp20//'.ICS'
+            ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp23//'.ICS'
             iwin = PIPE(ctmp)
          ENDIF
-         ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp20//'.ANG'
+         ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp23//'.ANG'
          iwin = PIPE(ctmp)
-         ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp20//'.TLJ'
+         ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ'
          iwin = PIPE(ctmp)
       ELSE
 C--------WINDOWS
-         ctmp = 'move INCIDENT.CS '//ctldir//ctmp20//'.CS >NUL'
+         ctmp = 'move INCIDENT.CS '//ctldir//ctmp23//'.CS >NUL'
          iwin = PIPE(ctmp)
          IF (DIRect.GT.0) THEN
-            ctmp = 'move INCIDENT.ICS '//ctldir//ctmp20//'.ICS >NUL'
+            ctmp = 'move INCIDENT.ICS '//ctldir//ctmp23//'.ICS >NUL'
             iwin = PIPE(ctmp)
          ENDIF
-         ctmp = 'move INCIDENT.ANG '//ctldir//ctmp20//'.ANG >NUL'
+         ctmp = 'move INCIDENT.ANG '//ctldir//ctmp23//'.ANG >NUL'
          iwin = PIPE(ctmp)
-         ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp20//'.TLJ >NUL'
+         ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ >NUL'
          iwin = PIPE(ctmp)
       ENDIF
       ENDIF
@@ -561,7 +561,7 @@ C-----Save TLs, SINl
 C
 C-----Storing transmission coefficients for the incident channel
       IF (IOUt.EQ.5) THEN
-         OPEN (46,FILE = ctldir//ctmp20//'_INC.LST')
+         OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
          DO l = 0, maxlw
             WRITE (46,*) l, SNGL(stl(l + 1))
@@ -570,7 +570,7 @@ C-----Storing transmission coefficients for the incident channel
      &          ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
          CLOSE (46)
       ENDIF
-      OPEN (45,FILE = (ctldir//ctmp20//'.INC'),FORM = 'UNFORMATTED')
+      OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
          WRITE (45) stl(l+1)
