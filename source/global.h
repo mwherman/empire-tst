@@ -1,11 +1,11 @@
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
-     &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc), 
+     &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),
      &                 AUSpec(ndecse,0:ndejc), AVOm(0:ndejc,0:ndnuc),
      &                 AVSo(0:ndejc,0:ndnuc), AWOm(0:ndejc,0:ndnuc),
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc),
      &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
-     &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL, 
+     &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
      &                 CSDirlev(ndlv,0:ndejc),
      &                 CSE(ndecse,0:ndejc,0:ndnuc),
@@ -57,7 +57,7 @@
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FIScon, FISden(ndnuc),
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
-     &                 FISshi(ndnuc), FITlev, FITomp, FLAm(ndcc),TOTred,
+     &                 FISshi(ndnuc), FITlev, FITomp, FLAm(ndcc),
      &                 FUSred, GAMmafis(2), GCAsc, GDIv, GDIvp, GDRdyn,
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2,
@@ -74,7 +74,7 @@
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc),
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
-     &                 , REDmsc(ndlw,2), RESmas(0:130,0:400),
+     &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc)
       CHARACTER*21 REAction(ndnuc)
       DOUBLE PRECISION RO(ndex,ndlw,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -96,7 +96,7 @@
      &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
      &                 UGRid(0:nfisenmax,nfhump), VEQ,
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
-     &                 VOMs(0:ndejc,0:ndnuc),
+     &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
      &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
      &                 WOMs(0:ndejc,0:ndnuc),
      &                 WOMv(0:ndejc,0:ndnuc),
@@ -123,7 +123,7 @@
      &                 SIG, TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1,
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
-     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,TOTred,
+     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,
      &                 FITomp, FITlev, DV, FCC, STMro, DEGa, GDIvp,
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc,
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
@@ -131,10 +131,12 @@
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
+     &                 TOTred
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc, ELCncs
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
-     &                 REDmsc, TUNe, TUNEpe, EJMass, SIGabs, WIDcoll
+     &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
+     &                 WIDcoll
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,

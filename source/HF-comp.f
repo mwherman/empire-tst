@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-11 05:50:58 $
-Ccc   * $Id: HF-comp.f,v 1.79 2005-07-11 05:50:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-21 08:52:47 $
+Ccc   * $Id: HF-comp.f,v 1.80 2005-07-21 08:52:47 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1262,6 +1262,7 @@ C           GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
             ENDIF
          ENDIF
       ENDIF
+      Sumfis = Sumfis*TUNefi(Nnuc)
       DENhf = DENhf + Sumfis
       END
 
@@ -1693,6 +1694,7 @@ C----triple-humped
      &          Sumfis, TDIr, TABs, TDIr23
       ENDIF
       IF (Sumfis.LT.0.0000000000000001) Sumfis = 0.
+      Sumfis = Sumfis*TUNefi(Nnuc)
       DENhf = DENhf + Sumfis
       END
 

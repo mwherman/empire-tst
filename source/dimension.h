@@ -1,6 +1,6 @@
       PARAMETER(
      * NDNUC= 60
-     *,NDEXCLUS = 20
+     *,NDEXCLUS = 60
      *,NDEJC=3
      *,NDAFIS=1
      *,NDEX= 201

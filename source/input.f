@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-20 14:35:08 $
-Ccc   * $Id: input.f,v 1.159 2005-07-20 14:35:08 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-21 08:52:47 $
+Ccc   * $Id: input.f,v 1.160 2005-07-21 08:52:47 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -143,19 +143,20 @@ C--------select Meyers-Swiatecki shell corrections
          SHNix = 0.0
 C--------neutralize tuning factors and OMP normalization factors
          DO nejc = 0, NDEJC
-           TUNEpe(nejc) = 1.0
+           TUNEpe(nejc) = 1.d0
          ENDDO
          DO nnuc = 0, NDNUC
+            TUNefi(nnuc) = 1.d0
             DO nejc = 0, NDEJC
-               TUNe(nejc,nnuc) = 1.0
+               TUNe(nejc,nnuc) = 1.d0
 C--------------Volume real potential
-               FNvvomp(Nejc,Nnuc) = 1.0
-               FNavomp(Nejc,Nnuc) = 1.0
+               FNvvomp(Nejc,Nnuc) = 1.d0
+               FNavomp(Nejc,Nnuc) = 1.d0
 C--------------Volume imaginary potential
-               FNwvomp(Nejc,Nnuc) = 1.0
+               FNwvomp(Nejc,Nnuc) = 1.d0
 C--------------Surface imaginary potential:
-               FNwsomp(Nejc,Nnuc) = 1.0
-               FNasomp(Nejc,Nnuc) = 1.0
+               FNwsomp(Nejc,Nnuc) = 1.d0
+               FNasomp(Nejc,Nnuc) = 1.d0
             ENDDO
          ENDDO
 C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
@@ -4336,6 +4337,41 @@ C              TUNEpe(i1) = val + grand()*sigma
               WRITE (12,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), val
+            endif
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'TUNEFI') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS '',I3,A2,'' NOT NEEDED'')') i2,
+     &                SYMb(nnuc)
+               WRITE (6,'('' FISSION WIDTH TUNING IGNORED'')')
+               GOTO 100
+            ENDIF
+            if(i3.gt.0.) then
+              WRITE (6,
+     &'('' Uncertainty of the Fission width of nucleus '',I3,A2,
+     &         '' is equal to '',i2,'' %'')')
+     &         i2, SYMb(nnuc), i3
+               sigma = val*0.01*i3
+C              TUNefi(nnuc) = val + grand()*sigma
+               TUNefi(nnuc) = val + (2*drand()-1.)*sigma
+              WRITE (6,
+     &'('' Fission width of nucleus '',I3,A2,
+     &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), TUNefi(nnuc)
+              IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &       IPArCOV, TUNefi(nnuc), INDexf,INDexb
+             else
+              TUNefi(nnuc) = val
+              WRITE (6,
+     &'('' Fission width of nucleus '',I3,A2,
+     &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
+              WRITE (12,
+     &'('' Fission width of nucleus '',I3,A2,
+     &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
             endif
             GOTO 100
          ENDIF
