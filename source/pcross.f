@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-11 16:05:36 $
-Ccc   * $Id: pcross.f,v 1.39 2005-07-11 16:05:36 Capote Exp $
+Ccc   * $Date: 2005-07-26 11:16:07 $
+Ccc   * $Id: pcross.f,v 1.40 2005-07-26 11:16:07 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C Local variables
 C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
-     &       fint(NDEX), flm(4,4), fr, ftmp, gc, hlp1, pc,
+     &       fint(NDEX), flm(4,4), fmsd, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
@@ -418,17 +418,17 @@ C     Note, that PCROSS only calculates emission into the continuum
             eee = DE*(ie - 1)
             ftmp = spec(nejc,ie)
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
+            DO iang = 1, NDANG
+               ddxs(iang) = 0.d0
+            ENDDO    
 C
 C           Kalbach systematic for PCROSS DDX calculations
 C           fmsd is assumed 1, i.e. pure PE emission
 C
-            DO iang = 1, NDANG
-               ddxs(iang) = 0.d0
-            ENDDO
-C           fmsd = 1.d0
+            fmsd = 1.d0
 C           fmsd set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     &              ebind, eee, ftmp, 1.d0, ddxs, NDAng)
+     &              ebind, eee, ftmp, fmsd, ddxs, NDAng)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
@@ -439,7 +439,7 @@ C           fmsd set to 0.d0 means isotropic distribution
 99020 FORMAT (/' ',57('-')/)
       END
 
-      SUBROUTINE KALBACH(Jcom,Jzcom,Jpin,Jnin,Jpout,Jnout,Elab,Esys,
+      SUBROUTINE KALBACH(Jcom,Jzcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
      &Bin, Eps, Total, Fmsd, Sigma, NDang)
 C
 C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
@@ -491,6 +491,7 @@ C
 Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
       jcomt = Jcom
+      jnin = Jninp
       if(jpin.eq.0.and.jnin.eq.0)then
 C        the following is a modification for photonuclear reactions
          jflagph=1
