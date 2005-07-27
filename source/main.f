@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 14:01:06 $
-Ccc   * $Id: main.f,v 1.125 2005-07-21 14:01:06 Capote Exp $
+Ccc   * $Date: 2005-07-27 22:09:16 $
+Ccc   * $Id: main.f,v 1.126 2005-07-27 22:09:16 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -72,7 +72,7 @@ C
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/,epre/0.0/
-       DATA opart/1hn,1hp,1ha/
+      DATA opart/1hn,1hp,1ha/
       icalled = 0
       CALL THORA(6)
 C-----
@@ -1262,7 +1262,8 @@ C--------Integrating exclusive population spectra (ENDF)
          emedp = 0
          emeda = 0
          emedh = 0
-         DO ispec = 1, NEX(1) + 10
+         IF ( ENDf(nnuc).EQ.1 )     THEN
+           DO ispec = 1, NEX(1) + 10
             gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
             xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
             ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
@@ -1276,18 +1277,18 @@ C--------Integrating exclusive population spectra (ENDF)
                emedh = emedh + POPcse(0,NDEJC,ispec,INExc(nnuc))
      &                    *DE*(ispec - 1)*DE
             ENDIF
-         ENDDO
-         POPcs(0,INExc(nnuc)) = gtotsp
-         POPcs(1,INExc(nnuc)) = xtotsp
-         POPcs(2,INExc(nnuc)) = ptotsp
-         POPcs(3,INExc(nnuc)) = atotsp
-         IF (NDEJC.EQ.4) POPcs(NDEJC,INExc(nnuc)) = htotsp
-         IF (gtotsp.NE.0) emedg = emedg/gtotsp
-         IF (xtotsp.NE.0) emedn = emedn/xtotsp
-         IF (ptotsp.NE.0) emedp = emedp/ptotsp
-         IF (atotsp.NE.0) emeda = emeda/atotsp
-         IF (htotsp.NE.0) emedh = emedh/htotsp
-         IF (CSPrd(nnuc).GT.0.d0 .AND. IOUt.GT.3) THEN
+           ENDDO
+           POPcs(0,INExc(nnuc)) = gtotsp
+           POPcs(1,INExc(nnuc)) = xtotsp
+           POPcs(2,INExc(nnuc)) = ptotsp
+           POPcs(3,INExc(nnuc)) = atotsp
+           IF (NDEJC.EQ.4) POPcs(NDEJC,INExc(nnuc)) = htotsp
+           IF (gtotsp.NE.0) emedg = emedg/gtotsp
+           IF (xtotsp.NE.0) emedn = emedn/xtotsp
+           IF (ptotsp.NE.0) emedp = emedp/ptotsp
+           IF (atotsp.NE.0) emeda = emeda/atotsp
+           IF (htotsp.NE.0) emedh = emedh/htotsp
+           IF (CSPrd(nnuc).GT.0.d0 .AND. IOUt.GT.3) THEN
 C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
                IF (nnuc.EQ.mt91) THEN
@@ -1360,7 +1361,8 @@ C--------------(merely for checking purpose)
      &                                 POPcseaf(0,3,ispec,INExc(nnuc))
                ENDDO
                WRITE (6,*) ' '
-         ENDIF
+           ENDIF
+          ENDIF
 C--------calculate life-times and widths
          IF (IOUt.GT.0) THEN
             IF (csemist.NE.0.0D0) THEN
@@ -1424,16 +1426,16 @@ C-----------CN contribution to elastic ddx
          WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,''
      &mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
-          IF(CSFis.gt.0.)
+         IF(CSFis.gt.0.)
      &      WRITE (12,'(''    fission  cross section'',G12.5,'' mb'')')
      &          CSFis
-          IF(CSEmis(0,nnuc).gt.0.) THEN
+         IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0)
            WRITE (6,'(''  g  emission cross section'',G12.5,'' mb'')')
      &          CSEmis(0,nnuc)
            WRITE (12,'('' g  emission cross section'',G12.5,'' mb'')')
      &          CSEmis(0,nnuc)
-          ENDIF
+         ENDIF
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.d0) THEN
             DO nejc = 1, NEJcm
@@ -1956,7 +1958,7 @@ C------------exact endpoint
       ENDIF
 C-----end of ENDF spectra (inclusive)
 
-      IF (ENDf(1).GT.0. .AND. EINl.GE.1.d0) THEN
+      IF (ENDf(1).EQ.1 .AND. EINl.GE.1.d0) THEN
          WRITE (6,*) ' '
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
@@ -1969,6 +1971,7 @@ C-----end of ENDF spectra (inclusive)
             controlp = 0
             controla = 0
             DO nnuc = 1, NNUcd
+                        IF(INExc(nnuc).eq.-1) CYCLE
                controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
                controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
                controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
@@ -2237,8 +2240,9 @@ C        WRITE(6,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
      &                                RECcse(ie,0,Nnuc)
          ENDDO
 C--------print end point again with 0 xs for consistency with particle spectra
-         WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
-     &                             RECcse(ilast + 1,0,Nnuc)
+C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
+C    &                             RECcse(ilast + 1,0,Nnuc)
+         WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,0.d0
          IF (ABS(1.0 - corr).GT.0.01D0 .AND. CSPrd(Nnuc).GT.0.001D0)
      &       THEN
             WRITE (6,*) ' '
