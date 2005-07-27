@@ -192,7 +192,8 @@ C* Files and logical file unit numbers
       FLV =-1
 C*
 C* Default path to RIPL nuclide level energy files
-      DPATH='..\Sources\Inputs\Levels\'
+C     DPATH='..\Sources\Inputs\Levels\'
+      DPATH='../../RIPL-2/levels/'
       LPATH=25
 C*
 C* Process the input
@@ -716,7 +717,8 @@ C* Determine the length of the directory path string
         LPATH=LPATH-1
       END DO
       IF(LPATH.EQ.0) THEN
-        DPATH='.\'
+C       DPATH='.\'
+        DPATH='./'
         LPATH=2
       END IF
       RETURN
@@ -796,7 +798,8 @@ C* '   DPATH  '
         LPATH=LPATH-1
       END DO
       IF(LPATH.EQ.0) THEN
-        DPATH='.\'
+C       DPATH='.\'
+        DPATH='./'
         LPATH=2
       END IF
       GO TO 90
