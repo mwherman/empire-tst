@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 14:01:05 $
-Ccc   * $Id: input.f,v 1.161 2005-07-21 14:01:05 Capote Exp $
+Ccc   * $Date: 2005-07-27 14:17:43 $
+Ccc   * $Id: input.f,v 1.162 2005-07-27 14:17:43 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -236,7 +236,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -838,17 +838,18 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
-                           INExc(nnuc) = NEXclusive
                            IF(NEXclusive.GT.NDExclus) THEN
                              WRITE(6,*)'INSUFFICIENT DIMENSION NDExclus'
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
+                           INExc(NEXclusive) = nnuc
                         ENDIF
                      ENDDO
                   ENDDO
                ENDDO
             ENDDO
+	    WRITE(6,*) 'Number of exclusive nuclei :',NEXclusive
          ENDIF
 C
 C--------check input for consistency

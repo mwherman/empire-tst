@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-26 00:38:22 $
-Ccc   * $Id: auxiliary.f,v 1.20 2005-07-26 00:38:22 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-07-27 14:17:43 $
+Ccc   * $Id: auxiliary.f,v 1.21 2005-07-27 14:17:43 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -114,7 +114,7 @@ C
             ENDDO
          ENDDO
       ENDDO
-      DO nnuc = 1, NDExclus
+      DO nnuc = 0, NDExclus
          DO necse = 0, NDEX_D
             DO inecse = 1, NDECSED
                DO nejcd = 0, NDEJCD

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 14:01:06 $
-Ccc   * $Id: tl.f,v 1.67 2005-07-21 14:01:06 Capote Exp $
+Ccc   * $Date: 2005-07-27 14:17:43 $
+Ccc   * $Id: tl.f,v 1.68 2005-07-27 14:17:43 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1513,13 +1513,13 @@ C--------(nlev=1 corresponds to the ground state)
      &         jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
-         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15) THEN
+         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
             Maxlw = MAX(Maxlw,l)
-             if(Maxlw.GE.NDLW) Maxlw = NDLW - 1
+            if(Maxlw.GE.NDLW) Maxlw = NDLW - 1
          ENDIF
       ENDDO
       GOTO 100
@@ -1730,7 +1730,7 @@ C--------(nlev=1 corresponds to the ground state)
      &         jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
-         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15) THEN
+         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LE.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin JC
             TTLl(J,l) = TTLl(J,l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*SEJc(Nejc) + 1)

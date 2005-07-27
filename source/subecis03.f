@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-06-19 18:23:18 $
-Ccc   * $Id: subecis03.f,v 1.11 2005-06-19 18:23:18 Capote Exp $
+Ccc   * $Date: 2005-07-27 14:17:44 $
+Ccc   * $Id: subecis03.f,v 1.12 2005-07-27 14:17:44 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
@@ -755,10 +755,12 @@ C
 C
 C Dummy arguments
 C
-      CHARACTER*4 Cw(2,1)
+c     CHARACTER*4 Cw(2,1)
+      CHARACTER*4 Cw(2,*)
       REAL*8 Dw(*)
       LOGICAL Lo(250)
-      INTEGER Nw(2,5)
+c     INTEGER Nw(2,5)
+      INTEGER Nw(2,*)
 C
 C Local variables
 C
