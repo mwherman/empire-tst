@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 14:17:43 $
-Ccc   * $Id: auxiliary.f,v 1.21 2005-07-27 14:17:43 Capote Exp $
+Ccc   * $Date: 2005-07-27 16:00:18 $
+Ccc   * $Id: auxiliary.f,v 1.22 2005-07-27 16:00:18 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -24,7 +24,7 @@ C
 C
 C Local variables
 C
-      INTEGER ie, il, ilw, inecse, irec, j, nang, necse, nejc, nejcd, 
+      INTEGER ie, il, ilw, inecse, irec, j, nang, necse, nejc, nejcd,
      &        netl, nnex, nnlv, nnuc
 C
 C
@@ -69,6 +69,7 @@ C
          ENDDO
       ENDDO
       DO nnuc = 1, NDNUC
+         INExc(nnuc) = -1
          POPmax(nnuc) = 0.0
          CSPrd(nnuc) = 0.0
          EX(1,nnuc) = 0.0
@@ -150,8 +151,8 @@ C
          REDmsc(j,2) = 1.0
       ENDDO
       END
- 
- 
+
+
       SUBROUTINE INTGRS(A,B,Y,Dintg)
 CCCC *****************************************************************
 CCCC * Calculates an integral                                        *
@@ -191,8 +192,8 @@ C
          GOTO 100
       ENDIF
 99999 END
- 
- 
+
+
       SUBROUTINE LSQLGV(Xp,Yp,Np,Qq,Lmi,Lmx,Emm,Err,Rwo,Mxr)
 C-Title  : LSQLGV Subroutine
 C-Purpose: Least-squares fitting by variable order Legendre polynomials
@@ -271,8 +272,8 @@ C*
       ENDIF
   100 Lmx = nlg
       END
- 
- 
+
+
       SUBROUTINE LSQLEG(Xp,Yp,Np,Qq,N1,Aa,Ier)
 C-Title  : LSQLEG Subroutine
 C-Purpose: Fit Legendre coefficients to a set of data
@@ -320,8 +321,8 @@ C*    Solve the system of equations
       IF (det.NE.0.0D0) RETURN
       Ier = 1
       END
- 
- 
+
+
       DOUBLE PRECISION FUNCTION POLLG1(Uu,Ql,Nl)
 C-Title  : POLLG1 Function
 C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
@@ -363,8 +364,8 @@ C     DIMENSION QL(1),PL(20)
       ENDDO
       POLLG1 = ss
       END
- 
- 
+
+
       SUBROUTINE PLNLEG(Uu,Pl,Nl)
 C-Title  : PLNLEG Subroutine
 C-Purpose: Evaluate Legendre polynomials up to order NL
@@ -395,8 +396,8 @@ C
      &               /FLOAT(l)
       ENDDO
       END
- 
- 
+
+
       SUBROUTINE MTXGUP(A,F,X,N,Ldig,Det)
 C-Title  : MTXGUP subroutine
 C-Purpose: Matrix solver, Gauss elimination, part.pivoting
@@ -476,8 +477,8 @@ C*    Solve by backward substitution
       ENDDO
       X(1) = F(1)/A(1,1)
       END
- 
- 
+
+
       SUBROUTINE MATIN(As,Bs,N,M,Determ)
       INCLUDE 'dimension.h'
 C
@@ -492,7 +493,7 @@ C Local variables
 C
       DOUBLE PRECISION a(NDMSCS,NDMSCS), amax, b(NDMSCS), pivot(NDMSCS),
      &                 sog, swap, t
-      INTEGER i, icolum, indeks(NDMSCS,2), ipivot(NDMSCS), irow, j, 
+      INTEGER i, icolum, indeks(NDMSCS,2), ipivot(NDMSCS), irow, j,
      &        jcolum, jrow, k, l, l1, nnn
 C
 C     matrix inversion with accompanying solution of liner equations
@@ -605,9 +606,9 @@ C
          ENDDO
       ENDDO
       END
- 
- 
- 
+
+
+
       SUBROUTINE MATIN1(As,Bs,N,M,Determ)
       INCLUDE 'dimension.h'
 C
@@ -626,7 +627,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION a(NG,NG), amax, b(NG), pivot(NG), sog, swap, t
-      INTEGER i, icolum, indeks(NG,2), ipivot(NG), irow, j, jcolum, 
+      INTEGER i, icolum, indeks(NG,2), ipivot(NG), irow, j, jcolum,
      &        jrow, k, l, l1, nnn
 C
 C     matrix inversion with accompanying solution of liner equations
@@ -765,17 +766,17 @@ C Local variables
 C
 C
 C
-      DATA mat/'n ', 'p ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 
-     &     'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl', 'Ar', 
-     &     'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 
-     &     'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 
-     &     'Y ', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 
-     &     'In', 'Sn', 'Sb', 'Te', 'I ', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 
-     &     'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 
-     &     'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt', 
-     &     'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 
-     &     'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 
-     &     'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Ns', 'Hs', 
+      DATA mat/'n ', 'p ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ',
+     &     'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl', 'Ar',
+     &     'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni',
+     &     'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr',
+     &     'Y ', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+     &     'In', 'Sn', 'Sb', 'Te', 'I ', 'Xe', 'Cs', 'Ba', 'La', 'Ce',
+     &     'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
+     &     'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt',
+     &     'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra',
+     &     'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf',
+     &     'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Ns', 'Hs',
      &     'Mt', '??'/
       IF (Iz.GT.109) THEN
          SMAT = mat(110)
@@ -783,8 +784,8 @@ C
       ENDIF
       SMAT = mat(Iz)
       END
- 
- 
+
+
       SUBROUTINE WHERE(Izaf,Nnuc,Iloc)
 Ccc
 Ccc   ********************************************************************
@@ -825,7 +826,7 @@ C
             RETURN
          ENDIF
       ENDDO
-      WRITE (6,*) 
+      WRITE (6,*)
      &' INSUFFICIENT MEMORY ALLOCATION TO ACOMODATE ALL REQUESTED NUCLEI
      &'
       WRITE (6,*) ' INCREASE NDNUC PARAMETER IN global.h AND RECOMPILE'
@@ -879,8 +880,8 @@ C
       WRITE (6,*) ' EXECUTION STOPPED'
       STOP
       END
- 
- 
+
+
       SUBROUTINE MTXINV(A,X,Y,Mx,My,N,Eps,Irflag)
 C
 C-Title  : MTXINV subroutine
@@ -984,8 +985,8 @@ C*    Matrix ordering
       ENDDO
       Irflag = 0
       END
- 
- 
+
+
       SUBROUTINE MTXDG3(A,F,X,N,Im)
 C-Title  : MTXDG3 subroutine
 C-Purpose: Tridiagonal Matrix solver, Gauss elimination, no pivoting
@@ -1034,9 +1035,9 @@ C*    Backward sweep (x = U-1 p)
          X(ni) = F(ni) + A(3,ni)*X(ni + 1)
       ENDDO
       END
- 
- 
- 
+
+
+
       SUBROUTINE INTERMAT(Xi,Si,Yi,N,Xo,So,Yo,M,L,Emin,Emax)
 Ccc
 Ccc   ********************************************************************
@@ -1114,7 +1115,7 @@ C     IF(Emin.LT.Xo) THEN
          WRITE (6,*) ' '
          WRITE (6,*) 'INTERMAT: Inconsistent request               '
          WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: is above the maximum:        ', 
+         WRITE (6,*) 'INTERMAT: is above the maximum:        ',
      &               Xo + (M - 1)*So
          WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
@@ -1130,7 +1131,7 @@ C     IF(Emin.LT.Xo) THEN
       IF (Emax - (Xi + (N-1)*Si).GT.0.5*Si) THEN
          WRITE (6,*) ' '
          WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: Upper limit point  provided: ', 
+         WRITE (6,*) 'INTERMAT: Upper limit point  provided: ',
      &               Xi + (N - 1)*Si
          WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
          WRITE (6,*) 'INTERMAT: Execution terminated'
@@ -1175,9 +1176,9 @@ C--------start intrpolation
          ENDDO
       ENDDO
       END
- 
- 
- 
+
+
+
       SUBROUTINE BINTERMAT(Yi,Xi,Sxi,Nxi,Zi,Szi,Nzi,Yo,Xo,Sxo,Nxo,Zo,
      &                     Szo,Nzo,Exmin,Exmax,Ezmin,Ezmax)
 Ccc
@@ -1240,14 +1241,14 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Exmax, Exmin, Ezmax, Ezmin, Sxi, Sxo, Szi, Szo, 
+      DOUBLE PRECISION Exmax, Exmin, Ezmax, Ezmin, Sxi, Sxo, Szi, Szo,
      &                 Xi, Xo, Zi, Zo
       INTEGER Nxi, Nxo, Nzi, Nzo
       DOUBLE PRECISION Yi(Nxi,Nzi), Yo(Nxo,Nzo)
 C
 C Local variables
 C
-      DOUBLE PRECISION f1, f2, f3, f4, fyi(0:Nxi + 1,0:Nzi + 1), 
+      DOUBLE PRECISION f1, f2, f3, f4, fyi(0:Nxi + 1,0:Nzi + 1),
      &                 summino, t, u, xint, xis, zis
       INTEGER INT
       INTEGER ixi, ixmax, ixmin, ixo, izi, izmax, izmin, izo
@@ -1268,7 +1269,7 @@ C-----Check ranges and steps
          WRITE (6,*) ' '
          WRITE (6,*) 'BINTERMAT: Inconsistent request (2)           '
          WRITE (6,*) 'BINTERMAT: Upper limit point requested: ', Exmax
-         WRITE (6,*) 'BINTERMAT: is above the maximum:   ', 
+         WRITE (6,*) 'BINTERMAT: is above the maximum:   ',
      &               Xo + (Nxo - 1)*Sxo
          WRITE (6,*) 'BINTERMAT: Execution terminated'
          STOP
@@ -1284,7 +1285,7 @@ C-----Check ranges and steps
       IF (Exmax - (Xi + (Nxi-1)*Sxi).GT.0.5*Sxi) THEN
          WRITE (6,*) ' '
          WRITE (6,*) 'BINTERMAT: Upper X limit point requested: ', Exmax
-         WRITE (6,*) 'BINTERMAT: Upper X limit point provided:', 
+         WRITE (6,*) 'BINTERMAT: Upper X limit point provided:',
      &               Xi + (Nxi - 1)*Sxi
          WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
          WRITE (6,*) 'BINTERMAT: Execution terminated'
@@ -1302,7 +1303,7 @@ C-----Check ranges and steps
          WRITE (6,*) ' '
          WRITE (6,*) 'BINTERMAT: Inconsistent request (4)           '
          WRITE (6,*) 'BINTERMAT: Upper limit point requested: ', Ezmax
-         WRITE (6,*) 'BINTERMAT: is above the maximum:    ', 
+         WRITE (6,*) 'BINTERMAT: is above the maximum:    ',
      &               Zo + (Nzo - 1)*Szi
          WRITE (6,*) 'BINTERMAT: Execution terminated'
          STOP
@@ -1318,7 +1319,7 @@ C-----Check ranges and steps
       IF (Ezmax - (Zi + (Nzi-1)*Szi).GT.0.5*Szi) THEN
          WRITE (6,*) ' '
          WRITE (6,*) 'BINTERMAT: Upper Z limit point requested: ', Ezmax
-         WRITE (6,*) 'BINTERMAT: Upper Z limit point  provided:', 
+         WRITE (6,*) 'BINTERMAT: Upper Z limit point  provided:',
      &               Zi + (Nzi - 1)*Szi
          WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
          WRITE (6,*) 'BINTERMAT: Execution terminated'

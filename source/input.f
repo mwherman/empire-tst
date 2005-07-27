@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 14:17:43 $
-Ccc   * $Id: input.f,v 1.162 2005-07-27 14:17:43 Capote Exp $
+Ccc   * $Date: 2005-07-27 16:00:18 $
+Ccc   * $Id: input.f,v 1.163 2005-07-27 16:00:18 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -843,13 +843,13 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
-                           INExc(NEXclusive) = nnuc
+                           INExc(nnuc) = NEXclusive
                         ENDIF
                      ENDDO
                   ENDDO
                ENDDO
             ENDDO
-	    WRITE(6,*) 'Number of exclusive nuclei :',NEXclusive
+           WRITE(6,*) 'Number of exclusive nuclei :',NEXclusive
          ENDIF
 C
 C--------check input for consistency
@@ -1337,7 +1337,7 @@ C-----------Defining ICOller(i)
             ICOller(1) = ICOllev(1)
             DO i = 2, ND_nlv
                itmp = ICOllev(i)
-               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc 
+               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc
                ICOller(i) = itmp
             ENDDO
             IF (ierr.EQ.1) THEN
@@ -6370,14 +6370,14 @@ C--------------Additional levels are added for DWBA calculations
          WRITE (6,99005)
      &' Collective levels selected automatically from available target l
      &evels (vibrational model)           '
-         WRITE (6,*) 
+         WRITE (6,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
          WRITE (6,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
      &evels (vibrational model)'
-         WRITE (32,*) 
+         WRITE (32,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
