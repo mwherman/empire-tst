@@ -5382,6 +5382,11 @@ global file zvfilter zvvplots profilter filelist archfilter workdir
     #---------------------------------------------------------
     set types {
        {"Input Files"              {.inp}        }
+       {"Output (lst) Files"       {.lst}        }
+       {"Output (out) Files"       {.out}        }
+       {"EXFOR Files"              {.exf}        }
+       {"C4 Files"                 {.c4}         }
+       {"ENDF Files"               {.endf}       }
        {"All   Files"              {*}           }
     }
 
