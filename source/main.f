@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 22:09:16 $
-Ccc   * $Id: main.f,v 1.126 2005-07-27 22:09:16 Capote Exp $
+Ccc   * $Date: 2005-07-28 16:14:28 $
+Ccc   * $Id: main.f,v 1.127 2005-07-28 16:14:28 Capote Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -713,7 +713,7 @@ C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
      &          CSFus + SINl + SINlcc
-         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') 
+         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
      &         TOTcs*TOTred
          WRITE (12,*) ' '
       ENDIF
@@ -1035,11 +1035,12 @@ C--------account for widths fluctuations (HRTW)
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
             CALL HRTW
             IF (ENDf(1).GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
-            kemax = NEX(nnuc) - 1
+            kemax = max(NEX(nnuc) - 1,1)
             GCAsc = 1.0
          ENDIF
 C--------do loop over c.n. excitation energy
          DO ke = kemax, kemin, -1
+             IF(ke.le.0) cycle
             step = DE
             IF (ke.EQ.NEX(nnuc) .OR. ke.EQ.1) step = 0.5*DE
             IF (ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1) step = 1.0
@@ -1262,8 +1263,8 @@ C--------Integrating exclusive population spectra (ENDF)
          emedp = 0
          emeda = 0
          emedh = 0
-         IF ( ENDf(nnuc).EQ.1 )     THEN
-           DO ispec = 1, NEX(1) + 10
+         IF ( ENDf(nnuc).EQ.1 .AND. INExc(nnuc).GE.0)     THEN
+           DO ispec = 1, min(NEX(1) + 10,ndecsed)
             gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
             xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
             ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
@@ -1322,7 +1323,7 @@ C--------------(merely for checking purpose)
      &'',10x,''alpha'',9x,''l. ion'')')
                WRITE (6,*)
      &                  '----------------------------------------------'
-               DO ispec = 1, NEX(1) + 10
+               DO ispec = 1, min(NEX(1) + 10,ndecsed)
                  IF (NDEJC.EQ.4) THEN
                      WRITE (6,'(6g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,INExc(nnuc)),
@@ -1522,6 +1523,7 @@ C----
 C---- ENDF spectra printout (exclusive representation)
 C----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
+          IF(INExc(nnuc).LT.0) CYCLE
          IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
@@ -1971,7 +1973,7 @@ C-----end of ENDF spectra (inclusive)
             controlp = 0
             controla = 0
             DO nnuc = 1, NNUcd
-                        IF(INExc(nnuc).eq.-1) CYCLE
+               IF(INExc(nnuc).eq.-1) CYCLE
                controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
                controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
                controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
