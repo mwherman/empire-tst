@@ -1,5 +1,5 @@
       PARAMETER(
-     * NDNUC= 105
+     * NDNUC= 35
      *,NDEXCLUS = 35
      *,NDEJC=3
      *,NDAFIS=1
