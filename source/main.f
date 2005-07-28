@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-28 16:14:28 $
-Ccc   * $Id: main.f,v 1.127 2005-07-28 16:14:28 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-28 20:24:13 $
+Ccc   * $Id: main.f,v 1.128 2005-07-28 20:24:13 herman Exp $
 C
       PROGRAM EMPIRE
 Ccc
@@ -1523,7 +1523,7 @@ C----
 C---- ENDF spectra printout (exclusive representation)
 C----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
-          IF(INExc(nnuc).LT.0) CYCLE
+c         IF(INExc(nnuc).LT.0) CYCLE
          IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
