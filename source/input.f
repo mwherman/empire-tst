@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-28 16:29:28 $
-Ccc   * $Id: input.f,v 1.165 2005-07-28 16:29:28 herman Exp $
+Ccc   * $Date: 2005-07-28 20:25:10 $
+Ccc   * $Id: input.f,v 1.166 2005-07-28 20:25:10 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -200,6 +200,7 @@ C--------set gamma-strength parameters
          DEFgp = 40.
          ADIv = 0.0
          NEX(1) = 50
+         NEXreq = 50
          FITlev = 0.0
          GCAsc = -1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
@@ -1281,10 +1282,10 @@ C-----set giant resonance parameters for target
       GMRpar(8,0) = 0.0
 C-----compound nucleus 1
       nnuc = 1
-      IF (NEX(1).GT.NDEX) THEN
+      IF (NEXreq.GT.NDEX) THEN
          WRITE (6,*) ' NUMBER OF ENERGY BINS IN COMP. NUCL. SET TO',
      &               NDEX
-         NEX(1) = MAX(NDEX - 2,2)
+         NEXreq = MAX(NDEX - 2,2)
       ENDIF
 C-----determination of discrete levels and pairing shift for cn
       CALL LEVREAD(nnuc)
