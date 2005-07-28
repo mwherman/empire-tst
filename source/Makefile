@@ -1,7 +1,7 @@
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
 #----flags for production compilation with g77
-#FFLAGS = -O3
+#FFLAGS = -O
 #----flags for debuging using g77 compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
@@ -14,6 +14,7 @@
 FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
+FFLAGS =  -O
 
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
@@ -35,7 +36,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       \
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-            thora.o
+            thora.o           empire_ctl.o
 
 OBJE =      subecis03.o systematics.o
 
