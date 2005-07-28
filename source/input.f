@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-28 16:14:27 $
-Ccc   * $Id: input.f,v 1.164 2005-07-28 16:14:27 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-07-28 16:29:28 $
+Ccc   * $Id: input.f,v 1.165 2005-07-28 16:29:28 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -242,7 +242,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -2509,7 +2509,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b27  |'
+     &           '                       |  E M P I R E  -  2.19.b28  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
