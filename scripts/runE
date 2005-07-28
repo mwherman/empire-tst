@@ -50,7 +50,6 @@ rm  warnings 2>/dev/null
 rm  INPUT 2>/dev/null
 
 # COPY INPUT FILES FOR A GIVEN CASE
-
 cp $file.inp INPUT.DAT
 if [ -s $file.lev ]; then
    cp $file.lev LEVELS
@@ -89,6 +88,10 @@ if [ -s $file.exf ]; then
    cp $file.exf EXFOR.dat
    echo 'Using existing file with EXFOR data:'  $file.exf
 fi
+if [ -s $file.c4 ]; then
+   cp $file.c4 C4.dat
+   echo 'Using existing file with C4 fit data:'  $file.c4
+fi
 echo ' '
 echo $file ' R U N N I N G  !! !  !   !    !     !'
 time nice ../source/empire
@@ -106,9 +109,9 @@ rm -r TL 2>/dev/null
 if [ ! -s $file-omp.ripl ]; then
    cp OMPAR.RIPL $file-omp.ripl  2>/dev/null
 fi
-if [ ! -s $file-omp.dir ]; then
+#if [ ! -s $file-omp.dir ]; then
    cp OMPAR.DIR $file-omp.dir  2>/dev/null
-fi
+#fi
 if [ ! -s $file-inp.fis ]; then
    cp FISSION.INP $file-inp.fis  2>/dev/null
 fi
@@ -127,6 +130,10 @@ if [ ! -s $file-lev.col ]; then
    fi
    if [ -s TARGET_COLL.DAT ]; then
       cat TARGET_COLL.DAT >>$file-lev.col
+   fi
+else
+   if [ -s TARGET_COLL.DAT ]; then
+      cp TARGET_COLL.DAT $file-lev.col
    fi
 fi
 if [ -s CUMULPLOT.PS ]; then
@@ -174,6 +181,7 @@ rm {ccm,dwba,INCIDENT}.{CS,TLJ,ANG,ICS} 2>/dev/null
 rm ecis03.{ang,cs,dat,ics,pol,tlj} 2>/dev/null
 rm ecSPH.inp 2>/dev/null
 rm ECIS_SPH.out 2>/dev/null
+rm C4.dat 2>/dev/null
 
 
 if  [ -s $file.exf ]; then
