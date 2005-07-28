@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-28 20:25:10 $
-Ccc   * $Id: input.f,v 1.166 2005-07-28 20:25:10 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-28 21:05:00 $
+Ccc   * $Id: input.f,v 1.167 2005-07-28 21:05:00 Carlson Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -243,7 +243,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1166,9 +1166,9 @@ C--------print IDNa matrix
          WRITE(12,*) ' '
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
-         IF (FITomp.GT.0) THEN
+         IF (FITomp.NE.0) THEN
             IOUt = 1
-            NEXreq = 10
+            NEXreq = 30
             GCAsc = 1
             MSD = 0
             MSC = 0
@@ -1176,8 +1176,15 @@ C--------reset some options if OMP fitting option selected
             DEGa = 0
             PEQc = 0
             MFPp = 1.3
-            NNUcd = 1
+            NNUcd = 2
             NNUct = 4
+         ENDIF
+C Set number of angles to minimum for first energy of automatic search
+        IF (FITomp.LT.0) THEN
+          NDAng = 2
+          NANgela = 2
+          ANGles(1) = 0.0
+          ANGles(2) = 180.
          ENDIF
 C--------read nuclear deformations and masses
          CALL READNIX
@@ -1338,7 +1345,7 @@ C-----------Defining ICOller(i)
             ICOller(1) = ICOllev(1)
             DO i = 2, ND_nlv
                itmp = ICOllev(i)
-               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc
+               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc 
                ICOller(i) = itmp
             ENDDO
             IF (ierr.EQ.1) THEN
@@ -1627,7 +1634,11 @@ Cpr         WRITE(6,*) I,ETL(I,NEJC,NNUR)
 Cpr         END DO
 C-----------calculate tramsmission coefficients
             IF (FITlev.EQ.0) THEN
+               ICAlangs = ICAlangs-10 
+               NANgela = 2
                CALL TLEVAL(nejc,nnur,nonzero)
+               ICAlangs = ICAlangs+10 
+               NANgela = NDAng
 C--------------print transmission coefficients
                IF (nonzero .AND. IOUt.EQ.5) THEN
                   WRITE (6,*)
@@ -4290,6 +4301,9 @@ C-----
             FITomp = val
             IF (FITomp.GT.0.0D0) WRITE (6,
      &'('' OM parameter adjustment selected,'',
+     & '' (will reset several options'')')
+            IF (FITomp.LT.0.0D0) WRITE (6,
+     &'('' Automatic OM parameter adjustment selected,'',
      & '' (will reset several options'')')
             GOTO 100
          ENDIF

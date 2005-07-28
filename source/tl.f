@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 14:17:43 $
-Ccc   * $Id: tl.f,v 1.68 2005-07-27 14:17:43 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-28 21:05:01 $
+Ccc   * $Id: tl.f,v 1.69 2005-07-28 21:05:01 Carlson Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1933,7 +1933,7 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
 C     angstep = 2.5
-      angstep = 180.d0/(NAngela-1)
+      angstep = 180.d0/(NANgela-1)
       CALL INIT(Nejc,Nnuc)
       ECIs1 = BECis1
 C-----Deformation read instead of deformation lengths
@@ -1953,6 +1953,8 @@ C     Spin-orbit potential must be not deformed !!
 C-----ECIS iteration scheme is used.
 C     Shift to coupled equations if convergence is not achieved
 C     ECIs1(23:23) = 'T'
+C-----Calculations at experimental angles
+      IF (ICAlangs.GT.0) ECIs1(31:31) = 'T'
       ECIs2 = BECis2
 C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
@@ -2243,7 +2245,21 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
             ENDIF
   200    ENDDO
       ENDIF
-      WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
+
+      IF (ICAlangs.GT.0) THEN
+        WRITE (1,'(3f10.5)') 0.D0, 180.0D0, 180.D0
+        WRITE (1,'(2i5)') ICAlangs,0
+        DO i = 1, ICAlangs    
+          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0, 
+     1                                    1.0D0, 1.0D0, 0.0D0
+          DO iang = 1, NANgela
+            WRITE(1,'(5F10.5)') ANGles(iang), 1.0d3, 1.0d2, 0.0d0, 0.0d0
+           END DO
+         END DO
+       ELSE
+        WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
+       ENDIF            
+
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
 C
@@ -2330,6 +2346,8 @@ C-----Spin-orbit potential must be not deformed !!
 C-----ECIS iteration scheme is used.
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
+C-----Calculations at experimental angles
+      IF (ICAlangs.GT.0) ECIs1(31:31) = 'T'
       ECIs2 = BECis2
 C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
@@ -2630,7 +2648,19 @@ C-----------write(1,'(3f10.5)') rc,0.,0.
 C
 C-----Angular distribution step
 C
-      WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
+      IF (ICAlangs.GT.0) THEN
+        WRITE (1,'(3f10.5)') 0.D0, 180.0D0, 180.D0
+        WRITE (1,'(2i5)') ICAlangs,0
+        DO i = 1, ICAlangs    
+          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0, 
+     1                                    1.0D0, 1.0D0, 0.0D0
+          DO iang = 1, NANgela
+            WRITE(1,'(5F10.5)') ANGles(iang), 1.0D3, 1.0D2, 0.0D0, 0.0D0
+           END DO
+         END DO
+       ELSE
+        WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
+       ENDIF            
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
 C-----Running ECIS
@@ -2982,6 +3012,7 @@ C--------------Special Smith-type potential formulas
                IF (POT(i,j,5).NE.0.) Vlib(i) = Vlib(i) + POT(i,j,3)
      &             *COS(2.*pi*(ATAr - POT(i,j,4))/POT(i,j,5))
             ENDIF
+           IF(i.eq.2 .OR. i.eq.4) Vlib(i) = MAX(Vlib(i),0.0d0)
          ENDIF
       ENDDO
 C

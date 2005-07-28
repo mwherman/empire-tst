@@ -1,8 +1,9 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-28 20:24:13 $
-Ccc   * $Id: main.f,v 1.128 2005-07-28 20:24:13 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-28 21:05:00 $
+Ccc   * $Id: main.f,v 1.129 2005-07-28 21:05:00 Carlson Exp $
 C
-      PROGRAM EMPIRE
+C      PROGRAM EMPIRE
+      SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
@@ -64,17 +65,22 @@ C
      &        icsh, icsl, ie, iizaejc, il, ilev, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
-     &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nelang, nnuc,
+     &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nnuc,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
-      DATA ctldir/'TL/'/,epre/0.0/
-      DATA opart/1hn,1hp,1ha/
+      DATA ctldir/'TL/'/
+       DATA opart/1hn,1hp,1ha/
       icalled = 0
       CALL THORA(6)
+      EIN = 0.0d0
+      epre=EIN
+      ICAlangs = 0
+
+      OPEN (40,FILE = 'OPTFIT.CAL',STATUS='UNKNOWN')
 C-----
 C-----Read and prepare input data
 C-----
@@ -122,21 +128,30 @@ C     For resolution function (Spreading levels in the continuum)
       IF(WIDcoll.GT.0.d0)
      &   isigma = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
       ncoll = 0
-      nelang = NANgela
       ecm = EINl - EIN
-      dang = PI/FLOAT(nelang - 1)
+      dang = PI/FLOAT(NANgela - 1)
       angstep = 180.d0/(NANgela-1)
       gang = 180.d0/(NDAng-1)
 C-----
 C-----Get ECIS results
 C-----
-      OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
+      IF (ICAlangs.GT.0) THEN
+        OPEN (45,FILE = (ctldir//ctmp23//'.EXP'),STATUS = 'OLD',
      &      ERR = 1400)
-      READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
-      READ (45,*,END = 1400)   ! To skip level identifier line
-      DO iang = 1, nelang
-         READ (45,'(7x,E12.5)',END = 1400) elada(iang)
-      ENDDO
+        READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
+        READ (45,*,END = 1400)   ! To skip level identifier line
+        DO iang = 1, NANgela
+         READ (45,'(24x,E12.5)',END = 1400) elada(iang)
+        ENDDO
+       ELSE
+        OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
+     &      ERR = 1400)
+        READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
+        READ (45,*,END = 1400)   ! To skip level identifier line
+        DO iang = 1, NANgela
+           READ (45,'(7x,E12.5)',END = 1400) elada(iang)
+        ENDDO
+       ENDIF
       IF (DIRect.NE.0) THEN
          OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
@@ -163,15 +178,25 @@ C--------------add direct transition to the spectrum
                poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
-               READ (45,*,END = 1400)     ! Skipping level identifier line
-               iang = 0
-               DO iang1 = 1, NANgela
-                  READ (45,'(7x,E12.5)',END = 1400) ftmp
-C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS
-                  if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
-                  iang = iang +1
+               IF (ICAlangs.GT.0) THEN
+                IF (i.LE.ICAlangs) THEN
+                  READ (45,*,END = 1400)     ! Skipping level identifier line
+                  DO iang = 1, NANgela
+                    READ (45,'(24x,E12.5)',END = 1400) ftmp
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
-               ENDDO
+                  ENDDO
+                 ENDIF
+                ELSE
+                 READ (45,*,END = 1400)     ! Skipping level identifier line
+                 iang = 0
+                 DO iang1 = 1, NANgela
+                   READ (45,'(7x,E12.5)',END = 1400) ftmp
+C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS
+                   if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
+                   iang = iang +1
+                  CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
+                 ENDDO
+                ENDIF
 C--------------construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
@@ -234,26 +259,28 @@ C--------------Spreading it using resolution function (SQRT(2*PI) = 2.5066)
                else
                  CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
                endif
-               READ (45,*,END = 1400)     ! Skipping level identifier line
-               iang = 0
-               DO iang1 = 1, NANgela
-                  READ (45,'(7x,E12.5)',END = 1400) ftmp
+               IF (ICAlangs.EQ.0) THEN
+                 READ (45,*,END = 1400)     ! Skipping level identifier line
+                 iang = 0
+                 DO iang1 = 1, NANgela
+                    READ (45,'(7x,E12.5)',END = 1400) ftmp
 C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS
-                  if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
-                  iang = iang + 1
-                  if(isigma.gt.0 .and. dtmp.gt.0.) then
-                    do ie = max(icsl - 3*isigma,1) ,
-     &                    min(NDEcse,icsl + 3*isigma)
-                      popl = ftmp/DE * dexp(-dble(ie-icsl)**2/
-     &                    (2.*isigma*isigma))/(2.5066d0*isigma*dtmp)
+                    if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
+                    iang = iang + 1
+                    if(isigma.gt.0 .and. dtmp.gt.0.) then
+                      do ie = max(icsl - 3*isigma,1) ,
+     &                      min(NDEcse,icsl + 3*isigma)
+                        popl = ftmp/DE * dexp(-dble(ie-icsl)**2/
+     &                      (2.*isigma*isigma))/(2.5066d0*isigma*dtmp)
                       CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) +
      &                popl
-                    enddo
-                  else
+                     enddo
+                   else
                     CSEa(icsl,iang,nejcec,1) =  CSEa(icsl,iang,nejcec,1)
      &                                     + ftmp/DE
-                  endif
-              ENDDO
+                    endif
+                  ENDDO
+                ENDIF
              ENDIF
 C------------END OF ADDING INELASTIC TO CONTINUUM
            ENDIF
@@ -306,10 +333,10 @@ C        WRITE (6,99010) CSFus
       WRITE (6,99015)
       WRITE (6,99020)
       gang = 180.0/(NDAng - 1)
-      angstep = 180.0/(nelang - 1)
-      DO iang = 1, nelang/4 + 1
+      angstep = 180.0/(NANgela - 1)
+      DO iang = 1, NANgela/4 + 1
          imint = 4*(iang - 1) + 1
-         imaxt = MIN0(4*iang,nelang)
+         imaxt = MIN0(4*iang,NANgela)
          WRITE (6,99025) ((j - 1)*angstep,elada(j),j = imint,imaxt)
       ENDDO
 
@@ -339,12 +366,12 @@ C--------locate position of the projectile among ejectiles
          its = 2
          DO ilv = 2,ncoll
             DO iang= ilv+1,ncoll
-              if(ICOller(iang).eq.ICOller(ilv)) goto 99027
+              if(ICOller(iang).eq.ICOller(ilv)) goto 700
             ENDDO
             itemp(its) = ICOller(ilv)
             deform(its)   = D_DEF(ilv,2)
             its = its +1
-99027    ENDDO
+ 700     ENDDO
          its = its -1
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
            WRITE (6,99029)
@@ -713,7 +740,7 @@ C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
      &          CSFus + SINl + SINlcc
-         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
+         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') 
      &         TOTcs*TOTred
          WRITE (12,*) ' '
       ENDIF
@@ -875,19 +902,166 @@ C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
                   WRITE (12,*) ' '
                   WRITE (12,*) ' Elastic angular distribution '
                   WRITE (12,*) ' '
-                  delang = 180./FLOAT(nelang - 1)
-                  WRITE (12,99045) (FLOAT(iang - 1)*delang,iang = 1,
-     &                             nelang)
+                  IF (ICAlangs.GT.0) THEN
+                    WRITE (12,99045) (ANGles(iang),iang = 1, NANgela)
+                    ELSE
+                     delang = 180./FLOAT(NANgela - 1)
+                     WRITE (12,99045) (FLOAT(iang - 1)*delang,iang = 1,
+     &                                                         NANgela)
+                   ENDIF
 99045             FORMAT (10X,8G15.5)
-                  WRITE (12,99050) (elada(iang) + elcncs,iang = 1,nelang
+                 WRITE (12,99050) (elada(iang) + elcncs,iang = 1,NANgela
      &                             )
 99050             FORMAT (9X,8E15.5)
                   WRITE (12,*) ' '
                   IF (elcncs.EQ.0) WRITE (6,*)
      &                 'WARNING: CN elastic is 0'
-               ENDIF
+
+                  IF (FITomp.LT.0) THEN
+C                    WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs,CSPrd(1)
+                    WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+                   IF (ncoll.GT.0) THEN
+C--------locate position of the projectile among ejectiles
+                    CALL WHEREJC(IZAejc(0),nejcec,iloc)
+                    its = 2
+                    DO ilv = 2,ncoll
+                     DO iang= ilv+1,ncoll
+                      if(ICOller(iang).eq.ICOller(ilv)) goto 710
+                     ENDDO
+                     itemp(its) = ICOller(ilv)
+                     its = its +1
+ 710                ENDDO
+                   its = its -1
+                   WRITE (40,'(12x,11D12.5)') ELAcs,
+     &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+                   IF (ICAlangs.gt.0) THEN
+                    DO iang = 1, NDANG
+                     WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &                elada(iang) + elcncs,
+     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+                    ENDDO
+                   ENDIF
+                  ELSE
+                   WRITE (40,'(12x,11D12.5)') ELAcs
+                   IF (ICAlangs.gt.0) THEN
+                    DO iang = 1, NDANG
+                     WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &                elada(iang) + elcncs
+                    ENDDO
+                   ENDIF
+                 ENDIF
+                ENDIF
+c                  IF (ncoll.GT.0) THEN
+C--------locate position of the projectile among ejectiles
+c                    CALL WHEREJC(IZAejc(0),nejcec,iloc)
+c                    WRITE (6,*) ' '
+c                    gang = 180.d0/(NDANG - 1)
+c                    its = 2
+c                    DO ilv = 2,ncoll
+c                     DO iang= ilv+1,ncoll
+c                      if(ICOller(iang).eq.ICOller(ilv)) goto 720
+c                     ENDDO
+c                     itemp(its) = ICOller(ilv)
+c                     deform(its)   = D_DEF(ilv,2)
+c                     its = its +1
+c 720               ENDDO
+c                   its = its -1
+c                  IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
+c                   WRITE (12,99029)
+c                   WRITE (12,99030) (itemp(ilv),ilv = 2,MIN(its,10))
+c             WRITE (12,99031) (ELV(itemp(ilv),nnuc),ilv = 2,MIN(its,10))
+c                   WRITE (12,99033) (XJLv(itemp(ilv),nnuc)*
+c     &             LVP(itemp(ilv),nnuc),deform(ilv),ilv = 2,MIN(its,10))
+c                   WRITE (12,*) ' '
+c                   DO iang = 1, NDANG
+c                    IF (ICAlangs.GT.0) THEN
+c                     WRITE (12,99035) ANGles(iang),
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+c                    ELSE
+c                     WRITE (12,99035) (iang - 1)*gang,
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+c                    ENDIF
+c                  ENDDO
+c                  WRITE (12,*) ' '
+c                  WRITE (12,99040)(CSDirlev(itemp(ilv),nejcec),ilv = 2,
+c     &                                                     MIN(its,10))
+c
+c                  IF(its.gt.10) THEN
+c                  WRITE (6,*) ' '
+c                  WRITE (6,*) ' '
+c              WRITE (6,99030) (itemp(ilv),ilv = 11,MIN(its,20))
+c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=11,MIN(its,20))
+c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
+c     &             LVP(itemp(ilv),nnuc),deform(ilv),ilv =11,MIN(its,20))
+c                  WRITE (6,*) ' '
+c                   DO iang = 1, NDANG
+c                    IF (ICAlangs.GT.0) THEN
+c                     WRITE (6,99035) ANGles(iang),
+c123456789012345678901234567890123456789012345678901234567890123456789012
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =11,MIN(its,20))
+c                    ELSE
+c                     WRITE (6,99035) (iang - 1)*gang,
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =11,MIN(its,20))
+c                    ENDIF
+c                  ENDDO
+c                 WRITE (6,*) ' '
+c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nejcec),ilv = 11,
+c     &                      MIN(its,20))
+c                ENDIF
+c
+c                  IF(its.gt.20) THEN
+c                  WRITE (6,*) ' '
+c                  WRITE (6,*) ' '
+c              WRITE (6,99030) (itemp(ilv),ilv = 21,MIN(its,30))
+c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=21,MIN(its,30))
+c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
+c     &            LVP(itemp(ilv),nnuc),deform(ilv),ilv =21,MIN(its,30))
+c                  WRITE (6,*) ' '
+c                   DO iang = 1, NDANG
+c                    IF (ICAlangs.GT.0) THEN
+c                     WRITE (6,99035) ANGles(iang),
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =21,MIN(its,30))
+c                    ELSE
+c                     WRITE (6,99035) (iang - 1)*gang,
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =21,MIN(its,30))
+c                    ENDIF
+c                  ENDDO
+c                 WRITE (6,*) ' '
+c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nnuc),ilv = 21,
+c     &                      MIN(its,30))
+c                ENDIF
+c
+c                  IF(its.gt.30) THEN
+c                  WRITE (6,*) ' '
+c                  WRITE (6,*) ' '
+c              WRITE (6,99030) (itemp(ilv),ilv = 31,MIN(its,40))
+c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=31,MIN(its,40))
+c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
+c     &            LVP(itemp(ilv),nnuc),deform(ilv),ilv=31,MIN(its,40))
+c                  WRITE (6,*) ' '
+c                   DO iang = 1, NDANG
+c                    IF (ICAlangs.GT.0) THEN
+c                     WRITE (6,99035) ANGles(iang),
+c     &               (CSAlev(iang,itemp(ilv),nejcec),ilv=31,MIN(its,40))
+c                    ELSE
+c                     WRITE (6,99035) (iang - 1)*gang,
+c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =31,MIN(its,40))
+c                    ENDIF
+c                  ENDDO
+c                 WRITE (6,*) ' '
+c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nejcec),ilv = 31,
+c     &                      MIN(its,40))
+c                ENDIF
+                
+c                ENDIF
+c               ENDIF
+              ENDIF
             ENDIF
          ENDIF
+C Jump to end of loop after elastic when fitting   
+
+         If(FITomp.LT.0 .AND. nnuc.EQ.mt2) go to 1155
+
          POPmax(nnuc) = POPmax(nnuc)*0.0001
          IF (POPmax(nnuc).EQ.0.0D0) THEN
             WRITE (6,*) ' '
@@ -1028,7 +1202,7 @@ C--------in the first CN
      &          kemin = NEX(nnuc)
          ENDIF
 C--------turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
-         IF (FITomp.NE.0) kemin = NEX(nnuc)
+C         IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
 C--------account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
@@ -1984,26 +2158,55 @@ C-----end of ENDF spectra (inclusive)
          ENDDO
       ENDIF
 
- 1155 READ (5,'(A36)') nextenergy
-      IF(nextenergy(1:1).EQ.'$') THEN
-         READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1,
-     &       ikey2, ikey3, ikey4
-         CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
-         GO TO 1155
-      ELSE
-         READ(nextenergy,'(G15.5)') EIN
-      ENDIF
+ 1155 IF( FITomp.GE.0 ) THEN
+        READ (5,'(A36)') nextenergy
+        IF(nextenergy(1:1).EQ.'$') THEN
+           READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1,
+     &         ikey2, ikey3, ikey4
+           CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
+           GO TO 1155
+        ELSE
+           READ(nextenergy,'(G15.5)') EIN
+        ENDIF
+       ELSE
+        READ (5,*) EIN, NDAng, ICAlangs         
+          IF(NDAng.lt.2) THEN
+            NDAng=2
+            ANGles(1) = 0.
+            ANGles(2) = 180.
+           ELSE
+            READ (5,*) (ANGles(na),na=1,NDAng)
+           ENDIF
+          NANGela=NDAng
+          IF(NANgela.GT.NDAngecis) THEN
+          WRITE(6,*)
+     &         'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+          STOP 'FATAL: increase NDAngecis in dimension.h'
+        ENDIF
+       ENDIF
 
       IF (EIN.LT.0.0D0) THEN
          IF (FILevel) CLOSE (14)
          WRITE (12,*) ' '
          WRITE (6,*) ' '
          WRITE (6,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
+         CLOSE (5)
+         CLOSE (11)
+         CLOSE (12)
+         CLOSE (13)
+         CLOSE (14)
          CLOSE (15,STATUS = 'delete')
          CLOSE (16,STATUS = 'delete')
+         CLOSE (23)
+         CLOSE (24)
+         CLOSE (26)
+         CLOSE (29)
+         CLOSE (33)
+         CLOSE (40)
          CLOSE (66,STATUS = 'delete')
          WRITE (*,*) '.'
          CALL THORA(6)
+         CLOSE (6)
 C        SAVING RANDOM SEEDS
          ftmp = grand()
          OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
@@ -2012,9 +2215,11 @@ C        SAVING RANDOM SEEDS
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
-         STOP '.REGULAR STOP'
+C         STOP '.REGULAR STOP'
+         RETURN 
       ENDIF
       IF(EIN.LT.epre) THEN
+         WRITE(6,*) EIN,epre
          WRITE(6,*) 'FATAL: Input energies are not ordered !!'
          WRITE(6,*) 'FATAL: Check your input file'
          PAUSE 'FATAL: Input energies are not ordered !!'
@@ -2026,24 +2231,26 @@ C-----Initialized in input.f
 C     NANgela = 37
 C     NDAng   = 37
 C-----
-      IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-        NANgela = 73
-        NDAng   = 73
-      ENDIF
-      IF(EIN.GT.50.) THEN
-        NANgela = 91
-        NDAng   = 91
-      ENDIF
-      IF(NANgela.GT.NDAngecis) THEN
+      IF(FITomp.GE.0) THEN
+        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+          NANgela = 73
+          NDAng   = 73
+        ENDIF
+        IF(EIN.GT.50.) THEN
+          NANgela = 91
+          NDAng   = 91
+        ENDIF
+       IF(NANgela.GT.NDAngecis) THEN
          WRITE(6,*)
-     &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
-         STOP 'FATAL: increase NANgecis in dimension.h'
-      ENDIF
+     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+         STOP 'FATAL: increase NDAngecis in dimension.h'
+        ENDIF
 C-----set angles for inelastic calculations
-      da = 180.0/(NDANG - 1)
-      DO na = 1, NDANG
-        ANGles(na) = (na - 1)*da
-      ENDDO
+        da = 180.0/(NDANG - 1)
+        DO na = 1, NDANG
+          ANGles(na) = (na - 1)*da
+        ENDDO
+       ENDIF
       DO na = 1, NDANG
         CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
         SANgler(na) = SQRT(1.D0 - CANgler(na)**2)

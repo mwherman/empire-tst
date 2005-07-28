@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 14:17:44 $
-Ccc   * $Id: subecis03.f,v 1.12 2005-07-27 14:17:44 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-28 21:05:00 $
+Ccc   * $Id: subecis03.f,v 1.13 2005-07-28 21:05:00 Carlson Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
@@ -49,7 +49,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN (61,FILE = 'file61')
       OPEN (62,FILE = 'file62')
       OPEN (63,FILE = 'ecis03.tlj')
-      OPEN (64,FILE = 'file64')
+      OPEN (64,FILE = 'ecis03.exp')
       OPEN (65,FILE = 'file65')
       OPEN (91,FILE = 'file91')
       OPEN (85,FILE = 'ecis03.ang')
@@ -70,7 +70,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (61,STATUS = 'delete')
       CLOSE (62,STATUS = 'delete')
       CLOSE (63)
-      CLOSE (64,STATUS = 'delete')
+      CLOSE (64)
       CLOSE (65,STATUS = 'delete')
       CLOSE (91,STATUS = 'delete')
       CLOSE (85)
@@ -4216,7 +4216,7 @@ C
       INTEGER Idt, Iqm, Iqmax, Ism, Nbet, Npp, Nspin
       REAL*8 Beta(9,1), Fiss(2,1), Gam(1), Pip(15,1), Scn(7,1),
      &       Val(34,1), Wv(18,1)
-      INTEGER Ipi(11,3), Ipp(2,15,1), Nbta(18,1)
+      INTEGER Ipi(11,*), Ipp(2,15,1), Nbta(18,1)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -4931,7 +4931,7 @@ C Dummy arguments
 C
       INTEGER Jtx, Kab, Kba, Kbc, Kcc, Ktgr, Ms1, Ms2, Ncoll, Ncols,
      &        Njc, Njx, Njy, Nmax
-      INTEGER Ipi(11,3), Mf(10,1), Nct(6), Ngr(2), Niv(Ncoll,Ncoll,3),
+      INTEGER Ipi(11,*), Mf(10,1), Nct(6), Ngr(2), Niv(Ncoll,Ncoll,3),
      &        Npr(2)
       LOGICAL Lo(250)
       REAL*8 Wv(18,1)
@@ -5374,7 +5374,7 @@ C CHECK OF TOTAL CROSS-SECTION DATA                                     LECD-084
                   IF (j.LT.0 .OR. j.GT.Ncolt + 2) GOTO 500
                   IF (j.GT.0 .AND. j.LE.Ncolt .AND. Wv(3,j).LE.0.D0)
      &                GOTO 600
-                  IF (Lo(181)) GOTO 500
+C                  IF (Lo(181)) GOTO 500
                   IF (Lo(185) .AND. j.EQ.Ncolt + 1) GOTO 500
                   IF (Lo(186) .AND. j.EQ.Ncolt + 2) GOTO 500
                ENDDO
@@ -5508,8 +5508,8 @@ C Dummy arguments
 C
       INTEGER Jcal, Jtn, Ncolr, Nt
       CHARACTER*4 Am(2,1), Cbm(2,9,1), Cmf(10,Nt), Itz(7,21)
-      REAL*8 Bm(9,12)
-      INTEGER Ipi(11,3), Itx(7,21), Mf(10,Nt), Nx(18,12)
+      REAL*8 Bm(9,*)
+      INTEGER Ipi(11,*), Itx(7,21), Mf(10,Nt), Nx(18,*)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -6169,7 +6169,7 @@ C
       REAL*8 H
       INTEGER Ism, Kxt, Lm, Lmax1, Lmax2, Lmax3, Ncoll, Ncolt
       REAL*8 Fg(Lmax1,4,1), Wv(18,1), Xg(Lmax2,1), Z(1)
-      INTEGER Iexp(1), Ipi(11,3), Niv(Ncoll,Ncoll,3)
+      INTEGER Iexp(1), Ipi(11,*), Niv(Ncoll,Ncoll,3)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -8676,7 +8676,7 @@ C Dummy arguments
 C
       INTEGER Idt, Im, Iqmax, It, Nbt1, Ncoll, Nfa, Npp, Nspin, Nva
       REAL*8 Beta(9,Nbt1), Fac(Nfa), T(3,1), Var(Nva)
-      INTEGER Iph(2,Ncoll), Ipi(11,1), Iq(6,1), Nbeta(18,Nbt1),
+      INTEGER Iph(2,Ncoll), Ipi(11,*), Iq(6,1), Nbeta(18,Nbt1),
      &        Niv(Ncoll,Ncoll,2), Nvar(2,1)
       LOGICAL Lo(250)
 C
@@ -9172,7 +9172,7 @@ C Dummy arguments
 C
       INTEGER Idt, It, Nbt1, Ncoll, Nfa, Nva
       REAL*8 Fac(1), T(3,1), Var(Nva)
-      INTEGER Iph(2,Ncoll), Ipi(11,1), Iq(6,1), Nbta(18,1),
+      INTEGER Iph(2,Ncoll), Ipi(11,*), Iq(6,1), Nbta(18,1),
      &        Niv(Ncoll,Ncoll,2), Nvar(2,7)
       LOGICAL Lo(250)
 C
@@ -9789,7 +9789,7 @@ C Dummy arguments
 C
       INTEGER Idt, Iqmax, It, Ncoll, Nfa
       REAL*8 Beta(9,3), Fac(1), T(3,1), Va(5), Var(1)
-      INTEGER Iph(2,Ncoll), Ipi(11,1), Iq(6,1), Niv(Ncoll,Ncoll,2)
+      INTEGER Iph(2,Ncoll), Ipi(11,*), Iq(6,1), Niv(Ncoll,Ncoll,2)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -10604,7 +10604,7 @@ C Dummy arguments
 C
       INTEGER Idt, Ncoll, Ncolt, Nfa, Npp
       REAL*8 Fac(1), Pip(15,1), Va(150), Wv(18,1)
-      INTEGER Ipi(11,1), Ipp(2,15,1), Iq(6,1), Ivq(3,1), Ivy(7,1),
+      INTEGER Ipi(11,*), Ipp(2,15,1), Iq(6,1), Ivq(3,1), Ivy(7,1),
      &        Ll(2,8,1), Niv(Ncoll,Ncoll,2), Nva(300)
       LOGICAL Lo(250)
 C
@@ -11434,7 +11434,7 @@ C
 C Dummy arguments
 C
       INTEGER Ix, Kxt
-      INTEGER Ipi(11,1), Ipim(11,1), Nci(2,1)
+      INTEGER Ipi(11,*), Ipim(11,1), Nci(2,1)
       LOGICAL Lo(250)
       REAL*8 Scn(7,1), Wv(18,1), Wvm(18,1), Xd(3,1)
 C
@@ -12023,7 +12023,7 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Ipi(11,3)
+      INTEGER Ipi(11,*)
       LOGICAL Lo(250)
       REAL*8 Scn(7), Wv(18,1)
 C
@@ -12170,10 +12170,10 @@ C
 C
 C Dummy arguments
 C
-      CHARACTER*4 Cw(2,1)
-      REAL*8 Dw(1)
+      CHARACTER*4 Cw(2,*)
+      REAL*8 Dw(*)
       LOGICAL Lo(250)
-      INTEGER Nw(2,2)
+      INTEGER Nw(2,*)
 C
 C Local variables
 C
@@ -12513,7 +12513,7 @@ C
       INTEGER Idt, Iqm, Ism, Nbt1, Ncold, Ncoll, Ncolt, Npp
       REAL*8 Beta(9,1), Q(1), Tl(1), V(Ism,1), Val(34,1), Vco(2,1),
      &       Vdo(2,1), Wv(18,1), Wvm(18,1)
-      INTEGER Ipi(11,1), Ipim(11,1), Ipp(30,1), Ivq(3,1), Ivy(7,1),
+      INTEGER Ipi(11,*), Ipim(11,1), Ipp(30,1), Ivq(3,1), Ivy(7,1),
      &        Ivz(4,1), Mcm(2), Nbta(18,1), Np(1), Nval(1)
       LOGICAL Lo(250)
 C
@@ -16672,7 +16672,7 @@ C Dummy arguments
 C
       INTEGER Id, It, Kab, Kbc, Ncoll, Nfa, Nmax
       REAL*8 Aa(Kbc,1), At(Id,4), Fac(1), Tq(3,1), Wv(18,1)
-      INTEGER Ipi(11,1), Iq(6,1), Ivq(3,1), Ivz(4,1), Mc(Kab,12),
+      INTEGER Ipi(11,*), Iq(6,1), Ivq(3,1), Ivz(4,1), Mc(Kab,12),
      &        Nat(2*Id,4), Niv(Ncoll,Ncoll,3), Nvi(Kab,Kab,6)
       LOGICAL Lo(250)
 C
@@ -22389,7 +22389,7 @@ C
       REAL*8 Aa(Kbc,1), F(2,Jmax,1), Fai(Kab,1), Far(Kab,1), Fcn(Kmax,1)
      &       , Fiss(2,1), Gam(1), Gcn(Kmax,1), P(NC,NC,4), Q(1), Tl(1),
      &       Tx(1), V(Iq,1), Wv(18,1), Xd(3,1)
-      INTEGER Ipi(11,1), Ipim(11,1), Mc(Kab,12), Md(Kab,12), Ncj(2,1),
+      INTEGER Ipi(11,*), Ipim(11,1), Mc(Kab,12), Md(Kab,12), Ncj(2,1),
      &        Nct(6)
       LOGICAL Lo(250)
 C
@@ -24003,7 +24003,7 @@ C
       INTEGER Id, Ipj, Ipk, Jmax, Jmin, Kmax, Ncoll, Ncols
       REAL*8 Xz
       REAL*8 A(7,1), Ax(1), F(2,Jmax,1), Fcn(Kmax,1), Wv(18,1)
-      INTEGER Ipi(11,1), Mf(10,1)
+      INTEGER Ipi(11,*), Mf(10,1)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -24482,7 +24482,7 @@ C
      &       Fm(7,Ncolr), Res(1), Spg(1), Sr(2,Jmax,1), The(1), Tx(2),
      &       Wv(18,1), Wvm(18,1), Xd(3,1)
       CHARACTER*4 Cm(10,1)
-      INTEGER Ipi(11,1), Mf(10,1), Mfm(14,Ncolr), Nco(1), Noi(2,1)
+      INTEGER Ipi(11,*), Mf(10,1), Mfm(14,Ncolr), Nco(1), Noi(2,1)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -25189,7 +25189,7 @@ C
       INTEGER Ipj, Ipk, Jmax, Jmin, Kmax, Mt1, Ncj
       REAL*8 A(2,1), Ab(2,Mt1,1), B(2), Coe(1), Ex(2), Fcn(Kmax,1),
      &       Fr(2,Jmax,1), Wv(18,1)
-      INTEGER Ipi(11,1), Mf(10,8), Nco(20,1)
+      INTEGER Ipi(11,*), Mf(10,8), Nco(20,1)
       LOGICAL Lo(250)
 C
 C Local variables
@@ -26021,9 +26021,9 @@ C
 C Dummy arguments
 C
       INTEGER Kf
-      REAL*8 Dw(1)
+      REAL*8 Dw(*)
       LOGICAL Lo(250)
-      INTEGER Nw(2,1)
+      INTEGER Nw(2,*)
 C
 C Local variables
 C
@@ -26662,9 +26662,9 @@ C
 C Dummy arguments
 C
       REAL*8 Cm
-      REAL*8 Dw(1000)
+      REAL*8 Dw(*)
       LOGICAL Lo(250)
-      INTEGER Nw(2,1000)
+      INTEGER Nw(2,*)
 C
 C Local variables
 C

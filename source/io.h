@@ -5,24 +5,36 @@ c
 c      1     tl
 c      3     MSD-Orion
 c      4     ddhms
+c      5     io.h
+c      6     io.h
 c      8     MSD-Orion
 c      9     ddhms
 c     10     ddhms
-c     13     input
+c     11     io.h
+c     12     io.h
+c     13     io.h,input
+c     14     io.h
 c     15     MSD-Orion,MSD-Tristan
 c     16     MSD-Tristan
 c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
 c     22     input
+c     23     io.h
+c     24     io.h
 c     27     ddhms,input
+c     29     io.h
 c     28     ddhms
 c     32     input,tl
+c     33     io.h
 c     34     lev-dens
 c     35     lev-dens
 c     36     lev-dens
 c     38     lev-dens
 c     39     tl
+c     40     main,chi2 
+c     42     io.h (degas)
+c     43     io.h
 c     45     tl,fusion,main
 c     46     tl,fusion,main
 c     47     fusion,input
@@ -46,8 +58,8 @@ c     77     input
 c     78     ecis03
 c     79     input
 c     80     main
-c     81     input
-c     82     input
+c     81     input,lev-dens
+c     82     input,lev-dens
 c     83     input
 c     84     input
 c     85     ecis03
@@ -56,15 +68,15 @@ c     87     ecis03
 c     88     ecis03
 c     89     ecis03
 c     90     ecis03
-c     91     MSD-Tristan
-c     94     input.f
+c     91     ecis-03,MSD-Tristan
+c     94     input.f,main
+c     95     input.f
+c     96     tl
+c     97     tl
 c     99     ecis03
-c    133     tl
-c    134     tl
-c    157     HF-comp
 c
       OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
-      OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='NEW')
+      OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='UNKNOWN')
 C-----spin distribution from file SDFILE
       OPEN(UNIT=43,FILE='SDREAD', STATUS='OLD', ERR=768)
       SDREAD=.TRUE.

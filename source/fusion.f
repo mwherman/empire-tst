@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 14:01:05 $
-Ccc   * $Id: fusion.f,v 1.50 2005-07-21 14:01:05 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-07-28 21:05:00 $
+Ccc   * $Id: fusion.f,v 1.51 2005-07-28 21:05:00 Carlson Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -101,7 +101,7 @@ C--------Here the old calculated files should be read
          READ (45,END = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
-         IF (ABS(ener - EINl).LT.0.0001D0) THEN
+         IF (ABS(ener - EINl).LT.0.0001D0 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
                READ (45,END = 50) stl(l + 1)
@@ -125,12 +125,14 @@ C
 C-------If (energy read from file do not coincide
 C-------this nucleus should be recalculated (goto 300)
 C
-         WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
-     &               ' REQUESTED ENERGY=', SNGL(ener)
    50    CLOSE (45,STATUS = 'DELETE')
-         IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
-         WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
+
+         IF (FITomp.GE.0) THEN         
+           WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
+     &               ' REQUESTED ENERGY=', SNGL(ener)
+           WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
      &               ' FOR INC.CHANNEL HAS BEEN DELETED'
+          ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
       ENDIF
@@ -322,9 +324,9 @@ C-----------DWBA calculation. All collective levels considered
             ENDIF
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
             IF (DIRect.NE.3) THEN
-               CALL PROCESS_ECIS(IOPsys,'dwba',4,4)
+               CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
             ELSE
-               CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4)
+               CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
@@ -364,18 +366,18 @@ C-----------is calculated by CC method.
 C--------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
                IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4)
+                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4)
+                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.FALSE.)
                ENDIF
             ELSE
 C--------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
                IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4)
+                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4)
+                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
                ENDIF
             ENDIF
@@ -432,9 +434,9 @@ C--------------Angular distribution (incident.ang)
 C-----------------checking the correspondence of the excited states
                   IF (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) THEN
                      WRITE (6,*)
-     &            ' WARNING: DWBA and CCM state order does not coincide'
+     &            ' WARNING: DWBA and CCM state order do not coincide'
                      STOP
-     &            ' WARNING: DWBA and CCM state order does not coincide'
+     &            ' WARNING: DWBA and CCM state order do not coincide'
                   ENDIF
   235             BACKSPACE 45
                   READ (45,'(A80)',END = 240) rstring
@@ -446,6 +448,37 @@ C-----------------checking the correspondence of the excited states
                   ENDDO
                ENDDO
   240          CLOSE (45,STATUS = 'DELETE')
+               CLOSE (46,STATUS = 'DELETE')
+               CLOSE (47)
+C--------------Experimental angular distribution (incident.ang)
+               IF( ICAlangs.GT.0) THEN
+                 OPEN (45,FILE = 'dwba.EXP',STATUS = 'OLD',ERR = 260)
+                 READ (45,'(A80)',END = 260) rstring
+                 OPEN (46,FILE = 'ccm.EXP',STATUS = 'OLD',ERR = 260)
+                 READ (46,'(A80)',END = 250) ! first line is taken from dwba
+  250            OPEN (47,FILE = 'INCIDENT.EXP',STATUS = 'UNKNOWN')
+                 WRITE (47,'(A80)') rstring
+                 DO i = 1, ICAlangs
+                  READ (45,'(i5,5x,i5)',END = 260) istat1, nang
+                  READ (46,'(i5)',END = 255) istat2
+C-----------------checking the correspondence of the excited states
+                  IF (istat1.NE.istat2) THEN
+                     WRITE (6,*)
+     &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
+                     STOP
+     &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
+                   ENDIF
+  255             BACKSPACE 45
+                  READ (45,'(A80)',END = 260) rstring
+                  WRITE (47,'(A80)') rstring
+                  DO j = 1, nang
+                     READ (45,'(A80)',END = 260) rstring
+                     READ (46,'(A80)',END = 256) rstring
+  256                WRITE (47,'(A80)') rstring
+                  ENDDO
+                 ENDDO
+                ENDIF
+  260          CLOSE (45,STATUS = 'DELETE')
                CLOSE (46,STATUS = 'DELETE')
                CLOSE (47)
                IF (DEFormed) THEN
@@ -460,7 +493,7 @@ C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
-            CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3)
+            CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3,ICAlangs)
             WRITE (6,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
@@ -538,6 +571,10 @@ C--------LINUX
             ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp23//'.ICS'
             iwin = PIPE(ctmp)
          ENDIF
+         IF (ICAlangs.GT.0) THEN
+           ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP'
+           iwin = PIPE(ctmp)
+          ENDIF
          ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp23//'.ANG'
          iwin = PIPE(ctmp)
          ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ'
@@ -550,6 +587,10 @@ C--------WINDOWS
             ctmp = 'move INCIDENT.ICS '//ctldir//ctmp23//'.ICS >NUL'
             iwin = PIPE(ctmp)
          ENDIF
+         IF (ICAlangs.GT.0) THEN
+           ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP >NUL'
+           iwin = PIPE(ctmp)
+          ENDIF
          ctmp = 'move INCIDENT.ANG '//ctldir//ctmp23//'.ANG >NUL'
          iwin = PIPE(ctmp)
          ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ >NUL'
@@ -1029,7 +1070,7 @@ C
       END
 
 
-      SUBROUTINE PROCESS_ECIS(Iopsys,Outname,Length,Iret)
+      SUBROUTINE PROCESS_ECIS(Iopsys,Outname,Length,Iret,ICAlangs)
 C
 C Dummy arguments
 C
@@ -1045,6 +1086,10 @@ C
 C--------LINUX
          ctmp = 'cp ecis03.cs  '//Outname(1:Length)//'.CS '
          iwin = PIPE(ctmp)
+         IF(ICAlangs.GT.0) THEN
+           ctmp = 'cp ecis03.exp  '//Outname(1:Length)//'.EXP '
+           iwin = PIPE(ctmp)
+          ENDIF
          IF (Iret.EQ.1) RETURN
          ctmp = 'cp ecis03.tlj '//Outname(1:Length)//'.TLJ'
          iwin = PIPE(ctmp)
@@ -1058,6 +1103,10 @@ C--------LINUX
 C--------WINDOWS
          ctmp = 'copy ecis03.cs  '//Outname(1:Length)//'.CS  >NUL'
          iwin = PIPE(ctmp)
+         IF(ICAlangs.GT.0) THEN
+           ctmp = 'cp ecis03.exp  '//Outname(1:Length)//'.EXP  >NUL'
+           iwin = PIPE(ctmp)
+          ENDIF
          IF (Iret.EQ.1) RETURN
          ctmp = 'copy ecis03.tlj '//Outname(1:Length)//'.TLJ >NUL'
          iwin = PIPE(ctmp)
