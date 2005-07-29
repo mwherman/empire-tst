@@ -1,10 +1,22 @@
       PROGRAM EMPIRE_CTL
-
-      parameter(mxfit=10,mxind=5000)
+C
+C--- Controls execution of EMPIRE and/or fitting. 
+C---
+C--- The program has been designed to make the fitting routine, LOCALFIT,
+C--- as independent as possible of the rest of the code, so that it may 
+C--- be easily exchanged for another routine. It depends on three input
+C--- parameters: 
+C---   pars    - an array of parameters to be varied in fit
+C---   dparmx  - array of max variation allowed in each parameter in vars
+C---   nnft    - number of parameters in vars
+C--- It also uses a function CHISQRD(pars), provided below.
+C---
+C--- The logical variable autofit is true when fitting, false for a normal run.
+C
+      parameter(mxfit=10)
 
       logical autofit
-      dimension pars(10),dparmx(mxfit)
-      dimension egrid(0:mxind)
+      dimension pars(mxfit),dparmx(mxfit)
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft)
 
@@ -22,7 +34,19 @@ C
 C-------------------------------------------------------------------
 C
       subroutine scan4fit(autofit,pars,dparmx,nnft)
-
+C
+C--- Scans INPUT.DAT for automatic fit request (FITOMP=2) and the corresponding
+C--- parameters. If a request is found, the fit parameters are analyzed, the
+C--- C4 data file is read to prepare experimental data and an appropriate
+C--- input file (FITIN.DAT) is prepared. 
+C--- If a fit request is not found, control is returned to EMPIRE, which then
+C--- runs normally. 
+C--- Values returned by scan4fit:
+C---   autofit - logical variable, true for fit, false for normal run
+C---   pars    - an array of parameters to be varied in fit
+C---   dparmx  - array of max variation allowed in each parameter in vars
+C---   nnft    - number of parameters in vars
+C
       parameter(mxfit=10,mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
@@ -60,6 +84,8 @@ C
       open(UNIT=18,file='FITIN.DAT',status='UNKNOWN')
       open(UNIT=72,file='INPUT1.DAT',status='UNKNOWN')
 
+C--- The energy on the first line of input is taken to be the minimum 
+C--- incident energy of data included in the fit.  
       read(5,'(a35)') cmnd
       read(cmnd,*) emin
       emin=max(int(disc*emin+0.5),1)/disc
@@ -67,6 +93,8 @@ C
       write(18,'(f7.3)') egrid(1)
       write(72,'(a35)') cmnd
 
+C--- The projectile and target mass and charges are needed only to
+C--- obtain the neutron s-wave scattering length, if it is relevant.
       read(5,'(a35)') cmnd
       read(cmnd,*) aat,zzt
       write(18,'(a35)') cmnd
@@ -89,6 +117,8 @@ C
 
  10   read(5,'(a35)',end=100) cmnd
 
+C--- The fundamental fit command - automatic fitting will be attempted
+C--- if its value is 2 or larger. 
       if (cmnd(1:6).eq.'FITOMP') then
         read(cmnd,'(6x,g10.5,4i5)') val
         if (val.gt.1.) then
@@ -99,6 +129,10 @@ C
          endif
        endif
 
+C--- Generic command for varyng optical model parameters. Parameters must
+C--- must be specifies by i1 - RIPL potential number (1-6), potential
+C--- parameter number (r=1,d=2,v=3), and postion in RIPL file (1-13 for 
+C--- r and d, 1-24 for v).
       if(cmnd(1:6).eq.'FITPAR') then
         nfit=nfit+1
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i1,i2,i3
@@ -107,6 +141,8 @@ C
         go to 10
        endif
 
+C--- Keyword for varying deformations. At the moment l=2 and 4 are allowed
+C--- for rotational excitations, l=2 and 3 for vibrational ones. 
       if(cmnd(1:6).eq.'FITDEF') then
         nfit=nfit+1
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i1
@@ -115,6 +151,8 @@ C
         go to 10
        endif
 
+C--- Command for varying weights of specific types of data. idw(1,.) and
+C--- idw(2,.) are specified by the corresponding MF and MT numbers.
       if(cmnd(1:6).eq.'FITWT ') then
         nwt=nwt+1
         read(cmnd,'(6x,g10.5,4i5)') wtx(nwt),(idw(j,nwt),j=1,2)
@@ -122,6 +160,8 @@ C
         go to 10
        endif
 
+C--- Command for varying the weight of natural element data contained in 
+C--- the C4 file.
       if(cmnd(1:6).eq.'FITWT0') then
         nwt=nwt+1
         read(cmnd,'(6x,g10.5,4i5)') wt0
@@ -133,6 +173,8 @@ C
         go to 10
        endif
 
+C--- Command for varying the maximum incident energy of experimental data
+C--- used in the fit. The default value is 30 MeV. 
       if(cmnd(1:6).eq.'FITEMX') then
         nwt=nwt+1
         read(cmnd,'(6x,g10.5,4i5)') emax
@@ -140,6 +182,11 @@ C
         go to 10
        endif
 
+C--- Command for specifying mesh of incident energies at which EMPIRE
+C--- will calculate cross sections for subsequent interpolation of
+C--- integrated cross sections in CHISQRD. If specified, the intervals between 
+C--- energies, from emin, are egrid(2), egrid(2)+0.001*i1,egrid(2)+0.002*i1,...
+C--- If not specified, the energies afte the GO line are used.
       if(cmnd(1:6).eq.'FITGRD') then
         read(cmnd,'(6x,g10.5,4i5)') egrid(2),i1
         egrid(0)=1.1
@@ -154,6 +201,8 @@ C
 
 C--- Last look for FIT keywords -- the code can't look for more after this 
 C--- Looks for the various potential parameter options, FITRVR, FITRVD, etc.
+C--- The parameter i3 corresponds to the RIPL position of the parameter 
+C--- (1-13 for r and d, 1-24 for v).
       if(cmnd(1:3).eq.'FIT') then
         do i1=1,6
           if(cmnd(4:5).eq.pot1(i1)) go to 20
@@ -172,6 +221,8 @@ C--- Looks for the various potential parameter options, FITRVR, FITRVD, etc.
         go to 10
        endif
 
+C--- When GO is found, the program either exits or goes on to prepare 
+C--- parameters and data for the fit.
       if(cmnd(1:6).eq.'GO    ') then
         if (autofit) then
           write(18,'(a35)') cmnd 
@@ -179,7 +230,9 @@ C--- Looks for the various potential parameter options, FITRVR, FITRVD, etc.
           do i=1,1000
             read(5,'(a35)',end=40) cmnd
             write(72,'(a35)') cmnd
-            if(egrid(0).lt.0) then
+C--- Read the energy mesh from the lines after GO, if it is not specified
+C--- by FITGRD.
+            if(egrid(0).lt.0 .and. cmnd(1:1).ne.'$') then
               ngrid=ngrid+1
               read(cmnd,*) egrid(ngrid)
               if(egrid(ngrid).lt.0.) egrid(0)=ngrid-0.9
@@ -198,6 +251,7 @@ C--- Looks for the various potential parameter options, FITRVR, FITRVD, etc.
        endif
 
 C--- Write whatever falls through to FITIN.DAT (18) and INPUT1.DAT (72) 
+C--- (before GO is found).
       write(18,'(a35)') cmnd
       write(72,'(a35)') cmnd 
       go to 10
@@ -261,16 +315,15 @@ C--- for posterior consistency of parameters to be varied
         close(70)
        endif
 
-C--- Fit weights for types of cross sections are initialized to 1
+C--- Fit weights for types of cross sections (MF, MT) are initialized to 1.
       do n=1,15
         wt(n,1)=1.0
         wt(n,2)=1.0
        end do
 
 C--- Weights read as FITWT are analyzed and stored
-C--- Weights corresponding to MF=3 as wt(.,1)
-C--- Weights corresponding to MF=4 as wt(.,2)
-C--- The strength function weight is stored in wt(15,2)
+C--- Weights corresponding to MF=3 as wt(.,1), to MF=4 as wt(.,2)
+C--- The strength function weight (MF=3, MT=0) is stored in wt(15,2)
       if(nwt.gt.0) then
         do n=1,nwt
           if(idw(1,n).eq.3) then
@@ -304,7 +357,7 @@ C--- parameter type, stored in axx.
 
 C--- The parameters to be fit are then analyzed for consistency with
 C--- the direct optical potential and level files and stored according
-C--- to the internal order used in the CHI2 routine. The real parameter
+C--- to the internal order used in the CHISQRD routine. The real parameter
 C--- axx(n) determining the data type is stored as three integers in idv(.,n)
       if (nfit.gt.0) then
 
@@ -377,15 +430,20 @@ C--- axx(n) determining the data type is stored as three integers in idv(.,n)
 
       write(2,*)
 
+C--- The experimental data is prepared and the energy mesh for fitting
+C--- is pepared and written to FITIN.DAT.
       call readc4(emin,emax,izz,iaa)
 
       if(nfit.le.0) return
 
+C--- A check for initial displacements of fit parameters is made.
       ichng0=0
       do n=1,nfit
         if(abs(vals(n)).gt.1.0e-5) ichng0=1
        end do
 
+C--- If initial displacements are found, the OMPAR.DIR and TARGET_COLL.DAT
+C--- files are modified accordingly. The original files are first moved.
       if(ichng0.eq.1) then
         if(idv(1,1).lt.7) then
           if(LINUX) then
@@ -406,29 +464,40 @@ C--- axx(n) determining the data type is stored as three integers in idv(.,n)
            endif
          endif
 
+C--- The maximum fit displacements are modified so as to not constrain the
+C--- initial displacements.
         do n=1,nfit
           xvalx(n)=xvals(n)
           xvals(n)=abs(vals(n))
          end do
+C--- The files are modified according to the initial displacements.
         call fileprep
 
+C--- The displacements are set to 0 in the parameter file and the maximum
+C--- fit displacements restored.
         do n=1,nfit
           vals(n)=0.0
           xvals(n)=xvalx(n)
          end do
        endif
 
+C--- The maximum fit displacements are now checked to see that at least
+C--- one is nonzero.
       xvalmx=0.0
       do n=1,nfit
         xvalmx=xvalmx+xvals(n)
        end do
 
+C--- If all are zero, nfit is set to zero.
       if(xvalmx.lt.0.01) then
         nfit=0
         nnft=nfit
         return
        endif
 
+C--- The potential and deformation parameter files are now moved to
+C--- the appropriate location to serve as a basis for variations during
+C--- the fitting.
       if(idv(1,1).lt.7) then
         if(LINUX) then
           ctmp='mv OMPAR.DIR OMPAR0.DIR'
@@ -503,7 +572,11 @@ C--- izz and iaa are used to obtain the s-wave neutron scattering length.
 C---
 C--- The routine also accumulates and prints statistics on the number and
 C--- type of data and calls the routine WRITENP which determines and writes
-C--- the energy grid for EMPIRE calculations used in CHI2
+C--- the energy grid for EMPIRE calculations used in CHISQRD.
+C---
+C--- To facilitate comparison, in particular, to be able to determine 
+C--- equality of incident energies, these are discretized on a scale of 
+C--- 1/disc (MeV), where disc is a compilation parameter.
 C
       parameter(mxind=5000,mxinda=5000,mxelvls=9,nexlvl=2)
       parameter(disc=1.0e4)
@@ -524,10 +597,13 @@ C
 
       data elequiv/1.5e3/,aequiv/1.0e0/
 
+C--- The C4 file expresses energies in eV, so the min and max energy must
+C--- be converted accordingly.
       angfac=45./atan(1.)
       eminm=1.0e6*emin
       emaxm=1.0e6*emax
 
+C--- Istat will be used later to accumulate statistics of data types.
       do i=1,15
         do j=1,3
           istat(i,1)=0
@@ -546,6 +622,7 @@ C--- at 1 keV. MF=3, MT=0 is used internally to specify it.
       six(1)=0.0
       dsix(1)=0.0
 
+C--- It is obtained from the following file.
       INQUIRE(FILE = ('../RIPL-2/resonances/resonances0.dat'),
      &                        EXIST=fexist)
       IF(fexist .and. iaa.ne.0) then
@@ -562,30 +639,34 @@ C--- at 1 keV. MF=3, MT=0 is used internally to specify it.
  60     CLOSE (47)
        endif
 
-C--- The C4 data file is used for obtaining the experimental data. Z and A
-C--- are not checked so that natural data can be included with the isotopic
-C--- data.
+C--- The C4 data file is used to obtain the rest of the experimental data. 
+C--- Z and A are not checked so that natural data can be included with the 
+C--- isotopic data.
       open(unit=26,file='C4.dat',status='old')
 
       ind=2
       inda=1
       mxlvl=0
 
+C--- Reads a line from the C4 file.
  10   read(26,'(i5,i6,a1,i3,i4,3a1,8e9.3,a3)',END=20) izap,izat,metat,
      1      mf(ind),mt(ind),metap,ex4st,cm,ex(ind),dex(ind),six(ind),
      2      dsix(ind),cth,dcth,elvl,xxx,lvl
 
-C--- First check to see that the point is in the desired energy range
+C--- First check to see that the datum is in the desired energy range.
       if( ex(ind).lt.eminm .or. ex(ind).gt.emaxm ) go to 10
+C--- The incident energy is discretized and converted to MeV.
       ex(ind)=int(1.0e-6*disc*ex(ind)+0.5)/disc
 C--- An experimental uncertainty of 10% is assumed when none is found.
       if(dsix(ind).lt.1.0e-6) dsix(ind)=0.1*six(ind)
+C--- Natural data may be weighted differently by modifiying their 
+C--- uncertainties.
       if(mod(izat,1000).eq.0) dsix(ind)=wt0*dsix(ind)
-      if( (mt(ind).gt.0 .and. mt(ind).lt.4) .or. 
-     1    (mt(ind).eq.51 .and. lvl.eq.'LVL') ) then
 C--- Sorting out the data to excited levels. Although data for up to
 C--- 9 (mxelvls) excited levels can be stored, only 2 (nexlvl) are 
 C--- actually used at the moment.
+      if( (mt(ind).gt.0 .and. mt(ind).lt.4) .or. 
+     1    (mt(ind).eq.51 .and. lvl.eq.'LVL') ) then
         if(elvl.ne.0.0) then
           mlvl=0
           if(mxlvl.gt.0) then
@@ -601,7 +682,8 @@ C--- actually used at the moment.
           mt(ind)=50+mlvl
          endif
         if(mt(ind).gt.50+nexlvl) go to 10
-C--- Storing differential angular MF=4 data
+C--- Converting and storing differential angular MF=4 data. (Integrated data
+C--- was stored when read.)
         if(mf(ind).eq.3) then
           ind=ind+1
          else if(mf(ind).eq.4) then
@@ -633,8 +715,8 @@ C--- The experimental data are ordered in incident energy. The ordering is
 C--- contained in the array ipe. 
       call bubble(indmx,ex,ipe)
 
-C--- The data are now reordered in incident energy, as they will be 
-C---  calculated in EMPIRE and used in CHI2.
+C--- The data are now explixcitly ordered in incident energy, as they will be 
+C---  calculated in EMPIRE and used in CHISQRD.
 C---  The first point is the strength function.
       en(1)=ex(1)
       sig(1)=six(1)
@@ -644,21 +726,34 @@ C---  The first point is the strength function.
       nangs(1)=0
       icala(1)=0
 
+C--- Several counters important for storage are initialized.
+C---   inde - number of distinct incident energies
+C---   nintot - number of integrated cross sections
+C---   nanxtot - number of angular data (angles times ang. dists.) 
+C---   nangtot - number of angles 
+C---   nangdtot - number of angular distributions
       inde=1
       nintot=1
       nanxtot=0
       nangtot=0
       nangdtot=0
 
+C--- a fake point above the real data is added 
       ipe(indmx+1)=indmx+1
       ex(indmx+1)=1.0e9
       mf(indmx+1)=3
       mt(indmx+1)=1
 
+C--- The data are scanned and combined according to the discretized 
+C--- incident energy.
       do i=2,indmx+1
         if(int(disc*ex(ipe(i))+0.5)-int(disc*en(inde)+0.5).GT.0) then
+C--- When a different energy is found, angular distributions of the preceding
+C--- energy are stored.
           if(inde.gt.0) then
             if(nangd(inde).gt.0) then
+C--- The angles are first ordered and merged so that only one set of angles
+C--- is stored for each incident energy.
               call bubble(nangtmp,angtmp,ipt)
               inda=nangtot+1
               angs(inda)=angtmp(ipt(1))
@@ -668,6 +763,8 @@ C---  The first point is the strength function.
                   angs(inda)=angtmp(ipt(j))
                  endif
                end do
+C--- The angular data is then stored. The data value is 0 when there is
+C--- no data for that angular distribution at the given angle.
               nangs(inde)=inda-nangtot
               do j=1,nangs(inde)*nangd(inde)
                 siga(nanxtot+j)=0.
@@ -681,17 +778,23 @@ C---  The first point is the strength function.
                 if(abs(angtmp(ipt(j))-angs(inda)).gt.aequiv) 
      &                                                    inda=inda+1
                 nuind=nanxtot+nangs(inde)*idtmp(ipt(j))+inda-nangtot
+C--- Data are converted to millibarns.
                 siga(nuind)=1.0e3*sixa(loca(ipt(j)))
                 dsiga(nuind)=1.0e3*dsixa(loca(ipt(j)))
                end do
               nangtot=inda
               nanxtot=nanxtot+nangs(inde)*nangd(inde)
               icala(inde)=1
+C--- The maximum number of angular distributions that must be calculated
+C--- at a given incident energy is determined.
               do j=nangdtot-nangd(inde)+1,nangdtot
                 icala(inde)=max(icala(inde),idang(j))
                end do
              endif
            endif
+C--- Once the angular data of the preceding energy has been treated,
+C--- relevant indices for the new enegry are initialized and the enrgy is 
+C--- stored.
           inde=inde+1
           en(inde)=ex(ipe(i))
           nint(inde)=0
@@ -699,6 +802,8 @@ C---  The first point is the strength function.
           nangs(inde)=0
           nangtmp=0
          endif
+C--- Integrated data are stored. Data are converted to millibarns. 
+C--- Statistics on data type are accumulated.
         if(mf(ipe(i)).eq.3) then
           nint(inde)=nint(inde)+1
           nintot=nintot+1
@@ -718,6 +823,9 @@ C---  The first point is the strength function.
             idint(nintot)=mtpe
             istat(mtpe,1)=istat(mtpe,1)+1
            end if
+C--- Angular data are stored in a preliminary manner. They can be
+C--- processed completely (above) only after a new energy is found
+C--- and one is sure that no more distributions follow.
          else
           nangd(inde)=nangd(inde)+1
           nangdtot=nangdtot+1
@@ -739,9 +847,11 @@ C---  The first point is the strength function.
            end do
          endif
        end do
+C--- Nnde is the total number of incident energies at which data exist.
       nnde=inde-1
       istat(1,1)=istat(1,1)-1
 
+C--- Statistics on experimental data are printed.
       write(2,'('' The experimental data set in the energy range from'',
      &   f6.3,'' MeV to '', f6.2,'' MeV'',/,''  contains values at'',i5, 
      &   '' energies:'')') emin,emax,nnde
@@ -765,6 +875,8 @@ C---  The first point is the strength function.
      & ''tions (2nd state) with a total of '',i3,'' points'')') 
      &                                            istat(3,2),istat(3,3)
 
+C--- Based on the existent experimental data, the energy mesh for fitting
+C--- is now prepared and written to the input file, FITIN.DAT.
       call writenput(emin)
 
       return
@@ -773,7 +885,10 @@ C
 C-------------------------------------------------------------------
 C
       subroutine writenput(emin)
-
+C
+C--- Defines the discretized mesh of incident energies for EMPIRE
+C--- calculations and prints it in FITIN.DAT.
+C
       parameter(mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
@@ -788,6 +903,8 @@ C
 
       data hequiv/5.0e-4/
 
+C--- Treats the case in which the energy mesh is defined by the FITGRD
+C--- keyword.
       if(egrid(0).lt.2.) then
         de=disc*egrid(2)
         dde=disc*egrid(3)
@@ -804,6 +921,8 @@ C
            endif
          end do
  10     ngr=min(igr,mxind)
+C--- Treats the case in which the energy mesh is defined by the energies 
+C--- given after the GO keyword in the original input file.
        else
         ngr=egrid(0)
         igr=3
@@ -827,9 +946,10 @@ C--- Initialize parameters used in writing the energy grid.
       igr=2
       nodata=0
 
-C--- The grid of energies is now written to the FITIN.DAT file. Each
-C--- energy is written with the number of angles and of inelastic
-C--- occupations to be calculated. When the number of angles is greater
+C--- The mesh of energies is now written to the FITIN.DAT file. 
+C--- Energies for which angular data exist are added to the mesh. Each
+C--- energy is written with the number of angles and of elastic/inelastic
+C--- distributions to be calculated. When the number of angles is greater
 C--- than 0, the angles follow the energy on as many lines as are neeeded.
 C---
 C--- The flag nodata avoids writing energies of the grid which will not
@@ -871,7 +991,7 @@ C--- Finalizes the energy grid, as required by EMPIRE
       close(18)
 
 C--- The file FITIN.DAT is now moved to INPUT.DAT to perform the
-C--- the EMPIRE calculations used in CHI2. The original input file
+C--- the EMPIRE calculations used in CHISQRD. The original input file
 C--- is first moved to INPUT0.DAT 
       if(LINUX) then
         ctmp='mv INPUT.DAT INPUT0.DAT'
@@ -929,7 +1049,17 @@ C
 C-------------------------------------------------------------------
 C
       subroutine localfit(p0,dpmx,nfit)
-
+C
+C--- This routine attempts to minimize a function CHISQRD. It performs a
+C--- simple gradient search using numerical derivatives. 
+C--- Its input is given by
+C---    p0 - the array of parameters to be varied
+C---    dpmx - an array of which 0.01*dpmx(.) is used to calculate derivatives
+C---    nfit - the number of parameters to be varied.
+C--- Its output is given in p0.
+C--- It also requires an external function CHISQRD(p0). The call to CHISQRD
+C--- should not modify the array p0.
+C
 c      implicit double precision(a-h,o-z)
 
       parameter(mxfit=10)
@@ -1187,7 +1317,9 @@ C
 C-------------------------------------------------------------------
 C
       function chisqrd(p0)
-
+C
+C--- Calculates the chi2 using experimental data and EMPIRE calculations
+C
       parameter(mxind=5000,mxinda=5000,mxfit=10)
       parameter(disc=1.0e4)
 
@@ -1202,6 +1334,9 @@ C
      &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
 
+C--- If there are parameters being varied, places them in vals, accessible
+C--- from FILEPREP, and modifies the OMPAR.DIR and TARGET_COLL.DAT files with
+C--- FILEPREP in preparation for the EMPIRE calculations
       if(nfit.gt.0) then
         do n=1,nfit
           vals(n)=p0(n)
@@ -1209,20 +1344,23 @@ C
         call fileprep
        endif
 
+C--- Now run EMPIRE
       call empire
 
-      ths0=0.0
-      ths1=0.0
-      OPEN(6,file='OUTPUT.DAT',status='old')
-       do i=1,200
-         read(6,'(7x,a35)') astrngth
-         if(astrngth(1:14).ne.'Calc. Strength') cycle
-         read(astrngth,'(29x,f6.3)') ths0
-         read(6,'(36x,f6.3)') ths1
-        end do
-       close(6)
-     
+C--- The neutron s-wave strength function is obtained from the EMPIRE
+C--- output file and used to initialize chi2, if an experimental value
+C--- exists.
       if(sig(1).gt.0.0) then
+        ths0=0.0
+        ths1=0.0
+        OPEN(6,file='OUTPUT.DAT',status='old')
+        do i=1,200
+          read(6,'(7x,a35)') astrngth
+          if(astrngth(1:14).ne.'Calc. Strength') cycle
+          read(astrngth,'(29x,f6.3)') ths0
+          read(6,'(36x,f6.3)') ths1
+         end do
+        close(6)
         chi2=wt(15,2)*((sig(1)-ths0)/dsig(1))**2
        else
         chi2=0.0
@@ -1232,10 +1370,17 @@ C
       ntangd=0
       nt=0
 
+C--- The rest of the calculations have been written to OPTFIT.CAL
+C--- Data at the first energy are read from the file.
       OPEN(40,file='OPTFIT.CAL',status='OLD')
       READ (40,'(f12.3,2e12.5)') ee(1),(thsig(j,1),j=1,2)
       READ (40,'(12x,10e12.5)') (thsig(j,1),j=3,12)
 
+
+C--- The loop runs over the experimental values of the incident energy.
+C--- Calculations are read from OPTFIT.CAL according to need for them.
+C--- Calculated integrated cross sections are interpolated. Angular 
+C--- ditributions have been calculated at the experimental energy.
       nh=1
       nl=2
       do i=2,nnde
@@ -1251,12 +1396,14 @@ C
         if(nint(i).gt.0) then
           do j=1,nint(i)
             ntint=ntint+1
+C--- Interpolation of integrated cross section
             tsig=((ee(nh)-en(i))*thsig(idint(ntint),nl)
      &          +(en(i)-ee(nl))*thsig(idint(ntint),nh))/(ee(nh)-ee(nl))
             chi2=chi2+wt(idint(ntint),1)
      &                              *((tsig-sig(ntint))/dsig(ntint))**2
            end do
          endif
+C--- Angular distributions
         if(nangd(i).gt.0) then
           do k=1,nangd(i)
             ntangd=ntangd+1
@@ -1282,6 +1429,11 @@ C-------------------------------------------------------------------
 C
       subroutine fileprep
 
+C--- Rewrites the OMPAR.DIR and TARGET_COLL.DAT files.
+C--- The values given in vals(.) are added to the appropriate
+C--- values in the files, as determined by idv(,.), with changes
+C--- limited by the values given in xvals.
+
       parameter(mxfit=10)
 
       character line*100,fld*13
@@ -1290,15 +1442,20 @@ C
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
 
+C--- If no parameters are to be changed, tehre is nothing to do.
       if (nfit.le.0) return
 
+C--- Compares parameter values to limits and changes them if necessary 
       do n=1,nfit
         if(vals(n).gt.xvals(n)) vals(n)=xvals(n)
         if(vals(n).lt.-xvals(n)) vals(n)=-xvals(n)
        end do
 
+
       nxtpar=1
+C--- The optical model parameters are modified first
       if(idv(1,1).lt.7) then
+C--- Prepares line number and field positions of parameters to be changed
         do n=1,nfit
           lpar(1,n)=8*idv(1,n)+2*idv(2,n)+(idv(3,n)-2)/6-9
           lpar(2,n)=mod(idv(3,n)-2,6)+1
@@ -1309,17 +1466,21 @@ C
         open(unit=70,file='OMPAR0.DIR',status='OLD')
         open(unit=71,file='OMPAR.DIR',status='UNKNOWN')
 
+C--- Header of RIPL file read and written
         do i=1,11
           read(70,'(a100)') line
           write(71,'(a100)') line
          end do
 
+C--- Each potential section of the file is read
         do j1=1,6
           read(70,'(a100)') line
           write(71,'(a100)') line
           read(line,'(i5)') irng
+C--- When a potential exists
           if(irng.gt.0) then
             nxtpap=nxtpar
+C--- If no parameters to be changed here, it is read and written
             do ir=1,irng
               read(70,'(a100)') line
               write(71,'(a100)') line
@@ -1328,6 +1489,8 @@ C
                   read(70,'(a100)') line
                   write(71,'(a100)') line
                  end do
+C--- Otherwise, it is read and the relevant parameters modified before
+C--- writing
                else
                 lind=8*j1-7
                 nxtpap=nxtpar
@@ -1338,6 +1501,7 @@ C
                     lind=lind+1
                    else
                     read(line,'(f12.5,6e11.5)') ff,xx
+C--- Writing is performed so as to preserve the RIPL format
                     if(idv(3,nxtpap).eq.1) then
                       ff=ff+vals(nxtpap)
                       write(line(1:12),'(f12.5)') ff
@@ -1369,16 +1533,19 @@ C
 
        endif
 
+C--- Then deformation parameters are modified
       if(idv(1,nxtpar).eq.7) then
 
         open(unit=70,file='TARGET_COLL0.DAT',status='OLD')
         open(unit=71,file='TARGET_COLL.DAT',status='UNKNOWN')
 
+C--- Reading and writing header
         do i=1,2
           read(70,'(a100)') line
           write(71,'(a100)') line
          end do
 
+C--- Check to see if rotational or vibrational
         read(70,'(a50)') line(1:50)
         idef=0
         if(line(36:43).eq.'deformed') idef=1
@@ -1389,6 +1556,7 @@ C
           write(71,'(a50)') line(1:50)
          end do
 
+C--- Read, modify and write rotational level file
         if(idef.ne.0) then
           read(70,'(i8,2i5,f6.1,2e11.3)') nlvl,i1,i2,yy,beta2,beta4
           if(idv(2,nxtpar).eq.2) then
@@ -1404,6 +1572,7 @@ C
             read(70,'(a50)') line(1:50)
            write(71,'(a50)') line(1:50)
            end do
+C--- Read, modify and write vibrational level file
          else
           read(70,'(i8)') nlvl
           write(71,'(i8)') nlvl
@@ -1420,9 +1589,11 @@ C
      &                                .and. js.eq.2 .and. jp.eq.1) then
               betax2=betax
               beta2=betax+vals(nxtpar)
-              nobeta2=0
+              nb2=0
               nxtpar=nxtpar+1
              endif
+C--- The deformation parameter of all states of a vibrational band are
+C--- modified (and maybe even others).
             if(nb2.eq.0 .and. mod(js,2).eq.0 .and. jp.eq.1 .and.
      &                                            betax.eq.betax2) then 
               write(71,'(a29,e11.3)') line(1:29),beta2
@@ -1431,6 +1602,7 @@ C
                beta3=betax+vals(nxtpar) 
                write(71,'(a29,e11.3)') line(1:29),beta3
                nxtpar=nxtpar+1
+               nb3=0
              else
               write(71,'(a29,e11.3)') line(1:29),betax
              endif
