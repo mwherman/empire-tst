@@ -422,13 +422,29 @@ C*   MXLJ - maximum number of transitions from a level
       IF(LSC+MXLI*2.GT.MXR)
      1STOP 'EMPEND ERROR - MXR limit exceeded'
       DO 890 I=1,NXS
-        IF     (IWO(MTH-1+I).EQ. 51) THEN
+C* Select MT numbers in ascending order (index IT)
+        IT =0
+        MTI=1000
+        DO J=1,NXS
+          MTJ=IWO(MTH-1+J)
+          IF(MTJ.GT.   0 .AND.
+     1       MTJ.LT.1000 .AND.
+     2       MTJ.LT. MTI) THEN
+            IT =J
+            MTI=MTJ
+          END IF
+        END DO
+C* Flag reaction as processed
+        IWO(MTH-1+IT)=IWO(MTH-1+IT)+1000
+        IF(IT.EQ.0) GO TO 890
+C*
+        IF     (MTI.EQ. 51) THEN
           JZA=IZA+IZI-1
           MT =50
-        ELSE IF(IWO(MTH-1+I).EQ.600) THEN
+        ELSE IF(MTI.EQ.600) THEN
           JZA=IZA+IZI-1001
           MT =600
-        ELSE IF(IWO(MTH-1+I).EQ.800) THEN
+        ELSE IF(MTI.EQ.800) THEN
           JZA=IZA+IZI-2004
           MT =800
         ELSE
@@ -451,6 +467,10 @@ C*   MXLJ - maximum number of transitions from a level
         IF(NLV.GT.0) JPP=JPP+1
   890 CONTINUE
 C* Photon production data from discrete levels processed
+C* Remove flag from MT
+      DO IT=1,NXS
+        IF(IWO(MTH-1+IT).GT.1000) IWO(MTH-1+IT)=IWO(MTH-1+IT)-1000
+      END DO
       IF(JPP.GT.0) THEN
         NS=0
         CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
@@ -937,15 +957,13 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,x)  ') MT=  5
         IF(PTST.EQ.' (z,2n) ') MT= 16
         IF(PTST.EQ.' (z,3n) ') MT= 17
-c... Fix fission spectrum in EMPIRE output before activating MT=18
-c...    IF(PTST.EQ.' (z,fiss') MT= 18
         IF(PTST.EQ.' (z,np) ') MT= 28
         IF(PTST.EQ.' (z,na) ') MT= 22
         IF(PTST.EQ.' (z,2na)') MT= 24
         IF(PTST.EQ.' (z,4n) ') MT= 37
         IF(PTST.EQ.' (z,2np)') MT= 41
         IF(PTST.EQ.' (z,3np)') MT= 42
-c...    IF(PTST.EQ.' (z,5n) ') MT= 47
+c...        IF(PTST.EQ.' (z,5n) ') MT= 47
         IF(PTST.EQ.' (z,n)  ') MT= 91
 c...        IF(PTST.EQ.' (z,n)  ') THEN
 c...          IF(IZI.EQ.1) THEN
@@ -1137,7 +1155,7 @@ C-P
       DIMENSION  MTH(MXT),XSR(MXE,MXT)
       LFI=0
       DO I=1,NXS
-        IF(MTH(I).NE.18) THEN
+        IF(MTH(I).EQ.18) THEN
 C*        Fission reaction found
           DO J=1,NEN
 C*          Check for non-zero fission cross section
@@ -1345,6 +1363,7 @@ c...
 c...      print *,'rdang: zap,mt,ein,emp',nint(zap),mt,ein,emp
 c...
       NOFIT=0
+      NZERO=0
       NPT=0
       LHI=0
       KXA=1
@@ -1400,15 +1419,36 @@ C* Convert isotropic (angle-integrated) spectra to double differential
 C* Check for zero or negative distributions
       NEG=0
       NEP=0
+      KZE=0
       DO J=1,KXA
         DDJ=DD(J)
-        IF(DDJ.GT.0) NEP=NEP+1
-        IF(DDJ.LT.0) THEN
+        IF(DDJ.GT.0) THEN
+          NEP=NEP+1
+          KZE=0
+        ELSE
           IF(DDJ.LT.-1.E-20) NEG=NEG+1
           DDJ=0
+C*          Count zero-distribution entries at backward angles
+          KZE=KZE+1
         END IF
         DST(J)=DDJ*FF
       END DO
+      IF(KZE.GT. 0 ) THEN
+        IF(KZE.EQ.KXA) THEN
+          KZE=0
+        ELSE
+C* Force isotropic if zero-distribution at backward angles
+          NZERO=MAX(NZERO,KZE)
+          SS=0
+          DO J=2,KXA
+            SS=SS+(ANG(J)-ANG(J-1))*(DST(J)+DST(J-1))/2
+          END DO
+          SS=SS/(ANG(KXA)-ANG(1))
+          DO J=1,KXA
+            DST(J)=SS
+          END DO
+        END IF
+      END IF
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
       EOU=EE*1.E6
@@ -1431,6 +1471,7 @@ C* Suppress negative distributions to 2% of average of the neighbours
         END DO
       END IF
       IF(NEG.GT.0) THEN
+C*          Print warning on negative distributions
         WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
         WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
       END IF
@@ -1441,7 +1482,9 @@ C* Convert to Legendre polynomials and store
       IF(LB.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in RDANG'
       LC =MXR-LS
       LOO=LOR
-      CALL LSQLGV(ANG,DST,KXA,RWO(LPU),0,LOO,ETOL,ERR,RWO(LS),LC)
+c...  KKX=KXA-KZE
+      KKX=KXA
+      CALL LSQLGV(ANG,DST,KKX,RWO(LPU),0,LOO,ETOL,ERR,RWO(LS),LC)
       LHI=MAX(LHI,LOO)
       LO1=LOO+1
       RWO(LL)=EOU
@@ -1476,7 +1519,7 @@ C*      Fitted values to the "curves" file
         ELSE
           WRITE(LPT,933) EIN,EOU,MT,IFIX(ZAP+0.1)
         END IF
-        WRITE(LCU,931) LOO,ERR*100,NOFIT
+        WRITE(LCU,931) LOO
         DO K=2,KXA
           I=KXA+2-K
           WRITE(LPT,934) ANG(I),0.,0.,DST(I)
@@ -1564,6 +1607,11 @@ C* Print warning in case of badly fitted distributions
         WRITE(LTT,908) MT,NINT(ZAP),EIN,NOFIT
         WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
       END IF
+C* Print warning on zero-distribution at backward angles
+      IF(NZERO.GT.0) THEN
+        WRITE(LTT,905) MT,NINT(ZAP),EIN,NZERO,KXA
+        WRITE(LER,905) MT,NINT(ZAP),EIN,NZERO,KXA
+      END IF
       IF(NPT.LE.1) GO TO 800
 C* Check that the last point is zero distribution
       IF(RWO(LPU).NE.0) THEN
@@ -1598,6 +1646,9 @@ C*
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
+  905 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5,' Ein',1P,E10.3/17X
+     2      ,' Backward angle distribution zero at',I3
+     3      ,' out of',I3,' angle(s)')
   906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3/17X
      2      ,' Input angular distribution negative at',I3
@@ -1610,7 +1661,7 @@ C*
      1      ,' Eou',1P,E10.3,' > available energy',E10.3)
   912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
      1       ' "',A70,'"')
-  931 FORMAT('P(',I2.2,') Fit,Dmx%',F5.0,I3)
+  931 FORMAT('P(',I2.2,') Fit')
   932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
@@ -1884,6 +1935,8 @@ C* Reconstruct Q values from MT and the binding energies if necessary
       QQI(IXS)=QI
 C* Enter cross section for this discrete level
   360 XSC(NEN,IXS)=XS*1.E-3
+C*      Save QI for this level
+      QI=QQI(IXS)
       GO TO 352
 C* Read the elastic cross section but exclude incident charged particles
   370 IF(IZI.GE.1000) GO TO 351
@@ -2334,73 +2387,7 @@ C* If the integral is zero, skip this energy point
         IF(NE6.EQ.0) ETEF=EE
         GO TO 210
       END IF
-C* Insert the incident particle threshold energy if necessary
-      IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
-C*        Shift the existing points forward by 8 words
-        NW=4+NEP*(LHI+2)
-        IF(L6+NW+8.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-        DO J=1,NW
-          RWO(L6+NW+8-J)=RWO(L6+NW-J)
-        END DO
-C*        Insert the threshold distribution (delta function)
-        RWO(L6    )=ETH
-        RWO(L6 + 1)=0
-        RWO(L6 + 2)=4
-        RWO(L6 + 3)=2
-        DE=SMALL
-        IF(LEP.EQ.2) THEN
-          PE=2./DE
-        ELSE
-          PE=1./DE
-        END IF
-        RWO(L6+4)=0.
-        RWO(L6+5)=PE
-        RWO(L6+6)=DE
-        RWO(L6+7)=0.
-        L6 =L6 +8
-        NE6=NE6+1
-C*        Save the energy and the yield
-        EIS(NE6)=ETH
-        YLD(NE6)=YL0
-        E1=ETH
-      END IF
-C* Insert the pseudo-threshold energy if necessary
-      IF(ETEF.GT.0) THEN
-C*        Shift the existing points forward by 8 words
-        NW=4+NEP*(LHI+2)
-        IF(L6+NW+8.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-        DO J=1,NW
-          RWO(L6+NW+8-J)=RWO(L6+NW-J)
-        END DO
-C*        Insert the threshold distribution (delta function)
-        RWO(L6    )=ETEF
-        RWO(L6 + 1)=0
-        RWO(L6 + 2)=4
-        RWO(L6 + 3)=2
-        DE=SMALL
-        IF(LEP.EQ.2) THEN
-          PE=2./DE
-        ELSE
-          PE=1./DE
-        END IF
-        RWO(L6+4)=0.
-        RWO(L6+5)=PE
-        RWO(L6+6)=DE
-        RWO(L6+7)=0.
-        L6 =L6 +8
-        NE6=NE6+1
-C*        Save the energy and the yield
-        EIS(NE6)=ETEF
-        YLD(NE6)=0
-        E1=ETEF
-        ETEF=0
-      END IF
-C*
-C* Distributions for one incident energy processed - Normalize 
-      NE6=NE6+1
-
-c...        print *,'      ne6',ne6,ee
-
+C* Normalise the distribution
       LO1=LHI+1
       LL =L6 +4
       DO I=1,NEP
@@ -2409,15 +2396,100 @@ c...        print *,'      ne6',ne6,ee
         END DO
         LL =LL+LHI+2
       END DO
-C*
       LB1=LL
+C* Scale distribution integral by 4*Pi to get the cross section
+C* Scale by 1.E-9 to change mb/MeV into b/eV
+      SPC=SPC*4.E-9*PI
+C* Pack the size indices into the array
       RWO(L6    )=EE
       RWO(L6 + 1)=LHI
       RWO(L6 + 2)=NEP*(LHI+2)
       RWO(L6 + 3)=NEP
-C* Scale distribution integral by 4*Pi to get the cross section
-C* Scale by 1.E-9 to change mb/MeV into b/eV
-      SPC=SPC*4.E-9*PI
+C* Insert the incident particle threshold energy if necessary
+C...
+C...      print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
+C...
+      INSE=0
+      IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
+        INSE=1
+        EINS=ETH
+        IF(ZAP.EQ.0) THEN
+          YINS=(EINS/EE)*(SPC/XS3)
+        ELSE
+          YINS=YL0
+        END IF
+      END IF
+  630 IF(INSE.GT.0) THEN
+        IF(IZAP.EQ.0 .AND.
+     &    (MT.EQ.91 .OR. MT.EQ.649 .OR. MT.EQ. 849)) THEN
+C*          Duplicate existing points for continuum reactions
+
+C...          print *,'duplicating energy',rwo(l6),' to',eth
+
+          NW =4+NEP*(LHI+2)
+          LB1=L6+NW+NW
+          IF(LB1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+          DO J=1,NW
+            RWO(LB1-J)=RWO(L6+NW-J)
+          END DO
+C*          Insert the threshold distribution (delta function)
+          RWO(L6  )=EINS
+          RWO(L6+1)=LHI
+          RWO(L6+2)=NEP*(LHI+2)
+          RWO(L6+3)=NEP
+          L6 =L6+NW
+        ELSE
+C*          Shift the existing points forward by 8 words
+          NW =4+NEP*(LHI+2)
+          LB1=L6+NW+8
+          IF(LB1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+          DO J=1,NW
+            RWO(LB1-J)=RWO(L6+NW-J)
+          END DO
+C*          Insert the threshold distribution (delta function)
+          DE=SMALL
+          IF(LEP.EQ.2) THEN
+            PE=2./DE
+          ELSE
+            PE=1./DE
+          END IF
+          RWO(L6  )=EINS
+          RWO(L6+1)=0
+          RWO(L6+2)=4
+          RWO(L6+3)=2
+          RWO(L6+4)=0.
+          RWO(L6+5)=PE
+          RWO(L6+6)=DE
+          RWO(L6+7)=0.
+          L6 =L6+8
+        END IF
+C*        Save the energy and the yield
+        NE6=NE6+1
+        EIS(NE6)=EINS
+        YLD(NE6)=YINS
+        E1=ETH
+      END IF
+C* Insert the pseudo-threshold energy if necessary
+      IF(ETEF.GT.0) THEN
+
+C...          print *,'pseudo-threshold energy',rwo(l6),' to',eth
+
+        INSE=1
+        EINS=ETEF
+        IF(ZAP.EQ.0) THEN
+          YINS=(SPC/XS3)
+        ELSE
+          YINS=0
+        END IF
+        ETEF=0
+        GO TO 630
+      END IF
+C*
+C* Distributions for one incident energy processed - Normalize 
+      NE6=NE6+1
+
+c...        print *,'      ne6',ne6,ee
+
       IF(MT6.LT.0) GO TO 210
 C* Particle multiplicity for MT5 or gamma from integral/x.s. ratio
       IF(JT6.EQ.5 .OR. IZAP.EQ.0) THEN
@@ -2677,7 +2749,8 @@ C*
       ZA  = IZA
       LRP =-1
       NLIB= 8
-      NMOD= 0
+c...  NMOD= 0
+      NMOD= 1
 C*
       ELIS= 0.
       STA = 0.
@@ -2754,14 +2827,15 @@ C* Write file MF3 (cross section data)
       DO 360 JT=1,NXS
 C* Select MT numbers in ascending order
       IT =0
-      MT =999
-      DO 302 J=1,NXS
-      IF(MTH(J).LT.   0 .OR.
-     1   MTH(J).GT.1000 .OR.
-     2   MTH(J).GT.  MT) GO TO 302
-      IT =J
-      MT =MTH(IT)
-  302 CONTINUE
+      MT =1000
+      DO J=1,NXS
+        IF(MTH(J).GT.   0 .AND.
+     1     MTH(J).LT.1000 .AND.
+     2     MTH(J).LT.  MT) THEN
+          IT =J
+          MT =MTH(IT)
+        END IF
+      END DO
       IF(IT.EQ.0) GO TO 360
 C* Consider the output energy mesh
       IF(NEP.GT.0) GO TO 320
@@ -3819,13 +3893,13 @@ C       RER=ABS((YCI-YP(IP))/YCI)
           ERR=RER
           JRE=IP
         END IF
-C* Test minimum value of the distribution at mesh point
+C* Test distribution at mesh point
         IF(YCI.LT.YNP) THEN
           IF(YCI.LT.0) KNP=KNP+1
           JNP=IP
           YNP=YCI
         END IF
-C* Test minimum value of the distribution at midpoint
+C* Test distribution at midpoint
         IF(IP.LT.NNP) THEN
           XPI=(XP(IP)+XP(IP+1))/2
           YCI=POLLG1(XPI,QQ,NLG)
