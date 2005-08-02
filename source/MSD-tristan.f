@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-07-20 14:35:59 $
-Ccc   * $Id: MSD-tristan.f,v 1.46 2005-07-20 14:35:59 herman Exp $
+Ccc   * $Date: 2005-08-02 17:55:51 $
+Ccc   * $Id: MSD-tristan.f,v 1.47 2005-08-02 17:55:51 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2075,7 +2075,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:501), hhh
+      DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:3*NDEX), hhh
       REAL FLOAT
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb,
      &        nlmax

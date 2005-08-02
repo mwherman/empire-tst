@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-27 16:00:18 $
-Ccc   * $Id: auxiliary.f,v 1.22 2005-07-27 16:00:18 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-08-02 17:55:50 $
+Ccc   * $Id: auxiliary.f,v 1.23 2005-08-02 17:55:50 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -69,7 +69,6 @@ C
          ENDDO
       ENDDO
       DO nnuc = 1, NDNUC
-         INExc(nnuc) = -1
          POPmax(nnuc) = 0.0
          CSPrd(nnuc) = 0.0
          EX(1,nnuc) = 0.0
@@ -116,6 +115,7 @@ C
          ENDDO
       ENDDO
       DO nnuc = 0, NDExclus
+         INExc(nnuc) = 0
          DO necse = 0, NDEX_D
             DO inecse = 1, NDECSED
                DO nejcd = 0, NDEJCD

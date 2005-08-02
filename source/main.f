@@ -1,8 +1,7 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-28 21:05:00 $
-Ccc   * $Id: main.f,v 1.129 2005-07-28 21:05:00 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-08-02 17:55:50 $
+Ccc   * $Id: main.f,v 1.130 2005-08-02 17:55:50 herman Exp $
 C
-C      PROGRAM EMPIRE
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -44,8 +43,8 @@ C
      &                 dang, debinhms, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), emeda, emedg,
      &                 emedh, emedn, emedp, erecoil, espec, espmax,
-     &                 epre, ftmp, gamfis, gamt, gang, gtotsp, htotsp,
-     &                 piece, pope, poph, popl, popleft, poplev,
+     &                 epre, ftmp, gamfis, gamt, gang, grand, gtotsp, 
+     &                 htotsp, piece, pope, poph, popl, popleft, poplev,
      &                 popread, poptot, ptotsp, q2, q3, qmax, qstep,
      &                 recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
@@ -58,7 +57,7 @@ C
       CHARACTER*6 keyname
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
-       CHARACTER*1 opart(3)
+      CHARACTER*1 opart(3)
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled,
@@ -2147,7 +2146,7 @@ C-----end of ENDF spectra (inclusive)
             controlp = 0
             controla = 0
             DO nnuc = 1, NNUcd
-               IF(INExc(nnuc).eq.-1) CYCLE
+c              IF(INExc(nnuc).eq.-1) CYCLE
                controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
                controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
                controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))

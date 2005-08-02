@@ -46,7 +46,7 @@
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
-     &        INExc(ndexclus),ISProd(0:ndnuc), NDAng, ICAlangs
+     &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, ICAlangs
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv

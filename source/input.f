@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-28 21:05:00 $
-Ccc   * $Id: input.f,v 1.167 2005-07-28 21:05:00 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-08-02 17:55:50 $
+Ccc   * $Id: input.f,v 1.168 2005-08-02 17:55:50 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -243,7 +243,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -827,13 +827,16 @@ C                       residues must be heavier than alpha
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
 
+                     WRITE(6,*) 'iac,ia,ip,in ',iac,ia,ip,in 
                         IF(mulem.LE.NENdf) THEN
+                     WRITE(6,*) 'set nnuc ',nnuc,' to 1'
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
 C                          Comment the following line and uncommment the one after for all exclusive spectra
                            IF (ENDf(nnuc).EQ.0) THEN
                               ENDf(nnuc) = 2
                               EXClusiv = .FALSE.
+                     WRITE(6,*) 'set nnuc ',nnuc,' to 2'
                            ENDIF
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
@@ -844,7 +847,8 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
-                           INExc(nnuc) = NEXclusive
+                           INExc(nnuc) = NEXclusive         
+                     WRITE(6,*) 'set INExc(',nnuc,') to ', INExc(nnuc)
                         ENDIF
                      ENDDO
                   ENDDO

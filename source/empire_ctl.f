@@ -689,7 +689,7 @@ C--- was stored when read.)
          else if(mf(ind).eq.4) then
           sixa(inda)=six(ind)
           dsixa(inda)=dsix(ind)
-          dthex(inda)=angfac*(acos(cth+dcth)-acos(max(cth-dth,0.0)))
+          dthex(inda)=angfac*(acos(cth+dcth)-acos(max(cth-dcth,0.0)))
           thex(inda)=angfac*acos(cth)
           if(ex(ind).ne.ex(ind-1) .or. mt(ind).ne.mt(ind-1)) then
             dsix(ind-1)=inda-0.9
@@ -1508,7 +1508,7 @@ C--- Writing is performed so as to preserve the RIPL format
                      else
                       itmp=lpar(2,nxtpap)
                       yy=xx(itmp)+vals(nxtpap)
-                      write(fld,'(pe13.5)') yy
+                      write(fld,'(1pe13.5)') yy
                       fld(10:10)=fld(11:11)
                       fld(11:11)=fld(13:13)
                       itmp=11*itmp+2
