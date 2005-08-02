@@ -129,13 +129,13 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=800000,MXI=8000)
+      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=800000,MXI=8000,MLV=3)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
       DIMENSION    EIN(MXE),QQM(MXT),QQI(MXT)
-     1            ,RWO(MXR),IWO(MXI)
+     1            ,RWO(MXR),IWO(MXI),LVLF(MLV),LVMT(MLV),LVIZ(MLV)
 C* Filenames and logical file units
       DATA LIN,LOU,LKB,LTT,LER / 1, 2, 5, 6, 7 /
       DATA BLNK/'                                        '/
@@ -421,99 +421,71 @@ C*   MXLJ - maximum number of transitions from a level
       LSC=LBR+MXLI*MXLJ
       IF(LSC+MXLI*2.GT.MXR)
      1STOP 'EMPEND ERROR - MXR limit exceeded'
-      DO 890 I=1,NXS
-C* Select MT numbers in ascending order (index IT)
-        IT =0
-        MTI=1000
-        DO J=1,NXS
-          MTJ=IWO(MTH-1+J)
-          IF(MTJ.GT.   0 .AND.
-     1       MTJ.LT.1000 .AND.
-     2       MTJ.LT. MTI) THEN
-            IT =J
-            MTI=MTJ
-          END IF
-        END DO
-C* Flag reaction as processed
-        IWO(MTH-1+IT)=IWO(MTH-1+IT)+1000
-        IF(IT.EQ.0) GO TO 890
-C*
-        IF     (MTI.EQ. 51) THEN
-          JZA=IZA+IZI-1
-          MT =50
-        ELSE IF(MTI.EQ.600) THEN
-          JZA=IZA+IZI-1001
-          MT =600
-        ELSE IF(MTI.EQ.800) THEN
-          JZA=IZA+IZI-2004
-          MT =800
-        ELSE
-          GO TO 890
-        END IF
-        NL1=0
-        IF(JZA.EQ.IZA) NL1=1
-        MT0=MT
-        REWIND LIN
-        CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
-     1             ,RWO(LBR),MXLI,MXLJ)
-        CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,RWO(LEL)
-     1             ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
-        WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT
-        WRITE(LTT,995) '                     Number of levels : ',NLV
-        WRITE(LTT,991)
-        WRITE(LER,995) ' Processed discrete level photon prod.: ',MT
-        WRITE(LER,995) '                     Number of levels : ',NLV
-        WRITE(LER,991)
-        IF(NLV.GT.0) JPP=JPP+1
-  890 CONTINUE
-C* Photon production data from discrete levels processed
-C* Remove flag from MT
-      DO IT=1,NXS
-        IF(IWO(MTH-1+IT).GT.1000) IWO(MTH-1+IT)=IWO(MTH-1+IT)-1000
+C* Select discrete level reactions to be processed
+C* NOTE - Reactions going to ground states produce no photons
+      DO L=1,MLV
+        LVLF(L)=0
       END DO
+      DO I=1,NXS
+        IF     (IWO(MTH-1+I).GE. 51 .AND. IWO(MTH-1+I).LT. 91) THEN
+C* Count levels of the MT50 series, set mt and IZP
+          LVLF(1)=LVLF(1)+1
+          LVMT(1)=51
+          LVIZ(1)=1
+        ELSE IF(IWO(MTH-1+I).GE.601 .AND. IWO(MTH-1+I).LT.649) THEN
+C* Count levels of the MT600 series, set mt and IZP
+          LVLF(2)=LVLF(2)+1
+          LVMT(2)=601
+          LVIZ(2)=1001
+        ELSE IF(IWO(MTH-1+I).GE.801 .AND. IWO(MTH-1+I).LT.849) THEN
+C* Count levels of the MT800 series, set mt and IZP
+          LVLF(3)=LVLF(3)+1
+          LVMT(3)=801
+          LVIZ(3)=2004
+        END IF
+      END DO
+C* Process selecte discrete level reactions
+      DO L=1,MLV
+        IF(LVLF(L).GT.0) THEN
+          JZA=IZA+IZI-LVIZ(L)
+          NL1=1
+          MT0=LVMT(L)-NL1
+          REWIND LIN
+          CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
+     1               ,RWO(LBR),MXLI,MXLJ)
+          CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,RWO(LEL)
+     1               ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
+          KLV=NLV-NL1
+          WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT0
+          WRITE(LTT,995) '           Number of processed levels : ',KLV
+          WRITE(LTT,991)
+          WRITE(LER,995) ' Processed discrete level photon prod.: ',MT0
+          WRITE(LER,995) '           Number of processed levels : ',KLV
+          WRITE(LER,991)
+          JLV=LVLF(L)
+          IF(KLV.NE.JLV) THEN
+          WRITE(LTT,995) ' REMF12 WARNING - expected No.of levels:',JLV
+          WRITE(LER,995) ' REMF12 WARNING - expected No.of levels:',JLV
+          END IF
+          IF(NLV.GT.0) JPP=JPP+1
+        END IF
+      END DO
+C* Photon production data from discrete levels processed
       IF(JPP.GT.0) THEN
         NS=0
         CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       END IF
 C* Process photon angular distribution for discrete levels (isotropic)
       JPP  =0
-      LV50 =0
-      LV600=0
-      LV800=0
-      DO 892 I=1,NXS
-      IF     (IWO(MTH-1+I).GE. 50 .AND. IWO(MTH-1+I).LT. 91) THEN
-C* Count levels of the MT50 series
-        LV50=LV50+1
-      ELSE IF(IWO(MTH-1+I).GE.600 .AND. IWO(MTH-1+I).LT.649) THEN
-C* Count levels of the MT800 series
-        LV600=LV600+1
-      ELSE IF(IWO(MTH-1+I).GE.800 .AND. IWO(MTH-1+I).LT.849) THEN
-C* Count levels of the MT800 series
-        LV800=LV800+1
-      ELSE
-        GO TO 892
-      END IF
-  892 CONTINUE
-      IF(LV50 .GT.0) THEN
-C* Write photon distributions for MT50 series
-        JPP=JPP+1
-        MT0=50
-        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,LV50 ,NS)
-      END IF
-      IF(LV600.GT.0) THEN
-C* Write photon distributions for MT600 series
-        JPP=JPP+1
-        MT0=600
-        JV =LV600-1
-        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JV,NS)
-      END IF
-      IF(LV800.GT.0) THEN
-C* Write photon distributions for MT800 series
-        JPP=JPP+1
-        MT0=800
-        JV =LV800-1
-        CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JV,NS)
-      END IF
+      DO L=1,MLV
+        IF(LVLF(L).GT.0) THEN
+          JZA=IZA+IZI-LVIZ(L)
+          MT0=LVMT(L)
+          JLV=LVLF(L)
+          CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JLV ,NS)
+          JPP=JPP+1
+        END IF
+      END DO
 C* Photon angular distributions from discrete levels processed
       IF(JPP.GT.0) THEN
         NS=0
@@ -1888,7 +1860,11 @@ C* For incident protons allow ground state for other particles
 C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
-  352 READ (LIN,805) IL,EL,XS
+  352 READ (LIN,805) IL,EL,XS,NBR
+      DO WHILE (NBR.GT.7)
+        READ (LIN,891)
+        NBR=NBR-7
+      END DO
 C* Test for last level (IL=0 from reading blank line)
       IF(IL.LE.0 ) GO TO 351
       EL=EL*1.E6
@@ -2008,7 +1984,7 @@ C*
   802 FORMAT(I3,1X,A2,1X,I3)
   803 FORMAT(37X,F12.0)
   804 FORMAT(1X,I3,1X,A2,1X,I3,4X,3F10.0)
-  805 FORMAT(I12,F10.0,16X,F12.0)
+  805 FORMAT(I12,F10.0,16X,F12.0,I3)
   806 FORMAT(BN,8X,8F15.0)
   808 FORMAT(24X,F12.0)
 c.809 FORMAT(26X,F12.0)
@@ -3404,7 +3380,7 @@ C-Purpose: Write MF 14 data in ENDF-6 format
 C* Loop over all discrete levels
       DO 140 LL=1,NLV
 C* Define reaction type MT number
-      MT=MT0+LL
+      MT=MT0+LL-1
 C* Assume isotropic photon distribution
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 1, 0, 1, 0)
 C* Section end
