@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-02 17:55:50 $
-Ccc   * $Id: input.f,v 1.168 2005-08-02 17:55:50 herman Exp $
+Ccc   * $Date: 2005-08-03 14:13:30 $
+Ccc   * $Id: input.f,v 1.169 2005-08-03 14:13:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -827,16 +827,13 @@ C                       residues must be heavier than alpha
                         izatmp = INT(1000*ztmp + atmp)
                         CALL WHERE(izatmp,nnuc,iloc)
 
-                     WRITE(6,*) 'iac,ia,ip,in ',iac,ia,ip,in 
                         IF(mulem.LE.NENdf) THEN
-                     WRITE(6,*) 'set nnuc ',nnuc,' to 1'
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
 C                          Comment the following line and uncommment the one after for all exclusive spectra
                            IF (ENDf(nnuc).EQ.0) THEN
                               ENDf(nnuc) = 2
                               EXClusiv = .FALSE.
-                     WRITE(6,*) 'set nnuc ',nnuc,' to 2'
                            ENDIF
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
@@ -848,7 +845,6 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
                            INExc(nnuc) = NEXclusive         
-                     WRITE(6,*) 'set INExc(',nnuc,') to ', INExc(nnuc)
                         ENDIF
                      ENDDO
                   ENDDO
