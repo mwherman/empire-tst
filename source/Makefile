@@ -11,7 +11,7 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -O
@@ -23,11 +23,11 @@
 #FC   = f77
 
 #----Lahey/Fujitsu f95 FORTRAN compiler
-FC    = lf95
+#FC    = lf95
 #----flag for Lahey/Fujitsu to optimize
 #FFLAGS = --o3
 #----flag for Lahey/Fujitsu to check boundaries and more
-FFLAGS = -g --chk
+#FFLAGS = -g --chk
 
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
