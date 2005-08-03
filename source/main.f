@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-02 17:55:50 $
-Ccc   * $Id: main.f,v 1.130 2005-08-02 17:55:50 herman Exp $
+Ccc   * $Date: 2005-08-03 14:13:54 $
+Ccc   * $Id: main.f,v 1.131 2005-08-03 14:13:54 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -476,7 +476,7 @@ C-----
 C-----calculate MSD contribution
 C-----
       corrmsd = 1.0
-      IF (MSD.NE.0 .AND. EIN.GT.3.D0) THEN
+      IF (MSD.NE.0 .AND. EIN.GT.5.D0) THEN
 C
 C--------call ORION
 C
