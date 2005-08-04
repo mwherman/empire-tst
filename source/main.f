@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-03 14:13:54 $
-Ccc   * $Id: main.f,v 1.131 2005-08-03 14:13:54 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-08-04 11:52:04 $
+Ccc   * $Id: main.f,v 1.132 2005-08-04 11:52:04 Carlson Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -72,18 +72,18 @@ C
       CHARACTER*21 reactionx
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
-       DATA opart/1hn,1hp,1ha/
+      DATA opart/1hn,1hp,1ha/
       icalled = 0
       CALL THORA(6)
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
-
-      OPEN (40,FILE = 'OPTFIT.CAL',STATUS='UNKNOWN')
 C-----
 C-----Read and prepare input data
 C-----
  1300 CALL INPUT
+C
+      IF (FITomp.LT.0) OPEN (40,FILE = 'OPTFIT.CAL',STATUS='UNKNOWN')
 C-----
 C-----Print input data
 C-----
@@ -919,6 +919,7 @@ C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
                   IF (FITomp.LT.0) THEN
 C                    WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs,CSPrd(1)
                     WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+c                    WRITE(*,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
                    IF (ncoll.GT.0) THEN
 C--------locate position of the projectile among ejectiles
                     CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -933,6 +934,8 @@ C--------locate position of the projectile among ejectiles
                    its = its -1
                    WRITE (40,'(12x,11D12.5)') ELAcs,
      &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+c                   WRITE (*,'(12x,11D12.5)') ELAcs,
+c     &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
                    IF (ICAlangs.gt.0) THEN
                     DO iang = 1, NDANG
                      WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
@@ -942,6 +945,7 @@ C--------locate position of the projectile among ejectiles
                    ENDIF
                   ELSE
                    WRITE (40,'(12x,11D12.5)') ELAcs
+c                   WRITE (*,'(12x,11D12.5)') ELAcs
                    IF (ICAlangs.gt.0) THEN
                     DO iang = 1, NDANG
                      WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
