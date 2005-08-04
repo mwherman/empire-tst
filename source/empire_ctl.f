@@ -955,12 +955,19 @@ C---
 C--- The flag nodata avoids writing energies of the grid which will not
 C--- be needed later for interpolation of integrated cross sections nor
 C--- for angular distributions.
+c 30   write(2,'(2i5,f8.3,2i5,f8.3,i5)') ngr,ie,en(ie),nangs(ie),igr,
+c     1                                                egrid(igr),nodata
  30   if(int(disc*en(ie)+0.5).lt.int(disc*egrid(igr)+0.5)) then
-        if(nangs(ie).gt.0) then        
+        if(nangs(ie).gt.0) then 
           if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
           write(18,'(f8.4,3i8)') en(ie),nangs(ie),icala(ie),nint(ie)
           write(18,'(10f8.2)') (angs(j),j=ntangs+1,ntangs+nangs(ie))
           ntangs=ntangs+nangs(ie)
+         else if(nodata.gt.1) then
+          write(18,'(f8.4,3i8)') egrid(igr-1),0,0
+          write(18,'(f8.4,3i8)') egrid(igr),0,0
+          igr=igr+1
+          if(igr.gt.ngr) go to 40
          endif
          ie=ie+1
          nodata=0
@@ -1375,7 +1382,6 @@ C--- Data at the first energy are read from the file.
       OPEN(40,file='OPTFIT.CAL',status='OLD')
       READ (40,'(f12.3,2e12.5)') ee(1),(thsig(j,1),j=1,2)
       READ (40,'(12x,10e12.5)') (thsig(j,1),j=3,12)
-
 
 C--- The loop runs over the experimental values of the incident energy.
 C--- Calculations are read from OPTFIT.CAL according to need for them.
