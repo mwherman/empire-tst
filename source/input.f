@@ -1,6 +1,6 @@
-Ccc   * $Author: Sin $
-Ccc   * $Date: 2005-08-05 17:48:07 $
-Ccc   * $Id: input.f,v 1.170 2005-08-05 17:48:07 Sin Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-08-05 19:03:10 $
+Ccc   * $Id: input.f,v 1.171 2005-08-05 19:03:10 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -402,8 +402,8 @@ C        Starting value of the number of angular points
          ENDIF
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(6,*)
-     &        'FATAL: increase NANgecis in dimension.h up to ',NANgela
-           STOP 'FATAL: increase NANgecis in dimension.h'
+     &        'FATAL: INCREASE NANgecis IN dimension.h UP TO ',NANgela
+           STOP 'FATAL: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
          da = 180.0/(NDANG - 1)
