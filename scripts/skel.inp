@@ -74,5 +74,20 @@ E1         0.
 FITOMP     1.
 FITLEV     2.
 
-
+Parameters for optical model parameter fitting. 
+The first value is an absolute (not a percentage) displacement from the current 
+value of the parameter in the *-omp.dir file. The second is the absolute value 
+(times 100) that defines the range of parameter variation. The third parameter
+indicate the position of the parameter in the RIPL-2 format.
+FITOMP     1.                                    !manual omp fit
+FITOMP     2.                                    !perform automatic omp search
+FITRVV     0.     500    1                       !fit real volume depth (+- 5 MeV)
+FITIVV     0.     100    1                       !fit imaginary volume depth (+- 1 MeV)
+FITISV     0.     100    1                       !fit imaginary surface depth (+- 1 MeV)
+FITRVR     0.      10    1                       !fit real volume radius (+- 0.1 fm)
+FITIVR     0.      10    1                       !fit imaginary volume radius (+- 0.1 fm)
+FITRVD     0.      10    1                       !fit real volume diffuseness (+- 0.1 fm)
+FITISD     0.       5    1                       !fit imaginary surface diffuseness (+- 0.05 fm)
+FITDEF     0.      10    2                       !fit l=2 (quadrupol) deformation  (+- 0.1)
+FITGRD                                           !autmatic incident energy grid in omp fit
 
