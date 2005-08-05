@@ -27,6 +27,10 @@ C-V  05/04 - Copy comments to MF1/MT451.
 C-V        - Upgrade to proces partially exclusive/inclusive spectra.
 C-V        - Allow metastable targets.
 C-V  05/06 Increase MXR from 200K to 800K.
+C-V  05/08 - Improved logic to reduce convergence problems of fitting
+C-V          angular distributions.
+C-V        - Add unassigned reactions to MT5 with yields for neutrons,
+C-V          protons and alpha particles.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -319,14 +323,17 @@ C* Process discrete levels if continuum reactions present
       LX=MXR-LA
       IF(LA.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
       REWIND LIN
-      JPRNT=IPRNT
-c...      IF(MT6.NE.2) JPRNT=-1
+C* Disable ANGDIS printout for bad Legendre fits except for elastic
+C* Discrete level distrib. checked with continuum when processing MF6
+      JPRNT=-1
+      IF(MT6.EQ.2) JPRNT=IPRNT
 C* Reading angular distributions - MF6 flagged negative
+      KT6=-MT6
 c...
 c...      print *,'processing MT',MT6
 c...
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),NEN,RWO(LE),RWO(LG),RWO(LA)
-     1           ,IWO(MTH),-MT6,IZI,QQM,QQI,AWR,ELO,NXS,NK,LCT,MXE,LX
+     1           ,IWO(MTH),KT6,IZI,QQM,QQI,AWR,ELO,NXS,NK,LCT,MXE,LX
      2           ,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2)
       IF(NK.LE.0) GO TO 490
 C* Write the ENDF file-4 data
@@ -361,6 +368,7 @@ C* Check if yields for unassigned reactions need to be printed
       NK=0
       DO I=1,NT6
         IF(IWO(LBI-1+I).EQ.5) GO TO 600
+        IF(IWO(LBI-1+I).EQ.201) NK=NK+1
         IF(IWO(LBI-1+I).EQ.203) NK=NK+1
         IF(IWO(LBI-1+I).EQ.207) NK=NK+1
       END DO
@@ -1025,9 +1033,9 @@ C*      Alpha emission (n,p+a)
       END
       SUBROUTINE POUCHR(PTST,KZAK,AWP)
 C-Title  : Subroutine POUCHR
-C-Purpose: Assign particle ZA and AWR from character string
+C-Purpose: Assign light particle ZA and AWR from character string
 C-Description:
-C-D  The input string PTST identifies the outgoing particle.
+C-D  The input string PTST identifies the light particle.
 C-D  If KZAK>0, it identifies the particle ZA.
 C-D  On output KZAK is the particle ZA designation and AWP is its
 C-D  atomic weight ratio relative to the neutron.
@@ -1042,10 +1050,10 @@ C*
       IZAK=KZAK
       IF      (PTST.EQ.'neutrons' .OR. IZAK.EQ.   1) THEN
         KZAK=1
-        AWP =1.
+        AWP =1
       ELSE IF (PTST.EQ.'gammas  ' .OR. IZAK.EQ.   0) THEN
         KZAK=0
-        AWP =0.
+        AWP =0
       ELSE IF (PTST.EQ.'protons ' .OR. IZAK.EQ.1001) THEN
         KZAK=1001
         AWP =AWH/AWN
@@ -1059,7 +1067,7 @@ C*
         KZAK=999999
         AWP =999999
       ELSE
-C* Unidentified outgoing particle
+C* Unidentified particle
         KZAK=-1
         AWP =-1
       END  IF
@@ -1150,11 +1158,13 @@ C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
       MT5 =0
       I5  =0
+      I201=0
       I203=0
       I207=0
       DO IX=1,NXS
         MM=MTH(IX)
         IF(MM.EQ.  5) I5  =IX
+        IF(MM.EQ.201) I201=IX
         IF(MM.EQ.203) I203=IX
         IF(MM.EQ.207) I207=IX
 C* Consider eligible reactions
@@ -1182,7 +1192,16 @@ C* Create MT 5 if not present
           XSR(J,I5)=0
         END DO
       END IF
-C* Create MT 203 if not present (flagged -ve for no spectra
+C* Create MT 201 if not present (flagged -ve for no spectra)
+      IF(I201.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-201
+        I201=NXS
+        DO J=1,NPT
+          XSR(J,I201)=0
+        END DO
+      END IF
+C* Create MT 203 if not present (flagged -ve for no spectra)
       IF(I203.LE.0) THEN
         NXS=NXS+1
         MTH(NXS)=-203
@@ -1191,7 +1210,7 @@ C* Create MT 203 if not present (flagged -ve for no spectra
           XSR(J,I203)=0
         END DO
       END IF
-C* Create MT 207 if not present (flagged -ve for no spectra
+C* Create MT 207 if not present (flagged -ve for no spectra)
       IF(I207.LE.0) THEN
         NXS=NXS+1
         MTH(NXS)=-207
@@ -1207,23 +1226,38 @@ C* Add contribution of reactions without differential data to MT5
           DO J=1,NPT
             XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
           END DO
-C* Add proton production to MT203
-          IF(MM.EQ.-28 .OR. MM.EQ.-41 .OR. MM.EQ.-42 .OR.
-     &       MM.EQ.-44 .OR. MM.EQ.-45 .OR.
-     &       MM.EQ.-103.OR. MM.EQ.-111.OR. MM.EQ.-112.OR.
-     &       MM.EQ.-115.OR. MM.EQ.-116) THEN
+          KM=-MM
+C* Add neutron production to MT201
+          IF(KM.EQ.11  .OR. KM.EQ.16 .OR. KM.EQ.17 .OR.
+     &      (KM.GE.22 .AND. KM.LE.25).OR.
+     &      (KM.GE.28 .AND. KM.LE.49)) THEN
+            KZAP=1
+            CALL YLDPOU(YI,KM,KZAP)
             DO J=1,NPT
-              XSR(J,I203)=XSR(J,I203)+XSR(J,IX)
+              XSR(J,I201)=XSR(J,I201)+YI*XSR(J,IX)
+            END DO
+          END IF
+C* Add proton production to MT203
+          IF(KM.EQ. 28.OR. KM.EQ. 41.OR. KM.EQ.42 .OR.
+     &       KM.EQ. 44.OR. KM.EQ. 45.OR.
+     &       KM.EQ.103.OR. KM.EQ.111.OR. KM.EQ.112.OR.
+     &       KM.EQ.115.OR. KM.EQ.116) THEN
+            KZAP=1001
+            CALL YLDPOU(YI,KM,KZAP)
+            DO J=1,NPT
+              XSR(J,I203)=XSR(J,I203)+YI*XSR(J,IX)
             END DO
           END IF
 C* Add alpha production to MT207
-          IF(MM.EQ.-22 .OR. MM.EQ.-23 .OR. MM.EQ.-24 .OR.
-     &       MM.EQ.-25 .OR. MM.EQ.-29 .OR. MM.EQ.-30 .OR.
-     &       MM.EQ.-35 .OR. MM.EQ.-36 .OR. MM.EQ.-45 .OR.
-     &       MM.EQ.-107.OR. MM.EQ.-108.OR. MM.EQ.-109.OR.
-     &       MM.EQ.-112) THEN
+          IF(KM.EQ. 22.OR. KM.EQ. 23.OR. KM.EQ. 24.OR.
+     &       KM.EQ. 25.OR. KM.EQ. 29.OR. KM.EQ. 30.OR.
+     &       KM.EQ. 35.OR. KM.EQ. 36.OR. KM.EQ. 45.OR.
+     &       KM.EQ.107.OR. KM.EQ.108.OR. KM.EQ.109.OR.
+     &       KM.EQ.112) THEN
+            KZAP=2004
+            CALL YLDPOU(YI,KM,KZAP)
             DO J=1,NPT
-              XSR(J,I207)=XSR(J,I207)+XSR(J,IX)
+              XSR(J,I207)=XSR(J,I207)+YI*XSR(J,IX)
             END DO
           END IF
         END IF
@@ -1651,10 +1685,11 @@ C-D  NEN  Counts the Number of energy points
 C-D  NXS  Counts the Number of reaction types
 C-
       CHARACTER*2  CH
+      CHARACTER*8  PTST
       CHARACTER*30 CHEN
       CHARACTER*80 REC,COM
-C* Declare XS,XC double precision to avoid underflow on reading
-      DOUBLE PRECISION XS,XC
+C* Declare XS,XC,XI double precision to avoid underflow on reading
+      DOUBLE PRECISION XS,XC,XI
       DIMENSION    EIN(MXE),XSC(MXE,MXT),QQM(MXT),QQI(MXT)
      1            ,MTH(MXT),IZB(MXM),BEN(3,MXM)
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -1686,6 +1721,8 @@ C* Identify projectile, target and energy
         WRITE(LTT,904) ' EMPEND ERROR - Invalid projectile ZA   ',IZI
 c...    STOP 'EMPEND ERROR - Invalid projectile'
       END IF
+      PTST='        '
+      CALL POUCHR(PTST,IZI,AWI)
       READ (REC(24:33),802) IZ,CH,IA
       IZA=IZ*1000+IA
       AWR=IA
@@ -1802,34 +1839,39 @@ C* Test if reaction is already registered
       IF(MT.EQ.5) THEN
 C* Reserve space for proton and alpha production of unidentified reactions
         IF(NXS+2.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
-        MT203=IXS+1
-        MT207=IXS+2
-        NXS  =NXS+2
+        MT201=IXS+1
+        MT203=IXS+2
+        MT207=IXS+3
+        NXS  =NXS+3
+        MTH(MT201)=201
         MTH(MT203)=203
         MTH(MT207)=207
       END IF
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
       QQI(IXS)=QQM(IXS)
-C* Special treatment for MT5 (separating out proton and alpha prod.
-  320 IF(MT.EQ.5) THEN
-C* Save proton and alpha production of unidentified reactions
-        IF     ((JZA.LE.IZA+1-1001 .AND. JZA.GT.IZA-1099) .OR.
-     &          (JZA.LE.IZA+1-3005 .AND. JZA.GT.IZA-3099)) THEN
-C*                (n,p+xn) + (n,p+a+xn)
-          XSC(NEN,MT203)=XSC(NEN,MT203)+XS*1.E-3
-        ELSE IF((JZA.LE.IZA+1-2004 .AND. JZA.GT.IZA-2099) .OR.
-     &          (JZA.LE.IZA+1-3005 .AND. JZA.GT.IZA-3099)) THEN
-C*                (n,a+xn) + (n,p+a+xn)
+C* Add cross section contribution
+  320 XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
+      IF(MT.NE.5) GO TO 110
+C* Special treatment for MT5 (summing neutron, proton and alpha prod.)
+        KZA=IZA+IZI-JZA
+C* Sum alpha production of unidentified reactions
+        DO WHILE (KZA.GE.2004)
           XSC(NEN,MT207)=XSC(NEN,MT207)+XS*1.E-3
-        ELSE
-          XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
-        END IF
+          KZA=KZA-2004
+        END DO
+C* Sum proton production of unidentified reactions
+        DO WHILE (KZA.GE.1001)
+          XSC(NEN,MT203)=XSC(NEN,MT203)+XS*1.E-3
+          KZA=KZA-1001
+        END DO
+C* Sum alpha production of unidentified reactions
+        DO WHILE (KZA.GE.   1)
+          XSC(NEN,MT201)=XSC(NEN,MT201)+XS*1.E-3
+          KZA=KZA-0001
+        END DO
         QQM(IXS)=MAX(QQ,QQM(IXS))
         QQI(IXS)=QQM(IXS)
-      ELSE
-        XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
-      END IF
       GO TO 110
 C*
 C* Process discrete levels - (n,n'), (n,p), (n,a)
@@ -1851,7 +1893,7 @@ C* Positioned to read discrete levels
       READ (LIN,891)
       READ (LIN,891)
       READ (LIN,891)
-      XI=0.
+      XI=0
       JL=0
 C* For incident neutrons allow ground state for other particles
       IF(IZI.EQ.   1 .AND. MT0.NE. 50) JL=-1
@@ -1913,6 +1955,7 @@ C* Enter cross section for this discrete level
   360 XSC(NEN,IXS)=XS*1.E-3
 C*      Save QI for this level
       QI=QQI(IXS)
+      QM=QQM(IXS)
       GO TO 352
 C* Read the elastic cross section but exclude incident charged particles
   370 IF(IZI.GE.1000) GO TO 351
@@ -1966,7 +2009,10 @@ C* Test if reaction is already registered
       NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
-C* Reaction QM and QI values from the last discrete level
+C* Reaction QM value from the last discrete level
+C* Reaction QI may be lower due to (z,g+x) reactions
+      QIE=-0.99*EE*AWR/(AWR+AWI)
+      QI =MAX(QI,QIE)
       MTH(IXS)=MT
       QQM(IXS)=QM
       QQI(IXS)=QI
@@ -2390,7 +2436,11 @@ C...
         INSE=1
         EINS=ETH
         IF(ZAP.EQ.0) THEN
-          YINS=(EINS/EE)*(SPC/XS3)
+C* Scale the gamma yield by the ratio of total available energy
+C* and the available energy at threshold
+          EAVE=-QQI(I)+ EE*AWR/(AWR+AWI)
+          EAV0=-QQI(I)+ETH*AWR/(AWR+AWI)
+          YINS=(EAV0/EAVE)*(SPC/XS3)
         ELSE
           YINS=YL0
         END IF
@@ -3165,17 +3215,33 @@ C* Initialize constants
       QM=0.
       QI=0.
       CALL POUCHR(PTST,IZI,AWI)
-C* Identify indices of MT 5,203,207
+C* Identify indices of MT 5,201,203,207
       NK =0
       MT5=0
+      MT201=0
       MT203=0
       MT207=0
       DO I=1,NXS
         IF(IABS(MTH(I)).EQ.  5) MT5  =I
+        IF(IABS(MTH(I)).EQ.201) MT201=I
         IF(IABS(MTH(I)).EQ.203) MT203=I
         IF(IABS(MTH(I)).EQ.207) MT207=I
       END DO
       IF(MT5.LE.0) RETURN
+C* Convert neutron yields to multiplicities
+      IF(MT201.GT.0) THEN
+        JK201=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X201=XSC(I,MT201)
+          IF(X201.GT.0) THEN
+            XSC(I,MT201)=X201/X5
+            JK201=1
+          END IF
+        END DO
+        NK=NK+JK201
+      END IF
+C* Convert proton yields to multiplicities
       IF(MT203.GT.0) THEN
         JK203=0
         DO I=1,NEN
@@ -3188,6 +3254,7 @@ C* Identify indices of MT 5,203,207
         END DO
         NK=NK+JK203
       END IF
+C* Convert alpha yields to multiplicities
       IF(MT207.GT.0) THEN
         JK207=0
         DO I=1,NEN
@@ -3201,12 +3268,13 @@ C* Identify indices of MT 5,203,207
         NK=NK+JK207
       END IF
 C*
-C* Write file MF6/MT5 (proton and alpha yield data only)
+C* Write file MF6/MT5 (neutron, proton and alpha yield data only)
       MF =6
       MT =5
       ZA =IZA
       LCT=1
       LIP=1
+C* Flag unknown distribution (LAW=0)
       LAW=0
 C* Write HEAD record
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,LCT,NK, 0)
@@ -3214,10 +3282,10 @@ C*
       LE  =1
       LX  =MXR/2
       ETH =-QQI(MT5)*(AWR+AWI)/AWR
-C* Write the yield for protons and alphas
-      IZAP=1001
-      IXS =MT203
-      JK  =JK203
+C* Write the yield for neutrons, protons and alphas
+      IZAP=1
+      IXS =MT201
+      JK  =JK201
   200 IF(JK.GT.0) THEN
         CALL POUCHR(PTST,IZAP,AWP)
 C* Remove duplicate points
@@ -3250,7 +3318,13 @@ C* Write TAB1 record
         CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
      1             ,NR,NP,NBT,INT,RWO(LE),RWO(LX))
       END IF
-      IF(IZAP.EQ.1001) THEN
+C* Repeat for other particles
+      IF(IZAP.EQ.1) THEN
+        IZAP=1001
+        IXS =MT203
+        JK  =JK203
+        GO TO 200
+      ELSE IF(IZAP.EQ.1001) THEN
         IZAP=2004
         IXS=MT207
         JK =JK207
