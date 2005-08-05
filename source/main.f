@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-08-04 11:52:04 $
-Ccc   * $Id: main.f,v 1.132 2005-08-04 11:52:04 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-08-05 19:05:01 $
+Ccc   * $Id: main.f,v 1.133 2005-08-05 19:05:01 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -225,7 +225,6 @@ C--------------------escape if we go beyond recoil spectrum dimension
                ENDIF
              ENDIF
            ELSE
-C
 C------------ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0001)
@@ -263,7 +262,7 @@ C--------------Spreading it using resolution function (SQRT(2*PI) = 2.5066)
                  iang = 0
                  DO iang1 = 1, NANgela
                     READ (45,'(7x,E12.5)',END = 1400) ftmp
-C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS
+C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
                     if(isigma.gt.0 .and. dtmp.gt.0.) then
@@ -2137,7 +2136,7 @@ C------------exact endpoint
       ENDIF
 C-----end of ENDF spectra (inclusive)
 
-      IF (ENDf(1).EQ.1 .AND. EINl.GE.1.d0) THEN
+      IF (EXClusiv .AND. EINl.GE.1.d0) THEN
          WRITE (6,*) ' '
          WRITE (6,*) '----------------------------------------------'
          WRITE (6,*) 'Test - integrals of portions of DDX spectra'
@@ -2150,7 +2149,7 @@ C-----end of ENDF spectra (inclusive)
             controlp = 0
             controla = 0
             DO nnuc = 1, NNUcd
-c              IF(INExc(nnuc).eq.-1) CYCLE
+               IF(ENDf(nnuc).NE.1) CYCLE
                controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
                controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
                controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
@@ -2183,8 +2182,8 @@ c              IF(INExc(nnuc).eq.-1) CYCLE
           NANGela=NDAng
           IF(NANgela.GT.NDAngecis) THEN
           WRITE(6,*)
-     &         'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-          STOP 'FATAL: increase NDAngecis in dimension.h'
+     &         'FATAL: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
+          STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
        ENDIF
 
@@ -2223,9 +2222,9 @@ C         STOP '.REGULAR STOP'
       ENDIF
       IF(EIN.LT.epre) THEN
          WRITE(6,*) EIN,epre
-         WRITE(6,*) 'FATAL: Input energies are not ordered !!'
-         WRITE(6,*) 'FATAL: Check your input file'
-         PAUSE 'FATAL: Input energies are not ordered !!'
+         WRITE(6,*) 'FATAL: INPUT ENERGIES OUT OF ORDER !!'
+         WRITE(6,*) 'FATAL: CHECK YOUR INPUT FILE'
+         PAUSE 'FATAL: INPUT ENERGIES OUT OF ORDER !!'
          STOP
       ENDIF
       epre = EIN
