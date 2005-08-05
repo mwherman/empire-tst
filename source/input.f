@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-03 14:13:30 $
-Ccc   * $Id: input.f,v 1.169 2005-08-03 14:13:30 herman Exp $
+Ccc   * $Author: Sin $
+Ccc   * $Date: 2005-08-05 17:48:07 $
+Ccc   * $Id: input.f,v 1.170 2005-08-05 17:48:07 Sin Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -3814,7 +3814,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'HRTW  ') THEN
-            IF (val.GT.0.) THEN
+            IF (val.GT.0) THEN
               LHRtw = 1
               EHRtw = 5.d0
               IF (val.gt.1.1d0) EHRtw = val
@@ -3824,6 +3824,8 @@ C-----
               IF (LHRtw.NE.0) WRITE (12,
      &           '('' Width fluctuations calculated within HRTW '',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
+            ELSE
+               LHRtw = 0
             ENDIF
             GOTO 100
          ENDIF
