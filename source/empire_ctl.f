@@ -18,10 +18,10 @@ C
       logical autofit
       dimension pars(mxfit),dparmx(mxfit)
 
-      CALL SCAN4FIT(autofit,pars,dparmx,nnft)
+      CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr)
 
       IF (autofit) THEN
-         CALL LOCALFIT(pars,dparmx,nnft)
+         CALL LOCALFIT(pars,dparmx,nnft,xitr)
          CALL CLEANUP(nnft)  
          CALL EMPIRE
       ELSE
@@ -33,7 +33,7 @@ C
 C
 C-------------------------------------------------------------------
 C
-      subroutine scan4fit(autofit,pars,dparmx,nnft)
+      subroutine scan4fit(autofit,pars,dparmx,nnft,xitr)
 C
 C--- Scans INPUT.DAT for automatic fit request (FITOMP=2) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
@@ -74,6 +74,7 @@ C
 
       autofit = .FALSE.
       wt0=1.0
+      xitr=3.05
 
       egrid(0)=-1.1
       ngrid=1
@@ -170,6 +171,13 @@ C--- the C4 file.
          else
           wt0=1.0/sqrt(wt0)
          endif
+        go to 10
+       endif
+
+C--- Command for varying the number of iterations in localfit.
+C--- Xitr consists of mxitr+itmax/100
+      if(cmnd(1:6).eq.'FITITR') then
+        read(cmnd,'(6x,g10.5,4i5)') xitr
         go to 10
        endif
 
@@ -739,8 +747,11 @@ C---   nangdtot - number of angular distributions
       nangdtot=0
 
 C--- a fake point above the real data is added 
+C--- This fake point defines the energy limit above which the program 
+C--- will not function as written due to integer*4 overflow in the 
+C--- discretization.
       ipe(indmx+1)=indmx+1
-      ex(indmx+1)=1.0e9
+      ex(indmx+1)=(2**30-1)/disc
       mf(indmx+1)=3
       mt(indmx+1)=1
 
@@ -955,19 +966,12 @@ C---
 C--- The flag nodata avoids writing energies of the grid which will not
 C--- be needed later for interpolation of integrated cross sections nor
 C--- for angular distributions.
-c 30   write(2,'(2i5,f8.3,2i5,f8.3,i5)') ngr,ie,en(ie),nangs(ie),igr,
-c     1                                                egrid(igr),nodata
  30   if(int(disc*en(ie)+0.5).lt.int(disc*egrid(igr)+0.5)) then
-        if(nangs(ie).gt.0) then 
-          if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
-          write(18,'(f8.4,3i8)') en(ie),nangs(ie),icala(ie),nint(ie)
+        if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
+        if(nangs(ie).gt.0) then        
+          write(18,'(f8.4,3i8)') en(ie),nangs(ie),icala(ie)
           write(18,'(10f8.2)') (angs(j),j=ntangs+1,ntangs+nangs(ie))
           ntangs=ntangs+nangs(ie)
-         else if(nodata.gt.1) then
-          write(18,'(f8.4,3i8)') egrid(igr-1),0,0
-          write(18,'(f8.4,3i8)') egrid(igr),0,0
-          igr=igr+1
-          if(igr.gt.ngr) go to 40
          endif
          ie=ie+1
          nodata=0
@@ -1055,7 +1059,7 @@ C--- until nothing changes place.
 C
 C-------------------------------------------------------------------
 C
-      subroutine localfit(p0,dpmx,nfit)
+      subroutine localfit(p0,dpmx,nfit,xitr)
 C
 C--- This routine attempts to minimize a function CHISQRD. It performs a
 C--- simple gradient search using numerical derivatives. 
@@ -1078,7 +1082,10 @@ c----------------------------------------------------------------------
 
       if(nfit.le.0) go to 150
 
-       do 100 itfit=1,3
+      mxitr=max(int(xitr+0.001),min(nfit,3))
+      itmax=max(mod(int(100*xitr+0.1),100),5)
+
+       do 100 itfit=1,mxitr
 
       do n=1,nfit
         dp(n)=0.0d0
@@ -1147,7 +1154,6 @@ c----------------------------------------------------------------------
       dpx=0.01d0
       idsum=0
 
-      itmax=5
       ichng0=0
 
       do it=1,itmax
@@ -1383,6 +1389,7 @@ C--- Data at the first energy are read from the file.
       READ (40,'(f12.3,2e12.5)') ee(1),(thsig(j,1),j=1,2)
       READ (40,'(12x,10e12.5)') (thsig(j,1),j=3,12)
 
+
 C--- The loop runs over the experimental values of the incident energy.
 C--- Calculations are read from OPTFIT.CAL according to need for them.
 C--- Calculated integrated cross sections are interpolated. Angular 
@@ -1598,8 +1605,8 @@ C--- Read, modify and write vibrational level file
               nb2=0
               nxtpar=nxtpar+1
              endif
-C--- The deformation parameter of all states of a vibrational band are
-C--- modified (and maybe even others).
+C--- The deformation parameter of all states of a 2+ vibrational band are
+C--- modified.
             if(nb2.eq.0 .and. mod(js,2).eq.0 .and. jp.eq.1 .and.
      &                                            betax.eq.betax2) then 
               write(71,'(a29,e11.3)') line(1:29),beta2
