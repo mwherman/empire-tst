@@ -46,7 +46,7 @@
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
-     &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, ICAlangs
+     &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
@@ -57,7 +57,7 @@
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FIScon, FISden(ndnuc),
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
-     &                 FISshi(ndnuc), FITlev, FITomp, FLAm(ndcc),
+     &                 FISshi(ndnuc), FITlev, FLAm(ndcc),
      &                 FUSred, GAMmafis(2), GCAsc, GDIv, GDIvp, GDRdyn,
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2,
@@ -124,7 +124,7 @@
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,
-     &                 FITomp, FITlev, DV, FCC, STMro, DEGa, GDIvp,
+     &                 FITlev, DV, FCC, STMro, DEGa, GDIvp,
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc,
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
@@ -156,7 +156,7 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela, NDAng, ISProd, ICAlangs
+     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
