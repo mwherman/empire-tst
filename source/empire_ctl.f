@@ -4,16 +4,17 @@ C--- Controls execution of EMPIRE and/or fitting.
 C---
 C--- The program has been designed to make the fitting routine, LOCALFIT,
 C--- as independent as possible of the rest of the code, so that it may 
-C--- be easily exchanged for another routine. It depends on three input
+C--- be easily exchanged for another routine. It depends on four input
 C--- parameters: 
 C---   pars    - an array of parameters to be varied in fit
 C---   dparmx  - array of max variation allowed in each parameter in vars
 C---   nnft    - number of parameters in vars
+C---   xitr    - a real constructed of the inner and outer loop iteration
 C--- It also uses a function CHISQRD(pars), provided below.
 C---
 C--- The logical variable autofit is true when fitting, false for a normal run.
 C
-      parameter(mxfit=10)
+      parameter(mxfit=20)
 
       logical autofit
       dimension pars(mxfit),dparmx(mxfit)
@@ -47,13 +48,14 @@ C---   pars    - an array of parameters to be varied in fit
 C---   dparmx  - array of max variation allowed in each parameter in vars
 C---   nnft    - number of parameters in vars
 C
-      parameter(mxfit=10,mxind=5000,mxinda=5000)
+      parameter(mxfit=20,mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
       logical autofit
       logical fexist
       logical LINUX/.TRUE./
-      character cmnd*35,cmndp*50,ctmp*132
+      character cmnd*35,cmndp*35,cmndt*35
+      character ctmp*132
       character pot1(6)*2,pot2(3)*1
       integer*4 PIPE,itmp
       dimension wtx(30),idw(2,30)
@@ -89,24 +91,33 @@ C--- The energy on the first line of input is taken to be the minimum
 C--- incident energy of data included in the fit.  
       read(5,'(a35)') cmnd
       read(cmnd,*) emin
-      emin=max(int(disc*emin+0.5),1)/disc
-      egrid(1)=min(emin,0.001)
-      write(18,'(f7.3)') egrid(1)
       write(72,'(a35)') cmnd
 
-C--- The projectile and target mass and charges are needed only to
-C--- obtain the neutron s-wave scattering length, if it is relevant.
-      read(5,'(a35)') cmnd
-      read(cmnd,*) aat,zzt
-      write(18,'(a35)') cmnd
-      write(72,'(a35)') cmnd   
-      read(5,'(a35)') cmnd
+C--- The projectile and target mass and charges are needed to obtain the 
+C--- neutron s-wave scattering length, in the case of a neutron projectile,
+C--- and to estimate the minium incident energy, in the case of a proton
+C--- projectile.
+      read(5,'(a35)') cmndt
+      read(cmndt,*) aat,zzt
+      write(72,'(a35)') cmndt
+  
+      read(5,'(a35)') cmndp
+      read(cmndp,*) aap,zzp
+      write(72,'(a35)') cmndp  
 
-      read(cmnd,*) aap,zzp
+C--- With Zp, Zt and At, the Coulomb barrier and the lowest energy used in
+C--- the fit energy mesh can be estimated. For protons, the lowest energy is
+C--- taken to about half the Coulomb barrier, for neutrons 1 keV.
+      eclmn=int(0.5*disc*zzp*zzt/aat**(1./3.)+0.5)/disc
+      emin=max(int(disc*emin+0.5),1)/disc
+      egrid(1)=min(emin,max(0.001,eclmn))
+
+      write(18,'(f7.3)') egrid(1)
+      write(18,'(a35)') cmndt
+      write(18,'(a35)') cmndp
+
+C--- Prepare (or not) for search for neutron s-wave scattreing length. 
       if(int(aap+0.1).ne.1 .or. int(zzp+0.1).ne.0) aat=0.
-      write(18,'(a35)') cmnd
-      write(72,'(a35)') cmnd   
-
       izz=zzt+0.1
       iaa=aat+0.1
 
@@ -130,12 +141,12 @@ C--- if its value is 2 or larger.
          endif
        endif
 
-C--- Generic command for varyng optical model parameters. Parameters must
-C--- must be specifies by i1 - RIPL potential number (1-6), potential
-C--- parameter number (r=1,d=2,v=3), and postion in RIPL file (1-13 for 
-C--- r and d, 1-24 for v).
+C--- Generic command for varying parameters. Parameters must
+C--- be specifies by i1 - RIPL potential number (1-6), i2 - potential
+C--- parameter number (r=1,d=2,v=3), and i3 - postion in RIPL file (1-13 for 
+C--- r and d, 1-24 for v) or by i1=7 (deformation) and i2 - multipolarity.
       if(cmnd(1:6).eq.'FITPAR') then
-        nfit=nfit+1
+        nfit=min(nfit+1,mxfit-1)
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i1,i2,i3
         xvalx(nfit)=0.01*imx
         axx(nfit)=1000*i1+100*i2+13
@@ -145,7 +156,7 @@ C--- r and d, 1-24 for v).
 C--- Keyword for varying deformations. At the moment l=2 and 4 are allowed
 C--- for rotational excitations, l=2 and 3 for vibrational ones. 
       if(cmnd(1:6).eq.'FITDEF') then
-        nfit=nfit+1
+        nfit=min(nfit+1,mxfit-1)
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i1
         xvalx(nfit)=0.01*imx
         axx(nfit)=7000+100*i1
@@ -222,7 +233,7 @@ C--- (1-13 for r and d, 1-24 for v).
          end do
         write(18,'(a35)') cmnd 
         go to 10
- 30     nfit=nfit+1
+ 30     nfit=min(nfit+1,mxfit-1)
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i3
         xvalx(nfit)=0.01*imx
         axx(nfit)=1000*i1+100*i2+i3
@@ -349,8 +360,9 @@ C--- The strength function weight (MF=3, MT=0) is stored in wt(15,2)
          end do
        endif
 
-      if(nfit.gt.9) then
-        write(2,*) ' A maximum of 9 parameters may be fit at once'
+      if(nfit.gt.mxfit-1) then
+        write(2,'('' A maximum of'',i3,'' parameters may be fit '',
+     1   ''at once.'')') mxfit-1 
         write(2,*) ' Please adjust your input accordingly. STOP.'
         stop
        endif
@@ -536,7 +548,7 @@ C
 C
 C--- Writes the parameters to be adjusted in a reasonably readable manner
 C
-      parameter(mxfit=10)
+      parameter(mxfit=20)
 
       character pot1(6)*13,pot2(3)*9
 
@@ -549,12 +561,12 @@ C
 C--- First the optical potential parameters and their fit limits
       do n=1,nfit
         if(idv(1,n).lt.7) then
-          write(2,'(a28,i2,a9,f7.3,a16,f7.3)')
+          write(2,'(a28,i2,a9,f7.4,a16,f7.4)')
      &    pot1(idv(1,n))//pot2(idv(2,n))//'param ',idv(3,n),
      &    ' value = ',vals(n),'   max val = +/-',xvals(n)
          else
 C--- then the deformations and their fit limits
-          write(2,'(a28,i2,a9,f7.3,a16,f7.3)')
+          write(2,'(a28,i2,a9,f7.4,a16,f7.4)')
      &    'Deformation  beta  --   multipolarity ',idv(2,n),
      &    ' value = ',vals(n),'   max val = +/-',xvals(n)
          endif
@@ -912,8 +924,6 @@ C
      &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
 
-      data hequiv/5.0e-4/
-
 C--- Treats the case in which the energy mesh is defined by the FITGRD
 C--- keyword.
       if(egrid(0).lt.2.) then
@@ -1051,7 +1061,7 @@ C--- then back down
           ipt(i+1)=iptr
          endif
        end do
-C--- until nothing changes place.
+C--- until nothing changes.
       if(imdone.eq.0) go to 10
 
       return
@@ -1064,19 +1074,20 @@ C
 C--- This routine attempts to minimize a function CHISQRD. It performs a
 C--- simple gradient search using numerical derivatives. 
 C--- Its input is given by
-C---    p0 - the array of parameters to be varied
+C---    p0 - the array of parameters to be varied.
 C---    dpmx - an array of which 0.01*dpmx(.) is used to calculate derivatives
 C---    nfit - the number of parameters to be varied.
-C--- Its output is given in p0.
+C---    xitr - a real containing the inner and outer loop indices, mxitr and as
+C---           itmax, in the form mxitr + itmax/100.
+C---           Default values are: mxitr -> min(nfit,3); itmax -> 5.
+C--- The output of the routine is given in p0.
 C--- It also requires an external function CHISQRD(p0). The call to CHISQRD
 C--- should not modify the array p0.
 C
-c      implicit double precision(a-h,o-z)
+      parameter(mxfit=20)
 
-      parameter(mxfit=10)
-
-      dimension pp(mxfit),p0(mxfit),dp(mxfit),dpmx(nfit)
-      dimension dchi(mxfit)
+      dimension p0(mxfit),dpmx(mxfit)
+      dimension pp(mxfit),dp(mxfit),dchi(mxfit)
 
 c----------------------------------------------------------------------
 
@@ -1333,7 +1344,7 @@ C
 C
 C--- Calculates the chi2 using experimental data and EMPIRE calculations
 C
-      parameter(mxind=5000,mxinda=5000,mxfit=10)
+      parameter(mxind=5000,mxinda=5000,mxfit=20)
       parameter(disc=1.0e4)
 
       character astrngth*35
@@ -1388,7 +1399,6 @@ C--- Data at the first energy are read from the file.
       OPEN(40,file='OPTFIT.CAL',status='OLD')
       READ (40,'(f12.3,2e12.5)') ee(1),(thsig(j,1),j=1,2)
       READ (40,'(12x,10e12.5)') (thsig(j,1),j=3,12)
-
 
 C--- The loop runs over the experimental values of the incident energy.
 C--- Calculations are read from OPTFIT.CAL according to need for them.
@@ -1447,7 +1457,7 @@ C--- The values given in vals(.) are added to the appropriate
 C--- values in the files, as determined by idv(,.), with changes
 C--- limited by the values given in xvals.
 
-      parameter(mxfit=10)
+      parameter(mxfit=20)
 
       character line*100,fld*13
       dimension lpar(2,mxfit)
@@ -1455,7 +1465,7 @@ C--- limited by the values given in xvals.
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
 
-C--- If no parameters are to be changed, tehre is nothing to do.
+C--- If no parameters are to be changed, there is nothing to do.
       if (nfit.le.0) return
 
 C--- Compares parameter values to limits and changes them if necessary 
