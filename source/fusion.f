@@ -1,6 +1,6 @@
 Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-28 21:05:00 $
-Ccc   * $Id: fusion.f,v 1.51 2005-07-28 21:05:00 Carlson Exp $
+Ccc   * $Date: 2005-08-09 11:27:14 $
+Ccc   * $Id: fusion.f,v 1.52 2005-08-09 11:27:14 Carlson Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -127,7 +127,7 @@ C-------this nucleus should be recalculated (goto 300)
 C
    50    CLOSE (45,STATUS = 'DELETE')
 
-         IF (FITomp.GE.0) THEN         
+         IF (FITomp.EQ.0) THEN         
            WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
            WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
