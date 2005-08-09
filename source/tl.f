@@ -1,6 +1,6 @@
 Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-28 21:05:01 $
-Ccc   * $Id: tl.f,v 1.69 2005-07-28 21:05:01 Carlson Exp $
+Ccc   * $Date: 2005-08-09 11:30:00 $
+Ccc   * $Id: tl.f,v 1.70 2005-08-09 11:30:00 Carlson Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1587,9 +1587,10 @@ C          SINl = SINl + dtmp
       ENDDO
   400 CLOSE (45)
       IF (SINl+SINlcc.EQ.0.D0) RETURN
-      IF (SINlcc.GT.ABScs) THEN
+C--- SINlcc in next IF changed to SINl - BVC
+      IF (SINl.GT.ABScs) THEN
          WRITE (6,*)
-         WRITE (6,*) ' WARNING: LOOK ECIS NON-CONVERGENCE !!'
+         WRITE (6,*) ' WARNING: POSSIBLE ECIS NON-CONVERGENCE !!'
          WRITE (6,
      &     '(5x,''**************************************************'')'
      &     )
@@ -1617,7 +1618,7 @@ C          SINl = SINl + dtmp
          WRITE (6,
      &     '(5x,''**************************************************'')'
      &     )
-         STOP 200
+         STOP ' POSSIBLE ECIS NON-CONVERGENCE !!'
       ENDIF
 C
 C     Absorption cross section includes inelastic scattering cross section to coupled levels
@@ -2148,7 +2149,7 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
      &                 ' ECIS can not be used with Gaussian formfactors'
             WRITE (6,*) ' for imaginary surface contribution'
             WRITE (6,*) ' Change OMP potential for elastic channel'
-            STOP '14'
+            STOP ' No Gaussian form factors in ECIS!'
          ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
@@ -2548,7 +2549,7 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
      &                 ' ECIS can not be used with Gaussian formfactors'
             WRITE (6,*) ' for imaginary surface contribution'
             WRITE (6,*) ' Change OMP potential for elastic channel'
-            STOP '14'
+            STOP ' No Gaussian form factors in ECIS!'
          ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
