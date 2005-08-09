@@ -393,6 +393,10 @@ C* Read the EMPIRE output file to extract energy/angle distrib.
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),NEN,RWO(LE),RWO(LG),RWO(LA)
      1           ,IWO(MTH),MT6,IZI,QQM,QQI,AWR,ELO,NXS,NK,LCT,MXE,LX
      2           ,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2)
+c...
+c...      print *,'Read data for',nk,' particles'
+c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
+c...
       IF(NK.LE.0) GO TO 800
 C* Write the ENDF file-6 data
       CALL WRIMF6(LOU,RWO(LA),MT6,MAT,IZA,AWR,NK,LCT,NS)
@@ -1556,10 +1560,10 @@ C* Function at 3/4 to the next mesh point
 C*
 C* End of test prints
 C*
-
-c       print *,'awr,awp,emx,emp',awr,awp,emx,emp
-c       print *,'rl,ru',rwo(lpl),rwo(lpu)
-
+c...
+c...       print *,'awr,awp,emx,emp',awr,awp,emx,emp
+c...       print *,'rl,ru',rwo(lpl),rwo(lpu)
+c...
 C* For (l > 0) divide by (2*l+1) to conform with ENDF rules.
       DO L=1,LOR
         IF(L.GT.LOO) RWO(LPU+L)=0.
@@ -2105,7 +2109,7 @@ C* For other reactions scan the file to identify all outgoing particles
   110 READ (LIN,891,END=140) REC
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C...
-C...      print *,'mt6',mt6,rec(14:22)
+c...      print *,'mt6',mt6,rec(14:30)
 C...
       IF(MT6.LT.0) THEN
 C* For discrete level reactions consider only neutrons, protons, alphas
@@ -2126,9 +2130,12 @@ C* For discrete level reactions consider only neutrons, protons, alphas
 C* Identify reaction and check if it matches the required given by JT6
       CALL EMTCHR(REC(23:30),MT,IZI)
 C...
-C...   print *,'     Assigned MT,JT,MTC',MT,JT6,MTC
+c...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
 C...
       IF(MT.EQ. 0 .OR. MT.NE.JT6) GO TO 110
+C...
+c...      print *,'     Found MT,JT,MTC',MT,JT6,MTC
+C...
 C* Assign KZAK to outgoing particle ZA for unique react. identification
       PTST=REC(15:22)
       KZAK=-1
@@ -2147,7 +2154,7 @@ C* New particle for this reaction identified
       NK=NK+1
       IF(NK.GT.MXP) STOP 'EMPEND ERROR - MXP limit exceeded'
 C...
-C...       print *,'    New NK',NK,' particle ',PTST,KZAK
+c...       print *,'    New NK',NK,' particle ',PTST,KZAK
 C...
       POUT(NK)=PTST
       IZAK(NK)=KZAK
@@ -2199,7 +2206,7 @@ C* Find the cross section index
       IF(MTH(I).EQ.MTC) THEN
         ETH=MAX(-QQI(I)*(AWR+AWI)/AWR, ELO )
 c...
-c...        print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo
+c...        print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
 c...
         MT =MTC
         MTX=MT
@@ -2242,7 +2249,7 @@ C* If no matching index is found the work array is corrupted (???!!!)
       IF(NE6.GT.0) GO TO 430
 C* Define the general File-4 data (HEAD and TAB1 rec.) on first point
 c...
-c...       print *,'je3,ne6,xs3',je3,ne6,xs3
+C...       print *,'je3,ne6,xs3',je3,ne6,xs3
 c...
       ZAP=1.
       AWP=1.
@@ -2254,6 +2261,7 @@ c...
       Y1 =YL0
       E2 =EE
       Y2 =YL0
+      NYL=1
       LEP=2
 C     LEP=1
       LANG=1
@@ -2297,6 +2305,9 @@ C* Check if particle is to be processed
       IF(PTST.NE.POUT(IK)) GO TO 210
       IF(PTST.EQ.'recoils ') THEN
         READ (REC(35:58),808) KZAK
+c...
+c...        print *,rec(15:41),pout(ik),izak(ik)
+c...
         IF(KZAK.NE.IZAK(IK)) GO TO 210
       END IF
 C* Identify the reaction and assign the MT number
@@ -2329,16 +2340,18 @@ c...
 c...      print *,'mt,ne6,kzak,yl0',mt,ne6,kzak,yl0
 c...
       IF(YL0.GT.0) THEN
+        NYL=1
         NP=2
         YLD( 1)=YL0
         YLD(NP)=YL0
       ELSE
-        NP=0
+        NYL=0
+        NP =0
       END IF
 C*
-
+C...
 c...      print *,'particle ZAP,AWP',Kzak,awp
-
+c...
       IZAP=KZAK
       ZAP=KZAK
       LIP=0
@@ -2363,8 +2376,8 @@ c...
       LB1=LPK
   620 CONTINUE
 c
-C      print *,'   ee,e1,e2',ee,e1,e2
-C      print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
+c...      print *,'   ee,e1,e2',ee,e1,e2
+c...      print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
 c
 C*
 C* Process correlated energy/angle distribution for this energy
@@ -2429,7 +2442,7 @@ C* Pack the size indices into the array
       RWO(L6 + 3)=NEP
 C* Insert the incident particle threshold energy if necessary
 C...
-C...      print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
+c...      print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
 C...
       INSE=0
       IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
@@ -2449,9 +2462,9 @@ C* and the available energy at threshold
         IF(IZAP.EQ.0 .AND.
      &    (MT.EQ.91 .OR. MT.EQ.649 .OR. MT.EQ. 849)) THEN
 C*          Duplicate existing points for continuum reactions
-
-C...          print *,'duplicating energy',rwo(l6),' to',eth
-
+c...
+c...          print *,'duplicating energy',rwo(l6),' to',eth
+c...
           NW =4+NEP*(LHI+2)
           LB1=L6+NW+NW
           IF(LB1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
@@ -2466,6 +2479,9 @@ C*          Insert the threshold distribution (delta function)
           L6 =L6+NW
         ELSE
 C*          Shift the existing points forward by 8 words
+c...
+c...          print *,'inserting Eth before energy',rwo(l6),' Eth',eth
+c...
           NW =4+NEP*(LHI+2)
           LB1=L6+NW+8
           IF(LB1.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
@@ -2483,10 +2499,10 @@ C*          Insert the threshold distribution (delta function)
           RWO(L6+1)=0
           RWO(L6+2)=4
           RWO(L6+3)=2
-          RWO(L6+4)=0.
+          RWO(L6+4)=0
           RWO(L6+5)=PE
           RWO(L6+6)=DE
-          RWO(L6+7)=0.
+          RWO(L6+7)=0
           L6 =L6+8
         END IF
 C*        Save the energy and the yield
@@ -2497,9 +2513,9 @@ C*        Save the energy and the yield
       END IF
 C* Insert the pseudo-threshold energy if necessary
       IF(ETEF.GT.0) THEN
-
-C...          print *,'pseudo-threshold energy',rwo(l6),' to',eth
-
+c...
+c...          print *,'pseudo-threshold energy',rwo(l6),' to',eth
+c...
         INSE=1
         EINS=ETEF
         IF(ZAP.EQ.0) THEN
@@ -2513,9 +2529,10 @@ C...          print *,'pseudo-threshold energy',rwo(l6),' to',eth
 C*
 C* Distributions for one incident energy processed - Normalize 
       NE6=NE6+1
-
-c...        print *,'      ne6',ne6,ee
-
+c...
+c...          print *,'      Processed energy ne6',ne6,ee,eth
+c...          print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
+c...
       IF(MT6.LT.0) GO TO 210
 C* Particle multiplicity for MT5 or gamma from integral/x.s. ratio
       IF(JT6.EQ.5 .OR. IZAP.EQ.0) THEN
@@ -2547,22 +2564,11 @@ c...
 C*
 C-F File read - Add general reaction data into the packed array
   700 IF(NK.LE.0) RETURN
-
+c...
 c...        PRINT *,'REAMF6 IK,LXA',IK,LXA
-
-      RWO(LXA   )=ZAP
-      RWO(LXA+ 1)=AWP
-      RWO(LXA+ 2)=LIP
-      RWO(LXA+ 3)=LAW
-      RWO(LXA+ 4)=NR
-      RWO(LXA+ 5)=NP
-      LAE=LXA+6
-      LAG=LAE+NP
-      LA1=LAG+NP
-
-c...        print *,'np,ne6',np,ne6
-
-      IF(NP.EQ.0) THEN
+c...
+      IF(NE6.LE.0) THEN
+        IZAP=IZAK(IK)
         IF(IZAP.EQ.0) THEN
           WRITE(LTT,995) ' EMPEND ERROR - No gamma yields for MT  ',JT6
           WRITE(LER,995) ' EMPEND ERROR - No gamma yields for MT  ',JT6
@@ -2575,7 +2581,20 @@ c...        print *,'np,ne6',np,ne6
           NSK=NSK+1
           GO TO 704
         END IF
-      ELSE IF(NP.EQ.2) THEN
+      END IF
+      RWO(LXA   )=ZAP
+      RWO(LXA+ 1)=AWP
+      RWO(LXA+ 2)=LIP
+      RWO(LXA+ 3)=LAW
+      RWO(LXA+ 4)=NR
+      RWO(LXA+ 5)=NP
+      LAE=LXA+6
+      LAG=LAE+NP
+      LA1=LAG+NP
+c...
+c...        print *,'np,ne6',np,ne6
+c...
+      IF(NYL.EQ.1) THEN
         RWO(LAE  )=E1
         RWO(LAE+1)=E2
         RWO(LAG  )=YLD( 1)
@@ -2598,14 +2617,19 @@ C* Compact the array (No. of pts. for yields .le. NE3+1)
         PRINT *,'NP,NE3,LXA,LP1,LPK',NP,NE3,LXA,LP1,LPK
         STOP 'REAMF6 ERROR - Work array corrupted'
       END IF
-
-c...       PRINT *,'      REAMF6 IK,LXA,LP1,LPK,LL',IK,LXA,LP1,LPK,LL
-
+c...
+c...      PRINT *,'      REAMF6 pck IK,LXA,LP1,LPK,LL',IK,LXA,LP1,LPK,LL
+c...
       NW=LL-LPK
       DO I=1,NW
         RWO(LP1-1+I)=RWO(LPK-1+I)
       END DO
       LBL=LP1+NW
+c...
+c...          print '(1p,10e12.3)',(rwo(lxa-1+j),j=1,120)
+c...          print '(1p,10e12.3)',(rwo(j),j=1,120)
+c...          print *,'ee,eth',ee,eth
+c...
 C* Reaction data read - check for next outgoing particle
   704 IF(IK.LT.NK) THEN
         REWIND LIN
@@ -2638,7 +2662,7 @@ C*
      1      ,1P,E10.3,' xs',E9.2,' Intg.=',E9.2)
   921 FORMAT(' Processing outgoing ',A8,' ZAP',I6,' for MT',I4)
   994 FORMAT(BN,F10.0)
-  995 FORMAT(A40,I4)
+  995 FORMAT(A40,I6)
       END
       SUBROUTINE REMF12(LIN,LTT,LER,IZA,NLV,ENL,NBR,LBR,BRR,MXLI,MXLJ)
 C-Title  : REMF12 Subroutine
@@ -3349,44 +3373,46 @@ C* Write file MF6 (energy/angle distributions)
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,LCT,NK, 0)
       LL =1
 C* Loop over outgoing particles
-      DO 60 IK=1,NK
-      ZAP=RWO(LL  )
-      AWP=RWO(LL+1)
-      LIP=RWO(LL+2)+0.1
-      LAW=RWO(LL+3)+0.1
-      NR =RWO(LL+4)+0.1
-      NP =RWO(LL+5)+0.1
+      DO IK=1,NK
+        ZAP=RWO(LL  )
+        AWP=RWO(LL+1)
+        LIP=RWO(LL+2)+0.1
+        LAW=RWO(LL+3)+0.1
+        NR =RWO(LL+4)+0.1
+        NP =RWO(LL+5)+0.1
 c...
 c...      print *,'mf,mt,np,zap,awp',mf,mt,np,zap,awp
 c...
-      NBT(1)=NP
-      INT(1)=2
-      LAE=LL+6
-      LAG=LAE+NP
-      LA1=LAG+NP
-      CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
-     1           ,NR,NP,NBT,INT,RWO(LAE),RWO(LAG))
-      LANG  =RWO(LA1   )+0.1
-      LEP   =RWO(LA1+ 1)+0.1
-      NR    =RWO(LA1+ 2)+0.1
-      NE    =RWO(LA1+ 3)+0.1
-      NBT(1)=RWO(LA1+ 4)+0.1
-      INT(1)=RWO(LA1+ 5)+0.1
-      CALL WRTAB2(LOU,MAT,MF,MT,NS,0.,0.,LANG,LEP
-     1           ,NR,NE,NBT,INT)
-      LL=LL+12+2*NP
+        NBT(1)=NP
+        INT(1)=2
+        LAE=LL+6
+        LAG=LAE+NP
+        LA1=LAG+NP
+        CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
+     &             ,NR,NP,NBT,INT,RWO(LAE),RWO(LAG))
+        LANG  =RWO(LA1   )+0.1
+        LEP   =RWO(LA1+ 1)+0.1
+        NR    =RWO(LA1+ 2)+0.1
+        NE    =RWO(LA1+ 3)+0.1
+        NBT(1)=RWO(LA1+ 4)+0.1
+        INT(1)=RWO(LA1+ 5)+0.1
+        CALL WRTAB2(LOU,MAT,MF,MT,NS,0.,0.,LANG,LEP
+     &             ,NR,NE,NBT,INT)
+        LL=LL+12+2*NP
 C* Loop over the incident particle energies
-      DO 40 IE=1,NE
-      ND  =0
-      EOU =RWO(LL  )
-      NA  =RWO(LL+1)+0.1
-      NW  =RWO(LL+2)+0.1
-      NEP =RWO(LL+3)+0.1
-      LL  =LL+4
-      CALL WRLIST(LOU,MAT,MF,MT,NS,0.,EOU,ND,NA,NW,NEP,RWO(LL))
-      LL  =LL+NW
-   40 CONTINUE
-   60 CONTINUE
+        IF(NE.GT.0) THEN
+          DO IE=1,NE
+            ND  =0
+            EOU =RWO(LL  )
+            NA  =RWO(LL+1)+0.1
+            NW  =RWO(LL+2)+0.1
+            NEP =RWO(LL+3)+0.1
+            LL  =LL+4
+            CALL WRLIST(LOU,MAT,MF,MT,NS,0.,EOU,ND,NA,NW,NEP,RWO(LL))
+            LL  =LL+NW
+          END DO
+        END IF
+      END DO
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       NS=0
@@ -3557,10 +3583,10 @@ C* First line of the TAB2 record
       WRITE(REC(3),42) L1
       WRITE(REC(4),42) L2
       WRITE(REC(5),42) NR
-
       WRITE(REC(6),42) NZ
       NS=NS+1
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(NZ.LE.0) RETURN
 C* Write interpolation data
       N =0
    20 I =0
