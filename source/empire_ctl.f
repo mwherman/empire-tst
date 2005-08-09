@@ -108,7 +108,7 @@ C--- projectile.
 C--- With Zp, Zt and At, the Coulomb barrier and the lowest energy used in
 C--- the fit energy mesh can be estimated. For protons, the lowest energy is
 C--- taken to about half the Coulomb barrier, for neutrons 1 keV.
-      eclmn=int(0.5*disc*zzp*zzt/aat**(1./3.)+0.5)/disc
+      eclmn=int(0.2*disc*zzp*zzt/aat**(1./3.)+0.5)/disc
       emin=max(int(disc*emin+0.5),1)/disc
       egrid(1)=min(emin,max(0.001,eclmn))
 
@@ -116,16 +116,31 @@ C--- taken to about half the Coulomb barrier, for neutrons 1 keV.
       write(18,'(a35)') cmndt
       write(18,'(a35)') cmndp
 
-C--- Prepare (or not) for search for neutron s-wave scattreing length. 
-      if(int(aap+0.1).ne.1 .or. int(zzp+0.1).ne.0) aat=0.
-      izz=zzt+0.1
-      iaa=aat+0.1
-
       do i=1,4
         read(5,'(a35)') cmnd
-        write(18,'(a35)') cmnd
         write(72,'(a35)') cmnd   
        end do
+
+C--- Prepare (or not) for search for neutron s-wave scattering length
+C--- as well as prepare neutron or proton fit input or jump out. 
+      if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.0) then
+        write(18,'(i3)') 1
+        write(18,'(i3)') 0
+       else if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.1) then
+        write(18,'(i3)') 0
+        write(18,'(i3)') 1
+        aat=0.
+       else
+        close(5)
+        close(18,status='delete')
+        close(72,status='delete')
+        return
+       endif
+      write(18,'(i3)') 0
+      write(18,'(i3,2f3.0)') 0, 0., 0.
+
+      izz=zzt+0.1
+      iaa=aat+0.1
 
  10   read(5,'(a35)',end=100) cmnd
 
