@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-05 19:03:10 $
-Ccc   * $Id: input.f,v 1.171 2005-08-05 19:03:10 herman Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2005-08-09 11:28:51 $
+Ccc   * $Id: input.f,v 1.172 2005-08-09 11:28:51 Carlson Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -4301,10 +4301,10 @@ C-----
 C-----
          IF (name.EQ.'FITOMP') THEN
             FITomp = val
-            IF (FITomp.GT.0.0D0) WRITE (6,
+            IF (FITomp.GT.0) WRITE (6,
      &'('' OM parameter adjustment selected,'',
      & '' (will reset several options'')')
-            IF (FITomp.LT.0.0D0) WRITE (6,
+            IF (FITomp.LT.0) WRITE (6,
      &'('' Automatic OM parameter adjustment selected,'',
      & '' (will reset several options'')')
             GOTO 100
