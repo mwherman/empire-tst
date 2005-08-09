@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-08-02 17:55:51 $
-Ccc   * $Id: MSD-tristan.f,v 1.47 2005-08-02 17:55:51 herman Exp $
+Ccc   * $Date: 2005-08-09 13:11:51 $
+Ccc   * $Id: MSD-tristan.f,v 1.48 2005-08-09 13:11:51 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -43,7 +43,8 @@ C
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAPin(2), HOMin, Q0, QGRand, QMAx,
      &                 QMIna, QMInb, QS1, QS2, QSTep, RAC,
-     &                 RHOb(301,11,2), RI, ROPt, RR, THEta1, THEta2, U0,
+     &                 RHOb(3*(NDEx+25),11,2), RI, ROPt, RR, THEta1, 
+     &                 THEta2, U0,
      &                 U9, XSinl, W0, WIDex, WIDexin, WR1(12*NDANGecis),
      &                 WR2(144*NDANGecis)
       INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
@@ -353,21 +354,23 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, ANGle(NDANGecis), AU, AW, BETa(301,11),
+      DOUBLE PRECISION ALSin, ANGle(NDANGecis), AU, AW, 
+     &                 BETa(3*(NDEx+25),11),
      &                 BST1(2), CLRn(11), CNOrin(22), DTHeta, BST(3),
      &                 EBCs(500,2), ECEntr(5), EFItin(22), EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin, FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega,
      &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2,
-     &                 QSTep, RAC, RHO(301,11), RHOb(301,11,2), RI,
+     &                 QSTep, RAC, RHO(3*(NDEx+25),11), 
+     &                 RHOb(3*(NDEx+25),11,2), RI,
      &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
      &                 U0, U9, UAMp(500,2), VAMp(500,2), VLS(2), W0,
      &                 WIDex, WIDexin
       INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID,
      &        IE, IG, JSP(500,2), L9(10), LSP(500,2), NHOle(2),
-     &        NLEv(301,11), NQ1x, NQ2x, NRMax(10), NSP(500,2), NTOtal(2)
-      COMMON  RHO, SRNew, SREw, SREwl, GSDm, BETa, NLEv
+     &        NQ1x, NQ2x, NRMax(10), NSP(500,2), NTOtal(2)
+      COMMON  RHO, SRNew, SREw, SREwl, GSDm, BETa
       COMMON /CCLQ  / IC1max, IC2max, IC1x, IC2x, IC12x, ICMax, NQ1x,
      &                NQ2x
       COMMON /CRAC  / FAClog, RAC, U9, IA, IB, IC, ID, IE, IG, L9
@@ -420,11 +423,11 @@ C
      &     0.8931D0/
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
       DATA eqqx/80.0D0/
-C     IF(NEBINX.GT.301)THEN
-C     WRITE(6,*)' ------>> INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
-C     & ETC. TO: ',NEBINX
-C     STOP
-C     ENDIF
+      IF(NEBINX.GT.3*(NDEx+25))THEN
+      WRITE(6,*)' FATAL:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
+     & ETC. TO: ',NEBINX
+      STOP
+      ENDIF
 C     WRITE(17,*)NEBINX,ICMAX
       fpi = 4.*PI
       fourpi = 1.0/fpi
@@ -2047,17 +2050,17 @@ C
      &                 FFAc2d(2), FFAc3d(2), FFTot(10), FNOrm(6),
      &                 FNQ(6,6), FQ(6), GAP(2), HOMega, Q0, QGRand,
      &                 QMAx, QMIna, QMInb, QS1, QS2, QSTep, RAC,
-     &                 RHO(301,11), RHOb(301,11,2), RMS(3), ROPt,
+     &                 RHO(3*(NDEx+25),11), RHOb(3*(NDEx+25),11,2), 
+     &                 RMS(3), ROPt,
      &                 SREw(21), SREwl(21), SRNew(21), THEta1, THEta2,
      &                 U9, VLS(2), WIDex
       INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr, IC2x,
      &        ICC, ICMax, ID, IE, IG, JSP(500,2), KDEnvi, KEX3,
      &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), LSP(500,2),
-     &        NAVerg, NCHanl, NEBinx, NFAc12, NHOle(2), NLEv(301,11),
+     &        NAVerg, NCHanl, NEBinx, NFAc12, NHOle(2), 
      &        NN, NQ1x, NQ2x, NRMax(10), NSP(500,2), NTHeta, NTOtal(2),
      &        NZ
-      COMMON  RHO, SRNew, SREw, SREwl, AN, FNQ, FQ, FNOrm, ALPha, DUMmy,
-     &        NLEv
+      COMMON  RHO, SRNew, SREw, SREwl, AN, FNQ, FQ, FNOrm, ALPha, DUMmy
       COMMON /CC    / THEta1, THEta2, NCHanl, NN, NZ, IC1mxr, IC2mxr,
      &                KRType, KRTmax, KDEnvi, NTHeta, NEBinx, NAVerg,
      &                NFAc12, KEX3
@@ -2080,7 +2083,7 @@ C
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb,
      &        nlmax
 C
-C-----in RHO,NLEV,RHOB etc the increased argument NEB corresponds to
+C-----in RHO,RHOB etc the increased argument NEB corresponds to
 C-----increased excitation energy.
 C
       iout4 = KTRl(4)
@@ -2397,8 +2400,8 @@ C
      &                 EOUtmi, EOUtmx, ESTep, ETMax, ETMin, EXTcom(10),
      &                 FAC1d(2), FAC2d(2), FAC3d(2), FACb, FFTot(10),
      &                 Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, QSTep,
-     &                 RHOb(301,11,2), ROPt, THEta1, THEta2, WIDex,
-     &                 Xsinl
+     &                 RHOb(3*(NDEx+25),11,2), ROPt, THEta1, THEta2, 
+     &                 WIDex, Xsinl
       INTEGER IC12x, IC1mx, IC1mxr, IC2mx, IC2mxr, ICMax, KDEnvi, KEX3,
      &        KEXcom(10), KRTmax, KRType, KTRl(10), LC1mx, LC2mx,
      &        NAVerg, NCHanl, NEBinx, NFAc12, NN, NQ1x, NQ2x, NRMax(10),
@@ -2427,8 +2430,9 @@ C
      &                 f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6),
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2,
-     &                 qq(5), rb12, s1, s2, s3, sg(301), sigm, sn, sum,
-     &                 sumpx(301,2), x, x2, xl, xq, yl, zz(15), f1(15)
+     &                 qq(5), rb12, s1, s2, s3, sg(3*(NDEx+25)), sigm, 
+     &                 sn, sum, sumpx(3*(NDEx+25),2), x, x2, xl, xq, yl,
+     &                 zz(15), f1(15)
       REAL FLOAT
       REAL hhh
       INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
@@ -2444,8 +2448,8 @@ C
       IF (ZEJc(Nejc).EQ.1.0D0) nej = 2
       IF (ZEJc(Nejc).GT.1.0D0) THEN
          WRITE (6,*)
-     &' THIS IMPLEMENTATION OF TRISTAN IS NOT ABLE TO TREAT ANYTHING ELS
-     &E AS NEUTRON OR PROTON IN THE INCOMMING CHANNEL'
+     &' THIS IMPLEMENTATION OF TRISTAN IS ABLE TO TREAT ONLY NEUTRON OR 
+     &PROTON IN THE INCIDENT CHANNEL'
          STOP
       ENDIF
       nnur = NREs(nej)
