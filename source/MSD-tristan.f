@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-08-09 13:11:51 $
-Ccc   * $Id: MSD-tristan.f,v 1.48 2005-08-09 13:11:51 herman Exp $
+Ccc   * $Date: 2005-08-10 18:08:31 $
+Ccc   * $Id: MSD-tristan.f,v 1.49 2005-08-10 18:08:31 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -423,7 +423,7 @@ C
      &     0.8931D0/
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
       DATA eqqx/80.0D0/
-      IF(NEBINX.GT.3*(NDEx+25))THEN
+      IF(Nebins.GT.3*(NDEx+25))THEN
       WRITE(6,*)' FATAL:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
      & ETC. TO: ',NEBINX
       STOP
