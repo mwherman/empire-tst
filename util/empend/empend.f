@@ -1127,6 +1127,9 @@ C* Outgoing alphas
         IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
      &     MT.EQ.108) YI=2
         IF(MT.EQ.109) YI=3
+      ELSE IF(KZAP.EQ.0) THEN
+C* Outgoing photons
+        YI=0
       ELSE
 C* Recoils
         YI=1
