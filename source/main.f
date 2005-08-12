@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-05 19:05:01 $
-Ccc   * $Id: main.f,v 1.133 2005-08-05 19:05:01 herman Exp $
+Ccc   * $Date: 2005-08-12 21:36:44 $
+Ccc   * $Id: main.f,v 1.134 2005-08-12 21:36:44 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -1948,7 +1948,7 @@ C-----is not yet done! Should be performed in ACCUM and EXCLUSIVEC/L
 C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
-C------double-differential spectra
+C------calculate double-differential spectra
        DO nejc = 0, NDEJC
 c         sumtst=0
           DO iesp = 1, NDECSE
@@ -2061,7 +2061,8 @@ C--------neutrons
      &            (ANGles(nang),nang=1,NDANG)
          DO ie = 1, nspec - 1
            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (max(0.d0,CSEa(ie,nang,1,0)),nang = 1,NDANG)
+c    &            (max(0.d0,CSEa(ie,nang,1,0)),nang = 1,NDANG)
+     &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
          ENDDO
 C--------exact endpoint
          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
@@ -2080,7 +2081,8 @@ C--------protons
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (max(0.d0,CSEa(ie,nang,2,0)),nang = 1,NDANG)
+C    &            (max(0.d0,CSEa(ie,nang,2,0)),nang = 1,NDANG)
+     &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
@@ -2101,6 +2103,7 @@ C--------alphas
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (max(0.d0,CSEa(ie,nang,3,0)),nang = 1,NDANG)
+c    &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
@@ -2362,8 +2365,8 @@ C--------decay to discrete levels (stored with icse=0)
             IF (erecod.LT.0) GOTO 100
             DO ire = 1, NDEREC      !over recoil spectrum
                DO na = 1, NDANG !over angles
-                  erecoil = (ire - 1)*DERec + erecod
-                  erecoil = erecoil + 2.0*SQRT((ire - 1)*DERec*erecod)
+                  erecoil = (ire - 1)*DERec + erecod + 
+     &                       2.0*SQRT((ire - 1)*DERec*erecod)
      &                      *CANgler(na)
                   irec = erecoil/DERec + 1.001
                   weight = (erecoil - (irec - 1)*DERec)/DERec
@@ -2372,6 +2375,17 @@ C--------decay to discrete levels (stored with icse=0)
      &                                  + RECcse(ire,Ke,Nnuc)
      &                                  *REClev(il,nejc)*(1.0 - weight)
      &                                  *SANgler(na)*coef
+c------------------------
+c                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0 
+c    &               .AND.na.EQ.10) THEN
+c                 WRITE(6,*) '       Parent bin', Ke
+c                 WRITE(6,*) 'Recoil bin', ire
+c                 WRITE(6,*) 'Erecoil ', erecoil, erecod, nnuc
+c                 WRITE(6,*) 'RECcse, RECcse par, REClev',
+c    &            RECcse(irec,0,nnur),RECcse(ire,Ke,Nnuc), 
+c    &            REClev(il,nejc) 
+c                 ENDIF
+c------------------------
                   IF (irec + 1.GT.NDEREC) GOTO 60
                   RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
      &               + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
