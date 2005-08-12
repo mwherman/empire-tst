@@ -11,10 +11,13 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
-#FFLAGS =  -O
+#FFLAGS =  -C -ftrapuv -g -debug all
+#FFLAGS =  -O3
+#----flags for automatic parallelization
+#FFLAGS =  -parallel
 
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
@@ -23,7 +26,7 @@ FC     =  ifort
 #FC   = f77
 
 #----Lahey/Fujitsu f95 FORTRAN compiler
-#FC    = lf95
+FC    = lf95
 #----flag for Lahey/Fujitsu to optimize
 #FFLAGS = --o3
 #----flag for Lahey/Fujitsu to check boundaries and more
