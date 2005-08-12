@@ -51,6 +51,7 @@ C*
      &    /  1,  2,  3,  4,  5,  6 /
 C*
       SMALL=1.E-4
+      TINY =2.E-6
       NMT=0
       ELE=1.E-5
       ERL=ELE
@@ -392,10 +393,8 @@ C-F  Check threshold in files MF>=4
       DO I=1,NMT
         IF(MTLS(I).EQ.MT) THEN
           EAD=ELOW(I)
-
-          WRITE(LTT,*) ' Change MF/MT',MF,MT,' lower energy to',EAD
-          WRITE(LLG,*) ' Change MF/MT',MF,MT,' lower energy to',EAD
-
+          WRITE(LTT,*) ' Check MF/MT',MF,MT
+          WRITE(LLG,*) ' Check MF/MT',MF,MT
 C* Copy the header record
           READ (CH66,891) C1,C2,LVT,LTTE,N1,N2
           CALL WRCONT(LOU,MAT,MF,MT,NS,C1,C2,LVT,LTTE,N1,N2)
@@ -417,12 +416,16 @@ C* Duplicate the first distribution to EAD and copy the rest
           ELSE IF(LTTE.EQ.1) THEN
             CALL RDLIST(LEM,A1,EE,LT,L2,N1,NL,RWO,MXRW,IER)
             IF(ABS(EE-EAD).LT.SMALL*EE) THEN
+              IF(ABS(EE-EAD).GT.TINY*EE) THEN
+                WRITE(LTT,*) '      Adjust threshold from',EE,' to',EAD
+                WRITE(LLG,*) '      Adjust threshold from',EE,' to',EAD
+              END IF
               EE=EAD
-              WRITE(LTT,*) '      Adjust threshold'
-              WRITE(LLG,*) '      Adjust threshold'
               CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,L1,L2
      1                   ,NR,NE,NBT,INR)
             ELSE
+              WRITE(LTT,*) '      Add lower energy',EAD
+              WRITE(LLG,*) '      Add lower energy',EAD
               NE1=NE+1
               DO J=1,NR
                 NBT(J)=NBT(J)+1
@@ -444,9 +447,11 @@ C* Duplicate the first distribution to EAD and copy the rest
             CALL RDTAB1(LEM,A1,EE,LT,M2,NRR,NP
      &                 ,NBT(K3),INR(K3),RWO(K1),RWO(K2),NK,IER)
             IF(ABS(EE-EAD).LT.SMALL*EE) THEN
+              IF(ABS(EE-EAD).GT.TINY*EE) THEN
+                WRITE(LTT,*) '      Adjust threshold'
+                WRITE(LLG,*) '      Adjust threshold'
+              END IF
               EE=EAD
-              WRITE(LTT,*) '      Adjust threshold'
-              WRITE(LLG,*) '      Adjust threshold'
               CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,L1,L2
      &                   ,NR,NE,NBT,INR)
             ELSE
@@ -531,10 +536,12 @@ C* Loop over all particles
      &                 ,NBT,INR,RWO(K11),RWO(K21),LK1,IER)
             EE=RWO(K11)
             IF(ABS(EE-EAD).LT.SMALL*EE) THEN
+              IF(ABS(EE-EAD).GT.TINY*EE) THEN
+                WRITE(LTT,*) '      Adjust threshold TAB1'
+                WRITE(LLG,*) '      Adjust threshold TAB1'
+              END IF
               EE=EAD
               RWO(K11)=EE
-              WRITE(LTT,*) '      Adjust threshold TAB1'
-              WRITE(LLG,*) '      Adjust threshold TAB1'
             ELSE
 C* Duplicate the first multiplicity to EAD and copy the rest
               NP=NP+1
@@ -559,9 +566,11 @@ C* Continuum energy-angle distributions (LAW=1)
 C* Duplicate the first distribution to EAD and copy the rest
               CALL RDLIST(LEM,A1,EE,LD,NA,NW,NEP,RWO,MXRW,IER)
               IF(ABS(EE-EAD).LT.SMALL*EE) THEN
+                IF(ABS(EE-EAD).GT.TINY*EE) THEN
+                  WRITE(LTT,*) '      Adjust threshold TAB2'
+                  WRITE(LLG,*) '      Adjust threshold TAB2'
+                END IF
                 EE=EAD
-                WRITE(LTT,*) '      Adjust threshold TAB2'
-                WRITE(LLG,*) '      Adjust threshold TAB2'
                 CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,LANG,LEP
      &                     ,NR, NE,NBT,INR)
               ELSE
@@ -586,9 +595,11 @@ C* Discrete two-body scattering (LAW=2)
 C* Duplicate the first distribution to EAD and copy the rest
               CALL RDLIST(LEM,A1,EE,LANG,L2,NW,NL,RWO,MXRW,IER)
               IF(ABS(EE-EAD).LT.SMALL*EE) THEN
+                IF(ABS(EE-EAD).GT.TINY*EE) THEN
+                  WRITE(LTT,*) '      Adjust threshold TAB2'
+                  WRITE(LLG,*) '      Adjust threshold TAB2'
                 EE=EAD
-                WRITE(LTT,*) '      Adjust threshold TAB2'
-                WRITE(LLG,*) '      Adjust threshold TAB2'
+                END IF
                 CALL WRTAB2(LOU,MAT,MF,MT,NS,C1,C2,L1,L2
      &                     ,NR, NE,NBT,INR)
               ELSE
