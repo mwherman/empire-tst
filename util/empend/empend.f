@@ -31,6 +31,7 @@ C-V  05/08 - Improved logic to reduce convergence problems of fitting
 C-V          angular distributions.
 C-V        - Add unassigned reactions to MT5 with yields for neutrons,
 C-V          protons and alpha particles.
+C-V        - Fix yields and pseudo-threshold distributions in MF6/MT5.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -1132,13 +1133,22 @@ C* Outgoing photons
         YI=0
       ELSE
 C* Recoils
-        YI=1
+        IF(MT.EQ.5) THEN
+          YI=0
+        ELSE
+          YI=1
+        END IF
       END IF
       RETURN
       END
       SUBROUTINE CHKFIS(NXS,NEN,MTH,XSR,MXE,MXT,LFI)
-C-T
-C-P
+C-Title  : Subroutine CHKFIS
+C-Purpose: Check for non-zero fission cross section
+C-Description:
+C-D  Scan cross sections in array XSR(i,j) given at energies Ei
+C-D  for reaction MTH(j) equal 18. If non-zero cross sections are
+C-D  encountered, set flag LFI=1, otherwise, LFI=0.
+C-
       DIMENSION  MTH(MXT),XSR(MXE,MXT)
       LFI=0
       DO I=1,NXS
@@ -2093,6 +2103,7 @@ C* NE6 counts the Number of energy points
       IK =0
       NK =0
       NSK=0
+      NYL=1
 c...      NP =0
 c...      IT =0
       PTST='        '
@@ -2205,18 +2216,25 @@ c...      NE6N=0
       YL0= 1
       ETEF=0
 C* Find the cross section index
-      DO 204 I=1,NXS
-      IF(MTH(I).EQ.MTC) THEN
-        ETH=MAX(-QQI(I)*(AWR+AWI)/AWR, ELO )
+      DO I=1,NXS
+        IF(MTH(I).EQ.MTC) THEN
+          ETH=MAX(-QQI(I)*(AWR+AWI)/AWR, ELO )
 c...
 c...        print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
 c...
-        MT =MTC
-        MTX=MT
-        IT =I
-        GO TO 210
-      END IF
-  204 CONTINUE
+          MT =MTC
+          MTX=MT
+          IT =I
+C* Find pseudo-threshold energy (if applicable)
+          DO J=1,NE3
+            EN3=EIN(J)
+            XS3=XSC(J,IT)
+            IF(XS3.GT.0) EXIT
+            IF(EN3.GT.ETH) ETEF=EN3
+          END DO
+          GO TO 210
+        END IF
+      END DO
 C* Reaction not on the list of MF3 reactions - skip the data
       WRITE(LTT,912) JT6
       NK=0
@@ -2372,11 +2390,11 @@ C* Unit base linear interpolation between incident neutron energies
       INA=22
 C* Reserve space for yields in the Real array
       LXA=LBL
-c...
-c...       PRINT *,'      REAMF6 IK,LXA',IK,LXA
-c...
       LPK=LXA+12+2*(NE3+1)
       LB1=LPK
+c...
+c...       PRINT *,'      REAMF6 IK,LXA,LPK,LB1',IK,LXA,LPK,LB1
+c...
   620 CONTINUE
 c
 c...      print *,'   ee,e1,e2',ee,e1,e2
@@ -2422,7 +2440,7 @@ C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
         WRITE(LTT,914) JT6,IZAP,EE,XS3,SPC
         WRITE(LER,914) JT6,IZAP,EE,XS3,SPC
-        IF(NE6.EQ.0) ETEF=EE
+        IF(NE6.EQ.0) ETEF=MAX(ETEF,EE)
         GO TO 210
       END IF
 C* Normalise the distribution
@@ -2444,9 +2462,9 @@ C* Pack the size indices into the array
       RWO(L6 + 2)=NEP*(LHI+2)
       RWO(L6 + 3)=NEP
 C* Insert the incident particle threshold energy if necessary
-C...
+c...
 c...      print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
-C...
+c...
       INSE=0
       IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
         INSE=1
@@ -2595,13 +2613,13 @@ c...
       LAG=LAE+NP
       LA1=LAG+NP
 c...
-c...        print *,'np,ne6',np,ne6
+c...        print *,'np,ne6,nyl',np,ne6,nyl
 c...
       IF(NYL.EQ.1) THEN
         RWO(LAE  )=E1
         RWO(LAE+1)=E2
-        RWO(LAG  )=YLD( 1)
-        RWO(LAG+1)=YLD(NP)
+        RWO(LAG  )=YL0
+        RWO(LAG+1)=YL0
       ELSE
         DO I=1,NP
           RWO(LAE-1+I)=EIS(I)
@@ -2623,14 +2641,14 @@ C* Compact the array (No. of pts. for yields .le. NE3+1)
 c...
 c...      PRINT *,'      REAMF6 pck IK,LXA,LP1,LPK,LL',IK,LXA,LP1,LPK,LL
 c...
-      NW=LL-LPK
+      NW=LB1-LPK
       DO I=1,NW
         RWO(LP1-1+I)=RWO(LPK-1+I)
       END DO
       LBL=LP1+NW
 c...
-c...          print '(1p,10e12.3)',(rwo(lxa-1+j),j=1,120)
-c...          print '(1p,10e12.3)',(rwo(j),j=1,120)
+c...          print '(1p,10e12.3)',(rwo(lxa-1+j),j=1,122)
+c...          print '(1p,10e12.3)',(rwo(j),j=1,122)
 c...          print *,'ee,eth',ee,eth
 c...
 C* Reaction data read - check for next outgoing particle
