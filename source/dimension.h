@@ -1,9 +1,9 @@
       PARAMETER(
-     * NDNUC= 35
-     *,NDEXCLUS = 5
+     * NDNUC= 85
+     *,NDEXCLUS = 20
      *,NDEJC=3
      *,NDAFIS=1
-     *,NDEX= 151
+     *,NDEX= 162
      *,NDLW= 40
      *,NDTL= 40
      *,NDMSCS=4
