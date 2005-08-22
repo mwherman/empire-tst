@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-12 21:36:44 $
-Ccc   * $Id: main.f,v 1.134 2005-08-12 21:36:44 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-08-22 20:08:44 $
+Ccc   * $Id: main.f,v 1.135 2005-08-22 20:08:44 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -1699,19 +1699,22 @@ C----
 C---- ENDF spectra printout (exclusive representation)
 C----
       DO nnuc = 1, NNUcd               !loop over decaying nuclei
-c         IF(INExc(nnuc).LT.0) CYCLE
          IF (ENDf(nnuc).EQ.1) THEN
             IF (CSPrd(nnuc).GT.0.0D0) THEN
                DO nejc = 0, NDEJC         !loop over ejectiles
                   IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
-                   IF(nejc.GE.1 .AND. nejc.LE.3) THEN
+                  ares = A(nnuc) - AEJc(nejc)
+                  zres = Z(nnuc) - ZEJc(nejc)
+C-----------------residual nuclei must be heavier than alpha
+                  if(ares.le.4. and. zres.le.2.) cycle
+                  IF(nejc.GE.1 .AND. nejc.LE.3) THEN
                      DO itmp = 3,21
                       IF(REAction(nnuc)(itmp:itmp).eq.opart(nejc))
      &               goto 1529
                      ENDDO
                      CYCLE
-                   ENDIF
- 1529             nspec = INT(EMAx(nnuc)/DE) + 2
+                  ENDIF
+ 1529             nspec = min(INT(EMAx(nnuc)/DE) + 2,NDECSE)
                   IF (nejc.EQ.0) THEN
                      cejectile = 'gammas   '
                      iizaejc = 0
@@ -1948,8 +1951,8 @@ C-----is not yet done! Should be performed in ACCUM and EXCLUSIVEC/L
 C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
-C------calculate double-differential spectra
-       DO nejc = 0, NDEJC
+C-----calculate double-differential spectra
+      DO nejc = 0, NDEJC
 c         sumtst=0
           DO iesp = 1, NDECSE
 C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc
@@ -1968,7 +1971,7 @@ C               IF (iesp.EQ.1) ftmp = 2.d0
              ENDDO
           ENDDO
 c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
-       ENDDO
+      ENDDO
 
       WRITE (6,*) ' '
       WRITE (6,'(''  Total fission cross section '',G12.5,'' mb'')')
@@ -2220,7 +2223,6 @@ C        SAVING RANDOM SEEDS
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
-C         STOP '.REGULAR STOP'
          RETURN 
       ENDIF
       IF(EIN.LT.epre) THEN
@@ -2245,17 +2247,17 @@ C-----
           NANgela = 91
           NDAng   = 91
         ENDIF
-       IF(NANgela.GT.NDAngecis) THEN
-         WRITE(6,*)
+        IF(NANgela.GT.NDAngecis) THEN
+          WRITE(6,*)
      &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
          STOP 'FATAL: increase NDAngecis in dimension.h'
         ENDIF
-C-----set angles for inelastic calculations
+C-------set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
         DO na = 1, NDANG
           ANGles(na) = (na - 1)*da
         ENDDO
-       ENDIF
+      ENDIF
       DO na = 1, NDANG
         CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
         SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
