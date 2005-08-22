@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-08-05 19:01:42 $
-Ccc   * $Id: auxiliary.f,v 1.25 2005-08-05 19:01:42 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-08-22 20:11:19 $
+Ccc   * $Id: auxiliary.f,v 1.26 2005-08-22 20:11:19 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -825,6 +825,7 @@ C
             RETURN
          ENDIF
       ENDDO
+      WRITE (6,*) ' Nucleus Izaf ',Izaf,' not found'
       WRITE (6,*)
      &' INSUFFICIENT MEMORY ALLOCATION TO ACOMODATE ALL REQUESTED NUCLEI
      &'

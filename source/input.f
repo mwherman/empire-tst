@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-08-09 11:28:51 $
-Ccc   * $Id: input.f,v 1.172 2005-08-09 11:28:51 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-08-22 20:13:43 $
+Ccc   * $Id: input.f,v 1.173 2005-08-22 20:13:43 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -840,6 +840,7 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
                            IF(NEXclusive.GT.NDExclus) THEN
+			     WRITE(6,*)'FATAL: NEXclusive =',NEXclusive
                              WRITE(6,*)'INSUFFICIENT DIMENSION NDExclus'
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
