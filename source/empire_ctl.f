@@ -617,7 +617,9 @@ C
       parameter(disc=1.0e4)
 
       logical fexist
-      character metat*1,metap*1,ex4stat*1,cm*1,lvl*3
+C     character metat*1,metap*1,ex4stat*1,cm*1,lvl*3
+C     Corrected RCN
+      character metat*1,metap*1,ex4st*1,cm*1,lvl*3
       dimension mf(mxind),mt(mxind)
       dimension ex(mxind),dex(mxind),six(mxind),dsix(mxind)
       dimension elvls(mxelvls)
