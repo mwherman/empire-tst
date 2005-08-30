@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-08-10 18:08:31 $
-Ccc   * $Id: MSD-tristan.f,v 1.49 2005-08-10 18:08:31 herman Exp $
+Ccc   * $Date: 2005-08-30 18:24:48 $
+Ccc   * $Id: MSD-tristan.f,v 1.50 2005-08-30 18:24:48 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -1535,8 +1535,8 @@ C--------L=INDEKS(N)
             ip = NN(np,I3)
             jp = LL(np,I3)
             kp = JJ(np,I3)
-            up = UAMp(np,I3)
-            vp = VAMp(np,I3)
+            up = UAMp(n,I3)
+            vp = VAMp(n,I3)
 C-----------LP=INDEKS(NP)
             IF (x.GT.xp) THEN
                ESP(np,I3) = x
