@@ -7,6 +7,7 @@ c      3     MSD-Orion
 c      4     ddhms
 c      5     io.h
 c      6     io.h
+c      7     empire_ctl
 c      8     MSD-Orion
 c      9     ddhms
 c     10     ddhms
@@ -22,6 +23,7 @@ c     21     input
 c     22     input
 c     23     io.h
 c     24     io.h
+c     25     empire_ctl
 c     27     ddhms,input
 c     29     io.h
 c     28     ddhms
@@ -75,28 +77,28 @@ c     96     tl
 c     97     tl
 c     99     ecis03
 c
-      OPEN(UNIT= 5,FILE='INPUT.DAT', STATUS='OLD')
-      OPEN(UNIT= 6,FILE='LIST.DAT' , STATUS='UNKNOWN')
+      OPEN (UNIT = 5,FILE='INPUT.DAT', STATUS='OLD')
+      OPEN (UNIT = 6,FILE='LIST.DAT' , STATUS='UNKNOWN')
 C-----spin distribution from file SDFILE
-      OPEN(UNIT=43,FILE='SDREAD', STATUS='OLD', ERR=768)
+      OPEN (UNIT = 43,FILE='SDREAD', STATUS='OLD', ERR=768)
       SDREAD=.TRUE.
       GOTO 869
  768  SDREAD=.FALSE.
  869  CONTINUE
 C-----fusion transmission coefficients from file FUSION
-      OPEN(UNIT=11,FILE='FUSION'   , STATUS='OLD', ERR=778)
+      OPEN (UNIT = 11,FILE='FUSION'   , STATUS='OLD', ERR=778)
       FUSREAD=.TRUE.
       GOTO 889
  778  FUSREAD=.FALSE.
  889  CONTINUE
-      OPEN(UNIT=12,FILE='OUTPUT.DAT')
-      OPEN(UNIT=13,FILE='LEVELS', STATUS='OLD', ERR=777)
+      OPEN (UNIT = 12,FILE='OUTPUT.DAT')
+      OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD', ERR=777)
       FILEVEL=.TRUE.
       GOTO 888
  777  FILEVEL=.FALSE.
-      OPEN(UNIT=14, FILE='LEVELS', STATUS='NEW')
+      OPEN (UNIT = 14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
-      OPEN(UNIT=33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
+      OPEN (UNIT = 33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
 C     Added to check if file is not empty
       READ(33,*,END=881)
       REWIND(33)
@@ -104,9 +106,9 @@ C     Added to check if file is not empty
       GOTO 891
  881  CLOSE(33,STATUS='DELETE')
  879  OMPARfCC=.FALSE.
-      OPEN(UNIT=33, FILE='OMPAR.DIR', STATUS='NEW')
+      OPEN (UNIT = 33, FILE='OMPAR.DIR', STATUS='NEW')
 891   CONTINUE
-      OPEN(UNIT=29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
+      OPEN (UNIT = 29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
 C     Added to check if file is not empty
       READ(29,*,END=776)
       REWIND(29)
@@ -114,17 +116,17 @@ C     Added to check if file is not empty
       GOTO 895
  776  CLOSE(29,STATUS='DELETE')
  780  OMPAR_RIPLF=.FALSE.
-      OPEN(UNIT=29, FILE='OMPAR.RIPL', STATUS='NEW')
+      OPEN (UNIT = 29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-      OPEN(UNIT=23,FILE='../data/nparac.dat'
+      OPEN (UNIT = 23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
-      OPEN(UNIT=24,FILE='../data/ldp.dat'
+      OPEN (UNIT = 24,FILE='../data/ldp.dat'
      *,STATUS='OLD')
-      OPEN(UNIT=26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
+      OPEN (UNIT = 26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
-C     OPEN(UNIT=30,FILE='GAMMA.DAT')
-C     OPEN(UNIT=41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
-      OPEN(UNIT=42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
+C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
+      OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
 
 
 
