@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-08-22 20:13:43 $
-Ccc   * $Id: input.f,v 1.173 2005-08-22 20:13:43 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-09-06 22:45:02 $
+Ccc   * $Id: input.f,v 1.174 2005-09-06 22:45:02 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -3318,6 +3318,15 @@ C                FNvvomp(i3,nnuc) = 1. + grand()*sigma
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb
             endif
+            if(val.lt.0.) then
+              FNvvomp(i3,nnuc) = abs(val)
+              WRITE (6,
+     &        '('' Real volume potential depth in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
+              WRITE (12,
+     &        '('' Real volume potential depth in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
+            endif
             GOTO 100
          ENDIF
 C----
@@ -3353,6 +3362,15 @@ C                FNavomp(i3,nnuc) = 1. + grand()*sigma
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb
+            endif
+            if(val.lt.0.) then
+              FNavomp(i3,nnuc) = abs(val)
+              WRITE (6,
+     &        '('' Volume potential diffuseness in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
+              WRITE (12,
+     &        '('' Volume potential diffuseness in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3392,11 +3410,11 @@ C                FNwvomp(i3,nnuc) = 1. + grand()*sigma
             if(val.lt.0.) then
               FNwvomp(i3,nnuc) = abs(val)
               WRITE (6,
-     &        '('' Imag. volume potential depth scaling factor : ''
-     &        ,f5.2)') FNwvomp(i3,nnuc)
+     &        '('' Imag. volume potential depth scaled by ''
+     &        ,f5.2)') abs(val)
               WRITE (12,
-     &        '('' Imag. volume potential depth scaling factor : ''
-     &        ,f5.2)') FNwvomp(i3,nnuc)
+     &        '('' Imag. volume potential depth scaled by ''
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3436,11 +3454,11 @@ C                FNwsomp(i3,nnuc) = 1. + grand()*sigma
             if(val.lt.0.) then
               FNwsomp(i3,nnuc) = abs(val)
               WRITE (6,
-     &        '('' Imag. surface potential depth scaling factor : ''
-     &        ,f5.2)') FNwsomp(i3,nnuc)
+     &        '('' Imag. surface potential depth scaled by ''
+     &        ,f5.2)') abs(val)
               WRITE (12,
-     &        '('' Imag. surface potential depth scaling factor : ''
-     &        ,f5.2)') FNwsomp(i3,nnuc)
+     &        '('' Imag. surface potential depth scaled by ''
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3478,6 +3496,16 @@ C                FNasomp(i3,nnuc) = 1. + grand()*sigma
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb
             endif
+            if(val.lt.0.) then
+              FNasomp(i3,nnuc) = abs(val)
+              WRITE (6,
+     &        '('' Surface potential diffuseness scaled by ''
+     &        ,f5.2)') abs(val) 
+              WRITE (12,
+     &        '('' Surface potential diffuseness scaled by ''
+     &        ,f5.2)') abs(val) 
+            endif
+            GOTO 100
             GOTO 100
          ENDIF
 C-----
@@ -6023,7 +6051,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ENDIF
       IF (beta2.EQ.0.D0) THEN
          WRITE (6,*) ' WARNING: ',
-     &    'E(2+) level is not contained in Raman 2001 database (RIPL-2)'
+     &    'E(2+) level not found in Raman 2001 database (RIPL-2)'
          IF(odd) then
             WRITE (6,*) ' WARNING: Odd nucleus, ',
      &            'FRDM deformation will be used for the gs band'
@@ -6037,7 +6065,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          WRITE (6,*) ' WARNING: ',
-     &        'E(3-) level is not contained in Kibedi database (RIPL-2)'
+     &        'E(3-) level not found in Kibedi database (RIPL-2)'
          WRITE (6,*) ' WARNING: ',
      &            'Default dynamical deformations 0.05(3-) will be used'
          beta3 = 0.05
