@@ -57,6 +57,16 @@
     setting TUNE to 1 turns off normalization (M. Herman).
 25. ENDF utility codes (CHECKR, FIZCON, STANEF, PSYCHE) updated to the 7.02
     version (M. Herman)
+26. Maximum energy for the HRTW calculations can be controlled from the 
+    optional input (R. Capote)
+26. Automatic fit of Optical Model Parameters added by B. Carlson
+27. Printing of l=2 neutron strength function added (M. Divadeenam)
+28. Response functions for the 5 lowest l transfers in MSD can be normalized 
+    with a single input line RESNOR (no l-value must be specified) (M. Herman)
+29. Effect of ATILNO changed! It renormalizes currently used level density 
+    parameter a-tilde preserving internal normalization set by the average 
+    ratio between systematics and experimental data. Effective renormalization
+    factor is ATILNO*<exp/sys> rather than ATILNO (M. Herman)
     
 
          
