@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-08-09 11:27:14 $
-Ccc   * $Id: fusion.f,v 1.52 2005-08-09 11:27:14 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-09-13 13:12:22 $
+Ccc   * $Id: fusion.f,v 1.53 2005-09-13 13:12:22 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -70,7 +70,7 @@ C
 C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       xmas_npro = EJMass(Npro)
-      el   = EINl
+      el = EINl
       ecms = EIN
       S1 = 0.5
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
@@ -128,9 +128,9 @@ C
    50    CLOSE (45,STATUS = 'DELETE')
 
          IF (FITomp.EQ.0) THEN         
-           WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
+         WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
-           WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
+         WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
      &               ' FOR INC.CHANNEL HAS BEEN DELETED'
           ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
@@ -319,7 +319,7 @@ C-----------DWBA calculation. All collective levels considered
             IF (DIRect.EQ.3) THEN
                WRITE (6,*) ' DWBA calculations for inelastic scattering'
             ELSE
-               WRITE (6,*)' DWBA calculations for inelastic scattering'
+               WRITE (6,*) ' DWBA calculations for inelastic scattering'
                WRITE (6,*)'             to uncoupled collective levels'
             ENDIF
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
@@ -573,7 +573,7 @@ C--------LINUX
          ENDIF
          IF (ICAlangs.GT.0) THEN
            ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP'
-           iwin = PIPE(ctmp)
+         iwin = PIPE(ctmp)
           ENDIF
          ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp23//'.ANG'
          iwin = PIPE(ctmp)
@@ -589,7 +589,7 @@ C--------WINDOWS
          ENDIF
          IF (ICAlangs.GT.0) THEN
            ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP >NUL'
-           iwin = PIPE(ctmp)
+         iwin = PIPE(ctmp)
           ENDIF
          ctmp = 'move INCIDENT.ANG '//ctldir//ctmp23//'.ANG >NUL'
          iwin = PIPE(ctmp)
@@ -614,7 +614,7 @@ C-----Storing transmission coefficients for the incident channel
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
-         WRITE (45) stl(l+1)
+         WRITE (45) stl(l + 1)
       ENDDO
       WRITE (45) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
       CLOSE (45)
@@ -630,6 +630,8 @@ C-----Storing transmission coefficients for the incident channel
          r2 = rp*rp
          p1 = (ak2*r2)/(1.0D+00 + ak2*r2)
          s1a = stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*EINl))
+         p2 = (ak2*r2)**2/(9.0D+00+3.0D+00*ak2*r2+(ak2*r2)**2)
+         s2a = stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EIN1))
 C--------Corrected scattering radius
          rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
@@ -646,16 +648,19 @@ C--------Corrected scattering radius
      &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
          ENDIF
          WRITE ( 6,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), EINl*1.D3, TOTcs, rp
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3), 
+     &         EINl*1.D3, TOTcs, rp
          WRITE (12,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), EINl*1.D3, TOTcs, rp
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3), 
+     &         EINl*1.D3, TOTcs, rp
 
 99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,' T0=',d12.6/
      &           6x,'                          S1 =',f6.3,' T1=',d12.6/
+     &           6x,'                          S2 =',f6.3,' T2=',d12.6/
      &           6x,' Elab = ',F6.1,' keV',
      &              '        Total XS = ',F9.2,' mb'/
      &           6x,' Scattering radius =',f7.3,' fm'/7x,54(1h*))
-         WRITE ( 6,*)
+         WRITE (6,*)
          WRITE (12,*)
       ENDIF
 
@@ -1118,4 +1123,5 @@ C--------WINDOWS
          iwin = PIPE(ctmp)
       ENDIF
       END
+
 
