@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-13 20:17:44 $
-Ccc   * $Id: input.f,v 1.175 2005-09-13 20:17:44 herman Exp $
+Ccc   * $Date: 2005-09-13 22:07:47 $
+Ccc   * $Id: input.f,v 1.176 2005-09-13 22:07:47 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -4548,13 +4548,25 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'RESNOR') THEN
+            IF(i1.EQ.0) THEN
+               DO i=1,5 
+                  CNOrin(i + 1) = val
+               ENDDO 
+               WRITE (6,
+     &'('' Response functions for first 5 l transfers in MSD normalized 
+     &by factor '',F6.3)') val
+               WRITE (12,
+     &'('' Response functions for first 5 l transfers in MSD normalized 
+     &by factor '',F6.3)') val
+            GOTO 100
+            ENDIF
             CNOrin(i1 + 1) = val
             WRITE (6,
-     &'('' Response function for multipolarity'',I3,'' normalized by fac
-     &tor '',F6.3)') i1, CNOrin(i1 + 1)
+     &'('' Response function for l transfer'',I3,'' normalized by factor
+     & '',F6.3)') i1, CNOrin(i1 + 1)
             WRITE (12,
-     &'('' Response function for multipolarity'',I3,'' normalized by fac
-     &tor '',F6.3)') i1, CNOrin(i1 + 1)
+     &'('' Response function for l transfer'',I3,'' normalized by factor
+     & '',F6.3)') i1, CNOrin(i1 + 1)
             GOTO 100
          ENDIF
 C--------TRISTAN (MSD) input **** done ****
