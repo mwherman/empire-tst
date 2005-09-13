@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-06 22:45:02 $
-Ccc   * $Id: input.f,v 1.174 2005-09-06 22:45:02 herman Exp $
+Ccc   * $Date: 2005-09-13 20:17:44 $
+Ccc   * $Id: input.f,v 1.175 2005-09-13 20:17:44 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -840,7 +840,7 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
                            IF(NEXclusive.GT.NDExclus) THEN
-			     WRITE(6,*)'FATAL: NEXclusive =',NEXclusive
+                             WRITE(6,*)'FATAL: NEXclusive =',NEXclusive
                              WRITE(6,*)'INSUFFICIENT DIMENSION NDExclus'
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
@@ -926,6 +926,13 @@ C--------------------------------------------------------------------------
             WRITE (6,*) 'FATAL: HMS allowed only for incident nucleons'
             WRITE (6,*) 'FATAL: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
+         ENDIF
+C--------------------------------------------------------------------------
+         IF(KALman.GT.0) THEN
+            DO i=1,NDNUC
+               ENDF(i) = 0
+            ENDDO 
+            WRITE (6,*) ' ENDF set to 0 due to the KALMAN option'
          ENDIF
 C--------------------------------------------------------------------------
          IF (FISbar(nnuc).NE.1 .AND. FISopt(nnuc).NE.0) THEN
@@ -4339,6 +4346,15 @@ C-----
             GOTO 100
          ENDIF
 
+C-----Sensitivity calculations for KALMAN
+         IF (name.EQ.'KALMAN') THEN
+            KALman = val
+            IF (KALman.GT.0) WRITE (6,
+     &'('' Sensitivity calculations will be performed,'',
+     & '' (will reset ENDF option to 0'')')
+            GOTO 100
+         ENDIF
+
 C--------Tuning factors
          IF (name.EQ.'TUNEPE') THEN
             IF (i1.GT.NDEJC) THEN
@@ -5011,6 +5027,15 @@ C
       ENDDO
       nexp = 0
       atilsum = 0.0
+      WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
+      WRITE(6,'(1X)') 
+      WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a''
+     &         ''-tilde'')') 
+      WRITE(6,'(4X,54(''-''))') 
+      WRITE(6,'(1X)') 
+      WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
+     &               ''  ATILNO     final'')') 
+      WRITE(6,'(1X)') 
   100 READ (24,'(I7,I4,2F7.2,E10.4,E10.3)',END = 200) izar, nlevc,
      &      arogc, aroc, qn, dob
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
@@ -5018,8 +5043,9 @@ C
          IF (iloc.EQ.0) THEN
             NLV(nnuc) = nlevc
             DOBs(nnuc) = dob
-            if(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
+            IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
+             
 C-----------set up normalization factors for level density parameter 'a'
             IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. arogc.NE.0.0D0) THEN
 C--------------Gilbert-Cameron (no explicit collective effects)
@@ -5033,14 +5059,9 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   gamma = 0.051
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
-                  IF (ATIlnor(nnuc).EQ.0.D0) ATIlnor(nnuc) = arogc/asys
-C
-C                 Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
-C
-                  ROPar(1,nnuc) = asys*ATIlnor(nnuc)
-                  ROPar(3,nnuc) = del
-               ENDIF
-               IF (ADIv.EQ.0.0D0) THEN
+                  atiln = arogc/asys
+C--------------EMPIRE-specific 
+               ELSEIF (ADIv.EQ.0.0D0) THEN
                   del = 0.
                   delp = 12./SQRT(A(nnuc))
                   IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
@@ -5074,20 +5095,21 @@ C-----------------EMPIRE systematics with M-S shell corrections
                      IF (ABS(acrt - ar).LE.0.001D0*acrt) GOTO 105
                      ar = acrt
                   ENDDO
-  105             econd = 1.5*acrt*delp**2/pi2
-                                              !-del  !!!!!!!!!!!
+  105             econd = 1.5*acrt*delp**2/pi2 !-del  !!!!!!!!!!!
                   uexc = qn + del - econd
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
-                  IF (ATIlnor(nnuc).EQ.0.0D0) ATIlnor(nnuc) = aroc/asys
-C
-C                 Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
-C
-                  ROPar(1,nnuc) = asys*ATIlnor(nnuc)
-                  ROPar(3,nnuc) = del
+                  atiln = aroc/asys
                ENDIF
-               atilsum = atilsum + ATIlnor(nnuc)
-               nexp = nexp + 1
+               IF(ATIlnor(nnuc).EQ.0) THEN 
+                  ATIlnor(nnuc) = atiln
+               ELSE
+                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+               ENDIF
+C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
+               ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+               ROPar(3,nnuc) = del
+C--------------Print resulting level density parameters
                IF (FITlev.GT.0.0D0) THEN
                   WRITE (6,*) ' '
                   WRITE (6,*) 'Nucleus A=', INT(A(nnuc)), ' Z=',
@@ -5098,27 +5120,45 @@ C
                   IF (ADIv.EQ.2.0D0) WRITE (6,*) 'SHC=', SHC(nnuc),
      &                ' U=', uexc, ' DELTA=', del, ' asys=', asys,
      &                ' aexp=', arogc
+               ELSE
+                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.3.0D0)
+     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+                  IF (ADIv.EQ.2.0D0) 
+     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
                ENDIF
+C--------------Calculate sum for the average normalization factor
+               atilsum = atilsum + atiln
+               nexp = nexp + 1
             ENDIF
          ENDIF
       ENDIF
       GOTO 100
   200 IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. nexp.GT.2) THEN
-         atilave = atilsum/FLOAT(nexp)
-         WRITE (6,*) ' '
-         WRITE (6,*) 'Level density systematics normalized by factor ',
+         atilave = ABS(atilsum/FLOAT(nexp))
+         WRITE (6,'(''               Average exp/sys'',F10.3)')
      &               atilave
-         WRITE (6,*) ' '
       ELSE
-         WRITE (6,*) ' '
          WRITE (6,*)
      &'Level density systematics NOT normalized to Dobs at neutron bindi
      &ng energy'
-         WRITE (6,*) ' '
          atilave = 1.0
       ENDIF
-      DO nnuc = 0, NNUct
-         IF (ATIlnor(nnuc).EQ.0.0D0) ATIlnor(nnuc) = atilave
+      DO nnuc = 1, NNUct
+         IF (ATIlnor(nnuc).EQ.0.0D0) THEN 
+            ATIlnor(nnuc) = atilave
+            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,1F10.3)') 
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &         atilave
+         ELSEIF (ROPar(1,nnuc).EQ.0) THEN 
+            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2F10.3)') 
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &         atilave, ATIlnor(nnuc)
+            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+         ENDIF
       ENDDO
       END
 C
