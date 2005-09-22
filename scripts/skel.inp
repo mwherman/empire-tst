@@ -90,4 +90,5 @@ FITRVD     0.      10    1                       !fit real volume diffuseness (+
 FITISD     0.       5    1                       !fit imaginary surface diffuseness (+- 0.05 fm)
 FITDEF     0.      10    2                       !fit l=2 (quadrupol) deformation  (+- 0.1)
 FITGRD                                           !autmatic incident energy grid in omp fit
+FITITR     6.08                                  !increase number of iterations (default 3.05)
 
