@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-08-09 11:30:00 $
-Ccc   * $Id: tl.f,v 1.70 2005-08-09 11:30:00 Carlson Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-09-22 22:03:44 $
+Ccc   * $Id: tl.f,v 1.71 2005-09-22 22:03:44 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -500,17 +500,17 @@ C
       ACOul(Nejc,Nnuc) = ACOu
 C-----Volume real potential: Woods-Saxon
       VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
-      RVOm(Nejc,Nnuc) = rlib(1)
+      RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
       AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
 C-----Volume imaginary potential: Woods-Saxon
       WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
-      RWOmv(Nejc,Nnuc) = rlib(2)
+      RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
       AWOmv(Nejc,Nnuc) = alib(2)*FNavomp(Nejc,Nnuc)
 C-----Real surface contribution
       VOMs(Nejc,Nnuc) = vlib(3)
 C-----Surface imaginary potential:
       WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
-      RWOm(Nejc,Nnuc) = rlib(4)
+      RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
       AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
       SFIom(Nejc,Nnuc) = 1.D0
 C-----if rco(4,1,1) >0.0: Woods-Saxon derivative surface potential
