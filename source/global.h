@@ -30,7 +30,11 @@
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
      &                 FNwsomp(0:ndejc,0:ndnuc),
-     &                 FNasomp(0:ndejc,0:ndnuc)
+     &                 FNasomp(0:ndejc,0:ndnuc),
+     &                 FNrvomp(0:ndejc,0:ndnuc),
+     &                 FNrwvomp(0:ndejc,0:ndnuc),
+     &                 FNrsomp(0:ndejc,0:ndnuc)
+        
       INTEGER BFF(2), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc,
      &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
@@ -46,7 +50,8 @@
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
-     &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs
+     &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
+     &        KALman
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
@@ -131,6 +136,7 @@
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
+     &                 FNrvomp,FNrwvomp,FNrsomp,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs 
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
@@ -156,7 +162,7 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs
+     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs, KALman
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv

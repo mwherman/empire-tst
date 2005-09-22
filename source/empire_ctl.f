@@ -1,6 +1,7 @@
       PROGRAM EMPIRE_CTL
 C
-C--- Controls execution of EMPIRE and/or fitting. 
+C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting, 
+C--- (iii) sensitivity matrix. 
 C---
 C--- The program has been designed to make the fitting routine, LOCALFIT,
 C--- as independent as possible of the rest of the code, so that it may 
@@ -13,18 +14,26 @@ C---   xitr    - a real constructed of the inner and outer loop iteration
 C--- It also uses a function CHISQRD(pars), provided below.
 C---
 C--- The logical variable autofit is true when fitting, false for a normal run.
+C--- The logical variable sensit is true for sensitivity calc., false for a normal run.
 C
       parameter(mxfit=20)
 
-      logical autofit
+      logical autofit, sensit 
       dimension pars(mxfit),dparmx(mxfit)
 
-      CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr)
+      CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
+      IF(autofit .AND. sensit) THEN
+      WRITE(6,*) 'OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE RUN TO
+     &GETHER'
+      STOP 'NO OMP FIT TOGETHER WITH KALMAN CALCULATIONS'
+      ENDIF
 
       IF (autofit) THEN
          CALL LOCALFIT(pars,dparmx,nnft,xitr)
          CALL CLEANUP(nnft)  
          CALL EMPIRE
+      ELSEIF(sensit) THEN
+         CALL SENSITIVITY
       ELSE
          CALL EMPIRE
       ENDIF
@@ -34,16 +43,18 @@ C
 C
 C-------------------------------------------------------------------
 C
-      subroutine scan4fit(autofit,pars,dparmx,nnft,xitr)
+      subroutine scan4fit(autofit,pars,dparmx,nnft,xitr,sensit)
 C
-C--- Scans INPUT.DAT for automatic fit request (FITOMP=2) and the corresponding
+C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=2) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
 C--- C4 data file is read to prepare experimental data and an appropriate
 C--- input file (FITIN.DAT) is prepared. 
-C--- If a fit request is not found, control is returned to EMPIRE, which then
+C--- Scans also INPUT.DAT for the request for sensitivity matrix calculations. 
+C--- If none of the requests is found, control is returned to EMPIRE, which then
 C--- runs normally. 
 C--- Values returned by scan4fit:
 C---   autofit - logical variable, true for fit, false for normal run
+C---   sensit - logical variable, true for sensitivity calculations, false for normal run
 C---   pars    - an array of parameters to be varied in fit
 C---   dparmx  - array of max variation allowed in each parameter in vars
 C---   nnft    - number of parameters in vars
@@ -51,7 +62,7 @@ C
       parameter(mxfit=20,mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
-      logical autofit
+      logical autofit, sensit 
       logical fexist
       logical LINUX/.TRUE./
       character cmnd*35,cmndp*35,cmndt*35
@@ -75,6 +86,7 @@ C
       data pot2/'R','D','V'/
 
       autofit = .FALSE.
+      sensit = .FALSE.
       wt0=1.0
       xitr=3.05
 
@@ -143,6 +155,15 @@ C--- as well as prepare neutron or proton fit input or jump out.
       iaa=aat+0.1
 
  10   read(5,'(a35)',end=100) cmnd
+
+C--- Check whether sensitivity matrix calculations are requested
+      if (cmnd(1:6).eq.'KALMAN') then
+        read(cmnd,'(6x,g10.5,4i5)') val
+        if (val.gt.0) then
+          sensit = .TRUE.
+          return
+         endif
+       endif
 
 C--- The fundamental fit command - automatic fitting will be attempted
 C--- if its value is 2 or larger. 
@@ -296,7 +317,7 @@ C--- Open the principal file for printing of fit output
       CALL THORA(2)
 
       write(2,*)
-      write(2,*) ' Setup of automatic fit procedure iniciated.'
+      write(2,*) ' Setup of automatic fit procedure initiated.'
       write(2,*)
 
 C-- Test for the existence of the C4 data file
@@ -485,7 +506,7 @@ C--- files are modified accordingly. The original files are first moved.
             ctmp='mv OMPAR.DIR OMPAR0.DIR'
             itmp=PIPE(ctmp)
            else
-            ctmp='move OMPAR.DIR OMPAR0.DIR'
+            ctmp='ren OMPAR.DIR OMPAR0.DIR'
             itmp=PIPE(ctmp)
            endif
          endif
@@ -494,7 +515,7 @@ C--- files are modified accordingly. The original files are first moved.
             ctmp='mv TARGET_COLL.DAT TARGET_COLL0.DAT'
             itmp=PIPE(ctmp)
            else
-            ctmp='move TARGET_COLL.DAT TARGET_COLL0.DAT'
+            ctmp='ren TARGET_COLL.DAT TARGET_COLL0.DAT'
             itmp=PIPE(ctmp)
            endif
          endif
@@ -538,7 +559,7 @@ C--- the fitting.
           ctmp='mv OMPAR.DIR OMPAR0.DIR'
           itmp=PIPE(ctmp)
          else
-          ctmp='move OMPAR.DIR OMPAR0.DIR'
+          ctmp='ren OMPAR.DIR OMPAR0.DIR'
           itmp=PIPE(ctmp)
          endif
        endif
@@ -547,7 +568,7 @@ C--- the fitting.
           ctmp='mv TARGET_COLL.DAT TARGET_COLL0.DAT'
           itmp=PIPE(ctmp)
          else
-          ctmp='move TARGET_COLL.DAT TARGET_COLL0.DAT'
+          ctmp='ren TARGET_COLL.DAT TARGET_COLL0.DAT'
           itmp=PIPE(ctmp)
          endif
        endif
@@ -595,7 +616,7 @@ C
       subroutine readc4(emin,emax,izz,iaa)
 C
 C--- READC4 prepares the experimental data, obtained from the 
-C--- appropriate C$ file, for fitting. The s-wave neutron strength 
+C--- appropriate C4 file, for fitting. The s-wave neutron strength 
 C    function is also used, when it exists and is relevant.
 C--- The input parameters are
 C---      emin - minimum incident energy of data to be considered
@@ -617,8 +638,6 @@ C
       parameter(disc=1.0e4)
 
       logical fexist
-C     character metat*1,metap*1,ex4stat*1,cm*1,lvl*3
-C     Corrected RCN
       character metat*1,metap*1,ex4st*1,cm*1,lvl*3
       dimension mf(mxind),mt(mxind)
       dimension ex(mxind),dex(mxind),six(mxind),dsix(mxind)
@@ -1037,9 +1056,9 @@ C--- is first moved to INPUT0.DAT
         ctmp='mv FITIN.DAT INPUT.DAT'
         itmp=PIPE(ctmp)
        else
-        ctmp='move INPUT.DAT INPUT0.DAT'
+        ctmp='ren INPUT.DAT INPUT0.DAT'
         itmp=PIPE(ctmp)
-        ctmp='move FITIN.DAT INPUT.DAT'
+        ctmp='ren FITIN.DAT INPUT.DAT'
         itmp=PIPE(ctmp)
        endif
 
@@ -1386,7 +1405,7 @@ C--- FILEPREP in preparation for the EMPIRE calculations
        endif
 
 C--- Now run EMPIRE
-      call empire
+      CALL EMPIRE
 
 C--- The neutron s-wave strength function is obtained from the EMPIRE
 C--- output file and used to initialize chi2, if an experimental value
@@ -1668,6 +1687,7 @@ C
       parameter(mxind=5000,mxinda=5000)
 
       logical LINUX/.TRUE./
+      CHARACTER*6 name
       integer*4 PIPE,itmp
       character*132 ctmp
 
@@ -1697,12 +1717,400 @@ C
       close(2)
 
       IF(LINUX) THEN
-        ctmp='mv INPUT1.DAT INPUT.DAT'
+          ctmp='mv INPUT1.DAT INPUT.DAT'
         itmp=PIPE(ctmp)
        else
-        ctmp='move INPUT1.DAT INPUT.DAT'
+        ctmp='ren INPUT1.DAT INPUT.DAT'
         itmp=PIPE(ctmp)
        endif
 
       return
       end
+
+      subroutine sensitivity
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:iou*
+Ccc   *                    S E N S I T I V I T Y                         *
+Ccc   *                                                                  *
+Ccc   *     Modifies the optimal input according to instructions in      *
+Ccc   *     the SENSITIVITY.INP file, runs EMPIRE,  and                  *
+Ccc   *     calculates sensitivity matrix to be used with KALMAN.        *
+Ccc   *                                                                  *
+Ccc   * input:none                                                       *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+
+      IMPLICIT NONE
+      logical fexist
+      logical LINUX/.TRUE./
+      CHARACTER*6 name, namee, namelst
+      CHARACTER*80 inprecord 
+      CHARACTER*238 outrecord 
+      character*132 ctmp
+      character*1 namecat, category
+      integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
+     &        ndreac, nreac, ndkeys
+      parameter (ndreac=100, ndkeys=120) 
+      double precision val, vale, valmem, einl
+      double precision xsec, xsecu, xsecd,  sensmat
+      dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac), 
+     &          sensmat(ndreac)
+      integer*4 itmp
+      INTEGER*4 PIPE
+      dimension namelst(ndkeys), namecat(ndkeys)
+      data namelst /
+     &  'ATILNO', 'CHMS  ', 'DEFPAR', 'FUSRED', 'GDIVP ', 'GDRST1', 
+     &  'GDRST2', 'GDRWEI', 'GDRWP ', 'GTILNO', 'PCROSS', 'QFIS  ', 
+     &  'RESNOR', 'TOTRED', 'TUNEFI', 'TUNEPE', 'TUNE  ', 'UOMPAS', 
+     &  'UOMPAV', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'ALS   ', 'BETAV ', 
+     &  'BETCC ', 'BFUS  ', 'BNDG  ', 'CRL   ', 'CSGDR1', 'CSGDR2', 
+     &  'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ', 
+     &  'DV    ', 'EFIT  ', 'EGDR1 ', 'EGDR2 ', 'EX1   ', 'EX2   ', 
+     &  'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 
+     &  'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 
+     &  'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA', 
+     &  'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 
+     &  'TRUNC ', 'WIDEX ', 'COMPFF', 'DEGAS ', 'DIRECT', 'DIRPOT', 
+     &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN', 
+     &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP', 
+     &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT', 
+     &  'GSTRFN', 'GST   ', 'HMS   ', 'HRTW  ', 'IOUT  ', 'JSTAB ', 
+     &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ', 
+     &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ', 
+     &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF', 
+     &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS'/
+      data namecat /
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'F'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     /
+C-----meaning of namecat:
+C-----A - variation of the parameter Allowed (default value is 1)
+C-----R - variation of the parameter allowed with Restriction   
+C-----    (parameter must be explicitly specified in the optional part
+C-----    of the standard input)
+C-----F - variation of the parameter not allowed (discrete value keyword)
+      INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
+      IF(.not.fexist) THEN
+         WRITE(6,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
+     &E INSTRUCTING WHICH PARAMETERS TO VARY HAS BEEN FOUND ' 
+         STOP 'SENSITIVITY INPUT MISSING'
+      ENDIF
+C-----Move original (reference) input out of the way
+      IF(LINUX) THEN
+         ctmp='mv INPUT.DAT INPUTREF.DAT'
+         itmp=PIPE(ctmp)
+      ELSE
+         ctmp='ren INPUT.DAT INPUTREF.DAT'
+         itmp=PIPE(ctmp)
+      ENDIF
+C-----
+C-----Run calculations with original input
+C-----
+      OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
+      OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
+C-----
+C-----Read and copy mandatory part of the standard input     
+C-----
+      DO i=1,7
+         READ(44,'(A80)') inprecord 
+         WRITE(7,'(A80)') inprecord 
+      ENDDO
+C-----Read line of optional input
+   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
+      IF(namee.EQ.'GO    ' ) THEN
+         WRITE(7,'(A6)')namee
+         GOTO 70 !Jump to $ format for parameters that happens after GO
+      ENDIF
+C-----Copy input but skip KALMAN
+      IF(namee.NE.'KALMAN') 
+     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
+      GOTO 50
+C-----
+C-----Read and copy optional part of the standard input     
+C-----
+   70 READ(44,'(A80)',END = 30) inprecord 
+      WRITE(7,'(A80)') inprecord 
+      GOTO 70
+
+   30 CLOSE(7)
+      CLOSE(44)
+      CLOSE(5)
+      CALL EMPIRE
+C-----Move original (reference) outputs out of the way
+      IF(LINUX) THEN
+         ctmp='mv LIST.DAT LISTREF.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='mv OUTPUT.DAT OUTPUTREF.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='mv XSECTIONS.OUT XSECTIONSREF.OUT'
+         itmp=PIPE(ctmp)
+      ELSE
+         ctmp='ren LIST.DAT LISTREF.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='ren OUTPUT.DAT OUTPUTREF.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='ren XSECTIONS.OUT XSECTIONSREF.OUT'
+         itmp=PIPE(ctmp)
+      ENDIF
+C-----
+C-----Run sensitivity calculations
+C-----
+      OPEN (UNIT = 92,FILE='SENSITIVITY.MATRIX', STATUS='UNKNOWN', 
+     &                POSITION='APPEND') ! sensitivity matrix
+      OPEN(UNIT = 17, FILE='SENSITIVITY.INP', STATUS='old') !list of parameters to vary
+C-----Read one line of the sensitivity input
+  100 READ (17,'(A80)',END = 350) inprecord
+      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR. 
+     &    inprecord(1:1).EQ.'!') GOTO 100
+      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200) name,val,i1,i2, i3, i4
+C-----Check category of the parameter to be varied
+      category = 'F'
+      DO i = 1, ndkeys
+         IF(name.EQ.namelst(i)) THEN
+            category = namecat(i)
+            cycle
+         ENDIF
+      ENDDO 
+      IF(category.EQ.'F') GOTO 100 
+      valmem = val
+      IF(val.GE.1) THEN
+c       WRITE(6,*) 'PARAMETER ',name,' VARIATION ',val,
+c    &             ' IS BIGGER THAN 1' 
+      STOP 'PARAMETER VARIATION LARGER THAN 100%'
+      ENDIF
+C-----Check whether omp is being varied - if so then move Tl directory out of the way
+      IF(name(1:4).EQ.'UOMP') THEN
+         IF(LINUX) THEN
+            ctmp='mv TL TLREF'
+c           ctmp='rm -r TL'
+            itmp=PIPE(ctmp)
+            ctmp='mkdir TL'
+            itmp=PIPE(ctmp)
+         ELSE
+            ctmp='ren TL TLREF'
+            itmp=PIPE(ctmp)
+            ctmp='mkdir TL'
+            itmp=PIPE(ctmp)
+         ENDIF
+      ENDIF
+      ifound = 0
+      DO k = 1, 2 ! 1 for parameter+val, 2 for parameter-val
+         OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
+         IF(k.EQ.2) val = -val !normally we only invert the sign
+         IF(name(1:4).EQ.'UOMP' .AND. k.EQ.2 ) THEN 
+            IF(LINUX) THEN
+               ctmp='rm -r TL'
+               itmp=PIPE(ctmp)
+               ctmp='mkdir TL'
+               itmp=PIPE(ctmp)
+            ELSE
+               ctmp='del TL'
+               itmp=PIPE(ctmp)
+               ctmp='mkdir TL'
+               itmp=PIPE(ctmp)
+            ENDIF
+         ENDIF
+c     WRITE(6,'(''Varying parameter '',A6,''x''F10.3,4I5)')  
+c    &      name, 1.0+val, i1,i2, i3, i4
+      OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
+C-----
+C-----Read and copy mandatory part of the standard input     
+C-----
+      DO i=1,7
+         READ(44,'(A80)') inprecord 
+         WRITE(7,'(A80)') inprecord 
+      ENDDO
+C-----Read line of optional input
+  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
+      IF(namee.EQ.'GO    ' ) THEN
+         IF(ifound.EQ.0) THEN
+            IF(category.EQ.'A') THEN 
+               IF(name(1:4).EQ.'UOMP') THEN !special treatment for omp parameters (they must be negative)
+                  WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val), 
+     &                     i1, i2, i3, i4 ! include omp parameter if missing
+               ELSE
+                  WRITE(7,'(A6,F10.3,4I5)') name,  (1.0+val), 
+     &                     i1, i2, i3, i4 ! include omp parameter if missing
+               ENDIF
+            ELSEIF(category.EQ.'R') THEN
+               CLOSE(7)
+               CLOSE(44)
+               CLOSE(5)
+               GOTO 100 !get next parameter to vary
+            ENDIF
+         ENDIF
+         WRITE(7,'(A6)')namee
+         GOTO 170 !Jump to $ format for parameters that happens to be after GO
+      ENDIF
+C-----Write modified input with increased value of the parameter if name matches
+      IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND. i3.EQ.i3e
+     &   .AND. i4.EQ.i4e) THEN
+         WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
+         ifound = 1
+      ELSE
+         IF(namee.NE.'KALMAN') 
+     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
+      ENDIF
+      GOTO 150
+C-----
+C-----Read and copy optional part of the standard input     
+C-----
+  170 READ(44,'(A80)',END = 300) inprecord 
+      IF(inprecord(1:1).EQ.'$') THEN
+         READ (inprecord,'(1X,A6,G10.5,4I5)',END = 300) namee,vale, i1e,
+     &      i2e, i3e, i4e
+C--------Write modified input with increased value of the parameter if name matches
+         IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND. 
+     &      i3.EQ.i3e .AND. i4.EQ.i4e) THEN 
+            WRITE(7,'(''$'',A6,F10.3,4I5)') namee,vale*(1+val), 
+     &         i1e, i2e, i3e, i4e
+         ELSE
+            WRITE(7,'(A80)') inprecord 
+         ENDIF
+      ELSE
+        WRITE(7,'(A80)') inprecord 
+      ENDIF
+      GOTO 170
+
+  300 CLOSE(7)
+      CLOSE(44)
+      CLOSE(5)
+      CALL EMPIRE
+
+C-----Delete modified input that has been used and move XSECTIONS.OUT file
+      IF(LINUX) THEN
+         ctmp='rm INPUT.DAT'
+         itmp=PIPE(ctmp)
+         IF(k.EQ.1) THEN
+            ctmp = 'mv XSECTIONS.OUT XS-UP.DAT'
+         ELSE
+            ctmp = 'mv XSECTIONS.OUT XS-DOWN.DAT'
+         ENDIF
+         itmp=PIPE(ctmp)
+       ELSE
+         ctmp='del INPUT.DAT'
+         itmp=PIPE(ctmp)
+         IF(k.EQ.1) THEN
+            ctmp = 'ren XSECTIONS.OUT XS-UP.DAT'
+         ELSE
+            ctmp = 'ren XSECTIONS.OUT XS-DOWN.DAT'
+         ENDIF
+         itmp=PIPE(ctmp)
+      ENDIF
+      ENDDO !loop over parameter+val and parameter-val
+C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
+      IF(name(1:4).EQ.'UOMP') THEN
+         IF(LINUX) THEN
+            ctmp='rm -rf TL'
+            itmp=PIPE(ctmp)
+            ctmp='mv TLREF TL'
+            itmp=PIPE(ctmp)
+         ELSE
+            ctmp='del TL'
+            itmp=PIPE(ctmp)
+            ctmp='ren TLREF TL'
+            itmp=PIPE(ctmp)
+         ENDIF
+      ENDIF
+C-----      
+C-----Calculate sensitivity to the parameter
+C-----      
+      OPEN (UNIT = 34,FILE='XS-UP.DAT', STATUS='OLD') ! x-sections with parameter+val
+      READ(34,'(A238)') outrecord 
+      WRITE(92,'(A238)') outrecord 
+      WRITE(92,'(''# Parameter: '',A6,2x,4I3,''  variation: +-''F5.3,
+     &      ''     Sensitivity matrix'')') name,  i1, i2,
+     &      i3, i4, valmem
+      READ(outrecord,'(1x,I3)') ireac !read number of reactions
+C-----Check whether ireac is within dimensions
+      IF(ireac.GT.ndreac) THEN
+         STOP 'INSUFFICIENT NDREAC DIMENSION IN empire_ctl.f'
+      ENDIF
+      nreac = ireac/19
+      nreac = MAX(1,nreac)
+      IF(ireac.GT.19*nreac) nreac = nreac + 1
+      DO i=1,nreac 
+      READ(34,'(A238)') outrecord 
+      WRITE(92,'(A238)') outrecord 
+      ENDDO 
+      OPEN (UNIT = 35,FILE='XS-DOWN.DAT', STATUS='OLD') ! x-sections with parameter-val
+      READ(35,'(A80)') inprecord !skip lines with heading
+      DO i=1,nreac 
+      READ(35,'(A80)') inprecord 
+      ENDDO 
+      OPEN (UNIT = 36,FILE='XSECTIONSREF.OUT', STATUS='OLD') ! central x-sections 
+      READ(36,'(A80)') inprecord !skip lines with heading
+      DO i=1,nreac 
+      READ(36,'(A80)') inprecord 
+      ENDDO 
+ 180  READ(34,'(G10.5,1P(19E12.5))',END=190) einl, (xsecu(i),i=1,ireac) 
+      READ(35,'(G10.5,1P(19E12.5))') einl, (xsecd(i),i=1,ireac) 
+      READ(36,'(G10.5,1P(19E12.5))') einl, (xsec(i),i=1,ireac) 
+      DO i = 1, ireac
+         IF(ABS(xsecu(i)-xsecd(i)).LE.((xsecu(i)+xsecd(i))*1.0D-5) )THEN
+            sensmat(i) = 0
+         ELSEIF(xsec(i).EQ.0) THEN
+            sensmat(i) = 0
+         ELSE
+c           sensmat(i) = (xsecu(i)-xsecd(i))/(2.0*valmem)
+C-----------Relative sensitivity (per variation interval) 
+            sensmat(i) = (xsecu(i)-xsecd(i))/xsec(i)
+         ENDIF
+      ENDDO 
+      WRITE(92,'(G10.5,1P(19E12.4))') EINl, (sensmat(i),i=1,ireac)
+      GOTO 180
+  190 CONTINUE
+      CLOSE(34)
+      CLOSE(35)
+      CLOSE(36)
+      WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
+      GOTO 100 !Parameter done, return and get another parameter to vary
+  200 WRITE (6,
+     &'('' FATAL: INVALID FORMAT in KEY: '',A6,
+     &  '', EMPIRE STOPPED'')') name
+      STOP ' FATAL: INVALID FORMAT in input KEY '
+C-----Resotore standard input 
+  350 IF(LINUX) THEN
+         ctmp='mv INPUTREF.DAT INPUT.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='mv LISTREF.DAT LIST.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='mv OUTPUTREF.DAT OUTPUT.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='mv XSECTIONSREF.OUT XSECTIONS.OUT'
+         itmp=PIPE(ctmp)
+      ELSE
+         ctmp='ren INPUTREF.DAT INPUT.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='ren LISTREF.DAT LIST.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='ren OUTPUTREF.DAT OUTPUT.DAT'
+         itmp=PIPE(ctmp)
+         ctmp='ren XSECTIONSREF.OUT XSECTIONS.OUT'
+         itmp=PIPE(ctmp)
+      ENDIF
+      return
+      end
+
+

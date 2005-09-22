@@ -17,26 +17,29 @@ c     13     io.h,input
 c     14     io.h
 c     15     MSD-Orion,MSD-Tristan
 c     16     MSD-Tristan
+c     17     empire_ctl
 c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
 c     22     input
 c     23     io.h
 c     24     io.h
-c     25     empire_ctl
+c     25     (seems to be used but don't know where)
 c     27     ddhms,input
-c     29     io.h
 c     28     ddhms
+c     29     io.h
 c     32     input,tl
 c     33     io.h
-c     34     lev-dens
-c     35     lev-dens
-c     36     lev-dens
+c     34     lev-dens, empire_ctl 
+c     35     lev-dens, empire_ctl
+c     36     lev-dens, empire_ctl
 c     38     lev-dens
 c     39     tl
 c     40     main,chi2 
+c     41     main (table of x-sections)
 c     42     io.h (degas)
 c     43     io.h
+c     44     empire_ctl (standard input)
 c     45     tl,fusion,main
 c     46     tl,fusion,main
 c     47     fusion,input
@@ -71,6 +74,7 @@ c     88     ecis03
 c     89     ecis03
 c     90     ecis03
 c     91     ecis-03,MSD-Tristan
+c     92     empire_ctl
 c     94     input.f,main
 c     95     input.f
 c     96     tl

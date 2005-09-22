@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-08-22 20:08:44 $
-Ccc   * $Id: main.f,v 1.135 2005-08-22 20:08:44 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-09-22 22:07:15 $
+Ccc   * $Id: main.f,v 1.136 2005-09-22 22:07:15 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -97,6 +97,16 @@ C-----
       IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0
+C-----
+C-----Open file 41 with tabulated cross sections
+C-----
+      IF (FIRst_ein) THEN
+      OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown') 
+      WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3, 
+     &      int(Z(0)), SYMb(0), int(A(0))
+      WRITE(41,'(''#'',A10,1X,(19A12))') '  Einc    ','  Total     ',
+     &      '  Elastic   ','  Fission   ',(REAction(nnuc),nnuc=1,NNUcd)
+      ENDIF
 C-----
 C-----Prepare Giant Resonance parameters - systematics
 C-----
@@ -600,7 +610,7 @@ C--------correct CN population for PE and DWBA into continuum emission
             IF (MSD+MSC.GT.0 .AND. ICOmpff.GT.0) THEN
                WRITE (6,*) 'TRY TO TURN OFF COMPRESSIONAL FORM FACTOR '
                WRITE (6,*) 'SETTING COMPFF TO 0 IN THE OPTIONAL INPUT.'
-               STOP
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.GT.0 .AND. ICOmpff.EQ.0) THEN
                WRITE (6,*) 'THIS MAY HAPPEN IF RESPONSE FUNCTIONS ARE '
@@ -609,7 +619,7 @@ C--------correct CN population for PE and DWBA into continuum emission
                WRITE (6,*) 'IN OPTIONAL INPUT.    '
                WRITE (6,*)
      &                    'IF THESE ARE FINE TRY ANOTHER OPTICAL MODEL.'
-               STOP
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.EQ.0) THEN
                WRITE (6,*) 'THIS MAY HAPPEN IF TOO MANY DISCRETE LEVELS'
@@ -618,7 +628,7 @@ C--------correct CN population for PE and DWBA into continuum emission
                WRITE (6,*) 'COLLECTIVE LEVEL FILE.'
                WRITE (6,*)
      &                  'TRY TO REDUCE THE NUMBER OF COLLECTIVE LEVELS.'
-               STOP
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
          ENDIF
          DO i = 1, NLW
@@ -1693,6 +1703,9 @@ C--------
 C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
+C-----Write a row in the table of cross sections
+      WRITE(41,'(G10.5,1P(19E12.5))') EINl, TOTcs, ELAcs, 
+     &     TOTcsfis, (CSPrd(nnuc),nnuc=1,NNUcd) 
       CLOSE (80)
       CLOSE (79)
 C----
@@ -1960,9 +1973,6 @@ c            sumtst=sumtst+CSE(iesp,nejc,0)
              DO nang = 1, NDANG
                 piece = CSEmsd(iesp,nejc)
                 IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
-C               RCN, Added to compensate the doubling in exclusive (from check vs exclusive)
-C               ftmp = 1.d0
-C               IF (iesp.EQ.1) ftmp = 2.d0
                 CSEa(iesp,nang,nejc,0)
      &             = ((CSE(iesp,nejc,0)
      &             - piece*POPcseaf(0,nejc,iesp,0))
@@ -2211,6 +2221,7 @@ C-----end of ENDF spectra (inclusive)
          CLOSE (29)
          CLOSE (33)
          CLOSE (40)
+         CLOSE (41)
          CLOSE (66,STATUS = 'delete')
          WRITE (*,*) '.'
          CALL THORA(6)

@@ -5550,7 +5550,7 @@ set eres 0.02
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h  io.h ddhms.cmb Makefile]
+set modules [list empire_ctl.f main.f input.f  fusion.f tl.f subecis03.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f  degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h  io.h ddhms.cmb Makefile]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -7784,6 +7784,8 @@ set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS
 $file.inp &}} -label {Create input} 
     $site_3_0.menu92 add command \
         -command {exec $editor $file.inp &} -label {Edit input} 
+    $site_3_0.menu92 add command \
+        -command {exec $editor $file-inp.sen &} -label {Sensitivity input} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
@@ -7853,6 +7855,8 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu94 add command \
         -command {exec $editor $file.out &} -label {EMPIRE short} 
     $site_3_0.menu94 add command \
+        -command {exec $editor $file.xsc &} -label {Cross-sections} 
+    $site_3_0.menu94 add command \
         -command {exec $editor $file.sys &} -label {x-sec systematics} 
     $site_3_0.menu94 add separator \
         
@@ -7872,6 +7876,10 @@ $file.inp &}} -label {Create input}
         -command {exec $editor $file-s.endf &} -label {ENDF plotted} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file-e.endf &} -label {ENDF empend} 
+    $site_3_0.menu94 add separator \
+
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file-mat.sen &} -label {Sensitivity matrix} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \

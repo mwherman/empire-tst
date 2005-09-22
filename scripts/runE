@@ -48,6 +48,8 @@ rm  TARGET_COLL.RIPL 2>/dev/null
 rm  TARGET-*.tl 2>/dev/null
 rm  warnings 2>/dev/null
 rm  INPUT 2>/dev/null
+rm  XS-DOWN.DAT XSECTIONS.OUT XS-UP.DAT 2>/dev/null
+rm  SENSITIVITY.INP SENSITIVITY.MATRIX 2>/dev/null
 
 # COPY INPUT FILES FOR A GIVEN CASE
 cp $file.inp INPUT.DAT
@@ -92,11 +94,19 @@ if [ -s $file.c4 ]; then
    cp $file.c4 C4.dat
    echo 'Using existing file with C4 fit data:'  $file.c4
 fi
+if [ -s $file-inp.sen ]; then
+   cp $file-inp.sen SENSITIVITY.INP
+   echo 'File with sensitivity input exists:'  $file-inp.sen
+fi
+if [ -s $file-mat.sen ]; then
+   cp $file-mat.sen SENSITIVITY.MATRIX
+   echo 'File with sensitivity matrix exists:'  $file-mat.sen
+fi
 echo ' '
 echo $file ' R U N N I N G  !! !  !   !    !     !'
 time nice ../source/empire
 echo 'DONE !!!'
-
+ 
 #MOVE CASE-RELATED FILES TO THE RIGHT PLACE
 
 mv OUTPUT.DAT $file.out
@@ -109,9 +119,9 @@ rm -r TL 2>/dev/null
 if [ ! -s $file-omp.ripl ]; then
    cp OMPAR.RIPL $file-omp.ripl  2>/dev/null
 fi
-#if [ ! -s $file-omp.dir ]; then
+if [ ! -s $file-omp.dir ]; then
    cp OMPAR.DIR $file-omp.dir  2>/dev/null
-#fi
+fi
 if [ ! -s $file-inp.fis ]; then
    cp FISSION.INP $file-inp.fis  2>/dev/null
 fi
@@ -143,6 +153,13 @@ fi
 if [ -s SYSTEMATICS.TXT ]; then
    mv  SYSTEMATICS.TXT $file.sys
 fi
+if [ -s XSECTIONS.OUT ]; then
+   mv  XSECTIONS.OUT $file.xsc
+fi
+if [ -s SENSITIVITY.MATRIX ]; then
+   mv  SENSITIVITY.MATRIX $file-mat.sen
+fi
+
 
 mv EXFOR.dat $file.exf
 mv ECIS_ROT.out $file-ecis.out 2>/dev/null
@@ -182,6 +199,9 @@ rm ecis03.{ang,cs,dat,ics,pol,tlj} 2>/dev/null
 rm ecSPH.inp 2>/dev/null
 rm ECIS_SPH.out 2>/dev/null
 rm C4.dat 2>/dev/null
+rm FITIN.DAT 2>/dev/null
+rm INPUT1.DAT 2>/dev/null
+rm  SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 
 
 if  [ -s $file.exf ]; then
