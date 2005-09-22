@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-13 13:12:22 $
-Ccc   * $Id: fusion.f,v 1.53 2005-09-13 13:12:22 herman Exp $
+Ccc   * $Date: 2005-09-22 22:05:24 $
+Ccc   * $Id: fusion.f,v 1.54 2005-09-22 22:05:24 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -631,7 +631,7 @@ C-----Storing transmission coefficients for the incident channel
          p1 = (ak2*r2)/(1.0D+00 + ak2*r2)
          s1a = stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*EINl))
          p2 = (ak2*r2)**2/(9.0D+00+3.0D+00*ak2*r2+(ak2*r2)**2)
-         s2a = stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EIN1))
+         s2a = stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EINl))
 C--------Corrected scattering radius
          rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
