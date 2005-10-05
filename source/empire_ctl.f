@@ -1687,7 +1687,6 @@ C
       parameter(mxind=5000,mxinda=5000)
 
       logical LINUX/.TRUE./
-      CHARACTER*6 name
       integer*4 PIPE,itmp
       character*132 ctmp
 
@@ -1717,7 +1716,7 @@ C
       close(2)
 
       IF(LINUX) THEN
-          ctmp='mv INPUT1.DAT INPUT.DAT'
+        ctmp='mv INPUT1.DAT INPUT.DAT'
         itmp=PIPE(ctmp)
        else
         ctmp='ren INPUT1.DAT INPUT.DAT'

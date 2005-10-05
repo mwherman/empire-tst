@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-22 22:05:24 $
-Ccc   * $Id: fusion.f,v 1.54 2005-09-22 22:05:24 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-05 16:20:14 $
+Ccc   * $Id: fusion.f,v 1.55 2005-10-05 16:20:14 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -398,11 +398,17 @@ C-----------------LINUX
                   iwin = PIPE(ctmp)
                   ctmp = 'cp ccm.TLJ INCIDENT.TLJ'
                   iwin = PIPE(ctmp)
+C                 Only Legendre elastic expansion is needed
+                  ctmp = 'cp ccm.LEG INCIDENT.LEG'
+                  iwin = PIPE(ctmp)
                ELSE
 C-----------------WINDOWS
                   ctmp = 'copy ccm.CS INCIDENT.CS >NUL'
                   iwin = PIPE(ctmp)
                   ctmp = 'copy ccm.TLJ INCIDENT.TLJ'
+                  iwin = PIPE(ctmp)
+C                 Only Legendre elastic expansion is needed
+                  ctmp = 'copy ccm.LEG INCIDENT.LEG'
                   iwin = PIPE(ctmp)
                ENDIF
 C--------------Inelastic cross section (incident.ics)
@@ -568,14 +574,16 @@ C--------LINUX
          ctmp = 'mv INCIDENT.CS '//ctldir//ctmp23//'.CS'
          iwin = PIPE(ctmp)
          IF (DIRect.GT.0) THEN
-            ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp23//'.ICS'
-            iwin = PIPE(ctmp)
+           ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp23//'.ICS'
+           iwin = PIPE(ctmp)
          ENDIF
          IF (ICAlangs.GT.0) THEN
            ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP'
-         iwin = PIPE(ctmp)
-          ENDIF
+           iwin = PIPE(ctmp)
+         ENDIF
          ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp23//'.ANG'
+         iwin = PIPE(ctmp)
+         ctmp = 'mv INCIDENT.LEG '//ctldir//ctmp23//'.LEG'
          iwin = PIPE(ctmp)
          ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ'
          iwin = PIPE(ctmp)
@@ -584,14 +592,16 @@ C--------WINDOWS
          ctmp = 'move INCIDENT.CS '//ctldir//ctmp23//'.CS >NUL'
          iwin = PIPE(ctmp)
          IF (DIRect.GT.0) THEN
-            ctmp = 'move INCIDENT.ICS '//ctldir//ctmp23//'.ICS >NUL'
-            iwin = PIPE(ctmp)
+           ctmp = 'move INCIDENT.ICS '//ctldir//ctmp23//'.ICS >NUL'
+           iwin = PIPE(ctmp)
          ENDIF
          IF (ICAlangs.GT.0) THEN
            ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP >NUL'
-         iwin = PIPE(ctmp)
-          ENDIF
+           iwin = PIPE(ctmp)
+         ENDIF
          ctmp = 'move INCIDENT.ANG '//ctldir//ctmp23//'.ANG >NUL'
+         iwin = PIPE(ctmp)
+         ctmp = 'move INCIDENT.LEG '//ctldir//ctmp23//'.LEG >NUL'
          iwin = PIPE(ctmp)
          ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ >NUL'
          iwin = PIPE(ctmp)
@@ -1101,6 +1111,8 @@ C--------LINUX
          IF (Iret.EQ.2) RETURN
          ctmp = 'cp ecis03.ang '//Outname(1:Length)//'.ANG'
          iwin = PIPE(ctmp)
+         ctmp = 'cp ecis03.leg '//Outname(1:Length)//'.LEG'
+         iwin = PIPE(ctmp)
          IF (Iret.EQ.3) RETURN
          ctmp = 'cp ecis03.ics '//Outname(1:Length)//'.ICS'
          iwin = PIPE(ctmp)
@@ -1117,6 +1129,8 @@ C--------WINDOWS
          iwin = PIPE(ctmp)
          IF (Iret.EQ.2) RETURN
          ctmp = 'copy ecis03.ang '//Outname(1:Length)//'.ANG >NUL'
+         iwin = PIPE(ctmp)
+         ctmp = 'copy ecis03.leg '//Outname(1:Length)//'.LEG >NUL'
          iwin = PIPE(ctmp)
          IF (Iret.EQ.3) RETURN
          ctmp = 'copy ecis03.ics '//Outname(1:Length)//'.ICS >NUL'

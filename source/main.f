@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-22 22:07:15 $
-Ccc   * $Id: main.f,v 1.136 2005-09-22 22:07:15 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-05 16:20:13 $
+Ccc   * $Id: main.f,v 1.137 2005-10-05 16:20:13 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -41,17 +41,17 @@ C
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
-     &                 ecm, elada(NDAngecis), emeda, emedg,
-     &                 emedh, emedn, emedp, erecoil, espec, espmax,
-     &                 epre, ftmp, gamfis, gamt, gang, grand, gtotsp, 
-     &                 htotsp, piece, pope, poph, popl, popleft, poplev,
-     &                 popread, poptot, ptotsp, q2, q3, qmax, qstep,
-     &                 recorp, sgamc, spdif, spdiff, stauc,
+     &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda, 
+     &                 emedg, emedh, emedn, emedp, erecoil, espec, 
+     &                 espmax, epre, ftmp, gamfis, gamt, gang, grand, 
+     &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
+     &                 poplev, popread, poptot, ptotsp, q2, q3, qmax, 
+     &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
      &                 totemis, weight, xcse, xizat, xnhms, xnl,
      &                 xnor, xtotsp, xsinlcont, xsinl, zres, angstep,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
-     &                 checkXS
+     &                 checkXS 
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -65,8 +65,8 @@ C
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nnuc,
-     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,
-     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4
+     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,   neles,
+     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4 
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -152,7 +152,15 @@ C-----
         DO iang = 1, NANgela
          READ (45,'(24x,E12.5)',END = 1400) elada(iang)
         ENDDO
-       ELSE
+      ELSE
+        OPEN (45,FILE = (ctldir//ctmp23//'.LEG'),STATUS = 'OLD',
+     &      ERR = 1400)
+        READ (45,*,END = 1400)   ! To skip first line <LEGENDRE> ..
+        READ (45,'(5x,i5)',END = 1400) neles    
+        DO iang = 1, min(NDAng,neles)
+           READ (45,'(10x,d20.10)',END = 1400) elleg(iang)
+        ENDDO
+      CLOSE(45)
         OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
      &      ERR = 1400)
         READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
@@ -160,7 +168,8 @@ C-----
         DO iang = 1, NANgela
            READ (45,'(7x,E12.5)',END = 1400) elada(iang)
         ENDDO
-       ENDIF
+      ENDIF
+
       IF (DIRect.NE.0) THEN
          OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
@@ -361,7 +370,7 @@ C        WRITE (6,99010) CSFus
 99032 FORMAT ('        ',10(5x,'E=',f7.4))
 99033 FORMAT ('        ',9(4x,f4.1,'/',f5.4))
 99034 FORMAT ('        ',10(4x,f4.1,'/',f5.4))
-99035 FORMAT (1x,f5.0,3x,11(2x,E12.6))
+99035 FORMAT (1x,f5.1,3x,11(2x,E12.6))
 99040 FORMAT (6x,3x,11(2x,E12.6))
 
       WRITE (6,'(//)')
@@ -912,23 +921,31 @@ C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
                   WRITE (12,*) ' '
                   IF (ICAlangs.GT.0) THEN
                     WRITE (12,99045) (ANGles(iang),iang = 1, NANgela)
-                    ELSE
-                     delang = 180./FLOAT(NANgela - 1)
-                     WRITE (12,99045) (FLOAT(iang - 1)*delang,iang = 1,
+                  ELSE
+                    delang = 180./FLOAT(NANgela - 1)
+                    WRITE (12,99045) (FLOAT(iang - 1)*delang,iang = 1,
      &                                                         NANgela)
-                   ENDIF
+                  ENDIF
 99045             FORMAT (10X,8G15.5)
-                 WRITE (12,99050) (elada(iang) + elcncs,iang = 1,NANgela
-     &                             )
+                  WRITE (12,99050) (elada(iang)+elcncs,iang = 1,NANgela)
 99050             FORMAT (9X,8E15.5)
                   WRITE (12,*) ' '
+                  WRITE (12,*) ' '
+                  WRITE (12,*) ' Elastic legendre expansion '
+                  WRITE (12,*) ' '
+                  WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                  WRITE (12,*) ' '
+                  WRITE (12,'(9X,8D15.8)') (elleg(1)+elcncs*4.d0*PI),
+     &               (elleg(iang),iang = 2,min(NDAng,neles))
+                  WRITE (12,*) ' '
+
                   IF (elcncs.EQ.0) WRITE (6,*)
      &                 'WARNING: CN elastic is 0'
 
                   IF (FITomp.LT.0) THEN
-C                    WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs,CSPrd(1)
-                    WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
-c                    WRITE(*,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+C                  WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs,CSPrd(1)
+                   WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+c                  WRITE(*,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
                    IF (ncoll.GT.0) THEN
 C--------locate position of the projectile among ejectiles
                     CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -2245,24 +2262,23 @@ C        SAVING RANDOM SEEDS
       ENDIF
       epre = EIN
 C-----
-C-----Initialized in input.f
-C     NANgela = 37
-C     NDAng   = 37
 C-----
       IF(FITomp.GE.0) THEN
-        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-          NANgela = 73
-          NDAng   = 73
-        ENDIF
-        IF(EIN.GT.50.) THEN
-          NANgela = 91
-          NDAng   = 91
-        ENDIF
-        IF(NANgela.GT.NDAngecis) THEN
-          WRITE(6,*)
-     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-         STOP 'FATAL: increase NDAngecis in dimension.h'
-        ENDIF
+        NANgela = 73
+        NDAng   = 73
+C       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+C         NANgela = 73
+C         NDAng   = 73
+C       ENDIF
+C       IF(EIN.GT.50.) THEN
+C         NANgela = 91
+C         NDAng   = 91
+C       ENDIF
+C       IF(NANgela.GT.NDAngecis) THEN
+C         WRITE(6,*)
+C    &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+C        STOP 'FATAL: increase NDAngecis in dimension.h'
+C       ENDIF
 C-------set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
         DO na = 1, NDANG

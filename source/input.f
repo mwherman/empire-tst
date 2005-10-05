@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-22 22:07:14 $
-Ccc   * $Id: input.f,v 1.177 2005-09-22 22:07:14 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-05 16:20:13 $
+Ccc   * $Id: input.f,v 1.178 2005-10-05 16:20:13 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -240,13 +240,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -394,15 +394,17 @@ C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
 C        Starting value of the number of angular points
-         NANgela = 37
-         NDAng   = 37
-         IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-           NANgela = 73
-           NDAng   = 73
-         ELSEIF(EIN.GT.50.) THEN
-           NANgela = 91
-           NDAng   = 91
-         ENDIF
+C        NANgela = 37
+C        NDAng   = 37
+C        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+C          NANgela = 73
+C          NDAng   = 73
+C        ELSEIF(EIN.GT.50.) THEN
+C          NANgela = 91
+C          NDAng   = 91
+C        ENDIF
+         NANgela = 73
+         NDAng   = 73
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(6,*)
      &        'FATAL: INCREASE NANgecis IN dimension.h UP TO ',NANgela
@@ -1301,6 +1303,7 @@ C-----set giant resonance parameters for target
 C-----compound nucleus 1
       nnuc = 1
       IF (NEXreq.GT.NDEX) THEN
+       WRITE (6,*) 
          WRITE (6,*) ' NUMBER OF ENERGY BINS IN COMP. NUCL. SET TO',
      &               NDEX
          NEXreq = MAX(NDEX - 2,2)
@@ -1646,10 +1649,12 @@ Cpr         END DO
 C-----------calculate tramsmission coefficients
             IF (FITlev.EQ.0) THEN
                ICAlangs = ICAlangs-10 
+               itmp = NANgela
                NANgela = 2
                CALL TLEVAL(nejc,nnur,nonzero)
                ICAlangs = ICAlangs+10 
-               NANgela = NDAng
+               NANgela = itmp
+C              NANgela = NDAng
 C--------------print transmission coefficients
                IF (nonzero .AND. IOUt.EQ.5) THEN
                   WRITE (6,*)

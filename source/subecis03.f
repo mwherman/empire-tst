@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2005-07-28 21:05:00 $
-Ccc   * $Id: subecis03.f,v 1.13 2005-07-28 21:05:00 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-05 16:20:14 $
+Ccc   * $Id: subecis03.f,v 1.14 2005-10-05 16:20:14 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
@@ -50,7 +50,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN (62,FILE = 'file62')
       OPEN (63,FILE = 'ecis03.tlj')
       OPEN (64,FILE = 'ecis03.exp')
-      OPEN (65,FILE = 'file65')
+      OPEN (65,FILE = 'ecis03.leg')
       OPEN (91,FILE = 'file91')
       OPEN (85,FILE = 'ecis03.ang')
       OPEN (86,FILE = 'file86')
@@ -71,7 +71,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (62,STATUS = 'delete')
       CLOSE (63)
       CLOSE (64)
-      CLOSE (65,STATUS = 'delete')
+      CLOSE (65)
       CLOSE (91,STATUS = 'delete')
       CLOSE (85)
       CLOSE (86,STATUS = 'delete')

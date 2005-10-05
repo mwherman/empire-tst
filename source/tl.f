@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-09-22 22:03:44 $
-Ccc   * $Id: tl.f,v 1.71 2005-09-22 22:03:44 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-05 16:20:13 $
+Ccc   * $Id: tl.f,v 1.72 2005-10-05 16:20:13 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1961,6 +1961,8 @@ C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----penetrabilities punched on cards
       ECIs2(13:13) = 'T'
+C-----Legendre coefficients output
+      ECIs2(15:15) = 'T'
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
@@ -2047,6 +2049,8 @@ C-----Matching radius
 C-----CARD 5
       rmatch = 20.D0
       WRITE (1,'(10x,f10.5)') rmatch
+C     To obtain Legendre expansion a blank card calling for default values of the expansion
+      WRITE (1,*) 
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
 C-----ground state
@@ -2355,6 +2359,8 @@ C-----Angular distribution is calculated
 C-----Penetrabilities punched on cards
       ECIs2(13:13) = 'T'
 C
+C-----Legendre coefficients output
+      ECIs2(15:15) = 'T'
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
@@ -2439,6 +2445,8 @@ C-----make sure that all contributions to s-wave scattering are included
 C-----CARD 5
       rmatch = 20.D0
       WRITE (1,'(10x,f10.5)') rmatch
+C     To obtain Legendre expansion a blank card calling for default values of the expansion
+      WRITE(1, *)
 C-----Matching radius calculated within ECIS
 C     WRITE(1, *)
       ch = '-'
