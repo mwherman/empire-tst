@@ -34,6 +34,10 @@ make -f datzvdl.mak
 make -f endzvd.mak
 make -f curzvd3l.mak
 make -f pntdatl.mak
+cd ../kalman
+make kalman3
+make kalend
+make c4tokal
 cd ../../EXFOR
 make
 cd ../
