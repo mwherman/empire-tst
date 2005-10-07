@@ -772,6 +772,7 @@ C*
       KRW =MRW
       MF  =MF0
       MT  =MT0
+      IINL=0
       I600=0
       I800=0
       MINL=0
@@ -1148,7 +1149,7 @@ C* Define particle multiplicities
       YL=1
       IF(IZAP0.LT.0) GO TO 30
       CALL YLDPOU(YL,MT0,IZAP0)
-C* Special treatment for neutron-induced fission
+C* Special treatment for neutrons from fission
       IF(IZAP0.EQ.1) THEN
         IF(MT0.EQ.19) GO TO 900
         IF(MT0.EQ.18) THEN
@@ -1192,6 +1193,7 @@ C...      print *,'Searching MAT,MF,MT,IER',MAT,MF,MT,IER
 C...
       IF(IER.NE.0) THEN
         IF(KEA.EQ.2 .AND. IZAP0.EQ.0) THEN
+C* If no data found and photon spectrum requested, try MF 13
           REWIND LEF
           MF =13
           MT =MT0
@@ -1253,20 +1255,21 @@ C* Error trapping when no data found in the ENDF file
         NK =N1
         JNK=0
 C* Split the work array RWO to operate on function and argument
-C* 1   - First argument
+C* LE  - First argument
 C* LX  - First function
 C* LXE - Second argument
 C* LXX - Second function
         KX =MRW/2
+        LE =1
         LX =KX+1
         LD =KX/2
-        LXE= 1+LD
+        LXE=LE+LD
         LXX=LX+LD
 C* Loop over particles
    31   JNK=JNK+1
 C* Retrieve the particle yield
         CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
-     &             ,RWO,RWO(LX),KX,IER)
+     &             ,RWO(LE),RWO(LX),KX,IER)
 C* Check for matching particle - else skip section
         IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
 c...
@@ -1457,21 +1460,21 @@ C* Read incident energy definitions
       LXX=LXE+KX
       NE1=0
       EI1=0
-      DO 44 IE=1,NE
+      DO IE=1,NE
 C* For each incident energy read the angular distribution
-      CALL RDTAB1(LEF,TEMP,EI2,LT,L2,NRP,NEP1,NBT(NM),INR(NM)
-     1           ,RWO(LXE),RWO(LXX),KX,IER)
-      IF(IER.NE.0) THEN
-        PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
-        STOP 'DXSEN1 ERROR reading ang.distributions'
-      END IF
-C...  IF(NRP.GT.1)
-C... 1 PRINT *,' WARNING - Multiple A interp.ranges for MF 4, MT',MT
+        CALL RDTAB1(LEF,TEMP,EI2,LT,L2,NRP,NEP1,NBT(NM),INR(NM)
+     1             ,RWO(LXE),RWO(LXX),KX,IER)
+        IF(IER.NE.0) THEN
+          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+          STOP 'DXSEN1 ERROR reading ang.distributions'
+        END IF
+C...    IF(NRP.GT.1)
+C... 1   PRINT *,' WARNING - Multiple A interp.ranges for MF 4, MT',MT
 C* Lin-interpolate angular distributions over incident energies
-      INE=2
-      CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR(NM)
-     1               ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,KX)
-   44 CONTINUE
+        INE=2
+        CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR(NM)
+     1                 ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,KX)
+      END DO
 C*
 C* Angular distribution at incident energy Ein processed
 C* Calculate  integral SS over distribution DXS at cosines ENR
@@ -1558,7 +1561,7 @@ C*        Average cosine of the outgoing particle in the Lab system
         XLB=SPS/SDS
       END IF
       IF(AWP.LT.0) GO TO 50
-C* Interpolate precomputed Eou corresponding to Xlb
+C* Interpolate precomputed Eou corresponding to XLB
       IER=0
       EO =FINTXS(XLB,ENR,RWO(LXE),NE1,INA,IER)
       NE1=21
@@ -1758,7 +1761,6 @@ C...    Secondary particle energy distributions MF 5 not coded
         IER=13
         GO TO 900
       END IF
-      GO TO 800
 C*
 C* Process coupled energy/angle distributions MF6 of selected particle
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
@@ -1835,6 +1837,15 @@ C*        Set IER to flag error and terminate
         END IF
         GO TO 61
       END IF
+C* Particle found - extract tye yield
+      CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
+      YL6=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+      IF(MT.EQ.18) THEN
+C* Neutron multiplicities for fission are included in MF1
+        YL=YL*YL6
+      ELSE
+        YL=YL6
+      END IF
 C* Check the data representation for this particle
 c...
 c...      print *,'processing particle/mf/mt/law',nint(zap),mf,mt,law
@@ -1890,8 +1901,6 @@ C* The rest of processing is identifal to MF 4 case
 C*
 C* Process MF 6 Law 7 data
    70 CONTINUE
-      CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
-      YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
 C* Read incident energy definitions
       CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
       NM=NR+1
@@ -1960,9 +1969,9 @@ C... Should calculate the proper lower bound for the cosine !!!
       INM=INM-10*(INM/10)
       CALL YTGEOU(SS,A1,A2,NMU,AMU,PMU,INM)
       IF(DEG.LT.0) SS=SS*(A2-A1)
-      DO 73 I=1,NEP1
-      RWO(LX-1+I)=RWO(LX-1+I)/SS
-   73 CONTINUE
+      DO I=1,NEP1
+        RWO(LX-1+I)=RWO(LX-1+I)/SS
+      END DO
 C...  IF(ABS(SS-1).GT.0.01) PRINT *,'MAT,MT,Ei,SS',ZA0,MT0,EI2,SS
 C*
 C* Lin-interpolate between distributions for two incident energies
@@ -2208,9 +2217,9 @@ C* Distribution assembled - check that the last point is zero
       END IF
 C* Scale the distribution by the cross section
       SS=YL*XS*SAN
-      DO 804 I=1,NEN
-      DXS(I)=SS*DXS(I)
-  804 CONTINUE
+      DO I=1,NEN
+        DXS(I)=SS*DXS(I)
+      END DO
 c...
 c...      print *,'nen',nen
 c...      print *,enr(1),dxs(1)
@@ -2625,7 +2634,7 @@ C-D    IER=1  End-of-file
 C-D        2  Read error
 C-D        9  Available field length NMX is exceeded.
 C-
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(1),INR(1)
       DIMENSION    EN(NMX), XS(NMX)
 C*
       IER=0
@@ -2653,7 +2662,7 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(N1),INR(N1)
 C*
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
@@ -2711,10 +2720,10 @@ C-Purpose: Interpolate the cross section table to EIN
         FINTXS=XS(NP)
         RETURN
       END IF
-      DO 20 I=2,NP
-      I2=I
-      IF(EN(I).GE.EIN) GO TO 22
-   20 CONTINUE
+      DO I=2,NP
+        I2=I
+        IF(EN(I).GE.EIN) GO TO 22
+      END DO
       IER=11
    22 I1=I2-1
       IF(INR.EQ.2) THEN
@@ -2764,7 +2773,7 @@ C-Purpose: Write a CONT record to an ENDF file
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INR(1),X(1),Y(1)
+      DIMENSION     NBT(NR),INR(NR),X(NP),Y(NP)
       DATA BLN/'           '/
 C* First line of the TAB1 record
       CALL CHENDF(C1,REC(1))
@@ -2815,7 +2824,7 @@ C* Loop for all argument&function pairs
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INR(1)
+      DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -3242,15 +3251,14 @@ C*
      1            , AI2,NEP2,EN2,XS2 ,INE, MEP2)
 C-Title  : Subroutine FYTG2D
 C-Purpose: Integrate tabulated distribution
-      DIMENSION  EN0(NEP0),XS0(NEP0),
-     1           EN1(NEP1),XS1(NEP1),
+      DIMENSION  EN0(MEP2),XS0(MEP2),
+     1           EN1(MEP2),XS1(MEP2),
      2           EN2(MEP2),XS2(MEP2)
 C*
       IF(INE.GT.2) STOP 'Log interpolation in MF 6'
 C* Convert second set of points to linearly interpolable form
       IF(INE.EQ.1) THEN
 C* Convert histogram interpolation to linear
-
         J=2*NEP2
         IF(J.GT.MEP2) THEN
 C...      PRINT *,'J,MEP2',J,MEP2
