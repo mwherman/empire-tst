@@ -88,6 +88,8 @@ DFUS    Diffuseness in the transmission coefficients for HI fusion
 TRGLEV  Excited level of the target is set to VAL
         (default: 1 (ground state)).
 
+TOTRED  Total cross section will be multiplied by VAL (default: 1.).
+
 Width fluctuations (HRTW)
 -------------------------
 
