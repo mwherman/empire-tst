@@ -35,6 +35,9 @@
 ! *                        9. MOVE POTENTIAL SCATTERING TEST TO PSYCHE.
 ! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
 ! *                        1. FIX RESONANCE PARAMETER SUM TEST
+! *         VERSION 7.03   SEPTEMBER 2005     M.HERMAN
+! *                        1. MAX NUMBER OF SECTIONS IN MT=12,13 INCREASED
+! *                           TO 200
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -100,7 +103,7 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
 !...MOD
 !/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
@@ -395,7 +398,7 @@
 !
 !     STORES FLAG FOR MT'S SEEN IN FILE 12 AND/OR 13
 !
-      INTEGER(KIND=I4), PARAMETER :: SZMTS = 100
+      INTEGER(KIND=I4), PARAMETER :: SZMTS = 200
       INTEGER(KIND=I4), DIMENSION(SZMTS,2) :: ICON
       INTEGER(KIND=I4) :: NPMT
 !
