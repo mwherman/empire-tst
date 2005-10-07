@@ -1,0 +1,47 @@
+#! /bin/sh -
+#SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION)
+file=$1
+MAT=$2
+MT=$3
+work=`pwd`
+if [ "$MAT" = "" ]
+   then
+   MAT=1111
+fi
+if [ "$MT" = "" ]
+   then
+   MT=102
+fi
+
+../util/kalman/genkal.pl $file
+
+ln -s $file.c4 fort.1
+../util/kalman/c4tokal >kalman.inp
+rm fort.1
+if [ ! -s $file-expcorr.kal ]; then
+   cp fort.12 $file-expcorr.kal  
+else
+   cp $file-expcorr.kal fort.12     
+fi
+if [ ! -s $file-expxsc.kal ]; then
+   cp fort.10 $file-expxsc.kal  
+else
+   cp $file-expxsc.kal fort.10     
+fi
+
+echo 'Edit Kalman input'
+gvim kalman.inp
+read dum
+../util/kalman/kalman3 <kalman.inp >$file-out.kal
+mv fort.13 $file-xsc.kal
+mv fort.14 $file-cov.kal
+mv fort.18 $file-err-$MT.kal
+gvim ../util/kalman/kalend.f
+echo 'Edit data section'
+read dum
+g77 ../util/kalman/kalend.f -o ../util/kalman/kalend
+../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
+../util/kalman/mf33.pl $MT <$file-33-$MT.cov
+../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >corrplot.dat
+gnuplot ../util/kalman/corr.plt
+exit
