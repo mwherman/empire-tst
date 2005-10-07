@@ -27,7 +27,6 @@ EOF
 mv empend.log $file-log.empend
 rm OUTPUT.DAT
 
-
 # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
 
 rm $file-f.endf 2>/dev/null
