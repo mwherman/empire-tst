@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-05 16:20:13 $
-Ccc   * $Id: input.f,v 1.178 2005-10-05 16:20:13 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-10-07 20:40:50 $
+Ccc   * $Id: input.f,v 1.179 2005-10-07 20:40:50 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2537,7 +2537,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b28  |'
+     &           '                       |  E M P I R E  -  2.19.b29  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
