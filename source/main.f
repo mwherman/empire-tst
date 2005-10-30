@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 12:40:35 $
-Ccc   * $Id: main.f,v 1.138 2005-10-30 12:40:35 Capote Exp $
+Ccc   * $Date: 2005-10-30 22:08:30 $
+Ccc   * $Id: main.f,v 1.139 2005-10-30 22:08:30 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -160,7 +160,7 @@ C-----
         DO iang = 1, min(NDAng,neles)
            READ (45,'(10x,d20.10)',END = 1400) elleg(iang)
         ENDDO
-      CLOSE(45)
+        CLOSE(45)
         OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
      &      ERR = 1400)
         READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
@@ -587,8 +587,10 @@ C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
               WRITE (6,*) ' '
 C-------------Maximum and minimum energy bin
               echannel = EX(NEX(1),1) - Q(nejc,1)
-C-------------last continuum energy bin is calculated
-              DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
+C-------------Last continuum energy bin is calculated (+ 1 added, 10, 2005)
+C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
+
+              DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 2.0001),1)
                 WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
      &           (max(CSEa(i,iang,nejc,1),0.d0),iang = iad,iam)
               ENDDO
@@ -739,7 +741,7 @@ C    &  '' mb including'')') CSFus
      &  '' mb including'')') CSFus + SINl + SINlcc
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
-     &  G13.6,'' mb'')') SINl
+     &  G13.6,'' mb'')') SINl + SINlcc
             WRITE (6,'(''   DWBA to continuum = '',
      &  G13.6,'' mb'')') xsinlcont
             WRITE (6,'(''   PE + inelastic to continuum = '',
@@ -2027,10 +2029,12 @@ c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
      &           23(1H*))')
       ENDIF
       IF(abs(ABScs - checkXS).GT.0.01*ABScs) THEN
-         WRITE (6,*)
+        WRITE (6,*)
         WRITE (6,'('' WARNING: Sum of production XS and fission XS'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
-        WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
+
+              IF((ABScs - 4.*PI*ELCncs).NE.0.d0)
+     &    WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
      &            100.d0*abs((ABScs - 4.*PI*ELCncs - checkXS))/
      &                    (ABScs - 4.*PI*ELCncs)
       ENDIF
@@ -2082,23 +2086,27 @@ C--------exact endpoint
 C--------print inclusive spectra of ejectiles
 C--------neutrons
          nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
-         IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-         WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
-         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-         WRITE (12,*) ' '
-         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+               IF (nspec.gt.0) THEN
+
+          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
+          WRITE (12,'(30X,''A      n      g      l      e      s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
-         DO ie = 1, nspec - 1
-           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+          DO ie = 1, nspec - 1
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
 c    &            (max(0.d0,CSEa(ie,nang,1,0)),nang = 1,NDANG)
      &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
-         ENDDO
-C--------exact endpoint
-         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
+          ENDDO
+C---------exact endpoint
+          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &            (max(0.d0,CSEa(nspec,nang,1,0)),nang = 1,NDANG)
-         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
+          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &            (0.d0,nang = 1,NDANG)
+
+            ENDIF
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
          IF(nspec.gt.0) then
@@ -2148,8 +2156,8 @@ C--------light ions
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
              WRITE (12,
-     &'(''  Spectrum of  '',I1,''-'',A2,4X,                          ''(
-     &n,x)'')') INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
+     &'(''  Spectrum of  '',I1,''-'',A2,4X,A5,I7,''(LI,x)'')')
+     &INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
              WRITE(12,'(30X,''A      n      g      l      e      s '')')
              WRITE (12,*) ' '
              WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
