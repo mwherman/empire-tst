@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-26 11:16:07 $
-Ccc   * $Id: pcross.f,v 1.40 2005-07-26 11:16:07 Capote Exp $
+Ccc   * $Date: 2005-10-30 22:07:51 $
+Ccc   * $Id: pcross.f,v 1.41 2005-10-30 22:07:51 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -170,9 +170,11 @@ C        ENDIF
          pair(nejc) = 0.d0
 C--------Maximum and minimum energy bin
          excnq = EXCn -Q(nejc,1)
-C--------last continuum energy bin is calculated, RCN 11/2004
-         nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
-         DO ienerg = 2, NEX(nnur)
+C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
+C        nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 2.0001),1)
+         DO ienerg = 2, nexrt
+C        DO ienerg = 2, NEX(nnur)	 
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
 C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
@@ -187,8 +189,9 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
       ENDDO
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
-C-----Last continuum energy bin is calculated
-      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
+C-----Last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
+C     nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
+      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 2.0001),1)
       DO ienerg = 2, NDEX
          eee = DE*(ienerg - 1)
          IF (ec.GT.eee) iemax(0) = ienerg
@@ -397,7 +400,7 @@ C     Note, that PCROSS only calculates emission into the continuum
       totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
-          IF(nnur.LT.0) cycle
+         IF(nnur.LT.0) cycle
          ao = AEJc(nejc)
          zo = ZEJc(nejc)
          IF (nejc.gt.0) THEN !particle
