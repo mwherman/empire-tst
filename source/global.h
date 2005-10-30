@@ -39,7 +39,7 @@
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc,
      &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys,
-     &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev), LEVcc,
+     &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev), 
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,

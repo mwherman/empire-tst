@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-05 16:20:14 $
-Ccc   * $Id: fusion.f,v 1.55 2005-10-05 16:20:14 Capote Exp $
+Ccc   * $Date: 2005-10-30 12:40:35 $
+Ccc   * $Id: fusion.f,v 1.56 2005-10-30 12:40:35 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-05 16:20:13 $
-Ccc   * $Id: main.f,v 1.137 2005-10-05 16:20:13 Capote Exp $
+Ccc   * $Date: 2005-10-30 12:40:35 $
+Ccc   * $Id: main.f,v 1.138 2005-10-30 12:40:35 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -931,11 +931,11 @@ C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
 99050             FORMAT (9X,8E15.5)
                   WRITE (12,*) ' '
                   WRITE (12,*) ' '
-                  WRITE (12,*) ' Elastic legendre expansion '
+                  WRITE (12,*) ' Legendre coefficients expansion '
                   WRITE (12,*) ' '
                   WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                   WRITE (12,*) ' '
-                  WRITE (12,'(9X,8D15.8)') (elleg(1)+elcncs*4.d0*PI),
+                  WRITE (12,'(9X,8D15.8)') (elleg(1)+elcncs),
      &               (elleg(iang),iang = 2,min(NDAng,neles))
                   WRITE (12,*) ' '
 
@@ -2264,8 +2264,8 @@ C        SAVING RANDOM SEEDS
 C-----
 C-----
       IF(FITomp.GE.0) THEN
-        NANgela = 73
-        NDAng   = 73
+        NANgela = 91
+        NDAng   = 91
 C       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
 C         NANgela = 73
 C         NDAng   = 73

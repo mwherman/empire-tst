@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-10-07 20:40:50 $
-Ccc   * $Id: input.f,v 1.179 2005-10-07 20:40:50 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-10-30 12:40:35 $
+Ccc   * $Id: input.f,v 1.180 2005-10-30 12:40:35 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -240,13 +240,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -5254,6 +5254,10 @@ C-----------------EMPIRE systematics with M-S shell corrections
                ENDIF
                IF(ATIlnor(nnuc).EQ.0) THEN 
                   ATIlnor(nnuc) = atiln
+C
+C              The following two lines must be commented to reproduce Th-232 evaluation
+C              with the original th32.inp input file dated 16/07/2005
+C              (another change is also needed (look for atilno appearance)
                ELSE
                   ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
@@ -5308,6 +5312,9 @@ C--------------Calculate sum for the average normalization factor
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2F10.3)') 
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
      &         atilave, ATIlnor(nnuc)
+C           The following line must also be commented to reproduce Th-232 evaluation
+C           with the original th32.inp input file dated 16/07/2005
+C           (another change before this one (look for atilno appearance)    
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
          ENDIF
       ENDDO

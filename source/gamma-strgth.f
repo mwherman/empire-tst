@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-04-24 20:12:06 $
-Ccc   * $Id: gamma-strgth.f,v 1.23 2005-04-24 20:12:06 Capote Exp $
+Ccc   * $Date: 2005-10-30 12:40:35 $
+Ccc   * $Id: gamma-strgth.f,v 1.24 2005-10-30 12:40:35 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -313,7 +313,7 @@ C Local variables
 C
       DOUBLE PRECISION ed, gqr
       ed = Eg*Eg
-	gqr = 0.d0
+      gqr = 0.d0
       IF (TE2.NE.0.D0) gqr = DE2*ed*ed/((ed - EE2)**2 + WE2*ed)
       E2 = (1 - TE2)*CE2*3.54E-13*A4*ed*ed*Eg + TE2*gqr
       END
@@ -338,7 +338,7 @@ C Local variables
 C
       DOUBLE PRECISION ed, gmr
       ed = Eg*Eg
-	gmr = 0.d0
+      gmr = 0.d0
       IF (TM1.NE.0.D0) gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)
       XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
       END
