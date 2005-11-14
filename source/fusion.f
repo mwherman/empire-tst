@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 12:40:35 $
-Ccc   * $Id: fusion.f,v 1.56 2005-10-30 12:40:35 Capote Exp $
+Ccc   * $Date: 2005-11-14 17:18:39 $
+Ccc   * $Id: fusion.f,v 1.57 2005-11-14 17:18:39 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -269,7 +269,7 @@ C--------for photon induced reactions
 C--------if FUSREAD true read l distribution of fusion cross section
 C--------and calculate transmission coefficients
          el = EINl
-         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,.FALSE.)
+         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
          wf = ak2/10.D0
          DO j = 1, NDLW
             READ (11,*,END = 150) csvalue
@@ -284,14 +284,14 @@ C--------and calculate transmission coefficients
             ENDIF
          ENDDO
   150    NLW = j - 1
-          CSFus = 0.d0
+         CSFus = 0.d0
          DO j = 1, NLW
             CSFus = CSFus + (2*j - 1)*stl(j)
-          ENDDO
+         ENDDO
          maxlw = NLW
          ABScs = CSFus
-          SINlcc=0.d0
-          SINl=0.d0
+         SINlcc=0.d0
+         SINl=0.d0
          WRITE (6,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (6,*)
@@ -531,8 +531,7 @@ C--------calculation of h.i. transmission coefficients for fusion
          NLW = maxlw
 C--------channel spin min and max
          el = EINl
-         relcal = .FALSE.
-         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+         CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
          IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
      &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
@@ -631,8 +630,9 @@ C-----Storing transmission coefficients for the incident channel
 
   300 el = EINl
       relcal = .FALSE.
-      IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
+      IF (IRElat(Npro,Ntrg).GT.0 .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+      relcal = .FALSE.
 
       IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))

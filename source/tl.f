@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 12:40:32 $
-Ccc   * $Id: tl.f,v 1.73 2005-10-30 12:40:32 Capote Exp $
+Ccc   * $Date: 2005-11-14 17:15:00 $
+Ccc   * $Id: tl.f,v 1.74 2005-11-14 17:15:00 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -629,12 +629,12 @@ C-----Here ieof must be 0 always because we checked in input.f
       ENDIF
 C-----Reading o.m.  potential parameters for IPOTEN catalog number
       CALL OMIN(ki,ieof,irel)
-       IRElat(Nejc,Nnuc) = irel
+      IRElat(Nejc,Nnuc) = irel
 C
 C-----Ener must be in LAB system
 C
   100 relcal = .FALSE.
-      IF (irel.GT.0) relcal = .TRUE.
+      IF (irel.GT.0 .or. RELkin) relcal = .TRUE.
       IF (Ikey.LT.0) THEN
          ener = Eilab
          CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,1,relcal)
@@ -642,6 +642,7 @@ C
          CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,2,relcal)
          ener = Eilab
       ENDIF
+      relcal = .FALSE.
       CALL RIPL2EMPIRE(Nejc,Nnuc,ener)
       IF (CCCalc) MODelecis = MODelcc
 C     Sometimes imaginary potentials are allowed to be negatives, RCN
@@ -1553,8 +1554,9 @@ C
 C     xmas_nnuc = AMAss(Nnuc)
       elab = EINl
       relcal = .FALSE.
-      IF (IRElat(Nejc,Nnuc).GT.0) relcal = .TRUE.
+      IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
+      relcal = .FALSE.
 C-----Absorption cross section in mb
       sabs = 0.D0
       DO l = 0, Maxlw
@@ -1763,8 +1765,9 @@ C-----For vibrational the Tls must be multiplied by
          xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
          xmas_nejc = EJMass(Nejc)
          relcal = .FALSE.
-         IF (IRElat(Nejc,Nnuc).GT.0) relcal = .TRUE.
+         IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
+         relcal = .FALSE.
 C--------Reaction cross section in mb
          sabs = 0.D0
          DO l = 0, lmax
@@ -1857,8 +1860,8 @@ C     For ecis03
 C
 C-----*** OPTICAL POTENTIALS ***
 C-----Relativistic kinematics (y/n)
-      IF(IRElat(Nejc,Nnuc).GT.0) RELkin = .TRUE.
-      IF (RELkin) THEN
+C     IF(IRElat(Nejc,Nnuc).GT.0) RELkin = .TRUE.
+      IF(IRElat(Nejc,Nnuc).GT.0) THEN
          FLGrel = 'y'
       ELSE
          FLGrel = 'n'

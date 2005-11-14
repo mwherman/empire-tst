@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-01 14:30:41 $
-Ccc   * $Id: HRTW-comp.f,v 1.34 2005-07-01 14:30:41 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-11-14 17:17:36 $
+Ccc   * $Id: HRTW-comp.f,v 1.35 2005-11-14 17:17:36 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1340,7 +1340,7 @@ C
       DOUBLE PRECISION ak2, chsp, coef, ecms, el, s1, smax, smin,
      &                 vl, xmas_npro, xmas_ntrg
       REAL FLOAT
-       LOGICAL relcal
+      LOGICAL relcal
       INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, mul
       INTEGER INT, MIN0
       DOUBLE PRECISION PAR
@@ -1352,8 +1352,10 @@ C
       xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       el = EINl
       relcal = .FALSE.
-      IF (IRElat(Npro,Ntrg).GT.0) relcal = .TRUE.
+      IF (IRElat(Npro,Ntrg).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+      relcal = .FALSE.
+
       coef = 10.d0*PI/ak2/
      &    (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       s1 = 0.5
