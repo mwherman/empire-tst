@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:17:04 $
-Ccc   * $Id: main.f,v 1.140 2005-11-14 17:17:04 Capote Exp $
+Ccc   * $Date: 2005-11-14 17:28:51 $
+Ccc   * $Id: main.f,v 1.141 2005-11-14 17:28:51 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -2211,22 +2211,22 @@ C-----end of ENDF spectra (inclusive)
         ELSE
            READ(nextenergy,'(G15.5)') EIN
         ENDIF
-       ELSE
+      ELSE
         READ (5,*) EIN, NDAng, ICAlangs         
           IF(NDAng.lt.2) THEN
             NDAng=2
             ANGles(1) = 0.
             ANGles(2) = 180.
-           ELSE
+          ELSE
             READ (5,*) (ANGles(na),na=1,NDAng)
-           ENDIF
+          ENDIF
           NANGela=NDAng
           IF(NANgela.GT.NDAngecis) THEN
           WRITE(6,*)
      &         'FATAL: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
-       ENDIF
+      ENDIF
 
       IF (EIN.LT.0.0D0) THEN
          IF (FILevel) CLOSE (14)
@@ -2272,21 +2272,21 @@ C        SAVING RANDOM SEEDS
 C-----
 C-----
       IF(FITomp.GE.0) THEN
-        NANgela = 91
-        NDAng   = 91
-C       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-C         NANgela = 73
-C         NDAng   = 73
-C       ENDIF
-C       IF(EIN.GT.50.) THEN
-C         NANgela = 91
-C         NDAng   = 91
-C       ENDIF
-C       IF(NANgela.GT.NDAngecis) THEN
-C         WRITE(6,*)
-C    &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-C        STOP 'FATAL: increase NDAngecis in dimension.h'
-C       ENDIF
+        NANgela = 37
+        NDAng   = 37
+        IF(EIN.GT.10. .AND. EIN.LE.50.) THEN
+          NANgela = 73
+          NDAng   = 73
+        ENDIF
+        IF(EIN.GT.50.) THEN
+          NANgela = 91
+          NDAng   = 91
+        ENDIF
+        IF(NANgela.GT.NDAngecis) THEN
+          WRITE(6,*)
+     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+          STOP 'FATAL: increase NDAngecis in dimension.h'
+        ENDIF
 C-------set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
         DO na = 1, NDANG
