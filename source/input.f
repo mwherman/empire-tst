@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-31 15:38:26 $
-Ccc   * $Id: input.f,v 1.182 2005-10-31 15:38:26 Capote Exp $
+Ccc   * $Date: 2005-11-14 17:29:30 $
+Ccc   * $Id: input.f,v 1.183 2005-11-14 17:29:30 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -394,17 +394,17 @@ C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
 C        Starting value of the number of angular points
-C        NANgela = 37
-C        NDAng   = 37
-C        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-C          NANgela = 73
-C          NDAng   = 73
-C        ELSEIF(EIN.GT.50.) THEN
-C          NANgela = 91
-C          NDAng   = 91
-C        ENDIF
-         NANgela = 73
-         NDAng   = 73
+         NANgela = 37
+         NDAng   = 37
+         IF(EIN.GT.10. .AND. EIN.LE.50.) THEN
+           NANgela = 73
+           NDAng   = 73
+         ELSEIF(EIN.GT.50.) THEN
+           NANgela = 91
+           NDAng   = 91
+         ENDIF
+C        NANgela = 73
+C        NDAng   = 73
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(6,*)
      &        'FATAL: INCREASE NANgecis IN dimension.h UP TO ',NANgela
@@ -520,9 +520,7 @@ C--------compound nucleus 1
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
 C        ENDf(1) = 1.0
-
          NENDf = 1 
-
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -1165,7 +1163,8 @@ C--------print IDNa matrix
          WRITE (6,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
          WRITE (6,*) ' '
 
-          IF(NENDf.GT.0) THEN
+         IF(NENDf.GT.0) THEN
+
          WRITE(12,*) ' '
          WRITE(12,*)
      &            '                      Use of preequilibrium models '
@@ -1183,7 +1182,7 @@ C--------print IDNa matrix
          WRITE(12,'('' a             '',8I7)')(IDNa(6,j),j = 1,NDMODELS)
          WRITE(12,*) ' '
 
-          ENDIF
+         ENDIF
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
@@ -1353,7 +1352,6 @@ C-----set giant resonance parameters for CN
       GMRpar(8,nnuc) = 0.0
       AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
-
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
@@ -1547,14 +1545,9 @@ C-----------determination of excitation energy matrix in res. nuclei
      &                                  - Q(nejc,nnuc)
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
 C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
-
 C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
-
             NEX(nnur) = MAX(NINT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
-
             NEXr(nejc,nnuc) = MAX(NINT((emaxr-ECUt(nnur))/DE + 1.0),0)
-
-
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -5352,8 +5345,8 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-               ELSE
-                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+C              ELSE
+C                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5409,7 +5402,7 @@ C--------------Calculate sum for the average normalization factor
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)    
-            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
          ENDIF
       ENDDO
       END
