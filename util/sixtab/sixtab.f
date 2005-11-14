@@ -360,11 +360,11 @@ C-D A section of file 6 using legendre or tabulated angular distributions
 C-D is converted into Law 7 format with NCS angles. Intermediate results
 C-D are written to scratch file on unit LSC.
 C-
-      PARAMETER       (MXMU=50, MXPL=20, MXRW=10000)
+      PARAMETER       (MXMU=50, MXPL=65, MXNB=20, MXRW=10000)
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
       DOUBLE PRECISION PAR,CLB,P1,P2,PP
-      DIMENSION RWO(MXRW),NBT(20),INT(20)
+      DIMENSION RWO(MXRW),NBT(MXNB),INT(MXNB)
       DIMENSION AMU(MXMU),PLL(MXPL)
 C*
       DATA PI /3.141592654/
@@ -410,6 +410,7 @@ C* Begin loop over all outgoing particles
 C* Process the multiplicities for this particle
       CALL RDTAB1(LEN,ZAP,AWP,LIP,LAW0, NR, NP, NBT,INT
      1           ,RWO(LXE),RWO(LXS),KX,IER)
+      IF(NR.GT.MXNB) STOP 'SIXTAB ERROR - MXNB limit exceeded'
       IZAP=NINT(ZAP)
       LAW =LAW0
 C* Set the co-ordinate system flag LCT
@@ -663,6 +664,7 @@ C* Case: Normal Law-1 distribution with angular dependence
       KX  =MXRW-LXX
       NCYC=NA+2
       NL  =NA+1
+      IF(NL.GT.MXPL) STOP 'SIXTAB ERROR - MXPL limit exceeded'
       NMU =NCS
       IF( NL.LE.1) NMU=2
 C* Linear interpolation between cosines
@@ -856,7 +858,7 @@ C* Continue with the incident energy loop
   600 CONTINUE
 C* Print cumulative error message for spectrum normalisation
       IF(LTT.GT.0 .AND. NSIG.GT.0) THEN
-        SIGMX=SIGMX*100
+        SIGMX=MIN(99999999.9,SIGMX*100)
         WRITE(LTT,900) ' WARNING - Spectrum normalis. at points ',NSIG
         WRITE(LTT,903) '            Max normalisation dif. [%]  ',SIGMX
         WRITE(LTT,901) '                    at incident energy  ',EINMX
