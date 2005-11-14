@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 22:08:30 $
-Ccc   * $Id: main.f,v 1.139 2005-10-30 22:08:30 Capote Exp $
+Ccc   * $Date: 2005-11-14 17:17:04 $
+Ccc   * $Id: main.f,v 1.140 2005-11-14 17:17:04 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
