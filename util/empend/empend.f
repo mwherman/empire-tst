@@ -326,8 +326,11 @@ C* Process discrete levels if continuum reactions present
       REWIND LIN
 C* Disable ANGDIS printout for bad Legendre fits except for elastic
 C* Discrete level distrib. checked with continuum when processing MF6
-      JPRNT=-1
-      IF(MT6.EQ.2) JPRNT=IPRNT
+      JPRNT=IPRNT
+c...
+c...      JPRNT=-1
+c...      IF(MT6.EQ.2) JPRNT=IPRNT
+c...
 C* Reading angular distributions - MF6 flagged negative
       KT6=-MT6
 c...
@@ -681,12 +684,19 @@ C* (n,2np) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
 C* (n,3np) cross section
           MT =   42
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (n,n2p) cross section
+          MT =44
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (n,npa) cross section
           MT =   45
         ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
 C* (n,5n) cross section
 C...          MT =   47
+C... Conflicts with (n,2np)
+C...    ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (n,He3) cross section
+C...          MT =  106
         ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
 C* (n,2a) cross section
           MT =  108
@@ -1515,13 +1525,24 @@ C*
 C-F Check the distribution for consistency and print warnings
 C*
       JPRNT=0
+C* Print distribution if max. order requested
+      IF(LOO.GE.LOR) THEN
+        JPRNT=1
+C...
+C...    print *,'   MT,Ein,Eou,Loo',MT,Ein,Eou,Loo
+C...
+      END IF
 C* Check for printout on exceeding tolerance limits
       IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
 C*      Count the number of points with convergence problems
         NOFIT=NOFIT+1
 C*      Print a warning when convergence problems are encountered
-C...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
-C...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+c...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+c...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+c...
+c...        write(ler,*) 'Ein,Eou,Loo',Ein,Eou,Loo
+c...        write(ler,*) rwo(lpu),(RWO(LPU+L)/(2*L+1)/RWO(LPU),L=1,Loo)
+c...
         IF(IPRNT.EQ.0) JPRNT=1
 C* Check for specific reaction printout
       ELSE IF
@@ -1531,7 +1552,7 @@ C* Check for specific reaction printout
         JPRNT=1
       END IF
 C* Check for isotropic distributions (suppress printout)
-      IF(LOR.LT.1) JPRNT=0
+      IF(LOO.LT.1) JPRNT=0
 C* Check for differences in the fitted angular distributions
 C* at meshpoints and midpoints
       IF(JPRNT.NE.0) THEN
@@ -1595,29 +1616,29 @@ C...      EOU=EMP
 C* Save the outgoing particle energy
       RWO(LL)=EOU
 C* Remove point at EOL if it is linearly interpolable between EO3, EOU
-      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
-        ITHIN=1
-C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
-        CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
-C*      Check the absolute difference relative to P0 term
-        F0=RWO(LPL)*ETHN
-        DO I=1,LO1
-          FF=ABS(RWO(LS-1+I)-RWO(LPL-1+I))
-          IF(FF.GT.F0) ITHIN=0
-        END DO
-        IF(ITHIN.NE.0) THEN
-C*      Thinning flag set - rplace point at EOL with EOU
-          RWO(LPL-1)=RWO(LPU-1)
-          DO I=1,LO1
-            RWO(LPL-1+I)=RWO(LPU-1+I)
-          END DO
-          IF(EMP.LE.0 .OR. EOU.LT.EMP) THEN
-            GO TO 450
-          ELSE
-            GO TO 700
-          END IF
-        END IF
-      END IF
+C...      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
+C...        ITHIN=1
+C...C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
+C...        CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
+C...C*      Check the absolute difference relative to P0 term
+C...        F0=RWO(LPL)*ETHN
+C...        DO I=1,LO1
+C...          FF=ABS(RWO(LS-1+I)-RWO(LPL-1+I))
+C...          IF(FF.GT.F0) ITHIN=0
+C...        END DO
+C...        IF(ITHIN.NE.0) THEN
+C...C*      Thinning flag set - rplace point at EOL with EOU
+C...          RWO(LPL-1)=RWO(LPU-1)
+C...          DO I=1,LO1
+C...            RWO(LPL-1+I)=RWO(LPU-1+I)
+C...          END DO
+C...          IF(EMP.LE.0 .OR. EOU.LT.EMP) THEN
+C...            GO TO 450
+C...          ELSE
+C...            GO TO 700
+C...          END IF
+C...        END IF
+C...      END IF
 C* Increment indices in the storage array and loop to next point
       NPT=NPT+1
       NW =NW+LOR+2
@@ -1658,6 +1679,14 @@ C* Pack the data into compact matrix RWO(LH2,NPT)
         II =II+LH2
         JJ =JJ+LOR+2
       END DO
+c...
+c...  ii=1
+c...  do i=1,npt
+c...    write(ler,*) '    Eou',rwo(ii),rwo(ii+l)
+c... 1               ,(rwo(ii-1+l)/rwo(ii+1),l=3,lh2)
+c...    ii=ii+lh2
+c...  end do
+c...
 C*
   800 RETURN
 C* Error trap reading input record
@@ -1679,7 +1708,7 @@ C*
   907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
   908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' bad ang.distr. fit at',I3,' points')
+     1      ,' Ein',1P,E10.3,' bad ang.distr. fit for',I3,' Eout')
   909 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
      1      ,' Eou',1P,E10.3,' > available energy',E10.3)
   912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
@@ -2079,8 +2108,6 @@ C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       DIMENSION     IZAK(MXP),AWPK(MXP),ZANG(MXZ),ZLEG(MXZ)
 C*
       DATA PI/3.1415926/
-C* Permissible tolerance for fitted angular distributions (fraction)
-      DATA ETOL/ 0.010 /
       DATA SMALL/1.E-5 /
 C* Maximum Legendre order
       DATA LOMX/ 64 /
@@ -3065,6 +3092,7 @@ C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=80)
       CHARACTER*8  PTST
+      DOUBLE PRECISION DEIN,DAWR,DAWI,DAWP,DQQI
       DIMENSION    RWO(1),QQM(1),QQI(1),MTH(1),NBT(1),INT(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
@@ -3113,9 +3141,9 @@ C* Loop over the incident particle energies
       TT  =0.
       LT  =0
       EIN =RWO(LL  )
-      NA  =RWO(LL+1)+0.1
-      NW  =RWO(LL+2)+0.1
-      NEP =RWO(LL+3)+0.1
+      NA  =NINT(RWO(LL+1))
+      NW  =NINT(RWO(LL+2))
+      NEP =NINT(RWO(LL+3))
       NA1 =NA+1
       LL  =LL+4
 C* Determine the outgoing particle energy
@@ -3124,7 +3152,12 @@ C*      Process all energies for elastic
         EOU=0
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
-        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT)) * ((AWR+AWI-AWP)/(AWR+AWI))
+        DEIN=DBLE(EIN)
+        DAWR=DBLE(AWR)
+        DAWI=DBLE(AWI)
+        DAWP=DBLE(AWP)
+        DQQI=DBLE(QQI(IT))
+        EOU=(DEIN*DAWR/(DAWR+DAWI)+DQQI)*((DAWR+DAWI-DAWP)/(DAWR+DAWI))
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
@@ -3176,34 +3209,40 @@ C* Linearly interpolate Legendre coefficients to EOU
         L2  =L1+NA+2
         E2  =RWO(L2)
         TST =DLVL*EIN*1E-6
-        IF(ABS(EOU-E2).LT.TST .OR.
-     &    (E2.LT.EOU .AND. IEP.GE.NEP) ) THEN
-C* Last point or matching level to within tolerance
-            CALL FLDMOV(NA1,RWO(L2+1),QQ)
-C...          print *,'Match MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
-C... 1               ,QQM(IT)-QQI(IT)
-C...          print *,' iep,nep',iep,nep
+C* Read until EOU is enclosed by E1 and E2
+        IF(E2.LT.EOU .AND. IEP.LT.NEP) GO TO 38
+C* Check the closest
+        DE1=ABS(EOU-E1)
+        DE2=ABS(EOU-E2)
+        IF(MIN(DE1,DE2).GT.TST) THEN
+C* No matching levels, linearly interpolate
+          CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
+          WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+          WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+C...
+              print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
+     1               ,QQM(IT)-QQI(IT)
 C...          print *,e1,(rwo(l1+j),j=1,NA1)
 C...          print *,e2,(rwo(l2+j),j=1,NA1)
 C...          read (*,'(a1)') yes
-        ELSE
-C* Try next point or linearly interpolate
-          IF(E2.LT.EOU) GO TO 38
-          CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
-C...      IF(ABS(EOU-E1).GT.DLVL) THEN
-          IF(ABS(EOU-E1).GT.TST) THEN
-C*          If Eout equals 1-st point, interpolate but suppress printout
-            WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
-            WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+C...
 c...
 c...            print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
 c...
-          END IF
-C...          print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
+        ELSE IF(DE1.LT.DE2) THEN
+C* Move lower point
+          CALL FLDMOV(NA1,RWO(L1+1),QQ)
+c...
+c...          print *,'Match MT,Ein,Eou,E1,Elvl',MT,EIN,EOU,E1
 c... 1               ,QQM(IT)-QQI(IT)
-C...          print *,e1,(rwo(l1+j),j=1,NA1)
-C...          print *,e2,(rwo(l2+j),j=1,NA1)
-C...          read (*,'(a1)') yes
+c...
+        ELSE
+C* Move lower point
+          CALL FLDMOV(NA1,RWO(L2+1),QQ)
+c...
+c...          print *,'Match MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
+c... 1               ,QQM(IT)-QQI(IT)
+c...
         END IF
       END IF
       IF(NA.LE.0 .OR. ABS(QQ(1)).LT.1.E-20) THEN
@@ -3918,9 +3957,10 @@ C-D    A scratch array RWO of length MXR is needed, where the value of
 C-D  MXR does not exceed LP*4+(LMX+4)*(LMX+1) .
 C-D    On output, the Legendre coefficients are stored in QQ. The actual
 C-D  order of Legendre polynomials used is contained in LMX.
-C-D  On exit, ERR contains the actual max.relative difference between
-C-D  the input and the fitted data. If negative distributions arise
-C-D  from the fit, ERR contains the most negative value.
+C-D  On exit, ERR contains the actual maximum difference between
+C-D  the input and the fitted data relative to the average. If the
+C-D  fitted distribution is negative, ERR contains the most negative
+C-D  value.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
@@ -3990,13 +4030,13 @@ C       RER=ABS((YCI-YP(IP))/YCI)
           ERR=RER
           JRE=IP
         END IF
-C* Test distribution at mesh point
+C* Test minimum value of distribution at mesh point
         IF(YCI.LT.YNP) THEN
           IF(YCI.LT.0) KNP=KNP+1
           JNP=IP
           YNP=YCI
         END IF
-C* Test distribution at midpoint
+C* Test minimum value of distribution at midpoint
         IF(IP.LT.NNP) THEN
           XPI=(XP(IP)+XP(IP+1))/2
           YCI=POLLG1(XPI,QQ,NLG)
@@ -4012,19 +4052,19 @@ c...      PRINT *,EMM,ERR,YNP,YNM,JNM,L,JER
 c...
       YNP=YNP/QQ(1)
       YNM=YNM/QQ(1)
-      IF(-YNP.GT.ABS(ERR)) ERR=YNP
-      IF(-YNM.GT.ABS(ERR)) ERR=YNM
+      IF(YNP.LT.0) ERR=MIN(ERR,YNP)
+      IF(YNM.LT.0) ERR=MIN(ERR,YNM)
 C*
 C* Take corrective action
       IF(KNP.GT. 0 ) THEN
-C* Case: Distribution negative at mesh point
+C* Case: Distribution negative at mesh point - increase L
         IF(L.LT.LMM) THEN
           L=L+1
           GO TO 20
         END IF
       END IF
       IF(ERR.GT.EMM) THEN
-C* Case: Tolerance limit not satisfied
+C* Case: Tolerance limit not satisfied - increase L
         IF(L.LT.LMM .AND. JER.EQ.0) THEN
 C*        Increase order of approximation
           L =L+1
@@ -4044,7 +4084,7 @@ C*        Double the mesh
           END IF
         END IF
       END IF
-C* Case: Distribution is negative at midpoint
+C* Case: Distribution is negative at midpoint - force extra points
       IF((KNM.GT.0 .OR. KNP.GT.0) .AND. NNP.LT.MXP) THEN
 C*    Force extra point if distribution negative at midpoint
         IF(YNP.LT.YNM) THEN
