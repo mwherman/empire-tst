@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-21 21:43:46 $
-Ccc   * $Id: main.f,v 1.142 2005-11-21 21:43:46 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-11-21 22:03:20 $
+Ccc   * $Id: main.f,v 1.143 2005-11-21 22:03:20 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -165,8 +165,13 @@ C-----
      &      ERR = 1400)
         READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
         READ (45,*,END = 1400)   ! To skip level identifier line
-        DO iang = 1, NANgela
-           READ (45,'(7x,E12.5)',END = 1400) elada(iang)
+        iang = 0
+        DO iang1 = 1, NANgela
+C---------To use only those values corresponding to EMPIRE grid for inelastic XS
+           READ (45,'(7x,E12.5)',END = 1400) ftmp
+           if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
+           iang = iang +1
+           elada(iang) = ftmp
         ENDDO
       ENDIF
 
@@ -209,7 +214,7 @@ C--------------add direct transition to the spectrum
                  iang = 0
                  DO iang1 = 1, NANgela
                    READ (45,'(7x,E12.5)',END = 1400) ftmp
-C-----------------To use only those values corresponding to EMPIRE grid for inelastic XS
+C------------------To use only those values corresponding to EMPIRE grid for inelastic XS
                    if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                    iang = iang +1
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
@@ -1799,15 +1804,29 @@ C-----------------------(continuum part)
                         ENDDO
                         IF (nspec.GT.0) THEN
                            DO ie = 1, nspec ! reconstruct continuum DDX spectrum
+                              piece = CSEmsd(ie,nejc)
+                              IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
+                              ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
+     &                             piece*POPcseaf(0,nejc,ie,INExc(nnuc))
+     &                             )/4.0/PI
+                              IF(ftmp .LT.0) THEN
+                                 WRITE(6,*) 'WARNING: Corrective action 
+     &to avoid negative ddx cross sections taken'
+           WRITE(6,*) 'ie,nejc=',ie,nejc
+           WRITE(6,*) 'ftmp=',ftmp
+           WRITE(6,*) 'POPcse(0,...)=',POPcse(0,nejc,ie,INExc(nnuc))
+           WRITE(6,*) 'CSEmsd(ie,nejc)=',CSEmsd(ie,nejc)
+           WRITE(6,*) 'POPcseaf(0,...)=',POPcseaf(0,nejc,ie,INExc(nnuc))
+           WRITE(6,*) '------'
+                                 ftmp = 0.0
+                                 POPcseaf(0,nejc,ie,INExc(nnuc)) = 
+     &                                  POPcse(0,nejc,ie,INExc(nnuc))/
+     &                                  piece
+                              ENDIF
                               DO nang = 1, NDANG
-                                 piece = CSEmsd(ie,nejc)
-                                 IF (ie.EQ.NEXr(nejc,1))
-     &                               piece = 0.5*piece
-                                 cseaprnt(ie,nang)
-     &                              = ((POPcse(0,nejc,ie,INExc(nnuc))
-     &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
-     &                              /4.0/PI + CSEa(ie,nang,nejc,1)
-     &                              *POPcseaf(0,nejc,ie,INExc(nnuc)))
+                                 cseaprnt(ie,nang) = 
+     &                          ftmp + CSEa(ie,nang,nejc,1)*  
+     &                                POPcseaf(0,nejc,ie,INExc(nnuc))
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1820,7 +1839,7 @@ C-----------------------(continuum part)
                            WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                 (9X,8E15.5
      &))') FLOAT(ie - 1)*DE/recorp,
-     &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
+     &                  (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
@@ -1838,14 +1857,23 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
                            ENDDO
                         ENDDO
                         DO ie = 1, nspec  ! reconstruct DDX spectrum
+                           piece = CSEmsd(ie,nejc)
+                           IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
+                           ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
+     &                           piece*POPcseaf(0,nejc,ie,INExc(nnuc)
+     &                           ))/4.0/PI
+                           IF(ftmp .LT.0) THEN
+                              ftmp = 0.0
+                              POPcseaf(0,nejc,ie,INExc(nnuc)) = 
+     &                               POPcse(0,nejc,ie,INExc(nnuc))/
+     &                               piece
+                              WRITE(6,*) 'WARNING: Corrective action 2 
+     &to avoid negative ddx cross sections taken'
+                           ENDIF
                            DO nang = 1, NDANG
-                              piece = CSEmsd(ie,nejc)
-                              IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
                               cseaprnt(ie,nang)
-     &                           = ((POPcse(0,nejc,ie,INExc(nnuc))
-     &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
-     &                           /4.0/PI + CSEa(ie,nang,nejc,INExc(1))
-     &                           *POPcseaf(0,nejc,ie,INExc(nnuc)))
+     &                           = ftmp + CSEa(ie,nang,nejc,1)*
+     &                          POPcseaf(0,nejc,ie,INExc(nnuc))
                            ENDDO
                         ENDDO
                         DO nang = 1, NDANG
@@ -1857,7 +1885,7 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
                            WRITE (12,
      &'(F10.5,E14.5,7E15.5,/,                                 (9X,8E15.5
      &))') FLOAT(ie - 1)*DE/recorp,
-     &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
+     &                  (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                         ENDDO
                         DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
@@ -1988,14 +2016,30 @@ c         sumtst=0
           DO iesp = 1, NDECSE
 C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc
 c            sumtst=sumtst+CSE(iesp,nejc,0)
+             piece = CSEmsd(iesp,nejc)
+             IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
+             ftmp =(CSE(iesp,nejc,0)-
+     &             piece*POPcseaf(0,nejc,ie,INExc(nnuc))
+     &             )/4.0/PI
+             IF(ftmp .LT.0) THEN
+                WRITE(6,*) 'WARNING: Corrective action 3 
+     &to avoid negative ddx cross sections taken'
+           WRITE(6,*) 'ie,nejc =',ie,nejc
+           WRITE(6,*) 'ftmp=',ftmp
+           WRITE(6,*) 'CSE(ie,...)=',CSE(iesp,nejc,0)
+           WRITE(6,*) 'CSEmsd(ie,nejc)=',CSEmsd(ie,nejc)
+           WRITE(6,*) 'POPcseaf(0,...)=',POPcseaf(0,nejc,ie,INExc(nnuc))
+           WRITE(6,*) '------'
+                ftmp = 0.0
+                POPcseaf(0,nejc,ie,INExc(nnuc)) = 
+     &                 CSE(iesp,nejc,0)/piece
+             ENDIF
              DO nang = 1, NDANG
-                piece = CSEmsd(iesp,nejc)
-                IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
                 CSEa(iesp,nang,nejc,0)
-     &             = ((CSE(iesp,nejc,0)
-     &             - piece*POPcseaf(0,nejc,iesp,0))
-     &             /4.0/PI      + CSEa(iesp,nang,nejc,1)
-     &             *POPcseaf(0,nejc,iesp,0))
+     &             = ftmp + 
+C    &          (CSEa(iesp,nang,nejc,1)- piece/4.0/PI)
+C      RCN: Mike please check if INExc(1) is ok here !!! I guess it is the same than 1
+     &          CSEa(iesp,nang,nejc,INExc(1))*POPcseaf(0,nejc,iesp,0)
              ENDDO
           ENDDO
 c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
@@ -2093,12 +2137,12 @@ C--------neutrons
           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
-           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
-     &            (max(0.d0,CSEa(nspec,nang,1,0)),nang = 1,NDANG)
+     &            (CSEa(nspec,nang,1,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &            (0.d0,nang = 1,NDANG)
          ENDIF
@@ -2118,7 +2162,7 @@ C--------protons
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
-     &            (max(0.d0,CSEa(nspec,nang,2,0)),nang = 1,NDANG)
+     &            (CSEa(nspec,nang,2,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
      &            (0.d0,nang = 1,NDANG)
          ENDIF
@@ -2138,7 +2182,7 @@ C--------alphas
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
-     &            (max(0.d0,CSEa(nspec,nang,3,0)),nang = 1,NDANG)
+     &            (CSEa(nspec,nang,3,0),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
      &            (0.d0,nang = 1,NDANG)
          ENDIF
@@ -2162,7 +2206,7 @@ C--------light ions
 C------------exact endpoint
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
      &           - Q(NDEJC,1),
-     &           (max(0.d0,CSEa(nspec,nang,NDEJC,0)),nang = 1,NDANG)
+     &           (CSEa(nspec,nang,NDEJC,0),nang = 1,NDANG)
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
      &           - Q(NDEJC,1), (0.d0,nang = 1,NDANG)
            ENDIF
