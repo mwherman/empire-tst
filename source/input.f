@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-21 21:43:46 $
-Ccc   * $Id: input.f,v 1.184 2005-11-21 21:43:46 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2005-11-21 23:06:43 $
+Ccc   * $Id: input.f,v 1.185 2005-11-21 23:06:43 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5309,7 +5309,7 @@ C--------------Calculate sum for the average normalization factor
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
-	    ftmp =   ATIlnor(nnuc)
+            ftmp =   ATIlnor(nnuc)
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
