@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-11-21 21:43:47 $
-Ccc   * $Id: MSD-tristan.f,v 1.51 2005-11-21 21:43:47 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:57:12 $
+Ccc   * $Id: MSD-tristan.f,v 1.52 2005-11-21 21:57:12 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3004,23 +3004,32 @@ C
             dang = 3.14159/FLOAT(nangle - 1)
             coef = 2*3.14159*dang/DERec
             ecm = EINl - EIN
-            DO ie = 1, nexrt
-               echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
-               DO na = 1, nangle
-                  erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
-     &                      *CANgler(na)
-                  irec = erecoil/DERec + 1.001
-                  weight = (erecoil - (irec - 1)*DERec)/DERec
-                  IF (irec + 1.GT.NDEREC) GOTO 20
-                  csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
-     &                     *coef
-                  RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
-     &               + csmsdl*(1.0 - weight)
-                  RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
-     &               + csmsdl*weight
-C
+            IF(Nejc.NE.0) THEN
+               DO ie = 1, nexrt
+                  echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
+                  DO na = 1, nangle
+                     erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
+     &                         *CANgler(na)
+                     irec = erecoil/DERec + 1.001
+                     weight = (erecoil - (irec - 1)*DERec)/DERec
+                     IF (irec + 1.GT.NDEREC) GOTO 20
+                     csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
+     &                        *coef
+                     RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
+     &                  + csmsdl*(1.0 - weight)
+                     RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
+     &                  + csmsdl*weight
+C              
+                  ENDDO
+   20          ENDDO
+            ELSE
+               DO ie = 1, nexrt
+                  DO na = 1, nangle
+c  should do something here                  
+                  ENDDO
                ENDDO
-   20       ENDDO
+            ENDIF
+             
          ENDIF
       ENDIF
 C-----
