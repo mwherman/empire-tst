@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:18:39 $
-Ccc   * $Id: fusion.f,v 1.57 2005-11-14 17:18:39 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:46 $
+Ccc   * $Id: fusion.f,v 1.58 2005-11-21 21:43:46 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -127,7 +127,7 @@ C-------this nucleus should be recalculated (goto 300)
 C
    50    CLOSE (45,STATUS = 'DELETE')
 
-         IF (FITomp.EQ.0) THEN         
+         IF (FITomp.EQ.0) THEN
          WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
          WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
@@ -284,14 +284,14 @@ C--------and calculate transmission coefficients
             ENDIF
          ENDDO
   150    NLW = j - 1
-         CSFus = 0.d0
+          CSFus = 0.d0
          DO j = 1, NLW
             CSFus = CSFus + (2*j - 1)*stl(j)
-         ENDDO
+          ENDDO
          maxlw = NLW
          ABScs = CSFus
-         SINlcc=0.d0
-         SINl=0.d0
+          SINlcc=0.d0
+          SINl=0.d0
          WRITE (6,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (6,*)
@@ -630,9 +630,8 @@ C-----Storing transmission coefficients for the incident channel
 
   300 el = EINl
       relcal = .FALSE.
-      IF (IRElat(Npro,Ntrg).GT.0 .or. RELkin) relcal = .TRUE.
+      IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-      relcal = .FALSE.
 
       IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
@@ -658,10 +657,10 @@ C--------Corrected scattering radius
      &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
          ENDIF
          WRITE ( 6,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3), 
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3),
      &         EINl*1.D3, TOTcs, rp
          WRITE (12,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3), 
+     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3),
      &         EINl*1.D3, TOTcs, rp
 
 99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,' T0=',d12.6/

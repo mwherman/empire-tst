@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-08-30 18:24:48 $
-Ccc   * $Id: MSD-tristan.f,v 1.50 2005-08-30 18:24:48 herman Exp $
+Ccc   * $Date: 2005-11-21 21:43:47 $
+Ccc   * $Id: MSD-tristan.f,v 1.51 2005-11-21 21:43:47 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2977,7 +2977,7 @@ C-----ground state target spin XJLV(1,0)
          ENDDO
 C--------add MSD contribution to the population spectra
 C--------used for ENDF exclusive spectra
-         IF (ENDf(1).EQ.1) THEN
+         IF (ENDf(1).GT.0) THEN
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
 C--------------DE
@@ -2996,7 +2996,10 @@ C--------------Bin population by MSD (spin/parity integrated)
             ENDDO
          ENDIF
 C--------storing continuum recoils
-         IF (ENDf(1).GT.0) THEN
+         IF (ENDf(1).GT.0 .and. nejc.ne.0) THEN
+C
+C           No recoils from gamma emission for the time being  
+C	 
             nangle = NDANG
             dang = 3.14159/FLOAT(nangle - 1)
             coef = 2*3.14159*dang/DERec

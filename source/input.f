@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:29:30 $
-Ccc   * $Id: input.f,v 1.183 2005-11-14 17:29:30 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:46 $
+Ccc   * $Id: input.f,v 1.184 2005-11-21 21:43:46 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -394,17 +394,17 @@ C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
 C        Starting value of the number of angular points
-         NANgela = 37
-         NDAng   = 37
-         IF(EIN.GT.10. .AND. EIN.LE.50.) THEN
-           NANgela = 73
-           NDAng   = 73
-         ELSEIF(EIN.GT.50.) THEN
-           NANgela = 91
-           NDAng   = 91
-         ENDIF
-C        NANgela = 73
-C        NDAng   = 73
+C        NANgela = 37
+C        NDAng   = 37
+C        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+C          NANgela = 73
+C          NDAng   = 73
+C        ELSEIF(EIN.GT.50.) THEN
+C          NANgela = 91
+C          NDAng   = 91
+C        ENDIF
+         NANgela = 91
+         NDAng   = 91
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(6,*)
      &        'FATAL: INCREASE NANgecis IN dimension.h UP TO ',NANgela
@@ -520,7 +520,6 @@ C--------compound nucleus 1
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
 C        ENDf(1) = 1.0
-         NENDf = 1 
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -851,7 +850,7 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                              WRITE(6,*)'INCREASE NDExclus AND RECOMPILE'
                              STOP 'INSUFFICIENT DIMENSION NDExclus'
                            ENDIF
-                           INExc(nnuc) = NEXclusive         
+                           INExc(nnuc) = NEXclusive
                         ENDIF
                      ENDDO
                   ENDDO
@@ -911,7 +910,7 @@ C
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
 C--------------------------------------------------------------------------
-         IF (LHMs.NE.0 .AND. NENDf.EQ.1) THEN
+         IF (LHMs.NE.0 .AND. ENDf(1).EQ.1) THEN
             WRITE (6,*) ' '
             WRITE (6,*)
      &                 'WARNING: HMS is incompatible with ENDF=1 option'
@@ -937,7 +936,7 @@ C--------------------------------------------------------------------------
          IF(KALman.GT.0) THEN
             DO i=1,NDNUC
                ENDF(i) = 0
-            ENDDO 
+            ENDDO
             WRITE (6,*) ' ENDF set to 0 due to the KALMAN option'
          ENDIF
 C--------------------------------------------------------------------------
@@ -1162,9 +1161,6 @@ C--------print IDNa matrix
          WRITE (6,'('' gammas      '',8I10)') (IDNa(5,j),j = 1,NDMODELS)
          WRITE (6,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
          WRITE (6,*) ' '
-
-         IF(NENDf.GT.0) THEN
-
          WRITE(12,*) ' '
          WRITE(12,*)
      &            '                      Use of preequilibrium models '
@@ -1181,8 +1177,6 @@ C--------print IDNa matrix
          WRITE(12,'('' g             '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
          WRITE(12,'('' a             '',8I7)')(IDNa(6,j),j = 1,NDMODELS)
          WRITE(12,*) ' '
-
-         ENDIF
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
@@ -1309,7 +1303,7 @@ C-----set giant resonance parameters for target
 C-----compound nucleus 1
       nnuc = 1
       IF (NEXreq.GT.NDEX) THEN
-       WRITE (6,*) 
+       WRITE (6,*)
          WRITE (6,*) ' NUMBER OF ENERGY BINS IN COMP. NUCL. SET TO',
      &               NDEX
          NEXreq = MAX(NDEX - 2,2)
@@ -1352,6 +1346,7 @@ C-----set giant resonance parameters for CN
       GMRpar(8,nnuc) = 0.0
       AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
+
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
@@ -1364,7 +1359,7 @@ C-----------Defining ICOller(i)
             ICOller(1) = ICOllev(1)
             DO i = 2, ND_nlv
                itmp = ICOllev(i)
-               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc 
+               IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc
                ICOller(i) = itmp
             ENDDO
             IF (ierr.EQ.1) THEN
@@ -1544,10 +1539,9 @@ C-----------determination of excitation energy matrix in res. nuclei
             IF (NEX(nnuc).GT.0) emaxr = EX(NEX(nnuc),nnuc)
      &                                  - Q(nejc,nnuc)
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
-C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
-C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
-            NEX(nnur) = MAX(NINT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
-            NEXr(nejc,nnuc) = MAX(NINT((emaxr-ECUt(nnur))/DE + 1.0),0)
+            NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
+            NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
+
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -1654,11 +1648,11 @@ Cpr         WRITE(6,*) I,ETL(I,NEJC,NNUR)
 Cpr         END DO
 C-----------calculate tramsmission coefficients
             IF (FITlev.EQ.0) THEN
-               ICAlangs = ICAlangs-10 
+               ICAlangs = ICAlangs-10
                itmp = NANgela
                NANgela = 2
                CALL TLEVAL(nejc,nnur,nonzero)
-               ICAlangs = ICAlangs+10 
+               ICAlangs = ICAlangs+10
                NANgela = itmp
 C              NANgela = NDAng
 C--------------print transmission coefficients
@@ -2038,7 +2032,7 @@ C
       INTEGER IFIX
       REAL SNGL
 
-      IF (NENDf.NE.0.0D0 .AND. FIRst_ein) THEN
+      IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
         WRITE (12,*) ' '
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
      &     'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
@@ -2101,9 +2095,9 @@ C
             IF (ENDf(i).EQ.2.0D0)
      &        WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
-C         ELSE
-C           WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
-C    &                   (Q(j,i),j = 1,NEJcm)
+          ELSE
+            WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
+     &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
         ENDDO
 
@@ -2112,8 +2106,6 @@ C    &                   (Q(j,i),j = 1,NEJcm)
           WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
 
-
-         IF(NENDf.GT.0.) THEN
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS                                         '
         WRITE (12,*) '                                                '
@@ -2169,7 +2161,7 @@ C    &                   (Q(j,i),j = 1,NEJcm)
         WRITE (12,*) '************************************************'
         WRITE (12,*) '                                                '
         WRITE (12,*)
-         ENDIF
+
         WRITE (6,*)
         WRITE (6,*)
 
@@ -2545,7 +2537,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b29  |'
+     &           '                       |  E M P I R E  -  2.19.b30  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -2557,10 +2549,6 @@ C
       WRITE (6,*) 'Following options/parameters have been used'
       WRITE (6,*) '-------------------------------------------'
       WRITE (6,*) ' '
-
-
-
-       IF(NENDf.GT.0) THEN
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) 'Authors:'
@@ -2613,8 +2601,6 @@ C
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Discrete levels were taken from the RIPL-2 level   '
       WRITE (12,*) 'file, based on the 1998 version of ENSDF.          '
-
-       ENDIF
       irun = 0
   100 IF(irun.EQ.1) RETURN
       READ (5,'(A1)') name(1:1)
@@ -2668,45 +2654,39 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF (OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3)) WRITE (6,
      &'('' Input file OMPAR.DIR with optical model'',
      &'' parameters to be used in inelastic scattering'')')
-
-
-
-             IF(NENDf.GT.0) THEN
-              IF (KEY_shape.EQ.0) WRITE (12,
+            IF (KEY_shape.EQ.0) WRITE (12,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
-              IF (KEY_shape.EQ.1) WRITE (12,
+            IF (KEY_shape.EQ.1) WRITE (12,
      &                         '('' E1 strength function set to MLO1'')'
      &                         )
-              IF (KEY_shape.EQ.2) WRITE (12,
+            IF (KEY_shape.EQ.2) WRITE (12,
      &                         '('' E1 strength function set to MLO2'')'
      &                         )
-              IF (KEY_shape.EQ.3) WRITE (12,
+            IF (KEY_shape.EQ.3) WRITE (12,
      &                         '('' E1 strength function set to MLO3'')'
      &                         )
-              IF (KEY_shape.EQ.4) WRITE (12,
+            IF (KEY_shape.EQ.4) WRITE (12,
      &                         '('' E1 strength function set to EGLO'')'
      &                         )
-              IF (KEY_shape.EQ.5) WRITE (12,
+            IF (KEY_shape.EQ.5) WRITE (12,
      &                          '('' E1 strength function set to GFL'')'
      &                          )
-              IF (KEY_shape.EQ.6) WRITE (12,
+            IF (KEY_shape.EQ.6) WRITE (12,
      &                    '('' E1 strength shape function set to SLO'')'
      &                    )
-              IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
      &         '('' GDR parameters from Messina systematics'')')
-              IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
+            IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
      &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
-              IF(Key_gdrgfl.EQ.1)WRITE(12,
+            IF(Key_gdrgfl.EQ.1)WRITE(12,
      &         '('' GDR parameters from RIPL-2/Exp.data+'',
      &           ''Plujko systematics'')')
-              IF(Key_gdrgfl.EQ.2)WRITE(12,
+            IF(Key_gdrgfl.EQ.2)WRITE(12,
      &          '('' GDR parameters from RIPL-2/Exp.data+'',
      &           ''Goriely calc.'')')
-C-----        print  maximal gamma-ray multipolarity  'MAXmult'
-              IF(MAXmult.GT.2)WRITE(12,
+C-----      print  maximal gamma-ray multipolarity  'MAXmult'
+            IF(MAXmult.GT.2)WRITE(12,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
-             ENDIF
-
 
             IF (DIRect.EQ.0 .AND. KTRompcc.NE.0) THEN
                WRITE (6,
@@ -2737,7 +2717,7 @@ C--------DEGAS input
             IF (val.GT.0) WRITE(6,
      &              '('' Exciton model calculations with code DEGAS '')'
      &              )
-            IF (val.GT.0 .AND. NENDf.GT.0) WRITE(12,
+            IF (val.GT.0) WRITE(12,
      &              '('' Exciton model calculations with code DEGAS '')'
      &              )
             GOTO 100
@@ -2761,8 +2741,7 @@ C                GDIvp = val + grand()*sigma
               WRITE(6,
      &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
      &'' code DEGAS '')') GDIvp
-
-              IF (NENDf.GT.0) WRITE(12,
+              WRITE(12,
      &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
      &'' code DEGAS '')') GDIvp
             endif
@@ -2778,7 +2757,7 @@ C--------PCROSS input
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
      &  '' Kalbach systematics angular distributions (see RIPL-1)'')')
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
      &  '' Kalbach systematics angular distributions (see RIPL-1)'')')
@@ -2799,7 +2778,7 @@ C                MFPp = val + grand()*sigma
                 WRITE (6,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Default: 1.3)'')') MFPp
-                IF (NENDf.GT.0) WRITE (12,
+                WRITE (12,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Default: 1.3)'')') MFPp
                endif
@@ -2815,10 +2794,10 @@ C                MFPp = val + grand()*sigma
      &        ''*sqrt(g*U)'')') CHMax
               WRITE (6,
      &'(''    being U the CN excitation energy '')')
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &'('' Max hole number in PCROSS set to'',F4.2,
      &        ''*sqrt(g*U)'')') CHMax
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &'(''    being U the CN excitation energy '')')
              ENDIF
             GOTO 100
@@ -2865,8 +2844,6 @@ C--------------searching in the RIPL database
             IF (DIRect.EQ.2) WRITE (6,
      &'('' Coupled Channels (ECIS) used for Tl calculations in inelastic
      & channels'')')
-
-             IF (NENDf.GT.0) THEN 
             IF (DIRect.EQ.3) WRITE (12,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
@@ -2876,8 +2853,6 @@ C--------------searching in the RIPL database
             IF (DIRect.EQ.2) WRITE (12,
      &'('' Coupled Channels (ECIS) used for Tl calculations in inelastic
      & channels'')')
-
-             ENDIF
             GOTO 100
          ENDIF
          IF (name.EQ.'EcDWBA') THEN
@@ -2913,14 +2888,10 @@ C
             IF (val.NE.0.) THEN
                RELkin = .TRUE.
                WRITE (6,'(1x,A)') 'Relativistic kinematics used'
-               IF(NENDf.GT.0) 
-
-     &         WRITE (12,'(1x,A)') 'Relativistic kinematics used'
+               WRITE (12,'(1x,A)') 'Relativistic kinematics used'
             ELSE
                WRITE (6,'(1x,A)') 'Non-relativistic kinematics used'
-
-               IF(NENDf.GT.0) 
-     &         WRITE (12,'(1x,A)') 'Non-relativistic kinematics used'
+               WRITE (12,'(1x,A)') 'Non-relativistic kinematics used'
             ENDIF
             GOTO 100
          ENDIF
@@ -3024,7 +2995,7 @@ C-----
             WRITE (6,
      &          '('' Liquid drop fission barriers multiplied by'',F6.3)'
      &          ) QFIs
-            IF(NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &          '('' Liquid drop fission barriers multiplied by'',F6.3)'
      &          ) QFIs
             GOTO 100
@@ -3047,23 +3018,19 @@ C-----
             IF (ADIv.EQ.3.0D0) WRITE (6,
      &          '('' Microscopic HFBCS level densities were selected'')'
      &          )
-
-             IF (NENDf.GT.0) THEN
-              IF (ADIv.EQ.0.0D0) WRITE (12,
+            IF (ADIv.EQ.0.0D0) WRITE (12,
      &           '('' EMPIRE-specific level densities '')'
      &           )
-              IF (ADIv.EQ.1.0D0) WRITE (12,
+            IF (ADIv.EQ.1.0D0) WRITE (12,
      &'('' EMPIRE-specific level densities with fitted parameters'')')
-              IF (ADIv.GT.3.0D0) WRITE (12,
+            IF (ADIv.GT.3.0D0) WRITE (12,
      &     '('' ROCOL level densities with a=A/''  ,F5.2)') ADIv
-              IF (ADIv.EQ.2.0D0) WRITE (12,
+            IF (ADIv.EQ.2.0D0) WRITE (12,
      &           '('' Gilbert-Cameron level densities '')'
      &           )
-              IF (ADIv.EQ.3.0D0) WRITE (12,
+            IF (ADIv.EQ.3.0D0) WRITE (12,
      &          '('' Microscopic HFBCS level densities '')'
      &          )
-
-            ENDIF
             GOTO 100
          ENDIF
 C-----
@@ -3072,7 +3039,7 @@ C-----
             WRITE (6,
      &          '('' Viscosity parameter set to'',F6.3,'' 10**21 1/s'')'
      &          ) BETav
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &          '('' Viscosity parameter set to'',F6.3,'' 10**21 1/s'')'
      &          ) BETav
             GOTO 100
@@ -3083,7 +3050,7 @@ C-----
             WRITE (6,
      &'('' Shell correction to fission barrier brougth to 1/2 at spin ''
      &,F5.1)') SHRj
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &'('' Shell correction to fission barrier brougth to 1/2 at spin ''
      &,F5.1)') SHRj
             GOTO 100
@@ -3094,7 +3061,7 @@ C-----
             WRITE (6,
      &          '('' Diffusness of the shell correction damping'',F6.3)'
      &          ) SHRd
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &          '('' Diffusness of the shell correction damping'',F6.3)'
      &          ) SHRd
             GOTO 100
@@ -3103,11 +3070,9 @@ C-----
          IF (name.EQ.'FUSRED') THEN
             FUSred = val
             WRITE (6,'('' Fusion cross section was scaled by factor'',
-     &         F6.3)') FUSred
-            IF (NENDf.GT.0) WRITE (12,
-     &         '('' Fusion cross section was scaled by factor '',F6.3)') 
-
-     &         FUSred
+     &             F6.3)') FUSred
+            WRITE (12,'('' Fusion cross section was scaled by factor '',
+     &             F6.3)') FUSred
             GOTO 100
          ENDIF
 C-----
@@ -3115,9 +3080,7 @@ C-----
             TOTred = val
             WRITE (6,'('' Total cross section was scaled by factor '',
      &             F6.3)') TOTred
-            IF (NENDf.GT.0) WRITE (12,
-
-     &          '('' Total cross section was scaled by factor '',
+            WRITE (12,'('' Total cross section was scaled by factor '',
      &             F6.3)') TOTred
             GOTO 100
          ENDIF
@@ -3175,9 +3138,7 @@ C-----
          IF (name.EQ.'TRGLEV') THEN
             LEVtarg = val
             WRITE (6,'('' Target excited to the level #'',I2)') LEVtarg
-
-            IF (NENDf.GT.0) 
-     &      WRITE (12,'('' Target excited to the level #'',I2)') LEVtarg
+            WRITE (12,'('' Target excited to the level #'',I2)') LEVtarg
             GOTO 100
          ENDIF
 C-----
@@ -3223,9 +3184,7 @@ C-----
          IF (name.EQ.'XNI   ') THEN
             XNI = val
             WRITE (6,'('' Initial exciton number set to '',F4.1)') XNI
-
-            IF (NENDf.GT.0) 
-     &            WRITE (12,'('' Initial exciton number '',F4.1)') XNI
+            WRITE (12,'('' Initial exciton number '',F4.1)') XNI
             GOTO 100
          ENDIF
 C-----
@@ -3234,7 +3193,7 @@ C-----
             WRITE (6,
      &       '(''(n-p)/(n-n) interaction strength ratio set to '',F5.2)'
      &       ) TORy
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &       '(''(n-p)/(n-n) interaction strength ratio '',F5.2)'
      &       ) TORy
             GOTO 100
@@ -3245,7 +3204,7 @@ C-----
             WRITE (6,
      &   '('' Initial number of excitons being neutrons set to '',F6.3)'
      &    ) EX1
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &    '('' Initial number of excitons being neutrons '',F6.3)') EX1
             GOTO 100
          ENDIF
@@ -3255,7 +3214,7 @@ C-----
             WRITE (6,
      &   '('' Initial number of excitons being protons set to  '',F6.3)'
      &    ) EX2
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &    '('' Initial number of excitons being protons '',F6.3)') EX2
             GOTO 100
          ENDIF
@@ -3265,7 +3224,7 @@ C-----
             IF (GST.EQ.1.0D0) WRITE (6,
      &                            '('' Gamma emission in MSC allowed'')'
      &                            )
-            IF (GST.EQ.1.0D0 .AND. NENDf.GT.0 ) WRITE (12,
+            IF (GST.EQ.1.0D0) WRITE (12,
      &                       '('' Gamma emission in MSC considered'')')
             GOTO 100
          ENDIF
@@ -3286,7 +3245,7 @@ C-----
             WRITE (6,
      &      '('' Single particle level density in MSC set to A/'',F5.2)'
      &      ) GDIv
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &      '('' Single particle level density in MSC set to A/'',F5.2)'
      &      ) GDIv
             GOTO 100
@@ -3296,9 +3255,7 @@ C-----
             D1Fra = val
             WRITE (6,'('' Spreading to total GDR width set to '',F5.3)')
      &             D1Fra
-
-            IF (NENDf.GT.0) WRITE (12,
-     &               '('' Spreading to total GDR width set to '',F5.3)'
+            WRITE (12,'('' Spreading to total GDR width set to '',F5.3)'
      &             ) D1Fra
             GOTO 100
          ENDIF
@@ -3381,7 +3338,7 @@ C                FNvvomp(i3,nnuc) = 1. + grand()*sigma
               WRITE (6,
      &        '('' Real volume potential depth in '',I3,A2,
      &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' Real volume potential depth in '',I3,A2,
      &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
@@ -3427,7 +3384,7 @@ C                FNavomp(i3,nnuc) = 1. + grand()*sigma
               WRITE (6,
      &        '('' Volume potential diffuseness in '',I3,A2,
      &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' Volume potential diffuseness in '',I3,A2,
      &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
@@ -3471,7 +3428,7 @@ C                FNwvomp(i3,nnuc) = 1. + grand()*sigma
               WRITE (6,
      &        '('' Imag. volume potential depth scaled by ''
      &        ,f5.2)') abs(val)
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' Imag. volume potential depth scaled by ''
      &        ,f5.2)') abs(val)
             endif
@@ -3513,10 +3470,10 @@ C                FNwsomp(i3,nnuc) = 1. + grand()*sigma
             if(val.lt.0.) then
               FNwsomp(i3,nnuc) = abs(val)
               WRITE (6,
-     &        '('' Imag. surface potential depth scaled by '',f5.2)') 
+     &        '('' Imag. surface potential depth scaled by '',f5.2)')
      &            abs(val)
-              IF (NENDf.GT.0) WRITE (12,
-     &        '('' Imag. surface potential depth scaled by '',f5.2)') 
+              WRITE (12,
+     &        '('' Imag. surface potential depth scaled by '',f5.2)')
      &           abs(val)
             endif
             GOTO 100
@@ -3558,10 +3515,10 @@ C                FNasomp(i3,nnuc) = 1. + grand()*sigma
               FNasomp(i3,nnuc) = abs(val)
               WRITE (6,
      &        '('' Surface potential diffuseness scaled by ''
-     &        ,f5.2)') abs(val) 
-              IF (NENDf.GT.0) WRITE (12,
+     &        ,f5.2)') abs(val)
+              WRITE (12,
      &        '('' Surface potential diffuseness scaled by ''
-     &        ,f5.2)') abs(val) 
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3602,10 +3559,10 @@ C                FNrsomp(i3,nnuc) = 1. + grand()*sigma
               FNrsomp(i3,nnuc) = abs(val)
               WRITE (6,
      &        '('' Surface potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
-              IF (NENDf.GT.0) WRITE (12,
+     &        ,f5.2)') abs(val)
+              WRITE (12,
      &        '('' Surface potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3646,10 +3603,10 @@ C                FNrwvomp(i3,nnuc) = 1. + grand()*sigma
               FNrwvomp(i3,nnuc) = abs(val)
               WRITE (6,
      &        '('' Volume imaginary potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
-              IF (NENDf.GT.0) WRITE (12,
+     &        ,f5.2)') abs(val)
+              WRITE (12,
      &        '('' Volume imaginary potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3690,10 +3647,10 @@ C                FNrvomp(i3,nnuc) = 1. + grand()*sigma
               FNrvomp(i3,nnuc) = abs(val)
               WRITE (6,
      &        '('' Volume real potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
-              IF (NENDf.GT.0) WRITE (12,
+     &        ,f5.2)') abs(val)
+              WRITE (12,
      &        '('' Volume real potential radius scaled by ''
-     &        ,f5.2)') abs(val) 
+     &        ,f5.2)') abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3737,7 +3694,7 @@ C-----
               WRITE (6,
      &      '('' GDR first hump energy in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR first hump energy in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
              endif
@@ -3753,7 +3710,7 @@ C-----
               WRITE (6,
      &        '('' GDR first hump width in all nuclei set to '',F5.2)')
      &        val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' GDR first hump width in all nuclei set to '',F5.2)')
      &        val
               GOTO 100
@@ -3783,7 +3740,7 @@ C-----
               WRITE (6,
      &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
              endif
@@ -3799,7 +3756,7 @@ C-----
               WRITE (6,
      &        '('' GDR first hump cross section in all nuclei set to ''
      &        ,F5.2)') val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' GDR first hump cross section in all nuclei set to ''
      &        ,F5.2)') val
               GOTO 100
@@ -3829,7 +3786,7 @@ C-----
               WRITE (6,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
      &      ,F5.2)') i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
      &      ,F5.2)') i2, SYMb(nnuc), val
              endif
@@ -3875,7 +3832,7 @@ C-----
               WRITE (6,
      &      '('' GDR second hump energy in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR second hump energy in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
              endif
@@ -3891,7 +3848,7 @@ C-----
               WRITE (6,
      &        '('' GDR second hump width in all nuclei set to '',F5.2)')
      &        val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' GDR second hump width in all nuclei set to '',F5.2)')
      &        val
               GOTO 100
@@ -3921,7 +3878,7 @@ C-----
               WRITE (6,
      &      '('' GDR second hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR second hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
              endif
@@ -3937,7 +3894,7 @@ C-----
               WRITE (6,
      &        '('' GDR second hump cross section in all nuclei set to ''
      &        ,F5.2)') val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &        '('' GDR second hump cross section in all nuclei set to ''
      &        ,F5.2)') val
               GOTO 100
@@ -3967,7 +3924,7 @@ C-----
               WRITE (6,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
      &      ,F5.2)') i2, SYMb(nnuc), val
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
      &      ,F5.2)') i2, SYMb(nnuc), val
              endif
@@ -3979,11 +3936,11 @@ C-----
             IF (MSD.EQ.1) WRITE (6,
      &'('' MSD calculations with ORION+TRISTAN were selected'')
      &   ')
-            IF (MSD.EQ.1 .AND. NENDf.GT.0) WRITE (12,
+            IF (MSD.EQ.1) WRITE (12,
      &'('' MSD calculations with ORION+TRISTAN were used'')')
             IF (MSD.EQ.2) WRITE (6,
      &         '('' including contribution to discrete levels'')')
-            IF (MSD.EQ.2 .AND. NENDf.GT.0) WRITE (12,
+            IF (MSD.EQ.2) WRITE (12,
      &         '('' including contribution to discrete levels'')')
             GOTO 100
          ENDIF
@@ -3993,7 +3950,7 @@ C-----
             IF (MSC.NE.0) WRITE (6,
      &                '('' Heidelberg MSC calculations were selected'')'
      &                )
-            IF (MSC.NE.0 .AND. NENDf.GT.0) WRITE (12,
+            IF (MSC.NE.0) WRITE (12,
      &                '('' Heidelberg MSC calculations were used'')')
             GOTO 100
          ENDIF
@@ -4003,7 +3960,7 @@ C-----
             IF (LHMs.NE.0) WRITE (6,
      &            '('' HMS preequilibrium calculations were selected'')'
      &            )
-            IF (LHMs.NE.0 .AND. NENDf.GT.0) WRITE (12,
+            IF (LHMs.NE.0) WRITE (12,
      &            '('' HMS preequilibrium calculations were used'')')
             GOTO 100
          ENDIF
@@ -4013,9 +3970,7 @@ C-----
                NHMs = val
                WRITE (6,'('' Number of events in HMS set to '',I10)')
      &                NHMs
-               IF (NENDf.GT.0) 
-
-     &         WRITE (12,'('' Number of events in HMS '',I10)') NHMs
+               WRITE (12,'('' Number of events in HMS '',I10)') NHMs
             ENDIF
             GOTO 100
          ENDIF
@@ -4026,7 +3981,7 @@ C-----
                WRITE (6,
      &             '('' Default damp rate in HMS multiplied by '',F6.3)'
      &             ) CHMs
-               IF (NENDf.GT.0) WRITE (12,
+               WRITE (12,
      &             '('' Default damp rate in HMS multiplied by '',F6.3)'
      &             ) CHMs
             ENDIF
@@ -4041,7 +3996,7 @@ C-----
               IF (LHRtw.NE.0) WRITE (6,
      &           '('' HRTW width fluctuation correction was selected'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
-              IF (LHRtw.NE.0 .AND. NENDf.GT.0) WRITE (12,
+              IF (LHRtw.NE.0) WRITE (12,
      &           '('' Width fluctuations calculated within HRTW '',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
             ELSE
@@ -4055,7 +4010,7 @@ C-----
             WRITE (6,
      &             '('' Factor in energy increase of GDR width'',F7.5)')
      &             DIToro
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &             '('' Factor in energy increase of GDR width'',F7.5)')
      &             DIToro
             GOTO 100
@@ -4066,7 +4021,7 @@ C-----
             WRITE (6,
      &         '('' GDR first hump width increased by '',F5.2,'' MeV'')'
      &         ) GDRwa1
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &         '('' GDR first hump width increased by '',F5.2,'' MeV'')'
      &         ) GDRwa1
             GOTO 100
@@ -4077,7 +4032,7 @@ C-----
             WRITE (6,
      &        '('' GDR second hump width increased by '',F5.2,'' MeV'')'
      &        ) GDRwa2
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &        '('' GDR second hump width increased by '',F5.2,'' MeV'')'
      &        ) GDRwa2
             GOTO 100
@@ -4087,10 +4042,7 @@ C-----
             GDResh = val
             WRITE (6,'('' GDR position shifted by '',F6.3,'' MeV'')')
      &             GDResh
-
-            IF (NENDf.GT.0) WRITE (12,
-
-     &               '('' GDR position shifted by '',F6.3,'' MeV'')')
+            WRITE (12,'('' GDR position shifted by '',F6.3,'' MeV'')')
      &             GDResh
             GOTO 100
          ENDIF
@@ -4100,7 +4052,7 @@ C-----
             WRITE (6,
      &'('' Splitting of GDR peaks increased by '',F6.3,         '' MEV''
      &)') GDRspl
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &'('' Splitting of GDR peaks increased by '',F6.3,         '' MEV''
      &)') GDRspl
             GOTO 100
@@ -4111,7 +4063,7 @@ C-----
             WRITE (6,
      &'('' Gamma strength multiplied by '',F6.3,'' for the first GDR hum
      &p'')') EWSr1
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &'('' Gamma strength multiplied by '',F6.3,'' for the first GDR hum
      &p'')') EWSr1
             GOTO 100
@@ -4122,7 +4074,7 @@ C-----
             WRITE (6,
      &'('' Gamma strength multiplied by '',F6.3,'' for the second GDR hu
      &mp'')') EWSr2
-            IF (NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &'('' Gamma strength multiplied by '',F6.3,'' for the second GDR hu
      &mp'')') EWSr2
             GOTO 100
@@ -4140,9 +4092,7 @@ C-----
             DEFpar = val
             WRITE (6,'('' Dynamic deformation multiplyer '',F7.3)')
      &             DEFpar
-            IF (NENDf.GT.0) WRITE (12,   
-
-     &               '('' Dynamic deformation multiplyer '',F7.3)')
+            WRITE (12,'('' Dynamic deformation multiplyer '',F7.3)')
      &             DEFpar
             GOTO 100
          ENDIF
@@ -4172,30 +4122,24 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-            IF(i1.eq.0 .OR. i2.eq.0) THEN
+             IF(i1.eq.0 .OR. i2.eq.0) THEN
 C             Setting ENDF for all emission loops
               NENdf = INT(val)
-
-              IF (NENDf.GT.0) THEN
-                WRITE (6,'('' ENDF formatting enabled'')')
-                WRITE (6,'(
-     &           '' Exclusive spectra available up to'',
-     &           '' emission loop # '',I2)') NENdf
-
-                WRITE (12,'(
-     &           '' Exclusive spectra available up to'',
-     &           '' emission loop # '',I2)') NENdf
-
-                 ENDIF
-
-              GOTO 100
-            ENDIF
-            IF(val.LT.0) THEN
-              WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)')
+              WRITE (6,'('' ENDF formatting enabled'')')
+              WRITE (6,'(
+     &         '' Exclusive spectra available up to'',
+     &         '' emission loop # '',I2)') NENdf
+              WRITE (12,'(
+     &         '' Exclusive spectra available up to'',
+     &         '' emission loop # '',I2)') NENdf
+                  GOTO 100
+             ENDIF
+             IF(val.LT.0) THEN
+               WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)')
      &                i2, SYMb(nnuc)
-              WRITE (6,'('' SETTING IGNORED'')')
-              GOTO 100
-            ENDIF
+               WRITE (6,'('' SETTING IGNORED'')')
+               GOTO 100
+             ENDIF
 C           Setting ENDF for a single nucleus
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
@@ -4329,8 +4273,6 @@ C-----
                IF (val.EQ.( - 2.D0)) WRITE (6,
      &         '('' L. d. a-parameter according to Mebel systematics'')'
      &         )
-
-               IF (NENDf.GT.0.) THEN
                IF (val.GT.0.0D0) WRITE (12,
      &       '('' L. d. a-parameter set to '',F6.2,'' for all nuclei'')'
      &       ) val
@@ -4343,8 +4285,6 @@ C-----
                IF (val.EQ.( - 2.D0)) WRITE (12,
      &         '('' L. d. a-parameter according to Mebel systematics'')'
      &         )
-
-                ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -4358,7 +4298,7 @@ C-----
             WRITE (6,
      & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
      & ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
      & ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4373,7 +4313,7 @@ C-----
                WRITE (6,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
-               IF (NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
                GOTO 100
@@ -4396,8 +4336,8 @@ C              ATIlnor(nnuc) = val + grand()*sigma
               WRITE (6,
      &        '('' L.d. a-parameter sampled value : '',f8.3)')
      &        ATIlnor(nnuc)
-              IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, ATIlnor(nnuc),INDexf,INDexb
             else
               ATIlnor(nnuc) = val
@@ -4418,7 +4358,7 @@ C-----
                WRITE (6,
      &     '('' Single particle l.d. parameter g multiplied by '',F6.2)'
      &     ) val
-               IF (NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &     '('' Single particle l.d. parameter g multiplied by '',F6.2)'
      &     ) val
                GOTO 100
@@ -4466,7 +4406,7 @@ C-----
             WRITE (6,
      & '('' L.d. parameter Ux  in '',I3,A2,'' set to ''          ,F6.3)'
      & ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      & '('' L.d. parameter Ux  in '',I3,A2,'' set to ''          ,F6.3)'
      & ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4485,7 +4425,7 @@ C-----
             WRITE (6,
      &      '('' Pairing shift in '',I3,A2,'' set to ''          ,F6.3)'
      &      ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &      '('' Pairing shift in '',I3,A2,'' set to ''          ,F6.3)'
      &      ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4504,7 +4444,7 @@ C-----
             WRITE (6,
      &  '('' L.d. parameter Eo in '',I3,A2,'' set to ''          ,F6.3)'
      &  ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &  '('' L.d. parameter Eo in '',I3,A2,'' set to ''          ,F6.3)'
      &  ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4523,7 +4463,7 @@ C-----
             WRITE (6,
      &   '('' L.d. parameter T in '',I3,A2,'' set to ''          ,F6.3)'
      &   ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &   '('' L.d. parameter T in '',I3,A2,'' set to ''          ,F6.3)'
      &   ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4579,7 +4519,7 @@ C              TUNEpe(i1) = val + grand()*sigma
               WRITE (6,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), val
-              IF (NENDf.GT.0.) WRITE (12,
+              WRITE (12,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), val
             endif
@@ -4614,7 +4554,7 @@ C              TUNefi(nnuc) = val + grand()*sigma
               WRITE (6,
      &'('' Fission width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
-              IF (NENDf.GT.0.) WRITE (12,
+              WRITE (12,
      &'('' Fission width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
             endif
@@ -4653,7 +4593,7 @@ C              TUNe(i3,nnuc) = val + grand()*sigma
               WRITE (6,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), val
-              IF (NENDf.GT.0.) WRITE (12,
+              WRITE (12,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
             endif
@@ -4665,7 +4605,7 @@ C--------input for TRISTAN (MSD)
             IF (WIDexin.GT.0.0D0) WRITE (6,
      &'('' Experimental energy resolution in MSD set to'',F6.3,'' MeV'')
      &') WIDexin
-            IF (WIDexin.GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (WIDexin.GT.0.0D0) WRITE (12,
      &'('' Experimental energy resolution in MSD set to'',F6.3,'' MeV'')
      &') WIDexin
             GOTO 100
@@ -4677,14 +4617,14 @@ C-----
                WRITE (6,
      &'('' Compressional l=0 form factor''
      &,'' used in MSD calculations'')')
-               IF (NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &'('' Compressional l=0 form factor''
      &,'' used in MSD calculations'')')
             ELSE
                WRITE (6,
      &'('' Surface l=0 form factor''
      &,'' used in MSD calculations'')')
-               IF (NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &'('' Surface l=0 form factor''
      &,'' used in MSD calculations'')')
             ENDIF
@@ -4696,7 +4636,7 @@ C-----
             IF (GAPin(2).GT.0.0D0) WRITE (6,
      &'('' Proton  pairing gap for target in MSD set to'',F6.3,'' MeV'')
      &') GAPin(2)
-            IF (GAPin(2).GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (GAPin(2).GT.0.0D0) WRITE (12,
      &'('' Proton  pairing gap for target in MSD set to'',F6.3,'' MeV'')
      &') GAPin(2)
             GOTO 100
@@ -4707,7 +4647,7 @@ C-----
             IF (GAPin(1).GT.0.0D0) WRITE (6,
      &'('' Neutron pairing gap for target in MSD set to'',F6.3,'' MeV'')
      &') GAPin(1)
-            IF (GAPin(1).GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (GAPin(1).GT.0.0D0) WRITE (12,
      &'('' Neutron pairing gap for target in MSD set to'',F6.3,'' MeV'')
      &') GAPin(1)
             GOTO 100
@@ -4718,7 +4658,7 @@ C-----
             IF (HOMin.GT.0.0D0) WRITE (6,
      &'('' Harmonic oscillator energy (hbar*omega) for MSD'',   F6.3,''
      &MeV'')') HOMin
-            IF (HOMin.GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (HOMin.GT.0.0D0) WRITE (12,
      &'('' Harmonic oscillator energy (hbar*omega) for MSD'',   F6.3,''
      &MeV'')') HOMin
             GOTO 100
@@ -4729,7 +4669,7 @@ C-----
             IF (ALSin.GT.0.0D0) WRITE (6,
      &'('' l*s coupling strength in harmonic oscill. (MSD)'',   F6.3,''
      &MeV'')') ALSin
-            IF (ALSin.GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (ALSin.GT.0.0D0) WRITE (12,
      &'('' l*s coupling strength in harmonic oscill. (MSD)'',   F6.3,''
      &MeV'')') ALSin
             GOTO 100
@@ -4740,7 +4680,7 @@ C-----
             IF (EFItin(i1 + 1).GT.0.0D0) WRITE (6,
      &'('' Field strength of multipolarity'',I2,'' fitted to the level a
      &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
-            IF (EFItin(i1 + 1).GT.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (EFItin(i1 + 1).GT.0.0D0) WRITE (12,
      &'('' Field strength of multipolarity'',I2,'' fitted to the level a
      &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
             GOTO 100
@@ -4748,14 +4688,14 @@ C-----
 C-----
          IF (name.EQ.'RESNOR') THEN
             IF(i1.EQ.0) THEN
-               DO i=1,5 
+               DO i=1,5
                   CNOrin(i + 1) = val
-               ENDDO 
+               ENDDO
                WRITE (6,
-     &'('' Response functions for first 5 l transfers in MSD normalized 
+     &'('' Response functions for first 5 l transfers in MSD normalized
      &by factor '',F6.3)') val
-               IF (NENDf.GT.0.) WRITE (12,
-     &'('' Response functions for first 5 l transfers in MSD normalized 
+               WRITE (12,
+     &'('' Response functions for first 5 l transfers in MSD normalized
      &by factor '',F6.3)') val
             GOTO 100
             ENDIF
@@ -4763,7 +4703,7 @@ C-----
             WRITE (6,
      &'('' Response function for l transfer'',I3,'' normalized by factor
      & '',F6.3)') i1, CNOrin(i1 + 1)
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &'('' Response function for l transfer'',I3,'' normalized by factor
      & '',F6.3)') i1, CNOrin(i1 + 1)
             GOTO 100
@@ -4777,10 +4717,10 @@ C--------TRISTAN (MSD) input **** done ****
             IF (SHNix.EQ.0.0D0) WRITE (6,
      &           '('' Shell corrections according to Myers-Swiatecki'')'
      &           )
-            IF (SHNix.NE.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (SHNix.NE.0.0D0) WRITE (12,
      &                '('' Shell corrections according to Nix-Moller'')'
      &                )
-            IF (SHNix.EQ.0.0D0 .AND. NENDf.GT.0.) WRITE (12,
+            IF (SHNix.EQ.0.0D0) WRITE (12,
      &           '('' Shell corrections according to Myers-Swiatecki'')'
      &           )
             GOTO 100
@@ -4800,15 +4740,10 @@ C-----
          IF (name.EQ.'E1    ') THEN
             IF (val.GT.0.0D+0) THEN
                WRITE (6,'('' E1 photo-absorption selected'')')
-
-               IF(NENDf.GT.0.)
-     &         WRITE (12,'('' E1 photo-absorption selected'')')
+               WRITE (12,'('' E1 photo-absorption selected'')')
             ELSE
                WRITE (6,'('' E1 photo-absorption blocked'')')
-
-               IF(NENDf.GT.0.)
-
-     &         WRITE (12,'('' E1 photo-absorption blocked'')')
+               WRITE (12,'('' E1 photo-absorption blocked'')')
             ENDIF
             IGE1 = val
             GOTO 100
@@ -4817,16 +4752,10 @@ C-----
          IF (name.EQ.'M1    ') THEN
             IF (val.GT.0.0D+0) THEN
                WRITE (6,'('' M1 photo-absorption selected'')')
-
-               IF(NENDf.GT.0.)
-
-     &         WRITE (12,'('' M1 photo-absorption selected'')')
+               WRITE (12,'('' M1 photo-absorption selected'')')
             ELSE
                WRITE (6,'('' M1 photo-absorption blocked'')')
-
-               IF(NENDf.GT.0.)
-
-     &         WRITE (12,'('' M1 photo-absorption blocked'')')
+               WRITE (12,'('' M1 photo-absorption blocked'')')
             ENDIF
             IGM1 = val
             GOTO 100
@@ -4835,16 +4764,10 @@ C-----
          IF (name.EQ.'E2    ') THEN
             IF (val.GT.0.0D+0) THEN
                WRITE (6,'('' E2 photo-absorption selected'')')
-
-               IF(NENDf.GT.0.)
-
-     &         WRITE (12,'('' E2 photo-absorption selected'')')
+               WRITE (12,'('' E2 photo-absorption selected'')')
             ELSE
                WRITE (6,'('' E2 photo-absorption blocked'')')
-
-               IF(NENDf.GT.0.)
-
-     &         WRITE (12,'('' E2 photo-absorption blocked'')')
+               WRITE (12,'('' E2 photo-absorption blocked'')')
             ENDIF
             IGE2 = val
             GOTO 100
@@ -4855,7 +4778,7 @@ C-----
                WRITE (6,
      &'('' Quasideuteron photo-absorption is '',          '' suppressed
      &since E1 photo-absorption is blocked!'')')
-               IF(NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &'('' Quasideuteron photo-absorption is '',          '' suppressed
      &since E1 photo-absorption is blocked!'')')
             ELSE
@@ -4863,7 +4786,7 @@ C-----
                WRITE (6,
      &'('' Quasideuteron photoabsorption cross section'',
      &  '' normalized by a factor '',F6.3)') LQDfac
-               IF(NENDf.GT.0.) WRITE (12,
+               WRITE (12,
      &'('' Quasideuteron photoabsorption cross section'',
      &  '' normalized by a factor '',F6.3)') LQDfac
             ENDIF
@@ -4887,7 +4810,7 @@ C--------checking for fission data in the optional input
                   FISshi(nnuc) = val
                ENDDO
                WRITE (6,*) 'For all nuclei: ', fstring
-               IF(NENDf.GT.0.) WRITE (12,*) 'For all nuclei: ',fstring
+               WRITE (12,*) 'For all nuclei: ', fstring
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -4899,9 +4822,7 @@ C--------checking for fission data in the optional input
             ENDIF
             FISshi(nnuc) = val
             WRITE (6,*) 'For ', i2, '-', SYMb(nnuc), ' ', fstring
-            IF(NENDf.GT.0.) 
-
-     &          WRITE (12,*) 'For ', i2, '-', SYMb(nnuc), ' ', fstring
+            WRITE (12,*) 'For ', i2, '-', SYMb(nnuc), ' ', fstring
             GOTO 100
          ENDIF
 C-----
@@ -4925,7 +4846,7 @@ C-----
             WRITE (6,
      &            '('' FISMOD  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
-            IF(NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &            '('' FISMOD  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4938,9 +4859,7 @@ C-----
                   FISopt(nnuc) = val
                ENDDO
                WRITE (6,'('' FISOPT  in all nuclei set to '',F6.3)') val
-
-               IF(NENDf.GT.0.) 
-     &         WRITE (12,'('' FISOPT  in all nuclei set to '',F6.3)')val
+               WRITE (12,'('' FISOPT  in all nuclei set to '',F6.3)')val
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -4954,7 +4873,7 @@ C-----
             WRITE (6,
      &            '('' FISOPT  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
-            IF(NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &            '('' FISOPT  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4967,9 +4886,7 @@ C-----
                   FISbar(nnuc) = val
                ENDDO
                WRITE (6,'('' FISBAR  in all nuclei set to '',F6.3)') val
-
-               IF (NENDf.GT.0.) 
-     &         WRITE (12,'('' FISBAR  in all nuclei set to '',F6.3)')val
+               WRITE (12,'('' FISBAR  in all nuclei set to '',F6.3)')val
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -4983,7 +4900,7 @@ C-----
             WRITE (6,
      &            '('' FISBAR  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &            '('' FISBAR  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
             GOTO 100
@@ -4996,9 +4913,7 @@ C-----
                   FISden(nnuc) = val
                ENDDO
                WRITE (6,'('' FISDEN  in all nuclei set to '',F6.3)') val
-
-               IF(NENDf.GT.0.) 
-     %         WRITE (12,'('' FISDEN  in all nuclei set to '',F6.3)')val
+               WRITE (12,'('' FISDEN  in all nuclei set to '',F6.3)')val
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -5012,7 +4927,7 @@ C-----
             WRITE (6,
      &            '('' FISDEN  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
-            IF (NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &            '('' FISDEN  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
             GOTO 100
@@ -5025,9 +4940,7 @@ C-----
                   FISdis(nnuc) = val
                ENDDO
                WRITE (6,'('' FISDIS  in all nuclei set to '',F6.3)') val
-
-               IF(NENDf.GT.0.) 
-     &         WRITE (12,'('' FISDIS  in all nuclei set to '',F6.3)')val
+               WRITE (12,'('' FISDIS  in all nuclei set to '',F6.3)')val
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -5041,7 +4954,7 @@ C-----
             WRITE (6,
      &            '('' FISDIS  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
-            IF(NENDf.GT.0.) WRITE (12,
+            WRITE (12,
      &            '('' FISDIS  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val
             GOTO 100
@@ -5265,15 +5178,15 @@ C
       ENDDO
       nexp = 0
       atilsum = 0.0
-      WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
-      WRITE(6,'(1X)') 
+      WRITE(6,'(1X)')
+      WRITE(6,'(1X)')
       WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a''
-     &         ''-tilde'')') 
-      WRITE(6,'(4X,54(''-''))') 
-      WRITE(6,'(1X)') 
+     &         ''-tilde'')')
+      WRITE(6,'(4X,54(''-''))')
+      WRITE(6,'(1X)')
       WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
-     &               ''  ATILNO     final'')') 
-      WRITE(6,'(1X)') 
+     &               ''  ATILNO     final'')')
+      WRITE(6,'(1X)')
   100 READ (24,'(I7,I4,2F7.2,E10.4,E10.3)',END = 200) izar, nlevc,
      &      arogc, aroc, qn, dob
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
@@ -5283,7 +5196,7 @@ C
             DOBs(nnuc) = dob
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
-             
+
 C-----------set up normalization factors for level density parameter 'a'
             IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. arogc.NE.0.0D0) THEN
 C--------------Gilbert-Cameron (no explicit collective effects)
@@ -5298,7 +5211,7 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   atiln = arogc/asys
-C--------------EMPIRE-specific 
+C--------------EMPIRE-specific
                ELSEIF (ADIv.EQ.0.0D0) THEN
                   del = 0.
                   delp = 12./SQRT(A(nnuc))
@@ -5339,7 +5252,7 @@ C-----------------EMPIRE systematics with M-S shell corrections
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   atiln = aroc/asys
                ENDIF
-               IF(ATIlnor(nnuc).EQ.0) THEN 
+               IF(ATIlnor(nnuc).EQ.0) THEN
                   ATIlnor(nnuc) = atiln
 C
 C              The following two lines must be commented to reproduce Th-232 evaluation
@@ -5364,12 +5277,12 @@ C--------------Print resulting level density parameters
      &                ' aexp=', arogc
                ELSE
                   IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.3.0D0)
-     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-                  IF (ADIv.EQ.2.0D0) 
-     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5F10.3)') 
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+                  IF (ADIv.EQ.2.0D0)
+     &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
                ENDIF
 C--------------Calculate sum for the average normalization factor
@@ -5381,7 +5294,7 @@ C--------------Calculate sum for the average normalization factor
       GOTO 100
   200 IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. nexp.GT.2) THEN
          atilave = ABS(atilsum/FLOAT(nexp))
-         WRITE (6,'(''               Average exp/sys'',F10.3)')
+         WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
      &               atilave
       ELSE
          WRITE (6,*)
@@ -5390,19 +5303,20 @@ C--------------Calculate sum for the average normalization factor
          atilave = 1.0
       ENDIF
       DO nnuc = 1, NNUct
-         IF (ATIlnor(nnuc).EQ.0.0D0) THEN 
+         IF (ATIlnor(nnuc).EQ.0.0D0) THEN
             ATIlnor(nnuc) = atilave
-            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,1F10.3)') 
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
-         ELSEIF (ROPar(1,nnuc).EQ.0) THEN 
-            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2F10.3)') 
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
-     &         atilave, ATIlnor(nnuc)
+         ELSEIF (ROPar(1,nnuc).EQ.0) THEN
+	    ftmp =   ATIlnor(nnuc)
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
-C           (another change before this one (look for atilno appearance)    
-C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+C           (another change before this one (look for atilno appearance)
+C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave	 
+            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         atilave, ATIlnor(nnuc),ftmp
          ENDIF
       ENDDO
       END
@@ -6119,33 +6033,22 @@ C
 C--------Collective levels automatically selected, pls check
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
-         IF(NENDf.GT.0) 
-
-     &   WRITE (12,*)' Collective levels used in direct calcualtions'
+         WRITE (12,*)' Collective levels used in direct calcualtions'
 C--------2nd line
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
 C--------82 208    nucleus is treated as spherical
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
-
-         IF(NENDf.GT.0) 
-
-     &   WRITE (12,'(a100)') comment
+         WRITE (12,'(a100)') comment
 C--------empty line
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
-
-         IF(NENDf.GT.0) 
-
-     &   WRITE (12,'(a100)') comment
+         WRITE (12,'(a100)') comment
 C--------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
-
-         IF(NENDf.GT.0) 
-
-     &   WRITE (12,'(a100)') comment
+         WRITE (12,'(a100)') comment
          DEFormed = .FALSE.
          IF (ABS(DEF(1,0)).GT.0.1D0) DEFormed = .TRUE.
 C
@@ -6160,16 +6063,12 @@ C-----------Number of collective levels
      &            IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
             WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
-
-            IF(NENDf.GT.0) 
-
-     &      WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
+            WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
          ELSE
             READ (32,'(3x,3I5)') ND_nlv
             WRITE (6,'(3x,3I5)') ND_nlv
-
-            IF(NENDf.GT.0) WRITE (12,'(3x,3I5)') ND_nlv
+            WRITE (12,'(3x,3I5)') ND_nlv
          ENDIF
 C--------if nd_nlv=0 , then no collective levels will be considered
 C--------setting direct to zero
@@ -6188,10 +6087,8 @@ C--------empty line
 C--------'collective levels:'
          READ (32,'(a100)') comment
          WRITE (6,'(a100)') comment
-         IF(NENDf.GT.0) WRITE (12,*)' '
-         IF(NENDf.GT.0) 
-
-     &   WRITE (12,*)' N  E[MeV]   J  pi  Nph L  K  Dyn. Def.'
+         WRITE (12,*)' '
+         WRITE (12,*)' N  E[MeV]   J  pi  Nph L  K  Dyn. Def.'
 C--------Reading ground state infomation (to avoid overwriting deformation)
          READ (32,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
@@ -6199,9 +6096,7 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
          WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
-
-         IF (NENDf.GT.0) 
-     &   WRITE (12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
+         WRITE (12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
          DO i = 2, ND_nlv
@@ -6215,12 +6110,12 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-            IF(NENDf.GT.0) WRITE (12,
+            WRITE (12,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
          ENDDO
-         IF (NENDf.GT.0) WRITE(12,*) ' '
+         WRITE(12,*) ' '
          CLOSE (32)
          IFINDCOLL = 0
          RETURN
@@ -6805,17 +6700,11 @@ C-----------------swapping
          WRITE (6,'(3x,I5)') ND_nlv
          WRITE (6,*)
          WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-
-
          WRITE (32,*)
          WRITE (32,*) '   Ncoll  '
          WRITE (32,'(3x,3I5)') ND_nlv
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-          
-
-          IF (NENDf.GT.0.) THEN
-
          WRITE (12,*)
          WRITE (12,*) 'Collective levels used in direct calculations'
          WRITE (12,*)
@@ -6823,14 +6712,11 @@ C-----------------swapping
          WRITE (12,'(3x,3I5)') ND_nlv
          WRITE (12,*)
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-          ENDIF
-
 
          ncont = NLV(nnurec) + LEVcc
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.0
-
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
             IF (itmp1.LE.NLV(nnurec)) THEN
@@ -6838,22 +6724,14 @@ C-----------------swapping
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp
-              IF (NENDf.GT.0) WRITE (12,
-
+              WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-
      &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &           D_Llv(i), D_Klv(i), ftmp
-
               WRITE (6,
-
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-
      &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &           D_Llv(i), D_Klv(i), ftmp
-
             ELSE
               ncont = ncont + 1
               IF(ncont.GT.99) GOTO 653
@@ -6861,23 +6739,17 @@ C-----------------swapping
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
               WRITE (6,
-
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
-
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
-
             ENDIF
          ENDDO
- 653     IF (NENDf.GT.0) WRITE(12,*) ' '
-
-         WRITE(6,*)
+ 653     WRITE(12,*) ' '
       ELSE
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
@@ -6936,8 +6808,6 @@ C-----------------swapping
      &          IDEfcc, D_Xjlv(1), (D_Def(1,j),j = 2,IDEfcc,2)
          WRITE (32,*)
          WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-
-          IF (NENDf.GT.0) THEN
          WRITE (12,*)
          WRITE (12,*) 'Collective levels used in direct calculations'
          WRITE (12,*)
@@ -6945,8 +6815,8 @@ C-----------------swapping
          WRITE (12,'(3x,3I5)') ND_nlv
          WRITE (12,*)
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
-          ENDIF
-         ncont = NLV(nnurec) + LEVcc
+
+          ncont = NLV(nnurec) + LEVcc
 
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
@@ -6963,7 +6833,7 @@ C-----------------swapping
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           0, 0, ftmp
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           0, 0, ftmp
@@ -6978,15 +6848,13 @@ C-----------------swapping
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
-              IF (NENDf.GT.0) WRITE (12,
+              WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
             ENDIF
          ENDDO
-99004    IF (NENDf.GT.0) WRITE(12,*) ' '
-
-         WRITE (6,*) 
+99004    WRITE(12,*) ' '
       ENDIF
       CLOSE (32)
       RETURN

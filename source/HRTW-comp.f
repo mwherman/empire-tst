@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:17:36 $
-Ccc   * $Id: HRTW-comp.f,v 1.35 2005-11-14 17:17:36 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:46 $
+Ccc   * $Id: HRTW-comp.f,v 1.36 2005-11-21 21:43:46 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1354,8 +1354,6 @@ C
       relcal = .FALSE.
       IF (IRElat(Npro,Ntrg).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-      relcal = .FALSE.
-
       coef = 10.d0*PI/ak2/
      &    (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       s1 = 0.5

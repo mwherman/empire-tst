@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:15:00 $
-Ccc   * $Id: tl.f,v 1.74 2005-11-14 17:15:00 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:46 $
+Ccc   * $Id: tl.f,v 1.75 2005-11-21 21:43:46 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -579,7 +579,7 @@ C-----set validity range to any energy (can be modified later)
       OMEmin(Nejc,Nnuc) = 0.D0
       OMEmax(Nejc,Nnuc) = 1000.D0
 C-----set relativistic calculation key to 0
-C     IRElat(Nejc,Nnuc) = 0
+      IRElat(Nejc,Nnuc) = 0
       fexist = OMPar_riplf
       IF (CCCalc) fexist = OMParfcc
 C-----OMPAR.RIPL file exists ?
@@ -590,8 +590,8 @@ C--------komp = 29 OR 33
          IF (ieof.EQ.0) THEN
 C-----------Reading potential parameters from OMPAR.RIPL(OMPAR.DIR) file
             CALL READ_OMPAR_RIPL(Komp,ierr,irel)
-             IRElat(Nejc,Nnuc) = irel
-             IF(Komp.eq.33) IRElat(0,0) = irel
+            IRElat(Nejc,Nnuc) = irel
+            IF(Komp.eq.33) IRElat(0,0) = irel
             IF (ierr.EQ.0) GOTO 100
          ENDIF
 C--------ieof<>0 or ierr<>0
@@ -634,7 +634,7 @@ C
 C-----Ener must be in LAB system
 C
   100 relcal = .FALSE.
-      IF (irel.GT.0 .or. RELkin) relcal = .TRUE.
+      IF (IRElat(Nejc,Nnuc).GT.0  .or. RELkin) relcal = .TRUE.
       IF (Ikey.LT.0) THEN
          ener = Eilab
          CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,1,relcal)
@@ -642,7 +642,6 @@ C
          CALL KINEMA(Eilab,Eicms,Mi,Mt,Ak2,2,relcal)
          ener = Eilab
       ENDIF
-      relcal = .FALSE.
       CALL RIPL2EMPIRE(Nejc,Nnuc,ener)
       IF (CCCalc) MODelecis = MODelcc
 C     Sometimes imaginary potentials are allowed to be negatives, RCN
@@ -1556,7 +1555,6 @@ C     xmas_nnuc = AMAss(Nnuc)
       relcal = .FALSE.
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
-      relcal = .FALSE.
 C-----Absorption cross section in mb
       sabs = 0.D0
       DO l = 0, Maxlw
@@ -1767,7 +1765,6 @@ C-----For vibrational the Tls must be multiplied by
          relcal = .FALSE.
          IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
-         relcal = .FALSE.
 C--------Reaction cross section in mb
          sabs = 0.D0
          DO l = 0, lmax
@@ -1860,8 +1857,7 @@ C     For ecis03
 C
 C-----*** OPTICAL POTENTIALS ***
 C-----Relativistic kinematics (y/n)
-C     IF(IRElat(Nejc,Nnuc).GT.0) RELkin = .TRUE.
-      IF(IRElat(Nejc,Nnuc).GT.0) THEN
+      IF (IRElat(Nejc,Nnuc).GT.0 .or. RELkin) THEN
          FLGrel = 'y'
       ELSE
          FLGrel = 'n'
@@ -2053,7 +2049,7 @@ C-----CARD 5
       rmatch = 20.D0
       WRITE (1,'(10x,f10.5)') rmatch
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
-      WRITE (1,*) 
+      WRITE (1,*)
 C     Matching radius calculated within ECIS
 C     WRITE(1, *)
 C-----ground state
@@ -2257,8 +2253,8 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
       IF (ICAlangs.GT.0) THEN
         WRITE (1,'(3f10.5)') 0.D0, 180.0D0, 180.D0
         WRITE (1,'(2i5)') ICAlangs,0
-        DO i = 1, ICAlangs    
-          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0, 
+        DO i = 1, ICAlangs
+          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0,
      1                                    1.0D0, 1.0D0, 0.0D0
           DO iang = 1, NANgela
             WRITE(1,'(5F10.5)') ANGles(iang), 1.0d3, 1.0d2, 0.0d0, 0.0d0
@@ -2266,7 +2262,7 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
          END DO
        ELSE
         WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
-       ENDIF            
+       ENDIF
 
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
@@ -2663,8 +2659,8 @@ C
       IF (ICAlangs.GT.0) THEN
         WRITE (1,'(3f10.5)') 0.D0, 180.0D0, 180.D0
         WRITE (1,'(2i5)') ICAlangs,0
-        DO i = 1, ICAlangs    
-          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0, 
+        DO i = 1, ICAlangs
+          WRITE(1,'(A1,I1,I3,2I5,5X,3F10.5)') 'F', 0, NANgela, i, 0,
      1                                    1.0D0, 1.0D0, 0.0D0
           DO iang = 1, NANgela
             WRITE(1,'(5F10.5)') ANGles(iang), 1.0D3, 1.0D2, 0.0D0, 0.0D0
@@ -2672,7 +2668,7 @@ C
          END DO
        ELSE
         WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
-       ENDIF            
+       ENDIF
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
 C-----Running ECIS

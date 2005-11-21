@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-14 17:28:51 $
-Ccc   * $Id: main.f,v 1.141 2005-11-14 17:28:51 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:46 $
+Ccc   * $Id: main.f,v 1.142 2005-11-21 21:43:46 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -41,17 +41,17 @@ C
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
-     &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda, 
-     &                 emedg, emedh, emedn, emedp, erecoil, espec, 
-     &                 espmax, epre, ftmp, gamfis, gamt, gang, grand, 
+     &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
+     &                 emedg, emedh, emedn, emedp, erecoil, espec,
+     &                 espmax, epre, ftmp, gamfis, gamt, gang, grand,
      &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
-     &                 poplev, popread, poptot, ptotsp, q2, q3, qmax, 
+     &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
      &                 totemis, weight, xcse, xizat, xnhms, xnl,
      &                 xnor, xtotsp, xsinlcont, xsinl, zres, angstep,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
-     &                 checkXS 
+     &                 checkXS
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -66,7 +66,7 @@ C
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
      &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nnuc,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,   neles,
-     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4 
+     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -101,8 +101,8 @@ C-----
 C-----Open file 41 with tabulated cross sections
 C-----
       IF (FIRst_ein) THEN
-      OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown') 
-      WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3, 
+      OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
+      WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
      &      int(Z(0)), SYMb(0), int(A(0))
       WRITE(41,'(''#'',A10,1X,(19A12))') '  Einc    ','  Total     ',
      &      '  Elastic   ','  Fission   ',(REAction(nnuc),nnuc=1,NNUcd)
@@ -156,7 +156,7 @@ C-----
         OPEN (45,FILE = (ctldir//ctmp23//'.LEG'),STATUS = 'OLD',
      &      ERR = 1400)
         READ (45,*,END = 1400)   ! To skip first line <LEGENDRE> ..
-        READ (45,'(5x,i5)',END = 1400) neles    
+        READ (45,'(5x,i5)',END = 1400) neles
         DO iang = 1, min(NDAng,neles)
            READ (45,'(10x,d20.10)',END = 1400) elleg(iang)
         ENDDO
@@ -589,7 +589,6 @@ C-------------Maximum and minimum energy bin
               echannel = EX(NEX(1),1) - Q(nejc,1)
 C-------------Last continuum energy bin is calculated (+ 1 added, 10, 2005)
 C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
-
               DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 2.0001),1)
                 WRITE (6,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
      &           (max(CSEa(i,iang,nejc,1),0.d0),iang = iad,iam)
@@ -741,7 +740,7 @@ C    &  '' mb including'')') CSFus
      &  '' mb including'')') CSFus + SINl + SINlcc
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
-     &  G13.6,'' mb'')') SINl + SINlcc
+     &  G13.6,'' mb'')') SINl  + SINlcc
             WRITE (6,'(''   DWBA to continuum = '',
      &  G13.6,'' mb'')') xsinlcont
             WRITE (6,'(''   PE + inelastic to continuum = '',
@@ -759,7 +758,7 @@ C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
      &          CSFus + SINl + SINlcc
-         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')') 
+         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
      &         TOTcs*TOTred
          WRITE (12,*) ' '
       ENDIF
@@ -1083,13 +1082,13 @@ c                 WRITE (6,*) ' '
 c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nejcec),ilv = 31,
 c     &                      MIN(its,40))
 c                ENDIF
-                
+
 c                ENDIF
 c               ENDIF
               ENDIF
             ENDIF
          ENDIF
-C Jump to end of loop after elastic when fitting   
+C Jump to end of loop after elastic when fitting
 
          If(FITomp.LT.0 .AND. nnuc.EQ.mt2) go to 1155
 
@@ -1723,8 +1722,8 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections
-      WRITE(41,'(G10.5,1P(19E12.5))') EINl, TOTcs, ELAcs, 
-     &     TOTcsfis, (CSPrd(nnuc),nnuc=1,NNUcd) 
+      WRITE(41,'(G10.5,1P(19E12.5))') EINl, TOTcs, ELAcs,
+     &     TOTcsfis, (CSPrd(nnuc),nnuc=1,NNUcd)
       CLOSE (80)
       CLOSE (79)
 C----
@@ -2032,9 +2031,8 @@ c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
         WRITE (6,*)
         WRITE (6,'('' WARNING: Sum of production XS and fission XS'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
-
-              IF((ABScs - 4.*PI*ELCncs).NE.0.d0)
-     &    WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
+        IF((ABScs - 4.*PI*ELCncs).NE.0.d0)
+     &  WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
      &            100.d0*abs((ABScs - 4.*PI*ELCncs - checkXS))/
      &                    (ABScs - 4.*PI*ELCncs)
       ENDIF
@@ -2086,8 +2084,7 @@ C--------exact endpoint
 C--------print inclusive spectra of ejectiles
 C--------neutrons
          nspec = INT((EMAx(1) - Q(1,1))/DE) + 2
-               IF (nspec.gt.0) THEN
-
+         IF (nspec.gt.0) THEN
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
@@ -2096,8 +2093,7 @@ C--------neutrons
           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
-             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-c    &            (max(0.d0,CSEa(ie,nang,1,0)),nang = 1,NDANG)
+           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
      &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
@@ -2105,8 +2101,7 @@ C---------exact endpoint
      &            (max(0.d0,CSEa(nspec,nang,1,0)),nang = 1,NDANG)
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
      &            (0.d0,nang = 1,NDANG)
-
-            ENDIF
+         ENDIF
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
          IF(nspec.gt.0) then
@@ -2119,7 +2114,6 @@ C--------protons
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-C    &            (max(0.d0,CSEa(ie,nang,2,0)),nang = 1,NDANG)
      &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
@@ -2140,8 +2134,7 @@ C--------alphas
      &            (ANGles(nang),nang=1,NDANG)
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (max(0.d0,CSEa(ie,nang,3,0)),nang = 1,NDANG)
-c    &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
+     &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
           ENDDO
 C---------exact endpoint
           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
@@ -2164,7 +2157,7 @@ C--------light ions
      &           (ANGles(nang),nang=1,NDANG)
              DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
-     &           *DE, (max(0.d0,CSEa(ie,nang,NDEJC,0)),nang = 1,NDANG)
+     &           *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
              ENDDO
 C------------exact endpoint
              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
@@ -2211,22 +2204,22 @@ C-----end of ENDF spectra (inclusive)
         ELSE
            READ(nextenergy,'(G15.5)') EIN
         ENDIF
-      ELSE
-        READ (5,*) EIN, NDAng, ICAlangs         
+       ELSE
+        READ (5,*) EIN, NDAng, ICAlangs
           IF(NDAng.lt.2) THEN
             NDAng=2
             ANGles(1) = 0.
             ANGles(2) = 180.
-          ELSE
+           ELSE
             READ (5,*) (ANGles(na),na=1,NDAng)
-          ENDIF
+           ENDIF
           NANGela=NDAng
           IF(NANgela.GT.NDAngecis) THEN
           WRITE(6,*)
      &         'FATAL: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
-      ENDIF
+       ENDIF
 
       IF (EIN.LT.0.0D0) THEN
          IF (FILevel) CLOSE (14)
@@ -2259,7 +2252,7 @@ C        SAVING RANDOM SEEDS
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
-         RETURN 
+         RETURN
       ENDIF
       IF(EIN.LT.epre) THEN
          WRITE(6,*) EIN,epre
@@ -2272,21 +2265,21 @@ C        SAVING RANDOM SEEDS
 C-----
 C-----
       IF(FITomp.GE.0) THEN
-        NANgela = 37
-        NDAng   = 37
-        IF(EIN.GT.10. .AND. EIN.LE.50.) THEN
-          NANgela = 73
-          NDAng   = 73
-        ENDIF
-        IF(EIN.GT.50.) THEN
-          NANgela = 91
-          NDAng   = 91
-        ENDIF
-        IF(NANgela.GT.NDAngecis) THEN
-          WRITE(6,*)
-     &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
-          STOP 'FATAL: increase NDAngecis in dimension.h'
-        ENDIF
+        NANgela = 91
+        NDAng   = 91
+C       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
+C         NANgela = 73
+C         NDAng   = 73
+C       ENDIF
+C       IF(EIN.GT.50.) THEN
+C         NANgela = 91
+C         NDAng   = 91
+C       ENDIF
+C       IF(NANgela.GT.NDAngecis) THEN
+C         WRITE(6,*)
+C    &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+C        STOP 'FATAL: increase NDAngecis in dimension.h'
+C       ENDIF
 C-------set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
         DO na = 1, NDANG
@@ -2402,7 +2395,7 @@ C--------decay to discrete levels (stored with icse=0)
             IF (erecod.LT.0) GOTO 100
             DO ire = 1, NDEREC      !over recoil spectrum
                DO na = 1, NDANG !over angles
-                  erecoil = (ire - 1)*DERec + erecod + 
+                  erecoil = (ire - 1)*DERec + erecod +
      &                       2.0*SQRT((ire - 1)*DERec*erecod)
      &                      *CANgler(na)
                   irec = erecoil/DERec + 1.001
@@ -2413,14 +2406,14 @@ C--------decay to discrete levels (stored with icse=0)
      &                                  *REClev(il,nejc)*(1.0 - weight)
      &                                  *SANgler(na)*coef
 c------------------------
-c                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0 
+c                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
 c    &               .AND.na.EQ.10) THEN
 c                 WRITE(6,*) '       Parent bin', Ke
 c                 WRITE(6,*) 'Recoil bin', ire
 c                 WRITE(6,*) 'Erecoil ', erecoil, erecod, nnuc
 c                 WRITE(6,*) 'RECcse, RECcse par, REClev',
-c    &            RECcse(irec,0,nnur),RECcse(ire,Ke,Nnuc), 
-c    &            REClev(il,nejc) 
+c    &            RECcse(irec,0,nnur),RECcse(ire,Ke,Nnuc),
+c    &            REClev(il,nejc)
 c                 ENDIF
 c------------------------
                   IF (irec + 1.GT.NDEREC) GOTO 60

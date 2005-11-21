@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 22:07:51 $
-Ccc   * $Id: pcross.f,v 1.41 2005-10-30 22:07:51 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:47 $
+Ccc   * $Id: pcross.f,v 1.42 2005-11-21 21:43:47 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -71,6 +71,7 @@ C     INITIALIZATION
 
 C     Projectile mass and charge number
       ap = AEJc(NPRoject)
+      if(NPRoject.eq.0) ap=0
       zp = ZEJc(NPRoject)
       cme = MFPp/1.4D21
 C-----Excitation energy (MeV)
@@ -174,7 +175,7 @@ C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/200
 C        nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 2.0001),1)
          DO ienerg = 2, nexrt
-C        DO ienerg = 2, NEX(nnur)	 
+C        DO ienerg = 2, NEX(nnur)    
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
 C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
@@ -401,16 +402,18 @@ C     Note, that PCROSS only calculates emission into the continuum
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
          IF(nnur.LT.0) cycle
-         ao = AEJc(nejc)
-         zo = ZEJc(nejc)
          IF (nejc.gt.0) THEN !particle
             IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) cycle
             IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle
             IF (nejc.EQ.3 .AND. IDNa(6,6).EQ.0) cycle
+            ao = AEJc(nejc)
+            zo = ZEJc(nejc)
             excnq = EXCn - Q(nejc,1)
             ebind = Q(nejc,1)
          ELSE !gamma
             IF (IDNa(5,6).EQ.0) cycle
+            ao = 0
+            zo = 0
             nnur = 1
             excnq = EXCn
             ebind = 0.d0

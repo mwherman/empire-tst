@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-05-10 07:14:25 $
-Ccc   * $Id: gamma-strength-analytic.f,v 1.17 2005-05-10 07:14:25 Capote Exp $
+Ccc   * $Date: 2005-11-21 21:43:47 $
+Ccc   * $Id: gamma-strength-analytic.f,v 1.18 2005-11-21 21:43:47 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
      &   Eexcitf,Temperf,Egamma,Keyshape)
@@ -420,7 +420,6 @@ C     Plujko 2005
      &  ((EGDr*EGDr - egamma2)**2 + LMConst*(Egamma*gamma)**2)
       END
 
-
       DOUBLE PRECISION FUNCTION WIDTHGFL(T,Egamma)
       IMPLICIT NONE
 C
@@ -437,18 +436,23 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION const1, const2, egamma2, gdq, gdq0, pi24
+      DOUBLE PRECISION const1, const2, egamma2, gdq, gdq0, pi24, ftmp
 C
 C
       DATA pi24/39.47841761D0/, const1/1.05D0/
       save pi24,const1
       egamma2 = Egamma**2
-      gdq0 = const1*SQRT(BETagfl2*EGDr**2 + EGDr*S2Plusgfl)
-      gdq = const1*SQRT(BETagfl2*egamma2 + Egamma*S2Plusgfl)
+
+      gdq0 = 0.d0
+      ftmp = BETagfl2*EGDr**2 + EGDr*S2Plusgfl
+      if(ftmp.gt.0.d0) gdq0 = const1*DSQRT(ftmp)
+
+      gdq = 0.d0
+      ftmp = BETagfl2*egamma2 + Egamma*S2Plusgfl
+      if(ftmp.gt.0.d0) gdq = const1*SQRT(ftmp)
       const2 = (GGDr - gdq0)/(EGDr**2)
       WIDTHGFL = const2*(egamma2 + pi24*T**2) + gdq
       END
-
 
       DOUBLE PRECISION FUNCTION MLO3(T,Egamma)
       IMPLICIT NONE
