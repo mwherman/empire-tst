@@ -50,6 +50,7 @@ rm  warnings 2>/dev/null
 rm  INPUT 2>/dev/null
 rm  XS-DOWN.DAT XSECTIONS.OUT XS-UP.DAT 2>/dev/null
 rm  SENSITIVITY.INP SENSITIVITY.MATRIX 2>/dev/null
+rm *.leg
 
 # COPY INPUT FILES FOR A GIVEN CASE
 cp $file.inp INPUT.DAT
@@ -102,6 +103,12 @@ if [ -s $file-mat.sen ]; then
    cp $file-mat.sen SENSITIVITY.MATRIX
    echo 'File with sensitivity matrix exists:'  $file-mat.sen
 fi
+if [ -s $file.rng ]; then
+cp $file.rng R250SEED.DAT 
+   echo 'Using existing random number generator seed'
+fi
+
+
 echo ' '
 echo $file ' R U N N I N G  !! !  !   !    !     !'
 time nice ../source/empire
@@ -168,6 +175,8 @@ mv ECIS_VIBROT.out $file-ecis.out 2>/dev/null
 mv ecVIB.inp $file-ecis.in 2>/dev/null
 mv ecROT.inp $file-ecis.in 2>/dev/null
 mv ecVIBROT.inp $file-ecis.in 2>/dev/null
+mv FISSION.OUT  $file-fiss.out 2>/dev/nul
+mv R250SEED.DAT $file.rng 2>/dev/null
 
 # EXTRACT WARNINGS
 
@@ -184,7 +193,6 @@ rm EXFOR.datp  2>/dev/null
 rm INPUT  2>/dev/null
 rm INPUT.DAT  2>/dev/null
 rm FISSION.INP  2>/dev/null
-#rm FISSION.OUT  2>/dev/null
 rm OMPAR.DIR  2>/dev/null
 rm OMPdata.dat  2>/dev/null
 rm mt_x4r.txt  2>/dev/null
@@ -194,14 +202,16 @@ rm TAPE66 2>/dev/null
 rm file99 2>/dev/null
 rm DEGASRESULT 2>/dev/null
 rm angdis.{pnt,cur} 2>/dev/null
-rm {ccm,dwba,INCIDENT}.{CS,TLJ,ANG,ICS} 2>/dev/null
-rm ecis03.{ang,cs,dat,ics,pol,tlj} 2>/dev/null
+rm {ccm,dwba,INCIDENT}.{CS,TLJ,ANG,ICS,LEG} 2>/dev/null
+rm ecis03.{ang,cs,dat,ics,pol,tlj,leg,esp} 2>/dev/null
 rm ecSPH.inp 2>/dev/null
 rm ECIS_SPH.out 2>/dev/null
 rm C4.dat 2>/dev/null
 rm FITIN.DAT 2>/dev/null
 rm INPUT1.DAT 2>/dev/null
-rm  SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
+rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
+rm TARGET_COLL_RIPL.DAT 2>/dev/null
+rm COVAR.DAT 2>/dev/null
 
 
 if  [ -s $file.exf ]; then
