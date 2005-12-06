@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-11-21 23:06:43 $
-Ccc   * $Id: input.f,v 1.185 2005-11-21 23:06:43 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-12-06 16:13:49 $
+Ccc   * $Id: input.f,v 1.186 2005-12-06 16:13:49 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2500,10 +2500,11 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALSin, CNOrin(22), EFItin(22), GAPin(2), HOMin,
-     &                 WIDexin
+     &                 WIDexin, BET2in, GRIn(2)
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /R250COM/ INDexf,INDexb,BUFfer
-      COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin
+      COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin, 
+     &                BET2in, GRIn
 C
 C Local variables
 C
@@ -2522,6 +2523,9 @@ C-----initialization of TRISTAN input parameters
       GAPin(2) = 0.
       HOMin = 0.0
       ALSin = 1.5
+      BET2in = 0.0
+      GRIn(1) = 5.0
+      GRIn(2) = 5.0
       DO i = 1, 22
          CNOrin(i) = 1.0
       ENDDO
@@ -4708,6 +4712,42 @@ C-----
      & '',F6.3)') i1, CNOrin(i1 + 1)
             GOTO 100
          ENDIF
+C-----
+         IF (name.EQ.'DEFMSD') THEN
+            BET2in = val
+            IF (BET2in.GT.0.0D0) WRITE (6,
+     &'('' Beta-2 in def. Nilsson Hamiltonian in MSD'',   F6.3
+     &)') BET2in
+            IF (BET2in.GT.0.0D0) WRITE (12,
+     &'('' Beta-2 in def. Nilsson Hamiltonian in MSD'',   F6.3
+     &)') BET2in
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'GRANGP') THEN
+            GRin(1) = val
+            IF (GRin(1).GT.0.0D0) WRITE (6,
+     &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
+     &MeV'')') GRin(1)
+            IF (GRin(1).GT.0.0D0) WRITE (12,
+     &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
+     &MeV'')') GRin(1)
+            GOTO 100
+         ENDIF
+C----
+         IF (name.EQ.'GRANGN') THEN
+            GRin(2) = val
+            IF (GRin(2).GT.0.0D0) WRITE (6,
+     &'('' Energy range for pairing calculations (MSD neut.)'',F6.3,''
+     & MeV'')') GRin(2)
+            IF (GRin(2).GT.0.0D0) WRITE (12,
+     &'('' Energy range for pairing calculations (MSD neut.)'',F6.3,''
+     & MeV'')') GRin(2)
+            GOTO 100
+         ENDIF
+C----
+
+
 C--------TRISTAN (MSD) input **** done ****
          IF (name.EQ.'NIXSH ') THEN
             SHNix = val
@@ -5309,7 +5349,7 @@ C--------------Calculate sum for the average normalization factor
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
-            ftmp =   ATIlnor(nnuc)
+	    ftmp =   ATIlnor(nnuc)
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
