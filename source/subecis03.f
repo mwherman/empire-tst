@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-10-30 12:40:33 $
-Ccc   * $Id: subecis03.f,v 1.15 2005-10-30 12:40:33 Capote Exp $
+Ccc   * $Date: 2005-12-07 08:22:34 $
+Ccc   * $Id: subecis03.f,v 1.16 2005-12-07 08:22:34 Capote Exp $
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C

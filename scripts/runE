@@ -7,7 +7,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta28            '
+echo '                     V E R S I O N  2.19.beta31            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -41,8 +41,8 @@ rm  OMPAR.DIR 2>/dev/null
 rm  FISSION.INP 2>/dev/null
 rm  FISSION.OUT 2>/dev/null
 rm  CUMULPLOT.PS 2>/dev/null
-rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
-rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out  2>/dev/null
+rm  ecVIB.inp ecROT.inp ecVIBROT.inp *.leg *.LEG 2>/dev/null
+rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
 rm  TARGET_COLL.DAT 2>/dev/null
 rm  TARGET_COLL.RIPL 2>/dev/null
 rm  TARGET-*.tl 2>/dev/null
@@ -50,7 +50,6 @@ rm  warnings 2>/dev/null
 rm  INPUT 2>/dev/null
 rm  XS-DOWN.DAT XSECTIONS.OUT XS-UP.DAT 2>/dev/null
 rm  SENSITIVITY.INP SENSITIVITY.MATRIX 2>/dev/null
-rm *.leg
 
 # COPY INPUT FILES FOR A GIVEN CASE
 cp $file.inp INPUT.DAT
@@ -175,7 +174,7 @@ mv ECIS_VIBROT.out $file-ecis.out 2>/dev/null
 mv ecVIB.inp $file-ecis.in 2>/dev/null
 mv ecROT.inp $file-ecis.in 2>/dev/null
 mv ecVIBROT.inp $file-ecis.in 2>/dev/null
-mv FISSION.OUT  $file-fiss.out 2>/dev/nul
+mv FISSION.OUT  $file-fiss.out 2>/dev/null
 mv R250SEED.DAT $file.rng 2>/dev/null
 
 # EXTRACT WARNINGS
@@ -212,7 +211,6 @@ rm INPUT1.DAT 2>/dev/null
 rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 rm TARGET_COLL_RIPL.DAT 2>/dev/null
 rm COVAR.DAT 2>/dev/null
-
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then

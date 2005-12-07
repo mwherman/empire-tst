@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-11-21 21:43:46 $
-Ccc   * $Id: tl.f,v 1.75 2005-11-21 21:43:46 Capote Exp $
+Ccc   * $Date: 2005-12-07 08:23:53 $
+Ccc   * $Id: tl.f,v 1.76 2005-12-07 08:23:53 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
