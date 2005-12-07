@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-12-06 16:13:50 $
-Ccc   * $Id: MSD-tristan.f,v 1.53 2005-12-06 16:13:50 Capote Exp $
+Ccc   * $Date: 2005-12-07 08:20:23 $
+Ccc   * $Id: MSD-tristan.f,v 1.54 2005-12-07 08:20:23 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -404,9 +404,9 @@ C
      &                 bqq, cci(11), ccm(11), ccp(11), ccpm(2), ccr(11),
      &                 ceff, clex(11), clsc(11), cneg, cnorm, cpos,
      &                 cr1(11), cr2, cr3(11), dci(11), dcr(11), ddr(2),
-     &                 de3, deqq, dnz, dqqst(30000), dr, dwex, dwsx, e,  ! nilsson
+     &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
      &                 e0, efit(22), efitx, egr, em, emi, emisq, ep,
-     &                 epl, eplsq, eqq, eqqst(30000), eqqx,ess(0:10000), ! nilsson
+     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nilsson
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,
      &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm,
      &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt,
@@ -427,7 +427,7 @@ C
      &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2,
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
-     &                 wqqst(30000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
+     &                 wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
      &                 xpos, xqq, yea(11), yqq, sum                      ! nilsson
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
@@ -1422,7 +1422,7 @@ C
 
       DOUBLE PRECISION EBCs(500,2), ESP(500,2), GSD(201, 3),
      &                 GSP(201, 2), RST(201), UAMp(500,2), VAMp(500,2)   ! nilsson
-     &                 , WFR(201, 50)
+     &                 , WFR(201,100)
       INTEGER IBLk(2), NSP(500,2), KSP(500,2), NBL(2),BLKSP(500,2),      ! nilsson
      &        NRX                                                        ! nilsson
       COMMON /BLOCK / IBLk, BLKSP                                        ! nilsson
