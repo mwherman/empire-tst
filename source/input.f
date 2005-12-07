@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-06 16:13:49 $
-Ccc   * $Id: input.f,v 1.186 2005-12-06 16:13:49 Capote Exp $
+Ccc   * $Date: 2005-12-07 08:27:02 $
+Ccc   * $Id: input.f,v 1.187 2005-12-07 08:27:02 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2541,7 +2541,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b30  |'
+     &           '                       |  E M P I R E  -  2.19.b31  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -2564,7 +2564,7 @@ C
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b27 by      '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b31 by      '
       WRITE (12,*) 'M. Herman et al [He01, He02]. This code integrates '
       WRITE (12,*) 'into a single system a number of important modules '
       WRITE (12,*) 'and features:                                      '
