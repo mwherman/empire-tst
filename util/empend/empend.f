@@ -1249,7 +1249,11 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
 C* Add contribution of reactions without differential data to MT5
       DO IX=1,NXS
         MM=MTH(IX)
-        IF(MM.LT.0) THEN
+        IF(MM.LT.0 .AND.
+     &     (-MM.LT.201 .OR. -MM.GT.207)) THEN
+C...
+C...      print *,'   Adding to MT5 contribution from MT',mm
+C...
           DO J=1,NPT
             XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
           END DO
@@ -1337,7 +1341,7 @@ C*
   802 FORMAT(I3,1X,A2,1X,I3)
   891 FORMAT(A136)
       END
-      SUBROUTINE RDANGD(LIN,LOR,LHI,NPT,EMP,RWO,MXR,LTT,LER,LCU,LPT
+      SUBROUTINE RDANGD(LIN,LOR,LHI,NPT,EMP,RWO,MXR,LTT,LER,L92,LCU,LPT
      2                 ,ZAP,MT,IPRNT,EIN,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C-Title  : Subroutine RDANGD
 C-Purpose: Read angular distributions
@@ -1365,6 +1369,7 @@ C-D
 C-D The remaining parameters are required for printout control
 C-D  LTT  Logical unit of the terminal screen.
 C-D  LER  Logical unit of the log file.
+C-D  L92  Logical unit of the PLOTTAB input file
 C-D  LCU  Logical unit of the curves log file.
 C-D  LPT  Logical unit of the points log file.
 C-D  ZAP  ZA designation of the outgoing particle.
@@ -1396,7 +1401,6 @@ c...
 c...      print *,'rdang: zap,mt,ein,emp',nint(zap),mt,ein,emp
 c...
       NOFIT=0
-      NZERO=0
       NPT=0
       LHI=0
       KXA=1
@@ -1449,6 +1453,9 @@ C* Convert isotropic (angle-integrated) spectra to double differential
       ELSE
         FF=1
       END IF
+C* Suppress negative energies (unless processing discrete data)
+      IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
+      EOU=EE*1.E6
 C* Check for zero or negative distributions
       NEG=0
       NEP=0
@@ -1459,54 +1466,47 @@ C* Check for zero or negative distributions
           NEP=NEP+1
           KZE=0
         ELSE
-          IF(DDJ.LT.-1.E-20) NEG=NEG+1
           DDJ=0
-C*          Count zero-distribution entries at backward angles
+C*          Count all zero-distribution entries
+          NEG=NEG+1
+C*          Count trailing zero-distribution entries at backward angles
           KZE=KZE+1
         END IF
         DST(J)=DDJ*FF
       END DO
-      IF(KZE.GT. 0 ) THEN
-        IF(KZE.EQ.KXA) THEN
-          KZE=0
-        ELSE
-C* Force isotropic if zero-distribution at backward angles
-          NZERO=MAX(NZERO,KZE)
-          SS=0
-          DO J=2,KXA
-            SS=SS+(ANG(J)-ANG(J-1))*(DST(J)+DST(J-1))/2
-          END DO
-          SS=SS/(ANG(KXA)-ANG(1))
-          DO J=1,KXA
-            DST(J)=SS
+      IF(NEP.EQ. 0) NEG=0
+      IF(NEG.GT. 0) THEN
+C* Force zero points to half of the average of neighbours until all >0
+        IF(KXA.GT.2) THEN
+
+          icnt=0
+
+          KZERO=1
+          DO WHILE (KZERO.GT.0)
+
+            icnt=icnt+1
+            if(icnt.gt.200) then
+              print *,'icnt,kxa',icnt,kxa
+              do j=1,kxa
+                print *,j,dst(j)
+              end do
+              stop
+            end if
+
+            KZERO=0
+            DO J=3,KXA
+              IF(DST(J-1).LE.0) THEN
+                KZERO=1
+                DDJ=MAX(1.E-30, (DST(J-2)+DST(J))/2)
+                IF(DDJ.GT.1E-20) DDJ=DDJ/2
+                DST(J-1)=DDJ
+              END IF
+            END DO
           END DO
         END IF
-      END IF
-C* Suppress negative energies (unless processing discrete data)
-      IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
-      EOU=EE*1.E6
-C* Suppress negative distributions to 2% of average of the neighbours
-      IF(NEG.GT.0 .AND. NEP.GT.0) THEN
-        DO J=1,KXA
-          IF(DST(J).LE.0) THEN
-            DJ=0
-            NJ=0
-            IF(J.GT.1) THEN
-              DJ=DST(J-1)
-              NJ=1
-            END IF
-            IF(J.LT.KXA) THEN
-              DJ=DJ+DST(J+1)
-              NJ=NJ+1
-            END IF
-            DST(J)=0.02*DJ/NJ
-          END IF
-        END DO
-      END IF
-      IF(NEG.GT.0) THEN
 C*          Print warning on negative distributions
-        WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
-        WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
+C...    WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
+C...    WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
       END IF
 C* Convert to Legendre polynomials and store
       LPU=LL+1
@@ -1537,6 +1537,7 @@ C* Check for printout on exceeding tolerance limits
 C*      Count the number of points with convergence problems
         NOFIT=NOFIT+1
 C*      Print a warning when convergence problems are encountered
+c...
 c...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
 c...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
 c...
@@ -1556,8 +1557,13 @@ C* Check for isotropic distributions (suppress printout)
 C* Check for differences in the fitted angular distributions
 C* at meshpoints and midpoints
       IF(JPRNT.NE.0) THEN
-C*      Original values to the "points" file
-C*      Fitted values to the "curves" file
+C*      Plotting instructions to the "input" file on unit L92
+C*      Original values to the "points" file file on unit LPT
+C*      Fitted values to the "curves" file file on unit LCU
+        WRITE(L92,*) 'EMPEND Plotting MT',MT,' Err',ERR
+        WRITE(L92,*) 'Ein',EIN,' Eou',EOU,' Particle ZA',NINT(ZAP)
+        WRITE(L92,821) 0,0,0,0
+        WRITE(L92,821) 0,2,0
         IF(EOU.GE.0) THEN
           WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
         ELSE
@@ -1616,29 +1622,29 @@ C...      EOU=EMP
 C* Save the outgoing particle energy
       RWO(LL)=EOU
 C* Remove point at EOL if it is linearly interpolable between EO3, EOU
-C...      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
-C...        ITHIN=1
-C...C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
-C...        CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
-C...C*      Check the absolute difference relative to P0 term
-C...        F0=RWO(LPL)*ETHN
-C...        DO I=1,LO1
-C...          FF=ABS(RWO(LS-1+I)-RWO(LPL-1+I))
-C...          IF(FF.GT.F0) ITHIN=0
-C...        END DO
-C...        IF(ITHIN.NE.0) THEN
-C...C*      Thinning flag set - rplace point at EOL with EOU
-C...          RWO(LPL-1)=RWO(LPU-1)
-C...          DO I=1,LO1
-C...            RWO(LPL-1+I)=RWO(LPU-1+I)
-C...          END DO
-C...          IF(EMP.LE.0 .OR. EOU.LT.EMP) THEN
-C...            GO TO 450
-C...          ELSE
-C...            GO TO 700
-C...          END IF
-C...        END IF
-C...      END IF
+      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
+        ITHIN=1
+C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
+        CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
+C*      Check the absolute difference relative to P0 term
+        F0=RWO(LPL)*ETHN
+        DO I=1,LO1
+          FF=ABS(RWO(LS-1+I)-RWO(LPL-1+I))
+          IF(FF.GT.F0) ITHIN=0
+        END DO
+        IF(ITHIN.NE.0) THEN
+C*      Thinning flag set - rplace point at EOL with EOU
+          RWO(LPL-1)=RWO(LPU-1)
+          DO I=1,LO1
+            RWO(LPL-1+I)=RWO(LPU-1+I)
+          END DO
+          IF(EMP.LE.0 .OR. EOU.LT.EMP) THEN
+            GO TO 450
+          ELSE
+            GO TO 700
+          END IF
+        END IF
+      END IF
 C* Increment indices in the storage array and loop to next point
       NPT=NPT+1
       NW =NW+LOR+2
@@ -1652,9 +1658,9 @@ C* Print warning in case of badly fitted distributions
         WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
       END IF
 C* Print warning on zero-distribution at backward angles
-      IF(NZERO.GT.0) THEN
-        WRITE(LTT,905) MT,NINT(ZAP),EIN,NZERO,KXA
-        WRITE(LER,905) MT,NINT(ZAP),EIN,NZERO,KXA
+      IF(NEG.GT.0) THEN
+        WRITE(LTT,905) MT,NINT(ZAP),EIN,NEG,KXA
+        WRITE(LER,905) MT,NINT(ZAP),EIN,NEG,KXA
       END IF
       IF(NPT.LE.1) GO TO 800
 C* Check that the last point is zero distribution
@@ -1697,6 +1703,7 @@ C*
   806 FORMAT(6X,8(5X,F10.4))
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
   809 FORMAT(9X,8F15.4)
+  821 FORMAT(22X,4I11)
   891 FORMAT(A136)
   905 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5,' Ein',1P,E10.3/17X
      2      ,' Backward angle distribution zero at',I3
@@ -1836,6 +1843,9 @@ C* Add to MT5 unidentified products with non-zero x-sect., print warning
   212   READ (LIN,891) REC
         IF(REC(13:22).NE.'production') GO TO 212
         READ (REC,803) XS
+c...
+c...        print *,'izi,iza,jza,mt',izi,iza,jza,mt,rec(2:50)
+c...
         IF(XS.GT.0) THEN
           COM=' WARNING >>MT 5'//REC(2:22)//REC(37:52)//' at'//CHEN
           WRITE(LTT,891) COM
@@ -2099,7 +2109,7 @@ C-
 C* Number of input angles MXA and number of particles per react. MXP
       PARAMETER    (MXA=80, MXP=40, MXZ=160)
       CHARACTER*8   POUT(MXP),PTST
-      CHARACTER*40  FLPT,FLCU
+      CHARACTER*40  FL92,FLPT,FLCU
       CHARACTER*136 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
@@ -2112,13 +2122,24 @@ C*
 C* Maximum Legendre order
       DATA LOMX/ 64 /
 C* Test print filenames and logical file units
-      DATA FLCU/'angdis.cur'/
-     1     FLPT/'angdis.pnt'/
-      DATA LCU,LPT/ 31,32/
+      DATA FL92/'angdis.p92'/
+     &     FLCU/'angdis.cur'/
+     &     FLPT/'angdis.pnt'/
+      DATA L92,LCU,LPT/-30,31,32/
 C* Test print files
       IF(IPRNT.GE.0) THEN
-        OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
-        OPEN (UNIT=LPT,FILE=FLPT,STATUS='UNKNOWN')
+        IF(L92.LT.0) THEN
+          L92=-L92
+          OPEN (UNIT=L92,FILE=FL92,STATUS='UNKNOWN')
+          OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
+          OPEN (UNIT=LPT,FILE=FLPT,STATUS='UNKNOWN')
+          WRITE(L92,821) 0.,24., 0.,16., 1, 1, 1.2
+          WRITE(L92,822)  1,  1, 1,  0,  4, 0, 0
+          WRITE(L92, * ) 'Angle                                   '
+     &                  ,'Cosine'
+          WRITE(L92, * ) 'Distribution                            '
+     &                  ,'mb/MeV/St'
+        END IF
       END IF
 C* Initialise indices
 C* NE6 counts the Number of energy points
@@ -2327,7 +2348,7 @@ C* Process the angular distribution for this energy
       LMX=MXR-L6-4
       READ (LIN,891) REC
       EMP=0
-      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L6+4),LMX,LTT,LER,LCU,LPT
+      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L6+4),LMX,LTT,LER,L92,LCU,LPT
      2           ,ZAP,MTC,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C* Only one distribution should be present
       IF(NEP.NE.1) THEN
@@ -2448,7 +2469,7 @@ C... Set EMP=0 to skip testing in RDANG
 C...
       EMP=0
       LMX=MXR-LL
-      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,LCU,LPT
+      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,L92,LCU,LPT
      2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C* Calculate the integral of the spectrum
       SPC=0
@@ -2699,6 +2720,8 @@ C*
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
   808 FORMAT(BN,I6,6X,F12.0)
   809 FORMAT(9X,8F15.4)
+  821 FORMAT(4F11.0,2I11,F4.2)
+  822 FORMAT(6I11,I4)
   891 FORMAT(A136)
   909 FORMAT(' EMPEND WARNING - MT',I3,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
@@ -2960,6 +2983,7 @@ C* Case: Expand the cross section set by spline interpolation
 C* Define the threshold
       ETH=MAX((-QQI(IT))*(AWR+AWI)/AWR , EIN(1) )
       XSL=SMALL
+      XMX=SMALL
 C* Define the input energy points for the spline fit
       ME =0
       DO 322 J=1,NEN
@@ -2975,15 +2999,20 @@ C* Normal case
         IF(XSC(J,IT).GT.0) THEN
           XSL=ALOG(XSC(J,IT))
           RWO(MY+ME)=XSL
+          XMX=MAX(XMX,XSL)
         ELSE
           RWO(MY+ME)=SMALL
         END IF
         IF(ME.NE.1 .OR. RWO(MY+ME).GT.SMALL) ME=ME+1
+c...
+c...    print *,'j,N,me,mt,xsl,e,x'
+c... &          ,j,NEN,me,mth(it),xsl,ein(j),xsc(j,it),XMX
+c...
   322 CONTINUE
 C* Check that there are NON-ZERO points above threshold
       IF(ME.LT.2 .OR.
+     1  (ME.EQ.2 .AND.XMX.LE.SMALL)) THEN
 C*        Flag MT "+2000" to prevent processing double differential data
-     1  (ME.EQ.2 .AND.XSL.LE.SMALL)) THEN
         MTH(IT)=MTH(IT)+2000
         GO TO 360
       END IF
@@ -3158,6 +3187,9 @@ C*      Determine the outgoing particle energy for discrete levels
         DAWP=DBLE(AWP)
         DQQI=DBLE(QQI(IT))
         EOU=(DEIN*DAWR/(DAWR+DAWI)+DQQI)*((DAWR+DAWI-DAWP)/(DAWR+DAWI))
+
+        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))*((AWR+AWI-AWP)/(AWR+AWI))
+
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
@@ -3211,6 +3243,12 @@ C* Linearly interpolate Legendre coefficients to EOU
         TST =DLVL*EIN*1E-6
 C* Read until EOU is enclosed by E1 and E2
         IF(E2.LT.EOU .AND. IEP.LT.NEP) GO TO 38
+c...
+c...    if(-eou.gt.2.40e6 .and. -eou.lt.2.41e6) then
+c...      print *,'EIN,EOU,e1,e2,AWR,AWI,AWP,QQI'
+c... &            ,EIN,EOU,e1,e2,AWR,AWI,AWP,QQI(IT)
+c...    end if
+c...
 C* Check the closest
         DE1=ABS(EOU-E1)
         DE2=ABS(EOU-E2)
@@ -3963,10 +4001,13 @@ C-D  fitted distribution is negative, ERR contains the most negative
 C-D  value.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
+      PARAMETER (MXEH=64)
+      DIMENSION  ERHI(MXEH)
       DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
       ERR=0
       NLG=0
       LM0=LMX
+      LST=0
 c...
 c...      LMX=MIN(LMX,NP-1)
 c...
@@ -4004,16 +4045,18 @@ C* Loop to find the appropriate Legendre order
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
       CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
+      IF(LST.NE.0) GO TO 40
 C* Trap zero-determinant
       IF(JER.NE.0) THEN
         NLG=NLG-1
         GO TO 30
       END IF
+C* Save the coefficients
       DO I=1,N1
         QQ(I)=RWO(LLG-1+I)
       END DO
 C* Check absolute difference between input and calculated points ERR
-C* Check for negative distributions
+C* and for negative distributions
    30 ERR=0
       YNP=YP(1)
       YNM=YP(1)
@@ -4025,7 +4068,8 @@ C* Check for negative distributions
       DO IP=1,NP
         YCI=POLLG1(XP(IP),QQ,NLG)
 C       RER=ABS((YCI-YP(IP))/YCI)
-        RER=ABS((YCI-YP(IP))/QQ(1))
+C       RER=ABS((YCI-YP(IP))/QQ(1))
+        RER=ABS((YCI-YP(IP))/MAX(YCI,QQ(1)))
         IF(RER.GT.ERR) THEN
           ERR=RER
           JRE=IP
@@ -4059,18 +4103,22 @@ C* Take corrective action
       IF(KNP.GT. 0 ) THEN
 C* Case: Distribution negative at mesh point - increase L
         IF(L.LT.LMM) THEN
+          IF(L.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
+          ERHI(L)=ERR
           L=L+1
           GO TO 20
         END IF
       END IF
       IF(ERR.GT.EMM) THEN
-C* Case: Tolerance limit not satisfied - increase L
+C* Case: Tolerance limit not satisfied
         IF(L.LT.LMM .AND. JER.EQ.0) THEN
-C*        Increase order of approximation
+C*          Try increasing the order of approximation
+          IF(L.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
+          ERHI(L)=ERR
           L =L+1
           GO TO 20
         ELSE
-C*        Double the mesh
+C*          Try Doubling the mesh
           IF(NNP.LE.MXP/3 .AND. ERR.GT.EMM*2) THEN
             JNP=1+(NNP-1)*2
             DO J=2,NNP
@@ -4080,11 +4128,12 @@ C*        Double the mesh
               RWO(LYP+JNP+2-2*J)=(RWO(LYP+NNP+1-J)+RWO(LYP+NNP  -J))/2
             END DO
             NNP=JNP
+            ERHI(L)=10*EMM
             GO TO 20
           END IF
         END IF
       END IF
-C* Case: Distribution is negative at midpoint - force extra points
+C* Case: Distribution is negative - force extra points
       IF((KNM.GT.0 .OR. KNP.GT.0) .AND. NNP.LT.MXP) THEN
 C*    Force extra point if distribution negative at midpoint
         IF(YNP.LT.YNM) THEN
@@ -4113,8 +4162,35 @@ c...
 c...        print *,(rwo(lxp-1+j),j=1,nnp)
 c...        print *,(rwo(lyp-1+j),j=1,nnp)
 c...
+        ERHI(L)=10*EMM
         GO TO 20
       END IF
+C*
+C* Check the improvement in last increments of order
+      ERHI(L)=ERR
+      ELS=ERR
+      LL0=L
+c...
+C...      print *,'Fitted order: l,els,err',l,els,emm
+c...
+c###  DO WHILE (L.GT.1 .AND. ERHI(L-1).GT.0 .AND.
+C### &          ERHI(L-1).LT.2.0*EMM .AND. 
+C### &          ERHI(L-1).LT.1.2*ELS)
+C*      Reduce order as long as error <1.2*last and <2.0*max
+      DO WHILE (L.GT.1 .AND. ERHI(L-1).GT.0 .AND.
+     &          ERHI(L-1).LT.1.2*ELS)
+C*      Reduce order as long as error <1.2*last
+        L=L-1
+        ELS=MIN(ELS,ERHI(L-1))
+c...
+c...        print *,'     l,err',l,erhi(l)
+c...
+      END DO
+c...
+c...  if(ll0.ge.64 .and. l.ge.64) print *,'    Limit 64',erhi(l-1),err
+c...
+      LST=1
+      IF(L.LT.LL0) GO TO 20
 C*
 C* Terminate
    40 LMX=NLG
