@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-07 08:27:02 $
-Ccc   * $Id: input.f,v 1.187 2005-12-07 08:27:02 Capote Exp $
+Ccc   * $Date: 2005-12-08 09:46:03 $
+Ccc   * $Id: input.f,v 1.188 2005-12-08 09:46:03 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -231,6 +231,8 @@ C
          MODelecis = 0
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
+         DEFdyn = 1.d0
+         DEFsta = 1.d0
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -4603,6 +4605,55 @@ C              TUNe(i3,nnuc) = val + grand()*sigma
             endif
             GOTO 100
          ENDIF
+C-----
+         IF (name.EQ.'DEFDYN') THEN
+            IF(val.gt.0) DEFdyn = val
+            IF(i1.gt.0.) then
+              WRITE (6,
+     &'('' DWBA dynamical deformation uncertainty is equal to '',
+     &i2,'' %'')') i1
+              sigma = val*0.01*i1
+C             DEFdyn = val + grand()*sigma
+              DEFdyn = val + (2*drand()-1.)*sigma
+	      IF (DEFdyn.LT.0.) DEFdyn = 1.
+              WRITE (6,
+     &'('' DWBA dynamical deformations multiplied by'',F6.3)') DEFdyn
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &           IPArCOV, DEFdyn, INDexf,INDexb
+            ELSE
+              WRITE (6,
+     &'('' DWBA dynamical deformations multiplied by'',F6.3)') val
+              WRITE (12,
+     &'('' DWBA dynamical deformations multiplied by'',F6.3)') val
+	    ENDIF
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'DEFSTA') THEN
+            IF(val.gt.0) DEFsta = val
+            IF(i1.gt.0.) then
+              WRITE (6,
+     &'('' CC static deformation uncertainty is equal to '',
+     &i2,'' %'')') i1
+              sigma = val*0.01*i1
+C             DEFsta = val + grand()*sigma
+              DEFsta = val + (2*drand()-1.)*sigma
+	      IF (DEFsta.LT.0.) DEFsta = 1.
+              WRITE (6,
+     &'('' CC static deformation multiplied by'',F6.3)') DEFsta
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &           IPArCOV, DEFsta, INDexf,INDexb
+            ELSE
+              WRITE (6,
+     &'('' CC static deformation multiplied by'',F6.3)') val
+              WRITE (12,
+     &'('' CC static deformation multiplied by'',F6.3)') val
+            ENDIF
+            GOTO 100
+         ENDIF
+
 C--------input for TRISTAN (MSD)
          IF (name.EQ.'WIDEX ') THEN
             WIDexin = val
@@ -4745,10 +4796,8 @@ C----
      & MeV'')') GRin(2)
             GOTO 100
          ENDIF
-C----
-
-
 C--------TRISTAN (MSD) input **** done ****
+
          IF (name.EQ.'NIXSH ') THEN
             SHNix = val
             IF (SHNix.NE.0.0D0) WRITE (6,
@@ -6101,6 +6150,12 @@ C        It could be a bad approximation for a quasispherical nucleus
 C-----------Number of collective levels
             READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &            IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
+
+C           For covariance calculation of static deformation
+            DO j= 2,IDEfcc,2
+	      D_Def(1,j) = D_Def(1,j)*DEFsta
+            ENDDO
+
             WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
             WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
@@ -6111,12 +6166,12 @@ C-----------Number of collective levels
             WRITE (12,'(3x,3I5)') ND_nlv
          ENDIF
 C--------if nd_nlv=0 , then no collective levels will be considered
-C--------setting direct to zero
+C--------setting DIRect to zero
          IF (ND_nlv.EQ.0) THEN
             WRITE (6,*) ' WARNING: ND_NLV=0 in COLLECTIVE.LEV file'
             WRITE (6,*) ' WARNING: No collective levels considered'
             WRITE (6,*) ' WARNING: DIRECT has been set to 0'
-C-----------setting direct to zerO
+C-----------setting DIRect to zero
             DIRect = 0
             IFINDCOLL = 2
             RETURN
@@ -6129,7 +6184,7 @@ C--------'collective levels:'
          WRITE (6,'(a100)') comment
          WRITE (12,*)' '
          WRITE (12,*)' N  E[MeV]   J  pi  Nph L  K  Dyn. Def.'
-C--------Reading ground state infomation (to avoid overwriting deformation)
+C--------Reading ground state information (to avoid overwriting deformation)
          READ (32,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &         D_Llv(1), D_Klv(1)
@@ -6143,7 +6198,11 @@ C--------Reading ground state infomation (to avoid overwriting deformation)
             READ (32,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+     &          D_Llv(i), D_Klv(i), ftmp, ctmp5
+C
+C           For covariance calculation of dynamical deformation
+	    D_Def(i,2) = ftmp*DEFdyn
+
             WRITE (6,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
