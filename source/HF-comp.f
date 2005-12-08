@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 08:52:47 $
-Ccc   * $Id: HF-comp.f,v 1.80 2005-07-21 08:52:47 Capote Exp $
+Ccc   * $Date: 2005-12-08 09:45:10 $
+Ccc   * $Id: HF-comp.f,v 1.81 2005-12-08 09:45:10 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1262,7 +1262,6 @@ C           GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
             ENDIF
          ENDIF
       ENDIF
-      Sumfis = Sumfis*TUNefi(Nnuc)
       DENhf = DENhf + Sumfis
       END
 
@@ -1323,12 +1322,12 @@ C COMMON variables
 C
       DOUBLE PRECISION HO(NFPARAB), PHAsr(NFPARAB), SMIu, TABs, TDIr,
      &                 TDIr23, TF(NFPARAB), TFC, TFCc, TFD(NFPARAB),
-     &                 TFIso, TG2, VBArex(NFPARAB)
+     &                 TG2, VBArex(NFPARAB)
       INTEGER JCC
       COMMON /CMIU  / SMIu, PHAsr, HO
       COMMON /COMFIS3/ VBArex, TFD
       COMMON /COMFIS4/ TFC, TFCc, JCC
-      COMMON /IMAG  / TF, TDIr, TABs, TDIr23, TG2, TFIso
+      COMMON /IMAG  / TF, TDIr, TABs, TDIr23, TG2
 C
 C Dummy arguments
 C
@@ -1694,7 +1693,6 @@ C----triple-humped
      &          Sumfis, TDIr, TABs, TDIr23
       ENDIF
       IF (Sumfis.LT.0.0000000000000001) Sumfis = 0.
-      Sumfis = Sumfis*TUNefi(Nnuc)
       DENhf = DENhf + Sumfis
       END
 
@@ -2260,7 +2258,7 @@ C
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, TFB,
      &                 TDIrect
-      COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso
+      COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 C
 C Dummy arguments
 C

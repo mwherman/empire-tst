@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-08-22 20:11:19 $
-Ccc   * $Id: auxiliary.f,v 1.26 2005-08-22 20:11:19 Capote Exp $
+Ccc   * $Date: 2005-12-08 09:44:28 $
+Ccc   * $Id: auxiliary.f,v 1.27 2005-12-08 09:44:28 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -71,6 +71,7 @@ C
       DO nnuc = 1, NDNUC
          POPmax(nnuc) = 0.0
          CSPrd(nnuc) = 0.0
+         CSPfis(nnuc) = 0.0
          EX(1,nnuc) = 0.0
          JSTab(nnuc) = 0.0
          QPRod(nnuc) = -1000.0
