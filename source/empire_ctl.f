@@ -1749,11 +1749,12 @@ Ccc
       CHARACTER*6 name, namee, namelst
       CHARACTER*80 inprecord 
       CHARACTER*238 outrecord 
+      CHARACTER*1080 title
       character*132 ctmp
       character*1 namecat, category
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, nreac, ndkeys
-      parameter (ndreac=100, ndkeys=120) 
+      parameter (ndreac=100, ndkeys=125) 
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac), 
@@ -1781,7 +1782,8 @@ Ccc
      &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ', 
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ', 
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF', 
-     &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS'/
+     &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP'/
       data namecat /
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
@@ -1802,7 +1804,8 @@ Ccc
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     /
+     &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction   
@@ -2046,26 +2049,28 @@ C-----Check whether ireac is within dimensions
       IF(ireac.GT.ndreac) THEN
          STOP 'INSUFFICIENT NDREAC DIMENSION IN empire_ctl.f'
       ENDIF
-      nreac = ireac/19
-      nreac = MAX(1,nreac)
-      IF(ireac.GT.19*nreac) nreac = nreac + 1
-      DO i=1,nreac 
-      READ(34,'(A238)') outrecord 
-      WRITE(92,'(A238)') outrecord 
-      ENDDO 
+C     nreac = ireac/19
+C     nreac = MAX(1,nreac)
+C     IF(ireac.GT.19*nreac) nreac = nreac + 1
+C     DO i=1,nreac 
+      READ(34,'(A1080)') title
+      WRITE(92,'(A1080)') title
+C     READ(34,'(A238)') outrecord 
+C     WRITE(92,'(A238)') outrecord 
+C     ENDDO 
       OPEN (UNIT = 35,FILE='XS-DOWN.DAT', STATUS='OLD') ! x-sections with parameter-val
       READ(35,'(A80)') inprecord !skip lines with heading
-      DO i=1,nreac 
+C     DO i=1,nreac 
       READ(35,'(A80)') inprecord 
-      ENDDO 
+C     ENDDO 
       OPEN (UNIT = 36,FILE='XSECTIONSREF.OUT', STATUS='OLD') ! central x-sections 
       READ(36,'(A80)') inprecord !skip lines with heading
-      DO i=1,nreac 
+C     DO i=1,nreac 
       READ(36,'(A80)') inprecord 
-      ENDDO 
- 180  READ(34,'(G10.5,1P(19E12.5))',END=190) einl, (xsecu(i),i=1,ireac) 
-      READ(35,'(G10.5,1P(19E12.5))') einl, (xsecd(i),i=1,ireac) 
-      READ(36,'(G10.5,1P(19E12.5))') einl, (xsec(i),i=1,ireac) 
+C     ENDDO 
+ 180  READ(34,'(G10.5,1P(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac) 
+      READ(35,'(G10.5,1P(90E12.5))') einl, (xsecd(i),i=1,ireac) 
+      READ(36,'(G10.5,1P(90E12.5))') einl, (xsec(i),i=1,ireac) 
       DO i = 1, ireac
          IF(ABS(xsecu(i)-xsecd(i)).LE.((xsecu(i)+xsecd(i))*1.0D-5) )THEN
             sensmat(i) = 0
@@ -2077,7 +2082,7 @@ C-----------Relative sensitivity (per variation interval)
             sensmat(i) = (xsecu(i)-xsecd(i))/xsec(i)
          ENDIF
       ENDDO 
-      WRITE(92,'(G10.5,1P(19E12.4))') EINl, (sensmat(i),i=1,ireac)
+      WRITE(92,'(G10.5,1P(90E12.4))') EINl, (sensmat(i),i=1,ireac)
       GOTO 180
   190 CONTINUE
       CLOSE(34)
