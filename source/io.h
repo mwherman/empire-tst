@@ -79,6 +79,7 @@ c     94     input.f,main
 c     95     input.f
 c     96     tl
 c     97     tl
+c     98     fission XS 
 c     99     ecis03
 c
       OPEN (UNIT = 5,FILE='INPUT.DAT', STATUS='OLD')
