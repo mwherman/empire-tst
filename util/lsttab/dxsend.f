@@ -829,7 +829,7 @@ C* Redefine the requested level energy with the actual
         ELV=EL1
       END IF
 C*
-C* Check if reaction summation is required
+C* Check if reaction summation is required (request MT=5)
       IF(MT0.NE.5) GO TO 60
 C* Find particle emission reactions
       REWIND LEF
@@ -837,7 +837,7 @@ C* Find particle emission reactions
       ZAP =ZAP0
       IZAP=ZAP+0.1
 C*
-C* Prepare reaction list for light particles
+C* Prepare reaction list for light particles in MT5
 C*
       IF(IZAP.GE.1 .AND.IZAP.LE.2004) THEN
    20   MF=3
@@ -845,7 +845,7 @@ C*
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
-C* Select contributing reactions
+C* Select contributing reactions (yield >= 0)
         CALL  YLDPOU(YI,MT,IZAP)
         IF(YI.GE.0) THEN
           LOOP=LOOP+1
@@ -1306,12 +1306,10 @@ C*         Skip subsection for Law 7
               CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU
      &                   ,NBT(NM),INR(NM),IER)
               NO=NM+NMU
-              LXE=1
-              LXX=LX
               DO IM=1,NMU
                 CALL RDTAB1(LEF,C1,AI2,L1,L2,NRP,NEP2
      &                     ,NBT(NO),INR(NO)
-     &                     ,RWO(LXE),RWO(LXX),KX,IER)
+     &                     ,RWO(LE),RWO(LX),KX,IER)
               END DO
             END DO
           ELSE
@@ -1324,7 +1322,7 @@ C*           Set IER to flag error and terminate
           GO TO 31
         END IF
 C* Interpolate yields to the cross section grid
-        CALL FITGRD(NP,RWO,RWO(LX),NEN,ENR,RWO(LXX))
+        CALL FITGRD(NP,RWO(LE),RWO(LX),NEN,ENR,RWO(LXX))
         DO I=1,NEN
           DXS(I)=DXS(I)*RWO(LXX-1+I)
         END DO
@@ -3137,6 +3135,9 @@ C* All points processed
       SUBROUTINE FITGRD(NEP1,EN1,XS1,NEP2,EN2,XS2)
 C-Title  : Subroutine FITGRD
 C-Purpose: Interpolate a tabulated function to a given grid
+C-Description:
+C-D Function XS1 at NEP1 argument values in EN1 is interpolated to
+C-D NEP2 values XS2 corresponding to argument values in EN2
       DIMENSION EN1(NEP1),XS1(NEP1),EN2(NEP2),XS2(NEP2)
 C*
       J2=1
