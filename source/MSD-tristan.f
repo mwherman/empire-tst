@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2005-12-07 08:20:23 $
-Ccc   * $Id: MSD-tristan.f,v 1.54 2005-12-07 08:20:23 Capote Exp $
+Ccc   * $Date: 2005-12-08 09:45:50 $
+Ccc   * $Id: MSD-tristan.f,v 1.55 2005-12-08 09:45:50 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -410,17 +410,17 @@ C
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,
      &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm,
      &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt,
-     &                 rdsq, re1, re2, re3, reduqq, resid,
-     &                 ah(14),ap(14)                                     ! nilsson
+     &                 rdsq, re1, re2, re3, resid,
+     &                 ah(14),ap(14)                                   ! nilsson
       REAL d1, hhh
       DOUBLE PRECISION DWIDTH
-      DOUBLE PRECISION VCC                                               ! nilsson
+      DOUBLE PRECISION VCC                                             ! nilsson
       REAL FLOAT
-      INTEGER i,j,jtw1(14),jtw2(14),k,kc, kcx, kh, kmax, kp, kqq, krt,   ! nilsson
-     &        krtx,l,l1,l2, lm, lmax, lst, lt, lth(14), ltmax, ltmaxr,   ! nilsson
-     &        ltmin,ltp(14),ltp1, ltr, lttw, n, nconf(21), ne, nebinx,   ! nilsson
+      INTEGER i,jtw1(14),jtw2(14),k,kc, kcx, kh, kmax, kp, kqq, krt,   ! nilsson
+     &        krtx,l1,l2, lm, lmax, lst, lt, lth(14), ltmax, ltmaxr,   ! nilsson
+     &        ltmin,ltp(14),ltp1, ltr, lttw, n, nconf(21), ne, nebinx, ! nilsson
      &        nesx, nh, nlhm, nlpm, nos1, nos2, np, np1, nr, nxmax,
-     &        kth, ktp, iminh,iminp,m,nrad1,nrad2,n1,n2                  ! nilsson
+     &        kth, ktp, iminh,iminp,nrad1,nrad2,n1,n2                  ! nilsson
       INTEGER IABS, INT
       DOUBLE PRECISION rfqqr(0:501,11), rfqqx(0:501,11), rfqqy(0:501,11)
      &                 , rh0, rho1, rl, rmax, rmosc, rmsgs, rnorm,
@@ -1423,7 +1423,7 @@ C
       DOUBLE PRECISION EBCs(500,2), ESP(500,2), GSD(201, 3),
      &                 GSP(201, 2), RST(201), UAMp(500,2), VAMp(500,2)   ! nilsson
      &                 , WFR(201,100)
-      INTEGER IBLk(2), NSP(500,2), KSP(500,2), NBL(2),BLKSP(500,2),      ! nilsson
+      INTEGER IBLk(2), NSP(500,2), KSP(500,2), BLKSP(500,2),             ! nilsson
      &        NRX                                                        ! nilsson
       COMMON /BLOCK / IBLk, BLKSP                                        ! nilsson
       COMMON /DENS  / GSD, GSP
@@ -1617,7 +1617,7 @@ C COMMON variables
 C
       DOUBLE PRECISION EBCs(500, 2), ESP(500, 2), UAMp(500, 2),          ! nilsson
      &                 VAMp(500, 2), ASP(500,14,2)                       ! nilsson
-      INTEGER KK(500, 2), NN(500, 2),BL(500,2)                           ! nilsson
+      INTEGER KK(500, 2), NN(500, 2)                                     ! nilsson
       COMMON /EVBCS / EBCs, VAMp, UAMp
       COMMON /SPQN  / ESP, KK, NN                                        ! nilsson
       COMMON /SPQN2 / ASP                                                ! nilsson
@@ -1628,7 +1628,7 @@ C
 C
 C Local variables
 C
-      INTEGER i, ip, j, jp, k, kp, n, np, np1
+      INTEGER i, ip, k, kp, n, np, np1
       DOUBLE PRECISION q, qp, u, up, v, vp, x, xp
       DIMENSION a(14),ap(14)                                             ! nilsson
 C
@@ -1761,16 +1761,13 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a3, ad, all, als, anp(2,2), bcsrerun, chemic,
+      DOUBLE PRECISION a3, ad, all, als, anp(2,2), chemic,
      &                 dnz, e0, espx, hhh, hom, pi, pqn, r, rd, rde,
      &                 rmsd, rnp(3,2), rw0, rws, uscal, uvec, vll(16,2),
      &                 w, xnp, d,v
-      DOUBLE PRECISION EHO
       REAL FLOAT
-      INTEGER i, ifermi, ipr, is, jtw, k, l, lmax, lmin,                 ! nilsson
-     &        ltw, n, n1, n2, ndim, nhx, nl, nnucl, np, npar, nq, nqx,
-     &        nr, nspl, numnuc
-      INTEGER INDF
+      INTEGER i, ifermi, ipr, k,                                         ! nilsson
+     &        n, n1, n2, ndim, nhx, nl, nnucl, nq, nqx, numnuc
       INTEGER INT, kh, lsp, jsp, teller, imin                            ! nilsson
       logical break                                                      ! nilsson
       CHARACTER*10 text(2)
@@ -3460,9 +3457,9 @@ C
 15      CONTINUE
         IF(SM.EQ.0.)RETURN
         IF(I.LT.4)THEN
-          TRESH=0.2*SM/N**2
+          THRESH=0.2*SM/N**2
         ELSE
-          TRESH=0.
+          THRESH=0.
         ENDIF
         DO 22 IP=1,N-1
           DO 21 IQ=IP+1,N
@@ -3470,7 +3467,7 @@ C
             IF((I.GT.4).AND.(ABS(D(IP))+G.EQ.ABS(D(IP)))
      *         .AND.(ABS(D(IQ))+G.EQ.ABS(D(IQ))))THEN
               A(IP,IQ)=0.
-            ELSE IF(ABS(A(IP,IQ)).GT.TRESH)THEN
+            ELSE IF(ABS(A(IP,IQ)).GT.THRESH)THEN
               H=D(IQ)-D(IP)
               IF(ABS(H)+G.EQ.ABS(H))THEN
                 T=A(IP,IQ)/H
