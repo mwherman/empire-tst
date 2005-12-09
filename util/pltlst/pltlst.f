@@ -102,6 +102,8 @@ C* Process all C4 records and check for changes
       IEF =0
       IZP1=1
       IF(MT1.EQ.9000) IZP1=PRB1
+C* Ignore MT 51 without specified level energies
+      IF(MT1.EQ.51 .AND. PRC1.EQ.0) GO TO 20
 C* Mark for printout if any of the parameters change
       IF(IZI1.NE.IZI0) GO TO 40
       IF(IZA1.NE.IZA0) GO TO 40
