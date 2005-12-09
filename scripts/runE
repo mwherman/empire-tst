@@ -38,7 +38,7 @@ rm INCIDENT.CS INCIDENT.ICS INCIDENT.ANG INCIDENT.TLJ 2>/dev/null
 rm  OUTPUT.DAT LIST.DAT 2>/dev/null
 rm  OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
 rm  OMPAR.DIR 2>/dev/null
-rm  FISSION.INP 2>/dev/null
+rm  FISSION.INP FISS_XS.OUT 2>/dev/null
 rm  FISSION.OUT 2>/dev/null
 rm  CUMULPLOT.PS 2>/dev/null
 rm  ecVIB.inp ecROT.inp ecVIBROT.inp *.leg *.LEG 2>/dev/null
@@ -118,6 +118,7 @@ echo 'DONE !!!'
 mv OUTPUT.DAT $file.out
 mv LIST.DAT $file.lst
 mv LEVELS $file.lev
+mv FISS_XS.OUT $file-fiss.xsc
 if [ ! -d $file-tl ]; then
    mv TL/ $file-tl
 fi

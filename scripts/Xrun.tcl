@@ -7857,6 +7857,8 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu94 add command \
         -command {exec $editor $file.xsc &} -label {Cross-sections} 
     $site_3_0.menu94 add command \
+        -command {exec $editor $file-fiss.xsc &} -label {Fission chances} 
+    $site_3_0.menu94 add command \
         -command {exec $editor $file.sys &} -label {x-sec systematics} 
     $site_3_0.menu94 add separator \
         
