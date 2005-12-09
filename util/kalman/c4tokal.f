@@ -1,10 +1,20 @@
-      parameter(NDATA=1000,NSEC=100)
+      parameter(NDATA=50000,NSEC=1000)
       real*8       x(NDATA),y(NDATA),z(NDATA),dat(8)
-      integer      i,j,k,n(NSEC),msec
+      integer      i,j,k,n(NSEC),msec, nparam
       integer      iza,mf,mt,kentry,ksubent,kentold,ksubold
       character*25 ref
       data         kentold,ksubold/0,0/
 
+C-----get number of parameters
+      OPEN(10, FILE='SENSITIVITY.INP', STATUS='old')
+      nparam = 0
+  500 READ(10,'(a7)',end=3000) ref
+      IF(ref.EQ.'       ' ) GOTO 3000
+      nparam = nparam + 1 
+      GOTO 500
+ 3000 CONTINUE
+      CLOSE(10)
+      
       j=1
       k=1
       read(1,100         ) iza,mf,mt,(dat(i),i=1,8),ref,kentold,ksubold
@@ -25,8 +35,8 @@
       rewind(1)
 
       write(6,*)  'INPUT'
-      write(6,200) msec,15,0,0
-      write(6,200)(i,i=1,15)
+      write(6,200) msec,nparam,0,0
+      write(6,200)(i,i=1,nparam)
 
       do k=1,msec
          do j=1,n(k)
@@ -48,6 +58,14 @@
             j = 6
          else if(mt .eq. 17) then
             j = 7
+         else if(mt .eq. 18) then
+            j = 3
+         else if(mt .eq. 4) then
+            j = 5
+         else if(mt .eq. 2) then
+            j = 2
+         else if(mt .eq. 1) then
+            j = 2
          end if
 
          write(6,200) j,1
