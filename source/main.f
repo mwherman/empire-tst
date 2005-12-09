@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-11-21 22:03:20 $
-Ccc   * $Id: main.f,v 1.143 2005-11-21 22:03:20 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2005-12-09 16:05:23 $
+Ccc   * $Id: main.f,v 1.144 2005-12-09 16:05:23 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -101,11 +101,17 @@ C-----
 C-----Open file 41 with tabulated cross sections
 C-----
       IF (FIRst_ein) THEN
-      OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
-      WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
+        OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
+        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
      &      int(Z(0)), SYMb(0), int(A(0))
-      WRITE(41,'(''#'',A10,1X,(19A12))') '  Einc    ','  Total     ',
+        WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
      &      '  Elastic   ','  Fission   ',(REAction(nnuc),nnuc=1,NNUcd)
+        OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
+        WRITE(98,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+2,
+     &      int(Z(0)), SYMb(0), int(A(0))
+        WRITE(98,'(''#'',A10,1X,A12,90(1x,I3,''-'',A2,''-'',I3,1x))') 
+     &      '  Einc    ',' Total_Fiss ',
+     &     (int(Z(nnuc)), SYMb(nnuc), int(A(nnuc)),nnuc=1,NNUcd)
       ENDIF
 C-----
 C-----Prepare Giant Resonance parameters - systematics
@@ -164,10 +170,10 @@ C-----
         OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
      &      ERR = 1400)
         READ (45,*,END = 1400)   ! To skip first line <ANG.DIS.> ..
-        READ (45,*,END = 1400)   ! To skip level identifier line
+        READ (45,*,END = 1400)   ! To skip level identifier line       
         iang = 0
         DO iang1 = 1, NANgela
-C---------To use only those values corresponding to EMPIRE grid for inelastic XS
+C----------To use only those values corresponding to EMPIRE grid for elastic XS
            READ (45,'(7x,E12.5)',END = 1400) ftmp
            if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
            iang = iang +1
@@ -254,7 +260,7 @@ C------------ADDING INELASTIC TO CONTINUUM  (D_Elv(ND_nlv) = elvr)
              icsl = INT(echannel/DE + 1.0001)
 C------------avoid reading closed channels
              IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
-     &       THEN
+     &         THEN
                READ (46,*,END = 1400) popread
 C
 C--------------This level is not counted as a discrete one
@@ -294,15 +300,15 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
      &                      min(NDEcse,icsl + 3*isigma)
                         popl = ftmp/DE * dexp(-dble(ie-icsl)**2/
      &                      (2.*isigma*isigma))/(2.5066d0*isigma*dtmp)
-                      CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) +
-     &                popl
-                     enddo
-                   else
-                    CSEa(icsl,iang,nejcec,1) =  CSEa(icsl,iang,nejcec,1)
-     &                                     + ftmp/DE
+                        CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1) 
+     &                       + popl
+                      enddo
+                    else
+                      CSEa(icsl,iang,nejcec,1) =  
+     &                  CSEa(icsl,iang,nejcec,1) + ftmp/DE
                     endif
-                  ENDDO
-                ENDIF
+                 ENDDO
+               ENDIF
              ENDIF
 C------------END OF ADDING INELASTIC TO CONTINUUM
            ENDIF
@@ -499,7 +505,7 @@ C-----
 C-----calculate MSD contribution
 C-----
       corrmsd = 1.0
-      IF (MSD.NE.0 .AND. EIN.GT.5.D0) THEN
+      IF (MSD.NE.0 .AND. EIN.GE.2.D0) THEN
 C
 C--------call ORION
 C
@@ -915,7 +921,6 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                   ENDIF
                ENDDO
 C--------------write elastic to tape 12
-C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
  1460          IF (nnuc.EQ.mt2) THEN
                   WRITE (12,'(1X,/,10X,40(1H-),/)')
                   WRITE (12,*) ' '
@@ -949,9 +954,7 @@ C1460          WRITE (12,'(1X,/,10X,40(1H-),/)')
      &                 'WARNING: CN elastic is 0'
 
                   IF (FITomp.LT.0) THEN
-C                  WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs,CSPrd(1)
-                   WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
-c                  WRITE(*,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+                   WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs                  
                    IF (ncoll.GT.0) THEN
 C--------locate position of the projectile among ejectiles
                     CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -963,133 +966,26 @@ C--------locate position of the projectile among ejectiles
                      itemp(its) = ICOller(ilv)
                      its = its +1
  710                ENDDO
-                   its = its -1
-                   WRITE (40,'(12x,11D12.5)') ELAcs,
+                    its = its -1
+                    WRITE (40,'(12x,11D12.5)') ELAcs,
      &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-c                   WRITE (*,'(12x,11D12.5)') ELAcs,
-c     &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-                   IF (ICAlangs.gt.0) THEN
-                    DO iang = 1, NDANG
-                     WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                elada(iang) + elcncs,
+                    IF (ICAlangs.gt.0) THEN
+                     DO iang = 1, NDANG
+                       WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &              elada(iang) + elcncs,
      &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-                    ENDDO
+                     ENDDO
+                    ENDIF
+                   ELSE
+                    WRITE (40,'(12x,11D12.5)') ELAcs
+                    IF (ICAlangs.gt.0) THEN
+                     DO iang = 1, NDANG
+                      WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &                                             elada(iang) + elcncs
+                     ENDDO
+                    ENDIF
                    ENDIF
-                  ELSE
-                   WRITE (40,'(12x,11D12.5)') ELAcs
-c                   WRITE (*,'(12x,11D12.5)') ELAcs
-                   IF (ICAlangs.gt.0) THEN
-                    DO iang = 1, NDANG
-                     WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                elada(iang) + elcncs
-                    ENDDO
-                   ENDIF
-                 ENDIF
-                ENDIF
-c                  IF (ncoll.GT.0) THEN
-C--------locate position of the projectile among ejectiles
-c                    CALL WHEREJC(IZAejc(0),nejcec,iloc)
-c                    WRITE (6,*) ' '
-c                    gang = 180.d0/(NDANG - 1)
-c                    its = 2
-c                    DO ilv = 2,ncoll
-c                     DO iang= ilv+1,ncoll
-c                      if(ICOller(iang).eq.ICOller(ilv)) goto 720
-c                     ENDDO
-c                     itemp(its) = ICOller(ilv)
-c                     deform(its)   = D_DEF(ilv,2)
-c                     its = its +1
-c 720               ENDDO
-c                   its = its -1
-c                  IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-c                   WRITE (12,99029)
-c                   WRITE (12,99030) (itemp(ilv),ilv = 2,MIN(its,10))
-c             WRITE (12,99031) (ELV(itemp(ilv),nnuc),ilv = 2,MIN(its,10))
-c                   WRITE (12,99033) (XJLv(itemp(ilv),nnuc)*
-c     &             LVP(itemp(ilv),nnuc),deform(ilv),ilv = 2,MIN(its,10))
-c                   WRITE (12,*) ' '
-c                   DO iang = 1, NDANG
-c                    IF (ICAlangs.GT.0) THEN
-c                     WRITE (12,99035) ANGles(iang),
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-c                    ELSE
-c                     WRITE (12,99035) (iang - 1)*gang,
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-c                    ENDIF
-c                  ENDDO
-c                  WRITE (12,*) ' '
-c                  WRITE (12,99040)(CSDirlev(itemp(ilv),nejcec),ilv = 2,
-c     &                                                     MIN(its,10))
-c
-c                  IF(its.gt.10) THEN
-c                  WRITE (6,*) ' '
-c                  WRITE (6,*) ' '
-c              WRITE (6,99030) (itemp(ilv),ilv = 11,MIN(its,20))
-c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=11,MIN(its,20))
-c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
-c     &             LVP(itemp(ilv),nnuc),deform(ilv),ilv =11,MIN(its,20))
-c                  WRITE (6,*) ' '
-c                   DO iang = 1, NDANG
-c                    IF (ICAlangs.GT.0) THEN
-c                     WRITE (6,99035) ANGles(iang),
-c123456789012345678901234567890123456789012345678901234567890123456789012
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =11,MIN(its,20))
-c                    ELSE
-c                     WRITE (6,99035) (iang - 1)*gang,
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =11,MIN(its,20))
-c                    ENDIF
-c                  ENDDO
-c                 WRITE (6,*) ' '
-c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nejcec),ilv = 11,
-c     &                      MIN(its,20))
-c                ENDIF
-c
-c                  IF(its.gt.20) THEN
-c                  WRITE (6,*) ' '
-c                  WRITE (6,*) ' '
-c              WRITE (6,99030) (itemp(ilv),ilv = 21,MIN(its,30))
-c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=21,MIN(its,30))
-c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
-c     &            LVP(itemp(ilv),nnuc),deform(ilv),ilv =21,MIN(its,30))
-c                  WRITE (6,*) ' '
-c                   DO iang = 1, NDANG
-c                    IF (ICAlangs.GT.0) THEN
-c                     WRITE (6,99035) ANGles(iang),
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =21,MIN(its,30))
-c                    ELSE
-c                     WRITE (6,99035) (iang - 1)*gang,
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =21,MIN(its,30))
-c                    ENDIF
-c                  ENDDO
-c                 WRITE (6,*) ' '
-c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nnuc),ilv = 21,
-c     &                      MIN(its,30))
-c                ENDIF
-c
-c                  IF(its.gt.30) THEN
-c                  WRITE (6,*) ' '
-c                  WRITE (6,*) ' '
-c              WRITE (6,99030) (itemp(ilv),ilv = 31,MIN(its,40))
-c              WRITE (6,99032)(ELV(itemp(ilv),nnuc),ilv=31,MIN(its,40))
-c              WRITE (6,99034)(XJLv(itemp(ilv),nnuc)*
-c     &            LVP(itemp(ilv),nnuc),deform(ilv),ilv=31,MIN(its,40))
-c                  WRITE (6,*) ' '
-c                   DO iang = 1, NDANG
-c                    IF (ICAlangs.GT.0) THEN
-c                     WRITE (6,99035) ANGles(iang),
-c     &               (CSAlev(iang,itemp(ilv),nejcec),ilv=31,MIN(its,40))
-c                    ELSE
-c                     WRITE (6,99035) (iang - 1)*gang,
-c     &              (CSAlev(iang,itemp(ilv),nejcec),ilv =31,MIN(its,40))
-c                    ENDIF
-c                  ENDDO
-c                 WRITE (6,*) ' '
-c                 WRITE (6,99040) (CSDirlev(itemp(ilv),nejcec),ilv = 31,
-c     &                      MIN(its,40))
-c                ENDIF
-
-c                ENDIF
-c               ENDIF
+                  ENDIF
               ENDIF
             ENDIF
          ENDIF
@@ -1572,10 +1468,37 @@ C--------------(merely for checking purpose)
                ENDDO
                WRITE (6,*) ' '
            ENDIF
-          ENDIF
-C--------calculate life-times and widths
+         ENDIF
+         IF (FISmod(nnuc).GT.0) THEN
+           DO m = 1, INT(FISmod(nnuc)) + 1
+              CSFis = CSFis + CSFism(m)
+           ENDDO
+       ENDIF
          IF (IOUt.GT.0) THEN
-            IF (csemist.NE.0.0D0) THEN
+           DO m = 1, INT(FISmod(nnuc)) + 1
+              IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
+              WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
+           ENDDO
+           WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
+         ENDIF 
+         IF (CSFis.NE.0.0D0) THEN
+           CSPfis(nnuc) = CSFis
+           WRITE (6,
+     &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
+     &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
+           IF (IOUt.GT.0) THEN
+C--------------calculate average fission life-time and width
+               tauf = stauc*6.589E-22*2.0*PI/CSFis
+               WRITE(6,
+     &         '(''  Average fission life-time'',G12.5,'' s'')') tauf
+               gamfis = gamt*CSFis/csemist
+               WRITE (6,
+     &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
+               WRITE (6,*) ' '
+           ENDIF
+         ENDIF
+         IF (csemist.NE.0.0D0 .and. IOUt.GT.0) THEN
+C--------------calculate average total life-time and width
                taut = stauc*6.589E-22*2.0*PI/csemist
                WRITE(6,
      &               '(/''  Average total   life-time'',G12.5,'' s'')')
@@ -1587,32 +1510,6 @@ C--------calculate life-times and widths
 C              TAUT=6.589E-22/GAMT
 C              WRITE(6,'('' Average total life-time 1/width'',g12.5,
 C              1       '' s'')') TAUT
-            ENDIF
-            IF (CSFis.NE.0.0D0) THEN
-               tauf = stauc*6.589E-22*2.0*PI/CSFis
-               WRITE(6,'(''  Average fission life-time'',G12.5,'' s'')')
-     &                tauf
-               gamfis = gamt*CSFis/csemist
-               WRITE (6,
-     &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
-            ENDIF
-C-----------life-times and widths  *** done ***
-            IF (FISmod(nnuc).GT.0) THEN
-               DO m = 1, INT(FISmod(nnuc)) + 1
-                  CSFis = CSFis + CSFism(m)
-               ENDDO
-               DO m = 1, INT(FISmod(nnuc)) + 1
-                  IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-                  WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
-               ENDDO
-               WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
-               IF (CSFis.GT.0.) THEN
-                 WRITE (6,*) ' '
-                 WRITE (6,
-     &            '('' Fission    cross section    '',G12.5,'' mb'')'
-     &             ) CSFis
-               ENDIF
-            ENDIF
          ENDIF
          TOTcsfis = TOTcsfis + CSFis
 C--------add compound elastic to shape elastic before everything falls
@@ -1727,8 +1624,10 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections
-      WRITE(41,'(G10.5,1P(19E12.5))') EINl, TOTcs, ELAcs,
+      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs, ELAcs,
      &     TOTcsfis, (CSPrd(nnuc),nnuc=1,NNUcd)
+      WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl, 
+     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)
       CLOSE (79)
 C----
@@ -1809,15 +1708,9 @@ C-----------------------(continuum part)
                               ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
      &                             piece*POPcseaf(0,nejc,ie,INExc(nnuc))
      &                             )/4.0/PI
-                              IF(ftmp .LT.0) THEN
+                              IF(ftmp.LT.0) THEN
                                  WRITE(6,*) 'WARNING: Corrective action 
      &to avoid negative ddx cross sections taken'
-           WRITE(6,*) 'ie,nejc=',ie,nejc
-           WRITE(6,*) 'ftmp=',ftmp
-           WRITE(6,*) 'POPcse(0,...)=',POPcse(0,nejc,ie,INExc(nnuc))
-           WRITE(6,*) 'CSEmsd(ie,nejc)=',CSEmsd(ie,nejc)
-           WRITE(6,*) 'POPcseaf(0,...)=',POPcseaf(0,nejc,ie,INExc(nnuc))
-           WRITE(6,*) '------'
                                  ftmp = 0.0
                                  POPcseaf(0,nejc,ie,INExc(nnuc)) = 
      &                                  POPcse(0,nejc,ie,INExc(nnuc))/
@@ -1825,10 +1718,22 @@ C-----------------------(continuum part)
                               ENDIF
                               DO nang = 1, NDANG
                                  cseaprnt(ie,nang) = 
-     &                          ftmp + CSEa(ie,nang,nejc,1)*  
+     &                          ftmp + CSEa(ie,nang,nejc,INExc(1))*  
      &                                POPcseaf(0,nejc,ie,INExc(nnuc))
                               ENDDO
                            ENDDO
+C                          DO ie = 1, nspec ! reconstruct continuum DDX spectrum
+C                             DO nang = 1, NDANG
+C                                piece = CSEmsd(ie,nejc)
+C                                IF (ie.EQ.NEXr(nejc,1))
+C    &                               piece = 0.5*piece
+C                                cseaprnt(ie,nang)
+C    &                              = ((POPcse(0,nejc,ie,INExc(nnuc))
+C    &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
+C    &                              /4.0/PI + CSEa(ie,nang,nejc,1)
+C    &                              *POPcseaf(0,nejc,ie,INExc(nnuc)))
+C                             ENDDO
+C                          ENDDO
                         ENDIF
                         DO nang = 1, NDANG
                                           !double the first bin to preserve integral in EMPEND
@@ -1862,20 +1767,31 @@ C-----------------------remaining n- or p-emissions (continuum and levels togeth
                            ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
      &                           piece*POPcseaf(0,nejc,ie,INExc(nnuc)
      &                           ))/4.0/PI
-                           IF(ftmp .LT.0) THEN
+                           IF(ftmp.LT.0) THEN
                               ftmp = 0.0
                               POPcseaf(0,nejc,ie,INExc(nnuc)) = 
      &                               POPcse(0,nejc,ie,INExc(nnuc))/
      &                               piece
-                              WRITE(6,*) 'WARNING: Corrective action 2 
-     &to avoid negative ddx cross sections taken'
+                              WRITE(6,*) 'WARNING: Corrective action to 
+     &avoid negative ddx cross sections taken'
                            ENDIF
                            DO nang = 1, NDANG
                               cseaprnt(ie,nang)
-     &                           = ftmp + CSEa(ie,nang,nejc,1)*
+     &                           = ftmp + CSEa(ie,nang,nejc,INExc(1))*
      &                          POPcseaf(0,nejc,ie,INExc(nnuc))
                            ENDDO
                         ENDDO
+C                       DO ie = 1, nspec  ! reconstruct DDX spectrum
+C                          DO nang = 1, NDANG
+C                             piece = CSEmsd(ie,nejc)
+C                             IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
+C                             cseaprnt(ie,nang)
+C    &                           = ((POPcse(0,nejc,ie,INExc(nnuc))
+C    &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
+C    &                           /4.0/PI + CSEa(ie,nang,nejc,INExc(1))
+C    &                           *POPcseaf(0,nejc,ie,INExc(nnuc)))
+C                          ENDDO
+C                       ENDDO
                         DO nang = 1, NDANG
                                           !double the first bin to preserve integral in EMPEND
                            cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
@@ -2011,39 +1927,19 @@ C-----NOTE: HMS cumulative spectra (if calculated) are already
 C-----stored in CSE(.,x,0) array
 C-----
 C-----calculate double-differential spectra
-      DO nejc = 0, NDEJC
-c         sumtst=0
-          DO iesp = 1, NDECSE
-C            WRITE(6,*)'iesp, CSE, nejc',iesp,CSE(iesp,nejc,0), nejc
-c            sumtst=sumtst+CSE(iesp,nejc,0)
-             piece = CSEmsd(iesp,nejc)
-             IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
-             ftmp =(CSE(iesp,nejc,0)-
-     &             piece*POPcseaf(0,nejc,ie,INExc(nnuc))
-     &             )/4.0/PI
-             IF(ftmp .LT.0) THEN
-                WRITE(6,*) 'WARNING: Corrective action 3 
-     &to avoid negative ddx cross sections taken'
-           WRITE(6,*) 'ie,nejc =',ie,nejc
-           WRITE(6,*) 'ftmp=',ftmp
-           WRITE(6,*) 'CSE(ie,...)=',CSE(iesp,nejc,0)
-           WRITE(6,*) 'CSEmsd(ie,nejc)=',CSEmsd(ie,nejc)
-           WRITE(6,*) 'POPcseaf(0,...)=',POPcseaf(0,nejc,ie,INExc(nnuc))
-           WRITE(6,*) '------'
-                ftmp = 0.0
-                POPcseaf(0,nejc,ie,INExc(nnuc)) = 
-     &                 CSE(iesp,nejc,0)/piece
-             ENDIF
-             DO nang = 1, NDANG
-                CSEa(iesp,nang,nejc,0)
-     &             = ftmp + 
-C    &          (CSEa(iesp,nang,nejc,1)- piece/4.0/PI)
-C      RCN: Mike please check if INExc(1) is ok here !!! I guess it is the same than 1
-     &          CSEa(iesp,nang,nejc,INExc(1))*POPcseaf(0,nejc,iesp,0)
-             ENDDO
-          ENDDO
-c         WRITE(6,*)'nejc, tot spec',nejc,sumtst*DE
-      ENDDO
+C     DO nejc = 0, NDEJC
+C          DO iesp = 1, NDECSE
+C            DO nang = 1, NDANG
+C               piece = CSEmsd(iesp,nejc)
+C               IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
+C               CSEa(iesp,nang,nejc,0)
+C    &             = ((CSE(iesp,nejc,0)
+C    &             - piece*POPcseaf(0,nejc,iesp,0))
+C    &             /4.0/PI      + CSEa(iesp,nang,nejc,1)
+C    &             *POPcseaf(0,nejc,iesp,0))
+C            ENDDO
+C         ENDDO
+C     ENDDO
 
       WRITE (6,*) ' '
       WRITE (6,'(''  Total fission cross section '',G12.5,'' mb'')')
@@ -2132,19 +2028,30 @@ C--------neutrons
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
-          WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,*) ' '
+C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+C    &            (ANGles(nang),nang=1,NDANG)
+C         DO ie = 1, nspec - 1
+C          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+C    &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
+C         ENDDO
+C---------exact endpoint
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
+C    &            (max(0.d0,CSEa(nspec,nang,1,0)),nang = 1,NDANG)
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
+C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &            (ANGles(nang),nang=1,NDANG)
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
           DO ie = 1, nspec - 1
-             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,1,0))
           ENDDO
 C---------exact endpoint
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
-     &            (CSEa(nspec,nang,1,0),nang = 1,NDANG)
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
-     &            (0.d0,nang = 1,NDANG)
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(1,1), 
+     &                              max(0.d0,CSE(nspec,1,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(1,1), 0.d0
          ENDIF
 C--------protons
          nspec = INT((EMAx(1) - Q(2,1))/DE) + 2
@@ -2152,19 +2059,30 @@ C--------protons
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
-          WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,*) ' '
+C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+C    &            (ANGles(nang),nang=1,NDANG)
+C         DO ie = 1, nspec - 1
+C           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+C    &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
+C         ENDDO
+C---------exact endpoint
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
+C    &            (max(0.d0,CSEa(nspec,nang,2,0)),nang = 1,NDANG)
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
+C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &            (ANGles(nang),nang=1,NDANG)
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
           DO ie = 1, nspec - 1
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,2,0))
           ENDDO
 C---------exact endpoint
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
-     &            (CSEa(nspec,nang,2,0),nang = 1,NDANG)
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
-     &            (0.d0,nang = 1,NDANG)
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(2,1), 
+     &                              max(0.d0,CSE(nspec,2,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(2,1), 0.d0
          ENDIF
 C--------alphas
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
@@ -2172,19 +2090,31 @@ C--------alphas
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
-          WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
+C         WRITE (12,*) ' '
+C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+C    &            (ANGles(nang),nang=1,NDANG)
+C         DO ie = 1, nspec - 1
+C           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
+C    &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
+C         ENDDO
+C---------exact endpoint
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
+C    &            (max(0.d0,CSEa(nspec,nang,3,0)),nang = 1,NDANG)
+C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
+C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &            (ANGles(nang),nang=1,NDANG)
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
           DO ie = 1, nspec - 1
-            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-     &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,3,0))
           ENDDO
 C---------exact endpoint
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
-     &            (CSEa(nspec,nang,3,0),nang = 1,NDANG)
-          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
-     &            (0.d0,nang = 1,NDANG)
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1), 
+     &                              max(0.d0,CSE(nspec,3,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1), 0.d0
+
          ENDIF
 C--------light ions
          IF (NDEJC.EQ.4) THEN
@@ -2195,20 +2125,31 @@ C--------light ions
              WRITE (12,
      &'(''  Spectrum of  '',I1,''-'',A2,4X,A5,I7,''(LI,x)'')')
      &INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
-             WRITE(12,'(30X,''A      n      g      l      e      s '')')
+C            WRITE(12,'(30X,''A      n      g      l      e      s '')')
+C            WRITE (12,*) ' '
+C            WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+C    &           (ANGles(nang),nang=1,NDANG)
+C            DO ie = 1, nspec - 1
+C              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
+C    &           *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
+C            ENDDO
+C------------exact endpoint
+C            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
+C    &           - Q(NDEJC,1),
+C    &           (max(0.d0,CSEa(nspec,nang,NDEJC,0)),nang = 1,NDANG)
+C            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
+C    &           - Q(NDEJC,1), (0.d0,nang = 1,NDANG)
              WRITE (12,*) ' '
-             WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &           (ANGles(nang),nang=1,NDANG)
+             WRITE (12,'('' Energy    mb/MeV'')')
+             WRITE (12,*) ' '
              DO ie = 1, nspec - 1
-               WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
-     &           *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
+               WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &                                   max(0.d0,CSE(ie,NDEJC,0))
              ENDDO
 C------------exact endpoint
-             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
-     &           - Q(NDEJC,1),
-     &           (CSEa(nspec,nang,NDEJC,0),nang = 1,NDANG)
-             WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
-     &           - Q(NDEJC,1), (0.d0,nang = 1,NDANG)
+             WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(NDEJC,1), 
+     &                                 max(0.d0,CSE(nspec,NDEJC,0))
+             WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(NDEJC,1), 0.d0
            ENDIF
          ENDIF
       ENDIF
@@ -2285,6 +2226,7 @@ C-----end of ENDF spectra (inclusive)
          CLOSE (40)
          CLOSE (41)
          CLOSE (66,STATUS = 'delete')
+         CLOSE (98)         
          WRITE (*,*) '.'
          CALL THORA(6)
          CLOSE (6)
