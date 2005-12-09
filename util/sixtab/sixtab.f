@@ -360,7 +360,7 @@ C-D A section of file 6 using legendre or tabulated angular distributions
 C-D is converted into Law 7 format with NCS angles. Intermediate results
 C-D are written to scratch file on unit LSC.
 C-
-      PARAMETER       (MXMU=50, MXPL=65, MXNB=20, MXRW=10000)
+      PARAMETER       (MXMU=50, MXPL=100, MXNB=20, MXRW=20000)
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
       DOUBLE PRECISION PAR,CLB,P1,P2,PP
@@ -369,12 +369,20 @@ C-
 C*
       DATA PI /3.141592654/
 C* Masses of primary light particles
-      DATA ANEU/1.008665/
-      DATA APRO/1.007273/
-      DATA ADEU/2.013558/
-      DATA ATRI/3.015505/
-      DATA AHE3/3.014960/
-      DATA AHE4/4.001505/
+c...  DATA AWN/1.008665/
+c...  DATA AWH/1.007273/
+c...  DATA AWD/2.013558/
+c...  DATA AWT/3.015505/
+c...  DATA AW3/3.014960/
+c...  DATA AWA/4.001505/
+C* AMDC Audi-Wapstra mass tables 2003 "http://www-nds.iaea.org/amdc/"
+C* Subtract electron mass and add ionisation energy defect
+      AWN = 1.008664916
+      AWH = 1.007825032 -   0.00054857991 + 0.000000015
+      AWD = 2.014101778 -   0.00054857991 + 0.000000015
+      AWT = 3.016049278 -   0.00054857991 + 0.000000015
+      AW3 = 3.016029319 - 2*0.00054857991 + 0.000000085
+      AWA = 4.002603254 - 2*0.00054857991 + 0.000000085
 C* Atomic mass constant (amu to eV)
       DATA AMUEV/931.494013E6/
 C*
@@ -386,6 +394,7 @@ C*
 C* Assume the projectile is neutron
       IZPR=1
 C* Define cosines for NCS angle intervals
+      IF(NCS.GT.MXMU) STOP 'SIXTAB ERROR - MXMU limit exceeded'
       DPI=PI/(NCS-1)
       DO I=1,NCS
         AMU(I)=COS(PI-(I-1)*DPI)
@@ -410,7 +419,7 @@ C* Begin loop over all outgoing particles
 C* Process the multiplicities for this particle
       CALL RDTAB1(LEN,ZAP,AWP,LIP,LAW0, NR, NP, NBT,INT
      1           ,RWO(LXE),RWO(LXS),KX,IER)
-      IF(NR.GT.MXNB) STOP 'SIXTAB ERROR - MXNB limit exceeded'
+      IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
       IZAP=NINT(ZAP)
       LAW =LAW0
 C* Set the co-ordinate system flag LCT
@@ -430,24 +439,24 @@ C* Redefine co-ordinate system to Lab
       END IF
 C* Define the mass of the incident particle
       IF     (IZPR.EQ.   1) THEN
-        AM1=ANEU
+        AM1=AWN
       ELSE IF(IZPR.EQ.1001) THEN
-        AM1=APRO
+        AM1=AWH
       ELSE IF(IZPR.EQ.1002) THEN
-        AM1=ADEU
+        AM1=AWD
       ELSE IF(IZPR.EQ.1003) THEN
-        AM1=ATRI
+        AM1=AWT
       ELSE IF(IZPR.EQ.2003) THEN
-        AM1=AHE3
+        AM1=AW3
       ELSE IF(IZPR.EQ.2004) THEN
-        AM1=AHE4
+        AM1=AWA
       ELSE
         STOP 'SIXTAB ERROR - Unknown incident particle'
       END IF
 C* Mass of the target nucleus
-      AM2=AWR*ANEU
+      AM2=AWR*AWN
 C* Mass of the primary outgoing particle
-      AM3=AWP*ANEU
+      AM3=AWP*AWN
 C* Mass ratios: AMR=target/projectile; ADS=ejectile/projectile
       AMR=AM2/AM1
       ADS=AM3/AM1
@@ -477,6 +486,7 @@ C*      Copy the data for Law 2, 5
         NMX=MXRW
         DO IE=1,NE
           CALL RDLIST(LEN,C1,EI,LANG,L2,NW,NL,RWO,NMX,IER)
+          IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
           IF(LAW0.EQ.2 .AND. LANG.EQ.0) THEN
 C*        Convert Legendre to pointwise distribution if necessary
             CALL LEGPNT(NW,NL,RWO,MXRW)
@@ -500,6 +510,7 @@ C*      Copy the data for Law 7
           DO IM=1,NMU
             CALL RDTAB1(LEN,C1,ACOS,L1,L2,NRP,NEP,NBT,INT
      &                 ,RWO,RWO(LX),KX,IER)
+            IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
             CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
      1                 ,NRP,NEP,NBT,INT,RWO,RWO(LX))
           END DO
@@ -664,7 +675,6 @@ C* Case: Normal Law-1 distribution with angular dependence
       KX  =MXRW-LXX
       NCYC=NA+2
       NL  =NA+1
-      IF(NL.GT.MXPL) STOP 'SIXTAB ERROR - MXPL limit exceeded'
       NMU =NCS
       IF( NL.LE.1) NMU=2
 C* Linear interpolation between cosines
@@ -747,6 +757,7 @@ C* Process the angular distributions
       IF (LANG.EQ. 1) THEN
 C*
 C* Calculate the probability from Legendre polynomials
+        IF(NA.GE.MXPL) STOP 'SIXTAB ERROR - MXPL limit exceeded'
         CALL PLNLEG(CSN,PLL,NA)
         FMU=0
         DO LL=1,NL
