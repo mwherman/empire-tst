@@ -36,7 +36,9 @@ C*    1994, 8  : COVARIANCE OF EXP.DATA READ FROM UNIT(12)           *
 C*               SEE SUBROUTINE EXDATA                               *
 C*                                                                   *
 C*********************************************************************
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+c     PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
 C               NP : MAXIMAL NUMBER OF PARAMETERS
 C               NX : MAXIMAL NUMBER OF EXPERIMENTAL DATA
 C               NS : MAXIMAL NUMBER OF SPLINE KNOTS
@@ -44,7 +46,7 @@ C               NR : MAXIMAL NUMBER OF REACTION TYPES
 C               MP : SIZE OF COVARIANCE OF PARAMETERS = NP*(NP+1)/2
 C               MX : SIZE OF COVARIANCE OF DATA       = NX*(NX+1)/2
 C
-      PARAMETER(NW=100)
+      PARAMETER(NW=5000)
 C               NW : MAXIMAL NUMBER OF MEASUREMENTS IN A REACTION
 C
       REAL*8 X(NX),Y(NX),V(MX)
@@ -242,7 +244,8 @@ C*************************************************************
 C
       SUBROUTINE PRCALC(NDATA,NENRG,NPARM,
      &                  X,Y,V,P1,PD,X0,S0,E0,A,CHISQ)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 X(NX),Y(NX),V(MX),S0(NS),E0(NS),A(NS,NP)
       REAL*8 P1(NP),PD(NP),X0(MP)
       REAL*8 D(NX,NS),W(NP,NX),F(NX,NP)
@@ -385,7 +388,8 @@ C     GETCRX : READ CALCULATED VALUES WITH PRIOR PARAMETERS  *
 C*************************************************************
 C
       SUBROUTINE GETCRX(NENRG,NRMAX,SG,EG,REACT)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS)
       DIMENSION NENRG(NR)
       CHARACTER*43 REACT(NR)
@@ -410,7 +414,8 @@ C*************************************************************
 C
       SUBROUTINE GETPRM(NPARM,NPMAX,P0,P1,X0,PRIP,PRIE,PRIC,IPARM,
      &                  PNAME)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 P1(NP),P0(NP),X0(MP)
       REAL*8 PRIP(NP),PRIE(NP),PRIC(MP)
       DIMENSION IPARM(NP)
@@ -441,7 +446,8 @@ C     GETSTV : READ SENSITIVITY MATRIX                       *
 C*************************************************************
 C
       SUBROUTINE GETSTV(NENRG,NRMAX,NPARM,NPMAX,AG,IPARM)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 AG(NR,NS,NP)
       DIMENSION IPARM(NP),NENRG(NR)
       CHARACTER*25 TARG
@@ -469,7 +475,8 @@ C     SETSTV : PREPARE SENSITIVITY AND SPLINE                *
 C*************************************************************
 C
       SUBROUTINE SETSTV(NENRG,NPARM,S0,E0,A,SG,EG,AG,IPARM,KREAC,IZERO)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS),AG(NR,NS,NP),S0(NS),E0(NS),A(NS,NP)
       DIMENSION NENRG(NR),IPARM(NP)
 C
@@ -512,7 +519,8 @@ C     EXDATA : READ EXPERIMENTAL DATA                        *
 C*************************************************************
 C
       SUBROUTINE EXDATA(X,Y,V,EMAX,EMIN,EW,NDATA,NGROUP,KCOVEX)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
 C
 C           KCOVEX = 1 : READ COVARIANCE FILE FROM UNIT(12)
 C           KCOVEX = 0 : DONT READ COVARIANCE FILE
@@ -683,7 +691,8 @@ C***************************************
 C     SWAP COLUMNS OF COVARIANCE       *
 C***************************************
       SUBROUTINE SWCL(V,N,I1,I2)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 V(MX)
       REAL*8 A(NX),B(NX),C(NX)
 C
@@ -732,7 +741,8 @@ C     DESIGN : PREPARE DESIGN MATRIX                         *
 C*************************************************************
 C
       SUBROUTINE DESIGN(D,X,E0,NDATA,NENRG)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       PARAMETER(NO=1)
 C               NO : ORDER OF POLYNOMIAL = 1
 C
@@ -779,7 +789,8 @@ C*************************************************************
 C     OUTSPL : WRITE SPLINES ON UNIT 13                      *
 C*************************************************************
       SUBROUTINE OUTSPL(NPARM,NRMAX,NENRG,IPARM,SG,EG,AG,P0,P1,REACT)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS),AG(NR,NS,NP),P0(NP),P1(NP)
       REAL*8 XX
       DIMENSION NENRG(NR),IPARM(NP)
@@ -807,7 +818,8 @@ C*************************************************************
 C     CVRSPL : WRITE COVARIANCE MATRIX OF SPLINES ON UNIT 14 *
 C*************************************************************
       SUBROUTINE CVRSPL(NPMAX,NRMAX,NENRG,PRIC,AG,SG,EG,REACT)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 PRIC(MP),SG(NR,NS),EG(NR,NS),AG(NR,NS,NP)
       REAL*8 VG(NS,NS),ER(NR,NS)
       DIMENSION NENRG(NR),IV(NS)
@@ -891,7 +903,8 @@ C***************************************
 C     VG <= A * PRIC * A**T            *
 C***************************************
       SUBROUTINE MULMTX(IR,JR,NIR,NJR,NPMAX,PRIC,AG,VG)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 PRIC(MP),AG(NR,NS,NP),VG(NS,NS)
       REAL*8 W(NP),XX
 C
@@ -924,7 +937,8 @@ C     PRSORT : WRITE VARIATION OF PARAMETERS ON UNIT 15      *
 C*************************************************************
 C
       SUBROUTINE PRSORT(PNAME)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       PARAMETER(NT=300)
 C               NT : MAXIMAL NUMBER OF ESTIMATION STEPS
 C
@@ -954,7 +968,8 @@ C     CVRPRM : WRITE COVARIANCE MATRIX                       *
 C*************************************************************
 C
       SUBROUTINE CVRPRM(K,NPARM,P1,PE,PNAME,X0)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 X0(MP),P1(NP),PE(NP)
       CHARACTER*12 PNAME(NP)
       DIMENSION IX(40)
@@ -996,7 +1011,8 @@ C     PREAD  : PRIOR PARAMETER READ                          *
 C*************************************************************
 C
       SUBROUTINE PREAD(KUNIT,NPARM,NPMAX,P1,X0,PRIP,PRIE,PRIC,IPARM)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 P1(NP),X0(MP),PRIP(NP),PRIE(NP),PRIC(MP)
       REAL*8 PW(NP)
       DIMENSION IPARM(NP)
@@ -1041,7 +1057,8 @@ C     PWRITE : POSTERIOR PARAMETER OUTPUT                    *
 C*************************************************************
 C
       SUBROUTINE PWRITE(KUNIT,NPARM,NPMAX,P1,PE,PRIP,PRIE,PRIC,IPARM)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 P1(NP),PE(NP),PRIP(NP),PRIE(NP),PRIC(MP)
       REAL*8 PW(NP)
       DIMENSION IPARM(NP)
@@ -1069,7 +1086,8 @@ C     INVMTX : CALCULATION IF INVERSE MATRIX                 *
 C*************************************************************
 C
       SUBROUTINE INVMTX(NDATA,V)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 V(MX)
       ICOND=0
       IF(NDATA.LT.1) THEN
@@ -1106,7 +1124,8 @@ C              U TRANSPOSE OF L                              *
 C*************************************************************
 C
       SUBROUTINE CHOLSK(N,V,ICOND)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 V(MX)
       REAL*8 X1,XX,EPS
 C
@@ -1187,7 +1206,8 @@ C              V**(-1)= U**(-1) D L**(-1)                    *
 C*************************************************************
 C
       SUBROUTINE INVERS(N,V,ICOND)
-      PARAMETER(NP=100,MP=5050,NX=300,MX=45150,NS=100,NR=30)
+      PARAMETER(NP=100,MP=NP*(NP+1)/2,NX=10000,MX=NX*(NX+1)/2,NS=100,
+     &          NR=30)
       REAL*8 V(MX)
       REAL*8 X1,XX
 C
