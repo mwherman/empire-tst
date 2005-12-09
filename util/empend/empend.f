@@ -401,7 +401,7 @@ c...
 c...      print *,'Read data for',nk,' particles'
 c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
 c...
-      IF(NK.LE.0) GO TO 800
+      IF(NK.LE.0) GO TO 620
 C* Write the ENDF file-6 data
       CALL WRIMF6(LOU,RWO(LA),MT6,MAT,IZA,AWR,NK,LCT,NS)
       WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',MT6
