@@ -1,10 +1,12 @@
       PROGRAM X4TOC4                                                    X4T00050
-C-Title  : Program PLOTC4
+C-Title  : Program X4TOC4
 C-Version: 86-1 (August 1986)
 C-V      2001/03 (March 2001)  *Minor corrections
 C-V      2002/10 Read sample thickness, convert transmission to x-sect.
 C-V      2004/01 Define all input filenames from input.
 C-V      2004/10 Redefine MT>=9000 to define incident particle.
+C-V      2005/07 Introduce F90 features for characters and do-loops
+C-V      2005/12 If E-level is zero, redefine MT 51 to MT 4
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -763,26 +765,23 @@ C-M
 C-M   READ(10,1000,END=100,ERR=200) A,B,C,D
 C-M
 C***** COMPUTER DEPENDENT CODING ******
-      INTEGER OUTP,OTAPE
+      INTEGER      OUTP,OTAPE
       CHARACTER*40 X4,X4NEW,C4,X4INP,X4LST,FLNM,BLNK
       CHARACTER*60 EXFOR14A,EXFOR24A,EXFOR25A,FLNM60
-      CHARACTER*4 CARD1,ENDSUB,KEYTAB
-      CHARACTER*1 CARD2,ENT,SUBENT                                      X4T07270
+      CHARACTER*11 CARD1,KEYTAB,ENDSUB
+      CHARACTER*1  CARD2,ENT,SUBENT
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T07280
-      COMMON/CARDS/CARD1(3,6),CARD2(14)                                 X4T07290
+      COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T07300
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T07310
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T07320
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T07330
       COMMON/POINTR/MPOINT(9)                                           X4T07340
-      DIMENSION ENDSUB(3),KEYTAB(3,5)                                   X4T07350
-      DATA KEYTAB/                                                      X4T07360
-     1 'SUBE','NT  ','   ',                                             X4T07370
-     2 'NOSU','BENT','   ',                                             X4T07380
-     3 'BIB ','    ','   ',                                             X4T07390
-     4 'COMM','ON  ','   ',                                             X4T07400
-     5 'DATA','    ','   '/                                             X4T07410
-      DATA ENDSUB/'ENDS','UBEN','T  '/                                  X4T07420
+      DIMENSION KEYTAB(5)
+      DATA KEYTAB/
+     & 'SUBENT     ','NOSUBENT   ','BIB        ','COMMON     ',                                             X4T07400
+     & 'DATA       '/
+      DATA ENDSUB/'ENDSUBENT  '/
 C-----DEFINE ALL I/O UNITS.
       DATA BLNK     /'                                        '/
      1     X4INP    /'X4TOC4.INP'/
@@ -795,12 +794,7 @@ C-----DEFINE ALL I/O UNITS.
      7     EXFOR25A /'EXFOR25A.DAT'/
       NEWX4=4                                                           X4T07440
       INP=5                                                             X4T07450
-C***** CULLEN
-C     OUTP=6                                                            X4T07460
-C***** CULLEN
-C***** TRKOV
       OUTP=8
-C***** TRKOV
       ITAPE=10                                                          X4T07470
       OTAPE=11                                                          X4T07480
       NTAPE1=12                                                         X4T07490
@@ -830,8 +824,9 @@ C*
       OPEN (UNIT=OTAPE ,FILE=C4      ,STATUS='UNKNOWN')
       OPEN (UNIT=NEWX4 ,FILE=X4NEW   ,STATUS='UNKNOWN')
 C-----INITIALIZE COUNTS.                                                X4T07520
-      DO 10 I=1,9                                                       X4T07530
-   10 MPOINT(I)=0                                                       X4T07540
+      DO I=1,9
+        MPOINT(I)=0
+      END DO
 C-----PRINT TITLE FOR OUTPUT.                                           X4T07550
       WRITE(OUTP,6000)                                                  X4T07560
 C-----READ REACTION VS. MF/MT TABLE                                     X4T07570
@@ -845,20 +840,18 @@ C                                                                       X4T07640
 C     READ EXFOR CARDS AND PROCESS SUBENT, BIB, COMMON OR DATA.         X4T07650
 C                                                                       X4T07660
    20 READ(ITAPE,1000,END=110,ERR=100) CARD1,CARD2                      X4T07670
-      DO 40 INKEY=1,5                                                   X4T07680
-      DO 30 J=1,3                                                       X4T07690
-      IF(CARD1(J,1).NE.KEYTAB(J,INKEY)) GO TO 40                        X4T07700
-   30 CONTINUE                                                          X4T07710
-      GO TO 50                                                          X4T07720
-   40 CONTINUE                                                          X4T07730
+      DO I=1,5
+        INKEY=I
+        IF(CARD1(1).EQ.KEYTAB(INKEY)) GO TO 50
+      END DO
       GO TO 20                                                          X4T07740
 C-----PROCESS SUBENT CARD.                                              X4T07750
    50 IF(INKEY.GT.2) GO TO 60                                           X4T07760
       CALL SUBIN                                                        X4T07770
       GO TO 20                                                          X4T07780
 C-----TRANSLATE N1, N2 FOR BIB, COMMON OR DATA.                         X4T07790
-   60 CALL INTGER(CARD1(1,2),N1,11)                                     X4T07800
-      CALL INTGER(CARD1(1,3),N2,11)                                     X4T07810
+   60 CALL INTGER(CARD1(2),N1,11)
+      CALL INTGER(CARD1(3),N2,11)
       IF(INKEY.NE.3) GO TO 90                                           X4T07820
       CALL BIBIN                                                        X4T07830
 C-----IF SAN>1 AND NO REACTIONS TRANSLATED SKIP SUBENTRY.               X4T07840
@@ -866,9 +859,7 @@ C-----IF SAN>1 AND NO REACTIONS TRANSLATED SKIP SUBENTRY.               X4T07840
       IF(KSANR.GT.0) GO TO 20                                           X4T07860
       MPOINT(2)=MPOINT(2)+1                                             X4T07870
    70 READ(ITAPE,1000,END=110,ERR=100) CARD1,CARD2                      X4T07880
-      DO 80 I=1,3                                                       X4T07890
-      IF(CARD1(I,1).NE.ENDSUB(I)) GO TO 70                              X4T07900
-   80 CONTINUE                                                          X4T07910
+      IF(CARD1(1).NE.ENDSUB) GO TO 70
       GO TO 20                                                          X4T07920
 C-----PROCESS COMMON OR DATA.                                           X4T07930
    90 IF(INKEY.EQ.4) CALL COMIN                                         X4T07940
@@ -882,17 +873,10 @@ C-----END OF RUN. PRINT SUMMARY OF TRANSLATION.                         X4T08000
   120 END FILE OTAPE                                                    X4T08020
       END FILE NEWX4                                                    X4T08030
       STOP                                                              X4T08040
- 1000 FORMAT(6(2A4,A3),14A1)                                            X4T08050
-C***** CULLEN
-C6000 FORMAT(' TRANSLATE DATA FROM EXFOR TO COMPUTATION FORMAT',        X4T08060
-C    1 ' (X4TOC4 VERSION 86-1)'/1X,70('=')/                             X4T08070
-C    2 ' READING TRANSLATION TABLES'/1X,70('='))                        X4T08080
-C***** CULLEN
-C***** TRKOV
+ 1000 FORMAT(6A11,14A1)
  6000 FORMAT(' TRANSLATE DATA FROM EXFOR TO COMPUTATION FORMAT',
-     1 ' (X4TOC4 VERSION 02-10)'/1X,70('=')/
+     1 ' (X4TOC4 VERSION 05/07)'/1X,70('=')/
      2 ' READING TRANSLATION TABLES'/1X,70('='))
-C***** TRKOV
  6010 FORMAT(1X,70('=')/' TRANSLATION SUMMARY'/1X,70('=')/              X4T08090
      1 ' SUBENTRIES TRANSLATED--------',I7/                             X4T08100
      2 ' SUBENTRIES SKIPPED-----------',I7,' (NO OUTPUT)'/              X4T08110
@@ -912,12 +896,12 @@ C***** TRKOV
 C                                                                       X4T08250
 C     SUBENT OR NOSUBENT CARD. INITIALIZE COUNTERS AND ARRAYS.          X4T08260
 C                                                                       X4T08270
-      INTEGER OUTP,OTAPE                                                X4T08280
-      CHARACTER*4 CARD1                                                 X4T08290
-      CHARACTER*1 CARD2,ENT,SUBENT,AUTH1,AUTHN,REFER1,REFERN,STAT1,     X4T08300
-     1 STATN,BLANK                                                      X4T08310
+      INTEGER      OUTP,OTAPE
+      CHARACTER*11 CARD1
+      CHARACTER*1  CARD2,ENT,SUBENT,AUTH1,AUTHN,REFER1,REFERN,STAT1
+     1            ,STATN,BLANK
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T08320
-      COMMON/CARDS/CARD1(3,6),CARD2(14)                                 X4T08330
+      COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T08340
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T08350
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T08360
@@ -935,23 +919,23 @@ C                                                                       X4T08470
 C-----ALLOW FOR EXFOR FILES WITHOUT IDENTS IN COLUMNS 67-80
 C-----READ ENT/SUBENT FROM COLUMNS 12-22 IF COLUMNS 67-80 ARE BLANK
 C
-      DO 2 I=1,14
-      IF(CARD2(I).NE.BLANK) GO TO 8
-    2 CONTINUE
-      CARD2(1  )=CARD1(1,2)(4:4)
-      DO 4 I=1,4
-      CARD2(I+1)=CARD1(2,2)(I:I)
-      IF(I.LT.4) CARD2(I+5)=CARD1(3,2)(I:I)
-    4 CONTINUE
+      DO I=1,14
+        IF(CARD2(I).NE.BLANK) GO TO 8
+      END DO
+      DO I=1,8
+        CARD2(I)=CARD1(2)(I+3:I+3)
+      END DO
     8 CONTINUE
       IRESET=0                                                          X4T08480
 C-----SAVE ENTRY NUMBER.                                                X4T08490
-      DO 10 I=1,5                                                       X4T08500
-      IF(ENT(I).NE.CARD2(I)) IRESET=1                                   X4T08510
-   10 ENT(I)=CARD2(I)                                                   X4T08520
+      DO I=1,5
+        IF(ENT(I).NE.CARD2(I)) IRESET=1
+        ENT(I)=CARD2(I)
+      END DO
 C-----SAVE SUBENTRY.                                                    X4T08530
-      DO 20 I=1,3                                                       X4T08540
-   20 SUBENT(I)=CARD2(I+5)                                              X4T08550
+      DO I=1,3
+        SUBENT(I)=CARD2(I+5)
+      END DO
 C-----CONVERT SUBENTRY NUMBER TO INTEGER.                               X4T08560
       CALL INTGER(CARD2(6),ISAN,3)                                      X4T08570
       IF(ISAN.EQ.1) IRESET=1                                            X4T08580
@@ -964,35 +948,39 @@ C-----NEW ENTRY OR SUBENTRY 1. RESET COMMON SUBENT COUNTS AND ARRAYS.   X4T08630
       KSAN1=0                                                           X4T08650
       STAT1=BLANK                                                       X4T08660
       IAUTH=0                                                           X4T08670
-      DO 30 I=1,25                                                      X4T08680
-   30 AUTH1(I)=BLANK                                                    X4T08690
+      DO I=1,25
+        AUTH1(I)=BLANK
+      END DO
       IREF=0                                                            X4T08700
-      DO 40 I=1,4                                                       X4T08710
-   40 REFER1(I)=BLANK                                                   X4T08720
+      DO I=1,4
+        REFER1(I)=BLANK
+      END DO
 C-----RESET ORDINARY SUBENT COUNTS AND ARRAYS.                          X4T08730
    50 ICOMN=ICOM1                                                       X4T08740
       IDATN=0                                                           X4T08750
       KSANR=KSAN1                                                       X4T08760
       STATN=BLANK                                                       X4T08770
       NAUTH=0                                                           X4T08780
-      DO 60 I=1,25                                                      X4T08790
-   60 AUTHN(I)=BLANK                                                    X4T08800
+      DO I=1,25
+        AUTHN(I)=BLANK
+      END DO
       NREF=0                                                            X4T08810
-      DO 70 I=1,4                                                       X4T08820
-   70 REFERN(I)=BLANK                                                   X4T08830
+      DO I=1,4
+        REFERN(I)=BLANK
+      END DO
       RETURN                                                            X4T08840
       END                                                               X4T08850
       SUBROUTINE BIBIN                                                  X4T08860
 C                                                                       X4T08870
 C     BIB CARD READ. PROCESS ENTIRE BIB SECTION.                        X4T08880
 C                                                                       X4T08890
-      INTEGER OUTP,OTAPE                                                X4T08900
-      CHARACTER*4 BIBKEY,KEYWD1                                         X4T08910
-      CHARACTER*1 CARD1,CARD2,KEYWD2,STAT1,STATN,AUTH1,AUTHN,REFER1,    X4T08920
-     1 REFERN,BLANK                                                     X4T08930
+      INTEGER      OUTP,OTAPE
+      CHARACTER*10 BIBKEY,KEYWD1
+      CHARACTER*1  CARD1,CARD2,KEYWD2,STAT1,STATN,AUTH1,AUTHN,REFER1
+     1            ,REFERN,BLANK
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T08940
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T08950
-      COMMON/BIBCRD/KEYWD1(3),KEYWD2,CARD1(55),CARD2(14)                X4T08960
+      COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T08970
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T08980
       COMMON/AUTHI/IAUTH,NAUTH                                          X4T08990
@@ -1000,27 +988,17 @@ C                                                                       X4T08890
       COMMON/REFERI/IREF,NREF                                           X4T09010
       COMMON/REFERC/REFER1(4),REFERN(4)                                 X4T09020
       COMMON/STATUC/STAT1,STATN                                         X4T09030
-      DIMENSION BIBKEY(3,9)                                             X4T09040
+      DIMENSION BIBKEY(9)
       DATA BLANK/' '/                                                   X4T09050
       DATA BIBKEY/                                                      X4T09060
-     1 'ENDB','IB  ','  ',                                              X4T09070
-     2 'REAC','TION','  ',                                              X4T09080
-     3 'ISO-','QUAN','T ',                                              X4T09090
-     4 'NUC-','QUAN','T ',                                              X4T09100
-     5 'CMPD','-QUA','NT',                                              X4T09110
-     6 'STAT','US  ','  ',                                              X4T09120
-     7 'REFE','RENC','E ',                                              X4T09130
-     8 'AUTH','OR  ','  ',                                              X4T09140
-     9 'TITL','E   ','  '/                                              X4T09150
+     1 'ENDBIB    ','REACTION  ','ISO-QUANT ','NUC-QUANT ',
+     5 'CMPD-QUANT','STATUS    ','REFERENCE ','AUTHOR    ',                                              X4T09140
+     9 'TITLE     '/
 C-----READ ALL BIB CARDS AND LIST REQUIRED KEYWORDS AND CONTINUATIONS.  X4T09160
    10 READ(ITAPE,1000,END=80,ERR=80) KEYWD1,KEYWD2,CARD1,CARD2          X4T09170
-   20 DO 40 K=1,9                                                       X4T09180
-      DO 30 I=1,3                                                       X4T09190
-      IF(KEYWD1(I).NE.BIBKEY(I,K)) GO TO 40                             X4T09200
-   30 CONTINUE                                                          X4T09210
-C-----REQUIRED KEYWORD FOUND.                                           X4T09220
-      GO TO 50                                                          X4T09230
-   40 CONTINUE                                                          X4T09240
+   20 DO K=1,9
+        IF(KEYWD1.EQ.BIBKEY(K)) GO TO 50
+      END DO
 C-----REQUIRED KEYWORD NOT FOUND. CONTINUE READING.                     X4T09250
       GO TO 10                                                          X4T09260
 C-----RETURN ON ENDBIB. OTHERWISE PROCESS.                              X4T09270
@@ -1041,7 +1019,7 @@ C-----END OF BIB SECTION.                                               X4T09400
 C-----ERROR READING EXFOR DATA.                                         X4T09420
    80 WRITE(OUTP,6000)                                                  X4T09430
       STOP                                                              X4T09440
- 1000 FORMAT(2A4,A2,A1,55A1,14A1)                                       X4T09450
+ 1000 FORMAT(A10,A1,55A1,14A1)
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T09460
       END                                                               X4T09470
       SUBROUTINE REACTN(KTYPE)                                          X4T09480
@@ -1055,13 +1033,13 @@ C     ZARBAK = BAKCUP COPY OF ZAR1 (USED FOR COMPLEX REACTIONS).        X4T09550
 C     RN     = COMPLEX REACTION WITH ZA REMOVED.                        X4T09560
 C     R1     = SIMPLE REACTION WITH ZA REMOVED.                         X4T09570
 C                                                                       X4T09580
-      INTEGER OUTP,OTAPE                                                X4T09590
-      CHARACTER*1 BLANK,PARENL,PARENR,ZAR1,ZAN,ZA1,R1,RN,FLAGR,CARD1,   X4T09600
-     1 CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES,ZANRAT,SLASH,  X4T09610
-     2 EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
-      CHARACTER*4 KEYWD1,BLANK4                                         X4T09630
+      INTEGER      OUTP,OTAPE
+      CHARACTER*1  BLANK,PARENL,PARENR,ZAR1,ZAN,ZA1,R1,RN,FLAGR,CARD1
+     &            ,CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES
+     &            ,ZANRAT,SLASH,EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
+      CHARACTER*10 KEYWD1,BLANK10
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T09640
-      COMMON/BIBCRD/KEYWD1(3),KEYWD2,CARD1(55),CARD2(14)                X4T09650
+      COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T09660
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T09670
       COMMON/ZART1I/KZAR1                                               X4T09680
@@ -1078,7 +1056,7 @@ C                                                                       X4T09580
       COMMON/RESIDI/KZARES                                              X4T09790
       COMMON/RESIDC/ZARES(7)                                            X4T09800
       DIMENSION ZARBAK(300),ZASAVE(300,10),NSAVE(10)                    X4T09810
-      DATA BLANK4/'    '/                                               X4T09820
+      DATA BLANK10/'          '/
       DATA BLANK/' '/                                                   X4T09830
       DATA PARENL/'('/                                                  X4T09840
       DATA PARENR/')'/                                                  X4T09850
@@ -1106,19 +1084,22 @@ C-----LOAD UP TO 55 CHARACTERS INTO INPUT CARD ARRAY.                   X4T10060
       NSAVEK=NSAVE(KSAVE)                                               X4T10070
       MSAVE=NSAVEK                                                      X4T10080
       IF(MSAVE.GT.55) MSAVE=55                                          X4T10090
-      DO 20 I=1,MSAVE                                                   X4T10100
-   20 CARD1(I)=ZASAVE(I,KSAVE)                                          X4T10110
+      DO I=1,MSAVE
+        CARD1(I)=ZASAVE(I,KSAVE)
+      END DO
       IF(MSAVE.GE.55) GO TO 40                                          X4T10120
       NN=MSAVE+1                                                        X4T10130
-      DO 30 I=NN,55                                                     X4T10140
-   30 CARD1(I)=BLANK                                                    X4T10150
+      DO I=NN,55
+        CARD1(I)=BLANK
+      END DO
 C-----IF ANY CHARACTERS REMAIN SHIFT THEN FORWARD IN SAVED ARRAY.       X4T10160
    40 IF(MSAVE.GE.NSAVEK) GO TO 60                                      X4T10170
       II=0                                                              X4T10180
       JJ=MSAVE+1                                                        X4T10190
-      DO 50 J=JJ,NSAVEK                                                 X4T10200
-      II=II+1                                                           X4T10210
-   50 ZASAVE(II,KSAVE)=ZASAVE(J,KSAVE)                                  X4T10220
+      DO J=JJ,NSAVEK
+        II=II+1
+        ZASAVE(II,KSAVE)=ZASAVE(J,KSAVE)
+      END DO
       NSAVE(KSAVE)=II                                                   X4T10230
       GO TO 80                                                          X4T10240
    60 KSAVE=KSAVE+1                                                     X4T10250
@@ -1128,7 +1109,7 @@ C-----READ NEXT CARD.                                                   X4T10270
       ISAVE=0                                                           X4T10290
       KSAVE=1                                                           X4T10300
 C-----CONTINUE DECODING IF KEYWORD FIELD IS BLANK.                      X4T10310
-      IF(KEYWD1(1).NE.BLANK4) GO TO 610                                 X4T10320
+      IF(KEYWD1.NE.BLANK10) GO TO 610
 C-----TO BE MACHINE READABLE COLUMN 12 MUST CONTAIN (. IF NOT, ASSUME   X4T10330
 C-----COMMENT CARD AND SKIP IT.                                         X4T10340
    80 IF(CARD1(1).NE.PARENL) GO TO 10                                   X4T10350
@@ -1146,10 +1127,11 @@ C-----AND CENTER-OF-MASS FLAG.                                          X4T10450
       IF(KSANP.GT.30) GO TO 620                                         X4T10470
       FLAGR(KSANP)=KEYWD2                                               X4T10480
       KZANRS(KSANP)=0                                                   X4T10490
-      DO 90 I=1,7                                                       X4T10500
-      ZAN(I,KSANP)=BLANK                                                X4T10510
-      ZANRAT(I,KSANP)=BLANK                                             X4T10520
-   90 ZANRES(I,KSANP)=BLANK                                             X4T10530
+      DO I=1,7
+        ZAN(I,KSANP)=BLANK
+        ZANRAT(I,KSANP)=BLANK
+        ZANRES(I,KSANP)=BLANK
+      END DO
       INPART(KSANP)=0                                                   X4T10540
       MFR(KSANP)=0                                                      X4T10550
       MTR(KSANP)=0                                                      X4T10560
@@ -1175,7 +1157,7 @@ C-----COPY UP TO BALANCED PARENTHESIS.                                  X4T10620
 C-----PARENTHESIS NOT BALANCED YET. READ NEXT CARD.                     X4T10760
       READ(ITAPE,1000,END=630,ERR=630) KEYWD1,KEYWD2,CARD1,CARD2        X4T10770
 C-----ERROR IF KEYWORD FIELD IS NOT BLANK.                              X4T10780
-      IF(KEYWD1(1).NE.BLANK4) GO TO 600                                 X4T10790
+      IF(KEYWD1.NE.BLANK10) GO TO 600
 C-----RESET TO BEGIN SCAN AT BEGINNING OF NEXT CARD.                    X4T10800
       II=1                                                              X4T10810
       GO TO 100                                                         X4T10820
@@ -1187,12 +1169,14 @@ C     REACTION IMPLIES ONLY 2 SETS OF PARENTHESIS.                      X4T10870
 C     OTHERS SUCH AS ISO-QUANT IMPLIES ONLY 1 SET OF PARENTHESIS.       X4T10880
 C                                                                       X4T10890
   140 KZABAK=KZAR1                                                      X4T10900
-      DO 150 I=1,KZABAK                                                 X4T10910
-  150 ZARBAK(I)=ZAR1(I)                                                 X4T10920
-      IF(KZABAK-60) 160,180,180                                         X4T10930
-  160 J=KZABAK+1                                                        X4T10940
-      DO 170 I=J,60                                                     X4T10950
-  170 ZARBAK(I)=BLANK                                                   X4T10960
+      DO I=1,KZABAK
+        ZARBAK(I)=ZAR1(I)
+      END DO
+      IF(KZABAK.GE.60) GO TO 180
+      J=KZABAK+1
+      DO I=J,60
+        ZARBAK(I)=BLANK
+      END DO
   180 IF(KTYPE.EQ.1.AND.LVLMAX.LE.2) GO TO 540                          X4T10970
       IF(LVLMAX.LE.1) GO TO 540                                         X4T10980
 C                                                                       X4T10990
@@ -1204,11 +1188,11 @@ C                                                                       X4T11020
       ISAVE=0                                                           X4T11050
       KSAVE=1                                                           X4T11060
       LVLOLD=0                                                          X4T11070
-  190 DO 200 I=J,KZABAK                                                 X4T11080
-      IF(ZARBAK(I).EQ.PARENL) LVLOLD=LVLOLD+1                           X4T11090
-      IF(ZARBAK(I).EQ.PARENR) LVLOLD=LVLOLD-1                           X4T11100
-      IF(LVLOLD.EQ.0) GO TO 210                                         X4T11110
-  200 CONTINUE                                                          X4T11120
+  190 DO I=J,KZABAK
+        IF(ZARBAK(I).EQ.PARENL) LVLOLD=LVLOLD+1
+        IF(ZARBAK(I).EQ.PARENR) LVLOLD=LVLOLD-1
+        IF(LVLOLD.EQ.0) GO TO 210
+      END DO
       GO TO 260                                                         X4T11130
   210 J=I+1                                                             X4T11140
       IF(J.GE.KZABAK) GO TO 260                                         X4T11150
@@ -1216,8 +1200,9 @@ C                                                                       X4T11020
 C-----MULTIPLE REACTIONS FOUND. DEFINE FIRST REACTION AS BEGINNING UP TOX4T11170
 C-----CURRENT POINT.                                                    X4T11180
       ISAVE=1                                                           X4T11190
-      DO 220 J=1,I                                                      X4T11200
-  220 ZASAVE(J,ISAVE)=ZARBAK(J)                                         X4T11210
+      DO J=1,I
+        ZASAVE(J,ISAVE)=ZARBAK(J)
+      END DO
       NSAVE(ISAVE)=I                                                    X4T11220
 C-----COLLECT REMAINING REACTIONS.                                      X4T11230
   230 ISAVE=ISAVE+1                                                     X4T11240
@@ -1245,16 +1230,17 @@ C                                                                       X4T11450
 C-----INCREMENT REACTION COUNT. ALLOW NO MORE THAN 30 REACTIONS.        X4T11460
   260 LOOP=0                                                            X4T11470
 C-----COPY ALL LEADING LEFT PARENTHESIS INTO RN.                        X4T11480
-      DO 270 IBAK=1,KZABAK                                              X4T11490
-      IF(ZARBAK(IBAK).NE.PARENL) GO TO 320                              X4T11500
-      RN(IBAK)=ZARBAK(IBAK)                                             X4T11510
-  270 CONTINUE                                                          X4T11520
+      DO IBAK=1,KZABAK
+        IF(ZARBAK(IBAK).NE.PARENL) GO TO 320
+        RN(IBAK)=ZARBAK(IBAK)
+      END DO
 C                                                                       X4T11530
 C     CANNOT TRANSLATE. ATEMPT TO TRANSLATE ENTIRE REACTION.            X4T11540
 C                                                                       X4T11550
-  280 DO 290 I=1,7                                                      X4T11560
-      ZA1(I)=ZAN(I,KSANP)                                               X4T11570
-  290 ZARES(I)=ZANRES(I,KSANP)                                          X4T11580
+  280 DO I=1,7
+        ZA1(I)=ZAN(I,KSANP)
+        ZARES(I)=ZANRES(I,KSANP)
+      END DO
       CALL MFMTX(ZARBAK,INPART(KSANP),MFR(KSANP),MTR(KSANP),            X4T11590
      1 IRFLAG(KSANP),KNOWN)                                             X4T11600
   300 WRITE(OUTP,6030) ENT,ISAN,INPART(KSANP),ZA1,ZARES,                X4T11610
@@ -1278,13 +1264,13 @@ C                                                                       X4T11780
   330 LVL=1                                                             X4T11790
       JBAK=IBAK                                                         X4T11800
       KZAR1=0                                                           X4T11810
-      DO 340 IBAK=JBAK,KZABAK                                           X4T11820
-      IF(ZARBAK(IBAK).EQ.PARENL) LVL=LVL+1                              X4T11830
-      IF(ZARBAK(IBAK).EQ.PARENR) LVL=LVL-1                              X4T11840
-      IF(LVL.EQ.0) GO TO 350                                            X4T11850
-      KZAR1=KZAR1+1                                                     X4T11860
-      ZAR1(KZAR1)=ZARBAK(IBAK)                                          X4T11870
-  340 CONTINUE                                                          X4T11880
+      DO IBAK=JBAK,KZABAK
+        IF(ZARBAK(IBAK).EQ.PARENL) LVL=LVL+1
+        IF(ZARBAK(IBAK).EQ.PARENR) LVL=LVL-1
+        IF(LVL.EQ.0) GO TO 350
+        KZAR1=KZAR1+1
+        ZAR1(KZAR1)=ZARBAK(IBAK)
+      END DO
       GO TO 280                                                         X4T11890
 C-----SIMPLE REACTION DEFINED (IN ZAR1). TRANSLATE IT.                  X4T11900
   350 CALL REACT1                                                       X4T11910
@@ -1293,8 +1279,9 @@ C-----SEE IF REACTION HAS BEEN TRANSLATED.                              X4T11920
 C-----DEFINE MF/MT EQUIVALENT.                                          X4T11940
       IF(KR1.GE.60) GO TO 370                                           X4T11950
       JR1=KR1+1                                                         X4T11960
-      DO 360 I=JR1,60                                                   X4T11970
-  360 R1(I)=BLANK                                                       X4T11980
+      DO I=JR1,60
+        R1(I)=BLANK
+      END DO
   370 CALL MFMTX(R1,INPARX,MFRX,MTRX,IRFLGX,KNOWN)                      X4T11990
 C-----SEE IF REACTION CAN BE TRANSLATED. IF NOT, TRY TO TRANSLATE ENTIREX4T12000
 C-----REACTION.                                                         X4T12010
@@ -1307,29 +1294,31 @@ C-----AND RESIDUAL ZA (OTHERWISE CANNOT TRANSLATE).                     X4T12060
 C-----IF THIS IS SECOND REACTION AND RATIO FLAG IS SET SAVE TARGET AND  X4T12080
 C-----PRODUCT ZA AND MT AND CONTINUE DECODING.                          X4T12090
       IF(LOOP.NE.1.OR.IMRATS.LE.0) GO TO 390                            X4T12100
-      DO 380 I=1,7                                                      X4T12110
-      ZANRAT(I,KSANP)=ZA1(I)                                            X4T12120
-  380 ZANRAT(I+7,KSANP)=ZARES(I)                                        X4T12130
+      DO I=1,7
+        ZANRAT(I,KSANP)=ZA1(I)
+        ZANRAT(I+7,KSANP)=ZARES(I)
+      END DO
       MTRAT(KSANP)=MTRX                                                 X4T12140
       GO TO 440                                                         X4T12150
 C-----CHECK FOR SAME TARGET AND RESIDUAL ZA....IF NOT, CANNOT TRANSLATE.X4T12160
   390 IF(KZA1.NE.KZAN(KSANP)) GO TO 280                                 X4T12170
-      DO 400 I=1,KZA1                                                   X4T12180
-      IF(ZAN(I,KSANP).NE.ZA1(I)) GO TO 280                              X4T12190
-  400 CONTINUE                                                          X4T12200
+      DO I=1,KZA1
+        IF(ZAN(I,KSANP).NE.ZA1(I)) GO TO 280
+      END DO
       IF(KZARES.NE.KZANRS(KSANP)) GO TO 280                             X4T12210
       IF(KZARES.LE.0) GO TO 440                                         X4T12220
-      DO 410 I=1,KZARES                                                 X4T12230
-      IF(ZANRES(I,KSANP).NE.ZARES(I)) GO TO 280                         X4T12240
-  410 CONTINUE                                                          X4T12250
+      DO I=1,KZARES
+        IF(ZANRES(I,KSANP).NE.ZARES(I)) GO TO 280
+      END DO
       GO TO 440                                                         X4T12260
 C-----SAVE FIRST TARGET AND RESIDUAL ZA (ONLY CROSS SECTIONS), INCIDENT X4T12270
 C-----PARTICLE, MF, MT AND REACTION OPERATION FLAG.                     X4T12280
   420 KZAN(KSANP)=KZA1                                                  X4T12290
       KZANRS(KSANP)=KZARES                                              X4T12300
-      DO 430 I=1,7                                                      X4T12310
-      ZAN(I,KSANP)=ZA1(I)                                               X4T12320
-  430 ZANRES(I,KSANP)=ZARES(I)                                          X4T12330
+      DO I=1,7
+        ZAN(I,KSANP)=ZA1(I)
+        ZANRES(I,KSANP)=ZARES(I)
+      END DO
       INPART(KSANP)=INPARX                                              X4T12340
       MFR(KSANP)=MFRX                                                   X4T12350
       MTR(KSANP)=MTRX                                                   X4T12360
@@ -1337,9 +1326,10 @@ C-----PARTICLE, MF, MT AND REACTION OPERATION FLAG.                     X4T12280
 C-----INCREMENT SIMPLE REACTION COUNT.                                  X4T12380
   440 LOOP=LOOP+1                                                       X4T12390
 C-----ADD NEXT SIMPLE REACTION TO COMPLEX REACTION STRING.              X4T12400
-      DO 450 I=1,KR1                                                    X4T12410
-      KRN=KRN+1                                                         X4T12420
-  450 RN(KRN)=R1(I)                                                     X4T12430
+      DO I=1,KR1
+        KRN=KRN+1
+        RN(KRN)=R1(I)
+      END DO
 C                                                                       X4T12440
 C     COPY TO BEGINNING OF NEXT SIMPLE REACTION, OR END OF COMPLEX      X4T12450
 C     REACTION. SIMPLE REACTION STARTS AT FIRST CHARACTER AFTER NEXT    X4T12460
@@ -1353,40 +1343,43 @@ C-----TO INDICATE POSSIBLE SIMPLE RATIO.                                X4T12530
       IF(LOOP.EQ.1.AND.ZARBAK(IBAK+1).EQ.SLASH) IMRATS=1                X4T12540
 C-----COPY UP TO NEXT LEFT PARENTHESIS OR END OF COMPLEX REACTION.      X4T12550
       JBAK=IBAK                                                         X4T12560
-      DO 460 IBAK=JBAK,KZABAK                                           X4T12570
-      KRN=KRN+1                                                         X4T12580
-      RN(KRN)=ZARBAK(IBAK)                                              X4T12590
-      IF(ZARBAK(IBAK).EQ.PARENL) GO TO 490                              X4T12600
-  460 CONTINUE                                                          X4T12610
+      DO IBAK=JBAK,KZABAK
+        KRN=KRN+1
+        RN(KRN)=ZARBAK(IBAK)
+        IF(ZARBAK(IBAK).EQ.PARENL) GO TO 490
+      END DO
 C-----ENTIRE REACTION COPIED. IF SIMPLE RATIO INCREASE MF BY 200 AND    X4T12620
 C-----USE ZA/MF/MT FROM FIRST REACTION. OTHERWISE ATTEMPT TO TRANSLATE  X4T12630
 C-----COMPLEX REACTION.                                                 X4T12640
       IF(LOOP.NE.2.OR.IMRATS.NE.1) GO TO 510                            X4T12650
       MFR(KSANP)=MFR(KSANP)+200                                         X4T12660
-  470 DO 480 I=1,7                                                      X4T12670
-      ZA1(I)=ZAN(I,KSANP)                                               X4T12680
-  480 ZARES(I)=ZANRES(I,KSANP)                                          X4T12690
+  470 DO I=1,7
+        ZA1(I)=ZAN(I,KSANP)
+        ZARES(I)=ZANRES(I,KSANP)
+      END DO
       GO TO 300                                                         X4T12700
 C-----COPY ALL LEFT PARENTHESIS AND THEN BRANCH BACK TO DEFINE SIMPLE   X4T12710
 C-----REACTION.                                                         X4T12720
   490 JBAK=IBAK+1                                                       X4T12730
       IF(JBAK.GT.KZABAK) GO TO 280                                      X4T12740
-      DO 500 IBAK=JBAK,KZABAK                                           X4T12750
-      IF(ZAR1(IBAK).NE.PARENL) GO TO 330                                X4T12760
-      KRN=KRN+1                                                         X4T12770
-      RN(KRN)=ZARBAK(IBAK)                                              X4T12780
-  500 CONTINUE                                                          X4T12790
+      DO IBAK=JBAK,KZABAK
+        IF(ZAR1(IBAK).NE.PARENL) GO TO 330
+        KRN=KRN+1
+        RN(KRN)=ZARBAK(IBAK)
+      END DO
       GO TO 280                                                         X4T12800
 C                                                                       X4T12810
 C     COMPLEX TRANSLATION COMPLETED. MOVE TO R1 AND ZA1 TO DEFINE       X4T12820
 C     PROJECTILE, MF AND MT.                                            X4T12830
 C                                                                       X4T12840
   510 KR1=KRN                                                           X4T12850
-      DO 520 I=1,KRN                                                    X4T12860
-  520 R1(I)=RN(I)                                                       X4T12870
-      DO 530 I=1,7                                                      X4T12880
-      ZA1(I)=ZAN(I,KSANP)                                               X4T12890
-  530 ZARES(I)=ZANRES(I,KSANP)                                          X4T12900
+      DO I=1,KRN
+        R1(I)=RN(I)
+      END DO
+      DO I=1,7
+        ZA1(I)=ZAN(I,KSANP)
+        ZARES(I)=ZANRES(I,KSANP)
+      END DO
       GO TO 560                                                         X4T12910
 C                                                                       X4T12920
 C     SIMPLE REACTION. TRANSLATE IT.                                    X4T12930
@@ -1397,16 +1390,18 @@ C-----SEE IF REACTION HAS BEEN TRANSLATED.                              X4T12960
 C-----SAVE TARGET ZA.                                                   X4T12980
       KZAN(KSANP)=KZA1                                                  X4T12990
       KZANRS(KSANP)=KZARES                                              X4T13000
-      DO 550 I=1,7                                                      X4T13010
-      ZAN(I,KSANP)=ZA1(I)                                               X4T13020
-  550 ZANRES(I,KSANP)=ZARES(I)                                          X4T13030
+      DO I=1,7
+        ZAN(I,KSANP)=ZA1(I)
+        ZANRES(I,KSANP)=ZARES(I)
+      END DO
 C                                                                       X4T13040
 C     DEFINE MF/MT EQUIVALENT.                                          X4T13050
 C                                                                       X4T13060
   560 IF(KR1.GE.60) GO TO 580                                           X4T13070
       JR1=KR1+1                                                         X4T13080
-      DO 570 I=JR1,60                                                   X4T13090
-  570 R1(I)=BLANK                                                       X4T13100
+      DO I=JR1,60
+        R1(I)=BLANK
+      END DO
   580 CALL MFMTX(R1,INPART(KSANP),MFR(KSANP),MTR(KSANP),                X4T13110
      1 IRFLAG(KSANP),KNOWN)                                             X4T13120
       WRITE(OUTP,6030) ENT,ISAN,INPART(KSANP),ZA1,ZARES,                X4T13130
@@ -1416,9 +1411,10 @@ C-----INCREASE REACTION COUNT IF MF/MT ARE BOTH POSITIVE.               X4T13150
       KSANR=KSANP                                                       X4T13170
 C-----IF SIMPLE RATIO DEFINE NUMERATOR AND DENOMINATOR TO BE THE SAME.  X4T13180
       IF(MFR(KSANP).NE.203) GO TO 10                                    X4T13190
-      DO 590 I=1,7                                                      X4T13200
-      ZANRAT(I,KSANP)=ZA1(I)                                            X4T13210
-  590 ZANRAT(I+7,KSANP)=ZARES(I)                                        X4T13220
+      DO I=1,7
+        ZANRAT(I,KSANP)=ZA1(I)
+        ZANRAT(I+7,KSANP)=ZARES(I)
+      END DO
 C-----ASSUME RATIO OF METASTABLE STATES DEFINED.                        X4T13230
       ZANRAT(14,KSANP)=MRAT                                             X4T13240
       MTRAT(KSANP)=MTR(KSANP)                                           X4T13250
@@ -1436,7 +1432,7 @@ C-----OVER 30 REACTIONS.                                                X4T13340
 C-----ERROR READING EXFOR DATA FILE.                                    X4T13370
   630 WRITE(OUTP,6040)                                                  X4T13380
       STOP                                                              X4T13390
- 1000 FORMAT(2A4,A2,A1,55A1,14A1)                                       X4T13400
+ 1000 FORMAT(A10,A1,55A1,14A1)
  4000 FORMAT(1X,5A1,I3,1X,60A1/(10X,60A1))                              X4T13410
  6000 FORMAT(10X,80A1)                                                  X4T13420
  6010 FORMAT(10X,'FORMAT ERROR...PARENTHESIS DO NOT BALANCE')           X4T13430
@@ -1448,9 +1444,9 @@ C-----ERROR READING EXFOR DATA FILE.                                    X4T13370
 C                                                                       X4T13490
 C     DECODE SIMPLE REACTION (ZAR1) INTO Z,A AND BASIC REACTION.        X4T13500
 C                                                                       X4T13510
-      INTEGER OUTP,OTAPE                                                X4T13520
-      CHARACTER*1 BLANK,PARENL,PARENR,DASH,COMMA,ZERO,DIGIT,ZAR1,       X4T13530
-     1 ZA1,R1,NX,FLAGR,ZAN,LABCM,ZARES,ZANRES,ZANRAT                    X4T13540
+      INTEGER      OUTP,OTAPE
+      CHARACTER*1  BLANK,PARENL,PARENR,DASH,COMMA,ZERO,DIGIT,ZAR1
+     &            ,ZA1,R1,NX,FLAGR,ZAN,LABCM,ZARES,ZANRES,ZANRAT
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T13550
       COMMON/ZART1I/KZAR1                                               X4T13560
       COMMON/ZART1C/ZAR1(300)                                           X4T13570
@@ -1473,8 +1469,9 @@ C                                                                       X4T13510
       DATA NX/',','X'/                                                  X4T13750
 C-----INITIALIZE RESIDUAL NUCLEUS ZA.                                   X4T13760
       KZARES=0                                                          X4T13770
-      DO 10 I=1,7                                                       X4T13780
-   10 ZARES(I)=BLANK                                                    X4T13790
+      DO I=1,7
+        ZARES(I)=BLANK
+      END DO
 C-----DECODE TARGET ZA AND CHECK FOR ERROR.                             X4T13800
       CALL DECOZA(ZAR1,KZAR1,1,INOW,ZA1,KZA1)                           X4T13810
       IF(KZA1.LE.0) GO TO 130                                           X4T13820
@@ -1508,13 +1505,14 @@ C-----IS COMMA SKIP IT (EMPTY RESIDUAL NUCLEUS FIELD).                  X4T14070
       GO TO 100                                                         X4T14100
    40 IF(KZARES.LE.0) GO TO 90                                          X4T14110
 C-----REMOVE LEADING ZEROES (EXCEPT THE LAST ONE) FROM RESIDUAL NUCLEUS.X4T14120
-      DO 50 I=1,5                                                       X4T14130
-      IF(ZARES(I).NE.BLANK) GO TO 60                                    X4T14140
-   50 CONTINUE                                                          X4T14150
+      DO I=1,5
+        IF(ZARES(I).NE.BLANK) GO TO 60
+      END DO
       GO TO 80                                                          X4T14160
-   60 DO 70 J=I,5                                                       X4T14170
-      IF(ZARES(J).NE.ZERO) GO TO 80                                     X4T14180
-   70 ZARES(J)=BLANK                                                    X4T14190
+   60 DO J=I,5
+        IF(ZARES(J).NE.ZERO) GO TO 80
+        ZARES(J)=BLANK
+      END DO
 C-----IF REACTION DOES NOT END WITH ,X) IS RESIDUAL CHARACTER COUNT=0   X4T14200
    80 IF(R1(KR1-2).NE.NX(1).OR.R1(KR1-1).NE.NX(2)) KZARES=0             X4T14210
 C                                                                       X4T14220
@@ -1522,9 +1520,10 @@ C     COPY REMAINDER OF REACTION.                                       X4T14230
 C                                                                       X4T14240
    90 INOW=INOW+1                                                       X4T14250
   100 IF(INOW.GT.KZAR1) GO TO 140                                       X4T14260
-      DO 110 JNOW=INOW,KZAR1                                            X4T14270
-      KR1=KR1+1                                                         X4T14280
-  110 R1(KR1)=ZAR1(JNOW)                                                X4T14290
+      DO JNOW=INOW,KZAR1
+        KR1=KR1+1
+        R1(KR1)=ZAR1(JNOW)
+      END DO
       GO TO 140                                                         X4T14300
 C-----ERROR. CANNOT LOCATE END OF REACTION.                             X4T14310
   120 WRITE(OUTP,6000) (ZAR1(I),I=1,KZAR1)                              X4T14320
@@ -1589,18 +1588,19 @@ C                                                                       X4T14780
 C-----INITIALIZE ZA.                                                    X4T14910
       KNOW=KSTART                                                       X4T14920
       KZAX=0                                                            X4T14930
-      DO 10 I=1,7                                                       X4T14940
-   10 ZAX(I)=BLANK                                                      X4T14950
+      DO I=1,7
+        ZAX(I)=BLANK
+      END DO
 C-----INITIALIZE METASTABLE FIELD CHARACTER COUNT.                      X4T14960
       MRAT=BLANK                                                        X4T14970
       METAF=0                                                           X4T14980
 C-----COPY FIELD IF NOT TWO DASHES BEFORE NEXT COMMA (ONLY RESIDUAL     X4T14990
 C-----NUCLEUS FIELD).                                                   X4T15000
       IDASH=0                                                           X4T15010
-      DO 20 I=KSTART,KSIZE                                              X4T15020
-      IF(ZARACT(I).EQ.COMMA) GO TO 30                                   X4T15030
-      IF(ZARACT(I).EQ.DASH) IDASH=IDASH+1                               X4T15040
-   20 CONTINUE                                                          X4T15050
+      DO I=KSTART,KSIZE
+        IF(ZARACT(I).EQ.COMMA) GO TO 30
+        IF(ZARACT(I).EQ.DASH) IDASH=IDASH+1
+      END DO
       RETURN                                                            X4T15060
    30 IF(IDASH.GE.2) GO TO 40                                           X4T15070
       RETURN                                                            X4T15080
@@ -1630,8 +1630,9 @@ C-----FIRST DASH FOUND. IF NECESSARY RIGHT ADJUST Z WITH LEADING BLANKS.X4T15260
       ZAX(MM)=ZAX(LL)                                                   X4T15320
       MM=MM-1                                                           X4T15330
    80 LL=LL-1                                                           X4T15340
-      DO 90 M=1,MM                                                      X4T15350
-   90 ZAX(M)=BLANK                                                      X4T15360
+      DO M=1,MM
+        ZAX(M)=BLANK
+      END DO
       KZAX=3                                                            X4T15370
       GO TO 140                                                         X4T15380
 C-----SECOND DASH FOUND. CHEMICAL SYMBOL HAS BEEN SKIPPED. SET DASH     X4T15390
@@ -1663,12 +1664,14 @@ C-----END OF A FOUND. IF NECESSARY RIGHT ADJUST A WITH LEADING ZEROES.  X4T15640
   150 IF(KZAX.GE.6) GO TO 180                                           X4T15650
       MM=6                                                              X4T15660
       LL=KZAX                                                           X4T15670
-      DO 160 M=4,KZAX                                                   X4T15680
-      ZAX(MM)=ZAX(LL)                                                   X4T15690
-      MM=MM-1                                                           X4T15700
-  160 LL=LL-1                                                           X4T15710
-      DO 170 M=4,MM                                                     X4T15720
-  170 ZAX(M)=ZERO                                                       X4T15730
+      DO M=4,KZAX
+        ZAX(MM)=ZAX(LL)
+        MM=MM-1
+        LL=LL-1
+      END DO
+      DO M=4,MM
+        ZAX(M)=ZERO
+      END DO
   180 KZAX=7                                                            X4T15740
 C-----IF NECESSARY DECODE METASTABLE STATE FIELD.                       X4T15750
       IF(METAF.GT.0) CALL DECODM(METBCD,METAF,ZAX,MRAT)                 X4T15760
@@ -1701,9 +1704,9 @@ C                                                                       X4T16020
 C     DETERMINE IF THIS IS RATIO OF METASTABLE STATES.                  X4T16030
 C                                                                       X4T16040
       JFIELD=1                                                          X4T16050
-      DO 10 I=1,METAF                                                   X4T16060
-      IF(METBCD(I).EQ.SLASH) GO TO 20                                   X4T16070
-   10 CONTINUE                                                          X4T16080
+      DO I=1,METAF
+        IF(METBCD(I).EQ.SLASH) GO TO 20
+      END DO
 C-----NO. SET DENOMINATOR TO BLANK AND DECODE ONLY ONE FIELD.           X4T16090
       MRAT=BLANK                                                        X4T16100
       KFIELD=1                                                          X4T16110
@@ -1737,9 +1740,9 @@ C                                                                       X4T16330
 C                                                                       X4T16390
 C     MORE THAN TWO CHARACTERS. SEE IF SUM OF STATES.                   X4T16400
 C                                                                       X4T16410
-   60 DO 70 I=JFIELD,NFIELD                                             X4T16420
-      IF(METBCD(I).EQ.PLUS) GO TO 90                                    X4T16430
-   70 CONTINUE                                                          X4T16440
+   60 DO I=JFIELD,NFIELD
+        IF(METBCD(I).EQ.PLUS) GO TO 90
+      END DO
 C                                                                       X4T16450
 C     CANNOT DECODE. DEFINE ?                                           X4T16460
 C                                                                       X4T16470
@@ -1759,9 +1762,9 @@ C                                                                       X4T16530
 C                                                                       X4T16610
 C     DEFINE STATUS.                                                    X4T16620
 C                                                                       X4T16630
-      CHARACTER*4 KEYWD1                                                X4T16640
+      CHARACTER*10 KEYWD1
       CHARACTER*1 CARD1,CARD2,KEYWD2,BLANK,PARENL,STAT1,STATN,STATAB    X4T16650
-      COMMON/BIBCRD/KEYWD1(3),KEYWD2,CARD1(55),CARD2(14)                X4T16660
+      COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T16670
       COMMON/STATUC/STAT1,STATN                                         X4T16680
       DIMENSION STATAB(7,7)                                             X4T16690
@@ -1799,11 +1802,11 @@ C                                                                       X4T17000
 C     SAVE LATEST YEAR FROM REFERENCES.                                 X4T17010
 C                                                                       X4T17020
       INTEGER OUTP,OTAPE                                                X4T17030
-      CHARACTER*4 KEYWD1                                                X4T17040
+      CHARACTER*10 KEYWD1
       CHARACTER*1 CARD1,CARD2,KEYWD2,REFER1,REFERN,BLANK,PARENL,PARENR, X4T17050
      1 COMMA,DIGITS                                                     X4T17060
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T17070
-      COMMON/BIBCRD/KEYWD1(3),KEYWD2,CARD1(55),CARD2(14)                X4T17080
+      COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T17090
       COMMON/REFERI/IREF,NREF                                           X4T17100
       COMMON/REFERC/REFER1(4),REFERN(4)                                 X4T17110
@@ -1815,18 +1818,19 @@ C                                                                       X4T17020
       DATA COMMA/','/                                                   X4T17170
 C-----INITIALIZE REFERENCE.                                             X4T17180
       NREF=0                                                            X4T17190
-      DO 10 I=1,4                                                       X4T17200
-   10 REFERN(I)=BLANK                                                   X4T17210
+      DO I=1,4
+        REFERN(I)=BLANK
+      END DO
       IF(CARD1(1).NE.PARENL) GO TO 70                                   X4T17220
 C-----FIND END OF REFERENCE AND LAST PRECEDING COMMA.                   X4T17230
       ICOM=0                                                            X4T17240
       LVL=1                                                             X4T17250
-      DO 20 IEND=2,55                                                   X4T17260
-      IF(CARD1(IEND).EQ.PARENL) LVL=LVL+1                               X4T17270
-      IF(CARD1(IEND).EQ.PARENR) LVL=LVL-1                               X4T17280
-      IF(CARD1(IEND).EQ.COMMA) ICOM=IEND                                X4T17290
-      IF(LVL.LE.0) GO TO 30                                             X4T17300
-   20 CONTINUE                                                          X4T17310
+      DO IEND=2,55
+        IF(CARD1(IEND).EQ.PARENL) LVL=LVL+1
+        IF(CARD1(IEND).EQ.PARENR) LVL=LVL-1
+        IF(CARD1(IEND).EQ.COMMA) ICOM=IEND
+        IF(LVL.LE.0) GO TO 30
+      END DO
       GO TO 70                                                          X4T17320
 C-----SEARCH FOR YEAR BETWEEN LAST COMMA AND END OF REFERENCE.          X4T17330
    30 IF(ICOM.LE.0) GO TO 70                                            X4T17340
@@ -1859,8 +1863,9 @@ C-----IF THIS IS SUBENTRY 1 SAVE COMMON YEAR.                           X4T17560
    70 IF(ISAN.NE.1) GO TO 90                                            X4T17570
       IREF=NREF                                                         X4T17580
       IF(IREF.LE.0) GO TO 90                                            X4T17590
-      DO 80 I=1,4                                                       X4T17600
-   80 REFER1(I)=REFERN(I)                                               X4T17610
+      DO I=1,4
+        REFER1(I)=REFERN(I)
+      END DO
    90 RETURN                                                            X4T17620
       END                                                               X4T17630
       SUBROUTINE AUTHOR                                                 X4T17640
@@ -1868,11 +1873,11 @@ C                                                                       X4T17650
 C     SAVE FIRST AUTHOR. IF MORE THAN ONE AUTHOR ADD ET.EL.             X4T17660
 C                                                                       X4T17670
       INTEGER OUTP,OTAPE                                                X4T17680
-      CHARACTER*4 KEYWD1                                                X4T17690
+      CHARACTER*10 KEYWD1
       CHARACTER*1 CARD1,CARD2,KEYWD2,AUTH1,AUTHN,BLANK,PARENL,PARENR,   X4T17700
      1 COMMA,ETAL                                                       X4T17710
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T17720
-      COMMON/BIBCRD/KEYWD1(3),KEYWD2,CARD1(55),CARD2(14)                X4T17730
+      COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T17740
       COMMON/AUTHI/IAUTH,NAUTH                                          X4T17750
       COMMON/AUTHC/AUTH1(25),AUTHN(25)                                  X4T17760
@@ -1884,8 +1889,9 @@ C                                                                       X4T17670
       DATA ETAL/',','E','T','.','A','L','.'/                            X4T17820
 C-----INITIALIZE AUTHOR.                                                X4T17830
       NAUTH=0                                                           X4T17840
-      DO 10 I=1,25                                                      X4T17850
-   10 AUTHN(I)=BLANK                                                    X4T17860
+      DO I=1,25
+        AUTHN(I)=BLANK
+      END DO
 C-----TO BE MACHINE READABLE COLUMN 11 MUST CONTAIN (                   X4T17870
       IF(CARD1(1).NE.PARENL) GO TO 60                                   X4T17880
 C-----DEFINE FIRST AUTHOR UP TO ) OR ,                                  X4T17890
@@ -1902,35 +1908,37 @@ C-----OTHERWISE JUST INSERT COMMA.                                      X4T17980
       NAUTH=NAUTH+1                                                     X4T18000
       AUTHN(NAUTH)=COMMA                                                X4T18010
       GO TO 60                                                          X4T18020
-   40 DO 50 I=1,7                                                       X4T18030
-      NAUTH=NAUTH+1                                                     X4T18040
-   50 AUTHN(NAUTH)=ETAL(I)                                              X4T18050
+   40 DO I=1,7
+        NAUTH=NAUTH+1
+        AUTHN(NAUTH)=ETAL(I)
+      END DO
 C-----IF THIS IS SUBENTRY 1 SAVE COMMON AUTHOR.                         X4T18060
    60 IF(ISAN.NE.1) GO TO 80                                            X4T18070
       IAUTH=NAUTH                                                       X4T18080
       IF(IAUTH.LE.0) GO TO 80                                           X4T18090
-      DO 70 I=1,IAUTH                                                   X4T18100
-   70 AUTH1(I)=AUTHN(I)                                                 X4T18110
+      DO I=1,IAUTH
+        AUTH1(I)=AUTHN(I)
+      END DO
    80 RETURN                                                            X4T18120
       END                                                               X4T18130
       SUBROUTINE COMIN                                                  X4T18140
       INTEGER OUTP,OTAPE                                                X4T18150
-      CHARACTER*4 CARD1,TITLE,UNIT,DATUM                                X4T18160
+      CHARACTER*11 CARD1,TITLE,UNIT,DATUM
+      CHARACTER*4  TITLE4
       CHARACTER*1 CARD2,ENT,SUBENT,FLAGI                                X4T18170
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T18180
-      COMMON/CARDS/CARD1(3,6),CARD2(14)                                 X4T18190
+      COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18200
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T18210
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T18220
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T18230
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T18240
 C-----SAVE TITLES, UNITS AND DATA.                                      X4T18250
       I1=ICOM1+1                                                        X4T18260
       I2=ICOM1+N1                                                       X4T18270
-      READ(ITAPE,1010,END=10,ERR=10) ((TITLE(J,I),J=1,3),FLAGI(I),      X4T18280
-     1 I=I1,I2)                                                         X4T18290
-      READ(ITAPE,1020,END=10,ERR=10) ((UNIT(J,I),J=1,3),I=I1,I2)        X4T18300
-      READ(ITAPE,1020,END=10,ERR=10) ((DATUM(J,I),J=1,3),I=I1,I2)       X4T18310
+      READ(ITAPE,1010,END=10,ERR=10) (TITLE(I),FLAGI(I),I=I1,I2)                                                         X4T18290
+      READ(ITAPE,1020,END=10,ERR=10) ( UNIT(I),I=I1,I2)
+      READ(ITAPE,1020,END=10,ERR=10) (DATUM(I),I=I1,I2)
 C-----DEFINE COLUMN COUNTS.                                             X4T18320
       ICOMN=I2                                                          X4T18330
       IF(ISAN.EQ.1) ICOM1=I2                                            X4T18340
@@ -1939,8 +1947,8 @@ C-----ERROR READING EXFOR DATA.                                         X4T18360
    10 WRITE(OUTP,6000)                                                  X4T18370
       STOP                                                              X4T18380
  1000 FORMAT(6(2A4,A3),14A1)                                            X4T18390
- 1010 FORMAT(6(2A4,A2,A1))                                              X4T18400
- 1020 FORMAT(6(2A4,A3))                                                 X4T18410
+ 1010 FORMAT(6(A10,A1))
+ 1020 FORMAT(6A11)
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T18420
       END                                                               X4T18430
       SUBROUTINE DATIN                                                  X4T18440
@@ -1948,15 +1956,17 @@ C                                                                       X4T18450
 C     READ DATA POINTS, TRANSLATE AND OUTPUT IN COMPUTATION FORMAT.     X4T18460
 C                                                                       X4T18470
       INTEGER OUTP,OTAPE                                                X4T18480
-      CHARACTER*4 CARD1,TITLE,UNIT,DATUM,BLANK4,OUTLIN,IM78             X4T18490
-      CHARACTER*1 CARD2,ENT,SUBENT,FLAGI,FLAGR,ZAN,AUTH1,AUTHN,AUTHK,   X4T18500
+      CHARACTER*11 CARD1,TITLE,UNIT,DATUM,BLANK11
+      CHARACTER*9  OUTLIN,BLANK9
+      CHARACTER*4  TITLE4,IM78,BLANK4
+      CHARACTER*1  CARD2,ENT,SUBENT,FLAGI,FLAGR,ZAN,AUTH1,AUTHN,AUTHK,
      1 REFER1,REFERN,LABCM,STAT1,STATN,BLANK,ZANRES,ZANRAT,DIGITS,ZANOK X4T18510
      1,ZAPO(6,8)                                                        TRKOV
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T18520
-      COMMON/CARDS/CARD1(3,6),CARD2(14)                                 X4T18530
+      COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18540
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T18550
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T18560
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T18570
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T18590
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T18600
@@ -1973,9 +1983,11 @@ C                                                                       X4T18470
       COMMON/REFERC/REFER1(4),REFERN(4)                                 X4T18710
       COMMON/POINTR/MPOINT(9)                                           X4T18720
       COMMON/STATUC/STAT1,STATN                                         X4T18730
-      DIMENSION AUTHK(25),OUTLIN(3,8),DIGITS(10),ZANOK(7)               X4T18740
+      DIMENSION AUTHK(25),OUTLIN(8),DIGITS(10),ZANOK(7)
       DATA BLANK/' '/                                                   X4T18750
       DATA BLANK4/'    '/                                               X4T18760
+      DATA BLANK9/'         '/
+      DATA BLANK11/'           '/
       DATA DIGITS/'0','1','2','3','4','5','6','7','8','9'/              X4T18770
       DATA ZAPO /' ',' ',' ',' ',' ','0',                               TRKOV
      2           ' ',' ',' ',' ',' ','1',                               TRKOV
@@ -1993,38 +2005,43 @@ C                                                                       X4T18810
       IF(STATN.EQ.BLANK) STATN=STAT1                                    X4T18830
       IF(NAUTH.GT.0.OR.IAUTH.LE.0) GO TO 20                             X4T18840
       NAUTH=IAUTH                                                       X4T18850
-      DO 10 I=1,NAUTH                                                   X4T18860
-   10 AUTHN(I)=AUTH1(I)                                                 X4T18870
+      DO I=1,NAUTH
+        AUTHN(I)=AUTH1(I)
+      END DO
    20 IF(NREF.GT.0.OR.IREF.LE.0) GO TO 40                               X4T18880
       NREF=IREF                                                         X4T18890
-      DO 30 I=1,NREF                                                    X4T18900
-   30 REFERN(I)=REFER1(I)                                               X4T18910
+      DO I=1,NREF
+        REFERN(I)=REFER1(I)
+      END DO
 C-----COPY AUTHOR TO OUTPUT ARRAY.                                      X4T18920
    40 KAUTH=NAUTH                                                       X4T18930
-      DO 50 I=1,25                                                      X4T18940
-   50 AUTHK(I)=AUTHN(I)                                                 X4T18950
+      DO I=1,25
+        AUTHK(I)=AUTHN(I)
+      END DO
 C-----ADD YEAR TO END OF AUTHOR.                                        X4T18960
       IF(NREF.LE.0) GO TO 70                                            X4T18970
       KAUTH=KAUTH+1                                                     X4T18980
-      DO 60 I=1,4                                                       X4T18990
-      KAUTH=KAUTH+1                                                     X4T19000
-   60 AUTHK(KAUTH)=REFERN(I)                                            X4T19010
+      DO I=1,4
+        KAUTH=KAUTH+1
+        AUTHK(KAUTH)=REFERN(I)
+      END DO
 C                                                                       X4T19020
 C     SAVE TITLES AND UNITS AND DEFINE INITIAL NUMBER OF COLUMNS.       X4T19030
 C                                                                       X4T19040
    70 I1=ICOMN+1                                                        X4T19050
       I2=ICOMN+N1                                                       X4T19060
       IDATN=I2                                                          X4T19070
-      READ(ITAPE,1010,END=500,ERR=500) ((TITLE(J,I),J=1,3),FLAGI(I),    X4T19080
-     1 I=I1,I2)                                                         X4T19090
-      READ(ITAPE,1020,END=500,ERR=500) ((UNIT(J,I),J=1,3),I=I1,I2)      X4T19100
+      READ(ITAPE,1010,END=500,ERR=500) (TITLE(I),FLAGI(I),I=I1,I2)                                                         X4T19090
+      READ(ITAPE,1020,END=500,ERR=500) (UNIT(I),I=I1,I2)
 C-----INITIALIZE FIELD 7-8 DEFINITION TO BLANK.                         X4T19110
-      DO 80 I=1,I2                                                      X4T19120
-   80 TITLE(4,I)=BLANK4                                                 X4T19130
+      DO I=1,I2
+        TITLE4(I)=BLANK4
+      END DO
 C-----INITIALIZE FLAGS TO INDICATE ALL INPUT FIELDS NOT YET REQUIRED OR X4T19140
 C-----TRANSLATED.                                                       X4T19150
-      DO 90 I=1,IDATN                                                   X4T19160
-   90 IMUSED(I)=0                                                       X4T19170
+      DO I=1,IDATN
+        IMUSED(I)=0
+      END DO
 C                                                                       X4T19180
 C     DETERMINE THIS IS A MULTI-DIMENSIONAL TABLE = ONE REACTION BUT    X4T19190
 C     MULTIPLE FLAGS IN COMMON SECTION. FOR THIS CASE DEFINE MULTIPLE   X4T19200
@@ -2044,9 +2061,10 @@ C-----REACTION COUNT AND DEFINING FLAG, ZA, MF, MT, REACTION OPERATION. X4T19330
   110 KSANR=KSANR+1                                                     X4T19340
       FLAGR(KSANR)=FLAGI(I)                                             X4T19350
       KZANRS(KSANR)=KZANRS(1)                                           X4T19360
-      DO 120 K=1,7                                                      X4T19370
-      ZAN(K,KSANR)=ZAN(K,1)                                             X4T19380
-  120 ZANRES(K,KSANR)=ZANRES(K,1)                                       X4T19390
+      DO K=1,7
+        ZAN(K,KSANR)=ZAN(K,1)
+        ZANRES(K,KSANR)=ZANRES(K,1)
+      END DO
       INPART(KSANR)=INPART(1)                                           X4T19400
       MFR(KSANR)=MFR(1)                                                 X4T19410
       MTR(KSANR)=MTR(1)                                                 X4T19420
@@ -2100,12 +2118,12 @@ C-----INITIALIZE L =0 LEGENDRE COEFFICIENT COUNT.                       X4T19890
       LEGS=0                                                            X4T19900
 C-----SET UP LOOP TO READ DATA POINTS.                                  X4T19910
       DO 460 NPT=1,N2                                                   X4T19920
-      READ(ITAPE,1020,END=500,ERR=500) ((DATUM(J,I),J=1,3),I=I1,I2)     X4T19930
+      READ(ITAPE,1020,END=500,ERR=500) (DATUM(I),I=I1,I2)
 C-----RESET FLAGS TO INDICATE THAT DATA JUST READ HAS NOT YET BEEN      X4T19940
 C-----TRANSLATED.                                                       X4T19950
-      DO 180 I=I1,I2                                                    X4T19960
-      IF(IMUSED(I).EQ.2) IMUSED(I)=1                                    X4T19970
-  180 CONTINUE                                                          X4T19980
+      DO I=I1,I2
+        IF(IMUSED(I).EQ.2) IMUSED(I)=1
+      END DO
 C                                                                       X4T19990
 C     SET UP LOOP OVER REACTIONS.                                       X4T20000
 C                                                                       X4T20010
@@ -2137,9 +2155,7 @@ C-----PRINT WARNING IF DATA FIELD IS NOT DEFINED.                       X4T20220
 C-----DATA FIELD IS DEFINED. SEE IF DATA FIELD IS BLANK (SKIP TEST IF   X4T20270
 C-----DATA FIELD WAS CREATED).                                          X4T20280
   190 IF(II.GT.IDAT1) GO TO 210                                         X4T20290
-      DO 200 I=1,3                                                      X4T20300
-      IF(DATUM(I,II).NE.BLANK4) GO TO 210                               X4T20310
-  200 CONTINUE                                                          X4T20320
+      IF(DATUM(II).NE.BLANK11) GO TO 210
 C-----PRINT WARNING WHEN FIRST BLANK DATA FIELD IS FOUND.               X4T20330
       IF(NODATA.EQ.0) WRITE(OUTP,6025)                                  X4T20340
       NODATA=1                                                          X4T20350
@@ -2158,9 +2174,7 @@ C-----INCIDENT ENERGY FIELD IS DEFINED. SEE IF FIELD IS BLANK (SKIP     X4T20470
 C-----TEST IF FIELD WAS CREATED).                                       X4T20480
   220 IF(IEIN.GT.IDAT1) GO TO 240                                       X4T20490
       IF(NOEIN.GT.0) GO TO 240                                          X4T20500
-      DO 230 I=1,3                                                      X4T20510
-      IF(DATUM(I,IEIN).NE.BLANK4) GO TO 240                             X4T20520
-  230 CONTINUE                                                          X4T20530
+      IF(DATUM(IEIN).NE.BLANK11) GO TO 240
 C-----PRINT WARNING WHEN FIRST BLANK INCIDENT ENERGY FIELD IS FOUND.    X4T20540
       WRITE(OUTP,6150)                                                  X4T20550
       NOEIN=1                                                           X4T20560
@@ -2180,9 +2194,7 @@ C-----FIELD IS DEFINED. SEE IF FIELD IS BLANK (SKIP TEST IF FIELD WAS   X4T20690
 C-----CREATED).                                                         X4T20700
   250 IF(IMU.GT.IDAT1) GO TO 270                                        X4T20710
       IF(NOMU.GT.0) GO TO 270                                           X4T20720
-      DO 260 I=1,3                                                      X4T20730
-      IF(DATUM(I,IMU).NE.BLANK4) GO TO 270                              X4T20740
-  260 CONTINUE                                                          X4T20750
+      IF(DATUM(IMU).NE.BLANK11) GO TO 270
 C-----PRINT WARNING WHEN FIRST BLANK FIELD IS FOUND.                    X4T20760
       WRITE(OUTP,6170)                                                  X4T20770
       NOMU=1                                                            X4T20780
@@ -2200,18 +2212,16 @@ C-----FIELD IS DEFINED. SEE IF FIELD IS BLANK (SKIP TEST IF FIELD WAS   X4T20890
 C-----CREATED).                                                         X4T20900
   280 IF(IE2.GT.IDAT1) GO TO 300                                        X4T20910
       IF(NOE2.GT.0) GO TO 300                                           X4T20920
-      DO 290 I=1,3                                                      X4T20930
-      IF(DATUM(I,IE2).NE.BLANK4) GO TO 300                              X4T20940
-  290 CONTINUE                                                          X4T20950
+      IF(DATUM(IE2).NE.BLANK11) GO TO 300
 C-----PRINT WARNING WHEN FIRST BLANK FIELD IS FOUND.                    X4T20960
       WRITE(OUTP,6190)                                                  X4T20970
       NOE2=1                                                            X4T20980
 C                                                                       X4T20990
 C     INITIALIZE OUTPUT FIELDS AND THEN FILL IN ALL REQUIRED OUTPUT.    X4T21000
 C                                                                       X4T21010
-  300 DO 310 J=1,8                                                      X4T21020
-      DO 310 I=1,3                                                      X4T21030
-  310 OUTLIN(I,J)=BLANK4                                                X4T21040
+  300 DO J=1,8
+        OUTLIN(J)=BLANK9
+      END DO
 C-----INITIALIZE DEFINITION OF FIELD 7-8.                               X4T21050
       IM78=BLANK4                                                       X4T21060
       DO 340 I=1,8                                                      X4T21070
@@ -2231,13 +2241,13 @@ C-----INSURE THAT ALL ERRORS ARE NON-NEGATIVE.                          X4T21200
       OVALUE=ABS(OVALUE)                                                X4T21210
       IF(OVALUE.LE.0.0) GO TO 340                                       X4T21220
 C-----FORMAT DATA FOR OUTPUT.                                           X4T21230
-  330 CALL NORMF(OVALUE,OUTLIN(1,I))                                    X4T21240
+  330 CALL NORMF(OVALUE,OUTLIN(I))
 C-----IF REQUIRED SET DEFINITION OF FIELDS 7-8.                         X4T21250
       IF(I.NE.7) GO TO 340                                              X4T21260
-      IF(TITLE(4,II).EQ.BLANK4) GO TO 340                               X4T21270
-      IF(IM78.EQ.TITLE(4,II)) GO TO 340                                 X4T21280
+      IF(TITLE4(II).EQ.BLANK4) GO TO 340
+      IF(IM78.EQ.TITLE4(II)) GO TO 340
       IF(NPT.EQ.1.AND.IM78.NE.BLANK4) WRITE(OUTP,6040)                  X4T21290
-      IM78=TITLE(4,II)                                                  X4T21300
+      IM78=TITLE4(II)
       IF(NPT.EQ.1) WRITE(OUTP,6030) IM78                                X4T21310
   340 CONTINUE                                                          X4T21320
 C                                                                       X4T21330
@@ -2266,7 +2276,7 @@ C-----CHECK FOR PRODUCTION REACTIONS (MT = 9000 - 9999).                X4T21550
       IF(MTR(ISANR).LT.9000) WRITE(OUTP,6080) (ZANRES(M,ISANR),M=1,7)   X4T21560
 C-----INSERT RESIDUAL NUCLEUS IN THE SIXTH OUTPUT FIELD (NORMALLY USED  X4T21570
 C-----FOR COSINE ERROR).                                                X4T21580
-  370 CALL RESZA(OUTLIN(1,6),ZANRES(1,ISANR))                           X4T21590
+  370 CALL RESZA(OUTLIN(6),ZANRES(1,ISANR))
       GO TO 390                                                         X4T21600
 C-----NO PRODUCT ZA. PRINT WARNING IF MT = 9000 - 9999.                 X4T21610
 C 380 IF(NPT.EQ.1.AND.MTR(ISANR).GE.9000) WRITE(OUTP,6090)              X4T21620
@@ -2278,7 +2288,7 @@ C 380 IF(NPT.EQ.1.AND.MTR(ISANR).GE.9000) WRITE(OUTP,6090)              X4T21620
       IPO=IPO+1                                                         TRKOV
       IF(IPO.GT.8) IPO=8                                                TRKOV
       WRITE(OUTP,6090) (ZAPO(J,IPO),J=1,6)                              TRKOV
-  382 CALL RESZA(OUTLIN(1,6),ZAPO(1,IPO))                               TRKOV
+  382 CALL RESZA(OUTLIN(6),ZAPO(1,IPO))
 C                                                                       X4T21630
 C     RATIO                                                             X4T21640
 C                                                                       X4T21650
@@ -2305,14 +2315,16 @@ C-----CHECK FOR CONFLICT (RATIO OF PRODUCTIONS).                        X4T21850
       IF(MTR(ISANR).GE.9000.OR.MTRAT(ISANR).GE.9000) WRITE(OUTP,6070)   X4T21860
 C-----INSERT RATIO MT IN FIFTH FIELD AND ZA IN SIXTH OUTPUT FIELD       X4T21870
 C-----(NORMALLY USED FOR COSINE AND COSINE ERROR).                      X4T21880
-  420 CALL RATZA(OUTLIN(1,5),OUTLIN(1,6),MTRAT(ISANR),ZANRAT(1,ISANR))  X4T21890
+  420 CALL RATZA(OUTLIN(5),OUTLIN(6),MTRAT(ISANR),ZANRAT(1,ISANR))
       GO TO 440                                                         X4T21900
 C-----NO RATIO ZA/MT. PRINT WARNING IF MF = 203.                        X4T21910
   430 IF(NPT.EQ.1.AND.MFR(ISANR).EQ.203) WRITE(OUTP,6100)               X4T21920
+C-----IF LEVEL ENERGY UNDEFINED FOR MT 51 CHANGE TO MT 4
+  440 IF(MTR(ISANR).EQ.51 .AND. OUTLIN(7).EQ.BLANK9) MTR(ISANR)=4
 C                                                                       X4T21930
 C     PRINT DATA POINT.                                                 X4T21940
 C                                                                       X4T21950
-  440 WRITE(OTAPE,1100) INPART(ISANR),(ZAN(I,ISANR),I=1,7),MFR(ISANR),  X4T21960
+      WRITE(OTAPE,1100) INPART(ISANR),(ZAN(I,ISANR),I=1,7),MFR(ISANR),  X4T21960
      1 MTR(ISANR),ZANRES(7,ISANR),STATN,LABCM(ISANR),OUTLIN,IM78,       X4T21970
      1 AUTHK,ENT,ISAN,FLAGR(ISANR)                                      X4T21980
       MPOINT(4)=MPOINT(4)+1                                             X4T21990
@@ -2336,9 +2348,9 @@ C                                                                       X4T22160
   500 WRITE(OUTP,6000)                                                  X4T22170
       STOP                                                              X4T22180
  1000 FORMAT(6(2A4,A3),14A1)                                            X4T22190
- 1010 FORMAT(6(2A4,A2,A1))                                              X4T22200
- 1020 FORMAT(6(2A4,A3))                                                 X4T22210
- 1100 FORMAT(I5,7A1,I3,I4,3A1,8(2A4,A1),A3,25A1,5A1,I3,A2)              X4T22220
+ 1010 FORMAT(6(A10,A1))
+ 1020 FORMAT(6A11)
+ 1100 FORMAT(I5,7A1,I3,I4,3A1,8A9,A3,25A1,5A1,I3,A1)
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T22230
  6010 FORMAT(10X,'WARNING.....MULTI-DIMENSIONAL DATA TABLE')            X4T22240
  6020 FORMAT(10X,'WARNING.....DATA IS NOT DEFINED. DATA POINT IGNORED') X4T22250
@@ -2389,8 +2401,9 @@ C                                                                       X4T22650
       DATA BLANK/' '/                                                   X4T22680
       DATA DOT/'.'/                                                     X4T22690
       OUT1(1)=BLANK                                                     X4T22700
-      DO 10 I=1,6                                                       X4T22710
-   10 OUT1(I+1)=ZANRES(I)                                               X4T22720
+      DO I=1,6
+        OUT1(I+1)=ZANRES(I)
+      END DO
       OUT1(8)=DOT                                                       X4T22730
 C-----DEFINE PRODUCT METASTABLE STATE FLAG EQUIVALENT AND OUTPUT IN     X4T22740
 C-----COLUMN 9.                                                         X4T22750
@@ -2409,8 +2422,9 @@ C                                                                       X4T22820
       DATA DIGITS/'0','1','2','3','4','5','6','7','8','9'/              X4T22880
       MT=MTIN                                                           X4T22890
 C-----INITIALIZE FIRST WORD TO BLANK FOLLOWED BY DECIMAL POINT.         X4T22900
-      DO 10 I=1,7                                                       X4T22910
-   10 OUT1(I)=BLANK                                                     X4T22920
+      DO I=1,7
+        OUT1(I)=BLANK
+      END DO
       OUT1(8)=DOT                                                       X4T22930
 C-----OUTPUT MT IN FIRST WORD (CHARACTERS 4 THROUGH 7).                 X4T22940
       J=4                                                               X4T22950
@@ -2419,19 +2433,21 @@ C-----OUTPUT MT IN FIRST WORD (CHARACTERS 4 THROUGH 7).                 X4T22940
       IF(MT.LT.10) J=1                                                  X4T22980
       MULTMT=MULT(J)                                                    X4T22990
       II=8-J                                                            X4T23000
-      DO 20 I=1,J                                                       X4T23010
-      IDIG=MT/MULTMT                                                    X4T23020
-      OUT1(II)=DIGITS(IDIG+1)                                           X4T23030
-      MT=MT-IDIG*MULTMT                                                 X4T23040
-      MULTMT=MULTMT/10                                                  X4T23050
-   20 II=II+1                                                           X4T23060
+      DO I=1,J
+        IDIG=MT/MULTMT
+        OUT1(II)=DIGITS(IDIG+1)
+        MT=MT-IDIG*MULTMT
+        MULTMT=MULTMT/10
+        II=II+1
+      END DO
 C-----DEFINE PRODUCT METASTABLE STATE FLAG EQUIVALENT AND OUTPUT IN     X4T23070
 C-----COLUMN 9.                                                         X4T23080
       CALL META10(OUT1(9),ZANRAT(14))                                   X4T23090
 C-----OUTPUT ZA IN SECOND WORD.                                         X4T23100
       OUT2(1)=BLANK                                                     X4T23110
-      DO 30 I=1,6                                                       X4T23120
-   30 OUT2(I+1)=ZANRAT(I)                                               X4T23130
+      DO I=1,6
+        OUT2(I+1)=ZANRAT(I)
+      END DO
       OUT2(8)=DOT                                                       X4T23140
 C-----DEFINE ZA METASTABLE STATE FLAG EQUIVALENT AND OUTPUT IN          X4T23150
 C-----COLUMN 9.                                                         X4T23160
@@ -2450,9 +2466,9 @@ C                                                                       X4T23240
       DATA MTAB2/                                                       X4T23290
      1 '0','1','2','3','4','5','6','7','8','9','9'/                     X4T23300
 C-----LOOK UP METASTABLE STATE CHARACTER.                               X4T23310
-      DO 10 I=1,11                                                      X4T23320
-      IF(MSTATE.EQ.MTAB1(I)) GO TO 20                                   X4T23330
-   10 CONTINUE                                                          X4T23340
+      DO I=1,11
+        IF(MSTATE.EQ.MTAB1(I)) GO TO 20
+      END DO
 C-----SET INDEX TO UNKNOWN.                                             X4T23350
       I=7                                                               X4T23360
    20 OUT=MTAB2(I)                                                      X4T23370
@@ -2482,8 +2498,9 @@ C-----IF NUMBER IS ZERO RETURN STANDARD FORM.                           X4T23600
       XIN=X                                                             X4T23610
       XABS=DABS(XIN)                                                    X4T23620
       IF(XABS.GT.XZERO) GO TO 20                                        X4T23630
-      DO 10 I=1,9                                                       X4T23640
-   10 FIELD(I)=ZERO(I)                                                  X4T23650
+      DO I=1,9
+        FIELD(I)=ZERO(I)
+      END DO
       RETURN                                                            X4T23660
 C-----IF NUMBER OUT OF RANGE USE E FORMAT.                              X4T23670
    20 IF(XABS.LT.ZMULT(2).OR.XABS.GE.ZMULT(11)) GO TO 110               X4T23680
@@ -2499,8 +2516,9 @@ C-----PRECEDING VALUE WILL NORMALIZE NUMBER.                            X4T23760
 C-----DEFINE EXPONENT TO PUT NUMBER IN NORMAL FORM N.NNNN...            X4T23780
       KEXP=IEXP-4                                                       X4T23790
 C-----INITIALIZE OUTPUT FIELD.                                          X4T23800
-      DO 50 I=1,9                                                       X4T23810
-   50 FIELD(I)=BLANK                                                    X4T23820
+      DO I=1,9
+        FIELD(I)=BLANK
+      END DO
 C-----IF NUMBER IS NEGATIVE SET SIGN.                                   X4T23830
       IF(X.LT.0.0) FIELD(1)=MINUS                                       X4T23840
 C-----DEFINE NORMALIZED INTEGER.                                        X4T23850
@@ -2566,12 +2584,14 @@ C                                                                       X4T24360
 C-----IF NUMBER IS ZERO RETURN STANDARD FORM.                           X4T24450
       XABS=ABS(X)                                                       X4T24460
       IF(XABS.GT.0.0) GO TO 20                                          X4T24470
-      DO 10 I=1,9                                                       X4T24480
-   10 FIELD(I)=ZERO(I)                                                  X4T24490
+      DO I=1,9
+        FIELD(I)=ZERO(I)
+      END DO
       RETURN                                                            X4T24500
 C-----INITIALIZE OUTPUT FIELD.                                          X4T24510
-   20 DO 30 I=1,9                                                       X4T24520
-   30 FIELD(I)=BLANK                                                    X4T24530
+   20 DO I=1,9
+        FIELD(I)=BLANK
+      END DO
 C-----IF NUMBER IS NEGATIVE INSERT LEADING MINUS SIGN.                  X4T24540
       IF(X.LT.0.0) FIELD(1)=MINUS                                       X4T24550
 C-----INSERT DECIMAL POINT.                                             X4T24560
@@ -2680,19 +2700,20 @@ C                                                                       X4T25580
 C     READ COLUMN HEADING VS. MF/FIELDS.                                X4T25590
 C                                                                       X4T25600
       INTEGER OUTP,OTAPE                                                X4T25610
-      CHARACTER*4 TITTAB,DUMMY,DUMMY2                                   X4T25620
+      CHARACTER*11 TITTAB
+      CHARACTER*4  TITTAB4,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T25630
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T25640
       COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T25650
      1 ITFLAG(400)                                                      X4T25660
-      COMMON/TITTBC/TITTAB(4,400)                                       X4T25670
+      COMMON/TITTBC/TITTAB(400),TITTAB4(400)
       DIMENSION DUMMY(7)                                                X4T25680
       DATA BLANK/' '/                                                   X4T25690
       DATA MAXIE/400/                                                   X4T25700
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25710
       DO 20 ITITLE=1,MAXIE                                              X4T25720
-   10 READ(NTAPE2,1000,END=60,ERR=50) (TITTAB(J,ITITLE),J=1,3),         X4T25730
-     1 DUMMY,TITTAB(4,ITITLE),FLAG                                      X4T25740
+   10 READ(NTAPE2,1000,END=60,ERR=50) TITTAB(ITITLE),
+     1 DUMMY,TITTAB4(ITITLE),FLAG
       IF(FLAG.NE.BLANK) GO TO 10                                        X4T25750
       CALL INTGER(DUMMY(1),MFTITL(ITITLE),4)                            X4T25760
       CALL INTGER(DUMMY(2),MFTITH(ITITLE),5)                            X4T25770
@@ -2714,7 +2735,7 @@ C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25710
       WRITE(OUTP,6020) MAXIE                                            X4T25930
       ITITLE=MAXIE                                                      X4T25940
       RETURN                                                            X4T25950
- 1000 FORMAT(2A4,A3,A4,A4,A1,A4,A1,A4,A1,2X,A3,44X,A1)                  X4T25960
+ 1000 FORMAT(A11,A4,A4,A1,A4,A1,A4,A1,2X,A3,44X,A1)
  6000 FORMAT(' ERROR READING TITLE TABLE...EXECUTION TERMINATED')       X4T25970
  6010 FORMAT(' TITLES---------------',I5,' (',I5,' ALLOWED)')           X4T25980
  6020 FORMAT(' WARNING...ONLY FIRST ',I5,' TITLES USED')                X4T25990
@@ -2724,26 +2745,26 @@ C                                                                       X4T26020
 C     READ COLUMN UNITS, STANDARD UNITS AND CONVERSION FACTORS          X4T26030
 C                                                                       X4T26040
       INTEGER OUTP,OTAPE                                                X4T26050
-      CHARACTER*4 UNITAB,DUMMY,DUMMY2                                   X4T26060
+      CHARACTER*11 UNITAB,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T26070
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26080
       COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T26090
-      COMMON/UNITBC/UNITAB(6,400)                                       X4T26100
-      DIMENSION DUMMY(9)                                                X4T26110
+      COMMON/UNITBC/UNITAB(2,400)
+      DIMENSION DUMMY(3)
       DATA BLANK/' '/                                                   X4T26120
       DATA MAXIE/400/                                                   X4T26130
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T26140
       DO 20 IUNIT=1,MAXIE                                               X4T26150
-   10 READ(NTAPE3,1000,END=60,ERR=50) (UNITAB(J,IUNIT),J=1,6),          X4T26160
+   10 READ(NTAPE3,1000,END=60,ERR=50) (UNITAB(J,IUNIT),J=1,2),
      1 DUMMY,FLAG                                                       X4T26170
       IF(FLAG.NE.BLANK) GO TO 10                                        X4T26180
-      CALL FLOATF(DUMMY(1),TIMES(IUNIT))                                X4T26190
-      CALL FLOATF(DUMMY(4),ADD(IUNIT))                                  X4T26200
-      CALL INTGER(DUMMY(7),IUFLAG(IUNIT),11)                            X4T26210
+      CALL FLOATF(DUMMY(1),TIMES(IUNIT))
+      CALL FLOATF(DUMMY(2),ADD(IUNIT))
+      CALL INTGER(DUMMY(3),IUFLAG(IUNIT),11)
    20 CONTINUE                                                          X4T26220
       IUNIT=MAXIE                                                       X4T26230
    30 IUNIT=IUNIT+1                                                     X4T26240
-   40 READ(NTAPE3,1000,END=60,ERR=50) (DUMMY2,J=1,6),                   X4T26250
+   40 READ(NTAPE3,1000,END=60,ERR=50) (DUMMY2,J=1,2),
      1 DUMMY,FLAG                                                       X4T26260
       IF(FLAG.NE.BLANK) GO TO 40                                        X4T26270
       GO TO 30                                                          X4T26280
@@ -2755,7 +2776,7 @@ C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T26140
       WRITE(OUTP,6020) MAXIE                                            X4T26340
       IUNIT=MAXIE                                                       X4T26350
       RETURN                                                            X4T26360
- 1000 FORMAT(5(2A4,A3),24X,A1)                                          X4T26370
+ 1000 FORMAT(5(A11),24X,A1)
  6000 FORMAT(' ERROR READING UNITS TABLE...EXECUTION TERMINATED')       X4T26380
  6010 FORMAT(' UNITS----------------',I5,' (',I5,' ALLOWED)')           X4T26390
  6020 FORMAT(' WARNING...ONLY FIRST ',I5,' UNITS USED')                 X4T26400
@@ -2815,17 +2836,18 @@ C     USE REACTION DEFINED MF TO PERMUTE DATA COLUMNS INTO OUTPUT ORDER X4T26930
 C     FOR ALL REACTIONS.                                                X4T26940
 C                                                                       X4T26950
       INTEGER OUTP,OTAPE                                                X4T26960
-      CHARACTER*4 TITTAB,TITLE,UNIT,DATUM                               X4T26970
+      CHARACTER*11 TITLE,UNIT,DATUM,TITTAB
+      CHARACTER*4  TITLE4,TITTAB4
       CHARACTER*1 FLAGI,FLAGR,ZAN,BLANK ,ENT,SUBENT,LABCM,ZANRES,ZANRAT X4T26980
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26990
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27000
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27010
       COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T27020
      1 ITFLAG(400)                                                      X4T27030
-      COMMON/TITTBC/TITTAB(4,400)                                       X4T27040
+      COMMON/TITTBC/TITTAB(400),TITTAB4(400)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27050
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27060
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T27070
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T27080
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T27090
       COMMON/ZATNC1/FLAGR(30),ZAN(7,30),ZANRES(7,30),ZANRAT(14,30),     X4T27100
@@ -2839,10 +2861,11 @@ C-----SET UP LOOP OVER REACTIONS.                                       X4T27170
       IF(KSANR.LE.0) RETURN                                             X4T27180
       DO 100 ISANR=1,KSANR                                              X4T27190
 C-----INITIALIZE OUTPUT FIELD VECTORS.                                  X4T27200
-      DO 20 K=1,10                                                      X4T27210
-      DO 10 I=1,8                                                       X4T27220
-   10 IMOUT(I,ISANR,K)=0                                                X4T27230
-   20 CONTINUE                                                          X4T27240
+      DO K=1,10
+        DO I=1,8
+          IMOUT(I,ISANR,K)=0
+        END DO
+      END DO
 C-----SELECT COLUMNS WITH COLUMN 11 BLANK OR SAME AS REACTION HAS IN    X4T27250
 C-----COLUMN 11.                                                        X4T27260
       DO 90 KIN=1,IDATN                                                 X4T27270
@@ -2852,15 +2875,13 @@ C-----SELECT TITLES FROM TABLE FOR WHICH MF RANGE SPANS MF OF REACTION. X4T27300
    30 DO 50 KTAB=1,ITITLE                                               X4T27310
       IF(MFR(ISANR).LT.MFTITL(KTAB).OR.                                 X4T27320
      1 MFR(ISANR).GT.MFTITH(KTAB)) GO TO 50                             X4T27330
-      DO 40 L=1,3                                                       X4T27340
-      IF(TITLE(L,KIN).NE.TITTAB(L,KTAB)) GO TO 50                       X4T27350
-   40 CONTINUE                                                          X4T27360
+      IF(TITLE(KIN).NE.TITTAB(KTAB)) GO TO 50
       GO TO 60                                                          X4T27370
    50 CONTINUE                                                          X4T27380
 C                                                                       X4T27390
 C     TITLE IS NOT DEFINED. WRITE TITLE TO NEWX4 FILE.                  X4T27400
 C                                                                       X4T27410
-      WRITE(NEWX4,4000) ENT,ISAN,(TITLE(L,KIN),L=1,3)                   X4T27420
+      WRITE(NEWX4,4000) ENT,ISAN,TITLE(KIN)
       MPOINT(8)=MPOINT(8)+1                                             X4T27430
       GO TO 90                                                          X4T27440
 C                                                                       X4T27450
@@ -2870,7 +2891,7 @@ C                                                                       X4T27480
    60 KOUT=IFIELD(KTAB)                                                 X4T27490
       IF(KOUT.LE.0) GO TO 90                                            X4T27500
 C-----DEFINE FIELDS 7-8.                                                X4T27510
-      TITLE(4,KIN)=TITTAB(4,KTAB)                                       X4T27520
+      TITLE4(KIN)=TITTAB4(KTAB)
 C-----SAVE INPUT FIELD INDEX IN NEXT AVAILABLE OUTPUT FIELD LOCATION.   X4T27530
       DO 70 JMULT=1,10                                                  X4T27540
       IF(IMOUT(KOUT,ISANR,JMULT).LE.0) GO TO 80                         X4T27550
@@ -2885,7 +2906,7 @@ C-----TRANSLATION).                                                     X4T27620
    90 CONTINUE                                                          X4T27640
   100 CONTINUE                                                          X4T27650
       RETURN                                                            X4T27660
- 4000 FORMAT(1X,5A1,I3,1X,2A4,A2)                                       X4T27670
+ 4000 FORMAT(1X,5A1,I3,1X,A10)
       END                                                               X4T27680
       SUBROUTINE TOPS1                                                  X4T27690
 C                                                                       X4T27700
@@ -2895,18 +2916,18 @@ C     (2) DEFINE -MIN OR -MAX TO CREATE A PAIR (CREATE -MIN= 0,         X4T27730
 C         OR -MAX = 15 MEV).                                            X4T27740
 C                                                                       X4T27750
       INTEGER OUTP,OTAPE                                                X4T27760
-      CHARACTER*4 TITTAB,TITLE,UNIT,DATUM,TITLE2,TITLE3,EV,LIMITS       X4T27770
-      CHARACTER*1 FLAGI,FLAGR,ZAN,ENT,SUBENT,LABCM,CENTER,ZANRES,ZANRAT,X4T27780
-     1 BLANK                                                            X4T27790
+      CHARACTER*11 TITLE,UNIT,DATUM,EV,LIMITS,TITLE2,TITLE3
+      CHARACTER*4  TITLE4
+      CHARACTER*1  FLAGI,FLAGR,ZAN,ENT,SUBENT,LABCM,CENTER
+     &            ,ZANRES,ZANRAT,BLANK                                                            X4T27790
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T27800
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27820
       COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T27830
      1 ITFLAG(400)                                                      X4T27840
-      COMMON/TITTBC/TITTAB(4,400)                                       X4T27850
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27860
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27870
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T27880
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T27890
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T27900
       COMMON/ZATNC1/FLAGR(30),ZAN(7,30),ZANRES(7,30),ZANRAT(14,30),     X4T27910
@@ -2915,13 +2936,12 @@ C                                                                       X4T27750
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T27940
      1 KTFLGX(50),KUFLGX(50)                                            X4T27950
       COMMON/POINTR/MPOINT(9)                                           X4T27960
-      DIMENSION TITLE2(3),TITLE3(3),EV(3),LIMITS(3,2)                   X4T27970
+      DIMENSION LIMITS(2)
       DATA CENTER/'C'/                                                  X4T27980
       DATA BLANK/' '/                                                   X4T27990
-      DATA EV/'EV  ','    ','   '/                                      X4T28000
+      DATA EV/'EV         '/
       DATA LIMITS/                                                      X4T28010
-     1 ' 0.0','    ','   ',                                             X4T28020
-     2 ' 1.5','0000','+ 7'/                                             X4T28030
+     1 ' 0.0       ',' 1.50000+ 7'/
       KDATN=IDATN                                                       X4T28040
       DO 110 ISANR=1,KSANR                                              X4T28050
 C-----INITIALIZE SYSTEM FLAG TO BLANK.                                  X4T28060
@@ -2941,10 +2961,10 @@ C-----SEE IF -MIN AND -MAX MUST APPEAR IN PAIR.                         X4T28190
    10 IF(KTFLGX(KIN).NE.9) GO TO 90                                     X4T28200
 C-----DECODE TITLE TO DEFINE COMPLEMENTARY TITLE AND WHETHER TITLE      X4T28210
 C-----ENDS IN -MIN, -MAX OR OTHER (ERROR).                              X4T28220
-      CALL IPAIR(TITLE(1,KIN),TITLE2,IWAY)                              X4T28230
+      CALL IPAIR(TITLE(KIN),TITLE2,IWAY)
       IF(IWAY.GT.0) GO TO 20                                            X4T28240
 C-----ERROR. TITLE DOES NOT END IN -MIN OR -MAX.                        X4T28250
-      WRITE(OUTP,6000) (TITLE(J,KIN),J=1,3),FLAGI(KIN)                  X4T28260
+      WRITE(OUTP,6000) TITLE(KIN),FLAGI(KIN)
       GO TO 90                                                          X4T28270
 C-----TITLE ENDS IN -MIN OR -MAX. SCAN REMAINING TITLES FOR OTHER       X4T28280
 C-----LIMIT AND SAME TITLE FLAG.                                        X4T28290
@@ -2953,34 +2973,29 @@ C-----LIMIT AND SAME TITLE FLAG.                                        X4T28290
       DO 60 K=JIN,KDATN                                                 X4T28320
       IF(IMUSED(K).LE.0.OR.KTFLGX(K).NE.9) GO TO 60                     X4T28330
       IF(FLAGI(K).NE.FLAGI(KIN)) GO TO 60                               X4T28340
-      CALL IPAIR(TITLE(1,K),TITLE3,KWAY)                                X4T28350
+      CALL IPAIR(TITLE(K),TITLE3,KWAY)
       IF(KWAY.EQ.0) GO TO 60                                            X4T28360
       IF(IWAY.NE.KWAY) GO TO 40                                         X4T28370
 C-----POSSIBLE MULTIPLE SAME LIMIT. CHECK FOR SAME TITLE.               X4T28380
-      DO 30 J=1,3                                                       X4T28390
-      IF(TITLE(J,KIN).NE.TITLE3(J)) GO TO 90                            X4T28400
-   30 CONTINUE                                                          X4T28410
-      WRITE(OUTP,6010) (TITLE(J,KIN),J=1,3),FLAGI(KIN)                  X4T28420
+      IF(TITLE(KIN).NE.TITLE3) GO TO 90
+      WRITE(OUTP,6010) TITLE(KIN),FLAGI(KIN)
       GO TO 90                                                          X4T28430
 C-----SEE IF RECONSTRUCTED TITLE TITLE IS SAME AS ORIGINAL              X4T28440
 C-----(E.G., AVOID ASUMMING EN-MIN AND E-MAX ARE A PAIR).               X4T28450
-   40 DO 50 J=1,3                                                       X4T28460
-      IF(TITLE(J,KIN).NE.TITLE3(J)) GO TO 60                            X4T28470
-   50 CONTINUE                                                          X4T28480
+   40 IF(TITLE(KIN).NE.TITLE3) GO TO 60
 C-----LIMITS ARE PAIRED.                                                X4T28490
       GO TO 90                                                          X4T28500
    60 CONTINUE                                                          X4T28510
 C-----LIMITS ARE NOT PAIRED. CREATE DATA POINT.                         X4T28520
    70 IDATN=IDATN+1                                                     X4T28530
       KWAY=3-IWAY                                                       X4T28540
-      DO 80 J=1,3                                                       X4T28550
-      TITLE(J,IDATN)=TITLE2(J)                                          X4T28560
-      UNIT(J,IDATN)=EV(J)                                               X4T28570
-   80 DATUM(J,IDATN)=LIMITS(J,KWAY)                                     X4T28580
+      TITLE(IDATN)=TITLE2
+      DATUM(IDATN)=LIMITS(KWAY)
+      UNIT(IDATN)=EV
       FLAGI(IDATN)=FLAGI(KIN)                                           X4T28590
       IMUSED(IDATN)=1                                                   X4T28600
-      WRITE(OUTP,6020) (TITLE(J,IDATN),J=1,3),FLAGI(IDATN),             X4T28610
-     1 (DATUM(J,IDATN),J=1,3),(UNIT(J,IDATN),J=1,3)                     X4T28620
+      WRITE(OUTP,6020) TITLE(IDATN),FLAGI(IDATN),
+     1 DATUM(IDATN),UNIT(IDATN)
 C-----SET INDEX TO OUTPUT CREATED LIMIT NEXT TO EXISTING LIMIT.         X4T28630
       IF(IWAY.EQ.1) IMOUT(KFIELD+1,ISANR,KMULT)=IDATN                   X4T28640
       IF(IWAY.EQ.2) IMOUT(KFIELD-1,ISANR,KMULT)=IDATN                   X4T28650
@@ -2988,9 +3003,9 @@ C-----SET INDEX TO OUTPUT CREATED LIMIT NEXT TO EXISTING LIMIT.         X4T28630
   100 CONTINUE                                                          X4T28670
   110 CONTINUE                                                          X4T28680
       RETURN                                                            X4T28690
- 6000 FORMAT(10X,'WARNING.....CHECK -MIN/-MAX FLAG FOR ',2A4,A2,A1)     X4T28700
- 6010 FORMAT(10X,'WARNING.....MULTIPLE -MIN/-MAX FIELDS ',2A4,A2,A1)    X4T28710
- 6020 FORMAT(10X,'OPERATION...CREATED ',2A4,A2,A1,1X,2A4,A3,1X,2A4,A3)  X4T28720
+ 6000 FORMAT(10X,'WARNING.....CHECK -MIN/-MAX FLAG FOR ',A10,A1)
+ 6010 FORMAT(10X,'WARNING.....MULTIPLE -MIN/-MAX FIELDS ',A10,A1)
+ 6020 FORMAT(10X,'OPERATION...CREATED ',A10,A1,1X,A11,1X,A11)
  6030 FORMAT(10X,'OPERATION...CENTER-OF-MASS SYSTEM FLAG SET')          X4T28730
       END                                                               X4T28740
       SUBROUTINE IPAIR(TITLE1,TITLE2,IWAY)                              X4T28750
@@ -3006,10 +3021,10 @@ C                                                                       X4T28790
       DATA BLANK/' '/                                                   X4T28850
 C-----FIND LAST NON-BLANK CHARACTER.                                    X4T28860
       II=11                                                             X4T28870
-      DO 10 I=1,10                                                      X4T28880
-      II=II-1                                                           X4T28890
-      IF(TITLE1(II).NE.BLANK) GO TO 20                                  X4T28900
-   10 CONTINUE                                                          X4T28910
+      DO I=1,10
+        II=II-1
+        IF(TITLE1(II).NE.BLANK) GO TO 20
+      END DO
       GO TO 50                                                          X4T28920
 C-----SEARCH FOR -MIN OR -MAX.                                          X4T28930
    20 DO 40 IWAY=1,2                                                    X4T28940
@@ -3027,30 +3042,34 @@ C----- -MIN/-MAX NOT FOUND.                                             X4T29030
 C----- -MIN/-MAX FOUND. DEFINE COMPLEMENTARY TITLE.                     X4T29060
    60 II=II-4                                                           X4T29070
       KWAY=3-IWAY                                                       X4T29080
-      DO 70 I=1,II                                                      X4T29090
-   70 TITLE2(I)=TITLE1(I)                                               X4T29100
-      DO 80 I=1,4                                                       X4T29110
-      II=II+1                                                           X4T29120
-   80 TITLE2(II)=MINMAX(I,KWAY)                                         X4T29130
+      DO I=1,II
+        TITLE2(I)=TITLE1(I)
+      END DO
+      DO I=1,4
+        II=II+1
+        TITLE2(II)=MINMAX(I,KWAY)
+      END DO
       IF(II.GE.11) GO TO 100                                            X4T29140
       II=II+1                                                           X4T29150
-      DO 90 I=II,11                                                     X4T29160
-   90 TITLE2(I)=BLANK                                                   X4T29170
+      DO I=II,11
+        TITLE2(I)=BLANK
+      END DO
   100 RETURN                                                            X4T29180
       END                                                               X4T29190
       SUBROUTINE UNIT1                                                  X4T29200
 C                                                                       X4T29210
 C     DEFINE UNIT CONVERSION FACTORS AND OPERATIONS.                    X4T29220
 C                                                                       X4T29230
-      INTEGER OUTP,OTAPE                                                X4T29240
-      CHARACTER*4 UNITAB,TITLE,UNIT,DATUM                               X4T29250
-      CHARACTER*1 ENT,SUBENT,STAT1,STATN,UNNORM                         X4T29260
+      INTEGER      OUTP,OTAPE
+      CHARACTER*11 UNITAB,TITLE,UNIT,DATUM
+      CHARACTER*4  TITLE4
+      CHARACTER*1  ENT,SUBENT,STAT1,STATN,UNNORM
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T29270
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29280
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29290
       COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T29300
-      COMMON/UNITBC/UNITAB(6,400)                                       X4T29310
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T29320
+      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T29330
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T29340
      1 KTFLGX(50),KUFLGX(50)                                            X4T29350
@@ -3064,17 +3083,15 @@ C                                                                       X4T29410
       IF(IMUSED(I).LE.0) GO TO 30                                       X4T29430
 C-----DETERMINE CONVERSION FACTOR FOR UNITS.                            X4T29440
       DO 20 J=1,IUNIT                                                   X4T29450
-      DO 10 K=1,3                                                       X4T29460
-      IF(UNIT(K,I).NE.UNITAB(K,J)) GO TO 20                             X4T29470
-   10 CONTINUE                                                          X4T29480
+      IF(UNIT(I).NE.UNITAB(1,J)) GO TO 20
 C-----TITLE IS DEFINED. DEFINE MULTIPLIER, ADDER AND UNIT OPERATION.    X4T29490
       TIMEX(I)=TIMES(J)                                                 X4T29500
       ADDX(I)=ADD(J)                                                    X4T29510
       KUFLGX(I)=IUFLAG(J)                                               X4T29520
 C-----IF REQUESTED PRINT WARNING MESSAGE.                               X4T29530
-      IF(IUFLAG(J).EQ.7) WRITE(OUTP,6000) (UNIT(K,I),K=1,3)             X4T29540
+      IF(IUFLAG(J).EQ.7) WRITE(OUTP,6000) UNIT(I)
       IF(IUFLAG(J).NE.8) GO TO 30                                       X4T29550
-      WRITE(OUTP,6010) (UNIT(K,I),K=1,3)                                X4T29560
+      WRITE(OUTP,6010) UNIT(I)
       STATN=UNNORM                                                      X4T29570
       GO TO 30                                                          X4T29580
    20 CONTINUE                                                          X4T29590
@@ -3084,30 +3101,31 @@ C                                                                       X4T29620
       TIMEX(I)=0.0                                                      X4T29630
       ADDX(I)=0.0                                                       X4T29640
       KUFLGX(I)=0                                                       X4T29650
-      WRITE(NEWX4,4000) ENT,ISAN,(UNIT(K,I),K=1,3)                      X4T29660
+      WRITE(NEWX4,4000) ENT,ISAN,UNIT(I)
       MPOINT(9)=MPOINT(9)+1                                             X4T29670
    30 CONTINUE                                                          X4T29680
       RETURN                                                            X4T29690
- 4000 FORMAT(1X,5A1,I3,1X,2A4,A3)                                       X4T29700
- 6000 FORMAT(10X,'WARNING.....UNITS=',2A4,A3)                           X4T29710
- 6010 FORMAT(10X,'WARNING.....UNITS=',2A4,A3,' STATUS CHANGED TO',      X4T29720
+ 4000 FORMAT(1X,5A1,I3,1X,A10)
+ 6000 FORMAT(10X,'WARNING.....UNITS=',A11)
+ 6010 FORMAT(10X,'WARNING.....UNITS=',A11,' STATUS CHANGED TO',
      1 ' UNNORMALIZED (U)')                                             X4T29730
       END                                                               X4T29740
       SUBROUTINE UNIT2                                                  X4T29750
 C                                                                       X4T29760
 C     TRANSLATE FIELDS TO STANDARD UNITS.                               X4T29770
 C                                                                       X4T29780
-      CHARACTER*4 UNITAB,TITLE,UNIT,DATUM                               X4T29790
-      CHARACTER*1 ENT,SUBENT                                            X4T29800
+      CHARACTER*11 TITLE,UNITAB,UNIT,DATUM
+      CHARACTER*4  TITLE4
+      CHARACTER*1  ENT,SUBENT
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29820
       COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T29830
-      COMMON/UNITBC/UNITAB(6,400)                                       X4T29840
+      COMMON/UNITBC/UNITAB(2,400)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T29850
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T29860
       COMMON/RNOW/ISANR                                                 X4T29870
       COMMON/OUTVEC/IMOUT(8,30,10),KMOUT(8,30)                          X4T29880
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T29890
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T29900
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T29910
      1 KTFLGX(50),KUFLGX(50)                                            X4T29920
@@ -3121,7 +3139,7 @@ C                                                                       X4T29960
       IF(II.EQ.0) GO TO 40                                              X4T30000
       IF(IMUSED(II)-1) 40,10,20                                         X4T30010
 C-----CONVERT DATA FROM HOLLERITH TO FLOATING POINT.                    X4T30020
-   10 CALL FLOATF(DATUM(1,II),VALUEI(II))                               X4T30030
+   10 CALL FLOATF(DATUM(II),VALUEI(II))
       IMUSED(II)=2                                                      X4T30040
 C-----APPLY CONVERSION FACTORS.                                         X4T30050
    20 VALUES(II)=TIMEX(II)*VALUEI(II)+ADDX(II)                          X4T30060
@@ -3141,7 +3159,8 @@ C     (5) LENGTH (CM OR FERMI) TO AREA (BARNS)                          X4T30190
 C     (6) BARNS*SQRT(E) TO BARNS                                        X4T30200
 C                                                                       X4T30210
       INTEGER OUTP,OTAPE                                                X4T30220
-      CHARACTER*4 UNITAB,TITLE,UNIT,DATUM                               X4T30230
+      CHARACTER*11 UNITAB,TITLE,UNIT,DATUM
+      CHARACTER*4  TITLE4
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T30240
       COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T30250
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T30260
@@ -3149,8 +3168,8 @@ C                                                                       X4T30210
       COMMON/RNOW/ISANR                                                 X4T30280
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T30290
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T30300
-      COMMON/UNITBC/UNITAB(6,400)
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T30320
+      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/OUTVEC/IMOUT(8,30,10),KMOUT(8,30)                          X4T30330
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T30340
      1 KTFLGX(50),KUFLGX(50)                                            X4T30350
@@ -3158,8 +3177,9 @@ C                                                                       X4T30210
       DATA PI/3.141597/                                                 X4T30370
       DATA RES2EV/2.77E-5/                                              X4T30380
 C-----DEFINE UNIT OPERATIONS FOR INTERNAL USE.                          X4T30390
-      DO 10 I=1,IDATN                                                   X4T30400
-   10 KUFLG1(I)=KUFLGX(I)                                               X4T30410
+      DO I=1,IDATN
+        KUFLG1(I)=KUFLGX(I)
+      END DO
 C-----SET UP LOOP OVER OUTPUT FIELDS.                                   X4T30420
       DO 140 KFIELD=1,8                                                 X4T30430
 C-----SET UP LOOP OVER EXFOR FIELDS MAPPED INTO OUTPUT FIELD.           X4T30440
@@ -3290,15 +3310,16 @@ C                                                                       X4T31680
 C     RESOLVE MULTIPLE INPUT FIELDS MAPPED INTO A SINGLE OUTPUT FIELD.  X4T31690
 C                                                                       X4T31700
       INTEGER OUTP,OTAPE                                                X4T31710
-      CHARACTER*4 TITLE,UNIT,DATUM                                      X4T31720
-      CHARACTER*1 FLAGI                                                 X4T31730
+      CHARACTER*11 TITLE,UNIT,DATUM
+      CHARACTER*4  TITLE4
+      CHARACTER*1  FLAGI
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T31740
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T31750
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T31760
       COMMON/RNOW/ISANR                                                 X4T31770
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T31780
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T31790
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T31800
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T31810
       COMMON/OUTVEC/IMOUT(8,30,10),KMOUT(8,30)                          X4T31820
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T31830
@@ -3314,10 +3335,10 @@ C-----CHECK FOR CURRENT FIELD DEFINED BY PRECEDING FIELD.               X4T31910
       ISKIP=0                                                           X4T31930
       GO TO 310                                                         X4T31940
 C-----COUNT THE NUMBER OF INPUT FIELDS MAPPED INTO 1 OUTPUT FIELD.      X4T31950
-   10 DO 20 JMULT=1,10                                                  X4T31960
-      II=IMOUT(KFIELD,ISANR,JMULT)                                      X4T31970
-      IF(II.LE.0) GO TO 30                                              X4T31980
-   20 CONTINUE                                                          X4T31990
+   10 DO JMULT=1,10
+        II=IMOUT(KFIELD,ISANR,JMULT)
+        IF(II.LE.0) GO TO 30
+      END DO
       JMULT=10                                                          X4T32000
 C                                                                       X4T32010
 C     ATTEMPT TO RESOLVE MULTIPLE FIELD DEFINITION (IF ANY).            X4T32020
@@ -3327,23 +3348,24 @@ C                                                                       X4T32030
 C-----ONLY PRINT MULTIPLE FIELD WARNING MESSAGE FOR FIRST POINT.        X4T32060
       IF(NPT.GT.1) GO TO 50                                             X4T32070
       WRITE(OUTP,6000)                                                  X4T32080
-      DO 40 KMULT=1,JMULT                                               X4T32090
-      JJ=IMOUT(KFIELD,ISANR,KMULT)                                      X4T32100
-   40 WRITE(OUTP,6020) (TITLE(J,JJ),J=1,3),FLAGI(JJ)                    X4T32110
+      DO KMULT=1,JMULT
+        JJ=IMOUT(KFIELD,ISANR,KMULT)
+        WRITE(OUTP,6020) TITLE(JJ),FLAGI(JJ)
+      END DO
 C-----USE TITLE FLAG TO (1) ALWAYS CHOOSE.                              X4T32120
-   50 DO 60 KMULT=1,JMULT                                               X4T32130
-      JJ=IMOUT(KFIELD,ISANR,KMULT)                                      X4T32140
-      IF(KTFLGX(JJ).EQ.1) GO TO 90                                      X4T32150
-   60 CONTINUE                                                          X4T32160
+   50 DO KMULT=1,JMULT
+        JJ=IMOUT(KFIELD,ISANR,KMULT)
+        IF(KTFLGX(JJ).EQ.1) GO TO 90
+      END DO
 C-----USE TITLE FLAG TO (2) CHOOSE FIRST (3) NEVER CHOOSE.              X4T32170
       KK=0                                                              X4T32180
-      DO 70 KMULT=1,JMULT                                               X4T32190
-      JJ=IMOUT(KFIELD,ISANR,KMULT)                                      X4T32200
-      IF(KTFLGX(JJ).EQ.2) GO TO 90                                      X4T32210
-      IF(KTFLGX(JJ).EQ.3) GO TO 70                                      X4T32220
-      KK=KK+1                                                           X4T32230
-      IMOUT(KFIELD,ISANR,KK)=IMOUT(KFIELD,ISANR,KMULT)                  X4T32240
-   70 CONTINUE                                                          X4T32250
+      DO 70 KMULT=1,JMULT
+        JJ=IMOUT(KFIELD,ISANR,KMULT)
+        IF(KTFLGX(JJ).EQ.2) GO TO 90
+        IF(KTFLGX(JJ).EQ.3) GO TO 70
+        KK=KK+1
+        IMOUT(KFIELD,ISANR,KK)=IMOUT(KFIELD,ISANR,KMULT)
+   70 CONTINUE
       JMULT=KK                                                          X4T32260
 C-----SET NEXT FIELD TO ZERO TO ELIMINATE ALL (3) NEVER CHOOSE FIELDS   X4T32270
 C-----FOR ALL POINTS IN TABLE.                                          X4T32280
@@ -3357,7 +3379,7 @@ C-----IF (1) ALWAYS CHOOSE OR (2) CHOOSE FIRST FIELD OR ONLY ONE        X4T32350
 C-----FIELD LEFT NO MORE CONFLICT FOR ALL POINTS IN TABLE.              X4T32360
    90 IMOUT(KFIELD,ISANR,1)=JJ                                          X4T32370
       IMOUT(KFIELD,ISANR,2)=0                                           X4T32380
-      IF(NPT.EQ.1) WRITE(OUTP,6080) (TITLE(J,JJ),J=1,3),FLAGI(JJ)       X4T32390
+      IF(NPT.EQ.1) WRITE(OUTP,6080) TITLE(JJ),FLAGI(JJ)
       GO TO 300                                                         X4T32400
 C-----SEE IF ALL REMAINING FIELDS HAVE THE SAME TITLE FLAG.             X4T32410
   100 JOPS=0                                                            X4T32420
@@ -3393,7 +3415,7 @@ C-----SELECT LARGEST OR QUADRATIC COMBINATION.                          X4T32660
 C-----SAVE DEFINITION OF FIELDS 7-8.                                    X4T32720
       IF(KFIELD.NE.7) GO TO 300                                         X4T32730
       II=IMOUT(KFIELD,ISANR,1)                                          X4T32740
-      TITLE(4,IDATN)=TITLE(4,II)                                        X4T32750
+      TITLE4(IDATN)=TITLE4(II)
       GO TO 300                                                         X4T32760
 C-----SEE IF DATA ARE TO BE COMBINED TO DEFINE AVERAGE AND SPREAD.      X4T32770
   140 IF(JOPS.EQ.7) GO TO 150                                           X4T32780
@@ -3422,7 +3444,7 @@ C-----COMBINE FIELDS TO DEFINE AVERAGE.                                 X4T32890
 C-----SAVE DEFINITION OF FIELDS 7-8.                                    X4T33010
       IF(KFIELD.NE.7) GO TO 170                                         X4T33020
       II=IMOUT(KFIELD,ISANR,1)                                          X4T33030
-      TITLE(4,IDATN)=TITLE(4,II)                                        X4T33040
+      TITLE4(IDATN)=TITLE4(II)
   170 IF(JOPS.EQ.7) GO TO 310                                           X4T33050
 C-----DEFINE COMBINED ERROR.                                            X4T33060
       ERRAV=0.0                                                         X4T33070
@@ -3478,9 +3500,10 @@ C                                                                       X4T33520
   260 IF(NPT.GT.1) GO TO 290                                            X4T33530
       WRITE(OUTP,6010) KFIELD                                           X4T33540
   270 WRITE(OUTP,6050)                                                  X4T33550
-      DO 280 KMULT=1,JMULT                                              X4T33560
-      JJ=IMOUT(KFIELD,ISANR,KMULT)                                      X4T33570
-  280 WRITE(OUTP,6020) (TITLE(J,JJ),J=1,3),FLAGI(JJ)                    X4T33580
+      DO KMULT=1,JMULT
+        JJ=IMOUT(KFIELD,ISANR,KMULT)
+        WRITE(OUTP,6020) TITLE(JJ),FLAGI(JJ)
+      END DO
 C-----USE FIRST INPUT FIELD FOR OUTPUT.                                 X4T33590
   290 JJ=IMOUT(KFIELD,ISANR,1)                                          X4T33600
 C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
@@ -3489,7 +3512,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
       RETURN                                                            X4T33640
  6000 FORMAT(10X,'WARNING.....CHECK MULTIPLE FIELD DEFINITION')         X4T33650
  6010 FORMAT(10X,'WARNING.....FIELD=',I2,' UNRESOLVED MULTIPLE FIELDS') X4T33660
- 6020 FORMAT(10X,2A4,A2,A1)                                             X4T33670
+ 6020 FORMAT(10X,A10,A1)
  6030 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT COMBINE FIELDS TO',   X4T33680
      1       10X,'DEFINE AVERAGE FOLLOWED BY ERROR (NO FIELD 9)')       X4T33690
  6040 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT COMBINE FIELDS TO',   X4T33700
@@ -3499,7 +3522,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
      1 10X,'SMALLEST VALUES (NO FIELD 9)')                              X4T33740
  6070 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT SELECT LARGEST AND'/  X4T33750
      1 10X,'SMALLEST VALUES (FIELD=',I2,' USED)')                       X4T33760
- 6080 FORMAT(10X,'OPERATION...SELECTED ',2A4,A2,A1)                     X4T33770
+ 6080 FORMAT(10X,'OPERATION...SELECTED ',A10,A1)
  6090 FORMAT(10X,'OPERATION...NO FIELD SELECTED (ALL NEVER OUTPUT)')    X4T33780
  6100 FORMAT(10X,'OPERATION...SELECTED LARGEST')                        X4T33790
  6110 FORMAT(10X,'OPERATION...COMBINED FIELDS QUADRATICALLY')           X4T33800
@@ -3519,16 +3542,17 @@ C                           DATA AND DATA ERROR).                       X4T33930
 C     (6) DATA = DATA/(F(0)*(2*L+1)) (DATA AND DATA ERROR)              X4T33940
 C     (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)    ***** TRKOV
 C                                                                       X4T33950
-      INTEGER OUTP,OTAPE                                                X4T33960
-      CHARACTER*4 TITLE,UNIT,DATUM                                      X4T33970
-      CHARACTER*1 FLAGI,FLAGR,ZAN,LABCM,BLANK,ZANRES,ZANRAT             X4T33980
+      INTEGER      OUTP,OTAPE
+      CHARACTER*11 TITLE,UNIT,DATUM
+      CHARACTER*4  TITLE4
+      CHARACTER*1  FLAGI,FLAGR,ZAN,LABCM,BLANK,ZANRES,ZANRAT
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T33990
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T34000
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T34010
       COMMON/RNOW/ISANR                                                 X4T34020
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T34030
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T34040
-      COMMON/HEADC1/TITLE(4,50),UNIT(3,50),DATUM(3,50)                  X4T34050
+      COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADC2/FLAGI(50)                                           X4T34060
       COMMON/OUTVEC/IMOUT(8,30,10),KMOUT(8,30)                          X4T34070
       COMMON/ZATNC1/FLAGR(30),ZAN(7,30),ZANRES(7,30),ZANRAT(14,30),     X4T34080
@@ -3628,31 +3652,23 @@ C-----RE-NORMALIZE DATA.                                                X4T34950
       II=KMOUT(4,ISANR)                                                 X4T34970
       IF(II.LE.0) GO TO 110                                             X4T34980
       VALUES(II)=VALUES(II)/ZNORM                                       X4T34990
-C***** CULLEN
-C 110 RETURN                                                            X4T35000
-C***** CULLEN
-C***** TRKOV
   110 GO TO 800
   120 IF(IRFLAG(ISANR).NE.8) GO TO 800
-C***** TRKOV
 C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
-C***** TRKOV
       IF(ICOMN .LT. 1) GO TO 126
       IF(IMUSED(ICOMN).NE.0) GO TO 124
         IMUSED(ICOMN)=1
         VALUES(ICOMN)=1
-        IF(UNIT(1,ICOMN).NE.'ATOM' .OR.
-     1     UNIT(2,ICOMN).NE.'S/B ') GO TO 126
-          CALL FLOATF(DATUM(1,ICOMN),VALUES(ICOMN))
+        IF(UNIT(ICOMN).NE.'ATOMS/B   ') GO TO 126
+          CALL FLOATF(DATUM(ICOMN),VALUES(ICOMN))
           GO TO 124
-  123   WRITE(OUTP,6080) DATUM(1,ICOMN),DATUM(1,ICOMN)
+  123   WRITE(OUTP,6080) DATUM(ICOMN)
   124 CONTINUE
       VALUES(II)=-LOG(VALUES(II))/VALUES(ICOMN)
       GO TO 800
   126 WRITE(OUTP,6082)
       IRFLAG(ISANR)=0
   800 RETURN
-C***** TRKOV
  6000 FORMAT(10X,'OPERATION...CREATED EN          ',1PE11.4,' EV')      X4T35010
  6010 FORMAT(10X,'WARNING...LEGENDRE ORDER (COLUMN 5) NOT DEFINED'/     X4T35020
      1 10X,'LEGENDRE COEFFICIENTS CANNOT BE RENORMALIZED')              X4T35030
@@ -3664,12 +3680,10 @@ C***** TRKOV
      1 10X,'LEGENDRE COEFFICIENTS CANNOT BE RENORMALIZED')              X4T35090
  6070 FORMAT(10X,'WARNING...NO F(0) AT ENERGY = ',1PE11.4,' EV'/        X4T35100
      1 10X,'LEGENDRE COEFFICIENTS CANNOT BE RENORMALIZED')              X4T35110
-C***** TRKOV
- 6080 FORMAT(10X,'WARNING...UNITS IN COMMON FIELD ',2A4,/
+ 6080 FORMAT(10X,'WARNING...UNITS IN COMMON FIELD ',A11,/
      1      ,10X,'                     EXPECTED ATOMS/B')
  6082 FORMAT(10X,'WARNING...SAMPLE THICKNESS FOR TRANSMISSION DATA'
      1      ,' NOT SPECIFIED')
-C***** TRKOV
       END                                                               X4T35120
       SUBROUTINE INTGER(CARD,N,I)                                       X4T35130
 C                                                                       X4T35140
