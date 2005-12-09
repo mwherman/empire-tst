@@ -13,6 +13,8 @@ if [ "$MT" = "" ]
    MT=102
 fi
 
+cp $file-inp.sen SENSITIVITY.INP
+
 ../util/kalman/genkal.pl $file
 
 ln -s $file.c4 fort.1
@@ -44,4 +46,6 @@ g77 ../util/kalman/kalend.f -o ../util/kalman/kalend
 ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
 ../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >corrplot.dat
 gnuplot ../util/kalman/corr.plt
+
+rm SENSITIVITY.INP
 exit
