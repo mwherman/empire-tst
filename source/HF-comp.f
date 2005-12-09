@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-08 09:45:10 $
-Ccc   * $Id: HF-comp.f,v 1.81 2005-12-08 09:45:10 Capote Exp $
+Ccc   * $Date: 2005-12-09 16:03:53 $
+Ccc   * $Id: HF-comp.f,v 1.82 2005-12-09 16:03:53 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1234,6 +1234,9 @@ C-----------
          ENDIF
       ENDIF
   100 IF (Sumfis.EQ.0.0D0) RETURN
+
+      Sumfis = Sumfis*TUNEfi(Nnuc) 
+
       IF (BETav.NE.0.0D0) THEN
 C--------reduction of the fission width due to possible return from the
 C--------saddle point (nuclear viscosity 1-st effect)
@@ -1403,7 +1406,7 @@ C==============discrete contribution====================
                      VBArex(ibar) = EFB(ibar) + exfis
                      arg = 2*PI*(VBArex(ibar) - ee)/H(nr,ibar)
                      IF (arg.LE.EXPmax) THEN
-                        TFD(ibar) = 1./(1. + EXP(arg))
+                        TFD(ibar) = 1./(1. + EXP(arg)) * TUNEfi(Nnuc)
                      ELSE
                         TFD(ibar) = 0.0
                      ENDIF
@@ -1462,7 +1465,7 @@ C-------subbarrier effects
                         arg = PHAsr(ibar)
                      ENDIF
                      IF (arg.GT.EXPmax) arg = EXPmax
-                     TFD(ibar) = 1./(1. + EXP(arg))
+                     TFD(ibar) = 1./(1. + EXP(arg)) * TUNEfi(Nnuc)
                   ENDDO
 C
 C----------- Penetrability calculations for double-humped case
@@ -1574,7 +1577,7 @@ C--------------region III
 C-------------region IV
                      IF (ee.GT.VBArex(1) .AND. ee.LE.VBArex(5)) THEN
                         CALL WKBFISNUM(ee,1.)
-                        tdirr23 = 1./(1. + EXP(PHAsr(2)))
+                        tdirr23 = 1./(1. + EXP(PHAsr(2)))* TUNEfi(Nnuc)
                         tdirr = 0.
                         tabss = TFD(1)
                      ENDIF
@@ -1631,7 +1634,7 @@ CRC      GAUSSFIS is more efficient
 CMS      However, as for the moment it does not work, SIMPSFIS is used
          CALL SIMPSFIS(Nnuc,ibar,ee)
 CMS      CALL GAUSSFIS(NNUc, IBAr)
-         tfcon(ibar) = TFCc
+         tfcon(ibar) = TFCc * TUNEfi(Nnuc)
          TF(ibar) = tfdis(ibar) + tfcon(ibar)
       ENDDO
       TABs = TABs + tfcon(1)
@@ -1654,7 +1657,7 @@ C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 C-----single-humped
       IF (NRBar.EQ.1) THEN
          Sumfis = TF(1)
-         WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
+	   WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
      &          tfdis(1), tfcon(1), Sumfis
       ENDIF
 C-----double-humped
@@ -1663,7 +1666,6 @@ C-----double-humped
          IF (tnumm.EQ.0.0) THEN
             Sumfis = 0.
          ELSE
-
             IF (FISopt(Nnuc).EQ.0.) THEN
                Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))
                WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')

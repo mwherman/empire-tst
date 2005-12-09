@@ -1753,8 +1753,10 @@ Ccc
       character*132 ctmp
       character*1 namecat, category
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
-     &        ndreac, nreac, ndkeys
-      parameter (ndreac=100, ndkeys=125) 
+     &        ndreac, ndkeys
+
+C     integer nreac  
+      parameter (ndreac=90, ndkeys=128) 
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac), 
@@ -1783,7 +1785,8 @@ Ccc
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ', 
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF', 
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
-     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP'/
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
+     &  'FISBOU', 'ATILFI'/
       data namecat /
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
@@ -1805,7 +1808,8 @@ Ccc
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction   
@@ -1902,10 +1906,10 @@ c    &             ' IS BIGGER THAN 1'
       STOP 'PARAMETER VARIATION LARGER THAN 100%'
       ENDIF
 C-----Check whether omp is being varied - if so then move Tl directory out of the way
-      IF(name(1:4).EQ.'UOMP') THEN
+      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN' 
+     &   .OR. name.EQ.'DEFSTA') THEN
          IF(LINUX) THEN
             ctmp='mv TL TLREF'
-c           ctmp='rm -r TL'
             itmp=PIPE(ctmp)
             ctmp='mkdir TL'
             itmp=PIPE(ctmp)
@@ -1920,7 +1924,8 @@ c           ctmp='rm -r TL'
       DO k = 1, 2 ! 1 for parameter+val, 2 for parameter-val
          OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
          IF(k.EQ.2) val = -val !normally we only invert the sign
-         IF(name(1:4).EQ.'UOMP' .AND. k.EQ.2 ) THEN 
+         IF(name(1:4).EQ.'UOMP'  .OR. name.EQ.'DEFDYN' 
+     &   .OR. name.EQ.'DEFSTA'.AND. k.EQ.2 ) THEN 
             IF(LINUX) THEN
                ctmp='rm -r TL'
                itmp=PIPE(ctmp)
@@ -2022,7 +2027,8 @@ C-----Delete modified input that has been used and move XSECTIONS.OUT file
       ENDIF
       ENDDO !loop over parameter+val and parameter-val
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
-      IF(name(1:4).EQ.'UOMP') THEN
+      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN' 
+     &   .OR. name.EQ.'DEFSTA') THEN
          IF(LINUX) THEN
             ctmp='rm -rf TL'
             itmp=PIPE(ctmp)
@@ -2116,5 +2122,4 @@ C-----Resotore standard input
       ENDIF
       return
       end
-
 

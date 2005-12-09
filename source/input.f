@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-08 09:46:03 $
-Ccc   * $Id: input.f,v 1.188 2005-12-08 09:46:03 Capote Exp $
+Ccc   * $Date: 2005-12-09 16:03:53 $
+Ccc   * $Id: input.f,v 1.189 2005-12-09 16:03:53 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -174,6 +174,12 @@ C-----------set level density parameters
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
+
+            ATIlfi(nnuc) = 1.
+
+            FISbin(nnuc) = 1.
+
+            FISbou(nnuc) = 1.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
 C-----------set ENDF flag to 0 (no ENDF formatting)
@@ -232,7 +238,7 @@ C
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
          DEFdyn = 1.d0
-         DEFsta = 1.d0
+        DEFsta = 1.d0
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -4355,6 +4361,275 @@ C              ATIlnor(nnuc) = val + grand()*sigma
             GOTO 100
          ENDIF
 C-----
+
+         IF (name.EQ.'ATILFI') THEN
+
+            izar = i1*1000 + i2
+
+            IF (izar.EQ.0) THEN
+
+               DO i = 1, NDNUC
+
+                  ATIlfi(i) = val
+
+               ENDDO
+
+               WRITE (6,
+
+     &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               WRITE (12,
+
+     &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               GOTO 100
+
+            ENDIF
+
+            CALL WHERE(izar,nnuc,iloc)
+
+            IF (iloc.EQ.1) THEN
+
+               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
+
+     &                '' NOT NEEDED'')') i2,i1
+
+               WRITE (6,'('' NORMALIZATION OF SP a-tilde IGNORED'')')
+
+               GOTO 100
+
+            ENDIF
+
+
+
+            if(i3.ne.0) then
+
+              WRITE (6,
+
+     &        '('' Saddle-point l.d. a-parameter uncertainty in '',I3,
+
+     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+
+               sigma = val*i3*0.01
+
+C              ATIlfi(nnuc) = val + grand()*sigma
+
+               ATIlfi(nnuc) = val + (2*drand()-1.)*sigma
+
+              WRITE (6,
+
+     &        '('' Saddle-point l.d. a-parameter sampled value : '',
+
+     &        f8.3)') ATIlfi(nnuc)
+
+               IPArCOV = IPArCOV +1
+
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+
+     &              IPArCOV, ATIlfi(nnuc),INDexf,INDexb
+
+            else
+
+              ATIlfi(nnuc) = val
+
+              WRITE (6,
+
+     &        '('' Saddle-point l.d. a-parameter in '',I3,A2,
+
+     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
+
+             endif
+
+            GOTO 100
+
+         ENDIF
+
+C-----
+
+         IF (name.EQ.'FISBIN') THEN
+
+            izar = i1*1000 + i2
+
+            IF (izar.EQ.0) THEN
+
+               DO i = 1, NDNUC
+
+                  FISbin(i) = val
+
+               ENDDO
+
+               WRITE (6,
+
+     &'('' Inner fission barrier  in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               WRITE (12,
+
+     &'('' Inner fission barrier  in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               GOTO 100
+
+            ENDIF
+
+            CALL WHERE(izar,nnuc,iloc)
+
+            IF (iloc.EQ.1) THEN
+
+               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
+
+     &                '' NOT NEEDED'')') i2,i1
+
+               WRITE (6,
+
+     &         '('' NORMALIZATION OF inner fission barrier IGNORED'')')
+
+               GOTO 100
+
+            ENDIF
+
+
+
+            if(i3.ne.0) then
+
+              WRITE (6,
+
+     &        '('' Inner fission barrier uncertainty in '',I3,
+
+     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+
+               sigma = val*i3*0.01
+
+C              FISbin(nnuc) = val + grand()*sigma
+
+               FISbin(nnuc) = val + (2*drand()-1.)*sigma
+
+              WRITE (6,                                                                                    
+
+     &        '('' Inner fission barrier factor sampled value : '',
+
+     &        f8.3)') FISbin(nnuc)
+
+               IPArCOV = IPArCOV +1
+
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+
+     &              IPArCOV, FISbin(nnuc),INDexf,INDexb
+
+            else
+
+              FISbin(nnuc) = val
+
+              WRITE (6,
+
+     &        '('' Inner fission barrier in '',I3,A2,
+
+     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
+
+             endif
+
+            GOTO 100
+
+         ENDIF
+
+C-----
+
+         IF (name.EQ.'FISBOU') THEN
+
+            izar = i1*1000 + i2
+
+            IF (izar.EQ.0) THEN
+
+               DO i = 1, NDNUC
+
+                  FISbou(i) = val
+
+               ENDDO
+
+               WRITE (6,
+
+     &'('' Outer fission barrier  in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               WRITE (12,
+
+     &'('' Outer fission barrier  in all nuclei multiplied by '',
+
+     &F6.2)') val
+
+               GOTO 100
+
+            ENDIF
+
+            CALL WHERE(izar,nnuc,iloc)
+
+            IF (iloc.EQ.1) THEN
+
+               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
+
+     &                '' NOT NEEDED'')') i2,i1
+
+               WRITE (6,
+
+     &         '('' NORMALIZATION OF outer fission barrier IGNORED'')')
+
+               GOTO 100
+
+            ENDIF
+
+
+
+            if(i3.ne.0) then
+
+               WRITE (6,
+
+     &        '('' Outer fission barrier uncertainty in '',I3,
+
+     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+
+               sigma = val*i3*0.01
+
+C              FISbou(nnuc) = val + grand()*sigma
+
+               FISbou(nnuc) = val + (2*drand()-1.)*sigma
+
+               WRITE (6,                                                                                   
+
+     &         '('' Outer fission barrier factor sampled value : '',
+
+     &         f8.3)') FISbou(nnuc)
+
+               IPArCOV = IPArCOV +1
+
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+
+     &              IPArCOV, FISbou(nnuc),INDexf,INDexb
+
+            else
+
+              FISbou(nnuc) = val
+
+              WRITE (6,
+
+     &        '('' Outer fission barrier in '',I3,A2,
+
+     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
+
+             endif
+
+            GOTO 100
+
+         ENDIF
+
+C-----
+
          IF (name.EQ.'GTILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
@@ -4615,7 +4890,7 @@ C-----
               sigma = val*0.01*i1
 C             DEFdyn = val + grand()*sigma
               DEFdyn = val + (2*drand()-1.)*sigma
-	      IF (DEFdyn.LT.0.) DEFdyn = 1.
+             IF (DEFdyn.LT.0.) DEFdyn = 1.
               WRITE (6,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') DEFdyn
               IPArCOV = IPArCOV +1
@@ -4626,7 +4901,7 @@ C             DEFdyn = val + grand()*sigma
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') val
               WRITE (12,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') val
-	    ENDIF
+           ENDIF
             GOTO 100
          ENDIF
 C-----
@@ -4639,9 +4914,9 @@ C-----
               sigma = val*0.01*i1
 C             DEFsta = val + grand()*sigma
               DEFsta = val + (2*drand()-1.)*sigma
-	      IF (DEFsta.LT.0.) DEFsta = 1.
+             IF (DEFsta.LT.0.) DEFsta = 1.
               WRITE (6,
-     &'('' CC static deformation multiplied by'',F6.3)') DEFsta
+     &'('' CC static deformation multiplied by'',F6.3)') DEFSTA
               IPArCOV = IPArCOV +1
               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &           IPArCOV, DEFsta, INDexf,INDexb
@@ -5347,8 +5622,8 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-C              ELSE
-C                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+               ELSE
+                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5398,11 +5673,11 @@ C--------------Calculate sum for the average normalization factor
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
-	    ftmp =   ATIlnor(nnuc)
+           ftmp =   ATIlnor(nnuc)
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
-C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave	 
+            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave        
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp
@@ -6150,12 +6425,11 @@ C        It could be a bad approximation for a quasispherical nucleus
 C-----------Number of collective levels
             READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &            IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
-
 C           For covariance calculation of static deformation
             DO j= 2,IDEfcc,2
-	      D_Def(1,j) = D_Def(1,j)*DEFsta
+                D_Def(1,j) = D_Def(1,j)*DEFsta
             ENDDO
-
+C
             WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
      &             IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
             WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, LMAxcc,
@@ -6201,8 +6475,8 @@ C--------Reading ground state information (to avoid overwriting deformation)
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
 C
 C           For covariance calculation of dynamical deformation
-	    D_Def(i,2) = ftmp*DEFdyn
-
+             D_Def(i,2) = ftmp*DEFdyn
+C
             WRITE (6,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -7541,6 +7815,27 @@ C
      &    EFB(3), H(1,3)
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
+
+
+
+      NRBarc = NRBar - NRWel
+
+C     For covariance
+
+      EFB(1) = EFB(1) * FISbin (Nnuc)
+
+       IF(NRBarc.GE.2) THEN
+
+        DO i=2,NRBarc
+
+          EFB(i) = EFB(i) * FISbou (Nnuc)
+
+         ENDDO
+
+       ENDIF
+
+C 
+
       READ (79,*)
       READ (79,*)
       READ (79,*) (HJ(Nnuc,i),i = 1,NRBar)
@@ -7574,7 +7869,6 @@ C
          ENDDO
       ENDDO
       READ (79,*)
-      NRBarc = NRBar - NRWel
       IF (NRBarc.EQ.3) THEN
          READ (79,*)
          READ (79,'(3f9.3)') VEQ, HOEq, DEFeq
@@ -7588,15 +7882,26 @@ C
          READ (79,*)
          DO ibar = 1, nrbarc1
             IF (FISmod(Nnuc).EQ.0. .OR.
-     &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2))
-     &           READ (79,'(1x, A8, 1x, I1,4x, I1, 4f9.3)') cara8, i,
+     &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) THEN
+                READ (79,'(1x, A8, 1x, I1,4x, I1, 4f9.3)') cara8, i,
      &          BFF(ibar), SHCfis(ibar), DELtafis(ibar), GAMmafis(ibar),
      &          AFIs(ibar)
+
+C               For covariance
+
+                AFIs(ibar) = AFIs(ibar) * ATILfi(Nnuc)
+
+             ENDIF
             IF (FISmod(Nnuc).GT.0. .AND. ibar.EQ.2) THEN
                DO m = 1, nrmod
                   READ (79,'(10x, I1, 2x, I1, 1x, I1, 4f9.3)') i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
      &                  AFIsm(m)
+
+C                 For covariance
+
+                  AFIsm(ibar) = AFIsm(ibar) * ATILfi(Nnuc)
+
                ENDDO
             ENDIF
          ENDDO
