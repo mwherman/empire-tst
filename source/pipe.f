@@ -1,3 +1,7 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:18:32 $
+Ccc   * $Id: pipe.f,v 1.4 2006-01-02 06:18:32 herman Exp $
+            
 C/* pipe.f
 C/*               R.Capote, 01/99                      */
 C/*                                                    */

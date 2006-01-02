@@ -1,3 +1,8 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:16:25 $
+Ccc   * $Id: global.h,v 1.68 2006-01-02 06:16:25 herman Exp $
+            
+      
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
      &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),

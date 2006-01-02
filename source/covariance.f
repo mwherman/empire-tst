@@ -1,3 +1,6 @@
+Ccc   * $Author: 
+Ccc   * $Date: 
+Ccc   * $Id: 
       program COVARIANCE
       integer*4 PIPE,itmp,i1,i2
       character*80 command

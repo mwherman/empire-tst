@@ -1,3 +1,7 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:15:50 $
+Ccc   * $Id: empire_ctl.f,v 1.14 2006-01-02 06:15:50 herman Exp $
+                  
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting, 

@@ -1,3 +1,8 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:19:56 $
+Ccc   * $Id: ripl2empireS.h,v 1.4 2006-01-02 06:19:56 herman Exp $
+            
+
       INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7
 C
 C-----Common blocks and declarations from omretrieve.f (RIPL)

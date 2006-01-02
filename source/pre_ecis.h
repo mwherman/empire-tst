@@ -1,3 +1,7 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:19:01 $
+Ccc   * $Id: pre_ecis.h,v 1.2 2006-01-02 06:19:01 herman Exp $
+            
 c      ---------------------------------------------------------
 c      | File with common blocks and declarations for PRE_ECIS  |
 c      ---------------------------------------------------------

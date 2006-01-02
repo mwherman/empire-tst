@@ -1,3 +1,8 @@
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006-01-02 06:20:26 $
+Ccc   * $Id: systematics.f,v 1.3 2006-01-02 06:20:26 herman Exp $
+            
+      
       SUBROUTINE SYSTEMATICS(Atrg,Ztrg,iprojectile)
 Ccc
 Ccc   ********************************************************************
