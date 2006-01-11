@@ -7888,6 +7888,8 @@ $file.inp &}} -label {Create input}
         -command {exec $editor $file-xsc.kal &} -label {KALMAN x-sections} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file-cov.kal &} -label {Covariance matrices} 
+    $site_3_0.menu94 add command \
+        -command {exec gnuplot ../util/kalman/corr.plt &} -label {Covariance plot} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
