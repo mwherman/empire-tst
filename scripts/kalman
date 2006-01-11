@@ -20,11 +20,19 @@ cp $file-inp.sen SENSITIVITY.INP
 ln -s $file.c4 fort.1
 ../util/kalman/c4tokal >kalman.inp
 rm fort.1
+# correlations among experimental data
 if [ ! -s $file-expcorr.kal ]; then
    cp fort.12 $file-expcorr.kal  
 else
    cp $file-expcorr.kal fort.12     
 fi
+# correlations among model parameters
+if [ ! -s $file-parcorr.kal ]; then
+   cp fort.52 $file-parcorr.kal  
+else
+   cp $file-parcorr.kal fort.52     
+fi
+# experimental data
 if [ ! -s $file-expxsc.kal ]; then
    cp fort.10 $file-expxsc.kal  
 else
@@ -37,7 +45,12 @@ read dum
 ../util/kalman/kalman3 <kalman.inp >$file-out.kal
 mv fort.13 $file-xsc.kal
 mv fort.14 $file-cov.kal
-mv fort.18 $file-err-$MT.kal
+
+# run KALEND
+
+cat >KALEND.INP <<EOF
+$MT 0
+EOF
 gvim ../util/kalman/kalend.f
 echo 'Edit data section'
 read dum
@@ -45,7 +58,9 @@ g77 ../util/kalman/kalend.f -o ../util/kalman/kalend
 ../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
 ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
 ../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >corrplot.dat
+mv fort.18 $file-err-$MT.kal
 gnuplot ../util/kalman/corr.plt
 
 rm SENSITIVITY.INP
+rm KALEND.INP
 exit
