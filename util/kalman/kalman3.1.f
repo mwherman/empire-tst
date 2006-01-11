@@ -835,6 +835,17 @@ C***************************************
    20       ER(IR,I)=DSQRT(VG(I,I))
          WRITE(14,300) REACT(IR)
          WRITE(14,200)(INDEX+J,J=1,NENRG(IR))
+c
+c**************************************
+c     Generate ENDF-like numbers      *
+c**************************************
+         write(16,100) nenrg(ir)
+         write(16,500) (eg(ir,i),i=1,nenrg(ir))
+         write(16,500) (sg(ir,i),i=1,nenrg(ir))
+         do i=1,nenrg(ir)
+            write(16,500) (vg(i,j),j=1,nenrg(ir))
+         end do
+c
          DO 30 I=1,NENRG(IR)
             DO 40 J=1,NENRG(IR)
                IF(ER(IR,I).EQ.0.0 .OR. ER(IR,J).EQ.0.0) THEN
@@ -896,6 +907,7 @@ C***************************************
   300 FORMAT('DIAGONAL    ',A43)
   400 FORMAT('OFF-DIAGONAL',A43,/,
      &       '            ',A43)
+  500 FORMAT(6(1PE12.5))
       RETURN
       END
 C
