@@ -1,4 +1,4 @@
-      INTEGER NS,NENRG,I,J,K,iskip
+      INTEGER NS,NENRG,I,J,K,iskip,nskip
       PARAMETER(NS=100)
       REAL*8 S(NS),E(NS),D(NS),V(NS,NS),C(NS,NS),X(NS)
 C
@@ -21,23 +21,50 @@ C Gd156
 C     DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
 C    1      6.41560E+04,1.54583E+02,0.0   ,0.0  , 0.002227/
 C Gd157
-c      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c     1      6.41570E+04,1.55576E+02,0.0   ,0.0  , 0.0548811/
+      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
+      1      6.41570E+04,1.55576E+02,0.0   ,0.0  , 0.0548811/
 C Gd158
 c       DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
 c      1      6.41580E+04,1.56567E+02,0.0   ,0.0  , 0.0099495/
 C Gd160
-      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth  /
-     1      6.41600E+04,1.58553E+02,0.0   ,0.0  , 0.0096620/
+c      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth  /
+c     1      6.41600E+04,1.58553E+02,0.0   ,0.0  , 0.0096620/
 
 
       DATA MTL,   NL, MAT1,  MT1,   NC,   NI,   LS,   LB/
      1       0,    1,    0,  102,    0,    1,    1,    5/
+      OPEN(5, FILE='KALEND.INP', STATUS='OLD') 
 C
 C     MT number
-      MT1 = 102
+      nskip = 0
+      READ(5,*) MT1, nskip
+      IF(nskip.EQ.0) THEN
+         IF(MT1.EQ.1) THEN
+            nskip = 0
+         ELSEIF(MT1.EQ.2) THEN
+            nskip = 1
+         ELSEIF(MT1.EQ.18) THEN
+            nskip = 2
+         ELSEIF(MT1.EQ.102) THEN
+            nskip = 3
+         ELSEIF(MT1.EQ.4) THEN
+            nskip = 4
+         ELSEIF(MT1.EQ.16) THEN
+            nskip = 5
+         ELSEIF(MT1.EQ.17) THEN    ! NOTE from here on the actual positions depend on EMPIRE input!
+            nskip = 6
+         ELSEIF(MT1.EQ.103) THEN
+            nskip = 7
+         ELSEIF(MT1.EQ.22) THEN
+            nskip = 8
+         ELSEIF(MT1.EQ.107) THEN
+            nskip = 11
+         ELSE
+            STOP 'MT not supported'
+         ENDIF
+      ENDIF
 
-      do k=1,3
+      do k=1,nskip    !skip cov. matrices before the one actually needed
          read(16,2000) nenrg
          read(16,2010)(x(i),i=1,nenrg)
          read(16,2010)(x(i),i=1,nenrg)
