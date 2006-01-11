@@ -65,7 +65,15 @@ C-----get number of parameters
          else if(mt .eq. 2) then
             j = 2
          else if(mt .eq. 1) then
-            j = 2
+            j = 1
+         else if(mt .eq. 103) then
+            j = 8  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt .eq. 107) then
+            j = 12  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt .eq. 22) then
+            j = 9  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt .eq. 28) then
+            j = 13  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
          end if
 
          write(6,200) j,1
