@@ -5,39 +5,13 @@ C
       REAL*8  ZA,AWR,XMF1,XLFS1,ETH
       INTEGER MTL,NL,MAT1,MT1,NC,NI,LS,LB,NT,NE
 
-C Gd152
-c      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c     1      6.41520E+04,1.50615E+02,0.0   ,0.0  , 0.05  /
-C Gd153
-c     DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c    1      6.41530E+04,1.51608E+02,0.0   ,0.0  , 1.29e-04/
-C Gd154
-c      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c     1      6.41540E+04,1.52599E+02,0.0   ,0.0  , 0.05  /
-C Gd155
-c       DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c      1      6.41550E+04,1.53592E+02,0.0   ,0.0  , 0.0604/
-C Gd156
-C     DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-C    1      6.41560E+04,1.54583E+02,0.0   ,0.0  , 0.002227/
-C Gd157
-      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-      1      6.41570E+04,1.55576E+02,0.0   ,0.0  , 0.0548811/
-C Gd158
-c       DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth   /
-c      1      6.41580E+04,1.56567E+02,0.0   ,0.0  , 0.0099495/
-C Gd160
-c      DATA  ZA         ,AWR        ,XMF1  ,XLFS1, eth  /
-c     1      6.41600E+04,1.58553E+02,0.0   ,0.0  , 0.0096620/
-
-
-      DATA MTL,   NL, MAT1,  MT1,   NC,   NI,   LS,   LB/
-     1       0,    1,    0,  102,    0,    1,    1,    5/
       OPEN(5, FILE='KALEND.INP', STATUS='OLD') 
 C
 C     MT number
       nskip = 0
-      READ(5,*) MT1, nskip
+      READ(5,*) MT1, MAT1, nskip
+C     Open ENDF file and get needed data
+      CALL READENDF(MT1, MAT1, ZA, AWR, XMF1, XLFS1, eth) 
       IF(nskip.EQ.0) THEN
          IF(MT1.EQ.1) THEN
             nskip = 0
@@ -198,7 +172,6 @@ c      NE=NE+3
       WRITE(6,2020) 0.0,0.0,LS,LB,NT,NE
       WRITE(6,2030)(E(I)*1E+06,I=1,NE),
      1             ((V(I,J),J=I,NE-1),I=1,NE-1)
-
       DO I=1,NE
          write(18,2040) e(i),sqrt(v(i,i))*100.0
          DO J=1,NE
@@ -207,9 +180,7 @@ c      NE=NE+3
          write(17,*)
       end do
       write(18,*)
-
       write(6,*)
-
  2000 FORMAT(I5)
  2010 FORMAT(6E12.5)
  2020 FORMAT(2(1PE13.6),4I11)
@@ -217,3 +188,50 @@ c      NE=NE+3
  2040 FORMAT(3(1X,1PE13.6))
  3000 STOP
       END
+
+      SUBROUTINE READENDF(MT1, MAT1, ZA, AWR, XMF1, XLFS1, ETH) 
+      REAL*8  ZA,AWR,XMF1,XLFS1,ETH
+      INTEGER MAT1,MT1
+C  Read ENDF file and extract various data
+      CHARACTER*66 C66
+C* Filenames and logical file units
+      DATA LIN /12/
+C   The two uqntities below are set to 0 since we only treat covariances
+C   within one reation of a single material
+      XMF1 = 0.0
+      XLFS1 = 0.0
+      OPEN(LIN, FILE='ENDF.DAT', STATUS='unknown') 
+C* Find out the material
+      READ (LIN,940) C66,MAT,MF,MT,NC !top line
+  10  READ (LIN,940) C66,MAT,MF,MT,NC !line 1
+      IF(MAT.LT.0) STOP 'MAT MISSING IN THE ENDF FILE'
+C  In case MAT1=0 use the first material in the file      
+      IF(MAT1.EQ.0) MAT1 = MAT
+      IF(MAT.NE.MAT1) GOTO 10
+      READ (C66,924) ZA, AWR
+  20  READ (LIN,940) C66,MAT,MF,MT,NC 
+      IF(MF.NE.3 .OR. MT.NE.MT1) GOTO 20
+      READ (LIN,940) C66,MAT,MF,MT,NC 
+      READ (LIN,940) C66,MAT,MF,MT,NC 
+  30  READ (LIN,940) C66,MAT,MF,MT,NC 
+      IF(MF.NE.3.AND.MT.NE.MT1) STOP 'MT MISSING OR LACKS NON-ZERO XS'
+      READ (C66,925) E1, XSEC1, E2, XSEC2, E3, XSEC3 
+      IF(XSEC1.GT.0) THEN
+         ETH = E1*1.0E-6
+         RETURN
+      ELSEIF(XSEC2.GT.0) THEN
+         ETH = E2*1.0E-6
+         RETURN
+      ELSEIF(XSEC3.GT.0) THEN
+         ETH = E3*1.0E-6
+         RETURN
+      ELSE 
+         GOTO 30
+      ENDIF
+C*
+  940 FORMAT(A66,I4,I2,I3,I5)
+  924 FORMAT(2F11.0,4I11)
+  925 FORMAT(6F11.0)
+  930 FORMAT(44x,I11)
+      END
+
