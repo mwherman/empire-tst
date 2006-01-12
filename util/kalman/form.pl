@@ -10,15 +10,6 @@ if($mt eq ''){
     $mt = '102';
 }
 
-#$mat = 6425; # Gd152
-#$mat = 6428; # Gd153
-#$mat = 6431; # Gd154
-#$mat = 6434; # Gd155
-#$mat = 6437; # Gd156
-#$mat = 6440; # Gd157
-#$mat = 6443; # Gd158
-#$mat = 6449; # Gd160
-
 open(KALEND,"../util/kalman/kalend |");
 
 $cnt =    1;
