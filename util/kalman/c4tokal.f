@@ -77,7 +77,7 @@ C-----get number of parameters
          end if
 
          write(6,200) j,1
-         write(6,300) 1.0
+         write(6,300) 0.0
       end do
 
 
