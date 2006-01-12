@@ -49,12 +49,9 @@ mv fort.14 $file-cov.kal
 # run KALEND
 
 cat >KALEND.INP <<EOF
-$MT 0
+$MT $MAT 0
 EOF
-gvim ../util/kalman/kalend.f
-echo 'Edit data section'
-read dum
-g77 ../util/kalman/kalend.f -o ../util/kalman/kalend
+ln -s $file.endf ENDF.DAT
 ../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
 ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
 ../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >corrplot.dat
@@ -63,4 +60,5 @@ gnuplot ../util/kalman/corr.plt
 
 rm SENSITIVITY.INP
 rm KALEND.INP
+rm ENDF.DAT
 exit
