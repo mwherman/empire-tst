@@ -176,7 +176,7 @@ C-
       CHARACTER*(LCH)  ENT(MXEN)
       CHARACTER*9      AOU,POU,ELV,ELW
       CHARACTER*3      LB3
-      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR)
+      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR), CHAR1, CHAR2
       LOGICAL          EXST
       DIMENSION        IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
      &                ,NSE(MXEN),ID3(MXIR),ID4(MXIR)
@@ -663,6 +663,24 @@ C* Rewind if next entry ILN appears before the current buffer
           JJ=JLN-I1+1
 c...          print *,'i1,i2,jln',i1,i2,jln,JJ
           REC=RC6(JJ)
+CMH Move year to adjucent to the accession number
+          DO ichar=98,122
+             IF(REC(ichar:ichar) .EQ.'(' ) THEN
+                CHAR1=REC(ichar+1:ichar+1)
+                CHAR2=REC(ichar+2:ichar+2)
+                REC(ichar:ichar)=' '
+                REC(ichar+1:ichar+1)=' '
+                REC(ichar+2:ichar+2)=' '
+                REC(ichar+3:ichar+3)=' '
+                REC(119:119)='('
+                REC(120:120)=CHAR1
+                REC(121:121)=CHAR2
+                REC(122:122)=')'
+                GOTO 599
+             ENDIF
+          ENDDO
+  599     CONTINUE        
+          
 C* Suppress printout of negative cross sections
           READ (REC,941,ERR=801) MF,XS
           IF(MF.NE.3 .OR. XS.GT.0) WRITE(LOU,901) REC
