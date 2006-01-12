@@ -29,7 +29,7 @@ set zrange [-100 : 100]
 set mztics  5
 set ztics  50
 
-#set pm3d map at b
+#set pm3d map
 set pm3d 
 set output "corr155mt102.eps"
 splot "corrplot.dat" u 1:2:($3*100) noti w l
