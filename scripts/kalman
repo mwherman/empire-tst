@@ -1,24 +1,29 @@
 #! /bin/sh -
 #SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION)
 file=$1
-MAT=$2
-MT=$3
+MAT=$3
+MT=$2
 work=`pwd`
 if [ "$MAT" = "" ]
    then
    MAT=1111
-fi
+findex.htmli
 if [ "$MT" = "" ]
    then
    MT=102
 fi
 
+# Input for c4tokal and kalend
+cat >KALEND.INP <<EOF
+$MT $MAT 0
+EOF
 cp $file-inp.sen SENSITIVITY.INP
 
 ../util/kalman/genkal.pl $file
 
 ln -s $file.c4 fort.1
-../util/kalman/c4tokal >kalman.inp
+
+../util/kalman/c4tokal<KALEND.INP >KALMAN.INP
 rm fort.1
 # correlations among experimental data
 if [ ! -s $file-expcorr.kal ]; then
@@ -40,17 +45,14 @@ else
 fi
 
 echo 'Edit Kalman input'
-gvim kalman.inp
+gvim KALMAN.INP
 read dum
-../util/kalman/kalman3 <kalman.inp >$file-out.kal
+../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
 mv fort.13 $file-xsc.kal
 mv fort.14 $file-cov.kal
 
 # run KALEND
 
-cat >KALEND.INP <<EOF
-$MT $MAT 0
-EOF
 ln -s $file.endf ENDF.DAT
 ../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
 ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
@@ -60,5 +62,6 @@ gnuplot ../util/kalman/corr.plt
 
 rm SENSITIVITY.INP
 rm KALEND.INP
+rm KALMAN.INP
 rm ENDF.DAT
 exit
