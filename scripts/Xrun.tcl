@@ -7830,6 +7830,28 @@ $file.inp &}} -label {Create input}
         -label {Plot list} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4 
+    $site_3_0.menu93 add separator  
+    $site_3_0.menu93 add cascade \
+        -menu "$site_3_0.menu93.men87" -command {} -label {KALMAN for} 
+    set site_5_0 $site_3_0.menu93
+    menu $site_5_0.men87 \
+        -tearoff 0 
+    $site_5_0.men87 add radiobutton \
+        -value 1 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {Total MT=1}
+    $site_5_0.men87 add radiobutton \
+        -value 2 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {Elastic MT=2}
+    $site_5_0.men87 add radiobutton \
+        -value 4 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {Inelastic MT=4}
+    $site_5_0.men87 add radiobutton \
+        -value 16 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {(z,2n) MT=16}
+    $site_5_0.men87 add radiobutton \
+        -value 17 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {(z,3n) MT=17}
+    $site_5_0.men87 add radiobutton \
+        -value 102 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {(n,g) MT=102}
+    $site_5_0.men87 add radiobutton \
+        -value 103 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {(n,p) MT=103}
+    $site_5_0.men87 add radiobutton \
+        -value 107 -variable MTKAL -command {exec ../scripts/kalman  $file $MTKAL $mat 0} -label {(n,a) MT=107}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
