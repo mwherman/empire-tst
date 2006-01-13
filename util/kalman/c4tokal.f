@@ -1,6 +1,6 @@
       parameter(NDATA=50000,NSEC=1000)
       real*8       x(NDATA),y(NDATA),z(NDATA),dat(8)
-      integer      i,j,k,n(NSEC),msec, nparam
+      integer      i,j,j1,k,n(NSEC),msec, nparam, mt1
       integer      iza,mf,mt,kentry,ksubent,kentold,ksubold
       character*25 ref
       data         kentold,ksubold/0,0/
@@ -8,6 +8,32 @@
 C-----get number of parameters
       OPEN(10, FILE='SENSITIVITY.INP', STATUS='old')
       nparam = 0
+      READ(5,*) MT1
+          if(mt1 .eq. 102) then
+            j1 = 4
+         else if(mt1 .eq. 16) then
+            j1 = 6
+         else if(mt1 .eq. 17) then
+            j1 = 7
+         else if(mt1 .eq. 18) then
+            j1 = 3
+         else if(mt1 .eq. 4) then
+            j1 = 5
+         else if(mt1 .eq. 2) then
+            j1 = 2
+         else if(mt1 .eq. 1) then
+            j1 = 1
+         else if(mt1 .eq. 103) then
+            j1 = 8  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt1 .eq. 107) then
+            j1 = 12  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt1 .eq. 22) then
+            j1 = 9  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else if(mt1 .eq. 28) then
+            j1 = 13  !DEPENDS ON NUMBER OF EMISSIONS (here 3 neutrons)
+         else 
+            j1 = 0
+         end if
   500 READ(10,'(a7)',end=3000) ref
       IF(ref.EQ.'       ' ) GOTO 3000
       nparam = nparam + 1 
@@ -77,7 +103,12 @@ C-----get number of parameters
          end if
 
          write(6,200) j,1
-         write(6,300) 0.0
+         IF(j.EQ.j1) THEN
+            write(6,300) 1.0
+         ELSE
+            write(6,300) 0.0
+         ENDIF
+          
       end do
 
 
