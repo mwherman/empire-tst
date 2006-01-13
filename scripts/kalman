@@ -7,7 +7,7 @@ work=`pwd`
 if [ "$MAT" = "" ]
    then
    MAT=1111
-findex.htmli
+fi
 if [ "$MT" = "" ]
    then
    MT=102
@@ -45,8 +45,8 @@ else
 fi
 
 echo 'Edit Kalman input'
-gvim KALMAN.INP
-read dum
+emacs KALMAN.INP
+#read dum
 ../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
 mv fort.13 $file-xsc.kal
 mv fort.14 $file-cov.kal
