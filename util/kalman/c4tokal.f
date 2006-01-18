@@ -61,7 +61,7 @@ C-----get number of parameters
       rewind(1)
 
       write(6,*)  'INPUT'
-      write(6,200) msec,nparam,0,0
+      write(6,200) msec,nparam,0,0,1
       write(6,200)(i,i=1,nparam)
 
       do k=1,msec
