@@ -4,6 +4,10 @@
 C
       REAL*8  ZA,AWR,XMF1,XLFS1,ETH
       INTEGER MTL,NL,MAT1,MT1,NC,NI,LS,LB,NT,NE
+      LS = 1
+      LB = 5
+      NL = 1
+      NI = 1
 
       OPEN(5, FILE='KALEND.INP', STATUS='OLD') 
 C
@@ -168,7 +172,8 @@ c      NE=NE+3
 
       NT = NE*(NE+1)/2
       WRITE(6,2020) ZA,AWR,0,MTL,0,NL
-      WRITE(6,2020) XMF1,XLFS1,MAT1,MT1,NC,NI
+C     WRITE(6,2020) XMF1,XLFS1,MAT1,MT1,NC,NI
+      WRITE(6,2020) XMF1,XLFS1,0,MT1,NC,NI
       WRITE(6,2020) 0.0,0.0,LS,LB,NT,NE
       WRITE(6,2030)(E(I)*1E+06,I=1,NE),
      1             ((V(I,J),J=I,NE-1),I=1,NE-1)
