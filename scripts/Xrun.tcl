@@ -7853,6 +7853,11 @@ $file.inp &}} -label {Create input}
          -command {exec  xterm -e ../scripts/kalman  $file 103 $mat 0} -label {(n,p) MT=103}
     $site_5_0.men87 add command \
          -command {exec  xterm -e ../scripts/kalman  $file 107 $mat 0} -label {(n,a) MT=107}
+
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/mergeMF33 $file 
+exec xterm -e mv $file-m.endf $file.endf
+exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
