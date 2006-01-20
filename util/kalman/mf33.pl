@@ -76,8 +76,14 @@ if($s){
                     $k =    $j + $i*$ne - $i*($i+1)/2;
                 }
                 for( $jp = 0; $jp < $finemesh; $jp++ ){
+		    if($err[$i]>0){
+		    if($err[$j]>0){
                     printf(" % 11.4e % 11.4e % 11.4e\n",
                            $ei+$ip*$dei,$ej+$jp*$dej,$d[$k]/$err[$j]/$err[$i]);
+		}}else{
+                    printf(" % 11.4e % 11.4e % 11.4e\n",
+                           $ei+$ip*$dei,$ej+$jp*$dej,0);
+                }
                 }
             }
             print "\n";
