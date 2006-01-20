@@ -16,6 +16,7 @@ C     MT number
       READ(5,*) MT1, MAT1, nskip
 C     Open ENDF file and get needed data
       CALL READENDF(MT1, MAT1, ZA, AWR, XMF1, XLFS1, eth) 
+      eth = eth*0.999
       IF(nskip.EQ.0) THEN
          IF(MT1.EQ.1) THEN
             nskip = 0
