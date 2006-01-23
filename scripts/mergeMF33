@@ -36,6 +36,7 @@ if { $MATR == 0 } {
   }
 }
 set line_mem $line
+if { $MF == $MFR } {set line_mem ""}
 # merge all covariance files
 exec xterm -e ../scripts/mergecov $file $MATR
 set modfile MT33
@@ -59,10 +60,12 @@ while { [string length $line] > 0 } {
                break
        }
 }
-#Add FEND record
-puts  $outendf [format "                                                                  %s 0  0    0" $MATR ]
+if { $line_mem != "" } {
+   #Add FEND record
+   puts  $outendf [format "                                                                  %s 0  0    0" $MATR ]
+   puts $outendf $line_mem
+}
 #Copy rest of the original file
-puts $outendf $line_mem
 gets $basendf line
 while { [string length $line] > 0 } {
        set MATm [string trim [string range $line 66 69]]
