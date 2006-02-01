@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-09 16:03:53 $
-Ccc   * $Id: input.f,v 1.189 2005-12-09 16:03:53 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-02-01 22:49:03 $
+Ccc   * $Id: input.f,v 1.190 2006-02-01 22:49:03 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2507,7 +2507,7 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, CNOrin(22), EFItin(22), GAPin(2), HOMin,
+      DOUBLE PRECISION ALSin, CNOrin(6,6), EFItin(6,6), GAPin(2), HOMin,
      &                 WIDexin, BET2in, GRIn(2)
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /R250COM/ INDexf,INDexb,BUFfer
@@ -2534,8 +2534,11 @@ C-----initialization of TRISTAN input parameters
       BET2in = 0.0
       GRIn(1) = 5.0
       GRIn(2) = 5.0
-      DO i = 1, 22
-         CNOrin(i) = 1.0
+      DO i = 1, 6                                                        ! nilsson_newest
+         do j = 1,6                                                      ! nilsson_newest
+            CNOrin(i,j) = 1.0                                            ! nilsson_newest
+            EFItin(i,j) = 0.0D0                                          ! nilsson_newest
+         enddo                                                           ! nilsson_newest
       ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
 C
@@ -2549,7 +2552,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b31  |'
+     &           '                       |  E M P I R E  -  2.19.b32  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -5006,38 +5009,88 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'EFIT  ') THEN
-            EFItin(i1 + 1) = val
-            IF (EFItin(i1 + 1).GT.0.0D0) WRITE (6,
-     &'('' Field strength of multipolarity'',I2,'' fitted to the level a
-     &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
-            IF (EFItin(i1 + 1).GT.0.0D0) WRITE (12,
-     &'('' Field strength of multipolarity'',I2,'' fitted to the level a
-     &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
-            GOTO 100
+            EFItin(i1 + 1,i2+1) = val                                    ! nilsson_newest
+            IF (EFItin(i1 + 1,i2+1).GT.0.0D0) WRITE (6,                  ! nilsson_newest
+     &'(''Field strength of multipolarity/k'', I1''/''I1,''fitted to the ! nilsson_newest
+     &level at '',F6.3,'' MeV'')') i1,i2, EFItin(i1 + 1,i2 + 1)          ! nilsson_newest
+            IF (EFItin(i1 + 1,i2+1).GT.0.0D0) WRITE (12,                 ! nilsson_newest
+     &'(''Field strength of multipolarity/k'', I1''/''I1,''fitted to the ! nilsson_newest
+     &level at '',F6.3,'' MeV'')') i1,i2, EFItin(i1 + 1,i2 + 1)          ! nilsson_newest
+           GOTO 100
          ENDIF
+C-----
+c        IF (name.EQ.'EFIT  ') THEN
+c           EFItin(i1 + 1) = val
+c           IF (EFItin(i1 + 1).GT.0.0D0) WRITE (6,
+c    &'('' Field strength of multipolarity'',I2,'' fitted to the level a
+c    &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
+c           IF (EFItin(i1 + 1).GT.0.0D0) WRITE (12,
+c    &'('' Field strength of multipolarity'',I2,'' fitted to the level a
+c    &t '',F6.3,'' MeV'')') i1, EFItin(i1 + 1)
+c           GOTO 100
+c        ENDIF
 C-----
          IF (name.EQ.'RESNOR') THEN
             IF(i1.EQ.0) THEN
-               DO i=1,5
-                  CNOrin(i + 1) = val
+               DO i = 1, 6  
+                  DO j = 1,6
+                     CNOrin(i,j) = val  
+                  ENDDO
                ENDDO
                WRITE (6,
-     &'('' Response functions for first 5 l transfers in MSD normalized
-     &by factor '',F6.3)') val
+     &'('' All response functions in MSD normalized by factor '',F6.3)')
+     &         val
                WRITE (12,
-     &'('' Response functions for first 5 l transfers in MSD normalized
-     &by factor '',F6.3)') val
+     &'('' All response functions in MSD normalized by factor '',F6.3)')
+     &         val
             GOTO 100
             ENDIF
-            CNOrin(i1 + 1) = val
+
+            IF(i2.EQ.0) THEN
+                  DO j = 1,6
+                     CNOrin(i1+1,j) = val  
+                  ENDDO
             WRITE (6,
-     &'('' Response function for l transfer'',I3,'' normalized by factor
-     & '',F6.3)') i1, CNOrin(i1 + 1)
+     &'(''Response function for multipolarity'', I1,'' normalized by fac
+     &tor '',F6.3)') i1, val
             WRITE (12,
-     &'('' Response function for l transfer'',I3,'' normalized by factor
-     & '',F6.3)') i1, CNOrin(i1 + 1)
+     &'(''Response function for multipolarity'', I1,'' normalized by fac
+     &tor '',F6.3)') i1, val
+            GOTO 100
+            ENDIF
+
+            CNOrin(i1 + 1,i2 + 1) = val                                  ! nilsson_newest
+            WRITE (6,
+     &'(''Response function for multipolarity/k'', I1,''/''I1,''normaliz ! nilsson_newest
+     &ed by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)               ! nilsson_newest
+            WRITE (12,
+     &'(''Response function for multipolarity/k'', I1,''/''I1,''normaliz ! nilsson_newest
+     &ed by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)               ! nilsson_newest
             GOTO 100
          ENDIF
+
+c        IF (name.EQ.'RESNOR') THEN
+c           IF(i1.EQ.0) THEN
+c              DO i=1,5
+c                 CNOrin(i + 1) = val
+c              ENDDO
+c              WRITE (6,
+c    &'('' Response functions for first 5 l transfers in MSD normalized
+c    &by factor '',F6.3)') val
+c              WRITE (12,
+c    &'('' Response functions for first 5 l transfers in MSD normalized
+c    &by factor '',F6.3)') val
+c           GOTO 100
+c           ENDIF
+c           CNOrin(i1 + 1) = val
+c           WRITE (6,
+c    &'('' Response function for l transfer'',I3,'' normalized by factor
+c    & '',F6.3)') i1, CNOrin(i1 + 1)
+c           WRITE (12,
+c    &'('' Response function for l transfer'',I3,'' normalized by factor
+c    & '',F6.3)') i1, CNOrin(i1 + 1)
+c           GOTO 100
+c        ENDIF
 C-----
          IF (name.EQ.'DEFMSD') THEN
             BET2in = val
