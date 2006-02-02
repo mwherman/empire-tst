@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-01 22:49:03 $
-Ccc   * $Id: input.f,v 1.190 2006-02-01 22:49:03 herman Exp $
+Ccc   * $Date: 2006-02-02 23:32:54 $
+Ccc   * $Id: input.f,v 1.191 2006-02-02 23:32:54 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5009,15 +5009,26 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'EFIT  ') THEN
-            EFItin(i1 + 1,i2+1) = val                                    ! nilsson_newest
-            IF (EFItin(i1 + 1,i2+1).GT.0.0D0) WRITE (6,                  ! nilsson_newest
-     &'(''Field strength of multipolarity/k'', I1''/''I1,''fitted to the ! nilsson_newest
-     &level at '',F6.3,'' MeV'')') i1,i2, EFItin(i1 + 1,i2 + 1)          ! nilsson_newest
-            IF (EFItin(i1 + 1,i2+1).GT.0.0D0) WRITE (12,                 ! nilsson_newest
-     &'(''Field strength of multipolarity/k'', I1''/''I1,''fitted to the ! nilsson_newest
-     &level at '',F6.3,'' MeV'')') i1,i2, EFItin(i1 + 1,i2 + 1)          ! nilsson_newest
-           GOTO 100
+            EFItin(i1 + 1,i2+1) = val                                    ! nilsson
+            IF (EFItin(i1 + 1,i2+1).GT.0.0D0) then                       ! nilsson
+               if (i2.eq.0) then                                         ! nilsson
+                  WRITE (6,
+     &'('' Field strength of multipolarity'',I2,'' or multipolarity/k'', ! nilsson
+     &I2''/''I1,'' fitted to the level at '',F6.3,'' MeV'')')i1, i1,i2,  ! nilsson
+     &EFItin(i1 + 1,i2 + 1)                                              ! nilsson
+                  WRITE (12,
+     &'('' Field strength of multipolarity'',I2,'' or multipolarity/k'', ! nilsson
+     &I2''/''I1,'' fitted to the level at '',F6.3,'' MeV'')')i1, i1,i2,  ! nilsson
+     &EFItin(i1 + 1,i2 + 1)                                              ! nilsson
+               else                                                      ! nilsson
+                  WRITE (12,
+     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
+     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
+               endif                                                     ! nilsson
+            ENDIF                                                        ! nilsson
+            GOTO 100
          ENDIF
+
 C-----
 c        IF (name.EQ.'EFIT  ') THEN
 c           EFItin(i1 + 1) = val
@@ -5032,9 +5043,9 @@ c        ENDIF
 C-----
          IF (name.EQ.'RESNOR') THEN
             IF(i1.EQ.0) THEN
-               DO i = 1, 6  
-                  DO j = 1,6
-                     CNOrin(i,j) = val  
+               DO i = 1, 5
+                  DO j = 1,i + 1
+                     CNOrin(i + 1,j) = val
                   ENDDO
                ENDDO
                WRITE (6,
@@ -5043,32 +5054,29 @@ C-----
                WRITE (12,
      &'('' All response functions in MSD normalized by factor '',F6.3)')
      &         val
-            GOTO 100
+               GOTO 100
+            ELSE IF(i2.EQ.0) THEN                                        ! nilsson
+               DO j = 1, i1 + 1                                          ! nilsson
+                  CNOrin(i1 + 1,j) = val                                 ! nilsson
+               ENDDO                                                     ! nilsson
+               WRITE (6,
+     &'('' Response function for l transfer'',I2,'' or l/k transfer''    ! nilsson
+     &I2,''/''I1,'' normalized by factor'',F6.3)') i1,i1,i2, val         ! nilsson
+               WRITE (12,
+     &'('' Response function for l transfer'', I3,'' or l/k transfer''   ! nilsson
+     &I2,''/''I1,'' normalized by factor '',F6.3)') i1,i1,i2, val        ! nilsson
+               GOTO 100
+            ELSE
+               CNOrin(i1 + 1,i2 + 1) = val                               ! nilsson
+               WRITE (6,
+     &'('' Response function for l/k transfer'', I2,''/''I1,'' normalize ! nilsson
+     &d by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)                ! nilsson
+               WRITE (12,
+     &'('' Response function for l/k transfer'', I2,''/''I1,'' normalize ! nilsson
+     &d by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)                ! nilsson
+               GOTO 100
             ENDIF
-
-            IF(i2.EQ.0) THEN
-                  DO j = 1,6
-                     CNOrin(i1+1,j) = val  
-                  ENDDO
-            WRITE (6,
-     &'(''Response function for multipolarity'', I1,'' normalized by fac
-     &tor '',F6.3)') i1, val
-            WRITE (12,
-     &'(''Response function for multipolarity'', I1,'' normalized by fac
-     &tor '',F6.3)') i1, val
-            GOTO 100
-            ENDIF
-
-            CNOrin(i1 + 1,i2 + 1) = val                                  ! nilsson_newest
-            WRITE (6,
-     &'(''Response function for multipolarity/k'', I1,''/''I1,''normaliz ! nilsson_newest
-     &ed by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)               ! nilsson_newest
-            WRITE (12,
-     &'(''Response function for multipolarity/k'', I1,''/''I1,''normaliz ! nilsson_newest
-     &ed by factor '',F6.3)') i1,i2, CNOrin(i1 + 1,i2 + 1)               ! nilsson_newest
-            GOTO 100
          ENDIF
-
 c        IF (name.EQ.'RESNOR') THEN
 c           IF(i1.EQ.0) THEN
 c              DO i=1,5
