@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-02 23:32:54 $
-Ccc   * $Id: input.f,v 1.191 2006-02-02 23:32:54 herman Exp $
+Ccc   * $Date: 2006-02-03 22:24:13 $
+Ccc   * $Id: input.f,v 1.192 2006-02-03 22:24:13 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5008,7 +5008,7 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF (name.EQ.'EFIT  ') THEN
+       IF (name.EQ.'EFIT  ') THEN
             EFItin(i1 + 1,i2+1) = val                                    ! nilsson
             IF (EFItin(i1 + 1,i2+1).GT.0.0D0) then                       ! nilsson
                if (i2.eq.0) then                                         ! nilsson
@@ -5021,6 +5021,9 @@ C-----
      &I2''/''I1,'' fitted to the level at '',F6.3,'' MeV'')')i1, i1,i2,  ! nilsson
      &EFItin(i1 + 1,i2 + 1)                                              ! nilsson
                else                                                      ! nilsson
+                  WRITE (6,
+     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
+     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
                   WRITE (12,
      &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
      & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
@@ -5028,7 +5031,6 @@ C-----
             ENDIF                                                        ! nilsson
             GOTO 100
          ENDIF
-
 C-----
 c        IF (name.EQ.'EFIT  ') THEN
 c           EFItin(i1 + 1) = val
