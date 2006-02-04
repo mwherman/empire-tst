@@ -1,8 +1,3 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-01-02 06:16:25 $
-Ccc   * $Id: global.h,v 1.68 2006-01-02 06:16:25 herman Exp $
-            
-      
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
      &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),
@@ -104,7 +99,7 @@ Ccc   * $Id: global.h,v 1.68 2006-01-02 06:16:25 herman Exp $
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,
      &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
-     &                 UGRid(0:nfisenmax,nfhump), VEQ,
+     &                 UGRid(0:nfisenmax,nfhump), VEQ, CONteq,
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
      &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
      &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
@@ -174,7 +169,7 @@ Ccc   * $Id: global.h,v 1.68 2006-01-02 06:16:25 herman Exp $
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
-      COMMON /MOMENT/ MOMparcrt, MOMortcrt, VEQ, HOEq, DEFeq
+      COMMON /MOMENT/ MOMparcrt, MOMortcrt, VEQ, HOEq, DEFeq, CONteq
       COMMON /NUMHLP_I/ LTUrbo
       COMMON /NUMHLP_R/ RORed, ARGred, EXPmax, EXPdec, TURbo
       COMMON /TLCOEF/ TL

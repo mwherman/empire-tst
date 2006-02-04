@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-09 16:05:23 $
-Ccc   * $Id: main.f,v 1.144 2005-12-09 16:05:23 Capote Exp $
+Ccc   * $Date: 2006-02-04 18:53:06 $
+Ccc   * $Id: main.f,v 1.145 2006-02-04 18:53:06 Capote Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -568,7 +568,9 @@ C-----distributions according to Kalbach systematics
 C-----
       totemis = 0.d0
       IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
-         ftmp = CSFus - xsinl - xsinlcont
+C        ftmp = CSFus - xsinl - xsinlcont
+C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission so it should not used for normalization  
+         ftmp = CSFus - xsinlcont
          CALL PCROSS(ftmp,totemis)
       ENDIF          ! PCRoss done
 
@@ -800,6 +802,12 @@ C-----start DO loop over decaying nuclei
                ENDDO
             ENDDO
          ENDDO
+
+         WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)), 
+     &	 SYMb(nnuc), INT(A(nnuc))
+1234     FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,  
+     &   ' (',I3,'-',A2,'-',I3,')' ) 
+
          IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
             CALL READ_INPFIS(nnuc)
             nrbarc1 = NRBarc

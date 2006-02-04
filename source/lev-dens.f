@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-14 07:14:52 $
-Ccc   * $Id: lev-dens.f,v 1.45 2005-07-14 07:14:52 Capote Exp $
+Ccc   * $Date: 2006-02-04 18:53:06 $
+Ccc   * $Id: lev-dens.f,v 1.46 2006-02-04 18:53:06 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1901,7 +1901,7 @@ C-----where continuum starts,ends,steps in between
          DO nr = 1, NRFdis(Ib)
             IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
          ENDDO
-         IF (NRBarc.EQ.3) XMInn(2) = 0.0001
+         IF (NRBarc.EQ.3) XMInn(2) = CONteq
          IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
             xmax = XMInn(Ib) + 4.D0
          ELSE
@@ -1924,7 +1924,7 @@ C-----where continuum starts,ends,steps in between
             IF (EFDism(nr,Mmod).GT.XMInnm(Mmod)) XMInnm(Mmod)
      &          = EFDism(nr,Mmod)
          ENDDO
-         IF (NRBarc.EQ.3) XMInn(2) = 0.0001
+C        IF (NRBarc.EQ.3) XMInn(2) = 0.0001
                                            !! Should be checked for multimodal
          IF (excn1.LE.(EFBm(Mmod) + XMInnm(Mmod))) THEN
             xmax = XMInn(Mmod) + 4.

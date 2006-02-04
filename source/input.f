@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-03 22:24:13 $
-Ccc   * $Id: input.f,v 1.192 2006-02-03 22:24:13 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2006-02-04 18:53:06 $
+Ccc   * $Id: input.f,v 1.193 2006-02-04 18:53:06 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -174,11 +174,8 @@ C-----------set level density parameters
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
-
             ATIlfi(nnuc) = 1.
-
             FISbin(nnuc) = 1.
-
             FISbou(nnuc) = 1.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
@@ -2511,7 +2508,7 @@ C
      &                 WIDexin, BET2in, GRIn(2)
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /R250COM/ INDexf,INDexb,BUFfer
-      COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin, 
+      COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin,
      &                BET2in, GRIn
 C
 C Local variables
@@ -4513,7 +4510,7 @@ C              FISbin(nnuc) = val + grand()*sigma
 
                FISbin(nnuc) = val + (2*drand()-1.)*sigma
 
-              WRITE (6,                                                                                    
+              WRITE (6,
 
      &        '('' Inner fission barrier factor sampled value : '',
 
@@ -4603,7 +4600,7 @@ C              FISbou(nnuc) = val + grand()*sigma
 
                FISbou(nnuc) = val + (2*drand()-1.)*sigma
 
-               WRITE (6,                                                                                   
+               WRITE (6,
 
      &         '('' Outer fission barrier factor sampled value : '',
 
@@ -5740,7 +5737,7 @@ C--------------Calculate sum for the average normalization factor
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
-            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave        
+            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp
@@ -7879,25 +7876,15 @@ C
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
 
-
-
+      CONteq = 0.0001d0
       NRBarc = NRBar - NRWel
-
 C     For covariance
-
       EFB(1) = EFB(1) * FISbin (Nnuc)
-
-       IF(NRBarc.GE.2) THEN
-
+      IF(NRBarc.GE.2) THEN
         DO i=2,NRBarc
-
           EFB(i) = EFB(i) * FISbou (Nnuc)
-
-         ENDDO
-
-       ENDIF
-
-C 
+        ENDDO
+      ENDIF
 
       READ (79,*)
       READ (79,*)
@@ -7931,10 +7918,13 @@ C
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
       ENDDO
+
       READ (79,*)
       IF (NRBarc.EQ.3) THEN
          READ (79,*)
-         READ (79,'(3f9.3)') VEQ, HOEq, DEFeq
+C        READ (79,'(3f9.3)') VEQ, HOEq, DEFeq
+         READ (79,'(4f9.3)') VEQ, HOEq, DEFeq, CONteq
+         IF (CONteq.eq.0.d0) CONteq = 0.0001d0
       ENDIF
       READ (79,*)
       nrbarc1 = NRBarc
