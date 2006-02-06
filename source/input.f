@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-06 20:34:02 $
-Ccc   * $Id: input.f,v 1.194 2006-02-06 20:34:02 herman Exp $
+Ccc   * $Date: 2006-02-06 23:18:07 $
+Ccc   * $Id: input.f,v 1.195 2006-02-06 23:18:07 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2762,9 +2762,9 @@ C                GDIvp = val + grand()*sigma
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.5 .AND. val.LE.3.D0) THEN
+            IF (val.GE.0.8 .AND. val.LE.3.D0) THEN
               PEQc = 1.
-              MFPp = MFPp*val
+              MFPp = val
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
@@ -2788,11 +2788,11 @@ C                MFPp = val + grand()*sigma
      &              IPArCOV, MFPp, INDexf,INDexb
               else
                 WRITE (6,
-     &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Default: 1.3)'')') MFPp
+     &'('' Mean free path parameter in PCROSS set to '',F4.1
+     &  )') MFPp
                 WRITE (12,
-     &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Default: 1.3)'')') MFPp
+     &'('' Mean free path parameter in PCROSS set to '',F4.1
+     &  )') MFPp
                endif
              ENDIF
             GOTO 100
