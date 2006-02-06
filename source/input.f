@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-04 18:53:06 $
-Ccc   * $Id: input.f,v 1.193 2006-02-04 18:53:06 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-02-06 20:34:02 $
+Ccc   * $Id: input.f,v 1.194 2006-02-06 20:34:02 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2762,9 +2762,9 @@ C                GDIvp = val + grand()*sigma
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.8 .AND. val.LE.3.D0) THEN
+            IF (val.GE.0.5 .AND. val.LE.3.D0) THEN
               PEQc = 1.
-              MFPp = val
+              MFPp = MFPp*val
               WRITE (6,
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
