@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-04 18:53:06 $
-Ccc   * $Id: main.f,v 1.145 2006-02-04 18:53:06 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-02-17 23:22:42 $
+Ccc   * $Id: main.f,v 1.146 2006-02-17 23:22:42 herman Exp $
 C
       SUBROUTINE EMPIRE
 Ccc
@@ -731,7 +731,6 @@ C-----
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
-C    &  '' mb including'')') CSFus
      &  '' mb including'')') CSFus + SINl + SINlcc
             WRITE (6,
      &'(''   DWBA inelastic to uncoupled discrete levels = '',
@@ -749,7 +748,6 @@ C    &  '' mb including'')') CSFus
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
-C    &  '' mb including'')') CSFus
      &  '' mb including'')') CSFus + SINl + SINlcc
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
@@ -1631,9 +1629,10 @@ C--------
 C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
-C-----Write a row in the table of cross sections
+C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
       WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs, ELAcs,
-     &     TOTcsfis, (CSPrd(nnuc),nnuc=1,NNUcd)
+     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs, 
+     &     (CSPrd(nnuc),nnuc=3,NNUcd)
       WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl, 
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)
