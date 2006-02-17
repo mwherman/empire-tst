@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-01-02 06:15:50 $
-Ccc   * $Id: empire_ctl.f,v 1.14 2006-01-02 06:15:50 herman Exp $
+Ccc   * $Date: 2006-02-17 23:20:03 $
+Ccc   * $Id: empire_ctl.f,v 1.15 2006-02-17 23:20:03 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -329,7 +329,7 @@ C-- Test for the existence of the C4 data file
       if (.not.fexist) then
         write(2,*) ' A C4 data file, *.c4, is necessary for fitting.', 
      &           ' STOP.'
-        stop
+        stop 'A C4 data file is necessary for fitting'
        endif
 
 C--- Tests for the existence of the direct optical potential file
@@ -339,7 +339,7 @@ C--- check of the parameters to be varied
       if (.not.fexist) then
         write(2,*) ' A direct optical data file, *-omp.dir, is ',
      *               'necessary for fitting. STOP.'
-        stop
+        stop 'A direct optical data file is necessary for fitting'
        else
         open(unit=70,file='OMPAR.DIR',status='old')
         do  i=1,11
