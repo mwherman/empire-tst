@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-06 23:18:07 $
-Ccc   * $Id: input.f,v 1.195 2006-02-06 23:18:07 herman Exp $
+Ccc   * $Date: 2006-02-17 23:23:28 $
+Ccc   * $Id: input.f,v 1.196 2006-02-17 23:23:28 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -235,7 +235,7 @@ C
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
          DEFdyn = 1.d0
-        DEFsta = 1.d0
+         DEFsta = 1.d0
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
