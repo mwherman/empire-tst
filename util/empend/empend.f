@@ -256,7 +256,8 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       JT6=MXI-LBI
       CALL SCNMF6(LIN,NT6,IWO(LBI),JT6,IZI)
 C* Summ MF 5 contributions as necessary
-      CALL SUMMF5(NXS,NEN,IWO(MTH),NT6,IWO(LBI),RWO(LXS),MXE,MXT)
+      CALL SUMMF5(NXS,NEN,IWO(MTH),NT6,IWO(LBI)
+     &           ,RWO(LXS),QQM,QQI,MXE,MXT)
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
       NS =-1
@@ -266,8 +267,16 @@ C* Check if nuclide is fissile
 C* Write the ENDF file-1 data
       EMX=EIN(NEN)
       CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,AWR,EMX,NS)
+      NS=-1
+      MF= 1
+      CALL WRIMF3(LOU,MXE,MXT,LXR,MF
+     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+      NS=-1
+      CALL WRCONT(LOU,MAT, 0, 0,NS, 0. , 0., 0, 0, 0, 0)
 C* Write the ENDF file-3 data
-      CALL WRIMF3(LOU,MXE,MXT,LXR
+      MF=3
+      CALL WRIMF3(LOU,MXE,MXT,LXR,MF
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
      1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
       WRITE(LTT,991)
@@ -952,6 +961,7 @@ C* Assign MT numbers
         IF(PTST.EQ.' (z,x)  ') MT=  5
         IF(PTST.EQ.' (z,2n) ') MT= 16
         IF(PTST.EQ.' (z,3n) ') MT= 17
+        IF(PTST.EQ.' (z,fiss') MT= 18
         IF(PTST.EQ.' (z,np) ') MT= 28
         IF(PTST.EQ.' (z,na) ') MT= 22
         IF(PTST.EQ.' (z,2na)') MT= 24
@@ -1106,7 +1116,8 @@ C-D
 C* Outgoing neutrons
         IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
      &    (MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=0
-        IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.22 .OR. MT.EQ.23 .OR.
+        IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.18 .OR.
+     &     MT.EQ.22 .OR. MT.EQ.23 .OR.
      &    (MT.GE.28.AND. MT.LE.29).OR.
      &    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.44 .OR. MT.EQ.45 .OR.
      &    (MT.GE.50.AND.MT.LE.91)) YI=1
@@ -1172,7 +1183,7 @@ C*          Check for non-zero fission cross section
       END DO
       RETURN
       END
-      SUBROUTINE SUMMF5(NXS,NPT,MTH,NT6,MT6,XSR,MXE,MXT)
+      SUBROUTINE SUMMF5(NXS,NPT,MTH,NT6,MT6,XSR,QQM,QQI,MXE,MXT)
 C-Title  : Subroutine SUMMF5
 C-Purpose: Sum reactions contributing to MT 5
 C-Description:
@@ -1180,7 +1191,7 @@ C-D Scan all MT reaction values in MTH for MT>5
 C-D Compare with MT values in MT6 for reactions having differential data
 C-D Flag eligible reactions with -ve MT; eligible reactions are:
 C-D all 5<MT<600,649,849 excluding fission and discrete level reactions.
-      DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT)
+      DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT),QQM(MXT),QQI(MXT)
 C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
       MT5 =0
@@ -1218,6 +1229,7 @@ C* Create MT 5 if not present
         DO J=1,NPT
           XSR(J,I5)=0
         END DO
+        QQM(I5)=-1.E12
       END IF
 C* Create MT 201 if not present (flagged -ve for no spectra)
       IF(I201.LE.0) THEN
@@ -1227,6 +1239,7 @@ C* Create MT 201 if not present (flagged -ve for no spectra)
         DO J=1,NPT
           XSR(J,I201)=0
         END DO
+        QQM(I201)=-1.E12
       END IF
 C* Create MT 203 if not present (flagged -ve for no spectra)
       IF(I203.LE.0) THEN
@@ -1236,6 +1249,7 @@ C* Create MT 203 if not present (flagged -ve for no spectra)
         DO J=1,NPT
           XSR(J,I203)=0
         END DO
+        QQM(I203)=-1.E12
       END IF
 C* Create MT 207 if not present (flagged -ve for no spectra)
       IF(I207.LE.0) THEN
@@ -1245,18 +1259,22 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
         DO J=1,NPT
           XSR(J,I207)=0
         END DO
+        QQM(I207)=-1.E12
       END IF
 C* Add contribution of reactions without differential data to MT5
       DO IX=1,NXS
         MM=MTH(IX)
         IF(MM.LT.0 .AND.
-     &     (-MM.LT.201 .OR. -MM.GT.207)) THEN
+     &     (-MM.LT.201 .OR. -MM.GT.207) .AND.
+     &     (-MM.LT.450 .OR. -MM.GE.460)) THEN
 C...
-C...      print *,'   Adding to MT5 contribution from MT',mm
+          print *,' Adding to MT5 contribution from MT/Q',MM,QQM(IX)
 C...
           DO J=1,NPT
             XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
           END DO
+          QQM(I5)=MAX(QQM(IX),QQM(I5))
+          QQI(I5)=QQM(I5)
           KM=-MM
 C* Add neutron production to MT201
           IF(KM.EQ.11  .OR. KM.EQ.16 .OR. KM.EQ.17 .OR.
@@ -1267,6 +1285,8 @@ C* Add neutron production to MT201
             DO J=1,NPT
               XSR(J,I201)=XSR(J,I201)+YI*XSR(J,IX)
             END DO
+            QQM(I201)=MAX(QQM(IX),QQM(I201))
+            QQI(I201)=QQM(I201)
           END IF
 C* Add proton production to MT203
           IF(KM.EQ. 28.OR. KM.EQ. 41.OR. KM.EQ.42 .OR.
@@ -1278,6 +1298,8 @@ C* Add proton production to MT203
             DO J=1,NPT
               XSR(J,I203)=XSR(J,I203)+YI*XSR(J,IX)
             END DO
+            QQM(I203)=MAX(QQM(IX),QQM(I203))
+            QQI(I203)=QQM(I203)
           END IF
 C* Add alpha production to MT207
           IF(KM.EQ. 22.OR. KM.EQ. 23.OR. KM.EQ. 24.OR.
@@ -1290,6 +1312,8 @@ C* Add alpha production to MT207
             DO J=1,NPT
               XSR(J,I207)=XSR(J,I207)+YI*XSR(J,IX)
             END DO
+            QQM(I207)=MAX(QQM(IX),QQM(I207))
+            QQI(I207)=QQM(I207)
           END IF
         END IF
       END DO
@@ -1341,6 +1365,435 @@ C*
   802 FORMAT(I3,1X,A2,1X,I3)
   891 FORMAT(A136)
       END
+      SUBROUTINE RDANGF(LIN,NEN,NAN,RWO,MXR,ANG,MXA,MT,ZAP,LTT,LER)
+C-Title  : Subroutine RDANGF
+C-Purpose: Read angular distributions
+C-Description:
+C-D The correlated energy/angle double differential cross sections from
+C-D EMPIRE output are read into the work array. The following conditioning
+C-D of the data is performed:
+C-D  - Multiple energy points with zero distribution are skipped.
+C-D  - Zero distributions over limited range of angles are forced
+C-D    to half the value of the neighbours until all are positive.
+C-D  - If the distribution is angle-integrated, it is divided by 4*Pi
+C-D    for consistency to simplify post-processing.
+C-D
+C-D Formal parameters have the following meaning:
+C-D  LIN  Logical unit number of the EMPIRE short output.
+C-D  NEN  Number of outfoing particle energies.
+C-D  NAN  Number of angles at which the distribution is tabulated
+C-D  RWO  Work array, which contains on exit a packed matrix of
+C-D       dimensions RWO(LHI+2,NPT).
+C-D       Each of the NEN rows contains:
+C-D        - outgoing particle energy
+C-D        - NAN points of the distribution at angles ANG.
+C-D  MXR  Maximum size of the work array RWO.
+C-D  ANG  Cosines of angles at which the distributions are tabulated.
+C-D  MXA  Maximum number of cosines.
+C-D  MT   ENDF reaction designation.
+C-D  ZAP  ZA designation of the outgoing particle
+C-
+C* Maximum number of angles MDA, local array.
+      PARAMETER     (MDA=120)
+      DOUBLE PRECISION DD(MDA),DDJ,PI,FF
+      CHARACTER*136  REC
+      DIMENSION      ANG(MXA)
+      DIMENSION      RWO(MXR)
+C* Permissible tolerance for interpolated angular distributions (fraction)
+      DATA ETOL/ 0.010 /
+C*
+      DATA PI/3.1415926D0/
+C*
+      IZA=NINT(ZAP)
+      NEN=0
+      LD =1
+      NZZ=0
+C-F Check if angles are given (No. of angles NAN=1 if isotropic)
+      READ (LIN,891) REC
+      IF(REC(1:40).EQ.'                                        ') THEN
+        FF =1/(4*PI)
+        NAN=1
+      ELSE
+C-F Read the angles at which the distributions are given (8 per row)
+        FF =1
+        NAN=8
+        J1 =1
+   20   READ (REC,806,ERR=802) (ANG(J),J=J1,NAN)
+        IF(ANG(NAN).GT.0 .AND. NINT(ANG(NAN)).LT.180) THEN
+          J1=NAN+1
+          NAN=NAN+8
+          IF(NAN.GT.MXA) STOP 'RDANGF ERROR - MXA limit exceeded'
+          IF(NAN.GT.MDA) STOP 'RDANGF ERROR - MDA limit exceeded'
+          READ (LIN,891) REC
+          GO TO 20
+        END IF
+        DO WHILE (ANG(NAN).EQ.0 .AND.NAN.GT.1)
+          NAN=NAN-1
+        END DO
+C* Convert angles from degrees to cosines
+        DO J=1,NAN
+          ANG(J)=COS(PI*ANG(J)/180)
+        END DO
+      END IF
+C*
+C-F Read angular distributions until a blank line is encountered
+   40 READ (LIN,891) REC
+      IF(REC(1:20).EQ.'                    ') GO TO 80
+      JXA=MIN(NAN,8)
+C* Read distribution in double precision to avoid underflow
+      READ (REC,807,ERR=802) EE,(DD(J),J=1,JXA)
+      IF(NAN.GT.8) READ (LIN,809,ERR=802) (DD(J),J=9,NAN)
+C* Suppress negative energies (unless processing discrete data)
+      IF(MT.GT.0 .AND. EE.LT.0) GO TO 40
+      EOU=EE*1.E6
+      RWO(LD)=EOU
+C* Check for zero or negative distributions
+      NEG=0
+      NEP=0
+      KZE=0
+      DO J=1,NAN
+        DDJ=DD(J)
+        IF(DDJ.GT.0) THEN
+C*          Count non-zero distributions
+          NEP=NEP+1
+          KZE=0
+        ELSE
+          DDJ=0
+C*          Count all zero-distribution entries
+          NEG=NEG+1
+C*          Count trailing zero-distribution entries at backward angles
+          KZE=KZE+1
+        END IF
+        RWO(LD+J)=DDJ*FF
+      END DO
+C* Mark point with all-zero distributions
+      IF(NEP.EQ. 0) THEN
+        NEG=0
+        NZZ=NZZ+1
+      ELSE
+        NZZ=0
+      END IF
+      IF(NEG.GT. 0) THEN
+C* Force zero points to half of the average of neighbours until all >0
+        IF(NAN.GT.2) THEN
+          KZERO=1
+          DO WHILE (KZERO.GT.0)
+            KZERO=0
+            DO J=3,NAN
+              IF(RWO(LD+J-1).LE.0) THEN
+                KZERO=1
+                DDJ=MAX(1.E-30, (RWO(LD+J-2)+RWO(LD+J))/2)
+                IF(DDJ.GT.1E-20) DDJ=DDJ/2
+                RWO(LD+J-1)=DDJ
+              END IF
+            END DO
+          END DO
+        END IF
+C*          Print warning on negative distributions
+C...    WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,NAN
+C...    WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,NAN
+      END IF
+C* Check for multiple zero distributions
+      IF(NZZ.GT.2) THEN
+        EOU=RWO(LD)
+        RWO(LD-1-NAN)=EOU
+        NZZ=NZZ-1
+      ELSE
+        LD=LD+1+NAN
+        NEN=NEN+1
+      END IF
+      GO TO 40
+C*
+C* Check that the last point is a zero distribution
+   80 IF(NZZ.GT.1) NEN=NEN-(NZZ-1)
+      IF(NEN.GT.1 .AND. NZZ.LT.1) THEN
+        NEN=NEN+1
+        RWO(LD)=EOU*1.00001
+        DO J=1,NAN
+          RWO(LD+J)=0
+        END DO
+      END IF
+c...
+c...    if(mt.eq. 5) then
+c...      print *,'direct mt,za',mt,nint(zap),nen
+c...      ld=1
+c...      jm=min(nan+1,5)
+c...      do i=1,nen
+c...        print *,(rwo(ld-1+j),j=1,jm)
+c...        ld=ld+nan+1
+c...      end do
+c...    end if
+c...
+      IF(NEN.LT.3) GO TO 82
+C*
+C* Remove points that can be reproduced by linear interpolation
+      LD1=1
+      LD2=LD1+1+NAN
+      LD3=LD2+1+NAN
+      NDEL=0
+      DO I=3,NEN
+        E1=RWO(LD1)
+        E2=RWO(LD2)
+        E3=RWO(LD3)
+        ISTAY=1
+C*    --Check point 2 (excluding discrete levels)
+        IF(E2.GT.0) THEN
+          ISTAY=0
+          DO J=1,NAN
+            F1=RWO(LD1+J)
+            F2=RWO(LD2+J)
+            F3=RWO(LD3+J)
+            FI=F1+(E2-E1)*(F3-F1)/(E3-E1)
+            IF(F2.GT.0) THEN
+              DF= ABS(FI/F2-1)
+              IF(DF.GT.ETOL) ISTAY=1
+            ELSE
+              ISTAY=1
+            END IF
+          END DO
+        END IF
+        IF(ISTAY.EQ.1) THEN
+C*      --Point 2 stays, move points 2 and 3 and redefine
+          JD1=LD1+1+NAN
+          JD2=JD1+1+NAN
+          RWO(JD1)=E2
+          RWO(JD2)=E3
+          DO J=1,NAN
+            RWO(JD1+J)=RWO(LD2+J)
+            RWO(JD2+J)=RWO(LD3+J)
+          END DO
+          LD1=JD1
+          LD2=JD2
+        ELSE
+C*      --Point 2 to be removed, rename 3 to 2
+c...
+c...          print *,'remove mt,za,eo',mt,nint(zap),e2
+c...
+          LD2=LD3
+          E2 =E3
+          NDEL=NDEL+1
+        END IF
+C*    --Process next point
+        IF(I.LT.NEN) LD3=LD3+1+NAN
+      END DO
+C*  --Move the last point
+      JD1=LD1+1+NAN
+      JD2=JD1+1+NAN
+      RWO(JD1)=E2
+      RWO(JD2)=E3
+      DO J=1,NAN
+        RWO(JD1+J)=RWO(LD2+J)
+        RWO(JD2+J)=RWO(LD3+J)
+      END DO
+      NEN=NEN-NDEL
+C*
+C* All processing completed
+c...
+c...    if(mt.eq. 5) then
+c...      print *,'adjusted mt,za',mt,nint(zap),nen
+c...      ld=1
+c...      jm=min(nan+1,5)
+c...      do i=1,nen
+c...        print *,(rwo(ld-1+j),j=1,jm)
+c...        ld=ld+nan+1
+c...      end do
+c...    if(ndel.gt.0)  stop
+c...    end if
+c...
+   82 RETURN
+C*
+C* Error trap reading input record
+  802 WRITE(LTT,912) REC
+      WRITE(LER,912) REC
+      STOP 'EMPEND ERROR - reading file'
+C*
+  806 FORMAT(6X,8(5X,F10.4))
+  807 FORMAT(BN,F10.5,F14.4,7F15.4)
+  809 FORMAT(9X,8F15.4)
+  891 FORMAT(A136)
+  906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
+     1      ,' Ein',1P,E10.3,' Eou',E10.3/17X
+     2      ,' Input angular distribution negative at',I3
+     3      ,' out of',I3,' angle(s)')
+  912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
+     1       ' "',A70,'"')
+      END
+      SUBROUTINE ANGLEG(NAN,ANG,NEN,DST,LOMX,LOR,PLG,MXR,RWO,MT,EIN,ZAP
+     &                 ,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
+C-Title  : Subroutine ANGLEG
+C-Purpose: Convert angular distributions to Legendre polynomials
+C-Description:
+C-D  NAN        Number of angles (i)
+C-D  ANG(i)     Cosines of angles at which distributions are tabulated
+C-D  NEN        Number of outgoing particle energies (j)
+C-D  DST(1,j)   Outgoing particle energy Ej [eV]
+C-D  DST(1+i,j) Distribution at cosines C(i) for energy E(j)
+C-D  LOMX       Maximum Legendre order.
+C-D  LOR        Highest Legendre order after fitting.
+C-D  PLG(1,j)   =DST(1,j)
+C-D  PLG(1+i,j) Legendre coefficients corresponding to DST(1+i,j)
+C-D  MXR        Maximum size of the work array RWO
+C-D  RWO        Work array.
+C-D
+C-D  Note: it is permissible to use implicit equivalence between DST
+C-D  and PLG by specifying the same array when calling the routine.
+C-
+      PARAMETER  (MAN=120)
+      DIMENSION   SCR(MAN)
+      DIMENSION   ANG(NAN),DST(1),PLG(1),RWO(MXR)
+C* Permissible tolerance for fitted angular distributions (fraction)
+      DATA ETOL/ 0.010 /
+C*
+      LD   =1
+      LP   =1
+      LOR  =0
+      LOX  =MIN(LOMX,NAN-1)
+      NOFIT=0
+C*
+C* Loop over all outgoing energy points
+      DO I=1,NEN
+        JPRNT  =0
+        EOU    =DST(LD)
+        DO J=1,LOX
+          SCR(J)=0
+        END DO
+C*        Fit Legendre polynomials
+        LOO    =LOX
+        CALL LSQLGV(ANG,DST(LD+1),NAN,SCR,0,LOO,ETOL,ERR,RWO,MXR)
+        LOR=MAX(LOR,LOO)
+c...
+c...    if(abs(mt).eq.849) then
+c...        print *,'LOX,lor,loo',LOX,lor,loo,mt,ein
+c...        if(nan.gt.1) print *,(ang(j),j=1,4),'...',ang(nan)
+c...        print *,(dst(ld-1+j),j=1,5),'...',dst(ld+nan)
+c...        print *,eou,(scr(j),j=1,4)
+c...            stop
+c...    end if
+C*
+C* Check for printout on exceeding tolerance limits
+        IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
+C*        Count the number of points with convergence problems
+          NOFIT=NOFIT+1
+C*        Print a warning when convergence problems are encountered
+c...
+c...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+c...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
+c...
+c...        write(ler,*) 'Ein,Eou,Loo',Ein,Eou,Loo
+c...        write(ler,*) scr(1),(scr(1+L)/(2*L+1)/scr(1),L=1,Loo)
+c...
+          IF(IPRNT.EQ.0) JPRNT=1
+C*        Check for specific reaction printout
+        ELSE IF
+     1    (IPRNT.EQ.MT                    .AND.
+     2    (  EIN.GE.EI1 .AND. EIN.LE.EI2) .AND.
+     3    (  EOU.GE.EO1 .AND. EOU.LE.EO2)) THEN
+          JPRNT=1
+        END IF
+C* Check for isotropic distributions (suppress printout)
+        IF(LOO.LT.1) JPRNT=0
+C* Check for differences in the fitted angular distributions
+C* at meshpoints and midpoints
+        IF(JPRNT.NE.0) THEN
+C*        Plotting instructions to the "input" file on unit L92
+C*        Original values to the "points" file file on unit LPT
+C*        Fitted values to the "curves" file file on unit LCU
+          WRITE(L92,*) 'EMPEND Plotting MT',MT,' Err',ERR
+          WRITE(L92,*) 'Ein',EIN,' Eou',EOU,' Particle ZA',NINT(ZAP)
+          WRITE(L92,821) 0,0,0,0
+          WRITE(L92,821) 0,2,0
+          IF(EOU.GE.0) THEN
+            WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
+          ELSE
+            WRITE(LPT,933) EIN,EOU,MT,IFIX(ZAP+0.1)
+          END IF
+          WRITE(LCU,931) LOO
+C*
+          DO K=2,NAN
+            L=NAN+2-K
+            WRITE(LPT,934) ANG(L),0.,0.,DST(LD+L)
+C*       -- Function at mesh point
+            ANI=ANG(L)
+            DSI=POLLG1(ANI,SCR,LOO)
+            WRITE(LCU,934) ANI,DSI
+C*       -- Function at 1/4 to the next mesh point
+            ANI=(3*ANG(L)+  ANG(L-1))/4
+            DSI=POLLG1(ANI,SCR,LOO)
+            WRITE(LCU,934) ANI,DSI
+C*       -- Function at 2/4 to the next mesh point
+            ANI=(2*ANG(L)+2*ANG(L-1))/4
+            DSI=POLLG1(ANI,SCR,LOO)
+            WRITE(LCU,934) ANI,DSI
+C*       -- Function at 3/4 to the next mesh point
+            ANI=(  ANG(L)+3*ANG(L-1))/4
+            DSI=POLLG1(ANI,SCR,LOO)
+            WRITE(LCU,934) ANI,DSI
+          END DO
+          ANI=ANG(1)
+          DSI=POLLG1(ANI,SCR,LOO)
+          WRITE(LPT,934) ANG(L),0.,0.,DST(LD+1)
+          WRITE(LCU,934) ANI,DSI
+          WRITE(LCU,934)
+          WRITE(LPT,934)
+        END IF
+C*
+C*      End of test prints
+C*
+        PLG(LP)=EOU
+        DO J=1,LOX
+          PLG(LP+J)=SCR(J)
+        END DO
+C*   -- For (l > 0) divide by (2*l+1) to conform with ENDF rules.
+        DO L=1,LOR
+          IF(L.GT.LOO) PLG(LP+1+L)=0.
+          PLG(LP+1+L)=PLG(LP+1+L)/(2*L+1)
+        END DO
+        LD=LD+NAN+1
+        LP=LP+LOX+2
+      END DO
+c...
+c...          print *,'LOX,lor,loo,mt',LOX,lor,loo,mt
+c...          do i=1,nen
+c...            lp=1+(i-1)*(lox+2)
+c...            print *,lp,(plg(lp-1+j),j=1,5)
+c...            if(abs(mt).gt.2) stop
+c...          end do
+
+C* Re-pack the array of Legendre coefficients
+      LP1=1
+      LP2=1
+      DO I=1,NEN
+        NLG=LOX+2
+        DO J=1,NLG
+          PLG(LP2-1+J)=PLG(LP1-1+J)
+        END DO
+        LP1=LP1+NLG
+        LP2=LP2+LOR+2
+      END DO
+c...
+c...          do i=1,nen
+c...            lp=1+(i-1)*(lor+2)
+c...            print *,lp,(plg(lp-1+j),j=1,5)
+c...            if(abs(mt).gt.2) stop
+c...          end do
+
+C* Print warning in case of badly fitted distributions
+      IF(NOFIT.GT.0) THEN
+        WRITE(LTT,908) MT,NINT(ZAP),EIN,NOFIT
+        WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
+      END IF
+C*
+  821 FORMAT(22X,4I11)
+  907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
+     1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
+  908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
+     1      ,' Ein',1P,E10.3,' bad ang.distr. fit for',I3,' Eout')
+  931 FORMAT('P(',I2.2,') Fit')
+  932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
+  933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
+  934 FORMAT(1P,6E11.4)
+      END
+c... old coding
       SUBROUTINE RDANGD(LIN,LOR,LHI,NPT,EMP,RWO,MXR,LTT,LER,L92,LCU,LPT
      2                 ,ZAP,MT,IPRNT,EIN,EI1,EI2,EO1,EO2,NZA1,NZA2)
 C-Title  : Subroutine RDANGD
@@ -1351,7 +1804,7 @@ C-D EMPIRE output are read, converted to Legendre polynomials and
 C-D packed into the work array. The following conditioning of the
 C-D data is performed:
 C-D  - Multiple energy points with zero distribution are skipped.
-C-D  - The maximum outgoing particle energy is EMP.
+C-D  - The maximum outgoing particle energy is EMP, if EMP>0.
 C-D
 C-D Formal parameters have the following meaning:
 C-D  LIN  Logical unit number of the EMPIRE short output.
@@ -1361,9 +1814,10 @@ C-D  NPT  Number of outgoing particle energy points.
 C-D  EMP  Maximum particle energy limit (if EMP>0) [eV]
 C-D  RWO  Work array, which contains on exit a packed matrix of
 C-D       dimensions RWO(LHI+2,NPT).
-C-D       Each of the NPT rows contains the outgoing particle energy
-C-D       and LHI+1 Legendre coefficients of the angular distribution
-C-D       expansion.
+C-D       Each of the NPT rows contains:
+C-D        - outgoing particle energy
+C-D        - LHI+1 Legendre coefficients of the angular distribution
+C-D          expansion.
 C-D  MXR  Maximum size of the work array RWO.
 C-D
 C-D The remaining parameters are required for printout control
@@ -1385,7 +1839,7 @@ C-D  NZA2
 C-
 C* Maximum number of angles MXA, fine grid MXZ
       PARAMETER     (MXA=120,MXZ=240)
-      DOUBLE PRECISION DD(MXA)
+      DOUBLE PRECISION DD(MXA),DDJ,PI,FF
       CHARACTER*136  REC
       DIMENSION      ANG(MXA),DST(MXA)
       DIMENSION      ZANG(MXZ),ZLEG(MXZ)
@@ -1395,7 +1849,7 @@ C* Permissible tolerance for fitted angular distributions (fraction)
 C* Thinning tolerance for angular distribution (fraction)
       DATA ETHN/ 0.002 /
 C*
-      DATA PI/3.1415926/
+      DATA PI/3.1415926D0/
 C*
 c...
 c...      print *,'rdang: zap,mt,ein,emp',nint(zap),mt,ein,emp
@@ -1478,21 +1932,8 @@ C*          Count trailing zero-distribution entries at backward angles
       IF(NEG.GT. 0) THEN
 C* Force zero points to half of the average of neighbours until all >0
         IF(KXA.GT.2) THEN
-
-          icnt=0
-
           KZERO=1
           DO WHILE (KZERO.GT.0)
-
-            icnt=icnt+1
-            if(icnt.gt.200) then
-              print *,'icnt,kxa',icnt,kxa
-              do j=1,kxa
-                print *,j,dst(j)
-              end do
-              stop
-            end if
-
             KZERO=0
             DO J=3,KXA
               IF(DST(J-1).LE.0) THEN
@@ -1725,12 +2166,18 @@ C*
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
       END
+c... end old coding
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1                 ,EIN,XSC,QQM,QQI,MTH,IZB,BEN
      1                 ,IZI,IZA,LISO,AWR,NEN,NXS)
 C-Title  : REAMF3 Subroutine
 C-Purpose: Read EMPIRE output to be converted into ENDF format
 C-Description:
+C-D  Cross sections and nu-bar are extracted from Empire output. The
+C-D  energies are stored in array EIN, containing NEN energy values
+C-D  Ej on exit. The cross sections and nu-bar are collected in array
+C-D  XSC(j,i) for 'i' reaction channels.
+C-D
 C-D  MTH  Array contains MT numbers of identified reactions. The MT
 C-D       numbers of reactions contributing to MT 5 in the high-energy
 C-D       type of file is flagged by adding MT+1000.
@@ -1763,6 +2210,21 @@ c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
         QQ=2.0E8
         MT=18
         READ(REC,809) XS
+        GO TO 312
+      END IF
+      IF(REC(2:14).EQ.' Multiplicity') THEN
+C* Average number of (prompt) neutrons per fission
+        QQ=0
+C...    MT=456
+        MT=452
+        IF(REC(15:20).EQ.' (nue)') THEN
+          READ(REC(21:30),994) XS
+        ELSE
+          READ(REC(15:24),994) XS
+        END IF
+C...
+C...        print *,' nubar',ee,xs
+C...
         GO TO 312
       END IF
       GO TO 110
@@ -1907,25 +2369,33 @@ C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
       QQI(IXS)=QQM(IXS)
 C* Add cross section contribution
-  320 XSC(NEN,IXS)=XSC(NEN,IXS)+XS*1.E-3
+  320 IF(MT.GE.450 .AND. MT.LT.460) THEN
+        XSC(NEN,IXS)=XS
+      ELSE
+        XS=XS*1.E-3
+        XSC(NEN,IXS)=XSC(NEN,IXS)+XS
+      END IF
       IF(MT.NE.5) GO TO 110
 C* Special treatment for MT5 (summing neutron, proton and alpha prod.)
         KZA=IZA+IZI-JZA
 C* Sum alpha production of unidentified reactions
         DO WHILE (KZA.GE.2004)
-          XSC(NEN,MT207)=XSC(NEN,MT207)+XS*1.E-3
+          XSC(NEN,MT207)=XSC(NEN,MT207)+XS
           KZA=KZA-2004
         END DO
 C* Sum proton production of unidentified reactions
         DO WHILE (KZA.GE.1001)
-          XSC(NEN,MT203)=XSC(NEN,MT203)+XS*1.E-3
+          XSC(NEN,MT203)=XSC(NEN,MT203)+XS
           KZA=KZA-1001
         END DO
 C* Sum alpha production of unidentified reactions
         DO WHILE (KZA.GE.   1)
-          XSC(NEN,MT201)=XSC(NEN,MT201)+XS*1.E-3
+          XSC(NEN,MT201)=XSC(NEN,MT201)+XS
           KZA=KZA-0001
         END DO
+
+        print *,'MT5 iza,jza,qj,qq',iza,jza,qqm(ixs),qq
+
         QQM(IXS)=MAX(QQ,QQM(IXS))
         QQI(IXS)=QQM(IXS)
       GO TO 110
@@ -2107,7 +2577,7 @@ C-V  00/03 Define Unit base linear interpolation between incident E.
 C-V  03/02 Major reorganisation of the routine
 C-
 C* Number of input angles MXA and number of particles per react. MXP
-      PARAMETER    (MXA=80, MXP=40, MXZ=160)
+      PARAMETER    (MXA=120, MXP=40, MXZ=160)
       CHARACTER*8   POUT(MXP),PTST
       CHARACTER*40  FL92,FLPT,FLCU
       CHARACTER*136 REC
@@ -2133,7 +2603,7 @@ C* Test print files
           OPEN (UNIT=L92,FILE=FL92,STATUS='UNKNOWN')
           OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
           OPEN (UNIT=LPT,FILE=FLPT,STATUS='UNKNOWN')
-          WRITE(L92,821) 0.,24., 0.,16., 1, 1, 1.2
+          WRITE(L92,821) 0.5,14., 0.5,10., 1, 1, 1.2
           WRITE(L92,822)  1,  1, 1,  0,  4, 0, 0
           WRITE(L92, * ) 'Angle                                   '
      &                  ,'Cosine'
@@ -2293,9 +2763,16 @@ C* Search the EMPIRE output for specific strings
       IF(REC(1:10).EQ.' REACTION '        ) GO TO 300
       IF(REC(1:14).EQ.'  Elastic angu'    ) GO TO 400
       IF(REC(1:14).EQ.'  Spectrum of '    ) GO TO 600
+      IF(REC(1:26).EQ.'    fission  cross section') THEN
+C*      Count fission reactions
+        READ (REC(27:36),994) X
+        IF(X.GT.1.E-10) NFIS=NFIS+1
+      END IF
       GO TO 210
 C* Read the incident particle energy
   300 READ (REC(51:60),994) EE
+      NFIS=0
+      JFIS=0
       EE=EE*1.E6
       IF(EE.GT.E0 .AND. (EE-ETH).GT.-EE*SMALL) GO TO 210
 C* Skip to next energy if current less or equal to previous point
@@ -2345,11 +2822,21 @@ C* Reserve the space in the Real array
 C* Define specific File-6 data for all incident energies
   430 L6 =LBL
 C* Process the angular distribution for this energy
-      LMX=MXR-L6-4
+      l64=l6+4
+      LMX=MXR-L64
       READ (LIN,891) REC
       EMP=0
-      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L6+4),LMX,LTT,LER,L92,LCU,LPT
-     2           ,ZAP,MTC,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
+C... new coding
+      CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MTC,ZAP,LTT,LER)
+      LSC=L64+NEP*(NAN+1)
+      LMX=MXR-LSC
+      LOX=MIN(LOMX,NAN-1)
+      CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
+     &           ,MTC,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
+C...
+c...  CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L6+4),LMX,LTT,LER,L92,LCU,LPT
+c... 2           ,ZAP,MTC,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
+c...
 C* Only one distribution should be present
       IF(NEP.NE.1) THEN
         PRINT *,'WARNING - Several distributions for elastic'
@@ -2451,7 +2938,7 @@ c
 C*
 C* Process correlated energy/angle distribution for this energy
       L6 =LB1
-      LL =L6 + 4
+      L64=L6 + 4
       NW =0
       NEP=0
       E1 =MIN(E1,EE)
@@ -2459,8 +2946,6 @@ C* Process correlated energy/angle distribution for this energy
       LHI=0
       KXA=1
       JXA=1
-      READ (LIN,891)
-      READ (LIN,891)
 C* Set the available outgoing particle energy
 C...      EMP=EMX
 C...      EMP=EMX* (AWR+AWI-AWP)/(AWR+AWI)
@@ -2468,14 +2953,45 @@ C... Maximum particle energy should be set within the EMPIRE code!!!
 C... Set EMP=0 to skip testing in RDANG
 C...
       EMP=0
-      LMX=MXR-LL
-      CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(LL),LMX,LTT,LER,L92,LCU,LPT
-     2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
+      LMX=MXR-L64
+      READ (LIN,891)
+      READ (LIN,891)
+c... new coding
+      CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MT6,ZAP,LTT,LER)
+c...
+c...       if(nint(zap).eq.2004) then
+c...          print *,rec
+c...          print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
+c...           do j=1,nep
+c...           do j=1,10
+c...             print *,(rwo((j-1)*(nan+1)+k+l64-1),k=1,5)
+c...           end do
+c...           stop
+c...       end if
+
+      LSC=L64+NEP*(NAN+1)
+      LMX=MXR-LSC
+      LOX=MIN(LOMX,NAN-1)
+      CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
+     &           ,MT6,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
+c... old coding
+c...  CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L64),LMX,LTT,LER,L92,LCU,LPT
+c... 2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
+
+c...       if(nint(zap).eq.2004) then
+c...          print *,'LOMX,LHI,NEP',LOMX,LHI,NEP,mt6,ee
+c...          do j=1,nep
+c...          do j=1,10
+c...            print *,(rwo((j-1)*(lhi+2)+k+l64-1),k=1,4)
+c...          end do
+c...          stop
+c...       end if
+
 C* Calculate the integral of the spectrum
       SPC=0
-      EOU=RWO(LL)
-      PEU=RWO(LL+1)
-      LI =LL
+      EOU=RWO(L64)
+      PEU=RWO(L64+1)
+      LI =L64
       DO I=2,NEP
         LI =LI+LHI+2
         EOL=EOU
@@ -2493,14 +3009,14 @@ C* If the integral is zero, skip this energy point
       END IF
 C* Normalise the distribution
       LO1=LHI+1
-      LL =L6 +4
+      L64=L6 +4
       DO I=1,NEP
         DO L=1,LO1
-          RWO(LL+L)=RWO(LL+L)/SPC
+          RWO(L64+L)=RWO(L64+L)/SPC
         END DO
-        LL =LL+LHI+2
+        L64=L64+LHI+2
       END DO
-      LB1=LL
+      LB1=L64
 C* Scale distribution integral by 4*Pi to get the cross section
 C* Scale by 1.E-9 to change mb/MeV into b/eV
       SPC=SPC*4.E-9*PI
@@ -2612,7 +3128,7 @@ c...
 c...        print *,'zap,ee,spc,xs3,ne6',izap,ee,spc,xs3,ne6
 c...
       ELSE
-C* Check for consistency (neutrons only)
+C* Check for consistency (neutrons only, exclude fission)
         IF(IZAP.EQ.1 .AND.XS3.GT.0 ) THEN
            IF(YL0.GT.1E-12) THEN
              XSP=SPC/YL0
@@ -2623,7 +3139,7 @@ c...
 c...            print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
 c...
            DFP=100*(XSP-XS3)/XS3
-           IF(ABS(DFP).GT.2.) THEN
+           IF(ABS(DFP).GT.2. .AND. MT.NE.18) THEN
              WRITE(LTT,909) MT,EE,XS3,DFP
              WRITE(LER,909) MT,EE,XS3,DFP
            END IF
@@ -2913,15 +3429,13 @@ C*
       CLOSE(UNIT=LSC)
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS, 0. , 0., 0, 0, 0, 0)
-      NS=-1
-      CALL WRCONT(LOU,MAT, 0, 0,NS, 0. , 0., 0, 0, 0, 0)
 C*
       RETURN
 C*
    92 FORMAT(I3,'-',A2,'-',I3,A1,' EMPIRE Calculation',36X)
    93 FORMAT(A66)
       END
-      SUBROUTINE WRIMF3(LOU,MXE,MXT,MXR
+      SUBROUTINE WRIMF3(LOU,MXE,MXT,MXR,MF
      1                 ,EIN,XSC,QQM,QQI,MTH,RWO
      1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
 C-Title  : WRIMF3 Subroutine
@@ -2942,19 +3456,23 @@ C* Initialize constants
       QI=0.
       CALL POUCHR(PTST,IZI,AWI)
 C*
-C* Write file MF3 (cross section data)
-      MF =3
+C* Write file MF3 (cross section data) or MF1 (tabulated data)
       ZA =IZA
       DO 360 JT=1,NXS
 C* Select MT numbers in ascending order
       IT =0
       MT =1000
       DO J=1,NXS
-        IF(MTH(J).GT.   0 .AND.
-     1     MTH(J).LT.1000 .AND.
-     2     MTH(J).LT.  MT) THEN
-          IT =J
-          MT =MTH(IT)
+C* Select the cross section with the lowest MT number
+C* Exclude cross sections flagged "processed" (MT>1000)
+C* Special processing of MF 1 tabulated data (MT 450-460)
+        MTJ=MTH(J)
+        IF((MF.EQ.1 .AND. (-MTJ.GT.450 .AND. -MTJ.LT.460)) .OR.
+     &     (MF.EQ.3 .AND. (MTJ.GT.   0 .AND.
+     &                     MTJ.LT.1000 .AND.
+     &                     MTJ.LT.  MT) ) ) THEN
+            IT =J
+            MT =ABS(MTJ)
         END IF
       END DO
       IF(IT.EQ.0) GO TO 360
@@ -3089,18 +3607,24 @@ C* Remove redundant zeroes below pseudo-threshold
         RWO(LY+1)=0
       END DO
 C* Write HEAD record
-      CALL WRCONT(LOU,MAT,MF,MTH(IT),NS, ZA,AWR, 0, 0, 0, 0)
+      L1=0
+      L2=0
+      N1=0
+      N2=0
+      IF(MF.EQ.1) L2=2
+      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,N1,N2)
 C* Write TAB1 record
       NR    =1
       INT(1)=2
       NBT(1)=NEO
-      CALL WRTAB1(LOU,MAT,MF,MTH(IT),NS,QQM(IT),QQI(IT), 0, 0
+      CALL WRTAB1(LOU,MAT,MF,MT,NS,QQM(IT),QQI(IT), 0, 0
      1           ,NR,NEO,NBT,INT,RWO(LX),RWO(LY))
 C* Write CONT record - end of data set
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       NS=0
-      MTH(IT)=MTH(IT)+1000
+      IF(MTH(IT).GT.0) MTH(IT)=MTH(IT)+1000
+      IF(MTH(IT).LT.0) MTH(IT)=MTH(IT)-1000
   360 CONTINUE
 C* All cross sections processed
       NS=-1
@@ -3110,7 +3634,8 @@ C* Change back the MT numbers that were flagged "+1000"
 c...        DO WHILE (MTH(I).GT.1000)
 c...          MTH(I)=MTH(I)-1000
 c...        END DO
-        IF(MTH(I).GT.1000) MTH(I)=MTH(I)-1000
+        IF(MTH(I).GT. 1000) MTH(I)=MTH(I)-1000
+        IF(MTH(I).LT.-1000) MTH(I)=MTH(I)+1000
       END DO
 C*
       RETURN
