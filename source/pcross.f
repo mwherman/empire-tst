@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-07 08:23:34 $
-Ccc   * $Id: pcross.f,v 1.43 2005-12-07 08:23:34 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:51:30 $
+Ccc   * $Id: pcross.f,v 1.44 2006-02-26 03:51:30 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C Local variables
 C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
-     &       fint(NDEX), flm(4,4), fmsd, fr, ftmp, gc, hlp1, pc,
+     &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
@@ -429,12 +429,12 @@ C     Note, that PCROSS only calculates emission into the continuum
             ENDDO    
 C
 C           Kalbach systematic for PCROSS DDX calculations
-C           fmsd is assumed 1, i.e. pure PE emission
+C           fanisot is assumed 1, i.e. pure PE emission
 C
-            fmsd = 1.d0
+            fanisot = 1.d0
 C           fmsd set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     &              ebind, eee, ftmp, fmsd, ddxs, NDAng)
+     &              ebind, eee, ftmp, fanisot, ddxs, NDAng)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
@@ -569,6 +569,7 @@ C
         y = epscm*e3 / (esys*35.)
         a = a + 1.9*y*y*y*y*xmb
       endif
+
       xnorm = a*total / (12.5664*dsinh(a))
 
       do i=1,NDAng
