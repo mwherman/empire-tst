@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-08 09:44:28 $
-Ccc   * $Id: auxiliary.f,v 1.27 2005-12-08 09:44:28 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: auxiliary.f,v 1.28 2006-02-26 03:52:55 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -45,12 +45,16 @@ C
          CSEmis(nejc,0) = 0.0
          CSMsd(nejc) = 0.0
          CSHms(nejc) = 0.0
+         DO necse = 1, NDEPFN
+           DO nnuc = 1, NDNUC
+             CSEfis(necse,nejc,nnuc) = 0.0
+           ENDDO
+         ENDDO
          if (nejc.le.2) CSMsc(nejc) = 0.0
          DO necse = 1, NDECSE
             CSE(necse,nejc,0) = 0.0
             CSEmsd(necse,nejc) = 0.0
             CSEhms(necse,nejc) = 0.0
-            CSEfis(necse,nejc) = 0.0
             AUSpec(necse,nejc) = 0.0
             DO nang = 1, NDANG
                CSEa(necse,nang,nejc,0) = 0.0
@@ -59,6 +63,7 @@ C
             ENDDO
          ENDDO
       ENDDO
+
       DO nejc = 0, NEJcm
          DO il = 1, NDLV
             REClev(il,nejc) = 0.0

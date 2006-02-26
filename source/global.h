@@ -12,7 +12,7 @@
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),
      &                 CSEahms(ndecse,ndangecis,0:ndejc),
      &                 CSEhms(ndecse,0:ndejc), CSHms(0:ndejc),
-     &                 CSEfis(ndecse,0:ndejc), CSPfis(0:ndnuc),
+     &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
      &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),

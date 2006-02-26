@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-07 08:23:53 $
-Ccc   * $Id: tl.f,v 1.76 2005-12-07 08:23:53 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: tl.f,v 1.77 2006-02-26 03:52:55 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1911,7 +1911,7 @@ C Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
-      LOGICAL Ldwba
+      LOGICAL Ldwba,lodd
 C
 C Local variables
 C
@@ -2023,6 +2023,12 @@ C
      &         **0.33333333*0.22*SQRT((xmas_nejc + xmas_nnuc)*elab)
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
       njmax = MAX(ldwmax,30)
+
+	lodd = .false.
+      IF( (mod(nint(Z(Nnuc)),2).ne.0 .or. 
+     >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
+     >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.  
+
       IF (Inlkey.EQ.0) THEN
 C-------writing input
          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
@@ -2076,12 +2082,15 @@ C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (D_Lvp(j).GT.0) ch = '+'
 C-----------If channel is closed ground state potential is used for this level
             eee = El - D_Elv(j)/xratio
+            dtmp = D_Xjlv(j)
+            ! making integer spin for odd nuclides CC levels in DWBA calculations
+            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))   
             IF (eee.GE.0.0001) THEN
                nwrite = nwrite + 1
-               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, nwrite,
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
      &                ch, D_Elv(j)
             ELSE
-               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, 1, ch,
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, 1, ch,
      &                D_Elv(j)
             ENDIF
             IF (Ldwba .OR. DIRect.EQ.3) THEN

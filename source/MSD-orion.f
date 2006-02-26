@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-07-21 14:01:06 $
-Ccc   * $Id: MSD-orion.f,v 1.18 2005-07-21 14:01:06 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: MSD-orion.f,v 1.19 2006-02-26 03:52:55 Capote Exp $
 C
 C
 C
@@ -605,10 +605,25 @@ C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          WRITE (6,*) ' EXECUTION STOPPED !!!!'
          STOP
       ENDIF
+
+      IF (DIRect.GT.0) THEN
+C--------Saving KTRlom(0,0)
+         itmp1 = KTRlom(0,0)
+         KTRlom(0,0) = KTRompcc
+         CCCalc = .TRUE.
+      ENDIF
+
 C     Using settings for inelastic channel
       komp = 29
 C     E is always in lab system => IKEY = -1
       CALL OMPAR(Nejc,nnuc,E,eicms,Mi,Mt,ak2,komp, - 1)
+
+      IF (DIRect.GT.0) THEN
+C--------Restoring KTRlom(0,0)
+         KTRlom(0,0) = itmp1
+         CCCalc = .FALSE.
+      ENDIF
+
       Rv = RVOm(Nejc,nnuc)
       Av = AVOm(Nejc,nnuc)
       Rw = RWOm(Nejc,nnuc)

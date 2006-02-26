@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-01-02 06:13:33 $
-Ccc   * $Id: ddhms.f,v 1.25 2006-01-02 06:13:33 herman Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Readnevr,Ihistlabr,Irecprintr,
@@ -9,8 +9,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.25 $
-C $Id: ddhms.f,v 1.25 2006-01-02 06:13:33 herman Exp $
+C CVS Version Management $Revision: 1.26 $
+C $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2192,9 +2192,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.25 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.26 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.25 2006-01-02 06:13:33 herman Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -2663,97 +2663,7 @@ C
 C     RCN, 09/2004
 C     SUBROUTINE DELETED AS EXCessmass and RESmas defined globally
       END
-C
-      SUBROUTINE NUCMAS(Nn,Nz,Ebin)
-C
-C                --------------------------------------------
-C                |Nuclear mass formula of Duflo-Zuker (1992)|
-C                --------------------------------------------
-C nn  : neutron number
-C nz  : proton number
-C ebin: total binding energy
-C
-      IMPLICIT NONE
-C
-C Dummy arguments
-C
-      REAL*8 Ebin
-      INTEGER Nn, Nz
-C
-C Local variables
-C
-      REAL*8 a(21), a5, dfn, dfz, e0, edef, esh, esh1, f1, f2, f3, f4,
-     &       pn, pz, ron, roz, s, t, txxx, txxz, tzzx, tzzz, u, v, x,
-     &       xmag(6), xx, z, zmag(5), zz
-      DOUBLE PRECISION DABS
-      INTEGER k, kl, l, nn2, nz2
-      DATA zmag/14., 28., 50., 82., 114./
-      DATA xmag/14., 28., 50., 82., 126., 184./
-      DATA a/16.178, 18.422, 120.146, 202.305, 12.454, 0.73598, 5.204,
-     &     1.0645, 1.4206, 0.0548, 0.1786, .6181, .0988, .0265, -.1537,
-     &     .3113, -.6650, -.0553, -.0401, .1774, .4523/
-      x = Nn
-      z = Nz
-      t = DABS(x - z)*.5
-      v = x + z
-      s = v**(2./3.)
-      u = v**(1./3.)
-C
-C     E0:macroscopic part of the binding energy
-C
-      a5 = a(5)
-      IF (z.GT.x) a5 = 0.
-      e0 = a(1)*v - a(2)*s - a(3)*t*t/v + a(4)*t*t/u/v - a(5)*t/u - a(6)
-     &     *z*z/u
-      esh = 0.
-      esh1 = 0.
-      DO k = 2, 5
-         f1 = zmag(k - 1)
-         f2 = zmag(k)
-         dfz = f2 - f1
-         IF (z.GE.f1 .AND. z.LT.f2) THEN
-            roz = (z - f1)/dfz
-            pz = roz*(roz - 1)*dfz
-            DO l = 2, 6
-               f3 = xmag(l - 1)
-               f4 = xmag(l)
-               dfn = f4 - f3
-               IF (x.GE.f3 .AND. x.LT.f4) THEN
-                  ron = (x - f3)/dfn
-                  pn = ron*(ron - 1)*dfn
-                  esh = (pn + pz)*a(8) + a(10)*pn*pz
-                  xx = 2.*ron - 1.
-                  zz = 2.*roz - 1.
-                  txxx = pn*xx
-                  tzzz = pz*zz
-                  txxz = pn*zz
-                  tzzx = pz*xx
-                  kl = l - k
-                  IF (kl.EQ.0) esh1 = a(k + 10)*(txxx + tzzz)
-     &                                + a(k + 15)*(txxz + tzzx)
-                  IF (kl.EQ.1) esh1 = a(k + 11)*txxx - a(k + 16)
-     &                                *txxz + a(k + 10)*tzzz - a(k + 15)
-     &                                *tzzx
-                  IF (kl.EQ.2) esh1 = a(k + 12)*txxx + a(k + 17)
-     &                                *txxz + a(k + 10)*tzzz + a(k + 15)
-     &                                *tzzx
-                  edef = a(9)*(pn + pz) + a(11)*pn*pz
-                  IF (esh.LT.edef) esh = edef
-               ENDIF
-            ENDDO
-         ENDIF
-      ENDDO
-      Ebin = e0 + esh + esh1
-      nn2 = Nn/2
-      nz2 = Nz/2
-      nn2 = 2*nn2
-      nz2 = 2*nz2
-      IF (nn2.NE.Nn) Ebin = Ebin - a(7)/u
-      IF (nz2.NE.Nz) Ebin = Ebin - a(7)/u
-      END
-C
-C
-C
+
       SUBROUTINE SEPARATION
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'

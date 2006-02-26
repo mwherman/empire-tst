@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-07 08:24:08 $
-Ccc   * $Id: fusion.f,v 1.59 2005-12-07 08:24:08 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:52:54 $
+Ccc   * $Id: fusion.f,v 1.60 2006-02-26 03:52:54 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -44,7 +44,7 @@ C
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
       DOUBLE PRECISION DMAX1
-      LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal
+      LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal, lodd
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
@@ -302,6 +302,10 @@ C--------calculation of o.m. transmission coefficients for absorption
          IWArn = 0
          ldbwacalc = .FALSE.
          ltlj = .FALSE.
+	   lodd = .false.
+         IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
+     >        mod(nint(A(Ntrg)-Z(Ntrg)),2).ne.0) .and.
+     >        mod(nint(A(Ntrg)),2).ne.0 ) lodd = .true.  
          dodwba = .FALSE.
          DO l = 1, NDCOLLEV
             IF (ICOllev(l).LT.LEVcc) CYCLE ! Skipping coupled levels
@@ -320,7 +324,7 @@ C-----------DWBA calculation. All collective levels considered
                WRITE (6,*) ' DWBA calculations for inelastic scattering'
             ELSE
                WRITE (6,*) ' DWBA calculations for inelastic scattering'
-               WRITE (6,*)'             to uncoupled collective levels'
+               WRITE (6,*) '    to uncoupled coll. levels and continuum'
             ENDIF
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
             IF (DIRect.NE.3) THEN
@@ -437,16 +441,20 @@ C--------------Angular distribution (incident.ang)
                   READ (45,'(5x,F5.1,A1,4x,i5)',END = 240) stmp1, ctmp1,
      &                  nang
                   READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
-C-----------------checking the correspondence of the excited states
-                  IF (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) THEN
-                     WRITE (6,*)
+C-----------------checking the correspondence of the excited states for even-even targets
+                  IF ( .not.lodd .AND. 
+     &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
+                    WRITE (6,*)
      &            ' WARNING: DWBA and CCM state order do not coincide'
                      STOP
      &            ' WARNING: DWBA and CCM state order do not coincide'
                   ENDIF
+                  BACKSPACE 46
+	            READ (46,'(A80)',END = 235) rstring
+	            GOTO 2351 
   235             BACKSPACE 45
                   READ (45,'(A80)',END = 240) rstring
-                  WRITE (47,'(A80)') rstring
+ 2351             WRITE (47,'(A80)') rstring
                   DO j = 1, nang
                      READ (45,'(A80)',END = 240) rstring
                      READ (46,'(A80)',END = 236) rstring

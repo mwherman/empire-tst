@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-01-02 06:17:16 $
-Ccc   * $Id: io.h,v 1.28 2006-01-02 06:17:16 herman Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: io.h,v 1.29 2006-02-26 03:52:55 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -61,6 +61,17 @@ c     63     ecis03
 c     64     ecis03
 c     65     ecis03
 c     66     ecis03, MSD-Tristan
+
+c     70     fileprep (empire_ctl fit)
+
+c     71     fileprep (empire_ctl fit)
+
+c     72     fileprep (empire_ctl fit)
+
+c     73     main.f (for pfns OUTPUT)
+
+c     74     main.f (for pfns OUTPUT)
+
 c     75     ecis03
 c     76     ecis03
 c     77     input
@@ -136,7 +147,6 @@ C     Added to check if file is not empty
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
-
 
 
 

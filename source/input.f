@@ -1,6 +1,3 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2006-02-17 23:23:28 $
-Ccc   * $Id: input.f,v 1.196 2006-02-17 23:23:28 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -235,7 +232,7 @@ C
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
          DEFdyn = 1.d0
-         DEFsta = 1.d0
+        DEFsta = 1.d0
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -1314,6 +1311,7 @@ C-----compound nucleus 1
          NEXreq = MAX(NDEX - 2,2)
       ENDIF
 C-----determination of discrete levels and pairing shift for cn
+      write(6,*)
       CALL LEVREAD(nnuc)
       IF (ROPar(3,nnuc).EQ.0.0D0) THEN
          IF (Z(nnuc).GT.98.0D0 .OR. ROPaa(nnuc).LE.0.0D0) THEN
@@ -1983,6 +1981,9 @@ C--------------------only gamma decay is considered up to now
                   ENDIF
                ENDIF
             ENDDO
+            write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
+     >        'FOR NUCLEUS ',chelem,
+     >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
          ENDIF
       ENDIF
   200 IF (.NOT.FILevel) CLOSE (13)
@@ -2122,6 +2123,7 @@ C
         WRITE (12,*) '   MT=102 Capture                               '
         WRITE (12,*) '   MT=16   (n,2n)                               '
         WRITE (12,*) '   MT=17   (n,3n)                               '
+        WRITE (12,*) '   MT=18   (n,f)                                '
         WRITE (12,*) '   MT=22   (n,na)                               '
         WRITE (12,*) '   MT=24   (n,2na)                              '
         WRITE (12,*) '   MT=28   (n,np)                               '
@@ -2136,7 +2138,7 @@ C
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
-        WRITE (12,*) 'MF=12 Transition probablility arrays for photon '
+        WRITE (12,*) 'MF=12 Transition probability arrays for photon  '
         WRITE (12,*) '      production; taken from the RIPL-2         '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=14 Photon angular distributions              '
@@ -2153,14 +2155,15 @@ C
         WRITE (12,*) '[He02] M. Herman, R. Capote, P. Oblozinsky,     '
         WRITE (12,*) '       M. Sin, A. Trkov, A. Ventura, V. Zerkin  '
         WRITE (12,*) '   Recent Development of the Nuclear            '
-        WRITE (12,*) '   Reaction Model Code Empire,  International   '
+        WRITE (12,*) '   Reaction Model Code EMPIRE,  International   '
         WRITE (12,*) '   Conference on Nuclear Data for Science &     '
         WRITE (12,*) '   Technology - ND2004 September 26 - October 1,'
         WRITE (12,*) '   2004, Santa Fe, New Mexico.                  '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[Ri03]                                          '
-        WRITE (12,*) '   RIPL-2: Reference Input Parameter Library    '
-        WRITE (12,*) '   IAEA, Vienna 2005, see                       '
+        WRITE (12,*) '   Handbook for calculations of nuclear reaction'
+        WRITE (12,*) '   data: Reference Input Parameter Library II.  '
+        WRITE (12,*) '   IAEA, Vienna 2005. Available online at       '
         WRITE (12,*) '   http://www-nds.iaea.org/RIPL-2/              '
         WRITE (12,*) '                                                '
         WRITE (12,*) '************************************************'
@@ -2549,7 +2552,7 @@ C
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b32  |'
+     &           '                       |  E M P I R E  -  2.19.b33  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -2572,7 +2575,7 @@ C
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b31 by      '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b33 by      '
       WRITE (12,*) 'M. Herman et al [He01, He02]. This code integrates '
       WRITE (12,*) 'into a single system a number of important modules '
       WRITE (12,*) 'and features:                                      '
@@ -2747,7 +2750,7 @@ C                GDIvp = val + grand()*sigma
      &          ,f5.2)') GDIvp
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, MFPp, INDexf,INDexb
+     &              IPArCOV, GDIvp, INDexf,INDexb
             else
               GDIvp = val
               WRITE(6,
@@ -2788,11 +2791,11 @@ C                MFPp = val + grand()*sigma
      &              IPArCOV, MFPp, INDexf,INDexb
               else
                 WRITE (6,
-     &'('' Mean free path parameter in PCROSS set to '',F4.1
-     &  )') MFPp
+     &'('' Mean free path parameter in PCROSS set to '',F4.1,
+     &  '' (Recommended ~ 1.5)'')') MFPp
                 WRITE (12,
-     &'('' Mean free path parameter in PCROSS set to '',F4.1
-     &  )') MFPp
+     &'('' Mean free path parameter in PCROSS set to '',F4.1,
+     &  '' (Recommended ~ 1.5)'')') MFPp
                endif
              ENDIF
             GOTO 100
@@ -2802,12 +2805,12 @@ C                MFPp = val + grand()*sigma
             IF (val.GE.0.1 .AND. val.LE.1.5D0) THEN
               CHMax = val
               WRITE (6,
-     &'('' Max hole number in PCROSS set to'',F4.2,
+     &'('' Max hole number in PCROSS set to '',F4.2,
      &        ''*sqrt(g*U)'')') CHMax
               WRITE (6,
      &'(''    being U the CN excitation energy '')')
               WRITE (12,
-     &'('' Max hole number in PCROSS set to'',F4.2,
+     &'('' Max hole number in PCROSS set to '',F4.2,
      &        ''*sqrt(g*U)'')') CHMax
               WRITE (12,
      &'(''    being U the CN excitation energy '')')
@@ -5468,15 +5471,17 @@ C
          DO ia = 2*iz - 10, 3*iz
             IF (RESmas(iz,ia).EQ.0.D0) THEN
                in = ia - iz
-               CALL NUCMAS(in,iz,ebin)
+               if (in.le.0) cycle
+               CALL mass10(in,iz,ebin)
+C              CALL NUCMAS(in,iz,ebin)
                RESmas(iz,ia) = iz*AMUpro + in*AMUneu - ebin/AMUmev
                EXCessmass(iz,ia) = RESmas(iz,ia)*AMUmev - REAL(ia)
             ENDIF
          ENDDO
       ENDDO
 C-----mbc1 a quick/temp? solution to weird light undefined masses: define
-C-----resmas=A for al nuclei so far undefined
-C-----prvisouly i had a problem for be6 => be5 +n since mass be5 undefined
+C-----resmas=A for all nuclei so far undefined
+C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
       DO iz = 1, 130
          DO ia = 1, 400
             IF (RESmas(iz,ia).EQ.0.D0) THEN
@@ -5682,8 +5687,8 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-               ELSE
-                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+C              ELSE
+C                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5737,7 +5742,7 @@ C--------------Calculate sum for the average normalization factor
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
-            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp
@@ -6430,7 +6435,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION beta2, beta3, betatmp, delta_k, dtmp, elvr,
-     &                 etmp, ftmp, gspar, gspin, jtmp, qn, t12, xjlvr
+     &                 etmp, ftmp, gspar, gspin, jtmp, qn, t12, xjlvr,
+     &                 egrcoll(3,3),ggrcoll(3,3),
+     &                 betahegor, betalegor, betagmr, betagqr,
+     &                 sgmr, sgqr, sgor
       CHARACTER*1 dum
       CHARACTER*5 chelem
       CHARACTER*100 ch_iuf, comment
@@ -6447,6 +6455,28 @@ C
       CHARACTER*6 reftmp
 
       ND_nlv = 0
+
+C
+C     Giant multipole resonances following TALYS
+C
+c     For each L multipolarity Energy Weighted Sum Rule (EWSR) applies:
+c     SUM_i(E_i*beta_i)=57.5*A**(-5/3)*L*(L+1)
+C
+
+      sgmr=23.*A(0)**(-5./3.)
+      egrcoll(0,1)=18.7-0.025*A(0)
+      ggrcoll(0,1)=3.
+      sgqr=575.*A(0)**(-5./3.)
+      egrcoll(2,1)=65.*A(0)**(-1./3.)
+      ggrcoll(2,1)=85.*A(0)**(-2./3.)
+      sgor=1208.*A(0)**(-5./3.)
+      sleor=0.3*sgor
+      egrcoll(3,1)=31.*A(0)**(-1./3.)
+      ggrcoll(3,1)=5.
+      sheor=0.7*sgor
+      egrcoll(3,2)=115.*A(0)**(-1./3.)
+      ggrcoll(3,2)=9.3-A(0)/48.
+
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
       IF (fexist) THEN
          WRITE (6,*) ' '
@@ -6528,6 +6558,9 @@ C--------Reading ground state information (to avoid overwriting deformation)
          WRITE (12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
+
+C
+         igreson = 0
          DO i = 2, ND_nlv
             READ (32,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
@@ -6535,7 +6568,7 @@ C--------Reading ground state information (to avoid overwriting deformation)
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
 C
 C           For covariance calculation of dynamical deformation
-             D_Def(i,2) = ftmp*DEFdyn
+            D_Def(i,2) = ftmp*DEFdyn
 C
             WRITE (6,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
@@ -6543,13 +6576,69 @@ C
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
+
+            IF(D_Def(i,2).GT.0.05d0) then
+              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+              igreson = 1
+            ENDIF
             WRITE (12,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+
+C
+C           CHECKING EWSR
+C
+            IF(D_Def(i,2).GT.0.d0 .AND. D_Def(i,2).LE.0.05d0) then
+              ftmp = D_Def(i,2)
+              if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
+     >                            ftmp = D_Def(1,2) ! coupled levels
+              betasq=ftmp*ftmp
+              edis1=D_Elv(i)
+              jdis1=int(D_Xjlv(i))
+              if (jdis1.eq.0) Sgmr=Sgmr-betasq*edis1
+              if (jdis1.eq.2) Sgqr=Sgqr-betasq*edis1
+              if (jdis1.eq.3) Sleor=Sleor-betasq*edis1
+              if(sgmr.gt.0) isgmr = ICOllev(i)
+              if(sgqr.gt.0) isgqr = ICOllev(i)
+              if(sleor.gt.0) isgor = ICOllev(i)
+            ENDIF
+
          ENDDO
+
          WRITE(12,*) ' '
          CLOSE (32)
+
+         if(igreson.eq.0) THEN
+           if (sgmr.gt.0.) betagmr=sqrt(sgmr/egrcoll(0,1))
+           if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
+           if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
+           betahegor=sqrt(sheor/egrcoll(3,2))
+           write(6,*)
+           write(6,*)
+     >       '===================================================='
+           write(6,*)'  Energy Weighted Sum Rules for GIANT RESONANCES'
+           write(6,*)
+     >       ' (You can add these resonances to collective levels)'
+           write(6,*) '            EWSR       Uexc    Width    Beta '
+           if(betagmr.LT.1.d0)
+     >       write(6,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GMR :',
+     >       sgmr,egrcoll(0,1),ggrcoll(0,1),betagmr,isgmr
+           if(betagqr.LT.1.d0)
+     >       write(6,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GQR :',
+     >       sgqr,egrcoll(2,1),ggrcoll(2,1),betagqr,isgqr
+           if(betalegor.LT.1.d0)
+     >       write(6,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'leGOR :',
+     >       sleor,egrcoll(3,1),ggrcoll(3,1),betalegor,isgor
+           write(6,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'heGOR :',
+     >       sheor,egrcoll(3,2),ggrcoll(3,2),betahegor
+           write(6,*)
+     >       '===================================================='
+           write(6,*)
+         endif
+
          IFINDCOLL = 0
          RETURN
       ENDIF

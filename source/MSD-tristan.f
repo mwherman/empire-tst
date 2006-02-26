@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-02-01 22:49:03 $
-Ccc   * $Id: MSD-tristan.f,v 1.56 2006-02-01 22:49:03 herman Exp $
+Ccc   * $Date: 2006-02-26 03:52:54 $
+Ccc   * $Id: MSD-tristan.f,v 1.57 2006-02-26 03:52:54 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -435,7 +435,7 @@ c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nils
      &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2,
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
-c     &                 wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,  ! nilsson
+c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
      &                               wqrex, x, xea(6,6), xir, xneg, xp,  ! nilsson
      &                 xpos, xqq, yea(6,6), yqq, sum                     ! nilsson
       EQUIVALENCE (BST(1),BST1)

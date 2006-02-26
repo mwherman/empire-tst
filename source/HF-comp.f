@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-12-09 16:03:53 $
-Ccc   * $Id: HF-comp.f,v 1.82 2005-12-09 16:03:53 Capote Exp $
+Ccc   * $Date: 2006-02-26 03:52:55 $
+Ccc   * $Id: HF-comp.f,v 1.83 2006-02-26 03:52:55 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -183,6 +183,7 @@ C
       DOUBLE PRECISION excnq, xnor
       INTEGER icsp, ie, iejc
       INTEGER INT
+C     data jsigma/0/,jsigma2/36/
 C
 C
 C
@@ -196,14 +197,17 @@ C-----Fission
 C-----
 C-----Contribution due to feeding spectra from Nnuc (no decay contribution)
 C-----DE spectra (DDX are not done for fission although they could be)
-      IF (Nejc.EQ. - 1) THEN
+C
+      IF (Nejc.EQ. -1) THEN
+C        fission of n,nx and npx nuclei considered 
          IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
-            DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) CSEfis(ie,iejc)
-     &             = CSEfis(ie,iejc) + POPcse(Iec,iejc,ie,INExc(Nnuc))
-     &               *xnor
+C           DO iejc = 0, NDEJC
+            DO iejc = 0, 1  ! only neutrons and photons for the time being
+              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) 
+     &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
+     &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
             ENDDO
          ENDDO
          RETURN   !if fission
@@ -1235,7 +1239,13 @@ C-----------
       ENDIF
   100 IF (Sumfis.EQ.0.0D0) RETURN
 
+
+
+
+
       Sumfis = Sumfis*TUNEfi(Nnuc) 
+
+
 
       IF (BETav.NE.0.0D0) THEN
 C--------reduction of the fission width due to possible return from the
@@ -1413,7 +1423,11 @@ C==============discrete contribution====================
                      tfdis(ibar) = tfdis(ibar) + TFD(ibar)
                   ENDIF
                ENDDO
+
+
             ENDDO
+
+
          ENDDO
       ENDIF
 C-------subbarrier effects
@@ -1657,8 +1671,12 @@ C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 C-----single-humped
       IF (NRBar.EQ.1) THEN
          Sumfis = TF(1)
-	   WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
+
+
+         WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
      &          tfdis(1), tfcon(1), Sumfis
+
+
       ENDIF
 C-----double-humped
       IF (NRBarc.EQ.2.) THEN
@@ -1667,12 +1685,16 @@ C-----double-humped
             Sumfis = 0.
          ELSE
             IF (FISopt(Nnuc).EQ.0.) THEN
+
+
                Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))
                WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
      &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
      &                tfdis(2), tfcon(1), tfcon(2), Sumfis
             ENDIF
             IF (NRWel.EQ.1 .AND. FISopt(Nnuc).GT.0.) THEN
+
+
                Sumfis = TDIr + TABs*TF(2)/(TF(1) + TDIr + TG2)
                WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
      &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
@@ -1686,6 +1708,8 @@ C----triple-humped
          IF (tnumm.EQ.0.) THEN
             Sumfis = 0.
          ELSE
+
+
             Sumfis = TF(1)*TDIr23/(TF(1) + TDIr23)
             IF (NRWel.EQ.2 .AND. FISopt(Nnuc).GT.0.) Sumfis = TDIr +
      &          TABs*TDIr23/(TF(1) + TDIr23)
