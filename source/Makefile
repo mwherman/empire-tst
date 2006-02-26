@@ -39,7 +39,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       \
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-            thora.o           empire_ctl.o
+            thora.o           empire_ctl.o      pfns.o
 
 OBJE =      subecis03.o systematics.o
 
