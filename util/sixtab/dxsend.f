@@ -1036,6 +1036,7 @@ C-V  03/01 - Add MF5 Maxwellian fission spectrum representation.
 C-V        - Add LO=1, LF=2 capability for MF12 processing.
 C-V  03/11 - Guard cross section retrieval against overflow.
 C-V  03/12 - Implement MF6 Law2 LANG>10 processing.
+C-V  06/01 - Add evaporation spectrum to options in MF 5.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -1403,10 +1404,10 @@ C* Process MF 4 data - Preset isotropic CM angular distributions
       NR =1
       INR(1)=2
       NE1=11
-      DO 41 I=1,NE1
-      ENR(I)=-1+(I-1)*2.0/(NE1-1)
-      DXS(I)=0.5
-   41 CONTINUE
+      DO I=1,NE1
+        ENR(I)=-1+(I-1)*2.0/(NE1-1)
+        DXS(I)=0.5
+      END DO
       ENR(NE1)=1
       IF(IER.NE.0) THEN
 C* Check for error condition
@@ -1478,7 +1479,8 @@ C* Angular distribution at incident energy Ein processed
 C* Calculate  integral SS over distribution DXS at cosines ENR
    45 EA=ENR(1)
       EB=ENR(NE1)
-      CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INR)
+      INT=INR(1)
+      CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INT)
 C*
 C* Process energy distributions for two-body reactions (AWP>0)
 C* Definitions:
@@ -1571,6 +1573,15 @@ C* Process energy distribution data in MF 5
         MF =5
         MT =MT0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,NK,N2,MAT,MF,MT,IER)
+C...
+c...    print *,'Found ZA0,ZA,AW,NK,MAT,MF,MT,IER'
+c...    print *,       ZA0,ZA,AW,NK,MAT,MF,MT,IER
+C...
+        IF(IER.NE.0) THEN
+          PRINT *,'DXSEN1 WARNING - No MF 5 for MT',MT
+          IER=14
+          GO TO 900
+        END IF
       END IF
       NX=MRW/2
       LX=NX+1
@@ -1643,10 +1654,10 @@ C...
             PRINT *,'WARNING - Non-linear interp. for MF/MT',MF,MT
             INE=2
           END IF
-          DO 53 I=1,NF
-          RWO(LXE-1+I)=RWO(LXE-2+2*I)
-          RWO(LXX-1+I)=RWO(LXE-1+2*I)
-   53     CONTINUE
+          DO I=1,NF
+            RWO(LXE-1+I)=RWO(LXE-2+2*I)
+            RWO(LXX-1+I)=RWO(LXE-1+2*I)
+          END DO
         END IF
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
@@ -1654,7 +1665,8 @@ C...
         END IF
         IF(KEA.EQ.2) THEN
 Case: Interpolate outgoing particle energy distributions
-          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR
+          INT=INR(1)
+          CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INT
      1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
         ELSE
 Case: Interpolate distrib. to a given outgoing particle energy
@@ -1669,8 +1681,9 @@ Case: Interpolate distrib. to a given outgoing particle energy
           END IF
         END IF
    54   CONTINUE
-      ELSE IF(LF.EQ.7) THEN
-C* Energy dependent Maxwellian fission spectrum (Law 7)
+      ELSE IF(LF.EQ.7 .OR. LF.EQ.9) THEN
+C* Energy dependent Maxwellian fission spectrum (Law 7) OR
+C* Evaporation spectrum (Law 9)
         NX=MRW/2
         LX=NX+1
         UPEN=C1
@@ -1679,6 +1692,48 @@ C* Energy dependent Maxwellian fission spectrum (Law 7)
           GO TO 900
         END IF
 C* Read and interpolate Maxwellian temperature parameter Theta
+        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1             ,RWO,RWO(LX),NX,IER)
+        INE=INR(1)
+        IF(NR.GT.1) THEN
+          PRINT *,'WARNING - Multiple interp. ranges in MF5 MT',MT0
+        END IF
+        IF(INE.GT.2) THEN
+          PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
+        END IF
+        THETA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
+        IF(KEA.EQ.2) THEN
+Case: Generate outgoing particle energy distributions
+          NE1=101
+C*         Limit the table to the upper energy on the ENDF file
+          EE =MIN(ETOP,EIN-UPEN)
+          DE =EE/(NE1-1)
+          DO I=1,NE1
+            EE =(I-1)*DE
+            ENR(I)=EE
+            DXS(I)=SPMAXW(EE,EIN,UPEN,THETA)
+          END DO
+        ELSE
+C* Case: Calculate values at the given outgoing particle energy
+          IF(LF.EQ.7) THEN
+C*            Maxwellian fission spectrum
+            YL=YL*SPMAXW(EOU,EIN,UPEN,THETA)
+          ELSE
+C*            Evaporation spectrum
+            YL=YL*SPEVAP(EOU,EIN,UPEN,THETA)
+          END IF
+          GO TO 800
+        END IF
+      ELSE IF(LF.EQ.9) THEN
+C* Evaporation spectrum (Law 9)
+        NX=MRW/2
+        LX=NX+1
+        UPEN=C1
+        IF(EIN-UPEN.LE.0) THEN
+          NEN=0
+          GO TO 900
+        END IF
+C* Read and interpolate the temperature parameter Theta
         CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
      1             ,RWO,RWO(LX),NX,IER)
         INE=INR(1)
@@ -1705,6 +1760,7 @@ Case: Calculate values at the given outgoing particle energy
           YL=YL*SPMAXW(EOU,EIN,UPEN,THETA)
           GO TO 800
         END IF
+
       ELSE IF(LF.EQ.11) THEN
 C* Energy dependent Watt spectrum (Law 11)
         NX=MRW/2
@@ -1759,9 +1815,9 @@ C...    Secondary particle energy distributions MF 5 not coded
         IER=13
         GO TO 900
       END IF
+      GO TO 800
 C*
 C* Process coupled energy/angle distributions MF6 of selected particle
-      CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
    60 LCT=L2
       NK =N1
       JNK=0
@@ -2477,6 +2533,16 @@ C* Spectrum
       SPMAXW=SQRT(EE)*EXP(-EE/THETA)/CNRM
       RETURN
       END
+      FUNCTION SPEVAP(EE,EI,EU,THETA)
+C-Title  : Function SPEVAP
+C-Purpose: Calculate the EVAPORATION spectrum value at energy EE
+C* Normalisation constant
+      E0=(EI-EU)/THETA
+      CNRM=THETA*THETA*(1 - (1+E0)*EXP(-E0) )
+C* Spectrum
+      SPEVAP=EE*EXP(-EE/THETA)/CNRM
+      RETURN
+      END
       FUNCTION SPWATT(EE,EI,EU,WA,WB)
 C-Title  : Function SPWATT
 C-Purpose: Calculate the Watt fission spectrum value at energy EE
@@ -2943,7 +3009,7 @@ C-D  The size of EN1, XS1 and EN2, XS2 arreys are assumed to be
 C-D  at least 2*NEP1 and 2*NEP2, respectively. Array elements above
 C-D  NEP1 and NEP2 are used as scratch area.
 C-D
-      DIMENSION  EN1(NEP1),XS1(NEP1), EN2(MEP2),XS2(MEP2)
+      DIMENSION  EN1(1),XS1(1), EN2(MEP2),XS2(MEP2)
 C*
       IF(INE.GT.2) STOP 'Log interpolation in MF 6'
 C* Convert second set of points to linearly interpolable form
@@ -3069,7 +3135,7 @@ C-D  are merged into EUN with NEU points. Special care is taken to
 C-D  retain double points within a grid that allow for function
 C-D  discontinuities.
 C-
-      DIMENSION EN1(NEP1),EN2(NEP2),EUN(NEP2)
+      DIMENSION EN1(NEP1),EN2(NEP2),EUN(KX)
       IF(NEP2.LE.0) GO TO 30
       IF(NEP1.LE.0) GO TO 34
       NEU=0
@@ -3087,7 +3153,9 @@ C...    PRINT *,'UNIGRD ERROR in grid-1:',NEU,KX
       END IF
       EUN(NEU)=EN1(J1)
 C* Test for coincident points in the second grid
-      IF(EN1(J1).EQ.EN2(J2) .AND. J2.LE.NEP2) J2=J2+1
+      IF(J2.LE.NEP2) THEN
+        IF(EN1(J1).EQ.EN2(J2)) J2=J2+1
+      END IF
       J1 =J1+1
 C* Test for the end of the grid set
       IF(J1.GT.NEP1 .AND. J2.GT.NEP2) GO TO 40
@@ -3105,7 +3173,9 @@ C...     PRINT *,'NEU,KX',NEU,KX
       END IF
       EUN(NEU)=EN2(J2)
 C* Test for coincident points in the first grid
-      IF(EN1(J1).EQ.EN2(J2) .AND. J1.LE.NEP1) J1=J1+1
+      IF(J1.LE.NEP1) THEN
+        IF(EN1(J1).EQ.EN2(J2)) J1=J1+1
+      END IF
       J2 =J2+1
 C* Test for the end of the grid set
       IF(J1.GT.NEP1 .AND. J2.GT.NEP2) GO TO 40

@@ -2487,6 +2487,9 @@
 !
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP
       INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
+!trkov    start
+      INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN
+!trkov    end
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,II,I2,N,NN
       REAL(KIND=R4) :: C1,C2
@@ -2528,7 +2531,12 @@
 !
 !              NEW STYLE FORMATS
 !
-               ELSE
+!original start
+!              ELSE
+!original end
+!trkov    start
+               ELSE IF(LCOMP.EQ.1) THEN
+!trkov    end
                   CALL CONT(C1,C2,L1,L2,NSRS,NLRS)
                   IF(NSRS.GT.0)  THEN
                      DO I2=1,NSRS
@@ -2540,6 +2548,21 @@
                         CALL CANT(C1,C2,L1,L2,N1,N2)
                      END DO
                   END IF
+!trkov    start
+               ELSE IF(LCOMP.EQ.2) THEN
+                  IF((LRF.GE.1 .AND. LRF.LE.3) .OR. LRF.EQ.7) THEN
+                     CALL CANT(C1,C2,L1, L2,NRSA12,NRSA)
+                     CALL CONT(C1,C2,L1,NNN,    NM,  N2)
+                     DO I2=1,NM
+                        CALL TEXTR(1)
+                     END DO
+                  ELSE
+                     WRITE(*,*) 'Illegal LRF',LRF
+                     STOP 'ERROR IN FILE32 - Unsupported LRF'
+                  END IF
+               ELSE
+                  STOP 'ERROR IN FILE32 - Illegal LCOMP'
+!trkov    end
                END IF
 !
 !           UNRESOLVED RESONANCE PARAMETERS
@@ -2547,10 +2570,15 @@
             ELSE
                CALL CONT(C1,C2,L1,L2,NLS,N2)
                DO N=1,NLS
-                  CALL CONT(C1,C2,L1,L2,NJS,N2)
-                  DO NN=1,NJS
-                     CALL CANT(C1,C2,L1,L2,N1,N2)
-                  END DO
+!original start
+!                 CALL CONT(C1,C2,L1,L2,NJS,N2)
+!                 DO NN=1,NJS
+!                    CALL CANT(C1,C2,L1,L2,N1,N2)
+!                 END DO
+!original end
+!trkov    start
+                  CALL CANT(C1,C2,L1,L2,N1,NJS)
+!trkov    end
                END DO
                CALL CANT(C1,C2,L1,L2,N1,N2)
             END IF

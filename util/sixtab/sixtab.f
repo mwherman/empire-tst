@@ -360,7 +360,7 @@ C-D A section of file 6 using legendre or tabulated angular distributions
 C-D is converted into Law 7 format with NCS angles. Intermediate results
 C-D are written to scratch file on unit LSC.
 C-
-      PARAMETER       (MXMU=50, MXPL=100, MXNB=20, MXRW=20000)
+      PARAMETER       (MXMU=50, MXPL=100, MXNB=20, MXRW=80000)
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
       DOUBLE PRECISION PAR,CLB,P1,P2,PP
@@ -578,6 +578,8 @@ C* Write the TAB2 record defining incident energy and cosine list
 C* Process the continuum contribution (if present)
         IF(ND.LT.NEP) THEN
           NEPP=NEP-ND
+          LL  =(NEPP+ND)*(NA+2)
+          IF(LL.GT.NXS) STOP 'MF6LW7 ERROR - MXRW limit exceeded'
           DO IP=1,NEPP
             RWO(LXE-1+IP)=RWO(LX1+(NA+2)*(ND+IP-1)  )
             RWO(LXS-1+IP)=RWO(LX1+(NA+2)*(ND+IP-1)+1)
@@ -709,7 +711,7 @@ C* Begin loop over secondary particle energies
       ECM=RWO(LX1+NCYC*(IP-1))
 C* Check that outgoing particle energies are monotonic increasing
       IF(ECM.LT.ECM0) THEN
-        IF(LTT.GT.0) WRITE(LTT,964) IZAP,EIN,ECM
+        IF(LTT.GT.0) WRITE(LTT,964) MT,IZAP,EIN,ECM
         GO TO 408
       END IF
       ECM0=ECM
@@ -888,7 +890,8 @@ C*
   960 FORMAT(/' Converting MF=6, MT=',I3,' to Law 7 format')
   961 FORMAT(' SIXTAB ERROR - Can not process Law',I3,' for ZAP',I6)
   962 FORMAT(12X,A8,' Representation for particle IZAP',I6)
-  964 FORMAT(' SIXTAB WARNING - Format error ZAP,Ein,Ep',I6,1P,2E10.3)
+  964 FORMAT(' SIXTAB WARNING - Format error MT,ZAP,Ein,Ep'
+     &                                      ,I3,I6,1P,2E10.3)
       END
       SUBROUTINE LEGPNT(NW,NL,RWO,MXRW)
 C-Title  : Subroutine LEGPNT
