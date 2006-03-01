@@ -778,7 +778,7 @@ proc Canonize {w object opt} {
 ## Library Procedure:  ::combobox2::ComputeGeometry
 
 namespace eval ::combobox2 {
-proc ComputeGeometry {w} {
+proc CemputeGeometry {w} {
     upvar ::combobox2::${w}::widgets widgets
     upvar ::combobox2::${w}::options options
 
@@ -5922,7 +5922,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_11_0.cpd75" "Button32" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd75 "$site_11_0.cpd75 Button $top all _vTclBalloon"
     bind $site_11_0.cpd75 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Be aware that EMPIRE and Formatting must be run before the remaining one}
+        set ::vTcl::balloon::%W {Be aware that EMPIRE and Formatting must be run before the remaining ones}
     }
     pack $site_11_0.cpd72 \
         -in $site_11_0 -anchor center -expand 0 -fill x -padx 5 -pady 5 \
@@ -6172,7 +6172,7 @@ exit} \
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec rm -r $file-tl
+        -command {exec rm -r $file-tl 
 exec xterm -e ../scripts/run $file
 adjourn .top75
 # create list of possible ddx plots
@@ -7886,6 +7886,10 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
         -command {exec $editor $file.xsc &} -label {Cross-sections} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file-fiss.xsc &} -label {Fission chances} 
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file-pfnm.out &} -label {Fiss. neutr. multiplicities} 
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file-pfns.out &} -label {Fiss. neutr. spectra} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file.sys &} -label {x-sec systematics} 
     $site_3_0.menu94 add separator \
