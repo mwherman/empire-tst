@@ -1,8 +1,8 @@
 #! /bin/sh -
 #SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION)
 file=$1
-MAT=$3
 MT=$2
+MAT=$3
 work=`pwd`
 if [ "$MAT" = "" ]
    then
@@ -12,6 +12,12 @@ if [ "$MT" = "" ]
    then
    MT=102
 fi
+
+rm fort* 2>/dev/null
+rm SENSITIVITY.INP 2>/dev/null
+rm KALEND.INP 2>/dev/null
+rm KALMAN.INP 2>/dev/null
+rm ENDF.DAT 2>/dev/null
 
 # Input for c4tokal and kalend
 cat >KALEND.INP <<EOF
@@ -46,7 +52,6 @@ fi
 
 echo 'Edit Kalman input'
 emacs KALMAN.INP
-#read dum
 ../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
 mv fort.13 $file-xsc.kal
 mv fort.14 $file-cov.kal
@@ -64,4 +69,5 @@ rm SENSITIVITY.INP
 rm KALEND.INP
 rm KALMAN.INP
 rm ENDF.DAT
+rm fort*
 exit
