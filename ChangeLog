@@ -67,6 +67,33 @@
     parameter a-tilde preserving internal normalization set by the average 
     ratio between systematics and experimental data. Effective renormalization
     factor is ATILNO*<exp/sys> rather than ATILNO (M. Herman)
+30. Prompt fission neutron spectrum calculation including post-fission neutrons 
+    emitted from fully accelerated fragments (see Kornilov N.V. et al, Physics 
+    of Atomic Nuclei ,62 (1999), pp.173-185) and pre-fission neutrons  emitted 
+    after neutron or proton emission of the fissioning CN. These neutrons are 
+    treated exactly within EMPIRE HF calculation. Implemented algorithm is an 
+    extension of the one by Maslov et al. (Eur. Phys. J. A18 (2003) 93-102) 
+    and allows to go above 20 MeV up to about 150 MeV. Nu-bar is also an extension 
+    of the formalism published by Maslov et al. (Eur. Phys. J. A18 (2003) 93-102) 
+    allowing to extend the energy range from 20 MeV up to about 150 MeV.
+    Both, nu-bar and PFNS calculations are consistent with the calculated fission 
+    cross sections. The implemented model allows for a better description of PFNS 
+    above the emissive threshold than the Los Alamos model. (R. Capote & M. Sin)
+32. Giant Multipole sum rules in the continuum are implemented (considering the 
+    collective states with spin 0,2,3 included in the collective level file). 
+    The results are printed in the long output. Eventually, the new listed resonances 
+    could be manually added to the collective level file to fulfill corresponding 
+    sum rule. If the sum rule is exhausted, then the corresponding deformation  
+    is set to zero. The empirical formulae used for estimation of energies 
+    and widths of Giant Multipole Resonances were taken from the TALYS manual. 
+    No checking is done of the collective strength used in the MSC+MSD calculations.
+    (R. Capote)
+33. DWBA on odd nuclides is implemented under following limitations: (i) No discrete 
+    levels can be calculated with DWBA, for these rigid rotor CC model is 
+    recommended. (ii) Calculated DWBA strength is distributed assuming a Gaussian 
+    resolution function. (iii) No spin coupling is considered. (iv) DWBA calculations
+    are carried out for a neighbour nucleus and collective states included in the 
+    continuum must have even spin!!!(R. Capote)
     
 
          
