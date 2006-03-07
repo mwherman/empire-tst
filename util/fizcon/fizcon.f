@@ -34,10 +34,11 @@
 ! *                        8. CORRECT PRODUCT TEST FOR ELASTIC SCATTERING       
 ! *                        9. MOVE POTENTIAL SCATTERING TEST TO PSYCHE.
 ! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
-! *                        1. FIX RESONANCE PARAMETER SUM TEST
-! *         VERSION 7.03   SEPTEMBER 2005     M.HERMAN
-! *                        1. MAX NUMBER OF SECTIONS IN MT=12,13 INCREASED
-! *                           TO 200
+! *                        1. ONLY ERRORS REPORTED IN OUTPUT
+! *         VERSION 7.03   FEBRUARY 2006     M. HERMAN
+! *                        1. INCREASED DIMENSIONS FOR WORKSPACE AND NUMBER
+! *                           OF GAMMA RAYS
+! *
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
@@ -105,7 +106,7 @@
 !...VMS, UNX, ANSI, WIN, LWI, DVF
       CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -212,6 +213,10 @@
 !
       INTEGER(KIND=I4) :: MATO,MFO,MTO
 !
+!     MATERIAL, FILE, AND SECTION NUMBER OF LAST ERROR DETECTED
+!
+      INTEGER(KIND=I4) :: MATERR,MFERR,MTERR,MISFERR
+!
 !     1000*Z + A OF MATERIAL CURRENTLY BEING PROCESSED
 !        AWR IS THE RATIO OF THE MATERIAL MASS TO THAT OF THE NEUTRON
 !        AWI IS THE RATIO OF THE PROJECTILE MASS TO THE THAT OF NEUTRON
@@ -295,7 +300,7 @@
 !
 !     TOTAL DATA STORAGE ARRAYS FOR SUMUP TESTS
 !
-      INTEGER(KIND=I4), PARAMETER :: SZDAT=50000
+      INTEGER(KIND=I4), PARAMETER :: SZDAT=500000
       INTEGER(KIND=I4) :: NTOT
       REAL(KIND=R4), DIMENSION(SZDAT) :: XT,YT,YINT
       REAL(KIND=R4), DIMENSION(4,3) :: COEFS
@@ -391,14 +396,14 @@
 !
 !     DISCRETE GAMMA RAYS SEEN IN FILES 12 AND/OR 13
 !
-      INTEGER(KIND=I4), PARAMETER :: SZGAM=25
+      INTEGER(KIND=I4), PARAMETER :: SZGAM=500
       REAL(KIND=R4), DIMENSION(SZGAM) :: EGAM
       INTEGER(KIND=I4), DIMENSION(SZGAM) :: MTGAM
       INTEGER(KIND=I4) :: NMTGAM
 !
 !     STORES FLAG FOR MT'S SEEN IN FILE 12 AND/OR 13
 !
-      INTEGER(KIND=I4), PARAMETER :: SZMTS = 200
+      INTEGER(KIND=I4), PARAMETER :: SZMTS = 150
       INTEGER(KIND=I4), DIMENSION(SZMTS,2) :: ICON
       INTEGER(KIND=I4) :: NPMT
 !
@@ -794,6 +799,8 @@
 !
 !     EXECUTES FIZCON PROCESS
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!
       CHARACTER(LEN=80) :: IFIELD
       INTEGER(KIND=I4) :: IQUIT   ! FLAG TO INDICATE WHETHER OR NOT TO EXIT     
       INTEGER(KIND=I4) :: IFIND   ! FLAGS WHETHER DESIRED MATERIAL FOUND
@@ -869,14 +876,11 @@
          REWIND (UNIT=ISCRU1)
          REWIND (UNIT=ISCRU2)
          WRITE(NOUT,'(A/3X,A,I5)')  CHAR(12),'CHECK MATERIAL',MAT
-         WRITE(NOUT,'(19X,A)')                                          &       
-     &          '(NO ERRORS DETECTED IN SECTIONS WITHOUT COMMENTS)'
          IF(NOUT.NE.IOUT) THEN
             IF(IMDC.LT.4) WRITE(IOUT,'(/A)')   '   '
          END IF
       END IF
       IF(MF.NE.MFO)   THEN
-         WRITE(NOUT,'(/A/A,I2)')  DASHES,'FILE ',MF
          MFO = MF
          IF(MF.GE.31) THEN
             NCX = 0
@@ -889,8 +893,7 @@
 !
 !     NEW SECTION
 !
-   30 WRITE(NOUT,'(3X,A,I3)')  'SECTION ',MT
-      MTO = MT
+   30 MTO = MT
 !
 !     IN INTERACTIVE MODE OUTPUT CURRENT SECTION ID TO TERMINAL
 !
@@ -941,22 +944,10 @@
             MTT = MT
             NSEQT = NSEQ
             IF(MFO.EQ.1)   THEN
-               EMESS = ' '
-               CALL ERROR_MESSAGE(0)
-               EMESS = 'SUMUP TEST RESULTS'
-               CALL ERROR_MESSAGE(0)
                CALL SUM452(0)
             ELSE IF(MFO.EQ.3) THEN
-               EMESS = ' '
-               CALL ERROR_MESSAGE(0)
-               EMESS = 'SUMUP TEST RESULTS'
-               CALL ERROR_MESSAGE(0)
                CALL SUMF3(0)
             ELSE IF(MFO.EQ.23)  THEN
-               EMESS = ' '
-               CALL ERROR_MESSAGE(0)
-               EMESS = 'SUMUP TEST RESULTS'
-               CALL ERROR_MESSAGE(0)
                CALL SUMGAM(0)
             END IF
             ITEST = 0
@@ -1029,6 +1020,10 @@
       MATO = 0
       MFO = 0
       MTO = 0
+      MATERR = 0
+      MFERR = 0
+      MTERR = 0
+      MISFERR = 0
       IFIN = 0
       IBAV = 2
       IBREM = 1
@@ -1672,7 +1667,6 @@
          CALL RDTEXT
          IF(NC.LE.NID)   THEN
             IF(IMDC.LT.4) WRITE(IOUT,'(1X,A66)')   TEXT
-            IF(NOUT.NE.IOUT)   WRITE(NOUT,'(5X,A66)')   TEXT
          END IF
       END DO
 !
@@ -2077,7 +2071,7 @@
 !********TEST THAT RESONANCE ENERGIES ARE IN INCREASING ORDER
          CALL TEST5Y(1,NPL,NREP,1)
 !********TEST IF PARTIAL WIDTHS ADD UP TO TOTAL
-         IF(LRF.LT.3)   CALL TESTW(1,NPL,NREP)
+         IF(LRF.NE.3)   CALL TESTW(NPL,3,NREP)
 !
 !        TEST ON INDIVIDUAL PARAMETERS
 !
@@ -2567,10 +2561,10 @@
 !     PROCESS EACH SET OF PARAMETERS
 !
       DO K=NBEG,NVALS,NSTEP
-         K0 = K + 2
-         K1 = K + 3
-         K2 = K + NSTEP - 1
-         KK = K
+         K0 = K
+         K1 = K + 1
+         K2 = K + NSTEP - NVALS
+         KK = K - 2
          TOT = Y(K0)
 !********ERROR IF TOTAL IS ZERO
          IF(TOT.LE.0.0)  THEN
@@ -8230,6 +8224,7 @@
 !
       INTEGER(KIND=I4) :: N0
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: IACTION,IDX,IMTT,ITS,MTT,MTL,IADV,NREC,NTM,K1
@@ -8297,7 +8292,6 @@
 !              DO SUMUP TEST AS ALL PARTIALS HAVE BEEN PROCESSED
 !                  FOR TEST MF(1) = MF(2) + MF(3)
 !
-               WRITE(NOUT,'(/5X,A/)')  'SUMUP TEST RESULTS'
                CALL TSTTOT
             END IF
          END IF
@@ -8447,11 +8441,7 @@
 !
 !        CAN TEST BE DONE?
 !
-         IF(MTFLGS(JJ).EQ.1)   THEN
-            WRITE(EMESS,'(A,I4,A)')                                     &       
-     &           'MT=',ITFLE,' PARTIALS ARE NOT PRESENT -- NO TEST'
-            CALL ERROR_MESSAGE(0)
-         ELSE IF(MTFLGS(JJ).GT.1) THEN
+         IF(MTFLGS(JJ).GT.1) THEN
 !
 !           LOCATE SUM IN SCRATCH FILE
 !
@@ -8790,6 +8780,8 @@
       INTEGER(KIND=I4) :: NTOTS
       REAL(KIND=R4), DIMENSION(NTOTS) :: AX,BY
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!
       INTEGER(KIND=I4) :: KP,NST,NUS,NPART
       INTEGER(KIND=I4) :: NBEG,NPR
       INTEGER(KIND=I4) :: I,N,IK
@@ -8877,16 +8869,14 @@
 !     WRITE OUT POINTS MISSING IN SUM GRID
 !
    50 IF(NPART.GT.0)   THEN
-         EMESS = ' '
-         CALL ERROR_MESSAGE(0)
          IF(N0.GT.0)   THEN
             WRITE(EMESS,'(4X,A,I3,A,I3,A)')                             &       
      &           'MT= ',MT,' SUBSECTION ',N0,' BEING PROCESSED'
-            CALL ERROR_MESSAGE(0)
+            WRITE(NOUT,'(/5X,A)')  TRIM(EMESS)
          ELSE
             WRITE(EMESS,'(4X,A,I3,A)')                                  &       
      &           'MT= ',MT,' BEING PROCESSED'
-            CALL ERROR_MESSAGE(0)
+            WRITE(NOUT,'(/5X,A)')  TRIM(EMESS)
          END IF
          WRITE(NOUT,60)
    60    FORMAT(14X,'POINTS IN PARTIAL, NOT IN TOTAL'/                  &       
@@ -8895,7 +8885,7 @@
          WRITE(NOUT,'((8X,5(1PE14.6)))')  (XPART(I),I=1,NPR)
          IF(NPR.LT.NPART) THEN
             EMESS = '         AND MORE'
-            CALL ERROR_MESSAGE(0)
+            WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
          END IF
       END IF
 !
@@ -8975,6 +8965,7 @@
 !
       IMPLICIT NONE
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: INIT,J0,J1,LL
@@ -9001,9 +8992,11 @@
      &          'SINGLE ALPHA PRODUCTION     ',                         &       
      &          'TOTAL PHOTON INTERACTION    ',                         &       
      &          'PAIR PROD CROSS SECTIONS    '/
-      INTEGER(KIND=I4), DIMENSION(NTESTS), PARAMETER ::                  &      
+      INTEGER(KIND=I4), DIMENSION(NTESTS), PARAMETER ::                 &       
      &         MTALL = (/452,1,3,4,9,10,12,13,18,101,103,104,105,106,   &       
      &                   107,501,516/)
+      INTEGER(KIND=I4), DIMENSION(NTESTS), PARAMETER ::                 &       
+     &         MFALL = (/1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,23,23/)
 !
 !     INITIALIZE
 !
@@ -9089,11 +9082,10 @@
             INIT = 1
             DO II=1,NTESTS
                IF(ITFLE.EQ.MTALL(II))   THEN
-                  EMESS = ' '
-                  CALL ERROR_MESSAGE(0)
-                  WRITE(EMESS,'(19X,2A)')                               &       
-     &                 'SUMUP TEST FAILED FOR ',ITLE(II)
-                  CALL ERROR_MESSAGE(0)
+                  WRITE(EMESS,'(3A,I2,A,I3,A)')                         &       
+     &                 'SUMUP TEST FAILED FOR ',TRIM(ITLE(II)),
+     &                 ' (MF=',MFALL(II),' AND MT=',MTALL(II),')'
+                  WRITE(NOUT,'(//5X,A)')  TRIM(EMESS)
                   IF(ITFLE.NE.12.AND.ITFLE.NE.13)   THEN
                      WRITE(NOUT,40)  (MTOO(JJ),JJ=1,NMTO)
    40                FORMAT(/5X,'THE FOLLOWING MTS WERE USED IN ',      &       
@@ -9662,6 +9654,7 @@
 !
       INTEGER(KIND=I4) :: MF1,MF2
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFL,MFU
@@ -9690,7 +9683,7 @@
             IF(I455.NE.I456) THEN
                EMESS = 'BOTH SECTIONS MF=1, MT=455 AND MT=456 '//       &       
      &                        'MUST BE PRESENT'
-               CALL ERROR_MESSAGE(0)
+               WRITE(NOUT,'(/5X,A)')  TRIM(EMESS)
                NMISS = 1
             END IF
          ELSE
@@ -9703,11 +9696,6 @@
          IF(IFL3.EQ.0.OR.NSUB.NE.10)   THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-   15          FORMAT(//80('-')/'FILE ',I2)
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             CALL MISFIL(M,2,2,NMISS)
             CALL MISFIL(M,5,17,NMISS)
             CALL MISFIL(M,22,26,NMISS)
@@ -9722,10 +9710,6 @@
          IF(IFL3.EQ.0.OR.NSUB.NE.10)   THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             CALL MISFIL(M,5,17,NMISS)
             CALL MISFIL(M,22,26,NMISS)
             CALL MISFIL(M,28,37,NMISS)
@@ -9739,10 +9723,6 @@
          IF(IFL3.EQ.0.OR.NSUB.EQ.10)   THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             CALL MISFIL(M,2,2,NMISS)
             CALL MISFIL(M,5,26,NMISS)
             CALL MISFIL(M,28,42,NMISS)
@@ -9758,18 +9738,19 @@
          IF(NLMF.EQ.0)  THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             DO N=1,NLMF
                LMFSN = LMFS(2,N)
                IF(LMFSN.NE.0.AND.LMFSN.EQ.M) THEN
                   NMISS = NMISS + 1
+                  IF(MISFERR.NE.M) THEN
+                     WRITE(NOUT,'(/3X,A,I2)')                           &       
+     &                          'MISSING SECTIONS IN FILE ',M
+                     MISFERR = M
+                  END IF
                   WRITE(EMESS,'(A,I4,A,I3)')                            &       
      &               'FILE 8, MT=',LMFS(1,N),                           &       
      &               ' REQUIRES SAME MT IN FILE',LMFS(2,N)
-                  CALL ERROR_MESSAGE(0)
+                  WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
                END IF
             END DO
             IF(M.EQ.10)  NLMF = 0
@@ -9781,19 +9762,20 @@
          IF(NPMT.EQ.0.OR.NSUB.NE.10)  THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             DO N=1,NPMT
                IF(ICON(N,2).LT.2000) THEN
                   MFR = ICON(N,1)/1000
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
+                  IF(MISFERR.NE.M) THEN
+                     WRITE(NOUT,'(/3X,A,I2)')                           &       
+     &                          'MISSING SECTIONS IN FILE ',M
+                     MISFERR = M
+                  END IF
                   WRITE(EMESS,'(A,I3,A,I3,A,I4)')                       &       
      &                'CONTENTS OF FILE',MFR,' REQUIRE A SECTION MF=',  &       
      &                M,'  AND MT=',MTR
-                  CALL ERROR_MESSAGE(0)
+                  WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
                ELSE
                   ICON(N,2) = ICON(N,2) - 2000
                END IF
@@ -9806,19 +9788,20 @@
          IF(NPMT.EQ.0.OR.NSUB.NE.10)  THEN
             NMISS = -1
          ELSE
-            IF(MF1.NE.M)   THEN
-               WRITE(NOUT,15)  M
-            END IF
-            WRITE(NOUT,'(3X,A)')  'MISSING SECTIONS'
             DO N=1,NPMT
                IF(ICON(N,2).NE.0) THEN
                   MFR = ICON(N,1)/1000
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
+                  IF(MISFERR.NE.M) THEN
+                     WRITE(NOUT,'(/3X,A,I2)')                           &       
+     &                          'MISSING SECTIONS IN FILE ',M
+                     MISFERR = M
+                  END IF
                   WRITE(EMESS,'(A,I3,A,I3,A,I4)')                       &       
      &                'CONTENTS OF FILE',MFR,' REQUIRE A SECTION MF=',  &       
      &                M,'  AND MT=',MTR
-                  CALL ERROR_MESSAGE(0)
+                  WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
                END IF
             END DO
             NPMT = 0
@@ -9827,10 +9810,6 @@
          NMISS = -1
       END IF
 !
-      IF(NMISS.EQ.0)   THEN
-         EMESS = 'NO REQUIRED SECTIONS MISSING'
-         CALL ERROR_MESSAGE(0)
-      END IF
   100 CONTINUE
 !
       RETURN
@@ -9847,6 +9826,7 @@
 !
       INTEGER(KIND=I4) :: MF0,MT1,MT2,NMISS
 !
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFTL,MFTH,NNL,NDUM,MTT,MFT1,ISET
@@ -9876,10 +9856,15 @@
                      IF(ISET.LT.3)   GO TO 50
                   END IF
                END IF
+               IF(MISFERR.NE.MF0) THEN
+                  WRITE(NOUT,'(/3X,A,I2)')  'MISSING SECTIONS IN FILE ',&       
+     &                                       MF0
+                  MISFERR = MF0
+               END IF
                WRITE(EMESS,'(A,I4,2A,I2)')                              &       
      &              'PRESENCE OF FILE 3, MT=',MTT,' REQUIRES AN ',      &       
      &              'EQUIVALENT SECTION IN FILE',MF0
-               CALL ERROR_MESSAGE(0)
+               WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
                NMISS = NMISS + 1
             END IF
          END IF
@@ -11450,6 +11435,13 @@
 !
 !     PUT OUT ERROR MESSAGE
 !
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3   )') '  ERROR(S) FOUND IN MAT=',&       
+     &          MATO,', MF=',MFO,', MT=',MTO
+         MATERR = MATO
+         MFERR = MFO
+         MTERR = MTO
+      END IF
       IF(ISEQ.NE.0) THEN
          WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',ISEQ
       ELSE
