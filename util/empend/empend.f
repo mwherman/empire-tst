@@ -1445,6 +1445,7 @@ C* Read distribution in double precision to avoid underflow
       IF(NAN.GT.8) READ (LIN,809,ERR=802) (DD(J),J=9,NAN)
 C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 40
+      IF(LD+1+NAN.GT.MXR) STOP 'RDANGF ERROR - MXR limit exceeded'
       EOU=EE*1.E6
       RWO(LD)=EOU
 C* Check for zero or negative distributions
@@ -1648,6 +1649,7 @@ C*
       LP   =1
       LOR  =0
       LOX  =MIN(LOMX,NAN-1)
+      IF(LOX.GT.MAN) STOP 'ANGLEG ERROR - MAN limit exceeded'
       NOFIT=0
 C*
 C* Loop over all outgoing energy points
@@ -1739,14 +1741,16 @@ C*       -- Function at 3/4 to the next mesh point
 C*
 C*      End of test prints
 C*
-        PLG(LP)=EOU
-        DO J=1,LOX
-          PLG(LP+J)=SCR(J)
-        END DO
+C* Save Legendre coefficients to main output array
 C*   -- For (l > 0) divide by (2*l+1) to conform with ENDF rules.
-        DO L=1,LOR
-          IF(L.GT.LOO) PLG(LP+1+L)=0.
-          PLG(LP+1+L)=PLG(LP+1+L)/(2*L+1)
+        PLG(LP  )=EOU
+        PLG(LP+1)=SCR(1)
+        DO L=1,LOX
+          IF(L.LE.LOO) THEN
+            PLG(LP+1+L)=SCR(1+L)/(2*L+1)
+          ELSE
+            PLG(LP+1+L)=0
+          END IF
         END DO
         LD=LD+NAN+1
         LP=LP+LOX+2
@@ -2393,9 +2397,9 @@ C* Sum alpha production of unidentified reactions
           XSC(NEN,MT201)=XSC(NEN,MT201)+XS
           KZA=KZA-0001
         END DO
-
-        print *,'MT5 iza,jza,qj,qq',iza,jza,qqm(ixs),qq
-
+c...
+c...        print *,'MT5 iza,jza,qj,qq',iza,jza,qqm(ixs),qq
+c...
         QQM(IXS)=MAX(QQ,QQM(IXS))
         QQI(IXS)=QQM(IXS)
       GO TO 110
@@ -2818,6 +2822,7 @@ C* Reserve the space in the Real array
       LXA=LBL
       LBL=LXA+12+2*NP
       LPK=LBL
+      LB1=LBL
       IF(LBL.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
 C* Define specific File-6 data for all incident energies
   430 L6 =LBL
@@ -3204,6 +3209,7 @@ C* Compact the array (No. of pts. for yields .le. NE3+1)
       END IF
 c...
 c...      PRINT *,'      REAMF6 pck IK,LXA,LP1,LPK,LL',IK,LXA,LP1,LPK,LL
+c...      PRINT *,'      REAMF6 pck MT,IK,NK,LB1,LP1',MT6,IK,NK,LB1,LP1
 c...
       NW=LB1-LPK
       DO I=1,NW
@@ -4526,12 +4532,13 @@ C-D  fitted distribution is negative, ERR contains the most negative
 C-D  value.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
-      PARAMETER (MXEH=64)
+      PARAMETER (MXEH=120)
       DIMENSION  ERHI(MXEH)
       DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
       ERR=0
       NLG=0
       LM0=LMX
+      LM1=LM0+1
       LST=0
 c...
 c...      LMX=MIN(LMX,NP-1)
@@ -4546,7 +4553,7 @@ C* Check if zero-order
       QQ(1)=SY/(XP(NP)-XP(1))
       IF(LMX.LT.1) GO TO 30
 C* Clear the coefficients field
-      DO L=1,LMX
+      DO L=1,LM1
         QQ(L+1)=0.
       END DO
 C* Save the input points, allow for quadrupling the mesh
@@ -4577,8 +4584,12 @@ C* Trap zero-determinant
         GO TO 30
       END IF
 C* Save the coefficients
-      DO I=1,N1
-        QQ(I)=RWO(LLG-1+I)
+      DO I=1,LM1
+        IF(I.LE.N1) THEN
+          QQ(I)=RWO(LLG-1+I)
+        ELSE
+          QQ(I)=0
+        END IF
       END DO
 C* Check absolute difference between input and calculated points ERR
 C* and for negative distributions
