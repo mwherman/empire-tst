@@ -50,6 +50,9 @@
 ! *                       10. ALLOWED EMAX DOWN TO 1.0 MEV FOR OTHER
 ! *                           THAN INCIDENT NEUTRONS.
 ! *
+! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
+! *                        1. ONLY ERRORS REPORTED IN OUTPUT
+! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
 ! *         NATIONAL NUCLEAR DATA CENTER
@@ -113,7 +116,7 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
 !...MOD
 !/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
 !---MDC---
@@ -211,6 +214,10 @@
 !     MATERIAL, FILE, AND SECTION NUMBER CURRENTLY BEING PROCESSED
 !
       INTEGER(KIND=I4) :: MATO,MFO,MTO
+!
+!     MATERIAL, FILE, AND SECTION NUMBER OF LAST ERROR DETECTED
+!
+      INTEGER(KIND=I4) :: MATERR,MFERR,MTERR
 !
 !     1000*Z + A OF MATERIAL CURRENTLY BEING PROCESSED
 !        AWR IS THE RATIO OF THE MATERIAL MASS TO THAT OF THE NEUTRON
@@ -492,8 +499,6 @@
          N12S = 0
          MFO = 0
          WRITE(NOUT,'(A/1X,A,I5)')  CHAR(12),'CHECK MATERIAL',MATO
-         WRITE(NOUT,'(19X,A)')                                          &       
-     &          '(NO ERRORS DETECTED IN SECTIONS WITHOUT COMMENTS)'
          IF(NOUT.NE.IOUT)  THEN
             IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
          END IF
@@ -506,21 +511,17 @@
             IFL2 = 1
          ELSE
             IF(IFL2.EQ.0.AND.LRP.GE.0)  THEN
-               WRITE(NOUT,'(/A/A)')  DASHES,'FILE  2'
-               WRITE(NOUT,'(3X,A)')  'SECTION  151'
                WRITE(EMESS,'(A,I3,A)') 'LRP =',LRP,                     &       
      &          ' REQUIRES THE PRESENCE OF FILE 2, BUT IT IS MISSING.'
                CALL ERROR_MESSAGE(0)
                IFL2 = 1
             END IF
          END IF
-         WRITE(NOUT,'(/A/A,I2)')  DASHES,'FILE ',MF
       END IF
 !
 !     NEW SECTION
 !
-   35 WRITE(NOUT,'(3X,A,I3)')  'SECTION ',MT
-      MTO = MT
+   35 MTO = MT
 !
 !     IN INTERACTIVE MODE OUTPUT CURRENT SECTION ID TO TERMINAL
 !
@@ -535,7 +536,7 @@
 !
       IF(MAT.NE.MATO.OR.IFIN.NE.0)   THEN
          IF(NXC.GT.0) THEN
-            WRITE(NOUT,'(//A//)')  DASHES
+            WRITE(NOUT,'(//)')
             DO N=1,NXC
                IF(INDX(N,2).EQ.1) THEN
                   INDX1 = INDX(N,1)/1000
@@ -606,6 +607,9 @@
       MATO = 0
       MFO = 0
       MTO = 0
+      MATERR = 0
+      MFERR = 0
+      MTERR = 0
       NFOR = 0
       IFIN = 0
       NOUT = IOUT
@@ -863,12 +867,12 @@
       IF(MF.NE.0.OR.MT.NE.0)  THEN
          TLABEL = 'TAPE IS NOT LABELED'
          LABEL = 0
-         WRITE(NOUT,'(/A/)') 'TAPE BEING PROCESSED IS NOT LABELED'
+!        WRITE(NOUT,'(/A/)') 'TAPE BEING PROCESSED IS NOT LABELED'
          GO TO 60
       ELSE
          LABEL = MAT
-         WRITE(NOUT,'(/2A,I5/4X,2A)') 'TAPE BEING PROCESSED IS ',       &       
-     &           'NUMBERED',LABEL,'LABEL IS  ',TLABEL
+!        WRITE(NOUT,'(/2A,I5/4X,2A)') 'TAPE BEING PROCESSED IS ',       &       
+!    &           'NUMBERED',LABEL,'LABEL IS  ',TLABEL
       END IF
       GO TO 40
 !
@@ -1126,6 +1130,7 @@
 !
       IMPLICIT NONE
 !
+      CHARACTER(LEN=80) :: EMESSP
       INTEGER(KIND=I4) :: IPATH
 !
 !     SET ERROR FLAG
@@ -1133,18 +1138,19 @@
       IERX = 1
       SELECT CASE (IPATH)
          CASE (1)
-            EMESS = 'CANNOT EXIST WHEN LRP = -1'
+            EMESSP = 'CANNOT EXIST WHEN LRP = -1'
          CASE (2)
-            EMESS = 'NOT ALLOWED FOR NSUB ='
+            EMESSP = 'NOT ALLOWED FOR NSUB ='
          CASE (3)
-            EMESS = 'ALLOWED ONLY IN A NEUTRON DATA SUBLIBRARY'
+            EMESSP = 'ALLOWED ONLY IN A NEUTRON DATA SUBLIBRARY'
          CASE (4)
-            EMESS = 'IS NOT PERMITTED'
+            EMESSP = 'IS NOT PERMITTED'
       END SELECT
       IF(IPATH.EQ.2) THEN
-         WRITE(EMESS(23:28),'(I6)') NSUB
+         WRITE(EMESSP(23:28),'(I6)') NSUB
       END IF
-      WRITE(NOUT,'(5X,A,I3,1X,A)') 'FILE',MF,EMESS
+      WRITE(EMESS,'(A,I3,1X,A)') 'FILE',MF,EMESS
+      CALL ERROR_MESSAGE(0)
 !
       RETURN
       END SUBROUTINE MF_ERRORS
@@ -1321,8 +1327,9 @@
 !
 !     MESSAGE TO USER ABOUT SECTION SKIPPED
 !
-      WRITE(NOUT,'(5X,A,I3,A,I4,A,I6,A,I6)') 'MF=',MFO,' MT=',MTO,      &       
-     &      ' CAN NOT BE CHECKED FROM SEQUENCE NUMBER ',NSEQB,' TO',NSEQ
+      WRITE(EMESS,'(2A,I6,A,I6)') 'SECTION CANNOT BE',                  &       
+     &      ' CHECKED FROM SEQUENCE NUMBER ',NSEQB,' TO',NSEQ
+      CALL ERROR_MESSAGE(0)
    60 IF(MAT.LT.0)  THEN
          CALL CONTROL_ERRORS(1)
       ELSE IF (MAT.EQ.0) THEN
@@ -1795,7 +1802,6 @@
          END IF
          IF(NC.LE.NID)   THEN
             IF(IMDC.LT.4)  WRITE(IOUT,'(1X,A66)')   TEXT
-            IF(NOUT.NE.IOUT)   WRITE(NOUT,'(5X,A66)')   TEXT
          END IF
       END DO
       IF(IMDC.LT.4) WRITE(IOUT,'(1X,A)') ' '
@@ -2752,9 +2758,9 @@
       LVT = L1H
       CALL TEST1(LVT,0,1,'LVT',2)
       IF(LVT.EQ.1) THEN
-         EMESS = ' THE ELASTIC TRANSFORMATION MATRIX IS NO '
+         EMESS = ' THE ELASTIC TRANSFORMATION MATRIX IS NO'
          CALL ERROR_MESSAGE(0)
-         EMESS = '      LONGER SUPPORTED'
+         EMESS = '       LONGER SUPPORTED'
          CALL ERROR_MESSAGE(NSEQP)
       END IF
 !*****TEST ANGULAR REPRESENTATION FLAG
@@ -6593,6 +6599,13 @@
 !
 !     PUT OUT ERROR MESSAGE
 !
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  ERROR(S) FOUND IN MAT=',  &
+     &          MATO,', MF=',MFO,', MT=',MTO
+         MATERR = MATO
+         MFERR = MFO
+         MTERR = MTO
+      END IF
       IF(JSEQ.NE.0) THEN
          IF(ASEQ.NE.' ') THEN
             WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
