@@ -607,9 +607,31 @@ JSTAB   Stability limit with respect to spin for the nucleus Z=I1 and A=I2,
        = 0 set at a spin at which fission barrier (including shell correction) disappears (default),
        > 0 set to VAL.
 
-FITOMP  Sets calculations for GUI assisted manual fitting of optical model
-        parameters (only total, elastic, capture and inelastic scattering are
-        calculated independently of what is specified in the input).
+FITOMP  Controls fitting of optical model potential in the incident channel
+        =0 No fit (default)
+        =1 GUI assisted manual fitting; only total, elastic, capture and inelastic 
+           scattering are calculated independently of what is specified in the input.
+           If plots with 'List names' ompR1 and eventually ompR2 are set they
+           will be updated and reproduced after each run.
+        =2 Automatic fit. See default EMPIRE input (../scripts/skel.inp) for
+           keywords to be placed in the input. 
+
+           Examples are given below.
+           FITRVV     0.     500    1    !fit real volume depth (+- 5 MeV)
+           FITIVV     0.     100    1    !fit imaginary volume depth (+- 1 MeV)
+           FITISV     0.     100    1    !fit imaginary surface depth (+- 1 MeV)
+           FITRVR     0.      10    1    !fit real volume radius (+- 0.1 fm)
+           FITIVR     0.      10    1    !fit imaginary volume radius (+- 0.1 fm)
+           FITRVD     0.      10    1    !fit real volume diffuseness (+- 0.1 fm)
+           FITISD     0.       5    1    !fit imaginary surface diffuseness (+- 0.05 fm)
+           FITDEF     0.      10    2    !fit l=2 (quadrupol) deformation  (+- 0.1)
+           FITGRD                        !autmatic incident energy grid in omp fit
+           FITITR     6.08               !increase number of iterations (default 3.05)
+           The first value is an absolute (not a percentage) displacement from the current 
+           value of the parameter in the *-omp.dir file. The second is the absolute value 
+           (times 100) that defines the range of parameter variation. The third parameter
+           indicate the position of the parameter in the RIPL-2 format.
+            
 
 
                          D I M E S I O N S
