@@ -4007,7 +4007,7 @@ C-----
             IF (val.GT.0) THEN
               LHRtw = 1
               EHRtw = 5.d0
-              IF (val.gt.1.1d0) EHRtw = val
+              IF (val.gt.0.250) EHRtw = val
               IF (LHRtw.NE.0) WRITE (6,
      &           '('' HRTW width fluctuation correction was selected'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
@@ -5687,7 +5687,7 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-C              ELSE
+               ELSE
                   ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
@@ -6436,7 +6436,7 @@ C Local variables
 C
       DOUBLE PRECISION beta2, beta3, betatmp, delta_k, dtmp, elvr,
      &                 etmp, ftmp, gspar, gspin, jtmp, qn, t12, xjlvr,
-     &                 egrcoll(3,3),ggrcoll(3,3),
+     &                 egrcoll(0:3,3),ggrcoll(0:3,3),
      &                 betahegor, betalegor, betagmr, betagqr,
      &                 sgmr, sgqr, sgor
       CHARACTER*1 dum
@@ -6560,12 +6560,16 @@ C--------Reading ground state information (to avoid overwriting deformation)
      &          D_Llv(1), D_Klv(1), 0.01
 
 C
+         mintsp = mod(NINT(2*D_Xjlv(1)),2)
          igreson = 0
          DO i = 2, ND_nlv
             READ (32,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
+C           For odd nuclides, collective states in continuum have
+C           different spin than the ground state
+            if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont' 
 C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
@@ -7236,12 +7240,16 @@ C-----------------swapping
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
 
          ncont = NLV(nnurec) + LEVcc
+         mintsp = mod(NINT(2*D_Xjlv(1)),2)
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.0
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-            IF (itmp1.LE.NLV(nnurec)) THEN
+            IF (itmp1.LE.NLV(nnurec) .and. 
+C              For odd nuclides, collective states in continuum have
+C              different spin than the ground state
+     &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN 
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -7338,7 +7346,8 @@ C-----------------swapping
          WRITE (12,*)
          WRITE (12,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
 
-          ncont = NLV(nnurec) + LEVcc
+         ncont = NLV(nnurec) + LEVcc
+         mintsp = mod(NINT(2*D_Xjlv(1)),2)
 
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
@@ -7346,7 +7355,10 @@ C-----------------swapping
 
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-            IF (itmp1.LE.NLV(nnurec)) THEN
+            IF (itmp1.LE.NLV(nnurec) .and. 
+C             For odd nuclides, collective states in continuum have
+C             different spin than the ground state
+     &        (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN 
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -7361,7 +7373,7 @@ C-----------------swapping
      &           0, 0, ftmp
             ELSE
               ncont = ncont + 1
-               IF(ncont.GT.99) GOTO 99004
+              IF(ncont.GT.99) GOTO 99004
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
