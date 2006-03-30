@@ -7822,6 +7822,9 @@ $file.inp &}} -label {Create input}
         -command {exec xterm -e ../scripts/addresonances $file &} \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/rec-elastic $file &} \
+        -label {Reconstruct elastic} 
+    $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/process $file 1 &} \
@@ -7944,6 +7947,9 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.empend &} -font {} \
         -label {EMPEND Log} 
+    $site_3_0.men70 add command \
+        -command {exec $editor $file-log.endres &} -font {} \
+        -label {ENDRES Log} 
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
@@ -7966,8 +7972,6 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup &} -font {} -label {FIXUP Log} 
-    $site_3_0.men70 add command \
         -command {exec $editor $file-log.legend &} -font {} \
         -label {LEGEND Log} 
     $site_3_0.men70 add command \
@@ -7976,6 +7980,15 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.recent &} -font {} \
         -label {RECENT Log} 
+    $site_3_0.men70 add command \
+        -command {exec $editor $file-log.sigma1 &} -font {} \
+        -label {SIGMA1 Log} 
+    $site_3_0.men70 add command \
+        -command {exec $editor $file-log.fixup &} -font {} \
+        -label {FIXUP Log} 
+    $site_3_0.men70 add command \
+        -command {exec $editor $file-log.fixup2 &} -font {} \
+        -label {FIXUP-2 Log} 
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.plotc4 &} -font {} \
         -label {PLOTC4 Log} 
