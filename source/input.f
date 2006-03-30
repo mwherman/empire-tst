@@ -5745,7 +5745,7 @@ C           (another change before this one (look for atilno appearance)
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         atilave, ATIlnor(nnuc),ftmp
+     &         atilave, ftmp, ATIlnor(nnuc)
          ENDIF
       ENDDO
       END
