@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-26 03:52:55 $
-Ccc   * $Id: auxiliary.f,v 1.28 2006-02-26 03:52:55 Capote Exp $
+Ccc   * $Date: 2006-05-04 07:53:13 $
+Ccc   * $Id: auxiliary.f,v 1.29 2006-05-04 07:53:13 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -56,7 +56,7 @@ C
             CSEmsd(necse,nejc) = 0.0
             CSEhms(necse,nejc) = 0.0
             AUSpec(necse,nejc) = 0.0
-            DO nang = 1, NDANG
+            DO nang = 1, NDANGecis
                CSEa(necse,nang,nejc,0) = 0.0
                CSEa(necse,nang,nejc,1) = 0.0
                CSEahms(necse,nang,nejc) = 0.0
@@ -881,6 +881,8 @@ C
       DO Nejc = 1, NDEJC
          IF (IZAejc(Nejc).EQ.Izaf) RETURN
       ENDDO
+C     For HI calculations
+      IF (IZAejc(0).EQ.Izaf) RETURN
       Iloc = 1
       WRITE (6,*) ' WHEREJC HAS BEEN ASKED FOR UNKNOWN EJECTILE', Izaf
       WRITE (6,*) ' EXECUTION STOPPED'

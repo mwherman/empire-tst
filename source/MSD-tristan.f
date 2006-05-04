@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-02-26 03:52:54 $
-Ccc   * $Id: MSD-tristan.f,v 1.57 2006-02-26 03:52:54 Capote Exp $
+Ccc   * $Date: 2006-05-04 07:53:13 $
+Ccc   * $Id: MSD-tristan.f,v 1.58 2006-05-04 07:53:13 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -400,8 +400,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, aqq, bosc,
-     &                 bqq, cci(6,6), ccm(6,6), ccp(6,6), ccpm(2),       ! nilsson_newest
+      DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, bosc,
+     &                 cci(6,6), ccm(6,6), ccp(6,6), ccpm(2),            ! nilsson_newest
      &                 ccr(6,6),                                         ! nilsson_newest
      &                 ceff, clex(6,6), clsc(6,6), cneg, cnorm, cpos,    ! nilsson_newest
      &                 cr1(6,6), cr2, cr3(6,6), dci(6,6), dcr(6,6),      ! nilsson_newest
@@ -409,7 +409,7 @@ C
 c     &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
      &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  ! nilsson
      &                 e0, efit(6,6), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
-c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nilsson
+c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000),! nilsson
      &                 epl, eplsq, eqq,               eqqx,ess(0:10000), ! nilsson
 
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,
@@ -421,10 +421,10 @@ c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nils
       DOUBLE PRECISION DWIDTH
       DOUBLE PRECISION VCC                                               ! nilsson
       REAL FLOAT
-      INTEGER i,jtw1(14),jtw2(14),k,kc, kcx, kh, kmax, kp, kqq, krt,     ! nilsson
+      INTEGER i,jtw1(14),jtw2(14),k, kcx, kh, kmax, kp, kqq, krt,        ! nilsson
      &        krtx,l1,l2, lm, lmax, lst, lt, lth(14), ltmax, ltmaxr,     ! nilsson
      &        ltmin,ltp(14),ltp1, ltr, lttw, n, nconf(21), ne, nebinx,   ! nilsson
-     &        nesx, nh, nlhm, nlpm, nos1, nos2, np, np1, nr, nxmax,
+     &        nesx, nh, nlhm, nlpm, nos1, nos2, np, nr, nxmax,
      &        kt, ktp1,                                                  ! nilsson_newest
      &        kth, ktp, iminh,iminp,nrad1,nrad2,n1,n2                    ! nilsson
       INTEGER IABS, INT
@@ -436,8 +436,8 @@ c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nils
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
 c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
-     &                               wqrex, x, xea(6,6), xir, xneg, xp,  ! nilsson
-     &                 xpos, xqq, yea(6,6), yqq, sum                     ! nilsson
+     &                               wqrex, xea(6,6), xir, xneg,         ! nilsson
+     &                 xpos, yea(6,6), sum                               ! nilsson
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
      &     0.8931D0/
@@ -1044,38 +1044,6 @@ C
          ENDDO
          kcx = kc
          kqq = 1
-
-c The following statements are commented out since wqqst, dqqst
-c and eqqst are never used (h.wienke).
-
-c        IF (kqq.EQ.1) THEN
-C
-C-----------sorting
-C
-c            DO n = 1, kcx - 1
-c               np1 = n + 1
-c               x = eqqst(n)
-c               aqq = wqqst(n)
-c               bqq = dqqst(n)
-c               DO np = np1, kcx
-c                  xp = eqqst(np)
-c                  xqq = wqqst(np)
-c                  yqq = dqqst(np)
-c                  IF (x.GT.xp) THEN
-c                     eqqst(np) = x
-c                     wqqst(np) = aqq
-c                     dqqst(np) = bqq
-c                     eqqst(n) = xp
-c                     wqqst(n) = xqq
-c                     dqqst(n) = yqq
-c                     x = xp
-c                     aqq = xqq
-c                     bqq = yqq
-c                  ENDIF
-c               ENDDO
-c            ENDDO
-c        ENDIF
-C
 C
 C--------the multipole fields are normalized as:
 C--------U(l;r) = (r/rd)**l * homega
@@ -2171,7 +2139,7 @@ C
       DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:3*(NDEx+25)),hhh
       REAL FLOAT
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb,
-     &        nlmax,kp1,kt,kc                                            ! nilsson_newest
+     &        nlmax,kp1,kt                                               ! nilsson_newest
 C
 C-----in RHO, RHOB etc the increased argument NEB corresponds to
 C-----increased excitation energy.

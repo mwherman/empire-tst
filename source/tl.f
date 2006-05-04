@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-26 03:52:55 $
-Ccc   * $Id: tl.f,v 1.77 2006-02-26 03:52:55 Capote Exp $
+Ccc   * $Date: 2006-05-04 07:53:13 $
+Ccc   * $Id: tl.f,v 1.78 2006-05-04 07:53:13 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1481,7 +1481,7 @@ C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
      &                 xmas_nejc, xmas_nnuc, sinlcont
       DOUBLE PRECISION DBLE
-      INTEGER ilv, l, nc, nceq, ncoll, nlev
+      INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp
       LOGICAL relcal
       CHARACTER*1 parc
       REAL SNGL
@@ -1565,11 +1565,15 @@ C-----Absorption cross section in mb
 
       CSFus = ABScs
 
+      mintsp = mod(NINT(2*D_Xjlv(1)),2)
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-         IF (ICOller(l+1).LE.NLV(nnuc)) THEN
+         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND. 
+C            For odd nuclides, collective states in continuum have
+C            different spin than the ground state
+     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN 
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
@@ -1704,7 +1708,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
-     &                 selecis, sinl, sreac, sreacecis, stotecis,
+     &                 selecis, sinlss, sreac, sreacecis, stotecis,
      &                 xmas_nejc, xmas_nnuc
       DOUBLE PRECISION DBLE
       LOGICAL relcal
@@ -1756,7 +1760,7 @@ C-----For vibrational the Tls must be multiplied by
       READ (45,*,END = 300) sreacecis
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) selecis
   300 CLOSE (45)
-      sinl = 0.D0
+      sinlss = 0.D0
       SIGabs(J,Nejc,Nnuc) = 0.D0
       IF (sreacecis.LE.0.D0) RETURN
       IF (IOUt.EQ.5) THEN
@@ -1773,13 +1777,13 @@ C--------Reaction cross section in mb
          sabs = 10.*PI/ak2*sabs
          OPEN (UNIT = 45,FILE = 'ecis03.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
-         sinl = 0.D0
+         sinlss = 0.D0
          DO l = 1, ncoll - 1
             READ (45,*,END = 350) dtmp
-            sinl = sinl + dtmp
+            sinlss = sinlss + dtmp
          ENDDO
   350    CLOSE (45)
-         sreac = sabs + sinl
+         sreac = sabs + sinlss
          IF (sabs.GT.0.D0) THEN
             WRITE (6,*)
             WRITE (6,'(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)') '  LMAX:',
@@ -1791,9 +1795,9 @@ C--------Reaction cross section in mb
      &                  ' mb (read from ECIS)'
             WRITE (6,*) ' ECIS/EMPIRE ratio of reaction XS =',
      &                    SNGL(sreacecis/sreac)
-            IF (sinl.GT.0.D0) THEN
-               WRITE (6,*) ' Sinl =', SNGL(sinl), ' mb (read from ECIS)'
-               WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+            IF (sinlss.GT.0.D0) THEN
+             WRITE (6,*) ' Sinl =', SNGL(sinlss), ' mb (read from ECIS)'
+             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
             ENDIF
          ENDIF
       ENDIF
@@ -2024,7 +2028,7 @@ C
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
       njmax = MAX(ldwmax,30)
 
-	lodd = .false.
+      lodd = .false.
       IF( (mod(nint(Z(Nnuc)),2).ne.0 .or. 
      >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
      >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.  

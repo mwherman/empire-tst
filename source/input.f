@@ -1,3 +1,6 @@
+Ccc
+Ccc   * $Date: 2006-05-04 07:53:13 $
+Ccc   * $Id: input.f,v 1.201 2006-05-04 07:53:13 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5688,7 +5691,7 @@ C              The following two lines must be commented to reproduce Th-232 eva
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
                ELSE
-                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5743,9 +5746,9 @@ C           The following line must also be commented to reproduce Th-232 evalua
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
-            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,3(2x,F8.5))')
+            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         atilave, ftmp, ATIlnor(nnuc)
+     &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave
          ENDIF
       ENDDO
       END
@@ -6808,17 +6811,17 @@ C--------Skipping levels with unknown spin in the discrete level region
          IF (xjlvr.LT.0. .AND. ilv.LE.NLV(nnurec)) CYCLE
          IF (xjlvr.LT.0.) THEN ! unknown spin in continuum
 C                                assigning randomly 2+,4+,3- spin
-            ftmp = drand()
+           ftmp = drand()
            xjlvr = 2
            lvpr  = 1
-            if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
+           if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
              xjlvr = 4
              lvpr  = 1
-            endif
-            if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
+           endif
+           if(ftmp.GT.0.3333d0 .AND. ftmp.LE.0.6666d0) THEN
              xjlvr = 3
              lvpr  = -1
-            endif
+           endif
          ENDIF
          IF (ilv.EQ.1) THEN
             delta_k = 2.D0
@@ -6849,8 +6852,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                   WRITE (6,*)
      &                     'WARNING: ONLY DWBA CALCULATIONS ALLOWED FOR'
                   WRITE (6,*) 'WARNING: ODD SPHERICAL NUCLEUS'
-                  WRITE (6,*) 'WARNING: DIRECT reset to zero'
-                  DIRect = 0
+                  WRITE (6,*) 'WARNING: DIRECT reset to 3'
+                  DIRect = 3
                ENDIF
                GOTO 500
             ENDIF
@@ -6858,6 +6861,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i20p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6869,6 +6874,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i21p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6880,6 +6887,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i4p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6891,6 +6900,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i0p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6913,6 +6924,8 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i3m = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6970,6 +6983,8 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i20p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6982,6 +6997,8 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i4p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6994,6 +7011,8 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i6p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -7007,6 +7026,8 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i8p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-26 03:52:54 $
-Ccc   * $Id: fusion.f,v 1.60 2006-02-26 03:52:54 Capote Exp $
+Ccc   * $Date: 2006-05-04 07:53:13 $
+Ccc   * $Id: fusion.f,v 1.61 2006-05-04 07:53:13 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -173,8 +173,8 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
             ENDDO
    60       ABScs=CSFus
-             SINlcc=0.d0
-             SINl  =0.d0
+            SINlcc=0.d0
+            SINl  =0.d0
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -290,8 +290,8 @@ C--------and calculate transmission coefficients
           ENDDO
          maxlw = NLW
          ABScs = CSFus
-          SINlcc=0.d0
-          SINl=0.d0
+         SINlcc=0.d0
+         SINl=0.d0
          WRITE (6,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (6,*)
