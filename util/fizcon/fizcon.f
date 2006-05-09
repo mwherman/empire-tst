@@ -38,6 +38,8 @@
 ! *         VERSION 7.03   FEBRUARY 2006     M. HERMAN
 ! *                        1. INCREASED DIMENSIONS FOR WORKSPACE AND NUMBER
 ! *                           OF GAMMA RAYS
+! *         VERSION 7.04   APRIL 2006     M. HERMAN
+! *                        1. 'LB=8 SECTION MISSING' NOT CONSIDERED AN ERROR 
 ! *
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
@@ -104,9 +106,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.04'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.04'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -7268,11 +7270,11 @@
          END IF
 !
 !        CHECK THAT AN LB=8 SUB-SUBSECTION EXISTS
-!
-         IF(NFOR.GE.6.AND.ILB8.EQ.0)  THEN
-               EMESS = 'REQUIRED SUB-SUBSECTION WITH LB=8 IS MISSING'
-               CALL ERROR_MESSAGE( 0)
-         END IF
+!        (REMOVED APRIL 2006)
+!        IF(NFOR.GE.6.AND.ILB8.EQ.0)  THEN
+!              EMESS = 'REQUIRED SUB-SUBSECTION WITH LB=8 IS MISSING'
+!              CALL ERROR_MESSAGE( 0)
+!        END IF
       END IF
 !
       NCXLAS = NCX
