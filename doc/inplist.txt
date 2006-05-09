@@ -342,12 +342,7 @@ LEVDEN  Selects level density approach,
 
 ATILNO  systematics value of the level density parameter \widetilde{a}
         will be multiplied by VAL for the nucleus with Z=I1 and
-        A=I2. NOTE: if the experimental value of the level density
-        parameter exists, the term is ignored while it is used to
-        define the normalization factor when ATILNO does not appear in
-        the input or is set to 0.  Therefore, using ATILNO set to a
-        higher (or lower) value than 1 may actually result in a lower
-        (or greater) \widetilde{a} than in the default calculations.
+        A=I2. 
 
 GCROA   Level density parameter a in Gilbert-Cameron approach
        >  0 parameter a in nucleus Z=I1, A=I2 set to VAL ,
