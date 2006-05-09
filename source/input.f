@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-05-09 19:50:45 $
-Ccc   * $Id: input.f,v 1.203 2006-05-09 19:50:45 herman Exp $
+Ccc   * $Date: 2006-05-09 21:59:30 $
+Ccc   * $Id: input.f,v 1.204 2006-05-09 21:59:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -295,6 +295,7 @@ C
 C--------default input parameters for MSD
 C
          MSD = 0
+         EMInmsd = 5. !Emin for starting MSD calculations
 C--------ICOmpff must be off for DOM potentials
          ICOmpff = 0  !compressional form factor off
 C        ICOmpff = 1  !compressional form factor on
@@ -2559,7 +2560,7 @@ C-----Go to the end of the COVAR.DAT file
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b34  |'
+     &           '                       |  E M P I R E  -  2.19.b35  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
@@ -4940,6 +4941,14 @@ C             DEFsta = val + grand()*sigma
          ENDIF
 
 C--------input for TRISTAN (MSD)
+         IF (name.EQ.'MSDMIN') THEN
+            EMInmsd = val
+            WRITE (6,
+     &'('' MSD calculations starting at '',F6.3,'' MeV'')
+     &') EMInmsd
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'WIDEX ') THEN
             WIDexin = val
             IF (WIDexin.GT.0.0D0) WRITE (6,
