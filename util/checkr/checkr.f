@@ -53,6 +53,11 @@
 ! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
 ! *                        1. ONLY ERRORS REPORTED IN OUTPUT
 ! *
+! *         VERSION 7.03   APRIL 2006     M. HERMAN
+! *                        1. WARNING SUBROUTINE INTRODUCED
+! *                           'MT ALLOWED IN DERIVED FILES' CLSSIFIED AS
+! *                           WARNING INSTEAD OF AN ERROR
+! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
 ! *         NATIONAL NUCLEAR DATA CENTER
@@ -116,9 +121,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '1.0'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -6119,7 +6124,7 @@
      &                  (MTT.GE.201.AND.MTT.LE.450))  THEN
             WRITE(EMESS,'(A,I4,A)')                                     &       
      &              'MT=',MTT0,' ALLOWED ONLY IN DERIVED FILES'
-            CALL ERROR_MESSAGE(NSEQP1)
+            CALL WARNING_MESSAGE(NSEQP1)
          END IF
       END IF
 !
@@ -6582,6 +6587,47 @@
 !
   100 RETURN
       END SUBROUTINE TESTS
+!
+!***********************************************************************
+!
+      SUBROUTINE WARNING_MESSAGE(JSEQ)
+!
+!     ROUTINE TO OUTPUT ERROR MESSAGE IN STANDARD FORM
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=I4) :: JSEQ
+!
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!
+      INTEGER(KIND=I4) :: NEMES
+!
+!     PUT OUT ERROR MESSAGE
+!
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  WARNING(S)       IN MAT=',&
+     &          MATO,', MF=',MFO,', MT=',MTO
+         MATERR = MATO
+         MFERR = MFO
+         MTERR = MTO
+      END IF
+      IF(JSEQ.NE.0) THEN
+         IF(ASEQ.NE.' ') THEN
+            WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
+         ELSE
+            WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'RECORD NUMBER',ISEQ
+         END IF
+      ELSE
+         IF(EMESS.EQ.' ') THEN
+            NEMES = 1
+         ELSE
+            NEMES = LEN_TRIM(EMESS)
+         END IF
+         WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
+      END IF
+!
+      RETURN
+      END SUBROUTINE WARNING_MESSAGE
 !
 !***********************************************************************
 !
