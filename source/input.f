@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-05-09 19:21:33 $
-Ccc   * $Id: input.f,v 1.202 2006-05-09 19:21:33 herman Exp $
+Ccc   * $Date: 2006-05-09 19:50:45 $
+Ccc   * $Id: input.f,v 1.203 2006-05-09 19:50:45 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2548,7 +2548,11 @@ C
 C      By default, no covariance calculation is done
 C
       IPArCOV = 0
-      OPEN(95,FILE='COVAR.DAT',ACCESS='APPEND',STATUS='UNKNOWN')
+      OPEN(95,FILE='COVAR.DAT',STATUS='UNKNOWN')
+C-----Go to the end of the COVAR.DAT file      
+   10 READ(95,*,END=11) dum
+      GOTO 10
+   11 CONTINUE
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
       WRITE (6,*) '                        ____________________________'
