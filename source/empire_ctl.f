@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-02-17 23:20:03 $
-Ccc   * $Id: empire_ctl.f,v 1.15 2006-02-17 23:20:03 herman Exp $
+Ccc   * $Date: 2006-05-10 19:01:20 $
+Ccc   * $Id: empire_ctl.f,v 1.16 2006-05-10 19:01:20 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1755,7 +1755,7 @@ Ccc
       CHARACTER*238 outrecord 
       CHARACTER*1080 title
       character*132 ctmp
-      character*1 namecat, category
+      character*1 namecat, category, dum
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, ndkeys
 
@@ -1886,8 +1886,11 @@ C-----Move original (reference) outputs out of the way
 C-----
 C-----Run sensitivity calculations
 C-----
-      OPEN (UNIT = 92,FILE='SENSITIVITY.MATRIX', STATUS='UNKNOWN', 
-     &                POSITION='APPEND') ! sensitivity matrix
+      OPEN (UNIT = 92,FILE='SENSITIVITY.MATRIX', STATUS='UNKNOWN') ! sensitivity matrix
+C-----Go to the end of the SENSITIVITY.MATRIX file      
+  111 READ(92,*,END=112) dum
+      GOTO 111
+  112 CONTINUE
       OPEN(UNIT = 17, FILE='SENSITIVITY.INP', STATUS='old') !list of parameters to vary
 C-----Read one line of the sensitivity input
   100 READ (17,'(A80)',END = 350) inprecord
