@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2006-05-09 21:59:29 $
-Ccc   * $Id: main.f,v 1.150 2006-05-09 21:59:29 herman Exp $
+Ccc   * $Date: 2006-08-08 17:29:17 $
+Ccc   * $Id: main.f,v 1.151 2006-08-08 17:29:17 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -8,7 +8,7 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
 Ccc   *                         E M P I R E                              *
 Ccc   *                                                                  *
-Ccc   *                    Main of the EMPIRE code.                      *
+Ccc   *               Used to be main of the EMPIRE code                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
@@ -1787,18 +1787,6 @@ C-----------------------(continuum part)
      &                                POPcseaf(0,nejc,ie,INExc(nnuc))
                               ENDDO
                            ENDDO
-C                          DO ie = 1, nspec ! reconstruct continuum DDX spectrum
-C                             DO nang = 1, NDANG
-C                                piece = CSEmsd(ie,nejc)
-C                                IF (ie.EQ.NEXr(nejc,1))
-C    &                               piece = 0.5*piece
-C                                cseaprnt(ie,nang)
-C    &                              = ((POPcse(0,nejc,ie,INExc(nnuc))
-C    &                          - piece*POPcseaf(0,nejc,ie,INExc(nnuc)))
-C    &                              /4.0/PI + CSEa(ie,nang,nejc,1)
-C    &                              *POPcseaf(0,nejc,ie,INExc(nnuc)))
-C                             ENDDO
-C                          ENDDO
                         ENDIF
                         DO nang = 1, NDANG
                                           !double the first bin to preserve integral in EMPEND
@@ -2297,7 +2285,7 @@ C              CSEfis(1,nejc,Nnuc) = CSEfis(1,nejc,Nnuc)*2
                ENDIF
 
               ENDIF  ! (A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1))
-            ENDDO     ! over ejectiles
+            ENDDO  ! over ejectiles
             nfission = nfission + 1
          ENDIF  !  IF ( TOTcsfis > 0 & CSPfis(nnuc)> 0 & Z(0)==Z(nnuc) )
       ENDDO  ! over decaying nuclei
@@ -2571,19 +2559,6 @@ C--------neutrons
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
-C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-C         WRITE (12,*) ' '
-C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-C    &            (ANGles(nang),nang=1,NDANG)
-C         DO ie = 1, nspec - 1
-C          WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-C    &            (CSEa(ie,nang,1,0),nang = 1,NDANG)
-C         ENDDO
-C---------exact endpoint
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
-C    &            (max(0.d0,CSEa(nspec,nang,1,0)),nang = 1,NDANG)
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(1,1),
-C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
           WRITE (12,'('' Energy    mb/MeV'')')
           WRITE (12,*) ' '
@@ -2602,19 +2577,6 @@ C--------protons
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
-C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-C         WRITE (12,*) ' '
-C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-C    &            (ANGles(nang),nang=1,NDANG)
-C         DO ie = 1, nspec - 1
-C           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-C    &            (CSEa(ie,nang,2,0),nang = 1,NDANG)
-C         ENDDO
-C---------exact endpoint
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
-C    &            (max(0.d0,CSEa(nspec,nang,2,0)),nang = 1,NDANG)
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(2,1),
-C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
           WRITE (12,'('' Energy    mb/MeV'')')
           WRITE (12,*) ' '
@@ -2633,19 +2595,6 @@ C--------alphas
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
-C         WRITE (12,'(30X,''A      n      g      l      e      s '')')
-C         WRITE (12,*) ' '
-C         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-C    &            (ANGles(nang),nang=1,NDANG)
-C         DO ie = 1, nspec - 1
-C           WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)*DE,
-C    &            (CSEa(ie,nang,3,0),nang = 1,NDANG)
-C         ENDDO
-C---------exact endpoint
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
-C    &            (max(0.d0,CSEa(nspec,nang,3,0)),nang = 1,NDANG)
-C         WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1) - Q(3,1),
-C    &            (0.d0,nang = 1,NDANG)
           WRITE (12,*) ' '
           WRITE (12,'('' Energy    mb/MeV'')')
           WRITE (12,*) ' '
@@ -2667,20 +2616,6 @@ C--------light ions
              WRITE (12,
      &'(''  Spectrum of  '',I1,''-'',A2,4X,A5,I7,''(LI,x)'')')
      &INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
-C            WRITE(12,'(30X,''A      n      g      l      e      s '')')
-C            WRITE (12,*) ' '
-C            WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-C    &           (ANGles(nang),nang=1,NDANG)
-C            DO ie = 1, nspec - 1
-C              WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') FLOAT(ie - 1)
-C    &           *DE, (CSEa(ie,nang,NDEJC,0),nang = 1,NDANG)
-C            ENDDO
-C------------exact endpoint
-C            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
-C    &           - Q(NDEJC,1),
-C    &           (max(0.d0,CSEa(nspec,nang,NDEJC,0)),nang = 1,NDANG)
-C            WRITE (12,'(F9.4,8E15.5,/,(9X,8E15.5))') EMAx(1)
-C    &           - Q(NDEJC,1), (0.d0,nang = 1,NDANG)
              WRITE (12,*) ' '
              WRITE (12,'('' Energy    mb/MeV'')')
              WRITE (12,*) ' '
@@ -2769,7 +2704,6 @@ C-----End of ENDF spectra (inclusive)
          CLOSE (98)
          CLOSE (73)
          CLOSE (74)
-ccc         CLOSE (107)
          WRITE (*,*) '.'
          CALL THORA(6)
          CLOSE (6)
@@ -2821,10 +2755,6 @@ C-------Set angles for inelastic calculations
       ENDDO
       FIRst_ein = .FALSE.
       GOTO 1300
-C
-C-----Accuracy of the outgoing energy increased by one digit
-C
-C99070FORMAT (I12,F10.4,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12G10.3)
       END
