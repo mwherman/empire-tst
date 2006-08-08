@@ -7825,6 +7825,9 @@ $file.inp &}} -label {Create input}
         -command {exec xterm -e ../scripts/rec-elastic $file &} \
         -label {Reconstruct elastic} 
     $site_3_0.menu93 add command \
+        -command {exec xterm -e ../scripts/accept-omp-fit $file &} \
+        -label {Accept last OMP fit} 
+    $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/process $file 1 &} \
@@ -7868,7 +7871,7 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e ../scripts/runjoy $file $mat &} -label NJOY 
+        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -7895,6 +7898,11 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
         -command {exec $editor $file-pfns.out &} -label {Fiss. neutr. spectra} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file.sys &} -label {x-sec systematics} 
+    $site_3_0.menu94 add command \
+        -command {exec $editor $file-ompfit.lst &} -label {OMP fit output} 
+    $site_3_0.menu94 add command \
+        -command {exec kompare OMPAR.DIR zr90-omp.dir &} \
+        -label {Compare OMPs} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
@@ -7940,6 +7948,9 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     set site_3_0 $top.m88
     menu $site_3_0.men70 \
         -tearoff 0 
+    $site_3_0.men70 add command \
+        -command {exec lyx $file.lyx &} -font {} \
+        -label {Report} 
     $site_3_0.men70 add command \
         \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
