@@ -80,15 +80,25 @@ value of the parameter in the *-omp.dir file. The second is the absolute value
 (times 100) that defines the range of parameter variation. The third parameter
 indicate the position of the parameter in the RIPL-2 format.
 FITOMP     1.                                    !manual omp fit
+#depths
 FITOMP     2.                                    !perform automatic omp search
 FITRVV     0.     500    1                       !fit real volume depth (+- 5 MeV)
-FITIVV     0.     100    1                       !fit imaginary volume depth (+- 1 MeV)
+FITRVV     0.      10    2                       !fit real volume depth (+- 0.1 MeV)
+FITRVV     0.     200    7                       !fit real volume depth (+- 2 MeV)
+FITRVV     0.     200   18                       !fit real volume depth (+- 2 MeV)
+FITIVV     0.     100    1                       !fit imaginary volume depth (+- 0.1 MeV)
+FITIVV     0.      50    2                       !fit imaginary volume depth (+- 0.5 MeV)
 FITISV     0.     100    1                       !fit imaginary surface depth (+- 1 MeV)
+FITISV     0.      20    2                       !fit imaginary surface depth (+- 0.2 MeV)
+FITISV     0.     300    7                       !fit imaginary surface depth (+- 3 MeV)
+FITITR     6.08                                  !increase number of iterations (default 3.05)
+#geometry
+FITOMP     2.                                    !perform automatic omp search
 FITRVR     0.      10    1                       !fit real volume radius (+- 0.1 fm)
 FITIVR     0.      10    1                       !fit imaginary volume radius (+- 0.1 fm)
+FITISR     0.      10    1                       !fit imaginary surface radius (+- 0.1 fm)
 FITRVD     0.      10    1                       !fit real volume diffuseness (+- 0.1 fm)
+FITIVD     0.       5    1                       !fit imaginary volume diffuseness (+- 0.05 fm)
 FITISD     0.       5    1                       !fit imaginary surface diffuseness (+- 0.05 fm)
-FITDEF     0.      10    2                       !fit l=2 (quadrupol) deformation  (+- 0.1)
 FITGRD                                           !autmatic incident energy grid in omp fit
-FITITR     6.08                                  !increase number of iterations (default 3.05)
-
+FITITR     6.08                                  !increase number of iterations 
