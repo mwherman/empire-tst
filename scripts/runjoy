@@ -1,11 +1,16 @@
 #! /bin/sh -
 # SCRIPT TO RUN STANDARD NJOY TEST
-# Usage: runjoy file_name MAT_number
+# Usage: runjoy file_name [MAT_number]
 #
 MAT=$2
 if [ "$2" = "" ]
    then
-    MAT=1111
+exec 3< $1.endf        #open file $1
+read <&3               #read fir st line
+read -n 66 <&3         #read 66 chracters from the second line
+read -n 4 MAT <&3      #read MAT number
+exec 3>&-              #close the file
+echo 'Set MAT to '$MAT
 fi
 cp $1.endf tape20
 cat>njoyinput <<EOF
@@ -32,7 +37,7 @@ cat>njoyinput <<EOF
  0/
  heatr
  -21 -24 -25 30/
- $MAT 6 0 1 0 0/
+ $MAT 6 0 1 0 2/
  302 303 304 402 443 444
  purr
  -21 -25 -26
