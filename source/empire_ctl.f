@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-05-10 19:01:20 $
-Ccc   * $Id: empire_ctl.f,v 1.16 2006-05-10 19:01:20 herman Exp $
+Ccc   * $Date: 2006-08-08 17:27:46 $
+Ccc   * $Id: empire_ctl.f,v 1.17 2006-08-08 17:27:46 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1760,7 +1760,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac  
-      parameter (ndreac=90, ndkeys=128) 
+      parameter (ndreac=90, ndkeys=129) 
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac), 
@@ -1790,7 +1790,7 @@ C     integer nreac
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF', 
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
-     &  'FISBOU', 'ATILFI'/
+     &  'FISBOU', 'ATILFI', 'DEFNOR'/
       data namecat /
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
@@ -1813,7 +1813,7 @@ C     integer nreac
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     /
+     &  'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction   

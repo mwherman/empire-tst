@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-05-09 21:59:30 $
-Ccc   * $Id: input.f,v 1.204 2006-05-09 21:59:30 herman Exp $
+Ccc   * $Date: 2006-08-08 17:28:36 $
+Ccc   * $Id: input.f,v 1.205 2006-08-08 17:28:36 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -146,6 +146,7 @@ C--------neutralize tuning factors and OMP normalization factors
            TUNEpe(nejc) = 1.d0
          ENDDO
          DO nnuc = 0, NDNUC
+            DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.d0
@@ -235,7 +236,7 @@ C
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
          DEFdyn = 1.d0
-        DEFsta = 1.d0
+         DEFsta = 1.d0
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -1985,9 +1986,9 @@ C--------------------only gamma decay is considered up to now
                   ENDIF
                ENDIF
             ENDDO
-            write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-     >        'FOR NUCLEUS ',chelem,
-     >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
+c           write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
+c    >        'FOR NUCLEUS ',chelem,
+c    >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
          ENDIF
       ENDIF
   200 IF (.NOT.FILevel) CLOSE (13)
@@ -4110,13 +4111,44 @@ C-----
      &,F7.3,''% Weisskopf'')') GDRweis*100., (1. - GDRweis)*100.0
             GOTO 100
          ENDIF
-C-----
+C----
          IF (name.EQ.'DEFPAR') THEN
             DEFpar = val
             WRITE (6,'('' Dynamic deformation multiplyer '',F7.3)')
      &             DEFpar
             WRITE (12,'('' Dynamic deformation multiplyer '',F7.3)')
      &             DEFpar
+            GOTO 100
+         ENDIF
+C----
+         IF (name.EQ.'DEFNOR') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+               DO i = 0, NDNUC
+                  DEFnor(i) = val
+               ENDDO
+               IF (val.NE.1.0D0) WRITE (6,
+     &         '('' gs-deformation multiplier set to '',F6.1,
+     &         '' for all nuclei'')') val
+               IF (val.NE.1.0D0) WRITE (12,
+     &         '('' gs-deformation multiplier set to '',F6.1,
+     &         '' for all nuclei'')') val
+               GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (6,'('' GS-DEFORMATION NORMALIZATION IGNORED'')')
+               GOTO 100
+            ENDIF
+            DEFnor(nnuc) = val
+            WRITE (6,
+     & '('' gs-deformation multiplier in '',I3,A2,'' set to ''  ,F7.3)'
+     & )  i2, SYMb(nnuc), val
+            WRITE (12,
+     & '('' gs-deformation multiplier in '',I3,A2,'' set to ''  ,F7.3)'
+     & )  i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
@@ -5522,14 +5554,14 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
-               DEF(1,nnuc) = beta2x(k)
+               DEF(1,nnuc) = beta2x(k)*DEFnor(nnuc)
                XMAss(nnuc) = EXCessmass(iz,ia)
                AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
             ENDIF
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-               DEF(1,0) = beta2x(k)
+               DEF(1,0) = beta2x(k)*DEFnor(0)
                XMAss(0) = EXCessmass(iz,ia)
             ENDIF
          ELSE
@@ -6997,7 +7029,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     &            ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
