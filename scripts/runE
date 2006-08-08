@@ -7,7 +7,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta34            '
+echo '                     V E R S I O N  2.19.beta35            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -178,8 +178,9 @@ mv ecROT.inp $file-ecis.in 2>/dev/null
 mv ecVIBROT.inp $file-ecis.in 2>/dev/null
 mv FISSION.OUT  $file-fiss.out 2>/dev/null
 mv R250SEED.DAT $file.rng 2>/dev/null
-mw PFNM.OUT $file-pfnm.out 2>/dev/null
-mw PFNS.OUT $file-pfns.out 2>/dev/null
+mv PFNM.OUT $file-pfnm.out 2>/dev/null
+mv PFNS.OUT $file-pfns.out 2>/dev/null
+mv FIT.OUT $file-ompfit.lst 2>/dev/null
 
 # EXTRACT WARNINGS
 
@@ -215,6 +216,7 @@ rm INPUT1.DAT 2>/dev/null
 rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 rm TARGET_COLL_RIPL.DAT 2>/dev/null
 rm COVAR.DAT 2>/dev/null
+rm OPTFIT.CAL OMPAR0.DIR INPUT0.DAT  2>/dev/null
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then
