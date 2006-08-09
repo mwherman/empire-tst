@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-05-04 07:53:13 $
-Ccc   * $Id: MSD-tristan.f,v 1.58 2006-05-04 07:53:13 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:44 $
+Ccc   * $Id: MSD-tristan.f,v 1.59 2006-08-09 12:37:44 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC

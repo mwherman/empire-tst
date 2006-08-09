@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-05-04 07:53:13 $
-Ccc   * $Id: tl.f,v 1.78 2006-05-04 07:53:13 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:44 $
+Ccc   * $Id: tl.f,v 1.79 2006-08-09 12:37:44 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -476,6 +476,7 @@ C
       AMU0c2 = AMUmev
       ENCoul = 0.4*ZTAr/ATAr**(1./3.)
       EFErmi = EEFermi(Nejc,Nnuc)
+
       CALL OPTMOD(E,vlib,rlib,alib)
 C
 C-----RIPL-II
@@ -507,7 +508,7 @@ C-----Volume imaginary potential: Woods-Saxon
       RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
       AWOmv(Nejc,Nnuc) = alib(2)*FNavomp(Nejc,Nnuc)
 C-----Real surface contribution
-      VOMs(Nejc,Nnuc) = vlib(3)
+      VOMs(Nejc,Nnuc) = vlib(3)*FNwsomp(Nejc,Nnuc)
 C-----Surface imaginary potential:
       WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
       RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
@@ -1850,14 +1851,16 @@ C
       CHARACTER*5 ctarget
       INTEGER INT, NINT
 C
-C     +10        +20      +30        +40
-C     123456789 123456789 123456789 123456789 123456789
+C                         +10       +20       +30       +40
+C               123456789 123456789 123456789 123456789 123456789
       BECis1 = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFTFFFFFFFFFFFFFFFFFFFFFF'
-C     +50     +60        +70      +80        +90
-C     123456789 123456789 123456789 123456789 123456789
-C     BECis2 = 'FFFFFFFFFFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+C               +50     +60        +70      +80        +90
+C               123456789 123456789 123456789 123456789 123456789
 C     For ecis03
       BECis2 = 'FFFFFFFFTFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+
+
+C     BECis2 = 'FFFFFFFFFFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
 C
 C-----*** OPTICAL POTENTIALS ***
 C-----Relativistic kinematics (y/n)
@@ -1910,6 +1913,32 @@ C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
+C-----For dispersive optical model potentials
+
+C-----It is ripl2empireS.h because it must be compatible
+
+C-----with global.h declarations so some variables must be renamed
+
+      INCLUDE 'ripl2empireS.h'
+
+C
+
+C COMMON variables
+
+C
+
+      REAL*8 AAV, AS, BS, BV, CS, ETMP, EF, EP, EA
+
+      INTEGER IQ, NNS, NNV, IDRs
+
+      COMMON /ENERGY/ ETMP, EF, EP
+
+      COMMON /PDATAS/ AS, BS, CS, NNS, IQ
+
+      COMMON /PDATAV/ AAV, BV, NNV
+
+      COMMON /DISPER/   IDRs, EA
+
 C
 C Dummy arguments
 C
@@ -1920,10 +1949,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab, elabe, rmatch,
-     &                 xmas_nejc, xmas_nnuc, xratio, zerosp
+     &                 xmas_nejc, xmas_nnuc, xratio, zerosp, eatmp
       CHARACTER*1 ch
       DOUBLE PRECISION DABS
-      INTEGER ikey, ip, iterm, j, ldwmax, ncoll, nd_cons, nd_nlvop,
+      INTEGER ikey, ip, iterm, j, ldwmax, ncollx, nd_cons, nd_nlvop,
      &        njmax, npp, nwrite
       INTEGER INT, NINT
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
@@ -1951,25 +1980,50 @@ C-----Real SO potential deformed
 C     ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
 C     ECIs1(14:14) = 'T'
-C-----Usual coupled equations instead of ECIS scheme is used
-C     Spin-orbit potential must be not deformed !!
-      ECIs1(21:21) = 'T'
 C-----ECIS iteration scheme is used.
-C     Shift to coupled equations if convergence is not achieved
-C     ECIs1(23:23) = 'T'
+
+      ECIs1(21:21) = 'F'
+
+C-----Usual coupled equations instead of ECIS scheme is used
+
+C     for non-zero spins or energies below 3 MeV
+
+C-----Spin-orbit potential must be not deformed !!
+
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.3.d0)
+
+     >  ECIs1(21:21) = 'T'
+
+C-----Shift to coupled equations if convergence is not achieved
+
+      ECIs1(23:23) = 'T'
+
 C-----Calculations at experimental angles
+
       IF (ICAlangs.GT.0) ECIs1(31:31) = 'T'
+
       ECIs2 = BECis2
+
 C-----Angular distribution is calculated
+
       ECIs2(14:14) = 'T'
-C-----penetrabilities punched on cards
+
+C-----Penetrabilities punched on cards
+
       ECIs2(13:13) = 'T'
+
 C-----Legendre coefficients output
+
       ECIs2(15:15) = 'T'
+
 C-----Cmatrix output
+
       ECIs2(5:5) = 'F'
+
 C-----Smatrix output
+
       ECIs2(6:6) = 'F'
+
 C     DWBA option added
       IF (DIRect.EQ.3 .OR. Ldwba) THEN
 C-----Iteration scheme used for DWBA
@@ -1996,6 +2050,24 @@ C
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
 
+
+
+      IF (IDRs.GT.0) THEN
+
+
+C      Preparing dispersive CC input for ECIS
+
+
+       ECIs1(10:10)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (GS)
+
+
+       ECIs1(20:20)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (EXC.LEV.)
+
+
+      ENDIF
+
+
+
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
       nd_nlvop = 1
@@ -2013,7 +2085,7 @@ C-----At least ground state is always open !!, RCN 31/03/2001
       ENDIF
 C
 C-----Considering only coupled levels if CC calculation
-      ncoll = nd_cons
+      ncollx = nd_cons
 C
       iterm = 20
 C-----For DWBA only one iteration is used
@@ -2053,7 +2125,7 @@ C-----CARD 2
 C-----CARD 3
       WRITE (1,'(a50)') ECIs2
 C-----CARD 4
-      WRITE (1,'(4i5)') ncoll, njmax, iterm, npp
+      WRITE (1,'(4i5)') ncollx, njmax, iterm, npp
 C-----Matching radius
 C-----CARD 5
       rmatch = 20.D0
@@ -2187,6 +2259,27 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
 C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
       WRITE (1,'(3f10.5)') 0., 0., 0.
+      IF (IDRs.GT.0) THEN
+
+       eatmp=EA 
+
+       IF(EA.gt.1000.d0) eatmp=0.d0
+
+C                einc       ef       ep         ea
+
+C    1    0       15.   -10.392     -5.66       90.
+
+       write(1,'(2I5,6F10.5)')   1,  0,  el,  ef,  ep,  eatmp
+
+C                                4    4      58.8       3.25 .0395
+
+       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
+
+       write(1,'(7F10.5)') 0.d0
+
+      endif
+
+
       IF (Inlkey.NE.0) THEN
 C
 C------2) discrete levels
@@ -2259,6 +2352,31 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
                WRITE (1,'(3f10.5)')
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
                WRITE (1,'(3f10.5)') 0., 0., 0.
+
+               IF (IDRs.GT.0) THEN
+
+                eatmp = EA
+
+                IF(EA.gt.1000.d0) eatmp=0.d0
+
+C                                                einc       ef       ep         ea
+
+C                                       1    0    15.   -10.392     -5.66       90.
+
+                write(1,'(2I5,6F10.5)') 1,   0,   el,  ef,  ep,  eatmp
+
+C                          n    m  Bv              Bs   Cs
+
+C                          4    4      58.8       3.25 .0395
+
+                write(1,'(2I5,6F10.5)') 
+
+     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
+
+                write(1,'(7F10.5)') 0.d0
+
+               ENDIF
+
             ENDIF
   200    ENDDO
       ENDIF
@@ -2315,20 +2433,50 @@ C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
+C-----For dispersive optical model potentials
+
+
+C-----It is ripl2empireS.h because it must be compatible
+
+
+C-----with global.h declarations so some variables must be renamed
+
+
+      INCLUDE 'ripl2empireS.h'
+
+
 C
 C Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
 C
+
+C COMMON variables
+
+C
+
+      REAL*8 AAV, AS, BS, BV, CS, ETMP, EF, EP, EA
+
+      INTEGER IQ, NNS, NNV, IDRs
+
+      COMMON /ENERGY/ ETMP, EF, EP
+
+      COMMON /PDATAS/ AS, BS, CS, NNS, IQ
+
+      COMMON /PDATAV/ AAV, BV, NNV
+
+      COMMON /DISPER/   IDRs, EA
+
+C
 C Local variables
 C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab, elabe, rmatch,
-     &                 xmas_nejc, xmas_nnuc, xratio
+     &                 xmas_nejc, xmas_nnuc, xratio, eatmp
       CHARACTER*1 ch
       DOUBLE PRECISION DABS
-      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), ncoll,
-     &        nd_cons, nd_nlvop, njmax, npho, npp, nwrite
+      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), 
+     &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite
       INTEGER INT, NINT
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -2357,10 +2505,20 @@ C-----Real SO potential deformed
 C-----ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
 C-----ECIs1(14:14) = 'T'
-C-----Usual coupled equations instead of ECIS scheme is used
-C-----Spin-orbit potential must be not deformed !!
-      ECIs1(21:21) = 'T'
+
 C-----ECIS iteration scheme is used.
+
+      ECIs1(21:21) = 'F'
+
+C-----Usual coupled equations instead of ECIS scheme is used
+
+C     for non-zero spins or energies below 3 MeV
+
+C-----Spin-orbit potential must be not deformed !!
+
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.3.d0)
+
+     >  ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -2370,13 +2528,14 @@ C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----Penetrabilities punched on cards
       ECIs2(13:13) = 'T'
-C
 C-----Legendre coefficients output
       ECIs2(15:15) = 'T'
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
       ECIs2(6:6) = 'F'
+
+
 C-----DWBA option added
       IF (DIRect.EQ.3) THEN
 C-----Iteration scheme used for DWBA
@@ -2404,6 +2563,18 @@ C
       CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,ak2,ikey)
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
+
+
+      IF (IDRs.GT.0) THEN
+
+C      Preparing dispersive CC input for ECIS
+
+       ECIs1(10:10)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (GS)
+
+       ECIs1(20:20)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (EXC.LEV.)
+
+      ENDIF
+
 C
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
@@ -2424,7 +2595,7 @@ C-----------All levels with icollev(j)<LEVcc should be calculated by CC
       IF (nd_nlvop.EQ.1) WRITE (6,*)
      &               ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
-      ncoll = nd_cons
+      ncollm = nd_cons
 C
       iterm = 20
 C-----For DWBA only one iteration is used
@@ -2453,7 +2624,7 @@ C-----make sure that all contributions to s-wave scattering are included
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
       jdm = XJLv(ilv,Nnuc) + SEJc(Nejc) + 0.5
-      WRITE (1,'(4i5,30x,i5)') ncoll, njmax, iterm, npp, jdm
+      WRITE (1,'(4i5,30x,i5)') ncollm, njmax, iterm, npp, jdm
 C-----CARD 5
       rmatch = 20.D0
       WRITE (1,'(10x,f10.5)') rmatch
@@ -2588,9 +2759,31 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
-C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
+
       WRITE (1,'(3f10.5)') 0., 0., 0.
+
+      IF (IDRs.GT.0) THEN
+
+       eatmp=EA 
+
+       IF(EA.gt.1000.d0) eatmp=0.d0
+
+C                einc       ef       ep         ea
+
+C    1    0       15.   -10.392     -5.66       90.
+
+       write(1,'(2I5,6F10.5)')   1,  0,  el,  ef,  ep,  eatmp
+
+C                                4    4      58.8       3.25 .0395
+
+       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
+
+       write(1,'(7F10.5)') 0.d0
+
+      endif
+
+
 C-----2) discrete levels
       DO j = 2, ND_nlv
 C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
@@ -2660,10 +2853,33 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
             ELSE
                WRITE (1,'(3f10.5)') 0., 0., 0.
             ENDIF
-C-----------write(1,'(3f10.5)') rc,0.,0.
             WRITE (1,'(3f10.5)')
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
+            IF (IDRs.GT.0) THEN
+
+             eatmp = EA
+
+             IF(EA.gt.1000.d0) eatmp=0.d0
+
+C                                                einc       ef       ep         ea
+
+C                                       1    0    15.   -10.392     -5.66       90.
+
+             write(1,'(2I5,6F10.5)')    1,   0,   el,  ef,  ep,  eatmp
+
+C                          n    m  Bv              Bs   Cs
+
+C                          4    4      58.8       3.25 .0395
+
+             write(1,'(2I5,6F10.5)') 
+
+     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
+
+             write(1,'(7F10.5)') 0.d0
+
+            ENDIF
+
          ENDIF
       ENDDO
 C
@@ -2721,7 +2937,6 @@ C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
          CALL OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,komp,Ikey)
       ENDIF
       END
-
 
       SUBROUTINE KINEMA(El,E1,Mi,Mt,Ak2,Iopt,Relcal)
 C
@@ -2837,12 +3052,14 @@ C
 C
 C COMMON variables
 C
-      REAL*8 AAV, AS, BS, BV, CS, EEE, EF, EP, WDE, WVE
-      INTEGER IQ, N, NNS
+      REAL*8 AAV, AS, BS, BV, CS, EEE, EF, EP, WDE, WVE, EA
+      INTEGER IQ, N, NNS, NNV, IDRs
       COMMON /ENERGY/ EEE, EF, EP
       COMMON /PDATAS/ AS, BS, CS, NNS, IQ
-      COMMON /PDATAV/ AAV, BV, N
+      COMMON /PDATAV/ AAV, BV, NNV
       COMMON /WENERG/ WDE, WVE
+
+      COMMON /DISPER/ IDRs, EA
 C
 C Dummy arguments
 C
@@ -2852,7 +3069,7 @@ C
 C Local variables
 C
       REAL*8 aavso, alphav, alpha_pb, beta_pb, bvso, derdws, derdwv,
-     &       dtmp, dws, dwv, dwvso, ea, gamma_pb, vdcoul, vnonl, vscoul,
+     &       dtmp, dws, dwv, dwvso, gamma_pb, vdcoul, vnonl, vscoul,
      &       vvcoul
       REAL b(6,NDIM1,15), dtmp1, dwmin, dwplus, dwsm, dwsp, elf,
      &     encoul2, pi, t12der, t1der, t1m, t1p, t2der, t2m, t2p, vc,
@@ -2868,12 +3085,11 @@ C
 C-----Generate optical model parameters for ECIS
 C
       pi = ACOS( - 1.D0)
-      vdcoul = 0.D0
-      vvcoul = 0.D0
-      vscoul = 0.D0
-      vc = 0.
-      RC = 0.
-       ACOu = 0.
+      RC = 0.d0
+      ACOu = 0.d0
+
+      IDRs = 0 ! Imaginary and HF geometry in dispersive potentials are the same
+
       IF (JCOul.GE.1) THEN
          jc = 1
          DO j = 1, JCOul
@@ -2882,14 +3098,28 @@ C
          jc = MIN0(jc,JCOul)
          RC = RCOul0(jc)*ATAr**( - 1./3.) + RCOul(jc) + RCOul1(jc)
      &        *ATAr**( - 2./3.) + RCOul2(jc)*ATAr**( - 5./3.)
-          ACOu = ACOul(jc)
+         ACOu = ACOul(jc)
       ENDIF
       encoul2 = 0.
       IF (RC.GT.0.) encoul2 = 1.73*ZTAr/(RC*ATAr**(1./3.))
       DO i = 1, 6
-         Rlib(i) = 0.
-         Alib(i) = 0.
-         Vlib(i) = 0.
+
+         vdcoul = 0.D0
+
+         vvcoul = 0.D0
+
+         vscoul = 0.D0
+
+         derdwv = 0.d0
+
+         derdws = 0.d0
+
+         dwvnonl = 0.d0
+
+         vc = 0.d0
+         Rlib(i) = 0.d0
+         Alib(i) = 0.d0
+         Vlib(i) = 0.d0
          jab = IABS(JRAnge(i))
          IF (JRAnge(i).GE.1) THEN
             jp = 1
@@ -2929,6 +3159,23 @@ C--------------RCN, 09/2004, to handle new extension to the OMP RIPL-2 format
      &                *ATAr + ACO(i,j,8)*ATAr**2 + ACO(i,j,9)*ATAr**3 +
      &                ACO(i,j,10)*ATAr**(1./3.) + ACO(i,j,11)
      &                *ATAr**( - 1./3.)
+
+
+
+
+
+            IF (i.eq.2) THEN
+
+
+               IF( ABS(Rlib(1)-Rlib(2)).gt.0.001 ) IDRs = 1
+
+
+               IF( ABS(Alib(1)-Alib(2)).gt.0.001 ) IDRs = 1
+
+
+            ENDIF
+
+
             IF (POT(i,j,24).NE.0.) THEN
 C--------------Special Koning-type potential formulas
                IF (POT(i,j,24).EQ.1.) THEN
@@ -3033,13 +3280,16 @@ C--------------Special Smith-type potential formulas
                IF (POT(i,j,5).NE.0.) Vlib(i) = Vlib(i) + POT(i,j,3)
      &             *COS(2.*pi*(ATAr - POT(i,j,4))/POT(i,j,5))
             ENDIF
-           IF(i.eq.2 .OR. i.eq.4) Vlib(i) = MAX(Vlib(i),0.0d0)
+
+
+C             Setting imaginary potentials to zero if negative !!
+            IF(i.eq.2 .OR. i.eq.4) Vlib(i) = MAX(Vlib(i),0.0d0)
          ENDIF
       ENDDO
 C
 C-----To calculate dispersion relation contribution
 C
-      IF (ABS(IDR).GE.2) THEN
+152   IF (ABS(IDR).GE.2) THEN
 C
 C-------Exact calculation of the dispersive contribution
 C
@@ -3053,12 +3303,28 @@ C--------Real volume contribution from Dispersive relation
             AAV = DBLE(INT(100000*b(i,j,6)))/100000
             BV = DBLE(INT(100000*b(i,j,7)))/100000
             N = NINT(POT(i,j,13))
+
+
+            NNV = N
+
+
             IF (N.EQ.0 .OR. MOD(N,2).EQ.1)
      &           STOP 'Zero or odd exponent in Wv(E) for dispersive OMP'
 
 C-----------Retrieving average energy of the particle states Ep
             EP = DBLE(INT(100000*POT(i,j,20)))/100000
             IF (EP.EQ.0.) EP = EF
+C-----------Nonlocality correction to the DOM integral
+
+C-----------(only used if Ea is non-zero)
+
+            ea = DBLE(INT(100000*POT(i,j,21)))/100000
+
+            IF (ea.EQ.0.) ea = 1000.1D0
+
+
+            IF (IDRs.GT.0) GOTO 154
+
 
 C-----------Analytical DOM integral
             dwv = DOM_INT_WV(EF,EP,AAV,BV,EEE,N,derdwv)
@@ -3070,16 +3336,12 @@ C           DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
 C           DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
 C           DerDWV = -b(1,1,5)*encoul2*(DWVp-DWVm)*5.d0
 
-C         if(idr.le.-2) then
-C           numerical DOM integral (not needed for a time being)
-C           WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
-C           DWV=2*DOM_int(Delta_WV,WVf,Ef,Ef+5.*Bv,150000.d0,EEE,0.d0)
-C         endif
+C           if(idr.le.-2) then
+C             numerical DOM integral (not needed for a time being)
+C             WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
+C             DWV=2*DOM_int(Delta_WV,WVf,Ef,Ef+5.*Bv,150000.d0,EEE,0.d0)
+C           endif
 C
-C-----------Nonlocality correction to the DOM integral
-C-----------(only used if Ea is non-zero)
-            ea = DBLE(INT(100000*POT(i,j,21)))/100000
-            IF (ea.EQ.0.) ea = 1000.1D0
             dwplus = 0.D0
             dwmin = 0.D0
             t12der = 0.D0
@@ -3113,7 +3375,8 @@ C--------------to real volume potential
             ENDIF
             vvcoul = derdwv + t12der
          ENDIF
-         i = 4
+
+154      i = 4
 C--------Only one energy range
          j = 1
 C--------Real surface contribution from Dispersive relation
@@ -3124,6 +3387,9 @@ C--------Real surface contribution from Dispersive relation
             BS = DBLE(INT(100000*b(i,j,10)))/100000
             CS = DBLE(INT(100000*b(i,j,9)))/100000
             N = NINT(POT(i,j,13))
+
+
+            NNS = N
             IF (N.EQ.0 .OR. MOD(N,2).EQ.1)
      &           STOP 'Zero or odd exponent in Wd(E) for dispersive OMP'
 
@@ -3133,8 +3399,8 @@ C--------Real surface contribution from Dispersive relation
 C-----------Retrieving average energy of the particle states Ep
             EP = DBLE(INT(100000*POT(i,j,20)))/100000
             IF (EP.EQ.0.) EP = EF
-C-----------Ea=dble(int(100000*pot(i,j,21)))/100000
-C-----------if(Ea.eq.0.) Ea=1000.1d0
+
+            IF (IDRs.GT.0) GOTO 156
 
             IF (IDR.GE.2) THEN
 C--------------analytical DOM integral
@@ -3164,7 +3430,7 @@ C-----------------Numerical derivative
 
          ENDIF
 
-         i = 6
+156      i = 6
 C--------Only one energy range
          j = 1
 C--------Real spin orbit contribution from Dispersive relation
@@ -3198,7 +3464,6 @@ C--------Geometry parameters are the same as for the imaginary spin orbit potent
       ENDIF
       END
 
-
       SUBROUTINE SETR(A,B,N)
 C
 C     ******************************************************************
@@ -3219,7 +3484,6 @@ C
       ENDDO
       END
 
-
       SUBROUTINE BCOGET(B,J)
 C     Routine to compute b coefficients for Koning global potential
 C
@@ -3232,13 +3496,23 @@ C
       INTEGER J
       REAL B(6,NDIM1,15)
       CALL SETR(0.,B,90*NDIM1)
+
+      V1 = 0.d0
+
+      W1 = 0.d0
+
+
 C-----Original Koning dependence
       B(1,J,1) = POT(1,J,1) + POT(1,J,2)*ATAr + POT(1,J,8)*ETA
+
+
 C-----Soukhovitski dependence
       IF ((POT(1,J,20).NE.0.) .AND.
      &    (POT(1,J,14) + POT(1,J,15)*ATAr + POT(1,J,16)).NE.0.) B(1,J,1)
      &    = POT(1,J,1) + POT(1,J,2)*ATAr + POT(1,J,8)*ETA + POT(1,J,20)
      &      *ETA/(POT(1,J,14) + POT(1,J,15)*ATAr + POT(1,J,16))
+
+
       B(1,J,2) = POT(1,J,3) + POT(1,J,4)*ATAr
       B(1,J,3) = POT(1,J,5) + POT(1,J,6)*ATAr
       B(1,J,4) = POT(1,J,7)
@@ -3255,7 +3529,7 @@ C-----V^0_R + V^A_R*(A-232)
 C-----To preserve compatibility with RIPL-2 Koning database
 C-----b(i,j,15) must be equal to 1. !!! for Koning OMP
       IF ((POT(1,J,14) + POT(1,J,15)*ATAr + POT(1,J,16)).EQ.0.)
-     &    B(1,J,15) = 1.
+     &    B(1,J,15) = 1.d0
 C-----if(abs(b(1,j,15)).lt.1.e-8) b(1,j,15) = 1.
 C-----Wv( Av )
       B(2,J,6) = POT(2,J,1) + POT(2,J,2)*ATAr
@@ -3266,7 +3540,21 @@ C
 C-----added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
 C-----Wd( As )
 C-----b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta
-      B(4,J,8) = POT(4,J,1) + POT(4,J,8)*ETA + POT(4,J,7)*ATAr
+
+
+c     added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
+C     B(4,J,8) = POT(4,J,1) + POT(4,J,8)*ETA + POT(4,J,7)*ATAr
+
+
+c     added A**(-1/3) dependence for As parameter (RCN, 11/2005), i.e.  pot(4,j,9)<>0
+
+
+      B(4,j,8)  =  POT(4,j,1) + POT(4,j,8)*ETA + POT(4,j,7)*atar + 
+
+
+     >                POT(4,j,9)*ATAr**(-1.d0/3.d0)
+
+
 C-----Wd( Cs )
       IF (POT(4,J,3).NE.0.) THEN
          B(4,J,9) = POT(4,J,2) + POT(4,J,3)
@@ -3284,8 +3572,10 @@ C-----Vso
 C-----Wso
       B(6,J,6) = POT(6,J,1)
       B(6,J,7) = POT(6,J,3)
-      END
 
+
+      RETURN
+      END
 
       REAL*8 FUNCTION VHF(Einp,Alpha_pb,Beta_pb,Gamma_pb)
 C
@@ -3322,7 +3612,6 @@ C-----getting amu
       IF (ABS(VHF - vtmp).GT.0.0001 .AND. niter.LT.10000) GOTO 100
       END
 
-
       REAL FUNCTION XKINE(Ei,Amu)
 C
 C***********************************************************************
@@ -3356,7 +3645,6 @@ C--------Relativistic kinematics
          XKINE = etott/(etoti + etott)
       ENDIF
       END
-
 
       REAL*8 FUNCTION DOM_INT_WV(Ef,Ep,Av,Bv,E,N,Derivintwv)
 C
@@ -3431,8 +3719,6 @@ C----------------------------------
      &             + resemin*LOG(DABS(emin)))
       Derivintwv = -Av/pi*(rds/N + dereplus + deremin)
       END
-
-
 
       REAL*8 FUNCTION DOM_INT_WS(Ef,Ep,As,Bs,Cs,E,M,Derivintws)
 C
@@ -3540,7 +3826,6 @@ C
       WDD = A*ee/(ee + B**M)*EXP( - arg)
       END
 
-
       REAL*8 FUNCTION DOM_INT_T1(Ef,Ea,E)
 C
 C     Integral over E' corresponding to nonlocal additions T1(E'<<0)
@@ -3563,7 +3848,6 @@ C
       t13 = -eax**2*LOG(eax)/(ex*(eax**2 + ea2))
       DOM_INT_T1 = ex/pi*(t11 + t12 + t13)
       END
-
 
       REAL*8 FUNCTION DOM_INT_T2(Ef,Ea,E)
 C
@@ -3597,7 +3881,6 @@ C
       ENDIF
       DOM_INT_T2 = 1.D0/pi*(r1 + r2 + r3 + r4)
       END
-
 
       COMPLEX*16 FUNCTION ZFI(Za)
 C
@@ -3643,8 +3926,6 @@ C
       ENDDO
       ZFI = 1.D0/(ZFI + Za)
       END
-
-
 
       REAL*8 FUNCTION EIN(X)
 C

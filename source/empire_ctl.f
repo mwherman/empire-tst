@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-08-08 17:27:46 $
-Ccc   * $Id: empire_ctl.f,v 1.17 2006-08-08 17:27:46 herman Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: empire_ctl.f,v 1.18 2006-08-09 12:37:42 Capote Exp $
                   
       PROGRAM EMPIRE_CTL
 C

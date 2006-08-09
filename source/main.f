@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2006-08-08 17:29:17 $
-Ccc   * $Id: main.f,v 1.151 2006-08-08 17:29:17 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2006-08-09 12:37:43 $
+Ccc   * $Id: main.f,v 1.152 2006-08-09 12:37:43 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -50,10 +50,10 @@ C     COMMON /nubar3 / efl,efh,tm
 C     COMMON /inp_sp1/ er,tke,amash,sn,egam
 C     COMMON /inp_sp3/ flf,fhf,finput,filsan,fnc
 C     COMMON /inp_sp5/ eenc,signcf,nrnc
-
 C
 C Local variables
 C
+      DOUBLE PRECISION fniu, acc      
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
@@ -2044,8 +2044,8 @@ C------------------Post-fission neutrons assumed isotropically distributed
      &                                CSEfis(ie,nejc,nnuc)/(4.d0*PI)
                    ENDDO
                  ENDDO
-C	           bindS(izfiss) = Q(1,nnuc)   ! Binding energy of the emitted N		 
-              isnewchain(izfiss) = 1
+C                bindS(izfiss) = Q(1,nnuc)   ! Binding energy of the emitted N             
+                 isnewchain(izfiss) = 1
                  WRITE (12,
      &       '(''  Postfission <En> for fissioning nucleus '',
      &          G12.5,5x,G12.5)') eneutr
@@ -2129,7 +2129,7 @@ C
 C----------------We substract binding energy of the neutrons to the previous
 C----------------nuclei in the chain to consider the emitted pre-fission neutron.
 C----------------We also substract the corresponding average energy eneutr     
-C	       
+C            
                  eincid = EXCn - Q(izfiss+1,1) - bindS(izfiss) - eneutr 
                  write(*,'(1x,a4,4(f8.3,1x),3x,i3,1x,i3,5x,f10.3)') 
      &            'Ein=',eincid, bindS(izfiss),  eneutr, egamma,  
@@ -2373,7 +2373,7 @@ C               ftmp1 is the integral of csepfns(ie,nejc) over energy (ie index)
                 if(ftmp.gt.0) ratio2maxw(ie) =
      &                  csepfns(ie,nejc)/(ftmp*ftmp1)
 C
-C---------------Integral of the maxwell distribution must be equal 1
+C---------------Integral of the Maxwell distribution must be equal 1
 C               if(ie.gt.1) then
 C                 deltae = enepfns(ie,nejc)-enepfns(ie-1,nejc)
 C                 fmed1 = ( fmaxw(enepfns(ie  ,nejc),tequiv) +
@@ -2476,23 +2476,26 @@ C     ENDDO
         WRITE (6,'('' * Compound elastic cross section (CE) '',G12.5,
      &              '' mb  '')') 4.*PI*ELCncs
         WRITE (6,'('' * Reaction cross section - CE '',G12.5,
-     &              '' mb  '')') ABScs - 4.*PI*ELCncs
+     &              '' mb  '')') ABScs*FUSred - 4.*PI*ELCncs
+        if(FUSred.ne.1.)
+     &  WRITE (6,'('' * Reaction cross section scaled by '',G12.5,
+     &              '' mb  '')') FUSred    
         WRITE (6,'('' * Production cross section + fission '',
      &           G12.5,'' mb'')')  checkXS - 4.*PI*ELCncs
         WRITE (6,'('' * Difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs - checkXS))/
-     &                    (ABScs - 4.*PI*ELCncs)
+     &            100.d0*abs((ABScs*FUSred - checkXS))/
+     &                    (ABScs*FUSred - 4.*PI*ELCncs)
          WRITE (6,'('' *******************************************'',
      &           23(1H*))')
       ENDIF
-      IF(abs(ABScs - checkXS).GT.0.01*ABScs) THEN
+      IF(abs(ABScs*FUSred - checkXS).GT.0.01*ABScs) THEN      
         WRITE (6,*)
         WRITE (6,'('' WARNING: Sum of production XS and fission XS'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
-        IF((ABScs - 4.*PI*ELCncs).NE.0.d0)
+        IF((ABScs*FUSred - 4.*PI*ELCncs).NE.0.d0)
      &  WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs - 4.*PI*ELCncs - checkXS))/
-     &                    (ABScs - 4.*PI*ELCncs)
+     &            100.d0*abs((ABScs*FUSred - 4.*PI*ELCncs - checkXS))/
+     &                    (ABScs*FUSred - 4.*PI*ELCncs)
       ENDIF
       WRITE (6,*)
       IF (IOUt.GT.1) THEN

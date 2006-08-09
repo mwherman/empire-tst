@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006-01-02 06:12:18 $
-Ccc   * $Id: covariance.f,v 1.5 2006-01-02 06:12:18 herman Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: covariance.f,v 1.6 2006-08-09 12:37:42 Capote Exp $
       PROGRAM COVARIANCE
       integer*4 PIPE,itmp,i1,i2
       character*80 command

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-08-08 17:28:36 $
-Ccc   * $Id: input.f,v 1.205 2006-08-08 17:28:36 herman Exp $
+Ccc   * $Date: 2006-08-09 12:37:43 $
+Ccc   * $Id: input.f,v 1.206 2006-08-09 12:37:43 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -237,6 +237,7 @@ C
          WIDcoll = 0.d0
          DEFdyn = 1.d0
          DEFsta = 1.d0
+         DEFnuc = 0.d0         
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -258,7 +259,7 @@ C--------CCFUF parameters
          FCC = 1.
          NACc = 0
 C        By default only target deformation is considered
-         NSCc = 4
+         NSCc = 2
 C        Default deformation values, they are changed in ifindcoll()
          BETcc(1) = 0.15
          BETcc(2) = 0.05
@@ -962,16 +963,6 @@ C--------------------------------------------------------------------------
      &                 ' WARNING!!!! Direct mechanism is not supported '
             WRITE (6,*) ' WARNING!!!! for photo-nuclear reactions and '
             WRITE (6,*) ' WARNING!!!! has been turned off  '
-            WRITE (6,*) ' '
-         ENDIF
-         IF (DIRect.EQ.3 .AND.
-     &       (MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0)) THEN
-            DIRect = 1
-            WRITE (6,*) ' '
-            WRITE (6,*) ' WARNING!!!! DWBA mechanism is not supported'
-            WRITE (6,*) ' WARNING!!!! for reactions on odd nuclei    '
-            WRITE (6,*) ' WARNING!!!! DIRECT 1 has been set to 1     '
-            WRITE (6,*) ' WARNING!!!! Small deformation is assumed   '
             WRITE (6,*) ' '
          ENDIF
          IF (DIRect.GT.0 .AND. KTRompcc.EQ.0) THEN
@@ -1986,9 +1977,9 @@ C--------------------only gamma decay is considered up to now
                   ENDIF
                ENDIF
             ENDDO
-c           write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-c    >        'FOR NUCLEUS ',chelem,
-c    >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
+            IF(IOUT.GT.3) write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
+     >        'FOR NUCLEUS ',chelem,
+     >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
          ENDIF
       ENDIF
   200 IF (.NOT.FILevel) CLOSE (13)
@@ -2967,6 +2958,13 @@ C-----
             WRITE (6,
      &'('' Deformation of the n='',I2,'' collective level set to'',F6.3)
      &') i1, BETcc(i1)
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'DEFNUC ') THEN
+            DEF(1,0) = val
+            WRITE (6,
+     &'('' Deformation of the target nucleus set to'',F6.3)') val
             GOTO 100
          ENDIF
 
@@ -5561,7 +5559,7 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-               DEF(1,0) = beta2x(k)*DEFnor(0)
+               IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)*DEFnor(0)
                XMAss(0) = EXCessmass(iz,ia)
             ENDIF
          ELSE
@@ -6907,7 +6905,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6920,7 +6918,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6933,7 +6931,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6946,7 +6944,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -6970,7 +6968,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -7043,7 +7041,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -7057,7 +7055,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -7072,7 +7070,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
-     >			 ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr

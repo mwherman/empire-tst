@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-26 03:52:55 $
-Ccc   * $Id: HF-comp.f,v 1.83 2006-02-26 03:52:55 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: HF-comp.f,v 1.84 2006-08-09 12:37:42 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'

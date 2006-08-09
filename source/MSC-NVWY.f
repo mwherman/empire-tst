@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2005-07-11 05:50:58 $
-Ccc   * $Id: MSC-NVWY.f,v 1.13 2005-07-11 05:50:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2006-08-09 12:37:39 $
+Ccc   * $Id: MSC-NVWY.f,v 1.14 2006-08-09 12:37:39 Capote Exp $
 C
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)

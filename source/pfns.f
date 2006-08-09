@@ -1,8 +1,8 @@
 Ccc
-Ccc   * $Date: 2006-05-04 07:53:13 $
-Ccc   * $Id: pfns.f,v 1.2 2006-05-04 07:53:13 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:44 $
+Ccc   * $Id: pfns.f,v 1.3 2006-08-09 12:37:44 Capote Exp $
 C
-      real*8 function fniu(en,iaf,izf,acc)
+      DOUBLE PRECISION function fniu(en,iaf,izf,acc)
 C
 C    Following Malinovskii 
 C
@@ -10,6 +10,8 @@ C
       real*8 CNdef,HFdef,LFdef,ftmp,Erel
       real*8 en, eg0, egn, bn, acc, uexcit
       real*8 deltaz,deltan,delta
+      real*8 TKE
+      integer iaf,izf
 C     Mass of heavy fragment fixed following Malinovskii
       data iah/140/
 C     Average gamma energy release Eg = eg0 + niu*egn
@@ -151,7 +153,7 @@ C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuA
 
       S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
       S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n5*p2)/pnorm
-	Sn = S1n
+      Sn = S1n
       Sn = 0.5*( S1n + 0.5*S2n)      
 C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
 C     eg0 = Sn*0.92

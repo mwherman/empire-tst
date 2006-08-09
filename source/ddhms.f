@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-02-26 03:52:55 $
-Ccc   * $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Readnevr,Ihistlabr,Irecprintr,
@@ -9,8 +9,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.26 $
-C $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $
+C CVS Version Management $Revision: 1.27 $
+C $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2192,9 +2192,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.26 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.27 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.26 2006-02-26 03:52:55 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-05-04 07:53:13 $
-Ccc   * $Id: auxiliary.f,v 1.29 2006-05-04 07:53:13 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:43 $
+Ccc   * $Id: auxiliary.f,v 1.30 2006-08-09 12:37:43 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-02-26 03:52:55 $
-Ccc   * $Id: io.h,v 1.29 2006-02-26 03:52:55 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: io.h,v 1.30 2006-08-09 12:37:42 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -61,17 +61,11 @@ c     63     ecis03
 c     64     ecis03
 c     65     ecis03
 c     66     ecis03, MSD-Tristan
-
 c     70     fileprep (empire_ctl fit)
-
 c     71     fileprep (empire_ctl fit)
-
 c     72     fileprep (empire_ctl fit)
-
 c     73     main.f (for pfns OUTPUT)
-
 c     74     main.f (for pfns OUTPUT)
-
 c     75     ecis03
 c     76     ecis03
 c     77     input

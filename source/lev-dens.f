@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-02-04 18:53:06 $
-Ccc   * $Id: lev-dens.f,v 1.46 2006-02-04 18:53:06 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:42 $
+Ccc   * $Id: lev-dens.f,v 1.47 2006-08-09 12:37:42 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -655,9 +655,10 @@ C-----set Ignatyuk type energy dependence for 'a'
             ar = ACRt
          ENDDO
          WRITE (6,*)
-     &     ' WARNING: Search for critical a-parameter has not convergeD'
+     &     ' WARNING: Search for critical a-parameter has not converged
+     & for A=',A(nnuc),' Z=',Z(nnuc)
          WRITE (6,*) ' WARNING: Last iteration has given acrt=', ACRt
-         WRITE (6,*) ' WARNING: Execution continues'
+         WRITE (6,*) ' WARNING: Setting Acrt to 0, execution continues'
       ENDIF
   100 IF (ACRt.LT.0.0D0) ACRt = 0.0
       ECOnd = 1.5*ACRt*DELp**2/pi2

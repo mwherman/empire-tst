@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2005-03-17 10:54:40 $
-Ccc   * $Id: ph-lev-dens.f,v 1.9 2005-03-17 10:54:40 Capote Exp $
+Ccc   * $Date: 2006-08-09 12:37:39 $
+Ccc   * $Id: ph-lev-dens.f,v 1.10 2006-08-09 12:37:39 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
