@@ -19,6 +19,7 @@
      &                 CSRead, D1Fra, DE, DEF(ndlw,0:ndnuc), DEFeq,
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,
      &                 DEFprj, DEGa, DELtafis(2), DENhf, DERec, 
+     &                 DEFnor(0:NDNUC),
      &                 DEStepp(2), DFUs, DIRect, DIToro, DOBs(0:ndnuc),
      &                 DRTl(ndlw), DV, D_Def(ndcollev,nddefcc),
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,
@@ -137,6 +138,7 @@
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
+     &                 DEFnor,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
