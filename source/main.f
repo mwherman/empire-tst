@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:43 $
-Ccc   * $Id: main.f,v 1.152 2006-08-09 12:37:43 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-08-29 14:58:27 $
+Ccc   * $Id: main.f,v 1.153 2006-08-29 14:58:27 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -53,7 +53,7 @@ C     COMMON /inp_sp5/ eenc,signcf,nrnc
 C
 C Local variables
 C
-      DOUBLE PRECISION fniu, acc      
+C     DOUBLE PRECISION fniu, acc      
       DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
@@ -72,7 +72,7 @@ C
 C                      Total prompt fission spectra only for two ejectiles (n,g)
 C                      Total PF angular distribution defined only for neutrons
      &                 cseapfns(NDEPFN,NDAngecis),enepfns(NDEPFN,0:1),
-     &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),acc,
+     &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),acc,fniu,
      &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind, 
      &                 eincid, eee, uuuu, fanisot, eneutr
       CHARACTER*9 cejectile
