@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:44 $
-Ccc   * $Id: tl.f,v 1.79 2006-08-09 12:37:44 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-09-01 22:39:56 $
+Ccc   * $Id: tl.f,v 1.80 2006-09-01 22:39:56 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1937,7 +1937,7 @@ C
 
       COMMON /PDATAV/ AAV, BV, NNV
 
-      COMMON /DISPER/   IDRs, EA
+      COMMON /DISPER/   EA, IDRs 
 
 C
 C Dummy arguments
@@ -2466,7 +2466,7 @@ C
 
       COMMON /PDATAV/ AAV, BV, NNV
 
-      COMMON /DISPER/   IDRs, EA
+      COMMON /DISPER/   EA, IDRs 
 
 C
 C Local variables
@@ -3059,7 +3059,7 @@ C
       COMMON /PDATAV/ AAV, BV, NNV
       COMMON /WENERG/ WDE, WVE
 
-      COMMON /DISPER/ IDRs, EA
+      COMMON /DISPER/   EA, IDRs 
 C
 C Dummy arguments
 C
