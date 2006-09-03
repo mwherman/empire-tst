@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2006-09-01 22:39:56 $
-Ccc   * $Id: tl.f,v 1.80 2006-09-01 22:39:56 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2006-09-03 11:58:03 $
+Ccc   * $Id: tl.f,v 1.81 2006-09-03 11:58:03 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1571,10 +1571,10 @@ C-----Absorption cross section in mb
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND. 
+         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND.
 C            For odd nuclides, collective states in continuum have
 C            different spin than the ground state
-     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN 
+     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
@@ -1937,7 +1937,7 @@ C
 
       COMMON /PDATAV/ AAV, BV, NNV
 
-      COMMON /DISPER/   EA, IDRs 
+      COMMON /DISPER/   EA, IDRs
 
 C
 C Dummy arguments
@@ -2101,9 +2101,9 @@ C-----Maximum number of channel spin (increased to 100 for high energy scatterin
       njmax = MAX(ldwmax,30)
 
       lodd = .false.
-      IF( (mod(nint(Z(Nnuc)),2).ne.0 .or. 
+      IF( (mod(nint(Z(Nnuc)),2).ne.0 .or.
      >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
-     >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.  
+     >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.
 
       IF (Inlkey.EQ.0) THEN
 C-------writing input
@@ -2160,7 +2160,7 @@ C-----------If channel is closed ground state potential is used for this level
             eee = El - D_Elv(j)/xratio
             dtmp = D_Xjlv(j)
             ! making integer spin for odd nuclides CC levels in DWBA calculations
-            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))   
+            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
             IF (eee.GE.0.0001) THEN
                nwrite = nwrite + 1
                WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
@@ -2260,25 +2260,15 @@ C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
       WRITE (1,'(3f10.5)') 0., 0., 0.
       IF (IDRs.GT.0) THEN
-
-       eatmp=EA 
-
+       eatmp=EA
        IF(EA.gt.1000.d0) eatmp=0.d0
-
 C                einc       ef       ep         ea
-
 C    1    0       15.   -10.392     -5.66       90.
-
        write(1,'(2I5,6F10.5)')   1,  0,  el,  ef,  ep,  eatmp
-
 C                                4    4      58.8       3.25 .0395
-
-       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
-
+       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0
        write(1,'(7F10.5)') 0.d0
-
       endif
-
 
       IF (Inlkey.NE.0) THEN
 C
@@ -2358,25 +2348,15 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
                 eatmp = EA
 
                 IF(EA.gt.1000.d0) eatmp=0.d0
-
 C                                                einc       ef       ep         ea
-
 C                                       1    0    15.   -10.392     -5.66       90.
-
                 write(1,'(2I5,6F10.5)') 1,   0,   el,  ef,  ep,  eatmp
-
 C                          n    m  Bv              Bs   Cs
-
 C                          4    4      58.8       3.25 .0395
-
-                write(1,'(2I5,6F10.5)') 
-
-     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
-
+                write(1,'(2I5,6F10.5)')
+     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0
                 write(1,'(7F10.5)') 0.d0
-
                ENDIF
-
             ENDIF
   200    ENDDO
       ENDIF
@@ -2434,40 +2414,23 @@ C
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
 C-----For dispersive optical model potentials
-
-
 C-----It is ripl2empireS.h because it must be compatible
-
-
 C-----with global.h declarations so some variables must be renamed
-
-
       INCLUDE 'ripl2empireS.h'
-
-
 C
 C Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
 C
-
 C COMMON variables
-
 C
-
       REAL*8 AAV, AS, BS, BV, CS, ETMP, EF, EP, EA
-
       INTEGER IQ, NNS, NNV, IDRs
-
       COMMON /ENERGY/ ETMP, EF, EP
-
       COMMON /PDATAS/ AS, BS, CS, NNS, IQ
-
       COMMON /PDATAV/ AAV, BV, NNV
-
-      COMMON /DISPER/   EA, IDRs 
-
+      COMMON /DISPER/ EA, IDRs
 C
 C Local variables
 C
@@ -2475,7 +2438,7 @@ C
      &                 xmas_nejc, xmas_nnuc, xratio, eatmp
       CHARACTER*1 ch
       DOUBLE PRECISION DABS
-      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), 
+      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV),
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite
       INTEGER INT, NINT
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
@@ -2505,19 +2468,12 @@ C-----Real SO potential deformed
 C-----ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
 C-----ECIs1(14:14) = 'T'
-
 C-----ECIS iteration scheme is used.
-
       ECIs1(21:21) = 'F'
-
 C-----Usual coupled equations instead of ECIS scheme is used
-
 C     for non-zero spins or energies below 3 MeV
-
 C-----Spin-orbit potential must be not deformed !!
-
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.3.d0)
-
      >  ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
@@ -2534,8 +2490,6 @@ C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
       ECIs2(6:6) = 'F'
-
-
 C-----DWBA option added
       IF (DIRect.EQ.3) THEN
 C-----Iteration scheme used for DWBA
@@ -2564,17 +2518,11 @@ C
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') ECIs1(8:8) = 'T'
 
-
       IF (IDRs.GT.0) THEN
-
 C      Preparing dispersive CC input for ECIS
-
        ECIs1(10:10)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (GS)
-
        ECIs1(20:20)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (EXC.LEV.)
-
       ENDIF
-
 C
 C-----Only for target, find open channels
 C-----At least ground state is always open !!, RCN 31/03/2001
@@ -2760,29 +2708,17 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
       WRITE (1,'(3f10.5)') RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
-
       WRITE (1,'(3f10.5)') 0., 0., 0.
-
       IF (IDRs.GT.0) THEN
-
-       eatmp=EA 
-
+       eatmp=EA
        IF(EA.gt.1000.d0) eatmp=0.d0
-
 C                einc       ef       ep         ea
-
 C    1    0       15.   -10.392     -5.66       90.
-
        write(1,'(2I5,6F10.5)')   1,  0,  el,  ef,  ep,  eatmp
-
 C                                4    4      58.8       3.25 .0395
-
-       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
-
+       write(1,'(2I5,6F10.5)') nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0
        write(1,'(7F10.5)') 0.d0
-
       endif
-
 
 C-----2) discrete levels
       DO j = 2, ND_nlv
@@ -2857,29 +2793,17 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
             IF (IDRs.GT.0) THEN
-
              eatmp = EA
-
              IF(EA.gt.1000.d0) eatmp=0.d0
-
 C                                                einc       ef       ep         ea
-
 C                                       1    0    15.   -10.392     -5.66       90.
-
              write(1,'(2I5,6F10.5)')    1,   0,   el,  ef,  ep,  eatmp
-
 C                          n    m  Bv              Bs   Cs
-
 C                          4    4      58.8       3.25 .0395
-
-             write(1,'(2I5,6F10.5)') 
-
-     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0          
-
+             write(1,'(2I5,6F10.5)')
+     +                   nnv, nns, Bv, 0.d0, 0.d0, Bs,  Cs,  0.d0
              write(1,'(7F10.5)') 0.d0
-
             ENDIF
-
          ENDIF
       ENDDO
 C
@@ -3059,7 +2983,7 @@ C
       COMMON /PDATAV/ AAV, BV, NNV
       COMMON /WENERG/ WDE, WVE
 
-      COMMON /DISPER/   EA, IDRs 
+      COMMON /DISPER/   EA, IDRs
 C
 C Dummy arguments
 C
@@ -3103,19 +3027,12 @@ C
       encoul2 = 0.
       IF (RC.GT.0.) encoul2 = 1.73*ZTAr/(RC*ATAr**(1./3.))
       DO i = 1, 6
-
          vdcoul = 0.D0
-
          vvcoul = 0.D0
-
          vscoul = 0.D0
-
          derdwv = 0.d0
-
          derdws = 0.d0
-
          dwvnonl = 0.d0
-
          vc = 0.d0
          Rlib(i) = 0.d0
          Alib(i) = 0.d0
@@ -3160,22 +3077,10 @@ C--------------RCN, 09/2004, to handle new extension to the OMP RIPL-2 format
      &                ACO(i,j,10)*ATAr**(1./3.) + ACO(i,j,11)
      &                *ATAr**( - 1./3.)
 
-
-
-
-
             IF (i.eq.2) THEN
-
-
                IF( ABS(Rlib(1)-Rlib(2)).gt.0.001 ) IDRs = 1
-
-
                IF( ABS(Alib(1)-Alib(2)).gt.0.001 ) IDRs = 1
-
-
             ENDIF
-
-
             IF (POT(i,j,24).NE.0.) THEN
 C--------------Special Koning-type potential formulas
                IF (POT(i,j,24).EQ.1.) THEN
@@ -3280,9 +3185,7 @@ C--------------Special Smith-type potential formulas
                IF (POT(i,j,5).NE.0.) Vlib(i) = Vlib(i) + POT(i,j,3)
      &             *COS(2.*pi*(ATAr - POT(i,j,4))/POT(i,j,5))
             ENDIF
-
-
-C             Setting imaginary potentials to zero if negative !!
+C           Setting imaginary potentials to zero if negative !!
             IF(i.eq.2 .OR. i.eq.4) Vlib(i) = MAX(Vlib(i),0.0d0)
          ENDIF
       ENDDO
@@ -3303,39 +3206,25 @@ C--------Real volume contribution from Dispersive relation
             AAV = DBLE(INT(100000*b(i,j,6)))/100000
             BV = DBLE(INT(100000*b(i,j,7)))/100000
             N = NINT(POT(i,j,13))
-
-
             NNV = N
-
-
             IF (N.EQ.0 .OR. MOD(N,2).EQ.1)
      &           STOP 'Zero or odd exponent in Wv(E) for dispersive OMP'
-
 C-----------Retrieving average energy of the particle states Ep
             EP = DBLE(INT(100000*POT(i,j,20)))/100000
             IF (EP.EQ.0.) EP = EF
 C-----------Nonlocality correction to the DOM integral
-
 C-----------(only used if Ea is non-zero)
-
             ea = DBLE(INT(100000*POT(i,j,21)))/100000
-
             IF (ea.EQ.0.) ea = 1000.1D0
-
-
             IF (IDRs.GT.0) GOTO 154
-
-
 C-----------Analytical DOM integral
             dwv = DOM_INT_WV(EF,EP,AAV,BV,EEE,N,derdwv)
-
 C-----------Coulomb correction for real volume potential
             derdwv = -b(1,1,5)*encoul2*derdwv
 C-----------numerical DOM derivative (not needed for a time being)
 C           DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
 C           DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
 C           DerDWV = -b(1,1,5)*encoul2*(DWVp-DWVm)*5.d0
-
 C           if(idr.le.-2) then
 C             numerical DOM integral (not needed for a time being)
 C             WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
@@ -3387,21 +3276,15 @@ C--------Real surface contribution from Dispersive relation
             BS = DBLE(INT(100000*b(i,j,10)))/100000
             CS = DBLE(INT(100000*b(i,j,9)))/100000
             N = NINT(POT(i,j,13))
-
-
             NNS = N
             IF (N.EQ.0 .OR. MOD(N,2).EQ.1)
      &           STOP 'Zero or odd exponent in Wd(E) for dispersive OMP'
-
             IQ = 1
             IF (b(4,j,12).GT.0.) IQ = NINT(b(4,j,12))
-
 C-----------Retrieving average energy of the particle states Ep
             EP = DBLE(INT(100000*POT(i,j,20)))/100000
             IF (EP.EQ.0.) EP = EF
-
             IF (IDRs.GT.0) GOTO 156
-
             IF (IDR.GE.2) THEN
 C--------------analytical DOM integral
                dws = DOM_INT_WS(EF,EP,AS,BS,CS,EEE,N,derdws)
@@ -3437,16 +3320,13 @@ C--------Real spin orbit contribution from Dispersive relation
          dwvso = 0.D0
 C
          IF (POT(6,1,24).NE.0 .AND. ABS(IDR).EQ.3) THEN
-
             aavso = DBLE(INT(100000*b(i,j,6)))/100000
             bvso = DBLE(INT(100000*b(i,j,7)))/100000
             N = NINT(POT(i,j,13))
             IF (N.EQ.0 .OR. MOD(N,2).EQ.1) STOP
      &          'Zero or odd exponent in Wso(E) for dispersive OMP'
-
 C----------analytical DOM integral
             dwvso = DOM_INT_WV(EF,EF,aavso,bvso,EEE,N,dtmp)
-
          ENDIF
 
 C--------Adding real volume dispersive contribution to the real potential
@@ -3496,23 +3376,15 @@ C
       INTEGER J
       REAL B(6,NDIM1,15)
       CALL SETR(0.,B,90*NDIM1)
-
       V1 = 0.d0
-
       W1 = 0.d0
-
-
 C-----Original Koning dependence
       B(1,J,1) = POT(1,J,1) + POT(1,J,2)*ATAr + POT(1,J,8)*ETA
-
-
 C-----Soukhovitski dependence
       IF ((POT(1,J,20).NE.0.) .AND.
      &    (POT(1,J,14) + POT(1,J,15)*ATAr + POT(1,J,16)).NE.0.) B(1,J,1)
      &    = POT(1,J,1) + POT(1,J,2)*ATAr + POT(1,J,8)*ETA + POT(1,J,20)
      &      *ETA/(POT(1,J,14) + POT(1,J,15)*ATAr + POT(1,J,16))
-
-
       B(1,J,2) = POT(1,J,3) + POT(1,J,4)*ATAr
       B(1,J,3) = POT(1,J,5) + POT(1,J,6)*ATAr
       B(1,J,4) = POT(1,J,7)
@@ -3540,21 +3412,12 @@ C
 C-----added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
 C-----Wd( As )
 C-----b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta
-
-
-c     added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
+C
+C     added A dependence for As parameter (RCN, 09/2004), i.e.  pot(4,j,7)<>0
 C     B(4,J,8) = POT(4,J,1) + POT(4,J,8)*ETA + POT(4,J,7)*ATAr
-
-
 c     added A**(-1/3) dependence for As parameter (RCN, 11/2005), i.e.  pot(4,j,9)<>0
-
-
-      B(4,j,8)  =  POT(4,j,1) + POT(4,j,8)*ETA + POT(4,j,7)*atar + 
-
-
+      B(4,j,8)  =  POT(4,j,1) + POT(4,j,8)*ETA + POT(4,j,7)*atar +
      >                POT(4,j,9)*ATAr**(-1.d0/3.d0)
-
-
 C-----Wd( Cs )
       IF (POT(4,J,3).NE.0.) THEN
          B(4,J,9) = POT(4,J,2) + POT(4,J,3)
@@ -3572,8 +3435,6 @@ C-----Vso
 C-----Wso
       B(6,J,6) = POT(6,J,1)
       B(6,J,7) = POT(6,J,3)
-
-
       RETURN
       END
 
@@ -3785,7 +3646,6 @@ C----------------------------------
      &             - resemin*EXP( - Cs*emin)*EIN(Cs*emin))
       Derivintws = As/pi*(rds/M + dereplus + deremin)
       END
-
 
       REAL*8 FUNCTION WV(A,B,Ep,Ef,E,N)
       IMPLICIT NONE
@@ -4005,7 +3865,6 @@ C
       DELTA_WD = (WDF(A,B,C,EP,Y,M,IQ) - WDE)
      &           /((Y - EF)**2 - (E - EF)**2)
       END
-
 
       REAL*8 FUNCTION WDF(A,B,C,Ep,E,M,Iq)
 C
