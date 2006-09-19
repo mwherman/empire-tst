@@ -1,6 +1,14 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:40 $
-Ccc   * $Id: subecis03.f,v 1.17 2006-08-09 12:37:40 Capote Exp $
+Ccc   * $Date: 2006-09-19 13:30:22 $
+Ccc   * $Id: subecis03.f,v 1.18 2006-09-19 13:30:22 Capote Exp $
+C--------------------------------------------------------------------------------------
+C     Customized version of ECIS03 to read externally calculated dispersive corrections
+C     8. Sept. 2006, RCN
+C
+C     Allow to use dispersive potentials feturing different geometries
+C     of the imaginary volume and real volume potentials
+C     (like DCCOMP for actinides)
+C--------------------------------------------------------------------------------------
 
       SUBROUTINE ECIS(Inpnam,Outnam)
 C
@@ -4495,6 +4503,31 @@ C INPUT OF FOLDING PARAMETERS                                           LECT-244
          IF (.NOT.(Lo(110))) THEN
 C INPUT OF DISPERSION PARAMETERS                                        LECT-248
             READ (MR,99235) ippip, Ipp(2,1,ip), (Pip(j,ip),j = 3,8)
+            if(ippip.LT.0) then
+                 ippip = 1
+                 WRITE (MW,99070)
+                 Ipp(1,1,ip) = -Ipp(1,1,ip)
+                 Pip(7,ip) = -1. ! FLAG for DISP
+                 IF (LO(7)) GOTO 610
+                 IF (Pip(3,ip).EQ.0.D0) Pip(3,ip) = Wv(9*ippip + 3,ij)
+                 IF (Pip(4,ip).NE.0.D0.AND. Val( 4,ip).EQ.0.D0) GOTO 525
+                 IF (Pip(5,ip).NE.0.D0.AND. Val(10,ip).EQ.0.D0) GOTO 535
+                 IF (Pip(6,ip).NE.0.D0.AND. Val(16,ip).EQ.0.D0) GOTO 550
+                 WRITE (MW,99066) Pip(3,ip)
+99066            FORMAT (' EXTERNAL DISPERSIVE CORRECTIONS READ FOR',
+     &              F12.6,' MEV (LAB)')
+                 WRITE (MW,99067) Pip(4,ip), Pip(4,ip)/Val(4,ip)
+99067            FORMAT (' CORR. TO VOLUME/SCALAR REAL POTENTIAL',
+     &              F12.6,' MEV  (',F12.6,')')
+                 WRITE (MW,99068) Pip(5,ip), Pip(5,ip)/Val(10,ip)
+99068            FORMAT (' CORR. TO SURFACE/VECTOR REAL POTENTIAL',
+     &              F12.6,' MEV (',F12.6,')')
+                 WRITE (MW,99069) Pip(6,ip), Pip(6,ip)/Val(16,ip)
+99069            FORMAT (' CORR. TO SP-O/TENSOR REAL POTENTIAL',
+     &              F12.6,' MEV    (',F12.6,')')
+                 CYCLE
+            endif
+
             READ (MR,99235) Ipp(1,2,ip), Ipp(2,2,ip),
      &                      (Pip(j,ip),j = 9,14)
             READ (MR,99230) Pip(15,ip)
@@ -4508,12 +4541,13 @@ C INPUT OF DISPERSION PARAMETERS                                        LECT-248
             IF (ippip.EQ.1) THEN
                Ipp(1,1,ip) = -Ipp(1,1,ip)
                WRITE (MW,99070)
-99070          FORMAT (' USE OF LABORATORY ENERGIES')
+99070          FORMAT (/' USE OF LABORATORY ENERGIES')
             ELSE
                ippip = 0
                WRITE (MW,99075)
 99075          FORMAT (' USE OF CENTER OF MASS ENERGIES')
             ENDIF
+
             IF (Pip(3,ip).EQ.0.D0) Pip(3,ip) = Wv(9*ippip + 3,ij)
             IF (Pip(4,ip).EQ.0.D0) Pip(4,ip) = -6.8D0
             IF (Pip(5,ip).EQ.0.D0) Pip(5,ip) = Pip(4,ip)
@@ -4543,6 +4577,8 @@ C INPUT OF DISPERSION PARAMETERS                                        LECT-248
             ELSE
                WRITE (MW,99240) cleg(i1), cleg(i1 + 1), Ipp(1,2,ip),
      &                          Pip(9,ip)
+
+               IF (Pip(10,ip).EQ.0.D0) Pip(10,ip) = 1.65d0
                IF (Ipp(2,1,ip).NE.0 .OR. Pip(10,ip).NE.0.D0)
      &             WRITE (MW,99100) Pip(4,ip), Pip(6,ip), Ipp(2,1,ip),
      &                              Pip(10,ip), Pip(11,ip)
@@ -4725,8 +4761,31 @@ C INPUT OF DEFORMED SPIN-ORBIT PARAMETERS                               LECT-331
      &' CANNOT BE USED WITH VARIATION OF THE HARTREE-FOCK POTENTIAL OF W
      &HICH THE STRENGTH IS 0':/10X,'PIP(15,',I2,') =',D13.6,'  V =',
      &D13.6)
+      GOTO 600
+  525 WRITE (MW,99196) ip, ip, Pip(4,ip), Val(4,ip)
+99196 FORMAT (' THE POTENTIAL',I4,
+     &' CANNOT BE USED WITH VARIATION OF THE IMAGINARY VOLUME OF WHICH
+     &THE STRENGTH IS 0:'/10X,'PIP(4,',I2,') =',D13.6,'  Wv =',
+     &D13.6)
+      GOTO 600
+  535 WRITE (MW,99197) ip, ip, Pip(5,ip), Val(10,ip)
+99197 FORMAT (' THE POTENTIAL',I4,
+     &' CANNOT BE USED WITH VARIATION OF THE IMAGINARY SURFACE OF WHICH
+     & THE STRENGTH IS 0:'/10X,'PIP(4,',I2,') =',D13.6,'  Ws =',
+     &D13.6)
+      GOTO 600
+  550 WRITE (MW,99198) ip, ip, Pip(6,ip), Val(16,ip)
+99198 FORMAT (' THE POTENTIAL',I4,
+     &' CANNOT BE USED WITH VARIATION OF THE IMAGINARY SPIN-ORBIT OF WHI
+     &CH THE STRENGTH IS 0:'/10X,'PIP(5,',I2,') =',D13.6,'  Wso =',
+     &D13.6)
   600 WRITE (MW,99200)
 99200 FORMAT (' GIVE VALUES FOR ANOTHER ENERGY'/)
+      GOTO 700
+  610 WRITE (MW,99201)
+99201 FORMAT (' EXTERNAL FORM FACTORS NOT COMPATIBLE',
+     &        ' WITH EXTERNAL DISPERSIVE CORRECTIONS INPUT'/
+     &        ' SET LO(7) TO FALSE')
   700 WRITE (MW,99205)
 99205 FORMAT (//' IN LECT  ... STOP ...')
       STOP
@@ -11606,7 +11665,7 @@ C
      &       bt, bx, ci, cn, cr, cs, dc, dd, de, df, di, dr, e0, e1, e2,
      &       ea, ef, el, ell, eo, ep, f, fe, ff, g1, g2, h(2), p, p2,
      &       p4, pi, vv(3), ww(6), xi, xr, xx, y, yc, yd, ye, yi, yr,
-     &       yy, zf, zi, zr, zt, zz
+     &       yy, zf, zi, zr, zt, zz, wsurf
       DOUBLE PRECISION DABS, DATAN2, DCOS, DEXP, DLOG, DMAX1, DMIN1,
      &                 DSIN, DSQRT
       INTEGER i, ip, iv, iz, j, k, l, m, m2, mm(2), n, n2, nn(2)
@@ -11620,6 +11679,7 @@ C
      &ACE/VECTOR CORRECTION   SP.-O/TENSOR CORRECTION'/34X,
      &3(4X,'IMAGINARY',9X,'REAL'))
 C LOOP ON LEVELS                                                        DISP-031
+
       DO iv = 1, Ncolt
          DO i = 1, 6
             ww(i) = 0.D0
@@ -11631,13 +11691,24 @@ C LOOP ON LEVELS                                                        DISP-031
                vv(1) = Val(Nval(1,8*ip - 5),1)
                vv(2) = Val(Nval(1,8*ip - 4),1)
                vv(3) = Val(Nval(1,8*ip),1)
+
             ELSE
                vv(1) = Val(1,ip)
                vv(2) = Val(4,ip)
+               wsurf = Val(10,ip)
                vv(3) = Val(16,ip)
             ENDIF
+  
+            if(Pip(7,ip).LT.0.d0) then
+               ww(2) = Pip(4,ip)/vv(2)   ! DWV   correction
+               ww(4) = Pip(5,ip)/wsurf   ! DWS   correction
+               ww(6) = Pip(6,ip)/vv(3)   ! DWVso correction
+               GOTO 100
+            endif
+
             iz = 3
-            IF (Ipp(1,1,ip).LT.0) iz = 12
+            IF (Ipp(1,1,ip).LT.0) iz = 12  ! LAB ENERGIES USED
+
             ef = Pip(4,ip)
             ep = Pip(5,ip)
             eo = ep - ef

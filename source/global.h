@@ -52,7 +52,7 @@
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
-     &        KALman
+     &        KALman, FISspe
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
@@ -157,7 +157,7 @@
      &                 CSPfis
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
-     &                  LHMs, NHMs, NEXreq,
+     &                  LHMs, NHMs, NEXreq, FISspe,
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX, IX4ret,
      &                  JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, LEVtarg,
      &                  KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, NEXr,

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-08-09 12:37:43 $
-Ccc   * $Id: input.f,v 1.206 2006-08-09 12:37:43 Capote Exp $
+Ccc   * $Date: 2006-09-19 13:34:40 $
+Ccc   * $Id: input.f,v 1.207 2006-09-19 13:34:40 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -231,6 +231,7 @@ C
          DIRect = 0
          KTRompcc = 0
          CCCalc = .FALSE.
+         FISspe = 0
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.
@@ -5433,6 +5434,22 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'FISSPE') THEN
+            if(nint(val).gt.0 .and. nint(val).le.2) THEN
+              FISspe = nint(val)
+              WRITE (6,*) 'Prompt fission neutron spectra calculated'
+              IF(FISspe.eq.1) WRITE (6,*) ' using Los Alamos model'
+              IF(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
+C--------------------------------------------------------------------------
+            else
+               WRITE (6,
+     &         '('' Fission spectrum key out of range (0-2) '',i2)')
+     &         nint(val)
+            endif
+            GOTO 100
+         ENDIF
+C-----
+C-----
          WRITE (6,'('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
      &          name
       GOTO 100
@@ -5733,8 +5750,8 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-               ELSE
-                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+C              ELSE
+C                ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5788,7 +5805,7 @@ C--------------Calculate sum for the average normalization factor
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
-            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave
