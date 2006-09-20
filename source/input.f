@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-09-19 13:34:40 $
-Ccc   * $Id: input.f,v 1.207 2006-09-19 13:34:40 Capote Exp $
+Ccc   * $Date: 2006-09-20 14:06:57 $
+Ccc   * $Id: input.f,v 1.208 2006-09-20 14:06:57 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5443,8 +5443,8 @@ C-----
 C--------------------------------------------------------------------------
             else
                WRITE (6,
-     &         '('' Fission spectrum key out of range (0-2) '',i2)')
-     &         nint(val)
+     &         '('' WARNING: Fission spectrum key out of range (0-2) '',
+     &         i2)') nint(val)
             endif
             GOTO 100
          ENDIF
