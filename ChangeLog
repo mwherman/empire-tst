@@ -94,9 +94,18 @@
     resolution function. (iii) No spin coupling is considered. (iv) DWBA calculations
     are carried out for a neighbour nucleus and collective states included in the 
     continuum must have even spin!!!(R. Capote)
+34. New input key FISSPE defined. Default value is 0 to supress PFNS calculations.
+    FISSPE = 1 means Los Alamos model is used for calculations of post-fission neutrons
+    FISSPE = 2 means Kornilov's parametrization is used for calculations of post-fission
+             neutrons
+    If FISspe = 1 then additional input files are needed (R. Capote & M. Sin)
+35. ECIS subroutine changed to allow explicit input of the externally calculated 
+    dispersive corrections allowing to use dispersive potentials with different
+    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote)     	     
+36. Optical model and discrete levels' databases updated using preliminary RIPL-3       
+    libraries. (R Capote)
     
-
-         
+        
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
