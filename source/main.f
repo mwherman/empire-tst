@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-09-19 13:35:07 $
-Ccc   * $Id: main.f,v 1.154 2006-09-19 13:35:07 Capote Exp $
+Ccc   * $Date: 2006-09-20 14:33:53 $
+Ccc   * $Id: main.f,v 1.155 2006-09-20 14:33:53 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1670,7 +1670,7 @@ C----
 C---- ENDF spectra printout (exclusive representation)
 C----
 c fisspec===========
-      CALL INPUT_SPEC
+      IF (FISspe.eq.1) CALL INPUT_SPEC
 c fisspec===============
 C     Assumed that a maximum of 2 different isotopes contribute to fission XS
 C     (i.e those coming from fissioning nuclei after primary neutron-proton
