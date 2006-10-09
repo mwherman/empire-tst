@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:44 $
-Ccc   * $Id: pcross.f,v 1.46 2006-08-09 12:37:44 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2006-10-09 20:24:58 $
+Ccc   * $Id: pcross.f,v 1.47 2006-10-09 20:24:58 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -186,7 +186,7 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
                sg = SIGabs(ienerg,nejc,nnur)
             ENDIF
             IF ( (sg.LT.1.D-15) .and. nejc.gt.1 .and. 
-     &	    ienerg.LE.iemax(nejc) ) iemin(nejc) = ienerg
+     &         ienerg.LE.iemax(nejc) ) iemin(nejc) = ienerg
          ENDDO
       ENDDO
 C-----Maximum and minimum energy bin for gamma emission
