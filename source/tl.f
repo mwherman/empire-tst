@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-09-20 14:32:45 $
-Ccc   * $Id: tl.f,v 1.83 2006-09-20 14:32:45 Capote Exp $
+Ccc   * $Date: 2006-11-07 14:54:19 $
+Ccc   * $Id: tl.f,v 1.84 2006-11-07 14:54:19 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1967,7 +1967,7 @@ C-----Real SO potential deformed
 C     ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
 C     ECIs1(14:14) = 'T'
-C-----ECIS iteration scheme is used.
+C-----ECIS iteration scheme is used. (To be checked following Harm Wienke message))
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 3 MeV
@@ -1991,7 +1991,7 @@ C-----Smatrix output
       ECIs2(6:6) = 'F'
 C     DWBA option added
       IF (DIRect.EQ.3 .OR. Ldwba) THEN
-C-----Iteration scheme used for DWBA
+C-----Iteration scheme used for DWBA (To be checked following Harm Wienke message)
          ECIs1(21:21) = 'F'
 C--------DWBA
          ECIs2(42:42) = 'T'
@@ -2396,7 +2396,7 @@ C-----ECIs1(13:13) = 'T'
 C-----Imaginary SO potential deformed
 C-----ECIs1(14:14) = 'T'
 
-C-----ECIS iteration scheme is used.
+C-----ECIS iteration scheme is used. (To be checked following Harm Wienke message)
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 3 MeV
@@ -2421,7 +2421,7 @@ C-----Smatrix output
 
 C-----DWBA option added
       IF (DIRect.EQ.3) THEN
-C-----Iteration scheme used for DWBA
+C-----Iteration scheme used for DWBA (To be checked following Harm Wienke message)
          ECIs1(21:21) = 'F'
 C--------ECIs1(23:23) = 'F'
 C--------DWBA
