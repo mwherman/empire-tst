@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-09-20 14:06:57 $
-Ccc   * $Id: input.f,v 1.208 2006-09-20 14:06:57 herman Exp $
+Ccc   * $Date: 2006-11-13 15:50:32 $
+Ccc   * $Id: input.f,v 1.209 2006-11-13 15:50:32 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5435,11 +5435,16 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FISSPE') THEN
-            if(nint(val).gt.0 .and. nint(val).le.2) THEN
-              FISspe = nint(val)
-              WRITE (6,*) 'Prompt fission neutron spectra calculated'
-              IF(FISspe.eq.1) WRITE (6,*) ' using Los Alamos model'
-              IF(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
+            if(nint(val).ge.0 .and. nint(val).le.2) THEN
+              if(nint(val).gt.0) then
+	        FISspe = nint(val)
+                WRITE (6,*) 'Prompt fission neutron spectra calculated'
+                if(FISspe.eq.1) WRITE (6,*) ' using Los Alamos model'
+                if(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
+              else
+                WRITE (6,*) 
+     &		        'Prompt fission neutron spectra not calculated'	      
+	      endif 		
 C--------------------------------------------------------------------------
             else
                WRITE (6,
