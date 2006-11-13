@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-11-07 14:54:19 $
-Ccc   * $Id: tl.f,v 1.84 2006-11-07 14:54:19 Capote Exp $
+Ccc   * $Date: 2006-11-13 15:22:29 $
+Ccc   * $Id: tl.f,v 1.85 2006-11-13 15:22:29 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2211,7 +2211,8 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
 C-----write(1,'(3f10.5)') rc,0.,0.
       WRITE (1,'(3f10.5)') RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
       WRITE (1,'(3f10.5)') 0., 0., 0.
-      IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+C     IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+      IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elab,DWVNUM
 
       IF (Inlkey.NE.0) THEN
 C
@@ -2285,7 +2286,8 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
                WRITE (1,'(3f10.5)')
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
                WRITE (1,'(3f10.5)') 0., 0., 0.
-               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+C              IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM	   
             ENDIF
   200    ENDDO
       ENDIF
@@ -2640,7 +2642,8 @@ C-----write(1,'(3f10.5)') wwso,rwso,awso
 
       WRITE (1,'(3f10.5)') 0., 0., 0.
 
-      IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+C     IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+      IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elab,DWVNUM
 
 C-----2) discrete levels
       DO j = 2, ND_nlv
@@ -2714,7 +2717,8 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
             WRITE (1,'(3f10.5)')
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
-            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+C           IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
+            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM	
          ENDIF
       ENDDO
 C
