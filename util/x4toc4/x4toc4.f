@@ -7,6 +7,9 @@ C-V      2004/01 Define all input filenames from input.
 C-V      2004/10 Redefine MT>=9000 to define incident particle.
 C-V      2005/07 Introduce F90 features for characters and do-loops
 C-V      2005/12 If E-level is zero, redefine MT 51 to MT 4
+C-V      2006/02 Fix Y2K date in references
+C-V      2006/04 Deleted SF9, V.Zerkin@iaea.org
+C-V      2006/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -1022,6 +1025,70 @@ C-----ERROR READING EXFOR DATA.                                         X4T09420
  1000 FORMAT(A10,A1,55A1,14A1)
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T09460
       END                                                               X4T09470
+
+c---zvv+++
+c	delete SF9 and end-commas from reaction-string
+c	by V.Zerkin, IAEA-NDS, 2006-04-11
+      function deleteSF9(ZAR1,KZAR1)
+	CHARACTER*300  ZAR1,tmp,tmp2
+	tmp=' '
+	tmp(1:1)='('
+	tmp(2:KZAR1+1)=ZAR1(1:KZAR1)
+	tmp(KZAR1+2:KZAR1+2)=')'
+c	call outCharArray(tmp,KZAR1+3)
+	deleteSF9=0
+	i=replaceStr(tmp,300,',CALC)',')')	!--- Calculated data
+	i=replaceStr(tmp,300,',DERIV)',')')	!--- Derived data
+	i=replaceStr(tmp,300,',EVAL)',')')	!--- Evaluated data
+	i=replaceStr(tmp,300,',EXP)',')')	!--- Evaluated data
+	i=replaceStr(tmp,300,',RECOM)',')')	!--- Recommended data
+	i=replaceStr(tmp,300,',)',')')		!--- delete comas at the end
+c	call outCharArray(tmp,KZAR1+3)
+	ll=mylen(tmp)
+c	write (*,*) ' LL=',ll
+	tmp2=' '
+	tmp2(1:ll-2)=tmp(2:ll-1)
+	ll=mylen(tmp2)
+c	call outCharArray(tmp2,ll+1)
+	deleteSF9=ll
+	return
+      end
+
+      subroutine outCharArray(str,lstr)
+      CHARACTER*1 str(lstr)
+      WRITE(*,4000) '"',(str(I),I=1,lstr),'"'
+ 4000 FORMAT(1X,60A1/(10X,60A1))
+      end
+
+      function mylen(str)
+	CHARACTER*1 str(1)
+	mylen=0
+	do i=1,300
+c	call outCharArray(str(i),1)
+	if (str(i).eq.' ') return
+	mylen=mylen+1
+	end do
+	return
+      end
+
+      function replaceStr(str0,lstr0,str1,str2)
+	CHARACTER(LEN=*) str0,str1,str2
+	lstr1=len(str1)
+	lstr2=len(str2)
+	replaceStr=0
+	do i=1,300
+	ind=INDEX(str0,str1)
+c	write (*,*) ' ind=',ind,' L1=',lstr1,' L2=',lstr2
+	if (ind.le.0) return
+	lshift=lstr0-(ind+lstr1)
+	str0(ind+lstr2:ind+lstr2+lshift)=str0(ind+lstr1:ind+lstr1+lshift)
+	str0(ind:ind+lstr2)=str2(1:lstr2)
+	replaceStr=replaceStr+1
+	end do
+	return
+      end
+c---zvv---
+
       SUBROUTINE REACTN(KTYPE)                                          X4T09480
 C                                                                       X4T09490
 C     TRANSLATE EACH REACTION (UP TO 30) SEPERATELY.                    X4T09500
@@ -1169,6 +1236,12 @@ C     REACTION IMPLIES ONLY 2 SETS OF PARENTHESIS.                      X4T10870
 C     OTHERS SUCH AS ISO-QUANT IMPLIES ONLY 1 SET OF PARENTHESIS.       X4T10880
 C                                                                       X4T10890
   140 KZABAK=KZAR1                                                      X4T10900
+c---zvv+++
+c	WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'	!---zvv-tst
+	KZAR1=deleteSF9(ZAR1,KZAR1)
+	KZABAK=KZAR1
+c	WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'	!---zvv-tst
+c---zvv---
       DO I=1,KZABAK
         ZARBAK(I)=ZAR1(I)
       END DO
@@ -1841,14 +1914,16 @@ C-----SELECT LAST TWO DIGITS OF YEAR.                                   X4T17350
       IF(IDIG.EQ.4) GO TO 40                                            X4T17390
 C-----6 DIGIT DATE. SELECT MIDDLE TWO DIGITS AS MONTH.                  X4T17400
       IF(IDIG.GT.6) GO TO 50
-C-----(START OF  YEAR...1975) SELECT THIRD AND FOURTH DIGITS.
-      IF(CARD1(ICOM+1).EQ.DIGITS(1).OR.
-     1 CARD1(ICOM+1).EQ.DIGITS(10)) GO TO 50
+C-----(START OF  YEAR...19YY, 20YY) SELECT THIRD AND FOURTH DIGITS.
+      IF( (CARD1(ICOM+1).EQ.DIGITS(1).AND.CARD1(ICOM+2).EQ.DIGITS(9))
+     &.OR.(CARD1(ICOM+1).EQ.DIGITS(2).AND.CARD1(ICOM+2).LT.DIGITS(4))
+     &.OR. CARD1(ICOM+1).EQ.DIGITS(10)) GO TO 50
       GO TO 60
 C-----4 DIGIT DATE. IF FIRST DIGITS IS 0 OR 1 (START OF MONTH 1 TO 12   X4T17420
 C-----OR START OF  YEAR...1975) SELECT THIRD AND FOURTH DIGITS.         X4T17430
-   40 IF(CARD1(ICOM+1).EQ.DIGITS(1).OR.                                 X4T17440
-     1 CARD1(ICOM+1).EQ.DIGITS(10)) GO TO 50                            X4T17450
+   40 IF( (CARD1(ICOM+1).EQ.DIGITS(1).AND.CARD1(ICOM+2).EQ.DIGITS(9))
+     &.OR.(CARD1(ICOM+1).EQ.DIGITS(2).AND.CARD1(ICOM+2).LT.DIGITS(4))
+     &.OR. CARD1(ICOM+1).EQ.DIGITS(10)) GO TO 50
 C-----IF LAST TWO DIGITS ARE A MONTH (E.G. 00 TO 12...LEADING           X4T17460
 C-----DIGIT 0 OR 1) SELECT FIRST TWO DIGITS.                            X4T17470
       IF(CARD1(ICOM+3).EQ.DIGITS(1).OR.                                 X4T17480
@@ -2658,10 +2733,10 @@ C                                                                       X4T25140
       CHARACTER*1 FLAG,BLANK                                            X4T25170
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T25180
       COMMON/MFMTI1/IMFMT                                               X4T25190
-      COMMON/MFMTI2/MFMTAB(7,400)                                       X4T25200
-      COMMON/MFMTC/R2MFMT(12,400)                                       X4T25210
+      COMMON/MFMTI2/MFMTAB(7,11111)                                       X4T25200
+      COMMON/MFMTC/R2MFMT(12,11111)                                       X4T25210
       DIMENSION DUMMY(8)                                                X4T25220
-      DATA MAXIE/400/                                                   X4T25230
+      DATA MAXIE/11111/                                                   X4T25230
       DATA BLANK/' '/                                                   X4T25240
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25250
       DO 20 IMFMT=1,MAXIE                                               X4T25260
@@ -2704,12 +2779,12 @@ C                                                                       X4T25600
       CHARACTER*4  TITTAB4,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T25630
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T25640
-      COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T25650
-     1 ITFLAG(400)                                                      X4T25660
-      COMMON/TITTBC/TITTAB(400),TITTAB4(400)
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T25650
+     1 ITFLAG(11111)                                                      X4T25660
+      COMMON/TITTBC/TITTAB(11111),TITTAB4(11111)
       DIMENSION DUMMY(7)                                                X4T25680
       DATA BLANK/' '/                                                   X4T25690
-      DATA MAXIE/400/                                                   X4T25700
+      DATA MAXIE/11111/                                                   X4T25700
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25710
       DO 20 ITITLE=1,MAXIE                                              X4T25720
    10 READ(NTAPE2,1000,END=60,ERR=50) TITTAB(ITITLE),
@@ -2748,11 +2823,11 @@ C                                                                       X4T26040
       CHARACTER*11 UNITAB,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T26070
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26080
-      COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T26090
-      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T26090
+      COMMON/UNITBC/UNITAB(2,11111)
       DIMENSION DUMMY(3)
       DATA BLANK/' '/                                                   X4T26120
-      DATA MAXIE/400/                                                   X4T26130
+      DATA MAXIE/11111/                                                   X4T26130
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T26140
       DO 20 IUNIT=1,MAXIE                                               X4T26150
    10 READ(NTAPE3,1000,END=60,ERR=50) (UNITAB(J,IUNIT),J=1,2),
@@ -2793,8 +2868,8 @@ C                                                                       X4T26450
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T26510
       COMMON/RESIDI/KZARES                                              X4T26520
       COMMON/MFMTI1/IMFMT                                               X4T26530
-      COMMON/MFMTI2/MFMTAB(7,400)                                       X4T26540
-      COMMON/MFMTC/R2MFMT(12,400)                                       X4T26550
+      COMMON/MFMTI2/MFMTAB(7,11111)                                       X4T26540
+      COMMON/MFMTC/R2MFMT(12,11111)                                       X4T26550
       COMMON/POINTR/MPOINT(9)                                           X4T26560
       DIMENSION REACT(15)                                               X4T26570
       DO 20 I=1,IMFMT                                                   X4T26580
@@ -2842,9 +2917,9 @@ C                                                                       X4T26950
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26990
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27000
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27010
-      COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T27020
-     1 ITFLAG(400)                                                      X4T27030
-      COMMON/TITTBC/TITTAB(400),TITTAB4(400)
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T27020
+     1 ITFLAG(11111)                                                      X4T27030
+      COMMON/TITTBC/TITTAB(11111),TITTAB4(11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27050
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27060
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
@@ -2923,8 +2998,8 @@ C                                                                       X4T27750
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T27800
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27820
-      COMMON/TITTBI/ITITLE,MFTITL(400),MFTITH(400),IFIELD(400),         X4T27830
-     1 ITFLAG(400)                                                      X4T27840
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T27830
+     1 ITFLAG(11111)                                                      X4T27840
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27860
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27870
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
@@ -3067,8 +3142,8 @@ C                                                                       X4T29230
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T29270
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29280
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29290
-      COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T29300
-      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T29300
+      COMMON/UNITBC/UNITAB(2,11111)
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T29330
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T29340
@@ -3119,8 +3194,8 @@ C                                                                       X4T29780
       CHARACTER*1  ENT,SUBENT
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29820
-      COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T29830
-      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T29830
+      COMMON/UNITBC/UNITAB(2,11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T29850
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T29860
       COMMON/RNOW/ISANR                                                 X4T29870
@@ -3162,13 +3237,13 @@ C                                                                       X4T30210
       CHARACTER*11 UNITAB,TITLE,UNIT,DATUM
       CHARACTER*4  TITLE4
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T30240
-      COMMON/UNITBI/IUNIT,TIMES(400),ADD(400),IUFLAG(400)               X4T30250
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T30250
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T30260
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T30270
       COMMON/RNOW/ISANR                                                 X4T30280
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T30290
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T30300
-      COMMON/UNITBC/UNITAB(2,400)
+      COMMON/UNITBC/UNITAB(2,11111)
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/OUTVEC/IMOUT(8,30,10),KMOUT(8,30)                          X4T30330
       COMMON/OUTVAL/IMUSED(50),VALUES(100),TIMEX(50),ADDX(50),          X4T30340

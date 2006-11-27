@@ -54,129 +54,140 @@ UNITS      UNITS       MULTIPLIER ADDER           OPERATION                    1
                                                                                1
 ENERGY                                                                         1
                                                                                1
-MICRO-EV   EV          1.00000- 6 0.0                 0                         
-MILLI-EV   EV          1.00000- 3 0.0                 0                         
-EV         EV          1.0        0.0                 0                         
-KEV        EV          1.00000+ 3 0.0                 0                         
-MEV        EV          1.00000+ 6 0.0                 0                         
-GEV        EV          1.00000+ 9 0.0                 0                         
-TEV        EV          1.00000+12 0.0                 0                         
-1/MICRO-EV 1/EV        1.00000+ 6 0.0                 0                         
-1/MILLI-EV 1/EV        1.00000+ 3 0.0                 0                         
-1/EV       1/EV        1.0        0.0                 0                         
-1/KEV      1/EV        1.00000- 3 0.0                 0                         
-1/MEV      1/EV        1.00000- 6 0.0                 0                         
-1/GEV      1/EV        1.00000- 9 0.0                 0                         
-1/TEV      1/EV        1.00000-12 0.0                 0                         
+MICRO-EV   EV          1.00000- 6 0.0                 0
+MILLI-EV   EV          1.00000- 3 0.0                 0
+EV         EV          1.0        0.0                 0
+KEV        EV          1.00000+ 3 0.0                 0
+MEV        EV          1.00000+ 6 0.0                 0
+GEV        EV          1.00000+ 9 0.0                 0
+TEV        EV          1.00000+12 0.0                 0
+1/MICRO-EV 1/EV        1.00000+ 6 0.0                 0
+1/MILLI-EV 1/EV        1.00000+ 3 0.0                 0
+1/EV       1/EV        1.0        0.0                 0
+1/KEV      1/EV        1.00000- 3 0.0                 0
+1/MEV      1/EV        1.00000- 6 0.0                 0
+1/GEV      1/EV        1.00000- 9 0.0                 0
+1/TEV      1/EV        1.00000-12 0.0                 0
                                                                                1
 RESOLUTION                                                                     1
                                                                                1
-NSEC/M     EV          1.0        0.0                 3                         
-MICROSEC/M EV          1.00000+ 3 0.0                 3                         
-MSEC/M     EV          1.00000+ 6 0.0                 3                         
-ANGSTROM   EV          1.0        0.0                 4                         
+NSEC/M     EV          1.0        0.0                 3
+MICROSEC/M EV          1.00000+ 3 0.0                 3
+MSEC/M     EV          1.00000+ 6 0.0                 3
+ANGSTROM   EV          1.0        0.0                 4
                                                                                1
 CROSS SECTIONS                                                                 1
                                                                                1
-MICRO-B    B           1.00000- 6 0.0                 0                         
-MB         B           1.00000- 3 0.0                 0                         
-B          B           1.0        0.0                 0                         
-KB         B           1.00000+ 6 0.0                 0                         
-MB*RT-EV   B           1.00000- 3 0.0                 6                         
-B*RT-EV    B           1.0        0.0                 6                         
-MB*MILLIEV B*EV        1.00000- 6 0.0                 0                         
-MB*EV      B*EV        1.00000- 3 0.0                 0                         
-B*MILLI-EV B*EV        1.00000- 3 0.0                 0                         
-B*EV       B*EV        1.0        0.0                 0                         
-MB*EV-SQ   B*EV-SQ     1.00000- 3 0.0                 0                         
-B*EV-SQ    B*EV-SQ     1.0        0.0                 0                         
-B*EV*RT-EV B*EV*RT-EV  1.0        0.0                 0                         
+MICRO-B    B           1.00000- 6 0.0                 0
+MB         B           1.00000- 3 0.0                 0
+B          B           1.0        0.0                 0
+KB         B           1.00000+ 6 0.0                 0
+MB*RT-EV   B           1.00000- 3 0.0                 6
+B*RT-EV    B           1.0        0.0                 6
+MB*MILLIEV B*EV        1.00000- 6 0.0                 0
+MB*EV      B*EV        1.00000- 3 0.0                 0
+B*MILLI-EV B*EV        1.00000- 3 0.0                 0
+B*EV       B*EV        1.0        0.0                 0
+MB*EV-SQ   B*EV-SQ     1.00000- 3 0.0                 0
+B*EV-SQ    B*EV-SQ     1.0        0.0                 0
+B*EV*RT-EV B*EV*RT-EV  1.0        0.0                 0
                                                                                1
 LENGTH                                                                         1
                                                                                1
-FERMI      B           1.00000- 1 0.0                 5                         
-MM         B           1.00000+11 0.0                 5                         
-CM         B           1.00000+12 0.0                 5                         
-M          B           1.00000+14 0.0                 5                         
+FERMI      B           1.00000- 1 0.0                 5
+MM         B           1.00000+11 0.0                 5
+CM         B           1.00000+12 0.0                 5
+M          B           1.00000+14 0.0                 5
                                                                                1
 ANGLES                                                                         1
                                                                                1
-ASEC       NO-DIM      2.77777- 4 0.0                 2                         
-AMIN       NO-DIM      1.66666- 2 0.0                 2                         
-ADEG       NO-DIM      1.0        0.0                 2                         
+ASEC       NO-DIM      2.77777- 4 0.0                 2
+AMIN       NO-DIM      1.66666- 2 0.0                 2
+ADEG       NO-DIM      1.0        0.0                 2
                                                                                1
 ANGULAR DISTRIBUTIONS                                                          1
                                                                                1
-MU-B/SR    B/SR        1.00000- 6 0.0                 0                         
-MB/SR      B/SR        1.00000- 3 0.0                 0                         
-B/SR       B/SR        1.0        0.0                 0                         
-1/SR       1/SR        1.0        0.0                 0                         
+MU-B/SR    B/SR        1.00000- 6 0.0                 0
+MB/SR      B/SR        1.00000- 3 0.0                 0
+B/SR       B/SR        1.0        0.0                 0
+1/SR       1/SR        1.0        0.0                 0
                                                                                1
 ENERGY DISTRIBUTIONS                                                           1
                                                                                1
-MU-B/MEV   B/EV        1.0        0.0                 0                         
-MB/EV      B/EV        1.00000- 3 0.0                 0                         
-MB/KEV     B/EV        1.00000- 6 0.0                 0                         
-MB/MEV     B/EV        1.00000- 9 0.0                 0                         
-B/MILLI-EV B/EV        1.00000+ 3 0.0                 0                         
-B/EV       B/EV        1.0        0.0                 0                         
-B/KEV      B/EV        1.00000- 3 0.0                 0                         
-B/MEV      B/EV        1.00000- 6 0.0                 0                         
+                   Old 1.00000    ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+MU-B/MEV   B/EV        1.00000-12 0.0                 0
+MB/EV      B/EV        1.00000- 3 0.0                 0
+MB/KEV     B/EV        1.00000- 6 0.0                 0
+MB/MEV     B/EV        1.00000- 9 0.0                 0
+B/MILLI-EV B/EV        1.00000+ 3 0.0                 0
+B/EV       B/EV        1.0        0.0                 0
+B/KEV      B/EV        1.00000- 3 0.0                 0
+B/MEV      B/EV        1.00000- 6 0.0                 0
                                                                                1
 DOUBLE DIFFERENTIAL DISTRIBUTIONS                                              1
                                                                                1
-MUB/SR/MEV B/SR/EV     1.00000-12 0.0                 0                         
-MB/SR/EV   B/SR/EV     1.00000- 3 0.0                 0                         
-MB/SR/KEV  B/SR/EV     1.00000- 6 0.0                 0                         
-MB/SR/MEV  B/SR/EV     1.00000- 9 0.0                 0                         
-MB/SR/GEV  B/SR/EV     1.00000-12 0.0                 0                         
-B/SR/MI-EV B/SR/EV     1.00000+ 3 0.0                 0                         
-B/SR/EV    B/SR/EV     1.0        0.0                 0                         
-B/SR/KEV   B/SR/EV     1.00000- 3 0.0                 0                         
-B/SR/MEV   B/SR/EV     1.00000- 6 0.0                 0                         
-B/SR/GEV   B/SR/EV     1.00000- 9 0.0                 0                         
+MUB/SR/MEV B/SR/EV     1.00000-12 0.0                 0
+MB/SR/EV   B/SR/EV     1.00000- 3 0.0                 0
+MB/SR/KEV  B/SR/EV     1.00000- 6 0.0                 0
+MB/SR/MEV  B/SR/EV     1.00000- 9 0.0                 0
+MB/SR/GEV  B/SR/EV     1.00000-12 0.0                 0
+B/SR/MI-EV B/SR/EV     1.00000+ 3 0.0                 0
+B/SR/EV    B/SR/EV     1.0        0.0                 0
+B/SR/KEV   B/SR/EV     1.00000- 3 0.0                 0
+B/SR/MEV   B/SR/EV     1.00000- 6 0.0                 0
+B/SR/GEV   B/SR/EV     1.00000- 9 0.0                 0
                                                                                1
 TRIPLE DIFFERENTIAL DISTRIBUTIONS                                              1
                                                                                1
-MB/SR/MEV2 B/SR/EV2    1.00000-15 0.0                 0                         
+MB/SR/MEV2 B/SR/EV2    1.00000-15 0.0                 0
                                                                                1
 TEMPERATURE                                                                    1
                                                                                1
-DEG-K      DEG-K       1.0        0.0                 0                         
-DEG-C      DEG-K       1.0        273.16              0                         
-DEG-F      DEG-K       0.555556   255.382             0                         
+DEG-K      DEG-K       1.0        0.0                 0
+DEG-C      DEG-K       1.0        273.16              0
+DEG-F      DEG-K       0.555556   255.382             0
                                                                                1
 TIME                                                                           1
                                                                                1
-PSEC       SEC         1.00000-12 0.0                 0                         
-NSEC       SEC         1.00000- 9 0.0                 0                         
-MICROSEC   SEC         1.00000- 6 0.0                 0                         
-MSEC       SEC         1.00000- 3 0.0                 0                         
-SEC        SEC         1.0        0.0                 0                         
-MIN        SEC         6.00000+ 1 0.0                 0                         
-HR         SEC         3.60000+ 2 0.0                 0                         
-D          SEC         8.64000+ 3 0.0                 0                         
-Y          SEC         3.15576+ 6 0.0                 0                         
-YR         SEC         3.15576+ 6 0.0                 0                         
-1/PSEC     1/SEC       1.00000+12 0.0                 0                         
-1/NSEC     1/SEC       1.00000+ 9 0.0                 0                         
-1/MICROSEC 1/SEC       1.00000+ 6 0.0                 0                         
-1/MSEC     1/SEC       1.00000+ 3 0.0                 0                         
-1/SEC      1/SEC       1.0        0.0                 0                         
-1/MIN      1/SEC       1.66666- 2 0.0                 0                         
-1/HR       1/SEC       2.77777- 3 0.0                 0                         
-1/D        1/SEC       1.15741- 4 0.0                 0                         
-1/Y        1/SEC       3.16881- 7 0.0                 0                         
-1/YR       1/SEC       3.16881- 7 0.0                 0                         
+PSEC       SEC         1.00000-12 0.0                 0
+NSEC       SEC         1.00000- 9 0.0                 0
+MICROSEC   SEC         1.00000- 6 0.0                 0
+MSEC       SEC         1.00000- 3 0.0                 0
+SEC        SEC         1.0        0.0                 0
+MIN        SEC         6.00000+ 1 0.0                 0
+                   Old 3.60000+ 2 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+HR         SEC         3.60000+ 3 0.0                 0
+                   Old 8.64000+ 3 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+D          SEC         8.64000+ 4 0.0                 0
+                   Old 3.15576+ 6 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+Y          SEC         3.15569+ 7 0.0                 0
+YR         SEC         3.15569+ 7 0.0                 0
+1/PSEC     1/SEC       1.00000+12 0.0                 0
+1/NSEC     1/SEC       1.00000+ 9 0.0                 0
+1/MICROSEC 1/SEC       1.00000+ 6 0.0                 0
+1/MSEC     1/SEC       1.00000+ 3 0.0                 0
+1/SEC      1/SEC       1.0        0.0                 0
+1/MIN      1/SEC       1.66666- 2 0.0                 0
+                   Old 2.77777- 3 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+1/HR       1/SEC       2.77778- 4 0.0                 0
+                   Old 1.15741- 4 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+1/D        1/SEC       1.15741- 5 0.0                 0
+                   Old 3.16881- 7 ref.: OTSUKA Naohiko, e-mail, 27 May 2005    1
+1/Y        1/SEC       3.16888- 8 0.0                 0
+1/YR       1/SEC       3.16888- 8 0.0                 0
                                                                                1
 MISCELLANEOUS                                                                  1
                                                                                1
-PER-CENT   (VARIOUS)   1.0        0.0                 1                         
-NO-DIM     NO-DIM      1.0        0.0                 0                         
-GAM/100N   GAM/100N    1.00000- 2 0.0                 7                         
-GAM/PART   GAM/PART    1.0        0.0                 7                         
-PC/FIS     PC/FIS      1.00000- 2 0.0                 7                         
-ARB-UNITS  ARB-UNITS   1.0        0.0                 8                         
-SEE TEXT   SEE TEXT    1.0        0.0                 7                         
-MUCI/MUA   MUCI/MUA    1.0        0.0                 7                         
-MUCI/MUAHR MUCI/MUAHR  1.0        0.0                 7                         
+PER-CENT   (VARIOUS)   1.0        0.0                 1
+NO-DIM     NO-DIM      1.0        0.0                 0
+GAM/100N   GAM/100N    1.00000- 2 0.0                 7
+GAM/PART   GAM/PART    1.0        0.0                 7
+PC/FIS     PC/FIS      1.00000- 2 0.0                 7
+                   Added by V.Zekin for OTSUKA Naohiko,    19-Oct-2006         1
+PRT/FIS    PRT/FIS     1.0        0.0                 7
+PART/FIS   PART/FIS    1.0        0.0                 7
+                   ---end---        for OTSUKA Naohiko,    19-Oct-2006         1
+ARB-UNITS  ARB-UNITS   1.0        0.0                 8
+SEE TEXT   SEE TEXT    1.0        0.0                 7
+MUCI/MUA   MUCI/MUA    1.0        0.0                 7
+MUCI/MUAHR MUCI/MUAHR  1.0        0.0                 7
