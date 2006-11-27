@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-11-13 15:50:32 $
-Ccc   * $Id: input.f,v 1.209 2006-11-13 15:50:32 Capote Exp $
+Ccc   * $Date: 2006-11-27 14:20:27 $
+Ccc   * $Id: input.f,v 1.210 2006-11-27 14:20:27 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5755,8 +5755,8 @@ C
 C              The following two lines must be commented to reproduce Th-232 evaluation
 C              with the original th32.inp input file dated 16/07/2005
 C              (another change is also needed (look for atilno appearance)
-C              ELSE
-C                ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+               ELSE
+                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
                ROPar(1,nnuc) = asys*ATIlnor(nnuc)
@@ -5810,7 +5810,7 @@ C--------------Calculate sum for the average normalization factor
 C           The following line must also be commented to reproduce Th-232 evaluation
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
-C           ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave

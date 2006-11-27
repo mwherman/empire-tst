@@ -32,6 +32,7 @@ C-V          angular distributions.
 C-V        - Add unassigned reactions to MT5 with yields for neutrons,
 C-V          protons and alpha particles.
 C-V        - Fix yields and pseudo-threshold distributions in MF6/MT5.
+C-V  06/02 - Input NLIB, ALAB, EDATE, AUTHOR strings.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -135,6 +136,7 @@ C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
       PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=800000,MXI=8000,MLV=3)
+      CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
@@ -166,6 +168,30 @@ C* Subtract electron mass and add ionisation energy defect
       AWT = 3.016049278 -   0.00054857991 + 0.000000015
       AW3 = 3.016029319 - 2*0.00054857991 + 0.000000085
       AWA = 4.002603254 - 2*0.00054857991 + 0.000000085
+C* Define the test printout control parameters
+C... Hardwired specifications
+      IPRNT=0
+C* If specific MT requested, define also energy range and particle
+      IF(IPRNT.GT.0) THEN
+C* Incident particle energy range
+        EI1  =0.
+        EI2  =2.E7
+C* Outgoing particle energy range
+        EO1  =0.
+        EO2  =2.E7
+C* Outgoing particle ZA identifier
+        NZA1 =0
+        NZA2 =99999
+      END IF
+C* Default ENDF specifications
+      NLIB= 8
+c...  NMOD= 0
+      NMOD= 1
+      ALAB='EMPIRE     '
+      EDATE='           '
+      AUTHOR(1)='           '
+      AUTHOR(2)='           '
+      AUTHOR(3)='           '
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -197,21 +223,13 @@ C* Define the MAT number
    15 WRITE(LTT,991) '$Enter the ENDF material MAT number   : '
       READ (LKB,992) MAT
       IF(MAT.LE.0)   MAT=1111
-C* Define the test printout control parameters (-1, 0, MT)
-C... Hardwired specifications
-      IPRNT=0
-C* If specific MT requested, define also energy range and particle
-      IF(IPRNT.GT.0) THEN
-C* Incident particle energy range
-        EI1  =0.
-        EI2  =2.E7
-C* Outgoing particle energy range
-        EO1  =0.
-        EO2  =2.E7
-C* Outgoing particle ZA identifier
-        NZA1 =0
-        NZA2 =99999
-      END IF
+C* Define the NLIB number
+      WRITE(LTT,991) '$Enter the NLIB number                : '
+      READ (LKB,992,END=16) NLIB
+      IF(NLIB.LE.0)   NLIB=8
+C* Define ALAB, EDATE, AUTHOR strings.
+      WRITE(LTT,991) '$Enter ALAB, EDATE, AUTHOR string     : '
+      READ (LKB,997,END=16) ALAB,EDATE,AUTHOR
 C*
 C* Write the input options to Log-file
    16 OPEN (UNIT=LER,FILE=FLER,STATUS='UNKNOWN')
@@ -266,7 +284,8 @@ C* Check if nuclide is fissile
       CALL CHKFIS(NXS,NEN,IWO(MTH),RWO(LXS),MXE,MXT,LFI)
 C* Write the ENDF file-1 data
       EMX=EIN(NEN)
-      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,AWR,EMX,NS)
+      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB
+     &           ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
       NS=-1
       MF= 1
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF
@@ -529,6 +548,7 @@ C*
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,4I5)
   996 FORMAT(A40,F10.4)
+  997 FORMAT(6A11)
   998 FORMAT(10I5)
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT)
@@ -1408,6 +1428,7 @@ C*
       NEN=0
       LD =1
       NZZ=0
+      EOO=-1.e12
 C-F Check if angles are given (No. of angles NAN=1 if isotropic)
       READ (LIN,891) REC
       IF(REC(1:40).EQ.'                                        ') THEN
@@ -1447,6 +1468,9 @@ C* Suppress negative energies (unless processing discrete data)
       IF(MT.GT.0 .AND. EE.LT.0) GO TO 40
       IF(LD+1+NAN.GT.MXR) STOP 'RDANGF ERROR - MXR limit exceeded'
       EOU=EE*1.E6
+C*    -- Shift duplicate energies
+      IF(EOU.LE.EOO) EOU=EOU*1.00001
+      EOO=EOU
       RWO(LD)=EOU
 C* Check for zero or negative distributions
       NEG=0
@@ -2219,8 +2243,8 @@ c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
       IF(REC(2:14).EQ.' Multiplicity') THEN
 C* Average number of (prompt) neutrons per fission
         QQ=0
-C...    MT=456
-        MT=452
+        MT=456
+C...    MT=452
         IF(REC(15:20).EQ.' (nue)') THEN
           READ(REC(21:30),994) XS
         ELSE
@@ -2580,8 +2604,8 @@ C-Version:
 C-V  00/03 Define Unit base linear interpolation between incident E.
 C-V  03/02 Major reorganisation of the routine
 C-
-C* Number of input angles MXA and number of particles per react. MXP
-      PARAMETER    (MXA=120, MXP=40, MXZ=160)
+C* No.of input angles MXA, fine grid angles MXZ, particles/reaction MXP
+      PARAMETER    (MXA=200, MXZ=400, MXP=200)
       CHARACTER*8   POUT(MXP),PTST
       CHARACTER*40  FL92,FLPT,FLCU
       CHARACTER*136 REC
@@ -3338,12 +3362,13 @@ C*
   912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
      1       '                  Transfer to ground state assumed')
       END
-      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,AWR,EMX,NS)
+      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB
+     &                 ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
 C-Title  : WRIMF1 Subroutine
 C-Purpose: Write comment section (file-1) data in ENDF-6 format
       CHARACTER*66 REC
       CHARACTER*40 FLSC
-      CHARACTER*11 BL11
+      CHARACTER*11 BL11,ZSYMAM,ALAB,EDATE,AUTHOR(3)
       CHARACTER*8  PTST
       CHARACTER*2  C2,CH(100)
       CHARACTER*1  ST
@@ -3385,15 +3410,12 @@ C*
       ELSE
         ST=' '
       END IF
-      WRITE(REC,92) IZ,C2,IA,ST
+      WRITE(ZSYMAM,92) IZ,C2,IA,ST
 C*
       MF  = 1
       MT  = 451
       ZA  = IZA
       LRP =-1
-      NLIB= 8
-c...  NMOD= 0
-      NMOD= 1
 C*
       ELIS= 0.
       STA = 0.
@@ -3424,6 +3446,7 @@ C*
       CALL WRCONT(LOU,MAT,MF,MT,NS,ELIS,STA,LIS,LISO, 0 ,NFOR)
       CALL WRCONT(LOU,MAT,MF,MT,NS,AWI ,EMX,  0,  0,NSUB,NVER)
       CALL WRCONT(LOU,MAT,MF,MT,NS,TEMP, 0.,LDRV, 0, NWD, NXC)
+      REC=ZSYMAM//ALAB//EDATE//AUTHOR(1)//AUTHOR(2)//AUTHOR(3)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
       REC=BL11//BL11//BL11//BL11//BL11//BL11
       CALL WRTEXT(LOU,MAT,MF,MT,NS,REC)
@@ -3438,7 +3461,7 @@ C*
 C*
       RETURN
 C*
-   92 FORMAT(I3,'-',A2,'-',I3,A1,' EMPIRE Calculation',36X)
+   92 FORMAT(I3,'-',A2,'-',I3,A1)
    93 FORMAT(A66)
       END
       SUBROUTINE WRIMF3(LOU,MXE,MXT,MXR,MF

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-09-20 14:33:53 $
-Ccc   * $Id: main.f,v 1.155 2006-09-20 14:33:53 Capote Exp $
+Ccc   * $Date: 2006-11-27 14:20:27 $
+Ccc   * $Id: main.f,v 1.156 2006-11-27 14:20:27 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -903,10 +903,17 @@ C--------Reset variables for life-time calculations
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
-            WRITE (12,
+            IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+	      WRITE (12,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+            ELSE
+  	      WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+	    ENDIF
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF (nnuc.NE.1) THEN
