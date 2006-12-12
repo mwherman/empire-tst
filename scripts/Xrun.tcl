@@ -6672,7 +6672,7 @@ exec xterm -e ../scripts/zvvddx $file $multi &} \
     vTcl:DefineAlias "$site_9_0.but81" "Button131" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but81 "$site_9_0.but81 Button $top all _vTclBalloon"
     bind $site_9_0.but81 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Create ZVV plot for as selected in the window to the left }
+        set ::vTcl::balloon::%W {Create ZVV plot for the items selected in the window to the left }
     }
     ::iwidgets::combobox $site_9_0.com77 \
         \

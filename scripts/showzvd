@@ -1,6 +1,8 @@
 #!/bin/bash
+ln -s ../util/c4zvd/ps01.tit ps01.tit        
 for file in $*
 do
-../util/c4zvd/zvview.exe -p:$file $file
+../util/c4zvd/zvview.exe -p:$file $file ps01.tit/c
 done
+rm ps01.tit
 exit
