@@ -10,6 +10,7 @@ C-V      2005/12 If E-level is zero, redefine MT 51 to MT 4
 C-V      2006/02 Fix Y2K date in references
 C-V      2006/04 Deleted SF9, V.Zerkin@iaea.org
 C-V      2006/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
+C-V      2006/12 Ratio-to-rutherfors scattering for charged particles
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -553,6 +554,15 @@ C-M  then properly interpreting the data using these definition in all
 C-M  applications (for examples, see program PLOTC4 input directionary
 C-M  for proton induced reactions).
 C-M
+C-M  Sometimes elastic scattering reactions may be represented in the
+C-M  form of the ratio to Coulomb scattering cross section (sometimes
+C-M  referred to as "Ratio-to-Rutherford), identified by reaction
+C-M  modifier flag RTH. Masses of the target and the projectile are
+C-M  required, which are read from the Audi-Wapstra mass tables
+C-M  in the file specified on input. The file is available from the
+C-M  IAEA web site. The expression for Coulomb scattering corresponds
+C-M  to the equations 6.11 and 6.12 in the ENDF-102 formats manual.
+C-M
 C-M  OUTPUT REPORT
 C-M  -------------
 C-M  This program will write a report on Unit 6 (OUTP) to allow the
@@ -661,6 +671,7 @@ C-M   10  X4       EXFOR data to be translated (default 'X4.DAT')
 C-M   12  EXFOR14A EXFOR reaction dictionary (default 'EXFOR14A.DAT')
 C-M   14  EXFOR24A EXFOR title dictionary (default 'EXFOR24A.DAT')
 C-M   15  EXFOR25A EXFOR units dictionary (default 'EXFOR25A.DAT')
+C-M   16  ATMASS   Audi-Wapstra mass table (default 'mass.mas03')
 C-M
 C-M  OUTPUT FILES
 C-M  ------------
@@ -684,6 +695,7 @@ C-M    C4       Output data in computation format
 C-M    EXFOR14A EXFOR reaction dictionary
 C-M    EXFOR24A EXFOR title dictionary
 C-M    EXFOR25A EXFOR units dictionary
+C-M    ATMASS   Audi-Wapstra mass table
 C-M  If any of the filenames is blank or if an end-of-file mark is
 C-M  encountered, the remaining filenames assume their default
 C-M  values.
@@ -770,10 +782,10 @@ C-M
 C***** COMPUTER DEPENDENT CODING ******
       INTEGER      OUTP,OTAPE
       CHARACTER*40 X4,X4NEW,C4,X4INP,X4LST,FLNM,BLNK
-      CHARACTER*60 EXFOR14A,EXFOR24A,EXFOR25A,FLNM60
+      CHARACTER*60 EXFOR14A,EXFOR24A,EXFOR25A,FLNM60,ATMASS
       CHARACTER*11 CARD1,KEYTAB,ENDSUB
       CHARACTER*1  CARD2,ENT,SUBENT
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T07280
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T07300
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T07310
@@ -795,6 +807,7 @@ C-----DEFINE ALL I/O UNITS.
      5     EXFOR14A /'EXFOR14A.DAT'/
      6     EXFOR24A /'EXFOR24A.DAT'/
      7     EXFOR25A /'EXFOR25A.DAT'/
+     8     ATMASS   /'mass.mas03'/
       NEWX4=4                                                           X4T07440
       INP=5                                                             X4T07450
       OUTP=8
@@ -803,6 +816,7 @@ C-----DEFINE ALL I/O UNITS.
       NTAPE1=12                                                         X4T07490
       NTAPE2=14                                                         X4T07500
       NTAPE3=15                                                         X4T07510
+      NMASS=16
       OPEN (UNIT=INP,FILE=X4INP,STATUS='OLD',ERR=9)
       READ (INP,'(A40)',END=9) FLNM
       IF(FLNM.NE.BLNK) X4=FLNM
@@ -814,6 +828,8 @@ C-----DEFINE ALL I/O UNITS.
       IF(FLNM60(1:40).NE.BLNK) EXFOR24A=FLNM60
       READ (INP,'(A60)',END=9) FLNM60
       IF(FLNM60(1:40).NE.BLNK) EXFOR25A=FLNM60
+      READ (INP,'(A60)',END=9) FLNM60
+      IF(FLNM60(1:40).NE.BLNK) ATMASS=FLNM60
     9 CLOSE(UNIT=INP)
 C*
       WRITE(*,*)'INPUT  FILE : ',X4INP
@@ -826,6 +842,10 @@ C*
       OPEN (UNIT=OUTP  ,FILE=X4LST   ,STATUS='UNKNOWN')
       OPEN (UNIT=OTAPE ,FILE=C4      ,STATUS='UNKNOWN')
       OPEN (UNIT=NEWX4 ,FILE=X4NEW   ,STATUS='UNKNOWN')
+      OPEN (UNIT=NMASS ,FILE=ATMASS,STATUS='OLD',ERR=22)
+      GO TO 24
+   22   NMASS=-NMASS
+   24 CONTINUE
 C-----INITIALIZE COUNTS.                                                X4T07520
       DO I=1,9
         MPOINT(I)=0
@@ -903,7 +923,7 @@ C                                                                       X4T08270
       CHARACTER*11 CARD1
       CHARACTER*1  CARD2,ENT,SUBENT,AUTH1,AUTHN,REFER1,REFERN,STAT1
      1            ,STATN,BLANK
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T08320
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T08340
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T08350
@@ -981,7 +1001,7 @@ C                                                                       X4T08890
       CHARACTER*10 BIBKEY,KEYWD1
       CHARACTER*1  CARD1,CARD2,KEYWD2,STAT1,STATN,AUTH1,AUTHN,REFER1
      1            ,REFERN,BLANK
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T08940
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T08950
       COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T08970
@@ -1025,35 +1045,33 @@ C-----ERROR READING EXFOR DATA.                                         X4T09420
  1000 FORMAT(A10,A1,55A1,14A1)
  6000 FORMAT(10X,'ERROR READING EXFOR DATA...EXECUTION TERMINATED')     X4T09460
       END                                                               X4T09470
-
 c---zvv+++
-c	delete SF9 and end-commas from reaction-string
-c	by V.Zerkin, IAEA-NDS, 2006-04-11
+c delete SF9 and end-commas from reaction-string
+c by V.Zerkin, IAEA-NDS, 2006-04-11
       function deleteSF9(ZAR1,KZAR1)
-	CHARACTER*300  ZAR1,tmp,tmp2
-	tmp=' '
-	tmp(1:1)='('
-	tmp(2:KZAR1+1)=ZAR1(1:KZAR1)
-	tmp(KZAR1+2:KZAR1+2)=')'
-c	call outCharArray(tmp,KZAR1+3)
-	deleteSF9=0
-	i=replaceStr(tmp,300,',CALC)',')')	!--- Calculated data
-	i=replaceStr(tmp,300,',DERIV)',')')	!--- Derived data
-	i=replaceStr(tmp,300,',EVAL)',')')	!--- Evaluated data
-	i=replaceStr(tmp,300,',EXP)',')')	!--- Evaluated data
-	i=replaceStr(tmp,300,',RECOM)',')')	!--- Recommended data
-	i=replaceStr(tmp,300,',)',')')		!--- delete comas at the end
-c	call outCharArray(tmp,KZAR1+3)
-	ll=mylen(tmp)
-c	write (*,*) ' LL=',ll
-	tmp2=' '
-	tmp2(1:ll-2)=tmp(2:ll-1)
-	ll=mylen(tmp2)
-c	call outCharArray(tmp2,ll+1)
-	deleteSF9=ll
-	return
+      CHARACTER*300  ZAR1,tmp,tmp2
+      tmp=' '
+      tmp(1:1)='('
+      tmp(2:KZAR1+1)=ZAR1(1:KZAR1)
+      tmp(KZAR1+2:KZAR1+2)=')'
+c     call outCharArray(tmp,KZAR1+3)
+      deleteSF9=0
+      i=replaceStr(tmp,300,',CALC)',')')      !--- Calculated data
+      i=replaceStr(tmp,300,',DERIV)',')')     !--- Derived data
+      i=replaceStr(tmp,300,',EVAL)',')')      !--- Evaluated data
+      i=replaceStr(tmp,300,',EXP)',')')       !--- Evaluated data
+      i=replaceStr(tmp,300,',RECOM)',')')     !--- Recommended data
+      i=replaceStr(tmp,300,',)',')')          !--- delete comas at the end
+c     call outCharArray(tmp,KZAR1+3)
+      ll=mylen(tmp)
+c     write (*,*) ' LL=',ll
+      tmp2=' '
+      tmp2(1:ll-2)=tmp(2:ll-1)
+      ll=mylen(tmp2)
+c     call outCharArray(tmp2,ll+1)
+      deleteSF9=ll
+      return
       end
-
       subroutine outCharArray(str,lstr)
       CHARACTER*1 str(lstr)
       WRITE(*,4000) '"',(str(I),I=1,lstr),'"'
@@ -1061,34 +1079,33 @@ c	call outCharArray(tmp2,ll+1)
       end
 
       function mylen(str)
-	CHARACTER*1 str(1)
-	mylen=0
-	do i=1,300
-c	call outCharArray(str(i),1)
-	if (str(i).eq.' ') return
-	mylen=mylen+1
-	end do
-	return
+      CHARACTER*1 str(1)
+      mylen=0
+      do i=1,300
+c       call outCharArray(str(i),1)
+        if (str(i).eq.' ') return
+        mylen=mylen+1
+      end do
+      return
       end
-
       function replaceStr(str0,lstr0,str1,str2)
-	CHARACTER(LEN=*) str0,str1,str2
-	lstr1=len(str1)
-	lstr2=len(str2)
-	replaceStr=0
-	do i=1,300
-	ind=INDEX(str0,str1)
-c	write (*,*) ' ind=',ind,' L1=',lstr1,' L2=',lstr2
-	if (ind.le.0) return
-	lshift=lstr0-(ind+lstr1)
-	str0(ind+lstr2:ind+lstr2+lshift)=str0(ind+lstr1:ind+lstr1+lshift)
-	str0(ind:ind+lstr2)=str2(1:lstr2)
-	replaceStr=replaceStr+1
-	end do
-	return
+      CHARACTER(LEN=*) str0,str1,str2
+      lstr1=len(str1)
+      lstr2=len(str2)
+      replaceStr=0
+      do i=1,300
+        ind=INDEX(str0,str1)
+c       write (*,*) ' ind=',ind,' L1=',lstr1,' L2=',lstr2
+        if (ind.le.0) return
+        lshift=lstr0-(ind+lstr1)
+        str0(ind+lstr2:ind+lstr2+lshift)
+     & =str0(ind+lstr1:ind+lstr1+lshift)
+        str0(ind:ind+lstr2)=str2(1:lstr2)
+        replaceStr=replaceStr+1
+      end do
+      return
       end
 c---zvv---
-
       SUBROUTINE REACTN(KTYPE)                                          X4T09480
 C                                                                       X4T09490
 C     TRANSLATE EACH REACTION (UP TO 30) SEPERATELY.                    X4T09500
@@ -1105,7 +1122,7 @@ C                                                                       X4T09580
      &            ,CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES
      &            ,ZANRAT,SLASH,EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
       CHARACTER*10 KEYWD1,BLANK10
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T09640
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T09660
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T09670
@@ -1237,10 +1254,10 @@ C     OTHERS SUCH AS ISO-QUANT IMPLIES ONLY 1 SET OF PARENTHESIS.       X4T10880
 C                                                                       X4T10890
   140 KZABAK=KZAR1                                                      X4T10900
 c---zvv+++
-c	WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'	!---zvv-tst
-	KZAR1=deleteSF9(ZAR1,KZAR1)
-	KZABAK=KZAR1
-c	WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'	!---zvv-tst
+c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
+      KZAR1=deleteSF9(ZAR1,KZAR1)
+      KZABAK=KZAR1
+c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
 c---zvv---
       DO I=1,KZABAK
         ZARBAK(I)=ZAR1(I)
@@ -1520,7 +1537,7 @@ C                                                                       X4T13510
       INTEGER      OUTP,OTAPE
       CHARACTER*1  BLANK,PARENL,PARENR,DASH,COMMA,ZERO,DIGIT,ZAR1
      &            ,ZA1,R1,NX,FLAGR,ZAN,LABCM,ZARES,ZANRES,ZANRAT
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T13550
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/ZART1I/KZAR1                                               X4T13560
       COMMON/ZART1C/ZAR1(300)                                           X4T13570
       COMMON/ZAT1I/KZA1,KR1                                             X4T13580
@@ -1649,7 +1666,7 @@ C                                                                       X4T14780
       INTEGER OUTP,OTAPE                                                X4T14790
       CHARACTER*1 ZARACT,ZAX,BLANK,ZERO,PARENL,PARENR,COMMA,DASH,MRAT,  X4T14800
      1 METBCD                                                           X4T14810
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T14820
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/RATMET/MRAT                                                X4T14830
       DIMENSION ZARACT(300),ZAX(7),METBCD(20)                           X4T14840
       DATA BLANK/' '/                                                   X4T14850
@@ -1765,7 +1782,7 @@ C     DECODE METASTABLE STATE FIELD.                                    X4T15900
 C                                                                       X4T15910
       INTEGER OUTP,OTAPE                                                X4T15920
       CHARACTER*1 METBCD,ZAX,MRAT,SLASH,M,PLUS,WHAT,BLANK,TOTAL,MET1    X4T15930
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T15940
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       DIMENSION METBCD(20),ZAX(7)                                       X4T15950
       DATA SLASH/'/'/                                                   X4T15960
       DATA BLANK/' '/                                                   X4T15970
@@ -1878,7 +1895,7 @@ C                                                                       X4T17020
       CHARACTER*10 KEYWD1
       CHARACTER*1 CARD1,CARD2,KEYWD2,REFER1,REFERN,BLANK,PARENL,PARENR, X4T17050
      1 COMMA,DIGITS                                                     X4T17060
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T17070
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T17090
       COMMON/REFERI/IREF,NREF                                           X4T17100
@@ -1951,7 +1968,7 @@ C                                                                       X4T17670
       CHARACTER*10 KEYWD1
       CHARACTER*1 CARD1,CARD2,KEYWD2,AUTH1,AUTHN,BLANK,PARENL,PARENR,   X4T17700
      1 COMMA,ETAL                                                       X4T17710
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T17720
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T17740
       COMMON/AUTHI/IAUTH,NAUTH                                          X4T17750
@@ -2001,7 +2018,7 @@ C-----IF THIS IS SUBENTRY 1 SAVE COMMON AUTHOR.                         X4T18060
       CHARACTER*11 CARD1,TITLE,UNIT,DATUM
       CHARACTER*4  TITLE4
       CHARACTER*1 CARD2,ENT,SUBENT,FLAGI                                X4T18170
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T18180
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18200
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T18210
@@ -2037,7 +2054,7 @@ C                                                                       X4T18470
       CHARACTER*1  CARD2,ENT,SUBENT,FLAGI,FLAGR,ZAN,AUTH1,AUTHN,AUTHK,
      1 REFER1,REFERN,LABCM,STAT1,STATN,BLANK,ZANRES,ZANRAT,DIGITS,ZANOK X4T18510
      1,ZAPO(6,8)                                                        TRKOV
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T18520
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18540
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T18550
@@ -2731,12 +2748,12 @@ C                                                                       X4T25140
       INTEGER OUTP,OTAPE                                                X4T25150
       CHARACTER*4 R2MFMT,DUMMY,DUMMY2                                   X4T25160
       CHARACTER*1 FLAG,BLANK                                            X4T25170
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T25180
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/MFMTI1/IMFMT                                               X4T25190
-      COMMON/MFMTI2/MFMTAB(7,11111)                                       X4T25200
-      COMMON/MFMTC/R2MFMT(12,11111)                                       X4T25210
+      COMMON/MFMTI2/MFMTAB(7,11111)
+      COMMON/MFMTC/R2MFMT(12,11111)
       DIMENSION DUMMY(8)                                                X4T25220
-      DATA MAXIE/11111/                                                   X4T25230
+      DATA MAXIE/11111/
       DATA BLANK/' '/                                                   X4T25240
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25250
       DO 20 IMFMT=1,MAXIE                                               X4T25260
@@ -2778,13 +2795,13 @@ C                                                                       X4T25600
       CHARACTER*11 TITTAB
       CHARACTER*4  TITTAB4,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T25630
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T25640
-      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T25650
-     1 ITFLAG(11111)                                                      X4T25660
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),
+     1 ITFLAG(11111)
       COMMON/TITTBC/TITTAB(11111),TITTAB4(11111)
       DIMENSION DUMMY(7)                                                X4T25680
       DATA BLANK/' '/                                                   X4T25690
-      DATA MAXIE/11111/                                                   X4T25700
+      DATA MAXIE/11111/
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T25710
       DO 20 ITITLE=1,MAXIE                                              X4T25720
    10 READ(NTAPE2,1000,END=60,ERR=50) TITTAB(ITITLE),
@@ -2822,12 +2839,12 @@ C                                                                       X4T26040
       INTEGER OUTP,OTAPE                                                X4T26050
       CHARACTER*11 UNITAB,DUMMY,DUMMY2
       CHARACTER*1 FLAG,BLANK                                            X4T26070
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26080
-      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T26090
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)
       COMMON/UNITBC/UNITAB(2,11111)
       DIMENSION DUMMY(3)
       DATA BLANK/' '/                                                   X4T26120
-      DATA MAXIE/11111/                                                   X4T26130
+      DATA MAXIE/11111/
 C-----READ ENTIRE FILE. SKIP CARDS WITH NON-BLANK COLUMN 80.            X4T26140
       DO 20 IUNIT=1,MAXIE                                               X4T26150
    10 READ(NTAPE3,1000,END=60,ERR=50) (UNITAB(J,IUNIT),J=1,2),
@@ -2863,13 +2880,13 @@ C                                                                       X4T26450
       INTEGER OUTP,OTAPE                                                X4T26460
       CHARACTER*4 R2MFMT,REACT                                          X4T26470
       CHARACTER*1 FLAG,BLANK,ENT,SUBENT                                 X4T26480
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26490
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T26500
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T26510
       COMMON/RESIDI/KZARES                                              X4T26520
       COMMON/MFMTI1/IMFMT                                               X4T26530
-      COMMON/MFMTI2/MFMTAB(7,11111)                                       X4T26540
-      COMMON/MFMTC/R2MFMT(12,11111)                                       X4T26550
+      COMMON/MFMTI2/MFMTAB(7,11111)
+      COMMON/MFMTC/R2MFMT(12,11111)
       COMMON/POINTR/MPOINT(9)                                           X4T26560
       DIMENSION REACT(15)                                               X4T26570
       DO 20 I=1,IMFMT                                                   X4T26580
@@ -2914,11 +2931,11 @@ C                                                                       X4T26950
       CHARACTER*11 TITLE,UNIT,DATUM,TITTAB
       CHARACTER*4  TITLE4,TITTAB4
       CHARACTER*1 FLAGI,FLAGR,ZAN,BLANK ,ENT,SUBENT,LABCM,ZANRES,ZANRAT X4T26980
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T26990
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27000
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27010
-      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T27020
-     1 ITFLAG(11111)                                                      X4T27030
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),
+     1 ITFLAG(11111)
       COMMON/TITTBC/TITTAB(11111),TITTAB4(11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27050
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27060
@@ -2995,11 +3012,11 @@ C                                                                       X4T27750
       CHARACTER*4  TITLE4
       CHARACTER*1  FLAGI,FLAGR,ZAN,ENT,SUBENT,LABCM,CENTER
      &            ,ZANRES,ZANRAT,BLANK                                                            X4T27790
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T27800
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27820
-      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),         X4T27830
-     1 ITFLAG(11111)                                                      X4T27840
+      COMMON/TITTBI/ITITLE,MFTITL(11111),MFTITH(11111),IFIELD(11111),
+     1 ITFLAG(11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T27860
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T27870
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
@@ -3139,10 +3156,10 @@ C                                                                       X4T29230
       CHARACTER*11 UNITAB,TITLE,UNIT,DATUM
       CHARACTER*4  TITLE4
       CHARACTER*1  ENT,SUBENT,STAT1,STATN,UNNORM
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T29270
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29280
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29290
-      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T29300
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)
       COMMON/UNITBC/UNITAB(2,11111)
       COMMON/HEADC1/TITLE(50),TITLE4(50),UNIT(50),DATUM(50)
       COMMON/HEADI/ICOM1,ICOMN,IDATN                                    X4T29330
@@ -3194,7 +3211,7 @@ C                                                                       X4T29780
       CHARACTER*1  ENT,SUBENT
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T29810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T29820
-      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T29830
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)
       COMMON/UNITBC/UNITAB(2,11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T29850
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T29860
@@ -3236,8 +3253,8 @@ C                                                                       X4T30210
       INTEGER OUTP,OTAPE                                                X4T30220
       CHARACTER*11 UNITAB,TITLE,UNIT,DATUM
       CHARACTER*4  TITLE4
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T30240
-      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)               X4T30250
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
+      COMMON/UNITBI/IUNIT,TIMES(11111),ADD(11111),IUFLAG(11111)
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T30260
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T30270
       COMMON/RNOW/ISANR                                                 X4T30280
@@ -3299,7 +3316,12 @@ C                                                                       X4T30790
       VALUES(II)=0.0                                                    X4T30830
       GO TO 120                                                         X4T30840
    40 XMU=VALUES(JJ)                                                    X4T30850
-      ANG=ACOS(XMU)                                                     X4T30860
+      IF(ABS(XMU).GT.1) THEN
+        ANG=XMU*PI/180
+        WRITE(OUTP,6051)
+      ELSE
+        ANG=ACOS(XMU)
+      END IF
       DANG=PI*VALUES(II)/180.0                                          X4T30870
       DMUP=COS(ANG+DANG)                                                X4T30880
       DMUM=COS(ANG-DANG)                                                X4T30890
@@ -3374,6 +3396,8 @@ C                                                                       X4T31450
      1 10X,'REQUIRED ENERGY FIELD NOT DEFINED')                         X4T31580
  6040 FORMAT(10X,'OPERATION...CONVERTED PER-CENT TO ABSOLUTE')          X4T31590
  6050 FORMAT(10X,'OPERATION...CONVERTED ANGLES TO COSINES')             X4T31600
+ 6051 FORMAT(10X,'WARNING...CANNOT CONVERT COSINE TO ANGLE'/
+     1 10X,'|COSINE| > 1; ASSUMED ANGLE IS GIVEN')
  6055 FORMAT(10X,'OPERATION...CONVERTED ANGULAR ERROR TO COSINE ERROR') X4T31610
  6060 FORMAT(10X,'OPERATION...CONVERTED RESOLUTION TO ERROR')           X4T31620
  6070 FORMAT(10X,'OPERATION...CONVERTED ANGSTROM TO ENERGY')            X4T31630
@@ -3388,7 +3412,7 @@ C                                                                       X4T31700
       CHARACTER*11 TITLE,UNIT,DATUM
       CHARACTER*4  TITLE4
       CHARACTER*1  FLAGI
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T31740
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T31750
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T31760
       COMMON/RNOW/ISANR                                                 X4T31770
@@ -3616,12 +3640,14 @@ C     (5) DATA = DATA/F(0) (F(0)=ZEROTH ORDER LEGENDRE COEFFICIENT,     X4T33920
 C                           DATA AND DATA ERROR).                       X4T33930
 C     (6) DATA = DATA/(F(0)*(2*L+1)) (DATA AND DATA ERROR)              X4T33940
 C     (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)    ***** TRKOV
+C     (9) DATA = DATA*RUTHERFORD (COULOMB) CROSS SECTION                ***** TRKOV
 C                                                                       X4T33950
       INTEGER      OUTP,OTAPE
       CHARACTER*11 TITLE,UNIT,DATUM
+      CHARACTER*7  ZACH7
       CHARACTER*4  TITLE4
       CHARACTER*1  FLAGI,FLAGR,ZAN,LABCM,BLANK,ZANRES,ZANRAT
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T33990
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/ZATNI/KSAN1,KSANR,KZAN(30),INPART(30),MFR(30),MTR(30),     X4T34000
      1 IRFLAG(30),KZANRS(30),MTRAT(30)                                  X4T34010
       COMMON/RNOW/ISANR                                                 X4T34020
@@ -3728,13 +3754,14 @@ C-----RE-NORMALIZE DATA.                                                X4T34950
       IF(II.LE.0) GO TO 110                                             X4T34980
       VALUES(II)=VALUES(II)/ZNORM                                       X4T34990
   110 GO TO 800
-  120 IF(IRFLAG(ISANR).NE.8) GO TO 800
+  120 IF(IRFLAG(ISANR).GT.8) GO TO 130
 C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
       IF(ICOMN .LT. 1) GO TO 126
       IF(IMUSED(ICOMN).NE.0) GO TO 124
         IMUSED(ICOMN)=1
         VALUES(ICOMN)=1
         IF(UNIT(ICOMN).NE.'ATOMS/B   ') GO TO 126
+        IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.9) WRITE(OUTP,6081)
           CALL FLOATF(DATUM(ICOMN),VALUES(ICOMN))
           GO TO 124
   123   WRITE(OUTP,6080) DATUM(ICOMN)
@@ -3743,6 +3770,51 @@ C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
       GO TO 800
   126 WRITE(OUTP,6082)
       IRFLAG(ISANR)=0
+C-----CONVERT RATIO-TO-RUTHERFORD INTO CROSS SECTIONS
+  130 IF(IRFLAG(ISANR).GT.9) GO TO 800
+C*    -- define constants (Table 1, Appendix H, ENDF-102 manual)
+      IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.9) WRITE(OUTP,6090)
+      PCP=6.58211889E-16
+      RAL=137.03599976
+      AMUEV=9.31494013E8
+      CC=299792458
+C*    -- Energy and angle
+      IE=KMOUT(1,ISANR)
+      IA=KMOUT(5,ISANR)
+      EE=VALUES(IE)
+      AIN=VALUES(IA)
+C*    -- Target and projectile ZA
+      DO K=1,7
+        ZACH7(K:K)=ZAN(K,ISANR)
+      END DO
+      READ (ZACH7,'(I6)') IZA
+      IZAP=INPART(ISANR)
+C*    -- Target and projectile mass (equal to ejectile)
+      CALL ZAMASS(NMASS,IZA, AWT)
+      CALL ZAMASS(NMASS,IZAP,AM1)
+      AWP=AM1
+C*    -- Target and projectile charge
+      ZZT=IZA /1000
+      ZZI=IZAP/1000
+C*    -- Target spin (only relevant when equal to projectile)
+      SPI=0
+C*    - Calculate Rutherford (Coulomb) scattering term
+      AA =AWT/AWP
+      AK =2*AMUEV/(PCP*CC*1E14)**2
+      AE =AMUEV/(2*RAL*RAL)
+      AKA=SQRT(AK*AM1*EE)*AA/(AA+1)
+      AET=ZZT*ZZI*SQRT(AE*AM1/EE)
+        IF(IZAP.NE.IZA) THEN
+          SIGC=AET*AET/(AKA*AKA*(1-AIN)**2)
+        ELSE
+          A0 =LOG((1+AIN)/(1-AIN))
+          A1 =COS(AET*A0)
+          A2 =A1* (-1)**NINT(2*SPI) /(2*SPI+1)
+          A3 =A2+ (1+AIN*AIN)/(1-AIN*AIN)
+          SIGC=A3* 2 * (AET*AET/(AKA*AKA*(1-AIN*AIN)))
+        END IF
+      VALUES(II)=VALUES(II)*SIGC
+C-----
   800 RETURN
  6000 FORMAT(10X,'OPERATION...CREATED EN          ',1PE11.4,' EV')      X4T35010
  6010 FORMAT(10X,'WARNING...LEGENDRE ORDER (COLUMN 5) NOT DEFINED'/     X4T35020
@@ -3757,8 +3829,10 @@ C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
      1 10X,'LEGENDRE COEFFICIENTS CANNOT BE RENORMALIZED')              X4T35110
  6080 FORMAT(10X,'WARNING...UNITS IN COMMON FIELD ',A11,/
      1      ,10X,'                     EXPECTED ATOMS/B')
+ 6081 FORMAT(10X,'OPERATION...CONVERTED TRANSMISSION TO X.S.')
  6082 FORMAT(10X,'WARNING...SAMPLE THICKNESS FOR TRANSMISSION DATA'
      1      ,' NOT SPECIFIED')
+ 6090 FORMAT(10X,'OPERATION...CONVERTED RUTHERFORD RATIO TO X.S.')
       END                                                               X4T35120
       SUBROUTINE INTGER(CARD,N,I)                                       X4T35130
 C                                                                       X4T35140
@@ -3766,7 +3840,7 @@ C     TRANSLATE FROM CHARACTERS TO INTEGER                              X4T35150
 C                                                                       X4T35160
       INTEGER OUTP,OTAPE                                                X4T35170
       CHARACTER*1 CARD,DIGITS,PLUS,MINUS,BLANK,STAR,STARS               X4T35180
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T35190
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       DIMENSION CARD(I),DIGITS(10),STARS(11)                            X4T35200
       DATA DIGITS/'0','1','2','3','4','5','6','7','8','9'/              X4T35210
       DATA STARS/' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '/           X4T35220
@@ -3822,7 +3896,7 @@ C                                                                       X4T35710
       INTEGER OUTP,OTAPE                                                X4T35720
       CHARACTER*1 BLANK,DOT,EXPD,EXPE,PLUS,MINUS,STAR,MESS,DIGIT,FIELD, X4T35730
      1 IFIELD                                                           X4T35740
-      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4                           X4T35750
+      COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       DIMENSION FIELD(11),TEN(35),DIGIT(10),MESS(11)
       DATA BLANK/' '/                                                   X4T35770
       DATA DOT/'.'/                                                     X4T35780
@@ -3954,3 +4028,36 @@ C-----POINT.                                                            X4T36890
  6000 FORMAT(1X,11A1/1X,11A1/                                           X4T37050
      1 ' SUBROUTINE FLOATF...ERROR IN INPUT DATA...TRANSLATED AS 0')    X4T37060
       END                                                               X4T37070
+      SUBROUTINE ZAMASS(NMASS,IZA,AWT)
+C-Title  : Subroutine ZAMASS
+C-Purpose: Read Audi-Wapstra tables for atomic weight of nuclide IZA
+C-
+      CHARACTER*132 REC
+      IF(NMASS.LE.0) GO TO 80
+C* Try reading Audi-Wapstra file
+      REWIND NMASS
+C* Skip header records
+   20 READ (NMASS,90) REC
+      IF(REC(1:4).NE.'1N-Z') GO TO 20
+      READ (NMASS,90) REC
+C* Search the file for matching ZA
+   40 READ (NMASS,90,END=80) REC
+      READ (REC,91,ERR=40) IZ,IA,AM1,AM2
+      JZA=IZ*1000+IA
+      IF(JZA.NE.IZA) GO TO 40
+C* Matching nuclide found
+      AWT=AM1+AM2/1000000
+      RETURN
+C...
+C... CRUDE APPROXIMATION FOR NUCLIDES NOT LISTED
+C...
+   80 CONTINUE
+      PRINT *,'ZAMASS WARNING - Mass approximated by A for',IZA
+C...
+      IZ=IZA/1000
+      IA=IZA-1000*IZ
+      AWT=IA
+      RETURN
+   90 FORMAT(A132)
+   91 FORMAT(9X,I5,I5,77X,F3.0,F13.0)
+      END

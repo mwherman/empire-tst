@@ -16,6 +16,10 @@ C-V                            inelastic angular distributions.
 C-V                           *Differentiate between isomeric states.
 C-V                           *Fix bugs for compilers with dynamic 
 C-V                            memory allocation
+C-V      2004-1               *Fix bug plotting EXFOR only.
+C-V      2006-2               *Update for consistency with DXSEND
+C-V                            upgrade to provide uncertainties,
+C-V                            if available.
 C-Purpose: Plot experimental and evaluated nuclear data
 C-Author:
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -552,12 +556,10 @@ C-M  energy range the user may input up to 100 additional cards.
 C-M
 C-M  Card  Columns  Format  Description
 C-M  ----  -------  ------  -----------
-C-M    1     1-10     F10   Paper offset in the horizontal direction.
-C-M         11-20     F10   Total paper width in the horizontal
-C-M                         direction.
-C-M         21-30     F10   Paper offset in the vertical direction.
-C-M         31-40     F10   Total paper width in the vertical
-C-M                         direction.
+C-M    1     1-10     F10   Paper offset along paper height [inch].
+C-M         11-20     F10   Total paper height (default 12.5) [inch]
+C-M         21-30     F10   Paper offset along paper width.
+C-M         31-40     F10   Total paper width (default 10) [inch]
 C-M    2     1- 5     I5    Compare EXFOR data to ENDF
 C-M                         0 = No
 C-M                         1 = Yes
@@ -732,10 +734,10 @@ C-M  Retrieval of differential and double differential data is done
 C-M  through the DXSEND package, which is provided as a separate
 C-M  module. It is called by:
 C-M
-C-M     CALL DXSEND(LEF,ZA0,ZAP,MF0,MT0,KEA,EINC,PAR,EPS,ENR,DXS
-C-M    1           ,RWO,NEN,MEN,MRW,LTT,ELV)
+C-M     CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF0,MT0,KEA,EINC,PAR,EPS
+C-M    1           ,ENR,DXS,RWO,NEN,MEN,MRW,LTT,ELV)
 C-M
-C-M  The DXSEND module reads an ENDF file and extract cross sections
+C-M  The DXSELM module reads an ENDF file and extract cross sections
 C-M  (KEA=0), differential cross section (angular distributions KEA=1
 C-M  or energy spectra KEA=2, parameter PAR < -2) and double
 C-M  differential cross sections (correlated energy/angle distributions
@@ -749,6 +751,9 @@ C-M    If a special MT number is requested (for example, MT=5 for
 C-M  particle emission where particle is defined by its ZA designation
 C-M  in ZAP), the retrieval is done recursively for all neutron emission
 C-M  reactions and all contributions are summed.
+C-M    Although the DXSELM routine allows reconstruction of elemental
+C-M  data from the isotopic components, this feature cannot be
+C-M  implemented in PLOTC4.
 C-M
 C-M  Formal parameters are:
 C-M  LEF  - File unit number from which the ENDF file is read.
@@ -790,8 +795,8 @@ C-M         requesting angular distributions (if applicable).
 C-M         completed successfully.
 C-M
 C-M  External routines called:
-C-M   DXSEN1,SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,FINT2D,YTGEOU,FNGAUS,
-C-M   FYTG2D,UNIGRD,FITGRD
+C-M   DXSELM,DXSEND,DXSEN1,SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,
+C-M   FINT2D,YTGEOU,FNGAUS,FYTG2D,UNIGRD,FITGRD
 C-M
 C***** RETRIEVAL OF DIFFERENTIAL AND DOUBLE DIFFERENTIAL DATA **********
 C***** COMPUTER DEPENDENT CODING ***************************************
@@ -867,8 +872,8 @@ C-M              =   3 - Move
 C-M              =  -1 - End of current plot...advance by X,Y
 C-M              = 999 - End of plotting.
 C-M
-C-M   PEN(IPEN)             - Select color.
-C-M        IPEN- Color = 1 to N (N = Any positive integer)
+C-M   PEN(ICOL)             - Select color.
+C-M        ICOL  - Color = 1 to N (N = Any positive integer)
 C-M
 C-M  In order to interface this program for use on any plotter which
 C-M  does not use the above conventions it is merely necessary for the
@@ -996,7 +1001,7 @@ C-M
 C***** PLOTTER/GRAPHICS TERMINAL INTERFACE *****************************
       PARAMETER (MXPNT=90000)
       PARAMETER (MXPGP=10000)
-      PARAMETER (MXRW=200000)
+      PARAMETER (MXRW=200000,MXIS=10)
       INTEGER OUTP
       CHARACTER*40 P4INP,P4LST,C4DAT,EDAT,ZADEF,MFDEF,MTDEF,CHTAB
       CHARACTER*4 VERSES,VERSEZ
@@ -1039,7 +1044,7 @@ C***** PLOTTER/GRAPHICS TERMINAL INTERFACE *****************************
       COMMON/EPSMF6/EP6
       DIMENSION REFX(9),FIELDI(8)
       DIMENSION VERSEZ(5,4)
-      DIMENSION RWO(MXRW)
+      DIMENSION RWO(MXRW),ZEL(MXIS),FRC(MXIS),ZPAGE(MXPNT)
       DATA REFX/'Othe','rs  ',' ',' ',' ',' ',' ',' ',' '/
       DATA BLANK/'    '/
       DATA BLANK1/' '/
@@ -1075,7 +1080,7 @@ C ----CHANGE THIS DATA STATEMENT TO IDENTIFY UPDATED VERSIONS
       ISYM=17
       OPEN (UNIT=INP   ,FILE=P4INP,STATUS='OLD')
       OPEN (UNIT=ITAPE1,FILE=C4DAT,STATUS='OLD')
-      OPEN (UNIT=ITAPE2,FILE=EDAT ,STATUS='OLD')
+      OPEN (UNIT=ITAPE2,FILE=EDAT ,STATUS='UNKNOWN')
       OPEN (UNIT=NTAPE1,FILE=ZADEF,STATUS='OLD')
       OPEN (UNIT=NTAPE2,FILE=MFDEF,STATUS='OLD')
       OPEN (UNIT=NTAPE3,FILE=MTDEF,STATUS='OLD')
@@ -1110,11 +1115,14 @@ C
 C     READ ENDF/B AND/OR EXFOR DATA AND MAKE PLOTS.
 C
 C ----IF COMPARISON MODE READ NEXT SECTION OF ENDF/B DATA.
+c...
+c...      print *,'mymode',mymode
+c...
    20 IF(MYMODE.LT.2) GO TO 30
       IEVEND=0
       CALL GETEV(IEVEND)
 C...
-C...      PRINT *,'MF,MT,IEVEND',MF,MT,IEVEND
+C...  PRINT *,'MF,MT,IEVEND',MF,MT,IEVEND
 C...
 C ----END OF RUN IF END OF ENDF/B DATA.
       IF(IEVEND.NE.0) GO TO 80
@@ -1169,8 +1177,10 @@ C* Unit LTT is for messages from DXSEND (set zero to suppress)
       IF(MT.EQ.9000) MTX=5
 C... Temporary diagnostic printout
       PRINT *,'mfin,mf,mt,zap,kea',MFIN,MF,MTX,NINT(ZAP),KEA
-      CALL DXSEND(ITAPE2,ZAA,ZAP,MFIN,MTX,KEA,EINC,PAR,EP6
-     1           ,XPAGE,YPAGE,RWO,N2,MPT,MXRW,LTT,ELV)
+      NUC=0
+      ZEL(1)=ZAA
+      CALL DXSELM(ITAPE2,NUC,ZEL,FRC,ZAP,MFIN,MTX,KEA,EINC,PAR,EP6
+     1           ,XPAGE,YPAGE,ZPAGE,RWO,N2,MPT,MXRW,LTT,ELV)
 C... Temporary diagnostic printout
       PRINT *,'Zaa,Zap,MTX,Ein,Par,Kea,Np'
      1        ,IFIX(ZAA),NINT(ZAP),MTX,EINC,PAR,IDOUB,N2
@@ -1499,10 +1509,10 @@ C
 C ----DEFINE UPPER DEFAULT ENERGY TO BE 100 MEV.
       DATA EMAX/1.0E+10/
 C ----DEFAULT PAPER SIZE
-      PAPERX0=-0.4947
-      PAPERX1=13.9947
-      PAPERY0=-0.3
-      PAPERY1=10.3
+      PAPERX0= 0
+      PAPERX1=12.5
+      PAPERY0= 0.5
+      PAPERY1=10
 C ----READ INPUT PARAMTERS.
       READ(INP,4030) PAPX0,PAPX1,PAPY0,PAPY1
       IF(PAPX0.NE.0) PAPERX0=PAPX0
@@ -1689,11 +1699,10 @@ C...
       DATA MF10MT,MF10ST/ 0, 0/
       DATA CHST/'G   ','M   ','N   ','4   ','5   '
      1         ,'6   ','7   ','8   ','*   '/
-C....
+C...
 C ----DURING FIRST PASS SKIP ENDF/B TAPE LABEL.
       IF(IPASS.EQ.0) READ(ITAPE2,1000,ERR=100,END=100) HEADER
       IPASS=1
-      IMF6=0
       IEND=0
 C ----FIND BEGINNING OF NEXT SECTION.
    10 READ(ITAPE2,1010) C1,C2,L1,L2,NS,N2,MAT,MF,MT
@@ -1728,11 +1737,11 @@ C     DATA IS REQUESTED. READ DATA UP TO MXPNT POINTS AT A TIME. IF OVER
 C     MXPNT POINTS STORE ALL IN PAGING SYSTEM.
 C
 C ----CHECK FOR MF3/4/5/6 FILE DATA
-C ----IF MF4/5/6, SET THE IMF6 FLAG BUT LOAD THE DATA AFTER EXFOR
+C ----IF MF4/5/6, LOAD THE DATA AFTER EXFOR
    70 IF(MF.EQ.3 .OR. MF.EQ.10) GO TO 78
-      IF(MF.LT.4 .OR. MF.GT.6) GO TO 50
-      IF(MF.NE.4) MT=9000
-   76 IMF6=1
+      IF(MF.LT.4 .OR. (MF.GT.6 .AND. MF.LT.12) .OR. MF.GT.12) GO TO 50
+      IF(MF.NE. 4) MF=6
+      IF(MF.NE. 4) MT=9000
       IEND=0
    77 READ(ITAPE2,1040) MAT,MFS,MTS
       IF(MTS.NE.0) GO TO 77
@@ -3817,9 +3826,9 @@ C...     &   (ABS(EEXT-ENEXT(I)).LE.E2TOL*EEXT)) GO TO 60
       IF(DE1.LE.TS1 .AND. DE2.LE.TS2) GO TO 60
 C...  IF( ABS(FIELDI(1)-ENINC(I)).LT.ETOL*ENINC(I)) GO TO 60
 C...  IF(FIELDI(1).EQ.ENINC(I)) GO TO 60
-
+c...
 c...      print *,EINC,DE1,TS1,EEXT,DE2,TS2
-
+c...
    40 CONTINUE
 C ----NEW ZA/MF/MT. IF POSSIBLE SAVE.
 C ----SUPPRESS PROCESSING OF ANGLE-DEPENDENT ELASTIC CROSS SECTION
@@ -3843,8 +3852,8 @@ C ----SUPPRESS PROCESSING OF ANGLE-DEPENDENT ELASTIC CROSS SECTION
       ENEXT(NZATAB)=EEXT
       I=NZATAB
 c...
-c...      print *,' NEW mf,mt,Ei,Ex',mfx,mtx,einc,eext
-c...     1       ,ref1(1),ref1(2)
+c...  print *,' NEW mf,mt,Ei,Ex',mfx,mtx,einc,eext
+c... 1       ,ref1(1),ref1(2)
 c...
 C ----OLD ZA/MF/MT. UPDATE LAST RECORD COUNT AND POINT COUNT.
    60 MZATAB(6,I)=ILINE
@@ -3898,6 +3907,8 @@ C
 C     SELECT NEXT ZA/MF/MT FROM EXFOR INDEX. END IF NO MORE EXFOR DATA
 C     TO PLOT.
 C
+      MSTAT1=BLANK
+      MSTAT2=BLANK
       KZATAB=KZATAB+1
       IF(KZATAB.GT.NZATAB) GO TO 630
       IPROJT=MZATAB(1,KZATAB)
@@ -3967,15 +3978,10 @@ C...        PRINT *,'MF,MT,KZATAB,EINC,EEXT',MF,MT,KZATAB,EINC,EEXT
 C...
       END IF
 C ----INITIALIZE ALL METASTABLE STATE FLAGS.
-C...  MSTAT1=BLANK
-C...  MSTAT2=BLANK
       MSTAR1=BLANK1
       MSTAR2=BLANK1
-C...  MSTA1X=BLANK
-C...  MSTA2X=BLANK
       MSTA1X=MSTAT1
       MSTA2X=MSTAT2
-C...
       MSTA1R=BLANK1
       MSTA2R=BLANK1
 C ----INITIALIZE STATUS AND CENTER-OF-MASS FLAG.
@@ -4008,7 +4014,7 @@ C ----SET FLAG TO SHOW THAT NEXT POINT IS IN CORE.
   180 DO 510 JEX=1,MAXIE
       IEX=JEX
 C...
-C...         print *,'JEX,IEX,IEXPAS',JEX,IEX,IEXPAS
+C...     print *,'JEX,IEX,IEXPAS',JEX,IEX,IEXPAS
 C...
 C ----SKIP READ IF NEXT POINT IS ALREADY IN CORE.
       IF(IEXPAS.EQ.1) GO TO 200
@@ -4027,7 +4033,7 @@ C     IMMEDIATELY SKIP DATA WHICH CANNOT BE PLOTTED.
 C
 C     NON-MATCHING DISCRETE STATES (GROUND AND METASTABLE)
 C...
-C...    print *,'MSTA2X,MSTAT2,"',MSTA2X(1:1),'"',MSTAT2(1:1),'"',IEX
+C...  print *,'MSTA2X,MSTAT2"',MSTA2X(1:1),'"',MSTAT2(1:1),'"',IEX
 C...
 
       IF(MSTA2X(1:1).EQ.MSTAT2(1:1)) GO TO 202
@@ -4310,7 +4316,7 @@ C ----TWO POINTS READ.
       XEX(IEX)=FIELDI(7)
       DXEX(IEX)=FIELDI(8)
 
-c...    print *,'   iex,e,x',iex,xex(iex),dxex(iex),' going to 510'
+c...  print *,'   iex,e,x',iex,xex(iex),dxex(iex),' going to 510'
 
       GO TO 510
 C ----LEGENDRE COEFFICIENTS.

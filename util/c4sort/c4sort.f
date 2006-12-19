@@ -1,13 +1,12 @@
       PROGRAM C4SORT
 C-Title  : Program C4SORT
 C-Purpose: Sort EXFOR file in C4 format
-C-Author : Andrej Trkov                        e-mail: A.Trkov@iaea.org
-C-A        International Atomic Energy Agency     tel: +43 1 2600 21712
-C-A        Nuclear Data Section                   fax: +43 1 2600 7
-C-A        Wagramerstrasse 5
-C-A        P.O.Box 100
-C-A        A-1400 Vienna
-C-A        AUSTRIA
+C-Author : Andrej Trkov, IAEA
+C-A        Present address:                       e-mail: Andrej.Trkov@ijs.si
+C-A        "Jozef Stefan" Institute               tel: +386 1 5885 324
+C-A        Jamova 39
+C-A        1000 Ljubljana
+C-A        Slovenia
 C-Version: Original code March 2001
 C-V  01/05 Increase MXEN from 2000 to 5000 (A.Trkov)
 C-V  03/07 Implement ALIASLV to modify level energies (A.Trkov)
@@ -26,6 +25,7 @@ C-V        - Match discrete level energies to RIPL database (A.Trkov).
 C-V  05/11 - Fix bugs.
 C-V  05/12 - Increase MXIR from 12000 to 80000 (A.Trkov)
 C-V        - Increase MXEN from 40000 to 80000 (A.Trkov)
+C-V  06/12 Another fix to format reading metastable targets (A.Trkov)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -147,9 +147,11 @@ C-M    LIN  1  Input instructions file, if not read from default input.
 C-M    LC4  2  Source EXFOR data file in C4 format, if not read from
 C-M            the default input.
 C-M    LOU  3  Sorted EXFOR data file in C4 format (output).
-C-M    LSC  4  C4SORT.TMP scratch file.
+C-M    LES  4  Cross section standards in ENDF format.
 C-M    LKB  5  Default input.
 C-M    LTT  6  Default output.
+C-M    LSC  7  C4SORT.TMP scratch file.
+C-M    LSC  8  C4SORT.TM2 second scratch file.
 C-M
 C-M  Dimension limits:
 C-M    MXEN - maximum number of EXFOR entries or sections by which
@@ -164,11 +166,11 @@ C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-
-      PARAMETER       (MXEN=80000,MXAL=20,LCH=52,MXIR=80000)
-      PARAMETER       (MEL1=20)
+      PARAMETER       (MXEN=80000,MXAL=20,LCH=52,MXIR=80000,MXMT=30)
+      PARAMETER       (MEL1=20,MXNP=10000,MXRW=20000)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*80     DPATH
-      CHARACTER*40     FLIN,FLC4,FLOU,FLSC
+      CHARACTER*40     BLNK,FLIN,FLC4,FLOU,FLES,FLSC,FLS2
       CHARACTER*35     REF
       CHARACTER*20     ZAMT,CH20,ELL(MXIR)
       CHARACTER*15     EIN
@@ -176,21 +178,26 @@ C-
       CHARACTER*(LCH)  ENT(MXEN)
       CHARACTER*9      AOU,POU,ELV,ELW
       CHARACTER*3      LB3
-      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR), CHAR1, CHAR2
+      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR)
       LOGICAL          EXST
       DIMENSION        IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
      &                ,NSE(MXEN),ID3(MXIR),ID4(MXIR)
+     &                ,MATS(MXMT),MTS(MXMT),ELO(MXMT),EHI(MXMT)
+     &                ,EST(MXNP),XST(MXNP),DST(MXNP),RWO(MXRW)
       EQUIVALENCE     (ENT(1),EN1(1,1))
       EQUIVALENCE     (ELL(1),EL1(1,1))
 C* Preset the ZA and reference strings
       DATA REF/'###################################'/
       DATA ZAMT/'####################'/
 C* Files and logical file unit numbers
-      DATA FLIN/'C4SORT.INP'/
+      DATA BLNK/'                                        '/
+     1     FLIN/'C4SORT.INP'/
      2     FLC4/'C4.DAT'/
      3     FLOU/'C4.DAT'/
-     4     FLSC/'C4SORT.TMP'/
-      DATA LIN,LC4,LOU,LSC,LKB,LTT/ 1, 2, 3, 4, 5, 6 /
+     4     FLES/'                                        '/
+     7     FLSC/'C4SORT.TMP'/
+     7     FLS2/'C4SORT.TM2'/
+      DATA LIN,LC4,LOU,LES,LKB,LTT,LSC,LS2/ 1, 2, 3,-4, 5, 6, 7, 8 /
       NSET=0
       MPG =20000
       FLV =-1
@@ -211,13 +218,13 @@ C* C4SORT Input exists -Process the input file
    14 OPEN(UNIT=LIN,FILE=FLIN,STATUS='OLD')
       IER=0
       NALI=MXAL
-      CALL C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
+      CALL C4SINP(LIN,LTT,FLC4,FLOU,FLES,NALI,ALIA,DPATH,LPATH,IER)
       CLOSE(UNIT=LIN)
       IF(IER.EQ.0) GO TO 16
 C* Remedial action if fatal error on input is encountered:
 C* Print a warning to default output and try reading default input
    15 NALI=MXAL
-      CALL C4SINP(LKB,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
+      CALL C4SINP(LKB,LTT,FLC4,FLOU,FLES,NALI,ALIA,DPATH,LPATH,IER)
       FLIN='Keyboard'
       IF(IER.EQ.0) GO TO 16
 C* Try input/output ENDF files from default input/output
@@ -225,21 +232,118 @@ C* Try input/output ENDF files from default input/output
       LOU=LTT
       LTT=0
       MATH=0
-      GO TO 17
+      GO TO 19
 C*
 C* Input instructions processed - start processing the C4 file
    16 OPEN (UNIT=LC4,FILE=FLC4,STATUS='OLD')
       OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
+c...
+c...      print *,'standards file',fles,les
+c...
+      IF(FLES.NE.BLNK) THEN
+C*
+C* Process the cross section standards file to define ratios
+        LES=ABS(LES)
+        OPEN (UNIT=LES,FILE=FLES,STATUS='OLD',ERR=802)
+        CALL LSTSTD(LES,MXMT,MXNP,NMT,MATS,MTS,ELO,EHI,EST,XST)
+c...
+c..    print *,'Standard reactions nmt',nmt
+c...    do j=1,nmt
+c...      print *,mats(j),mts(j),elo(j),ehi(j)
+c...    end do
+c...
+C* Convert ratios to cross sections when possible - write to scratch
+        OPEN (UNIT=LS2,FILE=FLS2,STATUS='UNKNOWN')
+        IZA1=-1
+        MT1 =-1
+   17   READ (LC4,901,END=18) REC
+        READ (REC(13:15),*) MF
+        IF(MF.EQ.203) THEN
+          READ(REC(59:76),*) RMT,RZA
+          MTR =IFIX(RMT)
+          IZAR=10*IFIX(RZA)
+          DO I=1,NMT
+            IF(MATS(I).EQ.IZAR .AND. MTS(I).EQ.MTR) THEN
+C*            Matching standard reaction found - check energy            
+C...
+C...            print *,'"',rec( 1:49),'"'
+C...            print *,'Require standard mat,mt',izar,mtr,iza1,mt1
+C...
+              READ (REC(23:31),931,ERR=801) FIN
+              IF(FIN.GE.ELO(I) .AND. FIN.LE.EHI(I)) THEN
+C*              Energy range of the standard is valid - retrieve              
+                IF(MTR.NE.MT1 .OR. IZAR.NE.IZA1) THEN
+C...
+c...              print *,'      Load Standard mf,mt,za',mf,mtr,izar
+C...
+                  MF1 =3
+                  MT1 =MTR
+                  IZA1=IZAR
+                  ZA1 =IZAR*0.1
+                  MST =0
+                  CALL GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
+     &                       ,NP,EST,XST,DST,RWO,MXRW)
+                END IF
+                INR=2
+C*              Cross section standard and its absolute uncertainty
+                RR=FINTXS(FIN,EST,XST,NP,INR,IER)
+                DR=FINTXS(FIN,EST,DST,NP,INR,IER)
+C*              Measured cross section ratio and its absolute uncertainty
+                READ (REC(41:49),931,ERR=801) FXS
+                READ (REC(50:58),931,ERR=801) DXS
+C...
+c...            print *,'np,fin,fxs,dxs,rr,dr',np,fin,fxs,dxs,rr,dr
+C...
+C*              Sum errors from measurement and standard
+                DXS=DXS/FXS
+                DR =DR /RR
+                DXS=SQRT(DXS*DXS+DR*DR)
+                FXS=FXS*RR
+                DXS=DXS*FXS
+                CALL CH9PCK(FXS,POU)
+                REC(41:49)=POU
+                CALL CH9PCK(DXS,POU)
+                REC(50:58)=POU
+                REC(59:76)='                  '
+C*              Label reaction as converted from ratio by inserting "R"                
+                II=122
+                DO WHILE(II.GT.98 .AND. REC(II-1:II-1).EQ.' ')
+                  II=II-1
+                END DO
+                REC(II:II)='R'
+C...
+c...                print *,ii,'"',rec(98:ii),'"'
+C...
+                REC(12:15)='   3'
+                RC1=REC
+                WRITE(LS2,901) REC
+                GO TO 17
+              END IF
+            END IF
+          END DO
+        END IF
+C* Suppress entry if the same is preceeded by the ratio entry
+        IF(REC(1:40).NE.RC1(1:40) .OR.
+     &     REC(98:II-1).NE.RC1(98:II-1) .OR.
+     &     REC(II+1:130).NE.RC1(II+1:130))
+     &  WRITE(LS2,901) REC
+        GO TO 17
+C* Reaction ratios converted, C4 file copied to scratch-2        
+   18   CLOSE(UNIT=LC4)
+        LC4=LS2
+        REWIND LS2
+      END IF
 C* Write the banner to output
       WRITE(LTT,900) ' C4SORT - Sort data in a C4 file        '
       WRITE(LTT,900) ' -------------------------------        '
-      WRITE(LTT,900)
+      WRITE(LTT,900) BLNK
       WRITE(LTT,900) '              Input instructions file : ',FLIN
       WRITE(LTT,900) '       Source EXFOR file in C4 format : ',FLC4
       WRITE(LTT,900) '       Sorted EXFOR file in C4 format : ',FLOU
+      IF(LES.GT.0)
+     &WRITE(LTT,900) '      Cross sect.React.Standards file : ',FLES
       WRITE(LTT,900) ' Directory path to nuclear level files: ',DPATH
-
-      WRITE(LTT,900)
+      WRITE(LTT,900) BLNK
       IF(NALI.GT.0) THEN
         WRITE(LTT,900) ' Aliased quantities:                    '
         WRITE(LTT,900) ' Old:  MAT  MF  MT      ELVL New:  MAT  '
@@ -248,7 +352,7 @@ C* Write the banner to output
           WRITE(LTT,*) '    ',ALIA(1,I),ALIA(3,I),ALIA(2,I),ALIA(4,I)
         END DO
       END IF
-   17 CONTINUE
+   19 CONTINUE
 C*
 C* Begin processing the source file
       NEN=0
@@ -258,9 +362,9 @@ C* Begin processing the source file
 C* Copy records to scratch until the reference changes
    20 NSET=NSET+1
       READ (LC4,901,END=200) REC
-
-c...      print *,nset,'"',rec(1:30)
-
+c...
+c...  print *,'nset',nset,'"',rec(1:30)
+c...
    24 IF(REC(2:20).EQ.'                   ') GO TO 200
 C* Change any alias ZA/MF/MT designations
       CALL CALIAS(NALI,ALIA,REC)
@@ -276,9 +380,13 @@ C* Adjust the level energy if necessary (and possible)
         IF(LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') THEN
           READ (REC(1:20),902,ERR=801) IZA
           FLV0=FLV
+c...
+c...      print *,'Calling MCHLVL',IZA,FLV,LPATH,IER
+c... &           ,'"',DPATH(1:LPATH),'"'
+c...
           CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
 c...
-c...          print *,'"',rec(1:20),'"',iza,flv0,flv,ier
+c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
         END IF
         WRITE(ELW,931) FLV
@@ -316,7 +424,7 @@ C...      END IF
 C* Save the number of points for the previous entry
       IF(NEN.GT.0) NSE(NEN)=NSET
 C...
-C...      if(nen.gt.0) print *,'      at20 nen,nset',nen,nset
+c...  if(nen.gt.0) print *,'      at 20 nen,nset',nen,nset
 C...
 C* Save the new record entry
       WRITE(LSC,901) REC
@@ -350,7 +458,7 @@ C* Identify outgoing particle (if relevant)
       IFIN=NINT(FIN)
       IFLV=NINT(FLV)
 c...
-c...      print '(i5,3a)',nen,ent(nen),' ',ref//' in30'
+c...  print '(i5,3a)',nen,ent(nen),' ',ref//' in30'
 c...
       NSET=0
 C* Proceed to next record
@@ -402,9 +510,13 @@ C* Adjust the level energy if necessary (and possible)
       IF(FLV.GT.0 .AND. (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC')) THEN
         READ (REC(1:20),902,ERR=801) IZA
         FLV0=FLV
+c...
+c...      print *,'Calling MCHLVL',IZA,FLV,LPATH,IER
+c... &           ,'"',DPATH(1:LPATH),'"'
+c...
         CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
 c...
-c...          print *,'"',rec(1:20),'"',iza,flv0,flv,ier
+c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
         WRITE(ELW,931) FLV
         REC(77:85)=ELW
@@ -483,7 +595,7 @@ C* Re-sequence double differential data by angles/incident energies
       ZAMT=REC(1:20)
       IFIN=NINT(FIN)
 c...
-c...        if(nen.gt.0) print *,'      at60 nen,nset',nen,nset
+c...    print *,'      at 60 nen,nset',nen,nset
 c...
       IR  =0
    62 IR  =IR+1
@@ -508,7 +620,12 @@ C* Sort MF6 by angle and outgoing energy
         ELL(IR)=ELW//POU//'  '
       END IF
 C* Read the next record
-      READ (LC4,901,END=200) REC
+      IEN=1
+      READ (LC4,901,END=64) REC
+      IEN=0
+c...
+c...  print *,'ir',ir,'"',rec(1:30)
+c...
       IF(REC(1:20).EQ.'                    ') GO TO 64
 C* Change any alias ZA/MF/MT designations
       CALL CALIAS(NALI,ALIA,REC)
@@ -516,6 +633,9 @@ C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
 C* Decode the incident particle energy
       READ (REC(23:31),931,ERR=801) FIN
+c...
+c...  print *,'zamt,rec,ref',zamt,'"',rec(1:30),rec(98:132)
+c...
 C* Check for change in IZI, IZA, MF, MT, reference or incident energy
       IF(REC( 1: 20).NE.ZAMT) GO TO 64
       IF(REC(98:132).NE. REF) GO TO 64
@@ -553,8 +673,8 @@ C* On change of incident energy(MF4) or angle(MF6), make a new record entry
 C* Save the number of points for the previous entry
           IF(NEN.GT.0) NSE(NEN)=NSET
 c...
-c...          if(nen.gt.0) print *,'      at64 nen,nset',nen,nset
-c...          print *,'ELL,pou',ch20,pou
+c...      if(nen.gt.0) print *,'      at64 nen,nset',nen,nset
+c...      print *,'ELL,pou',ch20,pou
 c...
 C* Save the new entry data
           IF(NEN.GE.MXEN) STOP 'C4SORT ERROR - MXEN Limit exceeded'
@@ -597,13 +717,13 @@ c        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
 c      END DO
 c      STOP
 c
-      IF(REC(1:20).EQ.'                    ') GO TO 200
+      IF(IEN.EQ.1. OR. REC(1:20).EQ.'                    ') GO TO 200
       GO TO 24
 C*
 C* Source C4 file processed
   200 IF(NEN.GT.0) NSE(NEN)=NSET
 c...
-c...        if(nen.gt.0) print *,'      at200 nen,nset',nen,nset
+c...    if(nen.gt.0) print *,'      at 200 nen,nset',nen,nset
 c...
       WRITE(LTT,921) ' Number of EXFOR entries to sort      : ',NEN
       WRITE(LTT,921) ' Total number of records              : ',JLN
@@ -661,26 +781,10 @@ C* Rewind if next entry ILN appears before the current buffer
             END DO
           END DO
           JJ=JLN-I1+1
+c...
 c...          print *,'i1,i2,jln',i1,i2,jln,JJ
+c...
           REC=RC6(JJ)
-CMH Move year to adjucent to the accession number
-          DO ichar=98,122
-             IF(REC(ichar:ichar) .EQ.'(' ) THEN
-                CHAR1=REC(ichar+1:ichar+1)
-                CHAR2=REC(ichar+2:ichar+2)
-                REC(ichar:ichar)=' '
-                REC(ichar+1:ichar+1)=' '
-                REC(ichar+2:ichar+2)=' '
-                REC(ichar+3:ichar+3)=' '
-                REC(119:119)='('
-                REC(120:120)=CHAR1
-                REC(121:121)=CHAR2
-                REC(122:122)=')'
-                GOTO 599
-             ENDIF
-          ENDDO
-  599     CONTINUE        
-          
 C* Suppress printout of negative cross sections
           READ (REC,941,ERR=801) MF,XS
           IF(MF.NE.3 .OR. XS.GT.0) WRITE(LOU,901) REC
@@ -704,6 +808,9 @@ C* Error trap
       WRITE(*,900) '"'//REC(1:39),REC(40:78)//'"'
       STOP 'C4SORT ERROR - reading C4 file'
 C*
+  802 WRITE(*,900) ' C4SORT ERROR - Non existent standards: ',FLES
+      STOP 'C4SORT ERROR - Non existen standards file'
+C*
   900 FORMAT(2A40)
   901 FORMAT(A132)
   902 FORMAT(5X,I6)
@@ -714,17 +821,476 @@ C*
   938 FORMAT(I9)
   941 FORMAT(12X,I3,25X,F9.0)
       END
-      SUBROUTINE C4SINP(LIN,LTT,FLC4,FLOU,NALI,ALIA,DPATH,LPATH,IER)
+      SUBROUTINE CH9PCK(FLT,CH9)
+C-Title  : Subroutine CH9PCK
+C-Purpose: Pack floating point number into 9-character fiels
+      CHARACTER*9  CH9
+      CHARACTER*15 C15
+      WRITE(C15,'(1P,E15.8)') FLT
+      L=15
+      IF(C15(14:14).EQ.'0') THEN
+       L=14
+       C15(14:14)=C15(15:15)
+      END IF
+      CH9=C15(1:9)
+      K=L-12
+      DO I=1,K
+        CH9(9-K+I:9-K+I)=C15(L-K+I:L-K+I)
+      END DO
+      RETURN
+      END
+      SUBROUTINE LSTSTD(LES,MXMT,MXNP,NMT,MATS,MTS,ELO,EHI,EN,XS)
+C-Title  : Subroutine LSTSTD
+C-Purpose: List the contents of the ENDF Cross Section Standards file
+      PARAMETER (MXNB=40)
+      CHARACTER*66 C66
+      DIMENSION  MATS(MXMT),MTS(MXMT),ELO(MXMT),EHI(MXMT)
+     &          ,EN(MXNP),XS(MXNP)
+      DIMENSION  NBT(MXNB),INT(MXNB)
+      NMT=0
+      REWIND LES
+      MAT=0
+      MT0=0
+C* Start processing the ENDF file
+   20 CALL RDTEXT(LES,MAT,MF,MT,C66,IER)
+      IF(IER.NE. 0) GO TO 90
+      IF(MT.EQ.MT0) GO TO 20
+      MT0=MT
+      IF(MT.EQ.  0) GO TO 20
+      IF(MF.NE.  3) GO TO 20
+C* Identified MF3 section
+      READ (C66,92) ZA
+C* Read cross sections from the TAB1 record
+      CALL RDTAB1(LES,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,MXNP,IER)
+      IF(IER.EQ. 9 ) STOP 'LSTSTD ERROR - MXNP Limit exceeded'
+      IF(N1.GT.MXNB) STOP 'LSTSTD ERROR - MXNB Limit exceeded'
+      LIS0=0
+      IZA =10*NINT(ZA)+LIS0
+      NMT=NMT+1
+      MATS(NMT)=IZA
+c...
+c...        print *,nmt,mats(nmt),mt,N1,N2
+c...
+      MTS(NMT) =MT
+      ELO(NMT)=EN(1)
+      IF(ABS(ELO(NMT)-0.0253).LT.1.E-6) ELO(NMT)=EN(2)
+      EHI(NMT)=EN(N2)
+      IF(IER.EQ.0) GO TO 20
+   90 RETURN
+C*
+   92 FORMAT(2F11.0,5I11)   
+      END      
+      SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
+     &                 ,NP,EN,XS,DX,RWO,MXRW)
+C-Title  : Subroutine LSTSTD
+C-Purpose: Get cross section and its absolute uncertainty
+      PARAMETER (MXNB=40)
+      CHARACTER*66 C66
+      DIMENSION  EN(MXNP),XS(MXNP),DX(MXNP),RWO(MXRW)
+      DIMENSION  NBT(MXNB),INT(MXNB)
+C*
+      REWIND LES
+      DO I=1,MXNP
+        DX(I)=0
+      END DO
+      NP =0
+      I33=0
+C* If MF10, define metastable state
+      JST=1
+      IF(MF1.EQ.10) JST=MST+1
+      MF=MF1
+      MT=MT1
+C*
+C* Search the ENDF file for section MT1 in file MF3
+      CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
+      IF(IER.NE. 0) GO TO 90
+C*      
+C* Reaction found - read cross sections from the TAB1 record
+      IF(MF.EQ.10 .AND. JST.GT.N1) THEN
+C*      Requested metastable state higher than available in MF10
+        NP=0
+        RETURN
+      END IF
+      DO J=1,JST
+        CALL RDTAB1(LES,QM,QI,L1,L2,N1,NP,NBT,INT,EN,XS,MXNP,IER)
+        IF(IER.EQ. 9 ) STOP 'GETSTD ERROR - MXNP Limit exceeded'
+        IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
+      END DO
+      IF(N1.NE.1 .OR. INT(1).NE.2) THEN
+        PRINT *,'WARNING - used lin-lin interpolation instead of',INT(1)
+      END IF
+c...
+c...      print *,'done mf/mt',mf,mt
+c...
+      IF(MF1.NE.3) GO TO 90
+      MF=33
+      MT=MT1
+C*
+C* Search the ENDF file for section MT1 in file MF33
+      CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
+      IF(IER.NE. 0) GO TO 90
+c...
+c...      print *,'Found mf,mt',mf,mt
+c...
+C*
+C* Reaction found - read the covariance matrix
+      MTL=L2
+      NL =N2
+C* If reaction is a constituent of a lumped reaction uncertainties
+C* cannot be calculated
+      IF(MTL.GT.0) GO TO 90
+C... Current coding limitation
+      IF(NL.GT.1) THEN
+        PRINT *,'WARNING - Multiple sections in MF33 for MT',MT
+        NL=1
+      END IF
+C...
+C* Loop over all sections
+      DO I=1,NL
+        CALL RDHEAD(LES,MAT,MF,MT,XMF1,XLFS1,MATX,MTX,NC,NI,IER)
+        IF(IER.NE.0) STOP 'RDHEAD ERROR reading MF33 (2)'
+        IF(MATX.NE.0 .OR. MTX.NE.MT1) GO TO 90
+C... Current coding limitation
+        IF(NC.GT.0) THEN
+          PRINT *,'WARNING - NC sections present in MF33 for MT',MT
+          GO TO 90
+        END IF
+C...
+        DO J=1,NI
+          CALL RDLIST(LES,C1,C2,LT,LB,NT,NE,RWO,MXRW,IER)
+          IF(IER.NE.0) THEN
+            PRINT *, 'RDHEAD ERROR reading LIST in MF33',IER
+            GO TO 90
+          END IF
+          IF(LB.EQ.1) THEN
+C* Process section with LB=1 representation
+            IF(LT.NE.0) THEN
+C*            Warn about unsupported sections
+              PRINT *, 'RDHEAD WARNING - unsupported MT/LB/LT',MT,LB,LT
+            END IF
+            LE =1
+            LD =LE+NE
+            LL =LD+NE
+C*          Sort array to separate out energy and variance vector
+            DO K=1,NT
+              RWO(LL-1+K)=RWO(K)
+            END DO
+            DO K=1,NE
+              RWO(LE-1+K)=RWO(LL+2*K-2)
+              RWO(LD-1+K)=RWO(LL+2*K-1)
+            END DO
+            INR=1
+C*          Approximately convert variances to lin-lin form
+c...            ZR=0
+c...            DD=MAX(ZR, RWO(LD)-(RWO(LD+1)-RWO(LD))/2 )
+c...            D2=RWO(LD)
+c...            DO K=3,NE
+c...              D1=D2
+c...              D2=RWO(LD-2+K)
+c...              RWO(LD-2+K)=(D1+D2)/2
+c...            END DO
+c...            RWO(LD)=DD
+c...            RWO(LD-1+NE)=D2+(D2-D1)/2
+c...            INR=2
+C*          Interpolate variance to cross section grid
+            INR=1
+            DO K=1,NP
+              EIN=EN(K)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DX(K)=DX(K)+DD
+c...
+c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
+c...
+            END DO
+          ELSE IF(LB.EQ.5) THEN
+C* Process section with LB=5 representation
+            LS=LT
+            LD=NE+1
+            LL=LD
+            DO K=2,NE
+c...
+c...                print *,'      ee,dx',rwo(k-1),rwo(ll)
+c...
+C*            Pick diagonal elements
+              RWO(LD-2+K)=RWO(LL)
+C*            Increment index to next diagonal (asymmetric/symmetric)
+              IF(LS.EQ.0) THEN
+                LL=LL+NE-1
+              ELSE
+                LL=LL+NE+1-K
+              END IF
+            END DO
+            INR=1
+C*          Approximately convert variances to lin-lin form
+C...            ZR=0
+C...            DD=MAX(ZR, RWO(LD)-(RWO(LD+1)-RWO(LD))/2 )
+C...            D2=RWO(LD)
+C...            DO K=3,NE
+C...              D1=D2
+C...              D2=RWO(LD-2+K)
+C...              RWO(LD-2+K)=(D1+D2)/2
+C...            END DO
+C...            RWO(LD)=DD
+C...            RWO(LD-1+NE)=D2+(D2-D1)/2
+C...            INR=2
+C*          Interpolate variance to cross section grid
+            DO K=1,NP
+              EIN=EN(K)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DX(K)=DX(K)+DD
+c...
+c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
+c...
+            END DO
+          ELSE
+C* Warn about unsupported sections
+            PRINT *, 'RDHEAD WARNING - unsupported LB in MT',MT,LB
+          END IF
+        END DO
+        I33=I33+1
+      END DO
+C*
+C* Convert variance to absolute uncertainty
+   90 IF(I33.GT.0) THEN
+        DO K=1,NP
+          EIN=EN(K)
+          XSI=XS(K)
+          DDI=DX(K)
+          DX(K)=SQRT(DDI)*XSI
+        END DO
+      END IF
+C* All processing completed
+      RETURN
+      END      
+      SUBROUTINE FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+C-Title  : Subroutine FINDMT
+C-Purpose: Find specified reaction in an ENDF file
+C-Description:
+C-D  The routine finds the specified material, file or section
+C-D  in an ENDF file. The material may be characterised by the
+C-D  ZA0 number defined as Z*1000+A+LIS0/10 (the decimal point
+C-D  allows for isomeric states). Alternately, if ZA0<0, the
+C-D  absolute integer value is interpreted as the required MAT
+C-D  number. If MF and MT are non-zero, the file is scanned
+C-D  until the value on the file matches the input value.
+C-D
+C-D  Notes:
+C-D  - The search for metastable states by ZA0 is only possible
+C-D    if MF1 MT451 data are on the file.
+C-D  - In this case the actual file position is on the second
+C-D    record of this section.
+C-D  - Once the required ZA is identified, the ZA0 value is
+C-D    redefined to -MAT to search by the MAT number in
+C-D    consecutive searches, if required.
+C-D
+C-D  Error flags:
+C-D  IER = 0  Normal termination.
+C-D        1  Specified material not found.
+C-D        2  End-of-file before material found.
+C-D        3  Read error.
+C-
+      CHARACTER*66 C66
+C* Initialise
+      IER= 0
+      MF0=MF
+      MT0=MT
+      MF =-1
+      MT =-1
+      MMM=-1
+      ZA = 0
+      IF     (ZA0.LT.0) THEN
+        MAT0=-ZA0+0.1
+      ELSE IF(ZA0.GT.0) THEN
+        IZA0=ZA0*10
+      ELSE
+        CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+        IF(IER.GT.0) GO TO 80
+        MAT0=-1
+        GO TO 21
+      END IF
+C*
+C* Loop to find the specified material
+   20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LT.0) GO TO 80
+      IF(ZA0.LT.0) THEN
+C* Case: Search by MAT number
+        IF(MAT.NE.MAT0) GO TO 20
+      ELSE
+C* Case: Search by ZA number (including decimal LIS0)
+        IF(MT.EQ.0) GO TO 20
+        IF(MAT.EQ.MMM ) GO TO 20
+        MMM=MAT
+        READ (C66,92) ZA
+        IZA=ZA*10
+        IF(MF.EQ.1. AND. MT.EQ.451) THEN
+          READ (LEF,92) DD,DD,LIS,LIS0
+          IZA=IZA+LIS0
+        END IF
+        IF(IZA.NE.IZA0) GO TO 20
+        ZA=IZA*0.1
+        ZA0=-MAT
+      END IF
+C* Loop to find the file number
+   21 IF(MF0.EQ. 0) GO TO 30
+   22 IF(MF0.EQ.MF) GO TO 30
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
+      GO TO 22
+C* Loop to find the reaction type number
+   30 IF(MT0.EQ. 0) GO TO 40
+   32 IF(MT0.EQ.MT) GO TO 40
+      CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+      IF(IER.GT.0 .OR. MAT.LE.0) GO TO 80
+      IF(MF0.GT.0 .AND. MF.GT.MF0) GO TO 20
+      GO TO 32
+C* Normal termination
+   40 READ (C66,92) ZA,AW,L1,L2,N1,N2
+      RETURN
+C*
+C* Error traps
+   80 IER=IER+1
+      RETURN
+C*
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
+      END
+      FUNCTION FINTXS(EIN,EN,XS,NP,INR,IER)
+C-Title  : Function FINTXS
+C-Purpose: Interpolate the cross section table to EIN
+      DIMENSION EN(NP),XS(NP)
+      IF     (EIN.LT.EN(1)) THEN
+        FINTXS=XS(1)
+        RETURN
+      ELSE IF(EIN.GT.EN(NP)) THEN
+        FINTXS=XS(NP)
+        RETURN
+      END IF
+      DO I=2,NP
+        I2=I
+        IF(EN(I).GE.EIN) GO TO 22
+      END DO
+      IER=11
+   22 I1=I2-1
+      IF(INR.EQ.2) THEN
+        FF=XS(I1)+(XS(I2)-XS(I1))*(EIN-EN(I1))/(EN(I2)-EN(I1))
+      ELSE
+        FF=XS(I1)
+      END IF
+      FINTXS=FF
+      RETURN
+      END
+      SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
+C-Title  : RDTEXT Subroutine
+C-Purpose: Read a text record to an ENDF file
+      CHARACTER*66  REC
+      READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
+      IER=0
+      RETURN
+   81 IER=1
+      RETURN
+   82 IER=2
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
+C-Title  : Subroutine RDHEAD
+C-Purpose: Read an ENDF HEAD record
+C-Description:
+C-D  The HEAD record of an ENDF file is read. The following error
+C-D  conditions are trapped by setting the IER flag:
+C-D    IER = 0  Normal termination
+C-D          1  End-of-file
+C-D          2  Read error
+C-
+      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      RETURN
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
+      END
+      SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
+C-Title  : Subroutine RDTAB1
+C-Purpose: Read an ENDF TAB1 record
+C-Description:
+C-D  The TAB1 record of an ENDF-formatted file is read.
+C-D  Error condition:
+C-D    IER=1  End-of-file
+C-D        2  Read error
+C-D        9  Available field length NMX is exceeded.
+C-
+      DIMENSION    NBT(1),INR(1)
+      DIMENSION    EN(NMX), XS(NMX)
+C*
+      IER=0
+      READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
+      JP=N2
+      IF(N2.GT.NMX) THEN
+        JP=NMX
+        IER=9
+      END IF
+      READ (LEF,904,END=100,ERR=200) (EN(J),XS(J),J=1,JP)
+      RETURN
+  100 IER=1
+      RETURN
+  200 IER=2
+      RETURN
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6I11)
+  904 FORMAT(6F11.0)
+      END
+      SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
+C-Title  : Subroutine RDLIST
+C-Purpose: Read an ENDF LIST record
+C-Description:
+C-D LEF     ENDF file unit number
+C-D C1...N2 parameters of the LIST record
+C-D VK      Array of the LIST 
+C-D MVK     Maximum size of the VK array
+C-D IER     Error flag with the following meaning:
+C-D     -1  Maximum array size exceeded
+C-
+      DOUBLE PRECISION RUFL,RR(6)
+      DIMENSION    VK(1)
+C*
+      READ (LEF,902) C1,C2,L1,L2,N1,N2
+      IF(N1+5.GT.MVK) THEN
+        IER=-1
+        RETURN
+      END IF
+      IF(N1.EQ.0) RETURN
+C* Read the LIST2 entries, watch for underflow
+      NUFL=0
+      RUFL=1
+      DO J=1,N1,6
+        READ (LEF,903) (RR(K),K=1,6)
+        DO K=1,6
+          IF(RR(K).NE.0 .AND. ABS(RR(K)).LT.1.E-30) THEN
+            NUFL=NUFL+1
+            IF(ABS(RR(K)).LT.ABS(RUFL)) RUFL=RR(K)
+          END IF
+          VK(J-1+K)=RR(K)
+        END DO
+      END DO
+      IF(NUFL.GT.0) THEN
+        PRINT *,' RDLIST WARNING - Underflow conditions',NUFL
+        PRINT *,'                        Minimum number',RUFL
+      END IF
+      RETURN
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6F11.0)
+      END
+      SUBROUTINE C4SINP(LIN,LTT,FLC4,FLOU,FLES,NALI,ALIA
+     &                 ,DPATH,LPATH,IER)
 C-Title  : Subroutine C4SINP
 C-Purpose: Process input instructions for C4SORT
       PARAMETER    (MXKW=10)
       CHARACTER*80  DPATH
-      CHARACTER*40  FLC4,FLOU
+      CHARACTER*40  FLC4,FLOU,FLES
       CHARACTER*14  WORD,ALIA(4,1)
       CHARACTER*10  KWRD(MXKW),REC(8),C10
 C*
       DATA KWRD
-     1/'$* C4SORT ','   FLC4IN ','   FLC4OU ','          ','          '
+     1/'$* C4SORT ','   FLC4IN ','   FLC4OU ','   FLESTD ','          '
      1,'   ALIAS  ','   ALIASLV','   DPATH  ','          ','   ENDC4S '/
 C* Set upper limit on alias and preset actual number
       MXAL=NALI
@@ -788,8 +1354,10 @@ C* '   FLC4IN '
 C* '   FLC4OU '
   130 FLOU=REC(2)//REC(3)//REC(4)//REC(5)
       GO TO 90
+C* '   FLESTD '
+  140 FLES=REC(2)//REC(3)//REC(4)//REC(5)
+      GO TO 90
 C* Unused keywords
-  140 CONTINUE
   150 CONTINUE
       GO TO 90
 C* '   ALIAS  '
@@ -981,10 +1549,13 @@ C-
       CHARACTER*80     DPATH
       DIMENSION        ELVL(MXLVL)
 C*
-      SAVE IZA0,IFND,ELVL
+      SAVE IZA0,IFND,NLVL,ELVL
 C*
       DATA IZA0,IFND/ -1, 0 /
 C*
+c...
+c...      print *,'MCHLVL IZA,IZA0',IZA,IZA0
+c...
       IF(IZA.NE.IZA0) THEN
         IZ=IZA/1000
         IA=IZA-IZ*1000
@@ -998,7 +1569,7 @@ c...      STOP    'ERROR Reading RIPL energy level file'
         END IF
       END IF
 c...
-c...      print *,'iza,iza0,ifnd,ier',iza,iza0,ifnd,ier
+c...      print *,'MCHLVL iza,iza0,ifnd,ier',iza,iza0,ifnd,ier
 c...
       IZA0=IZA
       IF(IFND.NE.1) THEN
@@ -1100,5 +1671,6 @@ C     Levels' file not found
       return
 C     Isotope not found
   300 ierr = 2
+      CLOSE (13)
       return
       end

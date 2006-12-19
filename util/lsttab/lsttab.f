@@ -14,6 +14,9 @@ C-V  05/02  - Read projectile ZA from columns 79-84 (Trkov)
 C-V         - Fix DXSEXF routine to test for projectile.
 C-V  05/04  Increase limit on MXP from 200000 to 300000 (Trkov).
 C-V  05/06  Check residual production for MF3/MT9000 (Trkov).
+C-V  06/02  Update for consistency with DXSEND upgrade to provide
+C-V         uncertainties, if available.
+C-V  06/03  Implement retrieval of cross sections at fixed angle.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -51,13 +54,14 @@ C-M   FLLG LLG=9  Log-file for error messages and warnings.
 C-M
 C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=300000,MXR=600000,MXEN=5,MXIS=10)
+      PARAMETER   (MPT=1000,MXP=300000,MXR=600000,MXEN=10,MXIS=10)
       CHARACTER*1  CM
       CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG
      1            ,FLEF(MXEN),COM(MXEN)
       CHARACTER*84 COM1,COM2
       CHARACTER*84 C84,RFX(MPT)
-      DIMENSION    ES(MXP),SG(MXP),RWO(MXR),ZEL(MXIS),FRC(MXIS)
+      DIMENSION    ES(MXP),SG(MXP),UG(MXP)
+     &            ,RWO(MXR),ZEL(MXIS),FRC(MXIS)
 C* Default logical file units
       DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG
      1    /  1,  2,  3,  5,  6, 7, 8, 9 /
@@ -102,10 +106,13 @@ C* Define the ENDF files
       IF(FLNM.EQ.BLNK .OR.  FLNM(1:1).EQ.'-') GO TO 30
       OPEN (UNIT=LEF,FILE=FLNM,STATUS='OLD',ERR=24)
       CLOSE(UNIT=LEF)
-      NEN=NEN+1
-      COM(NEN)=FLNM
-      FLEF(NEN)=FLNM
-      GO TO 25
+      IF(NEN.LT.MXEN) THEN
+        NEN=NEN+1
+        COM(NEN)=FLNM
+        FLEF(NEN)=FLNM
+        GO TO 25
+      END IF
+      WRITE(LTT,91) ' WARNING - MXEN limit exceeded; ignore  '
    30 CONTINUE
 C...  IF(NEN.LE.1) GO TO 40
       WRITE(LTT,95) ' Total number of ENDF files entered     ',NEN
@@ -131,6 +138,7 @@ C* Open the output files
       OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
       OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
 C* Print input specifications to terminal
+      WRITE(LTT,91) BLNK
       WRITE(LTT,91) ' PLOTC4 list file                     : ',FLLS
       WRITE(LTT,91) ' C4 file of EXFOR data                : ',FLC4
       WRITE(LTT,91) ' List of ENDF files                     '
@@ -139,11 +147,12 @@ C* Print input specifications to terminal
         WRITE(LTT,91) '   '//FLEF(I),COM(I)
       END DO
       WRITE(LTT,93) ' Resolution broadening fraction       : ',EP6
+      WRITE(LTT,91) BLNK
 C* Write banner to log file
-      WRITE(LLG,91)
+      WRITE(LLG,91) BLNK
       WRITE(LLG,91) ' LSTTAB - Extract Data from ENDF / C4   '
       WRITE(LLG,91) ' ------------------------------------   '
-      WRITE(LLG,91)
+      WRITE(LLG,91) BLNK
       WRITE(LLG,91) ' PLOTC4 list file                     : ',FLLS
       WRITE(LLG,91) ' C4 file of EXFOR data                : ',FLC4
       WRITE(LLG,91) ' List of ENDF files                     '
@@ -175,7 +184,11 @@ C*
         IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
       ELSE
-        WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+        MTH=MT
+        IF(MF.EQ.4 .AND. MT/10000.EQ.4) MTH=MT-40000
+        WRITE(COM2(12:19),'(I3,I5)') MF,MTH
+        IF(C84(46:54).NE.'    ')
+     &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
         IF(C84(56:59).NE.'    ')
      &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
         IF(C84(63:67).NE.'    ')
@@ -188,7 +201,7 @@ C* Log the start of request
       WRITE(LLG,95) ' Processing list index                : ',IDX
       WRITE(LLG,93) ' Scaling factor                       : ',SCL
       WRITE(LLG,95) ' Emitted particle ZA                  : ',IZP
-      WRITE(LLG,99) COM2
+      WRITE(LLG,96) COM2
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
@@ -203,10 +216,16 @@ C*
 C*        Discrete energy level (if applicable)
         IF(EOU.GT.0) ELV=EOU
       ELSE IF(MF.EQ.4) THEN
+C*        Cross section at fixed angle
+        IF(MT/10000 .EQ.4) THEN
+          KEA=0
+          PAR=DEG
+        ELSE
 C* Angular distributions (outg. particle energy-integrated)
-        KEA=1
+          KEA=1
 C*        Discrete energy level (if applicable)
-        IF(EOU.GT.0) ELV=EOU
+          IF(EOU.GT.0) ELV=EOU
+        END IF
       ELSE IF(MF.EQ.5) THEN
 C* Energy distributions (outg. particle angle-integrated)
         KEA=2
@@ -235,32 +254,44 @@ C* Extract the data from the ENDF file
       NUC=0
       EL1=ELV
       ZEL(1)=ZA
-      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PAR,EP6,ES,SG
-     1           ,RWO,NP,MXP,MXR,LLG,EL1)
+      PRINT *,'DXSELM: ZA,MF,MT,KEA,EIN,PAR'
+     1          ,nint(ZA),MF,MT,KEA,EIN,PAR
+      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PAR,EP6
+     1           ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
       IF(NP.LE.0) THEN
         PRINT *,'LSTTAB ERROR - No matching curves for',NINT(ZA)
         PRINT *,'       mt,kea,ein,par',mt,kea,ein,par
         WRITE(LLG,95)' LSTTAB ERROR - No matching curve for ZA',NINT(ZA)
         WRITE(LLG, *)' zap,mf,mt,kea,ein,par',izp,mf,mt,kea,ein,par
+      ELSE
+        PRINT *,'DXSELM No.of points',NP
       END IF
       CLOSE(UNIT=LEF)
 C* Prepare the ENDF comment header for the PLOTTAB curves file
       IF(COM(M).EQ.BLNK) THEN
         MAT =IZ*100+(IA-100*(IA/100))
-        CALL COMCUR(MAT,MF,MTE,KEA,EIN,PAR,COM1)
+        CALL COMCUR(MAT,MF,MT,KEA,EIN,PAR,COM1)
       ELSE
         COM1=COM(M)
       END IF
       IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
+      WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C* Write the data to the PLOTTAB curves file
-      WRITE(LCU,91) COM1,COM2
+      WRITE(LCU,99) COM1,COM2
       DO 82 I=1,NP
 C* Suppress printing negative or zero points
       EE=ES(I)
       IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
       IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
       FF=SG(I)*SCL
-      IF(SG(I).GT.0) WRITE(LCU,94) EE,FF
+      UF=UG(I)*SCL
+      IF(SG(I).GT.0) THEN
+        IF(UF.GT.0) THEN
+          WRITE(LCU,94) EE,FF,UF
+        ELSE
+          WRITE(LCU,94) EE,FF
+        END IF
+      END IF
    82 CONTINUE
       WRITE(LCU,94)
    86 CONTINUE
@@ -269,6 +300,9 @@ C* Extract the data from the C4 file
       IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) THEN
         PAR=ELV
         WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') ELV
+      END IF
+      IF(MF.EQ.4 .AND. MT/10000 .EQ.4) THEN
+        PAR=DEG
       END IF
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
@@ -294,7 +328,7 @@ C*
    96 FORMAT(A84)
    97 FORMAT(BN,I10)
    98 FORMAT(BN,F10.0)
-   99 FORMAT(A70)
+   99 FORMAT(A40,A84)
       END
       SUBROUTINE RDC4LS(LLS,NID,RFX)
 C-Title  : Subroutine RDC4LS
@@ -360,7 +394,7 @@ C*
           EE=EIN
         UN=' '
         END IF
-        IF(KEA.EQ.2) THEN
+        IF(KEA.EQ.2 .OR. (KEA.EQ.0 .AND.MT/10000.EQ.4)) THEN
           IF(PAR.GE.0) THEN
 c...        DEG=ACOS(PAR)*180/PI
             DEG=PAR
@@ -418,15 +452,20 @@ C-D   SCL   -  Cross section scaling factor (input parameter, can
 C-D            be used to convert units).
 C-D   COM2  -  Comment to label the output data sets.
 C-
+      PARAMETER   (MXAU=100)
       CHARACTER*1  MM(3),CM,C1,C2,C3
+      CHARACTER*9  CHX4
       CHARACTER*11 REC(6)
-      CHARACTER*25 REF,RF0
-      CHARACTER*60 COM2
+      CHARACTER*25 REF,RF0,RF4,RFAU(MXAU)
+      CHARACTER*84 COM2
       DATA MM/' ','M','N'/
 C* Fractional tolerance to identify "equal" arguments
 C* For best results the tolerance limits should be consistent with
 C* those defined in PLOTC4 for the same variables.
-      DATA ETOL,E2TOL/0.015, 0.003/
+C*   ETOL  fractional tolerance on energy
+C*   ATOL  tolerance on angle [deg]
+C*   E2TOL fractional tolerance on discrete level energy
+      DATA ETOL,ATOL,E2TOL/0.015, 3.0, 0.003/
 C*
       DATA PI/3.14159265/
 C*
@@ -440,18 +479,30 @@ C*
       NP   =0
       DO 12 J=1,6
       REC(J)='           '
+      MTH=MT0
+      MFH=MF0
+      IF(MT0/10000.EQ.4) THEN
+        MTH=MT0-40000
+      END IF
+      IC4=0
+      LAU=0
+      NAU=0
    12 CONTINUE
 C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
-     1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF
+     1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
+      IC4=IC4+1
 C* Test for matching data request
       IF(IZAI.NE. IZAI ) GO TO 20
       IF(IZA0.GT.0 .AND. IZA .NE.IZA0  ) GO TO 20
       IF(CM  .NE.MM(IM)) GO TO 20
-      IF(MF  .NE.MF0   ) GO TO 20
-      IF(MT  .NE.MT0   ) GO TO 20
+      IF(MF  .NE.MFH   ) GO TO 20
+      IF(MT  .NE.MTH   ) GO TO 20
+C* Test for supported MTs in MF 1
+      IF(MF.EQ.1) THEN
+        IF(MT.NE.452 .AND. MT.NE.455 .AND. MT.NE.456) GO TO 20
+      ELSE IF(MF.EQ.3) THEN
 C* Test outgoing particle and discrete level energy
-      IF(MF.EQ.3) THEN
         IF(PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
           IF6=F6
         IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
@@ -461,34 +512,76 @@ C* Test outgoing particle
           IF6=F6
 c...      IF(F6.EQ.0) IF6=1
           IF(IZAP0.NE.IF6) GO TO 20
+c...
+c...      print *,'Found mf,mt,izap0,if6',mf,mt,izap0,if6
+c...
         END IF
-C* Test incident energy
-        IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
-C* Test outgoing particle and discrete level energy
-        IF( MF.EQ.4 .AND.
-     &    (PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) ) GO TO 20
+        IF(MF.EQ.4) THEN
+          IF(MT0/10000.EQ.4) THEN
+C* Test angle for cross section at fixed angle
+c...        IF(ABS(COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
+            IF(ABS(ACOS(F5)*180/PI-PR0).GT.ATOL) GO TO 20
+          ELSE
+C* Test incident and level energy for double differential data
+            IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
+C* Test level energy for angular distribution data
+            IF(PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
+          END IF
+        ELSE
+C* Test incident and level energy for double differential data
+          IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
+c...
+c...      print *,'  mf,mt,ei0,f1,pr0,f5',mf,mt,ei0,f1,pr0,f5
+c...
+        END IF
 C* Test outgoing particle energy for correl.ang.distributions
         IF((MF.EQ.6 .AND. KEA.EQ.1) .AND.
      &     ABS(PR0-F7).GT.ETOL*F7 ) GO TO 20
 C* Test outgoing particle scattering angle for correal.ang.distrib.
+c...
+c...    print *,'  ang',acos(f5)*180/pi, pr0
+c...
         IF((MF.EQ.6 .AND. KEA.EQ.2) .AND.
-     &     ABS(COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
+     &     ABS(ACOS(F5)*180/PI-PR0).GT.ATOL) GO TO 20
+c... &     ABS(COS(PR0*PI/180)-F5) .GT.ETOL) GO TO 20
       ELSE
 C* Ignore other MF cases
         GO TO 20
       END IF
 C* Identify next set of points if author changes
       IF(REF.NE.RF0) THEN
+C* Special treatment for cross sections at fixed outgoing angle
+        IF(MF.EQ.4 .AND. MT0/10000.EQ.4) THEN
+C*        -- Check if the author was already processed
+          DO I=1,NAU
+            IF(RFAU(I).EQ.REF) GO TO 20
+          END DO
+          IF(NP.GT.0) THEN
+C* Remember the index record of next author and skip the data
+c...
+c...        IF(LAU.EQ.0) print *,'next author at',IC4,' "',REF,'"'
+c...
+            IF(LAU.EQ.0) LAU=IC4
+            GO TO 20
+          END IF
+        END IF
         IF(NS.GT.0) WRITE(LPN,920)
         NP=0
         NS=NS+1
+        COM2(60:69)='X'//CHX4
         WRITE(LPN,902) REF,COM2
         RF0=REF
+        RF4=REF
       END IF
 C*
-      IF(MF.EQ.3) THEN
-C* Simple cross sections
-        WRITE(REC(1),911) F1
+      IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR.
+     &  (MF0.EQ.4 .AND. MT0/10000.EQ.4)) THEN
+C* Simple cross sections and cross sections at fixed angle
+        IF(F1.GT.1.0E-9 .AND. F1.LT.9.9E+9) THEN
+          WRITE(REC(1),911) F1
+        ELSE
+          WRITE(REC(1),912) F1
+        END IF
         IF(F2.NE.0) THEN
           WRITE(REC(2),912) F2
           WRITE(REC(3),912) F2
@@ -506,9 +599,9 @@ C* Simple cross sections
           REC(6)='           '
         END IF
 C* Angular distributions
-      ELSE IF(MF.EQ.4 .OR.(MF.EQ.6 .AND. KEA.EQ.1) ) THEN
+      ELSE IF(MF0.EQ.4 .OR.(MF0.EQ.6 .AND. KEA.EQ.1) ) THEN
 C* Convert elastic ang.distrib. from CM to Lab if necessary
-        IF((MF.EQ.4 .AND. MT.EQ.2) .AND. C3.NE.' ') THEN
+        IF((MF0.EQ.4 .AND. MT0.EQ.2) .AND. C3.NE.' ') THEN
 C* Definitions:
 C*  XCM - cosine os scattering angle in CM system
 C*  XLB - cosine os scattering angle in Lab system
@@ -549,9 +642,22 @@ C* Convert cosine (and uncertainty) to degrees
           REC(3)='           '
         END IF
 C* Energy spectra
-      ELSE IF(MF.EQ.5 .OR.(MF.EQ.6 .AND. KEA.EQ.2) ) THEN
+      ELSE IF(MF0.EQ.5 .OR.(MF0.EQ.6 .AND. KEA.EQ.2) ) THEN
         FF=F7
         IF(FF.GT.0 .AND. FF.LT.1.E-9) FF=1.E-9
+        IF(C3.NE.' ') THEN
+C... Exact conversion to LAB co-ordinate system cannot be done
+C...      GO TO 20
+C* Convert approximately from CM to LAB
+          I1=IZAI+IZA
+          I2=I1-IZAP0
+          I1=I1-1000*(I1/1000)
+          I2=I2-1000*(I2/1000)
+          FA=FLOAT(I1)/I2
+          FF=FF*FA
+          F3=F3/FA
+          F4=F4/FA
+        END IF
         WRITE(REC(1),911) FF
         IF(F8.NE.0) THEN
           WRITE(REC(2),912) F8
@@ -579,13 +685,33 @@ C* Suppress printing negative or zero points
       END IF
       GO TO 20
 C* End of data set
-   80 WRITE(LPN,920)
+   80 IF(MF0.EQ.4 .AND. MT0/10000.EQ.4) THEN
+C...
+C...      print *,lau,'done "',RF4,'"'
+C...
+        NAU=NAU+1
+        IF(NAU.GT.MXAU) STOP 'DXSEXF ERROR - MXAU limit exceeded'
+        RFAU(NAU)=RF4
+        IF(LAU.GT.0) THEN
+C* If cross sections at fixed angle, rewind and skip to the next author
+          REWIND LC4
+          DO I=2,LAU
+            READ (LC4,901)
+          END DO
+          RF0=RF4
+          IC4=LAU-1
+          LAU=0
+          NP =0
+          GO TO 20
+        END IF
+      END IF
+C* File processing done
+      WRITE(LPN,920)
       RETURN
 C*
-  901 FORMAT(I5,I6,A1,I3,I4,3A1,8F9.0,A3,A25)
-  902 FORMAT(A25,15X,A60)
+  901 FORMAT(I5,I6,A1,I3,I4,3A1,8F9.0,A3,A25,A9)
+  902 FORMAT(A25,15X,A84)
   911 FORMAT(1P,E11.4E1)
   912 FORMAT(1P,E11.3)
   920 FORMAT(6A11)
       END
-
