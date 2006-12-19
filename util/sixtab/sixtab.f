@@ -711,7 +711,7 @@ C* Begin loop over secondary particle energies
       ECM=RWO(LX1+NCYC*(IP-1))
 C* Check that outgoing particle energies are monotonic increasing
       IF(ECM.LT.ECM0) THEN
-        IF(LTT.GT.0) WRITE(LTT,964) MT,IZAP,EIN,ECM
+        IF(LTT.GT.0) WRITE(LTT,964) MT0,IZAP,EIN,ECM
         GO TO 408
       END IF
       ECM0=ECM
@@ -1026,27 +1026,6 @@ C
       IF (IZA2.EQ.1) FB=HALF
       IF (IZA2.EQ.2004) FB=2
       BACH=B1*X1+B2*X1**3+B3*FA*FB*X3**4
-      RETURN
-      END
-      SUBROUTINE PLNLEG(U,PL,NL)
-C-Title  : PLNLEG Subroutine
-C-Purpose: Evaluate Legendre polynomials up to order NL
-C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia (1997)
-C-Description:
-C-D  Given the argument value U in the interval [-1,1], the
-C-D  polynomials up to order NL are calculated by a recurrence
-C-D  relation and stored in PL.
-C-
-      DIMENSION PL(1)
-      PL(1)=1.
-      IF(NL.LT.1) RETURN
-      PL(2)=U
-      IF(NL.LT.2) RETURN
-      DO 20 L=2,NL
-      G=U*PL(L)
-      H=G-PL(L-1)
-      PL(L+1)=H+G-H/L
-   20 CONTINUE
       RETURN
       END
       SUBROUTINE EDTMF1(LEN,LOU,CMT,NCT,C66,MATD,MFD,MTD,IER)
