@@ -27,6 +27,7 @@ int num;
     return(i);
 }
 
+/*
 char    *my_fgets(s,ls,f)
 char    *s;
 int     ls;
@@ -47,6 +48,62 @@ FILE    *f;
         if (endStr != NULL) return(ss);
     }
 }
+*/
+
+
+char    *my_fgets(s,ls,f)
+char    *s;
+int     ls;
+FILE    *f;
+{
+    int ii;
+    char    *ss, *sss, *sst, *endStr, ww[10];
+    ss = fgets(s,ls,f);
+    if (ss==NULL) return(ss);
+	//printf("\n0{%s}0",s);
+//  endStr = strchr(s,'\n');
+    s[ls-1]='\0';
+    for (endStr=NULL,sss=s,ii=0; ii<ls ; sss++,ii++)
+    if ((*sss=='\n')||(*sss=='\r')) {endStr=sss;break;}
+
+    if (endStr != NULL) {
+        *endStr = '\0';
+        return(ss);
+    }
+	//printf("\n1{%s}1",s);
+    for (;;) {
+        sst = fgets(ww,10-1,f);
+        if (sst==NULL) return(ss);      // конец файла
+	//printf("\n2{{%s}}2",sst);
+//	endStr = strchr(ww, '\n');
+	for (endStr=NULL,sss=ww,ii=0; ii<10; sss++,ii++) {
+	    if ((*sss=='\n')||(*sss=='\r')) {endStr=sss;break;}
+	}
+        if (endStr != NULL) return(ss); // найден символ '\n'
+    }
+}
+
+char    *my_fgetsfull(s,ls,f)
+char    *s;
+int     ls;
+FILE    *f;
+{
+    int ii;
+    char    *ss, *sss, *sst, *endStr, ww[10];
+    ss = fgets(s,ls,f);
+    if (ss==NULL) return(ss);
+//printf("\n0{%s}0",s);
+//  endStr = strchr(s,'\n');
+    s[ls-1]='\0';
+    for (endStr=NULL,sss=s,ii=0; ii<ls ; sss++,ii++)
+    if ((*sss=='\n')||(*sss=='\r')) {endStr=sss;break;}
+
+    if (endStr != NULL) {
+        *endStr = '\0';
+        return(ss);
+    }
+    return(ss);
+}
 
 delSpaces(s)
 char    *s;
@@ -65,6 +122,19 @@ int     k;
     i = strlen (s);
     for (; i<k; i++) s[i]=' ';
     s[k] = '\0';
+}
+
+int padstr (s,k)
+char    *s;
+int     k;
+{
+    int   i,l;
+    l = strlen (s);
+    if (l>=k) return(0);
+    for (i=l; i>=0; i--) s[i-l+k]=s[i];
+    for (i=0; i<k-l; i++) s[i]=' ';
+    s[k] = '\0';
+    return(0);
 }
 
 int floatExtract(rr,s0,n0,ls1)
@@ -109,6 +179,7 @@ float *rr;
         if (ss!=NULL) {
             //--- {+|-|space} found
             //printf("ss=<%s>",ss);
+	    delLiderSpace(ss+1);
             if (isdigit(*(ss+1))!=0) {
                 //--- digit after +|-|SP
                 ll=strlen(ss);
@@ -166,6 +237,21 @@ char *s1, *s0;
     for (si=s1; *si != '\0'; si++)
     if ((*si==' ')||(*si=='\n')||(*si=='\t')) break;
     *si = '\0';
+    i=strlen(s1);
+    return(i);
+}
+
+//---Word may contain 'SPACE' in it ---
+int wordSpExtract(s1,s0,n0,ls1)
+char *s1, *s0;
+{
+    int  i;
+    char    *si;
+    *s1 = '\0';
+    i=strExtract(s1,s0,n0,ls1);
+    if (i<=0) return(i);
+    delLiderSpace(s1);
+    delEndSpace(s1);
     i=strlen(s1);
     return(i);
 }
@@ -287,9 +373,79 @@ char    *s,sym1,sym2;
 {
     char    *si;
     for (si=s; *si != '\0'; si++) {
-    if (*si==sym1) {
-        *si=sym2;
-        break;
-    }
+        if (*si==sym1) {
+            *si=sym2;
+            //break;  // change 1-st symbol
+        }
     }
 }
+
+strTrim(s)
+char    *s;
+{
+    delLiderSpace(s);
+    delEndSpace(s);
+}
+
+
+int strTab2Space(s0,s1)
+char *s1, *s0;
+{
+    int  i, ii;
+    for (i=0; ;) {
+        if (*s0=='\0') break;
+        if (*s0=='\t') {
+	    s0++;
+	    do {
+        	*s1++ = ' ';
+        	i++;
+	    } while ((i%8)!=0);
+        }
+        else {
+            *s1++ = *s0++;
+            i++;
+        }
+    }
+    *s1='\0';
+    return(i);
+}
+
+int float2str(float rr, char *str)
+{
+    int i,ii,ie,ll;
+    static char s1[24];
+
+//--- g-format
+    sprintf(s1,"%g",rr);
+    //printf("[%p][%s]<%g>...",str,s1,rr); getch();
+    ll=strlen(s1);
+    for (i=0; i<ll; i++) {
+	if (s1[i]=='e') {
+	    ii=sscanf(&s1[i+1],"%d",&ie);
+	    if (ii!=1) break;
+	    sprintf(&s1[i+1],"%+d",ie);
+	    break;
+	}
+    }
+    strcpy(str,s1);
+    return(0);
+}
+
+
+/*
+main (argc,argv)
+int     argc;
+char    **argv;
+{
+    int i,ii;
+    float ff;
+    setFNumeration();
+    setN1Numeration(1);
+    ii=floatExtract(&ff," 123.456E 2 ",1,11);
+    printf("ii=%d ff=%g\n",ii,ff);
+    ii=floatExtract(&ff," 1.00200+ 3",1,11);
+    printf("ii=%d ff=%g\n",ii,ff);
+    ii=floatExtract(&ff," 1.002000+3",1,11);
+    printf("ii=%d ff=%g\n",ii,ff);
+}
+*/
