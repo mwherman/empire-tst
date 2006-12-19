@@ -21,10 +21,10 @@ LIBS   =
 LFLAGS = /out:$(NAMEEXE)
 LFLAGS = -o$(NAMEEXE)
 
-$(NAMEEXE) :  $(NAME).mak $(OBJS)
-      $(LINK) $(OBJS) $(LFLAGS)
+$(NAMEEXE) :  $(NAME)l.mak $(OBJS)
+	$(LINK) $(OBJS) $(LFLAGS)
 
 #.c.obj:
 #   $(CC) $(CFLAGS) { $< }
 .c.$(O):
-      $(CC) $(CFLAGS) $<
+	$(CC) $(CFLAGS) $<
