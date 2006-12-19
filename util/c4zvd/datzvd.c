@@ -8,6 +8,7 @@ static  char    str0[LSTR];
 static  char    str1[LSTR];
 static  char    str2[LSTR];
 static  char    str3[LSTR];
+static  char    strtmp[LSTR];
 static  char    strRequest[LSTR];
 static  char    strName[LSTR];
 
@@ -36,7 +37,7 @@ char    *outZVDFileName;
 
 FILE    *inFile;
 FILE    *outFile;
-char    *ss,*my_fgets();
+char    *ss,*ss1,*my_fgets();
 char    *my_calloc();
 
 #define LREACT 300
@@ -83,6 +84,7 @@ struct  Xref *xref;
 
 int firstMT=0;
 int firstMF=0;
+int firstDA_E=0;
 
 int  checkEnoughMemry(char *mem, char *msg, int lx, int ly);
 
@@ -305,6 +307,7 @@ char    **argv;
                 if (str1[ii]=='/') strcpy(&str1[ii],&str1[ii+1]);
                 else ii++;
             }
+//	    printf("[%s]\n",str1);
             strcpy(info.szDateRef,str1);
             continue;
         }
@@ -313,6 +316,10 @@ char    **argv;
             strcpy(str1,&str0[8]);
             delLiderSpace(str1);
             delEndSpace(str1);
+	    ss1=strstr(str1,"Ang=");
+	    if (ss1!=NULL) firstDA_E=1;
+	    ss1=strstr(str1," An");
+	    if (ss1!=NULL) firstDA_E=1;
             for (ii=0, found=0; ii<nReactions; ii++) {
                 if (strcmp(str1,reactions+LREACT*ii)==0) {
                     found=1;
@@ -425,8 +432,9 @@ char    **argv;
             xref[numSubent].numReact=info.iReaction;
             xref[numSubent].numSubent=numSubent;
             strcpy(xref[numSubent].text,"");
-            mystrcat(xref[numSubent].text,"",2);
-            mystrcat(xref[numSubent].text,info.szReaction,39);
+//??2006            mystrcat(xref[numSubent].text,"",2);
+//??2006            mystrcat(xref[numSubent].text,info.szReaction,39);
+            mystrcat(xref[numSubent].text,info.szReaction,41);
             myReal2ShortStr(info.enMin,str2);
             mystrcat(xref[numSubent].text,str2,6);
             strcat(xref[numSubent].text," ");
@@ -438,7 +446,15 @@ char    **argv;
             mystrcat(xref[numSubent].text,info.szInstitute,15);
             mystrcat(xref[numSubent].text,info.szReference,22);
             strcat(xref[numSubent].text," ");
-            info.szDateRef[0]=' '; info.szDateRef[1]=' ';
+
+//????20060323
+//          info.szDateRef[0]=' '; info.szDateRef[1]=' ';
+	    if (info.szDateRef[0]=='2') {
+		strcpy(strtmp,info.szDateRef);
+		strcpy(&info.szDateRef[2],strtmp);
+	    }
+	    info.szDateRef[0]=' '; info.szDateRef[1]=' ';
+
             mystrcat(xref[numSubent].text,info.szDateRef,6);
             strcat(xref[numSubent].text," ");
             mystrcat(xref[numSubent].text,info.szAuthor,17);
@@ -544,7 +560,7 @@ char    **argv;
         fprintf(outFile,"x-scale: auto\n");
         fprintf(outFile,"y-scale: auto\n");
         printf ("firstMF=%d...",firstMF); //getch();
-        if (firstMF==4) {
+        if ((firstMF%100==4)&&(firstDA_E==0)) {
             fprintf(outFile,"x: Ang.\n");
             fprintf(outFile,"x-long: Angle\n");
             fprintf(outFile,"x-unit: 1, (deg)\n");
@@ -555,6 +571,11 @@ char    **argv;
             fprintf(outFile,"y-unit: 1, (b/sr)\n");
             fprintf(outFile,"y-unit: 1e-3, (mb/sr)\n");
             fprintf(outFile,"iy-unit: 1\n");
+        }
+        if (firstMF==204) {
+            fprintf(outFile,"y: Ratio\n");
+	    fprintf(outFile,"y-unit: 1, \n");
+	    fprintf(outFile,"iy-unit: 1\n");
         }
         if (firstMF==5) {
             fprintf(outFile,"x-long: Energy\n");
@@ -572,6 +593,26 @@ char    **argv;
             fprintf(outFile,"iy-unit: 1\n");
             fprintf(outFile,"//\n"); //end mark
         }
+        if (firstMF==1) {
+	    fprintf(outFile,"x-long: Energy\n");
+	if (firstMT==452)
+        fprintf(outFile,"y: Total nubar\n");
+	else
+	if (firstMT==455)
+        fprintf(outFile,"y: Delayed nubar\n");
+	else
+	if (firstMT==456)
+        fprintf(outFile,"y: Prompt nubar\n");
+	else
+	if (firstMT==454)
+        fprintf(outFile,"y: Independent fission product yield\n");
+	else
+        fprintf(outFile,"y: A fission quantity\n");
+//	    fprintf(outFile,"y: nubar\n");
+	    fprintf(outFile,"y-unit: 1, \n");
+	    fprintf(outFile,"iy-unit: 1\n");
+            fprintf(outFile,"//\n"); //end mark
+	}
         fprintf(outFile,"#end   %s.tit/c\n",strName);
     }
     fclose(outFile);
