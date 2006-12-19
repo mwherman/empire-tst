@@ -7,19 +7,29 @@
 static  char    str [LSTR];
 static  char    str0[LSTR];
 static  char    str1[LSTR];
+static  char    strTmp[LSTR];
+static  char    strProjectile[LSTR]="N";
+static  int     izaProjectile=1;
+int za2particle(int za, char *str);
+int za2nuclide(int za, char *str);
 
 FILE    *inFile, *in2File, *outFile;
 char    *ss,*my_fgets();
 int extractReaction(char *str0, int flagPrint);
+char* getReactionFromX4List(char *datasetID);
+
+char  x4lstrFileName[LSTR]="";
+FILE  *x4lstFile=NULL;
 
 struct sdataset {
     char  code     [80];
     char  reaction [80];
     char  subentry [10];
+    char  datasetID[12];
     char  author   [80];
     char  institute[80];
     char  reference[80];
-    char  sf56      [80];
+    char  sf56     [80];
     char  comment  [80];
     int   lData;
     float eMin;
@@ -55,16 +65,29 @@ char    **argv;
 
     filename=*argv++; iarg++;
     outfilename=*argv++; iarg++;
+
+/*
     if (iarg<argc) {
-//	reactionName=*argv++;
         strcpy(reactionName,*argv++);
 	iarg++;
     }
+*/
+
+    for (; iarg<argc; iarg++) {
+	ss=*argv++;
+	if (strncmp(ss,"X4R=",4)==0) {
+	    strcpy(x4lstrFileName,ss+4);
+	    x4lstFile=fopen(x4lstrFileName,"r");
+	    continue;
+	}
+    }
+
+
 
     printf(" Translate PNT file to DAT file.\n");
-    printf(" V.Zerkin, IAEA, 2000-2004\n");
+    printf(" V.Zerkin, IAEA, 2000-2006\n");
     printf("\n");
-    printf(" from:[%s] to:[%s] reaction:[%s]\n",filename,outfilename,reactionName);
+    printf(" from:[%s] to:[%s] x4.lstR:[%s]\n",filename,outfilename,x4lstrFileName);
     //getch();
 
     setFNumeration();
@@ -223,6 +246,7 @@ int extractAuthor(char *str00)
         iy=0;
         ii=sscanf(sss+1,"%d",&iy);
         if (ii==1) {
+            if (iy<40) iy=iy+100;
             if (iy<1900) dataset.year=1900+iy;
             else dataset.year=iy;
         }
@@ -245,29 +269,29 @@ struct mtReac {
     char reac[20];
 };
 static struct mtReac mtRc[]={
-    {   1,  "(N,TOT)" }
-   ,{   2,  "(N,EL)" }
-   ,{   4,  "(N,INL)" }
-   ,{  16,  "(N,2N)" }
-   ,{  17,  "(N,3N)" }
-   ,{  18,  "(N,F)" }
-   ,{  22,  "(N,N+A)" }
-   ,{  24,  "(N,2N+A)" }
-   ,{  28,  "(N,N+P)" }
-   ,{  29,  "(N,N+2A)" }
-   ,{  32,  "(N,N+D)" }
-   ,{  33,  "(N,N+T)" }
-   ,{  34,  "(N,N+HE3)" }
-   ,{  42,  "(N,2N+P)" }
-   ,{ 102,  "(N,G)" }
-   ,{ 103,  "(N,P)" }
-   ,{ 104,  "(N,D)" }
-   ,{ 105,  "(N,T)" }
-   ,{ 106,  "(N,HE3)" }
-   ,{ 107,  "(N,A)" }
-   ,{ 108,  "(N,2A)" }
-   ,{ 111,  "(N,2P)" }
-   ,{9000,  "(N,X)" }
+    {   1,  ",TOT" }
+   ,{   2,  ",EL" }
+   ,{   4,  ",INL" }
+   ,{  16,  ",2N" }
+   ,{  17,  ",3N" }
+   ,{  18,  ",F" }
+   ,{  22,  ",N+A" }
+   ,{  24,  ",2N+A" }
+   ,{  28,  ",N+P" }
+   ,{  29,  ",N+2A" }
+   ,{  32,  ",N+D" }
+   ,{  33,  ",N+T" }
+   ,{  34,  ",N+HE3" }
+   ,{  42,  ",2N+P" }
+   ,{ 102,  ",G" }
+   ,{ 103,  ",P" }
+   ,{ 104,  ",D" }
+   ,{ 105,  ",T" }
+   ,{ 106,  ",HE3" }
+   ,{ 107,  ",A" }
+   ,{ 108,  ",2A" }
+   ,{ 111,  ",2P" }
+   ,{9000,  ",X" }
 };
 
 struct mfReac {
@@ -287,8 +311,22 @@ int extractReaction(char *str0, int flagPrint)
     char *sss,*sss1;
     static char str[LSTR];
     static char isoName[LSTR];
-    static char str1[LSTR],str2[LSTR],str3[LSTR],str4[LSTR],str5[LSTR];
+    static char str1[LSTR],str2[LSTR],str3[LSTR],str4[LSTR],str5[LSTR],str6[LSTR];
     strcpy(dataset.sf56,"");
+
+    if (strlen(str0)>101) {
+	ii=strExtract(str6,str0,101,108);
+	printf(" SUBENT=[%s]\n",str6);
+	for (ii=0; ii<strlen(str6); ii++) if (str6[ii]==' ') str6[ii]='0';
+	strcpy(dataset.subentry,str6);
+	strcpy(dataset.datasetID,str6);
+	ii=strExtract(str6,str0,109,109); //---pointer
+	if (ii>=0) strcat(dataset.datasetID,str6);
+	else strcat(dataset.datasetID," ");
+	printf(" SUBENT_POINTER=[%s]\n",dataset.datasetID);
+	str0[100-1]='\0';
+    }
+
     ll=strlen(str0);
 //    printf("[%s]...",str0);    getch();
     if (ll<40) return(-1);
@@ -307,25 +345,46 @@ int extractReaction(char *str0, int flagPrint)
     strcpy(isoName,str);
     isoName[11]='\0';
     delSpaces(isoName);
-    strcpy(str,&str0[51]);
-//  ii=sscanf(str,"%d%d%s%s%s",&mf,&mt,str1,str2,str3);
-    ii=sscanf(str,"%d%d%s%s%s%s%s",&mf,&mt,str1,str2,str3,str4,str5);
+//    strcpy(str,&str0[51]);
+//    ii=sscanf(str,"%d%d%s%s%s%s%s",&mf,&mt,str1,str2,str3,str4,str5);
+    ii=strExtract(str,str0,60,81);
+    ii=intExtract(&mf,str0,52,54);
+    ii=intExtract(&mt,str0,55,59);
+    ii=sscanf(str,"%s%s%s%s%s",str1,str2,str3,str4,str5);
+
+//    printf(" str=[%s] ",str);
+//    printf(" str1=[%s] ",str1); printf(" str2=[%s] ",str2);
+//    printf(" str3=[%s] ",str3); printf(" str4=[%s] ",str4);
+//    printf(" str5=[%s]\n",str5);
 
     if (flagPrint>0)
     printf(" MF=%d, MT=%d...",mf,mt); //getch();
     dataset.mf=mf;
     dataset.mt=mt;
 
+//    ii=wordExtract(strProjectile,str0,81,83);
+//    if ((ii<=0)||(strlen(strProjectile)<=0)) strcpy(strProjectile,"N");
+    ii=intExtract(&izaProjectile,str0,83,88);
+    if (ii>0) za2nuclide(izaProjectile,strProjectile);
+	//printf(" strProjectile=[%s]\n",strProjectile);
+
     strcpy(dataset.reaction,isoName);
     for (ii=0, found=0; ii<(sizeof(mtRc)/sizeof(mtRc[0])); ii++) {
         if (mtRc[ii].mt==mt) {
+            strcat(dataset.reaction,"(");
+            strcat(dataset.reaction,strProjectile);
             strcat(dataset.reaction,mtRc[ii].reac);
+            strcat(dataset.reaction,")");
 	    found=1;
 	    break;
         }
     }
-    if (found==0)
-    strcat(dataset.reaction,"(?,?)");
+//  if (found==0)
+//  strcat(dataset.reaction,"(?,?)");
+    if (found==0) {
+        sprintf(strTmp,"(MT=%d)",mt);
+        strcat(dataset.reaction,strTmp);
+    }
 
     for (ii=0, found=0; ii<(sizeof(mfRc)/sizeof(mfRc[0])); ii++) {
         if (mfRc[ii].mf==mf) {
@@ -337,6 +396,10 @@ int extractReaction(char *str0, int flagPrint)
     if (found==0)
     strcat(dataset.reaction,",?");
     strcpy(dataset.sf56,"");
+
+    ss=getReactionFromX4List(dataset.datasetID);
+    if (ss!=NULL) strcpy(dataset.reaction,ss);
+
     if (flagPrint>0)
     printf(" Reaction: [%s]",dataset.reaction);    //getch();
 
@@ -381,4 +444,80 @@ acceptData()
     dataset.lData++;
     if (rdata[0]<dataset.eMin) dataset.eMin=rdata[0];
     if (rdata[0]>dataset.eMax) dataset.eMax=rdata[0];
+}
+
+
+static char  *nucl[] = {
+   "N"  , "H"  , "He" , "Li" , "Be" , "B"  , "C"  , "N"  , "O"  , "F" 
+ , "Ne" , "Na" , "Mg" , "Al" , "Si" , "P"  , "S"  , "Cl" , "Ar" , "K" 
+ , "Ca" , "Sc" , "Ti" , "V"  , "Cr" , "Mn" , "Fe" , "Co" , "Ni" , "Cu"
+ , "Zn" , "Ga" , "Ge" , "As" , "Se" , "Br" , "Kr" , "Rb" , "Sr" , "Y" 
+ , "Zr" , "Nb" , "Mo" , "Tc" , "Ru" , "Rh" , "Pd" , "Ag" , "Cd" , "In"
+ , "Sn" , "Sb" , "Te" , "I"  , "Xe" , "Cs" , "Ba" , "La" , "Ce" , "Pr"
+ , "Nd" , "Pm" , "Sm" , "Eu" , "Gd" , "Tb" , "Dy" , "Ho" , "Er" , "Tm"
+ , "Yb" , "Lu" , "Hf" , "Ta" , "W"  , "Re" , "Os" , "Ir" , "Pt" , "Au"
+ , "Hg" , "Tl" , "Pb" , "Bi" , "Po" , "At" , "Rn" , "Fr" , "Ra" , "Ac"
+ , "Th" , "Pa" , "U"  , "Np" , "Pu" , "Am" , "Cm" , "Bk" , "Cf" , "Es"
+ , "Fm" , "Md" , "No" , "Lr" , "Rf" , "Db" , "Sg" , "Bh" , "Hs" , "Mt"
+ , "Ds" , "Rg" , "12" , "13" , "14" , "15" , "16" , "17" , "18" 
+};
+
+
+int za2particle(int za, char *str)
+{
+    int z,a,nNucl;
+    switch (za) {
+	case  0:	strcpy(str,"G");	return(0);
+	case  1:	strcpy(str,"N");	return(0);
+	case -1:	strcpy(str,"E");	return(0);
+	case 12:	strcpy(str,"Pos");	return(0);
+	case 1001:	strcpy(str,"P");	return(0);
+	case 1002:	strcpy(str,"D");	return(0);
+	case 1003:	strcpy(str,"T");	return(0);
+	case 2004:	strcpy(str,"A");	return(0);
+	case 2003:	strcpy(str,"He3");	return(0);
+	case 2005:	strcpy(str,"He5");	return(0);
+	case 2006:	strcpy(str,"He6");	return(0);
+	default:	return(-1);
+    }
+}
+
+int za2nuclide(int za, char *str)
+{
+    int z,a,nNucl,ii;
+    nNucl = sizeof(nucl)/sizeof(nucl[0]);
+    *str = '\0';
+    ii=za2particle(za,str);
+    if (ii>=0) return 0;
+    z=za/1000;
+    a=za%1000;
+    if ((z<0)&&(a<0)) return(-1);
+    if (z>=nNucl) return(-1);
+//  sprintf(str,"%d-%s-%d",z,nucl[z],a);
+//  printf("%s-%d...",nucl[z],a); getchar();
+    sprintf(str,"%s-%d",nucl[z],a);
+    return(0);
+}
+
+
+char* getReactionFromX4List(char *datasetID)
+{
+    int     ls;
+    char    poi;
+    static  char  datID[LSTR];
+    static  char  str[LSTR];
+    if (x4lstFile==NULL) return NULL;
+    rewind(x4lstFile);
+    for (;;) {
+        ss=my_fgets(str,LSTR,x4lstFile);
+        if (ss==NULL) break;
+	//printf("===str=[%s]===",str);
+        ls=strlen(str);
+        if (ls<10) continue;
+	strcpy(datID,str);
+	datID[9]='\0';
+	//printf("===datID=[%s]===",datID);
+        if (strcmp(datID,datasetID)==0) return (&str[10]);
+    }
+    return NULL;
 }
