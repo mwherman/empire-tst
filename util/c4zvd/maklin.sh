@@ -1,3 +1,4 @@
+#! /bin/sh -
     set -x
 echo "Begin compilation of C programs"
     make -f curzvd3l.mak
@@ -5,3 +6,4 @@ echo "Begin compilation of C programs"
     make -f datzvdl.mak
     make -f c4dat4l.mak
     make -f endzvdl.mak
+exit
