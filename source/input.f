@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-11-27 14:20:27 $
-Ccc   * $Id: input.f,v 1.210 2006-11-27 14:20:27 Capote Exp $
+Ccc   * $Date: 2006-12-26 21:32:44 $
+Ccc   * $Id: input.f,v 1.211 2006-12-26 21:32:44 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -714,25 +714,25 @@ C--------------retrieval from the remote database
                ENDIF
 C--------------retrieval from the local MySQL database
 C--------------including data for the natural element
-C              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-C                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
-C    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
-C    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-C              ELSEIF(IX4ret.EQ.1)THEN
-C                 x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
-C    &                       ';'//SYMb(0)//'-'//atar//'" '//
-C    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-C              ENDIF
-C--------------data for the target isotop only
-               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)
-     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-     &                       '"'//proj//',*"#'
-               ELSEIF (IX4ret.EQ.1) THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)
-     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-     &                       '"'//proj//',*"#'
+               IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
+     &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
+     &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+               ELSEIF(IX4ret.EQ.1)THEN
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
+     &                       ';'//SYMb(0)//'-'//atar//'" '//
+     &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
                ENDIF
+C--------------data for the target isotop only
+C              IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
+C                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)
+C    &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+C    &                       '"'//proj//',*"#'
+C              ELSEIF (IX4ret.EQ.1) THEN
+C                 x4string = '../scripts/X4retrieve "'//SYMb(0)
+C    &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+C    &                       '"'//proj//',*"#'
+C              ENDIF
                iwin = PIPE(x4string)
             ENDIF
          ENDIF
