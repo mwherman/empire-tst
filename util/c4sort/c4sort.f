@@ -203,8 +203,8 @@ C* Files and logical file unit numbers
       FLV =-1
 C*
 C* Default path to RIPL nuclide level energy files
-      DPATH='../Sources/Inputs/Levels/'
-      LPATH=25
+      DPATH='../../RIPL-2/levels/'
+      LPATH=20
 C*
 C* Process the input
 C*
