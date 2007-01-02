@@ -15,7 +15,9 @@ command="../util/c4zvd/zvview.exe -p:$1_ ps01.tit/c"
             read file
         fi
         command=$command" "$file
-$command
+ln -s ../util/c4zvd/ps01.tit ps01.tit
+$command ps01.tit/c
+rm ps01.tit
 if [ -f zv00.ps ]; then
    mv zv00.ps $file-plot
    rename zvd-plot ps *
