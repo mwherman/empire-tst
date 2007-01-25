@@ -778,7 +778,7 @@ proc Canonize {w object opt} {
 ## Library Procedure:  ::combobox2::ComputeGeometry
 
 namespace eval ::combobox2 {
-proc CemputeGeometry {w} {
+proc ComputeGeometry {w} {
     upvar ::combobox2::${w}::widgets widgets
     upvar ::combobox2::${w}::options options
 
@@ -5145,6 +5145,10 @@ proc vTcl:project:info {} {
             array set save {-command 1 -label 1}
         }
     }
+    set site_4_0 $site_3_0.menu93
+    namespace eval ::widgets::$site_4_0.men87 {
+        array set save {-activebackground 1 -activeforeground 1 -foreground 1 -tearoff 1}
+    }
     set site_3_0 $base.m88
     namespace eval ::widgets::$site_3_0.menu94 {
         array set save {-activebackground 1 -activeforeground 1 -background 1 -foreground 1 -tearoff 1}
@@ -5184,6 +5188,16 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$base.m76 {
         array set save {-disabledforeground 1 -tearoff 1}
     }
+    namespace eval ::widgets::$base.__tk_filedialog {
+    }
+    set site_4_0 $base.__tk_filedialog.bot
+    set site_4_0 $base.__tk_filedialog.top
+    set site_5_0 $site_4_0.f1
+    set site_5_0 $site_4_0.f3
+    set site_6_0 $site_5_0.types
+    set site_5_0 $site_4_0.f2
+    set site_6_0 $site_5_0.a
+    set site_6_0 $site_5_0.b
     namespace eval ::widgets_bindings {
         set tagslist {_vTclBalloon _TopLevel}
     }
@@ -5514,10 +5528,11 @@ global widget file profilter zvfilter archfilter
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat e
+global mac editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat e
 
 set e "-e"
-        
+set mac ""
+
 if {[file exists ../.Xrunrc] == 1} {
    set rcfl [open ../.Xrunrc r+]
    gets $rcfl file
@@ -5612,7 +5627,7 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -menu "$top.m88" -background #ffffff -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 854x315+0+599; update
+    wm geometry $top 854x315+20+610; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -5760,7 +5775,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but85" "Button7" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but85 "$site_3_0.but85 Button $top all _vTclBalloon _vTclBalloon"
     bind $site_3_0.but85 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {View PLOTC4 plots}
+        set ::vTcl::balloon::%W "View PLOTC4 plots"
     }
     button $site_3_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -5773,7 +5788,7 @@ ddlist} -cursor hand2 \
     vTcl:DefineAlias "$site_3_0.but76" "Button132" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but76 "$site_3_0.but76 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but76 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Update lists of files (do after running any code) }
+        set ::vTcl::balloon::%W "Update lists of files \n (do after running any code) "
     }
     button $site_3_0.cpd68 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6174,7 +6189,7 @@ exit} \
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec rm -r $file-tl 
+        -command {exec rm -r $file-tl
 exec xterm $e ../scripts/run $file
 adjourn .top75
 # create list of possible ddx plots
@@ -7839,33 +7854,60 @@ $file.inp &}} -label {Create input}
         -label {Plot list} 
     $site_3_0.menu93 add command \
         -command {exec xterm $e ../scripts/plot $file &} -label PLOTC4 
-    $site_3_0.menu93 add separator  
-    $site_3_0.menu93 add cascade \
-        -menu "$site_3_0.menu93.men87" -command {} -label {KALMAN for} 
-    set site_5_0 $site_3_0.menu93
-    menu $site_5_0.men87 \
-        -tearoff 0 
-    $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 1 $mat 0} -label {Total MT=1}
-    $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 2 $mat 0} -label {Elastic MT=2}
-    $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 4 $mat 0} -label {Inelastic MT=4}
-    $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 16 $mat 0} -label {(z,2n) MT=16}
-    $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 17 $mat 0} -label {(z,3n) MT=17}
-    $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 102 $mat 0} -label {(n,g) MT=102}
-    $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 103 $mat 0} -label {(n,p) MT=103}
-    $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 107 $mat 0} -label {(n,a) MT=107}
-
+    $site_3_0.menu93 add separator \
+        
     $site_3_0.menu93 add command \
+        \
+        -command {set emp_inp [open $file.inp r]
+  gets $emp_inp line
+  gets $emp_inp line
+  set line [regsub -all " +" $line " "]
+  set line [string trim $line]
+  set line [split $line]
+  set Ainp [lindex $line 0]
+  set Zinp [lindex $line 1]
+  set ZAinp [expr int($Zinp*1000+$Ainp)]
+  set Mass $Ainp
+  exec ../scripts/resonance.tcl $ZAinp $mat $Mass &} \
+        -label {Resonance Module} 
+    $site_3_0.menu93 add separator \
+        
+    $site_3_0.menu93 add cascade \
+        -command {} -label {KALMAN for} 
+    set site_4_0 $site_3_0.menu93
+    menu $site_4_0.men87 \
+        -activebackground #f9f9f9 -activeforeground black -foreground black \
+        -tearoff 0 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 1 $mat 0} \
+        -label {Total MT=1} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 2 $mat 0} \
+        -label {Elastic MT=2} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 4 $mat 0} \
+        -label {Inelastic MT=4} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 16 $mat 0} \
+        -label {(z,2n) MT=16} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 17 $mat 0} \
+        -label {(z,3n) MT=17} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 102 $mat 0} \
+        -label {(n,g) MT=102} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 103 $mat 0} \
+        -label {(n,p) MT=103} 
+    $site_4_0.men87 add command \
+        -command {exec  xterm $e ../scripts/kalman  $file 107 $mat 0} \
+        -label {(n,a) MT=107} 
+    $site_3_0.menu93 add command \
+        \
         -command {exec xterm $e ../scripts/mergeMF33 $file 
 exec xterm $e mv $file-m.endf $file.endf
-exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
+exec  xterm $e ../scripts/stanef $file & } \
+        -label {Insert covariances} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -7891,13 +7933,15 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu94 add command \
         -command {exec $editor $file.out &} -label {EMPIRE short} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.xsc &} -label {Cross-sections} 
+        -command {exec $editor $file.xsc &} -label Cross-sections 
     $site_3_0.menu94 add command \
         -command {exec $editor $file-fiss.xsc &} -label {Fission chances} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-pfnm.out &} -label {Fiss. neutr. multiplicities} 
+        -command {exec $editor $file-pfnm.out &} \
+        -label {Fiss. neutr. multiplicities} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-pfns.out &} -label {Fiss. neutr. spectra} 
+        -command {exec $editor $file-pfns.out &} \
+        -label {Fiss. neutr. spectra} 
     $site_3_0.menu94 add command \
         -command {exec $editor $file.sys &} -label {x-sec systematics} 
     $site_3_0.menu94 add command \
@@ -7924,7 +7968,7 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu94 add command \
         -command {exec $editor $file-e.endf &} -label {ENDF empend} 
     $site_3_0.menu94 add separator \
-
+        
     $site_3_0.menu94 add command \
         -command {exec $editor $file-mat.sen &} -label {Sensitivity matrix} 
     $site_3_0.menu94 add command \
@@ -7934,7 +7978,8 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu94 add command \
         -command {exec $editor $file-cov.kal &} -label {Covariance matrices} 
     $site_3_0.menu94 add command \
-        -command {exec gnuplot ../util/kalman/corr.plt &} -label {Covariance plot} 
+        -command {exec gnuplot ../util/kalman/corr.plt &} \
+        -label {Covariance plot} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
@@ -7951,8 +7996,7 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
     menu $site_3_0.men70 \
         -tearoff 0 
     $site_3_0.men70 add command \
-        -command {exec lyx $file.lyx &} -font {} \
-        -label {Report} 
+        -command {exec lyx $file.lyx &} -font {} -label Report 
     $site_3_0.men70 add command \
         \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
@@ -7997,8 +8041,7 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
         -command {exec $editor $file-log.sigma1 &} -font {} \
         -label {SIGMA1 Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup &} -font {} \
-        -label {FIXUP Log} 
+        -command {exec $editor $file-log.fixup &} -font {} -label {FIXUP Log} 
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.fixup2 &} -font {} \
         -label {FIXUP-2 Log} 
@@ -8108,64 +8151,6 @@ cd $workdir} \
 
 
 if {![info exists vTcl(sourcing)]} {
-bind "_vTclBalloon" <<KillBalloon>> {
-    namespace eval ::vTcl::balloon {
-        after cancel $id
-        if {[winfo exists .vTcl.balloon]} {
-            destroy .vTcl.balloon
-        }
-        set set 0
-    }
-}
-bind "_vTclBalloon" <<vTclBalloon>> {
-    if {$::vTcl::balloon::first != 1} {break}
-
-    namespace eval ::vTcl::balloon {
-        set first 2
-        if {![winfo exists .vTcl]} {
-            toplevel .vTcl; wm withdraw .vTcl
-        }
-        if {![winfo exists .vTcl.balloon]} {
-            toplevel .vTcl.balloon -bg black
-        }
-        wm overrideredirect .vTcl.balloon 1
-        label .vTcl.balloon.l  -text ${%W} -relief flat  -bg #ffffaa -fg black -padx 2 -pady 0 -anchor w
-        pack .vTcl.balloon.l -side left -padx 1 -pady 1
-        wm geometry  .vTcl.balloon  +[expr {[winfo rootx %W]+[winfo width %W]/2}]+[expr {[winfo rooty %W]+[winfo height %W]+4}]
-        set set 1
-    }
-}
-bind "_vTclBalloon" <Button> {
-    namespace eval ::vTcl::balloon {
-        set first 0
-    }
-    vTcl:FireEvent %W <<KillBalloon>>
-}
-bind "_vTclBalloon" <Enter> {
-    namespace eval ::vTcl::balloon {
-        ## self defining balloon?
-        if {![info exists %W]} {
-            vTcl:FireEvent %W <<SetBalloon>>
-        }
-        set set 0
-        set first 1
-        set id [after 500 {vTcl:FireEvent %W <<vTclBalloon>>}]
-    }
-}
-bind "_vTclBalloon" <Leave> {
-    namespace eval ::vTcl::balloon {
-        set first 0
-    }
-    vTcl:FireEvent %W <<KillBalloon>>
-}
-bind "_vTclBalloon" <Motion> {
-    namespace eval ::vTcl::balloon {
-        if {!$set} {
-            after cancel $id
-            set id [after 500 {vTcl:FireEvent %W <<vTclBalloon>>}]
-        }
-    }
-}
 }
 #############################################################################
 ## Binding tag:  _TopLevel
