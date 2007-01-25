@@ -29,6 +29,9 @@ make
 cd ../sigma1
 make
 cd ../c4zvd
+make -f c4dat.mak
+make -f datzvdl.mak
+make -f endzvdl.mak
 make -f curzvd3l.mak
 make -f pntdatl.mak
 make -f datzvdl.mak
@@ -38,6 +41,8 @@ cd ../kalman
 make kalman3
 make kalend
 make c4tokal
+cd ../resonance
+make all
 cd ../../EXFOR
 make
 cd ../
