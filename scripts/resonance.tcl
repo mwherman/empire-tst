@@ -377,12 +377,6 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_8_0.ent93 {
         array set save {-_tooltip 1 -background 1 -insertbackground 1 -state 1 -textvariable 1}
     }
-    namespace eval ::widgets::$site_8_0.lab73 {
-        array set save {-text 1}
-    }
-    namespace eval ::widgets::$site_8_0.ent74 {
-        array set save {-_tooltip 1 -background 1 -insertbackground 1 -state 1 -textvariable 1}
-    }
     namespace eval ::widgets::$site_8_0.lab75 {
         array set save {-text 1}
     }
@@ -533,6 +527,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_8_0.but74 {
         array set save {-command 1 -text 1}
     }
+    namespace eval ::widgets::$site_8_0.but76 {
+        array set save {-command 1 -text 1}
+    }
     set site_8_1 [lindex [$base.tab85 childsite] 1]
     namespace eval ::widgets::$site_8_1 {
         array set save {-background 1 -highlightcolor 1}
@@ -563,12 +560,10 @@ proc vTcl:project:info {} {
 #############################################################################
 ## Procedure:  main
 
-proc ::main {argc argv} {
-  global m_nZ
+proc ::loadvars {} {
   global m_nZA
-  global m_nMAT
+  global m_nZ
   global m_fAwt
-  global m_fGPower
   global m_fAbun
   global m_fBn
   global m_fSpin
@@ -586,14 +581,8 @@ proc ::main {argc argv} {
 
   global m_szCodeDir
 
-  if {$argc < 3} return
-
-  set m_nZA [lindex $argv 0]
-  set m_nMAT [lindex $argv 1]
-  set m_fAwt [lindex $argv 2]
   set m_nZ [expr int($m_nZA/1000)]
 
-  set m_fGPower 2.5
   set output [exec $m_szCodeDir/readrp $m_nZA]
   set output [regsub -all "\n" $output " "]
   set output [regsub -all " +" $output " "]
@@ -601,27 +590,36 @@ proc ::main {argc argv} {
   set output [split $output]
 
   set m_fAbun [lindex $output 0]
-  set m_fBn [lindex $output 1]
-  set m_fSpin [format "%.1f" [lindex $output 2]]
-  set m_fD0 [format "%.2f" [lindex $output 3]]
-  set m_fD1 [format "%.2f" [lindex $output 4]]
-  set m_fD2 [format "%.2f" [lindex $output 5]]
-  set m_fSf0 [format "%.2e" [lindex $output 6]]
-  set m_fSf1 [format "%.2e" [lindex $output 7]]
-  set m_fSf2 [format "%.2e" [lindex $output 8]]
-  set m_fGg0 [format "%.2f" [lindex $output 9]]
-  set m_fGg1 [format "%.2f" [lindex $output 10]]
-  set m_fGg2 [format "%.2f" [lindex $output 11]]
-  set m_fLevel2 [lindex $output 12]
-  set m_fR [format "%.2f" [lindex $output 13]]
+  if {$m_fAbun==0} {puts "Warning: abundance is zero"}
+  set m_fAwt [lindex $output 1]
+  if {$m_fAwt==0} {puts "Warning: atomic mass is zero"}
+  set m_fBn [lindex $output 2]
+  if {$m_fBn==0} {puts "Warning: binding energy is zero"}
+  set m_fSpin [format "%.1f" [lindex $output 3]]
+  if {$m_fSpin==-1} {puts "Warning: spin is not given"}
+  set m_fD0 [format "%.2f" [lindex $output 4]]
+  set m_fD1 [format "%.2f" [lindex $output 5]]
+  set m_fD2 [format "%.2f" [lindex $output 6]]
+  set m_fSf0 [format "%.2e" [lindex $output 7]]
+  set m_fSf1 [format "%.2e" [lindex $output 8]]
+  set m_fSf2 [format "%.2e" [lindex $output 9]]
+  set m_fGg0 [format "%.2f" [lindex $output 10]]
+  set m_fGg1 [format "%.2f" [lindex $output 11]]
+  set m_fGg2 [format "%.2f" [lindex $output 12]]
+  set m_fLevel2 [lindex $output 13]
+  if {$m_fLevel2==0} {puts "Warning: 2nd level energy is not given"}
+  set m_fR [format "%.2f" [lindex $output 14]]
+}
+
+proc ::main {argc argv} {
 }
 
 #############################################################################
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-  if {$argc < 3} {
-    puts "usage: main.tcl ZA MAT AWT"
+  if {$argc < 2} {
+    puts "usage: resonance.tcl ZA MAT"
     exit
   }
 
@@ -632,6 +630,10 @@ proc ::init {argc argv} {
   global m_bGotWRIURR
   global m_bGotRECENT
 
+  global m_fGPower
+  global m_nZA
+  global m_nMAT
+
   set m_szCodeDir ../util/resonance
   set m_szAtlasDir ../Atlas
 
@@ -639,7 +641,12 @@ proc ::init {argc argv} {
   set m_bGotWRIURR 0
   set m_bGotRECENT 0
 
+  set m_fGPower 2.5
   
+  set m_nZA [lindex $argv 0]
+  set m_nMAT [lindex $argv 1]
+
+  loadvars
 }
 
 init $argc $argv
@@ -657,7 +664,7 @@ proc vTclWindow. {base} {
     ###################
     wm focusmodel $top passive
     wm geometry $top 1x1+0+0; update
-    wm maxsize $top 1265 994
+    wm maxsize $top 1585 1120
     wm minsize $top 1 1
     wm overrideredirect $top 0
     wm resizable $top 1 1
@@ -766,7 +773,7 @@ proc vTclWindow.top71 {base} {
         -text ZA: 
     vTcl:DefineAlias "$site_8_0.lab89" "Label3" vTcl:WidgetProc "Toplevel1" 1
     entry $site_8_0.ent92 \
-        -background white -insertbackground black -state readonly \
+        -background white -insertbackground black -state normal \
         -textvariable m_nZA 
     vTcl:DefineAlias "$site_8_0.ent92" "Entry1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_8_0.ent92 "$site_8_0.ent92 Entry $top all _vTclBalloon"
@@ -777,24 +784,16 @@ proc vTclWindow.top71 {base} {
         -text MAT: 
     vTcl:DefineAlias "$site_8_0.lab90" "Label4" vTcl:WidgetProc "Toplevel1" 1
     entry $site_8_0.ent93 \
-        -background white -insertbackground black -state readonly \
+        -background white -insertbackground black -state normal \
         -textvariable m_nMAT 
     vTcl:DefineAlias "$site_8_0.ent93" "Entry2" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_8_0.ent93 "$site_8_0.ent93 Entry $top all _vTclBalloon"
     bind $site_8_0.ent93 <<SetBalloon>> {
         set ::vTcl::balloon::%W {material number}
     }
-    label $site_8_0.lab73 \
-        -text spin: 
-    vTcl:DefineAlias "$site_8_0.lab73" "Label17" vTcl:WidgetProc "Toplevel1" 1
-    entry $site_8_0.ent74 \
-        -background white -insertbackground black -state readonly \
-        -textvariable m_fSpin 
-    vTcl:DefineAlias "$site_8_0.ent74" "Entry18" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.ent74 "$site_8_0.ent74 Entry $top all _vTclBalloon"
-    bind $site_8_0.ent74 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {traget spin}
-    }
+    button $site_8_0.but76 \
+        -command {loadvars} -text Reload 
+    vTcl:DefineAlias "$site_8_0.but76" "Button7" vTcl:WidgetProc "Toplevel1" 1
     label $site_8_0.lab75 \
         -text s-wave 
     vTcl:DefineAlias "$site_8_0.lab75" "Label13" vTcl:WidgetProc "Toplevel1" 1
@@ -1169,7 +1168,7 @@ proc vTclWindow.top71 {base} {
     puts $file "&end"
     close $file
 #   run PTANAL
-    exec $m_szCodeDir/ptanal2 > ptanal.std
+    exec $m_szCodeDir/ptanal > ptanal.std
     exec kedit ptanal.std 2> /dev/null &
     exec cp -a endfa.txt endfr.txt
     set m_bGotPTANAL 1
@@ -1202,7 +1201,7 @@ proc vTclWindow.top71 {base} {
     puts $file "&end"
     close $file
 #   run WRIURR
-    exec $m_szCodeDir/wriurr2 > wriurr.std
+    exec $m_szCodeDir/wriurr > wriurr.std
     exec kedit wriurr.std 2> /dev/null &
     set m_bGotWRIURR 1
   }
@@ -1216,7 +1215,7 @@ proc vTclWindow.top71 {base} {
     puts $file [format "%11.4e%11.4e\n" 0 0.01]
     close $file
 #   run RECENT
-    exec $m_szCodeDir/recent > recent.std
+    exec ../util/recent/recent > recent.std
     exec kedit recent.std 2> /dev/null &
     set m_bGotRECENT 1
   }
@@ -1306,12 +1305,6 @@ proc vTclWindow.top71 {base} {
     place $site_8_0.ent93 \
         -in $site_8_0 -x 184 -y 50 -width 60 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab73 \
-        -in $site_8_0 -x 269 -y 51 -width 34 -height 20 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.ent74 \
-        -in $site_8_0 -x 309 -y 50 -width 60 -height 22 -anchor nw \
-        -bordermode ignore 
     place $site_8_0.lab75 \
         -in $site_8_0 -x 81 -y 82 -width 54 -height 20 -anchor nw \
         -bordermode ignore 
@@ -1380,6 +1373,9 @@ proc vTclWindow.top71 {base} {
         -bordermode ignore 
     place $site_8_0.but74 \
         -in $site_8_0 -x 420 -y 245 -width 160 -height 28 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but76 \
+        -in $site_8_0 -x 277 -y 46 -width 93 -height 28 -anchor nw \
         -bordermode ignore 
     set site_8_1 [lindex [$top.tab85 childsite] 1]
     set site_8_2 [lindex [$top.tab85 childsite] 2]
