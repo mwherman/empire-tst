@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-11-27 14:20:27 $
-Ccc   * $Id: main.f,v 1.156 2006-11-27 14:20:27 Capote Exp $
+Ccc   * $Author: Carlson $
+Ccc   * $Date: 2007-01-29 14:27:48 $
+Ccc   * $Id: main.f,v 1.157 2007-01-29 14:27:48 Carlson Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -899,7 +899,7 @@ C--------Reset variables for life-time calculations
             WRITE (6,*) ' -------------------------------------'
             WRITE (6,*) ' '
          ENDIF
-         IF (ENDf(nnuc).NE.0.0D0) THEN
+         IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
