@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-29 14:31:26 $
-Ccc   * $Id: input.f,v 1.212 2007-01-29 14:31:26 Carlson Exp $
+Ccc   * $Date: 2007-01-29 17:23:15 $
+Ccc   * $Id: input.f,v 1.213 2007-01-29 17:23:15 Carlson Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -928,7 +928,8 @@ C--------------------------------------------------------------------------
          ENDIF
          IF (LHMs.NE.0 .AND. ENDf(1).EQ.0 .AND. NDAng.NE.37 ) THEN
             WRITE (6,*) 
-            WRITE (6,*) 'NDANG reset to 37 for compatibility with HMS'
+            WRITE (6,*) 'WARNING: NDANG reset to 37 for compatibility ', 
+     1                                                  ' with HMS'
             WRITE (6,*)
             NANgela = 37
             NDAng   = 37
