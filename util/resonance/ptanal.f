@@ -2,7 +2,7 @@
 C
 C     written by J.H.Chang (as ANAL)
 C     modified by S.Y.Oh (PTANAL) March 30, 1999
-C     modified by Y.S.Cho (PTANAL2) Nov 8, 2006 (for EMPIRE)
+C     modified by Y.S.Cho (PTANAL) Jan 26, 2007 (for EMPIRE)
 C     July 26,2006    linux output for d0, s0 agreed with alpha results.
 C      However, linux version gave ridiculous  result for *.fit outputs
 C     Tom  burrows and mike herman found out that variable dummy was not
@@ -80,7 +80,7 @@ c     inflag=2
        sf1(is)=0.
        sf2(is)=0.
       enddo
-      ecut=100000.0
+      ecut=500000.0
       gncut(1)=0.
       gncut(2)=0.
       gncuth(1)=1000000.
@@ -98,6 +98,7 @@ ccho  call readsas('sas.txt')
       call ptdist(-1)
       call ptdist(0)
       call ptdist(1)
+      call mkgplot
       call gamavg
       if(spin.ge.0.0) then
        call spina
@@ -204,11 +205,11 @@ ccho   ggflag(2,i)=' '
          stop
        endif
 cdub
-       print('(i6,1x,e10.4,1x,e8.2,1x,a1,1x,f4.1,1x,a1,1x,a1,i2,1x,
-     1         a3,e8.2,1x,e8.2,1x,a3,e8.2,1x,e8.2,1x,a3,e8.2)'),
-     2        iza,rp(1,i),rp(2,i),jflag,SJ(i),lflag,'L',LJ(i),
-     3        gnflag(1,i),rp(3,i),rp(4,i),ggflag(1,i),rp(5,i),rp(6,i),
-     4        aaflag(1,i),rp(7,i)
+c      print('(i6,1x,e10.4,1x,e8.2,1x,a1,1x,f4.1,1x,a1,1x,a1,i2,1x,
+c    1         a3,e8.2,1x,e8.2,1x,a3,e8.2,1x,e8.2,1x,a3,e8.2)'),
+c    2        iza,rp(1,i),rp(2,i),jflag,SJ(i),lflag,'L',LJ(i),
+c    3        gnflag(1,i),rp(3,i),rp(4,i),ggflag(1,i),rp(5,i),rp(6,i),
+c    4        aaflag(1,i),rp(7,i)
        nres=i
 c
       enddo
@@ -458,7 +459,7 @@ ccho  character*1 ggflag
       common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
       dimension x(mres),c(mres),csig(mres)
-      character ptfn*20,ptft*20,wav*1,fname*20,nwave*6
+      character ptfn*20,ptft*20,wav*1,nwave*6,cmd*30
       Real cfit
       Real dyda(2)
       dimension wav(3),A(2),covar(2,2)
@@ -534,9 +535,9 @@ C     use Levenberg-Marquardt Method
       A(1)=jres
       A(2)=0.2
       if(lwave.eq.0) then
-       A(2)=0.05
-ccho
-c      A(2)=sf0*D0
+ccho   A(2)=0.05
+ccho   replaced by the following formula
+       A(2)=sf0*D0
       elseif(lwave.eq.1) then
        A(2)=0.2
       endif
@@ -604,42 +605,11 @@ c2220  format(5x,' Str.ftn.=',f8.3,' +-',f8.3,' E-4 (including error',
       open(4,file=ptft,status='unknown')
       do j=1,jres
        call porter(x(j),A,cfit,dyda,2)
-ccho   write(4,*) x(j),cfit
-       write(4,*) x(j),A,cfit
+       write(4,*) x(j),cfit
 coh       write(4,*) 1000.*x(j)*x(j),cfit
       enddo
       close(4)
       print *,' File ',ptft,' written.'
-ccho  for generating the gnuplot script
-      if(lwave.lt.0) then
-        write(fname,'(a)') 'ptdist.gp'
-      else
-        write(fname,'(a,i1,a)') 'ptdist',lwave,'.gp'
-      endif
-      open(9,file=fname,status='unknown')
-      write(9,*) '# Gnuplot script file for plotting resonance curves'
-      write(9,*) "# Type the command: gnuplot> load 'ptdist.gp'"
-      write(9,*) 'set title "Porter-Thomas distribution"'
-      if(lwave.lt.0) then
-        write(9,'(a)')
-     1        'plot "ptdist.dat" title "combined" with line,\\'
-        write(9,'(a)')
-     1        '     "ptdist.fit" title "fitted-combined" with line'
-        close(9)
-      else
-        if(lwave.eq.0) then
-          nwave='s-wave'
-        elseif(lwave.eq.1) then
-          nwave='p-wave'
-        elseif(lwave.eq.2) then
-          nwave='d-wave'
-        endif
-        write(9,'(a,i1,a,a,a)') 'plot "ptdist',lwave,
-     1        '.dat" title "',nwave,'" with line,\\'
-        write(9,'(a,i1,a,a,a)') '     "ptdist',lwave,
-     1        '.fit" title "fitted ',nwave,'" with line'
-      endif
-      close(9)
       return
 
   900 write(7,2500) jres
@@ -1113,7 +1083,6 @@ ccho      cause problem if average gamma width is not given
  2030       format(5x,a10,': gGn is not given. Based on',
      1      ' capture area and avg. Gg, gGn =',f7.4)
             ehead='    '
-            print *,'en=',En,'gGn=',gGn
           endif
          endif
          gn=gGn/gfact
@@ -1848,3 +1817,40 @@ C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       ran2=min(AM*iy,RNMX)
       return
       END
+c     generate a gnuplot script
+      subroutine mkgplot
+      dimension icolor(10)
+c     set label and line colors
+      icolor(1)=3
+      icolor(2)=3
+      icolor(3)=1
+      icolor(4)=1
+      icolor(5)=7
+      icolor(6)=7
+      icolor(7)=-1
+      icolor(8)=-1
+      icolor(9)=-1
+      icolor(10)=-1
+      open(9,file='ptdist.gp',status='unknown')
+      write(9,*) '# Gnuplot script file for plotting resonance curves'
+      write(9,*) "# Type the command: gnuplot> load 'ptdist.gp'"
+      write(9,*) "set terminal postscript color solid"
+      write(9,*) 'set output "|cat >ptdist.ps"'
+      write(9,*) 'set title "Porter-Thomas distribution"'
+ccho  for generating the gnuplot script
+      write(9,*) 'plot "ptdist.dat" title "combined" with line lt ',
+     1           icolor(1),', \\'
+      write(9,*) '     "ptdist.fit" title "fitted-combined"',
+     1           ' with line lt ',icolor(2),', \\'
+      write(9,*) '     "ptdist0.dat" title "s-wave"',
+     1           ' with line lt ',icolor(3),', \\'
+      write(9,*) '     "ptdist0.fit" title "s-wave"',
+     1           ' with line lt ',icolor(4),', \\'
+      write(9,*) '     "ptdist1.dat" title "p-wave"',
+     1           ' with line lt ',icolor(5),', \\'
+      write(9,*) '     "ptdist1.fit" title "p-wave"',
+     1           ' with line lt ',icolor(6)
+      close(9)
+      irt=system("gnuplot ptdist.gp")
+      return
+      end

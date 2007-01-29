@@ -1,7 +1,9 @@
       program readrp
 C
 C     Read resonance property and parameter tables from Atlas
-C     written by Y.S.Cho
+C     Written by Y.S.Cho (Jan 29, 2007)
+C
+C     Read ZA (1000*Z+A) as an argument at startup
 C
 C     Input files:
 C       discrete level data (../RIPL-2/levels/z???.dat)
@@ -10,7 +12,12 @@ C       resonance property data (../res-properties/z???.dat)
 C       resonance parameter data (../res-parameters/z???.dat)
 C
 C     Output files:
-C       standard output (parameters required for TCL script)
+C       standard output (basic parameters required for TCL script)
+C         basic parameters to standard output are
+C         abundance,binding energy,spin,average level spacing for s,p and d-waves,
+C         neutron strength function for s,p and d-waves,
+c         average gamma width for s,p and d-waves, scattering radius
+c         maximum resonance energy in the atlas and first level energy, in turn.
 C       local resonance parameter data (za?????.atlas)
 C
       character keyw*3,val*11,err*11
@@ -49,6 +56,8 @@ c
 c     read atomic weight from RIPL-2
 c
       AMUmev = 9.31494013D+02
+      AMUneu = 1.008664916
+      AMUpro = 1.007276467
 c
       open(11,file='../RIPL-2/masses/mass-frdm95.dat',status='old',
      1     err=200)
@@ -63,6 +72,7 @@ c
           excess=xmassth
         endif
         awt=imass+excess/AMUmev
+        awt=iz*AMUpro+(imass-iz)*AMUneu+excess/AMUmev
         goto 190
       endif
       goto 110
@@ -153,18 +163,19 @@ c
      1         'while reading resonance property table'
       stop
   490 close(2)
-      print *, abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,
-     1         ggavg(1),ggavg(2),ggavg(3),flevel,ap
 c
 c     copy resonance parameter table into local directory if not any
 c
   600 write(copyf,'(a,i6.6,a)') 'za',int(zam),'.atlas'
+      emax=0
       open(4,file=copyf,status='old',err=610)
-      goto 900
+      goto 800
+c     copy resonance parameter table into local directory
+c     read maximum energy from the global file
   610 write(fname,'(a,a)') '../Atlas/res-parameters/',basef
       open(3,file=fname,status='old')
       open(4,file=copyf,status='unknown')
-  700 read(3,'(a)',end=800) line
+  650 read(3,'(a)',end=690) line
       if (line(1:1).eq.'#') then
         write(4,'(a)'),line
       else
@@ -174,12 +185,24 @@ c
      2        e8.0,1x,a3,1x,1x,1x,e9.0,1x,e8.0,1x,3x,1x,1x,1x,9x,1x,8x,
      3        1x,a3,1x,1x,1x,e9.0,1x,8x,1x,3x,1x,1x,1x,9x,1x,8x)
         if(e0.gt.0.0.and.iza.eq.zam) then
+          emax=e0
           write(4,'(a)'),line
         endif
       endif
-      goto 700
-  800 close(3)
-  900 close(4)
+      goto 650
+  690 close(3)
+      close(4)
+      goto 999
+c     read maximum energy from the local file
+  800 read(4,'(a)',end=890) line
+      if (line(1:1).ne.'#') then
+        read(line,3000) iza,e0
+        emax=e0
+      endif
+      goto 800
+  890 close(4)
+  999 print *, abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,
+     1         ggavg(1),ggavg(2),ggavg(3),ap,emax,flevel*1e6
       end
 c
       function str2r(str,iline)

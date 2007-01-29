@@ -1,6 +1,6 @@
       program wriurr      
 C
-C     MODIFIED BY Y.S.CHO (01.11.2007)
+C     MODIFIED BY Y.S.CHO (Jan 24, 2007)
 C     APENDING RESONANCE PARAMETERS TO ENDFR.TXT
 C     INPUT FILES = WRIURRX.INP
 C                   ENDFR.TXT

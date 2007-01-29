@@ -1,6 +1,6 @@
       program scanr      
 C
-C     WRITTEN BY Y.S.Cho
+C     WRITTEN BY Y.S.Cho (Jan 26, 2007)
 C     SEARCH UPPER BOUNDARY OF RESOLVED RESONANCE REGION
 C     BY FINDING THE MINIMUM CHISQ AND PRESENT A PLOT
 C     A PART OF ENDF READING ROUTINE TAKEN FROM PTANAL
@@ -22,14 +22,12 @@ c
       read(1,input)
       close(1)
   100 open(2,file='endfr.txt',status='old')
-      open(8,file='scanr.gp',status='unknown')
 C     skip first record
  1000 format(a,i4,i2,i3,i5)
       read(2,1000) txt
       call rd1451
       call rd2151
       close(2)
-      close(8)
       stop
       end
 c................................................................
@@ -134,8 +132,12 @@ c     set label and line colors
       icolor(9)=-1
       icolor(10)=-1
 c
+      open(8,file='scanr.gp',status='unknown')
+c
       write(8,*) '# Gnuplot script file for plotting resonance curves'
       write(8,*) "# Type the command: gnuplot> load 'scanr.gp'"
+      write(8,*) "set terminal postscript color solid"
+      write(8,*) 'set output "|cat >scanr.ps"'
       write(8,*) 'set title "Resonance curves"'
       write(8,*) 'set xlabel "Resonance energy (eV)"'
       write(8,*) 'set ylabel "Index (number)"'
@@ -238,32 +240,34 @@ c
       enddo
 
       do ll=1,nls
-      write(fname,'(a,i1,a)') 'l',ll-1,'.txt'
-      if (ll.eq.1) then
-        write(nwave,'(a)') 's-wave'
-      elseif (ll.eq.2) then
-        write(nwave,'(a)') 'p-wave'
-      elseif (ll.eq.3) then
-        write(nwave,'(a)') 'd-wave'
-      else
-        write(nwave,'(a,i2)') 'l = ',ll-1
-      endif
- 2700 format(' plot "',a,'" title "',a,'" with line lt ',i1,',\\')
- 2800 format('      "',a,'" title "',a,'" with line lt ',i1,',\\')
-      if (ll.eq.1) then
-        write(8,2700) fname,nwave,icolor(ll*2-1)
-      else
-        write(8,2800) fname,nwave,icolor(ll*2-1)
-      endif
- 2900 format('      ',e10.3,'*x+',e10.3,' title "fitted ',a,
-     1'" with line lt ',i1,$)
-      write(8,2900) a(ll),b(ll),nwave,icolor(ll*2)
-      if (ll.eq.nls) then
-        write(8,'(a)') ''
-      else
-        write(8,'(a)') ',\\'
-      endif
+        write(fname,'(a,i1,a)') 'l',ll-1,'.txt'
+        if (ll.eq.1) then
+          write(nwave,'(a)') 's-wave'
+        elseif (ll.eq.2) then
+          write(nwave,'(a)') 'p-wave'
+        elseif (ll.eq.3) then
+          write(nwave,'(a)') 'd-wave'
+        else
+          write(nwave,'(a,i2)') 'l = ',ll-1
+        endif
+ 2700   format(' plot "',a,'" title "',a,'" with line lt ',i1,',\\')
+ 2800   format('      "',a,'" title "',a,'" with line lt ',i1,',\\')
+        if (ll.eq.1) then
+          write(8,2700) fname,nwave,icolor(ll*2-1)
+        else
+          write(8,2800) fname,nwave,icolor(ll*2-1)
+        endif
+ 2900   format('      ',e10.3,'*x+',e10.3,' title "fitted ',a,
+     1         '" with line lt ',i1,$)
+        write(8,2900) a(ll),b(ll),nwave,icolor(ll*2)
+        if (ll.eq.nls) then
+          write(8,'(a)') ''
+        else
+          write(8,'(a)') ',\\'
+        endif
       enddo
+      close(8)
+      irt=system("gnuplot scanr.gp")
       return
       end
 c................................................................
