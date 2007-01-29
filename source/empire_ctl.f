@@ -1,6 +1,6 @@
 Ccc   * $Author: Carlson $ 
-Ccc   * $Date: 2007-01-29 14:26:07 $
-Ccc   * $Id: empire_ctl.f,v 1.19 2007-01-29 14:26:07 Carlson Exp $
+Ccc   * $Date: 2007-01-29 17:15:39 $
+Ccc   * $Id: empire_ctl.f,v 1.20 2007-01-29 17:15:39 Carlson Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -49,7 +49,7 @@ C-------------------------------------------------------------------
 C
       subroutine scan4fit(autofit,pars,dparmx,nnft,xitr,sensit)
 C
-C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=2) and the corresponding
+C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=1) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
 C--- C4 data file is read to prepare experimental data and an appropriate
 C--- input file (FITIN.DAT) is prepared. 
@@ -185,7 +185,7 @@ C--- The fundamental fit command - automatic fitting will be attempted
 C--- if its value is 2 or larger. 
       if (cmnd(1:6).eq.'FITOMP') then
         read(cmnd,'(6x,g10.5,4i5)') val
-        if (val.gt.1.) then
+        if (val.gt.0.) then
           autofit = .TRUE.
           write(18,'(a6,f10.5)') cmnd(1:6),-1.0
           write(72,'(a6,f10.5)') cmnd(1:6),1.0
@@ -2141,4 +2141,3 @@ C-----Resotore standard input
       ENDIF
       return
       end
-
