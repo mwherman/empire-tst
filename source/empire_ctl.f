@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: empire_ctl.f,v 1.18 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Author: Carlson $ 
+Ccc   * $Date: 2007-01-29 14:26:07 $
+Ccc   * $Id: empire_ctl.f,v 1.19 2007-01-29 14:26:07 Carlson Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -123,8 +123,10 @@ C--- projectile.
 
 C--- With Zp, Zt and At, the Coulomb barrier and the lowest energy used in
 C--- the fit energy mesh can be estimated. For protons, the lowest energy is
-C--- taken to about half the Coulomb barrier, for neutrons 1 keV.
-      eclmn=int(0.2*disc*zzp*zzt/aat**(1./3.)+0.5)/disc
+C--- taken to about 0.6 to 0.8 of the Coulomb barrier, for neutrons 1 keV.
+      culbar=1.44*zzp*zzt/(3.75+1.25*aat**(1./3.))
+      eclmn= max(culbar-0.75-0.5*(2*zzp-aap)-0.01*zzt,0.6*culbar)    
+      eclmn=int(disc*eclmn+0.5)/disc
       emin=max(int(disc*emin+0.5),1)/disc
       egrid(1)=min(emin,max(0.001,eclmn))
 
@@ -142,17 +144,27 @@ C--- as well as prepare neutron or proton fit input or jump out.
       if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.0) then
         write(18,'(i3)') 1
         write(18,'(i3)') 0
+        write(18,'(i3)') 0
        else if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.1) then
         write(18,'(i3)') 0
         write(18,'(i3)') 1
+        write(18,'(i3)') 0
         aat=0.
+       else if(int(aap+0.1).eq.2 .and. int(zzp+0.1).eq.4) then
+        close(5)
+        close(18,status='delete')
+        close(72,status='delete')
+        return
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 1
+c        aat=0.
        else
         close(5)
         close(18,status='delete')
         close(72,status='delete')
         return
        endif
-      write(18,'(i3)') 0
       write(18,'(i3,2f3.0)') 0, 0., 0.
 
       izz=zzt+0.1
