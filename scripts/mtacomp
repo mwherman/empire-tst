@@ -27,7 +27,7 @@ if [ "$name1" != "" ]; then
    rm EXFOR tmp.dat c4.zvd end1.zvd  $name1  2>/dev/null
    ln -sf $dir1/$root.c4 EXFOR
    ln -sf $dir1/$root-s.endf $name1
-   ../util/c4zvd/c4dat4l.exe  A $MT EXFOR tmp.dat
+   ../util/c4zvd/c4dat4l.exe  EXFOR tmp.dat MF=3 MT=$MT 
    ../util/c4zvd/datzvdl.exe tmp.dat c4.zvd
    echo '#begin aa.tit' >>c4.zvd
    echo '[func]' >>c4.zvd

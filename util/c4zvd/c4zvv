@@ -1,12 +1,16 @@
 #!/bin/bash
-echo c4zvv ZA MT file.c4 file.endf file.zvd
-echo $1 $2 $3 $4 $5
-rm tmp.dat c4.zvd end.zvd $5
-./c4dat4l.exe $1 $2 $3 tmp.dat
+MT=$1
+file=$2 
+echo ' '
+echo 'Running ZVView plot for:'
+echo 'MT='$1
+echo $file'='$2 
+rm tmp.dat c4.zvd end.zvd $file-$MT.zvd
+./c4dat4l.exe c4 tmp.dat MF=3 MT=$1
 ./datzvdl.exe tmp.dat c4.zvd
-./endzvdl.exe $1 $2 $4 end.zvd
-echo #!zvview.exe >$5
-cat c4.zvd >>$5
-cat end.zvd >>$5
-./zvview.exe $5 ps01.tit/c
+./endzvdl.exe A $MT Present end.zvd
+echo #!zvview.exe >$file-$MT.zvd
+cat c4.zvd >$file-$MT.zvd
+cat end.zvd >>$file-$MT.zvd
+./zvview.exe $file-$MT.zvd ps01.tit/c
 
