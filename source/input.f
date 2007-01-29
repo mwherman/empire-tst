@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-12-26 21:32:44 $
-Ccc   * $Id: input.f,v 1.211 2006-12-26 21:32:44 herman Exp $
+Ccc   * $Date: 2007-01-29 14:31:26 $
+Ccc   * $Id: input.f,v 1.212 2007-01-29 14:31:26 Carlson Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -926,15 +926,31 @@ C--------------------------------------------------------------------------
             WRITE (6,*) 'WARNING: and has been turned off'
             LHMs = 0
          ENDIF
-         IF (LHMs.NE.0 .AND. (NDANG.NE.19 .OR. NDANG.NE.37)) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) 'FATAL: NDANG IN dimension.h MUST BE 19 or 37'
+         IF (LHMs.NE.0 .AND. ENDf(1).EQ.0 .AND. NDAng.NE.37 ) THEN
+            WRITE (6,*) 
+            WRITE (6,*) 'NDANG reset to 37 for compatibility with HMS'
             WRITE (6,*)
-     &'FATAL: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
-            WRITE (6,*)
-     &'FATAL: SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-            STOP 'FATAL: NDANG IN dimension.h MUST BE 19 or 37 for HMS'
+            NANgela = 37
+            NDAng   = 37
+C--------reset angles for inelastic calculations
+            da = 180.0/(NDANG - 1)
+            DO na = 1, NDANG
+              ANGles(na) = (na - 1)*da
+            ENDDO
+            DO na = 1, NDANG
+              CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
+              SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
+            ENDDO
          ENDIF
+c         IF (LHMs.NE.0 .AND. (NDANG.NE.19 .OR. NDANG.NE.37)) THEN
+c            WRITE (6,*) ' '
+c            WRITE (6,*) 'FATAL: NDANG IN dimension.h MUST BE 19 or 37'
+c            WRITE (6,*)
+c     &'FATAL: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+c            WRITE (6,*)
+c     &'FATAL: SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+c            STOP 'FATAL: NDANG IN dimension.h MUST BE 19 or 37 for HMS'
+c         ENDIF
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (6,*) ' '
             WRITE (6,*) 'FATAL: HMS allowed only for incident nucleons'
@@ -1180,7 +1196,7 @@ C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
             IOUt = 1
-            NEXreq = 30
+            NEXreq = MIN(NEXreq,30)
             GCAsc = 1
             MSD = 0
             MSC = 0
@@ -1418,17 +1434,17 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether any residue excitation is higher than CN
-      qmin = 0.0
+      qmin = 1000.0d0
 C
 C     The block below is what it should be, but it does HRTW routine crash !!!!
 C     i.e. DE can not be changed for the time being, this part should be revised
 C     together with width fluctuation routine
 C     RCN, 14 June 2005
 C
-C     DO i = 1, NDEJC
-C        CALL BNDG(i,1,qtmp)
-C        IF (qtmp.LT.qmin) qmin = qtmp
-C     ENDDO
+      DO i = 1, NDEJC
+        CALL BNDG(i,1,qtmp)
+        IF (qtmp.LT.qmin) qmin = qtmp
+      ENDDO
 C     IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
 C--------Energy redefined
 C        DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
@@ -2576,7 +2592,7 @@ C-----Go to the end of the COVAR.DAT file
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b33 by      '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-2.19b35 by      '
       WRITE (12,*) 'M. Herman et al [He01, He02]. This code integrates '
       WRITE (12,*) 'into a single system a number of important modules '
       WRITE (12,*) 'and features:                                      '
@@ -5453,6 +5469,8 @@ C--------------------------------------------------------------------------
             endif
             GOTO 100
          ENDIF
+C--------------------------------------------------------------------------
+         IF (name(1:3).EQ.'FIT') GOTO 100
 C-----
 C-----
          WRITE (6,'('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
