@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: degas.f,v 1.29 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Author: Carlson $ 
+Ccc   * $Date: 2007-01-29 14:24:38 $
+Ccc   * $Id: degas.f,v 1.30 2007-01-29 14:24:38 Carlson Exp $
             
       SUBROUTINE EMPIREDEGAS
       INCLUDE 'dimension.h'
@@ -186,7 +186,7 @@ C     ! Incident proton
       CJGsdegas = XJLv(LEVtarg,1)  ! CN     g.s. spin
       BEProjdegas = 0.0      ! Binding of projectile if not n or p
       GAQdegas = 0.0         ! Quadrupole reaction (default=0.001)
-      BDEgas(1,1) = Q(0,1)   ! Neutron binding energy in CN
+      BDEgas(1,1) = Q(1,1)   ! Neutron binding energy in CN
       BDEgas(1,2) = Q(2,1)   ! Proton  binding energy in CN
       IF (GDIv.GT.1.0) THEN
          GGDegas(1) = A(1)/GDIv
