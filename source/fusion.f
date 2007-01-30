@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 13:18:00 $
-Ccc   * $Id: fusion.f,v 1.64 2007-01-30 13:18:00 Capote Exp $
+Ccc   * $Date: 2007-01-30 14:20:42 $
+Ccc   * $Id: fusion.f,v 1.65 2007-01-30 14:20:42 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -729,9 +729,10 @@ C--------Corrected scattering radius
      &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
 99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
 99008    FORMAT (6x,' ****************************************')
-         WRITE (6,*)' SElastic  = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
-         WRITE (6,*)' Sfusion   = SUM_over_L {(2*L+1)*Tl(L)}'
-         WRITE (6,*)' Sreaction = Sfusion + SUM_over_exc.lev.j {Sinl(j}'
+         WRITE (6,*)' SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
+         WRITE (6,*)' Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
+         WRITE (6,*)' Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
+         WRITE (6,*)
          WRITE (12,*)
       ENDIF
 
