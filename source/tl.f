@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-11-13 15:22:29 $
-Ccc   * $Id: tl.f,v 1.85 2006-11-13 15:22:29 Capote Exp $
+Ccc   * $Date: 2007-01-30 11:12:23 $
+Ccc   * $Id: tl.f,v 1.86 2007-01-30 11:12:23 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1448,7 +1448,7 @@ C--------------EXACT (no DWBA) calculation
       END
 
 
-      SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc,Nnuc,Maxlw,Stl,Lvibrat)
+      SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc,Nnuc,Maxlw,Stl,Sel,Lvibrat)
 C
 C     Process ECIS output to obtain Stl matrix for the incident channel
 C     Reads from unit 45 and writes to unit 6
@@ -1461,6 +1461,9 @@ C             So we can not use the real spin of the given nucleus XJLv(1, Nnuc)
 C
 C     OUTPUT: Maxlw and Stl(1-Maxlw) are the maximum angular momentum and Tls
 C             SINl is the total inelastic cross section
+C             Selast is the shape elastic cross section
+C             Sel(L) contains the shape elastic cross section for a given orbital momentum L 
+C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L 
 C
 C
       INCLUDE 'dimension.h'
@@ -1475,14 +1478,14 @@ C Dummy arguments
 C
       LOGICAL Lvibrat
       INTEGER Maxlw, Nejc, Nnuc
-      DOUBLE PRECISION Stl(NDLW)
+      DOUBLE PRECISION Stl(NDLW),Sel(NDLW)
 C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
-     &                 xmas_nejc, xmas_nnuc, sinlcont
+     &                 xmas_nejc, xmas_nnuc, sinlcont, selast
       DOUBLE PRECISION DBLE
-      INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp
+      INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
       LOGICAL relcal
       CHARACTER*1 parc
       REAL SNGL
@@ -1491,6 +1494,7 @@ C
 
       DO l = 1, NDLW
        Stl(l) = 0.d0
+	 Sel(l) = 0.d0
       ENDDO
 
       ilv = 1
@@ -1498,9 +1502,38 @@ C
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
-C-----Opening ecis03 output file containing Tlj
-C     OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.tlj')
-      OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ')
+C-----Opening ecis03 output file containing Smatrix
+      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.smat', ERR=90)
+      READ (45,*,END = 90)   ! To skip first line <SMATRIX> ..
+   80 READ (45,'(1x,f4.1,1x,a1,1x,i4,1x,i4)',END=90) 
+     &     jc, parc, nceq, nctot
+C     JC,ParC is the channel spin and parity
+C     nceq is the total number of coupled equations
+C     ncin is the number of independent coupled equations
+      ncsol=nctot/nceq
+C     Loop over the number of coupled equations
+      do ncint=1,ncsol
+        do nc=1,nceq               
+C       Reading the coupled level number nlev, the orbital momentum L,
+C           angular momentum j and Transmission coefficient Tlj,c(JC)
+C       (nlev=1 corresponds to the ground state)
+        read (45,
+     &  '(1x,3(I2,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)                     
+     &  nc1,nc2,nlev,l,jj,sreal,simag,stmp                       
+        IF (nlev.eq.1 .and. nc1.eq.nc2 
+     &  .and. stmp.GT.1.D-15 .AND. L.LT.NDLW) 
+C-----------Averaging over particle and target spin, summing over channel spin jc
+C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
+     &      Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2) 
+     &           /DBLE(2*L + 1)
+     &           /DBLE(2*SEJc(Nejc) + 1)
+     &           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+        enddo
+      enddo
+      GOTO 80
+   90 CLOSE(45)
+
+      OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200)
       READ (45,*,END = 200)   ! To skip first line <TLJs.> ..
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
@@ -1529,6 +1562,7 @@ C-----For vibrational the Tls must be multiplied by
       IF (Lvibrat) THEN
          DO l = 0, Maxlw
             Stl(l + 1) = Stl(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
+            Sel(l + 1) = Sel(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
          ENDDO
       ENDIF
 
@@ -1538,6 +1572,9 @@ C-----For vibrational the Tls must be multiplied by
       SINl = 0.D0
       SINlcc = 0.D0
       sinlcont = 0.D0
+      sabs = 0.D0
+      selast = 0.D0
+      
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*) TOTcs
@@ -1556,12 +1593,15 @@ C     xmas_nnuc = AMAss(Nnuc)
       relcal = .FALSE.
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
-C-----Absorption cross section in mb
-      sabs = 0.D0
+
+C-----Absorption and elastic cross sections in mb
       DO l = 0, Maxlw
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
+	   Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
+         selast = selast + Sel(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = 10.d0*PI/ak2*sabs
+
       IF (sabs.LE.0.D0) RETURN
 
       CSFus = ABScs
@@ -1634,6 +1674,10 @@ C
          WRITE (6,*) ' INCIDENT CHANNEL:'
          WRITE (6,'(A7,I6,A5,F10.3,A10,F10.3,A10)') '  LMAX:', Maxlw,
      &          ' E = ', EIN, ' MeV (CMS)', elab, ' MeV (LAB)'
+         WRITE (6,*) ' XS calculated using Smat:   Selast =',
+     &               SNGL(selast), ' mb '
+         WRITE (6,*) ' Shape elastic XS =', SNGL(ELAcs),
+     &               ' mb (read from ECIS)'
          WRITE (6,*) ' XS calculated using averaged Tls:   Sabs =',
      &               SNGL(sabs), ' mb '
          WRITE (6,*) ' Reaction XS =', SNGL(ABScs),
@@ -1772,9 +1816,14 @@ C-----For vibrational the Tls must be multiplied by
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
 C--------Reaction cross section in mb
          sabs = 0.D0
+	   if(elab.lt.0.3d0) write(6,*)
          DO l = 0, lmax
-            sabs = sabs + TTLl(J,l)*DBLE(2*l + 1)
+            stmp = TTLl(J,l)*DBLE(2*l + 1)
+            if(elab.lt.0.3d0) write(6,303) l,stmp*10.*PI/ak2
+  303       format(3x,' L =',I3,' Sabs(L) =',d12.6)       	         
+	      sabs = sabs + stmp
          ENDDO
+	   if(elab.lt.0.3d0) write(6,*)
          sabs = 10.*PI/ak2*sabs
          OPEN (UNIT = 45,FILE = 'ecis03.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
@@ -1988,7 +2037,8 @@ C-----Legendre coefficients output
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
-      ECIs2(6:6) = 'F'
+      ECIs2(6:6) = 'T'
+      ECIs2(10:10) = 'T'
 C     DWBA option added
       IF (DIRect.EQ.3 .OR. Ldwba) THEN
 C-----Iteration scheme used for DWBA (To be checked following Harm Wienke message)
@@ -2419,8 +2469,8 @@ C-----Legendre coefficients output
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
-      ECIs2(6:6) = 'F'
-
+      ECIs2(6:6) = 'T'
+      ECIs2(10:10) = 'T'
 C-----DWBA option added
       IF (DIRect.EQ.3) THEN
 C-----Iteration scheme used for DWBA (To be checked following Harm Wienke message)
