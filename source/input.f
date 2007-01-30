@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-30 13:24:27 $
-Ccc   * $Id: input.f,v 1.216 2007-01-30 13:24:27 Capote Exp $
+Ccc   * $Date: 2007-01-30 14:44:36 $
+Ccc   * $Id: input.f,v 1.217 2007-01-30 14:44:36 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -249,13 +249,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
