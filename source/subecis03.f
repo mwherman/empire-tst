@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-09-19 13:30:22 $
-Ccc   * $Id: subecis03.f,v 1.18 2006-09-19 13:30:22 Capote Exp $
+Ccc   * $Date: 2007-01-30 11:10:36 $
+Ccc   * $Id: subecis03.f,v 1.19 2007-01-30 11:10:36 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS03 to read externally calculated dispersive corrections
 C     8. Sept. 2006, RCN
@@ -33,6 +33,7 @@ C
       CHARACTER*4 cw(2,IDMX)
       INTEGER nw(2,IDMX)
       REAL w
+
 C
 C
 C 01/01/04                                                      ECIS03  ECIS-000
@@ -53,20 +54,24 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN (58,FILE = 'ecis03.cs')
       OPEN (55,FILE = 'ecis03.dat')
       OPEN (59,FILE = 'ecis03.ics')
-      OPEN (60,FILE = 'file60')
+      OPEN (60,FILE = 'ecis03.smat')
       OPEN (61,FILE = 'file61')
       OPEN (62,FILE = 'file62')
       OPEN (63,FILE = 'ecis03.tlj')
       OPEN (64,FILE = 'ecis03.exp')
       OPEN (65,FILE = 'ecis03.leg')
-      OPEN (91,FILE = 'file91')
       OPEN (85,FILE = 'ecis03.ang')
       OPEN (86,FILE = 'file86')
       OPEN (87,FILE = 'file87')
       OPEN (88,FILE = 'file88')
       OPEN (89,FILE = 'file89')
       OPEN (90,FILE = 'file90')
+      OPEN (91,FILE = 'file91')
+
+      OPEN (93,FILE = 'file93')
+
       OPEN (99,FILE = 'file99')
+
       CALL CALC(nw,cw,DW,IDMX)
       CLOSE (75)
       CLOSE (76)
@@ -74,20 +79,25 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (58)
       CLOSE (55)
       CLOSE (59)
-      CLOSE (60,STATUS = 'delete')
+      CLOSE (60)
       CLOSE (61,STATUS = 'delete')
       CLOSE (62,STATUS = 'delete')
       CLOSE (63)
       CLOSE (64)
       CLOSE (65)
-      CLOSE (91,STATUS = 'delete')
       CLOSE (85)
       CLOSE (86,STATUS = 'delete')
       CLOSE (87,STATUS = 'delete')
       CLOSE (88,STATUS = 'delete')
       CLOSE (89,STATUS = 'delete')
       CLOSE (90,STATUS = 'delete')
+
+      CLOSE (91,STATUS = 'delete')
+
+      CLOSE (93,STATUS = 'delete')
+
       CLOSE (99,STATUS = 'delete')
+
       END
 C 01/01/04                                                      ECIS03  HORA-000
       SUBROUTINE HORA
@@ -12473,8 +12483,8 @@ C CHANGE OF PARITY                                                      CAL1-184
                   WRITE (63,99045) k1, k2, u1, u2
                ENDDO
             ENDDO
-C     CLOSE (99,STATUS='DELETE')                                        CAL1-204
-            CLOSE (99)
+            CLOSE (99)       
+C           CLOSE (99,STATUS='DELETE')       
          ENDIF
       ELSE
          JPI = JPI + 1
@@ -23740,7 +23750,7 @@ C TRANSFORMATION                                                        SCHE-370
      &                             'S MATRIX',20X,'|S|',7X,
      &                             'PHASE /WITH COUL.')
                            npt = npt + 1
-                           IF (Lo(60)) WRITE (99,99045) bj, ip(jij),
+                           IF (Lo(60)) WRITE (93,99045) bj, ip(jij),
      &                         nc2, nc1
                         ENDIF
                      ENDIF
@@ -23777,7 +23787,7 @@ C TRANSFORMATION                                                        SCHE-370
      &                                    d1, d2
 99010                                  FORMAT (1X,3I3,I5,F7.1,4X,1P,
      &                                    2D15.7,' I',4X,0P,3F11.8)
-                                       IF (Lo(60)) WRITE (99,99050) nc1,
+                                       IF (Lo(60)) WRITE (93,99050) nc1,
      &                                    nc2, iv, lc, bj, b1, b2, b3
                                     ENDIF
                                  ENDIF
@@ -23818,18 +23828,19 @@ C  HELICITY SCATTERING COEFFICIENTS                                     SCHE-413
          IF (.NOT.(Lo(160))) THEN
             WRITE (60,99015) Wv(1,1), Wv(12,1), Wv(2,1), Ipi(4,1), npt
 99015       FORMAT ('<S-MATRIX>',F10.2,F10.5,F10.2,2I5)
-            REWIND 99
+            REWIND 93
             DO i = 1, npt
-               READ (99,99045) u1, ipp, k1, k2
+               READ (93,99045) u1, ipp, k1, k2
                WRITE (60,99045) u1, ipp, k1, k2
                DO k = 1, k2
-                  READ (99,99050) k1, k2, k3, k4, bj, b1, b2, b3
+                  READ (93,99050) k1, k2, k3, k4, bj, b1, b2, b3
                   WRITE (60,99020) k1, k2, k3, k4, bj, b1, b2, b3
 99020             FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(D15.7,1X),'I',4X,
      &                    F11.8)
                ENDDO
             ENDDO
-            CLOSE (99,STATUS = 'DELETE')
+            CLOSE (93,STATUS = 'DELETE')
+
          ENDIF
       ENDIF
       IF (.NOT.(Lo(165))) THEN
