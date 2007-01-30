@@ -1,13 +1,13 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 11:10:36 $
-Ccc   * $Id: subecis03.f,v 1.19 2007-01-30 11:10:36 Capote Exp $
+Ccc   * $Date: 2007-01-30 13:09:28 $
+Ccc   * $Id: subecis03.f,v 1.20 2007-01-30 13:09:28 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS03 to read externally calculated dispersive corrections
 C     8. Sept. 2006, RCN
 C
-C     Allow to use dispersive potentials feturing different geometries
+C     Allow to use dispersive potentials featuring different geometries
 C     of the imaginary volume and real volume potentials
-C     (like DCCOMP for actinides)
+C     (like DCCOMP #2408 for actinides)
 C--------------------------------------------------------------------------------------
 
       SUBROUTINE ECIS(Inpnam,Outnam)
