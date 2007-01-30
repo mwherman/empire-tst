@@ -48,8 +48,17 @@ fi
 # RUN ZVD
 
 cd ../util/c4zvd/
-ln -sf $work/$file-s.endf Empire
-./c4zvv A $MT $work/$file.c4 Empire $file-$MT.zvd 
+ln -sf $work/$file-s.endf Present
+ln -sf $work/$file.c4 c4
+#./c4zvv $MT $file 
+rm tmp.dat c4.zvd end.zvd $file-$MT.zvd
+./c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
+./datzvdl.exe tmp.dat c4.zvd
+./endzvdl.exe A $MT Present end.zvd
+echo #!zvview.exe >$file-$MT.zvd
+cat c4.zvd >$file-$MT.zvd
+cat end.zvd >>$file-$MT.zvd
+./zvview.exe $file-$MT.zvd ps01.tit/c
 mv $file-$MT.zvd $work
 cd $work
 
