@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-30 13:07:17 $
-Ccc   * $Id: input.f,v 1.214 2007-01-30 13:07:17 Capote Exp $
+Ccc   * $Date: 2007-01-30 13:11:18 $
+Ccc   * $Id: input.f,v 1.215 2007-01-30 13:11:18 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5326,7 +5326,7 @@ C-----
                 if(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
               else
                 WRITE (6,*) 
-     &                    'Prompt fission neutron spectra not calculated'           
+     &           'Prompt fission neutron spectra not calculated'           
             endif             
 C--------------------------------------------------------------------------
             else
