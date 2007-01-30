@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: io.h,v 1.30 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Date: 2007-01-30 11:07:02 $
+Ccc   * $Id: io.h,v 1.31 2007-01-30 11:07:02 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -50,6 +50,7 @@ c     47     fusion,input
 c     48     systematics
 c     51     input
 c     52     input
+c     53     fusion
 c     54     HF-comp
 c     55     ecis03
 c     58     ecis03
@@ -84,6 +85,7 @@ c     89     ecis03
 c     90     ecis03
 c     91     ecis-03,MSD-Tristan
 c     92     empire_ctl
+c     93     ecis-03
 c     94     input.f,main
 c     95     input.f
 c     96     tl
@@ -141,6 +143,7 @@ C     Added to check if file is not empty
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+      OPEN (UNIT = 53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
 
 
 

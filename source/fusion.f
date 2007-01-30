@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:43 $
-Ccc   * $Id: fusion.f,v 1.62 2006-08-09 12:37:43 Capote Exp $
+Ccc   * $Date: 2007-01-30 11:06:28 $
+Ccc   * $Id: fusion.f,v 1.63 2007-01-30 11:06:28 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -38,7 +38,7 @@ C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ctmp1,
      &                 ctmp2, e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 stmp1, stmp2, sum, wparg, xmas_npro,
+     &                 stmp1, stmp2, sum, wparg, xmas_npro, sel(NDLW),
      &                 xmas_ntrg, wf
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
@@ -83,7 +83,8 @@ C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       CSFus = 0.0
       maxlw = 0
       DO i = 1, NDLW
-         stl(i) = 0.0
+         stl(i) = 0.d0
+	   sel(i) = 0.d0
       ENDDO
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -108,17 +109,24 @@ C--------Here the old calculated files should be read
                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
             ENDDO
             READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-            CLOSE (45)
             IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
      &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
      &                    ABScs, SINl, SINlcc, CSFus
+            READ (45,END = 300) l
+            IF(L.EQ.123456) THEN
+              IF (IOUt.EQ.5) WRITE (46,*) L
+              DO l = 0, maxlw
+                READ (45,END = 300) sel(l + 1)
+                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(sel(l + 1))
+              ENDDO
+	      ENDIF
+            CLOSE (45)
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.EQ.5) THEN
                WRITE (6,*)
      &' Transmission coefficients for incident channel read from file: '
                WRITE (6,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
-
             GOTO 300
          ENDIF
 C
@@ -284,10 +292,10 @@ C--------and calculate transmission coefficients
             ENDIF
          ENDDO
   150    NLW = j - 1
-          CSFus = 0.d0
+         CSFus = 0.d0
          DO j = 1, NLW
             CSFus = CSFus + (2*j - 1)*stl(j)
-          ENDDO
+         ENDDO
          maxlw = NLW
          ABScs = CSFus
          SINlcc=0.d0
@@ -331,7 +339,7 @@ C-----------DWBA calculation. All collective levels considered
                CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
             ELSE
                CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
-               CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
+               CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
                WRITE (6,*) ' SOMP transmission coefficients used for ',
@@ -370,19 +378,19 @@ C-----------is calculated by CC method.
 C--------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
                IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
-                  CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.FALSE.)
+                CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.FALSE.)
                ENDIF
             ELSE
 C--------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
                IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
-                  CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
+                CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ENDIF
             ENDIF
             IF (DIRect.EQ.1) THEN
@@ -496,9 +504,9 @@ C-----------------checking the correspondence of the excited states
                CLOSE (46,STATUS = 'DELETE')
                CLOSE (47)
                IF (DEFormed) THEN
-                  CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.FALSE.)
+                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.FALSE.)
                ELSE
-                  CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
+                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ENDIF
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
          ENDIF  ! END of DIRECT=1/2 block
@@ -510,7 +518,7 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3,ICAlangs)
             WRITE (6,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
-            CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,.TRUE.)
+            CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
          ENDIF
          IF (maxlw.GT.NDLW) THEN
             WRITE (6,*)
@@ -626,6 +634,10 @@ C-----Storing transmission coefficients for the incident channel
          ENDDO
          WRITE (46,'(1x,A30,6(e12.6,1x))') 'EL,TOT,REAC,INEL,CC,CSFus:',
      &          ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
+         WRITE (46,'(1x,I6)') 123456 
+         DO l = 0, maxlw
+            WRITE (46,*) l, SNGL(sel(l + 1))
+         ENDDO
          CLOSE (46)
       ENDIF
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
@@ -634,6 +646,14 @@ C-----Storing transmission coefficients for the incident channel
          WRITE (45) stl(l + 1)
       ENDDO
       WRITE (45) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+C
+C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
+C
+	l = 123456
+      WRITE (45) l 
+      DO l = 0, maxlw
+         WRITE (45) sel(l + 1)
+      ENDDO
       CLOSE (45)
 
   300 el = EINl
@@ -641,7 +661,7 @@ C-----Storing transmission coefficients for the incident channel
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
-      IF (EINl.LT.0.1D0 .AND. ZEJc(Npro).EQ.0) THEN
+      IF (EINl.LT.0.3D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
          r2 = rp*rp
@@ -677,6 +697,38 @@ C--------Corrected scattering radius
      &           6x,' Elab = ',F6.1,' keV',
      &              '        Total XS = ',F9.2,' mb'/
      &           6x,' Scattering radius =',f7.3,' fm'/7x,54(1h*))
+         WRITE (6,*)
+         WRITE (12,*)
+	   selast = 0.d0
+	   DO l = 0, maxlw
+	     IF(STL(l+1).LT.1.d-15) EXIT
+           selast = selast + (2*l+1)*sel(l + 1)
+         ENDDO
+   	   WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+     &          	  6H(ECIS:,F10.3,1H),1x,2hmb)') 
+     &              selast, ELAcs
+   	   WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+     &          	  6H(ECIS:,F10.3,1H),1x,2hmb)') 
+     &              selast, ELAcs
+   	   WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
+     &              6x,17HSHAPE ELASTIC XS=,F10.3,1x,2hmb)') 
+     &              EINl*1000, selast
+         WRITE ( 6,99006)
+         WRITE (12,99006)
+         WRITE (53,99006)
+	   DO l = 0, maxlw
+	     IF(STL(l+1).LT.1.d-15) EXIT
+           WRITE ( 6,99007) l, stl(l + 1), sel(l + 1)
+           WRITE (12,99007) l, stl(l + 1), sel(l + 1)
+           WRITE (53,99007) l, stl(l + 1), sel(l + 1)
+         ENDDO
+         WRITE ( 6,99008)
+         WRITE (12,99008)
+         WRITE (53,99008)
+99006    FORMAT (6x,' ****************************************'/
+     &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
+99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
+99008    FORMAT (6x,' ****************************************')
          WRITE (6,*)
          WRITE (12,*)
       ENDIF
