@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 11:06:28 $
-Ccc   * $Id: fusion.f,v 1.63 2007-01-30 11:06:28 Capote Exp $
+Ccc   * $Date: 2007-01-30 13:18:00 $
+Ccc   * $Id: fusion.f,v 1.64 2007-01-30 13:18:00 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -84,7 +84,7 @@ C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       maxlw = 0
       DO i = 1, NDLW
          stl(i) = 0.d0
-	   sel(i) = 0.d0
+         sel(i) = 0.d0
       ENDDO
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -119,7 +119,7 @@ C--------Here the old calculated files should be read
                 READ (45,END = 300) sel(l + 1)
                 IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(sel(l + 1))
               ENDDO
-	      ENDIF
+            ENDIF
             CLOSE (45)
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.EQ.5) THEN
@@ -310,7 +310,7 @@ C--------calculation of o.m. transmission coefficients for absorption
          IWArn = 0
          ldbwacalc = .FALSE.
          ltlj = .FALSE.
-	   lodd = .false.
+         lodd = .false.
          IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
      >        mod(nint(A(Ntrg)-Z(Ntrg)),2).ne.0) .and.
      >        mod(nint(A(Ntrg)),2).ne.0 ) lodd = .true.  
@@ -458,8 +458,8 @@ C-----------------checking the correspondence of the excited states for even-eve
      &            ' WARNING: DWBA and CCM state order do not coincide'
                   ENDIF
                   BACKSPACE 46
-	            READ (46,'(A80)',END = 235) rstring
-	            GOTO 2351 
+                  READ (46,'(A80)',END = 235) rstring
+                  GOTO 2351 
   235             BACKSPACE 45
                   READ (45,'(A80)',END = 240) rstring
  2351             WRITE (47,'(A80)') rstring
@@ -649,7 +649,7 @@ C-----Storing transmission coefficients for the incident channel
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
-	l = 123456
+      l = 123456
       WRITE (45) l 
       DO l = 0, maxlw
          WRITE (45) sel(l + 1)
@@ -699,25 +699,25 @@ C--------Corrected scattering radius
      &           6x,' Scattering radius =',f7.3,' fm'/7x,54(1h*))
          WRITE (6,*)
          WRITE (12,*)
-	   selast = 0.d0
-	   DO l = 0, maxlw
-	     IF(STL(l+1).LT.1.d-15) EXIT
+         selast = 0.d0
+         DO l = 0, maxlw
+           IF(STL(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
-   	   WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
-     &          	  6H(ECIS:,F10.3,1H),1x,2hmb)') 
+         WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+     &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs
-   	   WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
-     &          	  6H(ECIS:,F10.3,1H),1x,2hmb)') 
+         WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+     &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs
-   	   WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
+         WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
      &              6x,17HSHAPE ELASTIC XS=,F10.3,1x,2hmb)') 
      &              EINl*1000, selast
          WRITE ( 6,99006)
          WRITE (12,99006)
          WRITE (53,99006)
-	   DO l = 0, maxlw
-	     IF(STL(l+1).LT.1.d-15) EXIT
+         DO l = 0, maxlw
+           IF(STL(l+1).LT.1.d-15) EXIT
            WRITE ( 6,99007) l, stl(l + 1), sel(l + 1)
            WRITE (12,99007) l, stl(l + 1), sel(l + 1)
            WRITE (53,99007) l, stl(l + 1), sel(l + 1)
@@ -729,7 +729,9 @@ C--------Corrected scattering radius
      &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
 99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
 99008    FORMAT (6x,' ****************************************')
-         WRITE (6,*)
+         WRITE (6,*)' SElastic  = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
+         WRITE (6,*)' Sfusion   = SUM_over_L {(2*L+1)*Tl(L)}'
+         WRITE (6,*)' Sreaction = Sfusion + SUM_over_exc.lev.j {Sinl(j}'
          WRITE (12,*)
       ENDIF
 
