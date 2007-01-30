@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $
-Ccc   * $Date: 2007-01-29 14:27:48 $
-Ccc   * $Id: main.f,v 1.157 2007-01-29 14:27:48 Carlson Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-01-30 13:07:18 $
+Ccc   * $Id: main.f,v 1.158 2007-01-30 13:07:18 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -261,7 +261,7 @@ C------------------To use only those values corresponding to EMPIRE grid for ine
                  ENDDO
                 ENDIF
 C--------------Construct recoil spectra due to direct transitions
-               IF (ENDf(nnurec).GT.0) THEN
+               IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
                   dang = PI/FLOAT(NDANG - 1)
                   coef = 2*PI*dang
 C-----------------Check whether integral over angles agrees with x-sec. read from ECIS
@@ -904,16 +904,16 @@ C--------Reset variables for life-time calculations
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
-	      WRITE (12,
+            WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
             ELSE
-  	      WRITE (12,
+            WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-	    ENDIF
+          ENDIF
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF (nnuc.NE.1) THEN
@@ -1179,7 +1179,8 @@ C--------Account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
             CALL HRTW
-            IF (ENDf(1).GT.0) CALL RECOIL(kemax,nnuc) !recoil spectrum
+            IF (ENDf(1).GT.0 .AND. RECoil.GT.0) 
+     &        CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
             kemax = max(NEX(nnuc) - 1,1)
             GCAsc = 1.0
          ENDIF
@@ -1290,7 +1291,8 @@ C-----------------Calculate total emission
                   csemist = csemist + CSFis
  1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
-            IF (ENDf(nnuc).GT.0) CALL RECOIL(ke,nnuc) !recoil spectrum for ke bin
+            IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0) 
+     &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc)) THEN
                IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
      &             ' mb'
@@ -1924,7 +1926,8 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
                   ENDIF
                ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
  1530         ENDDO   ! over ejectiles
-              IF (nnuc.NE.1) CALL PRINT_RECOIL(nnuc,REAction(nnuc))
+              IF (nnuc.NE.1  .AND. RECoil.GT.0) 
+     &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 C
@@ -2569,7 +2572,8 @@ C-----
 C--------Print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-            IF (ENDf(nnuc).EQ.2) CALL PRINT_RECOIL(nnuc,reactionx)
+            IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0) 
+     &        CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C--------Print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
@@ -2794,7 +2798,7 @@ C-------Set angles for inelastic calculations
       END
 C
 C
-      SUBROUTINE RECOIL(Ke,Nnuc)
+      SUBROUTINE GET_RECOIL(Ke,Nnuc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*

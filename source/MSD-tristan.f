@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-08-09 12:37:44 $
-Ccc   * $Id: MSD-tristan.f,v 1.59 2006-08-09 12:37:44 Capote Exp $
+Ccc   * $Date: 2007-01-30 13:07:18 $
+Ccc   * $Id: MSD-tristan.f,v 1.60 2007-01-30 13:07:18 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3071,7 +3071,7 @@ C--------------Bin population by MSD (spin/parity integrated)
             ENDDO
          ENDIF
 C--------storing continuum recoils
-         IF (ENDf(1).GT.0 .and. nejc.ne.0) THEN
+         IF (ENDf(1).GT.0 .and. nejc.ne.0 .and. RECOIL.GT.0) THEN
 C
 C           No recoils from gamma emission for the time being
 C
@@ -3122,7 +3122,7 @@ C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
       IF (nexrt.LE.0) nexrt = 1
-      IF (ENDf(1).GT.0) THEN
+      IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
          nangle = NDANG
          DO ie = nexrt, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)

@@ -85,7 +85,7 @@
       CHARACTER*21 REAction(ndnuc)
       DOUBLE PRECISION RO(ndex,ndlw,ndnuc), ROF(ndex,ndlw,ndnuc),
      &                 ROFis(0:nfisenmax,ndlw,nfhump), ROPaa(ndnuc),
-     &                 ROPar(ndropm,ndnuc), RORed,
+     &                 ROPar(ndropm,ndnuc), RORed, RECoil,
      &                 RVOm(0:ndejc,0:ndnuc),
      &                 RVSo(0:ndejc,0:ndnuc),
      &                 RWOm(0:ndejc,0:ndnuc),
@@ -154,7 +154,7 @@
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
-     &                 CSPfis
+     &                 CSPfis, RECoil
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
      &                  LHMs, NHMs, NEXreq, FISspe,

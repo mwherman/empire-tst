@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 11:12:23 $
-Ccc   * $Id: tl.f,v 1.86 2007-01-30 11:12:23 Capote Exp $
+Ccc   * $Date: 2007-01-30 13:07:19 $
+Ccc   * $Id: tl.f,v 1.87 2007-01-30 13:07:19 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1494,7 +1494,7 @@ C
 
       DO l = 1, NDLW
        Stl(l) = 0.d0
-	 Sel(l) = 0.d0
+       Sel(l) = 0.d0
       ENDDO
 
       ilv = 1
@@ -1597,7 +1597,7 @@ C     xmas_nnuc = AMAss(Nnuc)
 C-----Absorption and elastic cross sections in mb
       DO l = 0, Maxlw
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
-	   Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
+         Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
          selast = selast + Sel(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = 10.d0*PI/ak2*sabs
@@ -1816,14 +1816,14 @@ C-----For vibrational the Tls must be multiplied by
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
 C--------Reaction cross section in mb
          sabs = 0.D0
-	   if(elab.lt.0.3d0) write(6,*)
+         if(elab.lt.0.3d0) write(6,*)
          DO l = 0, lmax
             stmp = TTLl(J,l)*DBLE(2*l + 1)
             if(elab.lt.0.3d0) write(6,303) l,stmp*10.*PI/ak2
-  303       format(3x,' L =',I3,' Sabs(L) =',d12.6)       	         
-	      sabs = sabs + stmp
+  303       format(3x,' L =',I3,' Sabs(L) =',d12.6)                  
+            sabs = sabs + stmp
          ENDDO
-	   if(elab.lt.0.3d0) write(6,*)
+         if(elab.lt.0.3d0) write(6,*)
          sabs = 10.*PI/ak2*sabs
          OPEN (UNIT = 45,FILE = 'ecis03.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
@@ -2337,7 +2337,7 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
                WRITE (1,'(3f10.5)') 0., 0., 0.
 C              IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
-               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM	   
+               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM    
             ENDIF
   200    ENDDO
       ENDIF
@@ -2768,7 +2768,7 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
 C           IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
-            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM	
+            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM    
          ENDIF
       ENDDO
 C
@@ -2942,7 +2942,7 @@ C
 C COMMON variables
 C
       REAL*8 AAV, AS, BS, BV, CS, EEE, EF, EP, WDE, WVE, EA
-	REAL*8 DWVNUM
+      REAL*8 DWVNUM
       INTEGER IQ, N, NNS, NNV, IDRs
       COMMON /DENERGY/ EEE, EF, EP, EA
       COMMON /PDATAS/ AS, BS, CS, NNS, IQ
@@ -2992,7 +2992,7 @@ C
       encoul2 = 0.
       IF (RC.GT.0.) encoul2 = 1.73*ZTAr/(RC*ATAr**(1./3.))
 
-	DWVNUM = 0.d0
+      DWVNUM = 0.d0
 
       DO i = 1, 6
          vdcoul = 0.D0
@@ -3315,7 +3315,7 @@ C----------analytical DOM integral
 
 C--------Adding real volume dispersive contribution to the real potential
 C--------Geometry parameters are the same as for the volume potential(imag and real).
-	   if (IDRs.gt.0) DWVNUM = dwv + vvcoul
+         if (IDRs.gt.0) DWVNUM = dwv + vvcoul
          Vlib(1) = Vlib(1) + dwv + vvcoul
 C--------Including real surface and Coulomb dispersive contribution
 C--------Geometry parameters are the same as for the imaginary surface potential.

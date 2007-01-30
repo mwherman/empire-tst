@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-29 17:23:15 $
-Ccc   * $Id: input.f,v 1.213 2007-01-29 17:23:15 Carlson Exp $
+Ccc   * $Date: 2007-01-30 13:07:17 $
+Ccc   * $Id: input.f,v 1.214 2007-01-30 13:07:17 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -239,6 +239,7 @@ C
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0         
+         RECoil = 1.d0               
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -1436,22 +1437,23 @@ C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
-C
+      DO i = 1, NDEJC
+        CALL BNDG(i,1,qtmp)
+        IF (qtmp.LT.qmin) qmin = qtmp
+      ENDDO
+C===============================================================================
 C     The block below is what it should be, but it does HRTW routine crash !!!!
 C     i.e. DE can not be changed for the time being, this part should be revised
 C     together with width fluctuation routine
 C     RCN, 14 June 2005
 C
-      DO i = 1, NDEJC
-        CALL BNDG(i,1,qtmp)
-        IF (qtmp.LT.qmin) qmin = qtmp
-      ENDDO
 C     IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
 C--------Energy redefined
 C        DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
 C--------Number of steps in CN outgoing energy grid redefined
 C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
 C     ENDIF
+C===============================================================================
 
       WRITE( 6,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
@@ -4420,275 +4422,139 @@ C              ATIlnor(nnuc) = val + grand()*sigma
             GOTO 100
          ENDIF
 C-----
-
          IF (name.EQ.'ATILFI') THEN
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
                DO i = 1, NDNUC
-
                   ATIlfi(i) = val
-
                ENDDO
-
                WRITE (6,
-
      &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
-
      &F6.2)') val
-
                WRITE (12,
-
      &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
-
      &F6.2)') val
-
                GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
                WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
                WRITE (6,'('' NORMALIZATION OF SP a-tilde IGNORED'')')
-
                GOTO 100
-
             ENDIF
-
-
-
             if(i3.ne.0) then
-
               WRITE (6,
-
      &        '('' Saddle-point l.d. a-parameter uncertainty in '',I3,
-
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-
                sigma = val*i3*0.01
-
 C              ATIlfi(nnuc) = val + grand()*sigma
-
                ATIlfi(nnuc) = val + (2*drand()-1.)*sigma
-
               WRITE (6,
-
      &        '('' Saddle-point l.d. a-parameter sampled value : '',
-
      &        f8.3)') ATIlfi(nnuc)
-
-               IPArCOV = IPArCOV +1
-
-               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, ATIlfi(nnuc),INDexf,INDexb
-
             else
-
               ATIlfi(nnuc) = val
-
               WRITE (6,
-
      &        '('' Saddle-point l.d. a-parameter in '',I3,A2,
-
      &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-
-             endif
-
+            endif
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'FISBIN') THEN
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
                DO i = 1, NDNUC
-
-                  FISbin(i) = val
-
+                 FISbin(i) = val
                ENDDO
-
                WRITE (6,
-
      &'('' Inner fission barrier  in all nuclei multiplied by '',
-
      &F6.2)') val
-
                WRITE (12,
-
      &'('' Inner fission barrier  in all nuclei multiplied by '',
-
      &F6.2)') val
-
                GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
                WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
                WRITE (6,
-
      &         '('' NORMALIZATION OF inner fission barrier IGNORED'')')
-
                GOTO 100
-
             ENDIF
 
-
-
             if(i3.ne.0) then
-
               WRITE (6,
-
      &        '('' Inner fission barrier uncertainty in '',I3,
-
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-
                sigma = val*i3*0.01
-
 C              FISbin(nnuc) = val + grand()*sigma
-
                FISbin(nnuc) = val + (2*drand()-1.)*sigma
-
               WRITE (6,
-
      &        '('' Inner fission barrier factor sampled value : '',
-
      &        f8.3)') FISbin(nnuc)
-
-               IPArCOV = IPArCOV +1
-
-               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FISbin(nnuc),INDexf,INDexb
-
             else
-
               FISbin(nnuc) = val
-
               WRITE (6,
-
      &        '('' Inner fission barrier in '',I3,A2,
-
      &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-
-             endif
-
+            endif
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'FISBOU') THEN
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
                DO i = 1, NDNUC
-
                   FISbou(i) = val
-
                ENDDO
-
                WRITE (6,
-
      &'('' Outer fission barrier  in all nuclei multiplied by '',
-
      &F6.2)') val
-
                WRITE (12,
-
      &'('' Outer fission barrier  in all nuclei multiplied by '',
-
      &F6.2)') val
-
                GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
                WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
                WRITE (6,
-
      &         '('' NORMALIZATION OF outer fission barrier IGNORED'')')
-
                GOTO 100
-
             ENDIF
-
-
 
             if(i3.ne.0) then
-
                WRITE (6,
-
      &        '('' Outer fission barrier uncertainty in '',I3,
-
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-
                sigma = val*i3*0.01
-
 C              FISbou(nnuc) = val + grand()*sigma
-
                FISbou(nnuc) = val + (2*drand()-1.)*sigma
-
                WRITE (6,
-
      &         '('' Outer fission barrier factor sampled value : '',
-
      &         f8.3)') FISbou(nnuc)
-
                IPArCOV = IPArCOV +1
-
                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-
      &              IPArCOV, FISbou(nnuc),INDexf,INDexb
-
             else
-
               FISbou(nnuc) = val
-
               WRITE (6,
-
      &        '('' Outer fission barrier in '',I3,A2,
-
      &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-
-             endif
-
+            endif
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'GTILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
@@ -5454,14 +5320,14 @@ C-----
          IF (name.EQ.'FISSPE') THEN
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
-	        FISspe = nint(val)
+              FISspe = nint(val)
                 WRITE (6,*) 'Prompt fission neutron spectra calculated'
                 if(FISspe.eq.1) WRITE (6,*) ' using Los Alamos model'
                 if(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
               else
                 WRITE (6,*) 
-     &		        'Prompt fission neutron spectra not calculated'	      
-	      endif 		
+     &                    'Prompt fission neutron spectra not calculated'           
+            endif             
 C--------------------------------------------------------------------------
             else
                WRITE (6,
@@ -5470,6 +5336,14 @@ C--------------------------------------------------------------------------
             endif
             GOTO 100
          ENDIF
+         
+         IF (name.EQ.'RECOIL') THEN
+            RECoil = val
+            IF (RECOIL.LT.0.d0) RECoil = 1.d0
+            IF (RECOIL.eq.0.d0) 
+     &      WRITE (6,'('' RECOILS ARE NOT CALCULATED)') 
+            GOTO 100
+         ENDIF        
 C--------------------------------------------------------------------------
          IF (name(1:3).EQ.'FIT') GOTO 100
 C-----
