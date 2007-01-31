@@ -2,6 +2,7 @@
 #SCRIPT TO EXTRACT CROSS SECTIONS FROM THE EMPIRE OUTPUT AND PLOT THEM
 #WITH ZVVIEW
 
+rm zv00.ps zv00.eps
 repeat=y
 echo '#zvview.exe' >PLOT.zvd
 file=$1
@@ -89,10 +90,19 @@ echo 'color: 1'>>PLOT.zvd
 echo 'con: 1'>>PLOT.zvd
 echo 'dot: 0'>>PLOT.zvd
 echo 'bot: 0'>>PLOT.zvd
-echo 'thick: 1'>>PLOT.zvd
+echo 'thick: 2'>>PLOT.zvd
 echo '#end control.tit/c'>>PLOT.zvd
 
 ln -s ../util/c4zvd/ps01.tit ps01.tit
 ../util/c4zvd/zvview.exe -p:$file PLOT.zvd  ps01.tit/c
 rm ps01.tit
+
+# store PostScript
+if [ -f zv00.ps ]; then
+   mv zv00.ps $file-emp.ps
+fi
+if [ -f zv00.eps ]; then
+   mv zv00.eps $file-emp.eps
+fi
+
 exit
