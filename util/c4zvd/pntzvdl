@@ -19,4 +19,3 @@ if [ "$4" = "" ]; then
 fi
 #next line makes use of the ddx.tit file with plot settings
 ./zvview.exe -p:tmp $3 ddx.tit </dev/null
-#./zvv97lm.exe -p:tmp $3 ddx.tit </dev/null

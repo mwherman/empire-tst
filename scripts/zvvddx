@@ -16,7 +16,7 @@ mv LSTTAB.CUR ../c4zvd/LSTTAB.CUR
 mv LSTTAB.PNT ../c4zvd/LSTTAB.PNT
 cd ../c4zvd
 rm zv*.ps zv*.eps 2>/dev/null
-#./pntzvdl.bat LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+#make actual plot 
 ./pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
 mv DDXPLOT.zvd $work/$file-$2.zvd
 if [ -f zv00.ps ]; then

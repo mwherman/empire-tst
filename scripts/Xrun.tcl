@@ -6680,7 +6680,6 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec gvim LSTTAB.INP
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
 exec xterm $e ../scripts/zvvddx $file $multi &} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
