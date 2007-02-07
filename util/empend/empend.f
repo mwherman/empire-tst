@@ -2793,7 +2793,7 @@ C* Search the EMPIRE output for specific strings
       IF(REC(1:14).EQ.'  Spectrum of '    ) GO TO 600
       IF(REC(1:26).EQ.'    fission  cross section') THEN
 C*      Count fission reactions
-        READ (REC(27:36),994) X
+        READ (REC(27:38),992) X
         IF(X.GT.1.E-10) NFIS=NFIS+1
       END IF
       GO TO 210
@@ -3278,6 +3278,7 @@ C*
   914 FORMAT(' EMPEND WARNING - skip MT',I4,' Zap',I6,' Ein'
      1      ,1P,E10.3,' xs',E9.2,' Intg.=',E9.2)
   921 FORMAT(' Processing outgoing ',A8,' ZAP',I6,' for MT',I4)
+  992 FORMAT(BN,F12.0)
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,I6)
       END
@@ -4169,6 +4170,9 @@ C-Purpose: Write a CONT record to an ENDF file
       WRITE(REC(5),20) N1
       WRITE(REC(6),20) N2
    12 NS=NS+1
+      IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       RETURN
    20 FORMAT(I11)
@@ -4834,7 +4838,7 @@ C-
       PL(L2)=UU
       IF(NL.LT.2) RETURN
       DO 20 L=2,NL
-      PL(L+1)=(PL(L)*UU*FLOAT(2*L-1)-PL(L-1)*FLOAT(L-1))/FLOAT(L)
+      PL(L+1)=( PL(L)*UU*(2*L-1) - PL(L-1)*(L-1) )/L
    20 CONTINUE
       RETURN
       END
