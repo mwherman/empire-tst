@@ -1,6 +1,6 @@
       program wriurr      
 C
-C     MODIFIED BY Y.S.CHO (Jan 24, 2007)
+C     MODIFIED BY Y.S.CHO (Jan 31, 2007)
 C     APENDING RESONANCE PARAMETERS TO ENDFR.TXT
 C     INPUT FILES = WRIURRX.INP
 C                   ENDFR.TXT
@@ -154,7 +154,8 @@ c
       ener=ener+de(n)
       ne=n+1
       enddo
- 200  write(7,2050) ne,e0,euner
+ccho 200  write(7,2050) ne,e0,euner
+ 200  write(7,2050) ne,e0,ener
  2050 format(//5x,'Energy intervals:',i4,2x,
      1            '(',1pe11.4,' - ',e11.4,' eV)')
       print 2050, ne,e0,ener

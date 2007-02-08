@@ -2,7 +2,7 @@
 C
 C     written by J.H.Chang (as ANAL)
 C     modified by S.Y.Oh (PTANAL) March 30, 1999
-C     modified by Y.S.Cho (PTANAL) Jan 26, 2007 (for EMPIRE)
+C     modified by Y.S.Cho (PTANAL) Feb 06, 2007 (for EMPIRE)
 C     July 26,2006    linux output for d0, s0 agreed with alpha results.
 C      However, linux version gave ridiculous  result for *.fit outputs
 C     Tom  burrows and mike herman found out that variable dummy was not
@@ -62,7 +62,7 @@ c                Resonances having widths larger than the values would
 c                not be taken into account for the analyses.
 c        Note: Very minor effect is observed using this option.
 c     mat = MAT number in ENDF format
-c     inflag = input flag: read inflag*gGn & inflag*gGn0 from BNL325.TXT
+c     inflag = input flag: read inflag*gGn & inflag*gGn0 from BNL325.TXT ; OBSOLETE
 c            Of usual, inflag=2 for odd and =1 for even nuclide, respectively
 ccho  inflag is no longer used. It is now provided in the resonance parameter table
 ccho  abun = fractional abundance
@@ -128,13 +128,15 @@ ccho  modified to read newly introduced resonance parameter table
 c     instead of bnl325.txt
 c
       write(fname,'(a,i6.6,a)') 'za',int(zam),'.atlas'
-      open(2,file=fname,status='old',err=333)
+      open(2,file=fname,status='old',err=130)
       ex=-99.0
       nres=0
+      iline=0
       do i=1,mres
   300  read(2,'(a)',end=120) line
+       iline=iline+1
        if (line(1:1).eq.'#') goto 300
-       read(line,2000) iza,e0,de0,jflag,ajx,lflag,lw,
+       read(line,2000,err=150) iza,e0,de0,jflag,ajx,lflag,lw,
      1                      nflag,ggn,dggn,gflag,gg,dgg,aflag,area
  2000  format(i6,1x,2x,1x,3x,1x,11x,1x,e10.0,1x,e7.0,1x,a1,1x,f3.1,1x,
      1        a1,1x,i1,1x,3x,1x,1x,1x,9x,1x,8x,1x,a3,1x,1x,1x,e9.0,1x,
@@ -216,7 +218,10 @@ c
       print *,' *** Too many resonances in file: ',fname
   120 close(2)
       return
-  333 print *, '*** Failed to read resonance parameter table '
+  130 print *, '*** Failed to read resonance parameter table '
+      stop
+  150 print *, '*** Error reading rssonance parameter table at line ',
+     1         iline
       stop
       end
 c.....
@@ -472,7 +477,14 @@ ccho  character*1 ggflag
  2000 format(//5x,'Porter-Thomas fit for ',a,'-wave')
 C     compute reduced width
       j=0
+Ccho  skip the leading negative energies
+      nneg=0
       do n=1,nres
+       if(rp(1,n).ge.0) goto 20
+       nneg=nneg+1
+      enddo
+ccho 20 do n=1,nres
+   20 do n=1+nneg,nres
        E=rp(1,n)
        if(E.gt.ecut) go to 100
 coh       gGn=rp(3,n)/2
@@ -535,9 +547,9 @@ C     use Levenberg-Marquardt Method
       A(1)=jres
       A(2)=0.2
       if(lwave.eq.0) then
-ccho   A(2)=0.05
+       A(2)=0.05
 ccho   replaced by the following formula
-       A(2)=sf0*D0
+ccho   A(2)=sf0*D0
       elseif(lwave.eq.1) then
        A(2)=0.2
       endif
@@ -909,7 +921,8 @@ C     spj: minimum j-spin corresponding to pr(1)
       pr(5)=(spi+2)/(6*spi+3)
       pr(6)=(spi+3)/(6*spi+3)
       go to 500
-  300 print *,' *** LJPROB *** High wave',i2,' is not programmed yet'
+ccho  300 print *,' *** LJPROB *** High wave',i2,' is not programmed yet'
+  300 print *,' *** LJPROB *** High wave',L,' is not programmed yet'
       stop
   500 spj=0.5*(j2-1)
       return
@@ -923,7 +936,7 @@ ccho  character*1 ggflag
      1            gnflag(2,mres),aaflag(2,mres)
       common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
-      character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*10
+      character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*11
       dimension nr(5),sx(6),wav(5)
       data wav/'s','p','?','?','?'/
 c
@@ -1597,8 +1610,8 @@ ccho
 ccho    just skip the current processing when error occures
 c       if (a(icol,icol).eq.0.) pause 'singular matrix in gaussj'
         if (a(icol,icol).eq.0.) then
-          print *,'*** WARNING *** singular matrix in gaussj:',
-       1          ' the results may be not correct'
+          print *,'*** WARNING *** singular matrix in gaussj: '//
+     &            'the results may be not correct'
           ierr=1
           return
         endif
@@ -1821,12 +1834,12 @@ c     generate a gnuplot script
       subroutine mkgplot
       dimension icolor(10)
 c     set label and line colors
-      icolor(1)=3
-      icolor(2)=3
-      icolor(3)=1
-      icolor(4)=1
-      icolor(5)=7
-      icolor(6)=7
+      icolor(1)=7
+      icolor(2)=7
+      icolor(3)=3
+      icolor(4)=3
+      icolor(5)=1
+      icolor(6)=1
       icolor(7)=-1
       icolor(8)=-1
       icolor(9)=-1
@@ -1834,22 +1847,31 @@ c     set label and line colors
       open(9,file='ptdist.gp',status='unknown')
       write(9,*) '# Gnuplot script file for plotting resonance curves'
       write(9,*) "# Type the command: gnuplot> load 'ptdist.gp'"
-      write(9,*) "set terminal postscript color solid"
+      write(9,*) "set terminal postscript enhanced color solid"
       write(9,*) 'set output "|cat >ptdist.ps"'
       write(9,*) 'set title "Porter-Thomas distribution"'
-ccho  for generating the gnuplot script
-      write(9,*) 'plot "ptdist.dat" title "combined" with line lt ',
-     1           icolor(1),', \\'
-      write(9,*) '     "ptdist.fit" title "fitted-combined"',
-     1           ' with line lt ',icolor(2),', \\'
-      write(9,*) '     "ptdist0.dat" title "s-wave"',
-     1           ' with line lt ',icolor(3),', \\'
-      write(9,*) '     "ptdist0.fit" title "s-wave"',
-     1           ' with line lt ',icolor(4),', \\'
-      write(9,*) '     "ptdist1.dat" title "p-wave"',
-     1           ' with line lt ',icolor(5),', \\'
-      write(9,*) '     "ptdist1.fit" title "p-wave"',
-     1           ' with line lt ',icolor(6)
+      write(9,*) 'set xlabel "(g{/Symbol G}@^{/Times-Italic l}_n)',
+     1           '^{1/2} (eV^{1/2})"'
+      write(9,*) 'set ylabel "Number of Resonances"'
+ 1000 format(a,a,/,a,i1,a)
+      write(9,1000) 'plot "ptdist.dat" title ',
+     1           '"Experimental data (combined)"\\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(1),',\\'
+      write(9,1000) '     "ptdist.fit" title ',
+     1           '"Porter-Thomas fit (combined)"\\',
+     2           '     with line lt ',icolor(2),',\\'
+      write(9,1000) '     "ptdist0.dat" title ',
+     1           '"Experimental data (s-wave)"\\',
+     1           '     with points pt 4 ps 0.5 lt ',icolor(3),',\\'
+      write(9,1000) '     "ptdist0.fit" title ',
+     1           '"Porter-Thomas fit (s-wave)"\\',
+     2           '     with line lt ',icolor(4),',\\'
+      write(9,1000) '     "ptdist1.dat" title ',
+     1           '"Experimental data (p-wave)"\\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(5),',\\'
+      write(9,1000) '     "ptdist1.fit" title ',
+     1           '"Porter-Thomas fit (p-wave)"\\',
+     2           '     with line lt ',icolor(6),''
       close(9)
       irt=system("gnuplot ptdist.gp")
       return

@@ -1,6 +1,6 @@
       program scanr      
 C
-C     WRITTEN BY Y.S.Cho (Jan 26, 2007)
+C     WRITTEN BY Y.S.Cho (Feb 02, 2007)
 C     SEARCH UPPER BOUNDARY OF RESOLVED RESONANCE REGION
 C     BY FINDING THE MINIMUM CHISQ AND PRESENT A PLOT
 C     A PART OF ENDF READING ROUTINE TAKEN FROM PTANAL
@@ -138,12 +138,11 @@ c
       write(8,*) "# Type the command: gnuplot> load 'scanr.gp'"
       write(8,*) "set terminal postscript color solid"
       write(8,*) 'set output "|cat >scanr.ps"'
-      write(8,*) 'set title "Resonance curves"'
-      write(8,*) 'set xlabel "Resonance energy (eV)"'
-      write(8,*) 'set ylabel "Index (number)"'
+      write(8,*) 'set title "Cumulative plot of resonances"'
+      write(8,*) 'set xlabel "Energy (keV)"'
+      write(8,*) 'set ylabel "Number of resonance"'
       write(8,*) 'set key left top'
 
-c     Writes the resonance data to l?.txt
       print('(/5x,a)'),'Finding cutoff energies'
       do ll=1,nls
         if (ll.eq.1) print ('(/a)'),(' For s-wave...')
@@ -163,17 +162,19 @@ c       print *, 'L = ', ll-1
         print 2100, 'AWRI',awri,c1
  300    continue
         ners = 0
+c     Writes the resonance data to l?.txt (as an unit of kev)
         do n=1,nrs
           read(2,1200) er,aj,gt,gn,gg,gf
           if (er .gt. 0) then
  2400       format(e11.4, a1, i4)
-            write(9, 2400) er, 9, ners+1
-            ers(ners+1)=er
+            write(9, 2400) er/1000, 9, ners+1
+            ers(ners+1)=er/1000
             ners=ners+1
           endif
         enddo
         close(9)
 
+c       find the upper energy smaller than cuten
         if (cuten(ll).ne.0) then
           do nn=ners,3,-1
             if (ers(nn).le.cuten(ll)) then
@@ -231,10 +232,10 @@ c
         print('(a,e10.3,a,e10.3,a,i1,a,f10.3)'),
      1        ' Linear least square fit: a=',a(ll),', b=',b(ll),
      2        ' d',ll-1,'=',1/a(ll)
-        write(8,'(a,i1,a,f10.3,a,f10.3,a,f4.2,a,i1)')
-     1        ' set label " E_',ll-1,'=',ers(nnn),
-     2        '" at ',ers(nnn),',graph ',0.25*ll,' textcolor lt ',
-     3        icolor(ll*2)
+        write(8,'(a,f10.3,a,f10.3,a,f4.2,a,i1,a)')
+     1        ' set label "',ers(nnn),
+     2        ' " at ',ers(nnn),',graph ',0.25*ll,' textcolor lt ',
+     3        icolor(ll*2),' right'
         write(8,'(a,f10.3,a,f10.3,a,i1)') ' set arrow from ',ers(nnn),
      1        ',graph 0 to ',ers(nnn),',graph 1 nohead lt ',icolor(ll*2)
       enddo
@@ -270,7 +271,9 @@ c
       irt=system("gnuplot scanr.gp")
       return
       end
-c................................................................
+c
+c     obtain the linear least square fit of data
+c
       subroutine sqrfit(nx,xx,a,b)
       dimension xx(*)
       sx=0
@@ -289,11 +292,17 @@ c................................................................
       b=(-sx*sxy+sx2*sy)/(nx*sx2-sx*sx)
       return
       end
+c
+c     compute chi-sq
+c
       real*8 function chisq(nx,xx,a,b)
       dimension xx(*)
       chisq=0
       do n=1,nx
-        chisq=chisq+(n-a*xx(n)-b)*(n-a*xx(n)-b)/(a*xx(n)+b)
+c       chisq=chisq+(n-a*xx(n)-b)*(n-a*xx(n)-b)/(a*xx(n)+b)
+        chisq=chisq+(n-a*xx(n)-b)*(n-a*xx(n)-b)/n
+c       print *,'data(',n,')=',xx(n),'ax+b=',a*xx(n)+b,'chisq=',chisq
       enddo
+c     print *,'chisq=',chisq
       return
       end

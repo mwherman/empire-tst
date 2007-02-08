@@ -7866,7 +7866,7 @@ $file.inp &}} -label {Create input}
   set Zinp [lindex $line 1]
   set ZAinp [expr int($Zinp*1000+$Ainp)]
   set Mass $Ainp
-  exec ../scripts/resonance.tcl $ZAinp $mat $Mass &} \
+  exec ../scripts/resonance.tcl $ZAinp $mat $Mass true &} \
         -label {Resonance Module} 
     $site_3_0.menu93 add separator \
         

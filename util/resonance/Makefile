@@ -37,8 +37,9 @@ OBJP =	ptanal.o
 OBJR =	readrp.o
 OBJW =	wriurr.o
 OBJS =	scanr.o
+OBJX =	readx4.o
 
-all: ptanal readrp scanr wriurr
+all: ptanal readrp scanr wriurr readx4
 
 ptanal:   $(OBJP)
 	$(FC) -o $@ $(OBJP)
@@ -51,6 +52,9 @@ wriurr:   $(OBJW)
         
 scanr:   $(OBJS)
 	$(FC) -o $@ $(OBJS)
+
+readx4:   $(OBJX)
+	$(FC) -o $@ $(OBJX)
 
 
 
