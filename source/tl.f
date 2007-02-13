@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 13:07:19 $
-Ccc   * $Id: tl.f,v 1.87 2007-01-30 13:07:19 Capote Exp $
+Ccc   * $Date: 2007-02-13 19:35:31 $
+Ccc   * $Id: tl.f,v 1.88 2007-02-13 19:35:31 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1462,8 +1462,8 @@ C
 C     OUTPUT: Maxlw and Stl(1-Maxlw) are the maximum angular momentum and Tls
 C             SINl is the total inelastic cross section
 C             Selast is the shape elastic cross section
-C             Sel(L) contains the shape elastic cross section for a given orbital momentum L 
-C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L 
+C             Sel(L) contains the shape elastic cross section for a given orbital momentum L
+C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L
 C
 C
       INCLUDE 'dimension.h'
@@ -1505,7 +1505,7 @@ C------------------------------------------
 C-----Opening ecis03 output file containing Smatrix
       OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis03.smat', ERR=90)
       READ (45,*,END = 90)   ! To skip first line <SMATRIX> ..
-   80 READ (45,'(1x,f4.1,1x,a1,1x,i4,1x,i4)',END=90) 
+   80 READ (45,'(1x,f4.1,1x,a1,1x,i4,1x,i4)',END=90)
      &     jc, parc, nceq, nctot
 C     JC,ParC is the channel spin and parity
 C     nceq is the total number of coupled equations
@@ -1513,18 +1513,18 @@ C     ncin is the number of independent coupled equations
       ncsol=nctot/nceq
 C     Loop over the number of coupled equations
       do ncint=1,ncsol
-        do nc=1,nceq               
+        do nc=1,nceq
 C       Reading the coupled level number nlev, the orbital momentum L,
 C           angular momentum j and Transmission coefficient Tlj,c(JC)
 C       (nlev=1 corresponds to the ground state)
         read (45,
-     &  '(1x,3(I2,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)                     
-     &  nc1,nc2,nlev,l,jj,sreal,simag,stmp                       
-        IF (nlev.eq.1 .and. nc1.eq.nc2 
-     &  .and. stmp.GT.1.D-15 .AND. L.LT.NDLW) 
+     &  '(1x,3(I3,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)
+     &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
+        IF (nlev.eq.1 .and. nc1.eq.nc2
+     &  .and. stmp.GT.1.D-15 .AND. L.LT.NDLW)
 C-----------Averaging over particle and target spin, summing over channel spin jc
 C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
-     &      Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2) 
+     &      Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2)
      &           /DBLE(2*L + 1)
      &           /DBLE(2*SEJc(Nejc) + 1)
      &           /DBLE(2*XJLv(ilv,Nnuc) + 1)
@@ -1574,7 +1574,7 @@ C-----For vibrational the Tls must be multiplied by
       sinlcont = 0.D0
       sabs = 0.D0
       selast = 0.D0
-      
+
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*) TOTcs
@@ -1611,10 +1611,10 @@ C-----Absorption and elastic cross sections in mb
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND. 
+         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND.
 C            For odd nuclides, collective states in continuum have
 C            different spin than the ground state
-     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN 
+     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
@@ -1820,7 +1820,7 @@ C--------Reaction cross section in mb
          DO l = 0, lmax
             stmp = TTLl(J,l)*DBLE(2*l + 1)
             if(elab.lt.0.3d0) write(6,303) l,stmp*10.*PI/ak2
-  303       format(3x,' L =',I3,' Sabs(L) =',d12.6)                  
+  303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
             sabs = sabs + stmp
          ENDDO
          if(elab.lt.0.3d0) write(6,*)
@@ -1974,7 +1974,7 @@ C
       COMMON /DENERGY/ ETMP, EF, EP, EA
       COMMON /PDATAS/ AS, BS, CS, NNS, IQ
       COMMON /PDATAV/ AAV, BV, NNV
-      COMMON /DISPER/ DWVNUM, IDRs 
+      COMMON /DISPER/ DWVNUM, IDRs
 C
 C Dummy arguments
 C
@@ -2103,9 +2103,9 @@ C-----Maximum number of channel spin (increased to 100 for high energy scatterin
       njmax = MAX(ldwmax,30)
 
       lodd = .false.
-      IF( (mod(nint(Z(Nnuc)),2).ne.0 .or. 
+      IF( (mod(nint(Z(Nnuc)),2).ne.0 .or.
      >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
-     >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.  
+     >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.
 
       IF (Inlkey.EQ.0) THEN
 C-------writing input
@@ -2162,7 +2162,7 @@ C-----------If channel is closed ground state potential is used for this level
             eee = El - D_Elv(j)/xratio
             dtmp = D_Xjlv(j)
             ! making integer spin for odd nuclides CC levels in DWBA calculations
-            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))   
+            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
             IF (eee.GE.0.0001) THEN
                nwrite = nwrite + 1
                WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
@@ -2337,7 +2337,7 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
                WRITE (1,'(3f10.5)') 0., 0., 0.
 C              IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
-               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM    
+               IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM
             ENDIF
   200    ENDDO
       ENDIF
@@ -2407,9 +2407,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 DWVNUM 
+      REAL*8 DWVNUM
       INTEGER IDRs
-      COMMON /DISPER/ DWVNUM, IDRs 
+      COMMON /DISPER/ DWVNUM, IDRs
 C
 C Local variables
 C
@@ -2417,7 +2417,7 @@ C
      &                 xmas_nejc, xmas_nnuc, xratio
       CHARACTER*1 ch
       DOUBLE PRECISION DABS
-      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), 
+      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV),
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite
       INTEGER INT, NINT
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
@@ -2768,7 +2768,7 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
      &                RCOul(Nejc,Nnuc), ACOul(Nejc,Nnuc), 0.
             WRITE (1,'(3f10.5)') 0., 0., 0.
 C           IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,0.d0,DWVNUM
-            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM    
+            IF (IDRs.GT.0) write(1,'(2I5,6F10.5)') -1,0,elabe,DWVNUM
          ENDIF
       ENDDO
 C
@@ -2948,7 +2948,7 @@ C
       COMMON /PDATAS/ AS, BS, CS, NNS, IQ
       COMMON /PDATAV/ AAV, BV, NNV
       COMMON /WENERG/ WDE, WVE
-      COMMON /DISPER/ DWVNUM, IDRs 
+      COMMON /DISPER/ DWVNUM, IDRs
 C
 C Dummy arguments
 C
@@ -3413,7 +3413,7 @@ C     B(4,J,8) = POT(4,J,1) + POT(4,J,8)*ETA + POT(4,J,7)*ATAr
 c     added A**(-1/3) dependence for As parameter (RCN, 11/2005), i.e.  pot(4,j,9)<>0
 
 
-      B(4,j,8)  =  POT(4,j,1) + POT(4,j,8)*ETA + POT(4,j,7)*atar + 
+      B(4,j,8)  =  POT(4,j,1) + POT(4,j,8)*ETA + POT(4,j,7)*atar +
 
 
      >                POT(4,j,9)*ATAr**(-1.d0/3.d0)

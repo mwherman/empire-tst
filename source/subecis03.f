@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 13:09:28 $
-Ccc   * $Id: subecis03.f,v 1.20 2007-01-30 13:09:28 Capote Exp $
+Ccc   * $Date: 2007-02-13 19:35:32 $
+Ccc   * $Id: subecis03.f,v 1.21 2007-02-13 19:35:32 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS03 to read externally calculated dispersive corrections
 C     8. Sept. 2006, RCN
@@ -23835,7 +23835,7 @@ C  HELICITY SCATTERING COEFFICIENTS                                     SCHE-413
                DO k = 1, k2
                   READ (93,99050) k1, k2, k3, k4, bj, b1, b2, b3
                   WRITE (60,99020) k1, k2, k3, k4, bj, b1, b2, b3
-99020             FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(D15.7,1X),'I',4X,
+99020             FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(D15.7,1X),'I',4X,
      &                    F11.8)
                ENDDO
             ENDDO
@@ -23933,7 +23933,7 @@ C CALCULATION OF THE NEW SCATTERING COEFFICIENTS                        SCHE-499
 99040 FORMAT (' IN SCHE  .... STOP ....')
       STOP
 99045 FORMAT (1X,F4.1,1X,A1,1X,I4,1X,I4)
-99050 FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(D15.7,1X),5X,F11.8)
+99050 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(D15.7,1X),5X,F11.8)
       END
 C 01/01/04                                                      ECIS03  COCN-000
       SUBROUTINE COCN(La,Lb,Ja,Jb,Iw,Iv,Ij,Ip,Rb,Rc,Nt)
