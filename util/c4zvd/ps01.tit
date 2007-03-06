@@ -24,3 +24,22 @@ LG_PS_BOXTITLE: 0 20 Helvetica
 !Uncomment below for noninteractive EPS plots
 !NODIALOG: 4
 
+!TIT: test plot
+!TIT2: Cross sections
+!X-SCALE: log
+!X-RANGE: 10 20
+!Y-SCALE: log
+!X-GRID: 0
+!Y-GRID: 0
+!Size of the plot
+!LX-WIN: 600 400 700 412
+!LY-WIN: 450 300 500 335
+!BUTTONS: 0
+!NOSTAT: 1
+!X-UNIT: MEV
+!Y-UNIT: MB
+!X: E
+!Y: Cross Section
+!x-long: Incident Neutron Energy
+legend: 1
+!mode: FIXSYM
