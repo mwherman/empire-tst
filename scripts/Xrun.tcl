@@ -7749,6 +7749,8 @@ exit} \
         -command {exec $editor ../util/x4toc4/reaction &} \
         -label {X4TOC4 table} 
     $site_3_0.menu90 add command \
+        -command {exec $editor ../util/c4zvd/ps01.tit &} -label {ZVView options} 
+    $site_3_0.menu90 add command \
         -command {exec $editor ../source/Makefile &} -label {Edit Makefile} 
 
     $site_3_0.menu90 add cascade \
