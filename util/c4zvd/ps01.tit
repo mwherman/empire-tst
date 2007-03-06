@@ -21,8 +21,10 @@ LG_PS_PAGE2: 1
 LG_PS_FONT: 0 13 Helvetica  
 LG_PS_BOXTITLE: 0 20 Helvetica
 
-!Uncomment below for noninteractive EPS plots
+!non-interactive EPS plots
 !NODIALOG: 4
+!non-interactive gif plots
+!NODIALOG: 2
 
 !TIT: test plot
 !TIT2: Cross sections
