@@ -10,5 +10,7 @@ if [ -f zv00.eps ]; then
    mv zv00.eps $file.eps
 fi
 done
+rename 'zvd.ps' ps $file*
+rename 'zvd.eps' eps $file*
 rm ps01.tit
 exit

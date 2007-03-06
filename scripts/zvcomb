@@ -3,8 +3,7 @@
 echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
 file=$2
-ln -s ../util/c4zvd/ps01.tit ps01.tit
-command="../util/c4zvd/zvview.exe -p:$1_ ps01.tit/c"
+command="../util/c4zvd/zvview.exe -p:$file ps01.tit/c"
         if [ "$file" = "" ]
            then
             echo 'Plots available for merging:'
@@ -19,12 +18,12 @@ ln -s ../util/c4zvd/ps01.tit ps01.tit
 $command ps01.tit/c
 rm ps01.tit
 if [ -f zv00.ps ]; then
-   mv zv00.ps $file-plot
-   rename zvd-plot ps *
+   mv zv00.ps $file.ps
 fi
 if [ -f zv00.eps ]; then
-   mv zv00.eps $file-eplot
-   rename zvd-eplot eps *
+   mv zv00.eps $file.eps
 fi
+rename 'zvd.ps' ps $file*
+rename 'zvd.eps' eps $file*
 rm ps01.tit
 exit

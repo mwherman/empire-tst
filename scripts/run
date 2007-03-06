@@ -9,7 +9,7 @@ work=`pwd`
 
 ../scripts/runE $file
 
-# RUN EMPEND, & ENDRES (ENDF FORMATING) 
+# RUN EMPEND, & FIXUP
 
 ../scripts/format $file $mat 
 

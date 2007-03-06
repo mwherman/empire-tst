@@ -5488,7 +5488,7 @@ foreach el $stablist {
       close $mulinput
    }
 
-   exec xterm -e ../scripts/run $mulinputn 2
+   exec xterm -e ../scripts/run $mulinputn 1111
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {

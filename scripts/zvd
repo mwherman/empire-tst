@@ -58,13 +58,13 @@ rm tmp.dat c4.zvd end.zvd $file-$MT.zvd  zv*.ps zv*.eps 2>/dev/null
 echo #!zvview.exe >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
-./zvview.exe $file-$MT.zvd ps01.tit/c
-mv $file-$MT.zvd $work
+./zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
+mv $file-$MT.* $work
 if [ -f zv00.ps ]; then
-   mv zv00.ps $work/$file-$2.ps
+   mv zv00.ps $work/$file-$MT.ps
 fi
 if [ -f zv00.eps ]; then
-   mv zv00.eps $work/$file-$2.eps
+   mv zv00.eps $work/$file-$MT.eps
 fi
 cd $work
 
