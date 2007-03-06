@@ -5245,9 +5245,9 @@ global widget
 #   set Starget [lindex $elspl 1]
 #   set Atarget [lindex $elspl 2]
 #   set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname
-#   exec xterm $e store $archdir $mulinputn
+#   exec xterm -e store $archdir $mulinputn
 #}
-exec xterm $e ../scripts/storemul $archdir/ $mulstname
+exec xterm -e ../scripts/storemul $archdir/ $mulstname
 if {$mulstname == ""} {
     exec mv default.inp $archdir/
     } else {
@@ -5487,7 +5487,8 @@ foreach el $stablist {
       close $skelinp
       close $mulinput
    }
-   exec xterm $e ../scripts/run $mulinputn 2
+
+   exec xterm -e ../scripts/run $mulinputn 2
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
@@ -5528,9 +5529,7 @@ global widget file profilter zvfilter archfilter
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat e
-
-set e "-e"
+global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat EXPDAT
 
 if {[file exists ../.Xrunrc] == 1} {
    set rcfl [open ../.Xrunrc r+]
@@ -5542,6 +5541,7 @@ if {[file exists ../.Xrunrc] == 1} {
    gets $rcfl wwwviewer
    gets $rcfl compeval
    gets $rcfl mat
+   gets $rcfl EXPDAT
       } else {
    set rcfl [open ../.Xrunrc a+]
    set workdir [pwd]
@@ -5552,6 +5552,7 @@ if {[file exists ../.Xrunrc] == 1} {
    set pdfviewer ""
    set compeval ""
    set mat 1111
+   set EXPDAT 1
 
    }
 close $rcfl
@@ -5679,7 +5680,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/run $file $mat &
+        -command {exec xterm -e ../scripts/run $file $mat &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5693,7 +5694,7 @@ adjourn .top75} \
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/runE $file &
+        -command {exec xterm -e ../scripts/runE $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5922,11 +5923,11 @@ exec $editor $file.inp &} \
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm $e ../scripts/runE $file}
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm $e ../scripts/format $file $mat }
-if {$cverify == 1 && [file exists $file.endf]} {exec xterm $e ../scripts/verify $file}
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm $e ../scripts/process $file $mat }
-if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm $e ../scripts/plot $file}
+        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e ../scripts/runE $file}
+if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e ../scripts/format $file $mat }
+if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/verify $file}
+if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e ../scripts/process $file $mat }
+if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e ../scripts/plot $file}
 
 # create list of possible ddx plots
 ddlist
@@ -6141,6 +6142,7 @@ puts $rcfl $pdfviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
 puts $rcfl $mat
+puts $rcfl $EXPDAT
 close $rcfl
 
 
@@ -6189,7 +6191,7 @@ exit} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {exec rm -r $file-tl
-exec xterm $e ../scripts/run $file
+exec xterm -e ../scripts/run $file
 adjourn .top75
 # create list of possible ddx plots
 ddlist
@@ -6218,8 +6220,8 @@ puts $lsttab ""
 close $lsttab
 #exec gvim LSTTAB.INP
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
-exec xterm $e ../scripts/zvvddx $file omp1 1
-exec xterm $e ../scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
+exec xterm -e ../scripts/zvvddx $file omp1 1
+exec xterm -e ../scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
 
 
 set ddx $memlist(omp2)
@@ -6246,8 +6248,8 @@ foreach el $ddx {
 puts $lsttab ""
 close $lsttab
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
-exec xterm $e ../scripts/zvvddx $file omp2 1
-exec xterm $e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
+exec xterm -e ../scripts/zvvddx $file omp2 1
+exec xterm -e ../scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
@@ -6285,7 +6287,7 @@ adjourn .top75} \
     button $site_10_0.cpd81 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/x4interface $file &
+        -command {exec xterm -e ../scripts/x4interface $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6298,7 +6300,7 @@ adjourn .top75} \
     button $site_10_0.cpd82 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/c4 $file &
+        -command {exec xterm -e ../scripts/c4 $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6322,7 +6324,7 @@ adjourn .top75} \
     button $site_10_0.cpd84 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/sortc4 $file &
+        -command {exec xterm -e ../scripts/sortc4 $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6398,7 +6400,7 @@ adjourn .top75} \
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -activebackground #dcdcdc \
-        -dblclickcommand {exec xterm $e ../scripts/zvcomb $file [selection get] &} \
+        -dblclickcommand {exec xterm -e ../scripts/zvcomb $file [selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \
@@ -6499,7 +6501,7 @@ adjourn .top75} \
     button $site_9_0.but96 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
-        -command {exec xterm $e ../scripts/zvd $file $mt &
+        -command {exec xterm -e ../scripts/zvd $file $mt &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6542,7 +6544,7 @@ adjourn .top75} \
     button $site_9_0.but89 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
-        -command {exec xterm $e ../scripts/zvpl $file &
+        -command {exec xterm -e ../scripts/zvpl $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6681,7 +6683,7 @@ foreach el $ddx {
 puts $lsttab ""
 close $lsttab
 exec mv LSTTAB.INP ../util/lsttab/LSTTAB.INP
-exec xterm $e ../scripts/zvvddx $file $multi &} \
+exec xterm -e ../scripts/zvvddx $file $multi &} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Plot the list } 
     vTcl:DefineAlias "$site_9_0.but81" "Button131" vTcl:WidgetProc "Toplevel1" 1
@@ -7037,7 +7039,11 @@ if {$exten == ".ps"} {
 } elseif {$exten == ".eps"} {
   exec $psviewer $selecfile &
 } elseif {$exten == ".zvd"} {
-  exec xterm $e ../scripts/zvcomb $selecfile &
+  exec xterm -e ../scripts/zvcomb $selecfile &
+} elseif {$exten == ".gnudat"} {
+  exec xterm -e cp $selecfile  corrplot.dat
+  exec xterm -e gnuplot ../util/kalman/corr.plt
+  exec xterm -e rm corrplot.dat
 } else {
   exec $editor $selecfile &
 }} \
@@ -7160,7 +7166,7 @@ if {$archexten == ".ps"} {
 } elseif {$archexten == ".eps"} {
   exec $psviewer $archdir/$archfile &
 } elseif {$archexten == ".zvd"} {
-  exec xterm $e ../scripts/zvcomb $archdir/$archfile &
+  exec xterm -e ../scripts/zvcomb $archdir/$archfile &
 } else {
   exec $editor $archdir/$archfile &
 }} \
@@ -7237,7 +7243,7 @@ adjourn .top75 }} \
     button $site_9_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc \
-        -command {exec xterm $e ../scripts/store $archdir $file
+        -command {exec xterm -e ../scripts/store $archdir $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -7652,7 +7658,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {cd ../source
-exec xterm $e make
+exec xterm -e make
 cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text Make 
@@ -7665,7 +7671,7 @@ cd $workdir} -cursor hand2 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
         -command {cd ../
-exec xterm $e ./Compile
+exec xterm -e ./Compile
 cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
@@ -7710,6 +7716,7 @@ puts $rcfl $pdfviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
 puts $rcfl $mat
+puts $rcfl $EXPDAT
 close $rcfl
 
 
@@ -7743,6 +7750,20 @@ exit} \
         -label {X4TOC4 table} 
     $site_3_0.menu90 add command \
         -command {exec $editor ../source/Makefile &} -label {Edit Makefile} 
+
+    $site_3_0.menu90 add cascade \
+        -menu "$site_3_0.menu90.menu77" -command {} -label {Kalman option} 
+    set site_4_0 $site_3_0.menu90
+    menu $site_4_0.menu77 \
+        -activebackground #dcdcdc -activeforeground #000000 \
+        -background #dcdcdc -foreground #000000 -tearoff 0 
+    $site_4_0.menu77 add radiobutton \
+        -value 0 -variable EXPDAT -command {} -label {No exp. data} 
+    $site_4_0.menu77 add radiobutton \
+        -value 1 -variable EXPDAT -command {} -label {Exp. data for selected reaction} 
+    $site_4_0.menu77 add radiobutton \
+        -value 2 -variable EXPDAT -command {} -label {All exp. data}
+
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu97" -command {} -label {Select editor} 
     set site_4_0 $site_3_0.menu90
@@ -7825,33 +7846,33 @@ $file.inp &}} -label {Create input}
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/run $file $mat &} \
+        -command {exec xterm -e ../scripts/run $file $mat &} \
         -label {Full run} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/runE $file &} -label EMPIRE 
+        -command {exec xterm -e ../scripts/runE $file &} -label EMPIRE 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/format $file &} -label Format 
+        -command {exec xterm -e ../scripts/format $file &} -label Format 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/addresonances $file &} \
+        -command {exec xterm -e ../scripts/addresonances $file &} \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/rec-elastic $file &} \
+        -command {exec xterm -e ../scripts/rec-elastic $file &} \
         -label {Reconstruct elastic} 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/accept-omp-fit $file &} \
+        -command {exec xterm -e ../scripts/accept-omp-fit $file &} \
         -label {Accept last OMP fit} 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/verify $file &} -label Verify 
+        -command {exec xterm -e ../scripts/verify $file &} -label Verify 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/process $file 1 &} \
+        -command {exec xterm -e ../scripts/process $file 1 &} \
         -label PreProcess 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/plotlst $file &} \
+        -command {exec xterm -e ../scripts/plotlst $file &} \
         -label {Plot list} 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/plot $file &} -label PLOTC4 
+        -command {exec xterm -e ../scripts/plot $file &} -label PLOTC4 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -7866,7 +7887,7 @@ $file.inp &}} -label {Create input}
   set Zinp [lindex $line 1]
   set ZAinp [expr int($Zinp*1000+$Ainp)]
   set Mass $Ainp
-  exec ../scripts/resonance.tcl $ZAinp $mat true &} \
+  exec ../scripts/resonance.tcl $ZAinp $mat $Mass &} \
         -label {Resonance Module} 
     $site_3_0.menu93 add separator \
         
@@ -7876,40 +7897,42 @@ $file.inp &}} -label {Create input}
     menu $site_5_0.men87 \
         -tearoff 0 
     $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 1 $mat 0} -label {Total MT=1}
+        -command {exec  xterm -e ../scripts/kalman  $file 1 $mat $EXPDAT} -label {Total MT=1}
     $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 2 $mat 0} -label {Elastic MT=2}
+        -command {exec  xterm -e ../scripts/kalman  $file 2 $mat $EXPDAT} -label {Elastic MT=2}
     $site_5_0.men87 add command \
-        -command {exec  xterm $e ../scripts/kalman  $file 4 $mat 0} -label {Inelastic MT=4}
+        -command {exec  xterm -e ../scripts/kalman  $file 4 $mat $EXPDAT} -label {Inelastic MT=4}
     $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 16 $mat 0} -label {(z,2n) MT=16}
+         -command {exec  xterm -e ../scripts/kalman  $file 16 $mat $EXPDAT} -label {(z,2n) MT=16}
     $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 17 $mat 0} -label {(z,3n) MT=17}
+         -command {exec  xterm -e ../scripts/kalman  $file 17 $mat $EXPDAT} -label {(z,3n) MT=17}
     $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 102 $mat 0} -label {(n,g) MT=102}
+         -command {exec  xterm -e ../scripts/kalman  $file 102 $mat $EXPDAT} -label {(n,g) MT=102}
     $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 103 $mat 0} -label {(n,p) MT=103}
+         -command {exec  xterm -e ../scripts/kalman  $file 103 $mat $EXPDAT} -label {(n,p) MT=103}
     $site_5_0.men87 add command \
-         -command {exec  xterm $e ../scripts/kalman  $file 107 $mat 0} -label {(n,a) MT=107}
+         -command {exec  xterm -e ../scripts/kalman  $file 107 $mat $EXPDAT} -label {(n,a) MT=107}
+    $site_5_0.men87 add command \
+         -command {exec  xterm -e ../scripts/kalman  $file 0 $mat $EXPDAT} -label {all MTs}
 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/mergeMF33 $file 
-exec xterm $e mv $file-m.endf $file.endf
-exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
+        -command {exec xterm -e ../scripts/mergeMF33 $file 
+exec xterm -e mv $file-m.endf $file.endf
+exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/stanef $file &} -label STANEF 
+        -command {exec xterm -e ../scripts/stanef $file &} -label STANEF 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/runjoy $file &} -label NJOY 
+        -command {exec xterm -e ../scripts/runjoy $file &} -label NJOY 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/c4 $file &} -label X4TOC4 
+        -command {exec xterm -e ../scripts/c4 $file &} -label X4TOC4 
     $site_3_0.menu93 add command \
-        -command {exec xterm $e ../scripts/sortc4 $file &} -label SORTC4 
+        -command {exec xterm -e ../scripts/sortc4 $file &} -label SORTC4 
     $top.m88 add cascade \
         -menu "$top.m88.menu94" -command {} -label Outputs 
     set site_3_0 $top.m88
@@ -8046,10 +8069,10 @@ exec  xterm $e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
-        -command {exec xterm $e ../scripts/zvpl $file &} \
+        -command {exec xterm -e ../scripts/zvpl $file &} \
         -label {Create ZVV plot} 
     $site_3_0.menu95 add command \
-        -command {exec xterm $e ../scripts/zvcomb &} -label {Merge ZVV plots} 
+        -command {exec xterm -e ../scripts/zvcomb &} -label {Merge ZVV plots} 
     $site_3_0.menu95 add command \
         -command {exec ../scripts/guizvv.tcl $file &} -label {Compare ZVV} 
     $site_3_0.menu95 add separator \
@@ -8076,7 +8099,7 @@ exec rm -f $file.inp} \
         -command {exec $editor ../source/dimension.h &} -label Dimensions 
     $site_3_0.men78 add command \
         -command {cd ../source
-exec xterm $e make &
+exec xterm -e make &
 cd $workdir} \
         -label Compile 
     $top.m88 add separator \
