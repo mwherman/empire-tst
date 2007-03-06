@@ -41,5 +41,5 @@ LG_PS_BOXTITLE: 0 20 Helvetica
 !X: E
 !Y: Cross Section
 !x-long: Incident Neutron Energy
-legend: 1
+!legend: 1
 !mode: FIXSYM
