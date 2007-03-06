@@ -20,3 +20,7 @@ LG_PS_BOX: 1
 LG_PS_PAGE2: 1
 LG_PS_FONT: 0 13 Helvetica  
 LG_PS_BOXTITLE: 0 20 Helvetica
+
+!Uncomment below for noninteractive EPS plots
+!NODIALOG: 4
+
