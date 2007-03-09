@@ -5487,12 +5487,13 @@ foreach el $stablist {
       close $skelinp
       close $mulinput
    }
-
-if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e ../scripts/runE $mulinputn}
-if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e ../scripts/format $mulinputn 1111 }
-if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/verify $mulinputn}
-if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/process $mulinputn 1111 }
-if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e ../scripts/plot $mulinputn}
+   set seninpexists [file exists $mulinputn-inp.sen]
+   if {$seninpexists == 0 } {file copy skel-inp.sen $mulinput-inp.sen}
+   if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e ../scripts/runE $mulinputn}
+   if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e ../scripts/format $mulinputn 1111 }
+   if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/verify $mulinputn}
+   if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/process $mulinputn 1111 }
+   if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e ../scripts/plot $mulinputn}
 
 #  exec xterm -e ../scripts/run $mulinputn 1111
    set delistmul ""
@@ -7736,6 +7737,8 @@ exit} \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
         -command {exec $editor ../scripts/skel.inp &} -label {Default input} 
+    $site_3_0.menu90 add command \
+        -command {exec $editor ../scripts/skel-inp.sen &} -label {Default sensitivity input} 
     $site_3_0.menu90 add command \
         -command {exec $editor ../util/empend/EMPEND.INP &} \
         -label {EMPEND input} 
