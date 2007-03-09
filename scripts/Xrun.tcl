@@ -5464,7 +5464,7 @@ close $abundance
 ## Procedure:  runlist
 
 proc ::runlist {stablist mulstname} {
-global widget ckmlo ckmsh ckmlog ckmendf ckmplots ckmx4 ckmc4 ckmriplomp  ckmdiromp ckmlev ckmcollev ckminp
+global widget ckmlo ckmsh ckmlog ckmendf ckmplots ckmx4 ckmc4 ckmriplomp  ckmdiromp ckmlev ckmcollev ckminp cempire cformat cverify cprepro cplot
 set checkept $ckmlo$ckmsh$ckmendf$ckmplots
 if {$checkept == ".lst.out*.endf.ps"} return
 foreach el $stablist {
@@ -5488,7 +5488,13 @@ foreach el $stablist {
       close $mulinput
    }
 
-   exec xterm -e ../scripts/run $mulinputn 1111
+if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e ../scripts/runE $mulinputn}
+if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e ../scripts/format $mulinputn 1111 }
+if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/verify $mulinputn}
+if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/process $mulinputn 1111 }
+if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e ../scripts/plot $mulinputn}
+
+#  exec xterm -e ../scripts/run $mulinputn 1111
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
