@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-30 14:44:36 $
-Ccc   * $Id: input.f,v 1.217 2007-01-30 14:44:36 herman Exp $
+Ccc   * $Date: 2007-03-19 13:31:46 $
+Ccc   * $Id: input.f,v 1.218 2007-03-19 13:31:46 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1278,6 +1278,9 @@ C               Setting the normalization factor for OMP (used in covariance cal
                 FNwsomp(0,0) = FNwsomp(Nejc,i)
                 FNavomp(0,0) = FNavomp(Nejc,i)
                 FNasomp(0,0) = FNasomp(Nejc,i)
+                FNrvomp(0,0) = FNrvomp(Nejc,i)
+                FNrwomp(0,0) = FNrwomp(Nejc,i)
+                FNrsomp(0,0) = FNrsomp(Nejc,i)
                  GOTO 11
              ENDIF
             ENDDO
