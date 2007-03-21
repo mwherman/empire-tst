@@ -217,6 +217,7 @@ rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 rm TARGET_COLL_RIPL.DAT 2>/dev/null
 rm COVAR.DAT 2>/dev/null
 rm OPTFIT.CAL OMPAR0.DIR INPUT0.DAT  2>/dev/null
+rm OMPAR.DIR LOW_ENERGY.OUT ecis03.exp ecis03.smat 2>/dev/null
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then
@@ -251,6 +252,9 @@ if [ ! -s $file-ecis.out ]; then
 fi
 if [ ! -s $file-inp.fis ]; then
        rm $file-inp.fis  2>/dev/null
+fi
+if [ ! -s $file-pfns.out ]; then
+       rm $file-pfns.out  2>/dev/null
 fi
 if [ ! -s FISSION.OUT ]; then
        rm FISSION.OUT  2>/dev/null
