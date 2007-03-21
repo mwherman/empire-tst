@@ -5510,13 +5510,9 @@ foreach el $stablist {
 }
 if {$mulstname == ""} {
     exec cp ../scripts/skel.inp default.inp
-    } else {
-    exec cp ../scripts/skel.inp $mulstname.inp
-    }
-}
-if {$mulstname == ""} {
     exec cp ../scripts/skel-inp.sen default-inp.sen
     } else {
+    exec cp ../scripts/skel.inp $mulstname.inp
     exec cp ../scripts/skel-inp.sen $mulstname-inp.sen
     }
 }
@@ -5834,8 +5830,9 @@ adjourn .top75} \
     }
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
-        -command {exec ../scripts/clean $file
-adjourn .top75} \
+        -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all files related to the project except input?" "" 0 No Yes ] == 1} {
+exec ../scripts/clean $file
+adjourn .top75}} \
         -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
         -highlightcolor #000000 \
