@@ -181,6 +181,7 @@ mv R250SEED.DAT $file.rng 2>/dev/null
 mv PFNM.OUT $file-pfnm.out 2>/dev/null
 mv PFNS.OUT $file-pfns.out 2>/dev/null
 mv FIT.OUT $file-ompfit.lst 2>/dev/null
+mv COVAR.DAT $file-MC.par 2>/dev/null
 
 # EXTRACT WARNINGS
 
@@ -197,7 +198,7 @@ rm EXFOR.datp  2>/dev/null
 rm INPUT  2>/dev/null
 rm INPUT.DAT  2>/dev/null
 rm FISSION.INP  2>/dev/null
-#rm OMPAR.DIR  2>/dev/null
+rm OMPAR.DIR  2>/dev/null
 rm OMPdata.dat  2>/dev/null
 rm mt_x4r.txt  2>/dev/null
 rm TAPE15 2>/dev/null
