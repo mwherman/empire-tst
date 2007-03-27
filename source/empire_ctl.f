@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-03-27 17:45:26 $
-Ccc   * $Id: empire_ctl.f,v 1.23 2007-03-27 17:45:26 herman Exp $
+Ccc   * $Date: 2007-03-27 19:21:28 $
+Ccc   * $Id: empire_ctl.f,v 1.24 2007-03-27 19:21:28 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1853,6 +1853,14 @@ C-----Move original (reference) input out of the way
 C-----
 C-----Run calculations with original input
 C-----
+C
+C-----Read target and projectile from the input file
+      OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD')
+      READ(44,'(A80)') inprecord 
+      read(44,*) atarget,ztarget 
+      read(44,*) aprojec,Zprojec
+      close(44)
+
       CLOSE(5) !close standard INPUT.DAT (just to be sure)
       OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
