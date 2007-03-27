@@ -1,5 +1,5 @@
 #---- pfg90 compiler
-FC     =  pgf90
+#FC     =  pgf90
 #FFLAGS =  -O2
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
