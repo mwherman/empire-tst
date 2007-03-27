@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-03-27 14:30:08 $
-Ccc   * $Id: empire_ctl.f,v 1.22 2007-03-27 14:30:08 herman Exp $
+Ccc   * $Date: 2007-03-27 17:45:26 $
+Ccc   * $Id: empire_ctl.f,v 1.23 2007-03-27 17:45:26 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1333,7 +1333,7 @@ c----------------------------------------------------------------------
             if(den.gt.1.0d-6) then
               dpx=0.5d0*(dp1**2*chi2-dp2**2*chi1)/den
               if(dpx.gt.dp2) then
-                dpx=min(dpx,10.0d0*dp2)
+                dpx=min(dpx,10.0*dp2)
                 id=3
                 if(chi2.lt.chi1) id=2
                else if(dpx.gt.dp1) then
@@ -1853,6 +1853,7 @@ C-----Move original (reference) input out of the way
 C-----
 C-----Run calculations with original input
 C-----
+      CLOSE(5) !close standard INPUT.DAT (just to be sure)
       OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
 C-----
@@ -1881,8 +1882,7 @@ C-----
 
    30 CLOSE(7)
       CLOSE(44)
-      CLOSE(5)
-      CALL EMPIRE
+      CALL EMPIRE !calculations with original input
 C-----Move original (reference) outputs out of the way
       IF(LINUX) THEN
          ctmp='mv LIST.DAT LISTREF.DAT'
