@@ -1,0 +1,16 @@
+UOMPRS     0.05    00  01   1           ! omp real surface radius for ZZ AAA + neutrons
+UOMPRV     0.05    00  01   1           ! omp real volume radius for ZZ AAA + neutrons
+UOMPRW     0.05    00  01   1           ! omp imaginary volume radius for ZZ AAA + neutrons
+UOMPVV     0.05    00  01   1           ! omp real volume depth for ZZ AAA + neutrons
+UOMPWS     0.05    00  01   1           ! omp imaginary surface depth for ZZ AAA + neutrons 
+UOMPWV     0.05    00  01   1           ! omp imaginary volume  depth for ZZ AAA + neutrons 
+UOMPAS     0.05    00  01   1           ! omp imaginary surface diff.  for ZZ AAA + neutrons
+UOMPAV     0.05    00  01   1           ! omp real volume diff. for ZZ AAA + neutrons
+ATILNO     0.05    00  00               ! level density parameter a-tilde for ZZ AAA
+ATILNO     0.05    00  01               ! level density parameter a-tilde for ZZ AAA  
+ATILNO     0.05    00  02               ! level density parameter a-tilde for ZZ AAA 
+ATILNO     0.05    01  00               ! level density parameter a-tilde for ZZ AAA 
+GTILNO     0.1     00  01               ! Single particle level density parameter  for ZZ AAA
+GTILNO     0.1     01  00               ! Single particle level density parameter  for ZZ AAA
+TUNE       0.1     00  00   0           ! Emission width for gammas from ZZ AAA
+PCROSS     0.1                          ! mean free path in exciton model
