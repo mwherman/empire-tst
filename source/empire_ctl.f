@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-03-27 14:03:24 $
-Ccc   * $Id: empire_ctl.f,v 1.21 2007-03-27 14:03:24 herman Exp $
+Ccc   * $Date: 2007-03-27 14:30:08 $
+Ccc   * $Id: empire_ctl.f,v 1.22 2007-03-27 14:30:08 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1779,6 +1779,10 @@ C     integer nreac
      &          sensmat(ndreac)
       integer*4 itmp
       INTEGER*4 PIPE
+C
+      real*8 atarget,ztarget,aprojec,Zprojec
+      integer*4 i1p,i2p
+C
       dimension namelst(ndkeys), namecat(ndkeys)
       data namelst /
      &  'ATILNO', 'CHMS  ', 'DEFPAR', 'FUSRED', 'GDIVP ', 'GDRST1', 
@@ -1908,7 +1912,11 @@ C-----Read one line of the sensitivity input
   100 READ (17,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR. 
      &    inprecord(1:1).EQ.'!') GOTO 100
-      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200) name,val,i1,i2, i3, i4
+C      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200) name,val,i1,i2, i3, i4
+      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200)name,val,i1p,i2p,i3, i4
+      i2=int(atarget)-i1p-i2p+int(aprojec)-int(zprojec)
+      i1=int(ztarget)-i1p
+C      write(0,*) name,i1,i2
 C-----Check category of the parameter to be varied
       category = 'F'
       DO i = 1, ndkeys
@@ -2067,7 +2075,7 @@ C-----
       READ(34,'(A238)') outrecord 
       WRITE(92,'(A238)') outrecord 
       WRITE(92,'(''# Parameter: '',A6,2x,4I3,''  variation: +-''F5.3,
-     &      ''     Sensitivity matrix'')') name,  i1, i2,
+     &      ''     Sensitivity matrix'')') name,  i1p, i2p,
      &      i3, i4, valmem
       READ(outrecord,'(1x,I3)') ireac !read number of reactions
 C-----Check whether ireac is within dimensions
