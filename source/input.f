@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-03-19 13:31:46 $
-Ccc   * $Id: input.f,v 1.218 2007-03-19 13:31:46 herman Exp $
+Ccc   * $Date: 2007-03-27 14:27:28 $
+Ccc   * $Id: input.f,v 1.219 2007-03-27 14:27:28 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -715,25 +715,25 @@ C--------------retrieval from the remote database
                ENDIF
 C--------------retrieval from the local MySQL database
 C--------------including data for the natural element
-               IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
-     &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
-     &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-               ELSEIF(IX4ret.EQ.1)THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
-     &                       ';'//SYMb(0)//'-'//atar//'" '//
-     &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-               ENDIF
+c              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
+c                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
+c    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
+c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+c              ELSEIF(IX4ret.EQ.1)THEN
+c                 x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
+c    &                       ';'//SYMb(0)//'-'//atar//'" '//
+c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+c              ENDIF
 C--------------data for the target isotop only
-C              IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
-C                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)
-C    &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-C    &                       '"'//proj//',*"#'
-C              ELSEIF (IX4ret.EQ.1) THEN
-C                 x4string = '../scripts/X4retrieve "'//SYMb(0)
-C    &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-C    &                       '"'//proj//',*"#'
-C              ENDIF
+               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)
+     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+     &                       '"'//proj//',*"#'
+               ELSEIF (IX4ret.EQ.1) THEN
+                  x4string = '../scripts/X4retrieve "'//SYMb(0)
+     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+     &                       '"'//proj//',*"#'
+               ENDIF
                iwin = PIPE(x4string)
             ENDIF
          ENDIF
@@ -1279,7 +1279,7 @@ C               Setting the normalization factor for OMP (used in covariance cal
                 FNavomp(0,0) = FNavomp(Nejc,i)
                 FNasomp(0,0) = FNasomp(Nejc,i)
                 FNrvomp(0,0) = FNrvomp(Nejc,i)
-                FNrwomp(0,0) = FNrwomp(Nejc,i)
+                FNrwvomp(0,0) = FNrwvomp(Nejc,i)
                 FNrsomp(0,0) = FNrsomp(Nejc,i)
                  GOTO 11
              ENDIF
