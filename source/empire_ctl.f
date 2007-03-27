@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $ 
-Ccc   * $Date: 2007-01-29 17:15:39 $
-Ccc   * $Id: empire_ctl.f,v 1.20 2007-01-29 17:15:39 Carlson Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2007-03-27 14:03:24 $
+Ccc   * $Id: empire_ctl.f,v 1.21 2007-03-27 14:03:24 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1977,7 +1977,7 @@ C-----Read line of optional input
      &                     i1, i2, i3, i4 ! include omp parameter if missing
                ELSE
                   WRITE(7,'(A6,F10.3,4I5)') name,  (1.0+val), 
-     &                     i1, i2, i3, i4 ! include omp parameter if missing
+     &                     i1, i2, i3, i4 
                ENDIF
             ELSEIF(category.EQ.'R') THEN
                CLOSE(7)
