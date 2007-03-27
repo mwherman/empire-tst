@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-03-27 19:21:28 $
-Ccc   * $Id: empire_ctl.f,v 1.24 2007-03-27 19:21:28 herman Exp $
+Ccc   * $Date: 2007-03-27 22:39:04 $
+Ccc   * $Id: empire_ctl.f,v 1.25 2007-03-27 22:39:04 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -1855,11 +1855,11 @@ C-----Run calculations with original input
 C-----
 C
 C-----Read target and projectile from the input file
-      OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD')
-      READ(44,'(A80)') inprecord 
-      read(44,*) atarget,ztarget 
-      read(44,*) aprojec,Zprojec
-      close(44)
+c     OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD')
+c     READ(44,'(A80)') inprecord 
+c     read(44,*) atarget,ztarget 
+c     read(44,*) aprojec,Zprojec
+c     close(44)
 
       CLOSE(5) !close standard INPUT.DAT (just to be sure)
       OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
@@ -1869,8 +1869,13 @@ C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,7
          READ(44,'(A80)') inprecord 
+C--------Read target and projectile from the input file
+         IF(i.EQ.2) read(inprecord,*) atarget,ztarget  
+         IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
          WRITE(7,'(A80)') inprecord 
       ENDDO
+      WRITE(6,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
+     &            aprojec,Zprojec
 C-----Read line of optional input
    50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
