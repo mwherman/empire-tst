@@ -5,6 +5,18 @@ AMT=$2
 MAT=$3
 EXPDAT=$4
 
+if [ ! -s $file-c4.kal ]; then
+   if [ -s $file.c4 ]; then
+      grep '^.\{12,15\}  3 ' $file.c4 | grep -v '^.\{19\}[!-~]' >$file-c4.kal
+   else
+     echo "    1 99999   4  11    1.0000+8          1.0000-4 1.0000-4                                       FAKE LINE FOR KALMAN     11111 11" >$file-c4.kal
+   fi
+fi
+
+if [ ! -s $file-c4.kal ]; then
+     echo "    1 99999   4  11    1.0000+8          1.0000-4 1.0000-4                                       FAKE LINE FOR KALMAN     11111 11" >$file-c4.kal
+fi
+
 if [ "$AMT" = "0" ]
    then
    AMT="1 2 4 16 102"
@@ -40,7 +52,7 @@ EOF
 
        ../util/kalman/genkal.pl $file
 
-       ln -s $file.c4 fort.1
+       ln -s $file-c4.kal fort.1
 
        ../util/kalman/c4tokal<KALEND.INP >KALMAN.INP
        rm fort.1
@@ -99,7 +111,7 @@ EOF
 
        ../util/kalman/genkal.pl $file
 
-       ln -s $file.c4 fort.1
+       ln -s $file-c4.kal fort.1
 
        ../util/kalman/c4tokal<KALEND.INP >KALMAN.INP
        rm fort.1
@@ -125,6 +137,10 @@ EOF
              cp $file-expxsc.kal fort.10     
           fi
        fi
+# tmp
+#        echo 'Edit Kalman input'
+#        emacs KALMAN.INP
+# tmp
        ../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
        mv fort.13 $file-xsc.kal
        mv fort.14 $file-cov.kal
@@ -133,8 +149,8 @@ EOF
        do
         echo "MT=${MT}, MAT=${MAT}"
 # tmp
-#        echo 'Edit Kalman input'
-#        emacs KALMAN.INP
+#       echo 'Edit Kalman input'
+#       emacs KALMAN.INP
 # tmp
         cat >KALEND.INP <<EOF
 $MT $MAT 0 $EXPDAT
