@@ -5,6 +5,8 @@ AMT=$2
 MAT=$3
 EXPDAT=$4
 
+#Clean C4 file to leave only total cross sections (MF=3) (no meta, g.s., etc., no spectra, ang.distr. ...) 
+#if there are no suitable exp. data create c4 file with one fake line to make KALMAN happy :)
 if [ ! -s $file-c4.kal ]; then
    if [ -s $file.c4 ]; then
       grep '^.\{12,15\}  3 ' $file.c4 | grep -v '^.\{19\}[!-~]' >$file-c4.kal
