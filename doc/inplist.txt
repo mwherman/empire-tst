@@ -166,12 +166,12 @@ Multi-step Direct
 MSD     Controls Multi-step Direct calculations ,
        = 0 no MSD calculations (default),
        = 1 MSD calculations selected - ORION + TRISTAN will be executed,
-       = 2 MSD calculations selected but only TRISTAN will be
-           executed using the most recent results of ORION. WARNING!
-           there is no check whether the last and the current run
-           match with regard to the projectile, the target and the
-           incident energy; this option can be used for a single
-           incident energy only.
+           (contribution to discrete levels disregarded if CC or DWBA
+           calculations selected (DIRECT > 0))
+       = 2 MSD calculations selected - ORION + TRISTAN will be executed
+           including contribution to discrete levels regardless of the 
+           DIRECT option (option to be used only with the CC rotational 
+           model)
 
 COMPFF  Controls form factor for l=0 transfer 
        = 0 surface form factor (default)
