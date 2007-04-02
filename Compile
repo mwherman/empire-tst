@@ -35,10 +35,12 @@ make -f endzvdl.mak
 make -f curzvd3l.mak
 make -f pntdatl.mak
 chmod a+x pntzvdl
-cd ../kalman
-make kalman3
-make kalend
-make c4tokal
+if [ -d file ../kalman ]; then
+   cd ../kalman
+   make kalman3
+   make kalend
+   make c4tokal
+fi
 cd ../resonance
 make all
 cd ../../EXFOR
