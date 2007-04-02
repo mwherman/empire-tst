@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2006-10-09 20:24:58 $
-Ccc   * $Id: pcross.f,v 1.47 2006-10-09 20:24:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-04-02 22:01:59 $
+Ccc   * $Id: pcross.f,v 1.48 2007-04-02 22:01:59 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -100,17 +100,19 @@ C
       em(1) = 1.D0 - QDFrac
       em(2) = QDFrac
 C
-      gc = FLOAT(ac)/13.*GTIlnor(1)
-      pc = ROPar(3,1)
-      IF(pc.eq.0.) then
+      ggg = GDIV
+      if(GDIV.eq.0) ggg=13.d0
+      gc = FLOAT(ac)/ggg*GTIlnor(1)
+c     pc = ROPar(3,1)
+c     IF(pc.eq.0.) then
         ftmp = 0.
         IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
         pc = ftmp                                             ! odd
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
-      ENDIF
+c     ENDIF
 C     Empirically found that it is better not to use pairing correction
-      pc = 0.d0
+C     pc = 0.d0
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -158,21 +160,20 @@ C
          zr = zc - ZEJc(nejc)
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
-         g(nejc) = FLOAT(ar)/13.*GTIlnor(nnur)
+         g(nejc) = FLOAT(ar)/ggg*GTIlnor(nnur)
 C        Empirically found that it is better not to use pairing correction here
-C        pair(nejc) = ROPar(3,nnur)
-C        IF( pair(nejc).eq.0.) THEN
-C          ftmp = 0.
-C          IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
-C          pair(nejc) = ftmp
-C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-C          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
-C        ENDIF
-         pair(nejc) = 0.d0
+c        pair(nejc) = ROPar(3,nnur)
+c        IF( pair(nejc).eq.0.) THEN
+           ftmp = 0.
+           IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
+           pair(nejc) = ftmp
+           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
+           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
+c        ENDIF
+C        pair(nejc) = 0.d0
 C--------Maximum and minimum energy bin
          excnq = EXCn -Q(nejc,1)
 C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
-C        nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 2.0001),1)
          DO ienerg = 2, nexrt
 C        DO ienerg = 2, NEX(nnur)    
@@ -192,7 +193,6 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
 C-----Last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
-C     nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
       nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 2.0001),1)
       DO ienerg = 2, NDEX
          eee = DE*(ienerg - 1)

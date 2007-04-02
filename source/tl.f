@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-02-13 19:35:31 $
-Ccc   * $Id: tl.f,v 1.88 2007-02-13 19:35:31 Capote Exp $
+Ccc   * $Date: 2007-04-02 22:01:59 $
+Ccc   * $Id: tl.f,v 1.89 2007-04-02 22:01:59 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1339,7 +1339,12 @@ C
       DO l = 0, lmax
          READ (45,END = 300) TTLl(ien,l)
          IF (IOUt.EQ.5) WRITE (46,*) l, TTLl(ien,l)
+C
+C        Newly added 
+C
+C        TTLl(ien,l) = TTLl(ien,l)*OUTred(Nejc,Nnuc)   
       ENDDO
+C	SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45)
@@ -1597,10 +1602,11 @@ C     xmas_nnuc = AMAss(Nnuc)
 C-----Absorption and elastic cross sections in mb
       DO l = 0, Maxlw
          sabs = sabs + Stl(l + 1)*DBLE(2*l + 1)
-         Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
+C        Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
          selast = selast + Sel(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = 10.d0*PI/ak2*sabs
+	selast = selast*10.d0*PI/ak2
 
       IF (sabs.LE.0.D0) RETURN
 
@@ -1855,10 +1861,12 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) lmax, J, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
          WRITE (46) TTLl(J,l)
+C        TTLl(J,l) = TTLl(J,l)*OUTred(Nejc,Nnuc)   
       ENDDO
       WRITE (46) sreacecis
       MAXl(J) = lmax
       SIGabs(J,Nejc,Nnuc) = sreacecis
+C     SIGabs(J,Nejc,Nnuc) = sreacecis*OUTred(Nejc,Nnuc)
       END
 C
 C
@@ -2112,14 +2120,14 @@ C-------writing input
          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
 C-------CARD 1 : Title
          WRITE (1,
-     &          '(f6.2,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
+     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
      &          ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
       ELSE
 C-------writing input
          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIB.inp')
 C-------CARD 1 : Title
          WRITE (1,
-     &      '(f6.2,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
+     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
      &      ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
       ENDIF
 C-----CARD 2
@@ -2145,9 +2153,9 @@ C-----It is justified for vibrational model and DWBA calculations
 C-----so we are using zero spin and positive parity herehere
 C-----NOT TRUE for rotational model calculations (see ecis_CCrot)
 C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(1,NNUC),0,1, ch, elab,
-      WRITE (1,'(f5.2,2i2,a1,5f10.5)') zerosp, 0, 1, '+', elab,
-     &                                 SEJc(Nejc), xmas_nejc, xmas_nnuc,
-     &                                 Z(Nnuc)*ZEJc(Nejc)
+      WRITE (1,'(f5.2,2i2,a1,f10.6,4F10.5)') zerosp, 0, 1, '+', elab,
+     &                              SEJc(Nejc), xmas_nejc, xmas_nnuc,
+     &                              Z(Nnuc)*ZEJc(Nejc)
 C-----0 phonon involved
       WRITE (1,'( )')
       IF (Inlkey.NE.0) THEN
@@ -2542,7 +2550,7 @@ C-----Writing input
       OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
 C-----CARD 1 : Title
       WRITE (1,
-     &'(f6.2,'' MeV '',a8,'' on '',i3,a2,'': VIBR-ROTATIONAL CC     '')'
+     &'(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBR-ROTATIONAL CC'')'
      &) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
 C-----CARD 2
       WRITE (1,'(a50)') ECIs1
@@ -2563,9 +2571,9 @@ C-----Matching radius calculated within ECIS
 C     WRITE(1, *)
       ch = '-'
       IF (LVP(ilv,Nnuc).GT.0) ch = '+'
-      WRITE (1,'(f5.2,2i2,a1,5f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
-     &                                 elab, SEJc(Nejc), xmas_nejc,
-     &                                 xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
+      WRITE (1,'(f5.2,2i2,a1,F10.6,4f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
+     &                              elab, SEJc(Nejc), xmas_nejc,
+     &                              xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
 C-----Discrete levels
       npho = 0
       nwrite = 1

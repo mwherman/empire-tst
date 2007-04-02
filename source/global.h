@@ -63,7 +63,7 @@
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FIScon, FISden(ndnuc),
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
-     &                 FISshi(ndnuc), FITlev, FLAm(ndcc),
+     &                 FISshi(ndnuc), FITlev, FLAm(ndcc), FCCred,
      &                 FUSred, GAMmafis(2), GCAsc, GDIv, GDIvp, GDRdyn,
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2,
@@ -138,7 +138,7 @@
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
-     &                 DEFnor,
+     &                 DEFnor, FCCred,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,

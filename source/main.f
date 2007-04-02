@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-01-30 14:39:04 $
-Ccc   * $Id: main.f,v 1.159 2007-01-30 14:39:04 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-04-02 22:01:58 $
+Ccc   * $Id: main.f,v 1.160 2007-04-02 22:01:58 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -231,6 +231,7 @@ C------------Avoid reading closed channels
                icsl = INT(xcse)
                icsh = icsl + 1
                READ (46,*,END = 1400) popread
+               popread = popread*FCCred
                ncoll = i
                POPlv(ilv,nnurec) = POPlv(ilv,nnurec) + popread
                CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
@@ -296,6 +297,7 @@ C------------Avoid reading closed channels
              IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
      &         THEN
                READ (46,*,END = 1400) popread
+	         popread = popread*FUSred
 C
 C--------------This level is not counted as a discrete one
 C--------------but it is embedded in the continuum
@@ -391,17 +393,26 @@ C-----Print elastic and direct cross sections from ECIS
         ENDIF
       ENDIF
 
+	ElasticCorr = 0.d0
+	IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
+     &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
+     &              + (1.d0 - FUSred)*CSFus/FUSred  
+     &              + (1.d0 - FCCred)*(SINl + SINlcc)
+
       IF (KTRlom(0,0).GT.0) THEN
       IF (ZEJc(0).EQ.0 .AND. AEJc(0).GT.0) THEN
-C        WRITE (6,99005) TOTcs, CSFus, ELAcs
-ccc          write(107,*)ein,totcs
-         WRITE (6,99005) TOTcs, ABScs, ELAcs
-99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',/,2x,
-     &           'Absorption cross section    :',e14.7,' mb',/,2x,
-     &           'Shape elastic cross section :',e14.7,' mb',//)
+         WRITE (6,99005) TOTcs,TOTred*TOTcs, 
+     &                   CSFus,CSFus/FUSred, 
+     &	               ELAcs, ElasticCorr + ELAcs
+99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
+     &                '  ( Scaled  ',e14.7,' mb )',/,2x,
+     &           'Absorption cross section    :',e14.7,' mb',
+     &                '  ( Scaled  ',e14.7,' mb )',/,2x,
+     &           'Shape elastic cross section :',e14.7,' mb',
+     &                '  ( Scaled  ',e14.7,' mb )',//)
       ENDIF
       IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
-         WRITE (6,99010) CSFus + SINlcc + SINl
+         WRITE (6,99010) CSFus + (SINlcc + SINl)*FCCred
 99010    FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',//)
       ENDIF
       WRITE (6,99015)
@@ -768,13 +779,13 @@ C-----
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
-     &  '' mb including'')') CSFus + SINl + SINlcc
+     &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred
             WRITE (6,
      &'(''   DWBA inelastic to uncoupled discrete levels = '',
-     &  G13.6,'' mb'')') SINl
+     &  G13.6,'' mb'')') SINl*FCCred
             WRITE (6,
      &'(''   CC inelastic to coupled discrete levels = '',
-     &  G13.6,'' mb'')') SINlcc
+     &  G13.6,'' mb'')') SINlcc*FCCred
             WRITE (6,'(''   DWBA to continuum = '',
      &  G13.6,'' mb'')') xsinlcont
             WRITE (6,'(''   PE + inelastic to continuum = '',
@@ -785,10 +796,10 @@ C-----
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (6,
      &'(''   Fusion cross section = '',G13.6,
-     &  '' mb including'')') CSFus + SINl + SINlcc
+     &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred
             WRITE (6,
      &'(''   DWBA inelastic to discrete levels = '',
-     &  G13.6,'' mb'')') SINl  + SINlcc
+     &  G13.6,'' mb'')') (SINl  + SINlcc)*FCCred
             WRITE (6,'(''   DWBA to continuum = '',
      &  G13.6,'' mb'')') xsinlcont
             WRITE (6,'(''   PE + inelastic to continuum = '',
@@ -801,11 +812,11 @@ C-----
       IF (ENDf(1).EQ.0.0D0) THEN
 C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
          WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
-     &          CSFus + SINl + SINlcc
+     &          CSFus + (SINl + SINlcc)*FCCred
       ELSE
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
-     &          CSFus + SINl + SINlcc
+     &          CSFus + (SINl + SINlcc)*FCCred
          WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
      &         TOTcs*TOTred
          WRITE (12,*) ' '
@@ -973,7 +984,7 @@ C--------------Write elastic to tape 12
                   WRITE (12,*) ' '
                   WRITE (12,
      &                   '('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
-     &                   ELAcs
+     &                   ELAcs + ElasticCorr + 4.*PI*ELCncs
                   WRITE (12,*) ' '
                   WRITE (12,*) ' Elastic angular distribution '
                   WRITE (12,*) ' '
@@ -985,7 +996,15 @@ C--------------Write elastic to tape 12
      &                                                         NANgela)
                   ENDIF
 99045             FORMAT (10X,8G15.5)
-                  WRITE (12,99050) (elada(iang)+elcncs,iang = 1,NANgela)
+                  if(ELAcs.GT.0.D0) then
+				    WRITE (12,99050) 
+     &              ((1.d0 + ElasticCorr/ELAcs)*elada(iang) + ELCncs,
+     &               iang = 1,NANgela)
+	              else 
+				    WRITE (12,99050) 
+     &              ( elada(iang) + ELCncs,
+     &               iang = 1,NANgela)
+	              endif
 99050             FORMAT (9X,8E15.5)
                   WRITE (12,*) ' '
                   WRITE (12,*) ' '
@@ -993,13 +1012,22 @@ C--------------Write elastic to tape 12
                   WRITE (12,*) ' '
                   WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                   WRITE (12,*) ' '
-                  WRITE (12,'(9X,8D15.8)') (elleg(1)+elcncs),
+                  if(ELAcs.GT.0.D0) THEN
+				    WRITE (12,'(9X,8D15.8)') 
+     &               ((1.d0 + ElasticCorr/ELAcs)*elleg(1) + ELCncs),
+     &               ((1.d0 + ElasticCorr/ELAcs)*elleg(iang),
+     &               iang = 2,min(NDAng,neles))
+	              else
+				    WRITE (12,'(9X,8D15.8)') 
+     &               (elleg(1) + ELCncs),
      &               (elleg(iang),iang = 2,min(NDAng,neles))
+				  endif
                   WRITE (12,*) ' '
                   IF (elcncs.EQ.0) WRITE (6,*)
      &                 'WARNING: CN elastic is 0'
                   IF (FITomp.LT.0) THEN
-                   WRITE(40,'(F12.4,3D12.5)') EINl,TOTcs,ABScs
+                   WRITE(40,'(F12.4,3D12.5)') 
+     &                    EINl,TOTcs,ABScs
                    IF (ncoll.GT.0) THEN
 C-------------------locate position of the projectile among ejectiles
                     CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -1555,10 +1583,11 @@ C--------down on the ground state
      &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
            WRITE (6,*)
            WRITE (6,*) ' Incident energy (CMS)      ', EIN, ' MeV'
-           WRITE (6,*) ' Shape elastic cross section', ELAcs, ' mb'
+           WRITE (6,*) ' Shape elastic cross section', 
+     &                   ElasticCorr + ELAcs, ' mb'
            WRITE (6,*) ' CN elastic cross section   ',
      &                    POPlv(LEVtarg,mt2),' mb'
-           ELAcs = ELAcs + POPlv(LEVtarg,mt2)
+C          ELAcs = ELAcs + POPlv(LEVtarg,mt2)   ! commented RCN, 03/07
 C----------CN contribution to elastic ddx
            elcncs = POPlv(LEVtarg,mt2)/4.0/PI
            WRITE (6,*)
@@ -1660,7 +1689,8 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
-      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs, ELAcs,
+      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
+     &	   ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
      &     (CSPrd(nnuc),nnuc=3,NNUcd)
       WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl,
@@ -2519,30 +2549,70 @@ C     ENDDO
      &           23(1H*))')
         WRITE (6,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
+        if(TOTred.ne.1.)
+     &  WRITE (6,'('' * Total cross section scaled by '',G12.5,
+     &              '' mb  '')') TOTred    
+        WRITE (6,
+     &  '('' * Optical model total cross section              '',G12.5,
+     &              '' mb  '')') TOTcs*TOTred
+        WRITE (6,
+     &  '('' * Calculated total cross section                 '',G12.5,
+     &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
+     &  ElasticCorr + ELAcs    
+        WRITE (6,
+     &  '('' * Optical model nonelastic cross section (ABScs) '',G12.5,
+     &              '' mb  '')') (ABScs - (SINl+SINlcc))*FUSred
+     &                           + (SINl+SINlcc)*FCCred
+        WRITE (6,
+     &  '('' * Calculated nonelastic cross section            '',G12.5,
+     &              '' mb  '')') 
+     &   CSFus + (SINl+SINlcc)*FCCred 
+        WRITE (6,
+     &  '('' * Production cross section (incl.fission)        '',
+     &           G12.5,'' mb'')')  checkXS 
+C    &  '('' * Production cross section (incl.fission & CE) '',
+C    &           G12.5,'' mb'')')  checkXS + 4.*PI*ELCncs
+        WRITE (6,'('' * Difference: '', F9.5,'' %'')')
+     &    100.d0*abs(
+     &    ( CSFus + (SINl+SINlcc)*FCCred - checkXS ) )/
+     &    ( CSFus + (SINl+SINlcc)*FCCred )
         WRITE (6,'('' * Compound elastic cross section (CE) '',G12.5,
      &              '' mb  '')') 4.*PI*ELCncs
-        WRITE (6,'('' * Reaction cross section - CE '',G12.5,
-     &              '' mb  '')') ABScs*FUSred - 4.*PI*ELCncs
+C       WRITE (6,'('' * Reaction cross section - CE '',G12.5,
+C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred
+C    &                           - 4.*PI*ELCncs
         if(FUSred.ne.1.)
-     &  WRITE (6,'('' * Reaction cross section scaled by '',G12.5,
+     &  WRITE (6,'('' * CN formation cross section scaled by '',G12.5,
      &              '' mb  '')') FUSred    
-        WRITE (6,'('' * Production cross section + fission '',
-     &           G12.5,'' mb'')')  checkXS - 4.*PI*ELCncs
-        WRITE (6,'('' * Difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs*FUSred - checkXS))/
-     &                    (ABScs*FUSred - 4.*PI*ELCncs)
+        if(FCCred.ne.1.)
+     &  WRITE (6,'('' * Direct collective cross section scaled by '',
+     &              G12.5,'' mb  '')') FCCred    
          WRITE (6,'('' *******************************************'',
      &           23(1H*))')
       ENDIF
-      IF(abs(ABScs*FUSred - checkXS).GT.0.01*ABScs) THEN      
+      IF(abs(CSFus + (SINl+SINlcc)*FCCred - checkXS)
+     &	.GT.0.01*(CSFus + (SINl+SINlcc)*FCCred)) THEN      
         WRITE (6,*)
-        WRITE (6,'('' WARNING: Sum of production XS and fission XS'')')
+        WRITE (6,'('' WARNING: Sum of production XS(incl.fission)'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
-        IF((ABScs*FUSred - 4.*PI*ELCncs).NE.0.d0)
+        IF((CSFus + (SINl+SINlcc)*FCCred).NE.0.d0)
      &  WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
-     &            100.d0*abs((ABScs*FUSred - 4.*PI*ELCncs - checkXS))/
-     &                    (ABScs*FUSred - 4.*PI*ELCncs)
+     &   100.d0*
+     &   abs(CSFus + (SINl+SINlcc)*FCCred - checkXS)/
+     &                (CSFus + (SINl+SINlcc)*FCCred)
       ENDIF
+
+      IF(TOTred*TOTcs.gt.0.d0 .and.
+     &     abs(CSFus + (SINl+SINlcc)*FCCred + ElasticCorr + 
+     &     ELAcs - TOTred*TOTcs) .GT. 0.01*TOTred*TOTcs) THEN      
+        WRITE (6,*)
+        WRITE (6,'('' WARNING: Total XS is not equal'')')
+        WRITE (6,'('' WARNING: Elastic + Absorption cross section'')')
+        WRITE (6,'('' WARNING:     difference: '', F9.5,'' %'')')
+     & 100.d0*abs(ABScs + ElasticCorr  + ELAcs - TOTred*TOTcs)/
+     &                 (TOTred*TOTcs)
+      ENDIF
+
       WRITE (6,*)
       IF (IOUt.GT.1) THEN
          csemax = 0.

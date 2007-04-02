@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-01-30 11:07:02 $
-Ccc   * $Id: io.h,v 1.31 2007-01-30 11:07:02 Capote Exp $
+Ccc   * $Date: 2007-04-02 22:01:58 $
+Ccc   * $Id: io.h,v 1.32 2007-04-02 22:01:58 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -144,7 +144,7 @@ C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
       OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
       OPEN (UNIT = 53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
-
+      OPEN (UNIT = 95,FILE='COVAR.DAT', STATUS = 'UNKNOWN')      
 
 
 

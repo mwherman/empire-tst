@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-03-27 14:27:28 $
-Ccc   * $Id: input.f,v 1.219 2007-03-27 14:27:28 herman Exp $
+Ccc   * $Date: 2007-04-02 22:01:57 $
+Ccc   * $Id: input.f,v 1.220 2007-04-02 22:01:57 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -222,8 +222,9 @@ C--------fusion parameters
          EXPush = 0.
          CRL = 0.0
          DFUs = 1.
-         FUSred = 1.
-         TOTred = 1.
+         FUSred = 1.d0
+         FCCred = 1.d0
+         TOTred = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -255,7 +256,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1281,7 +1282,7 @@ C               Setting the normalization factor for OMP (used in covariance cal
                 FNrvomp(0,0) = FNrvomp(Nejc,i)
                 FNrwvomp(0,0) = FNrwvomp(Nejc,i)
                 FNrsomp(0,0) = FNrsomp(Nejc,i)
-                 GOTO 11
+                GOTO 11
              ENDIF
             ENDDO
           ENDIF
@@ -2564,10 +2565,11 @@ C
 C      By default, no covariance calculation is done
 C
       IPArCOV = 0
-      OPEN(95,FILE='COVAR.DAT',STATUS='UNKNOWN')
+C     Moved to io.h 
+C     OPEN(95,FILE='COVAR.DAT',STATUS='UNKNOWN')
 C-----Go to the end of the COVAR.DAT file      
-   10 READ(95,*,END=11) dum
-      GOTO 10
+C  10 READ(95,*,END=11) dum
+C     GOTO 10
    11 CONTINUE
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
@@ -3112,21 +3114,81 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'FCCRED') THEN
+            if(i1.ne.0) then
+                WRITE (6,
+     &          '('' Direct cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                 sigma = val*i1*0.01
+C                FCCred = val + grand()*sigma
+                 FCCred = val + (2*drand()-1.)*sigma
+                WRITE (6, 
+     &		'('' Direct cross section was scaled by factor ''
+     &          ,f6.3)') FCCred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, FCCred, INDexf,INDexb
+            else
+                FCCred = val	    
+                WRITE (6,
+     &		'('' Direct cross section was scaled by factor '',
+     &		F6.3)') FCCred
+                WRITE (12,
+     &		'('' Direct cross section was scaled by factor '',
+     &           F6.3)') FCCred
+            endif
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'FUSRED') THEN
-            FUSred = val
-            WRITE (6,'('' Fusion cross section was scaled by factor'',
-     &             F6.3)') FUSred
-            WRITE (12,'('' Fusion cross section was scaled by factor '',
-     &             F6.3)') FUSred
+            if(i1.ne.0) then
+                WRITE (6,
+     &          '('' Fusion cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                 sigma = val*i1*0.01
+C                FUSred = val + grand()*sigma
+                 FUSred = val + (2*drand()-1.)*sigma
+                WRITE (6, 
+     &		'('' Fusion cross section was scaled by factor ''
+     &          ,f6.3)') FUSred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, FUSred, INDexf,INDexb
+            else
+                FUSred = val	    
+                WRITE (6,
+     &		'('' Fusion cross section was scaled by factor '',
+     &		F6.3)') FUSred
+                WRITE (12,
+     &		'('' Fusion cross section was scaled by factor '',
+     &           F6.3)') FUSred
+            endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'TOTRED') THEN
-            TOTred = val
-            WRITE (6,'('' Total cross section was scaled by factor '',
-     &             F6.3)') TOTred
-            WRITE (12,'('' Total cross section was scaled by factor '',
-     &             F6.3)') TOTred
+            if(i1.ne.0) then
+                WRITE (6,
+     &          '('' Total cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                 sigma = val*i1*0.01
+C                TOTred = val + grand()*sigma
+                 TOTred = val + (2*drand()-1.)*sigma
+                WRITE (6,
+     &          '('' Total cross section was scaled by factor ''
+     &          ,f6.3)') TOTred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, TOTred, INDexf,INDexb
+            else
+                TOTred = val	    
+                WRITE (6,
+     &		'('' Total cross section was scaled by factor '',
+     &          F6.3)') TOTred
+                WRITE (12,
+     &		'('' Total cross section was scaled by factor '',
+     &          F6.3)') TOTred
+            endif
             GOTO 100
          ENDIF
 C-----
@@ -4383,17 +4445,35 @@ C-----
          IF (name.EQ.'ATILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
-               DO i = 1, NDNUC
+             if(i3.ne.0) then
+              WRITE (6,
+     &        '('' Global L.d. a-parameter uncertainty '',
+     &        '' is equal to '',i2,''%'')') i3
+              sigma = val*i3*0.01
+	      atilss = val + (2*drand()-1.)*sigma
+C	      atilss = val + grand()*sigma
+              DO i = 1, NDNUC
+                  ATIlnor(i) = atilss
+              ENDDO	       
+              WRITE (6,
+     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
+     &       ) atilss     
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &           IPArCOV, atilss,INDexf,INDexb
+             else
+              DO i = 1, NDNUC
                   ATIlnor(i) = val
-               ENDDO
-               WRITE (6,
+              ENDDO
+              WRITE (6,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
-               WRITE (12,
-     &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
-     &       ) val
-               GOTO 100
+             endif
+	     
+             GOTO 100
+	     
             ENDIF
+	    
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
                WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
@@ -4420,7 +4500,7 @@ C              ATIlnor(nnuc) = val + grand()*sigma
               WRITE (6,
      &      '('' L.d. a-parameter in '',I3,A2,'' multiplied by '',F6.2)'
      &        ) i2, SYMb(nnuc), val
-             endif
+            endif
 
             GOTO 100
          ENDIF
@@ -4713,13 +4793,14 @@ C--------Tuning factors
               WRITE (6,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' uncertainty is equal to '',i2,'' %'')')
-     &        i1, A(1), SYMb(1), i2
+     &        i1, NINT(A(1)), SYMb(1), i2
                sigma = val*0.01*i2
 C              TUNEpe(i1) = val + grand()*sigma
                TUNEpe(i1) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
-     &  '' multiplied by '',F6.3)') i1, A(1), SYMb(1), TUNEpe(i1)
+     &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), 
+     & TUNEpe(i1)
               IPArCOV = IPArCOV +1
               WRITE(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &           IPArCOV, TUNEpe(i1), INDexf,INDexb

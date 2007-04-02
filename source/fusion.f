@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-01-30 14:20:42 $
-Ccc   * $Id: fusion.f,v 1.65 2007-01-30 14:20:42 Capote Exp $
+Ccc   * $Date: 2007-04-02 22:01:57 $
+Ccc   * $Id: fusion.f,v 1.66 2007-04-02 22:01:57 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -334,6 +334,17 @@ C-----------DWBA calculation. All collective levels considered
                WRITE (6,*) ' DWBA calculations for inelastic scattering'
                WRITE (6,*) '    to uncoupled coll. levels and continuum'
             ENDIF
+
+C           Setting the normalization factor for OMP (used in covariance calculation)
+C           FNvvomp(0,0) = FNvvomp(Npro,Ntrg)
+C           FNwvomp(0,0) = FNwvomp(Nejc,i)
+C           FNwsomp(0,0) = FNwsomp(Nejc,i)
+C           FNavomp(0,0) = FNavomp(Nejc,i)
+C           FNasomp(0,0) = FNasomp(Nejc,i)
+C           FNrvomp(0,0) = FNrvomp(Nejc,i)
+C           FNrwvomp(0,0) = FNrwvomp(Nejc,i)
+C           FNrsomp(0,0) = FNrsomp(Nejc,i)
+ 
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
             IF (DIRect.NE.3) THEN
                CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
@@ -661,16 +672,22 @@ C
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
+	ElasticCorr = 0.d0
+	IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
+     &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
+     &              + (1.d0 - FUSred)*CSFus   ! Here CSFus is not scaled yet 
+     &              + (1.d0 - FCCred)*(SINl + SINlcc)
+
       IF (EINl.LT.0.3D0 .AND. ZEJc(Npro).EQ.0) THEN
-         s0 = stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
+         s0 = FUSred * stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
          r2 = rp*rp
          p1 = (ak2*r2)/(1.0D+00 + ak2*r2)
-         s1a = stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*EINl))
+         s1a = FUSred * stl(2)/(2.0D+00*PI*p1*SQRT(1.0D+06*EINl))
          p2 = (ak2*r2)**2/(9.0D+00+3.0D+00*ak2*r2+(ak2*r2)**2)
-         s2a = stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EINl))
+         s2a = FUSred * stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EINl))
 C--------Corrected scattering radius
-         rp = SQRT(ELAcs/(4.0D+00*PI*10.D+00))
+         rp = SQRT((ELAcs + ElasticCorr)/(4.0D+00*PI*10.D+00))
          WRITE (6,*)
          IF(S0_obs.GT.0.)   THEN
            WRITE ( 6,99004) S0_obs,S0_unc
@@ -685,12 +702,15 @@ C--------Corrected scattering radius
      &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
          ENDIF
          WRITE ( 6,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3),
-     &         EINl*1.D3, TOTcs, rp
+     &         s0*1D4, FUSRED*stl(1), s1a*1D4, 
+     &                 FUSRED*stl(2), s2a*1D4, 
+     &                 FUSRED*stl(3),
+     &         EINl*1.D3, TOTcs*TOTred, rp
          WRITE (12,99005)
-     &         s0*1D4, stl(1), s1a*1D4, stl(2), s2a*1D4, stl(3),
-     &         EINl*1.D3, TOTcs, rp
-
+     &         s0*1D4, FUSRED*stl(1), s1a*1D4, 
+     &                 FUSRED*stl(2), s2a*1D4, 
+     &                 FUSRED*stl(3),
+     &         EINl*1.D3, TOTcs*TOTred, rp
 99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,' T0=',d12.6/
      &           6x,'                          S1 =',f6.3,' T1=',d12.6/
      &           6x,'                          S2 =',f6.3,' T2=',d12.6/
@@ -701,12 +721,13 @@ C--------Corrected scattering radius
          WRITE (12,*)
          selast = 0.d0
          DO l = 0, maxlw
-           IF(STL(l+1).LT.1.d-15) EXIT
+           IF(sel(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
+	   selast = selast *  10.d0*PI/ak2
          WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
-     &              selast, ELAcs
+     &              selast, ELAcs 
          WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs
@@ -718,9 +739,12 @@ C--------Corrected scattering radius
          WRITE (53,99006)
          DO l = 0, maxlw
            IF(STL(l+1).LT.1.d-15) EXIT
-           WRITE ( 6,99007) l, stl(l + 1), sel(l + 1)
-           WRITE (12,99007) l, stl(l + 1), sel(l + 1)
-           WRITE (53,99007) l, stl(l + 1), sel(l + 1)
+           WRITE ( 6,99007) l, stl(l + 1), 
+     &              10.d0*PI/ak2*sel(l + 1)
+           WRITE (12,99007) l, stl(l + 1),
+     &              10.d0*PI/ak2*sel(l + 1)
+           WRITE (53,99007) l, stl(l + 1),
+     &              10.d0*PI/ak2*sel(l + 1)
          ENDDO
          WRITE ( 6,99008)
          WRITE (12,99008)
@@ -729,9 +753,12 @@ C--------Corrected scattering radius
      &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
 99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
 99008    FORMAT (6x,' ****************************************')
-         WRITE (6,*)' SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
-         WRITE (6,*)' Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
-         WRITE (6,*)' Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
+         WRITE (6,*)
+         WRITE (6,*)
+     &   '      SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
+         WRITE (6,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
+         WRITE (6,*)
+     &   '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
          WRITE (6,*)
          WRITE (12,*)
       ENDIF
@@ -783,9 +810,10 @@ C-----------DIRECT=1 or DIRECT=2
       ENDIF
       IF (IOUt.EQ.5) THEN
          WRITE (6,*)
-         WRITE (6,*) ' CSFus(SUM_Tl)   CSFus+SINl+CC    ABScs(ECIS)'
-         WRITE (6,'(1x,3(D12.6,2x))')
-     &      SNGL(CSFus), SNGL(CSFus + SINl + SINlcc), SNGL(ABScs)
+         WRITE (6,*) 
+     &   '      CSFus(SUM_Tl)   CSFus+SINl+CC    ABScs(ECIS)'
+         WRITE (6,'(4x,3(2x,D12.6,2x))')
+     &   CSFus, CSFus + SINl + SINlcc, ABScs
          WRITE (6,*)
       ENDIF
 
