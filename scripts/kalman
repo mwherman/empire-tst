@@ -21,7 +21,7 @@ fi
 
 if [ "$AMT" = "0" ]
    then
-   AMT="1 2 4 16 102"
+   AMT="1 2 4 16 102 103 107"
 fi
 if [ "$EXPDAT" = "" ]
    then
@@ -167,10 +167,67 @@ EOF
 # tmp
        done
   fi
+
+for MT in $AMT
+  do
+    echo "Plotting MT= ${MT}"
+cp ../scripts/skel_ps.gnu tmp.gnu
+sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.ps'/" tmp.gnu
+label="Unknown reaction"
+if [ $MT = "1" ]
+   then
+   label="Total"
+fi
+if [ $MT = "2" ]
+   then
+   label="Elastic"
+fi
+if [ $MT = "4" ]
+   then
+   label="Inelastic"
+fi
+if [ $MT = "16" ]
+   then
+   label="(n,2n)"
+fi
+if [ $MT = "18" ]
+   then
+   label="Fission"
+fi
+if [ $MT = "17" ]
+   then
+   label="(n,3n)"
+fi
+if [ $MT = "17" ]
+   then
+   label="(n,3n)"
+fi
+if [ $MT = "102" ]
+   then
+   label="(n,g)"
+fi
+if [ $MT = "103" ]
+   then
+   label="(n,p)"
+fi
+if [ $MT = "107" ]
+   then
+   label="(n,a)"
+fi
+echo $label
+sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp.gnu
+sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp.gnu
+sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp.gnu
+cp tmp.gnu  $file-$MT-cov.gnu
+gnuplot tmp.gnu
+mv tmp.ps $file-$MT-cov.ps
+done
+
 rm SENSITIVITY.INP
 rm KALEND.INP
 rm KALMAN.INP
 rm ENDF.DAT
 rm fort.*
+rm tmp.gnu 2>/dev/null
 
 
