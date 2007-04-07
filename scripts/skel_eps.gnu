@@ -15,13 +15,14 @@ set ylabel 'Energy [MeV]'
 
 set log xy
 
+show margin
 set zrange [-1 : 1]
-set yrange [0.001 : 100]
-set xrange [0.001 : 100]
+set yrange [0.1 : 20]
+set xrange [0.1 : 20]
 set mztics  5
 set ztics  50
-set title filereaction offset 0,5
-set label reactionfile at 0.01,250
+set title filereaction
+set label reactionfile at 25,55
 set pm3d implicit at b
 set cbrange [-1:1]
 splot filedat u 1:2:3 not w pm3d

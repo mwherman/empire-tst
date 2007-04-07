@@ -168,66 +168,121 @@ EOF
        done
   fi
 
+nr=1
 for MT in $AMT
   do
     echo "Plotting MT= ${MT}"
-cp ../scripts/skel_ps.gnu tmp.gnu
-sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.ps'/" tmp.gnu
+cp ../scripts/skel_err_ps.gnu tmp_err_ps.gnu
+cp ../scripts/skel_ps.gnu tmp_ps.gnu
+sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.ps'/" tmp_ps.gnu
+cp ../scripts/skel_eps.gnu tmp_eps.gnu
+sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.eps'/" tmp_eps.gnu
 label="Unknown reaction"
 if [ $MT = "1" ]
    then
    label="Total"
+   rea[$MT]="Total"
 fi
 if [ $MT = "2" ]
    then
    label="Elastic"
+   rea[$MT]="Elastic"
 fi
 if [ $MT = "4" ]
    then
    label="Inelastic"
+   rea[$MT]="Inelastic"
 fi
 if [ $MT = "16" ]
    then
    label="(n,2n)"
+   rea[$MT]="(n,2n)"
 fi
 if [ $MT = "18" ]
    then
    label="Fission"
+   rea[$MT]="Fission"
 fi
 if [ $MT = "17" ]
    then
    label="(n,3n)"
+   rea[$MT]="(n,3n)"
 fi
 if [ $MT = "17" ]
    then
    label="(n,3n)"
+   rea[$MT]="(n,3n)"
 fi
 if [ $MT = "102" ]
    then
    label="(n,g)"
+   rea[$MT]="(n,{/Symbol g})"
 fi
 if [ $MT = "103" ]
    then
    label="(n,p)"
+   rea[$MT]="(n,p)"
 fi
 if [ $MT = "107" ]
    then
    label="(n,a)"
+   rea[$MT]="(n,{/Symbol a})"
 fi
 echo $label
-sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp.gnu
-sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp.gnu
-sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp.gnu
-cp tmp.gnu  $file-$MT-cov.gnu
-gnuplot tmp.gnu
+# Postscript picture(s)
+sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp_ps.gnu
+sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp_ps.gnu
+sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp_ps.gnu
+cp tmp_ps.gnu  $file-$MT-cov_ps.gnu
+gnuplot tmp_ps.gnu
 mv tmp.ps $file-$MT-cov.ps
+# Ecapsulated postscript picture(s) LaTeX style.
+sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp_eps.gnu
+sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp_eps.gnu
+sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp_eps.gnu
+cp tmp_eps.gnu  $file-$MT-cov_eps.gnu
+gnuplot tmp_eps.gnu
+ln -s ../scripts/driver.tex driver.tex
+latex driver.tex
+dvips -E -o $file-$MT-cov.eps driver.dvi
+rm driver.*
+# pdf picture(s)
+epstopdf $file-$MT-cov.eps
+reaction[$nr]=$MT
+let nr=nr+1
 done
+let nr=nr-1
+cp ../scripts/skel_err_ps.gnu tmp_err_ps.gnu
+cat >> gfile <<EOF
+plot \\
+EOF
+cat  gfile >> tmp_err_ps.gnu
+rm gfile
+i=1
+while [  $i -le $nr ]; do
+#   echo $i $nr
+if [ $i = $nr ]
+   then
+   cat >> gfile <<EOF
+'$file-err-${reaction[$i]}.kal' u 1:2 t '${rea[${reaction[$i]}]}' w l lw 1.6
+EOF
+cat  gfile >> tmp_err_ps.gnu
+rm gfile
+else
+   cat >> gfile <<EOF
+'$file-err-${reaction[$i]}.kal' u 1:2 t '${rea[${reaction[$i]}]}' w l lw 1.6,\\
+EOF
+cat  gfile >> tmp_err_ps.gnu
+rm gfile
+fi
+let i=i+1
+done
+mv tmp_err_ps.gnu $file-err.gnu
+gnuplot $file-err.gnu
 
 rm SENSITIVITY.INP
 rm KALEND.INP
 rm KALMAN.INP
 rm ENDF.DAT
 rm fort.*
-rm tmp.gnu 2>/dev/null
-
-
+rm tmp*.* 2>/dev/null

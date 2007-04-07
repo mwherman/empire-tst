@@ -2,12 +2,12 @@
 xxx.   xx.           ;TARGET  A , Z 
   1.    0.           ;PROJECTILE A, Z
 2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
-1                    ;NUMBER OF PROTONS  TO BE EMITTED
-1                    ;NUMBER OF ALPHAS   TO BE EMITTED
+0                    ;NUMBER OF PROTONS  TO BE EMITTED
+0                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       3.                                               
 LEVDEN     0.                                              
-NEX      100.                                                   
+NEX      080.                                                   
 MSD        1.                                                     
 COMPFF     1.
 MSC        1.                                                         
@@ -20,6 +20,8 @@ DIRECT     1.
 OMPOT  -1478.       1                               
 DIRPOT -1478.       1
 GSTRFN     1.
+RECOIL     0.
+KALMAN     1.
 GO                                                  
 0.002
 0.005
