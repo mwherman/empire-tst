@@ -1,5 +1,5 @@
 #! /bin/sh -
-#SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION)
+#SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION) AND TO MAKE CORRELATION AND UNCERTAINTY PLOTS
 file=$1
 AMT=$2
 MAT=$3
@@ -279,6 +279,7 @@ let i=i+1
 done
 mv tmp_err_ps.gnu $file-err.gnu
 gnuplot $file-err.gnu
+mv tmp_err.ps $file-err.ps
 
 rm SENSITIVITY.INP
 rm KALEND.INP
