@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-04-04 18:28:33 $
-Ccc   * $Id: input.f,v 1.221 2007-04-04 18:28:33 herman Exp $
+Ccc   * $Date: 2007-04-10 18:48:01 $
+Ccc   * $Id: input.f,v 1.222 2007-04-10 18:48:01 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -4853,13 +4853,6 @@ C              TUNefi(nnuc) = val + grand()*sigma
 
          IF (name.EQ.'TUNE  ') THEN
             izar = i1*1000 + i2
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (6,'('' TUNING IGNORED'')')
-               GOTO 100
-            ENDIF
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   TUNe(i3,nnuc) = val
@@ -4868,6 +4861,13 @@ C              TUNefi(nnuc) = val + grand()*sigma
      &            ' in all nuclei scaled by ', val
                WRITE (12,*) 'Strength function for ',i3,
      &            ' in all nuclei scaled by ', val
+               GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (6,'('' TUNING IGNORED'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
