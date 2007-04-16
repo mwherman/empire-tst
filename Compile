@@ -37,9 +37,7 @@ make -f pntdatl.mak
 chmod a+x pntzvdl
 if [ -d file ../kalman ]; then
    cd ../kalman
-   make kalman3
-   make kalend
-   make c4tokal
+   make all
 fi
 cd ../resonance
 make all
