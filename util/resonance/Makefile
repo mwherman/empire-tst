@@ -1,8 +1,8 @@
-#----GNU g77 FORTRAN compiler
-FC     =  g77
-#----flags for production compilation with g77
+#----GNU gfortran FORTRAN compiler
+FC     =  gfortran
+#----flags for production compilation with gfortran
 #FFLAGS = -O
-#----flags for debuging using g77 compiler
+#----flags for debuging using gfortran compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
 #----GNU g95 FORTRAN compiler
@@ -56,5 +56,5 @@ scanr:   $(OBJS)
 readx4:   $(OBJX)
 	$(FC) -o $@ $(OBJX)
 
-
-
+clean:
+	rm *.o
