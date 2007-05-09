@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: HF-comp.f,v 1.84 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-09 22:38:35 $
+Ccc   * $Id: HF-comp.f,v 1.85 2007-05-09 22:38:35 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -692,6 +692,74 @@ C-----------------NOTE: internal conversion taken into account
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
+               ENDDO
+            ENDIF
+         ENDIF
+  100 ENDDO
+99999 END
+
+      SUBROUTINE DECAYD_DIR(Nnuc, Nejc)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:ppu*
+Ccc   *                       D E C A Y D _ D I R                        *
+Ccc   *                                                                  *
+Ccc   *  Calculates gamma decay of discrete levels according to          *
+Ccc   *  the decay scheme contained in the IBR matrix. Special version   *
+Ccc   *  to process direct population of discrete levels by a neutron,   *
+Ccc   *  proton or alpha.                                                *
+Ccc   *  Must be called after decay of the first CN bin is done.         *
+Ccc   *  NOTE: gammas are NOT added to the spectra                       *
+Ccc   *                                                                  *
+Ccc   * input:Nnuc - nucleus  index (position) in the table              *
+Ccc   *       Nejc - ejectile index (position) in the table              *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION egd, gacs, popl
+      INTEGER i, icse, j, j1, l
+      INTEGER INT, NINT
+C
+C
+      DO i = 1, NLV(Nnuc) - 1
+         l = NLV(Nnuc) - i + 1
+         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).gt.0. ) THEN
+C-----------Well... let it go down to the ground state
+            gacs = POPlv(l,Nnuc)
+            POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
+            egd = ELV(l,Nnuc)
+            CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+         ELSE
+            popl = POPlv(l,Nnuc)
+            IF (popl.NE.0.0D0) THEN
+               DO j = 1, NDBR
+                  j1 = NINT(BR(l,j,1,Nnuc))
+                  IF (j1.EQ.0) GOTO 100
+                  IF (j1.GE.l) THEN
+                     GOTO 99999
+                  ENDIF
+                  gacs = popl*BR(l,j,2,Nnuc)
+                  POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
+                  gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
+                  egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
+                  icse = min(INT(2.0001 + egd/DE),ndecse)
+                  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
                ENDDO
             ENDIF
          ENDIF
