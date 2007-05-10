@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-09 22:38:35 $
-Ccc   * $Id: HF-comp.f,v 1.85 2007-05-09 22:38:35 herman Exp $
+Ccc   * $Date: 2007-05-10 04:30:05 $
+Ccc   * $Id: HF-comp.f,v 1.86 2007-05-10 04:30:05 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -637,7 +637,7 @@ C
 C-----------Well... let it go down to the ground state
             gacs = POPlv(l,Nnuc)
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
-            POPlv(l,Nnuc) = 0.0
+c           POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
             icse = min(INT(2.0001 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
@@ -707,9 +707,8 @@ Ccc   *                                                                  *
 Ccc   *  Calculates gamma decay of discrete levels according to          *
 Ccc   *  the decay scheme contained in the IBR matrix. Special version   *
 Ccc   *  to process direct population of discrete levels by a neutron,   *
-Ccc   *  proton or alpha.                                                *
-Ccc   *  Must be called after decay of the first CN bin is done.         *
-Ccc   *  NOTE: gammas are NOT added to the spectra                       *
+Ccc   *  proton or alpha without adding gamma-transitions to spectra.    *
+Ccc   *  Must be called after the decay of the first CN bin is done.     *
 Ccc   *                                                                  *
 Ccc   * input:Nnuc - nucleus  index (position) in the table              *
 Ccc   *       Nejc - ejectile index (position) in the table              *
@@ -737,16 +736,17 @@ C
       INTEGER INT, NINT
 C
 C
+      WRITE(6,*)'Ejectile',nejc 
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).gt.0. ) THEN
+         WRITE(6,*)'Direct level ',l,' decay pop=', CSDirlev(l,nejc)
+         IF (BR(l,1,2,Nnuc).EQ.0. .and. CSDirlev(l,nejc).gt.0. ) THEN
 C-----------Well... let it go down to the ground state
-            gacs = POPlv(l,Nnuc)
-            POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
-            egd = ELV(l,Nnuc)
+            gacs = CSDirlev(l,nejc)
+            CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
          ELSE
-            popl = POPlv(l,Nnuc)
+            popl = CSDirlev(l,nejc)
             IF (popl.NE.0.0D0) THEN
                DO j = 1, NDBR
                   j1 = NINT(BR(l,j,1,Nnuc))
@@ -755,10 +755,9 @@ C-----------Well... let it go down to the ground state
                      GOTO 99999
                   ENDIF
                   gacs = popl*BR(l,j,2,Nnuc)
-                  POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
+                  CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
+                  WRITE(6,*)'   populating level',j1,' with ',gacs 
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
-                  egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-                  icse = min(INT(2.0001 + egd/DE),ndecse)
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
                ENDDO
             ENDIF
@@ -799,7 +798,7 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-C ****************************************************************************
+C *                                                                          *
 C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
 C *          calculations of gamma-transitions both between states in        *
 C *          continuum and from continuum states to discrete levels;         *
@@ -807,9 +806,11 @@ C *          variable 'MAXmult' is transmitted in 'global.h';                *
 C *          a value of 'MAXmult' is set in modul 'input.f';                 *
 C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
 C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
-C ****************************************************************************
+C *                                                                          *
+C *                                                                          *
 C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C ****************************************************************************
+C *                                                                          *
+C *                                                                          *
 C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
 C * are calculated with the use of the relationships between                 *
 C * single-particle radiative strength functions in the Weisskopf form.      *
@@ -1028,6 +1029,7 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 C ****************************************************************************
+C *                                                                          *
 C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
 C *          calculations of gamma-transitions both between states in        *
 C *          continuum and from continuum states to discrete levels;         *
@@ -1035,9 +1037,11 @@ C *          variable 'MAXmult' is transmitted in 'global.h';                *
 C *          a value of 'MAXmult' is set in modul 'input.f';                 *
 C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
 C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
-C ****************************************************************************
+C *                                                                          *
+C *                                                                          *
 C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C ****************************************************************************
+C *                                                                          *
+C *                                                                          *
 C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
 C * are calculated with the use of the relationships between                 *
 C * single-particle radiative strength functions in the Weisskopf form.      *
@@ -1306,15 +1310,7 @@ C-----------
          ENDIF
       ENDIF
   100 IF (Sumfis.EQ.0.0D0) RETURN
-
-
-
-
-
       Sumfis = Sumfis*TUNEfi(Nnuc) 
-
-
-
       IF (BETav.NE.0.0D0) THEN
 C--------reduction of the fission width due to possible return from the
 C--------saddle point (nuclear viscosity 1-st effect)

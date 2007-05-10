@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-04-02 22:01:58 $
-Ccc   * $Id: main.f,v 1.160 2007-04-02 22:01:58 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-10 04:30:05 $
+Ccc   * $Id: main.f,v 1.161 2007-05-10 04:30:05 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -393,8 +393,8 @@ C-----Print elastic and direct cross sections from ECIS
         ENDIF
       ENDIF
 
-	ElasticCorr = 0.d0
-	IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
+      ElasticCorr = 0.d0
+      IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
      &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
      &              + (1.d0 - FUSred)*CSFus/FUSred  
      &              + (1.d0 - FCCred)*(SINl + SINlcc)
@@ -403,7 +403,7 @@ C-----Print elastic and direct cross sections from ECIS
       IF (ZEJc(0).EQ.0 .AND. AEJc(0).GT.0) THEN
          WRITE (6,99005) TOTcs,TOTred*TOTcs, 
      &                   CSFus,CSFus/FUSred, 
-     &	               ELAcs, ElasticCorr + ELAcs
+     &                   ELAcs, ElasticCorr + ELAcs
 99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
      &                '  ( Scaled  ',e14.7,' mb )',/,2x,
      &           'Absorption cross section    :',e14.7,' mb',
@@ -978,6 +978,12 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
                   ENDIF
                ENDDO
+C--------------Decay direct population of discrete levels by a neutron,
+C--------------proton or alpha without storing emitted gammas in the spectra.
+               IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
+     &              mt849) .AND. il.NE.1) THEN
+                  CALL DECAYD_DIR(nnuc, nejc)
+               ENDIF
 C--------------Write elastic to tape 12
  1460          IF (nnuc.EQ.mt2) THEN
                   WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -997,14 +1003,14 @@ C--------------Write elastic to tape 12
                   ENDIF
 99045             FORMAT (10X,8G15.5)
                   if(ELAcs.GT.0.D0) then
-				    WRITE (12,99050) 
-     &              ((1.d0 + ElasticCorr/ELAcs)*elada(iang) + ELCncs,
+                     WRITE (12,99050) 
+     &               ((1.d0 + ElasticCorr/ELAcs)*elada(iang) + ELCncs,
      &               iang = 1,NANgela)
-	              else 
-				    WRITE (12,99050) 
-     &              ( elada(iang) + ELCncs,
+                  else 
+                     WRITE (12,99050) 
+     &               (elada(iang) + ELCncs,
      &               iang = 1,NANgela)
-	              endif
+                  endif
 99050             FORMAT (9X,8E15.5)
                   WRITE (12,*) ' '
                   WRITE (12,*) ' '
@@ -1013,15 +1019,15 @@ C--------------Write elastic to tape 12
                   WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                   WRITE (12,*) ' '
                   if(ELAcs.GT.0.D0) THEN
-				    WRITE (12,'(9X,8D15.8)') 
+                     WRITE (12,'(9X,8D15.8)') 
      &               ((1.d0 + ElasticCorr/ELAcs)*elleg(1) + ELCncs),
      &               ((1.d0 + ElasticCorr/ELAcs)*elleg(iang),
      &               iang = 2,min(NDAng,neles))
-	              else
-				    WRITE (12,'(9X,8D15.8)') 
+                  else
+                     WRITE (12,'(9X,8D15.8)') 
      &               (elleg(1) + ELCncs),
      &               (elleg(iang),iang = 2,min(NDAng,neles))
-				  endif
+                  endif
                   WRITE (12,*) ' '
                   IF (elcncs.EQ.0) WRITE (6,*)
      &                 'WARNING: CN elastic is 0'
@@ -1468,23 +1474,26 @@ C--------------(merely for checking purpose)
                   nejc = 1
                   WRITE (6,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') xtotsp
-                  DO ilev = 1, NLV(nnuc)
-                     xtotsp = xtotsp + CSDirlev(ilev,nejc)
-                  ENDDO
+                  xtotsp = CSDirlev(1,nejc)
+c                 DO ilev = 1, NLV(nnuc)
+c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
+c                 ENDDO
                ELSEIF (nnuc.EQ.mt649) THEN
                   nejc = 2
                   WRITE (6,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') ptotsp
-                  DO ilev = 1, NLV(nnuc)
-                     ptotsp = ptotsp + CSDirlev(ilev,nejc)
-                  ENDDO
+                  ptotsp = CSDirlev(1,nejc)
+c                 DO ilev = 1, NLV(nnuc)
+c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
+c                 ENDDO
                ELSEIF (nnuc.EQ.mt849) THEN
                   nejc = 3
                   WRITE (6,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') atotsp
-                  DO ilev = 1, NLV(nnuc)
-                     atotsp = atotsp + CSDirlev(ilev,nejc)
-                  ENDDO
+                  atotsp = CSDirlev(1,nejc)
+c                 DO ilev = 1, NLV(nnuc)
+c                    atotsp = atotsp + CSDirlev(ilev,nejc)
+c                 ENDDO
                ENDIF
                WRITE (6,*) ' '
                WRITE (6,*)
@@ -1690,7 +1699,7 @@ C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
       WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
-     &	   ELAcs + ElasticCorr + 4.*PI*ELCncs,
+     &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
      &     (CSPrd(nnuc),nnuc=3,NNUcd)
       WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl,
@@ -2591,7 +2600,7 @@ C    &                           - 4.*PI*ELCncs
      &           23(1H*))')
       ENDIF
       IF(abs(CSFus + (SINl+SINlcc)*FCCred - checkXS)
-     &	.GT.0.01*(CSFus + (SINl+SINlcc)*FCCred)) THEN      
+     &  .GT.0.01*(CSFus + (SINl+SINlcc)*FCCred)) THEN      
         WRITE (6,*)
         WRITE (6,'('' WARNING: Sum of production XS(incl.fission)'')')
         WRITE (6,'('' WARNING: is not equal reaction cross section'')')
