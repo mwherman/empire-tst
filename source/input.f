@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-04-10 18:48:01 $
-Ccc   * $Id: input.f,v 1.222 2007-04-10 18:48:01 herman Exp $
+Ccc   * $Date: 2007-05-10 19:44:30 $
+Ccc   * $Id: input.f,v 1.223 2007-05-10 19:44:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -256,7 +256,8 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
+         IF(IOPSYS.EQ.0) IX4ret = 1 
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -5662,15 +5663,17 @@ C
       ENDDO
       nexp = 0
       atilsum = 0.0
-      WRITE(6,'(1X)')
-      WRITE(6,'(1X)')
-      WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a''
-     &         ''-tilde'')')
-      WRITE(6,'(4X,54(''-''))')
-      WRITE(6,'(1X)')
-      WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) THEN
+         WRITE(6,'(1X)')
+         WRITE(6,'(1X)')
+         WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a
+     &        -tilde'')')
+         WRITE(6,'(4X,54(''-''))')
+         WRITE(6,'(1X)')
+         WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
      &               ''  ATILNO     final'')')
-      WRITE(6,'(1X)')
+         WRITE(6,'(1X)')            
+      ENDIF
   100 READ (24,'(I7,I4,2F7.2,E10.4,E10.3)',END = 200) izar, nlevc,
      &      arogc, aroc, qn, dob
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
@@ -5753,14 +5756,14 @@ C--------------Print resulting level density parameters
                   WRITE (6,*) ' '
                   WRITE (6,*) 'Nucleus A=', INT(A(nnuc)), ' Z=',
      &                        INT(Z(nnuc))
-                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.3.0D0) WRITE (6,*)
+                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) WRITE (6,*)
      &                 'SHC=', SHC(nnuc), ' U=', uexc, ' DELTA=', del,
      &                ' asys=', asys, ' aexp=', aroc,' Dobs=',dob
                   IF (ADIv.EQ.2.0D0) WRITE (6,*) 'SHC=', SHC(nnuc),
      &                ' U=', uexc, ' DELTA=', del, ' asys=', asys,
      &                ' aexp=', arogc
                ELSE
-                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.3.0D0)
+                  IF (ADIv.EQ.0.0D0)
      &            WRITE(6,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
@@ -5778,18 +5781,20 @@ C--------------Calculate sum for the average normalization factor
       GOTO 100
   200 IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. nexp.GT.2) THEN
          atilave = ABS(atilsum/FLOAT(nexp))
-         WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
-     &               atilave
       ELSE
          WRITE (6,*)
      &'Level density systematics NOT normalized to Dobs at neutron bindi
      &ng energy'
          atilave = 1.0
       ENDIF
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+     &    WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
+     &               atilave
       DO nnuc = 1, NNUct
          IF (ATIlnor(nnuc).EQ.0.0D0) THEN
             ATIlnor(nnuc) = atilave
-            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+     &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
@@ -5798,7 +5803,8 @@ C           The following line must also be commented to reproduce Th-232 evalua
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
-            WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+     &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave
          ENDIF
