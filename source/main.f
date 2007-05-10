@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-10 04:30:05 $
-Ccc   * $Id: main.f,v 1.161 2007-05-10 04:30:05 herman Exp $
+Ccc   * $Date: 2007-05-10 19:45:35 $
+Ccc   * $Id: main.f,v 1.162 2007-05-10 19:45:35 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1362,7 +1362,7 @@ C--------Printout of results for the decay of NNUC nucleus
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (6,
      &'(10X,''NOTE: due to ENDF option direct particle contribution was
-     &shifted to the g.s.'')')
+     & shifted to the g.s.'')')
          IF (IOUt.GT.0) WRITE (6,'(1X,/,10X,40(1H-),/)')
          IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
             WRITE (12,
