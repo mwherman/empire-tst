@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:43 $
-Ccc   * $Id: auxiliary.f,v 1.30 2006-08-09 12:37:43 Capote Exp $
+Ccc   * $Date: 2007-05-11 15:39:51 $
+Ccc   * $Id: auxiliary.f,v 1.31 2007-05-11 15:39:51 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -73,6 +73,9 @@ C
             AUSpec(ie,nejc) = 0.0
          ENDDO
       ENDDO
+      DO j = 1, NDLW
+         ISIsom(j,0) = 0
+      ENDDO
       DO nnuc = 1, NDNUC
          POPmax(nnuc) = 0.0
          CSPrd(nnuc) = 0.0
@@ -82,6 +85,7 @@ C
          QPRod(nnuc) = -1000.0
          FISden(nnuc) = 1.0
          DO j = 1, NDLW
+            ISIsom(j,nnuc) = 0
             FISb(j,nnuc) = 0.0
          ENDDO
          DO nejc = 1, NDEJC

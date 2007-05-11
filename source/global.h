@@ -30,7 +30,7 @@
      &                 FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
-     &                 FNwsomp(0:ndejc,0:ndnuc),
+     &                 FNwsomp(0:ndejc,0:ndnuc), TISomer,
      &                 FNasomp(0:ndejc,0:ndnuc),
      &                 FNrvomp(0:ndejc,0:ndnuc),
      &                 FNrwvomp(0:ndejc,0:ndnuc),
@@ -52,7 +52,7 @@
      &        NRBarc, NRBinfis(2), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
-     &        KALman, FISspe
+     &        KALman, FISspe, ISIsom(ndlv,0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv
@@ -138,7 +138,7 @@
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
-     &                 DEFnor, FCCred,
+     &                 DEFnor, FCCred, TISomer,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
@@ -157,7 +157,7 @@
      &                 CSPfis, RECoil
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
-     &                  LHMs, NHMs, NEXreq, FISspe,
+     &                  LHMs, NHMs, NEXreq, FISspe,	ISIsom,
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX, IX4ret,
      &                  JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, LEVtarg,
      &                  KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, NEXr,

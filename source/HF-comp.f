@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-10 04:30:05 $
-Ccc   * $Id: HF-comp.f,v 1.86 2007-05-10 04:30:05 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-11 15:39:52 $
+Ccc   * $Id: HF-comp.f,v 1.87 2007-05-11 15:39:52 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -731,9 +731,9 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION egd, gacs, popl
-      INTEGER i, icse, j, j1, l
-      INTEGER INT, NINT
+      DOUBLE PRECISION gacs, popl
+      INTEGER i, j, j1, l
+      INTEGER NINT
 C
 C
       WRITE(6,*)'Ejectile',nejc 

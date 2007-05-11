@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-04-02 22:01:59 $
-Ccc   * $Id: pcross.f,v 1.48 2007-04-02 22:01:59 Capote Exp $
+Ccc   * $Date: 2007-05-11 15:39:52 $
+Ccc   * $Id: pcross.f,v 1.49 2007-05-11 15:39:52 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -129,10 +129,11 @@ C
 C     Nmax = Aproj + NHEq -1 (is equal to NHEq for nucleon induced reactions)
 C
 C     Chinese group uses CHMax = 0.88, but it gives to hard PE spectrum in Th232
-C
-      IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
+C     so it was reduced by IAEA to 0.2.
+C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
+Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
+      IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
       NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
-
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
          iemin(nejc) = 2
@@ -148,8 +149,22 @@ C-----ZERO ARRAY INITIALIZATION
          ENDDO
       ENDDO
       WRITE (6,99020)
+C
+Cig---Direct reaction spectra for d,p and d,t only
+C
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
+     &                   .and. NDEJC.eq.4) THEN
+        write(6,99002)
+99002   FORMAT (/5X,
+     &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
+     &//)
+        call DTRANS(EXCn,DE,spec,cross)
+99003   FORMAT (7x,5F8.2)
+        write(6,99003) Ein,sigr,cross(2),cross(4)
+      ENDIF
+C
       WRITE (6,99005)
-99005 FORMAT (5X,' Preequilibrium decay (PCROSS)',/)
+99005 FORMAT (//5X,' Preequilibrium decay (PCROSS)',/)
       WRITE (6,99010) MFPp
 99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
 C
@@ -176,7 +191,7 @@ C--------Maximum and minimum energy bin
 C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
          nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 2.0001),1)
          DO ienerg = 2, nexrt
-C        DO ienerg = 2, NEX(nnur)    
+C        DO ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
 C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
@@ -186,7 +201,7 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
             ELSE
                sg = SIGabs(ienerg,nejc,nnur)
             ENDIF
-            IF ( (sg.LT.1.D-15) .and. nejc.gt.1 .and. 
+            IF ( (sg.LT.1.D-15) .and. nejc.gt.1 .and.
      &         ienerg.LE.iemax(nejc) ) iemin(nejc) = ienerg
          ENDDO
       ENDDO
@@ -344,11 +359,13 @@ C
                wb = we(nejc,h1,ienerg)
                IF (wb.GT.0.) emis = emis + wb*em(h1)
             ENDDO
-            spec(nejc,ienerg) = Sigr*emis
+            spec(nejc,ienerg) = spec(nejc,ienerg) + Sigr*emis
+C           spec(nejc,ienerg) = Sigr*emis
             hlp1 = hlp1 + Sigr*emis*DE
          ENDDO
          totemis = totemis + hlp1
-         cross(nejc) = hlp1
+         cross(nejc) = hlp1 + cross(nejc)
+cig      Some problems can arise later with a large direct cross section !
       ENDDO
 
       IF (IOUt.GE.1) THEN
@@ -391,6 +408,12 @@ C         WRITE(6, *)'==========================='
       WRITE (6,99015) totemis, fr
 99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
      &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
+     &                   .and. NDEJC.eq.4) THEN
+            WRITE (6,99016) totemis, fr
+99016 FORMAT (1x,'Kalbach parameterization for pick-up and stripping',
+     &           ' is considered'/)
+      ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
 C     Note, that PCROSS only calculates emission into the continuum
@@ -427,7 +450,7 @@ C     Note, that PCROSS only calculates emission into the continuum
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
-            ENDDO    
+            ENDDO
 C
 C           Kalbach systematic for PCROSS DDX calculations
 C           fanisot is assumed 1, i.e. pure PE emission
@@ -442,6 +465,8 @@ C           fmsd set to 0.d0 means isotropic distribution
          ENDDO
        ENDDO
 
+cig ***  totemis includes the preequilibrium contribution only !  ******
+      totemis=sigr*fr
       WRITE (6,99020)
 99020 FORMAT (/' ',57('-')/)
       END
