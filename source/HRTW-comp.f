@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-04-01 23:50:59 $
-Ccc   * $Id: HRTW-comp.f,v 1.39 2007-04-01 23:50:59 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-13 20:49:00 $
+Ccc   * $Id: HRTW-comp.f,v 1.40 2007-05-13 20:49:00 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -46,16 +46,19 @@ C-----threshold for considering channel as a 'strong' one
 C-----set CN nucleus
       nnuc = 1
 C-----reset variables
-      sgamc = 0.0
-      csemist = 0.0
-      CSFis = 0.0
-      sumfis = 0.0
+      sgamc = 0.d0
+      sumGg = 0.d0
+	d0c   = 0.d0 
+	d000  = 0.d0 
+      csemist = 0.d0
+      CSFis = 0.d0
+      sumfis = 0.d0
 C-----assure that full gamma cascade in the first CN is
 C-----accounted for when width fluctuation (HRTW) is selected
       GCAsc = 1.0
       ke = NEX(nnuc)
 
-      sumGg = 0.d0
+
       WRITE(6,*)
       WRITE(6,*)
 C-----
@@ -102,6 +105,7 @@ C-----------do loop over ejectiles       ***done***
 C-----------gamma emision
             sumg = 0.0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
+		  d0c = d0c + RO(ke,jcn,nnuc)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
@@ -234,8 +238,8 @@ C
                 WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
-
                 sumGg = sumGg + sumg
+	          d000  = d000 + d0c
               ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
@@ -252,6 +256,8 @@ C
      &          'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
+            if(d000.gt.0.d0) d000 = 2.d0 / d000
+            WRITE(6,'(1x,''Calculated D0 = '',F7.3)')	d000*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               TUNe(0, Nnuc) = ggexper/sumGg
               WRITE(6 ,
