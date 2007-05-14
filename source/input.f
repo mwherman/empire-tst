@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-10 19:44:30 $
-Ccc   * $Id: input.f,v 1.223 2007-05-10 19:44:30 herman Exp $
+Ccc   * $Date: 2007-05-14 10:41:55 $
+Ccc   * $Id: input.f,v 1.224 2007-05-14 10:41:55 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -241,6 +241,7 @@ C
          DEFsta = 1.d0
          DEFnuc = 0.d0         
          RECoil = 1.d0               
+         TISomer = 1.d33   ! No isomer is considered by default
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -250,13 +251,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
          IF(IOPSYS.EQ.0) IX4ret = 1 
 C--------CCFUF parameters
          DV = 10.
@@ -1864,6 +1865,7 @@ C       We could put here whatever systematics for D0 or Gg we want
           ELV(ilv,Nnuc) = ELV(ilv,itmp)
           XJLv(ilv,Nnuc) = XJLv(ilv,itmp)
           LVP(ilv,Nnuc) = LVP(ilv,itmp)
+          ISIsom(ilv,Nnuc) = ISIsom(ilv,itmp)
           DO nbr = 1, NDBR
             BR(ilv,nbr,1,Nnuc) = BR(ilv,nbr,1,itmp)
             BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,itmp)
@@ -1878,6 +1880,7 @@ C-------set ground state in case nucleus not in file
         LVP(1,Nnuc) = 1
         XJLv(1,Nnuc) = 0.0
         IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
+        ISIsom(1,Nnuc) = 0
 C-------set ground state *** done ***
         IF(.NOT.FILevel) THEN
 C---------constructing input and filenames
@@ -1944,6 +1947,14 @@ C------------levels for nucleus NNUC copied to file *.lev
      &                   ) NLV(Nnuc)
                   GOTO 200
                ENDIF
+               IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
+                  WRITE (6,'('' WARNING:'')')
+                  WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+     &                      chelem, izr
+                  WRITE (6,
+     &'('' WARNING: excited state No.'',I3,                          ''
+     &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
+               ENDIF
                IF (ilv.NE.1) THEN
                   IF (ELV(ilv,Nnuc).EQ.0.) THEN
                      WRITE (6,'('' WARNING:'')')
@@ -1953,14 +1964,9 @@ C------------levels for nucleus NNUC copied to file *.lev
      &'('' WARNING: excited state '',I3,                             ''
      &has got zero excitation energy'')') ilv
                   ENDIF
-                  IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
-                     WRITE (6,'('' WARNING:'')')
-                     WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
-     &                      chelem, izr
-                     WRITE (6,
-     &'('' WARNING: excited state No.'',I3,                          ''
-     &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
-                  ENDIF
+
+                  IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1
+
                   IF (ndbrlin.GT.NDBR) THEN
                      WRITE (6,'('' WARNING:'')')
                      WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
@@ -2358,7 +2364,6 @@ C-----constructing input and filenames
          ENDDO
          GOTO 400
       ELSE
-C--------create file with levels xxx.lev
          IF (.NOT.FILevel) THEN
             BACKSPACE (13)
             READ (13,'(A110)') ch_iuf
@@ -2373,7 +2378,6 @@ C              WRITE (14,'(A110)') ch_iuf
                BACKSPACE (13)
             ENDDO
          ENDIF
-C--------levels for nucleus NNUC copied to file xxx.lev
          DO ilv = 1, nlvr
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
      &            xjlvr, lvpr, t12, ndbrlin
@@ -3112,6 +3116,25 @@ C-----
             WRITE (12,
      &          '('' Diffusness of the shell correction damping'',F6.3)'
      &          ) SHRd
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'ISOMER') THEN
+	      IF(val.le.1.d0) THEN
+              WRITE (6,
+     &        '('' Minimum half life of the considered isomers < 1s !''
+     &         ,F6.3)') val
+              WRITE (6,'('' Value rest to 1 s'')') 
+              TISomer = 1.d0
+		    GOTO 100
+	      ENDIF
+            TISomer = val
+            WRITE (6,
+     &       '('' Minimum half life of the considered isomers : '',
+     &         F6.3,2H S)') val
+            WRITE (12,
+     &       '('' Minimum half life of the considered isomers : '',
+     &         F6.3,2H S)') val
             GOTO 100
          ENDIF
 C-----
