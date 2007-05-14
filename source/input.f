@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-14 10:41:55 $
-Ccc   * $Id: input.f,v 1.224 2007-05-14 10:41:55 Capote Exp $
+Ccc   * $Date: 2007-05-14 22:32:02 $
+Ccc   * $Id: input.f,v 1.225 2007-05-14 22:32:02 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -241,7 +241,7 @@ C
          DEFsta = 1.d0
          DEFnuc = 0.d0         
          RECoil = 1.d0               
-         TISomer = 1.d33   ! No isomer is considered by default
+         TISomer = 1.d0    ! 1 sec. default threshold for being isomer
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -251,14 +251,15 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
-         IF(IOPSYS.EQ.0) IX4ret = 1 
+C Roberto, don't touch these two below, please :) 
+         IX4ret = 1 
+         IF(IOPSYS.EQ.1) IX4ret = 0 
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -3120,14 +3121,14 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ISOMER') THEN
-	      IF(val.le.1.d0) THEN
+         IF(val.le.1.d0) THEN
               WRITE (6,
      &        '('' Minimum half life of the considered isomers < 1s !''
      &         ,F6.3)') val
-              WRITE (6,'('' Value rest to 1 s'')') 
+              WRITE (6,'('' Value reset to 1 s'')') 
               TISomer = 1.d0
-		    GOTO 100
-	      ENDIF
+         GOTO 100
+         ENDIF
             TISomer = val
             WRITE (6,
      &       '('' Minimum half life of the considered isomers : '',
@@ -3147,18 +3148,18 @@ C-----
 C                FCCred = val + grand()*sigma
                  FCCred = val + (2*drand()-1.)*sigma
                 WRITE (6, 
-     &		'('' Direct cross section was scaled by factor ''
+     &     '('' Direct cross section was scaled by factor ''
      &          ,f6.3)') FCCred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FCCred, INDexf,INDexb
             else
-                FCCred = val	    
+                FCCred = val    
                 WRITE (6,
-     &		'('' Direct cross section was scaled by factor '',
+     &      '('' Direct cross section was scaled by factor '',
      &		F6.3)') FCCred
                 WRITE (12,
-     &		'('' Direct cross section was scaled by factor '',
+     &      '('' Direct cross section was scaled by factor '',
      &           F6.3)') FCCred
             endif
             GOTO 100
@@ -3173,18 +3174,18 @@ C-----
 C                FUSred = val + grand()*sigma
                  FUSred = val + (2*drand()-1.)*sigma
                 WRITE (6, 
-     &		'('' Fusion cross section was scaled by factor ''
+     &      '('' Fusion cross section was scaled by factor ''
      &          ,f6.3)') FUSred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FUSred, INDexf,INDexb
             else
-                FUSred = val	    
+                FUSred = val   
                 WRITE (6,
-     &		'('' Fusion cross section was scaled by factor '',
+     &      '('' Fusion cross section was scaled by factor '',
      &		F6.3)') FUSred
                 WRITE (12,
-     &		'('' Fusion cross section was scaled by factor '',
+     &      '('' Fusion cross section was scaled by factor '',
      &           F6.3)') FUSred
             endif
             GOTO 100
@@ -3205,12 +3206,12 @@ C                TOTred = val + grand()*sigma
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, TOTred, INDexf,INDexb
             else
-                TOTred = val	    
+                TOTred = val    
                 WRITE (6,
-     &		'('' Total cross section was scaled by factor '',
+     &      '('' Total cross section was scaled by factor '',
      &          F6.3)') TOTred
                 WRITE (12,
-     &		'('' Total cross section was scaled by factor '',
+     &      '('' Total cross section was scaled by factor '',
      &          F6.3)') TOTred
             endif
             GOTO 100
@@ -4474,11 +4475,11 @@ C-----
      &        '('' Global L.d. a-parameter uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
               sigma = val*i3*0.01
-	      atilss = val + (2*drand()-1.)*sigma
+         atilss = val + (2*drand()-1.)*sigma
 C	      atilss = val + grand()*sigma
               DO i = 1, NDNUC
                   ATIlnor(i) = atilss
-              ENDDO	       
+              ENDDO      
               WRITE (6,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) atilss     
@@ -4493,11 +4494,8 @@ C	      atilss = val + grand()*sigma
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) val
              endif
-	     
              GOTO 100
-	     
             ENDIF
-	    
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
                WRITE (6,'('' NUCLEUS A,Z ='',I3,'','',I3,

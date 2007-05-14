@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-13 20:49:00 $
-Ccc   * $Id: HRTW-comp.f,v 1.40 2007-05-13 20:49:00 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-14 22:32:02 $
+Ccc   * $Id: HRTW-comp.f,v 1.41 2007-05-14 22:32:02 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -48,8 +48,8 @@ C-----set CN nucleus
 C-----reset variables
       sgamc = 0.d0
       sumGg = 0.d0
-	d0c   = 0.d0 
-	d000  = 0.d0 
+      d0c   = 0.d0 
+      d000  = 0.d0 
       csemist = 0.d0
       CSFis = 0.d0
       sumfis = 0.d0
@@ -105,7 +105,7 @@ C-----------do loop over ejectiles       ***done***
 C-----------gamma emision
             sumg = 0.0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
-		  d0c = d0c + RO(ke,jcn,nnuc)
+            d0c = d0c + RO(ke,jcn,nnuc)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
@@ -239,7 +239,7 @@ C
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
                 sumGg = sumGg + sumg
-	          d000  = d000 + d0c
+                d000  = d000 + d0c
               ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
@@ -257,7 +257,7 @@ C
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
             if(d000.gt.0.d0) d000 = 2.d0 / d000
-            WRITE(6,'(1x,''Calculated D0 = '',F7.3)')	d000*1000
+            WRITE(6,'(1x,''Calculated D0 = '',F7.3)') d000*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               TUNe(0, Nnuc) = ggexper/sumGg
               WRITE(6 ,
