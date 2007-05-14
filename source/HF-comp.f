@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-11 15:39:52 $
-Ccc   * $Id: HF-comp.f,v 1.87 2007-05-11 15:39:52 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-14 22:32:39 $
+Ccc   * $Id: HF-comp.f,v 1.88 2007-05-14 22:32:39 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -623,12 +623,22 @@ C
       INTEGER INT, NINT
 C
 C
+      nejc = -1
+      IF (nnuc.EQ.mt91) THEN
+        nejc = 1
+      ELSEIF (nnuc.EQ.mt649) THEN
+         nejc = 2
+      ELSEIF (nnuc.EQ.mt849) THEN
+         nejc = 3
+      ENDIF
       IF (IOUt.GT.2) WRITE (6,99005)
 99005 FORMAT (1X,////,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
      &        1X,27('*'),//)
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).gt.0. ) THEN
+         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND. 
+     &      ISIsom(il,Nnuc).EQ.0) THEN
+C-----------Normal level without branching ratios
             IF (IOUt.GT.2) WRITE (6,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99010       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
@@ -637,7 +647,7 @@ C
 C-----------Well... let it go down to the ground state
             gacs = POPlv(l,Nnuc)
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
-c           POPlv(l,Nnuc) = 0.0
+            POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
             icse = min(INT(2.0001 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
@@ -649,7 +659,28 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
             ELSEIF(ENDf(Nnuc).EQ.2) THEN
                CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
             ENDIF
+         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND. 
+     &           nejc.GT.0) THEN
+C-----------Isomer state in the residue after n,p, or alpha emission
+C-----------No gamma-decay of the isomeric state imposed
+C-----------Add gamma cascade population to the direct population 
+            POPlv(l,Nnuc) = POPlv(l,Nnuc)+CSDirlev(l,nejc)
+            IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
+     &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
+99012       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
+     &              ' and spin ',F6.1,' with final population ',G13.5,
+     &              ' mb is an isomer')
+C-----------We add it to the ground state to have correct total cross section
+            POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
+         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1) THEN
+C-----------Isomer state in any other nucleus                        
+C-----------No gamma-decay of the isomeric state imposed
+            IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
+     &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
+C-----------We add it to the ground state to have correct total cross section
+            POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
          ELSE
+C-----------Normal level with branching ratios
             popl = POPlv(l,Nnuc)
             IF (popl.NE.0.0D0) THEN
                IF (IOUt.GT.2) WRITE (6,99015) ELV(l,Nnuc), LVP(l,Nnuc)

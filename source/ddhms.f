@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2007-05-14 22:32:38 $
+Ccc   * $Id: ddhms.f,v 1.28 2007-05-14 22:32:38 herman Exp $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Readnevr,Ihistlabr,Irecprintr,
@@ -9,8 +9,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.27 $
-C $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $
+C CVS Version Management $Revision: 1.28 $
+C $Id: ddhms.f,v 1.28 2007-05-14 22:32:38 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2192,9 +2192,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.27 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.28 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.27 2006-08-09 12:37:42 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.28 2007-05-14 22:32:38 herman Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
@@ -4583,7 +4583,7 @@ C
      &                 xmre, xnor, zero
       REAL FLOAT
       INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre,
-     &        mrec, mt649, mt91, na, ndiscmax, ne, nejc, nempmax(2),
+     &        mrec,  na, ndiscmax, ne, nejc, nempmax(2),
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
       INTEGER INT
 C

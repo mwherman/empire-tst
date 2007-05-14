@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-14 10:41:56 $
-Ccc   * $Id: main.f,v 1.164 2007-05-14 10:41:56 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-14 22:32:39 $
+Ccc   * $Id: main.f,v 1.165 2007-05-14 22:32:39 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -88,8 +88,8 @@ C                      Total PF angular distribution defined only for neutrons
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
      &        icsh, icsl, ie, iizaejc, il, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
-     &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, mt2, mt649,
-     &        mt849, mt91, nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp,
+     &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m, 
+     &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,   neles,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
      &        isnewchain(0:1)
@@ -1615,6 +1615,20 @@ C----------CN contribution to elastic ddx
          WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,''
      &mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
+         metas = 0
+         DO l= NLV(Nnuc), 2, -1
+            IF(ISIsom(l,Nnuc).EQ.1) THEN 
+            WRITE(12,'(1X,I3,''-'',A2,''-'',I3,'' isomeric state '',
+     &           F7.4,'' MeV ('',F5.1,'') population '',G12.6,'' mb'')')
+     &           iz, SYMb(nnuc), ia, ELV(l,Nnuc), 
+     &           LVP(l,Nnuc)*XJLv(l,Nnuc), POPlv(l,Nnuc)
+            metas = metas + 1
+            CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
+            ENDIF 
+         ENDDO 
+         IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+     &           '' ground state population '',G12.6,'' mb'')')
+     &           iz, SYMb(nnuc), ia, CSPrd(nnuc)
          IF(CSFis.gt.0.)
      &      WRITE (12,'(''    fission  cross section'',G12.5,'' mb'')')
      &          CSFis

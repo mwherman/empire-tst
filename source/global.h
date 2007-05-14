@@ -36,7 +36,8 @@
      &                 FNrwvomp(0:ndejc,0:ndnuc),
      &                 FNrsomp(0:ndejc,0:ndnuc)
         
-      INTEGER BFF(2), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
+      INTEGER MT2, MT91, MT649, MT849,
+     &        BFF(2), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc,
      &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys,
@@ -166,7 +167,8 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs, KALman
+     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs, KALman,
+     &                  MT2, MT91, MT649, MT849
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
