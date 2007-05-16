@@ -11,6 +11,8 @@ C-V      2006/02 Fix Y2K date in references
 C-V      2006/04 Deleted SF9, V.Zerkin@iaea.org
 C-V      2006/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
 C-V      2006/12 Ratio-to-rutherfors scattering for charged particles
+C-V      2007/04 Trivial syntax correction (V. Zerkin)
+C-V              Interpret Q-value as -LevelEnergy for inelastic (A.Trkov)
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -2146,7 +2148,7 @@ C-----CHECK FOR NEW NON-BLANK FLAG IN COMMON.                           X4T19260
       IF(FLAGI(I).EQ.BLANK) GO TO 130                                   X4T19270
       IF(KSANR.EQ.0) GO TO 110                                          X4T19280
       DO 100 J=1,KSANR                                                  X4T19290
-      IF(FLAGI(I).EQ.FLAGR(I)) GO TO 130                                X4T19300
+      IF(FLAGI(I).EQ.FLAGR(J)) GO TO 130
   100 CONTINUE                                                          X4T19310
 C-----NEW FLAG. CREATE SAME REACTION WITH NEW FLAG BY INCREASING        X4T19320
 C-----REACTION COUNT AND DEFINING FLAG, ZA, MF, MT, REACTION OPERATION. X4T19330
@@ -2341,6 +2343,11 @@ C-----IF REQUIRED SET DEFINITION OF FIELDS 7-8.                         X4T21250
       IF(NPT.EQ.1.AND.IM78.NE.BLANK4) WRITE(OUTP,6040)                  X4T21290
       IM78=TITLE4(II)
       IF(NPT.EQ.1) WRITE(OUTP,6030) IM78                                X4T21310
+c...
+      write(outp,*) values(ii)
+c...  OVALUE=ABS(VALUES(II))
+c...  CALL NORMF(OVALUE,OUTLIN(I))
+c...
   340 CONTINUE                                                          X4T21320
 C                                                                       X4T21330
 C     IF REQUIRED INSERT RESIDUAL NUCLEUS ZA (PRODUCTION) OR RATIO      X4T21340
@@ -3099,6 +3106,7 @@ C-----SET INDEX TO OUTPUT CREATED LIMIT NEXT TO EXISTING LIMIT.         X4T28630
  6010 FORMAT(10X,'WARNING.....MULTIPLE -MIN/-MAX FIELDS ',A10,A1)
  6020 FORMAT(10X,'OPERATION...CREATED ',A10,A1,1X,A11,1X,A11)
  6030 FORMAT(10X,'OPERATION...CENTER-OF-MASS SYSTEM FLAG SET')          X4T28730
+ 6040 FORMAT(10X,'OPERATION...ABSOLUTE',A11)
       END                                                               X4T28740
       SUBROUTINE IPAIR(TITLE1,TITLE2,IWAY)                              X4T28750
 C                                                                       X4T28760
@@ -3437,6 +3445,8 @@ C-----COUNT THE NUMBER OF INPUT FIELDS MAPPED INTO 1 OUTPUT FIELD.      X4T31950
    10 DO JMULT=1,10
         II=IMOUT(KFIELD,ISANR,JMULT)
         IF(II.LE.0) GO TO 30
+C-----  OPERATION ABSOLUTE ON THE VALUES (IF REQUESTED)
+        IF(KTFLGX(II).EQ.11) VALUES(II)=ABS(VALUES(II))
       END DO
       JMULT=10                                                          X4T32000
 C                                                                       X4T32010
@@ -3895,13 +3905,15 @@ C     MUST BE BETWEEN 1.0E-40 AND 1.0E+40.                              X4T35700
 C                                                                       X4T35710
       INTEGER OUTP,OTAPE                                                X4T35720
       CHARACTER*1 BLANK,DOT,EXPD,EXPE,PLUS,MINUS,STAR,MESS,DIGIT,FIELD, X4T35730
-     1 IFIELD                                                           X4T35740
+     1 IFIELD,EXPDL,EXPEL
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       DIMENSION FIELD(11),TEN(35),DIGIT(10),MESS(11)
       DATA BLANK/' '/                                                   X4T35770
       DATA DOT/'.'/                                                     X4T35780
       DATA EXPD/'D'/                                                    X4T35790
       DATA EXPE/'E'/                                                    X4T35800
+      DATA EXPDL/'d'/
+      DATA EXPEL/'e'/
       DATA PLUS/'+'/                                                    X4T35810
       DATA MINUS/'-'/                                                   X4T35820
       DATA STAR/'*'/                                                    X4T35830
@@ -3950,7 +3962,8 @@ C-----SCAN FOR DIGIT OR DECIMAL POINT (WHICH ARE PART OF MANTISSA).     X4T36200
 C-----SCAN FOR BLANK (WHICH ENDS MANTISSA).                             X4T36270
    70 IF(IFIELD.EQ.BLANK) GO TO 100                                     X4T36280
 C-----SCAN FOR E,D,- OR + (WHICH BEGINS EXPONENT).                      X4T36290
-      IF(IFIELD.EQ.EXPE.OR.IFIELD.EQ.EXPD) GO TO 130                    X4T36300
+      IF(IFIELD.EQ.EXPE .OR.IFIELD.EQ.EXPD .OR.
+     &   IFIELD.EQ.EXPEL.OR.IFIELD.EQ.EXPDL) GO TO 130
       IF(IFIELD.EQ.MINUS) GO TO 160                                     X4T36310
       IF(IFIELD.EQ.PLUS) GO TO 140                                      X4T36320
 C-----ERROR. CANNOT IDENTIFY CHARACTER.                                 X4T36330

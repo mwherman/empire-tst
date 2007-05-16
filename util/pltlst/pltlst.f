@@ -11,6 +11,7 @@ C-V  2006/03 - Re-activate IEX=<2-point minimum for MF>3
 C-V            Add MF 1 MT 452,455,456 to list
 C-V          - Add MF 4 MT=MT+40000 for cross sections at fixed angle
 C-V  2006/11 Process discrete level partial reactions.
+C-V  2007/03 Suppress listing MT reactions of 4000 series (input change!)
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -26,6 +27,8 @@ C-M  Instructions:
 C-M  Two input records may be specified:
 C-M  - Name of the file with EXFOR data in C4 format (default C4.DAT)
 C-M  - Name of the output list file (default PLOTC4.LST)
+C-M  - Flags (until EOF):
+C-M      "no4000"  Suppress MT reactions of 4000 series
 C-M
 C-M  The default input filename is PLTLST.INP. If the file does not
 C-M  exist, the program tries to read the entries from the default
@@ -64,6 +67,7 @@ C* Fractional tolerance for differentiating incident energies of
 C* differential and double differential data,
 C* Angle difference for differentiating distributions at fixed angles
       DATA ETOL,ITOL/ 0.015, 5 /
+      NO4000=0
 C* Write the banner
       WRITE(LTT,903)
       WRITE(LTT,903) ' PLTLST - Generate listing of EXFOR data'
@@ -81,6 +85,14 @@ C* If input does not exist, try reading the default input
      &WRITE(LTT,903) ' Enter the output list filename         '
       READ (LIN,903,END=10) FLNM
       IF(FLNM.NE.BLNK) FLLS=FLNM
+C* Read flags until blank or EOF
+    8 READ (LIN,903,END=10) FLNM
+      IF(FLNM.EQ.BLNK) GO TO 10
+      IF(FLNM(1:6).EQ.'no4000') THEN
+        NO4000=1
+        WRITE(LTT,903) BLNK
+        WRITE(LTT,903) ' Suppress MT reactions of 4000 series   '
+      END IF
 C* Open the files
    10 OPEN (UNIT=LEX,FILE=FLEX,STATUS='OLD')
       OPEN (UNIT=LLS,FILE=FLLS,STATUS='UNKNOWN')
@@ -219,7 +231,8 @@ C* Check for close-lying discrete levels
 C* Write a record to output list file
       IDX=IDX+1
       WRITE(LLS,914) IZ,CH(IZ),IA,MST,IZP0,MF0,MT0,IEX,CH10,IDX,IZI0
-   44 IF(MF0.EQ.4 .AND. (MF1.GT.MF0 .OR. MT1.NE.MT0 .OR. IEF.EQ.1)) THEN
+   44 IF(NO4000.EQ.0 .AND. MF0.EQ.4 .AND.
+     &   (MF1.GT.MF0 .OR. MT1.NE.MT0 .OR. IEF.EQ.1)) THEN
         CH10(1)='          '
 C...    CH10(3)='          '
 C* Average the angles in the present bin

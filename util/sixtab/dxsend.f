@@ -5,6 +5,7 @@ C-Purpose: Extract double differential cross sections from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
 C-Version: 15-Dec-2003 (Original code).
 C-V  06/02 Add UXS parameter for uncertainty of DXS
+C-V  07/04 Assign relative uncertainty of lumped reactions to all comp.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -798,7 +799,7 @@ c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
       IF(ELV.GT.0 .AND. (MF0.EQ.3 .OR. MF0.EQ.4) .AND.
-     &  ( (MT0.GE. 51 .AND. MT0.LT. 91) .OR.
+     &  ( (MT0.GE. 50 .AND. MT0.LT. 91) .OR.
      &    (MT0.GE.600 .AND. MT0.LT.649) .OR.
      &    (MT0.GE.800 .AND. MT0.LT.849) ) ) THEN
 C* Find the matching energy level for discrete inelastic ang.distr.
@@ -847,6 +848,8 @@ C*
 C* Prepare reaction list for light particles in MT5
 C*
       IF(IZAP.GE.1 .AND.IZAP.LE.2004) THEN
+C*
+C* Particle emission (except gamma); special treatment for fission
         I18=0
    20   MF=3
         MT=0
@@ -854,7 +857,7 @@ C*
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
 C* Select contributing reactions (yield >= 0)
-        CALL  YLDPOU(YI,MT,IZAP)
+        CALL  YLDPOU(YI,MT,IZAP,IZAI)
         IF(MT.EQ.18) I18=1
 C* Skip chance fission if total fission is given
         IF(I18.EQ.8 .AND.
@@ -927,6 +930,33 @@ C...    STOP 'DXSEND ERROR - No coding for requested particle'
         PRINT *,'DXSEND WARNING - Not coded for eject.ZAP',IZAP
         GO TO 90
       END IF
+      GO TO 50
+C*
+C* In case of absence of redundant reactions, sum from the partials
+   48 IER=0
+      MF=3
+      MT=0
+      CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+      IF(IER.NE.0) GO TO 50
+      CALL SKIPSC(LEF)
+      IF(MT0.EQ.4) THEN
+        IF(MT.LT.50) GO TO 48
+        IF(MT.GT.91) GO TO 50
+      ELSE IF(MT0.EQ.103) THEN
+        IF(MT.LT.600) GO TO 48
+        IF(MT.GT.649) GO TO 50
+      ELSE IF(MT0.EQ.107) THEN
+        IF(MT.LT.800) GO TO 48
+        IF(MT.GT.849) GO TO 50
+      ELSE
+        GO TO 50
+      END IF
+C* Add reaction as contributor to MT0
+      LOOP=LOOP+1
+      IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
+      LST(LOOP)=MT
+      GO TO 48
+C*
 C* All reactions found - begin processing
    50 IF(LOOP.LT.1) THEN
         WRITE(LTT,903) ' DXSEND WARNING - No data on file for MT',MT0
@@ -944,13 +974,16 @@ C* Exclude cumulative reactions if discrete levels present
         IF((LST(I).GT.600 .AND. LST(I).LE.649) .AND. M600.EQ.1) IL=IL-1
         IF((LST(I).GT.800 .AND. LST(I).LE.849) .AND. M800.EQ.1) IL=IL-1
       END DO
+      IER=0
       LOOP=IL
       IL=1
       ML=0
       MT=LST(IL)
-C...
-      PRINT *,'Contributing reactions:',(lst(j),j=1,loop)
-C...
+C*
+      WRITE( * ,903) ' Contributing reactions                : ',LOOP
+      WRITE( * ,905) (LST(J),J=1,LOOP)
+      WRITE(LTT,903) ' Contributing reactions                : ',LOOP
+      WRITE(LTT,905) (LST(J),J=1,LOOP)
 C*
 C* Retrieve the double differential cross section energy distribution
    60 CALL DXSEN1(LEF,ZA0,ZAP,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
@@ -959,6 +992,16 @@ c...
 c...  print *,' Add contribution from MT/NE',mt,ne
 c...
       IF( IER.NE.0) THEN
+        NEN=0
+C*      -- Try reconstructing redundant reactions from partials
+        IF(MT0.EQ.4 .OR. MT0.EQ.103 .OR. MT0.EQ.107) THEN
+          IF(MT.EQ.MT0) THEN
+            REWIND LEF
+            CALL SKIPSC(LEF)
+            GO TO 48
+          END IF
+        END IF
+C*      -- Print error message
         IF(LTT.GT.0) THEN
         IF(IER.LT.MXE) THEN
         WRITE(LTT,901) ' DXSEND WARNING - Error encountered   : '
@@ -1031,6 +1074,7 @@ C*
   903 FORMAT(A40,I6)
   904 FORMAT(' DXSEND WARNING - failed reconstructing'
      1       ,I3,' out of',I3,' reactions')
+  905 FORMAT(10X,10I5)
       END
       SUBROUTINE DXSEN1(LEF,ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
      1                 ,ENR,DXS,UXS,RWO,NEN,MEN,MRW,IER)
@@ -1140,8 +1184,8 @@ c...
 C*
       DATA PI/3.14159265/
 C...
-c...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-c... 1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+C... 1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -1183,13 +1227,21 @@ C* Case: Cross section at fixed angle
         END IF
       END IF
 C*
+C* Identify the projectile
+      MF =1
+      MT =451
       REWIND LEF
+      CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
+      CALL RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
+      CALL RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
+      IZAI=N1/10
+C* Continue processing the file
       CALL SKIPSC(LEF)
 C*
 C* Define particle multiplicities
       YL=1
       IF(IZAP0.LT.0) GO TO 30
-      CALL YLDPOU(YL,MT0,IZAP0)
+      CALL YLDPOU(YL,MT0,IZAP0,IZAI)
 C* Special treatment for nu-bar and neutrons from fission
       IF(IZAP0.EQ.1) THEN
         IF(MT0.EQ.19) GO TO 900
@@ -1594,12 +1646,13 @@ C* Find the energy/angle distribution data
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
 c...      print *,'find1 mf,mt,ier',mat,mf,mt,ier
+c...      print *,'izap0',izap0
 c...
 C* Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
 C* No MF4/5/6 possible only for discrete level (two-body isotr.) react.
         IF     (IZAP0.EQ.   1) THEN
-          IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) GO TO 40
+          IF(MT0.EQ.2 .OR. (MT0.GE.50 .AND. MT0.LT.91) ) GO TO 40
         ELSE IF(IZAP0.EQ.1001) THEN
           IF(MT0.GE.600 .AND. MT0.LT.649) GO TO 40
         ELSE IF(IZAP0.EQ.2004) THEN
@@ -1985,43 +2038,6 @@ C*            Evaporation spectrum
           END IF
           GO TO 800
         END IF
-      ELSE IF(LF.EQ.9) THEN
-C* Evaporation spectrum (Law 9)
-        NX=MRW/2
-        LX=NX+1
-        UPEN=C1
-        IF(EIN-UPEN.LE.0) THEN
-          NEN=0
-          GO TO 900
-        END IF
-C* Read and interpolate the temperature parameter Theta
-        CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
-     1             ,RWO,RWO(LX),NX,IER)
-        INE=INR(1)
-        IF(NR.GT.1) THEN
-          PRINT *,'WARNING - Multiple interp. ranges in MF5 MT',MT0
-        END IF
-        IF(INE.GT.2) THEN
-          PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
-        END IF
-        THETA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
-        IF(KEA.EQ.2) THEN
-Case: Generate outgoing particle energy distributions
-          NE1=101
-C*         Limit the table to the upper energy on the ENDF file
-          EE =MIN(ETOP,EIN-UPEN)
-          DE =EE/(NE1-1)
-          DO 56 I=1,NE1
-          EE =(I-1)*DE
-          ENR(I)=EE
-          DXS(I)=SPMAXW(EE,EIN,UPEN,THETA)
-   56     CONTINUE
-        ELSE
-Case: Calculate values at the given outgoing particle energy
-          YL=YL*SPMAXW(EOU,EIN,UPEN,THETA)
-          GO TO 800
-        END IF
-
       ELSE IF(LF.EQ.11) THEN
 C* Energy dependent Watt spectrum (Law 11)
         NX=MRW/2
@@ -2607,24 +2623,33 @@ C*      Requested metastable state higher than available in MF10
       END IF
       DO J=1,JST
         CALL RDTAB1(LES,QM,QI,L1,L2,N1,NP,NBT,INT,EN,XS,MXNP,IER)
-        IF(IER.EQ. 9 ) STOP 'GETSTD ERROR - MXNP Limit exceeded'
+        IF(IER.GT.0) THEN
+          IF     (IER.EQ. 8 ) THEN
+            PRINT *, 'GETSTD WARNING - numerical overflow'
+          ELSE IF(IER.EQ. 9 ) THEN
+            PRINT *, 'GETSTD WARNING - MXNP Limit exceeded'
+          ELSE
+            PRINT *, 'GETSTD ERROR - IER',IER
+          END IF
+        END IF
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
       END DO
       IF(N1.NE.1 .OR. INT(1).NE.2) THEN
         PRINT *,'WARNING - forced lin-lin interp. instead of',INT(1)
       END IF
 c...
-c...      print *,'done mf/mt',mf,mt
+c...      print *,'done mf/mt, np',mf,mt,np
 c...
 C* Negative MT1 is a flag to skip processing the covariance data
       IF(MF1.NE.3 .OR. MT1.LT.0) GO TO 90
       MF=33
       MT=MT1
+      JTL=0
 C*
 C* Search the ENDF file for section MT1 in file MF33
-      CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+   20 CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...          print *,'Found mf,mt,ier',mf,mt,ier
+c...      print *,'Found mf,mt,ier',mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*
@@ -2632,19 +2657,25 @@ C* Reaction found - read the covariance matrix
       MTL=L2
       NL =N2
 C* If reaction is a constituent of a lumped reaction uncertainties
-C* cannot be calculated
-      IF(MTL.GT.0) GO TO 90
+C* the same relative uncertainty is assigned to all constituents
+      IF(MTL.GT.0) THEN
+        PRINT *,'WARNING - Rel.uncertainty from lumped MT',MTL
+        MT =MTL
+        JTL=MTL
+        GO TO 20
+      END IF
 C... Current coding limitation
       IF(NL.GT.1) THEN
         PRINT *,'WARNING - Multiple sections in MF33 for MT',MT
         NL=1
       END IF
+      NL=MAX(1,NL)
 C...
 C* Loop over all sections
       DO I=1,NL
-        CALL RDHEAD(LES,MAT,MF,MT,XMF1,XLFS1,MATX,MTX,NC,NI,IER)
+        CALL RDHEAD(LES,MAT,MFX,MTX,XMF1,XLFS1,MATX,MTX,NC,NI,IER)
         IF(IER.NE.0) STOP 'RDHEAD ERROR reading MF33 (2)'
-        IF(MATX.NE.0 .OR. MTX.NE.MT1) GO TO 90
+        IF(MATX.NE.0 .OR. MTX.NE.MT) GO TO 90
 C... Current coding limitation
         IF(NC.GT.0) THEN
           PRINT *,'WARNING - NC sections present in MF33 for MT',MT
@@ -2754,12 +2785,15 @@ C* Convert variance to absolute uncertainty
           DX(K)=SQRT(DDI)*XSI
         END DO
       END IF
+C...
+C...      PRINT *,'i33,np',i33,np
+C...
 C* All processing completed
       RETURN
       END      
-      SUBROUTINE YLDPOU(YI,MT,KZAP)
+      SUBROUTINE YLDPOU(YI,MT,KZAP,KZAI)
 C-Title  : Subroutine YLDPOU
-C-Purpose: Define yield YI of particla KZAP in reaction MT
+C-Purpose: Define yield YI of particle KZAP in reaction MT
 C-Author : A. Trkov
 C-Version: 06/05 Fix yield for elastic.
 C-Reference: Common routine to EMPEND and DXSEND
@@ -2772,6 +2806,11 @@ C-D            multiplicity has to be obtained from other sources
 C-D       < 0  Particle cannot be produced from this reaction
 C-D  
       YI=-1
+C* Elastic contribution when ejectile=projectile
+      IF(KZAP.EQ.KZAI .AND. MT.EQ.2) THEN
+        YI=1
+        RETURN
+      END IF
       IF     (KZAP.EQ.   1) THEN
 C* Outgoing neutrons
         IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
@@ -2788,7 +2827,7 @@ C* Outgoing neutrons
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
         IF(MT.EQ. 5) YI=0
-        IF(MT.EQ. 2 .OR. MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
+        IF(MT.EQ.28  .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
      &     MT.EQ.45  .OR. MT.EQ.103 .OR. MT.EQ.112 .OR.
      &    (MT.GE.600.AND. MT.LE.649)) YI=1
         IF(MT.EQ.44 .OR. MT.EQ.111) YI=2
@@ -2800,12 +2839,11 @@ C* Outgoing deuterons
       ELSE IF(KZAP.EQ.2003) THEN
 C* Outgoing He-3
         IF(MT.EQ. 5) YI=0
-        IF(MT.EQ. 2 .OR. MT.EQ.34 .OR. MT.EQ.106) YI=1
+        IF(MT.EQ.34 .OR. MT.EQ.106) YI=1
       ELSE IF(KZAP.EQ.2004) THEN
 C* Outgoing alphas
         IF(MT.EQ. 5) YI=0
-        IF(MT.EQ. 2 .OR.
-     &     MT.EQ. 22 .OR. MT.EQ.24 .OR. MT.EQ.25 .OR. MT.EQ.45 .OR.
+        IF(MT.EQ. 22 .OR. MT.EQ.24 .OR. MT.EQ.25 .OR. MT.EQ.45 .OR.
      &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849)) YI=1
         IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
      &     MT.EQ.108) YI=2
@@ -3172,8 +3210,11 @@ C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-C-D        9  Available field length NMX is exceeded.
+C-D       -8  WARNING - Numerical underflow (<E-36)
+C-D        8  WARNING - Numerical overflow  (>E+36)
+C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
+      DOUBLE PRECISION EE(3),XX(3)
       DIMENSION    NBT(1),INR(1)
       DIMENSION    EN(NMX), XS(NMX)
 C*
@@ -3185,7 +3226,25 @@ C*
         JP=NMX
         IER=9
       END IF
-      READ (LEF,904,END=100,ERR=200) (EN(J),XS(J),J=1,JP)
+      JR=(JP+2)/3
+      J=0
+      DO K=1,JR
+        READ(LEF,904,END=100,ERR=200) (EE(M),XX(M),M=1,3)
+        DO M=1,3
+          J=J+1
+          IF(J.LE.JP) THEN
+            IF(ABS(XX(M)).LT.1E-36) THEN
+              XX(M)=0
+C...          IER=-8
+            ELSE IF(ABS(XX(M)).GT.1.E36) THEN
+              XX(M)=1E36
+              IER=8
+            END IF
+            EN(J)=EE(M)
+            XS(J)=XX(M)
+          END IF
+        END DO
+      END DO
       RETURN
   100 IER=1
       RETURN
@@ -3633,7 +3692,7 @@ C*
 C* Add a point from first set
    10 NEU=NEU+1
       IF(NEU.GT.KX) THEN
-C...    PRINT *,'UNIGRD ERROR in grid-1:',NEU,KX
+        PRINT *,'UNIGRD ERROR in grid-1:',NEU,KX
         STOP 'UNIGRD ERROR - KX limit exceeded'
       END IF
       EUN(NEU)=EN1(J1)
@@ -3653,7 +3712,7 @@ C*
 C* Add a point from second set
    20 NEU=NEU+1
       IF(NEU.GT.KX) THEN
-C...     PRINT *,'NEU,KX',NEU,KX
+         PRINT *,'NEU,KX',NEU,KX
          STOP 'UNIGRD ERROR - KX limit exceeded'
       END IF
       EUN(NEU)=EN2(J2)
