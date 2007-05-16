@@ -26,6 +26,7 @@ C-V  05/11 - Fix bugs.
 C-V  05/12 - Increase MXIR from 12000 to 80000 (A.Trkov)
 C-V        - Increase MXEN from 40000 to 80000 (A.Trkov)
 C-V  06/12 Another fix to format reading metastable targets (A.Trkov)
+C-V  07/04 Convert E2 to LVL for MT51 if Elo=Ehi (A.Trkov)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -203,8 +204,8 @@ C* Files and logical file unit numbers
       FLV =-1
 C*
 C* Default path to RIPL nuclide level energy files
-      DPATH='../../RIPL-2/levels/'
-      LPATH=20
+      DPATH='../Sources/Inputs/Levels/'
+      LPATH=25
 C*
 C* Process the input
 C*
@@ -370,12 +371,27 @@ C* Change any alias ZA/MF/MT designations
       CALL CALIAS(NALI,ALIA,REC)
 C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
+      READ (REC(16:19), * ,END=801,ERR=801) MT
 C* Decode the incident particle energy
       READ (REC(23:31),931,ERR=801) FIN
 C* Decode secondary or discrete level energy
       READ (REC(77:85),931,ERR=801) FLV
-C* Adjust the level energy if necessary (and possible)
+C* Convert outgoing particle energy to level energy, if applicable
+C* (same coding also after label 30)
       LB3=REC(95:97)
+      IF(LB3.EQ.' E2' .AND. MT.EQ.51) THEN
+        READ (REC(86:94),931,ERR=801) FLV1
+        IF(NINT(FLV1).EQ.0 .OR. NINT(FLV).EQ.NINT(FLV1)) THEN
+          LB3='LVL'
+          REC(95:97)=LB3
+          REC(86:94)='         '
+C*        -- Approximately convert level energy to CM
+          READ (REC(3: 5),*) AP
+          READ (REC(9:11),*) AT
+          IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+        END IF
+      END IF
+C* Adjust the level energy if necessary (and possible)
       IF(FLV.GT.0) THEN
         IF(LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') THEN
           READ (REC(1:20),902,ERR=801) IZA
@@ -389,8 +405,10 @@ c...
 c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
         END IF
-        WRITE(ELW,931) FLV
-        REC(77:85)=ELW
+        IF(FLV.LT.1.E8) THEN
+          WRITE(ELW,938) NINT(FLV)
+          REC(77:85)=ELW
+        END IF
       END IF
 C* Special treatment discrete level and secondary energy reactions
       IF(MF.EQ.3 .AND. NINT(FLV).GT.0) GO TO 30
@@ -440,7 +458,7 @@ C* Define level energies for discrete level reactions (if given)
       IF((MF.EQ.3 .OR. MF.EQ.4) .AND.
      &   (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') ) THEN
         READ(REC(77:85),931,ERR=801) DMY
-        WRITE(ELV,931) DMY
+        WRITE(ELV,938) NINT(DMY)
       END IF
 C* Identify outgoing particle (if relevant)
       IF(MF.EQ.3 .OR. MF.EQ.5 .OR. MF.EQ.6) THEN
@@ -490,10 +508,10 @@ C...      WRITE(ELV,931) FLV
 C...      REC(77:85)=ELV
 C*
 C* Standardise level/secondary energy format
-      WRITE(ELW,931) FLV
+      WRITE(ELW,938) NINT(FLV)
       WRITE(POU,938) MIN(999999999,NINT(FIN))
 C* Save record to RC6 field and sorting string to ELL
-      REC(77:85)=ELW
+      IF(FLV.LT.1.E8) REC(77:85)=ELW
       RC6(IR)=REC
       ELL(IR)=ELW//POU//'  '
 C*
@@ -502,11 +520,24 @@ C* Read a new record from the C4 file
       IF(REC(1:20).EQ.'                    ') GO TO 34
 C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
+      READ (REC(16:19), * ,END=801,ERR=801) MT
 C* Decode the incident particle energy
       READ (REC(23:31),931,ERR=801) FIN
 C* Adjust the level energy if necessary (and possible)
       READ(REC(77:85),931,ERR=801) FLV
       LB3=REC(95:97)
+      IF(LB3.EQ.' E2' .AND. MT.EQ.51) THEN
+        READ (REC(86:94),931,ERR=801) FLV1
+        IF(NINT(FLV1).EQ.0 .OR. NINT(FLV).EQ.NINT(FLV1)) THEN
+          LB3='LVL'
+          REC(95:97)=LB3
+          REC(86:94)='         '
+C*        -- Approximately convert level energy to CM
+          READ (REC(3: 5),*) AP
+          READ (REC(9:11),*) AT
+          IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+        END IF
+      END IF
       IF(FLV.GT.0 .AND. (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC')) THEN
         READ (REC(1:20),902,ERR=801) IZA
         FLV0=FLV
@@ -518,8 +549,10 @@ c...
 c...
 c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
-        WRITE(ELW,931) FLV
-        REC(77:85)=ELW
+        IF(FLV.LT.1.E8) THEN
+          WRITE(ELW,938) NINT(FLV)
+          REC(77:85)=ELW
+        END IF
       END IF
 C* Check for change in IZA, MF, MT
       IF(REC( 1: 20).NE.ZAMT) GO TO 34
