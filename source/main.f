@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-17 15:46:58 $
-Ccc   * $Id: main.f,v 1.167 2007-05-17 15:46:58 Capote Exp $
+Ccc   * $Date: 2007-05-17 16:09:08 $
+Ccc   * $Id: main.f,v 1.168 2007-05-17 16:09:08 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -83,7 +83,6 @@ C                      Total PF angular distribution defined only for neutrons
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
       CHARACTER*1 opart(3)
-      CHARACTER*21 REActprn(ndnuc)
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -105,9 +104,6 @@ C                      Total PF angular distribution defined only for neutrons
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
-      DO i=1,ndnuc
-        REActprn(i)='                     '
-      ENDDO
 C-----
 C-----Read and prepare input data
 C-----
@@ -133,11 +129,14 @@ C-----
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
      &      int(Z(0)), SYMb(0), int(A(0))   
-        WRITE(41,'(''#'',A10,1X,(4A12\))') '  Einc    ','  Total     ',
-     &       '  Elastic   ','  Reaction  ','  Fission   '
-        DO nnuc=1,NNUcd
-          IF(ENDf(nnuc).GT.0) WRITE(41,'(A12\))') REAction(nnuc)
-        ENDDO 
+        WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
+     &       '  Elastic   ','  Reaction  ','  Fission   ',
+     &         (REAction(nnuc),nnuc=1,NNUcd)
+C       WRITE(41,'(''#'',A10,1X,(4A12\))') '  Einc    ','  Total     ',
+C    &       '  Elastic   ','  Reaction  ','  Fission   '
+C       DO nnuc=1,NNUcd
+C         IF(ENDf(nnuc).GT.0) WRITE(41,'(A12\))') REAction(nnuc)
+C       ENDDO 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+2,
      &      int(Z(0)), SYMb(0), int(A(0))
@@ -1727,19 +1726,21 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
-C     WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
-C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
-C    &     CSFus + (SINl+SINlcc)*FCCred,
-C    &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
-C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
-      WRITE(41,'(/G10.5,6E12.5\))') EINl, TOTcs*TOTred, 
+      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     CSFus + (SINl+SINlcc)*FCCred,
-     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs
-      DO nnuc=3,NNUcd
-        IF(ENDf(nnuc).GT.0) WRITE(41,'(E12.5\)') CSPrd(nnuc)
-      ENDDO 
-      WRITE (41,'(/)')
+     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
+     &     (CSPrd(nnuc),nnuc=3,NNUcd)
+
+C     WRITE(41,'(/G10.5,6E12.5\))') EINl, TOTcs*TOTred, 
+C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
+C    &     CSFus + (SINl+SINlcc)*FCCred,
+C    &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs
+C     DO nnuc=3,NNUcd
+C       IF(ENDf(nnuc).GT.0) WRITE(41,'(E12.5\)') CSPrd(nnuc)
+C     ENDDO 
+C     WRITE (41,'(/)')
+
       WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)
