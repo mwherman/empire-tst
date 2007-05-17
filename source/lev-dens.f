@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: lev-dens.f,v 1.47 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Date: 2007-05-17 21:11:27 $
+Ccc   * $Id: lev-dens.f,v 1.48 2007-05-17 21:11:27 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1017,6 +1017,9 @@ C-----------dependent factor
             ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
             IF (ac.LE.0.0D0) RETURN
          ENDIF
+C        Spin-cut off tuning	 
+         mompar = REDSEF*mompar
+         momort = REDSEF*momort	 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2)*RORed
             IF (i.EQ.1) THEN

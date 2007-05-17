@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-17 15:46:59 $
-Ccc   * $Id: input.f,v 1.226 2007-05-17 15:46:59 Capote Exp $
+Ccc   * $Date: 2007-05-17 21:11:26 $
+Ccc   * $Id: input.f,v 1.227 2007-05-17 21:11:26 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -225,6 +225,7 @@ C--------fusion parameters
          FUSred = 1.d0
          FCCred = 1.d0
          TOTred = 1.d0
+         REDsef = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -239,8 +240,8 @@ C
          WIDcoll = 0.d0
          DEFdyn = 1.d0
          DEFsta = 1.d0
-         DEFnuc = 0.d0         
-         RECoil = 1.d0               
+         DEFnuc = 0.d0
+         RECoil = 1.d0
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
 C--------Relativistic kinematics
          RELkin = .FALSE.
@@ -257,9 +258,9 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-C Roberto, don't touch these two below, please :) 
-         IX4ret = 1 
-         IF(IOPSYS.EQ.1) IX4ret = 0 
+C Roberto, don't touch these two below, please :)
+         IX4ret = 1
+         IF(IOPSYS.EQ.1) IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -932,8 +933,8 @@ C--------------------------------------------------------------------------
             LHMs = 0
          ENDIF
          IF (LHMs.NE.0 .AND. ENDf(1).EQ.0 .AND. NDAng.NE.37 ) THEN
-            WRITE (6,*) 
-            WRITE (6,*) 'WARNING: NDANG reset to 37 for compatibility ', 
+            WRITE (6,*)
+            WRITE (6,*) 'WARNING: NDANG reset to 37 for compatibility ',
      1                                                  ' with HMS'
             WRITE (6,*)
             NANgela = 37
@@ -2571,9 +2572,9 @@ C
 C      By default, no covariance calculation is done
 C
       IPArCOV = 0
-C     Moved to io.h 
+C     Moved to io.h
 C     OPEN(95,FILE='COVAR.DAT',STATUS='UNKNOWN')
-C-----Go to the end of the COVAR.DAT file      
+C-----Go to the end of the COVAR.DAT file
 C  10 READ(95,*,END=11) dum
 C     GOTO 10
    11 CONTINUE
@@ -3125,7 +3126,7 @@ C-----
               WRITE (6,
      &        '('' Minimum half life of the considered isomers < 1s !''
      &         ,F6.3)') val
-              WRITE (6,'('' Value reset to 1 s'')') 
+              WRITE (6,'('' Value reset to 1 s'')')
               TISomer = 1.d0
          GOTO 100
          ENDIF
@@ -3147,20 +3148,34 @@ C-----
                  sigma = val*i1*0.01
 C                FCCred = val + grand()*sigma
                  FCCred = val + (2*drand()-1.)*sigma
-                WRITE (6, 
+                WRITE (6,
      &     '('' Direct cross section was scaled by factor ''
      &          ,f6.3)') FCCred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FCCred, INDexf,INDexb
             else
-                FCCred = val    
+                FCCred = val
                 WRITE (6,
      &      '('' Direct cross section was scaled by factor '',
-     &		F6.3)') FCCred
+     &            F6.3)') FCCred
                 WRITE (12,
      &      '('' Direct cross section was scaled by factor '',
      &           F6.3)') FCCred
+            endif
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'REDSEF') THEN
+            REDsef = 1.d0
+            if(val.le.1.d0 .and. val.gt.0.05d0) THEN
+                REDsef = val
+                WRITE (6,
+     &  '('' Spin-cut off parameter for dynamic LD reduced by factor '',
+     &          F6.3)') REDsef
+                WRITE (12,
+     &  '('' Spin-cut off parameter for dynamic LD reduced by factor '',
+     &           F6.3)') REDsef
             endif
             GOTO 100
          ENDIF
@@ -3173,17 +3188,17 @@ C-----
                  sigma = val*i1*0.01
 C                FUSred = val + grand()*sigma
                  FUSred = val + (2*drand()-1.)*sigma
-                WRITE (6, 
+                WRITE (6,
      &      '('' Fusion cross section was scaled by factor ''
      &          ,f6.3)') FUSred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FUSred, INDexf,INDexb
             else
-                FUSred = val   
+                FUSred = val
                 WRITE (6,
      &      '('' Fusion cross section was scaled by factor '',
-     &		F6.3)') FUSred
+     &            F6.3)') FUSred
                 WRITE (12,
      &      '('' Fusion cross section was scaled by factor '',
      &           F6.3)') FUSred
@@ -3206,7 +3221,7 @@ C                TOTred = val + grand()*sigma
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, TOTred, INDexf,INDexb
             else
-                TOTred = val    
+                TOTred = val
                 WRITE (6,
      &      '('' Total cross section was scaled by factor '',
      &          F6.3)') TOTred
@@ -4475,20 +4490,20 @@ C-----
      &        '('' Global L.d. a-parameter uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
               sigma = val*i3*0.01
-         atilss = val + (2*drand()-1.)*sigma
-C	      atilss = val + grand()*sigma
+              atilss = val + (2*drand()-1.)*sigma
+C             atilss = val + grand()*sigma
               DO i = 1, NDNUC
-                  ATIlnor(i) = atilss
-              ENDDO      
+                ATIlnor(i) = atilss
+              ENDDO
               WRITE (6,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
-     &       ) atilss     
+     &       ) atilss
               IPArCOV = IPArCOV +1
               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &           IPArCOV, atilss,INDexf,INDexb
+     &          IPArCOV, atilss,INDexf,INDexb
              else
               DO i = 1, NDNUC
-                  ATIlnor(i) = val
+                ATIlnor(i) = val
               ENDDO
               WRITE (6,
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
@@ -4821,7 +4836,7 @@ C              TUNEpe(i1) = val + grand()*sigma
                TUNEpe(i1) = val + (2*drand()-1.)*sigma
               WRITE (6,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
-     &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1), 
+     &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1),
      & TUNEpe(i1)
               IPArCOV = IPArCOV +1
               WRITE(95,'(1x,i5,1x,d12.6,1x,2i13)')
@@ -5441,9 +5456,9 @@ C-----
                 if(FISspe.eq.1) WRITE (6,*) ' using Los Alamos model'
                 if(FISspe.eq.2) WRITE (6,*) ' using Kornilov''s model'
               else
-                WRITE (6,*) 
-     &           'Prompt fission neutron spectra not calculated'           
-            endif             
+                WRITE (6,*)
+     &           'Prompt fission neutron spectra not calculated'
+            endif
 C--------------------------------------------------------------------------
             else
                WRITE (6,
@@ -5452,14 +5467,14 @@ C--------------------------------------------------------------------------
             endif
             GOTO 100
          ENDIF
-         
+
          IF (name.EQ.'RECOIL') THEN
             RECoil = val
             IF (RECOIL.LT.0.d0) RECoil = 1.d0
-            IF (RECOIL.eq.0.d0) 
-     &      WRITE (6,'('' Recoils are not calculated'')') 
+            IF (RECOIL.eq.0.d0)
+     &      WRITE (6,'('' Recoils are not calculated'')')
             GOTO 100
-         ENDIF        
+         ENDIF
 C--------------------------------------------------------------------------
          IF (name(1:3).EQ.'FIT') GOTO 100
 C-----
@@ -5693,7 +5708,7 @@ C
          WRITE(6,'(1X)')
          WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
      &               ''  ATILNO     final'')')
-         WRITE(6,'(1X)')            
+         WRITE(6,'(1X)')
       ENDIF
   100 READ (24,'(I7,I4,2F7.2,E10.4,E10.3)',END = 200) izar, nlevc,
      &      arogc, aroc, qn, dob
@@ -5808,13 +5823,13 @@ C--------------Calculate sum for the average normalization factor
      &ng energy'
          atilave = 1.0
       ENDIF
-      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
      &    WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
      &               atilave
       DO nnuc = 1, NNUct
          IF (ATIlnor(nnuc).EQ.0.0D0) THEN
             ATIlnor(nnuc) = atilave
-      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
      &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave
@@ -5824,7 +5839,7 @@ C           The following line must also be commented to reproduce Th-232 evalua
 C           with the original th32.inp input file dated 16/07/2005
 C           (another change before this one (look for atilno appearance)
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
-      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) 
+      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
      &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave
@@ -6651,7 +6666,7 @@ C
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
-            if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont' 
+            if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
@@ -6940,7 +6955,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i20p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -6953,7 +6968,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i21p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -6966,7 +6981,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i4p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -6979,7 +6994,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i0p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7003,7 +7018,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                i3m = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7062,7 +7077,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i20p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      &            ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7076,7 +7091,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i4p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7090,7 +7105,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i6p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7105,7 +7120,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i8p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3) 
+               IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -7346,10 +7361,10 @@ C-----------------swapping
             IF (i.EQ.1) ftmp = 0.0
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-            IF (itmp1.LE.NLV(nnurec) .and. 
+            IF (itmp1.LE.NLV(nnurec) .and.
 C              For odd nuclides, collective states in continuum have
 C              different spin than the ground state
-     &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN 
+     &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -7455,10 +7470,10 @@ C-----------------swapping
 
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-            IF (itmp1.LE.NLV(nnurec) .and. 
+            IF (itmp1.LE.NLV(nnurec) .and.
 C             For odd nuclides, collective states in continuum have
 C             different spin than the ground state
-     &        (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN 
+     &        (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
