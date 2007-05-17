@@ -7,3 +7,4 @@ echo "Begin compilation of C programs"
     make -f c4dat4l.mak
     make -f endzvdl.mak
 exit
+chmod +x pntzvdl
