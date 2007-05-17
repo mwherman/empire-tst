@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-14 22:32:39 $
-Ccc   * $Id: HF-comp.f,v 1.88 2007-05-14 22:32:39 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-17 15:47:01 $
+Ccc   * $Id: HF-comp.f,v 1.89 2007-05-17 15:47:01 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -637,7 +637,7 @@ C
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
          IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND. 
-     &      ISIsom(il,Nnuc).EQ.0) THEN
+     &      ISIsom(l,Nnuc).EQ.0) THEN
 C-----------Normal level without branching ratios
             IF (IOUt.GT.2) WRITE (6,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
@@ -664,7 +664,7 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
 C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
 C-----------Add gamma cascade population to the direct population 
-            POPlv(l,Nnuc) = POPlv(l,Nnuc)+CSDirlev(l,nejc)
+            POPlv(l,Nnuc) = POPlv(l,Nnuc) + CSDirlev(l,nejc)
             IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99012       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',

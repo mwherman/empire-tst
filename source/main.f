@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-16 22:09:34 $
-Ccc   * $Id: main.f,v 1.166 2007-05-16 22:09:34 Capote Exp $
+Ccc   * $Date: 2007-05-17 15:46:58 $
+Ccc   * $Id: main.f,v 1.167 2007-05-17 15:46:58 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -83,6 +83,7 @@ C                      Total PF angular distribution defined only for neutrons
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
       CHARACTER*1 opart(3)
+      CHARACTER*21 REActprn(ndnuc)
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -104,6 +105,9 @@ C                      Total PF angular distribution defined only for neutrons
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
+      DO i=1,ndnuc
+        REActprn(i)='                     '
+      ENDDO
 C-----
 C-----Read and prepare input data
 C-----
@@ -128,9 +132,12 @@ C-----
       IF (FIRst_ein) THEN
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
-     &      int(Z(0)), SYMb(0), int(A(0))
-        WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
-     &      '  Elastic   ','  Fission   ',(REAction(nnuc),nnuc=1,NNUcd)
+     &      int(Z(0)), SYMb(0), int(A(0))   
+        WRITE(41,'(''#'',A10,1X,(4A12\))') '  Einc    ','  Total     ',
+     &       '  Elastic   ','  Reaction  ','  Fission   '
+        DO nnuc=1,NNUcd
+          IF(ENDf(nnuc).GT.0) WRITE(41,'(A12\))') REAction(nnuc)
+        ENDDO 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+2,
      &      int(Z(0)), SYMb(0), int(A(0))
@@ -1618,17 +1625,17 @@ C----------CN contribution to elastic ddx
          metas = 0
          DO l= NLV(Nnuc), 2, -1
             IF(ISIsom(l,Nnuc).EQ.1) THEN 
+              metas = metas + 1            
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
-     &           '' isomer state population  '',G12.6,'' mb'',
-     &           ''  LEVEL '',F7.4,'' MeV ('',F5.1,'')'' )')
+     &           ''  isomer state population '',G12.6,'' mb'',
+     &           1x,1hm,I1,'' level '',F7.4,'' MeV ('',F5.1,'')'' )')
      &           iz, SYMb(nnuc), ia, POPlv(l,Nnuc),
-     &           ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
-              metas = metas + 1
+     &           metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
               CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
             ENDIF 
          ENDDO 
          IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
-     &           '' ground state population  '',G12.6,'' mb'')')
+     &           ''  ground state population '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, CSPrd(nnuc)
          IF(CSFis.gt.0.)
      &      WRITE (12,'(''    fission  cross section'',G12.5,'' mb'')')
@@ -1720,10 +1727,19 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
-      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
+C     WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred, 
+C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
+C    &     CSFus + (SINl+SINlcc)*FCCred,
+C    &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
+C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
+      WRITE(41,'(/G10.5,6E12.5\))') EINl, TOTcs*TOTred, 
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
-     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
-     &     (CSPrd(nnuc),nnuc=3,NNUcd)
+     &     CSFus + (SINl+SINlcc)*FCCred,
+     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs
+      DO nnuc=3,NNUcd
+        IF(ENDf(nnuc).GT.0) WRITE(41,'(E12.5\)') CSPrd(nnuc)
+      ENDDO 
+      WRITE (41,'(/)')
       WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)

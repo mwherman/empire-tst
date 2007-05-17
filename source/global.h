@@ -158,7 +158,7 @@
      &                 CSPfis, RECoil
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
-     &                  LHMs, NHMs, NEXreq, FISspe,	ISIsom,
+     &                  LHMs, NHMs, NEXreq, FISspe,   ISIsom,
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX, IX4ret,
      &                  JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, LEVtarg,
      &                  KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, NEXr,
@@ -167,8 +167,8 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
-     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs, KALman,
-     &                  MT2, MT91, MT649, MT849
+     &                  NANgela, NDAng, ISProd, FITomp, ICAlangs, 
+     &                  KALman, MT2, MT91, MT649, MT849
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
