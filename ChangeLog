@@ -107,8 +107,17 @@
 37. X4TOC4 updated to improve printing of the reference (including Y2K problem)
     disctionaries largely extended (V. Zerkin)
 38. Extension of the MSD formalism to deformed nuclei (H. Wienke)
-39. Non-interactive PostScript plots with ZVView
-40. Access to ZVView configuration file from GUI
+>>>>>>>>>>>>>>>>>NICE-2007<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+39. Non-interactive PostScript plots with ZVView (V. Zerkin, M. Herman)
+40. Access to ZVView configuration file from GUI (V. Zerkin, M. Herman)
+41. Moments of inertia (spin distribution parameter) controlled from the input
+    (R.Capote)
+42. Direct cross sections can be scaled by the factor defined in input 
+    (R. Capote)
+42. Direct cross sections can be scaled by the factor defined in input 
+    (R. Capote)
+42. Isomeric states automatically detected, their cross sections calculated
+    (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
