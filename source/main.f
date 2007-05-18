@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-18 14:00:29 $
-Ccc   * $Id: main.f,v 1.170 2007-05-18 14:00:29 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-18 14:13:52 $
+Ccc   * $Id: main.f,v 1.171 2007-05-18 14:13:52 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1634,8 +1634,8 @@ C----------CN contribution to elastic ddx
      &         metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
               CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
             ENDIF 
-         ENDDO 
-         IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+           ENDDO 
+           IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           '' ground state population  '',G12.6,''mb'')')
      &           iz, SYMb(nnuc), ia, CSPrd(nnuc)
          ENDIF

@@ -101,7 +101,7 @@
     If FISspe = 1 then additional input files are needed (R. Capote & M. Sin)
 35. ECIS subroutine changed to allow explicit input of the externally calculated 
     dispersive corrections allowing to use dispersive potentials with different
-    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote)     	     
+    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote)           
 36. Optical model and discrete levels' databases updated using preliminary RIPL-3       
     libraries. (R Capote)
 37. X4TOC4 updated to improve printing of the reference (including Y2K problem)
@@ -114,9 +114,10 @@
     (R.Capote)
 42. Direct cross sections can be scaled by the factor defined in input 
     (R. Capote)
-42. Direct cross sections can be scaled by the factor defined in input 
-    (R. Capote)
-42. Isomeric states automatically detected, their cross sections calculated
+43. Scaling of the direct and total cross-sections automatically considered
+    in the elastic cross section (R. Capote). The obtained ENDF file is consistent.
+    no further adjustment of the elastic channel is required.
+43. Isomeric states automatically detected, their cross sections calculated
     (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
         
         Changes in version 2.19beta24 with respect to 2.18  
