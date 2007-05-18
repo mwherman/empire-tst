@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-17 16:09:08 $
-Ccc   * $Id: main.f,v 1.168 2007-05-17 16:09:08 Capote Exp $
+Ccc   * $Date: 2007-05-18 13:15:15 $
+Ccc   * $Id: main.f,v 1.169 2007-05-18 13:15:15 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1436,8 +1436,8 @@ C--------gamma decay of discrete levels (DECAYD)
          IF (IOUt.GT.0) THEN
             WRITE (6,'(1X,/,10X,40(1H-),/)')
             WRITE (6,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.5,''
-     &mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.5,
+     &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
             IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (6,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
@@ -1619,10 +1619,12 @@ C----------CN contribution to elastic ddx
          checkXS = checkXS + CSPrd(nnuc)
          WRITE (12,*) ' '
          WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,''
-     &mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
-         metas = 0
-         DO l= NLV(Nnuc), 2, -1
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+     &'' mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
+         
+         IF(CSPrd(nnuc).GT.0.d0) THEN
+           metas = 0
+           DO l= NLV(Nnuc), 2, -1
             IF(ISIsom(l,Nnuc).EQ.1) THEN 
               metas = metas + 1            
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
@@ -1632,10 +1634,11 @@ C----------CN contribution to elastic ddx
      &           metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
               CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
             ENDIF 
-         ENDDO 
-         IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+           ENDDO 
+           IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           ''  ground state population '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, CSPrd(nnuc)
+         ENDIF
          IF(CSFis.gt.0.)
      &      WRITE (12,'(''    fission  cross section'',G12.5,'' mb'')')
      &          CSFis
