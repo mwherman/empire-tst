@@ -405,82 +405,58 @@ FISSHI   Controls treatment of the fission channel for nucleus
       The following options are valid only when FISSHI = 0
 
 
-FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
-      =0 Ripl-2 (microscopic calculations by Goriely with internally set
-         barrier widths taken from Lynn - default),
-      =1 internal EMPIRE library
-      =2 Ripl-1 (compilation of Maslov, model dependent!)
+      FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
+            =0 Ripl-2 (microscopic calculations by Goriely with internally set
+               barrier widths taken from Lynn - default),
+            =1 internal EMPIRE library
+            =2 Ripl-1 (compilation of Maslov, model dependent!)
+      
+      FISDEN   Controls level densities at saddle points for nucleus Z=I1, A=I2 
+            =0 Ripl-2 (microscopic calculations by Goriely)
+            =1 Empire specific 
+      
+      FISOPT   Controls subbarrier effects for nucleus Z=I1, A=I2 
+            =0 no subbarrier effects
+            =1 subbarrier effects considered (only with FISBAR=1)
+            =2 subbarrier effects & isomeric fission considered 
+               (only with FISBAR=1)
+      
+      FISMOD   Controls multimodality of fission for nucleus Z=I1, A=I2 
+            =0 single-modal fission
+            =1 multimodal fission
+            =2 multimodal fission
+      
+      FISDIS   Controls discrete transitional states
+            =0 no discrete states above fission barrier for nucleus Z=I1, A=I2
+            =1 discrete states above fission barrier for nucleus Z=I1, A=I2
 
-FISDEN   Controls level densities at saddle points for nucleus Z=I1, A=I2 
-      =0 Ripl-2 (microscopic calculations by Goriely)
-      =1 Empire specific 
 
-FISOPT   Controls subbarrier effects for nucleus Z=I1, A=I2 
-      =0 no subbarrier effects
-      =1 subbarrier effects considered (only with FISBAR=1)
-      =2 subbarrier effects & isomeric fission considered 
-         (only with FISBAR=1)
+      The following options are valid only when FISSHI = 1
 
-FISMOD   Controls multimodality of fission for nucleus Z=I1, A=I2 
-      =0 single-modal fission
-      =1 multimodal fission
-      =2 multimodal fission
-
-FISDIS   Controls discrete transitional states
-      =0 no discrete states above fission barrier for nucleus Z=I1, A=I2
-      =1 discrete states above fission barrier for nucleus Z=I1, A=I2
-
-      The following options are valid only when FISSHI = 1 
-
-QFIS    Liquid drop fission barriers multiplied by VAL (default: 1.).
-
-BETAV   Viscosity  parameter set to VAL (10^{-21}s^{-1}) (default: 4.).
-
-SHRJ    Shell correction to fission barrier dampped to 1/2 at spin VAL 
-        (default: 24.).
-
-SHRD    Diffuseness of the shell correction damping set to VAL (default: 2.5).
-
-FISOPT  Controls subbarrier effects for nucleus Z=I1, A=I2
-       = 0 no subbarrier effects
-       = 1 subbarrier effects considered (only with FISBAR=1)
-       = 2 subbarrier effects & isomeric fission considered (only with FISBAR=1)
-
-FISMOD  Controls multimodality of fission for nucleus Z=I1, A=I2
-       = 0 single-modal fission
-       = 1 multimodal fission (2 modes)
-       = 2 multimodal fission (3 modes)
-
-FISDIS  Controls discrete transitional states
-       = 0 no discrete states above fission barrier for nucleus Z=I1, A=I2
-       = 1 discrete states above fission barrier for nucleus Z=I1, A=I2
-
-The following options are valid only when FISSHI = 1
-
-QFIS    Liquid drop fission barriers multiplied by VAL (default: 1).
-
-BETAV   Viscosity parameter set to VAL (10^{-21}s^{-1}) (default: 4).
-
-SHRJ    Shell correction to fission barrier damped to 1/2 at
-        spin VAL (default: 24).
-
-SHRD    Diffuseness of the shell correction damping  set to VAL
-        (default: 2.5).
-
-TEMP0   Temperature at which shell correction fade-out  space
-        starts set to VAL (default: 1.65).
-
-SHRT    Parameter in the temperature shell correction fade-out
-        set to VAL (default: 1.066).
-
-DEFGA   d (amplitude) in the Gaussian term in fission barrier set to VAL
-        (default: 0. - no correction).
-
-DEFGW   \Delta J_{G} (width) in the Gaussian term in fission barrier
-        set to VAL (default: 10).
-
-DEFGP   J_{G} (position) in the Gaussian term in fission barrier
-        set to VAL (default: 40).
+      QFIS    Liquid drop fission barriers multiplied by VAL (default: 1).
+      
+      BETAV   Viscosity parameter set to VAL (10^{-21}s^{-1}) (default: 4).
+      
+      SHRJ    Shell correction to fission barrier damped to 1/2 at
+              spin VAL (default: 24).
+      
+      SHRD    Diffuseness of the shell correction damping  set to VAL
+              (default: 2.5).
+      
+      TEMP0   Temperature at which shell correction fade-out  space
+              starts set to VAL (default: 1.65).
+      
+      SHRT    Parameter in the temperature shell correction fade-out
+              set to VAL (default: 1.066).
+      
+      DEFGA   d (amplitude) in the Gaussian term in fission barrier set to VAL
+              (default: 0. - no correction).
+      
+      DEFGW   \Delta J_{G} (width) in the Gaussian term in fission barrier
+              set to VAL (default: 10).
+      
+      DEFGP   J_{G} (position) in the Gaussian term in fission barrier
+              set to VAL (default: 40).
 
 Gamma-ray strength functions 
 ----------------------------
