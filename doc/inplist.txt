@@ -35,9 +35,14 @@ LTURBO   Step in the angular momentum set to VAL. This option can be
          in all residual nuclei will be considered. The result is appropriately
          normalized so that no flux is lost (default: 1).
 
-ENDF    Controls output for ENDF formatting ,
-       = 1 output for the ENDF formatting will be created ,
-       = 0 no output for the ENDF formatting will be created (default).
+ENDF     Controls output for ENDF formatting and exclusive/inclusive emission,
+       =  0 no output for the ENDF formatting will be created (default).
+       >= 1 output for the ENDF formatting will be created ,       
+            ENDF = 2 means all reactions emitting 2 or less particles are exclusive
+                     the rest are inclusive (lumped into MT=5)
+            ENDF = 3 means all reactions emitting 3 or less particles are exclusive
+                     the rest are inclusive (lumped into MT=5)
+            etc.  
 
 Output control
 --------------
@@ -61,6 +66,10 @@ Fusion
 ------
 
 FUSRED  Fusion cross section will be multiplied by VAL (default: 1.).
+
+FCCRED  Direct cross section will be multiplied by VAL (default: 1.).
+
+TOTRED  Total cross section will be multiplied by VAL (default: 1.).
 
 CSREAD  Controls HI fusion cross section determination,
        > 0 HI fusion cross section is set to VAL [in mb],
@@ -88,16 +97,13 @@ DFUS    Diffuseness in the transmission coefficients for HI fusion
 TRGLEV  Excited level of the target is set to VAL
         (default: 1 (ground state)).
 
-TOTRED  Total cross section will be multiplied by VAL (default: 1.).
-
 Width fluctuations (HRTW)
 -------------------------
 
 HRTW    Controls HRTW calculations
-       = 0 no HRTW
-       = 1 HRTW up to 5 MeV incident energy, and no HRTW above
-           this value (default)
-       = 2 HRTW for all incident energies
+       = 0    no HRTW
+       > 0    HRTW up to VAL (in MeV) incident energy, and no HRTW above
+              this value
 
 CCFUS input
 -----------
@@ -229,14 +235,14 @@ GST     Controls \gamma -emission in MSC,
 Multi-step direct
 -----------------          
 
-MSD 	Controls Multistep Direct calculations ,
-	  = 0 no MSD calculations (default),
-	  = 1 MSD calculations selected - ORION + TRISTAN will be executed ,
-	  = 2 MSD calculations selected but only TRISTAN will be executed using
-	      the most recent results of ORION. WARNING! there is no check whether
-	      the last and the current run match with regard to the projectile,
-	      the target and the incident energy; this option can be used for a
-	      single incident energy only.
+MSD   Controls Multistep Direct calculations ,
+        = 0 no MSD calculations (default),
+        = 1 MSD calculations selected - ORION + TRISTAN will be executed ,
+        = 2 MSD calculations selected but only TRISTAN will be executed using
+            the most recent results of ORION. WARNING! there is no check whether
+            the last and the current run match with regard to the projectile,
+            the target and the incident energy; this option can be used for a
+            single incident energy only.
 
 COMPFF Controls form factor for the l=0 transitions
        = 0 standard surface form factor (default)
@@ -244,54 +250,54 @@ COMPFF Controls form factor for the l=0 transitions
 
 WIDEX  Experimental energy resolution set to VAL (default: 0.2).
 
-GAPP 	 Proton pairing gap for target set to VAL (default: 12/sqrt{A}).
+GAPP   Proton pairing gap for target set to VAL (default: 12/sqrt{A}).
 
-GAPN 	 Neutron pairing gap for target set to VAL (default: 12/sqrt{A}).
+GAPN   Neutron pairing gap for target set to VAL (default: 12/sqrt{A}).
 
 HOMEGA Oscillator energy (default: 41.47/A^{1/3} MeV).
 
-EFIT 	 Coupling constants of multipolarity I1 fitted to the level at energy
-	    VAL (defaults: -1 for lambda=0, E_{GDR} for lambda =1, energies
-	    of the first low-lying 2+, 3-, and 4+ levels for lambda =2, 3, and  4,
-	    respectively).
+EFIT   Coupling constants of multipolarity I1 fitted to the level at energy
+          VAL (defaults: -1 for lambda=0, E_{GDR} for lambda =1, energies
+          of the first low-lying 2+, 3-, and 4+ levels for lambda =2, 3, and  4,
+          respectively).
 
 RESNOR Response function for multipolarity I1 will be normalized by
-	    factor VAL (default: 1.).
+          factor VAL (default: 1.).
 
-ALS 	 l-s coupling strength in the harmonic oscillator (default: 1.5).
+ALS    l-s coupling strength in the harmonic oscillator (default: 1.5).
 
 Multi-step compound 
 -------------------          
 
-MSC 	Controls Multistep Compound calculations ,
-	  = 0 no MSC calculations (default),
-	  = 1 MSC calculations selected.
+MSC   Controls Multistep Compound calculations ,
+        = 0 no MSC calculations (default),
+        = 1 MSC calculations selected.
 
-XNI 	Initial exciton number set to VAL (default set internally depending
-	   on the case, 3 for nucleon inuced reactions).
+XNI   Initial exciton number set to VAL (default set internally depending
+         on the case, 3 for nucleon inuced reactions).
 
-GDIV 	Single particle level densities in MSC set to A/VAL (default: 13.0).
+GDIV  Single particle level densities in MSC set to A/VAL (default: 13.0).
 
-TORY 	Ratio of unlike to like nucleon-nucleon interaction cross section
-	   set to VAL. Used for determination of relative share between neutron
-	   and protons in the exciton configurations (default: 4.).
+TORY  Ratio of unlike to like nucleon-nucleon interaction cross section
+         set to VAL. Used for determination of relative share between neutron
+         and protons in the exciton configurations (default: 4.).
 
-EX1 	Initial number of excitons being neutrons set to VAL (default set
-	   internally depending on the case and on TORY).
+EX1   Initial number of excitons being neutrons set to VAL (default set
+         internally depending on the case and on TORY).
 
-EX2 	Initial number of excitons being protons set to VAL (default set
-	   internally depending on the case and on TORY).
+EX2   Initial number of excitons being protons set to VAL (default set
+         internally depending on the case and on TORY).
 
 D1FRA Ratio of the spreading GDR width to the total GDR width set to
-	   VAL (default: 0.8).
+         VAL (default: 0.8).
 
-GST 	Controls gamma-emission in MSC,
-	  = 0 no gamma-emission in MSC (default),
-	  = 1 gamma-emission in MSC selected.
+GST   Controls gamma-emission in MSC,
+        = 0 no gamma-emission in MSC (default),
+        = 1 gamma-emission in MSC selected.
 
 STMRO Controls p-h level density calculations, 
-	  = 0 closed form p-h state densities selected (default),
-	  = 1 microscopic p-h state densities selected (not yet implemented) .
+        = 0 closed form p-h state densities selected (default),
+        = 1 microscopic p-h state densities selected (not yet implemented) .
 
 Exciton model (DEGAS)
 ---------------------
@@ -324,9 +330,15 @@ PCROSS  Controls calculations with PCROSS
 
 GTILNO  Single particle level density parameter g (in PCROSS) multiplied 
         by VAL
+        
+GDIV    Single particle level densities in PCROSS set to A/VAL (default: 13.0).        
 
 Level densities
 ---------------
+
+REDSEF  Spin-cut off parameter for dynamic LD scaled by factor VAL (default: 1.0)
+        Is used to reduce the effective moment of inertia (both paralell and 
+        perpendicular moments are affected). Useful in isomeric XS calculations
 
 LEVDEN  Selects level density approach,
        = 0 EMPIRE-specific level densities, BCS + Fermi gas with
@@ -426,14 +438,14 @@ FISDIS   Controls discrete transitional states
 
       The following options are valid only when FISSHI = 1 
 
-QFIS 	  Liquid drop fission barriers multiplied by VAL (default: 1.).
+QFIS    Liquid drop fission barriers multiplied by VAL (default: 1.).
 
 BETAV   Viscosity  parameter set to VAL (10^{-21}s^{-1}) (default: 4.).
 
-SHRJ 	  Shell correction to fission barrier dampped to 1/2 at spin VAL 
+SHRJ    Shell correction to fission barrier dampped to 1/2 at spin VAL 
         (default: 24.).
 
-SHRD 	  Diffuseness of the shell correction damping set to VAL (default: 2.5).
+SHRD    Diffuseness of the shell correction damping set to VAL (default: 2.5).
 
 FISOPT  Controls subbarrier effects for nucleus Z=I1, A=I2
        = 0 no subbarrier effects
@@ -504,10 +516,10 @@ GDRGFL   Selects source of GDR parameters
       = 0 Messina systematics
       = 1 experimental or systematics of RIPL-2 (default)
 
-GDRDYN 	Controls GDR treatment ,
-   	= 0. GDR shape depends on the ground state deformation (default),
-   	= 1. GDR shape dependance accounts for the rotation induced deformation
-	        (spin dependent).
+GDRDYN      Controls GDR treatment ,
+      = 0. GDR shape depends on the ground state deformation (default),
+      = 1. GDR shape dependance accounts for the rotation induced deformation
+              (spin dependent).
 
 GGDR1   GDR width of first peak set to VAL (default calculated
         internally from systematics).
@@ -592,6 +604,9 @@ RELKIN  Controls kinematics,
 
 Miscellaneous
 -------------
+
+ISOMER  Minimum half life of the considered isomers set to VAL seconds (minimum 1 sec)
+        Default = 1 sec. To avoid isomers' printout input a big number here.
 
 BNDG    Binding energy of ejectile I3 in nucleus Z=I1, A=I2 set to VAL
         (default calculated internally from nuclear masses).
