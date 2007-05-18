@@ -23,7 +23,6 @@ value.  Anything below this line will be ignored by the code.
 *) Any  line starting  with !, #,  or *  is treated as  comment. There
 might be an arbitrary number of comments line in the optional(!) input.
 
-Calculation control
 -------------------
 
 NEX       Maximum number of energy steps in the integration set to VAL
@@ -235,14 +234,22 @@ GST     Controls \gamma -emission in MSC,
 Multi-step direct
 -----------------          
 
-MSD   Controls Multistep Direct calculations ,
-        = 0 no MSD calculations (default),
-        = 1 MSD calculations selected - ORION + TRISTAN will be executed ,
-        = 2 MSD calculations selected but only TRISTAN will be executed using
-            the most recent results of ORION. WARNING! there is no check whether
-            the last and the current run match with regard to the projectile,
-            the target and the incident energy; this option can be used for a
-            single incident energy only.
+MSD 	Controls Multistep Direct calculations ,
+	  = 0 no MSD calculations (default),
+	  = 1 MSD calculations selected - ORION + TRISTAN will be executed,
+         discrte levels will be poulated by the MSD mechanism only if no
+         CC or DWBA calculations are selected,
+	  = 2 MSD calculations selected and used in the full range of outgoing
+         particle energies, i.e., if CC or DWBA calculations are selected
+         MSD contribution to discrete levels will be summed up with direct
+         calculations. If no direct calculations are selected (DIRECT=0) then
+         MSD=1 and MSD=2 are euquivalent.
+         NOTE: this option is legitimate only if nucleus is
+         deformed and rotational CC is being used. Then MSD ads up vibrational
+         component. Otherwise, vibrational contribution is double-counted
+         and EMPIRE is not protected against such a missuse. 
+
+MSDMIN MSD calculations only for C.M. incident energies >= VAL (default: 5 MeV)
 
 COMPFF Controls form factor for the l=0 transitions
        = 0 standard surface form factor (default)
@@ -386,20 +393,6 @@ NIXSH  = 0 shell-corrections calculated according to Myers-Swiatecki (default),
 Fission
 -------
 
-FISSHI  Controls treatment of the fission channel for nucleus Z=I1, A=I2
-       = 0 advanced fission (multi-humped barrier, optical model for fission) recommended
-           for light particle or photon induced fission (default)
-       = 1 fission over single-humped barrier (good only for Heavy Ion induced reactions)
-       = 2 fission ignored
-
-The following options are valid only when FISSHI = 0
-
-FISBAR  Controls origin of fission barrier data for nucleus Z=I1, A=I2
-       = 0 Ripl-2 (microscopic calculations by Goriely with internally set barrier widths
-           taken from Lynn - default),
-       = 1 internal EMPIRE library
-       = 2 Ripl-1 (compilation of Maslov, model dependent!)
-
 FISSHI   Controls treatment of the fission channel for nucleus
          Z=I1, A=I2 
       =0 advanced fission (multi-humped barrier, optical model for
@@ -410,6 +403,7 @@ FISSHI   Controls treatment of the fission channel for nucleus
       =2 fission ignored
 
       The following options are valid only when FISSHI = 0
+
 
 FISBAR   Controls origin of fission barrier data for nucleus Z=I1, A=I2 
       =0 Ripl-2 (microscopic calculations by Goriely with internally set
@@ -612,6 +606,8 @@ BNDG    Binding energy of ejectile I3 in nucleus Z=I1, A=I2 set to VAL
         (default calculated internally from nuclear masses).
 
 DEFPAR  b coefficient in dynamic deformation expression set to VAL (default: 1).
+
+DEFNOR  ground-state deformation for nucleus Z=I1, A=I2 normalized by VAL (default: 1).
 
 JSTAB   Stability limit with respect to spin for the nucleus Z=I1 and A=I2,
        = 0 set at a spin at which fission barrier (including shell correction) disappears (default),
