@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-18 13:15:15 $
-Ccc   * $Id: main.f,v 1.169 2007-05-18 13:15:15 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-18 14:00:29 $
+Ccc   * $Id: main.f,v 1.170 2007-05-18 14:00:29 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1628,15 +1628,15 @@ C----------CN contribution to elastic ddx
             IF(ISIsom(l,Nnuc).EQ.1) THEN 
               metas = metas + 1            
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
-     &           ''  isomer state population '',G12.6,'' mb'',
-     &           1x,1hm,I1,'' level '',F7.4,'' MeV ('',F5.1,'')'' )')
-     &           iz, SYMb(nnuc), ia, POPlv(l,Nnuc),
-     &           metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
+     &         '' isomer state population  '',G12.6,
+     &         ''mb (m'',I1,'' E='',F7.4,''MeV Jp='',F5.1,'')'')')
+     &         iz, SYMb(nnuc), ia, POPlv(l,Nnuc),
+     &         metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
               CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
             ENDIF 
-           ENDDO 
-           IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
-     &           ''  ground state population '',G12.6,'' mb'')')
+         ENDDO 
+         IF(metas.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+     &           '' ground state population  '',G12.6,''mb'')')
      &           iz, SYMb(nnuc), ia, CSPrd(nnuc)
          ENDIF
          IF(CSFis.gt.0.)
