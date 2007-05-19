@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-04-02 22:01:59 $
-Ccc   * $Id: tl.f,v 1.89 2007-04-02 22:01:59 Capote Exp $
+Ccc   * $Date: 2007-05-19 21:25:47 $
+Ccc   * $Id: tl.f,v 1.90 2007-05-19 21:25:47 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1476,8 +1476,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, ELAcs, SINl, TOTcs, SINlcc
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc
+      DOUBLE PRECISION ABScs, ELAcs, SINl, TOTcs, SINlcc, SINlcont
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
 C
 C Dummy arguments
 C
@@ -1488,7 +1488,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
-     &                 xmas_nejc, xmas_nnuc, sinlcont, selast
+     &                 xmas_nejc, xmas_nnuc, selast
       DOUBLE PRECISION DBLE
       INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
       LOGICAL relcal
@@ -1576,7 +1576,7 @@ C-----For vibrational the Tls must be multiplied by
       ELAcs = 0.D0
       SINl = 0.D0
       SINlcc = 0.D0
-      sinlcont = 0.D0
+      SINlcont = 0.D0
       sabs = 0.D0
       selast = 0.D0
 
@@ -1631,13 +1631,13 @@ C             Uncoupled discrete levels
            ENDIF
          ELSE
 C          Scattering into continuum
-           sinlcont = sinlcont + dtmp
+           SINlcont = SINlcont + dtmp
 C          Not included into inelastic as it is renormalized in main.f
 C          SINl = SINl + dtmp
          ENDIF
       ENDDO
   400 CLOSE (45)
-      IF (SINl+SINlcc.EQ.0.D0) RETURN
+      IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C--- SINlcc in next IF changed to SINl - BVC
       IF (SINl.GT.ABScs) THEN
          WRITE (6,*)
@@ -1696,13 +1696,14 @@ C
      &      ' Inelastic XS to uncoupled discrete levels (DWBA) =',
      &               SNGL(SINl), ' mb '
          WRITE (6,*) ' Inelastic XS to the continuum (sinlcont) =',
-     &               SNGL(sinlcont), ' mb '
+     &               SNGL(SINlcont), ' mb '
          IF (SINlcc.GT.0.D0) THEN
             WRITE (6,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (6,*) ' Sreac - SINl (renormalized by DWBA) =',
-     &         SNGL(ABScs - SINlcc - SINl), ' mb (Sabs - SINl)'
+         WRITE (6,*) ' Sreac - SINl - sinlcont(renormalized by DWBA) =',
+     &         SNGL(ABScs -SINlcc -SINl -SINlcont), 
+     &             ' mb (Sabs - SINl - SINlcont)'
          WRITE (6,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (6,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
@@ -1715,9 +1716,13 @@ C     between calculated and read ECIS XS
 C     Discrete level inelastic scattering (not coupled levels) also included
 C
       DO l = 0, Maxlw
-         Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl)/sabs
+        Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
       ENDDO
-      CSFus = ABScs - SINlcc - SINl
+      CSFus = ABScs - SINlcc - SINl - SINlcont
+C     DO l = 0, Maxlw
+C        Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl)/sabs
+C     ENDDO
+C     CSFus = ABScs - SINlcc - SINl 
 
       RETURN
       END

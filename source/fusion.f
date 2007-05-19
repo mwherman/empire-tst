@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-04-02 22:01:57 $
-Ccc   * $Id: fusion.f,v 1.66 2007-04-02 22:01:57 Capote Exp $
+Ccc   * $Date: 2007-05-19 21:25:47 $
+Ccc   * $Id: fusion.f,v 1.67 2007-05-19 21:25:47 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -24,8 +24,9 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW), S1, SINl, TOTcs, SINlcc
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc
+      DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW)
+	DOUBLE PRECISION S1, SINl, TOTcs, SINlcc, SINlcont
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
       COMMON /ELASTIC/ ELTl
       COMMON /WAN   / S1
 C
@@ -79,6 +80,7 @@ C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
       TOTcs = 0.D0
       ABScs = 0.D0
       SINl = 0.D0
+      SINlcont = 0.D0
       csmax = 0.0
       CSFus = 0.0
       maxlw = 0
@@ -109,6 +111,7 @@ C--------Here the old calculated files should be read
                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
             ENDDO
             READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+	      SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
      &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
      &                    ABScs, SINl, SINlcc, CSFus
@@ -183,6 +186,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
    60       ABScs=CSFus
             SINlcc=0.d0
             SINl  =0.d0
+            SINlcont =0.d0
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -300,6 +304,7 @@ C--------and calculate transmission coefficients
          ABScs = CSFus
          SINlcc=0.d0
          SINl=0.d0
+         SINlcont =0.d0
          WRITE (6,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (6,*)
@@ -590,6 +595,7 @@ C--------channel spin min and max
          ABScs = CSFus
          SINlcc = 0.d0
          SINl = 0.d0
+         SINlcont =0.d0
       ENDIF ! END of FUSREAD block
 C
 C-----Moving incident channel results to TL/ directory
@@ -805,21 +811,22 @@ C-----------DIRECT=1 or DIRECT=2
             WRITE (6,*)
      &         ' CC OMP TLs normalized to substract DWBA contribution'
             WRITE (6,*)
-     &         '             to discrete un-coupled collective levels'
+     &         '                               to collective levels'
+C           WRITE (6,*)
+C    &         '             to discrete un-coupled collective levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN
          WRITE (6,*)
          WRITE (6,*) 
-     &   '      CSFus(SUM_Tl)   CSFus+SINl+CC    ABScs(ECIS)'
-         WRITE (6,'(4x,3(2x,D12.6,2x))')
-     &   CSFus, CSFus + SINl + SINlcc, ABScs
+     &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(ECIS)'
+         WRITE (6,'(4x,3(4x,D12.6,4x))')
+     &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
          WRITE (6,*)
       ENDIF
 
 C
 C     CSFus contains only the reaction cross section to be distributed
-C     Continuum inelastic scattering by DWBA was not substracted yet.
 C
 C-----calculation/reading of transmission coefficients for input channel done ------
 C
