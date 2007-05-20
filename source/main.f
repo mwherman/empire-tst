@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-19 21:25:47 $
-Ccc   * $Id: main.f,v 1.172 2007-05-19 21:25:47 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-20 04:50:10 $
+Ccc   * $Id: main.f,v 1.173 2007-05-20 04:50:10 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -350,12 +350,12 @@ c	         endif
                    dtmp = dexp(-dble(ie-icsl)**2/isigma2) + dtmp
                  enddo
                  if(dtmp.gt.0.d0) then
-	             check = 0.d0
+                   check = 0.d0
                    do ie = max(icsl - 3*isigma,1) ,
      &                     min(NDEcse,icsl + 3*isigma)
                      CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) + 
      &                 popread/DE*dexp(-dble(ie-icsl)**2/isigma2)/dtmp
-	               check = check +  popread
+                     check = check +  popread
      &                 * dexp(-dble(ie-icsl)**2/isigma2)/dtmp 
                    enddo
                    if(abs(check-popread).gt.0.05d0) 
@@ -698,12 +698,12 @@ C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
             ENDDO
          ENDIF
          if(xsinlcont.gt.0) then 
-	     write(6,*)
+            write(6,*)
      &     ' DWBA to continuum XS for inelastic channel ',xsinlcont
-	     SINlcont =  xsinlcont
-	   else	  
-	     SINlcont =  0.d0
-	   endif
+            SINlcont =  xsinlcont
+         else  
+            SINlcont =  0.d0
+         endif
 C        if(xsinlcont.gt.0) write(6,*)
 C    &   ' DWBA to continuum XS for inelastic channel (test) ',SINlcont
                WRITE (6,*)
@@ -1666,7 +1666,7 @@ C----------CN contribution to elastic ddx
          
          IF(CSPrd(nnuc).GT.0.d0) THEN
            metas = 0
-	     ftmp_gs = CSPrd(nnuc)
+           ftmp_gs = CSPrd(nnuc)
            DO l= NLV(Nnuc), 2, -1
             IF(ISIsom(l,Nnuc).EQ.1) THEN 
               metas = metas + 1            
@@ -1675,7 +1675,7 @@ C----------CN contribution to elastic ddx
      &         ''mb (m'',I1,'' E='',F7.4,''MeV Jp='',F5.1,'')'')')
      &         iz, SYMb(nnuc), ia, POPlv(l,Nnuc),
      &         metas, ELV(l,Nnuc), LVP(l,Nnuc)*XJLv(l,Nnuc) 
-	         ftmp_gs = ftmp_gs - POPlv(l,Nnuc)
+              ftmp_gs = ftmp_gs - POPlv(l,Nnuc)
 C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
             ENDIF 
            ENDDO 

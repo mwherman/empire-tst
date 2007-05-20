@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-19 21:25:47 $
-Ccc   * $Id: fusion.f,v 1.67 2007-05-19 21:25:47 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-20 04:50:10 $
+Ccc   * $Id: fusion.f,v 1.68 2007-05-20 04:50:10 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -25,7 +25,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW)
-	DOUBLE PRECISION S1, SINl, TOTcs, SINlcc, SINlcont
+      DOUBLE PRECISION S1, SINl, TOTcs, SINlcc, SINlcont
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
       COMMON /ELASTIC/ ELTl
       COMMON /WAN   / S1
@@ -111,7 +111,7 @@ C--------Here the old calculated files should be read
                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
             ENDDO
             READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-	      SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
+            SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
      &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
      &                    ABScs, SINl, SINlcc, CSFus
@@ -678,8 +678,8 @@ C
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
-	ElasticCorr = 0.d0
-	IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
+      ElasticCorr = 0.d0
+      IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
      &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
      &              + (1.d0 - FUSred)*CSFus   ! Here CSFus is not scaled yet 
      &              + (1.d0 - FCCred)*(SINl + SINlcc)
@@ -730,7 +730,7 @@ C--------Corrected scattering radius
            IF(sel(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
-	   selast = selast *  10.d0*PI/ak2
+         selast = selast *  10.d0*PI/ak2
          WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs 

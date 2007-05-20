@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-19 21:25:47 $
-Ccc   * $Id: tl.f,v 1.90 2007-05-19 21:25:47 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-20 04:50:10 $
+Ccc   * $Id: tl.f,v 1.91 2007-05-20 04:50:10 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1606,7 +1606,7 @@ C        Sel(l+1) = Sel(l+1)*10.d0*PI/ak2
          selast = selast + Sel(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs = 10.d0*PI/ak2*sabs
-	selast = selast*10.d0*PI/ak2
+      selast = selast*10.d0*PI/ak2
 
       IF (sabs.LE.0.D0) RETURN
 
