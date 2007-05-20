@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-17 15:47:01 $
-Ccc   * $Id: HF-comp.f,v 1.89 2007-05-17 15:47:01 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-20 04:38:50 $
+Ccc   * $Id: HF-comp.f,v 1.90 2007-05-20 04:38:50 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -770,7 +770,6 @@ C
       WRITE(6,*)'Ejectile',nejc 
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         WRITE(6,*)'Direct level ',l,' decay pop=', CSDirlev(l,nejc)
          IF (BR(l,1,2,Nnuc).EQ.0. .and. CSDirlev(l,nejc).gt.0. ) THEN
 C-----------Well... let it go down to the ground state
             gacs = CSDirlev(l,nejc)
@@ -787,7 +786,6 @@ C-----------Well... let it go down to the ground state
                   ENDIF
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
-                  WRITE(6,*)'   populating level',j1,' with ',gacs 
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
                ENDDO
