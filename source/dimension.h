@@ -3,14 +3,14 @@
      *,NDEXCLUS = 60
      *,NDEJC=3
      *,NDAFIS=1
-     *,NDEX= 151
+     *,NDEX=  151
      *,NDLW= 40
      *,NDTL= 40
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
      *,LEVcc=20
-     *,NDECSE=NDEX+10
+     *,NDECSE=NDEX+20
      *,NDEPFN=2*NDEX     
      *,NDANGecis=91
      *,NDNUCD=NDNUC
@@ -24,7 +24,7 @@
      *,NDRVOM=3
      *,NDRWOM=3
      *,NDRVSO=3
-     *,NDHRTW1=500
+     *,NDHRTW1=300
      *,NDHRTW2=20
      *,NDETL=NDEX+6
      *,NDEREC=NDECSE
