@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-18 13:03:51 $
-Ccc   * $Id: input.f,v 1.228 2007-05-18 13:03:51 herman Exp $
+Ccc   * $Date: 2007-05-21 05:13:59 $
+Ccc   * $Id: input.f,v 1.229 2007-05-21 05:13:59 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1442,6 +1442,22 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
       ENDIF
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
+C-----check whether spectrum array is big enough to accomodate capture spectrum
+      IF(INT(EMAx(1)/DE+1).GE.NDECSE) THEN 
+C===============================================================================
+C     The block below is what it should be, but it does HRTW routine crash !!!!
+C     i.e. DE can not be changed for the time being, this part should be revised
+C     together with width fluctuation routine
+C       DE = EMAx(1)/FLOAT(NDECSE-1)
+C       NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
+C       WRITE(6,*)'WARNING: Maximum number of enrgy bins set to',NEX(1),
+C    &            ' to accomodate capture spectrum'
+        nex1=INT((EMAx(1)-ECUt(1))/(EMAx(1)/FLOAT(NDECSE-1)))
+        WRITE(6,*)'THERE IS NOT ENOUGH SPACE FOR CAPTURE SPECTRUM' 
+        WRITE(6,*)'Decrease number of energy bins to ',nex1
+        WRITE(6,*)'or increase NDEX in dimension.h and recompile.' 
+        STOP 'NO SPACE FOR CAPTURE SPECTRUM'
+      ENDIF 
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
       DO i = 1, NDEJC
