@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-21 20:00:58 $
-Ccc   * $Id: HRTW-comp.f,v 1.42 2007-05-21 20:00:58 herman Exp $
+Ccc   * $Date: 2007-05-21 20:37:01 $
+Ccc   * $Id: HRTW-comp.f,v 1.43 2007-05-21 20:37:01 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -586,7 +586,7 @@ C--------------------entry with nhrtw=0
                      CALL TL2VL(tld,cor)
                      sumdl = sumdl + tld*cor
 C                    WRITE(6,*)'sumdl,tld,cor ',sumdl,tld,cor
-                     IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0) .AND.
+                     IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0) .AND.
      &                   tld.GT.H_Tthr) THEN
 C-----------------------case of a strong elastic channel
 C-----------------------record position of Tl, l and channel spin
@@ -1257,8 +1257,8 @@ C-----decay to discrete levels
 C-----
       IF (RORed.NE.0.0D0) THEN
          eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-C--------only ground state considered
-         i = 1
+C--------only target state considered
+         i = LEVtarg
          eout = eoutc - ELV(i,Nnur)
          IF (eout.LT.DE) THEN
 C--------level above the bin
