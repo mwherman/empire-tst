@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-21 10:24:48 $
-Ccc   * $Id: input.f,v 1.230 2007-05-21 10:24:48 Capote Exp $
+Ccc   * $Date: 2007-05-21 20:00:58 $
+Ccc   * $Id: input.f,v 1.231 2007-05-21 20:00:58 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -45,7 +45,7 @@ C
       LOGICAL gexist, nonzero, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        netl, nnuc, nnur, mulem
+     &        netl, nnuc, nnur, mulem, nucmin
       INTEGER IFINDCOLL
       INTEGER INDEX, INT, ISEED, NINT
       INTEGER*4 iwin
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -1428,7 +1428,7 @@ C-----WRITE heading on FILE6
      &          Q(0,1)
       ENDIF
 C
-C-----determination of excitation energy matrix in cn
+C-----determination of excitation energy matrix in CN
 C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
@@ -1442,23 +1442,8 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
       ENDIF
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
-C-----check whether spectrum array is big enough to accomodate capture spectrum
-
-      IF(INT(EMAx(1)/DE+1).GE.NDECSE) THEN 
-C===============================================================================
-C     The block below is what it should be, but it does HRTW routine crash !!!!
-C     i.e. DE can not be changed for the time being, this part should be revised
-C     together with width fluctuation routine
-C       DE = EMAx(1)/FLOAT(NDECSE-1)
-C       NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
-C       WRITE(6,*)'WARNING: Maximum number of enrgy bins set to',NEX(1),
-C    &            ' to accomodate capture spectrum'
-        nex1=INT((EMAx(1)-ECUt(1))/(EMAx(1)/FLOAT(NDECSE-1)))
-        WRITE(6,*)'THERE IS NOT ENOUGH SPACE FOR CAPTURE SPECTRUM' 
-        WRITE(6,*)'Decrease number of energy bins to ',nex1
-        WRITE(6,*)'or increase NDEX in dimension.h and recompile.' 
-        STOP 'NO SPACE FOR CAPTURE SPECTRUM'
-      ENDIF 
+C-----check whether spectrum array can accomodate capture with this DE
+      CALL CHECK_DE(EMAx(1),NDECSE)
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
       ichanmin = -1
@@ -1469,30 +1454,21 @@ C-----check whether any residue excitation is higher than CN
             ichanmin = i
          ENDIF  
       ENDDO
-C===============================================================================
-C     The block below is what it should be, but it does HRTW routine crash !!!!
-C     i.e. DE can not be changed for the time being, this part should be revised
-C     together with width fluctuation routine
-C     RCN, 14 June 2005              
-C     IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
-C--------Energy redefined
-C        WRITE( 6,'(1x,''Energy grid redefined following ejectile '',
-C    &   A2,'' with a negative Q value '',F6.2)')
-C    &   SYMbe(ichanmin),qmin
-C        WRITE( 6,'(1x,A28,F6.1,A4)')
-C    &       '            Old energy step ',DE*1000.d0,' keV'
-C        DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
-C--------Number of steps in CN outgoing energy grid redefined
-C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
-C     ENDIF
-C===============================================================================
-
+      CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
+C-----check whether population array can accomodate the reaction with the largest
+C-----continuum using current DE, if not adjust DE
+      CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+C-----check whether spectra array can accomodate the reaction with the largest
+C-----continuum using current DE, if not adjust DE
+      CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       WRITE( 6,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
-
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
+C
+C-----determination of excitation energy matrix in CN ***done***
+C
 C-----set energy bin for recoils (max. energy is increased by 5%)
       IF (AEJc(NDEJC).GT.AEJc(3)) THEN
          DERec = (EINl - EIN + (EMAx(1) - MIN(0.0D0,qmin))
@@ -1513,7 +1489,6 @@ C-----calculate compound nucleus level density
       ARGred = -1.
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
       IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,0.0D0,2.D0)
-C     <m2> could be added to the input
       IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
       IF (ADIv.EQ.3.0D0) CALL ROHFBCS(nnuc)
       IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0,1.D0)
@@ -1614,7 +1589,7 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
      &          '         TO CONSIDER IT, YOU HAVE TO DECREASE ',
      &          ' NEX IN THE INPUT '
                WRITE (6,*)
-     &          '         OR INCREASE NDEX PARAMETER IN Dimension.h'
+     &          '         OR INCREASE NDEX PARAMETER IN dimension.h'
                WRITE (6,'('' WARNING: EMAXr : '',F7.2,
      &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
                WRITE (6,*)
@@ -4327,14 +4302,16 @@ C-----
              IF(i1.eq.0 .OR. i2.eq.0) THEN
 C             Setting ENDF for all emission loops
               NENdf = INT(val)
-              WRITE (6,'('' ENDF formatting enabled'')')
-              WRITE (6,'(
-     &         '' Exclusive spectra available up to'',
-     &         '' emission loop # '',I2)') NENdf
-              WRITE (12,'(
-     &         '' Exclusive spectra available up to'',
-     &         '' emission loop # '',I2)') NENdf
-                  GOTO 100
+              IF(NENdf.GT.0) THEN
+                 WRITE (6,'('' ENDF formatting enabled'')')
+                 WRITE (6,'(
+     &            '' Exclusive spectra available up to'',
+     &            '' emission loop # '',I2)') NENdf
+                 WRITE (12,'(
+     &            '' Exclusive spectra available up to'',
+     &            '' emission loop # '',I2)') NENdf
+                     GOTO 100
+              ENDIF
              ENDIF
              IF(val.LT.0) THEN
                WRITE (6,'('' WRONG ENDF value for NUCLEUS '',I3,A2)')
@@ -8790,3 +8767,36 @@ C     Generator of normally distributed random numbers based on R250
 
       return
       End
+
+      SUBROUTINE CHECK_DE(Energy,Limit)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:ppu*
+Ccc   *                    C H E C K _ D E                               *
+Ccc   *                                                                  *
+Ccc   *  Checks whether the size of energy bin DE is big enough to       *
+Ccc   *  ensure that population and spectra arrays are sufficiently      *
+Ccc   *  dimensioned. If not, it adjusts number of bins in the CN untill *
+Ccc   *  DE is big enough.                                               *
+Ccc   *                                                                  *
+Ccc   *  Input: Energy - energy that has to be handled                   *
+Ccc   *         Limit  - dimension that must not be exceeded             *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      INTEGER Limit
+      REAL*8 Energy
+      IF(INT(Energy/DE+1).LT.Limit) RETURN
+   10 NEX(1) = NEX(1) - 1
+      IF(NEX(1).EQ.1) THEN
+         WRITE(6,*) 'FATAL ERROR DEFINING ENERGY STEP' 
+         WRITE(6,*) 'REPORT TO mwherman@bnl.gov      ' 
+         STOP ' FATAL ERROR DEFINING ENERGY STEP' 
+      ENDIF
+      DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
+      IF(INT(Energy/DE+1).GE.Limit) GOTO 10
+      WRITE(6,*) ' WARNING: Number of energy steps set to ',NEX(1)
+      RETURN
+      END

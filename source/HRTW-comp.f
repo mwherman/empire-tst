@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-14 22:32:02 $
-Ccc   * $Id: HRTW-comp.f,v 1.41 2007-05-14 22:32:02 herman Exp $
+Ccc   * $Date: 2007-05-21 20:00:58 $
+Ccc   * $Id: HRTW-comp.f,v 1.42 2007-05-21 20:00:58 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -354,6 +354,7 @@ C
 C
 C     WRITE(6,*)' '
 C     WRITE(6,*)'ejectile ,nhrtw ',nejc,nhrtw
+C     WRITE(6,*)'CN bin, spin, parity',Iec,Jc,Ipc
 C     WRITE(6,*)' '
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
@@ -593,9 +594,9 @@ C-----------------------record position of Tl, l and channel spin
                         MEMel(iel,2) = l
                         MEMel(iel,3) = INT(2.0*s)
 C                       WRITE(6,*)'got elastic iel ', iel,
-C                       &                     '  MEM# ',MEMel(iel,1),
-C                       &                     '  MEMk ',MEMel(iel,2),
-C                       &                     '  MEM2s ',MEMel(iel,3)
+C    &                     '  MEM# ',MEMel(iel,1),
+C    &                     '  MEMk ',MEMel(iel,2),
+C    &                     '  MEM2s ',MEMel(iel,3)
                         iel = iel + 1
                      ENDIF
                   ENDIF
@@ -1388,7 +1389,7 @@ C-----channel spin min and max
      &                    'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
                   WRITE (6,*) 'INCREASE NDHRTW2 IN THE dimension.h',
      &                        ' AND RECOMPILE.'
-                  STOP
+                  STOP 'INSUFFICIENT DIMENSION: NDHRTW2'
                ENDIF
                IF (NH_lch.GT.NDHRTW1) THEN
                   vl = VT1(ELTl(k),H_Tav,H_Sumtl)
@@ -1405,7 +1406,7 @@ C-----channel spin min and max
                      WRITE (6,*) ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
                      WRITE (6,*) ' REPORT THIS ERROR ALONG WITH RELATED'
                      WRITE (6,*) ' INPUT FILE TO: mwherman@bnl.gov'
-                     STOP
+                     STOP ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
                   ENDIF
                   vl = H_Tl(kel,1)
                ENDIF

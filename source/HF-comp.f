@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-20 04:38:50 $
-Ccc   * $Id: HF-comp.f,v 1.90 2007-05-20 04:38:50 herman Exp $
+Ccc   * $Date: 2007-05-21 20:00:58 $
+Ccc   * $Id: HF-comp.f,v 1.91 2007-05-21 20:00:58 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -767,7 +767,6 @@ C
       INTEGER NINT
 C
 C
-      WRITE(6,*)'Ejectile',nejc 
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
          IF (BR(l,1,2,Nnuc).EQ.0. .and. CSDirlev(l,nejc).gt.0. ) THEN
