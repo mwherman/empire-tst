@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-20 04:50:10 $
-Ccc   * $Id: main.f,v 1.173 2007-05-20 04:50:10 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-21 10:24:49 $
+Ccc   * $Id: main.f,v 1.174 2007-05-21 10:24:49 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -175,8 +175,10 @@ C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       checkXS = 0.d0
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
-      IF(WIDcoll.GT.0.d0)
-     &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
+C     RCN, To avoid gaussian spreading of the calculated strength
+C     IF(WIDcoll.GT.0.d0)
+C    &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
+
       ncoll = 0
       ecm = EINl - EIN
       dang = PI/FLOAT(NANgela - 1)
@@ -328,8 +330,7 @@ C
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
                  isigma2 = 2*isigma*isigma
                endif
-
-c	         if(icsl.gt.1) then
+c              if(icsl.gt.1) then
 c                CSEmsd(icsl-1,nejcec) = CSEmsd(icsl-1,nejcec) 
 c    &              + 0.2d0*popread/DE
 c                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + 
@@ -341,7 +342,7 @@ c                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) +
 c    &                0.7d0*popread/DE
 c                CSEmsd(icsl+1,nejcec) = CSEmsd(icsl+1,nejcec) 
 c    &              + 0.3d0*popread/DE
-c	         endif
+c              endif
 
                if(isigma.gt.0) then
                  dtmp = 0.d0
@@ -374,19 +375,19 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
 
-c	              if(icsl.gt.1) then 
+c                   if(icsl.gt.1) then 
 c                      CSEa(icsl-1,iang,nejcec,1) = 
 c     &                CSEa(icsl-1,iang,nejcec,1) + 0.2d0*ftmp/DE
 c                      CSEa(icsl  ,iang,nejcec,1) = 
 c     &                CSEa(icsl  ,iang,nejcec,1) + 0.6d0*ftmp/DE
 c                      CSEa(icsl+1,iang,nejcec,1) = 
 c     &                CSEa(icsl+1,iang,nejcec,1) + 0.2d0*ftmp/DE
-c	              else
+c                   else
 c                      CSEa(icsl  ,iang,nejcec,1) = 
 c     &                CSEa(icsl  ,iang,nejcec,1) + 0.7d0*ftmp/DE
 c                      CSEa(icsl+1,iang,nejcec,1) = 
 c     &                CSEa(icsl+1,iang,nejcec,1) + 0.3d0*ftmp/DE
-c	              endif
+c                   endif
 
                     if(isigma.gt.0 .and. dtmp.gt.0.d0) then
                       do ie = max(icsl - 3*isigma,1) ,
@@ -442,7 +443,7 @@ C-----Print elastic and direct cross sections from ECIS
       IF (KTRlom(0,0).GT.0) THEN
       IF (ZEJc(0).EQ.0 .AND. AEJc(0).GT.0) THEN
          WRITE (6,99005) TOTcs,TOTred*TOTcs, 
-     &                   CSFus,CSFus/FUSred, 
+     &                   CSFus/FUSred,CSFus, 
      &                   SINlcc + SINl + SINlcont,
      &                   (SINlcc + SINl)*FCCred + SINlcont,
      &                   ELAcs, ElasticCorr + ELAcs
@@ -453,7 +454,10 @@ C-----Print elastic and direct cross sections from ECIS
      &           'Direct cross section        :',e14.7,' mb',
      &                '  ( Scaled  ',e14.7,' mb )',/,2x,
      &           'Shape elastic cross section :',e14.7,' mb',
-     &                '  ( Scaled  ',e14.7,' mb )',//)
+     &                '  ( Shifted ',e14.7,' mb )')
+         IF(ElasticCorr.NE.0.d0) write(6,'(2x, 
+     &''** Elastic changed to compensate changes in total/absorption'',
+     &//)')
       ENDIF
       IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
          WRITE (6,99010) CSFus + (SINlcc + SINl)*FCCred + SINlcont
@@ -1212,11 +1216,22 @@ C--------
                CLOSE (8)
             ENDIF
          ENDIF
+C--------
+C--------Heidelberg Multistep Compound calculations
+C--------
+         IF (nnuc.EQ.1 .AND. MSC.NE.0) THEN
+            CALL HMSC(nvwful)
+            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)
+            CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
+            CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
+            IF (nvwful) GOTO 1500
+         ENDIF
          IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
      &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1) + CSEmis(3,1))
      &       .NE.0) THEN
             WRITE (6,*) ' '
-            WRITE (6,*) ' Preequilibrium spectra (sum of all models):'
+            WRITE (6,*) 
+     &        ' Preequilibrium + Direct spectra (sum of all models):'
             IF(CSEmis(0,1).GT.0) CALL AUERST(1,0)
             IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
             IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
@@ -1228,16 +1243,6 @@ C--------
                CALL AUERST(0,2)
                WRITE (6,*) ' '
             ENDIF
-         ENDIF
-C--------
-C--------Heidelberg Multistep Compound calculations
-C--------
-         IF (nnuc.EQ.1 .AND. MSC.NE.0) THEN
-            CALL HMSC(nvwful)
-            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)
-            CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
-            CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
-            IF (nvwful) GOTO 1500
          ENDIF
 C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay
@@ -2645,8 +2650,8 @@ C     ENDDO
         WRITE (6,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
         if(TOTred.ne.1.)
-     &  WRITE (6,'('' * Total cross section scaled by '',G12.5,
-     &              '' mb  '')') TOTred    
+     &  WRITE (6,'('' * Total cross section scaled by '',G12.5,)')
+     &  TOTred    
         WRITE (6,
      &  '('' * Optical model total cross section              '',G12.5,
      &              '' mb  '')') TOTcs*TOTred
@@ -2659,7 +2664,7 @@ C     ENDDO
      &              '' mb  '')') 
      &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
      &   + (SINl+SINlcc)*FCCred + SINlcont
-	    WRITE (6,
+          WRITE (6,
      &  '('' * Calculated nonelastic cross section            '',G12.5,
      &              '' mb  '')') 
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
@@ -2677,10 +2682,10 @@ C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred
 C    &                           + SINlcont - 4.*PI*ELCncs
         if(FUSred.ne.1.)
      &  WRITE (6,'('' * CN formation cross section scaled by '',G12.5,
-     &              '' mb  '')') FUSred    
+     &  )') FUSred    
         if(FCCred.ne.1.)
      &  WRITE (6,'('' * Direct collective cross section scaled by '',
-     &              G12.5,'' mb  '')') FCCred    
+     &  G12.5)') FCCred    
          WRITE (6,'('' *******************************************'',
      &           23(1H*))')
       ENDIF

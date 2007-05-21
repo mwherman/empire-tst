@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-21 05:13:59 $
-Ccc   * $Id: input.f,v 1.229 2007-05-21 05:13:59 herman Exp $
+Ccc   * $Date: 2007-05-21 10:24:48 $
+Ccc   * $Id: input.f,v 1.230 2007-05-21 10:24:48 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -1443,6 +1443,7 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether spectrum array is big enough to accomodate capture spectrum
+
       IF(INT(EMAx(1)/DE+1).GE.NDECSE) THEN 
 C===============================================================================
 C     The block below is what it should be, but it does HRTW routine crash !!!!
@@ -1460,18 +1461,26 @@ C    &            ' to accomodate capture spectrum'
       ENDIF 
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
+      ichanmin = -1
       DO i = 1, NDEJC
         CALL BNDG(i,1,qtmp)
-        IF (qtmp.LT.qmin) qmin = qtmp
+         IF (qtmp.LT.qmin) then 
+            qmin = qtmp
+            ichanmin = i
+         ENDIF  
       ENDDO
 C===============================================================================
 C     The block below is what it should be, but it does HRTW routine crash !!!!
 C     i.e. DE can not be changed for the time being, this part should be revised
 C     together with width fluctuation routine
-C     RCN, 14 June 2005
-C
+C     RCN, 14 June 2005              
 C     IF (EMAx(1) - ECUt(1).LT.EMAx(1) - qmin) THEN
 C--------Energy redefined
+C        WRITE( 6,'(1x,''Energy grid redefined following ejectile '',
+C    &   A2,'' with a negative Q value '',F6.2)')
+C    &   SYMbe(ichanmin),qmin
+C        WRITE( 6,'(1x,A28,F6.1,A4)')
+C    &       '            Old energy step ',DE*1000.d0,' keV'
 C        DE = (EMAx(1) - qmin)/FLOAT(NEXreq - 1)
 C--------Number of steps in CN outgoing energy grid redefined
 C        NEX(1) = MAX(INT((EMAx(1)-ECUt(1))/DE),2)
@@ -5718,7 +5727,7 @@ C
          WRITE(6,'(1X)')
          WRITE(6,'(1X)')
          WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a
-     &        -tilde'')')
+     &-tilde'')')
          WRITE(6,'(4X,54(''-''))')
          WRITE(6,'(1X)')
          WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
