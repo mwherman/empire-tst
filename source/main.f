@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-21 10:24:49 $
-Ccc   * $Id: main.f,v 1.174 2007-05-21 10:24:49 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-21 14:23:56 $
+Ccc   * $Id: main.f,v 1.175 2007-05-21 14:23:56 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2650,7 +2650,7 @@ C     ENDDO
         WRITE (6,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
         if(TOTred.ne.1.)
-     &  WRITE (6,'('' * Total cross section scaled by '',G12.5,)')
+     &  WRITE (6,'('' * Total cross section scaled by '',G12.5)')
      &  TOTred    
         WRITE (6,
      &  '('' * Optical model total cross section              '',G12.5,
@@ -2681,7 +2681,7 @@ C       WRITE (6,'('' * Reaction cross section - CE '',G12.5,
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred 
 C    &                           + SINlcont - 4.*PI*ELCncs
         if(FUSred.ne.1.)
-     &  WRITE (6,'('' * CN formation cross section scaled by '',G12.5,
+     &  WRITE (6,'('' * CN formation cross section scaled by '',G12.5
      &  )') FUSred    
         if(FCCred.ne.1.)
      &  WRITE (6,'('' * Direct collective cross section scaled by '',
