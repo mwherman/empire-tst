@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-21 14:23:56 $
-Ccc   * $Id: main.f,v 1.175 2007-05-21 14:23:56 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-21 20:56:23 $
+Ccc   * $Id: main.f,v 1.176 2007-05-21 20:56:23 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -175,9 +175,8 @@ C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       checkXS = 0.d0
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
-C     RCN, To avoid gaussian spreading of the calculated strength
-C     IF(WIDcoll.GT.0.d0)
-C    &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
+      IF(WIDcoll.GT.0.d0)
+     &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
 
       ncoll = 0
       ecm = EINl - EIN
