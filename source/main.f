@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-21 20:56:23 $
-Ccc   * $Id: main.f,v 1.176 2007-05-21 20:56:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-05-22 19:33:44 $
+Ccc   * $Id: main.f,v 1.177 2007-05-22 19:33:44 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -92,7 +92,7 @@ C                      Total PF angular distribution defined only for neutrons
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp,
      &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,   neles,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
-     &        isnewchain(0:1)
+     &        isnewchain(0:1), ncon
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist
       CHARACTER*21 reactionx
@@ -175,6 +175,7 @@ C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       checkXS = 0.d0
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
+C     RCN, To avoid gaussian spreading of the calculated strength
       IF(WIDcoll.GT.0.d0)
      &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
 
@@ -300,7 +301,17 @@ C--------------------Escape if we go beyond recoil spectrum dimension
            ELSE
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
-             icsl = INT(echannel/DE + 1.0001)
+             icsl = INT(echannel/DE + 1.0)
+             ncon = min(
+     &          NINT((EXCn-Q(nejcec,1)-ECUt(nnurec))/DE),NDEcse)
+C            WRITE(6,*) 'nejcec, nnurec',IZAejc(nejcec), IZA(nnurec)
+C            WRITE(6,*) 'Level in continuum',D_Elv(i)
+C            WRITE(6,*) 'Its bin number',icsl
+C            WRITE(6,*) 'E calc',EX(NEX(1),1)-Q(nejcec,1)-(icsl-1)*DE
+C            WRITE(6,*) 'Last discr. level',ELV(NLV(nnurec),nnurec)
+C            WRITE(6,*) 'Ecut',ECUt(nnurec)
+C            WRITE(6,*) 'Ex',EX(NEX(1),1)-Q(nejcec,1)-(ncon-1)*DE
+C            WRITE(6,*) 'Continuum starts at bin number',ncon
 C------------Avoid reading closed channels
              IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
      &         THEN
@@ -329,40 +340,26 @@ C
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
                  isigma2 = 2*isigma*isigma
                endif
-c              if(icsl.gt.1) then
-c                CSEmsd(icsl-1,nejcec) = CSEmsd(icsl-1,nejcec) 
-c    &              + 0.2d0*popread/DE
-c                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + 
-c    &                0.6d0*popread/DE
-c                CSEmsd(icsl+1,nejcec) = CSEmsd(icsl+1,nejcec) 
-c    &              + 0.2d0*popread/DE
-c              else
-c                CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + 
-c    &                0.7d0*popread/DE
-c                CSEmsd(icsl+1,nejcec) = CSEmsd(icsl+1,nejcec) 
-c    &              + 0.3d0*popread/DE
-c              endif
 
                if(isigma.gt.0) then
                  dtmp = 0.d0
                  do ie = max(icsl - 3*isigma,1) ,
-     &                   min(NDEcse,icsl + 3*isigma)
+     &                   min(icsl + 3*isigma,ncon)
                    dtmp = dexp(-dble(ie-icsl)**2/isigma2) + dtmp
                  enddo
                  if(dtmp.gt.0.d0) then
-                   check = 0.d0
                    do ie = max(icsl - 3*isigma,1) ,
-     &                     min(NDEcse,icsl + 3*isigma)
+     &                     min(icsl + 3*isigma,ncon)
                      CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) + 
      &                 popread/DE*dexp(-dble(ie-icsl)**2/isigma2)/dtmp
-                     check = check +  popread
-     &                 * dexp(-dble(ie-icsl)**2/isigma2)/dtmp 
                    enddo
-                   if(abs(check-popread).gt.0.05d0) 
-     &               write(*,*) 'WARNING: CHECK DWBA TO CONTINUUM'
+                 else
+                   CSEmsd(icsl  ,nejcec) = CSEmsd(icsl,nejcec) 
+     &              + popread/DE
                  endif
                else
-                 CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec) + popread/DE
+                 CSEmsd(icsl  ,nejcec) = CSEmsd(icsl,nejcec) 
+     &              + popread/DE
                endif
 
               IF (ICAlangs.EQ.0) THEN
@@ -374,29 +371,15 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
 
-c                   if(icsl.gt.1) then 
-c                      CSEa(icsl-1,iang,nejcec,1) = 
-c     &                CSEa(icsl-1,iang,nejcec,1) + 0.2d0*ftmp/DE
-c                      CSEa(icsl  ,iang,nejcec,1) = 
-c     &                CSEa(icsl  ,iang,nejcec,1) + 0.6d0*ftmp/DE
-c                      CSEa(icsl+1,iang,nejcec,1) = 
-c     &                CSEa(icsl+1,iang,nejcec,1) + 0.2d0*ftmp/DE
-c                   else
-c                      CSEa(icsl  ,iang,nejcec,1) = 
-c     &                CSEa(icsl  ,iang,nejcec,1) + 0.7d0*ftmp/DE
-c                      CSEa(icsl+1,iang,nejcec,1) = 
-c     &                CSEa(icsl+1,iang,nejcec,1) + 0.3d0*ftmp/DE
-c                   endif
-
                     if(isigma.gt.0 .and. dtmp.gt.0.d0) then
                       do ie = max(icsl - 3*isigma,1) ,
-     &                        min(NDEcse,icsl + 3*isigma)
+     &                        min(icsl + 3*isigma,ncon)
                         CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1)
      &                  + ftmp/DE * dexp(-dble(ie-icsl)**2/isigma2)/dtmp
                       enddo
                     else
                       CSEa(icsl,iang,nejcec,1) =
-     &                  CSEa(icsl,iang,nejcec,1) + ftmp/DE
+     &                    CSEa(icsl,iang,nejcec,1) + ftmp/DE
                     endif
                  ENDDO
                ENDIF
