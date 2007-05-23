@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-01-30 13:07:18 $
-Ccc   * $Id: MSD-tristan.f,v 1.60 2007-01-30 13:07:18 Capote Exp $
+Ccc   * $Date: 2007-05-23 21:30:08 $
+Ccc   * $Id: MSD-tristan.f,v 1.61 2007-05-23 21:30:08 herman Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -144,6 +144,7 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       IC1mxr = l1maxr + 1
       IC2mxr = l2maxr + 1
       ICMax = MAX(IC1max,IC2max)
+      IF(BET2in.EQ.0.0D+0) BET2in = DEF(1,nnuc)
       DO na = 1, nangle
          ANGle(na) = ANGles(na)
       ENDDO
