@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-20 04:50:10 $
-Ccc   * $Id: tl.f,v 1.91 2007-05-20 04:50:10 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-05-23 08:12:30 $
+Ccc   * $Id: tl.f,v 1.92 2007-05-23 08:12:30 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1344,7 +1344,7 @@ C        Newly added
 C
 C        TTLl(ien,l) = TTLl(ien,l)*OUTred(Nejc,Nnuc)   
       ENDDO
-C	SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
+C     SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45)
