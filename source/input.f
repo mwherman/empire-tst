@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-21 20:00:58 $
-Ccc   * $Id: input.f,v 1.231 2007-05-21 20:00:58 herman Exp $
+Ccc   * $Date: 2007-05-23 21:31:14 $
+Ccc   * $Id: input.f,v 1.232 2007-05-23 21:31:14 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5167,10 +5167,10 @@ C-----
          IF (name.EQ.'DEFMSD') THEN
             BET2in = val
             IF (BET2in.GT.0.0D0) WRITE (6,
-     &'('' Beta-2 in def. Nilsson Hamiltonian in MSD'',   F6.3
+     &'('' beta_2 deformation in Nilsson Hamiltonian (MSD)'', F6.3
      &)') BET2in
             IF (BET2in.GT.0.0D0) WRITE (12,
-     &'('' Beta-2 in def. Nilsson Hamiltonian in MSD'',   F6.3
+     &'('' beta_2 deformation in Nilsson Hamiltonian (MSD)'', F6.3
      &)') BET2in
             GOTO 100
          ENDIF
