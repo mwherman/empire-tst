@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-23 21:31:14 $
-Ccc   * $Id: input.f,v 1.232 2007-05-23 21:31:14 herman Exp $
+Ccc   * $Date: 2007-05-24 23:50:49 $
+Ccc   * $Id: input.f,v 1.233 2007-05-24 23:50:49 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -1810,6 +1810,9 @@ C
 C
 C Local variables
 C
+      CHARACTER*132 ctmp
+      INTEGER*4 iwin
+      INTEGER*4 PIPE
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
@@ -1820,8 +1823,9 @@ C
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
-      LOGICAL LREad
+      LOGICAL LREad,ADDnuc
 
+	ADDnuc = .FALSE.
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
@@ -1859,7 +1863,7 @@ C       We could put here whatever systematics for D0 or Gg we want
         ENDIF
       ENDDO
 
-   50 IF(.NOT.LREAD) then
+   50 IF(.NOT.LREad) then
         NLV(Nnuc) = NLV(itmp)
         NCOmp(Nnuc) = NCOmp(itmp)
         DO ilv = 1, NLV(Nnuc)
@@ -1889,7 +1893,6 @@ C---------constructing input and filenames
            finp = 'z'//ctmp3//'.dat'
            OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 400)
-           NSTored(nnuc) = izatmp
         ELSE
            REWIND 13
         ENDIF
@@ -1909,7 +1912,7 @@ C--------NLV   number of levels with unique spin and parity
 C--------NCOMP number of levels up to which the level scheme is estimated
 C--------to be complete
 C
-           IF (.NOT.FILevel) THEN
+           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
              BACKSPACE (13)
              READ (13,'(A110)') ch_iuf
              WRITE (14,'(A110)') ch_iuf
@@ -1921,7 +1924,7 @@ C------------limit to max. of 40 levels if ENDF active
              IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
              IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
-             IF (.NOT.FILevel) THEN
+             IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
                DO ilv = 1, nlvr + ngamr
                   READ (13,'(A110)') ch_iuf
                   WRITE (14,'(A110)') ch_iuf
@@ -1931,6 +1934,7 @@ C------------limit to max. of 40 levels if ENDF active
                ENDDO
              ENDIF
 C------------levels for nucleus NNUC copied to file *.lev
+             NSTored(nnuc) = izatmp
              DO ilv = 1, NLV(Nnuc)
                READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
@@ -2013,20 +2017,51 @@ C--------------------only gamma decay is considered up to now
      >        'FOR NUCLEUS ',chelem,
      >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
          ENDIF
-      ENDIF
-  200 IF (.NOT.FILevel) CLOSE (13)
+       ENDIF
+  200  IF(.NOT.ADDnuc) THEN 
+        IF (.NOT.FILevel) CLOSE (13)
+	 ELSE
+	  CLOSE(13)
+	  CLOSE(14)
+        IF (IOPsys.EQ.0) THEN
+          ctmp = 'cat LEVELS.ORG LEVELS.TMP>LEVELS'
+          iwin = PIPE(ctmp)
+          ctmp = 'rm LEVELS.ORG LEVELS.TMP'
+          iwin = PIPE(ctmp)
+        ELSE
+          iwin = PIPE('copy LEVELS.ORG+LEVELS.ADD LEVELS>nul')
+          iwin = PIPE('del LEVELS.ORG LEVELS.ADD>nul')
+        ENDIF
+        OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
+	  FILevel = .TRUE.
+	 ENDIF
       ENDIF
       RETURN
   300 IF(FILevel) THEN
         WRITE (6,
-     &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local levels file (...lev) '')') ia, iz
+     &  '('' Levels for nucleus A='',I3,'' Z='',I3,
+     &  '' not found in local levels file (...lev); RIPL-2 levels will 
+     &be used'')') ia, iz
+        CLOSE(13)
+        WRITE (ctmp3,'(I3.3)') iz
+        finp = 'z'//ctmp3//'.dat'
+        OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
+     &         ERR = 400)
+        IF (IOPsys.EQ.0) THEN
+          ctmp = 'mv LEVELS LEVELS.TMP'
+          iwin = PIPE(ctmp)
+        ELSE
+          iwin = PIPE('move LEVELS LEVELS.ORG>nul')
+        ENDIF
+	  CLOSE(14)
+        OPEN (UNIT = 14, FILE='LEVELS.ADD')
+        ADDnuc = .TRUE.
+  	  GOTO 100 
       ELSE
         WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in RIPL database '')') ia, iz
       ENDIF
-      IF (.NOT.FILevel) CLOSE (13)
       RETURN
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
