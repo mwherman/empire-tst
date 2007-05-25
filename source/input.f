@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 15:25:03 $
-Ccc   * $Id: input.f,v 1.236 2007-05-25 15:25:03 Capote Exp $
+Ccc   * $Date: 2007-05-25 15:46:17 $
+Ccc   * $Id: input.f,v 1.237 2007-05-25 15:46:17 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2027,9 +2027,9 @@ C---------------only gamma decay is considered up to now
         CLOSE(13)
         CLOSE(14)
         IF (IOPsys.EQ.0) THEN
-          ctmp = 'cat LEVELS.ORG LEVELS.TMP>LEVELS'
+          ctmp = 'cat LEVELS.ORG LEVELS.ADD>LEVELS'
           iwin = PIPE(ctmp)
-          ctmp = 'rm LEVELS.ORG LEVELS.TMP'
+          ctmp = 'rm LEVELS.ORG LEVELS.ADD'
           iwin = PIPE(ctmp)
         ELSE
           iwin = PIPE('copy LEVELS.ORG+LEVELS.ADD LEVELS>nul')
@@ -2051,7 +2051,7 @@ C---------------only gamma decay is considered up to now
         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 400)
         IF (IOPsys.EQ.0) THEN
-          ctmp = 'mv LEVELS LEVELS.TMP'
+          ctmp = 'mv LEVELS LEVELS.ORG'
           iwin = PIPE(ctmp)
         ELSE
           iwin = PIPE('move LEVELS LEVELS.ORG>nul')
