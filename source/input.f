@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 14:15:44 $
-Ccc   * $Id: input.f,v 1.235 2007-05-25 14:15:44 Capote Exp $
+Ccc   * $Date: 2007-05-25 15:25:03 $
+Ccc   * $Id: input.f,v 1.236 2007-05-25 15:25:03 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1879,158 +1879,151 @@ C       We could put here whatever systematics for D0 or Gg we want
             BR(ilv,nbr,3,Nnuc) = BR(ilv,nbr,3,itmp)
           ENDDO
         ENDDO
-      ELSE
-C-------set ground state in case nucleus not in file
-        NLV(Nnuc) = 1
-        NCOmp(Nnuc) = 1
-        ELV(1,Nnuc) = 0.0
-        LVP(1,Nnuc) = 1
-        XJLv(1,Nnuc) = 0.0
-        IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
-        ISIsom(1,Nnuc) = 0
-C-------set ground state *** done ***
-        IF(.NOT.FILevel) THEN
-C---------constructing input and filenames
-           WRITE (ctmp3,'(I3.3)') iz
-           finp = 'z'//ctmp3//'.dat'
-           OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
+        RETURN
+      ENDIF
+C-----set ground state in case nucleus not in file
+      NLV(Nnuc) = 1
+      NCOmp(Nnuc) = 1
+      ELV(1,Nnuc) = 0.0
+      LVP(1,Nnuc) = 1
+      XJLv(1,Nnuc) = 0.0
+      IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
+      ISIsom(1,Nnuc) = 0
+C-----set ground state *** done ***
+      IF(.NOT.FILevel) THEN
+C-------constructing input and filenames
+        WRITE (ctmp3,'(I3.3)') iz
+        finp = 'z'//ctmp3//'.dat'
+        OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 400)
-        ELSE
-           REWIND 13
-        ENDIF
-  100   READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
+      ELSE
+        REWIND 13
+      ENDIF
+  100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
 C-----nmax is a number of levels that constitute a complete scheme as
 C-----estimated by Belgya for RIPL-2.
 C-----It is used, but a visual check with FITLEV is always recommended.
-        IF (ia.NE.iar .OR. iz.NE.izr) THEN
-           DO ilv = 1, nlvr + ngamr
-             READ (13,'(A1)') dum
-           ENDDO
-           GOTO 100
-
-
-        ELSE
-C--------create file with levels (*.lev)
-C--------NLV   number of levels with unique spin and parity
-C--------NCOMP number of levels up to which the level scheme is estimated
-C--------to be complete
-C
-           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
-
-
-             BACKSPACE (13)
-             READ (13,'(A110)') ch_iuf
-             WRITE (14,'(A110)') ch_iuf
-           ENDIF
-           IF (nlvr.NE.0) THEN
-             IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc)
-     &          = MIN(NDLV,nmax)
-C------------limit to max. of 40 levels if ENDF active
-             IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
-             IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
+      IF (ia.NE.iar .OR. iz.NE.izr) THEN
+        DO ilv = 1, nlvr + ngamr
+          READ (13,'(A1)') dum
+        ENDDO
+        GOTO 100
+      ELSE
+C-------create file with levels (*.lev)
+C-------NLV   number of levels with unique spin and parity
+C-------NCOMP number of levels up to which the level scheme is estimated
+C-------to be complete
+        IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+          BACKSPACE (13)
+          READ (13,'(A110)') ch_iuf
+          WRITE (14,'(A110)') ch_iuf
+        ENDIF
+        IF (nlvr.NE.0) THEN
+          IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
+C---------limit to max. of 40 levels if ENDF active
+          IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+          IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
-             IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+          IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+             DO ilv = 1, nlvr + ngamr
+               READ (13,'(A110)') ch_iuf
+               WRITE (14,'(A110)') ch_iuf
+             ENDDO
+             DO ilv = 1, nlvr + ngamr
+               BACKSPACE (13)
+             ENDDO
+          ENDIF
+C---------levels for nucleus NNUC copied to file *.lev
+          NSTored(nnuc) = izatmp
 
-
-               DO ilv = 1, nlvr + ngamr
-                  READ (13,'(A110)') ch_iuf
-                  WRITE (14,'(A110)') ch_iuf
-               ENDDO
-               DO ilv = 1, nlvr + ngamr
-                  BACKSPACE (13)
-               ENDDO
-             ENDIF
-C------------levels for nucleus NNUC copied to file *.lev
-             NSTored(nnuc) = izatmp
-
-
-             DO ilv = 1, NLV(Nnuc)
-               READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
+          DO ilv = 1, NLV(Nnuc)
+            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
-               IF (ELV(ilv,Nnuc).GT.qn) THEN
-                  NLV(Nnuc) = max(ilv - 1,1)
-                  WRITE (6,'('' WARNING:'')')
-                  WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+            IF (ELV(ilv,Nnuc).GT.qn) THEN
+              NLV(Nnuc) = max(ilv - 1,1)
+              WRITE (6,'('' WARNING:'')')
+              WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                   chelem, izr
-                  WRITE (6,
+              WRITE (6,
      &'('' WARNING: Excited state '',I3,                             ''
      &is above neutron binding energy '',F6.3,                       ''
      &MeV'')') ilv, qn
-                  WRITE (6,'('' WARNING: Number of levels set to '',I3)'
+              WRITE (6,'('' WARNING: Number of levels set to '',I3)'
      &                   ) NLV(Nnuc)
-                  GOTO 200
-               ENDIF
-               IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
-                  WRITE (6,'('' WARNING:'')')
-                  WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+              GOTO 200
+            ENDIF
+            IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
+              WRITE (6,'('' WARNING:'')')
+              WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
-                  WRITE (6,
+              WRITE (6,
      &'('' WARNING: excited state No.'',I3,                          ''
      &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
-               ENDIF
-               IF (ilv.NE.1) THEN
-                  IF (ELV(ilv,Nnuc).EQ.0.) THEN
-                     WRITE (6,'('' WARNING:'')')
-                     WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+            ENDIF
+            IF (ilv.NE.1) THEN
+              IF (ELV(ilv,Nnuc).EQ.0.) THEN
+                WRITE (6,'('' WARNING:'')')
+                WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
-                     WRITE (6,
+                WRITE (6,
      &'('' WARNING: excited state '',I3,                             ''
      &has got zero excitation energy'')') ilv
-                  ENDIF
+              ENDIF
 
-                  IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1
+              IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1
 
-                  IF (ndbrlin.GT.NDBR) THEN
-                     WRITE (6,'('' WARNING:'')')
-                     WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+              IF (ndbrlin.GT.NDBR) THEN
+                WRITE (6,'('' WARNING:'')')
+                WRITE (6,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
-                     WRITE (6,
+                WRITE (6,
      &'('' WARNING: too many gamma decays ='',                       I3)
      &') ndbrlin
-                     WRITE (6,
+                WRITE (6,
      &'('' WARNING: Dimension allows for ='',                        I3)
      &') NDBR
-                     WRITE (6,'('' WARNING: some gammas discarded'')')
-                  ENDIF
-C-----------------clean BR matrix
-                  DO nbr = 1, NDBR
-                     BR(ilv,nbr,1,Nnuc) = 0.
-                     BR(ilv,nbr,2,Nnuc) = 0.
-                     BR(ilv,nbr,3,Nnuc) = 0.
-                  ENDDO
-                  ndb = MIN(ndbrlin,NDBR)
-                  sum = 0.0
-                  isum = 0
-                  DO nbr = 1, ndb
-                     READ (13,'(39X,I4,1X,F10.3,3(1X,E10.3))') ifinal,
+                WRITE (6,'('' WARNING: some gammas discarded'')')
+              ENDIF
+C-------------clean BR matrix
+              DO nbr = 1, NDBR
+                BR(ilv,nbr,1,Nnuc) = 0.
+                BR(ilv,nbr,2,Nnuc) = 0.
+                BR(ilv,nbr,3,Nnuc) = 0.
+              ENDDO
+              ndb = MIN(ndbrlin,NDBR)
+              sum = 0.d0
+              isum = 0
+              DO nbr = 1, ndb
+                READ (13,'(39X,I4,1X,F10.3,3(1X,E10.3))') ifinal,
      &                     egamma, pgamma, pelm, xicc
-C--------------------only gamma decay is considered up to now
-                     IF (pelm.GT.0.) THEN
-                        sum = sum + pelm
-                        isum = isum + 1
-                        BR(ilv,isum,1,Nnuc) = ifinal    !final level #
-                        BR(ilv,isum,2,Nnuc) = pelm      !branching
-                        BR(ilv,isum,3,Nnuc) = xicc      !int. convertion coeff.
-                     ENDIF
-                  ENDDO
-                  IF (sum.NE.1.D0 .AND. sum.NE.0.D0) THEN
-                     sum = 1.D0/sum
-                     DO nbr = 1, isum
-                        BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,Nnuc)*sum
-                     ENDDO
-                  ENDIF
-               ENDIF
-            ENDDO
-            IF(IOUT.GT.3) write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
+C---------------only gamma decay is considered up to now
+                IF (pelm.GT.0.) THEN
+                  sum = sum + pelm
+                  isum = isum + 1
+                  BR(ilv,isum,1,Nnuc) = ifinal    !final level #
+                  BR(ilv,isum,2,Nnuc) = pelm      !branching
+                  BR(ilv,isum,3,Nnuc) = xicc      !int. convertion coeff.
+                ENDIF
+              ENDDO
+              IF (sum.NE.1.D0 .AND. sum.NE.0.D0) THEN
+                sum = 1.D0/sum
+                DO nbr = 1, isum
+                  BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,Nnuc)*sum
+                ENDDO
+              ENDIF
+            ENDIF
+          ENDDO  ! end of loop over levels
+          IF(IOUT.GT.3) write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
      >        'FOR NUCLEUS ',chelem,
      >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
-         ENDIF
-       ENDIF
-  200  IF(.NOT.ADDnuc) THEN 
+        ENDIF
+      ENDIF
+
+  200 IF(.NOT.ADDnuc) THEN 
         IF (.NOT.FILevel) CLOSE (13)
-       ELSE
+      ELSE
         CLOSE(13)
         CLOSE(14)
         IF (IOPsys.EQ.0) THEN
@@ -2044,8 +2037,8 @@ C--------------------only gamma decay is considered up to now
         ENDIF
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
         FILevel = .TRUE.
-       ENDIF
       ENDIF
+
       RETURN
   300 IF(FILevel) THEN
         WRITE (6,
