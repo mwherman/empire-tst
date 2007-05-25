@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 17:43:35 $
-Ccc   * $Id: input.f,v 1.239 2007-05-25 17:43:35 Capote Exp $
+Ccc   * $Date: 2007-05-25 18:05:52 $
+Ccc   * $Id: input.f,v 1.240 2007-05-25 18:05:52 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1924,7 +1924,7 @@ C
         IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
-          WRITE (14,'(A110)') ch_iuf
+          WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
