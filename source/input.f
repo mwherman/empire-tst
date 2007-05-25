@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-24 23:50:49 $
-Ccc   * $Id: input.f,v 1.233 2007-05-24 23:50:49 Capote Exp $
+Ccc   * $Date: 2007-05-25 13:53:02 $
+Ccc   * $Id: input.f,v 1.234 2007-05-25 13:53:02 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -1810,9 +1810,17 @@ C
 C
 C Local variables
 C
+
+
       CHARACTER*132 ctmp
+
+
       INTEGER*4 iwin
+
+
       INTEGER*4 PIPE
+
+
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
@@ -1825,7 +1833,11 @@ C
       INTEGER INT
       LOGICAL LREad,ADDnuc
 
-	ADDnuc = .FALSE.
+
+
+      ADDnuc = .FALSE.
+
+
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
@@ -1906,6 +1918,8 @@ C-----It is used, but a visual check with FITLEV is always recommended.
              READ (13,'(A1)') dum
            ENDDO
            GOTO 100
+
+
         ELSE
 C--------create file with levels (*.lev)
 C--------NLV   number of levels with unique spin and parity
@@ -1913,6 +1927,8 @@ C--------NCOMP number of levels up to which the level scheme is estimated
 C--------to be complete
 C
            IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+
+
              BACKSPACE (13)
              READ (13,'(A110)') ch_iuf
              WRITE (14,'(A110)') ch_iuf
@@ -1925,6 +1941,8 @@ C------------limit to max. of 40 levels if ENDF active
              IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
              IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+
+
                DO ilv = 1, nlvr + ngamr
                   READ (13,'(A110)') ch_iuf
                   WRITE (14,'(A110)') ch_iuf
@@ -1935,6 +1953,8 @@ C------------limit to max. of 40 levels if ENDF active
              ENDIF
 C------------levels for nucleus NNUC copied to file *.lev
              NSTored(nnuc) = izatmp
+
+
              DO ilv = 1, NLV(Nnuc)
                READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
@@ -2019,50 +2039,120 @@ C--------------------only gamma decay is considered up to now
          ENDIF
        ENDIF
   200  IF(.NOT.ADDnuc) THEN 
+
+
         IF (.NOT.FILevel) CLOSE (13)
-	 ELSE
-	  CLOSE(13)
-	  CLOSE(14)
+
+
+       ELSE
+
+
+        CLOSE(13)
+
+
+        CLOSE(14)
+
+
         IF (IOPsys.EQ.0) THEN
+
+
           ctmp = 'cat LEVELS.ORG LEVELS.TMP>LEVELS'
+
+
           iwin = PIPE(ctmp)
+
+
           ctmp = 'rm LEVELS.ORG LEVELS.TMP'
+
+
           iwin = PIPE(ctmp)
+
+
         ELSE
+
+
           iwin = PIPE('copy LEVELS.ORG+LEVELS.ADD LEVELS>nul')
+
+
           iwin = PIPE('del LEVELS.ORG LEVELS.ADD>nul')
+
+
         ENDIF
+
+
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
-	  FILevel = .TRUE.
-	 ENDIF
+
+
+        FILevel = .TRUE.
+
+
+       ENDIF
+
+
       ENDIF
       RETURN
   300 IF(FILevel) THEN
         WRITE (6,
-     &  '('' Levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local levels file (...lev); RIPL-2 levels will 
-     &be used'')') ia, iz
+     &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
+     &  '' not found in local file (.lev). Default RIPL-2 levels will be
+
+
+     & used'')') ia, iz
         CLOSE(13)
+
+
         WRITE (ctmp3,'(I3.3)') iz
+
+
         finp = 'z'//ctmp3//'.dat'
+
+
         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
+
+
      &         ERR = 400)
+
+
         IF (IOPsys.EQ.0) THEN
+
+
           ctmp = 'mv LEVELS LEVELS.TMP'
+
+
           iwin = PIPE(ctmp)
+
+
         ELSE
+
+
           iwin = PIPE('move LEVELS LEVELS.ORG>nul')
+
+
         ENDIF
-	  CLOSE(14)
+
+
+        CLOSE(14)
+
+
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
+
+
         ADDnuc = .TRUE.
-  	  GOTO 100 
+
+
+        GOTO 100 
+
+
       ELSE
         WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in RIPL database '')') ia, iz
       ENDIF
+
+
       RETURN
+
+
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
       END
@@ -2349,7 +2439,6 @@ C
       DOUBLE PRECISION betatmp, elvr, etmp, jtmp, t12, xjlvr
       CHARACTER*1 dum
       CHARACTER*5 chelem
-      CHARACTER*110 ch_iuf
       CHARACTER*3 ctmp3
       CHARACTER*9 finp
       INTEGER i, iar, ilv, ilvr, iptmp, itmp2, izr, lvpr, natmp,
@@ -2384,38 +2473,20 @@ C-----First try to find 2+ and 3- states in the RIPL om-deformations file
 C
 C-----If missing in the RIPL om-deformations file try discrete levels file
 C-----constructing input and filenames
-  300 IF (.NOT.FILevel) THEN
-         WRITE (ctmp3,'(I3.3)') Iz
-         finp = 'z'//ctmp3//'.dat'
-         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
+  300 WRITE (ctmp3,'(I3.3)') Iz
+      finp = 'z'//ctmp3//'.dat'
+      OPEN (32,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 500)
-      ELSE
-         REWIND (13)
-      ENDIF
-  400 READ (13,'(A5,6I5,2f12.6)',END = 500) chelem, iar, izr, nlvr,
+  400 READ (32,'(A5,6I5,2f12.6)',END = 500) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2
       IF (Ia.NE.iar .OR. Iz.NE.izr) THEN
          DO ilv = 1, nlvr + ngamr
-            READ (13,'(A1)',END = 500) dum
+            READ (32,'(A1)',END = 500) dum
          ENDDO
          GOTO 400
       ELSE
-         IF (.NOT.FILevel) THEN
-            BACKSPACE (13)
-            READ (13,'(A110)') ch_iuf
-C           RCN, 04/2005  duplicate levels found !!
-C           WRITE (14,'(A110)') ch_iuf
-            DO ilv = 1, nlvr + ngamr
-               READ (13,'(A110)') ch_iuf
-C              RCN, 04/2005  duplicate levels found !!
-C              WRITE (14,'(A110)') ch_iuf
-            ENDDO
-            DO ilv = 1, nlvr + ngamr
-               BACKSPACE (13)
-            ENDDO
-         ENDIF
          DO ilv = 1, nlvr
-            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
+            READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
      &            xjlvr, lvpr, t12, ndbrlin
             IF (ilv.EQ.1) THEN
                Gspin = xjlvr
@@ -2430,18 +2501,20 @@ C-----------skipping levels with unknown spin or parity
             ENDIF
          ENDDO
       ENDIF
-      IF (.NOT.FILevel) CLOSE (13)
+      CLOSE (32)
       RETURN
   500 Gspin = 0.
       IF (Ia.NE.2*(Ia/2)) Gspin = 0.5
       Gspar = 1
       WRITE (6,
-     &'('' LEVELS FOR NUCLEUS A='',I3,'' Z='',I3,'' NOT FOUND IN THE FIL
-     &E'')') Ia, Iz
+     &'('' LEVELS FOR NUCLEUS A='',I3,'' Z='',I3,'' NOT FOUND IN THE RIP
+     &L DATABASE'')') Ia, Iz
       WRITE (6,
      & '('' JUST TO BE SURE I SET G.S. PARITY TO + AND SPIN TO:'',F5.1)'
      & ) Gspin
-      IF (.NOT.FILevel) CLOSE (13)
+
+
+      RETURN 
       END
 C
 C

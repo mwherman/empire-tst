@@ -119,6 +119,9 @@
     no further adjustment of the elastic channel is required.
 43. Isomeric states automatically detected, their cross sections calculated
     (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
+44. Long standing problem resulting in imcomplete levels' file fixed (R. Capote)
+45. Levels' file automatically updated from the RIPL database when missing nuclei
+    detected.
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004

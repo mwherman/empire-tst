@@ -70,6 +70,9 @@ FCCRED  Direct cross section will be multiplied by VAL (default: 1.).
 
 TOTRED  Total cross section will be multiplied by VAL (default: 1.).
 
+       If any of the above scaling factors are used, then the elastic cross
+       section will be automatically adjusted to compensate for changes.
+
 CSREAD  Controls HI fusion cross section determination,
        > 0 HI fusion cross section is set to VAL [in mb],
        = -1 distributed barrier model used ,
