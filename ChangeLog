@@ -121,7 +121,11 @@
     (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
 44. Long standing problem resulting in imcomplete levels' file fixed (R. Capote)
 45. Levels' file automatically updated from the RIPL database when missing nuclei
-    detected.
+    detected (R.Capote).
+46. Number of discrete levels considered in the calculations limited to half of
+    the value recommended in RIPL-3 (and not more than 15) if run with FITLEV>0
+    was not executed (i.e., adjustment of the discrete level range to fit level
+    densities was not done) (M. Herman).
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
