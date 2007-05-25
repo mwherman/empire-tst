@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 16:21:41 $
-Ccc   * $Id: input.f,v 1.238 2007-05-25 16:21:41 herman Exp $
+Ccc   * $Date: 2007-05-25 17:43:35 $
+Ccc   * $Id: input.f,v 1.239 2007-05-25 17:43:35 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1913,9 +1913,9 @@ C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
 C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
-           IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
-              nmax = MIN(nmax/2 + 1, 15)
-           ENDIF
+        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
+          nmax = MIN(nmax/2 + 1, 15)
+        ENDIF
 C----------create file with levels (*.lev)
 C----------NLV   number of levels with unique spin and parity
 C----------NCOMP number of levels up to which the level scheme is estimated
@@ -1924,7 +1924,6 @@ C
         IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
-          WRITE (14,'(A110)') ch_iuf
           WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
