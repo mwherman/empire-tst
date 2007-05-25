@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 13:53:02 $
-Ccc   * $Id: input.f,v 1.234 2007-05-25 13:53:02 Capote Exp $
+Ccc   * $Date: 2007-05-25 14:15:44 $
+Ccc   * $Id: input.f,v 1.235 2007-05-25 14:15:44 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1810,16 +1810,9 @@ C
 C
 C Local variables
 C
-
-
       CHARACTER*132 ctmp
-
-
       INTEGER*4 iwin
-
-
       INTEGER*4 PIPE
-
 
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
@@ -1833,10 +1826,7 @@ C
       INTEGER INT
       LOGICAL LREad,ADDnuc
 
-
-
       ADDnuc = .FALSE.
-
 
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
@@ -2039,120 +2029,50 @@ C--------------------only gamma decay is considered up to now
          ENDIF
        ENDIF
   200  IF(.NOT.ADDnuc) THEN 
-
-
         IF (.NOT.FILevel) CLOSE (13)
-
-
        ELSE
-
-
         CLOSE(13)
-
-
         CLOSE(14)
-
-
         IF (IOPsys.EQ.0) THEN
-
-
           ctmp = 'cat LEVELS.ORG LEVELS.TMP>LEVELS'
-
-
           iwin = PIPE(ctmp)
-
-
           ctmp = 'rm LEVELS.ORG LEVELS.TMP'
-
-
           iwin = PIPE(ctmp)
-
-
         ELSE
-
-
           iwin = PIPE('copy LEVELS.ORG+LEVELS.ADD LEVELS>nul')
-
-
           iwin = PIPE('del LEVELS.ORG LEVELS.ADD>nul')
-
-
         ENDIF
-
-
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
-
-
         FILevel = .TRUE.
-
-
        ENDIF
-
-
       ENDIF
       RETURN
   300 IF(FILevel) THEN
         WRITE (6,
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in local file (.lev). Default RIPL-2 levels will be
-
-
      & used'')') ia, iz
         CLOSE(13)
-
-
         WRITE (ctmp3,'(I3.3)') iz
-
-
         finp = 'z'//ctmp3//'.dat'
-
-
         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-
-
      &         ERR = 400)
-
-
         IF (IOPsys.EQ.0) THEN
-
-
           ctmp = 'mv LEVELS LEVELS.TMP'
-
-
           iwin = PIPE(ctmp)
-
-
         ELSE
-
-
           iwin = PIPE('move LEVELS LEVELS.ORG>nul')
-
-
         ENDIF
-
-
         CLOSE(14)
-
-
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
-
-
         ADDnuc = .TRUE.
-
-
         GOTO 100 
-
-
       ELSE
         WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in RIPL database '')') ia, iz
       ENDIF
-
-
       RETURN
-
-
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
       END
