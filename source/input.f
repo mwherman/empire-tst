@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 15:46:17 $
-Ccc   * $Id: input.f,v 1.237 2007-05-25 15:46:17 Capote Exp $
+Ccc   * $Date: 2007-05-25 16:21:41 $
+Ccc   * $Id: input.f,v 1.238 2007-05-25 16:21:41 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1824,13 +1824,15 @@ C
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
-      LOGICAL LREad,ADDnuc
+      LOGICAL LREad, ADDnuc, fexist
 
       ADDnuc = .FALSE.
 
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
+C-----Check if FITLEV option was run
+      INQUIRE (FILE = ('FITLEV.PS'),EXIST = fexist)
 C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
       IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
         OPEN (47,FILE = '../RIPL-2/resonances/resonances0.dat',
@@ -1901,22 +1903,28 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
-C-----nmax is a number of levels that constitute a complete scheme as
-C-----estimated by Belgya for RIPL-2.
-C-----It is used, but a visual check with FITLEV is always recommended.
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)') dum
         ENDDO
         GOTO 100
       ELSE
-C-------create file with levels (*.lev)
-C-------NLV   number of levels with unique spin and parity
-C-------NCOMP number of levels up to which the level scheme is estimated
-C-------to be complete
+C----------nmax is a number of levels that constitute a complete scheme as
+C----------estimated by Belgya for RIPL-2. We find it generally much too high.
+C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
+C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
+           IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
+              nmax = MIN(nmax/2 + 1, 15)
+           ENDIF
+C----------create file with levels (*.lev)
+C----------NLV   number of levels with unique spin and parity
+C----------NCOMP number of levels up to which the level scheme is estimated
+C----------to be complete
+C
         IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
+          WRITE (14,'(A110)') ch_iuf
           WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
@@ -1998,7 +2006,7 @@ C-------------clean BR matrix
               DO nbr = 1, ndb
                 READ (13,'(39X,I4,1X,F10.3,3(1X,E10.3))') ifinal,
      &                     egamma, pgamma, pelm, xicc
-C---------------only gamma decay is considered up to now
+C--------------------only gamma decay is considered up to now
                 IF (pelm.GT.0.) THEN
                   sum = sum + pelm
                   isum = isum + 1
@@ -2016,11 +2024,10 @@ C---------------only gamma decay is considered up to now
             ENDIF
           ENDDO  ! end of loop over levels
           IF(IOUT.GT.3) write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-     >        'FOR NUCLEUS ',chelem,
-     >        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
+     &        'FOR NUCLEUS ',chelem,
+     &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
         ENDIF
       ENDIF
-
   200 IF(.NOT.ADDnuc) THEN 
         IF (.NOT.FILevel) CLOSE (13)
       ELSE
