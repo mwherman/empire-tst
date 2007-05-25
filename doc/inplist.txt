@@ -1,4 +1,4 @@
-                              EMPIRE-II
+                              -II
 
                            Optional input
 
@@ -494,15 +494,6 @@ GDRDYN  Controls GDR treatment,
        = 0 GDR shape depends on the ground state deformation (default),
        = 1 GDR shape dependence accounts for the rotation induced
            deformation (spin dependent, Eq. [totdefor]).
-
-GDRGFL   Selects source of GDR parameters
-      = 0 Messina systematics
-      = 1 experimental or systematics of RIPL-2 (default)
-
-GDRDYN      Controls GDR treatment ,
-      = 0. GDR shape depends on the ground state deformation (default),
-      = 1. GDR shape dependance accounts for the rotation induced deformation
-              (spin dependent).
 
 GGDR1   GDR width of first peak set to VAL (default calculated
         internally from systematics).
