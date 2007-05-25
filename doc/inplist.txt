@@ -144,7 +144,7 @@ FCD     Strength of the coupling at the barrier for I2-th collective mode
 Coupled-Channels (ECIS)
 -----------------------
 
-DIRECT  Controls use of ECIS03
+DIRECT  Controls use of ECIS
        = 0 spherical OM used (default)
        = 1 Coupled Channel method used for calculation of inelastic
            scattering to collective levels. If a selected OM
@@ -158,12 +158,19 @@ DIRECT  Controls use of ECIS03
            Channel approach with ECIS03 (extensive calculation time).
        = 3 as DIRECT=1 but DWBA is used instead of CC. All
            transmission coefficients calculated with spherical OM
+
 NOTE: OM potential to be used by ECIS03 might be different from the
 one used in the rest of the calculations and can be specified with the
 DIRPOT option.
 
 EcDWBA  Selects all levels with energy below VAL and spin equal or less
         than I1 to be used in DWBA calculations performed parallel to CC.
+        
+DEFNUC Deformation of the nucleus set to VAL. 
+       The threshold value to assume that the nucleus is deformed is 0.1
+       If you want to force the assumption of sphericity for a given nucleus
+       you can use this parameter with a value less than 0.1
+       this parameter also affects the deformation used in MSD calculations        
 
 Multi-step Direct
 -----------------
@@ -234,12 +241,15 @@ GST     Controls \gamma -emission in MSC,
 Multi-step direct
 -----------------          
 
-MSD 	Controls Multistep Direct calculations ,
-	  = 0 no MSD calculations (default),
-	  = 1 MSD calculations selected - ORION + TRISTAN will be executed,
+If you want to modify the deformation used in the deformed MSD, you can 
+use the input parameter DEFNUC (see Coupled-channel section)
+
+MSD   Controls Multistep Direct calculations ,
+        = 0 no MSD calculations (default),
+        = 1 MSD calculations selected - ORION + TRISTAN will be executed,
          discrte levels will be poulated by the MSD mechanism only if no
          CC or DWBA calculations are selected,
-	  = 2 MSD calculations selected and used in the full range of outgoing
+        = 2 MSD calculations selected and used in the full range of outgoing
          particle energies, i.e., if CC or DWBA calculations are selected
          MSD contribution to discrete levels will be summed up with direct
          calculations. If no direct calculations are selected (DIRECT=0) then
@@ -248,7 +258,7 @@ MSD 	Controls Multistep Direct calculations ,
          deformed and rotational CC is being used. Then MSD ads up vibrational
          component. Otherwise, vibrational contribution is double-counted
          and EMPIRE is not protected against such a missuse. 
-
+         
 MSDMIN MSD calculations only for C.M. incident energies >= VAL (default: 5 MeV)
 
 COMPFF Controls form factor for the l=0 transitions
