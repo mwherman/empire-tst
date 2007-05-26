@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-25 18:05:52 $
-Ccc   * $Id: input.f,v 1.240 2007-05-25 18:05:52 herman Exp $
+Ccc   * $Date: 2007-05-26 19:12:52 $
+Ccc   * $Id: input.f,v 1.241 2007-05-26 19:12:52 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -40,7 +40,7 @@ C
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
-      CHARACTER*2 deut, gamma, trit
+      CHARACTER*2 deut, gamma, trit, cnejec2
       REAL FLOAT, SNGL
       LOGICAL gexist, nonzero, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -600,6 +600,7 @@ C--------------------------set reaction string
                            REAction(nnuc) = '(z,'
                            iend = 3
                            IF (in.NE.0) THEN
+                            IF(in.le.9) then
                               WRITE (cnejec,'(I1)') in
                               IF (in.GT.1) THEN
                                  REAction(nnuc)(iend + 1:iend + 1)
@@ -608,6 +609,14 @@ C--------------------------set reaction string
                               ENDIF
                               REAction(nnuc)(iend + 1:iend + 1) = 'n'
                               iend = iend + 1
+                            ELSE
+                              WRITE (cnejec2,'(I2)') in
+                              REAction(nnuc)(iend + 1:iend + 2)
+     &                              = cnejec2
+                                 iend = iend + 2
+                              REAction(nnuc)(iend + 1:iend + 1) = 'n'
+                              iend = iend + 1
+                            ENDIF
                            ENDIF
                            IF (ip.NE.0) THEN
                               WRITE (cnejec,'(I1)') ip
@@ -1449,10 +1458,10 @@ C-----check whether any residue excitation is higher than CN
       ichanmin = -1
       DO i = 1, NDEJC
         CALL BNDG(i,1,qtmp)
-         IF (qtmp.LT.qmin) then 
+         IF (qtmp.LT.qmin) then
             qmin = qtmp
             ichanmin = i
-         ENDIF  
+         ENDIF
       ENDDO
       CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
 C-----check whether population array can accomodate the reaction with the largest
@@ -2027,7 +2036,7 @@ C--------------------only gamma decay is considered up to now
      &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
         ENDIF
       ENDIF
-  200 IF(.NOT.ADDnuc) THEN 
+  200 IF(.NOT.ADDnuc) THEN
         IF (.NOT.FILevel) CLOSE (13)
       ELSE
         CLOSE(13)
@@ -2046,7 +2055,7 @@ C--------------------only gamma decay is considered up to now
       ENDIF
 
       RETURN
-  300 IF(FILevel) THEN
+  300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
         WRITE (6,
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in local file (.lev). Default RIPL-2 levels will be
@@ -2065,12 +2074,11 @@ C--------------------only gamma decay is considered up to now
         CLOSE(14)
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
         ADDnuc = .TRUE.
-        GOTO 100 
-      ELSE
-        WRITE (6,
+        GOTO 100
+      ENDIF
+      WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in RIPL database '')') ia, iz
-      ENDIF
       RETURN
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
@@ -2433,7 +2441,7 @@ C-----------skipping levels with unknown spin or parity
      & ) Gspin
 
 
-      RETURN 
+      RETURN
       END
 C
 C
@@ -8818,9 +8826,9 @@ Ccc
       IF(INT(Energy/DE+1).LT.Limit) RETURN
    10 NEX(1) = NEX(1) - 1
       IF(NEX(1).EQ.1) THEN
-         WRITE(6,*) 'FATAL ERROR DEFINING ENERGY STEP' 
-         WRITE(6,*) 'REPORT TO mwherman@bnl.gov      ' 
-         STOP ' FATAL ERROR DEFINING ENERGY STEP' 
+         WRITE(6,*) 'FATAL ERROR DEFINING ENERGY STEP'
+         WRITE(6,*) 'REPORT TO mwherman@bnl.gov      '
+         STOP ' FATAL ERROR DEFINING ENERGY STEP'
       ENDIF
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       IF(INT(Energy/DE+1).GE.Limit) GOTO 10
