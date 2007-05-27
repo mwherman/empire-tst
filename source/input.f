@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-26 19:12:52 $
-Ccc   * $Id: input.f,v 1.241 2007-05-26 19:12:52 Capote Exp $
+Ccc   * $Date: 2007-05-27 22:03:54 $
+Ccc   * $Id: input.f,v 1.242 2007-05-27 22:03:54 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -505,7 +505,12 @@ C--------NEMA  number of alphas   emitted
          READ (5,*) nema
 C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
-         IF (NDEJC.LT.4) NEMc = 0
+         IF (NDEJC.LT.4) THEN
+           WRITE (6,*) ' '
+           WRITE (6,*) ' WARNING: TO EMIT CLUSTERS change NDEJC to 4 in'
+           WRITE (6,*) ' dimension.h'
+           NEMc = 0
+         ENDIF
 C--------cluster ejectile
          IF (NDEJC.GT.3) THEN
             AEJc(NDEJC) = aclu
@@ -566,128 +571,135 @@ C--------correct ejectiles symbols
             IF (ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.3.0D0)
      &          SYMbe(nejc) = trit
          ENDDO
+C
+C        Please note that the order in which the array IZA(nnuc) is filled is
+C        quite important. We change the order of the proton and alpha loop
+
+C        In this way we make sure that z,a reaction is always considered,
+C        otherwise alpha will be replaced by 2n2p emission !! (RCN, May 2007)
+C
          DO iac = 0, NEMc
-            DO ia = 0, nema
-               DO ip = 0, nemp
-                  DO in = 0, nemn
-                     IF (iac + ia + ip + in.NE.0) THEN
-                        atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
-     &                         *AEJc(2) - FLOAT(ia)*AEJc(3)
-                        IF (NDEJC.GT.3) atmp = atmp - FLOAT(iac)
-     &                      *AEJc(NDEJC)
-                        ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)
-     &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
-                        IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
-     &                      *ZEJc(NDEJC)
+           DO ip = 0, nemp
+             DO ia = 0, nema
+               DO in = 0, nemn
+                 IF (iac + ia + ip + in.NE.0) THEN
+                    atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
+     &                     *AEJc(2) - FLOAT(ia)*AEJc(3)
+                    IF (NDEJC.GT.3) atmp = atmp - FLOAT(iac)
+     &                  *AEJc(NDEJC)
+                    ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)
+     &                     *ZEJc(2) - FLOAT(ia)*ZEJc(3)
+                    IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
+     &                  *ZEJc(NDEJC)
 
-C                       residues must be heavier than alpha !! (RCN)
-                        if(atmp.le.4 . or. ztmp.le.2) cycle
+C                   residues must be heavier than alpha !! (RCN)
+                    if(atmp.le.4 . or. ztmp.le.2) cycle
 
-                        izatmp = INT(1000*ztmp + atmp)
-                        CALL WHERE(izatmp,nnuc,iloc)
-                        IF (iloc.EQ.1) THEN
-                           A(nnuc) = atmp
-                           Z(nnuc) = ztmp
-                           XN(nnuc) = A(nnuc) - Z(nnuc)
-                           IZA(nnuc) = izatmp
-                           iia = INT(A(nnuc))
-                           iz = INT(Z(nnuc))
-                           SYMb(nnuc) = SMAT(iz)
-                           HIS(nnuc) = -1.
-                           IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
-     &                         HIS(nnuc) = -0.5
-C--------------------------set reaction string
-                           REAction(nnuc) = '(z,'
-                           iend = 3
-                           IF (in.NE.0) THEN
-                            IF(in.le.9) then
-                              WRITE (cnejec,'(I1)') in
-                              IF (in.GT.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1)
-     &                              = cnejec
-                                 iend = iend + 1
-                              ENDIF
-                              REAction(nnuc)(iend + 1:iend + 1) = 'n'
-                              iend = iend + 1
-                            ELSE
-                              WRITE (cnejec2,'(I2)') in
-                              REAction(nnuc)(iend + 1:iend + 2)
-     &                              = cnejec2
-                                 iend = iend + 2
-                              REAction(nnuc)(iend + 1:iend + 1) = 'n'
-                              iend = iend + 1
-                            ENDIF
-                           ENDIF
-                           IF (ip.NE.0) THEN
-                              WRITE (cnejec,'(I1)') ip
-                              IF (ip.GT.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1)
-     &                              = cnejec
-                                 iend = iend + 1
-                              ENDIF
-                              REAction(nnuc)(iend + 1:iend + 1) = 'p'
-                              iend = iend + 1
-                           ENDIF
-                           IF (ia.NE.0) THEN
-                              WRITE (cnejec,'(I1)') ia
-                              IF (ia.GT.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1)
-     &                              = cnejec
-                                 iend = iend + 1
-                              ENDIF
-                              REAction(nnuc)(iend + 1:iend + 1) = 'a'
-                              iend = iend + 1
-                           ENDIF
-                           IF (NDEJC.GT.3 .AND. iac.NE.0) THEN
-                              WRITE (cnejec,'(I1)') iac
-                              IF (iac.GT.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1)
-     &                              = cnejec
-                                 iend = iend + 1
-                              ENDIF
-C                             REAction(nnuc)(iend + 1:iend + 2) = 'li'
-C                             iend = iend + 2
-                              IF (AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC)
-     &                            .EQ.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1) = 'd'
-                                 iend = iend + 1
-                              ENDIF
-                              IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
-     &                            .EQ.1) THEN
-                                 REAction(nnuc)(iend + 1:iend + 1) = 't'
-                                 iend = iend + 1
-                              ENDIF
-                              IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
-     &                            .EQ.2) THEN
-                                 REAction(nnuc)(iend + 1:iend + 3)
-     &                               = 'He3'
-                                 iend = iend + 3
-                              ENDIF
-                           ENDIF
-                           REAction(nnuc)(iend + 1:iend + 1) = ')'
-C--------------------------set residues to be used for EXFOR retrieval
-                           RESidue(nnuc) = '          '
-                           RESidue(nnuc)(1:1) = '>'
-                           RESidue(nnuc)(2:3) = SYMb(nnuc)
-                           iend = INDEX(RESidue(nnuc),' ') - 1
-                           WRITE (ca1,'(I3)') iia
-                           RESidue(nnuc)(iend + 1:iend + 2) = '-'
-                           iend = iend + 1
-                           IF (iia.LT.10) THEN
-                              RESidue(nnuc)(iend + 1:iend + 2)
-     &                           = ca1(3:3)
-                           ELSEIF (iia.LT.100) THEN
-                              RESidue(nnuc)(iend + 1:iend + 3)
-     &                           = ca1(2:3)
-                           ELSE
-                              RESidue(nnuc)(iend + 1:iend + 4)
-     &                           = ca1(1:3)
-                           ENDIF
+                    izatmp = INT(1000*ztmp + atmp)
+                    CALL WHERE(izatmp,nnuc,iloc)
+                    IF (iloc.EQ.1) THEN
+                       A(nnuc) = atmp
+                       Z(nnuc) = ztmp
+                       XN(nnuc) = A(nnuc) - Z(nnuc)
+                       IZA(nnuc) = izatmp
+                       iia = INT(A(nnuc))
+                       iz = INT(Z(nnuc))
+                       SYMb(nnuc) = SMAT(iz)
+                       HIS(nnuc) = -1.
+                       IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
+     &                     HIS(nnuc) = -0.5
+C----------------------set reaction string
+                       REAction(nnuc) = '(z,'
+                       iend = 3
+                       IF (in.NE.0) THEN
+                        IF(in.le.9) then
+                          WRITE (cnejec,'(I1)') in
+                          IF (in.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 'n'
+                          iend = iend + 1
+                        ELSE
+                          WRITE (cnejec2,'(I2)') in
+                          REAction(nnuc)(iend + 1:iend + 2)
+     &                          = cnejec2
+                             iend = iend + 2
+                          REAction(nnuc)(iend + 1:iend + 1) = 'n'
+                          iend = iend + 1
                         ENDIF
-                     ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
+                       ENDIF
+                       IF (ip.NE.0) THEN
+                          WRITE (cnejec,'(I1)') ip
+                          IF (ip.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 'p'
+                          iend = iend + 1
+                       ENDIF
+                       IF (ia.NE.0) THEN
+                          WRITE (cnejec,'(I1)') ia
+                          IF (ia.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 'a'
+                          iend = iend + 1
+                       ENDIF
+                       IF (NDEJC.GT.3 .AND. iac.NE.0) THEN
+                          WRITE (cnejec,'(I1)') iac
+                          IF (iac.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+C                         REAction(nnuc)(iend + 1:iend + 2) = 'li'
+C                         iend = iend + 2
+                          IF (AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC)
+     &                        .EQ.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1) = 'd'
+                             iend = iend + 1
+                          ENDIF
+                          IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
+     &                        .EQ.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1) = 't'
+                             iend = iend + 1
+                          ENDIF
+                          IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
+     &                        .EQ.2) THEN
+                             REAction(nnuc)(iend + 1:iend + 3)
+     &                           = 'He3'
+                             iend = iend + 3
+                          ENDIF
+                       ENDIF
+                       REAction(nnuc)(iend + 1:iend + 1) = ')'
+C----------------------set residues to be used for EXFOR retrieval
+                       RESidue(nnuc) = '          '
+                       RESidue(nnuc)(1:1) = '>'
+                       RESidue(nnuc)(2:3) = SYMb(nnuc)
+                       iend = INDEX(RESidue(nnuc),' ') - 1
+                       WRITE (ca1,'(I3)') iia
+                       RESidue(nnuc)(iend + 1:iend + 2) = '-'
+                       iend = iend + 1
+                       IF (iia.LT.10) THEN
+                          RESidue(nnuc)(iend + 1:iend + 2)
+     &                       = ca1(3:3)
+                       ELSEIF (iia.LT.100) THEN
+                          RESidue(nnuc)(iend + 1:iend + 3)
+     &                       = ca1(2:3)
+                       ELSE
+                          RESidue(nnuc)(iend + 1:iend + 4)
+     &                       = ca1(1:3)
+                       ENDIF
+                    ENDIF
+                 ENDIF
+              ENDDO
+           ENDDO
+          ENDDO
          ENDDO
 C--------retrieve EXFOR data
          INQUIRE (FILE = 'EXFOR.dat',EXIST = gexist)
@@ -838,9 +850,9 @@ C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
             DO iac = 0, NEMc
-               DO ia = 0, nema
-                  DO ip = 0, nemp
-                     DO in = 0, nemn
+              DO ip = 0, nemp
+                DO ia = 0, nema
+                   DO in = 0, nemn
                         mulem = iac + ia + ip + in
                         atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
      &                         *AEJc(2) - FLOAT(ia)*AEJc(3)
@@ -850,6 +862,7 @@ C--------Set exclusive and inclusive ENDF formatting flags
      &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
                         IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
      &                      *ZEJc(NDEJC)
+
 C                       residues must be heavier than alpha
                         if(atmp.le.4 . or. ztmp.le.2) cycle
                         izatmp = INT(1000*ztmp + atmp)
@@ -879,6 +892,7 @@ C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                   ENDDO
                ENDDO
             ENDDO
+
            WRITE(6,*) 'Number of exclusive nuclei :',NEXclusive
          ENDIF
 C

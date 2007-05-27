@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-26 19:12:53 $
-Ccc   * $Id: main.f,v 1.178 2007-05-26 19:12:53 Capote Exp $
+Ccc   * $Date: 2007-05-27 22:03:54 $
+Ccc   * $Id: main.f,v 1.179 2007-05-27 22:03:54 Capote Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -431,9 +431,13 @@ C-----Print elastic and direct cross sections from ECIS
      &                '  ( Scaled  ',e14.7,' mb )',/,2x,
      &           'Shape elastic cross section :',e14.7,' mb',
      &                '  ( Shifted ',e14.7,' mb )')
-         IF(ElasticCorr.NE.0.d0) write(6,'(2x,
+         IF(ElasticCorr.NE.0.d0) then
+           write(6,'(2x,
      &''** Elastic changed to compensate changes in total/absorption'',
      &//)')
+         ELSE
+           write(6,'(//)')
+         ENDIF
       ENDIF
       IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
          WRITE (6,99010) CSFus + (SINlcc + SINl)*FCCred + SINlcont
