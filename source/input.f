@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-27 22:03:54 $
-Ccc   * $Id: input.f,v 1.242 2007-05-27 22:03:54 Capote Exp $
+Ccc   * $Date: 2007-05-29 19:47:30 $
+Ccc   * $Id: input.f,v 1.243 2007-05-29 19:47:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -252,7 +252,7 @@ C--------        Default value 0. i.e. none but those selected automatically
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -505,7 +505,7 @@ C--------NEMA  number of alphas   emitted
          READ (5,*) nema
 C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
-         IF (NDEJC.LT.4) THEN
+         IF (NEMc.GT.0 .AND. NDEJC.LT.4) THEN
            WRITE (6,*) ' '
            WRITE (6,*) ' WARNING: TO EMIT CLUSTERS change NDEJC to 4 in'
            WRITE (6,*) ' dimension.h'
