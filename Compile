@@ -35,7 +35,7 @@ make -f endzvdl.mak
 make -f curzvd3l.mak
 make -f pntdatl.mak
 chmod a+x pntzvdl
-if [ -d file ../kalman ]; then
+if [ -d ../kalman ]; then
    cd ../kalman
    make all
 fi
