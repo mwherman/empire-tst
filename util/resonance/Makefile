@@ -1,6 +1,8 @@
-#----GNU gfortran FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
+#---- pfg90 compiler
+#FC     =  pgf90
+#----GNU g77 FORTRAN compiler
+FC     =  g77
+#----flags for production compilation with g77
 #FFLAGS = -O
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
