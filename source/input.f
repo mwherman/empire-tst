@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-29 19:47:30 $
-Ccc   * $Id: input.f,v 1.243 2007-05-29 19:47:30 herman Exp $
+Ccc   * $Date: 2007-06-05 13:37:56 $
+Ccc   * $Id: input.f,v 1.244 2007-06-05 13:37:56 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -148,6 +148,9 @@ C--------neutralize tuning factors and OMP normalization factors
          DO nnuc = 0, NDNUC
             DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
+            DO j = 1, NDLW
+               ISIsom(j,nnuc) = 0
+            ENDDO
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.d0
 C--------------Volume real potential
@@ -2632,7 +2635,7 @@ C     GOTO 10
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b35  |'
+     &           '                       |  E M P I R E  -  2.19.b36  |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
