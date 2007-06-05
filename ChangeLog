@@ -131,6 +131,8 @@
     Q-values if needed (M. Herman).
 49. EXFOR library updated to January 2007 along with the retrieval system
     (V. Zerkin).
+50. EMPEND formats isomeric and ground state cross sections in MF=10. All 
+    known compiler warnings cleaned (A. Trkov). 
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
