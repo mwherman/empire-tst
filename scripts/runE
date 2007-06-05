@@ -7,7 +7,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta35            '
+echo '                     V E R S I O N  2.19.beta36            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -107,6 +107,9 @@ if [ -s $file.rng ]; then
 cp $file.rng R250SEED.DAT 
    echo 'Using existing random number generator seed'
 fi
+if [ -s $file-cum.ps ]; then
+ln -sf  $file-cum.ps FITLEV.PS
+fi
 
 
 echo ' '
@@ -156,7 +159,7 @@ else
 fi
 if [ -s CUMULPLOT.PS ]; then
    ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
-   gv -landscape $file-cum.ps &
+   kghostview -landscape $file-cum.ps &
 fi
 if [ -s SYSTEMATICS.TXT ]; then
    mv  SYSTEMATICS.TXT $file.sys
@@ -213,6 +216,7 @@ rm ecSPH.inp 2>/dev/null
 rm ECIS_SPH.out 2>/dev/null
 rm C4.dat 2>/dev/null
 rm FITIN.DAT 2>/dev/null
+rm FITLEV.PS 2>/dev/null
 rm INPUT1.DAT 2>/dev/null
 rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 rm TARGET_COLL_RIPL.DAT 2>/dev/null
@@ -256,6 +260,9 @@ if [ ! -s $file-inp.fis ]; then
 fi
 if [ ! -s $file-pfns.out ]; then
        rm $file-pfns.out  2>/dev/null
+fi
+if [ ! -s $file-MC.par ]; then
+       rm $file-MC.par  2>/dev/null
 fi
 if [ ! -s FISSION.OUT ]; then
        rm FISSION.OUT  2>/dev/null
