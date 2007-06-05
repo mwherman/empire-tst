@@ -5488,7 +5488,7 @@ foreach el $stablist {
       close $mulinput
    }
    set seninpexists [file exists $mulinputn-inp.sen]
-   if {$seninpexists == 0 } {file copy ../scripts/skel-inp.sen $mulinput-inp.sen}
+   if {$seninpexists == 0 } {file copy ../scripts/skel-inp.sen $mulinputn-inp.sen}
    if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e ../scripts/runE $mulinputn}
    if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e ../scripts/format $mulinputn 1111 }
    if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e ../scripts/verify $mulinputn}
