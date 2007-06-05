@@ -1,7 +1,7 @@
-FC     =  g77
-FFLAGS = 
+#---- pfg90 compiler
+#FC     =  pgf90 
 #----GNU g77 FORTRAN compiler
-#FC     = g77
+FC     = g77
 #----flags for production compilation with g77
 #FFLAGS = -O3 
 #----flags for debuging using g77 compiler 
@@ -26,5 +26,10 @@ OBJF =	 LINUX.o  endfio.o  sigma1.o  scratchb.o  timer.o
 
 sigma1:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
+
+clean:
+	rm *.o
+
+
 
 
