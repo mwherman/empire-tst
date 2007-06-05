@@ -8052,8 +8052,11 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.legend &} -font {} \
-        -label {LEGEND Log} 
+        -command {exec $editor $file-log.fixup &} -font {} \
+        -label {FIXUP Log} 
+    $site_3_0.men70 add command \
+        -command {exec $editor $file-log.fixup2 &} -font {} \
+        -label {FIXUP-2 Log} 
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.linear &} -font {} \
         -label {LINEAR Log} 
@@ -8064,11 +8067,8 @@ exec  xterm -e ../scripts/stanef $file & } -label {Insert covariances}
         -command {exec $editor $file-log.sigma1 &} -font {} \
         -label {SIGMA1 Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup &} -font {} \
-        -label {FIXUP Log} 
-    $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup2 &} -font {} \
-        -label {FIXUP-2 Log} 
+        -command {exec $editor $file-log.legend &} -font {} \
+        -label {LEGEND Log} 
     $site_3_0.men70 add command \
         -command {exec $editor $file-log.plotc4 &} -font {} \
         -label {PLOTC4 Log} 
