@@ -33,6 +33,11 @@ C-V        - Add unassigned reactions to MT5 with yields for neutrons,
 C-V          protons and alpha particles.
 C-V        - Fix yields and pseudo-threshold distributions in MF6/MT5.
 C-V  06/02 - Input NLIB, ALAB, EDATE, AUTHOR strings.
+C-V  07/02 - Trivial change for single-character element designation.
+C-V  07/03 - Remove extra SEND record after MF1 data.
+C-V  05/05 - Remove redundant messages about ang.dist.interpolation.
+C-V        - Fix small bug in gamma-yields at threshold.
+C-V        - Read isomer-production cross sections.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -135,7 +140,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=200,MXM=60,MXR=800000,MXI=8000,MLV=3)
+      PARAMETER   (MXE=200,MXT=400,MXM=60,MXR=800000,MXI=8000,MLV=3)
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
@@ -143,6 +148,7 @@ C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
       DIMENSION    EIN(MXE),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),IWO(MXI),LVLF(MLV),LVMT(MLV),LVIZ(MLV)
+c     DATA RWO/MXR*0./
 C* Filenames and logical file units
       DATA LIN,LOU,LKB,LTT,LER / 1, 2, 5, 6, 7 /
       DATA BLNK/'                                        '/
@@ -243,10 +249,10 @@ C* Write the input options to Log-file
       WRITE(LER,991)
 C*
 C* Process cross section data
-      WRITE (LTT,991)
-      WRITE (LTT,991) ' BEGIN PROCESSING CROSS SECTION DATA   '
-      WRITE (LER,991)
-      WRITE (LER,991) ' BEGIN PROCESSING CROSS SECTION DATA   '
+      WRITE(LTT,991)
+      WRITE(LTT,991) ' BEGIN PROCESSING CROSS SECTION DATA    '
+      WRITE(LER,991)
+      WRITE(LER,991) ' BEGIN PROCESSING CROSS SECTION DATA    '
 C* Define work array addresses
       MTH=1
       IZB=MTH+MXT
@@ -284,15 +290,15 @@ C* Check if nuclide is fissile
       CALL CHKFIS(NXS,NEN,IWO(MTH),RWO(LXS),MXE,MXT,LFI)
 C* Write the ENDF file-1 data
       EMX=EIN(NEN)
-      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB
+      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB,NMOD
      &           ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
+C* Write tabulated ENDF file-1 data (nu-bar)
       NS=-1
       MF= 1
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
      1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
       NS=-1
-      CALL WRCONT(LOU,MAT, 0, 0,NS, 0. , 0., 0, 0, 0, 0)
 C* Write the ENDF file-3 data
       MF=3
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF
@@ -308,7 +314,7 @@ C* Write the ENDF file-3 data
       WRITE(LER,991)
       DO I=1,NXS
         JT=IWO(MTH-1+I)
-        IF(JT.GT.1000) THEN
+        IF(JT.GT.1000 .AND. JT.LE.9999) THEN
           JT=JT-1000*(JT/1000)
           WRITE(LTT,995) '       Cross section too small for MT : ',JT
           WRITE(LER,995) '       Cross section too small for MT : ',JT
@@ -318,12 +324,12 @@ C* Write the ENDF file-3 data
 C*
       WRITE(LTT,991)
       WRITE(LTT,991) ' List of MT numbers for MF3             '
-      WRITE(LTT,998) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
       WRITE(LTT,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LTT,998) (IWO(LBI-1+J),J=1,NT6)
       WRITE(LER,991)
       WRITE(LER,991) ' List of MT numbers for MF3             '
-      WRITE(LER,998) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
 C*
@@ -392,10 +398,10 @@ C* Angular distribution data processed
   492 CONTINUE
 C*
 C* Process double differential data
-      WRITE (LTT,991)
-      WRITE (LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
-      WRITE (LER,991)
-      WRITE (LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
+      WRITE(LTT,991)
+      WRITE(LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
+      WRITE(LER,991)
+      WRITE(LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
 C* Check if yields for unassigned reactions need to be printed
       NK=0
       DO I=1,NT6
@@ -441,16 +447,36 @@ C* Write the ENDF file-6 data
   620 JT6=JT6+1
       IF(JT6.LT.NT6) GO TO 600
 C* Energy/angle distribution data processed
-  800 IF(JT6.GT.0) THEN
+      IF(JT6.GT.0) THEN
         NS=0
         CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       END IF
 C*
+C* Write radioisotope and isomer production data (MF10)
+      WRITE(LTT,991)
+      WRITE(LTT,991) ' BEGIN WRITING ACTIVATION DATA          '
+      WRITE(LER,991)
+      WRITE(LER,991) ' BEGIN WRITING ACTIVATION DATA          '
+      N10=0
+      NRC=0
+      MF =10
+      LIW=MTH+NXS
+      LXI=MXI-LIW
+      CALL WRMF10(LOU,MXE,MXT,LXI,LXR,MF
+     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(LIW),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
+      WRITE(LTT,995) ' Number of MT sections written        : ',N10
+      WRITE(LTT,995) '            Total number of reactions : ',NRC
+      WRITE(LTT,991)
+      WRITE(LER,995) ' Number of MT sections written        : ',N10
+      WRITE(LER,995) '            Total number of reactions : ',NRC
+      WRITE(LER,991)
+C*
 C* Process discrete level photon production
-      WRITE (LTT,991)
-      WRITE (LTT,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA '
-      WRITE (LER,991)
-      WRITE (LER,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA '
+      WRITE(LTT,991)
+      WRITE(LTT,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA  '
+      WRITE(LER,991)
+      WRITE(LER,991) ' BEGIN PROCESSING DISCRETE PHOTON DATA  '
 C*   MXLI - maximum number of discrete levels
 C*   MXLJ - maximum number of transitions from a level
       MXLI=100
@@ -550,6 +576,7 @@ C*
   996 FORMAT(A40,F10.4)
   997 FORMAT(6A11)
   998 FORMAT(10I5)
+  999 FORMAT(10I8)
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine EMTIZA
@@ -1018,8 +1045,9 @@ c...        END IF
       SUBROUTINE QVALUE(IMT,MT,IZA,IZB,BEN,QQM)
 C-Title  : Subroutine QVALUE
 C-Purpose: Reconstruct Q-value from reaction and binding energies
-      DIMENSION  IZB(1),BEN(3,1)
+      DIMENSION  IZB(IMT),BEN(3,IMT)
       QQM=0
+      IF(IMT.LE.0) RETURN
         DO I=1,IMT
           KZA=IZB(I)
 C* Consider the radiative capture reaction
@@ -1392,7 +1420,8 @@ C-Description:
 C-D The correlated energy/angle double differential cross sections from
 C-D EMPIRE output are read into the work array. The following conditioning
 C-D of the data is performed:
-C-D  - Multiple energy points with zero distribution are skipped.
+C-D  - Multiple energy points with zero distribution are skipped
+C-D    unless they are from discrete level data.
 C-D  - Zero distributions over limited range of angles are forced
 C-D    to half the value of the neighbours until all are positive.
 C-D  - If the distribution is angle-integrated, it is divided by 4*Pi
@@ -1428,7 +1457,7 @@ C*
       NEN=0
       LD =1
       NZZ=0
-      EOO=-1.e12
+      EOO=-1.E12
 C-F Check if angles are given (No. of angles NAN=1 if isotropic)
       READ (LIN,891) REC
       IF(REC(1:40).EQ.'                                        ') THEN
@@ -1491,10 +1520,10 @@ C*          Count trailing zero-distribution entries at backward angles
         END IF
         RWO(LD+J)=DDJ*FF
       END DO
-C* Mark point with all-zero distributions
+C* Mark point with all-zero distributions (except if discrete level)
       IF(NEP.EQ. 0) THEN
         NEG=0
-        NZZ=NZZ+1
+        IF(EOU.GE.0) NZZ=NZZ+1
       ELSE
         NZZ=0
       END IF
@@ -1683,18 +1712,22 @@ C* Loop over all outgoing energy points
         DO J=1,LOX
           SCR(J)=0
         END DO
+c...
+c...       print *,'    Do lsqlgv for energy point',i,' of',nen
+c...
 C*        Fit Legendre polynomials
         LOO    =LOX
         CALL LSQLGV(ANG,DST(LD+1),NAN,SCR,0,LOO,ETOL,ERR,RWO,MXR)
         LOR=MAX(LOR,LOO)
 c...
-c...    if(abs(mt).eq.849) then
-c...        print *,'LOX,lor,loo',LOX,lor,loo,mt,ein
-c...        if(nan.gt.1) print *,(ang(j),j=1,4),'...',ang(nan)
-c...        print *,(dst(ld-1+j),j=1,5),'...',dst(ld+nan)
-c...        print *,eou,(scr(j),j=1,4)
-c...            stop
-c...    end if
+c...       print *,'    Done lsqlgv LOR',LOR
+C...    if(abs(mt).eq.649) then
+C...        print *,'LOX,lor,loo',LOX,lor,loo,mt,ein
+C...        if(nan.gt.1) print *,(ang(j),j=1,4),'...',ang(nan)
+C...        print *,(dst(ld-1+j),j=1,5),'...',dst(ld+nan)
+C...        print *,eou,(scr(j),j=1,4)
+C...            stop
+C...    end if
 C*
 C* Check for printout on exceeding tolerance limits
         IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
@@ -1705,8 +1738,8 @@ c...
 c...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
 c...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
 c...
-c...        write(ler,*) 'Ein,Eou,Loo',Ein,Eou,Loo
-c...        write(ler,*) scr(1),(scr(1+L)/(2*L+1)/scr(1),L=1,Loo)
+c...        write(*,*) 'Ein,Eou,Loo',Ein,Eou,Loo
+c...        write(*,*) scr(1),(scr(1+L)/(2*L+1)/scr(1),L=1,Loo)
 c...
           IF(IPRNT.EQ.0) JPRNT=1
 C*        Check for specific reaction printout
@@ -1780,7 +1813,7 @@ C*   -- For (l > 0) divide by (2*l+1) to conform with ENDF rules.
         LP=LP+LOX+2
       END DO
 c...
-c...          print *,'LOX,lor,loo,mt',LOX,lor,loo,mt
+c...          print *,'        LOX,lor,loo,mt',LOX,lor,loo,mt
 c...          do i=1,nen
 c...            lp=1+(i-1)*(lox+2)
 c...            print *,lp,(plg(lp-1+j),j=1,5)
@@ -1810,6 +1843,10 @@ C* Print warning in case of badly fitted distributions
         WRITE(LTT,908) MT,NINT(ZAP),EIN,NOFIT
         WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
       END IF
+c...
+c...      print *,'              exit angleg'
+c...
+      RETURN
 C*
   821 FORMAT(22X,4I11)
   907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
@@ -1821,380 +1858,6 @@ C*
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
       END
-c... old coding
-      SUBROUTINE RDANGD(LIN,LOR,LHI,NPT,EMP,RWO,MXR,LTT,LER,L92,LCU,LPT
-     2                 ,ZAP,MT,IPRNT,EIN,EI1,EI2,EO1,EO2,NZA1,NZA2)
-C-Title  : Subroutine RDANGD
-C-Purpose: Read angular distributions
-C-Description:
-C-D The correlated energy/angle double differential cross sections from
-C-D EMPIRE output are read, converted to Legendre polynomials and
-C-D packed into the work array. The following conditioning of the
-C-D data is performed:
-C-D  - Multiple energy points with zero distribution are skipped.
-C-D  - The maximum outgoing particle energy is EMP, if EMP>0.
-C-D
-C-D Formal parameters have the following meaning:
-C-D  LIN  Logical unit number of the EMPIRE short output.
-C-D  LOR  Maximum allowed Legendre order.
-C-D  LHI  Maximum fitted Legendre order (output).
-C-D  NPT  Number of outgoing particle energy points.
-C-D  EMP  Maximum particle energy limit (if EMP>0) [eV]
-C-D  RWO  Work array, which contains on exit a packed matrix of
-C-D       dimensions RWO(LHI+2,NPT).
-C-D       Each of the NPT rows contains:
-C-D        - outgoing particle energy
-C-D        - LHI+1 Legendre coefficients of the angular distribution
-C-D          expansion.
-C-D  MXR  Maximum size of the work array RWO.
-C-D
-C-D The remaining parameters are required for printout control
-C-D  LTT  Logical unit of the terminal screen.
-C-D  LER  Logical unit of the log file.
-C-D  L92  Logical unit of the PLOTTAB input file
-C-D  LCU  Logical unit of the curves log file.
-C-D  LPT  Logical unit of the points log file.
-C-D  ZAP  ZA designation of the outgoing particle.
-C-D  MT   Reaction number.
-C-D  IPRNT  Printout flag.
-C-D  EIN  Incident particle energy.
-C-D  EI1
-C-D  EI2
-C-D  EO1
-C-D  EO2
-C-D  NZA1
-C-D  NZA2
-C-
-C* Maximum number of angles MXA, fine grid MXZ
-      PARAMETER     (MXA=120,MXZ=240)
-      DOUBLE PRECISION DD(MXA),DDJ,PI,FF
-      CHARACTER*136  REC
-      DIMENSION      ANG(MXA),DST(MXA)
-      DIMENSION      ZANG(MXZ),ZLEG(MXZ)
-      DIMENSION      RWO(MXR)
-C* Permissible tolerance for fitted angular distributions (fraction)
-      DATA ETOL/ 0.010 /
-C* Thinning tolerance for angular distribution (fraction)
-      DATA ETHN/ 0.002 /
-C*
-      DATA PI/3.1415926D0/
-C*
-c...
-c...      print *,'rdang: zap,mt,ein,emp',nint(zap),mt,ein,emp
-c...
-      NOFIT=0
-      NPT=0
-      LHI=0
-      KXA=1
-C-F Check if angles are given (No. of angles KXA=1 if isotropic)
-      READ (LIN,891) REC
-      IF(REC(24:38).EQ.'               ') GO TO 438
-C-F Read the angles at which the distributions are given (8 per row)
-        KXA=8
-        J1 =1
-  432   READ (REC,806,ERR=802) (ANG(J),J=J1,KXA)
-  433   IF(ANG(KXA).EQ.0) THEN
-          KXA=KXA-1
-          GO TO 433
-        ELSE IF(ANG(KXA).LT.180.) THEN
-          READ (LIN,891) REC
-          KXA=KXA+8
-          IF(KXA.GT.MXA) STOP 'REAMF6 ERROR - MXA limit exceeded'
-          J1 =J1 +8
-          GO TO 432
-        END IF
-C* Convert angles from degrees to cosines
-        DO 436 J=1,KXA
-          ANG(J)=COS(PI*ANG(J)/180)
-  436   CONTINUE
-C*
-C* Initialise reading the distributions and set the addresses:
-C*   LPU - Legendre coefficients at EOU (current energy)
-C*   LPL - Legendre coefficients at EOL (previous energy)
-C*   LP3 - Legendre coefficients at EO3 (pre-previous energy)
-  438 EOU=0
-      EOL=0
-      LL =1
-      LPU=LL+1
-      LPL=LPU
-C*
-C-F Read angular distributions until a blank line is encountered
-  440 EO3=EOL
-      EOL=EOU
-      LP3=LPL
-      LPL=LPU
-  450 READ (LIN,891) REC
-      IF(REC(1:20).EQ.'                    ') GO TO 700
-      JXA=MIN(KXA,8)
-C* Read distribution in double precision to avoid underflow
-      READ (REC,807,ERR=802) EE,(DD(J),J=1,JXA)
-      IF(KXA.GT.8) READ (LIN,809,ERR=802) (DD(J),J=9,KXA)
-      IF(KXA.EQ.1) THEN
-C* Convert isotropic (angle-integrated) spectra to double differential
-        FF=1/(4*PI)
-      ELSE
-        FF=1
-      END IF
-C* Suppress negative energies (unless processing discrete data)
-      IF(MT.GT.0 .AND. EE.LT.0) GO TO 450
-      EOU=EE*1.E6
-C* Check for zero or negative distributions
-      NEG=0
-      NEP=0
-      KZE=0
-      DO J=1,KXA
-        DDJ=DD(J)
-        IF(DDJ.GT.0) THEN
-          NEP=NEP+1
-          KZE=0
-        ELSE
-          DDJ=0
-C*          Count all zero-distribution entries
-          NEG=NEG+1
-C*          Count trailing zero-distribution entries at backward angles
-          KZE=KZE+1
-        END IF
-        DST(J)=DDJ*FF
-      END DO
-      IF(NEP.EQ. 0) NEG=0
-      IF(NEG.GT. 0) THEN
-C* Force zero points to half of the average of neighbours until all >0
-        IF(KXA.GT.2) THEN
-          KZERO=1
-          DO WHILE (KZERO.GT.0)
-            KZERO=0
-            DO J=3,KXA
-              IF(DST(J-1).LE.0) THEN
-                KZERO=1
-                DDJ=MAX(1.E-30, (DST(J-2)+DST(J))/2)
-                IF(DDJ.GT.1E-20) DDJ=DDJ/2
-                DST(J-1)=DDJ
-              END IF
-            END DO
-          END DO
-        END IF
-C*          Print warning on negative distributions
-C...    WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
-C...    WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,KXA
-      END IF
-C* Convert to Legendre polynomials and store
-      LPU=LL+1
-      LS =LPU+LOR+2
-      LB =LS +LOR+2
-      IF(LB.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded in RDANG'
-      LC =MXR-LS
-      LOO=LOR
-c...  KKX=KXA-KZE
-      KKX=KXA
-      CALL LSQLGV(ANG,DST,KKX,RWO(LPU),0,LOO,ETOL,ERR,RWO(LS),LC)
-      LHI=MAX(LHI,LOO)
-      LO1=LOO+1
-      RWO(LL)=EOU
-C*
-C-F Check the distribution for consistency and print warnings
-C*
-      JPRNT=0
-C* Print distribution if max. order requested
-      IF(LOO.GE.LOR) THEN
-        JPRNT=1
-C...
-C...    print *,'   MT,Ein,Eou,Loo',MT,Ein,Eou,Loo
-C...
-      END IF
-C* Check for printout on exceeding tolerance limits
-      IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
-C*      Count the number of points with convergence problems
-        NOFIT=NOFIT+1
-C*      Print a warning when convergence problems are encountered
-c...
-c...        WRITE(LTT,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
-c...        WRITE(LER,907) MT,NINT(ZAP),EIN,EOU,ERR*100.
-c...
-c...        write(ler,*) 'Ein,Eou,Loo',Ein,Eou,Loo
-c...        write(ler,*) rwo(lpu),(RWO(LPU+L)/(2*L+1)/RWO(LPU),L=1,Loo)
-c...
-        IF(IPRNT.EQ.0) JPRNT=1
-C* Check for specific reaction printout
-      ELSE IF
-     1  (IPRNT.EQ.MT                    .AND.
-     2  (  EIN.GE.EI1 .AND. EIN.LE.EI2) .AND.
-     3  (  EOU.GE.EO1 .AND. EOU.LE.EO2)) THEN
-        JPRNT=1
-      END IF
-C* Check for isotropic distributions (suppress printout)
-      IF(LOO.LT.1) JPRNT=0
-C* Check for differences in the fitted angular distributions
-C* at meshpoints and midpoints
-      IF(JPRNT.NE.0) THEN
-C*      Plotting instructions to the "input" file on unit L92
-C*      Original values to the "points" file file on unit LPT
-C*      Fitted values to the "curves" file file on unit LCU
-        WRITE(L92,*) 'EMPEND Plotting MT',MT,' Err',ERR
-        WRITE(L92,*) 'Ein',EIN,' Eou',EOU,' Particle ZA',NINT(ZAP)
-        WRITE(L92,821) 0,0,0,0
-        WRITE(L92,821) 0,2,0
-        IF(EOU.GE.0) THEN
-          WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
-        ELSE
-          WRITE(LPT,933) EIN,EOU,MT,IFIX(ZAP+0.1)
-        END IF
-        WRITE(LCU,931) LOO
-        DO K=2,KXA
-          I=KXA+2-K
-          WRITE(LPT,934) ANG(I),0.,0.,DST(I)
-C* Function at mesh point
-          ANI=ANG(I)
-          DSI=POLLG1(ANI,RWO(LPU),LOO)
-          WRITE(LCU,934) ANI,DSI
-C* Function at 1/4 to the next mesh point
-          ANI=(3*ANG(I)+  ANG(I-1))/4
-          DSI=POLLG1(ANI,RWO(LPU),LOO)
-          WRITE(LCU,934) ANI,DSI
-C* Function at 2/4 to the next mesh point
-          ANI=(2*ANG(I)+2*ANG(I-1))/4
-          DSI=POLLG1(ANI,RWO(LPU),LOO)
-          WRITE(LCU,934) ANI,DSI
-C* Function at 3/4 to the next mesh point
-          ANI=(  ANG(I)+3*ANG(I-1))/4
-          DSI=POLLG1(ANI,RWO(LPU),LOO)
-          WRITE(LCU,934) ANI,DSI
-        END DO
-        ANI=ANG(1)
-        DSI=POLLG1(ANI,RWO(LPU),LOO)
-        WRITE(LPT,934) ANI,0.,0.,DST(1)
-        WRITE(LCU,934) ANI,DSI
-        WRITE(LCU,934)
-        WRITE(LPT,934)
-      END IF
-C*
-C* End of test prints
-C*
-c...
-c...       print *,'awr,awp,emx,emp',awr,awp,emx,emp
-c...       print *,'rl,ru',rwo(lpl),rwo(lpu)
-c...
-C* For (l > 0) divide by (2*l+1) to conform with ENDF rules.
-      DO L=1,LOR
-        IF(L.GT.LOO) RWO(LPU+L)=0.
-        RWO(LPU+L)=RWO(LPU+L)/FLOAT(2*L+1)
-      END DO
-      IF(NPT.GT.0) THEN
-        IF(EMP.GT.0 .AND. EOU.GT.EMP) THEN
-C* Check the maximum particle energy limit EMP
-          WRITE(LTT,909) MT,NINT(ZAP),EOU,EMP
-          WRITE(LER,909) MT,NINT(ZAP),EOU,EMP
-C... Maximum energy limit should be applied within EMPIRE !!!
-C...      CALL FLDINT(LO1,EOL,RWO(LPL),EOU,RWO(LPU),EMP,RWO(LPU))
-C...      EOU=EMP
-        END IF
-      END IF
-C* Save the outgoing particle energy
-      RWO(LL)=EOU
-C* Remove point at EOL if it is linearly interpolable between EO3, EOU
-      IF(NPT.GT.1 .AND. EOU.GT.0) THEN
-        ITHIN=1
-C*      Interpolate Legendre coefficients between EO3 and EOU to EOL
-        CALL FLDINT(LO1,EO3,RWO(LP3),EOU,RWO(LPU),EOL,RWO(LS))
-C*      Check the absolute difference relative to P0 term
-        F0=RWO(LPL)*ETHN
-        DO I=1,LO1
-          FF=ABS(RWO(LS-1+I)-RWO(LPL-1+I))
-          IF(FF.GT.F0) ITHIN=0
-        END DO
-        IF(ITHIN.NE.0) THEN
-C*      Thinning flag set - rplace point at EOL with EOU
-          RWO(LPL-1)=RWO(LPU-1)
-          DO I=1,LO1
-            RWO(LPL-1+I)=RWO(LPU-1+I)
-          END DO
-          IF(EMP.LE.0 .OR. EOU.LT.EMP) THEN
-            GO TO 450
-          ELSE
-            GO TO 700
-          END IF
-        END IF
-      END IF
-C* Increment indices in the storage array and loop to next point
-      NPT=NPT+1
-      NW =NW+LOR+2
-      LL =LL+LOR+2
-      IF(EMP.LE.0 .OR. EOU.LT.EMP) GO TO 440
-C*
-C* All spectrum data read
-C* Print warning in case of badly fitted distributions
-  700 IF(NOFIT.GT.0) THEN
-        WRITE(LTT,908) MT,NINT(ZAP),EIN,NOFIT
-        WRITE(LER,908) MT,NINT(ZAP),EIN,NOFIT
-      END IF
-C* Print warning on zero-distribution at backward angles
-      IF(NEG.GT.0) THEN
-        WRITE(LTT,905) MT,NINT(ZAP),EIN,NEG,KXA
-        WRITE(LER,905) MT,NINT(ZAP),EIN,NEG,KXA
-      END IF
-      IF(NPT.LE.1) GO TO 800
-C* Check that the last point is zero distribution
-      IF(RWO(LPU).NE.0) THEN
-C*      Shift energy - double points cause problems in HEATR
-        RWO(LL)=RWO(LPU-1)*1.00001
-        DO L=1,LO1
-          RWO(LL+L)=0.
-        END DO
-        NPT=NPT+1
-        NW =NW+LOR+2
-        LL =LL+LOR+2
-      END IF
-C* Pack the data into compact matrix RWO(LH2,NPT)
-      LH2=LHI+2
-      II =LH2
-      JJ =LOR+2
-      DO  I=2,NPT
-        DO J=1,LH2
-          RWO(II+J)=RWO(JJ+J)
-        END DO
-        II =II+LH2
-        JJ =JJ+LOR+2
-      END DO
-c...
-c...  ii=1
-c...  do i=1,npt
-c...    write(ler,*) '    Eou',rwo(ii),rwo(ii+l)
-c... 1               ,(rwo(ii-1+l)/rwo(ii+1),l=3,lh2)
-c...    ii=ii+lh2
-c...  end do
-c...
-C*
-  800 RETURN
-C* Error trap reading input record
-  802 WRITE(LTT,912) REC
-      WRITE(LER,912) REC
-      STOP 'EMPEND ERROR - reading file'
-C*
-  806 FORMAT(6X,8(5X,F10.4))
-  807 FORMAT(BN,F10.5,F14.4,7F15.4)
-  809 FORMAT(9X,8F15.4)
-  821 FORMAT(22X,4I11)
-  891 FORMAT(A136)
-  905 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5,' Ein',1P,E10.3/17X
-     2      ,' Backward angle distribution zero at',I3
-     3      ,' out of',I3,' angle(s)')
-  906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' Eou',E10.3/17X
-     2      ,' Input angular distribution negative at',I3
-     3      ,' out of',I3,' angle(s)')
-  907 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' Eou',E10.3,' Ang.Fit Dif',0P,F6.1,'%')
-  908 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Ein',1P,E10.3,' bad ang.distr. fit for',I3,' Eout')
-  909 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
-     1      ,' Eou',1P,E10.3,' > available energy',E10.3)
-  912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
-     1       ' "',A70,'"')
-  931 FORMAT('P(',I2.2,') Fit')
-  932 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.2E1,' MT',I3,' PZA',I5)
-  933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
-  934 FORMAT(1P,6E11.4)
-      END
-c... end old coding
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1                 ,EIN,XSC,QQM,QQI,MTH,IZB,BEN
      1                 ,IZI,IZA,LISO,AWR,NEN,NXS)
@@ -2225,16 +1888,20 @@ C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
 C* Search for the reaction header cards
 C*   NEN counts the Number of energy points
 C*   NXS counts the Number of reaction types
+C*   IMT count of the nucleons for which binding energies are given
       NXS=0
       NEN=0
+      IMT=0
 C*
 C* Search EMPIRE output for specific strings
   110 READ (LIN,891,END=700) REC
-      IF(REC(1:10).EQ.' REACTION '                  ) GO TO 200
-      IF(REC(1:18).EQ.'  Decaying nucleus'          ) GO TO 210
-      IF(REC(1:10).EQ.' TOTAL  CR'                  ) GO TO 290
-c...  IF(REC(5:20).EQ.'fission  cross s'            ) THEN
-      IF(REC(2:19).EQ.'Tot. fission cross'          ) THEN
+      IF(REC( 1:10).EQ.' REACTION '                  ) GO TO 200
+      IF(REC( 1:18).EQ.'  Decaying nucleus'          ) GO TO 210
+      IF(REC(13:35).EQ.'ground state population'     ) GO TO 220
+      IF(REC(13:35).EQ.'isomer state population'     ) GO TO 224
+      IF(REC( 1:10).EQ.' TOTAL  CR'                  ) GO TO 290
+c...  IF(REC( 5:20).EQ.'fission  cross s'            ) THEN
+      IF(REC( 2:19).EQ.'Tot. fission cross'          ) THEN
         QQ=2.0E8
         MT=18
         READ(REC,809) XS
@@ -2326,6 +1993,7 @@ C* If target nucleus, read the mass
 C* Read the reaction Q-value
       READ (REC(56:65),994) QQ
       QQ=QQ*1.E6
+      QI=QQ
 C* Assign MT number from residual ZA
       CALL EMTIZA(IZI,IZA,JZA,MT)
       IF(MT.EQ.0) THEN
@@ -2353,6 +2021,21 @@ C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
 C* All other cross sections are processed in the same way
       GO TO 310
 C*
+C* Isomer production cross section - ground state
+  220 CONTINUE
+C 39-Y - 90 ground state population   42.2774    mb
+      EISO=0
+      MISO=0
+      GO TO 226
+C* Isomer production cross section - ground state
+  224 CONTINUE
+      READ (REC(59:65),*) EISO
+      EISO=EISO*1.E6
+      MISO=1
+  226 QI  =QQ-EISO
+      MT  =JZA*10+MISO
+      GO TO 311
+C*
 C* Read the total cross section but exclude incident charged particles
   290 IF(IZI.GE.1000) GO TO 110
       READ (REC,808) XS
@@ -2369,13 +2052,29 @@ C* Read the cross section
   311 READ (REC,803) XS
       IF(XS.LE.0) GO TO 110
 C* Reconstruct Q-values from MT and the binding energies
-      IF(QQ.EQ.0 .AND. MT.NE.50) CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
+      IF(QQ.EQ.0 .AND. MT.NE.50) THEN
+        CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
+      END IF
 C* Test if reaction is already registered
   312 IF(NXS.GT.0) THEN
         DO I=1,NXS
           IXS=I
           MTI=ABS(MTH(I))
-          IF(MTI.EQ.MT) GO TO 320
+          IF(MTI.EQ.MT) THEN
+            IF(ABS(MT).LE.999) THEN
+              GO TO 320
+            ELSE
+C*            Check level energy for isomer production
+              IF(QI.EQ.QQI(I)) GO TO 320
+C*            -- If level energy different, increment the MT
+              MT=MT+1
+C*            -- Increment the MT in the stored array
+C...          MTI=MTI+1
+C...          IF(MTH(I).LT.0) MTI=-MTI
+C...          MTH(I)=MTI
+              MT=MT+1
+            END IF
+          END IF
         END DO
       END IF
       NXS=NXS+1
@@ -2395,7 +2094,7 @@ C* Reserve space for proton and alpha production of unidentified reactions
       END IF
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
-      QQI(IXS)=QQM(IXS)
+      QQI(IXS)=QI
 C* Add cross section contribution
   320 IF(MT.GE.450 .AND. MT.LT.460) THEN
         XSC(NEN,IXS)=XS
@@ -2490,7 +2189,7 @@ C* Enter new discrete level for this reaction
       MTH(IXS)=MT
       QM=QQ
 C* Reconstruct Q values from MT and the binding energies if necessary
-      IF(QQ.EQ.0 .AND. MT0.NE.50) THEN
+      IF(QQ.EQ.0 .AND. MT0.NE.50 .AND. IMT.GT.0) THEN
         QM=0
         DO I=1,IMT
           KZA=IZB(I)
@@ -2766,7 +2465,7 @@ C* Find the cross section index
         IF(MTH(I).EQ.MTC) THEN
           ETH=MAX(-QQI(I)*(AWR+AWI)/AWR, ELO )
 c...
-c...        print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
+c...    print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
 c...
           MT =MTC
           MTX=MT
@@ -2855,17 +2554,12 @@ C* Process the angular distribution for this energy
       LMX=MXR-L64
       READ (LIN,891) REC
       EMP=0
-C... new coding
       CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MTC,ZAP,LTT,LER)
       LSC=L64+NEP*(NAN+1)
       LMX=MXR-LSC
       LOX=MIN(LOMX,NAN-1)
       CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
      &           ,MTC,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
-C...
-c...  CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L6+4),LMX,LTT,LER,L92,LCU,LPT
-c... 2           ,ZAP,MTC,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
-c...
 C* Only one distribution should be present
       IF(NEP.NE.1) THEN
         PRINT *,'WARNING - Several distributions for elastic'
@@ -2891,7 +2585,7 @@ C* Check if particle is to be processed
       IF(PTST.EQ.'recoils ') THEN
         READ (REC(35:58),808) KZAK
 c...
-c...        print *,rec(15:41),pout(ik),izak(ik)
+        print *,rec(15:41),pout(ik),izak(ik)
 c...
         IF(KZAK.NE.IZAK(IK)) GO TO 210
       END IF
@@ -2900,7 +2594,7 @@ C* Identify the reaction and assign the MT number
       IF(MT.EQ. 0 ) GO TO 210
       IF(MT.NE.JT6) GO TO 210
 c...
-c...      print *,'processing energy ne6,ee,eth,mt',ne6,ee,eth,mt,mt6
+c...  print *,'processing energy ne6,ee,eth,mt',ne6,ee,eth,mt,mt6
 c...
 C* Define the pointwise cross section at the same energy
       XS3=0.
@@ -2910,7 +2604,7 @@ C* Define the pointwise cross section at the same energy
       XS3=XSC(JE3,IT)
       IF(ABS(EN3-EE).GT.EE*SMALL .AND. JE3.LT.NE3) GO TO 615
 c...
-c...      print *,'processing energy',ne6+1,ee,' xs=',xs3
+c...  print *,'  processing energy',ne6+1,ee,' xs=',xs3
 c...
 C* Skip this energy if cross section is zero
       IF(XS3.LE.0) GO TO 210
@@ -2922,7 +2616,7 @@ C* Preset the particle multiplicity for specific reactions
       AWP =AWPK(IK)
       CALL YLDPOU(YL0,MT,KZAK)
 c...
-c...      print *,'mt,ne6,kzak,yl0',mt,ne6,kzak,yl0
+c...  print *,'  mt,ne6,kzak,yl0',mt,ne6,kzak,yl0
 c...
       IF(YL0.GT.0) THEN
         NYL=1
@@ -2935,7 +2629,7 @@ c...
       END IF
 C*
 C...
-c...      print *,'particle ZAP,AWP',Kzak,awp
+c...  print *,'  particle ZAP,AWP',Kzak,awp
 c...
       IZAP=KZAK
       ZAP=KZAK
@@ -2985,9 +2679,9 @@ C...
       LMX=MXR-L64
       READ (LIN,891)
       READ (LIN,891)
-c... new coding
       CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MT6,ZAP,LTT,LER)
 c...
+c...       print *,'  Done rdangf NEP',NEP
 c...       if(nint(zap).eq.2004) then
 c...          print *,rec
 c...          print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
@@ -2997,16 +2691,14 @@ c...             print *,(rwo((j-1)*(nan+1)+k+l64-1),k=1,5)
 c...           end do
 c...           stop
 c...       end if
-
+c...
       LSC=L64+NEP*(NAN+1)
       LMX=MXR-LSC
       LOX=MIN(LOMX,NAN-1)
       CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
      &           ,MT6,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
-c... old coding
-c...  CALL RDANGD(LIN,LOMX,LHI,NEP,EMP,RWO(L64),LMX,LTT,LER,L92,LCU,LPT
-c... 2           ,ZAP,MT6,IPRNT,EE,EI1,EI2,EO1,EO2,NZA1,NZA2)
-
+c...
+c...       print *,'  Done angleg NEP',NEP
 c...       if(nint(zap).eq.2004) then
 c...          print *,'LOMX,LHI,NEP',LOMX,LHI,NEP,mt6,ee
 c...          do j=1,nep
@@ -3015,7 +2707,7 @@ c...            print *,(rwo((j-1)*(lhi+2)+k+l64-1),k=1,4)
 c...          end do
 c...          stop
 c...       end if
-
+c...
 C* Calculate the integral of the spectrum
       SPC=0
       EOU=RWO(L64)
@@ -3065,8 +2757,8 @@ c...
         IF(ZAP.EQ.0) THEN
 C* Scale the gamma yield by the ratio of total available energy
 C* and the available energy at threshold
-          EAVE=-QQI(I)+ EE*AWR/(AWR+AWI)
-          EAV0=-QQI(I)+ETH*AWR/(AWR+AWI)
+          EAVE=-QQI(IT)+ EE*AWR/(AWR+AWI)
+          EAV0=-QQI(IT)+ETH*AWR/(AWR+AWI)
           YINS=(EAV0/EAVE)*(SPC/XS3)
         ELSE
           YINS=YL0
@@ -3363,7 +3055,7 @@ C*
   912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
      1       '                  Transfer to ground state assumed')
       END
-      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB
+      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB,NMOD
      &                 ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
 C-Title  : WRIMF1 Subroutine
 C-Purpose: Write comment section (file-1) data in ENDF-6 format
@@ -3374,16 +3066,16 @@ C-Purpose: Write comment section (file-1) data in ENDF-6 format
       CHARACTER*2  C2,CH(100)
       CHARACTER*1  ST
       DATA CH
-     1 /' H','He','Li','Be',' B',' C',' N',' O',' F','Ne'
-     2 ,'Na','Mg','Al','Si',' P',' S','Cl','Ar',' K','Ca'
-     3 ,'Sc','Ti',' V','Cr','Mn','Fe','Co','Ni','Cu','Zn'
-     4 ,'Ga','Ge','As','Se','Br','Kr','Rb','Sr',' Y','Zr'
+     1 /'H ','He','Li','Be','B ','C ','N ','O ','F ','Ne'
+     2 ,'Na','Mg','Al','Si','P ','S ','Cl','Ar','K ','Ca'
+     3 ,'Sc','Ti','V ','Cr','Mn','Fe','Co','Ni','Cu','Zn'
+     4 ,'Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y ','Zr'
      5 ,'Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn'
-     6 ,'Sb','Te',' I','Xe','Cs','Ba','La','Ce','Pr','Nd'
+     6 ,'Sb','Te','I ','Xe','Cs','Ba','La','Ce','Pr','Nd'
      7 ,'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb'
-     8 ,'Lu','Hf','Ta',' W','Re','Os','Ir','Pt','Au','Hg'
+     8 ,'Lu','Hf','Ta','W ','Re','Os','Ir','Pt','Au','Hg'
      9 ,'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th'
-     * ,'Pa',' U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm'/
+     * ,'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm'/
       DATA PTST/'        '/
       DATA BL11/'           '/
       DATA FLSC/'empmf1.tmp'/
@@ -3653,19 +3345,25 @@ C* Write CONT record - end of data set
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       NS=0
-      IF(MTH(IT).GT.0) MTH(IT)=MTH(IT)+1000
-      IF(MTH(IT).LT.0) MTH(IT)=MTH(IT)-1000
+C* Flag reaction as processed by adding 1000 to the MT
+      MTFLG=ABS(MTH(IT))
+      IF(MTFLG.LT.1000) THEN
+        MTFLG=MTFLG+1000
+        IF(MTH(IT).LT.0) MTFLG=-MTFLG
+        MTH(IT)=MTFLG
+      END IF
   360 CONTINUE
 C* All cross sections processed
       NS=-1
       CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
 C* Change back the MT numbers that were flagged "+1000"
-      DO I=1,NXS
-c...        DO WHILE (MTH(I).GT.1000)
-c...          MTH(I)=MTH(I)-1000
-c...        END DO
-        IF(MTH(I).GT. 1000) MTH(I)=MTH(I)-1000
-        IF(MTH(I).LT.-1000) MTH(I)=MTH(I)+1000
+      DO IT=1,NXS
+        MTFLG=ABS(MTH(IT))
+        IF(MTFLG.GT.1000 .AND. MTFLG.LT.9999) THEN
+          MTFLG=MTFLG-1000
+          IF(MTH(IT).LT.0) MTFLG=-MTFLG
+          MTH(IT)=MTFLG
+        END IF
       END DO
 C*
       RETURN
@@ -3736,15 +3434,15 @@ C*      Process all energies for elastic
         EOU=0
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
-        DEIN=DBLE(EIN)
-        DAWR=DBLE(AWR)
-        DAWI=DBLE(AWI)
-        DAWP=DBLE(AWP)
-        DQQI=DBLE(QQI(IT))
-        EOU=(DEIN*DAWR/(DAWR+DAWI)+DQQI)*((DAWR+DAWI-DAWP)/(DAWR+DAWI))
-
+c...    DEIN=DBLE(EIN)
+c...    DAWR=DBLE(AWR)
+c...    DAWI=DBLE(AWI)
+c...    DAWP=DBLE(AWP)
+c...    DQQI=DBLE(QQI(IT))
+c...    EOU=(DEIN*DAWR/(DAWR+DAWI)+DQQI)*((DAWR+DAWI-DAWP)/(DAWR+DAWI))
+c...
         EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))*((AWR+AWI-AWP)/(AWR+AWI))
-
+c...
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
@@ -3754,6 +3452,9 @@ C* Skip points below threshold
         LL=LL+NW
         GO TO 40
       END IF
+C...
+C...  print *,'writing Ein,Eou',EIN,Eou
+C...
 C* Print header CONT and TAB2 records
       IF(J2.EQ.0) THEN
         IF(ABS(EIN-ETH).LT.1.E-4*EIN) THEN
@@ -3807,21 +3508,20 @@ c...
 C* Check the closest
         DE1=ABS(EOU-E1)
         DE2=ABS(EOU-E2)
-        IF(MIN(DE1,DE2).GT.TST) THEN
-C* No matching levels, linearly interpolate
+        IF(MIN(DE1,DE2).GT.TST .AND. NA1.GT.1) THEN
+C* No matching levels, linearly interpolate (except if isotropic)
           CALL FLDINT(NA1,E1,RWO(L1+1),E2,RWO(L2+1),EOU,QQ)
           WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
           WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
 C...
-              print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
-     1               ,QQM(IT)-QQI(IT)
+C...          print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
+C... 1               ,QQM(IT)-QQI(IT)
 C...          print *,e1,(rwo(l1+j),j=1,NA1)
 C...          print *,e2,(rwo(l2+j),j=1,NA1)
 C...          read (*,'(a1)') yes
 C...
-c...
-c...            print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
-c...
+C...          print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
+C...
         ELSE IF(DE1.LT.DE2) THEN
 C* Move lower point
           CALL FLDMOV(NA1,RWO(L1+1),QQ)
@@ -3830,7 +3530,7 @@ c...          print *,'Match MT,Ein,Eou,E1,Elvl',MT,EIN,EOU,E1
 c... 1               ,QQM(IT)-QQI(IT)
 c...
         ELSE
-C* Move lower point
+C* Move upper point
           CALL FLDMOV(NA1,RWO(L2+1),QQ)
 c...
 c...          print *,'Match MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
@@ -4070,6 +3770,289 @@ C* Loop over the incident particle energies
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       NS=0
 C*
+      RETURN
+      END
+      SUBROUTINE WRMF10(LOU,MXE,MXT,MXI,MXR,MF
+     1                 ,EIN,XSC,QQM,QQI,MTH,IWO,RWO
+     1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
+C-Title  : WRMF10 Subroutine
+C-Purpose: Write activation cross sections (file MF10) in ENDF-6 format
+C-Description:
+C-D  Print activation reactions stored with MT=10*ZAP+LFS
+C-D  Determine MT numbers internally
+C-D  Sort printout in ascending order of MT numbers
+C-
+      CHARACTER*8  PTST
+      DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
+     1            ,RWO(MXR),IWO(MXI),NBT(1),INT(1)
+C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
+      DATA XSMALL,SMALL,ZRO/ 1.0E-34, -34., 0./
+      DATA PTST/'        '/
+C*
+C* Scan activation cross sections for associated MT numbers
+      N10=0
+      NRC=0
+      ZRO=0
+      CALL POUCHR(PTST,IZI,AWI)
+c...
+      print '(10I8)',(mth(i),i=1,nxs)
+c...
+      IF(NXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
+      DO I=1,NXS
+        IF(MTH(I).GT.9999) THEN
+C*        -- Assign MT number from residual ZA
+          JZA=MTH(I)/10
+          CALL EMTIZA(IZI,IZA,JZA,MT)
+          IF(MT.EQ. 50) MT=  4
+          IF(MT.EQ.600) MT=103
+          IF(MT.EQ.800) MT=107
+          IF(MT.EQ.0) THEN
+            MT=5
+          ELSE
+C*          -- Check if reaction is to be lumped with MT5
+C... does not work - sign redefined???
+C...        DO J=1,NXS
+C...          IF(MT.EQ.-MTH(J)) THEN
+C...            MT=5
+C...            EXIT
+C...          END IF
+C...        END DO
+          END IF
+          IWO(I)=MT
+          NRC=NRC+1
+        ELSE
+          IWO(I)=1000
+        END IF
+      END DO
+C* Find reaction set with lowest MT number
+  100 LRC=1+NXS
+      JXS=0
+      MT =1000
+      DO I=1,NXS
+        IF(IWO(I).LT.MT) THEN
+          JXS=1
+          IWO(LRC-1+JXS)=I
+          MT=IWO(I)
+        ELSE IF(IWO(I).EQ.MT) THEN
+          JXS=JXS+1
+          IF(LRC-1+JXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
+          IWO(LRC-1+JXS)=I
+        END IF
+      END DO
+C* Check if last reaction
+      IF(MT.GE.1000) GO TO 200
+c...
+      print *,'found',jxs,' reaction(s) for MT',mt,' at'
+     &       ,(iwo(lrc-1+j),j=1,jxs)
+c...
+C*
+C* Save reaction labels for sorting
+      LZA=LRC+JXS
+      IF(LZA+JXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
+      DO J=1,JXS
+        L=IWO(LRC-1+J)
+        IWO(LZA-1+J)=MTH(L)
+      END DO
+C*
+C* Write HEAD record
+      L1=0
+      L2=0
+      N2=0
+      ZA=IZA
+      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,JXS,N2)
+C*
+C* Sort constituent reactions by residual in ascending order
+      JRC=0
+  120 MRC=2000000
+      IT =0
+      DO J=1,JXS
+        IF(IWO(LZA-1+J).LT.MRC) THEN
+          IT=IWO(LRC-1+J)
+          JX=J
+          MRC=IWO(LZA-1+J)
+        END IF
+      END DO
+C* Flag residual for this reaction processed
+      IWO(LZA-1+JX)=IWO(LZA-1+JX)+2000000
+      IF(IT.LE.0) GO TO 200
+      JZA=MTH(IT)/10
+      LFS=MTH(IT)-JZA*10
+c...
+      print *,'    writing reaction',IT,' residual',jza,' state',lfs
+c...
+      NEO=NEP*NEN *2
+      LX =1
+      LY =LX+NEO
+      MX =LY+NEO
+      MY =MX+NEN+1
+      LS =MY+NEN+1
+      LBL=MX
+      IF(LS+3*NEN+MAX(NEN,NEO).GT.MXR)
+     1 STOP 'EMPEND ERROR - MXR limit exceeded in WRMF10'
+C* Define the threshold
+      ETH=MAX((-QQI(IT))*(AWR+AWI)/AWR , EIN(1) )
+      XSL=SMALL
+      XMX=SMALL
+C* Define the input energy points for the spline fit
+      ME =0
+      ISMAL=0
+      DO J=1,NEN
+        IF(EIN(J).GE.ETH) THEN
+          IF(EIN(J).GT.ETH .AND. ME.EQ.0) THEN
+C* Threshold case
+            RWO(MX+ME)=ETH
+            RWO(MY+ME)=SMALL
+            ME=ME+1
+c...   
+c...           print *,'threshold me,e,x',me,rwo(mx-1+me),rwo(my-1+me)
+c...   
+          END IF
+          RWO(MX+ME)=EIN(J)
+          IF(XSC(J,IT).GT.0) THEN
+C* Normal case - enter previous point if small
+            IF(ISMAL.GT.1) THEN
+              RWO(MX+ME)=EIN(J-1)
+              RWO(MY+ME)=SMALL
+              ME=ME+1
+c...
+c...              print *,'after me,e,x',me,rwo(mx-1+me),rwo(my-1+me)
+c...
+              RWO(MX+ME)=EIN(J)
+            END IF
+C* Normal case
+            XSL=ALOG(XSC(J,IT))
+            RWO(MY+ME)=XSL
+            XMX=MAX(XMX,XSL)
+            ISMAL=0
+            ME=ME+1
+c...
+c...              print *,'normal me,e,x',me,rwo(mx-1+me),rwo(my-1+me)
+c...
+          ELSE
+C* Special treatment of small cross sections
+            RWO(MY+ME)=SMALL
+            ISMAL=ISMAL+1
+            IF(ISMAL.EQ.1 .OR. J.EQ.NEN) THEN
+              ME=ME+1
+c...
+c...              print *,'small me,e,x',me,rwo(mx-1+me),rwo(my-1+me)
+c...
+            END IF
+          END IF
+c...
+c...    print *,'j,N,me,mt,xsl,e,x'
+c... &          ,j,NEN,me,mth(it),xsl,ein(j),xsc(j,it),XMX
+c...
+        END IF
+      END DO
+C* Define the output grid for spline interpolated function
+      FNP=NEP
+      IF(ME.LE.3) FNP=1
+      NE1=1
+      E2 =RWO(MX)
+      RWO(LX)=E2
+      RWO(LY)=RWO(MY)
+      DO J=2,ME
+        E1 =E2
+        E2 =RWO(MX-1+J)
+        DE=(E2-E1)/FNP
+        DO K=1,NEP
+          EE= E1+(K-1)*DE
+          IF(EE.GT.1.001*ETH) THEN
+            RWO(LX+NE1)=EE
+            RWO(LY+NE1)=RWO(MY-1+J)
+            NE1=NE1+1
+          END IF
+        END DO
+      END DO
+      RWO(LX+NE1)=RWO(MX-1+ME)
+      RWO(LY+NE1)=RWO(MY-1+ME)
+      NE1=NE1+1
+      IF(ME.LE.3) GO TO 132
+C* Log-lin interpolate from threshold
+      JX=MX
+      JY=MY
+      JE=ME
+      KX=LX
+      KY=LY
+      KE=NE1
+C* Linearly interpolate the first non-zero x-sect on output grid
+  126 IF(RWO(JY).GT.SMALL) GO TO 130
+      RWO(KY)=RWO(JY)
+     1 +(RWO(JY+1)-RWO(JY))*(RWO(KX)-RWO(JX))/(RWO(JX+1)-RWO(JX))
+      KX=KX+1
+      KY=KY+1
+      KE=KE-1
+      IF(KE.LT.1) GO TO 132
+      IF(RWO(KX).LT.RWO(JX+1)) GO TO 126
+      IF(JE.LE.2) GO TO 132
+      JX=JX+1
+      JY=JY+1
+      JE=JE-1
+      GO TO 126
+C* Spline fit log of the cross section (oner non-zero range)
+  130 F1=0.
+      F2=0.
+      CALL FINSP3(RWO(JX),RWO(JY),JE
+     &           ,RWO(KX),RWO(KY),RWO(KY),KE,F1,F2,RWO(LS)) 
+C* Convert back to cross sections from log
+  132 DO J=1,NE1
+        R=RWO(LY-1+J)
+        RWO(LY-1+J)=0.
+        IF(R.GT.SMALL) RWO(LY-1+J)=EXP(R)
+c...        
+c...        print *,j,rwo(lx-1+j),rwo(ly-1+j)
+c...
+      END DO
+C* Thin the cross section to ERR lin.interp. tolerance limit
+      NEO=NE1
+      IF(ERR.GT.0)
+     1CALL THINXS(RWO(LX),RWO(LY),NE1,RWO(LX),RWO(LY),NEO,ERR)
+C* Check fitted data and remove zero x-sect points below threshold
+      KX=1
+C* Find pseudo-threshold
+      DO WHILE (KX.LT.NEN .AND. 
+     &         (XSC(KX,IT).LT.XSMALL .AND. XSC(KX+1,IT).LT.XSMALL))
+        KX=KX+1
+      END DO
+      EPT=EIN(KX)
+C* Remove redundant zeroes below pseudo-threshold
+      DO WHILE (RWO(LX+1).LT.EPT)
+        NEO=NEO-1
+        LX=LX+1
+        LY=LY+1
+        RWO(LX  )=RWO(LX-1)
+        RWO(LY  )=0
+        RWO(LY+1)=0
+      END DO
+C* Write TAB1 record
+      NR    =1
+      INT(1)=2
+      NBT(1)=NEO
+      CALL WRTAB1(LOU,MAT,MF,MT,NS,QQM(IT),QQI(IT),JZA,LFS
+     1           ,NR,NEO,NBT,INT,RWO(LX),RWO(LY))
+C*
+C* Proceed to the next reaction of the current MT
+      IWO(LZA-1+JX)=IWO(LZA-1+JX)+2000000
+      JRC=JRC+1
+      IF(JRC.LT.JXS) GO TO 120
+C* Flag reactions processed and try the next MT set
+      NS=99998
+      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      N10=N10+1
+      DO J=1,JXS
+        L=IWO(LRC-1+J)
+        IWO(L)=IWO(L)+1000
+      END DO
+      GO TO 100
+C*
+C* All reactions processed
+  200 CONTINUE
+C* Write the FEND record
+      IF(N10.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
       RETURN
       END
       SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,ENL,NBR,LBR,BRR
@@ -4567,6 +4550,7 @@ C-
       LM0=LMX
       LM1=LM0+1
       LST=0
+      LO1=1
 c...
 c...      LMX=MIN(LMX,NP-1)
 c...
@@ -4597,8 +4581,8 @@ C*
 C* Loop to find the appropriate Legendre order
       L1 =MAX(1,LMI)
       LL =LLG+LMX+2
-      L  =L1
-   20 NLG=L
+      LO1=L1
+   20 NLG=LO1
       N1 =NLG+1
       LMM=MIN(LM0,NNP*2/3)
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
@@ -4644,7 +4628,7 @@ C* Test minimum value of distribution at mesh point
           YNP=YCI
         END IF
 C* Test minimum value of distribution at midpoint
-        IF(IP.LT.NNP) THEN
+        IF(IP.LT.NP) THEN
           XPI=(XP(IP)+XP(IP+1))/2
           YCI=POLLG1(XPI,QQ,NLG)
           IF(YCI.LT.YNM) THEN
@@ -4655,7 +4639,7 @@ C* Test minimum value of distribution at midpoint
         END IF
       END DO
 c...
-c...      PRINT *,EMM,ERR,YNP,YNM,JNM,L,JER
+c...      PRINT *,EMM,ERR,YNP,YNM,JNM,LO1,JER
 c...
       YNP=YNP/QQ(1)
       YNM=YNM/QQ(1)
@@ -4665,22 +4649,28 @@ C*
 C* Take corrective action
       IF(KNP.GT. 0 ) THEN
 C* Case: Distribution negative at mesh point - increase L
-        IF(L.LT.LMM) THEN
-          IF(L.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
-          ERHI(L)=ERR
-          L=L+1
+        IF(LO1.LT.LMM) THEN
+          IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
+          ERHI(LO1)=ERR
+          LO1=LO1+1
           GO TO 20
         END IF
       END IF
       IF(ERR.GT.EMM) THEN
 C* Case: Tolerance limit not satisfied
-        IF(L.LT.LMM .AND. JER.EQ.0) THEN
+        IF(LO1.LT.LMM .AND. JER.EQ.0) THEN
 C*          Try increasing the order of approximation
-          IF(L.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
-          ERHI(L)=ERR
-          L =L+1
+c...
+c...        print *,'            Increase order to',LO1
+c...
+          IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
+          ERHI(LO1)=ERR
+          LO1=LO1+1
           GO TO 20
         ELSE
+c...
+c...        print *,'            Double the mesh to',1+(NNP-1)*2
+c...
 C*          Try Doubling the mesh
           IF(NNP.LE.MXP/3 .AND. ERR.GT.EMM*2) THEN
             JNP=1+(NNP-1)*2
@@ -4691,7 +4681,7 @@ C*          Try Doubling the mesh
               RWO(LYP+JNP+2-2*J)=(RWO(LYP+NNP+1-J)+RWO(LYP+NNP  -J))/2
             END DO
             NNP=JNP
-            ERHI(L)=10*EMM
+            ERHI(LO1)=10*EMM
             GO TO 20
           END IF
         END IF
@@ -4725,35 +4715,33 @@ c...
 c...        print *,(rwo(lxp-1+j),j=1,nnp)
 c...        print *,(rwo(lyp-1+j),j=1,nnp)
 c...
-        ERHI(L)=10*EMM
+        ERHI(LO1)=10*EMM
         GO TO 20
       END IF
 C*
 C* Check the improvement in last increments of order
-      ERHI(L)=ERR
+c...
+      ERHI(LO1)=ERR
       ELS=ERR
-      LL0=L
+      LL0=LO1
 c...
-C...      print *,'Fitted order: l,els,err',l,els,emm
+C...      print *,'Fitted order: l,els,err',lO1,els,emm
 c...
-c###  DO WHILE (L.GT.1 .AND. ERHI(L-1).GT.0 .AND.
-C### &          ERHI(L-1).LT.2.0*EMM .AND. 
-C### &          ERHI(L-1).LT.1.2*ELS)
+c###  DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
+C### &          ERHI(LO1-1).LT.2.0*EMM .AND. 
+C### &          ERHI(LO1-1).LT.1.2*ELS)
 C*      Reduce order as long as error <1.2*last and <2.0*max
-      DO WHILE (L.GT.1 .AND. ERHI(L-1).GT.0 .AND.
-     &          ERHI(L-1).LT.1.2*ELS)
+      DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
+     &          ERHI(LO1-1).LT.1.2*ELS)
 C*      Reduce order as long as error <1.2*last
-        L=L-1
-        ELS=MIN(ELS,ERHI(L-1))
-c...
-c...        print *,'     l,err',l,erhi(l)
-c...
+        LO1=LO1-1
+        ELS=MIN(ELS,ERHI(LO1))
       END DO
 c...
-c...  if(ll0.ge.64 .and. l.ge.64) print *,'    Limit 64',erhi(l-1),err
+c...  if(ll0.ge.64 .and. lo1.ge.64) print *,'Limit 64',erhi(lo1-1),err
 c...
       LST=1
-      IF(L.LT.LL0) GO TO 20
+      IF(LO1.LT.LL0) GO TO 20
 C*
 C* Terminate
    40 LMX=NLG
