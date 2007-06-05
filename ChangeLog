@@ -126,6 +126,11 @@
     the value recommended in RIPL-3 (and not more than 15) if run with FITLEV>0
     was not executed (i.e., adjustment of the discrete level range to fit level
     densities was not done) (M. Herman).
+47. ZVView updated to the 97.4 version (V. Zerkin)
+48. Number of bins automatically adjusted to accomodate reactions with negative
+    Q-values if needed (M. Herman).
+49. EXFOR library updated to January 2007 along with the retrieval system
+    (V. Zerkin).
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
