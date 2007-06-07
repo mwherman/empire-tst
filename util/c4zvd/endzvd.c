@@ -60,9 +60,9 @@ char    **argv;
     outfilename=*argv++;
 
     printf(" Extract MF=3 from ENDF file to ZVD file.\n");
-    printf(" V.Zerkin, IAEA, 2000\n");
+    printf(" V.Zerkin, IAEA, 2000-2007\n");
     printf("\n");
-    printf(" ZA=%s, MT=%d, file: [%s]\n",zaStr,mtNeeded,filename);
+    printf(" zaAll=%d ZA=%s, MT=%d, file: [%s]\n",flagAllZA,zaStr,mtNeeded,filename);
     //getch();
 
     setFNumeration();
@@ -93,20 +93,27 @@ char    **argv;
     for (; ; ) {
         ss=my_fgets(str0,LSTR,inFile);
         if (ss==NULL) break;
-//      printf("[%s]...",str0); getch(); printf("\n");
+//	printf("...[%s]",str0); //getch(); printf("\n");
         mt=-1;
         ii=intExtract(&mat,str0,67,70);
         ii=intExtract(&mf ,str0,71,72);
         ii=intExtract(&mt ,str0,73,75);
         ii=intExtract(&num,str0,76,80);
-        if ((mf==3)&&(mt==mtNeeded)) {
+//	printf("mat=%d mf=%d mt=%d num=%d\n",mat,mf,mt,num);
+//	if ((mf==3)&&(mt==mtNeeded)) {
+	if (((mf==3)||(mf==10))&&(mt==mtNeeded)) {
+//	    printf("---[%s]\n",str0);
+	    rr=0;
+	    ii=floatExtract(&rr,str0,1,11);
+	    za=rr;
             if (flagAllZA==0) {
-                rr=0;
-                ii=floatExtract(&rr,str0,1,11);
-                za=rr;
                 if (za!=zaNeeded) continue;
             }
-            fprintf(outFile,"#begin %s/3\n",filename);
+//	    printf("===[%s]\n",str0);
+	    makeNuclide(za,str1);
+//	    fprintf(outFile,"#begin %s/3\n",filename);
+//	    fprintf(outFile,"#begin %s:%s:MF%d:MT%d/3\n",filename,str1,mf,mt);
+            fprintf(outFile,"#begin %s:MF%d:MT%d/3\n",str1,mf,mt);
             fprintf(outFile,"%s\n",str0);
             flagBegin=1;
             for (; ; ) {
@@ -117,7 +124,8 @@ char    **argv;
                 ii=intExtract(&mf ,str0,71,72);
                 ii=intExtract(&mt ,str0,73,75);
                 ii=intExtract(&num,str0,76,80);
-                if ((mf==3)&&(mt==mtNeeded)) {
+//		if ((mf==3)&&(mt==mtNeeded)) {
+	        if (((mf==3)||(mf==10))&&(mt==mtNeeded)) {
                     fprintf(outFile,"%s\n",str0);
                 }
                 else {
@@ -140,6 +148,7 @@ char    **argv;
     fclose(outFile);
     fclose(inFile);
 }
+
 
 int makeNuclide(int za, char *str)
 {
