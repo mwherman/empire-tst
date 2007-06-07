@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-07 15:22:56 $
-Ccc   * $Id: input.f,v 1.247 2007-06-07 15:22:56 herman Exp $
+Ccc   * $Date: 2007-06-07 19:16:33 $
+Ccc   * $Id: input.f,v 1.248 2007-06-07 19:16:33 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -989,14 +989,6 @@ c         ENDIF
             WRITE (6,*) 'FATAL: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
-C--------------------------------------------------------------------------
-         IF(KALman.GT.0) THEN
-            DO i=1,NDNUC
-               ENDF(i) = 0
-            ENDDO
-            WRITE (6,*) ' ENDF set to 0 due to the KALMAN option'
-         ENDIF
-C--------------------------------------------------------------------------
          IF (FISbar(nnuc).NE.1 .AND. FISopt(nnuc).NE.0) THEN
             FISopt(nnuc) = 0
             WRITE (6,*) ' '

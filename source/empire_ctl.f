@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-03-27 22:39:04 $
-Ccc   * $Id: empire_ctl.f,v 1.25 2007-03-27 22:39:04 herman Exp $
+Ccc   * $Date: 2007-06-07 19:16:33 $
+Ccc   * $Id: empire_ctl.f,v 1.26 2007-06-07 19:16:33 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -2015,9 +2015,10 @@ C-----Write modified input with increased value of the parameter if name matches
      &   .AND. i4.EQ.i4e) THEN
          WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
          ifound = 1
-      ELSE
-         IF(namee.NE.'KALMAN') 
-     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
+      ELSEIF(namee.EQ.'ENDF  ') THEN 
+         WRITE(7,'(A6,F10.3,4I5)')namee, 0.0, i1e, i2e, i3e, i4e 
+      ELSEIF(namee.NE.'KALMAN') THEN 
+         WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
       ENDIF
       GOTO 150
 C-----
