@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-17 21:11:27 $
-Ccc   * $Id: lev-dens.f,v 1.48 2007-05-17 21:11:27 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-06-07 15:15:40 $
+Ccc   * $Id: lev-dens.f,v 1.49 2007-06-07 15:15:40 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -767,19 +767,22 @@ C--------cumulative plot of levels along with the l.d. formula
 99005    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,' norm=',F6.4,
      &           ' atil=',F4.1,' Ncut=',I3)
          OPEN (35,FILE = 'fort.35')
-         WRITE (35,*) 'set terminal postscript enhanced color'
+         WRITE (35,*) 'set terminal postscript enhanced color lw 2 
+     & solid "Helvetica" 20'
          WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
          WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                    dshift, UCRt - DEL - dshift, DEF(1,Nnuc),
      &                    ATIl, NLV(Nnuc)
-99010    FORMAT ('set title "Cumul. plot for ',I3,'-',A2,'-',I3,
-     &           '   U shift = ',F6.3,' Ucrt = ',F5.2,' Def = ',F6.2,
+99010    FORMAT ('set title "',I3,'-',A2,'-',I3,
+     &           '   Ushift = ',F6.3,' Ucrt = ',F5.2,' Def = ',F6.2,
      &           ' atil=',F4.1,' Ncut=',I3,'"')
          WRITE (35,*) 'set logscale y'
-         WRITE (35,*) 'set xlabel "Energy (MeV)" 0,0'
-         WRITE (35,*) 'set ylabel "Number of levels" 0,0'
+         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
+         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+         WRITE (35,*) 'set style fill solid 0.1'
          WRITE (35,*)
-     &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
+     &   'plot  "fort.34" t "Level density" w l, 
+     &   "fort.36"  t "Discrete levels"  w l' 
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
@@ -1465,13 +1468,15 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
      &                          NLV(Nnuc)
 99005          FORMAT ('set title "NO SOLUTION FOR ',I3,'-',A2,'-',I3,
      &                 ' Ncut=',I3,'"')
-               WRITE (35,*) 'set terminal postscript enhanced color'
+               WRITE (35,*) 'set terminal postscript enhanced color lw 2
+     & solid "Helvetica" 20'
                WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
                WRITE (35,*) 'set logscale y'
-               WRITE (35,*) 'set xlabel "Energy (MeV)" 0,0'
-               WRITE (35,*) 'set ylabel "Number of levels" 0,0'
+               WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
+             WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
                WRITE (35,*)
-     &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
+     &  'plot  "fort.34" t "Level density" w l, 
+     &  "fort.36"  t "Discrete levels"  w l' 
                CLOSE (35)
                OPEN (34,FILE = 'fort.34')
                OPEN (36,FILE = 'fort.36')
@@ -1548,17 +1553,19 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE (6,*) ' A=', A(Nnuc), 'Z=', Z(Nnuc), ' Ncut=', NLV(Nnuc)
          WRITE (6,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
          OPEN (35,FILE = 'fort.35')
-         WRITE (35,*) 'set terminal postscript enhanced color'
+         WRITE (35,*) 'set terminal postscript enhanced color lw 2
+     & solid "Helvetica" 20'
          WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
          WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)), am, t,
      &                    eo, NLV(Nnuc)
-99010    FORMAT ('set title "Cumul.plot for ',I3,'-',A2,'-',I3,': a=',
+99010    FORMAT ('set title "',I3,'-',A2,'-',I3,': a=',
      &           F4.1,' T=',F4.1,' E0=',F4.1,' Ncut=',I3,'"')
          WRITE (35,*) 'set logscale y'
-         WRITE (35,*) 'set xlabel "Energy (MeV)" 0,0'
-         WRITE (35,*) 'set ylabel "Number of levels" 0,0'
+         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
+         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
          WRITE (35,*)
-     &               'plot "fort.34" t "fit" w l ,"fort.36" t "lev" w l'
+     &   'plot  "fort.34" t "Level density" w l, 
+     &   "fort.36"  t "Discrete levels"  w l' 
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')

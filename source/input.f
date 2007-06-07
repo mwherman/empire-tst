@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-06 10:01:03 $
-Ccc   * $Id: input.f,v 1.245 2007-06-06 10:01:03 Capote Exp $
+Ccc   * $Date: 2007-06-07 15:15:38 $
+Ccc   * $Id: input.f,v 1.246 2007-06-07 15:15:38 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1774,7 +1774,15 @@ C--------OMPAR.DIR
          CLOSE (33,STATUS = 'DELETE')
 C--------OMPAR.RIPL
          CLOSE (29,STATUS = 'DELETE')
-         STOP 'PLOTS DONE'
+         IF(ADIv.EQ.0 .OR. ADIv.EQ.2) THEN
+            STOP 'PLOTS DONE'
+         ELSE
+            WRITE(6,*) ' '
+            WRITE(6,*) 'LEVEL DENSITY PLOTS ARE ONLY POSSIBLE'
+            WRITE(6,*) 'FOR EMPIRE-SPECIFIC (LEVDEN=0) AND   '
+            WRITE(6,*) 'GILBERT-CAMERON LEVEL DENSITIES      '
+            STOP 'NO CUMULATIVE PLOTS FOR THIS VALUE OF LEVDEN' 
+         ENDIF
       ENDIF
 C---- fission input is created if it does not exist and FISSHI=0
       DO nnuc = 1, NNUct
@@ -2075,7 +2083,7 @@ C--------------------only gamma decay is considered up to now
   300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
         WRITE (6,
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local file (.lev). Default RIPL-2 levels will be
+     &  '' not found in local file (.lev). Default RIPL-3 levels will be
      & used'')') ia, iz
         CLOSE(13)
         WRITE (ctmp3,'(I3.3)') iz
