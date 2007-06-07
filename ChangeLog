@@ -133,6 +133,8 @@
     (V. Zerkin).
 50. EMPEND formats isomeric and ground state cross sections in MF=10. All 
     known compiler warnings cleaned (A. Trkov). 
+51. Plotting of isomeric cross sections added (V. Zerkin)
+52. Cumulative plots of levels improved (M. Herman)
         
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
