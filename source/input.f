@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-07 19:16:33 $
-Ccc   * $Id: input.f,v 1.248 2007-06-07 19:16:33 herman Exp $
+Ccc   * $Date: 2007-06-08 08:37:27 $
+Ccc   * $Id: input.f,v 1.249 2007-06-08 08:37:27 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -875,6 +875,7 @@ C                       residues must be heavier than alpha
                            IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ELSE
 C                          Comment the following line and uncommment the one after for all exclusive spectra
+
                            IF (ENDf(nnuc).EQ.0) THEN
                               ENDf(nnuc) = 2
                               EXClusiv = .FALSE.
@@ -1527,6 +1528,8 @@ C
 C           residual nuclei must be heavier than alpha
             if(ares.le.4 . or. zres.le.2) cycle
 
+
+
             izares = INT(1000*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) THEN
@@ -1885,7 +1888,11 @@ C       We could put here whatever systematics for D0 or Gg we want
       ENDIF
 
    70 LREad = .TRUE.
+
+
       izatmp = INT(1000*iz + ia)
+
+
       DO itmp = 0,NDNuc
         IF(NSTOred(itmp).eq.izatmp) THEN
           LREad = .FALSE.
@@ -1929,19 +1936,21 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
+
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)') dum
         ENDDO
         GOTO 100
       ELSE
+
 C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
 C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
-        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
-          nmax = MIN(nmax/2 + 1, 15)
-        ENDIF
+        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) 
+
+     &     nmax = MIN(nmax/2 + 1, 15)
 C----------create file with levels (*.lev)
 C----------NLV   number of levels with unique spin and parity
 C----------NCOMP number of levels up to which the level scheme is estimated
@@ -1950,7 +1959,10 @@ C
         IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
-          WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
+C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
+
+
+          WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
@@ -2059,46 +2071,71 @@ C--------------------only gamma decay is considered up to now
         CLOSE(13)
         CLOSE(14)
         IF (IOPsys.EQ.0) THEN
-          ctmp = 'cat LEVELS.ORG LEVELS.ADD>LEVELS'
+          ctmp = 'cat LEVELS LEVELS.ADD>LEVELS.TMP'
           iwin = PIPE(ctmp)
-          ctmp = 'rm LEVELS.ORG LEVELS.ADD'
+
+          ctmp = 'mv LEVELS.TMP LEVELS'
+
+          iwin = PIPE(ctmp)
+
+          ctmp = 'rm LEVELS.ADD'
           iwin = PIPE(ctmp)
         ELSE
-          iwin = PIPE('copy LEVELS.ORG+LEVELS.ADD LEVELS>nul')
-          iwin = PIPE('del LEVELS.ORG LEVELS.ADD>nul')
+          iwin = PIPE('copy LEVELS+LEVELS.ADD LEVELS.TMP>nul')
+
+          iwin = PIPE('move LEVELS.TMP LEVELS>nul')
+          iwin = PIPE('del LEVELS.ADD>nul')
         ENDIF
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
-        FILevel = .TRUE.
-      ENDIF
 
+        FILevel = .TRUE.
+
+      ENDIF
       RETURN
+
   300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
-        WRITE (6,
+
+        IF(FIRst_ein) WRITE (6,
+
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local file (.lev). Default RIPL-3 levels will be
+
+     &  '' not found in local file (.lev). Default RIPL-2 levels will be
+
      & used'')') ia, iz
+
         CLOSE(13)
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 400)
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'mv LEVELS LEVELS.ORG'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('move LEVELS LEVELS.ORG>nul')
-        ENDIF
         CLOSE(14)
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
         ADDnuc = .TRUE.
         GOTO 100
       ENDIF
-      WRITE (6,
+
+      IF(FIRst_ein) WRITE (6,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in RIPL database '')') ia, iz
+     &  '' not found in the RIPL database '')') ia, iz
+
+
+      IF(ADDnuc) THEN
+
+        CLOSE(13)
+
+        CLOSE(14,STATUS='DELETE')
+
+        IF (FILevel) OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
+
+      ENDIF
+
       RETURN
+
   400 WRITE (6,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
+
+      RETURN
+
       END
 C
 C
