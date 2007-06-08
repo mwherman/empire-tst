@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-06-07 15:15:40 $
-Ccc   * $Id: lev-dens.f,v 1.49 2007-06-07 15:15:40 herman Exp $
+Ccc   * $Date: 2007-06-08 13:47:55 $
+Ccc   * $Id: lev-dens.f,v 1.50 2007-06-08 13:47:55 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -779,10 +779,11 @@ C--------cumulative plot of levels along with the l.d. formula
          WRITE (35,*) 'set logscale y'
          WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
          WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
-         WRITE (35,*) 'set style fill solid 0.1'
-         WRITE (35,*)
-     &   'plot  "fort.34" t "Level density" w l, 
-     &   "fort.36"  t "Discrete levels"  w l' 
+         WRITE (35,*) 'set style line 1 lt 1 lw 2'
+         WRITE (35,*) 'set style line 2 lt 5 lw 2'
+         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
+         WRITE (35,*) 't "Discrete levels", \'
+         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
@@ -1474,19 +1475,21 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                WRITE (35,*) 'set logscale y'
                WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
              WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
-               WRITE (35,*)
-     &  'plot  "fort.34" t "Level density" w l, 
-     &  "fort.36"  t "Discrete levels"  w l' 
+               WRITE (35,*) 'set style line 1 lt 5 lw 2'
+               WRITE (35,*) 'set style line 2 lt 1 lw 2'
+               WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
+               WRITE (35,*) 't "Discrete levels", \'
+               WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
                CLOSE (35)
                OPEN (34,FILE = 'fort.34')
                OPEN (36,FILE = 'fort.36')
                WRITE (36,*) '0.0 1.0'
-               DO il = 2, NLV(Nnuc)
+               DO il = 1, NLV(Nnuc)
                   WRITE (36,*) ELV(il,Nnuc), FLOAT(il - 1)
                   WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
 C-----------------integration over energy. There should be factor
 C-----------------2 because of the parity
-                  rolowint = EXP(( - eom/tm))
+                  rolowint = 1.0 + EXP(( - eom/tm))
      &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
                   WRITE (34,*) ELV(il,Nnuc), rolowint
                ENDDO
@@ -1563,18 +1566,20 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE (35,*) 'set logscale y'
          WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
          WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
-         WRITE (35,*)
-     &   'plot  "fort.34" t "Level density" w l, 
-     &   "fort.36"  t "Discrete levels"  w l' 
+         WRITE (35,*) 'set style line 1 lt 1 lw 2'
+         WRITE (35,*) 'set style line 2 lt 5 lw 2'
+         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
+         WRITE (35,*) 't "Discrete levels", \'
+         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
          WRITE (36,*) '0.0 1.0'
-         DO il = 2, NLV(Nnuc)
+         DO il = 1, NLV(Nnuc)
             WRITE (36,*) ELV(il,Nnuc), FLOAT(il - 1)
             WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
 C-----------Integration over energy.
-            rolowint = EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
+            rolowint = 1.0 + EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
             WRITE (34,*) ELV(il,Nnuc), rolowint
          ENDDO
          CLOSE (36)
