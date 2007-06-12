@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-06-08 13:47:55 $
-Ccc   * $Id: lev-dens.f,v 1.50 2007-06-08 13:47:55 herman Exp $
+Ccc   * $Date: 2007-06-12 14:53:29 $
+Ccc   * $Id: lev-dens.f,v 1.51 2007-06-12 14:53:29 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1023,7 +1023,7 @@ C-----------dependent factor
          ENDIF
 C        Spin-cut off tuning	 
          mompar = REDSEF*mompar
-         momort = REDSEF*momort	 
+         momort = REDSEF*momort 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2)*RORed
             IF (i.EQ.1) THEN
@@ -1340,7 +1340,7 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A23, AP1, AP2, BF, DEL, DELp, GAMma
+      DOUBLE PRECISION A2, A23, AP1, AP2, BF, DEL, DELp, GAMma, eps
       INTEGER NLWst
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
@@ -1458,6 +1458,7 @@ C
          WRITE (6,*) 'WARNING: Reanalise GC l.d. parameters for:'
          WRITE (6,*) 'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
          WRITE (6,*) 'WARNING: a=', am, ' T=', t
+         WRITE (6,*) 'WARNING: I will use the last T=', tm,' for calc.'
          WRITE (6,*) 'WARNING: '
 C--------anyhow, plot fit of the levels with the low energy l.d. formula
          IF (FITlev.GE.0.0D0) THEN
@@ -1489,9 +1490,9 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
                   WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
 C-----------------integration over energy. There should be factor
 C-----------------2 because of the parity
-                  rolowint = 1.0 + EXP(( - eom/tm))
+                  rolowint = EXP(( - eom/tm))
      &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
-                  WRITE (34,*) ELV(il,Nnuc), rolowint
+                  WRITE (34,*) ELV(il,Nnuc), rolowint + 1.0
                ENDDO
                CLOSE (36)
                CLOSE (34)
@@ -1540,11 +1541,12 @@ C
 C-----fit nuclear temperature (and Ux) to discrete levels
       IF (NLV(Nnuc).GT.5 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
      &    ROPar(5,Nnuc).EQ.0.0D0) THEN
-         rolowint = EXP(( - eo/t))*(DEXP(ELV(NLV(Nnuc),Nnuc)/t) - 1.)
-         IF (ABS(rolowint - NLV(Nnuc)).GT.0.5D0) THEN
+         eps = MIN(NLV(Nnuc)*0.03, 0.5)
+         rolowint = EXP(( - eo/t))*(EXP(ELV(NLV(Nnuc),Nnuc)/t) - 1.)
+         IF (ABS(rolowint + 1.0 - NLV(Nnuc)).GT.eps) THEN
             tm = t
-            t = t + 0.01*LOG(NLV(Nnuc)/DEXP((-eo/t))
-     &          /(DEXP(ELV(NLV(Nnuc),Nnuc)/t) - 1))
+            t = t + 0.01*LOG((NLV(Nnuc)-1)/EXP((-eo/t))
+     &          /(EXP(ELV(NLV(Nnuc),Nnuc)/t) - 1))
             ux = 0.0
             eo = 0.0
             iter = iter + 1
@@ -1579,8 +1581,8 @@ C-----plot fit of the levels with the low energy l.d. formula
             WRITE (36,*) ELV(il,Nnuc), FLOAT(il - 1)
             WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
 C-----------Integration over energy.
-            rolowint = 1.0 + EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
-            WRITE (34,*) ELV(il,Nnuc), rolowint
+            rolowint = EXP(( - eo/t))*(EXP(ELV(il,Nnuc)/t) - 1.)
+            WRITE (34,*) ELV(il,Nnuc), rolowint + 1.0
          ENDDO
          CLOSE (36)
          CLOSE (34)
