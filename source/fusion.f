@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-23 08:12:30 $
-Ccc   * $Id: fusion.f,v 1.69 2007-05-23 08:12:30 Capote Exp $
+Ccc   * $Date: 2007-06-12 09:27:16 $
+Ccc   * $Id: fusion.f,v 1.70 2007-06-12 09:27:16 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -711,18 +711,19 @@ C--------Corrected scattering radius
      &         s0*1D4, FUSRED*stl(1), s1a*1D4, 
      &                 FUSRED*stl(2), s2a*1D4, 
      &                 FUSRED*stl(3),
-     &         EINl*1.D3, TOTcs*TOTred, rp
+     &         EINl*1.D3, TOTcs*TOTred, rp, 1.35*(A(Ntrg)**0.333333333) 
          WRITE (12,99005)
      &         s0*1D4, FUSRED*stl(1), s1a*1D4, 
      &                 FUSRED*stl(2), s2a*1D4, 
      &                 FUSRED*stl(3),
-     &         EINl*1.D3, TOTcs*TOTred, rp
+     &         EINl*1.D3, TOTcs*TOTred, rp, 1.35*(A(Ntrg)**0.333333333)
 99005    FORMAT (6x,' Calc. Strength functions S0 =',f6.3,' T0=',d12.6/
      &           6x,'                          S1 =',f6.3,' T1=',d12.6/
      &           6x,'                          S2 =',f6.3,' T2=',d12.6/
      &           6x,' Elab = ',F6.1,' keV',
      &              '        Total XS = ',F9.2,' mb'/
-     &           6x,' Scattering radius =',f7.3,' fm'/7x,54(1h*))
+     &           6x,' Scattering radius =',f7.3,' fm'/
+     &           6x,'   1.35 A**(1/3)   =',f7.3,' fm'//7x,54(1h*))
          WRITE (6,*)
          WRITE (12,*)
          selast = 0.d0
