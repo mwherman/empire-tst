@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-06-12 14:53:29 $
-Ccc   * $Id: lev-dens.f,v 1.51 2007-06-12 14:53:29 herman Exp $
+Ccc   * $Date: 2007-06-13 20:36:13 $
+Ccc   * $Id: lev-dens.f,v 1.52 2007-06-13 20:36:13 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -781,9 +781,9 @@ C--------cumulative plot of levels along with the l.d. formula
          WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
          WRITE (35,*) 'set style line 1 lt 1 lw 2'
          WRITE (35,*) 'set style line 2 lt 5 lw 2'
-         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
-         WRITE (35,*) 't "Discrete levels", \'
-         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
+         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \ '
+         WRITE (35,*) 't "Discrete levels", \ '
+         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\ '
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
@@ -1478,9 +1478,9 @@ C--------anyhow, plot fit of the levels with the low energy l.d. formula
              WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
                WRITE (35,*) 'set style line 1 lt 5 lw 2'
                WRITE (35,*) 'set style line 2 lt 1 lw 2'
-               WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
-               WRITE (35,*) 't "Discrete levels", \'
-               WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
+               WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \ '
+               WRITE (35,*) 't "Discrete levels", \ '
+               WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\ '
                CLOSE (35)
                OPEN (34,FILE = 'fort.34')
                OPEN (36,FILE = 'fort.36')
@@ -1570,9 +1570,9 @@ C-----plot fit of the levels with the low energy l.d. formula
          WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
          WRITE (35,*) 'set style line 1 lt 1 lw 2'
          WRITE (35,*) 'set style line 2 lt 5 lw 2'
-         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \'
-         WRITE (35,*) 't "Discrete levels", \'
-         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\'
+         WRITE (35,*) 'plot "fort.36" w filledcu y2 ls 2 \ '
+         WRITE (35,*) 't "Discrete levels", \ '
+         WRITE (35,*) '"fort.34" w l ls 1 t "Level density"\ '
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
