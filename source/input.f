@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-08 08:37:27 $
-Ccc   * $Id: input.f,v 1.249 2007-06-08 08:37:27 Capote Exp $
+Ccc   * $Date: 2007-06-13 19:51:39 $
+Ccc   * $Id: input.f,v 1.250 2007-06-13 19:51:39 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -852,6 +852,8 @@ C
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
+C-----------We fix below target ENDf flag since it escapes normal setting         
+            IF (ENDf(0).EQ.0) ENDf(0) = 1
             DO iac = 0, NEMc
               DO ip = 0, nemp
                 DO ia = 0, nema
@@ -1967,7 +1969,7 @@ C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
         IF (nlvr.NE.0) THEN
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
 C---------limit to max. of 40 levels if ENDF active
-          IF (ENDf(Nnuc).NE.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+          IF (ENDf(1).GT.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
           IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
