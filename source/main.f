@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-27 22:03:54 $
-Ccc   * $Id: main.f,v 1.179 2007-05-27 22:03:54 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-06-13 21:26:22 $
+Ccc   * $Id: main.f,v 1.180 2007-06-13 21:26:22 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -26,6 +26,9 @@ C
      &                 TFIso, TGIso, TISo, TOTcs, SINlcc, SINlcont,
      &                 UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD),
      &                 XMInnm(NFMOD),XCOs(NDAngecis)
+C
+      DOUBLE PRECISION csinel,eps
+C
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
@@ -1758,11 +1761,36 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
+ccccccccccccccccccccccccccccccccccccccccccccccccc
+C----Reaction Cross Sections lower than 1.d-10 are considered zero.
+      eps=1.d-10
+       csinel=CSPrd(2)-4.*PI*ELCncs
+      if (CSPrd(1).lt.eps) then
+       CSPrd(1)=0.d0
+      endif
+      if (csinel.lt.eps) then      
+       csinel=0.d0
+      endif
+      do nnuc=3,NNUcd
+       if (CSPrd(nnuc).lt.eps) then
+         CSPrd(nnuc)=0.d0
+       endif
+      enddo
+cccccccccccccccccccccccccccccccccccccccccccccccc
       WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
-     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
+     &     TOTcsfis, CSPrd(1), csinel,
      &     (CSPrd(nnuc),nnuc=3,NNUcd)
+C
+C
+c      WRITE(0,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
+c     &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
+c     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
+c     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
+c     &     (CSPrd(nnuc),nnuc=3,NNUcd)
+C
+C
 
 C     WRITE(41,'(/G10.5,6E12.5\))') EINl, TOTcs*TOTred,
 C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
@@ -1899,9 +1927,13 @@ C-----------------------(continuum part)
      &to avoid negative ddx cross sections taken'
                                  iprinted = 1
                                  ftmp = 0.0
-                                 POPcseaf(0,nejc,ie,INExc(nnuc)) =
-     &                                  POPcse(0,nejc,ie,INExc(nnuc))/
-     &                                  piece
+                                 IF(piece.GT.0) THEN
+                                    POPcseaf(0,nejc,ie,INExc(nnuc)) =
+     &                                    POPcse(0,nejc,ie,INExc(nnuc))/
+     &                                    piece
+                                 ELSE
+                                    POPcseaf(0,nejc,ie,INExc(nnuc)) = 0.0
+                                 ENDIF
                               ENDIF
                               DO nang = 1, NDANG
                                  cseaprnt(ie,nang) =
