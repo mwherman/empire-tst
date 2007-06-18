@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-11 15:39:52 $
-Ccc   * $Id: pcross.f,v 1.49 2007-05-11 15:39:52 Capote Exp $
+Ccc   * $Date: 2007-06-18 15:02:52 $
+Ccc   * $Id: pcross.f,v 1.50 2007-06-18 15:02:52 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h'
@@ -160,7 +160,7 @@ C
      &//)
         call DTRANS(EXCn,DE,spec,cross)
 99003   FORMAT (7x,5F8.2)
-        write(6,99003) Ein,sigr,cross(2),cross(4)
+        write(6,99003) Ein,sigr,cross(2),cross(NDEJC)
       ENDIF
 C
       WRITE (6,99005)

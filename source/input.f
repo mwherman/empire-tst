@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-18 14:20:31 $
-Ccc   * $Id: input.f,v 1.251 2007-06-18 14:20:31 herman Exp $
+Ccc   * $Date: 2007-06-18 15:02:51 $
+Ccc   * $Id: input.f,v 1.252 2007-06-18 15:02:51 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -582,8 +582,8 @@ C        In this way we make sure that z,a reaction is always considered,
 C        otherwise alpha will be replaced by 2n2p emission !! (RCN, May 2007)
 C
          DO iac = 0, NEMc
-           DO ip = 0, nemp
-             DO ia = 0, nema
+           DO ia = 0, nema
+             DO ip = 0, nemp           
                DO in = 0, nemn
                  IF (iac + ia + ip + in.NE.0) THEN
                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
@@ -597,7 +597,6 @@ C
 
 C                   residues must be heavier than alpha !! (RCN)
                     if(atmp.le.4 . or. ztmp.le.2) cycle
-
                     izatmp = INT(1000*ztmp + atmp)
                     CALL WHERE(izatmp,nnuc,iloc)
                     IF (iloc.EQ.1) THEN
@@ -855,8 +854,8 @@ C--------Set exclusive and inclusive ENDF formatting flags
 C-----------We fix below target ENDf flag since it escapes normal setting         
             IF (ENDf(0).EQ.0) ENDf(0) = 1
             DO iac = 0, NEMc
-              DO ip = 0, nemp
-                DO ia = 0, nema
+              DO ia = 0, nema            
+                DO ip = 0, nemp
                    DO in = 0, nemn
                         mulem = iac + ia + ip + in
                         atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
