@@ -2,7 +2,7 @@
 #FC     =  pgf90
 #FFLAGS =  -O2
 #----GNU g77 FORTRAN compiler
-#FC     =  g77
+FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
@@ -16,10 +16,10 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for optimalization using ifort 
 #FFLAGS = -arch pn4 -O3 -axPW  -ipo   
-FFLAGS = -arch pn4 -O3 -ipo 
+#FFLAGS = -arch pn4 -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
