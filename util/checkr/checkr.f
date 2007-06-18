@@ -6186,7 +6186,7 @@
 !
       ELSE IF(MTT.GT.301.AND.MTT.LE.450) THEN
 !********GET CORRESPONDING REACTION MT
-         IF(MTT.LE..420)  THEN
+         IF(MTT.LE.420)  THEN
             MT3 = MTT - 300
             GO TO 50
          END IF
