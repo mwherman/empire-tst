@@ -7,7 +7,7 @@ echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
 echo '          E      M    M  P      I  R  R   E          H   H '
 echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
 echo '                                                           '
-echo '                     V E R S I O N  2.19.beta36            '
+echo '                     V E R S I O N  2.19.beta37            '
 echo '                                                           '
 echo '                       marching towards LODI               '
 echo '                                                           '
@@ -122,7 +122,7 @@ echo 'DONE !!!'
 mv OUTPUT.DAT $file.out
 mv LIST.DAT $file.lst
 mv LEVELS $file.lev
-mv FISS_XS.OUT $file-fiss.xsc
+mv FISS_XS.OUT $file-fiss.xsc 2>/dev/null
 if [ ! -d $file-tl ]; then
    mv TL/ $file-tl
 fi
@@ -159,7 +159,7 @@ else
 fi
 if [ -s CUMULPLOT.PS ]; then
    ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
-   kghostview -landscape $file-cum.ps &
+   kghostview -landscape $file-cum.ps 
 fi
 if [ -s SYSTEMATICS.TXT ]; then
    mv  SYSTEMATICS.TXT $file.sys
