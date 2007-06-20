@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-18 15:02:51 $
-Ccc   * $Id: input.f,v 1.252 2007-06-18 15:02:51 Capote Exp $
+Ccc   * $Date: 2007-06-20 22:37:44 $
+Ccc   * $Id: input.f,v 1.253 2007-06-20 22:37:44 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1949,9 +1949,16 @@ C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
 C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
-        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) 
-
-     &     nmax = MIN(nmax/2 + 1, 15)
+        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN 
+           nmax = MIN(nmax/2 + 1, 15)
+           WRITE (6,'('' WARNING:'')')
+           WRITE (6,'('' WARNING: for isotope '',A5,''-'',I3)')
+     &            chelem, iar
+           WRITE (6,'('' WARNING: number of levels was reduced to '',
+     &            I3)') nmax
+           WRITE (6,'('' WARNING: since FITLEV option had not been'',
+     &            '' run before'')')
+        ENDIF
 C----------create file with levels (*.lev)
 C----------NLV   number of levels with unique spin and parity
 C----------NCOMP number of levels up to which the level scheme is estimated
@@ -5648,7 +5655,7 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          EXCessmass(iz,ia) = excess(k)
   200 ENDDO
 C
-C-----nucmas: subroutine for formula of Duflo-Zuker for masses outside M-N
+C-----mass10: subroutine for formula of Duflo-Zuker for masses outside M-N
 C
       DO iz = 6, 100
          DO ia = 2*iz - 10, 3*iz
@@ -5656,7 +5663,6 @@ C
                in = ia - iz
                if (in.le.0) cycle
                CALL mass10(in,iz,ebin)
-C              CALL NUCMAS(in,iz,ebin)
                RESmas(iz,ia) = iz*AMUpro + in*AMUneu - ebin/AMUmev
                EXCessmass(iz,ia) = RESmas(iz,ia)*AMUmev - REAL(ia)
             ENDIF
