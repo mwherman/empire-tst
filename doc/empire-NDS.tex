@@ -200,9 +200,9 @@ The flowchart of the EMPIRE-2 system is shown in Fig.~\ref{Fig:empire-flowchart}
 The entire EMPIRE-2 system can be divided into four major components:
 \begin{enumerate}
 \item physics core,
-\item utility codes,
-\item scripts and GUIs,
 \item input parameter library,
+\item scripts and GUIs,
+\item utility codes,
 \item experimental data library (EXFOR).
 \end{enumerate}
 The physics core, supported by the input parameter library, is a heart of the system. It consists of a number of modules that implement various nuclear reaction theory models. The selection of these models is very pragmatical - we try to cover all important features of nuclear reactions using modern, physically sound theoretical approaches  that are computationally reasonable.  Accordingly,
@@ -829,11 +829,167 @@ JENDL-3.3 libraries.}
 \end{figure}
 
 
+\subsubsection{$\gamma$-emission in Multi-step Compound}
+
+The emission of $\gamma$ in the Multi-step Compound\index{MSC} mechanism
+is treated in terms of the model proposed by Hoering and Weidenmueller
+\cite{GammaMSC}. Application follows the paper by Herman \emph{et
+al}. \cite{GammaMSCapp}. The model assumes that $\gamma$ emission
+occurs through the deexcitation of the Giant Dipole Resonance (GDR)
+built within MSC\index{MSC} classes. Following Brink-Axel hypothesis
+\cite{Axel,Brink,Brinka} each nuclear state serves as the basis of
+a GDR excitation with identical properties. Moreover, the Tamm-Dancoff
+approximation is used and GDR is represented as a linear combination
+of correlated 1p-1h states. Each MSC class \emph{M,} now characterized
+also by its spin \emph{J,} splits into four sub-classes $M_{n}$.
+The states in subclasses $M_{n}$, with \emph{n}=1, 2 and 3 contain
+GDR built on states in class \emph{M-1} with spins \emph{J-1, J},
+and \emph{J+1}, respectively, and opposite parity. The states in class
+$M_{4}$ are pure single particle excitations and contain no GDR.
+
+The pure MSC-contribution to the cross section is obtained while neglecting
+the GDR built on the ground state, which leads to the non-statistical
+direct-semidirect process. The theory \cite{GammaMSC} allows for
+the inclusion of direct-semidirect in the formalism. However, the
+implementation of direct-semidirect in the EMPIRE is oversimplified
+and has been disabled. On the other hand, an option is provided to
+start MSC\index{MSC} calculations right from the first class. This
+approach lacks formal justification but brings the model closer to
+the treatment of $\gamma$ emission in the classical preequilibrium
+models.
+
+The average MSC cross section is given by \begin{equation}
+\overline{\sigma_{a,\gamma}^{MSC}}=T_{a,Mm}\Pi_{Mm,Nn}T_{Nn,\gamma},\label{GammaMSCxs}\end{equation}
+where \begin{eqnarray}
+(\Pi^{-1})_{Mm,Nn} & = & 2\pi\rho_{Mm}v_{Mm,Nn}2\pi\rho_{Nn}\nonumber \\
+ &  & +\delta_{M,N}\delta_{m,n}2\pi\rho_{Mm}(\Gamma_{Mm}^{\uparrow}+\Gamma_{Mm}^{\downarrow})\label{Pigamma}\end{eqnarray}
+and $T_{a}=\sum_{Mm}T_{aMm}$ are the optical model transmission coefficients.
+
+The transmission coefficients for the \emph{E1}-$\gamma$ channel
+are defined, as for the particle channel, in terms of the unitarity
+deficit of the average $S$-matrix. \begin{equation}
+T_{\gamma}=1-\Big|\overline{S_{\gamma\gamma}}\Big|^{2}.\end{equation}
+This is directly proportional to the strength function $f(E)$, which
+can be written as a function of the absorption cross section, yielding
+\begin{equation}
+T_{\gamma}^{E_{1}}=\frac{1}{2\pi}\sigma_{abs}(E_{\gamma}^{E_{1}})\frac{(E_{\gamma}^{E_{1}})^{2}}{(\hbar c)^{2}}.\end{equation}
+The absorption cross section has a Lorentzian form and is given by
+\begin{equation}
+\sigma_{abs}(E_{\gamma}^{E_{1}})=\sigma_{res}\frac{(E_{\gamma}^{E_{1}})^{2}\Gamma_{res}^{2}}{((E_{\gamma}^{E_{1}})^{2}-E_{res}^{2})^{2}+(E_{\gamma}^{E_{1}})^{2}\Gamma_{res}^{2}}.\end{equation}
+For the resonance energy $E_{res}$, the resonance width $\Gamma_{res}$,
+and the peak cross section $\sigma_{res}$, the experimental or systematics
+data are used as input parameters. As in the case of particle emission,
+the average matrix element $v_{Mm,Nn}$ coupling non-collective states
+of two exciton classes is determined from the imaginary part of the
+optical model potential.
+
+Next, we will analyze the individual matrix elements $(\Pi^{-1})_{Mm,Nn}$.
+We begin by investigating the non-diagonal block $(\Pi^{-1})_{Mm,(M+1)n}=2\pi\rho_{Mm}v_{Mm,(M+1)n}^{2}2\pi\rho_{(M+1)n}$,
+i. e., the transition from a state in exciton class $M$ to a state
+in the next higher exciton class $(M+1)$. There are four different
+types of matrix elements:
+
+\begin{itemize}
+\item decay of a GDR,
+\item the single particle transitions leaving the GDR unchanged,
+\item transitions among non-collective states,
+\item GDR creation.
+\end{itemize}
+Computation of these four types of matrix elements is discussed below.
+
+\textbf{(i)} The matrix element $(\Pi^{-1})_{Mm,(M+1)4}$, $m=$ 1,
+2 or 3 describes the decay of a GDR via coupling to the next higher
+exciton class. This process is responsible for the spreading width
+of the GDR. In colliding with a bound particle the GDR looses its
+coherence and the bound particle is excited into an excited state
+thus creating another particle-hole state. This matrix element can
+be written as \begin{equation}
+2\pi\rho_{Mm}v_{Mm,(M+1)4}^{2}2\pi\rho_{(M+1)4}=2\pi\rho_{Mm}\Gamma_{GDR}^{\downarrow}.\end{equation}
+For the width of the GDR the experimental value is used. Unfortunately,
+there is little literature on how this width is separated into spreading
+and decay width. It is known that for heavy nuclei the spreading width
+is dominant, whereas for light nuclei the reverse is true. For $^{208}$Pb
+approximately 90\% of the width is due to the spreading width. For
+$^{16}$O, on the other hand, 90\% of the width is due to the decay
+width \cite{BBB83}. This separation can be entered into the calculations
+as an input parameter. The result depends only weakly on this coefficient.
+The level densit\index{p-h level density}ies $\rho_{Mm}^{J,\pi}(E)$
+for m=1,2,3 are given by the exciton level densities $\rho_{M-1}^{(J-1),-\pi}(E-E_{GDR})$,
+$\rho_{M-1}^{J,-\pi}(E-E_{GDR})$ and $\rho_{M-1}^{(J+1),-\pi}(E-E_{GDR})$,
+respectively. These correspond to the level densities of the non-collective
+states on which GDR is built. Implicitly, all of them are for bound
+configurations.
+
+\textbf{(ii)} The matrix element $(\Pi^{-1})_{Mm,(M+1)n}$, m, n=1,
+2, 3 describes the transition of a GDR-state in class $M$ to a GDR-state
+in class $(M+1)$. In such a transition the GDR is not affected and
+is just a \char`\"{}spectator\char`\"{}. This is again a consequence
+of the two-body nature of the residual interaction. The subclasses
+1, 2, 3 differ only in the angular momenta of the non-collective states
+the GDR is built on. Since a transition among these states must not
+change the angular momentum this part is diagonal in the subclass
+indices, i. e. $(\Pi^{-1})_{Mm,(M+1)m}\not=0$, only. Thus, these
+matrix elements are given by \begin{equation}
+(\Pi^{-1})_{Mm,(M+1)m}=2\pi\rho_{Mm}v_{n.c.}^{2}2\pi\rho_{Mm\rightarrow(M+1)m}^{acc},\end{equation}
+where $\rho_{Mm}^{J}(E)$, m=1,2,3, is the exciton level densit\index{p-h level densities}y
+$\rho_{M-1}^{(J^{\prime},-\pi)}(E-E_{GDR})$ with $J^{\prime}=(J-1),J,(J+1)$
+$\rho_{Mm\rightarrow(M+1)m}^{acc}(E)$, m=1, 2, 3 are the accessible
+state densities $\rho_{(M-1),J\rightarrow M,J^{\prime}}^{acc}(E-E_{GDR})$
+with $J^{\prime}=(J-1),\,,J,\,(J+1)$, respectively. $v_{n.c.}$ stands
+for the average transition matrix element between two non-collective
+states of neighboring exciton classes.
+
+\textbf{(iii)} The matrix element $(\Pi^{-1})_{M4,(M+1)4}$ describes
+transitions between non-collective states only. The matrix element
+is again expressed through the average transition strength $v_{n.c.}$
+between two non-collective states \begin{equation}
+(\Pi^{-1})_{M4,(M+1)4}=2\pi\rho_{M4}(E)v_{n.c.}^{2}2\pi\rho_{M4\rightarrow(M+1)4}^{acc}(E).\end{equation}
+
+
+\textbf{(iv)} The matrix element $(\Pi^{-1})_{M4,(M+1)m}$ with $m$
+= 1, 2, and 3 describes the creation of a GDR in the next higher exciton
+class. In the current version of EMPIRE the total GDR width is taken
+to describe this process%
+\footnote{This may overestimate creation rate of the GDR. Other approaches are
+to use non-collective matrix element or the GDR width split among
+the neighboring classes. To activate these possibilities the user
+has to edit MSC\index{MSC}-NVWY\index{NVWY}.f file and uncomment
+adequate lines in both of the following ranges 1028-1036 and 1093-1106.%
+}. However, the creation of a GDR is possible only if a particle or
+a hole has enough energy to create the GDR state. This is another
+consequence of the two-body nature of the residual interaction. A
+particle with the excitation energy of the GDR resonance is generally
+unbound. Thus, only a hole can contribute. The probability for a hole
+to have the required energy $\epsilon$ within the configuration with
+the total exciton number $(p+h)$ is given by \begin{equation}
+P(\epsilon)=N\frac{\rho(p,h-1,E-\epsilon)}{\rho(p,h,E)},\end{equation}
+where $\rho(p,h-1,E-\epsilon)$ is the level density\index{p-h level densities}
+of the remaining excitons after removing a hole of the energy $\epsilon$.
+$\rho(p,h,E)$ is the total level density at energy $E$ for $(p+h)$
+excitons. $N$ is the normalization constant. \begin{equation}
+\frac{1}{N}=\int_{0}^{E}\frac{\rho(p,h-1,E-\epsilon)}{\rho(p,h,E)}d\epsilon=\frac{\rho(p,h-1,E)}{\rho(p,h,E)(p+h-1)}.\end{equation}
+Hence, the probability for a hole to have the energy $E\geq E_{GDR}$
+is given by \begin{eqnarray}
+\int_{E_{GDR}}^{E}P(\epsilon)d\epsilon & = & \frac{(p+h-1)}{\rho(p,h-1,E)}\int_{E_{GDR}}^{E}\rho(p,h-1,E-\epsilon)d\epsilon\nonumber \\
+ & = & \frac{\rho(p,h-1,E-E_{GDR})}{\rho(p,h,E)}.\end{eqnarray}
+Collecting everything yields \begin{equation}
+(\Pi^{-1})_{M4,(M+1)m}=2\pi\rho_{M4}(E)\Gamma_{GDR}^{\downarrow}\frac{\rho(p,h-1,E-E_{GDR})}{\rho(p,h,E)}.\end{equation}
+
+
+Thus, all four types of matrix elements within the block $(M,M+1)$
+have been determined. The matrix element $(\Pi^{-1})_{(M+1)m,Mn}$
+is obtained using the symmetry properties of the matrix $\Pi^{-1}$.
+The diagonal elements of this matrix are then obtained by summation:
+\begin{equation}
+(\Pi^{-1})_{Mm,Mm}=\sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M+1)n}+\sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M-1)n}+\sum_{c}T_{Mm,c}.\,.\end{equation}
+The matrix $\Pi^{-1}$is inverted numerically and used in Eq.\ref{GammaMSCxs}
+to calculate $\gamma$-emission spectra.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Exciton model \label{DEGAS}}
+\subsubsection{Exciton model DEGAS\label{DEGAS}}
 
-\paragraph{DEGAS}
 The module DEGAS\index{DEGAS} is the exciton model
 code with angular-momentum conservation written by E. B\v et\' ak
 as an improved version of the code PEGAS \cite{Degas} by E. B\v et\' ak
@@ -1005,7 +1161,7 @@ of the capture cross section above 3~MeV.
 
 
 
-\paragraph{PCROSS}
+\subsubsection{Exciton model PCROSS\label{PCROSS}}
 The module PCROSS includes a preequilibrium mechanism for clusters in the incoming and outgoing
 channels by including the Iwamoto-Harade model~\cite{Iwamoto} parameterized and improved
 in~\cite{Sato,Zhang1,Zhang2}. In this model, the formation probability of a cluster takes into
@@ -2460,9 +2616,6 @@ in Fig.~\ref{pa231}.
 experimental data.}
 \end{figure}
 
-
-
-
 \subsection{Spectra of Recoils}
 Energy spectra of recoils are calculated taking into account correlations
 between the excitation energy of the nucleus and the emission energy
@@ -2585,9 +2738,11 @@ that contributed to the population of a given energy bin in the residue.
 of exclusive spectra.}
 \end{figure}
 
+\section{ENDF-6 Formating and Utility Codes}
+Essential reaction calculations are performed by the EMPIRE physics core. Most of nuclear physicists
+would not need any further processing except automatic graphical comparison with the experimental data, which greately facilitates adjustment of model parameters to reproduce measurements. For the nuclear data evaluator, this point is only the beginning of the lengthy process. Further steps include ENDF-6 formating, including neutron resonances, checking file consistency and integrity, verification of the ENDF-6 formating, pre-processing  (resonance reconstruction and Doppler broadening) and comparison against experimental data, generation of the processed file suitable for transport calculations (e.g., processing with the NJOY code) and final validation against integral benchmark experiments.
 
-
-\subsection{ENDF-6 Formating}
+The most critical step on the way to the evaluated data file is organizing the results of the model calculation according to the internationally adopted ENDF-6 format~\cite{ENDF-102}.
 The ENDF option in the input file instructs EMPIRE to
 write all necessary information to the dedicated output file.
 This file is processed by the utility
@@ -2663,11 +2818,8 @@ on the EMPIRE output file by more than 5\%, a warning message is written.
 \end{itemize}
 Additional messages monitor the progress of the data formatting process.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Utility Codes\label{Sec:utility-codes}}
-
-Essential reaction calculations are performed by the EMPIRE physics core. Most of nuclear physicists
-would not need any further processing except automatic graphical comparison with the experimental data, which greately facilitates adjustment of model parameters to reproduce measurements. For the nuclear data evaluator, this point is only the beginning of the lengthy process. Further steps include ENDF-6 formating, including resonances, checking file consistency and integrity, verification of the ENDF-6 formating, pre-processing  (resonance reconstruction and Doppler broadening) and comparison against experimental data, generation of the processed file suitable for transport calculations (e.g., processing with the NJOY code) and final validation against integral benchmark experiments.  To expediate this long chain the EMPIRE system incorporates a number of stand-alone codes:
+To expediate a long chain of operations to be executed once ENDF-6 formatting is completed
+the EMPIRE system incorporates a number of stand-alone codes:
 \begin{itemize}
 \item \textbf{ENDRES\index{ENDRES}}: merges existing resonance parameters
 into ENDF-6 formatted file produced by EMPEND (written by A. Trkov),
@@ -2717,7 +2869,7 @@ input reduced to the specification of the incident channel (projectile, target, 
 \item ground state properties (masses, deformations, spins, parities, shell corrections, abundances)
 \item optical model potential parameters including CC coupling schemes and deformations
 \item discrete level's energies, spins, parities, half-lives and $\gamma$-ray decay transitions with respective internal coversion coefficients
-\item $\gamma$-ray strength functions including Giant Dipol parameters
+\item $\gamma$-ray strength functions including Giant Dipole parameters
 \item average resonance parameters for s-wave and p-wave neutron resonances
 \item level density parameters for EMPIRE-spacific and Gilbert-Cameron models
 \item microscopically calculated level densities including those at saddle points
@@ -2730,7 +2882,7 @@ and more up to date RIPL-2 database has reduced the original \emph{empire/data}
 library to a few EMPIRE-specific files and neutron resonance parameters
 from ENDF/B-VII.0.
 
-The second source of input parameters are internal systematics that provide input parameters if they are not available from the input parameter libraries. These include systematics for EMPIRE-specific and Gilbert-Cameron level density parameters, shell corrections acording to Swiatecki, single-humped fission barriers and moemnts of inertia according to Sierk~\cite{sierk}, nuclear masses by Duflo-Zuker~\cite{Duflo:96}, and Giant Dipol resonances not mentioning numerous global parameters embedded in the nuclear reaction models.
+The second source of input parameters are internal systematics that provide input parameters if they are not available from the input parameter libraries. These include systematics for EMPIRE-specific and Gilbert-Cameron level density parameters, shell corrections acording to Swiatecki, single-humped fission barriers and moemnts of inertia according to Sierk~\cite{sierk}, nuclear masses by Duflo-Zuker~\cite{Duflo:96}, and Giant Dipole resonances not mentioning numerous global parameters embedded in the nuclear reaction models.
 
 Finally, EMPIRE is equipped with alghorithms to produce derived input parameters. The typical examples are automatic selection of target levels to be coupled in the CC calculations, section of collective levels to adjust field strength parameters in the MSD calculations and adjusting level density parameters by fitting cumulative number of discrete levels.
 
@@ -2932,10 +3084,31 @@ However, EMPIRE-specific level densities suffer the same uncertainty as GC when 
 \subsection{Fission products for ENDF/B-VII.0}
 \subsection{Minor Actinides for ENDF/B-VII.0}
 \subsection{Other applications}
+We have been using EMPIRE-II for astrophysical research, namely to
+predict the production of
+long-lived radioisotopes in solar flares. A large number of total cross
+sections for protons, 3-He and
+alpha-particle induced reactions have been evaluated with the code. The
+reference to this work is:
+
+Delayed X- and Gamma-Ray Line Emission from Solar Flare Radioactivity
+V. Tatischeff, B. Kozlovsky, J. Kiener, and R. J. Murphy
+/The Astrophysical Journal Supplement Series/, volume 165 (2006), pages
+606–617
 
 \section{Cross section  covariances}
 
 \section{Conclusions}
+
+In his book Science of Logic, Georg Friedrich Hegel remarked:
+‘‘It is said that there are no sudden changes in nature, and the
+common view has it that when we speak of a growth or a
+destruction, we always imagine a gradual growth or disappearance.
+Yet we have seen cases in which the alteration of existence
+involves not only a transition from one proportion to another,
+but also a transition, by a sudden leap, into a . . . qualitatively
+different thing; an interruption of a gradual process, differing
+qualitatively from the preceding, the former state’’ (1).
 
 \section*{Acknowledgments}
 EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL proje ct and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, A. Taccone, and A. Lamberto who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
