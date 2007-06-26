@@ -430,70 +430,118 @@ by adjusting dynamical deformations of collective levels.
 \end{enumerate}
 
 \textbf{ROBERTO CHECK BELOW!!!}
-Particular feature of the EMPIRE is a capability of performing DWBA calculations to the
+The particular feature of EMPIRE is a capability of performing DWBA calculations to the
 discrete levels embedded in the continuum to improve descritption of the high energy region
-in neutron spectra. The code automatically selects suitable discrete levels from
+of neutron spectra. The code automatically selects suitable discrete levels from
 the complete set available in the RIPL-2 library. The DWBA contribution is then convoluted
-with Gaussian function and summed up with the statistical model contribution. Generally, such calculations coexist with the CC calculations to low lying levels. The user may choose to disable the DWBA to the continuum.
+with the Gaussian function to simulate experimental energy resolution and summed up with the statistical model contribution. Generally, such calculations coexist with the CC calculations to low lying levels. User may choose to disable the DWBA to the continuum.
 
 \subsection{Preequilibrium Reactions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsubsection{Multi-step Direct\label{sec: MSD}}
+
+
 The approach to statistical Multi-step Direct\index{MSD} reactions
 is based on the Multi-step Direct (MSD) theory of preequilibrium scattering
 to the continuum originally proposed by Tamura, Udagawa and Lenske
 \cite{TUL}. Since then, the approach has been revised, especially
 the part related to statistical and dynamical treatment of nuclear
 structure leading to ORION and TRISTAN codes that are integrated in
-the EMPIRE package.
+the EMPIRE package. The description of the MSD formalism that follows
+is largely based on the original write up by Lenske and Wolter and
+provides the user with a general understanding of the physics involved
+in the MSD calculations performed with EMPIRE.
 
 The evolution of the projectile-target system from small to large
 energy losses in the open channel space is described in the MSD theory
 with a combination of direct reaction (DR), microscopic nuclear structure
 and statistical methods. As typical for the DR-approach, it is assumed
-that the closed channel space, {\it i.e.} the MSC contributions,
-can be treated separately within the Multi-step Compound mechanism.
+that the closed channel space, i.e. the MSC\index{MSC} contributions,
+have been projected out and can be treated separately within the Multi-step
+Compound\index{MSC} mechanism.
 
-In the MSD theory the effective Hamiltonian in the open
+
+\paragraph{\label{sec: MSD}Outline of the theory}
+
+In the MSD\index{MSD} theory the effective Hamiltonian in the open
 channel space is divided into an energy averaged optical model part
 $H^{opt}$, describing the relative motion of projectile $a$ and
 target $A$, the intrinsic Hamiltonian $H^{intr}$ of the asymptotically
 separated nuclei and the residual effective projectile-target interaction
 $V^{res}$ leading to non-elastic processes
+
 \begin{equation}
 H=H^{opt}+H^{intr}+V^{res}\quad.\label{fullh}
 \end{equation}
-Both $H^{opt}$ and $V^{res}$ are non-hermitian operators. To a large
+
+\noindent Both $H^{opt}$ and $V^{res}$ are non-hermitian operators. To a large
 extent the imaginary parts are related to the flux absorbed into the
 closed channels, but those open channels which are not treated explicitly
 are also contributing.
-The ORION code solves the Lippmann-Schwinger equation
+
+The ORION\index{ORION} code solves the Lippmann-Schwinger equation
 for the open channel T-matrix where the $n^{th}$-order term
+
 \begin{equation}
-T_{\gamma0}^{(n)}=<\chi_{E}^{(-)}|(\gamma|V^{res}(G^{chan}(E)V^{res})^{n-1}|0)|\chi_{0}^{(+)}>
-\label{tgamman}
-\end{equation}
-describes the $n-$step transition from the entrance channel with
+T_{\gamma0}^{(n)}=<\chi_{E}^{(-)}|(\gamma|V^{res}(G^{chan}(E)V^{res})^{n-1}|0)|\chi_{0}^{(+)}>\label{tgamman}\end{equation}
+
+\noindent describes the $n-$step transition from the entrance channel with
 incoming scattering wave $\chi_{0}^{(+)}$ and the ground state configuration
 $|0)=|aA)$ to an exit channel $\gamma$ with outgoing wave $\chi_{E}^{(-)}$
 at the energy E \cite{SLW,LW92}. $G^{chan}(E)$ is the Green's function
 for the channel. The scattering waves are optical model wave functions.
 They are weakly energy dependent on a scale much larger than the one
-on which the intrinsic states $\gamma$ vary. The MSD
+on which the intrinsic states $\gamma$ vary. The MSD\index{MSD}
 approach treats the residual projectile-target interactions perturbatively.
 In this sense, MSD theory is a {}``weak coupling'' description of
 continuum scattering.
+
 In order to describe the statistical content of pre-equilibrium spectra
 the real states $\gamma$ are expanded into \emph{n}-particle and
 \emph{n}-hole model states $c$. Explicitly, $H^{intr}$ is chosen
-as \begin{equation}
-H^{intr}=H_{0}^{intr}+V^{intr}\quad.\label{hintr}\end{equation}
- The states $c$ are eigenstates of $H_{0}^{intr}$ and the residual
+as
+\begin{equation}
+H^{intr}=H_{0}^{intr}+V^{intr}\quad.\label{hintr}
+\end{equation}
+
+\noindent The states $c$ are eigenstates of $H_{0}^{intr}$ and the residual
 interaction $V^{intr}$ couples states from different particle-hole
 classes only. It is assumed that the configuration mixing between
 $np-nh$ classes is stochastic in nature and leads to a random distribution
-of amplitudes with mean value zero \cite{LW92}. Similar to the chaining and
-never-come-back hypotheses of \cite{FKK}
+of amplitudes with mean value zero \cite{LW92}. When the density
+matrix is averaged over a finite energy interval, e.g. with a Lorentzian
+or Gaussian $g(x)$ of full width $\Delta$ large compared to the
+mean level spacing,
+\begin{equation}
+\hat{\rho}(E)=\int dE'g(E-E')\hat{\rho}_{micro}(E)\label{rhoav}
+\end{equation}
+\noindent the coherence of the basis states is lost. As a result, the density
+matrix becomes a statistical matrix
+\begin{equation}
+\hat{\rho}(E)=\sum_{n}{\hat{\rho}_{n}(E)}.\label{levelc}
+\end{equation}
+\noindent The summation extends over the $np-nh$ classes with
+\begin{equation}
+\hat{\rho}_{n}(E)=\sum_{c=[npnh]}{|c)P_{c}(E)(c|}\label{leveld}
+\end{equation}
+\noindent and the probability per energy to find the system in the configuration
+$c$ is given by the spectroscopic densities,
+\begin{equation}
+P_{c}(E)=-\frac{1}{\pi}Im[\int dE'g(E-E')(c|G^{intr}(E')|c)]\,,\label{specd}
+\end{equation}
+\noindent with $G^{intr}(E)$ being the intrinsic Green's function.
+
+The statistical operators carry further properties which are important
+for the physical content of the description. Integrating $P_{c}(E)$
+over an interval $\Delta E$ one obtains the spectroscopic factor
+for the configuration $c$ in $\Delta E$. Irrespective of the representation,
+i.e. in either the $\gamma$ or the $c$ basis, the trace of $\hat{\rho}(E)$,
+Eq. \ref{rhoav}, gives the total level density\index{level density}
+at energy $E$. The partial level density of $np-nh$ states is determined
+by $tr(\hat{\rho}_{n})$ (Eq. \ref{leveld}).
+
+Similar to the chaining and never-come-back hypotheses of \cite{FKK}
 the interference terms $n\ne k$ are neglected by assuming that in
 each step the reaction is dominated by transitions into configurations
 with the highest level density at a given excitation energy. This
@@ -501,35 +549,113 @@ means, that we neglect de-excitation and re-scattering processes which
 decrease or leave the $ph-$number unchanged, respectively. With this
 assumption the cross section becomes an incoherent super-position
 of $n-$step contributions
+
 \begin{equation}
-\frac{d^{2}\sigma}{d\Omega dE}=\sum_{n}{\frac{d^{2}\sigma^{(n)}}{d\Omega dE}}\,,
-\label{sigma0}
+\frac{d^{2}\sigma}{d\Omega dE}=\sum_{n}{\frac{d^{2}\sigma^{(n)}}{d\Omega dE}}\,,\label{sigma0}
 \end{equation}
+\noindent where the multi-step cross sections are defined as
+\begin{equation}
+\frac{d^{2}\sigma^{(n)}}{d\Omega dE}=\sum_{c=[npnh]}{P_{c}(E)|T_{c0}^{(n)}|^{2}}\,.\label{sign}
+\end{equation}
+\noindent Expanding $V^{res}$ into multi-poles $V_{\lambda}$ and noting that
+only $1p-1h$ configurations are directly excited in a one-step process
+the $\sigma^{(1)}$ is determined by an average over transitions into
+the $1p-1h$ states $c$ around excitation energy $E$ with form factors
+\begin{equation}
+F_{\lambda}^{c0}=(c|V_{\lambda}|0)\,.
+\end{equation}
+\noindent Rather than treating each transition separately it is sufficient to
+consider averages over the microscopic form factors. Thus, $V^{res}$
+is represented in terms of state independent multipole form factors
+$F_{\lambda}$ and nuclear transition operators $O_{\lambda}$
+\begin{equation}
+V^{res}(r,\xi)=\sum_{\lambda}{F_{\lambda}(r)O_{\lambda}(\xi)}.\label{vres}
+\end{equation}
+\noindent Here, $r$ denotes the relative motion coordinate and $\xi=(\xi_{a},\xi_{A})$
+are the intrinsic coordinates including spin and isospin, respectively.
+The multipole form factors $F_{\lambda}$ in turn are related to $O_{\lambda}$.
+In a self-consistent approach they are obtained by averaging $V^{res}$
+over $O_{\lambda}$:
+\begin{equation}
+F_{\lambda}(r)=(c|O_{\lambda}^{\dag}\hat{\rho}(E)V^{res}|c)/S_{\lambda}(E,c).\label{formf}
+\end{equation}
+\noindent Here, the general case of a transition starting from an arbitrary
+state $c$ is considered which appears in the intermediate steps of
+higher order multi-step processes. For one-step reactions the initial
+state is the ground state $c=0$. By normalization to the transition
+strength function $S_{\lambda}$
+\begin{equation}
+(c|O_{\lambda'}^{\dag}\hat{\rho}(E)O_{\lambda}|c)=\delta_{\lambda\lambda'}S_{\lambda}(E,c)\label{slambda}
+\end{equation}
+\noindent the dependence of the form factor on the internal state is removed
+to a large extent. $S_{\lambda}$ is the nuclear response function
+for the external operator $O_{\lambda}$ describing the transition
+rate per unit energy from the state $c$ into the ensemble of states
+$c'$ centered at energy $E$.
+
+The above relations are appropriate for one-step reactions where $c$
+is the ground state. However, in higher steps $c$ is an arbitrary
+intermediate $np-nh$ state which is summed over in the cross section.
+Thus, for multi-step scattering the form factor, Eq.\ref{formf} actually
+utilizes a too microscopic picture. The statistical aspects in multi-step
+transitions are taken fully into account by the average multipole
+form factors
+\begin{equation}
+F_{\lambda}=\frac{tr(\hat{\rho}O_{\lambda}^{\dag}\hat{\rho}V^{res})}{tr(\hat{\rho}O_{\lambda}^{\dag}\hat{\rho}O_{\lambda})}\,,\label{fav}
+\end{equation}
+\noindent which are independent of the initial state and the multi-step order,
+respectively. In the applications of the theory these global form
+factors together with the response functions of Eq.\ref{slambda}
+are used.
+
 With the above results the one-step cross section is expressed as
 \begin{equation}
-\frac{d^{2}\sigma^{(1)}}{dEd\Omega}=\sum_{\lambda}{S_{\lambda}(E)\overline{\frac{d\sigma^{(1)}}{d\Omega}}\mid_{\lambda}}\,,
-\label{sigma1}
+\frac{d^{2}\sigma^{(1)}}{dEd\Omega}=\sum_{\lambda}{S_{\lambda}(E)\overline{\frac{d\sigma^{(1)}}{d\Omega}}\mid_{\lambda}}\,,\label{sigma1}
 \end{equation}
 \noindent where $\overline{\sigma^{(1)}}$ is a reduced DWBA\index{DWBA} cross
-section calculated with the average form factors
-and $S_{\lambda}(E)$ is the response function of the nucleus to the
-angular momentum transfer $\Delta l=\lambda$.
-The cross section calculations also include a second step given by the
- very intuitive expression
+section calculated with the average form factors (Eq.\ref{formf}).
+
+The multi-step part of the theory is discussed here for two-step reactions
+only. The state-independent and slowly varying two-step amplitudes
+read
+\begin{equation}
+T_{\lambda_{1},\lambda_{2}}^{(2)}=<\chi_{E}^{(-)}|F_{\lambda_{2}}G^{opt}F_{\lambda_{1}}|\chi_{\alpha}^{(+)}>\,,\label{amp2}
+\end{equation}
+\noindent with $G^{opt}$ being Green's function for the optical model potential.
+The nuclear structure information is now contained completely in
+\begin{equation}
+(0|O_{\lambda'_{1}}^{\dag}G^{(intr)\dag}(E'_{1})O_{\lambda'_{2}}^{\dag}\hat{\rho}(E)O_{\lambda_{2}}G^{(intr)}(E_{1})O_{\lambda_{1}}|0)\,.\label{two1}
+\end{equation}
+\noindent By definition, the exit channel configurations are $2p-2h$ states
+which are excited from $1p-1h$ states $c_{1}$. Also in the first
+step only $1p-1h$ states $a$ are excited. Therefore, we only have
+to consider the $1p-1h$ reduced parts of the two Green functions.
+
+To a good approximation the dependence of $S_{\lambda_{2}}(E,c_{1})$
+on $c_{1}$ can be replaced by a dependence on $E_{1}$ by considering
+that the spectroscopic strength usually is located in the vicinity
+of the unperturbed energy. Theoretically, this is achieved by taking
+the average over the response functions belonging to states $c_{1}$
+at energy $E_{1}$
 \begin{eqnarray}
-{d^{2}\sigma^{(2)}}/{dEd\Omega}&=&
-\sum_{\lambda_{1}\lambda_{2}}{\int dE_{1}S_{\lambda_{2}}(E,E_{1})S_{\lambda_{1}}(E_{1},0)}\nonumber\\
-&& \overline{\frac{d\sigma^{(2)}}{d\Omega}}(E,E_{1})|_{\lambda_{1}\lambda_{2}},\label{sigma2}
-\end{eqnarray}
-$\overline{\sigma^{(2)}}$ is an averaged cross section defined in
-terms of the $T^{(2)}-$matrix elements, which describes
+S_{\lambda}(E,E_{1}) & = & \frac{\sum_{c_{1}}{P_{c_{1}}(E_{1})S_{\lambda}(E,c_{1})}}{\sum_{c_{1}}{P_{c_{1}}(E_{1})}}\nonumber \\
+ & = & \frac{tr(\hat{\rho}_{1}(E_{1})O_{\lambda}^{\dag}\hat{\rho}(E)O_{\lambda})}{tr(\hat{\rho}_{1}(E_{1}))}\quad.\label{slave}
+ \end{eqnarray}
+\noindent The final result for the two-step MSD\index{MSD} cross section is
+of very intuitive structure
+\begin{equation}
+{d^{2}\sigma^{(2)}}/{dEd\Omega}=\sum_{\lambda_{1}\lambda_{2}}{\int dE_{1}S_{\lambda_{2}}(E,E_{1})S_{\lambda_{1}}(E_{1},0)\overline{\frac{d\sigma^{(2)}}{d\Omega}}(E,E_{1})\mid_{\lambda_{1}\lambda_{2}}}.\label{sigma2}
+\end{equation}
+\noindent $\overline{\sigma^{(2)}}$ is an averaged cross section defined in
+terms of the $T^{(2)}-$matrix elements (Eq.\ref{amp2}, which describes
 two-step scattering wave-mechanically as a coherent quantal process.
 The total response of the intrinsic system at energy loss $E$ is
-contained in the first and second step transition response functions.
+contained in the first and second step transition strength functions.
 The folding accounts for the partitions of the total energy $E$ into
 one- and two-step parts such that $E$ is conserved.
 
-In most cases it is a good approximation
+In the present version of the code only one- and two-step MSD\index{MSD}
+contributions are considered. In most cases it is a good approximation
 to use the ground state response functions also for the second step
 but at an energy shifted by the amount of total energy loss in the
 first step. This corresponds to the assumption that the structure
@@ -537,55 +663,212 @@ of excited nuclei is close to the structure of the ground state as
 far as single particle occupancies and other mean-field properties
 are concerned.
 
-A reliable
+Summarizing this section, the statistical properties of pre-equilibrium
+spectra are used to eliminate interference contributions at various
+places. Physically, this corresponds to the neglect of certain intrinsic
+correlation functions which only would be observable at an energy
+resolution of the order of the average level spacing. This leads to
+a representation of pre-equilibrium cross sections as an incoherent
+super-position of multi-step contributions. The statistical treatment
+is introduced in a minimal way, namely referring only to the intrinsic
+systems while multi-step scattering is described quantum-mechanically
+as a coherent process at all steps.
+
+
+\paragraph{Notes on RPA-Description of Transition Strength Functions}
+
+In the MSD\index{MSD} approach continuum scattering is considered
+as a sequence of $1p-1h$ transitions and the transition strength
+functions, Eq. \ref{slambda}, correspond to response functions of
+an external one-body operator acting repeatedly on a nucleus. A reliable
 description of one-body response functions is provided by the Random
-Phase Approximation theory \cite{Neg,Wal} (RPA\index{RPA}).
-Important quantities like energy weighted
-sum rules are known to be conserved by RPA\index{RPA}.
+Phase Approximation theory \cite{Neg,Wal} (RPA\index{RPA}). In RPA
+the whole series of $1p-1h$ interaction diagrams is summed exactly.
+Thus, an essential contribution to the intrinsic correlations is treated
+explicitly. In the notation of Section \ref{sec: MSD} they are part
+of $H_{0}^{intr}$. Thus, the $ph-$classes are built from correlated
+basis states. This justifies also the \textit{ansatz} of Eq. \ref{hintr}
+where $V^{intr}$ was defined as to act only between $ph-$classes.
+
+An important advantage for a reliable description of pre-equilibrium
+spectra is that RPA\index{RPA} accounts for collective and non-collective
+features on the same theoretical footing \cite{Wal,BM,LW92,SLW,RegT}.
+The approach describes at the same time the large amount of weakly
+excited background states and the strongly excited giant resonances
+$(GR)$ in the continuum together with low-lying surface vibrations.
+It is clear that the response functions do not suffer from double
+counting of transition strength which appears if collective states
+are treated separately. Important quantities like energy weighted
+sum rules are known to be conserved by RPA\index{RPA}. Also the enhancement
+of the response due to ground state correlations is included.
+
+In view of a large number of $p-h$ configurations which are needed
+in order to describe nuclear spectra over a range of excitation energies
+of several tens of $MeV$ a fully microscopic calculation is of little
+use. In accordance with the statistical description of cross section
+statistical considerations are also incorporated into the structure
+calculations. Instead of solving the RPA\index{RPA}-eigenvalue problem
+by direct diagonalization it is more appropriate to consider the average
+properties of excitations. The Green function approach to RPA\index{RPA}
+\cite{Wal,LW92} provides the proper theoretical basis for such a
+description.
+
 For a general formulation, applicable also to open shell nuclei, the
 quasi-particle RPA (QRPA) is used. Thus, a BCS\index{BCS} ground
 state and a canonical transformation to quasi-particles is assumed
 \cite{RS}. The excitations are then given in terms of two quasi-particle
-($2qp$) rather than by $1p-1h$ configurations.
+($2qp$) rather than by $1p-1h$ configurations. Furthermore, in order
+to account for the self-energies the $2qp$ energies are taken to
+be complex by adding a state dependent damping width $\Gamma_{\alpha}^{\downarrow}$.
+The response functions include inelastic events only and are calculated
+in linear response theory. Formally, the response functions entering
+into the MSD\index{MSD}-calculation are expressed through the RPA
+polarization propagator $\chi^{RPA}(E)$
 
-Originally, the spectroscopic strength functions were derived assuming degenerate
-single particle levels. This approach predicts
-well double-differential neutron emission spectra from spherical nuclei but
-falls short of reproducing the inelastic scattering to the continuum in deformed nuclei.
-Recently, the TRISTAN module has been extended to allow for determination of
+\begin{equation}
+S_{\lambda}(E,0)=-\frac{1}{\pi}Im[\chi^{RPA}(E)]\,.\label{sgrpa}
+\end{equation}
+\noindent In higher steps, where the transition starts from a state $c\not=0$,
+the $1p1h$ densities and response functions on the background of
+an already excited nucleus are required. At excitation energies per
+particle which are well below the Fermi energy the structure remains
+close to the ground state. Since this is the region of main interest
+for pre-equilibrium scattering Eq.\ref{sgrpa} is used also in two-step
+and higher order reactions at the appropriate excitation energy. The
+average response functions, Eq.\ref{slave}, are approximated by
+
+\begin{equation}
+S_{\lambda}(E,E_{1})\simeq S_{\lambda}(E-E_{1},0)\,,\label{slrpa}
+\end{equation}
+\noindent where it is assumed that $S_{\lambda}$ depends only on energy difference
+$E-E_{1}$ which corresponds to the relative excitation energy. The
+form factors of Eq.\ref{fav} are found to be given by folding $V^{res}$
+with $\overline{\rho_{\lambda}}$. Thus, the theory leads to a transparent
+and consistent description of nuclear structure and reaction dynamics
+which accounts for the microscopic and the statistical aspects of
+pre-equilibrium reactions.
+
+The code TRISTAN\index{TRISTAN} assumes $O_{\lambda}=\kappa_{\lambda}U_{\lambda}$,
+where the radial part of $U_{\lambda}$ is chosen as the derivative
+of the ground state potential and the coupling constants $\kappa_{\lambda}$
+are treated as empirical parameters. This phenomenological approach
+to RPA\index{RPA} is widely used in structure calculations and has
+been found to give reliable results for response functions \cite{BM,Solv}.
+The ground state is obtained from a BCS\index{BCS} calculation
+in the {}``fixed gap approximation'' with $\Delta_{p}=\Delta_{n}=12.0/\sqrt{(}A)$
+MeV for protons and neutrons. This also allows a realistic description
+of open-shell nuclei. Correspondingly, the response functions are
+calculated with quasi-particle RPA\index{RPA} (QRPA).
+
+Multipole fields with a radial shape $\sim r^{\lambda}$ are taken.
+The coupling constants $\kappa_{\lambda}$ are determined such that
+excitation energies of low-lying surface oscillations and of the Giant
+Dipole Resonance are reproduced.
+
+
+
+\begin{figure}[htbp]
+\scalebox{0.6}{\includegraphics{Th-defMSD.eps}}
+\caption{The effect of accounting for nuclear deformation in MSD calculations on the neutron spectrum emitted at 60 degree from 11.5 MeV neutrons interacting with $^{232}$Th.}
+\label{fig:Th-defMSD}
+\end{figure}
+
+
+The $2qp-$spreading width $\Gamma_{\alpha}^{\downarrow}$ which describes
+in a global way the internal nuclear dissipation of the model states
+is parametrized as
+
+\begin{eqnarray}
+\Gamma_{\alpha}^{\downarrow}&=&\Gamma_{0}(\frac{1}{1+exp((E_{\alpha}-E_{thr})/a)} \nonumber \\ &-&\frac{1}{1+exp((-E_{\alpha}-E_{thr})/a)})
+\end{eqnarray}
+
+\noindent an odd function of $E_{\alpha}$. The parameters $\Gamma_{0},\, E_{thr},\, a$
+are taken equal to the width and energy of the giant dipole resonance.
+The maximum $l$-transfer $\lambda$ is internally set between 1 and
+4 depending on the maximum $l$ contributing to the reaction cross
+section.
+
+Originally, the response functions were calculated with single
+particle levels from a spherical Nilsson Hamiltonian with standard
+parameters. Recently, the TRISTAN module has been extended to allow for determination of
 the strength functions  from non-degenerate single particle levels
 and wave functions resulting from the quadrupole deformation of the nuclear potential.
-This modification greatly improves descritption of the high energy part of the neutron spectra for some strongly deformed nuclei as illustrated in Fig.~\ref{fig:def-MSD} in the case of $^{232}$Th.
+The effect of this modification is illustrated in Fig.~\ref{fig:Th-defMSD}. The MSD dominated energy region of the neutron spectrum resulting from the interaction of 11.5 MeV neutrons with $^{232}$Th is considerably increased that greatly improves agreement with the experiment.
 
+
+In EMPIRE-2.19 fitting of the coupling constants $\kappa_{\lambda}$has
+been improved to minimize their fluctuations with changing incident
+energy.
+
+
+\paragraph{Implementation of ORION and TRISTAN\index{TRISTAN} codes in EMPIRE}
+
+Implementation of ORION\index{ORION} and TRISTAN codes in EMPIRE
+involves a few modifications that facilitate operation of the codes.
+The common input parameters (such as incident channel configuration
+and optical model parameters) are passed to ORION and TRISTAN directly
+from the EMPIRE. The parameters that are specific to ORION and TRISTAN
+are set to default values in EMPIRE and transmitted when ORION and
+TRISTAN are called. The latter parameters can be modified by the user
+in the optional input to EMPIRE. However, a default MSD\index{MSD}
+calculation can be performed without any additional input.
+
+EMPIRE takes care of multiple calls of ORION\index{ORION} with appropriate
+energy losses (Q-triangle). In the first set of calls, a standard
+averaged form factor is used. Then EMPIRE calls ORION calculations
+with the compressional form factor, which is more appropriate for
+$\lambda=0$ momentum transfer. The tables resulting from both sets
+of calculations are merged in such a way that all $\lambda=0$ momentum
+transfers are calculated with the compressional form factor while
+the remaining ones are determined with the standard form factor. The
+extension of the original version of ORION to the compressional form
+factor for $\lambda=0$ was performed according to the suggestions
+by H. Lenske)
+
+The TRISTAN\index{TRISTAN} code has been modified to automate blocking
+of the shell model orbital by the unpaired nucleon. In the stand alone
+version of the code this orbital must be specified in the input. Since
+the orbitals are reordered during the calculations two runs are necessary
+(the first one without blocking to identify a correct orbital). In
+the version of TRISTAN that is included in EMPIRE this preliminary
+calculation is performed internally, whenever necessary, and the blocking
+is set up.
 
 Results of the MSD\index{MSD} calculations are sensitive to the coupling
-constants $\kappa_{\lambda}$ determining response functions for
-$\Delta l=\lambda$ transfer. By default, these are determined such
-that excitation energies of low-lying 2$^{+}$, 3$^{-}$, and 4$^{+}$ collective
-levels be reproduced.  The energy of the Giant Dipole
+constants $\kappa_{\lambda}$. By default, these are determined such
+that excitation energies of low-lying 2$^{+}$, 3$^{-}$, and 4$^{+}$collective
+levels be reproduced. The code identifies the lowest discrete levels
+with the above spins and uses them for for fitting coupling constants
+$\kappa_{\lambda}$. However, not always the lowest levels are the
+collective ones. If this happens, the user has to fix the energies
+of these levels in the input file. The energy of the Giant Dipole
 Resonance is used to determine the $\kappa_{1}$ parameter. For $\lambda=0$
 transitions the self-consistent coupling constant is used by default.
+Also in $\lambda=0$ and $\lambda=1$ cases user may choose to provide
+the respective energies in the input. Each of the coupling constants
+can also be set to the self-consistent value.
 
-The actual implementation of the TRISTAN\index{TRISTAN}
-code does not allow for treatment of the charge exchange channels.
-Therefore, the MSD\index{MSD} cross sections and double-differential
-spectra can only be calculated for the inelastic scattering. It should
-be stressed, however, that due to the collective nature of the MSD\index{MSD}
-approach, its contribution to the inelastic scattering is much bigger
-than to the charge-exchange channels and thus the latter ones can
-be calculated with the exciton model with
-reasonable accuracy.
+In Fig.~\ref{PrMSD} we present neutron spectrum from the $^{141}$Pr(n,xn) reaction at 14.1 MeV
+calculated within the MSD formalism. The MSD results are summed up with the Multi-step Compound (MSC) contribution and the pure statistical model component (Hauser-Feshbach) to cover major mechanisms involved in the reaction. Note that direct inelastic scattering to discrete levels was also treated within the MSD model. In Fig.~\ref{PrMSD} we anticipate results obtained with the classical exciton model (PCROSS) and with the Hauser-Feshbach approach to illustrate role of the preequilibrium emission and advantages of using quantum-mechanical treatment. It is remarkable that a simple, classical exciton model provides results that match the base line of the more advanced MSD/MSC approach. The exciton model, however, is not able to account for the structure resulting from the excitation of the collective levels. The latter can only be discribed in terms of quantum theories such as CC or MSD. It is clear from Fig.~\ref{PrMSD} that in the same energy region the compound nucleus model falls short by several orders of magnitude.
 
-The contribution of MSD (together with Multi-step Compound), compared to
-calculations with compound nucleus only is presented in Fig.~\ref{PrMSD} for
-the neutron spectra emission for the $^{141}$Pr(n,xn) reaction.
 \begin{figure}[htbp]
 \scalebox{0.8}{\includegraphics{msd.eps}}
-\caption{Neutron spectra emission at 90 degree for an incident neutron energy of 14.1~MeV on $^{141}$Pr.}
+\caption{Effect of adding (i) quantum-mechanical (MSD+MSC) and (ii) exciton model (PCROSS) contributions to the Hauser-Feshbach (HF) predictions on the spectrum of neutrons emitted in the interaction of an incident
+14.1~MeV neutron with $^{141}$Pr.}
 \label{PrMSD}
 \end{figure}
 
 
+The current implementation of the TRISTAN
+code does not allow for treatment of the charge exchange channels.
+Therefore, the MSD cross sections and double-differential
+spectra can only be calculated for the inelastic scattering . It should
+be stressed, however, that due to the collective nature of the MSD\index{MSD}
+approach, its contribution to the inelastic scattering is much bigger
+than to the charge-exchange channels and thus the latter ones can
+be calculated with the exciton model modules PCROSS or DEGAS (see Section
+\ref{PCROSS} and \ref{DEGAS}) or Monte Carlo approach (see Section \ref{DDHMS}) with
+reasonable accuracy.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -776,7 +1059,7 @@ and unbound states in class $n$ by $\rho_{n}^{b}$ and $\rho_{n}^{u}$
 respectively, and their sum by $\rho$, the transmission coefficient
 populating the first MSC\index{MSC} class may be written as
 \begin{eqnarray}
-T_{1}&=&T_{om}\frac{<V_{ub}^{2}>\rho_{1}^{b}(E)}{<V_{ub}^{2}>\rho_{1}^{b}(E)+<V_{uu}^{2}>\rho_{1}^{u}(E)}\nonumber\\
+T_{1}&=&T_{om}\frac{<V_{ub}^{2}>\rho_{1}^{b}(E)}{<V_{ub}^{2}>\rho_{1}^{b}(E)+<V_{uu}^{2}>\rho_{1}^{u}(E)}\nonumber\\active
 &=&T_{om}\frac{R}{(R-1)+\frac{\rho_{1}(E)}{\rho_{1}^{b}(E)}}\label{eq9}
 \end{eqnarray}
 The same reasoning may be applied to the flux remaining in the open
@@ -804,6 +1087,7 @@ exact angular momentum coupling impossible. Choice of the 1\emph{p}-1\emph{h}
 spin distribution reflects dominant contribution of the first step
 of the MSD\index{MSD}, which leaves the residual nucleus in the 2-exciton
 state.
+
 The MSD\index{MSD} cross section to the discrete states is distributed
 arbitrary among 2+, 3-, and 4+ states with relative weights 4:2:1
 respectively and inversely proportional to the squared distance between
@@ -813,10 +1097,9 @@ of an odd nucleus all levels with spins that differ from 2+, 3-, and
 4+ by 1/2 are assumed to belong to the respective spin multiplet.
 There was no attempt to treat MSD\index{MSD} population of discrete
 levels more accurately as this kludge can be removed by using strict
-Coupled-Channels\index{Coupled-Channels} calculations.
+Coupled-Channels calculations.
 
-Figure~\ref{thoriumMSD} presents the result of recent calculation including
-MSC/MSD modeling for neutron the emission spectra on Thorium-232~\cite{crp} at
+Figure~\ref{thoriumMSD} presents MSC/MSD modeling of neutron spectra from $^{232}$Th~\cite{crp} at
 60 degree for an incident neutron energy of 18~MeV. Improvement in the comparison
 with experimental data~\cite{mats} can be noticed compared to the previous evaluation from
 ENDF/B-VI.8 and JENDL-3.3.
@@ -897,6 +1180,7 @@ types of matrix elements:
 \end{itemize}
 Computation of these four types of matrix elements is discussed below.
 
+\smallskip
 \textbf{(i)} The matrix element $(\Pi^{-1})_{Mm,(M+1)4}$, $m=$ 1,
 2 or 3 describes the decay of a GDR via coupling to the next higher
 exciton class. This process is responsible for the spreading width
@@ -920,6 +1204,7 @@ respectively. These correspond to the level densities of the non-collective
 states on which GDR is built. Implicitly, all of them are for bound
 configurations.
 
+\smallskip
 \textbf{(ii)} The matrix element $(\Pi^{-1})_{Mm,(M+1)n}$, m, n=1,
 2, 3 describes the transition of a GDR-state in class $M$ to a GDR-state
 in class $(M+1)$. In such a transition the GDR is not affected and
@@ -939,13 +1224,14 @@ with $J^{\prime}=(J-1),\,,J,\,(J+1)$, respectively. $v_{n.c.}$ stands
 for the average transition matrix element between two non-collective
 states of neighboring exciton classes.
 
+\smallskip
 \textbf{(iii)} The matrix element $(\Pi^{-1})_{M4,(M+1)4}$ describes
 transitions between non-collective states only. The matrix element
 is again expressed through the average transition strength $v_{n.c.}$
 between two non-collective states \begin{equation}
 (\Pi^{-1})_{M4,(M+1)4}=2\pi\rho_{M4}(E)v_{n.c.}^{2}2\pi\rho_{M4\rightarrow(M+1)4}^{acc}(E).\end{equation}
 
-
+\smallskip
 \textbf{(iv)} The matrix element $(\Pi^{-1})_{M4,(M+1)m}$ with $m$
 = 1, 2, and 3 describes the creation of a GDR in the next higher exciton
 class. In the current version of EMPIRE the total GDR width is taken
@@ -980,8 +1266,10 @@ Thus, all four types of matrix elements within the block $(M,M+1)$
 have been determined. The matrix element $(\Pi^{-1})_{(M+1)m,Mn}$
 is obtained using the symmetry properties of the matrix $\Pi^{-1}$.
 The diagonal elements of this matrix are then obtained by summation:
-\begin{equation}
-(\Pi^{-1})_{Mm,Mm}=\sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M+1)n}+\sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M-1)n}+\sum_{c}T_{Mm,c}.\,.\end{equation}
+\begin{eqnarray}
+(\Pi^{-1})_{Mm,Mm} &=& \sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M+1)n}  \\
+&+& \sum_{n=1}^{4}(\Pi^{-1})_{Mm,(M-1)n} + \sum_{c}T_{Mm,c} \hspace{1pt}.\nonumber
+\end{eqnarray}
 The matrix $\Pi^{-1}$is inverted numerically and used in Eq.\ref{GammaMSCxs}
 to calculate $\gamma$-emission spectra.
 
@@ -3048,14 +3336,23 @@ material.
 \subsection{Graphic User Interface}
 
 \textbf{TO BE COMPLETED}
-Due to a large number of operations and extended lists the new GUI
+EMPIRE is a complex system of heterogenous codes. Most of them require
+appropriate input files and many have to be run in a sequence, i.e., an output of one code serves
+as an input for the next code. Especially in the evaluation work such chains of
+calculations have to be executed hundreds of times. Manual  management of such calculations
+would be exceedingly tedious and error prone. To expediate these tasks EMPIRE is provided with a number of scripts and Graphic User Interfaces (GUI) that make most of these operations transparent.
+Certain utility codes are executed automatically without explicit request of the user.
+Other are activated with a simple click of the mouse. In all cases, EMPIRE scripts take
+care of creating adequate inputs and renaming outputs so that they form a consistent project.
+
+Due to a large number of operations and extended lists the EMPIRE Graphic User Interface (GUI)
 is organized in a form of a notebook with several panels. Generally,
 there are several equivalent ways of performing the same operation
 and the user my choose the one which suits him best. All basic functions,
-such as running the code and viweing the results can be achieved from
+such as running the code and viweing the results can be controlled from
 the pull-down menues and icon-denoted buttons below the menue bar.
 On the other hand, more advanced features such a plotting and file
-management can only be accessed from the various panels.
+management can only be accessed from the dedicated panels.
 
 \subsection{Fitting Optical Model Parameters}
 EMPIRE may be asked to perform automatic fitting of parameters defining the direct optical model potential including  deformation parameters of the collective target levels. The fitting procedure also uses the experimental data. At the moment, this option only works for neutron or proton scattering.
@@ -3072,8 +3369,6 @@ At present, the optical model fitting is performed using a simple numerical grad
 Adjusting level density parameters to reproduce cumulative plots of discrete levels is strongly recommended before any cross section calculations are attempted. This allows a check of whether the discrete level schemes for the involved nuclei are complete and consistent with the level density parametrization. Plots of cumulative number of levels for each nucleus involved in the calcultions for which at least three levels are known can be created by setting up one option in the input file. Two somewhat extreme examples of such plots are shown in Fig.~\ref{fig: badfit} and \ref{fig: goodfit}. Fig.~\ref{fig: badfit} demonstrates 10 levels in $^{96}$Pd, which could not be matched with the level densities, which usually happens when the levels are over extend. Then, levels that were not detected experimentally are missing in the spectrum, and the resulting high energy end of the cumulative plot is too low. Missing levels are more likely in the high-energy region of the spectrum and reducing the number of levels considered may restore agreement; neglecting the highest 4 levels in $^{96}$Pd leads to a reasonable fit, as shown in the Fig.~\ref{fig: goodfit}. Graphical representation helps to identify the level at which cumulative plot starts to bend, and levels lying above this point should be excluded from consideration.
 
 \subsection{Use of Level densities}
-Use of level densities
-
 The variety of nuclear level densities available in EMPIRE calls for additional guidance on their use. Only three options are recommended: EMPIRE-specific, Gilbert-Cameron (GC) and HF-BCS; all remaining options (such as Fermi-gas with level density parameter a=A/8) are included for comparison but their accuracy is much lower than the three recommendations. The GC level densities, especially when adjusted to known experimental data, may be the most accurate at excitation energies up to the neutron binding and slightly above. However, GC level densities do not lend themselves to extrapolation to higher excitation energies and to nuclei far from the stability line. Energy extrapolation in GC might be dangerous because of the collective effects which are implicitly contained in the level density parameter \textit{a}. While this can be an acceptable approximation at low excitation energies for which level densities are fixed by fitting experimental data (discrete levels and neutron resonance spacings), there is no physical justification for extending such a treatment to higher energies. In fact, collective effects, as implicitly accounted for in the GC approach, increase exponentially with excitation energy instead of decreasing and eventually disappearing. In this respect, EMPIRE-specific and microscopic HF-BCS densities behave properly and should be preferred at excitation energies well above neutron binding.
 
 EMPIRE-specific level densities, in addition to explicit treatment of the collective effects and their damping, also include the effects of dynamic deformation, which is induced by the rotation of a nucleus at high spin. This deformation affects level densities through the modification of nuclear moments of inertia. The yrast line is taken into account by setting level densities to zero whenever the thermal energy available for single particle motion is negative. Thermal energy is calculated as the difference between the total excitation energy and the energy needed for rotation. Spin and energy ranges are also formally unlimited in the EMPIRE-specific level densities. These features make the approach particularly suited for the Heavy Ion and high-energy nucleon-induced reactions. On the other hand, EMPIRE-specific level densities are fitted to the experimental data in a manner similar to the GC, suggesting that their predictions at low energies should be comparable to those of GC or even better due to the use of the BCS model below critical energy. Therefore, EMPIRE-specific level densities are generally recommended, and are used as a default in the EMPIRE.
@@ -3084,17 +3379,14 @@ However, EMPIRE-specific level densities suffer the same uncertainty as GC when 
 \subsection{Fission products for ENDF/B-VII.0}
 \subsection{Minor Actinides for ENDF/B-VII.0}
 \subsection{Other applications}
-We have been using EMPIRE-II for astrophysical research, namely to
-predict the production of
-long-lived radioisotopes in solar flares. A large number of total cross
-sections for protons, 3-He and
-alpha-particle induced reactions have been evaluated with the code. The
-reference to this work is:
+Tatischeff \textit{et al.} have been using EMPIRE for astrophysical research, namely to
+predict the production of long-lived radioisotopes in solar flares~\cite{Tatischeff:06}.
+A large number of total cross sections for protons, $^3$He and
+$\alpha$-particle induced reactions have been evaluated with the code.
 
-Delayed X- and Gamma-Ray Line Emission from Solar Flare Radioactivity
-V. Tatischeff, B. Kozlovsky, J. Kiener, and R. J. Murphy
-/The Astrophysical Journal Supplement Series/, volume 165 (2006), pages
-606–617
+Voinov el al. used EMPIRE for determination of the level densities in $^{56}$Fe
+and low-energy enhancement of the $\gamma$-ray strength function~\cite{Voinov:06}.
+This exercise consisted in modeling neutron spectra from the $^{55}$Mn(d,n)$^{56}$Fe reaction.
 
 \section{Cross section  covariances}
 
