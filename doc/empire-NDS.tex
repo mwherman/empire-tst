@@ -3379,6 +3379,8 @@ However, EMPIRE-specific level densities suffer the same uncertainty as GC when 
 \subsection{Fission products for ENDF/B-VII.0}
 \subsection{Minor Actinides for ENDF/B-VII.0}
 \subsection{Other applications}
+Avrigeanu ...
+
 Tatischeff \textit{et al.} have been using EMPIRE for astrophysical research, namely to
 predict the production of long-lived radioisotopes in solar flares~\cite{Tatischeff:06}.
 A large number of total cross sections for protons, $^3$He and
@@ -3388,19 +3390,41 @@ Voinov el al. used EMPIRE for determination of the level densities in $^{56}$Fe
 and low-energy enhancement of the $\gamma$-ray strength function~\cite{Voinov:06}.
 This exercise consisted in modeling neutron spectra from the $^{55}$Mn(d,n)$^{56}$Fe reaction.
 
-\section{Cross section  covariances}
+EMPIRE-2.18 and a few empirical relations were used to calculate total neutron yield and angular distributions of neutron dose from thick targets bombarded with Heavy Ions. Experimental results were reproduced reasonably well and EMPIRE predictions turned out to be more reliable than other approaches tested in this work~\cite{Nandy:07}. The  activity induced in the thick lead-bismuth and iron alloy targets by 30 MeV protons~\cite{Nandy:07a} and some reactions induced by high energy neutrons were also interpreted using EMPIRE by the Kolkata group. The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}. EMPIRE  has also been used in Refs.~\cite{Qaim:05,Said:06,Elmaghraby:06}
+
+\section{Cross section covariances}
+Quantification of nuclear data uncertianties and correlations has recently become a hot topic. The tremendous demand for the covarinces is driven by several factors.  Improved nuclear data libraries, qualitative leap in computer capacities due to massive parallelization, and advances in particle transport codes offer a possibility to replace expensive and time consuming mock-up experiments with computational simulations of nuclear facilities and devices. Uncertainty margins of such simulations are largely determined by the uncertainties of the underlying nuclear data. In addition, covariances are necessary for sensitivity studies that allow for a meanigful design-oriented adjustement of the microscopic nuclear data. These studies are also critical in assesing needs for data improvement.
+
+EMPIRE is responding to the demand for cross section uncertainties by implementing covariance generation capabilities. We pursue two distinct aproaches:
+\begin{itemize}
+\item use EMPIRE to produce sensitivities of cross sections to model partameters and employ Bayesian code KALMAN, developed by Kawano~\cite{Kawano:97}, to propagate parameter uncertainties onto cross sections,
+\item perform multiple EMPIRE calculations with randomly disturbed model parameters and apply statistical analysis to the calculated cross sections.
+\end{itemize}
+
+Both implementations are pretty well integrated with the EMPIRE structure, although they haven't yet reached the level of robustness and flexibility typical for the remaining part of the system. The KALMAN and Monte Carlo methods both provide reliable model based covariances. The KALMAN approach is considerably faster but assumes linear dependence of cross sections on model parameters. This assumption works well in most of the cases as long as parameter variations are small although there are indications that the linearity assumption breaks down for major optical model parameters.  The Monte Carlo method avoids this problem at the expense of much bigger computational effort.
+
+Reliable inclusion of the experimental data in the covariance analysis is still under study although such capabilities are built into the KALMAN implementation and are being developed for the Monte Carlo approach.
+An alternative path is to use model based covariances as an input to the generalized least square system GANDR~\cite{GANDR}. Pilot covariances for 8 isotopes of Gd and for $^{232}$Th were generated for the new ENDF/B-VII.0 libarary~\cite{ENDF-VII} using EMPIRE-KALMAN and Monte-Carlo-EMPIRE-GANDR techniques respectively. However, since the covariance module of EMPIRE is still evolving, we defer a more detailed discussion of the covariances to the future paper.
+
+A by-product of generating covariances with the KALMAN approach is a very powerful technique for adjusting model parameters to experimental data. In order to be efficient and meanigful the experiemtal data have to be consistent and reliable, which usually requires detailed scrutiny of avialble measurements, their renormalization and rejection of obvious outliers. Such data, along with the sensitivity matrix can then be processed by KALMAN, which performs simulatneous tuning of the entire set of model parameters to all measured reaction channels. This procedure provides also parameter uncertainties and correlations.
+
+
+
 
 \section{Conclusions}
 
 In his book Science of Logic, Georg Friedrich Hegel remarked:
-‘‘It is said that there are no sudden changes in nature, and the
-common view has it that when we speak of a growth or a
-destruction, we always imagine a gradual growth or disappearance.
-Yet we have seen cases in which the alteration of existence
+‘‘
+% It is said that there are no sudden changes in nature, and the
+% common view has it that when we speak of a growth or a
+% destruction, we always imagine a gradual growth or disappearance.
+... we have seen cases in which the alteration of existence
 involves not only a transition from one proportion to another,
 but also a transition, by a sudden leap, into a . . . qualitatively
-different thing; an interruption of a gradual process, differing
-qualitatively from the preceding, the former state’’ (1).
+different thing...
+%  an interruption of a gradual process, differing
+% qualitatively from the preceding, the former state
+’’ (1).
 
 \section*{Acknowledgments}
 EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL proje ct and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, A. Taccone, and A. Lamberto who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
