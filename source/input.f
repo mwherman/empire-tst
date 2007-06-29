@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-06-20 22:37:44 $
-Ccc   * $Id: input.f,v 1.253 2007-06-20 22:37:44 herman Exp $
+Ccc   * $Date: 2007-06-29 13:07:23 $
+Ccc   * $Id: input.f,v 1.254 2007-06-29 13:07:23 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2068,9 +2068,8 @@ C--------------------only gamma decay is considered up to now
               ENDIF
             ENDIF
           ENDDO  ! end of loop over levels
-          IF(IOUT.GT.3) write(6,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-     &        'FOR NUCLEUS ',chelem,
-     &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
+          IF(IOUT.GT.3) write(6,'(1x,A5,1x,A25,1x,F5.2,A4)')
+     &       chelem,'continuum starts at E=',ELV( NLV(Nnuc),Nnuc),' MeV'
         ENDIF
       ENDIF
   200 IF(.NOT.ADDnuc) THEN
