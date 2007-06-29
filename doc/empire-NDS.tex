@@ -449,7 +449,7 @@ to the continuum originally proposed by Tamura, Udagawa and Lenske
 the part related to statistical and dynamical treatment of nuclear
 structure leading to ORION and TRISTAN codes that are integrated in
 the EMPIRE package. The description of the MSD formalism that follows
-is largely based on the original write up by Lenske and Wolter and
+is, to a large extent, based on the original write up by Lenske and Wolter and
 provides the user with a general understanding of the physics involved
 in the MSD calculations performed with EMPIRE.
 
@@ -579,7 +579,12 @@ over $O_{\lambda}$:
 \begin{equation}
 F_{\lambda}(r)=(c|O_{\lambda}^{\dag}\hat{\rho}(E)V^{res}|c)/S_{\lambda}(E,c).\label{formf}
 \end{equation}
-\noindent Here, the general case of a transition starting from an arbitrary
+\noindent where the density operator $\hat{\rho}(E)$ is given by
+\begin{equation}
+\hat{\rho}(E)=-\frac{1}{\pi}Im G^{intr}(E)\,\label{specd}
+\end{equation}
+\noindent with $G^{intr}(E)$ the intrinsic nuclear Green function.
+Here, the general case of a transition starting from an arbitrary
 state $c$ is considered which appears in the intermediate steps of
 higher order multi-step processes. For one-step reactions the initial
 state is the ground state $c=0$. By normalization to the transition
@@ -588,10 +593,11 @@ strength function $S_{\lambda}$
 (c|O_{\lambda'}^{\dag}\hat{\rho}(E)O_{\lambda}|c)=\delta_{\lambda\lambda'}S_{\lambda}(E,c)\label{slambda}
 \end{equation}
 \noindent the dependence of the form factor on the internal state is removed
-to a large extent. $S_{\lambda}$ is the nuclear response function
-for the external operator $O_{\lambda}$ describing the transition
-rate per unit energy from the state $c$ into the ensemble of states
-$c'$ centered at energy $E$.
+to a large extent.
+The nuclear transition strength function $S_{\lambda}$ for the external operator
+$O_{\lambda}$ describes the transition rate per unit energy, with angular momentum transfer
+$\Delta l=\lambda$, from the state
+$c$ into the ensemble of states $c'$ centered at energy $E$.
 
 The above relations are appropriate for one-step reactions where $c$
 is the ground state. However, in higher steps $c$ is an arbitrary
@@ -642,12 +648,13 @@ S_{\lambda}(E,E_{1}) & = & \frac{\sum_{c_{1}}{P_{c_{1}}(E_{1})S_{\lambda}(E,c_{1
  & = & \frac{tr(\hat{\rho}_{1}(E_{1})O_{\lambda}^{\dag}\hat{\rho}(E)O_{\lambda})}{tr(\hat{\rho}_{1}(E_{1}))}\quad.\label{slave}
  \end{eqnarray}
 \noindent The final result for the two-step MSD\index{MSD} cross section is
-of very intuitive structure
+of very intuitive folding structure
 \begin{equation}
-{d^{2}\sigma^{(2)}}/{dEd\Omega}=\sum_{\lambda_{1}\lambda_{2}}{\int dE_{1}S_{\lambda_{2}}(E,E_{1})S_{\lambda_{1}}(E_{1},0)\overline{\frac{d\sigma^{(2)}}{d\Omega}}(E,E_{1})\mid_{\lambda_{1}\lambda_{2}}}.\label{sigma2}
+\frac{d^{2}\sigma^{(2)}}{dEd\Omega}=\sum_{\lambda_{1}\lambda_{2}}{\int dE_{1}S_{\lambda_{2}}(E,E_{1})S_{\lambda_{1}}(E_{1},0)\overline{\frac{d\sigma^{(2)}}{d\Omega}}(E,E_{1})\mid_{\lambda_{1}\lambda_{2}}}.
+\label{sigma2}
 \end{equation}
 \noindent $\overline{\sigma^{(2)}}$ is an averaged cross section defined in
-terms of the $T^{(2)}-$matrix elements (Eq.\ref{amp2}, which describes
+terms of the $T^{(2)}-$matrix elements (Eq.\ref{amp2}), which describes
 two-step scattering wave-mechanically as a coherent quantal process.
 The total response of the intrinsic system at energy loss $E$ is
 contained in the first and second step transition strength functions.
@@ -676,7 +683,6 @@ as a coherent process at all steps.
 
 
 \paragraph{Notes on RPA-Description of Transition Strength Functions}
-
 In the MSD\index{MSD} approach continuum scattering is considered
 as a sequence of $1p-1h$ transitions and the transition strength
 functions, Eq. \ref{slambda}, correspond to response functions of
@@ -721,14 +727,67 @@ state and a canonical transformation to quasi-particles is assumed
 to account for the self-energies the $2qp$ energies are taken to
 be complex by adding a state dependent damping width $\Gamma_{\alpha}^{\downarrow}$.
 The response functions include inelastic events only and are calculated
-in linear response theory. Formally, the response functions entering
-into the MSD\index{MSD}-calculation are expressed through the RPA
-polarization propagator $\chi^{RPA}(E)$
+in linear response theory.
+
+HARM STARTS\\
+In the (Q)RPA formalism the intrinsic nuclear Green function $G^{QRPA}(\varepsilon)$ (see also Eq.~\ref{specd}) is obtained from the Bethe-Salpeter equation
+%for each $\lambda$:
+\begin{equation}
+G^{QRPA}(\varepsilon) = G_{0}^{2qp}(\varepsilon)+ G_{0}^{2qp}(\varepsilon)VG^{QRPA}(\varepsilon)\end{equation}
+with  $G_{0}^{2qp}(\varepsilon)$ the uncorrelated 2qp Green function and V the residual 2qp interaction.
+Originally the single-particle levels and wave functions, which determine the 2qp excitations and
+consequently the Green functions and spectroscopic strength functions,
+were calculated in TRISTAN assuming the scattering nucleus to be spherical.
+This approach predicts
+well double-differential neutron emission spectra from spherical nuclei but
+falls short of reproducing the inelastic scattering to the continuum in deformed nuclei.
+Recently, the TRISTAN module has been extended to allow for obtaining non-degenerate
+single particle levels and wave functions from a nuclear potential including a quadrupole deformation term~\cite{Wienke:07}.
+The multipole spectroscopic strength function is now given by an explicit summation over the azimuthal projection $k$ of the angular momentum onto the deformation axis
 
 \begin{equation}
-S_{\lambda}(E,0)=-\frac{1}{\pi}Im[\chi^{RPA}(E)]\,.\label{sgrpa}
+S_{\lambda} =-\frac{1}{\pi}Im\sum_k\langle c|\,O_{\lambda,k}^{\dagger
+}\,G^{QRPA}(\varepsilon )\,O_{\lambda,k}|c\rangle
+\label{sgrpa}
 \end{equation}
-\noindent In higher steps, where the transition starts from a state $c\not=0$,
+This modification greatly improves the description of the high energy part of the neutron spectra for some strongly deformed nuclei as illustrated in Fig.~\ref{fig:Th-defMSD}.
+
+In TRISTAN the schematic RPA is used in which a separable residual interaction
+of the form
+\begin{equation}
+V^{sep}(1,2)=\sum_{\lambda(,k)}\kappa _{\lambda(,k)}O_{\lambda(,k)}(1)O_{\lambda(,k)}(2)
+\end{equation}
+\noindent is assumed.
+Thus, results of the MSD\index{MSD} calculations are sensitive to the coupling
+constants $\kappa_{\lambda(,k)}$. These are set automatically by the code to reproduce
+excitation energies of low-lying surface oscillations and of the Giant
+Dipole Resonance.\\
+HARM ENDS
+
+
+%
+% Formally, the response functions entering
+% into the MSD\index{MSD}-calculation are expressed through the RPA
+% polarization propagator $\chi^{RPA}(E)$
+%
+% \begin{equation}
+% S_{\lambda}(E,0)=-\frac{1}{\pi}Im[\chi^{RPA}(E)]\,.\label{sgrpa}
+% \end{equation}
+HARM CHECK THE PARAGRAPH BELOW - IT MIGHT COLLIDE WITH THE ONE ABOVE (DEFINITION OF 'O' AND USE OF k)
+
+The code TRISTAN assumes $O_{\lambda}=\kappa_{\lambda}U_{\lambda}$,
+where the radial part of $U_{\lambda}$ is chosen as the derivative
+of the ground state potential and the coupling constants $\kappa_{\lambda}$
+are treated as empirical parameters. This phenomenological approach
+to RPA\index{RPA} is widely used in structure calculations and has
+been found to give reliable results for response functions \cite{BM,Solv}.
+The ground state is obtained from a BCS\index{BCS} calculation
+in the {}``fixed gap approximation'' with $\Delta_{p}=\Delta_{n}=12.0/\sqrt{(}A)$
+MeV for protons and neutrons. This also allows a realistic description
+of open-shell nuclei. Correspondingly, the response functions are
+calculated with quasi-particle RPA\index{RPA} (QRPA).
+
+In higher steps, where the transition starts from a state $c\not=0$,
 the $1p1h$ densities and response functions on the background of
 an already excited nucleus are required. At excitation energies per
 particle which are well below the Fermi energy the structure remains
@@ -747,24 +806,6 @@ with $\overline{\rho_{\lambda}}$. Thus, the theory leads to a transparent
 and consistent description of nuclear structure and reaction dynamics
 which accounts for the microscopic and the statistical aspects of
 pre-equilibrium reactions.
-
-The code TRISTAN\index{TRISTAN} assumes $O_{\lambda}=\kappa_{\lambda}U_{\lambda}$,
-where the radial part of $U_{\lambda}$ is chosen as the derivative
-of the ground state potential and the coupling constants $\kappa_{\lambda}$
-are treated as empirical parameters. This phenomenological approach
-to RPA\index{RPA} is widely used in structure calculations and has
-been found to give reliable results for response functions \cite{BM,Solv}.
-The ground state is obtained from a BCS\index{BCS} calculation
-in the {}``fixed gap approximation'' with $\Delta_{p}=\Delta_{n}=12.0/\sqrt{(}A)$
-MeV for protons and neutrons. This also allows a realistic description
-of open-shell nuclei. Correspondingly, the response functions are
-calculated with quasi-particle RPA\index{RPA} (QRPA).
-
-Multipole fields with a radial shape $\sim r^{\lambda}$ are taken.
-The coupling constants $\kappa_{\lambda}$ are determined such that
-excitation energies of low-lying surface oscillations and of the Giant
-Dipole Resonance are reproduced.
-
 
 
 \begin{figure}[htbp]
@@ -787,19 +828,6 @@ are taken equal to the width and energy of the giant dipole resonance.
 The maximum $l$-transfer $\lambda$ is internally set between 1 and
 4 depending on the maximum $l$ contributing to the reaction cross
 section.
-
-Originally, the response functions were calculated with single
-particle levels from a spherical Nilsson Hamiltonian with standard
-parameters. Recently, the TRISTAN module has been extended to allow for determination of
-the strength functions  from non-degenerate single particle levels
-and wave functions resulting from the quadrupole deformation of the nuclear potential.
-The effect of this modification is illustrated in Fig.~\ref{fig:Th-defMSD}. The MSD dominated energy region of the neutron spectrum resulting from the interaction of 11.5 MeV neutrons with $^{232}$Th is considerably increased that greatly improves agreement with the experiment.
-
-
-In EMPIRE-2.19 fitting of the coupling constants $\kappa_{\lambda}$has
-been improved to minimize their fluctuations with changing incident
-energy.
-
 
 \paragraph{Implementation of ORION and TRISTAN\index{TRISTAN} codes in EMPIRE}
 
@@ -849,7 +877,7 @@ the respective energies in the input. Each of the coupling constants
 can also be set to the self-consistent value.
 
 In Fig.~\ref{PrMSD} we present neutron spectrum from the $^{141}$Pr(n,xn) reaction at 14.1 MeV
-calculated within the MSD formalism. The MSD results are summed up with the Multi-step Compound (MSC) contribution and the pure statistical model component (Hauser-Feshbach) to cover major mechanisms involved in the reaction. Note that direct inelastic scattering to discrete levels was also treated within the MSD model. In Fig.~\ref{PrMSD} we anticipate results obtained with the classical exciton model (PCROSS) and with the Hauser-Feshbach approach to illustrate role of the preequilibrium emission and advantages of using quantum-mechanical treatment. It is remarkable that a simple, classical exciton model provides results that match the base line of the more advanced MSD/MSC approach. The exciton model, however, is not able to account for the structure resulting from the excitation of the collective levels. The latter can only be discribed in terms of quantum theories such as CC or MSD. It is clear from Fig.~\ref{PrMSD} that in the same energy region the compound nucleus model falls short by several orders of magnitude.
+calculated within the MSD formalism. The MSD results are summed up with the Multi-step Compound (MSC) contribution and the pure statistical model component (Hauser-Feshbach) to cover major mechanisms involved in the reaction. Note that direct inelastic scattering to discrete levels was also treated within the MSD model. We anticipate results obtained with the classical exciton model (PCROSS) and with the Hauser-Feshbach approach to illustrate role of the preequilibrium emission and compare classical and quantum-mechanical treatments. It is remarkable that a simple, classical exciton model provides results that match the base line of the more advanced MSD/MSC approach. The exciton model, however, is not able to account for the structure resulting from the excitation of the collective levels. The latter can only be described in terms of quantum theories such as CC or MSD. It is well known that in the same energy region the compound nucleus contribution is practically negligible.
 
 \begin{figure}[htbp]
 \scalebox{0.8}{\includegraphics{msd.eps}}
@@ -1883,12 +1911,14 @@ f(U)=1-exp(-\gamma U).
 \label{shellGC}
 \end{equation}
 The three relevant systematics available in EMPIRE are:
-(i) Ignatyuk \emph{et al.} \cite{ignaa}: $\widetilde{a}=0.154A+6.3\cdot10^{-5}A^{2}$
+\begin{description}
+\item[Ignatyuk~\emph{et al.}~\cite{ignaa}]: $\widetilde{a}=0.154A+6.3\cdot10^{-5}A^{2}$
 and $\gamma=-0.054$
-(ii) Arthur \cite{arthura}: $\widetilde{a}=0.1375A-8.36\cdot10^{-5}A^{2}$
+\item[Arthur~\cite{arthura}]: $\widetilde{a}=0.1375A-8.36\cdot10^{-5}A^{2}$
 and $\gamma=-0.054$
-(iii) Iljinov \emph{et al.} \cite{Mebel}: $\widetilde{a}=0.114A+9.80\cdot10^{-2}A^{2/3}$
+\item[Iljinov~\emph{et al.}~\cite{Mebel}]: $\widetilde{a}=0.114A+9.80\cdot10^{-2}A^{2/3}$
 and $\gamma=-0.051$
+\end{description}
 We stress that Gilbert-Cameron approach does not account explicitly
 for the collective enhancements of the level densities\index{level densities}.
 These are included implicitly in the $\widetilde{a}$ when fitting
@@ -3390,23 +3420,23 @@ Voinov el al. used EMPIRE for determination of the level densities in $^{56}$Fe
 and low-energy enhancement of the $\gamma$-ray strength function~\cite{Voinov:06}.
 This exercise consisted in modeling neutron spectra from the $^{55}$Mn(d,n)$^{56}$Fe reaction.
 
-EMPIRE-2.18 and a few empirical relations were used to calculate total neutron yield and angular distributions of neutron dose from thick targets bombarded with Heavy Ions. Experimental results were reproduced reasonably well and EMPIRE predictions turned out to be more reliable than other approaches tested in this work~\cite{Nandy:07}. The  activity induced in the thick lead-bismuth and iron alloy targets by 30 MeV protons~\cite{Nandy:07a} and some reactions induced by high energy neutrons were also interpreted using EMPIRE by the Kolkata group. The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}. EMPIRE  has also been used in Refs.~\cite{Qaim:05,Said:06,Elmaghraby:06}
+EMPIRE-2.18 and a few empirical relations were used to calculate total neutron yield and angular distributions of neutron dose from thick targets bombarded with Heavy Ions. Experimental results were reproduced reasonably well and EMPIRE predictions turned out to be more reliable than other approaches tested in this work~\cite{Nandy:07}. The  activity induced in the thick lead-bismuth and iron alloy targets by 30 MeV protons~\cite{Nandy:07a} and some reactions induced by high energy neutrons were also interpreted using EMPIRE by the Kolkata group. The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}. EMPIRE  has also been used in Refs.~\cite{Qaim:05, Said:06, Elmaghraby:06, Pandey:07}
 
 \section{Cross section covariances}
-Quantification of nuclear data uncertianties and correlations has recently become a hot topic. The tremendous demand for the covarinces is driven by several factors.  Improved nuclear data libraries, qualitative leap in computer capacities due to massive parallelization, and advances in particle transport codes offer a possibility to replace expensive and time consuming mock-up experiments with computational simulations of nuclear facilities and devices. Uncertainty margins of such simulations are largely determined by the uncertainties of the underlying nuclear data. In addition, covariances are necessary for sensitivity studies that allow for a meanigful design-oriented adjustement of the microscopic nuclear data. These studies are also critical in assesing needs for data improvement.
+Quantification of nuclear data uncertainties and correlations has recently become a hot topic. The tremendous demand for the covariances is driven by several factors.  Improved nuclear data libraries, qualitative leap in computer capacities due to massive parallelization, and advances in particle transport codes offer a possibility to replace expensive and time consuming mock-up experiments with computational simulations of nuclear facilities and devices. Uncertainty margins of such simulations are largely determined by the uncertainties of the underlying nuclear data. In addition, covariances are necessary for sensitivity studies that allow for a meaningful design-oriented adjustment of the microscopic nuclear data. These studies are also critical in assessing needs for data improvement.
 
-EMPIRE is responding to the demand for cross section uncertainties by implementing covariance generation capabilities. We pursue two distinct aproaches:
+EMPIRE is responding to the demand for cross section uncertainties by implementing covariance generation capabilities. We pursue two distinct approaches:
 \begin{itemize}
-\item use EMPIRE to produce sensitivities of cross sections to model partameters and employ Bayesian code KALMAN, developed by Kawano~\cite{Kawano:97}, to propagate parameter uncertainties onto cross sections,
+\item use EMPIRE to produce sensitivities of cross sections to model parameters and employ Bayesian code KALMAN, developed by Kawano~\cite{Kawano:97}, to propagate parameter uncertainties onto cross sections,
 \item perform multiple EMPIRE calculations with randomly disturbed model parameters and apply statistical analysis to the calculated cross sections.
 \end{itemize}
 
 Both implementations are pretty well integrated with the EMPIRE structure, although they haven't yet reached the level of robustness and flexibility typical for the remaining part of the system. The KALMAN and Monte Carlo methods both provide reliable model based covariances. The KALMAN approach is considerably faster but assumes linear dependence of cross sections on model parameters. This assumption works well in most of the cases as long as parameter variations are small although there are indications that the linearity assumption breaks down for major optical model parameters.  The Monte Carlo method avoids this problem at the expense of much bigger computational effort.
 
 Reliable inclusion of the experimental data in the covariance analysis is still under study although such capabilities are built into the KALMAN implementation and are being developed for the Monte Carlo approach.
-An alternative path is to use model based covariances as an input to the generalized least square system GANDR~\cite{GANDR}. Pilot covariances for 8 isotopes of Gd and for $^{232}$Th were generated for the new ENDF/B-VII.0 libarary~\cite{ENDF-VII} using EMPIRE-KALMAN and Monte-Carlo-EMPIRE-GANDR techniques respectively. However, since the covariance module of EMPIRE is still evolving, we defer a more detailed discussion of the covariances to the future paper.
+An alternative path is to use model based covariances as an input to the generalized least square system GANDR~\cite{GANDR}. Pilot covariances for 8 isotopes of Gd and for $^{232}$Th were generated for the new ENDF/B-VII.0 library~\cite{ENDF-VII} using EMPIRE-KALMAN and Monte-Carlo-EMPIRE-GANDR techniques respectively. However, since the covariance module of EMPIRE is still evolving, we defer a more detailed discussion of the covariances to the future paper.
 
-A by-product of generating covariances with the KALMAN approach is a very powerful technique for adjusting model parameters to experimental data. In order to be efficient and meanigful the experiemtal data have to be consistent and reliable, which usually requires detailed scrutiny of avialble measurements, their renormalization and rejection of obvious outliers. Such data, along with the sensitivity matrix can then be processed by KALMAN, which performs simulatneous tuning of the entire set of model parameters to all measured reaction channels. This procedure provides also parameter uncertainties and correlations.
+A by-product of generating covariances with the KALMAN approach is a very powerful technique for adjusting model parameters to experimental data. In order to be efficient and meaningful the experimental data have to be consistent and reliable, which usually requires detailed scrutiny of available measurements, their renormalization and rejection of obvious outliers. Such data, along with the sensitivity matrix can then be processed by KALMAN, which performs simultaneous tuning of the entire set of model parameters to all measured reaction channels. This procedure provides also parameter uncertainties and correlations.
 
 
 
@@ -3424,7 +3454,7 @@ but also a transition, by a sudden leap, into a . . . qualitatively
 different thing...
 %  an interruption of a gradual process, differing
 % qualitatively from the preceding, the former state
-’’ (1).
+% ’’ (1).
 
 \section*{Acknowledgments}
 EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL proje ct and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, A. Taccone, and A. Lamberto who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
