@@ -56,7 +56,7 @@
 
 \preprint{Nuclear Data Sheets}
 %\draft
-\title{EMPIRE-2: the integrated nuclear theory system for evaluating nuclear reactions}
+\title{EMPIRE: Integrated Nuclear Theory System for  Evaluation of Nuclear Reactions }
 
 
 \author{M. Herman}
@@ -159,7 +159,7 @@ used for theory based predictions of cross sections and spectra provided by EMPI
 \section{Overview of the EMPIRE-2 system}
 
 The origin of the EMPIRE-2 system can be traced back to the statistical model
-code EMPIRE~\cite{empire-1} coded by M. Herman and first released in 1980.
+code EMPIRE~\cite{EMPIRE-I} coded by M. Herman and first released in 1980.
 This initial version had been extended over following years by adding modern
 approaches to preequilibrium emission such as FKK~\cite{FKK} and NVWY~\cite{NVWY}
 formulations of the Multi-step Compound mechanism, and combinatorial
@@ -439,7 +439,7 @@ with the Gaussian function to simulate experimental energy resolution and summed
 \subsection{Preequilibrium Reactions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{Multi-step Direct\label{sec: MSD}}
+\subsubsection{fMulti-step Direct\label{sec: MSD}}
 
 
 The approach to statistical Multi-step Direct\index{MSD} reactions
@@ -3407,20 +3407,49 @@ However, EMPIRE-specific level densities suffer the same uncertainty as GC when 
 
 \section{Selected applications of EMPIRE}
 \subsection{Fission products for ENDF/B-VII.0}
+Germanium~\cite{iwamoto2005ncs}
 \subsection{Minor Actinides for ENDF/B-VII.0}
+Thorium~\cite{Sin:06}
+
+Americium~\cite{Rochman:06a}
 \subsection{Other applications}
-Avrigeanu ...
+Vanadium~\cite{Rochman:06b}
 
-Tatischeff \textit{et al.} have been using EMPIRE for astrophysical research, namely to
-predict the production of long-lived radioisotopes in solar flares~\cite{Tatischeff:06}.
-A large number of total cross sections for protons, $^3$He and
-$\alpha$-particle induced reactions have been evaluated with the code.
+Tecnecium~\cite{Rochman:07c}
 
-Voinov el al. used EMPIRE for determination of the level densities in $^{56}$Fe
+A detailed analysis of neutron activation cross sections on isotopes of tungsten has been reported in Ref.~\cite{Avrigeanu:06}. This work provides also direct comparison of EMPIRE and TALYS results.
+
+In Ref.~\cite{reifarth2003snc} EMPIRE in combination
+with the measured value of the $^{147}$Pm(n,$\gamma$) reaction, participated in a
+reliable estimation of the reaction rates for neutron capture on $^{148}$Pm and $^{149}$Pm, for which no experimental information is available. These results allowed
+a considerably refined analyses of the s-process branchings at A=147/148, which are probing the neutron density in the He-burning shell of low-mass asymptotic giant branch stars.
+
+Tatischeff \textit{et al.} have been using EMPIRE for another astrophysical research, namely to predict the production of long-lived radioisotopes in solar flares~\cite{Tatischeff:06}. A large number of total cross sections for protons, $^3$He and $\alpha$-particle induced reactions have been evaluated with the code.
+
+EMPIRE served as a calculational tool for investigating effective interactions for multistep processes carried out in Ref.~\cite{avrigeanu2001eim}. This work attempted to overcome problems related to the effective NN-interaction strength V$_0$ obtained in direct fits to the experimental data.
+
+
+The angle-integrated neutron inelastic scattering spectra detected by the Fast Neutron-Induced Gamma-Ray Observer (FIGARO) at Los Alamos were compared with predictions of the nuclear model calculations performed with EMPIRE~\cite{rochman2004nir}.
+
+Voinov \textit{et al.} used EMPIRE for determination of the level densities in $^{56}$Fe
 and low-energy enhancement of the $\gamma$-ray strength function~\cite{Voinov:06}.
 This exercise consisted in modeling neutron spectra from the $^{55}$Mn(d,n)$^{56}$Fe reaction.
 
-EMPIRE-2.18 and a few empirical relations were used to calculate total neutron yield and angular distributions of neutron dose from thick targets bombarded with Heavy Ions. Experimental results were reproduced reasonably well and EMPIRE predictions turned out to be more reliable than other approaches tested in this work~\cite{Nandy:07}. The  activity induced in the thick lead-bismuth and iron alloy targets by 30 MeV protons~\cite{Nandy:07a} and some reactions induced by high energy neutrons were also interpreted using EMPIRE by the Kolkata group. The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}. EMPIRE  has also been used in Refs.~\cite{Qaim:05, Said:06, Elmaghraby:06, Pandey:07}
+The influence of reaction channel on the isomeric cross-section ratio was investigated by analyzing the experimental data on several reactions leading to the production of the metastable and ground state in $^{52}$Mn~\cite{Qaim:05}. The calculations with EMPIRE described the isomeric cross-section ratio rather well in the
+case of a simple nucleon emission reaction but not when
+complex reaction channels were involved. This failure is likely due to the lack of the preequilibrium mechanism in the incident and outgoing channels. This option was added to the PCROSS module after the analysis by Qaim and his collaborators had been completed.
+
+Signorini \textit{et al.} employed EMPIRE in the study of breakup processes in the $^9$Be+$^{208}$Pb, $^9$Be+$^{209}$Bi and $^6$Li+$^{208}$Pb systems around the Coulomb barrier~\cite{signorini2004bps}.
+
+EMPIRE and a few empirical relations were used to calculate total neutron yield and angular distributions of neutron dose from thick targets bombarded with Heavy Ions. Experimental results were reproduced reasonably well and EMPIRE predictions turned out to be more reliable than other approaches tested in this work~\cite{Nandy:07}.
+
+The  activity induced in the thick lead-bismuth and iron alloy targets by 30 MeV protons~\cite{Nandy:07a} and some reactions induced by high energy neutrons were also interpreted using EMPIRE by the Kolkata group. The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}. The code  has also been used in Refs.~\cite{Said:06, Elmaghraby:06, Pandey:07}
+
+Finally, we mention application of EMPIRE  for neutron-induced reactions in microelectronics~\cite{wrobel2005unc}.
+\subsection{Medical radioisotope production}
+R.E. Schenter and his students have done hundreds of EMPIRE-18 and EMPIRE-19 calculations for the past ten years.  These involve calculating energy dependent reaction cross sections for isotope production in accelerator and fission reactor systems.   The reactions include incident gammas, neutrons, protons, deuterons, tritons, $^3$He and alphas on mostly stable targets. The reactions are mainly for incident particles with energies below 30 MeV.  These results “open up the door” for several new ways of isotope production, especially those for medical isotope applications, as demonstrated by a United States Patent Application 20060023829 that concerns a new method for preparing $^{99m}$Tc, via its $^{99}Mo$ parent, by $\alpha$-particle irradiation of $^{96}$Zr. The authors find EMPIRE code system extremely valuable to their numerous medical isotope  production projects.
+
+F. Groppi and E. Menapace from Milan have been using EMPIRE for predicting cross sections of charged particle induced reactions that could offer innovative way of production of certain medical radioisotopes. Applications of these radioisotopes include simultaneous $\beta+/\beta-$ metabolic radiotherapy with intrinsic PET imaging,  bone metastases pain palliation by negatron metabolic radiotherapy including SPECT imaging,  and high-LET radio- and immuno-radiotherapy. Results of this research were published in Refs.~\cite{Menapace:04, Menapace:05, Groppi:05, Groppi:05a, Groppi:06, Alfassi:06, Persico:06}
 
 \section{Cross section covariances}
 Quantification of nuclear data uncertainties and correlations has recently become a hot topic. The tremendous demand for the covariances is driven by several factors.  Improved nuclear data libraries, qualitative leap in computer capacities due to massive parallelization, and advances in particle transport codes offer a possibility to replace expensive and time consuming mock-up experiments with computational simulations of nuclear facilities and devices. Uncertainty margins of such simulations are largely determined by the uncertainties of the underlying nuclear data. In addition, covariances are necessary for sensitivity studies that allow for a meaningful design-oriented adjustment of the microscopic nuclear data. These studies are also critical in assessing needs for data improvement.
