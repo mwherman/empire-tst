@@ -772,22 +772,6 @@ S_{\lambda} =-\frac{1}{\pi}Im\sum_k[\chi_{\lambda,k}^{QRPA}(\varepsilon)]\label{
 It can be shown that the contributions of the off-diagonal terms in (\ref{bs3}) to the
 spectroscopic strength function are neglibly small compared to the diagonal
 terms \cite{nextpaper}.
-%references
-%
-%\bibitem{TULnew} {H.~Lenske and H.~Wolter. \textit{Nucl. Phys.} }\textbf{A358%
-%}, 483{\ (1992); \textit{Nucl. Phys.}\emph{\ }}\textbf{A690}, 267 (2001).
-
-%\bibitem{fetter} {A.L.~.Fetter and J.D.~Walecka, in \textit{Quantum Theory
-%of Many Body Systems}, (McGraw-Hill, New York, 1971)}
-
-%\bibitem{wienke:07} {H.~Wienke, M.~Herman, R.~Capote and M.~Sin, \textit
-%proceedings of the International Conference on Nuclear Data for Science and Technology
-%2007, Nice, 23-27 april, 2007). pp??}
-
-%\bibitem{nextpaper} {H.~Wienke, M.~Herman, R.~Capote and M.~Sin, to be
-%published.}
-
-HARM ENDS2\\
 
 The ground state is obtained from a BCS\index{BCS} calculation
 in the {}``fixed gap approximation'' with $\Delta_{p}=\Delta_{n}=12.0/\sqrt{(}A)$
@@ -1856,8 +1840,68 @@ orbital angular momentum $l$, which together with the particle spin
 $s$ couples to the channel angular momentum $j$. For the discrete
 levels (characterized by the energy $E_{i}$, spin $J_{i}$, and parity
 $\pi_{i}$) the level density $\rho(E,J',\pi')$ reduces to $\delta(E-E_{i})\delta_{(J',J_{i})}\delta_{(\pi',\pi_{i})}$.
-The parity selection rules are implicit in
-Eq. \ref{pwidth}.
+The parity selection rules are implicit in Eq. \ref{pwidth}.
+
+
+\paragraph{Width fluctuation correction}
+To account for the correlation between incident and exit channels in
+elastic scattering we use model proposed by Hofmann, Richert, Tepel
+and Weidenmueller~\cite{HRTW} (HRTW). In the case of no direct reaction
+contribution, the averaged$S$-matrix element connecting channels $a$ and
+$b$ can be written as
+\begin{equation}
+<S>_{ab}=\delta_{ab}e^{i\varsigma_{ab}}(1-T_{a})^{1/2},
+\label{Sab}
+\end{equation}
+\noindent where
+\begin{equation}
+T_{a}=1-|<S>_{aa}|^{2}
+\label{Ta}
+\end{equation}
+is an optical model transmission coefficient. The HRTW model assumes
+that the Compound Nucleus (CN) cross sections factorize and
+can be expressed through a product of the channel dependent quantities
+$\xi$. This would be the famous Bohr's assumption if not for the
+elastic enhancement factor $W_{a}$, which has been introduced by
+HRTW in order to account for the elastic channel correlation
+\begin{equation}
+<\sigma_{ab}^{fl}>=\xi_{a}\xi_{b}\quad a\neq b\qquad and\qquad<\sigma_{a}^{fl}>=W_{a}\xi_{a}^{2}.
+\label{Sig-fluc}
+\end{equation}
+ Setting
+\begin{equation}
+\xi_{a}=\frac{V_{a}}{\sqrt{\sum_{c}V_{c}}}
+\label{ksi}
+\end{equation}
+we get for the CN cross section
+\begin{equation}
+\sigma_{ab}^{CN}\equiv<\sigma_{ab}^{fl}>=V_{a}V_{b}\left(\sum_{c}V_{c}\right)^{-1}\left[1+\delta_{ab}\left(W_{a}-1\right)\right].
+\label{Sig-flucV}
+\end{equation}
+Taking into account that the incoming flux has to be conserved (unitary
+condition) we find the relation between $V$s, the elastic enhancement
+factor ($W_{a}$), and the transmission coefficient ($T_{a}$)
+\begin{equation}
+V_{a}=T_{a}\left[1+\frac{V_{a}}{\left(\sum_{c}V_{c}\right)}\left(W_{a}-1\right)\right]^{-1}.
+\label{Va}
+\end{equation}
+This equation can be solved for $V_{a}$ by iteration once all $W_{a}$
+are known. The current version of EMPIRE uses $W_{a}$ derived from
+the analysis of numerically generated sets of $S$-matrices~\cite{HHM}.
+The resulting formula for the elastic enhancement factor is
+\begin{equation}
+W_{a}=1+2\left[1+T_{a}^{F}\right]^{-1}+87\left(\frac{T_{a}-T_{ave}}{\sum_{c}T_{c}}\right)^{2}\left(\frac{T_{a}}{\sum_{c}T_{c}}\right)^{5},
+\label{Wa}
+\end{equation}
+with
+\begin{equation}
+F=4\frac{T_{ave}}{\sum_{c}T_{c}}\left(1+\frac{T_{a}}{\sum_{c}T_{c}}\right)\left(1+3\frac{T_{ave}}{\sum_{c}T_{c}}\right)^{-1},
+\label{Wa-F}
+\end{equation}
+which completes formulation of the model.
+By default, we use the HRTW model below 5 MeV incident
+energy.
+
 
 \subsubsection{Level densities}
 EMPIRE accounts for various models describing level densities\index{level densities}
@@ -2413,68 +2457,6 @@ with these different representations are presented in Fig.~\ref{unresolved01}.
 different $\gamma$-ray strength functions.}
 \label{unresolved01}
 \end{figure}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Width fluctuation correction}
-To account for the correlation between incident and exit channels in
-elastic scattering we use model proposed by Hofmann, Richert, Tepel
-and Weidenmueller~\cite{HRTW} (HRTW). In the case of no direct reaction
-contribution, the averaged$S$-matrix element connecting channels $a$ and
-$b$ can be written as
-\begin{equation}
-<S>_{ab}=\delta_{ab}e^{i\varsigma_{ab}}(1-T_{a})^{1/2},
-\label{Sab}
-\end{equation}
-\noindent where
-\begin{equation}
-T_{a}=1-|<S>_{aa}|^{2}
-\label{Ta}
-\end{equation}
-is an optical model transmission coefficient. The HRTW model assumes
-that the Compound Nucleus (CN) cross sections factorize and
-can be expressed through a product of the channel dependent quantities
-$\xi$. This would be the famous Bohr's assumption if not for the
-elastic enhancement factor $W_{a}$, which has been introduced by
-HRTW in order to account for the elastic channel correlation
-\begin{equation}
-<\sigma_{ab}^{fl}>=\xi_{a}\xi_{b}\quad a\neq b\qquad and\qquad<\sigma_{a}^{fl}>=W_{a}\xi_{a}^{2}.
-\label{Sig-fluc}
-\end{equation}
- Setting
-\begin{equation}
-\xi_{a}=\frac{V_{a}}{\sqrt{\sum_{c}V_{c}}}
-\label{ksi}
-\end{equation}
-we get for the CN cross section
-\begin{equation}
-\sigma_{ab}^{CN}\equiv<\sigma_{ab}^{fl}>=V_{a}V_{b}\left(\sum_{c}V_{c}\right)^{-1}\left[1+\delta_{ab}\left(W_{a}-1\right)\right].
-\label{Sig-flucV}
-\end{equation}
-Taking into account that the incoming flux has to be conserved (unitary
-condition) we find the relation between $V$s, the elastic enhancement
-factor ($W_{a}$), and the transmission coefficient ($T_{a}$)
-\begin{equation}
-V_{a}=T_{a}\left[1+\frac{V_{a}}{\left(\sum_{c}V_{c}\right)}\left(W_{a}-1\right)\right]^{-1}.
-\label{Va}
-\end{equation}
-This equation can be solved for $V_{a}$ by iteration once all $W_{a}$
-are known. The current version of EMPIRE uses $W_{a}$ derived from
-the analysis of numerically generated sets of $S$-matrices~\cite{HHM}.
-The resulting formula for the elastic enhancement factor is
-\begin{equation}
-W_{a}=1+2\left[1+T_{a}^{F}\right]^{-1}+87\left(\frac{T_{a}-T_{ave}}{\sum_{c}T_{c}}\right)^{2}\left(\frac{T_{a}}{\sum_{c}T_{c}}\right)^{5},
-\label{Wa}
-\end{equation}
-with
-\begin{equation}
-F=4\frac{T_{ave}}{\sum_{c}T_{c}}\left(1+\frac{T_{a}}{\sum_{c}T_{c}}\right)\left(1+3\frac{T_{ave}}{\sum_{c}T_{c}}\right)^{-1},
-\label{Wa-F}
-\end{equation}
-which completes formulation of the model.
-By default, we use the HRTW model below 5 MeV incident
-energy.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
