@@ -4328,6 +4328,13 @@ barrier height and  saddle point symmetry for the inner and outer barrier,
 and the pairing correlation function recommended for the fission level density.
 
 
+\begin{figure*}[htbp]
+\scalebox{0.29}{\includegraphics{GUI-main1.eps}}
+\scalebox{0.28}{\includegraphics{GUI-ZVV.eps}}
+\caption{\label{fig:GUI} EMPIRE Grpahic User Interface. The main panel, providing the for the operation of the physics calculations and viewing of the results is shown to the left. The plotting panel that allows to create, view, mergfe and delete plots is shown on the right hand side.}
+\end{figure*}
+
+
 \subsection{Fission barriers and saddle point deformations based on the ETFSI model}
 Predictions of the fission barriers and saddle point deformations
 obtained within the Extended Thomas-Fermi plus Strutinsky Integral
@@ -4386,11 +4393,25 @@ such as running the code and viewing the results can be controlled from
 the pull-down menus and icon-denoted buttons below the menu bar.
 Some particular features, which require more input from the user (such as plotting and file management), can only be accessed from the dedicated panels.
 
-Fig.~\ref{fig:GUI} shows the ``Main 1'' and the ``ZVV plots'' pannels. The first one is a simple collection of buttons allowing to prepare the input, run calculations and view the results. The ``ZVV plots'' panel shows the list of existing plots and allows to create new graphs including angular distributions, energy spectra and energy-angle correlated cross sections. All plots contain available experimental data and may include other calculations or external ENDF formatted files.  We refer to the EMPIRE manual for more detailed description of numerous plotting options.
+Fig.~\ref{fig:GUI} shows the ``Main 1'' and the ``ZVV plots'' pannels. The first one is a simple collection of buttons allowing to prepare the input, run calculations and view the results. The ``ZVV plots'' panel shows the list of existing plots and allows to create new graphs including angular distributions, energy spectra and energy-angle correlated cross sections. All plots contain available experimental data and may include other calculations or external ENDF formatted files.  We refer to the EMPIRE manual for more detailed description of numerous plotting options. An example of the screen-shot presented on Fig.~\ref{fig:screenshot} shows EMPIRE GUI in action.
 
-The EMPIRE GUI is designed to provide complete control of the evaluation procedure from the input preparation up to the final checking with the NJOY code. A single mouse click is suffeicent to run cross section calculations, EXFOR retrieval, ENDF formatting, preprocessing, checking and plotting. Another click includes neutron resonances into the file obtained in the previous step. Final click processes the new file wth the NJOY code. User has access to all intermediate files and can rerun selected parts of the procedure if necessary (e.g., after manual intervention in the file). Through the ``Options'' pull-down menu user can modify default inputs for most of the ENDF formatting and processing codes. GUI provides also basic file management  functions (such as editing, deleting and archieving), which are effectively supported by filters that allow to select a narrow group of files. Finally, we mention a possibility of running calculations for a selected group of nuclei (no limit on the size of the group) using the same generic input. Such an operation that may, for example, produce the ENDF-6 formatted files for all stable isotopes can again be initiated with a single mouse click.
+\begin{figure*}[htbp]
+\scalebox{0.38}{\includegraphics{empire-89Y.eps}}
+\caption{\label{fig:screenshot} Screen-shot of the EMPIRE GUI with a generated plot of cross sections for the inelastic scattering to the first 4 levels in $^{89}$Y. Note the capability of the interface to multiply results by a power of 10 to separate the curves.}
+\end{figure*}
+
+
+The EMPIRE GUI is designed to provide complete control of the evaluation procedure from the input preparation up to the final checking with the NJOY code. A single mouse click is sufficient to run cross section calculations, EXFOR retrieval, ENDF formatting, preprocessing, checking and plotting. Another click includes neutron resonances into the file obtained in the previous step. Final click processes the new file with the NJOY code. User has access to all intermediate files and can rerun selected parts of the procedure if necessary (e.g., after manual intervention in the file). Through the ``Options'' pull-down menu user can modify default inputs for most of the ENDF formatting and processing codes. GUI provides also basic file management  functions (such as editing, deleting and archiving), which are effectively supported by filters that allow to select a narrow group of files. Finally, we mention a possibility of running calculations for a selected group of nuclei (no limit on the size of the group) using the same generic input. Such an operation that may produce, for example, the default, ENDF-6 formatted files for all stable isotopes can again be initiated with a single mouse click.
+
 
 \subsection{Defaults}
+Nuclear reaction models used in a typical EMPIRE calculation require hundreds of input parameters. Without libraries of parameters and defaults preparation of the input file be a matter of days. On the other hand, it is important to leave the user the possibility to adjust some parameters in order to improve agreement with experimental data or to perform sensitivity studies. To conciliate these two contradicting necessities EMPIRE implements a multi-fold system of defaults.
+
+First, practically all parameters such as masses, optical potentials, discrete levels, level densities, deformations, fission barriers, Giant Resonances, etc., are taken from the RIPL library. If a parameter is not available in RIPL the internal EMPIRE systematics are used to provide the value. Internal defaults are also used to set up model options that were not explicitly specified in the user's input. In the first run EMPIRE creates a number of local files that contain extracted parameters. In subsequent runs, the code uses these files to obtain parameters. In other words, local files take precedence over global RIPL-2 files, which provides the user with a convenience of editing these files without affecting input libraries. Deleting any of these local files prompts the code to restore them using the RIPL library defaults.
+
+Most of the input parameters can also be controlled from the input - usually through the multiplicative factors. This possibility is very convenient for  generating sensitivity matrices to the perturbation of parameters and determination of covariances with the Monte Carlo approach.
+
+Additional way of controlling defaults is the skeleton input - a generic input file which is used as a template for creating input file for the new case. It may contain an arbitrary number of records with any keyword and its value that is  recognized by the code including projectile and set of incident energies. User may modify this input according to her/his needs and effectively over write the built-in defaults.
 
 \subsection{Fitting Optical Model Parameters}
 EMPIRE may be asked to perform automatic fitting of parameters defining the direct optical model potential including  deformation parameters of the collective target levels. The fitting procedure also uses the experimental data. At the moment, this option only works for neutron or proton scattering.
@@ -4417,7 +4438,7 @@ However, EMPIRE-specific level densities suffer the same uncertainty as GC when 
 \section{Selected Applications of EMPIRE}
 
 \subsection{ENDF/B-VII.0 Evaluations}
-EMPIRE-2.19 was extensively used in the development of the ENDF/B-VII.0 library for which it produced 78 full evaluations (nearly 20\% of the whole neutron sublibrary). This major exercise was also a most thorough test and validation of the system. The EMPIRE based evaluations in ENDF/B-VII.0, listed in Tab.~\ref{endf7list}, can be divided into (i) fission products (evaluated by BNL, BNL-KAERI, BNL-ORNL, BNL-JAERI, BNL-LANL and LLNL), (ii) iridium isotopes evalauted by the BNL-LANL collaboration and (iii) actinides ($^{232}$Th and $^{231,233}$Pr evaluated in the frame of the IAEA coordinated research project. Nearly all evaluations cover the standard energy range from 10$^{-5}$~eV up to 20 MeV. However, the actinide evaluations extend up to 60 MeV proving that EMPIRE  is not limitted to the typical ENDF energy range.
+EMPIRE-2.19 was extensively used in the development of the ENDF/B-VII.0 library for which it produced 78 full evaluations (nearly 20\% of the whole neutron sublibrary). This major exercise was also a most thorough test and validation of the system. The EMPIRE based evaluations in ENDF/B-VII.0, listed in Tab.~\ref{endf7list}, can be divided into (i) fission products (evaluated by BNL, BNL-KAERI, BNL-ORNL, BNL-JAERI, BNL-LANL and LLNL), (ii) iridium isotopes evalauted by the BNL-LANL collaboration and (iii) actinides ($^{232}$Th and $^{231,233}$Pr evaluated in the frame of the IAEA coordinated research project. Nearly all evaluations cover the standard energy range from 10$^{-5}$~eV up to 20 MeV. However, the actinide evaluations extend up to 60 MeV proving that EMPIRE  is not limitted to the classical ENDF energy range.
 
 \begin{longtable*}{lllll}
 \caption{List of ENDF/B-VII.0 evaluations performed with EMPIRE \label{endf7list}}\\
