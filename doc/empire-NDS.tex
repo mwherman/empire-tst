@@ -4411,7 +4411,9 @@ First, practically all parameters such as masses, optical potentials, discrete l
 
 Most of the input parameters can also be controlled from the input - usually through the multiplicative factors. This possibility is very convenient for  generating sensitivity matrices to the perturbation of parameters and determination of covariances with the Monte Carlo approach.
 
-Additional way of controlling defaults is the skeleton input - a generic input file which is used as a template for creating input file for the new case. It may contain an arbitrary number of records with any keyword and its value that is  recognized by the code including projectile and set of incident energies. User may modify this input according to her/his needs and effectively over write the built-in defaults.
+Additional way of controlling defaults is the skeleton input - a generic input file which is used as a template for creating input for the new case. It may contain an arbitrary number of records with any keyword that is  recognized by the code including the projectile and set of incident energies. User may modify this input according to her/his needs and effectively overwrite the built-in defaults.
+
+The way EMPIRE approaches defaults enables standard calculations with minimal user's input retaining an easy and selective control over all model parameters. It is also designed to support massive calculations on many targets with the customized input.
 
 \subsection{Fitting Optical Model Parameters}
 EMPIRE may be asked to perform automatic fitting of parameters defining the direct optical model potential including  deformation parameters of the collective target levels. The fitting procedure also uses the experimental data. At the moment, this option only works for neutron or proton scattering.
@@ -4619,6 +4621,8 @@ Finally, we mention application of EMPIRE  for neutron-induced reactions in micr
 
 \section{Future Developments}
 
+The first part of the old rule of programming says: "If the code is useful it will be changed...". We are aware of certain shorcommings of the code and plan to address them in future.  One class of improvements is removing certain approximations that are related to the HI heritage such as: (i) use of the l-dependent optical model transmission coefficents, (ii) isotropic angular distribution for compound nucleus reaction products and (iii) parity-independent level densities. Another class of improvements, which actually is given the higher priority, is extending EMPIRE to cover neutron resonances and provide cross section covariances. In the remainig part of this section we describe the latter two aspects in more details.
+
 \subsection{Neutron Resonance Module}
 EMPIRE-3 uses an internal, ENDF-6 formatted, database of resonances to complete fast neutron evaluations with the resonance region. Recently,  Mughabghab completed his Atlas of Neutron Resonances~\cite{Mughabghab:06}, a monumental compilation/evaluation work across the whole table of isotopes. This wealth of information must find its way into the evaluated libraries. With this goal in mind, we have started a new EMPIRE module~\cite{Cho:07} that will provide easy access to the Atlas data and their seemless transfer to the evaluation. We also intend to preserve legacy codes and methodology that has been developed over years and constitutes scientific heritage of great importance for application of nuclear technology.
 
@@ -4683,27 +4687,31 @@ A by-product of generating covariances with the KALMAN approach is a very powerf
 
 
 \section{Conclusions}
+The EMPIRE system is the outcome of a multi-year coordinated effort of several developers and contributors. It grew up from the tradition of the Warsaw school of neutron physics but has been developed on various continents and benefited from the voluntary support of many scientists who offered their codes, advise, inspiration, criticism and encouragement. The EMPIRE's goal is to create the integrated environment that brings under a single roof major nuclear reactions models, is applicable to different reactions types and energy ranges, and responds to the needs of basic research as well as various nuclear applications with emphasis on nuclear data evaluation. On the operational side it should be easy to use but at the same time flexible enough to adjust to various necessities. We believe that the version 3.0 of EMPIRE is a landmark on our way toward this ambitious goal. It has proved its usefulness in a number of fields, starting with the ENDF/B-VII.0 library that serves the whole rainbow of nuclear technology applications, through basic physics and  astrophysics research, medical isotope production, to end up with the  application to microelectronics.
 
-In his book Science of Logic, Georg Friedrich Hegel remarked:
-... we have seen cases in which the alteration of existence
-involves not only a transition from one proportion to another,
-but also a transition, by a sudden leap, into a . . . qualitatively
-different thing...%  an interruption of a gradual process, differing
-% qualitatively from the preceding, the former state.
+Actually, EMPIRE is very close to a target that was even not foreseen in the initial design - a possibility of reducing a modern evaluation of more than 20 thousand lines to a small EMPIRE input file of less than 100 lines. Incorporation of the resonance region and flexibility of the code make it already feasible. Several low priority fission product evaluations in ENDF/B-VII.0 are completly based on the EMPIRE calculations. The complex $^{232}$Th evaluation is not far from this goal; only certain details (e.g., nu-bars ) were not provided by EMPIRE. Having evaluations stored in such a super-compact format would offer advantages going beyond simple saving of the space. User would use EMPIRE as a sort of a processing code to generate cross section and spectra on any desired energy grid.  Updating the evaluation with new reaction channels or adding new experimental data would be highly simplified, improving model prametrization straightforward, incorporation of new reaction models feasible, and the physics contents of the evaluation evident.
 
+The ease of use, combined with the power of parallel super-computing, open new horizons for generating nuclear data and determining model parameters. Massive calculations, that are perfectly feasible with the current technology, allow to perform global adjustment of the model parameters constrained by the complete set of  relevant microscopic experimental data on all isotopes. This analysis might even be carried out further by including integral experiments in the process. If experimental database is properly assessed and wrong experiments are corrected or removed this large scale project should improve our understanding of nuclear reactions and  provide better quality, consistent nuclear data files with covariances. We note, that the validation phase would be naturally incorporated in the evaluations procedure. If the reaction modeling is flexible enough the \textit{a posteriori} data adjustment would also be an integral part of the evaluation procedure and would be done on the level of model parameters. This Global Nuclear Data Initiative was presented at the DOE Workshop at Bethesda in August 2006.
+
+In his book Science of Logic, the great German philosopher Georg Friedrich Hegel remarked:
+"\ldots we have seen cases in which the alteration of existence involves not only a transition from one proportion to another, but also a transition, by a sudden leap, into a \ldots qualitatively
+different thing\ldots". With recent advanced in nuclear reaction modeling supported by the amazing increase of the computation power we might be approaching the edge of such a transition from quantity to quality. In a not very distant future the whole evaluation-validation-adjustment scheme used  today for generation of nuclear data libraries might be revolutionized. At the same time, better parametrization of nuclear reaction models along with the increased use of microscopic formulations will increase our confidence in extrapolating to the regions far from the stability line.
 
 \section*{Acknowledgments}
-EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL project and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, and A. Taccone who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
 
-Almost authors: Rochman, Mughabghab, Cho, Kawano, Chadwick, Ventura, V. Plujko
+EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge our colleagues whose work was
+
+we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL project and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, and A. Taccone who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
+
+Almost authors: D. Rochman, S. Mughabghab, Cho, T. Kawano, M.B. Chadwick, A. Ventura, V. Plujko, H.A. Weidenmueller
 Code authors: ...
-Utilities: Dunford
-Processing: Cullen, MacFarlane
-Inspiration and suppport: Marcinkowski, Reffo
+Utilities: Ch. Dunford
+Processing: R. Cullen, R. MacFarlane
+Inspiration and suppport: A. Marcinkowski, G. Reffo
 RIPL: IAEA
-Exfor: Schwerer
-Preeq modeling: Hodgson \& Gadioli, Koning, Young, Ignatyuk
-Paper preparation: Pritychenko, Sonzogni, Pigni, Arcilla, ...
+Exfor: O. Schwerer
+Preeq modeling: Hodgson, E. Gadioli, A. Koning, Ph. Young, A. Ignatyuk, M. Blann
+Paper preparation: B. Pritychenko, A. Sonzogni, M. Pigni, R. Arcilla, ...
 
 
 \bibliography{empire}
