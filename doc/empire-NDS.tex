@@ -169,10 +169,11 @@ mechanism \cite{FKK} lead to the EMPIRE-MSC version.
 
 In 1985, development of the EMPIRE moved, along with the main author, to ENEA (Bologna).
 The NVWY~\cite{NVWY}, another quantum-mechanical formulation of the Multi-step Compound mechanism,
-was implemented in the HMS-EMPIRE. This version also
+was implemented in the HMS-EMPIRE and suplemented with the TUL approach\cite{TUL} to the Multi-step Direct emission. This version also
 included combinatorial calculations of particle-hole level densities.
+
 In addition, a version for Heavy Ion induced reactions (EMPIRE HI)
-was developed as a part of the fusion-fission studies carried out in collaboration with the INFN group at Messina lead by G. Giardina. During this exercise it became clear that the original formulation did not lend itself for large scale extensions and a new code should be rewritten from scratch. Thus, interpretation of the Heavy Ion (HI) induced reactions was the initial motivation for the development of the new EMPIRE-2 code. Its design was, therefore,  guided by the particular HI necessities that posed a much broader variety of challenges than neutron activation. However, these challenges were exploited to enrich the code and make it more general without compromising capabilities of treating neutron induced reactions, which remained one of the principal objectives.
+was developed as a part of the fusion-fission studies carried out in collaboration with the INFN group at Messina lead by G. Giardina. During this exercise it became clear that the original formulation did not lend itself for large scale extensions and a new code should be written from scratch. Thus, interpretation of the Heavy Ion (HI) induced reactions was the initial motivation for the development of the new EMPIRE-2 code. Its design was, therefore,  guided by the particular HI necessities that posed a much broader variety of challenges than neutron activation. However, these challenges were exploited to enrich the code and make it more general without compromising capabilities of treating neutron induced reactions, which remained one of the principal objectives.
 
 Actual coding was preceded by a conceptual study to define goals, means and coding styles. It indicated essential features that the new code should fulfill:
 \begin{itemize}
@@ -188,10 +189,10 @@ During the 'Bologna period' (1990-1997) the EMPIRE developer team was formed whe
 
 In 1997 the EMPIRE home site transferred to the IAEA in Vienna. This move accelerated the development with two new members joining the team - V. Zerkin implemented EXFOR retrieval and interactive plotting while P. Oblo\v zinsk\'y incorporated exciton model with angular momentum coupling (DEGAS) and took the lead in promoting EMPIRE internationally. The code was first officially released (version 2.13)~\cite{EMPIRE:Trieste01} on the occasion of the ICTP Workshop on Nuclear Reaction Data and Nuclear Reactors in 2000.
 
-In 2003 EMPIRE has found a new home at the National Nuclear Data Center at BNL (M. Herman and P. Oblo\v zinsk\'y) while R. Capote, A. Trkov and V. Zerkin continued development in Vienna. M. Sin joined the team bringing the much needed fission expertize. She initiated and played the leading role in the radical upgrade of the fission channel. B.V. Carlson followed with addition of the photonuclear reactions and highly automatized fitting of the optical model potential. More recently, H. Wienke upgraded the MSD module by extending it to the deformed nuclei.
+In 2003 EMPIRE has found a new home at the National Nuclear Data Center at BNL (M. Herman and P. Oblo\v zinsk\'y) while R. Capote, A. Trkov and V. Zerkin continued development in Vienna. M. Sin joined the team bringing the much needed fission expertize. She took the lead in the radical upgrade of the fission channel. B.V. Carlson followed with addition of the photonuclear reactions and highly automatized fitting of the optical model potential. More recently, H. Wienke upgraded the MSD module by extending it to the deformed nuclei.
 
 In this paper we describe the 3.0 version of the code (denominated 'Arcola'). Its immediate predecessor 2.19 was extensively used in the development of the ENDF/B-VII.0 library~\cite{ENDF-VII}. The following sections outline physics built into various modules of the EMPIRE, contents of the input libraries, particular features offered by the code and summarize usage of the EMPIRE in various laboratories. The intention of this writeup is to present capabilities of the system and explain means it is using to produce the answer. Even with the relatively generous space available to this review it is not possible to document all minor features and details of the algorithms used in the code. In particular, input preparation and operation of the code are outside the scope of the present paper. Users are advised to consult EMPIRE manual available at www.nndc.bnl.gov/empire and www-nds.iaea.org/empire for more practical instructions. Similarly, we
-refer to RIPL-2 documentation~\cite{RIPL-2} for particulars regarding this input parameter library and to the Ref.~\cite{Mughabghab:06} for details concerning evaluation of neutron resonances.
+refer to RIPL-2 documentation~\cite{RIPL2} for particulars regarding this input parameter library and to the Ref.~\cite{Mughabghab:06} for details concerning evaluation of neutron resonances.
 
 \section{Overview of the EMPIRE System}
 The current 3.0 version of the EMPIRE is a milestone in the evolution of the EMPIRE system. It marks the point in which the code has achieved practically all goals that were set up in the conceptual design. We stress again that EMPIRE-2 has been a totally new development although it has benefited from the experience
@@ -211,7 +212,7 @@ cross sections, spectra, angular distributions and angle-energy correlated spect
 and $\gamma$-rays, as well as cross sections for population of isomeric levels
 (activation cross sections). Such extensive calculations require a considerable amount
 of input parameters. To provide them EMPIRE incorporates a comprehensive library of model
-parameters, largely based on the IAEA RIPL-2~\cite{RIPL-2} project,
+parameters, largely based on the IAEA RIPL-2~\cite{RIPL2} project,
 although the preliminary recommendations of the follow up edition (RIPL-3) are used when available. The calculated results can be plotted and compared against experimental data automatically extracted
 from the EXFOR library~\cite{EXFOR}.
 
@@ -4187,7 +4188,7 @@ These codes are conveniently linked via bash scripts and operated from the main 
 \section{Input Libraries}
 The EMPIRE system is provided with a complete set
 of input parameters that allow to perform default calculations with user's
-input reduced to the specification of the incident channel (projectile, target, and incident energy). The major sources of these parameters are RIPL-2~\cite{RIPL-2} and the preliminary RIPL-3 libraries that include experimental results and/or theoretical predictions for:
+input reduced to the specification of the incident channel (projectile, target, and incident energy). The major sources of these parameters are RIPL-2~\cite{RIPL2} and the preliminary RIPL-3 libraries that include experimental results and/or theoretical predictions for:
 \begin{itemize}
 \item ground state properties (masses, deformations, spins, parities, shell corrections, abundances)
 \item optical model potential parameters including CC coupling schemes and deformations
@@ -4598,8 +4599,8 @@ Signorini \textit{et al.} employed EMPIRE in the study of breakup processes in t
 The BARC group utilized EMPIRE in their work on $\alpha$-particle potential~\cite{Kumar:06}
 
 \subsection{Astrophysics}
-In Ref.~\cite{reifarth2003snc} EMPIRE in combination
-with the measured value of the $^{147}$Pm(n,$\gamma$) reaction, participated in a reliable estimation of the reaction rates for neutron capture on $^{148}$Pm and $^{149}$Pm, for which no experimental information is available. These results allowed a considerably refined analysis of the s-process branchings at A=147/148, which are probing the neutron density in the He-burning shell of low-mass asymptotic giant branch stars.
+In Ref.~\cite{reifarth2003snc} EMPIRE, combined
+with the measured value of the $^{147}$Pm(n,$\gamma$) reaction, enabled a reliable estimation of the reaction rates for neutron capture on $^{148}$Pm and $^{149}$Pm, for which no experimental information is available. These results allowed a considerably refined analysis of the s-process branchings at A=147/148, which are probing the neutron density in the He-burning shell of low-mass asymptotic giant branch stars.
 
 Tatischeff \textit{et al.} have been using EMPIRE for another astrophysical research, namely to predict the production of long-lived radioisotopes in solar flares~\cite{Tatischeff:06}. A large number of total cross sections for protons, $^3$He and $\alpha$-particle induced reactions have been evaluated with the code.
 
@@ -4694,25 +4695,37 @@ Actually, EMPIRE is very close to a target that was even not foreseen in the ini
 The ease of use, combined with the power of parallel super-computing, open new horizons for generating nuclear data and determining model parameters. Massive calculations, that are perfectly feasible with the current technology, allow to perform global adjustment of the model parameters constrained by the complete set of  relevant microscopic experimental data on all isotopes. This analysis might even be carried out further by including integral experiments in the process. If experimental database is properly assessed and wrong experiments are corrected or removed this large scale project should improve our understanding of nuclear reactions and  provide better quality, consistent nuclear data files with covariances. We note, that the validation phase would be naturally incorporated in the evaluations procedure. If the reaction modeling is flexible enough the \textit{a posteriori} data adjustment would also be an integral part of the evaluation procedure and would be done on the level of model parameters. This Global Nuclear Data Initiative was presented at the DOE Workshop at Bethesda in August 2006.
 
 In his book Science of Logic, the great German philosopher Georg Friedrich Hegel remarked:
-"\ldots we have seen cases in which the alteration of existence involves not only a transition from one proportion to another, but also a transition, by a sudden leap, into a \ldots qualitatively
-different thing\ldots". With recent advanced in nuclear reaction modeling supported by the amazing increase of the computation power we might be approaching the edge of such a transition from quantity to quality. In a not very distant future the whole evaluation-validation-adjustment scheme used  today for generation of nuclear data libraries might be revolutionized. At the same time, better parametrization of nuclear reaction models along with the increased use of microscopic formulations will increase our confidence in extrapolating to the regions far from the stability line.
+"\ldots \textit{we have seen cases in which the alteration of existence involves not only a transition from one proportion to another, but also a transition, by a sudden leap, into a} \ldots \textit{qualitatively
+different thing}\ldots". With recent advanced in nuclear reaction modeling supported by the amazing increase of the computation power we might be approaching the edge of such a transition from quantity to quality. In a not very distant future the whole evaluation-validation-adjustment scheme used  today for generation of nuclear data libraries might be revolutionized. At the same time, better parametrization of nuclear reaction models along with the increased use of microscopic formulations will increase our confidence in extrapolating to the regions far from the stability line.
 
 \section*{Acknowledgments}
 
-EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code. The recent developments described in this report would not have been possible without their valuable voluntary contributions. First of all, we would like to acknowledge our colleagues whose work was
+EMPIRE is the result of international cooperation towards open source software as so successfully promoted by the General Public License. A number of authors contributed to the development of the code and it would be next to impossible to list all names. We stress that the code described in this paper would not have been possible without their valuable and voluntary cooperation.
 
-we would like to acknowledge the authors of the codes that are included in EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). We feel particularly fortunate to be able to built on the comprehensive compilation of model parameters created in the frame of RIPL projects under auspices of the IAEA. We are grateful to all participants of the three phases of the RIPL project and in particular to V. Plujko who has implemented his suite of $\gamma$-ray strength functions developed within RIPL-2. Our gratitude goes also to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE. We would like to thank M. Mebel for providing the routine for calculation of shell-corrections according to Myers and Swiatecki. One of us (M.H.) is grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, and A. Taccone who assisted the project from the very beginning and have tested various preliminary versions of the code since 1993. M.H. would also like to thank A. Nichols for his thorough review of the previous version of the EMPIRE manual.
+%main users and plot producers
+First of all, we would like to acknowledge our colleagues whose work helped to prepare this paper. D. Rochman and H.I. Kim deserve a special mention as the two major users of the code during the ENDF/B-VII.0 development. Their comments were of great value and enabled to trace coding errors and improve the stability of the code. In this paper, we often use their results as examples.
 
-Almost authors: D. Rochman, S. Mughabghab, Cho, T. Kawano, M.B. Chadwick, A. Ventura, V. Plujko, H.A. Weidenmueller
-Code authors: ...
-Utilities: Ch. Dunford
-Processing: R. Cullen, R. MacFarlane
-Inspiration and suppport: A. Marcinkowski, G. Reffo
-RIPL: IAEA
-Exfor: O. Schwerer
-Preeq modeling: Hodgson, E. Gadioli, A. Koning, Ph. Young, A. Ignatyuk, M. Blann
-Paper preparation: B. Pritychenko, A. Sonzogni, M. Pigni, R. Arcilla, ...
+%almost authors
+We are in debt with
+T. Kawano who drew our attention to covariances, and was actively involved in the implementation of his KALMAN code in the EMPIRE. D. Rochman was the first to use the EMPIRE/KALMAN system for determining covariances. We also highly appreciate  S. Mughabghab's and Young-Sik Cho's efforts to develop resonance module linking Atlas of Neutron Resonances and EMPIRE. Although the covariance and the resonance modules are not officially distributed with the EMPIRE-3.0 they are going to become part of the system in the next release.
 
+%other code authors
+We gratefully acknowledge the authors of the codes that are included in the physics core of EMPIRE: E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN), J. Raynal (ECIS03), and A. Sierk (BARFIT and MOMFIT). Our gratitude goes also to Ch. Dunford for his ENDF checking codes, D.E. Cullen whose suit of preprocessing codes makes an essential part of the EMPIRE system and to R. MacFarlane for his help in interfacing EMPIRE with his processing code NJOY.
+
+%IAEA
+We feel particularly fortunate to be able to built on the two solid foundations - the comprehensive compilation of model parameters (RIPL) and the extensive compilation of experimental results (CSISRS/EXFOR). both created under auspices of the IAEA.  We are grateful to the two recent heads of the Nuclear Data Section D. Muir and A. Nichols for their continues support of the two projects. Naturally, our gratitude goes also to all participants of the three phases of the RIPL project and all EXFOR compilers, in particular to O. Schwerer who dedicated his career to EXFOR. Three of us (M.H., R.C. and A.T.), who  had (or still have) a privilege to work under leadership of A. Nichols would like thank him for his encouragement and support for the development of EMPIRE.
+
+%contributors
+We owe special thanks to A. Ventura who was actively involved in the formulation of the fission theory coded in EMPIRE and to A. Hoering who took part in the implementation of $\gamma$-emission within the Multistep Compound mechanism. M. Mebel should be thanked for providing the routine for calculation of shell-corrections according to Myers and Swiatecki and  V. Plujko for implementing his suite of $\gamma$-ray strength functions developed within the RIPL-2.
+
+%'enlighteners'
+Finally, there is a group of our colleagues to whom we owe particular gratitude for their enlightenment and inspiration. It is a honour to acknowledge H.A. Weidenmueller guidance on Mutistep Compound theory and foundations of the statistical model, discussions with H. Lenske and H. Wolter on Multistep Direct and its implementation, working with H. Hofmann on width fluctuations, and with D. Smith on exploration of the world of covariances. The EMPIRE wouldn't reach the current stage without illuminating discussions on the preequilibrium emission with M. Blann, P.E. Hodgson, and E. Gadioli and without constructive criticism by A. Ignatyuk. We also benefited from the exchange of experience with  authors of other codes. We would like to express our appreciation to Ph. Young, M.B. Chadwick, A. Koning and T. Kawano for inspiring discussions, indication of priorities, and technical suggestions.
+
+%nostalgy
+One of us (M.H.) would like to thank A. Marcinkowski for motivating him to write the EMPIRE-1 code. He is also grateful to G. Giardina and his collaborators A. D'Arrigo, R. Sturiale, and A. Taccone who assisted the EMPIRE-2 project from the very beginning and have tested various preliminary versions of the code since 1993.
+
+%technical
+Last but not least, we would like to thank B. Pritychenko, A. Sonzogni, M. Pigni, and R. Arcilla for the their assistance in the preparation of the manuscript and assembling the Nuclear Data Sheets issue.
 
 \bibliography{empire}
 
