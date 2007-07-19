@@ -148,14 +148,14 @@ used by EMPIRE to predict reaction cross sections and spectra.
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{ToDo and deficiencies}
-
-\begin{itemize}
-\item PCROSS to be expanded
-\item gamma-strength functions to be expanded with the new ones, add higher multipolarities
-\item Plots to be improved
-\item Formatting updated with isomeric cross sections and mixed exclusive/inclusive spectra
-\end{itemize}
+% \section{ToDo and deficiencies}
+%
+% \begin{itemize}
+% \item PCROSS to be expanded
+% \item gamma-strength functions to be expanded with the new ones, add higher multipolarities
+% \item Plots to be improved
+% \item Formatting updated with isomeric cross sections and mixed exclusive/inclusive spectra
+% \end{itemize}
 
 \section{Introduction}
 Roots of the EMPIRE system originate at the Institute of Nuclear Research (INR) in Warsaw and can be traced back to early seventies, when a vigorous program of activation measurements brought a natural need for an adequate  tool to interpret experimental results. The ISOMER code~\cite{Grochulski:73} was a first response to this necessity. This ingenious master-piece of programming incorporated the spin-dependent statistical theory of nuclear reactions within the ridiculously small, for today's standards, memory of just 4k. The ISOMER was coded in ALGOL and run on a transistor based computer GIER. The source of the code and input data were stored on the perforated paper tape, which used to break in the middle of the night (typical calculations would last a whole weekend). When the new CYBER-72 (CDC) computer was installed at INR and the GIER machine was moved out of the town a new code became an obvious necessity. Thus, the first EMPIRE code grew up on this well prepared, fertail soil building on the previous experience with the enthusiasm that characterized research at those days.
@@ -233,7 +233,7 @@ The entire EMPIRE system can be divided into five major components:
 \item library of neutron resonances,
 \item library of experimental data (EXFOR).
 \end{enumerate}
-The flowchart shown in Fig.~\ref{fig:empire-flowchart} illustrates organization of the system and indicates flow of the data. The physics core, supported by the input parameter library, is a heart of the system. It consists of a number of modules that implement various nuclear reaction theory models. Furthermore, the package includes a number of stand-alone utility codes that are listed in Sec.~\ref{Sec:utility-codes}. This significant part of the EMPIRE system serves particular needs of nuclear data evaluation, such as ENDF-6 formatting, file verification, preprocessing, plotting and the ultimate check consisting in processing the file with the NJOY code. The utility codes, scripts and GUIs are instrumental in making EMPIRE user friendly. Due to the high level of integration between various components of EMPIRE provided by the scripts and intuitive control ensured by the GUIs the operation of the whole system is very easy.  Most intermediate steps are totally transparent to the user.  In the extreme case of accepting all defaults, a complete ENDF-6 formatted file, including graphical comparison with experimental data and full verification with the checking codes, can be created by typing in the atomic and mass numbers for the target followed by a couple of mouse-clicks.
+The flowchart shown in Fig.~\ref{fig:empire-flowchart} illustrates organization of the system and indicates flow of the data. The physics core, supported by the input parameter library, is a heart of the system. It consists of a number of modules that implement various nuclear reaction theory models. Furthermore, the package includes a number of stand-alone utility codes that are listed in Sec.~\ref{Sec:utility-codes}. This significant part of the EMPIRE system serves particular needs of nuclear data evaluation, such as ENDF-6 formatting, file verification, preprocessing, plotting and the ultimate check consisting in processing the file with the NJOY code~\cite{MacFarlane:06,MacFarlane:94}. The utility codes, scripts and GUIs are instrumental in making EMPIRE user friendly. Due to the high level of integration between various components of EMPIRE provided by the scripts and intuitive control ensured by the GUIs the operation of the whole system is very easy.  Most intermediate steps are totally transparent to the user.  In the extreme case of accepting all defaults, a complete ENDF-6 formatted file, including graphical comparison with experimental data and full verification with the checking codes, can be created by typing in the atomic and mass numbers for the target followed by a couple of mouse-clicks.
 
 
 We strive to provide ultimately all functionalities necessary or useful for nuclear data evaluation. The three recent extensions bring us closer to this goal: (i) the highly automated module for adjustment of optical potential parameters, (ii) the resonance module bringing capability of extracting, analyzing and formating resonance parameters from the Atlas of Neutron Resonances~\cite{Mughabghab:06}, and (iii) the covariance module enabling quantification of nuclear data uncertainties using both Monte Carlo and KALMAN methods to combine experimental covariances with the model based ones. The latter two extensions, although well advanced, are still in a phase of development and testing. Therefore, we will not cover them extensively in the present paper.
@@ -839,7 +839,7 @@ have been projected out and can be treated separately within the Multi-step
 Compound\index{MSC} mechanism.
 
 
-\paragraph{\label{sec: MSD}Outline of the Theory}
+\paragraph{\label{sec:MSDtheory}Outline of the Theory}
 
 In the MSD\index{MSD} theory the effective Hamiltonian in the open
 channel space is divided into an energy averaged optical model part
@@ -1057,7 +1057,7 @@ description of one-body response functions is provided by the Random
 Phase Approximation theory \cite{Neg,Wal} (RPA\index{RPA}). In RPA
 the whole series of $1p-1h$ interaction diagrams is summed exactly.
 Thus, an essential contribution to the intrinsic correlations is treated
-explicitly. In the notation of Section \ref{sec: MSD} they are part
+explicitly. In the notation of Section \ref{sec:MSDtheory} they are part
 of $H_{0}^{intr}$. Thus, the $ph-$classes are built from correlated
 basis states. This justifies also the \textit{ansatz} of Eq. \ref{hintr}
 where $V^{intr}$ was defined as to act only between $ph-$classes.
@@ -1094,7 +1094,7 @@ to account for the self-energies the $2qp$ energies are taken to
 be complex by adding a state dependent damping width $\Gamma_{\alpha}^{\downarrow}$.
 The response functions include inelastic events only and are calculated
 in linear response theory.
-In the (Q)RPA formalism the intrinsic nuclear Green function $G^{QRPA}(\varepsilon)$ (see also Eq.~\ref{specd}) is obtained from the Bethe-Salpeter (BS)equation \cite{fetter}
+In the (Q)RPA formalism the intrinsic nuclear Green function $G^{QRPA}(\varepsilon)$ (see also Eq.~\ref{specd}) is obtained from the Bethe-Salpeter (BS)equation \cite{Wal}
 \begin{equation}
 G^{QRPA}(\varepsilon) = G_{0}^{2qp}(\varepsilon)+ G_{0}^{2qp}(\varepsilon)VG^{QRPA}(\varepsilon)\label{bs1}\end{equation}
 with  $G_{0}^{2qp}(\varepsilon)$ the uncorrelated Green function determined by the 2qp excitations, and V the residual 2qp interaction. In the RPA schematic model the latter is assumed to be
@@ -1102,7 +1102,7 @@ separable \begin{equation}
 V^{res}(1,2)=\sum_{\lambda}\kappa _{\lambda}O_{\lambda}(1)O_{\lambda}(2)
 \end{equation}
 Then the BS equation for the QRPA polarization propagator $\chi_{\lambda}^{QRPA}(\varepsilon)$
-is \cite{TULnew}:
+is \cite{Lenske:01}:
 \begin{equation}
 \chi_{\lambda}^{QRPA}(\varepsilon)=  \chi_{\lambda}^{2pq}(\varepsilon) + \kappa_{\lambda}\chi_{\lambda}^{2pq}(\varepsilon)\chi_{\lambda}^{QRPA}(\varepsilon)\label{bs2}
 \end{equation}
@@ -1141,7 +1141,7 @@ S_{\lambda} =-\frac{1}{\pi}Im\sum_k[\chi_{\lambda,k}^{QRPA}(\varepsilon)]\label{
 \end{equation}
 It can be shown that the contributions of the off-diagonal terms in (\ref{bs3}) to the
 spectroscopic strength function are negligibly small compared to the diagonal
-terms \cite{nextpaper}.
+terms \cite{Wienke:08}.
 
 The ground state is obtained from a BCS\index{BCS} calculation
 in the {}``fixed gap approximation'' with $\Delta_{p}=\Delta_{n}=12.0/\sqrt{(}A)$
@@ -2271,7 +2271,7 @@ energy.
 
 \subsubsection{$\gamma$-ray Emission}
 The E1, E2, and M1 transitions are taken into account in the statistical
-model (Hauser-Feshbach\index{Hauser-Feshbach}) calculations using
+model (Hauser-Feshbach\index{Hauser-Feshbach}) default calculations using
 the Giant Multipole Resonance model known as Brink-Axel hypothesis \cite{Axel,Brink,Brinka}.
 The Brink-Axel hypothesis allows the cross section for photoabsorption
 by an excited state to be equated with that of the ground state. Introducing
@@ -2321,6 +2321,25 @@ with these different representations are presented in Fig.~\ref{unresolved01}.
 different $\gamma$-ray strength functions.}
 \label{unresolved01}
 \end{figure}
+
+User may increase the maximum multipolarity from the default value of 2
+(E1, M1 and E2 transitions only) up to the maximal value of 10.
+This change affects calculations of $\gamma$-transitions between states in the
+continuum as well as from the continuum to discrete levels.
+The radiative strength functions for higher multipole orders ($f_{EL}$, $f_{ML}$)
+are calculated using the relationships between
+single-particle radiative strength functions expressed in the Weisskopf form.
+For the electric transitions we have
+\begin{equation}
+f_{E(L+1)}/f_{EL} = C E_{\gamma}^2[(3+L)/(5+L)]^2,
+\end{equation}
+\noindent where $C=[R/(\hbar c)]^2 = 3.7*10^{-5}A^{2/3}$ if nuclear radius  $R=1.2 A^{2/3}$ [fm] is assumed.
+For the magnetic transitions we use
+ \begin{equation}
+f_{M(L+1)}/f_{E(L+1)} = 10[\hbar/(m c R)]^2 = 0.307 A^{-2/3}.
+\end{equation}
+
+
 
 
 \subsubsection{Fission}
@@ -2436,7 +2455,7 @@ The multi-modal approach assumes Brosa's channel concept and the hypothesis that
 bifurcation points appear in the deformation region corresponding to the second
 minimum~\cite{Brosa:90-multimodal}. Consequently, different discrete and continuous spectra
 for the transition states at the outer saddle are considered for each
-mode. This is illustrated in Fig. \ref{fis-multimod}
+mode. This is illustrated in Fig.~\ref{fis-multimod}
 for two modes known as super-long symmetric (SL) and standard asymmetric
 (S1).
 
@@ -2520,7 +2539,7 @@ and the fission probability $P_{f_j}$ associated to the $j$-th well
 %
 \begin{equation}
 T_{ind}=\sum_{j=2}^{N}T_{abs_j}P_{f_j}.
-\label{tf}
+\label{tf1}
 \end{equation}
 %
 For a double-humped fission barrier the above relation becomes
@@ -2795,16 +2814,16 @@ impossible to apply the same procedure and only fission probabilities given by E
 can be used.
 
  The significant difference appears between calculations considering partial damping (fission
-coefficient given by Eq.\ref{tfis}) and full damping (fission coefficient given by
+coefficient given by Eq.~\ref{tfis}) and full damping (fission coefficient given by
 Eq.\ref{tf-full}) of the vibrational states within well(s).
-This is illustrated in Fig.\ref{fis-u38-fcom} in case of neutron induced
+This is illustrated in Fig.~\ref{fis-u38-fcom} in case of neutron induced
 fission cross section of $^{238}$U. By assuming complete damping for
 subbarrier excitation energies, the fission cross section is overestimated and its
 resonance structure is not reproduced.
 %
 \begin{figure}[htbp]
 \scalebox{0.55}{\includegraphics{emp-fis-u38-fcom.eps}}
-\caption{Neutron induced fission cross section of $^{238}$U calculated with the same
+\caption{\label{fis-u38-fcom}Neutron induced fission cross section of $^{238}$U calculated with the same
 barriers' parameters but with different assumptions about the damping of the class II
 vibrational states: partial damping (full curve), complete damping (dashed curve)}.
 \end{figure}
@@ -4066,7 +4085,7 @@ of exclusive spectra.}
 Essential reaction calculations are performed by the EMPIRE physics core. Most of nuclear physicists
 would not need any further processing except automatic graphical comparison with the experimental data, which greatly facilitates adjustment of model parameters to reproduce measurements. For the nuclear data evaluator, this point is only the beginning of the lengthy process. Further steps include ENDF-6 formating, including neutron resonances, checking file consistency and integrity, verification of the ENDF-6 formating, pre-processing  (resonance reconstruction and Doppler broadening) and comparison against experimental data, generation of the processed file suitable for transport calculations (e.g., processing with the NJOY code) and final validation against integral benchmark experiments.
 
-The most critical step on the way to the evaluated data file is organizing the results of the model calculation according to the internationally adopted ENDF-6 format~\cite{ENDF-102}.
+The most critical step on the way to the evaluated data file is organizing the results of the model calculation according to the internationally adopted ENDF-6 format~\cite{Herman:05a}.
 The ENDF option in the input file instructs EMPIRE to
 write all necessary information to the dedicated output file.
 This file is processed by the utility
@@ -4183,7 +4202,7 @@ by V. Zerkin).
 V. Zerkin~\cite{ZVView}.
 \end{itemize}
 
-These codes are conveniently linked via bash scripts and operated from the main EMPIRE GUI. They can be executed with a simple mouse click while the system takes care of preparing input files for each code and transferring outputs between the codes. This system extends up to the creation of the input for the processing code NJOY~\cite{NJOY} and executing NJOY calculations. Actually, the NJOY code is the only one not provided with the EMPIRE package. It has to installed separately but once present its execution can be controlled via EMPIRE main GUI. In all cases, default calculations are completely transparent to the user that does not need to
+These codes are conveniently linked via bash scripts and operated from the main EMPIRE GUI. They can be executed with a simple mouse click while the system takes care of preparing input files for each code and transferring outputs between the codes. This system extends up to the creation of the input for the processing code NJOY~\cite{MacFarlane:06,MacFarlane:94} and executing NJOY calculations. Actually, the NJOY code is the only one not provided with the EMPIRE package. It has to installed separately but once present its execution can be controlled via EMPIRE main GUI. In all cases, default calculations are completely transparent to the user that does not need to
 
 \section{Input Libraries}
 The EMPIRE system is provided with a complete set
@@ -4427,8 +4446,22 @@ The RIPL-2 parametrization is used to identify the optical model parameters, any
 
 At present, the optical model fitting is performed using a simple numerical gradient search to minimize the $\chi^{2}$. The adjusted parameters are stored in the original EMPIRE input files (accordingly modified) so that any subsequent run of EMPIRE uses the new parameters.
 
+\begin{figure}[tbp]
+\scalebox{0.32}{\rotatebox{-90}{\includegraphics{bad-fitlev.eps}}}
+\caption{\label{fig: badfit}Cumulative plot of 16 discrete levels in $^{95}$Ru (blue area) which could not be reproduced by the EMPIRE-specific level density calculations with default parametrization (solid red line).}
+\end{figure}
+
+
+\begin{figure}[tbp]
+\scalebox{0.32}{\rotatebox{-90}{\includegraphics{good-fitlev.eps}}}
+\caption{\label{fig: goodfit}Same as Fig.~\ref{fig: badfit} but after restricting the fit to the first 7 levels only. Note the difference of an order of magnitude in the level densities around 5 MeV.}
+\end{figure}
+
 \subsection{Fitting Discrete Levels}
-Adjusting level density parameters to reproduce cumulative plots of discrete levels is strongly recommended before any cross section calculations are attempted. This allows a check of whether the discrete level schemes for the involved nuclei are complete and consistent with the level density parametrization. Plots of cumulative number of levels for each nucleus involved in the calculations for which at least three levels are known can be created by setting up one option in the input file. Two somewhat extreme examples of such plots are shown in Fig.~\ref{fig: badfit} and \ref{fig: goodfit}. Fig.~\ref{fig: badfit} demonstrates 10 levels in $^{96}$Pd, which could not be matched with the level densities, which usually happens when the levels are over extend. Then, levels that were not detected experimentally are missing in the spectrum, and the resulting high energy end of the cumulative plot is too low. Missing levels are more likely in the high-energy region of the spectrum and reducing the number of levels considered may restore agreement; neglecting the highest 4 levels in $^{96}$Pd leads to a reasonable fit, as shown in the Fig.~\ref{fig: goodfit}. Graphical representation helps to identify the level at which cumulative plot starts to bend, and levels lying above this point should be excluded from consideration.
+Adjusting level density parameters to reproduce cumulative plots of discrete levels is strongly recommended before any cross section calculations are attempted. This allows a check of whether the discrete level schemes for the involved nuclei are complete and consistent with the level density parametrization. Plots of cumulative number of levels for each nucleus involved in the calculations for which at least three levels are known can be created by setting up one option in the input file. Two somewhat extreme examples of such plots are shown in Fig.~\ref{fig: badfit} and \ref{fig: goodfit}. Fig.~\ref{fig: badfit} demonstrates 16 levels in $^{95}$Ru, which could not be matched with the level densities, which usually happens when the levels are over extend. Then, levels that were not detected experimentally are missing in the spectrum, and the resulting high energy end of the cumulative plot is too low. Missing levels are more likely in the high-energy region of the spectrum and reducing the number of levels considered may restore agreement; neglecting the highest 9 levels in $^{96}$Pd leads to a reasonable fit, as shown in the Fig.~\ref{fig: goodfit}. Graphical representation helps to identify the level at which cumulative plot starts to bend, and levels lying above this point should be excluded from consideration.
+
+Calculated cross sections are very sensitive to the discrete level cut off. Extending discrete level region too far might dramatically affect level densities between the cut off energy and neutron binding (as shown in Figs.~\ref{fig: badfit, fig: goodfit}) distorting distribution of the flux between channels. Therefore, careful fitting of level densities to the discrete levels must always be a first step in any serious calculations.
+
 
 \subsection{Use of Level densities}
 The variety of nuclear level densities available in EMPIRE calls for additional guidance on their use. Only three options are recommended: EMPIRE-specific, Gilbert-Cameron (GC) and HF-BCS; all remaining options (such as Fermi-gas with level density parameter a=A/8) are included for comparison but their accuracy is much lower than the three recommendations. The GC level densities, especially when adjusted to known experimental data, may be the most accurate at excitation energies up to the neutron binding and slightly above. However, GC level densities do not lend themselves to extrapolation to higher excitation energies and to nuclei far from the stability line. Energy extrapolation in GC might be dangerous because of the collective effects which are implicitly contained in the level density parameter \textit{a}. While this can be an acceptable approximation at low excitation energies for which level densities are fixed by fitting experimental data (discrete levels and neutron resonance spacings), there is no physical justification for extending such a treatment to higher energies. In fact, collective effects, as implicitly accounted for in the GC approach, increase exponentially with excitation energy instead of decreasing and eventually disappearing. In this respect, EMPIRE-specific and microscopic HF-BCS densities behave properly and should be preferred at excitation energies well above neutron binding.
