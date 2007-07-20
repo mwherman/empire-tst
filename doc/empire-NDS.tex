@@ -18,8 +18,8 @@
 %  3)  latex apssamp.tex
 %  4)  latex apssamp.tex
 %
-%\documentclass[twocolumn,amsmath,amssymb,10pt,groupedaddress,letter]{revtex4}
-\documentclass[twocolumn,amsmath,amssymb,10pt,groupedaddress,a4paper]{revtex4}
+\documentclass[twocolumn,amsmath,amssymb,10pt,groupedaddress,letter]{revtex4}
+%\documentclass[twocolumn,amsmath,amssymb,10pt,groupedaddress,a4paper]{revtex4}
 %\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 
 % Some other (several out of many) possibilities
@@ -47,6 +47,8 @@
 \usepackage{longtable}
 \usepackage{multirow}
 \usepackage[active]{srcltx}
+\textheight 230mm
+\topmargin -15mm
 %\usepackage{bibunits}% Separate lists of references
 %\usepackage[bookmarksnumbered,colorlinks,backref, bookmarks, breaklinks, linktocpage]{hyperref}
 \bibliographystyle{ieeetr.bst}
@@ -131,7 +133,7 @@ capabilities of the code, outlines physical models and indicates parameter libra
 used by EMPIRE to predict reaction cross sections and spectra.
 
 \end{abstract}
-
+\vspace*{12mm}
 \maketitle
 \lhead{EMPIRE: Nuclear Reaction Code...}
 \chead{NUCLEAR DATA SHEETS}
@@ -141,12 +143,8 @@ used by EMPIRE to predict reaction cross sections and spectra.
 \setlength{\headrulewidth}{0.4pt}
 \setlength{\footrulewidth}{0.4pt}
 
-\newpage
 \tableofcontents
 
-
-
-\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \section{ToDo and deficiencies}
 %
@@ -157,7 +155,12 @@ used by EMPIRE to predict reaction cross sections and spectra.
 % \item Formatting updated with isomeric cross sections and mixed exclusive/inclusive spectra
 % \end{itemize}
 
+
+
+\newpage
 \section{Introduction}
+Recent release of the ENDF/B-VII.0 library~\cite{ENDF-VII} substantiated importance of the theory in the modern evaluation methodology. Nuclear reaction codes are instrumental in providing predictions for the cross sections and spectra  that were not measured or need to be interpolated or extrapolated to other energy regions. Use of the theory based modeling is actually the only viable way of generating complete and consistent data files. The most recent, frequently used, and comprehensive nuclear reaction codes are GNASH~\cite{Young:77, Young:92, Young:98}, TALYS~\cite{TALYS}, and EMPIRE. This paper describes the latter one.
+
 Roots of the EMPIRE system originate at the Institute of Nuclear Research (INR) in Warsaw and can be traced back to early seventies, when a vigorous program of activation measurements brought a natural need for an adequate  tool to interpret experimental results. The ISOMER code~\cite{Grochulski:73} was a first response to this necessity. This ingenious master-piece of programming incorporated the spin-dependent statistical theory of nuclear reactions within the ridiculously small, for today's standards, memory of just 4k. The ISOMER was coded in ALGOL and run on a transistor based computer GIER. The source of the code and input data were stored on the perforated paper tape, which used to break in the middle of the night (typical calculations would last a whole weekend). When the new CYBER-72 (CDC) computer was installed at INR and the GIER machine was moved out of the town a new code became an obvious necessity. Thus, the first EMPIRE code grew up on this well prepared, fertail soil building on the previous experience with the enthusiasm that characterized research at those days.
 
 The first version of the EMPIRE code was developed by M. Herman as a part of his Ph.D. thesis supervised by A. Marcinkowski. The original version, released in 1980~\cite{EMPIRE-I},
@@ -171,6 +174,35 @@ In 1985, development of the EMPIRE moved, along with the main author, to ENEA (B
 The NVWY~\cite{NVWY}, another quantum-mechanical formulation of the Multi-step Compound mechanism,
 was implemented in the HMS-EMPIRE and suplemented with the TUL approach\cite{TUL} to the Multi-step Direct emission. This version also
 included combinatorial calculations of particle-hole level densities.
+
+
+\begin{table*}
+\caption{Major releases of the EMPIRE code\label{tab:emp-history}}
+\begin{tabular}{lrll}
+\hline
+\textbf{Version}       &\textbf{ Year }&\textbf{Location}&\textbf{Comments}   \\
+\hline
+   EMPIRE              &    1980    &    Warsaw     &  CN+HYBRID          \\
+   EMPIRE MSC          &    1983    &    Warsaw     &  FKK(MSC)   \\
+   EMPIRE HI           &    1988    &    Messina    &  Heavy Ion version \\
+   EMPIRE HMS          &    1991    &    Bologna    &  NVWY(MSC)+TUL(MSD)   \\
+   EMPIRE-2.13         &    2001    &    Vienna     &  totally rewritten  \\
+   EMPIRE-2.17 (Montenotte)&2002    & Vienna        &  ECIS, HRTW, EXFOR, HMS,   \\
+                        &           &               &  DEGAS, RIPL-2, plotting   \\
+   EMPIRE-2.18 (Mondovi)&  2002     & Vienna        &                   \\
+   EMPIRE-2.19 (Lodi)  &   2005     & Brookhaven    & advanced fission, \\
+                       &            &               & photo-nuclear reactions, \\
+                       &            &               & PE clusters (PCROSS), OMP fitting,\\
+                       &            &               & merging resonances, \\
+                       &            &               & checking codes, NJOY support,\\
+                       &            &               & used for ENDF/B-VII.0 \\
+   EMPIRE-3.0 (Arcola) &   2007     & Brookhaven    & deformed TUL(MSD)  \\
+                       &            &               & improved fission \\
+                       &            &               & formatting isomers \\
+   \hline
+\end{tabular}
+\end{table*}
+
 
 In addition, a version for Heavy Ion induced reactions (EMPIRE HI)
 was developed as a part of the fusion-fission studies carried out in collaboration with the INFN group at Messina lead by G. Giardina. During this exercise it became clear that the original formulation did not lend itself for large scale extensions and a new code should be written from scratch. Thus, interpretation of the Heavy Ion (HI) induced reactions was the initial motivation for the development of the new EMPIRE-2 code. Its design was, therefore,  guided by the particular HI necessities that posed a much broader variety of challenges than neutron activation. However, these challenges were exploited to enrich the code and make it more general without compromising capabilities of treating neutron induced reactions, which remained one of the principal objectives.
@@ -189,7 +221,7 @@ During the 'Bologna period' (1990-1997) the EMPIRE developer team was formed whe
 
 In 1997 the EMPIRE home site transferred to the IAEA in Vienna. This move accelerated the development with two new members joining the team - V. Zerkin implemented EXFOR retrieval and interactive plotting while P. Oblo\v zinsk\'y incorporated exciton model with angular momentum coupling (DEGAS) and took the lead in promoting EMPIRE internationally. The code was first officially released (version 2.13)~\cite{EMPIRE:Trieste01} on the occasion of the ICTP Workshop on Nuclear Reaction Data and Nuclear Reactors in 2000.
 
-In 2003 EMPIRE has found a new home at the National Nuclear Data Center at BNL (M. Herman and P. Oblo\v zinsk\'y) while R. Capote, A. Trkov and V. Zerkin continued development in Vienna. M. Sin joined the team bringing the much needed fission expertize. She took the lead in the radical upgrade of the fission channel. B.V. Carlson followed with addition of the photonuclear reactions and highly automatized fitting of the optical model potential. More recently, H. Wienke upgraded the MSD module by extending it to the deformed nuclei.
+In 2003 EMPIRE has found a new home at the National Nuclear Data Center at BNL (M. Herman and P. Oblo\v zinsk\'y) while R. Capote, A. Trkov and V. Zerkin continued development in Vienna. M. Sin joined the team bringing the much needed fission expertize and took the lead in a radical upgrade of the fission channel. B.V. Carlson followed with addition of the photo-nuclear reactions and highly automatized fitting of the optical model potential. More recently, H. Wienke upgraded the MSD module by extending it to the deformed nuclei. In Tab.\ref{tab:emp-history} we list the most important releases of EMPIRE and indicate major additions or modifications with respect to the previous version.
 
 In this paper we describe the 3.0 version of the code (denominated 'Arcola'). Its immediate predecessor 2.19 was extensively used in the development of the ENDF/B-VII.0 library~\cite{ENDF-VII}. The following sections outline physics built into various modules of the EMPIRE, contents of the input libraries, particular features offered by the code and summarize usage of the EMPIRE in various laboratories. The intention of this writeup is to present capabilities of the system and explain means it is using to produce the answer. Even with the relatively generous space available to this review it is not possible to document all minor features and details of the algorithms used in the code. In particular, input preparation and operation of the code are outside the scope of the present paper. Users are advised to consult EMPIRE manual available at www.nndc.bnl.gov/empire and www-nds.iaea.org/empire for more practical instructions. Similarly, we
 refer to RIPL-2 documentation~\cite{RIPL2} for particulars regarding this input parameter library and to the Ref.~\cite{Mughabghab:06} for details concerning evaluation of neutron resonances.
@@ -218,7 +250,7 @@ from the EXFOR library~\cite{EXFOR}.
 
 \begin{figure*}[htbp]
 \scalebox{0.80}{\includegraphics{flowchart.eps}}
-\caption{Flow-chart of the EMPIRE system.}
+\caption{Flow-chart of the EMPIRE system showing major components of the system and their interdependence.}
 \label{fig:empire-flowchart}
 \end{figure*}
 
@@ -238,7 +270,7 @@ The flowchart shown in Fig.~\ref{fig:empire-flowchart} illustrates organization 
 
 We strive to provide ultimately all functionalities necessary or useful for nuclear data evaluation. The three recent extensions bring us closer to this goal: (i) the highly automated module for adjustment of optical potential parameters, (ii) the resonance module bringing capability of extracting, analyzing and formating resonance parameters from the Atlas of Neutron Resonances~\cite{Mughabghab:06}, and (iii) the covariance module enabling quantification of nuclear data uncertainties using both Monte Carlo and KALMAN methods to combine experimental covariances with the model based ones. The latter two extensions, although well advanced, are still in a phase of development and testing. Therefore, we will not cover them extensively in the present paper.
 
-We are pleased to acknowledge existence of similar all-in-one codes that built on a comparable physics, use alike design concepts, aim at analogous targets and address akin users. In the first place we mention the TALYS code~\cite{TALYS}, the original development by the Dutch-French collaboration, and the McGANSH code - being developed at Los Alamos as the successor to the well known and widely used GNASH code. We are also aware of the two independent activities carried out at JAEA in Japan. This healthy and friendly competition is a sign of vigorousness(HERE) of the field and should bring considerable benefits. The codes differ in the selection of the reaction models, tend to employ somewhat different implementations, and provide unique  features that make them better tailored to particular problems. The comparison of calculated results provides insight into accuracies of the models, approximations involved in their implementation and, last but not least, it helps to discover and correct coding errors that otherwise would be difficult to detect ("errare humanum est perseverare diabolicum" Lucius Annaeus Seneca, ca. 4 BC $-$ AD 65).
+We are pleased to acknowledge existence of similar all-in-one codes that built on a comparable physics, use alike design concepts, aim at analogous targets and address akin users. In the first place we mention the TALYS code~\cite{TALYS}, the original development by the Dutch-French collaboration, and the McGANSH code - being developed at Los Alamos as the successor to the well known and widely used GNASH code~\cite{Young:77, Young:92, Young:98}. We are also aware of the two independent activities carried out at JAEA in Japan. This healthy and friendly competition is a sign of vigorousness of the field and should bring considerable benefits. The codes differ in the selection of the reaction models, tend to employ somewhat different implementations, and provide unique  features that make them better tailored to particular problems. The comparison of calculated results provides insight into accuracies of the models, approximations involved in their implementation and, last but not least, it helps to discover and correct coding errors that otherwise would be difficult to detect ("errare humanum est perseverare diabolicum" Lucius Annaeus Seneca, ca. 4 BC $-$ AD 65).
 
 
 \section{Physics Core of EMPIRE}
@@ -738,12 +770,12 @@ Secs.~\ref{sec:sph-opt} and \ref{sec:DWBA-CC}),
 while different approaches are needed for heavy ions (HI) and photons.
 
 The model for photoabsorption must account for the different reaction
-mechanisms involved in the initial photonuclear excitation process
+mechanisms involved in the initial photo-nuclear excitation process
 and can not be decoupled from the subsequent decay of the excited
 nucleus by particle and $\gamma$-ray emission. At low energies, below
 about 30 MeV, the giant dipole resonance (GDR) is the dominant excitation
 mechanism, while at higher energies photoabsorption on a neutron-proton
-pair (a quasi-deuteron, QD) is the dominant mechanism. Since photonuclear
+pair (a quasi-deuteron, QD) is the dominant mechanism. Since photo-nuclear
 reactions are described in terms of preequilibrium models, we will discuss
 them in more detail in Sec.~\ref{sec:photonuclear}
 
@@ -838,7 +870,7 @@ that the closed channel space, i.e. the MSC\index{MSC} contributions,
 have been projected out and can be treated separately within the Multi-step
 Compound\index{MSC} mechanism.
 
-
+\medskip
 \paragraph{\label{sec:MSDtheory}Outline of the Theory}
 
 In the MSD\index{MSD} theory the effective Hamiltonian in the open
@@ -1047,7 +1079,7 @@ is introduced in a minimal way, namely referring only to the intrinsic
 systems while multi-step scattering is described quantum-mechanically
 as a coherent process at all steps.
 
-
+\medskip
 \paragraph{Notes on RPA-Description of Transition Strength Functions}
 In the MSD\index{MSD} approach continuum scattering is considered
 as a sequence of $1p-1h$ transitions and the transition strength
@@ -1191,7 +1223,7 @@ The maximum $l$-transfer $\lambda$ is internally set between 1 and
 4 depending on the maximum $l$ contributing to the reaction cross
 section.
 
-
+\medskip
 \paragraph{Implementation of ORION and TRISTAN\index{TRISTAN} Codes in EMPIRE}
 
 Implementation of ORION\index{ORION} and TRISTAN codes in EMPIRE
@@ -1365,7 +1397,7 @@ classes, which are generally sufficient to grasp the most important
 part of the MSC spectrum and to delegate the rest of the decay to
 the Hauser-Feshbach model.
 
-
+\medskip
 \paragraph{Conditional Level Densities}
 Following Ref. \cite{Stan}, the conditional density of states having
 all $p$ particles bound ({\it i.e.} below the binding energy $B$) reads
@@ -1425,6 +1457,7 @@ Y_{n}^{n+1}\downarrow & = & g\frac{(h+1)(h+2)}{\rho_{ph}^{B}(E)}\biggl\{\frac{1}
 \end{eqnarray}
 \noindent with $\alpha$ equal 1 for $E>B$ and 0 for $E\leq B$.
 
+\medskip
 \paragraph{Coupling Between MSC\index{MSC} and MSD\index{MSD}}
 The NVWY\index{NVWY} theory includes a possibility of feeding higher
 MSC classes directly from the MSD\index{MSD} chain, in addition to
@@ -1500,7 +1533,7 @@ JENDL-3.3 libraries.}
 \label{thoriumMSD}
 \end{figure}
 
-
+\medskip
 \paragraph{$\gamma$-emission in Multi-step Compound}
 
 The emission of $\gamma$ in the Multi-step Compound\index{MSC} mechanism
@@ -1760,7 +1793,7 @@ is recovered
 \end{equation}
 \begin{figure}[htbp]
 \scalebox{0.8}{\includegraphics{ir193.eps}}
-\caption{Neutron capture cross section for $^{193}$Ir. }
+\caption{Comparison of the neutron capture on $^{193}$Ir calculated using pure compound nucleus and compound nucleus combined with the preequilibrium model DEGAS (including emission of $\gamma$-rays showing overwhelming contribution of the precompound process at higher incident energies. }
 \label{ir193}
 \end{figure}
 
@@ -1832,8 +1865,7 @@ and preequilibrium emission cross sections
 Here, subscripts $c$ and $r$ refer to the composite and residual
 nuclei respectively.
 
-An example of an improved calculation of neutron capture reaction on $^{193}$Ir is presented
-in Fig.~\ref{ir193}. (HERE) Two calculations, with and without DEGAS, show increase of the capture cross section above 3~MeV.
+The improvement obtained by including preequilibrium emission of photons is illustrated in Fig.~\ref{ir193} in the case of neutron capture on $^{193}$Ir. The two calculations, one with and one without DEGAS, show substantial increase of the capture cross section above 3~MeV. In the region of the Giant Dipole Resonance this difference exceeds an order of magnitude due to the dominating role of the preequilibrium mechanism in the emission of $\gamma$-rays at these energies.
 
 
 
@@ -2054,8 +2086,8 @@ preequilibrium model with proper angular momentum coupling.
 
 
 \subsubsection{\label{sec:photonuclear} Photonuclear Reactions}
-A model of photonuclear reactions must account for the different reaction
-mechanisms involved in the initial photonuclear excitation process
+A model of photo-nuclear reactions must account for the different reaction
+mechanisms involved in the initial photo-nuclear excitation process
 and the subsequent decay of the excited nucleus by particle and gamma-ray
 emission. At low energies, below about 30 MeV, the Giant Dipole Resonance
 (GDR) is the dominant excitation mechanism, where a collective bulk
@@ -2122,7 +2154,7 @@ particle-hole excitations ($1p1h$ for the GDR; $2p2h$ or $2p1h$
 for QD processes) and thus it is natural to use a preequilibrium theory
 of particle-hole processes to describe the preequilibrium emission
 and damping to equilibrium during the evolution of the reaction. Such
-models can be used to calculate photonuclear reactions for incident
+models can be used to calculate photo-nuclear reactions for incident
 photons with energies up to about 140 MeV, which is the threshold
 for pion production.
 \begin{figure}[htbp]
@@ -2133,7 +2165,7 @@ photo-absorption on $^{235}$U.}
 \end{figure}
 
 At present, EMPIRE permits the calculation of
-preequilibrium emission in photonuclear reactions using either the
+preequilibrium emission in photo-nuclear reactions using either the
 exciton model module PCROSS\index{PCROSS} or the Hybrid Monte-Carlo
 Simulation module HMS\index{HMS}. Both implementations of photoabsorption
 represent the GDR fraction as an initial $1p1h$ excitation and the
@@ -2148,7 +2180,7 @@ nuclear system reaches equilibrium, after which it decays by sequential
 particle or gamma-ray emission (or possibly fission) until the nuclear
 ground state is reached. In EMPIRE, the Hauser-Feshbach theory is
 used to calculate cross sections for these processes.
-Much more information on photonuclear reactions can be found in
+Much more information on photo-nuclear reactions can be found in
 Ref.~\cite{PHNuc}, which served as the basis for this brief description
 of these processes.
 For illustration of the capability of the EMPIRE code, figure~\ref{u235abs}
@@ -2371,7 +2403,7 @@ barrier, therefore only the latest will be given in this paper. Further details 
 general formula are included in \cite{Sin:07}.
 \\
 
-
+\medskip
 %==============================================================
 \paragraph*{Fission barriers.}
 %==============================================================
@@ -2484,7 +2516,7 @@ requiring a blind description of fission for nuclei far from stability.
 \label{fis-tot-bar}
 \end{figure}
 %
-\\
+\medskip
 %==============================================================
 \paragraph*{Fission mechanisms.}
 %==============================================================
@@ -2555,7 +2587,8 @@ transmission coefficient through the outer peak, $T_{\gamma _{II}}$
 describes gamma-decay in the isomeric well and $R$ is the branching ratio for
 fission of the isomeric state. In most of the cases $T_{\gamma _{II}}$ is
 small and is usually neglected.
-\\
+
+\medskip
 %==============================================================
 \paragraph*{Fission coefficients.}
 %==============================================================
@@ -2592,6 +2625,7 @@ approximated as:
 j=2,N.
 \end{equation}
 
+\medskip
 \paragraph*{Optical model for fission.}
 %
 The direct transmission coefficient through a real double-humped fission barrier
@@ -2840,8 +2874,7 @@ parameters and their values are extracted from systematics or from the fit of th
 data. Even if the predictive power of the model is not very good, the descriptive power is
 impressive (see ....Actinides for ENDF).
 
-
-%
+\medskip
 %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 \paragraph*{Surrogate optical model for fission.}
 %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -2920,7 +2953,7 @@ Eq.\ref{tf-full}.}
 \end{figure}
 %
 
-
+\medskip
 %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 \paragraph*{Multi-modal fission.}
 %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -3470,6 +3503,7 @@ the level densities as long as damping of the collective effects is
 irrelevant. The relatively low angular momentum introduced by the
 incident projectile justifies neglect of dynamical effects.
 
+\medskip
 \paragraph{Gilbert-Cameron level densities}
 The Gilbert-Cameron approach \cite{gc} splits excitation energy in
 two regions. Different functional forms of level densities\index{level densities}
@@ -3531,6 +3565,7 @@ These are included implicitly in the $\widetilde{a}$ when fitting
 neutron resonance spacings. Such an approach leads to the over-estimation
 of the level densities above, say, 20 MeV.
 
+\medskip
 \paragraph{EMPIRE-specific level densities}
 The dynamic approach to the level densities\index{level densities}
 is specific to the EMPIRE code. It takes into account collective enhancements
@@ -3761,6 +3796,7 @@ densities\index{level densities} below $U_{crt}$ are calculated
 in the frame of the super-fluid model \cite{igna} with the pairing
 gap $\Delta=12/\sqrt{A}$.
 
+\medskip
 \paragraph{Hartree-Fock-BCS level densities}
 EMPIRE can read precalculated level densities\index{level densities}
 from the RIPL\index{RIPL}-2 library, which contains tables of level
@@ -3864,6 +3900,42 @@ of stability.
 A comparison of  calculation of the neutron capture cross section on $^{160}$Gd
 with different level densities is presented in Fig.~\ref{levdens}. These
 calculations were obtained with default parameters for the models.
+
+\medskip
+\paragraph{Level densities at saddles}
+The two available options for the level densities at saddles are shortly characterized below.
+\begin{description}
+\item [Default option] EMPIRE-specific dynamic approach as used for normal
+states (BCS + modified Fermi Gas) except for the following differences:
+\begin{itemize}
+\item equilibrium deformation is replaced by the saddle deformation,
+\item pairing at saddles is parameterized following RIPL-2 as $\Delta_{f}=14A^{1/2}$,
+\item shell corrections at saddles are calculated as recommended in RIPL-2:
+\begin{eqnarray}
+\delta W_{A}&=&\left\{ \begin{array}{lr}
+2.6 & Z\leq97\\
+2.6-0.1(Z-97) & Z>97\end{array}\right.\nonumber\\
+\delta W_{B}&=&\left\{ \begin{array}{lr}
+0.6+0.1(Z-97)+0.04(N-143) & Z<97\\
+0.6+0.04(N-143) & Z\geq97\end{array}\right.\nonumber
+\end{eqnarray}
+\item collective enhancements corresponding to the nuclear shape asymmetry
+at each saddle are calculated following the prescription in RIPL-2.
+The following shape asymmetries can be considered:
+\begin{tabular}{ll}
+ - axial, mirror symmetry\tabularnewline
+ - axial asymmetry, mirror symmetry\tabularnewline
+ - axial symmetry, mirror asymmetry\tabularnewline
+ - axial, mirror asymmetry \tabularnewline
+\end{tabular}
+\end{itemize}
+
+\item [Alternative option] microscopic Hartree-Fock-BCS calculations of level densities
+at saddles retrieved from RIPL-2.
+\end{description}
+For both options, the energy dependence of level densities
+can be adjusted by multiplying level densities with a quadratic function
+$a_{0}+a_{1}E+a_{2}E^{2}$ with coefficients chosen by the user.
 
 
 \subsubsection{Nuclear Deformation and Moments of Inertia\label{sec: defor}}
@@ -4655,7 +4727,7 @@ Finally, we mention application of EMPIRE  for neutron-induced reactions in micr
 
 \section{Future Developments}
 
-The first part of the old rule of programming says: "If the code is useful it will be changed...". We are aware of certain shorcommings of the code and plan to address them in future.  One class of improvements is removing certain approximations that are related to the HI heritage such as: (i) use of the l-dependent optical model transmission coefficents, (ii) isotropic angular distribution for compound nucleus reaction products and (iii) parity-independent level densities. Another class of improvements, which actually is given the higher priority, is extending EMPIRE to cover neutron resonances and provide cross section covariances. In the remainig part of this section we describe the latter two aspects in more details.
+The first part of the old rule of programming says: "If the code is useful it will be changed...". We are aware of certain shorcommings of the code and plan to address them in future.  One class of improvements is removing certain approximations that are related to the HI heritage such as: (i) use of the l-dependent optical model transmission coefficents, (ii) isotropic angular distribution for compound nucleus reaction products and (iii) parity-independent level densities. Another class of improvements, which actually is given a higher priority, is extending EMPIRE to cover neutron resonances and provide cross section covariances. In the remainig part of this section we describe the latter two aspects in more details.
 
 \subsection{Neutron Resonance Module}
 EMPIRE-3 uses an internal, ENDF-6 formatted, database of resonances to complete fast neutron evaluations with the resonance region. Recently,  Mughabghab completed his Atlas of Neutron Resonances~\cite{Mughabghab:06}, a monumental compilation/evaluation work across the whole table of isotopes. This wealth of information must find its way into the evaluated libraries. With this goal in mind, we have started a new EMPIRE module~\cite{Cho:07} that will provide easy access to the Atlas data and their seemless transfer to the evaluation. We also intend to preserve legacy codes and methodology that has been developed over years and constitutes scientific heritage of great importance for application of nuclear technology.
