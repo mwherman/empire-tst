@@ -37,7 +37,6 @@
 
 
 \documentclass[twocolumn,10pt,groupedaddress,letter]{revtex4}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{makeidx}
@@ -63,7 +62,7 @@
 \textheight 230mm
 \topmargin -15mm
 \bibliographystyle{ieeetr.bst}
-\input{tcilatex}
+% \input{tcilatex}
 
 \begin{document}
 
@@ -668,9 +667,9 @@ wave function, Eq. (\ref{parwav}), and the result is compared to the
 expected form of the asymptotic wave function, one can extract the partial
 wave expansion of the scattering amplitudes,
 \begin{eqnarray}
-f_{\nu^{\prime}\nu}(\theta) & = & \frac{4\pi}{2ik}\sum_{{{\QATOP{ljn}{%
+f_{\nu^{\prime}\nu}(\theta) &=& \frac{4\pi}{2ik}\sum_{{{{ljn}{
 mm^{\prime}}}}}\;\left(e^{2i\sigma_{l}}S_{l}^{j}-1\right) \\
-& & \qquad\times Y_{lm^{\prime}}(\hat{r})Y_{lm}^{*}(\hat{k})\left\langle
+&& \qquad\times Y_{lm^{\prime}}(\hat{r})Y_{lm}^{*}(\hat{k})\left\langle
 lm^{\prime}s\nu^{\prime}|jn\right\rangle \left\langle jn|lms\nu\right\rangle
 \,.  \notag
 \end{eqnarray}
@@ -1981,19 +1980,6 @@ the respective spin multiplet. There was no attempt to treat MSD%
 \index{MSD} population of discrete levels more accurately as this kludge can
 be removed by using strict Coupled-Channels calculations.
 
-Figure~\ref{thoriumMSD} presents MSC/MSD modeling of neutron spectra from $%
-^{232}$Th~\cite{crp} at 60 degree for an incident neutron energy of 18~MeV.
-Improvement in the comparison with experimental data~\cite{mats} can be
-noticed compared to the previous evaluation from ENDF/B-VI.8 and JENDL-3.3.
-\begin{figure}[htbp]
-\scalebox{0.8}{\includegraphics{thorium.eps}}
-\caption{EMPIRE calculation for the neutron spectra emission at 60 degree
-for an incident neutron energy of 18.0~MeV on $^{232}$Th, compared to
-experimental data~\protect\cite{mats} and the ENDF/B-VI.8 and JENDL-3.3
-libraries.}
-\label{thoriumMSD}
-\end{figure}
-
 \medskip
 
 \paragraph{$\protect\gamma$-emission in Multi-step Compound}
@@ -2411,13 +2397,13 @@ the dominating role of the preequilibrium mechanism in the emission of $%
 \subsubsection{Exciton Model PCROSS\label{PCROSS}}
 
 The module PCROSS includes a preequilibrium mechanism as defined in the
-exciton model \cite{gr66}, which is based on the solution of the master
-equation \cite{clbl71} in the form proposed by Cline \cite{cl72} and
-Ribansky \cite{riobbe73}:
+exciton model \cite{Griffin:66}, which is based on the solution of the master
+equation \cite{Cline:71} in the form proposed by Cline \cite{Cline:72} and
+Ribansky \cite{Ribansky:73}:
 \begin{eqnarray}
--q_{t=0}(n) &=&\lambda _{+}(E,n+2)\tau (n+2)+  \notag \\
+-q_{t=0}(n) &=& \lambda _{+}(E,n+2)\tau (n+2)+  \notag \\
 &&\lambda _{-}(E,n-2)\tau (n-2)-  \notag \\
-&&\left[ \lambda _{+}(E,n)+\lambda _{-}(E,n)+L(E,n)\right]  \notag \\
+&&\left[ \lambda _{+}(E,n)+\lambda _{-}(E,n)+L(E,n)\right] \notag \\
 &&\tau (n),  \label{master}
 \end{eqnarray}%
 where $q_{t}(n)$ is the initial occupation probability of the composite
@@ -2429,7 +2415,7 @@ Note that no spin is included in the PCROSS formulation, which is the main
 difference to the DEGAS treatment. To obtain the numerical solution of the
 system of the algebraic equations for $\tau (n)$ given by equation \ref%
 {master}, we use the algorithm proposed by Akkermans, Gruppelaar and Reffo
-\cite{akgrre80}, which produces an exact result for any initial condition of
+\cite{Akkermans:80}, which produces an exact result for any initial condition of
 the problem. We are interested in the preequilibrium contribution only, so
 the \textit{never-come-back} assumption is used meaning that $\lambda
 _{+}(E,n)\gg \lambda _{-}(E,n)$ and only transitions increasing the
@@ -2463,10 +2449,9 @@ as coded in the PCROSS module.
 
 The equidistant spacing model has been used extensively to derive closed
 analytical formulae for partial state densities $\omega (p,h,U)$ employed in
-the preequilibrium models (for a review see Ref.\cite{ripl2}). At present,
-the PCROSS code uses the Williams formula \cite{wi71} where the Pauli
-correction $A(p,h)$ is calculated in accordance with Kalbach's method \cite%
-{ka83}.
+the preequilibrium models (for a review see Ref.\cite{RIPL2}). At present,
+the PCROSS code uses the Williams formula \cite{Williams:71} where the Pauli
+correction $A(p,h)$ is calculated in accordance with Kalbach's method \cite{Kalbach:83}.
 \begin{equation}
 \omega (p,h,E)=g\frac{\left( g(E-D)-A(p,h)\right) ^{p+h-1}}{p!h!(p+h-1)!}
 \end{equation}%
@@ -2475,33 +2460,32 @@ A(p,h)=\frac{1}{4}\left[ p(p-1)+h(h-1)\right]
 \end{equation*}%
 The state density $\omega (p,h,U)$ is set to zero when the excitation energy
 $E$ is less than the Pauli energy $\frac{1}{4g}\left[ p^{2}+h^{2})\right] $
-\cite{bacape89}. It was pointed out by Blann \cite{bl72} that the state
+\cite{Baguer:89}. It was pointed out by Blann~\cite{Blann:72} that the state
 density should be corrected by the depth of the potential well. The
-potential depth corrections formulated by Betak and Dobes \cite{bedo76} are
-used in PCROSS employing the simplified expressions obtained by Kalbach \cite%
-{ka77,ka83}.
+potential depth corrections formulated by Betak and Dobes \cite{Betak:76} are
+used in PCROSS employing the simplified expressions obtained by Kalbach \cite{Kalbach:77,Kalbach:83}.
 
 \paragraph{Internal transition rates}
 
 In the PCROSS code we use the parametrization of transition rate proposed by
-Blann and Mignerey \cite{blmi72}, which is based on existing experimental
+Blann and Mignerey \cite{Blann:72a}, which is based on existing experimental
 data on nucleon scattering and considers the Pauli principle in an
 approximate way. Using this parametrization and considering the
 particle-hole state densities from the Williams formula, we can obtain for
-the internal transition rates the expressions found by Machner \cite{ma81}:
+the internal transition rates the expressions found by Machner \cite{Machner:81}:
 \begin{equation}
 \lambda _{+}(E,n)=\frac{1}{K_{mfp}}\left[ 1.4x10^{21}E^{\prime }-\frac{2}{n+1%
 }6x10^{18}E^{\prime 2}\right]  \label{transplus}
 \end{equation}%
-In the PCROSS code the additional 3/8 factor introduced by Gupta \cite{gu81}
+In the PCROSS code the additional 3/8 factor introduced by Gupta \cite{Gupta:81}
 was taken into account in the r.h.s. of equation \ref{transplus}. This
 factor results from the reduction of a two-component master equation (i.e.
 with the neutron-proton distinction) to an effective one-component equation
-\cite{gu81}. Taking also into account the direct reaction contribution, as
+\cite{Gupta:81}. Taking also into account the direct reaction contribution, as
 has been mentioned above, we usually obtained a value of 1.1-1.6 for the
 mean free path parameter $K_{mfp}$. The increase of this parameter above
 unity could be expected as effects such as parity and angular momentum
-conservation are not considered in the Blann parameterization \cite{blmi72}.
+conservation are not considered in the Blann parameterization \cite{Blann:72a}.
 These effects taken together would produce an increase of the nucleon mean
 free path in the nuclear matter. The assumed default value of this parameter
 equal 1.3 is in good agreement with the one employed in typical hybrid model
@@ -2509,66 +2493,74 @@ calculations.
 
 \paragraph{Probability of nucleon emission}
 
-For the nucleon emission rate the method of Kalbach \cite{clbl71,cl72,ka77}
+For the nucleon emission rate the method of Kalbach \cite{Cline:71,Cline:72,Kalbach:77}
 is being implemented. The expression for the nucleon emission probability is
 derived applying the principle of detailed balance in a way similar to what
 is done in the evaporation model. The probability of emission $%
 W_{b}(E,n,\epsilon _{b})$ of a nucleon\textit{\ }$b$ with spin $s_{b}$,
 reduced mass $\mu _{b}$ and energy $\epsilon _{b}$ from a state with $n$
 excitons is given by,
-\begin{equation}
-W_{b}(E,n,\epsilon _{b})=\frac{2s_{b}+1}{\pi ^{2}\hbar ^{3}}\mu _{b}\epsilon
+\begin{eqnarray}
+W_{b}(E,n,\epsilon _{b})&=&\frac{2s_{b}+1}{\pi ^{2}\hbar ^{3}}\mu _{b}\epsilon
 _{b}\sigma _{b}^{inv}(\epsilon _{b})\times   \notag \\
-\frac{\omega _{res}(p-b,h,U)}{\omega _{CN}(p,h,E)}Q_{b}(p.h)
-\end{equation}%
+&&\frac{\omega _{res}(p-b,h,U)}{\omega _{CN}(p,h,E)}Q_{b}(p.h)
+\end{eqnarray}%
 where $E(U)$ is the excitation energy of the CN (residual nucleus), $\omega
 (p,h,U)$ is the particle-hole state density and $\sigma _{b}^{inv}(\epsilon
 _{b})$ the inverse channel reaction cross section. The factor $Q_{b}(p.h)$
 takes into account the fraction of $b$ nucleons in the $n$-th stage of the
-reaction and is calculated as discussed by Gupta \cite{gu81}.
+reaction and is calculated as discussed by Gupta \cite{Gupta:81}.
 
 \paragraph{Probability of cluster emission}
 
 The module PCROSS includes a preequilibrium mechanism for clusters in the
-incoming and outgoing channels by including the Iwamoto-Harada model~\cite%
-{iwha82} parametrized and improved in~\cite{saiwha83,za88,za89}. In this
+incoming and outgoing channels by including the Iwamoto-Harada model~\cite{Iwamoto:82} parametrized and improved in~\cite{Sato:83,Shang:88,Shang:89}. In this
 model, the formation probability of a cluster takes into account excitons
 below and above the Fermi surface and avoids free parameters. In the
 Iwamoto-Harada model~the probability of emission of the cluster $\beta $
 with spin $s_{\beta }$, reduced mass $\mu _{\beta }$ and energy $\epsilon
 _{\beta }$ from a state with $n$ excitons is given by%
-\begin{equation}
-W_{\beta }(E,n,\epsilon _{\beta })=\frac{2s_{\beta }+1}{\pi ^{2}\hbar ^{3}}%
+\begin{eqnarray}
+W_{\beta }(E,n,\epsilon _{\beta })&=&\frac{2s_{\beta }+1}{\pi ^{2}\hbar ^{3}}%
 \mu _{\beta }\epsilon _{\beta }\sigma _{\beta }^{inv}(\epsilon _{\beta
 })\times   \notag \\
-\frac{\sum\limits_{l+m=\beta }F_{lm}^{\beta }(\epsilon _{\beta
-})Q_{lm}^{\beta }(p.h)\omega _{res}(p-l,h,U)}{\omega _{CN}(p,h,E)}
-\end{equation}%
+&&\frac{\sum\limits_{l+m=\beta }F_{lm}^{\beta }(\epsilon _{\beta
+})Q_{lm}^{\beta }(p.h)\omega _{res}(p-l,h,U)}{\omega _{CN}(p,h,E)} \notag \\
+&&
+\end{eqnarray}%
 where the factor $Q_{lm}^{\beta }(p.h)$ is the generalization of the factor $%
 Q_{b}(p.h)$ which takes into account the probability of the outgoing cluster
 $\beta $ being formed with $l$ particles situated above and $m$ below the
-Fermi surface ($\beta =l+m$) \cite{za89} and the factor $F_{lm}^{\beta
+Fermi surface ($\beta =l+m$) \cite{Shang:89} and the factor $F_{lm}^{\beta
 }(\epsilon _{\beta })$ gives the probability of formation of the cluster $%
 \beta $ as a function of its energy. This last factor is calculated in
 PCROSS following the unpublished parametrization based on the original
-calculations of the cluster formation probabilty by Iwamoto and Harada \cite%
-{iwha82}.
+calculations of the cluster formation probability by Iwamoto and Harada \cite{Iwamoto:82}.
+
+Fig.~\ref{goldna} illustrates an essential
+improvement brought by the Iwamoto-Harada model to the interpretation of the $\alpha$-particle emission in the $^{197}$Au(n,$\alpha $) reaction.
+\begin{figure}[tbph]
+\scalebox{0.61}{\includegraphics{hermanm1_f4.eps}}
+\caption{Improvement in the description of the $^{179}$Au(n,$\protect\alpha $%
+) reaction achieved by employing the Iwamoto-Harada model for preequilibrium
+emission of $\protect\alpha $-particles.}
+\label{goldna}
+\end{figure}
 
 \paragraph{Probability of gamma emission}
 
 The probability of emission of gamma radiation (without spin selection
 rules) is derived in a way similar to the nucleon emission probability
-applying the principle of detailed balance \cite{plpr78,bedo79,akgr85} and
-can be expressed as%
-\begin{equation}
-W_{\gamma }(E,n,\epsilon _{\gamma })=\frac{1}{\pi ^{2}\hbar ^{3}c^{2}}%
+applying the principle of detailed balance \cite{Pluyko:78,Betak:79,Akkermans:85} and can be expressed as%
+\begin{eqnarray}
+W_{\gamma }(E,n,\epsilon _{\gamma })&=&\frac{1}{\pi ^{2}\hbar ^{3}c^{2}}%
 \epsilon _{\gamma }^{2}\sigma _{\gamma }^{inv}(\epsilon _{\gamma })\times
 \notag \\
-\frac{\sum\limits_{k}b(k\rightarrow n,\epsilon _{\gamma })\omega
+&&\frac{\sum\limits_{k}b(k\rightarrow n,\epsilon _{\gamma })\omega
 _{res}(p,h,U)}{\omega _{CN}(p,h,E)}
-\end{equation}%
+\end{eqnarray}%
 Coefficients $b(k\rightarrow n,\epsilon _{\gamma })$ are the branching
-ratios derived by Gruppelaar and Akkermans \cite{akgr85}. The inverse
+ratios derived by Gruppelaar and Akkermans \cite{Akkermans:85}. The inverse
 cross-section of reaction $\sigma _{\gamma }^{inv}(\epsilon _{\gamma })$ in
 the gamma channel is calculated with consideration of the contribution of
 the GDR only.
@@ -2577,25 +2569,23 @@ the GDR only.
 
 Calculations in the PCROSS module start with exciton number $n=1$, thus
 taking into account the direct gamma emission. The equilibrium exciton
-number is taken equal to $\sqrt{1.4}gE$ \cite{za88,za89}.
+number is taken equal to $\sqrt{1.4}gE$ \cite{Shang:88,Shang:89}.
 
-\bigskip In Fig.~\ref{goldna}, the Iwamoto-Harada model brings an essential
-improvement to the treatment of the $\alpha $-particle emission in the $%
-^{197}$Au(n,$\alpha $) reaction.
-\begin{figure}[tbph]
-\scalebox{0.61}{\includegraphics{hermanm1_f4.eps}}
-\caption{Improvement in the description of the $^{179}$Au(n,$\protect\alpha $%
-) reaction achieved by employing the Iwamoto-Harada model for preequilibrium
-emission of $\protect\alpha $-particles.}
-\label{goldna}
+\bigskip
+
+
+The exciton model, as implemented in the PCROSS code, has been extensively
+used in recent evaluations. Combined with direct
+contribution described in terms of the CC+DWBA models it gave an excellent description of the inelastic scattering of neutrons on $^{232}$Th in the energy range from 1 MeV up to 20 MeV. Fig. \ref{thspectra} shows an example of the neutron spectrum extracted from the recent IAEA evaluation included in the ENDF/B-VII library. The advanced modeling resulted in a dramatic improvement of the high energy part of the spectrum compared to the previous evaluations.
+
+\begin{figure}[htbp]
+\scalebox{0.8}{\includegraphics{thorium.eps}}
+\caption{EMPIRE calculation for the neutron spectra emission at 60 degree
+for an incident neutron energy of 18.0~MeV on $^{232}$Th, compared to
+experimental data~\protect\cite{mats} and the ENDF/B-VI.8 and JENDL-3.3
+libraries.}
+\label{thspectra}
 \end{figure}
-The exciton model as implemented in the PCROSS code has been extensively
-employed in recent evaluations. The exciton model combined with direct
-contribution described by CC+DWBA models gives an excellent description of
-the inelastic scattering of neutrons on $^{232}$Th nucleus from 1 MeV up to
-20 MeV incident energy as can be seen in Fig. \ref{thspectra}. These results
-correspond to the recent IAEA thorium evaluation in the fast neutron range,
-which was included into the ENDF/B-VII library.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -3295,7 +3285,7 @@ indirect mechanism. In the intermediate case, the fission process can be
 described by a smooth transition between the direct and indirect
 transmissions. In the optical model for fission this is achieved by
 introducing a negative imaginary potential for the deformation range
-corresponding to the absorbing wells ~\cite{Bhandari:79},\cite{Back:74}. A
+corresponding to the absorbing wells ~\cite{Bhandari:79, Back:74}. A
 simpler way to describe the degree of damping is by assigning
 energy-dependent weights to the direct and indirect fission coefficients.
 Details about both approaches are given in the next paragraphs.
@@ -3331,7 +3321,7 @@ _{II}}$ is small and is usually neglected.
 
 %==============================================================
 The transmission coefficients are expressed in first-order WKB approximation
-in terms of the momentum integrals for the humps~\cite{Froman:65, FD70}:
+in terms of the momentum integrals for the humps~\cite{Froman:65}:
 \begin{equation}
 K_{i}=\pm\left\vert
 \int_{a_{i}}^{b_{i}}[2\mu(E-V_{i}(\beta))/\hbar^{2}]^{1/2}d\beta\right\vert
@@ -3404,16 +3394,16 @@ T_{abs}=T_{dir}\frac{e^{2\delta_2}-(1-T_{B})e^{-2\delta_2}-T_{B}}{T_{B}}\,.
 \label{tabs_2}
 \end{equation}
 Further details about the iterative expressions of direct and absorption
-coefficients for multi-humped fission barriers will be given in \cite{Sin:07}%
+coefficients for multi-humped fission barriers are given in \cite{Sin:07}%
 .
 
 The total fission coefficient which enters the statistical model of nuclear
-reactions correspond to a certain spin and parity. Both direct transmission
+reactions corresponds to a certain spin and parity. Both direct transmission
 and absorption in the isomeric well(s) occur through the barriers associated
 to discrete and continuous transition states spectra. Therefore, the total
 fission coefficient for a certain spin and parity is the sum of the
 contributions of all discrete bands and continuous transition states
-containing levels with those particular spin and parity.
+containing levels with these particular spin and parity.
 
 For the direct fission coefficient the sum rule simply means
 \begin{equation}
@@ -3469,7 +3459,7 @@ J\pi)d\varepsilon} {1+\exp\left[ -(2\pi/\hbar\omega_{A})
 was obtained based on the following considerations:
 
 \begin{itemize}
-\item[-] in full $K$-mixing approximation all the discrete channels with the
+\item[-] in full $K$-mixing approximation all  discrete channels with the
 same $J\pi$ contribute irrespective to their $K$ value to the total
 absorption coefficient;
 
@@ -3488,7 +3478,7 @@ i=A,B.  \label{tfi}
 \end{eqnarray}
 The general expression for the fission coefficient (Eq.\ref{tf}) obtained
 within the optical model for fission in "full K-mixing" approximation, valid
-on any energy range, becomes
+in any energy range, becomes
 \begin{eqnarray}
 T_{f}(EJ\pi)=\sum_{K\le J}T_{dir}(EKJ\pi)+\qquad\quad  \notag \\
 T_{abs}(E J \pi)\frac{T_{B}(E J \pi)}{T_{A}(E J \pi)+T_{B}(E J \pi)}.
@@ -3513,7 +3503,7 @@ overestimation of the fission cross section if is used for subbarrier
 excitation energies.
 
 %\paragraph{Fission probabilities.}
-The fission probability is usually defined as the branching ratio of the
+The fission probability is usually defined as the ratio of the
 fission coefficient and the sum of all the transmission coefficients (for
 fission and for the competing channels $\sum_dT_d$)
 \begin{equation}
@@ -3554,9 +3544,9 @@ T_{abs}(T_{B}+T_{\gamma II})}.  \label{b11}
 \end{equation}
 
 The difference between the fission cross sections obtained with Eq.\ref{pf0}
-and Eq.\ref{pf11} appears only at very low excitation energies and is more
-or less significant depending on the fission barrier parameters. For more
-than two humps is practically impossible to apply the same procedure and
+and Eq.\ref{pf11} appears only at very low excitation energies and
+depends on the parameters of the fission barrier. For more
+than two humps it is practically impossible to apply the same procedure and
 only fission probabilities given by Eq.\ref{pf0} can be used.
 
 The significant difference appears between calculations considering partial
@@ -3577,14 +3567,14 @@ complete damping (dashed curve)}
 
 The optical model for fission provides a realistic description of the
 fission cross section, including the resonance structure at subbarrier
-excitation energies due to the coupling among discrete vibrational states in
-different wells. Therefore, the model is recommended to be used when high
-accuracy in description of the experimental data is required. As mentioned
-before, in such cases, the parameters of the fission barriers associated to
+excitation energies resulting from the coupling among discrete vibrational states in
+different wells. Therefore, this model is recommended when high
+accuracy description of experimental data is required. As mentioned
+before, in such cases, the parameters of the fission barriers associated with
 the transition states are considered free parameters and their values are
 extracted from systematics or from the fit of the experimental data. Even if
-the predictive power of the model is not very good, the descriptive power is
-impressive (see ....Actinides for ENDF).
+the predictive power of the model is limitted, the descriptive power is
+impressive (see $^{232}$Th and $^{231,233}$Pa in ENDF/B-VII.0\cite{ENDF-VII}).
 
 \medskip %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -3598,16 +3588,16 @@ by level densities. Analyzing the expressions of the fission coefficients in
 the previous paragraph, it can be easily noticed that the coupling among the
 vibrational states in the wells, determined by the degree of their damping,
 is contained only in the discrete terms. By cutting them, the general
-expression of the fission coefficient reduces to Eq.\ref{tf-full} which
+expression for the fission coefficient reduces to Eq.\ref{tf-full} which
 corresponds to full damping, or in other words, to decoupled transmissions
 through independent humps (Fig.\ref{fis-ld0.eps}.a). Using this expression
 would overestimate fission cross section of fertile nuclei at low energies.
-To overcome this disadvantage, in EMPIRE was implemented an alternative way
-to consider partial damping, which does not involve imaginary potential or
+To overcome this difficulty, we implemented in EMPIRE an alternative way
+of accounting for partial damping, which does not involve imaginary potential or
 discrete transition states. In this surrogate of the optical model for
 fission, the degree of damping is taken into account by defining the total
 fission coefficient as a weighted sum of of the direct coefficient
-corresponding to zero-damping and the indirect coefficient corresponding to
+corresponding to zero-damping and the indirect coefficient corresponding to the
 full damping
 \begin{equation}
 T_{f}(E J \pi)=(1-w(E))T_{dir_{(0)}}^{cont}(E J
@@ -3619,7 +3609,7 @@ order to calculate it, a level density describing the entire fission barrier
 would be needed (Fig.\ref{fis-ld0.eps}.b). The problem is that the
 phenomenological or microscopic models provide the level densities of the
 transition states only for the maxima and minima of the fission barrier.
-Making the assumption that the direct transmission is controlled by the
+Assuming that the direct transmission is controlled by the
 minimum level density at saddles the direct fission coefficient is
 calculated as
 \begin{equation}
@@ -3641,25 +3631,26 @@ energies comparable or higher than the barrier height (full arrows).}
 \label{fis-ld0.eps}
 \end{figure}
 Compared to the optical model for fission, this alternative approach has the
-advantage that describes the direct and indirect fission mechanisms without
+advantage of describing the direct and indirect fission mechanisms without
 involving many parameters. It can be used also when discrete transition
 states are considered, but the resonant structure is not equally well
-reproduced. In the optical model for fission, with increasing energy the
-imaginary potential strength increases and the resonances get damped (become
+reproduced. In the optical model for fission,  the
+imaginary potential strength increases with increasing energy
+and the resonances get damped (become
 wider and flatter until they disappear). In the surrogate approach the
-resonances, coming from the direct term, remain undamped, only their
-contribution diminishes together with the increase of the weight $w$.
+resonances, due to the direct term, remain undamped, only their
+contribution diminishes along with the increase of the weight $w$.
 
-It is recommended to use this model when only information about the
+This model is recommended when only the
 fundamental barrier and the level densities at saddles are available. The
-model was used to test microscopic barriers defined numerically \cite{Sin:07}%
-, a relevant example being presented in Fig.\ref{am41-surr}.
+model was used~\cite{Sin:07} to test fission barriers obtained in microscopic calculations,
+and a relevant example is presented in Fig.\ref{am41-surr}.
 \begin{figure}[htbp]
 \scalebox{0.55}{\includegraphics{emp-am41-surr.eps}}
-\caption{Neutron induced fission cross section of $^{241}$Am calculated with
+\caption{Neutron induced fission cross sections on $^{241}$Am calculated with
 microscopic fission barrier \protect\cite{Goriely:07-mass} and level
 densities at saddles \protect\cite{Goriely:07-ld}. The full curve was
-obtained using Eq.\protect\ref{tfsurr} and full curve was obtained using Eq.%
+obtained using Eq.\protect\ref{tfsurr} and dashed curve was obtained using Eq.%
 \protect\ref{tf-full}.}
 \label{am41-surr}
 \end{figure}
@@ -5063,7 +5054,7 @@ These codes are coveniently linked via bash scripts and operated from the
 main EMPIRE GUI. They can be executed with a simple mouse click while the
 system takes care of preparing input files for each code and transfering
 outputs between the codes. This system extends up to the creation of the
-input for the processing code NJOY~\cite{NJOY} and executing NJOY calculations.
+input for the processing code NJOY~\cite{MacFarlane:94} and executing NJOY calculations.
 Actually, the NJOY code is the only one not provided with the EMPIRE package.
 It has to be installed seprately, but once present, its execution can be controlled via EMPIRE main GUI. In all cases, default calculations are completely transparent to the user that does not need to apply more sophisticated case-dependent options that are otherwise available.
 
@@ -5074,7 +5065,7 @@ It has to be installed seprately, but once present, its execution can be control
 The EMPIRE system is provided with a complete set of input parameters that
 allow to perform default calculations with user's input reduced to the
 specification of the incident channel (projectile, target, and incident
-energy). The major sources of these parameters are RIPL-2~\cite{ripl2} and
+energy). The major sources of these parameters are RIPL-2~\cite{RIPL2} and
 the preliminary RIPL-3 libraries that include experimental results and/or
 theoretical predictions for:
 
@@ -5470,8 +5461,7 @@ involved nuclei are complete and consistent with the level density
 parametrization. Plots of cumulative number of levels for each nucleus
 involved in the calculations for which at least three levels are known can
 be created by setting up one option in the input file. Two somewhat extreme
-examples of such plots are shown in Fig.~\ref{fig: badfit} and \ref{fig:
-goodfit}. Fig.~\ref{fig: badfit} demonstrates 16 levels in $^{95}$Ru, which
+examples of such plots are shown in Fig.~\ref{fig: badfit} and \ref{fig: goodfit}. Fig.~\ref{fig: badfit} demonstrates 16 levels in $^{95}$Ru, which
 could not be matched with the level densities, which usually happens when
 the levels are over extend. Then, levels that were not detected
 experimentally are missing in the spectrum, and the resulting high energy
@@ -5485,8 +5475,7 @@ from consideration.
 
 Calculated cross sections are very sensitive to the discrete level cut off.
 Extending discrete level region too far might dramatically affect level
-densities between the cut off energy and neutron binding (as shown in Figs.~%
-\ref{fig: badfit, fig: goodfit}) distorting distribution of the flux between
+densities between the cut off energy and neutron binding (as shown in Figs.~\ref{fig: badfit},~\ref{fig: goodfit}) distorting distribution of the flux between
 channels. Therefore, careful fitting of level densities to the discrete
 levels must always be a first step in any serious calculations.
 
@@ -6194,9 +6183,9 @@ MacFarlane for his help in interfacing EMPIRE with his processing code NJOY.
 %IAEA
 We feel particularly fortunate to be able to built on the two solid
 foundations - the comprehensive compilation of model parameters (RIPL) and
-the extensive compilation of experimental results (CSISRS/EXFOR). both
-created under auspices of the IAEA. We are grateful to the two recent heads
-of the Nuclear Data Section D. Muir and A. Nichols for their continues
+the extensive compilation of experimental results (CSISRS/EXFOR).
+We are grateful to the two recent heads
+of the IAEA Nuclear Data Section D. Muir and A. Nichols for their continues
 support of the two projects. Naturally, our gratitude goes also to all
 participants of the three phases of the RIPL project and all EXFOR
 compilers, in particular to O. Schwerer who dedicated his career to EXFOR.
@@ -6240,7 +6229,7 @@ Last but not least, we would like to thank B. Pritychenko, A. Sonzogni, M.
 Pigni, and R. Arcilla for their assistance in the preparation of the
 manuscript and assembling the Nuclear Data Sheets issue.
 
-\bibliographystyle{plain}
+% \bibliographystyle{plain}
 \bibliography{empire}
 
 \end{document}
