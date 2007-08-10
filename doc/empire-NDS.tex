@@ -59,7 +59,7 @@
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 
 \pagestyle{fancy}
-\textheight 230mm
+\textheight 250mm
 \topmargin -15mm
 \bibliographystyle{ieeetr.bst}
 % \input{tcilatex}
@@ -93,7 +93,7 @@ nuclear models, and designed for calculations over a broad range of energies
 and incident particles. A projectile can be neutron, proton, any ion
 (including Heavy Ions) or a photon. The energy range extends from the
 beginning of the unresolved resonance region for neutron induced reactions ($%
-\backsim $ keV) and goes up to few hundred MeV for Heavy Ion induced
+\backsim$ keV) and goes up to few hundred MeV for Heavy Ion induced
 reactions.
 
 The code accounts for the major nuclear reaction mechanisms, including
@@ -232,11 +232,14 @@ EMPIRE-2.17 (Montenotte) & 2002 & Vienna & ECIS, HRTW, EXFOR, HMS, \\
 EMPIRE-2.18 (Mondovi) & 2002 & Vienna &  \\
 EMPIRE-2.19 (Lodi) & 2005 & Brookhaven & advanced fission, \\
 &  &  & photo-nuclear reactions, \\
-&  &  & PE clusters (PCROSS), OMP fitting, \\
+&  &  & PE clusters (PCROSS), \\
+&  &  & OMP fitting, \\
 &  &  & merging resonances, \\
+&  &  & mixed inclusive/exclusive spectra, \\
 &  &  & checking codes, NJOY support, \\
 &  &  & used for ENDF/B-VII.0 \\
 EMPIRE-3.0 (Arcola) & 2007 & Brookhaven & deformed TUL(MSD) \\
+&  &  & Monte Carlo sampling of input parameters \\
 &  &  & improved fission \\
 &  &  & formatting isomers \\ \hline
 \end{tabular}%
@@ -303,9 +306,9 @@ occasion of the ICTP Workshop on Nuclear Reaction Data and Nuclear Reactors
 in Trieste.
 
 In 2003 EMPIRE has found a new home at the National Nuclear Data Center at
-BNL (M. Herman and P. Oblo\v zinsk\'y) while R. Capote, A. Trkov and V.
+BNL (M. Herman and P. Oblo\v{z}insk\'{y}) while R. Capote, A. Trkov and V.
 Zerkin continued development in Vienna. M. Sin joined the team bringing the
-much needed fission expertize and took the lead in a radical upgrade of the
+much needed fission expertise and took the lead in a radical upgrade of the
 fission channel. B.V. Carlson followed with addition of the photo-nuclear
 reactions and highly automatized fitting of the optical model potential.
 More recently, H. Wienke upgraded the MSD module by extending it to the
@@ -319,7 +322,7 @@ development of the ENDF/B-VII.0 library~\cite{ENDF-VII}. The following
 sections outline physics built into various modules of the EMPIRE, contents
 of the input libraries, particular features offered by the code and
 summarize usage of the EMPIRE in various laboratories. The intention of this
-writeup is to present capabilities of the system and explain means it is
+write-up is to present capabilities of the system and explain means it is
 using to produce answers. Even with the relatively generous space available
 to this review it is not possible to document all minor features and details
 of the algorithms used in the code. In particular, input preparation and
@@ -407,7 +410,7 @@ nuclear data evaluation. The three recent extensions bring us closer to this
 goal. The highly automated module for adjustment of optical potential
 parameters refines essential parameters underlying any evaluation. The
 resonance module, being developed together with Young-Sik Cho, brings a
-capability of extracting, analyzing and formating resonance parameters from
+capability of extracting, analyzing and formatting resonance parameters from
 the Mughabghab's Atlas of Neutron Resonances~\cite{Mughabghab:06}. The
 covariance module enables quantification of nuclear data uncertainties using
 both Monte Carlo and KALMAN methods to combine experimental covariances with
@@ -476,7 +479,7 @@ incorporated in the physics core of the EMPIRE:
 The reader is referred to the original papers for a more detailed
 description of these codes.
 
-The selection of the reaction models is pragmatical - we try to cover all
+The selection of the reaction models is pragmatic - we try to cover all
 important features of nuclear reactions using modern, physically sound
 theoretical approaches that are computationally reasonable. Accordingly, we
 employ the Distorted Wave Born Approximation (DWBA) and Coupled-Channel (CC)
@@ -527,7 +530,7 @@ advantages but none is perfect. The comparison shown in Table~\ref%
 features. Therefore, the selection of the optimal model depends on the
 application. For example, reactions induced by high energy nucleons ($>$50
 MeV) will be most adequately described with the DDHMS module that is the
-only one to properly account for the multi-particle PE emission. On the other
+only one to properly account for the multiparticle PE emission. On the other
 hand, lack of the exclusive spectra excludes this model from nuclear data
 evaluations. We note also that the MSC formalism must be used together with
 the MSD and is, therefore, indirectly affected by the shortcomings of the
@@ -552,8 +555,8 @@ Angular distributions & + & - & - & +/- & + \\
 Charge-exchange reactions & - & + & + & + & + \\
 Cluster emission & - & - & - & + & - \\
 $\gamma$ emission & - & + & + & + & - \\
-Multi-particle PE emission & +/- & - & - & - & + \\
-Photo-nuclear reactions & - & - & - & + & + \\
+Multiparticle PE emission & +/- & - & - & - & + \\
+Photonuclear reactions & - & - & - & + & + \\
 Complex projectile & - & + & - & + & - \\
 Exclusive spectra & + & + & + & + & - \\ \hline
 \end{tabular}%
@@ -788,7 +791,7 @@ uses the RIPL%
 \index{RIPL}-2 \cite{RIPL2} optical model segment and resorts to the RIPL-2
 discrete level schemes and to the RIPL-2 deformation parameters (quadrupole
 deformations $\beta _{2}$) only if these are not included in the optical
-model parameter set available from RIPL-2. The vibrational (dynamical)
+model parameter set available from RIPL-2. The vibrational (dynamic)
 deformations are defined as 0.15 for quadrupole and 0.05 for octupole
 vibrations. Calculations can be performed for the majority of deformed
 nuclei including rotational and vibrational, even-even and even-A with
@@ -986,8 +989,8 @@ l^{\prime}j^{\prime}lj}{J}}}}(2J+1)\,\left|S_{l^{\prime}j^{%
 \prime}c_{0},ljc_{0}}^{J}-\delta_{l^{\prime}l}\delta_{j^{\prime}j}%
 \right|^{2}\,.
 \end{equation}
-The integrated inelastic cross sections exist for for both neutral and
-charged particles. They take the form
+The integrated inelastic cross sections exist for both neutral and charged
+particles. They take the form
 \begin{equation}
 \sigma_{c}=\frac{1}{(2s+1)(2I_{0}+1)}\frac{\pi}{k^{2}}\sum_{{{\QATOP{%
 l^{\prime}j^{\prime}lj}{J}}}}(2J+1)\,\left|S_{l^{\prime}j^{%
@@ -1102,7 +1105,7 @@ coupled levels. For strong coupling, such as that of highly deformed
 rotational bands in heavy nuclei, it should be used with caution. The DWBA
 option has an advantage if the suitable CC-OMP is not available. In such a
 case, one can use S-OMP parameters in the DWBA calculations tuning inelastic
-cross sections by adjusting the dynamical deformations of collective levels.
+cross sections by adjusting the dynamic deformations of collective levels.
 \end{enumerate}
 
 \bigskip
@@ -1113,7 +1116,7 @@ embedded in the continuum to improve the description of the high energy
 region of neutron spectra. The code automatically selects suitable discrete
 levels from the complete set available in the RIPL-2 library. Fictitious
 levels could also be used. Calculated inelastic cross sections are
-subtracted from the available reaction cross section for subsequent
+substracted from the available reaction cross section for subsequent
 preequilibrium and HF calculations. These capabilities can be combined with
 all those cases listed above. For those levels embedded in the continuum the
 DWBA contribution is then convoluted with a Gaussian function to simulate
@@ -2239,7 +2242,7 @@ R_{n}(J)=%
 \frac{2J+1}{2}exp\left( -\frac{(J+1/2)^{2}}{2\sigma _{n}^{2}}\right) ,
 \end{equation}%
 with $\sigma _{n}$ being the spin cut-off parameter ($\sigma
-_{n}^{2}=(0.24+0.0038\cdot E)\cdot nA^{2/3}).$ Treatment of the intra-nuclear
+_{n}^{2}=(0.24+0.0038\cdot E)\cdot nA^{2/3}).$ Treatment of the intranuclear
 cascade rates follows the FKK \cite{FKK} approach. The energy and spin
 dependence are assumed to factorize
 \begin{equation}
@@ -2324,7 +2327,7 @@ if emission of a $\gamma$ occurs with no change in the exciton number, or
 \notag \\
 \frac{b_{n-2,S}^{nJ}\omega(n-2,E-E_{\gamma},S)}{\omega(n,E,J)},&&
 \end{eqnarray}
-in the case of annihilation of one particle-hole pair. The photo-absorption
+in the case of annihilation of one particle-hole pair. The photoabsorption
 cross section $\sigma_{GDR}(E_{\gamma})$ is written in the Lorentzian form
 \begin{equation}
 \sigma_{GDR}(E_{\gamma})=53.2mb\frac{NZ}{A}\frac{E_{\gamma}^{2}\Gamma^{2}}{%
@@ -2478,7 +2481,8 @@ Blann and Mignerey \cite{Blann:72a}, which is based on existing experimental
 data on nucleon scattering and considers the Pauli principle in an
 approximate way. Using this parametrization and considering the
 particle-hole state densities from the Williams formula, we can obtain for
-the internal transition rates the expressions found by Machner \cite{Machner:81}:
+the internal transition rates the expressions found by Machner \cite%
+{Machner:81}:
 \begin{equation}
 \lambda _{+}(E,n)=\frac{1}{K_{mfp}}\left[ 1.4x10^{21}E^{\prime }-\frac{2}{n+1%
 }6x10^{18}E^{\prime 2}\right]  \label{transplus}
@@ -2542,10 +2546,12 @@ Fermi surface ($\beta =l+m$) \cite{Shang:89} and the factor $F_{lm}^{\beta
 }(\epsilon _{\beta })$ gives the probability of formation of the cluster $%
 \beta $ as a function of its energy. This last factor is calculated in
 PCROSS following the unpublished parametrization based on the original
-calculations of the cluster formation probability by Iwamoto and Harada \cite{Iwamoto:82}.
+calculations of the cluster formation probability by Iwamoto and Harada \cite%
+{Iwamoto:82}.
 
-Fig.~\ref{goldna} illustrates an essential
-improvement brought by the Iwamoto-Harada model to the interpretation of the $\alpha$-particle emission in the $^{197}$Au(n,$\alpha $) reaction.
+Fig.~\ref{goldna} illustrates an essential improvement brought by the
+Iwamoto-Harada model to the interpretation of the $\alpha$-particle emission
+in the $^{197}$Au(n,$\alpha $) reaction.
 \begin{figure}[tbph]
 \scalebox{0.61}{\includegraphics{hermanm1_f4.eps}}
 \caption{Improvement in the description of the $^{179}$Au(n,$\protect\alpha $%
@@ -2559,7 +2565,7 @@ emission of $\protect\alpha $-particles.}
 The probability of emission of gamma radiation (without spin selection
 rules) is derived in a way similar to the nucleon emission probability
 applying the principle of detailed balance \cite%
-{plpr78,Betak:79,Akkermans:85} and can be expressed as%
+{Pluyko:78,Betak:79,Akkermans:85} and can be expressed as%
 \begin{eqnarray}
 W_{\gamma }(E,n,\epsilon _{\gamma })&=&\frac{1}{\pi ^{2}\hbar ^{3}c^{2}}%
 \epsilon _{\gamma }^{2}\sigma _{\gamma }^{inv}(\epsilon _{\gamma })\times
@@ -2581,10 +2587,26 @@ number is taken equal to $\sqrt{1.4}gE$ \cite{Shang:88,Shang:89}.
 
 \bigskip
 
-
 The exciton model, as implemented in the PCROSS code, has been extensively
-used in recent evaluations. Combined with direct
-contribution described in terms of the CC+DWBA models it gave an excellent description of the inelastic scattering of neutrons on $^{232}$Th in the energy range from 1 MeV up to 20 MeV. Fig. \ref{thspectra} shows an example of the neutron spectrum extracted from the recent IAEA evaluation included in the ENDF/B-VII library. The advanced modeling resulted in a dramatic improvement of the high energy part of the spectrum compared to the previous evaluations.
+used in recent evaluations. Combined with direct contribution described in
+terms of the CC+DWBA models it gave an excellent description of the forward
+inelastic scattering of neutrons on $^{232}$Th in the energy range from 6.1
+MeV up to 18 MeV as can be seen in Fig. \ref{thspectra}.
+
+\begin{figure}[htbp]
+\scalebox{0.6}{\includegraphics{thspectra.eps}}
+\caption{EMPIRE calculations of the neutron spectra emitted at 30 degrees
+for 6.1, 11.9, 14.1 and 18 MeV neutrons incident on $^{232}$Th (scaled
+by 1, 10$^3$,10$^6$ and 10$^9$ respectively). Fission neutrons are not
+included.}
+\label{thspectra}
+\end{figure}
+
+The 18 MeV emission spectra at 60 degrees extracted from the recent IAEA
+evaluation included in the ENDF/B-VII library is compared to previous
+evaluations in Fig. \ref{thspectra18}. The advanced modeling resulted in a
+dramatic improvement of the high energy part of the spectrum compared to the
+previous evaluations.
 
 \begin{figure}[htbp]
 \scalebox{0.8}{\includegraphics{thorium.eps}}
@@ -2592,7 +2614,7 @@ contribution described in terms of the CC+DWBA models it gave an excellent descr
 for an incident neutron energy of 18.0~MeV on $^{232}$Th, compared to
 experimental data~\protect\cite{mats} and the ENDF/B-VI.8 and JENDL-3.3
 libraries.}
-\label{thspectra}
+\label{thspectra18}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2602,21 +2624,21 @@ libraries.}
 The Hybrid Monte-Carlo Simulation (HMS) approach to the preequilibrium
 emission of nucleons has been formulated by M. Blann \cite{Blann-HMS} as a
 hybrid model \cite{hybrid,hybrid1,hybrid2,hybrid3} inspired version of the
-intra-nuclear cascade approach. Contrary to other classical preequilibrium
+intranuclear cascade approach. Contrary to other classical preequilibrium
 models, this approach avoids multi-exciton level densities%
 \index{p-h level densities}, which were shown by Bisplinghoff \cite%
 {Bisplinghoff} to be used inconsistently in the exciton and in the hybrid
 formulations. The HMS%
 \index{HMS} model has a number of attractive features. First of all, there
-are no physical limits on a number of preequilibrium emissions (apart from
+are no physical limits on the number of preequilibrium emissions (apart from
 energy conservation). With the addition of linear momentum conservation by
-M. Chadwick and P. Oblo\v zinsk\' y (DDHMS), the model provides a nearly
-complete set of observables. These include cross sections for the production
-of residuals, light-particle double-differential spectra and spectra of
-recoils. Spin and excitation-energy dependent populations of residual nuclei
-can also be obtained, an essential feature for coupling the preequilibrium
-mechanism to the subsequent Compound Nucleus decay. The binding energies in
-the HMS%
+M. Chadwick and P. Oblo\v{z}insk%
+\'{ }y (DDHMS), the model provides a nearly complete set of observables.
+These include cross sections for the production of residuals, light-particle
+double-differential spectra and spectra of recoils. Spin and
+excitation-energy dependent populations of residual nuclei can also be
+obtained, an essential feature for coupling the preequilibrium mechanism to
+the subsequent Compound Nucleus decay. The binding energies in the HMS%
 \index{HMS} model are thermodynamically correct. The DDHMS model proved to
 perform very well
 %up to at least 250 MeV, extending energy range of the EMPIRE applicability
@@ -2827,7 +2849,7 @@ obtained from DEGAS, PCROSS or MSC but not from HMS. Finally, we note that
 DEGAS is the only $\gamma$-emission preequilibrium model with proper angular
 momentum coupling.
 
-\subsubsection{\label{sec:photonuclear} Photo-nuclear Reactions}
+\subsubsection{\label{sec:photonuclear} Photonuclear Reactions}
 
 A model of photo-nuclear reactions must account for the different reaction
 mechanisms involved in the initial photo-nuclear excitation process and the
@@ -2835,9 +2857,9 @@ subsequent decay of the excited nucleus by particle and $\gamma$-ray
 emission. At low energies, below about 30 MeV, the Giant Dipole Resonance
 (GDR) is the dominant excitation mechanism, where a collective bulk
 oscillation of the neutrons against the protons occurs. At higher energies,
-up to approximately 150 MeV, photo-absorption on a neutron-proton pair (a
+up to approximately 150 MeV, photoabsorption on a neutron-proton pair (a
 quasi-deuteron, QD), which has a large dipole moment, is the dominant
-mechanism. In EMPIRE, the photo-absorption cross section is calculated as the
+mechanism. In EMPIRE, the photoabsorption cross section is calculated as the
 sum of two components~\cite{PHNuc},
 \begin{equation}
 \sigma_{abs}(E_{\gamma})=\sigma_{GDR}(E_{\gamma})+\sigma_{QD}(E_{\gamma}).
@@ -2858,8 +2880,8 @@ and one uses $i=1,2$. As a rule, the parameters are derived from fits to
 experimental data or from systematics~\cite{RIPL2}. The QD component, $%
 \sigma_{QD}(E_{\gamma})$, is taken from the model of Chadwick~\emph{et al.}~%
 \cite{chadQD}, which uses a Levinger-type theory. It relates the nuclear
-photo-absorption cross section to the experimental deuteron
-photo-disintegration cross section, $\sigma_{d}(E_{\gamma})$, as
+photoabsorption cross section to the experimental deuteron
+photodisintegration cross section, $\sigma_{d}(E_{\gamma})$, as
 \begin{equation}
 \sigma_{QD}(E_{\gamma})=L\frac{NZ}{A}\sigma_{d}(E_{\gamma})\,
 f(E_{\gamma})\,.
@@ -2868,7 +2890,7 @@ Here, the Levinger parameter was derived as $L=6.5$ and $f(E_{\gamma})$ is
 the Pauli-blocking function, which reduces the free deuteron cross section $%
 \sigma_{d}(E_{\gamma})$ to account for Pauli blocking of the excited neutron
 and proton by the nuclear medium. The experimental deuteron
-photo-disintegration cross section was parametrized as
+photodisintegration cross section was parametrized as
 \begin{equation}
 \sigma_{d}(E_{\gamma})=61.2\frac{(E_{\gamma}-2.24)^{3/2}}{E_{\gamma}^{3}}\,,
 \end{equation}
@@ -2893,7 +2915,7 @@ and $D=24.2$ MeV for $E_{\gamma}>140$ MeV. This form has the correct
 behavior in that it tends to zero at $E_{\gamma}=0$ and to unity for large $%
 E_{\gamma}$, and is continuous with the previous equation at 20 and 140 MeV.
 Preequilibrium reaction mechanisms become important for incident photon
-energies above 10 to 15 MeV. In the photo-absorption mechanisms described
+energies above 10 to 15 MeV. In the photoabsorption mechanisms described
 above, the initial nuclear excitation can be understood in terms of
 particle-hole excitations ($1p1h$ for the GDR; $2p2h$ or $2p1h$ for QD
 processes) and thus it is natural to use a preequilibrium theory of
@@ -2911,9 +2933,9 @@ photo-absorption on $^{235}$U.}
 At present, EMPIRE permits the calculation of preequilibrium emission in
 photo-nuclear reactions using either the exciton model module PCROSS%
 \index{PCROSS} or the Hybrid Monte-Carlo Simulation module HMS%
-\index{HMS}. Both implementations of photo-absorption represent the GDR
+\index{HMS}. Both implementations of photoabsorption represent the GDR
 fraction as an initial $1p1h$ excitation and the QD fraction as an initial $%
-2p2h$ excitation. The implementation of photo-absorption in PCROSS does not
+2p2h$ excitation. The implementation of photoabsorption in PCROSS does not
 take into account the correlation of the two holes created through the QD
 mechanism, which would require an initial configuration closer to a $2p1h$
 one than to a $2p2h$ one~\cite{PHNuc}. The implementation in HMS takes this
@@ -3039,13 +3061,13 @@ F=4\frac{T_{ave}}{\sum_{c}T_{c}}\left(1+\frac{T_{a}}{\sum_{c}T_{c}}%
 which completes formulation of the model. By default, we use the HRTW model
 below 5 MeV incident energy.
 
-\subsubsection{$\protect\gamma$-ray Emission}
+\subsubsection{Photon Emission}
 
 The E1, E2, and M1 transitions are taken into account in the statistical
 model (Hauser-Feshbach%
 \index{Hauser-Feshbach}) default calculations using the Giant Multipole
 Resonance model known as Brink-Axel hypothesis \cite{Axel,Brink,Brinka}. The
-Brink-Axel hypothesis allows the cross section for photo-absorption by an
+Brink-Axel hypothesis allows the cross section for photoabsorption by an
 excited state to be equated with that of the ground state. Introducing the $%
 \gamma$-ray strength function $f_{Xl}(E_{\gamma})$, the transmission
 coefficient can be written as
@@ -3096,13 +3118,13 @@ responsible for the capture cross sections. The capture cross sections
 calculated with these different representations are presented in Fig.~\ref%
 {unresolved01}.
 \begin{figure}[htbp]
-\scalebox{0.8}{\includegraphics{gdr.eps}}
+\scalebox{0.78}{\includegraphics{gdr.eps}}
 \caption{Comparison of the capture cross section for $^{99}$Tc calculated
 with different $\protect\gamma$-ray strength functions.}
 \label{unresolved01}
 \end{figure}
 
-User may increase the maximum multi-polarity from the default value of 2 (E1,
+User may increase the maximum multipolarity from the default value of 2 (E1,
 M1 and E2 transitions only) up to the maximal value of 10. This change
 affects calculations of $\gamma$-transitions between states in the continuum
 as well as from the continuum to discrete levels. The radiative strength
@@ -3300,19 +3322,21 @@ weights to the direct and indirect fission coefficients. Details about both
 approaches are given in the next paragraphs.
 
 The flux absorbed in the well(s) can: \newline
-\qquad(i) be re-emitted in the fission channel by direct transmission
+\qquad (i) be re-emitted in the fission channel by direct transmission
 through the outer hump(s), \newline
-\qquad(ii) be absorbed in another well (undergo a shape transitions),
+\qquad (ii) be absorbed in another well (undergo a shape transitions),
 \newline
-\qquad(iii) undergo $\gamma$-transition to the isomeric state; the isomeric
-state, in turn, can decay by delayed (isomeric) fission or by shape
-transitions. The general expression for the indirect term is a sum of $N-1$
-terms, where $N-1$ is the number of wells. The term $j$ represents the
-product of the absorption coefficient $T_{abs_j}$ and the fission
-probability $P_{f_j}$ associated to the $j$-th well
+\qquad (iii) undergo $\gamma $-transition to the isomeric state; the
+isomeric state, in turn, can decay by delayed (isomeric) fission or by shape
+transitions.
+
+The general expression for the indirect term is a sum of $N-1$ terms, where $%
+N-1$ is the number of wells. The term $j$ represents the product of the
+absorption coefficient $T_{abs_{j}}$ and the fission probability $P_{f_{j}}$
+associated to the $j$-th well
 \begin{equation}
-T_{ind}=\sum_{j=2}^{N}T_{abs_j}P_{f_j}.  \label{tf1}
-\end{equation}
+T_{ind}=\sum_{j=2}^{N}T_{abs_{j}}P_{f_{j}}.  \label{tf1}
+\end{equation}%
 For a double-humped fission barrier the above relation becomes
 
 \begin{equation}
@@ -3385,25 +3409,26 @@ potentials introduced in the deformation ranges corresponding to the minima
 of the nuclear potential. The expression of the fission coefficient
 describing direct transmission through a double-humped barrier in the
 presence of absorption is a generalization of Eq.\ref{tdir_20}. It is
-obtained by adding to the real momentum integrals $\nu_j$ the imaginary
-contributions $\delta_j$ corresponding to the imaginary potentials \cite%
+obtained by adding to the real momentum integrals $\nu _{j}$ the imaginary
+contributions $\delta _{j}$ corresponding to the imaginary potentials \cite%
 {Bhandari:79}
 \begin{equation}
-\delta_j=-\left( \frac{\mu}{2\hbar^{2}}\right) ^{1/2}\int_{a_{j}}^{b_{j}}%
-\frac{W_j(\beta)}{[E-V_{j}(\beta)]^{1/2}}d\beta\,\quad j=2,N.
-\end{equation}
+\delta _{j}=-\left( \frac{\mu }{2\hbar ^{2}}\right)
+^{1/2}\int_{a_{j}}^{b_{j}}\frac{W_{j}(\beta )}{[E-V_{j}(\beta )]^{1/2}}%
+d\beta \,\quad j=2,N.
+\end{equation}%
 The direct transmission coefficient and the absorption coefficient for a
 complex double-humped fission barrier read
 \begin{equation}
-T_{dir}=\frac{T_{A}T_{B}}{e^{2\delta_2}+2B^{1/2}\cos
-(2\nu_{2})+Be^{-2\delta_2}}  \label{tdir_2}
-\end{equation}
+T_{dir}=\frac{T_{A}T_{B}}{e^{2\delta _{2}}+2B^{1/2}\cos (2\nu
+_{2})+Be^{-2\delta _{2}}}  \label{tdir_2}
+\end{equation}%
 \begin{equation}
-T_{abs}=T_{dir}\frac{e^{2\delta_2}-(1-T_{B})e^{-2\delta_2}-T_{B}}{T_{B}}\,.
-\label{tabs_2}
-\end{equation}
+T_{abs}=T_{dir}\frac{e^{2\delta _{2}}-(1-T_{B})e^{-2\delta _{2}}-T_{B}}{T_{B}%
+}\,.  \label{tabs_2}
+\end{equation}%
 Further details about the iterative expressions of direct and absorption
-coefficients for multi-humped fission barriers are given in \cite{Sin:07}.
+coefficients for multi-humped fission barriers are given in \cite{Sin:07a}.
 
 The total fission coefficient which enters the statistical model of nuclear
 reactions corresponds to a certain spin and parity. Both direct transmission
@@ -3507,7 +3532,7 @@ T_{f}(E J \pi)=T_{A}(E J \pi)\frac{T_{B}(E J \pi)}{T_{A}(E J \pi)+T_{B}(E J
 \pi)}.  \label{tf-full}
 \end{equation}
 This expression, used in almost all reaction codes, leads to an
-overestimation of the fission cross section if is used for sub-barrier
+overestimation of the fission cross section if is used for subbarrier
 excitation energies.
 
 %\paragraph{Fission probabilities.}
@@ -3562,7 +3587,7 @@ damping (fission coefficient given by Eq.~\ref{tfis}) and full damping
 (fission coefficient given by Eq.\ref{tf-full}) of the vibrational states
 within well(s). This is illustrated in Fig.~\ref{fis-u38-fcom} in case of
 neutron induced fission cross section of $^{238}$U. By assuming complete
-damping for sub-barrier excitation energies, the fission cross section is
+damping for subbarrier excitation energies, the fission cross section is
 overestimated and its resonance structure is not reproduced.
 \begin{figure}[htbp]
 \scalebox{0.55}{\includegraphics{emp-fis-u38-fcom.eps}} .
@@ -3574,7 +3599,7 @@ complete damping (dashed curve)}
 \end{figure}
 
 The optical model for fission provides a realistic description of the
-fission cross section, including the resonance structure at sub-barrier
+fission cross section, including the resonance structure at subbarrier
 excitation energies resulting from the coupling among discrete vibrational
 states in different wells. Therefore, this model is recommended when high
 accuracy description of experimental data is required. As mentioned before,
@@ -3605,13 +3630,13 @@ To overcome this difficulty, we implemented in EMPIRE an alternative way of
 accounting for partial damping, which does not involve imaginary potential
 or discrete transition states. In this surrogate of the optical model for
 fission, the degree of damping is taken into account by defining the total
-fission coefficient as a weighted sum of of the direct coefficient
+fission coefficient as a weighted sum of the direct coefficient
 corresponding to zero-damping and the indirect coefficient corresponding to
 the full damping
 \begin{equation}
-T_{f}(E J \pi)=(1-w(E))T_{dir_{(0)}}^{cont}(E J
-\pi)+w(E)T_{ind_{(f)}}^{cont}(E J \pi).  \label{tfsurr}
-\end{equation}
+T_{f}(EJ\pi )=(1-w(E))T_{dir_{(0)}}^{cont}(EJ\pi
+)+w(E)T_{ind_{(f)}}^{cont}(EJ\pi ).  \label{tfsurr}
+\end{equation}%
 The term $T_{dir_{(0)}}^{cont}$ describes the direct transmission without
 absorption through barriers associated to transition states in continuum. In
 order to calculate it, a level density describing the entire fission barrier
@@ -3621,16 +3646,16 @@ transition states only for the maxima and minima of the fission barrier.
 Assuming that the direct transmission is controlled by the minimum level
 density at saddles the direct fission coefficient is calculated as
 \begin{equation}
-T_{dir}^{cont}(EJ\pi)=\int_0^{\infty}T_{dir_{(0)}}(\varepsilon J
-\pi)\rho_{min} (\varepsilon J \pi) d \varepsilon
-\end{equation}
+T_{dir}^{cont}(EJ\pi )=\int_{0}^{\infty }T_{dir_{(0)}}(\varepsilon J\pi
+)\rho _{min}(\varepsilon J\pi )d\varepsilon
+\end{equation}%
 where $T_{dir_{(0)}}$ is given by Eq.\ref{tdir_20}. The indirect coefficient
-$T_{ind_{(f)}}^{cont}$ is calculated with Eq.\ref{tf-full}, where $T_A$ and $%
-T_B$ are given by the second term in Eq.\ref{tfi}. The weight $w$ is
+$T_{ind_{(f)}}^{cont}$ is calculated with Eq.\ref{tf-full}, where $T_{A}$
+and $T_{B}$ are given by the second term in Eq.\ref{tfi}. The weight $w$ is
 energy-dependent and ranges from 0 for excitation energies close to the
 bottom of the well(s) to 1 for excitation energies close to the height of
 the lowest hump \cite{Sin:07}.
-\begin{figure}[htbp]
+\begin{figure}[tbph]
 \scalebox{0.6}{\includegraphics{emp-fis-ld0.eps}}
 \caption{Illustration of the transmission mechanisms through fission
 barriers: (a) decoupled transmissions through independent humps, (b) direct
@@ -3729,12 +3754,6 @@ and $T_{f}$ is the total fission coefficient
 \begin{equation}
 T_{f}=\frac{T_{A}\sum_{m}T_{B,m}}{T_{A}+\sum_{m}T_{B,m}}.
 \end{equation}
-
-The capabilities of the fission models mentioned above, allow EMPIRE to be
-used in a wide range of applications from those requiring an accurate
-description of the experimental data to testing theoretical hypothesis,
-results of the microscopic models, or blind calculations involving a big
-number of nuclei far from stability.
 
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -4205,20 +4224,45 @@ number of nuclei far from stability.
 %
 %
 
+\paragraph{Prompt fission neutrons}
+
+Prompt fission neutron (PFN) spectra and average number of prompt fission
+neutron ($\overline{\nu}$) calculations are important additions that make the
+evaluated files for actinides complete. Furthermore, both $\overline{\nu}$ and PFN
+spectra are also consistent with the calculated fission cross sections using
+the models described above. The calculated PFN spectra were recently added
+to the EMPIRE based on a modified Los Alamos model considering both
+post-fission neutrons emitted from fully accelerated fragments and a
+properly weighted contribution of pre-fission neutrons \cite{ma03}
+Pre-fission neutron spectra are derived from the EMPIRE calculated exclusive
+neutron emission spectra and fission cross sections, ensuring consistency of
+the calculated values. It should be noted that the sudden drop of the PFN
+average energy above the emissive fission threshold discussed by Maslov \cite%
+{ma03} is naturally obtained in our calculations.
+
+\bigskip
+
+The capabilities of the fission models mentioned above, allow EMPIRE to be
+used in a wide range of applications from those requiring an accurate
+description of the experimental data to testing theoretical hypothesis,
+results of the microscopic models, or blind calculations involving a big
+number of nuclei far from stability.
+
 \subsubsection{Level Densities}
 
 EMPIRE accounts for various models describing level densities%
-\index{level densities} and includes several respective parameterizations. In
-each case equal parity distribution $\rho(E,J,\pi)=%
-\frac{1}{2}\rho(E,J)$ is assumed. Choice of the proper representation
-depends on a case being considered. For the nucleon induced reactions, with
-CN excited up to about 20 MeV, the Gilbert-Cameron approach is recommended.
-It assures the most accurate description of level densities in the energy
-range up to the neutron binding energy. The collective effects are included
-in the level density parameter $a$, providing reasonable estimate of the
-level densities as long as damping of the collective effects is irrelevant.
-The relatively low angular momentum introduced by the incident projectile
-justifies neglect of dynamical effects.
+\index{level densities} and includes several respective parametrizations. In
+each case equal parity distribution $\rho (E,J,\pi )=%
+\frac{1}{2}\rho (E,J)$ is assumed, except when microscopic parity dependent
+tabulated RIPL-3 level densities are used. Choice of the proper
+representation depends on a case being considered. For the nucleon induced
+reactions, with CN excited up to about 20 MeV, the Gilbert-Cameron approach
+is recommended. It assures the most accurate description of level densities
+in the energy range up to the neutron binding energy. The collective effects
+are included in the level density parameter $a$, providing reasonable
+estimate of the level densities as long as damping of the collective effects
+is irrelevant. The relatively low angular momentum introduced by the
+incident projectile justifies neglect of dynamical effects.
 
 \medskip
 
@@ -5225,7 +5269,7 @@ Details concerning the above assignments have been published in the RIPL%
 The RIPL-2 optical model parameters (omp) library, which was compiled within
 an IAEA Coordinated Research Project~\cite{RIPL2} greatly simplifies use of
 the EMPIRE. The original RIPL-2 library contains 409 sets of omp for nuclei
-up to Lr (Z=103) for neutrons, protons, $\alpha$-particles, d, t, and $^{3}$%
+up to Lr (Z=103) for neutrons, protons, $\alpha $-particles, d, t, and $^{3}$%
 He up to 400 MeV (mass and energy ranges vary for different
 target-projectile combinations). The library contains omp for single
 isotopes (or for a limited range of isotopes) and global systematics valid
@@ -5233,10 +5277,9 @@ over a wide range of masses. The current version implemented in EMPIRE is an
 expanded data set, being developed within the RIPL-3 IAEA Coordinated
 Research Project. The total number of potentials was increased up to 450.
 Many new coupled-channels potentials have been added to the library,
-including global CC for actinides (2601 and 5601) and global dispersive
-spherical potential (2407) for neutron induced reactions. The possibility to
-use dispersive coupled-channel potentials is also available (e.g., 608 and
-4608).
+including global CC for actinides (2601 and 5601) \cite{sochle04}, regional
+dispersive potential for actinides (2408 and 4608) and global dispersive
+spherical potential (2407) for neutron induced reactions \cite{moro04}.
 
 \subsection{Experimental Giant Dipole Resonance parameters}
 
@@ -5250,7 +5293,7 @@ estimated by Liu Jianfeng and Su Zongdi in 1995.
 
 Predictions of the Giant Dipole Resonance (GDR) energies and widths for
 about 6000 nuclei with Z starting with 14 up to 110 lying between the proton
-and the neutron drip-lines. The GDR is represented in the Goldhaber-Teller
+and the neutron driplines. The GDR is represented in the Goldhaber-Teller
 model \cite{Goldhaber48} where the neutron and proton densities perform an
 out-of-phase vibration around their center of mass. The dynamics of the
 oscillation is assumed to be dominated by the np-interaction \cite{Isacker92}%
@@ -5271,17 +5314,30 @@ to it.
 
 \subsection{Tabulated HF-BCS level densities}
 
-This directory contains tabulated level densities%
-\index{level densities} and is a part of the RIPL%
+Tabulated level densities%
+\index{HF-BCS level densities} are part of the RIPL%
 \index{RIPL}-2 library. It consists of separate files for 103 elements
 between Z=8 and Z=110, each of them containing a number of isotopes. The
 level densities were calculated using Hartree-Fock-BCS model and adjusted to
 discrete levels schemes and neutron resonance spacings. The maximum numbers
 of discrete levels up to which the scheme was considered to be complete are
 listed in the file Nmax\_Umax placed in the same directory. The level
-densities are given for spins up to 30$\hbar$ and excitation energies up to
+densities are given for spins up to 30$\hbar $ and excitation energies up to
 150 MeV. More details about the calculations can be found in Ref.~\cite%
 {HFBCS}.
+
+\subsection{Tabulated HFB level densities}
+
+Recently calculated parity dependent level densities%
+\index{HFB level densities} are proposed to become a part of the RIPL%
+\index{RIPL}-3 library. The level densities were calculated using
+Hartree-Fock-Bogoliubov model combined with collective model for the
+description of the enhancement \cite{higo06}. They were also adjusted to
+discrete levels schemes and neutron resonance spacings. The level densities
+are tabulated for spins up to 50$\hbar $ and excitation energies up to 150
+MeV. More details about the calculations can be found in Ref.~\cite{higo06}.
+These new level densities are intended to replace HF-BCS level densities
+tabulated in RIPL-2.
 
 \subsection{Experimental fission barriers}
 
@@ -5601,7 +5657,7 @@ reactions well above the Coulomb barrier.
 
 EMPIRE-2.19 was extensively used in the development of the ENDF/B-VII.0
 library for which it produced 78 full evaluations (nearly 20\% of the whole
-neutron sub-library). This major exercise was also a most thorough test and
+neutron sublibrary). This major exercise was also a most thorough test and
 validation of the system. The EMPIRE based evaluations in ENDF/B-VII.0,
 listed in Tab.~\ref{endf7list}, can be divided into (i) fission products
 (evaluated by BNL, BNL-KAERI, BNL-ORNL, BNL-JAERI, BNL-LANL and LLNL), (ii)
@@ -5811,35 +5867,89 @@ Of particular interest are IAEA evaluations of three actinides ($^{232}$Th
 and $^{231,233}$Pa) important for the innovative nuclear reactors based on
 the Th-U cycle. The very presence of the fission channel is a challenge
 since, in the case of a strong fission channel, the predictive power of the
-theory is rather limited while the precision requested by the energy
-applications is generally very high. In most actinide evaluations made so
-far nuclear reaction modeling served only to provide general shape of the
-cross sections which were then adjusted manually to reproduce most trusted
-measurements. In addition, the triple humped fission barriers theoretically
-expected in $^{232}$Th and $^{231}$Pa makes modeling of the fission channel
-much more complex. The sophisticated formulation of the fission channel in
-EMPIRE, along with the flexibility provided by the code, allowed to
-reproduce existing experimental data so well (see Fig.~\ref{231Pr}) that
-ENDF/B-VII.0 evaluations simply adopted EMPIRE results. Only nu-bar
-evaluations were taken over from other sources.
+theory is rather limitted while the precision requested by the applications
+is generally very high. In most actinides evaluations made so far nuclear
+reaction modeling served only to provide general shape of the cross sections
+which were then adjusted manually to reproduce most trusted measurements. In
+addition, the triple humped fission barriers are expected in $^{232}$Th and $%
+^{231}$Pa that makes modeling of the fission channel much more complex. The
+sophisticated formulation of the fission channel in EMPIRE, along with the
+flexibility provided by the code, allowed to reproduce existing experimental
+data so well (see Fig.~\ref{231Pa}) that ENDF/B-VII.0 evaluations simply
+adopted EMPIRE results. Only nu-bars were taken over from other evaluations.
+This last shortcoming is going to disappear once subroutines for calculating
+neutron spectra from fission fragments are adequately parametrized.
 
 \begin{figure}[tbph]
 \scalebox{0.6}{\includegraphics{231Pr.eps}}
 \caption{Fission, capture and (n,2n) reactions on $^{231}$Pa calculated with
 EMPIRE for ENDF/B-VII.0.}
-\label{231Pr}
+\label{231Pa}
 \end{figure}
+
+\subsection{Tungsten evaluation}
+
+Recently a new evaluation of \ the neutron induced reactions on tungsten
+isotopes up to 60 MeV has been presented \cite{catrko07}. Accurate nuclear
+data for tungsten isotopes are required because tungsten is a candidate for
+material for first-wall components in fusion devices, target material for
+systems based on high-current accelerators, as well as neutron dosimetry
+with the $^{186}$W(n,$\gamma$) reaction. In spite of some recent attempts to
+improve the evaluated cross section data for tungsten \cite{pe06}, the
+status of the data is unsatisfactory. The reported evaluation in the fast
+energy range \cite{catrko07} was fully based on nuclear model calculations
+using the EMPIRE code. A crucial point was the selection of the
+coupled-channel optical model potential. Direct interaction cross sections
+to low-lying levels and transmission coefficients for the incident channel
+on $^{180-186}$W nuclei were obtained from the isospin-dependent dispersive
+coupled-channel OMP \cite{casoqu06,casitr06}. The same potential was used to
+calculate direct excitation of the collective levels in the continuum by
+DWBA method up to about 10 MeV excitation energy. Pre-equilibrium emission
+was considered using one-component exciton model PCROSS, which includes
+nucleon, gamma and cluster emission
+
+Total, capture, emission cross sections of neutrons and charged particles,
+average resonance parameters and angular distributions of neutron and proton
+scattering on all tungsten isotopes were in good agreement with the
+available experimental data. An example of the evaluated cross sections for
+selected neutron induced reactions of $^{186}$W in comparison with
+experimental data is shown in Fig. \ref{w186_XS}. An excellent description
+of all low energy cross sections has been achieved.
+
+\begin{figure}[tbph]
+\scalebox{0.35}{\rotatebox{-90}{\includegraphics{w186_XS.eps}}}
+\caption{Evaluated cross sections of $^{186}$W below 5 MeV \protect\cite%
+{catrko07}. Shown are total, elastic, inelastic, scattering to the first two excited levels
+and the capture.}
+\label{w186_XS}
+\end{figure}
+
+The $^{186}$W(n,2n) excitation function calculated by the EMPIRE code,
+including both the total and the isomeric excitation of the 197 keV level is
+plotted in Fig.\ref{w186_n2n_isomer}. The excellent agreement of the
+isomeric calculation validates the $\gamma$-emission treatment in the EMPIRE
+code.
+
+\bigskip
+\begin{figure}[tbph]
+\scalebox{0.6}{\rotatebox{-90}{\includegraphics{w186_n2n_isom.eps}}}
+\caption{Evaluated excitation function of the $^{186}$W(n,2n) reaction
+\protect\cite{catrko07}. The isomeric contribution is also shown.}
+\label{w186_n2n_isomer}
+\end{figure}
+\bigskip
+
 
 \subsection{Basic physics}
 
-A detailed analysis of neutron activation cross sections on isotopes of
-tungsten has been reported in Ref.~\cite{Avrigeanu:06}. This work provides
-also direct comparison of EMPIRE and TALYS results.
-
 EMPIRE served as a calculation tool for investigating effective interactions
-for multi-step processes carried out in Ref.~\cite{avrigeanu2001eim}. This
+for multistep processes carried out in Ref.~\cite{avrigeanu2001eim}. This
 work attempted to overcome problems related to the effective NN-interaction
-strength V$_0$ obtained in direct fits to the experimental data.
+strength V$_{0}$ obtained in direct fits to the experimental data.
+
+A detailed analysis of neutron activation cross sections on isotopes of
+tungsten has been recently reported in Ref.~\cite{Avrigeanu:06}. That work
+provides also direct comparison of EMPIRE and TALYS results.
 
 The angle-integrated neutron inelastic scattering spectra detected by the
 Fast Neutron-Induced Gamma-Ray Observer (FIGARO) at Los Alamos were compared
@@ -5886,6 +5996,44 @@ evaluated with the code.
 
 \subsection{Medical Radioisotope Production}
 
+Radiopharmaceuticals play an important role in modern medicine in terms of
+both diagnostic investigations and therapeutic treatment. The role of
+nuclear data is mainly with respect to ensuring the quality assurance of the
+radioactive materials and methods adopted in such work. An IAEA Coordinated
+Research Project (CRP) has been successfully organized with the primary aim
+of improving the production cross-section data for therapeutic radionuclides
+\cite{INDC_NDS_501}. Experimental data compilations and data selection,
+theoretical calculations and the final evaluations for each of the reactions
+producing therapeutic radionuclides will become available within a few
+months. EMPIRE has been extensively used by two of us (RC and MS) and by A.
+Ignatyuk for theoretical modeling of the studied reactions within this CRP.
+As an example, one of the reactions under study for the production of
+beta-emitting $^{186}$Re radioisotope by a proton induced reaction on $%
+^{186} $W is shown in Fig.\ref{fig:w186_pn} together with the selected
+experimental data. EMPIRE calculations slightly underestimate the peak
+contribution, but reproduce very well the high energy tail of the excitation
+function associated to the preequilibrium emission and direct processes in
+the proton induced reaction. Another example is the reaction $^{116}$%
+Cd(p,3n), which could be used for the production of the very much used
+radioisotope $^{114m}$In. Experimental data and results of the EMPIRE
+calculations are shown in Fig.\ref{fig:cd116_p3n}. The agreement is not perfect,
+but calculation of the production of an isomer after emission
+of three neutrons is very challenging.
+
+\begin{figure}[htpb]
+\scalebox{0.38}{\rotatebox{-90}{\includegraphics{cd116_p3n.eps}}}
+\caption{Production of the $^{114m}$In radionuclide in the $^{116}$Cd(p,3n)
+reaction}
+\label{fig:cd116_p3n}
+\end{figure}
+
+\begin{figure}[htpb]
+\scalebox{0.38}{\rotatebox{-90}{\includegraphics{w186_pn.eps}}}
+\caption{Production of the $^{186}$Re radionuclide in the $^{186}$W(p,n)
+reaction}
+\label{fig:w186_pn}
+\end{figure}
+
 R.E. Schenter and his students have done hundreds of EMPIRE-2.18 and
 EMPIRE-2.19 calculations for the past ten years. These involve calculating
 energy dependent reaction cross sections for isotope production in
@@ -5901,17 +6049,13 @@ extremely valuable to their numerous medical isotope production projects.
 
 F. Groppi and E. Menapace from Milan have been using EMPIRE for predicting
 cross sections of charged particle induced reactions that could offer
-innovative way of production of\^{A}~certain medical radioisotopes.
-Applications of these radioisotopes include simultaneous $\beta +/\beta -$
-metabolic radiotherapy with intrinsic PET imaging, bone metastases pain
-palliation by negatron metabolic radiotherapy including SPECT imaging, and
-high-LET radio- and immuno-radiotherapy. Results of this research were
-published in Refs.~\cite{Menapace:04, Menapace:05, Groppi:05, Groppi:05a,
-Groppi:06, Alfassi:06, Persico:06}
-
-Two of us (RC and MS) and A. Ignatyuk have been calculating neutron and
-charged-particle threshold excitation functions for production of
-therapeutic radionuclides in accelerator and fission reactor systems.
+innovative way of production of~certain medical radioisotopes. Applications
+of these radioisotopes include simultaneous $\beta +/\beta -$ metabolic
+radiotherapy with intrinsic PET imaging, bone metastases pain palliation by
+negatron metabolic radiotherapy including SPECT imaging, and high-LET
+radiotherapy. Results of this research were published in Refs.~\cite%
+{Menapace:04, Menapace:05, Groppi:05, Groppi:05a, Groppi:06, Alfassi:06,
+Persico:06}
 
 EMPIRE and a few empirical relations were used to calculate total neutron
 yield and angular distributions of neutron dose from thick targets bombarded
@@ -5983,7 +6127,7 @@ the EXFOR library. Graphic user interface (GUI) will allow the evaluator to
 adjust boundaries of resolved and unresolved resonance regions, the average
 resonance parameters and their energy dependencies in order to reproduce
 measured cross sections. The concept GUI for the resonance module is shown
-in fig. \ref{fig:res-GUI}. Merging of the resonance region with the
+in Fig. \ref{fig:res-GUI}. Merging of the resonance region with the
 fast-neutron part of the evaluation will be performed with the existing code
 ENDRES.
 
@@ -6192,7 +6336,7 @@ In his book Science of Logic, the great German philosopher Georg Friedrich
 Hegel remarked: "\ldots \textit{we have seen cases in which the alteration
 of existence involves not only a transition from one proportion to another,
 but also a transition, by a sudden leap, into a} \ldots \textit{%
-qualitatively different thing}\ldots". With recent advanced in nuclear
+qualitatively different thing}\ldots ". With recent advances in nuclear
 reaction modeling supported by the amazing increase of the computation power
 we might be approaching the edge of such a transition from quantity to
 quality. In a not very distant future the whole
@@ -6218,6 +6362,13 @@ the two major users of the code during the ENDF/B-VII.0 development. Their
 comments were of great value and enabled to trace coding errors and improve
 the stability of the code. In this paper, we often use their results as
 examples.
+
+%Raynal
+We owe very special thanks to J. Raynal who has been developing his ECIS
+code since 1972 \cite{ra72} and is still actively maintaining and extending
+it as evidenced by the recent release of the 2007 version. His code is the
+EMPIRE, TALYS and McGNASH backbone for all optical model calculations,
+playing a unique role in current nuclear data evaluation efforts.
 
 %almost authors
 We are in debt with T. Kawano who drew our attention to covariances, and was
@@ -6252,28 +6403,32 @@ work under leadership of A. Nichols would like thank him for his
 encouragement and support for the development of EMPIRE.
 
 %contributors
-We owe special thanks to A. Ventura who was actively involved in the
-formulation of the fission theory coded in EMPIRE and to A. Hoering who took
-part in the implementation of $\gamma$-emission within the Multistep
-Compound mechanism. M. Mebel should be thanked for providing the routine for
+We would like to thank A. Ventura who was involved in the early formulations
+of the fission theory used in EMPIRE and to A. Hoering who took part in the
+implementation of $\gamma $-emission within the Multistep Compound
+mechanism. M. Mebel should be thanked for providing the routine for
 calculation of shell-corrections according to Myers and Swiatecki and V.
-Plujko for implementing his suite of $\gamma$-ray strength functions
+Plujko for implementing his suite of $\gamma $-ray strength functions
 developed within the RIPL-2.
+
+We would like to thank A. Ignatyuk who has been a permanent source of
+inspiration, constructive criticism and encouragement and lately has been
+using EMPIRE in many different applications.
 
 %'enlighteners'
 Finally, there is a group of our colleagues to whom we owe particular
-gratitude for their enlightenment and inspiration. It is a Honor to
-acknowledge H.A. Weidenmueller guidance on Multi-step Compound theory and
+gratitude for their enlightenment and inspiration. It is a honour to
+acknowledge H.A. Weidenmueller guidance on Multistep Compound theory and
 foundations of the statistical model, discussions with H. Lenske and H.
 Wolter on Multistep Direct and its implementation, working with H. Hofmann
 on width fluctuations, and with D. Smith on exploration of the world of
 covariances. The EMPIRE wouldn't reach the current stage without
 illuminating discussions on the preequilibrium emission with M. Blann, P.E.
-Hodgson, and E. Gadioli and without constructive criticism by A. Ignatyuk.
-We also benefited from the exchange of experience with authors of other
-codes. We would like to express our appreciation to Ph. Young, M.B.
-Chadwick, A. Koning, S. Hilaire, S. Goriely and T. Kawano for inspiring
-discussions, indication of priorities, and technical suggestions.
+Hodgson, and E. Gadioli. We also benefited from the exchange of experience
+with authors of other codes. We would like to express our appreciation to
+Ph. Young, M.B. Chadwick, A. Koning, S. Hilaire, S. Goriely and T. Kawano
+for inspiring discussions, indication of priorities, and technical
+suggestions.
 
 %nostalgy
 One of us (M.H.) would like to thank A. Marcinkowski for motivating him to
