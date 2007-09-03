@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:40 $
-Ccc   * $Id: scnd-preeq.f,v 1.18 2006-08-09 12:37:40 Capote Exp $
+Ccc   * $Date: 2007-09-03 14:20:32 $
+Ccc   * $Id: scnd-preeq.f,v 1.19 2007-09-03 14:20:32 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc

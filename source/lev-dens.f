@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-08-29 20:25:54 $
-Ccc   * $Id: lev-dens.f,v 1.53 2007-08-29 20:25:54 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-09-03 14:20:31 $
+Ccc   * $Id: lev-dens.f,v 1.54 2007-09-03 14:20:31 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -41,7 +41,6 @@ CCC   *     BF=3. STANDS FOR THE TRIAXIAL YRAST STATE                     *
 CCC   *                                                                   *
 CCC   * OUTPUT:NONE                                                       *
 CCC   *                                                                   *
-CCC   * CALLS:ALIT                                                        *
 CCC   *                                                                   *
 CCC   *********************************************************************
 CCC
@@ -153,7 +152,8 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
      &                  YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax)
                IF (rotemp.LT.RORed) rotemp = 0.0
                IF (BF.NE.0.0D0) THEN
-                  RO(kk,i,Nnuc) = rotemp
+                  RO(kk,i,1,Nnuc) = rotemp
+                  RO(kk,i,2,Nnuc) = rotemp
                ELSE
                   ROF(kk,i,Nnuc) = rotemp
                ENDIF
@@ -722,7 +722,8 @@ C--------can not be taken into account (RORed=0)
 C--------------clean RO matrix
             IF (BF.NE.0.0D0) THEN
                DO i = 1, NDLW
-                  RO(kk,i,Nnuc) = 0.0
+                  RO(kk,i,1,Nnuc) = 0.d0
+                  RO(kk,i,2,Nnuc) = 0.d0
                ENDDO
             ENDIF
 C--------------decrease energy shift above the last level to become 0 at Qn
@@ -736,9 +737,17 @@ C--------------decrease energy shift above the last level to become 0 at Qn
             ENDIF
             CALL DAMIRO(kk,Nnuc,dshif,defit,Asaf,rotemp,aj)
             DO ij = 1, NLWst
-               IF (kk.GT.1) rocumul = rocumul +
-     &                                (RO(kk - 1,ij,Nnuc) + RO(kk,ij,
-     &                                Nnuc))*defit/RORed
+C-----------Integration over energy. There should be factor 2 because of the
+C-----------parity but it cancels with the 1/2 steming from the trapezoid
+C-----------integration
+C              IF (kk.GT.1) rocumul = rocumul +
+C    &                                (RO(kk - 1,ij,Nnuc) + RO(kk,ij,
+C    &                                Nnuc))*defit/RORed
+C-----------Integration over energy. Parity dependence explicitly considered.
+C-----------There is a factor 1/2 steming from the trapezoid integration
+               IF (kk.GT.1) rocumul = rocumul + 0.5d0*defit/RORed*
+     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc)) 
             ENDDO
             IF (rocumul.LE.FLOAT(NLV(Nnuc))) THEN
                kkl = kk
@@ -795,12 +804,18 @@ C--------cumulative plot of levels along with the l.d. formula
          rocumul = 1.0
          WRITE (34,*) '0.0  ', rocumul
          DO kk = 2, nplot
-C-----------integration over energy. There should be factor 2 because of the
+C-----------Integration over energy. There should be factor 2 because of the
 C-----------parity but it cancels with the 1/2 steming from the trapezoid
 C-----------integration
             DO ij = 1, NLWst
-               rocumul = rocumul + (RO(kk - 1,ij,Nnuc) + RO(kk,ij,Nnuc))
-     &                   *defit/RORed
+C              rocumul = rocumul + (RO(kk - 1,ij,Nnuc) + RO(kk,ij,Nnuc))
+C    &                   *defit/RORed
+C-----------integration over energy. Parity dependence explicitly considered.
+C-----------There is a factor 1/2 steming from the trapezoid integration
+               rocumul = rocumul + 0.5d0*defit/RORed*
+     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc)) 
+     
             ENDDO
             WRITE (34,*) defit*FLOAT(kk - 1), rocumul
          ENDDO
@@ -826,7 +841,8 @@ C--------
 C-----------clean RO matrix
          IF (BF.NE.0.0D0) THEN
             DO i = 1, NDLW
-               RO(kk,i,Nnuc) = 0.0
+               RO(kk,i,1,Nnuc) = 0.d0
+               RO(kk,i,2,Nnuc) = 0.d0
             ENDDO
          ENDIF
          IF (FITlev.LE.0.0D0 .OR. EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc))
@@ -847,11 +863,14 @@ C----------plot level density
             u = EX(kk,Nnuc)
             rolowint = 0.D0
             DO j = 1, NDLW
-               rolowint = rolowint + 2*RO(kk,j,Nnuc)
+C              rolowint = rolowint + 2*RO(kk,j,Nnuc)
+               rolowint = rolowint + RO(kk,j,1,Nnuc) + RO(kk,j,2,Nnuc)                
             ENDDO
-            WRITE (38,'(1x,5(e10.3,1x))') u, rolowint*EXP(ARGred),
-     &             2*RO(kk,1,Nnuc)*EXP(ARGred), 2*RO(kk,2,Nnuc)
-     &             *EXP(ARGred), 2*RO(kk,3,Nnuc)*EXP(ARGred)
+            WRITE (38,'(1x,8(e10.3,1x))') u, rolowint*EXP(ARGred),
+     &             RO(kk,1,1,Nnuc)*EXP(ARGred), RO(kk,2,1,Nnuc)
+     &             *EXP(ARGred), RO(kk,3,1,Nnuc)*EXP(ARGred),
+     &             RO(kk,1,2,Nnuc)*EXP(ARGred), RO(kk,2,2,Nnuc)
+     &             *EXP(ARGred), RO(kk,3,2,Nnuc)*EXP(ARGred)
          ENDDO
          CLOSE (38)
       ENDIF
@@ -1021,7 +1040,7 @@ C-----------dependent factor
             ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
             IF (ac.LE.0.0D0) RETURN
          ENDIF
-C        Spin-cut off tuning	 
+C        Spin-cut off tuning   
          mompar = REDSEF*mompar
          momort = REDSEF*momort 
          IF (bcs) THEN
@@ -1036,12 +1055,12 @@ C        Spin-cut off tuning
             IF (i.EQ.1) t = SQRT(u/ac)
          ENDIF
          IF (BF.NE.0.0D0) THEN
-            RO(Kk,i,Nnuc) = Rotemp
-            IF (i.EQ.1) TNUc(Kk,Nnuc) = t
+            RO(Kk,i,1,Nnuc) = Rotemp
+            RO(Kk,i,2,Nnuc) = Rotemp
          ELSE
             ROF(Kk,i,Nnuc) = Rotemp
-            IF (i.EQ.1) TNUcf(Kk,Nnuc) = t
          ENDIF
+         IF (i.EQ.1) TNUc(Kk,Nnuc) = t         
       ENDDO
 99999 END
 
@@ -1234,7 +1253,8 @@ C-----set to 0 level density array
       DO i = 1, NDEX
          DO k = 1, NDLW
             IF (BF.NE.0.0D0) THEN
-               RO(i,k,Nnuc) = 0.0
+               RO(i,k,1,Nnuc) = 0.0
+               RO(i,k,2,Nnuc) = 0.0
             ELSE
                ROF(i,k,Nnuc) = 0.0
             ENDIF
@@ -1614,8 +1634,12 @@ C                 arg = (xj + 1)*xj/(2.*Sig)
                   IF (arg.LE.EXPmax) THEN
                      rjj = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
 C--------------------0.5 coming from parity
-                     RO(i,j,Nnuc) = 0.5*rhou*rjj
-                     IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.
+C                    RO(i,j,Nnuc) = 0.5*rhou*rjj
+C                    IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.
+                     RO(i,j,1,Nnuc) = 0.5*rhou*rjj
+                     RO(i,j,2,Nnuc) = 0.5*rhou*rjj
+                     IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
+                     IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0                                       
                   ENDIF
                ENDDO
                efort = e
@@ -1650,8 +1674,12 @@ C                 arg = (xj + 1)*xj/(2.*Sig)
                   IF (arg.LT.EXPmax) THEN
                      rjj = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
 C--------------------0.5 coming from parity
-                     RO(i,j,Nnuc) = 0.5*rhou*rjj
-                     IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.
+C                    RO(i,j,Nnuc) = 0.5*rhou*rjj
+C                    IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.d0
+                     RO(i,j,1,Nnuc) = 0.5*rhou*rjj
+                     RO(i,j,2,Nnuc) = 0.5*rhou*rjj
+                     IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
+                     IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0
                   ENDIF
                ENDDO
             ENDIF
@@ -1664,12 +1692,15 @@ C--------plot level density
          DO i = 1, NEX(Nnuc)
             u = EX(i,Nnuc)
             rolowint = 0.D0
+C           RECTANGULAR INTEGRATION (no 1/2)             
             DO j = 1, NLW
-               rolowint = rolowint + 2*RO(i,j,Nnuc)
+               rolowint = rolowint + RO(i,j,1,Nnuc) + RO(i,j,2,Nnuc) 
             ENDDO
-            WRITE (38,'(1x,5(e10.3,1x))') u, rolowint*EXP(ARGred),
-     &             2*RO(i,1,Nnuc)*EXP(ARGred), 2*RO(i,2,Nnuc)
-     &             *EXP(ARGred), 2*RO(i,3,Nnuc)*EXP(ARGred)
+            WRITE (38,'(1x,8(e10.3,1x))') u, rolowint*EXP(ARGred),
+     &             RO(i,1,1,Nnuc)*EXP(ARGred), RO(i,2,1,Nnuc)
+     &             *EXP(ARGred), RO(i,3,1,Nnuc)*EXP(ARGred),
+     &             RO(i,1,2,Nnuc)*EXP(ARGred), RO(i,2,2,Nnuc)
+     &             *EXP(ARGred), RO(i,3,2,Nnuc)*EXP(ARGred)
          ENDDO
          CLOSE (38)
       ENDIF
@@ -1717,21 +1748,29 @@ C
       ENDIF
       END
 
-
-
-      SUBROUTINE ROHFBCS(Nnuc)
+      SUBROUTINE ROHFB(Nnuc)
 CCC
 CCC   *********************************************************************
 CCC   *                                                         CLASS:PPU *
-CCC   *                      R O H F B C S                                *
+CCC   *                      R O H F B                                    *
 CCC   *                                                                   *
-CCC   *  Reads level densities calculated in the frame of the Hartree-    *
-CCC   *  Fock-BCS model and stored in the tables (RIPL-2) and interpolates*
-CCC   *  them linearily in log to the EMPIRE energy grid.                 *
-CCC   *  level densities were generated and provided to RIPL-2 by         *
-CCC   *  S. Goriely.                                                      *
+CCC   *  Reads level densities numerically calculated by a combinatorial  *
+
+CCC   *  method using Hartree-Fock-Bogoliubov single particle levels          *
+
+CCC   *            (to be included within RIPL-3)                         *
+
 CCC   *                                                                   *
+
+CCC   *     S.Hilaire and S. Goriely, Nucl.Phys.A 779 (2006) 63-81        *
+
+CCC   *  "Global microscopic nuclear level densities within the HFB plus  *
+
+CCC   *   combinatorial method for practical applications"                    *
+
 CCC   *                                                                   *
+
+CCC   *  Interpolates LDs linearily in log to the EMPIRE energy grid.     *
 CCC   *                                                                   *
 CCC   *  INPUT:                                                           *
 CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
@@ -1739,6 +1778,7 @@ CCC   *                                                                   *
 CCC   *                                                                   *
 CCC   * OUTPUT:NONE                                                       *
 CCC   *                                                                   *
+CCC   * CALLS:ALIT                                                        *
 CCC   *                                                                   *
 CCC   *********************************************************************
 CCC
@@ -1748,7 +1788,9 @@ C
 C PARAMETER definitions
 C
       INTEGER NLDGRID, JMAX
-      PARAMETER (NLDGRID = 55,JMAX = 30)
+
+C     FOLLOWS RIPL-3 DIMENSIONS 
+      PARAMETER (NLDGRID = 60,JMAX = 50)
 C
 C Dummy arguments
 C
@@ -1756,14 +1798,19 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION c1, c2, cf, cgrid(0:NLDGRID), hhh, r1, r2,
-     &                 rhogrid(0:NLDGRID,JMAX), rhoogrid(0:NLDGRID),
-     &                 rhotgrid(0:NLDGRID), tgrid(0:NLDGRID), u,
-     &                 uugrid(0:NLDGRID)
+      DOUBLE PRECISION c1, c2, cf, hhh, r1, r2,
+     & rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
+     & rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2), 
+     & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u
       CHARACTER*2 car2
+      CHARACTER*8 paritate      
       DOUBLE PRECISION DLOG10
       CHARACTER*56 filename
       INTEGER i, ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
+
+      INTEGER*4 PIPE
+
+
       cf = 0
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1776,19 +1823,26 @@ C
       DO i = 0, NLDGRID
          uugrid(i) = 0.
          tgrid(i) = 0.
-         cgrid(i) = 1.
-         rhoogrid(i) = 1.E-20
-         rhotgrid(i) = 1.E-20
+         cgrid(i,1) = 0.
+         cgrid(i,2) = 0.         
+         rhoogrid(i,1) = 1.d-20
+         rhoogrid(i,2) = 1.d-20
+         rhotgrid(i,1) = 1.d-20
+         rhotgrid(i,2) = 1.d-20
          DO j = 1, jmaxl
-            rhogrid(i,j) = 1.E-20
+            rhogrid(i,j,1) = 1.d-20
+            rhogrid(i,j,2) = 1.d-20
          ENDDO
       ENDDO
       WRITE (filename,99005) iz
-99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
-     &        '.dat')
+      
+c99005 FORMAT ('../RIPL-2/densities/total/HFB/z',i3.3)
+C99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
+99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3)
+     
       OPEN (UNIT = 34,FILE = filename,ERR = 300)
-  100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar
-99010 FORMAT (23x,a2,i3,3x,i3)
+  100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate
+99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
       IF (iar.NE.ia .OR. izr.NE.iz) GOTO 100
 C
@@ -1797,17 +1851,31 @@ C
       READ (34,*,END = 300)
       READ (34,*,END = 300)
       i = 1
-  200 READ (34,99015,END = 400) uugrid(i), tgrid(i), cgrid(i),
-     &                          rhoogrid(i), rhotgrid(i),
-     &                          (rhogrid(i,j),j = 1,jmaxl)
-99015 FORMAT (1x,f6.2,f7.3,1x,1p,33E9.2,0p)
+  200 READ (34,99015,END = 300) uugrid(i), tgrid(i), cgrid(i,1),
+     &                          rhoogrid(i,1), rhotgrid(i,1),
+     &                         (rhogrid(i,j,1),j = 1,jmaxl)
+99015 FORMAT (1x,f6.2,f7.3,1x,53E9.2)
+      IF (uugrid(i).LE.0.001) GOTO 270
+      IF (i.EQ.NLDGRID) GOTO 250
+      i = i + 1
+      GOTO 200
+  250 i = 1 
+      READ (34,*,END = 300)
+C     SKIPPING 4 TITLE LINES
+  270 READ(34,*,END = 300)
+      READ(34,*,END = 300)
+      READ(34,*,END = 300)
+      READ(34,*,END = 300)  
+  280 READ (34,99015,END = 300) uugrid(i), tgrid(i), cgrid(i,2),
+     &                          rhoogrid(i,2), rhotgrid(i,2),
+     &                         (rhogrid(i,j,2),j = 1,jmaxl)
       IF (uugrid(i).LE.0.001) GOTO 400
       IF (i.EQ.NLDGRID) GOTO 400
       i = i + 1
-      GOTO 200
-  300 WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
+      GOTO 280
+  300 WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFB'
       WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
-      STOP 'HFBCS lev dens. missing'
+      STOP 'RIPL HFB ground state lev dens. missing'
   400 CLOSE (34)
       iugrid = i - 1
       DO kk = 1, NEX(Nnuc)
@@ -1816,11 +1884,11 @@ C
          IF (u.LT.0.) RETURN
          IF (u.GT.150.0D0) THEN
             WRITE (6,*) ' '
-            WRITE (6,*) ' HFBCS LEV. DENS. DEFINED UP TO 150 MeV ONLY'
+            WRITE (6,*) ' HFB LEV. DENS. DEFINED UP TO 150 MeV ONLY'
             WRITE (6,*) ' REQUESTED ENERY IS ', u, ' MeV'
             WRITE (6,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
             WRITE (6,*) ' EXECUTION STOPPED'
-            STOP 'TOO HIGH ENERGY FOR HFBCS LEV. DENS.'
+            STOP 'TOO HIGH ENERGY FOR HFB LEV. DENS.'
          ENDIF
 C
 C--------interpolation in the level density tables
@@ -1849,37 +1917,116 @@ C
          c1 = (uugrid(khi) - u)/hhh
          c2 = (u - uugrid(klo))/hhh
          DO j = 1, jmaxl
-            r1 = rhogrid(klo,j)
-            r2 = rhogrid(khi,j)
+            r1 = rhogrid(klo,j,1)
+            r2 = rhogrid(khi,j,1)
             IF (r1.GT.0 .AND. r2.GT.0) THEN
-               RO(kk,j,Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
+               RO(kk,j,1,Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
             ELSE
-               RO(kk,j,Nnuc) = c1*r1 + c2*r2
+               RO(kk,j,1,Nnuc) = c1*r1 + c2*r2
             ENDIF
-            IF (RO(kk,j,Nnuc).LT.0) RO(kk,j,Nnuc) = 0.
+            IF (RO(kk,j,1,Nnuc).LT.0) RO(kk,j,1,Nnuc) = 0.d0
+            
+            r1 = rhogrid(klo,j,2)
+            r2 = rhogrid(khi,j,2)
+            IF (r1.GT.0 .AND. r2.GT.0) THEN
+               RO(kk,j,2,Nnuc) = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
+            ELSE
+               RO(kk,j,2,Nnuc) = c1*r1 + c2*r2
+            ENDIF
+            IF (RO(kk,j,2,Nnuc).LT.0) RO(kk,j,2,Nnuc) = 0.d0           
          ENDDO
          TNUc(kk,Nnuc) = c1*tgrid(klo) + c2*tgrid(khi)
       ENDDO
+
+C--------cumulative plot of levels along with the l.d. formula
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) THEN
+         WRITE (6,99007) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &                   NLV(Nnuc)
+99007    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,
+     &           '   Microscopic LD,  Ncut=',I3)
+         OPEN (35,FILE = 'fort.35')
+         WRITE (35,*) 'set terminal postscript enhanced color lw 2 
+     & solid "Helvetica" 20'
+         WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
+         WRITE (35,9909) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &                    NLV(Nnuc)
+ 9909    FORMAT ('set title "',I3,'-',A2,'-',I3,
+     &           '   Microscopic LD,  Ncut=',I3,'"')
+         WRITE (35,*) 'set logscale y'
+         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
+         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+         WRITE (35,*) 'set style line 1 lt 1 lw 2'
+         WRITE (35,*) 'set style line 2 lt 5 lw 2'
+         WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
+     &els", "fort.34" w l ls 1 t "Level density" '')')
+         CLOSE (35)
+         OPEN (34,FILE = 'fort.34')
+         OPEN (36,FILE = 'fort.36')
+         WRITE (36,*) '0.0 1.0'
+         DO il = 2, NLV(Nnuc)
+            WRITE (36,*) ELV(il,Nnuc), FLOAT(il - 1)
+            WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
+         ENDDO
+         rocumul = 1.0
+         WRITE (34,*) '0.0  ', rocumul
+C        DO kk = 2, nplot
+C-----------Integration over energy. There should be factor 2 because of the
+C-----------parity but it cancels with the 1/2 steming from the trapezoid
+C-----------integration
+C           DO ij = 1, NLWst
+C              rocumul = rocumul + (RO(kk - 1,ij,Nnuc) + RO(kk,ij,Nnuc))
+C    &                   *defit/RORed
+C-----------integration over energy. Parity dependence explicitly considered.
+C-----------There is a factor 1/2 steming from the trapezoid integration
+C              rocumul = rocumul + 0.5d0*defit/RORed*
+C    &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+C    &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc)) 
+   
+C           ENDDO
+C           WRITE (34,*) ELV(il,Nnuc), rocumul
+C        ENDDO
+         CLOSE (36)
+         CLOSE (34)
+         IF (IOPsys.EQ.0) THEN
+            iwin = PIPE('gnuplot fort.35#')
+            CLOSE (35)
+         ENDIF
+      ENDIF
+
+C-----plotting fit of the levels with low energy formula  ***done***
+
+c          write(6,*)'GSDENS',nnuc
+c            DO ii = 1, 60
+c            write (6,'(f7.2,1x,2e9.2)')uugrid(ii),  RhOogrid(ii,1),
+c     &        RhOogrid(ii,2)
+c            ENDDO
+
+c            pause
+      RETURN
       END
-C
-C
+
       SUBROUTINE DAMI_ROFIS(Nnuc,Ib,Mmod,Rafis)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A23, ACR, ACRt, ACRtf(2), AFIsm(NFMOD), AP1,
+      DOUBLE PRECISION A2, A23, ACR, ACRt, ACRtf(NFHUMP), AFIsm(NFMOD),
+     &                 AP1,
      &                 AP2, ATIl, BET2, BF, CSFism(NFMOD), DEFbm(NFMOD),
      &                 DEL, DELp, DELtafism(NFMOD), DEStepm(NFMOD),
-     &                 DETcrt, DETcrtf(2), ECOnd, ECOndf(2), EFBm(NFMOD)
-     &                 , EFDism(NFTRANS,NFMOD), GAMma, GAMmafism(NFMOD),
+     &                 DETcrt, DETcrtf(NFHUMP), ECOnd, ECOndf(NFHUMP),
+     &                 EFBm(NFMOD),
+     &                 EFDism(NFTRANS,NFMOD), GAMma, GAMmafism(NFMOD),
      &                 HM(NFTRANS,NFMOD), MORtcrt(NFPARAB),
      &                 MPArcrt(NFPARAB), ROFism(0:NFISENMAX,NDLW,NFMOD),
-     &                 SCR, SCRtf(2), SHCfism(NFMOD), TCRt, TCRtf(2),
+     &                 SCR, SCRtf(NFHUMP), SHCfism(NFMOD), TCRt, 
+     &                 TCRtf(NFHUMP),
      &                 TDIrect, TDIrm(NFMOD), TFB, TFBm(NFMOD), UCRt,
-     &                 UCRtf(2), UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD)
-     &                 , XMInnm(NFMOD)
+     &                 UCRtf(NFHUMP), UGRidf(0:NFISENMAX,NFMOD), 
+     &                 WFIsm(NFMOD),
+     &                 XMInnm(NFMOD),ECFis(NFHUMP),ECFism(NFMOD)
+
       INTEGER BFFm(NFMOD), NLWst, NRBinfism(NFMOD)
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl,
      &                BET2
@@ -1888,7 +2035,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect
+     &                 TFB, TDIrect, ECFis, ECFism
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
 C Dummy arguments
@@ -1899,31 +2046,35 @@ C
 C Local variables
 C
       DOUBLE PRECISION aaj, accn, ar, desteppp, excn1, fshell, mm2, r0,
-     &                 rotemp, shcf, t, u, xmax, xr
+     &                 rotemp, shcf, u, xmax, xr
       CHARACTER*50 filename
       REAL FLOAT
-      INTEGER ia, iar, ibb, iff, ii, in, ix, iz, izr, j, jj, kk, nr
-      INTEGER INT
-      DOUBLE PRECISION ROBCSF, RODEFF
+      INTEGER ia, iff, in, ix, iz, jj, kk, nr
+      INTEGER INT,ild
+      DOUBLE PRECISION ROBCSF, RODEFF, ROFiso(0:nfisenmax,2,nfhump)
       CHARACTER*2 simb
+      CHARACTER*8 paritate
+      LOGICAL fexist
+
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
       BET2 = DEFfis(Ib)
-      IF (NRBarc.EQ.3 .AND. Ib.EQ.2) BET2 = DEFeq
 C-----where continuum starts,ends,steps in between
       IF (Mmod.EQ.0) THEN
          XMInn(Ib) = 0.0001
          DO nr = 1, NRFdis(Ib)
             IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
          ENDDO
-         IF (NRBarc.EQ.3) XMInn(2) = CONteq
+         IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
+        
          IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
             xmax = XMInn(Ib) + 4.D0
          ELSE
-            xmax = excn1 - (EFB(Ib) + XMInn(Ib)) + 4.
+            xmax = excn1 - (EFB(Ib) + XMInn(Ib)) + 4.D0
          ENDIF
-         DEStepp(Ib) = (xmax - XMInn(Ib))/100.
-         NRBinfis(Ib) = INT((xmax - XMInn(Ib))/DEStepp(Ib))
+         DEStepp(Ib) = (xmax - XMInn(Ib))/300.
+         NRBinfis(Ib) =INT((xmax - XMInn(Ib))/DEStepp(Ib))
+
          IF (NRBinfis(Ib).GT.NFISENMAX) THEN
             WRITE (6,*)
      &              ' ERROR: Level density at saddle exceeds dimensions'
@@ -1939,14 +2090,14 @@ C-----where continuum starts,ends,steps in between
             IF (EFDism(nr,Mmod).GT.XMInnm(Mmod)) XMInnm(Mmod)
      &          = EFDism(nr,Mmod)
          ENDDO
-C        IF (NRBarc.EQ.3) XMInn(2) = 0.0001
-                                           !! Should be checked for multimodal
+         IF(ECFism(Mmod).gt.0.) XMInnm(Mmod) = ECFism(Mmod)
+       
          IF (excn1.LE.(EFBm(Mmod) + XMInnm(Mmod))) THEN
-            xmax = XMInn(Mmod) + 4.
+            xmax = XMInn(Mmod) + 4.d0
          ELSE
-            xmax = excn1 - (EFBm(Mmod) + XMInnm(Mmod)) + 4.
+            xmax = excn1 - (EFBm(Mmod) + XMInnm(Mmod)) + 4.d0
          ENDIF
-         DEStepm(Mmod) = (xmax - XMInnm(Mmod))/100.
+         DEStepm(Mmod) = (xmax - XMInnm(Mmod))/100.d0
          NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
          IF (NRBinfism(Mmod).GT.NFISENMAX) THEN
             WRITE (6,*)
@@ -1958,83 +2109,31 @@ C        IF (NRBarc.EQ.3) XMInn(2) = 0.0001
             UGRidf(kk,Mmod) = XMInnm(Mmod) + (kk - 1)*DEStepm(Mmod)
          ENDDO
       ENDIF
+
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
       in = ia - iz
-C-----FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2 file
-      IF (FISden(Nnuc).EQ.0.) THEN
+
+      IF (FISden(Nnuc).NE.1.) THEN
+C--------FISDEN(Nnuc)=0 reading microscopic lev. dens. from the RIPL-2,3 file
          iz = INT(Z(Nnuc))
          ia = INT(A(Nnuc))
-         WRITE (filename,99005) iz
-99005    FORMAT ('../RIPL-2/fission/fis-levden-hfbcs-inner/z',i3.3,
-     &           '.dat')
-         OPEN (UNIT = 81,FILE = filename,ERR = 150)
-         READ (81,*,END = 150)
-   50    READ (81,99010,ERR = 50,END = 150) simb, izr, iar
-99010    FORMAT (23x,a2,i3,3x,i3)
-         IF (simb.NE.'Z=') GOTO 50
-         IF (iar.NE.ia .OR. izr.NE.iz) GOTO 50
-         READ (81,*,END = 150)
-         READ (81,*,END = 150)
-         ii = 1
-  100    READ (81,'(f7.2,f7.3,1x,33e9.2)') UGRid(ii,1), t, t, t, t,
-     &         (ROFis(ii,j,1),j = 1,NFISJ)
-         IF (UGRid(ii,1).LE.0.001) GOTO 200
-         IF (ii.EQ.NFISEN) GOTO 200
-         ii = ii + 1
-         GOTO 100
-  150    WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFBSC'
-         WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
-         WRITE (6,*)
-     &       ' ERROR: HFBCS lev dens. at the inner saddle point missing'
-         STOP 'ERROR: HFBCS lev dens. at the inner saddle point missing'
-  200    CLOSE (81)
-         IF (NRBar.GT.1) THEN
-            WRITE (filename,99015) iz
-99015       FORMAT ('../RIPL-2/fission/fis-levden-hfbcs-outer/z',i3.3,
-     &              '.dat')
-            OPEN (UNIT = 82,FILE = filename,ERR = 260)
-            READ (82,*,END = 260)
-  220       READ (82,99020,ERR = 220,END = 260) simb, izr, iar
-99020       FORMAT (23x,a2,i3,3x,i3)
-            IF (simb.NE.'Z=') GOTO 220
-            IF (iar.NE.ia .OR. izr.NE.iz) GOTO 220
-            READ (82,*,END = 260)
-            READ (82,*,END = 260)
-            ii = 1
-  240       READ (82,'(f7.2,f7.3,1x,33e9.2)') UGRid(ii,2), t, t, t, t,
-     &            (ROFis(ii,j,2),j = 1,NFISJ)
-            IF (UGRid(ii,2).LE.0.001) GOTO 280
-            IF (ii.EQ.NFISEN) GOTO 280
-            ii = ii + 1
-            GOTO 240
-  260       WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
-     &                  ' IN HFBSC'
-            WRITE (6,*)
-     &                ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED'
-            WRITE (6,*)
-     &        'ERROR: HFBCS lev dens. at the outer saddle-point missing'
-            STOP
-     &        'ERROR: HFBCS lev dens. at the outer saddle-point missing'
-  280       CLOSE (82)
-         ENDIF
-         IF (NFISJ.LT.NLW) THEN
-            DO ibb = 1, NRBarc
-               DO j = NFISJ + 1, NLW
-                  DO ii = 1, NFISEN
-                     ROFis(ii,j,ibb) = 0.
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDIF
-      ELSEIF (FISden(Nnuc).EQ.1.) THEN
+c--------parity dependence
+         ild = ib
+         WRITE (filename,99006)ild, iz
+99006    FORMAT ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
+c99006    FORMAT ('../RIPL-2/fission/nld-saddle/Max',i1,'/z',i3.3)
+         INQUIRE(file = filename, exist = fexist)
+         IF(fexist) 
+     &     CALL HFB_FIS(ib,iz,ia,simb,paritate,filename,rofiso)    
+       ELSE
+C        FISden(Nnuc).EQ.1.
 C
-C-----Empire specific
+C--------Empire specific
 C
-         mm2 = 0.24*A(Nnuc)**0.666667
+         mm2 = 0.24 * A(Nnuc)**0.666667
          r0 = 1.4
          iff = 1
-
 C--------Empire systematics with Nix-Moeller shell corrections
          AP1 = 0.94431E-01
          AP2 = -0.80140E-01
@@ -2053,7 +2152,7 @@ C--------Empire systematics with M-S shell corrections
          ENDIF
 
          ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
-C        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
+c        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
          ATIl = ATIl*Rafis
          IF (Mmod.EQ.0) THEN
             GAMma = GAMmafis(Ib)
@@ -2071,6 +2170,8 @@ C        atil = 0.0482 * A(Nnuc) + 0.123 * A(Nnuc)**0.666 !Hilaire
             desteppp = DEStepm(Mmod)
          ENDIF
          TCRt = 0.9*0.567*DELp
+c        TCRt = 0.8575*0.567*DELp
+c        TCRt = 0.567*DELp
          ar = ATIl*(1.0 + shcf*GAMma)
          DO ix = 1, 20
             xr = ar*TCRt**2
@@ -2094,11 +2195,12 @@ C--------45.84 stands for (12/SQRT(pi))**2
          MOMparcrt = 6*ACRt*mm2*(1. - (2./3.)*bet2)/PI**2
          IF (MOMparcrt.LT.2.) MOMparcrt = 2.
          MOMortcrt = 0.0095616*r0**2*A(Nnuc)**(5./3.)
-     &               *(1. + (1./3.)*bet2)!DEFfis(Ib))
+     &               *(1. + (1./3.)*bet2)!*2.41)!DEFfis(Ib))
          DEL = 0.
          IF (MOD(in,2).NE.0) DEL = DELp
          IF (MOD(iz,2).NE.0) DEL = DEL + DELp
 
+         
          DO jj = 1, NLW
             aaj = FLOAT(jj) + HIS(Nnuc)
             DO kk = 1, NRBinfis(Ib)
@@ -2113,8 +2215,14 @@ C--------45.84 stands for (12/SQRT(pi))**2
                   rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
      &                     iff)*RORed
                ENDIF
-               IF (Mmod.EQ.0) ROFis(kk,jj,Ib) = rotemp
+               IF (Mmod.EQ.0)THEN
+                  ROFis(kk,jj,Ib) = rotemp
+                  ROFisp(kk,jj,1,Ib) = rotemp
+                  ROFisp(kk,jj,2,Ib) = rotemp
+               ENDIF
+
                IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp
+
             ENDDO
          ENDDO
          ACRtf(Ib) = ACRt
@@ -2127,6 +2235,62 @@ C--------45.84 stands for (12/SQRT(pi))**2
       END
 C
 C
+      SUBROUTINE HFB_FIS(ib,iz,ia,simb,paritate,filename,rofiso)
+
+      include 'dimension.h'
+      include 'global.h'
+     
+      DOUBLE PRECISION ROFiso(0:nfisenmax,2,nfhump),t,t1,t2   
+      CHARACTER*50 filename
+      INTEGER ia, iar, ib, ii, iz, izr
+      CHARACTER*2 simb
+      CHARACTER*8 paritate
+
+      OPEN (UNIT = 81,FILE = filename,ERR = 151)
+      READ (81,*,END = 151)
+c-----positive
+ 51   READ (81,99011,ERR = 51,END = 151) simb, izr, iar,paritate
+99011 FORMAT (23x,a2,i3,3x,i3,2x,a8)
+      IF (simb.NE.'Z=') GOTO 51
+      IF (iar.NE.ia .OR. izr.NE.iz) GOTO 51
+      IF (paritate.NE.'Positive') GOTO 51
+      READ (81,*,END = 151)
+      READ (81,*,END = 151)
+      ii = 1
+ 101  READ (81,'(1x,f6.2,f7.3,1x,1p,53e9.2,0p)') UGRid(ii,ib), t, t,
+     &     ROFiso(ii,1,ib), t, (ROFisp(ii,j,1,ib),j = 1,NFISJ1)
+      IF (UGRid(ii,ib).LE.0.001) GOTO 101
+
+      DO j = 1,NFISJ1
+            IF(ROFisp(ii,j,1,ib).eq.0.d0)ROFisp(ii,j,1,ib)=1.d-10 
+      ENDDO   
+      ii = ii + 1
+      IF(ii.LE. NFIsen1)GOTO 101
+c---- negative 
+      READ (81,*,END = 151)
+      READ (81,*,END = 151)
+      READ (81,99011) simb, izr, iar,paritate
+      READ (81,*,END = 151)
+      READ (81,*,END = 151)
+      ii = 1
+ 1011 READ (81,'(1x,f6.2,f7.3,1x,1p,53e9.2,0p)') UGRid(ii,ib), t1, t2, 
+     &      ROFiso(ii,2,ib), t, (ROFisp(ii,j,2,ib),j = 1,NFISJ1)
+      IF (ii.EQ.60) GOTO 201
+      ii = ii + 1
+      IF(ii.LE. NFIsen1)GOTO 1011
+ 151  WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
+     &                  ' IN HFB at saddle'
+      WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION 
+     &                    TERMINATED '
+      WRITE (6,*)
+     &           ' ERROR: HFB lev dens. at saddle',ib,'  missing'
+            STOP ' ERROR: HFB lev dens. at saddle missing'
+ 201  continue
+      CLOSE (81)     
+      RETURN
+      END
+
+
       DOUBLE PRECISION FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Iff)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
@@ -2163,10 +2327,13 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF (ABS(BET2).GT.0.005D0) seff2 = momp**0.333*momo**0.6666*t
       arg = s - (Aj + 0.5)**2/(2.0*seff2)
       IF (arg.LE.0.0D0) RETURN
+C      seff2 = Mompar*T!CRt
       robcs = 0.5*const*(2*Aj + 1.)*EXP(arg)/SQRT(seff2**3*det)
       CALL DAMPROTVIB(U,qk,t,qv,A,vibrk,BET2)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*t))
-      ROBCSF = robcs*vibrk*momo*t*qdamp
+      ROBCSF = robcs*momo*t*qdamp*vibrk
+     &         *(qv - vibrk*(qv - 1.))
+
       IF (Iff.EQ.2) ROBCSF = ROBCSF*2.*SQRT(2.*pi)*SQRT(momp*t)
       IF (Iff.EQ.3) ROBCSF = ROBCSF*2.
       IF (Iff.EQ.4) ROBCSF = ROBCSF*4.*SQRT(2.*pi)*SQRT(momp*t)
@@ -2261,20 +2428,18 @@ C
      &                 sdrop, thalf
       Qk = 0.
 c      dmphalf = 20.
-c      dmpdiff = 7.
+c      dmpdiff = 1.!7.
       dmphalf = 120.*A**0.333*bet2**2         !according to RIPL-2
-      dmpdiff = 1400.*A**(-0.666)*bet2**2
+      dmpdiff =1400.*A**(-0.666)*bet2**2
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
       thalf = 1.
-      dt = 0.1
+      dt=0.1
       arg = (T - thalf)/dt
       Q = 1.0/(EXP((-arg)) + 1.0)
       DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
 c      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
-      Vibrk = EXP(0.086*A**(2./3.)*T**(4./3.))
+      Vibrk = EXP(0.09286*A**(2./3.)*T**(4./3.))
       END
-C
-C

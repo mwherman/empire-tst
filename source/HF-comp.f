@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-21 20:00:58 $
-Ccc   * $Id: HF-comp.f,v 1.91 2007-05-21 20:00:58 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-09-03 14:20:30 $
+Ccc   * $Id: HF-comp.f,v 1.92 2007-09-03 14:20:30 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -199,13 +199,13 @@ C-----Contribution due to feeding spectra from Nnuc (no decay contribution)
 C-----DE spectra (DDX are not done for fission although they could be)
 C
       IF (Nejc.EQ. -1) THEN
-C        fission of n,nx and npx nuclei considered 
+C        fission of n,nx and npx nuclei considered
          IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
 C           DO iejc = 0, NDEJC
             DO iejc = 0, 1  ! only neutrons and photons for the time being
-              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) 
+              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
      &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
      &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
             ENDDO
@@ -221,10 +221,10 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
 C-----Contribution coming straight from the current decay
-C-----(ignore if residue is inclusive since summation already done in ACCUM) 
+C-----(ignore if residue is inclusive since summation already done in ACCUM)
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
-      IF(ENDf(Nnur).EQ.1) THEN 
-         POPcse(Ief,Nejc,icsp,INExc(Nnur)) = 
+      IF(ENDf(Nnur).EQ.1) THEN
+         POPcse(Ief,Nejc,icsp,INExc(Nnur)) =
      &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt
       ELSE
          CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
@@ -241,7 +241,7 @@ C-----DE spectra
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ELSE
-                     POPcse(Ief,iejc,ie,INExc(Nnur)) = 
+                     POPcse(Ief,iejc,ie,INExc(Nnur)) =
      &                 POPcse(Ief,iejc,ie,INExc(Nnur))
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
@@ -321,7 +321,7 @@ C                                   decays leading to this energy bin)
 C
 C-----Contribution comming straight from the current decay
       IF(ENDf(Nnur).EQ.1) THEN
-         POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur)) 
+         POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur))
      &       + Popt
       ELSE
          CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
@@ -423,11 +423,11 @@ C
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----clear scratch matrices
-      SCRtem(Nejc) = 0.0
+      SCRtem(Nejc) = 0.d0
       DO j = 1, NLW
          DO i = 1, NEX(Nnur) + 1
-            SCRt(i,j,1,Nejc) = 0.0
-            SCRt(i,j,2,Nejc) = 0.0
+            SCRt(i,j,1,Nejc) = 0.d0
+            SCRt(i,j,2,Nejc) = 0.d0
          ENDDO
       ENDDO
       iexc = NEX(Nnuc) - NEXr(Nejc,Nnuc)
@@ -471,9 +471,9 @@ C-----------------IP1 and IP2 decide to which parity each SUMTL  goes
                   ENDDO
 C-----------------do loop over l   ***done***
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &               + sumtl1*RO(iermax,jr,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &             + sumtl1*RO(iermax,jr,ip1,Nnur)*TURbo*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &               + sumtl2*RO(iermax,jr,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &             + sumtl2*RO(iermax,jr,ip2,Nnur)*TURbo*TUNe(Nejc,Nnuc)
                ENDIF
 C--------------decay to the highest but one bin (conditional see the next IF)
                IF (ZEJc(Nejc).EQ.0.0D0 .AND. Iec.EQ.NEX(Nnuc) - 1) THEN
@@ -496,9 +496,9 @@ C-----------------be energy step and also emission step dependent
                   corr = 0.4444/(DE - XN(Nnur) + XN(1))
      &                   *TURbo*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &               + sumtl1*RO(iermax,jr,Nnur)*corr
+     &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &               + sumtl2*RO(iermax,jr,Nnur)*corr
+     &               + sumtl2*RO(iermax,jr,ip2,Nnur)*corr
                ENDIF
 C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
@@ -519,9 +519,9 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
 C-----------------do loop over l   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*RO(ier,jr,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TURbo*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*RO(ier,jr,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TURbo*TUNe(Nejc,Nnuc)
                ENDDO
 C--------------do loop over r.n. energies ***done***
             ENDDO
@@ -636,7 +636,7 @@ C
      &        1X,27('*'),//)
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND. 
+         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND.
      &      ISIsom(l,Nnuc).EQ.0) THEN
 C-----------Normal level without branching ratios
             IF (IOUt.GT.2) WRITE (6,99010) ELV(l,Nnuc), LVP(l,Nnuc)
@@ -659,11 +659,11 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
             ELSEIF(ENDf(Nnuc).EQ.2) THEN
                CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
             ENDIF
-         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND. 
+         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND.
      &           nejc.GT.0) THEN
 C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
-C-----------Add gamma cascade population to the direct population 
+C-----------Add gamma cascade population to the direct population
             POPlv(l,Nnuc) = POPlv(l,Nnuc) + CSDirlev(l,nejc)
             IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
@@ -673,7 +673,7 @@ C-----------Add gamma cascade population to the direct population
 C-----------We add it to the ground state to have correct total cross section
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
          ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1) THEN
-C-----------Isomer state in any other nucleus                        
+C-----------Isomer state in any other nucleus
 C-----------No gamma-decay of the isomeric state imposed
             IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
@@ -780,9 +780,7 @@ C-----------Well... let it go down to the ground state
                DO j = 1, NDBR
                   j1 = NINT(BR(l,j,1,Nnuc))
                   IF (j1.EQ.0) GOTO 100
-                  IF (j1.GE.l) THEN
-                     GOTO 99999
-                  ENDIF
+                  IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
@@ -791,7 +789,7 @@ C-----------Well... let it go down to the ground state
             ENDIF
          ENDIF
   100 ENDDO
-99999 END
+      END
 
 
       SUBROUTINE DECAYG(Nnuc,Iec,Jc,Ipc,Sum)
@@ -959,8 +957,8 @@ C
                    scrtneg = scrtneg + xle(lamb)
                  ENDIF
                ENDDO
-               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
-               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
+               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, ipos, Nnuc)
+               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg, Nnuc)
             ENDIF
            ENDDO
       ENDDO
@@ -1066,9 +1064,9 @@ C *          a value of 'MAXmult' is set in modul 'input.f';                 *
 C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
 C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
 C *                                                                          *
-C *                                                                          *
+C ****************************************************************************
 C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C *                                                                          *
+C ****************************************************************************
 C *                                                                          *
 C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
 C * are calculated with the use of the relationships between                 *
@@ -1147,7 +1145,9 @@ C-----decay to the continuum
 C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
-        IF (RO(ier,Jc,Nnuc).NE.0.D0) THEN
+        IF (RO(ier,Jc,1,Nnuc).NE.0.D0 .OR.
+     &      RO(ier,Jc,2,Nnuc).NE.0.D0) THEN
+
            eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
            xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &            TUNe(0, Nnuc)
@@ -1171,11 +1171,11 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
             IF(lambmin.LE.lambmax)THEN
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
-                   sump = sump + xle(lamb)*RO(ier, Jr, Nnuc)
-                   sumn = sumn + xlm(lamb)*RO(ier, Jr, Nnuc)
+                   sump = sump + xle(lamb)*RO(ier, Jr, ipos, Nnuc)
+                   sumn = sumn + xlm(lamb)*RO(ier, Jr, ineg, Nnuc)
                  ELSE
-                   sump = sump + xlm(lamb)*RO(ier, Jr, Nnuc)
-                   sumn = sumn + xle(lamb)*RO(ier, Jr, Nnuc)
+                   sump = sump + xlm(lamb)*RO(ier, Jr, ipos, Nnuc)
+                   sumn = sumn + xle(lamb)*RO(ier, Jr, ineg, Nnuc)
                  ENDIF
                ENDDO
             ENDIF
@@ -1338,7 +1338,7 @@ C-----------
          ENDIF
       ENDIF
   100 IF (Sumfis.EQ.0.0D0) RETURN
-      Sumfis = Sumfis*TUNEfi(Nnuc) 
+      Sumfis = Sumfis*TUNEfi(Nnuc)
       IF (BETav.NE.0.0D0) THEN
 C--------reduction of the fission width due to possible return from the
 C--------saddle point (nuclear viscosity 1-st effect)
@@ -1351,7 +1351,7 @@ C-----------to form a saddle point (nuclear viscosity 2-nd effect)
 C-----------according to Rastopchin et al. Sov. Jour. Nucl. Phys. 53,741(1991)
 C-----------omega1=omega0=1.6*10^21 (1/s) hbar*omega=1MeV
 C-----------BETAV critical =3.2; 0.19531 stands for 1/(2*omega1**2)
-            gpart = DENhf/RO(Iec,Jc,Nnuc)/2./PI
+            gpart = DENhf/(RO(Iec,Jc,1,Nnuc)+RO(Iec,Jc,2,Nnuc))/2.d0/PI
 C           GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
             tau = LOG(10.0*(fisba - YRAst(Jc,Nnuc))/temp)
             IF (BETav.LT.3.2D0) THEN
@@ -1425,37 +1425,308 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION HO(NFPARAB), PHAsr(NFPARAB), SMIu, TABs, TDIr,
-     &                 TDIr23, TF(NFPARAB), TFC, TFCc, TFD(NFPARAB),
-     &                 TG2, VBArex(NFPARAB)
+      DOUBLE PRECISION HO(NFPARAB), TABs, TDIr,
+     &                 TDIr23, TF(NFPARAB), TFCc,
+     &                 TFD(NRBar),TG2, VBArex(NFPARAB)
+
+      DOUBLE PRECISION tdirf(NRBar), tdirb(NRBar)
+      DOUBLE PRECISION tabsf(NRBar),tabsb(NRBar)
+      DOUBLE PRECISION tabs1,tabs2,tabs12,tabs21, tind1, tind2
+      DOUBLE PRECISION sumtk, sumtj, rap,barmin
+
       INTEGER JCC
-      COMMON /CMIU  / SMIu, PHAsr, HO
-      COMMON /COMFIS3/ VBArex, TFD
-      COMMON /COMFIS4/ TFC, TFCc, JCC
+
       COMMON /IMAG  / TF, TDIr, TABs, TDIr23, TG2
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+
+      DOUBLE PRECISION tff(NRBar)
+      DOUBLE PRECISION vdef_1d(800), eps_1d(800)
 C
 C Dummy arguments
 C
-      INTEGER Iec, Ip, Jc, Mmod, Nnuc
+      INTEGER Iec, Ip, Jc, Mmod, Nnuc,npoints
       DOUBLE PRECISION Sumfis
 C
 C Local variables
 C
-      DOUBLE PRECISION aj, aral, arg, atal, bral, btal, cral, ctal,
-     &                 delt, dral, dtal, ee, eeiso, efbmin, eral, etal,
-     &                 exfis, hh2, sfmin, snc, tabss, tdir1, tdir231,
-     &                 tdirr, tdirr23, tfcon(NFPARAB), tfdis(NFPARAB),
-     &                 tnumm, vv2, wimagg
+      DOUBLE PRECISION aj, ee, tdircont(NRBarc),
+     &                 exfis, sfmin, snc,
+     &                 tfcon(NRBarc), tfdis(NRBarc),
+     &                 tweightw(2), 
+     &                 vbarmax(NFPARAB)
       REAL FLOAT
-      INTEGER ibar, ist, jnc, nr, nrbarc1
-C
+      INTEGER ibar, ist, jnc, nr, ipa, nrhump
 C
       ee = EX(Iec,Nnuc)
-      Sumfis = 0.0
+      Sumfis = 0.D0
       IF (ee.EQ.0.0D0) RETURN
-C     Below is a square root of (MIU divided by 2)
-      SMIu = 0.1643167*A(Nnuc)**(5./6.)
+
       JCC = Jc
+
+      nrhump = nrbar - nrwel
+      DO ibar = 1, nrhump         !NRBarc
+         tfdis(ibar) = 0.d0
+         tfcon(ibar) = 0.d0
+         tdircont(ibar) = 0.d0
+         tf(ibar)=0.d0
+      ENDDO
+      DO ibar = 1, NRBar
+         vbarmax(ibar) = 0.d0
+      ENDDO
+
+      DO iv = 1, NRWel
+         tweightw(iv)=0.d0
+      ENDDO
+
+      TABs = 0.D0
+      tabss=0.d0
+      tabs1 = 0.d0
+      tabs2 = 0.d0
+      tabs12 = 0.d0
+      tabs21 = 0.d0
+
+      tdir = 0.d0
+      tdir21 = 0.d0
+      tdir23 = 0.d0
+      sumtk = 0.d0
+      sumtj = 0.d0
+
+      DO k=1, NRBar,2   ! de vazut cu hcont !!!!!!!!!!!!!!!!!!!!!!!!!!
+         HO(k) = H(1, int(k/2)+1)
+      ENDDO
+      DO k=2, NRBar,2
+         HO(k) = H(1, NRBarc+int(k/2))
+      ENDDO
+
+c-----discrete contribution
+
+c-----numerical barrier from RIPL-3; no discrete transition states, only gs
+      IF(FISbar(Nnuc).EQ.3.)THEN
+         IF (Jc.EQ.1 .AND. Ip.EQ.1) THEN
+             DO ibar = 1, NRBar
+                VBArex(ibar) = EFB(ibar)
+             ENDDO
+
+             CALL NUMBARR(Nnuc,Vbarex,ho)
+             CALL WKBFIS1(Ee, nnuc, tff, tdirf, tdirb, tabsf, tabsb)
+
+             DO k = 1, nrhump !NRBarc
+                TFD(k) = Tff(2*(k-1)+1)
+             ENDDO
+             DO ibar = 1, NRBarc
+                tfdis(ibar) = tfdis(ibar) + TFD(ibar)
+             ENDDO
+          ENDIF
+          GOTO 700
+       ENDIF
+
+c-----parabolic barriers
+      DO nr = 1, NRFdis(1)
+         sfmin = SFDis(nr,1)
+         ist = 1
+         IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ.1) THEN
+            sfmin = 0.
+            ist = 2
+         ENDIF
+         IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ. - 1) THEN
+            sfmin = 1.
+            ist = 2
+         ENDIF
+         sfmin = sfmin - HIS(Nnuc)
+
+         DO jnc = INT(sfmin), Jc, ist
+            IF (jnc.EQ.Jc .AND. IPFdis(nr,1).EQ.Ip) THEN
+               DO k=1, NRBar,2
+                  HO(k) = H(nr, int(k/2)+1)
+               ENDDO
+               DO k=2, NRBar,2
+                  HO(k) = H(nr, NRBarc+int(k/2))
+               ENDDO
+               snc = FLOAT(jnc) + HIS(Nnuc)
+               DO ibar = 1, NRBar
+                  exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
+     &                    *(snc*(snc + 1) - SFDis(nr,ibar)
+     &                    *(SFDis(nr,ibar) + 1))
+                  VBArex(ibar) = EFB(ibar) + exfis
+                  IF(nr.eq.1) vbarmax(ibar) = exfis
+                  IF(exfis.gt.vbarmax(ibar)) vbarmax(ibar) = exfis
+               ENDDO
+
+               CALL NUMBARR(Nnuc,Vbarex,HO)
+               CALL WKBFIS1(Ee, nnuc, tff, tdirf, tdirb, tabsf, tabsb)
+
+               DO k=1, NRBarc
+                  TFD(k) = Tff(2*(k-1)+1)
+               ENDDO
+               DO ibar = 1, NRBarc
+                  tfdis(ibar) = tfdis(ibar) + TFD(ibar)
+               ENDDO
+
+               IF(FISopt(Nnuc).GT.0.)THEN
+                  IF (tabsb(1) + tdirb(1).GT.1.) tdirb(1) = 0.d0
+                  tdir = tdir + tdirb(1)
+                  tabs1 = tabs1 + tabsb(1)
+
+                  IF(NRBar.EQ.5)THEN
+                     tabs2  = tabs2  + tabsf(5)
+                     tabs12 = tabs12 + tabsb(3)
+                     tabs21 = tabs21 + tabsf(3)
+                     tdir21 = tdir21 + tdirf(3)
+                     tdir23 = tdir23 + tdirb(3)
+                  ENDIF
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+C----continuum contribution
+ 700  aj = FLOAT(Jc) + HIS(Nnuc)
+      IF(Ip.EQ.1)  ipa = 1
+      IF(Ip.EQ.-1) ipa = 2
+
+c-----continuum direct and indirect weights
+c      barmin =  vbarmax(1) + efb(1)
+      barmin =   efb(1)
+      DO iw = 1, NRWel
+         IF(awf(iw).EQ.0.d0)THEN
+            tweightw(iw) = 1.d0
+            goto 650!CYCLE
+         ENDIF
+         barmin =  vbarmax(iw) + efb(iw)
+c        IF(barmin.GT.(vbarmax(iw) + efb(iw)))
+c     &     barmin =  vbarmax(iw) + efb(iw)
+c         IF(barmin.GT.efb(iw))
+c     &     barmin =  efb(iw)
+         tweightw(iw) = 2.d0 * (Ee - efb(NRBarc + iw)) /
+     &                    ((barmin - efb(NRBarc + iw)) *
+     &                    (1.d0 + dexp( - (Ee - barmin) / awf(iw))))
+         IF(Ee.GT.barmin) tweightw(iw) = 1.d0
+ 650     IF(Ee.LE.efb(NRBarc + iw)) tweightw(iw) = 0.d0
+      ENDDO
+
+c---- Direct transmission of continuum at subbarrier energies
+      IF(tweightw(1).EQ.1.d0) GOTO 800
+      IF(FISbar(Nnuc).EQ.3.)THEN
+         CALL SIMPSNumTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
+      ELSE
+         CALL SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
+      ENDIF
+      tdircont(1) = tdircont(1) * TUNEfi(Nnuc)
+
+      IF(FISopt(Nnuc).EQ.0)THEN
+         tdir = (tdir + tdircont(1))* (1.d0 - tweightw(1))
+      ELSE
+         tdir = tdir + (1.d0 - tweightw(1)) * tdircont(1)
+      ENDIF
+      IF(NRBar.EQ.5)THEN
+         tdircont(2) = tdircont(2) * TUNEfi(Nnuc)
+         tdircont(3) = tdircont(3) * TUNEfi(Nnuc)
+         IF(FISopt(Nnuc).EQ.0)THEN
+            tdir23 = (tdir23 + tdircont(2)) * (1.d0 - tweightw(2))
+            tdir21 = (tdir21 + tdircont(3)) * (1.d0 - tweightw(1)) *
+     &                                        (1.d0 - tweightw(2))
+         ELSE
+            tdir23 = tdir23 + (1.d0 - tweightw(2)) * tdircont(2)
+            tdir21 = tdir21 + (1.d0 - tweightw(1)) *
+     &                        (1.d0 - tweightw(2)) * tdircont(3) !!!
+         ENDIF
+      ENDIF
+
+C-----Continuum contribution to each hump transmission coeffiecient
+
+ 800  IF(FISbar(Nnuc).EQ.3.)THEN
+         CALL SIMPSNumBar(Nnuc,Ee,JCC,Ipa,Nrbarc,tfcon) !numerical barriers
+      ELSE
+         DO ibar = 1, nrbarc
+            CALL SIMPSFIS(Nnuc,Ee,JCC,Ipa,Ibar,TFCc,vbarmax)!parabolic barriers
+            tfcon(ibar) = TFCc
+         ENDDO
+      ENDIF
+
+      DO ibar = 1, nrhump
+        TF(ibar) = tfdis(ibar) + tfcon(ibar)* TUNEfi(Nnuc)
+      ENDDO
+c  
+C-----Continuum contribution to absorption
+      IF(FISopt(Nnuc).EQ.0)THEN
+         Tabs1 = (Tabs1 +tfcon(1)) * tweightw(1)
+      ELSE
+         Tabs1 = Tabs1 + tweightw(1) * tfcon(1)
+      ENDIF
+      TABs = Tabs1
+
+      IF(NRHump.EQ.3) THEN
+         IF(Ee.GT.efb(5))THEN
+            IF(FISopt(Nnuc).GT.0)THEN
+               TABs12 = TABs12 +  tfcon(2) * tweightw(2)
+               TABs21 = TABs21 +  tfcon(2) * tweightw(1)
+               TABs2 =  TABs2 +  tdircont(3) * (1.d0-tweightw(1)) *
+     &                  tweightw(2)
+            ENDIF
+         ELSE
+            tabs12 = 0.d0
+            tabs21 = 0.d0
+            tabs2 = 0.d0
+            tdir21 = 0.d0
+         ENDIF
+         sumtj = tf(1) + tdir23 + tabs12
+         sumtk = tf(3) + tdir21 + tabs21
+         IF(sumtj.EQ.0..OR.sumtk.EQ.0.)THEN
+            Tind1 = 0.d0
+            Tind2 = 0.d0
+         ELSE
+            IF(FISopt(Nnuc).GT.0)THEN
+               rap = 1.d0/(1.d0 - tabs12 * tabs21/(sumtj * sumtk))
+               Tind1 = tabs1 * (tdir23 + tabs12 * tf(3)/sumtk)/sumtj
+               Tind2 = tabs2 * (tf(3) + tabs21 * tdir23/sumtj)/sumtk
+               Tind1 = Tind1 * rap
+               Tind2 = Tind2 * rap
+            ELSE
+               Tind1 =  tf(1) * tf(2) * tf(3)/
+     &                 (tf(1) * tf(2) + tf(1) * tf(3) + tf(2) * tf(3))
+               Tind1 = tweightw(1) * tind1
+               Tind2 = 0.d0
+            ENDIF
+         ENDIF
+      ENDIF
+
+
+      IF (FISopt(Nnuc).EQ.2.) THEN
+C        gamma transition in isomeric well, not calculated yet
+         TG2 = .00002
+      ELSE
+         TG2 = 0.d0
+      ENDIF
+C--------------------------------------------------------------------
+C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
+
+C-----single-humped
+      IF(NRHump.EQ.1) Sumfis = Tf(1)
+
+C-----double-humped
+      IF(NRhump.EQ.2)THEN
+         IF(TF(1) + TF(2).EQ.0.0) THEN
+            Sumfis = 0.d0
+         ENDIF
+         IF(FISOPT(Nnuc).GT.0)THEN
+            Sumfis = Tdir + tabs1 * Tf(2)/(Tf(1) + Tf(2) + Tg2)
+         ELSE
+            Sumfis = Tdir +  tweightw(1) * Tf(1) * Tf(2)/(Tf(1) + Tf(2))
+         ENDIF
+         Sumfis =  Tf(1) * Tf(2)/(Tf(1) + Tf(2)) !!!!!!!!!!!!!!!!!!!!!!
+      ENDIF
+
+C----triple-humped
+      IF(NRHump.EQ.3)THEN
+         Sumfis = Tdir + tind1 + tind2
+c         sumfis=tf(1)*tf(2)*tf(3)/(tf(1)*tf(2)+tf(1)*tf(3)+tf(2)*tf(3))
+c          sumfis=tf(1)*tf(2)/(tf(1)+tf(2))
+c     &    *tweightw(1)!+tdir
+c         sumfis=tweightw(1)*tind1+tdir
+      ENDIF
+
+c---------------------------------------------------------------------
+c     WRITING FISSION OUTPUT
+
       IF (Jc.EQ.1 .AND. Ip.EQ.1 .AND. Mmod.LT.2) THEN
          WRITE (80,*) '  '
          WRITE (80,'(1x,a19,f9.5,a4)') 'Excitation energy =', ee, ' MeV'
@@ -1474,787 +1745,368 @@ C---------triple-humped
          IF (NRBar.EQ.3 .AND. NRWel.EQ.0) WRITE (80,'(22x,6(a4,7x))')
      &        'TAd', 'TBd', 'TCd', 'TAc', 'Teqc', 'Tf'
 
-         IF (NRBar.EQ.5) WRITE (80,'(16x,9(a4,7x),a6)') 'TAd', 'TBd',
-     &                          'TCd', 'TAc', 'Teqc', 'Tf', 'Tdir',
+         IF (NRBar.EQ.5) WRITE (80,'(16x,10(a4,7x),a6)') 'TAd', 'TBd',
+     &                  'TCd', 'TAc', 'TBc', 'TCc', 'Tf', 'Tdir',
      &                          'Tabs', 'Tdir23'
       ENDIF
-      DO ibar = 1, NRBarc
-         tfdis(ibar) = 0.
-         tfcon(ibar) = 0.
-      ENDDO
-C==============discrete contribution====================
-      IF (FISopt(Nnuc).EQ.0.) THEN
-         DO ibar = 1, NRBarc
-            DO nr = 1, NRFdis(ibar)
-               sfmin = SFDis(nr,ibar)
-               ist = 1
-               IF (SFDis(nr,ibar).EQ.0.0 .AND. IPFdis(nr,ibar).EQ.1)
-     &             THEN
-                  sfmin = 0.
-                  ist = 2
-               ENDIF
-               IF (SFDis(nr,ibar).EQ.0.0 .AND. IPFdis(nr,ibar).EQ. - 1)
-     &             THEN
-                  sfmin = 1.
-                  ist = 2
-               ENDIF
-               sfmin = sfmin - HIS(Nnuc)
-               DO jnc = INT(sfmin), Jc, ist
-                  IF (jnc.EQ.Jc .AND. IPFdis(nr,ibar).EQ.Ip) THEN
-                     snc = FLOAT(jnc) + HIS(Nnuc)
-                     exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
-     &                       *(snc*(snc + 1) - SFDis(nr,ibar)
-     &                       *(SFDis(nr,ibar) + 1))
-                     VBArex(ibar) = EFB(ibar) + exfis
-                     arg = 2*PI*(VBArex(ibar) - ee)/H(nr,ibar)
-                     IF (arg.LE.EXPmax) THEN
-                        TFD(ibar) = 1./(1. + EXP(arg)) * TUNEfi(Nnuc)
-                     ELSE
-                        TFD(ibar) = 0.0
-                     ENDIF
-                     tfdis(ibar) = tfdis(ibar) + TFD(ibar)
-                  ENDIF
-               ENDDO
 
 
-            ENDDO
-
-
-         ENDDO
-      ENDIF
-C-------subbarrier effects
-      IF (FISopt(Nnuc).GT.0.) THEN
-         TDIr = 0.D0
-         TABs = 0.D0
-         TDIr23 = 0.D0
-         IF (NRBar.EQ.3 .AND. NRWel.EQ.1) eeiso = ee - EFB(3)
-         IF (NRBar.EQ.5 .AND. NRWel.EQ.2) eeiso = ee - EFB(4)
-         wimagg = WIMag(1) + WIMag(2)*eeiso + WIMag(3)*eeiso**2
-         DO nr = 1, NRFdis(1)
-            sfmin = SFDis(nr,1)
-            ist = 1
-            IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ.1) THEN
-               sfmin = 0.
-               ist = 2
-            ENDIF
-            IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ. - 1) THEN
-               sfmin = 1.
-               ist = 2
-            ENDIF
-            sfmin = sfmin - HIS(Nnuc)
-            DO jnc = INT(sfmin), Jc, ist
-               IF (jnc.EQ.Jc .AND. IPFdis(nr,1).EQ.Ip) THEN
-                  snc = FLOAT(jnc) + HIS(Nnuc)
-                  DO ibar = 1, NRBar
-                     exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
-     &                       *(snc*(snc + 1) - SFDis(nr,ibar)
-     &                       *(SFDis(nr,ibar) + 1))
-                     VBArex(ibar) = EFB(ibar) + exfis
-                  ENDDO
-                  IF (NRBar.EQ.3 .AND. NRWel.EQ.1) THEN
-                     HO(1) = H(nr,1)
-                     HO(2) = H(nr,3)
-                     HO(3) = H(nr,2)
-                  ENDIF
-                  IF (NRBar.EQ.5) THEN
-                     HO(1) = H(nr,1)
-                     HO(2) = H(nr,4)
-                     HO(3) = H(nr,2)
-                     HO(4) = H(nr,5)
-                     HO(5) = H(nr,3)
-                  ENDIF
-                  CALL WKBFISNUM(ee,0.)
-                  DO ibar = 1, NRBarc
-                     IF (PHAsr(ibar).LE.0.) THEN
-                        arg = 2*PI*(VBArex(ibar) - ee)/H(nr,ibar)
-                     ELSE
-                        arg = PHAsr(ibar)
-                     ENDIF
-                     IF (arg.GT.EXPmax) arg = EXPmax
-                     TFD(ibar) = 1./(1. + EXP(arg)) * TUNEfi(Nnuc)
-                  ENDDO
-C
-C----------- Penetrability calculations for double-humped case
-                  IF (NRBar.EQ.3 .AND. NRWel.EQ.1.) THEN
-C------------region I
-                     IF (ee.LE.VBArex(3)) THEN
-C                        call wkbfisnum(ee,3.)
-                        tdirr = TFD(1)*TFD(2)
-                        tabss = 0.
-                     ENDIF
-C-----------region II
-                     IF (ee.LT.VBArex(1) .AND. ee.LT.VBArex(2)) THEN
-                        delt = wimagg*PHAsr(3)
-                        IF (delt.GT.EXPmax) delt = EXPmax
-                        tdir1 = (1. - TFD(1))*(1. - TFD(2))
-                        tdirr = TFD(1)*TFD(2)
-     &                          /(EXP(delt) + 2*SQRT(ABS(tdir1))
-     &                          *COS(PHAsr(3)) + tdir1*EXP( - delt))
-                        IF (TFD(2).GT.0.) THEN
-                           tabss = tdirr*(EXP(delt)/TFD(2)
-     &                             - (1 - TFD(2))*EXP( - delt)/TFD(2)
-     &                             - 1)
-                        ELSE
-                           tabss = 0.
-                        ENDIF
-                     ENDIF
-C-----------region III
-                     IF (ee.GE.MIN(VBArex(1),VBArex(2))) THEN
-                        tdirr = 0.
-                        tabss = TFD(1)
-                     ENDIF
-                  ENDIF
-C----------------------------------------------------------------
-C-------- Penetrability calculations for triple-humped barrier for
-C         light actinides
-                  IF (NRBar.EQ.5 .AND. NRWel.EQ.2.) THEN
-C-----------region I
-                     IF (ee.LE.VBArex(4) .AND. ee.LE.VBArex(5)) THEN
-                        TFD(1) = 0.
-                        TFD(2) = 0.
-                        TFD(3) = 0.
-                        tdirr = 0.
-                        tabss = 0.
-                        tdirr23 = 0.
-                     ENDIF
-C-------------region II
-                     IF (ee.LE.VBArex(1) .AND. ee.LE.VBArex(5) .AND.
-     &                   ee.GT.VBArex(4)) THEN
-                        delt = wimagg*PHAsr(4)
-                        IF (delt.GT.EXPmax) delt = EXPmax
-                        CALL WKBFISNUM(ee,1.)
-                        tdirr23 = 0.
-                        IF (PHAsr(2).GE.0.)
-     &                      tdirr23 = 1./(1. + EXP(PHAsr(2)))
-                        tdir1 = (1. - TFD(1))*(1. - tdirr23)
-                        tdirr = TFD(1)
-     &                          *tdirr23/(EXP(delt) + 2*SQRT(ABS(tdir1))
-     &                          *COS(PHAsr(4)) + tdir1*EXP( - delt))
-                        tabss = tdirr*(EXP(delt)/tdirr23 -
-     &                          (1. - tdirr23)*EXP( - delt)/tdirr23 -
-     &                          1.)
-                        IF (delt.EQ.0.) tabss = 0.
-                     ENDIF
-C--------------region III
-                     efbmin = MIN(VBArex(2),VBArex(3))
-                     IF (ee.LT.VBArex(1) .AND. ee.GT.VBArex(4) .AND.
-     &                   ee.GT.VBArex(5) .AND. ee.LT.efbmin) THEN
-                        delt = wimagg*PHAsr(4)
-                        atal = EXP( - delt)*(1. - TFD(1))*(1. - TFD(2))
-     &                         + EXP(delt)*(1. - TFD(2))*(1. - TFD(3))
-     &                         + EXP( - delt)*(1. - TFD(1))
-     &                         *(1. - TFD(3)) + EXP(delt)
-                        btal = 2*((1. - TFD(1))**0.5)*(1. - TFD(2))
-     &                         *(1. - TFD(3))**0.5
-                        ctal = 2*((1. - TFD(1))**0.5)*(1. - TFD(3))**0.5
-                        dtal = 2*((1. - TFD(1))**0.5)
-     &                         *((1. - TFD(2))**0.5)*(2. - TFD(3))
-                        etal = 2*((1. - TFD(2))**0.5)
-     &                         *((1. - TFD(3))**0.5)
-     &                         *(EXP( - delt)*(1. - TFD(1)) + EXP(delt))
-
-                        tdirr = TFD(1)*TFD(2)*TFD(3)
-     &                          /(atal + btal*COS(PHAsr(4) - PHAsr(5))
-     &                          + ctal*COS(PHAsr(4) + PHAsr(5))
-     &                          + dtal*COS(PHAsr(4))
-     &                          + etal*COS(PHAsr(5)))
-
-                        aral = EXP( - delt)*(2. - TFD(2) - TFD(3))
-     &                         + EXP(delt)*(1. - TFD(1))
-     &                         *((1. - TFD(2))*(1. - TFD(3)) + 1.)
-                        bral = btal
-                        cral = ctal
-                        dral = dtal
-                        eral = 2*((1. - TFD(2))**0.5)
-     &                         *((1. - TFD(3))**0.5)
-     &                         *(EXP(delt)*(1. - TFD(1)) + EXP( - delt))
-
-                        tabss = 1. - (tdirr/(TFD(1)*TFD(2)*TFD(3)))
-     &                          *(TFD(1)*TFD(2)*TFD(3)
-     &                          + aral + bral*COS((PHAsr(4)-PHAsr(5)))
-     &                          + cral*COS((PHAsr(4)+PHAsr(5)))
-     &                          + dral*COS(PHAsr(4))
-     &                          + eral*COS(PHAsr(5)))
-                        tdir231 = (1. - TFD(2))*(1. - TFD(3))
-                        tdirr23 = TFD(2)*TFD(3)
-     &                            /(1. + 2*SQRT(ABS(tdir231))
-     &                            *COS(1.*PHAsr(5)) + tdir231)
-                     ENDIF
-C-------------region IV
-                     IF (ee.GT.VBArex(1) .AND. ee.LE.VBArex(5)) THEN
-                        CALL WKBFISNUM(ee,1.)
-                        tdirr23 = 1./(1. + EXP(PHAsr(2)))* TUNEfi(Nnuc)
-                        tdirr = 0.
-                        tabss = TFD(1)
-                     ENDIF
-C-------------region V
-                     IF (ee.GT.VBArex(1) .AND. ee.GT.VBArex(5) .AND.
-     &                   ee.LT.efbmin) THEN
-                        tdir231 = (1. - TFD(2))*(1. - TFD(3))
-                        tdirr23 = TFD(2)*TFD(3)
-     &                            /(1. + 2.*SQRT(ABS(tdir231))
-     &                            *COS(PHAsr(5)) + tdir231)
-                        tdirr = 0.
-                        tabss = TFD(1)
-                     ENDIF
-C-------------region VI
-                     IF (ee.GE.efbmin) THEN
-                        tdirr23=0.
-C                       tdirr23 = TFD(2)*TFD(3)
-                        tdirr = 0.
-                        tabss = TFD(1)
-                     ENDIF
-                  ENDIF
-C-------------------------
-                  IF (tabss + tdirr.GT.1.) tdirr = 0.
-                  TDIr = TDIr + tdirr
-                  TABs = TABs + tabss
-                  IF (NRBarc.EQ.3) TDIr23 = TDIr23 + tdirr23
-                  DO ibar = 1, NRBarc
-                     tfdis(ibar) = tfdis(ibar) + TFD(ibar)
-                  ENDDO
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDIF
-C==============continuum contribution====================
-      aj = FLOAT(Jc) + HIS(Nnuc)
-      nrbarc1 = NRBarc
-      IF (NRBarc.EQ.3) THEN
-         nrbarc1 = 2
-         hh2 = H(1,2)
-         vv2 = EFB(2)
-         H(1,2) = HOEq
-         EFB(2) = VEQ
-      ENDIF
-
-      DO ibar = 1, nrbarc1
-         arg = 2*PI*(EFB(ibar) - ee)/H(1,ibar)
-         IF (arg.LE.EXPmax) THEN
-            TFC = EXP(arg)
-         ELSE
-            TFC = EXP(EXPmax)
-         ENDIF
-CRC      SIMPSFIS remains just for testing purposes, is not used anymore
-CRC      GAUSSFIS is more efficient
-CMS      However, as for the moment it does not work, SIMPSFIS is used
-         CALL SIMPSFIS(Nnuc,ibar,ee)
-CMS      CALL GAUSSFIS(NNUc, IBAr)
-         tfcon(ibar) = TFCc * TUNEfi(Nnuc)
-         TF(ibar) = tfdis(ibar) + tfcon(ibar)
-      ENDDO
-      TABs = TABs + tfcon(1)
-
-      IF (NRBarc.EQ.3) THEN
-         IF (FISopt(Nnuc).EQ.0) TDIr23 = tfdis(2)*tfdis(3) + tfcon(2)
-         IF (FISopt(Nnuc).EQ.1) TDIr23 = TDIr23 + tfcon(2)
-         H(1,2) = hh2
-         EFB(2) = vv2
-      ENDIF
-
-      IF (FISopt(Nnuc).EQ.2.) THEN
-C      gamma transition in isomeric well, not calculated yet
-         TG2 = .00002
-      ELSE
-         TG2 = 0.
-      ENDIF
-C
-C     CALCULATING FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 C-----single-humped
-      IF (NRBar.EQ.1) THEN
-         Sumfis = TF(1)
-
-
-         WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
+      IF (Nrhump.EQ.1)
+     &    WRITE (80,'(1x,a2,f4.1,1x,a3,I2,3g11.4)') 'J=', aj, 'Pi=', Ip,
      &          tfdis(1), tfcon(1), Sumfis
 
-
-      ENDIF
 C-----double-humped
-      IF (NRBarc.EQ.2.) THEN
-         tnumm = TF(1) + TF(2)
-         IF (tnumm.EQ.0.0) THEN
-            Sumfis = 0.
-         ELSE
-            IF (FISopt(Nnuc).EQ.0.) THEN
+      IF (Nrhump.EQ.2.) THEN
+c         IF (FISopt(Nnuc).EQ.0.)
+c     &       WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
+c     &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
+c     &                tfdis(2), tfcon(1), tfcon(2), Sumfis
 
-
-               Sumfis = TF(1)*TF(2)/(TF(1) + TF(2))
-               WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
-     &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
-     &                tfdis(2), tfcon(1), tfcon(2), Sumfis
-            ENDIF
-            IF (NRWel.EQ.1 .AND. FISopt(Nnuc).GT.0.) THEN
-
-
-               Sumfis = TDIr + TABs*TF(2)/(TF(1) + TDIr + TG2)
-               WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
+c         IF (FISopt(Nnuc).GT.0.)
+            WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
      &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
      &                tfdis(2), tfcon(1), tfcon(2), Sumfis, TDIr, TABs
-            ENDIF
-         ENDIF
       ENDIF
-C----triple-humped
-      IF (NRBarc.EQ.3) THEN
-         tnumm = TF(1) + TDIr23
-         IF (tnumm.EQ.0.) THEN
-            Sumfis = 0.
-         ELSE
+C-----triple-humped
+      IF (Nrhump.EQ.3)
+     &  WRITE (80,'(1x,a2,f4.1,1x,a3,I2,10g11.4)') 'J=', aj, 'Pi=', Ip,
+     &        tfdis(1), tfdis(2), tfdis(3), tfcon(1), tfcon(2),tfcon(3),
+     &        Sumfis, TDIr, TABs, TDIr23
 
-
-            Sumfis = TF(1)*TDIr23/(TF(1) + TDIr23)
-            IF (NRWel.EQ.2 .AND. FISopt(Nnuc).GT.0.) Sumfis = TDIr +
-     &          TABs*TDIr23/(TF(1) + TDIr23)
-         ENDIF
-         WRITE (80,'(1x,a2,f4.1,1x,a3,I2,9g11.4)') 'J=', aj, 'Pi=', Ip,
-     &          tfdis(1), tfdis(2), tfdis(3), tfcon(1), tfcon(2),
-     &          Sumfis, TDIr, TABs, TDIr23
-      ENDIF
-      IF (Sumfis.LT.0.0000000000000001) Sumfis = 0.
+      IF (Sumfis.LT.0.0000000000000001) Sumfis = 0.d0
       DENhf = DENhf + Sumfis
       END
+c======================================================================
 
-
-      SUBROUTINE WKBFISNUM(Ee,Subwell)
-C
-C     Calculates Momentum integrals by Gauss - Legendre method
-C
+      SUBROUTINE SIMPSFIS(Nnuc,Ee,JCC,Ipa,Ibar,TFCc,vbarmax)
+C-----Simpson integration
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
+C COMMON variables
+C
+      INTEGER JCC
+      DOUBLE PRECISION  TFCc
+C
+C Dummy arguments
+C
+      INTEGER Ibar, Nnuc,ipa
+      DOUBLE PRECISION Ee
+C
+C Local variables
+C
+      DOUBLE PRECISION arg1, dens, enh1, ux1, vbarmax(NFPARAB)
+      DOUBLE PRECISION FISINT
+      INTEGER i,ii, nn,INT
+C
+      TFCc = 0.d0
+      ii = int(vbarmax(ibar)/destepp(ibar))
+      DO i = 1, NRBinfis(Ibar)
+         ux1 = XMInn(Ibar) + (i - 1)*DEStepp(Ibar)
+         enh1 = ENH_ld(1,Ibar) + (ENH_ld(2,Ibar) + ENH_ld(3,Ibar)*ux1)
+     &          *ux1
+         arg1 = 2*PI*(ux1 + EFB(Ibar) - Ee)/Hcont(Ibar)
+         IF (arg1.GE.EXPmax) arg1 = EXPmax
+
+         IF (FISden(Nnuc).EQ.1 .AND. enh1.GT.0)
+     &       dens = enh1 * ROFisp(i,JCC,ipa,Ibar)/(1.d0 + EXP(arg1))
+         IF (FISden(Nnuc).EQ.0 .AND. enh1.GT.0)
+     &       dens = enh1 * FISINT(Ibar,ux1,JCC,Nnuc,0)/(1.d0+ EXP(arg1))
+         IF (FISden(Nnuc).EQ.2.)
+     &       dens = enh1 * FISINT(Ibar,ux1,JCC,Nnuc,ipa)/
+     &              (1.d0 + EXP(arg1))
+         nn = 2
+         IF ((i * 0.5).EQ.INT(i/2)) nn = 4
+         IF (i.EQ.1 .OR. i.EQ.(NRBinfis(Ibar))) nn = 1
+         dens = nn * dens
+         TFCc = TFCc + dens
+      ENDDO
+      TFCc = TFCc * DEStepp(Ibar)
+      RETURN
+      END
+
+
+      SUBROUTINE SIMPSNumBar(Nnuc,Ee,JCC,Ipa,Nrbarc1,tfcon)
+C-----Simpson integration
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 C
 C COMMON variables
 C
-      DOUBLE PRECISION EJOin(2*NFPARAB), EPSil(NFPARAB), HO(NFPARAB),
-     &                 PHAsr(NFPARAB), SMIu, TFD(NFPARAB), UEX,
-     &                 VBArex(NFPARAB), VJJ(NFPARAB)
-      REAL SUBwell1
-      COMMON /CMIU  / SMIu, PHAsr, HO
-      COMMON /COMFIS3/ VBArex, TFD
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEX, SUBwell1
+      INTEGER JCC
+      DOUBLE PRECISION  TFCc
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION tfcon(NRBarc),Ee
+      INTEGER Nnuc, Nrbarc1, Ipa
+C
+C Local variables
+C
+      DOUBLE PRECISION arg1, dens, enh1, ux1, uexcit1
+      DOUBLE PRECISION phase(2*NFPARAB)
+      DOUBLE PRECISION FISINT
+      INTEGER i, nn,INT, ibar
+C
+      DO Ibar = 1, nrbarc1
+         TFCc = 0.d0
+         tfcon(Ibar) = 0.d0
+         DO i = 1, NRBinfis(ibar)
+            ux1 = XMInn(Ibar) + (i - 1)*DEStepp(Ibar)
+            enh1 = ENH_ld(1,Ibar) + (ENH_ld(2,Ibar) + ENH_ld(3,Ibar)
+     &             * ux1) * ux1
+C---------- Momentum integrals are calculated
+            uexcit1 = Ee - ux1
+
+            CALL PHASES(uexcit1, phase, nnuc)
+
+            if(Ibar.eq.1) arg1 = 2.d0*phase(1)
+            if(Ibar.eq.2) arg1 = 2.d0*phase(3)
+
+            IF (FISden(Nnuc).EQ.1 .AND. enh1.GT.0)
+     &           dens = enh1*ROFisp(i,JCC,ipa,Ibar)/(1. + EXP(arg1))
+
+            IF (FISden(Nnuc).EQ.0 .AND. enh1.GT.0)
+     &           dens = enh1*FISINT(Ibar,ux1,JCC,Nnuc,0)/(1.+ EXP(arg1))
+
+            IF (FISden(Nnuc).EQ.2.)
+     &          dens = enh1 * FISINT(Ibar,ux1,JCC,Nnuc,ipa)/
+     &                 (1. + EXP(arg1))
+           nn = 2
+           IF ((i*0.5).EQ.INT(i/2)) nn = 4
+           IF (i.EQ.1 .OR. i.EQ.(NRBinfis(Ibar))) nn = 1
+
+           dens = nn * dens
+           TFCc = TFCc + dens
+c           if( dens.le.1.d-6*TFCc ) EXIT
+        ENDDO
+
+        TFCc = TFCc*DEStepp(Ibar)
+        tfcon(ibar) = TFCc * TUNEfi(Nnuc)
+      ENDDO
+      RETURN
+      END
+C=============================================================
+
+      SUBROUTINE SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
+C-----Simpson integration for direct transmission
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C COMMON variables
+C
+      INTEGER JCC
+      DOUBLE PRECISION  vbarmax(nfparab)
 C
 C Dummy arguments
 C
       DOUBLE PRECISION Ee
-      REAL Subwell
+      INTEGER Ibar, Nnuc,ipa,iw
 C
 C Local variables
 C
-      DOUBLE PRECISION abserr, dmom, dmominteg(NFPARAB),
-     &                 einters(2*NFPARAB), es, ftmp
-      DOUBLE PRECISION FMOMENT, GAUSS_INT
-      INTEGER j, k
-      EXTERNAL FMOMENT
-      IF (NRBar.EQ.3 .AND. NRWel.EQ.1) THEN
-         VJJ(1) = VBArex(1)
-         VJJ(2) = VBArex(3)
-         VJJ(3) = VBArex(2)
-      ENDIF
-      IF (NRBar.EQ.5) THEN
-         VJJ(1) = VBArex(1)
-         VJJ(2) = VBArex(4)
-         VJJ(3) = VBArex(2)
-         VJJ(4) = VBArex(5)
-         VJJ(5) = VBArex(3)
-      ENDIF
-C-----deformations at saddles and wells and matching points--------------------
-C     Fission barriers are modelled by NRBar parabols
-C     EPSil(i) are the parabols vortex
-C     EJOin(i) are the corresponding deformation at which parabols join
-      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))
-      EJOin(2) = EPSil(1)
-     &           + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
-     &           /(SMIu*HO(1))
-      EJOin(1) = 2*EPSil(1) - EJOin(2)
-      DO k = 2, NRBar
-         EJOin(2*k - 1) = EJOin(2*(k - 1))
-         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
-     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
-         IF (k.LT.NRBar) EJOin(2*k) = EPSil(k)
-     &                                + SQRT(( - 1)**k*(VJJ(k+1)
-     &                                - VJJ(k))
-     &                                /(1.D0 + (HO(k)/HO(k+1))**2))
-     &                                /(SMIu*HO(k))
+      DOUBLE PRECISION FISINT,arg1,ux1
+      DOUBLE PRECISION dmom,ttf(nrbarc),ttdir(NRBarc),
+     &                 tdircont(nrbarc),romin
+      INTEGER i,ii, nn, INT
+C
+
+      arg1 = 0.d0
+      dmom = 0.d0
+      DO ib = 1, NRBarc
+         ttdir(ib) = 0.d0
+         tdircont(ib) =0.d0
+         ttf(ib) = 0.d0
       ENDDO
-      EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
-C-----Einters(i) are the deformations corresponding to the intersection points
-C     between parabols and the straigth line parallel to the deformation
-C     axis corresponding to the excitation energy
-      DO j = 1, 2*NRBar
-         einters(j) = -1.
-      ENDDO
-      DO j = 1, NRBar
-         ftmp = ( - 1)**j*(Ee - VJJ(j))
-         IF (ftmp.GE.0.D0) THEN
-            IF (Ee.EQ.VJJ(j)) THEN
-               einters(2*j - 1) = Ee
-               einters(2*j) = Ee
-               GOTO 100
-            ENDIF
-            es = SQRT(ftmp)/(SMIu*HO(j))
-C           LEFT intersect
-            einters(2*j - 1) = EPSil(j) - es
-C           RIGTH intersect
-            einters(2*j) = EPSil(j) + es
-         ENDIF
-  100 ENDDO
-C-------------------------------------------------------------------
-C     Difficult logical block below to discriminate between intersection
-C     points corresponding to different parabols
-      DO j = 1, 2*NRBar, 2
-         IF (einters(j).GE.0.) THEN
-C           LEFT intersect
-            IF (j.GT.1 .AND. einters(j).LT.EJOin(j)) einters(j) = -1.
-C           RIGTH intersect
-            IF (j + 1.LT.2*NRBar) THEN
-               IF (einters(j + 1).GT.EJOin(j + 1)) einters(j + 1) = -1.
-            ENDIF
+
+      ibar = 1
+      ii = int(vbarmax(1)/destepp(1))
+      romin= ROFisp(ii,JCC,ipa,1)
+
+      DO ib = 2, NRBarc
+         IF(romin.gt.ROFisp(ii,JCC,ipa,ib))THEN
+            romin = ROFisp(ii,JCC,ipa,ib)
+            ibar = ib
+            ii = int(vbarmax(ib)/destepp(ib))
          ENDIF
       ENDDO
-C     Below is tested only for wells
-      DO j = 3, 2*NRBar - 2, 4
-C        LEFT intersect
-         IF (einters(j).LT.0.) einters(j) = einters(j - 1)
-C        RIGTH intersect
-         IF (einters(j + 1).LT.0.) einters(j + 1) = einters(j + 2)
-      ENDDO
-C     Below is tested only for hills
-      DO j = 1, 2*NRBar, 4
-C        LEFT intersect
-         IF (j.GT.1 .AND. einters(j).LT.0.) einters(j) = einters(j - 1)
-C        RIGTH intersect
-         IF (j + 1.LT.2*NRBar .AND. einters(j + 1).LT.0.) einters(j + 1)
-     &       = einters(j + 2)
-      ENDDO
-      IF (Subwell.EQ.1.) THEN
-         ftmp = -(Ee - VJJ(3))
-         es = SQRT(ftmp)/(SMIu*HO(3))
-C           LEFT intersect
-         einters(5) = EPSil(3) - es
-         einters(4) = einters(5)
-         ftmp = -(Ee - VJJ(5))
-         es = SQRT(ftmp)/(SMIu*HO(5))
-C           RIGTH intersect
-         einters(10) = EPSil(5) + es
-         einters(9) = einters(10)
-      ENDIF
-C---------------------------------
-C     Momentum integrals calculated by Gauss-Legendre integration
-      UEX = Ee
-      DO k = 1, NRBar
-         dmominteg(k) = 0.D0
-         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)
-     &       dmominteg(k) = GAUSS_INT(FMOMENT,einters(2*k - 1),
-     &                      einters(2*k),abserr)
-      ENDDO
-      SUBwell1 = Subwell
-      IF (Subwell.EQ.1.) dmom = GAUSS_INT(FMOMENT,einters(5),einters(10)
-     &                          ,abserr)
-      IF (NRBar.EQ.3) THEN
-         PHAsr(1) = 2.*dmominteg(1)
-         PHAsr(2) = 2.*dmominteg(3)
-         PHAsr(3) = 2.*dmominteg(2)
-      ENDIF
-      IF (NRBar.EQ.5) THEN
-         PHAsr(1) = 2.*dmominteg(1)
-         PHAsr(2) = 2.*dmominteg(3)
-         PHAsr(3) = 2.*dmominteg(5)
-         PHAsr(4) = 2.*dmominteg(2)
-         PHAsr(5) = 2.*dmominteg(4)
-         IF (Subwell.EQ.1.) PHAsr(2) = 2.*dmom
-      ENDIF
-      END
 
-
-      SUBROUTINE GAUSSFIS(Nnuc,Ibar)
-C     Gauss-Legendre integration of the fission level densities
-C     Passing parameters to the integrand function Fdensity
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C COMMON variables
-C
-      INTEGER IIBar, JCC, NNNuc
-      DOUBLE PRECISION TFC, TFCc
-      COMMON /COMFIS4/ TFC, TFCc, JCC
-      COMMON /GDENSIT/ NNNuc, IIBar
-C
-C Dummy arguments
-C
-      INTEGER Ibar, Nnuc
-C
-C Local variables
-C
-      DOUBLE PRECISION abserr, fff, xabs, xmax, xmin
-      DOUBLE PRECISION FDENSITY, GAUSS_INT
-      EXTERNAL FDENSITY
-C
-      IIBar = Ibar
-      NNNuc = Nnuc
-      TFCc = 0.D0
-      xmin = XMInn(Ibar)
-      xmax = XMInn(Ibar) + (NRBinfis(Ibar) - 1)*DEStepp(Ibar)
-      TFCc = GAUSS_INT(FDENSITY,xmin,xmax,abserr)
-C
-C     If Relative Error for Gaussian Integration > 1 %
-C
-C     Try to find a true upper limit <xabs> which is always below Ee+4
-C     The condition used is FDENSITY(xabs)>0.00001
-C     We are using 0.5 MeV step because it is enough to get a good accuracy
-C
-      IF (abserr*100.GT.TFCc) THEN
-         xabs = xmax
-   50    fff = FDENSITY(xabs)
-         IF (fff.LE.0.00001D0) THEN
-            xabs = xabs - 0.5
-            IF (xabs.LT.(xmin + 0.25)) THEN
-               xabs = xmin + 0.25
-               GOTO 100
-            ENDIF
-            GOTO 50
-         ENDIF
-  100    TFCc = 0.D0
-         TFCc = GAUSS_INT(FDENSITY,xmin,xabs,abserr)
-      ENDIF
-      END
-
-
-      REAL*8 FUNCTION FDENSITY(Uxx)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C COMMON variables
-C
-      INTEGER IBAr, JCC, NNUc
-      DOUBLE PRECISION TFC, TFCc
-      COMMON /COMFIS4/ TFC, TFCc, JCC
-      COMMON /GDENSIT/ NNUc, IBAr
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Uxx
-C
-C Local variables
-C
-      DOUBLE PRECISION arg, enh1, pix2
-      DOUBLE PRECISION FISINT
-C
-C
-C     Penetrability in the continuum.
-C     Level densities at the saddle points are used
-      DATA pix2/6.28318530717958647692528676655901D0/
-      FDENSITY = 0.D0
-      enh1 = ENH_ld(1,IBAr) + (ENH_ld(2,IBAr) + ENH_ld(3,IBAr)*Uxx)*Uxx
-      arg = pix2*Uxx/H(1,IBAr)
-      IF (arg.GT.EXPmax) arg = EXPmax
-C     FISINT  function takes care of the interpolation from the  LD tables
-      FDENSITY = enh1*FISINT(IBAr,Uxx,JCC,NNUc)/(1. + TFC*EXP(arg))
-      END
-
-
-      REAL*8 FUNCTION FMOMENT(Eps)
-      INCLUDE 'dimension.h'
-C
-C
-C COMMON variables
-C
-      REAL*8 EJOin(2*NFPARAB), EPSil(NFPARAB), PHAsr(NFPARAB), SMIu,
-     &       UEX, VJJ(NFPARAB)
-      DOUBLE PRECISION HO(NFPARAB)
-      REAL SUBwell1
-      COMMON /CMIU  / SMIu, PHAsr, HO
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEX, SUBwell1
-C
-C Dummy arguments
-C
-      REAL*8 Eps
-C
-C Local variables
-C
-      DOUBLE PRECISION DABS, DSQRT
-      REAL*8 VDEF
-C
-C
-      FMOMENT = 2*SMIu*DSQRT(DABS(UEX - VDEF(Eps)))
-      END
-
-
-      REAL*8 FUNCTION VDEF(Eps)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C COMMON variables
-C
-      DOUBLE PRECISION EJOin(2*NFPARAB), EPSil(NFPARAB), HO(NFPARAB),
-     &                 PHAsr(NFPARAB), SMIu, UEX, VJJ(NFPARAB)
-      REAL SUBwell1
-      COMMON /CMIU  / SMIu, PHAsr, HO
-      COMMON /COMFIS5/ EPSil, EJOin, VJJ, UEX, SUBwell1
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Eps
-C
-C Local variables
-C
-      INTEGER j
-C
-C
-C     calculation of the deformation potential energy
-      VDEF = 0.D0
-      IF (Eps.LE.EJOin(2)) THEN
-         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
-         RETURN
-      ENDIF
-      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
-         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
-         RETURN
-      ENDIF
-      IF (SUBwell1.EQ.1.) THEN
-         IF (Eps.LT.EJOin(4) .AND. Eps.GT.EJOin(3)) VDEF = VJJ(2)
-     &       + (SMIu*HO(2)*(Eps - EPSil(2)))**2
-         IF (Eps.LT.EJOin(6) .AND. Eps.GT.EJOin(5)) VDEF = VJJ(3)
-     &       - (SMIu*HO(3)*(Eps - EPSil(3)))**2
-         IF (Eps.LT.EJOin(8) .AND. Eps.GT.EJOin(7)) VDEF = VJJ(4)
-     &       + (SMIu*HO(4)*(Eps - EPSil(4)))**2
-         IF (Eps.LT.EJOin(10) .AND. Eps.GT.EJOin(9)) VDEF = VJJ(5)
-     &       - (SMIu*HO(5)*(Eps - EPSil(5)))**2
-      ENDIF
-
-      IF (SUBwell1.EQ.0.) THEN
-         DO j = 2, NRBar - 1
-            IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) THEN
-               VDEF = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))
-     &                **2
-               RETURN
-            ENDIF
+      DO i = 1, NRBinfis(Ibar)
+         ux1 = xminn(ibar) + (i - 1)*DEStepp(Ibar)
+         DO ib = 1, NRBarc
+            arg1 = 2.d0 * PI * (ux1 + EFB(ib) - Ee)/HCOnt(ib)
+            IF (arg1.GE.EXPmax) arg1 = EXPmax
+            ttf(ib) = 1.d0/(1.d0 + EXP(arg1))
          ENDDO
-      ENDIF
+         ttdir(nrbarc) = ttf(nrbarc)
+         DO iw =  NRWel, 1, -1
+            IF(Ee.LT.(EFB(nrbarc + iw) + ux1))THEN
+               ttdir(iw) = ttf(iw) *  ttdir(iw + 1)
+               GOTO 100
+            ENDIF
+            arg1 =  - 2.d0 * PI * (ux1 + EFB(NRBarc + iw) - Ee)
+     &               /HCOnt(Nrbarc + iw)
+            arg1=0.d0
+            dmom=(1.d0 - ttf(iw)) * (1.d0 - ttdir(iw + 1))
+            ttdir(iw) =  ttf(iw) *  ttdir(iw + 1)/
+     &                  (1.d0 + 2.d0 * dSQRT(dmom) *
+     &                  COS(arg1) + dmom)
+c        ttdir(iw) =  ttdir(iw + 1)*(1.d0/(dSQRT(dmom) *cos(arg1)+dmom))
+
+ 100     ENDDO
+         IF(NRBar.EQ.5.AND.Ee.GT.EFB(NRBarc + 1))THEN
+            dmom=(1.d0 - ttf(1)) * (1.d0 - ttf(2))
+            arg1 = - 2.d0 * PI * (ux1 + EFB(NRBarc + 1) - Ee)
+     &             /HCOnt(Nrbarc + 1)
+            ttdir(3) =  ttf(1) *  ttf(2)/
+     &                  (1.d0 + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(arg1) + dmom)
+         ENDIF
+
+         nn = 2
+
+         IF ((i*0.5).EQ.INT(i/2)) nn = 4
+         IF (i.EQ.1 .OR. i.EQ.(NRBinfis(Ibar))) nn = 1
+
+         DO iw = 1, NRBar - 2
+            IF (FISden(Nnuc).EQ.1 )
+     &           ttdir(iw) = ttdir(iw) *  ROFisp(i,JCC,ipa,ibar)
+            IF (FISden(Nnuc).EQ.0 )
+     &           ttdir(iw) = ttdir(iw) * FISINT(Ibar,ux1,JCC,Nnuc,0)
+            IF (FISden(Nnuc).EQ.2.)
+     &           ttdir(iw) = ttdir(iw) * FISINT(Ibar,ux1,JCC,Nnuc,1)
+            ttdir(iw) =  ttdir(iw) * nn
+            tdircont(iw) = tdircont(iw) + ttdir(iw)
+         ENDDO
+ 300  ENDDO
+
+      DO iw = 1,NRBar -NRWel
+         tdircont(iw) = tdircont(iw) * DEStepp(Ibar)
+      ENDDO
+      RETURN
       END
 
+C=============================================================
 
-      REAL*8 FUNCTION GAUSS_INT(F,Ea,Eb,Abserr)
+      SUBROUTINE SIMPSNumTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
+C-----Simpson integration for direct transmission
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 C
+C COMMON variables
+C
+      INTEGER JCC
+      DOUBLE PRECISION  vbarmax(nfparab),phase(2 * NFPARAB), uexcit1
 C
 C Dummy arguments
 C
-      REAL*8 Abserr
-      REAL*8 Ea, Eb
-      REAL*8 F
+      DOUBLE PRECISION Ee
+      INTEGER Ibar, Nnuc,ipa,iw
 C
 C Local variables
 C
-      REAL*8 absc, abscm1, fsum, fval1, fval1m1, fval2, fval2m1, resk1
-      REAL*8 centr1, hlgth1, resg1, wg(10), wgk(21), xgk(21)
-      INTEGER j, jtw, jtwm1
-      EXTERNAL F
+      DOUBLE PRECISION FISINT, arg1, ux1
+      DOUBLE PRECISION dmom,ttf(nrbarc),ttdir(NRBarc),
+     &                 tdircont(nrbarc),romin
+      INTEGER i,ii, nn, INT
 C
-C
-C
-C     THE ABSCISSAE AND WEIGHTS ARE GIVEN FOR THE INTERVAL (-1,1).
-C     BECAUSE OF SYMMETRY ONLY THE POSITIVE ABSCISSAE AND THEIR
-C     CORRESPONDING WEIGHTS ARE GIVEN.
-C
-C     XG - ABSCISSAE OF THE 41-POINT GAUSS-KRONROD RULE
-C     WG - WEIGHTS OF THE 20-POINT GAUSS RULE
-C
-C GAUSS QUADRATURE WEIGHTS AND KRONROD QUADRATURE ABSCISSAE AND WEIGHTS
-C AS EVALUATED WITH 80 DECIMAL DIGIT ARITHMETIC BY L. W. FULLERTON,
-C BELL LABS, NOV. 1981.
-C
-      DATA wg(1)/0.017614007139152118311861962351853D0/
-      DATA wg(2)/0.040601429800386941331039952274932D0/
-      DATA wg(3)/0.062672048334109063569506535187042D0/
-      DATA wg(4)/0.083276741576704748724758143222046D0/
-      DATA wg(5)/0.101930119817240435036750135480350D0/
-      DATA wg(6)/0.118194531961518417312377377711382D0/
-      DATA wg(7)/0.131688638449176626898494499748163D0/
-      DATA wg(8)/0.142096109318382051329298325067165D0/
-      DATA wg(9)/0.149172986472603746787828737001969D0/
-      DATA wg(10)/0.152753387130725850698084331955098D0/
-C
-      DATA xgk(1)/0.998859031588277663838315576545863D0/
-      DATA xgk(2)/0.993128599185094924786122388471320D0/
-      DATA xgk(3)/0.981507877450250259193342994720217D0/
-      DATA xgk(4)/0.963971927277913791267666131197277D0/
-      DATA xgk(5)/0.940822633831754753519982722212443D0/
-      DATA xgk(6)/0.912234428251325905867752441203298D0/
-      DATA xgk(7)/0.878276811252281976077442995113078D0/
-      DATA xgk(8)/0.839116971822218823394529061701521D0/
-      DATA xgk(9)/0.795041428837551198350638833272788D0/
-      DATA xgk(10)/0.746331906460150792614305070355642D0/
-      DATA xgk(11)/0.693237656334751384805490711845932D0/
-      DATA xgk(12)/0.636053680726515025452836696226286D0/
-      DATA xgk(13)/0.575140446819710315342946036586425D0/
-      DATA xgk(14)/0.510867001950827098004364050955251D0/
-      DATA xgk(15)/0.443593175238725103199992213492640D0/
-      DATA xgk(16)/0.373706088715419560672548177024927D0/
-      DATA xgk(17)/0.301627868114913004320555356858592D0/
-      DATA xgk(18)/0.227785851141645078080496195368575D0/
-      DATA xgk(19)/0.152605465240922675505220241022678D0/
-      DATA xgk(20)/0.076526521133497333754640409398838D0/
-      DATA xgk(21)/0.000000000000000000000000000000000D0/
-C
-      DATA wgk(1)/0.003073583718520531501218293246031D0/
-      DATA wgk(2)/0.008600269855642942198661787950102D0/
-      DATA wgk(3)/0.014626169256971252983787960308868D0/
-      DATA wgk(4)/0.020388373461266523598010231432755D0/
-      DATA wgk(5)/0.025882133604951158834505067096153D0/
-      DATA wgk(6)/0.031287306777032798958543119323801D0/
-      DATA wgk(7)/0.036600169758200798030557240707211D0/
-      DATA wgk(8)/0.041668873327973686263788305936895D0/
-      DATA wgk(9)/0.046434821867497674720231880926108D0/
-      DATA wgk(10)/0.050944573923728691932707670050345D0/
-      DATA wgk(11)/0.055195105348285994744832372419777D0/
-      DATA wgk(12)/0.059111400880639572374967220648594D0/
-      DATA wgk(13)/0.062653237554781168025870122174255D0/
-      DATA wgk(14)/0.065834597133618422111563556969398D0/
-      DATA wgk(15)/0.068648672928521619345623411885368D0/
-      DATA wgk(16)/0.071054423553444068305790361723210D0/
-      DATA wgk(17)/0.073030690332786667495189417658913D0/
-      DATA wgk(18)/0.074582875400499188986581418362488D0/
-      DATA wgk(19)/0.075704497684556674659542775376617D0/
-      DATA wgk(20)/0.076377867672080736705502835038061D0/
-      DATA wgk(21)/0.076600711917999656445049901530102D0/
-C
-C     Integrating from Ea to Eint
-      centr1 = 0.5D+00*(Ea + Eb)
-      hlgth1 = 0.5D+00*(Eb - Ea)
-C
-C     COMPUTE THE 41-POINT GAUSS-KRONROD APPROXIMATION TO
-C     THE INTEGRAL, AND ESTIMATE THE ABSOLUTE ERROR.
-C
-      resg1 = 0.0D+00
-      resk1 = wgk(21)*F(centr1)
-      DO j = 1, 10
-         jtw = j*2
-         jtwm1 = jtw - 1
-         absc = hlgth1*xgk(jtw)
-         fval1 = F(centr1 - absc)
-         fval2 = F(centr1 + absc)
-         fsum = fval1 + fval2
-         abscm1 = hlgth1*xgk(jtwm1)
-         fval1m1 = F(centr1 - abscm1)
-         fval2m1 = F(centr1 + abscm1)
-         resg1 = resg1 + wg(j)*fsum
-         resk1 = resk1 + wgk(jtw)*fsum + wgk(jtwm1)*(fval1m1 + fval2m1)
+      arg1 = 0.d0
+      dmom = 0.d0
+      DO ib = 1, NRBarc
+         ttdir(ib) = 0.d0
+         tdircont(ib) =0.d0
+         ttf(ib) = 0.d0
       ENDDO
-      GAUSS_INT = resk1*hlgth1
-      Abserr = ABS((resk1 - resg1)*hlgth1)
+
+      ibar = 1
+      ii = int(vbarmax(1)/destepp(1))
+      romin= ROFisp(ii,JCC,ipa,1)
+
+      DO ib = 2, NRBarc
+         IF(romin.gt.ROFisp(ii,JCC,ipa,ib))THEN
+            romin = ROFisp(ii,JCC,ipa,ib)
+            ibar = ib
+            ii = int(vbarmax(ib)/destepp(ib))
+         ENDIF
+      ENDDO
+
+      DO i = ii, NRBinfis(Ibar)
+         ux1 = xminn(ibar) + (i - 1)*DEStepp(Ibar)
+         uexcit1 = Ee - ux1
+
+         DO ib = 1, NRBar
+            CALL PHASES(uexcit1, phase, nnuc)
+         ENDDO
+
+         DO ib = 1, NRBarc
+            if(Ib.eq.1) arg1 = 2.d0*phase(1)
+            if(Ib.eq.2) arg1 = 2.d0*phase(3)
+            if(Ib.eq.3) arg1 = 2.d0*phase(5)
+
+            IF (arg1.GE.EXPmax) arg1 = EXPmax
+            ttf(ib) = 1.d0/(1.d0 + EXP(arg1))
+         ENDDO
+
+         ttdir(nrbarc) = ttf(nrbarc)
+
+         DO iw =  NRWel, 1, -1
+            IF(Ee.LT.(EFB(nrbarc + iw) + ux1))THEN
+               ttdir(iw) = ttf(iw) *  ttdir(iw + 1)
+               GOTO 100
+            ENDIF
+            if(Iw.eq.1) arg1 =  2.d0*phase(2)
+            if(Iw.eq.2) arg1 =  2.d0*phase(4)
+
+            arg1=0.d0
+            dmom=(1.d0 - ttf(iw)) * (1.d0 - ttdir(iw + 1))
+            ttdir(iw) =  ttf(iw) *  ttdir(iw + 1)/
+     &                  (1.d0 + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(arg1) + dmom)
+ 100     ENDDO
+         IF(NRBar.EQ.5.AND.Ee.GT.EFB(NRBarc + 1))THEN
+            dmom=(1.d0 - ttf(1)) * (1.d0 - ttf(2))
+            arg1 =  2.d0*phase(2)
+c            arg1 = - 2.d0 * PI * (ux1 + EFB(NRBarc + 1) - Ee)
+c     &             /HCOnt(Nrbarc + 1)
+            ttdir(3) =  ttf(1) *  ttf(2)/
+     &                  (1.d0 + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(arg1) + dmom)
+         ENDIF
+
+         nn = 2
+
+         IF ((i*0.5).EQ.INT(i/2)) nn = 4
+         IF (i.EQ.1 .OR. i.EQ.(NRBinfis(Ibar))) nn = 1
+
+         DO iw = 1, NRBar - 2
+            IF (FISden(Nnuc).EQ.1 )
+     &           ttdir(iw) = ttdir(iw) *  ROFisp(i,JCC,ipa,ibar)
+            IF (FISden(Nnuc).EQ.0 )
+     &           ttdir(iw) = ttdir(iw) * FISINT(Ibar,ux1,JCC,Nnuc,0)
+            IF (FISden(Nnuc).EQ.2.)
+     &           ttdir(iw) = ttdir(iw) * FISINT(Ibar,ux1,JCC,Nnuc,1)
+            ttdir(iw) =  ttdir(iw) * nn
+            tdircont(iw) = tdircont(iw) + ttdir(iw)
+         ENDDO
+ 300  ENDDO
+
+      DO iw = 1, NRBar -2 !NRWel
+         tdircont(iw) = tdircont(iw) * DEStepp(Ibar)
+      ENDDO
+      RETURN
       END
+c-----------------------------------------------------
 
 
-      DOUBLE PRECISION FUNCTION FISINT(Ib,Ux,Jcc,Nnuc)
+      DOUBLE PRECISION FUNCTION FISINT(Ib,Ux,Jcc,Nnuc,ipa)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C Dummy arguments
 C
-      INTEGER Ib, Jcc, Nnuc
+      INTEGER Ib, Jcc, Nnuc,ipa
       DOUBLE PRECISION Ux
 C
 C Local variables
@@ -2265,7 +2117,10 @@ C
 C
 C
       IF (FISden(Nnuc).EQ.1.) iugrid = NRBinfis(Ib)
-      IF (FISden(Nnuc).EQ.0.) iugrid = NFISEN
+      IF (FISden(Nnuc).EQ.0.) iugrid = NFISEN !!!!!!!!!!!!!!!!!!!
+      IF (FISden(Nnuc).EQ.2.) iugrid = NFISEN1 !!!!!!!!!!!!!!!!!!!!!!
+
+      ROFisp(0,Jcc,ipa,Ib)=0.d0
       klo = 1
       khi = iugrid
       IF (Ux.LE.UGRid(klo,Ib)) THEN
@@ -2291,12 +2146,18 @@ C
          ENDIF
          GOTO 100
       ENDIF
+
 C-----LEVEL DENSITY INTERPOLATION
   200 hhh = UGRid(khi,Ib) - UGRid(klo,Ib)
       c1 = (UGRid(khi,Ib) - Ux)/hhh
       c2 = (Ux - UGRid(klo,Ib))/hhh
-      r1 = ROFis(klo,Jcc,Ib)
-      r2 = ROFis(khi,Jcc,Ib)
+      IF(ipa.EQ.0)THEN
+         r1 = ROFis(klo,Jcc,Ib)
+         r2 = ROFis(khi,Jcc,Ib)
+      ENDIF
+      r1 = ROFisp(klo,Jcc,ipa,Ib)
+      r2 = ROFisp(khi,Jcc,ipa,Ib)
+
       IF (r1.GT.0 .AND. r2.GT.0) THEN
          FISINT = MAX(10.**(c1*DLOG10(r1) + c2*DLOG10(r2)),0.)
       ELSE
@@ -2304,56 +2165,7 @@ C-----LEVEL DENSITY INTERPOLATION
       ENDIF
       END
 
-
-      SUBROUTINE SIMPSFIS(Nnuc,Ibar,Ee)
-C-----Simpson integration
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C COMMON variables
-C
-      INTEGER JCC
-      DOUBLE PRECISION TFC, TFCc
-      COMMON /COMFIS4/ TFC, TFCc, JCC
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Ee
-      INTEGER Ibar, Nnuc
-C
-C Local variables
-C
-      DOUBLE PRECISION arg1, dens, enh1, ux1
-      DOUBLE PRECISION FISINT
-      INTEGER i, nn
-      INTEGER INT
-C
-C
-      TFCc = 0.
-      DO i = 1, NRBinfis(Ibar)
-         ux1 = XMInn(Ibar) + (i - 1)*DEStepp(Ibar)
-         IF (ux1.LT.0.) ux1 = 0.0001
-         enh1 = ENH_ld(1,Ibar) + (ENH_ld(2,Ibar) + ENH_ld(3,Ibar)*ux1)
-     &          *ux1
-         arg1 = 2*PI*(ux1 + EFB(Ibar) - Ee)/H(1,Ibar)
-         IF (arg1.GE.EXPmax) arg1 = EXPmax
-
-         IF (FISden(Nnuc).EQ.1 .AND. enh1.GT.0)
-     &       dens = enh1*ROFis(i,JCC,Ibar)/(1. + EXP(arg1))
-
-         IF (FISden(Nnuc).EQ.0 .AND. enh1.GT.0)
-     &       dens = enh1*FISINT(Ibar,ux1,JCC,Nnuc)/(1. + EXP(arg1))
-         nn = 2
-         IF ((i*0.5).EQ.INT(i/2)) nn = 4
-         IF (i.EQ.1 .OR. i.EQ.(NRBinfis(Ibar))) nn = 1
-         dens = nn*dens
-         TFCc = TFCc + dens
-      ENDDO
-      TFCc = TFCc*DEStepp(Ibar)
-      END
-
-
+c-----------------------------------------------------------
       SUBROUTINE WRITE_OUTFIS(Nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -2361,21 +2173,26 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ACRtf(2), AFIsm(3), DEFbm(3), DELtafism(3),
-     &                 DEStepm(2), DETcrtf(2), ECOndf(2), EFBm(3),
-     &                 EFDism(NFTRANS,3), GAMmafism(3), HM(NFTRANS,3),
+      DOUBLE PRECISION  TFIso, TGIso
+      DOUBLE PRECISION ACRtf(NFHUMP),  DETcrtf(NFHUMP), ECOndf(NFHUMP),
+     &                 SCRtf(NFHUMP),TCRtf(NFHUMP), UCRtf(NFHUMP)
+
+      DOUBLE PRECISION AFIsm(NFMOD), DEFbm(NFMOD), DELtafism(NFMOD),
+     &                 DEStepm(NFMOD), EFBm(NFMOD),
+     &                 EFDism(NFTRANS,NFMOD), GAMmafism(NFMOD),
+     &                 HM(NFTRANS,NFMOD),
      &                 MORtcrt(NFPARAB), MPArcrt(NFPARAB), RFIso,
-     &                 ROFism(160,30,3), SCRtf(2), SHCfism(3), TCRtf(2),
-     &                 TDIrect, TDIrm(3), TFB, TFBm(3), TFIso, TGIso,
-     &                 TISo, UCRtf(2), UGRidf(0:NFISENMAX,3), WFIsm(3),
-     &                 XMInnm(3)
-      INTEGER BFFm(3), NRBinfism(3)
+     &                 ROFism(160,30,NFMOD), SHCfism(NFMOD),
+     &                 TDIrect, TDIrm(NFMOD), TFB, TFBm(NFMOD),
+     &                 TISo, UGRidf(0:NFISENMAX,3), WFIsm(3),
+     &                 XMInnm(NFMOD),ECFis(NFHUMP),ECFism(NFMOD)
+      INTEGER BFFm(3), NRBinfism(NFMOD)
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, TFB,
-     &                 TDIrect
+     &                 TDIrect,ECFis,ECFism
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 C
 C Dummy arguments
@@ -2411,7 +2228,7 @@ C
          IF (FISmod(Nnuc).EQ.0.) THEN
             WRITE (80,'(a)')
      &                    '    Va      ha      Vb      hb     (in Mev) '
-            WRITE (80,'(4f8.3)') (EFB(i),H(1,i),i = 1,NRBar)
+            WRITE (80,'(4f8.3)') (EFB(i),HCOnt(i),i = 1,NRBar)
          ENDIF
          IF (FISmod(Nnuc).EQ.1.) THEN
             WRITE (80,'(a,1x,a)')

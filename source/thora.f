@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2006-08-09 12:37:40 $
-Ccc   * $Id: thora.f,v 1.5 2006-08-09 12:37:40 Capote Exp $
+Ccc   * $Date: 2007-09-03 14:20:35 $
+Ccc   * $Id: thora.f,v 1.6 2007-09-03 14:20:35 Capote Exp $
       SUBROUTINE THORA(IOUT)
 C
 C     R. Capote, March 2005

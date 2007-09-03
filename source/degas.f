@@ -1,6 +1,6 @@
-Ccc   * $Author: Carlson $ 
-Ccc   * $Date: 2007-01-29 14:24:38 $
-Ccc   * $Id: degas.f,v 1.30 2007-01-29 14:24:38 Carlson Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2007-09-03 14:20:29 $
+Ccc   * $Id: degas.f,v 1.31 2007-09-03 14:20:29 Capote Exp $
             
       SUBROUTINE EMPIREDEGAS
       INCLUDE 'dimension.h'

@@ -50,16 +50,17 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             ph-lev-dens.o     pipe.o            print.o       \
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
-            thora.o           empire_ctl.o      pfns.o        dtrans.o
+            thora.o           empire_ctl.o      pfns.o        dtrans.o\
+            fitbarrier.o      
 
 OBJE =      subecis03.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
-	$(FC) -o $@ $(OBJF) $(OBJE)
+      $(FC) -o $@ $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
-#	$(FC) --parallel -o $@ $(OBJF) $(OBJE)
+#     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h
@@ -67,4 +68,4 @@ ddhms.o : ddhms.cmb
 tl.o  : pre_ecis.h
 
 clean:
-	rm *.o
+      rm *.o

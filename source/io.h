@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-04-02 22:01:58 $
-Ccc   * $Id: io.h,v 1.32 2007-04-02 22:01:58 Capote Exp $
+Ccc   * $Date: 2007-09-03 14:20:31 $
+Ccc   * $Id: io.h,v 1.33 2007-09-03 14:20:31 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -29,6 +29,7 @@ c     22     input
 c     23     io.h
 c     24     io.h
 c     25     (seems to be used but don't know where)
+c     26     empire-ctrl, main
 c     27     ddhms,input
 c     28     ddhms
 c     29     io.h
@@ -62,6 +63,7 @@ c     63     ecis03
 c     64     ecis03
 c     65     ecis03
 c     66     ecis03, MSD-Tristan
+c     68     main
 c     70     fileprep (empire_ctl fit)
 c     71     fileprep (empire_ctl fit)
 c     72     fileprep (empire_ctl fit)
@@ -142,10 +144,10 @@ C     Added to check if file is not empty
      *',STATUS='OLD')
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
-      OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
-      OPEN (UNIT = 53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
-      OPEN (UNIT = 95,FILE='COVAR.DAT', STATUS = 'UNKNOWN')      
-
+C     OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+C     OPEN (UNIT = 53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
+C     OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
+C     OPEN (UNIT = 95,FILE='COVAR.DAT', STATUS = 'UNKNOWN')      
 
 
 

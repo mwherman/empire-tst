@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: pipe.f,v 1.5 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Date: 2007-09-03 14:20:32 $
+Ccc   * $Id: pipe.f,v 1.6 2007-09-03 14:20:32 Capote Exp $
             
 C/* pipe.f
 C/*               R.Capote, 01/99                      */

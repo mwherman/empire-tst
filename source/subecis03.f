@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-02-13 19:35:32 $
-Ccc   * $Id: subecis03.f,v 1.21 2007-02-13 19:35:32 Capote Exp $
+Ccc   * $Date: 2007-09-03 14:20:32 $
+Ccc   * $Id: subecis03.f,v 1.22 2007-09-03 14:20:32 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS03 to read externally calculated dispersive corrections
 C     8. Sept. 2006, RCN
@@ -67,11 +67,8 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       OPEN (89,FILE = 'file89')
       OPEN (90,FILE = 'file90')
       OPEN (91,FILE = 'file91')
-
       OPEN (93,FILE = 'file93')
-
       OPEN (99,FILE = 'file99')
-
       CALL CALC(nw,cw,DW,IDMX)
       CLOSE (75)
       CLOSE (76)
@@ -83,7 +80,7 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (61,STATUS = 'delete')
       CLOSE (62,STATUS = 'delete')
       CLOSE (63)
-      CLOSE (64)
+      CLOSE (64,STATUS = 'delete')
       CLOSE (65)
       CLOSE (85)
       CLOSE (86,STATUS = 'delete')
@@ -91,13 +88,9 @@ C 6. THESES VALUES ARE NOT SAVED ON TAPE MS.                            ECIS-013
       CLOSE (88,STATUS = 'delete')
       CLOSE (89,STATUS = 'delete')
       CLOSE (90,STATUS = 'delete')
-
       CLOSE (91,STATUS = 'delete')
-
       CLOSE (93,STATUS = 'delete')
-
-      CLOSE (99,STATUS = 'delete')
-
+C     CLOSE (99,STATUS = 'delete')
       END
 C 01/01/04                                                      ECIS03  HORA-000
       SUBROUTINE HORA

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-06-05 13:37:56 $
-Ccc   * $Id: auxiliary.f,v 1.32 2007-06-05 13:37:56 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-09-03 14:20:29 $
+Ccc   * $Id: auxiliary.f,v 1.33 2007-09-03 14:20:29 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -99,7 +99,8 @@ C
             UEXcit(nnex,nnuc) = 0.0
             TNUcf(nnex,nnuc) = 0.0
             DO ilw = 1, NDLW
-               RO(nnex,ilw,nnuc) = 0.0
+               RO(nnex,ilw,1,nnuc) = 0.0
+               RO(nnex,ilw,2,nnuc) = 0.0
                ROF(nnex,ilw,nnuc) = 0.0
                POP(nnex,ilw,1,nnuc) = 0.0
                POP(nnex,ilw,2,nnuc) = 0.0

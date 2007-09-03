@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-05-21 20:37:01 $
-Ccc   * $Id: HRTW-comp.f,v 1.43 2007-05-21 20:37:01 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-09-03 14:20:30 $
+Ccc   * $Id: HRTW-comp.f,v 1.44 2007-09-03 14:20:30 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -35,7 +35,7 @@ C
       DOUBLE PRECISION aafis, csemist, cnspin, dencomp, ggexper, sgamc,
      &                 sum, sumfis, sumfism(3), sumg, tlump, xnor
       REAL FLOAT
-      INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
+      INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, n0c
       INTEGER INT
       DOUBLE PRECISION VT1
 C
@@ -47,9 +47,6 @@ C-----set CN nucleus
       nnuc = 1
 C-----reset variables
       sgamc = 0.d0
-      sumGg = 0.d0
-      d0c   = 0.d0 
-      d000  = 0.d0 
       csemist = 0.d0
       CSFis = 0.d0
       sumfis = 0.d0
@@ -58,7 +55,6 @@ C-----accounted for when width fluctuation (HRTW) is selected
       GCAsc = 1.0
       ke = NEX(nnuc)
 
-
       WRITE(6,*)
       WRITE(6,*)
 C-----
@@ -66,6 +62,9 @@ C-----start CN nucleus decay
 C-----
 C-----do loop over decaying nucleus parity
       DO ipar = 1, 2
+         n0c   = 0
+         d0c   = 0.d0 
+         sumGg = 0.d0         
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
          DO jcn = 1, NLW
@@ -105,7 +104,6 @@ C-----------do loop over ejectiles       ***done***
 C-----------gamma emision
             sumg = 0.0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
-            d0c = d0c + RO(ke,jcn,nnuc)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C-----------fission
@@ -213,9 +211,9 @@ C--------------
 C--------------normalization and accumulation
 C--------------
                xnor = H_Abs(i,1)/DENhf
-C              stauc = stauc + RO(ke,jcn,nnuc)*xnor
-               IF (RO(ke,jcn,nnuc).NE.0.0D0) sgamc = sgamc +
-     &             DENhf*H_Abs(i,1)/RO(ke,jcn,nnuc)
+C              stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
+               IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
+     &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
      &                    dencomp,aafis)
 C--------------calculate total emission
@@ -233,13 +231,14 @@ C
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
+                d0c = d0c + RO(ke,jcn,ipar,nnuc)     
+                n0c = n0c + 1
                 WRITE(6,'(1x,
      &            ''Renormalization of Gamma-ray strength function'')')
                 WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
                 sumGg = sumGg + sumg
-                d000  = d000 + d0c
               ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
@@ -256,13 +255,19 @@ C
      &          'D0 = ', D0_obs*1000,' +/- ',D0_unc*1000,' eV'
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
-            if(d000.gt.0.d0) d000 = 2.d0 / d000
-            WRITE(6,'(1x,''Calculated D0 = '',F7.3)') d000*1000
+            if(d0c.gt.0.d0) d0c = dble(n0c) / d0c
+            WRITE(6,'(1x,''Calculated D0 = '',F7.3)') d0c*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
-              TUNe(0, Nnuc) = ggexper/sumGg
-              WRITE(6 ,
+              IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
+                TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
+                WRITE(6 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')
      &         TUNe(0, Nnuc)
+              ELSE
+                WRITE(6 ,
+     &       '(1x,''Gamma emission is not normalized''/
+     &         1x,''D0 are not available ! '')')
+              ENDIF
             ELSE
               WRITE(6,
      &         '(1x,''Gamma emission is not normalized''/
@@ -395,9 +400,9 @@ C--------------decay to the highest possible bin (non neutron only)
                IF (ZEJc(Nejc).NE.0.0D0) THEN
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
-                  rho = RO(iermax,jr,Nnur)*DE*TUNe(Nejc,Nnuc)
 C-----------------odd and even l-values treated separately
 C-----------------IP1 and IP2 decide to which parity each SUMTL  goes
+                  rho = RO(iermax,jr,ip1,Nnur)*DE*TUNe(Nejc,Nnuc)
                   sumtl1 = 0.0
                   DO l = lmin, lmax, 2      ! do loop over l
                      IF (Nhrtw.GT.0) THEN
@@ -410,6 +415,7 @@ C                       WRITE(6,*)'A Tl= ' , TL(5,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
+                  rho = RO(iermax,jr,ip2,Nnur)*DE*TUNe(Nejc,Nnuc)                  
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -423,9 +429,9 @@ C                       WRITE(6,*)'B Tl= ' , TL(5,l,Nejc,Nnur)
                      ENDIF
                   ENDDO                     ! over l
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &               + sumtl1*RO(iermax,jr,Nnur)
+     &               + sumtl1*RO(iermax,jr,ip1,Nnur)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &               + sumtl2*RO(iermax,jr,Nnur)
+     &               + sumtl2*RO(iermax,jr,ip2,Nnur)
                ENDIF
 C--------------decay to the highest but one bin (conditional see the next IF)
                IF (ZEJc(Nejc).EQ.0.0D0 .AND. Iec.EQ.NEX(Nnuc) - 1) THEN
@@ -435,9 +441,9 @@ C-----------------CORR in the next lines accounts for the Tl interpolation
 C-----------------and integration over overlaping bins (2/3), it turned out it must
 C-----------------be energy step and also emission step dependent
                   corr = 0.4444/(DE - XN(Nnur) + XN(1))
-                  rho = RO(iermax,jr,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
+                  rho = RO(iermax,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                  
                   sumtl1 = 0.0
                   DO l = lmin, lmax, 2       ! do loop over l
                      IF (Nhrtw.GT.0) THEN
@@ -450,6 +456,7 @@ C                       WRITE(6,*)'C Tl= ' , TL(6,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
+                  rho = RO(iermax,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                                    
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -463,9 +470,9 @@ C                       WRITE(6,*)'D Tl= ' , TL(6,l,Nejc,Nnur)
                      ENDIF
                   ENDDO                      ! over l
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &               + sumtl1*RO(iermax,jr,Nnur)*corr
+     &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &               + sumtl2*RO(iermax,jr,Nnur)*corr
+     &               + sumtl2*RO(iermax,jr,ip2,Nnur)*corr
                ENDIF
 C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
@@ -478,9 +485,9 @@ C--------------bin from the top excluded as already done)
                   ELSE
                      corr = 1.0
                   ENDIF
-                  rho = RO(ier,jr,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
+                  rho = RO(ier,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
                   sumtl1 = 0.0
                   DO l = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -493,6 +500,7 @@ C                       WRITE(6,*)'E Tl= ' , TL(ietl,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
+                  rho = RO(ier,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                  
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -508,9 +516,9 @@ C                       WRITE(6,*)'F Tl= ' , TL(ietl,l,Nejc,Nnur)
 C-----------------do loop over l   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*RO(ier,jr,Nnur)
+     &               + sumtl1*RO(ier,jr,ip1,Nnur)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*RO(ier,jr,Nnur)
+     &               + sumtl2*RO(ier,jr,ip2,Nnur)
                ENDDO               ! over r.n. energies
             ENDDO           ! over channel spins
          ENDDO        ! over and r.n. spins
@@ -808,17 +816,24 @@ C--------Plujko_new-2005
                  IF(lamb/2*2.EQ.lamb)THEN
                    scrtpos = scrtpos + xle(lamb)
                    scrtneg = scrtneg + xlm(lamb)
-                 ELSE
+                   IF(Nhrtw.EQ.0) hsumtls = hsumtls + 
+     &  	                   xle(lamb)**2 * RO(ier, Jr, ipos, Nnuc) + 
+     &                       xlm(lamb)**2	* RO(ier, Jr, ineg, Nnuc)
+                  ELSE
                    scrtpos = scrtpos + xlm(lamb)
                    scrtneg = scrtneg + xle(lamb)
+                   IF(Nhrtw.EQ.0) hsumtls = hsumtls + 
+     &  	                   xlm(lamb)**2 * RO(ier, Jr, ipos, Nnuc) + 
+     &                       xle(lamb)**2	* RO(ier, Jr, ineg, Nnuc)
+C                  !first HRTW entry done
                  ENDIF
-                 IF(Nhrtw.EQ.0)THEN
-                   hsumtls = hsumtls + xle(lamb)**2 + xlm(lamb)**2
-                 ENDIF    !first HRTW entry done
                ENDDO
-               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, Nnuc)
-               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, Nnuc)
-               H_Sumtls = H_Sumtls + hsumtls*RO(ier, Jr, Nnuc)*corr
+               SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, ipos, Nnuc)
+               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg,Nnuc)
+C
+C              Check, it could be we need to split hsumtls depending on parity !!!!
+C
+               H_Sumtls = H_Sumtls + hsumtls*corr
             ENDIF
          ENDDO
       ENDDO

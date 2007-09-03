@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-03-09 20:23:15 $
-Ccc   * $Id: print.f,v 1.15 2007-03-09 20:23:15 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-09-03 14:20:32 $
+Ccc   * $Id: print.f,v 1.16 2007-09-03 14:20:32 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -47,14 +47,8 @@ C
          IF (CSE(i,Nejc,Nnuc).GT.0.d0) kmax = i
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
-      IF (csemax.LE.0.0D0) RETURN
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
-      n = IFIX(SNGL(LOG10(csemax) + 1.))
-      s3 = 10.**n
-      s2 = s3*0.1
-      s1 = s2*0.1
-      s0 = s1*0.1
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
@@ -79,6 +73,30 @@ C
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
       ENDIF
+C
+C     RCN, Aug.30, 2007. 
+C     Stringest test to avoid plotting problems.
+C     Cross sections smaller than 0.01 mb are not relevant at all.  
+C
+      IF (csemax.LE.1.d-5) THEN
+        totspec = 0.d0
+        DO i = 1, kmax
+           totspec  = totspec  + CSE(i,Nejc,Nnuc)
+        ENDDO
+        totspec = totspec - 
+     &	          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+        totspec = totspec*DE     
+        WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
+     &          totspec      
+        RETURN
+      ENDIF	
+      
+      n = IFIX(SNGL(LOG10(csemax) + 1.))
+      s3 = 10.**n
+      s2 = s3*0.1
+      s1 = s2*0.1
+      s0 = s1*0.1
+
 
       WRITE (6,99030) s0, s1, s2, s3
 99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
