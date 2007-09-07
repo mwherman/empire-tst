@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-06-07 19:16:33 $
-Ccc   * $Id: empire_ctl.f,v 1.26 2007-06-07 19:16:33 herman Exp $
+Ccc   * $Date: 2007-09-07 18:39:51 $
+Ccc   * $Id: empire_ctl.f,v 1.27 2007-09-07 18:39:51 herman Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -68,7 +68,7 @@ C
 
       logical autofit, sensit 
       logical fexist
-      logical LINUX/.TRUE./
+      logical LINUX
       character cmnd*35,cmndp*35,cmndt*35
       character ctmp*132
       character pot1(6)*2,pot2(3)*1
@@ -91,6 +91,7 @@ C
 
       autofit = .FALSE.
       sensit = .FALSE.
+      LINUX = .TRUE.
       wt0=1.0
       xitr=3.05
 
@@ -967,7 +968,7 @@ C
       parameter(mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
-      logical LINUX/.TRUE./
+      logical LINUX
       integer*4 PIPE,itmp
       character*132 ctmp
 
@@ -975,7 +976,7 @@ C
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
      &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
-
+      LINUX = .TRUE.
 C--- Treats the case in which the energy mesh is defined by the FITGRD
 C--- keyword.
       if(egrid(0).lt.2.) then
@@ -1702,7 +1703,7 @@ C--- of EMPIRE after the fitting is done.
 C
       parameter(mxind=5000,mxinda=5000)
 
-      logical LINUX/.TRUE./
+      logical LINUX
       integer*4 PIPE,itmp
       character*132 ctmp
 
@@ -1711,6 +1712,7 @@ C
      &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
 
+      LINUX = .TRUE.
       if(sig(1).gt.1.0e-3) then
         write(2,*)
         write(2,*) ' Neutron s-wave strength function:'
@@ -1761,7 +1763,7 @@ Ccc
 
       IMPLICIT NONE
       logical fexist
-      logical LINUX/.TRUE./
+      logical LINUX
       CHARACTER*6 name, namee, namelst
       CHARACTER*80 inprecord 
       CHARACTER*238 outrecord 
@@ -1836,6 +1838,7 @@ C-----R - variation of the parameter allowed with Restriction
 C-----    (parameter must be explicitly specified in the optional part
 C-----    of the standard input)
 C-----F - variation of the parameter not allowed (discrete value keyword)
+      LINUX = .TRUE.
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(6,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL

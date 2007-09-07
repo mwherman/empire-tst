@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:30 $
-Ccc   * $Id: HRTW-comp.f,v 1.44 2007-09-03 14:20:30 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-09-07 18:39:08 $
+Ccc   * $Id: HRTW-comp.f,v 1.45 2007-09-07 18:39:08 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -227,7 +227,7 @@ C           Gamma width calculation
 C
             IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
-              if(mod(XJLv(LEVtarg,0)*2,2.).eq.1) cnspin = jcn
+              if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
