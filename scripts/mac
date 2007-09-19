@@ -1,0 +1,18 @@
+#! /bin/sh -
+#SCRIPT TO CONVERT BASH SCRIPTS INTO MAC COMPATIBLE
+echo '                                                           '
+echo '        Converting scripts to Mac'
+cp Xrun.tcl Xrun.tcl.org
+sed s/"xterm -e"/xterm/ Xrun.tcl.org >Xrun.tcl 
+
+cp guizvv.tcl guizvv.tcl.org
+sed s/"xterm -e"/xterm/ guizvv.tcl.org >guizvv.tcl 
+
+cp resonance.tcl resonance.tcl.org
+sed s/"xterm -e"/xterm/ resonance.tcl.org >resonance.tcl 
+
+#if [ ! -s FISSION.OUT ]; then
+#       rm FISSION.OUT  2>/dev/null
+#fi
+echo 'Done'
+exit
