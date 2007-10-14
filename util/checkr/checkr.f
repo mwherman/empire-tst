@@ -598,7 +598,7 @@
 !
       INTEGER(KIND=I4) :: IQUIT
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       CHARACTER(LEN=1) :: IW
@@ -1555,7 +1555,7 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
       CHARACTER(LEN=11) :: ZSA
@@ -6772,11 +6772,11 @@
 !/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
 !/      ILENP = ILENP2
 !...UNX
-      CALL GETCL(INPAR)
-      ilenp = LEN_TRIM(INPAR)
+!      CALL GETCL(INPAR)
+!      ilenp = LEN_TRIM(INPAR)
 !...DVF
-!/      CALL GETARG(1,INPAR)
-!/      ilenp = LEN_TRIM(INPAR)
+      CALL GETARG(1,INPAR)
+      ilenp = LEN_TRIM(INPAR)
 !...ANS
 !/      WRITE(IOUT,'(A)')                                               &       
 !/     &    ' Control File Specification        - '
