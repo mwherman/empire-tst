@@ -35,13 +35,24 @@ make -f endzvdl.mak
 make -f curzvd3l.mak
 make -f pntdatl.mak
 chmod a+x pntzvdl
+# F95 GNU compiler gfortran is required
+cd ../psyche
+make
+cd ../checkr
+make
+cd ../stanef
+make
+cd ../fizcon
+make
+cd ../../EXFOR
+make
+cd ../
+if [ -d ../resonance ]; then
+   cd ../resonance
+   make all
+fi
 if [ -d ../kalman ]; then
    cd ../kalman
    make all
 fi
-cd ../resonance
-make all
-cd ../../EXFOR
-make
-cd ../
 exit
