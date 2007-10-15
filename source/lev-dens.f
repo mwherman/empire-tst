@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:31 $
-Ccc   * $Id: lev-dens.f,v 1.54 2007-09-03 14:20:31 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-10-15 22:08:15 $
+Ccc   * $Id: lev-dens.f,v 1.55 2007-10-15 22:08:15 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -932,10 +932,10 @@ C-----determination of U for normal states
          ELSE
             u = EX(Kk,Nnuc) + DEL + Dshif
          ENDIF
-         IF (u.LE.0.0D0) GOTO 99999
+         IF (u.LE.0.0D0) RETURN
          IF (u.GT.UCRt) THEN
             u = u - ECOnd
-            IF (u.LE.0.0D0) GOTO 99999
+            IF (u.LE.0.0D0) RETURN
             bcs = .FALSE.
          ELSE
             bcs = .TRUE.
@@ -975,7 +975,7 @@ C-----------temperature fade-out of the shell correction  --- done ----
                bcs = .TRUE.
             ENDIF
             UEXcit(Kk,Nnuc) = MAX(u,0.D0)
-            IF (u.LE.0.0D0) GOTO 99999
+            IF (u.LE.0.0D0) RETURN
             IF (Z(Nnuc).LT.102.0D0 .AND. Z(Nnuc).GE.19.0D0) THEN
 C--------------next line is to calculate deformation parameter A2 only
                CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),0.0D0,u,accn,Aj,
@@ -1003,7 +1003,7 @@ C-----------dependent factor
             ATIl = ATIl*ATIlnor(Nnuc)
             IF (Asaf.GE.0.D0) ac = ATIl*FSHELL(u,SHC(Nnuc),Asaf)
             IF (Asaf.LT.0.D0) ac = -ATIl*Asaf
-            IF (ac.LE.0.D0) GOTO 99999
+            IF (ac.LE.0.D0) RETURN
          ELSE
 C
 C-----------Yrast states
@@ -1062,7 +1062,7 @@ C        Spin-cut off tuning
          ENDIF
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t         
       ENDDO
-99999 END
+      END
 
 
       SUBROUTINE PRERO(Nnuc,Cf)
@@ -1838,7 +1838,7 @@ C
       
 c99005 FORMAT ('../RIPL-2/densities/total/HFB/z',i3.3)
 C99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
-99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3)
+99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3,'.tab')
      
       OPEN (UNIT = 34,FILE = filename,ERR = 300)
   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate
@@ -1882,13 +1882,13 @@ C     SKIPPING 4 TITLE LINES
          u = EX(kk,Nnuc)
          UEXcit(kk,Nnuc) = u
          IF (u.LT.0.) RETURN
-         IF (u.GT.150.0D0) THEN
+         IF (u.GT.200.0D0) THEN
             WRITE (6,*) ' '
-            WRITE (6,*) ' HFB LEV. DENS. DEFINED UP TO 150 MeV ONLY'
+            WRITE (6,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
             WRITE (6,*) ' REQUESTED ENERY IS ', u, ' MeV'
             WRITE (6,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
             WRITE (6,*) ' EXECUTION STOPPED'
-            STOP 'TOO HIGH ENERGY FOR HFB LEV. DENS.'
+            STOP 'TOO HIGH ENERGY FOR HFB LEVEL DENSITIES'
          ENDIF
 C
 C--------interpolation in the level density tables
