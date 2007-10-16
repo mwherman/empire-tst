@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-09-03 14:20:29 $
-Ccc   * $Id: ddhms.f,v 1.29 2007-09-03 14:20:29 Capote Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2007-10-16 14:24:10 $
+Ccc   * $Id: ddhms.f,v 1.30 2007-10-16 14:24:10 herman Exp $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Readnevr,Ihistlabr,Irecprintr,
@@ -9,14 +9,14 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.29 $
-C $Id: ddhms.f,v 1.29 2007-09-03 14:20:29 Capote Exp $
+C CVS Version Management $Revision: 1.30 $
+C $Id: ddhms.f,v 1.30 2007-10-16 14:24:10 herman Exp $
 C
-C  name ddhms stands for "double-differential HMS preeq."
-C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
+C  Name DDHMS stands for "double-differential HMS preeq."
+C  Computes preequilibrium spectra with Hybrid Monte Carlo simulaion (HMS)
 C
 C  Formalism implemented developed in collaboration with M. Blann,
-C  see phys rev c57, 233 (1998), and ang. mom. transfer model developed
+C  see Phys Rev C57, 233 (1998), and ang. mom. transfer model developed
 C  with P. Oblozinsky. Aspects of machine dependence and portability
 C  of random numbers studied with P. Talou.
 C
@@ -2192,9 +2192,9 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.29 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.30 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.29 2007-09-03 14:20:29 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.30 2007-10-16 14:24:10 herman Exp $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'

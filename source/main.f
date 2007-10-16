@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:31 $
-Ccc   * $Id: main.f,v 1.181 2007-09-03 14:20:31 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-10-16 14:32:00 $
+Ccc   * $Id: main.f,v 1.182 2007-10-16 14:32:00 herman Exp $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -133,9 +133,8 @@ C-----
 C-----Open file 41 with tabulated cross sections
 C-----
       IF (FIRst_ein) THEN
-	  IF( DEGa.GT.0 ) OPEN (42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
-        
-	  OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
+        IF( DEGa.GT.0 ) OPEN (42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
+        OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
 C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
 
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
@@ -467,24 +466,24 @@ C-----Print elastic and direct cross sections from ECIS
          WRITE (6,99025) ((j - 1)*angstep,elada(j),j = imint,imaxt)
       ENDDO
 
-C     For Chris 
+C     For Chris
 C     IF (ICAlangs.LE.0) THEN  ! skipping when fitting OMP
 C        WRITE (68,'('' INCIDENT ENERGY (lab)    ='',G12.5,'' MeV'')')
-C    &     EINl 
+C    &     EINl
 C        if(ELAcs.GT.0.D0) then
-C          DO iang= 1,NANgela      
+C          DO iang= 1,NANgela
 C            IF( ABS(FLOAT(iang-1)*angstep-125.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.       
+C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.
 C    &           ABS(FLOAT(iang-1)*angstep-165.d0).le.0.1 )
-C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep, 
+C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep,
 C    &             (1.d0 + ElasticCorr/ELAcs)*elada(iang)+ELCncs
 C          ENDDO
 C        else
-C          DO iang= 1,NANgela      
+C          DO iang= 1,NANgela
 C            IF( ABS(FLOAT(iang-1)*angstep-125.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.       
+C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.
 C    &           ABS(FLOAT(iang-1)*angstep-165.d0).le.0.1 )
-C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep,  
+C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep,
 C    &             elada(iang) + ELCncs
 C          ENDDO
 C        endif
@@ -600,7 +599,7 @@ C
 C     Skipping all emission calculations
 C     GOTO 99999
 C
-C-----Locate postions of ENDF MT-numbers 2, 91, 649, and 849
+C-----Locate positions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
       CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)
       CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)
@@ -2975,7 +2974,7 @@ C        CLOSING FILES
 C
          WRITE (12,*) ' '
          CLOSE (5)
-	   WRITE (*,*) '.'	   
+         WRITE (*,*) '.'
          WRITE (6,*) ' '
          WRITE (6,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
          CALL THORA(6)
@@ -2992,15 +2991,15 @@ C
          CLOSE (33)
          CLOSE (40)
          CLOSE (41)
-  	   IF( DEGa.GT.0 ) CLOSE(42)
-	   CLOSE(53)
-	   CLOSE(58)
+         IF( DEGa.GT.0 ) CLOSE(42)
+         CLOSE(53)
+         CLOSE(58)
          CLOSE (66,STATUS = 'delete')
 C        CLOSE (68) ! for Chris
          IF(FISspe.GT.0) THEN
            CLOSE (73)
            CLOSE (74)
-	   ENDIF
+         ENDIF
          CLOSE (98)
 
 C--------Saving random seeds

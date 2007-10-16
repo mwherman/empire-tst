@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:29 $
-Ccc   * $Id: bar_mom.f,v 1.9 2007-09-03 14:20:29 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-10-16 14:26:13 $
+Ccc   * $Id: bar_mom.f,v 1.10 2007-10-16 14:26:13 herman Exp $
 C
       SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
 C
@@ -570,7 +570,7 @@ C
                      ENDDO
                   ENDDO
                   Selmax = elmax
-C--------in       case l is larger than the stability limit set it to selmax
+C--------in case l is larger than the stability limit set it to selmax
                   IF (el.GT.Selmax) el = Selmax
                   ell = el/Selmax
                   IF (Il.EQ.1000) ell = 1.0
