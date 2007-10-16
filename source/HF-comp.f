@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:30 $
-Ccc   * $Id: HF-comp.f,v 1.92 2007-09-03 14:20:30 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-10-16 14:27:20 $
+Ccc   * $Id: HF-comp.f,v 1.93 2007-10-16 14:27:20 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -111,14 +111,14 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
             IF (popll.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
-                  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,popll)
+                  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
             IF (poph.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
-                  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,poph)
+                  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
                ENDIF
@@ -266,7 +266,7 @@ C-----------DDX spectra using portions
       END
 
 
-      SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Popt)
+      SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -340,6 +340,10 @@ C-----DE spectra
                     ELSE
                       POPcse(0,iejc,iesp,INExc(Nnur))
      &                = POPcse(0,iejc,iesp,INExc(Nnur))
+     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
+C---------------------Store also population spectra for discrete levels 
+                      POPcselv(Il,iejc,iesp,INExc(Nnur)) 
+     &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
      &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                     ENDIF
                   ENDIF
