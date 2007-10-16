@@ -20,7 +20,7 @@
      &                 CSRead, D1Fra, DE, DEF(ndlw,0:ndnuc), DEFeq,
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,
-     &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),
+     &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),HOEq,
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro, 
      &                 DRTl(ndlw), DV, D_Def(ndcollev,nddefcc),
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,
@@ -79,6 +79,7 @@
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
+     &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
