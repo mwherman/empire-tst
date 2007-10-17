@@ -135,7 +135,9 @@
     known compiler warnings cleaned (A. Trkov). 
 51. Plotting of isomeric cross sections added (V. Zerkin)
 52. Cumulative plots of levels improved (M. Herman)
-        
+53. Scattering radius added in EMPEND (A. Trkov)
+54. Improved formatting of radionuclide production in MF=10 (A. Trkov)
+
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
 
