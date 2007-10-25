@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2006-09-19 13:28:40 $
-Ccc   * $Id: pfns.f,v 1.4 2006-09-19 13:28:40 Capote Exp $
+Ccc   * $Date: 2007-10-25 21:34:44 $
+Ccc   * $Id: pfns.f,v 1.5 2007-10-25 21:34:44 herman Exp $
       DOUBLE PRECISION function fniuLANL(en,iaf,izf)
 C
 C    Following Malinovskii 
@@ -722,7 +722,6 @@ c     real*4 e  ! for mass10 CALL
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 c--------------------------------------------------------------------c
-c       File "du_zu_10.feb96"                                        c
 c                                                                    c
 c       J. Duflo and A.P. Zuker  Feb 23, 1996  10 parameters formula c
 c       Reference:                                                   c
