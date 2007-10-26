@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-10-26 14:00:25 $ 
-Ccc   * $Id: empend.f,v 1.45 2007-10-26 14:00:25 herman Exp $ 
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-10-26 20:43:35 $ 
+Ccc   * $Id: empend.f,v 1.46 2007-10-26 20:43:35 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -42,7 +42,7 @@ C-V  07/03 - Remove extra SEND record after MF1 data.
 C-V  07/05 - Remove redundant messages about ang.dist.interpolation.
 C-V        - Fix small bug in gamma-yields at threshold.
 C-V        - Read isomer-production cross sections.
-C-V  07/10 - Add scattering radius
+C-V  07/10 - Add scattering radius and target spin in File 2.
 C-V        - Improve radioisotope production formatting in MF10.
 C-M  
 C-M  Manual for Program EMPEND
@@ -204,6 +204,10 @@ c...  NMOD= 0
       AUTHOR(1)='           '
       AUTHOR(2)='           '
       AUTHOR(3)='           '
+      SPI =0
+      STF0=0
+      GAMG=0
+      D0LV=0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -274,7 +278,7 @@ C*
 C* Read the EMPIRE output file to extract the cross sections
       CALL REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(IZB),RWO(LBE)
-     1           ,IZI,IZA,LISO,AWR,NEN,NXS)
+     1           ,IZI,IZA,LISO,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS)
       IF(NEN.LE.0) THEN
         WRITE(LTT,995) ' EMPEND ERROR - Number of energy points:',NEN
         WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
@@ -305,10 +309,8 @@ C* Write tabulated ENDF file-1 data (nu-bar)
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
      1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
       NS=-1
-C... WARNING... Spin is not defined in the source file
-      SPI=0
       CALL WRIMF2(LOU,MXE,MXT,EIN,RWO(LXS),IWO(MTH)
-     &           ,MAT,IZA,AWR,SPI,NEN,NXS,NS)
+     &           ,MAT,IZA,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,NS)
 C* Write the ENDF file-3 data
       MF=3
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF
@@ -2012,7 +2014,7 @@ C*
       END
       SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1                 ,EIN,XSC,QQM,QQI,MTH,IZB,BEN
-     1                 ,IZI,IZA,LISO,AWR,NEN,NXS)
+     1                 ,IZI,IZA,LISO,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS)
 C-Title  : REAMF3 Subroutine
 C-Purpose: Read EMPIRE output to be converted into ENDF format
 C-Description:
@@ -2128,6 +2130,9 @@ C* Read the scattering radius
         READ(REC(27:33),*) XS
         GO TO 312
       END IF
+      IF(REC( 1:26).EQ.'       Calc. Strength func'  ) THEN
+        READ(REC(37:42),*) STF0
+      END IF
       IF(REC(1:10).EQ.' FUSION CR') GO TO 110
       IF(REC(1:10).NE.'    Nucleu') GO TO 207
       READ (LIN,891)
@@ -2206,6 +2211,12 @@ C* Read the total cross section but exclude incident charged particles
 C*
 C* General processing of cross sections
   310 READ (LIN,891) REC
+      IF(REC(1:4).EQ.' Gg =') THEN
+        READ(REC(5:13),*) GAMG
+        READ (LIN,891) REC
+        READ(REC(5:13),*) D0LV
+        GO TO 310
+      END IF
       IF(REC(13:22).NE.'production') GO TO 310
 C* Read the cross section
   311 READ (REC,803) XS
@@ -2326,7 +2337,9 @@ C* For incident protons allow ground state for other particles
 C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
-  352 READ (LIN,805) IL,EL,XS,NBR
+  352 READ (LIN,805) IL,EL,II,X,XS,NBR
+C*      -- Assign spin from first level when product=target
+      IF(IZA.EQ.JZA .AND. IL.EQ.1) SPI=X
       DO WHILE (NBR.GT.7)
         READ (LIN,891)
         NBR=NBR-7
@@ -2454,7 +2467,7 @@ C*
   802 FORMAT(I3,1X,A2,1X,I3)
   803 FORMAT(37X,F12.0)
   804 FORMAT(1X,I3,1X,A2,1X,I3,4X,3F10.0)
-  805 FORMAT(I12,F10.0,16X,F12.0,I3)
+  805 FORMAT(I12,F10.0,I5,F8.0,3X,F12.0,I3)
   806 FORMAT(BN,8X,8F15.0)
   808 FORMAT(24X,F12.0)
 c.809 FORMAT(26X,F12.0)
@@ -3344,6 +3357,8 @@ C-D MAT      Material identifier
 C-D IZA      ZA designation of the target =1000Z+A
 C-D AWR      Atomic mass ratio of the target to neutron
 C-D SPI      Spin of the target
+C-D GAMG     Average gamma width
+C-D D0LV     Average level spacing
 C-D NEN      Actual number of energy points
 C-D NXS      Actual number of cross section sets
 C-D NS       ENDF record sequence number
@@ -3365,6 +3380,9 @@ C* Define remaining constants
       ZA =IZA
       EL =EIN(1)
       EH =EIN(NEN)
+C* Assume fission widths in URR are not given
+      LFW=0
+C* Check for the scattering radius
       NRO=0
 C* Find the reaction index of the scattering radius
       IR =0
