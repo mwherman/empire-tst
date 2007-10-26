@@ -1,3 +1,7 @@
+Ccc   * $Author:
+Ccc   * $Date: 
+Ccc   * $Id: 
+
       PROGRAM EMPEND
 C-Title  : EMPEND Program
 C-Purpose: Convert EMPIRE output into ENDF format
