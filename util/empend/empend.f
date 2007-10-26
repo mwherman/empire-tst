@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-10-26 21:29:08 $ 
-Ccc   * $Id: empend.f,v 1.47 2007-10-26 21:29:08 Capote Exp $ 
+Ccc   * $Date: 2007-10-26 21:52:07 $ 
+Ccc   * $Id: empend.f,v 1.48 2007-10-26 21:52:07 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -3292,7 +3292,8 @@ C*
       MF  = 1
       MT  = 451
       ZA  = IZA
-      LRP =-1
+C* At least scattering radius coded = set LRP=0
+      LRP = 0
 C*
       ELIS= 0.
       STA = 0.
@@ -3383,6 +3384,8 @@ C* Define remaining constants
       EH =EIN(NEN)
 C* Assume fission widths in URR are not given
       LFW=0
+C* One energy ranges - just scattering radius
+      NER=1
 C* Check for the scattering radius
       NRO=0
 C* Find the reaction index of the scattering radius
