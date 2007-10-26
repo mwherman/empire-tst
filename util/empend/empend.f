@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-10-26 21:52:07 $ 
-Ccc   * $Id: empend.f,v 1.48 2007-10-26 21:52:07 Capote Exp $ 
+Ccc   * $Date: 2007-10-26 22:09:50 $ 
+Ccc   * $Id: empend.f,v 1.49 2007-10-26 22:09:50 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -3404,15 +3404,15 @@ C* Determine the range of validity
             EH=EIN(I)
           END IF
         END DO
-        IF(LR.GT.1) THEN
 C...WARNING... NRO=1 currently not allowed in ENDF format
-          NRO=1
+C...    IF(LR.GT.1) THEN
+C...      NRO=1
 C...
-          NR =1
-          NP =LR
-          NBT(1)=NP
-          INT(1)=2
-        END IF
+C...      NR =1
+C...      NP =LR
+C...      NBT(1)=NP
+C...      INT(1)=2
+C...    END IF
 C* Take the first value of the scattering radius if NRO=0
         AP=XSC(1,IR)
       ELSE
