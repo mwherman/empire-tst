@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-10-25 21:35:42 $
-Ccc   * $Id: HRTW-comp.f,v 1.46 2007-10-25 21:35:42 herman Exp $
+Ccc   * $Date: 2007-10-26 13:07:58 $
+Ccc   * $Id: HRTW-comp.f,v 1.47 2007-10-26 13:07:58 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -251,15 +251,15 @@ C
             WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
             WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-            WRITE(12,'(1x,A5,F8.3,A5,F8.3,A4)')
-     &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+c           WRITE(12,'(1x,A5,F8.3,A5,F8.3,A4)')
+c    &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
             WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
             if(d0c.gt.0.d0) d0c = dble(n0c) / d0c
             WRITE(6,'(1x,''Calculated D0 = '',F8.3,'' keV'')') d0c*1000
-            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
+c           WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
                 TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
