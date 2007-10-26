@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-10-26 13:07:58 $
-Ccc   * $Id: HRTW-comp.f,v 1.47 2007-10-26 13:07:58 herman Exp $
+Ccc   * $Date: 2007-10-26 16:34:20 $
+Ccc   * $Id: HRTW-comp.f,v 1.48 2007-10-26 16:34:20 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -233,8 +233,12 @@ C
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)     
                 n0c = n0c + 1
+                WRITE(6,'(1x,''-----------------------------------------
+     &-----'')')
                 WRITE(6,'(1x,
      &            ''Renormalization of Gamma-ray strength function'')')
+                WRITE(6,'(1x,''-----------------------------------------
+     &-----'')')
                 WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
@@ -243,26 +247,38 @@ C
             ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
+      IF(d0c.gt.0.d0) d0c = dble(n0c)/d0c
+      IF(D0_obs.EQ.0.0D0) D0_obs = d0c*1000 !use calculated D0 (in keV) if not measured
       IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0. AND. D0_obs.GT.0.) THEN
             ggexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(6,'(1x,
      &      ''Experimental information from capture channel'')')
             WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
+            IF(GG_unc.GT.0.0D0) THEN
             WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-c           WRITE(12,'(1x,A5,F8.3,A5,F8.3,A4)')
-c    &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+            ELSE
+            WRITE(6,'(1x,A5,F8.3,A18)')
+     &          'Gg = ', GG_obs,' meV (systematics)'
+            ENDIF
+            WRITE(12,'(1x,A5,F8.3,A5,F8.3,A4)')
+     &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+            IF(D0_unc.GT.0.0D0) THEN
             WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
+            ELSE
+            WRITE(6,'(1x,A5,F8.3,A17)')
+     &          'D0 = ', D0_obs,' keV (calculated)'
+            ENDIF
             WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
-            if(d0c.gt.0.d0) d0c = dble(n0c) / d0c
             WRITE(6,'(1x,''Calculated D0 = '',F8.3,'' keV'')') d0c*1000
-c           WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
-                TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
+c               TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
+                TUNe(0, Nnuc) = ggexper/sumGg
                 WRITE(6 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')
      &         TUNe(0, Nnuc)
@@ -277,6 +293,8 @@ c           WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
      &           1x,''TUNE(0,Nnuc) set in input to '',F7.3)')
      &         TUNe(0, Nnuc)
             ENDIF
+                WRITE(6,'(1x,''-----------------------------------------
+     &-----'')')
             WRITE(6,*)
          ENDIF
       ENDIF
