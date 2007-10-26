@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-10-26 20:43:35 $ 
-Ccc   * $Id: empend.f,v 1.46 2007-10-26 20:43:35 Capote Exp $ 
+Ccc   * $Date: 2007-10-26 21:29:08 $ 
+Ccc   * $Id: empend.f,v 1.47 2007-10-26 21:29:08 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -3342,7 +3342,7 @@ C*
    93 FORMAT(A66)
       END
       SUBROUTINE WRIMF2(LOU,MXE,MXT,EIN,XSC,MTH,MAT,IZA
-     &                 ,AWR,SPI,NEN,NXS,NS)
+     &                 ,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,NS)
 C-Title  : WRIMF2 Subroutine
 C-Purpose: Write MF2 (scattering radius) in ENDF-6 format
 C-Description:
@@ -3357,6 +3357,7 @@ C-D MAT      Material identifier
 C-D IZA      ZA designation of the target =1000Z+A
 C-D AWR      Atomic mass ratio of the target to neutron
 C-D SPI      Spin of the target
+C-D STF0     S0-strength function
 C-D GAMG     Average gamma width
 C-D D0LV     Average level spacing
 C-D NEN      Actual number of energy points
