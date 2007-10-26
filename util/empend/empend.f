@@ -1,6 +1,6 @@
-Ccc   * $Author:
-Ccc   * $Date: 
-Ccc   * $Id: 
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-10-26 14:00:25 $ 
+Ccc   * $Id: empend.f,v 1.45 2007-10-26 14:00:25 herman Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
