@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-10-26 22:09:50 $ 
-Ccc   * $Id: empend.f,v 1.49 2007-10-26 22:09:50 Capote Exp $ 
+Ccc   * $Date: 2007-10-27 04:10:09 $ 
+Ccc   * $Id: empend.f,v 1.50 2007-10-27 04:10:09 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -208,6 +208,7 @@ c...  NMOD= 0
       STF0=0
       GAMG=0
       D0LV=0
+      LRP = 0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -289,8 +290,8 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       REWIND LIN
       JT6=MXI-LBI
       CALL SCNMF6(LIN,NT6,IWO(LBI),JT6,IZI)
-C* Summ MF 5 contributions as necessary
-      CALL SUMMF5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
+C* Summ MT 5 contributions as necessary
+      CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
      &           ,RWO(LXS),QQM,QQI,MXE,MXT)
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
@@ -298,9 +299,20 @@ C* Write the ENDF file header record to output
       CALL WRTEXT(LOU, 0, 0, 0,NS,REC)
 C* Check if nuclide is fissile
       CALL CHKFIS(NXS,NEN,IWO(MTH),RWO(LXS),MXE,MXT,LFI)
-C* Write the ENDF file-1 data
+C* Check if resonance parameters need to be written (yes for neutrons)
+      IF(IZI.EQ.1) THEN
+        IF(STF0.GT.0 .AND. D0LV.GT.0) THEN
+          LRP=1
+        ELSE
+          LRP=0
+        END IF
+      ELSE
+        LRP=-1
+      END IF
+C* Maximum energy of the evaluation
       EMX=EIN(NEN)
-      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB,NMOD
+C* Write the ENDF file-1 data
+      CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LRP,LFI,NLIB,NMOD
      &           ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
 C* Write tabulated ENDF file-1 data (nu-bar)
       NS=-1
@@ -309,7 +321,8 @@ C* Write tabulated ENDF file-1 data (nu-bar)
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
      1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
       NS=-1
-      CALL WRIMF2(LOU,MXE,MXT,EIN,RWO(LXS),IWO(MTH)
+      IF(LRP.GE.0)
+     &CALL WRIMF2(LOU,MXE,MXT,EIN,RWO(LXS),IWO(MTH)
      &           ,MAT,IZA,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,NS)
 C* Write the ENDF file-3 data
       MF=3
@@ -1337,8 +1350,8 @@ C*          Check for non-zero fission cross section
       END DO
       RETURN
       END
-      SUBROUTINE SUMMF5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSR,QQM,QQI,MXE,MXT)
-C-Title  : Subroutine SUMMF5
+      SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSR,QQM,QQI,MXE,MXT)
+C-Title  : Subroutine SUMMT5
 C-Purpose: Sum reactions contributing to MT 5
 C-Version:
 C-V  07/10 Extensive changes, change convention for MT5 summation
@@ -1351,8 +1364,11 @@ C-D that the reaction cross section will also be processable in MF10.
 C-D The exception are discrete level reactions, which do not necessarily
 C-D require differential data (if isotropic distributions are assumed).
 C-D   All reactions with MT>9999 and LFS>4 (if any) will be added to
-C-D MT5. Furthermore, all reactions are scanned to construct special
-C-D particle production cross sections MT201, 203 and 207.
+C-D MT5. Possible light-particle products are registered and the cross
+C-D sections added to construct special particle production cross 
+C-D sections MT201, 203 and 207 that contribute to MT5. These are used
+C-D to calculate the particle yields in MF6/MT5 and do not include
+C-D particle production from explicitly represented reactions.
 C-
       DIMENSION  MTH(MXT),MT6(MXT),XSR(MXE,MXT),QQM(MXT),QQI(MXT)
 C* Process only if NT6>0
@@ -1409,7 +1425,8 @@ C* Create MT 5 if not present
 C* Create MT 201 if not present (flagged -ve for no spectra)
       IF(I201.LE.0) THEN
         NXS=NXS+1
-        MTH(NXS)=-201
+c...    MTH(NXS)=-201
+        MTH(NXS)= 201
         I201=NXS
         DO J=1,NPT
           XSR(J,I201)=0
@@ -1437,87 +1454,53 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
         QQM(I207)=-1.E12
       END IF
 C* Add contribution of reactions without differential data to MT5
+C* (identified by MT=10*ZA+LFS, LFS>0).
       DO IX=1,NXS
         MT=MTH(IX)
         M5=0
-        IF(MT.GT.9999) THEN
+        IF(MT.LE.9999) GO TO 80
           M5=MT-10*(MT/10)
-          IF(M5.GE.5) THEN
+          IF(M5.LT.5) GO TO 80
             DO J=1,NPT
               XSR(J,I5)=XSR(J,I5)+XSR(J,IX)
             END DO
             QQM(I5)=MAX(QQM(IX),QQM(I5))
             QQI(I5)=QQM(I5)
 
-            print *,' Addint to MT5 production of ZA/Q',MT/10,QQM(I5)
+            print *,' Adding to MT5 production of ZA/Q',MT/10,QQM(I5)
 
-          END IF
-        END IF
-C.        IF(MT.LT.0 .AND.
-C.     &     (-MT.LT.201 .OR. -MT.GT.207) .AND.
-C.     &     (-MT.LT.450 .OR. -MT.GE.460)) THEN
-C.C...
-C.          print *,' Adding to MT5 contribution from MT/Q',MT,QQM(IX)
-C.C...
-        KM=MT
-        IF(MT.GT.9999) KM=MT/10
-C* Add alpha production to MT207
-   20   IF(KM.EQ. 22.OR. KM.EQ. 23.OR. KM.EQ. 24.OR.
-     &     KM.EQ. 25.OR. KM.EQ. 29.OR. KM.EQ. 30.OR.
-     &     KM.EQ. 35.OR. KM.EQ. 36.OR. KM.EQ. 45.OR.
-     &     KM.EQ.107.OR. KM.EQ.108.OR. KM.EQ.109.OR.
-     &     KM.EQ.112.OR.(KM.GT.999 .AND. M5.GE.5)) THEN
-          IF(KM.LE.999) THEN
-            KZAP=2004
-            CALL YLDPOU(YI,KM,KZAP)
-          ELSE
-            KM=KM-2004
-            YI=1
-          END IF
-          DO J=1,NPT
-            XSR(J,I207)=XSR(J,I207)+YI*XSR(J,IX)
-          END DO
-          QQM(I207)=MAX(QQM(IX),QQM(I207))
-          QQI(I207)=QQM(I207)
-        END IF
-        IF(KM.GT.IZA+IZI) GO TO 20
-C* Add proton production to MT203
-   40   IF(KM.EQ. 28.OR. KM.EQ. 41.OR. KM.EQ.42 .OR.
-     &     KM.EQ. 44.OR. KM.EQ. 45.OR.
-     &     KM.EQ.103.OR. KM.EQ.111.OR. KM.EQ.112.OR.
-     &     KM.EQ.115.OR. KM.EQ.116.OR.(KM.GT.999 .AND. M5.GE.5)) THEN
-          IF(KM.LE.999) THEN
-            KZAP=1001
-            CALL YLDPOU(YI,KM,KZAP)
-          ELSE
-            KM=KM-1001
-            YI=1
-          END IF
-          DO J=1,NPT
-            XSR(J,I203)=XSR(J,I203)+YI*XSR(J,IX)
-          END DO
-          QQM(I203)=MAX(QQM(IX),QQM(I203))
-          QQI(I203)=QQM(I203)
-        END IF
-        IF(KM.GT.IZA+IZI) GO TO 40
-C* Add neutron production to MT201
-   60   IF(KM.EQ.11  .OR. KM.EQ.16 .OR. KM.EQ.17 .OR.
-     &    (KM.GE.22 .AND. KM.LE.25).OR.
-     &    (KM.GE.28 .AND. KM.LE.49).OR.
-     &    (KM.GT.999.AND. M5.GE.5)) THEN
-          IF(KM.LE.999) THEN
-            KZAP=1
-            CALL YLDPOU(YI,KM,KZAP)
-          ELSE
-            KM=KM-1
-            YI=1
-          END IF
-          DO J=1,NPT
-            XSR(J,I201)=XSR(J,I201)+YI*XSR(J,IX)
-          END DO
-          QQM(I201)=MAX(QQM(IX),QQM(I201))
-          QQI(I201)=QQM(I201)
-        END IF
+            KM=MT/10
+C*          -- Add alpha production to MT207
+   20       IF(IZA+IZI-2004.LT.KM) GO TO 40
+              KM=KM+2004
+              YI=1
+              DO J=1,NPT
+                XSR(J,I207)=XSR(J,I207)+YI*XSR(J,IX)
+              END DO
+              QQM(I207)=MAX(QQM(IX),QQM(I207))
+              QQI(I207)=QQM(I207)
+              GO TO 20
+C*          -- Add proton production to MT203
+   40       IF(IZA+IZI-1001.LT.KM) GO TO 60
+              KM=KM+1001
+              YI=1
+              DO J=1,NPT
+                XSR(J,I203)=XSR(J,I203)+YI*XSR(J,IX)
+              END DO
+              QQM(I203)=MAX(QQM(IX),QQM(I203))
+              QQI(I203)=QQM(I203)
+              GO TO 40
+C*          -- Add neutron production to MT201
+   60       IF(IZA+IZI-   1.LT.KM) GO TO 80
+              KM=KM+   1
+              YI=1
+              DO J=1,NPT
+                XSR(J,I201)=XSR(J,I201)+YI*XSR(J,IX)
+              END DO
+              QQM(I201)=MAX(QQM(IX),QQM(I201))
+              QQI(I201)=QQM(I201)
+              GO TO 60
+   80 CONTINUE
       END DO
       RETURN
       END
@@ -3239,7 +3222,7 @@ C*
   912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
      1       '                  Transfer to ground state assumed')
       END
-      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LFI,NLIB,NMOD
+      SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LRP,LFI,NLIB,NMOD
      &                 ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
 C-Title  : WRIMF1 Subroutine
 C-Purpose: Write comment section (file-1) data in ENDF-6 format
@@ -3292,8 +3275,6 @@ C*
       MF  = 1
       MT  = 451
       ZA  = IZA
-C* At least scattering radius coded = set LRP=0
-      LRP = 0
 C*
       ELIS= 0.
       STA = 0.
@@ -3887,9 +3868,11 @@ C* Convert neutron yields to multiplicities
         DO I=1,NEN
           X5  =XSC(I,MT5)
           X201=XSC(I,MT201)
-          IF(X201.GT.0) THEN
+          IF(X201.GT.0 .AND. X5.GT.0) THEN
             XSC(I,MT201)=X201/X5
             JK201=1
+          ELSE
+            XSC(I,MT201)=0
           END IF
         END DO
         NK=NK+JK201
@@ -3900,9 +3883,11 @@ C* Convert proton yields to multiplicities
         DO I=1,NEN
           X5  =XSC(I,MT5)
           X203=XSC(I,MT203)
-          IF(X203.GT.0) THEN
+          IF(X203.GT.0 .AND. X5.GT.0) THEN
             XSC(I,MT203)=X203/X5
             JK203=1
+          ELSE
+            XSC(I,MT203)=0
           END IF
         END DO
         NK=NK+JK203
@@ -3913,9 +3898,11 @@ C* Convert alpha yields to multiplicities
         DO I=1,NEN
           X5  =XSC(I,MT5)
           X207=XSC(I,MT207)
-          IF(X207.GT.0) THEN
+          IF(X207.GT.0 .AND. X5.GT.0) THEN
             XSC(I,MT207)=X207/X5
             JK207=1
+          ELSE
+            XSC(I,MT207)=0
           END IF
         END DO
         NK=NK+JK207
@@ -4112,7 +4099,8 @@ C* Find reaction set with lowest MT number - save index list in LRC
           MT=IWO(I)
         ELSE IF(IWO(I).EQ.MT) THEN
           JXS=JXS+1
-          IF(LRC-1+JXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
+          IF(LRC-1+JXS.GT.MXI)
+     &       STOP 'WRMF10 ERROR - MXI limit exceeded'
           IWO(LRC-1+JXS)=I
         END IF
       END DO
@@ -4126,17 +4114,26 @@ C*
 C* Save reaction labels for sorting - save list for current MT in LZA
       LZA=LRC+JXS
       IF(LZA+JXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
+      M0=0
+      M5=0
       DO J=1,JXS
         L=IWO(LRC-1+J)
-        IWO(LZA-1+J)=MTH(L)
+        MM=MTH(L)
+        IWO(LZA-1+J)=MM
+        MM=MM-10*(MM/10)
+        IF(MM.EQ.0) M0=1
+        IF(MM.EQ.5) M5=1
       END DO
+C* If LFS=0 and LFS=5 (total) are present, remove the later
+      JX1=JXS
+      IF(M0.EQ.1 .AND. M5.EQ.1) JX1=JXS-1
 C*
 C* Write HEAD record
       L1=0
       L2=0
       N2=0
       ZA=IZA
-      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,JXS,N2)
+      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,JX1,N2)
 C*
 C* Sort constituent reactions by residual in ascending order
       JRC=0
@@ -4317,7 +4314,7 @@ C* Proceed to the next reaction of the current MT
 c...
 c...  print *,'      reaction',jrc,' for mt/za',mt,jza,' processed'
 c...
-      IF(JRC.LT.JXS) GO TO 120
+      IF(JRC.LT.JX1) GO TO 120
 C* Flag reactions processed and try the next MT set
       NS=99998
       CALL WRCONT(LOU,MAT,MF,IZRO,NS,ZRO,ZRO,IZRO,IZRO,IZRO,IZRO)
@@ -4570,21 +4567,32 @@ C-Purpose: Pack value into 11-character string
       CH=' 0.00000+00'
       FA=ABS(FF)
       IA=0
+C* Trap unreasonably large values, print as "9.99999+99"
+      if(fa.gt.1e30) then
+        CH=' 9.99999+99'
+        return
+      end if
+C* Check for small values, print as zero
    20 IF(FA.LT.1.0E-30 ) RETURN
+C* Condition mantissa of small numnbers
       IF(FA.LT.9.999950) GO TO 40
-      FA=FA*0.1
+      FA=FA/10
       IA=IA+1
       GO TO 20
+C* Condition mantissa of large numnbers
    40 IF(FA.GE.0.999995) GO TO 50
-      FA=FA*10.
+      FA=FA*10
       IA=IA-1
       GO TO 40
+C* Sign of the exponent
    50 SN='+'
       IF(IA.LT.0) THEN
         SN='-'
         IA=-IA
       END IF
+C* Sign of the mantissa
       IF(FF.LT.0) FA=-FA
+C* Write character fiels
       WRITE(CH,80) FA,SN,IA
       RETURN
    80 FORMAT(F8.5,A1,I2.2)
