@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-10-26 16:34:20 $
-Ccc   * $Id: HRTW-comp.f,v 1.48 2007-10-26 16:34:20 herman Exp $
+Ccc   * $Date: 2007-10-30 22:09:28 $
+Ccc   * $Id: HRTW-comp.f,v 1.49 2007-10-30 22:09:28 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -60,11 +60,11 @@ C-----accounted for when width fluctuation (HRTW) is selected
 C-----
 C-----start CN nucleus decay
 C-----
+      n0c   = 0
+      d0c   = 0.d0 
+      sumGg = 0.d0         
 C-----do loop over decaying nucleus parity
       DO ipar = 1, 2
-         n0c   = 0
-         d0c   = 0.d0 
-         sumGg = 0.d0         
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
          DO jcn = 1, NLW
