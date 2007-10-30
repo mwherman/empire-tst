@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-10-16 14:30:53 $
-Ccc   * $Id: input.f,v 1.256 2007-10-16 14:30:53 herman Exp $
+Ccc   * $Date: 2007-10-30 22:06:50 $
+Ccc   * $Id: input.f,v 1.257 2007-10-30 22:06:50 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1525,19 +1525,19 @@ C-----calculate compound nucleus level density
       IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0,1.D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
-         IF (ADIv.LT.3.0D0) THEN
+         IF (ADIv.NE.0.0D0 .AND. ADIv.NE.3.0D0) THEN
          WRITE (6,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
      &          SYMb(nnuc)
          WRITE (6,99010) (EX(i,nnuc),
      &       (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,12),i = 1,NEX(nnuc))
          ELSE
          WRITE (6,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,''POSITIVE PARITY''/)')
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
      &          ia, SYMb(nnuc)
          WRITE (6,99010) (EX(i,nnuc),
      &       (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,12),i = 1,NEX(nnuc))
          WRITE (6,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,''NEGATIVE PARITY''/)')
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnuc)
          WRITE (6,99010) (EX(i,nnuc),
      &       (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,12),i = 1,NEX(nnuc))
@@ -1775,19 +1775,19 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0,1.D0)
             IF (IOUt.EQ.6) THEN
               ia = INT(A(nnur))
-              IF (ADIv.LT.3.0D0) THEN
+              IF (ADIv.NE.0.0D0 .AND. ADIv.NE.3.0D0) THEN
               WRITE (6,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
      &          ia, SYMb(nnuc)
               WRITE (6,99010) (EX(i,nnur),
      &          (RO(i,j,1,nnur)*EXP(ARGred),j = 1,12),i = 1,NEX(nnur))
               ELSE
               WRITE (6,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,''POSITIVE PARITY''/)')
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
      &          ia, SYMb(nnur)
          WRITE (6,99010) (EX(i,nnur),
      &       (RO(i,j,1,nnur)*EXP(ARGred),j = 1,12),i = 1,NEX(nnur))
          WRITE (6,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,''NEGATIVE PARITY''/)')
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnur)
          WRITE (6,99010) (EX(i,nnur),
      &       (RO(i,j,2,nnur)*EXP(ARGred),j = 1,12),i = 1,NEX(nnur))
@@ -1921,11 +1921,28 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         GOTO 70
    65   WRITE (6,*) ' WARNING: ',
      &   '../RIPL-2/resonances/resonances0.dat file not found '
-        WRITE (6,*) ' WARNING: D0 and gamma width are not available '
-C       We could put here whatever systematics for D0 or Gg we want
+        WRITE (6,*) ' WARNING: Experimental D0 and gamma width are not a
+     &vailable '
+   70   CONTINUE
       ENDIF
-
-   70 LREad = .TRUE.
+      IF(S0_obs.EQ.0) THEN   !No experimental Gg - use Kopecky's spline fit
+         IF(ia.LT.40) THEN
+           Gg_obs = 1593000/A(Nnuc)**2   !in meV
+         ELSE
+            OPEN (47,FILE = '../data/Ggamma.dat',STATUS='old',ERR=75)
+            READ (47,'(///)') ! Skipping first 4 title lines
+            DO i = 1, 211
+               READ (47,'(3x,I5,F8.4)',END=75,ERR=75) natmp, gggtmp
+               IF (natmp.NE.Ia) CYCLE
+               Gg_obs = gggtmp*1000.0D0 !in meV
+               GOTO 85
+            ENDDO
+   75       WRITE (6,*) ' WARNING:../data/Ggamma.dat file not found' 
+   85       CLOSE (47)
+         ENDIF
+      ENDIF
+       
+      LREad = .TRUE.
 
 
       izatmp = INT(1000*iz + ia)
