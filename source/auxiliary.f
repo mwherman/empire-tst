@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:29 $
-Ccc   * $Id: auxiliary.f,v 1.33 2007-09-03 14:20:29 Capote Exp $
+Ccc   * $Date: 2007-11-01 23:20:34 $
+Ccc   * $Id: auxiliary.f,v 1.34 2007-11-01 23:20:34 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -80,7 +80,6 @@ C
          EX(1,nnuc) = 0.0
          JSTab(nnuc) = 0.0
          QPRod(nnuc) = -1000.0
-         FISden(nnuc) = 1.0
          DO j = 1, NDLW
             FISb(j,nnuc) = 0.0
          ENDDO

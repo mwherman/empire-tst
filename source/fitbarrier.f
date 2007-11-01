@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:30 $
-Ccc   * $Id: fitbarrier.f,v 1.1 2007-09-03 14:20:30 Capote Exp $
+Ccc   * $Date: 2007-11-01 23:20:34 $
+Ccc   * $Id: fitbarrier.f,v 1.2 2007-11-01 23:20:34 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
@@ -10,17 +10,17 @@ Ccc   * $Id: fitbarrier.f,v 1.1 2007-09-03 14:20:30 Capote Exp $
       COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
 
 
-      DOUBLE PRECISION vdef_1d(800), eps_1d(800)
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
       DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
       DOUBLE PRECISION centr, heigth, width, ucentr, uheigth, uwidth
       DOUBLE PRECISION rmiu,smiu
-        
+
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr
 
       DOUBLE PRECISION VBArex(NFPARAB), VJJ(NFPARAB), HO(NFPARAB)
       DOUBLE PRECISION EJOin(2*NFPARAB), EPSil(NFPARAB)
 C     Functions
-      INTEGER Find_Extrem1, nrhump
+      INTEGER Find_Extrem1
 
       rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
       smiu = DSQRT(0.5d0*rmiu)
@@ -31,7 +31,7 @@ c-----Generating numerical barrier starting from parabolas' parameters
             VJJ(k) = VBArex(int(k/2)+1)
          ENDDO
          DO k=2, NRBar,2
-            VJJ(k) = VBArex(NRBarc+int(k/2))
+            VJJ(k) = VBArex(NRHump+int(k/2))
          ENDDO
 
 C-----------deformations at saddles and wells and matching points-----------
@@ -72,30 +72,18 @@ C        EJOin(i) are the corresponding deformation at which parabolas join
             ENDDO
          ENDDO
       ENDIF
-c----------------------------------------------------
-      DO j = 1, nextr
-         Vpos(j) = DEFfis(j)
-      ENDDO
-      Vpos(nextr+1) = 100.d0
 
 C-----Finding maxima and minima of the deformation energy curve
 C                   initializes iiextr() and nextr
-      nextr = Find_Extrem1(Nnuc)
-      nrhump = nextr/2 + 1
-      nrwel = nextr/2
-      nrbar = nrhump + nrwel
-
-      IF(nextr.NE.NRBar)THEN
-       write(*,*)'nextr',nextr,NRBar
-         pause                  !STOP
-      endif
-
-      IF(FISbar(Nnuc).EQ.3.) goto 101
+ 100  nextr = Find_Extrem1(Nnuc)
+      DO j = 1, nextr
+         Vpos(j) = DEFfis(j)
+      ENDDO
+      Vpos(nextr + 1) = 100.d0
 C==================================================================
 C     Fitting parabola
-
-      DO j=1,nextr
-        CALL ParabFit(iiextr(j),3,rmiu,eps_1d,vdef_1d,
+      DO j = 1, nextr
+        CALL ParabFit(iiextr(j), 3, rmiu, eps_1d, vdef_1d,
      &        centr,  heigth,  width, ucentr, uheigth, uwidth)
         IF(width.LT.0.05d0) CYCLE      ! Skipping very narrow peaks
 c       write(*,*) ' Def: ',sngl(EPS_1d(iiextr(j))),
@@ -108,23 +96,52 @@ C       Initializes parabola's parameters
 C
 C       The real height and position of the barrier are used
 c       (not the fitted parabola height or center)
+
+        nextr = nrbar
         Vheigth(j) = Vdef_1d(iiextr(j))
         Vwidth(j) = width
         Vpos(j) = EPS_1d(iiextr(j))
       ENDDO
+C     Vpos(0) = 1.d0
       Vpos(nextr+1) = 100.d0
 
+      RETURN
+      END
+
+C===================================================================
+      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp,tabsp)
+C
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
+      COMMON /VARGS/ Uexc, Smiu, K
+
+      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
+      DOUBLE PRECISION ee,uexc
+      DOUBLE PRECISION phase(2*NFPARAB)
+
+      DOUBLE PRECISION dmom, rmiu, Smiu, W
+
+      DOUBLE PRECISION exp2del(NFPARAB), exm2del(NFPARAB)
+      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
+      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),tfdd(NFPARAB), tdr
+
+      INTEGER j,k
+
+      rmiu = 0.054d0 * A(Nnuc) * * (5.d0/3.d0)
+      smiu = DSQRT(0.5d0 * rmiu)
+      uexc = Ee
+
+      DO k = 1, 2 * NRBar
+        phase(k) = 0.d0
+      ENDDO
+
       IF(FISbar(Nnuc).EQ.3.)THEN
-         DO k=1, NRBar,2
-            EFB(int(k/2)+1)= Vheigth(k)
-            h(1,int(k/2)+1)=Vwidth(k)
-         ENDDO
-         DO k=2, NRBar,2
-            EFB(NRBarc+int(k/2))=Vheigth(k)
-            h(1,NRBarc+int(k/2))=Vwidth(k)
-         ENDDO
-      ENDIF
- 101  IF(FISbar(Nnuc).EQ.3.)THEN
           DO k=1, NRBar,2
             Vheigth(int(k/2)+1)= EFB(k)
             Vwidth(int(k/2)+1)=h(1,k)
@@ -133,219 +150,118 @@ c       (not the fitted parabola height or center)
             Vheigth(NRBarc+int(k/2))= EFB(k)
             Vwidth(NRBarc+int(k/2))=h(1,k)
           ENDDO
+          DO j = 1, nextr
+             Vpos(j) = DEFfis(j)
+          ENDDO
+          Vpos(nextr+1) = 100.d0
       ENDIF
-      DO i= 2, NRBar,2
-        IF(Vheigth(i).GE.Vheigth(i-1).OR.Vheigth(i).GE.Vheigth(i+1))then
-      write(*,*)Vheigth(1),Vheigth(2),Vheigth(3),Vheigth(4),Vheigth(5)
-            write(*,*)'wrong parameters'
-            pause
-         ENDIF
-      ENDDO   
-
-      RETURN
-      END
-
-C===================================================================
-      SUBROUTINE WKBFIS1(Ee, nnuc, tff, tdirf, tdirb, tabsf, tabsb)
-C
-C     Roberto Capote, IAEA/NDS
-C     e-mail: r.capotenoy@iaea.org, 24 August 2006, v1.00
-C             rcapotenoy@yahoo.com
-C
-C     Mihaela Sin, University of Bucharest
-C     e-mail: mihaela.sin@gmail.com
-C
-C     For theory behind see
-C     M. Sin, R. Capote, A. Ventura et al, Phys.Rev.C74, 014608 (2006)
-C
-C     WKBFIS calculates WKB momentum integrals by Gauss - Legendre method
-C     for any given one-dimensional barrier and a given excitation
-C     energy.
-C
-C     * Ee is the excitation energy
-C     * tfis is the fission transmission coefficient (see eq.(4) PRC)
-C     * tff(extrema) are the transmission coefficients for all extrema
-C       calculated using the real barrier shape
-C       tff(1)= Ta, tff(3)= Tb, tff(2)= Twell (for double humped barrier)
-C     * wimag(1,2,3) : Imaginary potential parameters
-C       wimag(1)  is the scaling of the absorptive potential (MeV)
-C       wimag(2)  corresponds to diffuseness below the barrier (MeV)
-C       wimag(3)  corresponds to diffuseness above the barrier (MeV)
-C
-C
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-
-      DOUBLE PRECISION vdef_1d(800), eps_1d(800)      
-      INTEGER nfparab, npoints, iiextr(0:2*NFPARAB), nextr
-
-      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
-      COMMON /VARGS/ Uexc, Smiu, K
-
-      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
-      DOUBLE PRECISION ee,uexc
-      DOUBLE PRECISION tff(NRBar), phase(2*NFPARAB),delta(NRBar)
-      DOUBLE PRECISION tdirf(NRBar), tdirb(NRBar)
-      DOUBLE PRECISION tabsf(NRBar),tabsb(NRBar)
-
-      DOUBLE PRECISION dmom, rmiu, Smiu, diffusen, W
-      DOUBLE PRECISION exp_p2delta(NRBar), exp_m2delta(NRBar)
-     
-      INTEGER j,k
-
-      rmiu = 0.054d0 * A(Nnuc) * * (5.d0/3.d0)
-      smiu = DSQRT(0.5d0 * rmiu)
-      uexc = Ee
-
-      DO k = 1, NRBar
-        tff(k)   = 0.d0
-      ENDDO   
-      DO k = 1, 2 * NRBar !max_num_barr ! barriers and wells
-        phase(k) = 0.d0
-      ENDDO
 
 C---- Momentum integrals are calculated
       CALL PHASES(ee, phase, nnuc)
 C     Calculating transmission from phases
-      DO j = 1, NRBar, 2
-         tff(j) = 1.d0/(1.d0 + DEXP(2.d0 *  phase(j)))
+      DO ih = 1, nrbar, 2
+         TFDd(ih/2 + 1) = 1.d0/(1.d0 + DEXP(2.d0 *  phase(ih)))
       ENDDO
 
-
-      
-c      IF(FISopt(Nnuc).EQ.0)THEN
-c         tft(nextr) = tff(nextr)      
-c         DO k = nextr-2, 1, -2
-c            dmom = (1.d0 - tff(k))*(1.d0 - tft(k+2))
-c            tft(k) = (1.d0 - tweightw(k)) *  (tff(k)*tft(k+2) /
-c     &        (1.d0 + 2.d0*dSQRT(dmom)*dCOS(2.d0*phase(k+1)) + dmom))
-c     &        + tweightw(k) * (tff(k) * tft(k+2)/(tff(k) + tft(k+2)))
-c         ENDDO
-c      ENDIF
-
-
-      IF(FISopt(Nnuc).EQ.1)THEN  
-         w=0.d0
+      IF(FISopt(Nnuc).EQ.1)THEN
 C-------Imaginary potential strengths
-         DO i = 2, NRBar,2
-            delta(i) = 0.d0
-            dmom = min(efb(nrbar-i),efb(nrbar))
-            IF(Ee.LE.dmom) THEN
-               diffusen = wimag(2)
-            ELSE
-               diffusen = wimag(3)
-            ENDIF
-            W = wimag(1) *(Ee - efb(nrbarc+i/2)) / 
-     &           (1.d0 + dexp(-(Ee - dmom)/diffusen))
-
-ccc           IF(Wimag(1).GT.0.d0)THEN
-               if(Ee.gt. min(Vheigth(i-1),Vheigth(i+1)))w=1.d0
-ccc            ENDIF
-            if(Ee.le. EFB(NRBarc + i/2))w=0.d0
-
-            delta(i) = W*phase(i)
-
-            exp_p2delta(i) = dexp( 2.d0*delta(i))
-            exp_m2delta(i) = dexp(-2.d0*delta(i))
-
-            if (delta(i).eq.0.d0) exp_p2delta(i) = 1.d0
-            if (delta(i).eq.0.d0) exp_m2delta(i) = 1.d0
+         w = 0.d0
+         DO iw = 2, nrbar, 2
+            phasep(iw/2 + 1) = phase(iw)
          ENDDO
-      
-c-------------------------------------------------------------
-         DO i = 1, NRBar
-            tdirb(i) = 0.d0
-            tdirf(i) = 0.d0
-            tabsb(i) = 0.d0
-            tabsf(i) = 0.d0
-         ENDDO 
+         DO iw = 2, NRWel + 1
+            delt(iw) = 0.d0
+            dmom = min(efb(iw-1),efb(iw))
+            W = wimag(1) * (Ee - efb(iw - 1)) /
+     &           (1.d0 + dexp(-(Ee - dmom)/ wimag(iw)))
 
-         tdirb(NRBar)=tff(NRBar)
-         DO i = NRBar - 2, 1, -2
-            if(ee.lt.vheigth(i+1))THEN
-               phase(i + 1) = 0.d0
-               exp_p2delta(i + 1) = 1.d0
-               exp_m2delta(i + 1) = 1.d0
-            endif
-            dmom=(1.d0 - tff(i)) * (1.d0 - tdirb(i + 2))    
-            tdirb(i) = tff(i) * tdirb(i + 2)/
-     &                  (exp_p2delta(i + 1) + 2.d0 * dSQRT(dmom) *
-     &                  dCOS(2.d0 * phase(i + 1)) + 
-     &                  dmom * exp_m2delta(i + 1))
-c            if(ee.lt.vheigth(i+1))tdirb(i)= tff(i) * tdirb(i + 2)
-            IF(delta( i+ 1).GT.0.D0) THEN
-               tabsb(i) = tdirb(i) * (exp_p2delta(i + 1) - 
-     &               (1.d0 - tdirb(i + 2)) * exp_m2delta(i + 1) - 
-     &                tdirb(i + 2)) /tdirb(i + 2)
-            ELSE
-               tabsb(i)=0.D0
-            ENDIF            
+            if(Ee.le. EFB(NRBar + iw - 1)) W = 0.d0
+            if(ee.lt.efb(nrhump + iw -1)) phasep(iw) = 0.d0
+            delt(iw) = W * phasep(iw)
+            exp2del(iw) = dexp( 2.d0*delt(iw))
+            exm2del(iw) = dexp(-2.d0*delt(iw))
+            if (delt(iw).eq.0.d0) exp2del(iw) = 1.d0
+            if (delt(iw).eq.0.d0) exm2del(iw) = 1.d0
          ENDDO
 
-         tdirf(1) = tff(1)       
-         DO i = 3, NRBar, 2
+         DO ih = 1, nrhump
+            DO ih1 = 1, nrhump
+               tdirp(ih, ih1) = 0.d0
+               tdirp(ih, ih1) = 0.d0
+               IF(ih.EQ.ih1) tdirp(ih, ih1) = tfdd(ih)
+            ENDDO
+         ENDDO
 
-            if(ee.lt.vheigth(i-1))THEN
-               phase(i - 1) = 0.d0
-               exp_p2delta(i - 1) = 1.d0
-               exp_m2delta(i - 1) = 1.d0
-            endif
+         DO ih1 = nrhump, 2, -1
+            DO ih = ih1 - 1, 1, -1
+               dmom = (1.d0 - tdirp(ih, ih)) * (1.d0 - tdirp(ih+1, ih1))
+               tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(ih + 1)) +
+     &                          dmom * exm2del(ih + 1))
+            ENDDO
+         ENDDO
 
-            dmom=(1.d0 - tdirf(i-2)) * (1.d0 - tff(i))    
-            tdirf(i) = tdirf(i-2) * tff(i)/
-     &                  (exp_p2delta(i - 1) + 2.d0 * dSQRT(dmom) *
-     &                  dCOS(2.d0 * phase(i - 1)) + 
-     &                  dmom * exp_m2delta(i - 1))
-            IF(delta( i- 1).GT.0.D0) THEN
-               IF(i.EQ.3) tabsf(i) = tdirf(i) * (exp_p2delta(i - 1) - 
-     &                     (1.d0 - tdirf(i-2)) * exp_m2delta(i - 1) - 
-     &                      tdirf(i-2)) /tdirf(i-2)
-               IF(i.EQ.5) tabsf(i) = tdirf(i) * (exp_p2delta(i - 1) - 
-     &                         (1.d0 - tff(5)) * exp_m2delta(i - 1) - 
-     &                         tff(5)) /tff(5)
-            ELSE
-               tabsf(i)=0.D0
-            ENDIF   
-        ENDDO
-c        dmom=(1.d0 - tff(1)) * (1.d0 - tff(3)) 
-c         tabsb(1)= (tff(1) * tff(3)/
-c     &                  (exp_p2delta(2) + 2.d0 * dSQRT(dmom) *
-c     &                  dCOS(2.d0 * phase(2)) + 
-c     &                  dmom * exp_m2delta(2)))*
-c     &                 (exp_p2delta(2) - 
-c     &               (1.d0 - tff(3)) * exp_m2delta(2) - 
-c     &                tff(3)) /tff(3)
-      ENDIF   
+         DO ih1 = 1, nrhump - 1
+            DO ih = ih1 + 1, nrhump - 1
+               dmom = (1.d0 - tdirp(ih, ih)) * (1.d0 - tdirp(ih+1, ih1))
+               tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(ih + 1)) +
+     &                          dmom * exm2del(ih + 1))
+            ENDDO
+         ENDDO
+
+         DO iw = 1, nrwel
+            DO iw1 = iw + 1, nrwel + 1
+               IF(delt( iw1).GT.0.D0) THEN
+                  dmom = (1.d0 - tdirp(iw, iw1 - 1)) *
+     &                   (1.d0 - tdirp(iw1, nrhump))
+                  tdr  = tdirp(iw, iw1 - 1) *  tdirp(iw1, nrhump)/
+     &                         (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(iw1)) +
+     &                          dmom * exm2del(iw1))
+
+                  tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                           - (1.d0 - tdirp(iw1, nrhump)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1, nrhump)) /tdirp(iw1, nrhump)
+               ELSE
+                  tabsp(iw, iw1) = 0.D0
+               ENDIF
+            ENDDO
+         ENDDO
+
+         DO iw = nrwel + 1, 3, -1
+            DO iw1 = iw -1, 2, -1
+               IF(delt( iw1).GT.0.D0) THEN
+                  dmom = (1.d0 - tdirp(iw - 1, iw1)) *
+     &                   (1.d0 - tdirp(iw1-1, 1))
+                  tdr  = tdirp(iw-1, iw1) *  tdirp(iw1-1, 1)/
+     &                         (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(iw1)) +
+     &                          dmom * exm2del(iw1))
+
+                  tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                          - (1.d0 -  tdirp(iw1-1, 1)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1-1, 1)) /tdirp(iw1-1, 1)
+               ELSE
+                   tabsp(iw, iw1) = 0.D0
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDIF
       return
       END
-
-
 c------------------------------------------------------------------
       SUBROUTINE PHASES(uexcit1, phase, nnuc)
-C
-C     Roberto Capote, IAEA/NDS
-C     e-mail: r.capotenoy@iaea.org, 24 August 2006, v1.00
-C             rcapotenoy@yahoo.com
-C
-C     Mihaela Sin, University of Bucharest
-C     e-mail: mihaela.sin@gmail.com
-C
-C     For theory behind see
-C     M. Sin, R. Capote, A. Ventura et al, Phys.Rev.C74, 014608 (2006)
-C
-C     PHASES calculates momentum integrals by Gauss - Legendre method
-C     for any given one-dimensional barrier and a given excitation
-C     energy.
-C
-C     * uexcit1 is the excitation energy
-C
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      REAL*8 vdef_1d(800), eps_1d(800)
-      INTEGER nfparab, npoints, iiextr(0:2*NFPARAB), nextr
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
       COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
@@ -360,33 +276,31 @@ C-------------------------------------------------------------------
 
 C     FUNCTIONS
       REAL*8   Fmoment1, FmomentParab, GaussLegendre41, FindIntersect
-C     INTEGER Find_Extrem
       EXTERNAL FmomentParab, Fmoment1
 
       rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
       Uexc   = uexcit1
       smiu = DSQRT(0.5d0 * rmiu)
-
-      DO k=1, 2 * NRBar  !max_num_barr ! barriers and wells
+c
+      DO k = 1, 2 * NRBar
          phase(k) = 0.d0
       ENDDO
 
-      ftmp1 = eps_1d(3) 
-      ftmp2 = vdef_1d(3)
 C---- Momentum integrals are calculated
       IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) THEN
-         DO k=1, nextr                       ! barriers and wells
-          IF(mod(k,2).eq.1) then             ! BARRIERS
-            IF(uexcit1.ge.Vheigth(k)) THEN   ! Hill-Wheeler formula
+         DO k = 1, nextr                            ! humps and wells
+          IF(mod(k, 2).eq.1) then                   ! humps
+            IF(uexcit1.ge.Vheigth(k)) THEN          ! Hill-Wheeler formula
                dmom = pi * (Vheigth(k) - uexcit1)/Vwidth(k)
                phase(k)   = min(dmom,50.d0)
-            ELSE                             !WKB
+            ELSE                                    !WKB
                epsa = FindIntersect(uexcit1,iiextr(k-1),iiextr(k),
      &                .false.)
                epsb = FindIntersect(uexcit1,iiextr(k),iiextr(k+1),
      &                .false.)
 C              Calculating phase integral for real shape
                dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+
                IF(dmom.gt.0.d0 .and. abserr.gt.dmom*0.03) THEN
                   write(*,*) ' WARNING: For extremum ',k,
      &                       ' phase integral is not accurate (',
@@ -394,7 +308,7 @@ C              Calculating phase integral for real shape
                ENDIF
                phase(k) = min(dmom,50.d0)
             ENDIF
-          ELSE                             ! WELLS
+          ELSE                                     ! WELLS
             IF(uexcit1.LE.Vheigth(k)) THEN
 C              Excitation energies below the well
                phase(k) = 0.d0
@@ -416,9 +330,6 @@ C              Calculating phase integral for real shape
         ENDDO
       ELSE
         DO k=1, nextr   ! only parabolic barriers
-C         PARABOLIC BARRIERS
-C         For excitation energies above and below barriers  transmission
-C         coefficient is calculated by Hill-Wheeler formula
           dmom = pi*(Vheigth(k) - uexcit1)/Vwidth(k)       !Hill-Wheeler
           phase(k)   = min(dmom,50.d0)
         ENDDO
@@ -427,49 +338,39 @@ C
       RETURN
       END
 
+c===================================================
 
-
-
-      INTEGER FUNCTION Find_Extrem1(Nnuc) 
+      INTEGER FUNCTION Find_Extrem1(Nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
 C     Find all extremums of the smoothed deformation energy curve
-
-C                                         
-
-C     Nsmooth is defined globally(default) and it could be
-
-C             modified in the fission input for each nucleus  
-
 C
-
-      DOUBLE PRECISION vdef_1d(800), eps_1d(800)
+C     Nsmooth is defined globally(default) and it could be
+C             modified in the fission input for each nucleus
+C
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
       INTEGER npoints
       LOGICAL logmin, logmax
       INTEGER j,k
       INTEGER iext
-      INTEGER iiextr(0:2*NFPARAB)
+      INTEGER iiextr(0: 2 * NFPARAB)
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, iext
-     
+
       iext = 0
       Find_Extrem1 = 0
       iiextr(0)=1
 CC-------------------------------------------------------------------------------------
 C     determination of the minima   and maxima
       iext=0
-     
+
       do j = NRSmooth(Nnuc) + 1 , npoints - NRSmooth(Nnuc)
         logmax=.true.
         do k = j - NRSmooth(Nnuc), j + NRSmooth(Nnuc)
           if (k.eq.j) cycle
           if (Vdef_1D(k).gt.Vdef_1D(j)) logmax=.false.
-c          write(*,*)'ex0', j, k, Vdef_1D(k), npoints
         enddo
-        
-c          pause
-
         if (logmax) then
           iext=iext+1
           iiextr(iext)=j
@@ -479,16 +380,13 @@ c          pause
           if (k.eq.j.or.k.lt.1) cycle
           if (Vdef_1D(k).lt.Vdef_1D(j)) logmin=.false.
         enddo
-c        write(*,*)'ex1'
         if (logmin) then
           iext=iext+1
           iiextr(iext)=j
         endif
       enddo
-c      write(*,*)'ex2'
       Find_Extrem1 = iext
       iiextr(iext+1)= npoints
-
       return
       end
 
@@ -532,11 +430,12 @@ C     This function calculates parabolic shape of the deformation energy
 C
 C     Called by gaussian integration
 C
-c      IMPLICIT NONE
+c     IMPLICIT NONE
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
       REAL*8 EPS
       REAL*8 Uexc, Smiu
-      PARAMETER(NFPARAB=5)
-      INTEGER K, nfparab
+      INTEGER K
       COMMON /VARGS/ Uexc, Smiu, K
       COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
       REAL*8 Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
@@ -554,9 +453,10 @@ C     at deformation EPS (needed to integrte this function)
 C
 C     Called by gaussian integration
 C
-      REAL*8 vdef_1d(800), eps_1d(800)
-      parameter(NFPARAB=5)
-      INTEGER nfparab, npoints, iiextr(0:2*NFPARAB), nextr
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 C
 C     Local variables
@@ -595,15 +495,14 @@ c===================================================
       INTEGER Imax  ! Position of the maximum
       INTEGER Npfit ! Number of points to fit
       REAL*8 RMIU   ! MIU = 0.054d0*ANUC**(5.d0/3.d0)
-      REAL*8 EPSs(800) ! Deformation Array          (X)
-      REAL*8 VDEFf(800)! Deformation Energy Array (Y)
+      REAL*8 EPSs(*) ! Deformation Array        (X)
+      REAL*8 VDEFf(*)! Deformation Energy Array (Y)
       REAL*8  CENTR,  HEIGTH,  WIDTH ! BARRIER'S PARAMETER
       REAL*8 uCENTR, uHEIGTH, uWIDTH ! BARRIER'S PARAMETER UNCERTAINTIES
 
 C     Local variables
       integer i,npts,ierr
       real*8 x(1024),y(1024),aa(3),siga(3),chisqr
-
 
       npts = 0
 
@@ -786,10 +685,7 @@ C       CALCULATE UNCERTAINTIES
 
         RETURN
         END
-C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+C++++++++++++++++++++++++++++
 
         SUBROUTINE MATINVM( NORDER, DET, ARRAY )
 
@@ -883,14 +779,15 @@ C     If solution not found, then assign first or last point
 C     of the interval depending on whether we are solving the equation
 C     in the rigth(left) side of the barrier(well) case
 C
-c      IMPLICIT NONE
+C     IMPLICIT NONE
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-      PARAMETER(NFPARAB=5)
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
       INTEGER ja, jb, npoints, iiextr(0:2*NFPARAB), nextr
-        REAL*8 uexc
-      REAL*8 vdef_1d(800), eps_1d(800)
+      REAL*8 uexc
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
       LOGICAL iswell
-csin      INCLUDE 'vdeform.inc'
 C
 C     Local variables
       INTEGER j, is0, is1
@@ -930,6 +827,7 @@ C       BARRIERS
       ENDIF
       RETURN
       END
+
       REAL*8 FUNCTION GaussLegendre41(F,Ea,Eb,ABSERR)
       IMPLICIT NONE
       REAL*8 F

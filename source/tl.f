@@ -1,6 +1,7 @@
+$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-05-23 08:12:30 $
-Ccc   * $Id: tl.f,v 1.92 2007-05-23 08:12:30 Capote Exp $
+Ccc   * $Date: 2007-11-01 23:20:36 $
+Ccc   * $Id: tl.f,v 1.93 2007-11-01 23:20:36 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2034,7 +2035,7 @@ C-----ECIS iteration scheme is used. (To be checked following Harm Wienke messag
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 3 MeV
 C-----Spin-orbit potential must be not deformed !!
-      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.3.d0)
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0)
      >  ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
@@ -2466,7 +2467,7 @@ C-----ECIS iteration scheme is used. (To be checked following Harm Wienke messag
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 3 MeV
 C-----Spin-orbit potential must be not deformed !!
-      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.3.d0)
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0)
      >  ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'

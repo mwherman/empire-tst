@@ -1,6 +1,7 @@
+$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: print.f,v 1.16 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Date: 2007-11-01 23:20:36 $
+Ccc   * $Id: print.f,v 1.17 2007-11-01 23:20:36 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc

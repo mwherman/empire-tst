@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-10-30 22:06:50 $
-Ccc   * $Id: input.f,v 1.257 2007-10-30 22:06:50 herman Exp $
+Ccc   * $Date: 2007-11-01 23:20:35 $
+Ccc   * $Id: input.f,v 1.258 2007-11-01 23:20:35 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -148,6 +148,9 @@ C--------neutralize tuning factors and OMP normalization factors
          DO nnuc = 0, NDNUC
             DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
+
+            FISDEN(Nnuc) = 1.d0
+
             DO j = 1, NDLW
                ISIsom(j,nnuc) = 0
             ENDDO
@@ -261,7 +264,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 1
+         IX4ret = 0
          IF(IOPSYS.EQ.1) IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
@@ -278,7 +281,7 @@ C        Default deformation values, they are changed in ifindcoll()
          FLAm(2) = 3.
          FLAm(3) = -2.
          FLAm(4) = -3.
-C--------set acceleration option
+C--------set accelleration option
          LTUrbo = 1
          TURbo = FLOAT(LTUrbo)
 C--------temperature fade-out parameters of fission barrier
@@ -1525,7 +1528,7 @@ C-----calculate compound nucleus level density
       IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0,1.D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
-         IF (ADIv.NE.0.0D0 .AND. ADIv.NE.3.0D0) THEN
+         IF (ADIv.LT.3.0D0) THEN
          WRITE (6,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
      &          SYMb(nnuc)
          WRITE (6,99010) (EX(i,nnuc),
@@ -1681,18 +1684,18 @@ C-----------determination of etl matrix
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
-               IF((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).LT.culbar) THEN
+c               IF((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).LT.culbar) THEN
                  EMAx(nnur) = 0.d0
                  NEX(nnur) = 0
                  NEXr(nejc,nnuc) = 0
                  Q(nejc,nnuc) = 99.d0
                  CYCLE
-               ELSE
-                 WRITE (6,*)
-     &             ' OUT OF BOUNDARY; DECREASE NEX IN INPUT OR INCREASE'
-     &             , ' NDEX IN dimension.h AND RECOMPILE'
-                 STOP 10
-               ENDIF
+c               ELSE
+c                 WRITE (6,*)
+c     &             ' OUT OF BOUNDARY; DECREASE NEX IN INPUT OR INCREASE'
+c     &             , ' NDEX IN dimension.h AND RECOMPILE'
+c                 STOP 10
+c               ENDIF
             ENDIF
             IF (NEXr(nejc,nnuc).GT.0 .AND. NEX(nnuc).GT.0) THEN
                ETL(5,nejc,nnur) = EX(NEX(nnuc),nnuc)
@@ -1775,7 +1778,7 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0,1.D0)
             IF (IOUt.EQ.6) THEN
               ia = INT(A(nnur))
-              IF (ADIv.NE.0.0D0 .AND. ADIv.NE.3.0D0) THEN
+              IF (ADIv.LT.3.0D0) THEN
               WRITE (6,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
      &          ia, SYMb(nnuc)
               WRITE (6,99010) (EX(i,nnur),
@@ -1921,8 +1924,7 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         GOTO 70
    65   WRITE (6,*) ' WARNING: ',
      &   '../RIPL-2/resonances/resonances0.dat file not found '
-        WRITE (6,*) ' WARNING: Experimental D0 and gamma width are not a
-     &vailable '
+        WRITE (6,*) ' WARNING: D0 and gamma width are not available '
    70   CONTINUE
       ENDIF
       IF(S0_obs.EQ.0) THEN   !No experimental Gg - use Kopecky's spline fit
@@ -1937,17 +1939,13 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
                Gg_obs = gggtmp*1000.0D0 !in meV
                GOTO 85
             ENDDO
-   75       WRITE (6,*) ' WARNING:../data/Ggamma.dat file not found' 
+   75       WRITE (6,*) ' WARNING:../data/Ggamma.dat file not found'
    85       CLOSE (47)
          ENDIF
       ENDIF
-       
+
       LREad = .TRUE.
-
-
       izatmp = INT(1000*iz + ia)
-
-
       DO itmp = 0,NDNuc
         IF(NSTOred(itmp).eq.izatmp) THEN
           LREad = .FALSE.
@@ -2003,16 +2001,16 @@ C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
 C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
-c       IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
-c          nmax = MIN(nmax/2 + 1, 15)
-c          WRITE (6,'('' WARNING:'')')
-c          WRITE (6,'('' WARNING: for isotope '',A5,''-'',I3)')
-c    &            chelem, iar
-c          WRITE (6,'('' WARNING: number of levels was reduced to '',
-c    &            I3)') nmax
-c          WRITE (6,'('' WARNING: since FITLEV option had not been'',
-c    &            '' run before'')')
-c       ENDIF
+        IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
+           nmax = MIN(nmax/2 + 1, 15)
+           WRITE (6,'('' WARNING:'')')
+           WRITE (6,'('' WARNING: for isotope '',A5,''-'',I3)')
+     &            chelem, iar
+           WRITE (6,'('' WARNING: number of levels was reduced to '',
+     &            I3)') nmax
+           WRITE (6,'('' WARNING: since FITLEV option had not been'',
+     &            '' run before'')')
+        ENDIF
 C----------create file with levels (*.lev)
 C----------NLV   number of levels with unique spin and parity
 C----------NCOMP number of levels up to which the level scheme is estimated
@@ -2554,7 +2552,7 @@ Ccc   *                      P T L E V S E T                             *
 Ccc   *                                                                  *
 Ccc   *  Sets ground state spin and parity and first 2+ and 3- levels'   *
 Ccc   *  energies (latter for CCFUS and TRISTAN). For even-even nuclei   *
-Ccc   *  just calls PTLEVRE. For other calls PTLEVRE for neighboring    *
+Ccc   *  just calls PTLEVRE. For other calls PTLEVRE for neighbouring    *
 Ccc   *  nuclei and take average for 2+ and 3- energies.                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
@@ -3240,7 +3238,7 @@ C-----
      &'('' Shell correction to fission barrier brougth to 1/2 at spin ''
      &,F5.1)') SHRj
             WRITE (12,
-     &'('' Shell correction to fission barrier brought to 1/2 at spin ''
+     &'('' Shell correction to fission barrier brougth to 1/2 at spin ''
      &,F5.1)') SHRj
             GOTO 100
          ENDIF
@@ -5658,7 +5656,7 @@ Ccc   *                                                                  *
 Ccc   * author: M.Herman & R.Sturiale                                    *
 Ccc   * date:   27.Sep.1996                                              *
 Ccc   * revision:1    by: R.Capote               on:09.2004              *
-Ccc   * RIPL-2 database used                                              *
+Ccc   * RIPL-2 database used                                             *
 Ccc   ********************************************************************
 Ccc
       OPEN (UNIT = 27,STATUS = 'OLD',
@@ -6485,7 +6483,7 @@ Ccc   ******************************************************************
 Ccc   *                                                       class:iou*
 Ccc   *                         B N D G                                *
 Ccc   *                                                                *
-Ccc   *           Calculates binding energies                           *
+Ccc   *           Calculates binding energies                          *
 Ccc   *                                                                *
 Ccc   * input:NEJC, NNUC                                               *
 Ccc   *                                                                *
@@ -7706,7 +7704,7 @@ C
      &                 TDIrect, TDIrm(NFMOD), TFB, TFBm(NFMOD), UCRt,
      &                 UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD)
      &                 , XMInnm(NFMOD), ECFism(NFMOD),
-     &                 vdef_1d(800),eps_1d(800)
+     &                 vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)
       INTEGER BFFm(NFMOD), NLWst, NRBinfism(NFMOD)
       INTEGER iiextr(0:2*NFPARAB), nextr
 
@@ -7728,6 +7726,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION ain, aout, bexp, bexp1, cin, cout, hin, hout
+       DOUBLE PRECISION barnorm(nfhump)
+
       CHARACTER*20 cara
       CHARACTER*33 cara1
       CHARACTER*55 cara2
@@ -7737,12 +7737,9 @@ C
       CHARACTER*50 filename
 
       DOUBLE PRECISION rmiu,width(NFPARAB)
-      INTEGER Find_Extrem, nrhump
+      INTEGER Find_Extrem
 
-C
-C     Save NSMooth into FISSION INPUT
-C
-      IF(NRSmooth(Nnuc).EQ.0) NRSmooth= 5
+      IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
       iz=INT(Z(Nnuc))
       ia=INT(A(Nnuc))
 
@@ -7781,11 +7778,11 @@ C-----RIPL-2 ETFSI values
          WRITE (6,*)
      &' FATAL: file ../RIPL-2/fission/fis-barrier-etfsi.dat may be missi
      &ng'
-c         STOP ' FATAL: Fission barrier can not be retrieved'
-         NRBar = 1.
-         EFB(1) = 10.
-         h(1, 1) = 1.
-         FISDEN(Nnuc)=1.
+         STOP ' FATAL: Fission barrier can not be retrieved'
+C        NRBar = 1.
+C        EFB(1) = 10.
+C        h(1, 1) = 1.
+C        FISDEN(Nnuc)=1.
       ENDIF
 C-----RIPL-2 "experimental" values
       IF (FISbar(Nnuc).EQ.2.) THEN
@@ -7994,7 +7991,7 @@ C
             ENDDO
          ENDDO
       ENDIF
-c     IF(FISbar(Nnuc).LE.2.)
+c      IF(FISbar(Nnuc).LE.2.)
       NRBarc= NRBar- NRWel
       DO i = 1, NRBar
          Hcont(i)= H(1,i)
@@ -8002,14 +7999,15 @@ c     IF(FISbar(Nnuc).LE.2.)
       CALL DEFO_FIS(Nnuc)
 C
 C================  level densities at saddles  ===============================
-      IF (FISden(Nnuc).EQ.1.) THEN
+      IF (FISden(Nnuc).GE.1.) THEN
 C--------nuclear shape asymmetry at saddles
 C           bff=1 axial, mass symmetry
 C           bff=2 axial asymmetry,mass symmetry
 C           bff=3 axial symmetry,mass asymmetry
 C           bff=4 axial asymmetry,mass asymmetry
          BFF(1) = 1.
-         IF (A(Nnuc).GT.236) BFF(1) = 2.
+C        IF (A(Nnuc).GT.236) BFF(1) = 2.
+         IF (A(Nnuc)-Z(Nnuc).GE.144) BFF(1) = 2.
          BFF(2) = 3.
          BFF(3) = 3.
 C--------shell corrections at saddles according to RIPL-2
@@ -8082,9 +8080,35 @@ C---- writing data in FISSION.INP
          ENDDO
       ENDIF
 
-
       WRITE (79,'(a15,i1,a15,i1)') ' Nr.parabolas =', NRBar,
      &                             '      Nr.wells=', NRWel
+      DO nh =1, nrhump
+         barnorm(nh) = 0.d0
+      ENDDO
+
+      IF(FISbar(nnuc).EQ.3)THEN
+
+
+
+        WRITE (79,*) 'Index of extrema'
+
+
+
+        WRITE (79,*)(iiextr(j), j = 1, nrbar)
+
+
+
+
+
+
+
+        WRITE (79,*) ' Normalization factors for humps'
+        WRITE (79,'(4f10.3)')(barnorm(nh), nh=1,nrhump)
+      ENDIF
+
+
+
+
       WRITE (79,'(a8,f2.0)') 'FISMOD =', FISmod(Nnuc)
       WRITE (79,*) '  '
       IF (NRBar.EQ.1) THEN
@@ -8230,19 +8254,19 @@ c-----LD
          WRITE (79,*)
       ENDIF
 
-      IF (FISden(Nnuc).EQ.2.) THEN
-         cara2 =
-     &          'Level densities at the saddle points taken from RIPL-3'
-         WRITE (79,*)
-         WRITE (79,'(a7,f2.0,a55)') 'FISDEN=', FISden(Nnuc), cara2
-         WRITE (79,*)
-      ENDIF
+c      IF (FISden(Nnuc).EQ.2.) THEN
+c         cara2 =
+c     &          'Level densities at the saddle points taken from RIPL-3'
+c         WRITE (79,*)
+c         WRITE (79,'(a7,f2.0,a55)') 'FISDEN=', FISden(Nnuc), cara2
+c         WRITE (79,*)
+c      ENDIF
 
-      IF (FISden(Nnuc).EQ.1.) THEN
+c      IF (FISden(Nnuc).EQ.1.) THEN
          cara2 = 'Level densities at the saddle points EMPIRE specific'
-         WRITE (79,*) '  '
-         WRITE (79,'(a7,f2.0,a55)') 'FISDEN=', FISden(Nnuc), cara2
-         WRITE (79,*) '  '
+c        WRITE (79,*) '  '
+c         WRITE (79,'(a7,f2.0,a55)') 'FISDEN=', FISden(Nnuc), cara2
+c        WRITE (79,*) '  '
          WRITE (79,*)
      &'  Asymmetry  shell-corr  delta    gamma    atilf/atil at saddles'
          DO nr = 1, nrbarc
@@ -8259,7 +8283,7 @@ c-----LD
                ENDDO
             ENDIF
          ENDDO
-      ENDIF
+c      ENDIF
 c
 C-----the coefficients of a linear energy dependent factor adjusting
 C-----the fission level densities;
@@ -8283,7 +8307,7 @@ C-----the fission level densities;
       WRITE (79,*) '   '
 
       DO nr = 1, nrwel
-         awf(nr) = 1.d0
+         awf(nr) = 0.d0
          WRITE (79,'(1x, A8, 1x, I1, 1f9.3)') '    Well', nr, awf(nr)
       ENDDO
       END
@@ -8304,15 +8328,18 @@ C
      &                 TFBm(NFMOD), UGRidf(0:NFISENMAX,NFMOD),
      &                 WFIsm(NFMOD), XMInnm(NFMOD),
      &                 ECFism(NFMOD),
-     &                 vdef_1d(800), eps_1d(800)
+     &                 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT),
+     &                 barnorm(nfhump)
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
      &                 TFB, TDIrect,ECFis,ECFism
-      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /NUMBAR/  eps_1d, vdef_1d,  npoints, iiextr, nextr
       INTEGER iiextr(0:2*NFPARAB), nextr
 C
+
+       DOUBLE PRECISION rmiu,width(NFPARAB)
 C Dummy arguments
 C
       INTEGER Nnuc,npoints
@@ -8334,19 +8361,48 @@ C
       READ (79,'(4x,a2,i3,2x,a2,i3)') carz, iz, cara3, ia
       IF (carz.EQ.'Z=' .AND. iz.NE.INT(Z(Nnuc)) .OR. ia.NE.INT(A(Nnuc)))
      &    GOTO 100
-c      READ (79,'(a40)') line
-c      READ (79,'(a8,f2.0,a28,a20)') cara8, FISbar(Nnuc)
       READ (79,*)
       READ (79,*)
 
       IF(FISbar(Nnuc).EQ.3.)THEN
-         READ(79,'(i3)')npoints
-         DO i=1, npoints
+         READ(79,'(i3)') npoints
+         DO i = 1, npoints
             READ(79,'(i4,2f10.3)')ii, vdef_1d(i),eps_1d(i)
          ENDDO
       ENDIF
 
       READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
+      NRHump = NRBar - NRWel
+      nextr = nrbar
+
+
+
+
+
+
+
+      DO nh =1, nrhump
+
+
+
+         barnorm(nh) = 0.d0
+
+
+
+      ENDDO
+
+
+
+
+      IF(FISbar(Nnuc).EQ.3.)THEN
+         READ (79,*)
+         READ (79,*)(iiextr(j), j = 1, nrbar)
+         iiextr(0) = 1
+         iiextr(nextr+1)= npoints
+         READ (79,*)
+         READ (79,'(4f10.3)')(barnorm(nh), nh=1,nrhump)
+      ENDIF
+
       READ (79,'(a8,f2.0)') cara8, FISmod(Nnuc)
       READ (79,*)
       READ (79,*)
@@ -8362,9 +8418,53 @@ c      READ (79,'(a8,f2.0,a28,a20)') cara8, FISbar(Nnuc)
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
 
+      IF(FISbar(Nnuc).EQ.3.)THEN
+         barmin =  vdef_1d(iiextr(2))
+         DO n = 3, nextr-1
+            IF( vdef_1d(iiextr(n)).lt.barmin)
+     &         barmin= vdef_1d(iiextr(n))
+         ENDDO
+         DO nh = 1, nrbar, 2
+            IF(barnorm(nh/2 + 1).ne.0)THEN
+               DO id = iiextr(nh - 1),  iiextr(nh + 1)
+                  IF(vdef_1d(id).ge.barmin)
+     &               vdef_1d(id) = vdef_1d(id) +  barnorm(nh/2 + 1) *
+     &                            (vdef_1d(id) - barmin)
+               ENDDO
+            ENDIF
+         ENDDO
+C------- Fitting parabola
+         rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
+
+         DO j = 1, nrbar!nextr
+c            write(*,*)'extr',iiextr(j)
+            CALL ParabFit(iiextr(j),3,rmiu,eps_1d,vdef_1d,
+     &        centr,  heigth,  width(j), ucentr, uheigth, uwidth)
+            IF(width(j).LT.0.05d0) CYCLE ! Skipping very narrow peaks
+         ENDDO
+
+         DO k = 1, NRBar, 2
+            EFB(int(k/2) + 1)    = Vdef_1d(iiextr(k))
+            hcont(int(k/2) + 1)    = width(k)
+            DEFfis(int(k/2) + 1) = eps_1d(iiextr(k))
+         ENDDO
+
+
+         DO k=2, NRBar,2
+            EFB(NRBarc + int(k/2))    = Vdef_1d(iiextr(k))
+            h(1,NRBarc + int(k/2))    = width(k)
+            DEFfis(NRBarc + int(k/2)) = eps_1d(iiextr(k))
+         ENDDO
+
+      ENDIF
+
+
+
+
+
       NRBarc = NRBar - NRWel
 C     For covariance
-      EFB(1) = EFB(1) * FISbin (Nnuc)
+      EFB(1) = EFB(1) * FISbin (Nnuc) !?????????????
       IF(NRBarc.GE.2) THEN
         DO i = 2, NRBarc   !???????????
           EFB(i) = EFB(i) * FISbou (Nnuc)
@@ -8405,7 +8505,7 @@ C     For covariance
       ENDDO
 
       READ (79,*)
-      READ (79,*)
+c      READ (79,*)
 c      nrbarc1 = NRBarc
 ccc      IF (NRBarc.EQ.3) nrbarc1 = 2
       IF (NRBar.EQ.2)THEN
@@ -8414,9 +8514,12 @@ ccc      IF (NRBarc.EQ.3) nrbarc1 = 2
          NRBar=3
       ENDIF
 
- 200  READ (79,'(a7,f2.0)') cara8, FISden(Nnuc)
-      READ (79,*)
-      IF (FISden(Nnuc).EQ.1.) THEN
+ 200  continue
+
+
+c      READ (79,'(a7,f2.0)') cara8, FISden(Nnuc)
+c      READ (79,*)
+c     IF (FISden(Nnuc).EQ.1.) THEN
          READ (79,*)
          DO ibar = 1, nrbarc
             IF (FISmod(Nnuc).EQ.0. .OR.
@@ -8437,7 +8540,7 @@ C                 For covariance
                ENDDO
             ENDIF
          ENDDO
-      ENDIF
+c      ENDIF
  300  READ (79,*)
       READ (79,*)
       READ (79,*)
@@ -8446,6 +8549,7 @@ C                 For covariance
          READ (79,'(1x, A8, 1x, I1, 3f9.3)') cara8, i, ENH_ld(1,nr),
      &         ENH_ld(2,nr), ENH_ld(3,nr)
       ENDDO
+c      if(nrwel.eq.0)nrwel=1
       READ (79,*)
       DO nr = 1, nrwel
          READ (79,'(1x, A8, 1x, I1, 1f9.3)') cara8, i, awf(nr)
@@ -8470,7 +8574,7 @@ C     Find all extrema of the smoothed deformation energy curve
 C     Nrsmooth is defined globally(default) and it could be
 C             modified in input for each nucleus
 C
-      DOUBLE PRECISION vdef_1d(800), eps_1d(800)
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
       INTEGER npoints
       LOGICAL logmin, logmax
       INTEGER j,k
@@ -8590,7 +8694,6 @@ C-----deformations at saddles and wells and matching points--------------------
 
       END
 C
-C
       SUBROUTINE GDRGFLDATA(Znucleus,Anucleus)
 C
 Ccc  ********************************************************************
@@ -8653,7 +8756,7 @@ Ccc  *  prepared from data file "raman_tableI.txt" given by  S.Raman,   *
 Ccc  *  C.W.Nestor,Jr, P.Tikkanen [Atom.Data Nucl.Data Tabl. 78(2001)1; *
 Ccc  *  Table 1 for even-even nuclei].The value of deformation parameter*
 Ccc  *  '|beta2|' from "deflib.dat"file is used for 'beta' if the 'beta'*
-Ccc  *  is absent in the "def_eff.dat" file and  global parametrization *
+Ccc  *  is absent in the "def_eff.dat" file and  global parametrisation *
 Ccc  *  for parameter 'S2Plus=(E2+)*beta**2' is used in this case.      *
 Ccc  ********************************************************************
 C

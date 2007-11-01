@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-10-30 22:09:28 $
-Ccc   * $Id: HRTW-comp.f,v 1.49 2007-10-30 22:09:28 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2007-11-01 23:20:35 $
+Ccc   * $Id: HRTW-comp.f,v 1.50 2007-11-01 23:20:35 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -60,10 +60,11 @@ C-----accounted for when width fluctuation (HRTW) is selected
 C-----
 C-----start CN nucleus decay
 C-----
-      n0c   = 0
-      d0c   = 0.d0 
-      sumGg = 0.d0         
 C-----do loop over decaying nucleus parity
+      n0c   = 0
+      d0c   = 0.d0
+      sumGg = 0.d0
+
       DO ipar = 1, 2
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
@@ -231,7 +232,7 @@ C
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
-                d0c = d0c + RO(ke,jcn,ipar,nnuc)     
+                d0c = d0c + RO(ke,jcn,ipar,nnuc)
                 n0c = n0c + 1
                 WRITE(6,'(1x,''-----------------------------------------
      &-----'')')
@@ -250,7 +251,7 @@ C
       IF(d0c.gt.0.d0) d0c = dble(n0c)/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c*1000 !use calculated D0 (in keV) if not measured
       IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
-         IF(Gg_obs.GT.0. AND. D0_obs.GT.0.) THEN
+         IF(Gg_obs.GT.0.d0) THEN
             ggexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(6,'(1x,
      &      ''Experimental information from capture channel'')')
@@ -271,21 +272,25 @@ C
             WRITE(6,'(1x,A5,F8.3,A17)')
      &          'D0 = ', D0_obs,' keV (calculated)'
             ENDIF
-            WRITE(6,'(1x,''Normalization factor = '',F7.3)')
+            if(sumGg.gt.0.d0) then
+              WRITE(6,'(1x,''Normalization factor = '',F7.3)')
      &           ggexper/sumGg
-            WRITE(6,'(1x,''Calculated D0 = '',F8.3,'' keV'')') d0c*1000
+            else
+              WRITE(6,'(1x,
+     &        ''Calculated Gamma width = 0, no Normalization'')')
+            endif
+            WRITE(6,'(1x,''Calculated D0 = '',F7.3)') d0c*1000
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
-c               TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
-                TUNe(0, Nnuc) = ggexper/sumGg
+                TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
+C               TUNe(0, Nnuc) = ggexper/sumGg
                 WRITE(6 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')
      &         TUNe(0, Nnuc)
               ELSE
                 WRITE(6 ,
-     &       '(1x,''Gamma emission is not normalized''/
-     &         1x,''D0 are not available ! '')')
+     &       '(1x,''Gamma emission is not normalized'')')
               ENDIF
             ELSE
               WRITE(6,
@@ -293,8 +298,6 @@ c               TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
      &           1x,''TUNE(0,Nnuc) set in input to '',F7.3)')
      &         TUNe(0, Nnuc)
             ENDIF
-                WRITE(6,'(1x,''-----------------------------------------
-     &-----'')')
             WRITE(6,*)
          ENDIF
       ENDIF
@@ -436,7 +439,7 @@ C                       WRITE(6,*)'A Tl= ' , TL(5,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
-                  rho = RO(iermax,jr,ip2,Nnur)*DE*TUNe(Nejc,Nnuc)                  
+                  rho = RO(iermax,jr,ip2,Nnur)*DE*TUNe(Nejc,Nnuc)
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -464,7 +467,7 @@ C-----------------be energy step and also emission step dependent
                   corr = 0.4444/(DE - XN(Nnur) + XN(1))
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
-                  rho = RO(iermax,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                  
+                  rho = RO(iermax,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
                   sumtl1 = 0.0
                   DO l = lmin, lmax, 2       ! do loop over l
                      IF (Nhrtw.GT.0) THEN
@@ -477,7 +480,7 @@ C                       WRITE(6,*)'C Tl= ' , TL(6,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
-                  rho = RO(iermax,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                                    
+                  rho = RO(iermax,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -521,7 +524,7 @@ C                       WRITE(6,*)'E Tl= ' , TL(ietl,l,Nejc,Nnur)
                         sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
                      ENDIF
                   ENDDO
-                  rho = RO(ier,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)                  
+                  rho = RO(ier,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
                   sumtl2 = 0.0
                   DO l = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
@@ -837,15 +840,15 @@ C--------Plujko_new-2005
                  IF(lamb/2*2.EQ.lamb)THEN
                    scrtpos = scrtpos + xle(lamb)
                    scrtneg = scrtneg + xlm(lamb)
-                   IF(Nhrtw.EQ.0) hsumtls = hsumtls + 
-     &  	                   xle(lamb)**2 * RO(ier, Jr, ipos, Nnuc) + 
-     &                       xlm(lamb)**2	* RO(ier, Jr, ineg, Nnuc)
+                   IF(Nhrtw.EQ.0) hsumtls = hsumtls +
+     &                         xle(lamb)**2 * RO(ier, Jr, ipos, Nnuc) +
+     &                       xlm(lamb)**2 * RO(ier, Jr, ineg, Nnuc)
                   ELSE
                    scrtpos = scrtpos + xlm(lamb)
                    scrtneg = scrtneg + xle(lamb)
-                   IF(Nhrtw.EQ.0) hsumtls = hsumtls + 
-     &  	                   xlm(lamb)**2 * RO(ier, Jr, ipos, Nnuc) + 
-     &                       xle(lamb)**2	* RO(ier, Jr, ineg, Nnuc)
+                   IF(Nhrtw.EQ.0) hsumtls = hsumtls +
+     &                         xlm(lamb)**2 * RO(ier, Jr, ipos, Nnuc) +
+     &                       xle(lamb)**2 * RO(ier, Jr, ineg, Nnuc)
 C                  !first HRTW entry done
                  ENDIF
                ENDDO
