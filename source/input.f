@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-11-01 23:20:35 $
-Ccc   * $Id: input.f,v 1.258 2007-11-01 23:20:35 Capote Exp $
+Ccc   * $Date: 2007-11-02 18:34:26 $
+Ccc   * $Id: input.f,v 1.259 2007-11-02 18:34:26 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -264,7 +264,7 @@ C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+         IX4ret = 1
          IF(IOPSYS.EQ.1) IX4ret = 0
 C--------CCFUF parameters
          DV = 10.
@@ -8370,30 +8370,12 @@ C
             READ(79,'(i4,2f10.3)')ii, vdef_1d(i),eps_1d(i)
          ENDDO
       ENDIF
-
       READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
       NRHump = NRBar - NRWel
       nextr = nrbar
-
-
-
-
-
-
-
       DO nh =1, nrhump
-
-
-
          barnorm(nh) = 0.d0
-
-
-
       ENDDO
-
-
-
-
       IF(FISbar(Nnuc).EQ.3.)THEN
          READ (79,*)
          READ (79,*)(iiextr(j), j = 1, nrbar)
@@ -8402,7 +8384,6 @@ C
          READ (79,*)
          READ (79,'(4f10.3)')(barnorm(nh), nh=1,nrhump)
       ENDIF
-
       READ (79,'(a8,f2.0)') cara8, FISmod(Nnuc)
       READ (79,*)
       READ (79,*)
@@ -8435,33 +8416,23 @@ C
          ENDDO
 C------- Fitting parabola
          rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
-
          DO j = 1, nrbar!nextr
 c            write(*,*)'extr',iiextr(j)
             CALL ParabFit(iiextr(j),3,rmiu,eps_1d,vdef_1d,
      &        centr,  heigth,  width(j), ucentr, uheigth, uwidth)
             IF(width(j).LT.0.05d0) CYCLE ! Skipping very narrow peaks
          ENDDO
-
          DO k = 1, NRBar, 2
             EFB(int(k/2) + 1)    = Vdef_1d(iiextr(k))
             hcont(int(k/2) + 1)    = width(k)
             DEFfis(int(k/2) + 1) = eps_1d(iiextr(k))
          ENDDO
-
-
          DO k=2, NRBar,2
             EFB(NRBarc + int(k/2))    = Vdef_1d(iiextr(k))
             h(1,NRBarc + int(k/2))    = width(k)
             DEFfis(NRBarc + int(k/2)) = eps_1d(iiextr(k))
          ENDDO
-
       ENDIF
-
-
-
-
-
       NRBarc = NRBar - NRWel
 C     For covariance
       EFB(1) = EFB(1) * FISbin (Nnuc) !?????????????
@@ -8470,7 +8441,6 @@ C     For covariance
           EFB(i) = EFB(i) * FISbou (Nnuc)
         ENDDO
       ENDIF
-
       READ (79,*)
       READ (79,*)
       READ (79,*) (HJ(Nnuc,i),i = 1,NRBar)
