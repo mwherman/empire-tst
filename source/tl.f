@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:36 $
-Ccc   * $Id: tl.f,v 1.93 2007-11-01 23:20:36 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-11-02 18:48:30 $
+Ccc   * $Id: tl.f,v 1.94 2007-11-02 18:48:30 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc

@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:34 $
-Ccc   * $Id: fusion.f,v 1.71 2007-11-01 23:20:34 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-11-02 18:47:43 $
+Ccc   * $Id: fusion.f,v 1.72 2007-11-02 18:47:43 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
