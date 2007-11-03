@@ -25,6 +25,8 @@
 ! *                           FIZCON
 ! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
 ! *                        1. Fixed bug in calculation of L=2 penetrability
+! *         VERSION 7.03   Sept  2007     R. Capote
+! *                        1. Can be compiled with GNU g95
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *

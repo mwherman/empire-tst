@@ -58,6 +58,9 @@
 ! *                           'MT ALLOWED IN DERIVED FILES' CLSSIFIED AS
 ! *                           WARNING INSTEAD OF AN ERROR
 ! *
+! *         VERSION 7.04   Sept  2007     R. Capote
+! *                        1. Can be compiled with GNU g95
+! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
 ! *
 ! *         NATIONAL NUCLEAR DATA CENTER

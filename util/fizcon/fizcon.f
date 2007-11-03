@@ -40,6 +40,8 @@
 ! *                           OF GAMMA RAYS
 ! *         VERSION 7.04   APRIL 2006     M. HERMAN
 ! *                        1. 'LB=8 SECTION MISSING' NOT CONSIDERED AN ERROR 
+! *         VERSION 7.05   Sept  2007     R. Capote
+! *                        1. Can be compiled with GNU g95
 ! *
 ! *
 ! *      REFER ALL COMMENTS AND INQUIRIES TO
