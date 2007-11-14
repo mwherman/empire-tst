@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:36 $
-Ccc   * $Id: main.f,v 1.183 2007-11-01 23:20:36 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-11-14 16:47:27 $
+Ccc   * $Id: main.f,v 1.184 2007-11-14 16:47:27 herman Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -2926,6 +2926,7 @@ C
 C        CLOSING FILES
 C
          WRITE (12,*) ' '
+         WRITE (12,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
          CLOSE (5)
          WRITE (*,*) '.'
          WRITE (6,*) ' '
