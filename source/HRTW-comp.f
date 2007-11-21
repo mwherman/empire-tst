@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:35 $
-Ccc   * $Id: HRTW-comp.f,v 1.50 2007-11-01 23:20:35 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-11-21 15:35:48 $
+Ccc   * $Id: HRTW-comp.f,v 1.51 2007-11-21 15:35:48 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -257,19 +257,19 @@ C
      &      ''Experimental information from capture channel'')')
             WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
             IF(GG_unc.GT.0.0D0) THEN
-            WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
+            WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
             ELSE
-            WRITE(6,'(1x,A5,F8.3,A18)')
+            WRITE(6,'(1x,A5,F9.3,A18)')
      &          'Gg = ', GG_obs,' meV (systematics)'
             ENDIF
-            WRITE(12,'(1x,A5,F8.3,A5,F8.3,A4)')
+            WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
             IF(D0_unc.GT.0.0D0) THEN
-            WRITE(6,'(1x,A5,F8.3,A5,F8.3,A4)')
+            WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
             ELSE
-            WRITE(6,'(1x,A5,F8.3,A17)')
+            WRITE(6,'(1x,A5,F9.3,A17)')
      &          'D0 = ', D0_obs,' keV (calculated)'
             ENDIF
             if(sumGg.gt.0.d0) then
