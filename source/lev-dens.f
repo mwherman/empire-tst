@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:36 $
-Ccc   * $Id: lev-dens.f,v 1.56 2007-11-01 23:20:36 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-11-21 15:23:53 $
+Ccc   * $Id: lev-dens.f,v 1.57 2007-11-21 15:23:53 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -838,7 +838,7 @@ C--------plot of the l.d. formula
 
          OPEN (36, FILE=ctmp1, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
-         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
+         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,10H lev. den.)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
          write(36,'(A10)') 'fun: EMP_LD'
          write(36,'(A10)') 'thick: 2   '
@@ -1972,7 +1972,7 @@ C--------Cumulative Level Density plot
 
          OPEN (36, FILE=ctmp, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
-         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
+         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,11H cumulative)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
          write(36,'(A10)') 'fun: Exp Lev'
          write(36,'(A10)') 'thick: 2   '
