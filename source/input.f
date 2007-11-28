@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-11-02 18:34:26 $
-Ccc   * $Id: input.f,v 1.259 2007-11-02 18:34:26 herman Exp $
+Ccc   * $Date: 2007-11-28 03:42:57 $
+Ccc   * $Id: input.f,v 1.260 2007-11-28 03:42:57 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2004,8 +2004,8 @@ C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
         IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
            nmax = MIN(nmax/2 + 1, 15)
            WRITE (6,'('' WARNING:'')')
-           WRITE (6,'('' WARNING: for isotope '',A5,''-'',I3)')
-     &            chelem, iar
+           WRITE (6,'('' WARNING: For isotope '',A5)')
+     &            chelem
            WRITE (6,'('' WARNING: number of levels was reduced to '',
      &            I3)') nmax
            WRITE (6,'('' WARNING: since FITLEV option had not been'',
