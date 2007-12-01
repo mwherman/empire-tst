@@ -101,8 +101,8 @@
     If FISspe = 1 then additional input files are needed (R. Capote & M. Sin)
 35. ECIS subroutine changed to allow explicit input of the externally calculated 
     dispersive corrections allowing to use dispersive potentials with different
-    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote)           
-36. Optical model and discrete levels' databases updated using preliminary RIPL-3       
+    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote) 
+36. Optical model and discrete levels' databases updated using preliminary RIPL-3
     libraries. (R Capote)
 37. X4TOC4 updated to improve printing of the reference (including Y2K problem)
     disctionaries largely extended (V. Zerkin)
@@ -119,14 +119,14 @@
     no further adjustment of the elastic channel is required.
 43. Isomeric states automatically detected, their cross sections calculated
     (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
-44. Long standing problem resulting in imcomplete levels' file fixed (R. Capote)
+44. Long standing problem resulting in incomplete levels' file fixed (R. Capote)
 45. Levels' file automatically updated from the RIPL database when missing nuclei
     detected (R.Capote).
 46. Number of discrete levels considered in the calculations limited to half of
     the value recommended in RIPL-3 (and not more than 15) if run with FITLEV>0
     was not executed (i.e., adjustment of the discrete level range to fit level
     densities was not done) (M. Herman).
-47. ZVView updated to the 97.4 version (V. Zerkin)
+47. ZVView updated to the 9.74 version (V. Zerkin)
 48. Number of bins automatically adjusted to accomodate reactions with negative
     Q-values if needed (M. Herman).
 49. EXFOR library updated to January 2007 along with the retrieval system
