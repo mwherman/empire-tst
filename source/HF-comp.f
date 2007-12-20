@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:35 $
-Ccc   * $Id: HF-comp.f,v 1.94 2007-11-01 23:20:35 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2007-12-20 11:03:40 $
+Ccc   * $Id: HF-comp.f,v 1.95 2007-12-20 11:03:40 herman Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -578,7 +578,8 @@ C-----------do loop over l --- done ----------------------------------------
             s = s + 1.
             IF (s.LE.smax) GOTO 20
 C-----------loop over channel spin ------ done ----------------------------
-            sumdl = sumdl*RORed*cor*TUNe(Nejc,Nnuc)
+C           sumdl = sumdl*RORed*cor*TUNe(Nejc,Nnuc)
+            sumdl = sumdl*RORed*cor
             SCRtl(i,Nejc) = sumdl
             Sum = Sum + sumdl
          ENDDO
@@ -586,7 +587,6 @@ C--------do loop over discrete levels --------- done --------------------
       ENDIF
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
-Cpr   WRITE(6,*) 'TOTAL SUM=',SUM
       END
 
 
@@ -828,35 +828,6 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-C *                                                                          *
-C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
-C *          calculations of gamma-transitions both between states in        *
-C *          continuum and from continuum states to discrete levels;         *
-C *          variable 'MAXmult' is transmitted in 'global.h';                *
-C *          a value of 'MAXmult' is set in modul 'input.f';                 *
-C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
-C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
-C *                                                                          *
-C *                                                                          *
-C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C *                                                                          *
-C *                                                                          *
-C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
-C * are calculated with the use of the relationships between                 *
-C * single-particle radiative strength functions in the Weisskopf form.      *
-C *                                                                          *
-C *   Electric transitions:                                                  *
-C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
-C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
-C *   xle(i) = f_Ei                                                          *
-C *                                                                          *
-C *   Magnetic transitions:                                                  *
-C *   f_M(L+1)/f_E(L+1) = cme,                                               *
-C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
-C *   xlm(i) = f_Mi                                                          *
-C *                                                                          *
-C ****************************************************************************
-Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -874,13 +845,33 @@ C
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
 C
-C-----Plujko_new-2005
       INTEGER Jr,lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
      &                 scrtpos, scrtneg, hscrtl
       DIMENSION xle(10),xlm(10)
 C
-C-----MAXmult - maximal gamma-ray multipolarity
+C----MAXmult - maximal gamma-ray multipolarity
+C    maximal value (.LT.10) of gamma-ray multipolarity (L) in        
+C    calculations of gamma-transitions both between states in        
+C    continuum and from continuum states to discrete levels.         
+C    A default value of 'MAXmult' is set to 2 in 'input.f'                  
+C    but can be adjusted in the input.         
+C
+C   The radiative strength functions of higher multipole orders       
+C   (f_EL, f_ML) are calculated using the relationships between                 
+C   single-particle radiative strength functions in the Weisskopf form.      
+C                                                                            
+C     Electric transitions:                                                  
+C     f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              
+C     cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   
+C     xle(i) = f_Ei                                                          
+C                                                                            
+C     Magnetic transitions:                                                  
+C     f_M(L+1)/f_E(L+1) = cme,                                               
+C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         
+C     xlm(i) = f_Mi                                                          
+C                                                                            
+C 
       DO i = 1, MAXmult
          xle(i) = 0.0D0
          xlm(i) = 0.0D0
@@ -930,7 +921,6 @@ C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-C--------Plujko_new-2005
          xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &            TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
@@ -986,16 +976,16 @@ C-----do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
           lmax = xjc + XJLv(i,Nnuc) + 0.001
-C---------Plujko_new-2005
           lambmin = MAX0(1,lmin)
           lambmax = MIN0(lmax,MAXmult)
           IF(lambmin.LE.lambmax)THEN
              eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
              ipar = (1 + LVP(i, Nnuc)*Ipc)/2
              iodd = 1 - ipar
-             xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
-             xlm(1) = XM1(eg)
-             IF(lambmax.GE.2) xle(2) = E2(eg)
+             xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))*
+     &             TUNe(0, Nnuc)
+             xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+             IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
              IF(lambmax.GT.2) THEN
               xlm(2) = xle(2)*cme
               DO j = 3, lambmax
@@ -1014,7 +1004,7 @@ C---------Plujko_new-2005
      &                  xlm(lamb)*ipar + xle(lamb)*iodd
               ENDIF
              ENDDO
-          SCRtl(i, 0) = hscrtl*RORed*TUNe(0, Nnuc)
+          SCRtl(i, 0) = hscrtl*RORed
           Sum = Sum + SCRtl(i, 0)
           ENDIF
          ENDDO
@@ -1058,36 +1048,6 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-C ****************************************************************************
-C *                                                                          *
-C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
-C *          calculations of gamma-transitions both between states in        *
-C *          continuum and from continuum states to discrete levels;         *
-C *          variable 'MAXmult' is transmitted in 'global.h';                *
-C *          a value of 'MAXmult' is set in modul 'input.f';                 *
-C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
-C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
-C *                                                                          *
-C ****************************************************************************
-C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C ****************************************************************************
-C *                                                                          *
-C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
-C * are calculated with the use of the relationships between                 *
-C * single-particle radiative strength functions in the Weisskopf form.      *
-C *                                                                          *
-C *   Electric transitions:                                                  *
-C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
-C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
-C *   xle(i) = f_Ei                                                          *
-C *                                                                          *
-C *   Magnetic transitions:                                                  *
-C *   f_M(L+1)/f_E(L+1) = cme,                                               *
-C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
-C *   xlm(i) = f_Mi                                                          *
-C *                                                                          *
-C ****************************************************************************
-Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1103,11 +1063,9 @@ C
       DOUBLE PRECISION eg, sumn, sump, xjc
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, lmax, lmin
-C-----Plujko_new-2005
       INTEGER Jr, lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr, hscrtl
       DIMENSION xle(10),xlm(10)
-C-----MAXmult - maximal gamma-ray multipolarity
       DO i = 1, MAXmult
          xle(i) = 0.0D0
          xlm(i) = 0.0D0
@@ -1205,36 +1163,35 @@ C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
           lmax = xjc + XJLv(i,Nnuc) + 0.001
-C---------Plujko_new-2005
           lambmin = MAX0(1,lmin)
           lambmax = MIN0(lmax,MAXmult)
           IF(lambmin.LE.lambmax)THEN
             eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
             ipar = (1 + LVP(i, Nnuc)*Ipc)/2
             iodd = 1 - ipar
-            xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
-            xlm(1) = XM1(eg)
-            IF(lambmax.GE.2) xle(2) = E2(eg)
-            IF(lambmax.GT.2) THEN
+            xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))*
+     &         *TUNe(0, Nnuc)
+             IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
+             IF(lambmax.GT.2) THEN
               xlm(2) = xle(2)*cme
               DO j = 3, lambmax
                xle(j) = xle(j-1)*eg**2*cee
      &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
                xlm(j) = xle(j)*cme
               ENDDO
-            ENDIF
-            hscrtl = 0.0D0
-            DO lamb = lambmin, lambmax
+             ENDIF
+             hscrtl = 0.0D0
+             DO lamb = lambmin, lambmax
               IF(lamb/2*2.EQ.lamb)THEN
                hscrtl = hscrtl +
      &                  xle(lamb)*ipar + xlm(lamb)*iodd
-              ELSE
+               ELSE
                hscrtl = hscrtl +
      &                  xlm(lamb)*ipar + xle(lamb)*iodd
               ENDIF
-            ENDDO
-            SCRtl(i, 0) = hscrtl*RORed*TUNe(0, Nnuc)
-            Sum = Sum + SCRtl(i, 0)
+             ENDDO
+          SCRtl(i, 0) = hscrtl*RORed
+          Sum = Sum + SCRtl(i, 0)
           ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
@@ -1684,18 +1641,16 @@ c----sumfis
       tabs = tabspp(1,2)
       tdir = tdirpp(1,2)
 
-c----------------------------------------------------------------------------
       IF (FISopt(Nnuc).EQ.2.) THEN
-C        gamma transition in isomeric well, not calculated yet
+C--------gamma transition in isomeric well, not calculated yet
          TG2 = .00002
       ELSE
          TG2 = 0.d0
       ENDIF
-C     FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
+C-----FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
       IF (Sumfis.LT.0.0000000000000001) Sumfis = 0.d0
  890  DENhf = DENhf + Sumfis
-c---------------------------------------------------------------------
-c     WRITING FISSION OUTPUT
+c-----WRITING FISSION OUTPUT
 
  900  IF (Jc.EQ.1 .AND. Ip.EQ.1 .AND. Mmod.LT.2) THEN
          WRITE (80,*) '  '
@@ -1743,9 +1698,7 @@ C-----triple-humped
      &  WRITE (80,'(1x,a2,f4.1,1x,a3,I2,10g11.4)') 'J=', aj, 'Pi=', Ip,
      &        tfdis(1), tfdis(2), tfdis(3), tfcon(1), tfcon(2),tfcon(3),
      &        Sumfis, TDIr, TABs
-
       END
-c======================================================================
 
       SUBROUTINE SIMPSFIS(Nnuc,Ee,JCC,Ipa,tfcon)
 C-----Simpson integration
@@ -1797,7 +1750,6 @@ C           if( ee.gt.efb(ibar) + 2.and.dens.le.1.d-6*TFCc ) EXIT
       RETURN
       END
 
-C=============================================================
       SUBROUTINE SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
 C-----Simpson integration for direct transmission
       INCLUDE 'dimension.h'
@@ -1887,7 +1839,6 @@ c     &               /HCOnt(Nrhump + ih1)
       SUBROUTINE WRITE_OUTFIS(Nnuc)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
