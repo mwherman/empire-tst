@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-21 15:35:48 $
-Ccc   * $Id: HRTW-comp.f,v 1.51 2007-11-21 15:35:48 herman Exp $
+Ccc   * $Date: 2007-12-20 11:05:30 $
+Ccc   * $Id: HRTW-comp.f,v 1.52 2007-12-20 11:05:30 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -226,7 +226,7 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
+            IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn
               if( ip.eq.LVP(LEVtarg,0) .AND.
@@ -243,51 +243,53 @@ C
                 WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state (J=',cnspin,',Par=',ip,
      &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
-                sumGg = sumGg + sumg
+                sumtg = sumtg + sumg
               ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
-      IF(d0c.gt.0.d0) d0c = dble(n0c)/d0c
-      IF(D0_obs.EQ.0.0D0) D0_obs = d0c*1000 !use calculated D0 (in keV) if not measured
-      IF(EIN.LE.0.05  .AND. FIRst_ein) THEN
+      IF(d0c.gt.0.d0) d0c = dble(n0c)/d0c*1000
+      IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
+      IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0.d0) THEN
-            ggexper = 2*pi*Gg_obs/D0_obs/1.E6
+            tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(6,'(1x,
      &      ''Experimental information from capture channel'')')
-            WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',ggexper
+            WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',tgexper
             IF(GG_unc.GT.0.0D0) THEN
-            WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
+              WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
             ELSE
-            WRITE(6,'(1x,A5,F9.3,A18)')
+              WRITE(6,'(1x,A5,F9.3,A18)')
      &          'Gg = ', GG_obs,' meV (systematics)'
             ENDIF
             WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+            
             IF(D0_unc.GT.0.0D0) THEN
-            WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
+              WRITE(6,'(1x,A5,F11.6,A5,F11.6,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
+              WRITE(6,'(1x,A5,F11.6,A17)')
+     &          'D0 = ', d0c,' keV (calculated)'
             ELSE
-            WRITE(6,'(1x,A5,F9.3,A17)')
+              WRITE(6,'(1x,A5,F11.6,A17)')
      &          'D0 = ', D0_obs,' keV (calculated)'
             ENDIF
-            if(sumGg.gt.0.d0) then
+            if(sumtg.gt.0.d0) then
               WRITE(6,'(1x,''Normalization factor = '',F7.3)')
-     &           ggexper/sumGg
+     &           tgexper/sumtg
             else
               WRITE(6,'(1x,
-     &        ''Calculated Gamma width = 0, no Normalization'')')
+     &        ''Calculated Tgamma = 0, no Normalization'')')
             endif
-            WRITE(6,'(1x,''Calculated D0 = '',F7.3)') d0c*1000
-            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') d0c*1000
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') D0_obs
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
-                TUNe(0, Nnuc) = (ggexper/D0_obs) / (sumGg/d0c)
-C               TUNe(0, Nnuc) = ggexper/sumGg
+                TUNe(0, Nnuc) = tgexper/sumtg
                 WRITE(6 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')
      &         TUNe(0, Nnuc)
+               WRITE(6,*)
               ELSE
                 WRITE(6 ,
      &       '(1x,''Gamma emission is not normalized'')')
@@ -586,8 +588,15 @@ C--------do loop over discrete levels -----------------------------------
 C--------
          DO i = 1, NLV(Nnur)
             eout = eoutc - ELV(i,Nnur)
-            cor = TUNe(Nejc,Nnuc)
-            IF (i.EQ.1) cor = 1.0
+C
+C           TUNe commented as it is dangerous to scale Ts for discrete levels 
+C           It means cor becomes 1 always !
+C
+C           Dec. 2007, MH, RCN, MS 
+C
+C           cor = TUNe(Nejc,Nnuc)
+C           IF (i.EQ.1) cor = 1.0
+            cor = 1.d0
 C-----------level above the bin
             IF (eout.LT.0.0D0) GOTO 100
             sumdl = 0.0
@@ -685,33 +694,6 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-C ****************************************************************************
-C * MAXmult - maximal value (=< 10) of gamma-ray multipolarity (L) in        *
-C *          calculations of gamma-transitions both between states in        *
-C *          continuum and from continuum states to discrete levels;         *
-C *          variable 'MAXmult' is transmitted in 'global.h';                *
-C *          a value of 'MAXmult' is set in modul 'input.f';                 *
-C *          it is equal to 2 by default (SUBROUTINE INPUT) or can be        *
-C *          reading from 'input.dat' in other cases (SUBROUTINE READIN).    *
-C ****************************************************************************
-C * E1, M1 and E2 transitions are only taken into account if 'MAXmult =2'.   *
-C ****************************************************************************
-C * Radiative strength functions of higher multipole orders(f_EL, f_ML)      *
-C * are calculated with the use of the relationships between                 *
-C * single-particle radiative strength functions in the Weisskopf form.      *
-C *                                                                          *
-C *   Electric transitions:                                                  *
-C *   f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              *
-C *   cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   *
-C *   xle(i) = f_Ei                                                          *
-C *                                                                          *
-C *   Magnetic transitions:                                                  *
-C *   f_M(L+1)/f_E(L+1) = cme,                                               *
-C *   cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         *
-C *   xlm(i) = f_Mi                                                          *
-C *                                                                          *
-C ****************************************************************************
-Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -735,13 +717,33 @@ C
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0
-C-----Plujko_new-2005
       INTEGER Jr, lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
      &                 scrtpos, scrtneg, hsumtls,  hscrtl
       DIMENSION xle(10),xlm(10)
 
 C----MAXmult - maximal gamma-ray multipolarity
+C    maximal value (.LT.10) of gamma-ray multipolarity (L) in        
+C    calculations of gamma-transitions both between states in        
+C    continuum and from continuum states to discrete levels.         
+C    A default value of 'MAXmult' is set to 2 in 'input.f'                  
+C    but can be adjusted in the input.         
+C
+C   The radiative strength functions of higher multipole orders       
+C   (f_EL, f_ML) are calculated using the relationships between                 
+C   single-particle radiative strength functions in the Weisskopf form.      
+C                                                                            
+C     Electric transitions:                                                  
+C     f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              
+C     cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   
+C     xle(i) = f_Ei                                                          
+C                                                                            
+C     Magnetic transitions:                                                  
+C     f_M(L+1)/f_E(L+1) = cme,                                               
+C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         
+C     xlm(i) = f_Mi                                                          
+C                                                                            
+C 
       DO i = 1, MAXmult
          xle(i) = 0.0D0
          xlm(i) = 0.0D0
@@ -798,10 +800,10 @@ C-----do loop over c.n. energies (loops over spins and parities expanded)
             corr = 1.0
          ENDIF
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-C--------Plujko_new-2005
          xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
-         xlm(1) = XM1(eg)
-         xle(2) = E2(eg)
+     &      *TUNe(0, Nnuc)
+         xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+         xle(2) = E2(eg)*TUNe(0, Nnuc)
          IF(MAXmult.GT.2) THEN
             xlm(2) = xle(2)*cme
             DO i = 3, MAXmult
@@ -810,23 +812,23 @@ C--------Plujko_new-2005
              xlm(i)= xle(i)*cme
             ENDDO
          ENDIF
-         IF(Nhrtw.EQ.0)THEN
-            DO i = 1, MAXmult
-             xle(i) = xle(i)*TUNe(0, Nnuc)
-             xlm(i) = xlm(i)*TUNe(0, Nnuc)
-            ENDDO
-         ELSE
-            IF(MAXmult.EQ.2) THEN
-              xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-              xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-              xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-            ELSE
-              DO i = 1, MAXmult
-                xle(i) = VT1(xle(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                xlm(i) = VT1(xlm(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-              ENDDO
-            ENDIF
-         ENDIF
+c        IF(Nhrtw.EQ.0)THEN
+c           DO i = 1, MAXmult
+c            xle(i) = xle(i)*TUNe(0, Nnuc)
+c            xlm(i) = xlm(i)*TUNe(0, Nnuc)
+c           ENDDO
+c        ELSE
+c           IF(MAXmult.EQ.2) THEN
+c             xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c             xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c             xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c           ELSE
+c             DO i = 1, MAXmult
+c               xle(i) = VT1(xle(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c               xlm(i) = VT1(xlm(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c             ENDDO
+c           ENDIF
+c        ENDIF
          DO Jr = 1, jmax
             xjr = FLOAT(Jr) + HIS(Nnuc)
             lambmin = MAX0(1,ABS(Jc-Jr))
@@ -880,7 +882,6 @@ C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
           lmax = xjc + XJLv(i,Nnuc) + 0.001
-C---------Plujko_new-2005
           lambmin = MAX0(1,lmin)
           lambmax = MIN0(lmax,MAXmult)
           IF(lambmin.LE.lambmax)THEN
@@ -888,8 +889,9 @@ C---------Plujko_new-2005
              ipar = (1 + LVP(i, Nnuc)*Ipc)/2
              iodd = 1 - ipar
              xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
-             xlm(1) = XM1(eg)
-             IF(lambmax.GE.2) xle(2) = E2(eg)
+     &           *TUNe(0, Nnuc)
+             xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+             IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
              IF(lambmax.GT.2) THEN
               xlm(2) = xle(2)*cme
               DO j = 3, lambmax
@@ -898,23 +900,23 @@ C---------Plujko_new-2005
                xlm(j) = xle(j)*cme
               ENDDO
              ENDIF
-             IF(Nhrtw.EQ.0)THEN
-              DO j = 1, lambmax
-               xle(j) = xle(j)*TUNe(0, Nnuc)
-               xlm(j) = xlm(j)*TUNe(0, Nnuc)
-              ENDDO
-             ELSE
-              IF(lambmax.EQ.2) THEN
-                xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-              ELSE
-                DO j = 1, lambmax
-                 xle(j) = VT1(xle(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                 xlm(j) = VT1(xlm(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-                ENDDO
-              ENDIF
-             ENDIF
+c            IF(Nhrtw.EQ.0)THEN
+c             DO j = 1, lambmax
+c              xle(j) = xle(j)*TUNe(0, Nnuc)
+c              xlm(j) = xlm(j)*TUNe(0, Nnuc)
+c             ENDDO
+c            ELSE
+c             IF(lambmax.EQ.2) THEN
+c               xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c               xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c               xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c             ELSE
+c               DO j = 1, lambmax
+c                xle(j) = VT1(xle(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c                xlm(j) = VT1(xlm(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
+c               ENDDO
+c             ENDIF
+c            ENDIF
              hscrtl = 0.0D0
              hsumtls = 0.0D0
              DO lamb = lambmin, lambmax
