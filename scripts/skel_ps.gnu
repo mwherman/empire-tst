@@ -13,11 +13,11 @@ set xlabel 'Energy [MeV]'
 set ylabel 'Energy [MeV]'
 # ylabel rotate in ps but not in dvi!
 
-set log xy
+#set log xy
 
 set zrange [-1 : 1]
-set yrange [0.1 : 20]
-set xrange [0.1 : 20]
+set yrange [0. : 20]
+set xrange [0. : 20]
 set mztics  5
 set ztics  50
 set title filereaction 
