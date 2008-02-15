@@ -30,9 +30,9 @@ if [ "$name1" != "" ]; then
    ../util/c4zvd/c4dat4l.exe  EXFOR tmp.dat MF=3 MT=$MT 
    ../util/c4zvd/datzvdl.exe tmp.dat c4.zvd
    echo '#begin aa.tit' >>c4.zvd
+#  put here counting of lines in c4.zvd and skip the rest if no real data inside  
    echo '[func]' >>c4.zvd
    echo 'color: 3' >>c4.zvd
-   echo 'con: 0' >>c4.zvd
    echo 'set: apply' >>c4.zvd
    echo '#end aa.tit' >>c4.zvd
    cat   c4.zvd >>$root-$MT$suf.zvd
