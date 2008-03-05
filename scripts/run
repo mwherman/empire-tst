@@ -1,4 +1,4 @@
-#! /bin/sh -
+#!/bin/bash
 #SCRIPT TO RUN FULL EMPIRE PACKAGE
 
 file=$1
@@ -34,7 +34,6 @@ rm $work/$file-f.endf   2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
 rm $work/$file-e.endf   2>/dev/null
 #rm $work/$file-s.endf   2>/dev/null
-
 
 # REMOVE EMPTY FILES
 

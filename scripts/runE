@@ -1,4 +1,4 @@
-#! /bin/sh -
+#!/bin/bash
 #SCRIPT TO RUN EMPIRE (ONLY X-SEC CALCULATIONS)
 echo '                                                           '
 echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      H   H '
@@ -223,6 +223,7 @@ rm TARGET_COLL_RIPL.DAT 2>/dev/null
 rm COVAR.DAT 2>/dev/null
 rm OPTFIT.CAL OMPAR0.DIR INPUT0.DAT  2>/dev/null
 rm OMPAR.DIR LOW_ENERGY.OUT ecis03.exp ecis03.smat 2>/dev/null
+rm angdis.p92 ecis03.dat empmf1.tmp FISS_XS.ZVD 2>/dev/null
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then
