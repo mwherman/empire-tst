@@ -25,6 +25,9 @@ C     skip first record
       write(7,2400) nseq-1
       print 2400,nseq-1
       endif
+ccho  the following two routines are inserted for file 32 (covariances)
+      call rd32151
+      call wurrcov
       mt=0
       nseq=99999
       call wrcont(0.0,0.0,0,0,0,0)
@@ -41,7 +44,9 @@ C     skip first record
       end
 c.......................................................
       subroutine wurr
+      common/cont/ mat,mf,mt,nseq
       common/quan/ za,awr,awri,spin,ap,endres, ncard(2)      
+      common/urrv/ e0,uppen
       character*1 wv(3)      
       dimension gf(10),sf(3),gg(3),ds0(3),de(300),dratio(3),icon(3)     
       dimension gfdisp(10),gsum(3),gsumc(3)      
@@ -167,6 +172,7 @@ ccho 200  write(7,2050) ne,e0,euner
       endif
 C     Unresolved parameters with LRF=2 (parameters are energy dept if icon=1)
       call wrcont(e0,ener,2,2,0,naps)
+      uppen = ener
 C
       LSSF=0
       call wrcont(spin,ap,0,0,NLS,0)
@@ -234,6 +240,26 @@ ccho  call wrlist(ener,dsj,0.0,gn,0.001*gg(ll),0.0)
       enddo
       enddo
       enddo
+      mt=0
+      call wrcont(0.0,0.0,0,0,0,0)
+      mf=0
+      call wrcont(0.0,0.0,0,0,0,0)
+      return
+      end
+c.......................................................
+      subroutine wurrcov
+      common/quan/ za,awr,awri,spin,ap,endres, ncard(2)      
+      common/urrv/ e0,uppen
+      naps=0
+      call wrcont(e0,uppen,2,2,0,naps)
+      NLS=0
+      call wrcont(spin,ap,0,0,NLS,0)
+      L=0
+      NJS=0
+      call wrcont(awri,0.0,L,0,6*NJS,NJS)
+      MPAR=0
+      NPAR=0
+      call wrcont(0.0,0.0,MPAR,0,NPAR*(NPAR+1)/2,NPAR)
       return
       end
 C............................................................
@@ -500,10 +526,92 @@ C     SLBW section
       write(7,2100) 'AWRI',awri,c1
  300  call wrcont(awri,qx,l,lrx,nrs6,nrs)
       do n=1,nrs
-      read(1,1200) er,aj,gt,gn,gg,gf
-      call wrlist(er,aj,gt,gn,gg,gf)
+        read(1,1200) er,aj,gt,gn,gg,gf
+        call wrlist(er,aj,gt,gn,gg,gf)
       enddo
       enddo
+      read(1,1100) c1,c2,n1,n2,n3,n4
+      read(1,1100) c1,c2,n1,n2,n3,n4
+      return
+      end
+c........................................................................
+      subroutine rd32151
+      common/quan/ za,awr,awri,spin,ap,endres, ncard(2)
+      common/cont/ mat,mf,mt,nseq
+      dimension kij(18)
+      write(7,1990)
+ 1990 format(/5x,'Processing Covariances of Resolved Res. section')
+      print 1990
+ 1000 format(a,i4,i2,i3,i5)
+ 1100 format(2e11.4,4i11,i4,i2,i3,i5)
+ 1200 format(6e11.4, i4,i2,i3,i5)
+ 2000 format(' *** ',a,' mismatch, Expect',i11,', but',i11)
+ 2100 format(' *** ',a,' mismatch, Expect ',1pe12.5,', but',e12.5)
+      read(1,1100) c1,c2,n1,n2,nis,n4,imat,imf,imt
+      if(imat.eq.mat) go to 100
+      print 2000,'MAT',mat,imat
+  100 if(imf.eq.2) go to 110
+      print 2000,'MF',2,imf
+  110 if(imt.eq.151) go to 120
+      print 2100,'MT',151,imt
+  120 if(abs(c1-za).lt.0.001) go to 130
+      write(7,2100) 'ZA',za,c1
+  130 if(abs(c2-awr).lt.0.01) go to 140
+      write(7,2100) 'AWR',awr,c2  
+ 140  mf=32
+      mt=151
+      call wrcont(za,awr,0,0,nis,0)
+      read(1,1100) c1,c2,n1,lfw,ner,n4
+      if(abs(c1-za).lt.0.01) go to 150
+      write(7,2100) 'ZAI',za,c1
+  150 if(abs(c2-1.0).lt.0.01) go to 160
+      write(7,2100) 'ABN',1.0,c2
+  160 if((ner.eq.1).or.(ner.eq.2)) go to 170
+      write(7,2000) 'NER',2,ner
+      write(7,*) '  We forces NER=2, one for Res.Res.',
+     1 ' the other for Unres.Res.'
+  170 call wrcont(za,1.0,0,lfw,2,0)
+C     Handle for resolved energy region
+      read(1,1100) el,eh,lru,lrf,nro,naps
+      write(7,2500) el,eh 
+ 2500 format(//2x,'Resolved res. region:',1pe11.3,' -',e11.3,' eV')
+      endres=eh
+      if(lru.eq.1) go to 180
+      write(7,2000) 'LRU',1,lru
+  180 if(lrf.eq.1) go to 190
+      write(7,2000) 'LRF',1,lrf
+  190 if(nro.eq.0) go to 200
+      write(7,2000) 'NRO',0,nro
+  200 if((naps.eq.0).or.(naps.eq.1)) go to 210
+      write(7,2000) 'NAPS',0,naps
+  210 call wrcont(el,eh,lru,lrf,nro,naps)
+C     SLBW section
+      read(1,1100) spin,ap,n1,lcomp,nlsa,n4
+      if(lcomp.ne.2) then
+        write(7,2000) 'LCOMP',2,lcomp
+        stop
+      endif
+      call wrcont(spin,ap,n1,lcomp,nlsa,n4)
+      write(7,2300) spin
+ 2300 format(' Spin of target nucleus =',f4.1)
+      read(1,1100) c1,qx,l,lrx,nrs12,nrs
+      if(abs(c1-awri).lt.0.0001) go to 300
+      write(7,2100) 'AWRI',awri,c1
+ 300  call wrcont(awri,qx,l,lrx,nrs12,nrs)
+      do n=1,nrs
+        read(1,1200) er,aj,gt,gn,gg,gf
+        call wrlist(er,aj,gt,gn,gg,gf)
+        read(1,1200) der,c1,c2,dgn,dgg,dgf
+        call wrlist(der,c1,c2,dgn,dgg,dgf)
+      enddo
+      read(1,1100) c1,c2,n1,nnn,nm,n4
+      call wrcont(c1,c2,n1,nnn,nm,n4);
+      do n=1,nm
+        read(1,4000) ii,jj,(kij(nn),nn=1,13)
+        write(2,4000) ii,jj,(kij(nn),nn=1,13),mat,mf,mt,nseq
+        nseq=nseq+1
+      enddo
+ 4000 format(2i5,1x,13i4,3x,i4,i2,i3,i5)
       return
       end
 c...................................................................

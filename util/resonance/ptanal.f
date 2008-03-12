@@ -938,6 +938,10 @@ ccho  character*1 ggflag
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
       character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*11
       dimension nr(5),sx(6),wav(5)
+ccho  new arrays inserted for file 32 generation
+      dimension wgt(mres),wgn(mres),wgg(mres)
+      dimension correff(4*mres,4*mres)
+      dimension kij(18)
       data wav/'s','p','?','?','?'/
 c
 ccho  introduce user-supplied ap
@@ -1013,7 +1017,8 @@ C     find maximum L value and count number of resonances
       enddo
       lm=0
       do n=1,nres
-       if(rp(1,n).lt.ecut) then
+ccho   if(rp(1,n).lt.ecut) then
+       if(rp(1,n).le.ecut) then
         lw=LJ(n)+1
         if((lw.le.0).or.(lw.gt.5)) then
          print *,' *** No L-value at ',n,'-th resonance, lw=',lw
@@ -1049,7 +1054,8 @@ C 3000 format(/)
         En=rp(1,n)
         write(ehead,3020) En
  3020   format(f10.1,' eV')
-        if((En.lt.ecut).and.(LJ(n).eq.lwave)) then
+ccho    if((En.lt.ecut).and.(LJ(n).eq.lwave)) then
+        if((En.le.ecut).and.(LJ(n).eq.lwave)) then
          call r2str(sx(1),11,6,En)
          call r2str(sx(2),11,6,SJ(n))
          gfact=(2*SJ(n)+1)/(2.0*(2*spin+1))
@@ -1164,6 +1170,10 @@ C         recheck capture area
      1     'calc.=',1pe9.2,2x,'data=',1pe9.2)
           endif
          endif
+ccho     inserted for file 32 generation
+         wgt(n)=gt
+         wgn(n)=gn
+         wgg(n)=gg
          call r2str(sx(3),11,6,gt)
          call r2str(sx(4),11,6,gn)
          call r2str(sx(5),11,6,gg)
@@ -1191,6 +1201,140 @@ cc       if(nrgg.gt.0) write(7,2200) 1000*sumgg/nrgg,nrgg
       enddo
       write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,mfh,0,99999
       write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,0,0,0
+c
+ccho  the new file 32 follows
+c
+      mfh=32
+      mth=151
+      call r2str(s1,11,6, zam)
+      call r2str(s2,11,6, awt)
+      write(3,1000) s1,s2,0,0,1,0,mat,mfh,mth
+      call r2str(s2,11,6, 1.0)
+      write(3,1000) s1,s2,0,0,1,0,mat,mfh,mth
+C     spicify MLBW and energy range
+      call r2str(s1,11,6, 1.0e-5)
+      call r2str(s2,11,6, ecut)
+c     LRU=1 LRF=2
+      write(3,1000) s1,s2,1,2,0,0,mat,mfh,mth
+      lcomp=2
+c     nlsa=0?
+      nlsa=0
+      call r2str(s1,11,6, spin)
+      call r2str(s2,11,6, ap)
+      write(3,1000) s1,s2,0,lcomp,nlsa,0,mat,mfh,mth
+      call r2str(s1,11,6,awri)
+      call r2str(s2,11,6,qx)
+      write(3,1000) s1,s2,0,0,12*nres,nres,mat,mfh,mth
+c
+c     resonance parameters and their uncertainties are written
+c
+      do n=1,nres
+        En=rp(1,n)
+        if(En.le.ecut) then
+         call r2str(sx(1),11,6,En)
+         call r2str(sx(2),11,6,SJ(n))
+         call r2str(sx(3),11,6,wgt(n))
+         call r2str(sx(4),11,6,wgn(n))
+         call r2str(sx(5),11,6,wgg(n))
+         sx(6)='   '
+         write(3,1200) sx, mat,mfh,mth
+         if (rp(2,n).eq.0.0) then
+           call r2str(sx(1),11,6,abs(0.01*En))
+         else
+           call r2str(sx(1),11,6,rp(2,n))
+         endif
+         call r2str(sx(2),11,6,0.0)
+         call r2str(sx(3),11,6,0.0)
+         if (rp(4,n).eq.0.0) then
+           call r2str(sx(4),11,6,0.08*wgn(n))
+         else
+           if (wgn(n).eq.rp(3,n)) then
+             call r2str(sx(4),11,6,rp(4,n))
+           else
+             call r2str(sx(4),11,6,wgn(n)*rp(4,n)/rp(3,n))
+           endif
+         endif
+         if (rp(6,n).eq.0.0) then
+           call r2str(sx(5),11,6,0.1*wgg(n))
+         else
+           if (wgg(n).eq.rp(5,n)) then
+             call r2str(sx(5),11,6,rp(6,n))
+           else
+             call r2str(sx(5),11,6,wgg(n)*rp(6,n)/rp(5,n))
+           endif
+         endif
+         sx(6)='   '
+         write(3,1200) sx, mat,mfh,mth
+        endif
+      enddo
+c
+c     correlation coefficients are written
+c
+      nnn=3*nres
+      ndigit=3
+c     initialize the correlation matrix
+      do i=1,nnn
+        do j=1,nnn
+          correff(j,i)=0.0
+        enddo
+      enddo
+c     correlation coefficients are assigned and
+c     values between -10^-3 and 10^3 are dropped according to the rule
+      correff(1,1)=1.0
+      correff(1,2)=1.0
+      correff(2,2)=1.0
+      correff(7,10)=1.867e-2
+      correff(10,50)=1.3463e-3
+      correff(12,50)=-1.45678e-1
+      correff(13,50)=1.45678e-1
+      correff(22,50)=1.0
+      correff(28,50)=0.234
+      correff(49,50)=0.35
+      correff(1049,2058)=0.1049
+      correff(1249,2059)=0.1249
+      nm=0
+c     compute number of lines for correlation coefficients
+      do i=1,nnn
+        j=1
+        do while (j.lt.i)
+          if (correff(j,i).ne.0) then
+            len=min(13,i-j)
+            nm=nm+1
+            j=j+len
+          else
+            j=j+1
+          endif
+        enddo
+      enddo
+      call r2str(s1,11,6, 0.0)
+      call r2str(s2,11,6, 0.0)
+      write(3,1000) s1,s2,ndigit,nnn,nm,0,mat,mfh,mth
+c     write the correlation coefficients
+      do i=1,nnn
+        j=1
+        do while (j.lt.i)
+          if (correff(j,i).ne.0) then
+            len=min(13,i-j)
+            do n=1,len
+c     multiply by 10^ndigit (=3 for our case) and convert it to integer
+              kij(n)=1000*correff(j+n-1,i)
+            enddo
+            do n=len+1,18
+              kij(n)=0
+            enddo
+            write(3,4000) i,j,(kij(n),n=1,13),mat,mfh,mth
+            j=j+len
+          else
+            j=j+1
+          endif
+        enddo
+      enddo
+ 4000 format(2i5,1x,13i4,3x,i4,i2,i3,i5)
+      write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,mfh,0,99999
+      write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,0,0,0
+c
+ccho end of file 32
+c
       close(3)
       print *,' ENDFA.TXT has been written.'
       write(7,2300) nrr ,ecut
