@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-11-28 03:42:57 $
-Ccc   * $Id: input.f,v 1.260 2007-11-28 03:42:57 herman Exp $
+Ccc   * $Date: 2008-04-09 22:37:05 $
+Ccc   * $Id: input.f,v 1.261 2008-04-09 22:37:05 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2716,11 +2716,11 @@ C     GOTO 10
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  E M P I R E  -  2.19.b37  |'
+     &           '                       |  E M P I R E  -  3beta0    |'
       WRITE (6,*)
      &           '                       |                            |'
       WRITE (6,*)
-     &           '                       |  marching towards LODI ;-) |'
+     &           '                       |          ARCOLA            |'
       WRITE (6,*)
      &           '                       |____________________________|'
       WRITE (6,*) ' '
