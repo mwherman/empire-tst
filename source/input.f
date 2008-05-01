@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-04-09 22:37:05 $
-Ccc   * $Id: input.f,v 1.261 2008-04-09 22:37:05 herman Exp $
+Ccc   * $Date: 2008-05-01 20:10:47 $
+Ccc   * $Id: input.f,v 1.262 2008-05-01 20:10:47 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -6489,7 +6489,6 @@ Ccc   * input:NEJC, NNUC                                               *
 Ccc   *                                                                *
 Ccc   * output:BND                                                     *
 Ccc   *                                                                *
-Ccc   * calls:where                                                    *
 Ccc   *                                                                *
 Ccc   ******************************************************************
 Ccc
@@ -6503,13 +6502,17 @@ C
 C
 C Local variables
 C
-      INTEGER ar, zr
+      INTEGER ar, zr, ap, zp, ac, zc 
       DOUBLE PRECISION b1, b2, b3
+      zc = Z(Nnuc)
+      ac = A(Nnuc)
+      zp = ZEJc(Nejc)
+      ap = AEJc(Nejc)
       zr = Z(Nnuc) - ZEJc(Nejc)
       ar = A(Nnuc) - AEJc(Nejc)
-      b1 = A(Nnuc)*AMUmev + XMAss(Nnuc)
+      b1 = A(Nnuc)*AMUmev + EXCessmass(zc,ac)
       b2 = ar*AMUmev + EXCessmass(zr,ar)
-      b3 = AEJc(Nejc)*AMUmev + XMAss_ej(Nejc)
+      b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
       Bnd = b2 + b3 - b1
       END
 C
