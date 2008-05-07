@@ -27,7 +27,7 @@ EOF
 ../util/stanef/stanef <INPUT
 mv $file-stan.endf $file.endf
 
-../process $file.endf
+../scripts/process $file
 
 # remove left-over files
 rm INPUT 2>/dev/null
