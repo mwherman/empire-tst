@@ -173,6 +173,8 @@ ccho   endif
          if(ajx.eq.0.0.and.ajxch.ne.'   '.and.jflag.eq.' ') jflag='C'
          if(lw.eq.0.and.lwch.ne.' '.and.lflag.eq.' ') lflag='C'
        endif
+ccho   cut to ecut
+       if (e0.gt.ecut) goto 120
        rp(1,i)=e0
        rp(2,i)=de0
 ccho   rp(3,i)=ggn/inflag
@@ -981,7 +983,7 @@ c
       write(3,1000) s1,s2,1,0,0,0,mat,mfh,mth
       write(3,1000) ' 0.0       ',' 0.0       ',0,0,0,6,mat,mfh,mth
       write(3,1000) ' 1.000000+0',' 2.000000+7',0,0,10,7,mat,mfh,mth
-      write(3,1000) ' 0.0       ',' 0.0       ',0,0,5,2,mat,mfh,mth
+      write(3,1000) ' 0.0       ',' 0.0       ',0,0,5,3,mat,mfh,mth
 c
       write(3,1200)
      1     ' zsymam    ',' ','RES. EVAL. ',' ',' ','1999mmdd   '
@@ -996,6 +998,8 @@ c
 c
       write(3,1000) ' ',' ',1,451,11,0,mat,mfh,mth
       write(3,1000) ' ',' ',2,151,9999,0,mat,mfh,mth
+ccho  for file 32
+      write(3,1000) ' ',' ',32,151,9999,0,mat,mfh,mth
 c
    90 write(3,1100) '  ',mat,1,0,99999
       write(3,1100) '  ',mat,0,0,0
@@ -1041,7 +1045,7 @@ C 3000 format(/)
       do lw=1,lm
        lwave=lw-1
        nrs=nr(lw)
-       awri=awt/1.008665
+       awri=awt
        qx=0
        call r2str(s1,11,6,awri)
        call r2str(s2,11,6,qx)
