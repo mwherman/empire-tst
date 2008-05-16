@@ -25,6 +25,12 @@ C     skip first record
       write(7,2400) nseq-1
       print 2400,nseq-1
       endif
+      mt=0
+      nseq=99999
+      call wrcont(0.0,0.0,0,0,0,0)
+      mf=0
+      nseq=0
+      call wrcont(0.0,0.0,0,0,0,0)
 ccho  the following two routines are inserted for file 32 (covariances)
       call rd32151
       call wurrcov
@@ -35,8 +41,10 @@ ccho  the following two routines are inserted for file 32 (covariances)
       nseq=0
       call wrcont(0.0,0.0,0,0,0,0)
       mat=0
+      nseq=0
       call wrcont(0.0,0.0,0,0,0,0)
       mat=-1
+      nseq=0
       call wrcont(0.0,0.0,0,0,0,0)
       close(2)
       close(7)
@@ -240,10 +248,6 @@ ccho  call wrlist(ener,dsj,0.0,gn,0.001*gg(ll),0.0)
       enddo
       enddo
       enddo
-      mt=0
-      call wrcont(0.0,0.0,0,0,0,0)
-      mf=0
-      call wrcont(0.0,0.0,0,0,0,0)
       return
       end
 c.......................................................
@@ -382,7 +386,7 @@ c................................................................
      1 ',  MT=',mt
       endif
       call wrcont(za,awr,lrp,lfi,nlib,nmod)
-      awri=awr/1.0086649
+      awri=awr
       read(1,1100) elis,sta,lis,liso,n4,nfor
       call wrcont(elis,sta,lis,liso,n4,nfor)
       read(1,1100) awi,c2,n1,n2,nsub,nver
@@ -550,7 +554,7 @@ c........................................................................
       read(1,1100) c1,c2,n1,n2,nis,n4,imat,imf,imt
       if(imat.eq.mat) go to 100
       print 2000,'MAT',mat,imat
-  100 if(imf.eq.2) go to 110
+  100 if(imf.eq.32) go to 110
       print 2000,'MF',2,imf
   110 if(imt.eq.151) go to 120
       print 2100,'MT',151,imt
@@ -598,12 +602,14 @@ C     SLBW section
       if(abs(c1-awri).lt.0.0001) go to 300
       write(7,2100) 'AWRI',awri,c1
  300  call wrcont(awri,qx,l,lrx,nrs12,nrs)
+      print *, nrs
       do n=1,nrs
         read(1,1200) er,aj,gt,gn,gg,gf
         call wrlist(er,aj,gt,gn,gg,gf)
         read(1,1200) der,c1,c2,dgn,dgg,dgf
         call wrlist(der,c1,c2,dgn,dgg,dgf)
       enddo
+      print *, 'END'
       read(1,1100) c1,c2,n1,nnn,nm,n4
       call wrcont(c1,c2,n1,nnn,nm,n4);
       do n=1,nm
