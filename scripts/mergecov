@@ -1,5 +1,6 @@
 #! /bin/sh -
 #script to merge covariances for individual reactions into a single MT33 file
+#MF32 is added at the begining if exists
 file=$1
 MAT=$2
 work=`pwd`
@@ -17,6 +18,7 @@ fi
 
 rm MT33 2>/dev/null
 
+cat $file-32.cov >>MT33 2>/dev/null
 cat $file-33-?.cov >>MT33 2>/dev/null
 cat $file-33-??.cov >>MT33 2>/dev/null
 cat $file-33-???.cov >>MT33 2>/dev/null
