@@ -4,11 +4,25 @@
 file=$1
 work=`pwd`
 
+#If local file with resonance parameters exist then use it
+if [ -f $file-res.endf ]; then
+cat >ENDRES.INP <<EOF
+empire.end
+$file-res.endf
+endf.dat
+0
+
+EOF
+mv -f ENDRES.INP ../util/endres/
+cp -f $file-res.endf ../util/endres/
+fi
+
 cd ../util/endres/
 rm empire.end endf.dat 2>/dev/null
 ln -sf $work/$file.endf empire.end
 ./endres <ENDRES.INP
 rm empire.end 
+rm $file-res.endf 
 mv endf.dat $work/$file.endf
 mv endres.lst $work/$file-log.endres
 cd $work
