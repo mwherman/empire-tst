@@ -42,7 +42,6 @@ S207=+( 22, 25)+(107,109)+(112,114)
                                                                  
 EOF
 
-#cp FIXUP2.INP FIXUP.INP
 ./fixup
 rm OUTPUT.ENDF
 mv FIXUP.ENDF $work/$file-f2.endf
