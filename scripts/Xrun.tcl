@@ -5900,7 +5900,7 @@ adjourn .top75}} \
     button $site_11_0.cpd72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec xterm -e -bg red -fg white -fn 10x20 -geometry 40x2+500+500 -e cp -i ../scripts/skel.inp $file.inp
+        -command {exec xterm -e cp -i ../scripts/skel.inp $file.inp
 adjourn .top75
 exec $editor $file.inp &} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
