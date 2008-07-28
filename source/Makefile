@@ -1,14 +1,20 @@
-#---- pfg90 compiler
-#FC     =  pgf90
-#FFLAGS =  -O2
+#----GNU gfortran FORTRAN compiler
+#FC     =  gfortran
+#----flags for production compilation with gfortran
+#FFLAGS = -O3
+
 #----GNU g77 FORTRAN compiler
 FC     =  g77
 #----flags for production compilation with g77
-#FFLAGS = -O3
+FFLAGS = -O3
 #----flags for debuging using g77 compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
-#----GNU g95 FORTRAN compiler
+#---- pfg90 compiler
+#FC     =  pgf90
+#FFLAGS =  -O2
+
+#----g95 FORTRAN compiler
 #FC     =  g95
 #----flags for production compilation with g95
 #FFLAGS = -O
@@ -19,7 +25,7 @@ FC     =  g77
 #FC     =  ifort
 #----flags for optimalization using ifort 
 #FFLAGS = -arch pn4 -O3 -axPW  -ipo   
-#FFLAGS = -arch pn4 -O3 -ipo 
+#FFLAGS =  -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
@@ -60,7 +66,7 @@ empire:   $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
-#     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
+#	$(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h
