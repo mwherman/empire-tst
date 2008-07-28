@@ -1,289 +1,164 @@
-#! /bin/sh -
-#SCRIPT TO RUN KALMAN (COVARIANCE MATRIX DETERMINATION) AND TO MAKE CORRELATION AND UNCERTAINTY PLOTS
+#!/bin/bash
+
 file=$1
-AMT=$2
+MT=$2
 MAT=$3
 EXPDAT=$4
 
-#Clean C4 file to leave only total cross sections (MF=3) (no meta, g.s., etc., no spectra, ang.distr. ...) 
-#if there are no suitable exp. data create c4 file with one fake line to make KALMAN happy :)
-if [ ! -s $file-c4.kal ]; then
-   if [ -s $file.c4 ]; then
-      grep '^.\{12,15\}  3 ' $file.c4 | grep -v '^.\{19\}[!-~]' >$file-c4.kal
-   else
-     echo "    1 99999   4  11    1.0000+8          1.0000-4 1.0000-4                                       FAKE LINE FOR KALMAN     11111 11" >$file-c4.kal
-   fi
+if [ -z $file ]; then
+echo "INPUT FILE NOT FOUND"
+exit
+fi
+if [ -z $MT -o "$MT" = "0" ]; then
+   MT="1 2 4 16 102 103 107"
+fi
+if [ -z $MAT ]; then
+   MAT="1111"
+fi
+if [ -z $EXPDAT ]; then
+   EXPDAT="1"
 fi
 
-if [ ! -s $file-c4.kal ]; then
-     echo "    1 99999   4  11    1.0000+8          1.0000-4 1.0000-4                                       FAKE LINE FOR KALMAN     11111 11" >$file-c4.kal
+if [ ! -s $file.endf ]; then
+   echo "ENDF FILE NOT FOUND ($file.endf)"
+   exit 0
+fi
+if [ ! -s $file.xsc ]; then
+   echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
+   exit 1
+fi
+if [ ! -s $file-inp.sen ]; then
+   echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
+   exit 2
+fi
+if [ ! -s $file-mat.sen ]; then
+   echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
+   exit 3
+fi
+if [ ! -s $file.c4 ]; then
+   echo "C4 FILE NOT FOUND ($file.c4)"
+   exit 4
 fi
 
-if [ "$AMT" = "0" ]
-   then
-   AMT="1 2 4 16 102 103 107"
-fi
-if [ "$EXPDAT" = "" ]
-   then
-   EXPDAT=1
-fi
-if [ "$MAT" = "3" ]
-   then
-   MAT=1111
-fi
-#
-# EXPDAT=1 - OPTION
-#
-if [ "$EXPDAT" = "1" ]
-   then
-   for MT in $AMT
-     do
-       echo "MT= ${MT}"
-       work=`pwd`
-       rm fort.* 2>/dev/null
-       rm MT33 2>/dev/null
-       rm SENSITIVITY.INP 2>/dev/null
-       rm KALEND.INP 2>/dev/null
-       rm KALMAN.INP 2>/dev/null
-       rm ENDF.DAT 2>/dev/null
-       # Input for c4tokal and kalend
-       cat >KALEND.INP <<EOF
-$MT $MAT 0 $EXPDAT
+
+rm INPUT.D 2>/dev/null
+rm KALMAN.INP 2>/dev/null
+rm fort.* 2>/dev/null
+rm check.out 2>/dev/null
+rm $file-*-c4.gpd 2>/dev/null
+rm $file-{c4,par,*-err}.kal 2>/dev/null
+rm $file-33-*.cov  2>/dev/null
+
+
+for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
+    grep "^.\{12,19\}  3 $j " $file.c4 >>$file-c4.kal
+done
+
+for k in $MT; do
+    echo "MT= ${k}"
+
+    if [ -s INPUT.D ]; then
+       rm INPUT.D
+    fi
+
+    cat >INPUT.D <<EOF
+$file ${k} $MAT $EXPDAT
 EOF
-       cp $file-inp.sen SENSITIVITY.INP
+    ../util/kalman/genkal.exe <INPUT.D >check.out
 
-       ../util/kalman/genkal.pl $file
 
-       ln -s $file-c4.kal fort.1
+    if [ -s check.out ]; then
+       exit
+    fi
 
-       ../util/kalman/c4tokal<KALEND.INP >KALMAN.INP
-       rm fort.1
-       # correlations among experimental data
-       if [ ! -s $file-expcorr.kal ]; then
-          cp fort.12 $file-expcorr.kal  
-       else
-          cp $file-expcorr.kal fort.12     
-       fi
-       # correlations among model parameters
-       if [ ! -s $file-parcorr.kal ]; then
-          cp fort.52 $file-parcorr.kal  
-       else
-          cp $file-parcorr.kal fort.52     
-       fi
-       # experimental data
+
+    if [ -s KALMAN.INP ]; then
+       rm KALMAN.INP
+    fi
+
+    ../util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+
+# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
+for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
+    l=`echo ${j}`
+    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
+done
+
+# EXPERIMENTAL DATA AND THEIR CORRELATIONS
+
+    if [ "$EXPDAT" != 0 ]; then
        if [ ! -s $file-expxsc.kal ]; then
-          cp fort.10 $file-expxsc.kal  
+	  cp fort.10 $file-expxsc.kal
        else
-          cp $file-expxsc.kal fort.10     
+	  cp $file-expxsc.kal fort.10
        fi
-       #
-       # RUN OF KALMAN
-       #
-       echo 'Edit Kalman input'
+       if [ ! -s $file-expcorr.kal ]; then
+	  cp fort.12 $file-expcorr.kal
+       else
+	  cp $file-expcorr.kal fort.12
+       fi
+    else
+       rm fort.10
+       rm fort.11
+       rm fort.12
+    fi
+
+# CORRELATIONS AMONG MODEL PARAMETERS
+    if [ ! -s $file-parcorr.kal ]; then
+       cp fort.52 $file-parcorr.kal
+    else
+       cp $file-parcorr.kal fort.52
+    fi
+
+#    if [ "$EXPDAT" != 0 ]; then
+       echo 'EDIT KALMAN INPUT'
        emacs KALMAN.INP
-       ../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
-       mv fort.13 $file-xsc.kal
-       mv fort.14 $file-cov.kal
-       ln -s $file.endf ENDF.DAT
-       # run KALEND
-       ../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
-       ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
-       ../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >corrplot.dat
-       mv fort.18 $file-err-$MT.kal
-       gnuplot ../util/kalman/corr.plt
-       mv corrplot.dat $file-$MT-cov.gnudat
-   done
-  #
-  # EXPDAT=0 AND 2 - OPTION
-  #
-else
-echo "AMT= ${AMT}, "
-       work=`pwd`
-       rm fort.* 2>/dev/null
-       rm MT33 2>/dev/null
-       rm SENSITIVITY.INP 2>/dev/null
-       rm KALEND.INP 2>/dev/null
-       rm KALMAN.INP 2>/dev/null
-       rm ENDF.DAT 2>/dev/null
-       # Input for c4tokal and kalend
-       cat >KALEND.INP <<EOF
-1 $MAT 0 $EXPDAT
-EOF
-       cp $file-inp.sen SENSITIVITY.INP
+#    fi
 
-       ../util/kalman/genkal.pl $file
+    ../util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
 
-       ln -s $file-c4.kal fort.1
+    mv fort.13 $file-xsc.kal
+    mv fort.14 $file-cov.kal
+    mv fort.15 $file-par.kal
 
-       ../util/kalman/c4tokal<KALEND.INP >KALMAN.INP
-       rm fort.1
-       # correlations among experimental data
-       if [ "$EXPDAT" = "2" ]; then
-          if [ ! -s $file-expcorr.kal ]; then
-             cp fort.12 $file-expcorr.kal  
-          else
-              cp $file-expcorr.kal fort.12     
-          fi
-       fi
-       # correlations among model parameters
-       if [ ! -s $file-parcorr.kal ]; then
-          cp fort.52 $file-parcorr.kal  
-       else
-          cp $file-parcorr.kal fort.52     
-       fi
-       # experimental data
-       if [ "$EXPDAT" = "2" ]; then
-          if [ ! -s $file-expxsc.kal ]; then
-             cp fort.10 $file-expxsc.kal  
-          else
-             cp $file-expxsc.kal fort.10     
-          fi
-       fi
-# tmp
-#        echo 'Edit Kalman input'
-#        emacs KALMAN.INP
-# tmp
-       ../util/kalman/kalman3 <KALMAN.INP >$file-out.kal
-       mv fort.13 $file-xsc.kal
-       mv fort.14 $file-cov.kal
-       ln -s $file.endf ENDF.DAT
-       for MT in $AMT
-       do
-        echo "MT=${MT}, MAT=${MAT}"
-# tmp
-#       echo 'Edit Kalman input'
-#       emacs KALMAN.INP
-# tmp
-        cat >KALEND.INP <<EOF
-$MT $MAT 0 $EXPDAT
-EOF
-        ../util/kalman/form.pl $MAT $MT >$file-33-$MT.cov
-        ../util/kalman/mf33.pl $MT <$file-33-$MT.cov
-        ../util/kalman/mf33.pl -$MT <$file-33-$MT.cov >$work/$file-$MT-cov.gnudat
-        mv fort.18 $file-err-$MT.kal
-# tmp
-#        cp $file-$MT-cov.gnudat corrplot.dat
-#        gnuplot ../util/kalman/corr.plt
-# tmp
-       done
-  fi
 
-nr=1
-for MT in $AMT
-  do
-    echo "Plotting MT= ${MT}"
-cp ../scripts/skel_err_ps.gnu tmp_err_ps.gnu
-cp ../scripts/skel_ps.gnu tmp_ps.gnu
-sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.ps'/" tmp_ps.gnu
-cp ../scripts/skel_eps.gnu tmp_eps.gnu
-sed -i -e "/^set output/ s/set output XXXXXXXX/set output 'tmp.eps'/" tmp_eps.gnu
-label="Unknown reaction"
-if [ $MT = "1" ]
-   then
-   label="Total"
-   rea[$MT]="Total"
-fi
-if [ $MT = "2" ]
-   then
-   label="Elastic"
-   rea[$MT]="Elastic"
-fi
-if [ $MT = "4" ]
-   then
-   label="Inelastic"
-   rea[$MT]="Inelastic"
-fi
-if [ $MT = "16" ]
-   then
-   label="(n,2n)"
-   rea[$MT]="(n,2n)"
-fi
-if [ $MT = "18" ]
-   then
-   label="Fission"
-   rea[$MT]="Fission"
-fi
-if [ $MT = "17" ]
-   then
-   label="(n,3n)"
-   rea[$MT]="(n,3n)"
-fi
-if [ $MT = "17" ]
-   then
-   label="(n,3n)"
-   rea[$MT]="(n,3n)"
-fi
-if [ $MT = "102" ]
-   then
-   label="(n,g)"
-   rea[$MT]="(n,{/Symbol g})"
-fi
-if [ $MT = "103" ]
-   then
-   label="(n,p)"
-   rea[$MT]="(n,p)"
-fi
-if [ $MT = "107" ]
-   then
-   label="(n,a)"
-   rea[$MT]="(n,{/Symbol a})"
-fi
-echo $label
-# Postscript picture(s)
-sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp_ps.gnu
-sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp_ps.gnu
-sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp_ps.gnu
-cp tmp_ps.gnu  $file-$MT-cov_ps.gnu
-gnuplot tmp_ps.gnu
-mv tmp.ps $file-$MT-cov.ps
-# Ecapsulated postscript picture(s) LaTeX style.
-sed -i -e "/^set title/ s/set title filereaction/set title '$label'/" tmp_eps.gnu
-sed -i -e "/^set label/ s/set label reactionfile/set label '$label'/" tmp_eps.gnu
-sed -i -e "/^splot/ s/splot filedat/splot '$file-$MT-cov.gnudat'/" tmp_eps.gnu
-cp tmp_eps.gnu  $file-$MT-cov_eps.gnu
-gnuplot tmp_eps.gnu
-ln -s ../scripts/driver.tex driver.tex
-latex driver.tex
-dvips -E -o $file-$MT-cov.eps driver.dvi
-rm driver.*
-# pdf picture(s)
-epstopdf $file-$MT-cov.eps
-reaction[$nr]=$MT
-let nr=nr+1
+    ../util/kalman/kalend2.exe <INPUT.D >check.out
+
+
+    if [ -s check.out ]; then
+       exit
+    fi
+
+    sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
+    awk ' BEGIN{}
+    { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
+
+    mv fort.18 $file-${k}-err.kal
+
+
+    cp $file-${k}-c4.gpd expxscplot.d
+
+    if [ "$EXPDAT" != 0 ]; then
+       gnuplot ../util/kalman/corr.gp
+    fi
+
+    mv corrplot.d $file-${k}-cov.gpd
+    mv xscplot.d  $file-${k}-xsc.gpd
+
+    rm fort.17
+    rm fort.20
+    rm expxscplot.d
+
+    echo 'COMPLETE ...'
+
 done
-let nr=nr-1
-cp ../scripts/skel_err_ps.gnu tmp_err_ps.gnu
-cat >> gfile <<EOF
-plot \\
-EOF
-cat  gfile >> tmp_err_ps.gnu
-rm gfile
-i=1
-while [  $i -le $nr ]; do
-#   echo $i $nr
-if [ $i = $nr ]
-   then
-   cat >> gfile <<EOF
-'$file-err-${reaction[$i]}.kal' u 1:2 t '${rea[${reaction[$i]}]}' w l lw 1.6
-EOF
-cat  gfile >> tmp_err_ps.gnu
-rm gfile
-else
-   cat >> gfile <<EOF
-'$file-err-${reaction[$i]}.kal' u 1:2 t '${rea[${reaction[$i]}]}' w l lw 1.6,\\
-EOF
-cat  gfile >> tmp_err_ps.gnu
-rm gfile
-fi
-let i=i+1
-done
-mv tmp_err_ps.gnu $file-err.gnu
-gnuplot $file-err.gnu
-mv tmp_err.ps $file-err.ps
 
-rm SENSITIVITY.INP
-rm KALEND.INP
+rm INPUT.D
 rm KALMAN.INP
-rm ENDF.DAT
-rm fort.*
-rm tmp*.* 2>/dev/null
+rm fort.{1*,50,52,75}
+rm check.out
+
+exit
+
+
+# l=`echo ${#k}` IT GIVES THE LENGHT OF THE STRING K
