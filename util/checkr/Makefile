@@ -1,5 +1,5 @@
 #....Intel FORTRAN compiler
-#FC     =  ifort 
+FC     =  ifort 
 #----GNU FORTRAN compiler (FEDORA 7)
 #FC     = gfortran
 #----standard f90 FORTRAN compiler
@@ -9,7 +9,7 @@
 #FC     =  gfortran
 
 #----GNU g95 FORTRAN Mac compiler
-FC     =  /sw/bin//g95
+#FC     =  /sw/bin//g95
 #----flags for production compilation with g95
 #FFLAGS = -O
 #----flags for detailed warnings
