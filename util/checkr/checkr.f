@@ -1,112 +1,158 @@
 !
 ! **********************************************************************
-! *   PROGRAM CHECKR
-! *
-! *   PROGRAM TO CHECK FORMAT VALIDITY OF AN ENDF-5 OR -6 FORMAT
-! *   EVALUATED DATA FILE
-! *
-! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
-! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
-! *                           MODLIB PROJECT
-! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
-! *                           GROUP PARAMETERS.
-! *                        3. CHECK FOR PROPER ZSA SYMBOL FOR FIRST
-! *                           FIELD ON RECORD 5 OF 1-451
-! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
-! *                             NAME
-! *                        5. ADD ERROR MESSAGE IF ELASTIC TRANS-
-! *                           FORMATION MATRIX IS GIVEN
-! *                        6. LIMIT ON ANGULAR POINTS IN FILE 4
-! *                              INCREASED TO 201
-! *                        7. LIMIT ON NUMBER OF ENERGIES AT WHICH
-! *                              ANGULAR DISTRIBUTIONS IN FILES 4 AND 6
-! *                               (TAB2) INCREASED TO 2000
-! *                        8. LIMIT ON NUMBER OF SUBSECTIONS IN FILE 6
-! *                              INCREASED TO 2000
-! *                        9. ALLOW BOTH THE A AND R PARAMETERS TO BE
-! *                           ENERGY DEPENDENT FOR KALBACH-MANN
-! *                       10. ALLOW LPT=15 FOR CHARGED-PARTICLE ELASTIC
-! *                           SCATTERING
-! *                       11. ALLOW STABLE NUCLEI IN 8-457 (NST=1)
-! *                       12. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
-! *                       13. ADDED COMMAND LINE INPUT TO UNIX AND
-! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
-! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
-! *                           OPTIONS ARE ASSUMED UNLESS THIRD
-! *                           PARAMETER IS N.
-! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
-! *                        1. CORRECTED CHECKS IN 8-457 FOR NST=1
-! *                        2. ALLOW 0-nn-1 AS A MATERIAL FOR DECAY DATA
-! *                        3. RDTAB1 AND RDTAB2 DID NOT BUFFER ALL
-! *                           PHYSICAL RECORDS
-! *                        4. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
-! *                        5. ALLOW NVER TO BE A YEAR 1990 TO CURRENT
-! *                        6. CORRECTED SYMBOL GENERATION FOR SECOND
-! *                            THIRD METASTABLE STATE (Kellett, NEA)
-! *                        7. ADDED SYMBOL XX FOR UNNAMED ELEMENTS
-! *                        8. ALLOW SECTION TO BE CHECKED EVEN IF MT
-! *                            NUMBER WRONG
-! *                        9. REMOVE ERRONEOUS ERROR CHECK ON ELFS
-! *                       10. ALLOWED EMAX DOWN TO 1.0 MEV FOR OTHER
-! *                           THAN INCIDENT NEUTRONS.
-! *
-! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
-! *                        1. ONLY ERRORS REPORTED IN OUTPUT
-! *
-! *         VERSION 7.03   APRIL 2006     M. HERMAN
-! *                        1. WARNING SUBROUTINE INTRODUCED
-! *                           'MT ALLOWED IN DERIVED FILES' CLSSIFIED AS
-! *                           WARNING INSTEAD OF AN ERROR
-! *
-! *         VERSION 7.04   Sept  2007     R. Capote
-! *                        1. Can be compiled with GNU g95
-! *
-! *      REFER ALL COMMENTS AND INQUIRIES TO
-! *
-! *         NATIONAL NUCLEAR DATA CENTER
-! *         BUILDING 197D
-! *         BROOKHAVEN NATIONAL LABORATORY
-! *         P.O. BOX 5000
-! *         UPTON, NY 11973-5000
-! *         USA
-! *
-! *      TELEPHONE           631-344-2902
-! *      E-MAIL              NNDC@BNL.GOV
-! *
+      PROGRAM CHECKR
+!-
+!-P   Program to check format validity of an ENDF-5 or -6 format
+!-P   evaluated data file
+!-V
+!-V         Version 8.00   June  2008     A. Trkov
+!-V                        1. Major updating of the code and removal of
+!-V                           many false errorr messages.
+!-V                        2. Further reduction of non-essential output.
+!-V                        3. Read real variables in double precision to
+!-V                           avoid reporting errors reading small numbers.
+!-V                        4. Implement extended features of the format
+!-V                           endorsed by CSEWG.
+!-V
+!-V         Version 7.04   Sept  2007     R. Capote
+!-V                        1. Can be compiled with GNU g95
+!-V
+!-V         Version 7.03   April 2006     M. Herman
+!-V                        1. Warning subroutine introduced:
+!-V                           'MT ALLOWED IN DERIVED FILES' clssified as
+!-V                           warning instead of an error
+!-V
+!-V         Version 7.02   May 2005     C.L. Dunford
+!-V                        1. Only errors reported in output
+!-V
+!-V         Version 7.01   April 2005     C.L.Dunford
+!-V                        1. Corrected checks in 8-457 for NST=1
+!-V                        2. Allow 0-nn-1 as a material for decay data
+!-V                        3. RDTAB1 and RDTAB2 did not buffer all
+!-V                           physical records
+!-V                        4. Set success flag after return from BEGIN
+!-V                        5. Allow NVER to be a year 1990 to current
+!-V                        6. Corrected symbol generation for second
+!-V                            third metastable state (Kellett, NEA)
+!-V                        7. Added symbol XX for unnamed elements
+!-V                        8. Allow section to be checked even if MT
+!-V                            number wrong
+!-V                        9. Remove erroneous error check on ELFS
+!-V                       10. Allowed EMAX down to 1.0 MeV for other
+!-V                           than incident neutrons.
+!-V
+!-V         Version 7.0    October 2004     C.L.Dunford
+!-V                        1. Modified to provide a module for the NEA
+!-V                           Modlib project
+!-V                        2. Allow energy dependent delayed fission
+!-V                           group parameters.
+!-V                        3. Check for proper ZSA SYMBOL for first
+!-V                           field on record 5 of 1-451
+!-V                        4. Permit user to supply batch input file
+!-V                             name
+!-V                        5. Add error message if elastic trans-
+!-V                           formation matrix is given
+!-V                        6. Limit on angular points in file 4
+!-V                              increased to 201
+!-V                        7. Limit on number of energies at which
+!-V                              angular distributions in files 4 and 6
+!-V                               (TAB2) increased to 2000
+!-V                        8. Limit on number of subsections in file 6
+!-V                              increased to 2000
+!-V                        9. Allow both the A and R parameters to be
+!-V                           energy dependent for Kalbach-Mann
+!-V                       10. Allow LPT=15 for charged-particle elastic
+!-V                           scattering
+!-V                       11. Allow stable nuclei in 8-457 (NST=1)
+!-V                       12. Removed Fortran line controls from output
+!-V                       13. Added command line input to Unix and
+!-V                           Windows versions. Note: only input and
+!-V                           output file names can be given. Default
+!-V                           options are assumed unless third
+!-V                           parameter is N.
+!-V      Refer all comments and inquiries to
+!-V
+!-V         National Nuclear Data Center
+!-V         Building 197D
+!-V         Brookhaven National Laboratory
+!-V         P.O. Box 5000
+!-V         Upton, NY 11973-5000
+!-V         USA
+!-V
+!-V      Telephone           631-344-2802
+!-V      E-mail              NNDC@BNL.GOV
+!-V
+!-M
+!-M CHECKR - Execute the ENDF-file checking process
+!-M ===============================================
+!-M
+!-M The CHECKR code performs basic checking of ENDF files to ensure
+!-M formal correctness and completeness of the file.
+!-M
+!-M Special features
+!-M - CHECKR checks the header record. If the sequence number is
+!-M   missing it assumes the file to be unsequenced and ignores
+!-M   columns 76-80. In such case, errors and warnings are reported
+!-M   with respect to the absolute record number in the file.
+!-M - The number of sections in an ENDF file are not restricted.
+!-M   However, for practical reasons the limit in CHECTR is 1000.
+!-M   If more sections are present, the checking for the presence
+!-M   of missing sections is skipped.
+!-M - Similarly, if the dictionalry section is missing, the checking
+!-M   for the presence of missing sections is skipped.
+!-M   
+!-M Input instructions:
+!-M   INFIL  = input ENDF file specification
+!-M   OUTFIL = output list file specification
+!-M   IW    = N  (all materials in file processed)
+!-M         = Y  (specify a material or range of materials)
+!-M
+!-M   if IW is YES, then another record is required
+!-M
+!-M   MATMIN  = Material number of first or only material
+!-M   MATMAX  = Material number of last material or a range
+!-M
+!-M   A comma or a dash between material numbers indicates a range
+!-M
+!-M        MATMIN  Selects this material and all others with a larger
+!-M                material number
+!-M       -MATMAX  Selects this material and all others with a smaller
+!-M                material number
+!-M
 !***********************************************************************
 !
-!     TO CUSTOMIZE THIS SOURCE RUN SETMDC
-!        ANS  -  ANSI STANDARD BATCH MODE VERSION
-!        VMS  -  COMMAND MODE FOR VMS OPERATING SYSTEM
-!        WIN  -  COMMAND MODE FOR PC USING DIGITAL VISUAL FORTRAN
-!        UNX  -  COMMAND MODE FOR UNIX USING LAHEY FORTRAN
-!        DVF  -  GRAPHICAL MODE FOR PC USING DIGITAL VISUAL FORTRAN
-!        LWI  -  GRAPHICAL MODE FOR UNIX USING LAHEY WINTERACTER
-!        MOD  -  MODULE FOR THE MODLIB PROJECT OF NEA WPEC
+!     To customize this source run SETMDC
+!        ANS  -  ANSI standard batch mode version
+!        VMS  -  Command mode for VMS operating system
+!        WIN  -  Command mode for PC using Digital Visual Fortran
+!        UNX  -  Command mode for Unix using lahey fortran
+!        DVF  -  Graphical mode for PC using digital visual fortran
+!        LWI  -  Graphical mode for Unix using Lahey Winteracter
+!        MOD  -  Module for the Modlib Project of NEA WPEC
 !
-!     THE "ANS" VERSION MEETS F95 STANDARDS FOR FIXED OR FREE FORMAT
+!     The "ANS" version meets F95 STANDARDS FOR FIXED OR FREE FORMAT
 !       SOURCE
-!     THE "VMS" VERSION WILL COMPILE WITH EITHER THE FORTRAN-77 OR
-!       FORTRAN-90 VMS COMPILER
-!     THE "DVF" VERSION HAS A WINDOWS GRAPHICAL INTERFACE. IT WILL
-!       COMPILE WITH THE DIGITAL VISUAL FORTRAN COMPILER RUNNING
-!       UNDER WINDOWS
-!     THE "LWI" VERSION HAS A X-WINDOWS GRAPHICAL INTERFACE. IT WILL
-!       COMPILE WITH THE LAHEY FORTRAN COMPILER WITH WINTERACTER
-!       RUNNING UNDER UNIX
+!     The "VMS" version will compile with either the Fortran-77 or
+!       Fortran-90 VMS compiler
+!     The "DVF" version has a Windows graphical interface. It will
+!       compile with the Digital Visual Fortran compiler running
+!       under Windows
+!     The "LWI" version has an X-Windows Graphical Interface. It will
+!       compile with the lahey fortran compiler with Winteracter
+!       running under Unix
 !
 !***********************************************************************
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
-!     MAIN PROGRAM FOR NON-WINDOWS IMPLEMENTATION OF CHECKR
+!     Main program for Non-Windows implementation of CHECKR
 !
-      PROGRAM CHECKR
+!     PROGRAM CHECKR
 !
       IMPLICIT NONE
 !...LWI, DVF, MOD
 !/!
-!/!     MODULE IMPLEMENTATION OF CHECKR FOR MODLIB AND WINDOWS
+!/!     Module implementation of CHECKR for MODLIB and Windows
 !/!
 !/      MODULE CHECKR
 !/!
@@ -120,37 +166,85 @@
 !/      PUBLIC :: IRERUN
 !---MDC---
 !
-!     CHECKR VERSION NUMBER
+!     CHECKR Version Number
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.03'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !---MDC---
 !
-!     DEFINE VARIABLE PRECISION
+!     Define variable precision
 !
-      INTEGER(KIND=4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
-      INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
-      INTEGER(KIND=4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
+      INTEGER (KIND= 4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
+      INTEGER (KIND= 4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
+      INTEGER (KIND= 4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
 !
-!     STANDARD FORTRAN INPUT AND OUTPUT UNITS
+!     Size limits common to all data tables
+!     -------------------------------------
+      INTEGER (KIND=I4), PARAMETER :: NIRMAX=20     ! Interpolation regions
+      INTEGER (KIND=I4), PARAMETER :: NPTSMAX=50000 ! Points in a TAB1
+      INTEGER (KIND=I4), PARAMETER :: NPTS2MAX=2000 ! Points in a TAB2
 !
+      INTEGER (KIND=I4), PARAMETER :: INTMAX=5      ! Allowed interpolation schemes
+!
+!     Important File-specific limits
+!     ------------------------------
+!          File 1 comments
+      INTEGER(KIND=I4), PARAMETER :: NCDMI=3,NCDMA=999999 !Comments
+      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000    ! Number of sections (dictionary)
+!          File 1 nubar
+      INTEGER(KIND=I4), PARAMETER :: NCOMAX=4        ! Nubar coefficients
+!          File 2 resonance data
+      INTEGER(KIND=I4), PARAMETER :: NISMAX=20       ! Number of isotopes
+      INTEGER(KIND=I4), PARAMETER :: NERM6=12,NERM5=2! Resonance ranges
+      INTEGER(KIND=I4), PARAMETER :: LRFM6=7,LRFM5=2 ! Allowed repres
+      INTEGER(KIND=I4), PARAMETER :: NSCLMAX=50      ! Scattering lengths
+      INTEGER(KIND=I4), PARAMETER :: NLSMAX=4        ! Resonance l-values
+      INTEGER(KIND=I4), PARAMETER :: NLSCMAX=20      ! l-values for dsigma
+      INTEGER(KIND=I4), PARAMETER :: NJSMAX=6        ! Resonance J-values
+      INTEGER(KIND=I4), PARAMETER :: NRESMAX=5000    ! Resonances per l
+      INTEGER(KIND=I4), PARAMETER :: NGREMAX=1,NFREMAX=1,NIREMAX=4,      &      
+     &                               NCREMAX=4       ! Maximum of reactions per type
+      INTEGER(KIND=I4), PARAMETER :: URNEMAX = 250   ! UR energy points
+!          File 4 secondary angular data
+      INTEGER(KIND=I4), PARAMETER :: NES4MAX=2000    ! Number of E(INC)
+      INTEGER(KIND=I4), PARAMETER :: NLEGMAX=64      ! Legendre coefs
+      INTEGER(KIND=I4), PARAMETER :: NANGMAX=201     ! Angle points
+!          File 5 secondary energy data
+      INTEGER(KIND=I4), PARAMETER :: NSUBSMAX=100    ! Subsection limit
+      INTEGER(KIND=I4), PARAMETER :: NES5MAX=200     ! Number of E(INC)
+      INTEGER(KIND=I4), PARAMETER :: NEDISMAX=1000   ! Energy points
+!          File 6 secondary energy-angle data
+      INTEGER(KIND=I4), PARAMETER :: NSUBS6MAX=2000  ! Subsection limit
+      INTEGER(KIND=I4), PARAMETER :: NES6MAX=NES4MAX ! Number of E(INC)
+!          File 7 thermal scattering law
+      INTEGER(KIND=I4), PARAMETER :: NPSAMAX=3       ! Non-principal atoms
+      INTEGER(KIND=I4), PARAMETER :: NSMTMAX=100     ! Subsequent temps
+!          File 8 fission yields and decay data
+      INTEGER(KIND=I4), PARAMETER :: NFPMAX=2500     ! Number of yields
+!                 Nnumber of final states
+!                 Limit is not in the manual - increase to 400 (A.Trkov)
+!     INTEGER(KIND=I4), PARAMETER :: NDSTMAX=100     ! Product states
+      INTEGER(KIND=I4), PARAMETER :: NDSTMAX=400     ! Product states
+!          Files 12 and 13 photon production
+!          No limits imposed in the ENDF manual - increase to 7000
+!     INTEGER(KIND=I4), PARAMETER :: NPHMAX=1000     ! Discrete photons
+      INTEGER(KIND=I4), PARAMETER :: NPHMAX=7000     ! Discrete photons
+!
+!     Standard Fortran input and output units
+!     ---------------------------------------
       INTEGER(KIND=I4) :: NIN
       INTEGER(KIND=I4), PARAMETER :: INPUT0 = 5, IOUT=6
 !
-!     ENDF DISK FILE INPUT AND CHECKING OUTPUT FORTRAN UNITS
+      INTEGER(KIND=I4), PARAMETER :: JIN=20,JOUT=21  ! File Units of the ENDF input file and checking output list file
 !
-      INTEGER(KIND=I4), PARAMETER :: JIN=20,JOUT=21
+      INTEGER(KIND=I4) :: NOUT                       ! File Unit of the final output list file
 !
-!     FINAL FORTRAN OUTPUT UNIT
-!
-      INTEGER(KIND=I4) :: NOUT
-!
-!     IMDC  FLAG FOR COMPILER OPTION
-!     TFMT  FORMAT FOR INTERACTIVE INPUT PROMPT
-!     STATUS PARAMETER FOR OPENING NEW FILE
+!     IMDC    flag for compiler option
+!     TFMT    format for interactive input prompt
+!     OSTATUS status parameter for opening new file
 !
 !+++MDC+++
 !...ANS
@@ -183,231 +277,130 @@
 !/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !---MDC---
 !
-!     COMMAND LINE INPUT TEXT AND TEXT LENGTH
 !
-      CHARACTER(LEN=100) :: INPAR
-      INTEGER(KIND=I4) :: ILENP
+      CHARACTER(LEN=100)    :: INPAR      ! Command line input text
+      INTEGER  (KIND=I4)    :: ILENP      ! Command line input text length
 !
       TYPE CHECKR_INPUT
          CHARACTER(LEN=100) :: INFIL
          CHARACTER(LEN=100) :: OUTFIL
-         INTEGER(KIND=I4) :: MATMIN
-         INTEGER(KIND=I4) :: MATMAX
+         INTEGER(KIND=I4)   :: MATMIN
+         INTEGER(KIND=I4)   :: MATMAX
       END TYPE CHECKR_INPUT
 !
       TYPE(CHECKR_INPUT) CHECKR_DATA
 !
-!     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
+      INTEGER (KIND=I4) :: NERROR         !  Counted number of errors
+      INTEGER (KIND=I4) :: NWARNG         !  Counted number of warnings
 !
-      INTEGER(KIND=I4) :: IONEPASS        !  0, YES;  1, NO
+      INTEGER (KIND=I4) :: IONEPASS       !  Flag to indicate whether multiple input files can be selected
+!                                         !  0, YES;  1, NO
 !
-!     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
+      INTEGER (KIND=I4) :: CHECKR_SUCCESS !  Flag to indicate success or failure of checkr execution
+      INTEGER (KIND=I4) :: IRERUN
 !
-      INTEGER(KIND=I4) :: CHECKR_SUCCESS, IRERUN
+      CHARACTER(LEN=66) :: TLABEL         ! File (TAPE) label from first record
+      INTEGER (KIND=I4) :: LABEL          ! File (TAPE) number from first record
 !
-!     FILE (TAPE) LABEL FROM FIRST RECORD
+      CHARACTER(LEN= 5) :: ASEQ           ! Flag to indicate a sequenced file
+!                                           unsequenced if blank
 !
-      CHARACTER(LEN=66) :: TLABEL
-      INTEGER(KIND=I4) :: LABEL
+      INTEGER (KIND=I4) :: NLIB           ! Library designation number
+      INTEGER (KIND=I4) :: NVER           ! Library version
+      INTEGER (KIND=I4) :: NSUB           ! Sublibrary number
+      INTEGER (KIND=I4) :: NMOD           ! Material MOD number
+      INTEGER (KIND=I4) :: NFOR           ! ENDF Format version
 !
-!     FLAG TO INDICATE A SEQUENCED FILE; UNSEQUENCED IF BLANK
+      INTEGER (KIND=I4) :: MATO           ! Material number currently being processed
+      INTEGER (KIND=I4) :: MFO            ! File number currently being processed
+      INTEGER (KIND=I4) :: MTO            ! Section number currently being processd
 !
-      CHARACTER(LEN=5) :: ASEQ
+      INTEGER (KIND=I4) :: MATERR         ! Material number of last error detected
+      INTEGER (KIND=I4) :: MFERR          ! File number of last error detected
+      INTEGER (KIND=I4) :: MTERR          ! Section number of last error detected
 !
-!     LIBRARY, VERSION, SUBLIBRARY, MOD NUMBER AND FORMAT OF
-!         MATERIAL BEING PROCESSED
+      CHARACTER(LEN=11) :: ZSA            ! Symbolic material designation
+      REAL    (KIND=R4) :: ZA             ! 1000*Z + A of material currently being processed
+      REAL    (KIND=R4) :: AWR            ! ratio of the material mass to that of the neutron
+      REAL    (KIND=R4) :: AWI            ! ratio of the projectile mass to the that of neutron
+      REAL    (KIND=R4) :: STA            ! STA = 0.0, stable material; STA = 1.0 radioactive material
 !
-      INTEGER(KIND=I4) :: NLIB,NVER,NSUB,NMOD,NFOR
+      INTEGER (KIND=I4) :: LIS            ! state number (0 for ground) of the material
+      INTEGER (KIND=I4) :: LISO           ! isomer state number of the material
 !
-!     MATERIAL, FILE, AND SECTION NUMBER CURRENTLY BEING PROCESSED
+      INTEGER (KIND=I4) :: LDRV           ! derived file flag
+      INTEGER (KIND=I4) :: LRP            ! resonance parameter flag
+      INTEGER (KIND=I4) :: LFI            ! fissibility flag
 !
-      INTEGER(KIND=I4) :: MATO,MFO,MTO
+      INTEGER (KIND=I4) :: I452           ! Flag indicating the presence of nubar in File 1
 !
-!     MATERIAL, FILE, AND SECTION NUMBER OF LAST ERROR DETECTED
+      INTEGER (KIND=I4) :: N12S           ! Number of Sections in MF=12 and MF=13 for the current material
 !
-      INTEGER(KIND=I4) :: MATERR,MFERR,MTERR
+      INTEGER (KIND=I4) :: MTLP           ! MT of last encountered lumped covariance
 !
-!     1000*Z + A OF MATERIAL CURRENTLY BEING PROCESSED
-!        AWR IS THE RATIO OF THE MATERIAL MASS TO THAT OF THE NEUTRON
-!        AWI IS THE RATIO OF THE PROJECTILE MASS TO THE THAT OF NEUTRON
-!        STA = 0.0, STABLE MATERIAL; STA = 1.0 RADIOACTIVE MATERIAL
+      INTEGER (KIND=I4) :: L1H,L2H,N1H,N2H! Contents of fields on a HEAD/CONT record
+      REAL    (KIND=R4) :: C1H,C2H
 !
-      REAL(KIND=R4) :: ZA,AWR,AWI,STA
+      INTEGER (KIND=I4) :: L1,L2,NR,NP    !  Contents of first record and interpolation table for a TAB1 record
+      REAL    (KIND=R4) :: C1,C2
+      INTEGER (KIND=I4), DIMENSION(NIRMAX) :: NBT,JNT
 !
-!     LIS   IS THE STATE NUMBER (0 FOR GROUND) OF THE MATERIAL
-!     LISO  IS THE ISOMER STATE NUMBER OF THE MATERIAL
-!
-      INTEGER(KIND=I4) :: LIS,LISO
-!
-!     LDRV   IS THE DERIVED FILE FLAG
-!     LRP    IS THE RESONANCE PARAMETER FLAG
-!     LFI    IS THE FISSION FLAG
-!
-      INTEGER(KIND=I4) :: LDRV,LRP,LFI
-!
-!     FLAG INDICATING THE PRESENCE OF NUBAR IN FILE 1
-!
-      INTEGER(KIND=I4) :: I452
-!
-!     NUMBER OF SECTIONS IN MF=12 AND MF=13 FOR THE CURRENT MATERIAL
-!
-      INTEGER(KIND=I4) :: N12S
-!
-!     MT OF LAST ENCOUNTERED LUMPED COVARIANCE
-!
-      INTEGER(KIND=I4) :: MTLP
-!
-!     CONTENTS OF FIELDS ON A HEAD/CONT RECORD
-!
-      INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
-      REAL(KIND=R4) :: C1H,C2H
-!
-!     SIZE LIMITS FOR ALL DATA TABLES
-!
-      INTEGER(KIND=I4), PARAMETER :: NIRMAX=20   ! INTERPOLATION REGIONS
-      INTEGER(KIND=I4), PARAMETER :: NPTSMAX=50000 ! POINTS IN A TAB 1
-      INTEGER(KIND=I4), PARAMETER :: NPTS2MAX=2000 ! POINTS IN A TAB 2
-!
-!     ALLOWED INTERPOLATION SCHEMES
-!
-      INTEGER(KIND=I4), PARAMETER :: INTMAX=6
-!
-!     CONTENTS OF FIRST RECORD AND INTERPOLATION TABLE FOR A TAB1 RECORD
-!
-      INTEGER(KIND=I4) :: L1,L2,NR,NP
-      INTEGER(KIND=I4), DIMENSION(NIRMAX) :: NBT,JNT
-      REAL(KIND=R4) :: C1,C2
-!
-!     CONTENTS OF FIRST RECORD AND INTERPOLATION TABLE FOR A TAB2 RECORD
-!
-      INTEGER(KIND=I4) :: L12,L22,NR2,NP2
+      INTEGER (KIND=I4) :: L12,L22,NR2,NP2!  Contents of first record and interpolation table for a TAB2 record
+      REAL    (KIND=R4) :: C12,C22
       INTEGER(KIND=I4), DIMENSION(NIRMAX) :: NBT2,JNT2
-      REAL(KIND=R4) :: C12,C22
 !
-!     CONTENTS OF FIRST RECORD AND FIRST FOUR DATA FIELDS OF A LIST
-!        RECORD
-!
-      INTEGER(KIND=I4) :: L1L,L2L,NPL,N2L
-      REAL(KIND=R4) :: C1L,C2L
+      INTEGER (KIND=I4) :: L1L,L2L,NPL,N2L!  Contents of first record and first four data fields of a list record
+      REAL    (KIND=R4) :: C1L,C2L
       REAL(KIND=R4), DIMENSION(4) :: BIN,BIN1
 !
-!     POSSIBLE DATA REPETITION RATES ON A LIST RECORD
+      INTEGER(KIND=I4), PARAMETER :: NREP6=6,NREP12=12,NREP18=18 ! Possible data repetition rates on a LIST record
 !
-      INTEGER(KIND=I4), PARAMETER :: NREP6 = 6,NREP12 = 12,NREP18=18
+      CHARACTER(LEN=66) :: TEXT           ! Text contents on a TEXT record
 !
-!     TEXT CONTENTS ON A TEXT RECORD
+      INTEGER (KIND=I4) :: MATP,MFP,MTP,NSEQP! Material, File, Section, and Sequence number of current record
 !
-      CHARACTER(LEN=66) :: TEXT
+      INTEGER (KIND=I4) :: NSEQP1         ! Sequence number of the CONT-like part of a TAB or LIST record
 !
-!     MATERIAL, FILE, SECTION, AND SEQUENCE NUMBER OF CURRENT RECORD
+      INTEGER (KIND=I4) :: ISEQ           ! Absolute record number of current record
 !
-      INTEGER(KIND=I4) :: MATP,MFP,MTP,NSEQP
+      CHARACTER(LEN=80) :: IFIELD         ! Character image of current record
 !
-!     SEQUENCE NUMBER OF THE CONT-LIKE PART OF A TAB OR LIST RECORD
-!
-      INTEGER(KIND=I4) :: NSEQP1
-!
-!     ABSOLUTE RECORD NUMBER OF CURRENT RECORD
-!
-      INTEGER(KIND=I4) :: ISEQ
-!
-!     CHARACTER IMAGE OF CURRENT RECORD
-!
-      CHARACTER(LEN=80) :: IFIELD
-!
-      INTEGER(KIND=I4) :: MAT,MF,MT,NSEQ
-!
-!     LOCATIONS OF THE BEGINNING OF EACH ENDF DATA FIELD
-!
-      INTEGER(KIND=I4), DIMENSION(7) :: IBR
+      INTEGER (KIND=I4) :: MAT,MF,MT,NSEQ ! Locations of the beginning of each endf data field
+      INTEGER (KIND=I4), DIMENSION(7) :: IBR
       DATA IBR/1,12,23,34,45,56,67/
 !
-!     LOCATIONS OF THE BEGINNING OF EACH ENDF ID FIELD
-!
-      INTEGER(KIND=I4), DIMENSION(5) :: IBR1
+      INTEGER(KIND=I4), DIMENSION(5) :: IBR1 ! Locations of the beginning of each ENDF ID field
       DATA IBR1/67,71,73,76,81/
 !
-!     CURRENT YEAR
+      INTEGER (KIND=I4) :: IYR            ! Current year
 !
-      INTEGER(KIND=I4) :: IYR
+      INTEGER (KIND=I4) :: IERX           ! Error flag
 !
-!     ERROR FLAG
+      INTEGER (KIND=I4) :: IFIN           ! End-of-file flag
 !
-      INTEGER(KIND=I4) :: IERX
+      CHARACTER(LEN=80) :: EMESS          ! Error message text
 !
-!     END OF FILE FLAG
+      REAL(KIND=R4), PARAMETER ::  EPS = .00001 ! Maximum tolerance for difference two floating point numbers
+!                                                  said to be equal
 !
-      INTEGER(KIND=I4) :: IFIN
-!
-!     ERROR MESSAGE TEXT
-!
-      CHARACTER(LEN=80) :: EMESS
-!
-!     MAXIMUM TOLERANCE FOR DIFFERENCE TWO FLOATING POINT NUMBERS
-!       SAID TO BE EQUAL
-!
-      REAL(KIND=R4), PARAMETER ::  EPS = .00001
-!
-!     NXC   NUMBER OF SECTIONS ENCOUNTERED
-!     NXC0  NUMBER OF SECTIONS IN THE DIRECTORY
-!
-      INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
-      INTEGER(KIND=I4) :: NXC,NXC0
-      INTEGER(KIND=I4), DIMENSION(NSECMAX,2):: INDX
-!
-!     SET SOME IMPORTANT LIMITS
-!
-!          FILE 1 COMMENTS
-      INTEGER(KIND=I4), PARAMETER :: NCDMI=3,NCDMA=999999 !COMMENTS
-!          FILE 1 NUBAR
-      INTEGER(KIND=I4), PARAMETER :: NCOMAX=4   ! NUBAR COEFFICIENTS
-!          FILE 2 RESONANCE DATA
-      INTEGER(KIND=I4), PARAMETER :: NISMAX=20  ! NUMBER OF ISOTOPES
-      INTEGER(KIND=I4), PARAMETER :: NERM6=12,NERM5=2 ! RESONANCE RANGES
-      INTEGER(KIND=I4), PARAMETER :: LRFM6=6,LRFM5=2 ! ALLOWED REPRES
-      INTEGER(KIND=I4), PARAMETER :: NSCLMAX=50  ! SCATTERING LENGTHS
-      INTEGER(KIND=I4), PARAMETER :: NLSMAX=4   ! RESONANCE L-VALUES
-      INTEGER(KIND=I4), PARAMETER :: NLSCMAX=20   ! L-VALUES FOR DSIGMA
-      INTEGER(KIND=I4), PARAMETER :: NJSMAX=6   ! RESONANCE J-VALUES
-      INTEGER(KIND=I4), PARAMETER :: NRESMAX=5000 ! RESONANCES PER L
-      INTEGER(KIND=I4), PARAMETER :: NGREMAX=1,NFREMAX=1,NIREMAX=4,      &      
-     &              NCREMAX=4      ! MAXIMUM OF REACTIONS PER TYPE
-      INTEGER(KIND=I4), PARAMETER :: URNEMAX = 250 !UR ENERGY POINTS
-!          FILE 4 SECONDARY ANGULAR DATA
-      INTEGER(KIND=I4), PARAMETER :: NES4MAX=2000 ! NUMBER OF E(INC)
-      INTEGER(KIND=I4), PARAMETER :: NLEGMAX=64  ! LEGENDRE COEFS
-      INTEGER(KIND=I4), PARAMETER :: NANGMAX=201 ! ANGLE POINTS
-!          FILE 5 SECONDARY ENERGY DATA
-      INTEGER(KIND=I4), PARAMETER :: NSUBSMAX=100!  SUBSECTION LIMIT
-      INTEGER(KIND=I4), PARAMETER :: NES5MAX=200 ! NUMBER OF E(INC)
-      INTEGER(KIND=I4), PARAMETER :: NEDISMAX=1000 ! ENERGY POINTS
-!          FILE 6 SECONDARY ENERGY-ANGLE DATA
-      INTEGER(KIND=I4), PARAMETER :: NSUBS6MAX=2000! SUBSECTION LIMIT
-      INTEGER(KIND=I4), PARAMETER :: NES6MAX=NES4MAX ! NUMBER OF E(INC)
-!          FILE 7 THERMAL SCATTERING LAW
-      INTEGER(KIND=I4), PARAMETER :: NPSAMAX=3     ! NONPRINCIPAL ATOMS
-      INTEGER(KIND=I4), PARAMETER :: NSMTMAX=100   ! SUBSEQUENT TEMPS
-!          FILE 8 FISSION YIELDS AND DECAY DATA
-      INTEGER(KIND=I4), PARAMETER :: NFPMAX=2500   ! NUMBER OF YIELDS
-      INTEGER(KIND=I4), PARAMETER :: NDSTMAX=100 ! PRODUCT STATES
-!          FILES 12 AND 13 PHOTON PRODUCTION
-      INTEGER(KIND=I4), PARAMETER :: NPHMAX=1000 ! DISCRETE PHOTONS
-!
+      INTEGER (KIND=I4) :: NXC            !  number of sections encountered
+      INTEGER (KIND=I4) :: NXC0           !  number of sections in the directory
+      INTEGER (KIND=I4), DIMENSION(NSECMAX,2):: INDX
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
-!     EXECUTE THE CHECKR PROGRAM WHEN A STAND ALONE PROGRAM
+!     Execute the CHECKR program when a stand alone program
 !
       CALL RUN_CHECKR
 !
-!     TERMINATE JOB
+!     Terminate job
 !
       IF(CHECKR_SUCCESS.EQ.0) THEN
-         WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB COMPLETED SUCCESSFULLY'
+         WRITE(IOUT,'(/A)') ' '
+         STOP '    CHECKR - Tests completed successfully'
       ELSE
-         WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB TERMINATED'
+         WRITE(IOUT,'(/A)') ' '
+         STOP '    CHECKR - Tests terminated abnormally!'
       END IF
 !---MDC---
 !
@@ -416,26 +409,6 @@
 !***********************************************************************
 !
       SUBROUTINE RUN_CHECKR
-!
-!     EXECUTES CHECKING PROCESS
-!
-!     INFIL = INPUT FILE SPECIFICATION
-!     OUTFIL = OUTPUT FILE SPECIFICATION
-!     IW    = N  (ALL MATERIALS IN FILE PROCESSED)
-!           = Y  (SPECIFY A MATERIAL OR RANGE OF MATERIALS)
-!
-!     IF IW IS YES, THEN ANOTHER RECORD IS REQUIRED
-!
-!     MATMIN  = MATERIAL NUMBER OF FIRST OR ONLY MATERIAL
-!     MATMAX  = MATERIAL NUMBER OF LAST MATERIAL OR A RANGE
-!
-!     A COMMA OR A DASH BETWEEN MATERIAL NUMBERS INDICATES A RANGE
-!
-!          MATMIN - SELECTS THIS MATERIAL AND ALL OTHERS WITH A LARGER
-!                   MATERIAL NUMBER
-!          -MATMAX  SELECTS THIS MATERIAL AND ALL OTHERS WITH A SMALLER
-!                  MATERIAL NUMBER
-!
 ! **********************************************************************
 !
       IMPLICIT NONE
@@ -443,27 +416,30 @@
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: MOD, ICHAR
 !
-      INTEGER(KIND=I4) :: IQUIT ! FLAG TO INDICATE WHETHER OR NOT TO EXIT       
-      INTEGER(KIND=I4) :: IFIND ! FLAGS WHETHER DESIRED MATERIAL FOUND
+      INTEGER(KIND=I4) :: IQUIT ! Flag to indicate whether or not to exit       
+      INTEGER(KIND=I4) :: IFIND ! Flags whether desired material found
       INTEGER(KIND=I4) :: IFL2
       INTEGER(KIND=I4) :: INDX1,INDX2
-      INTEGER(KIND=I4) :: N
+      INTEGER(KIND=I4) :: N,NN
 !
       CHARACTER(LEN=*), PARAMETER :: DASHES = REPEAT('-',80)
 !
-!     OUTPUT PROGRAM IDENTIFICATION
+!     Output program identification
+!
+      NERROR=0
+      NWARNG=0
 !
       CHECKR_SUCCESS = 0
       IF(IMDC.LT.4) THEN
          WRITE(IOUT,'(/2A)') ' PROGRAM CHECKR VERSION ',VERSION
       END IF
 !
-!     CHECK FOR COMMAND LINE INPUT
+!     Check for command line input
 !
       IONEPASS = 0
       CALL GET_FROM_CLINE
 !
-!     INITIALIZE RUN
+!     Initialize run
 !
    10 CALL BEGIN(IQUIT)
       IF(IQUIT.GT.0)  THEN
@@ -471,21 +447,21 @@
          GO TO 100
       END IF
 !
-!     CHECK LABEL AND FIND STARTING MATERIAL
+!     Check label and find starting material
 !
       CALL SEARCH(IFIND)
       IF(IFIND.EQ.0)   GO TO 50
 !
-!     UNEXPECTED END OF FILE ENCOUNTERED
+!     Unexpected end-of-file encountered
 !
    20 IF(IERX.EQ.2) THEN
          IF(IMDC.LT.4) THEN
-            WRITE(IOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
-     &                      'TEND RECORD FOUND!'
+            WRITE(IOUT,'(//5X,2A)')  'End-of-file encountered before ', &       
+     &                      'TEND record found!'
          END IF
          IF(NOUT.NE.IOUT)   THEN
-            WRITE(NOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
-     &                      'TEND RECORD FOUND!'
+            WRITE(NOUT,'(//5X,2A)')  'End-of-file encountered before ', &       
+     &                      'TEND record found!'
          END IF
          IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
          CLOSE(UNIT=JIN)
@@ -493,9 +469,9 @@
          GO TO 100
       END IF
 !
-!     PROCESS NEXT SECTION
+!     Process next section
 !
-      IF(MAT.NE.MATO)  THEN  ! NEW MATERIAL
+      IF(MAT.NE.MATO)  THEN  ! New material
          IF(CHECKR_DATA%MATMAX.NE.0.AND.MAT.GT.CHECKR_DATA%MATMAX)      &       
      &               GO TO 50
          NSEQP1 = NSEQP
@@ -506,12 +482,13 @@
          I452 = 0
          N12S = 0
          MFO = 0
-         WRITE(NOUT,'(A/1X,A,I5)')  CHAR(12),'CHECK MATERIAL',MATO
-         IF(NOUT.NE.IOUT)  THEN
-            IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
-         END IF
+!        Unconditional printing of material header
+!        WRITE(NOUT,'(A/1X,A,I5)')  CHAR(12),'Check material',MATO
+!        IF(NOUT.NE.IOUT)  THEN
+!           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+!        END IF
       END IF
-      IF(MF.NE.MFO)   THEN           ! NEW FILE
+      IF(MF.NE.MFO)   THEN           ! New file
          MFO = MF
          IF(MFO.EQ.1) THEN
             IFL2 = 0
@@ -520,36 +497,36 @@
          ELSE
             IF(IFL2.EQ.0.AND.LRP.GE.0)  THEN
                WRITE(EMESS,'(A,I3,A)') 'LRP =',LRP,                     &       
-     &          ' REQUIRES THE PRESENCE OF FILE 2, BUT IT IS MISSING.'
+     &          ' Requires the presence of File 2, but it is missing.'
                CALL ERROR_MESSAGE(0)
                IFL2 = 1
             END IF
          END IF
       END IF
 !
-!     NEW SECTION
+!     New section
 !
    35 MTO = MT
 !
-!     IN INTERACTIVE MODE OUTPUT CURRENT SECTION ID TO TERMINAL
+!     In interactive mode output current section ID to terminal
 !
       IF(NOUT.NE.IOUT) CALL OUT_STATUS
 !
-!     CHECK THE NEW SECTION
+!     Check the new section
 !
       CALL CHKSEC
       IF(IERX.EQ.2)   GO TO 20
 !
-!     CHECK FOR MISSING SECTIONS
+!     Check for missing sections
 !
       IF(MAT.NE.MATO.OR.IFIN.NE.0)   THEN
          IF(NXC.GT.0) THEN
-            WRITE(NOUT,'(//)')
-            DO N=1,NXC
+            NN=MIN(NXC,NSECMAX)
+            DO N=1,NN
                IF(INDX(N,2).EQ.1) THEN
                   INDX1 = INDX(N,1)/1000
                   INDX2 = MOD(INDX(N,1),1000)
-                  WRITE(EMESS,'(A,I5,3X,A,I3,3X,A,I4,3X,A)')            &       
+                  WRITE(EMESS,'(A,I5,3X,A,I3,3X,A,I4,3X,A)')            &
      &                 'SECTION MAT=',MATO,'MF=',INDX1,'MT=',           &       
      &                 INDX2,'IS MISSING'
                   CALL ERROR_MESSAGE(0)
@@ -581,7 +558,23 @@
 !
 !     CLOSE FILES
 !
-   50 IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+   50 CONTINUE
+
+         IF(NERROR.EQ.0 .AND. NWARNG.EQ.0) THEN
+           WRITE(IOUT,'(/A)') ' No problems to report'
+           IF(IOUT.NE.NOUT)
+     &     WRITE(NOUT,'(/A)') ' No problems to report'
+         ELSE
+           WRITE(IOUT,'(/A,2(I6,A))')
+     &           '     Encountered',NERROR,' errors,  '                 &
+     &                             ,NWARNG,' warnings'
+           IF(IOUT.NE.NOUT)                                             &
+     &     WRITE(NOUT,'(A/A,2(I6,A))') CHAR(12),
+     &           '     Encountered',NERROR,' errors,  '                 &
+     &                             ,NWARNG,' warnings'
+         END IF
+
+      IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
       CLOSE(UNIT=JIN)
 !
 !     SEE IF ONE PASS LIMIT SET
@@ -599,28 +592,28 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: IQUIT
+      INTEGER(KIND=I4)  :: IQUIT
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
-      CHARACTER(LEN=1) :: IW
-      CHARACTER(LEN=11) ::  ADATE
-      LOGICAL(KIND=I4) :: IEXIST
-      INTEGER(KIND=I4) :: IC
+      CHARACTER(LEN=1)  :: IW
+      CHARACTER(LEN=11) :: ADATE
+      LOGICAL(KIND=I4)  :: IEXIST
+      INTEGER(KIND=I4)  :: IC
 !
 !     INITIALIZE PROCESSING CONTROL VARIABLES
 !
-      IERX = 0
-      MATO = 0
-      MFO = 0
-      MTO = 0
-      MATERR = 0
+      IERX  = 0
+      MATO  = 0
+      MFO   = 0
+      MTO   = 0
+      MATERR= 0
       MFERR = 0
       MTERR = 0
-      NFOR = 0
-      IFIN = 0
-      NOUT = IOUT
+      NFOR  = 0
+      IFIN  = 0
+      NOUT  = IOUT
    10 IQUIT = 0
 !
 !     INITIALIZE TO STANDARD OPTIONS
@@ -864,7 +857,7 @@
 !     PARSE FIRST CARD TO SEE IF IT IS A LABEL
 !
       ASEQ = IFIELD(76:80)
-      IF(ASEQ.EQ.' ')    WRITE(NOUT,'(A//)')                             &      
+      IF(ASEQ.EQ.'     ')    WRITE(NOUT,'(//A//)')                      &
      &        'FILE IS UNSEQUENCED. NO SEQUENCE TESTS WILL BE DONE'
       ISEQ = 1
       NSEQ = 0
@@ -964,7 +957,7 @@
 !
       SUBROUTINE CHKSEC
 !
-!     CONTROLS CHECK OF A SECTION BASED ON ITS FILE NUMBER (MF)
+!     Controls check of a section based on its file number (MF)
 !
       IMPLICIT NONE
 !
@@ -972,17 +965,17 @@
 !
       INTEGER(KIND=I4) :: ISUBTP
 !
-!     TEST THAT ZA AND AWR ARE THE SAME AS IN MF=1 MT=451
+!     Test that ZA AND AWR are the same as in MF=1 MT=451
 !
       IF(MTO.NE.451)  THEN
          CALL TEST2F(C1H,ZA,'ZA')
          CALL TEST2F(C2H,AWR,'AWR')
       END IF
 !
-!     PROCESS THE SECTION IF A VALID MF IS FOUND
+!     Process the section if a valid MF is found
 !
       ISUBTP = MOD(NSUB,10)
-      SELECT CASE (MF)    ! BRANCH BASED ON FILE
+      SELECT CASE (MF)    ! Branch based on file
          CASE (1)
             CALL CKF1
          CASE (2)
@@ -1123,7 +1116,7 @@
             CALL MF_ERRORS(4)
       END SELECT
 !
-!     MOVE ON TO NEXT SECTION
+!     Move on to next section
 !
       CALL CHKHD
 !
@@ -1335,7 +1328,7 @@
 !
 !     MESSAGE TO USER ABOUT SECTION SKIPPED
 !
-      WRITE(EMESS,'(2A,I6,A,I6)') 'SECTION CANNOT BE',                  &       
+      WRITE(EMESS,'(2A,I8,A,I8)') 'SECTION CANNOT BE',                  &       
      &      ' CHECKED FROM SEQUENCE NUMBER ',NSEQB,' TO',NSEQ
       CALL ERROR_MESSAGE(0)
    60 IF(MAT.LT.0)  THEN
@@ -1458,17 +1451,17 @@
 !
       SUBROUTINE CKF1
 !
-!     ROUTINE TO CHECK FILE 1 DATA
+!     Routine to check File 1 data
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NUREP,N
+      INTEGER(KIND=I4) :: NUREP,N,LO,NG
 !
       INTEGER(KIND=I4), PARAMETER :: LNUMAX=2,LNUMAXS4=1
 !
 !     MF = 1, MT = 451
 !
-      IF(MF.EQ.1.AND.MT.EQ.451)   THEN  ! COMMENTS AND DIRECTORY
+      IF(MF.EQ.1.AND.MT.EQ.451)   THEN  ! Comments and directory
          CALL CKS451
          NUREP = 0
          GO TO 100
@@ -1531,6 +1524,21 @@
             CALL TEST2(N2L,9,'N2L')
             GO TO 100
 !
+         CASE (460)          ! Delayed photon data
+            LO = L1H
+            IF     (LO.EQ.1) THEN
+               NG = N1H
+               DO N=1,NG
+                 CALL RDTAB1
+               END DO
+            ELSE IF(LO.EQ.2) THEN
+               CALL RDLIST
+            ELSE
+               WRITE(EMESS,'(A,I2)') 'INVALID VALUE OF LO =',LO
+               CALL ERROR_MESSAGE(NSEQP)
+            END IF
+            GO TO 100
+!
          CASE DEFAULT
             GO TO 100
 !
@@ -1554,16 +1562,16 @@
 !
       SUBROUTINE CKS451
 !
-!     ROUTINE TO CHECK MT = 451
+!     Routine to check MT = 451
 !
       IMPLICIT NONE
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
-      CHARACTER(LEN=11) :: ZSA
+!     CHARACTER(LEN=11):: ZSA
       INTEGER(KIND=I4) :: IZ,IA,ISTA,IZA,IZ1
-      INTEGER(KIND=I4) :: NREL
+      INTEGER(KIND=I4) :: LREL
       INTEGER(KIND=I4) :: NCD,NID
       INTEGER(KIND=I4) :: MATCHK
       INTEGER(KIND=I4) :: JPART,JTYPE
@@ -1595,33 +1603,50 @@
      &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',         &       
      &       'Rg','XX'/)
 !
-!     SET CONTROL PARAMETERS FROM THE FIRST MATERIAL RECORD
+!     Set control parameters from the first material record
 !
-      ZA = C1H
+      ZSA ='           '
+      ZA  = C1H
       AWR = C2H
       LRP = L1H
       LFI = L2H
-      NLIB = N1H
-      NMOD = N2H
+      NLIB= N1H
+      NMOD= N2H
       IZ = IFIX(ZA)/1000
       IA = MOD(IFIX(ZA),1000)
 !
-!     CHECK PARAMETERS
-!
-      CALL TEST1(LRP,-1,2,'LRP',1)
-      CALL TEST1(LFI,0,1,'LFI',1)
-      CALL TEST1(NLIB,0,99,'LIB',1)
-      CALL TEST1(NMOD,0,20,'MOD',1)
-!
-!     READ THE NEXT CONTROL RECORD AND SET PARAMETERS
+!     Read the next control record and set parameters
 !
       CALL RDCONT
-      STA = C2H
-      LIS = L1H
+      STA  = C2H
+      LIS  = L1H
       LISO = L2H
       NFOR = N2H
 !
-!     CHECK PARAMETERS
+!     Build Z-S-A for Card 5, Field 1 test
+!
+      IF(NSUB.NE.12) THEN
+         ZSA = ' '
+         IZA = IFIX(ZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         IZ1 = MIN0((IZ+1),IELM)
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
+         IF(LISO.GE.3) THEN
+            ZSA(11:11) = 'O'
+         ELSE IF(LISO.GE.2) THEN
+            ZSA(11:11) = 'N'
+         ELSE IF(LISO.GE.1) THEN
+           ZSA(11:11) = 'M'
+         END IF
+      END IF
+!
+!     Check parameters for their respective valid range
+!
+      CALL TEST1(LRP,-1, 2,'LRP',1)
+      CALL TEST1(LFI, 0, 1,'LFI',1)
+      CALL TEST1(NLIB,0,99,'LIB',1)
+      CALL TEST1(NMOD,0,20,'MOD',1)
 !
       ISTA = IFIX(STA)
       CALL TEST1(ISTA,0,1,'STA',1)
@@ -1632,7 +1657,7 @@
          CALL TEST1(LISO,1,LIS,'LISO',1)
       END IF
 !
-!     ENDF-V FORMAT FILE
+!     ENDF-V format file
 !
       IF(NFOR.EQ.0)   THEN
          NFOR = 5
@@ -1656,21 +1681,21 @@
          CALL TEST1(NFOR,6,6,'NFOR',1)
       END IF
 !
-!     ENDF-VI OR LATER FORMAT, READ ANOTHER CONTROL RECORD
+!     ENDF-6 or later format, read another control record
 !
       CALL RDCONT
       AWI = C1H
       EMAX = C2H
-      NREL = L1H
+      LREL = L1H
       NSUB = N1H
       NVER = N2H
       NFOR = MAX0(6,NFOR)
 !
-!     CHECK NREL
+!     Check library release number LREL
 !
-      CALL TEST1(NREL,0,20,'NREL',1)
+      CALL TEST1(LREL,0,29999999,'LREL',1)
 !
-!     CHECK EMAX
+!     Check EMAX
 !
       SELECT CASE (NSUB)
          CASE (10)
@@ -1683,7 +1708,7 @@
             CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
       END SELECT
 !
-!     CHECK MAT NUMBER AGAINST ZA FOR ENDF/B
+!     Check MAT number against ZA for ENDF/B
 !
       IF(NFOR.GE.6) THEN
          IF((NLIB.EQ.0.OR.NLIB.EQ.4)) THEN
@@ -1707,12 +1732,12 @@
          END IF
       END IF
 !
-!     CHECK VALUES OF CONTROL VARIABLES
+!     Check values of control variables
 !
   10  IF(NVER.GE.1990.AND.NVER.LE.IYR) GO TO 15
       CALL TEST1(NVER,0,99,'NVER',1)
 !
-!     CHECK FOR A VALID SUB LIBRARY NUMBER
+!     Check for a valid Sub-Library number
 !
   15  NSEQP1 = NSEQP1 + 1
       JPART = NSUB/10
@@ -1735,7 +1760,7 @@
      &          'INVALID SUBLIBRARY NUMBER NSUB =',NSUB
       CALL ERROR_MESSAGE(NSEQP1)
       GO TO 40
-!*****CHECK LRP AGAINST NSUB
+!     Check LRP against NSUB
    30 IEF = 0
       IF(NSUB.EQ.10) THEN
          IF(LRP.EQ.-1)  IEF = 1
@@ -1748,11 +1773,11 @@
          CALL ERROR_MESSAGE(NSEQP1-2)
       END IF
 !
-!     PROCESS LAST CONTROL RECORD
+!     Process last control record
 !
    40 CALL RDCONT
 !
-!     CHECK PARAMETERS
+!     Check parameters
 !
       LDRV = L1H
       TEMP = C1H
@@ -1772,25 +1797,7 @@
          CALL TEST1(NCD,NCDMI,NCDMA,'NCD',1)
       END IF
 !
-!     BUILD Z-S-A FOR CARD 5, FIELD 1 TEST
-!
-      IF(NSUB.NE.12) THEN
-         ZSA = ' '
-         IZA = IFIX(ZA+.001)
-         IA = MOD(IZA,1000)
-         IZ = IZA/1000
-         IZ1 = MIN0((IZ+1),IELM)
-         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
-         IF(LISO.GE.3) THEN
-            ZSA(11:11) = 'O'
-         ELSE IF(LISO.GE.2) THEN
-            ZSA(11:11) = 'N'
-         ELSE IF(LISO.GE.1) THEN
-           ZSA(11:11) = 'M'
-         END IF
-      END IF
-!
-!     READ IN COMMENT RECORDS
+!     Read in comment records
 !
       IF(NFOR.GE.6)  THEN
          NID = 5
@@ -1803,9 +1810,9 @@
          IF(IERX.EQ.1)   GO TO 100
          IF(NC.EQ.1) THEN
             IF(NSUB.NE.12.AND.ZSA.NE.TEXT(1:11)) THEN
-               EMESS = 'ZSYNAM SHOULD BE '//TRIM(ZSA)//' NOT '//        &       
-     &                 TRIM(TEXT(1:11))
-               CALL ERROR_MESSAGE(NSEQP)
+               EMESS = 'ZSYNAM SHOULD BE "'//TRIM(ZSA)//'" NOT "'//     &       
+     &                 TRIM(TEXT(1:11))//'"'
+               CALL WARNING_MESSAGE(NSEQP)
             END IF
          END IF
          IF(NC.LE.NID)   THEN
@@ -1814,17 +1821,21 @@
       END DO
       IF(IMDC.LT.4) WRITE(IOUT,'(1X,A)') ' '
 !
-!     PROCESS THE DIRECTORY
+!     Process the directory
 !
       NXC = N2H
       NXC0 = NXC
-      CALL TEST1(NXC,0,NSECMAX,'NXC',2)
-      IF(IERX.EQ.1) GO TO 100
+      CALL TEST1(NXC,0,NSECMAX,'NXC',1)
+      IF(IERX.GT.1) GO TO 100
 !
-!     MESSAGE IF DIRECTORY MISSING
+!     Message if directory missing or too big
 !
-      IF(NXC0.EQ.0) THEN
-         EMESS = 'DIRECTORY MISSING'
+      IF(NXC0.EQ.0 .OR. NXC0.GT.NSECMAX) THEN
+         IF(NXC0.EQ.0) THEN
+           EMESS = 'DIRECTORY MISSING'
+         ELSE
+           EMESS = 'DIRECTORY TOO LONG'
+         END IF
          CALL ERROR_MESSAGE(NSEQP)
          EMESS = '    ALL TESTS WHICH DEPEND ON ITS PRESENCE WILL '//   &       
      &             'NOT BE DONE'
@@ -1832,36 +1843,38 @@
          GO TO 100
       END IF
 !
-!     CHECK THE DIRECTORY
+!     Check the directory
 !
       MFTP = 0
       N1 = 0
       DO N=1,NXC
          CALL RDCONT
-!********SECTION MOD NUMBER CANNOT EXCEED THE MATERIAL MOD NUMBER
+!        Section MOD number cannot exceed the material MOD number
          CALL TEST1(N2H,0,NMOD,'MOD',1)
-!********FIRST ENTRY IN THE DIRECTORY MUST BE 1/451
+!        First entry in the directory must be 1/451
          MFT = 1000*L1H + L2H
          IF(N.EQ.1.AND.MFT.NE.1451) THEN
             EMESS = 'FIRST DIRECTORY ENTRY IS NOT MF=1, MT=451'
             CALL ERROR_MESSAGE(NSEQP)
          END IF
-!***********DIRECTORY MUST BE IEASING ORDER OF MF AND MT
+!        Directory must be ieasing order of MF and MT
          IF(MFT.LE.MFTP)   THEN
             EMESS = 'DIRECTORY OUT OF ORDER'
             CALL ERROR_MESSAGE(NSEQP)
          ELSE
-!***********STORE MF AND MT IN THE INDEX
+!           Store MF and MT in the index
             N1 = N1 + 1
-            INDX(N1,1) = MFT
-            INDX(N1,2) = 1
+            IF(N1.LE.NSECMAX) THEN
+              INDX(N1,1) = MFT
+              INDX(N1,2) = 1
+            END IF
             MFTP = MFT
          END IF
          IF(IERX.EQ.1)   GO TO 100
       END DO
       NXC = N1
 !
-!     CHECK THAT SECTION IS IN THE DIRECTORY
+!     Check that section is in the directory
 !
   100 CALL TESTD(MFO,MTO)
 !
@@ -1872,8 +1885,8 @@
 !
       SUBROUTINE MATASS(IZ,IA,LIS0,MATCHK)
 !
-!     FUNCTION TO CONVERT A  CHARGE NUMBER, A MASS NUMBER AND A
-!       LEVEL NUMBER INTO A MATERIAL NUMBER FOR ENDF/B.
+!     Function to convert Z  charge number, A mass number and 
+!       level number into MAT material number for ENDF/B.
 !
       IMPLICIT NONE
 !
@@ -1902,26 +1915,26 @@
      &        ZACOMP = (/101,102,103,107,111,112,113,126,127,128,       &       
      &                   131,133,134,137,140,158,175,176/)
 !
-!     INITIALIZE
+!     Initialize
 !
       MATCHK = 0
       IF(IZ.LT.0.OR.IA.LT.0)   GO TO 100
       IF(IZ.EQ.0)  GO TO 50
-!*****ONLY GROUND STATE AND TWO LEVELS ALLOWED
+!     Only ground state and two levels allowed
       IF(LIS0.LT.0.OR.LIS0.GT.2)   GO TO 100
-!*****INITIALIZE ELEMENT RELATED PORTION OF THE MATERIAL NUMBER
+!     INITIALIZE ELEMENT RELATED PORTION OF THE MATERIAL NUMBER
       IF(IZ.LE.99)   THEN
          NMAT = 100*IZ
       ELSE
          NMAT = ISP(IZ-99)
       END IF
 !
-!     INTERPRET MASS NUMBER
+!     Interpret mass number
 !
       IASS = 0
-!*****CHECK FOR NATURAL ELEMENT
+!     Check for natural element
       IF(IA.NE.0)   THEN
-!*****GET MASS DEPENDENT PART OF MATERIAL NUMBER
+!     GET MASS DEPENDENT PART OF MATERIAL NUMBER
          ICENT = IMEAN(IZ)
          IF(IZ.LT.99)  THEN
             IASS = 3*(IA-ICENT) + 25 + LIS0
@@ -1931,7 +1944,7 @@
          END IF
       END IF
       IF(IASS.LT.0.OR.IASS.GT.99)   GO TO 100
-!*****COMPLETE MASS NUMBER
+!     COMPLETE MASS NUMBER
       MATCHK = NMAT + IASS
       GO TO 100
 !
@@ -1951,8 +1964,8 @@
 !
       SUBROUTINE MATASS_JEF(IZ,IA,LIS0,MATCHK)
 !
-!     FUNCTION TO CONVERT A  CHARGE NUMBER, A MASS NUMBER AND A
-!       LEVEL NUMBER INTO A MATERIAL NUMBER FOR JEF.
+!     Function to convert Z  charge number, A mass number and 
+!       level number into MAT material number for JEF.
 !
       IMPLICIT NONE
 !
@@ -2235,6 +2248,8 @@
             CALL CHECK_AA(NLS)
          CASE (6)
             CALL CHECK_HR(NLS)
+         CASE (7)
+!           Testing not implemented
       END SELECT
 !
   100 RETURN
@@ -2325,7 +2340,6 @@
 !********TEST NUMBER OF J STATES
          NJS = N1H
          CALL TEST1(NJS,1,NJSMAX,'NJS',1)
-         IF(IERX.EQ.1) GO TO 100
 !
 !        PROCESS EACH J STATE
 !
@@ -2767,9 +2781,9 @@
       CALL TEST1(LVT,0,1,'LVT',2)
       IF(LVT.EQ.1) THEN
          EMESS = ' THE ELASTIC TRANSFORMATION MATRIX IS NO'
-         CALL ERROR_MESSAGE(0)
+         CALL WARNING_MESSAGE(0)
          EMESS = '       LONGER SUPPORTED'
-         CALL ERROR_MESSAGE(NSEQP)
+         CALL WARNING_MESSAGE(NSEQP)
       END IF
 !*****TEST ANGULAR REPRESENTATION FLAG
       LTT = L2H
@@ -2875,7 +2889,7 @@
 !
       SUBROUTINE CKF5
 !
-!     ROUTINE TO CHECK FILE 5 DATA
+!     Routine to check File 5 data
 !
       IMPLICIT NONE
 !
@@ -2896,7 +2910,7 @@
       CALL TESTD(MFO,MTO)
       IF(IERX.EQ.1)   GO TO 100
 !
-!     THE EQUIVALENT SECTION MUST EXIST IN FILE 3 (FILE 1 IF MT=455)
+!     The equivalent section must exist in File 3 (File 1 if MT=455)
 !
       IF(MT.EQ.455)   THEN
          MFPR = 1
@@ -2914,9 +2928,9 @@
 !
       DO N=1,NK
          CALL RDTAB1
-!********TEST NUMBER OF POINTS IN PROBABILITY TABLE
+!        Test number of points in probability table
          CALL TEST1(NP,1,NES5MAX,'NP',1)
-!********TEST FOR VALID DISTRIBUTION LAW
+!        Test for valid distribution law
          LF = L2
          CALL TEST1(LF,1,LFMAX,'LF',2)
          IF(IERX.EQ.1) GO TO 100
@@ -2925,7 +2939,8 @@
 !        TABULATED DISTRIBUTION   LF=1
 !
             CASE (1)
-               CALL RDTAB2(0)
+!              Allow INT=11-15, 21-25
+               CALL RDTAB2(2)
                NE = NP2
                CALL TEST1(NE,1,NES5MAX,'NE',1)
                IF(IERX.EQ.1)   GO TO 100
@@ -3018,7 +3033,7 @@
 !
       MFM2 = MF - 2
       CALL TESTS(MFM2,MT,ISET)
-      IF(NXC0.NE.0.AND.ISET.NE.1.AND.ISET.NE.3)    THEN
+      IF(NXC0.GT.0.AND.NXC0.LT.NSECMAX.AND.ISET.NE.1.AND.ISET.NE.3) THEN
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM2,'/',MT,         &       
      &       ' NOT BE PRESENT'
@@ -3026,7 +3041,7 @@
       END IF
       MFM1 = MF - 1
       CALL TESTS(MFM1,MT,ISET)
-      IF(NXC0.NE.0.AND.ISET.NE.1.AND.ISET.NE.3)    THEN
+      IF(NXC0.GT.0.AND.NXC0.LT.NSECMAX.AND.ISET.NE.1.AND.ISET.NE.3) THEN
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM1,'/',MT,         &       
      &       ' NOT BE PRESENT'
@@ -3385,7 +3400,7 @@
       INTEGER(KIND=I4) :: LEP1
       INTEGER(KIND=I4) :: NFP,NUM
       INTEGER(KIND=I4) :: NS,NO
-      INTEGER(KIND=I4) :: LFSO,LFSP
+      INTEGER(KIND=I4) :: LFSO,LFSP,JZAO,JZAP
       INTEGER(KIND=I4) :: MATPR
       INTEGER(KIND=I4) :: LMF,NND
       INTEGER(KIND=I4) :: K,N
@@ -3432,6 +3447,7 @@
          NO = N2H
          CALL TEST1(NS,1,NDSTMAX,'NS',1)
          LFSP = -1
+         JZAP = -1
          DO N=1,NS
             IF(NO.EQ.1)  THEN
                CALL RDCONT
@@ -3452,11 +3468,17 @@
                MATPR = N2L
             END IF
 !***********CHECK INCREASING ORDER OF FINAL STATES
-            IF (LFSO.LE.LFSP)   THEN
+            JZAO=NINT(ZAP)
+            IF (JZAO.LT.JZAP)   THEN
+               EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING ZA'
+               CALL ERROR_MESSAGE(NSEQP1)
+            END IF
+            IF (JZAO.EQ.JZAP .AND. LFSO.LE.LFSP)   THEN
                EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING LFSO'
                CALL ERROR_MESSAGE(NSEQP1)
             END IF
             LFSP = LFSO
+            JZAP = JZAO
 !***********CHECK THAT ZAP IS NOT ZERO
             IF(ZAP.EQ.0.0) THEN
                EMESS = 'ZAP CANNOT BE 0.0'
@@ -3465,7 +3487,7 @@
 !***********CHECK THAT MATP IS ZERO, USE IS OBSOLETE
             IF(MATPR.NE.0) THEN
                EMESS = 'MATP IS OBSOLETE, SHOULD BE SET TO 0'
-               CALL ERROR_MESSAGE(NSEQP1)
+               CALL WARNING_MESSAGE(NSEQP1)
             ENDIF
 !***********CHECK FOR VALID LMF
             IF(LMF.EQ.3) THEN
@@ -3658,7 +3680,8 @@
       IF(MF.EQ.10)   THEN
          MFM1 = MF - 1
          CALL TESTS(MFM1,MT,ISET)
-         IF(NXC0.NE.0.AND.ISET.NE.1.AND.ISET.NE.3)    THEN
+         IF(NXC0.GT.0.AND.NXC0.LE.NSECMAX.AND.                          &
+     &      ISET.NE.1.AND.ISET.NE.3) THEN
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &        'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,         &       
      &        ' NOT BE PRESENT'
@@ -3768,9 +3791,13 @@
 !     FILE 12 CHECKS
 !
       IF(MF.EQ.12)   THEN
-!********CHECK THAT FILE 3 EXISTS FOR THE MT
-         CALL TESTP(3,MTO)
-!********CHECK FOR A VALID LO
+!        Check that File 3 exists for the MT
+         IF(MTO.EQ.460) THEN
+           CALL TESTP(1,MTO)
+         ELSE
+           CALL TESTP(3,MTO)
+         END IF
+!        Check for a valid LO
          LO = L1H
          CALL TEST1(LO,1,2,'LO',2)
 !
@@ -3780,7 +3807,8 @@
 !*******SAME SECTION CANNOT EXIST IN FILE 12
          MFM1 = MF - 1
          CALL TESTS(MFM1,MT,ISET)
-         IF(NXC0.NE.0.AND.ISET.NE.1.AND.ISET.NE.3)    THEN
+         IF(NXC0.GT.0.AND.NXC0.LE.NSECMAX.AND.                          &
+     &      ISET.NE.1.AND.ISET.NE.3) THEN
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &         'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,        &       
      &         ' NOT BE PRESENT'
@@ -3796,7 +3824,7 @@
       IF(LO.LE.1)   THEN
          NK = N1H
          CALL TEST1(NK,1,NPHMAX,'NK',1)
-         CALL TESTNK12(NK,0)
+         IF(NXC0.GT.0.AND.NXC0.LE.NSECMAX) CALL TESTNK12(NK,0)
 !
 !        READ IN REDUNDANT TOTAL
 !
@@ -3873,8 +3901,8 @@
          DO N=1,N12S
             IF(MT.EQ.MTS(N)) THEN
                IF(NKS(N).NE.NK) THEN
-                  WRITE(EMESS,'(A,I3,A,I4,A)')                          &       
-     &               'NK =',NK,' MUST BE EQUAL TO',NKS(N),              &       
+                  WRITE(EMESS,'(A,I5,A,I5,A)')                          &       
+     &               'NK=',NK,' MUST EQUAL',NKS(N),                     &       
      &               ' AS IN FILE 12 OR 13'
                   CALL ERROR_MESSAGE(NSEQP1)
                   GO TO 100
@@ -4263,7 +4291,7 @@
 !
       SUBROUTINE CKF32
 !
-!     ROUTINE TO CHECK FILE 32 DATA
+!     Routine to check File 32 data
 !
       IMPLICIT NONE
 !
@@ -4272,25 +4300,25 @@
       INTEGER(KIND=I4) :: NER,NERM
       INTEGER(KIND=I4) :: N,NI
 !
-!     TEST FOR A VALID MT NUMBER
+!     Test for a valid MT number
 !
       CALL TESTFT(MTO,MFO)
 !
-!     SEE IF SECTION IS IN THE DIRECTORY
+!     See if section is in the directory
 !
       CALL TESTD(MFO,MTO)
       IF(IERX.EQ.1)   GO TO 100
 !
-!     THE EQUIVALENT SECTION MUST EXIST IN FILE 2
+!     The equivalent section must exist in File 2
 !
       CALL TESTP(2,MTO)
 !
-!     TEST NUMBER OF ISOTOPES
+!     Test number of isotopes
 !
       NIS = N1H
       CALL TEST1(NIS,1,NISMAX,'NIS',1)
 !
-!     PROCESS EACH ISOTOPE
+!     Process each isotope
 !
       DO NI=1,NIS
          CALL RDCONT
@@ -4298,10 +4326,10 @@
             CALL TEST2F(C1H,ZA,'ZAI')
             CALL TEST2F(C2H,1.0,'ABN')
          END IF
-!********TEST LFW
+!        Test LFW
          LFW = L2H
          CALL TEST1(LFW,0,1,'LFW',2)
-!********TEST NUMBER OF ENERGY RANGES
+!        Test number of energy ranges
          NER = N1H
          IF(NFOR.GE.6)  THEN
             NERM = NERM6
@@ -4311,11 +4339,11 @@
          CALL TEST1(NER,1,NERM,'NER',1)
          IF(IERX.EQ.1) GO TO 100
 !
-!        PROCESS EACH ENERGY RANGE
+!        Process each energy range
 !
          DO N=1,NER
             CALL RDCONT
-!***********TEST LRU
+!           Test LRU
             LRU = L1H
             IF(NFOR.GE.6)   THEN
                LRUM = 2
@@ -4329,12 +4357,12 @@
                CALL TEST2(N2H,0,'N2H')
             END IF
 !
-!           BRANCH ON REPRESENTATION
+!           Branch on representation
 !
             IF(LRU.EQ.1)  THEN
                CALL RR_COV
             ELSE
-!**************CHECK FOR ONLY ONE REGION
+!              Check for only one region
                IF(N.NE.NER) THEN
                   EMESS = 'ONLY ONE UNRESOLVED RESONANCE REGION IS '
                   CALL ERROR_MESSAGE(0)
@@ -4354,7 +4382,7 @@
 !
       SUBROUTINE RR_COV
 !
-!     ROUTINE TO CHECK RESOLVED RESONANCE REGION COVARIANCES
+!     Routine to check resolved resonance region covariances
 !
       IMPLICIT NONE
 !
@@ -4364,13 +4392,14 @@
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
       INTEGER(KIND=I4) :: LB,LT,NE,NE2,NPM,NTT,NEC
       INTEGER(KIND=I4) :: I1,I3,NL
+      INTEGER(KIND=I4) :: NNN,NM
       REAL(KIND=R4) :: AP
 !
       LRF = L2H
 !
-!     SCATTERING LENGTH
+!     Scattering length
 !
-      NRO = N1H
+      NRO  = N1H
       NAPS = N2H
       IF(NRO.EQ.1) THEN
          NAPSM = 2
@@ -4382,38 +4411,38 @@
          IF(IERX.EQ.1)  GO TO 100
       END IF
 !
-!     PROCESS ENERGY DEPENDENT SCATTERING LENGTH
+!     Process energy dependent scattering radius
 !
       IF(NRO.NE.0)  THEN
          CALL RDCONT
          NIT = N2H
          DO I3=1,NIT
             CALL RDLIST
-!***********CHECK FOR VALID LB VALUE
+!           Check for valid LB value
             LB = L2L
             CALL TEST1(LB,0,6,'LB',2)
             IF(IERX.EQ.1) GO TO 100
-!***********CHECK CONSISTENCY OF FLAGS WITH LAW LB
-            LT = L1L
+!           Check consistency of flags with law LB
+            LT = NPL
             NE = N2L
             NE2 = N2L*2
             IF(LB.LE.2) THEN
-!**************LB = 0, 1, OR 2
+!              Test LB = 0, 1, OR 2
                CALL TEST2(LT,0,'LT')
                CALL TEST2(NPL,NE2,'NT')
             ELSE IF(LB.EQ.3.OR.LB.EQ.4) THEN
-!**************LB = 3 OR 4
+!              Test LB = 3 OR 4
                NPM = N2L - 1
                CALL TEST1(LT,1,NPM,'LT',1)
                CALL TEST2(NPL,NE2,'NT')
             ELSE IF(LB.EQ.5) THEN
-!**************LB = 5
+!              Test LB = 5
                CALL TEST1(LT,0,1,'LS',1)
                NTT = NE*(NE-1) + 1
                IF(LT.EQ.1) NTT = NE*(NE+1)/2
                CALL TEST2(NPL,NTT,'NT')
             ELSE IF(LB.EQ.6) THEN
-!**************LB = 6
+!              Test LB = 6
                CALL TEST2(LT,0,'LT')
                NEC=(NPL-1)/NE
                CALL TEST1(NEC,1,200,'NEC',1)
@@ -4423,7 +4452,7 @@
          END DO
       END IF
 !
-!     TEST LRF
+!     Test LRF
 !
       IF(NFOR.GE.6) THEN
          LRFM = LRFM6
@@ -4431,29 +4460,27 @@
          LRFM = LRFM5
       END IF
       CALL TEST1(LRF,1,LRFM,'LRF',2)
-      IF(IERX.EQ.1) GO TO 100
+      IF(IERX.GE.1) GO TO 100
 !
-!     READ NUMBER OF PARTIAL WAVES
+!     Read number of partial waves
 !
       CALL RDCONT
 !
-!     CHECK VALUE OF AP
+!     Check value of AP
 !
       AP = C2H
       IF(NFOR.GE.6) THEN
          IF(NAPS.NE.2.AND.NRO.EQ.1)  CALL TEST2F(AP,0.0,'AP')
       END IF
 !
-!     CHECK LSSF AND LCOMP
+!     Check LCOMP
 !
-      LSSF = L1H
-      CALL TEST2(LSSF,0,'LSSF')
       LCOMP = L2H
       IF(NFOR.GE.6)  THEN
-         CALL TEST1(LCOMP,0,1,'LCMP',2)
-         IF(IERX.EQ.1)   GO TO 100
+         CALL TEST1(LCOMP,0,2,'LCOMP',2)
+         IF(IERX.GE.1)   GO TO 100
       ELSE
-         CALL TEST2(LCOMP,0,'LCMP')
+         CALL TEST2(LCOMP,0,'LCOMP')
       END IF
 !
 !     CHECK NUMBER OF PARTIAL WAVES (L-VALUES)
@@ -4464,93 +4491,105 @@
       ELSE
          CALL TEST2(NLS,0,'NLS')
       END IF
+      IF(LCOMP.EQ.0) THEN
 !
-!     SINGLE AND MULTILEVEL BREIT-WIGNER ENDF-5 STYLE
+!        Single and Multilevel Breit-Wigner ENDF-5 style
 !
-      IF(LCOMP.NE.1) THEN
          DO NL=1,NLS
             CALL RDLIST
-!***********CHECK ON NUMBER OF RESONANCES ALLOWED
+!           Check on number of resonances allowed
             NRS = N2L
             CALL TEST1(NRS,1,NRESMAX,'NRS',2)
             IF(IERX.EQ.1) GO TO 100
-!***********CHECK NUMBER OF DATA ITEMS PER RESONANCE
+!           Check number of data items per resonance
             NUM = NPL/NREP18
             CALL TEST2(NRS,NUM,'NRS')
          END DO
          GO TO 100
-      END IF
-!
-!     NEW STYLE FORMATS
-!
-      CALL RDCONT
-      NSRS = N1H
-      NLRS = N2H
-!
-!     SHORT RANGE CORRELATIONS
-!
-      IF(NSRS.GT.0)  THEN
-         DO I1=1,NSRS
-            CALL RDLIST
-            MPAR = L1L
-            IF(LRF.EQ.4) THEN
-               MPARM = 8
-            ELSE
-               MPARM = 5
-            ENDIF
-            CALL TEST1(MPAR,1,MPARM,'MPAR',1)
-            NRB = N2L
-            CALL TEST1(NRB,1,250,'NRB',1)
-            NCOUNT = NRB*MPAR
-            NVS = NCOUNT*(NCOUNT+1)/2
-            NTT = NVS + 6*NRB
-            IF(LRF.EQ.4)  THEN
-               NTT = NTT + 6*NRB
-            ELSE
+      ELSE IF(LCOMP.EQ.1) THEN
+!   
+!        ENDF Compatible format
+!   
+         CALL RDCONT
+         NSRS = N1H
+         NLRS = N2H
+!   
+!        SHORT RANGE CORRELATIONS
+!   
+         IF(NSRS.GT.0)  THEN
+            DO I1=1,NSRS
+               CALL RDLIST
+               MPAR = L1L
+               IF     (LRF.EQ.3) THEN
+                  MPARM = 5
+               ELSE IF(LRF.EQ.4) THEN
+                  MPARM = 8
+               ELSE IF(LRF.EQ.7) THEN
+!                Checking coding not implemented
+                 GO TO 100
+               ENDIF
+               CALL TEST1(MPAR,1,MPARM,'MPAR',1)
+               NRB = N2L
+               CALL TEST1(NRB,1,250,'NRB',1)
+               NCOUNT = NRB*MPAR
+               NVS = NCOUNT*(NCOUNT+1)/2
                NTT = NVS + 6*NRB
-            END IF
-            CALL TEST2(NPL,NTT,'NPL')
-         END DO
-      ELSE IF(NLRS.EQ.0)  THEN
+               CALL TEST2(NPL,NTT,'NPL')
+            END DO
+         END IF
+         IF(NLRS.GT.0)  THEN
+!   
+!        LONG RANGE CORRELATIONS
+!   
+            DO I1=1,NLRS
+               CALL RDLIST
+!              Check IDP flag
+               IDP = L1L
+               IF(LRF.EQ.4) THEN
+                  IDPM = 8
+               ELSE
+                  IDPM = 5
+               END IF
+               CALL TEST1(IDP,1,IDPM,'IDP',1)
+!              Check for valid LB value
+               LB = L2L
+               CALL TEST1(LB,-1,5,'LB',2)
+               IF(IERX.EQ.1) GO TO 100
+!              Check consistency of flags with law LB
+               NE = N2L
+               NE2 = N2L*2
+               SELECT CASE (LB)
+!                 Test LB = -1, 0, 1, or 2
+                  CASE (-1:2)
+                    CALL TEST2(LT,0,'LT')
+                    CALL TEST2(NPL,NE2,'NT')
+!                 Test LB = 3 or 4
+                  CASE (3:4)
+                     WRITE(EMESS,'(A,I2,A)') 'LB=',LB,' NOT ALLOWED'
+                     CALL ERROR_MESSAGE(NSEQP1)
+!                 Test LB = 5
+                  CASE (5)
+                     CALL TEST1(LT,0,1,'LS',1)
+                     IF(LT.EQ.1) THEN
+                        NTT = NE*(NE+1)/2
+                     ELSE
+                        NTT = NE*(NE-1) + 1
+                     END IF
+                     CALL TEST2(NPL,NTT,'NT')
+               END SELECT
+            END DO
+         END IF
+      ELSE IF(LCOMP.EQ.2) THEN
 !
-!     LONG RANGE CORRELATIONS
+!        Compact format representation
 !
-         DO I1=1,NLRS
-            CALL RDLIST
-!***********CHECK IDP FLAG
-            IDP = L1L
-            IF(LRF.EQ.4) THEN
-               IDPM = 8
-            ELSE
-               IDPM = 5
-            END IF
-            CALL TEST1(IDP,1,IDPM,'IDP',1)
-!***********CHECK FOR VALID LB VALUE
-            LB = L2L
-            CALL TEST1(LB,-1,5,'LB',2)
-            IF(IERX.EQ.1) GO TO 100
-!***********CHECK CONSISTENCY OF FLAGS WITH LAW LB
-            NE = N2L
-            NE2 = N2L*2
-            SELECT CASE (LB)
-!**************LB = -1, 0, 1, OR 2
-               CASE (-1:2)
-                 CALL TEST2(LT,0,'LT')
-                 CALL TEST2(NPL,NE2,'NT')
-!**************LB = 3 OR 4
-               CASE (3:4)
-                  WRITE(EMESS,'(A,I2,A)') 'LB=',LB,' NOT ALLOWED'
-                  CALL ERROR_MESSAGE(NSEQP1)
-!**************LB = 5
-               CASE (5)
-                  CALL TEST1(LT,0,1,'LS',1)
-                  IF(LT.EQ.1) THEN
-                     NTT = NE*(NE+1)/2
-                  ELSE
-                     NTT = NE*(NE-1) + 1
-                  END IF
-                  CALL TEST2(NPL,NTT,'NT')
-            END SELECT
+         CALL RDLIST
+         CALL RDCONT
+         NNN=L2H
+         NM =N1H
+         DO I1=1,NM
+!           CALL RDINTG
+            CALL RDTEXT
          END DO
       END IF
 !
@@ -5310,7 +5349,7 @@
 !
       INTEGER(KIND=I4) :: NI,NF
       INTEGER(KIND=I4) :: I,N
-      REAL(KIND=R4), DIMENSION(6) :: ANT
+      REAL(KIND=R8), DIMENSION(6) :: ANT
 !
 !     READ IN CONT-LIKE RECORD
 !
@@ -5483,7 +5522,7 @@
 !
       INTEGER(KIND=I4) :: NN
       INTEGER(KIND=I4) :: I,N
-      REAL(KIND=R4), DIMENSION(6) :: ANT
+      REAL(KIND=R8), DIMENSION(6) :: ANT
 !
 !     READ IN CONT-LIKE RECORD
 !
@@ -5507,22 +5546,24 @@
 !
 !     CHECK LIMIT FOR NUMBER OF ENTRIES IN THE LIST RECORD
 !
-      CALL TEST1(NPL,1,NPTSMAX,'NPL',1)
+!*** The next test was deactivated because it is not in the manual (A.Trkov)
+!     CALL TEST1(NPL,1,NPTSMAX,'NPL',1)
 !
 !     PROCESS DATA TABLE
 !
       DO N=1,NPL,6
          ISEQ = ISEQ + 1
          NSEQP = 0
-         READ(JIN,'(6E11.4,I4,I2,I3,I5)',ERR=40,END=90)                 &       
+         READ(JIN,'(A)',END=90) IFIELD
+         READ(IFIELD,'(6E11.4,I4,I2,I3,I5)',ERR=40)                     &
      &                            ANT,MATP,MFP,MTP,NSEQP
          IF(ASEQ.EQ.' ') NSEQP = ISEQ
          GO TO 50
 !
 !        ERROR SO TRY TO READ EACH FIELD SEPARATELY
 !
-   40  IF(ASEQ.EQ.' ') NSEQP = ISEQ
-         CALL DATARD(ANT,MATP,MFP,MTP,NSEQP)
+   40    CALL DATARD(ANT,MATP,MFP,MTP,NSEQP)
+         IF(ASEQ.EQ.' ') NSEQP = ISEQ
 !
 !        TEST CONTENTS OF RECORD ID FIELDS
 !
@@ -5760,7 +5801,7 @@
 !
       INTEGER(KIND=I4) :: MATT,MFT,MTT
       INTEGER(KIND=I4) :: NSEQT
-      REAL(KIND=R4), DIMENSION(6) :: ANT
+      REAL(KIND=R8), DIMENSION(6) :: ANT
 !
       CHARACTER(LEN=11) :: RFIELD
       INTEGER(KIND=I4) :: K
@@ -5768,7 +5809,7 @@
 !     PROCESS FLOATING POINT FIELDS
 !
       DO K=1,6
-         ANT(K) = 0.
+         ANT(K) = 0
          RFIELD = IFIELD(IBR(K):IBR(K+1)-1)
          READ(RFIELD,'(E11.4)',ERR=10) ANT(K)
    10    CONTINUE
@@ -5795,7 +5836,7 @@
       INTEGER(KIND=I4) :: IFMT
 !
       CHARACTER(LEN=5) :: RFIELD
-      CHARACTER(LEN=25) :: FMT
+      CHARACTER(LEN=25):: FMT
       INTEGER(KIND=I4) :: NB
       INTEGER(KIND=I4) :: K
 !
@@ -5828,8 +5869,8 @@
          CASE (4)
             FMT = '(6E11.4,I4,I2,I3,I5)'
       END SELECT
-      EMESS = 'FORMAT ERROR IN CARD NO. '//IFIELD(76:80)
-      CALL ERROR_MESSAGE(0)
+      EMESS = 'FORMAT ERROR IN RECORD'
+      CALL ERROR_MESSAGE(NSEQR)
       EMESS = '    EXPECT FORMAT '//FMT
       CALL ERROR_MESSAGE(0)
       EMESS = '    READ   '//IFIELD
@@ -5855,15 +5896,15 @@
       INTEGER(KIND=I4) :: JNTMIN,JNTMAX
       INTEGER(KIND=I4) :: M
 !
-!     THERE MUST BE AT LEAST ONE INTERPOLATION REGION
+!     There must be at least one interpolation region
 !
       IF(NRT.LT.1)   GO TO 90
 !
-!     NUMBER OF REGIONS CANNOT EXCEED NUMBER OF POINTS
+!     Number of regions cannot exceed number of points
 !
       IF(NPT.LT.NRT) GO TO 90
 !
-!     REGION BOUNDRY POINTS MUST BE IN INCREASING ORDER
+!     Region boundry points must be in increasing order
 !
       IF(NRT.GT.1)  THEN
          DO M=2,NRT
@@ -5871,11 +5912,11 @@
          END DO
       END IF
 !
-!     LAST BOUNDRY MUST BE AT LAST POINT
+!     Last boundry must be at last point
 !
       IF(NBTT(NRT).NE.NPT) GO TO 90
 !
-!     FIRST BOUNDRY CANNOT BE BELOW FIRST POINT
+!     First boundry cannot be below first point
 !
       IF(NBTT(1).LT.1)   GO TO 90
       JNTMIN = 1
@@ -5884,7 +5925,7 @@
          IF(MF.EQ.3.OR.MF.EQ.6)   JNTMAX = 6
       END IF
 !
-!     ALL INTERPOLATION LAWS MUST BE VALID
+!     All interpolation laws must be valid
 !
       DO M=1,NRT
          KNT = JNTT(M)/10
@@ -5894,9 +5935,9 @@
       END DO
       GO TO 100
 !
-!     ERROR MESSAGE
+!     Error message
 !
-   90 EMESS = 'INTERPOLATION TABLE INCORRECT'
+   90 WRITE(EMESS,*)'INCORRECT INTERPOLATION TABLE'
       CALL ERROR_MESSAGE(NSEQP1)
 !
   100 RETURN
@@ -5946,7 +5987,7 @@
 !
       SUBROUTINE TEST1(N,NA,NB,KXXX,IERR)
 !
-!     ROUTINE TO TEST RANGE OF AN INTEGER
+!     Routine to test range of an integer
 !
       IMPLICIT NONE
 !
@@ -5954,13 +5995,18 @@
       INTEGER(KIND=I4) :: N,NA,NB
       INTEGER(KIND=I4) :: IERR
 !
-!     IF N IS GE NA, AND LE NB, OK
+!     If LB > N > NA, OK
 !
+      IERX=0
       IF(N.LT.NA.OR.N.GT.NB) THEN
          WRITE(EMESS,'(2A,I6,A,I6,A,I6)')                               &       
      &               KXXX,' =',N,' OUT OF RANGE',NA,' -',NB
          CALL ERROR_MESSAGE(NSEQP1)
-         IF(IERR.GT.1)   IERX = 1
+         IF(IERR.GT.1) THEN
+           IERX = IERR
+         ELSE
+           IERX = 1
+         END IF
       END IF
 !
       RETURN
@@ -6012,7 +6058,7 @@
 !
       SUBROUTINE TEST2F(A,B,KXXX)
 !
-!     ROUTINE TO TEST FOR EQUALITY OF FLOATING POINT NUMBERS, A = B
+!     Routine to test for equality of floating point numbers, A = B
 !
       IMPLICIT NONE
 !
@@ -6023,9 +6069,7 @@
 !
       REAL(KIND=R4) :: RTEST
 !
-      RTEST = ABS(A)
-      IF(B.NE.0.)  RTEST = ABS((B-A)/B)
-      IF(RTEST.GT.EPS)  THEN
+      IF(ABS(A-B).GT.EPS*MAX(ABS(A),ABS(B)))  THEN
          WRITE(EMESS,'(2A,1PE13.6)')                                    &       
      &                KXXX,' SHOULD BE SET TO ',B
          CALL ERROR_MESSAGE(NSEQP)
@@ -6126,7 +6170,7 @@
          IF(MTT.EQ.10.OR.MTT.EQ.27.OR.MTT.EQ.101.OR.                    &       
      &                  (MTT.GE.201.AND.MTT.LE.450))  THEN
             WRITE(EMESS,'(A,I4,A)')                                     &       
-     &              'MT=',MTT0,' ALLOWED ONLY IN DERIVED FILES'
+     &              'MT=',MTT0,' ALLOWED IN DERIVED FILES'
             CALL WARNING_MESSAGE(NSEQP1)
          END IF
       END IF
@@ -6158,6 +6202,13 @@
       SUBROUTINE GET_MTCAT(MTT,MT3,MTCAT)
 !
 !     EACH VALID MT IS ASSIGNED TO A CATEGORY (MTCAT)
+!       1  
+!       2  Resonance parameters
+!       3  Special reactions
+!       5  Particle production
+!       .
+!       .
+!       .
 !
       IMPLICIT NONE
 !
@@ -6207,6 +6258,8 @@
             MTCAT = 12
          ELSE IF(MTT.EQ.500)  THEN
             MTCAT = 3
+         ELSE IF(MTT.EQ.460)  THEN
+            MTCAT = 17
          END IF
 !
 !     PHOTON AND ELECTRON INTERACTION   501 - 599
@@ -6455,6 +6508,10 @@
 !********MTCAT=16;   ATOMIC RELAXATION DATA
          CASE (16)
             IF(MFT.NE.28)   IEVAL = 2
+!        MTCAT=17;   Delayed photon data
+         CASE (17)
+            IF(MFT.NE. 1 .AND. MFT.NE.12 .AND.
+     &         MFT.NE.14 .AND. MFT.NE.14)   IEVAL = 2
       END SELECT
 !
   100 RETURN
@@ -6464,8 +6521,8 @@
 !
       SUBROUTINE TESTD(MF1,MT1)
 !
-!     ROUTINE TO TEST WHETHER MF1,MT1 IS IN THE DIRECTORY. IF NOT, IT
-!       IS ADDED TO THE INDEX AND PROPERLY FLAGGED
+!     Routine to test whether MF1,MT1 is in the directory. If not, it
+!       is added to the index and properly flagged
 !
       IMPLICIT NONE
 !
@@ -6473,16 +6530,17 @@
 !
       INTEGER(KIND=I4) :: INDXT
       INTEGER(KIND=I4) :: IU
-      INTEGER(KIND=I4) :: I,J,K,N
+      INTEGER(KIND=I4) :: I,J,K,N,NN
 !
-!     DETERMINE PACKED VALUE
+!     Determine packed value
 !
       INDXT=1000*MF1+MT1
 !
 !     LOOK IT UP
 !
       IF(NXC.GT.0) THEN
-         DO N=1,NXC
+         NN=MIN(NXC,NSECMAX)
+         DO N=1,NN
             IF(INDX(N,1).GT.INDXT) GO TO 10
             IF(INDX(N,1).EQ.INDXT) GO TO 90
          END DO
@@ -6492,9 +6550,9 @@
       N = NXC + 1
    10 IF(IERX.NE.0) GO TO 100
 !
-!     SECTION NOT IN THE DIRECTORY, SO ADD IT TO THE INDEX
+!     Section not in the directory, so add it to the index
 !
-      IF(NXC.GE.250) GO TO 100
+      IF(NXC.GE.NSECMAX) GO TO 100
       NXC = NXC + 1
       IF(N.NE.NXC) THEN
          IU = NXC - N
@@ -6508,16 +6566,16 @@
       INDX(N,1) = INDXT
       INDX(N,2) = 2
 !
-!     WRITE ERROR MESSAGE
+!     Write error message
 !
-      IF(NXC0.NE.0) THEN
+      IF(NXC0.GT.0.AND.NXC0.LE.NSECMAX) THEN
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &             'SECTION',MF1,'/',MT1,' NOT IN DIRECTORY'
       END IF
       CALL ERROR_MESSAGE(0)
       GO TO 100
 !
-!     SECTION IN DIRECTORY SO FLAG IT AS FOUND
+!     Section in directory so flag it as found
 !
    90 INDX(N,2)=0
 !
@@ -6570,9 +6628,10 @@
       INTEGER(KIND=I4) :: MFT,MTT,ISET
 !
       INTEGER(KIND=I4) :: JNDX
-      INTEGER(KIND=I4) :: N
+      INTEGER(KIND=I4) :: N,NN
 !
-      IF(NXC.EQ.0) GO TO 100
+      ISET=-1
+      IF(NXC.LE.0 .OR. NXC.GT.NSECMAX) GO TO 100
 !
 !     DETERMINE PACKED VALUE
 !
@@ -6604,11 +6663,22 @@
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
+!       Material printout delimiter
+      CHARACTER(LEN=1) :: CHFF
+!     CHFF=CHAR(12)                        ! Form-feed
+      CHFF=CHAR(10)                        ! Double line-feed
 !
 !     PUT OUT ERROR MESSAGE
 !
+      IF(MATO.NE.MATERR) THEN
+        WRITE(NOUT,'(A/1X,3A,I5)') CHFF
+     &       ,'Check material ',ZSA,' MAT',MATO
+        IF(NOUT.NE.IOUT)  THEN
+           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+        END IF
+      END IF
       IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
-         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  WARNING(S)       IN MAT=',&
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  WARNING(S)     IN MAT=',  &
      &          MATO,', MF=',MFO,', MT=',MTO
          MATERR = MATO
          MFERR = MFO
@@ -6618,8 +6688,10 @@
          IF(ASEQ.NE.' ') THEN
             WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
          ELSE
-            WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'RECORD NUMBER',ISEQ
+            WRITE(NOUT,'(5X,2A,I8)')  EMESS(1:49),'RECORD NUMBER',ISEQ
          END IF
+!        Increment count for warnings
+         NWARNG=NWARNG+1
       ELSE
          IF(EMESS.EQ.' ') THEN
             NEMES = 1
@@ -6628,7 +6700,6 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
-!
       RETURN
       END SUBROUTINE WARNING_MESSAGE
 !
@@ -6645,8 +6716,20 @@
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
+!       Material printout delimiter
+      CHARACTER(LEN=1) :: CHFF
+!     CHFF=CHAR(12)                        ! Form-feed
+      CHFF=CHAR(10)                        ! Double line-feed
 !
 !     PUT OUT ERROR MESSAGE
+!
+      IF(MATO.NE.MATERR) THEN
+        WRITE(NOUT,'(A/1X,3A,I5)') CHFF
+     &       ,'Check material ',ZSA,' MAT',MATO
+        IF(NOUT.NE.IOUT)  THEN
+           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+        END IF
+      END IF
 !
       IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
          WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  ERROR(S) FOUND IN MAT=',  &
@@ -6659,8 +6742,10 @@
          IF(ASEQ.NE.' ') THEN
             WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
          ELSE
-            WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'RECORD NUMBER',ISEQ
+            WRITE(NOUT,'(5X,2A,I8)')  EMESS(1:49),'RECORD NUMBER',ISEQ
          END IF
+!        Increment count for errors
+         NERROR=NERROR+1
       ELSE
          IF(EMESS.EQ.' ') THEN
             NEMES = 1
@@ -6669,7 +6754,6 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
-!
       RETURN
       END SUBROUTINE ERROR_MESSAGE
 !
@@ -6776,10 +6860,10 @@
 !/      ILENP = ILENP2
 !...UNX
 !      CALL GETCL(INPAR)
-!      ilenp = LEN_TRIM(INPAR)
+!      ILENP = LEN_TRIM(INPAR)
 !...DVF
       CALL GETARG(1,INPAR)
-      ilenp = LEN_TRIM(INPAR)
+      ILENP = LEN_TRIM(INPAR)
 !...ANS
 !/      WRITE(IOUT,'(A)')                                               &       
 !/     &    ' Control File Specification        - '
@@ -6802,7 +6886,7 @@
       IF(MAT.GT.0.AND.MF.GT.0.AND.MT.GT.0) THEN
 !+++MDC+++
 !...VMS, ANS, WIN, UNX, MOD
-         WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
+         WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &
      &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
 !...DVF, LWI
 !/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MAT,MF,MT)
