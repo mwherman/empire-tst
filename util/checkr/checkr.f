@@ -5,7 +5,7 @@
 !-P   Program to check format validity of an ENDF-5 or -6 format
 !-P   evaluated data file
 !-V
-!-V         Version 8.00   June  2008     A. Trkov
+!-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Major updating of the code and removal of
 !-V                           many false errorr messages.
 !-V                        2. Further reduction of non-essential output.
@@ -13,6 +13,7 @@
 !-V                           avoid reporting errors reading small numbers.
 !-V                        4. Implement extended features of the format
 !-V                           endorsed by CSEWG.
+!-V                        5. Fix minor bugs related to undefined variables.
 !-V
 !-V         Version 7.04   Sept  2007     R. Capote
 !-V                        1. Can be compiled with GNU g95
@@ -506,7 +507,7 @@
 !
 !     New section
 !
-   35 MTO = MT
+      MTO = MT
 !
 !     In interactive mode output current section ID to terminal
 !
@@ -538,7 +539,7 @@
 !     END OF FILE 1 CHECK THAT VALUE OF LFI AND PRESENCE OF NUBAR
 !         IS COMPATIBLE
 !
-      IF(MF.NE.MFO.AND.MFO.EQ.1)   THEN
+       IF(MF.NE.MFO.AND.MFO.EQ.1)   THEN
          IF(LFI.EQ.1.AND.I452.NE.1.AND.MOD(NSUB,10).EQ.0) THEN
             EMESS = 'LFI INCORRECT OR NUBAR MISSING         PRECEDING '
             CALL ERROR_MESSAGE(NSEQP)
@@ -603,6 +604,11 @@
       INTEGER(KIND=I4)  :: IC
 !
 !     INITIALIZE PROCESSING CONTROL VARIABLES
+!
+      LRP   = 0
+      LFI   = 0
+      NSUB  = 0
+      NXC   = 0
 !
       IERX  = 0
       MATO  = 0
@@ -974,10 +980,11 @@
 !
 !     Process the section if a valid MF is found
 !
-      ISUBTP = MOD(NSUB,10)
+      ISUBTP = 0
       SELECT CASE (MF)    ! Branch based on file
          CASE (1)
             CALL CKF1
+            ISUBTP = MOD(NSUB,10)
          CASE (2)
             IF(LRP.LT.0) THEN
                CALL MF_ERRORS(1)
@@ -1623,24 +1630,6 @@
       LISO = L2H
       NFOR = N2H
 !
-!     Build Z-S-A for Card 5, Field 1 test
-!
-      IF(NSUB.NE.12) THEN
-         ZSA = ' '
-         IZA = IFIX(ZA+.001)
-         IA = MOD(IZA,1000)
-         IZ = IZA/1000
-         IZ1 = MIN0((IZ+1),IELM)
-         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
-         IF(LISO.GE.3) THEN
-            ZSA(11:11) = 'O'
-         ELSE IF(LISO.GE.2) THEN
-            ZSA(11:11) = 'N'
-         ELSE IF(LISO.GE.1) THEN
-           ZSA(11:11) = 'M'
-         END IF
-      END IF
-!
 !     Check parameters for their respective valid range
 !
       CALL TEST1(LRP,-1, 2,'LRP',1)
@@ -1690,6 +1679,24 @@
       NSUB = N1H
       NVER = N2H
       NFOR = MAX0(6,NFOR)
+!
+!     Build Z-S-A for Card 5, Field 1 test
+!
+      IF(NSUB.NE.12) THEN
+         ZSA = ' '
+         IZA = IFIX(ZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         IZ1 = MIN0((IZ+1),IELM)
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
+         IF(LISO.GE.3) THEN
+            ZSA(11:11) = 'O'
+         ELSE IF(LISO.GE.2) THEN
+            ZSA(11:11) = 'N'
+         ELSE IF(LISO.GE.1) THEN
+           ZSA(11:11) = 'M'
+         END IF
+      END IF
 !
 !     Check library release number LREL
 !
@@ -2234,7 +2241,7 @@
 !
 !     ALL PARAMETERIZATIONS
 !
-   80 SELECT CASE (LRF)
+      SELECT CASE (LRF)
          CASE (1:2)
             CALL CHECK_BW(NLS,LRF)
          CASE (3)
@@ -4386,7 +4393,7 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: LRF,LRFM,LSSF,NRO,NAPS,NAPSM,NIT
+      INTEGER(KIND=I4) :: LRF,LRFM,NRO,NAPS,NAPSM,NIT
       INTEGER(KIND=I4) :: NLS,NRS,NUM,NSRS,NLRS
       INTEGER(KIND=I4) :: MPAR,MPARM,LCOMP
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
@@ -6051,7 +6058,7 @@
       END IF
       IERX = 0
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE TEST1F
 !
 !***********************************************************************
@@ -6066,8 +6073,6 @@
       CHARACTER(LEN=*) :: KXXX
 !
       REAL(KIND=R4), INTRINSIC :: ABS
-!
-      REAL(KIND=R4) :: RTEST
 !
       IF(ABS(A-B).GT.EPS*MAX(ABS(A),ABS(B)))  THEN
          WRITE(EMESS,'(2A,1PE13.6)')                                    &       
@@ -6628,7 +6633,7 @@
       INTEGER(KIND=I4) :: MFT,MTT,ISET
 !
       INTEGER(KIND=I4) :: JNDX
-      INTEGER(KIND=I4) :: N,NN
+      INTEGER(KIND=I4) :: N
 !
       ISET=-1
       IF(NXC.LE.0 .OR. NXC.GT.NSECMAX) GO TO 100
