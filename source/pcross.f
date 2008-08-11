@@ -1,8 +1,8 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-06-18 15:02:52 $
-Ccc   * $Id: pcross.f,v 1.50 2007-06-18 15:02:52 Capote Exp $
+Ccc   * $Date: 2008-08-11 12:08:27 $
+Ccc   * $Id: pcross.f,v 1.51 2008-08-11 12:08:27 Capote Exp $
 C
-      SUBROUTINE PCROSS(Sigr,Totemis)
+      SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -37,7 +37,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Sigr, Totemis
+      REAL*8 Sigr, Totemis, Xsinl
 C
 C Local variables
 C
@@ -363,8 +363,11 @@ C
 C           spec(nejc,ienerg) = Sigr*emis
             hlp1 = hlp1 + Sigr*emis*DE
          ENDDO
-         totemis = totemis + hlp1
          cross(nejc) = hlp1 + cross(nejc)
+C        Skipping cross sections if MSD and MSC active      
+         IF (nejc.gt.0 .and. IDNa(2*nejc,6).EQ.0) CYCLE      
+         IF (                IDNa(5     ,6).EQ.0) CYCLE              
+         totemis = totemis + hlp1
 cig      Some problems can arise later with a large direct cross section !
       ENDDO
 
@@ -403,9 +406,18 @@ C         ENDDO
 C         WRITE(6, *)'==========================='
          ENDDO
       ENDIF
-
-      fr = totemis/Sigr
-      WRITE (6,99015) totemis, fr
+      if(MSD+MSC.eq.0) then
+        fr = totemis/Sigr
+        WRITE (6,99015) totemis, fr
+      ENDIF  
+      if(MSD+MSC.GT.0) then
+        fr = (totemis+Xsinl)/Sigr
+        WRITE (6,99014) Xsinl, totemis, fr
+      ENDIF  
+      write(6,*) 'Middle of PCROSS :',totemis,xsinl      
+99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
+     &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
+     &   ' mb'/1X,'total   preequilibrium fraction              =',F8.2)
 99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
      &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
@@ -464,9 +476,9 @@ C           fmsd set to 0.d0 means isotropic distribution
             ENDDO
          ENDDO
        ENDDO
-
+       write(6,*) 'End of PCROSS :',totemis,Xsinl
 cig ***  totemis includes the preequilibrium contribution only !  ******
-      totemis=sigr*fr
+c     totemis=sigr*fr
       WRITE (6,99020)
 99020 FORMAT (/' ',57('-')/)
       END
