@@ -1,3 +1,7 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-11 11:25:51 $
+Ccc   * $Id: dtrans.f,v 1.4 2008-08-11 11:25:51 Capote Exp $
+
       SUBROUTINE DTRANS(XMAX,ED,spec,cross)
 C
 C     DEUTERON INDUCED DIRECT STRIPPING d,p AND PICK-UP d,t
