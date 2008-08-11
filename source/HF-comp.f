@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-12-20 11:03:40 $
-Ccc   * $Id: HF-comp.f,v 1.95 2007-12-20 11:03:40 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-11 13:28:54 $
+Ccc   * $Id: HF-comp.f,v 1.96 2008-08-11 13:28:54 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -578,6 +578,10 @@ C-----------do loop over l --- done ----------------------------------------
             s = s + 1.
             IF (s.LE.smax) GOTO 20
 C-----------loop over channel spin ------ done ----------------------------
+C
+C           TUNe commented as it is dangerous to scale Ts for discrete levels 
+C           Dec. 2007, MH, RCN, MS 
+C
 C           sumdl = sumdl*RORed*cor*TUNe(Nejc,Nnuc)
             sumdl = sumdl*RORed*cor
             SCRtl(i,Nejc) = sumdl
@@ -1440,7 +1444,7 @@ C
          tf(ibar)=0.d0
       ENDDO
 
-      IF(max(efb(1),efb(2)).gt.ee + 2) goto 890
+C     IF(max(efb(1),efb(2)).gt.ee + 2) goto 890
 
       DO ibar = 1, NRBar
          vbarmax(ibar) = 0.d0

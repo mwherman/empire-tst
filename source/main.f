@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-14 16:47:27 $
-Ccc   * $Id: main.f,v 1.184 2007-11-14 16:47:27 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-11 13:28:36 $
+Ccc   * $Id: main.f,v 1.185 2008-08-11 13:28:36 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -79,14 +79,15 @@ C                      Total prompt fission spectra only for two ejectiles (n,g)
 C                      Total PF angular distribution defined only for neutrons
      &                 cseapfns(NDEPFN,NDAngecis),enepfns(NDEPFN,0:1),
      &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),
-     &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind,
-     &                 eincid, eee, uuuu, fanisot, eneutr
+     &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind, 
+     &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
+     &                 fisxse, dtmp0, dtmp1
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
-      CHARACTER*1 opart(3)
+C     CHARACTER*1 opart(3)
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -98,16 +99,21 @@ C                      Total PF angular distribution defined only for neutrons
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
      &        isnewchain(0:1), ncon
       INTEGER INT, MIN0, NINT
-      LOGICAL nvwful, fexist
-      CHARACTER*21 reactionx
+      LOGICAL nvwful, fexist, skip_fiss
+      CHARACTER*21 reactionx, preaction(ndnuc)
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
-      DATA opart/1hn,1hp,1ha/
+C     DATA opart/1hn,1hp,1ha/
       icalled = 0
       CALL THORA(6)
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
+      
+      open(94,file='EMPIRE.STA')
+      WRITE(94,'(1x,5HSTART)')
+      close(94)     
+      
 C-----
 C-----Read and prepare input data
 C-----
@@ -134,18 +140,27 @@ C-----
         OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
 C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
-        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
-     &      int(Z(0)), SYMb(0), int(A(0))
-        WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
+C
+C       Find exclusive nuclei and print their cross section
+C        
+        i = 0 
+        DO nnuc=1,NNUcd 
+C         IF(ENDF(nnuc).LE.1) then
+            i = i + 1
+            preaction(i) = REAction(nnuc)
+C         ENDIF  
+        ENDDO          
+        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+5,
+     &      int(Z(0)), SYMb(0), int(A(0))       
+        WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
      &       '  Elastic   ','  Reaction  ','  Fission   ',
-     &         (REAction(nnuc),nnuc=1,NNUcd)
-C       OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
-C       WRITE(98,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+2,
+     &         (preaction(nnuc),nnuc=1,max(i,86))
+C       WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
 C    &      int(Z(0)), SYMb(0), int(A(0))
-C       WRITE(98,'(''#'',A10,1X,A12,90(1x,I3,''-'',A2,''-'',I3,1x))')
-C    &      '  Einc    ',' Total_Fiss ',
-C    &     (int(Z(nnuc)), SYMb(nnuc), int(A(nnuc)),nnuc=1,NNUcd)
-        OPEN (98, FILE='FISS_XS.ZVD', STATUS='unknown')
+C       WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
+C    &       '  Elastic   ','  Reaction  ','  Fission   ',
+C    &         (REAction(nnuc),nnuc=1,NNUcd)
+        OPEN (98, FILE='FISS_XS.zvd', STATUS='unknown')
         write(98,'(A19)') '#begin LSTTAB.CUR/u'
         write(98,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
      &     'tit:',int(Z(0)), SYMb(0), int(A(0))
@@ -668,6 +683,7 @@ C--------Set to Q's to 0 if negative due to rounding error
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
          CLOSE(15)
       ENDIF
+
 C-----PCROSS exciton model calculations of preequilibrium contribution
 C-----including cluster emission by Iwamoto-Harada model and angular
 C-----distributions according to Kalbach systematics
@@ -678,7 +694,7 @@ C        ftmp = CSFus - xsinl
 C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission so it should not used for normalization
 C        xsinl is calculated by MSD
          ftmp = CSFus
-         CALL PCROSS(ftmp,totemis)
+         CALL PCROSS(ftmp,totemis,xsinl)
       ENDIF          ! PCRoss done
       IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. nejcec.gt.0
      &    .AND. NREs(nejcec).GE.0 ) THEN
@@ -739,12 +755,27 @@ C    &   ' DWBA to continuum XS for inelastic channel (test) ',SINlcont
 C--------Correct CN population for PE continuum emission
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
+            write(6,*) 
+     &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
+            write(*,*) 
+     &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
+            totemis = CSFus - xsinl
+            corrmsd = 0.d0
+           
+            if(xsinl.lt.0.0001d0) then
+              xsinl = 0.d0
+              totemis =  CSFus
+              corrmsd = 0.d0
+              write(6,*) ' Changed to : xsinl = ', xsinl,
+     &                   ' PCROSS=',totemis
+            endif  
+        
             WRITE (6,*) ' '
             WRITE (6,*) 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             IF (MSD+MSC.GT.0 .AND. ICOmpff.GT.0) THEN
                WRITE (6,*) 'TRY TO TURN OFF COMPRESSIONAL FORM FACTOR '
                WRITE (6,*) 'SETTING COMPFF TO 0 IN THE OPTIONAL INPUT.'
-               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.GT.0 .AND. ICOmpff.EQ.0) THEN
                WRITE (6,*) 'THIS MAY HAPPEN IF RESPONSE FUNCTIONS ARE '
@@ -753,7 +784,7 @@ C--------Correct CN population for PE continuum emission
                WRITE (6,*) 'IN OPTIONAL INPUT.    '
                WRITE (6,*)
      &                    'IF THESE ARE FINE TRY ANOTHER OPTICAL MODEL.'
-               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.EQ.0) THEN
                WRITE (6,*) 'THIS MAY HAPPEN IF TOO MANY DISCRETE LEVELS'
@@ -762,7 +793,7 @@ C--------Correct CN population for PE continuum emission
                WRITE (6,*) 'COLLECTIVE LEVEL FILE.'
                WRITE (6,*)
      &                  'TRY TO REDUCE THE NUMBER OF COLLECTIVE LEVELS.'
-               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
          ENDIF
          DO i = 1, NLW
@@ -903,7 +934,7 @@ C-----Renormalization of CN spin distribution if TURBO mode invoked
             POP(NEX(1),i,2,1) = POP(NEX(1),i,2,1)*cturbo
          ENDDO
       ENDIF
-       nubart=0
+      nubart=0
       OPEN (80,FILE = 'FISSION.OUT',STATUS = 'UNKNOWN')
 C-----Start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
@@ -1240,8 +1271,10 @@ C--------
             CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)
             CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
             CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
+            WRITE(6,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             IF (nvwful) GOTO 1500
          ENDIF
+                        
          IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
      &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1) + CSEmis(3,1))
      &       .NE.0) THEN
@@ -1298,6 +1331,10 @@ C--------Account for widths fluctuations (HRTW)
                ENDIF
             ENDIF
          ENDIF
+C
+         skip_fiss = .FALSE.
+         dtmp1 = 0.d0
+         dtmp0 = 0.d0
 C--------DO loop over c.n. excitation energy
          DO ke = kemax, kemin, -1
 C        DO ke = kemax, kemax
@@ -1322,6 +1359,7 @@ C--------------Calculate population in the energy bin ke
                ENDDO
                POPbin(ke,nnuc) = pope*step
             ENDIF
+
             DO ipar = 1, 2 !over decaying nucleus parity
                ip = INT(( - 1.0)**(ipar + 1))
                DO jcn = 1, NLW, LTUrbo !over decaying nucleus spin
@@ -1386,11 +1424,19 @@ C--------------------Look for the discrete level with the closest spin
                   ENDIF
 C-----------------
 C-----------------Fission ()
-                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
+                  IF(.NOT.skip_fiss) then
+                    IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
-                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
+                    IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
      &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,
      &                              dencomp,aafis,0)
+                  ELSE
+                    sumfis  = 0.d0
+                    aafis   = 0.d0 
+                    DO m = 1, INT(FISmod(nnuc)) + 1
+                      sumfism(m) = 0.d0
+                    ENDDO
+                  ENDIF
 C-----------------Normalization and accumulation
 C-----------------
                   xnor = POP(ke,jcn,ipar,nnuc)*step/DENhf
@@ -1398,7 +1444,13 @@ C-----------------
                   IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*POP(ke,jcn,ipar,nnuc)*step/RO(ke,jcn,ipar,nnuc)
                   CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
-     &                       dencomp,aafis)
+     &                       dencomp,aafis,fisxse)
+C
+C                 It should be updated for the multimodal fission
+C                                          fisxse ->  fisxse(m)
+C
+                  dtmp1 = dtmp1 + fisxse
+C
 C-----------------Calculate total emission
                   DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc,nnuc)
@@ -1406,12 +1458,19 @@ C-----------------Calculate total emission
                   csemist = csemist + CSFis
  1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
+C
+C           the following if could be commented to calculate fission for
+C           all excitation energies 
+            if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
+            dtmp0 =dtmp1
+ 
             IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc)) THEN
-               IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
-     &             ' mb'
-               IF (FISmod(nnuc).GT.0.) THEN
+               IF (FISmod(nnuc).EQ.0. .and. .not. skip_fiss) 
+     &              WRITE (80,*) 'csfis=', CSFis,
+     &              ' mb', '   fisxse=', dtmp1, ' mb' 
+               IF (FISmod(nnuc).GT.0. .and. dtmp1.ge.0.d0) THEN
                   WRITE (80,*) '  '
                   DO m = 1, INT(FISmod(nnuc)) + 1
                      WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),
@@ -1806,46 +1865,39 @@ C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
 ccccccccccccccccccccccccccccccccccccccccccccccccc
-C----Reaction Cross Sections lower than 1.d-10 are considered zero.
+C-----Reaction Cross Sections lower than 1.d-10 are considered zero.
       eps=1.d-10
-       csinel=CSPrd(2)-4.*PI*ELCncs
+      csinel=CSPrd(2)-4.*PI*ELCncs
       if (CSPrd(1).lt.eps) then
        CSPrd(1)=0.d0
       endif
       if (csinel.lt.eps) then
        csinel=0.d0
       endif
+      i=0
       do nnuc=3,NNUcd
-       if (CSPrd(nnuc).lt.eps) then
-         CSPrd(nnuc)=0.d0
-       endif
+        if (CSPrd(nnuc).lt.eps) CSPrd(nnuc)=0.d0
+C       if(ENDf(nnuc).le.1 .or. nnuc.le.22) then
+C       if(ENDf(nnuc).le.1) then
+          i = i + 1
+          csprnt(i) = CSPrd(nnuc)        
+C       endif             
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
-      WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
+      WRITE(41,'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
      &     TOTcsfis, CSPrd(1), csinel,
-     &     (CSPrd(nnuc),nnuc=3,NNUcd)
-C
-C
-c      WRITE(0,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
-c     &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
-c     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
-c     &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs,
-c     &     (CSPrd(nnuc),nnuc=3,NNUcd)
-C
-C
-C     WRITE(41,'(/G10.5,6E12.5\))') EINl, TOTcs*TOTred,
+     &     (csprnt(nnuc),nnuc=1,max(i,84))
+C     WRITE((),'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
 C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
 C    &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
-C    &     TOTcsfis, CSPrd(1), CSPrd(2)-4.*PI*ELCncs
-C     DO nnuc=3,NNUcd
-C       IF(ENDf(nnuc).GT.0) WRITE(41,'(E12.5\)') CSPrd(nnuc)
-C     ENDDO
-C     WRITE (41,'(/)')
-C     WRITE(98,'(G10.5,2X,1P(90E12.5))') EINl,
+C    &     TOTcsfis, CSPrd(1), csinel,
+C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
+C
+C     WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
 C    &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
-      WRITE(98,'(G15.5,2X,1P(90E12.5))') 1.d6*EINl,
+      WRITE(98,'(G15.5,2X,1P(95E12.5))') 1.d6*EINl,
      &     TOTcsfis*1d-3
       CLOSE (80)
       CLOSE (79)
@@ -1898,13 +1950,13 @@ C     For Kalbach parameterization
                 zres = Z(nnuc) - ZEJc(nejc)
 C---------------Residual nuclei must be heavier than alpha
                 if(ares.le.4. and. zres.le.2.) cycle
-                IF(nejc.GE.1 .AND. nejc.LE.3) THEN
-                  DO itmp = 3,21
-                    IF(REAction(nnuc)(itmp:itmp).eq.opart(nejc))
-     &                goto 1529
-                  ENDDO
-                  CYCLE
-                ENDIF
+C               IF(nejc.GE.1 .AND. nejc.LE.3) THEN
+C                 DO itmp = 3,21
+C                   IF(REAction(nnuc)(itmp:itmp).eq.opart(nejc))
+C    &                goto 1529
+C                 ENDDO
+C                 CYCLE
+C               ENDIF
  1529           nspec = min(INT(EMAx(nnuc)/DE) + 2,NDECSE)
                 IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
@@ -2767,9 +2819,13 @@ C     ENDDO
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF (FISspe.GT.0) WRITE(74,
-     &        '(1X,f8.5,1x,f8.3,4(1x,f7.3))')
+      IF(FISspe.GT.0) THEN 
+C    &        '(1X,f9.5,1x,f8.3,4(1x,f7.3))')
+              WRITE(74,
+     &        '(1X,f9.5,1x,d12.6,4(1x,d12.6))')
      &             EINl, eaverage, fniuS, fniuEVAL, tequiv
+      ENDIF
+
       IF (.NOT.EXClusiv) THEN
 C--------Print spectra of residues
          reactionx = '(z,x)  '
@@ -2945,7 +3001,11 @@ C
          CLOSE (33)
          CLOSE (40)
          CLOSE (41)
-         IF( DEGa.GT.0 ) CLOSE(42)
+         IF(DEGa.GT.0) THEN
+           CLOSE (42)
+         ELSE  
+           CLOSE (42,STATUS = 'delete')    
+         ENDIF  
          CLOSE(53)
          CLOSE(58)
          CLOSE (66,STATUS = 'delete')
@@ -2970,6 +3030,9 @@ C--------Saving random seeds
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
+         open(94,file='EMPIRE.STA',status='OLD')
+         WRITE(94,'(1x,2HOK )')
+         close(94)        
          RETURN
       ENDIF
       IF(EIN.LT.epre) THEN
@@ -3337,7 +3400,7 @@ C
       ENDIF
       END
       SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Dencomp,
-     &                 Aafis)
+     &                 Aafis,Fisxse)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3363,7 +3426,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Aafis, Dencomp, Sumfis, Xnor
+      DOUBLE PRECISION Aafis, Dencomp, Sumfis, Xnor, Fisxse
       INTEGER Ipar, Jcn, Ke, M, Nnuc
       DOUBLE PRECISION Sumfism(3)
 C
@@ -3371,7 +3434,7 @@ C Local variables
 C
       INTEGER INT
       INTEGER nejc, nnur, izares, iloc
-      DOUBLE PRECISION xnorfis, ares, zres, fisXS
+      DOUBLE PRECISION xnorfis, ares, zres
       Dencomp = DENhf - Sumfis
       IF(NRBar.GT.3) GOTO 101
       IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
@@ -3380,13 +3443,13 @@ C
             IF ((Dencomp + TDIr).GT.0.) THEN
                xnorfis = Xnor*DENhf/(Dencomp + TDIr)
             ELSE
-               xnorfis = 0.
+               xnorfis = 0.d0
             ENDIF
 C-----------Fission
-            fisXS = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
-            CSFis = CSFis + fisXS
-            IF (ENDf(Nnuc).EQ.1 .AND. fisXS.NE.0.0D+0)
-     &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,fisXS)
+            Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
+            CSFis = CSFis + Fisxse
+            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0)
+     &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
          ENDIF
          IF (FISmod(Nnuc).GT.0.) THEN
             IF ((Dencomp + TDIrect).GT.0.) THEN
@@ -3394,10 +3457,11 @@ C-----------Fission
             ELSE
                xnorfis = 0.
             ENDIF
+            Fisxse = 0.d0
             DO M = 1, INT(FISmod(Nnuc)) + 1
-               CSFism(M) = CSFism(M)
-     &                     + xnorfis*(TDIrm(M)*(1. - Aafis) + TFBm(M)
-     &                     *Aafis*(Dencomp + TDIrect)/TFB)
+              Fisxse = xnorfis*(TDIrm(M)*(1. - Aafis) + TFBm(M)
+     &                        *Aafis*(Dencomp + TDIrect)/TFB)
+              CSFism(M) = CSFism(M) + Fisxse
             ENDDO
 C
 C-----------Multimodal should be updated to allow for PFNS calculation !!!!
@@ -3441,11 +3505,11 @@ C-----gammas
       POP(Ke,Jcn,Ipar,Nnuc) = 0.0
 C-----fission
       IF (FISmod(Nnuc).EQ.0.) THEN
-           CSFis = CSFis + Sumfis*Xnor
-           fisXS = Sumfis*Xnor
-           IF (ENDf(Nnuc).EQ.1 .AND. fisXS.NE.0.0D+0)
-     &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,fisXS)
-        ENDIF
+           Fisxse = Sumfis*Xnor
+           CSFis  = CSFis + Fisxse
+           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0)
+     &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
+      ENDIF
 C
 C-----------Multimodal should be updated to allow for PFNS calculation !!!!
 C

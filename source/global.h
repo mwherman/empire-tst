@@ -41,7 +41,7 @@
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
      &        ICOller(ndcollev), ICOllev(ndcollev), ICOmpff, IDEfcc,
      &        IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
-     &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys,
+     &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,
      &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev),
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
@@ -115,6 +115,9 @@
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
+      DOUBLE PRECISION rTOTRED, rFCCRED, rFUSRED, rTUNEfi(0:ndnuc)    
+      DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
+c        
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf,
@@ -144,13 +147,14 @@
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp, FNwsomp, FNasomp,
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
-     &                 DEFnor, FCCred, TISomer,
+     &                 DEFnor, FCCred, TISomer, rFCCred, rFUSred,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
-     &                 WIDcoll, TOTred, REDsef
+     &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
+     &                 rTOTred
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -173,7 +177,7 @@
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
      &                  NANgela, NDAng, ISProd, FITomp, ICAlangs,
-     &                  KALman, MT2, MT91, MT649, MT849
+     &                  KALman, MT2, MT91, MT649, MT849, IOPran
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv

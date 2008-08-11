@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-12-20 11:05:30 $
-Ccc   * $Id: HRTW-comp.f,v 1.52 2007-12-20 11:05:30 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-11 13:28:20 $
+Ccc   * $Id: HRTW-comp.f,v 1.53 2008-08-11 13:28:20 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -32,8 +32,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, ggexper, sgamc,
-     &                 sum, sumfis, sumfism(3), sumg, tlump, xnor
+      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, tgexper,
+     &              sum, sumfis, sumfism(3), sumg, tlump, xnor, fisxse
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, n0c
       INTEGER INT
@@ -216,7 +216,7 @@ C              stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
                IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
-     &                    dencomp,aafis)
+     &                    dencomp,aafis,fisxse)
 C--------------calculate total emission
                DO nejc = 0, NEJcm
                   csemist = csemist + CSEmis(nejc,nnuc)
@@ -713,7 +713,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, eg, xjc
-      DOUBLE PRECISION E1, E2, VT1, XM1
+      DOUBLE PRECISION E1, E2, XM1
+C	DOUBLE PRECISION VT1
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0

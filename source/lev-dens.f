@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-21 15:23:53 $
-Ccc   * $Id: lev-dens.f,v 1.57 2007-11-21 15:23:53 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-11 13:28:45 $
+Ccc   * $Id: lev-dens.f,v 1.58 2008-08-11 13:28:45 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -600,8 +600,6 @@ C
       INTEGER*4 iwin
 
       INTEGER*4 PIPE
-
-
       pi2 = PI*PI
       BF = 1.0
       IF (Cf.NE.0.0D0) BF = 0.0D0
@@ -778,10 +776,15 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
       ENDIF
 
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) then
-C--------cumulative plot of levels along with the l.d. formula
-         write(caz,'(1HZ,I2.2,1HA,I3.3)')
-     >      int(Z(Nnuc)), int(A(Nnuc))
-         write(ctmp1,'(A7,A13)') caz,'_GS_EMPNL.ZVD'
+C--------cumulative plot of levels to the zvd
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
+         write(ctmp1,'(A7,A13)') caz,'_GS_EMPNL.zvd'
          OPEN (36, FILE=ctmp1, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
          write(36,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
@@ -830,46 +833,6 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          write(36,'(A2)') '//'
          write(36,'(A17)') '#end LSTTAB.CUR/c  '
          close(36)
-
-C--------plot of the l.d. formula
-         write(caz,'(1HZ,I2.2,1HA,I3.3)')
-     >      int(Z(Nnuc)), int(A(Nnuc))
-         write(ctmp1,'(A7,A13)') caz,'_GS_EMPLD.ZVD'
-
-         OPEN (36, FILE=ctmp1, STATUS='unknown')
-         write(36,'(A19)') '#begin LSTTAB.CUR/u'
-         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,10H lev. den.)')
-     &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
-         write(36,'(A10)') 'fun: EMP_LD'
-         write(36,'(A10)') 'thick: 2   '
-         write(36,'(A10/2H//)') 'length: 92 '
-
-         rocumul = 1.D0
-         DO ij = 1, NLWst
-           rocumul = rocumul + 0.5*defit/RORed*
-     &         (RO(1,ij,1,Nnuc) + RO(1,ij,2,Nnuc))
-         ENDDO
-         WRITE (36,*) 0.d0, rocumul
-         DO kk = 2, NEX(Nnuc)
-            rocumul = 1.D0
-            DO ij = 1, NLWst
-               rocumul = rocumul + 0.5d0*defit/RORed*
-     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
-     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
-            ENDDO
-            WRITE (36,*) defit*FLOAT(kk - 1)*1.d6, rocumul
-         ENDDO
-         write(36,'(A2)') '//'
-         write(36,'(A17)') '#end LSTTAB.CUR/u'
-         write(36,'(A19)') '#begin LSTTAB.CUR/c'
-         write(36,'(A22)') 'x: Excitation Energyÿx'
-         write(36,'(A17)') 'y: LEVEL DENSITY  '
-         write(36,'(A19)') 'x-scale: LIN       '
-         write(36,'(A17)') 'y-scale: LOG       '
-         write(36,'(A2)') '//'
-         write(36,'(A17)') '#end LSTTAB.CUR/c  '
-         close(36)
-
       ENDIF
 
 C--------cumulative plot of levels along with the l.d. formula
@@ -956,10 +919,47 @@ C-----------clean RO matrix
             CALL DAMIRO(kk,Nnuc,dshif,0.0D0,Asaf,rotemp,aj)
          ENDIF
       ENDDO
+
+      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) then
+C--------plot of the l.d. formula
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
+         write(ctmp1,'(A7,A13)') caz,'_GS_EMPLD.zvd'
+
+         OPEN (36, FILE=ctmp1, STATUS='unknown')
+         write(36,'(A19)') '#begin LSTTAB.CUR/u'
+         write(36,'(a4,1x,i3,''-'',A2,''-'',I3,10H lev. den.)')
+     &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         write(36,'(A10)') 'fun: EMP_LD'
+         write(36,'(A10)') 'thick: 2   '
+         write(36,'(A10/2H//)') 'length: 92 '
+         DO kk = 1, NEX(Nnuc)
+            u = EX(kk,Nnuc)
+            rocumul = 0.D0
+            DO ij = 1, NLWst
+               rocumul = rocumul + (RO(kk,ij,1,Nnuc) + RO(kk,ij,2,Nnuc))
+            ENDDO
+            WRITE (36,*) u*1.d6, rocumul
+         ENDDO
+         write(36,'(A2)') '//'
+         write(36,'(A17)') '#end LSTTAB.CUR/u'
+         write(36,'(A19)') '#begin LSTTAB.CUR/c'
+         write(36,'(A22)') 'x: Excitation Energyÿx'
+         write(36,'(A17)') 'y: LEVEL DENSITY  '
+         write(36,'(A19)') 'x-scale: LIN       '
+         write(36,'(A17)') 'y-scale: LOG       '
+         write(36,'(A2)') '//'
+         write(36,'(A17)') '#end LSTTAB.CUR/c  '
+         close(36)
+      ENDIF
+
       RETURN
-
       END
-
 
       DOUBLE PRECISION FUNCTION FSHELL(X,Xs,Xg)
 C
@@ -975,7 +975,6 @@ C
          FSHELL = 1 + Xg*Xs
       ENDIF
       END
-
 
       SUBROUTINE DAMIRO(Kk,Nnuc,Dshif,Destep,Asaf,Rotemp,Aj)
       INCLUDE 'dimension.h'
@@ -1147,7 +1146,6 @@ C        Spin-cut off tuning
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t
       ENDDO
 99999 END
-
 
       SUBROUTINE PRERO(Nnuc,Cf)
 CCC
@@ -1878,6 +1876,7 @@ C
      & rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
      & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u, 
 
+
      & rolowint1, rolowint2, rocumul
       CHARACTER*2 car2
       CHARACTER*8 paritate
@@ -1916,9 +1915,9 @@ C
 
 c99005 FORMAT ('../RIPL-2/densities/total/HFB/z',i3.3)
 C99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
-C99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3)
+99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3)
 C99005 FORMAT ('../RIPL-2/densities/total/Nice/z',i3.3)
-99005 FORMAT ('../RIPL-2/densities/total/BXL/z',i3.3)
+C99005 FORMAT ('../RIPL-2/densities/total/BXL/z',i3.3)
       INQUIRE(file = filename, exist = fexist)
       IF(.not.fexist) THEN
        WRITE(6,*) filename, 'does not exist'
@@ -1966,9 +1965,14 @@ C     SKIPPING 4 TITLE LINES
       iugrid = i - 1
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) then
 C--------Cumulative Level Density plot
-         write(caz,'(1HZ,I2.2,1HA,I3.3)')
-     >      int(Z(Nnuc)), int(A(Nnuc))
-         write(ctmp,'(A7,A13)') caz,'_GS_HFBNL.ZVD'
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
+         write(ctmp,'(A7,A13)') caz,'_GS_HFBNL.zvd'
 
          OPEN (36, FILE=ctmp, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
@@ -2108,9 +2112,14 @@ C
 
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) then
 C--------Level Density plot
-         write(caz,'(1HZ,I2.2,1HA,I3.3)')
-     >      int(Z(Nnuc)), int(A(Nnuc))
-         write(ctmp,'(A7,A13)') caz,'_GS_HFBLD.ZVD'
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
+         write(ctmp,'(A7,A13)') caz,'_GS_HFBLD.zvd'
 
          OPEN (36, FILE=ctmp, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
@@ -2222,15 +2231,12 @@ C--------cumulative plot of levels along with the l.d. formula
          rocumul = 1.0
          WRITE (34,*) '0.0  ', rocumul
          DO kk = 2, NFIsen1
-
 C-----------integration over energy. Parity dependence explicitly considered.
 C-----------There is a factor 1/2 steming from the trapezoid integration
 C              rocumul = rocumul + 0.5d0*defit/RORed*
-
-            DO ij = 1, NFISJ1
-
+C           DO ij = 1, NFISJ1
+            DO ij = 1, NLW
                rocumul = rocumul + 
-
      &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
             ENDDO
@@ -2361,6 +2367,7 @@ C        HFB calculated LD at saddles
 C
          CALL HFB_FIS(ib,Nnuc)
 
+
          RAFis = 1.d0
 C
       ENDIF
@@ -2466,6 +2473,7 @@ C
      &              rotemp*4.*SQRT(2.*pi)*SQRT(mompar*temp)
 
 
+
                    ROFis(kk,jj,Ib) = rotemp
                    ROFisp(kk,jj,1,Ib) = rotemp
                    ROFisp(kk,jj,2,Ib) = rotemp
@@ -2499,6 +2507,7 @@ C
          ENDDO
 
 
+
          ACRtf(Ib) = ACRt
          UCRtf(Ib) = UCRt
          ECOndf(Ib) = ECOnd
@@ -2509,10 +2518,14 @@ C
 C     ENDIF
 C--------Level Density plot
       IF (IOUT.EQ.6 .and. FISDEN(Nnuc).EQ.1) THEN
-         write(caz,'(I2.2,A2,I3.3)')
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
      >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
          write(ctmp,'(A13,I1,A9)') caz//'_SADD_',ib,'EMPLD.zvd'
-
 
          OPEN (36, FILE=ctmp, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
@@ -2525,6 +2538,7 @@ C--------Level Density plot
          DO kk = 1,NRBinfis(Ib)
             u = UGRid(kk,Ib) + DEL
             if(u.gt.EMAx(Nnuc)) exit
+
 
             rocumul1 = 0.d0
             rocumul2 = 0.d0
@@ -2658,7 +2672,8 @@ C
 
       WRITE (filename,99006)ib, iz
 C99006 FORMAT ('../RIPL-2/fission/Nice/Max',i1,'/z',i3.3)
-99006 FORMAT ('../RIPL-2/fission/BXL/Max',i1,'/z',i3.3)
+C99006 FORMAT ('../RIPL-2/fission/BXL/Max',i1,'/z',i3.3)
+99006 FORMAT ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
       INQUIRE(file = filename, exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
@@ -2789,8 +2804,13 @@ C
       ENDDO
 
       IF(IOUT.EQ.6) THEN
-         write(caz,'(I2.2,A2,I3.3)')
+         if(SYMb(Nnuc)(2:2).eq.' ') then
+           write(caz,'(I2.2,A1,A1,I3.3)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         else
+           write(caz,'(I2.2,A2,I3.3)')
      >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         endif
          write(ctmp,'(A13,I1,A9)') caz//'_SADD_',ib,'NUMLD.zvd'
          OPEN (36, FILE=ctmp, STATUS='unknown')
          write(36,'(A19)') '#begin LSTTAB.CUR/u'
@@ -2802,12 +2822,11 @@ C
 
          DO kk = 1,NRBinfis(Ib)
             u = XMInn(Ib) + (kk - 1)*DEStepp(Ib) 
-
-
             if(u.gt.EMAx(Nnuc)) exit
             rocumul1 = 0.d0
             rocumul2 = 0.d0
-            DO j = 1,NFIsj1
+C           DO j = 1,NFIsj1
+            DO j = 1,NLW
                rocumul1 = rocumul1 + ROFisp(kk,j,1,Ib)
                rocumul2 = rocumul2 + ROFisp(kk,j,2,Ib)
             ENDDO
@@ -2835,7 +2854,8 @@ C
             u = UGRid(kk,ib)
               if(u.gt.EMAx(Nnuc)) exit
             rocumul1 = 0.d0
-            DO j = 1,NFIsj1
+C           DO j = 1,NFIsj1
+            DO j = 1,NLW
                rocumul1 = rocumul1 + ROFisp(kk,j,1,Ib)
             ENDDO
             IF(rocumul1.gt.1e30) exit
@@ -2862,7 +2882,8 @@ C
             u = UGRid(kk,ib)
               if(u.gt.EMAx(Nnuc)) exit
             rocumul2 = 0.d0
-            DO j = 1,NFIsj1
+C           DO j = 1,NFIsj1
+            DO j = 1,NLW
                rocumul2 = rocumul2 + ROFisp(kk,j,2,Ib)
             ENDDO
             IF(rocumul2.gt.1e30) exit
