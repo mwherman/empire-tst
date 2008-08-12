@@ -55,10 +55,15 @@ c.......................................................
       common/cont/ mat,mf,mt,nseq
       common/quan/ za,awr,awri,spin,ap,endres, ncard(2)      
       common/urrv/ e0,uppen
+      common/covj/ NLS,NJS
+      common/gprob/ gfdisp(10),gsum(3), gsumc(3)
+      common/rprop/ gf(10),sf(3),gg(3),ds0(3)
       character*1 wv(3)      
-      dimension gf(10),sf(3),gg(3),ds0(3),de(300),dratio(3),icon(3)     
-      dimension gfdisp(10),gsum(3),gsumc(3)      
+c     dimension gf(10),sf(3),gg(3),ds0(3),de(300),dratio(3),icon(3)     
+      dimension de(300),dratio(3),icon(3)     
+c     dimension gfdisp(10),gsum(3),gsumc(3)      
       namelist/urr/ sf,gg,gpow,ds0,e0,ne,de,bn,pair,dena,disp,icon      
+      dimension agg(1000)
       data wv/'s','p','d'/
 c
 c     sf(3)  = strength functions for s-, p-, and -d waves [1E-4]
@@ -254,16 +259,33 @@ c.......................................................
       subroutine wurrcov
       common/quan/ za,awr,awri,spin,ap,endres, ncard(2)      
       common/urrv/ e0,uppen
+      common/covj/ NLS,NJS
+      common/gprob/ gfdisp(10),gsum(3), gsumc(3)
+      common/rprop/ gf(10),sf(3),gg(3),ds0(3)
       naps=0
-      call wrcont(e0,uppen,2,2,0,naps)
-      NLS=0
+      call wrcont(e0,uppen,2,1,0,naps)
       call wrcont(spin,ap,0,0,NLS,0)
-      L=0
-      NJS=0
-      call wrcont(awri,0.0,L,0,6*NJS,NJS)
-      MPAR=0
-      NPAR=0
+      SUMNJS = 0
+      do ll=1,NLS
+       L=ll-1
+C      compute number of resonance spins
+       call gfactor(spin,L, NJS,gf,spj)
+       call wrcont(awri,0.0,L,0,6*NJS,NJS)
+       SUMNJS = SUMNJS+NJS
+       do J=1,NJS
+        dsj= ds0(ll) * gsumc(ll)/gf(J)
+        gn=1.0e-4*sf(ll)*dsj
+c       ggr=gg(ll)
+        call wrlist(dsj,spj+J-1,gn,0.001*ggr,0.0,0.0)
+       enddo
+      enddo
+      MPAR=1
+      NPAR=MPAR*SUMNJS
+      NVAL=NPAR*(NPAR+1)/2
       call wrcont(0.0,0.0,MPAR,0,NPAR*(NPAR+1)/2,NPAR)
+      do I=1,int((NVAL+5)/6)
+        call wrlist(0.0,0.0,0.0,0.0,0.0,0.0);
+      enddo
       return
       end
 C............................................................
@@ -574,7 +596,9 @@ c........................................................................
       write(7,2000) 'NER',2,ner
       write(7,*) '  We forces NER=2, one for Res.Res.',
      1 ' the other for Unres.Res.'
+ccho NER=1 for test
   170 call wrcont(za,1.0,0,lfw,2,0)
+c 170 call wrcont(za,1.0,0,lfw,1,0)
 C     Handle for resolved energy region
       read(1,1100) el,eh,lru,lrf,nro,naps
       write(7,2500) el,eh 

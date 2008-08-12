@@ -40,8 +40,9 @@ OBJR =	readrp.o
 OBJW =	wriurr.o
 OBJS =	scanr.o
 OBJX =	readx4.o
+OBJT =  recent0.o endfio0.o scratchb.o timer.o LINUX.o
 
-all: ptanal readrp scanr wriurr readx4
+all: ptanal readrp scanr wriurr readx4 thermx
 
 ptanal:   $(OBJP)
 	$(FC) -o $@ $(OBJP)
@@ -57,6 +58,9 @@ scanr:   $(OBJS)
 
 readx4:   $(OBJX)
 	$(FC) -o $@ $(OBJX)
+
+thermx:  $(OBJT)
+	$(FC) -o $@ $(OBJT)
 
 clean:
 	rm *.o

@@ -35,10 +35,22 @@ ccho  character*1 ggflag
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
-      namelist/data/ awt,sf0,iset,sf1,D0,sf2,D1,ecut,ap,
+      common/adj/ npos,nidx,nplus,adjust
+ccho
+c                 adjust(1:1) : type of adjustment
+c                 adjust(2:5) : index of resonance which will be adjusted
+c                 adjust(7:10) : number of total positive resonances which will be adjusted
+c                 adjust(11:11) : sign of adjustment
+c                 adjust(12:13) : number of positive resonance energies at which cross sections
+c                                 will be evaluated
+c                 adjust(14:17) : number of extra positive resonances which will be included
+c                                 in ENDF file
+ccho
+      namelist/data/ adjust,awt,sf0,iset,sf1,D0,sf2,D1,ecut,ap,dap,
      1               zam,spin,ggavg,gncut,gncuth,mat,abun
+      character adjust*17
 c     namelist/data/ rad,awt,iset,ecut,zam,gncut,gncuth,mat,inflag
 c
 c     rad = const. to calc. AP [1.35 fm] ; OBSOLETE
@@ -68,6 +80,7 @@ ccho  inflag is no longer used. It is now provided in the resonance parameter ta
 ccho  abun = fractional abundance
 ccho  ap = scattering radius (in units of 1e-12 cm !!!)
 c
+      adjust=''
       rad=1.35
       iset=1
       spin=-1
@@ -118,8 +131,10 @@ ccho  character ggflag*1
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
+      common/adj/ npos,nidx,nplus,adjust
+      character adjust*17
 ccho  character srp*2,jflag*1,lflag*1,gflag*1,ajxch*3,lwch*1
       character jflag*1,lflag*1,ajxch*3,lwch*1,gflag*3,nflag*3,
      1          aflag*3
@@ -132,10 +147,26 @@ c
       ex=-99.0
       nres=0
       iline=0
+      npos=0
       do i=1,mres
   300  read(2,'(a)',end=120) line
        iline=iline+1
        if (line(1:1).eq.'#') goto 300
+c      iza: 1-6
+c      e0 : 27-36
+c      de0: 38-44
+c      jflag: 46
+c      ajx: 48-50
+c      lflag: 52
+c      lw: 54
+c      nflag: 81-83
+c      ggn: 87-95
+c      dggn: 97-104
+c      gflag: 106-108
+c      gg: 112-120
+c      dgg: 122-129
+c      aflag: 156-158
+c      area: 162-170
        read(line,2000,err=150) iza,e0,de0,jflag,ajx,lflag,lw,
      1                      nflag,ggn,dggn,gflag,gg,dgg,aflag,area
  2000  format(i6,1x,2x,1x,3x,1x,11x,1x,e10.0,1x,e7.0,1x,a1,1x,f3.1,1x,
@@ -175,6 +206,9 @@ ccho   endif
        endif
 ccho   cut to ecut
        if (e0.gt.ecut) goto 120
+       if (npos.eq.0.and.e0.gt.0) then
+         npos=i
+       endif
        rp(1,i)=e0
        rp(2,i)=de0
 ccho   rp(3,i)=ggn/inflag
@@ -219,10 +253,66 @@ c
       enddo
       print *,' *** Too many resonances in file: ',fname
   120 close(2)
+      if (adjust(1:1).ne.' ') then
+c      ptanla.unc is for writing uncertainty of resonance parameter to be adjusted
+       read(adjust(2:5),'(i4)') nidx
+       read(adjust(7:10),'(i4)') nplus
+       if (nidx.gt.nres.or.nidx.ge.npos+nplus) then
+         open(8,file='ptanal.unc',status='unknown')
+         write(8,'(a6,1x,i4,1x,e14.6)') 'DOSTOP',-999,0
+         close(8)
+         stop
+       endif
+       if (adjust(1:1).eq.'R') then
+         open(8,file='ptanal.unc',status='unknown')
+         write(8,'(a6,1x,i4,1x,e14.6)') 'SCATRD',0,dap/ap
+         close(8)
+         if (adjust(11:11).eq.'+') then
+           ap=ap+dap
+         else
+           ap=ap-dap
+         endif
+         print *,'scattering radius adjusted to ',ap
+       elseif (adjust(1:1).eq.'K') then
+         print *,'nothing adjusted'
+         read(adjust(12:13),'(i4)') nenr
+         open(8,file='ptanal.unc',status='unknown')
+         write(8,'(a6,1x,i4,1x,e14.6)') 'RESENR',0,rp(1,npos+nenr-1)
+         close(8)
+         open(8,file='ptanal.res',status='unknown')
+         do i=npos,npos+nenr-1
+           write(8,'(e14.6,1x,e14.6)') rp(1,i), rp(2,i)
+         enddo
+         close(8)
+       endif
+c      if (adjust(1:1).eq.'E') then
+c       if (adjust(11:11).eq.'+') then
+c        rp(1,nidx)=rp(1,nidx)+rp(2,nidx)
+c       else
+c        rp(1,nidx)=rp(1,nidx)-rp(2,nidx)
+c       endif
+c      elseif (adjust(1:1).eq.'N') then
+c       if (adjust(11:11).eq.'+') then
+c        rp(3,nidx)=rp(3,nidx)+rp(4,nidx)
+c       else
+c        rp(3,nidx)=rp(3,nidx)-rp(4,nidx)
+c       endif
+c      elseif (adjust(1:1).eq.'G') then
+c       if (adjust(11:11).eq.'+') then
+c        rp(5,nidx-1)=rp(5,nidx)+rp(6,nidx)
+c       else
+c        rp(5,nidx-1)=rp(5,nidx)-rp(6,nidx)
+c       endif
+c      elseif (adjust(1:1).eq.'F') then
+c      endif
+c      if (nplus+npos+4.lt.nres) then
+c       nres=nplus+npos+4
+c      endif
+      endif
       return
-  130 print *, '*** Failed to read resonance parameter table '
+  130 print *, '*** Failed to open resonance parameter table '
       stop
-  150 print *, '*** Error reading rssonance parameter table at line ',
+  150 print *, '*** Error reading resonance parameter table at line ',
      1         iline
       stop
       end
@@ -310,7 +400,7 @@ ccho  add capability of computing average Gg for each partial wave
       end
 c.....
       function penet(lwave,En)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
 C     compute penetrability
       penet=1
@@ -333,7 +423,7 @@ ccho  character*1 ggflag
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
 C     Bayesian check for P-wave
       character mk*1
@@ -463,7 +553,7 @@ ccho  character*1 ggflag
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
       dimension x(mres),c(mres),csig(mres)
       character ptfn*20,ptft*20,wav*1,nwave*6,cmd*30
@@ -747,7 +837,7 @@ ccho  character*1 ggflag
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
       dimension pr(6),nass(6),apr(6)
       write(7,1400) spin
@@ -936,22 +1026,26 @@ ccho  character*1 ggflag
       character*1 ggflag,gnflag,aaflag
       common/rps/ nres,rp(8,mres),SJ(mres),LJ(mres),ggflag(2,mres),
      1            gnflag(2,mres),aaflag(2,mres)
-      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
+      common/adj/ npos,nidx,nplus,adjust
+      character adjust*17
       character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*11
       dimension nr(5),sx(6),wav(5)
 ccho  new arrays inserted for file 32 generation
-      dimension wgt(mres),wgn(mres),wgg(mres)
+      dimension wEn(mres),wgt(mres),wgn(mres),wgg(mres),
+     1          dwEn(mres),dwgn(mres),dwgg(mres)
       dimension correff(4*mres,4*mres)
       dimension kij(18)
       data wav/'s','p','?','?','?'/
 c
 ccho  introduce user-supplied ap
       if (ap.eq.0) ap=0.123*awt**0.3333 + 0.08
-      write(7,1400) spin,ggavg,ap
+      write(7,1400) spin,ggavg,ap,dap
  1400 format(///' **** Writing ENDFA.TXT file'//
      1 5x,'Target spin =',f4.1/5x,'Avg. Gg = ',3f7.1,' meV'/
-     2 5x,'Scatt. Rad. =',1pf5.2,' fm')
+ccho 2 5x,'Scatt. Rad. =',1pf5.2,' fm')
+     2 5x,'Scatt. Rad. =',1pf5.2,' +- ',f5.2,' fm')
       open(3,file='endfa.txt',status='unknown')
  1000 format(2a11,4i11,i4,i2,i3,i5)
  1100 format(a66,i4,i2,i3,i5)
@@ -1020,6 +1114,16 @@ C     find maximum L value and count number of resonances
        nr(lw)=0
       enddo
       lm=0
+
+ccho   cut the resonance energies for sensitivity calculation
+       if (adjust(1:1).ne.' ') then
+         read(adjust(14:17),'(i4)') nextra
+         if (nextra.ne.9999.and.nplus+nextra+npos-1.lt.nres) then
+           nres=nplus+nextra+npos-1
+         endif
+       endif
+ccho
+
       do n=1,nres
 ccho   if(rp(1,n).lt.ecut) then
        if(rp(1,n).le.ecut) then
@@ -1060,8 +1164,6 @@ C 3000 format(/)
  3020   format(f10.1,' eV')
 ccho    if((En.lt.ecut).and.(LJ(n).eq.lwave)) then
         if((En.le.ecut).and.(LJ(n).eq.lwave)) then
-         call r2str(sx(1),11,6,En)
-         call r2str(sx(2),11,6,SJ(n))
          gfact=(2*SJ(n)+1)/(2.0*(2*spin+1))
 C        compute missing gGn, or
 coh         gGn=rp(3,n)/2
@@ -1163,8 +1265,76 @@ C          decide gg based on supplied gn
           sumggg=sumggg+gg
           nrggg =nrggg+1
          endif
-
+c
+         if (rp(2,n).eq.0.0) then
+           dEn=abs(0.01*En)
+         else
+           dEn=rp(2,n)
+         endif
+         if (rp(4,n).eq.0.0) then
+           dgn=0.08*gn
+         else
+           if (gn.eq.rp(3,n)) then
+             dgn=rp(4,n)
+           else
+             dgn=gn*rp(4,n)/rp(3,n)
+           endif
+         endif
+         if (rp(6,n).eq.0.0) then
+           dgg=0.1*gg
+         else
+           if (gg.eq.rp(5,n)) then
+             dgg=rp(6,n)
+           else
+             dgg=gg*rp(6,n)/rp(5,n)
+           endif
+         endif
+c
+ccho  uncertainty of resonance parameter to be adjusted is written
+c     to ptanal.unc and the corresponding parameter is adjusted
+c     for the sensitivity matrix
+c
+         if (adjust(1:1).ne.' '.and.n.eq.nidx) then
+           ncount=nidx-npos
+           if (ncount.ge.0) then
+            ncount=ncount+1
+           endif
+           if (adjust(1:1).eq.'E') then
+            open(8,file='ptanal.unc',status='unknown')
+            write(8,'(a6,1x,i4,1x,e14.6)') 'ENERGY',ncount,abs(dEn/En)
+            close(8)
+            if (adjust(11:11).eq.'+') then
+             En=En+dEn
+            else
+             En=En-dEn
+            endif
+            print *,nidx,'th energy adjusted to ',En
+           elseif (adjust(1:1).eq.'N') then
+            open(8,file='ptanal.unc',status='unknown')
+            write(8,'(a6,1x,i4,1x,e14.6)')'NWIDTH',ncount,dgn/gn
+            close(8)
+            if (adjust(11:11).eq.'+') then
+             gn=gn+dgn
+            else
+             gn=gn-dgn
+            endif
+            print *,nidx,'th Gn adjusted to ',gn
+           elseif (adjust(1:1).eq.'G') then
+            open(8,file='ptanal.unc',status='unknown')
+            write(8,'(a6,1x,i4,1x,e14.6)')'GWIDTH',ncount,dgg/gg
+            close(8)
+            if (adjust(11:11).eq.'+') then
+             gg=gg+dgg
+            else
+             gg=gg-dgg
+            endif
+            print *,nidx,'th Gg adjusted to ',gg
+           elseif (adjust(1:1).eq.'F') then
+           endif
+         endif
+c
          gt=gn+gg
+c
          if(rp(7,n).gt.0.0) then
 C         recheck capture area
           area=gfact*gn*gg/gt
@@ -1174,13 +1344,21 @@ C         recheck capture area
      1     'calc.=',1pe9.2,2x,'data=',1pe9.2)
           endif
          endif
-ccho     inserted for file 32 generation
+c
+ccho     stored for file 32 generation
+         wEn(n)=En
          wgt(n)=gt
          wgn(n)=gn
          wgg(n)=gg
-         call r2str(sx(3),11,6,gt)
-         call r2str(sx(4),11,6,gn)
-         call r2str(sx(5),11,6,gg)
+         dwEn(n)=dEn
+         dwgn(n)=dgn
+         dwgg(n)=dgg
+c
+         call r2str(sx(1),11,6,wEn(n))
+         call r2str(sx(2),11,6,SJ(n))
+         call r2str(sx(3),11,6,wgt(n))
+         call r2str(sx(4),11,6,wgn(n))
+         call r2str(sx(5),11,6,wgg(n))
          sx(6)='   '
          write(3,1200) sx, mat,mfh,mth
         endif
@@ -1233,40 +1411,19 @@ c
 c     resonance parameters and their uncertainties are written
 c
       do n=1,nres
-        En=rp(1,n)
-        if(En.le.ecut) then
-         call r2str(sx(1),11,6,En)
+        if(wEn(n).le.ecut) then
+         call r2str(sx(1),11,6,wEn(n))
          call r2str(sx(2),11,6,SJ(n))
          call r2str(sx(3),11,6,wgt(n))
          call r2str(sx(4),11,6,wgn(n))
          call r2str(sx(5),11,6,wgg(n))
          sx(6)='   '
          write(3,1200) sx, mat,mfh,mth
-         if (rp(2,n).eq.0.0) then
-           call r2str(sx(1),11,6,abs(0.01*En))
-         else
-           call r2str(sx(1),11,6,rp(2,n))
-         endif
+         call r2str(sx(1),11,6,dwEn(n))
          call r2str(sx(2),11,6,0.0)
          call r2str(sx(3),11,6,0.0)
-         if (rp(4,n).eq.0.0) then
-           call r2str(sx(4),11,6,0.08*wgn(n))
-         else
-           if (wgn(n).eq.rp(3,n)) then
-             call r2str(sx(4),11,6,rp(4,n))
-           else
-             call r2str(sx(4),11,6,wgn(n)*rp(4,n)/rp(3,n))
-           endif
-         endif
-         if (rp(6,n).eq.0.0) then
-           call r2str(sx(5),11,6,0.1*wgg(n))
-         else
-           if (wgg(n).eq.rp(5,n)) then
-             call r2str(sx(5),11,6,rp(6,n))
-           else
-             call r2str(sx(5),11,6,wgg(n)*rp(6,n)/rp(5,n))
-           endif
-         endif
+         call r2str(sx(4),11,6,dwgn(n))
+         call r2str(sx(5),11,6,dwgg(n))
          sx(6)='   '
          write(3,1200) sx, mat,mfh,mth
         endif
@@ -1278,24 +1435,39 @@ c
       ndigit=3
 c     initialize the correlation matrix
       do i=1,nnn
-        do j=1,nnn
+        do j=1,i-1
           correff(j,i)=0.0
         enddo
       enddo
+c
 c     correlation coefficients are assigned and
-c     values between -10^-3 and 10^3 are dropped according to the rule
-      correff(1,1)=1.0
-      correff(1,2)=1.0
-      correff(2,2)=1.0
-      correff(7,10)=1.867e-2
-      correff(10,50)=1.3463e-3
-      correff(12,50)=-1.45678e-1
-      correff(13,50)=1.45678e-1
-      correff(22,50)=1.0
-      correff(28,50)=0.234
-      correff(49,50)=0.35
-      correff(1049,2058)=0.1049
-      correff(1249,2059)=0.1249
+c     values between -10^-3 and 10^-3 are dropped according to the rule
+c
+c     corr : correlation between Gn and Gg
+c     corr = -0.99
+c     corr = 0.5
+c     corr = 0.0
+c     do i=1,nnn
+c       if (mod(i,3).eq.0) then
+c         correff(i-1,i)=corr
+c       endif
+c     enddo
+c
+c     assigning of correlations should be done here
+
+c     examples
+c     correff(1,1)=1.0
+c     correff(1,2)=1.0
+c     correff(2,2)=1.0
+c     correff(7,10)=1.867e-2
+c     correff(10,50)=1.3463e-3
+c     correff(12,50)=-1.45678e-1
+c     correff(13,50)=1.45678e-1
+c     correff(22,50)=1.0
+c     correff(28,50)=0.234
+c     correff(49,50)=0.35
+c     correff(1049,2058)=0.1049
+c     correff(1249,2059)=0.1249
       nm=0
 c     compute number of lines for correlation coefficients
       do i=1,nnn
@@ -1336,6 +1508,8 @@ c     multiply by 10^ndigit (=3 for our case) and convert it to integer
  4000 format(2i5,1x,13i4,3x,i4,i2,i3,i5)
       write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,mfh,0,99999
       write(3,1000) ' 0.0',' 0.0',0,0,0,0,mat,0,0,0
+      write(3,1000) ' 0.0',' 0.0',0,0,0,0,0,0,0,0
+      write(3,1000) ' 0.0',' 0.0',0,0,0,0,-1,0,0,0
 c
 ccho end of file 32
 c
@@ -1347,6 +1521,7 @@ c
  2060 format(10x,'<D>   =',f9.2,'   eV')
       if(nrggg.gt.0) write(7,2220) 1000*sumggg/nrggg,nrggg
  2220 format(10x,'<Gg>  =',f10.3,' meV from',i3,' res. with given Gg')
+c
       return
       end
 c.....
