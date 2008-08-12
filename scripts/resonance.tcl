@@ -387,18 +387,15 @@ proc vTcl:project:info {} {
     }
     namespace eval ::widgets::$base.tab85 {
         array set save {-height 1 -tabpos 1}
+        namespace eval subOptions {
+            array set save {-label 1}
+        }
     }
     set site_8_0 [lindex [$base.tab85 childsite] 0]
     namespace eval ::widgets::$site_8_0 {
         array set save {-background 1 -highlightcolor 1}
     }
     set site_8_0 $site_8_0
-    namespace eval ::widgets::$site_8_0.lab87 {
-        array set save {-font 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.lab88 {
-        array set save {-font 1 -text 1}
-    }
     namespace eval ::widgets::$site_8_0.lab89 {
         array set save {-_tooltip 1 -anchor 1 -text 1}
     }
@@ -538,55 +535,162 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_8_0.but74 {
         array set save {-_tooltip 1 -command 1 -text 1}
     }
-    namespace eval ::widgets::$site_8_0.fra106 {
-        array set save {-borderwidth 1 -height 1 -relief 1 -width 1}
+    namespace eval ::widgets::$site_8_0.but65 {
+        array set save {-command 1 -text 1}
     }
-    set site_9_0 $site_8_0.fra106
-    namespace eval ::widgets::$site_9_0.che108 {
-        array set save {-_tooltip 1 -anchor 1 -command 1 -justify 1 -text 1 -variable 1}
+    namespace eval ::widgets::$site_8_0.but66 {
+        array set save {-command 1 -text 1}
     }
-    namespace eval ::widgets::$site_9_0.che109 {
-        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    namespace eval ::widgets::$site_8_0.but67 {
+        array set save {-command 1 -text 1}
     }
-    namespace eval ::widgets::$site_9_0.che110 {
-        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    namespace eval ::widgets::$site_8_0.but68 {
+        array set save {-command 1 -text 1}
     }
-    namespace eval ::widgets::$site_9_0.che111 {
-        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    namespace eval ::widgets::$site_8_0.but69 {
+        array set save {-command 1 -text 1}
     }
-    namespace eval ::widgets::$site_9_0.but107 {
-        array set save {-_tooltip 1 -command 1 -font 1 -text 1}
+    namespace eval ::widgets::$site_8_0.but70 {
+        array set save {-command 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.but71 {
-        array set save {-_tooltip 1 -command 1 -text 1 -width 1}
-    }
-    namespace eval ::widgets::$site_8_0.but72 {
-        array set save {-_tooltip 1 -command 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.but79 {
-        array set save {-_tooltip 1 -command 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.but73 {
-        array set save {-_tooltip 1 -command 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.but77 {
-        array set save {-_tooltip 1 -command 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.but78 {
-        array set save {-_tooltip 1 -command 1 -text 1}
-    }
-    namespace eval ::widgets::$site_8_0.che71 {
-        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
-    }
-    namespace eval ::widgets::$site_8_0.che72 {
-        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
-    }
-    namespace eval ::widgets::$site_8_0.che73 {
-        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
+        array set save {-command 1 -text 1}
     }
     set site_8_1 [lindex [$base.tab85 childsite] 1]
     namespace eval ::widgets::$site_8_1 {
         array set save {-background 1 -highlightcolor 1}
+    }
+    set site_8_0 $site_8_1
+    namespace eval ::widgets::$site_8_0.lab65 {
+        array set save {-labelpos 1 -labeltext 1}
+    }
+    set site_10_0 [$site_8_0.lab65 childsite]
+    namespace eval ::widgets::$site_10_0 {
+        array set save {-background 1 -highlightcolor 1}
+    }
+    set site_10_0 $site_10_0
+    namespace eval ::widgets::$site_10_0.lab71 {
+        array set save {-anchor 1 -justify 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent72 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab73 {
+        array set save {-anchor 1 -justify 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent74 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_10_0.but73 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab65 {
+        array set save {-anchor 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent66 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_10_0.tex65 {
+        array set save {-background 1 -insertbackground 1}
+    }
+    namespace eval ::widgets::$site_10_0.che66 {
+        array set save {-_tooltip 1 -anchor 1 -command 1 -justify 1 -overrelief 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.che67 {
+        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.che68 {
+        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.but65 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab66 {
+        array set save {-anchor 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad65 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad66 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad67 {
+        array set save {-_tooltip 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad68 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad69 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.rad70 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_8_0.lab66 {
+        array set save {-labelpos 1 -labeltext 1}
+    }
+    set site_10_0 [$site_8_0.lab66 childsite]
+    namespace eval ::widgets::$site_10_0 {
+        array set save {-background 1 -highlightcolor 1}
+    }
+    set site_10_0 $site_10_0
+    namespace eval ::widgets::$site_10_0.cpd67 {
+        array set save {-_tooltip 1 -anchor 1 -command 1 -justify 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd68 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd69 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd70 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1 -wraplength 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd65 {
+        array set save {-labelpos 1 -labeltext 1}
+    }
+    set site_12_0 [$site_10_0.cpd65 childsite]
+    namespace eval ::widgets::$site_12_0 {
+        array set save {-background 1 -height 1 -highlightcolor 1 -width 1}
+    }
+    set site_12_0 $site_12_0
+    namespace eval ::widgets::$site_12_0.cpd65 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd66 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab65 {
+        array set save {-labelpos 1 -labeltext 1}
+    }
+    set site_12_0 [$site_10_0.lab65 childsite]
+    namespace eval ::widgets::$site_12_0 {
+        array set save {-background 1 -highlightcolor 1}
+    }
+    set site_12_0 $site_12_0
+    namespace eval ::widgets::$site_12_0.cpd66 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd67 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd68 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd69 {
+        array set save {-_tooltip 1 -anchor 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd70 {
+        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_12_0.cpd71 {
+        array set save {-_tooltip 1 -anchor 1 -justify 1 -text 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd71 {
+        array set save {-_tooltip 1 -command 1 -text 1 -width 1}
+    }
+    namespace eval ::widgets::$site_10_0.cpd72 {
+        array set save {-_tooltip 1 -command 1 -font 1 -text 1}
     }
     set site_8_2 [lindex [$base.tab85 childsite] 2]
     namespace eval ::widgets::$site_8_2 {
@@ -604,6 +708,7 @@ proc vTcl:project:info {} {
             LoadVars
             Cleanup
             PlotXS
+            RunKALMAN
             RunCodes
             GetSymbol
         }
@@ -624,6 +729,7 @@ proc ::main {argc argv} {
   global argv0
   global m_nZA
   global m_nMAT
+  global m_szZAname
   global m_szFile m_szEditor m_szPsviewer
   global m_szBaseDir m_szWorkingDir m_szCodeDir m_szAtlasDir m_szENDFDir
 
@@ -664,11 +770,11 @@ proc ::main {argc argv} {
   if {$m_szFile == "" || $flag != "true"} {
     set m_szFile [format "%06d" $m_nZA]
   }
+  set m_szZAname [format "za%06d" $m_nZA]
 
   InitVars
   LoadVars
 }
-
 #############################################################################
 ## Procedure:  InitVars
 
@@ -677,32 +783,51 @@ proc ::InitVars {} {
   global m_fErmax
   global m_fDe
   global m_bGotPTANAL m_bGotWRIURR m_bGotRECENT
+  global m_bGotSensitivity
+  global m_nKALMT
 
   set m_bGotPTANAL 0
   set m_bGotWRIURR 0
   set m_bGotRECENT 0
+  set m_bGotSensitivity 0
 
   set m_fGPower 2.5
   set m_fErmax 500000
   set m_fDe 30
-}
 
+  set m_nKALMT  9999
+}
 #############################################################################
 ## Procedure:  LoadVars
 
 proc ::LoadVars {} {
   global m_nZA m_nZ m_nA
+  global m_szZAname
   global m_fAwt m_fAbun m_fBn m_fSpin
   global m_fD0 m_fD1 m_fD2
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
   global m_fErmax m_fEumax
-  global m_fR
+# m_fR, m_fDR : scattering radius and its error
+  global m_fR m_fDR
+# m_fSS, m_fDSS : scattering cross section and its error
+  global m_fSS m_fDSS
+# m_fCS, m_fDCS : capture cross section and its error
+  global m_fCS m_fDCS
+# m_fLdp: level density parameter
   global m_fLdp m_fCutoff
+  global m_nNoResToBeAdjusted
+  global m_nNoResToBeEvaluated
+  global m_nNoExtraRes
 
   global m_bGotPTANAL m_bGotWRIURR m_bGotRECENT
+  global m_bGotSensitivity
 
   global m_szBaseDir m_szCodeDir m_szFile m_szWorkingDir
+
+  set m_nNoResToBeAdjusted 10
+  set m_nNoResToBeEvaluated 3
+  set m_nNoExtraRes 5
 
   set m_nZA [expr int($m_nZA)]
   set m_nZ [expr $m_nZA/1000]
@@ -711,12 +836,13 @@ proc ::LoadVars {} {
   set m_bGotPTANAL 0
   set m_bGotWRIURR 0
   set m_bGotRECENT 0
+  set m_bGotSensitivity 0
 
   cd $m_szWorkingDir
 
-  set fn [format "za%06d.atlas" $m_nZA]
+  set atlasfn [format "%s.atlas" $m_szZAname]
   if {[file exists $m_szFile.atlas]} {
-    exec mv -f $m_szFile.atlas $fn
+    exec mv -f $m_szFile.atlas $atlasfn
   }
 
   set output [exec $m_szCodeDir/readrp $m_nZA $m_szBaseDir]
@@ -743,8 +869,13 @@ proc ::LoadVars {} {
   set m_fGg1 [format "%.2f" [lindex $output 11]]
   set m_fGg2 [format "%.2f" [lindex $output 12]]
   set m_fR [format "%.2f" [lindex $output 13]]
-  set m_fErmax [lindex $output 14]
-  set m_fEumax [lindex $output 15]
+  set m_fDR [format "%.2f" [lindex $output 14]]
+  set m_fSS [format "%f" [lindex $output 15]]
+  set m_fDSS [format "%f" [lindex $output 16]]
+  set m_fCS [format "%f" [lindex $output 17]]
+  set m_fDCS [format "%f" [lindex $output 18]]
+  set m_fErmax [lindex $output 19]
+  set m_fEumax [lindex $output 20]
   if {$m_fEumax==0} {set m_fEumax 20e6}
 
   set m_fLdp [format "%.2f" [expr $m_nA/8.0]]
@@ -763,10 +894,10 @@ proc ::LoadVars {} {
     set m_fCutoff [format "%.2f" [expr sqrt(0.0888*pow($m_nA,2./3)*sqrt($m_fLdp*($m_fBn-$pair)))]]
   }
 
-  if {[file exists $fn]} {
-    exec mv -f $fn $m_szFile.atlas
+  if {[file exists $atlasfn]} {
+    exec mv -f $atlasfn $m_szFile.atlas
   } else {
-    puts [format "Error: Local resonance parameter table '%s' not found" $fn]
+    puts [format "Error: Local resonance parameter table '%s' not found" $atlasfn]
   }
 
   if {[file exists $m_szFile.exf]} { exec cp $m_szFile.exf EXFOR.dat }
@@ -782,13 +913,13 @@ proc ::LoadVars {} {
   }
   exec rm -f EXFOR.dat EXFOR.datp
 }
-
 #############################################################################
 ## Procedure:  Cleanup
 
 proc ::Cleanup {} {
   global m_nZA
-  exec rm -f ptanal.inp ptanal.lis ptanal.std
+  global m_szZAname
+#  exec rm -f ptanal.inp ptanal.lis ptanal.std
   exec rm -f wriurr.inp wriurr.lis wriurr.std
   exec rm -f RECENT.INP RECENT.LST recent.std
   exec rm -f SIGMA1.INP SIGMA1.LST sigma1.std
@@ -796,10 +927,9 @@ proc ::Cleanup {} {
   exec rm -f ptdist0.dat ptdist0.fit ptdist1.dat ptdist1.fit ptdist.dat ptdist.fit ptdist.gp ptdist.ps
   exec rm -f l0.txt l1.txt l2.txt scanr.gp scanr.ps scanr.std
   exec rm -f endfr.txt endfa.txt endfu.txt endfu.pw endfu.bpw
-  exec rm -f [format "za%06d.atlas" $m_nZA]
+  exec rm -f [format "%s.atlas" $m_szZAname]
   puts "Cleanup completed"
 }
-
 #############################################################################
 ## Procedure:  PlotXS
 
@@ -868,32 +998,286 @@ proc ::PlotXS {nMT bENDF bJENDL bJEFF} {
   }
 }
 #############################################################################
-## Procedure:  RunCodes
+## Procedure:  RunKALMAN
 
-proc ::RunCodes {} {
+proc ::RunKALMAN {} {
   global m_szBaseDir m_szFile m_szWorkingDir m_szCodeDir
-  global m_bAllcodes m_bPTANAL m_bWRIURR m_bRECENT
-  global m_nZA m_nMAT
+  global m_bAllcodes1 m_bSensitivity m_bKALMAN
+  global m_nZ m_nA m_nZA m_nMAT
+  global m_szZAname
   global m_fAwt m_fAbun m_fBn m_fSpin
   global m_fD0 m_fD1 m_fD2
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
   global m_fErmax m_fEumax
-  global m_fR m_fCutoff m_fDe m_fLdp m_fGPower
+  global m_fR m_fDR m_fCutoff m_fDe m_fLdp m_fGPower
+  global m_fSS m_fDSS m_fCS m_fDCS
+  global m_fGn0_cut m_fGn1_cut
+  global m_nNoResToBeAdjusted m_nNoResToBeEvaluated m_nNoExtraRes
+  global m_bGotSensitivity
+  global m_nKALMT
+
+# m_nNoResToBeAdjusted: number of resonances to be adjusted for sensitivy calculation
+# m_nNoResToBeEvaluated: number of resonance energies to be added to the energy grid of THERMX(revised RECENT)
+
+  cd $m_szWorkingDir
+  if {$m_bAllcodes1 ==0 && $m_bSensitivity == 0 &&
+      $m_bKALMAN == 0} {
+    tk_dialog .msgbox "Error" "No job specified" info 0 OK
+  }
+
+#   verify the integrity of input befor run
+  if {$m_bAllcodes1 != 0 || $m_bSensitivity != 0} {
+    if {$m_nNoResToBeAdjusted <= 0} {
+      tk_dialog .msgbox "Error" "No. of resonances to be adjusted should be larger than 0" info 0 OK
+      return
+    } elseif {$m_nNoResToBeEvaluated <= 0} {
+      tk_dialog .msgbox "Error" "No. of resonances to be evalulated should be larger than 0" info 0 OK
+      return
+    } elseif {$m_nNoExtraRes < 0} {
+      tk_dialog .msgbox "Error" "No. of extra resonances should be equal or larger than 0" info 0 OK
+      return
+    }
+  }
+  if {$m_bAllcodes1 != 0 || $m_bKALMAN != 0} {
+    if {$m_bAllcodes1 == 0 && $m_bSensitivity == 0 && $m_bGotSensitivity == 0} {
+      tk_dialog .msgbox "Error" "Run sensitivity calculation first" info 0 OK
+      return
+    }
+  }
+
+  if {$m_bAllcodes1 != 0 || $m_bSensitivity != 0} {
+
+    set files [glob -nocomplain "$m_szZAname*.kal"]
+    foreach fn $files {
+      catch {file delete $fn}
+    }
+
+    set atlasfn [format "%s.atlas" $m_szZAname]
+    exec cp -f $m_szFile.atlas $atlasfn
+
+    set fn [format "%s-inp.sen" $m_szZAname]
+    set inpfile [open $fn w]
+    set fn [format "%s-mat.sen" $m_szZAname]
+    set senfile [open $fn w]
+
+    for {set i -3} {$i< [expr 2*6*$m_nNoResToBeAdjusted]} {incr i} {
+      if {![file exists $m_szFile.atlas]} {
+        tk_dialog .msgbox "Error" "Local resonance parameter table '$m_szFile.atlas' not found" info 0 OK
+        return
+      }
+#     make a input file for PTANAL
+      exec rm -f ptanal.std
+      set file [open "ptanal.inp" w]
+      puts $file "&data"
+      puts $file " zam=$m_nZA mat=$m_nMAT awt=$m_fAwt spin=$m_fSpin"
+      if {$m_fAbun !=0} {puts $file " abun=$m_fAbun"}
+      puts $file " sf0=$m_fSf0\n sf1=$m_fSf1,$m_fSf1,$m_fSf1\n D0=$m_fD0"
+      puts $file " ggavg=$m_fGg0, $m_fGg1"
+      if {$m_fErmax != ""} {puts $file " ecut=$m_fErmax"}
+      if {$m_fGn0_cut != ""} {puts $file " gncut=$m_fGn0_cut,$m_fGn1_cut"}
+      puts $file [format " ap=%f dap=%f" [expr $m_fR/10] [expr $m_fDR/10]]
+      if {$i == -3} {
+        puts $file [format " adjust='K0001/%04d %2d%4d'" $m_nNoResToBeAdjusted $m_nNoResToBeEvaluated $m_nNoExtraRes]
+      } elseif {$i == -2} {
+        puts $file [format " adjust='R0001/%04d-%2d%4d'" $m_nNoResToBeAdjusted $m_nNoResToBeEvaluated $m_nNoExtraRes]
+      } elseif {$i == -1} {
+        puts $file [format " adjust='R0001/%04d+%2d%4d'" $m_nNoResToBeAdjusted $m_nNoResToBeEvaluated $m_nNoExtraRes]
+      } elseif {[expr $i%6] == 0} {
+        puts $file [format " adjust='E%04d/%04d-  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      } elseif {[expr $i%6] == 1} {
+        puts $file [format " adjust='E%04d/%04d+  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      } elseif {[expr $i%6] == 2} {
+        puts $file [format " adjust='N%04d/%04d-  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      } elseif {[expr $i%6] == 3} {
+        puts $file [format " adjust='N%04d/%04d+  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      } elseif {[expr $i%6] == 4} {
+        puts $file [format " adjust='G%04d/%04d-  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      } else {
+        puts $file [format " adjust='G%04d/%04d+  %4d'" [expr $i/6+1] $m_nNoResToBeAdjusted $m_nNoExtraRes]
+      }
+      puts $file "&end"
+      close $file
+#     run PTANAL
+      exec $m_szCodeDir/ptanal > ptanal.std
+      if {![file exists endfa.txt]} {
+        tk_dialog .msgbox "Error" "Failed to run PTANAL.\nCheck the standard output of PTANAL" info 0 OK
+        return
+      }
+      set count 0
+      set file [open "ptanal.unc" r]
+      gets $file line
+      scan $line "%s%d%f" pname count uncert
+      close $file
+      if {$pname == "DOSTOP"} { break }
+      if {$i == -3} { set ulimit $uncert }
+#      exec cp ptanal.inp [format "INP%03d-%d" $count [expr $i%6+1]]
+#      exec cp ptanal.std [format "STD%03d-%d" $count [expr $i%6+1]]
+#      exec cp ptanal.lis [format "LIS%03d-%d" $count [expr $i%6+1]]
+#      exec cp endfa.txt [format "ENDF%03d-%d" $count [expr $i%6+1]]
+#      exec cp ptanal.unc [format "UNC%03d-%d" $count [expr $i%6+1]]
+#     make a input file for THERMX
+      set file [open "THERMX.INP" w]
+      puts $file [format "%11d%11.4E%11d%11d%11d%11d" 0 1e-10 1 1 1 1]
+      puts $file "endfa.txt\nendfu.pw"
+      puts $file [format "%11d%11d%11.4e%11.4e\n" 1 9999 0 $ulimit]
+      puts $file [format "%11.4E%11.4E\n" 0 0.01]
+      close $file
+#     run THERMX
+      exec $m_szCodeDir/thermx > thermx.std
+
+#      exec cp endfu.pw [format "PWD%03d-%d" $count [expr $i%6+1]]
+      set file [open "endfu.pw" r]
+      set n 0
+      while {[gets $file line] >= 0} {
+        if {[string index $line 0] == "#"} {continue}
+        set en($n) 0
+        set total($n) 0
+        set elastic($n) 0
+        set capture($n) 0
+        set fission($n) 0
+        scan $line "%f%f%f%f" en($n) total($n) elastic($n) capture($n)
+#       puts [format "%f %f %f %f" $en($n) $total($n) $elastic($n) $capture($n)]
+        set n [expr $n+1]
+      }
+      close $file
+      if {$i == -3} {
+        set fn [format "%s.xsc" $m_szZAname]
+        set xsfile [open $fn w]
+        puts $xsfile [format "#  5          %3d-%-2s-%3d" $m_nZ [GetSymbol $m_nZ] $m_nA]
+        puts $xsfile "#  Einc       Total       Elastic     Reaction    Fission   (z,gamma)"
+        set ndata $n
+#       <Units>
+#       Energy : MeV
+#       Cross section : mb
+        for {set n 0} {$n<$ndata} {incr n} {
+          set en0($n) $en($n)
+          set total0($n) $total($n)
+          set elastic0($n) $elastic($n)
+          set capture0($n) $capture($n)
+          set fission0($n) $fission($n)
+          puts $xsfile [format "%10.4E%12.5E%12.5E%12.5E%12.5E%12.5E"  [expr $en($n)*1E-6]  [expr $total0($n)*1E3]  [expr $elastic0($n)*1E3]  0.0  0.0  [expr $capture0($n)*1E3]]
+        }
+        close $xsfile
+      } elseif {$i == -2 || [expr $i%2] == 0} {
+        set ndata $n
+        for {set n 0} {$n<$ndata} {incr n} {
+          set en1($n) $en($n)
+          set total1($n) $total($n)
+          set elastic1($n) $elastic($n)
+          set capture1($n) $capture($n)
+          set fission1($n) $fission($n)
+        }
+      } else {
+        puts $senfile [format "#  5          %3d-%-2s-%3d" $m_nZ [GetSymbol $m_nZ] $m_nA]
+        if {$pname == "SCATRD"} {
+          puts $inpfile [format "%6s    %8.5f    00  00   0           ! scattering radius" "SCATRD" $uncert]
+          puts $senfile [format "# Parameter: %6s  %3d%3d%3d%3d  variation: +-%.3f     Sensitivity matrix"  $pname $count 1 1 0 $uncert]
+        } elseif {$pname == "ENERGY"} {
+          puts $inpfile [format "%2s%04d    %8.5f    00  00   0           ! resonance energy" "EN" $count $uncert]
+          puts $senfile [format "# Parameter: %2s%04d  %3d%3d%3d%3d  variation: +-%.3f     Sensitivity matrix"  [string range $pname 0 1] $count $count 1 1 0 $uncert]
+        } elseif {$pname == "NWIDTH"} {
+          puts $inpfile [format "%2s%04d    %8.5f    00  00   0           ! neutron width" "NW" $count $uncert]
+          puts $senfile [format "# Parameter: %2s%04d  %3d%3d%3d%3d  variation: +-%.3f     Sensitivity matrix"  [string range $pname 0 1] $count $count 1 1 0 $uncert]
+        } elseif {$pname == "GWIDTH"} {
+          puts $inpfile [format "%2s%04d    %8.5f    00  00   0           ! gamma width" "GW" $count $uncert]
+          puts $senfile [format "# Parameter: %2s%04d  %3d%3d%3d%3d  variation: +-%.3f     Sensitivity matrix"  [string range $pname 0 1] $count $count 1 1 0 $uncert]
+        }
+        puts $senfile "#  Einc       Total       Elastic     Reaction    Fission   (z,gamma)"
+        set ndata $n
+#       <Units>
+#       Energy : MeV
+        for {set n 0} {$n<$ndata} {incr n} {
+          puts $senfile [format "%10.4E%12.4E%12.4E%12.4E%12.4E%12.4E" [expr $en1($n)*1E-6]  [expr ($total($n)-$total1($n))/$total0($n)]  [expr ($elastic($n)-$elastic1($n))/$elastic0($n)]  0.0 0.0  [expr ($capture($n)-$capture1($n))/$capture0($n)]]
+        }
+        puts $senfile ""
+      }
+    }
+#    exec rm -f THERMX.INP endfa.txt endfu.pw
+##    exec rm -f ptanal.inp $atlasfn
+    close $inpfile
+    close $senfile
+
+    set fn [format "%s.c4" $m_szZAname]
+    set c4file [open $fn w]
+    puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 2 0.0253 0 $m_fSS $m_fDSS 0 0 0 0 "S.F.Mughabghab (06)" 10000 1]
+    puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 102 0.0253 0 $m_fCS $m_fDCS 0 0 0 0 "S.F.Mughabghab (06)" 10000 2]
+    close $inpfile
+
+    set m_bGotSensitivity 1
+  }
+  if {$m_bAllcodes1 != 0 || $m_bKALMAN != 0} {
+#     run KALMAN
+    if {$m_nKALMT == 0} {
+      set MT 1
+      set EXPDAT 0
+    } elseif {$m_nKALMT == 9999} {
+      set MT 1
+      set EXPDAT 2
+    } else {
+      set MT $m_nKALMT
+      set EXPDAT 1
+    }
+    exec $m_szBaseDir/scripts/kalman $m_szZAname $MT $m_nMAT $EXPDAT
+  
+#    set fn [format "%s.atlas" $m_szZAname]
+#    set atlas1 [open $fn r]
+#    set fn [format "%s.atlas~" $m_szZAname]
+#    set atlas2 [open $fn w]
+#    while {[gets $atlas1 line] >= 0} {
+#      if {[string index $line 0] == "#"} {continue}
+#        set iza   [string range $line 0 5]
+#        set sym   [string range $line 7 8]
+#        set e0    [string range $line 26 35]
+#        set de0   [string range $line 37 43]
+#        set jflag [string range $line 45 45]
+#        set ajx   [string range $line 47 49]
+#        set lflag [string range $line 51 51]
+#        set lw    [string range $line 53 53]
+#        set nflag [string range $line 80 82]
+#        set ggn   [string range $line 86 94]
+#        set dggn  [string range $line 96 103]
+#        set gflag [string range $line 105 107]
+#        set gg    [string range $line 111 119]
+#        set dgg   [string range $line 121 128]
+#        set aflag [string range $line 155 157]
+#        set area  [string range $line 161 169]
+#        catch {puts $atlas2 [format "%6d;%2s;%3s;%11s;%10.4e;%7.2e;%1s;%3.1f;%1s;%1d;%3s;%1s;%9s;%8s;%3s;%1s;%9e;%8e;%3s;%1s;%9e;%8e%3s%1s%9s%8s%3s%1s%9e" $iza $sym "" "" $e0 $de0 $jflag $ajx $lflag $lw "" "" "" "" $nflag "" $ggn $dggn $gflag "" $gg $dgg "" "" "" "" $aflag "" $area]}
+#    }
+#    close $atlas1
+#    close $atlas2
+  }
+}
+#############################################################################
+## Procedure:  RunCodes
+
+proc ::RunCodes {} {
+  global m_szBaseDir m_szFile m_szWorkingDir m_szCodeDir
+  global m_bAllcodes2 m_bPTANAL m_bWRIURR m_bRECENT
+  global m_nZ m_nA m_nZA m_nMAT
+  global m_szZAname
+  global m_fAwt m_fAbun m_fBn m_fSpin
+  global m_fD0 m_fD1 m_fD2
+  global m_fSf0 m_fSf1 m_fSf2
+  global m_fGg0 m_fGg1 m_fGg2
+  global m_fErmax m_fEumax
+  global m_fR m_fDR m_fCutoff m_fDe m_fLdp m_fGPower
   global m_fGn0_cut m_fGn1_cut
   global m_bIcon1 m_bIcon2 m_bIcon3
   global m_bGotPTANAL m_bGotWRIURR m_bGotRECENT
 
   cd $m_szWorkingDir
-  if {$m_bAllcodes ==0 && $m_bPTANAL == 0 &&
+  if {$m_bAllcodes2 ==0 && $m_bPTANAL == 0 &&
       $m_bWRIURR == 0 && $m_bRECENT == 0} {
     tk_dialog .msgbox "Error" "No job specified" info 0 OK
   }
+
+
 #   verify the integrity of input befor run
-  if {$m_bAllcodes != 0 || $m_bPTANAL != 0} {
+  if {$m_bAllcodes2 != 0 || $m_bPTANAL != 0} {
   }
-  if {$m_bAllcodes != 0 || $m_bWRIURR != 0} {
-    if {$m_bAllcodes == 0 && $m_bPTANAL == 0 && $m_bGotPTANAL == 0} {
+  if {$m_bAllcodes2 != 0 || $m_bWRIURR != 0} {
+    if {$m_bAllcodes2 == 0 && $m_bPTANAL == 0 && $m_bGotPTANAL == 0} {
       tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
       return
     }
@@ -914,19 +1298,19 @@ proc ::RunCodes {} {
       return
     }
   }
-  if {$m_bAllcodes != 0 || $m_bRECENT != 0} {
-    if {$m_bAllcodes == 0 && $m_bWRIURR == 0 && $m_bGotWRIURR == 0} {
+  if {$m_bAllcodes2 != 0 || $m_bRECENT != 0} {
+    if {$m_bAllcodes2 == 0 && $m_bWRIURR == 0 && $m_bGotWRIURR == 0} {
       tk_dialog .msgbox "Error" "Run PTANAL and WRIURR first" info 0 OK
       return
     }
   }
-  if {$m_bAllcodes != 0 || $m_bPTANAL != 0} {
+  if {$m_bAllcodes2 != 0 || $m_bPTANAL != 0} {
     if {![file exists $m_szFile.atlas]} {
       tk_dialog .msgbox "Error" "Local resonance parameter table '$m_szFile.atlas' not found" info 0 OK
       return
     }
-    set fn [format "za%06d.atlas" $m_nZA]
-    exec cp -f $m_szFile.atlas $fn
+    set atlasfn [format "%s.atlas" $m_szZAname]
+    exec cp -f $m_szFile.atlas $atlasfn
     exec rm -f ptanal.std
 #   make a input file for PTANAL
     set file [open "ptanal.inp" w]
@@ -937,7 +1321,7 @@ proc ::RunCodes {} {
     puts $file " ggavg=$m_fGg0, $m_fGg1"
     if {$m_fErmax != ""} {puts $file " ecut=$m_fErmax"}
     if {$m_fGn0_cut != ""} {puts $file " gncut=$m_fGn0_cut,$m_fGn1_cut"}
-    puts $file " ap=[format "%.2f" [expr $m_fR/10]]"
+    puts $file [format " ap=%f" [expr $m_fR/10]]
     puts $file "&end"
     close $file
 #   run PTANAL
@@ -946,7 +1330,7 @@ proc ::RunCodes {} {
     } else {
       exec xterm -T PTANAL -e sh -c "$m_szCodeDir/ptanal > ptanal.std"
     }
-    exec rm -f ptanal.inp $fn
+#    exec rm -f ptanal.inp $atlasfn
     exec mv -f ptanal.lis $m_szFile-log.ptanal
     if {![file exists endfa.txt]} {
       tk_dialog .msgbox "Error" "Failed to run PTANAL.\nCheck the standard output of PTANAL" info 0 OK
@@ -956,7 +1340,11 @@ proc ::RunCodes {} {
     }
     set m_bGotPTANAL 1
   }
-  if {$m_bAllcodes != 0 || $m_bWRIURR != 0} {
+  if {$m_bAllcodes2 != 0 || $m_bWRIURR != 0} {
+    if {$m_fEumax < $m_fErmax} {
+      tk_dialog .msgbox "Error" "Emax of unresolved region should be larger than Emax of resolved region" info 0 OK
+      return
+    }
     exec rm -f wriurr.std
 #   make a input file for WRIURR
     set file [open "wriurr.inp" w]
@@ -1003,7 +1391,7 @@ proc ::RunCodes {} {
     exec mv -f wriurr.lis $m_szFile-log.wriurr
     set m_bGotWRIURR 1
   }
-  if {$m_bAllcodes != 0 || $m_bRECENT != 0} {
+  if {$m_bAllcodes2 != 0 || $m_bRECENT != 0} {
     exec rm -f recent.std
     exec rm -f sigma1.std
 #   make a input file for RECENT
@@ -1038,7 +1426,6 @@ proc ::RunCodes {} {
     set m_bGotRECENT 1
   }
 }
-
 #############################################################################
 ## Procedure:  GetSymbol
 
@@ -1076,7 +1463,7 @@ proc vTclWindow. {base} {
     ###################
     wm focusmodel $top passive
     wm geometry $top 1x1+0+0; update
-    wm maxsize $top 1585 1120
+    wm maxsize $top 1905 1169
     wm minsize $top 1 1
     wm overrideredirect $top 0
     wm resizable $top 1 1
@@ -1107,7 +1494,7 @@ proc vTclWindow.top71 {base} {
     vTcl:toplevel $top -class Toplevel \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 617x543+36+223; update
+    wm geometry $top 617x543+11+547; update
     wm maxsize $top 1585 1120
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -1127,14 +1514,17 @@ proc vTclWindow.top71 {base} {
         -anchor w -menu "$site_3_0.01.02" -padx 4 -pady 3 -text File -width 4 
     vTcl:DefineAlias "$site_3_0.01" "Menubutton4" vTcl:WidgetProc "Toplevel1" 1
     menu $site_3_0.01.02 \
-        -activeborderwidth 1 -borderwidth 1 -tearoff 0 
+        -activeborderwidth 1 -borderwidth 1 -font {Helvetica -12 bold} \
+        -tearoff 0 
     vTcl:DefineAlias "$site_3_0.01.02" "Menu1" vTcl:WidgetProc "" 1
     $site_3_0.01.02 add command \
         -accelerator Ctrl+L -command LoadVars -label Load 
     $site_3_0.01.02 add command \
-        -accelerator Ctrl+C -command {exec $m_szEditor $m_szFile.c4} -label {Edit C4}
+        -accelerator Ctrl+C -command {exec $m_szEditor $m_szFile.c4} \
+        -label {Edit C4} 
     $site_3_0.01.02 add command \
-        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} -label {Edit EXFOR}
+        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} \
+        -label {Edit EXFOR} 
     $site_3_0.01.02 add command \
         -accelerator Ctrl+X -command {Cleanup; exit} -label Exit 
     menubutton $site_3_0.05 \
@@ -1150,12 +1540,12 @@ proc vTclWindow.top71 {base} {
         } \
         -label About 
     menubutton $site_3_0.men72 \
-        -menu "$site_3_0.men72.m" -padx 6 -pady 4 -text View 
+        -menu "$site_3_0.men72.m" -padx 6 -pady 4 -text Outputs 
     vTcl:DefineAlias "$site_3_0.men72" "Menubutton1" vTcl:WidgetProc "Toplevel1" 1
     menu $site_3_0.men72.m \
         -tearoff 0 
     $site_3_0.men72.m add cascade \
-        -menu "$site_3_0.men72.m.men72" -command {} -label {Standard output} 
+        -menu "$site_3_0.men72.m.men72" -command {} -label PTANAL 
     set site_5_0 $site_3_0.men72.m
     menu $site_5_0.men72 \
         -tearoff 0 
@@ -1167,31 +1557,8 @@ proc vTclWindow.top71 {base} {
     exec $m_szEditor ptanal.std &
   }
         } \
-        -label PTANAL 
+        -label log 
     $site_5_0.men72 add command \
-        \
-        -command {
-  cd $m_szWorkingDir
-  if {[file exists wriurr.std]} {
-    exec $m_szEditor wriurr.std &
-  }
-        } \
-        -label WRIURR 
-    $site_5_0.men72 add command \
-        \
-        -command {
-  cd $m_szWorkingDir
-  if {[file exists recent.std]} {
-    exec $m_szEditor recent.std &
-  }
-        } \
-        -label RECENT 
-    $site_3_0.men72.m add cascade \
-        -menu "$site_3_0.men72.m.men71" -command {} -label {List output} 
-    set site_5_0 $site_3_0.men72.m
-    menu $site_5_0.men71 \
-        -tearoff 0 
-    $site_5_0.men71 add command \
         \
         -command {
   cd $m_szWorkingDir
@@ -1199,7 +1566,21 @@ proc vTclWindow.top71 {base} {
     exec $m_szEditor $m_szFile-log.ptanal &
   }
         } \
-        -label PTANAL 
+        -label output 
+    $site_3_0.men72.m add cascade \
+        -menu "$site_3_0.men72.m.men71" -command {} -label WRIURR 
+    set site_5_0 $site_3_0.men72.m
+    menu $site_5_0.men71 \
+        -tearoff 0 
+    $site_5_0.men71 add command \
+        \
+        -command {
+  cd $m_szWorkingDir
+  if {[file exists wriurr.std]} {
+    exec $m_szEditor wriurr.std &
+  }
+        } \
+        -label log 
     $site_5_0.men71 add command \
         \
         -command {
@@ -1208,132 +1589,74 @@ proc vTclWindow.top71 {base} {
       exec $m_szEditor $m_szFile-log.wriurr &
   }
         } \
-        -label WRIURR 
-    $site_5_0.men71 add command \
-        \
-        -command {
-  if {$m_bGotRECENT} {
-    cd $m_szWorkingDir
-    exec $m_szEditor RECENT.LST &
-  }
-        } \
-        -label RECENT 
+        -label output 
     $site_3_0.men72.m add cascade \
-        -menu "$site_3_0.men72.m.men73" -command {} -label Plot 
+        -menu "$site_3_0.men72.m.men73" -command {} -label RECENT 
     set site_5_0 $site_3_0.men72.m
     menu $site_5_0.men73 \
         -tearoff 0 
     $site_5_0.men73 add command \
         \
         -command {
-  if {$m_bGotPTANAL} {
-    cd $m_szWorkingDir
-    if {![file exists ptdist.ps]} {
-      tk_dialog .msgbox "Error" "Plot not found\nProbably your GNUPLOT is outdated" info 0 OK
-      return
-    }
-    exec $m_szPsviewer ptdist.ps &
-  } else {
-    tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
+  cd $m_szWorkingDir
+  if {[file exists recent.std]} {
+    exec $m_szEditor recent.std &
   }
         } \
-        -label {Porter-Thomas analysis} 
+        -label log 
     $site_5_0.men73 add command \
         \
         -command {
-  if {$m_bGotPTANAL} {
+  if {$m_bGotRECENT} {
     cd $m_szWorkingDir
-    if {[file exists /usr/bin/tee]} {
-      exec xterm -T scanr -e sh -c "$m_szCodeDir/scanr | /usr/bin/tee scanr.std"
-    } else {
-      exec xterm -T scanr -e sh -c "$m_szCodeDir/scanr > scanr.std"
-    }
-    if {![file exists scanr.ps]} {
-      tk_dialog .msgbox "Error" "Plot not found\nProbably your GNUPLOT is outdated" info 0 OK
-      return
-    }
-    exec mv -f scanr.ps $m_szFile-res.ps
-    exec $m_szPsviewer $m_szFile-res.ps &
-  } else {
-    tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
+    exec $m_szEditor RECENT.LST &
   }
          } \
-        -label {Cumulative plot} 
+        -label output 
     $site_3_0.men72.m add cascade \
-        -menu "$site_3_0.men72.m.men74" -command {} -label Systematics 
+        -menu "$site_3_0.men72.m.men74" -command {} -label KALMAN 
     set site_5_0 $site_3_0.men72.m
     menu $site_5_0.men74 \
         -tearoff 0 
     $site_5_0.men74 add command \
         \
         -command {
-  if {[file exists $m_szAtlasDir/post-script/rprime.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/rprime.eps &
+  if {[file exists $m_szZAname-out.kal]} {
+    exec $m_szEditor $m_szZAname-out.kal &
   } else {
-    tk_dialog .msgbox "Error" "Plot of R' not found" info 0 OK
+    tk_dialog .msgbox "Error" "KALMAN output not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label R' 
+        -label output 
     $site_5_0.men74 add command \
         \
         -command {
-  if {[file exists $m_szAtlasDir/post-script/density.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/density.eps &
+  if {[file exists $m_szZAname-xsc.kal]} {
+    exec $m_szEditor $m_szZAname-xsc.kal &
   } else {
-    tk_dialog .msgbox "Error" "Plot of level density parameter not found" info 0 OK
+    tk_dialog .msgbox "Error" "KALMAN x-sections not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label {Level density parameter} 
+        -label x-sections 
     $site_5_0.men74 add command \
         \
         -command {
-  if {[file exists $m_szAtlasDir/post-script/swave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/swave.eps &
+  if {[file exists $m_szZAname-cov.kal]} {
+    exec $m_szEditor $m_szZAname-cov.kal &
   } else {
-    tk_dialog .msgbox "Error" "Plot of strength function for s-wave not found" info 0 OK
+    tk_dialog .msgbox "Error" "KALMAN covariance matrices not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label {Strength function for s-wave} 
+        -label {covariance matrices} 
     $site_5_0.men74 add command \
-        \
         -command {
-  if {[file exists $m_szAtlasDir/post-script/pwave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/pwave.eps &
+  if {[file exists $m_szZAname-expcorr.kal]} {
+    exec $m_szEditor $m_szZAname-expcorr.kal &
   } else {
-    tk_dialog .msgbox "Error" "Plot of strength function for p-wave not found" info 0 OK
+    tk_dialog .msgbox "Error" "KALMAN experimental correlations not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label {Strength function for p-wave} 
-    $site_5_0.men74 add command \
-        \
-        -command {
-  if {[file exists $m_szAtlasDir/post-script/dwave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/dwave.eps &
-  } else {
-    tk_dialog .msgbox "Error" "Plot of strength function for d-wave not found" info 0 OK
-  }
-        } \
-        -label {Strength function for d-wave} 
-    $site_5_0.men74 add command \
-        \
-        -command {
-  if {[file exists $m_szAtlasDir/post-script/gammagamma0.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma0.eps &
-  } else {
-    tk_dialog .msgbox "Error" "Plot of s-wave average capture width not found" info 0 OK
-  }
-        } \
-        -label {s-wave average capture width} 
-    $site_5_0.men74 add command \
-        \
-        -command {
-  if {[file exists $m_szAtlasDir/post-script/gammagamma1.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma1.eps &
-  } else {
-    tk_dialog .msgbox "Error" "Plot of p-wave average capture width not found" info 0 OK
-  }
-        } \
-        -label {p-wave average capture width} 
+        -label {Experimental correlations} 
     pack $site_3_0.01 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     pack $site_3_0.05 \
@@ -1344,22 +1667,12 @@ proc vTclWindow.top71 {base} {
         -height 2000 -tabpos n 
     vTcl:DefineAlias "$top.tab85" "Tabnotebook2" vTcl:WidgetProc "Toplevel1" 1
     $top.tab85 add \
-        -label Main 
+        -label Input 
     $top.tab85 add \
-        
+        -label Execute 
     $top.tab85 add \
-        
+        -label {} 
     set site_8_0 [lindex [$top.tab85 childsite] 0]
-    label $site_8_0.lab87 \
-        \
-        -font [vTcl:font:getFontFromDescr "-family helvetica -size 12 -weight bold"] \
-        -text Input: 
-    vTcl:DefineAlias "$site_8_0.lab87" "Label1" vTcl:WidgetProc "Toplevel1" 1
-    label $site_8_0.lab88 \
-        \
-        -font [vTcl:font:getFontFromDescr "-family helvetica -size 12 -weight bold"] \
-        -text Output: 
-    vTcl:DefineAlias "$site_8_0.lab88" "Label2" vTcl:WidgetProc "Toplevel1" 1
     label $site_8_0.lab89 \
         -anchor w -text ZA: 
     vTcl:DefineAlias "$site_8_0.lab89" "Label3" vTcl:WidgetProc "Toplevel1" 1
@@ -1391,7 +1704,8 @@ proc vTclWindow.top71 {base} {
         set ::vTcl::balloon::%W {Material number}
     }
     button $site_8_0.but76 \
-        -command {set m_szFile [format "%06d" $m_nZA]; LoadVars;} \
+        \
+        -command {set m_szFile [format "%06d" $m_nZA]; set m_szZAname [format "za%06d" $m_nZA]; LoadVars;} \
         -text Reload 
     vTcl:DefineAlias "$site_8_0.but76" "Button7" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_8_0.but76 "$site_8_0.but76 Button $top all _vTclBalloon"
@@ -1732,7 +2046,7 @@ proc vTclWindow.top71 {base} {
   }
   exec $m_szEditor $m_szFile.atlas &
     } \
-        -text {Resonance parameters} -width 201 
+        -text {Edit resonance parameters} -width 211 
     vTcl:DefineAlias "$site_8_0.but75" "Button6" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_8_0.but75 "$site_8_0.but75 Button $top all _vTclBalloon"
     bind $site_8_0.but75 <<SetBalloon>> {
@@ -1741,9 +2055,9 @@ proc vTclWindow.top71 {base} {
     button $site_8_0.but74 \
         \
         -command {
-  set fn [format "z%03d.ps" $m_nZ]
-  if {[file exists $m_szAtlasDir/post-script/$fn]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/$fn &
+  set psfn [format "z%03d.ps" $m_nZ]
+  if {[file exists $m_szAtlasDir/post-script/$psfn]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/$psfn &
   } else {
     tk_dialog .msgbox "Error" "Atlas of Neutron Resonances not found" info 0 OK
   }
@@ -1754,14 +2068,369 @@ proc vTclWindow.top71 {base} {
     bind $site_8_0.but74 <<SetBalloon>> {
         set ::vTcl::balloon::%W {View Atlas of Neutron Resonances}
     }
-    frame $site_8_0.fra106 \
-        -borderwidth 2 -relief groove -height 153 -width 200 
-    vTcl:DefineAlias "$site_8_0.fra106" "Frame3" vTcl:WidgetProc "Toplevel1" 1
-    set site_9_0 $site_8_0.fra106
-    checkbutton $site_9_0.che108 \
-        -anchor w \
+    button $site_8_0.but65 \
+        \
         -command {
-  if {$m_bAllcodes ==1} {
+  if {[file exists $m_szAtlasDir/post-script/rprime.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/rprime.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of R' not found" info 0 OK
+  }
+    } \
+        -text {Scattering radius} 
+    vTcl:DefineAlias "$site_8_0.but65" "Button13" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but66 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/density.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/density.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of level density parameter not found" info 0 OK
+  }
+    } \
+        -text {Level density parameter} 
+    vTcl:DefineAlias "$site_8_0.but66" "Button14" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but67 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/swave.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/swave.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of strength function for s-wave not found" info 0 OK
+  }
+    } \
+        -text {Strength function for s-wave} 
+    vTcl:DefineAlias "$site_8_0.but67" "Button15" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but68 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/pwave.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/pwave.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of strength function for p-wave not found" info 0 OK
+  }
+    } \
+        -text {Strength function for p-wave} 
+    vTcl:DefineAlias "$site_8_0.but68" "Button16" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but69 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/dwave.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/dwave.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of strength function for d-wave not found" info 0 OK
+  }
+    } \
+        -text {Strength function for d-wave} 
+    vTcl:DefineAlias "$site_8_0.but69" "Button17" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but70 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/gammagamma0.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma0.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of s-wave average capture width not found" info 0 OK
+  }
+    } \
+        -text {s-wave average capture width} 
+    vTcl:DefineAlias "$site_8_0.but70" "Button18" vTcl:WidgetProc "Toplevel1" 1
+    button $site_8_0.but71 \
+        \
+        -command {
+  if {[file exists $m_szAtlasDir/post-script/gammagamma1.eps]} {
+    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma1.eps &
+  } else {
+    tk_dialog .msgbox "Error" "Plot of p-wave average capture width not found" info 0 OK
+  }
+    } \
+        -text {p-wave average capture width} 
+    vTcl:DefineAlias "$site_8_0.but71" "Button19" vTcl:WidgetProc "Toplevel1" 1
+    place $site_8_0.lab89 \
+        -in $site_8_0 -x 20 -y 14 -width 25 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent92 \
+        -in $site_8_0 -x 57 -y 13 -width 60 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab90 \
+        -in $site_8_0 -x 144 -y 14 -width 37 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent93 \
+        -in $site_8_0 -x 184 -y 13 -width 60 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but76 \
+        -in $site_8_0 -x 279 -y 10 -width 93 -height 28 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab75 \
+        -in $site_8_0 -x 81 -y 47 -width 54 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab76 \
+        -in $site_8_0 -x 193 -y 47 -width 54 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab78 \
+        -in $site_8_0 -x 302 -y 47 -width 54 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab72 \
+        -in $site_8_0 -x 20 -y 74 -width 29 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent73 \
+        -in $site_8_0 -x 70 -y 74 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent79 \
+        -in $site_8_0 -x 180 -y 74 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent80 \
+        -in $site_8_0 -x 290 -y 74 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab91 \
+        -in $site_8_0 -x 20 -y 101 -width 34 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent94 \
+        -in $site_8_0 -x 70 -y 101 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent98 \
+        -in $site_8_0 -x 180 -y 101 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent81 \
+        -in $site_8_0 -x 290 -y 101 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab82 \
+        -in $site_8_0 -x 20 -y 128 -width 33 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.ent83 \
+        -in $site_8_0 -x 70 -y 128 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.cpd71 \
+        -in $site_8_0 -x 180 -y 128 -width 84 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.cpd72 \
+        -in $site_8_0 -x 290 -y 128 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab71 \
+        -in $site_8_0 -x 7 -y 163 -width 372 -height 96 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.lab77 \
+        -in $site_8_0 -x 7 -y 261 -width 372 -height 184 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but75 \
+        -in $site_8_0 -x 388 -y 381 -width 211 -height 55 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but74 \
+        -in $site_8_0 -x 387 -y 301 -width 211 -height 55 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but65 \
+        -in $site_8_0 -x 387 -y 10 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but66 \
+        -in $site_8_0 -x 387 -y 45 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but67 \
+        -in $site_8_0 -x 387 -y 95 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but68 \
+        -in $site_8_0 -x 387 -y 130 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but69 \
+        -in $site_8_0 -x 387 -y 164 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but70 \
+        -in $site_8_0 -x 387 -y 214 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_8_0.but71 \
+        -in $site_8_0 -x 387 -y 251 -width 211 -height 26 -anchor nw \
+        -bordermode ignore 
+    set site_8_1 [lindex [$top.tab85 childsite] 1]
+    ::iwidgets::labeledframe $site_8_1.lab65 \
+        -labelpos nw -labeltext {Uncertainty calc.} 
+    vTcl:DefineAlias "$site_8_1.lab65" "Labeledframe2" vTcl:WidgetProc "Toplevel1" 1
+    set site_10_0 [$site_8_1.lab65 childsite]
+    label $site_10_0.lab71 \
+        -anchor w -justify left -text {No. of resonances to be varied:} 
+    vTcl:DefineAlias "$site_10_0.lab71" "Label1" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent72 \
+        -background white -insertbackground black \
+        -textvariable m_nNoResToBeAdjusted 
+    vTcl:DefineAlias "$site_10_0.ent72" "Entry14" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent72 "$site_10_0.ent72 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent72 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {No. of resonances that will be varied}
+    }
+    label $site_10_0.lab73 \
+        -anchor w -justify left \
+        -text {No. of additional resonances held fixed:} 
+    vTcl:DefineAlias "$site_10_0.lab73" "Label2" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent74 \
+        -background white -insertbackground black -textvariable m_nNoExtraRes 
+    vTcl:DefineAlias "$site_10_0.ent74" "Entry15" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent74 "$site_10_0.ent74 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent74 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {No. of additional resonances that will be held fixed (Enter 9999 to include all resonances)}
+    }
+    button $site_10_0.but73 \
+        -command { RunKALMAN } -text {Run codes} 
+    vTcl:DefineAlias "$site_10_0.but73" "Button4" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.but73 "$site_10_0.but73 Button $top all _vTclBalloon"
+    bind $site_10_0.but73 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Run the selected codes}
+    }
+    label $site_10_0.lab65 \
+        -anchor w -text {No. of resonances to write out:} 
+    vTcl:DefineAlias "$site_10_0.lab65" "Label17" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent66 \
+        -background white -insertbackground black \
+        -textvariable m_nNoResToBeEvaluated 
+    vTcl:DefineAlias "$site_10_0.ent66" "Entry18" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent66 "$site_10_0.ent66 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {No. of resonances to write out}
+    }
+    text $site_10_0.tex65 \
+        -background white -insertbackground black 
+    vTcl:DefineAlias "$site_10_0.tex65" "Text1" vTcl:WidgetProc "Toplevel1" 1
+    checkbutton $site_10_0.che66 \
+        -anchor w \
+        -command {if {$m_bAllcodes1 ==1} {
+    set m_bSensitivity 1
+    set m_bKALMAN 1
+   } else {
+    set m_bSensitivity 0
+    set m_bKALMAN 0
+   }} \
+        -justify left -overrelief flat -text {All codes} \
+        -variable m_bAllcodes1 
+    vTcl:DefineAlias "$site_10_0.che66" "Checkbutton7" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.che66 "$site_10_0.che66 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.che66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {All codes}
+    }
+    checkbutton $site_10_0.che67 \
+        -anchor w -justify left -text Sensitivity -variable m_bSensitivity 
+    vTcl:DefineAlias "$site_10_0.che67" "Checkbutton9" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.che67 "$site_10_0.che67 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.che67 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Generate the sensitivity matrix for KALMAN}
+    }
+    checkbutton $site_10_0.che68 \
+        -anchor w -justify left -text KALMAN -variable m_bKALMAN 
+    vTcl:DefineAlias "$site_10_0.che68" "Checkbutton10" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.che68 "$site_10_0.che68 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.che68 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Code for uncertainty and covariance estimation}
+    }
+    button $site_10_0.but65 \
+        -command {exec $m_szEditor $m_szZAname-parcorr.kal} -text {Parameter unc.} 
+    vTcl:DefineAlias "$site_10_0.but65" "Button9" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.but65 "$site_10_0.but65 Button $top all _vTclBalloon"
+    bind $site_10_0.but65 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Edit uncertainties of resonance parameter for KALMAN}
+    }
+    label $site_10_0.lab66 \
+        -anchor w -text {Reaction to be considered in KALMAN:} 
+    vTcl:DefineAlias "$site_10_0.lab66" "Label21" vTcl:WidgetProc "Toplevel1" 1
+    radiobutton $site_10_0.rad65 \
+        -anchor w -text None -value 0 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad65" "Radiobutton4" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad65 "$site_10_0.rad65 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad65 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {None}
+    }
+    radiobutton $site_10_0.rad66 \
+        -anchor w -text 1 -value 1 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad66" "Radiobutton5" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad66 "$site_10_0.rad66 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Total reaction}
+    }
+    radiobutton $site_10_0.rad67 \
+        -text 2 -value 2 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad67" "Radiobutton6" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad67 "$site_10_0.rad67 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad67 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Elastic scattering}
+    }
+    radiobutton $site_10_0.rad68 \
+        -anchor w -text 18 -value 18 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad68" "Radiobutton1" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad68 "$site_10_0.rad68 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad68 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Fission reaction}
+    }
+    radiobutton $site_10_0.rad69 \
+        -anchor w -text 102 -value 102 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad69" "Radiobutton2" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad69 "$site_10_0.rad69 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad69 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Capture reaction}
+    }
+    radiobutton $site_10_0.rad70 \
+        -anchor w -text All -value 9999 -variable m_nKALMT 
+    vTcl:DefineAlias "$site_10_0.rad70" "Radiobutton3" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.rad70 "$site_10_0.rad70 Radiobutton $top all _vTclBalloon"
+    bind $site_10_0.rad70 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {All reactions}
+    }
+    place $site_10_0.lab71 \
+        -in $site_10_0 -x 10 -y 10 -width 218 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent72 \
+        -in $site_10_0 -x 255 -y 9 -width 47 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab73 \
+        -in $site_10_0 -x 10 -y 36 -width 243 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent74 \
+        -in $site_10_0 -x 255 -y 35 -width 47 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.but73 \
+        -in $site_10_0 -x 413 -y 9 -width 110 -height 30 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab65 \
+        -in $site_10_0 -x 10 -y 62 -width 214 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent66 \
+        -in $site_10_0 -x 255 -y 61 -width 47 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.tex65 \
+        -in $site_10_0 -x 540 -y 92 -anchor nw -bordermode ignore 
+    place $site_10_0.che66 \
+        -in $site_10_0 -x 311 -y 9 -width 82 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.che67 \
+        -in $site_10_0 -x 314 -y 34 -width 94 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.che68 \
+        -in $site_10_0 -x 314 -y 59 -width 82 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.but65 \
+        -in $site_10_0 -x 413 -y 47 -width 110 -height 30 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab66 \
+        -in $site_10_0 -x 10 -y 89 -width 241 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad65 \
+        -in $site_10_0 -x 253 -y 88 -width 58 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad66 \
+        -in $site_10_0 -x 313 -y 88 -width 33 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad67 \
+        -in $site_10_0 -x 348 -y 88 -width 33 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad68 \
+        -in $site_10_0 -x 384 -y 89 -width 42 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad69 \
+        -in $site_10_0 -x 428 -y 89 -width 48 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.rad70 \
+        -in $site_10_0 -x 478 -y 88 -width 43 -height 22 -anchor nw \
+        -bordermode ignore 
+    ::iwidgets::labeledframe $site_8_1.lab66 \
+        -labelpos nw -labeltext Evaluation 
+    vTcl:DefineAlias "$site_8_1.lab66" "Labeledframe3" vTcl:WidgetProc "Toplevel1" 1
+    set site_10_0 [$site_8_1.lab66 childsite]
+    checkbutton $site_10_0.cpd67 \
+        -anchor w \
+        -command {if {$m_bAllcodes2 ==1} {
     set m_bPTANAL 1
     set m_bWRIURR 1
     set m_bRECENT 1
@@ -1770,74 +2439,38 @@ proc vTclWindow.top71 {base} {
     set m_bWRIURR 0
     set m_bRECENT 0
   }} \
-        -justify left -text All -variable m_bAllcodes 
-    vTcl:DefineAlias "$site_9_0.che108" "Checkbutton1" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_9_0.che108 "$site_9_0.che108 Checkbutton $top all _vTclBalloon"
-    bind $site_9_0.che108 <<SetBalloon>> {
+        -justify left -text {All codes} -variable m_bAllcodes2 
+    vTcl:DefineAlias "$site_10_0.cpd67" "Checkbutton1" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd67 "$site_10_0.cpd67 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.cpd67 <<SetBalloon>> {
         set ::vTcl::balloon::%W {All codes}
     }
-    checkbutton $site_9_0.che109 \
+    checkbutton $site_10_0.cpd68 \
         -anchor w -text PTANAL -variable m_bPTANAL 
-    vTcl:DefineAlias "$site_9_0.che109" "Checkbutton2" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_9_0.che109 "$site_9_0.che109 Checkbutton $top all _vTclBalloon"
-    bind $site_9_0.che109 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_10_0.cpd68" "Checkbutton2" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd68 "$site_10_0.cpd68 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.cpd68 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Code for the resolved region}
     }
-    checkbutton $site_9_0.che110 \
+    checkbutton $site_10_0.cpd69 \
         -anchor w -text WRIURR -variable m_bWRIURR 
-    vTcl:DefineAlias "$site_9_0.che110" "Checkbutton3" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_9_0.che110 "$site_9_0.che110 Checkbutton $top all _vTclBalloon"
-    bind $site_9_0.che110 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_10_0.cpd69" "Checkbutton3" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd69 "$site_10_0.cpd69 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.cpd69 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Code for the unresolved region}
     }
-    checkbutton $site_9_0.che111 \
-        -anchor w -text RECENT -variable m_bRECENT 
-    vTcl:DefineAlias "$site_9_0.che111" "Checkbutton4" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_9_0.che111 "$site_9_0.che111 Checkbutton $top all _vTclBalloon"
-    bind $site_9_0.che111 <<SetBalloon>> {
+    checkbutton $site_10_0.cpd70 \
+        -anchor w -text RECENT/SIGMA -variable m_bRECENT -wraplength 54 
+    vTcl:DefineAlias "$site_10_0.cpd70" "Checkbutton4" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd70 "$site_10_0.cpd70 Checkbutton $top all _vTclBalloon"
+    bind $site_10_0.cpd70 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Code for the pointwise cross sections}
     }
-    button $site_9_0.but107 \
-        -command { RunCodes } \
-        -font [vTcl:font:getFontFromDescr "-family helvetica -size 12 -weight bold"] \
-        -text Run 
-    vTcl:DefineAlias "$site_9_0.but107" "Button1" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_9_0.but107 "$site_9_0.but107 Button $top all _vTclBalloon"
-    bind $site_9_0.but107 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Run the specified codes}
-    }
-    place $site_9_0.che108 \
-        -in $site_9_0 -x 20 -y 7 -width 153 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_9_0.che109 \
-        -in $site_9_0 -x 20 -y 29 -width 153 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_9_0.che110 \
-        -in $site_9_0 -x 20 -y 51 -width 153 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_9_0.che111 \
-        -in $site_9_0 -x 20 -y 73 -width 153 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_9_0.but107 \
-        -in $site_9_0 -x 23 -y 101 -width 153 -height 40 -anchor nw \
-        -bordermode ignore 
-    button $site_8_0.but71 \
-        \
-        -command {
-  cd $m_szWorkingDir
-  if {[file exists $m_szFile-res.endf]} {
-    exec $m_szEditor $m_szFile-res.endf &
-  } elseif {$m_bGotPTANAL == 1} {
-    exec $m_szEditor endfr.txt &
-   }
-    } \
-        -text ENDF -width 92 
-    vTcl:DefineAlias "$site_8_0.but71" "Button2" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but71 "$site_8_0.but71 Button $top all _vTclBalloon"
-    bind $site_8_0.but71 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {View ENDF file}
-    }
-    button $site_8_0.but72 \
+    ::iwidgets::labeledframe $site_10_0.cpd65 \
+        -labelpos nw -labeltext Analysis 
+    vTcl:DefineAlias "$site_10_0.cpd65" "Labeledframe1" vTcl:WidgetProc "Toplevel1" 1
+    set site_12_0 [$site_10_0.cpd65 childsite]
+    button $site_12_0.cpd65 \
         \
         -command {
   if {$m_bGotPTANAL == 1} {
@@ -1858,12 +2491,12 @@ proc vTclWindow.top71 {base} {
   }
     } \
         -text {Cumulative plot} 
-    vTcl:DefineAlias "$site_8_0.but72" "Button3" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but72 "$site_8_0.but72 Button $top all _vTclBalloon"
-    bind $site_8_0.but72 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd65" "Button3" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd65 "$site_12_0.cpd65 Button $top all _vTclBalloon"
+    bind $site_12_0.cpd65 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Plot cumulative plot of resonance energies}
     }
-    button $site_8_0.but79 \
+    button $site_12_0.cpd66 \
         \
         -command {
   if {$m_bGotPTANAL} {
@@ -1878,162 +2511,136 @@ proc vTclWindow.top71 {base} {
   }
         } \
         -text {Porter-Thomas analysis} 
-    vTcl:DefineAlias "$site_8_0.but79" "Button10" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but79 "$site_8_0.but79 Button $top all _vTclBalloon"
-    bind $site_8_0.but79 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd66" "Button10" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd66 "$site_12_0.cpd66 Button $top all _vTclBalloon"
+    bind $site_12_0.cpd66 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Porter-Thomas analysis}
     }
-    button $site_8_0.but73 \
+    place $site_12_0.cpd65 \
+        -in $site_12_0 -x 15 -y 11 -width 341 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_12_0.cpd66 \
+        -in $site_12_0 -x 15 -y 43 -width 341 -height 26 -anchor nw \
+        -bordermode ignore 
+    ::iwidgets::labeledframe $site_10_0.lab65 \
+        -labelpos nw -labeltext Comparison 
+    vTcl:DefineAlias "$site_10_0.lab65" "Labeledframe4" vTcl:WidgetProc "Toplevel1" 1
+    set site_12_0 [$site_10_0.lab65 childsite]
+    button $site_12_0.cpd66 \
         -command {PlotXS 1 $m_bENDF $m_bJENDL $m_bJEFF} -text Total 
-    vTcl:DefineAlias "$site_8_0.but73" "Button4" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but73 "$site_8_0.but73 Button $top all _vTclBalloon"
-    bind $site_8_0.but73 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd66" "Button11" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd66 "$site_12_0.cpd66 Button $top all _vTclBalloon"
+    bind $site_12_0.cpd66 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Plot total cross sections at resonance region}
     }
-    button $site_8_0.but77 \
+    button $site_12_0.cpd67 \
         -command {PlotXS 2 $m_bENDF $m_bJENDL $m_bJEFF} -text Scattering 
-    vTcl:DefineAlias "$site_8_0.but77" "Button8" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but77 "$site_8_0.but77 Button $top all _vTclBalloon"
-    bind $site_8_0.but77 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd67" "Button8" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd67 "$site_12_0.cpd67 Button $top all _vTclBalloon"
+    bind $site_12_0.cpd67 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Plot scattering cross sections at resonance region}
     }
-    button $site_8_0.but78 \
+    button $site_12_0.cpd68 \
         -command {PlotXS 102 $m_bENDF $m_bJENDL $m_bJEFF} -text Capture 
-    vTcl:DefineAlias "$site_8_0.but78" "Button9" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.but78 "$site_8_0.but78 Button $top all _vTclBalloon"
-    bind $site_8_0.but78 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd68" "Button12" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd68 "$site_12_0.cpd68 Button $top all _vTclBalloon"
+    bind $site_12_0.cpd68 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Plot capture cross sections at resonance region}
     }
-    checkbutton $site_8_0.che71 \
+    checkbutton $site_12_0.cpd69 \
         -anchor w -text ENDF/B-VII -variable m_bENDF 
-    vTcl:DefineAlias "$site_8_0.che71" "Checkbutton7" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.che71 "$site_8_0.che71 Checkbutton $top all _vTclBalloon"
-    bind $site_8_0.che71 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd69" "Checkbutton13" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd69 "$site_12_0.cpd69 Checkbutton $top all _vTclBalloon"
+    bind $site_12_0.cpd69 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Compare with ENDF/B VII}
     }
-    checkbutton $site_8_0.che72 \
+    checkbutton $site_12_0.cpd70 \
         -anchor w -justify left -text JENDL-3.3 -variable m_bJENDL 
-    vTcl:DefineAlias "$site_8_0.che72" "Checkbutton9" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.che72 "$site_8_0.che72 Checkbutton $top all _vTclBalloon"
-    bind $site_8_0.che72 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd70" "Checkbutton12" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd70 "$site_12_0.cpd70 Checkbutton $top all _vTclBalloon"
+    bind $site_12_0.cpd70 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Compare with JENDL-3.3}
     }
-    checkbutton $site_8_0.che73 \
+    checkbutton $site_12_0.cpd71 \
         -anchor w -justify left -text JEFF-3.1 -variable m_bJEFF 
-    vTcl:DefineAlias "$site_8_0.che73" "Checkbutton10" vTcl:WidgetProc "Toplevel1" 1
-    bindtags $site_8_0.che73 "$site_8_0.che73 Checkbutton $top all _vTclBalloon"
-    bind $site_8_0.che73 <<SetBalloon>> {
+    vTcl:DefineAlias "$site_12_0.cpd71" "Checkbutton11" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.cpd71 "$site_12_0.cpd71 Checkbutton $top all _vTclBalloon"
+    bind $site_12_0.cpd71 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Compare with JEFF-3.1}
     }
-    place $site_8_0.lab87 \
-        -in $site_8_0 -x 176 -y 7 -width 51 -height 24 -anchor nw \
+    place $site_12_0.cpd66 \
+        -in $site_12_0 -x 15 -y 10 -width 100 -height 26 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab88 \
-        -in $site_8_0 -x 456 -y 7 -width 66 -height 24 -anchor nw \
+    place $site_12_0.cpd67 \
+        -in $site_12_0 -x 15 -y 41 -width 100 -height 26 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab89 \
-        -in $site_8_0 -x 20 -y 46 -width 25 -height 20 -anchor nw \
+    place $site_12_0.cpd68 \
+        -in $site_12_0 -x 15 -y 72 -width 100 -height 26 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent92 \
-        -in $site_8_0 -x 57 -y 45 -width 60 -height 22 -anchor nw \
+    place $site_12_0.cpd69 \
+        -in $site_12_0 -x 140 -y 12 -width 93 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab90 \
-        -in $site_8_0 -x 144 -y 46 -width 37 -height 20 -anchor nw \
+    place $site_12_0.cpd70 \
+        -in $site_12_0 -x 140 -y 43 -width 89 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent93 \
-        -in $site_8_0 -x 184 -y 45 -width 60 -height 22 -anchor nw \
+    place $site_12_0.cpd71 \
+        -in $site_12_0 -x 140 -y 74 -width 78 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.but76 \
-        -in $site_8_0 -x 279 -y 41 -width 93 -height 28 -anchor nw \
+    button $site_10_0.cpd71 \
+        \
+        -command {
+  cd $m_szWorkingDir
+  if {[file exists $m_szFile-res.endf]} {
+    exec $m_szEditor $m_szFile-res.endf &
+  } elseif {$m_bGotPTANAL == 1} {
+    exec $m_szEditor endfr.txt &
+   }
+    } \
+        -text ENDF -width 112 
+    vTcl:DefineAlias "$site_10_0.cpd71" "Button2" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd71 "$site_10_0.cpd71 Button $top all _vTclBalloon"
+    bind $site_10_0.cpd71 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {View ENDF file}
+    }
+    button $site_10_0.cpd72 \
+        -command { RunCodes } \
+        -font [vTcl:font:getFontFromDescr "-family helvetica -size 12 -weight bold"] \
+        -text {Run codes} 
+    vTcl:DefineAlias "$site_10_0.cpd72" "Button1" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.cpd72 "$site_10_0.cpd72 Button $top all _vTclBalloon"
+    bind $site_10_0.cpd72 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Run the selected codes}
+    }
+    place $site_10_0.cpd67 \
+        -in $site_10_0 -x 10 -y 11 -width 90 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab75 \
-        -in $site_8_0 -x 81 -y 77 -width 54 -height 20 -anchor nw \
+    place $site_10_0.cpd68 \
+        -in $site_10_0 -x 17 -y 39 -width 80 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab76 \
-        -in $site_8_0 -x 193 -y 79 -width 54 -height 20 -anchor nw \
+    place $site_10_0.cpd69 \
+        -in $site_10_0 -x 17 -y 61 -width 80 -height 22 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab78 \
-        -in $site_8_0 -x 302 -y 79 -width 54 -height 20 -anchor nw \
+    place $site_10_0.cpd70 \
+        -in $site_10_0 -x 17 -y 83 -width 80 -height 36 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab72 \
-        -in $site_8_0 -x 20 -y 99 -width 29 -height 20 -anchor nw \
+    place $site_10_0.cpd65 \
+        -in $site_10_0 -x 132 -y 1 -width 396 -height 110 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent73 \
-        -in $site_8_0 -x 70 -y 99 -width 80 -height 22 -anchor nw \
+    place $site_10_0.lab65 \
+        -in $site_10_0 -x 132 -y 111 -width 266 -height 139 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent79 \
-        -in $site_8_0 -x 180 -y 99 -width 80 -height 22 -anchor nw \
+    place $site_10_0.cpd71 \
+        -in $site_10_0 -x 410 -y 118 -width 112 -height 123 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent80 \
-        -in $site_8_0 -x 290 -y 99 -width 80 -height 22 -anchor nw \
+    place $site_10_0.cpd72 \
+        -in $site_10_0 -x 17 -y 131 -width 97 -height 110 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.lab91 \
-        -in $site_8_0 -x 20 -y 126 -width 34 -height 20 -anchor nw \
+    place $site_8_1.lab65 \
+        -in $site_8_1 -x 1 -y 299 -width 561 -height 154 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent94 \
-        -in $site_8_0 -x 70 -y 126 -width 80 -height 22 -anchor nw \
+    place $site_8_1.lab66 \
+        -in $site_8_1 -x 1 -y 11 -width 561 -height 284 -anchor nw \
         -bordermode ignore 
-    place $site_8_0.ent98 \
-        -in $site_8_0 -x 180 -y 126 -width 80 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.ent81 \
-        -in $site_8_0 -x 290 -y 126 -width 80 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.lab82 \
-        -in $site_8_0 -x 20 -y 153 -width 33 -height 20 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.ent83 \
-        -in $site_8_0 -x 70 -y 153 -width 80 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.cpd71 \
-        -in $site_8_0 -x 180 -y 153 -width 84 -height 20 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.cpd72 \
-        -in $site_8_0 -x 290 -y 153 -width 80 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.lab71 \
-        -in $site_8_0 -x 7 -y 188 -width 372 -height 96 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.lab77 \
-        -in $site_8_0 -x 7 -y 286 -width 372 -height 184 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but75 \
-        -in $site_8_0 -x 387 -y 241 -width 211 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but74 \
-        -in $site_8_0 -x 387 -y 273 -width 211 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.fra106 \
-        -in $site_8_0 -x 388 -y 309 -width 210 -height 153 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but71 \
-        -in $site_8_0 -x 387 -y 41 -width 211 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but72 \
-        -in $site_8_0 -x 387 -y 73 -width 211 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but79 \
-        -in $site_8_0 -x 387 -y 105 -width 211 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but73 \
-        -in $site_8_0 -x 387 -y 140 -width 100 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but77 \
-        -in $site_8_0 -x 387 -y 172 -width 100 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.but78 \
-        -in $site_8_0 -x 387 -y 204 -width 100 -height 28 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.che71 \
-        -in $site_8_0 -x 496 -y 145 -width 100 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.che72 \
-        -in $site_8_0 -x 496 -y 177 -width 100 -height 22 -anchor nw \
-        -bordermode ignore 
-    place $site_8_0.che73 \
-        -in $site_8_0 -x 496 -y 209 -width 100 -height 22 -anchor nw \
-        -bordermode ignore 
-    set site_8_1 [lindex [$top.tab85 childsite] 1]
     set site_8_2 [lindex [$top.tab85 childsite] 2]
     $top.tab85 select 0
     ###################
