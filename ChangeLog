@@ -137,6 +137,23 @@
 52. Cumulative plots of levels improved (M. Herman)
 53. Scattering radius added in EMPEND (A. Trkov)
 54. Improved formatting of radionuclide production in MF=10 (A. Trkov)
+55. Correlated sampling for TOTRED, FUSRED, FCCRED, TUNE and TUNEPE
+    implemented. The random number used in the first appearance of any of
+    these identifiers is stored and subsequently used for all remaining
+    energies of the given run. In this way all scaling goes in the same
+    direction. This patch allows to consider model error as the systematic
+    error in the scaling parameters which is always independent of the model
+    parameters uncertainty.
+56. Uniform of gaussian sampling of the uncertainties implemented (A new
+    input parameter RANDOM added).
+57. New fission model implemented as published in PRC 77 (2008) 054601.
+    Fission input/output routines 
+58. EGSM level density implemented.
+59. RIPL-3 semi-microscopic parity-dependent HFB LD implemented including
+    renormalization tables to fit RIPL-3 D0s.
+60. Renormalization of the capture channel using measured G/D ratio
+    tested.
+61. ZVView plotting of the GS and saddle LD implemented.
 
         Changes in version 2.19beta24 with respect to 2.18  
                       Brookhaven, February  2004
