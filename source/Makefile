@@ -1,20 +1,14 @@
-#----GNU gfortran FORTRAN compiler
-#FC     =  gfortran
-#----flags for production compilation with gfortran
-#FFLAGS = -O3
-
-#----GNU g77 FORTRAN compiler
-FC     =  g77
-#----flags for production compilation with g77
-FFLAGS = -O3
-#----flags for debuging using g77 compiler
-#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
-
 #---- pfg90 compiler
 #FC     =  pgf90
 #FFLAGS =  -O2
+#----GNU g77 FORTRAN compiler
+FC     =  g77
+#----flags for production compilation with g77
+#FFLAGS = -O3
+#----flags for debuging using g77 compiler
+#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 
-#----g95 FORTRAN compiler
+#----GNU g95 FORTRAN compiler
 #FC     =  g95
 #----flags for production compilation with g95
 #FFLAGS = -O
@@ -22,10 +16,10 @@ FFLAGS = -O3
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for optimalization using ifort 
-#FFLAGS = -arch pn4 -O3 -axPW  -ipo   
-#FFLAGS =  -O3 -ipo 
+FFLAGS = -arch pn4 -O3 -axPW   
+#FFLAGS = -arch pn4 -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
@@ -57,7 +51,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
-            fitbarrier.o
+            fitbarrier.o      fis_io.o          plot-zvv.o
 
 OBJE =      subecis03.o systematics.o
 
@@ -66,7 +60,7 @@ empire:   $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
-#	$(FC) --parallel -o $@ $(OBJF) $(OBJE)
+#     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h

@@ -51,7 +51,7 @@
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
-     &        NRBarc, NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab),
+     &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
@@ -95,7 +95,9 @@
      &                 RVSo(0:ndejc,0:ndnuc),
      &                 RWOm(0:ndejc,0:ndnuc),
      &                 RWOmv(0:ndejc,0:ndnuc),
-     &                 RWSo(0:ndejc,0:ndnuc), SANgler(ndangecis),
+     &                 RWSo(0:ndejc,0:ndnuc), 
+     &                 ROHfbp(ndnuc), ROHfba(ndnuc),
+     &                 SANgler(ndangecis),
      &                 SCRt(ndex,ndlw,2,0:ndejc), SCRtem(0:ndejc),
      &                 SCRtl(ndlv,0:ndejc), SEJc(0:ndejc),
      &                 SFDis(nftrans,nfparab), SFIom(0:ndejc,0:ndnuc),
@@ -105,7 +107,8 @@
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,
      &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
-     &                 UGRid(0:nfisenmax,nfhump),
+     &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),
+     &                 vibfdt(NFHUMP),
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
      &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
      &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
@@ -120,10 +123,10 @@
 c        
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
-     &                    DELtafis,XMInn, AFIs, awf,
+     &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
      &                    GAMmafis, NRBinfis,  BFF, DEStepp, HCOnt
 
-      COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRBarc, NRFdis, IPFdis
+      COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
@@ -154,7 +157,7 @@ c
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
-     &                 rTOTred
+     &                 rTOTred, ROHfbp, ROHfba
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,

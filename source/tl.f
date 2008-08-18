@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-02 18:48:30 $
-Ccc   * $Id: tl.f,v 1.94 2007-11-02 18:48:30 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-18 07:31:32 $
+Ccc   * $Id: tl.f,v 1.95 2008-08-18 07:31:32 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -227,9 +227,9 @@ C--------Setting EMPIRE global variables
      &                  ' (used in CC RIPL OMP)'
          ENDIF
 C
-C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------Joining TARGET_COLL.DAT and TARGET_COLL.RIPL files
 C
-         OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
+         OPEN (32,FILE = 'TARGET_COLL.RIPL')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
          WRITE (6,*)
@@ -294,7 +294,7 @@ C
             iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
-C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL.RIPL files
 C
          DO k = 1, NCOll(ncalc)
 C-----------The deformation for excited levels is not used in the pure
@@ -372,9 +372,9 @@ C
          WRITE (6,*)
          WRITE (6,*)
 C
-C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------Joining TARGET_COLL.DAT and TARGET_COLL.RIPL files
 C
-         OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
+         OPEN (32,FILE = 'TARGET_COLL.RIPL')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
          WRITE (6,*)
@@ -430,7 +430,7 @@ C
             iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
-C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL.RIPL files
 C
          DO k = 1, NVIb(ncalc)
             WRITE (32,
@@ -2143,7 +2143,9 @@ C-----CARD 4
       WRITE (1,'(4i5)') ncollx, njmax, iterm, npp
 C-----Matching radius
 C-----CARD 5
-      rmatch = 20.D0
+C     rmatch= 25.d0
+      rmatch = 1.35d0*A(nnuc)**(1./3.) +  10.d0*0.65d0
+      if(rmatch.lt.25.d0) rmatch = 25.d0
       WRITE (1,'(10x,f10.5)') rmatch
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
       WRITE (1,*)
@@ -2568,8 +2570,11 @@ C-----make sure that all contributions to s-wave scattering are included
       jdm = XJLv(ilv,Nnuc) + SEJc(Nejc) + 0.5
       WRITE (1,'(4i5,30x,i5)') ncollm, njmax, iterm, npp, jdm
 C-----CARD 5
-      rmatch = 20.D0
-      WRITE (1,'(10x,f10.5)') rmatch
+C     rmatch= 25.d0
+      rmatch = 1.35d0*A(nnuc)**(1./3.) +  10.d0*0.65d0
+      if(rmatch.lt.25.d0) rmatch = 25.d0
+C     WRITE (1,'(10x,f10.5)') rmatch
+      WRITE (1,'(2f10.5)') 0.1d0, rmatch
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
       WRITE(1, *)
 C-----Matching radius calculated within ECIS

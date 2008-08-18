@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-02 18:47:43 $
-Ccc   * $Id: fusion.f,v 1.72 2007-11-02 18:47:43 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-18 07:31:32 $
+Ccc   * $Id: fusion.f,v 1.73 2008-08-18 07:31:32 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -187,6 +187,9 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             SINlcc=0.d0
             SINl  =0.d0
             SINlcont =0.d0
+         
+ 	    NLW   = i - 1  ! RCN, Aug 2008
+
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -544,6 +547,12 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (6,*) ' FATAL: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
+         
+         NLW   = maxlw  ! RCN, Aug 2008
+	 
+	   WRITE(6,*) ' Maximum CN spin limited to ', NLW
+	   WRITE(6,*)
+
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '

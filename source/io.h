@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-09-03 14:20:31 $
-Ccc   * $Id: io.h,v 1.33 2007-09-03 14:20:31 Capote Exp $
+Ccc   * $Date: 2008-08-18 07:31:32 $
+Ccc   * $Id: io.h,v 1.34 2008-08-18 07:31:32 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -138,7 +138,8 @@ C     Added to check if file is not empty
  895  CONTINUE
       OPEN (UNIT = 23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
-      OPEN (UNIT = 24,FILE='../data/ldp.dat'
+C     OPEN (UNIT = 24,FILE='../data/ldp.dat'
+      OPEN (UNIT = 24,FILE='../data/EGSM_ldp.dat'                   
      *,STATUS='OLD')
       OPEN (UNIT = 26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')

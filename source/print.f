@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2007-11-02 18:48:30 $
-Ccc   * $Id: print.f,v 1.18 2007-11-02 18:48:30 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-18 07:31:32 $
+Ccc   * $Id: print.f,v 1.19 2008-08-18 07:31:32 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -135,4 +135,88 @@ C
       WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec 
 99045 FORMAT (24X,93('-'))
+      END
+
+      SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:iou*
+Ccc   *                         A U E R S T                              *
+Ccc   *                                                                  *
+Ccc   *   Produce zvview plots of NEJC-spectrum emitted from nucleus NNUC*
+Ccc   *   and prints  energy integrated cross section for this emission. *
+Ccc   *                                                                  *
+Ccc   * input:NNUC-decaying nucleus index                                *
+Ccc   *       NEJC-ejectile index                                        *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   * author: R. Capote                                                *
+Ccc   * date:    March 2008                                              *
+Ccc   * revision:#    by:name                     on:xx.mon.2009         *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nejc, Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION csemax, totspec
+      INTEGER i, kmax
+	CHARACTER*13 caz 
+	CHARACTER*31 title
+	character*1 part(0:4)
+	data part/'g','n','p','a','d'/
+
+      csemax = 0.d0
+      kmax = 1
+      DO i = 1, NDECSE
+         IF (CSE(i,Nejc,Nnuc).GT.0.d0) kmax = i
+         csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
+      ENDDO
+
+      IF (csemax.LE.1.d-5) return
+
+      kmax = kmax + 1
+      kmax = MIN0(kmax,NDECSE)
+
+      if(SYMb(Nnuc)(2:2).eq.' ') then
+        write(caz,'(I2.2,A1,A1,I3.3,A1,A1,A4)')
+     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
+     >      '_',part(Nejc),'.zvd'
+      else
+        write(caz,'(I2.2,A2,I3.3,A1,A1,A4)')
+     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
+     >      '_',part(Nejc),'.zvd'
+      endif
+
+      OPEN(36,file=caz,status='unknown')
+
+      totspec = 0.0
+      DO i = 1, kmax
+         totspec  = totspec  + CSE(i,Nejc,Nnuc)
+      ENDDO
+      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      totspec = totspec*DE
+
+      write(title,
+     & '(a5, i2,1h-,A2,1h-,I3,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
+     & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
+
+	CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
+      DO i = 1, kmax
+	   IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
+         WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6, 
+     >       CSE(i,Nejc,Nnuc)*1.d-3 ! Energy, Spectra in b/MeV
+      ENDDO
+	CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
+      CLOSE(36)
+      RETURN
       END

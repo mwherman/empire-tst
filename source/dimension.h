@@ -3,7 +3,7 @@
      *,NDEXCLUS = 16
      *,NDEJC=3
      *,NDAFIS=1
-     *,NDEX=  101
+     *,NDEX=  151
      *,NDLW= 40
      *,NDTL= 40
      *,NDMSCS=4

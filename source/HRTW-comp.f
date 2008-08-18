@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-11 13:28:20 $
-Ccc   * $Id: HRTW-comp.f,v 1.53 2008-08-11 13:28:20 Capote Exp $
+Ccc   * $Date: 2008-08-18 07:31:30 $
+Ccc   * $Id: HRTW-comp.f,v 1.54 2008-08-18 07:31:30 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -33,9 +33,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, tgexper,
-     &              sum, sumfis, sumfism(3), sumg, tlump, xnor, fisxse
+     &              sum, sumfis, sumfism(3), sumg, tlump, xnor, fisxse,
+     &              sumtg
       REAL FLOAT
-      INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, n0c
+      INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       DOUBLE PRECISION VT1
 C
@@ -61,7 +62,6 @@ C-----
 C-----start CN nucleus decay
 C-----
 C-----do loop over decaying nucleus parity
-      n0c   = 0
       d0c   = 0.d0
       sumGg = 0.d0
 
@@ -228,12 +228,11 @@ C           Gamma width calculation
 C
             IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
-              if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn
+              if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn - 1
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
-                n0c = n0c + 1
                 WRITE(6,'(1x,''-----------------------------------------
      &-----'')')
                 WRITE(6,'(1x,
@@ -248,7 +247,7 @@ C
             ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
-      IF(d0c.gt.0.d0) d0c = dble(n0c)/d0c*1000
+      IF(d0c.gt.0.d0) d0c = 1000.D0/d0c  ! MIKE PROPOSAL
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
       IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0.d0) THEN
@@ -714,7 +713,7 @@ C Local variables
 C
       DOUBLE PRECISION corr, eg, xjc
       DOUBLE PRECISION E1, E2, XM1
-C	DOUBLE PRECISION VT1
+C     DOUBLE PRECISION VT1
       REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER MAX0, MIN0

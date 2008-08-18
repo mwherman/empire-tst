@@ -1,6 +1,7 @@
+$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-11 13:28:36 $
-Ccc   * $Id: main.f,v 1.185 2008-08-11 13:28:36 Capote Exp $
+Ccc   * $Date: 2008-08-18 07:31:29 $
+Ccc   * $Id: main.f,v 1.186 2008-08-18 07:31:29 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -14,34 +15,47 @@ Ccc   ********************************************************************
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 C
+C
 C COMMON variables
 C
-      DOUBLE PRECISION ABScs, AFIsm(NFMOD), CSFism(NFMOD), DEFbm(NFMOD),
-     &                 DELtafism(NFMOD), DEStepm(NFMOD), EFBm(NFMOD),
-     &                 EFDism(NFTRANS,NFMOD), ELAcs, GAMmafism(NFMOD),
-     &                 HM(NFTRANS,NFMOD), PFIso, RFIso,
-     &                 ROFism(0:NFISENMAX,NDLW,NFMOD), SHCfism(NFMOD),
-     &                 SINl, TDIrect, TDIrm(NFMOD), TFB, TFBm(NFMOD),
-     &                 TFIso, TGIso, TISo, TOTcs, SINlcc, SINlcont,
-     &                 UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD),
-     &                 XMInnm(NFMOD),XCOs(NDAngecis)
-      DOUBLE PRECISION ECFis(NFHUMP), ECFism(NFMOD),
-     &                 vdef_1d(NFISBARPNT) , eps_1d(NFISBARPNT)
-C
-      DOUBLE PRECISION csinel,eps
-C
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD), npoints
-      INTEGER iiextr(0:2*NFPARAB), nextr
-      INTEGER*4 INDexf, INDexb, BUFfer(250)
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
+     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
+     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
+     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
+     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+
+      DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr							! NUMBAR
+
+      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)				! ROHFBSADD
+
+	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+
+	DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont        ! ECISXS
+
+	INTEGER*4 INDexf, INDexb, BUFfer(250)                               ! R250COM
+
+      DOUBLE PRECISION XCOs(NDAngecis)                                    ! KALB
+
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFis, ECFism
+     &                 TFB, TDIrect,ECFis,ECFism
+
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd, barnorm, hnorm
+
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
+      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
       COMMON /R250COM/ INDexf,INDexb,BUFfer
       COMMON /KALB/ XCOs
+
 C     DOUBLE PRECISION tres,fkt,prefise(20),nubar(20),nubart
 C     DOUBLE PRECISION postfise(20),rfc(20)
 C     DOUBLE PRECISION efl(20),efh(20),tm(20)
@@ -81,7 +95,7 @@ C                      Total PF angular distribution defined only for neutrons
      &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),
      &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind, 
      &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
-     &                 fisxse, dtmp0, dtmp1
+     &                 fisxse, dtmp0, dtmp1, csinel,eps
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -95,7 +109,7 @@ C     CHARACTER*1 opart(3)
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m,
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp,
-     &        nnur, nnurec, nnurn, nnurp, nrbarc1, nspec,   neles,
+     &        nnur, nnurec, nnurn, nnurp, nspec,   neles,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
      &        isnewchain(0:1), ncon
       INTEGER INT, MIN0, NINT
@@ -160,13 +174,14 @@ C    &      int(Z(0)), SYMb(0), int(A(0))
 C       WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         (REAction(nnuc),nnuc=1,NNUcd)
-        OPEN (98, FILE='FISS_XS.zvd', STATUS='unknown')
-        write(98,'(A19)') '#begin LSTTAB.CUR/u'
-        write(98,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
-     &     'tit:',int(Z(0)), SYMb(0), int(A(0))
-        write(98,'(A10)') 'fun: Empire'
-        write(98,'(A10)') 'thick: 2   '
-        write(98,'(A10/2H//)') 'length: 92 '
+        OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
+C       OPEN (98, FILE='FISS_XS.zvd', STATUS='unknown')
+C       write(98,'(A19)') '#begin LSTTAB.CUR/u'
+C       write(98,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
+C    &     'tit:',int(Z(0)), SYMb(0), int(A(0))
+C       write(98,'(A10)') 'fun: Empire'
+C       write(98,'(A10)') 'thick: 2   '
+C       write(98,'(A10/2H//)') 'length: 92 '
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
@@ -956,16 +971,16 @@ C-----Start DO loop over decaying nuclei
          ENDIF
          IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
             CALL READ_INPFIS(nnuc)
-            nrbarc1 = NRBarc
-C           IF (NRBarc.EQ.3) nrbarc1 = 2
-            DO i = 1, NRBarc
+            DO i = 1, NRHump
                IF (FISmod(nnuc).EQ.0. .OR.
-     &             (FISmod(nnuc).GT.0. .AND. i.NE.2))
-     &             CALL DAMI_ROFIS(nnuc,i,0,AFIs(i))
-               IF (FISmod(nnuc).GT.0. .AND. i.EQ.2) THEN
-                  DO m = 1, INT(FISmod(nnuc)) + 1
-                     CALL DAMI_ROFIS(nnuc,i,m,AFIsm(m))
-                  ENDDO
+     &            (FISmod(nnuc).GT.0. .AND. i.NE.2)) THEN
+                  IF(FISden(Nnuc).eq.1) then
+                    CALL DAMI_ROFIS(nnuc,i,0,AFIs(i))
+                  ELSEIF(FISDEN(Nnuc).eq.2) then
+                    CALL DAMI_RO_HFB_FIS(nnuc,i,AFIs(i))
+                  ELSE
+                    STOP 'CHECK FISDEN (not 1 or 2)!'
+                  ENDIF
                ENDIF
             ENDDO
             IF (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. FISmod(nnuc).EQ.0.)
@@ -975,13 +990,6 @@ C           IF (NRBarc.EQ.3) nrbarc1 = 2
                TGIso = EXP(2.*PI*(EFB(1) - (EFB(3)+H(1,3)/2.))/H(1,1))
      &                 /10.**14
             ENDIF
-C           IF (NRBar.EQ.5 .AND. NRWel.EQ.2 .AND. FISmod(nnuc).EQ.0.)
-C    &          THEN
-C              TFIso = 2.86896*EXP(2.*PI*(VEQ - (EFB(4)+H(1,4)/2.))
-C    &                 /HOEq)/(H(1,4)*(10.**21))
-C              TGIso = EXP(2.*PI*(EFB(1) - (EFB(4)+H(1,4)/2.))/H(1,1))
-C    &                 /10.**14
-C           ENDIF
             IF (FISmod(nnuc).EQ.0. .AND. NRBar.GE.3) THEN
                TISo = TFIso*TGIso/(TFIso + TGIso)
                RFIso = TGIso/(TFIso + TGIso)
@@ -1461,7 +1469,7 @@ C-----------------Calculate total emission
 C
 C           the following if could be commented to calculate fission for
 C           all excitation energies 
-            if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
+C           if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
             dtmp0 =dtmp1
  
             IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
@@ -1798,6 +1806,8 @@ C------------Residual nuclei must be heavier than alpha
              WRITE (12,
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
+             IF (IOUt.GT.0 .and. ENDf(nnuc).EQ.1 .and. FIRst_ein)
+     &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)    
              IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
              IF (IOUt.GT.0) WRITE (6,
      &             '(2X,A2,'' emission cross section'',G12.5,'' mb'')')
@@ -1895,10 +1905,10 @@ C    &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
 C    &     TOTcsfis, CSPrd(1), csinel,
 C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
 C
-C     WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
-C    &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
-      WRITE(98,'(G15.5,2X,1P(95E12.5))') 1.d6*EINl,
-     &     TOTcsfis*1d-3
+      WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
+     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
+C     WRITE(98,'(G15.5,2X,1P(95E12.5))') 1.d6*EINl,
+C    &     TOTcsfis*1d-3
       CLOSE (80)
       CLOSE (79)
       WRITE (12,*) ' '
@@ -1964,15 +1974,19 @@ C               ENDIF
                 ELSEIF (nejc.EQ.1) THEN
                   cejectile = 'neutrons '
                   iizaejc = IZAejc(nejc)
+                  if(FIRst_ein) open(36,file='NEUTRON_SPE.zvd')
                 ELSEIF (nejc.EQ.2) THEN
                   cejectile = 'protons  '
                   iizaejc = IZAejc(nejc)
+                  if(FIRst_ein) open(36,file='PROTON_SPE.zvd')
                 ELSEIF (nejc.EQ.3) THEN
                   cejectile = 'alphas   '
                   iizaejc = IZAejc(nejc)
+                  if(FIRst_ein) open(36,file='ALPHA_SPE.zvd')
                 ELSEIF (nejc.EQ.4) THEN
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(nejc)
+                  if(FIRst_ein) open(36,file='CLUSTER_SPE.zvd')
                 ENDIF
 C---------------Double the first bin x-sec to preserve integral in EMPEND
 C               POPcse(0, nejc, 1, INExc(nnuc)) =  POPcse(0, nejc, 1, INExc(nnuc))*2
@@ -3014,13 +3028,13 @@ C        CLOSE (68) ! for Chris
            CLOSE (73)
            CLOSE (74)
          ENDIF
-         write(98,'(A2)') '//'
-         write(98,'(A17)') '#end LSTTAB.CUR/u'
-         write(98,'(A19)') '#begin LSTTAB.CUR/c'
-         write(98,'(A19)') 'x-scale: auto      '
-         write(98,'(A17)') 'y-scale: auto      '
-         write(98,'(A2)') '//'
-         write(98,'(A17)') '#end LSTTAB.CUR/c  '
+C        write(98,'(A2)') '//'
+C        write(98,'(A17)') '#end LSTTAB.CUR/u'
+C        write(98,'(A19)') '#begin LSTTAB.CUR/c'
+C        write(98,'(A19)') 'x-scale: auto      '
+C        write(98,'(A17)') 'y-scale: auto      '
+C        write(98,'(A2)') '//'
+C        write(98,'(A17)') '#end LSTTAB.CUR/c  '
          CLOSE (98)
 C--------Saving random seeds
          ftmp = grand()
@@ -3225,6 +3239,8 @@ C-----gamma decay to discrete levels (stored with icse=0)
          ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
       END
+
+
       SUBROUTINE PRINT_RECOIL(Nnuc,React)
 C-----
 C-----Prints recoil spectrum of nnuc residue
@@ -3287,33 +3303,38 @@ C    &                             RECcse(ilast + 1,0,Nnuc)
          ENDIF
       ENDIF
       END
+
+
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism,Dencomp,Aafis,
      &                    Ifluct)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
+C
 C COMMON variables
 C
-      DOUBLE PRECISION AFIsm(NFMOD), CSFism(NFMOD), DEFbm(NFMOD),
-     &                 DELtafism(NFMOD), DEStepm(NFMOD), EFBm(NFMOD),
-     &                 EFDism(NFTRANS,NFMOD), GAMmafism(NFMOD),
-     &                 HM(NFTRANS,NFMOD), PFIso, RFIso,
-     &                 ROFism(0:NFISENMAX,NDLW,NFMOD), SHCfism(NFMOD),
-     &                 TABs, TDIr, TDIrect, TDIrm(NFMOD),
-     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso,
-     &                 TISo, UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD),
-     &                 XMInnm(NFMOD)
-      DOUBLE PRECISION ECFis(NFHUMP), ECFism(NFMOD),
-     &                 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
-      INTEGER iiextr(0:2*NFPARAB), nextr
+	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
+     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
+     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
+     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
+     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+
+	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+
+      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
+
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFis, ECFism
+     &                 TFB, TDIrect,ECFis,ECFism
+
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
       COMMON /IMAG  / TF, TDIr, TABs, TG2
-      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+
 C
 C Dummy arguments
 C
@@ -3326,7 +3347,7 @@ C
       DOUBLE PRECISION bbfis, cota, cota1, cotaexp, tout
       INTEGER INT
       INTEGER k, kk, m
-      INTEGER npoints
+
       IF (Ifluct.EQ.0) Dencomp = DENhf
       Aafis = 0.
       cota1 = 0.d0
@@ -3371,7 +3392,7 @@ C
       ENDIF
       cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
       IF (FISmod(Nnuc).EQ.0. .AND. FISopt(Nnuc).GT.0.) THEN
-         IF (NRBarc.EQ.2 .AND. NRWel.EQ.1) tout = TF(2)
+         IF (NRHump.EQ.2 .AND. NRWel.EQ.1) tout = TF(2)
          IF (tout*TABs.GT.0.) THEN
             bbfis = (TDIr + Dencomp)*(TF(1) + tout + TG2)
      &              /(TABs*(tout + TG2))
@@ -3399,42 +3420,51 @@ C
          ENDDO
       ENDIF
       END
+
       SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Dencomp,
      &                 Aafis,Fisxse)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
+C
 C COMMON variables
 C
-      DOUBLE PRECISION AFIsm(NFMOD), CSFism(NFMOD), DEFbm(NFMOD),
-     &                 DELtafism(NFMOD), DEStepm(NFMOD), EFBm(NFMOD),
-     &                 EFDism(NFTRANS,NFMOD), GAMmafism(NFMOD),
-     &                 HM(NFTRANS,NFMOD), PFIso, RFIso,
-     &                 ROFism(0:NFISENMAX,NDLW,NFMOD), SHCfism(NFMOD),
-     &                 TABs, TDIr, TDIrect, TDIrm(NFMOD),
-     &                 TF(NFPARAB), TFB, TFBm(NFMOD), TFIso, TG2, TGIso,
-     &                 TISo, UGRidf(0:NFISENMAX,NFMOD), WFIsm(NFMOD),
-     &                 XMInnm(NFMOD)
-      DOUBLE PRECISION ECFis(NFHUMP), ECFism(NFMOD)
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)
+	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
+     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
+     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
+     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
+     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+
+	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+
+      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
+
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFis, ECFism
+     &                 TFB, TDIrect,ECFis,ECFism
+
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
       COMMON /IMAG  / TF, TDIr, TABs, TG2
+
 C
 C Dummy arguments
 C
       DOUBLE PRECISION Aafis, Dencomp, Sumfis, Xnor, Fisxse
       INTEGER Ipar, Jcn, Ke, M, Nnuc
-      DOUBLE PRECISION Sumfism(3)
+      DOUBLE PRECISION Sumfism(NFMOD)
+
 C
 C Local variables
 C
       INTEGER INT
       INTEGER nejc, nnur, izares, iloc
       DOUBLE PRECISION xnorfis, ares, zres
+
       Dencomp = DENhf - Sumfis
       IF(NRBar.GT.3) GOTO 101
       IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
