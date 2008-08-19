@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-18 07:31:30 $
-Ccc   * $Id: input.f,v 1.264 2008-08-18 07:31:30 Capote Exp $
+Ccc   * $Date: 2008-08-19 06:26:10 $
+Ccc   * $Id: input.f,v 1.265 2008-08-19 06:26:10 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -176,6 +176,7 @@ C--------to turn off normalization to experimental Gg
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
 C-----------set level density parameters
+            FISDEN(Nnuc) = 1.d0
             ROPaa(nnuc) = -2.0
             ROPar(1,nnuc) = 0.
             ROPar(2,nnuc) = 0.
@@ -6193,8 +6194,8 @@ Ccc   *     Reads level density parameter according to Mebel and         *
 Ccc   *     the discrete level below which the decay scheme is complete  *
 Ccc   *     as determined by Molnar-Belgya (see RIPL CRP) from file 24   *
 Ccc   *     File 24 is organized in the following way:                   *
-Ccc   *     Z*1000+A                                                     *
-Ccc   *     NLEVC number of the level (NLEVC=1 for g.s.)                 *
+Ccc   *     ZA    - Z*1000+A                                             *
+Ccc   *     NLEVC - number of the level (NLEVC=1 for g.s.)               *
 Ccc   *     AROGC - a-parameter without collective effects (G.C.)        *
 Ccc   *     AROC  - a-parameter including collective effects.            *
 Ccc   *     QN    - neutron binding energy (as in Iljinov & Mebel)       *
@@ -6229,11 +6230,13 @@ C Local variables
 C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma,
-     &                 pi2, qn, tcrt, uexc, xr, gam
+     &                 pi2, qn, tcrt, uexc, xr, gam, ddob, esh, dap, dam
+
       REAL FLOAT
       DOUBLE PRECISION FSHELL
       INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc
       INTEGER INT
+
       pi2 = PI**2
       izamx = 0
       izamn = 200000
@@ -6248,7 +6251,6 @@ C
          WRITE(6,'(1X)')
          WRITE(6,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a
      &(Qn)'')')
-C    &-tilde'')')
          WRITE(6,'(4X,54(''-''))')
          WRITE(6,'(1X)')
          WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
@@ -6257,13 +6259,10 @@ C    &-tilde'')')
       ENDIF
 C==============================================================================
 C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
-C 100 READ (24,'(I7,I4,2F7.2,E10.4,E10.3)',END = 200) izar, nlevc,
-C    &      arogc, aroc, qn, dob
 C     Skipping header
       READ (24,'(///)')
-
-  100 READ (24,'(2I4,9x,F7.3,E13.5,67x,f8.4,9x,f8.4)',END = 200) 
-     &           nixz, nixa, qn, dob, aroc, asysnew 
+  100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200) 
+     &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
          CALL WHERE(izar,nnuc,iloc)
@@ -6273,8 +6272,6 @@ C     Skipping header
             a23 = A(nnuc)**0.666667
 
 C-----------set up normalization factors for level density parameter 'a'
-C           IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. arogc.NE.0.0D0) THEN
-
             IF (ROPaa(nnuc).EQ.( - 2.D0)) THEN
 C--------------Gilbert-Cameron (no explicit collective effects)
                IF (ADIv.EQ.2.D0) THEN
@@ -6296,28 +6293,6 @@ C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
                   delp = 12./SQRT(A(nnuc))
                   IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
                   IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
-C-----------------EMPIRE systematics with Nix-Moeller shell corrections
-C                 ap1 = 0.94431E-01
-C                 ap2 = -0.80140E-01
-C                 gamma = 0.75594E-01
-C                 IF (Z(nnuc).GE.85.D0) THEN
-C                    ap1 = ap1*1.2402
-C                    ap2 = ap2*1.2402
-C                    gamma = gamma*1.2494
-C                 ENDIF
-C-----------------EMPIRE systematics with M-S shell corrections
-C                 IF (SHNix.EQ.0.0D0) THEN
-C                    ap1 = .52268E-01
-C                    ap2 = .13395E+00
-C                    gamma = .93955E-01
-C                    IF (Z(nnuc).GE.85.D0) THEN
-C                       ap1 = ap1*1.2942
-C                       ap2 = ap2*1.2942
-C                       gamma = gamma*1.2928
-C                    ENDIF
-C                 ENDIF
-C
-C-----------------EMPIRE-3.0-dependence
                   CALL EGSMsys(ap1,ap2,gam)
                   gamma = gam/A(Nnuc)**0.333333
                   atil = ap1*A(nnuc) + ap2*a23
@@ -6337,10 +6312,6 @@ C-----------------EMPIRE-3.0-dependence
 
                IF(ATIlnor(nnuc).EQ.0) THEN
                   ATIlnor(nnuc) = atiln
-C
-C              The following two lines must be commented to reproduce Th-232 evaluation
-C              with the original th32.inp input file dated 16/07/2005
-C              (another change is also needed (look for atilno appearance)
                ELSE
                   ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
@@ -6375,12 +6346,9 @@ C--------------Calculate sum for the average normalization factor
          ENDIF
       ENDIF
       GOTO 100
-  200 IF (ROPaa(nnuc).EQ.( - 2.D0) .AND. nexp.GT.2) THEN
+  200 IF (ROPaa(nnuc).EQ.(-2.D0) .AND. nexp.GT.0) THEN
          atilave = ABS(atilsum/FLOAT(nexp))
       ELSE
-         WRITE (6,*)
-     &'Level density systematics NOT normalized to Dobs at neutron bindi
-     &ng energy'
          atilave = 1.0
       ENDIF
       IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
@@ -6395,14 +6363,11 @@ C--------------Calculate sum for the average normalization factor
      &         atilave
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
             ftmp =   ATIlnor(nnuc)
-C           The following line must also be commented to reproduce Th-232 evaluation
-C           with the original th32.inp input file dated 16/07/2005
-C           (another change before this one (look for atilno appearance)
             ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
             IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
-     &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,4(2x,F8.5))')
+     &      WRITE(6,'(I3,''-'',A2,''-'',I3, 30X,1(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         atilave, ATIlnor(nnuc),ftmp, ftmp/atilave
+     &         ftmp
          ENDIF
       ENDDO
       END
