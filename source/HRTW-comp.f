@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:30 $
-Ccc   * $Id: HRTW-comp.f,v 1.54 2008-08-18 07:31:30 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-08-19 06:18:43 $
+Ccc   * $Id: HRTW-comp.f,v 1.55 2008-08-19 06:18:43 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -64,7 +64,11 @@ C-----
 C-----do loop over decaying nucleus parity
       d0c   = 0.d0
       sumGg = 0.d0
-
+      sumtg = 0.d0
+      IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
+      WRITE(6,'(1x,''Renormalization of gamma-ray strength function'')')
+      WRITE(6,'(1x,''----------------------------------------------'')')
+      ENDIF
       DO ipar = 1, 2
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
@@ -226,30 +230,26 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
+            IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
-              if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn - 1
+              if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn-1
               if( ip.eq.LVP(LEVtarg,0) .AND.
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
-                WRITE(6,'(1x,''-----------------------------------------
-     &-----'')')
-                WRITE(6,'(1x,
-     &            ''Renormalization of Gamma-ray strength function'')')
-                WRITE(6,'(1x,''-----------------------------------------
-     &-----'')')
-                WRITE(6,'(1x,A12,f4.1,A5,I2,A36,d12.6)')
-     &           'CN state (J=',cnspin,',Par=',ip,
-     &           ') Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
+!        write(6,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
+                n0c = n0c + 1
+                WRITE(6,'(A12,f4.1,A5,I2,A36,d12.6)')
+     &           'CN state J=',cnspin,', Par=',ip,
+     &           ' Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
                 sumtg = sumtg + sumg
               ENDIF
             ENDIF
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
-      IF(d0c.gt.0.d0) d0c = 1000.D0/d0c  ! MIKE PROPOSAL
+      IF(d0c.gt.0.d0) d0c = 1000.0/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
-      IF(EIN.LE.0.5  .AND. FIRst_ein) THEN
+      IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(6,'(1x,
@@ -264,7 +264,7 @@ C
             ENDIF
             WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-            
+
             IF(D0_unc.GT.0.0D0) THEN
               WRITE(6,'(1x,A5,F11.6,A5,F11.6,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
@@ -588,10 +588,10 @@ C--------
          DO i = 1, NLV(Nnur)
             eout = eoutc - ELV(i,Nnur)
 C
-C           TUNe commented as it is dangerous to scale Ts for discrete levels 
+C           TUNe commented as it is dangerous to scale Ts for discrete levels
 C           It means cor becomes 1 always !
 C
-C           Dec. 2007, MH, RCN, MS 
+C           Dec. 2007, MH, RCN, MS
 C
 C           cor = TUNe(Nejc,Nnuc)
 C           IF (i.EQ.1) cor = 1.0
@@ -723,27 +723,27 @@ C     DOUBLE PRECISION VT1
       DIMENSION xle(10),xlm(10)
 
 C----MAXmult - maximal gamma-ray multipolarity
-C    maximal value (.LT.10) of gamma-ray multipolarity (L) in        
-C    calculations of gamma-transitions both between states in        
-C    continuum and from continuum states to discrete levels.         
-C    A default value of 'MAXmult' is set to 2 in 'input.f'                  
-C    but can be adjusted in the input.         
+C    maximal value (.LT.10) of gamma-ray multipolarity (L) in
+C    calculations of gamma-transitions both between states in
+C    continuum and from continuum states to discrete levels.
+C    A default value of 'MAXmult' is set to 2 in 'input.f'
+C    but can be adjusted in the input.
 C
-C   The radiative strength functions of higher multipole orders       
-C   (f_EL, f_ML) are calculated using the relationships between                 
-C   single-particle radiative strength functions in the Weisskopf form.      
-C                                                                            
-C     Electric transitions:                                                  
-C     f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              
-C     cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   
-C     xle(i) = f_Ei                                                          
-C                                                                            
-C     Magnetic transitions:                                                  
-C     f_M(L+1)/f_E(L+1) = cme,                                               
-C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         
-C     xlm(i) = f_Mi                                                          
-C                                                                            
-C 
+C   The radiative strength functions of higher multipole orders
+C   (f_EL, f_ML) are calculated using the relationships between
+C   single-particle radiative strength functions in the Weisskopf form.
+C
+C     Electric transitions:
+C     f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,
+C     cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)
+C     xle(i) = f_Ei
+C
+C     Magnetic transitions:
+C     f_M(L+1)/f_E(L+1) = cme,
+C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)
+C     xlm(i) = f_Mi
+C
+C
       DO i = 1, MAXmult
          xle(i) = 0.0D0
          xlm(i) = 0.0D0
