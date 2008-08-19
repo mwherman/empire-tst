@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-19 06:26:10 $
-Ccc   * $Id: input.f,v 1.265 2008-08-19 06:26:10 herman Exp $
+Ccc   * $Date: 2008-08-19 14:28:28 $
+Ccc   * $Id: input.f,v 1.266 2008-08-19 14:28:28 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -176,7 +176,6 @@ C--------to turn off normalization to experimental Gg
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
 C-----------set level density parameters
-            FISDEN(Nnuc) = 1.d0
             ROPaa(nnuc) = -2.0
             ROPar(1,nnuc) = 0.
             ROPar(2,nnuc) = 0.

@@ -1,7 +1,6 @@
-$DEBUG
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:29 $
-Ccc   * $Id: main.f,v 1.186 2008-08-18 07:31:29 Capote Exp $
+Ccc   * $Date: 2008-08-19 14:28:17 $
+Ccc   * $Id: main.f,v 1.187 2008-08-19 14:28:17 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -18,7 +17,7 @@ C
 C
 C COMMON variables
 C
-	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -28,16 +27,16 @@ C
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
-      INTEGER npoints, iiextr(0:2*NFPARAB), nextr							! NUMBAR
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)				! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
 
-	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
 
-	DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont        ! ECISXS
+      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont        ! ECISXS
 
-	INTEGER*4 INDexf, INDexb, BUFfer(250)                               ! R250COM
+      INTEGER*4 INDexf, INDexb, BUFfer(250)                               ! R250COM
 
       DOUBLE PRECISION XCOs(NDAngecis)                                    ! KALB
 
@@ -3313,7 +3312,7 @@ C
 C
 C COMMON variables
 C
-	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -3322,7 +3321,7 @@ C
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
 
@@ -3429,7 +3428,7 @@ C
 C
 C COMMON variables
 C
-	DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -3438,7 +3437,7 @@ C
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-	DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
 

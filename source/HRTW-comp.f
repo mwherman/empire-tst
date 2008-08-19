@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-08-19 06:18:43 $
-Ccc   * $Id: HRTW-comp.f,v 1.55 2008-08-19 06:18:43 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-19 14:28:37 $
+Ccc   * $Id: HRTW-comp.f,v 1.56 2008-08-19 14:28:37 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -65,7 +65,7 @@ C-----do loop over decaying nucleus parity
       d0c   = 0.d0
       sumGg = 0.d0
       sumtg = 0.d0
-      IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
+      IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
       WRITE(6,'(1x,''Renormalization of gamma-ray strength function'')')
       WRITE(6,'(1x,''----------------------------------------------'')')
       ENDIF
@@ -230,7 +230,7 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
+            IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn-1
               if( ip.eq.LVP(LEVtarg,0) .AND.
@@ -238,7 +238,6 @@ C
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
 !        write(6,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
-                n0c = n0c + 1
                 WRITE(6,'(A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state J=',cnspin,', Par=',ip,
      &           ' Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
@@ -249,7 +248,7 @@ C
       ENDDO          !loop over decaying nucleus parity
       IF(d0c.gt.0.d0) d0c = 1000.0/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
-      IF(EIN.LE.0.01  .AND. FIRst_ein) THEN
+      IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(6,'(1x,
