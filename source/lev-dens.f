@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:29 $
-Ccc   * $Id: lev-dens.f,v 1.59 2008-08-18 07:31:29 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-08-20 05:34:39 $
+Ccc   * $Id: lev-dens.f,v 1.60 2008-08-20 05:34:39 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -49,9 +49,9 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
 
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       
       INTEGER NLWst                                                       ! PARAM
 
@@ -60,17 +60,17 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Cf, Gcc
+      REAL*8 Cf, Gcc
       INTEGER Nnuc
 C
 C Local variables
 C
-      DOUBLE PRECISION ac, aj, cigor, dumm, momort, mompar, rbmsph,
+      REAL*8 ac, aj, cigor, dumm, momort, mompar, rbmsph,
      &                 rotemp, saimid, saimin, saimx, selmax, stab, u,
      &                 x1, x2, x3
       REAL FLOAT
       INTEGER i, ia, iz, kk
-      DOUBLE PRECISION RODEF
+      REAL*8 RODEF
       ia = A(Nnuc)
       iz = Z(Nnuc)
       A23 = A(Nnuc)**0.666667
@@ -366,16 +366,16 @@ Ccc   *****************************************************************
 C
 C COMMON variables
 C
-      DOUBLE PRECISION DMPc
+      REAL*8 DMPc
       COMMON /DAMPAR/ DMPc
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, B, Q, T
+      REAL*8 A, B, Q, T
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, d, delta, r
+      REAL*8 arg, d, delta, r
 C-----DMPC=1. selects slow damping
       DMPc = 1.
       IF (ABS(B).LT.0.0001D0 .OR. DMPc.EQ.0.0D0) THEN
@@ -411,11 +411,11 @@ CCC   *****************************************************************
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Q, T
+      REAL*8 Q, T
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, dt, thalf
+      REAL*8 arg, dt, thalf
       thalf = 1.
       dt = 0.1
       arg = (T - thalf)/dt
@@ -430,12 +430,12 @@ Ccc   *****************************************************************
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, B, Q, U
+      REAL*8 A, B, Q, U
 C
 C Local variables
 C
       REAL ALOG
-      DOUBLE PRECISION de, delta, e, q1, q2, r, u1, u2
+      REAL*8 de, delta, e, q1, q2, r, u1, u2
       Q = 0.0
 C-----calculation of delta def. param from a2 def. param.
       r = 2.*(B + 1.)/(2. - B)
@@ -494,9 +494,9 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
 
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
       INTEGER NLWst                                                       ! PARAM
 
@@ -506,12 +506,12 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Asaf, Cf
+      REAL*8 Asaf, Cf
       INTEGER Nnuc
 C
 C Local variables
 C
-      DOUBLE PRECISION aj, ar, defit, dshi, dshif, dshift, ellq, exkk,
+      REAL*8 aj, ar, defit, dshi, dshif, dshift, ellq, exkk,
      &                 pi2, rocumd, rocumu, rocumul, rolev, gam, 
      &                 rotemp, xr
       CHARACTER*7 caz
@@ -520,7 +520,7 @@ C
       CHARACTER*30 title
 
       REAL FLOAT
-      DOUBLE PRECISION FSHELL
+      REAL*8 FSHELL
       INTEGER i, ia, ij, il, in, iter, ix, iz, kk, kkl, kku, nplot
       INTEGER INT
       INTEGER*4 iwin
@@ -544,27 +544,6 @@ C
 
       CALL PRERO(Nnuc)
 
-C-----Empire systematics with Nix-Moeller shell corrections
-C     AP1 = 0.94431E-01
-C     AP2 = -0.80140E-01
-C     GAMma = 0.75594E-01
-C     IF (Z(Nnuc).GE.85.D0) THEN
-C        AP1 = AP1*1.2402
-C        AP2 = AP2*1.2402
-C        GAMma = GAMma*1.2494
-C     ENDIF
-C-----Empire systematics with M-S shell corrections
-C     IF (SHNix.EQ.0.0D0) THEN
-C        AP1 = .52268E-01
-C        AP2 = .13395E+00
-C        GAMma = .93955E-01
-C        IF (Z(Nnuc).GE.85.D0) THEN
-C           AP1 = AP1*1.2942
-C           AP2 = AP2*1.2942
-C           GAMma = GAMma*1.2928
-C        ENDIF
-C     ENDIF
- 
 C-----determination of the pairing shift DEL according to Moeller-Nix (Nucl. Phys. A536 (1992) 20)
 !       DELn = 4.8/FLOAT(in)**0.333333
 !       DELp = 4.8/FLOAT(iz)**0.333333
@@ -584,19 +563,8 @@ C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
       CALL EGSMsys(ap1,ap2,gam)
       gamma = gam/A(Nnuc)**0.333333
-
       IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) GAMma = Asaf
 C-----set Ignatyuk type energy dependence for 'a'
-!       ATIl = AP1*FLOAT(in) + AP2*A23 + AP3/100*FLOAT((iz-in)**2)  !  frm=1.715
-!       ATIl = AP1*FLOAT(in) + AP2*A23 + AP3/100*SHC(Nnuc)**2 !frm=1.663 Chi**2=12000
-!       ATIl = AP1*FLOAT(ia) + AP2*A23 + AP3/100*SHC(Nnuc)**2 !frm=1.676 Chi**2=9726
-!       ATIl = AP1*FLOAT(ia) + AP2*A23 + AP3/10*Defene(Nnuc)*SHC(Nnuc) !frm=1.689 Chi**2=11219
-!       ATIl = AP1*FLOAT(ia) + AP2*A23 + AP3/100*FLOAT(iz)*SHC(Nnuc)**2 !frm=1.647      Chi**2=9329
-!       ATIl = AP1*FLOAT(ia) + AP2*A23 + AP3/100*FLOAT(ia)*SHC(Nnuc)**2 !frm=1.648      Chi**2=9313
-!       ATIl = AP1*FLOAT(ia) + AP2*A23 + AP3/100*FLOAT(in)*SHC(Nnuc)**2 !frm=1.648      Chi**2=9104  best so far but gives negative a
-!       ATIl = AP1*FLOAT(ia) + AP2*A23  !frm=1.774  Chi**2=11064
-!       ATIl = AP1*FLOAT(in) + AP2*A23  !frm=1.733  Chi**2=12197
-      
       ATIl = AP1*FLOAT(ia) + AP2*A23
       ATIl = ATIl*ATIlnor(Nnuc)
       TCRt = 0.567*DELp
@@ -730,18 +698,15 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
 C--------cumulative plot of levels to the zvd
          if(SYMb(Nnuc)(2:2).eq.' ') then
            write(caz,'(I2.2,A1,A1,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+     &      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
          else
            write(caz,'(I2.2,A2,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+     &      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
          endif
-
          write(fname,'(A13)') '_GS_EMPNL.zvd'
          write(ctmp1,'(A20)') caz//fname
-
          write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
-
          OPEN (36, FILE=ctmp1, STATUS='unknown')
          write(caz,'(A7)') 'Exp_Lev'
          CALL OPEN_ZVV(36,caz,title)
@@ -751,10 +716,8 @@ C--------cumulative plot of levels to the zvd
            WRITE (36,*) ELV(kk,Nnuc)*1d6,FLOAT(kk)
          ENDDO
          CALL CLOSE_ZVV(36,' ',' ')
-
          write(caz,'(A7)') 'Cum_Tot'
          CALL OPEN_ZVV(36,caz,title)
-
          rocumul = 1.D0
          WRITE (36,*) '0.0 1.0'
          DO kk = 2, NEX(Nnuc)
@@ -889,9 +852,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
       
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       
       INTEGER NLWst                                                       ! PARAM
 
@@ -1108,7 +1071,7 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       INTEGER NLWst                                                       ! PARAM
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
@@ -1284,20 +1247,20 @@ CCC   ********************************************************************
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
       
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, A2, Aj, Momort, Mompar, U
+      REAL*8 A, A2, Aj, Momort, Mompar, U
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, const, det, dphi2, momo, momp, phi, phi2,
+      REAL*8 arg, const, det, dphi2, momo, momp, phi, phi2,
      &                 qdamp, qk, s, seff2, t, vibrk, om2,
      &                 q2, om3, q3
-      DOUBLE PRECISION DSQRT, EVIBR
+      REAL*8 DSQRT, EVIBR
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
       ROBCS = 0.D0
@@ -1307,21 +1270,16 @@ C-----CONST=1/(2*SQRT(2 PI))
       t = 2.D0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
       s = SCR*TCRt*dphi2/t
       det = DETcrt*dphi2*(1.D0 + phi2)**2
-
       momp = Mompar*TCRt*dphi2/t
-
       IF (momp.LT.0.0D0) RETURN
       momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*dphi2/t
-
       IF (momo.LT.0.0D0) RETURN
       seff2 = momp*t
       IF (ABS(A2).GT.0.005D0) seff2 = momp**0.333D0*momo**0.6667D0*t
-
 C     seff2 = momp**0.333D0*momo**0.6667D0*t
       IF (seff2.LE.0.0D0) RETURN
       arg = s - (Aj + 0.5D0)**2/(2.D0*seff2)
       IF (arg.LE.0.0D0) RETURN
-
 C     CALL DAMPKS(A, A2, t, qk)
       CALL DAMPROT(U,qk)
       qdamp = 1.D0 - qk*(1.D0 - 1.D0/(momo*t))
@@ -1332,17 +1290,12 @@ C-----vibrational enhancement factor (EMPIRE-3.0)
       om3 = EVIBR(Z, A, Shell, 3)
       CALL QVIBR(A,t,om3,7,q3)
       vibrk = q2*q3
-
-!     write(6,*)'BCS: A, Aj, vibrk', A, Aj, vibrk, om2, om3, q2, q3
-C-----vibrational enhancement factor
-c     CALL VIBR(A,t,vibrk)
       ROBCS = ROBCS*vibrk*momo*t*qdamp
-
       RETURN
       END
 
 
-      DOUBLE PRECISION FUNCTION SHCFADE(J,Shrj,Shrd)
+      REAL*8 FUNCTION SHCFADE(J,Shrj,Shrd)
       IMPLICIT REAL*8 (A-H,O-Z)      
 C
 Ccc   ********************************************************************
@@ -1357,14 +1310,13 @@ C
 C Dummy arguments
 C
       INTEGER J
-      DOUBLE PRECISION Shrd, Shrj
+      REAL*8 Shrd, Shrj
 C
 C Local variables
 C
       REAL FLOAT
       SHCFADE = 1.
       IF (Shrd.NE.0.D0) SHCFADE = 1.0/(1.0 + EXP((FLOAT(J)-Shrj)/Shrd))
-
       RETURN
       END
 
@@ -1394,7 +1346,9 @@ Ccc
       INTEGER LAMB
 
       Defener = 0.0D0   !just keep it if we decide to go for more tricky 2+
-
+C-----The two Evibr below form a new systematics of the vibrational 2+ energies
+C-----They are actually over written since their usage in the Do fit 
+C-----produces poor results.
       IF(Lamb .EQ. 2 .AND. Defener .LE. 0.01D0) THEN !spherical 2+
          Evibr = (4/(A-Z)**0.333-0.05*Shell)
       ELSEIF(Lamb .EQ. 2 .AND. Defener .GT. 0.01D0) THEN !deformed 2+
@@ -1410,7 +1364,6 @@ Ccc
 c        Evibr = 30./A**0.66666   ! Ignatyuk
          Evibr = 27./A**0.666667
       endif
-
       RETURN
       END
 
@@ -1436,22 +1389,22 @@ CCC
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A23, AP1, AP2, BF, DEL, DELp, GAMma, eps
+      REAL*8 A2, A23, AP1, AP2, BF, DEL, DELp, GAMma, eps
       INTEGER NLWst
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
 C Dummy arguments
 C
       INTEGER Nnuc
-      DOUBLE PRECISION Scutf
+      REAL*8 Scutf
 C
 C Local variables
 C
-      DOUBLE PRECISION am, amas, arg, atil, e, efort, enorm, eo,
+      REAL*8 am, amas, arg, atil, e, efort, enorm, eo,
      &                 eom, exl, rhou, rjj, rolowint, sigh, sigl, t, tm,
      &                 u, ux, xj
       CHARACTER*6 ctmp
-      DOUBLE PRECISION DEXP
+      REAL*8 DEXP
       REAL FLOAT
       INTEGER i, ig, igna, il, iter, j
       INTEGER INT
@@ -1803,31 +1756,22 @@ Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
-       IMPLICIT REAL*8 (a-h,o-z)
-
-
-
-       REAL*8 A,T,OM,Q
-
-       INTEGER LAM
-
-       REAL*8 cga, gam, fn, U, S 
-
-
-       Q=1.D0
-       IF(T.LT.0.01) RETURN
-       cga=0.0075D0*A**(1./3.)
-       GAM=cga*(OM**2+(2.*3.141593*T)**2)
-       FN=DEXP(-GAM/OM/2.D0)/(DEXP(OM/T)-1.D0)
-       IF(FN.LT.0.d0) RETURN
-       
-
-       U=LAM*OM*FN
-       S=LAM*((1.+FN)*DLOG(1.+FN)-FN*DLOG(FN))
-       Q=DEXP(S-U/T)
-       if (Q.lt.1.D0) Q=1.D0
-       RETURN
-       END
+      IMPLICIT REAL*8 (a-h,o-z)
+      REAL*8 A,T,OM,Q
+      INTEGER LAM
+      REAL*8 cga, gam, fn, U, S 
+      Q=1.D0
+      IF(T.LT.0.01) RETURN
+      cga=0.0075D0*A**(1./3.)
+      GAM=cga*(OM**2+(2.*3.141593*T)**2)
+      FN=DEXP(-GAM/OM/2.D0)/(DEXP(OM/T)-1.D0)
+      IF(FN.LT.0.d0) RETURN
+      U=LAM*OM*FN
+      S=LAM*((1.+FN)*DLOG(1.+FN)-FN*DLOG(FN))
+      Q=DEXP(S-U/T)
+      if (Q.lt.1.D0) Q=1.D0
+      RETURN
+      END
 C
       SUBROUTINE READ_SHELL_CORR
 Ccc
@@ -1893,7 +1837,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION B, Gcc, X1, X2, X3
+      REAL*8 B, Gcc, X1, X2, X3
       INTEGER Ia, Iz
 C
 C Local variables
@@ -1962,13 +1906,13 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION c1, c2, hhh, r1, r2, corr1,
+      REAL*8 c1, c2, hhh, r1, r2, corr1,
      & rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
      & rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
      & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u, rocumul, pcorr, acorr
       CHARACTER*2 car2
       CHARACTER*8 paritate
-      DOUBLE PRECISION DLOG10
+      REAL*8 DLOG10
       CHARACTER*30 title
       CHARACTER*13 fname
       CHARACTER*20 ctmp
@@ -1977,7 +1921,6 @@ C
       LOGICAL fexist
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
-
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -2113,10 +2056,10 @@ cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 C--------Cumulative Level Density plot
          if(SYMb(Nnuc)(2:2).eq.' ') then
            write(caz,'(I2.2,A1,A1,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+     &      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
          else
            write(caz,'(I2.2,A2,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+     &      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
          endif
          
          write(fname,'(A13)') '_GS_HFBNL.zvd'
@@ -2142,7 +2085,7 @@ C--------Cumulative Level Density plot
            IF(uugrid(kk) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
            WRITE (36,*) uugrid(kk)*1d6,cgrid(kk,1)+cgrid(kk,2)
          ENDDO
-         CALL CLOSE_ZVV(36,'Excitation Energy�x','NUMBER OF LEVELS')
+         CALL CLOSE_ZVV(36,'Excitation Energy','NUMBER OF LEVELS')
          close(36)
       ENDIF
 
@@ -2400,8 +2343,6 @@ C-----------rotation parallel to the symmetry axis
       ENDDO
   100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(qv - vibrk*(qv - 1.))
-c      write(6,*)'qv, vibrk, argred', qv, vibrk, argred
-
       RETURN
       END
 
@@ -2413,13 +2354,13 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
       
-      DOUBLE PRECISION ACRtf(NFHUMP), UCRtf(NFHUMP), TCRtf(NFHUMP),       ! CRITFIS
+      REAL*8 ACRtf(NFHUMP), UCRtf(NFHUMP), TCRtf(NFHUMP),       ! CRITFIS
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      REAL*8 ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -2428,13 +2369,13 @@ C
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
       INTEGER NLWst                                                       ! PARAM
 
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
+      REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
 
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)                   ! ROHFBSADD
+      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump)                   ! ROHFBSADD
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       
@@ -2453,12 +2394,12 @@ C
 C Dummy arguments
 C
       INTEGER Ib, Nnuc
-      DOUBLE PRECISION Rafis
+      REAL*8 Rafis
 C
 C Local variables
 C
-      DOUBLE PRECISION aaj, excn1,   rotemp, xmax, mompar, temp           
-      DOUBLE PRECISION bbb, ggg, rrry, rrr1, rrr2, def2
+      REAL*8 aaj, excn1,   rotemp, xmax, mompar, temp           
+      REAL*8 bbb, ggg, rrry, rrr1, rrr2, def2
       REAL FLOAT
       INTEGER ia, iff, in, iz, jj, kk, nr
       INTEGER INT
@@ -2569,8 +2510,8 @@ CCC   *********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
+      REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
+      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
 C
       COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
 C
@@ -2586,7 +2527,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION c1, c2, hhh, r1, r2,
+      REAL*8 c1, c2, hhh, r1, r2,
      &                 rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
      &                 rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
      &                 uugrid(0:NLDGRID), tgrid(0:NLDGRID), u
@@ -2594,7 +2535,7 @@ C
 
       CHARACTER*2 car2
       CHARACTER*8 paritate
-      DOUBLE PRECISION DLOG10
+      REAL*8 DLOG10
       CHARACTER*56 filename
 
       LOGICAL fexist
@@ -2745,13 +2686,13 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
 
-      DOUBLE PRECISION ACRtf(NFHUMP), UCRtf(NFHUMP), TCRtf(NFHUMP),       ! CRITFIS
+      REAL*8 ACRtf(NFHUMP), UCRtf(NFHUMP), TCRtf(NFHUMP),       ! CRITFIS
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      REAL*8 ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -2760,7 +2701,7 @@ C
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-      DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
+      REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
       INTEGER NLWst                                                       ! PARAM
 
@@ -2779,17 +2720,17 @@ C
 C Dummy arguments
 C
       INTEGER Ib, Mmod, Nnuc
-      DOUBLE PRECISION Rafis
+      REAL*8 Rafis
 C
 C Local variables
 C
-      DOUBLE PRECISION aaj, accn, ar, desteppp, excn1, mm2, r0, cigor,
+      REAL*8 aaj, accn, ar, desteppp, excn1, mm2, r0, cigor,
      &                 rotemp, shcf, u, xmax, xr, mompar, momort, temp,
      &                 vibbf12, vibbfdt, def2, stab, aj, gam, qigor
       REAL FLOAT
       INTEGER ia, iff, in, ix, iz, jj, kk, nr
       INTEGER INT
-      DOUBLE PRECISION ROBCSF, RODEFF,FSHELL
+      REAL*8 ROBCSF, RODEFF,FSHELL
 
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
@@ -3029,24 +2970,24 @@ c      pause
 C
 
 
-      DOUBLE PRECISION FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Momp,T,
+      REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Momp,T,
      &                                 vibbf12,vibbfdt,def2)
 
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+      IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
+      REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, Aj, Momort, Mompar, U, Momp, T
+      REAL*8 A, Aj, Momort, Mompar, U, Momp, T
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, const, det, momo, phi, phi2,dphi2,
+      REAL*8 arg, const, det, momo, phi, phi2,dphi2,
      &                 qdamp, qk, qv, s, seff2, vibrk, def2,
      &                 ro,ro_u,ro_j,ro_pi,pi,vibbf12,vibbfdt
 C-----CONST=1/(2*SQRT(2 PI))
@@ -3089,15 +3030,15 @@ c      pause
       END
 C
 C
-      DOUBLE PRECISION FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
+      REAL*8 FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
      &                          Argred,Expmax,T,def2,vibbf12,vibbfdt)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+      IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C Dummy arguments
-      DOUBLE PRECISION A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
+      REAL*8 A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
      &                 def2,T,vibbf12,vibbfdt
 C Local variables
-      DOUBLE PRECISION s,det,seff2, ro,ro_u,ro_j,ro_pi,summ,pi
-        DOUBLE PRECISION ak, arg, const, qk, qv, seff, sort2,
+      REAL*8 s,det,seff2, ro,ro_u,ro_j,ro_pi,summ,pi
+      REAL*8 ak, arg, const, qk, qv, seff, sort2,
      &                 sum, u, vibrk
       INTEGER i, k, kmin
       DATA const/0.01473144/
@@ -3108,7 +3049,6 @@ C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
       RODEFF = 0.D0
       sum = 0.D0 
       summ=0.d0
-
       T = DSQRT(E/Ac)
       seff = 1.0/Mompar - 1.0/Momort
       sort2 = Momort*t
@@ -3134,7 +3074,6 @@ c-----Empire
       ELSE
          kmin = 1
       ENDIF
-
       IF (Ss.EQ.( - 1.0D0)) THEN
          arg = 2*SQRT(Ac*e) - Argred
          IF (arg.LE.( - Expmax)) THEN
@@ -3146,7 +3085,6 @@ c-----Empire
          ENDIF
          IF (Aj.LT.1.0D0)GOTO 30
       ENDIF
-
       DO k = kmin, i
          ak = k + Ss
 C--------rotation perpendicular to the symmetry axis
@@ -3184,11 +3122,8 @@ c 40   ro_j=(1.d0/(2.d0*sqrt(2.d0*pi)))*summ/SQRT(Mompar*t)
  30   ro=(1.d0/(16.d0*sqrt(6.d0*pi)))*ac**0.25*sum/SQRT(Mompar*t)
       ro=const*ac**0.25*sum/SQRT(Mompar*t)
       ro=const/Ac**0.25/SQRT(Mompar*t)*sum
-
       ro = ro * 0.5 *0.5
-
 c      ro = ro_u * ro_j * ro_pi
-  
  90   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
       IF (qv.GE.0.999D0) vibrk = 1.0
  103  RODEFF = ro*(1.0 - qk*(1.0 - 1.0/sort2)) !*vibrk
@@ -3197,16 +3132,16 @@ c      ro = ro_u * ro_j * ro_pi
  101  RETURN
       END
      
-C==================================================================
+C
       SUBROUTINE DAMPROTVIB(E1,Qk,T,Q,A,Vibrk,def2,vibbf12,vibbfdt)
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, E1, Q, Qk, T, Vibrk,def2,vibbf12,vibbfdt
+      REAL*8 A, E1, Q, Qk, T, Vibrk,def2,vibbf12,vibbfdt
 C
 C Local variables
 C
-      DOUBLE PRECISION arg, cost, dmpdiff, dmphalf, dt, ht, m0, pi, r0,
+      REAL*8 arg, cost, dmpdiff, dmphalf, dt, ht, m0, pi, r0,
      &                 sdrop, thalf
     
       dmphalf = 120.d0*A**0.333*def2**2         !according to RIPL-2
@@ -3231,22 +3166,22 @@ c      Vibrk = EXP(0.0986*A**(2./3.)*T**(4./3.)) !pu41
       SUBROUTINE ROBCS_FG_FIS(A,E,Aj,T,shcf,gamma,momp,def2,rotemp,
      &                        vibbf12,vibbfdt)
 
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+      IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
 C COMMON variables
-      DOUBLE PRECISION ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt,
+      REAL*8 ACR, ACRt, ATIl, DETcrt, ECOnd, SCR, TCRt,
      &                 UCRt
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 C Dummy arguments
-      DOUBLE PRECISION A, Aj, Momort, Mompar, U, Momp, T,rotemp,gamma,
+      REAL*8 A, Aj, Momort, Mompar, U, Momp, T,rotemp,gamma,
      &                 shcf,def2
 C Local variables
-      DOUBLE PRECISION arg, const, det, momo, phi, phi2,dphi2,
+      REAL*8 arg, const, det, momo, phi, phi2,dphi2,
      &                 vibdamp, qv, robcs, s, seff2, vibrk,
      &                 seff2ort,mm2,qr,ac,e,rotdamp,vibbf12,
      &                 vibbfdt
-      DOUBLE PRECISION om2,om3,cga,q2,q3
-      DOUBLE PRECISION FSHELL 
+      REAL*8 om2,om3,cga,q2,q3
+      REAL*8 FSHELL 
       INTEGER fg
 C-----CONST=1/(2*SQRT(2 PI))
 
@@ -3341,11 +3276,11 @@ C***** QROT INCLUDING DAMPING ***
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION A, Q, T, Vibrk
+      REAL*8 A, Q, T, Vibrk
 C
 C Local variables
 C
-      DOUBLE PRECISION arg,  dt,thalf
+      REAL*8 arg,  dt,thalf
       thalf = 1.5
       dt=0.1
 c      thalf = 0.4               ! 1.
