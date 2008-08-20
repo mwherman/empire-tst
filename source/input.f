@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-19 14:28:28 $
-Ccc   * $Id: input.f,v 1.266 2008-08-19 14:28:28 Capote Exp $
+Ccc   * $Date: 2008-08-20 05:57:23 $
+Ccc   * $Id: input.f,v 1.267 2008-08-20 05:57:23 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -274,7 +274,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
