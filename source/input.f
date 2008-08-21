@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-20 05:57:23 $
-Ccc   * $Id: input.f,v 1.267 2008-08-20 05:57:23 herman Exp $
+Ccc   * $Date: 2008-08-21 05:41:40 $
+Ccc   * $Id: input.f,v 1.268 2008-08-21 05:41:40 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1613,11 +1613,9 @@ C-----calculate compound nucleus level density
                rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
              ENDDO
              WRITE (6,99010) EX(i,nnuc), rocumul*EXP(ARGred),
-
-
-     &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-
-
+     &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ELSE
            WRITE (6,'(1X,/,
@@ -6256,10 +6254,11 @@ C
      &               ''  ATILNO     final'')')
          WRITE(6,'(1X)')
       ENDIF
-C==============================================================================
+C
 C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
+C
 C     Skipping header
-      READ (24,'(///)')
+      READ (24,'(////)')
   100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200) 
      &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
       izar = nixz*1000 + nixa
