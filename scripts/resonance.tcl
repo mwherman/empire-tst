@@ -338,6 +338,9 @@ proc vTcl:project:info {} {
     }
     namespace eval ::widgets::$site_3_0.01.02 {
         array set save {-activeborderwidth 1 -borderwidth 1 -font 1 -tearoff 1}
+        namespace eval subOptions {
+            array set save {-accelerator 1 -command 1 -label 1}
+        }
     }
     namespace eval ::widgets::$site_3_0.05 {
         array set save {-anchor 1 -menu 1 -padx 1 -pady 1 -text 1 -width 1}
@@ -383,6 +386,15 @@ proc vTcl:project:info {} {
         array set save {-tearoff 1}
         namespace eval subOptions {
             array set save {-command 1 -label 1}
+        }
+    }
+    namespace eval ::widgets::$site_3_0.men67 {
+        array set save {-menu 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::$site_3_0.men67.m {
+        array set save {-tearoff 1}
+        namespace eval subOptions {
+            array set save {-accelerator 1 -command 1 -label 1}
         }
     }
     namespace eval ::widgets::$base.tab85 {
@@ -1463,7 +1475,7 @@ proc vTclWindow. {base} {
     ###################
     wm focusmodel $top passive
     wm geometry $top 1x1+0+0; update
-    wm maxsize $top 1905 1169
+    wm maxsize $top 1425 848
     wm minsize $top 1 1
     wm overrideredirect $top 0
     wm resizable $top 1 1
@@ -1494,7 +1506,7 @@ proc vTclWindow.top71 {base} {
     vTcl:toplevel $top -class Toplevel \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 617x543+11+547; update
+    wm geometry $top 617x543+623+144; update
     wm maxsize $top 1585 1120
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -1520,12 +1532,6 @@ proc vTclWindow.top71 {base} {
     $site_3_0.01.02 add command \
         -accelerator Ctrl+L -command LoadVars -label Load 
     $site_3_0.01.02 add command \
-        -accelerator Ctrl+C -command {exec $m_szEditor $m_szFile.c4} \
-        -label {Edit C4} 
-    $site_3_0.01.02 add command \
-        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} \
-        -label {Edit EXFOR} 
-    $site_3_0.01.02 add command \
         -accelerator Ctrl+X -command {Cleanup; exit} -label Exit 
     menubutton $site_3_0.05 \
         -anchor w -menu "$site_3_0.05.06" -padx 4 -pady 3 -text Help -width 4 
@@ -1539,6 +1545,41 @@ proc vTclWindow.top71 {base} {
   tk_dialog .msgbox "About" "Resonance module for EMPIRE\nWritten by Y.S.Cho\n (Last updated on 02/06/2007)\nwith the help of M.Herman and S.F.Mughabghab" info 0 OK
         } \
         -label About 
+    menubutton $site_3_0.men67 \
+        -menu "$site_3_0.men67.m" -padx 6 -pady 4 -text Input 
+    vTcl:DefineAlias "$site_3_0.men67" "Menubutton3" vTcl:WidgetProc "Toplevel1" 1
+    menu $site_3_0.men67.m \
+        -tearoff 0 
+    $site_3_0.men67.m add command \
+        -accelerator Ctrl+C -command {exec $m_szEditor $m_szFile.c4} \
+        -label {Edit C4} 
+    $site_3_0.men67.m add command \
+        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} \
+        -label {Edit EXFOR} 
+    $site_3_0.men67.m add command \
+        -accelerator {} \
+        -command {if {[file exists $m_szZAname-expcorr.kal]} {
+    exec $m_szEditor $m_szZAname-expcorr.kal &
+  } else {
+    tk_dialog .msgbox "Error" "KALMAN experimental correlations not found. Run KALMAN first" info 0 OK
+  }} \
+        -label {Experimental correlations} 
+    $site_3_0.men67.m add command \
+        -accelerator {} \
+        -command {if {[file exists $m_szZAname-expxsc.kal]} {
+    exec $m_szEditor $m_szZAname-expxsc.kal &
+  } else {
+    tk_dialog .msgbox "Error" "KALMAN experimental cross-sections not found. Run KALMAN first" info 0 OK
+  }} \
+        -label {Experimental x-sec} 
+    $site_3_0.men67.m add command \
+        -accelerator {} \
+        -command {if {[file exists $m_szZAname-parcorr.kal]} {
+    exec $m_szEditor $m_szZAname-parcorr.kal &
+  } else {
+    tk_dialog .msgbox "Error" "Parameter correlations for KALMAN not found. Run KALMAN first" info 0 OK
+  }} \
+        -label {Kalman parameter unc.} 
     menubutton $site_3_0.men72 \
         -menu "$site_3_0.men72.m" -padx 6 -pady 4 -text Outputs 
     vTcl:DefineAlias "$site_3_0.men72" "Menubutton1" vTcl:WidgetProc "Toplevel1" 1
@@ -1617,7 +1658,17 @@ proc vTclWindow.top71 {base} {
         -menu "$site_3_0.men72.m.men74" -command {} -label KALMAN 
     set site_5_0 $site_3_0.men72.m
     menu $site_5_0.men74 \
-        -tearoff 0 
+        -tearoff 1 
+    $site_5_0.men74 add command \
+        \
+        -command {
+  if {[file exists $m_szZAname-mat.sen]} {
+    exec $m_szEditor $m_szZAname-mat.sen &
+  } else {
+    tk_dialog .msgbox "Error" "Sensitivity matrix not found. Run 'Sensitivity' first" info 0 OK
+  }
+        } \
+        -label {Sensitivity matrix} 
     $site_5_0.men74 add command \
         \
         -command {
@@ -1627,7 +1678,7 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" "KALMAN output not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label output 
+        -label {Kalman output} 
     $site_5_0.men74 add command \
         \
         -command {
@@ -1637,7 +1688,7 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" "KALMAN x-sections not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label x-sections 
+        -label {Calculated cross-sections} 
     $site_5_0.men74 add command \
         \
         -command {
@@ -1648,19 +1699,12 @@ proc vTclWindow.top71 {base} {
   }
         } \
         -label {covariance matrices} 
-    $site_5_0.men74 add command \
-        -command {
-  if {[file exists $m_szZAname-expcorr.kal]} {
-    exec $m_szEditor $m_szZAname-expcorr.kal &
-  } else {
-    tk_dialog .msgbox "Error" "KALMAN experimental correlations not found. Run KALMAN first" info 0 OK
-  }
-        } \
-        -label {Experimental correlations} 
     pack $site_3_0.01 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     pack $site_3_0.05 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side right 
+    pack $site_3_0.men67 \
+        -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     pack $site_3_0.men72 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     ::iwidgets::tabnotebook $top.tab85 \
@@ -2317,7 +2361,8 @@ proc vTclWindow.top71 {base} {
         set ::vTcl::balloon::%W {Code for uncertainty and covariance estimation}
     }
     button $site_10_0.but65 \
-        -command {exec $m_szEditor $m_szZAname-parcorr.kal} -text {Parameter unc.} 
+        -command {exec $m_szEditor $m_szZAname-parcorr.kal} \
+        -text {Parameter unc.} 
     vTcl:DefineAlias "$site_10_0.but65" "Button9" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but65 "$site_10_0.but65 Button $top all _vTclBalloon"
     bind $site_10_0.but65 <<SetBalloon>> {
