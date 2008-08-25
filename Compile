@@ -44,9 +44,6 @@ cd ../stanef
 make
 cd ../fizcon
 make
-cd ../../EXFOR
-make
-cd ../
 if [ -d ../resonance ]; then
    cd ../resonance
    make all
@@ -55,4 +52,7 @@ if [ -d ../kalman ]; then
    cd ../kalman
    make all
 fi
+cd ../../EXFOR
+make
+cd ../
 exit
