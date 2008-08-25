@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2008-08-20 05:34:39 $
-Ccc   * $Id: lev-dens.f,v 1.60 2008-08-20 05:34:39 herman Exp $
+Ccc   * $Date: 2008-08-25 06:11:31 $
+Ccc   * $Id: lev-dens.f,v 1.61 2008-08-25 06:11:31 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -552,17 +552,10 @@ C-----determination of the pairing shift DEL according to Moeller-Nix (Nucl. Phy
 ! !       DELp = DELn*0.72
 ! !       DEL = DEL*0.72
 C-----determination of the pairing shift --- done -----
-C-----determination of the pairing shift
-      DELp = 12./SQRT(A(Nnuc))
-      DEL = 0.
-      IF (MOD(in,2).NE.0) DEL = DELp
-      IF (MOD(iz,2).NE.0) DEL = DEL + DELp
-C-----determination of the pairing shift --- done -----
 C
 C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
-      CALL EGSMsys(ap1,ap2,gam)
-      gamma = gam/A(Nnuc)**0.333333
+      CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
       IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) GAMma = Asaf
 C-----set Ignatyuk type energy dependence for 'a'
       ATIl = AP1*FLOAT(ia) + AP2*A23
@@ -2798,7 +2791,7 @@ C-----where continuum starts,ends,steps in between
       iff = 1
 
 C-----EMPIRE-3.0-dependence
-      CALL EGSMsys(ap1,ap2,gam)
+      CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
 
 C     IF (SHNix.EQ.1.0D0) THEN      
 C-------Empire systematics with Nix-Moeller shell corrections
@@ -2836,7 +2829,7 @@ C     ENDIF
       ENDIF
 
 
-      ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
+C     ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
 
       ATIl = ATIl*Rafis
 
@@ -3290,7 +3283,7 @@ c      dt=0.076
       Vibrk = EXP(0.09286*A**(2./3.)*T**(4./3.))
       END
 
-      SUBROUTINE EGSMsys(ap1,ap2,gam)
+      SUBROUTINE EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
 C-----
 C-----Set coefficients in the level-density-parameter formula
 C-----used in the EMPIRE-specific (EGSM) model:
@@ -3304,13 +3297,24 @@ C     EXT PARAMETER
 C     NO.   NAME        VALUE        
 C      1     A1        0.73701E-01   
 C      2     A2       -0.94508E-01   
-C      3     gamma     0.61083       
+C      3     gam       0.61083       
 C
 C      frm=1.774  Chi**2=11072
 C-----
-      REAL*8 ap1, ap2, gam
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      REAL*8 atil, ap1, ap2, gam, gamma, del, delp
+
+      del = 0.d0
+      delp = 12./SQRT(A(nnuc))
+      IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
+      IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
       ap1 = 0.73701E-01
       ap2 = -0.94508E-01
+c     atil = ap1*A(nnuc) + ap2*A(Nnuc)**0.666667
+      ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
+      ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
       gam =  0.61083
+      gamma = gam/A(Nnuc)**0.333333
       RETURN
       END

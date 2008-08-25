@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-21 05:41:40 $
-Ccc   * $Id: input.f,v 1.268 2008-08-21 05:41:40 herman Exp $
+Ccc   * $Date: 2008-08-25 06:11:30 $
+Ccc   * $Id: input.f,v 1.269 2008-08-25 06:11:30 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -6227,11 +6227,12 @@ C Local variables
 C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma,
-     &                 pi2, qn, tcrt, uexc, xr, gam, ddob, esh, dap, dam
+     &                 pi2, qn, tcrt, uexc, xr, gam, ddob, esh, dap, dam,
+     &                 atilnoz
 
       REAL FLOAT
       DOUBLE PRECISION FSHELL
-      INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc
+      INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz
       INTEGER INT
 
       pi2 = PI**2
@@ -6243,6 +6244,19 @@ C
       ENDDO
       nexp = 0
       atilsum = 0.0
+C-----Set EGSM normalization factors for each Z      
+      IF (ADIv.EQ.0.0D0) THEN
+         DO iz = 1,NDZmax
+            atilnoz(iz) = 1.0 !default
+         ENDDO 
+         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD') 
+         READ (31,'(///)')
+   90    READ (31,'(I5,F8.3)',END = 95) iz,atiln   
+         ATIlnoz(iz) = atiln
+         GOTO 90
+   95    CONTINUE 
+         CLOSE(31)
+      ENDIF
       IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) THEN
          WRITE(6,'(1X)')
          WRITE(6,'(1X)')
@@ -6250,15 +6264,15 @@ C
      &(Qn)'')')
          WRITE(6,'(4X,54(''-''))')
          WRITE(6,'(1X)')
-         WRITE(6,'(3X,''Nucleus     exp.      sys.     exp/sys '',
-     &               ''  ATILNO     final'')')
+         WRITE(6,'(3X,''Nucleus     exp.      sys.   int. nor. '',
+     &               ''ext. nor.    final'')')
          WRITE(6,'(1X)')
       ENDIF
 C
 C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
 C
 C     Skipping header
-      READ (24,'(////)')
+      READ (24,'(///)')
   100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200) 
      &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
       izar = nixz*1000 + nixa
@@ -6287,12 +6301,12 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   atiln = arogc/asys
 C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
                ELSEIF (ADIv.EQ.0.0D0) THEN
-                  del = 0.d0
-                  delp = 12./SQRT(A(nnuc))
-                  IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
-                  IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
-                  CALL EGSMsys(ap1,ap2,gam)
-                  gamma = gam/A(Nnuc)**0.333333
+c                 del = 0.d0
+c                 delp = 12./SQRT(A(nnuc))
+c                 IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
+c                 IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
+                  CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+c                 gamma = gam/A(Nnuc)**0.333333
                   atil = ap1*A(nnuc) + ap2*a23
                   tcrt = 0.567*delp
                   ar = atil*(1.0 + SHC(nnuc)*gamma)
@@ -6305,16 +6319,12 @@ C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
   105             econd = 1.5*acrt*delp**2/pi2 
                   uexc = qn + del - econd
                   asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
-                  atiln = aroc/asys
-               ENDIF
-
-               IF(ATIlnor(nnuc).EQ.0) THEN
-                  ATIlnor(nnuc) = atiln
-               ELSE
+C                 asys = atil*atilnoz(INT(Z(nnuc))) !apply elemental normalization factor
+                  atiln =  aroc/asys
                   ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
-C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
-               ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+C              Make values available to the level density routines
+               ROPar(1,nnuc) = aroc*ATIlnor(nnuc)/atiln !divide by atiln to recover input norm. factor
                ROPar(3,nnuc) = del
 C--------------Print resulting level density parameters
                IF (FITlev.GT.0.0D0) THEN
@@ -6354,14 +6364,14 @@ C--------------Calculate sum for the average normalization factor
      &               atilave
       DO nnuc = 1, NNUct
          IF (ATIlnor(nnuc).EQ.0.0D0) THEN
-            ATIlnor(nnuc) = atilave
+            ATIlnor(nnuc) = ATIlnoz(INT(Z(nnuc)))
             IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
      &      WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         atilave
+     &         ATIlnor(nnuc) 
          ELSEIF (ROPar(1,nnuc).EQ.0) THEN
             ftmp =   ATIlnor(nnuc)
-            ATIlnor(nnuc) = ATIlnor(nnuc)*atilave
+            ATIlnor(nnuc) = ATIlnor(nnuc)*ATIlnoz(INT(Z(nnuc)))
             IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
      &      WRITE(6,'(I3,''-'',A2,''-'',I3, 30X,1(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),

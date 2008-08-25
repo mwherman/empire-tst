@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $ 
-Ccc   * $Date: 2008-08-21 05:42:34 $
-Ccc   * $Id: io.h,v 1.35 2008-08-21 05:42:34 herman Exp $
+Ccc   * $Date: 2008-08-25 06:11:31 $
+Ccc   * $Id: io.h,v 1.36 2008-08-25 06:11:31 herman Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -22,6 +22,7 @@ c     14     io.h
 c     15     MSD-Orion,MSD-Tristan
 c     16     MSD-Tristan
 c     17     empire_ctl
+c     18     empire_ctl
 c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
@@ -33,6 +34,7 @@ c     26     empire-ctrl, main
 c     27     ddhms,input
 c     28     ddhms
 c     29     io.h
+c     31     input
 c     32     input,tl
 c     33     io.h
 c     34     lev-dens, empire_ctl 

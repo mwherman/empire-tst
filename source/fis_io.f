@@ -402,9 +402,7 @@ C--------pairing at saddles according to RIPL-2
 
 C--------EMPIRE-3.0-dependence
 
-         CALL EGSMsys(ap1,ap2,gam)
-
-         gamma = gam/A(Nnuc)**0.333333
+         CALL EGSMsys(atil,gamma,del,delp,nnuc)
 
          GAMmafis(ib) = Gamma
 C--------multiplier of atil

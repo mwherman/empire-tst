@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-11-01 23:20:34 $
-Ccc   * $Id: auxiliary.f,v 1.34 2007-11-01 23:20:34 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-08-25 06:11:29 $
+Ccc   * $Id: auxiliary.f,v 1.35 2008-08-25 06:11:29 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -747,6 +747,7 @@ C
       END
 C
       FUNCTION SMAT(Iz)
+      INCLUDE 'dimension.h'
 C
 C-----RETURNS CHEMICAL SYMBOL OF AN ELEMENT WITH Z=IZ
 C
@@ -759,7 +760,7 @@ C
 C
 C Local variables
 C
-      CHARACTER*2 mat(0:110)
+      CHARACTER*2 mat(0:NDZmax)
 C
 C
 C
@@ -783,8 +784,8 @@ C
      &     'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf',
      &     'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Ns', 'Hs',
      &     'Mt', '??'/
-      IF (Iz.GT.109) THEN
-         SMAT = mat(110)
+      IF (Iz.GT.NDZmax-1) THEN
+         SMAT = mat(NDZmax)
          RETURN
       ENDIF
       SMAT = mat(Iz)

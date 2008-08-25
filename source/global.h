@@ -9,6 +9,7 @@
      &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
      &                 CSDirlev(ndlv,0:ndejc), ATIlfi(0:ndnuc),
+     &                 ATIlnoz(NDZmax),
      &                 CSE(ndecse,0:ndejc,0:ndnuc), FISbin(0:ndnuc),
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),
      &                 CSEahms(ndecse,ndangecis,0:ndejc),
@@ -152,7 +153,7 @@ c
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
      &                 DEFnor, FCCred, TISomer, rFCCred, rFUSred,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd
+     &                 EMInmsd, ATIlnoz
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
