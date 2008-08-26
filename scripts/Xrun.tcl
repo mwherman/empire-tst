@@ -7827,7 +7827,7 @@ set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu92 add command \
-        -command {exec {cp skelet.inp
+        -command {exec {cp skel.inp
 $file.inp &}} -label {Create input} 
     $site_3_0.menu92 add command \
         -command {exec $editor $file.inp &} -label {Edit input} 
