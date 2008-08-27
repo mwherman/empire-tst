@@ -1,45 +1,123 @@
+! *
 ! **********************************************************************
 ! *
-! *   PROGRAM PSYCHE
-! *
-! *   PROGRAM TO PERFORM PHYSICS CHECKS ON DATA IN AN ENDF-V OR -VI
-! *   FORMAT EVALUATED DATA FILE
-! *
-! *
-! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
-! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
-! *                           MODLIB PROJECT
-! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
-! *                           GROUP PARAMETERS.
-! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
-! *                             NAME
-! *                        5. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
-! *                        6. ADDED COMMAND LINE INPUT TO UNIX AND
-! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
-! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
-! *                           OPTIONS ARE ASSUMED UNLESS THIRD
-! *                           PARAMETER IS N.
-! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
-! *                        1. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
-! *                        2. ADD POTENTIAL SCATTERING TEST FORMERLY IN
-! *                           FIZCON
-! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
-! *                        1. Fixed bug in calculation of L=2 penetrability
-! *         VERSION 7.03   Sept  2007     R. Capote
-! *                        1. Can be compiled with GNU g95
-! *
-! *      REFER ALL COMMENTS AND INQUIRIES TO
-! *
-! *         NATIONAL NUCLEAR DATA CENTER
-! *         BUILDING 197D
-! *         BROOKHAVEN NATIONAL LABORATORY
-! *         P.O. BOX 5000
-! *         UPTON, NY 11973-5000
-! *         USA
-! *
-! *      TELEPHONE           631-344-2902
-! *      E-MAIL              NNDC@BNL.GOV
-! *
+!+++MDC+++
+!...VMS, ANS, WIN, UNX
+!
+!     Main program for non-windows implementation of PSYCHE
+!
+      PROGRAM PSYCHE
+!
+      IMPLICIT NONE
+!
+!...LWI, DVF, MOD
+!/!
+!/!     MODULE IMPLEMENTATION OF PSYCHE FOR MODLIB AND WINDOWS
+!/!
+!/      MODULE PSYCHE
+!/!
+!/      IMPLICIT NONE
+!/!
+!/      PRIVATE
+!/!
+!/      PUBLIC :: RUN_PSYCHE
+!/      PUBLIC :: PSYCHE_INPUT, PSYCHE_DATA, PSYCHE_SUCCESS
+!...LWI, DVF
+!/      PUBLIC :: IRERUN
+!---MDC---
+!-T Program PSYCHE
+!-P Perform physics tests on data in evaluated nuclear data files
+!-P in ENDF-5 or ENDF-6 format
+!-V
+!-V         Version 8.00   August  2008     A. Trkov
+!-V                        1. Major updating of the code.
+!-V                        2. Further reduction of non-essential output.
+!-V                        3. Read real variables in double precision to
+!-V                           avoid reporting errors reading small numbers.
+!-V                        4. Implement extended features of the format
+!-V                           endorsed by CSEWG.
+!-V         VERSION 7.02   MAY 2005     C.L.DUNFORD
+!-V                        1. Fixed bug in calculation of L=2 penetrability
+!-V         VERSION 7.01   APRIL 2005     C.L.DUNFORD
+!-V                        1. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
+!-V                        2. ADD POTENTIAL SCATTERING TEST FORMERLY IN
+!-V                           FIZCON
+!-V         Version 7.0    OCTOBER 2004     C.L.DUNFORD
+!-V                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
+!-V                           MODLIB PROJECT
+!-V                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
+!-V                           GROUP PARAMETERS.
+!-V                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
+!-V                             NAME
+!-V                        5. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
+!-V                        6. ADDED COMMAND LINE INPUT TO UNIX AND
+!-V                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
+!-V                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
+!-V                           OPTIONS ARE ASSUMED UNLESS THIRD
+!-V                           PARAMETER IS N.
+!-V
+!-V      REFER ALL COMMENTS AND INQUIRIES TO
+!-V
+!-V         NATIONAL NUCLEAR DATA CENTER
+!-V         BUILDING 197D
+!-V         BROOKHAVEN NATIONAL LABORATORY
+!-V         P.O. BOX 5000
+!-V         UPTON, NY 11973-5000
+!-V         USA
+!-V
+!-V      TELEPHONE           631-344-2902
+!-V      E-MAIL              NNDC@BNL.GOV
+!-V
+!-M
+!-M PSYCHE - Perform Physics Tests on Evaluated Nuclear Data Files
+!-M ==============================================================
+!-M
+!-M PSYCHE is a program for checking the physics content of an 
+!-M evaluated data file. It can recognize the difference between 
+!-M ENDF-6 and ENDF-5 formats and performs its tests accordingly. 
+!-M The present version checks for energy conservation for emitted 
+!-M particles, checks Wick's limit for elastic scattering, analyzes 
+!-M resonance parameter statistics, calculates thermal cross sections 
+!-M and resonance integrals, examines continuity across resonance 
+!-M region boundaries and checks “Q” values against mass tables. 
+!-M It is assumed the file being checked has passed the CHECKR 
+!-M program without any errors being detected.
+!-M 
+!-M Fortran Logical Units Used:
+!-M     5  Default (keyboard) input 
+!-M     6  Default output (terminal screen)
+!-M    20  Input data file, ENDF format 
+!-M    21  Message file for program checking results  
+!-M 22-25  Temporary files for energy conservation tests 
+!-M 
+!-M Input Requirements:
+!-M In batch mode operation, the user must supply the following 
+!-M control information repeated for each input file to be processed.
+!-M
+!-M Record  Description
+!-M      1  Source ENDF filename 
+!-M      2  Output report filename 
+!-M         (if blank, messages go to standard output file on unit 6) 
+!-M      3  Flag to select standard or customised options
+!-M             Y  Yes, adopt standard options (default)
+!-M             N  No, proceed with the selection of special options
+!-M      4  Options selection (2 fields)
+!-M         - Material number where processing starts (integer)
+!-M           (If zero or blank, then checking begins with the 
+!-M           first material)
+!-M         - Material number where processing ends (integer)
+!-M           (If zero or blank, then checking continues to end 
+!-M			      of the file)
+!-M         If Record 4 is left entirely blank, then the entire input
+!-M         file is processed.
+!-M
+!-M Multiple input files can be processed to produce multiple output 
+!-M files by repeating the above input data sequence. The program 
+!-M execution is terminated with a record containing the word DONE.
+!-M 
+!-M In interactive mode operation, the above data is supplied in response 
+!-M to the appropriate query; in graphical mode, via a dialog box.
+!-M 
 !***********************************************************************
 !
 !     TO CUSTOMIZE THIS SOURCE RUN SETMDC
@@ -64,31 +142,6 @@
 !
 !***********************************************************************
 !
-!+++MDC+++
-!...VMS, ANS, WIN, UNX
-!
-!     MAIN PROGRAM FOR NON-WINDOWS IMPLEMENTATION OF PSYCHE
-!
-      PROGRAM PSYCHE
-!
-      IMPLICIT NONE
-!
-!...LWI, DVF, MOD
-!/!
-!/!     MODULE IMPLEMENTATION OF PSYCHE FOR MODLIB AND WINDOWS
-!/!
-!/      MODULE PSYCHE
-!/!
-!/      IMPLICIT NONE
-!/!
-!/      PRIVATE
-!/!
-!/      PUBLIC :: RUN_PSYCHE
-!/      PUBLIC :: PSYCHE_INPUT, PSYCHE_DATA, PSYCHE_SUCCESS
-!...LWI, DVF
-!/      PUBLIC :: IRERUN
-!---MDC---
-!
 !     PSYCHE VERSION NUMBER
 !
 !+++MDC+++
@@ -103,6 +156,9 @@
       INTEGER(KIND=4), PARAMETER :: I4 = SELECTED_INT_KIND(8)
       INTEGER(KIND=4), PARAMETER :: R4 = SELECTED_REAL_KIND(6,37)
       INTEGER(KIND=4), PARAMETER :: R8 = SELECTED_REAL_KIND(15,307)
+!
+!     Half of maximum number of Legendre coefficients
+      INTEGER(KIND=I4), PARAMETER :: MXLG=32
 !
       REAL(KIND=R4), PARAMETER :: FACTOR=1.008665
       REAL(KIND=R4), PARAMETER :: OTHIRD=1./3.
@@ -321,8 +377,8 @@
 !     LEGENDRE COEFFICIENTS
 !
       INTEGER(KIND=I4) :: NCOEF, NMOM,NPOWS
-      REAL(KIND=R4), DIMENSION(33) :: MEAN
-      REAL(KIND=R4), DIMENSION(32) :: VAR
+      REAL(KIND=R4), DIMENSION(MXLG+1) :: MEAN
+      REAL(KIND=R4), DIMENSION(MXLG) :: VAR
       INTEGER(KIND=I4), PARAMETER :: NCOEFMAX=64
       REAL(KIND=R4), DIMENSION(NCOEFMAX) :: F
       REAL(KIND=R4), DIMENSION(NCOEFMAX) :: MOMENT
@@ -581,7 +637,7 @@
 !
       INTEGER(KIND=I4) :: IQUIT
 !
-!     CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: ICHAR
 !
@@ -1136,8 +1192,9 @@
 !
 !     TEST ABUNDANCE WEIGHTED MASS OF A NATURAL ELEMENT
 !
+      IZ=NINT(C1H)/1000
+      AWREL = AWRN(IZ)
       IF(N1H.GT.1) THEN
-         AWREL = AWRN(IZ)
          IF(NISN.EQ.N1H)   THEN
             DIFF = ABS(1.-AWR/AWREL)
             IF(DIFF.GT.EPI4)   THEN
@@ -1312,7 +1369,7 @@
          END DO
       END IF
 !
-!     GET RESONANCEï¿½PARAMETERS
+!     GET RESONANCE PARAMETERS
 !
       CALL RDCONT
       AP = C2H
@@ -2694,13 +2751,15 @@
 !
       IMPLICIT NONE
 !
+      INTEGER(KIND=I4), PARAMETER :: MXEN=3000
+!
       INTEGER(KIND=I4) :: LVT,LTT,LI
       INTEGER(KIND=I4) :: NE,NOFF
       INTEGER(KIND=I4) :: INTT,IP,MTT
       INTEGER(KIND=I4) :: L,N,NN
       REAL(KIND=R4) :: ENN,PO,CON,CONS,YT,PERERR
       REAL(KIND=R4), DIMENSION(4) :: SIGP
-      REAL(KIND=R4), DIMENSION(1500) :: EN,WLT,STOT,SEL
+      REAL(KIND=R4), DIMENSION(MXEN) :: EN,WLT,STOT,SEL
 !
       REAL(KIND=R4), PARAMETER :: WLCONS=3.056E-08
 !
@@ -2731,6 +2790,7 @@
       CALL RDTAB2
       NE = NP2
       NOFF = 0
+      IF(NE.GT.MXEN) STOP 'PSYCHE ERROR - MXEN limit exceeded'
 !
 !     LEGENDRE COEFFICIENTS
 !
@@ -2793,8 +2853,8 @@
                   SEL(NN) = SIGP(2)
                END IF
             END DO
-            CONS = WLCONS*(AWR/(AWR+1.0))**2
          END IF
+         CONS = WLCONS*(AWR/(AWR+1.0))**2
 !
 !        GET TOTAL FROM SCRATCH FILE
 !
@@ -3217,11 +3277,12 @@
       REAL(KIND=R4) :: PK,XY,YN,X3,Y3,X4,Y4,EBAR,GEBAR,FNORM
       REAL(KIND=R4) :: TEST,YIBZ,SSUM,ANS,EAVAIL,PERR
 !
-      INTEGER(KIND=I4), PARAMETER :: NPOUTMAX=100
+      INTEGER(KIND=I4), PARAMETER :: NPOUTMAX=400
+      INTEGER(KIND=I4), PARAMETER :: NMUMAX=201
       CHARACTER(LEN=10), DIMENSION(NPOUTMAX) :: HL
       INTEGER(KIND=I4), DIMENSION(NPOUTMAX) :: LIK,JIK,NIK
       REAL(KIND=R4),DIMENSION(NPOUTMAX) :: VAL
-      REAL(KIND=R4), DIMENSION(201) :: XX,YY,ZZ
+      REAL(KIND=R4), DIMENSION(NMUMAX) :: XX,YY,ZZ
 !
       CHARACTER(LEN=10), PARAMETER :: HE='      E   '
       CHARACTER(LEN=10), PARAMETER :: HS='     SUM  '
@@ -3243,6 +3304,7 @@
       LL = 0
       LCT = L2H
       NK = N1H
+      IF(NK.GT.NPOUTMAX) STOP 'PSYCHE ERROR - NPOUTMAX limit exceeded'
       EMIN = 1.E+10
       EMAX = 0.
       NOG = 1
@@ -3417,6 +3479,8 @@
             DO N=1,NE
                CALL RDTAB2
                NMU = NP2
+               IF(NMU.GT.NMUMAX)
+     &            STOP 'PSYCHE ERROR - NMUMAX limit exceeded'
                E = C22
                IF(E.LT.EMIN) EMIN=E
                IF(E.GT.EMAX) EMAX=E
@@ -3700,13 +3764,15 @@
 !
       IMPLICIT NONE
 !
+      INTEGER(KIND=I4), PARAMETER :: MXEN=3000
+!
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: MTNOW,NK,LP,LF,NE
       INTEGER(KIND=I4) :: NX,IFP,NSPT
       INTEGER(KIND=I4) :: I,N,NTH
       REAL(KIND=R4) :: EGK,AWRX,E,ECM,EBAR,YIELD,TERP,ESIG,SIG3N
-      REAL(KIND=R4), DIMENSION(1500) :: SIG3
+      REAL(KIND=R4), DIMENSION(MXEN) :: SIG3
 !
 !     SAVE CURRENT MT VALUE
 !
@@ -3719,6 +3785,8 @@
       EGK = C1
       LF = L2
       NE = NP
+!
+      IF(NE.GT.MXEN) STOP 'PSYCHE ERROR - MXEN limit exceeded'
 !
 !     SAVE GRID AND TOTAL YIELD
 !
@@ -6071,6 +6139,7 @@
                GFX = 0.0
                GXX = 0.0
                IF(LFW.EQ.0)   THEN
+                  MUF= 0
                   DX = RESPAR(INOW)
                   AJ = RESPAR(INOW+1)
                   AMUN = RESPAR(INOW+2)
@@ -6734,6 +6803,7 @@
 !     CALCULATES MEANS AND VARIANCES FROM MOMENTS
 !     FOR LEGENDRE CHECKING ROUTINE.
 !
+!     Half of maximum number of Legendre coefficients
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: N,ITEST
@@ -6743,14 +6813,14 @@
       INTEGER(KIND=I4) :: IM1,IP1,NP1,IHF4
       INTEGER(KIND=I4) :: I,K
       REAL(KIND=R4) :: RMO1,RMO2,RMO3
-      REAL(KIND=R4), DIMENSION(32) :: MU,NORM,L,Q,SIG
-      REAL(KIND=R4), DIMENSION(32,33) :: A
+      REAL(KIND=R4), DIMENSION(MXLG) :: MU,NORM,L,Q,SIG
+      REAL(KIND=R4), DIMENSION(MXLG,MXLG+1) :: A
 !
       RMO1 = MOMENT(1)
       RMO2 = MOMENT(2)
       RMO3 = MOMENT(3)
 !
-      DO I=1,12
+      DO I=1,MXLG
          MU(I) = 0.
          SIG(I) = 0.
          NORM(I) = 0.
@@ -6759,7 +6829,7 @@
          MEAN(I) = 0.
          VAR(I) = 0.
       END DO
-      MEAN(13) = 0.
+      MEAN(MXLG+1) = 0.
       A = 0.
       ITEST = MOD(NMOM,2)
 !
@@ -6768,6 +6838,7 @@
 !           = -1     EVEN MOMENT REJECTED DUE TO NEGATIVE VARIANCE
 !
       N = NMOM/2
+      IF(N.GT.MXLG) STOP 'PSYCHE ERROR - MXLG limit exceeded'
       MU(1) = RMO1
       Q(1) = RMO1
       L(1) = RMO1
@@ -7420,6 +7491,8 @@
 !
       INTEGER(KIND=I4) :: NI,NF
       INTEGER(KIND=I4) :: N
+      REAL(KIND=R8), DIMENSION(6) :: Y8
+
 !
 !     READ CONT-LIKE RECORD
 !
@@ -7429,13 +7502,16 @@
 !
 !     READ IN DATA TABLE
 !
-      NI = 1
-   50 NF = NI + 5
-      READ(JIN,'(6E11.4,I4,I2,I3,I5)',END=90)                           &       
-     &        (Y(N),N=NI,NF),MATP,MFP,MTP,NSEQP
-      NI = NI + 6
-      IF(NF.LT.NPL)   GO TO 50
-      GO TO 100
+      NI = 0
+   50 READ(JIN,'(6E11.4,I4,I2,I3,I5)',ERR=90,END=90)                    &       
+     &        (Y8(N),N=1,6),MATP,MFP,MTP,NSEQP
+      IF(MATP.LE.0 .OR. MFP.LE.0 .OR. MTP.LE.0) GO TO 90
+      DO N=1,6
+        NI=NI+1
+        Y(NI)=Y8(N)
+        IF(NI.GE.NPL) GO TO 100
+      END DO
+      GO TO 50
 !
 !     UNEXPECTED END OF FILE
 !
@@ -8936,8 +9012,8 @@
 !/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
 !/      ILENP = ILENP2
 !...UNX
-!       CALL GETCL(INPAR)
-!       ilenp = LEN_TRIM(INPAR)
+!/      CALL GETCL(INPAR)
+!/      ilenp = LEN_TRIM(INPAR)
 !...DVF
       CALL GETARG(1,INPAR)
       ilenp = LEN_TRIM(INPAR)

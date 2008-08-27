@@ -1,61 +1,165 @@
+! *
 ! **********************************************************************
 ! *
-! *   PROGRAM FIZCON
-! *
-! *   PROGRAM TO CHECK PROCEDURES AND DATA IN AN ENDF-5 OR -6 FORMAT
-! *   EVALUATED DATA FILE
-! *
-! *
-! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
-! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
-! *                           MODLIB PROJECT
-! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
-! *                           GROUP PARAMETERS.
-! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
-! *                             NAME
-! *                        5. REMOVED FORTRAN LINE CONTROLS FROM OUTPUT
-! *                        6. ADDED COMMAND LINE INPUT TO UNIX AND
-! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
-! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
-! *                           OPTIONS ARE ASSUMED UNLES THIRD
-! *                           PARAMETER IS N.
-! *         VERSION 7.01   APRIL 2005     C.L.DUNFORD
-! *                        1. SET SUCCESS FLAG AFTER RETURN FROM BEGIN
-! *                        2. FIXED VALID LEVEL CHECK FOR AN ISOMER
-! *                        3. FIX SUBSECTION ENERGY RANGE TEST IN CKF9
-! *                        4. CHANGED LOWER LIMIT ON POTENTIAL
-! *                           SCATTERING TEST
-! *                        5. FIXED ERROR IN J-VALUE TEST WHEN L=0 AND I=0      
-! *                        6. ADDED ONE MORE SIGNIFICANT FIGURE TO UNION
-! *                           GRID CHECK AND SUM MUP OUTPUT MESSAGES
-! *                        7. PARTIAL FISSION CROSS SECTIONS MT=19,20,21
-! *                           AND 38 DO NOT REQIRE SECONDARY ENERGY
-! *                           DISTRIBUTIONS IN FILE 5.
-! *                        8. CORRECT PRODUCT TEST FOR ELASTIC SCATTERING       
-! *                        9. MOVE POTENTIAL SCATTERING TEST TO PSYCHE.
-! *         VERSION 7.02   MAY 2005     C.L.DUNFORD
-! *                        1. ONLY ERRORS REPORTED IN OUTPUT
-! *         VERSION 7.03   FEBRUARY 2006     M. HERMAN
-! *                        1. INCREASED DIMENSIONS FOR WORKSPACE AND NUMBER
-! *                           OF GAMMA RAYS
-! *         VERSION 7.04   APRIL 2006     M. HERMAN
-! *                        1. 'LB=8 SECTION MISSING' NOT CONSIDERED AN ERROR 
-! *         VERSION 7.05   Sept  2007     R. Capote
-! *                        1. Can be compiled with GNU g95
-! *
-! *
-! *      REFER ALL COMMENTS AND INQUIRIES TO
-! *
-! *         NATIONAL NUCLEAR DATA CENTER
-! *         BUILDING 197D
-! *         BROOKHAVEN NATIONAL LABORATORY
-! *         P.O. BOX 5000
-! *         UPTON, NY 11973-5000
-! *         USA
-! *
-! *      TELEPHONE           631-344-2902
-! *      E-MAIL              NNDC@BNL.GOV
-! *
+!+++MDC+++
+!...VMS, ANS, WIN, UNX
+!
+!     Main program for non-windows implementation of FIZCON
+!
+      PROGRAM FIZCON
+!
+      IMPLICIT NONE
+!...LWI, DVF, MOD
+!/!
+!/!     Module implementation of FIZCON for MODLIB and WINDOWS
+!/!
+!/      MODULE FIZCON
+!/!
+!/      IMPLICIT NONE
+!/!
+!/      PRIVATE
+!/!
+!/      PUBLIC :: RUN_FIZCON
+!/      PUBLIC :: FIZCON_INPUT, FIZCON_DATA, FIZCON_SUCCESS
+!...LWI, DVF
+!/      PUBLIC :: Default_epsiln, epsiln3, IRERUN
+!---MDC---
+!-T Program FIZCON
+!-P Check procedures and data in evaluated nuclear data files
+!-P in ENDF-5 or ENDF-6 format
+!-V
+!-V         Version 8.00   August  2008     A. Trkov
+!-V                        1. Major updating of the code.
+!-V                        2. Further reduction of non-essential output.
+!-V                        3. Read real variables in double precision to
+!-V                           avoid reporting errors reading small numbers.
+!-V                        4. Implement extended features of the format
+!-V                           endorsed by CSEWG.
+!-V         Version 7.04   April 2006     M. Herman
+!-V                        1. 'LB=8 SECTION MISSING' NOT CONSIDERED AN ERROR 
+!-V         Version 7.03   February 2006     M. Herman
+!-V                        1. Increased dimensions for workspace and number
+!-V                           of gamma rays
+!-V         Version 7.02   May 2005     C.L.Dunford
+!-V                        1. ONLY ERRORS REPORTED IN OUTPUT
+!-V         Version 7.01   April 2005     C.L.Dunford
+!-V                        1. Set success flag after return from begin
+!-V                        2. Fixed valid level check for an isomer
+!-V                        3. Fix subsection energy range test in CKF9
+!-V                        4. changed lower limit on potential
+!-V                           scattering test
+!-V                        5. Fixed error in J-value test WHEN L=0 and I=0      
+!-V                        6. Added one more significant figure to union
+!-V                           grid check and sum mup output messages
+!-V                        7. Partial fission cross sections MT=19,20,21
+!-V                           and 38 do not reqire secondary energy
+!-V                           distributions in file 5.
+!-V                        8. CORRECT PRODUCT TEST FOR ELASTIC SCATTERING       
+!-V                        9. Move potential scattering test to PSYCHE.
+!-V         Version 7.00   October 2004     C.L.Dunford
+!-V                        1. Modified to provide a module for the NEA
+!-V                           MODLIB project
+!-V                        2. Allow energy dependent delayed fission
+!-V                           group parameters.
+!-V                        4. Permit user to supply batch input file
+!-V                           name
+!-V                        5. Removed fortran line controls from output
+!-V                        6. Added command line input to Unix and
+!-V                           windows versions. note: only input and
+!-V                           output file names can be given. default
+!-V                           options are assumed unles third
+!-V                           parameter is N.
+!-V
+!-V
+!-V      Refer all comments and inquiries to
+!-V
+!-V         NATIONAL NUCLEAR DATA CENTER
+!-V         BUILDING 197D
+!-V         BROOKHAVEN NATIONAL LABORATORY
+!-V         P.O. BOX 5000
+!-V         UPTON, NY 11973-5000
+!-V         USA
+!-V
+!-V      TELEPHONE           631-344-2902
+!-V      E-MAIL              NNDC@BNL.GOV
+!-V
+!-M
+!-M FIZCON - Execute the ENDF-file checking process Phase-II
+!-M ========================================================
+!-M
+!-M FIZCON is a program for checking that an evaluated data file 
+!-M has valid data and conforms to recommended procedures. It can 
+!-M recognize the difference between ENDF-6 and ENDF-5 formats 
+!-M and performs its tests accordingly. Some of the tests performed 
+!-M include:
+!-M   1. Data arrays are in increasing energy order,
+!-M   2. Resonance parameter widths add up to the total, 
+!-M   3. Q-values are reasonable and consistent, 
+!-M   4. No required sections are missing and all cover the proper
+!-M      energy range, 
+!-M   5. Secondary distributions are normalized to 1.0, 
+!-M   6. Energy conservation in decay spectra. 
+!-M
+!-M Optional tests can be performed to check that redundant cross 
+!-M sections such as the inelastic cross section has an energy grid
+!-M which is the union of all its components and the cross section 
+!-M values are the sum of the component values at each energy 
+!-M (SUMUP test). Also optionally, algorithms are used to check for 
+!-M possible incorrect entry of data values (Deviant Point test). 
+!-M It is assumed the file being checked has passed the CHECKR 
+!-M program without any errors being detected.
+!-M
+!-M Fortran Logical Units Used:
+!-M     5  Default (keyboard) input 
+!-M     6  Default output (terminal screen)
+!-M    20  Input data file, ENDF format 
+!-M    21  Message file for program checking results  
+!-M 22,23  Temporary paging files for large data arrays 
+!-M 24,25  Temporary files for the SUMUP tests 
+!-M
+!-M Input Requirements:
+!-M In batch mode operation, the user must supply the following 
+!-M control information repeated for each input file to be processed.
+!-M
+!-M Record  Description
+!-M      1  Source ENDF filename 
+!-M      2  Output report filename 
+!-M         (if blank, messages go to standard output file on unit 6) 
+!-M      3  Flag to select standard or customised options
+!-M             Y  Yes, adopt standard options (default)
+!-M             N  No, proceed with the selection of special options
+!-M      4  Options selection (5 fields)
+!-M          - Material number where processing starts (integer)
+!-M            (If zero or blank, then checking begins with the
+!-M            first material)
+!-M          - Material number where processing ends (integer)
+!-M            (If zero or blank, then checking continues to end 
+!-M            of the file) 
+!-M          - Deviant point test control (character)
+!-M             Y  Do the test 
+!-M             N  Do not do the test (default)
+!-M          - SUMUP test control (character) 
+!-M             Y Do the test 
+!-M             N Do not do the test (default)	
+!-M          - Fractional acceptable difference (real) 
+!-M            The floating point number entered here represents the 
+!-M            maximum fractional difference tolerated in an equality 
+!-M            test such as a SUMUP test. If none is entered,
+!-M            the default value is .001 (1/10 of a percent). 
+!-M
+!-M If Record 4 is left entirely blank, then the “default” options are
+!-M executed. Those are to process the entire input file, to omit the 
+!-M SUMUP and Deviant Point tests and to assume an allowed fractional 
+!-M error of .001.
+!-M
+!-M Multiple input files can be processed to produce multiple output 
+!-M files by repeating the above input data sequence. The program 
+!-M execution is terminated with a record containing the word DONE.
+!-M
+!-M In interactive mode operation, the above data is supplied in 
+!-M response to the appropriate query; in graphical mode, via a 
+!-M dialog box.
+!-M
 !***********************************************************************
 !
 !     TO CUSTOMIZE THIS SOURCE RUN SETMDC
@@ -80,37 +184,14 @@
 !
 !***********************************************************************
 !
-!+++MDC+++
-!...VMS, ANS, WIN, UNX
-!
-!     MAIN PROGRAM FOR NON-WINDOWS IMPLEMENTATION OF FIZCON
-!
-      PROGRAM FIZCON
-!
-      IMPLICIT NONE
-!...LWI, DVF, MOD
-!/!
-!/!     MODULE IMPLEMENTATION OF FIZCON FOR MODLIB AND WINDOWS
-!/!
-!/      MODULE FIZCON
-!/!
-!/      IMPLICIT NONE
-!/!
-!/      PRIVATE
-!/!
-!/      PUBLIC :: RUN_FIZCON
-!/      PUBLIC :: FIZCON_INPUT, FIZCON_DATA, FIZCON_SUCCESS
-!...LWI, DVF
-!/      PUBLIC :: Default_epsiln, epsiln3, IRERUN
-!---MDC---
 !
 !     FIZCON VERSION NUMBER
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.04'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.04'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -191,6 +272,9 @@
 !
       TYPE(FIZCON_INPUT) :: FIZCON_DATA
 !
+      INTEGER (KIND=I4) :: NERROR         !  Counted number of errors
+      INTEGER (KIND=I4) :: NWARNG         !  Counted number of warnings
+!
 !     FLAG TO INDICATE WHETHER MULTIPLE INPUT FILES CAN BE SELECTED
 !
       INTEGER(KIND=I4) :: IONEPASS        !  0, YES;  1, NO
@@ -207,6 +291,9 @@
 !
       CHARACTER(LEN=66) :: TLABEL
       INTEGER(KIND=I4) :: LABEL
+!
+      CHARACTER(LEN= 5) :: ASEQ           ! Flag to indicate a sequenced file
+!                                           unsequenced if blank
 !
 !     LIBRARY, VERSION, SUBLIBRARY, MOD NUMBER AND FORMAT OF
 !         MATERIAL BEING PROCESSED
@@ -227,6 +314,7 @@
 !        STA = 0.0, STABLE MATERIAL; STA = 1.0 RADIOACTIVE MATERIAL
 !        ELIS IS THE EXCITATION ENERGY OF THE TARGET NUCLEUS
 !
+      CHARACTER(LEN=11) :: ZSA            ! Symbolic material designation
       REAL(KIND=R4)    :: ZA,AWR,AWI,STA,ELIS
 !
 !     ENERGY LIMITS FOR THE MATERIAL
@@ -383,7 +471,7 @@
 !
 !     STORES INFOMATION ABOUT RADIOACTIVE PRODUCTS FOUND IN FILE 8
 !
-      INTEGER(KIND=I4), PARAMETER :: SZLMF=100
+      INTEGER(KIND=I4), PARAMETER :: SZLMF=200
       INTEGER(KIND=I4) :: NLMF
       INTEGER(KIND=I4), DIMENSION(4,SZLMF) :: LMFS
       INTEGER(KIND=I4) :: NISSEC
@@ -441,7 +529,7 @@
       INTEGER(KIND=I4) :: IPAGEX,ILOWX,IHIGHX
       REAL(KIND=R4) :: XP(PAGESZ)
       INTEGER(KIND=I4) :: IPAGEY,ILOWY,IHIGHY
-      REAL(KIND=R4) :: YP(PAGESZ)
+      REAL(KIND=R8) :: YP(PAGESZ)
 !
 !     SUMUP DATA PAGING ARRAY
 !
@@ -787,12 +875,11 @@
 !
       IF(FIZCON_SUCCESS.EQ.0) THEN
          WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB COMPLETED SUCCESSFULLY'
+         STOP '    FIZCON - Tests completed successfully'
       ELSE
          WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB TERMINATED'
+         STOP '    FIZCON - Tests terminated abnormally!'
       END IF
- 
 !---MDC---
 !
       CONTAINS
@@ -803,7 +890,7 @@
 !
 !     EXECUTES FIZCON PROCESS
 !
-!     CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
       CHARACTER(LEN=80) :: IFIELD
       INTEGER(KIND=I4) :: IQUIT   ! FLAG TO INDICATE WHETHER OR NOT TO EXIT     
@@ -815,6 +902,9 @@
       CHARACTER(LEN=*), PARAMETER :: DASHES = REPEAT('-',80)
 !
 !     OUTPUT PROGRAM IDENTIFICATION
+!
+      NERROR=0
+      NWARNG=0
 !
       FIZCON_SUCCESS = 0
       IF(IMDC.LT.4) THEN
@@ -861,6 +951,7 @@
       IF(MAT.NE.MATO)  THEN    !NEW MATERIAL
          IF(FIZCON_DATA%MATMAX.NE.0.AND.MAT.GT.FIZCON_DATA%MATMAX)      &       
      &                  GO TO 70
+         INEGC  = 0
          NSEQP1 = NSEQP
          MATO = MAT
          MFO = 0
@@ -879,10 +970,11 @@
          REWIND (UNIT=ISCRXY)
          REWIND (UNIT=ISCRU1)
          REWIND (UNIT=ISCRU2)
-         WRITE(NOUT,'(A/3X,A,I5)')  CHAR(12),'CHECK MATERIAL',MAT
-         IF(NOUT.NE.IOUT) THEN
-            IF(IMDC.LT.4) WRITE(IOUT,'(/A)')   '   '
-         END IF
+!        Unconditional printing of material header
+!        WRITE(NOUT,'(A/1X,A,I5)')  CHAR(12),'Check material',MAT
+!        IF(NOUT.NE.IOUT)  THEN
+!           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+!        END IF
       END IF
       IF(MF.NE.MFO)   THEN
          MFO = MF
@@ -897,7 +989,7 @@
 !
 !     NEW SECTION
 !
-   30 MTO = MT
+      MTO = MT
 !
 !     IN INTERACTIVE MODE OUTPUT CURRENT SECTION ID TO TERMINAL
 !
@@ -912,7 +1004,7 @@
 !
    35 IF(IERX.NE.0) THEN
          IERX = 2
-         NSEQB = NSEQ
+         NSEQB= NSEQ
          DO WHILE (MT.NE.0)
             READ(JIN,'(A)',END=20) IFIELD
             READ(IFIELD,'(66X,I4,I2,I3,I5)',ERR=40)  MAT,MF,MT,NSEQ
@@ -980,7 +1072,23 @@
 !
 !     CLOSE FILES
 !
-   70 IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+   70 CONTINUE
+!
+         IF(NERROR.EQ.0 .AND. NWARNG.EQ.0) THEN
+           WRITE(IOUT,'(/A)') ' No problems to report'
+           IF(IOUT.NE.NOUT)
+     &     WRITE(NOUT,'(/A)') ' No problems to report'
+         ELSE
+           WRITE(IOUT,'(/A,2(I6,A))')
+     &           '     Encountered',NERROR,' errors,  '                 &
+     &                             ,NWARNG,' warnings'
+           IF(IOUT.NE.NOUT)                                             &
+     &     WRITE(NOUT,'(A/A,2(I6,A))') CHAR(12),
+     &           '     Encountered',NERROR,' errors,  '                 &
+     &                             ,NWARNG,' warnings'
+         END IF
+!
+      IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
       CLOSE(UNIT=JIN)
       CLOSE(UNIT=ISCRX,STATUS='DELETE')
       CLOSE(UNIT=ISCRY,STATUS='DELETE')
@@ -1005,7 +1113,7 @@
 !
       INTEGER(KIND=I4) :: IQUIT
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: ICHAR
 !
@@ -1360,6 +1468,11 @@
 !     READ AND PARSE FIRST CARD TO SEE IF IT IS A LABEL
 !
       READ(JIN,'(A)',END=90) IFIELD
+!
+!     PARSE FIRST CARD TO SEE IF IT IS SEQUENCED
+!
+      ASEQ = IFIELD(76:80)
+!
       READ(IFIELD,'(A,I4,I2,I3,I5)',ERR=20)  TLABEL,MAT,MF,MT,NSEQ
 !
 !     A LABELED TAPE?
@@ -1539,9 +1652,12 @@
          CASE (458)            !ENERGY RELEASE IN FISSION
             CALL CKS458
 !
+         CASE (460)            !Delayed photon data
+            CALL CKS460
+!
       END SELECT
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE CKF1
 !
 !***********************************************************************
@@ -1563,13 +1679,14 @@
 !
 !     INITIALIZE
 !
+      ZSA ='           '
       ZA = C1H
       AWR = C2H
       LRP = L1H
       LFI = L2H
       NLIB = N1H
       NMOD = N2H
-      IZT = ZA/1000.
+      IZT = IFIX(ZA)/1000
       ZT = IZT
 !
 !     TEST CHARGE-MASS REASONABILITY
@@ -1669,6 +1786,7 @@
       END IF
       DO NC=1,NCD
          CALL RDTEXT
+         IF(NC.EQ.1) ZSA=TEXT(1:11)
          IF(NC.LE.NID)   THEN
             IF(IMDC.LT.4) WRITE(IOUT,'(1X,A66)')   TEXT
          END IF
@@ -1850,6 +1968,44 @@
 !
       RETURN
       END SUBROUTINE CKS458
+!
+!***********************************************************************
+!
+      SUBROUTINE CKS460
+!
+!     Ccheck delayed photon data
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=I4) :: LO,NG,I
+      REAL(KIND=R4) :: YK
+      REAL(KIND=R4) :: SSUM
+      REAL(KIND=R4) :: ET,DELTA,ERBAR
+!
+      IF(LFI.NE.1)  THEN
+         EMESS = 'SECTION SHOULD BE USED FOR FERTILE AND '//            &       
+     &           'FISSIONABLE ISOTOPES ONLY'
+         CALL ERROR_MESSAGE(0)
+      END IF
+!
+      LO = L1H
+      NG = N1H
+!
+!     Discrete representation
+!
+      IF(LO.EQ.1) THEN
+        DO I=1,NG
+          CALL RDTAB1
+        END DO
+!
+!     Continuous representation
+!
+      ELSE IF(LO.EQ.2) THEN
+        CALL RDLIST
+      END IF
+!
+      RETURN
+      END SUBROUTINE CKS460
 !
 !***********************************************************************
 !
@@ -2198,7 +2354,6 @@
       REAL(KIND=R4) :: FL,FLP,AJLO,AJHI
       REAL(KIND=R4) :: ETST0,ETST
       REAL(KIND=R4) :: GN
-      REAL(KIND=R4) :: AC
       REAL(KIND=R4) :: AS,FAS,AJ,FAJ
       REAL(KIND=R4) :: AL,ALTEST,EPTEST
       REAL(KIND=R4), DIMENSION(4) ::  APART
@@ -2761,7 +2916,7 @@
 !
 !     TEST SPIN TO SEE IF INTEGRAL OR HALF-INTEGRAL
 !
-      ISPI = SPIN
+      ISPI = NINT(SPIN)
       DIF = ABS(SPIN-FLOAT(ISPI))
       IF(DIF.NE.0.0.AND.DIF.NE.0.5)   THEN
          EMESS = 'SPIN SHOULD BE INTEGRAL OR HALF INTEGRAL'
@@ -2987,6 +3142,9 @@
          IF(Q.LE.0.)   GO TO 50
       ELSE IF(IQTEST.EQ.7) THEN
          IF(Q.GE.QFLOW.AND.Q.LE.QFHIGH)   GO TO 50
+      ELSE
+!        No explicit test to be performed
+         GO TO 100
       END IF
       WRITE(EMESS,'(A,1PE12.5,A)')                                      &       
      &      'Q=',Q,' IS NOT REASONABLE FOR THIS SECTION'
@@ -3062,7 +3220,8 @@
 !     MT = 1 - 49
 !
       IF(MT.LE.49)   THEN
-         IF(MT.EQ.1.OR.MT.EQ.2.OR.MT.EQ.5) THEN
+!        IF(MT.EQ.1.OR.MT.EQ.2.OR.MT.EQ.5) THEN
+         IF(MT.EQ.1.OR.MT.EQ.2) THEN
             IQTEST = 1
          ELSEIF(MT.EQ.3) THEN
             IQTEST = 2
@@ -3331,7 +3490,7 @@
          IF(NM.GE.2) THEN
             IF(MOD(NM,2).NE.0)   THEN
                WRITE(EMESS,'(A,I3,A)')  'NM=',NM,' SHOULD BE EVEN'
-               CALL ERROR_MESSAGE(NSEQP1)
+               CALL WARNING_MESSAGE(NSEQP1)
             END IF
          END IF
       END IF
@@ -3362,7 +3521,7 @@
 !
    30 IF(ICONT.EQ.1.AND.LCT.EQ.2)  THEN
          EMESS = 'CONTINUUM REACTION RECOMMENDS LCT=1'
-         CALL ERROR_MESSAGE(NSEQP1)
+         CALL WARNING_MESSAGE(NSEQP1)
       ELSE IF(ICONT.EQ.0.AND.LCT.EQ.1)  THEN
          EMESS = 'DISCRETE CHANNEL REACTION REQUIRES LCT=2'
          CALL ERROR_MESSAGE(NSEQP1)
@@ -3386,7 +3545,7 @@
             IF(NPL.GE.2.AND.MOD(NPL,2).NE.0) THEN
                WRITE(EMESS,'(A,I3,A)')                                  &       
      &            'NL=',NPL,' SHOULD BE EVEN'
-               CALL ERROR_MESSAGE(NSEQP1)
+               CALL WARNING_MESSAGE(NSEQP1)
             END IF
             NP = NPL
             CALL TEST6Y (-1.0,1.0,'FL')
@@ -4234,7 +4393,7 @@
          CALL RDTAB1
       END IF
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE CKF7
 !
 !***********************************************************************
@@ -4275,6 +4434,8 @@
 !     PROCESS RADIOACTIVE PRODUCT DATA
 !
       ELSE
+         A = AMOD(C1H,1000.)
+         IA = A
          CALL CHK_RPD(IA)
       END IF
 !
@@ -4385,7 +4546,7 @@
 !
 !     GET Z AND A
 !
-      IZ = IFIX(ZA)/1000.
+      IZ = IFIX(ZA)/1000
       IA = MOD(IFIX(ZA),1000)
 !
 !     PROCESS DECAY MODES AND AVERAGE ENERGIES
@@ -5158,7 +5319,7 @@
          EA = EMASS*(G-1.)
       END IF
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE AVG
 !
 !***********************************************************************
@@ -5853,6 +6014,9 @@
 !        SAVE POINTER TO FILE CONTAINING PRODUCTION DATA
 !
          NLMF = NLMF + 1
+         IF(NLMF.GE.SZLMF) THEN
+            STOP 'FIZCON ERROR - SZLMF limit exceeded'
+         END IF
          IZAP = IFIX(ZAP)
          LMFS(1,NLMF) = MT
          LMFS(2,NLMF) = LMF
@@ -6081,7 +6245,7 @@
 !
       CALL TESTD(1000*MF+MT)
 !
-!     MAKE SURE THAT SECTION DOES NOT APPEAR IN MF = 12
+!     MAKE SURE THAT SECTION DOES NOT APPEAR IN MF = 13
 !
       IPLACE = NPMT + 1
       IF(NPMT.NE.0.AND.MF.EQ.13) THEN
@@ -6175,7 +6339,7 @@
 !
 !     SEE THAT DATA SPAN THE SAME RANGE AS IN FILE 3
 !
-      CALL ISFIL(MF,3,MT,MT)
+      IF(MT.NE.460) CALL ISFIL(MF,3,MT,MT)
 !
 !     MAKE SURE ONLY ONE CONTINUUM
 !
@@ -6481,7 +6645,7 @@
    70    CALL ISFIL(MF,MF1,MT,MT)
       END IF
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE CKF14
 !
 !***********************************************************************
@@ -6866,7 +7030,7 @@
 !
       CALL ISFIL(MF,23,MT,MT)
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE CKF26
 !
 !***********************************************************************
@@ -6937,7 +7101,7 @@
          CALL SUB_CHECK
       END DO
 !
-  100 RETURN
+      RETURN
       END SUBROUTINE CKF28
 !
 !***********************************************************************
@@ -7005,7 +7169,8 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: NIS,NER,LRU,NROO,NIT,LCOMP,NLS,NSRS,NLRS
-      INTEGER(KIND=I4) :: NI,N,NN,I1
+      INTEGER(KIND=I4) :: NLSA,NDIGIT
+      INTEGER(KIND=I4) :: NI,N,NN,I1,NM,NNN
 !
 !     CHECK THAT SECTION IS IN THE INDEX
 !
@@ -7052,7 +7217,7 @@
 !
 !              ENDF-6 FORMAT
 !
-               ELSE
+               ELSE IF(LCOMP.EQ.1) THEN
                   CALL RDCONT
                   NSRS = N1H
                   NLRS = N2H
@@ -7073,6 +7238,25 @@
                         END DO
                      END IF
                   END IF
+!
+!              Compact format representation
+!
+               ELSE IF(LCOMP.EQ.2) THEN
+                 NLSA=N1H
+                 CALL RDLIST
+                 CALL RDCONT
+                 NDIGIT=L1H
+!                If undefined, assume NDIGIT=2 to conform 
+!                with older convention
+                 IF(NDIGIT.LE.0) NDIGIT=2
+                 NNN   =L2H
+                 NM    =N1H
+                 DO I1=1,NM
+!                   CALL RDTEXT
+                    CALL RDINTG(NDIGIT)
+                 END DO
+               ELSE
+!                Invalid LCOMP
                END IF
 !
 !           UNRESOLVED RESONANCE REGION
@@ -7460,7 +7644,7 @@
 !
 !***********************************************************************
 !
-      SUBROUTINE NCTEST(I)
+      SUBROUTINE NCTEST(II)
 !
 !     CHECK ENERGY GRIDS OF ALL NC-TYPE SUB-SUBSECTIONS IN ONE
 !     SUBSECTION OF FILE 31 OR FILE 33.  IN ADDITION, IF LTY=0,
@@ -7469,7 +7653,7 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: I
+      INTEGER(KIND=I4) :: II,I
 !
       INTEGER(KIND=I4) :: LTY,NCI,MTI
       INTEGER(KIND=I4) :: KMIN,KMAX,NMIN,NMAX,NCXM
@@ -7479,7 +7663,7 @@
 !
 !     INITIALIZE ON FIRST PASS
 !
-      IF(I.EQ.1) E2LAST = 0.
+      IF(II.EQ.1) E2LAST = 0.
 !
 !     CHECK THAT E1 IS LESS THAN E2
 !
@@ -7541,7 +7725,7 @@
          END IF
          MTR = MTR + 1
          LOC = LOC + 2
-         MTI = Y(LOC) + .1
+         MTI = IFIX(Y(LOC) + .1)
          MTRITE(MTR) = MTI
          CALL TESTS(1000*MF+MTI,ISET)
          IF(ISET.GE.3)   THEN
@@ -8228,7 +8412,7 @@
 !
       INTEGER(KIND=I4) :: N0
 !
-!     CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: IACTION,IDX,IMTT,ITS,MTT,MTL,IADV,NREC,NTM,K1
@@ -8784,7 +8968,7 @@
       INTEGER(KIND=I4) :: NTOTS
       REAL(KIND=R4), DIMENSION(NTOTS) :: AX,BY
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
       INTEGER(KIND=I4) :: KP,NST,NUS,NPART
       INTEGER(KIND=I4) :: NBEG,NPR
@@ -8969,7 +9153,7 @@
 !
       IMPLICIT NONE
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: INIT,J0,J1,LL
@@ -9658,7 +9842,7 @@
 !
       INTEGER(KIND=I4) :: MF1,MF2
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFL,MFU
@@ -9830,7 +10014,7 @@
 !
       INTEGER(KIND=I4) :: MF0,MT1,MT2,NMISS
 !
-!      CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFTL,MFTH,NNL,NDUM,MTT,MFT1,ISET
@@ -11168,6 +11352,41 @@
 !
 !***********************************************************************
 !
+      SUBROUTINE RDINTG(NDIGIT)
+!
+!     Process a compact covariance format record
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=I4) :: NDIGIT,NROW,KIJ,II,JJ
+      PARAMETER (NROW=18)
+      DIMENSION KIJ(NROW)
+      IF (NDIGIT.EQ.2)
+     & READ (JIN,20,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+      IF (NDIGIT.EQ.3)
+     & READ (JIN,30,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+      IF (NDIGIT.EQ.4)
+     & READ (JIN,40,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+      IF (NDIGIT.EQ.5)
+     & READ (JIN,50,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+      IF (NDIGIT.EQ.6)
+     & READ (JIN,60,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+      GO TO 100
+   20 FORMAT (2I5, 1X, 18I3, 1X, I4, I2, I3, I5)
+   30 FORMAT (2I5, 1X, 13I4, 3X, I4, I2, I3, I5)
+   40 FORMAT (2I5, 1X, 11I5, I4, I2, I3, I5)
+   50 FORMAT (2I5, 1X, 9I6, 1X, I4, I2, I3, I5)
+   60 FORMAT (2I5, 8I7, I4, I2, I3, I5)
+!
+!     UNEXPECTED END OF FILE
+!
+   90 IERX = 2
+!
+  100 RETURN
+      END SUBROUTINE RDINTG
+!
+!***********************************************************************
+!
       SUBROUTINE RDLIST
 !
 !     PROCESS A LIST RECORD
@@ -11425,29 +11644,42 @@
 !
 !***********************************************************************
 !
-      SUBROUTINE ERROR_MESSAGE(ISEQ)
+      SUBROUTINE WARNING_MESSAGE(JSEQ)
 !
 !     ROUTINE TO OUTPUT ERROR MESSAGE IN STANDARD FORM
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: ISEQ
+      INTEGER(KIND=I4) :: JSEQ
 !
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
+!       Material printout delimiter
+      CHARACTER(LEN=1) :: CHFF
+!     CHFF=CHAR(12)                        ! Form-feed
+      CHFF=CHAR(10)                        ! Double line-feed
 !
 !     PUT OUT ERROR MESSAGE
 !
+      IF(MATO.NE.MATERR) THEN
+        WRITE(NOUT,'(A/1X,3A,I5)') CHFF
+     &       ,'Check material ',ZSA,' MAT',MATO
+        IF(NOUT.NE.IOUT)  THEN
+           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+        END IF
+      END IF
       IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
-         WRITE(NOUT,'(//A,I4,A,I2,A,I3   )') '  ERROR(S) FOUND IN MAT=',&       
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  WARNING(S)     IN MAT=',  &
      &          MATO,', MF=',MFO,', MT=',MTO
          MATERR = MATO
          MFERR = MFO
          MTERR = MTO
       END IF
-      IF(ISEQ.NE.0) THEN
-         WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',ISEQ
+      IF(JSEQ.NE.0) THEN
+         WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
+!        Increment count for warnings
+         NWARNG=NWARNG+1
       ELSE
          IF(EMESS.EQ.' ') THEN
             NEMES = 1
@@ -11456,7 +11688,56 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
+      RETURN
+      END SUBROUTINE WARNING_MESSAGE
 !
+!***********************************************************************
+!
+      SUBROUTINE ERROR_MESSAGE(JSEQ)
+!
+!     ROUTINE TO OUTPUT ERROR MESSAGE IN STANDARD FORM
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=I4) :: JSEQ
+!
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!
+      INTEGER(KIND=I4) :: NEMES
+!       Material printout delimiter
+      CHARACTER(LEN=1) :: CHFF
+!     CHFF=CHAR(12)                        ! Form-feed
+      CHFF=CHAR(10)                        ! Double line-feed
+!
+!     PUT OUT ERROR MESSAGE
+!
+      IF(MATO.NE.MATERR) THEN
+        WRITE(NOUT,'(A/1X,3A,I5)') CHFF
+     &       ,'Check material ',ZSA,' MAT',MATO
+        IF(NOUT.NE.IOUT)  THEN
+           IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
+        END IF
+      END IF
+!
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+         WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  ERROR(S) FOUND IN MAT=',  &
+     &          MATO,', MF=',MFO,', MT=',MTO
+         MATERR = MATO
+         MFERR = MFO
+         MTERR = MTO
+      END IF
+      IF(JSEQ.NE.0) THEN
+         WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
+!        Increment count for errors
+         NERROR=NERROR+1
+      ELSE
+         IF(EMESS.EQ.' ') THEN
+            NEMES = 1
+         ELSE
+            NEMES = LEN_TRIM(EMESS)
+         END IF
+         WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
+      END IF
       RETURN
       END SUBROUTINE ERROR_MESSAGE
 !
@@ -11561,8 +11842,8 @@
 !/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
 !/      ILENP = ILENP2
 !...UNX
-!     CALL GETCL(INPAR)
-!     ilenp = LEN_TRIM(INPAR)
+!/      CALL GETCL(INPAR)
+!/      ilenp = LEN_TRIM(INPAR)
 !...DVF
       CALL GETARG(1,INPAR)
       ilenp = LEN_TRIM(INPAR)

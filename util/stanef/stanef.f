@@ -1,79 +1,6 @@
-!
+! *
 ! **********************************************************************
 ! *
-! *     PROGRAM STANEF
-! *
-! *     STANEF WILL CONVERT TO STANDARD FORM AN ENDF-5 OR ENDF-6
-! *     FORMAT DATA FILE. THE FUNCTIONS INCLUDE CREATING OR MODIFYING
-! *     THE TAPE ID RECORD, CREATING A DIRECTORY IN MT=451, CREATING
-! *     OR MODIFYING SPECIAL HOLERITH ID RECORD IN FREE TEXT,
-! *     CONVERTING INTEGER AND FLOATING POINT FIELDS TO STANDARD FORM,
-! *     RESEQUENCING THE MATERIALS AND CONVERSION TO BINARY
-! *
-! *         VERSION 7.0    OCTOBER 2004     C.L.DUNFORD
-! *                        1. MODIFIED TO PROVIDE A MODULE FOR THE NEA
-! *                           MODLIB PRODULE
-! *                        2. ALLOW ENERGY DEPENDENT DELAYED FISSION
-! *                           GROUP PARAMETERS.
-! *                        3. CONSTRUCT PROPER ZSA SYMBOL FOR FIRST
-! *                           FIELD ON RECORD 5 OF 1-451
-! *                        4. PERMIT USER TO SUPPLY BATCH INPUT FILE
-! *                           NAME
-! *                        5. ADDED COMMAND LINE INPUT TO UNIX AND
-! *                           WINDOWS VERSIONS. NOTE: ONLY INPUT AND
-! *                           OUTPUT FILE NAMES CAN BE GIVEN. DEFAULT
-! *                           OPTIONS ARE ASSUMED UNLESS THIRD
-! *                           PARAMETER IS N.
-! *         VERSION 7.01   FEBRUARY 2005     C.L.DUNFORD
-! *                        1. SET SUCCESS FLAG WHEN DONE
-! *                        2. ADD NEW ELEMENT rOENTGENIUM (Rg)
-! *                        3. CORRECTED SYMBOL GENERATION FOR SECOND
-! *                            THIRD METASTABLE STATE (KELLETT, NEA)
-! *                        4. ADDED SYMBOL NN FOR NEUTRON IN SYMBOL
-! *                            GENERATION AND XX FOR UNNAMED ELEMENTS
-! *                        5. CORRECTIONS FOR FACT THAT SOME COMPILERS
-! *                            DO NOT RECOGNIZE THE INTRINSIC FUNCTION
-! *                            JFIX
-! *         VERSION 7.02   FEBRUARY 2006     M.HERMAN & A.TRKOV  
-! *                        1. SEVERAL DIMENSIONS INCREASED               
-! *                        2. EXTENDED MF=32 PROCESSING
-! *
-! *
-! *      REFER ALL COMMENTS AND INQUIRIES TO
-! *
-! *         NATIONAL NUCLEAR DATA CENTER
-! *         BUILDING 197D
-! *         BROOKHAVEN NATIONAL LABORATORY
-! *         P.O. BOX 5000
-! *         UPTON, NY 11973-5000
-! *         USA
-! *
-! *      TELEPHONE           631-344-2902
-! *      E-MAIL              NNDC@BNL.GOV
-! *
-!***********************************************************************
-!
-!     TO CUSTOMIZE THIS SOURCE RUN SETMDC
-!        ANS  -  ANSI STANDARD BATCH MODE VERSION
-!        VMS  -  COMMAND MODE FOR VMS OPERATING SYSTEM
-!        WIN  -  COMMAND MODE FOR PC USING DIGITAL VISUAL FORTRAN
-!        UNX  -  COMMAND MODE FOR UNIX USING LAHEY FORTRAN
-!        DVF  -  GRAPHICAL MODE FOR PC USING DIGITAL VISUAL FORTRAN
-!        LWI  -  GRAPHICAL MODE FOR UNIX USING LAHEY WINTERACTER
-!        MOD  -  MODULE FOR THE MODLIB PROJECT OF NEA WPEC
-!
-!     THE "ANS" VERSION MEETS F95 STANDARDS FOR FIXED OR FREE FORMAT
-!       SOURCE AND USES A FILE FOR NON-INTERACTIVE INPUT (BATCH MODE)
-!     THE "VMS" VERSION WILL COMPILE WITH EITHER THE FORTRAN-77 OR
-!       FORTRAN-90 VMS COMPILER
-!     THE "DVF" VERSION HAS A WINDOWS GRAPHICAL INTERFACE. IT WILL
-!       COMPILE WITH THE DIGITAL VISUAL FORTRAN COMPILER RUNNING
-!       UNDER WINDOWS
-!     THE "LWI" VERSION HAS A X-WINDOWS GRAPHICAL INTERFACE. IT WILL
-!       COMPILE WITH THE LAHEY FORTRAN COMPILER WITH WINTERACTER
-!       RUNNING UNDER UNIX
-!
-!***********************************************************************
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
@@ -98,14 +25,146 @@
 !...LWI, DVF
 !/        PUBLIC :: IRERUN
 !---MDC---
+!-T Program STANEF
+!-P Convert an ENDF file into standard form
+!-V         Version 8.00   August  2008     A. Trkov
+!-V                        1. Fix minor bugs.
+!-V                        2. Implement extended features of the format
+!-V                           endorsed by CSEWG.
+!-V         Version 7.02   FEBRUARY 2006     M.HERMAN & A.TRKOV  
+!-V                        1. SEVERAL DIMENSIONS INCREASED               
+!-V                        2. EXTENDED MF=32 PROCESSING
+!-V         Version 7.01   February 2005     C.L.Dunford
+!-V                        1. Set success flag when done
+!-V                        2. Add new element Roentgenium (Rg)
+!-V                        3. Corrected symbol generation for second
+!-V                            third metastable state (Kellett, NEA)
+!-V                        4. added symbol nn for neutron in symbol
+!-V                            generation and xx for unnamed elements
+!-V                        5. Corrections for fact that some compilers
+!-V                            do not recognize the intrinsic function
+!-V                            JFIX
+!-V         Version 7.0    October 2004     C.L.Dunford
+!-V                        1. Modified to provide a module for the NEA
+!-V                           MODLIB module
+!-V                        2. allow energy dependent delayed fission
+!-V                           group parameters.
+!-V                        3. Construct proper ZSA symbol for first
+!-V                           field on record 5 of 1-451
+!-V                        4. Permit user to supply batch input file
+!-V                           name
+!-V                        5. Added command line input to Unix and
+!-V                           windows versions. NOTE: only input and
+!-V                           output file names can be given. Default
+!-V                           options are assumed unless third
+!-V                           parameter is N.
+!-V
+!-V
+!-V      REFER ALL COMMENTS AND INQUIRIES TO
+!-V
+!-V         NATIONAL NUCLEAR DATA CENTER
+!-V         BUILDING 197D
+!-V         BROOKHAVEN NATIONAL LABORATORY
+!-V         P.O. BOX 5000
+!-V         UPTON, NY 11973-5000
+!-V         USA
+!-V
+!-V      TELEPHONE           631-344-2902
+!-V      E-MAIL              NNDC@BNL.GOV
+!-V
+!-M
+!-M STANEF - Convert ENDF-files to standard form
+!-M ============================================
+!-M 
+!-M STANEF is designed to perform bookkeeping operations on a data 
+!-M file containing one or more material evaluations in ENDF format. 
+!-M These operations include:
+!-M  1.  Creation or modification of a ``tape ID'' record,
+!-M  2.  Creation or update of the directory in MT=451,
+!-M  3.  Create or modify special hollerith ID records in MT=451 
+!-M      (ENDF-6 only),
+!-M  4.  Resequencing,
+!-M  5.  Conversion of integer and floating point fields to standard 
+!-M      format,
+!-M  6.  Creation of a binary (ENDF alternate format) file.
+!-M 
+!-M Fortran Logical Units Used:
+!-M     5  Default (keyboard) input 
+!-M     6  Default output (terminal screen)
+!-M    20  Input data file, ENDF format 
+!-M    21  Output ENDF file  
+!-M    22  Temporary paging files for large data arrays 
+!-M 
+!-M Input Requirements:
+!-M In batch mode operation, the user must supply the following 
+!-M control information repeated for each input file to be processed.
+!-M
+!-M Record  Description
+!-M      1  Input file specification 
+!-M      2  Output file specification 
+!-M      3  Tape label 
+!-M         - Tape label number (integer up to 4 digits)
+!-M            <0  means tape has no label
+!-M            =0  means copy old label (default)
+!-M            >0  means the value is used as the tape label number 
+!-M         - Up to 66 character text for ENDF tape label 
+!-M      4  Flag to select standard or customised options
+!-M             Y  Yes, adopt standard options (default)
+!-M             N  No, proceed with the selection of special options
+!-M      5  Options selection (4 fields) 
+!-M         - Mode of output file (integer) 
+!-M             0  Character format output  (default)
+!-M             1  Binary format (fields 2 and 3 ignored) 
+!-M         - Update directory and special hollerith (character) 
+!-M             Y execute this option (default)
+!-M             N do not execute this option
+!-M         - Numeric field standardization (character)
+!-M             Y execute this option  (default)
+!-M             N do not execute this option
+!-M         - Numeric field standardization for 2/151(character)
+!-M             Y  execute this option 
+!-M             N do not execute this option	
+!-M         If record 5 is left entirely blank, then the “default” 
+!-M         options are executed. Those are character format output 
+!-M         file, update MT=451 and standardize numeric fields.
+!-M 
+!-M Multiple input files can be processed to produce multiple output 
+!-M files by repeating the above input data sequence. The program 
+!-M execution is terminated with a record containing the word DONE.
+!-M 
+!-M In interactive mode operation, the above data is supplied in 
+!-M response to the appropriate query; in graphical mode, via a 
+!-M dialog box.
+!***********************************************************************
+!     TO CUSTOMIZE THIS SOURCE RUN SETMDC
+!        ANS  -  ANSI STANDARD BATCH MODE VERSION
+!        VMS  -  COMMAND MODE FOR VMS OPERATING SYSTEM
+!        WIN  -  COMMAND MODE FOR PC USING DIGITAL VISUAL FORTRAN
+!        UNX  -  COMMAND MODE FOR UNIX USING LAHEY FORTRAN
+!        DVF  -  GRAPHICAL MODE FOR PC USING DIGITAL VISUAL FORTRAN
+!        LWI  -  GRAPHICAL MODE FOR UNIX USING LAHEY WINTERACTER
+!        MOD  -  MODULE FOR THE MODLIB PROJECT OF NEA WPEC
+!
+!     THE "ANS" VERSION MEETS F95 STANDARDS FOR FIXED OR FREE FORMAT
+!       SOURCE AND USES A FILE FOR NON-INTERACTIVE INPUT (BATCH MODE)
+!     THE "VMS" VERSION WILL COMPILE WITH EITHER THE FORTRAN-77 OR
+!       FORTRAN-90 VMS COMPILER
+!     THE "DVF" VERSION HAS A WINDOWS GRAPHICAL INTERFACE. IT WILL
+!       COMPILE WITH THE DIGITAL VISUAL FORTRAN COMPILER RUNNING
+!       UNDER WINDOWS
+!     THE "LWI" VERSION HAS A X-WINDOWS GRAPHICAL INTERFACE. IT WILL
+!       COMPILE WITH THE LAHEY FORTRAN COMPILER WITH WINTERACTER
+!       RUNNING UNDER UNIX
+!
+!***********************************************************************
 !
 !     STANEF VERSION NUMBER
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '7.02'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -271,7 +330,7 @@
 !
       IMPLICIT NONE
 !
-!     CHARACTER(LEN=*), INTRINSIC :: TRIM
+      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, ICHAR
 !
@@ -957,22 +1016,6 @@
 !
 !     BUILD Z-S-A FOR CARD 5
 !
-      IF(NSUB.NE.12) THEN
-         ZSA = ' '
-         ZZA = ZA
-         IZA = IFIX(ZZA+.001)
-         IA = MOD(IZA,1000)
-         IZ = IZA/1000
-         IZ1 = MIN0((IZ+1),IELM)
-         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
-         IF(IMETA.GE.3) THEN
-            ZSA(11:11) = 'O'
-         ELSE IF(IMETA.GE.2) THEN
-            ZSA(11:11) = 'N'
-         ELSE IF(IMETA.GE.1) THEN
-           ZSA(11:11) = 'M'
-         END IF
-      END IF
 !
 !     READ THIRD CONT RECORD IF ENDF-6 OR LATER
 !
@@ -990,6 +1033,22 @@
                NVER = 5
          END SELECT
          NSUB = 10
+      END IF
+      IF(NSUB.NE.12) THEN
+         ZSA = ' '
+         ZZA = ZA
+         IZA = IFIX(ZZA+.001)
+         IA = MOD(IZA,1000)
+         IZ = IZA/1000
+         IZ1 = MIN0((IZ+1),IELM)
+         WRITE(ZSA,'(I3,3A,I3)') IZ,'-',ELEMNT(IZ1),'-',IA
+         IF(IMETA.GE.3) THEN
+            ZSA(11:11) = 'O'
+         ELSE IF(IMETA.GE.2) THEN
+            ZSA(11:11) = 'N'
+         ELSE IF(IMETA.GE.1) THEN
+           ZSA(11:11) = 'M'
+         END IF
       END IF
 !
 !     DIRECTORY NOT REVISED SO COPY NEXT CONT RECORD
@@ -1579,6 +1638,18 @@
 !
          CASE (458)
             CALL CANT(C1,C2,L1,L2,N1,N2)
+!
+!     ENERGY RELEASE IN FISSION
+!
+         CASE (460)
+            IF(L1H.EQ.1) THEN
+              NE=N1H
+              DO N=1,NE
+                CALL CANT1(C1,C2,L1,L2,N1,N2)
+              END DO
+            ELSE
+              CALL CANT(C1,C2,L1,L2,N1,N2)
+            END IF
 !
       END SELECT
 !
@@ -3130,7 +3201,7 @@
       REAL(KIND=R4) :: X
 !
       INTEGER(KIND=I4), INTRINSIC :: IFIX, IABS
-      REAL(KIND=R4), INTRINSIC :: ABS, LOG10
+      REAL(KIND=R4), INTRINSIC :: ABS
 !
       CHARACTER(LEN=1) :: CSIGN
       INTEGER(KIND=I4) :: IPOW
@@ -3159,9 +3230,19 @@
          FNUM = DBLE(X)*(10.0D00**(-IPOW))
          IPOW = IABS(IPOW)
 !
+!        CHECK THE EXPONENT
+!
+         IF(IPOW.GE.1000)   THEN
+            STOP 'STANEF ERROR - Exponent > 999'
+!
+!        THREE DIGIT EXPONENT
+!
+         ELSE IF(IPOW.GE.100)   THEN
+            WRITE(CX,'(F7.4,A1,I3)')  FNUM,CSIGN,IPOW
+!
 !        TWO DIGIT EXPONENT
 !
-         IF(IPOW.GE.10)   THEN
+         ELSE IF(IPOW.GE.10)   THEN
             WRITE(CX,'(F8.5,A1,I2)')  FNUM,CSIGN,IPOW
 !
 !        ONE DIGIT EXPONENT
@@ -3277,8 +3358,8 @@
 !/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
 !/      ILENP = ILENP2
 !...UNX
-!       CALL GETCL(INPAR)
-!       ilenp = LEN_TRIM(INPAR)
+!/      CALL GETCL(INPAR)
+!/      ilenp = LEN_TRIM(INPAR)
 !...DVF
       CALL GETARG(1,INPAR)
       ilenp = LEN_TRIM(INPAR)
