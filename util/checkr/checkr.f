@@ -1,9 +1,32 @@
-!
+! *
 ! **********************************************************************
+! *
+!+++MDC+++
+!...VMS, ANS, WIN, UNX
+!
+!     Main program for Non-Windows implementation of CHECKR
+!
       PROGRAM CHECKR
-!-
-!-P   Program to check format validity of an ENDF-5 or -6 format
-!-P   evaluated data file
+!
+      IMPLICIT NONE
+!...LWI, DVF, MOD
+!/!
+!/!     Module implementation of CHECKR for MODLIB and Windows
+!/!
+!/      MODULE CHECKR
+!/!
+!/      IMPLICIT NONE
+!/!
+!/      PRIVATE
+!/!
+!/      PUBLIC :: RUN_CHECKR
+!/      PUBLIC :: CHECKR_INPUT, CHECKR_DATA, CHECKR_SUCCESS
+!...LWI, DVF
+!/      PUBLIC :: IRERUN
+!---MDC---
+!-T Program CHECKR
+!-P Check format validity of an ENDF-5 or -6 format
+!-P evaluated data file
 !-V
 !-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Major updating of the code and removal of
@@ -87,8 +110,20 @@
 !-M CHECKR - Execute the ENDF-file checking process
 !-M ===============================================
 !-M
-!-M The CHECKR code performs basic checking of ENDF files to ensure
-!-M formal correctness and completeness of the file.
+!-M CHECKR is a program for checking that an evaluated data file 
+!-M conforms to the ENDF format in terms of formal correctness and
+!-M completeness of the file. It can recognize the difference 
+!-M between ENDF-6 and ENDF-5 formats and performs its tests 
+!-M accordingly. Integer control fields are checked to see that 
+!-M ENDF procedural limits on those fields are not violated. 
+!-M To the extent possible, fatal format errors are trapped to 
+!-M prevent unwanted termination of the program. Any file that 
+!-M passes through CHECKR without error messages conforms to the 
+!-M ENDF format. CHECKR will operate on file that have not been 
+!-M processed with STANEF. This has been done to facilitate 
+!-M processing by eliminating error messages in CHECKR, which 
+!-M would be automatically fixed by STANEF, which requires that 
+!-M the input file be in legal ENDF format.
 !-M
 !-M Special features
 !-M - CHECKR checks the header record. If the sequence number is
@@ -96,30 +131,47 @@
 !-M   columns 76-80. In such case, errors and warnings are reported
 !-M   with respect to the absolute record number in the file.
 !-M - The number of sections in an ENDF file are not restricted.
-!-M   However, for practical reasons the limit in CHECTR is 1000.
+!-M   However, for practical reasons the limit in CHECKR is 1000.
 !-M   If more sections are present, the checking for the presence
 !-M   of missing sections is skipped.
 !-M - Similarly, if the dictionalry section is missing, the checking
 !-M   for the presence of missing sections is skipped.
-!-M   
+!-M 
+!-M Fortran Logical Units Used:
+!-M     5  Default (keyboard) input 
+!-M     6  Default output (terminal screen)
+!-M    20  Input data file, ENDF format 
+!-M    21  Message file for program checking results  
+!-M 
 !-M Input instructions:
-!-M   INFIL  = input ENDF file specification
-!-M   OUTFIL = output list file specification
-!-M   IW    = N  (all materials in file processed)
-!-M         = Y  (specify a material or range of materials)
+!-M In batch mode operation, the user must supply the following control 
+!-M information repeated for each input file to be processed.
 !-M
-!-M   if IW is YES, then another record is required
-!-M
-!-M   MATMIN  = Material number of first or only material
-!-M   MATMAX  = Material number of last material or a range
-!-M
-!-M   A comma or a dash between material numbers indicates a range
-!-M
-!-M        MATMIN  Selects this material and all others with a larger
-!-M                material number
-!-M       -MATMAX  Selects this material and all others with a smaller
-!-M                material number
-!-M
+!-M Record  Description
+!-M      1  Source ENDF filename 
+!-M      2  Output report filename 
+!-M         (if blank, messages go to standard output file on unit 6) 
+!-M      3  Flag to select standard or customised options
+!-M             Y  Yes, adopt standard options (default)
+!-M             N  No, proceed with the selection of special options
+!-M      4  Options selection (2 fields)
+!-M         - Material number where processing starts (integer) 
+!-M          (If zero or blank, then checking begins with the first 
+!-M          material) 
+!-M         - Material number where processing ends (integer) 
+!-M          (If zero or blank, then checking continues to end 
+!-M          of the file) 
+!-M         If record 4 is left entirely blank, then the entire input 
+!-M         file is processed.
+!-M 
+!-M Multiple input files can be processed to produce multiple output 
+!-M files by repeating the above input data sequence. The program 
+!-M execution is terminated with a record containing the word DONE.
+!-M 
+!-M In interactive mode operation, the above data is supplied in 
+!-M response to the appropriate query; in graphical mode, via a 
+!-M dialog box.
+!-M 
 !***********************************************************************
 !
 !     To customize this source run SETMDC
@@ -143,29 +195,6 @@
 !       running under Unix
 !
 !***********************************************************************
-!+++MDC+++
-!...VMS, ANS, WIN, UNX
-!
-!     Main program for Non-Windows implementation of CHECKR
-!
-!     PROGRAM CHECKR
-!
-      IMPLICIT NONE
-!...LWI, DVF, MOD
-!/!
-!/!     Module implementation of CHECKR for MODLIB and Windows
-!/!
-!/      MODULE CHECKR
-!/!
-!/      IMPLICIT NONE
-!/!
-!/      PRIVATE
-!/!
-!/      PUBLIC :: RUN_CHECKR
-!/      PUBLIC :: CHECKR_INPUT, CHECKR_DATA, CHECKR_SUCCESS
-!...LWI, DVF
-!/      PUBLIC :: IRERUN
-!---MDC---
 !
 !     CHECKR Version Number
 !
@@ -319,6 +348,7 @@
       INTEGER (KIND=I4) :: MATERR         ! Material number of last error detected
       INTEGER (KIND=I4) :: MFERR          ! File number of last error detected
       INTEGER (KIND=I4) :: MTERR          ! Section number of last error detected
+      INTEGER (KIND=I4) :: MERWR          ! Flag for last printout (error/warning)
 !
       CHARACTER(LEN=11) :: ZSA            ! Symbolic material designation
       REAL    (KIND=R4) :: ZA             ! 1000*Z + A of material currently being processed
@@ -429,6 +459,7 @@
 !
       NERROR=0
       NWARNG=0
+      MERWR =0
 !
       CHECKR_SUCCESS = 0
       IF(IMDC.LT.4) THEN
@@ -560,7 +591,7 @@
 !     CLOSE FILES
 !
    50 CONTINUE
-
+!
          IF(NERROR.EQ.0 .AND. NWARNG.EQ.0) THEN
            WRITE(IOUT,'(/A)') ' No problems to report'
            IF(IOUT.NE.NOUT)
@@ -574,7 +605,7 @@
      &           '     Encountered',NERROR,' errors,  '                 &
      &                             ,NWARNG,' warnings'
          END IF
-
+!
       IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
       CLOSE(UNIT=JIN)
 !
@@ -1290,7 +1321,7 @@
 !     READ CONTROL CARD, HEAD EXPECTED
 !
    40 CALL RDHEAD(I)
-      IF(IERX.ge.1) GO TO 50
+      IF(IERX.GE.1) GO TO 50
       SELECT CASE (I)
 !********ITS A HEAD CARD, OK
          CASE (1)
@@ -1734,7 +1765,7 @@
             ELSE
                WRITE(EMESS,'(A,I5)')                                    &       
      &                '    MATERIAL NUMBER SHOULD BE',MATCHK
-               CALL ERROR_MESSAGE(0)
+               CALL WARNING_MESSAGE(0)
             END IF
          END IF
       END IF
@@ -4399,7 +4430,7 @@
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
       INTEGER(KIND=I4) :: LB,LT,NE,NE2,NPM,NTT,NEC
       INTEGER(KIND=I4) :: I1,I3,NL
-      INTEGER(KIND=I4) :: NNN,NM
+      INTEGER(KIND=I4) :: NDIGIT,NNN,NM
       REAL(KIND=R4) :: AP
 !
       LRF = L2H
@@ -4592,6 +4623,13 @@
 !
          CALL RDLIST
          CALL RDCONT
+         NDIGIT=L1H
+         IF(NDIGIT.EQ.0) THEN
+           WRITE(EMESS,'(A)') 'NDIGIT UNDEFINED'
+           CALL WARNING_MESSAGE(NSEQP1)
+         ELSE
+           CALL TEST1(NDIGIT,2,6,'NDIGIT',0)
+         END IF
          NNN=L2H
          NM =N1H
          DO I1=1,NM
@@ -6009,11 +6047,11 @@
          WRITE(EMESS,'(2A,I6,A,I6,A,I6)')                               &       
      &               KXXX,' =',N,' OUT OF RANGE',NA,' -',NB
          CALL ERROR_MESSAGE(NSEQP1)
-         IF(IERR.GT.1) THEN
+c        IF(IERR.GT.1) THEN
            IERX = IERR
-         ELSE
-           IERX = 1
-         END IF
+c        ELSE
+c          IERX = 1
+c        END IF
       END IF
 !
       RETURN
@@ -6659,7 +6697,7 @@
 !
       SUBROUTINE WARNING_MESSAGE(JSEQ)
 !
-!     ROUTINE TO OUTPUT ERROR MESSAGE IN STANDARD FORM
+!     ROUTINE TO OUTPUT WARNING MESSAGE IN STANDARD FORM
 !
       IMPLICIT NONE
 !
@@ -6673,7 +6711,7 @@
 !     CHFF=CHAR(12)                        ! Form-feed
       CHFF=CHAR(10)                        ! Double line-feed
 !
-!     PUT OUT ERROR MESSAGE
+!     PUT OUT WARNING MESSAGE
 !
       IF(MATO.NE.MATERR) THEN
         WRITE(NOUT,'(A/1X,3A,I5)') CHFF
@@ -6682,7 +6720,8 @@
            IF(IMDC.LT.4) WRITE(IOUT,'(/A)')  '   '
         END IF
       END IF
-      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR .OR.
+     &   MERWR.NE.1) THEN
          WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  WARNING(S)     IN MAT=',  &
      &          MATO,', MF=',MFO,', MT=',MTO
          MATERR = MATO
@@ -6705,6 +6744,7 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
+      MERWR = 1
       RETURN
       END SUBROUTINE WARNING_MESSAGE
 !
@@ -6736,7 +6776,8 @@
         END IF
       END IF
 !
-      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR) THEN
+      IF(MATO.NE.MATERR.OR.MFO.NE.MFERR.OR.MTO.NE.MTERR .OR.
+     &   MERWR.NE.2) THEN
          WRITE(NOUT,'(//A,I4,A,I2,A,I3 )') '  ERROR(S) FOUND IN MAT=',  &
      &          MATO,', MF=',MFO,', MT=',MTO
          MATERR = MATO
@@ -6759,6 +6800,7 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
+      MERWR = 2
       RETURN
       END SUBROUTINE ERROR_MESSAGE
 !
@@ -6907,4 +6949,3 @@
 !...LWI, DVF, MOD
 !/      END MODULE CHECKR
 !---MDC---
- 
