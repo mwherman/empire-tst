@@ -1,3 +1,7 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-27 12:23:26 $
+Ccc   * $Id: fis_io.f,v 1.3 2008-08-27 12:23:26 Capote Exp $
+C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
 C parameters independent of energy.
@@ -61,7 +65,7 @@ C
       INTEGER i, ib, ibar, ka, kz, m, nr,  nrmod, nrsm
       INTEGER INT,iz,ia,in
       CHARACTER*50 filename
-      DOUBLE PRECISION rmiu, gam 
+      DOUBLE PRECISION rmiu
       INTEGER Find_Extrem
       DATA chstar/70*'='/  
       REAL*8 centr,  heigth,  width(NFPARAB), ucentr, uheigth, uwidth
@@ -401,8 +405,7 @@ C--------pairing at saddles according to RIPL-2
          DELtafis(ib) = 14./SQRT(A(Nnuc))
 
 C--------EMPIRE-3.0-dependence
-
-         CALL EGSMsys(atil,gamma,del,delp,nnuc)
+	   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
 
          GAMmafis(ib) = Gamma
 C--------multiplier of atil

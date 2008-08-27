@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-25 06:11:30 $
-Ccc   * $Id: input.f,v 1.269 2008-08-25 06:11:30 herman Exp $
+Ccc   * $Date: 2008-08-27 12:23:26 $
+Ccc   * $Id: input.f,v 1.270 2008-08-27 12:23:26 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -6227,8 +6227,7 @@ C Local variables
 C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma,
-     &                 pi2, qn, tcrt, uexc, xr, gam, ddob, esh, dap, dam,
-     &                 atilnoz
+     &                 pi2, qn, tcrt, uexc, xr, ddob, esh, dap, dam
 
       REAL FLOAT
       DOUBLE PRECISION FSHELL
@@ -6273,6 +6272,10 @@ C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
 C
 C     Skipping header
       READ (24,'(///)')
+C     ! reading from the EGSM_ldp.dat file
+C 100 READ (24,'(2I4,9x,F7.3,E13.5,67x,f8.4,9x,f8.4)',END = 200) 
+C    &           nixz, nixa, qn, dob, aroc
+C     ! reading from the ldp.dat file
   100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200) 
      &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
       izar = nixz*1000 + nixa
@@ -6301,12 +6304,9 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   atiln = arogc/asys
 C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
                ELSEIF (ADIv.EQ.0.0D0) THEN
-c                 del = 0.d0
-c                 delp = 12./SQRT(A(nnuc))
-c                 IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
-c                 IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
+
                   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-c                 gamma = gam/A(Nnuc)**0.333333
+
                   atil = ap1*A(nnuc) + ap2*a23
                   tcrt = 0.567*delp
                   ar = atil*(1.0 + SHC(nnuc)*gamma)
@@ -6321,7 +6321,8 @@ c                 gamma = gam/A(Nnuc)**0.333333
                   asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
 C                 asys = atil*atilnoz(INT(Z(nnuc))) !apply elemental normalization factor
                   atiln =  aroc/asys
-                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+C                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+                  ATIlnor(nnuc) = atiln
                ENDIF
 C              Make values available to the level density routines
                ROPar(1,nnuc) = aroc*ATIlnor(nnuc)/atiln !divide by atiln to recover input norm. factor

@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-08-25 06:11:31 $
-Ccc   * $Id: lev-dens.f,v 1.61 2008-08-25 06:11:31 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-08-27 12:23:28 $
+Ccc   * $Id: lev-dens.f,v 1.62 2008-08-27 12:23:28 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -512,7 +512,7 @@ C
 C Local variables
 C
       REAL*8 aj, ar, defit, dshi, dshif, dshift, ellq, exkk,
-     &                 pi2, rocumd, rocumu, rocumul, rolev, gam, 
+     &                 pi2, rocumd, rocumu, rocumul, rolev, 
      &                 rotemp, xr
       CHARACTER*7 caz
       CHARACTER*13 fname
@@ -2719,7 +2719,7 @@ C Local variables
 C
       REAL*8 aaj, accn, ar, desteppp, excn1, mm2, r0, cigor,
      &                 rotemp, shcf, u, xmax, xr, mompar, momort, temp,
-     &                 vibbf12, vibbfdt, def2, stab, aj, gam, qigor
+     &                 vibbf12, vibbfdt, def2, stab, aj, qigor
       REAL FLOAT
       INTEGER ia, iff, in, ix, iz, jj, kk, nr
       INTEGER INT
@@ -2829,16 +2829,11 @@ C     ENDIF
       ENDIF
 
 
-C     ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
-
+      ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
       ATIl = ATIl*Rafis
 
-
-
       TCRt =0.567*DELp
-
       ar = ATIl*(1.0 + shcf*GAMma)
-
 
       if (iff.eq.2) then
         CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-2.0D0,u,ar,
@@ -2857,9 +2852,6 @@ C-----------dependent factor
       ELSE
          bsq = 1.0 + 0.4*(cigor - 1.0)**2
       ENDIF
-
-      ATIl = AP1*A(Nnuc) + bsq*AP2*A(Nnuc)**0.666667
-      ATIl = ATIl*Rafis
 
       TCRt =0.567*DELp
       ar = ATIl*(1.0 + shcf*GAMma)
@@ -3303,7 +3295,7 @@ C      frm=1.774  Chi**2=11072
 C-----
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      REAL*8 atil, ap1, ap2, gam, gamma, del, delp
+      REAL*8 ap1, ap2, gam, gamma, del, delp
 
       del = 0.d0
       delp = 12./SQRT(A(nnuc))
