@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-29 15:03:23 $
-Ccc   * $Id: lev-dens.f,v 1.63 2008-08-29 15:03:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-08-29 18:31:06 $
+Ccc   * $Id: lev-dens.f,v 1.64 2008-08-29 18:31:06 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -3305,11 +3305,9 @@ C-----
       ap2 = -0.94508E-01
       gam =  0.61083
       gamma = gam/A(Nnuc)**0.333333
-
-C     atil = ap1*A(nnuc) + ap2*A(Nnuc)**0.666667
-C     IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return  
-C     ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
-C     ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
+      IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return  
+      ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
+      ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
 
       RETURN
       END
