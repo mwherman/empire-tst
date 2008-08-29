@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-27 12:23:26 $
-Ccc   * $Id: input.f,v 1.270 2008-08-27 12:23:26 Capote Exp $
+Ccc   * $Date: 2008-08-29 15:03:23 $
+Ccc   * $Id: input.f,v 1.271 2008-08-29 15:03:23 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -274,7 +274,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (2.19 default)
@@ -1621,13 +1621,30 @@ c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            WRITE (6,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
      &          ia, SYMb(nnuc)
-           WRITE (6,99010) (EX(i,nnuc),
-     &       (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,12),i = 1,NEX(nnuc))
+           DO i = 1, NEX(nnuc)           
+             rocumul = 0.D0           
+             DO j = 1, NLW
+               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
+             ENDDO
+             WRITE (6,99010) EX(i,nnuc), rocumul*EXP(ARGred),
+     &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
+           ENDDO
+
            WRITE (6,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnuc)
-           WRITE (6,99010) (EX(i,nnuc),
-     &       (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,12),i = 1,NEX(nnuc))
+           DO i = 1, NEX(nnuc)           
+             rocumul = 0.D0           
+             DO j = 1, NLW
+               rocumul = rocumul + RO(i,j,2,Nnuc)
+             ENDDO
+             WRITE (6,99010) EX(i,nnuc), rocumul*EXP(ARGred),
+     &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
+           ENDDO
          ENDIF
       ENDIF
 C
@@ -1874,16 +1891,33 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
               ELSE
                 WRITE (6,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnur)
-                WRITE (6,99010) (EX(i,nnur),
-     &           (RO(i,j,1,nnur)*EXP(ARGred),j = 1,12),i = 1,NEX(nnur))
+     &          ia, SYMb(nnur)    
+                DO i = 1, NEX(nnur)           
+                  rocumul = 0.D0           
+                  DO j = 1, NLW
+                    rocumul = rocumul + RO(i,j,1,nnur)
+                  ENDDO
+                  WRITE (6,99010) EX(i,nnur), rocumul*EXP(ARGred),
+     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
+                ENDDO
+
                 WRITE (6,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnur)
-                WRITE (6,99010) (EX(i,nnur),
-     &           (RO(i,j,2,nnur)*EXP(ARGred),j = 1,12),i = 1,NEX(nnur))
+                DO i = 1, NEX(nnur)           
+                  rocumul = 0.D0           
+                  DO j = 1, NLW
+                    rocumul = rocumul + RO(i,j,2,nnur)
+                  ENDDO
+                  WRITE (6,99010) EX(i,nnur), rocumul*EXP(ARGred),
+     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
+                ENDDO
             ENDIF
-            ENDIF
+          ENDIF
          ELSE
             ia = INT(A(nnur))
             iz = INT(Z(nnur))
@@ -6303,8 +6337,8 @@ C--------------Gilbert-Cameron (no explicit collective effects)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   atiln = arogc/asys
 C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
-               ELSEIF (ADIv.EQ.0.0D0) THEN
-
+C              ELSEIF (ADIv.EQ.0.0D0) THEN
+               ELSE
                   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
 
                   atil = ap1*A(nnuc) + ap2*a23
@@ -6319,14 +6353,27 @@ C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
   105             econd = 1.5*acrt*delp**2/pi2 
                   uexc = qn + del - econd
                   asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
-C                 asys = atil*atilnoz(INT(Z(nnuc))) !apply elemental normalization factor
+
+                  if(atilnoz(INT(Z(nnuc))) .gt.0.d0)
+     >               asys = atil*atilnoz(INT(Z(nnuc))) !apply elemental normalization factor
+
                   atiln =  aroc/asys
-C                 ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
-                  ATIlnor(nnuc) = atiln
                ENDIF
-C              Make values available to the level density routines
-               ROPar(1,nnuc) = aroc*ATIlnor(nnuc)/atiln !divide by atiln to recover input norm. factor
+
+
+               IF(ATIlnor(nnuc).EQ.0) THEN
+                  ATIlnor(nnuc) = atiln
+               ELSE
+                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+               ENDIF
+
+C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc)
+               ROPar(1,nnuc) = asys*ATIlnor(nnuc)
                ROPar(3,nnuc) = del
+
+C              Make values available to the level density routines
+C              ROPar(1,nnuc) = aroc*ATIlnor(nnuc)/atiln !divide by atiln to recover input norm. factor
+C              ROPar(3,nnuc) = del
 C--------------Print resulting level density parameters
                IF (FITlev.GT.0.0D0) THEN
                   WRITE (6,*) ' '
