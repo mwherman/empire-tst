@@ -7763,11 +7763,11 @@ exit} \
     $site_3_0.menu90 add command \
         -command {exec $editor ../source/Makefile &} -label {Edit Makefile} 
     $site_3_0.menu90 add cascade \
-        -menu "$site_3_0.menu90.menu77" -command {} -label {Kalman option} 
+        -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.menu77 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_4_0.menu77 add radiobutton \
         -value 0 -variable EXPDAT -label {No exp. data} 
     $site_4_0.menu77 add radiobutton \
@@ -7825,7 +7825,7 @@ set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS
     set site_3_0 $top.m88
     menu $site_3_0.menu92 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu92 add command \
         -command {exec {cp skel.inp
 $file.inp &}} -label {Create input} 
@@ -7854,7 +7854,7 @@ $file.inp &}} -label {Create input}
     set site_3_0 $top.m88
     menu $site_3_0.menu93 \
         -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu93 add command \
         -command {exec xterm -e ../scripts/run $file $mat &} \
         -label {Full run} 
@@ -7902,11 +7902,11 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add cascade \
-        -command {} -label {KALMAN for} 
+        -menu "$site_3_0.menu93.men87" -command {} -label {KALMAN for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men87 \
         -activebackground #f9f9f9 -activeforeground black -foreground black \
-        -tearoff 0 
+        -tearoff 1 
     $site_4_0.men87 add command \
         -command {exec  xterm -e ../scripts/kalman  $file 1 $mat $EXPDAT} \
         -label {Total MT=1} 
