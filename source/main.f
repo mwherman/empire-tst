@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-29 15:03:24 $
-Ccc   * $Id: main.f,v 1.188 2008-08-29 15:03:24 Capote Exp $
+Ccc   * $Date: 2008-08-29 23:17:22 $
+Ccc   * $Id: main.f,v 1.189 2008-08-29 23:17:22 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -167,7 +167,7 @@ C         ENDIF
      &      int(Z(0)), SYMb(0), int(A(0))       
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
      &       '  Elastic   ','  Reaction  ','  Fission   ',
-     &         (preaction(nnuc),nnuc=1,min(i,NDNUC))
+     &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
 C       WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') NNUcd+3,
 C    &      int(Z(0)), SYMb(0), int(A(0))
 C       WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
@@ -1897,7 +1897,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
      &     TOTcsfis, CSPrd(1), csinel,
-     &     (csprnt(nnuc),nnuc=1,min(i,NDNUC))
+     &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 C     WRITE((),'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
 C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
 C    &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
