@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-08-29 18:31:05 $
-Ccc   * $Id: input.f,v 1.273 2008-08-29 18:31:05 herman Exp $
+Ccc   * $Date: 2008-09-03 01:32:48 $
+Ccc   * $Id: input.f,v 1.274 2008-09-03 01:32:48 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -6396,18 +6396,25 @@ C--------------Calculate sum for the average normalization factor
          atilave = 1.0
       ENDIF
       IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
-     &    WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
+     &   WRITE (6,'(''               Average exp/sys'',2x,F8.5)')
      &               atilave
          WRITE(6,'(1X)')
          WRITE(6,'(3X,''Nucleus                   final. nor. '')')
          WRITE(6,'(1X)')
       DO nnuc = 1, NNUct
-         IF(ATIlnor(nnuc).EQ.0) ATIlnor(nnuc) = 1.0
-         IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
-     &   WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
-     &      INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &      ATIlnor(nnuc) 
+            IF(ATIlnor(nnuc).LE.0.) then
+              WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+     &        INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &        ATIlnoz(INT(Z(nnuc))) 
+	        ATIlnor(nnuc) = 1.d0  
+	      ELSE
+              WRITE(6,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+     &        INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
+     &        ATIlnor(nnuc) 
+	      ENDIF
+
       ENDDO
+
       END
 C
 C
