@@ -1,8 +1,15 @@
+#FFLAGS =  -O2
+#----GNU gfortran FORTRAN compiler
+FC     =  gfortran
+#----flags for production compilation with gfortran
+#FFLAGS = -O3
+
 #---- pfg90 compiler
 #FC     =  pgf90
 #FFLAGS =  -O2
+
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
@@ -16,9 +23,9 @@ FC     =  g77
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for optimalization using ifort 
-FFLAGS = -arch pn4 -O3 -axPW   
+#FFLAGS = -arch pn4 -O3 -axPW   
 #FFLAGS = -arch pn4 -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
@@ -42,6 +49,19 @@ FFLAGS = -arch pn4 -O3 -axPW
 #FFLAGS = -g --chk
 #----flag for Lahey/Fujitsu parallel
 #FFLAGS = --parallel
+
+#===== M a c ==================================
+#---- gfortran Mac  compiler
+#FC     =  gfortran
+
+#----GNU g95 FORTRAN Mac compiler
+#FC     =  /sw/bin//g95
+#----flags for production compilation with g95
+#FFLAGS = -O
+#----flags for detailed warnings
+#FFLAGS = -Wall
+
+
 
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
