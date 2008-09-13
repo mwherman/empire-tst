@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:35 $
-Ccc   * $Id: thora.f,v 1.6 2007-09-03 14:20:35 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:05 $
+Ccc   * $Id: thora.f,v 1.7 2008-09-13 16:17:05 Capote Exp $
       SUBROUTINE THORA(IOUT)
 C
 C     R. Capote, March 2005
@@ -35,6 +35,8 @@ C
         ENDTIM = ENDTIM +  (ENDDAY-BEGDAY)*86400.
         DIFTIM=(ENDTIM-BEGTIM)/60.
         DIFTI1=(DIFTIM-INT(DIFTIM))*60.
+        WRITE(IOUT,1003) time(1:2),time(3:4),time(5:6),
+     >                   DATE(7:8),DATE(5:6),DATE(1:4)
         WRITE(IOUT,1002) INT(DIFTIM),NINT(DIFTI1)
       ENDIF
 
@@ -42,6 +44,9 @@ C
  1001 FORMAT
      >(/22X,'Start time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
  1002 FORMAT(1X,' Calculation time: ',I3,' min ',I2,' s')
+ 1003 FORMAT
+     >(/22X,'End   time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
+
+
 C====================================================================
       END
-

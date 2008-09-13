@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:32 $
-Ccc   * $Id: fitbarrier.f,v 1.4 2008-08-18 07:31:32 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:03 $
+Ccc   * $Id: fitbarrier.f,v 1.5 2008-09-13 16:17:03 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
@@ -24,7 +24,7 @@ C     Functions
 
       rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
       smiu = DSQRT(0.5d0*rmiu)
-      IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
+C     IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
 	nrsm = NRSmooth(Nnuc)
 
 c-----Generating numerical barrier starting from parabolas' parameters

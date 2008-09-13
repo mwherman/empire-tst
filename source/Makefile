@@ -1,6 +1,6 @@
 #FFLAGS =  -O2
 #----GNU gfortran FORTRAN compiler
-FC     =  gfortran
+# FC     =  gfortran
 #----flags for production compilation with gfortran
 #FFLAGS = -O3
 
@@ -23,9 +23,9 @@ FC     =  gfortran
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for optimalization using ifort 
-#FFLAGS = -arch pn4 -O3 -axPW   
+FFLAGS = -arch pn4 -O3 -axPW -ipo  
 #FFLAGS = -arch pn4 -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
@@ -73,7 +73,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
             fitbarrier.o      fis_io.o          plot-zvv.o
 
-OBJE =      subecis03.o systematics.o
+OBJE =      subecis06m.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
 	$(FC) -o $@ $(OBJF) $(OBJE)

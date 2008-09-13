@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-09-03 01:32:48 $
-Ccc   * $Id: input.f,v 1.274 2008-09-03 01:32:48 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:03 $
+Ccc   * $Id: input.f,v 1.275 2008-09-13 16:17:03 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -151,6 +151,7 @@ C--------neutralize tuning factors and OMP normalization factors
             DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
+            NRSmooth(nnuc) = 5
             DO j = 1, NDLW
                ISIsom(j,nnuc) = 0
             ENDDO

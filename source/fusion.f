@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:32 $
-Ccc   * $Id: fusion.f,v 1.73 2008-08-18 07:31:32 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:03 $
+Ccc   * $Id: fusion.f,v 1.74 2008-09-13 16:17:03 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -36,11 +36,10 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ctmp1,
-     &                 ctmp2, e1tmp, ecms, einlab, el, ener, p1, parcnj,
+      DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, 
+     &                 e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 stmp1, stmp2, sum, wparg, xmas_npro, sel(NDLW),
-     &                 xmas_ntrg, wf
+     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, wf
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
@@ -49,7 +48,7 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
-     &        nang
+     &        nang, itmp2, kk
       INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
@@ -130,6 +129,9 @@ C--------Here the old calculated files should be read
      &' Transmission coefficients for incident channel read from file: '
                WRITE (6,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
+            NLW = maxlw
+   	        WRITE(6,*) ' Maximum CN spin limited to ', NLW
+	        WRITE(6,*) 
             GOTO 300
          ENDIF
 C
@@ -187,9 +189,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             SINlcc=0.d0
             SINl  =0.d0
             SINlcont =0.d0
-         
- 	    NLW   = i - 1  ! RCN, Aug 2008
-
+			NLW = i - 1 ! RCN Aug 2008
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -276,6 +276,7 @@ C-----------end of E2
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
          ENDIF
+		 NLW = NDLW
 C--------END of calculation of fusion cross section
 C--------for photon induced reactions
   100    RETURN
@@ -436,10 +437,10 @@ C                 Only Legendre elastic expansion is needed
 C-----------------WINDOWS
                   ctmp = 'copy ccm.CS INCIDENT.CS >NUL'
                   iwin = PIPE(ctmp)
-                  ctmp = 'copy ccm.TLJ INCIDENT.TLJ'
+                  ctmp = 'copy ccm.TLJ INCIDENT.TLJ >NUL'
                   iwin = PIPE(ctmp)
 C                 Only Legendre elastic expansion is needed
-                  ctmp = 'copy ccm.LEG INCIDENT.LEG'
+                  ctmp = 'copy ccm.LEG INCIDENT.LEG >NUL'
                   iwin = PIPE(ctmp)
                ENDIF
 C--------------Inelastic cross section (incident.ics)
@@ -465,12 +466,18 @@ C--------------Angular distribution (incident.ang)
   230          OPEN (47,FILE = 'INCIDENT.ANG',STATUS = 'UNKNOWN')
                WRITE (47,'(A80)') rstring
                DO i = 1, ND_nlv
-                  READ (45,'(5x,F5.1,A1,4x,i5)',END = 240) stmp1, ctmp1,
-     &                  nang
-                  READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
+C-----------------checking the correspondence of the excited states
+C                 READ (45,'(5x,F5.1,A1,4x,i5)',END = 240) stmp1, ctmp1,
+C    &                  nang
+C                 READ (45,'(5x,F5.1,A1,i4,i5)',END = 240) stmp1, ctmp1,
+C    &                  itmp2, nang
+                  READ (45,'(i5,6x,i4,i5)',END = 240) 
+     &                 istat1, itmp2, nang
+C                 READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
+                  READ (46,'(i5)',END = 235) istat2
 C-----------------checking the correspondence of the excited states for even-even targets
-                  IF ( .not.lodd .AND. 
-     &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
+                  IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   
+C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
                     WRITE (6,*)
      &            ' WARNING: DWBA and CCM state order do not coincide'
                      STOP
@@ -482,7 +489,7 @@ C-----------------checking the correspondence of the excited states for even-eve
   235             BACKSPACE 45
                   READ (45,'(A80)',END = 240) rstring
  2351             WRITE (47,'(A80)') rstring
-                  DO j = 1, nang
+                  DO j = 1, itmp2*nang ! ecis06
                      READ (45,'(A80)',END = 240) rstring
                      READ (46,'(A80)',END = 236) rstring
   236                WRITE (47,'(A80)') rstring
@@ -492,7 +499,7 @@ C-----------------checking the correspondence of the excited states for even-eve
                CLOSE (46,STATUS = 'DELETE')
                CLOSE (47)
 C--------------Experimental angular distribution (incident.ang)
-               IF( ICAlangs.GT.0) THEN
+               IF( ICAlangs.GT.0) THEN   ! To be updated for ecis06 
                  OPEN (45,FILE = 'dwba.EXP',STATUS = 'OLD',ERR = 260)
                  READ (45,'(A80)',END = 260) rstring
                  OPEN (46,FILE = 'ccm.EXP',STATUS = 'OLD',ERR = 260)
@@ -547,12 +554,9 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (6,*) ' FATAL: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
-         
-         NLW   = maxlw  ! RCN, Aug 2008
-	 
-	   WRITE(6,*) ' Maximum CN spin limited to ', NLW
-	   WRITE(6,*)
-
+         NLW = maxlw
+	     WRITE(6,*) ' Maximum CN spin limited to ', NLW
+	     WRITE(6,*) 
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
@@ -570,6 +574,8 @@ C--------calculation of h.i. transmission coefficients for fusion
          CALL HITL(stl)
          if(NLW.GT.0) maxlw = min(NLW,maxlw)
          NLW = maxlw
+	     WRITE(6,*) ' Maximum CN spin limited to ', NLW
+	     WRITE(6,*) 
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
@@ -580,7 +586,8 @@ C--------channel spin min and max
          mul = smax - smin + 1.0001
          CSFus = 0.0
          DO ip = 1, 2     ! over parity
-          DO j = 1, NDLW !over compound nucleus spin
+C         DO j = 1, NDLW !over compound nucleus spin
+          DO j = 1, NLW !over compound nucleus spin
             sum = 0.0
             DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
@@ -610,6 +617,33 @@ C
 C-----Moving incident channel results to TL/ directory
 C
       IF (KTRlom(Npro,Ntrg).GT.0) THEN
+C       only for ecis06, Processing INCIDENT.ANG
+C-------Angular distribution (incident.ang)
+        OPEN (45,FILE = 'INCIDENT.ANG',STATUS = 'OLD',ERR = 270 )
+        READ (45,'(A80)',END = 270) rstring
+        OPEN (47,FILE = 'tmp.ang',STATUS = 'UNKNOWN')
+        WRITE (47,'(A80)') rstring
+        DO i = 1, max(ND_nlv,1)
+          READ (45,'(12x,i3,i5)',END = 270) itmp2, nang
+          BACKSPACE 45
+          READ (45,'(A80)',END = 270) rstring
+          WRITE (47,'(A80)') rstring
+          DO j = 1, itmp2*nang ! ecis06
+            READ (45,'(i4,A80)',END = 270) kk,rstring
+            if(kk.eq.0) WRITE (47,'(A80)') rstring
+          ENDDO
+        ENDDO
+  270   CLOSE (45,STATUS = 'DELETE')
+        CLOSE (47)
+        IF (IOPsys.EQ.0) THEN
+C---------LINUX
+          ctmp = 'mv tmp.ang INCIDENT.ANG'
+          iwin = PIPE(ctmp)
+        ELSE
+          ctmp = 'move tmp.ang INCIDENT.ANG >NUL'
+          iwin = PIPE(ctmp)
+      ENDIF
+
       IF (IOPsys.EQ.0) THEN
 C--------LINUX
          ctmp = 'mv INCIDENT.CS '//ctldir//ctmp23//'.CS'
@@ -1206,41 +1240,41 @@ C
       INTEGER*4 PIPE
       IF (Iopsys.EQ.0) THEN
 C--------LINUX
-         ctmp = 'cp ecis03.cs  '//Outname(1:Length)//'.CS '
+         ctmp = 'cp ecis06.cs  '//Outname(1:Length)//'.CS '
          iwin = PIPE(ctmp)
          IF(ICAlangs.GT.0) THEN
-           ctmp = 'cp ecis03.exp  '//Outname(1:Length)//'.EXP '
+           ctmp = 'cp ecis06.exp  '//Outname(1:Length)//'.EXP '
            iwin = PIPE(ctmp)
           ENDIF
          IF (Iret.EQ.1) RETURN
-         ctmp = 'cp ecis03.tlj '//Outname(1:Length)//'.TLJ'
+         ctmp = 'cp ecis06.tlj '//Outname(1:Length)//'.TLJ'
          iwin = PIPE(ctmp)
          IF (Iret.EQ.2) RETURN
-         ctmp = 'cp ecis03.ang '//Outname(1:Length)//'.ANG'
+         ctmp = 'cp ecis06.ang '//Outname(1:Length)//'.ANG'
          iwin = PIPE(ctmp)
-         ctmp = 'cp ecis03.leg '//Outname(1:Length)//'.LEG'
+         ctmp = 'cp ecis06.leg '//Outname(1:Length)//'.LEG'
          iwin = PIPE(ctmp)
          IF (Iret.EQ.3) RETURN
-         ctmp = 'cp ecis03.ics '//Outname(1:Length)//'.ICS'
+         ctmp = 'cp ecis06.ics '//Outname(1:Length)//'.ICS'
          iwin = PIPE(ctmp)
       ELSE
 C--------WINDOWS
-         ctmp = 'copy ecis03.cs  '//Outname(1:Length)//'.CS  >NUL'
+         ctmp = 'copy ecis06.cs  '//Outname(1:Length)//'.CS  >NUL'
          iwin = PIPE(ctmp)
          IF(ICAlangs.GT.0) THEN
-           ctmp = 'cp ecis03.exp  '//Outname(1:Length)//'.EXP  >NUL'
+           ctmp = 'cp ecis06.exp  '//Outname(1:Length)//'.EXP  >NUL'
            iwin = PIPE(ctmp)
           ENDIF
          IF (Iret.EQ.1) RETURN
-         ctmp = 'copy ecis03.tlj '//Outname(1:Length)//'.TLJ >NUL'
+         ctmp = 'copy ecis06.tlj '//Outname(1:Length)//'.TLJ >NUL'
          iwin = PIPE(ctmp)
          IF (Iret.EQ.2) RETURN
-         ctmp = 'copy ecis03.ang '//Outname(1:Length)//'.ANG >NUL'
+         ctmp = 'copy ecis06.ang '//Outname(1:Length)//'.ANG >NUL'
          iwin = PIPE(ctmp)
-         ctmp = 'copy ecis03.leg '//Outname(1:Length)//'.LEG >NUL'
+         ctmp = 'copy ecis06.leg '//Outname(1:Length)//'.LEG >NUL'
          iwin = PIPE(ctmp)
          IF (Iret.EQ.3) RETURN
-         ctmp = 'copy ecis03.ics '//Outname(1:Length)//'.ICS >NUL'
+         ctmp = 'copy ecis06.ics '//Outname(1:Length)//'.ICS >NUL'
          iwin = PIPE(ctmp)
       ENDIF
       END

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-29 23:17:22 $
-Ccc   * $Id: main.f,v 1.189 2008-08-29 23:17:22 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:04 $
+Ccc   * $Id: main.f,v 1.190 2008-09-13 16:17:04 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -249,7 +249,8 @@ C-----
         iang = 0
         DO iang1 = 1, NANgela
 C----------To use only those values corresponding to EMPIRE grid for elastic XS
-           READ (45,'(7x,E12.5)',END = 1400) ftmp
+C          READ (45,'( 7x,E12.5)',END = 1400) ftmp
+           READ (45,'(11x,E12.5)',END = 1400) ftmp    ! ecis06
            if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
            iang = iang +1
            elada(iang) = ftmp
@@ -300,7 +301,8 @@ C--------------Add direct transition to the spectrum
                  READ (45,*,END = 1400)     ! Skipping level identifier line
                  iang = 0
                  DO iang1 = 1, NANgela
-                   READ (45,'(7x,E12.5)',END = 1400) ftmp
+C                  READ (45,'( 7x,E12.5)',END = 1400) ftmp
+                   READ (45,'(11x,E12.5)',END = 1400) ftmp
 C------------------To use only those values corresponding to EMPIRE grid for inelastic XS
                    if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                    iang = iang +1

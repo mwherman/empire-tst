@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-27 12:23:26 $
-Ccc   * $Id: fis_io.f,v 1.3 2008-08-27 12:23:26 Capote Exp $
+Ccc   * $Date: 2008-09-13 16:17:03 $
+Ccc   * $Id: fis_io.f,v 1.4 2008-09-13 16:17:03 Capote Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -70,10 +70,11 @@ C
       DATA chstar/70*'='/  
       REAL*8 centr,  heigth,  width(NFPARAB), ucentr, uheigth, uwidth
 
-      IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
+
       iz=INT(Z(Nnuc))
       ia=INT(A(Nnuc))
 
+C     IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
       nrsm = NRSmooth(Nnuc)
 
       DO i = 1, NFPARAB
@@ -675,6 +676,7 @@ C
       ENDDO
       hnorm=1.d0
 
+      IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
       nrsm = NRSmooth(Nnuc)
 
       OPEN (79,FILE = 'FISSION.INP',STATUS = 'OLD',ERR = 400)
