@@ -35,6 +35,8 @@
 !-V                           avoid reporting errors reading small numbers.
 !-V                        4. Implement extended features of the format
 !-V                           endorsed by CSEWG.
+!-V                        5. Include corrections to problems identified
+!-V                           by A. Koning.
 !-V         Version 7.04   April 2006     M. Herman
 !-V                        1. 'LB=8 SECTION MISSING' NOT CONSIDERED AN ERROR 
 !-V         Version 7.03   February 2006     M. Herman
@@ -54,7 +56,7 @@
 !-V                        7. Partial fission cross sections MT=19,20,21
 !-V                           and 38 do not reqire secondary energy
 !-V                           distributions in file 5.
-!-V                        8. CORRECT PRODUCT TEST FOR ELASTIC SCATTERING       
+!-V                        8. Correct product test for elastic scattering       
 !-V                        9. Move potential scattering test to PSYCHE.
 !-V         Version 7.00   October 2004     C.L.Dunford
 !-V                        1. Modified to provide a module for the NEA
@@ -874,10 +876,10 @@
 !     TERMINATE JOB
 !
       IF(FIZCON_SUCCESS.EQ.0) THEN
-         WRITE(IOUT,'(/A)') '   '
+         WRITE(IOUT,'(/A)') ' '
          STOP '    FIZCON - Tests completed successfully'
       ELSE
-         WRITE(IOUT,'(/A)') '   '
+         WRITE(IOUT,'(/A)') ' '
          STOP '    FIZCON - Tests terminated abnormally!'
       END IF
 !---MDC---
@@ -2778,6 +2780,7 @@
       INTEGER(KIND=I4) :: I2,NPLFST
       INTEGER(KIND=I4) :: I,I1
       REAL(KIND=R4) :: ENU,DEV
+      SAVE NPLFST,I2
 !
 !     SAVE GRID ON FIRST PASS
 !
@@ -3195,6 +3198,7 @@
 !
 !     SETUP FOR ENDF-5 OR -6 FORMAT
 !
+      IQTEST=0
       IF(NFOR.GE.6) THEN
          Q = QM
          EXL = QM - QI + ELIS
@@ -3378,9 +3382,9 @@
       INTEGER(KIND=I4) :: LR,MTL,NCONT,IEQU
       REAL(KIND=R4) :: Q,QI,QM,QMVALT
 !
-      INTEGER(KIND=I4) :: IFLEV,ISETQM
+      INTEGER(KIND=I4), SAVE :: IFLEV,ISETQM
       INTEGER(KIND=I4), SAVE :: LRPR
-      REAL(KIND=R4) :: QMSAV,EXL
+      REAL(KIND=R4), SAVE :: QMSAV,EXL
       REAL(KIND=R4), SAVE :: EXLP
 !
 !     INITIALIZE ON FIRST MT OF AN OUTGOING PARTICLE TYPE
@@ -3952,6 +3956,7 @@
          ILTNA = 0
          NCKF6 = 1
       END IF
+      NK = N1H
 !
 !     TEST THAT SECTION IS IN THE INDEX
 !
@@ -4014,7 +4019,6 @@
 !
 !     LOOP OVER SUBSECTIONS
 !
-      NK = N1H
       LCT = L2H
       DO N=1,NK
          CALL RDTAB1
@@ -7660,6 +7664,7 @@
       INTEGER(KIND=I4) :: ICX,K,N
       INTEGER(KIND=I4) :: LOC,ISET
       REAL(KIND=R4) :: E2LAST,ER,EL
+      SAVE E2LAST
 !
 !     INITIALIZE ON FIRST PASS
 !
@@ -7850,6 +7855,7 @@
 !
 !     SET LB-DEPENDENT PARAMETERS.
 !
+      N2=0
       IF(LB.LE.4) THEN
          NSTEP = 2
          N = -1
@@ -8671,7 +8677,7 @@
                   E1T = XT(J)
                   EHI = XT(J+1)
                   IF(E1T.NE.EHI) THEN
-   50                IF(X(K).LE.E1T) THEN
+   50                IF(X(K).LE.E1T .AND. K.LT.NTOT) THEN
                         K = K + 1
                         GO TO 50
                      END IF
@@ -8685,7 +8691,7 @@
                         CALL ECSI(X(K1),Y(K1),X(K),Y(K),E1T,E2T,        &       
      &                                                  JNT(L),XINT)
                         YINT(J) = YINT(J) + XINT
-                        IF(E2T.NE.EHI) THEN
+                        IF(E2T.LT.EHI .AND. K.LT.NTOT) THEN
                            E1T = E2T
                            K = K + 1
                            GO TO 55
@@ -8718,7 +8724,7 @@
 !
       SUBROUTINE SUMPAR(N0)
 !
-!     SUMS UP PARTIAL CROSS SECTIONS IN FILES 9, 12 AND 13. THEN
+!     SUMS UP PARTIAL CROSS SECTIONS IN FILES 10, 12 AND 13. THEN
 !       COMPARES THEM TO THE CORRESPONDING TOTAL CROSS SECTIONS
 !
       IMPLICIT NONE
@@ -8735,7 +8741,6 @@
             ITFLE = MF
             GO TO 100
          ELSE
-            ISTO = 2
             IF(MF.EQ.9)  THEN
                ISTO = 3
             ELSE
@@ -9633,8 +9638,8 @@
 !
       INTEGER(KIND=I4) :: NI,NPP,INP,IFST,NF,IALL
       INTEGER(KIND=I4) :: I,J,K,II
-      REAL(KIND=R4), DIMENSION(12) ::  X1,Y1
-      REAL(KIND=R4), DIMENSION(6) ::  X2,Y2
+      REAL(KIND=R4), DIMENSION(12) ::  X1,X2
+      REAL(KIND=R8), DIMENSION(12) ::  Y1,Y2
 !
       IF(IFL.EQ.2)   GO TO 50
 !
@@ -9659,9 +9664,9 @@
          IALL = 1
 !*****ADDED POINTS IN INPUT RECORD DO EXCEED PAGING ARRAY
       ELSE
-         READ(ISCRU)  (XP(I),YP(I),I=NI,996),(X2(II),Y2(II),II=1,6)
+         READ(ISCRU)  (XP(I),YP(I),I=NI,996),(X2(II),Y2(II),II=1,12)
          NF = PAGESZ
-         NPP = NPP + 6
+         NPP = NPP + 12
          IALL = 0
       END IF
 !*****NO MORE POINTS SO OUTPUT FINAL PAGE
@@ -9672,15 +9677,15 @@
 !*****OUTPUT A FULL PAGE
       ELSE IF(NF.EQ.PAGESZ)   THEN
          CALL OUTXY(IFST,1,NF)
-         NI = 7
+         NI = 13
 !********STORE ANY POINTS WHICH DID NOT FIT ON PRIOR PAGE
          IF(IALL.EQ.0) THEN
-            DO II=1,6
-               XP(II+6) = X2(II)
-               YP(II+6) = Y2(II)
+            DO II=1,12
+               XP(II+12) = X2(II)
+               YP(II+12) = Y2(II)
             END DO
-            NI = NI + 6
-            NPP = NPP + 6
+            NI = NI + 12
+            NPP = NPP + 12
          END IF
       END IF
       GO TO 10
@@ -9721,7 +9726,8 @@
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2,MAT,MF,MT,NS,NBT,JNT
       INTEGER(KIND=I4) :: K,II,NN
-      REAL(KIND=R4) :: C1,C2,X1,Y1
+      REAL(KIND=R4) :: C1,C2,X1
+      REAL(KIND=R8) :: Y1
 !
       IF(N.GT.0) THEN
          DO K=1,N
@@ -11151,7 +11157,7 @@
 !
 !     READ IN RECORD
 !
-      READ(JIN,'(A66,A2,I4,I2,I3,I5)',END=90)  TEXT,MATP,MFP,MTP,NSEQP
+      READ(JIN,'(A66,I4,I2,I3,I5)',END=90)  TEXT,MATP,MFP,MTP,NSEQP
       GO TO 100
 !
 !     UNEXPECTED END OF FILE

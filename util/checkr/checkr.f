@@ -416,7 +416,7 @@
 !
       INTEGER (KIND=I4) :: NXC            !  number of sections encountered
       INTEGER (KIND=I4) :: NXC0           !  number of sections in the directory
-      INTEGER (KIND=I4), DIMENSION(NSECMAX,2):: INDX
+      INTEGER (KIND=I4), DIMENSION(NSECMAX,2):: INDX=0
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
@@ -1499,9 +1499,9 @@
 !
 !     MF = 1, MT = 451
 !
+      NUREP = 0
       IF(MF.EQ.1.AND.MT.EQ.451)   THEN  ! Comments and directory
          CALL CKS451
-         NUREP = 0
          GO TO 100
       END IF
 !
@@ -3930,6 +3930,7 @@
 !
       INTEGER(KIND=I4) :: N
       INTEGER(KIND=I4), DIMENSION(NSECMAX) :: MTS,NKS
+      SAVE MTS,NKS
 !
       IF(IPATH.EQ.0) THEN
          N12S = N12S + 1
