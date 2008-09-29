@@ -289,11 +289,11 @@
 !     TERMINATE JOB
 !
       IF(STANEF_SUCCESS.EQ.0) THEN
-         WRITE(OUTPUT,'(/A)') '   '
-         STOP '     JOB COMPLETED SUCCESSFULLY'
+         WRITE(OUTPUT,'(/A)') ' '
+         STOP '    STANEF - Completed successfully'
       ELSE
-         WRITE(OUTPUT,'(/A)') '   '
-         STOP '     JOB TERMINATED'
+         WRITE(OUTPUT,'(/A)') ' '
+         STOP '    STANEF - Terminated abnormally!'
       END IF
 !---MDC---
 !
