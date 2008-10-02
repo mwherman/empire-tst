@@ -15,11 +15,12 @@ MAIN = source util/*
 # some subdirectories in util are empty, so this will give errors
 
 
+# by default, compile everything with gfortran:
 all:
 	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE) $(compiler)); done
 
 
-# or make with compilers specified by individual projects:
+# or make with compilers specified by individual projects ('make spec'):
 spec:
 	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE)); done
 
