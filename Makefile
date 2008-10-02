@@ -9,6 +9,7 @@
 # --------------------------------------------------------------
 
 compiler = "FC=gfortran"
+flags = "FFLAGS=-O3"
 
 
 MAIN = source util/*
@@ -17,10 +18,10 @@ MAIN = source util/*
 
 # by default, compile everything with gfortran:
 all:
-	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE) $(compiler)); done
+	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE) $(compiler) $(flags)); done
 
 
-# or make with compilers specified by individual projects ('make spec'):
+# or make with compilers/flags specified by individual projects ('make spec'):
 spec:
 	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE)); done
 
