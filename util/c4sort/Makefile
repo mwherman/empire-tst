@@ -20,4 +20,7 @@ OBJF =	c4sort.o
 c4sort:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
+clean:
+	rm *.o
+
 

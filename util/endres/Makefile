@@ -22,4 +22,5 @@ OBJF =	endres.o
 endres:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

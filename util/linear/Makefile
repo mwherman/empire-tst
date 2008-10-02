@@ -27,4 +27,5 @@ OBJF =	 LINUX.o  endfio.o  linear.o  scratchb.o  timer.o
 linear:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

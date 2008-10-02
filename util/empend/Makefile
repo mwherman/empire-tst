@@ -39,4 +39,5 @@ OBJF =	empend.o
 empend:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

@@ -22,4 +22,5 @@ OBJF =	x4toc4.o
 x4toc4:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

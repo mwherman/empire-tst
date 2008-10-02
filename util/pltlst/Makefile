@@ -20,3 +20,6 @@ OBJF =	pltlst.o
 
 pltlst:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
+
+clean:
+	rm *.o

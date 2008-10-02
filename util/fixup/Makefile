@@ -22,4 +22,5 @@ OBJF =	fixup.o endfio.o  linux.o scratchb.o timer.o
 fixup:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

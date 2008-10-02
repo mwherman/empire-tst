@@ -15,4 +15,5 @@ OBJF =	psyche.o
 psyche:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

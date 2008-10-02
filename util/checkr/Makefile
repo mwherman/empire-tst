@@ -1,7 +1,7 @@
 #....Intel FORTRAN compiler
-FC     =  ifort 
+#FC     =  ifort 
 #----GNU FORTRAN compiler (FEDORA 7)
-#FC     = gfortran
+FC     = gfortran
 #----standard f90 FORTRAN compiler
 #FC	= f90
 #===== M a c ==================================
@@ -21,4 +21,6 @@ OBJF =	checkr.o
 checkr:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
+clean:
+	rm *.o
 

@@ -40,4 +40,5 @@ OBJF =	lsttab.o dxsend.o
 lsttab:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

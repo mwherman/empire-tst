@@ -27,4 +27,5 @@ OBJF =	 LINUX.o  endfio.o  legend.o  scratchb.o  timer.o
 legend:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

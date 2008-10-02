@@ -20,4 +20,5 @@ OBJF =	sixtab.o dxsend.o
 sixtab:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o

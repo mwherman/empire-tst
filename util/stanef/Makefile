@@ -14,4 +14,5 @@ OBJF =	stanef.o
 stanef:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
+clean:
+	rm *.o
