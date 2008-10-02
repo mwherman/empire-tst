@@ -8,13 +8,21 @@
 # binaries in a new empire/bin directory
 # --------------------------------------------------------------
 
+compiler = "FC=gfortran"
+
 
 MAIN = source util/*
 # some subdirectories in util are empty, so this will give errors
 
 
 all:
+	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE) $(compiler)); done
+
+
+# or make with compilers specified by individual projects:
+spec:
 	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE)); done
+
 
 clean:
 	@for dir in $(MAIN); do (echo $$dir; cd $$dir; $(MAKE) clean); done
