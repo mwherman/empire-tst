@@ -79,7 +79,7 @@
 !-M particles, checks Wick's limit for elastic scattering, analyzes 
 !-M resonance parameter statistics, calculates thermal cross sections 
 !-M and resonance integrals, examines continuity across resonance 
-!-M region boundaries and checks “Q” values against mass tables. 
+!-M region boundaries and checks ï¿½Qï¿½ values against mass tables. 
 !-M It is assumed the file being checked has passed the CHECKR 
 !-M program without any errors being detected.
 !-M 
@@ -637,7 +637,8 @@
 !
       INTEGER(KIND=I4) :: IQUIT
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: ICHAR
 !
@@ -1369,7 +1370,7 @@
          END DO
       END IF
 !
-!     GET RESONANCE PARAMETERS
+!     GET RESONANCEï¿½PARAMETERS
 !
       CALL RDCONT
       AP = C2H

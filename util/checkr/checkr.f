@@ -626,6 +626,7 @@
 !
       INTEGER(KIND=I4)  :: IQUIT
 !
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
@@ -1604,6 +1605,7 @@
 !
       IMPLICIT NONE
 !
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
