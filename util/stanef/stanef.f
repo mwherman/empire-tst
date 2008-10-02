@@ -124,7 +124,7 @@
 !-M         - Numeric field standardization for 2/151(character)
 !-M             Y  execute this option 
 !-M             N do not execute this option	
-!-M         If record 5 is left entirely blank, then the “default” 
+!-M         If record 5 is left entirely blank, then the ï¿½defaultï¿½ 
 !-M         options are executed. Those are character format output 
 !-M         file, update MT=451 and standardize numeric fields.
 !-M 
@@ -330,7 +330,8 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, ICHAR
 !

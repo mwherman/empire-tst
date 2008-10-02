@@ -149,7 +149,7 @@
 !-M            test such as a SUMUP test. If none is entered,
 !-M            the default value is .001 (1/10 of a percent). 
 !-M
-!-M If Record 4 is left entirely blank, then the “default” options are
+!-M If Record 4 is left entirely blank, then the ï¿½defaultï¿½ options are
 !-M executed. Those are to process the entire input file, to omit the 
 !-M SUMUP and Deviant Point tests and to assume an allowed fractional 
 !-M error of .001.
@@ -892,7 +892,8 @@
 !
 !     EXECUTES FIZCON PROCESS
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
       CHARACTER(LEN=80) :: IFIELD
       INTEGER(KIND=I4) :: IQUIT   ! FLAG TO INDICATE WHETHER OR NOT TO EXIT     
@@ -1115,7 +1116,8 @@
 !
       INTEGER(KIND=I4) :: IQUIT
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=I4), INTRINSIC :: ICHAR
 !
@@ -1386,7 +1388,8 @@
 !
       CHARACTER(LEN=*) :: MATSIN
 !
-      INTEGER(KIND=I4), INTRINSIC :: INDEX, LEN_TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     INTEGER(KIND=I4), INTRINSIC :: INDEX, LEN_TRIM
 !
       CHARACTER(LEN=10) :: BUF
       CHARACTER(LEN=4) :: BUF1,BUF2
@@ -8973,7 +8976,8 @@
       INTEGER(KIND=I4) :: NTOTS
       REAL(KIND=R4), DIMENSION(NTOTS) :: AX,BY
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
       INTEGER(KIND=I4) :: KP,NST,NUS,NPART
       INTEGER(KIND=I4) :: NBEG,NPR
@@ -9158,7 +9162,8 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: INIT,J0,J1,LL
@@ -9848,7 +9853,8 @@
 !
       INTEGER(KIND=I4) :: MF1,MF2
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFL,MFU
@@ -10020,7 +10026,8 @@
 !
       INTEGER(KIND=I4) :: MF0,MT1,MT2,NMISS
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
+!     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
+!     CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFTL,MFTH,NNL,NDUM,MTT,MFT1,ISET
