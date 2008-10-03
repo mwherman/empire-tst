@@ -6,6 +6,8 @@ FC     = gfortran
 #FC     = lf95
 #----standard f90 FORTRAN compiler
 #FC	= f90
+#----Intel f95 FORTRAN compiler
+#FC	= ifort
 
 OBJF =	fizcon.o
 
