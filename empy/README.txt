@@ -11,9 +11,10 @@ done manually:
 
 in your .bashrc or equivalent, place these lines:
 
-PYTHONPATH=$PYTHONPATH:<path_to_empire>/empy
+PYTHONPATH=$PYTHONPATH:<path_to_empire>
 export PYTHONPATH
 
+Note this should point to the directory *containing* empy, not to empy itself.
 
-Alternate installation via distutils should be available soon
+Alternate installation via distutils may become available soon
 
