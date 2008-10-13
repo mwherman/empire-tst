@@ -1,6 +1,6 @@
-INSTALL information for empyre -- cmattoon, 10/13/2008
+INSTALL information for empy -- cmattoon, 10/13/2008
 
-This is 'empyre', a set of python classes and functions for use with the 
+This is 'empy', a set of python classes and functions for use with the 
 nuclear modeling code EMPIRE.
 
 A recent version of python (2.*) is needed, along with NumPy 
@@ -11,7 +11,7 @@ done manually:
 
 in your .bashrc or equivalent, place these lines:
 
-PYTHONPATH=$PYTHONPATH:<path_to_empire>/empyre
+PYTHONPATH=$PYTHONPATH:<path_to_empire>/empy
 export PYTHONPATH
 
 
