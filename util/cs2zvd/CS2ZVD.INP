@@ -1,0 +1,16 @@
+0123456789012345678901234567890123456789012345678901234567890  <-  Column indicator
+ 1111111
+Each column correspond to one reaction. 
+For the zvd file to be produced the second column should contain 1.
+
+Check the cross section out put file XSECTIONS.OUT (or $proj.xsc) to see reactions
+The first six reactions are always fixed:
+1.- Total
+2.- Elastic
+3.- Reaction
+4.- Fission
+5.- Capture
+6.- (z,n)
+7.- (z,2n)   ! if two neutrons ore more are allowed
+
+This file could be edited to print more reactions
