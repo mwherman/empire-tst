@@ -1,18 +1,23 @@
       PROGRAM X4TOC4                                                    X4T00050
 C-Title  : Program X4TOC4
 C-Version: 86-1 (August 1986)
-C-V      2001/03 (March 2001)  *Minor corrections
-C-V      2002/10 Read sample thickness, convert transmission to x-sect.
-C-V      2004/01 Define all input filenames from input.
-C-V      2004/10 Redefine MT>=9000 to define incident particle.
-C-V      2005/07 Introduce F90 features for characters and do-loops
-C-V      2005/12 If E-level is zero, redefine MT 51 to MT 4
-C-V      2006/02 Fix Y2K date in references
-C-V      2006/04 Deleted SF9, V.Zerkin@iaea.org
-C-V      2006/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
-C-V      2006/12 Ratio-to-rutherfors scattering for charged particles
-C-V      2007/04 Trivial syntax correction (V. Zerkin)
-C-V              Interpret Q-value as -LevelEnergy for inelastic (A.Trkov)
+C-V  01/03 (March 2001)  *Minor corrections
+C-V  02/10 Read sample thickness, convert transmission to x-sect.
+C-V  04/01 Define all input filenames from input.
+C-V  04/10 Redefine MT>=9000 to define incident particle.
+C-V  05/07 Introduce F90 features for characters and do-loops
+C-V  05/12 If E-level is zero, redefine MT 51 to MT 4
+C-V  06/02 Fix Y2K date in references
+C-V  06/04 Deleted SF9, V.Zerkin@iaea.org
+C-V  06/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
+C-V  06/12 Ratio-to-rutherfors scattering for charged particles
+C-V  07/04 Trivial syntax correction (V. Zerkin)
+C-V        Interpret Q-value as -LevelEnergy for inelastic (A.Trkov)
+C-V  07/06 Fix uncert. when converting from ratio-to-Rutherford
+C-V  08/07 Fix unit conversion of multiple-column uncertainties.
+C-V  08/10 Overwrite energy uncertainty (if given) when EN-MIN, EN-MAX
+C-V        pair is processed (A. Trkov).
+C-V        Correct Angstrom to eV conversion (N. Otsuka, V. Zerkin).
 C-Purpose: Translate Data from EXFOR to Computational Format
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
@@ -2343,11 +2348,6 @@ C-----IF REQUIRED SET DEFINITION OF FIELDS 7-8.                         X4T21250
       IF(NPT.EQ.1.AND.IM78.NE.BLANK4) WRITE(OUTP,6040)                  X4T21290
       IM78=TITLE4(II)
       IF(NPT.EQ.1) WRITE(OUTP,6030) IM78                                X4T21310
-c...
-      write(outp,*) values(ii)
-c...  OVALUE=ABS(VALUES(II))
-c...  CALL NORMF(OVALUE,OUTLIN(I))
-c...
   340 CONTINUE                                                          X4T21320
 C                                                                       X4T21330
 C     IF REQUIRED INSERT RESIDUAL NUCLEUS ZA (PRODUCTION) OR RATIO      X4T21340
@@ -3018,7 +3018,7 @@ C                                                                       X4T27750
       CHARACTER*11 TITLE,UNIT,DATUM,EV,LIMITS,TITLE2,TITLE3
       CHARACTER*4  TITLE4
       CHARACTER*1  FLAGI,FLAGR,ZAN,ENT,SUBENT,LABCM,CENTER
-     &            ,ZANRES,ZANRAT,BLANK                                                            X4T27790
+     &            ,ZANRES,ZANRAT,BLANK
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T27810
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T27820
@@ -3106,7 +3106,6 @@ C-----SET INDEX TO OUTPUT CREATED LIMIT NEXT TO EXISTING LIMIT.         X4T28630
  6010 FORMAT(10X,'WARNING.....MULTIPLE -MIN/-MAX FIELDS ',A10,A1)
  6020 FORMAT(10X,'OPERATION...CREATED ',A10,A1,1X,A11,1X,A11)
  6030 FORMAT(10X,'OPERATION...CENTER-OF-MASS SYSTEM FLAG SET')          X4T28730
- 6040 FORMAT(10X,'OPERATION...ABSOLUTE',A11)
       END                                                               X4T28740
       SUBROUTINE IPAIR(TITLE1,TITLE2,IWAY)                              X4T28750
 C                                                                       X4T28760
@@ -3362,7 +3361,7 @@ C                                                                       X4T31150
    80 IF(KUFLG1(II).NE.4) GO TO 90                                      X4T31160
       XE=VALUES(II)                                                     X4T31170
       IF(XE.LE.0.0) GO TO 130                                           X4T31180
-      VALUES(II)=(8.18E+10)/(XE*XE)                                     X4T31190
+      VALUES(II)=(0.08180)/(XE*XE)
       IF(NPT.EQ.1) WRITE(OUTP,6070)                                     X4T31200
       GO TO 120                                                         X4T31210
 C                                                                       X4T31220
@@ -3446,7 +3445,10 @@ C-----COUNT THE NUMBER OF INPUT FIELDS MAPPED INTO 1 OUTPUT FIELD.      X4T31950
         II=IMOUT(KFIELD,ISANR,JMULT)
         IF(II.LE.0) GO TO 30
 C-----  OPERATION ABSOLUTE ON THE VALUES (IF REQUESTED)
-        IF(KTFLGX(II).EQ.11) VALUES(II)=ABS(VALUES(II))
+        IF(KTFLGX(II).EQ.11) THEN
+          VALUES(II)=ABS(VALUES(II))
+          IF(NPT.EQ.1) WRITE(OUTP,6150) TITLE(II)
+        END IF
       END DO
       JMULT=10                                                          X4T32000
 C                                                                       X4T32010
@@ -3532,11 +3534,15 @@ C-----SEE IF DATA ARE TO BE COMBINED TO DEFINE AVERAGE AND SPREAD.      X4T32770
 C-----CANNOT COMBINE FIELDS TO DEFINE AVERAGE AND ERROR IF CURRENT      X4T32800
 C-----OUTPUT FIELD IS 8 (I.E. NO OUTPUT FIELD 9) OR IF THE NEXT FIELD   X4T32810
 C-----IS ALREADY USED.                                                  X4T32820
-      IF(KFIELD.LT.8.AND.IMOUT(KFIELD+1,ISANR,1).LE.0) GO TO 150        X4T32830
+      KFP1=KFIELD+1
+C-----EXCEPTION FOR INCIDENT ENERGY - OVERWRITE UNCERTAINTY FIELD
+      IF(KFIELD.GT.1. OR.IMOUT(KFP1,ISANR,1).LE.0) GO TO 142
+      IF(IMOUT(KFP1,ISANR,1).GT.0) WRITE(OUTP,6042) KFP1
+      IMOUT(KFP1,ISANR,1)=0
+  142 IF(KFIELD.LT.8.AND.IMOUT(KFP1,ISANR,1).LE.0) GO TO 150
       IF(NPT.GT.1) GO TO 290                                            X4T32840
-      KFP1=KFIELD+1                                                     X4T32850
       IF(KFIELD.EQ.8) WRITE(OUTP,6030) KFIELD                           X4T32860
-      IF(IMOUT(KFP1,ISANR,1).GT.1) WRITE(OUTP,6040) KFIELD,KFP1         X4T32870
+      IF(IMOUT(KFP1,ISANR,1).GT.0) WRITE(OUTP,6040) KFIELD,KFP1         X4T32870
       GO TO 270                                                         X4T32880
 C-----COMBINE FIELDS TO DEFINE AVERAGE.                                 X4T32890
   150 IF(NPT.EQ.1.AND.JOPS.EQ.7) WRITE(OUTP,6120)                       X4T32900
@@ -3626,6 +3632,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
      1       10X,'DEFINE AVERAGE FOLLOWED BY ERROR (NO FIELD 9)')       X4T33690
  6040 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT COMBINE FIELDS TO',   X4T33700
      1       10X,'DEFINE AVERAGE FOLLOWED BY ERROR (FIELD=',I2,' USED)')X4T33710
+ 6042 FORMAT(10X,'WARNING.....FIELD=',I2,' ALREADY USED - OVERWRITE')
  6050 FORMAT(10X,'WILL USE THE FIRST OF THE FOLLOWING COLUMN TITLES')   X4T33720
  6060 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT SELECT LARGEST AND'/  X4T33730
      1 10X,'SMALLEST VALUES (NO FIELD 9)')                              X4T33740
@@ -3638,6 +3645,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
  6120 FORMAT(10X,'OPERATION...DEFINED AVERAGE VALUE')                   X4T33810
  6130 FORMAT(10X,'OPERATION...DEFINED AVERAGE VALUE AND ERROR')         X4T33820
  6140 FORMAT(10X,'OPERATION...SELECTED SMALLEST AND LARGEST VALUES')    X4T33830
+ 6150 FORMAT(10X,'OPERATION...ABSOLUTE',A11)
       END                                                               X4T33840
       SUBROUTINE REOPS                                                  X4T33850
 C                                                                       X4T33860
@@ -3823,6 +3831,9 @@ C*    - Calculate Rutherford (Coulomb) scattering term
           A3 =A2+ (1+AIN*AIN)/(1-AIN*AIN)
           SIGC=A3* 2 * (AET*AET/(AKA*AKA*(1-AIN*AIN)))
         END IF
+      VALUES(II)=VALUES(II)*SIGC
+C*    - Apply the same correction to the uncertainty
+      II=KMOUT(4,ISANR)
       VALUES(II)=VALUES(II)*SIGC
 C-----
   800 RETURN
