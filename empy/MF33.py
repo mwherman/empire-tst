@@ -48,12 +48,12 @@ class MF33(MF_base):
 			myline = fin.readline()
 		
 		# should be at the MT file header, but may have to go past SEND or FEND
-		MAT, MF, MT = endf.getVals( myline )
-		while MF != 33:
+		MAT_tmp, MF_tmp, MT_tmp = endf.getVals( myline )
+		while MF_tmp != 33 and MT_tmp != MT:
 			myline = fin.readline()
-			MAT, MF, MT = endf.getVals( myline )
+			MAT_tmp, MF_tmp, MT_tmp = endf.getVals( myline )
 		
-		self.MAT, self.MF, self.MT = MAT, MF, MT
+		self.MAT, self.MF, self.MT = MAT_tmp, MF_tmp, MT_tmp
 		self.header = myline
 		while 1:
 			zam, awt = myline.split()[:2]
