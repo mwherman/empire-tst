@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-09-13 16:17:03 $
-Ccc   * $Id: fusion.f,v 1.74 2008-09-13 16:17:03 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:20 $
+Ccc   * $Id: fusion.f,v 1.75 2008-10-14 21:32:20 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -125,13 +125,13 @@ C--------Here the old calculated files should be read
             CLOSE (45)
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.EQ.5) THEN
-               WRITE (6,*)
+               WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
-               WRITE (6,*) ' ', ctldir//ctmp23//'.INC'
+               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
             NLW = maxlw
-   	        WRITE(6,*) ' Maximum CN spin limited to ', NLW
-	        WRITE(6,*) 
+   	        WRITE(8,*) ' Maximum CN spin limited to ', NLW
+	        WRITE(8,*) 
             GOTO 300
          ENDIF
 C
@@ -141,9 +141,9 @@ C
    50    CLOSE (45,STATUS = 'DELETE')
 
          IF (FITomp.EQ.0) THEN
-         WRITE (6,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
+         WRITE (8,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
-         WRITE (6,*) 'WARNING: FILE WITH TRANSM. COEFF.',
+         WRITE (8,*) 'WARNING: FILE WITH TRANSM. COEFF.',
      &               ' FOR INC.CHANNEL HAS BEEN DELETED'
           ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
@@ -167,9 +167,9 @@ C                   A of c.n. /2 = integer+1/2 --> cnJ=n*1/2, where n=0,1,2...
 C                   ParcnJ=-1 or 1
 C                   csvalue = value in mb
 C           Reading no more than 2*NDLW rows
-            WRITE (6,*)
+            WRITE (8,*)
      &' Spin distribution of fusion cross section read from SDREAD file'
-            WRITE (6,*)
+            WRITE (8,*)
      &          ' (all previous instructions concerning fusion ignored)'
             DO i = 1, 2*NDLW
                READ (43,*,END = 60) cnj, parcnj, csvalue
@@ -195,15 +195,15 @@ C--------END of spin distribution from file SDFILE
             JSTab(1) = NDLW
                           !stability limit not a problem for photoreactions
             IF (EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
-               WRITE (6,*) 'WARNING: '
-               WRITE (6,*) 'WARNING: ECN=', EIN, ' Elev=',
+               WRITE (8,*) 'WARNING: '
+               WRITE (8,*) 'WARNING: ECN=', EIN, ' Elev=',
      &                     ELV(NLV(Ntrg),Ntrg)
-               WRITE (6,*)
+               WRITE (8,*)
      &                   'WARNING: CN excitation energy below continuum'
-               WRITE (6,*)
+               WRITE (8,*)
      &                   'WARNING: cut-off. zero reaction cross section'
-               WRITE (6,*) 'WARNING: will result'
-               WRITE (6,*) 'WARNING: '
+               WRITE (8,*) 'WARNING: will result'
+               WRITE (8,*) 'WARNING: '
             ENDIF
 C-----------E1
             IF (IGE1.NE.0) THEN
@@ -291,11 +291,11 @@ C--------and calculate transmission coefficients
             READ (11,*,END = 150) csvalue
             stl(j) = csvalue*wf/PI/(2*j - 1)
             IF (stl(j).GT.1.0D0) THEN
-               WRITE (6,*) ' '
-               WRITE (6,
+               WRITE (8,*) ' '
+               WRITE (8,
      &'(''TOO LARGE INPUT FUSION CROSS SECTION'',              '' FOR l=
      &'',I3,'' RESULTING Tl>1'')') j - 1
-               WRITE (6,*) ' EXECUTION STOPPED!!!'
+               WRITE (8,*) ' EXECUTION STOPPED!!!'
                STOP
             ENDIF
          ENDDO
@@ -309,9 +309,9 @@ C--------and calculate transmission coefficients
          SINlcc=0.d0
          SINl=0.d0
          SINlcont =0.d0
-         WRITE (6,*)
+         WRITE (8,*)
      &  ' Spin distribution of fusion cross section read from the file '
-         WRITE (6,*)
+         WRITE (8,*)
      &          ' (all previous instructions concerning fusion ignored)'
 C--------calculation of o.m. transmission coefficients for absorption
       ELSEIF (KTRlom(Npro,Ntrg).GT.0) THEN
@@ -338,10 +338,10 @@ C--------------Saving KTRlom(0,0)
             ENDIF
 C-----------DWBA calculation. All collective levels considered
             IF (DIRect.EQ.3) THEN
-               WRITE (6,*) ' DWBA calculations for inelastic scattering'
+               WRITE (8,*) ' DWBA calculations for inelastic scattering'
             ELSE
-               WRITE (6,*) ' DWBA calculations for inelastic scattering'
-               WRITE (6,*) '    to uncoupled coll. levels and continuum'
+               WRITE (8,*) ' DWBA calculations for inelastic scattering'
+               WRITE (8,*) '    to uncoupled coll. levels and continuum'
             ENDIF
 
 C           Setting the normalization factor for OMP (used in covariance calculation)
@@ -362,7 +362,7 @@ C           FNrsomp(0,0) = FNrsomp(Nejc,i)
                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
-               WRITE (6,*) ' SOMP transmission coefficients used for ',
+               WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                     'fusion determination'
             ENDIF
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
@@ -382,7 +382,7 @@ C---------for the inelastic channel. DIRECT 1 option assumes SOMP
 C---------with only one level to calculate the inelastic TLs.
 C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
-            WRITE (6,*) ' CC transmission coefficients used for ',
+            WRITE (8,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
 
             einlab = -EINl
@@ -445,7 +445,7 @@ C                 Only Legendre elastic expansion is needed
                ENDIF
 C--------------Inelastic cross section (incident.ics)
                OPEN (45,FILE = 'dwba.ICS',STATUS = 'OLD',ERR = 220)
-               OPEN (46,FILE = 'ccm.ICS',STATUS = 'OLD')
+               OPEN (46,FILE = 'ccm.ICS',STATUS = 'OLD',ERR = 220)
                OPEN (47,FILE = 'INCIDENT.ICS',STATUS = 'UNKNOWN')
                READ (45,'(A80)',END = 220) rstring
                READ (46,'(A80)',END = 210) ! first line is taken from dwba
@@ -478,7 +478,7 @@ C                 READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
 C-----------------checking the correspondence of the excited states for even-even targets
                   IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   
 C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
-                    WRITE (6,*)
+                    WRITE (8,*)
      &            ' WARNING: DWBA and CCM state order do not coincide'
                      STOP
      &            ' WARNING: DWBA and CCM state order do not coincide'
@@ -511,7 +511,7 @@ C--------------Experimental angular distribution (incident.ang)
                   READ (46,'(i5)',END = 255) istat2
 C-----------------checking the correspondence of the excited states
                   IF (istat1.NE.istat2) THEN
-                     WRITE (6,*)
+                     WRITE (8,*)
      &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
                      STOP
      &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
@@ -542,30 +542,30 @@ C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3,ICAlangs)
-            WRITE (6,*) ' SOMP transmission coefficients used for ',
+            WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
          ENDIF
          IF (maxlw.GT.NDLW) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &            ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
-            WRITE (6,*) ' FATAL: INCREASE NDLW IN dimension.h UP TO',
+            WRITE (8,*) ' FATAL: INCREASE NDLW IN dimension.h UP TO',
      &                  maxlw + 1
-            WRITE (6,*) ' FATAL: AND RECOMPILE THE CODE'
+            WRITE (8,*) ' FATAL: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
          NLW = maxlw
-	     WRITE(6,*) ' Maximum CN spin limited to ', NLW
-	     WRITE(6,*) 
+	     WRITE(8,*) ' Maximum CN spin limited to ', NLW
+	     WRITE(8,*) 
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
 C--------IWARN=3 - 'Energy requested lower than recommended for this potential'
 C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
          IF ((IWArn.EQ.1 .or. IWArn.EQ.2) .AND. FIRst_ein
-     &       .AND. IOUt.GE.5) WRITE (6,*) ' WARNING: ',KTRlom(0,0),
+     &       .AND. IOUt.GE.5) WRITE (8,*) ' WARNING: ',KTRlom(0,0),
      &   ' OMP not recommended for target Z,A=', Z(Ntrg),'-',(Ntrg)
-         IF ((IWArn.EQ.3 .OR. IWArn.EQ.4) .AND. IOUt.GE.5) WRITE (6,*)
+         IF ((IWArn.EQ.3 .OR. IWArn.EQ.4) .AND. IOUt.GE.5) WRITE (8,*)
      &      ' WARNING: ',KTRlom(0,0),' OMP not recommended for E=', EINl
          IWArn = 0
       ELSEIF (KTRlom(Npro,Ntrg).EQ.0) THEN
@@ -574,8 +574,8 @@ C--------calculation of h.i. transmission coefficients for fusion
          CALL HITL(stl)
          if(NLW.GT.0) maxlw = min(NLW,maxlw)
          NLW = maxlw
-	     WRITE(6,*) ' Maximum CN spin limited to ', NLW
-	     WRITE(6,*) 
+	     WRITE(8,*) ' Maximum CN spin limited to ', NLW
+	     WRITE(8,*) 
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
@@ -737,20 +737,20 @@ C
          s2a = FUSred * stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EINl))
 C--------Corrected scattering radius
          rp = SQRT((ELAcs + ElasticCorr)/(4.0D+00*PI*10.D+00))
-         WRITE (6,*)
+         WRITE (8,*)
          IF(S0_obs.GT.0.)   THEN
-           WRITE ( 6,99004) S0_obs,S0_unc
+           WRITE (8,99004) S0_obs,S0_unc
            WRITE (12,99004) S0_obs,S0_unc
 99004      FORMAT (7x,54(1h*)/
      &           6x,' LOW ENERGY NEUTRON SCATTERING:'/
      &           6x,' Exp.  Strength functions S0 =',f6.3,' (',f6.4,')')
          ELSE
-           WRITE ( 6,'(7x,54(1h*)/
+           WRITE (8,'(7x,54(1h*)/
      &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
            WRITE (12,'(7x,54(1h*)/
      &         7x,''LOW ENERGY NEUTRON SCATTERING:'')')
          ENDIF
-         WRITE ( 6,99005)
+         WRITE (8,99005)
      &         s0*1D4, FUSRED*stl(1), s1a*1D4, 
      &                 FUSRED*stl(2), s2a*1D4, 
      &                 FUSRED*stl(3),
@@ -767,7 +767,7 @@ C--------Corrected scattering radius
      &              '        Total XS = ',F9.2,' mb'/
      &           6x,' Scattering radius =',f7.3,' fm'/
      &           6x,'   1.35 A**(1/3)   =',f7.3,' fm'//7x,54(1h*))
-         WRITE (6,*)
+         WRITE (8,*)
          WRITE (12,*)
          selast = 0.d0
          DO l = 0, maxlw
@@ -775,7 +775,7 @@ C--------Corrected scattering radius
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
          selast = selast *  10.d0*PI/ak2
-         WRITE( 6,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+         WRITE(8,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs 
          WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
@@ -784,32 +784,32 @@ C--------Corrected scattering radius
          WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
      &              6x,17HSHAPE ELASTIC XS=,F10.3,1x,2hmb)') 
      &              EINl*1000, selast
-         WRITE ( 6,99006)
+         WRITE (8,99006)
          WRITE (12,99006)
          WRITE (53,99006)
          DO l = 0, maxlw
            IF(STL(l+1).LT.1.d-15) EXIT
-           WRITE ( 6,99007) l, stl(l + 1), 
+           WRITE (8,99007) l, stl(l + 1), 
      &              10.d0*PI/ak2*sel(l + 1)
            WRITE (12,99007) l, stl(l + 1),
      &              10.d0*PI/ak2*sel(l + 1)
            WRITE (53,99007) l, stl(l + 1),
      &              10.d0*PI/ak2*sel(l + 1)
          ENDDO
-         WRITE ( 6,99008)
+         WRITE (8,99008)
          WRITE (12,99008)
          WRITE (53,99008)
 99006    FORMAT (6x,' ****************************************'/
      &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
 99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
 99008    FORMAT (6x,' ****************************************')
-         WRITE (6,*)
-         WRITE (6,*)
+         WRITE (8,*)
+         WRITE (8,*)
      &   '      SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
-         WRITE (6,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
-         WRITE (6,*)
+         WRITE (8,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
+         WRITE (8,*)
      &   '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
-         WRITE (6,*)
+         WRITE (8,*)
          WRITE (12,*)
       ENDIF
 
@@ -846,27 +846,27 @@ C-----channel spin min and max
 
       IF (ldbwacalc .AND. CSFus.GT.0.D0 .AND. SINl.GT.0.D0) THEN
          IF (DIRect.EQ.3) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &         ' SOMP TLs normalized to substract DWBA contribution'
-            WRITE (6,*)
+            WRITE (8,*)
      &         '                               to collective levels'
          ELSE
 C-----------DIRECT=1 or DIRECT=2
-            WRITE (6,*)
+            WRITE (8,*)
      &         ' CC OMP TLs normalized to substract DWBA contribution'
-            WRITE (6,*)
+            WRITE (8,*)
      &         '                               to collective levels'
-C           WRITE (6,*)
+C           WRITE (8,*)
 C    &         '             to discrete un-coupled collective levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN
-         WRITE (6,*)
-         WRITE (6,*) 
+         WRITE (8,*)
+         WRITE (8,*) 
      &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(ECIS)'
-         WRITE (6,'(4x,3(4x,D12.6,4x))')
+         WRITE (8,'(4x,3(4x,D12.6,4x))')
      &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
-         WRITE (6,*)
+         WRITE (8,*)
       ENDIF
 
 C
@@ -895,12 +895,12 @@ C-----is still stable
       IF (NLW.GT.JSTab(1)) THEN
          NLW = JSTab(1)
          IF (IOUt.GT.0) THEN
-            WRITE (6,'('' Maximum spin to preserve stability is'',I4)')
+            WRITE (8,'('' Maximum spin to preserve stability is'',I4)')
      &             JSTab(1)
-            WRITE (6,
+            WRITE (8,
      &             '('' Calculations will be truncated at this limit'')'
      &             )
-            WRITE (6,
+            WRITE (8,
      &            '('' part of the fusion cross section will be lost'')'
      &            )
          ENDIF
@@ -913,9 +913,9 @@ C-----is still stable
       ENDIF
       IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
      &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
-         WRITE (6,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
+         WRITE (8,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
      &               POP(NEX(1),NLW,2,1), 'NLW=', NLW
-         WRITE (6,
+         WRITE (8,
      &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
      &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
      &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
@@ -1007,7 +1007,7 @@ C
    50    IF (Ein.GT.ee2) Crl = le2
          IF (Ein.LT.E1) Crl = Crl + (Ein - vmax)/(vmm - vmax)
       ELSE
-         WRITE (6,'(1X,''Incident energy below fusion barrier'')')
+         WRITE (8,'(1X,''Incident energy below fusion barrier'')')
          STOP
       ENDIF
       Csfus = 657.*(Ap + At)*Crl**2/(Ap*At*Ein)
@@ -1082,7 +1082,7 @@ C
       Vm = Zp*Zt*e2/xm + ht**2*Crl**2/(2*MI*xm**2)
      &     - R1*R2/R12/(0.03*EXP((xm-R12)/3.3)
      &     + 0.0061*EXP((xm-R12)/0.65))
-      IF (nr.GT.50) WRITE (6,'(10X,''MAX NO. OF ITERATIONS IN FINDA'')')
+      IF (nr.GT.50) WRITE (8,'(10X,''MAX NO. OF ITERATIONS IN FINDA'')')
       END
 
 

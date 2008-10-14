@@ -193,7 +193,7 @@ c       DO j = 1,NFIsj1
 	integer iout
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
 	if(title(1:1).ne.' ') write(iout,'(A30)') title      
-	write(iout,'(A12)') 'fun: '//tfunct
+	write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A10)') 'thick: 2   '
       write(iout,'(A10/2H//)') 'length: 92 '
 	return
@@ -205,8 +205,8 @@ c       DO j = 1,NFIsj1
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/u'
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
-	if(titlex(1:1).ne.' ') write(iout,'(A32)') 'x: '//titlex
-	if(titley(1:1).ne.' ') write(iout,'(A32)') 'y: '//titley
+	if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
+	if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
       write(iout,'(A19)') 'x-scale: auto      '
       write(iout,'(A17)') 'y-scale: auto      '
       write(iout,'(A2)') '//'

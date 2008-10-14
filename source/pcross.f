@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-11 12:08:27 $
-Ccc   * $Id: pcross.f,v 1.51 2008-08-11 12:08:27 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:24 $
+Ccc   * $Id: pcross.f,v 1.52 2008-10-14 21:32:24 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -148,24 +148,24 @@ C-----ZERO ARRAY INITIALIZATION
             L(nejc,hh) = 0.D0
          ENDDO
       ENDDO
-      WRITE (6,99020)
+      WRITE (8,99020)
 C
 Cig---Direct reaction spectra for d,p and d,t only
 C
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
      &                   .and. NDEJC.eq.4) THEN
-        write(6,99002)
+        write(8,99002)
 99002   FORMAT (/5X,
      &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
      &//)
         call DTRANS(EXCn,DE,spec,cross)
 99003   FORMAT (7x,5F8.2)
-        write(6,99003) Ein,sigr,cross(2),cross(NDEJC)
+        write(8,99003) Ein,sigr,cross(2),cross(NDEJC)
       ENDIF
 C
-      WRITE (6,99005)
+      WRITE (8,99005)
 99005 FORMAT (//5X,' Preequilibrium decay (PCROSS)',/)
-      WRITE (6,99010) MFPp
+      WRITE (8,99010) MFPp
 99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
 C
 C-----NEJcm is the maximum number of particles emitted
@@ -379,12 +379,12 @@ cig      Some problems can arise later with a large direct cross section !
                ELSE
                   status = "  (accepted)"
                ENDIF
-               WRITE (6,
+               WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSEIF (nejc.EQ.4 .AND. NEJcm.NE.3) THEN !light ion (always accepted)
                status = "  (accepted)"
-               WRITE (6,
+               WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSE !gamma
@@ -393,28 +393,28 @@ cig      Some problems can arise later with a large direct cross section !
                ELSE
                   status = "  (accepted)"
                ENDIF
-               WRITE (6,
+               WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') 'g ', cross(nejc), status
             ENDIF
 C---------We don't need this spectrum printout any more but I leave it
 C---------commented for checking in case anything goes wrong.
 C         DO ienerg = iemin(nejc), iemax(nejc)
-C                  WRITE(6,'(1x, F7.2, 2x, 7(D12.6, 1x))')
+C                  WRITE(8,'(1x, F7.2, 2x, 7(D12.6, 1x))')
 C    &             DE*(ienerg - 1), spec(nejc, ienerg)
 C         ENDDO
-C         WRITE(6, *)'==========================='
+C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
       if(MSD+MSC.eq.0) then
         fr = totemis/Sigr
-        WRITE (6,99015) totemis, fr
+        WRITE (8,99015) totemis, fr
       ENDIF  
       if(MSD+MSC.GT.0) then
         fr = (totemis+Xsinl)/Sigr
-        WRITE (6,99014) Xsinl, totemis, fr
+        WRITE (8,99014) Xsinl, totemis, fr
       ENDIF  
-      write(6,*) 'Middle of PCROSS :',totemis,xsinl      
+      write(8,*) 'Middle of PCROSS :',totemis,xsinl      
 99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
      &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
      &   ' mb'/1X,'total   preequilibrium fraction              =',F8.2)
@@ -422,7 +422,7 @@ C         WRITE(6, *)'==========================='
      &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
      &                   .and. NDEJC.eq.4) THEN
-            WRITE (6,99016) totemis, fr
+            WRITE (8,99016) totemis, fr
 99016 FORMAT (1x,'Kalbach parameterization for pick-up and stripping',
      &           ' is considered'/)
       ENDIF
@@ -476,10 +476,10 @@ C           fmsd set to 0.d0 means isotropic distribution
             ENDDO
          ENDDO
        ENDDO
-       write(6,*) 'End of PCROSS :',totemis,Xsinl
+       write(8,*) 'End of PCROSS :',totemis,Xsinl
 cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr
-      WRITE (6,99020)
+      WRITE (8,99020)
 99020 FORMAT (/' ',57('-')/)
       END
 
@@ -868,12 +868,12 @@ C--------NEVER COME BACK ASUMPTION
 C-----------------------------------------
          ls(h1) = Cme*ln(h1) + LP(h1) + LM(h1)
       ENDDO
-      IF (IOUt.GE.3 .AND. NEJcm.EQ.3) WRITE (6,99005)
+      IF (IOUt.GE.3 .AND. NEJcm.EQ.3) WRITE (8,99005)
 99005 FORMAT (/2X,'N',5X,'T r a n s i t i o n   r a t e s   ',
      &        '        E  m  i  s  s  i  o  n     r  a  t  e  s',//,5X,
      &'   plus     minus     TOTAL              TOTAL     gammas   neutr
      &ons   protons   alphas'/)
-      IF (IOUt.GE.3 .AND. NEJcm.EQ.4) WRITE (6,99010)
+      IF (IOUt.GE.3 .AND. NEJcm.EQ.4) WRITE (8,99010)
 99010 FORMAT (/2X,'N',5X,'T r a n s i t i o n   r a t e s   ',
      &        '        E  m  i  s  s  i  o  n     r  a  t  e  s',//,5X,
      &'   plus     minus     TOTAL              TOTAL     gammas   neutr
@@ -884,7 +884,7 @@ C-----------------------------------------
          hlp1 = LP(h1)/Cme
          hlp2 = LM(h1)/Cme
          hlp4 = hlp1 + hlp2
-         IF (IOUt.GE.3) WRITE (6,99015) ij, hlp1, hlp2, hlp4, ln(h1),
+         IF (IOUt.GE.3) WRITE (8,99015) ij, hlp1, hlp2, hlp4, ln(h1),
      &                                            (L(i,h1),i = 0,NEJcm)
 99015    FORMAT (I3,3E10.3,10X,6E10.3)
       ENDDO
@@ -912,18 +912,18 @@ C--------------------------------------------------------------------
          IF (Em(h1).NE.0.) Ih2 = h1
       ENDDO
       Ih2 = MIN(Ih2,NHEq)
-      IF (IOUt.GE.3) WRITE (6,99018)  2*(Ih2-1) + Ap, Ih2, CHMax
+      IF (IOUt.GE.3) WRITE (8,99018)  2*(Ih2-1) + Ap, Ih2, CHMax
 99018 FORMAT (/3X,'Nmax',I3,' Hmax =',I3,' Coeff. CHMax =',F4.2/)
-      IF (IOUt.GE.3) WRITE (6,99020)
+      IF (IOUt.GE.3) WRITE (8,99020)
 99020 FORMAT (/3X,'TIME INTEGRALS OF TAU(N)'/3X,
      &        ' N   UP TO Nmax       ')
       IF (IOUt.GE.3) THEN
          DO h1 = 1, Ih2
             hhh = 2*(h1 - 1) + Ap
-            WRITE (6,99025) hhh, Em(h1)
+            WRITE (8,99025) hhh, Em(h1)
 99025       FORMAT (I5,2E14.3)
          ENDDO
-         WRITE (6,*)
+         WRITE (8,*)
       ENDIF
       END
 

@@ -2,26 +2,32 @@
 xxx.   xx.           ;TARGET  A , Z 
   1.    0.           ;PROJECTILE A, Z
 2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
-0                    ;NUMBER OF PROTONS  TO BE EMITTED
-0                    ;NUMBER OF ALPHAS   TO BE EMITTED
+1                    ;NUMBER OF PROTONS  TO BE EMITTED
+1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       3.                                               
-LEVDEN     0.                                              
+LEVDEN     3.                               ! RIPL-3 HFB parity dependent NLD as default                                                          
+FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
 NEX      080.                                                   
-MSD        1.                                                     
-COMPFF     1.
-MSC        1.                                                         
-ENDF       5.                     
-PCROSS     1.
-DEGAS      1.
-HMS        0.
-TUNE       0.90    40   91    0                     
-DIRECT     1.
-OMPOT  -1478.       1                               
-DIRPOT -1478.       1
-GSTRFN     1.
-RECOIL     0.
-KALMAN     1.
+MSD        0.                               ! Recommended default for nucleon induced reactions MSD=1                                        *COMPFF     1.
+MSC        0.                               ! Recommended default for nucleon induced reactions MSC=1                           
+ENDF       0.                               ! No ENDF formatting by default   
+PCROSS    1.5                               ! Default prequilibrium using the exciton model
+DEGAS      0.                               ! Spin conserving exciton model for nucleons and gammas 
+HMS        0.                               ! Monte Carlo Hybrid preequilibrium model   
+*TUNE       0.90    Z0   A0    0            ! To fit the capture channel (commented)                    
+* OPTICAL MODEL INPUT
+DIRECT     0.                               ! Spherical optical model by default  
+*OMPOT  -2405.       1                      ! OMP for the inverse neutron channel - Koning - Delaroche   
+*OMPOT  -5405.       2                      ! OMP for the inverse proton channel  - Koning and Delaroche 
+*OMPOT  -9600.       3                      ! OMP for the inverse alpha channel   - Avrigeanu et al
+*DIRECT     1.                                
+*DIRECT     2.                              ! CC calculation using the potential given by DIRPOT (RIPL # 2408)    
+*DIRECT     3.                              ! DWBA calculation using the potential given by DIRPOT (RIPL # 2408)         
+*DIRPOT -2408.       
+GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)   
+RECOIL     0.                               ! No recoils are calculated. Sizeable speed-u if no ENDF file is required  
+*KALMAN    1. 
 GO                                                  
 0.002
 0.005

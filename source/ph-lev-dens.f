@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: ph-lev-dens.f,v 1.11 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:25 $
+Ccc   * $Id: ph-lev-dens.f,v 1.12 2008-10-14 21:32:25 Capote Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
@@ -269,7 +269,7 @@ C-----looks like 7a
          RETURN
       ENDIF
       IF (J.LT.0 .OR. K.GT.15) THEN
-C        WRITE (6,*) 'WARNING: message from W2 J, L, K,', J, L, K
+C        WRITE (8,*) 'WARNING: message from W2 J, L, K,', J, L, K
          W2 = 0.0
          RETURN
       ENDIF
@@ -375,7 +375,7 @@ C
          WOBL = WOBL*FACt(Ip + 1)
          RETURN
       ENDIF
-      WRITE (6,99005) Ip, Ih, n
+      WRITE (8,99005) Ip, Ih, n
 99005 FORMAT (1X,/1X,' ERROR IN WOBL CALL P=',I2,'  H=',I2,'  N=',I2,
      &        '    WOBL=0.0 RETURNED',/)
       END
@@ -464,13 +464,13 @@ C-----------hole part
             RETURN
          ENDIF
       ENDIF
-      WRITE (6,99005) Ip, Ih, U
+      WRITE (8,99005) Ip, Ih, U
 99005 FORMAT (1X,'ERROR IN VQ INPUT: P=',I2,' H=',I2,' E=',F8.4,
      &        '  VQ=0 RETURNED')
       END
 C
       SUBROUTINE TRATES
-      WRITE (6,*) 'ERROR: TRATES NOT IMPLEMENTED'
+      WRITE (8,*) 'ERROR: TRATES NOT IMPLEMENTED'
       END
 C
 C
@@ -485,7 +485,7 @@ C Local variables
 C
 C     Just dummy line to avoid compiler warning
       ROPHM = N + I + E + G
-      WRITE (6,*)
+      WRITE (8,*)
      > 'ERROR: MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
       ROPHM = 0.0
       END

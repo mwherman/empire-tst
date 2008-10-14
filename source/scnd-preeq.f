@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: scnd-preeq.f,v 1.19 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:25 $
+Ccc   * $Id: scnd-preeq.f,v 1.20 2008-10-14 21:32:25 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -178,12 +178,12 @@ C--------trapezoidal integration of continuum population for ejectile nejc
          ENDDO
          sum = sum*DE
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
-         WRITE (6,*) ' '
+         WRITE (8,*) ' '
          IF (Nejc.EQ.1) THEN
-            WRITE (6,*) ' n second-chance PE emission ', 
+            WRITE (8,*) ' n second-chance PE emission ', 
      &                  'cross section ', sum, ' mb'
          ELSEIF (Nejc.EQ.2) THEN
-            WRITE (6,*) ' p second-chance PE emission ', 
+            WRITE (8,*) ' p second-chance PE emission ', 
      &                  'cross section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s

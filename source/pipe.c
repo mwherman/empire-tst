@@ -20,7 +20,8 @@
 /* Do not use default declaration please, they are    */
 /* compiler and system dependent !!!!                 */
 
-#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #define L180 132
 
 long PIPE(char strinp[L180])

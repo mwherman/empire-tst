@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-09-03 14:20:29 $
-Ccc   * $Id: degas.f,v 1.31 2007-09-03 14:20:29 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:19 $
+Ccc   * $Id: degas.f,v 1.32 2008-10-14 21:32:19 Capote Exp $
             
       SUBROUTINE EMPIREDEGAS
       INCLUDE 'dimension.h'
@@ -165,13 +165,13 @@ C
       INDegas = INT(A(1) - Z(1))                ! N of CN
  
       IF (AEJc(0).NE.1.) THEN
-         WRITE (6,*) ''
-         WRITE (6,*) 'WARNING'
-         WRITE (6,*) 'WARNING: DEGAS can treat only neutron or proton '
-         WRITE (6,*) 'WARNING: as projectiles.'
-         WRITE (6,*) 'WARNING: DEGAS disposition ignored.'
-         WRITE (6,*) 'WARNING'
-         WRITE (6,*) ''
+         WRITE (8,*) ''
+         WRITE (8,*) 'WARNING'
+         WRITE (8,*) 'WARNING: DEGAS can treat only neutron or proton '
+         WRITE (8,*) 'WARNING: as projectiles.'
+         WRITE (8,*) 'WARNING: DEGAS disposition ignored.'
+         WRITE (8,*) 'WARNING'
+         WRITE (8,*) ''
          RETURN
       ENDIF
 C      IF((AEJc(0).EQ.0.) .AND. ZEJc(0).EQ.0.)KEYdegas0 = 0

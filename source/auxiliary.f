@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-08-25 06:11:29 $
-Ccc   * $Id: auxiliary.f,v 1.35 2008-08-25 06:11:29 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-10-14 21:32:18 $
+Ccc   * $Id: auxiliary.f,v 1.36 2008-10-14 21:32:18 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -189,7 +189,7 @@ C
       Dintg = sum*d*.5
       IF (ABS(Dintg - dintg1) - prec*ABS(Dintg).GT.0.D0) THEN
          IF (n.GT.200) THEN
-            WRITE (6,'('' STEPS IN INTGRS >200, PRECISION LOST'')')
+            WRITE (8,'('' STEPS IN INTGRS >200, PRECISION LOST'')')
             GOTO 99999
          ENDIF
          n = n + n
@@ -832,12 +832,12 @@ C
             RETURN
          ENDIF
       ENDDO
-      WRITE (6,*) ' Nucleus Izaf ',Izaf,' not found'
-      WRITE (6,*)
+      WRITE (8,*) ' Nucleus Izaf ',Izaf,' not found'
+      WRITE (8,*)
      &' INSUFFICIENT MEMORY ALLOCATION TO ACOMODATE ALL REQUESTED NUCLEI
      &'
-      WRITE (6,*) ' INCREASE NDNUC PARAMETER IN global.h AND RECOMPILE'
-      WRITE (6,*) ' EXECUTION STOPPED'
+      WRITE (8,*) ' INCREASE NDNUC PARAMETER IN global.h AND RECOMPILE'
+      WRITE (8,*) ' EXECUTION STOPPED'
       STOP
       END
 C
@@ -885,8 +885,8 @@ C
 C     For HI calculations
       IF (IZAejc(0).EQ.Izaf) RETURN
       Iloc = 1
-      WRITE (6,*) ' WHEREJC HAS BEEN ASKED FOR UNKNOWN EJECTILE', Izaf
-      WRITE (6,*) ' EXECUTION STOPPED'
+      WRITE (8,*) ' WHEREJC HAS BEEN ASKED FOR UNKNOWN EJECTILE', Izaf
+      WRITE (8,*) ' EXECUTION STOPPED'
       STOP
       END
 
@@ -1113,45 +1113,45 @@ C
 C-----Check ranges and steps
 C     IF(Emin.LT.Xo) THEN
       IF (Emin - Xo.LT. - 0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Inconsistent request               '
-         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (6,*) 'INTERMAT: is below the minimum:        ', Xo
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: is below the minimum:        ', Xo
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xo + (M-1)*So).GT.0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Inconsistent request               '
-         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: is above the maximum:        ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: is above the maximum:        ',
      &               Xo + (M - 1)*So
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Xi - Emin.GT.0.5*Si) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Lower limit point provided:  ', Xi
-         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Lower limit point provided:  ', Xi
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xi + (N-1)*Si).GT.0.5*Si) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: Upper limit point  provided: ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: Upper limit point  provided: ',
      &               Xi + (N - 1)*Si
-         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (So.LE.0 .OR. Si.LE.0) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Both X increments must be positive '
-         WRITE (6,*) 'INTERMAT: Provided input  increment: ', Si
-         WRITE (6,*) 'INTERMAT: Provided output increment: ', So
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Both X increments must be positive '
+         WRITE (8,*) 'INTERMAT: Provided input  increment: ', Si
+         WRITE (8,*) 'INTERMAT: Provided output increment: ', So
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
 C-----Start with the matrix
@@ -1263,83 +1263,83 @@ C
       INTEGER ixi, ixmax, ixmin, ixo, izi, izmax, izmin, izo
 C-----Check ranges and steps
       IF (Nxi.EQ.1 .OR. Nzi.EQ.1) THEN
-         WRITE (6,*) ' DIMENSION EQUAL TO 1 IN BINTERMAT'
+         WRITE (8,*) ' DIMENSION EQUAL TO 1 IN BINTERMAT'
          STOP
       ENDIF
       IF (Exmin - Xo.LT. - 0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Inconsistent request (1)           '
-         WRITE (6,*) 'BINTERMAT: Lower limit point requested: ', Exmin
-         WRITE (6,*) 'BINTERMAT: is below the minimum:        ', Xo
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Inconsistent request (1)           '
+         WRITE (8,*) 'BINTERMAT: Lower limit point requested: ', Exmin
+         WRITE (8,*) 'BINTERMAT: is below the minimum:        ', Xo
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Exmax - (Xo + (Nxo-1)*Sxo).GT.0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Inconsistent request (2)           '
-         WRITE (6,*) 'BINTERMAT: Upper limit point requested: ', Exmax
-         WRITE (6,*) 'BINTERMAT: is above the maximum:   ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Inconsistent request (2)           '
+         WRITE (8,*) 'BINTERMAT: Upper limit point requested: ', Exmax
+         WRITE (8,*) 'BINTERMAT: is above the maximum:   ',
      &               Xo + (Nxo - 1)*Sxo
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Xi - Exmin.GT.0.5*Sxi) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Lower X limit point provided:  ', Xi
-         WRITE (6,*) 'BINTERMAT: Lower X limit point requested: ', Exmin
-         WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Lower X limit point provided:  ', Xi
+         WRITE (8,*) 'BINTERMAT: Lower X limit point requested: ', Exmin
+         WRITE (8,*) 'BINTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Exmax - (Xi + (Nxi-1)*Sxi).GT.0.5*Sxi) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Upper X limit point requested: ', Exmax
-         WRITE (6,*) 'BINTERMAT: Upper X limit point provided:',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Upper X limit point requested: ', Exmax
+         WRITE (8,*) 'BINTERMAT: Upper X limit point provided:',
      &               Xi + (Nxi - 1)*Sxi
-         WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) 'BINTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Ezmin - Zo.LT. - 0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Inconsistent request (3)           '
-         WRITE (6,*) 'BINTERMAT: Lower limit point requested: ', Ezmin
-         WRITE (6,*) 'BINTERMAT: is below the minimum:        ', Zo
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Inconsistent request (3)           '
+         WRITE (8,*) 'BINTERMAT: Lower limit point requested: ', Ezmin
+         WRITE (8,*) 'BINTERMAT: is below the minimum:        ', Zo
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Ezmax - (Zo + (Nzo-1)*Szo).GT.0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Inconsistent request (4)           '
-         WRITE (6,*) 'BINTERMAT: Upper limit point requested: ', Ezmax
-         WRITE (6,*) 'BINTERMAT: is above the maximum:    ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Inconsistent request (4)           '
+         WRITE (8,*) 'BINTERMAT: Upper limit point requested: ', Ezmax
+         WRITE (8,*) 'BINTERMAT: is above the maximum:    ',
      &               Zo + (Nzo - 1)*Szi
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Zi - Ezmin.GT.0.5*Szi) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Lower Z limit point provided:  ', Zi
-         WRITE (6,*) 'BINTERMAT: Lower Z limit point requested: ', Ezmin
-         WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Lower Z limit point provided:  ', Zi
+         WRITE (8,*) 'BINTERMAT: Lower Z limit point requested: ', Ezmin
+         WRITE (8,*) 'BINTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Ezmax - (Zi + (Nzi-1)*Szi).GT.0.5*Szi) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: Upper Z limit point requested: ', Ezmax
-         WRITE (6,*) 'BINTERMAT: Upper Z limit point  provided:',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: Upper Z limit point requested: ', Ezmax
+         WRITE (8,*) 'BINTERMAT: Upper Z limit point  provided:',
      &               Zi + (Nzi - 1)*Szi
-         WRITE (6,*) 'BINTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) 'BINTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Sxo.LE.0 .OR. Sxi.LE.0 .OR. Szo.LE.0 .OR. Szi.LE.0) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'BINTERMAT: All increments must be positive '
-         WRITE (6,*) 'BINTERMAT: Provided input  increments: ', Sxi, Szi
-         WRITE (6,*) 'BINTERMAT: Provided output increments: ', Sxo, Szo
-         WRITE (6,*) 'BINTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'BINTERMAT: All increments must be positive '
+         WRITE (8,*) 'BINTERMAT: Provided input  increments: ', Sxi, Szi
+         WRITE (8,*) 'BINTERMAT: Provided output increments: ', Sxo, Szo
+         WRITE (8,*) 'BINTERMAT: Execution terminated'
          STOP
       ENDIF
 C-----transfer input matrix onto  fyi (contains frame)
@@ -1393,5 +1393,5 @@ C-----------interpolate
             summino = summino + xint
          ENDDO
       ENDDO
-C     WRITE(6,*)'recoil to cont=',summino*Sxo*Szo
+C     WRITE(8,*)'recoil to cont=',summino*Sxo*Szo
       END

@@ -1,15 +1,14 @@
 #!/bin/bash
 #SCRIPT TO RUN EMPIRE (ONLY X-SEC CALCULATIONS)
 echo '                                                           '
-echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      H   H '
-echo '          E      MM  MM  P   P  I  R   R  E          H   H '
-echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   H   H '
-echo '          E      M    M  P      I  R  R   E          H   H '
-echo '          EEEEE  M    M  P      I  R   R  EEEEE      H   H '
+echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 '
+echo '          E      MM  MM  P   P  I  R   R  E             33 '
+echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 '
+echo '          E      M    M  P      I  R  R   E              3 '
+echo '          EEEEE  M    M  P      I  R   R  EEEEE      33333 '
 echo '                                                           '
-echo '                     V E R S I O N  3 beta0                '
+echo '                     A R C O L E (beta 1)                  '
 echo '                                                           '
-echo '                          A R C O L A                      '
 echo '                                                           '
 echo ' '
 file=$1
@@ -33,9 +32,9 @@ fi
 # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
 
 rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
-rm ecis03.tlj ecis03.cs ecis03.ics ecis03.ang 2>/dev/null
+rm ecis06.{ang,cs,dat,ics,pol,tlj,leg,esp,inp} 2>/dev/null
 rm INCIDENT.CS INCIDENT.ICS INCIDENT.ANG INCIDENT.TLJ 2>/dev/null
-rm  PFNM.OUT PFNS.OUT 2>/dev/null
+rm  OMP_A.DAT EMPIRE.STA PFNM.OUT PFNS.OUT 2>/dev/null
 rm  OUTPUT.DAT LIST.DAT 2>/dev/null
 rm  OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
 rm  OMPAR.DIR 2>/dev/null
@@ -185,6 +184,7 @@ mv PFNM.OUT $file-pfnm.out 2>/dev/null
 mv PFNS.OUT $file-pfns.out 2>/dev/null
 mv FIT.OUT $file-ompfit.lst 2>/dev/null
 mv COVAR.DAT $file-MC.par 2>/dev/null
+mv OMP_A.DAT $file-aOMP.lst 2>/dev/null
 
 # EXTRACT WARNINGS
 
@@ -211,7 +211,7 @@ rm file99 2>/dev/null
 rm DEGASRESULT 2>/dev/null
 rm angdis.{pnt,cur} 2>/dev/null
 rm {ccm,dwba,INCIDENT}.{CS,TLJ,ANG,ICS,LEG} 2>/dev/null
-rm ecis03.{ang,cs,dat,ics,pol,tlj,leg,esp} 2>/dev/null
+rm ecis06.{ang,cs,dat,ics,pol,tlj,leg,esp,inp} 2>/dev/null
 rm ecSPH.inp 2>/dev/null
 rm ECIS_SPH.out 2>/dev/null
 rm C4.dat 2>/dev/null
@@ -222,8 +222,8 @@ rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
 rm TARGET_COLL_RIPL.DAT 2>/dev/null
 rm COVAR.DAT 2>/dev/null
 rm OPTFIT.CAL OMPAR0.DIR INPUT0.DAT  2>/dev/null
-rm OMPAR.DIR LOW_ENERGY.OUT ecis03.exp ecis03.smat 2>/dev/null
-rm angdis.p92 ecis03.dat empmf1.tmp FISS_XS.ZVD 2>/dev/null
+rm OMPAR.DIR LOW_ENERGY.OUT ecis06.exp ecis06.smat 2>/dev/null
+rm angdis.p92 ecis06.dat empmf1.tmp FISS_XS.ZVD 2>/dev/null
 
 if  [ -s $file.exf ]; then
     if  [ ! -s $file.c4 ]; then
@@ -267,6 +267,11 @@ if [ ! -s $file-MC.par ]; then
 fi
 if [ ! -s FISSION.OUT ]; then
        rm FISSION.OUT  2>/dev/null
+fi
+
+# PRODUCE ZVD FILES FROM CROSS-SECTION TABLES
+if  [ -s $file.xsc ]; then
+      ../scripts/cs2zvd $file
 fi
 
 exit

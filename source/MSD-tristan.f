@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2007-05-23 21:30:08 $
-Ccc   * $Id: MSD-tristan.f,v 1.61 2007-05-23 21:30:08 herman Exp $
+Ccc   * $Date: 2008-10-14 21:32:24 $
+Ccc   * $Id: MSD-tristan.f,v 1.62 2008-10-14 21:32:24 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -183,7 +183,7 @@ C
       NEBinx = (ETMax - ETMin)/ESTep + 1.2
       EOUtmx = ESTep*FLOAT(NEBinx)
       EOUtmi = EOUtmx - ESTep*FLOAT(NEBinx)
-      WRITE (6,99020)
+      WRITE (8,99020)
 99020 FORMAT ('1'//11X,10('*'),6X,
      &        'MSDR CALCULATION OF CONTINUOUS SPECTRA',6X,10('*')//34X,
      &        '(ON PROGRAM TRISTAN )'/34X,'   (V2.0, OCT.94)'//)
@@ -195,12 +195,12 @@ C
          nwr1 = (l1maxr/KEX3 + 1)*nangle
          nwr2 = (l2maxr/KEX3 + 1)*nwr1
          IF (nwr1.GT.12*NDANG) THEN
-            WRITE (6,*) ' INSUFFICIENT DIMENSION OF THE WR1 ARRAY IN'
-            WRITE (6,*) ' TRISTAN. MUST BE ', nwr1, ' AT LEAST'
+            WRITE (8,*) ' INSUFFICIENT DIMENSION OF THE WR1 ARRAY IN'
+            WRITE (8,*) ' TRISTAN. MUST BE ', nwr1, ' AT LEAST'
             IF (nwr2.GT.144*NDANG) THEN
-               WRITE (6,*) ' '
-               WRITE (6,*) ' INSUFFICIENT DIMENSION OF THE WR2 ARRAY IN'
-               WRITE (6,*) ' TRISTAN. MUST BE ', nwr2, ' AT LEAST'
+               WRITE (8,*) ' '
+               WRITE (8,*) ' INSUFFICIENT DIMENSION OF THE WR2 ARRAY IN'
+               WRITE (8,*) ' TRISTAN. MUST BE ', nwr2, ' AT LEAST'
             ENDIF
             STOP 'ERROR IN WR1 WR2 DIMENSIONS IN TRISTAN'
          ENDIF
@@ -266,10 +266,10 @@ C
                DO icp = 1, icpx
                   ka = nangle*(icp - 1) + 1
                   kb = ka - 1 + nangle
-                  IF (icp.EQ.1) WRITE (6,99030) (ANGle(n),n = 1,nangle)
+                  IF (icp.EQ.1) WRITE (8,99030) (ANGle(n),n = 1,nangle)
 99030             FORMAT (//20X,'1-STEP INPUT LEFT CROSS SECTIONS'//' ',
      &                    ' L1',2X,'Q1',2X,9F12.2)
-                  IF (icp.EQ.2) WRITE (6,99035) (ANGle(n),n = 1,nangle)
+                  IF (icp.EQ.2) WRITE (8,99035) (ANGle(n),n = 1,nangle)
 99035             FORMAT (//20X,'1-STEP INPUT RIGHT CROSS SECTIONS'//
      &                    ' ',' L1',2X,'Q1',2X,9F12.2)
                   DO i1 = 1, IC1x
@@ -277,7 +277,7 @@ C
                      q1 = QMAx - QSTep
                      DO nq = 1, NQ1x
                         q1 = q1 + QSTep
-                        WRITE (6,99040) l1, q1,
+                        WRITE (8,99040) l1, q1,
      &                                  (CROs1(nq,i1,na),na = ka,kb)
 99040                   FORMAT (' ',I3,F6.2,9E12.5)
                      ENDDO
@@ -286,13 +286,13 @@ C
                IF (NCHanl.EQ.2) GOTO 100
             ENDIF
             DO icp = 1, icpx
-               WRITE (6,99065)
+               WRITE (8,99065)
                ka = nangle*(icp - 1) + 1
                kb = ka - 1 + nangle
-               IF (icp.EQ.1) WRITE (6,99045) (ANGle(n),n = 1,nangle)
+               IF (icp.EQ.1) WRITE (8,99045) (ANGle(n),n = 1,nangle)
 99045          FORMAT (//20X,'2-STEP INPUT LEFT CROSS SECTIONS'//' ',
      &                 ' L1 L2  Q1',4X,'Q2  ',9F12.2)
-               IF (icp.EQ.2) WRITE (6,99050) (ANGle(n),n = 1,nangle)
+               IF (icp.EQ.2) WRITE (8,99050) (ANGle(n),n = 1,nangle)
 99050          FORMAT (//20X,'2-STEP INPUT RIGHT CROSS SECTIONS'//' ',
      &                 ' L1 L2  Q1',4X,'Q2  ',9F12.2)
                ic = 0
@@ -303,7 +303,7 @@ C
                      ic = ic + 1
                      q2 = QMAx - QSTep
                      nq = 0
-                     WRITE (6,99055)
+                     WRITE (8,99055)
 99055                FORMAT (/)
                      DO n2 = 1, NQ2x
                         q2 = q2 + QSTep
@@ -312,7 +312,7 @@ C
                         DO n1 = 1, n1x
                            q1 = q1 + QSTep
                            nq = nq + 1
-                           WRITE (6,99060) l1, l2, q1, q2,
+                           WRITE (8,99060) l1, l2, q1, q2,
      &                            (CROs2(nq,ic,n),n = ka,kb)
 99060                      FORMAT (' ',2I3,2F6.1,9E12.5)
                         ENDDO
@@ -320,7 +320,7 @@ C
                   ENDDO
                ENDDO
             ENDDO
-            WRITE (6,99065)
+            WRITE (8,99065)
          ENDIF
   100    DO na = 1, nangle
             IF (kread.NE.1) THEN
@@ -445,7 +445,7 @@ c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilss
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
       DATA eqqx/80.0D0/
       IF(Nebins.GT.3*(NDEx+25))THEN
-      WRITE(6,*)' FATAL:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
+      WRITE(8,*)' FATAL:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
      & ETC. TO: ',NEBINX
       STOP
       ENDIF
@@ -533,16 +533,16 @@ C
       nebinx = MAX(INT((efitx+5.*WIDex)/ESTep + 1.),Nebins)
       IF(NEBinx.GE.3*(NDEx+25)) THEN
          nexnew = INT(3*FLOAT(NDEx+25)/FLOAT(nebinx)*NEX(1)-1)
-         WRITE(6,*) ' '
-         WRITE(6,*) 'Insufficent dimensions for response function in'
-         WRITE(6,*) 'MSD-tristan.f  Possible solutions:'
-         WRITE(6,*) '- decrease NEX in input to ', nexnew
-         WRITE(6,*) '- increase NDEX in dimension.h to', nebinx/3-24,
+         WRITE(8,*) ' '
+         WRITE(8,*) 'Insufficent dimensions for response function in'
+         WRITE(8,*) 'MSD-tristan.f  Possible solutions:'
+         WRITE(8,*) '- decrease NEX in input to ', nexnew
+         WRITE(8,*) '- increase NDEX in dimension.h to', nebinx/3-24,
      &              ' and recompile the source'
-         WRITE(6,*) '- start MSD at higher incident energy '
+         WRITE(8,*) '- start MSD at higher incident energy '
          STOP 'Insuficient dimensions in TRISTAN (see output)'
       ENDIF
-      IF (nebinx.NE.Nebins .AND. IOUt.GT.3) WRITE (6,99005) nebinx*ESTep
+      IF (nebinx.NE.Nebins .AND. IOUt.GT.3) WRITE (8,99005) nebinx*ESTep
 99005 FORMAT (/' >> LIMIT OF EX IS INCREASED TO:',F9.3,' (MEV) <<'/
      &        '    (USED TO DETERMINE THE COUPLING CONSTANTS)')
       ltmaxr = ICMax
@@ -576,7 +576,7 @@ C-----set xea and yea to 0 to avoid undefined if efit's are 0
       ROPt = RR
       IF (ROPt.LE.0.0D0) ROPt = rd
       rdopt = rd/ROPt
-      IF (IOUt.GT.3) WRITE (6,99010) rd, ad, rh0, ROPt, rdopt
+      IF (IOUt.GT.3) WRITE (8,99010) rd, ad, rh0, ROPt, rdopt
 99010 FORMAT (//' ','RDENS=',F7.4,3X,'ADENS=',F7.4,3X,'RH0=',F7.4/' ',
      &        'ROPT =',F7.4,3X,'RATIO=',F7.4)
 C
@@ -602,7 +602,7 @@ C
       aew = 1.5
       e0 = egr - aew*LOG(9.)
       widas = widgr*1.11
-      IF (IOUt.GT.2) WRITE (6,99015) egr, wgr, widas, WIDex, e0, aew
+      IF (IOUt.GT.2) WRITE (8,99015) egr, wgr, widas, WIDex, e0, aew
 99015 FORMAT (/'  ENERGY DEPENDENT WIDTH OF RPA/QRPA STATES:'/
      &        '  E(GDR) :',F8.3,'   W(GDR)   :',F8.3,
      &        ' [MEV]'/'  WID(AS):',F8.3,'   WID(EXP.):',F8.3,
@@ -659,7 +659,7 @@ C
          ENDDO
       ENDDO
 C
-      IF (IOUt.GT.2) WRITE (6,99020)
+      IF (IOUt.GT.2) WRITE (8,99020)
 99020 FORMAT (//8X,' RADIAL MOMENTS <R**L>/A OF THE G.S. DENSITY'/5X,
      &        '           ( UNITS: [FM**L/A] )             '/4X,'L',11X,
      &        'L  ',11X,'L+1',11X,'L+2',11X,'L+3',11X,'L+4')
@@ -667,7 +667,7 @@ C
       DO l = 1, lmax, lst
          l1 = l
          l2 = MIN(lmax,l1 + lst - 1)
-         IF (IOUt.GT.2) WRITE (6,99025) l - 1, (GSDm(n)*api,n = l1,l2)
+         IF (IOUt.GT.2) WRITE (8,99025) l - 1, (GSDm(n)*api,n = l1,l2)
 99025    FORMAT (I5,5E14.7)
       ENDDO
 C
@@ -680,17 +680,17 @@ C
       hcorr = homeb/HOMega
       vnorm = homeb
       IF (IOUt.GT.3) THEN
-         WRITE (6,99030) bosc, BST(3), bosc/BST(3), BST1
+         WRITE (8,99030) bosc, BST(3), bosc/BST(3), BST1
 99030    FORMAT (//'  OSCILLATOR LENGTH:'/'  B(DENSITY):',F7.3,
      &           '  B(NILSSON):',F7.3,'  RATIO:',F7.4/'  B(PROTON) :',
      &           F7.3,'  B(NEUTRON):',F7.3)
-         WRITE (6,99035) homeb, HOMega, hcorr
+         WRITE (8,99035) homeb, HOMega, hcorr
 99035    FORMAT (/'  OSCILLATOR ENERGY:'/'  E(DENSITY):',F7.3,
      &           '  E(NILSSON):',F7.3,'  RATIO:',F7.4)
-         WRITE (6,99040) (SQRT(RMS(i)),i = 1,3)
+         WRITE (8,99040) (SQRT(RMS(i)),i = 1,3)
 99040    FORMAT (/'  <R**2> (IN [FM]) :'/'  PROTON    :',F7.3,
      &           '  NEUTRON   :',F7.3,'  TOTAL:',F7.4)
-         WRITE (6,99045) vnorm
+         WRITE (8,99045) vnorm
 99045    FORMAT (/'   STRENGTH OF THE MULTIPOLE-MULTIPOLE INTERACTION:'/
      &           '  VNORM     :',F7.3,' [MEV]')
       ENDIF
@@ -1115,7 +1115,7 @@ C                 cr3 = rfqqr(nea + 1, lt)
                   clex(lt,kt) = 0.0                                      ! nilsson_newest
                ENDIF
                IF (clex(lt,kt).EQ.0.D0) THEN                             ! nilsson_newest
-                  WRITE (6,99065) lt - 1,kt-1, efit(lt,kt), ddr          ! nilsson_newest
+                  WRITE (8,99065) lt - 1,kt-1, efit(lt,kt), ddr          ! nilsson_newest
 99065             FORMAT (/'WARNING: From TRISTAN:'/
      &                 'WARNING: - No fit of response function for J/K=' ! nilsson_newest
      &                  ,I3,I3/'WARNING: E(EXP.):',F8.2,'  2nd deriv.:', ! nilsson_newest
@@ -1211,12 +1211,12 @@ C        DO NE=1,NEBINX
 C        WRITE(17,1400)EST(NE),(RHO(NE,I),I=1,MIN(10,ICMAX))
 C        ENDDO
 C
-         IF (krt.EQ.1) WRITE (6,99080)
+         IF (krt.EQ.1) WRITE (8,99080)
 99080    FORMAT (//6X,'COUPLING CONSTANTS AND RENORMALIZATION'/6X,
      &           '       ( INELASTIC EXCITATION )      '/1X,'L/K',4X,
      &           'EA  ',2X,'SELF-CON',3X,'EMPIRICAL',6X,'RATIO',7X,
      &           'VEFF',4X,'RESIDUE',6X,'WIDTH',' CONFIG.')
-         IF (krt.EQ.2) WRITE (6,99085)
+         IF (krt.EQ.2) WRITE (8,99085)
 99085    FORMAT (//6X,'COUPLING CONSTANTS AND RENORMALIZATION'/6X,
      &           '   ( CHARGE EXCHANGE EXCITATION )    '/1X,'L/K',4X,
      &           'EA  ',3X,'SELF-CON',3X,'EMPIRICAL',6X,'RATIO',4X,
@@ -1233,12 +1233,12 @@ C
                widea = 0.0
             ENDIF
             veff = vnorm*CLRn(l,k)                                       ! nilsson_newest
-            WRITE (6,99090)l-1,k-1, efit(l,k), clsc(l,k), clex(l,k),     ! nilsson_newest
+            WRITE (8,99090)l-1,k-1, efit(l,k), clsc(l,k), clex(l,k),     ! nilsson_newest
      &            CLRn(l,k),veff, resid, widea, nconf(l)                 ! nilsson_newest
 99090       FORMAT (I2,I2,F8.3,2E11.4,2F11.4,E11.4,F11.4,I7)             ! nilsson_newest
             enddo                                                        ! nilsson_newest
          ENDDO
-         WRITE (6,99095) eqqx
+         WRITE (8,99095) eqqx
 99095    FORMAT (8X,'CONFIGURATION SPACE IS EQQX:',F9.3,' (MEV)')
 C
 C--------calculate non-energy weighted (SRNEW) and energy weighted (SREW)
@@ -1258,11 +1258,11 @@ C
                enddo                                                     ! nilsson_newest
             ENDDO
          ENDDO
-C        WRITE(6,607)RD,(LT-1,LT=1,LTMAXR)
+C        WRITE(8,607)RD,(LT-1,LT=1,LTMAXR)
 C        607 FORMAT(1H1/9X,'BETA-VALUES FOR TARGET EXCITATIONS  RD=',
 C        1 F7.4//1H ,4X,' EX',11(5X,I3,3X))
 C        DO 110 NE=1,NEBINX
-C        110 WRITE(6,608)EST(NE),(BETA(NE,LT),LT=1,LTMAXR)
+C        110 WRITE(8,608)EST(NE),(BETA(NE,LT),LT=1,LTMAXR)
 C        608 FORMAT(1H ,F7.2,11E11.4)
       ENDDO
       END
@@ -1517,11 +1517,11 @@ C
       text(1) = 'PROTONS '
       text(2) = 'NEUTRONS'
       IF (IBLk(I3).NE.0) THEN
-c         WRITE (6,99005) text(I3), NBL(I3), LBL(I3), JBL(I3)
+c         WRITE (8,99005) text(I3), NBL(I3), LBL(I3), JBL(I3)
 c99005    FORMAT (/5X,'PAIRING WITH BLOCKING FOR ',A10/5X,'N:',I3,'  L:',
 c     &           I3,'  J:',I3,'/2')
       ELSE
-         WRITE (6,99010) text(I3)
+         WRITE (8,99010) text(I3)
 99010    FORMAT (/5X,'PAIRING WITHOUT BLOCKING FOR ',A10/5X)
       ENDIF
       DO n = 1, NRX
@@ -1545,7 +1545,7 @@ C-----iteration for chemical potential
 C
       ii = 0
   100 ii = ii + 1
-      IF (ii.GT.imax) WRITE (6,*)
+      IF (ii.GT.imax) WRITE (8,*)
      &                   ' INITIALISATION FOR CHEMICAL POTENTIAL FAILED'
       chem(2) = chem(1) + dc
       CALL NUMBER(Ndim,I3,gsq,A,xnum,chem(2),d(2))
@@ -1562,7 +1562,7 @@ C
             Chemic = chem(1)
             text(1) = ' BCS FOR PROTONS  '
             text(2) = ' BCS FOR NEUTRONS '
-            WRITE (6,99015) text(I3), Gap, Chemic, xnum
+            WRITE (8,99015) text(I3), Gap, Chemic, xnum
 99015       FORMAT (//A20,'  GAP:',F8.3,'  CHEM.POT.:',F10.4,' NUMBER:',
      &              F8.1/'  NO.   N   L     J',5X,'EBCS',7X,'V',5X,
      &              'VSQ',3X,'EHOLE',3X,'EPART')
@@ -1585,7 +1585,7 @@ C--------------'indeks undefined' message. (n is not used anyway)
                ELSE
                   ESP(i,I3) = ep
                ENDIF
-               WRITE(6, 99020)i, KSP(i, I3), NSP(i, I3),                 ! nilsson
+               WRITE(8, 99020)i, KSP(i, I3), NSP(i, I3),                 ! nilsson
      &         e,    VAMp(i, I3), vsq, eh, ep                            ! nilsson
 99020          FORMAT(I5, 2I4, '/2', F9.4, 2F8.5, 2X, 2F8.3)             ! nilsson
 
@@ -1611,19 +1611,19 @@ C
                ENDDO
             ENDDO
             IF (NRX.GE.0) RETURN
-            WRITE (6,99025)
+            WRITE (8,99025)
 99025       FORMAT (//5X,'DENSITY AND PAIRING DENSITY'/8X,'R',6X,
      &              'DENSITY',6X,'PAIRING')
             nrxx = MIN(12.D0/(RST(2) - RST(1)),1.D0*NRX)
             nst = MAX(1,nrxx/25)
             DO n = 1, nrxx, nst
                k = MAX(1,n - 1)
-               WRITE (6,99030) RST(k), GSD(k,I3), GSP(k,I3)
+               WRITE (8,99030) RST(k), GSD(k,I3), GSP(k,I3)
 99030          FORMAT (F9.2,5E13.5)
             ENDDO
          ELSE
             IF (ii.GT.imax) THEN
-               WRITE (6,*) ' NO CONVERGENCE FOR CHEMICAL POTENTIAL'
+               WRITE (8,*) ' NO CONVERGENCE FOR CHEMICAL POTENTIAL'
                STOP
             ENDIF
             GOTO 150
@@ -1936,22 +1936,22 @@ C     ESPX=100.+ABS(E0)
       IF (nqx*HOMega.LT.espx) nqx = nqx + 1
       text(1) = 'PROTONS '
       text(2) = 'NEUTRONS'
-      WRITE (6,99005) text(I3), HOMega, VLS(I3), VLS(I3)*HOMega, e0
+      WRITE (8,99005) text(I3), HOMega, VLS(I3), VLS(I3)*HOMega, e0
 99005 FORMAT (//,5X,'NILSSON-HAMILTONIAN FOR ',A10/'  HOMEGA:',F8.3,
      &        '  A(LS):',F8.3,' V(LS):',F8.3,
      &        ' (MEV)'/'  E0 (POTENTIAL DEPTH U(R=0)):',F8.3,' [MEV]')
       ipr = 5
       IF (Iout.GT.3) THEN
-         WRITE (6,99010) (i - 1,i = 1,ipr)
+         WRITE (8,99010) (i - 1,i = 1,ipr)
 99010    FORMAT (/7X,'A(LL) (IN UNITS OF HOMEGA)'/3X,'N',5(5X,'N+',I1))
          DO n = 1, nqx + 1, ipr
             n1 = n
             n2 = MIN(nqx + 1,n1 + ipr - 1)
-            WRITE (6,99015) n - 1, (vll(k,I3),k = n1,n2)
+            WRITE (8,99015) n - 1, (vll(k,I3),k = n1,n2)
 99015       FORMAT (I4,5F8.4)
          ENDDO
       ENDIF
-C     WRITE (6, 6003) TEXT(I3)
+C     WRITE (8, 6003) TEXT(I3)
 C6003 FORMAT(//5X,'SINGLE PARTICLE STATES - INPUT FOR ',A8/
 C     1   '  NO.   N   L     J',5X,'ESP')
 C
@@ -2043,14 +2043,14 @@ C
          nhx = n-2                                                       ! nilsson
          GRin(i3)= esp(nhx,i3) - esp( ifermi,i3) + 0.1                   ! nilsson
          if (i3.eq.1) then                                               ! nilsson
-            WRITE (6,                                                    ! nilsson
+            WRITE (8,                                                    ! nilsson
      &'('' Range for constant gap. protons (MSD)'',   F6.3,''            ! nilsson
      &MeV'')') GRin(i3)                                                  ! nilsson
             WRITE (12,                                                   ! nilsson
      &'('' Range for constant gap. protons (MSD)'',   F6.3,''            ! nilsson
      &MeV'')') GRin(i3)                                                  ! nilsson
          else if(i3.eq.2) then                                           ! nilsson
-            WRITE (6,                                                    ! nilsson
+            WRITE (8,                                                    ! nilsson
      &'('' Range for constant gap. neutrons (MSD)'',   F6.3,''           ! nilsson
      &MeV'')') GRin(i3)                                                  ! nilsson
             WRITE (12,                                                   ! nilsson
@@ -2154,14 +2154,14 @@ C
          ipr = 1
          IF (ipr.NE.0) THEN
             IF (k.EQ.1) THEN
-               WRITE (6,99005)
+               WRITE (8,99005)
 99005          FORMAT (//10X,' PROTON SINGLE PARTICLE STATES:')
             ELSE
-               WRITE (6,99010)
+               WRITE (8,99010)
 99010          FORMAT (//10X,'NEUTRON SINGLE PARTICLE STATES:')
             ENDIF
             nlmax = NTOtal(k)
-            WRITE (6,99015) (ESP(i,k),NSP(i,k),KSP(i,k),i = 1,
+            WRITE (8,99015) (ESP(i,k),NSP(i,k),KSP(i,k),i = 1,
      &                      nlmax)
 99015       FORMAT (6(F9.2,2I3,'/2'))
          ENDIF
@@ -2192,7 +2192,7 @@ C
       IF (KRType.GE.4) THEN
          RAC = a1/(a1 - 3.)
          IF (KRType.GE.4) THEN
-            WRITE (6,*) '  ******  NOT USED  ******'
+            WRITE (8,*) '  ******  NOT USED  ******'
             STOP
          ENDIF
          DO lp1 = 1, ICMax
@@ -2207,27 +2207,27 @@ C
          krtx = KTRl(7) + 1
          DO krt = 1, krtx
             IF (krt.EQ.1) THEN
-               WRITE (6,99020) ETMin, ETMax, ESTep
+               WRITE (8,99020) ETMin, ETMax, ESTep
 99020          FORMAT (///10X,
      &                 'RPA RESPONSE FUNCTIONS (INELASTIC EXCITATION)'/
      &                 10X,'EXMIN=',F7.2,' EXMAX=',F7.2,' ESTEP=',F7.2/)
             ELSE
-               WRITE (6,99025) ETMin, ETMax, ESTep
+               WRITE (8,99025) ETMin, ETMax, ESTep
 99025          FORMAT (///10X,'RPA RESPONSE FUNCTIONS (CHARGE EXCHANGE)'
      &                 /10X,'EXMIN=',F7.2,' EXMAX=',F7.2,' ESTEP=',
      &                 F7.2/)
             ENDIF
-            WRITE (6,99030) (lt - 1,lt = 1,ltmaxr)
+            WRITE (8,99030) (lt - 1,lt = 1,ltmaxr)
 99030       FORMAT (5X,'EX',10(4X,I4,3X))
             DO neb = 1, NEBinx
-               WRITE (6,99035) est(neb),
+               WRITE (8,99035) est(neb),
      &                         (RHOb(neb,lt,krt),lt = 1,ltmaxr)
 99035          FORMAT (' ',F6.2,10E11.4)
             ENDDO
          ENDDO
-         WRITE (6,99040) (SRNew(lt),lt = 1,ltmaxr)
+         WRITE (8,99040) (SRNew(lt),lt = 1,ltmaxr)
 99040    FORMAT (///' ','SRNEW:',11E11.4)
-         WRITE (6,99045) (SREw(lt),lt = 1,ltmaxr)
+         WRITE (8,99045) (SREw(lt),lt = 1,ltmaxr)
 99045    FORMAT (' ','SREW :',11E11.4)
          IF (KTRl(8).EQ.( - 1)) GOTO 99999
       ENDIF
@@ -2237,7 +2237,7 @@ C
       ENDDO
       eex = ETMin - ESTep
       hhh = ESTep/3.
-      WRITE (6,99055) (ic - 1,ic = 1,ICMax)
+      WRITE (8,99055) (ic - 1,ic = 1,ICMax)
 99055 FORMAT ('1'/5X,'EWSR AS A FUNCTION OF EXCITATION ENERGY'/' ',3X,
      &        'EX ',11(5X,I3,3X))
       DO ne = 2, NEBinx, 2
@@ -2251,7 +2251,7 @@ C
      &                    + hhh*(e2*RHOb(ne - 2,ic,1) + 4.*e1*RHOb
      &                    (ne - 1,ic,1) + e0*RHOb(ne,ic,1))
             ENDDO
-            WRITE (6,99060) eex, (SREw(ic),ic = 1,ICMax)
+            WRITE (8,99060) eex, (SREw(ic),ic = 1,ICMax)
 99060       FORMAT (' ',F6.2,11E11.4)
          ENDIF
       ENDDO
@@ -2448,7 +2448,7 @@ C
       s2 = s2 - s1
       s1 = s1/FLOAT(N) - 1.
       IF (ABS(s1).GE.1.D-07 .OR. ABS(s2).GE.1.D-07) THEN
-         WRITE (6,99005) s1, s2
+         WRITE (8,99005) s1, s2
 99005    FORMAT (//' ','ERROR IN INVERT - S1,S2:',2E14.7)
       ENDIF
       DO i = 1, N
@@ -2519,7 +2519,7 @@ C
       nej = 1
       IF (ZEJc(Nejc).EQ.1.0D0) nej = 2
       IF (ZEJc(Nejc).GT.1.0D0) THEN
-         WRITE (6,*)
+         WRITE (8,*)
      &' THIS IMPLEMENTATION OF TRISTAN IS ABLE TO TREAT ONLY NEUTRON OR
      &PROTON IN THE INCIDENT CHANNEL'
          STOP
@@ -2532,7 +2532,7 @@ C
       kkp = 1
       IF (KRType.GE.4) kkp = 2
       nangle = Ngle
-      IF (IOUt.GT.3) WRITE (6,99005)
+      IF (IOUt.GT.3) WRITE (8,99005)
 99005 FORMAT ('1'/20X,10('+'),5X,'MSDR - CROSS SECTIONS AND',
      &        ' ANALYZING POWERS',5X,10('+')///40X,
      &        'UNITS ARE MB AND %'/)
@@ -2869,7 +2869,7 @@ C
                ENDDO
             ENDDO
    20       IF (IOUt.GT.3) THEN
-               WRITE (6,99010) ANGle(na), delta,
+               WRITE (8,99010) ANGle(na), delta,
      &                         (FAC1d(n),FAC2d(n),FAC3d(n),n = 1,NFAc12)
 99010          FORMAT (/'0',6X,
      &                 'X-SECTION AND ANALYZING POWER FOR THETA=',
@@ -2914,7 +2914,7 @@ C
                      ENDDO
                   ENDIF
                   IF (IOUt.GT.3) THEN
-                     WRITE (6,99020) eout, s1, s2, s3, sigm, f11, a1,
+                     WRITE (8,99020) eout, s1, s2, s3, sigm, f11, a1,
      &                               a2, a3, ay, f21
                      WRITE (66,99020) eout, s1, s2, sigm
                   ENDIF
@@ -2953,10 +2953,10 @@ C-----if ECIS active use only continuum part of the MSD spectrum
          CSMsd(nej) = CSMsd(nej) + piece*DE
          Xsinl = Xsinl + piece*DE
       ENDDO
-      WRITE(6,*) ' '
-      WRITE(6,'('' Integrated MSD emission at Elab '', G15.3,'' is ''
+      WRITE(8,*) ' '
+      WRITE(8,'('' Integrated MSD emission at Elab '', G15.3,'' is ''
      &         , G15.3,'' mb'')') EINl, CSMsd(nej) 
-      WRITE(6,*) ' '
+      WRITE(8,*) ' '
 C-----angular distributions integration *** done ***
 99020 FORMAT (' ',F6.2,6E11.4,4X,6F9.4)
       END
@@ -3005,10 +3005,10 @@ C
       INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
       INTEGER INT
       IF (NEX(Nnuc).LT.1) THEN
-         WRITE (6,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
-         WRITE (6,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
-         WRITE (6,*) ' NUCLEUS NNUC=', Nnuc, ' NEX(NNUC)=', NEX(Nnuc)
-         WRITE (6,*) ' I BETTER  S T O P'
+         WRITE (8,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
+         WRITE (8,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
+         WRITE (8,*) ' NUCLEUS NNUC=', Nnuc, ' NEX(NNUC)=', NEX(Nnuc)
+         WRITE (8,*) ' I BETTER  S T O P'
          STOP
       ENDIF
 C-----
@@ -3180,12 +3180,12 @@ C-----provided by TRISTAN at the closest bin.
          ENDIF
       ENDDO
   100 IF (swght.EQ.0.0D0) THEN
-         WRITE (6,*) ' WARNING:'
-         WRITE (6,*) ' WARNING: No level to put msd level contribution '
+         WRITE (8,*) ' WARNING:'
+         WRITE (8,*) ' WARNING: No level to put msd level contribution '
      &               , csmsdl, ' mb'
-         WRITE (6,*) ' WARNING: Load everything to the ground state '
-         WRITE (6,*) ' WARNING: Ang. dist. of discrete levels ignored'
-         WRITE (6,*) ' WARNING:'
+         WRITE (8,*) ' WARNING: Load everything to the ground state '
+         WRITE (8,*) ' WARNING: Ang. dist. of discrete levels ignored'
+         WRITE (8,*) ' WARNING:'
          POPlv(1,Nnur) = POPlv(1,Nnur) + csmsdl
          RETURN
       ENDIF

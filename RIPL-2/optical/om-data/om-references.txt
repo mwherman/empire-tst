@@ -188,3 +188,4 @@
 126.  E.D.Arthur,P.G.Young,W.Matthes, Report BNL-51245,751(1980)
 127.  M.Avrigeanu,W.von Oertzen,F.L.Roman, and V.Avrigeanu, Progress Rep
       ort IAEA RC 12422/R1 (2004), see also Nucl. Phys. A723,104(2003)
+128.  A.Kumar, S.Kailas, S.Rathi and K.Mahata, Nucl. Phys. A776 (2006) 105

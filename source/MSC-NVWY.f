@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: MSC-NVWY.f,v 1.15 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:23 $
+Ccc   * $Id: MSC-NVWY.f,v 1.16 2008-10-14 21:32:23 Capote Exp $
 C
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
@@ -66,7 +66,7 @@ C
 C-----n o t e jtl.lt.5 has a special meaning
 C-----n o t e missing transition to region between last level and ecut
 C-----        for neutron emission
-Cpr   WRITE(6,*) 'check for the parity in ro'
+Cpr   WRITE(8,*) 'check for the parity in ro'
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(1)
 C-----clear scratch matrix
@@ -342,22 +342,22 @@ C
       DOUBLE PRECISION yre, ysp
       EQUIVALENCE (PIM(1,1),PIM1)
 C
-      WRITE (6,'(1X,//,'' Options in Heidelberg M.S.C.'')')
-      WRITE (6,'('' ----------------------------'',/)')
-C     WRITE(6,'('' Transmission coeff. calculated dividing o.m. transmis
+      WRITE (8,'(1X,//,'' Options in Heidelberg M.S.C.'')')
+      WRITE (8,'('' ----------------------------'',/)')
+C     WRITE(8,'('' Transmission coeff. calculated dividing o.m. transmis
 C     xsion ceoff. according to acc. state densities'')')
-      WRITE (6,
+      WRITE (8,
      &'('' Transmission coeff. calculated using matrix elements determin
      &ed in the incident channel'')')
-C     WRITE(6,'('' gamma down calculated directly from the optical model
+C     WRITE(8,'('' gamma down calculated directly from the optical model
 C     x imaginary part'')')
-      WRITE (6,
+      WRITE (8,
      &'('' Gamma down calculated using matrix element determined from th
      &e optical model imaginary part'')')
-      WRITE (6,'('' using full spreading width of the GDR'')')
-C     WRITE(6,'('' using spreading width of the GDR split among three cl
+      WRITE (8,'('' using full spreading width of the GDR'')')
+C     WRITE(8,'('' using spreading width of the GDR split among three cl
 C     *asses'')')
-C     WRITE(6,'('' using single particl matrix element with analogy to (
+C     WRITE(8,'('' using single particl matrix element with analogy to (
 C     *1,4)-->(2,4)'')')
 C-----input parameters
       SIGnx = 0.26*A(1)**0.66666667
@@ -389,10 +389,10 @@ C-----determination of the initial exciton configuration for H.I.
 C-----determination of the initial exciton configuration **** done ****
       EXTr = EXCn
       IF (NLW.GT.NDLW - 1) THEN
-         WRITE (6,*) 'NDLW IS TOO SMALL FOR MSC'
-         WRITE (6,'('' INCREASE IT TO '',I3,'' AND RECOMPILE'')')
+         WRITE (8,*) 'NDLW IS TOO SMALL FOR MSC'
+         WRITE (8,'('' INCREASE IT TO '',I3,'' AND RECOMPILE'')')
      &          NLW + 1
-         WRITE (6,*) 'EXECUTION STOPPED'
+         WRITE (8,*) 'EXECUTION STOPPED'
          STOP
       ENDIF
 C-----calculation of factorial
@@ -407,27 +407,27 @@ C-----calculation of factorial      ***** done *******
       izares = 1000.0*Z(1) + A(1) - 1.
       CALL WHERE(izares,nresn,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (6,*)
+         WRITE (8,*)
      &'RESIDUAL NUCLEUS AFTER NEUTRON EMISSION FROM CN HAS NOT BEEN DETE
      &RMINED BEFORE CALL OF HMSC'
-         WRITE (6,*) 'OPEN NEUTRON EMISSION'
-         WRITE (6,*) 'EXECUTION STOPPED'
+         WRITE (8,*) 'OPEN NEUTRON EMISSION'
+         WRITE (8,*) 'EXECUTION STOPPED'
          STOP
       ENDIF
       izares = 1000.0*(Z(1) - 1.0) + A(1) - 1.
       CALL WHERE(izares,nresp,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (6,*)
+         WRITE (8,*)
      &'RESIDUAL NUCLEUS AFTER PROTON  EMISSION FROM CN HAS NOT BEEN DETE
      &RMINED BEFORE CALL OF HMSC'
-         WRITE (6,*) 'OPEN PROTON  EMISSION'
-         WRITE (6,*) 'EXECUTION STOPPED'
+         WRITE (8,*) 'OPEN PROTON  EMISSION'
+         WRITE (8,*) 'EXECUTION STOPPED'
          STOP
       ENDIF
 C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       G = A(1)/GDIv
       IF (STMro.EQ.1.0D0) THEN
-         WRITE (6,
+         WRITE (8,
      &'(     '' Microscopic p-h state densities will be calculated with
      &parameters'')')
          CALL TRATES
@@ -436,15 +436,15 @@ C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
          IF (ZEJc(0).EQ.2.0D0) ini = 1000200
       ENDIF
       Nvwful = .FALSE.
-      IF (NOUt.GT.0) WRITE (6,99005)
+      IF (NOUt.GT.0) WRITE (8,99005)
 99005 FORMAT (1X,//,1X,'Heidelberg M.S.C. (ausiliary output)',//)
       IF (SQRT(1.5D0*G*EXCn) + 6D0.LT.2.0D0*NDMSCS + 1.D0)
      &    Nvwful = .TRUE.
-      IF (Nvwful) WRITE (6,99010)
+      IF (Nvwful) WRITE (8,99010)
 99010 FORMAT (1X,
      &'C.N. decay will be totaly calculated in terms of the Heidelberg M
      &.S.C. theory')
-      IF (.NOT.Nvwful) WRITE (6,99015)
+      IF (.NOT.Nvwful) WRITE (8,99015)
 99015 FORMAT (1X,
      &'M.S.C. calculations of the C.N. decay will be followed by the Hau
      &ser-Feshbach approach')
@@ -458,7 +458,7 @@ C-----peaks is added to the average; this being absolutely arbitrary)
      &                                 (5,1)*GDRpar(6,1))
      &                                 /(GDRpar(3,1) + GDRpar(6,1))
      &                                 + 0.5*(GDRpar(4,1) - GDRpar(1,1))
-      WRITE (6,'('' Spreading/total GDR width ='',G12.5)') D1Fra
+      WRITE (8,'('' Spreading/total GDR width ='',G12.5)') D1Fra
       egdrr = EXCn - egdr
 C-----
 C-----calculation of spin distribution for each exciton number
@@ -525,12 +525,12 @@ C-----
             xep(1,2) = vu
          ENDIF
       ENDIF
-      WRITE (6,99020) xep(1,1), xep(1,2), IE(1)
+      WRITE (8,99020) xep(1,1), xep(1,2), IE(1)
 99020 FORMAT (1X,
      &        'Initial particle type number of excitons for neutrons=',
      &        F5.2,' for protons=',F5.2,' total number of excitons=',I2)
       IF (IE(1).GT.IV + 1) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' DIMENSIONS INSUFICIENT TO TREAT INITIAL EXCITON'',   '' NUMBE
      &R'',/,'' SET IV IN PARAMETER CARD TO '',I2,'' AND REC''   ,''OMPIL
      &E'')') IE(1) - 1
@@ -578,7 +578,7 @@ C-----RBU stands for the average ratio of the matrix elements connecting
 C-----initial channel to bound and unbound states
 C-----(RBU=m-to-bound/m-to-unbound)
       rbu = 1.
-      WRITE (6,
+      WRITE (8,
      &'(     '' Ratio of unbound-bound to unbound-unbound matrix element
      &s'',F6.2)') rbu
       DO k = 1, NDMSCS
@@ -608,16 +608,16 @@ C--------------------------------------------------
          ENDDO
       ENDDO
 C-----state density printout
-      WRITE (6,
+      WRITE (8,
      &'('' Relative population of subsequent MSC classes from the open s
      &pace:'',/)')
-      WRITE (6,99105) popart
+      WRITE (8,99105) popart
       IF (NOUt.GT.1) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' State density in C.N. as a function of spin and class number'
      &',/)')
          DO k = 1, NDMSCS
-            WRITE (6,99105) (awj(k,j),j = 1,12)
+            WRITE (8,99105) (awj(k,j),j = 1,12)
          ENDDO
       ENDIF
 C-----
@@ -791,12 +791,12 @@ C-----for proton absorption (used for the determination of Tl splitting)
 C-----
       IF (NOUt.GT.1) THEN
          DO k = 1, NDMSCS
-            WRITE (6,99025) k, ip(k), ih(k), IE(k), EXCn, awm(k)
+            WRITE (8,99025) k, ip(k), ih(k), IE(k), EXCn, awm(k)
 99025       FORMAT (1X,//,'  STEP K=',I3,' P=',I2,' H=',I2,' N=',I2,
      &              ' EXCN=',F8.3,' AWM=',G11.3,//,4X,
      &'Y(.,K,1)  Y(.,K,2)   Y(.,K,3)  Z(.,K,1)   Z(.,K,2)   Z(.,K,3)   Z
      &SUM(.,K)',//)
-            WRITE (6,99030) (i,YP(i,k,1,1),YP(i,k,2,1),YP(i,k,3,1),
+            WRITE (8,99030) (i,YP(i,k,1,1),YP(i,k,2,1),YP(i,k,3,1),
      &                      ZP(i,k,1,1),ZP(i,k,2,1),ZP(i,k,3,1),
      &                      ZSUm(i,k,1),i = 1,30)
 99030       FORMAT (I3,7G11.3)
@@ -891,12 +891,12 @@ C
                ENDIF
 C--------------printout of the pi matrix
                IF (NOUt.GT.2) THEN
-                  WRITE (6,99035) j, i
+                  WRITE (8,99035) j, i
 99035             FORMAT (1X,'PIM MATRIX   J=',I2,' I=',I2)
                   DO m2 = 1, NDMSCS
-                     WRITE (6,99105) (PIM(m1,m2),m1 = 1,NDMSCS)
+                     WRITE (8,99105) (PIM(m1,m2),m1 = 1,NDMSCS)
                   ENDDO
-                  WRITE (6,99110)
+                  WRITE (8,99110)
                ENDIF
 C--------------memorize PI matrix
                DO k1 = 1, NDMSCS
@@ -912,12 +912,12 @@ C--------------
                ENDDO
                CALL MATIN(PIM,bbb,NDMSCS,1,det)
                IF (NOUt.GT.2) THEN
-                  WRITE (6,99040) j, i
+                  WRITE (8,99040) j, i
 99040             FORMAT (1X,'Inverse PIM matrix   J=',I2,' I=',I2)
                   DO m2 = 1, NDMSCS
-                     WRITE (6,99105) (PIM(m1,m2),m1 = 1,NDMSCS)
+                     WRITE (8,99105) (PIM(m1,m2),m1 = 1,NDMSCS)
                   ENDDO
-                  WRITE (6,99110)
+                  WRITE (8,99110)
                ENDIF
 C--------------
 C--------------check of the invertion and printout
@@ -932,12 +932,12 @@ C--------------
                   ENDDO
                ENDDO
                IF (NOUt.GT.2) THEN
-                  WRITE (6,99045) j, i
+                  WRITE (8,99045) j, i
 99045             FORMAT (1X,'Control matrix   J=',I2,' I=',I2)
                   DO m2 = 1, NDMSCS
-                     WRITE (6,99105) (undex(m1,m2),m1 = 1,NDMSCS)
+                     WRITE (8,99105) (undex(m1,m2),m1 = 1,NDMSCS)
                   ENDDO
-                  WRITE (6,99110)
+                  WRITE (8,99110)
                ENDIF
 C--------------
 C--------------normalization of the inverted PIM matrix with the ini. population
@@ -949,9 +949,9 @@ C--------------
      &                            *popart(k2)
                   ENDDO
                ENDDO
-               IF (NOUt.GT.1) WRITE (6,99050) POP(NEX(1),j,i,1)
+               IF (NOUt.GT.1) WRITE (8,99050) POP(NEX(1),j,i,1)
 99050          FORMAT (1X,'Population to be distributed=',E12.5,' mb',/)
-               IF (NOUt.GT.3) WRITE (6,99055) PIM1
+               IF (NOUt.GT.3) WRITE (8,99055) PIM1
 99055          FORMAT (1X,'PIM TO BE USED (NORMALIZED):',/,1X,(12E11.4),
      &                 /)
 C
@@ -1031,11 +1031,11 @@ C--------------proton emission (if accepted, note IF on IDNA)
                ENDIF
                IF (NEX(nresn).GT.0) POPmax(nresn) = CSMsc(1)/NEX(nresn)
                IF (NEX(nresp).GT.0) POPmax(nresp) = CSMsc(2)/NEX(nresp)
-               IF (NOUt.GT.0) WRITE (6,99060) j, i, spg
+               IF (NOUt.GT.0) WRITE (8,99060) j, i, spg
 99060          FORMAT (1X,'J=',I2,' I=',I1,
      &                 '  emission from subsequent stages:',/,
      &                 (1X,12E11.4),//)
-               IF (NOUt.GT.0) WRITE (6,99110)
+               IF (NOUt.GT.0) WRITE (8,99110)
 C
 C************* Gamma emission  ******************************************
 C
@@ -1285,13 +1285,13 @@ C-----------------------
                            spw = vmn*WT(3,2,1,egdrr - ecor)
                            prop = 1./(egdrr**2 + 0.25*(gdrw + spw)**2)
                            propt = prop*G*vmn*gdrw*D1Fra
-C                          WRITE(6,'('' 2,.-->2,4, VERT. COL.'',G12.5)')PROPT
+C                          WRITE(8,'('' 2,.-->2,4, VERT. COL.'',G12.5)')PROPT
                            pig(2,5) = pig(2,5) - propt
                            pig(3,5) = pig(3,5) - propt
                            pig(4,5) = pig(4,5) - propt
                            propt = prop*gdrw*D1Fra*G/WT(5,3,2,
      &                             EXCn - ecor)
-C                          WRITE(6,'('' 2,4-->2,., BOTTOM ROW'',G12.5)')
+C                          WRITE(8,'('' 2,4-->2,., BOTTOM ROW'',G12.5)')
 C                          1                  (PROPT*SPW)
                            pig(5,2) = pig(5,2) - propt*spw
                            pig(5,3) = pig(5,3) - propt*spw
@@ -1299,9 +1299,9 @@ C                          1                  (PROPT*SPW)
                            pig(5,5) = pig(5,5)
      &                                + propt*(3*spw + (1 - D1Fra)*gdrw)
 C                          TESTT=PROPT*(3*SPW+(1-D1FRA)*GDRW)
-C                          WRITE(6,'('' 2,4-->2,4, LAST    '',G12.5)') TESTT
+C                          WRITE(8,'('' 2,4-->2,4, LAST    '',G12.5)') TESTT
                            propt = prop*vmn*G*gdrw
-C                          WRITE(6,'('' 2,.-->2,., DIAGONAL'',G12.5)') PROPT
+C                          WRITE(8,'('' 2,.-->2,., DIAGONAL'',G12.5)') PROPT
                            pig(2,2) = pig(2,2) + propt
                            pig(3,3) = pig(3,3) + propt
                            pig(4,4) = pig(4,4) + propt
@@ -1323,12 +1323,12 @@ C-----------------------memorize PIG matrix
                         ENDDO
 C-----------------------printout of the PIG matrix
                         IF (NG.LE.12 .AND. NOUt.GT.2) THEN
-                           WRITE (6,99065) j, i
+                           WRITE (8,99065) j, i
 99065                      FORMAT (1X,'PIG matrix   J=',I2,' I=',I2)
                            DO m2 = 1, NG
-                              WRITE (6,99115) (pig(m2,m1),m1 = 1,NG)
+                              WRITE (8,99115) (pig(m2,m1),m1 = 1,NG)
                            ENDDO
-                           WRITE (6,99110)
+                           WRITE (8,99110)
                         ENDIF
 C-----------------------
 C-----------------------invertion of the PIG matrix
@@ -1341,19 +1341,19 @@ C                       CALL MATIN1(pig,ggg,NG,1,det)
                         CALL MTXINV(pig,pigx,pigy,mpigx,mpigy,NG,eps,
      &                              irflag)
                         IF (irflag.NE.0) THEN
-                           WRITE (6,*) 'C.N. state J=', j*ipii,
+                           WRITE (8,*) 'C.N. state J=', j*ipii,
      &                     ' PIG-matrix in MSC gamma emission singular '
                            GOTO 20
                         ENDIF
 C-----------------------printout of the inverted PIG matrix
                         IF (NG.LE.12 .AND. NOUt.GT.2) THEN
-                           WRITE (6,99070) j, i
+                           WRITE (8,99070) j, i
 99070                      FORMAT (1X,'Inverse PIG matrix   J=',I2,
      &                             ' I=',I2)
                            DO m2 = 1, NG
-                              WRITE (6,99115) (pig(m2,m1),m1 = 1,NG)
+                              WRITE (8,99115) (pig(m2,m1),m1 = 1,NG)
                            ENDDO
-                           WRITE (6,99110)
+                           WRITE (8,99110)
                         ENDIF
 C-----------------------
 C-----------------------check of the invertion and printout
@@ -1369,21 +1369,21 @@ C-----------------------
                               ENDDO
                            ENDDO
                            IF (NG.LE.12) THEN
-                              WRITE (6,99075) j, i
+                              WRITE (8,99075) j, i
 99075                         FORMAT (1X,'Control PIG matrix   J=',I2,
      &                                ' I=',I2)
                               DO m2 = 1, NG
-                                 WRITE (6,99115)
+                                 WRITE (8,99115)
      &                                  (undeg(m2,m1),m1 = 1,NG)
                               ENDDO
                            ELSE
-                              WRITE (6,99080) j, i
+                              WRITE (8,99080) j, i
 99080                         FORMAT (1X,
      &                  'Diagonal elements of the control matrix for J='
      &                  ,I2,'D I=',I2,/)
-                              WRITE (6,99105) (undeg(m1,m1),m1 = 1,NG)
+                              WRITE (8,99105) (undeg(m1,m1),m1 = 1,NG)
                            ENDIF
-                           WRITE (6,99110)
+                           WRITE (8,99110)
                         ENDIF
 C-----------------------
 C-----------------------normalization of the inverted PIG matrix with the initial
@@ -1411,10 +1411,10 @@ C-----------------------
                            ENDDO
                         ENDDO
                         IF (NOUt.GT.3) THEN
-                           WRITE (6,99085) (pig(1,k1),k1 = 1,NG)
+                           WRITE (8,99085) (pig(1,k1),k1 = 1,NG)
 99085                      FORMAT (1X,'Normalized PIG to be used ',/,
      &                             (1X,12E11.4))
-                           WRITE (6,99110)
+                           WRITE (8,99110)
                         ENDIF
 C-----------------------
 C-----------------------do loop over c.n. excitation energy (after gamma emission)
@@ -1446,7 +1446,7 @@ C--------------------------------absorption cross section times propagator
                                  sdabs = popart(1)
      &                              *prop*POP(NEX(1),j,i,1)
      &                              *0.25/awj(1,j)
-                                 WRITE (6,
+                                 WRITE (8,
      &                '('' POP, PROPAGATOR, 3-P J DENS, SDABS'',4G12.5)'
      &                ) POP(NEX(1),j,i,1), prop, awj(1,j), sdabs
                               ENDIF
@@ -1543,7 +1543,7 @@ C--------------------------------state density for gamma emission
                               ENDIF
                            ENDDO
                         ENDDO
-C                       WRITE(6,'('' SD GAMMA GAMMA ='',G12.5)') SUMTLG
+C                       WRITE(8,'('' SD GAMMA GAMMA ='',G12.5)') SUMTLG
 C-----------------------T GAMMA GAMMA ESTIMATE
 C                       DO LE = 1, 21, 2
 C                       ENG = LE
@@ -1561,12 +1561,12 @@ C-----------------------coupling to 4-th subclass
 C                       END DO
 C-----------------------t gamma gamma estimate done
                         IF (NOUt.GT.0) THEN
-                           WRITE (6,99110)
-                           IF (ISD.EQ.1) WRITE (6,99090) j, i, spr
+                           WRITE (8,99110)
+                           IF (ISD.EQ.1) WRITE (8,99090) j, i, spr
 99090                      FORMAT (1X,//,1X,'J=',I2,' I=',I1,
      &                         ' Gamma emission from subsequent stages:'
      &                         ,/,1X,E11.4,/,(1X,4E11.4))
-                           IF (ISD.EQ.0) WRITE (6,99095) j, i, spr
+                           IF (ISD.EQ.0) WRITE (8,99095) j, i, spr
 99095                      FORMAT (1X,//,1X,'J=',I2,' I=',I1,
      &                         ' GAMMA EMISSION FROM SUBSEQUENT STAGES:'
      &                         ,/,(1X,4E11.4))
@@ -1583,16 +1583,16 @@ C-----------------------t gamma gamma estimate done
 C-----
 C-----spectra histograms
 C-----
-      WRITE (6,99100) NDMSCS
+      WRITE (8,99100) NDMSCS
 99100 FORMAT (1X,//,30X,'H e i d e l b e r g  M. S. C.  d e c a y  (',
      &        I2,' stages)',//)
 C     IF(GST.NE.0)CALL AUERST(1, 0)
 C     CALL AUERST(1, 1)
-      IF (IOUt.GT.0) WRITE (6,
+      IF (IOUt.GT.0) WRITE (8,
      &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
      &           ) SYMbe(1), CSMsc(1)
 C     CALL AUERST(1, 2)
-      IF (IOUt.GT.0) WRITE (6,
+      IF (IOUt.GT.0) WRITE (8,
      &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
      &           ) SYMbe(2), CSMsc(2)
 99105 FORMAT (1X,12E11.4)

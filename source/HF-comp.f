@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:29 $
-Ccc   * $Id: HF-comp.f,v 1.97 2008-08-18 07:31:29 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:21 $
+Ccc   * $Id: HF-comp.f,v 1.98 2008-10-14 21:32:21 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -639,7 +639,7 @@ C
       ELSEIF (nnuc.EQ.mt849) THEN
          nejc = 3
       ENDIF
-      IF (IOUt.GT.2) WRITE (6,99005)
+      IF (IOUt.GT.2) WRITE (8,99005)
 99005 FORMAT (1X,////,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
      &        1X,27('*'),//)
       DO i = 1, NLV(Nnuc) - 1
@@ -647,7 +647,7 @@ C
          IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND.
      &      ISIsom(l,Nnuc).EQ.0) THEN
 C-----------Normal level without branching ratios
-            IF (IOUt.GT.2) WRITE (6,99010) ELV(l,Nnuc), LVP(l,Nnuc)
+            IF (IOUt.GT.2) WRITE (8,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99010       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with population ',G13.5,
@@ -673,7 +673,7 @@ C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
 C-----------Add gamma cascade population to the direct population
             POPlv(l,Nnuc) = POPlv(l,Nnuc) + CSDirlev(l,nejc)
-            IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
+            IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99012       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with final population ',G13.5,
@@ -683,7 +683,7 @@ C-----------We add it to the ground state to have correct total cross section
          ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1) THEN
 C-----------Isomer state in any other nucleus
 C-----------No gamma-decay of the isomeric state imposed
-            IF (IOUt.GT.2) WRITE (6,99012) ELV(l,Nnuc), LVP(l,Nnuc)
+            IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 C-----------We add it to the ground state to have correct total cross section
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
@@ -691,7 +691,7 @@ C-----------We add it to the ground state to have correct total cross section
 C-----------Normal level with branching ratios
             popl = POPlv(l,Nnuc)
             IF (popl.NE.0.0D0) THEN
-               IF (IOUt.GT.2) WRITE (6,99015) ELV(l,Nnuc), LVP(l,Nnuc)
+               IF (IOUt.GT.2) WRITE (8,99015) ELV(l,Nnuc), LVP(l,Nnuc)
      &                               *XJLv(l,Nnuc), popl
 99015          FORMAT (1X//,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
      &                 ' level with final population ',G13.5,' mb',/,5X,
@@ -701,13 +701,13 @@ C-----------Normal level with branching ratios
                   j1 = NINT(BR(l,j,1,Nnuc))
                   IF (j1.EQ.0) GOTO 100
                   IF (j1.GE.l) THEN
-                     WRITE (6,99020)
+                     WRITE (8,99020)
 99020                FORMAT (10X,
      &                       'WARNING: error in discrete level deca',
      &                       'y data',/,10X,
      &                       'Final level above the initial one',/,10X,
      &                       'Further decay not considered ')
-                     WRITE (6,
+                     WRITE (8,
      &'(10X,''WARNING: Nucleus '',I3,''-'',A2,                        ''
      &level '',I3)') INT(A(Nnuc)), SYMb(Nnuc), l
                      GOTO 99999
@@ -727,7 +727,7 @@ C-----------------NOTE: internal conversion taken into account
                   ELSEIF(ENDf(Nnuc).EQ.2) THEN
                      CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
                   ENDIF
-                  IF (IOUt.GT.2) WRITE (6,99025) ELV(j1,Nnuc),
+                  IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
@@ -895,7 +895,6 @@ C
       Sum = 0.d0
       SCRtem(0) = 0.d0
       xjc = FLOAT(Jc) + HIS(Nnuc)
-C     WRITE(6,*) ' decaying state spin=',xjc,' and parity=',ipc
 C-----clear scratch matrix (continuum)
       DO j = 1, NLW
          DO i = 1, NEX(Nnuc)

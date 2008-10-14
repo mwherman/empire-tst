@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-08-29 18:31:06 $
-Ccc   * $Id: lev-dens.f,v 1.64 2008-08-29 18:31:06 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-10-14 21:32:22 $
+Ccc   * $Id: lev-dens.f,v 1.65 2008-10-14 21:32:22 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -85,13 +85,13 @@ C-----next call prepares for lev. dens. calculations
          CALL ALIT(iz,ia,x1,x2,x3,dumm,Gcc)
 C--------check whether a-parameter determined from the shell-model s.p.s. exists
          IF (x1 + x2 + x3.EQ.0.0D0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            WRITE (6,*) ' NO FIT DATA FOR LEVEL DENSITIES IN NUCLEUS'
-            WRITE (6,*) ' A=', A(Nnuc), '  Z=', Z(Nnuc)
-            WRITE (6,*) ' EXECUTION TERMINATED !!'
-            WRITE (6,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            WRITE (6,*) ' '
+            WRITE (8,*) ' '
+            WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            WRITE (8,*) ' NO FIT DATA FOR LEVEL DENSITIES IN NUCLEUS'
+            WRITE (8,*) ' A=', A(Nnuc), '  Z=', Z(Nnuc)
+            WRITE (8,*) ' EXECUTION TERMINATED !!'
+            WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            WRITE (8,*) ' '
             STOP
          ENDIF
       ENDIF
@@ -239,7 +239,7 @@ Ccccc *             A2 - nuclear deformation EPS including damped      *
 Ccccc *                  static and dynamical deformation              *
 Ccccc *           Stab - maximum spin ensuring stability against       *
 Ccccc *                  fission                                       *
-Ccccc *          Cigor - ration of the longest and shortest axis       *
+Ccccc *          Cigor - ratio of the longest and shortest axis        *
 Ccccc *                  to calculate Igor's factor accounting         *
 Ccccc *                  for increase of the lev. den. parameter       *
 Ccccc *                  due to increased nuclear surface              *
@@ -534,7 +534,7 @@ C
       iz = INT(Z(Nnuc))
       in = ia - iz
       IF (NEX(Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,         ''
      &HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO'',//
      &,'' LEVEL DENSITIES WILL NOT BE CALCULATED'')') ia, iz
@@ -571,11 +571,11 @@ C-----set Ignatyuk type energy dependence for 'a'
             IF (ABS(ACRt - ar).LE.0.001D0*ACRt) GOTO 100
             ar = ACRt
          ENDDO
-         WRITE (6,*)
+         WRITE (8,*)
      &     ' WARNING: Search for critical a-parameter has not converged
      & for A=',A(nnuc),' Z=',Z(nnuc)
-         WRITE (6,*) ' WARNING: Last iteration has given acrt=', ACRt
-         WRITE (6,*) ' WARNING: Setting Acrt to 0, execution continues'
+         WRITE (8,*) ' WARNING: Last iteration has given acrt=', ACRt
+         WRITE (8,*) ' WARNING: Setting Acrt to 0, execution continues'
       ENDIF
   100 IF (ACRt.LT.0.0D0) ACRt = 0.0
       ECOnd = 1.5*ACRt*DELp**2/pi2
@@ -597,15 +597,15 @@ C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
 C-----
       IF (FITlev.GT.0 .AND. RORed.EQ.0) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) ' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
-         WRITE (6,*) ' CHECK WHETHER YOU CAN INCREASE EXPmax in input.f'
-         WRITE (6,*) ' (MAXIMUM ARGUMENT OF THE EXPONENT ALLOWED)'
-         WRITE (6,*)
+         WRITE (8,*) ' '
+         WRITE (8,*) ' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
+         WRITE (8,*) ' CHECK WHETHER YOU CAN INCREASE EXPmax in input.f'
+         WRITE (8,*) ' (MAXIMUM ARGUMENT OF THE EXPONENT ALLOWED)'
+         WRITE (8,*)
      &             ' IF YOUR SYSTEM ALLOWS FOR THIS DO IT AND RECOMPILE'
-         WRITE (6,*) ' OTHERWISE YOU CAN NOT ASK FOR SUCH A HIGH ENERGY'
-         WRITE (6,*) ' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
-         WRITE (6,*) ' FOR THE TIME BEING EXECUTION TERMINATED'
+         WRITE (8,*) ' OTHERWISE YOU CAN NOT ASK FOR SUCH A HIGH ENERGY'
+         WRITE (8,*) ' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
+         WRITE (8,*) ' FOR THE TIME BEING EXECUTION TERMINATED'
          STOP
       ENDIF
 C-----get neutron binding energy  if not yet defined      
@@ -622,9 +622,9 @@ C-----than three or if max excitation energy is so high that levels
 C-----can not be taken into account (RORed=0)
       IF (NLV(Nnuc).GT.3 .AND. RORed.GT.0) THEN
          IF (FITlev.GT.0.0D0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) ' Fitting l.d. to discrete levels'
-            WRITE (6,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
+            WRITE (8,*) ' '
+            WRITE (8,*) ' Fitting l.d. to discrete levels'
+            WRITE (8,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
      &                  ' MeV'
          ENDIF
          defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
@@ -680,7 +680,7 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          dshi = (kkl - 1 + dshi)*defit
          dshi = dshi - ELV(NLV(Nnuc),Nnuc)
          dshift = dshift + dshi
-         IF (FITlev.GT.0.0D0) WRITE (6,'(I3,4X,3G12.5)') iter, dshi,
+         IF (FITlev.GT.0.0D0) WRITE (8,'(I3,4X,3G12.5)') iter, dshi,
      &                               dshift
          IF (ABS(dshi).GT.0.01D0) THEN
             IF (iter.LE.20) GOTO 150
@@ -733,7 +733,7 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
 
 C--------cumulative plot of levels along with the l.d. formula
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0) THEN
-         WRITE (6,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+         WRITE (8,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                   ATIlnor(Nnuc), ATIl, NLV(Nnuc)
 99005    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,' norm=',F6.4,
      &           ' atil=',F4.1,' Ncut=',I3)
@@ -1085,21 +1085,21 @@ C-----check of the input data ---------------------------------------
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
       IF (NLW.LE.0) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' MAXIMUM NUMBER OF PARTIAL WAVES HAS NOT BEEN'',             '
      &' DETRMINED BEFORE CALL OF PRERO'',//,                           '
      &' EXECUTION STOPPED'')')
          STOP
       ENDIF
       IF (ia.LE.0 .OR. iz.LE.0) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' A='',I3,'' AND/OR Z='',I2,                                ''
      & HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO'',               //,
      &'' EXECUTION STOPPED'')') ia, iz
          STOP
       ENDIF
       IF (Nnuc.GT.NDNUC) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' PRERO  CALLED FOR A NUCLEUS INDEX NNUC=''                   ,
      &I3,'' WHICH EXCEEDS DIMENSIONS'',/,                              '
      &' CHECK THIS CALL OR INCREASE NDNUC TO'',I4,                     '
@@ -1148,7 +1148,7 @@ C-----according to Myers&Swiatecki, Phys. Rev. C60(1999)014606
             IF (x.LE.x1 .AND. x.GE.30.0D0) fx = 0.595553 -
      &          0.124136*(x - x1)
             sb0 = s*fx
-            WRITE (6,
+            WRITE (8,
      &'('' Liquid drop fission barrier for '',i3,''-'',A2,         '' se
      &t to '',G10.5)') INT(A(Nnuc)), SYMb(Nnuc), sb0
          ENDIF
@@ -1246,7 +1246,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 A, A2, Aj, Momort, Mompar, U
+      REAL*8 Z, A, A2, Aj, Shell, U, Momort, Mompar
 C
 C Local variables
 C
@@ -1350,7 +1350,7 @@ C-----produces poor results.
          fsh = 1./(1.+0.050*Shell)
          Evibr = 110./A**(5./6.)*fsh
       ELSE
-         WRITE(6,*)'EVIBR: unsupported spin',Lamb,' (must be 2 or 3)'
+         WRITE(8,*)'EVIBR: unsupported spin',Lamb,' (must be 2 or 3)'
          STOP 'EVIBR: unsupported spin (must be 2 or 3)'
       ENDIF
       if(Lamb .EQ. 2) THEN
@@ -1482,30 +1482,30 @@ C-----calculation of matching point /if UX=0.0/
 C
       iter = 0
   100 IF (am*t.LE.6.D0 .OR. iter.GT.300) THEN
-         WRITE (6,*) 'WARNING: '
+         WRITE (8,*) 'WARNING: '
          IF (iter.LT.301) THEN
-            WRITE (6,*) 'WARNING: Number of iterations in ROGC ',
+            WRITE (8,*) 'WARNING: Number of iterations in ROGC ',
      &                  iter - 1
-            WRITE (6,*) 'WARNING: Can not calculate Ux'
+            WRITE (8,*) 'WARNING: Can not calculate Ux'
          ELSE
-            WRITE (6,*) 'WARNING: Maximum number if iterations in ROGC'
+            WRITE (8,*) 'WARNING: Maximum number if iterations in ROGC'
          ENDIF
-         WRITE (6,*) 'WARNING: Level density parameters inconsistent'
-         WRITE (6,*) 'WARNING: This may happen if you have used default'
-         WRITE (6,*) 'WARNING: systematics for too light nucleus or '
-         WRITE (6,*)
+         WRITE (8,*) 'WARNING: Level density parameters inconsistent'
+         WRITE (8,*) 'WARNING: This may happen if you have used default'
+         WRITE (8,*) 'WARNING: systematics for too light nucleus or '
+         WRITE (8,*)
      &              'WARNING: have allowed for too many discrete levels'
-         WRITE (6,*) 'WARNING: entering the region where these are lost'
-         WRITE (6,*) 'WARNING: Reanalise GC l.d. parameters for:'
-         WRITE (6,*) 'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
-         WRITE (6,*) 'WARNING: a=', am, ' T=', t
-         WRITE (6,*) 'WARNING: I will use the last T=', tm,' for calc.'
-         WRITE (6,*) 'WARNING: '
+         WRITE (8,*) 'WARNING: entering the region where these are lost'
+         WRITE (8,*) 'WARNING: Reanalise GC l.d. parameters for:'
+         WRITE (8,*) 'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
+         WRITE (8,*) 'WARNING: a=', am, ' T=', t
+         WRITE (8,*) 'WARNING: I will use the last T=', tm,' for calc.'
+         WRITE (8,*) 'WARNING: '
 C--------anyhow, plot fit of the levels with the low energy l.d. formula
          IF (FITlev.GE.0.0D0) THEN
             IF (NLV(Nnuc).GT.3) THEN
-               WRITE (6,*) ' a=', A(Nnuc), 'Z=', Z(Nnuc)
-               WRITE (6,*) ' A=', am, ' UX=', ux, ' T=', tm, ' EO=', eo
+               WRITE (8,*) ' a=', A(Nnuc), 'Z=', Z(Nnuc)
+               WRITE (8,*) ' A=', am, ' UX=', ux, ' T=', tm, ' EO=', eo
                OPEN (35,FILE = 'fort.35')
                WRITE (35,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                          NLV(Nnuc)
@@ -1548,8 +1548,8 @@ C-----------set nuclear temperature to the value from the systematics
             GOTO 500
 C-----------plotting fit of the levels with low energy formula  ***done***
          ELSEIF (FITlev.LT.0.0D0) THEN
-            WRITE (6,*) ' ERROR IN DISCRETE LEVEL FITTING'
-            WRITE (6,*) ' EXECUTION STOPPED BECAUSE OF FITLEV<0 OPTION '
+            WRITE (8,*) ' ERROR IN DISCRETE LEVEL FITTING'
+            WRITE (8,*) ' EXECUTION STOPPED BECAUSE OF FITLEV<0 OPTION '
             STOP 'ERROR IN DISCRETE LEVEL FITTING (GC)'
          ENDIF
       ENDIF
@@ -1595,8 +1595,8 @@ C-----fit nuclear temperature (and Ux) to discrete levels
       ENDIF
 C-----plot fit of the levels with the low energy l.d. formula
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.5) THEN
-         WRITE (6,*) ' A=', A(Nnuc), 'Z=', Z(Nnuc), ' Ncut=', NLV(Nnuc)
-         WRITE (6,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
+         WRITE (8,*) ' A=', A(Nnuc), 'Z=', Z(Nnuc), ' Ncut=', NLV(Nnuc)
+         WRITE (8,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
          OPEN (35,FILE = 'fort.35')
          WRITE (35,*) 'set terminal postscript enhanced color lw 2
      & solid "Helvetica" 20'
@@ -1792,7 +1792,7 @@ C
       CHARACTER*2 dum
 
 C-----Reading MS shell corrections and deformation energies
-      OPEN(11, FILE='../RIPL-2/densities/total/shellcor-ms.dat',
+      OPEN(11, FILE='../RIPL-2/densities/shellcor-ms.dat',
      &    STATUS='old')
 C-----Skipping header lines
       READ(11,*)
@@ -1843,7 +1843,7 @@ C
       IF (izia.EQ.iziar) RETURN
       GOTO 100
   200 IF (Gcc.EQ.2D0) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' LEVEL DENSITY FIT FOR Z='',I3,'' A='',I3,'' NOT      FOUND.
      &A/8 USED.'')') Iz, Ia
          B = 0.
@@ -1851,7 +1851,7 @@ C
          X2 = 0.
          X3 = 0.
       ELSE
-         WRITE (6,
+         WRITE (8,
      &'('' DEFORMATION FOR Z='',I3,'' A='',I3,'' NOT FOUND.     ASSUMED
      &SPHERICAL.'')') Iz, Ia
          B = 0.
@@ -1937,14 +1937,10 @@ C
       ENDDO
       WRITE (filename,99005) iz
   
-c99005 FORMAT ('../RIPL-2/densities/total/HFB/z',i3.3)
-C99005 FORMAT ('../RIPL-2/densities/total/level-densities-hfbcs/z',i3.3,
-99005 FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3,'.tab')
-C99005 FORMAT ('../RIPL-2/densities/total/Nice/z',i3.3)
-C99005 FORMAT ('../RIPL-2/densities/total/BXL/z',i3.3)
+99005 FORMAT ('../RIPL-2/densities/Gs/z',i3.3,'.tab')
       INQUIRE(file = filename, exist = fexist)
       IF(.not.fexist) THEN
-       WRITE(6,*) filename, 'does not exist'
+       WRITE(8,*) filename, 'does not exist'
        WRITE(*,*) filename, 'does not exist'
        STOP 'ERROR: '
       ENDIF
@@ -1984,8 +1980,8 @@ C     SKIPPING 4 TITLE LINES
       IF (i.EQ.NLDGRID) GOTO 400
       i = i + 1
       GOTO 280
-  300 WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFB'
-      WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
+  300 WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFB'
+      WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
       STOP 'RIPL HFB ground state lev dens. missing'
   400 CLOSE (34)
 C
@@ -1998,7 +1994,7 @@ C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
         WRITE (filename,99007) iz
-99007   FORMAT ('../RIPL-2/densities/total/Gs/z',i3.3,'.cor')
+99007   FORMAT ('../RIPL-2/densities/Gs/z',i3.3,'.cor')
         INQUIRE(file = filename, exist = fexist)
         IF(fexist) then
           OPEN (UNIT = 34,FILE = filename,ERR = 440)
@@ -2016,7 +2012,7 @@ c          ROHfba(Nnuc) = 0.d0
 C---------printing microscopic lev. dens. corrections from the RIPL-3 file
 C
           IF(ROHfba(Nnuc).ne.0.d0) then 
-            WRITE (6,
+            WRITE (8,
      &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
             WRITE (12,
@@ -2024,7 +2020,7 @@ C
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
           ENDIF
           IF(ROHfbp(Nnuc).ne.0.d0) then 
-            WRITE (6,
+            WRITE (8,
      &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
             WRITE (12,
@@ -2039,7 +2035,7 @@ C
           IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
         ENDIF
         goto 445
-  310   WRITE (6,*) ' Error reading microsc. LD corrections FOR Z=', iz, 
+  310   WRITE (8,*) ' Error reading microsc. LD corrections FOR Z=', iz, 
      &              ' A=', ia, ' IN HFB'
   445   CLOSE (34)
 cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -2087,11 +2083,11 @@ C--------Cumulative Level Density plot
          UEXcit(kk,Nnuc) = EX(kk,Nnuc)
          IF (u.LT.0.) CYCLE
          IF (u.GT.200.0D0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
-            WRITE (6,*) ' REQUESTED ENERY IS ', u, ' MeV'
-            WRITE (6,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
-            WRITE (6,*) ' EXECUTION STOPPED'
+            WRITE (8,*) ' '
+            WRITE (8,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
+            WRITE (8,*) ' REQUESTED ENERY IS ', u, ' MeV'
+            WRITE (8,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
+            WRITE (8,*) ' EXECUTION STOPPED'
             STOP 'TOO HIGH ENERGY FOR HFB LEV. DENS.'
          ENDIF
          corr1 = 1.d0
@@ -2144,7 +2140,7 @@ C-----plot of the l.d. formula
 
 C--------cumulative plot of levels along with the l.d. formula
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) THEN
-         WRITE (6,99009) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+         WRITE (8,99009) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                   NLV(Nnuc)
 99009    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,
      &           '   Microscopic LD,  Ncut=',I3)
@@ -2216,7 +2212,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
+      REAL*8 Z, A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
      &       Ss, Yrast, Shell
 C
 C Local variables
@@ -2224,12 +2220,7 @@ C
       REAL*8 ak, arg, con, const, e1, qk, qv, seff, sort2,
      &       sum, t, u, vibrk, om2, om3, q2, q3
       INTEGER i, k, kmin
-
-
-
       REAL*8 EVIBR
-
-
       DATA const/0.01473144/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
 C-----the last 2.0 takes into account parity (half to half)
@@ -2241,13 +2232,13 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
       RODEF = 0.0
       sum = 0.0
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
-         WRITE (6,*) 'WARNING: Negative moment of inertia for spin ', Aj
-         WRITE (6,*) 'WARNING: 0 level density returned by rodef'
+         WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj
+         WRITE (8,*) 'WARNING: 0 level density returned by rodef'
          RETURN
       ENDIF
       IF (Yrast .LT. 0.0D0) RETURN !Should not happen
       IF (Ac.EQ.0.0D0) THEN
-         WRITE (6,'('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
+         WRITE (8,'('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
          STOP
       ENDIF
       seff = 1.0/Mompar - 1.0/Momort
@@ -2292,7 +2283,7 @@ C     VIBRK=EXP(4.7957*A**(2./3.)*T**(4./3.)/100.)
 C-----damping of vibrational effects
 !       CALL DAMPV(t,qv)
 !       IF (qv.GE.0.999D0) vibrk = 1.0
-!       write(6,*)'DEF: A, Aj, vibrk', A, Aj, vibrk, om2, om3, q2, q3
+!       WRITE(8,*)'DEF: A, Aj, vibrk', A, Aj, vibrk, om2, om3, q2, q3
 C-----damping of rotational  effects with Fermi function independent
 C-----of deformation and mass number (consistent with the builtin systematics)
       CALL DAMPROT(e1,qk)
@@ -2418,7 +2409,7 @@ C-----where continuum starts,ends,steps in between
       NRBinfis(Ib) =INT((xmax - XMInn(Ib))/DEStepp(Ib))
        
       IF (NRBinfis(Ib).GT.NFISENMAX) THEN
-        WRITE (6,*)
+        WRITE (8,*)
      &              ' ERROR: Level density at saddle exceeds dimensions'
      &            , ' Increase NFISENMAX in dimension.h'
         STOP 'ERROR: Level density at saddle exceeds NFISENMAX'
@@ -2447,12 +2438,7 @@ C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
       IF (def2.GT.0.9D0) def2 = 0.9
       IF (def2.LT.( - 0.9D0)) def2 = -0.9
 
-cc    write(*,*)'momp-1', mompar
       mompar = rbmsph*(1. - (2./3.)*def2)
-cc    write(*,*)'momp-2', mompar
-
-cc      pause
-c      IF(mompar.lt.0)mompar=1.d0
 
       DO jj = 1,NLW
          aaj = FLOAT(jj) + HIS(Nnuc)
@@ -2465,10 +2451,6 @@ C              Triaxiality with mass symmetry
                IF (Iff.EQ.2) rotemp =
      &                       rotemp*SQRT(pi/2.d0)*SQRT(mompar*temp)
 c     &                       rotemp*SQRT(2.d0*pi)*SQRT(mompar*temp)
-cc               if(ib.eq.3)then
-cc               write(*,*)'momp',mompar
-cc               pause
-cc               endif
 C              Mass asymmetry is already considered in HFB calculations 
 C              IF (Iff.EQ.3) rotemp = rotemp*2.
 C              No symmetry 
@@ -2539,17 +2521,16 @@ C
       iz = Z(Nnuc)
 
       WRITE (filename,99006)ib, iz
-C99006 FORMAT ('../RIPL-2/fission/Nice/Max',i1,'/z',i3.3)
-C99006 FORMAT ('../RIPL-2/fission/BXL/Max',i1,'/z',i3.3)
-99006 FORMAT ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
+99006 FORMAT 
+     & ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
       INQUIRE(file = filename, exist = fexist)
       IF(.NOT.fexist) THEN
-        WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
+        WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
      &                  ' IN HFB at saddle ',ib
-        WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
+        WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
      &                    TERMINATED '
-        WRITE (6,*)
-     &           ' ERROR: HFB lev dens. at saddle',ib,'  missing'
+        WRITE (8,*)
+     &           ' ERROR: HFB lev dens. at saddle ',ib,'  missing'
         STOP ' ERROR: HFB lev dens. at saddle missing'
       ENDIF
 C
@@ -2602,25 +2583,24 @@ C     SKIPPING 4 TITLE LINES
       IF (i.EQ.NLDGRID) GOTO 400
       i = i + 1
       GOTO 280
- 300  WRITE (6,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
+ 300  WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
      &                  ' IN HFB at saddle ',ib
-      WRITE (6,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
+      WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
      &                    TERMINATED '
-      WRITE (6,*)
+      WRITE (8,*)
      &           ' ERROR: HFB lev dens. at saddle',ib,'  missing'
             STOP ' ERROR: HFB lev dens. at saddle missing'
   400 CLOSE (34)
       iugrid = i - 1
       DO kk = 1,NRBinfis(Ib)
-c         u = XMInn(Ib) + (kk - 1)*DEStepp(Ib) - ENH_ld(1,ib)
          u = XMInn(Ib) + (kk - 1)*DEStepp(Ib) - rohfbp_sd(ib)
          IF (u.LT.0.) cycle
          IF (u.GT.200.0D0) THEN
-            WRITE (6,*) ' '
-            WRITE (6,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
-            WRITE (6,*) ' REQUESTED ENERY IS ', u, ' MeV'
-            WRITE (6,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
-            WRITE (6,*) ' EXECUTION STOPPED'
+            WRITE (8,*) ' '
+            WRITE (8,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
+            WRITE (8,*) ' REQUESTED ENERY IS ', u, ' MeV'
+            WRITE (8,*) ' YOU HAVE TO USE ANOTHER LEVEL DENSITIES'
+            WRITE (8,*) ' EXECUTION STOPPED'
             STOP 'TOO HIGH ENERGY FOR HFB LEV. DENS.'
          ENDIF
 
@@ -2655,9 +2635,7 @@ C
                r2 = rhogrid(khi,j,ipp)          
                IF (r1.GT.1.d-12 .AND. r2.GT.1.d-12) THEN
                   ROFisp(kk,j,ipp,ib) = 10.**(c1*DLOG10(r1) + 
-     &                                  c2*DLOG10(r2))
-c                  IF(ENH_ld(2,ib).NE.0.d0) ROFisp(kk,j,ipp,ib) =
-c     &                 ROFisp(kk,j,ipp,ib)*dexp( ENH_ld(2,ib)*dsqrt(u) )  
+     &                                  c2*DLOG10(r2))  
                   IF(rohfba_sd(ib).NE.0.d0) ROFisp(kk,j,ipp,ib) =
      &               ROFisp(kk,j,ipp,ib)*dexp(rohfba_sd(ib)*dsqrt(u))   
                ELSE
@@ -2723,7 +2701,7 @@ C
       REAL FLOAT
       INTEGER ia, iff, in, ix, iz, jj, kk, nr
       INTEGER INT
-      REAL*8 ROBCSF, RODEFF,FSHELL
+      REAL*8 ROBCSF, RODEFF, FSHELL
 
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
@@ -2744,7 +2722,7 @@ C-----where continuum starts,ends,steps in between
          NRBinfis(Ib) =INT((xmax - XMInn(Ib))/DEStepp(Ib))
        
          IF (NRBinfis(Ib).GT.NFISENMAX) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &              ' ERROR: Level density at saddle exceeds dimensions'
      &              , ' Increase NFISENMAX in dimension.h'
             STOP 'ERROR: Level density at saddle exceeds NFISENMAX'
@@ -2768,7 +2746,7 @@ C-----where continuum starts,ends,steps in between
          DEStepm(Mmod) = (xmax - XMInnm(Mmod))/100.d0
          NRBinfism(Mmod) = INT((xmax - XMInnm(Mmod))/DEStepm(Mmod))
          IF (NRBinfism(Mmod).GT.NFISENMAX) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &              ' ERROR: Level density at saddle exceeds dimensions'
      &              , ' Increase NFISENMAX in dimension.h'
             STOP 'ERROR: Level density at saddle exceeds NFISENMAX'
@@ -2844,14 +2822,14 @@ C     ENDIF
       endif
 C-----------calculation of level density parameter 'a' including surface
 C-----------dependent factor
-      qigor = ( - 0.00246 + 0.3912961*cigor -
-     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
-     &              0.043075445*cigor**4) - 0.375
-      IF (qigor.GT.0.077D0) THEN
-         bsq = 0.983 + 0.439*qigor
-      ELSE
-         bsq = 1.0 + 0.4*(cigor - 1.0)**2
-      ENDIF
+c      qigor = ( - 0.00246 + 0.3912961*cigor -
+c     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
+c     &              0.043075445*cigor**4) - 0.375
+c      IF (qigor.GT.0.077D0) THEN
+c         bsq = 0.983 + 0.439*qigor
+c      ELSE
+c         bsq = 1.0 + 0.4*(cigor - 1.0)**2
+c      ENDIF
 
       TCRt =0.567*DELp
       ar = ATIl*(1.0 + shcf*GAMma)
@@ -2861,8 +2839,8 @@ C-----------dependent factor
          IF (ABS(ACRt - ar).LE.0.001D0*ACRt) GOTO 300
          ar = ACRt
       ENDDO
-      WRITE (6,*) ' WARNING: Last iteration acrt=', ACRt
-      WRITE (6,*) ' WARNING: Execution continues'
+      WRITE (8,*) ' WARNING: Last iteration acrt=', ACRt
+      WRITE (8,*) ' WARNING: Execution continues'
   300 IF (ACRt.LT.0.0D0) ACRt = 0.0
 
       ECOnd = 1.5*ACRt*DELp**2/(PI*PI)
@@ -2871,29 +2849,26 @@ C-----45.84 stands for (12/SQRT(pi))**2
       DETcrt = 45.84*ACRt**3*TCRt**5
       SCR = 2.*ACRt*TCRt
 
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
       def2 = a2
 c     def2 = DEFfis(Ib)
       momparcrt=mompar
       momortcrt=momort
-c      write(*,*)'momp-2', momparcrt,momortcrt
+
 c     mompar = rbmsph*(1. - (2./3.)*def2)
 c     Momparcrt = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
 c     Momortcrt = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)
 
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
-         WRITE (6,*) 'WARNING: Negative moment of inertia for spin ', Aj
-         WRITE (6,*) 'WARNING: 0 level density returned by rodef'
+         WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj
+         WRITE (8,*) 'WARNING: 0 level density returned by rodef'
          RETURN
       ENDIF
-cc      write(*,*)'momp-3', momparcrt,momortcrt
-cc      pause
+c
       DEL = 0.
-      IF (FISden(Nnuc).EQ.1.) THEN
+      IF (FISden(Nnuc).LE.1.) THEN
          IF (MOD(in,2).NE.0) DEL = DELp
          IF (MOD(iz,2).NE.0) DEL = DEL + DELp
       ENDIF
-  
 
  76   DO jj = 1,NLW
          aaj = FLOAT(jj) + HIS(Nnuc)
@@ -2901,7 +2876,7 @@ cc      pause
             rotemp=0.d0
             u = XMInn(Ib) + (kk - 1)*desteppp + DEL
 c-----------Ignatyuk
-            goto 344
+            IF(FISden(Nnuc).EQ.0)goto 344
             CALL ROBCS_FG_FIS(A(Nnuc),U,Aaj,Temp,shcf,gamma,mompar,
      &                        def2,rotemp,vibbf12, vibbfdt)
            goto 345        
@@ -2910,12 +2885,12 @@ c-----------Ignatyuk
                accn = ATIl*FSHELL(u,Shcf,GAMma)
                IF (accn.LE.0.0D0) RETURN
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,
-     &               MOMortcrt,HIS(Nnuc),ARGred,EXPmax,temp,def2,
-     &               vibbf12,vibbfdt)
+     &                         MOMortcrt,HIS(Nnuc),ARGred,
+     &                         EXPmax,temp,shcf,Z(Nnuc))
             ELSE
                accn = ACRt
                rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
-     &                  mompar,temp, vibbf12, vibbfdt,def2)*RORed
+     &                  mompar,temp,def2,shcf,Z(Nnuc))*RORed
             ENDIF
 c   
 cc            IF (Mmod.EQ.0)THEN
@@ -2935,12 +2910,6 @@ cc            ENDIF
          ENDDO
       ENDDO
 
-c      DO i = 1, NRHump
-c         DO k = 1, NRBinfis(i)
-c            write(*,*)'ro-lev', k,ROFisp(k,2,1,i)
-c         ENDDO   
-c      ENDDO   
-c      pause
  346  ACRtf(Ib) = ACRt
       UCRtf(Ib) = UCRt
       ECOndf(Ib) = ECOnd
@@ -2951,30 +2920,31 @@ c      pause
       VIBfdt(Ib)= vibbfdt
 
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
+	RETURN
       END
 C
 
 
       REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Momp,T,
-     &                                 vibbf12,vibbfdt,def2)
+     &                       def2,shcf,z)
 
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
 C COMMON variables
 C
       REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
-
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 C
 C Dummy arguments
 C
-      REAL*8 A, Aj, Momort, Mompar, U, Momp, T
+      REAL*8 A, Aj, Momort, Mompar, U, Momp, T, shcf, z
+      REAL*8 DSQRT, EVIBR
 C
 C Local variables
 C
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
-     &                 qdamp, qk, qv, s, seff2, vibrk, def2,
-     &                 ro,ro_u,ro_j,ro_pi,pi,vibbf12,vibbfdt
+     &       qdamp, qk, qv, s, seff2, vibrk, def2,
+     &       ro,ro_u,ro_j,ro_pi,pi,om2,om3,q2,q3
 C-----CONST=1/(2*SQRT(2 PI))
 
       DATA const/0.199471D0/
@@ -2996,35 +2966,40 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF (seff2.LE.0.0D0) RETURN
       arg = s - (Aj + 0.5D0)**2/(2.D0*seff2)
       IF (arg.LE.0.0D0) RETURN
-c      robcs = 0.5*const*(2.d0*Aj + 1.d0)*EXP(arg)/SQRT(seff2**3*det)
-
-      CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-      qdamp = 1.0 - qk*(1.0 - 1.0/(momo*T))
 
       ro_u=exp(s)/sqrt(det)
       ro_j=const*(2.d0*Aj + 1.d0)/seff2 **1.5*
      &       EXP(-(aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5
       ro = ro_u * ro_j * ro_pi 
-c      ro =  ro_j!* ro_pi 
-      ROBCSF = ro * momo * t* qdamp! *vibrk
+
+c     CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
+      CALL DAMPROT(u,qk)
+      qdamp = 1.0 - qk*(1.0 - 1.0/(momo*T))
+C-----vibrational enhancement factor (EMPIRE-3.0)
+      om2 = EVIBR(Z, A, shcf, 2)
+      CALL QVIBR(A,t,om2,5,q2)
+      om3 = EVIBR(Z, A, Shcf, 3)
+      CALL QVIBR(A,t,om3,7,q3)
+      vibrk = q2*q3
+      qv=0.d0
+      ROBCSF = ro * momo * t* qdamp 
      &         * (qv - vibrk * (qv - 1.))
-c      write(*,*)ROBCSF!ro,ro_j, momo,  t, qdamp!vibrk,(qv - vibrk * (qv - 1.)),t
-c      pause
       RETURN
       END
 C
 C
       REAL*8 FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
-     &                          Argred,Expmax,T,def2,vibbf12,vibbfdt)
+     &                       Argred,Expmax,T,shcf,z)
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C Dummy arguments
       REAL*8 A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
-     &                 def2,T,vibbf12,vibbfdt
+     &       T, shcf, z
 C Local variables
-      REAL*8 s,det,seff2, ro,ro_u,ro_j,ro_pi,summ,pi
-      REAL*8 ak, arg, const, qk, qv, seff, sort2,
-     &                 sum, u, vibrk
+      REAL*8 s,det,seff2, ro,ro_u,ro_j,ro_pi,pi
+      REAL*8 ak, arg, const, qk, qv, seff, sort2,con,
+     &                 sum, u, vibrk,om2,om3,q2,q3
+      REAL*8 Evibr
       INTEGER i, k, kmin
       DATA const/0.01473144/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
@@ -3035,11 +3010,12 @@ C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
       sum = 0.D0 
       summ=0.d0
       T = DSQRT(E/Ac)
+      con = const/Ac**0.25/SQRT(Mompar*t)
       seff = 1.0/Mompar - 1.0/Momort
       sort2 = Momort*t
       seff2 = mompar**0.333D0*momort**0.6666D0*t
-      GOTO 10
-c-----Ignatyuk
+c      GOTO 10
+c-----GSM
       S = 2.* Ac * T
       DET = 45.84 * Ac**3 * T**5    
       ro_u=exp(s)/sqrt(det)
@@ -3047,18 +3023,20 @@ c-----Ignatyuk
      &       EXP(-(aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5 
       ro = ro_u * ro_j * ro_pi
-      CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
+c      CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
+      om2 = EVIBR(Z, A, shcf, 2)
+      CALL QVIBR(A,t,om2,5,q2)
+      om3 = EVIBR(Z, A, Shcf, 3)
+      CALL QVIBR(A,t,om3,7,q3)
+      vibrk = q2*q3
+      qv=0.d0
+      CALL DAMPROT(e,qk)
       IF (qv.GE.0.999D0) vibrk = 1.0
-      RODEFF = ro*momort*t*(1.0 - qk*(1.0 - 1.0/sort2)) !*vibrk
+      RODEFF = ro*momort*t*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(qv - vibrk*(qv - 1.))
       GOTO 101
-c-----Empire
- 10   i = Aj + 1.
-      IF (Ss.EQ.( - 1.0D0)) THEN
-         kmin = 2
-      ELSE
-         kmin = 1
-      ENDIF
+c-----EGSM
+ 10   con = const/Ac**0.25/SQRT(Mompar*t)
       IF (Ss.EQ.( - 1.0D0)) THEN
          arg = 2*SQRT(Ac*e) - Argred
          IF (arg.LE.( - Expmax)) THEN
@@ -3068,13 +3046,19 @@ c-----Empire
          ELSE
             sum = EXP(arg)
          ENDIF
-         IF (Aj.LT.1.0D0)GOTO 30
+         IF (Aj.LT.1.0D0) GOTO 100
+      ENDIF
+      i = Aj + 1.
+      IF (Ss.EQ.( - 1.0D0)) THEN
+         kmin = 2
+      ELSE
+         kmin = 1
       ENDIF
       DO k = kmin, i
          ak = k + Ss
 C--------rotation perpendicular to the symmetry axis
          u = e - 0.5*ak**2*seff
-         IF (u.LE.0.0D0) GOTO  90
+         IF (u.LE.0.0D0) GOTO 100
          arg = 2.0*SQRT(Ac*u) - Argred
          IF (arg.GT.( - Expmax)) THEN
             IF (u.GT.1.0D0) THEN
@@ -3083,37 +3067,20 @@ C--------rotation perpendicular to the symmetry axis
                sum = sum + 2.0*EXP(arg)
             ENDIF
          ENDIF
-      ENDDO
-
-
-c      IF (Ss.EQ.( - 1.0D0))THEN
-c         summ=1.d0
-c         IF (Aj.LT.1.0D0) GOTO 40
-c      ELSE
-c         summ=0.d0
-c      ENDIF
-     
-c      DO k = kmin, i
-c         ak = k + Ss
-c         arg = -aj*(aj+1.d0)/(2.d0*sort2)-ak**2/(2.d0*seff2)   
-c         summ = summ + 2.0*EXP(arg)
-c      ENDDO
-
-
-c 30   ro_u = (sqrt(pi)/12.d0)*(2.d0*pi)**(-3./2.) * Ac**(-0.25)*sum
-c      ro_u = (sqrt(pi)/12.d0) * Ac**(-0.25)*sum 
-c      GOTO 40
-c 40   ro_j=(1.d0/(2.d0*sqrt(2.d0*pi)))*summ/SQRT(Mompar*t)
- 30   ro=(1.d0/(16.d0*sqrt(6.d0*pi)))*ac**0.25*sum/SQRT(Mompar*t)
-      ro=const*ac**0.25*sum/SQRT(Mompar*t)
-      ro=const/Ac**0.25/SQRT(Mompar*t)*sum
-      ro = ro * 0.5 *0.5
-c      ro = ro_u * ro_j * ro_pi
- 90   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-      IF (qv.GE.0.999D0) vibrk = 1.0
- 103  RODEFF = ro*(1.0 - qk*(1.0 - 1.0/sort2)) !*vibrk
+      ENDDO    
+   
+c100   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
+c      IF (qv.GE.0.999D0) vibrk = 1.0
+C-----vibrational enhancement factor (EMPIRE-3.0)
+ 100  om2 = EVIBR(Z, A, shcf, 2)
+      CALL QVIBR(A,t,om2,5,q2)
+      om3 = EVIBR(Z, A, Shcf, 3)
+      CALL QVIBR(A,t,om3,7,q3)
+      vibrk = q2*q3
+      qv=0.d0
+      CALL DAMPROT(e,qk)
+      RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
      &        *(qv - vibrk*(qv - 1.))
-
  101  RETURN
       END
      
@@ -3142,9 +3109,6 @@ C
       DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-c      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
-c      Vibrk = EXP(0.09286*A**(2./3.)*T**(4./3.)) !u236,u238
-c      Vibrk = EXP(0.0986*A**(2./3.)*T**(4./3.)) !pu41
       Vibrk = EXP(0.086*A**(2./3.)*T**(4./3.))
       END
 
@@ -3212,35 +3176,25 @@ C     Rotational enhancement JpT; damping as in EMPIRE
       CALL DAMPROTVIB(u,Qr,T,Qv,A,Vibrk,def2,vibbf12,vibbfdt)
       rotdamp = seff2ort*(1.0 - qr*(1.0 - 1.0/seff2ort))
       vibdamp = qv - vibrk*(qv - 1.)
-c      write(*,*)'e',vibrk, vibdamp,e
       goto 100
 
 C     Rotational enhancement and damping as in RIPL-2 (Ignatyuk prescription)
       om2=30./A**.66666
       om3=50./A**.66666
-c     om2=40./A**.66666
-c     om3=50./A**.66666
+
       CGA=.0075*A**.33333
       CALL QVIBR(T,OM2,CGA,5,Q2)
       CALL QVIBR(T,OM3,CGA,7,Q3)
       CALL QROT(A,def2,seff2ort,U,QR)
       rotdamp=Qr
       vibdamp=Q2*Q3
-         write(*,*)'i', vibdamp
-
-c      pause
-
  100  arg = s - (Aj + 0.5D0)**2/(2.D0*seff2)
       IF (arg.LE.0.0D0) RETURN
       robcs = 0.5*const*(2.d0*Aj + 1.d0)*EXP(arg)/SQRT(seff2**3*det)
       rotemp=robcs * rotdamp * vibdamp
-c      if(fg.eq.1)THEN
-c         write(*,*)rotemp
-c         pause
-c         endif
       RETURN
       END
-C
+
       SUBROUTINE QROT(A,BET,SIG4,U,QR)
       IMPLICIT REAL*8 (A-H,O-Z)
 C***** QROT INCLUDING DAMPING ***
@@ -3268,8 +3222,6 @@ C
       REAL*8 arg,  dt,thalf
       thalf = 1.5
       dt=0.1
-c      thalf = 0.4               ! 1.
-c      dt=0.076
       arg = (T - thalf)/dt
       Q = 1.0/(EXP((-arg)) + 1.0)
       Vibrk = EXP(0.09286*A**(2./3.)*T**(4./3.))

@@ -457,6 +457,7 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 8102  3He   spher.   no   no   28-28   58- 58  22.0- 84.0   120  H.H.Chang
 9100  4He   spher.   no   no    8-82   16-208   1.0- 25.0   121  L.McFadden
 9600  4He   spher.   no   no    8-96   16-250   1.0- 73.0   122  V.Avrigeanu
+9602  4He   spher.   no   no    8-96   16-250  10.0-200.0   128  A.Kumar
 9101  4He   spher.   no   no   10-92   20-235   1.0- 46.0   123  J.R.Huizenga
 9018  4He   spher.   no   no   13-13   27- 27   0.1- 20.0     8  R.C.Harper
 9000  4He   spher.   no   no   13-26   27- 56   1.0-100.0   124  E.D.Arthur

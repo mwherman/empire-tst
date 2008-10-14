@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: MSD-orion.f,v 1.21 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:24 $
+Ccc   * $Id: MSD-orion.f,v 1.22 2008-10-14 21:32:24 Capote Exp $
 C
 C
 C
@@ -188,7 +188,7 @@ C
       EQUIVALENCE (KEXcom(1),KEXcom1)
       EQUIVALENCE (KTRl(1),KTRl1)
       DATA holamu, holpmu/'AMU', 'PMU'/
-      OPEN (8,FORM = 'unformatted',STATUS = 'scratch')
+      OPEN (101,FORM = 'unformatted',STATUS = 'scratch')
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -403,9 +403,9 @@ C
          ENDIF
       ENDDO
       IF (Iout.GT.3) THEN
-         WRITE (6,99005)
+         WRITE (8,99005)
 99005    FORMAT ('1'//)
-         WRITE (6,99010) ELAb
+         WRITE (8,99010) ELAb
 99010    FORMAT (24X,10('*'),6X,
      &           'MULTI-STEP DIRECT-REACTION CALCULATION',6X,10('*')
      &           /39X,'(ON PROGRAM ORION3, Munich/Giessen 1997)'/47X,
@@ -413,59 +413,59 @@ C
       ENDIF
       IF (Iout.GT.3) THEN
          DO n = 1, NCHanl
-            WRITE (6,99015) n, TMAsr(n), PMAsr(n), ZTR(n), ZPR(n),
+            WRITE (8,99015) n, TMAsr(n), PMAsr(n), ZTR(n), ZPR(n),
      &                      LDWmxr(n), ISTw(n)
 99015       FORMAT (/21X,'CHANNEL NO.',I1,6X,'TMAS=',F5.1,2X,'PMAS=',
      &              F5.1,2X,'ZT=',F5.1,'  ZP=',F5.1,3X,'LDWMX=',I2,3X,
      &              'ISTW=',I1/)
-            WRITE (6,99070) VSXr(n), DVXr(n), WSXr(n), WSFr(n), VSOr(n),
+            WRITE (8,99070) VSXr(n), DVXr(n), WSXr(n), WSFr(n), VSOr(n),
      &                      WSOr(n), DFNr(n), DFNwr(n), DFNsr(n),
      &                      DFNspr(n), RZEr(n), RZEwr(n), RZEsr(n),
      &                      RZEspr(n), RZEcr(n)
          ENDDO
       ENDIF
       IF (Iout.GT.3) THEN
-         WRITE (6,99020) (LTRamx(j),QVAlue(j + 1),j = 1,JLSmax)
+         WRITE (8,99020) (LTRamx(j),QVAlue(j + 1),j = 1,JLSmax)
 99020    FORMAT (/51X,'TRANSITIONS ARE'/42X,'LTRAMX=',I2,5X,
      &           'QVALUE.(-1)=',F7.3)
-         WRITE (6,99025)
+         WRITE (8,99025)
 99025    FORMAT (/,48X,'FORM FACTOR PARAMETERS')
       ENDIF
       DO n = 1, JLSmax
          IF (LBTrf(n).GE.0) THEN
-            IF (Iout.GT.3) WRITE (6,99030) n, LBTrf(n), NODf(n), EGS(n),
+            IF (Iout.GT.3) WRITE (8,99030) n, LBTrf(n), NODf(n), EGS(n),
      &                            DZEro(n)
 99030       FORMAT (/21X,'JLS=',I1/21X,'LBTR=',I2,2X,'NOD=',I2,2X,
      &              'B.E.=',F7.4,3X,'DZERO=',F7.1)
          ELSE
             nc = NODf(n)
             kder = -LBTrf(n)
-            IF (Iout.GT.3) WRITE (6,99035) n, nc, kder, KCFf(n),
+            IF (Iout.GT.3) WRITE (8,99035) n, nc, kder, KCFf(n),
      &                            DZEro(n)
 99035       FORMAT (/21X,'JLS=',I1/21X,'NC=',I1,2X,'KDER=',I1,2X,
      &              'KCFF=',I1,5X,'BETA=',F7.4)
          ENDIF
-         IF (Iout.GT.3) WRITE (6,99070) VSXf(n), DVXf(n), WSXf(n),
+         IF (Iout.GT.3) WRITE (8,99070) VSXf(n), DVXf(n), WSXf(n),
      &                                  WSFf(n), VSOf(n), wsof(n),
      &                                  DFNf(n), DFNwf(n), DFNsf(n),
      &                                  DFNspf(n), RZEf(n), RZEwf(n),
      &                                  RZEsf(n), RZEspf(n), RZEcf(n)
       ENDDO
-      IF (Iout.GT.3) WRITE (6,99040) (i,i = 1,28)
+      IF (Iout.GT.3) WRITE (8,99040) (i,i = 1,28)
 99040 FORMAT (////7X,28I4)
       IF (Iout.GT.3) THEN
-         WRITE (6,99045) KTRl2
+         WRITE (8,99045) KTRl2
 99045    FORMAT (' KTRL  ',28I4)
-         WRITE (6,99050) KEXcom2
+         WRITE (8,99050) KEXcom2
 99050    FORMAT (' KEXCOM',28I4)
-         WRITE (6,99055) KTLout2
+         WRITE (8,99055) KTLout2
 99055    FORMAT (' KTLOUT',28I4)
-         WRITE (6,99060) EXTcom2
+         WRITE (8,99060) EXTcom2
 99060    FORMAT (' EXTCOM',10F10.5)
       ENDIF
       ampmwr = holamu
       IF (amupmu.NE.0.D0) ampmwr = holpmu
-      IF (Iout.GT.3) WRITE (6,99065) XMEs, ampmwr
+      IF (Iout.GT.3) WRITE (8,99065) XMEs, ampmwr
 99065 FORMAT (' XMES =',F7.5,3X,' UNIT =',A3)
       n1mx = (LTRamx(1) + 1)*NANglr
       n2mx = (LTRamx(2) + 1)*n1mx
@@ -481,8 +481,8 @@ C-----clear 1-step and 2-step cross section matrices
       ENDDO
       CALL CCCTRL(Iout)
 C-----all l-transfers for both steps (calculated using surface form factor)
-C     WRITE(6,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
-C     WRITE(6,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
+C     WRITE(8,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
+C     WRITE(8,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
       CALL FFCAL
       CALL HIBORN
       CALL XSEC(Iout)
@@ -504,8 +504,8 @@ C--------form factor)
          LBTrf(1) = -1
          LTRamx(2) = 0
          LBTrf(2) = -6
-C        WRITE(6,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
-C        WRITE(6,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
+C        WRITE(8,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
+C        WRITE(8,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
          CALL FFCAL
          CALL HIBORN
          CALL XSEC(Iout)
@@ -527,8 +527,8 @@ C--------all l-transfers in the second step (calculated using surface form)
          LBTrf(1) = -6
          LTRamx(2) = Ltrmax
          LBTrf(2) = -1
-C        WRITE(6,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
-C        WRITE(6,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
+C        WRITE(8,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
+C        WRITE(8,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
          CALL FFCAL
          CALL HIBORN
          CALL XSEC(Iout)
@@ -548,8 +548,8 @@ C--------form factor)
          LBTrf(1) = -6
          LTRamx(2) = 0
          LBTrf(2) = -6
-C        WRITE(6,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
-C        WRITE(6,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
+C        WRITE(8,*)'L transfer maxs: ',(LTRAMX(J),J=1,JLSMAX)
+C        WRITE(8,*)'Form factor    : ',(LBTRF(j),J=1,JLSMAX)
          CALL FFCAL
          CALL HIBORN
          CALL XSEC(Iout)
@@ -572,6 +572,7 @@ C-----write results to TAPE15
          ENDIF
          WRITE (15,*) (xwr2(n,nlr),n = 1,n2mx)
   100 ENDDO
+      CLOSE(101)
 99070 FORMAT (21X,'VSX,DVX,WSX,WSF,VSO,WSO',18X,'=',6F8.3/21X,
      &        'DFN,DFNW,DFNS,DFNSP',14X,'=',4F8.3/21X,
      &        'RZERO,RZEROW,RZEROS,RZROSP,RZEROC=',5F8.3)
@@ -599,10 +600,10 @@ C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
       izaf = Ztar*1000 + Atar
       CALL WHERE(izaf,nnuc,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (6,*) ' ORION has been called for the nucleus Z=',
+         WRITE (8,*) ' ORION has been called for the nucleus Z=',
      &               INT(Ztar), ' A=', INT(Atar)
-         WRITE (6,*) ' which is not defined in the table of nuclei'
-         WRITE (6,*) ' EXECUTION STOPPED !!!!'
+         WRITE (8,*) ' which is not defined in the table of nuclei'
+         WRITE (8,*) ' EXECUTION STOPPED !!!!'
          STOP
       ENDIF
 
@@ -750,17 +751,17 @@ Cmh         eta2a=2.0*eta
       a1 = TMAsr(1)**0.333333333333
       XBAr = RZEr(1)*a1
       IF (Iout.GT.3) THEN
-         WRITE (6,99005) (ECM(i1),i1 = 1,NCHanl)
+         WRITE (8,99005) (ECM(i1),i1 = 1,NCHanl)
 99005    FORMAT (/' ECM   ',6E15.5)
-         WRITE (6,99010) (WN(i1),i1 = 1,NCHanl)
+         WRITE (8,99010) (WN(i1),i1 = 1,NCHanl)
 99010    FORMAT (' WN    ',6E15.5)
-         WRITE (6,99015) (WNIni(i1),i1 = 1,NCHanl)
+         WRITE (8,99015) (WNIni(i1),i1 = 1,NCHanl)
 99015    FORMAT (' WNINI ',6E15.5)
-         WRITE (6,99020) (CE(i1),i1 = 1,NCHanl)
+         WRITE (8,99020) (CE(i1),i1 = 1,NCHanl)
 99020    FORMAT (' ETA   ',6E15.5)
-         WRITE (6,99025) (SGMazz(i1),i1 = 1,NCHanl)
+         WRITE (8,99025) (SGMazz(i1),i1 = 1,NCHanl)
 99025    FORMAT (' SIGM0 ',6E15.5)
-         WRITE (6,99030) XMAx, XBAr, NXCple, NXMax,
+         WRITE (8,99030) XMAx, XBAr, NXCple, NXMax,
      &                   (LDWmxr(n),n = 1,NCHanl)
 99030    FORMAT (' XMAX,XBAR=',2E13.5/' NXCPLE,NXMAX,LDWMXR(N)=',8I5)
       ENDIF
@@ -798,21 +799,21 @@ CBF      MATCHING POINT IN MSTEP IS AT NXMAX-2
          ENDDO
       ENDDO
       IF (KTLout(2).NE.0) THEN
-         WRITE (6,99035)
+         WRITE (8,99035)
 99035    FORMAT (/)
          DO n = 1, NCHanl
-            WRITE (6,99040) n
+            WRITE (8,99040) n
 99040       FORMAT (' COULOMB FUNCTIONS FOR NO.',I1,' CHANNEL')
             LMAx = LDWmxr(n) + 1
-            WRITE (6,99045) (FC(l,n),l = 1,LMAx,2)
+            WRITE (8,99045) (FC(l,n),l = 1,LMAx,2)
 99045       FORMAT (3X,'F ',10E12.4)
-            WRITE (6,99050) (GC(l,n),l = 1,LMAx,2)
+            WRITE (8,99050) (GC(l,n),l = 1,LMAx,2)
 99050       FORMAT (3X,'G ',10E12.4)
-            WRITE (6,99055) (FDC(l,n),l = 1,LMAx,2)
+            WRITE (8,99055) (FDC(l,n),l = 1,LMAx,2)
 99055       FORMAT (3X,'FD',10E12.4)
-            WRITE (6,99060) (GDC(l,n),l = 1,LMAx,2)
+            WRITE (8,99060) (GDC(l,n),l = 1,LMAx,2)
 99060       FORMAT (3X,'GD',10E12.4)
-            WRITE (6,99065) (EXSgri(l,n),l = 1,LMAx,4)
+            WRITE (8,99065) (EXSgri(l,n),l = 1,LMAx,4)
 99065       FORMAT (3X,'EX ',5('(',E10.3,E12.4,'),'))
          ENDDO
       ENDIF
@@ -915,7 +916,7 @@ C     NSTEP = 0
 C
 C<<<<<<<<<<<<<       variant A
 C                    IERR = 1
-                     WRITE (6,99005) inc, ro, wr
+                     WRITE (8,99005) inc, ro, wr
 99005                FORMAT ('0ASYMPT. EXPANS. DOES NOT CONVERGE',I5,
      &                       2E12.4/)
                   ELSE
@@ -1007,7 +1008,7 @@ C
 C<<<<<<<<<<<<<          variant A
 C                       IF (L .LT. LMX) GO TO 10
                         IF (l.LT.200) GOTO 210
-                        WRITE (6,99010) l, go, gpo, sum, sump
+                        WRITE (8,99010) l, go, gpo, sum, sump
 99010                   FORMAT ('0NO CONV IN F-RECURRENCE ',I5,4E15.6)
                      ENDIF
                      go = fo
@@ -1185,12 +1186,12 @@ C           Geometry parameters of imaginary surface potential (k=3) used
             ENDIF
          ENDDO
          IF (KTLout(2).EQ.2) THEN
-            WRITE (6,99005) n
+            WRITE (8,99005) n
 99005       FORMAT (/' OPTICAL POTENTIAL FOR CHANNEL NO. ',I1/6X,'R',8X,
      &              'VCENTR',6X,'VCENTI',6X,'VCOULM',6X,'VSPIN',7X,
      &              'VSPINI')
             DO nx = 10, NXMax, 10
-               WRITE (6,99010) xmem(nx), VCEntr(nx,n), VCEnti(nx,n),
+               WRITE (8,99010) xmem(nx), VCEntr(nx,n), VCEnti(nx,n),
      &                         VCOulm(nx,n), VSPin(nx,n), VSPini(nx,n)
 99010          FORMAT (1X,6E12.4)
             ENDDO
@@ -1271,16 +1272,16 @@ C
          t3 = TMAsr(1)/t4
          xmest = XMEs*t3
          fehler = ABS(xmest - XMEs)/XMEs
-CMH      WRITE(6, *)
+CMH      WRITE(8, *)
          IF (fehler.GT.0.01) THEN
-            WRITE (6,*) 'WARNING FROM ORION:'
-            WRITE (6,*) 'WARNING IN FFCAL ABS(XMEST-XMES)/XMES=', fehler
+            WRITE (8,*) 'WARNING FROM ORION:'
+            WRITE (8,*) 'WARNING IN FFCAL ABS(XMEST-XMES)/XMES=', fehler
          ENDIF
          tmas = TMAsr(nt)
 C
 CB       IF(LBTRF(N1).GE.0) GO TO 301
          IF (LBTrf(n1).GE.0) THEN
-            WRITE (6,*) 'THIS VERSION OF ORION IS FOR INELASTIC ',
+            WRITE (8,*) 'THIS VERSION OF ORION IS FOR INELASTIC ',
      &                  'SCATTERING ONLY'
             STOP
          ENDIF
@@ -1396,7 +1397,7 @@ CB
             VINti(nx,n1) = VINti(nx,n1)*dzr
          ENDDO
 C
-Cmh      IF(LBTRF(N1).GE.0) WRITE(6,416)EGEST,VSX
+Cmh      IF(LBTRF(N1).GE.0) WRITE(8,416)EGEST,VSX
 Cmh      416 FORMAT(3X,'B.E.=',F7.3,' MEV, VSX=',F7.3,' MEV, AFTER SEARCH'/)
 C
       ENDDO
@@ -1618,7 +1619,7 @@ CBF                                 SMAT(LB,N3,II3)=1.+2.*TTI*CMAT0
                                  ENDIF
                               ENDDO
                            ENDDO
-                           IF (KTLout(3).NE.0) WRITE (6,99005) na, nc,
+                           IF (KTLout(3).NE.0) WRITE (8,99005) na, nc,
      &                         nb, (CMAt2(mb,nc,na),mb = nbmin,nb)
 C6020                      FORMAT(' REACXS:   ',E13.5,'  (mb)')
 99005                      FORMAT (/'NA=',I3,' NC=',I3,' NB=',I3,
@@ -1632,7 +1633,7 @@ C
                   ENDDO
                ENDDO
                IF (KTLout(3).NE.0) THEN
-                  WRITE (6,99010) na, nc, (CMAt1(mc,na),mc = ncmin,nc)
+                  WRITE (8,99010) na, nc, (CMAt1(mc,na),mc = ncmin,nc)
 99010             FORMAT (/'NA=',I3,' NC=',I3,
      &                    ' YIELD CMAT1(1..NC,NA)'/(4(:'(',E11.4,',',
      &                    E11.4,' )',3X)))
@@ -1640,7 +1641,7 @@ C
 C                 END OF ONE-STEP
 C
 C
-Cmh               IF(KTLOUT(3).NE.0) WRITE(6,6010)LA,JATW,SMAT(LA,N1,II1),RMAT
+Cmh               IF(KTLOUT(3).NE.0) WRITE(8,6010)LA,JATW,SMAT(LA,N1,II1),RMAT
                ENDIF
             ENDIF
          ENDDO
@@ -1883,11 +1884,11 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION an(21), s1, sqrt2i, th, wl, wq(21), wr
+      DOUBLE PRECISION s1, sqrt2i  
       CHARACTER*1 hola, holl, holr, holx, nlrw
-      INTEGER istw23, l0posi, l1, l1p1, l1p1mx, l2p1, l2p1mx, lbcp1x,
+      INTEGER istw23, l0posi, l1p1, l1p1mx, l2p1, l2p1mx, lbcp1x,
      &        ll, llmax, lm10ps, lm20ps, lmm, lmp, lmpos, mm, mm1, n,
-     &        n1, n1mx, n1wx, n2mx, na, nanglx, nb, njl1, njl1mx, nlr,
+     &        n1mx, n1wx, n2mx, na, nanglx, nb, njl1, njl1mx, nlr,
      &        nr, nr1, nw1, nw2
       INTEGER MAX0, MIN0
 C
@@ -1920,7 +1921,7 @@ C
       l2p1mx = L2Maxm + 1
 C<<<<<<<<<<<<< variant A
 C     IF(NCHANL .EQ. 2) L2P1MX = 1
-      IF (KTLout(4).NE.0) WRITE (6,99005)
+      IF (KTLout(4).NE.0) WRITE (8,99005)
 99005 FORMAT (/' ENTER XSEC')
 C
 CB    CALCULATION OF LEGENDRE-POLYNOMIALS
@@ -1978,7 +1979,7 @@ C
 C
 CB    OUTPUT OF CROSS SECTIONS
 C
-      IF (KTLout(4).NE.0) WRITE (6,99010) L1Maxm, L2Maxm
+      IF (KTLout(4).NE.0) WRITE (8,99010) L1Maxm, L2Maxm
 99010 FORMAT ('1',47X,' CROSS SECTIONS FOR L1MAX=',I2,' L2MAX=',I2/)
       nanglx = MIN(NANglr,7)
       l1p1mx = L1Maxm + 1
@@ -1990,11 +1991,11 @@ C
 CB       OUTOUT OF ONE-STEP CROSS SECTIONS
 C
          IF (KTLout(4).NE.0) THEN
-            WRITE (6,99015)
+            WRITE (8,99015)
 99015       FORMAT (//44X,10('*'),' ONE-STEP CROSS SECTIONS ',10('*')/)
-            IF (KTRl(8).EQ.1) WRITE (6,99020)
+            IF (KTRl(8).EQ.1) WRITE (8,99020)
 99020       FORMAT (44X,9('*'),'  J1LOW AND J1UP SEPERATED ',9('*')/)
-            WRITE (6,99025) (ANGler(n),n = 1,nanglx)
+            WRITE (8,99025) (ANGler(n),n = 1,nanglx)
 99025       FORMAT (7X,'L/R L1  J1 ',5X,40(4X,F5.1,4X))
          ENDIF
          DO l1p1 = 1, l1p1mx
@@ -2019,21 +2020,21 @@ C
      &                             /SGMat(na,1)
                   ENDDO
                   IF (KTLout(4).NE.0) THEN
-                     WRITE (6,99030)
+                     WRITE (8,99030)
 99030                FORMAT (' ')
                      nlrw = holl
-                     WRITE (6,99060) nlrw, L1Tr, J1Tw,
+                     WRITE (8,99060) nlrw, L1Tr, J1Tw,
      &                               (WR1(nr,1),nr = nr1,
      &                               nr1 + nanglx - 1)
                      nlrw = holr
-                     WRITE (6,99060) nlrw, L1Tr, J1Tw,
+                     WRITE (8,99060) nlrw, L1Tr, J1Tw,
      &                               (WR1(nr,2),nr = nr1,
      &                               nr1 + nanglx - 1)
                      nlrw = holx
-                     WRITE (6,99060) nlrw, L1Tr, J1Tw,
+                     WRITE (8,99060) nlrw, L1Tr, J1Tw,
      &                               (SGMat(na,1),na = 1,nanglx)
                      nlrw = hola
-                     WRITE (6,99035) nlrw, L1Tr, J1Tw,
+                     WRITE (8,99035) nlrw, L1Tr, J1Tw,
      &                               (SGMat(na,2),na = 1,nanglx)
 99035                FORMAT (8X,A1,2I4,'/2',5X,40F13.5)
                   ENDIF
@@ -2046,9 +2047,9 @@ C
 CB    OUTPUT OF TWO-STEP CROSS SECTIONS
 C
       IF (KTLout(4).NE.0) THEN
-         WRITE (6,99040)
+         WRITE (8,99040)
 99040    FORMAT (//44X,10('*'),' TWO-STEP CROSS SECTIONS ',10('*')/)
-         WRITE (6,99045) (ANGler(na),na = 1,nanglx)
+         WRITE (8,99045) (ANGler(na),na = 1,nanglx)
 99045    FORMAT (6X,'L/R L1   L2 ',40(4X,F5.1,4X))
       ENDIF
       DO l1p1 = 1, l1p1mx
@@ -2062,64 +2063,25 @@ C
                SGMat(na,2) = 0.5*(WR2(nb,1) - WR2(nb,2))/SGMat(na,1)
             ENDDO
             IF (KTLout(4).NE.0) THEN
-               WRITE (6,99050)
+               WRITE (8,99050)
 99050          FORMAT (' ')
                nlrw = holl
-               WRITE (6,99065) nlrw, L1Tr, L2Tr,
+               WRITE (8,99065) nlrw, L1Tr, L2Tr,
      &                         (WR2(nr,1),nr = nr1,nr1 + nanglx - 1)
                nlrw = holr
-               WRITE (6,99065) nlrw, L1Tr, L2Tr,
+               WRITE (8,99065) nlrw, L1Tr, L2Tr,
      &                         (WR2(nr,2),nr = nr1,nr1 + nanglx - 1)
                nlrw = holx
-               WRITE (6,99065) nlrw, L1Tr, L2Tr,
+               WRITE (8,99065) nlrw, L1Tr, L2Tr,
      &                         (SGMat(na,1),na = 1,nanglx)
                nlrw = hola
-               WRITE (6,99055) nlrw, L1Tr, L2Tr,
+               WRITE (8,99055) nlrw, L1Tr, L2Tr,
      &                         (SGMat(na,2),na = 1,nanglx)
 99055          FORMAT (7X,A1,I4,I5,1X,40F13.5)
             ENDIF
          ENDDO
       ENDDO
   100 REWIND 7
-C
-C-----MH commented the bolck below (June 2001)
-C     DO nlr = 1, 2
-C     IF(KASe.NE.2)THEN
-C     WRITE(12, *)(WR1(n, nlr), n = 1, n1wx)
-C     IF(NCHanl.EQ.2)GOTO 200
-C     ENDIF
-C     WRITE(12, *)(WR2(n, nlr), n = 1, n2mx)
-C200  ENDDO
-C
-C
-C
-CWQAN AUSGABE NACH OUTWQAN
-C
-C-----MH disabled the IF below (June 2001)
-      IF (1.EQ.2) THEN
-         OPEN (19,FILE = 'wq1.p',STATUS = 'unknown')
-         OPEN (20,FILE = 'ay1.p',STATUS = 'unknown')
-C
-C        L1=L1OUTP
-C
-         DO na = 1, NANglr
-            DO l1 = 1, l1p1mx
-               th = ANGler(na)
-               n1 = l1*NANglr + na
-               wl = WR1(n1,1)
-               wr = WR1(n1,2)
-               wq(l1) = 0.5*(wl + wr)
-C--------------MH added protection against 0 (June 2001)
-               IF (wl + wr.NE.0) THEN
-                  an(l1) = (wl - wr)/(wl + wr)
-               ELSE
-                  an(l1) = 0.0
-               ENDIF
-            ENDDO
-            WRITE (19,99070) th, (wq(l1),l1 = 1,l1p1mx)
-            WRITE (20,99070) th, (an(l1),l1 = 1,l1p1mx)
-         ENDDO
-      ENDIF
 99060 FORMAT (8X,A1,2I4,'/2',5X,40E13.5)
 99065 FORMAT (7X,A1,I4,I5,1X,40E13.5)
 99070 FORMAT (F9.5,8E12.4)
@@ -2230,8 +2192,8 @@ C
                         ENDDO
                      ENDDO
                   ENDDO
-                  WRITE (8) (CLEbmm(n),n = 1,n2)
-                  IF (n2.NE.jlmttl) WRITE (6,99005) jla, jlb, n2, jlmttl
+                  WRITE (101) (CLEbmm(n),n = 1,n2)
+                  IF (n2.NE.jlmttl) WRITE (8,99005) jla, jlb, n2, jlmttl
 99005             FORMAT (//////'   XSEC-63.  JA,JB,N2,JLMTTL=',4I5)
                ENDIF
             ENDDO
@@ -2268,7 +2230,7 @@ C
                         ENDDO
                         nampmx = namp*NANglr
                         IF (nampmx.GT.100*100) THEN
-                           WRITE (6,*) ' sub XSEC - increase XAMP to:',
+                           WRITE (8,*) ' sub XSEC - increase XAMP to:',
      &                                 nampmx
                            STOP
                         ENDIF
@@ -2393,14 +2355,14 @@ C
       IF (Iout.GT.3) THEN
          OPEN (3,FILE = 'xs.d',STATUS = 'unknown')
          DO l1 = 0, L1Maxm
-            WRITE (6,99015) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
+            WRITE (8,99015) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
 99015       FORMAT (/' 1- and 2-step Cross Sections for L1:',
      &              I3/'   Theta',5X,'L1:',I2,9(7X,'L2:',I2))
             WRITE (3,99020) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
 99020       FORMAT ('# 1- and 2-step Cross Sections for L1:',
      &              I3/'#  Theta',8X,'L1:',I2,9(10X,'L2:',I2))
             DO na = 1, NANglr
-               WRITE (6,99025) ANGler(na), xsig1(l1,na),
+               WRITE (8,99025) ANGler(na), xsig1(l1,na),
      &                         (xsig2(l1,l2,na),l2 = 0,MIN(9,L2Maxm))
 99025          FORMAT (F8.3,10E12.4)
                WRITE (3,99030) ANGler(na), xsig1(l1,na),
@@ -3007,7 +2969,7 @@ C
       jx = MIN0(Jatw + Jbtw,J12mxt)
       IF (ji.LE.jx) THEN
          Jtl = ((jx + ji + 6 - 2*Kasem2)*(jx - ji + 2))/4
-         READ (8) (CLEbmm(n),n = 1,Jtl)
+         READ (101) (CLEbmm(n),n = 1,Jtl)
       ENDIF
       END
 C

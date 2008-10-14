@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2007-09-03 14:20:30 $
-Ccc   * $Id: gamma-strgth.f,v 1.26 2007-09-03 14:20:30 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:21 $
+Ccc   * $Id: gamma-strgth.f,v 1.27 2008-10-14 21:32:21 Capote Exp $
 C
       SUBROUTINE ULM(Nnuc)
 Ccc
@@ -151,20 +151,20 @@ C
 C-----printout of gamma transition parameters
 C
       IF (IOUt.GT.1) THEN
-         WRITE (6,99005)
+         WRITE (8,99005)
 99005    FORMAT (1X,' Gamma transitions parameters',//10X,'E1 ',11X,
      &           'E2 ',11X,'M1 '/)
-         WRITE (6,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
+         WRITE (8,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
      &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
 99010    FORMAT (1X,'TE',7X,F4.2,2(9X,F4.2),/,1X,'CE ',4X,F7.3,
      &           2(6X,F7.3),/,1X,'E1 ',4X,F6.2,2(7X,F6.2))
-         WRITE (6,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
+         WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
      &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
 99015    FORMAT (1X,'W1 ',4X,F6.2,2(7X,F6.2),/,1X,'D1',1X,F10.2,
      &           2(3X,F10.2))
-         WRITE (6,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
+         WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
 99020    FORMAT (1X,'E2 ',4X,F6.2,/,1X,'W2 ',4X,F6.2,/,1X,'D2 ',F10.2)
-         WRITE (6,99025)
+         WRITE (8,99025)
 99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR',//)
       ENDIF
       W1 = GDRpar(2,Nnuc)**2
@@ -266,9 +266,9 @@ C-----GDR parameters according to Messina systematics
          ENDIF
       ENDIF
       IF (e(1).LE.0.D0) THEN
-         WRITE (6,*) ' GDR FIRST PEAK NEGATIVE!'
-         WRITE (6,*) ' EXECUTION STOPPED!'
-         WRITE (6,*) 'def=', defexc, ' esys2', esys2
+         WRITE (8,*) ' GDR FIRST PEAK NEGATIVE!'
+         WRITE (8,*) ' EXECUTION STOPPED!'
+         WRITE (8,*) 'def=', defexc, ' esys2', esys2
          STOP
       ENDIF
       IF (Exc.LT.130.0D0) THEN
@@ -284,10 +284,10 @@ C-----GDR parameters according to Messina systematics
       W2L = g(2)**2
       ED1 = e(1)**2
       ED2 = e(2)**2
-      IF (Nnuc.EQ.1 .AND. Jcn.EQ.1) WRITE (6,*) 
+      IF (Nnuc.EQ.1 .AND. Jcn.EQ.1) WRITE (8,*) 
      &'  J      DEF       E1        G1       S1         E2           G2 
      &       S2'
-      IF (Nnuc.EQ.1) WRITE (6,99005) Jcn, defexc, e(1), g(1), s(1), 
+      IF (Nnuc.EQ.1) WRITE (8,99005) Jcn, defexc, e(1), g(1), s(1), 
      &                               e(2), g(2), s(2)
 99005 FORMAT (1X,I3,7F10.4)
       END

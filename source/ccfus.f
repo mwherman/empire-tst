@@ -1,5 +1,5 @@
-Ccc   * $Date: 2007-09-03 14:20:29 $
-Ccc   * $Id: ccfus.f,v 1.11 2007-09-03 14:20:29 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:19 $
+Ccc   * $Id: ccfus.f,v 1.12 2008-10-14 21:32:19 Capote Exp $
 C
       SUBROUTINE CCFUS(Stl)
 C
@@ -36,12 +36,12 @@ C
      &        np(NDCC), ns1
 C
 C
-      WRITE (6,*) ' '
-      WRITE (6,*)
+      WRITE (8,*) ' '
+      WRITE (8,*)
      & ' Fusion cross section calculated using coupled channel approach'
-      WRITE (6,*)
+      WRITE (8,*)
      &          ' by Dasso and Landowne (Comp. Phys. Comm. 46(1987)187)'
-      WRITE (6,*) ' '
+      WRITE (8,*) ' '
       sum = 0.
       DO k = 1, NDLW
          Stl(k) = 0.
@@ -65,24 +65,24 @@ C
       ETAk = 1.43997*ZEJc(0)*Z(0)
       fpi = 3.544908
       CALL BAR(rbar,vb,homega)
-      WRITE (6,99005) DV, vb, rbar, homega
+      WRITE (8,99005) DV, vb, rbar, homega
 99005 FORMAT (/,'  Parameters for DV=',F6.2,//,'      VB=',F6.1,
      &        '       RB=',F6.2,'       H-OMEGA=',F5.2,/)
       eps = homega/6.283185
       rcal = rbar + delb
 
       IF (NSCc.NE.0) THEN
-         WRITE (6,99010)
+         WRITE (8,99010)
 99010    FORMAT (/,2X,35('*'),/,'  *    BETA    * LAMDA *   Q(MEV)   *',
      &           /,2X,35('*'))
          DO n = 1, NSCc
-            WRITE (6,99015) BETcc(n), FLAm(n), QCC(n)
+            WRITE (8,99015) BETcc(n), FLAm(n), QCC(n)
 99015       FORMAT ('  *  ',F6.2,'    *  ',F3.0,'  *  ',F6.2,'    *')
             IF (BETcc(n).EQ.0.0D0 .AND. FIRst_ein) THEN
-               WRITE (6,*) ' WARNING:'
-               WRITE (6,*) ' WARNING: Deformation for channel ', n,
+               WRITE (8,*) ' WARNING:'
+               WRITE (8,*) ' WARNING: Deformation for channel ', n,
      &                     ' in CCFUS is 0'
-               WRITE (6,*) ' WARNING: It was set internally to 1E-5'
+               WRITE (8,*) ' WARNING: It was set internally to 1E-5'
                BETcc(n) = 1.0E-5
             ENDIF
             flamem(n) = FLAm(n)
@@ -106,17 +106,17 @@ C
             pa(n,1) = f*f/(f*f + fla(n,1)**2)
             pa(n,2) = f*f/(f*f + fla(n,2)**2)
          ENDDO
-         WRITE (6,99020)
+         WRITE (8,99020)
 99020    FORMAT (2X,35('*'),/)
       ENDIF
       IF (NACc.NE.0) THEN
-         WRITE (6,99025)
+         WRITE (8,99025)
 99025    FORMAT (2X,27('*'),/,'  *   F(MEV)   *   Q(MEV)   *',/,2X,
      &           27('*'))
          DO n = ns1, nmax
             fkap = 0.71
 C           READ (5,*) FCD(N),QCC(N)
-            WRITE (6,99030) FCD(n), QCC(n)
+            WRITE (8,99030) FCD(n), QCC(n)
 99030       FORMAT ('  *  ',F6.2,'    *  ',F6.2,'    *')
             sq = SQRT(QCC(n)*QCC(n) + 4.*FCD(n)*FCD(n))
             fla(n,1) = .5*(( - QCC(n)) - sq)
@@ -129,7 +129,7 @@ C           READ (5,*) FCD(N),QCC(N)
      &                   + 8.*(fkap*FCD(n)*FCD(n))**2/sq**3
             dfla2(n,2) = -dfla2(n,1)
          ENDDO
-         WRITE (6,99035)
+         WRITE (8,99035)
 99035    FORMAT (2X,27('*'),/)
       ENDIF
       ilim = nmax
@@ -179,7 +179,7 @@ C           FACTOR=31.41592*(2.*GL+1.)*HC**2/(2.*REDM*AU*EIN)
       facw = 31.416*rcal**2*eps
       SIG = sum
       sig0 = facw*LOG(1. + EXP((EIN-vb)/eps))/EIN
-      WRITE (6,99040) sig0
+      WRITE (8,99040) sig0
 C     34 FORMAT(/,'  CROSS SECTIONS FOR E =',1F6.1,' MEV ARE$',/,
 C     *' COUPLED =',1PE10.3E2,' mb       UNCOUPLED =',1PE10.3E2,' mb',/)
 99040 FORMAT (/1x,' Fusion cross section without channel coupling',

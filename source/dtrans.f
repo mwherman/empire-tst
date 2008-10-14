@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-11 11:25:51 $
-Ccc   * $Id: dtrans.f,v 1.4 2008-08-11 11:25:51 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:20 $
+Ccc   * $Id: dtrans.f,v 1.5 2008-10-14 21:32:20 Capote Exp $
 
       SUBROUTINE DTRANS(XMAX,ED,spec,cross)
 C
@@ -34,7 +34,7 @@ C-----Only deuteron reactions allowed
          ndel=1
 C--------gdel is the single-particle density for neutrons
          gdel=(A(0)-Z(0))/13.D0
-         write(6,100)ip,ndel,aa,ab,abb,Q(ip,1)
+         write(8,100)ip,ndel,aa,ab,abb,Q(ip,1)
 C--------Factors for stripping and pickup
          fac1=jst(ip)/3.*ab*(3800./abB)/Ein/(Ein+50.D0)**2
          fk=12.D0
@@ -53,7 +53,7 @@ C-----------sigabs(ke,ip,1) was estimated in global
             if(spectr.le.0.D0) cycle
             spec(ip,ke)=spectr
             cross(ip)=cross(ip)+spectr*de
-            write(6,102)ke,ek,fac1,fac2,sg,spec(ip,ke)
+            write(8,102)ke,ek,fac1,fac2,sg,spec(ip,ke)
          enddo
       enddo
       return

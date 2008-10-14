@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-19 14:28:37 $
-Ccc   * $Id: HRTW-comp.f,v 1.56 2008-08-19 14:28:37 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:21 $
+Ccc   * $Id: HRTW-comp.f,v 1.57 2008-10-14 21:32:21 Capote Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -56,8 +56,8 @@ C-----accounted for when width fluctuation (HRTW) is selected
       GCAsc = 1.0
       ke = NEX(nnuc)
 
-      WRITE(6,*)
-      WRITE(6,*)
+      WRITE(8,*)
+      WRITE(8,*)
 C-----
 C-----start CN nucleus decay
 C-----
@@ -66,16 +66,16 @@ C-----do loop over decaying nucleus parity
       sumGg = 0.d0
       sumtg = 0.d0
       IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
-      WRITE(6,'(1x,''Renormalization of gamma-ray strength function'')')
-      WRITE(6,'(1x,''----------------------------------------------'')')
+      WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
+      WRITE(8,'(1x,''----------------------------------------------'')')
       ENDIF
       DO ipar = 1, 2
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
          DO jcn = 1, NLW
-C           WRITE(6,*)'  '
-C           WRITE(6,*)'DECAY STATE J=',jcn,' PI=',ipar
-C           WRITE(6,*)'  '
+C           WRITE(8,*)'  '
+C           WRITE(8,*)'DECAY STATE J=',jcn,' PI=',ipar
+C           WRITE(8,*)'  '
             nhrtw = 0
 C-----------initialize variables
             DENhf = 0.0
@@ -100,9 +100,9 @@ C-----------do loop over ejectiles
 C              emitted nuclei must be heavier than alpha
                if(NREs(nejc).lt.0) cycle
                nnur = NREs(nejc)
-C              WRITE(6,*)'emitting ejectile=', nejc
+C              WRITE(8,*)'emitting ejectile=', nejc
                CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
-C              WRITE(6,*)'sum for ejectile=' , nejc, sum
+C              WRITE(8,*)'sum for ejectile=' , nejc, sum
                H_Sumtl = H_Sumtl + sum
             ENDDO
 C-----------do loop over ejectiles       ***done***
@@ -153,27 +153,27 @@ C--------------redefine fission transmission coef. using single iteration
             ELSE
                H_Tav = 0.0
             ENDIF
-C           WRITE(6,*)'sum gamma ' , sumg
-C           WRITE(6,*)'sum fission redifined ' , sumfis
-C           WRITE(6,*)'total sum for this state ' , H_Sumtl
-C           WRITE(6,*)'sum Tl**2 for this state ' , H_Sumtls
-C           WRITE(6,*)'sum of weak for this state ' , H_Sweak
-C           WRITE(6,*)'number of strong Tls for this state ' , NH_lch
-C           WRITE(6,*)'average Tl for this state ' , H_Tav
-C           WRITE(6,*)'strong Tls from this state ' , H_Tl
-C           WRITE(6,*)'first entry DENhf=',denhf
+C           WRITE(8,*)'sum gamma ' , sumg
+C           WRITE(8,*)'sum fission redifined ' , sumfis
+C           WRITE(8,*)'total sum for this state ' , H_Sumtl
+C           WRITE(8,*)'sum Tl**2 for this state ' , H_Sumtls
+C           WRITE(8,*)'sum of weak for this state ' , H_Sweak
+C           WRITE(8,*)'number of strong Tls for this state ' , NH_lch
+C           WRITE(8,*)'average Tl for this state ' , H_Tav
+C           WRITE(8,*)'strong Tls from this state ' , H_Tl
+C           WRITE(8,*)'first entry DENhf=',denhf
 C-----------
 C-----------the first HRTW run completed
 C-----------
 C-----------calculate V's for the strong channels (iteration)
-C           WRITE(6,*)'  '
+C           WRITE(8,*)'  '
             IF (NH_lch.LE.NDHRTW1)
      &          CALL AUSTER(H_Tl,H_Tav,H_Sumtl,H_Sweak,NH_lch,NDHRTW1)
-C           WRITE(6,*)'strong Vs from this state ' , H_Tl
-C           WRITE(6,*)'  '
-C           WRITE(6,*)'  '
-C           WRITE(6,*)'  '
-C           WRITE(6,*)'  '
+C           WRITE(8,*)'strong Vs from this state ' , H_Tl
+C           WRITE(8,*)'  '
+C           WRITE(8,*)'  '
+C           WRITE(8,*)'  '
+C           WRITE(8,*)'  '
 C-----------
 C-----------start the second HRTW run
 C-----------
@@ -181,9 +181,9 @@ C-----------calculate reaction cross section and its spin distribution
 C-----------split into contributions from individual partial waves
             CALL HRTW_MARENG(0,0,jcn,ipar,ich)
             DO i = 1, ich
-C              WRITE(6,*)' '
-C              WRITE(6,*)'HRTW entry=',i
-C              WRITE(6,*)' '
+C              WRITE(8,*)' '
+C              WRITE(8,*)'HRTW entry=',i
+C              WRITE(8,*)' '
                NSCh = 0
 C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
@@ -192,16 +192,16 @@ C--------------do loop over ejectiles (fission is not repeated)
 C                 emitted nuclei must be heavier than alpha
                   if(NREs(nejc).lt.0) cycle
                   nnur = NREs(nejc)
-C                 WRITE(6,*)'  '
-C                 WRITE(6,*)'second entry with ejec ' , nejc
+C                 WRITE(8,*)'  '
+C                 WRITE(8,*)'second entry with ejec ' , nejc
                   CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
-C                 WRITE(6,*)'sum for ejec=' ,nejc, sum
+C                 WRITE(8,*)'sum for ejec=' ,nejc, sum
                ENDDO
 C--------------do loop over ejectiles       ***done***
 C              CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
                DENhf = DENhf + sumg + sumfis
-C              WRITE(6,*)'second entry DENhf=',denhf
-C              WRITE(6,*)'second entry sumg=',sumg
+C              WRITE(8,*)'second entry DENhf=',denhf
+C              WRITE(8,*)'second entry sumg=',sumg
 C--------------
 C--------------correct scratch matrix for enhancement of the elastic channels
 C--------------
@@ -237,8 +237,8 @@ C
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
-!        write(6,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
-                WRITE(6,'(A12,f4.1,A5,I2,A36,d12.6)')
+!        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
+                WRITE(8,'(A12,f4.1,A5,I2,A36,d12.6)')
      &           'CN state J=',cnspin,', Par=',ip,
      &           ' Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
                 sumtg = sumtg + sumg
@@ -251,54 +251,54 @@ C
       IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
          IF(Gg_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
-            WRITE(6,'(1x,
+            WRITE(8,'(1x,
      &      ''Experimental information from capture channel'')')
-            WRITE(6,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',tgexper
+            WRITE(8,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',tgexper
             IF(GG_unc.GT.0.0D0) THEN
-              WRITE(6,'(1x,A5,F9.3,A5,F8.3,A4)')
+              WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
             ELSE
-              WRITE(6,'(1x,A5,F9.3,A18)')
+              WRITE(8,'(1x,A5,F9.3,A18)')
      &          'Gg = ', GG_obs,' meV (systematics)'
             ENDIF
             WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
 
             IF(D0_unc.GT.0.0D0) THEN
-              WRITE(6,'(1x,A5,F11.6,A5,F11.6,A4)')
+              WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
-              WRITE(6,'(1x,A5,F11.6,A17)')
+              WRITE(8,'(1x,A5,F11.6,A17)')
      &          'D0 = ', d0c,' keV (calculated)'
             ELSE
-              WRITE(6,'(1x,A5,F11.6,A17)')
+              WRITE(8,'(1x,A5,F11.6,A17)')
      &          'D0 = ', D0_obs,' keV (calculated)'
             ENDIF
             if(sumtg.gt.0.d0) then
-              WRITE(6,'(1x,''Normalization factor = '',F7.3)')
+              WRITE(8,'(1x,''Normalization factor = '',F7.3)')
      &           tgexper/sumtg
             else
-              WRITE(6,'(1x,
+              WRITE(8,'(1x,
      &        ''Calculated Tgamma = 0, no Normalization'')')
             endif
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') D0_obs
             IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
                 TUNe(0, Nnuc) = tgexper/sumtg
-                WRITE(6 ,
+                WRITE(8 ,
      &       '(1x,''Gamma emission width multiplied by '',F7.3)')
      &         TUNe(0, Nnuc)
-               WRITE(6,*)
+               WRITE(8,*)
               ELSE
-                WRITE(6 ,
+                WRITE(8 ,
      &       '(1x,''Gamma emission is not normalized'')')
               ENDIF
             ELSE
-              WRITE(6,
+              WRITE(8,
      &         '(1x,''Gamma emission is not normalized''/
      &           1x,''TUNE(0,Nnuc) set in input to '',F7.3)')
      &         TUNe(0, Nnuc)
             ENDIF
-            WRITE(6,*)
+            WRITE(8,*)
          ENDIF
       ENDIF
       END
@@ -381,10 +381,10 @@ C
       DOUBLE PRECISION VT
 C
 C
-C     WRITE(6,*)' '
-C     WRITE(6,*)'ejectile ,nhrtw ',nejc,nhrtw
-C     WRITE(6,*)'CN bin, spin, parity',Iec,Jc,Ipc
-C     WRITE(6,*)' '
+C     WRITE(8,*)' '
+C     WRITE(8,*)'ejectile ,nhrtw ',nejc,nhrtw
+C     WRITE(8,*)'CN bin, spin, parity',Iec,Jc,Ipc
+C     WRITE(8,*)' '
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----clear scratch matrices
@@ -434,7 +434,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + VT(TL(5,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'A Tl= ' , TL(5,l,Nejc,Nnur)
+C                       WRITE(8,*)'A Tl= ' , TL(5,l,Nejc,Nnur)
                         CALL TL2VL(TL(5,l,Nejc,Nnur),rho)
                         sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
                      ENDIF
@@ -447,7 +447,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + VT(TL(5,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'B Tl= ' , TL(5,l,Nejc,Nnur)
+C                       WRITE(8,*)'B Tl= ' , TL(5,l,Nejc,Nnur)
                         CALL TL2VL(TL(5,l,Nejc,Nnur),rho)
                         sumtl2 = sumtl2 + TL(5,l,Nejc,Nnur)
                      ENDIF
@@ -475,7 +475,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + VT(TL(6,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'C Tl= ' , TL(6,l,Nejc,Nnur)
+C                       WRITE(8,*)'C Tl= ' , TL(6,l,Nejc,Nnur)
                         CALL TL2VL(TL(6,l,Nejc,Nnur),rho)
                         sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
                      ENDIF
@@ -488,7 +488,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + VT(TL(6,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'D Tl= ' , TL(6,l,Nejc,Nnur)
+C                       WRITE(8,*)'D Tl= ' , TL(6,l,Nejc,Nnur)
                         CALL TL2VL(TL(6,l,Nejc,Nnur),rho)
                         sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
                      ENDIF
@@ -519,7 +519,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + VT(TL(ietl,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'E Tl= ' , TL(ietl,l,Nejc,Nnur)
+C                       WRITE(8,*)'E Tl= ' , TL(ietl,l,Nejc,Nnur)
                         CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho)
                         sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
                      ENDIF
@@ -532,7 +532,7 @@ C-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + VT(TL(ietl,l,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(6,*)'F Tl= ' , TL(ietl,l,Nejc,Nnur)
+C                       WRITE(8,*)'F Tl= ' , TL(ietl,l,Nejc,Nnur)
                         CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho)
                         sumtl2 = sumtl2 + TL(ietl,l,Nejc,Nnur)
                      ENDIF
@@ -624,7 +624,7 @@ C--------------------entry with nhrtw>0
 C--------------------entry with nhrtw=0
                      CALL TL2VL(tld,cor)
                      sumdl = sumdl + tld*cor
-C                    WRITE(6,*)'sumdl,tld,cor ',sumdl,tld,cor
+C                    WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
                      IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0) .AND.
      &                   tld.GT.H_Tthr) THEN
 C-----------------------case of a strong elastic channel
@@ -632,7 +632,7 @@ C-----------------------record position of Tl, l and channel spin
                         MEMel(iel,1) = NH_lch
                         MEMel(iel,2) = l
                         MEMel(iel,3) = INT(2.0*s)
-C                       WRITE(6,*)'got elastic iel ', iel,
+C                       WRITE(8,*)'got elastic iel ', iel,
 C    &                     '  MEM# ',MEMel(iel,1),
 C    &                     '  MEMk ',MEMel(iel,2),
 C    &                     '  MEM2s ',MEMel(iel,3)
@@ -648,13 +648,13 @@ C-----------loop over channel spin ------ done ----------------------------
             sumdl = sumdl*RORed
             SCRtl(i,Nejc) = sumdl
             Sum = Sum + sumdl
-C           WRITE(6,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
+C           WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
          ENDDO
 C--------do loop over discrete levels --------- done --------------------
       ENDIF
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
-Cpr   WRITE(6,*) 'TOTAL SUM=',SUM
+Cpr   WRITE(8,*) 'TOTAL SUM=',SUM
 C--------decay to the continuum ------ done -----------------------------
       END
 C
@@ -1191,9 +1191,9 @@ C
 C
 C
       IF (Lch.GT.Ndhrtw1) THEN
-         WRITE (6,*)
+         WRITE (8,*)
      &             'ERROR in AUSTER: Lch bigger than allowed by NDHRTW1'
-         WRITE (6,*) 'If you see this printed it means a BUG!'
+         WRITE (8,*) 'If you see this printed it means a BUG!'
          STOP
       ENDIF
       icount = 0
@@ -1213,7 +1213,7 @@ C
       ENDDO
       icount = icount + 1
       IF (icount.GT.1000) THEN
-         WRITE (6,*) ' Maximum iteration number reached in AUSTER'
+         WRITE (8,*) ' Maximum iteration number reached in AUSTER'
          RETURN
       ENDIF
       sum = sv
@@ -1423,11 +1423,11 @@ C-----channel spin min and max
          DO k = lmin, lmax
             IF (PAR(Ip,LVP(LEVtarg,Ntrg),k - 1).NE.0.0D0) THEN
                IF (Ich.GT.NDHRTW2) THEN
-                  WRITE (6,*) ' '
-                  WRITE (6,*) 'E R R O R !'
-                  WRITE (6,*)
+                  WRITE (8,*) ' '
+                  WRITE (8,*) 'E R R O R !'
+                  WRITE (8,*)
      &                    'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
-                  WRITE (6,*) 'INCREASE NDHRTW2 IN THE dimension.h',
+                  WRITE (8,*) 'INCREASE NDHRTW2 IN THE dimension.h',
      &                        ' AND RECOMPILE.'
                   STOP 'INSUFFICIENT DIMENSION: NDHRTW2'
                ENDIF
@@ -1442,10 +1442,10 @@ C-----channel spin min and max
      &                   MEMel(iel,2).EQ.k) kel = MEMel(iel,1)
                   ENDDO
                   IF (kel.EQ.0) THEN
-                     WRITE (6,*) ' '
-                     WRITE (6,*) ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
-                     WRITE (6,*) ' REPORT THIS ERROR ALONG WITH RELATED'
-                     WRITE (6,*) ' INPUT FILE TO: mwherman@bnl.gov'
+                     WRITE (8,*) ' '
+                     WRITE (8,*) ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
+                     WRITE (8,*) ' REPORT THIS ERROR ALONG WITH RELATED'
+                     WRITE (8,*) ' INPUT FILE TO: mwherman@bnl.gov'
                      STOP ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
                   ENDIF
                   vl = H_Tl(kel,1)

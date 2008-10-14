@@ -1,8 +1,12 @@
-#FFLAGS =  -O2
 #----GNU gfortran FORTRAN compiler
-# FC     =  gfortran
+#FC     =  gfortran
 #----flags for production compilation with gfortran
-#FFLAGS = -O3
+#FFLAGS = -O3 -std=legacy
+
+#----GNU f95 FORTRAN compiler
+#FC     =  f95
+#----flags for production compilation with gfortran
+#FFLAGS = -O3 -std=legacy
 
 #---- pfg90 compiler
 #FC     =  pgf90
@@ -25,13 +29,13 @@
 #----INTEL f95 compiler
 FC     =  ifort
 #----flags for optimalization using ifort 
-FFLAGS = -arch pn4 -O3 -axPW -ipo  
+#FFLAGS = -arch pn4 -O3 -axPW -ipo  
 #FFLAGS = -arch pn4 -O3 -ipo 
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
+FFLAGS =  -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
@@ -71,12 +75,12 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
-            fitbarrier.o      fis_io.o          plot-zvv.o
+            fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o
 
 OBJE =      subecis06m.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
-	$(FC) -o $@ $(OBJF) $(OBJE)
+      $(FC) -o $@ $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
@@ -88,4 +92,4 @@ ddhms.o : ddhms.cmb
 tl.o  : pre_ecis.h
 
 clean:
-	rm *.o
+      rm *.o

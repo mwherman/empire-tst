@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2007-09-07 18:39:51 $
-Ccc   * $Id: empire_ctl.f,v 1.27 2007-09-07 18:39:51 herman Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2008-10-14 21:32:20 $
+Ccc   * $Id: empire_ctl.f,v 1.28 2008-10-14 21:32:20 Capote Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -27,7 +27,7 @@ C
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
       IF(autofit .AND. sensit) THEN
-      WRITE(6,*) 'OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE RUN TO
+      WRITE(8,*) 'OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE RUN TO
      &GETHER'
       STOP 'NO OMP FIT TOGETHER WITH KALMAN CALCULATIONS'
       ENDIF
@@ -42,7 +42,7 @@ C
          CALL EMPIRE
       ENDIF
 
-      STOP '.REGULAR STOP'
+      STOP 
       END
 C
 C-------------------------------------------------------------------
@@ -1430,14 +1430,14 @@ C--- exists.
       if(sig(1).gt.0.0) then
         ths0=0.0
         ths1=0.0
-        OPEN(6,file='OUTPUT.DAT',status='old')
+        OPEN(100,file='OUTPUT.DAT',status='old')
         do i=1,200
-          read(6,'(7x,a35)') astrngth
+          read(100,'(7x,a35)') astrngth
           if(astrngth(1:14).ne.'Calc. Strength') cycle
           read(astrngth,'(29x,f6.3)') ths0
-          read(6,'(36x,f6.3)') ths1
+          read(100,'(36x,f6.3)') ths1
          end do
-        close(6)
+        close(100)
         chi2=wt(15,2)*((sig(1)-ths0)/dsig(1))**2
        else
         chi2=0.0
@@ -1841,7 +1841,7 @@ C-----F - variation of the parameter not allowed (discrete value keyword)
       LINUX = .TRUE.
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
-         WRITE(6,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
+         WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
      &E INSTRUCTING WHICH PARAMETERS TO VARY HAS BEEN FOUND ' 
          STOP 'SENSITIVITY INPUT MISSING'
       ENDIF
@@ -1877,7 +1877,7 @@ C--------Read target and projectile from the input file
          IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
          WRITE(7,'(A80)') inprecord 
       ENDDO
-      WRITE(6,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
+      WRITE(8,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
      &            aprojec,Zprojec
 C-----Read line of optional input
    50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
@@ -1944,7 +1944,7 @@ C-----Check category of the parameter to be varied
       IF(category.EQ.'F') GOTO 100 
       valmem = val
       IF(val.GE.1) THEN
-c       WRITE(6,*) 'PARAMETER ',name,' VARIATION ',val,
+c       WRITE(8,*) 'PARAMETER ',name,' VARIATION ',val,
 c    &             ' IS BIGGER THAN 1' 
       STOP 'PARAMETER VARIATION LARGER THAN 100%'
       ENDIF
@@ -1981,7 +1981,7 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
                itmp=PIPE(ctmp)
             ENDIF
          ENDIF
-c     WRITE(6,'(''Varying parameter '',A6,''x''F10.3,4I5)')  
+c     WRITE(8,'(''Varying parameter '',A6,''x''F10.3,4I5)')  
 c    &      name, 1.0+val, i1,i2, i3, i4
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
 C-----
@@ -2140,7 +2140,7 @@ C-----------Relative sensitivity (per variation interval)
       CLOSE(36)
       WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
       GOTO 100 !Parameter done, return and get another parameter to vary
-  200 WRITE (6,
+  200 WRITE (8,
      &'('' FATAL: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '

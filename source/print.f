@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-08-18 07:31:32 $
-Ccc   * $Id: print.f,v 1.19 2008-08-18 07:31:32 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:25 $
+Ccc   * $Id: print.f,v 1.20 2008-10-14 21:32:25 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -52,24 +52,24 @@ C
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
-         WRITE (6,99005)
+         WRITE (8,99005)
 99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
       ELSE
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
-           WRITE (6,99015)
+           WRITE (8,99015)
 99015 FORMAT (1X,///,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
           ENDIF
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
-           WRITE (6,99020)
+           WRITE (8,99020)
 99020 FORMAT (1X,///,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
-           WRITE (6,99025)
+           WRITE (8,99025)
 99025 FORMAT (1X,///,1X,54('*'),1X,'alpha  spectrum  ',54('*'),//)
          ENDIF
          IF ( AEJc(Nejc).GT.1.0D0 .AND.
      &    .NOT.(AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) ) THEN
-          WRITE (6,99010) ia, SYMbe(Nejc)
+          WRITE (8,99010) ia, SYMbe(Nejc)
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
       ENDIF
@@ -86,7 +86,7 @@ C
         totspec = totspec - 
      &	          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
         totspec = totspec*DE     
-        WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
+        WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec      
         RETURN
       ENDIF	
@@ -98,12 +98,12 @@ C
       s0 = s1*0.1
 
 
-      WRITE (6,99030) s0, s1, s2, s3
+      WRITE (8,99030) s0, s1, s2, s3
 99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
      &        E6.1)
-      WRITE (6,99035)
+      WRITE (8,99035)
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
-      WRITE (6,99045)
+      WRITE (8,99045)
 
       totspec = 0.0
       DO i = 1, kmax
@@ -126,13 +126,13 @@ C
          DO ij = 1, 93
             symc(ij) = haha
          ENDDO
-  150    WRITE (6,99040) e, CSE(i,Nejc,Nnuc), symc
+  150    WRITE (8,99040) e, CSE(i,Nejc,Nnuc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
       totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
-      WRITE (6,99045)
-      WRITE (6,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
+      WRITE (8,99045)
+      WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec 
 99045 FORMAT (24X,93('-'))
       END

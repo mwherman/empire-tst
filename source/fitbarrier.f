@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-09-13 16:17:03 $
-Ccc   * $Id: fitbarrier.f,v 1.5 2008-09-13 16:17:03 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:20 $
+Ccc   * $Id: fitbarrier.f,v 1.6 2008-10-14 21:32:20 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
@@ -24,8 +24,7 @@ C     Functions
 
       rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
       smiu = DSQRT(0.5d0*rmiu)
-C     IF(NRSmooth(Nnuc).EQ.0) NRSmooth(Nnuc)= 5
-	nrsm = NRSmooth(Nnuc)
+      nrsm = NRSmooth(Nnuc)
 
 c-----Generating numerical barrier starting from parabolas' parameters
       IF(FISbar(Nnuc).LE.2.)THEN
@@ -190,34 +189,17 @@ C-------Imaginary potential strengths
 
          DO iw = 2, nrbar,2
             deltt(iw) = 0.d0
-            dmom = min(Vheigth(iw-1),Vheigth(iw+1))!+1.5d0
+            dmom = max(Vheigth(iw-1),Vheigth(iw+1))
 
             w = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
      &                     ((dmom - Vheigth(iw)) *
-     &                     (1.d0 + (2.d0 * wimag(1)-1.d0)*
-     &                      dexp( - (Ee - dmom) / wimag(2))))
-
-c----------for th232
-            if(iw.eq.2)then
-               w=1.02
-c               if(ein.lt.0.9)w=.004
-            endif
-            if(iw.eq.4)w=0.00001
-c------------------------------------
-            w=0.01
-c            w=wimag(1)*(ee-vheigth(iw))**2
-c           write(*,*)'wdir',ee,ein,w,iw!dmom,Vheigth(iw),iw
-c            w=1.d0
+     &                     (1.d0 + (1.d0/wimag(1))*
+     &                      dexp( - (Ee - dmom) / wimag(iw))))
             if(Ee.le. Vheigth(iw)) W = 0.d0
             if(Ee.gt. dmom) W = 1.d0
             if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
             deltt(iw) = W * phase(iw)
-c           write(*,*)'w',iw,deltt(iw), W,  phase(iw)
          ENDDO
-
-
-c           pause
-      
 
          DO iw = 2, nrbar, 2
             delt(iw/2 + 1) = deltt(iw)

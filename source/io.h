@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-08-29 23:17:04 $
-Ccc   * $Id: io.h,v 1.37 2008-08-29 23:17:04 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:22 $
+Ccc   * $Id: io.h,v 1.38 2008-10-14 21:32:22 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -10,9 +10,9 @@ c      1     tl
 c      3     MSD-Orion
 c      4     ddhms
 c      5     io.h
-c      6     io.h
+c      6     STANDARD OUTPUT (screen)
 c      7     empire_ctl
-c      8     MSD-Orion
+c      8     io.h (LIST.DAT)
 c      9     ddhms
 c     10     ddhms
 c     11     io.h
@@ -55,50 +55,54 @@ c     51     input
 c     52     input
 c     53     fusion
 c     54     HF-comp
-c     55     ecis03
-c     58     ecis03
-c     59     ecis03
-c     60     ecis03,main
-c     61     ecis03
-c     62     ecis03,main
-c     63     ecis03
-c     64     ecis03
-c     65     ecis03
-c     66     ecis03, MSD-Tristan
+c     55     ecis
+c     58     ecis
+c     59     ecis
+c     60     ecis,main
+c     61     ecis
+c     62     ecis,main
+c     63     ecis
+c     64     ecis
+c     65     ecis
+c     66     ecis, MSD-Tristan
 c     68     main
 c     70     fileprep (empire_ctl fit)
 c     71     fileprep (empire_ctl fit)
 c     72     fileprep (empire_ctl fit)
 c     73     main.f (for pfns OUTPUT)
 c     74     main.f (for pfns OUTPUT)
-c     75     ecis03
-c     76     ecis03
+c     75     ecis
+c     76     ecis
 c     77     input
-c     78     ecis03
+c     78     ecis
 c     79     input
 c     80     main
 c     81     input,lev-dens
 c     82     input,lev-dens
 c     83     input
 c     84     input
-c     85     ecis03
-c     86     ecis03
-c     87     ecis03
-c     88     ecis03
-c     89     ecis03
-c     90     ecis03
-c     91     ecis-03,MSD-Tristan
+c     85     ecis
+c     86     ecis
+c     87     ecis
+c     88     ecis
+c     89     ecis
+c     90     ecis
+c     91     ecis,MSD-Tristan
 c     92     empire_ctl
-c     93     ecis-03
+c     93     ecis
 c     94     input.f,main
 c     95     input.f
 c     96     tl
 c     97     tl
 c     98     fission XS 
-c     99     ecis03
+c     99     ecis
+c    100     empire_ctl
+c    101     MSD-orion.f 
+c    102     Non-RIPL potential
 c
-      OPEN (UNIT = 5,FILE='INPUT.DAT', STATUS='OLD')
-      OPEN (UNIT = 6,FILE='LIST.DAT' , STATUS='UNKNOWN')
+      OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
+      OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
+      OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
 C-----spin distribution from file SDFILE
       OPEN (UNIT = 43,FILE='SDREAD', STATUS='OLD', ERR=768)
       SDREAD=.TRUE.
@@ -111,14 +115,14 @@ C-----fusion transmission coefficients from file FUSION
       GOTO 889
  778  FUSREAD=.FALSE.
  889  CONTINUE
-      OPEN (UNIT = 12,FILE='OUTPUT.DAT')
-      OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD', ERR=777)
+      OPEN (12,FILE='OUTPUT.DAT')
+      OPEN (13,FILE='LEVELS', STATUS='OLD', ERR=777)
       FILEVEL=.TRUE.
       GOTO 888
  777  FILEVEL=.FALSE.
-      OPEN (UNIT = 14, FILE='LEVELS', STATUS='NEW')
+      OPEN (14, FILE='LEVELS', STATUS='NEW')
  888  CONTINUE
-      OPEN (UNIT = 33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
+      OPEN (33,FILE='OMPAR.DIR' ,STATUS='OLD', ERR=879)
 C     Added to check if file is not empty
       READ(33,*,END=881)
       REWIND(33)
@@ -126,9 +130,9 @@ C     Added to check if file is not empty
       GOTO 891
  881  CLOSE(33,STATUS='DELETE')
  879  OMPARfCC=.FALSE.
-      OPEN (UNIT = 33, FILE='OMPAR.DIR', STATUS='NEW')
+      OPEN (33, FILE='OMPAR.DIR', STATUS='NEW')
 891   CONTINUE
-      OPEN (UNIT = 29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
+      OPEN (29,FILE='OMPAR.RIPL' ,STATUS='OLD', ERR=780)
 C     Added to check if file is not empty
       READ(29,*,END=776)
       REWIND(29)
@@ -136,13 +140,13 @@ C     Added to check if file is not empty
       GOTO 895
  776  CLOSE(29,STATUS='DELETE')
  780  OMPAR_RIPLF=.FALSE.
-      OPEN (UNIT = 29, FILE='OMPAR.RIPL', STATUS='NEW')
+      OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-      OPEN (UNIT = 23,FILE='../data/nparac.dat'
+      OPEN (23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
-      OPEN (UNIT = 24,FILE='../data/EGSM_ldp.dat'
+      OPEN (24,FILE='../data/EGSM_ldp.dat'
      *,STATUS='OLD')
-      OPEN (UNIT = 26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
+      OPEN (26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')

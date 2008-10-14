@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-09-13 16:17:05 $
-Ccc   * $Id: tl.f,v 1.96 2008-09-13 16:17:05 Capote Exp $
+Ccc   * $Date: 2008-10-14 21:32:25 $
+Ccc   * $Id: tl.f,v 1.97 2008-10-14 21:32:25 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -65,13 +65,13 @@ C--------------calculate fusion barrier using CCFUS routine BAR
                A0R = 0.63
                ETAk = 1.43997*ZEJc(0)*Z(0)
                CALL BAR(rbar,BFUs,homega)
-               WRITE (6,*) 'Fusion barrier is ', BFUs, ' MeV'
+               WRITE (8,*) 'Fusion barrier is ', BFUs, ' MeV'
             ENDIF
             IF (SIG.EQ.0.0D0) SIG = 0.05*BFUs
             IF (IOUt.GT.0) THEN
-               WRITE (6,*) 'Distributed fusion barrier with extra push='
+               WRITE (8,*) 'Distributed fusion barrier with extra push='
      &                     , EXPush
-               WRITE (6,*) 'SIG=', SIG, ' and TRUNC=', TRUnc,
+               WRITE (8,*) 'SIG=', SIG, ' and TRUNC=', TRUnc,
      &                     ' has been used'
             ENDIF
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
@@ -130,6 +130,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
+      DOUBLE PRECISION EcollTarget, RCCC
       CHARACTER*80 ch_iuf
       LOGICAL coll_defined
       CHARACTER*132 ctmp
@@ -156,8 +157,8 @@ C     IF (IMOdel.EQ.2) model = 'coupled-channels vibrational model'
 C     IF (IMOdel.EQ.3) model = 'coupled-channels soft rotor model'
 
       IF (IMOdel.EQ.3 .AND. FIRst_ein) THEN
-         WRITE (6,*) 'WARNING: coupled-channels soft rotor model'
-         WRITE (6,*) 'WARNING: OPTMAN code is needed            '
+         WRITE (8,*) 'WARNING: coupled-channels soft rotor model'
+         WRITE (8,*) 'WARNING: OPTMAN code is needed            '
          IWArn = 5
          GOTO 300
       ENDIF
@@ -174,10 +175,10 @@ C--------model = 'coupled-channels rigid rotor model'
 C
          coll_defined = .TRUE.
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (6,*) 'WARNING: None of the requested isotopes is '
-            WRITE (6,*)
+            WRITE (8,*) 'WARNING: None of the requested isotopes is '
+            WRITE (8,*)
      &               'WARNING: included in the selected RIPL potential.'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -186,9 +187,9 @@ C
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
                ncalc = n
                IF (IDEf(n).GT.2*LMAx(n) .OR. NCOll(n).GT.NDCOLLEV) THEN
-                  WRITE (6,*) 'WARNING: OMP collective levels are wrong'
-                  WRITE (6,*) 'WARNING: Too many levels or deformations'
-                  WRITE (6,*)
+                  WRITE (8,*) 'WARNING: OMP collective levels are wrong'
+                  WRITE (8,*) 'WARNING: Too many levels or deformations'
+                  WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
                   IWArn = 6
                   GOTO 300
@@ -196,16 +197,16 @@ C
             ENDIF
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &                'WARNING: RIPL OMP collective levels are not used'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &                'WARNING: RIPL OMP collective levels are not used'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -214,18 +215,18 @@ C--------Setting EMPIRE global variables
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
-         WRITE (6,*)
-         WRITE (6,*)
-         WRITE (6,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+         WRITE (8,*)
+         WRITE (8,*)
+         WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
             D_Def(1,k) = DDEf(ncalc,k)
          ENDDO
          IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (6,*) 'WARNING: Default number of coupled levels: ',
+            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
      &                  nld_cc
-            WRITE (6,*) 'WARNING: is not equal ', NCOll(ncalc),
+            WRITE (8,*) 'WARNING: is not equal ', NCOll(ncalc),
      &                  ' (used in CC RIPL OMP)'
          ENDIF
 C
@@ -234,37 +235,37 @@ C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
-         WRITE (6,*)
+         WRITE (8,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE (32,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          READ (97,'(A80)') ch_iuf   ! FIRST LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*) 'Dyn.deformations are not used in symm.rot.model'
+         WRITE (8,*) 'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,*) 'Dyn.deformations are not used in symm.rot.model'
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          READ (97,'(A80)') ch_iuf       ! 3ER LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*)
+         WRITE (8,*)
          WRITE (32,*)
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
          WRITE (96,'(A80)') ch_iuf
          DEFormed = .TRUE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
-               WRITE (6,*)
+               WRITE (8,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE (32,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-               WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
+               WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
                WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
@@ -274,11 +275,11 @@ C
                WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
-               WRITE (6,*)
+               WRITE (8,*)
                WRITE (32,*)
                READ (97,'(A80)') ch_iuf
                WRITE (96,*)
-               WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+               WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
@@ -306,13 +307,13 @@ C-----------rotational model so we are setting it to 0.01
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             k, EEX(k,ncalc), SPIn(k,ncalc), FLOAT(IPAr(k,ncalc)),
      &             0, 0, 0, 0.01
-            WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
+            WRITE (8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) k, EEX(k,ncalc), SPIn(k,ncalc),
      &               FLOAT(IPAr(k,ncalc)), 0, 0, 0, 0.01
          ENDDO
          CLOSE (32)
-         WRITE (6,*)
-         WRITE (6,*)
+         WRITE (8,*)
+         WRITE (8,*)
       ENDIF
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
 C
@@ -320,12 +321,12 @@ C--------model = 'coupled-channels vibrational model'
 C
          coll_defined = .TRUE.
          IF (NISotop.EQ.0) THEN
-            WRITE (6,*) 'WARNING: None of the requested isotopes is '
-            WRITE (6,*) 'WARNING: Included in the selected potential.'
-            WRITE (6,*)
+            WRITE (8,*) 'WARNING: None of the requested isotopes is '
+            WRITE (8,*) 'WARNING: Included in the selected potential.'
+            WRITE (8,*)
      &                 'WARNING: File with RIPL discrete levels can not'
-            WRITE (6,*) 'WARNING: be created.                    '
-            WRITE (6,*)
+            WRITE (8,*) 'WARNING: be created.                    '
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -336,29 +337,29 @@ C
                DO k = 2, NVIb(ncalc)
                   IF (NPH(k,ncalc).EQ.3) THEN
                      IWArn = 6
-                     WRITE (6,*) 'NPH(k,i)=3 !!! in RIPL OMP'
-                     WRITE (6,*)
+                     WRITE (8,*) 'NPH(k,i)=3 !!! in RIPL OMP'
+                     WRITE (8,*)
      &                          'Default collective levels will be used'
                      GOTO 300
                   ENDIF
                ENDDO
                IF (NVIb(n).GT.NDCOLLEV) THEN
-                  WRITE (6,*) 'RIPL OMP collective levels are wrong'
-                  WRITE (6,*) 'Too many levels'
-                  WRITE (6,*) 'Default collective levels will be used'
+                  WRITE (8,*) 'RIPL OMP collective levels are wrong'
+                  WRITE (8,*) 'Too many levels'
+                  WRITE (8,*) 'Default collective levels will be used'
                   IWArn = 6
                   GOTO 300
                ENDIF
             ENDIF
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (6,*) 'RIPL OMP collective levels are not used'
-            WRITE (6,*) 'Default collective levels will be used'
+            WRITE (8,*) 'RIPL OMP collective levels are not used'
+            WRITE (8,*) 'Default collective levels will be used'
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (6,*) 'RIPL OMP collective levels are not used'
-            WRITE (6,*) 'Default collective levels will be used'
+            WRITE (8,*) 'RIPL OMP collective levels are not used'
+            WRITE (8,*) 'Default collective levels will be used'
             GOTO 300
          ENDIF
          nld_cc = 0
@@ -366,55 +367,55 @@ C
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
          IF (nld_cc.NE.NVIb(ncalc)) THEN
-            WRITE (6,*) 'WARNING: Default number of coupled levels: ',
+            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
      &                  nld_cc
-            WRITE (6,*) 'WARNING: is not equal ', NVIb(ncalc),
+            WRITE (8,*) 'WARNING: is not equal ', NVIb(ncalc),
      &                  ' (used in CC RIPL OMP)'
          ENDIF
-         WRITE (6,*)
-         WRITE (6,*)
+         WRITE (8,*)
+         WRITE (8,*)
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
-         WRITE (6,*)
+         WRITE (8,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE (32,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          READ (97,'(A80)') ch_iuf   ! FIRST LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*) 'Dynamical deformations should be adjusted'
+         WRITE (8,*) 'Dynamical deformations should be adjusted'
          WRITE (32,*) 'Dynamical deformations should be adjusted'
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
          WRITE (96,'(A80)') 'Dynamical deformations should be adjusted'
-         WRITE (6,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
          READ (97,'(A80)') ch_iuf       ! 3ER LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*)
+         WRITE (8,*)
          WRITE (32,*)
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
          WRITE (96,'(A80)') ch_iuf
          DEFormed = .FALSE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
-               WRITE (6,*) '   Ncoll'
+               WRITE (8,*) '   Ncoll'
                WRITE (32,*) '   Ncoll'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*) '   Ncoll'
-               WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
+               WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
                WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
                READ (97,'(A80)') ch_iuf
                WRITE (96,'(A80)') ND_nlv
-               WRITE (6,*)
+               WRITE (8,*)
                WRITE (32,*)
                READ (97,'(A80)') ch_iuf
                WRITE (96,*)
-               WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+               WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
@@ -439,14 +440,14 @@ C
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             k, EXV(k,ncalc), SPInv(k,ncalc), FLOAT(IPAr(k,ncalc))
      &             , NPH(k,ncalc), 0, 0, DEFv(k,ncalc)
-            WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
+            WRITE (8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) k, EXV(k,ncalc), SPInv(k,ncalc),
      &               FLOAT(IPAr(k,ncalc)), NPH(k,ncalc), 0, 0,
      &               DEFv(k,ncalc)
          ENDDO
          CLOSE (32)
-         WRITE (6,*)
-         WRITE (6,*)
+         WRITE (8,*)
+         WRITE (8,*)
       ENDIF
 
       IF (IMOdel.EQ.3 .AND. (.NOT.coll_defined)) THEN
@@ -455,12 +456,12 @@ C--------model = 'coupled-channels soft rotor model'
 C
          coll_defined = .TRUE.
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (6,*) 'WARNING: None of the requested isotopes is '
-            WRITE (6,*)
+            WRITE (8,*) 'WARNING: None of the requested isotopes is '
+            WRITE (8,*)
      &               'WARNING: included in the selected RIPL potential.'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: No default hamiltonian is available'
-            WRITE (6,*)'WARNING: for the soft rotor model'
+            WRITE (8,*)'WARNING: for the soft rotor model'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
          ncalc = 0
@@ -468,9 +469,9 @@ C
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
                ncalc = n
                IF (IDEf(n).GT.2*LMAx(n) .OR. NCOll(n).GT.NDCOLLEV) THEN
-                  WRITE (6,*) 'WARNING: OMP collective levels are wrong'
-                  WRITE (6,*) 'WARNING: Too many levels or deformations'
-                  WRITE (6,*)
+                  WRITE (8,*) 'WARNING: OMP collective levels are wrong'
+                  WRITE (8,*) 'WARNING: Too many levels or deformations'
+                  WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
                   IWArn = 6
                   GOTO 300
@@ -478,16 +479,16 @@ C
             ENDIF
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &                'WARNING: RIPL OMP collective levels are not used'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (6,*)
+            WRITE (8,*)
      &                'WARNING: RIPL OMP collective levels are not used'
-            WRITE (6,*)
+            WRITE (8,*)
      &                 'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -496,18 +497,18 @@ C--------Setting EMPIRE global variables
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
-         WRITE (6,*)
-         WRITE (6,*)
-         WRITE (6,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+         WRITE (8,*)
+         WRITE (8,*)
+         WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
             D_Def(1,k) = DDEf(ncalc,k)
          ENDDO
          IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (6,*) 'WARNING: Default number of coupled levels: ',
+            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
      &                  nld_cc
-            WRITE (6,*) 'WARNING: is not equal ', NCOll(ncalc),
+            WRITE (8,*) 'WARNING: is not equal ', NCOll(ncalc),
      &                  ' (used in CC RIPL OMP)'
          ENDIF
 C
@@ -516,37 +517,37 @@ C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
-         WRITE (6,*)
+         WRITE (8,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE (32,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          READ (97,'(A80)') ch_iuf   ! FIRST LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*) 'Dyn.deformations are not used in symm.rot.model'
+         WRITE (8,*) 'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,*) 'Dyn.deformations are not used in symm.rot.model'
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
          READ (97,'(A80)') ch_iuf       ! 3ER LINE
          WRITE (96,'(A80)') ch_iuf
-         WRITE (6,*)
+         WRITE (8,*)
          WRITE (32,*)
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
          WRITE (96,'(A80)') ch_iuf
          DEFormed = .TRUE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
-               WRITE (6,*)
+               WRITE (8,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                WRITE (32,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*)
      &                 '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-               WRITE (6,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
+               WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
                WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n),
@@ -556,11 +557,11 @@ C
                WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &                LMAx(n), IDEf(n), BANdk(n),
      &                (DDEf(n,k),k = 2,IDEf(n),2)
-               WRITE (6,*)
+               WRITE (8,*)
                WRITE (32,*)
                READ (97,'(A80)') ch_iuf
                WRITE (96,*)
-               WRITE (6,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
+               WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                WRITE (32,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
                READ (97,'(A80)') ch_iuf
                WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
@@ -588,13 +589,13 @@ C-----------rotational model so we are setting it to 0.01
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             k, EEX(k,ncalc), SPIn(k,ncalc), FLOAT(IPAr(k,ncalc)),
      &             0, 0, 0, 0.01
-            WRITE (6,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
+            WRITE (8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) k, EEX(k,ncalc), SPIn(k,ncalc),
      &               FLOAT(IPAr(k,ncalc)), 0, 0, 0, 0.01
          ENDDO
          CLOSE (32)
-         WRITE (6,*)
-         WRITE (6,*)
+         WRITE (8,*)
+         WRITE (8,*)
       ENDIF
 C
 C-----END OF SETTING COLLECTIVE LEVELS for DIRECT CALCULATIONS
@@ -627,7 +628,14 @@ C
       ENCoul = 0.4*ZTAr/ATAr**(1./3.)
       EFErmi = EEFermi(Nejc,Nnuc)
 
-      CALL OPTMOD(E,vlib,rlib,alib)
+      IF(KTRlom(Nejc,Nnuc).NE.9602) then
+        CALL OPTMOD(E,vlib,rlib,alib)
+      ELSE
+        EcollTarget = -QCC(1)  ! energy of the collective state   
+        CALL KUMAR_OMP(A(NNUC),Z(NNUC),EcollTarget,
+     >                 E,RCCC,vlib,rlib,alib)
+        RC = RCCC  
+      ENDIF
 C
 C-----RIPL-II
 C-----1. The ordering of potentials has been changed to follow ECIS96:
@@ -747,20 +755,20 @@ C-----------Reading potential parameters from OMPAR.RIPL(OMPAR.DIR) file
          ENDIF
 C--------ieof<>0 or ierr<>0
          IF (IOUT.EQ.5) THEN
-           WRITE (6,*) ' '
+           WRITE (8,*) ' '
            IF (CCCalc) THEN
-             WRITE (6,
+             WRITE (8,
      &'('' OM parameters for '',I3,''-'',A2,'' +'',I2,''-''        ,A2,'
      &' not found in the OMPAR.DIR file'')') INT(A(Nnuc)), SYMb(Nnuc),
      &INT(AEJc(Nejc)), SYMbe(Nejc)
            ELSE
-             WRITE (6,
+             WRITE (8,
      &'('' OM parameters for '',I3,''-'',A2,'' +'',I2,''-''        ,A2,'
      &' not found in the OMPAR.RIPL file'')') INT(A(Nnuc)), SYMb(Nnuc),
      &INT(AEJc(Nejc)), SYMbe(Nejc)
            ENDIF
-           WRITE (6,*) 'I will resort to parameters from RIPL database'
-           WRITE (6,*) ' '
+           WRITE (8,*) 'I will resort to parameters from RIPL database'
+           WRITE (8,*) ' '
          ENDIF
       ENDIF
 C
@@ -774,7 +782,7 @@ C-----Searching in the RIPL database for IPOTEN catalog number
       CALL FINDPOT(ki,ieof,ipoten)
 C-----Here ieof must be 0 always because we checked in input.f
       IF (ieof.GT.0) THEN
-         WRITE (6,*) 'ERROR: PROBLEM with OMPAR.DIR library,RIPL #',
+         WRITE (8,*) 'ERROR: PROBLEM with OMPAR.DIR library,RIPL #',
      &               ipoten
          STOP 'ERROR: PROBLEM with OMPAR.DIR library'
       ENDIF
@@ -823,7 +831,7 @@ C--------komp = 29 OR 33
          ipoten = KTRlom(Nejc,Nnuc)
          CALL FINDPOT(ki,ieof,ipoten)
          IF (ieof.GT.0) THEN
-            WRITE (6,*) 'ERROR: PROBLEM with OMPAR.RIPL library,RIPL #',
+            WRITE (8,*) 'ERROR: PROBLEM with OMPAR.RIPL library,RIPL #',
      &                  ipoten
             STOP 'ERROR: PROBLEM with OMPAR.RIPL library'
          ENDIF
@@ -1327,7 +1335,7 @@ C
       INTEGER INT, MIN0
       Nonzero = .FALSE.
       IF (SEJc(Nejc).GT.1.0D0) THEN
-         WRITE (6,
+         WRITE (8,
      &'('' SPIN OF EJECTILE A='',I3,'' AND Z='',I2,'' IS '',    F4.1,/,'
      &' SUCH A LARGE VALUE IS NOT ALLOWED IN TRANSMISSION CEOFFICIENT CA
      &LCULATIONS'',/,'' EXECUTION S T O P P E D '')') INT(AEJc(Nejc)),
@@ -1356,11 +1364,11 @@ C-----IWARN=1 - 'A out of the recommended range '
 C-----IWARN=2 - 'Z out of the recommended range '
 C-----IWARN=3 - 'Energy requested lower than recommended for this potential'
 C-----IWARN=4 - 'Energy requested higher than recommended for this potential'
-      IF ((IWArn.EQ.1 .OR. IWArn.EQ.2) .AND. IOUt.GE.5) WRITE (6,*)
+      IF ((IWArn.EQ.1 .OR. IWArn.EQ.2) .AND. IOUt.GE.5) WRITE (8,*)
      &  ' WARNING: OMP not recommended for Z,A=', Z(Nnuc),'-',A(Nnuc)
-      IF (IWArn.EQ.3 .AND. IOUt.GE.5) WRITE (6,*)
+      IF (IWArn.EQ.3 .AND. IOUt.GE.5) WRITE (8,*)
      &     ' WARNING: OMP not recommended for low energies in Tl calc'
-      IF (IWArn.EQ.4 .AND. IOUt.GE.5) WRITE (6,*)
+      IF (IWArn.EQ.4 .AND. IOUt.GE.5) WRITE (8,*)
      &     ' WARNING: OMP not recommended for high energies in Tl calc'
       IWArn = 0
 C--------transfer of the calculated transmission coeff. onto TL matrix
@@ -1508,10 +1516,10 @@ C
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          IF (IOUt.EQ.5) THEN
-         WRITE (6,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
+         WRITE (8,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
      &               ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=',
      &               SNGL(ener)
-         WRITE (6,*)
+         WRITE (8,*)
      &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
           ENDIF
          GOTO 400
@@ -1531,7 +1539,7 @@ C     SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45)
       IF (IOUt.EQ.5) CLOSE (46)
-      IF (IOUt.EQ.5) WRITE (6,*)
+      IF (IOUt.EQ.5) WRITE (8,*)
      &                      'Transmission coefficients read from file: '
      &                      , (ctldir//ctmp23//'.BIN')
       RETURN
@@ -1544,12 +1552,12 @@ C     SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
             TTLl(i,l) = 0.D0
          ENDDO
       ENDDO
-      IF (IOUt.GT.0) WRITE (6,*) 'WARNING: ERROR WHEN READING TLs in ',
+      IF (IOUt.GT.0) WRITE (8,*) 'WARNING: ERROR WHEN READING TLs in ',
      &                           ctmp23
       IF (IOUt.EQ.5) THEN
-         WRITE (6,*)
+         WRITE (8,*)
      &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
-         WRITE (6,*)
+         WRITE (8,*)
      &           'WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
       ENDIF
 C-----Coulomb barrier (somewhat decreased) setting lower energy limit
@@ -1567,15 +1575,15 @@ C
 C--------Running ECIS
 C
          IF (IOUt.EQ.5) THEN
-            WRITE (6,*)
+            WRITE (8,*)
             IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN
-               WRITE (6,*) ' CC transmission coefficients used for ',
+               WRITE (8,*) ' CC transmission coefficients used for ',
      &                     'outgoing channels'
             ELSE
-               WRITE (6,*) ' Spherical OM transmission coefficients',
+               WRITE (8,*) ' Spherical OM transmission coefficients',
      &                     ' used for outgoing channels'
             ENDIF
-            WRITE (6,*)
+            WRITE (8,*)
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN (UNIT = 46,STATUS = 'unknown',
@@ -1613,24 +1621,24 @@ C--------------EXACT (no DWBA) calculation
   550    ENDDO
 
          CLOSE (46)
-         IF (IOUt.EQ.5) WRITE (6,*) ' Transm. coeff. written to file:',
+         IF (IOUt.EQ.5) WRITE (8,*) ' Transm. coeff. written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-         IF (IOUt.EQ.5) WRITE (6,*)
+         IF (IOUt.EQ.5) WRITE (8,*)
      &            ' ==================================================='
       ELSEIF (IOUt.EQ.5) THEN
-         WRITE (6,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
+         WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
      &          INT(AEJc(Nejc)), ' Z=', INT(ZEJc(Nejc)), ' S=',
      &          SEJc(Nejc)
          ilv = 1
          If(Nnuc.eq.0) ilv = Levtarg
-         WRITE (6,'(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)') 'RESIDUAL: A=',
+         WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)') 'RESIDUAL: A=',
      &          INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=',
      &          SNGL(XJLv(ilv,Nnuc)), ' P=', INT(LVP(ilv,Nnuc))
-         WRITE (6,*) 'WARNING: For this residual nucleus'
-         WRITE (6,*) 'WARNING: available energy is always '
-         WRITE (6,*) 'WARNING: below coulomb barrier'
-         WRITE (6,*) 'WARNING: Calculations are not needed!'
-         WRITE (6,*)
+         WRITE (8,*) 'WARNING: For this residual nucleus'
+         WRITE (8,*) 'WARNING: available energy is always '
+         WRITE (8,*) 'WARNING: below coulomb barrier'
+         WRITE (8,*) 'WARNING: Calculations are not needed!'
+         WRITE (8,*)
       ENDIF
       END
 
@@ -1829,33 +1837,33 @@ C          SINl = SINl + dtmp
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C--- SINlcc in next IF changed to SINl - BVC
       IF (SINl.GT.ABScs) THEN
-         WRITE (6,*)
-         WRITE (6,*) ' WARNING: POSSIBLE ECIS NON-CONVERGENCE !!'
-         WRITE (6,
+         WRITE (8,*)
+         WRITE (8,*) ' WARNING: POSSIBLE ECIS NON-CONVERGENCE !!'
+         WRITE (8,
      &     '(5x,''**************************************************'')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,'' Direct cross section calculation do not converge '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &'(6x,''Inelastic cross section ='',F8.2,'' mb''/
      &  6x,''Reaction  cross section ='',F8.2,'' mb''/)') SINl, ABScs
-         WRITE (6,
+         WRITE (8,
      &     '(5x,'' Either change OMP or change calculation method   '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,''        (DIRPOT)   or   (DIRECT) parameters       '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,'' This problem usually happens using DWBA method   '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,'' to treat strong coupled nuclei                   '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,''            CALCULATION STOPPED                   '')'
      &     )
-         WRITE (6,
+         WRITE (8,
      &     '(5x,''**************************************************'')'
      &     )
          STOP ' POSSIBLE ECIS NON-CONVERGENCE !!'
@@ -1865,38 +1873,38 @@ C     Absorption cross section includes inelastic scattering cross section to co
 C
       sreac = sabs + SINlcc
       IF (IOUt.EQ.5 .AND. sabs.GT.0.D0) THEN
-         WRITE (6,*)
-         WRITE (6,*) ' INCIDENT CHANNEL:'
-         WRITE (6,'(A7,I6,A5,F10.3,A10,F10.3,A10)') '  LMAX:', Maxlw,
+         WRITE (8,*)
+         WRITE (8,*) ' INCIDENT CHANNEL:'
+         WRITE (8,'(A7,I6,A5,F10.3,A10,F10.3,A10)') '  LMAX:', Maxlw,
      &          ' E = ', EIN, ' MeV (CMS)', elab, ' MeV (LAB)'
-         WRITE (6,*) ' XS calculated using Smat:   Selast =',
+         WRITE (8,*) ' XS calculated using Smat:   Selast =',
      &               SNGL(selast), ' mb '
-         WRITE (6,*) ' Shape elastic XS =', SNGL(ELAcs),
+         WRITE (8,*) ' Shape elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
-         WRITE (6,*) ' XS calculated using averaged Tls:   Sabs =',
+         WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
      &               SNGL(sabs), ' mb '
-         WRITE (6,*) ' Reaction XS =', SNGL(ABScs),
+         WRITE (8,*) ' Reaction XS =', SNGL(ABScs),
      &               ' mb (read from ECIS)'
-         WRITE (6,*) ' ECIS/EMPIRE ratio of reaction cross section =',
+         WRITE (8,*) ' ECIS/EMPIRE ratio of reaction cross section =',
      &               (ABScs - SINlcc)/sabs
-         WRITE (6,*) ' Inelastic XS to coupled levels (SINlcc) =',
+         WRITE (8,*) ' Inelastic XS to coupled levels (SINlcc) =',
      &               SNGL(SINlcc), ' mb '
-         WRITE (6,*)
+         WRITE (8,*)
      &      ' Inelastic XS to uncoupled discrete levels (DWBA) =',
      &               SNGL(SINl), ' mb '
-         WRITE (6,*) ' Inelastic XS to the continuum (sinlcont) =',
+         WRITE (8,*) ' Inelastic XS to the continuum (sinlcont) =',
      &               SNGL(SINlcont), ' mb '
          IF (SINlcc.GT.0.D0) THEN
-            WRITE (6,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
-            WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
+            WRITE (8,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
+            WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (6,*) ' Sreac - SINl - sinlcont(renormalized by DWBA) =',
+         WRITE (8,*) ' Sreac - SINl - sinlcont(renormalized by DWBA) =',
      &         SNGL(ABScs -SINlcc -SINl -SINlcont), 
      &             ' mb (Sabs - SINl - SINlcont)'
-         WRITE (6,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
-         WRITE (6,*) ' Shape Elastic XS =', SNGL(ELAcs),
+         WRITE (8,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
+         WRITE (8,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
-         WRITE (6,*)
+         WRITE (8,*)
 
       ENDIF
 C
@@ -2018,14 +2026,14 @@ C-----For vibrational the Tls must be multiplied by
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
 C--------Reaction cross section in mb
          sabs = 0.D0
-         if(elab.lt.0.3d0) write(6,*)
+         if(elab.lt.0.3d0) write(8,*)
          DO l = 0, lmax
             stmp = TTLl(J,l)*DBLE(2*l + 1)
-            if(elab.lt.0.3d0) write(6,303) l,stmp*10.*PI/ak2
+            if(elab.lt.0.3d0) write(8,303) l,stmp*10.*PI/ak2
   303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
             sabs = sabs + stmp
          ENDDO
-         if(elab.lt.0.3d0) write(6,*)
+         if(elab.lt.0.3d0) write(8,*)
          sabs = 10.*PI/ak2*sabs
          OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
@@ -2037,19 +2045,19 @@ C--------Reaction cross section in mb
   350    CLOSE (45)
          sreac = sabs + sinlss
          IF (sabs.GT.0.D0) THEN
-            WRITE (6,*)
-            WRITE (6,'(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)') '  LMAX:',
+            WRITE (8,*)
+            WRITE (8,'(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)') '  LMAX:',
      &             lmax, ' E=', ecms, ' MeV (CMS)', elab,
      &             ' MeV (LAB); Energy index =', J
-            WRITE (6,*) ' XS calculated using averaged Tls:   Sabs =',
+            WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
      &                  SNGL(sabs), ' mb '
-            WRITE (6,*) ' Reaction XS =', SNGL(sreacecis),
+            WRITE (8,*) ' Reaction XS =', SNGL(sreacecis),
      &                  ' mb (read from ECIS)'
-            WRITE (6,*) ' ECIS/EMPIRE ratio of reaction XS =',
+            WRITE (8,*) ' ECIS/EMPIRE ratio of reaction XS =',
      &                    SNGL(sreacecis/sreac)
             IF (sinlss.GT.0.D0) THEN
-             WRITE (6,*) ' Sinl =', SNGL(sinlss), ' mb (read from ECIS)'
-             WRITE (6,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+             WRITE (8,*) ' Sinl =', SNGL(sinlss), ' mb (read from ECIS)'
+             WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
             ENDIF
          ENDIF
       ENDIF
@@ -2132,7 +2140,7 @@ C--------A>99
       ENDIF
       WRITE (ceject(1:2),'(I1,I1)') INT(AEJc(Nejc)), INT(ZEJc(Nejc))
       OUTfile = ctarget//'_'//ceject
-CPR---write(6,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
+CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
 
 
@@ -2249,7 +2257,7 @@ C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
-	endif
+      endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -2278,7 +2286,7 @@ C     DWBA option added
 C-----Iteration scheme used for DWBA
          ECIs1(21:21) = 'F'
 C--------DWBA
-         ECIs1(30:30) = 'F'
+         ECIs1(30:30) = 'T'
 c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
@@ -2300,9 +2308,9 @@ C
       CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,ak2,ikey)
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') then
-	  ECIs1(8:8) = 'T'
+        ECIs1(8:8) = 'T'
         ECIs2(45:45)='T'  ! reduced energy is used
-	ENDIF
+      ENDIF
 
       IF (IDRs.GT.0) THEN
 C      Preparing dispersive CC input for ECIS
@@ -2321,7 +2329,7 @@ C-----At least ground state is always open
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
          ENDDO
          IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
-     &       WRITE (6,*)
+     &       WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
       ENDIF
 C
@@ -2410,12 +2418,24 @@ C-----------If channel is closed ground state potential is used for this level
             ! making integer spin for odd nuclides CC levels in DWBA calculations
             if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
             IF (eee.GE.0.0001) THEN
-               nwrite = nwrite + 1
-               WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
+
+               IF(IDRs.eq.0) then
+                 nwrite = nwrite + 1
+                 WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
      &                ch, D_Elv(j)
+
+               ELSE
+
+                 WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, 1, ch,
+
+     &                D_Elv(j)
+
+               ENDIF
             ELSE
                WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, 1, ch,
+
      &                D_Elv(j)
+
             ENDIF
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
@@ -2449,13 +2469,13 @@ C-----potential parameters
 C-----1) groundstate
 C     write(1,'(3f10.5)') v,rv,av
       IF (VOM(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
            WRITE (1,'(3f10.5)') VOM(Nejc,Nnuc)-DWVcor, 
      &                          RVOm(Nejc,Nnuc), AVOm(Nejc,Nnuc)
-	   ELSE
+         ELSE
            WRITE (1,'(3f10.5)') VOM(Nejc,Nnuc), 
      &                          RVOm(Nejc,Nnuc), AVOm(Nejc,Nnuc)
-	   ENDIF
+         ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -2468,13 +2488,13 @@ C-----write(1,'(3f10.5)') w,rw,aw
       ENDIF
 C-----write(1,'(3f10.5)') vd,rvd,avd
       IF (VOMs(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
            WRITE (1,'(3f10.5)') 0.d0, 
      &                          RWOm(Nejc,Nnuc), AWOm(Nejc,Nnuc)
-	   ELSE
+         ELSE
            WRITE (1,'(3f10.5)') VOMs(Nejc,Nnuc), 
      &                          RWOm(Nejc,Nnuc), AWOm(Nejc,Nnuc)
-	   ENDIF
+         ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -2489,12 +2509,12 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
      &                 ' ECIS can not be used with Gaussian formfactors'
             WRITE (*,*) ' for imaginary surface contribution '
             WRITE (*,*) ' Change OMP potential for elastic channel'
-            WRITE (6,*)
-            WRITE (6,*) ' ERROR !!!'
-            WRITE (6,*)
+            WRITE (8,*)
+            WRITE (8,*) ' ERROR !!!'
+            WRITE (8,*)
      &                 ' ECIS can not be used with Gaussian formfactors'
-            WRITE (6,*) ' for imaginary surface contribution'
-            WRITE (6,*) ' Change OMP potential for elastic channel'
+            WRITE (8,*) ' for imaginary surface contribution'
+            WRITE (8,*) ' Change OMP potential for elastic channel'
             STOP ' No Gaussian form factors in ECIS!'
          ENDIF
       ELSE
@@ -2502,13 +2522,13 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
       ENDIF
 C-----write(1,'(3f10.5)') vvso,rrvso,aavso
       IF (VSO(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
             WRITE (1,'(3f10.5)') VSO(Nejc,Nnuc)-DSOcor, 
      &                           RVSo(Nejc,Nnuc), AVSo(Nejc,Nnuc)
-	   ELSE
+         ELSE
             WRITE (1,'(3f10.5)') VSO(Nejc,Nnuc), 
      &                           RVSo(Nejc,Nnuc), AVSo(Nejc,Nnuc)
-	   ENDIF 
+         ENDIF 
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -2596,7 +2616,7 @@ C---------------SETPOTS : subroutine for optical model parameters
 C---------------From  cms system to Lab
 C               ecms = eee
 C               ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-                elabe = eee	! Changed on Aug. 2008
+                elabe = eee   ! Changed on Aug. 2008
                 ikey  = -1   
 C
 C---------------Transformation of energies from laboratory to center-of-mass
@@ -2637,15 +2657,15 @@ C
                 write (1,'(2(G10.4,F10.4,G10.4))') 
      >            tso, fso, fvs
 
-	          CYCLE
+                CYCLE
               ENDIF
-C	      ENDIF
+C           ENDIF
             IF (eee.LT.0.0001) THEN
 C---------------SETPOTS : subroutine for optical model parameters
 C---------------From  cms system to Lab
 C               ecms = eee
 C               ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-                elabe = eee	! Changed on Aug. 2008
+                elabe = eee   ! Changed on Aug. 2008
                 ikey  = -1   
 C
 C---------------Transformation of energies from laboratory to center-of-mass
@@ -2711,7 +2731,7 @@ C--------------write(1,'(3f10.5)') rc,0.,0.
          ENDDO
       ENDIF
 
-	IF (IDRs.eq.0) then
+      IF (IDRs.eq.0) then
 C
 C-------Angular distribution step
 C
@@ -2728,7 +2748,7 @@ C
         ELSE
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
-	ENDIF
+      ENDIF
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
 
@@ -2740,18 +2760,18 @@ C
         ELSE
           iwin = PIPE('copy ecSPH.inp ecis06.inp >NUL')
         ENDIF
-	ELSE
+      ELSE
         IF (IOPsys.EQ.0) THEN
           ctmp = 'cp ecVIB.inp ecis06.inp'
           iwin = PIPE(ctmp)
         ELSE
           iwin = PIPE('copy ecVIB.inp ecis06.inp >NUL')
         ENDIF
-	ENDIF
+      ENDIF
 C
 C-----Running ECIS06
 C
-      CALL ECIS('ecis06')
+      CALL ECIS('ecis06 ')
 
       IF (Inlkey.EQ.0) THEN
 C        CALL ECIS('ecSPH.inp','ECIS_SPH.out')
@@ -2888,7 +2908,7 @@ C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
-	endif
+      endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -2941,9 +2961,9 @@ C
       CALL SETPOTS(Nejc,Nnuc,elab,ecms,xmas_nejc,xmas_nnuc,ak2,ikey)
 C-----relativistic kinematics ?
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. FLGrel.EQ.'y') then
-	  ECIs1(8:8) = 'T'
+        ECIs1(8:8) = 'T'
         ECIs2(45:45)='T'  ! reduced energy is used
-	ENDIF
+      ENDIF
 
       IF (IDRs.GT.0) THEN
 C      Preparing dispersive CC input for ECIS
@@ -2966,7 +2986,7 @@ C-----------All levels with icollev(j)<LEVcc should be calculated by CC
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
          ENDDO
       ENDIF
-      IF (nd_nlvop.EQ.1) WRITE (6,*)
+      IF (nd_nlvop.EQ.1) WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
@@ -3081,13 +3101,13 @@ C-----1) groundstate
 C-----write(1,'(3f10.5)') v,rv,av
 C     write(1,'(3f10.5)') v,rv,av
       IF (VOM(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
            WRITE (1,'(3f10.5)') VOM(Nejc,Nnuc)-DWVcor, 
      &                          RVOm(Nejc,Nnuc), AVOm(Nejc,Nnuc)
-	   ELSE
+         ELSE
            WRITE (1,'(3f10.5)') VOM(Nejc,Nnuc), 
      &                          RVOm(Nejc,Nnuc), AVOm(Nejc,Nnuc)
-	   ENDIF
+         ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -3100,13 +3120,13 @@ C-----write(1,'(3f10.5)') w,rw,aw
       ENDIF
 C-----write(1,'(3f10.5)') vd,rvd,avd
       IF (VOMs(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
            WRITE (1,'(3f10.5)') 0.d0, 
      &                          RWOm(Nejc,Nnuc), AWOm(Nejc,Nnuc)
-	   ELSE
+         ELSE
            WRITE (1,'(3f10.5)') VOMs(Nejc,Nnuc), 
      &                          RWOm(Nejc,Nnuc), AWOm(Nejc,Nnuc)
-	   ENDIF
+         ENDIF
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -3121,12 +3141,12 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
      &                 ' ECIS can not be used with Gaussian formfactors'
             WRITE (*,*) ' for imaginary surface contribution '
             WRITE (*,*) ' Change OMP potential for elastic channel'
-            WRITE (6,*)
-            WRITE (6,*) ' ERROR !!!'
-            WRITE (6,*)
+            WRITE (8,*)
+            WRITE (8,*) ' ERROR !!!'
+            WRITE (8,*)
      &                 ' ECIS can not be used with Gaussian formfactors'
-            WRITE (6,*) ' for imaginary surface contribution'
-            WRITE (6,*) ' Change OMP potential for elastic channel'
+            WRITE (8,*) ' for imaginary surface contribution'
+            WRITE (8,*) ' Change OMP potential for elastic channel'
             STOP ' No Gaussian form factors in ECIS!'
          ENDIF
       ELSE
@@ -3134,13 +3154,13 @@ C-----write(1,'(3f10.5)') wd,rwd,awd
       ENDIF
 C-----write(1,'(3f10.5)') vvso,rrvso,aavso
       IF (VSO(Nejc,Nnuc).NE.0.) THEN
-	   IF(IDRs.gt.0) then
+         IF(IDRs.gt.0) then
             WRITE (1,'(3f10.5)') VSO(Nejc,Nnuc)-DSOcor, 
      &                           RVSo(Nejc,Nnuc), AVSo(Nejc,Nnuc)
-	   ELSE
+         ELSE
             WRITE (1,'(3f10.5)') VSO(Nejc,Nnuc), 
      &                           RVSo(Nejc,Nnuc), AVSo(Nejc,Nnuc)
-	   ENDIF 
+         ENDIF 
       ELSE
          WRITE (1,'(3f10.5)') 0., 0., 0.
       ENDIF
@@ -3229,7 +3249,7 @@ C-------------SETPOTS : subroutine for optical model parameters
 C-------------From  cms system to Lab
 C             ecms = eee
 C             ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-              elabe = eee	! Changed on Aug. 2008
+              elabe = eee     ! Changed on Aug. 2008
               ikey  = -1   
 C
 C-------------Transformation of energies from laboratory to center-of-mass if
@@ -3271,7 +3291,7 @@ C
               write (1,'(2(G10.4,F10.4,G10.4))') 
      >          tso, fso, fvs
 
-	        CYCLE
+              CYCLE
          ENDIF
 
          IF (eee.LT.0.0001) THEN
@@ -3279,7 +3299,7 @@ C-----------SETPOTS : subroutine for optical model parameters
 C-----------From  cms system to Lab
 C           ecms = eee
 C           ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-            elabe = eee	! Changed on Aug. 2008
+            elabe = eee ! Changed on Aug. 2008
             ikey  = -1   
 C
 C-----------Transformation of energies from laboratory to center-of-mass if
@@ -3342,7 +3362,7 @@ C-----------write(1,'(3f10.5)') wwso,rwso,awso
             WRITE (1,'(3f10.5)') 0., 0., 0.
          ENDIF
       ENDDO
-	IF (IDRs.eq.0) then
+      IF (IDRs.eq.0) then
 C
 C-------Angular distribution step
 C
@@ -3359,7 +3379,7 @@ C
         ELSE
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
-	ENDIF
+      ENDIF
       WRITE (1,'(3hFIN)')
       CLOSE (UNIT = 1)
 
@@ -3370,7 +3390,7 @@ C
         iwin = PIPE('copy ecVIBROT.inp ecis06.inp >NUL')
       ENDIF
 C-----Running ECIS
-      CALL ECIS('ecis06')
+      CALL ECIS('ecis06 ')
       IF (npho.GT.0) THEN
 C        CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out')
          IF (IOPsys.EQ.0) THEN
@@ -3391,7 +3411,7 @@ C        CALL ECIS('ecVIBROT.inp','ECIS_ROT.out')
             iwin = PIPE('move ecis06.out ECIS_ROT.out >NUL')
          ENDIF
       ENDIF
-	RETURN
+      RETURN
       END
 c----
 c     CCSOFTROTOR
@@ -3541,15 +3561,15 @@ C
 C
 C COMMON variables
 C
-	REAL*8 EEE,Ef,Ep,Ea
-	REAL*8 WDE,WVE
-	REAL*8 As,Bs,Cs
-	REAL*8 AAv,Bv 
-	REAL*8 AAvso,Bvso
-	INTEGER nns, iq, nnv, nnl
+      REAL*8 EEE,Ef,Ep,Ea
+      REAL*8 WDE,WVE
+      REAL*8 As,Bs,Cs
+      REAL*8 AAv,Bv 
+      REAL*8 AAvso,Bvso
+      INTEGER nns, iq, nnv, nnl
       REAL*8 VHFnum,DWVcor,VSOnum,DSOcor,ALhf,ALso,
      +               DWScor,ALpha,RSTep
-	INTEGER IDRs 
+      INTEGER IDRs 
 
       common /denergy/EEE,Ef,Ep,Ea          
       common /Wenerg/WDE,WVE
@@ -3599,13 +3619,13 @@ C
       ALhf = 0.d0
       ALso = 0.d0
       Alpha =  0.d0
-	RSTep = 10.d0
+      RSTep = 10.d0
 c
 c     Generate optical model parameters for ECIS
 c
       pi=acos(-1.d0)
       rc=0.d0
-	acou=0.d0
+      acou=0.d0
 
       IDRs = 0 ! Imaginary and HF geometry in dispersive potentials are the same
 
@@ -4104,7 +4124,7 @@ c        Visov = 2*pot(1,j,8)*sqrt(eta/atar)
 
          b(1,j,15) = 1.d0         
 
-	     b(1,j,5)  =  0.d0   ! No Coulomb correction
+           b(1,j,5)  =  0.d0   ! No Coulomb correction
 
          if(b(1,j,1).ne.0.d0) 
 c                         beta0         beta1          
