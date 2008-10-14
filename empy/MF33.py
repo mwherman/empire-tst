@@ -36,7 +36,7 @@ class MF33(MF_base):
 		self.MF
 		self.MT
 		"""
-		# super(MF33,self).__init__()
+		super(MF33,self).__init__()
 		
 		line, flag = endf.locate_section(filename, 33, MT)
 		assert flag[0] == 0, "MT section not found in file!"
