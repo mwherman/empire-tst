@@ -44,7 +44,7 @@ class MF33(MF_base):
 		fin = file(filename,"r")
 		
 		# read up to MT file:
-		for i in range(line):
+		for i in range(line+1):
 			myline = fin.readline()
 		
 		# should be at the MT file header, but may have to go past SEND or FEND
@@ -182,23 +182,35 @@ class MF33(MF_base):
 		return mat_form, nvals, matlength
 	
 	
-	def truncate(self,threshold):
+	def truncate(self, threshold, keep='+'):
 		"""
-		toss the portion of the correlation matrix below given threshold energy
+		keep only portion of the correlation matrix above (default)
+		or below (keep!='+') the given threshold energy
 		"""
-		from bisect import bisect
-		idx = bisect( self.elist, threshold )
+		try:
+			# check if threshold is already present, or add if not found
+			idx = self.elist.index( threshold )
+		except ValueError:
+			from bisect import bisect
+			idx = bisect( self.elist, threshold )
+			self.elist.insert( idx, threshold )
+
+		if keep=='+':
+			self.elist = self.elist[idx:]
+			
+			#NOT changing values in the matrix/uncertainties despite having a new
+			#threshold energy
+			idx -= 1
+			self.uncert = self.uncert[idx:]
+			self.cov_mat = self.cov_mat[idx:, idx:]
+			self.corr_mat = self.corr_mat[idx:, idx:]
 		
-		self.elist.insert( idx, threshold )
-		self.elist = self.elist[idx:]
-		
-		#NOT changing values in the matrix/uncertainties despite having a new
-		#threshold energy
-		idx -= 1
-		self.uncert = self.uncert[idx:]
-		self.cov_mat = self.cov_mat[idx:, idx:]
-		self.corr_mat = self.corr_mat[idx:, idx:]
-	
+		else:
+			self.elist = self.elist[:idx+1]
+			idx -= 1
+			self.uncert = self.uncert[:idx+1]
+			self.cov_mat = self.cov_mat[:idx+1, :idx+1]
+			self.corr_mat = self.corr_mat[:idx+1, :idx+1]
 
 	def scaleMatrix(self,maxVal):
 		"""
