@@ -53,8 +53,9 @@ def insertMFMT(basefile,mergefile,outfile, MF, MT = '*', MAT = 0):
 			send_line = i
 	
 	imerge = 0
-	while True:
+	while imerge < len(mergf):
 		MATr, MFr, MTr = getVals( mergf[imerge] )
+		#print MATr, MFr, MTr, imerge
 		if not (MFr == MF and MATr > 0): break
 		outf.write( mergf[imerge] )
 		imerge += 1
@@ -182,7 +183,8 @@ def locate_section(infile, MF, MT, MAT=0, outfile=None):
 		if outfile != None:
 			fout.write(inf[line])
 		line+=1
-		
+	
+	if line<0: line = 0 # getNextMat can give negative line numbers
 	return line, flag
 
 
@@ -249,11 +251,16 @@ def getVals(string):
 	"""
 	extract MAT, MF, MT as a tuple from a line of 80-column ENDF card.
 	"""
-	assert string[-1]=='\n', "don't use strip() before calling getVals!"
+	# check that strip() wasn't called:
+	assert (string[-1]=='\n'), "don't use strip() before calling getVals!"
+	
 	#going from the end of the string may be more robust:
 	#return (int(string[-15:-11]), int(string[-11:-9]), int(string[-9:-6]) )
-	return (int(string[66:70]), int(string[70:72]), int(string[72:75]) )
-
+	try:
+		return (int(string[66:70]), int(string[70:72]), int(string[72:75]) )
+	except ValueError:
+		# if the string is only a newline:
+		return -1,-1,-1
 
 
 if __name__ == '__main__':
