@@ -17,8 +17,8 @@ C Local variables
 C
       CHARACTER*20 ctmp
       CHARACTER*7 caz
-	CHARACTER*13 fname
-	CHARACTER*20 title
+      CHARACTER*13 fname
+      CHARACTER*20 title
 
       DOUBLE PRECISION u
 
@@ -30,23 +30,23 @@ C
      >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
       endif
 
-	IF(LEVden.eq.0) then
-	  write(fname,'(A13)') '_GS_EMPLD.zvd'
+      IF(LEVden.eq.0) then
+        write(fname,'(A13)') '_GS_EMPLD.zvd'
         write(ctmp,'(A20)') caz//fname
-	  write(caz,'(A7)') 'EMP_GS_'
-	ENDIF
+        write(caz,'(A7)') 'EMP_GS_'
+      ENDIF
 
-	IF(LEVden.eq.3) then
-	  write(fname,'(A13)') '_GS_HFBLD.zvd'
+      IF(LEVden.eq.3) then
+        write(fname,'(A13)') '_GS_HFBLD.zvd'
         write(ctmp,'(A20)') caz//fname
-	  write(caz,'(A7)') 'HFB_GS_'
-	ENDIF
+        write(caz,'(A7)') 'HFB_GS_'
+      ENDIF
 
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
 
       OPEN (36, FILE=ctmp, STATUS='unknown')
-	CALL OPEN_ZVV(36,caz,title)
+      CALL OPEN_ZVV(36,caz,title)
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint1 = 0.D0
@@ -59,10 +59,10 @@ C
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1+rolowint2
       ENDDO
-	CALL CLOSE_ZVV(36,' ',' ')
-	
-	write(caz,'(A7)') 'Pos_GS+'
-	CALL OPEN_ZVV(36,caz,' ')
+      CALL CLOSE_ZVV(36,' ',' ')
+      
+      write(caz,'(A7)') 'Pos_GS+'
+      CALL OPEN_ZVV(36,caz,' ')
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint1 = 0.D0
@@ -73,10 +73,10 @@ C
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1
       ENDDO
-	CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,' ',' ')
 
-	write(caz,'(A7)') 'Neg_GS-'
-	CALL OPEN_ZVV(36,caz,' ')
+      write(caz,'(A7)') 'Neg_GS-'
+      CALL OPEN_ZVV(36,caz,' ')
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint2 = 0.D0
@@ -87,12 +87,12 @@ C
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint2
       ENDDO
-	CALL CLOSE_ZVV(36,' ','GS Level Density')
+      CALL CLOSE_ZVV(36,' ','GS Level Density')
       CLOSE (36)
-	return
-	end
+      return
+      end
 
-	SUBROUTINE PLOT_ZVV_SadLD(Nnuc,Ib) 
+      SUBROUTINE PLOT_ZVV_SadLD(Nnuc,Ib) 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -117,23 +117,23 @@ C
      >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
       endif
 
-	IF(FISden(Nnuc).eq.1) then
-	  write(fname,'(A2,I1,A10)') '_S',ib,'_EMPLD.zvd'
+      IF(FISden(Nnuc).LE.1) then
+        write(fname,'(A2,I1,A10)') '_S',ib,'_EMPLD.zvd'
         write(ctmp,'(A20)') caz//fname
-	  write(caz,'(A6,I1)') 'EMP_S_',Ib
-	ENDIF
+        write(caz,'(A6,I1)') 'EMP_S_',Ib
+      ENDIF
 
-	IF(FISden(Nnuc).eq.2) then
-	  write(fname,'(A2,I1,A10)') '_S',ib,'_HFBLD.zvd'
+      IF(FISden(Nnuc).eq.2) then
+        write(fname,'(A2,I1,A10)') '_S',ib,'_HFBLD.zvd'
         write(ctmp,'(A20)') caz//fname
-	  write(caz,'(A6,I1)') 'HFB_S_',Ib
-	ENDIF
+        write(caz,'(A6,I1)') 'HFB_S_',Ib
+      ENDIF
  
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
 
       OPEN (36, FILE=ctmp, STATUS='unknown')
-	CALL OPEN_ZVV(36,caz,title)
+      CALL OPEN_ZVV(36,caz,title)
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
 c       if(u.gt.EMAx(Nnuc)) exit
@@ -148,10 +148,10 @@ c       DO j = 1,NFIsj1
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &        1e6*u,max(0.1d0,rocumul2+rocumul1)
       ENDDO
-	CALL CLOSE_ZVV(36,' ',' ')
-	
-	write(caz,'(A6,I1)') 'Pos_S_',Ib
-	CALL OPEN_ZVV(36,caz,' ')
+      CALL CLOSE_ZVV(36,' ',' ')
+      
+      write(caz,'(A6,I1)') 'Pos_S_',Ib
+      CALL OPEN_ZVV(36,caz,' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
 c       if(u.gt.EMAx(Nnuc)) exit
@@ -166,10 +166,10 @@ c        pause
           WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,max(rocumul1,0.1d0)
       ENDDO
-	CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,' ',' ')
 
-	write(caz,'(A6,I1)') 'Neg_S_',Ib
-	CALL OPEN_ZVV(36,caz,' ')
+      write(caz,'(A6,I1)') 'Neg_S_',Ib
+      CALL OPEN_ZVV(36,caz,' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
 c       if(u.gt.EMAx(Nnuc)) exit
@@ -182,34 +182,34 @@ c       DO j = 1,NFIsj1
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &      1e6*u,max(0.1d0,rocumul2)
       ENDDO
-	CALL CLOSE_ZVV(36,' ',' SP Level Density')
+      CALL CLOSE_ZVV(36,' ',' SP Level Density')
       CLOSE (36)
 
-	return
-	end
+      return
+      end
 
       SUBROUTINE OPEN_ZVV(iout,tfunct,title)
-	character*(*) title, tfunct
-	integer iout
+      character*(*) title, tfunct
+      integer iout
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
-	if(title(1:1).ne.' ') write(iout,'(A30)') title      
-	write(iout,'(A12,A)') 'fun: ',tfunct
+      if(title(1:1).ne.' ') write(iout,'(A30)') title      
+      write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A10)') 'thick: 2   '
       write(iout,'(A10/2H//)') 'length: 92 '
-	return
-	end
+      return
+      end
 
-	SUBROUTINE CLOSE_ZVV(iout,titlex,titley)
-	character*(*) titlex,titley
-	integer iout
+      SUBROUTINE CLOSE_ZVV(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/u'
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
-	if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
-	if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
+      if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
+      if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
       write(iout,'(A19)') 'x-scale: auto      '
       write(iout,'(A17)') 'y-scale: auto      '
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/c  '
-	return
-	end   
+      return
+      end   
