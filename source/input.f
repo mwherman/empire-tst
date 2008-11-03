@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-10-14 21:32:21 $
-Ccc   * $Id: input.f,v 1.276 2008-10-14 21:32:21 Capote Exp $
+Ccc   * $Date: 2008-11-03 22:59:45 $
+Ccc   * $Id: input.f,v 1.277 2008-11-03 22:59:45 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -43,7 +43,7 @@ C
       CHARACTER*2 deut, gamma, trit, cnejec2
       REAL FLOAT, SNGL
       LOGICAL gexist, nonzero, fexist
-      
+
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin
@@ -184,7 +184,7 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
-            ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value           
+            ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
             ATIlfi(nnuc) = 1.
             FISbin(nnuc) = 1.
             FISbou(nnuc) = 1.
@@ -257,7 +257,7 @@ C
          RECoil = 1.d0
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
          IOPran = 1 ! Default gaussian 1 sigma error
-C        IOPran = 0 ! Uniform 1 sigma error         
+C        IOPran = 0 ! Uniform 1 sigma error
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -602,7 +602,7 @@ C--------correct ejectiles symbols
          ENDDO
 C
 C        Please note that the order in which the array IZA(nnuc) is filled is
-C        quite important. 
+C        quite important.
 C
          DO iac = 0, NEMc
            DO ia = 0, nema
@@ -875,10 +875,10 @@ C
 C        Reassign reactions' strings to account for all emitted alphas
 C
          DO nnuc = 1, NNUcd
-            inres = XN(1) - XN(nnuc) 
-            ipres = Z(1)  - Z(nnuc) 
-            ia = min(inres/2,ipres/2) 
-            if(ia.le.0) cycle     
+            inres = XN(1) - XN(nnuc)
+            ipres = Z(1)  - Z(nnuc)
+            ia = min(inres/2,ipres/2)
+            if(ia.le.0) cycle
             in = inres - 2*ia
             ip = ipres - 2*ia
             mulem = ia + in + ip
@@ -925,7 +925,7 @@ C-----------set reaction string
               iend = iend + 1
             ENDIF
             REAction(nnuc)(iend + 1:iend + 1) = ')'
-         ENDDO        
+         ENDDO
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
@@ -961,9 +961,9 @@ C                          Comment the following block and uncommment the line a
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
 C                       RCN, April 2008
-                        IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6) 
+                        IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)
      >                    ENDf(nnuc) = 1 ! n,xn
-                        IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3) 
+                        IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)
      >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
                   IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
@@ -1338,7 +1338,7 @@ C--------set projectile/ejectile masses
      &                     -ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
          ENDDO
 C--------read shell corrections of RIPL-2/3
-         CALL READ_SHELL_CORR                
+         CALL READ_SHELL_CORR
 C--------read number of reasonably known levels and level density parameter 'a'
          CALL READLDP
 C--------fix-up deformations for CCFUS coupled channels
@@ -1608,8 +1608,8 @@ C-----calculate compound nucleus level density
          IF (ADIv.LT.3.0D0) THEN
            WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
      &          SYMb(nnuc)
-           DO i = 1, NEX(nnuc)           
-             rocumul = 0.D0           
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
              DO j = 1, NLW
                rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
              ENDDO
@@ -1622,8 +1622,8 @@ c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            WRITE (8,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
      &          ia, SYMb(nnuc)
-           DO i = 1, NEX(nnuc)           
-             rocumul = 0.D0           
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
              DO j = 1, NLW
                rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
              ENDDO
@@ -1636,8 +1636,8 @@ c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            WRITE (8,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnuc)
-           DO i = 1, NEX(nnuc)           
-             rocumul = 0.D0           
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
              DO j = 1, NLW
                rocumul = rocumul + RO(i,j,2,Nnuc)
              ENDDO
@@ -1881,8 +1881,8 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
               IF (ADIv.LT.3.0D0) THEN
                 WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
      &          ia, SYMb(nnur)
-                DO i = 1, NEX(nnur)           
-                  rocumul = 0.D0           
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
                   DO j = 1, NLW
                     rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
                   ENDDO
@@ -1892,9 +1892,9 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
               ELSE
                 WRITE (8,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnur)    
-                DO i = 1, NEX(nnur)           
-                  rocumul = 0.D0           
+     &          ia, SYMb(nnur)
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
                   DO j = 1, NLW
                     rocumul = rocumul + RO(i,j,1,nnur)
                   ENDDO
@@ -1907,8 +1907,8 @@ c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
                 WRITE (8,'(1X,/,
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
      &          ia, SYMb(nnur)
-                DO i = 1, NEX(nnur)           
-                  rocumul = 0.D0           
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
                   DO j = 1, NLW
                     rocumul = rocumul + RO(i,j,2,nnur)
                   ENDDO
@@ -3032,7 +3032,7 @@ C--------DEGAS input
                  sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
                   GDIvp = val + grand()*sigma
-                ELSE  
+                ELSE
                   GDIvp = val + 1.732d0*(2*drand()-1.)*sigma
                 ENDIF  
                 WRITE (8,
@@ -3073,7 +3073,7 @@ C--------PCROSS input
                  sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
                   MFPp = val + grand()*sigma
-                ELSE  
+                ELSE
                   MFPp = val + 1.732d0*(2*drand()-1.)*sigma
                 ENDIF  
                 WRITE (8,
@@ -3409,10 +3409,10 @@ C-----
      &          '' is equal to '',i2,'' %'')') i1
                  sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
-                  IF(rFCCred.eq.1.d0) rFCCred = grand() 
+                  IF(rFCCred.eq.1.d0) rFCCred = grand()
                   FCCred = val + rFCCred*sigma
-                ELSE  
-                  IF(rFCCred.eq.1.d0) rFCCred = drand() 
+                ELSE
+                  IF(rFCCred.eq.1.d0) rFCCred = drand()
                   FCCred = val + 1.732d0*(2*rFCCred-1.)*sigma
                 ENDIF  
                 WRITE (8,
@@ -3456,7 +3456,7 @@ C-----
                 IF(IOPran.gt.0) then
                   IF(rFUSred.eq.1.d0) rFUSred = grand()
                   FUSred = val + rFUSred*sigma
-                ELSE  
+                ELSE
                   IF(rFUSred.eq.1.d0) rFUSred = drand()
                   FUSred = val + 1.732d0*(2*rFUSred-1.)*sigma
                 ENDIF  
@@ -3487,7 +3487,7 @@ C-----
                 IF(IOPran.gt.0) then
                    IF(rTOTred.eq.1.d0) rTOTred = grand()
                    TOTred = val + rTOTred*sigma
-                ELSE  
+                ELSE
                    IF(rTOTred.eq.1.d0) rTOTred = drand()
                    TOTred = val + 1.732d0*(2*rTOTred-1.)*sigma
                 ENDIF  
@@ -3750,7 +3750,7 @@ C
                  sigma = val*0.01
               IF(IOPran.gt.0) then
                 FNvvomp(i3,nnuc) = 1. + grand()*sigma
-              ELSE  
+              ELSE
                 FNvvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF  
               WRITE (8,
@@ -3799,7 +3799,7 @@ C
                  sigma = val*0.01
               IF(IOPran.gt.0) then
                 FNavomp(i3,nnuc) = 1. + grand()*sigma
-              ELSE  
+              ELSE
                 FNavomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF  
               WRITE (8,
@@ -3846,8 +3846,8 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
                  sigma = val*0.01
               IF(IOPran.gt.0) then
                 FNwvomp(i3,nnuc) = max(1. + grand()*sigma,0.d0)
-              ELSE  
-                FNwvomp(i3,nnuc) = 
+              ELSE
+                FNwvomp(i3,nnuc) =
      &            max(1. + 1.732d0*(2*drand()-1.)*sigma,0.d0)
               ENDIF                   
               WRITE (8,
@@ -3895,7 +3895,7 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
               IF(IOPran.gt.0) then
                 FNwsomp(i3,nnuc) = max(1. + grand()*sigma,0.d0)
               ELSE
-                FNwsomp(i3,nnuc) = 
+                FNwsomp(i3,nnuc) =
      &            max(1. + 1.732d0*(2*drand()-1.)*sigma,0.d0)
               ENDIF
               WRITE (8,
@@ -3942,7 +3942,7 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
                  sigma = val*0.01
               IF(IOPran.gt.0) then
                 FNasomp(i3,nnuc) = 1. + grand()*sigma
-              ELSE 
+              ELSE
                 FNasomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
@@ -3987,7 +3987,7 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      &        '('' Surface potential radius uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
-              IF(IOPran.gt.0) then 
+              IF(IOPran.gt.0) then
                 FNrsomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
                 FNrsomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
@@ -4034,7 +4034,7 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &        '('' Volume imaginary potential radius uncertainty in '',
      &        I3,A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
               sigma = val*0.01
-              IF(IOPran.gt.0) then   
+              IF(IOPran.gt.0) then
                 FNrwvomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
                 FNrwvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
@@ -4132,10 +4132,10 @@ C-----
      &        '('' GDR first hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then       
+              IF(IOPran.gt.0) then
                 GDRpar(1,nnuc) = val + grand()*sigma
               ELSE
-                GDRpar(1,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+                GDRpar(1,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR first hump energy sampled value : '',f5.2)')
@@ -4182,10 +4182,10 @@ C-----
      &        '('' GDR first hump width uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then         
+              IF(IOPran.gt.0) then
                 GDRpar(2,nnuc) = val + grand()*sigma
               ELSE
-                GDRpar(2,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+                GDRpar(2,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR first hump width sampled value : '',f5.2)')
@@ -4232,10 +4232,10 @@ C-----
      &        '('' GDR first hump cross section uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then         
+              IF(IOPran.gt.0) then
                 GDRpar(3,nnuc) = val + grand()*sigma
               ELSE
-                GDRpar(3,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+                GDRpar(3,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR first hump cross section sampled value : ''
@@ -4282,10 +4282,10 @@ C-----
      &        '('' GDR second hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then       
+              IF(IOPran.gt.0) then
                 GDRpar(4,nnuc) = val + grand()*sigma
-              ELSE            
-                GDRpar(4,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+              ELSE
+                GDRpar(4,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR second hump energy sampled value : '',f5.2)')
@@ -4335,7 +4335,7 @@ C-----
               IF(IOPran.gt.0) then
                 GDRpar(5,nnuc) = val + grand()*sigma
               ELSE
-                GDRpar(5,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+                GDRpar(5,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR second hump width sampled value : '',f5.2)')
@@ -4382,10 +4382,10 @@ C-----
      &        '('' GDR second hump cross section uncertainty in '',I3,A2
      &        ,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then      
+              IF(IOPran.gt.0) then
                 GDRpar(6,nnuc) = val + grand()*sigma
               ELSE
-                GDRpar(6,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma       
+                GDRpar(6,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' GDR second hump cross section sampled value : ''
@@ -4741,7 +4741,7 @@ C-----
      &   I3,A2,'' is equal to '',i2,''%'')')
      &   SYMbe(i3), i2, SYMb(nnuc), i4
                sigma = val*i4*0.01
-               IF(IOPran.gt.0) then      
+               IF(IOPran.gt.0) then
                  Q(i3,nnuc) = val + grand()*sigma
                ELSE
                  Q(i3,nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
@@ -4842,7 +4842,7 @@ C-----
      &        '('' Global L.d. a-parameter uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then      
+              IF(IOPran.gt.0) then
                 atilss = val + grand()*sigma
               ELSE
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
@@ -4879,9 +4879,9 @@ C-----
      &        '('' L.d. a-parameter uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
                sigma = val*i3*0.01
-              IF(IOPran.gt.0) then      
+              IF(IOPran.gt.0) then
                 ATIlnor(nnuc) = val + grand()*sigma
-              ELSE 
+              ELSE
                 ATIlnor(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
@@ -4926,9 +4926,9 @@ C-----
      &        '('' Saddle-point l.d. a-parameter uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then             
+              IF(IOPran.gt.0) then
                 ATIlfi(nnuc) = val + grand()*sigma
-              ELSE 
+              ELSE
                 ATIlfi(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
@@ -4974,7 +4974,7 @@ C-----
      &        '('' Inner fission barrier uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then                     
+              IF(IOPran.gt.0) then
                 FISbin(nnuc) = val + grand()*sigma
               ELSE
                 FISbin(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
@@ -5022,7 +5022,7 @@ C-----
      &        '('' Outer fission barrier uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
                sigma = val*i3*0.01
-               IF(IOPran.gt.0) then                                
+               IF(IOPran.gt.0) then
                  FISbou(nnuc) = val + grand()*sigma
                ELSE
                  FISbou(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
@@ -5069,7 +5069,7 @@ C-----
      &        '('' Single particle l.d. parameter g uncertainty in '',
      &        I3,A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
               sigma = val*i3*0.01
-              IF(IOPran.gt.0) then                            
+              IF(IOPran.gt.0) then
                 GTIlnor(nnuc) = val + grand()*sigma
               ELSE
                 GTIlnor(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
@@ -5202,11 +5202,11 @@ C--------Tuning factors
      &         '' uncertainty is equal to '',i2,'' %'')')
      &        i1, NINT(A(1)), SYMb(1), i2
               sigma = val*0.01*i2
-              IF(IOPran.gt.0) then                                
+              IF(IOPran.gt.0) then
                 IF(rTUNEpe(i1).eq.1.d0) rTUNEpe(i1)=grand()
                 TUNEpe(i1) = val + rTUNEpe(i1)*sigma
               ELSE
-                IF(rTUNEpe(i1).eq.1.d0) rTUNEpe(i1)=drand()       
+                IF(rTUNEpe(i1).eq.1.d0) rTUNEpe(i1)=drand()
                 TUNEpe(i1) = val + 1.732d0*(2*rTUNEpe(i1)-1.)*sigma
               ENDIF
               WRITE (8,
@@ -5243,7 +5243,7 @@ C--------Tuning factors
      &         '' is equal to '',i2,'' %'')')
      &         i2, SYMb(nnuc), i3
               sigma = val*0.01*i3
-              IF(IOPran.gt.0) then            
+              IF(IOPran.gt.0) then
                 IF(rTUNEfi(nnuc).eq.1.d0) rTUNEfi(nnuc)=grand()
                 TUNefi(nnuc) = val + rTUNEfi(nnuc)*sigma
               ELSE
@@ -5297,12 +5297,12 @@ C--------Tuning factors
      &         '' uncertainty is equal to '',i2,'' %'')')
      &        i3, i2, SYMb(nnuc), i4
               sigma = val*0.01*i4
-              IF(IOPran.gt.0) then                
+              IF(IOPran.gt.0) then
                 IF(rTUNE(i3,nnuc).eq.1.d0) rTUNE(i3,nnuc)=grand()
                 TUNe(i3,nnuc) = val + rTUNE(i3,nnuc)*sigma
               ELSE
-                IF(rTUNE(i3,nnuc).eq.1.d0) rTUNE(i3,nnuc)=drand()       
-                TUNe(i3,nnuc) = val + 
+                IF(rTUNE(i3,nnuc).eq.1.d0) rTUNE(i3,nnuc)=drand()
+                TUNe(i3,nnuc) = val +
      &                          1.732d0*(2*rTUNE(i3,nnuc)-1.)*sigma
               ENDIF
               WRITE (8,
@@ -5330,11 +5330,11 @@ C-----
      &'('' DWBA dynamical deformation uncertainty is equal to '',
      &i2,'' %'')') i1
               sigma = val*0.01*i1
-              IF(IOPran.gt.0) then                     
+              IF(IOPran.gt.0) then
                 DEFdyn = val + grand()*sigma
               ELSE
                 DEFdyn = val + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF 
+              ENDIF
               IF (DEFdyn.LT.0.) DEFdyn = val
               WRITE (8,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') DEFdyn
@@ -5357,7 +5357,7 @@ C-----
      &'('' CC static deformation uncertainty is equal to '',
      &i2,'' %'')') i1
               sigma = val*0.01*i1
-              IF(IOPran.gt.0) then                          
+              IF(IOPran.gt.0) then
                 DEFsta = val + grand()*sigma
               ELSE
                 DEFsta = val + 1.732d0*(2*drand()-1.)*sigma
@@ -5704,7 +5704,7 @@ C-----shift parameter used to adjust HFB LD
              endif
              GOTO 100
             ENDIF
-            
+
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
              WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
@@ -5770,7 +5770,7 @@ C-----pseudo a-parameter used to adjust HFB LD
              endif
              GOTO 100
             ENDIF
-            
+
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
              WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
@@ -6034,7 +6034,7 @@ C-----
             endif
             INQUIRE(file='R250SEED.DAT',exist=fexist)
             if(.not.fexist) then
-C             If the file R250SEED.DAT does not exist, 
+C             If the file R250SEED.DAT does not exist,
 C             then starting seed is read
               iseed = abs(nint(val))
               if(iseed.le.1) iseed=1234567
@@ -6282,17 +6282,17 @@ C
       ENDDO
       nexp = 0
       atilsum = 0.0
-C-----Set EGSM normalization factors for each Z      
+C-----Set EGSM normalization factors for each Z
       IF (ADIv.EQ.0.0D0) THEN
          DO iz = 1,NDZmax
             ATIlnoz(iz) = 1.0 !default
-         ENDDO 
-         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD') 
+         ENDDO
+         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          READ (31,'(///)')
-   90    READ (31,'(I5,F8.3)',END = 95) iz,atiln   
+   90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
          ATIlnoz(iz) = atiln
          GOTO 90
-   95    CONTINUE 
+   95    CONTINUE
          CLOSE(31)
       ENDIF
       IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) THEN
@@ -6312,10 +6312,10 @@ C
 C     Skipping header
       READ (24,'(///)')
 C     ! reading from the EGSM_ldp.dat file
-C 100 READ (24,'(2I4,9x,F7.3,E13.5,67x,f8.4,9x,f8.4)',END = 200) 
+C 100 READ (24,'(2I4,9x,F7.3,E13.5,67x,f8.4,9x,f8.4)',END = 200)
 C    &           nixz, nixa, qn, dob, aroc
 C     ! reading from the ldp.dat file
-  100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200) 
+  100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200)
      &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
@@ -6354,7 +6354,7 @@ C              ELSEIF (ADIv.EQ.0.0D0) THEN
                      IF (ABS(acrt - ar).LE.0.001D0*acrt) GOTO 105
                      ar = acrt
                   ENDDO
-  105             econd = 1.5*acrt*delp**2/pi2 
+  105             econd = 1.5*acrt*delp**2/pi2
                   uexc = qn + del - econd
                   asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
                   atiln =  aroc/asys
@@ -6407,17 +6407,16 @@ C--------------Calculate sum for the average normalization factor
       WRITE(8,'(3X,''Nucleus                   final  norm.'')')
       WRITE(8,'(1X)')
       DO nnuc = 1, NNUct
-            IF(ATIlnor(nnuc).LE.0.) then
-              IF(ATIlnoz(INT(Z(nnuc))).GT.0.) 
-     &          WRITE(8,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
-     &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
-     &          ATIlnoz(INT(Z(nnuc))) 
-              ATIlnor(nnuc) = 1.d0  
-            ELSE
-              WRITE(8,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
-     &        INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), 
-     &        ATIlnor(nnuc) 
-            ENDIF
+         IF(ATIlnor(nnuc).LE.0.) then
+           WRITE(8,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+     &     INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &     ATIlnoz(INT(Z(nnuc)))
+           ATIlnor(nnuc) = 1.d0
+         ELSE
+           WRITE(8,'(I3,''-'',A2,''-'',I3, 20X,2x,1F8.5)')
+     &     INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &     ATIlnor(nnuc)
+         ENDIF
 
       ENDDO
 
@@ -6945,7 +6944,7 @@ C
 C
 C Local variables
 C
-      INTEGER ar, zr, ap, zp, ac, zc 
+      INTEGER ar, zr, ap, zp, ac, zc
       DOUBLE PRECISION b1, b2, b3
       zc = Z(Nnuc)
       ac = A(Nnuc)
@@ -8602,7 +8601,7 @@ C     Generator of normally distributed random numbers based on R250
       Integer*4 indexf, indexb, buffer(250)
       REAL*8 drand
       Common/R250COM/indexf,indexb,buffer
-10    continue 
+10    continue
       DO
           u = drand()
           v = drand()
