@@ -1,7 +1,9 @@
 #....Intel FORTRAN compiler
 #FC     =  ifort 
-#----GNU FORTRAN compiler (FEDORA 7)
+#----GNU FORTRAN compiler
 FC     = gfortran
+#----G95 FORTRAN compiler
+#FC     = g95
 #----standard f90 FORTRAN compiler
 #FC	= f90
 #===== M a c ==================================

@@ -1,6 +1,6 @@
-#----GNU FORTRAN compiler (FEDORA 7)
+#----GNU FORTRAN compiler 
 FC     = gfortran
-#----GNU FORTRAN95 compiler (FEDORA 6)
+#----GNU FORTRAN95 compiler
 #FC     = g95
 #----Lahey/Fujitsu FORTRAN95 compiler 
 #FC     = lf95
