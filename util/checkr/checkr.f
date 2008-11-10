@@ -28,6 +28,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.01   November 2008    A. Trkov
+!-V                        1. Minor update to process resonance LRF=7
+!-V                           representation
 !-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Major updating of the code and removal of
 !-V                           many false errorr messages.
@@ -2249,27 +2252,29 @@
 !     READ NUMBER OF PARTIAL WAVES
 !
       CALL RDCONT
+      IF(LRF.NE.7) THEN
 !*****CHECK NUMBER OF PARTIAL WAVES (L-VALUES)
-      NLS = N1H
-      IF(NFOR.GE.6) THEN
-         NLSC = N2H
-         CALL TEST1(NLS,1,NLSMAX,'NLS',1)
-         IF(LRF.EQ.3.OR.LRF.EQ.6)  THEN
-            CALL TEST1(NLSC,1,NLSCMAX,'NLSC',1)
-            IF(NLSC.LT.NLS)  THEN
-               EMESS = 'NLSC CANNOT BE LESS THAN NLS'
-               CALL ERROR_MESSAGE(NSEQP)
+         NLS = N1H
+         IF(NFOR.GE.6) THEN
+            NLSC = N2H
+            CALL TEST1(NLS,1,NLSMAX,'NLS',1)
+            IF(LRF.EQ.3.OR.LRF.EQ.6)  THEN
+               CALL TEST1(NLSC,1,NLSCMAX,'NLSC',1)
+               IF(NLSC.LT.NLS)  THEN
+                  EMESS = 'NLSC CANNOT BE LESS THAN NLS'
+                  CALL ERROR_MESSAGE(NSEQP)
+               END IF
+               CALL TEST1(L1H,0,1,'LAD',1)
             END IF
-            CALL TEST1(L1H,0,1,'LAD',1)
          END IF
-      END IF
-!
-!     CHECK VALUE OF AP
-!
-      AP = C2H
-      IF(NFOR.GE.6) THEN
-         IF(LRF.EQ.6.OR.(NAPS.NE.2.AND.NRO.EQ.1))                       &       
-     &        CALL TEST2F(AP,0.0,'AP')
+!        
+!        CHECK VALUE OF AP
+!        
+         AP = C2H
+         IF(NFOR.GE.6) THEN
+            IF(LRF.EQ.6.OR.(NAPS.NE.2.AND.NRO.EQ.1))                       &       
+     &           CALL TEST2F(AP,0.0,'AP')
+         END IF
       END IF
 !
 !     ALL PARAMETERIZATIONS
@@ -2289,7 +2294,7 @@
          CASE (6)
             CALL CHECK_HR(NLS)
          CASE (7)
-!           Testing not implemented
+            CALL CHECK_RL
       END SELECT
 !
   100 RETURN
@@ -2503,6 +2508,31 @@
 !
   100 RETURN
       END SUBROUTINE CHECK_HR
+!
+!***********************************************************************
+!
+      SUBROUTINE CHECK_RL
+!
+!     ROUTINE TO CHECK THE R-MATRIX LIMITED REPRESENTATION
+!
+      IMPLICIT NONE
+!
+      INTEGER(KIND=I4) :: IFG,KRM,NJS,KRL
+      INTEGER(KIND=I4) :: J
+!
+      IFG = L1H
+      KRM = L2H
+      NJS = N1H
+      KRL = N2H
+      CALL RDLIST
+!
+      DO J=1,NJS
+         CALL RDLIST
+         CALL RDLIST
+      END DO
+!
+      RETURN
+      END SUBROUTINE CHECK_RL
 !
 !***********************************************************************
 !
@@ -4428,11 +4458,11 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: LRF,LRFM,NRO,NAPS,NAPSM,NIT
-      INTEGER(KIND=I4) :: NLS,NRS,NUM,NSRS,NLRS
+      INTEGER(KIND=I4) :: NLS,NRS,NUM,NSRS,NLRS,NJS
       INTEGER(KIND=I4) :: MPAR,MPARM,LCOMP
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
       INTEGER(KIND=I4) :: LB,LT,NE,NE2,NPM,NTT,NEC
-      INTEGER(KIND=I4) :: I1,I3,NL
+      INTEGER(KIND=I4) :: I1,I3,NL,J
       INTEGER(KIND=I4) :: NDIGIT,NNN,NM
       REAL(KIND=R4) :: AP
 !
@@ -4510,7 +4540,7 @@
 !     Check value of AP
 !
       AP = C2H
-      IF(NFOR.GE.6) THEN
+      IF(NFOR.GE.6 .AND. LRF.NE.7) THEN
          IF(NAPS.NE.2.AND.NRO.EQ.1)  CALL TEST2F(AP,0.0,'AP')
       END IF
 !
@@ -4529,7 +4559,7 @@
       NLS = N1H
       IF(LCOMP.EQ.0)  THEN
          CALL TEST1(NLS,1,NLSMAX,'NLS',1)
-      ELSE
+      ELSE IF(LCOMP.EQ.1) THEN
          CALL TEST2(NLS,0,'NLS')
       END IF
       IF(LCOMP.EQ.0) THEN
@@ -4624,7 +4654,13 @@
 !
 !        Compact format representation
 !
+         NJS=N1H
          CALL RDLIST
+         DO J=1,NJS
+            CALL RDLIST
+            CALL RDLIST
+         END DO
+!
          CALL RDCONT
          NDIGIT=L1H
          IF(NDIGIT.EQ.0) THEN
