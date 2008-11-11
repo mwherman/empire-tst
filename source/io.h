@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-10-14 21:32:22 $
-Ccc   * $Id: io.h,v 1.38 2008-10-14 21:32:22 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:45 $
+Ccc   * $Id: io.h,v 1.39 2008-11-11 21:22:45 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -51,6 +51,7 @@ c     45     tl,fusion,main
 c     46     tl,fusion,main
 c     47     fusion,input
 c     48     systematics
+c     49     MSD-Orion
 c     51     input
 c     52     input
 c     53     fusion
@@ -97,7 +98,6 @@ c     97     tl
 c     98     fission XS 
 c     99     ecis
 c    100     empire_ctl
-c    101     MSD-orion.f 
 c    102     Non-RIPL potential
 c
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')

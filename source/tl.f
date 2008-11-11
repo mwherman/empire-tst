@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:25 $
-Ccc   * $Id: tl.f,v 1.97 2008-10-14 21:32:25 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:46 $
+Ccc   * $Id: tl.f,v 1.98 2008-11-11 21:22:46 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -809,8 +809,8 @@ C     Imaginary potentials must be positive, RCN
       WOMv(Nejc,Nnuc) = MAX(WOMv(Nejc,Nnuc),0.D0)
 C-----Some default protections
 C-----set coulomb radius equal to 1.25 if not defined
-      IF (RCOul(Nejc,Nnuc).EQ.0.0D0 .AND. Zejc(0).GT.0) 
-     &    RCOul(Nejc,Nnuc) = 1.25
+C     IF (RCOul(Nejc,Nnuc).EQ.0.0D0 .AND. Zejc(0).GT.0) 
+      IF (RCOul(Nejc,Nnuc).EQ.0.0D0) RCOul(Nejc,Nnuc) = 1.25
 C-----set volume imaginary diff. equal to surface imag. diff. if not defined
       IF (AWOmv(Nejc,Nnuc).EQ.0.0D0) AWOmv(Nejc,Nnuc) = AWOm(Nejc,Nnuc)
 C-----set volume imaginary radius equal to surface imag. radius if not defined

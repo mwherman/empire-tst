@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:20 $
-Ccc   * $Id: fusion.f,v 1.75 2008-10-14 21:32:20 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:45 $
+Ccc   * $Id: fusion.f,v 1.76 2008-11-11 21:22:45 Capote Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -130,8 +130,8 @@ C--------Here the old calculated files should be read
                WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
             NLW = maxlw
-   	        WRITE(8,*) ' Maximum CN spin limited to ', NLW
-	        WRITE(8,*) 
+              WRITE(8,*) ' Maximum CN spin limited to ', NLW
+              WRITE(8,*) 
             GOTO 300
          ENDIF
 C
@@ -189,7 +189,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             SINlcc=0.d0
             SINl  =0.d0
             SINlcont =0.d0
-			NLW = i - 1 ! RCN Aug 2008
+                  NLW = i - 1 ! RCN Aug 2008
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -276,7 +276,7 @@ C-----------end of E2
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
          ENDIF
-		 NLW = NDLW
+             NLW = NDLW
 C--------END of calculation of fusion cross section
 C--------for photon induced reactions
   100    RETURN
@@ -483,10 +483,10 @@ C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN
                      STOP
      &            ' WARNING: DWBA and CCM state order do not coincide'
                   ENDIF
-                  BACKSPACE 46
+                  BACKSPACE (46)
                   READ (46,'(A80)',END = 235) rstring
                   GOTO 2351 
-  235             BACKSPACE 45
+  235             BACKSPACE (45)
                   READ (45,'(A80)',END = 240) rstring
  2351             WRITE (47,'(A80)') rstring
                   DO j = 1, itmp2*nang ! ecis06
@@ -516,7 +516,7 @@ C-----------------checking the correspondence of the excited states
                      STOP
      &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
                    ENDIF
-  255             BACKSPACE 45
+  255             BACKSPACE (45)
                   READ (45,'(A80)',END = 260) rstring
                   WRITE (47,'(A80)') rstring
                   DO j = 1, nang
@@ -555,8 +555,8 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
          NLW = maxlw
-	     WRITE(8,*) ' Maximum CN spin limited to ', NLW
-	     WRITE(8,*) 
+           WRITE(8,*) ' Maximum CN spin limited to ', NLW
+           WRITE(8,*) 
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
@@ -574,8 +574,8 @@ C--------calculation of h.i. transmission coefficients for fusion
          CALL HITL(stl)
          if(NLW.GT.0) maxlw = min(NLW,maxlw)
          NLW = maxlw
-	     WRITE(8,*) ' Maximum CN spin limited to ', NLW
-	     WRITE(8,*) 
+           WRITE(8,*) ' Maximum CN spin limited to ', NLW
+           WRITE(8,*) 
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
@@ -625,7 +625,7 @@ C-------Angular distribution (incident.ang)
         WRITE (47,'(A80)') rstring
         DO i = 1, max(ND_nlv,1)
           READ (45,'(12x,i3,i5)',END = 270) itmp2, nang
-          BACKSPACE 45
+          BACKSPACE (45)
           READ (45,'(A80)',END = 270) rstring
           WRITE (47,'(A80)') rstring
           DO j = 1, itmp2*nang ! ecis06

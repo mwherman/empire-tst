@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:24 $
-Ccc   * $Id: MSD-orion.f,v 1.22 2008-10-14 21:32:24 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:46 $
+Ccc   * $Id: MSD-orion.f,v 1.23 2008-11-11 21:22:46 Capote Exp $
 C
 C
 C
@@ -188,7 +188,7 @@ C
       EQUIVALENCE (KEXcom(1),KEXcom1)
       EQUIVALENCE (KTRl(1),KTRl1)
       DATA holamu, holpmu/'AMU', 'PMU'/
-      OPEN (101,FORM = 'unformatted',STATUS = 'scratch')
+      OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -572,7 +572,7 @@ C-----write results to TAPE15
          ENDIF
          WRITE (15,*) (xwr2(n,nlr),n = 1,n2mx)
   100 ENDDO
-      CLOSE(101)
+      CLOSE(49)
 99070 FORMAT (21X,'VSX,DVX,WSX,WSF,VSO,WSO',18X,'=',6F8.3/21X,
      &        'DFN,DFNW,DFNS,DFNSP',14X,'=',4F8.3/21X,
      &        'RZERO,RZEROW,RZEROS,RZROSP,RZEROC=',5F8.3)
@@ -818,7 +818,7 @@ CBF      MATCHING POINT IN MSTEP IS AT NXMAX-2
          ENDDO
       ENDIF
       CALL OMPOTEN
-      REWIND 7
+C     REWIND 7
       END
 C
       SUBROUTINE FLGLCH
@@ -1488,7 +1488,7 @@ C
       ZERo = (0.0D0,0.0D0)
       TTR = (1.0D0,0.0D0)
       TTI = (0.0D0,1.0D0)
-      REWIND 7
+C     REWIND 7
       NXMax = KEXcom(2)
       dx = XMEs
       NRX = NXMax
@@ -1916,7 +1916,7 @@ C
       LDWmxb = LDWmxr(NCHanl)
       LDWmxc = LDWmxr(2)
       lbcp1x = MAX0(LDWmxc,LDWmxb) + 1
-      REWIND 7
+C     REWIND 7
       l1p1mx = L1Maxm + 1
       l2p1mx = L2Maxm + 1
 C<<<<<<<<<<<<< variant A
@@ -2081,7 +2081,8 @@ C
             ENDIF
          ENDDO
       ENDDO
-  100 REWIND 7
+C     REWIND 7
+  100 RETURN
 99060 FORMAT (8X,A1,2I4,'/2',5X,40E13.5)
 99065 FORMAT (7X,A1,I4,I5,1X,40E13.5)
 99070 FORMAT (F9.5,8E12.4)
@@ -2149,9 +2150,9 @@ C
       l1p1mx = L1Maxm + 1
       l2p1mx = L2Maxm + 1
 C
-CB    CALCULATION OF CLEBSCH-GORDAN-COEFF. AND WRITING TO TAPE8
+CB    CALCULATION OF CLEBSCH-GORDAN-COEFF. AND WRITING TO TAPE 49
 C
-      REWIND 8
+      REWIND (49)
       kaspar = 2 - MOD(KASe,2)
       njl1mx = 1 + (ISTw1 - ISTw2)
       njl2mx = 1 + (ISTw2 - ISTw3)
@@ -2192,7 +2193,7 @@ C
                         ENDDO
                      ENDDO
                   ENDDO
-                  WRITE (101) (CLEbmm(n),n = 1,n2)
+                  WRITE (49) (CLEbmm(n),n = 1,n2)
                   IF (n2.NE.jlmttl) WRITE (8,99005) jla, jlb, n2, jlmttl
 99005             FORMAT (//////'   XSEC-63.  JA,JB,N2,JLMTTL=',4I5)
                ENDIF
@@ -2440,7 +2441,7 @@ C
       hatj1 = SQRT(FLOAT(J1Tw + 1))
       hatj2 = SQRT(FLOAT(J2Tw + 1))
       kaspar = 2 - MOD(KASe,2)
-      REWIND 8
+      REWIND (49)
       jbmx = LDWmxb + 1
       jamx8 = LDWmxa + 1
       jamit8 = ISTw1
@@ -2472,7 +2473,7 @@ C
                IF (lb.EQ.0) legbas = 0
                IF (nlb.NE.0) THEN
                   DO ja = jamx, jami, -JAS
-                     BACKSPACE 8
+                     BACKSPACE (49)
                   ENDDO
                ELSEIF (jami.NE.1) THEN
                   jadpmx = jami - JAS
@@ -2969,7 +2970,7 @@ C
       jx = MIN0(Jatw + Jbtw,J12mxt)
       IF (ji.LE.jx) THEN
          Jtl = ((jx + ji + 6 - 2*Kasem2)*(jx - ji + 2))/4
-         READ (101) (CLEbmm(n),n = 1,Jtl)
+         READ (49) (CLEbmm(n),n = 1,Jtl)
       ENDIF
       END
 C

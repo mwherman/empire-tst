@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-11-03 22:59:46 $
-Ccc   * $Id: lev-dens.f,v 1.66 2008-11-03 22:59:46 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-11-11 21:22:46 $
+Ccc   * $Id: lev-dens.f,v 1.67 2008-11-11 21:22:46 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -610,7 +610,7 @@ C-----
       ENDIF
 C-----get neutron binding energy  if not yet defined
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
-         REWIND 25
+         REWIND (25)
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
 C-----get distance between Qn and the last level
@@ -793,7 +793,7 @@ C--------
 C--------do loop over excitation energy
 C--------
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
-         REWIND 25
+         REWIND (25)
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
       ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
@@ -1251,9 +1251,11 @@ C
 C Local variables
 C
       REAL*8 arg, const, det, dphi2, momo, momp, phi, phi2,
-     &                 qdamp, qk, s, seff2, t, vibrk, om2,
-     &                 q2, om3, q3
-C      REAL*8 DSQRT, EVIBR
+     &                 qdamp, qk, s, seff2, t, vibrk
+     &                 
+C     REAL*8 q2, om3, q3, om2
+C     REAL*8 DSQRT, EVIBR
+C
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
       ROBCS = 0.D0
@@ -1846,7 +1848,7 @@ C Local variables
 C
       REAL FLOAT
       INTEGER izia, iziar
-      REWIND 23
+      REWIND (23)
       izia = Iz*1000 + Ia
   100 READ (23,*,END = 200) iziar, B, X1, X2, X3
       IF (izia.EQ.iziar) RETURN
@@ -1958,7 +1960,7 @@ C
   100 READ (34,99010,ERR=300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
-      BACKSPACE 34
+      BACKSPACE (34)
       READ (34,99010,ERR=300,END = 300) car2, izr, iar, paritate
       IF (iar.NE.ia .OR. izr.NE.iz) GOTO 100
 C
@@ -2227,11 +2229,10 @@ C
 C Local variables
 C
       REAL*8 ak, arg, con, const, e1, qk, qv, seff, sort2,
-     &       sum, t, u, vibrk, om2, om3, q2, q3
+     &       sum, t, u, vibrk
       INTEGER i, k, kmin
 
-
-
+C     REAL*8 q2, om3, q3, om2
 C     REAL*8 EVIBR
 
 
@@ -2927,7 +2928,7 @@ cc            ENDIF
       VIBfdt(Ib)= vibbfdt
 
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
-	RETURN
+      RETURN
       END
 C
 

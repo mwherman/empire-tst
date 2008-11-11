@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-10-14 21:32:24 $
-Ccc   * $Id: MSD-tristan.f,v 1.62 2008-10-14 21:32:24 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:49 $
+Ccc   * $Id: MSD-tristan.f,v 1.63 2008-11-11 21:22:49 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -205,8 +205,8 @@ C
             STOP 'ERROR IN WR1 WR2 DIMENSIONS IN TRISTAN'
          ENDIF
 CCCCCC
-         REWIND 15
-         REWIND 16
+         REWIND (15)
+         REWIND (16)
 CCCCCC
          IC1x = L1maxm/KEX3 + 1
          IC2x = l2maxm/KEX3 + 1
@@ -2592,7 +2592,7 @@ C
             ENDDO
          ENDDO
       ENDDO
-      REWIND 16
+      REWIND (16)
       DO kr = 1, krtx
          DO na = 1, nangle
             IF (kr.EQ.1) THEN
@@ -2937,7 +2937,7 @@ C-----------------constructed out of discrete levels
    50    ENDDO
       ENDDO
       IF(IOUT.GT.3) CLOSE(66)
-      REWIND 14
+      REWIND (14)
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)

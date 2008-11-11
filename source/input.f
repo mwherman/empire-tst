@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-11-03 22:59:45 $
-Ccc   * $Id: input.f,v 1.277 2008-11-03 22:59:45 herman Exp $
+Ccc   * $Date: 2008-11-11 21:22:48 $
+Ccc   * $Id: input.f,v 1.278 2008-11-11 21:22:48 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2109,7 +2109,7 @@ C-------constructing input and filenames
         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
      &         ERR = 400)
       ELSE
-        REWIND 13
+        REWIND (13)
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn

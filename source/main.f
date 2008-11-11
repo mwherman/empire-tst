@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:23 $
-Ccc   * $Id: main.f,v 1.191 2008-10-14 21:32:23 Capote Exp $
+Ccc   * $Date: 2008-11-11 21:22:47 $
+Ccc   * $Id: main.f,v 1.192 2008-11-11 21:22:47 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -666,7 +666,6 @@ C--------If it does not, the program start new calculations
            WRITE (8,*) ' '
            GOTO 1450
          ENDIF
-C        REWIND 15
          WRITE (8,*) ' '
          qmax = 0.99*EIN
          qstep = qmax/3.0
@@ -691,7 +690,7 @@ C--------Set to Q's to 0 if negative due to rounding error
          IF (q2.LT.0.0D0) q2 = 0.0
          IF (q3.LT.0.0D0) q3 = 0.0
          GOTO 1420
- 1450    REWIND 15
+ 1450    REWIND (15)
          READ(15,*) qmax,qstep,ltrmax
          WRITE (8,*) ' '
          WRITE (8,*) ' '
@@ -965,7 +964,7 @@ C-----Start DO loop over decaying nuclei
             ENDDO
          ENDDO
          IF (IOUt.GT.0) THEN
-	   if(nnuc.le.NDEJC) 
+         if(nnuc.le.NDEJC) 
      &     WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)),
      &                  SYMb(nnuc), INT(A(nnuc))
 1234       FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,
@@ -2765,7 +2764,7 @@ C     ENDDO
      &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
      &   SINlcont + ElasticCorr + ELAcs
         ENDIF
-	WRITE (8,
+      WRITE (8,
      &  '('' * Optical model nonelastic cross section (ABScs) '',G12.5,
      &              '' mb  '')')
      &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
@@ -2816,7 +2815,7 @@ C     ENDDO
      &     G12.5,'' mb  ''/)') 4.*PI*ELCncs
         ELSE
           WRITE (*,*)
-	ENDIF
+      ENDIF
 
       ENDIF
       IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)
