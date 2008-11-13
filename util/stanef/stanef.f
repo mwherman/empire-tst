@@ -27,6 +27,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.01   November 2008     A. Trkov
+!-V                        1. If NSEQ>99999, reset NSEQ=0
 !-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Fix minor bugs.
 !-V                        2. Implement extended features of the format
@@ -124,7 +126,7 @@
 !-M         - Numeric field standardization for 2/151(character)
 !-M             Y  execute this option 
 !-M             N do not execute this option	
-!-M         If record 5 is left entirely blank, then the �default� 
+!-M         If record 5 is left entirely blank, then the default
 !-M         options are executed. Those are character format output 
 !-M         file, update MT=451 and standardize numeric fields.
 !-M 
@@ -865,7 +867,8 @@
          IF(NFOR.LT.6) THEN
            IF(MT.EQ.0.OR.MF.EQ.0) IOUTS = 1
            IF(MAT.GE.0)   THEN
-              NSEQ = MIN0(NSEQ+1,99999)
+              NSEQ = NSEQ+1
+              IF(NSEQ.GT.99999) NSEQ=0
            ELSE
               NSEQ = 0
            END IF
