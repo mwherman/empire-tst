@@ -5217,9 +5217,59 @@ proc vTcl:project:info {} {
 }
 }
 
+
+
+
+
+
 #################################
 # USER DEFINED PROCEDURES
 #
+
+#############################################################################
+# Edit file in editor of choice:
+#
+proc ::editFile {filename} {
+	## make empire flexible enough to handle opening files
+	## on various platforms. C.Mattoon, Nov 13 2008
+	if {$::tcl_platform(os)=="Darwin"} {
+		if [regexp {\.app} $::editor] {
+			exec open -a $::editor $filename
+		} else {
+			# hopefully command is recognized:
+			exec $::editor $filename &
+		}
+	} elseif {$::tcl_platform(os)=="Linux"} {
+		exec $::editor $filename &
+	} else {
+		# most likely windows, I don't know how to handle this yet
+		# need a windows machine to test with...
+		exec $::editor $filename &
+	}
+}
+
+#############################################################################
+# Open ps/pdf file in viewer of choice:
+#
+proc ::pspdfView {filename} {
+	## make empire flexible enough to handle opening files
+	## on various platforms. C.Mattoon, Nov 13 2008
+	if {$::tcl_platform(os)=="Darwin"} {
+		if [regexp {\.app} $::psviewer] {
+			exec open -a $::psviewer $filename	
+		} else {
+			# hopefully command is recognized:
+			exec $::psviewer $filename &
+		}
+	} elseif {$::tcl_platform(os)=="Linux"} {
+		exec $::psviewer $filename &
+	} else {
+		# most likely windows, I don't know how to handle this yet
+		# need a windows machine to test with
+		exec $::psviewer $filename &
+	}
+}
+
 #############################################################################
 ## Procedure:  main
 
@@ -5286,8 +5336,8 @@ proc ::ViewAll {} {
       set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname$suf($what)
       if {[file exists $mulinputn] == 0} continue
       if {$what == "PLOTC4-plots"} {
-         exec $psviewer $mulinputn
-      } else {exec $editor $mulinputn
+         pspdfView $mulinputn
+      } else { editFile $mulinputn
       }
    }
    Optionmenu3 select "View:"
@@ -5670,7 +5720,7 @@ adjourn .top75} \
     }
     button $site_3_0.but80 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.inp &} -cursor hand2 \
+        -background #dcdcdc -command { editFile $file.inp } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects edit.gif]] \
@@ -5710,7 +5760,7 @@ adjourn .top75} \
     }
     button $site_3_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.lst &} -cursor hand2 \
+        -background #dcdcdc -command { editFile $file.lst } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects editcopy.gif]] \
@@ -5722,7 +5772,7 @@ adjourn .top75} \
     }
     button $site_3_0.but77 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.out &} -cursor hand2 \
+        -background #dcdcdc -command { editFile $file.out } -cursor hand2 \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects shortout.gif]] \
@@ -5734,7 +5784,7 @@ adjourn .top75} \
     }
     button $site_3_0.but82 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.endf &} \
+        -background #dcdcdc -command { editFile $file.endf } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects kthememgr.gif]] \
@@ -5746,7 +5796,7 @@ adjourn .top75} \
     }
     button $site_3_0.but83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.exf &} -cursor hand2 \
+        -background #dcdcdc -command { editFile $file.exf } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects x4.gif]] \
@@ -5758,7 +5808,7 @@ adjourn .top75} \
     }
     button $site_3_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $file.c4 &} -cursor hand2 \
+        -background #dcdcdc -command { editFile $file.c4 } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects stop.gif]] \
@@ -5770,7 +5820,7 @@ adjourn .top75} \
     }
     button $site_3_0.but85 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $psviewer $file.ps &} \
+        -background #dcdcdc -command { pspdfView $file.ps } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / home herman empire work Projects imagegallery.gif]] \
@@ -5902,7 +5952,7 @@ adjourn .top75}} \
         -background #efefef \
         -command {exec xterm -e cp -i ../scripts/skel.inp $file.inp
 adjourn .top75
-exec $editor $file.inp &} \
+editFile $file.inp } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
         -relief raised -text {Create input} 
@@ -5913,7 +5963,7 @@ exec $editor $file.inp &} \
     }
     button $site_11_0.cpd73 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.inp &} -cursor hand2 \
+        -background #efefef -command { editFile $file.inp } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -pady 1m \
         -relief raised -text {Edit input} 
@@ -5993,7 +6043,7 @@ adjourn .top75} \
     set site_10_0 [$site_8_0.lab100 childsite]
     button $site_10_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.lst &} -cursor hand2 \
+        -background #efefef -command { editFile $file.lst } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Full 
@@ -6004,7 +6054,7 @@ adjourn .top75} \
     }
     button $site_10_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.out &} -cursor hand2 \
+        -background #efefef -command { editFile $file.out } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text Short 
@@ -6015,7 +6065,7 @@ adjourn .top75} \
     }
     button $site_10_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.endf &} \
+        -background #efefef -command { editFile $file.endf } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text ENDF 
@@ -6042,7 +6092,7 @@ adjourn .top75} \
     set site_11_0 $site_10_0.cpd71
     button $site_11_0.but92 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.lev &} -cursor hand2 \
+        -background #efefef -command { editFile $file.lev } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Discrete levels} 
@@ -6053,7 +6103,7 @@ adjourn .top75} \
     }
     button $site_11_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-lev.col &} \
+        -background #efefef -command { editFile $file-lev.col } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Collective levels} 
@@ -6064,7 +6114,7 @@ adjourn .top75} \
     }
     button $site_11_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $psviewer $file-cum.ps &} \
+        -background #efefef -command { pspdfView $file-cum.ps } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Cumul. plot} 
@@ -6086,7 +6136,7 @@ adjourn .top75} \
     set site_11_0 $site_10_0.cpd72
     button $site_11_0.but93 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-omp.ripl &} \
+        -background #efefef -command { editFile $file-omp.ripl } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {OM parameters} 
@@ -6097,7 +6147,7 @@ adjourn .top75} \
     }
     button $site_11_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-omp.dir &} \
+        -background #efefef -command { editFile $file-omp.dir } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {OMP for direct} 
@@ -6108,7 +6158,7 @@ adjourn .top75} \
     }
     button $site_11_0.cpd67 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-inp.fis &} \
+        -background #efefef -command { editFile $file-inp.fis } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
         -relief raised -text {Fission input} 
@@ -6183,7 +6233,7 @@ exit} \
     set site_10_0 [$site_8_1.lab105 childsite]
     button $site_10_0.but74 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-omp.ripl &} \
+        -background #efefef -command { editFile $file-omp.ripl } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {Edit RIPL OMP} 
@@ -6317,7 +6367,7 @@ adjourn .top75} \
     }
     button $site_10_0.cpd83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.exf &} -cursor hand2 \
+        -background #efefef -command { editFile $file.exf } -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {View EXFOR} -width 12 
@@ -6341,7 +6391,7 @@ adjourn .top75} \
     }
     button $site_10_0.cpd85 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file.c4 &} -cursor hand2 \
+        -background #efefef -command { editFile $file.c4 } -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
         -text {View C4} -width 12 
@@ -6367,7 +6417,7 @@ adjourn .top75} \
     set site_10_0 [$site_8_1.lab75 childsite]
     button $site_10_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-ecis.in &} \
+        -background #efefef -command { editFile $file-ecis.in } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -text {Edit input} 
@@ -6378,7 +6428,7 @@ adjourn .top75} \
     }
     button $site_10_0.but83 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $file-ecis.out &} \
+        -background #efefef -command { editFile $file-ecis.out } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc \
         -highlightcolor #000000 -text {View output} 
@@ -7041,9 +7091,9 @@ adjourn .top75 }} \
 set selecfile [lindex $selecfilelist 0]
 set exten [file extension $selecfile]
 if {$exten == ".ps"} {
-  exec $psviewer $selecfile &
+  pspdfView $selecfile
 } elseif {$exten == ".eps"} {
-  exec $psviewer $selecfile &
+  pspdfView $selecfile
 } elseif {$exten == ".zvd"} {
   exec xterm -e ../scripts/zvcomb $selecfile &
 } elseif {$exten == ".gnudat"} {
@@ -7051,7 +7101,7 @@ if {$exten == ".ps"} {
   exec xterm -e gnuplot ../util/kalman/corr.plt
   exec xterm -e rm corrplot.dat
 } else {
-  exec $editor $selecfile &
+  editFile $selecfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available files:} -listvariable filelist \
@@ -7097,7 +7147,7 @@ ddlist} \
     }
     button $site_10_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #dcdcdc -command {exec $editor $selecfile &} \
+        -background #dcdcdc -command { editFile $selecfile } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -text Edit 
     vTcl:DefineAlias "$site_10_0.but84" "Button127" vTcl:WidgetProc "Toplevel1" 1
@@ -7168,13 +7218,13 @@ set archfile ""} \
 set archfile [lindex $selarchfilelist 0]
 set archexten [file extension $archfile]
 if {$archexten == ".ps"} {
-  exec $psviewer $archdir/$archfile &
+  pspdfView $archdir/$archfile
 } elseif {$archexten == ".eps"} {
-  exec $psviewer $archdir/$archfile &
+  pspdfView $archdir/$archfile
 } elseif {$archexten == ".zvd"} {
   exec xterm -e ../scripts/zvcomb $archdir/$archfile &
 } else {
-  exec $editor $archdir/$archfile &
+  editFile $archdir/$archfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available files:} -listvariable archfilelist \
@@ -7203,7 +7253,7 @@ set archfile [lindex $selarchfilelist 0]} \
         -width 15 
     button $site_11_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
-        -background #efefef -command {exec $editor $archdir/$archfile &} \
+        -background #efefef -command { editFile $archdir/$archfile } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc -text {Edit file} 
     bindtags $site_11_0.but84 "$site_11_0.but84 Button $top all _vTclBalloon"
@@ -7642,7 +7692,7 @@ adjourn .top75} \
     set site_9_0 $site_8_7.fra84
     ::iwidgets::scrolledlistbox $site_9_0.scrolledlistbox83 \
         -activebackground #dcdcdc -cursor {} \
-        -dblclickcommand {exec $editor ../source/[selection get] &} \
+        -dblclickcommand { editFile {../source/[selection get]} } \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Double click to edit} -listvariable modules \
         -textbackground #ffffff -textfont {Helvetica -12 } -width 180 
@@ -7652,7 +7702,7 @@ adjourn .top75} \
     set site_10_0 $site_9_0.fra79
     button $site_10_0.but80 \
         -activebackground #eccceccceccc -activeforeground red \
-        -background #efefef -command {exec $editor ../source/dimension.h &} \
+        -background #efefef -command { editFile {../source/dimension.h} } \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Edit dimensions} -wraplength 70 
@@ -7735,33 +7785,33 @@ exit} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../scripts/skel.inp &} -label {Default input} 
+        -command { editFile {../scripts/skel.inp} } -label {Default input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../scripts/skel-inp.sen &} \
+        -command { editFile {../scripts/skel-inp.sen} } \
         -label {Default sensitivity input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/empend/EMPEND.INP &} \
+        -command { editFile {../util/empend/EMPEND.INP} } \
         -label {EMPEND input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/endres/ENDRES.INP &} \
+        -command { editFile {../util/endres/ENDRES.INP} } \
         -label {ENDRES input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/plotc4/PLOTC4.INP &} \
+        -command { editFile {../util/plotc4/PLOTC4.INP} } \
         -label {PLOTC4 input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/fixup/FIXUP.INP &} \
+        -command { editFile {../util/fixup/FIXUP.INP} } \
         -label {FIXUP input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/c4sort/C4SORT.INP &} \
+        -command { editFile {../util/c4sort/C4SORT.INP} } \
         -label {C4SORT input} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/x4toc4/reaction &} \
+        -command { editFile {../util/x4toc4/reaction} } \
         -label {X4TOC4 table} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../util/c4zvd/ps01.tit &} \
+        -command { editFile {../util/c4zvd/ps01.tit} } \
         -label {ZVView options} 
     $site_3_0.menu90 add command \
-        -command {exec $editor ../source/Makefile &} -label {Edit Makefile} 
+        -command { editFile {../source/Makefile} } -label {Edit Makefile} 
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
     set site_4_0 $site_3_0.menu90
@@ -7830,25 +7880,25 @@ set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS
         -command {exec {cp skel.inp
 $file.inp &}} -label {Create input} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.inp &} -label {Edit input} 
+        -command { editFile $file.inp } -label {Edit input} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-inp.sen &} -label {Sensitivity input} 
+        -command { editFile $file-inp.sen } -label {Sensitivity input} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.ripl &} -label {OM parameters} 
+        -command { editFile $file-omp.ripl } -label {OM parameters} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-omp.dir &} -label {OM par. for direct} 
+        -command { editFile $file-omp.dir } -label {OM par. for direct} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
-        -command {exec $editor $file.lev &} -label {Discrete levels} 
+        -command { editFile $file.lev } -label {Discrete levels} 
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-lev.col &} -label {Collective levels} 
+        -command { editFile $file-lev.col } -label {Collective levels} 
     $site_3_0.menu92 add separator \
         
     $site_3_0.menu92 add command \
-        -command {exec $editor $file-inp.fis &} -label {Fission input} 
+        -command { editFile $file-inp.fis } -label {Fission input} 
     $top.m88 add cascade \
         -menu "$top.m88.menu93" -command {} -label Execute 
     set site_3_0 $top.m88
@@ -7961,67 +8011,67 @@ exec  xterm -e ../scripts/stanef $file & } \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.lst &} -label {EMPIRE full} 
+        -command { editFile $file.lst } -label {EMPIRE full} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.out &} -label {EMPIRE short} 
+        -command { editFile $file.out } -label {EMPIRE short} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.xsc &} -label {Cross-sections} 
+        -command { editFile $file.xsc } -label {Cross-sections} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-fiss.xsc &} -label {Fission chances} 
+        -command { editFile $file-fiss.xsc } -label {Fission chances} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-pfnm.out &} \
+        -command { editFile $file-pfnm.out } \
         -label {Fiss. neutr. multiplicities} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-pfns.out &} \
+        -command { editFile $file-pfns.out } \
         -label {Fiss. neutr. spectra} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.sys &} -label {x-sec systematics} 
+        -command { editFile $file.sys } -label {x-sec systematics} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-ompfit.lst &} -label {OMP fit output} 
+        -command { editFile $file-ompfit.lst } -label {OMP fit output} 
     $site_3_0.menu94 add command \
         -command {exec kompare OMPAR.DIR zr90-omp.dir &} \
         -label {Compare OMPs} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-ecis.out &} -label {ECIS } 
+        -command { editFile $file-ecis.out } -label {ECIS } 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.exf &} -label EXFOR 
+        -command { editFile $file.exf } -label EXFOR 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.c4 &} -label {C4 file} 
+        -command { editFile $file.c4 } -label {C4 file} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.endf &} -label {ENDF final} 
+        -command { editFile $file.endf } -label {ENDF final} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-s.endf &} -label {ENDF plotted} 
+        -command { editFile $file-s.endf } -label {ENDF plotted} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-e.endf &} -label {ENDF empend} 
+        -command { editFile $file-e.endf } -label {ENDF empend} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-mat.sen &} -label {Sensitivity matrix} 
+        -command { editFile $file-mat.sen } -label {Sensitivity matrix} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-out.kal &} -label {KALMAN output} 
+        -command { editFile $file-out.kal } -label {KALMAN output} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-xsc.kal &} -label {KALMAN x-sections} 
+        -command { editFile $file-xsc.kal } -label {KALMAN x-sections} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-cov.kal &} -label {Covariance matrices} 
+        -command { editFile $file-cov.kal } -label {Covariance matrices} 
     $site_3_0.menu94 add command \
         -command {exec gnuplot ../util/kalman/corr.plt &} \
         -label {Covariance plot} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command {exec $editor $file-njoy.out &} -label {NJOY output} 
+        -command { editFile $file-njoy.out } -label {NJOY output} 
     $site_3_0.menu94 add command \
-        -command {exec $editor $file.ace &} -label {NJOY/ACER file} 
+        -command { editFile $file.ace } -label {NJOY/ACER file} 
     $site_3_0.menu94 add command \
-        -command {exec $psviewer $file-njoy.ps &} -label {NJOY plots} 
+        -command { pspdfView $file-njoy.ps } -label {NJOY plots} 
     $site_3_0.menu94 add command \
-        -command {exec $psviewer $file-acer.ps &} -label {NJOY/ACER plots} 
+        -command { pspdfView $file-acer.ps } -label {NJOY/ACER plots} 
     $top.m88 add cascade \
         -menu "$top.m88.men70" -command {} -label Logs 
     set site_3_0 $top.m88
@@ -8034,51 +8084,51 @@ exec  xterm -e ../scripts/stanef $file & } \
         -command {exec xterm -e -bg darkorange -title WARNINGS -e less $file.war &} \
         -font {} -label {EMPIRE warnings} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.empend &} -font {} \
+        -command { editFile $file-log.empend } -font {} \
         -label {EMPEND Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.endres &} -font {} \
+        -command { editFile $file-log.endres } -font {} \
         -label {ENDRES Log} 
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command {exec $editor $file.x42c4_lst &} -font {} \
+        -command { editFile $file.x42c4_lst } -font {} \
         -label {X4TOC4 Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file.x42c4_errs &} -font {} \
+        -command { editFile $file.x42c4_errs } -font {} \
         -label {X4TOC4 errors} 
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.checkr &} -font {} \
+        -command { editFile $file-log.checkr } -font {} \
         -label {CHECKR Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fizcon &} -font {} \
+        -command { editFile $file-log.fizcon } -font {} \
         -label {FIZCON Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.psyche &} -font {} \
+        -command { editFile $file-log.psyche } -font {} \
         -label {PSYCHE Log} 
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup &} -font {} -label {FIXUP Log} 
+        -command { editFile $file-log.fixup } -font {} -label {FIXUP Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.fixup2 &} -font {} \
+        -command { editFile $file-log.fixup2 } -font {} \
         -label {FIXUP-2 Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.linear &} -font {} \
+        -command { editFile $file-log.linear } -font {} \
         -label {LINEAR Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.recent &} -font {} \
+        -command { editFile $file-log.recent } -font {} \
         -label {RECENT Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.sigma1 &} -font {} \
+        -command { editFile $file-log.sigma1 } -font {} \
         -label {SIGMA1 Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.legend &} -font {} \
+        -command { editFile $file-log.legend } -font {} \
         -label {LEGEND Log} 
     $site_3_0.men70 add command \
-        -command {exec $editor $file-log.plotc4 &} -font {} \
+        -command { editFile $file-log.plotc4 } -font {} \
         -label {PLOTC4 Log} 
     $top.m88 add cascade \
         -menu "$top.m88.menu95" -command {} -label Plots 
@@ -8087,7 +8137,7 @@ exec  xterm -e ../scripts/stanef $file & } \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu95 add command \
-        -command {exec $psviewer $file.ps &} -label {PLOTC4 plots} 
+        -command { pspdfView $file.ps } -label {PLOTC4 plots} 
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
@@ -8100,7 +8150,7 @@ exec  xterm -e ../scripts/stanef $file & } \
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
-        -command {exec $psviewer $file-cum.ps &} -label {Cumul. levels} 
+        -command { pspdfView $file-cum.ps } -label {Cumul. levels} 
     $top.m88 add cascade \
         -menu "$top.m88.men77" -command {} -label Clean 
     set site_3_0 $top.m88
@@ -8118,7 +8168,7 @@ exec rm -f $file.inp} \
     menu $site_3_0.men78 \
         -disabledforeground #a1a4a1 -tearoff 0 
     $site_3_0.men78 add command \
-        -command {exec $editor ../source/dimension.h &} -label Dimensions 
+        -command { editFile {../source/dimension.h} } -label Dimensions 
     $site_3_0.men78 add command \
         -command {cd ../source
 exec xterm -e make &
@@ -8133,37 +8183,37 @@ cd $workdir} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../doc/inplist.txt &} -label {EMPIRE input} 
+        -command { editFile {../doc/inplist.txt} } -label {EMPIRE input} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../RIPL-2/optical/om-data/om-index.txt &} \
+        -command { editFile {../RIPL-2/optical/om-data/om-index.txt} } \
         -label {RIPL omp} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../doc/hints.txt &} -label FAQ 
+        -command { editFile {../doc/hints.txt} } -label FAQ 
     $site_3_0.menu96 add command \
-        -command {exec $psviewer ../doc/empire.ps &} -label {EMPIRE manual} 
+        -command { pspdfView {../doc/empire.ps} } -label {EMPIRE manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/empend/manual.txt &} \
+        -command { editFile {../util/empend/manual.txt} } \
         -label {EMPEND manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/c4sort/manual.txt &} \
+        -command { editFile {../util/c4sort/manual.txt} } \
         -label {C4SORT manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/legend/manual.txt &} \
+        -command { editFile {../util/legend/manual.txt} } \
         -label {LEGEND manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/plotc4/manual.txt &} \
+        -command { editFile {../util/plotc4/manual.txt} } \
         -label {PLOTC4 manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/x4toc4/manual.txt &} \
+        -command { editFile {../util/x4toc4/manual.txt} } \
         -label {X4TOC4 manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/fixup/manual.txt &} \
+        -command { editFile {../util/fixup/manual.txt} } \
         -label {FIXUP manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/lsttab/manual.txt &} \
+        -command { editFile {../util/lsttab/manual.txt} } \
         -label {LSTTAB manual} 
     $site_3_0.menu96 add command \
-        -command {exec $editor ../util/sixtab/manual.txt &} \
+        -command { editFile {../util/sixtab/manual.txt} } \
         -label {SIXTAB manual} 
     menu $top.m76 \
         -disabledforeground #a1a4a1 -tearoff 1 
