@@ -51,8 +51,6 @@ if {![info exists vTcl(sourcing)]} {
 #
 
 
-
-
 #############################################################################
 ## vTcl Code to Load Stock Images
 
@@ -5232,6 +5230,10 @@ proc vTcl:project:info {} {
 proc ::editFile {filename} {
 	## make empire flexible enough to handle opening files
 	## on various platforms. C.Mattoon, Nov 13 2008
+	if {$::editor == "specify editor"} {
+		set ::editor [tk_getOpenFile  -parent .top75 -title "Select editor"]
+	}
+	
 	if {$::tcl_platform(os)=="Darwin"} {
 		if [regexp {\.app} $::editor] {
 			exec open -a $::editor $filename
@@ -5449,6 +5451,7 @@ global file zvfilter zvvplots profilter filelist archfilter workdir
     }
 
 set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project directory and input file"]
+puts $defile
 set workdirt [file dirname $defile]
 set pdir [lindex [file split $workdirt] end-1]
 if { $pdir != "empire" } {
@@ -5680,7 +5683,15 @@ proc vTclWindow.top75 {base} {
     vTcl:toplevel $top -class Toplevel \
         -menu "$top.m88" -background #ffffff -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 854x315+169+694; update
+    # ActiveTcl widgets are a bit larger on OS X, make window bigger:
+    if {$::tcl_platform(os)=="Darwin"} {
+    	wm geometry $top 894x315+169+694; update
+    } elseif {$::tcl_platform(os)=="Linux"} {
+    	wm geometry $top 854x315+169+694; update
+    } else {
+    	# assume same size as for Linux
+    	wm geometry $top 854x315+169+694; update
+    }
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -6094,7 +6105,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { editFile $file.lev } -cursor hand2 \
         -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {Discrete levels} 
     vTcl:DefineAlias "$site_11_0.but92" "Button25" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but92 "$site_11_0.but92 Button $top all _vTclBalloon"
@@ -6105,7 +6116,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { editFile $file-lev.col } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {Collective levels} 
     vTcl:DefineAlias "$site_11_0.but93" "Button42" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
@@ -6116,7 +6127,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { pspdfView $file-cum.ps } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {Cumul. plot} 
     vTcl:DefineAlias "$site_11_0.but101" "Button49" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
@@ -6138,7 +6149,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { editFile $file-omp.ripl } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {OM parameters} 
     vTcl:DefineAlias "$site_11_0.but93" "Button50" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
@@ -6149,7 +6160,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { editFile $file-omp.dir } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {OMP for direct} 
     vTcl:DefineAlias "$site_11_0.but101" "Button54" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
@@ -6160,7 +6171,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef -command { editFile $file-inp.fis } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
-        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 1m \
+        -foreground darkgreen -highlightbackground #dcdcdc -image {} -padx 3m \
         -relief raised -text {Fission input} 
     vTcl:DefineAlias "$site_11_0.cpd67" "Button55" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd67 "$site_11_0.cpd67 Button $top all _vTclBalloon"
@@ -7692,7 +7703,7 @@ adjourn .top75} \
     set site_9_0 $site_8_7.fra84
     ::iwidgets::scrolledlistbox $site_9_0.scrolledlistbox83 \
         -activebackground #dcdcdc -cursor {} \
-        -dblclickcommand { editFile {../source/[selection get]} } \
+        -dblclickcommand { editFile ../source/[selection get] } \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Double click to edit} -listvariable modules \
         -textbackground #ffffff -textfont {Helvetica -12 } -width 180 
@@ -7700,12 +7711,22 @@ adjourn .top75} \
         -borderwidth 2 -background #efefef -height 75 \
         -highlightbackground #dcdcdc -width 125 
     set site_10_0 $site_9_0.fra79
-    button $site_10_0.but80 \
-        -activebackground #eccceccceccc -activeforeground red \
-        -background #efefef -command { editFile {../source/dimension.h} } \
-        -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
-        -foreground darkred -highlightbackground #dcdcdc \
-        -text {Edit dimensions} -wraplength 70 
+    if {$::tcl_platform(os)=="Darwin"} {
+    	# text wrapping for buttons appears to be broken on Mac //cmattoon
+	    button $site_10_0.but80 \
+    	    -activebackground #eccceccceccc -activeforeground red \
+    	    -background #efefef -command { editFile {../source/dimension.h} } \
+    	    -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+    	    -foreground darkred -highlightbackground #dcdcdc \
+    	    -text {Edit dimensions}
+    } else {
+    	button $site_10_0.but80 \
+    	    -activebackground #eccceccceccc -activeforeground red \
+    	    -background #efefef -command { editFile {../source/dimension.h} } \
+    	    -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
+    	    -foreground darkred -highlightbackground #dcdcdc \
+    	    -text {Edit dimensions} -wraplength 75 
+    }
     bindtags $site_10_0.but80 "$site_10_0.but80 Button $top all _vTclBalloon"
     bind $site_10_0.but80 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit dimension.h file setting dimensions in EMPIRE}
@@ -7727,7 +7748,7 @@ cd $workdir} -cursor hand2 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
         -command {cd ../
-exec xterm -e ./Compile
+exec xterm -e make
 cd $workdir} -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
