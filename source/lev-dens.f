@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-11-11 21:22:46 $
-Ccc   * $Id: lev-dens.f,v 1.67 2008-11-11 21:22:46 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-11-14 20:03:05 $
+Ccc   * $Id: lev-dens.f,v 1.68 2008-11-14 20:03:05 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1815,12 +1815,12 @@ C-----Skipping header lines
   98  FORMAT(2(i4),1x,a2,2x,f7.3,1x,f8.3)
       CALL WHERE(nz*1000+na,nnuc,iloc)
       IF (iloc.EQ.0) THEN
-C        SHC(Nnuc) = shelMSr + defcorr
+C        SHC(Nnuc) = shelMSr - defcorr
          SHC(Nnuc) = shelMSr
       ENDIF
 C-----projectile
       IF (nz.EQ.Z(0) .AND. na.EQ.A(0)) THEN
-C        SHC(0) = shelMSr + defcorr
+C        SHC(0) = shelMSr - defcorr
          SHC(0) = shelMSr
       ENDIF
       GO TO 40
@@ -2317,10 +2317,10 @@ C-----damping ***** done ********
       DO k = kmin, i
          ak = k + Ss
          IF (Bf.NE.1.0D0) THEN
-C-----------rotation perpendicular to the symmetry axis
+C-----------rotation perpendicular to the symmetry axis (prolate nucleus)
             u = e1 - 0.5*ak**2*seff
          ELSE
-C-----------rotation parallel to the symmetry axis
+C-----------rotation parallel to the symmetry axis (oblate nucleus)
             u = e1 - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
          ENDIF
          IF (u.LE.0.0D0) GOTO 100
