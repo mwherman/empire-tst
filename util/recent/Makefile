@@ -1,5 +1,5 @@
-FC     =  g77
-FFLAGS = 
+#FC     =  g77
+#FFLAGS = 
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----flags for production compilation with g77
@@ -19,7 +19,13 @@ FFLAGS =
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -f s -Qa -g
-
+FC     =  ifort
+#----flags for debuging using ifort compiler
+#FFLAGS =  -g -C
+#FFLAGS =  -C -ftrapuv -g -debug all
+FFLAGS =  -w -ipo -O3
+#----flags for automatic parallelization
+#FFLAGS =  -parallel
 
 OBJF =	 LINUX.o  endfio.o  recent.o  scratchb.o  timer.o
 
@@ -28,3 +34,5 @@ recent:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 
+clean:
+	rm *.o

@@ -1,7 +1,7 @@
-FC     =  g77
-FFLAGS = 
+#FC     =  g77
+#FFLAGS = 
 #----GNU g77 FORTRAN compiler
-#FC     = g77
+#FC     = g77 -O3
 #----Linux script calling f2c converter and gcc C compiler
 #FC     = fort77
 #----standard f77 FORTRAN compiler
@@ -12,6 +12,13 @@ FFLAGS =
 #FFLAGS = -O3 -malign-double -funroll-loops
 #----flags for debuging using g77 compiler 
 #FFLAGS =  -fno-underscoring  -ggdb
+FC     =  ifort
+#----flags for debuging using ifort compiler
+#FFLAGS =  -g -C
+#FFLAGS =  -C -ftrapuv -g -debug all
+FFLAGS =  -w -ipo -O3
+#----flags for automatic parallelization
+#FFLAGS =  -parallel
 
 
 OBJF =	sixtab.o dxsend.o
@@ -20,5 +27,7 @@ OBJF =	sixtab.o dxsend.o
 sixtab:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
+
 clean:
 	rm *.o
+

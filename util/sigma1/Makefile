@@ -1,7 +1,7 @@
 #---- pfg90 compiler
 #FC     =  pgf90 
 #----GNU gfortran FORTRAN compiler
-FC     = gfortran
+#FC     = gfortran
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----flags for production compilation with g77
@@ -21,7 +21,13 @@ FC     = gfortran
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -f s -Qa -g
-
+FC     =  ifort
+#----flags for debuging using ifort compiler
+#FFLAGS =  -g -C
+#FFLAGS =  -C -ftrapuv -g -debug all
+FFLAGS =  -w -ipo -O3
+#----flags for automatic parallelization
+#FFLAGS =  -parallel
 
 OBJF =	 LINUX.o  endfio.o  sigma1.o  scratchb.o  timer.o
 
