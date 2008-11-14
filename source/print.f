@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:25 $
-Ccc   * $Id: print.f,v 1.20 2008-10-14 21:32:25 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-11-14 20:08:46 $
+Ccc   * $Id: print.f,v 1.21 2008-11-14 20:08:46 herman Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -84,12 +84,12 @@ C
            totspec  = totspec  + CSE(i,Nejc,Nnuc)
         ENDDO
         totspec = totspec - 
-     &	          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
         totspec = totspec*DE     
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec      
         RETURN
-      ENDIF	
+      ENDIF
       
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
@@ -170,10 +170,10 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec
       INTEGER i, kmax
-	CHARACTER*13 caz 
-	CHARACTER*31 title
-	character*1 part(0:4)
-	data part/'g','n','p','a','d'/
+      CHARACTER*13 caz 
+      CHARACTER*31 title
+      character*1 part(0:4)
+      data part/'g','n','p','a','d'/
 
       csemax = 0.d0
       kmax = 1
@@ -189,12 +189,12 @@ C
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
         write(caz,'(I2.2,A1,A1,I3.3,A1,A1,A4)')
-     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
-     >      '_',part(Nejc),'.zvd'
+     &      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
+     &      '_',part(Nejc),'.zvd'
       else
         write(caz,'(I2.2,A2,I3.3,A1,A1,A4)')
-     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
-     >      '_',part(Nejc),'.zvd'
+     &      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
+     &      '_',part(Nejc),'.zvd'
       endif
 
       OPEN(36,file=caz,status='unknown')
@@ -210,13 +210,13 @@ C
      & '(a5, i2,1h-,A2,1h-,I3,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
 
-	CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
+      CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
       DO i = 1, kmax
-	   IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
+      IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6, 
-     >       CSE(i,Nejc,Nnuc)*1.d-3 ! Energy, Spectra in b/MeV
+     &       CSE(i,Nejc,Nnuc)*1.d-3 ! Energy, Spectra in b/MeV
       ENDDO
-	CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
+      CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
       CLOSE(36)
       RETURN
       END
