@@ -1910,7 +1910,7 @@ ccho
                   icol=k
                 endif
               else if (ipiv(k).gt.1) then
-                pause 'singular matrix in gaussj'
+                call pause ('singular matrix in gaussj')
               endif
 12          continue
           endif
@@ -2024,7 +2024,7 @@ CU    USES gcf,gser
       REAL gammcf,gamser,gln
 cdub  REAL*8 gammcf,gamser
 cdub  REAL gln
-      if(x.lt.0..or.a.le.0.)pause 'bad arguments in gammp'
+      if(x.lt.0..or.a.le.0.) call pause ('bad arguments in gammp')
       if(x.lt.a+1.)then
         call gser(gamser,a,x,gln)
         gammp=gamser
@@ -2048,7 +2048,7 @@ CU    USES gammln
       REAL ap,del,sumx,gammln
       gln=gammln(a)
       if(x.le.0.)then
-        if(x.lt.0.)pause 'x < 0 in gser'
+        if(x.lt.0.) call pause ('x < 0 in gser')
         gamser=0.
         return
       endif
@@ -2061,7 +2061,7 @@ CU    USES gammln
         sumx=sumx+del
         if(abs(del).lt.abs(sumx)*EPS)goto 1
 11    continue
-      pause 'a too large, ITMAX too small in gser'
+      call pause ('a too large, ITMAX too small in gser')
 1     gamser=sumx*exp(-x+a*log(x)-gln)
 cdub1     gamser=sumx*dexp(-x+a*dlog(x*1.0D0)-gln)
       return
@@ -2093,7 +2093,7 @@ CU    USES gammln
         h=h*del
         if(abs(del-1.).lt.EPS)goto 1
 11    continue
-      pause 'a too large, ITMAX too small in gcf'
+      call pause ('a too large, ITMAX too small in gcf')
 1     gammcf=exp(-x+a*log(x)-gln)*h
 cdub1     gammcf=dexp(-x+a*dlog(x*1.0D0)-gln)*h
       return
@@ -2197,5 +2197,18 @@ c     set label and line colors
      2           '     with line lt ',icolor(6),''
       close(9)
       irt=system("gnuplot ptdist.gp")
+      return
+      end
+
+
+C cmattoon: the pause statement is obsolete in f90, this subroutine
+C gives equivalent function
+C NOT useful if we plan on parallelizing however.     
+      subroutine pause(message)
+      character (len=*) message
+C     intent(in) message
+      print *, message
+C     now pause, wait for input:
+      read (*,*)
       return
       end

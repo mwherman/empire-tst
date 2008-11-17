@@ -70,7 +70,7 @@ c
    10 continue
 c
       iz=int(zam/1000)
-      imass=mod(zam,1000)
+      imass=mod(int(zam),1000)
       write(basef,'(a,i3.3,a)') 'z',iz,'.dat'
 c
       awt=readawt(iz,imass)

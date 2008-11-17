@@ -32,7 +32,7 @@ C     IX4ret = 2 remote SYBASE server
 
       Aprojec = 1
       Zprojec = 0
-      Atarg = mod(zam,1000)
+      Atarg = mod(int(zam),1000)
       Ztarg = int(zam/1000)
 C     symb = SMAT(Ztarg)
       call SYMBOL(Ztarg,symb)
