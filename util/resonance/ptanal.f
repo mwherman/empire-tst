@@ -1030,7 +1030,7 @@ ccho  character*1 ggflag
      1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
       common/adj/ npos,nidx,nplus,adjust
       character adjust*17
-      character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*11
+      character txt*66,s1*11,s2*11,sx*11,wav*1,ehead*14
       dimension nr(5),sx(6),wav(5)
 ccho  new arrays inserted for file 32 generation
       dimension wEn(mres),wgt(mres),wgn(mres),wgg(mres),
