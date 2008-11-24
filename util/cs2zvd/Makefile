@@ -45,3 +45,5 @@ cs2zvd.exe:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 
+clean:
+	rm *.o
