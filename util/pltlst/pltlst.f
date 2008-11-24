@@ -44,7 +44,7 @@ C-
       CHARACTER*26 REF
       CHARACTER*40 BLNK,FLNM,FLEX,FLLS,FLIN
       CHARACTER*80 RC1,RC2
-      CHARACTER*120    REC
+      CHARACTER*130    REC
       DIMENSION    ANG(MXAN),ANS(MXAN),KAN(MXAN)
       DATA BLNK/'                                        '/
      &     FLEX/'C4.DAT'/
