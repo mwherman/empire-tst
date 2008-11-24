@@ -1,5 +1,6 @@
+#----GNU gfortran FORTRAN compiler
 FC     =  gfortran
-FFLAGS = 
+#FFLAGS = 
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----Linux script calling f2c converter and gcc C compiler

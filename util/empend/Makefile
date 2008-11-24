@@ -1,5 +1,7 @@
+#----GNU gfortran FORTRAN compiler
+FC     =  gfortran
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O
 #----flags for debuging using g77 compiler

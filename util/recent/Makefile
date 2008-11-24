@@ -1,4 +1,5 @@
-#FC     =  g77
+#----GNU gfortran FORTRAN compiler
+FC     =  gfortran
 #FFLAGS = 
 #----GNU g77 FORTRAN compiler
 #FC     = g77
@@ -19,11 +20,11 @@
 #----flags for Fujitsu f90 FORTRAN compiler
 #FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -f s -Qa -g
-FC     =  ifort
+#FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-FFLAGS =  -w -ipo -O3
+#FFLAGS =  -w -ipo -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel
 

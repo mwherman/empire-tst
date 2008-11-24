@@ -1,11 +1,13 @@
+#----GNU gfortran FORTRAN compiler
+FC     =  gfortran
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O
 #----flags for debuging using g77 compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
 #FFLAGS =  -fno-automatic -finit-local-zero
-FFLAGS = -finit-local-zero -fno-automatic
+#FFLAGS = -finit-local-zero -fno-automatic
 
 #----GNU g95 FORTRAN compiler
 #FC     =  g95
