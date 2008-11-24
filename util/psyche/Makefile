@@ -1,5 +1,5 @@
 #----GNU FORTRAN compiler
-#FC     = gfortran
+FC     = gfortran
 #----GNU FORTRAN95 compiler 
 #FC     = g95
 #....Intel FORTRAN compiler
@@ -9,7 +9,7 @@
 #----standard f90 FORTRAN compiler
 #FC	= f90
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for optimalization using ifort 
 #FFLAGS = -arch pn4 -O3 -axPW  -ipo   
 #FFLAGS = -arch pn4 -O3 -ipo 
@@ -17,7 +17,7 @@ FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-FFLAGS =   -w -ipo -O3
+#FFLAGS =   -w -ipo -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
