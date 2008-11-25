@@ -30,11 +30,11 @@ C
 
         PI = 4. * ATAN(1.)
 
-	DO i=1,6
+        DO i=1,6
           Alib(i)=0.d0
           Rlib(i)=0.d0
           Vlib(i)=0.d0
-	ENDDO
+        ENDDO
 
         AT13 = AMASS ** (1./3.)
 C       BAR IS THE COULOMB BARRIER ENERGY
@@ -147,19 +147,19 @@ C         ASSUME THE DISPERSION CORRECTION TO VANISH AT EREF.
         VOI = AJIE / CONST / RI**3. / ( 1. + (CONST2 / RI)**2.)
 
         WRITE (102,75) ELAB, VOR, ROR, AR, VOI, ROI, AI, AJRE, AJIE,
-     1	               AZ, AMASS, EX
+     1               AZ, AMASS, EX
 C       OUTPUTS: VOR, ROR, AR, VOI, ROI, AI
 C       
         vlib(1) = VOR
-	alib(1) = AR
-	rlib(1) = ROR
+        alib(1) = AR
+        rlib(1) = ROR
         vlib(2) = VOI
-	alib(2) = AI
-	rlib(2) = ROI
+        alib(2) = AI
+        rlib(2) = ROI
 
-	RCC = 1.3d0
+        RCC = 1.3d0
 
-  75    FORMAT (2x,f9.3,x,f9.3,x,f9.3,x,f9.3,x,f9.3,x,f9.3,x,f9.3,7x,
-     1          f9.3,x,f9.3,7x,f9.3,x,f9.3,5x,F9.3)
+  75    FORMAT (2x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,
+     1          7x,f9.3,1x,f9.3,7x,f9.3,1x,f9.3,5x,F9.3)
       RETURN
       END
