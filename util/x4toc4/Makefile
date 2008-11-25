@@ -1,5 +1,6 @@
-FC     =  g77
-FFLAGS =
+#----GNU gfortran compiler
+FC     =  gfortran
+FFLAGS = -O3
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----Linux script calling f2c converter and gcc C compiler
@@ -12,9 +13,15 @@ FFLAGS =
 #FC	= frt
 #----flags for production compilation with g77
 #FFLAGS = -O3 -malign-double -funroll-loops
-#----flags for debuging using g77 compiler 
+#----flags for debuging using g77 compiler
 #FFLAGS =  -fno-underscoring  -ggdb
+#===== M a c ==================================
+#---- gfortran Mac  compiler
+#FC     =  gfortran
 
+#----GNU g95 FORTRAN Mac compiler
+#FC     =  /sw/bin//g95
+#FFLAGS = -fsloppy-char
 
 OBJF =	x4toc4.o
 
