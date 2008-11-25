@@ -1474,9 +1474,10 @@ c     compute number of lines for correlation coefficients
         j=1
         do while (j.lt.i)
           if (correff(j,i).ne.0) then
-            len=min(13,i-j)
+cmattoon            len=min(13,i-j)
             nm=nm+1
-            j=j+len
+cmattoon            j=j+len     ! in this case we only need j=j+1
+            j=j+1
           else
             j=j+1
           endif
