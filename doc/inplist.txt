@@ -1,4 +1,4 @@
-                              -II
+                              EMPIRE-3.0
 
                            Optional input
 
@@ -43,6 +43,10 @@ ENDF     Controls output for ENDF formatting and exclusive/inclusive emission,
                      the rest are inclusive (lumped into MT=5)
             etc.  
 
+RECOIL   Controls calculations of recoils if ENDF > 0
+        = 0 recoils are not calculated 
+        = 1 reacoils are calculated (defualt)
+        
 Output control
 --------------
 
@@ -152,17 +156,17 @@ DIRECT  Controls use of ECIS
        = 1 Coupled Channel method used for calculation of inelastic
            scattering to collective levels. If a selected OM
            potential is of CC type, the elastic and reaction cross
-           sections are also taken from ECIS03.  Otherwise, spherical
+           sections are also taken from ECIS06.  Otherwise, spherical
            OM results are used. In any case, transmission
            coefficients for all emissions are calculated with
            spherical OM
        = 2 as above but all transmission coefficients for the
            incident nucleon emission are calculated within Coupled
-           Channel approach with ECIS03 (extensive calculation time).
+           Channel approach with ECIS06 (extensive calculation time).
        = 3 as DIRECT=1 but DWBA is used instead of CC. All
            transmission coefficients calculated with spherical OM
 
-NOTE: OM potential to be used by ECIS03 might be different from the
+NOTE: OM potential to be used by ECIS06 might be different from the
 one used in the rest of the calculations and can be specified with the
 DIRPOT option.
 
@@ -396,7 +400,7 @@ GCROE0  Level density parameter E_{0} in Gilbert-Cameron approach for nucleus Z=
 GCROT   Level density parameter T in Gilbert-Cameron approach for nucleus Z=I1, A=I2 set to VAL
         (default calculated internally).
 
-FITLEV > 0 cumulative plots of discrete levels will be displayed. If LEVDEN=0 the energy range
+FITLEV > 0 cumulative plots of discrete levels will be displayed. The energy range
            of the plot will extend VAL MeV above the last discrete level,
        = 0 no cumulative plots (default).
 
@@ -561,7 +565,7 @@ OMPOT   Selects optical model parameters for neutrons (I1 = 1), protons (I1 = 2)
         file or in Help => 'RIPL omp' when using GUI. For backward compatibility this
         number must be entered with a negative sign.
 
-DIRPOT  Optical model parameters to be used by ECIS03. The same as above, except
+DIRPOT  Optical model parameters to be used by ECIS06. The same as above, except
         that I1 need not be specified (refers to inelastic channel by default).
 
 EFERMI  Fermi Energy for dispersive OM potential (default: -10.392 MeV).
