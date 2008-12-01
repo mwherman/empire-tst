@@ -144,7 +144,7 @@
     direction. This patch allows to consider model error as the systematic
     error in the scaling parameters which is always independent of the model
     parameters uncertainty.
-56. Uniform of gaussian sampling of the uncertainties implemented (A new
+56. Uniform or gaussian sampling of the uncertainties implemented (A new
     input parameter RANDOM added).
 57. New fission model implemented as published in PRC 77 (2008) 054601.
     Fission input/output routines 
