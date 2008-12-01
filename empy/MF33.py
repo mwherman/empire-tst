@@ -68,8 +68,8 @@ class MF33(MF_base):
 		self.subsecLine = myline
 		assert int(myline.split()[3]) == MT, "wrong MT value encountered in header"
 		
-		# same line, get number of subsections:
-		self.n_subsecs = int(myline[65:66])
+		# same line, get number of subsections, hopefully < 99:
+		self.n_subsecs = int(myline[64:66])
 		#print ("There are %i subsections" % n_subsecs)
 		
 		vals = []
@@ -196,14 +196,19 @@ class MF33(MF_base):
 			self.elist.insert( idx, threshold )
 
 		if keep=='+':
-			self.elist = self.elist[idx:]
+			self.elist = [1.0e-5] + self.elist[idx:]
 			
 			#NOT changing values in the matrix/uncertainties despite having a new
 			#threshold energy
 			idx -= 1
-			self.uncert = self.uncert[idx:]
-			self.cov_mat = self.cov_mat[idx:, idx:]
-			self.corr_mat = self.corr_mat[idx:, idx:]
+			self.uncert = self.uncert[0:1] + self.uncert[idx:]
+			
+			cov_mat = numpy.zeros( (len(self.elist)-1, len(self.elist)-1) )
+			cov_mat[1:,1:] = self.cov_mat[idx:, idx:]
+			self.cov_mat = cov_mat
+			corr_mat = numpy.zeros( (len(self.elist)-1, len(self.elist)-1) )
+			corr_mat[1:,1:] = self.corr_mat[idx:, idx:]
+			self.corr_mat = corr_mat
 		
 		else:
 			self.elist = self.elist[:idx+1]

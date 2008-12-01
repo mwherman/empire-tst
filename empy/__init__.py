@@ -7,9 +7,8 @@
 from info import __doc__
 
 # for 'from foo import *:
-__all__ = ['endf','MF33','formatGP']
+__all__ = ['endf','MF_base','MF33','formatGP']
 
 # or just import foo:
-import endf, MF33, formatGP
+import endf, MF_base, MF33, formatGP
 
-# private or base class:	'MF_base'
