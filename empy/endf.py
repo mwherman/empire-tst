@@ -56,7 +56,9 @@ def insertMFMT(basefile,mergefile,outfile, MF, MT = '*', MAT = 0):
 	while imerge < len(mergf):
 		MATr, MFr, MTr = getVals( mergf[imerge] )
 		#print MATr, MFr, MTr, imerge
-		if not (MFr == MF and MATr > 0): break
+		if not (MFr == MF and MATr > 0): 
+			print ("incorrect MF encountered\nintended for merging single-MF files only")
+			break
 		outf.write( mergf[imerge] )
 		imerge += 1
 	print ("Last two lines merged in were:")
@@ -80,7 +82,7 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
 	remove section "MF, MT" from infile, send to outfile
 	may also remove entire MF section by specifying the MF with MT='*' (default)
 	if no MAT is specified, file is assumed to contain only one MAT
-	removeMFMT creates errors in the ENDF directory, run STANEF or FIXUP to resolve
+	removeMFMT creates errors in the ENDF directory, run STANEF to resolve
 	"""
 	
 	line = 0
@@ -128,7 +130,7 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
 
 def locate_section(infile, MF, MT, MAT=0, outfile=None):
 	"""
-	Locate MAT/MF/MT section  in the input file
+	Locate MAT/MF/MT section in the input file
 	need only specify MAT for multi-MAT files
 	specify outfile to get a copy of data up to insertion point
 	
@@ -146,8 +148,8 @@ def locate_section(infile, MF, MT, MAT=0, outfile=None):
 	if outfile != None:
 		fout = file(outfile,"w")
 	
-	# first find the correct MAT:
-	line = getNextMAT( inf, 0 );
+	# find correct MAT if necessary:
+	line = 0
 	while find_mat:
 		MATr, MFr, MTr = getVals( inf[line] )
 		if MATr == MAT:
@@ -157,15 +159,14 @@ def locate_section(infile, MF, MT, MAT=0, outfile=None):
 			flag = 4, "MAT %i not found in this file" % MAT
 			return -1, flag
 	
-	# ok, now we are at the proper MAT section
+	# now at the proper MAT section
 	flag = 3		# flag for where we find the section
-	while line < len(inf):
+	for line in range( line, len(inf) ):
+		
 		MATr, MFr, MTr = getVals( inf[line] )
-		if ( MFr == MF and MT == '*'):
-			flag = 0, 'Found requested MF section'
-			break
-		elif ( MFr == MF and MTr == MT):
-			flag = 0, 'Found requested MFMT section'
+		
+		if ( MFr == MF and (MT=='*' or MTr==MT) ):
+			flag = 0, 'Found requested section'
 			break
 		elif (MFr == MF and MTr > MT):
 			flag = 1, 'No such MT, found proper insertion spot at %i %i %i' % (MATr, MFr, MTr)
@@ -182,9 +183,7 @@ def locate_section(infile, MF, MT, MAT=0, outfile=None):
 		# finish the loop:
 		if outfile != None:
 			fout.write(inf[line])
-		line+=1
 	
-	if line<0: line = 0 # getNextMat can give negative line numbers
 	return line, flag
 
 
@@ -215,7 +214,7 @@ def isMEND(string):
 def getNextMAT(inf, line):
 	"""
 	inf is a file.readlines() array, line is our current line in the file
-	returns either the line number where the next MAT number begins, or -1 if this is the 
+	returns line number where next MAT begins, or -1 if this is the 
 	last/only MAT in the file
 	"""
 	# bisect for binary searching through list
@@ -227,23 +226,24 @@ def getNextMAT(inf, line):
 #	print ("MEND found on lines " + repr(MEND_list) )
 	
 	#check integrity of the MEND_list
-	try:
-		for i in range( len(MEND_list) ):
-			assert MEND_list[i-1] != MEND_list[i] - 1
-	except AssertionError:
-		print ("Too many MEND sections! Please run CHECKR/FIXUP on the file.")
-		return -1
+	for i in range( len(MEND_list) ):
+		if MEND_list[i-1] == MEND_list[i] - 1:
+			print ("Too many MEND sections! Please run STANEF on the file.")
+			return -1
 	
-	# now three possibilities: line may be a MEND line (not the last), may be between MEND lines, or may be after last MEND. This should catch all possibilities:
-	nMAT = len(MEND_list)
+	nMAT = len(MEND_list) - 1 # since we added [0] to the list
 	idx = bisect(MEND_list, line)
 	
-	if line in MEND_list and MEND_list.index(line) < nMAT-1:
+	# line may be a MEND line (not the last), may be between MEND lines, or may be after last MEND. This should catch all possibilities:
+	if nMAT==1:
+		# only one material
+		return -1
+	elif line in MEND_list and MEND_list.index(line) < nMAT:
 		return line+1
-	elif idx<nMAT-1:
+	elif idx<nMAT:
 		return MEND_list[idx]+1
 	else:
-		# we're either at the EOF or have only one MAT
+		# we're already at the EOF
 		return -1
 
 
