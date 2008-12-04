@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-11-11 21:22:46 $
-Ccc   * $Id: tl.f,v 1.98 2008-11-11 21:22:46 Capote Exp $
+Ccc   * $Date: 2008-12-04 01:01:00 $
+Ccc   * $Id: tl.f,v 1.99 2008-12-04 01:01:00 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -162,7 +162,7 @@ C     IF (IMOdel.EQ.3) model = 'coupled-channels soft rotor model'
          IWArn = 5
          GOTO 300
       ENDIF
-      IF (IMOdel.EQ.1 .OR. IMOdel.EQ.2) THEN
+      IF (IMOdel.EQ.1 .OR. IMOdel.EQ.2 .OR. IMOdel.EQ.3) THEN
 C--------Imodel not used for non-inelastic channels
          IF (iainp.NE.A(0) .OR. izinp.NE.Z(0) .OR. AEJc(Nejc).NE.AEJc(0)
      &       .OR. ZEJc(Nejc).NE.ZEJc(0)) GOTO 300
@@ -213,8 +213,17 @@ C
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+            IF (ICOllev(k).LT.LEVcc) THEN
+                nld_cc = nld_cc + 1
+            ELSE
+              IF (k.le.NCOll(ncalc)) then
+                ICOllev(k) = ICOllev(k) - LEVCC
+                nld_cc = nld_cc + 1
+                WRITE (8,*) 'WARNING: level ',k,' COUPLED'
+              ENDIF
+            ENDIF
          ENDDO
+C
          WRITE (8,*)
          WRITE (8,*)
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
@@ -228,6 +237,7 @@ C--------Setting EMPIRE global variables
      &                  nld_cc
             WRITE (8,*) 'WARNING: is not equal ', NCOll(ncalc),
      &                  ' (used in CC RIPL OMP)'
+            WRITE (8,*) 'WARNING: Using RIPL CC levels'
          ENDIF
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
@@ -285,8 +295,10 @@ C
                WRITE (96,*) ' N   E[MeV]  J   pi Nph L  K  Dyn.Def.'
             ENDIF
          ENDDO
-   50    READ (97,'(A80)',END = 100) ch_iuf
-         WRITE (96,'(A80)') ch_iuf
+         k=1
+   50    READ (97,'(A80)',END = 100) ch_iuf                                      
+         WRITE (96,'(1x,I2,A77)') ICOllev(k),ch_iuf(4:80)
+         k = k + 1
          GOTO 50
   100    CLOSE (96)
          CLOSE (97,STATUS = 'DELETE')
@@ -297,7 +309,7 @@ C
             iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
-C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------JOIN finished
 C
          DO k = 1, NCOll(ncalc)
 C-----------The deformation for excited levels is not used in the pure
@@ -433,7 +445,7 @@ C
             iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
-C--------JOIN finished: TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C--------JOIN finished 
 C
          DO k = 1, NVIb(ncalc)
             WRITE (32,
@@ -2660,7 +2672,7 @@ C
                 CYCLE
               ENDIF
 C           ENDIF
-            IF (eee.LT.0.0001) THEN
+            IF (eee.GT.0.0001) THEN
 C---------------SETPOTS : subroutine for optical model parameters
 C---------------From  cms system to Lab
 C               ecms = eee
@@ -2749,9 +2761,8 @@ C
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
       ENDIF
-      WRITE (1,'(3hFIN)')
+      WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-
 
       IF (Inlkey.EQ.0) THEN
         IF (IOPsys.EQ.0) THEN
@@ -2786,7 +2797,7 @@ C        CALL ECIS('ecSPH.inp','ECIS_SPH.out')
          ENDIF
       ELSE
 C        CALL ECIS('ecVIB.inp','ECIS_VIB.out')
-         CALL ECIS('ecis06')
+C        CALL ECIS('ecis06 ')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv ecis06.out ECIS_VIB.out'
             iwin = PIPE(ctmp)
@@ -3294,7 +3305,7 @@ C
               CYCLE
          ENDIF
 
-         IF (eee.LT.0.0001) THEN
+         IF (eee.GT.0.0001) THEN
 C-----------SETPOTS : subroutine for optical model parameters
 C-----------From  cms system to Lab
 C           ecms = eee
@@ -3380,7 +3391,7 @@ C
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
       ENDIF
-      WRITE (1,'(3hFIN)')
+      WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
 
       IF (IOPsys.EQ.0) THEN

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-11-13 21:47:22 $
-Ccc   * $Id: input.f,v 1.279 2008-11-13 21:47:22 Sin Exp $
+Ccc   * $Date: 2008-12-04 01:00:59 $
+Ccc   * $Id: input.f,v 1.280 2008-12-04 01:00:59 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -7131,6 +7131,9 @@ C
       CHARACTER*6 reftmp
 
       ND_nlv = 0
+C-----Target corresponds to nnurec = 0
+C     CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+      nnurec = 0
 
 C
 C     Giant multipole resonances following TALYS
@@ -7472,10 +7475,6 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          beta3 = 0.05
       ENDIF
       NScc = max(iccfus-1,NScc,0)
-
-C-----Target corresponds to nnucrec = 0
-C     CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
-      nnurec = 0
 
   400 DO ilv = 1, nlvs
          READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') itmp, elvr,

@@ -1,3 +1,6 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-12-04 01:01:00 $
+Ccc   * $Id: kailas07emp.f,v 1.3 2008-12-04 01:01:00 Capote Exp $
       SUBROUTINE KUMAR_OMP(AMASS,AZ,EX,ELAB,RCC,Vlib,Rlib,Alib)
       IMPLICIT REAL*8 (A-H,O-Z)
 C
