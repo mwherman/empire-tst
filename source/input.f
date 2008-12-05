@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-04 01:00:59 $
-Ccc   * $Id: input.f,v 1.280 2008-12-04 01:00:59 Capote Exp $
+Ccc   * $Date: 2008-12-05 01:06:05 $
+Ccc   * $Id: input.f,v 1.281 2008-12-05 01:06:05 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -884,8 +884,10 @@ C
             mulem = ia + in + ip
             IF(mulem.LE.NENdf) ENDf(nnuc) = 1
 C           RCN, April 2008
-            IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)  ENDf(nnuc) = 1 ! n,xn
-            IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)  ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
+C           IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)  ENDf(nnuc) = 1 ! n,xn
+C           RCN, Dec 2008
+            IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)  ENDf(nnuc) = 1 ! n,xn
+            IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)  ENDf(nnuc) = 1 ! n,p; n,np; n,2np; n,3np
 C-----------set reaction string
             REAction(nnuc) = '(z,'
             iend = 3
