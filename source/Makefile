@@ -80,7 +80,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 OBJE =      subecis06m.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
-      $(FC) -o $@ $(OBJF) $(OBJE)
+	$(FC) -o $@ $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
@@ -92,4 +92,4 @@ ddhms.o : ddhms.cmb
 tl.o  : pre_ecis.h
 
 clean:
-      rm *.o
+	rm *.o
