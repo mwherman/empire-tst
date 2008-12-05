@@ -24,64 +24,70 @@ def insertMFMT(basefile,mergefile,outfile, MF, MT = '*', MAT = 0):
 	directory errors will result: run STANEF/FIXUP
 	"""
 		
-	line = 0
 	try:
 		inf = file(basefile,"r").readlines()
 		mergf = file(mergefile,"r").readlines()
 		outf = file(outfile,"w")
 		
-		line, flag = locate_section( basefile, MF, MT, MAT )
-		if flag[0] == 0:
-			raise KeyError
-	except KeyError:
-		print ("MF%i already present in the file. First remove the existing MF file using removeMFMT" % (MF) )
-		return -1
+		baseline, baseflag = locate_section( basefile, MF, MT, MAT )
+		if baseflag[0] == 0:
+			print ("Before merging remove section using removeMFMT to avoid overlap")
+			return -1
+		mergline, mergflag = locate_section( mergefile, MF, MT, MAT )
+		if mergflag[0] != 0:
+			print ("Requested section not found in %s"%mergefile)
+			return -1
 	except IOError:
-		print "infile or mergefile not found!"
+		print ("infile or mergefile not found!")
 		return -1
 	
-	for i in range(line):
+	# write original file up to merge point
+	for i in range(baseline):
 		outf.write( inf[i] )
-			
+	
 	# we can now insert the mergefile:
-	if mergf[0][-4:-1] != '  1':
-		print 'New MF file may start with incorrect line number... continuing anyway'
-	# also see if we have a proper FEND at the end of the merge file:
-	for i in range( len(mergf)-5, len(mergf) ):
-		if isSEND( mergf[i] ):
-			#print ("SEND found on line %i, %i total" % (i, len(mergf) ) )
-			send_line = i
-	
-	imerge = 0
-	while imerge < len(mergf):
-		MATr, MFr, MTr = getVals( mergf[imerge] )
-		#print MATr, MFr, MTr, imerge
-		if not (MFr == MF and MATr > 0): 
-			print ("incorrect MF encountered\nintended for merging single-MF files only")
+	for i in range( mergline, len(mergf) ):
+		MATr, MFr, MTr = getVals( mergf[i] )
+		#print (MATr, MFr, MTr, i)
+		
+		if MT=='*' and MFr != MF:
+			# reached end of MF section. Don't write FEND yet
 			break
-		outf.write( mergf[imerge] )
-		imerge += 1
+
+		outf.write( mergf[i] )
+		
+		if MT!='*' and isSEND( mergf[i] ):
+			# end of MT section. Do write SEND before break
+			break
+
 	print ("Last two lines merged in were:")
-	print mergf[imerge-2], mergf[imerge-1]
+	print ('%s%s' % (mergf[i-2], mergf[i-1]) )
 	
-	#add FEND:
-	MATr, MFr, MTr = getVals( mergf[ len(mergf)/2 ] )
-	FEND = "                                                                  %s 0  0    0\n" % MATr
-	outf.write(FEND)
+	# check the next line of the basefile to determine whether
+	# we need to add FEND record:
+	MATd, MFd, MTd = getVals( inf[baseline] )
+	if MFd != MF:
+		MATr, MFr, MTr = getVals( mergf[i-2] )
+		FEND = ('%66s%4i%2i%3i%5i\n' % ('',MATr,0,0,0) )
+		outf.write(FEND)
 	
 	# done with the merging, finish writing the basefile:
-	while line < len(inf):
-		outf.write( inf[line] )
-		line += 1
+	for i in range( baseline, len(inf) ):
+		outf.write( inf[i] )
 	
 	outf.close()	
 
 
-def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
+def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = None):
 	"""
+	removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = None)
+
 	remove section "MF, MT" from infile, send to outfile
-	may also remove entire MF section by specifying the MF with MT='*' (default)
+	removes entire MF section if MT='*' (default)
+	
 	if no MAT is specified, file is assumed to contain only one MAT
+	if dumpfile != None, removed section is written to dumpfile
+	
 	removeMFMT creates errors in the ENDF directory, run STANEF to resolve
 	"""
 	
@@ -104,9 +110,13 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
 		outf.write( inf[i] )
 	
 	# we've arrived at the correct section, now skip the next (MF or MFMT) section
+	if dumpfile != None:
+		dumpout = file(dumpfile,"w")
+
 	if MT=='*':
 		while True:
 			MATr, MFr, MTr = getVals( inf[line] )
+			dumpout.write( inf[line] )
 			if not (MFr == MF): break
 			line += 1
 		line += 1	# skip SEND
@@ -116,6 +126,7 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
 	else:
 		while True:
 			MATr, MFr, MTr = getVals( inf[line] )
+			dumpout.write( inf[line] )
 			if not (MFr == MF and MTr == MT): break
 			line += 1
 		line += 1	# skip SEND
@@ -130,11 +141,13 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0):
 
 def locate_section(infile, MF, MT, MAT=0, outfile=None):
 	"""
+	locate_section(infile, MF, MT, MAT=0, outfile=None):
+
 	Locate MAT/MF/MT section in the input file
 	need only specify MAT for multi-MAT files
 	specify outfile to get a copy of data up to insertion point
 	
-	return values: line # of insertion point and a flag of form (int, string): 
+	returns: line # of insertion point and a flag of form (int, string): 
 	flag[0] = 0 if MF/MT found in file,
 		1 if insertion spot for MT found,
 		2 if ins. spot for MF found,
@@ -217,41 +230,19 @@ def getNextMAT(inf, line):
 	returns line number where next MAT begins, or -1 if this is the 
 	last/only MAT in the file
 	"""
-	# bisect for binary searching through list
-	from bisect import bisect
-	
-	#find all the MEND entries in the file,
-	#pretend there's one at line 0 for bisect to work properly
-	MEND_list = [0] + [a for a in range( len(inf) ) if getVals(inf[a])[0] == 0 ]
-#	print ("MEND found on lines " + repr(MEND_list) )
-	
-	#check integrity of the MEND_list
-	for i in range( len(MEND_list) ):
-		if MEND_list[i-1] == MEND_list[i] - 1:
-			print ("Too many MEND sections! Please run STANEF on the file.")
-			return -1
-	
-	nMAT = len(MEND_list) - 1 # since we added [0] to the list
-	idx = bisect(MEND_list, line)
-	
-	# line may be a MEND line (not the last), may be between MEND lines, or may be after last MEND. This should catch all possibilities:
-	if nMAT==1:
-		# only one material
-		return -1
-	elif line in MEND_list and MEND_list.index(line) < nMAT:
-		return line+1
-	elif idx<nMAT:
-		return MEND_list[idx]+1
-	else:
-		# we're already at the EOF
-		return -1
+	MATc = getVals( inf[line] )[0]
+	for i in range( line, len(inf) ):
+		mat, mf, mt = getVals( inf[i] )
+		if mat>0 and mat!=MATc:
+			return i
+	return -1
 
 
 def getVals(string):
 	"""
 	extract MAT, MF, MT as a tuple from a line of 80-column ENDF card.
 	"""
-	# check that strip() wasn't called:
+	# check that strip() wasn't called (rstrip would be ok):
 	assert (string[-1]=='\n'), "don't use strip() before calling getVals!"
 	
 	#going from the end of the string may be more robust:
