@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-11-14 20:03:05 $
-Ccc   * $Id: lev-dens.f,v 1.68 2008-11-14 20:03:05 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-12-06 02:15:40 $
+Ccc   * $Id: lev-dens.f,v 1.69 2008-12-06 02:15:40 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -2964,7 +2964,7 @@ C-----CONST=1/(2*SQRT(2 PI))
 
       t = 2.D0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
       s = SCR*TCRt*(1.d0-phi2)/t
-      det = DETcrt*((1.d0-phi2)*(1.D0 + phi2))**2
+      det = DETcrt*(1.d0-phi2)*(1.D0 + phi2)**2
       momp = Mompar*TCRt*(1-phi2)/t
       IF (momp.LT.0.0D0)momp=2.d0! RETURN
       momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*(1.d0-phi2)/t
@@ -3157,7 +3157,7 @@ c-------BCS
         phi = DSQRT(phi2)
         t = 2.D0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
         s = SCR*TCRt*(1.d0-phi2)/t
-        det = DETcrt*((1.d0-phi2)*(1.D0 + phi2))**2
+        det = DETcrt*(1.d0-phi2)*(1.D0 + phi2)**2
         momp = Mompar*TCRt*(1-phi2)/t
         IF (momp.LT.0.0D0)RETURN
         momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*(1.d0-phi2)/t
