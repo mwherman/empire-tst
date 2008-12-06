@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-05 01:06:05 $
-Ccc   * $Id: input.f,v 1.281 2008-12-05 01:06:05 Capote Exp $
+Ccc   * $Date: 2008-12-06 01:57:08 $
+Ccc   * $Id: input.f,v 1.282 2008-12-06 01:57:08 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -885,7 +885,8 @@ C
             IF(mulem.LE.NENdf) ENDf(nnuc) = 1
 C           RCN, April 2008
 C           IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)  ENDf(nnuc) = 1 ! n,xn
-C           RCN, Dec 2008
+C           RCN, Dec 2008, (n,5n) and (n,6n) should be skipped as not implemented in ENDF-6 format
+C           These reactions are assumed to be always exclusive
             IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)  ENDf(nnuc) = 1 ! n,xn
             IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)  ENDf(nnuc) = 1 ! n,p; n,np; n,2np; n,3np
 C-----------set reaction string
@@ -963,7 +964,10 @@ C                          Comment the following block and uncommment the line a
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
 C                       RCN, April 2008
-                        IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)
+C                       IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)
+C    >                    ENDf(nnuc) = 1 ! n,xn
+C                       RCN, Dec 2008, (n,5n) and (n,6n) should be skipped as not implemented in ENDF-6 format
+                        IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)
      >                    ENDf(nnuc) = 1 ! n,xn
                         IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)
      >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
