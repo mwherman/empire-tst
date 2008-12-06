@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-06 02:15:40 $
-Ccc   * $Id: lev-dens.f,v 1.69 2008-12-06 02:15:40 Capote Exp $
+Ccc   * $Date: 2008-12-06 23:45:27 $
+Ccc   * $Id: lev-dens.f,v 1.70 2008-12-06 23:45:27 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -204,7 +204,7 @@ C
 C Local variables
 C
       REAL*8 cost, ht, m0, pi, r0, sdrop
-      DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
+      DATA m0, pi, r0, ht/1.044, 3.14159259, 1.26, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
       Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
@@ -260,7 +260,7 @@ C
      &       dt, eta, gamma, pi, r1, r2, r3, ry,
      &       rbmsph, t, tgscr, x, y, ycrit
 
-      pi = 3.14159
+      pi=3.14159259d0
       IF (A.LE.0.D0) RETURN
 C-----Damping ground state deformation (DT=0.4 Tgscr=1.5 MeV)
       dt = 0.4
@@ -288,7 +288,7 @@ C-----saddle point
       ELSEIF(Bf.LT.0.0D0) THEN
          beta = bt      ! the actual static saddle deformation is used (must be < 1.5 !!!)
          gamma = pi/3.                    ! axial symmetry
-         IF (Bf.LT.-2.0D0) gamma = pi/18. ! arbitrarily fixed asymmetry to 10 degrees
+         IF (Bf.LT.-1.50D0) gamma = pi/18. ! arbitrarily fixed asymmetry to 10 degrees
 C-----yrast states
       ELSEIF (Bf.GT.0.0D0) THEN
          gamma = pi/3.
@@ -346,7 +346,7 @@ C
 C Local variables
 C
       REAL*8 ht, m0, orti, pi, r0, rm2, sphi, t
-      DATA m0, r0, ht, pi/1.044, 1.24, 6.589, 3.141592/
+      DATA m0, r0, ht, pi/1.044, 1.24, 6.589, 3.14159259/
       t = SQRT(E/Ac)
       sphi = 2./5.*m0*r0**2*A**(5./3.)
       orti = sphi*(1. + B/3.)
@@ -1165,7 +1165,7 @@ C--------do loop over angular momentum
      &                  aj,mompar,momort,ftmp,stab,cigor)
 C           CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,0.0D0,15.0D0,
 C    &                  aj,mompar,momort,beta,stab,cigor)
-C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta          ! Commented to avouid using wrong beta out from SIGMAK
+C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta ! Commented to avoid using wrong beta out from SIGMAK
             IF (iz.GT.19 .AND. iz.LT.102) THEN
                sb = 0.0
                IF (j - 1.LE.ldstab)
@@ -2779,25 +2779,6 @@ C-----where continuum starts,ends,steps in between
 C-----EMPIRE-3.0-dependence
       CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
 
-C     IF (SHNix.EQ.1.0D0) THEN
-C-------Empire systematics with Nix-Moeller shell corrections
-C       AP1 = 0.94431E-01
-C       AP2 = -0.80140E-01
-C        IF (Z(Nnuc).GE.85.D0) THEN
-C         AP1 = AP1*1.2402
-C         AP2 = AP2*1.2402
-C       ENDIF
-C     ENDIF
-C-----Empire systematics with M-S shell corrections
-C     IF (SHNix.EQ.2.0D0) THEN
-C        AP1 = .52268E-01
-C        AP2 = .13395E+00
-C        IF (Z(Nnuc).GE.85.D0) THEN
-C            AP1 = AP1*1.2942
-C            AP2 = AP2*1.2942
-C        ENDIF
-C     ENDIF
-
       IF (Mmod.EQ.0) THEN
          GAMma = GAMmafis(Ib)
          DELp = DELtafis(Ib)
@@ -2814,30 +2795,36 @@ C     ENDIF
          desteppp = DEStepm(Mmod)
       ENDIF
 
-
       ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
       ATIl = ATIl*Rafis
-
-      TCRt =0.567*DELp
       ar = ATIl*(1.0 + shcf*GAMma)
-
+C
+C     ar - approximated value of "a"-parameter, which is only 
+C     used in SIGMAK to estimate the temperature       
+C
       if (iff.eq.2) then
-        CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-2.0D0,u,ar,
-     &                           aj,mompar,momort,A2,stab,cigor)
-      else
+C       Axial SYMMETRY
         CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-1.0D0,u,ar,
      &                           aj,mompar,momort,A2,stab,cigor)
+      else
+C       Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK      
+        CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-2.0D0,u,ar,
+     &                           aj,mompar,momort,A2,stab,cigor)
       endif
-C-----------calculation of level density parameter 'a' including surface
-C-----------dependent factor
-c      qigor = ( - 0.00246 + 0.3912961*cigor -
-c     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
-c     &              0.043075445*cigor**4) - 0.375
-c      IF (qigor.GT.0.077D0) THEN
-c         bsq = 0.983 + 0.439*qigor
-c      ELSE
-c         bsq = 1.0 + 0.4*(cigor - 1.0)**2
-c      ENDIF
+C      
+C-----calculation of level density parameter 'a' including 
+C-----surface deformation dependent factor bsq
+      bsq = 1.d0
+      qigor = ( - 0.00246 + 0.3912961*cigor -
+     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
+     &              0.043075445*cigor**4) - 0.375
+      IF (qigor.GT.0.077D0) THEN
+         bsq = 0.983 + 0.439*qigor
+      ELSE
+         bsq = 1.0 + 0.4*(cigor - 1.0)**2
+      ENDIF
+      ATIl = AP1*A(Nnuc) + bsq*AP2*A(Nnuc)**0.666667
+      ATIl = ATIl*Rafis
 
       TCRt =0.567*DELp
       ar = ATIl*(1.0 + shcf*GAMma)
@@ -2857,16 +2844,16 @@ C-----45.84 stands for (12/SQRT(pi))**2
       DETcrt = 45.84*ACRt**3*TCRt**5
       SCR = 2.*ACRt*TCRt
 
-      def2 = a2
-c     def2 = DEFfis(Ib)
       momparcrt=mompar
       momortcrt=momort
-
+C     def2 = a2
 c     mompar = rbmsph*(1. - (2./3.)*def2)
-c     Momparcrt = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
-c     Momortcrt = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)
+c     momparcrt = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
+c     momortcrt = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)
+      
+      def2 = a2
 
-      IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
+      IF (mompar.LT.0.0D0 .OR. momort.LT.0.0D0) THEN
          WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj
          WRITE (8,*) 'WARNING: 0 level density returned by rodef'
          RETURN
@@ -2892,6 +2879,7 @@ c-----------Ignatyuk
                u = u - ECOnd
                accn = ATIl*FSHELL(u,Shcf,GAMma)
                IF (accn.LE.0.0D0) RETURN
+C              In old versions we used here MOMparcrt instead of MOMpar                 
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,
      &                         MOMortcrt,HIS(Nnuc),ARGred,
      &                         EXPmax,temp,shcf,Z(Nnuc))
@@ -2904,7 +2892,7 @@ c
 cc            IF (Mmod.EQ.0)THEN
 c--------------SYMMETRY ENHANCEMENT
  345           IF (Iff.EQ.2) rotemp =
-c     &            rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
+c    &             rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
      &             rotemp*SQRT(pi/2.)*SQRT(mompar*temp)
                IF (Iff.EQ.3) rotemp = rotemp*2.d0
                IF (Iff.EQ.4) rotemp =
@@ -2954,20 +2942,19 @@ C
      &       qdamp, qk, qv, s, seff2, vibrk, def2,
      &       ro,ro_u,ro_j,ro_pi,pi,om2,om3,q2,q3
 C-----CONST=1/(2*SQRT(2 PI))
+      DATA const/0.199471D0/,pi/3.14159259d0/
 
-      DATA const/0.199471D0/
-      pi=3.14159265358979
       ROBCSF = 0.D0
       dphi2 = U/UCRt
       phi2 = 1.D0 - dphi2
       phi = DSQRT(phi2)
 
       t = 2.D0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
-      s = SCR*TCRt*(1.d0-phi2)/t
-      det = DETcrt*(1.d0-phi2)*(1.D0 + phi2)**2
-      momp = Mompar*TCRt*(1-phi2)/t
-      IF (momp.LT.0.0D0)momp=2.d0! RETURN
-      momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*(1.d0-phi2)/t
+      s = SCR*TCRt*dphi2/t
+      det = DETcrt*dphi2*(1.D0 + phi2)**2
+      momp = Mompar*TCRt*dphi2/t
+      IF (momp.LT.0.0D0) momp=2.d0 ! RETURN
+      momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*dphi2/t
       IF (momo.LT.0.0D0) RETURN
       seff2 = momp*t
       IF (ABS(def2).GT.0.005D0) seff2 = momp**0.333D0*momo**0.6666D0*t
@@ -2976,8 +2963,8 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF (arg.LE.0.0D0) RETURN
 
       ro_u=exp(s)/sqrt(det)
-      ro_j=const*(2.d0*Aj + 1.d0)/seff2 **1.5*
-     &       EXP(-(aj+0.5)**2/(2.d0*seff2))
+      ro_j=const*(2.d0*Aj + 1.d0)/seff2**1.5*
+     &       EXP(-(Aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5
       ro = ro_u * ro_j * ro_pi 
 
@@ -2985,14 +2972,21 @@ c     CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
       CALL DAMPROT(u,qk)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*T))
 C-----vibrational enhancement factor (EMPIRE-3.0)
-      om2 = EVIBR(Z, A, shcf, 2)
-      CALL QVIBR(A,t,om2,5,q2)
-      om3 = EVIBR(Z, A, Shcf, 3)
-      CALL QVIBR(A,t,om3,7,q3)
-      vibrk = q2*q3
-      qv=0.d0
-      ROBCSF = ro * momo * t* qdamp 
-     &         * (qv - vibrk * (qv - 1.))
+C     om2 = EVIBR(Z, A, schf, 2)
+C     CALL QVIBR(A,t,om2,5,q2)
+C     om3 = EVIBR(Z, A, schf, 3)
+C     CALL QVIBR(A,t,om3,7,q3)
+C     vibrk = q2*q3
+C-----vibrational enhancement factor (EMPIRE-2.19)
+      CALL VIBR(A,t,vibrk)
+C-----damping of vibrational effects
+      CALL DAMPV(t,qv)
+      IF (qv.GE.0.999D0) THEN
+         vibrk = 1.0
+      ELSE
+         vibrk = qv - vibrk*(qv - 1.)
+      ENDIF
+      ROBCSF = ro * momo * t * qdamp * vibrk 
       RETURN
       END
 C
@@ -3009,9 +3003,8 @@ C Local variables
      &                 sum, u, vibrk,om2,om3,q2,q3
       REAL*8 Evibr
       INTEGER i, k, kmin
-      DATA const/0.01473144/
+      DATA const/0.01473144/,pi/3.14159259d0/      
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
-      pi=3.14159265358979
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
       RODEFF = 0.D0
@@ -3080,15 +3073,22 @@ C--------rotation perpendicular to the symmetry axis
 c100   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
 c      IF (qv.GE.0.999D0) vibrk = 1.0
 C-----vibrational enhancement factor (EMPIRE-3.0)
- 100  om2 = EVIBR(Z, A, shcf, 2)
-      CALL QVIBR(A,t,om2,5,q2)
-      om3 = EVIBR(Z, A, Shcf, 3)
-      CALL QVIBR(A,t,om3,7,q3)
-      vibrk = q2*q3
-      qv=0.d0
+C     om2 = EVIBR(Z, A, schf, 2)
+C     CALL QVIBR(A,t,om2,5,q2)
+C     om3 = EVIBR(Z, A, schf, 3)
+C     CALL QVIBR(A,t,om3,7,q3)
+C     vibrk = q2*q3
+C-----vibrational enhancement factor (EMPIRE-2.19)
+      CALL VIBR(A,t,vibrk)
+C-----damping of vibrational effects
+      CALL DAMPV(t,qv)
+      IF (qv.GE.0.999D0) THEN
+         vibrk = 1.0
+      ELSE
+         vibrk = qv - vibrk*(qv - 1.)
+      ENDIF
       CALL DAMPROT(e,qk)
-      RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
-     &        *(qv - vibrk*(qv - 1.))
+      RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
  101  RETURN
       END
 
