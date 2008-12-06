@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-04 01:01:00 $
-Ccc   * $Id: tl.f,v 1.99 2008-12-04 01:01:00 Capote Exp $
+Ccc   * $Date: 2008-12-06 01:29:38 $
+Ccc   * $Id: tl.f,v 1.100 2008-12-06 01:29:38 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1729,8 +1729,11 @@ C       (nlev=1 corresponds to the ground state)
 C       read (45,
 C    &  '(1x,3(I3,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)
 C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
-        read (45, ! ecis06                
-     &  '(3I3,I4,1x,F6.1,1x,2(D15.7,1x),1x,4x,F12.8)',END=90)
+C       read (45, ! ecis06                
+C    &  '(3I3,I4,1x,F6.1,1x,2(D15.7,1x),1x,4x,F12.8)',END=90)
+C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
+        read (45, ! ecis06 (Dec 2008)               
+     &  '(3I3,I4,1x,F5.1,2x,2(D14.7,2x),1x,4x,F12.8)',END=90,ERR=90)
      &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
 
         IF (nlev.eq.1 .and. nc1.eq.nc2
@@ -1759,7 +1762,7 @@ C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
 C        READ (45,'(1x,I2,1x,I3,1x,F5.1,1x,e15.6)',END = 200) nlev, l,
 C    &         jj, dtmp
-         READ (45,*,END = 200) nlev, l, jj, dtmp
+         READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) THEN
@@ -1999,7 +2002,7 @@ C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
 C        READ (45,'(1x,I2,1x,I3,1x,F5.1,1x,e15.6)',END = 200) nlev, l,
 C    &         jj, dtmp
-         READ (45,*,END = 200) nlev, l, jj, dtmp
+         READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LE.NDLW) THEN
