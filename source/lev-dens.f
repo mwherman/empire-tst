@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-06 23:45:27 $
-Ccc   * $Id: lev-dens.f,v 1.70 2008-12-06 23:45:27 Capote Exp $
+Ccc   * $Date: 2008-12-07 21:36:48 $
+Ccc   * $Id: lev-dens.f,v 1.71 2008-12-07 21:36:48 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -2919,11 +2919,8 @@ cc            ENDIF
       RETURN
       END
 C
-
-
       REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Momp,T,
      &                       def2,shcf,z)
-
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
 C COMMON variables
@@ -2934,15 +2931,17 @@ C
 C Dummy arguments
 C
       REAL*8 A, Aj, Momort, Mompar, U, Momp, T, shcf, z
-      REAL*8 DSQRT, EVIBR
+      REAL*8 DSQRT
+C     REAL*8 EVIBR
 C
 C Local variables
 C
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
      &       qdamp, qk, qv, s, seff2, vibrk, def2,
-     &       ro,ro_u,ro_j,ro_pi,pi,om2,om3,q2,q3
+     &       ro,ro_u,ro_j,ro_pi
+C     REAL*8 om2,om3,q2,q3
 C-----CONST=1/(2*SQRT(2 PI))
-      DATA const/0.199471D0/,pi/3.14159259d0/
+      DATA const/0.199471D0/
 
       ROBCSF = 0.D0
       dphi2 = U/UCRt
@@ -3079,7 +3078,7 @@ C     om3 = EVIBR(Z, A, schf, 3)
 C     CALL QVIBR(A,t,om3,7,q3)
 C     vibrk = q2*q3
 C-----vibrational enhancement factor (EMPIRE-2.19)
-      CALL VIBR(A,t,vibrk)
+ 100  CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
       CALL DAMPV(t,qv)
       IF (qv.GE.0.999D0) THEN
