@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-07 21:36:48 $
-Ccc   * $Id: lev-dens.f,v 1.71 2008-12-07 21:36:48 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-12-08 05:55:10 $
+Ccc   * $Id: lev-dens.f,v 1.72 2008-12-08 05:55:10 herman Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -194,7 +194,7 @@ C
       SUBROUTINE VIBR(A,T,Vibrk)
       IMPLICIT REAL*8 (A-H,O-Z)
 CCCC  *****************************************************************
-CCCC  *  Calculates vibrational enhancement of level densities
+CCCC  *  Liquid drop vibrational enhancement of level densities
 CCCC  *****************************************************************
 C
 C Dummy arguments
@@ -208,6 +208,8 @@ C
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
       Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
+C-----vibrational enhancement factor (up to EMPIRE-2.19)
+C     VIBRK=EXP(4.7957*A**(2./3.)*T**(4./3.)/100.)
       END
 
 
@@ -1252,7 +1254,7 @@ C Local variables
 C
       REAL*8 arg, const, det, dphi2, momo, momp, phi, phi2,
      &                 qdamp, qk, s, seff2, t, vibrk
-     &                 
+     &
 C     REAL*8 q2, om3, q3, om2
 C     REAL*8 DSQRT, EVIBR
 C
@@ -1279,12 +1281,6 @@ C     CALL DAMPKS(A, A2, t, qk)
       CALL DAMPROT(U,qk)
       qdamp = 1.D0 - qk*(1.D0 - 1.D0/(momo*t))
       ROBCS = 0.5D0*const*(2*Aj + 1.D0)*EXP(arg)/SQRT(seff2**3*det)
-C-----vibrational enhancement factor (EMPIRE-3.0)
-C     om2 = EVIBR(Z, A, Shell, 2)
-C     CALL QVIBR(A,t,om2,5,q2)
-C     om3 = EVIBR(Z, A, Shell, 3)
-C     CALL QVIBR(A,t,om3,7,q3)
-C     vibrk = q2*q3
 C-----vibrational enhancement factor (EMPIRE-2.19)
       CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
@@ -1947,7 +1943,7 @@ C
          ENDDO
       ENDDO
       WRITE (filename,99005) iz
-  
+
 99005 FORMAT ('../RIPL-2/densities/Gs/z',i3.3,'.tab')
       INQUIRE(file = filename, exist = fexist)
       IF(.not.fexist) THEN
@@ -2022,7 +2018,7 @@ c          ROHfbp(Nnuc) = 0.d0
 c          ROHfba(Nnuc) = 0.d0
 C---------printing microscopic lev. dens. corrections from the RIPL-3 file
 C
-          IF(ROHfba(Nnuc).ne.0.d0) then 
+          IF(ROHfba(Nnuc).ne.0.d0) then
             WRITE (8,
      &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
@@ -2030,7 +2026,7 @@ C
      &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
           ENDIF
-          IF(ROHfbp(Nnuc).ne.0.d0) then 
+          IF(ROHfbp(Nnuc).ne.0.d0) then
             WRITE (8,
      &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
@@ -2046,7 +2042,7 @@ C
           IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
         ENDIF
         goto 445
-  310   WRITE (8,*) ' Error reading microsc. LD corrections FOR Z=', iz, 
+  310   WRITE (8,*) ' Error reading microsc. LD corrections FOR Z=', iz,
      &              ' A=', ia, ' IN HFB'
   445   CLOSE (34)
 cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -2265,33 +2261,15 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
       ENDIF
       t = SQRT(e1/Ac)
       con = const/Ac**0.25/SQRT(Mompar*t)
-C-----vibrational enhancement factor including damping (EMPIRE-3.0)
-!       cga=0.0075*A**(1./3.)
-!       fsh=1./(1.+0.050*Shell)       !Gorieli RIPL-3
-!       fsh=1./(1.+0.085*Shell)       !EGSM RPL-3
-!       if (fsh.le.0.) fsh=1.
-!       om2=65./A**(5./6.)*fsh        !Gorieli RIPL-3
-!       om2=30./A**.66666             !Ignatyuk RIPL-2
-!       om2=35./A**(5./6.)*fsh        !EGSM RIPL-3
-!      om2 = EVIBR(Z, A, Shell, 2)
-!      CALL QVIBR(A,t,om2,5,q2)
-!       fsh=1./(1.+0.055*Shell)       !EGSM RPL-3
-!       if (fsh.le.0.) fsh=1.
-!       om3=100./A**(5./6.)*fsh       !Gorieli RIPL-3
-!       OM3=50./A**.66666             !Ignatyuk RIPL-2
-!       om3=110./A**(5./6.)*fsh       !EGSM RPL-3
-!      om3 = EVIBR(Z, A, Shell, 3)
-!      CALL QVIBR(A,t,om3,7,q3)
-!      vibrk = q2*q3
-!      qv = 0.0   !no need for damping since included in QVIBR
 C-----vibrational enhancement factor (EMPIRE-2.19)
         CALL VIBR(A,t,vibrk)
-C-----vibrational enhancement factor (up to EMPIRE-2.19)
-C     VIBRK=EXP(4.7957*A**(2./3.)*T**(4./3.)/100.)
 C-----damping of vibrational effects
-        CALL DAMPV(t,qv)
-        IF (qv.GE.0.999D0) vibrk = 1.0
-!       write(6,*)'DEF: A, Aj, vibrk', A, Aj, vibrk, om2, om3, q2, q3
+      CALL DAMPV(t,qv)
+      IF (qv.GE.0.999D0) THEN
+         vibrk = 1.0
+      ELSE
+         vibrk = qv - vibrk*(qv - 1.)
+      ENDIF
 C-----damping of rotational  effects with Fermi function independent
 C-----of deformation and mass number (consistent with the builtin systematics)
       CALL DAMPROT(e1,qk)
@@ -2333,8 +2311,7 @@ C-----------rotation parallel to the symmetry axis (oblate nucleus)
             ENDIF
          ENDIF
       ENDDO
-  100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
-     &        *(qv - vibrk*(qv - 1.))
+  100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
       RETURN
       END
 
@@ -2459,7 +2436,7 @@ C              Triaxiality with mass symmetry
                IF (Iff.EQ.2) rotemp =
      &                       rotemp*SQRT(pi/2.d0)*SQRT(mompar*temp)
 c     &                       rotemp*SQRT(2.d0*pi)*SQRT(mompar*temp)
-C              Mass asymmetry is already considered in HFB calculations 
+C              Mass asymmetry is already considered in HFB calculations
 C              IF (Iff.EQ.3) rotemp = rotemp*2.
 C              No symmetry
                IF (Iff.EQ.4) rotemp =
@@ -2529,7 +2506,7 @@ C
       iz = Z(Nnuc)
 
       WRITE (filename,99006)ib, iz
-99006 FORMAT 
+99006 FORMAT
      & ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
       INQUIRE(file = filename, exist = fexist)
       IF(.NOT.fexist) THEN
@@ -2642,8 +2619,8 @@ C
                r1 = rhogrid(klo,j,ipp)
                r2 = rhogrid(khi,j,ipp)
                IF (r1.GT.1.d-12 .AND. r2.GT.1.d-12) THEN
-                  ROFisp(kk,j,ipp,ib) = 10.**(c1*DLOG10(r1) + 
-     &                                  c2*DLOG10(r2))  
+                  ROFisp(kk,j,ipp,ib) = 10.**(c1*DLOG10(r1) +
+     &                                  c2*DLOG10(r2))
                   IF(rohfba_sd(ib).NE.0.d0) ROFisp(kk,j,ipp,ib) =
      &               ROFisp(kk,j,ipp,ib)*dexp(rohfba_sd(ib)*dsqrt(u))
                ELSE
@@ -2965,17 +2942,10 @@ C-----CONST=1/(2*SQRT(2 PI))
       ro_j=const*(2.d0*Aj + 1.d0)/seff2**1.5*
      &       EXP(-(Aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5
-      ro = ro_u * ro_j * ro_pi 
-
+      ro = ro_u * ro_j * ro_pi
 c     CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
       CALL DAMPROT(u,qk)
       qdamp = 1.0 - qk*(1.0 - 1.0/(momo*T))
-C-----vibrational enhancement factor (EMPIRE-3.0)
-C     om2 = EVIBR(Z, A, schf, 2)
-C     CALL QVIBR(A,t,om2,5,q2)
-C     om3 = EVIBR(Z, A, schf, 3)
-C     CALL QVIBR(A,t,om3,7,q3)
-C     vibrk = q2*q3
 C-----vibrational enhancement factor (EMPIRE-2.19)
       CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
@@ -2985,7 +2955,7 @@ C-----damping of vibrational effects
       ELSE
          vibrk = qv - vibrk*(qv - 1.)
       ENDIF
-      ROBCSF = ro * momo * t * qdamp * vibrk 
+      ROBCSF = ro*momo*t*qdamp*vibrk
       RETURN
       END
 C
@@ -3024,16 +2994,17 @@ c-----GSM
       ro_pi=0.5
       ro = ro_u * ro_j * ro_pi
 c      CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-      om2 = EVIBR(Z, A, shcf, 2)
-      CALL QVIBR(A,t,om2,5,q2)
-      om3 = EVIBR(Z, A, Shcf, 3)
-      CALL QVIBR(A,t,om3,7,q3)
-      vibrk = q2*q3
-      qv=0.d0
       CALL DAMPROT(e,qk)
-      IF (qv.GE.0.999D0) vibrk = 1.0
-      RODEFF = ro*momort*t*(1.0 - qk*(1.0 - 1.0/sort2))
-     &        *(qv - vibrk*(qv - 1.))
+C-----vibrational enhancement factor (EMPIRE-2.19)
+      CALL VIBR(A,t,vibrk)
+C-----damping of vibrational effects
+      CALL DAMPV(t,qv)
+      IF (qv.GE.0.999D0) THEN
+         vibrk = 1.0
+      ELSE
+         vibrk = qv - vibrk*(qv - 1.)
+      ENDIF
+      RODEFF = ro*momort*t*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
       GOTO 101
 c-----EGSM
  10   con = const/Ac**0.25/SQRT(Mompar*t)
@@ -3067,16 +3038,10 @@ C--------rotation perpendicular to the symmetry axis
                sum = sum + 2.0*EXP(arg)
             ENDIF
          ENDIF
-      ENDDO    
-   
+      ENDDO
+
 c100   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
 c      IF (qv.GE.0.999D0) vibrk = 1.0
-C-----vibrational enhancement factor (EMPIRE-3.0)
-C     om2 = EVIBR(Z, A, schf, 2)
-C     CALL QVIBR(A,t,om2,5,q2)
-C     om3 = EVIBR(Z, A, schf, 3)
-C     CALL QVIBR(A,t,om3,7,q3)
-C     vibrk = q2*q3
 C-----vibrational enhancement factor (EMPIRE-2.19)
  100  CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
@@ -3235,22 +3200,32 @@ C
       END
 
       SUBROUTINE EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-C-----
-C-----Set coefficients in the level-density-parameter formula
-C-----used in the EMPIRE-specific (EGSM) model:
-C-----  atil = ap1*A(Nnuc) + ap2*A(nnuc)**2/3
-C-----  gamma = gam/A(nnuc)**1/3
-C-----
-C-----  using LDM vibrational enhancement (as in 2.19)
-C-----
-C-----MINUIT fit results:
-C NO.   NAME        VALUE          ERROR
-C  1     A1        0.75109E-01   0.21E-02
-C  2     A2       -0.41550E-02   0.16E-02
-C  3     gamma     0.57538       0.16E-01
-C
-C      frm = 1.717  Chi**2/n = 46.27
-C-----
+Cccc
+Cccc  ********************************************************************
+Cccc  *                                                          class:au*
+Cccc  *                    E G S M s y s                                 *
+Cccc  *                                                                  *
+Cccc  * EGSM level density systematics fitted to Do from RIPL-3.         *
+Cccc  *                                                                  *
+Cccc  * Set coefficients in the level-density-parameter formula          *
+Cccc  * used in the EMPIRE-specific (EGSM) model:                        *
+Cccc  * atil = ap1*A(Nnuc) + ap2*A(nnuc)**2/3                            *
+Cccc  * gamma = gam/A(nnuc)**1/3                                         *
+Cccc  *                                                                  *
+Cccc  * Using liquid drop vibrational enhancement factor (EMPIRE-2.19)   *
+Cccc  *                                                                  *
+Cccc  * MINUIT fit results:                                              *
+Cccc  * EXT PARAMETER                                                    *
+Cccc  * NO.   NAME        VALUE                                          *
+Cccc  *  1     A1        0.74055E-01                                     *
+Cccc  *  2     A2        0.28598E-03                                     *
+Cccc  *  3     gam       0.57248                                         *
+Cccc  *                                                                  *
+Cccc  *  frm=1.70   Chi**2=36 (per degree of freedom)                    *
+Cccc  *                                                                  *
+Cccc  * author: M.Herman                                                 *
+Cccc  * date:   December 2008                                            *
+Cccc  ********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       REAL*8 ap1, ap2, gam, gamma, del, delp
@@ -3259,9 +3234,9 @@ C-----
       delp = 12./SQRT(A(nnuc))
       IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
       IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
-      ap1 = 0.75109E-01
-      ap2 = -0.41550E-02
-      gam = 0.57538
+      ap1 = 0.74055E-01
+      ap2 = 0.28598E-03
+      gam = 0.57248 
       gamma = gam/A(Nnuc)**0.333333
       IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
       ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
