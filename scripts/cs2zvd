@@ -20,12 +20,12 @@ cp ../util/cs2zvd/CS2ZVD.INP .
 #vi CS2ZVD.INP	
 ../util/cs2zvd/cs2zvd.exe 
 if [ -f "XS_(z,tot).zvd" ]; then
- mv "XS_(z,tot).zvd" $file-ztot.zvd
+ mv "XS_(z,tot).zvd" $file-tot.zvd
 fi
 if [ -f "XS_(z,nel).zvd" ]; then
-  mv "XS_(z,nel).zvd" $file-zel.zvd
+  mv "XS_(z,nel).zvd" $file-el.zvd
 fi
-mv "XS_(z,nonel).zvd" $file-znon.zvd
+mv "XS_(z,nonel).zvd" $file-non.zvd
 if [ -f "XS_(z,gamma).zvd" ]; then
   mv "XS_(z,gamma).zvd" $file-zg.zvd
 fi
