@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:24 $
-Ccc   * $Id: pcross.f,v 1.52 2008-10-14 21:32:24 Capote Exp $
+Ccc   * $Date: 2008-12-10 02:02:06 $
+Ccc   * $Id: pcross.f,v 1.53 2008-12-10 02:02:06 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -44,7 +44,8 @@ C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
-     &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda
+     &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
+     &       dbreak, dpickup
 
       DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
      &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
@@ -152,6 +153,8 @@ C-----ZERO ARRAY INITIALIZATION
 C
 Cig---Direct reaction spectra for d,p and d,t only
 C
+      dbreak=0.d0
+      dpickup=0.d0
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
      &                   .and. NDEJC.eq.4) THEN
         write(8,99002)
@@ -161,6 +164,9 @@ C
         call DTRANS(EXCn,DE,spec,cross)
 99003   FORMAT (7x,5F8.2)
         write(8,99003) Ein,sigr,cross(2),cross(NDEJC)
+        dbreak=cross(2)
+C       Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
+        dpickup=cross(NDEJC)
       ENDIF
 C
       WRITE (8,99005)
@@ -364,10 +370,12 @@ C           spec(nejc,ienerg) = Sigr*emis
             hlp1 = hlp1 + Sigr*emis*DE
          ENDDO
          cross(nejc) = hlp1 + cross(nejc)
-C        Skipping cross sections if MSD and MSC active      
-         IF (nejc.gt.0 .and. IDNa(2*nejc,6).EQ.0) CYCLE      
-         IF (                IDNa(5     ,6).EQ.0) CYCLE              
-         totemis = totemis + hlp1
+C        Skipping cross sections if MSD and MSC active
+         IF (nejc.gt.0 .and. nejc.le.3) then
+           IF(IDNa(2*nejc,6).EQ.0) CYCLE
+           IF(IDNa(5     ,6).EQ.0) CYCLE
+         ENDIF
+         totemis = totemis + cross(nejc)
 cig      Some problems can arise later with a large direct cross section !
       ENDDO
 
@@ -409,12 +417,14 @@ C         WRITE(8, *)'==========================='
       if(MSD+MSC.eq.0) then
         fr = totemis/Sigr
         WRITE (8,99015) totemis, fr
-      ENDIF  
+      ENDIF
       if(MSD+MSC.GT.0) then
         fr = (totemis+Xsinl)/Sigr
         WRITE (8,99014) Xsinl, totemis, fr
-      ENDIF  
-      write(8,*) 'Middle of PCROSS :',totemis,xsinl      
+      ENDIF
+C
+C     write(8,*) 'Middle of PCROSS :',totemis,xsinl
+C
 99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
      &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
      &   ' mb'/1X,'total   preequilibrium fraction              =',F8.2)
@@ -422,9 +432,12 @@ C         WRITE(8, *)'==========================='
      &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
      &                   .and. NDEJC.eq.4) THEN
-            WRITE (8,99016) totemis, fr
-99016 FORMAT (1x,'Kalbach parameterization for pick-up and stripping',
-     &           ' is considered'/)
+            WRITE (8,99016)
+99016 FORMAT (/1x,'Kalbach parameterization for pick-up and stripping',
+     &           ' is considered')
+            WRITE (8,99017) dbreak,dpickup
+99017 FORMAT (1X,'PCROSS d,p breakup cross section   =',F8.2,
+     &  ' mb'/1X,'PCROSS d,t pickup  cross section   =',F8.2)
       ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
@@ -476,7 +489,9 @@ C           fmsd set to 0.d0 means isotropic distribution
             ENDDO
          ENDDO
        ENDDO
-       write(8,*) 'End of PCROSS :',totemis,Xsinl
+C
+C      write(8,*) 'End of PCROSS :',totemis,Xsinl
+C
 cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr
       WRITE (8,99020)
