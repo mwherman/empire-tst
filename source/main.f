@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-09 00:11:25 $
-Ccc   * $Id: main.f,v 1.193 2008-12-09 00:11:25 Capote Exp $
+Ccc   * $Date: 2008-12-10 22:18:13 $
+Ccc   * $Id: main.f,v 1.194 2008-12-10 22:18:13 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -842,20 +842,55 @@ C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
            CALL WHERE(izares,nnurn,iloc)
-           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
+C          IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
+           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,1)
            IF (iloc.EQ.0 .AND. IOUt.GT.3) CALL AUERST(nnur,1)
 C----------Proton emission
-           izares = izares - 1000
-           CALL WHERE(izares,nnurp,iloc)
-           IF (iloc.EQ.0) THEN
-             CALL SCNDPREEQ(nnur,nnurp,2,1)
-             IF (IOUt.GT.3) CALL AUERST(nnur,2)
-           ELSE
-             CALL SCNDPREEQ(nnur,nnurp,2,2)
-           ENDIF
+C          izares = izares - 1000
+C          CALL WHERE(izares,nnurp,iloc)
+C          IF (iloc.EQ.0) THEN
+C            CALL SCNDPREEQ(nnur,nnurp,2,1)
+C             IF (IOUt.GT.3) CALL AUERST(nnur,2)
+C          ELSE
+C            CALL SCNDPREEQ(nnur,nnurp,2,2)
+C          ENDIF
 C----------Second chance preequilibrium *** done ***
          ENDIF
       ENDIF
+
+C***************** OLD *************************************
+
+C--------add MSD contribution to the residual nucleus population
+C--------locate residual nucleus after MSD emission
+c        ares = A(1) - AEJc(nejc)
+c        zres = Z(1) - ZEJc(nejc)
+c        izares = INT(1000.0*zres + ares)
+c        CALL WHERE(izares, nnur, iloc)
+c        IF(iloc.EQ.1)THEN
+c           WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=', 
+c    &                 zres, ' HAS NOT BEEN INITIALIZED'
+c           WRITE(6, *)' EXECUTION STOPPED'
+c           STOP
+c        ENDIF
+
+C--------second chance preequilibrium emission after MSD emission
+C--------neutron emission
+c        izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
+c        CALL WHERE(izares, nnurn, iloc)
+c        IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
+c        IF(iloc.EQ.0 .AND. IOUt.GT.3)CALL AUERST(nnur, 1)
+C--------proton emission
+c        izares = izares - 1000
+c        CALL WHERE(izares, nnurp, iloc)
+c        IF(iloc.EQ.0)THEN
+c           CALL SCNDPREEQ(nnur, nnurp, 2, 1)
+c           IF(IOUt.GT.3)CALL AUERST(nnur, 2)
+c        ELSE
+c           CALL SCNDPREEQ(nnur, nnurp, 2, 2)
+c        ENDIF
+C--------second chance preequilibrium *** done ***
+
+
 C-----
 C-----PE + DWBA cont. *** done ***
 C-----

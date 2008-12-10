@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:25 $
-Ccc   * $Id: scnd-preeq.f,v 1.20 2008-10-14 21:32:25 Capote Exp $
+Ccc   * $Date: 2008-12-10 22:18:13 $
+Ccc   * $Id: scnd-preeq.f,v 1.21 2008-12-10 22:18:13 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -54,8 +54,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION bind, corr, excnq, pnratio, pop1, popp, 
-     &                 popsub(NDEX,NDLW,2), ratioro, sum, sumem, 
+      DOUBLE PRECISION bind, corr, excnq, pnratio, pop1, popp,
+     &                 popsub(NDEX,NDLW,2), ratioro, sum, sumem,
      &                 sumpopsub, welld
       REAL FLOAT, REAL
       INTEGER i, icse, ie, iec, iejc, ier, iermax, ietl, iexc, ip, itlc,
@@ -160,8 +160,11 @@ C--------------------probability *** done ***
                       IF (pop1.GT.0) THEN
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
-                       IF (ENDf(Nnuc).EQ.1.D0)
-     &                   CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
+                       IF (ENDf(Nnuc).EQ.1.D0) THEN
+                         CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
+                       ELSEIF (ENDf(Nnuc).EQ.2) THEN
+                         CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + pop1
+                       ENDIF
                        sumem = sumem + pop1
                       ENDIF
                   ENDDO         !end do on 2-nd residue excitation energy
@@ -180,10 +183,10 @@ C--------trapezoidal integration of continuum population for ejectile nejc
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          WRITE (8,*) ' '
          IF (Nejc.EQ.1) THEN
-            WRITE (8,*) ' n second-chance PE emission ', 
+            WRITE (8,*) ' n second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ELSEIF (Nejc.EQ.2) THEN
-            WRITE (8,*) ' p second-chance PE emission ', 
+            WRITE (8,*) ' p second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
