@@ -59,8 +59,8 @@ class mgCovars:
 			if not send:
 				if nval > 6:
 					
-					# read data in to the class defined above:
-					# xsecs have 'MT1', 'MT2' etc as keys
+					# read x-secs into the dictionary
+					# using 'MT1', 'MT2' etc as keys
 					if mf==1 and mt==451:
 						self.elist = datlist[i][18:]
 					elif mf==3:
@@ -93,7 +93,8 @@ class mgCovars:
 						covmat = numpy.zeros( (ngroups,ngroups) )
 						
 					if nval > 6:
-						start = d[12:18][3] - 1 #change to 0-based index
+						start = d[12:18][3] - 1 
+						# must change to 0-based index
 						row = d[12:18][5] - 1
 						data = d[18:]
 						end = start+len(data)
@@ -110,16 +111,21 @@ class mgCovars:
 		#print ('Create correlation matrices:')
 		for key in self.covars.keys():
 			covmat = self.covars[key]
-			uncert = numpy.sqrt( covmat.diagonal() )
+			
+			rowkey = ('MT'+key.split('MT')[1]) * 2
+			colkey = ('MT'+key.split('MT')[2]) * 2
+			rsd1 = numpy.sqrt( self.covars[rowkey].diagonal() )
+			rsd2 = numpy.sqrt( self.covars[colkey].diagonal() )
+
 			corrmat = self.covars[key].copy()
 			for i in range( ngroups ):
-				corrmat[i,:] /= uncert[i]
+				corrmat[i,:] /= rsd1[i]
 			for j in range( ngroups ):
-				corrmat[:,j] /= uncert[j]
+				corrmat[:,j] /= rsd2[j]
 			self.corrs[ key ] = corrmat
 		#stop = time.clock()
-		#print ('Elapsed time = %f s\n' % (stop - start) )	
-	
+		#print ('Elapsed time = %f s\n' % (stop - start) )
+
 	
 	def readSection( self, fin ):
 		"""
