@@ -47,6 +47,7 @@ SYSTEM FLAG THE EXFOR TITLE DATA-CM HAS A 6 IN COLUMN 30).                     1
                      (IF MISSING DEFINE -MIN= 0 OR -MAX= 15 MEV).              1
 (10) MULTIPLE FIELDS..CHOOSE LARGEST AND SMALLEST IN 2 SUCCESSIVE FIELDS,      1
                       (MULTIPLE E-LVL).                                        1
+(11) TAKE ABSOLUTE VALUE.                                                      1
                                                                                1
             MF  MF   OUTPUT                                                    1
             LOW HIGH FIELD  OPERATION                                          1
@@ -66,6 +67,10 @@ EN-RSL        1  999    2    4
 EN-ERR        1  999    2    4
 EN-RES-ERR    1  999    2    4
 EN-NRM        1  999    0    0
+Add CM energy conversion table (V.Zerkin, A.Trkov, 08/09)                      1
+EN-CM         1  999    0    6
+EN-CM-MIN     1  999    1    8
+EN-CM-MAX     1  999    1    8
                                                                                1
 DATA                                                                           1
                                                                                1
@@ -77,8 +82,9 @@ DATA-CM       1  999    3    6
 DATA-MIN      1  999    3    8
 DATA-MAX      1  999    3    8
 DATA-ERR      1  999    4    4
-DATA-ERR1     1  999    4    4
-DATA-ERR2     1  999    4    4
+Last flag in next 2 lines was changed from 4 to 5 (V.Zerkin 19-Oct-2006)       1
+DATA-ERR1     1  999    4    5
+DATA-ERR2     1  999    4    5
 +DATA-ERR     1  999    4    4
 -DATA-ERR     1  999    4    4
 ERR-T         1  999    4    1
@@ -121,6 +127,8 @@ E-CM-MIN      1  999    7    8   E2
 E-CM-MAX      1  999    7    8   E2
 E-LVL-MIN     1  999    7    0  DE2
 E-LVL-MAX     1  999    8    0  DE2
+Interpret Q-VAL as (-ve) outgoing particle energy E2 (A.Trkov, 07/02           1
+Q-VAL         1  999    7   11   E2
                                                                                1
 YIELD (USUALLY FISSION). OUTPUT ELEMENT IN FIELD 5, MASS IN FIELD 6.           1
                                                                                1

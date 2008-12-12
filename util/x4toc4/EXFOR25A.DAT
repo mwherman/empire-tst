@@ -81,7 +81,8 @@ CROSS SECTIONS                                                                 1
 MICRO-B    B           1.00000- 6 0.0                 0
 MB         B           1.00000- 3 0.0                 0
 B          B           1.0        0.0                 0
-KB         B           1.00000+ 6 0.0                 0
+KB         B           1.00000+ 3 0.0                 0
+MB         B           1.00000+ 6 0.0                 0
 MB*RT-EV   B           1.00000- 3 0.0                 6
 B*RT-EV    B           1.0        0.0                 6
 MB*MILLIEV B*EV        1.00000- 6 0.0                 0
@@ -183,10 +184,6 @@ NO-DIM     NO-DIM      1.0        0.0                 0
 GAM/100N   GAM/100N    1.00000- 2 0.0                 7
 GAM/PART   GAM/PART    1.0        0.0                 7
 PC/FIS     PC/FIS      1.00000- 2 0.0                 7
-                   Added by V.Zekin for OTSUKA Naohiko,    19-Oct-2006         1
-PRT/FIS    PRT/FIS     1.0        0.0                 7
-PART/FIS   PART/FIS    1.0        0.0                 7
-                   ---end---        for OTSUKA Naohiko,    19-Oct-2006         1
 ARB-UNITS  ARB-UNITS   1.0        0.0                 8
 SEE TEXT   SEE TEXT    1.0        0.0                 7
 MUCI/MUA   MUCI/MUA    1.0        0.0                 7

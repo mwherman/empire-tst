@@ -4076,10 +4076,11 @@ C...
 C... CRUDE APPROXIMATION FOR NUCLIDES NOT LISTED
 C...
    80 CONTINUE
-      PRINT *,'ZAMASS WARNING - Mass approximated by A for',IZA
+      PRINT *,'ZAMASS WARNING - Mass approximated by A for ZA',IZA
 C...
       IZ=IZA/1000
       IA=IZA-1000*IZ
+      IF(IA.EQ.0) IA=2*IZ
       AWT=IA
       RETURN
    90 FORMAT(A132)

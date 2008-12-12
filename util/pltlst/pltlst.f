@@ -11,7 +11,9 @@ C-V  2006/03 - Re-activate IEX=<2-point minimum for MF>3
 C-V            Add MF 1 MT 452,455,456 to list
 C-V          - Add MF 4 MT=MT+40000 for cross sections at fixed angle
 C-V  2006/11 Process discrete level partial reactions.
-C-V  2007/03 Suppress listing MT reactions of 4000 series (input change!)
+C-V  2007/03 Suppress listing MT reactions of 40000 series (input change!)
+C-V  2008/01 Apply 1-degree tolerance on angles for 40000 series
+C-V  2008/02 Add metastable products (MF10) (A. Trkov).
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -37,7 +39,7 @@ C-M  remaining entries assume their default values.
 C-
       PARAMETER   (MXAN=200)
       LOGICAL      EXST
-      CHARACTER*1  CHA,CHB,MST
+      CHARACTER*1  CHA0,CHA1,CHB0,CHB1,MS0,MS1
       CHARACTER*2  CH(100)
       CHARACTER*3  CHC0,CHC1
       CHARACTER*10 CH10(3)
@@ -45,7 +47,7 @@ C-
       CHARACTER*40 BLNK,FLNM,FLEX,FLLS,FLIN
       CHARACTER*80 RC1,RC2
       CHARACTER*130    REC
-      DIMENSION    ANG(MXAN),ANS(MXAN),KAN(MXAN)
+      DIMENSION    ANG(MXAN),ANS(MXAN),KAN(MXAN),ING(MXAN),KNG(MXAN)
       DATA BLNK/'                                        '/
      &     FLEX/'C4.DAT'/
      &     FLLS/'PLOTC4.LST'/
@@ -63,11 +65,19 @@ C-
      8 ,'Lu','Hf','Ta','W ','Re','Os','Ir','Pt','Au','Hg'
      9 ,'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th'
      * ,'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm'/
-C* Fractional tolerance for differentiating incident energies of
-C* differential and double differential data,
-C* Angle difference for differentiating distributions at fixed angles
-      DATA ETOL,ITOL/ 0.015, 5 /
+C* ETOL Fractional tolerance for differentiating incident energies of
+C*      differential and double differential data.
+C* ITOL Angle difference for differentiating energy distributions at
+C*      fixed angles.
+C* MTOL Angle difference for differentiating energy-dependent
+C*      cross sections at fixed angles.
+      DATA ETOL,ITOL,MTOL/ 0.015, 5, 1 /
       NO4000=0
+      DO I=1,MXAN
+        KAN(I)=0
+        KNG(I)=0
+        ANS(I)=0
+      END DO
 C* Write the banner
       WRITE(LTT,903)
       WRITE(LTT,903) ' PLTLST - Generate listing of EXFOR data'
@@ -106,12 +116,17 @@ C* Read the first C4 record
       IDX=0
       READ (LEX,901,END=80) REC
       IF(REC(1:40).EQ.BLNK) GO TO 80
-      READ (REC,902) IZI0,IZA0,MST,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
+      READ (REC,902) IZI0,IZA0,MS0,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
      &              ,PRA0,PRB0,PRC0,PRD0,CHC0,REF0,NEN0,NSU0
       IZP0=1
       IF(MT0.EQ.   2) IZP0=IZI0
       IF(MT0.EQ.9000) IZP0=PRB0
+      IF(CHA0.EQ.'T' .OR. CHA0.EQ.'+') CHA0=' '
+      IF(CHA0.EQ.'1') CHA0='M'
+      IF(CHA0.EQ.'2') CHA0='N'
+      IF(CHA0.EQ.'3') CHA0='O'
       NAN=0
+      MAN=0
       LVL0=0
       IF(PRC0 .NE. 0) LVL0=1
       IF(MT0.EQ.51 .OR. MT0.EQ.601 .OR. MT0.EQ.801) LVL0=1
@@ -121,7 +136,7 @@ C* Process all C4 records and check for changes
       IEF =1
       READ (LEX,901,END=40) REC
       IF(REC(1:40).EQ.BLNK) GO TO 40
-      READ (REC,902) IZI1,IZA1,MST,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
+      READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
       IEF =0
       IZP1=1
@@ -130,20 +145,45 @@ C* Process all C4 records and check for changes
       IF(MT1.EQ.51 .OR. MT1.EQ.601 .OR. MT1.EQ.801) LVL1=1
       IF(MT1.EQ.   2) IZP1=IZI1
       IF(MT1.EQ.9000) IZP1=PRB1
+      IF(CHA1.EQ.'T' .OR. CHA1.EQ.'+') CHA1=' '
+      IF(CHA1.EQ.'1') CHA1='M'
+      IF(CHA1.EQ.'2') CHA1='N'
+      IF(CHA1.EQ.'3') CHA1='O'
 C* Ignore MT 51 without specified level energies
       IF(MT1.EQ.51 .AND. PRC1.EQ.0) GO TO 20
 C* Mark for printout if any of the parameters change
+
+C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'mf1,mt1,m0,m1'
+C... &                                      ,mf1,mt1,cha1,cha0
+
       IF(IZI1.NE.IZI0) GO TO 40
       IF(IZA1.NE.IZA0) GO TO 40
+      IF(MS1 .NE.MS0 ) GO TO 40
       IF(MF1 .NE.MF0 ) GO TO 40
       IF(MT1 .NE.MT0 ) GO TO 40
+      IF(CHA0.NE.CHA1) GO TO 40
 C* Mark partial inelastic MF 3 where level energy changes
       IF(MF1 .EQ. 3 .AND. PRC1.NE.PRC0) GO TO 40
 C* Mark ang.distr. MF 4 where level energy changes and save angle
       IF(MF1 .EQ. 4) THEN
-        NEW=1
         ANJ=ACOS(PRA1)*180/PI
         JAN=NINT(ANJ)
+        NEW=1
+        IF(MAN.GT.0) THEN
+          DO J=1,MAN
+            IAN=ING(J)
+            IF(ABS(IAN-JAN).LE.MTOL) THEN
+              NEW=0
+              KNG(J)=KNG(J)+1
+            END IF
+          END DO
+        END IF
+        IF(NEW.EQ.1) THEN
+          MAN=MAN+1
+          IF(MAN.GT.MXAN) STOP 'PLTLST ERROR - MXAN Limit exceeded'
+          ING(MAN)=JAN
+        END IF
+        NEW=1
         IF(NAN.GT.0) THEN
           DO J=1,NAN
             IAN=NINT(ANG(J))
@@ -180,6 +220,9 @@ C* Reaction/Energy/Particle change - print record for previous set
    40 CONTINUE
 C* Exclude printout for the following conditions
 C* - MF out of range
+
+C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'passed 40'
+
       IF(MF0.NE.1 .AND. MF0.NE.3 .AND. MF0.NE.10 .AND.
      &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.6) GO TO 60
 C* - MT out of range
@@ -187,7 +230,7 @@ C* - MT out of range
 C* - Insufficient number of points (this also excludes distributions
 C*   which are not suitably sorted and would result in excessive output)
 c...  IF(IEX.LE.2) GO TO 60
-      IF(IEX.LE.2 .AND. MF0.GT.3) GO TO 44
+      IF(IEX.LE.2 .AND. (MF0.GT.3 .AND. MF0.NE.10)) GO TO 44
 C*
 C* Printout conditions satisfied - prepare output record
       IZ=IZA1/1000
@@ -196,9 +239,25 @@ C* Printout conditions satisfied - prepare output record
         CH10(I)='          '
       END DO
 C* Consider different cases
+      MMF=MF0
+      MMT=MT0
       IF     (MF0.EQ.3) THEN
 C* - MF3 discrete level energy (if present)
         IF(LVL0.NE.0) WRITE(CH10(3),'(1P,E10.4E1)') PRC0
+        IF(CHA0.NE.' ') THEN
+            MMF=10
+            IF     (CHA0.EQ.'G') THEN
+              WRITE(CH10(3),'(F10.1)') 0.
+            ELSE IF(CHA0.EQ.'M') THEN
+              WRITE(CH10(3),'(F10.1)') 1.
+            ELSE IF(CHA0.EQ.'N') THEN
+              WRITE(CH10(3),'(F10.1)') 2.
+            ELSE IF(CHA0.EQ.'O') THEN
+              WRITE(CH10(3),'(F10.1)') 3.
+            ELSE
+              PRINT *,'Unrecognised metastable state flag ',CHA0
+            END IF
+        END IF
       ELSE IF(MF0.EQ.4) THEN
 C* - MF4 incident particle energy and level
         WRITE(CH10(1),'(1P,E10.3E1)') ENR0
@@ -215,8 +274,8 @@ C...    WRITE(CH10(2),'(F8.1)') ACOS(PRA0)*180/PI
       END IF
 C* Check for close-lying discrete levels
       RC2=RC1
-      WRITE(RC1,914) IZ,CH(IZ),IA,MST,IZP0,MF0,MT0,IEX,CH10,IDX
-      IF(MF0.EQ.3 .AND. IDX.GT.0) THEN
+      WRITE(RC1,914) IZ,CH(IZ),IA,MS0,IZP0,MF0,MT0,IEX,CH10,IDX
+      IF(MMF.EQ.3 .AND. IDX.GT.0) THEN
         IF(RC1(1:26).EQ.RC2(1:26)) THEN
           READ (RC1(63:72),904) FLV
           READ (RC2(63:72),904) FL1
@@ -230,37 +289,33 @@ C* Check for close-lying discrete levels
       END IF
 C* Write a record to output list file
       IDX=IDX+1
-      WRITE(LLS,914) IZ,CH(IZ),IA,MST,IZP0,MF0,MT0,IEX,CH10,IDX,IZI0
+      WRITE(LLS,914) IZ,CH(IZ),IA,MS0,IZP0,MMF,MMT,IEX,CH10,IDX,IZI0
    44 IF(NO4000.EQ.0 .AND. MF0.EQ.4 .AND.
      &   (MF1.GT.MF0 .OR. MT1.NE.MT0 .OR. IEF.EQ.1)) THEN
         CH10(1)='          '
-C...    CH10(3)='          '
-C* Average the angles in the present bin
-        DO J=1,NAN
-          ANG(J)=ANS(J)/KAN(J)
-        END DO
-        DO J=1,NAN
+C* Use fine angular mesh for 40000 series
+        DO J=1,MAN
 C*        -- Sort angles in descending order
-          ANJ=ANG(1)
-          JAN=NINT(ANJ)
+          JAN=ING(1)
           KK =1
-          DO K=1,NAN
-            ANI=ANG(K)
-            IAN=NINT(ANI)
+          DO K=1,MAN
+            IAN=ING(K)
             IF(IAN.GT.JAN) THEN
               KK=K
               JAN=IAN
-              ANJ=ANI
             END IF
           END DO
-          WRITE(CH10(2),'(F8.2)') ANJ
-          ANG(KK)=-ANJ
-          JEX=KAN(KK)
+          WRITE(CH10(2),'(F8.0)') FLOAT(JAN)
+          ING(KK)=-JAN
+          JEX=KNG(KK)
           JT0=MT0+40000
-          IDX=IDX+1
-          WRITE(LLS,914) IZ,CH(IZ),IA,MST,IZP0,MF0,JT0,JEX,CH10,IDX,IZI0
+          IF(JEX.GT.1) THEN
+            IDX=IDX+1
+            WRITE(LLS,914) IZ,CH(IZ),IA,MS0,IZP0
+     &                    ,MF0,JT0,JEX,CH10,IDX,IZI0
+          END IF
         END DO
-        NAN=0
+        MAN=0
       END IF
 C*
 C* Reset parameters
@@ -268,6 +323,7 @@ C* Reset parameters
       IZI0=IZI1
       IZA0=IZA1
       IZP0=IZP1
+      MS0 =MS1
       MF0 =MF1
       MT0 =MT1
       CHA0=CHA1
@@ -290,7 +346,7 @@ C* All processing completed
    80 WRITE(LLS,910)
       STOP 'PLTLST Completed'
 C*
-  901 FORMAT(A120)
+  901 FORMAT(A130)
   902 FORMAT(I5,I6,A1,I3,I4,2A1,1X,8F9.0,A3,A26,I4,I3)
   903 FORMAT(2A40)
   904 FORMAT(BN,F10.0)
