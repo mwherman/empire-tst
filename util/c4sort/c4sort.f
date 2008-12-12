@@ -27,6 +27,8 @@ C-V  05/12 - Increase MXIR from 12000 to 80000 (A.Trkov)
 C-V        - Increase MXEN from 40000 to 80000 (A.Trkov)
 C-V  06/12 Another fix to format reading metastable targets (A.Trkov)
 C-V  07/04 Convert E2 to LVL for MT51 if Elo=Ehi (A.Trkov)
+C-V  08/01 Correct ZA of residual nucleus when searching level energies.
+C-V  08/02 Sort also by metastable products (A. Trkov).
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -167,7 +169,7 @@ C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-
-      PARAMETER       (MXEN=80000,MXAL=20,LCH=52,MXIR=80000,MXMT=30)
+      PARAMETER       (MXEN=80000,MXAL=20,LCH=53,MXIR=80000,MXMT=30)
       PARAMETER       (MEL1=20,MXNP=10000,MXRW=20000)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*80     DPATH
@@ -176,7 +178,7 @@ C-
       CHARACTER*20     ZAMT,CH20,ELL(MXIR)
       CHARACTER*15     EIN
       CHARACTER*14     ALIA(4,MXAL)
-      CHARACTER*(LCH)  ENT(MXEN)
+      CHARACTER*(LCH)  ENT(MXEN),ENTI
       CHARACTER*9      AOU,POU,ELV,ELW
       CHARACTER*3      LB3
       CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR)
@@ -204,6 +206,8 @@ C* Files and logical file unit numbers
       FLV =-1
 C*
 C* Default path to RIPL nuclide level energy files
+c...  DPATH='../Sources/Inputs/Levels/'
+c...  LPATH=25
       DPATH='../../RIPL-2/levels/'
       LPATH=20
 C*
@@ -394,13 +398,14 @@ C*        -- Approximately convert level energy to CM
 C* Adjust the level energy if necessary (and possible)
       IF(FLV.GT.0) THEN
         IF(LB3.EQ.'LVL' .OR. LB3.EQ.'EXC') THEN
-          READ (REC(1:20),902,ERR=801) IZA
+          READ (REC(1:20),902,ERR=801) IZI,IZA,MFC4,MTC4
+          CALL MTTOZA(IZI,IZA,IZX,MTC4)
           FLV0=FLV
 c...
-c...      print *,'Calling MCHLVL',IZA,FLV,LPATH,IER
+c...      print *,'Calling MCHLVL',IZX,FLV,LPATH,IER
 c... &           ,'"',DPATH(1:LPATH),'"'
 c...
-          CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
+          CALL MCHLVL(IZX,FLV,DPATH,LPATH,IER)
 c...
 c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
@@ -467,10 +472,15 @@ C* Identify outgoing particle (if relevant)
         POU='         '
       END IF
       IF(MF.EQ.3) THEN
-        ENT(NEN)=REC(1:19)//POU//ELV//EIN
+        ENTI=REC(1:20)//POU//ELV//EIN
       ELSE
-        ENT(NEN)=REC(1:19)//POU//EIN//ELV
+        ENTI=REC(1:20)//POU//EIN//ELV
       END IF
+      IF(ENTI(20:20).EQ.'T' .OR. ENTI(20:20).EQ.'+') ENTI(20:20)=' '
+      IF(ENTI(20:20).EQ.'1') ENTI(20:20)='M'
+      IF(ENTI(20:20).EQ.'2') ENTI(20:20)='N'
+      IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
+      ENT(NEN)=ENTI
       REF =REC(98:132)
       ZAMT=REC(1:20)
       IFIN=NINT(FIN)
@@ -539,13 +549,14 @@ C*        -- Approximately convert level energy to CM
         END IF
       END IF
       IF(FLV.GT.0 .AND. (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC')) THEN
-        READ (REC(1:20),902,ERR=801) IZA
+        READ (REC(1:20),902,ERR=801) IZI,IZA,MFC4,MTC4
+        CALL MTTOZA(IZI,IZA,IZX,MTC4)
         FLV0=FLV
 c...
-c...      print *,'Calling MCHLVL',IZA,FLV,LPATH,IER
+c...      print *,'Calling MCHLVL',IZX,FLV,LPATH,IER
 c... &           ,'"',DPATH(1:LPATH),'"'
 c...
-        CALL MCHLVL(IZA,FLV,DPATH,LPATH,IER)
+        CALL MCHLVL(IZX,FLV,DPATH,LPATH,IER)
 c...
 c...      print *,'"',rec(1:20),'"',iza,flv0,flv,ier
 c...
@@ -603,7 +614,13 @@ C* Save the new entry data
           ELV =CH20(1:9)
           IFIN=NINT(FIN)
           IFLV=NINT(FLV)
-          ENT(NEN)=RC1(1:19)//RC1(68:76)//ELV//EIN
+          ENTI=RC1(1:20)//RC1(68:76)//ELV//EIN
+          IF(ENTI(20:20).EQ.'T' .OR. 
+     &       ENTI(20:20).EQ.'+') ENTI(20:20)=' '
+          IF(ENTI(20:20).EQ.'1') ENTI(20:20)='M'
+          IF(ENTI(20:20).EQ.'2') ENTI(20:20)='N'
+          IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
+          ENT(NEN)=ENTI
 c...
 c...        print '(i5,3a)',nen,ent(nen),' ',ref//' in24'//ELL(L)
 c...
@@ -615,7 +632,7 @@ c...
 c...
 c...       WRITE(41,*) 'i,lne,nse,id2,ent'
 c...       DO I=1,NEN
-c...         WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
+c...         WRITE(41,'(4I6,A53)') I,LNE(I),NSE(I),ID2(I),ENT(I)
 c...       END DO
 c...       STOP
 cc...
@@ -721,7 +738,13 @@ C* Save the new entry data
           READ (EIN,931) FIN
           IF(MF.EQ.4) THEN
             WRITE(EIN,932) FIN
-            ENT(NEN)=RC1(1:19)//'         '//EIN//'         '
+            ENTI=RC1(1:20)//'         '//EIN//'         '
+            IF(ENTI(20:20).EQ.'T' .OR.
+     &         ENTI(20:20).EQ.'+') ENTI(20:20)=' '
+            IF(ENTI(20:20).EQ.'1') ENTI(20:20)='M'
+            IF(ENTI(20:20).EQ.'2') ENTI(20:20)='N'
+            IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
+            ENT(NEN)=ENTI
             WRITE(POU,938) MIN(999999999,NINT(FIN))
           ELSE
             WRITE(EIN,932) FIN
@@ -731,7 +754,14 @@ C* Save the new entry data
             POU=RC1(68:76)
             IF(POU(6:9).EQ.' 0.9' .OR.
      &         POU(6:9).EQ.'  .9') POU='   9999.9'
-            ENT(NEN)=RC1(1:19)//POU//EIN//AOU
+
+            ENTI=RC1(1:20)//POU//EIN//AOU
+            IF(ENTI(20:20).EQ.'T' .OR.
+     &         ENTI(20:20).EQ.'+') ENTI(20:20)=' '
+            IF(ENTI(20:20).EQ.'1') ENTI(20:20)='M'
+            IF(ENTI(20:20).EQ.'2') ENTI(20:20)='N'
+            IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
+            ENT(NEN)=ENTI
           END IF
           CH20=ELL(L)
           IFIN=NINT(FIN)
@@ -746,7 +776,7 @@ c...
 c
 c      WRITE(41,*) 'i,lne,nse,id2,ent'
 c      DO I=1,NEN
-c        WRITE(41,'(4I6,A52)') I,LNE(I),NSE(I),ID2(I),ENT(I)
+c        WRITE(41,'(4I6,A53)') I,LNE(I),NSE(I),ID2(I),ENT(I)
 c      END DO
 c      STOP
 c
@@ -772,7 +802,7 @@ c...      PRINT *,'Writing sorted entry list to c4sort.scr'
       DO I=1,NEN
         J=I
         J=ID2(I)
-        WRITE(41,'(4I6,A52)') I,J,LNE(J),NSE(J),ENT(J)
+        WRITE(41,'(4I6,A53)') I,J,LNE(J),NSE(J),ENT(J)
       END DO
       CLOSE(UNIT=41)
 C...
@@ -846,13 +876,107 @@ C*
 C*
   900 FORMAT(2A40)
   901 FORMAT(A132)
-  902 FORMAT(5X,I6)
+  902 FORMAT(I5,I6,2I4)
   921 FORMAT(A40,I6)
   931 FORMAT(BN,F9.0)
   932 FORMAT(F15.3)
   936 FORMAT(F9.6)
   938 FORMAT(I9)
   941 FORMAT(12X,I3,25X,F9.0)
+      END
+      SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
+C-Title  : Subroutine EMTIZA
+C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
+      IF     (MT.EQ.  2) THEN
+        JZA=IZA
+      ELSE IF(MT.EQ.  4) THEN
+        JZA=IZA+IZI-   1
+      ELSE IF(MT.EQ. 11) THEN
+        JZA=IZA+IZI-   2-1002
+      ELSE IF(MT.EQ. 16) THEN
+        JZA=IZA+IZI-   2
+      ELSE IF(MT.EQ. 17) THEN
+        JZA=IZA+IZI-   3
+      ELSE IF(MT.EQ. 22) THEN
+        JZA=IZA+IZI-   1-2004
+      ELSE IF(MT.EQ. 23) THEN
+        JZA=IZA+IZI-   1-3*2004
+      ELSE IF(MT.EQ. 24) THEN
+        JZA=IZA+IZI-   2-2004
+      ELSE IF(MT.EQ. 25) THEN
+        JZA=IZA+IZI-   3-2004
+      ELSE IF(MT.EQ. 28) THEN
+        JZA=IZA+IZI-   1-1001
+      ELSE IF(MT.EQ. 29) THEN
+        JZA=IZA+IZI-   1-2*2004
+      ELSE IF(MT.EQ. 30) THEN
+        JZA=IZA+IZI-   2-2*2004
+      ELSE IF(MT.EQ. 32) THEN
+        JZA=IZA+IZI-   1-1002
+      ELSE IF(MT.EQ. 33) THEN
+        JZA=IZA+IZI-   1-1003
+      ELSE IF(MT.EQ. 34) THEN
+        JZA=IZA+IZI-   1-2003
+      ELSE IF(MT.EQ. 35) THEN
+        JZA=IZA+IZI-   1-1002-2*2004
+      ELSE IF(MT.EQ. 36) THEN
+        JZA=IZA+IZI-   1-1003-2*2004
+      ELSE IF(MT.EQ. 37) THEN
+        JZA=IZA+IZI-   4
+      ELSE IF(MT.EQ. 41) THEN
+        JZA=IZA+IZI-   2-1001
+      ELSE IF(MT.EQ. 42) THEN
+        JZA=IZA+IZI-   3-1001
+      ELSE IF(MT.EQ. 44) THEN
+        JZA=IZA+IZI-   1-2*1001
+      ELSE IF(MT.EQ. 45) THEN
+        JZA=IZA+IZI-   1-1001-2004
+      ELSE IF(MT.GE. 50 .AND. MT.LE.91) THEN
+        JZA=IZA+IZI-   1
+      ELSE IF(MT.EQ.102) THEN
+        JZA=IZA+IZI
+      ELSE IF(MT.EQ.103) THEN
+        JZA=IZA+IZI-1001
+      ELSE IF(MT.EQ.104) THEN
+        JZA=IZA+IZI-1002
+      ELSE IF(MT.EQ.105) THEN
+        JZA=IZA+IZI-1003
+      ELSE IF(MT.EQ.106) THEN
+        JZA=IZA+IZI-2003
+      ELSE IF(MT.EQ.107) THEN
+        JZA=IZA+IZI-2004
+      ELSE IF(MT.EQ.108) THEN
+        JZA=IZA+IZI-2*2004
+      ELSE IF(MT.EQ.109) THEN
+        JZA=IZA+IZI-3*2004
+      ELSE IF(MT.EQ.111) THEN
+        JZA=IZA+IZI-2*1001
+      ELSE IF(MT.EQ.112) THEN
+        JZA=IZA+IZI-1001-2004
+      ELSE IF(MT.EQ.113) THEN
+        JZA=IZA+IZI-1003-2*2004
+      ELSE IF(MT.EQ.114) THEN
+        JZA=IZA+IZI-1002-2*2004
+      ELSE IF(MT.EQ.115) THEN
+        JZA=IZA+IZI-1001-1002
+      ELSE IF(MT.EQ.116) THEN
+        JZA=IZA+IZI-1001-1003
+      ELSE IF(MT.EQ.117) THEN
+        JZA=IZA+IZI-1002-2004
+      ELSE IF(MT.GE.600 .AND. MT.LE.649) THEN
+        JZA=IZA+IZI-1001
+      ELSE IF(MT.GE.650 .AND. MT.LE.699) THEN
+        JZA=IZA+IZI-1002
+      ELSE IF(MT.GE.700 .AND. MT.LE.749) THEN
+        JZA=IZA+IZI-1003
+      ELSE IF(MT.GE.750 .AND. MT.LE.799) THEN
+        JZA=IZA+IZI-2003
+      ELSE IF(MT.GE.800 .AND. MT.LE.849) THEN
+        JZA=IZA+IZI-2004
+      ELSE
+        JZA=0
+      END IF
+      RETURN
       END
       SUBROUTINE CH9PCK(FLT,CH9)
 C-Title  : Subroutine CH9PCK
