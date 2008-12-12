@@ -17,6 +17,16 @@ C-V  05/06  Check residual production for MF3/MT9000 (Trkov).
 C-V  06/02  Update for consistency with DXSEND upgrade to provide
 C-V         uncertainties, if available.
 C-V  06/03  Implement retrieval of cross sections at fixed angle.
+C-V  07/02  Increase limit on MRW from 600000 to  900000 (Trkov).
+C-V  07/07  Increase limit on MRW from 900000 to 1200000 (Trkov).
+C-V  08/01  To display cross sections at a given angle and
+C-V         level-energy, the level energy is written to columns
+C-V         21-30 on the label in the output file.
+C-V  08/02  If cross sections are requested (MF=3) and level energy
+C-V         is given, switch MF=10.
+C-V  08/03  Fix format for printing small uncertainties.
+C-V  08/04  Increase MXR from 1200000 to 4000000 (A.Trkov)
+C-V         Increase MXP from  300000 to  800000 (A.Trkov)
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -54,7 +64,7 @@ C-M   FLLG LLG=9  Log-file for error messages and warnings.
 C-M
 C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=300000,MXR=600000,MXEN=10,MXIS=10)
+      PARAMETER   (MPT=1000,MXP=800000,MXR=4000000,MXEN=10,MXIS=10)
       CHARACTER*1  CM
       CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG
      1            ,FLEF(MXEN),COM(MXEN)
@@ -183,16 +193,24 @@ C*
       IF(MF.EQ.3) THEN
         IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
+      ELSE IF(MF.EQ.10) THEN
+        WRITE(COM2(31:40),'(''M'',I2,7X)') NINT(EOU)
       ELSE
         MTH=MT
-        IF(MF.EQ.4 .AND. MT/10000.EQ.4) MTH=MT-40000
+        IF(MF.EQ.4 .AND. MT/10000.EQ.4) THEN
+C*        -- For x-sect at fixed angle write level energy and angle
+          MTH=MT-40000
+          WRITE(COM2(21:30),'(''El'',1P,E7.2E1,1X)') EOU
+          WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        ELSE
+          IF(C84(46:54).NE.'    ')
+     &    WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+          IF(C84(56:59).NE.'    ')
+     &    WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+          IF(C84(63:67).NE.'    ')
+     &    WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
+        END IF
         WRITE(COM2(12:19),'(I3,I5)') MF,MTH
-        IF(C84(46:54).NE.'    ')
-     &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
-        IF(C84(56:59).NE.'    ')
-     &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
-        IF(C84(63:67).NE.'    ')
-     &  WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
       END IF
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C*
@@ -210,12 +228,19 @@ C*
       ELV=0
       ZAP=IZP
       PAR=-2
-      IF     (MF.EQ.3) THEN
+      MF0=MF
+
+c...   print *,'mf,mt,kea,eou,par',mf,mt,kea,eou,par
+
+      IF     (MF0.EQ.3) THEN
         KEA=0
         PAR=0
 C*        Discrete energy level (if applicable)
-        IF(EOU.GT.0) ELV=EOU
-      ELSE IF(MF.EQ.4) THEN
+        IF(C84(63:72).NE.'          ') THEN
+          ELV=EOU
+          IF(MT.NE.51 .AND. MT.NE.600 .AND. MT.NE.800) MF =10
+        END IF
+      ELSE IF(MF0.EQ.4) THEN
 C*        Cross section at fixed angle
         IF(MT/10000 .EQ.4) THEN
           KEA=0
@@ -226,10 +251,10 @@ C* Angular distributions (outg. particle energy-integrated)
 C*        Discrete energy level (if applicable)
           IF(EOU.GT.0) ELV=EOU
         END IF
-      ELSE IF(MF.EQ.5) THEN
+      ELSE IF(MF0.EQ.5) THEN
 C* Energy distributions (outg. particle angle-integrated)
         KEA=2
-      ELSE IF(MF.EQ.6) THEN
+      ELSE IF(MF0.EQ.6) THEN
 C* Double differential distributions
         IF(DEG.LT.0) THEN
 C*          Request angular distributions
@@ -241,6 +266,9 @@ C*          Request energy spectra
           KEA=2
           IF(DEG.GE.0) PAR=DEG
         END IF
+      ELSE IF(MF0.EQ.10) THEN
+        KEA=0
+        PAR=EOU
       END IF
 C*
 C* Extract the data from the ENDF file
@@ -278,6 +306,7 @@ C* Prepare the ENDF comment header for the PLOTTAB curves file
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,99) COM1,COM2
+      IUF=0
       DO 82 I=1,NP
 C* Suppress printing negative or zero points
       EE=ES(I)
@@ -285,8 +314,9 @@ C* Suppress printing negative or zero points
       IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
       FF=SG(I)*SCL
       UF=UG(I)*SCL
+      IF(UF.GT.0) IUF=1
       IF(SG(I).GT.0) THEN
-        IF(UF.GT.0) THEN
+        IF(IUF.NE.0) THEN
           WRITE(LCU,94) EE,FF,UF
         ELSE
           WRITE(LCU,94) EE,FF
@@ -321,9 +351,9 @@ C* All processing completed
    90 STOP 'LSTTAB Completed'
 C*
    91 FORMAT(2A40)
-   92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,1P,E10.3,0P,F8.2,1P,E10.3,6X,I8)
+   92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,F10.3,F8.2,F10.3,6X,I8)
    93 FORMAT(A40,F10.3)
-   94 FORMAT(1P,3(E11.5E1,E11.4))
+   94 FORMAT(1P,E11.5E1,2E11.4)
    95 FORMAT(A40,I6)
    96 FORMAT(A84)
    97 FORMAT(BN,I10)
@@ -433,9 +463,11 @@ C-D   LC4   - Unit number of the C4 file (input).
 C-D   LPN   - Unit number of the output discrete points file in
 C-D           PLOTTAB format.
 C-D   ZAI   - Projectile ZA designation.
-C-D   ZA0   - Target nucleus ZA designation.
+C-D   ZA0   - Target nucleus ZA designation;
 C-D   ZAP0  - Outgoing particle ZA designation.
 C-D   MF0   - Requested MF number (ENDF format conventions)
+C-D           Note: Isomer production data requested with MF0=10
+C-D                 but appear under MF=3 in the C4 file
 C-D   MT0   - Requested MT number (ENDF format conventions)
 C-D   KEA   - Flag for the type of plot requested:
 C-D            0  - tabulated data (cross sections)
@@ -446,6 +478,7 @@ C-D   PR0   - Additional parameter for differential data:
 C-D            Energy  level for discrete level angular distributions [eV].
 C-D            Angle   for double differential energy distributions [deg].
 C-D            Energy  for double differential angular distributions [eV].
+C-D            LFS     metastable state number (0=ground) if MF0=10.
 C-D   NPP   -  Total number of points written to output.
 C-D   NS    -  Number of different data sets written to output.
 C-D   SCL   -  Cross section scaling factor (input parameter, can
@@ -463,9 +496,10 @@ C* Fractional tolerance to identify "equal" arguments
 C* For best results the tolerance limits should be consistent with
 C* those defined in PLOTC4 for the same variables.
 C*   ETOL  fractional tolerance on energy
-C*   ATOL  tolerance on angle [deg]
+C*   ATOL  tolerance on angle for double-differential data [deg]
+C*   AANG  tolerance on angle for double-differential data [deg]
 C*   E2TOL fractional tolerance on discrete level energy
-      DATA ETOL,ATOL,E2TOL/0.015, 3.0, 0.003/
+      DATA ETOL,ATOL,AANG,E2TOL/0.015, 5.0, 1.0, 0.003/
 C*
       DATA PI/3.14159265/
 C*
@@ -484,6 +518,7 @@ C*
       IF(MT0/10000.EQ.4) THEN
         MTH=MT0-40000
       END IF
+      IF(MF0.EQ.10) LFS=NINT(PR0)
       IC4=0
       LAU=0
       NAU=0
@@ -492,8 +527,17 @@ C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
       IC4=IC4+1
+      IF(CM.EQ.'T' .OR. CM.EQ.'+') CM=' '
+      IF(CM.EQ.'1') CM='M'
+      IF(CM.EQ.'2') CM='N'
+C* Test for metastable states
+      IF(C1.EQ.'T' .OR. C1.EQ.'+') C1=' '
+      IF(C1.NE.' '.AND.MF.EQ.3) MF=10
+      IF(C1.EQ.'0') C1='G'
+      IF(C1.EQ.'1') C1='M'
+      IF(C1.EQ.'2') C1='N'
+      IF(C1.EQ.'3') C1='O'
 C* Test for matching data request
-      IF(IZAI.NE. IZAI ) GO TO 20
       IF(IZA0.GT.0 .AND. IZA .NE.IZA0  ) GO TO 20
       IF(CM  .NE.MM(IM)) GO TO 20
       IF(MF  .NE.MFH   ) GO TO 20
@@ -513,14 +557,14 @@ C* Test outgoing particle
 c...      IF(F6.EQ.0) IF6=1
           IF(IZAP0.NE.IF6) GO TO 20
 c...
-c...      print *,'Found mf,mt,izap0,if6',mf,mt,izap0,if6
+C...      print *,'Found mf,mt,izap0,if6',mf,mt,izap0,if6
 c...
         END IF
         IF(MF.EQ.4) THEN
           IF(MT0/10000.EQ.4) THEN
 C* Test angle for cross section at fixed angle
-c...        IF(ABS(COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
-            IF(ABS(ACOS(F5)*180/PI-PR0).GT.ATOL) GO TO 20
+c...        IF(ABS( COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
+            IF(ABS(ACOS(F5)*180/PI-PR0).GT.AANG) GO TO 20
           ELSE
 C* Test incident and level energy for double differential data
             IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
@@ -544,6 +588,18 @@ c...
         IF((MF.EQ.6 .AND. KEA.EQ.2) .AND.
      &     ABS(ACOS(F5)*180/PI-PR0).GT.ATOL) GO TO 20
 c... &     ABS(COS(PR0*PI/180)-F5) .GT.ETOL) GO TO 20
+      ELSE IF(MF.EQ.10) THEN
+c...
+c...      print *,'c1,lfs,pr0,f7',c1,lfs,pr0,f7
+c...
+C* Test isomer production
+        IF(C1.EQ.'G' .AND. LFS.NE.0) GO TO 20
+        IF(C1.EQ.'M' .AND. LFS.NE.1) GO TO 20
+        IF(C1.EQ.'N' .AND. LFS.NE.2) GO TO 20
+        IF(C1.EQ.'O' .AND. LFS.NE.3) GO TO 20
+c...
+c...    print *,'passed ',ref
+c...
       ELSE
 C* Ignore other MF cases
         GO TO 20
@@ -574,7 +630,7 @@ c...
         RF4=REF
       END IF
 C*
-      IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR.
+      IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
      &  (MF0.EQ.4 .AND. MT0/10000.EQ.4)) THEN
 C* Simple cross sections and cross sections at fixed angle
         IF(F1.GT.1.0E-9 .AND. F1.LT.9.9E+9) THEN
