@@ -479,7 +479,7 @@ C*      No action necessary for Law 0, 3, 4
       ELSE IF(LAW0.EQ.2 .OR. LAW0.EQ.5 ) THEN
 C*      Copy the data for Law 2, 5
         IF(LAW0.EQ.5 .AND. LTT.GT.0)
-     1    WRITE(LTT,900) ' WARNING - Conversion not done for Law  ',LAW0
+     1    WRITE(LTT,900) ' WARNING - No conversion - copied Law   ',LAW0
         CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
      1             ,NR,NE,NBT,INT)
@@ -494,6 +494,13 @@ C*        Convert Legendre to pointwise distribution if necessary
           END IF
           CALL WRLIST(LOU,MAT0,MF0,MT0,NS,C1,EI,LANG,L2,NW,NL,RWO)
         END DO
+        GO TO 800
+      ELSE IF(LAW0.EQ.6 ) THEN
+C*      Copy the data for Law 6
+        IF(LTT.GT.0)
+     1    WRITE(LTT,900) ' WARNING - No conversion - copied Law   ',LAW0
+        CALL RDHEAD(LEN,MAT ,MF ,MT ,APSX,C2,L1,L2,N1,NPSX,IER)
+        CALL WRCONT(LOU,MAT0,MF0,MT0,NS,APSX,C2,L1,L2,N1,NPSX)
         GO TO 800
       ELSE IF(LAW.EQ.7) THEN
 C*      Copy the data for Law 7
@@ -799,7 +806,8 @@ C* Enter energy point - skip if energy less then previous point
       JP=JP+1
       IF(JP.GE.KX) STOP 'MF6LW7 ERROR - MXRW capacity exceeded'
 C* Continue with the secondary energy loop
-  408 IF(IP.LT.NEP) GO TO 200
+  408 CONTINUE
+      IF(IP.LT.NEP) GO TO 200
 C*
 C* All secondary particles energies processed
       IF(JP.EQ. 1 ) THEN
@@ -857,15 +865,20 @@ C* Check the integral normalisation factor
         END IF
 C* Copy from scratch to output and normalise distributions
       REWIND LSC
-      DO 550 IMU=1,NMU
-      CALL RDTAB1(LSC,C1,ACOS,L1,L2,NRP, JP, NBT,INT
-     1           ,RWO(LXE),RWO(LXX),KX,IER)
-      DO 542 J=1,JP
-      RWO(LXX+J-1)=RWO(LXX+J-1)/SIG
-  542 CONTINUE
-      CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
-     1           , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
-  550 CONTINUE
+      IF(SIG.LT.1E-30) THEN
+        IF(LTT.GT.0)
+     &  WRITE(LTT,*) 'WARNING - small normalisation Sig',SIG
+        SIG=1
+      END IF
+      DO IMU=1,NMU
+        CALL RDTAB1(LSC,C1,ACOS,L1,L2,NRP, JP, NBT,INT
+     1             ,RWO(LXE),RWO(LXX),KX,IER)
+        DO J=1,JP
+          RWO(LXX+J-1)=RWO(LXX+J-1)/SIG
+        END DO
+        CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
+     1             , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
+      END DO
       REWIND LSC
 C* Continue with the incident energy loop
   600 CONTINUE
