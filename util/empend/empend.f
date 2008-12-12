@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-07-30 19:00:38 $ 
-Ccc   * $Id: empend.f,v 1.52 2008-07-30 19:00:38 herman Exp $ 
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2008-12-12 14:28:02 $ 
+Ccc   * $Id: empend.f,v 1.53 2008-12-12 14:28:02 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -69,6 +69,8 @@ C-V  08/02 Improved compiler compatibility (use of undefined variables).
 C-V  08/05 - Separate (z,2n2px) from (z,ax), when possible.
 C-V        - Fix gamma yields at high energies when cross sections go
 C-V          to zero, e.g. (z,ax) after subtracting (z,2n2px).
+C-V  08/12 - Fix formatting of MF10 reactions involving alphas.
+C-V        - Print WARNING when unprocessable spectra are encountered.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -325,7 +327,7 @@ C*
 C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       REWIND LIN
       JT6=MXI-LBI
-      CALL SCNMF6(LIN,NT6,IWO(LBI),JT6,IZI)
+      CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI)
 C* Summ MT 5 contributions as necessary
       CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
      &           ,RWO(LXS),QQM,QQI,MXE,MXT)
@@ -642,7 +644,7 @@ C*
   999 FORMAT(10I8)
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
-C-Title  : Subroutine EMTIZA
+C-Title  : Subroutine MTTOZA
 C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
       IF     (MT.EQ.  2) THEN
         JZA=IZA
@@ -806,8 +808,8 @@ C* (g,n2p) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (g,npa) cross section
           MT = 45
-        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
-C* (g,5n) cross section
+c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
+c...C* (g,5n) cross section
 c...          MT = 47
         ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
 C* (g,g') radiative capture cross section
@@ -907,9 +909,9 @@ C* (n,n2p) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (n,npa) cross section
           MT =   45
-        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
-C* (n,5n) cross section
-C...          MT =   47
+c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
+c...C* (n,5n) cross section
+c...          MT =   47
 C... Conflicts with (n,2np)
 C...    ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
 C* (n,He3) cross section
@@ -991,9 +993,9 @@ C* (p,n2p) cross section
         ELSE IF(JZA  .EQ. IZA-2005) THEN
 C* (p,npa) cross section
           MT =45
-        ELSE IF(JZA  .EQ. IZA+IZI-5) THEN
-C* (p,5n) cross section
-C...          MT =   47
+c...        ELSE IF(JZA  .EQ. IZA+IZI-5) THEN
+c...C* (p,5n) cross section
+c...          MT =   47
         ELSE IF(JZA  .EQ. IZA+1001) THEN
 C* Radiative capture cross section
           MT =102
@@ -1106,9 +1108,9 @@ C* (a,n2p) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C* (a,npa) cross section
           MT =45
-        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
-C* (a,4n) cross section
-          MT =   47
+c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
+c...C* (a,5n) cross section
+c...          MT =47
         ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
 C* (a,g) radiative capture cross section
           MT =102
@@ -1247,12 +1249,12 @@ C...
      &       POUT.NE.'neutrons' .AND.
      &       POUT.NE.'protons ') MT=-MT
         END IF
-c...    IF(PTST.EQ.' (z,5n) ') THEN
-c...      MT= 47
-c...      IF(POUT.NE.'recoils ' .AND.
-c... &       POUT.NE.'gammas  ' .AND.
-c... &       POUT.NE.'neutrons') MT=-MT
-c...    END IF
+        IF(PTST.EQ.' (z,5n) ') THEN
+          MT= 47
+          IF(POUT.NE.'recoils ' .AND.
+     &       POUT.NE.'gammas  ' .AND.
+     &       POUT.NE.'neutrons') MT=-MT
+        END IF
         IF(PTST.EQ.' (z,n)  ') THEN
           MT= 91
           IF(POUT.NE.'recoils ' .AND.
@@ -1650,7 +1652,10 @@ C*          -- Add neutron production to MT201
       SUBROUTINE FIXALF(LIN,IZI,IZA,NXS,NPT,MTH,XSR,QQM,QQI,MXE,MXT)
 C-Title  : FIXALF Subroutine
 C-Purpose: Separate out (z,2p+2n+x) from (z,a+x)
+C-Version: May 2008
+C-V  08/07 Declare X2 double precision to avoid underflow
       CHARACTER*136 REC
+      DOUBLE PRECISION  SS,E1,E2,X1,X2
       DIMENSION MTH(MXT)
       DIMENSION XSR(MXE,MXT),QQM(MXT),QQI(MXT)
 C*
@@ -1721,16 +1726,31 @@ C*      -- New reaction - add if significant
         QQM(JX)=QQM(IX)
         QQI(JX)=QQI(IX)
   
-        PRINT *,'  Added reaction',MJZA,JX
+        PRINT *,'Added   (z,2n+2p+x) reaction',MJZA,JX
 
       END IF  
 C* Add '2n2p' contribution under reaction MJZA and subtract from MT
       IF(DX.LT. 0) DX=0
       IF(DX.GT.XS) DX=XS
-      XSR(IEN,IX)=XSR(IEN,IX)-DX
+      XALF=XSR(IEN,IX)-DX
+      FALF=XALF/XSR(IEN,IX)
+      XSR(IEN,IX)=XALF
       XSR(IEN,JX)=DX
       IF(J201.NE.0) XSR(IEN,J201)=XSR(IEN,J201)+DX*2
       IF(J203.NE.0) XSR(IEN,J203)=XSR(IEN,J203)+DX*2
+C* Check if there are any isomer-production reactions to be corrected
+      DO IX=1,NXS
+c...
+c...        print *,mth(ix),mjza
+c...
+        IF(MTH(IX)/10.EQ.MJZA/10 .AND. MTH(IX).NE.MJZA) THEN
+          XSR(IEN,IX)=XSR(IEN,IX)*FALF
+c...
+c...      print *,'Correcting isomeric reaction',mth(ix),' point',ien
+c...
+        END IF
+      END DO
+
       GO TO 110
 C*
   200 RETURN
@@ -1739,12 +1759,15 @@ C*
   804 FORMAT(F10.0,F14.0)
   891 FORMAT(A136)
       END
-      SUBROUTINE SCNMF6(LIN,NT6,MTH,MXI,IZI)
+      SUBROUTINE SCNMF6(LIN,LTT,LER,NT6,MTH,MXI,IZI)
 C-Title  : SCNMF6 Subroutine
 C-Purpose: Scan EMPIRE output for all react. with energy/angle distrib.
+      PARAMETER    (MXKUN=20)
       CHARACTER*136 REC
+      CHARACTER*8   CUN(MXKUN)
       DIMENSION MTH(1)
 C*
+      KUN=0
       NT6=0
   110 READ (LIN,891,END=200) REC
 C* Test for elastic angular distributions of neutral particles
@@ -1755,8 +1778,40 @@ C* Test for elastic angular distributions of neutral particles
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C* Identify the reaction and assign the MT number
       CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI)
-      IF(MT .LE.0) GO TO 110
-C* Spectrum printout encountered - begin processing
+      IF(MT .LE.0) THEN
+C*      -- Unknown reaction encountered
+        IF(KUN.GT.0) THEN
+          DO K=1,KUN
+            IF(REC(23:30).EQ.CUN(K)) GO TO 110
+          END DO
+        END IF
+        WRITE(LTT,*) 'WARNING - Unknown Spectrum of ',REC(15:30)
+        WRITE(LER,*) 'WARNING - Unknown Spectrum of ',REC(15:30)
+        KUN=KUN+1
+        CUN(KUN)=REC(23:30)
+        GO TO 110
+      END IF
+C* Check that the printed spectrum is not all zero
+      READ (LIN,891,END=200) REC
+      READ (LIN,891,END=200) REC
+      READ (LIN,891,END=200) REC
+C*    - Skip the test if angle-dependent cross sections
+C*      (Problems were noted only with (n,x) in some cases)
+      IF(REC(1:10).EQ.' Energy   ') GO TO 120
+C*    - Spectrum energy and value
+      READ (LIN,891,END=200) REC
+      READ (REC,892,ERR=200) E2,X2
+      SS=0
+  112 E1=E2
+      X1=X2
+      READ (LIN,891,END=200) REC
+      IF(REC(1:20).NE.'                    ') THEN
+        READ (REC,892,ERR=200) E2,X2
+        SS=SS+(E2-E1)*(X2+X1)/2
+        GO TO 112
+      END IF
+      IF(SS.LE.0) GO TO 110
+C* Valid spectrum printout encountered - begin processing
   120 IF(NT6.GT.0) THEN
 C* Check if already processed
         DO I=1,NT6
@@ -1780,11 +1835,12 @@ C* File processed - sort MT numbers in ascending order
           ISW=1
         END IF
       END DO
-      IF(ISW.NE.1) RETURN
-      GO TO 210
+      IF(ISW.EQ.1) GO TO 210
+      RETURN
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   891 FORMAT(A136)
+  892 FORMAT(F9.0,F15.0)
       END
       SUBROUTINE RDANGF(LIN,NEN,NAN,RWO,MXR,ANG,MXA,MT,ZAP,LTT,LER)
 C-Title  : Subroutine RDANGF
@@ -2042,7 +2098,7 @@ C*
      1      ,' Ein',1P,E10.3,' Eou',E10.3/17X
      2      ,' Input angular distribution negative at',I3
      3      ,' out of',I3,' angle(s)')
-  912 FORMAT(' EMPEND ERROR - in RDANG reading EMPIRE output record:'/
+  912 FORMAT(' EMPEND ERROR - in RDANGF reading EMPIRE output record:'/
      1       ' "',A70,'"')
       END
       SUBROUTINE ANGLEG(NAN,ANG,NEN,DST,LOMX,LOR,PLG,MXR,RWO,MT,EIN,ZAP
@@ -2706,7 +2762,7 @@ C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
       DIMENSION     EIN(1),XSC(MXE,1),EIS(1),YLD(1),QQM(1),QQI(1)
      1             ,RWO(1),ANG(MXA),DST(MXA),MTH(1)
-      DIMENSION     IZAK(MXP),AWPK(MXP),ZANG(MXZ),ZLEG(MXZ)
+      DIMENSION     IZAK(MXP),AWPK(MXP),ZANG(MXA),ZDST(MXA)
 C*
       DATA PI/3.1415926/
       DATA SMALL/1.E-5 /
@@ -2863,6 +2919,7 @@ c...      NE6N=0
       E0 =-1
       YL0= 1
       ETEF=0
+      LTTE=1
 C* Find the cross section index
       DO I=1,NXS
         IF(MTH(I).EQ.MTC) THEN
@@ -2963,30 +3020,98 @@ C* Reserve the space in the Real array
       END IF
 C* Define specific File-6 data for all incident energies
   430 L6 =LBL
-C* Process the angular distribution for this energy
+C* Read the angular distribution for this energy
       L64=L6+4
-      LMX=MXR-L64
+      LAN=L64+MAX(LOMX,2*MXA)+4
+      LMX=MXR-LAN
       READ (LIN,891) REC
       EMP=0
-      CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MTC,ZAP,LTT,LER)
-      LSC=L64+NEP*(NAN+1)
-      LMX=MXR-LSC
-      LOX=MIN(LOMX,NAN-1)
-      CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
-     &           ,MTC,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
-C* Only one distribution should be present
+      CALL RDANGF(LIN,NEP,NAN,RWO(LAN),LMX,ANG,MXA,MTC,ZAP,LTT,LER)
+C*    --Only one distribution should be present
       IF(NEP.NE.1) THEN
-        PRINT *,'WARNING - Several distributions for elastic'
+        PRINT *,'WARNING - Several distributions for elastic present'
 c       GO TO 210
       END IF
-      RWO(L6    )=EE
+      IF(LTTE.EQ.3) GO TO 440
+C* Check if Legendre coefficients are given explicitly
+      LHI=LOMX+1
+      READ (LIN,891) REC
+      READ (LIN,891) REC
+      IF(REC(1:20).EQ.'  Legendre coefficie') THEN
+        READ (LIN,891) REC
+        READ (LIN,891) REC
+        READ (REC(9:13),*) LHI
+        IF(LHI.GE.LMX) STOP 'REAMF6 - LMX array capacity exceeded'
+        READ (LIN,891) REC
+C...
+C... Truncate the series temporarily to suppress switching to tabular
+c...    LHI=MIN(LHI,LOMX+1)
+C...
+        IF(LHI.LE.LOMX+1) THEN
+          READ (LIN,809) (RWO(L64+L),L=1,LHI)
+          LHI=LHI-1
+          RWO(L64)=0
+          LVEC=LHI+2
+          GO TO 450
+        ELSE
+          GO TO 440
+        END IF
+      END IF
+C* Convert tabulated distribution to Legendre polynomial expansion
+      LSC=LAN+NEP*(NAN+1)
+      LMX=MXR-LSC
+C...
+C... Temporarily limit order to suppress switching to tabulated form
+      LOX=MIN(LOMX+1,NAN)
+c...  LOX=MIN(LOMX,NAN-1)
+C...
+      CALL ANGLEG(NAN,ANG,NEP,RWO(LAN),LOX,LHI,RWO(L64),LMX,RWO(LSC)
+     &    ,MTC,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
+      LVEC=LHI+2
+      IF(LHI.LE.LOMX) GO TO 450
+C* Number of Legendre coefficients too big - save tabular data
+  440 IF(LTTE.NE.3) THEN
+C* On first pass duplicate previous point in tabular form
+        LHI=-NANZ
+        LVEC=NANZ*2
+        LTTE=3
+        RWO(L6    )=EINZ
+        RWO(L6 + 1)=LHI
+        RWO(L6 + 2)=LVEC
+        RWO(L6 + 3)=1
+        DO I=1,NANZ
+          RWO(L64-I+NAN*2)=ZDST(I)
+          RWO(L64-I+NAN  )=ZANG(I)
+        END DO
+        LBL=L6 + 4 + LVEC
+        NE6=NE6+1
+        EIS(NE6)=EE
+        L6 =LBL
+        L64=L6+4
+      END IF
+C* Copy tabulated distribution, skip energy at RWO(LAN)
+      DO I=1,NAN
+        RWO(L64-I+NAN*2)=RWO(LAN+I)
+        RWO(L64-I+NAN  )=ANG(I)
+      END DO
+      LHI=-NAN
+      LVEC=NAN*2
+C* Save parameters in the work array
+  450 RWO(L6    )=EE
       RWO(L6 + 1)=LHI
-      RWO(L6 + 2)=LHI+2
+      RWO(L6 + 2)=LVEC
       RWO(L6 + 3)=1
-C* Increment indices in the storage array
-      LBL=L6 + 4 + LHI + 2
+C* Increment indices in the work array
+      LBL=L6 + 4 + LVEC
       NE6=NE6+1
       EIS(NE6)=EE
+C* Save a copy of the tabular distribution
+      NANZ=NAN
+      EINZ=EE
+      DO I=1,NANZ
+        ZANG(I)=ANG(I)
+        ZDST(I)=RWO(LAN+I)
+      END DO
       GO TO 210
 C*
 C* Read the energy/angle distribution data
@@ -3101,7 +3226,7 @@ C* Set the available outgoing particle energy
 C...      EMP=EMX
 C...      EMP=EMX* (AWR+AWI-AWP)/(AWR+AWI)
 C... Maximum particle energy should be set within the EMPIRE code!!!
-C... Set EMP=0 to skip testing in RDANG
+C... Set EMP=0 to skip testing in RDANGF
 C...
       EMP=0
       LMX=MXR-L64
@@ -3411,7 +3536,7 @@ C*
   806 FORMAT(6X,8(5X,F10.4))
   807 FORMAT(BN,F10.5,F14.4,7F15.4)
   808 FORMAT(BN,I6,6X,F12.0)
-  809 FORMAT(9X,8F15.4)
+  809 FORMAT(9X,8F15.0)
   821 FORMAT(4F11.0,2I11,F4.2)
   822 FORMAT(6I11,I4)
   891 FORMAT(A136)
@@ -3994,7 +4119,7 @@ C*
      1                 ,MT,MAT,IZA,IZI,AWR,LCT0,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
-      PARAMETER   (MXQ=80)
+      PARAMETER   (MXQ=202)
       CHARACTER*8  PTST
       DOUBLE PRECISION DEIN,DAWR,DAWI,DAWP,DQQI
       DIMENSION    RWO(1),QQM(1),QQI(1),MTH(1),NBT(1),INT(1)
@@ -4038,11 +4163,29 @@ C* Write file MF4 angular distributions (first outgoing particle)
       JE =NE
       NR =1
       LL =LL+12+2*NP
-      JE =NE
       J2 =0
       JTH=0
       INT(1)= 2
       ETH=(-QQI(IT))*(AWR+AWI)/AWR
+C* Scan the data-set to check if any tabular data exist
+      LL0=LL
+      NE1=NE
+      NM =0
+      DO IE=1,NE
+        NA  =NINT(RWO(LL+1))
+        NW  =NINT(RWO(LL+2))
+        LL  =LL+4+NW
+        NM  =MAX(NM,NA)
+        IF(NA.LT.0) THEN
+          NE1=IE-1
+          EXIT
+        END IF
+      END DO
+      LL =LL0
+      JE =NE1
+      NE2=NE-NE1
+      IF(NE2.GT.0) LTTE=3
+      IF(NE2.EQ.0) NM  =0
 C*
 C* Loop over the incident particle energies
       DO 40 IE=1,NE
@@ -4060,15 +4203,7 @@ C*      Process all energies for elastic
         EOU=0
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
-c...    DEIN=DBLE(EIN)
-c...    DAWR=DBLE(AWR)
-c...    DAWI=DBLE(AWI)
-c...    DAWP=DBLE(AWP)
-c...    DQQI=DBLE(QQI(IT))
-c...    EOU=(DEIN*DAWR/(DAWR+DAWI)+DQQI)*((DAWR+DAWI-DAWP)/(DAWR+DAWI))
-c...
         EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))*((AWR+AWI-AWP)/(AWR+AWI))
-c...
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
@@ -4100,10 +4235,10 @@ C*          Set the threshold data and flag JTH to add extra point
         END IF
         NBT(1)=JE
         CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,LVT,LTTE, 0, 0)
-        CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR, LI,LCT, 0, 0)
-        CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0, 0
+        CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR,LI, LCT , 0,NM)
+        CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
      1             ,NR,JE,NBT,INT)
-C* Print threshold distribution (if necessary)
+C* Print isotropic threshold distribution (if necessary)
         IF(JTH.EQ.1) THEN
           CALL WRLIST(LOU,MAT,MF,MT,NS,TT,ETH,LT, 0,NL, 0,QQ)
           J2 =J2+1
@@ -4118,19 +4253,25 @@ C* Check if discrete level data are present
 C*
       IF(NEP.LE.1) THEN
 C* Copy the coefficients if a single point is given
-        IF(NA1.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
-        CALL FLDMOV(NA1,RWO(L2+1),QQ)
+        IF(NW.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
+        IF(IE.LE.NE1) THEN
+          CALL FLDMOV(NA1,RWO(L2+1),QQ)
+        ELSE
+          CALL FLDMOV(NW ,RWO(L2  ),QQ)
+        END IF
       ELSE
 C* Linearly interpolate Legendre coefficients to EOU
+        IF(IE.GT.NE1)
+     &    STOP 'EMPEND ERROR - Level interp. not supported for tabular'
         IEP =1
-   38   IEP =IEP+1
+   32   IEP =IEP+1
         L1  =L2
         E1  =E2
         L2  =L1+NA+2
         E2  =RWO(L2)
         TST =DLVL*EIN*1E-6
 C* Read until EOU is enclosed by E1 and E2
-        IF(E2.LT.EOU .AND. IEP.LT.NEP) GO TO 38
+        IF(E2.LT.EOU .AND. IEP.LT.NEP) GO TO 32
 c...
 c...    if(-eou.gt.2.40e6 .and. -eou.lt.2.41e6) then
 c...      print *,'EIN,EOU,e1,e2,AWR,AWI,AWP,QQI'
@@ -4170,7 +4311,9 @@ c... 1               ,QQM(IT)-QQI(IT)
 c...
         END IF
       END IF
-      IF(NA.LE.0 .OR. ABS(QQ(1)).LT.1.E-20) THEN
+      IF(IE.GT.NE1) GO TO 36
+C* Condition the Legendre coefficients
+      IF(NA.EQ.0 .OR. ABS(QQ(1)).LT.1.E-20) THEN
         NA=1
         QQ(2)=0.
       ELSE
@@ -4184,16 +4327,46 @@ C* Make the Legendre order even
         QQ(1+NL)=0.
       END IF
 C* Reduce the trailing zero Legendre coefficients
-   39 IF(NL.GT.2 .AND. (QQ(NL).EQ.0 .AND. QQ(1+NL).EQ.0) ) THEN
+   34 IF(NL.GT.2 .AND. (QQ(NL).EQ.0 .AND. QQ(1+NL).EQ.0) ) THEN
         NL=NL-2
-        GO TO 39
+        GO TO 34
       END IF
 C* Write point at EMIN if Q>=0
       EE=EIN
       IF(J2.EQ.0 .AND. QQI(IT).GE.0) EE=EMIN
-C* Write the angular distribution
+C* Write the angular distribution Legendre coefficients
       CALL WRLIST(LOU,MAT,MF,MT,NS,TT,EE,LT, 0,NL, 0,QQ(2))
-      LL  =LL+NW
+      GO TO 38
+C*
+C* Tabular representation
+   36 NR  =1
+      IF(IE.EQ.NE1+1) THEN
+C*      -- Write the TAB2 record for the tabular data
+        NBT(1)=NE2
+        INT(1)=2
+        CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
+     1             ,NR,NE2,NBT,INT)
+      END IF
+      NP  =IABS(NA)
+      NBT(1)=NP
+C* Normalise the distribution
+      SS=0
+      E2=QQ(1)
+      F2=QQ(NP+1)
+      DO I=2,NP
+        E1=E2
+        F1=F2
+        E2=QQ(I)
+        F2=QQ(I+NP)
+        SS=SS+(E2-E1)*(F2+F1)/2
+      END DO
+      DO I=1,NP
+        QQ(I+NP)=QQ(I+NP)/SS
+      END DO
+      CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
+     1           ,NR,NP,NBT,INT,QQ(1),QQ(1+NP))
+C* One energy point processed
+   38 LL  =LL+NW
       J2  =J2+1
    40 CONTINUE
       IF(J2.GT.0) THEN
@@ -4448,15 +4621,19 @@ C* Eliminate reactions with all-zero cross sections
             IF(XSC(J,I).GT.0) NPT=NPT+1
           END DO
           IF(NPT.EQ.0) MTH(I)=-MTH(I)
-C* Eliminate reactions 10*ZA+5 if 10*ZA is present
-          MM=MTH(I)/10
-          MM=MTH(I)-10*MM
-          IF(MM.EQ.5) THEN
-            JT=10*(MTH(I)/10)
-            DO K=1,NXS
-              IF(MTH(K).EQ.JT) MTH(I)=-ABS(MTH(I))
-            END DO
-          END IF
+c...C* Eliminate reactions 10*ZA+5 if 10*ZA is present
+C... !!! No!!! Known case: 10ZA+0,1,2...=(n,a)-->107, 10ZA+5=(n,2n+2p)
+c...          MM=MTH(I)/10
+c...          MM=MTH(I)-10*MM
+c...          IF(MM.EQ.5) THEN
+c...            JT=10*(MTH(I)/10)
+c...            DO K=1,NXS
+c...              IF(MTH(K).EQ.JT) MTH(I)=-ABS(MTH(I))
+c...            END DO
+c...          END IF
+C* Suppress processing of compound-elastic for incident neutrons
+          JZA=MTH(I)/10
+          IF(IZI.EQ.1 .AND. IZA.EQ.JZA) MTH(I)=-ABS(MTH(I))
         END IF
       END DO
 c...
@@ -4478,10 +4655,18 @@ c...
 C*        -- Assign MT number from residual ZA
           JZA=MTH(I)/10
           CALL EMTIZA(IZI,IZA,JZA,MT)
-          IF(MT.EQ. 50) MT=  4
-          IF(MT.EQ.600) MT=103
-          IF(MT.EQ.800) MT=107
-          IF(MT.EQ.0) THEN
+          IF     (MT.EQ. 50) THEN
+            MT=  4
+          ELSE IF(MT.EQ.600) THEN
+            MT=103
+          ELSE IF(MT.EQ.800) THEN
+C*          -- Differentiate between (z,a) and (z,2n+2p)
+            IF(MTH(I)-JZA*10 .LT. 5) THEN
+              MT=107
+            ELSE
+              MT=5
+            END IF
+          ELSE IF(MT.EQ.  0) THEN
             MT=5
           END IF
           IWO(I)=MT
