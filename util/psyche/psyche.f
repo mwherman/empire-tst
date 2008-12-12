@@ -79,7 +79,7 @@
 !-M particles, checks Wick's limit for elastic scattering, analyzes 
 !-M resonance parameter statistics, calculates thermal cross sections 
 !-M and resonance integrals, examines continuity across resonance 
-!-M region boundaries and checks �Q� values against mass tables. 
+!-M region boundaries and checks "Q" values against mass tables. 
 !-M It is assumed the file being checked has passed the CHECKR 
 !-M program without any errors being detected.
 !-M 
@@ -1370,7 +1370,7 @@
          END DO
       END IF
 !
-!     GET RESONANCE�PARAMETERS
+!     GET RESONANCE PARAMETERS
 !
       CALL RDCONT
       AP = C2H
