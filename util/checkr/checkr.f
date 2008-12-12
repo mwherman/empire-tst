@@ -203,9 +203,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !---MDC---
 !
 !     Define variable precision
