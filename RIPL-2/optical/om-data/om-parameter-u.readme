@@ -1,5 +1,5 @@
 Directory: optical/om-data/
-File:      om-parameter-u.readme (Aug 18, 2008)
+File:      om-parameter-u.readme (Dec 15, 2008)
 ****************************************************
 
                     om-parameter-u.dat
@@ -11,8 +11,19 @@ Content
 -------
 Compilation of the Optical Model Potential parameters.
 The library contains all potentials we have compiled, starting
-form the users file of the RIPL-2 library. A table below 
+from the users file of the RIPL-2 library. A table below
 summarizes its contents.
+
+ SUMMARY of RIPL-3 optical potential library:
+ Number of library entries =  495
+ Number of spherical potentials =  384
+ Number of coupled channel vibrational potentials =  10
+ Number of coupled channel rigid rotor potentials =  97
+ Number of coupled channel soft rotor  potentials =  4
+ Number of dispersive potentials =  53
+ Number of potentials defined above 100 MeV =  182
+ Number of references =  135
+
 
 Format
 ------
@@ -38,11 +49,11 @@ epot(i,j)
 
 jcoul
        *****LOOP j=1,jcoul
-ecoul(j),rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j),acoul(j)
+ecoul(j),rcoul0(j),rcoul(j),rcoul1(j),rcoul2(j),beta(j),acoul(j),rcoul3(j)
        *****END j LOOP
-       
-	   model 0: Spherical model
-	   
+
+         model 0: Spherical model
+
     (1)*****SKIP TO (2)***** IF IMODEL NOT EQUAL TO 1
        model 1: RIGID ROTOR (ROTATIONAL MODEL) - Coupled-channels
 nisotopes
@@ -64,7 +75,7 @@ exv(k,n),spinv(k,n),iparv(k,n),nph(k,n),defv(k,n),thetm(k,n)
        *****END n LOOP
 
     (3)*****SKIP REMAINING LINES IF IMODEL NOT EQUAL TO 3
-       model 3: SOFT ROTOR (VIBRATIONAL-ROTATIONAL MODEL) - Coupled-channels 
+       model 3: SOFT ROTOR (VIBRATIONAL-ROTATIONAL MODEL) - Coupled-channels
 nisotopes
        *****LOOP n=1,nisotopes
 iz(n),ia(n),ncoll(n)
@@ -72,7 +83,7 @@ SR_hw(n),SR_amb0(n),SR_amg0(n),SR_gam0(n),SR_bet0(n),SR_bet4(n)  ! Hamiltonian p
 SR_bb42(n),SR_gamg(n),SR_delg(n),SR_bet3(n),SR_et0(n),SR_amu0(n) ! Hamiltonian parameters
 SR_hw0(n),SR_bb32(n),SR_gamde(n),SR_dpar(n),SR_gshape(n)         ! Hamiltonian parameters
        *****LOOP k=1,nvib(n)
-exv(k,n),spinv(k,n),iparv(k,n),SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)   
+exv(k,n),spinv(k,n),iparv(k,n),SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
        *****END k LOOP
        *****END n LOOP
 
@@ -101,6 +112,10 @@ iamin,iamax = minimum and maximum A values for this potential, where
     irel    = 0 for non-relativistic parameterization
             = 1 for relativistic parameterization (relat. kinem. +
                 reduced mass calculated from total relativistic energies)
+            = 2 for relativistic parameterization (relat. kinem. +
+                reduced mass calculated from total relativistic energies) +
+                all potential depths are multiplied by 1 + E/(E+2*mc**2) where E,m
+                are for incident particle and E = total cm kinetic energy.
     idr     = 0 dispersion relations not used
             = 1 dispersion relations with equivalent volume real
                 potential used
@@ -180,7 +195,7 @@ a(i,j) = abs(aco(i,j,1)) + aco(i,j,2)*E + aco(i,j,3)*eta
            + aco(i,j,6)*A**(2/3) + aco(i,j,7)*A
            + aco(i,j,8)*A**2 + aco(i,j,9)*A**3
            + aco(i,j,10)*A**(1/3) + aco(i,j,11)*A**(-1/3)
-		   + aco(i,j,12)*E
+               + aco(i,j,12)*E
 
  pot(i,j,k) = strength parameters in MeV given as follows:
 
@@ -226,7 +241,7 @@ if (pot(i,j,24) .eq. 1) .or. (pot(i,j,24) .eq. 3), then [Koning form]
 
      Vhf(E) = b(i,j,1)*( b(i,j,15) - b(i,j,2)*(E-EF) + b(i,j,3)*(E-EF)**2
          - b(i,j,4)*(E-EF)**3 + b(i,j,13)*exp(-b(i,j,14)*(E-EF)) )
-		 
+
 if pot(i,j,24) .eq. 2, then [Morillon-Romain form]
 
      Vhf(E) is the solution of the implicit equation considering nonlocality (Morillon & Romain):
@@ -250,13 +265,14 @@ if( (pot(i,j,24).ne.0) and (Ea < 1000) and (E > (EF + EA)) ) then,
      V(2,j) = V(2,j) + AlphaV*(sqrt(E)+(EF+EA)**1.5/(2.*E)-1.5*sqrt(EF+EA))
 
 where
-     if( (pot(2,j,24).ne.0) and (Ea < 1000) then, AlphaV = pot(2,j,22) 
-	 if  (pot(2,j,22).eq.0) AlphaV = 1.65 following Mahaux 1991
-	 
+     if( (pot(2,j,24).ne.0) and (Ea < 1000) then, AlphaV = pot(2,j,22)
+       if  (pot(2,j,22).eq.0) AlphaV = 1.65 following Mahaux 1991
+
      E      = Elab - pot(i,j,25)*Z/A**(1/3)
-	 Elab   = projectile laboratory energy in MeV 
-	 pot(i,j,25) is the estimated Coulomb shift used in Lane consistent potentials
-	 
+       Elab   = projectile laboratory energy in MeV
+       pot(i,j,25) is the estimated Coulomb shift used in Lane consistent potentials
+                   for proton induced reactions
+
      eta    = (N-Z)/A
      Ecoul1 = 0.4Z/A**(1/3)
      Ecoul2 = 1.73*Z/RC
@@ -265,7 +281,7 @@ where
 
      EF     = Fermi energy in MeV
             = pot(i,j,18) + pot(i,j,19)*A
-   
+
      If pot(i,j,18) and pot(i,j,19) = 0., then
      EF     = -0.5*[SN(Z,A) + SN(Z,A+1)]   (for incident neutrons)
             = -0.5*[SP(Z,A) + SP(Z+1,A+1)] (for incident protons)
@@ -278,19 +294,19 @@ For pot(i,j,24).ne.0, the b(i,j,m) are defined as: [extended Koning form]
 
        b(i,j,m)  =  0 for i=1,6, j=1,jrange(i), m=1,12, except for
                     the following:
- 
+
        b(1,j,1)  =  pot(1,j,1) + pot(1,j,2)*A + pot(1,j,8)*eta +
                   + pot(1,j,20)*eta/(pot(1,j,14) + pot(1,j,15)*A + pot(1,j,16))
-     
-	   b(1,j,2)  =  pot(1,j,3) + pot(1,j,4)*A 
-       if pot(i,j,24) = 3, then 
-	   b(1,j,2)  =  -(pot(1,j,3) + pot(1,j,4)*eta)/b(1,j,1) [Li - Cai form]
+
+         b(1,j,2)  =  pot(1,j,3) + pot(1,j,4)*A
+       if pot(i,j,24) = 3, then
+         b(1,j,2)  =  -(pot(1,j,3) + pot(1,j,4)*eta)/b(1,j,1) [Li - Cai form]
 
        b(1,j,3)  =  pot(1,j,5) + pot(1,j,6)*A
        b(1,j,4)  =  pot(1,j,7)
        b(1,j,5)  =  pot(1,j,9)
-	   if pot(i,j,24) = 3, then b(1,j,5) = 0  [No Coulomb correction for Li & Cai proton OMP]
-	   
+         if pot(i,j,24) = 3, then b(1,j,5) = 0  [No Coulomb correction for Li & Cai proton OMP]
+
        b(1,j,11) =  pot(1,j,10) + pot(1,j,11)*A
        b(1,j,12) =  pot(1,j,12)
        b(1,j,13) =  pot(1,j,16)
@@ -298,22 +314,22 @@ For pot(i,j,24).ne.0, the b(i,j,m) are defined as: [extended Koning form]
        b(1,j,15) =  pot(1,j,14) + pot(1,j,15)*A
        if b(1,j,15)   = 0  then b(1,j,15) = 1 To preserve compatibility with Koning form
        if pot(i,j,24) = 3, then b(1,j,15) = 1 To preserve compatibility with Koning form
-	   
+
        b(2,j,6)  =  pot(2,j,1) + pot(2,j,2)*A + pot(2,j,8)*eta
        b(2,j,7)  =  pot(2,j,3) + pot(2,j,4)*A + pot(2,j,9)*eta
        b(4,j,8)  =  pot(4,j,1) + pot(4,j,8)*eta + pot(4,j,7)*A + pot(4,j,9)*A**(-1/3)
-       b(4,j,9)  =  pot(4,j,2) + pot(4,j,10)*A 
+       b(4,j,9)  =  pot(4,j,2) + pot(4,j,10)*A
                   + pot(4,j,3)/(1. + exp((A-pot(4,j,4))/pot(4,j,5)))
        b(4,j,10) =  pot(4,j,6) + pot(4,j,11)*A
-       b(4,j,12) =  pot(4,j,12)	   
-	   
+       b(4,j,12) =  pot(4,j,12)
+
        b(5,j,11) =  pot(5,j,10) + pot(5,j,11)*A
        b(5,j,12) =  pot(5,j,12)
-	   
+
        b(6,j,6)  =  pot(6,j,1)
        b(6,j,7)  =  pot(6,j,3)
-       
-	   n(i,j)    =  int(pot(i,j,13))
+
+         n(i,j)    =  int(pot(i,j,13))
 
 And, continuing the definitions:
 
@@ -352,10 +368,12 @@ And, continuing the definitions:
        defv  = vibrational model deformation parameter
       thetm  = mixing parameter (degrees) for nph=3
 
-	  Soft-rotor hamiltonian parameters for this iz and ia (used only by the OPTMAN code)
+        Soft-rotor hamiltonian parameters for this iz and ia (used only by the OPTMAN code)
       SR_hw(n),SR_amb0(n),SR_amg0(n),SR_gam0(n),SR_bet0(n),SR_bet4(n)  ! Hamiltonian parameters
       SR_bb42(n),SR_gamg(n),SR_delg(n),SR_bet3(n),SR_et0(n),SR_amu0(n) ! Hamiltonian parameters
       SR_hw0(n),SR_bb32(n),SR_gamde(n),SR_dpar(n),SR_gshape(n)         ! Hamiltonian parameters
 
       Soft rotor quantum numbers for each vibrational-rotational level  (used only by the OPTMAN code)
-      SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)     
+      SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
+
+
