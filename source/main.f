@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-10 22:18:13 $
-Ccc   * $Id: main.f,v 1.194 2008-12-10 22:18:13 Capote Exp $
+Ccc   * $Date: 2008-12-15 01:52:20 $
+Ccc   * $Id: main.f,v 1.195 2008-12-15 01:52:20 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -22,7 +22,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect, ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -30,9 +30,10 @@ C
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
+     &                 rohfb_norm(NFHump)
 
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
       DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont        ! ECISXS
 
@@ -43,11 +44,11 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd, barnorm, hnorm
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd, rohfb_norm, barnorm, hnorm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -92,7 +93,7 @@ C                      Total prompt fission spectra only for two ejectiles (n,g)
 C                      Total PF angular distribution defined only for neutrons
      &                 cseapfns(NDEPFN,NDAngecis),enepfns(NDEPFN,0:1),
      &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),
-     &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind, 
+     &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind,
      &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
      &                 fisxse, dtmp0, dtmp1, csinel,eps
       CHARACTER*9 cejectile
@@ -122,11 +123,11 @@ C     DATA opart/1hn,1hp,1ha/
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
-      
+
       open(94,file='EMPIRE.STA')
       WRITE(94,'(1x,5HSTART)')
-      close(94)     
-      
+      close(94)
+
 C-----
 C-----Read and prepare input data
 C-----
@@ -155,16 +156,16 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
 C
 C       Find exclusive nuclei and print their cross section
-C        
-        i = 0 
-        DO nnuc=1,NNUcd 
+C
+        i = 0
+        DO nnuc=1,NNUcd
 C         IF(ENDF(nnuc).LE.1) then
             i = i + 1
             preaction(i) = REAction(nnuc)
-C         ENDIF  
-        ENDDO          
+C         ENDIF
+        ENDDO
         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+5,
-     &      int(Z(0)), SYMb(0), int(A(0))       
+     &      int(Z(0)), SYMb(0), int(A(0))
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
      &       '  Elastic   ','  Reaction  ','  Fission   ',
      &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
@@ -770,21 +771,21 @@ C    &   ' DWBA to continuum XS for inelastic channel (test) ',SINlcont
 C--------Correct CN population for PE continuum emission
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
-            write(8,*) 
+            write(8,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
-            write(*,*) 
+            write(*,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
             totemis = CSFus - xsinl
             corrmsd = 0.d0
-           
+
             if(xsinl.lt.0.0001d0) then
               xsinl = 0.d0
               totemis =  CSFus
               corrmsd = 0.d0
               write(8,*) ' Changed to : xsinl = ', xsinl,
      &                   ' PCROSS=',totemis
-            endif  
-        
+            endif
+
             WRITE (8,*) ' '
             WRITE (8,*) 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             IF (MSD+MSC.GT.0 .AND. ICOmpff.GT.0) THEN
@@ -842,18 +843,17 @@ C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
            CALL WHERE(izares,nnurn,iloc)
-C          IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
-           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,1)
+           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
            IF (iloc.EQ.0 .AND. IOUt.GT.3) CALL AUERST(nnur,1)
 C----------Proton emission
-C          izares = izares - 1000
-C          CALL WHERE(izares,nnurp,iloc)
-C          IF (iloc.EQ.0) THEN
-C            CALL SCNDPREEQ(nnur,nnurp,2,1)
-C             IF (IOUt.GT.3) CALL AUERST(nnur,2)
-C          ELSE
-C            CALL SCNDPREEQ(nnur,nnurp,2,2)
-C          ENDIF
+           izares = izares - 1000
+           CALL WHERE(izares,nnurp,iloc)
+           IF (iloc.EQ.0) THEN
+             CALL SCNDPREEQ(nnur,nnurp,2,1)
+             IF (IOUt.GT.3) CALL AUERST(nnur,2)
+           ELSE
+             CALL SCNDPREEQ(nnur,nnurp,2,2)
+           ENDIF
 C----------Second chance preequilibrium *** done ***
          ENDIF
       ENDIF
@@ -867,7 +867,7 @@ c        zres = Z(1) - ZEJc(nejc)
 c        izares = INT(1000.0*zres + ares)
 c        CALL WHERE(izares, nnur, iloc)
 c        IF(iloc.EQ.1)THEN
-c           WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=', 
+c           WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
 c    &                 zres, ' HAS NOT BEEN INITIALIZED'
 c           WRITE(6, *)' EXECUTION STOPPED'
 c           STOP
@@ -998,7 +998,7 @@ C-----Start DO loop over decaying nuclei
             ENDDO
          ENDDO
          IF (IOUt.GT.0) THEN
-         if(nnuc.le.NDEJC) 
+         if(nnuc.le.NDEJC)
      &     WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)),
      &                  SYMb(nnuc), INT(A(nnuc))
 1234       FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,
@@ -1315,7 +1315,7 @@ C--------
             WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             IF (nvwful) GOTO 1500
          ENDIF
-                        
+
          IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
      &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1) + CSEmis(3,1))
      &       .NE.0) THEN
@@ -1473,7 +1473,7 @@ C-----------------Fission ()
      &                              dencomp,aafis,0)
                   ELSE
                     sumfis  = 0.d0
-                    aafis   = 0.d0 
+                    aafis   = 0.d0
                     DO m = 1, INT(FISmod(nnuc)) + 1
                       sumfism(m) = 0.d0
                     ENDDO
@@ -1501,16 +1501,16 @@ C-----------------Calculate total emission
             ENDDO                   !loop over decaying nucleus parity
 C
 C           the following if could be commented to calculate fission for
-C           all excitation energies 
+C           all excitation energies
 C           if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
             dtmp0 =dtmp1
- 
+
             IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc)) THEN
-               IF (FISmod(nnuc).EQ.0. .and. .not. skip_fiss) 
+               IF (FISmod(nnuc).EQ.0. .and. .not. skip_fiss)
      &              WRITE (80,*) 'csfis=', CSFis,
-     &              ' mb', '   fisxse=', dtmp1, ' mb' 
+     &              ' mb', '   fisxse=', dtmp1, ' mb'
                IF (FISmod(nnuc).GT.0. .and. dtmp1.ge.0.d0) THEN
                   WRITE (80,*) '  '
                   DO m = 1, INT(FISmod(nnuc)) + 1
@@ -1840,7 +1840,7 @@ C------------Residual nuclei must be heavier than alpha
      &             '(1X,A2,'' emission cross section'',G12.5,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (IOUt.GT.0 .and. ENDf(nnuc).EQ.1 .and. FIRst_ein)
-     &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)    
+     &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
              IF (IOUt.GT.0) WRITE (8,
      &             '(2X,A2,'' emission cross section'',G12.5,'' mb'')')
@@ -1923,8 +1923,8 @@ C-----Reaction Cross Sections lower than 1.d-10 are considered zero.
 C       if(ENDf(nnuc).le.1 .or. nnuc.le.22) then
 C       if(ENDf(nnuc).le.1) then
           i = i + 1
-          csprnt(i) = CSPrd(nnuc)        
-C       endif             
+          csprnt(i) = CSPrd(nnuc)
+C       endif
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
       WRITE(41,'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
@@ -2825,7 +2825,7 @@ C     ENDDO
      &  G12.5)') FCCred
          WRITE (8,'('' *******************************************'',
      &           23(1H*))')
- 
+
         IF (INT(ZEJc(0)).EQ.0) THEN
          WRITE (*,
      &  '(''   Calculated total cross section                 '',
@@ -2836,7 +2836,7 @@ C     ENDDO
      &  '(''   Calculated nonelastic cross section            '',
      &        G12.5, '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
-     
+
         WRITE (*,
      &  '(''   Production cross section (incl.fission)        '',
      &           G12.5,'' mb'')')  checkXS
@@ -2844,7 +2844,7 @@ C     ENDDO
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
-        IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) THEN   
+        IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) THEN
           WRITE (*,'(''   Compound elastic cross section (CE) '',
      &     G12.5,'' mb  ''/)') 4.*PI*ELCncs
         ELSE
@@ -2895,7 +2895,7 @@ C     ENDDO
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF(FISspe.GT.0) THEN 
+      IF(FISspe.GT.0) THEN
 C    &        '(1X,f9.5,1x,f8.3,4(1x,f7.3))')
               WRITE(74,
      &        '(1X,f9.5,1x,d12.6,4(1x,d12.6))')
@@ -3080,9 +3080,9 @@ C
          CLOSE (41)
          IF(DEGa.GT.0) THEN
            CLOSE (42)
-         ELSE  
-           CLOSE (42,STATUS = 'delete')    
-         ENDIF  
+         ELSE
+           CLOSE (42,STATUS = 'delete')
+         ENDIF
          CLOSE(53)
          CLOSE(58)
          CLOSE (66,STATUS = 'delete')
@@ -3109,7 +3109,7 @@ C--------Saving random seeds
          CLOSE(94)
          open(94,file='EMPIRE.STA',status='OLD')
          WRITE(94,'(1x,2HOK )')
-         close(94)        
+         close(94)
          close(102)
          RETURN
       ENDIF
@@ -3382,18 +3382,18 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect, ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
 
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -3498,18 +3498,18 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect, ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
 
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 

@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-15 01:52:18 $
-Ccc   * $Id: input.f,v 1.283 2008-12-15 01:52:18 Capote Exp $
+Ccc   * $Date: 2008-12-15 01:53:10 $
+Ccc   * $Id: input.f,v 1.284 2008-12-15 01:53:10 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -269,9 +269,9 @@ C--------set fission defaults
          DO nnuc = 1, NDNUC
            FISbar(nnuc) = 2     ! HFB Goriely's parameters for parabolic barriers are default.
            FISopt(nnuc) = 0
-C          FISden(nnuc) = 2     ! HFB NLD 
+C          FISden(nnuc) = 2     ! HFB NLD
            FISden(nnuc) = 0     ! EMPIRE NLD at saddle points are default!!
-           FISmod(nnuc) = 0 
+           FISmod(nnuc) = 0
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
 C
@@ -989,14 +989,14 @@ C    >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
 C
 C--------check input for consistency
 C
-         WRITE (8,*) 
+         WRITE (8,*)
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
-     &      WRITE (8,*) 
+     &      WRITE (8,*)
      &'Uncertainty samp.-gaussian pdf. Interval: [-3*sig,3*sig]'
          IF(IOPran.le.0)  ! Uniform error
-     &      WRITE (8,*) 
+     &      WRITE (8,*)
      &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
-            WRITE (8,*)         
+            WRITE (8,*)
 
          IF (LHRtw.NE.0 .AND. LTUrbo.NE.1) THEN
             LTUrbo = 1
@@ -1104,15 +1104,15 @@ c         ENDIF
      &' WARNING: Please add line: DIRPOT ',-KTRompcc,
      &' to your INPUT file'
 
-            if(ABS(KTRompcc).ne.9602) then                                
+            if(ABS(KTRompcc).ne.9602) then
               WRITE (8,
      &'(''  Optical model parameters for direct inelastic scattering set
      & to RIPL #'',I4)') KTRompcc
             else
               WRITE (8,
      &'(''  Optical model parameters for direct inelastic scattering set
-     & to Kumar & Kailas 2007 values'')')           
-            endif    
+     & to Kumar & Kailas 2007 values'')')
+            endif
             WRITE (8,*) ' '
          ENDIF
 
@@ -2357,14 +2357,14 @@ C
      &            KTRlom(1,1)
         WRITE (12,*) 'Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP     
-        if(ABS(KTRlom(3,1)).ne.9602) then                                 
+C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
+        if(ABS(KTRlom(3,1)).ne.9602) then
         WRITE (12,*) 'Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
         else
-        WRITE (12,*) 'Alpha     o. m. parameters: Kumar & Kailas 2007 '                              
+        WRITE (12,*) 'Alpha     o. m. parameters: Kumar & Kailas 2007 '
       endif
-        
+
         IF (NEMc.GT.0) WRITE (12,*)
      &               'Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)
@@ -2465,7 +2465,7 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '                                                '
         WRITE (12,*) '[EMP] M. Herman, R. Capote, B. Carlson,         '
         WRITE (12,*) '      P. Oblozinsky, M. Sin, A. Trkov,          '
-        WRITE (12,*) '      H. Wienke and V. Zerkin                   '   
+        WRITE (12,*) '      H. Wienke and V. Zerkin                   '
         WRITE (12,*) '  "EMPIRE: Nuclear Reaction Model Code System   '
         WRITE (12,*) '           for data evaluation"                 '
         WRITE (12,*) '   Nuclear Data Sheets 108 (2007) 2655-2715     '
@@ -2518,11 +2518,11 @@ C        DO i = 1, NNUct
      &            KTRlom(1,1)
         WRITE (8,*) ' Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-        if(ABS(KTRlom(3,1)).ne.9602) then                                 
+        if(ABS(KTRlom(3,1)).ne.9602) then
         WRITE (8,*) ' Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
         else
-        WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '                              
+        WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
       endif
         IF (NEMc.GT.0) WRITE (8,*)
      &            ' Cluster   o. m. parameters: RIPL catalog number ',
@@ -2850,9 +2850,9 @@ C     GOTO 10
 
       WRITE (8,*)'                        ______ ______________________'
       WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |  E M P I R E  -  3 beta 1  |'
+      WRITE (8,*)'                       |  E M P I R E  -  3 beta 2  |'
       WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |    ARCOLE, Sept. 2008      |'
+      WRITE (8,*)'                       |    ARCOLE, Dec. 2008       |'
       WRITE (8,*)'                       |____________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -2870,7 +2870,7 @@ C     GOTO 10
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-3 beta1  by     '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-3 beta2  by     '
       WRITE (12,*) 'M. Herman et al [EMP]. This code integrates into a '
       WRITE (12,*) 'single system a number of important modules and    '
       WRITE (12,*) 'features:                                          '
@@ -3042,7 +3042,7 @@ C--------DEGAS input
                   GDIvp = val + grand()*sigma
                 ELSE
                   GDIvp = val + 1.732d0*(2*drand()-1.)*sigma
-                ENDIF  
+                ENDIF
                 WRITE (8,
      &       '('' DEGAS proton s.p.l. density sampled value is A/: ''
      &          ,f5.2)') GDIvp
@@ -3083,7 +3083,7 @@ C--------PCROSS input
                   MFPp = val + grand()*sigma
                 ELSE
                   MFPp = val + 1.732d0*(2*drand()-1.)*sigma
-                ENDIF  
+                ENDIF
                 WRITE (8,
      &          '('' Mean free path parameter sampled value : '',f5.2)')
      &          MFPp
@@ -3422,7 +3422,7 @@ C-----
                 ELSE
                   IF(rFCCred.eq.1.d0) rFCCred = drand()
                   FCCred = val + 1.732d0*(2*rFCCred-1.)*sigma
-                ENDIF  
+                ENDIF
                 WRITE (8,
      &     '('' Direct cross section was scaled by factor ''
      &          ,f6.3)') FCCred
@@ -3467,7 +3467,7 @@ C-----
                 ELSE
                   IF(rFUSred.eq.1.d0) rFUSred = drand()
                   FUSred = val + 1.732d0*(2*rFUSred-1.)*sigma
-                ENDIF  
+                ENDIF
                 WRITE (8,
      &      '('' Fusion cross section was scaled by factor ''
      &          ,f6.3)') FUSred
@@ -3498,7 +3498,7 @@ C-----
                 ELSE
                    IF(rTOTred.eq.1.d0) rTOTred = drand()
                    TOTred = val + 1.732d0*(2*rTOTred-1.)*sigma
-                ENDIF  
+                ENDIF
                 WRITE (8,
      &          '('' Total cross section was scaled by factor ''
      &          ,f6.3)') TOTred
@@ -3760,7 +3760,7 @@ C
                 FNvvomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
                 FNvvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF  
+              ENDIF
               WRITE (8,
      &        '('' Real volume potential depth sampled norm.factor : '',
      &        f5.2)') FNvvomp(i3,nnuc)
@@ -3809,7 +3809,7 @@ C
                 FNavomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
                 FNavomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF  
+              ENDIF
               WRITE (8,
      &        '('' Volume potential diffuseness sampled norm.factor : ''
      &        ,f5.2)') FNavomp(i3,nnuc)
@@ -3857,7 +3857,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
               ELSE
                 FNwvomp(i3,nnuc) =
      &            max(1. + 1.732d0*(2*drand()-1.)*sigma,0.d0)
-              ENDIF                   
+              ENDIF
               WRITE (8,
      &        '('' Imag. volume potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
@@ -4705,15 +4705,15 @@ C--------------Searching in the RIPL database for i1 catalog number
      &                        ' not found, using default choice'
                   GOTO 100
                ENDIF
-               if(INT(val).ne.9602) then                            
+               if(INT(val).ne.9602) then
                  WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
      &'', I4)') i1, INT(val)
                else
                  WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,
-     & '' set to Kumar & Kailas 2007 values'')') i1       
-               endif                 
+     & '' set to Kumar & Kailas 2007 values'')') i1
+               endif
             ELSE
                WRITE (8,
      &    '('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')'
@@ -6033,11 +6033,11 @@ C-----
          IF (name.EQ.'RANDOM') THEN
             if(nint(val).gt.0) then
               IOPran = 1
-              WRITE (8,*) 
+              WRITE (8,*)
      &          'Gaussian pdf assumed to calculate uncertainty'
             else
               IOPran = 0
-              WRITE (8,*) 
+              WRITE (8,*)
      &          'Uniform pdf assumed to calculate uncertainty'
             endif
             INQUIRE(file='R250SEED.DAT',exist=fexist)
@@ -6046,14 +6046,14 @@ C             If the file R250SEED.DAT does not exist,
 C             then starting seed is read
               iseed = abs(nint(val))
               if(iseed.le.1) iseed=1234567
-              WRITE (8,*) 'Random seeds :', 1, 104            
+              WRITE (8,*) 'Random seeds :', 1, 104
               Call R250Init(iseed)
             else
               OPEN(94,file='R250SEED.DAT',status='OLD')
               read(94,*)  indexf, indexb
-              CLOSE(94)          
-              WRITE (8,*) 'Random seeds :', indexf, indexb            
-            endif            
+              CLOSE(94)
+              WRITE (8,*) 'Random seeds :', indexf, indexb
+            endif
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
