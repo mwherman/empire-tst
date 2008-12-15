@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:20 $
-Ccc   * $Id: fis_io.f,v 1.5 2008-10-14 21:32:20 Capote Exp $
+Ccc   * $Date: 2008-12-15 01:52:18 $
+Ccc   * $Id: fis_io.f,v 1.6 2008-12-15 01:52:18 Capote Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -27,7 +27,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect, ECFism(NFMOD) 
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -38,7 +38,8 @@ C
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
+     &                 rohfb_norm(NFHUMP)
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
@@ -48,12 +49,12 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C Dummy arguments
 C
@@ -81,6 +82,7 @@ C
       DO ih = 1, NFHUMP
          rohfbp_sd(ih) = 0.d0
          rohfba_sd(ih) = 0.d0
+         rohfb_norm(ih)= 1.d0
          barnorm(ih) = 0.d0
       ENDDO
       hnorm=1.d0
@@ -147,9 +149,9 @@ c
 C-------Lynn values
       IF (NRBar.EQ.2) THEN
          IF (ka/2.EQ.INT(ka/2) .AND. kz/2.EQ.INT(kz/2)) THEN   ! even-even
-            H(1,1) = 1.04
+            H(1,1) = 1.00
             H(1,2) = 0.6
-            Hcont(1)= 1.04
+            Hcont(1)= 1.00
             Hcont(2)= 0.6
          ENDIF
          IF (ka/2.NE.INT(ka/2)) THEN                           ! odd A
@@ -159,14 +161,14 @@ C-------Lynn values
             Hcont(2)= 0.52
          ENDIF
          IF (ka/2.EQ.INT(ka/2) .AND. kz/2.NE.INT(kz/2)) THEN   ! odd-odd
-            H(1,1) = 0.605
-            H(1,2) = 0.405
-            Hcont(1)= 0.605
-            Hcont(2)= 0.405
+            H(1,1) = 0.60
+            H(1,2) = 0.40
+            Hcont(1)= 0.60
+            Hcont(2)= 0.40
          ENDIF
 C--------default values for the second well
-         H(1,3) = 1.
-         Hcont(3)= 1.
+         H(1,3) = 0.5
+         Hcont(3)= 0.5
          EFB(3) = 2.
       ENDIF
 C
@@ -242,7 +244,7 @@ C-----Default value for curvatures and protection !!
          NRHump = 2
          NRWel = 1
          EFB(3) = 2.d0
-         H(1,3) = 1.d0
+         H(1,3) = 0.5d0
       ENDIF
       NRHump=NRBar-NRWel
 C
@@ -433,14 +435,14 @@ C--------pairing at saddles according to RIPL-2
          DELtafis(ib) = 14./SQRT(A(Nnuc))
 
 C--------EMPIRE-3.0-dependence
-         CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-
-         GAMmafis(ib) = Gamma
+c         CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+         GAMmafis(ib) = 0.2d0!Gamma
 C--------multiplier of atil
          AFIs(ib) = 1.d0
          ECFis(ib) = 0.d0
-         vibf12(ib) = 0.1d0
-         vibfdt(ib) = 1.d0
+         vibf12(ib) = 1.d0
+         vibfdt(ib) = 0.1d0
+         vibfnorm(ib)= 2.d0
       ENDDO
 c=================================================================
 C---- writing data in FISSION.INP
@@ -607,13 +609,13 @@ c
      & saddles'
       WRITE (79,*)chstar
       WRITE (79,*)'             Asym shell-corr delta    gamma atilf/atil
-     &   Ecf     VIB1/2   VIBdt'
+     &   Ecf     VIB1/2  VIBdt'
       DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
-     &          WRITE (79,'(1x, A8, 1x, I1,4x,I1, 7f9.3)') 'Barrier',
+     &          WRITE (79,'(1x, A8, 1x, I1,4x,I1, 8f9.3)') 'Barrier',
      &          nr, BFF(nr), SHCfis(nr), DELtafis(nr), GAMmafis(nr),
-     &          AFIs(nr), ECFis(nr),vibf12(nr),vibfdt(nr)
+     &          AFIs(nr), ECFis(nr),vibf12(nr),vibfdt(nr),vibfnorm(ib)
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
@@ -629,10 +631,10 @@ c
       WRITE (79,*)'  Coefficients used only if FISDEN=2 to adjust HFB LD
      & at saddles '
       WRITE (79,*)chstar
-      WRITE (79,*) '            Asym    Delta    alpha '
+      WRITE (79,*) '            Asym    Delta    alpha   Norm'
       DO ih = 1, nrhump
          WRITE (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier', ih,
-     &          bff(ih), rohfbp_sd(ih), rohfba_sd(ih),ecfis(ih)
+     &          bff(ih), rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
       ENDDO
       WRITE (79,*)
 
@@ -664,24 +666,26 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect,  ECFism(NFMOD) 
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
-      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                                         ! NUMBAR
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)                   ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),               ! ROHFBSADD
+     &                 rohfb_norm(NFHUMP)
+c      DOUBLE PRECISION vibf12(NFHump),vibfdt(NFHump),vibfnorm(NFHump)     ! FISVIB
 
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
-
+     &                 TFB, TDIrect,ECFism
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
+c      COMMON /FISVIB/ vibf12,vibfdt,vibfnorm
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
 C
   
 C Dummy arguments
@@ -791,22 +795,22 @@ C-----FISDEN(Nnuc)= 2 HFB
 
       IF(FISDEN(Nnuc).LE.1)THEN
          READ (79,'(///)') 
-         DO ibar = 1, nrhump
+         DO ib = 1, nrhump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) THEN
-                READ (79,'(10x,  I1,4x, I1, 7f9.3)')  i,
-     &          BFF(ibar), SHCfis(ibar), DELtafis(ibar), GAMmafis(ibar),
-     &          AFIs(ibar),ECFis(ibar),vibf12(ibar),vibfdt(ibar)
+                READ (79,'(10x,  I1,4x, I1, 8f9.3)')  i,
+     &          BFF(ib), SHCfis(ib), DELtafis(ib), GAMmafis(ib),
+     &          AFIs(ib),ECFis(ib),vibf12(ib),vibfdt(ib),vibfnorm(ib)
 C               For covariance
-                AFIs(ibar) = AFIs(ibar) * ATILfi(Nnuc)
+                AFIs(ib) = AFIs(ib) * ATILfi(Nnuc)
              ENDIF
-             IF (FISmod(Nnuc).GT.0. .AND. ibar.EQ.2) THEN
+             IF (FISmod(Nnuc).GT.0. .AND. ib.EQ.2) THEN
                DO m = 1, nrmod
                   READ (79,'(10x, I1, 2x, I1, 1x, I1, 5f9.3)') i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
      &                  AFIsm(m), ECFism(m)
 C                 For covariance
-                  AFIsm(ibar) = AFIsm(ibar) * ATILfi(Nnuc)
+                  AFIsm(ib) = AFIsm(ib) * ATILfi(Nnuc)
                ENDDO
             ENDIF
          ENDDO
@@ -823,7 +827,7 @@ c         READ (79,*)
 
          DO ih = 1, nrhump
             READ (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
-     &            bff(ih),rohfbp_sd(ih), rohfba_sd(ih),ecfis(ih)
+     &            bff(ih),rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
          ENDDO
          READ (79,*)
       ENDIF
@@ -1040,7 +1044,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD) 
+     & TFB, TDIrect,  ECFism(NFMOD) 
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -1048,7 +1052,8 @@ C
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump)                   ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),               ! ROHFBSADD
+     &                 rohfb_norm(NFHUMP)
 
       DOUBLE PRECISION  TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
 
@@ -1058,11 +1063,11 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -1255,9 +1260,9 @@ c
          DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
-     &          WRITE (80,'(1x, A8, 1x, I1,4x,I1, 7f9.3)') 'Barrier',
+     &          WRITE (80,'(1x, A8, 1x, I1,4x,I1, 8f9.3)') 'Barrier',
      &          nr, BFF(nr), SHCfis(nr), DELtafis(nr), GAMmafis(nr),
-     &          AFIs(nr), ECFis(nr), vibf12(nr), vibfdt(nr)
+     &          AFIs(nr), ECFis(nr), vibf12(nr), vibfdt(nr),vibfnorm(ib)
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
@@ -1282,16 +1287,16 @@ c
 
 
       IF(FISDEN(Nnuc).EQ.2)THEN
-         WRITE (80,*) '              Delta    alpha '
+         WRITE (80,*) '              Delta    alpha   Norm'
          DO ih = 1, nrhump
-            WRITE (80,'(1x, A8, 1x, I1,4x,I1, 2f9.3)') 'Barrier', ih,
-     &             bff(ih), rohfbp_sd(ih), rohfba_sd(ih)
+            WRITE (80,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier', ih,
+     &             bff(ih), rohfbp_sd(ih), rohfba_sd(ih), rohfb_norm
          ENDDO
          WRITE (80,*)
       ENDIF
 
       WRITE (80,*)
-      WRITE (80,*)'  Coefficient(s) used to calculate the direct continuum
+      WRITE (80,*)'Coefficient(s) used to calculate the direct continuum
      & weight(s) '
       DO nr = 1, nrwel
          WRITE (80,'(1x, A8, 1x, I1, 1f9.3)') '    Well', nr, awf(nr)

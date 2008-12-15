@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-06 01:57:08 $
-Ccc   * $Id: input.f,v 1.282 2008-12-06 01:57:08 Capote Exp $
+Ccc   * $Date: 2008-12-15 01:52:18 $
+Ccc   * $Id: input.f,v 1.283 2008-12-15 01:52:18 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -269,7 +269,8 @@ C--------set fission defaults
          DO nnuc = 1, NDNUC
            FISbar(nnuc) = 2     ! HFB Goriely's parameters for parabolic barriers are default.
            FISopt(nnuc) = 0
-           FISden(nnuc) = 2     ! HFB NLD at saddle points are default!!
+C          FISden(nnuc) = 2     ! HFB NLD 
+           FISden(nnuc) = 0     ! EMPIRE NLD at saddle points are default!!
            FISmod(nnuc) = 0 
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
@@ -842,7 +843,7 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 5408
             ENDIF
          ELSEIF (AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
-            KTRlom(0,0) = 6400       ! Bojowald OMP for deuterons
+            KTRlom(0,0) = 6200       ! Bojowald OMP for deuterons (replaced by Haixia)
          ELSEIF (AEJc(0).EQ.3 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0,0) = 7100       ! Bechetti OMP for tritons
          ELSEIF ((AEJc(0).EQ.4 .OR. AEJc(0).EQ.3) .AND. ZEJc(0).EQ.2)
@@ -860,7 +861,7 @@ C-----------(McFadden global potential 9100 could be used)
             IF (NDEJC.GT.3) THEN
                KTRlom(NDEJC,i) = 9600
                IF (AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC).EQ.1)
-     &             KTRlom(NDEJC,i) = 6400
+     &             KTRlom(NDEJC,i) = 6200  ! Bojowald OMP for deuterons (replaced by Haixia)
                IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC).EQ.1)
      &             KTRlom(NDEJC,i) = 7100
                IF (NPRoject.EQ.NDEJC) KTRlom(NDEJC,i) = KTRlom(0,0)
@@ -963,14 +964,11 @@ C                          Comment the following block and uncommment the line a
                            ENDIF
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
-C                       RCN, April 2008
-C                       IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)
+C                       RCN, Dec 2008
+C                       IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)
 C    >                    ENDf(nnuc) = 1 ! n,xn
-C                       RCN, Dec 2008, (n,5n) and (n,6n) should be skipped as not implemented in ENDF-6 format
-                        IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)
-     >                    ENDf(nnuc) = 1 ! n,xn
-                        IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)
-     >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
+C                       IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)
+C    >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
                   IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
                            IF(NEXclusive.GT.NDExclus) THEN
@@ -1049,10 +1047,10 @@ C
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
 C--------------------------------------------------------------------------
-         IF (LHMs.NE.0 .AND. ENDf(1).EQ.1) THEN
+         IF (LHMs.NE.0 .AND. ENDf(1).GT.0) THEN
             WRITE (8,*) ' '
             WRITE (8,*)
-     &                 'WARNING: HMS is incompatible with ENDF=1 option'
+     &                 'WARNING: HMS is incompatible with ENDF>0 option'
             WRITE (8,*) 'WARNING: and has been turned off'
             LHMs = 0
          ENDIF
@@ -1129,6 +1127,7 @@ C        3 prot. disc.   x     x     0      0      x      0
 C        4 prot. cont.   0     x     x      x      x      x
 C        5 gamma         0     0     x      x      0      x
 C        6 alpha. cont.  0     0     0      0      0      x
+C        7 LI   . cont.  0     0     0      0      0      x
 C
 C--------with x=1 if used and x=0 if not.
 C
@@ -1255,6 +1254,7 @@ C--------set PCROSS  (.,6) cluster emission
             IDNa(4,6) = 1
             IDNa(5,6) = 1
             IDNa(6,6) = 1
+            IDNa(7,6) = 1
 C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
@@ -1297,6 +1297,7 @@ C--------print IDNa matrix
          WRITE (8,'('' prot. cont. '',8I10)') (IDNa(4,j),j = 1,NDMODELS)
          WRITE (8,'('' gammas      '',8I10)') (IDNa(5,j),j = 1,NDMODELS)
          WRITE (8,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
+         WRITE (8,'(''LI to continuum'',8I7)')(IDNa(7,j),j = 1,NDMODELS)
          WRITE (8,*) ' '
          WRITE(12,*) ' '
          WRITE(12,*)
@@ -1313,6 +1314,7 @@ C--------print IDNa matrix
          WRITE(12,'('' p to continuum'',8I7)')(IDNa(4,j),j = 1,NDMODELS)
          WRITE(12,'('' g             '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
          WRITE(12,'('' a             '',8I7)')(IDNa(6,j),j = 1,NDMODELS)
+         WRITE(12,'(''LI to continuum'',8I7)')(IDNa(7,j),j = 1,NDMODELS)
          WRITE(12,*) ' '
 C--------model matrix *** done ***
 C--------reset some options if OMP fitting option selected
@@ -1954,7 +1956,7 @@ C---- fission input is created if it does not exist and FISSHI=0
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
          IF (FISshi(nnuc).EQ.0. .AND.
-     &       (Z(nnuc).LT.78. .OR. A(nnuc).LT.224.)) FISsil(nnuc)
+     &       (Z(nnuc).LT.78. .OR. A(nnuc).LT.200.)) FISsil(nnuc)
      &       = .FALSE.
          IF (FISshi(nnuc).EQ.1.) THEN
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)

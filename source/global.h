@@ -26,8 +26,9 @@
      &                 DRTl(ndlw), DV, D_Def(ndcollev,nddefcc),
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,
-     &                 EEFermi(0:ndejc,0:ndnuc), EFB(nfparab),
-     &                 EFDis(nftrans,nfparab), EGDr1, EGDr2, EIN, EINl,
+     &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc), 
+     &                 EFB(nfparab),EFDis(nftrans,nfparab),
+     &                 EGDr1, EGDr2, EIN, EINl,
      &                 EJMass(0:ndejc), FISbou(0:ndnuc),
      &                 FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
@@ -109,7 +110,7 @@
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,
      &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),
-     &                 vibfdt(NFHUMP),
+     &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
      &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
      &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
@@ -125,7 +126,8 @@ c
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
-     &                    GAMmafis, NRBinfis,  BFF, DEStepp, HCOnt
+     &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp, 
+     &                    HCOnt, ECFis
 
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod

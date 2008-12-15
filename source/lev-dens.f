@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-12-08 05:55:10 $
-Ccc   * $Id: lev-dens.f,v 1.72 2008-12-08 05:55:10 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-12-15 01:52:20 $
+Ccc   * $Id: lev-dens.f,v 1.73 2008-12-15 01:52:20 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -151,10 +151,7 @@ C-----------------(spin dependent deformation beta calculated according to B.-Mo
                   ENDIF
                ENDIF
 
-c              rotemp = RODEF(A(Nnuc),u,ac,aj,mompar,momort,
-c    &                  YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax)
-               rotemp = RODEF(Z(Nnuc),A(Nnuc),u,ac,aj,SHC(Nnuc),
-     &                  mompar,momort,
+               rotemp = RODEF(A(Nnuc),u,ac,aj,mompar,momort,
      &                  YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax)
                IF (rotemp.LT.RORed) rotemp = 0.0
                IF (BF.NE.0.0D0) THEN
@@ -617,7 +614,7 @@ C-----get neutron binding energy  if not yet defined
       ENDIF
 C-----get distance between Qn and the last level
       ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
-C     dshift = 0.0 ???? Introduced by Mike on Aug. 2008, questioned
+      dshift = 0.0
       iter = 0
 C-----we are not going to fit discrete levels if there are not more
 C-----than three or if max excitation energy is so high that levels
@@ -799,7 +796,7 @@ C--------
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
       ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
-      dshift = 0.d0
+c      dshift = 0.d0
       DO kk = 1, NEX(Nnuc)
 C-----------clean RO matrix
          IF (BF.NE.0.0D0) THEN
@@ -999,22 +996,16 @@ cc         CALL ROBCS_FG_FIS(A(Nnuc),U,Aj,T,shc(nnuc),gamma,mompar,rotemp)
 cc            goto 345
 
          IF (bcs) THEN
-C           Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2)*RORed
-            Rotemp = ROBCS(Z(Nnuc),A(Nnuc),u,Aj,SHC(Nnuc),mompar,
-     &                      momort,A2)*RORed
-
+            Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2)*RORed
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
 
          ELSE
-c           Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,YRAst(i,Nnuc),
-c    &               HIS(Nnuc),BF,ARGred,EXPmax)
-            Rotemp = RODEF(Z(Nnuc),A(Nnuc),u,ac,Aj,SHC(Nnuc),mompar,
-     &               momort,YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax)
+            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,YRAst(i,Nnuc),
+     &               HIS(Nnuc),BF,ARGred,EXPmax)
             IF (i.EQ.1) t = SQRT(u/ac)
-
          ENDIF
 
  345     IF (BF.NE.0.0D0) THEN
@@ -1231,7 +1222,7 @@ C-----setting to 0 level density array ------ done ------
       END
 
 
-      REAL*8 FUNCTION ROBCS(Z,A,U,Aj,Shell,Mompar,Momort,A2)
+      REAL*8 FUNCTION ROBCS(A,U,Aj,Mompar,Momort,A2)
       IMPLICIT REAL*8 (A-H,O-Z)
 CCC   ********************************************************************
 CCC   *                                                         CLASS:APU*
@@ -1248,15 +1239,13 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Z, A, A2, Aj, Shell, U, Momort, Mompar
+      REAL*8 A, A2, Aj, U, Momort, Mompar
 C
 C Local variables
 C
       REAL*8 arg, const, det, dphi2, momo, momp, phi, phi2,
      &                 qdamp, qk, s, seff2, t, vibrk
      &
-C     REAL*8 q2, om3, q3, om2
-C     REAL*8 DSQRT, EVIBR
 C
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
@@ -2198,7 +2187,7 @@ C           DO ij = 1, NFISJ1
       RETURN
       END
 
-      REAL*8 FUNCTION RODEF(Z,A,E,Ac,Aj,Shell,Mompar,Momort,
+      REAL*8 FUNCTION RODEF(A,E,Ac,Aj,Mompar,Momort,
      &                                Yrast,Ss,Bf,Argred,Expmax)
       IMPLICIT REAL*8 (A-H,O-Z)
 Ccc   *********************************************************************
@@ -2219,8 +2208,8 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Z, A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
-     &       Ss, Yrast, Shell
+      REAL*8 A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
+     &       Ss, Yrast
 C
 C Local variables
 C
@@ -2264,12 +2253,9 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
 C-----vibrational enhancement factor (EMPIRE-2.19)
         CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
-      CALL DAMPV(t,qv)
-      IF (qv.GE.0.999D0) THEN
-         vibrk = 1.0
-      ELSE
-         vibrk = qv - vibrk*(qv - 1.)
-      ENDIF
+        CALL DAMPV(t,qv)
+        IF (qv.GE.0.999D0) vibrk = 1.0
+!       write(6,*)'DEF: A, Aj, vibrk', A, Aj, vibrk, om2, om3, q2, q3
 C-----damping of rotational  effects with Fermi function independent
 C-----of deformation and mass number (consistent with the builtin systematics)
       CALL DAMPROT(e1,qk)
@@ -2311,7 +2297,8 @@ C-----------rotation parallel to the symmetry axis (oblate nucleus)
             ENDIF
          ENDIF
       ENDDO
-  100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
+  100 RODEF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))
+     &        *(qv - vibrk*(qv - 1.))
       RETURN
       END
 
@@ -2334,17 +2321,17 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD)
+     & TFB, TDIrect,  ECFism(NFMOD)
 
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
 
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
-      INTEGER NLWst                                                       ! PARAM
+      INTEGER NLWst                                             ! PARAM
 
       REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
-
-      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump)                   ! ROHFBSADD
+      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
+     &       rohfb_norm(NFHump)
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
@@ -2354,11 +2341,11 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C Dummy arguments
 C
@@ -2383,7 +2370,7 @@ C-----where continuum starts,ends,steps in between
       DO nr = 1, NRFdis(Ib)
         IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
       ENDDO
-      IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
+c      IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
 
       IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
         xmax = XMInn(Ib) + 3.5D0
@@ -2435,13 +2422,13 @@ c-----------SYMMETRY ENHANCEMENT
 C              Triaxiality with mass symmetry
                IF (Iff.EQ.2) rotemp =
      &                       rotemp*SQRT(pi/2.d0)*SQRT(mompar*temp)
-c     &                       rotemp*SQRT(2.d0*pi)*SQRT(mompar*temp)
+c    &                       rotemp*SQRT(2.d0*pi)*SQRT(mompar*temp)
 C              Mass asymmetry is already considered in HFB calculations
 C              IF (Iff.EQ.3) rotemp = rotemp*2.
 C              No symmetry
                IF (Iff.EQ.4) rotemp =
      &                       rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
-               ROFisp(kk,jj,ipp,Ib) = rotemp
+               ROFisp(kk,jj,ipp,Ib) = rotemp * rohfb_norm(Ib)
             ENDDO
          ENDDO
       ENDDO
@@ -2471,9 +2458,10 @@ CCC   *********************************************************************
       INCLUDE 'global.h'
 
       REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
-      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump)               ! ROHFBSADD
+      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
+     &       rohfb_norm(NFHump)
 C
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,barnorm,hnorm
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C PARAMETER definitions
 C
@@ -2653,7 +2641,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ecfis(NFHUMP), ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -2669,7 +2657,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFis,ECFism
+     &                 TFB, TDIrect,ECFism
 
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
@@ -2682,7 +2670,8 @@ C Local variables
 C
       REAL*8 aaj, accn, ar, desteppp, excn1, mm2, r0, cigor,
      &                 rotemp, shcf, u, xmax, xr, mompar, momort, temp,
-     &                 vibbf12, vibbfdt, def2, stab, aj, qigor
+     &                 vibbf12, vibbfdt, def2, stab, aj, vn
+C     REAL*8 qigor 	 
       REAL FLOAT
       INTEGER ia, iff, in, ix, iz, jj, kk, nr
       INTEGER INT
@@ -2696,7 +2685,7 @@ C-----where continuum starts,ends,steps in between
          DO nr = 1, NRFdis(Ib)
             IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
          ENDDO
-         IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
+C        IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
 
          IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
             xmax = XMInn(Ib) + 3.5D0
@@ -2746,8 +2735,8 @@ C-----where continuum starts,ends,steps in between
       ia = INT(A(Nnuc))
       in = ia - iz
 
-      vibbf12 = vibf12(ib)
-      vibbfdt = vibfdt(ib)
+c      vibbf12 = vibf12(ib)
+c      vibbfdt = vibfdt(ib)
 
       mm2 = 0.24 * A(Nnuc)**0.666667
       r0=1.24
@@ -2762,6 +2751,9 @@ C-----EMPIRE-3.0-dependence
          shcf = SHCfis(Ib)
          iff = BFF(Ib)
          desteppp = DEStepp(Ib)
+         vibbf12 = VIBf12(Ib)
+         vibbfdt = VIBfdt(Ib)
+         vn = VIBfnorm(Ib)
       ELSE ! Mmod.GT.0
          NRBinfis(Ib) = NRBinfism(Mmod)
          XMInn(Ib) = XMInnm(Mmod)
@@ -2771,35 +2763,38 @@ C-----EMPIRE-3.0-dependence
          iff = BFFm(Mmod)
          desteppp = DEStepm(Mmod)
       ENDIF
-
+      gamma = gamma/A(Nnuc)**0.333333
       ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
       ATIl = ATIl*Rafis
       ar = ATIl*(1.0 + shcf*GAMma)
 C
-C     ar - approximated value of "a"-parameter, which is only 
-C     used in SIGMAK to estimate the temperature       
+C     ar - approximated value of "a"-parameter, which is only
+C     used in SIGMAK to estimate the temperature
 C
+      aj=0.
+      u=0.
       if (iff.eq.2) then
 C       Axial SYMMETRY
         CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-1.0D0,u,ar,
      &                           aj,mompar,momort,A2,stab,cigor)
       else
-C       Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK      
+C       Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK
         CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-2.0D0,u,ar,
      &                           aj,mompar,momort,A2,stab,cigor)
       endif
-C      
-C-----calculation of level density parameter 'a' including 
+C
+C-----calculation of level density parameter 'a' including
 C-----surface deformation dependent factor bsq
       bsq = 1.d0
-      qigor = ( - 0.00246 + 0.3912961*cigor -
-     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
-     &              0.043075445*cigor**4) - 0.375
-      IF (qigor.GT.0.077D0) THEN
-         bsq = 0.983 + 0.439*qigor
-      ELSE
-         bsq = 1.0 + 0.4*(cigor - 1.0)**2
-      ENDIF
+c      qigor = ( - 0.00246 + 0.3912961*cigor -
+c     &              0.00536399*cigor**2 - 0.051313*cigor**3 +
+c     &              0.043075445*cigor**4) - 0.375
+c      IF (qigor.GT.0.077D0) THEN
+c         bsq = 0.983 + 0.439*qigor
+c      ELSE
+c         bsq = 1.0 + 0.4*(cigor - 1.0)**2
+c      ENDIF
+c      bsq=1.
       ATIl = AP1*A(Nnuc) + bsq*AP2*A(Nnuc)**0.666667
       ATIl = ATIl*Rafis
 
@@ -2823,11 +2818,7 @@ C-----45.84 stands for (12/SQRT(pi))**2
 
       momparcrt=mompar
       momortcrt=momort
-C     def2 = a2
-c     mompar = rbmsph*(1. - (2./3.)*def2)
-c     momparcrt = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
-c     momortcrt = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)
-      
+
       def2 = a2
 
       IF (mompar.LT.0.0D0 .OR. momort.LT.0.0D0) THEN
@@ -2850,36 +2841,33 @@ c
 c-----------Ignatyuk
             IF(FISden(Nnuc).EQ.0)goto 344
             CALL ROBCS_FG_FIS(A(Nnuc),U,Aaj,Temp,shcf,gamma,mompar,
-     &                        def2,rotemp,vibbf12, vibbfdt)
+     &                        deffis(ib),rotemp)
            goto 345
  344       IF (u.GT.UCRt) THEN
                u = u - ECOnd
                accn = ATIl*FSHELL(u,Shcf,GAMma)
                IF (accn.LE.0.0D0) RETURN
-C              In old versions we used here MOMparcrt instead of MOMpar                 
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,
      &                         MOMortcrt,HIS(Nnuc),ARGred,
-     &                         EXPmax,temp,shcf,Z(Nnuc))
+     &                         EXPmax,temp,def2,vibbf12,vibbfdt,vn)
             ELSE
                accn = ACRt
                rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
-     &                  mompar,temp,def2,shcf,Z(Nnuc))*RORed
-            ENDIF
-c
-cc            IF (Mmod.EQ.0)THEN
-c--------------SYMMETRY ENHANCEMENT
- 345           IF (Iff.EQ.2) rotemp =
-c    &             rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
-     &             rotemp*SQRT(pi/2.)*SQRT(mompar*temp)
-               IF (Iff.EQ.3) rotemp = rotemp*2.d0
-               IF (Iff.EQ.4) rotemp =
-     &             rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
+     &                  mompar,temp,def2,vibbf12,vibbfdt,vn)*RORed
 
-               ROFis(kk,jj,Ib) = rotemp
-               ROFisp(kk,jj,1,Ib) = rotemp
-               ROFisp(kk,jj,2,Ib) = rotemp
-cc            ENDIF
-            IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp
+            ENDIF
+c-----------SYMMETRY ENHANCEMENT
+ 345        IF (Iff.EQ.2) rotemp =
+     &             rotemp * SQRT(pi/2.) * SQRT(mompar * temp)
+            IF (Iff.EQ.3) rotemp = rotemp * 2.d0
+            IF (Iff.EQ.4) rotemp =
+     &             rotemp* 2.* SQRT(2.* pi) * SQRT(mompar * temp)
+
+            ROFis(kk,jj,Ib) = rotemp
+            ROFisp(kk,jj,1,Ib) = rotemp
+            ROFisp(kk,jj,2,Ib) = rotemp
+
+            IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp ! to be updated
          ENDDO
       ENDDO
 
@@ -2896,8 +2884,11 @@ cc            ENDIF
       RETURN
       END
 C
+
+
       REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Momp,T,
-     &                       def2,shcf,z)
+     &                       def2,vibbf12,vibbfdt,vn)
+
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
 C COMMON variables
@@ -2907,16 +2898,17 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 A, Aj, Momort, Mompar, U, Momp, T, shcf, z
+      REAL*8 A, Aj, Momort, Mompar, U, Momp, T
+      REAL*8 vibbf12,vibbfdt,vn
       REAL*8 DSQRT
-C     REAL*8 EVIBR
 C
 C Local variables
 C
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
-     &       qdamp, qk, qv, s, seff2, vibrk, def2,
+     &       qk, qv, s, seff2, vibrk, def2,
      &       ro,ro_u,ro_j,ro_pi
-C     REAL*8 om2,om3,q2,q3
+C     REAL*8 qdamp 
+      REAL*8 rot_K, rot_Q, vib_KQ
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
 
@@ -2943,45 +2935,40 @@ C-----CONST=1/(2*SQRT(2 PI))
      &       EXP(-(Aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5
       ro = ro_u * ro_j * ro_pi
-c     CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-      CALL DAMPROT(u,qk)
-      qdamp = 1.0 - qk*(1.0 - 1.0/(momo*T))
-C-----vibrational enhancement factor (EMPIRE-2.19)
-      CALL VIBR(A,t,vibrk)
-C-----damping of vibrational effects
-      CALL DAMPV(t,qv)
-      IF (qv.GE.0.999D0) THEN
-         vibrk = 1.0
-      ELSE
-         vibrk = qv - vibrk*(qv - 1.)
-      ENDIF
-      ROBCSF = ro*momo*t*qdamp*vibrk
+      CALL DAMPROTVIB(U,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt,vn)
+      IF (qv.GE.0.999D0) vibrk = 1.0
+      rot_K  = momo*t
+      rot_Q  = 1.0 - qk*(1.0 - 1.0/(momo*T))
+      vib_KQ = qv - vibrk*(qv - 1.)
+      ROBCSF = ro *  rot_K * rot_Q * vib_KQ
+
       RETURN
       END
 C
 C
       REAL*8 FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
-     &                       Argred,Expmax,T,shcf,z)
+     &                       Argred,Expmax,T,def2,vibbf12,vibbfdt,vn)
+
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C Dummy arguments
       REAL*8 A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
-     &       T, shcf, z
+     &       T
+      REAL*8 vibbf12,vibbfdt,vn
 C Local variables
       REAL*8 s,det,seff2, ro,ro_u,ro_j,ro_pi,pi
-      REAL*8 ak, arg, const, qk, qv, seff, sort2,con,
-     &                 sum, u, vibrk,om2,om3,q2,q3
-      REAL*8 Evibr
+      REAL*8 ak, arg, const, qk, qv, seff, sort2, con,
+     &                 sum, u, vibrk
+      REAL*8 rot_K, rot_Q, vib_KQ
       INTEGER i, k, kmin
-      DATA const/0.01473144/,pi/3.14159259d0/      
+
+      DATA const/0.01473144/,pi/3.14159259d0/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
+
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
       RODEFF = 0.D0
-      sum = 0.D0
-      summ=0.d0
+
       T = DSQRT(E/Ac)
-      con = const/Ac**0.25/SQRT(Mompar*t)
-      seff = 1.0/Mompar - 1.0/Momort
       sort2 = Momort*t
       seff2 = mompar**0.333D0*momort**0.6666D0*t
 c      GOTO 10
@@ -2993,21 +2980,12 @@ c-----GSM
      &       EXP(-(aj+0.5)**2/(2.d0*seff2))
       ro_pi=0.5
       ro = ro_u * ro_j * ro_pi
-c      CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-      CALL DAMPROT(e,qk)
-C-----vibrational enhancement factor (EMPIRE-2.19)
-      CALL VIBR(A,t,vibrk)
-C-----damping of vibrational effects
-      CALL DAMPV(t,qv)
-      IF (qv.GE.0.999D0) THEN
-         vibrk = 1.0
-      ELSE
-         vibrk = qv - vibrk*(qv - 1.)
-      ENDIF
-      RODEFF = ro*momort*t*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
-      GOTO 101
+      GOTO 100
 c-----EGSM
- 10   con = const/Ac**0.25/SQRT(Mompar*t)
+ 10   sum = 0.D0
+      con = const/Ac**0.25/SQRT(Mompar*t)
+      seff = 1.0/Mompar - 1.0/Momort
+
       IF (Ss.EQ.( - 1.0D0)) THEN
          arg = 2*SQRT(Ac*e) - Argred
          IF (arg.LE.( - Expmax)) THEN
@@ -3025,6 +3003,7 @@ c-----EGSM
       ELSE
          kmin = 1
       ENDIF
+
       DO k = kmin, i
          ak = k + Ss
 C--------rotation perpendicular to the symmetry axis
@@ -3039,53 +3018,48 @@ C--------rotation perpendicular to the symmetry axis
             ENDIF
          ENDIF
       ENDDO
+      ro = con * sum
 
-c100   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt)
-c      IF (qv.GE.0.999D0) vibrk = 1.0
-C-----vibrational enhancement factor (EMPIRE-2.19)
- 100  CALL VIBR(A,t,vibrk)
-C-----damping of vibrational effects
-      CALL DAMPV(t,qv)
-      IF (qv.GE.0.999D0) THEN
-         vibrk = 1.0
-      ELSE
-         vibrk = qv - vibrk*(qv - 1.)
-      ENDIF
-      CALL DAMPROT(e,qk)
-      RODEFF = con*sum*(1.0 - qk*(1.0 - 1.0/sort2))*vibrk
- 101  RETURN
+100   CALL DAMPROTVIB(e,qk,T,qv,A,vibrk,def2,vibbf12,vibbfdt,vn)
+      IF (qv.GE.0.999D0) vibrk = 1.0
+      rot_K  = momort*t
+      rot_Q  = 1.0 - qk*(1.0 - 1.0/sort2)
+      vib_KQ = qv - vibrk*(qv - 1.)
+      RODEFF = ro * rot_K * rot_Q * vib_KQ
+
+      RETURN
       END
 
 C
-      SUBROUTINE DAMPROTVIB(E1,Qk,T,Q,A,Vibrk,def2,vibbf12,vibbfdt)
+      SUBROUTINE DAMPROTVIB(E1,Qk,T,Q,A,Vibrk,def2,thalf,dt,vn)
 C
 C Dummy arguments
 C
-      REAL*8 A, E1, Q, Qk, T, Vibrk,def2,vibbf12,vibbfdt
+      REAL*8 A, E1, Q, Qk, T, Vibrk,def2,vn
 C
 C Local variables
 C
       REAL*8 arg, cost, dmpdiff, dmphalf, dt, ht, m0, pi, r0,
      &                 sdrop, thalf
 
+C-----Qrot
       dmphalf = 120.d0*A**0.333*def2**2         !according to RIPL-2
       dmpdiff =1400.*A**(-0.666)*def2**2
       Qk = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((E1-dmphalf)/dmpdiff))
-
-      thalf=vibbf12
-      dt=vibbfdt
+C-----Qvib
       arg = (T - thalf)/dt
       Q = 1.0/(EXP((-arg)) + 1.0)
-
+C-----Kvib
       DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-      Vibrk = EXP(0.086*A**(2./3.)*T**(4./3.))
+      Vibrk = vn* EXP(1.7*cost**(2./3.)*T**(4./3.))
       END
 
-      SUBROUTINE ROBCS_FG_FIS(A,E,Aj,T,shcf,gamma,momp,def2,rotemp,
-     &                        vibbf12,vibbfdt)
+
+
+      SUBROUTINE ROBCS_FG_FIS(A,E,Aj,T,shcf,gamma,momp,def2,rotemp)
 
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
@@ -3098,9 +3072,9 @@ C Dummy arguments
      &                 shcf,def2
 C Local variables
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
-     &                 vibdamp, qv, robcs, s, seff2, vibrk,
-     &                 seff2ort,mm2,qr,ac,e,rotdamp,vibbf12,
-     &                 vibbfdt
+     &                 vibdamp, robcs, s, seff2, 
+     &                 seff2ort,mm2,qr,ac,e,rotdamp
+C     REAL*8 vibbf12, vibbfdt, vibrk, qv
       REAL*8 om2,om3,cga,q2,q3
       REAL*8 FSHELL
       INTEGER fg
@@ -3145,18 +3119,18 @@ c
       seff2ort = momo*t
 
 C     Rotational enhancement JpT; damping as in EMPIRE
-      CALL DAMPROTVIB(u,Qr,T,Qv,A,Vibrk,def2,vibbf12,vibbfdt)
-      rotdamp = seff2ort*(1.0 - qr*(1.0 - 1.0/seff2ort))
-      vibdamp = qv - vibrk*(qv - 1.)
-      goto 100
+c      CALL DAMPROTVIB(u,Qr,T,Qv,A,Vibrk,def2,vibbf12,vibbfdt)
+c      rotdamp = seff2ort*(1.0 - qr*(1.0 - 1.0/seff2ort))
+c      vibdamp = qv - vibrk*(qv - 1.)
+c      goto 100
 
 C     Rotational enhancement and damping as in RIPL-2 (Ignatyuk prescription)
       om2=30./A**.66666
       om3=50./A**.66666
 
       CGA=.0075*A**.33333
-      CALL QVIBR(T,OM2,CGA,5,Q2)
-      CALL QVIBR(T,OM3,CGA,7,Q3)
+      CALL DAMPVIB(T,OM2,CGA,5,Q2)
+      CALL DAMPVIB(T,OM3,CGA,7,Q3)
       CALL QROT(A,def2,seff2ort,U,QR)
       rotdamp=Qr
       vibdamp=Q2*Q3
@@ -3183,20 +3157,22 @@ C***** QROT INCLUDING DAMPING ***
    12 RETURN
       END
 
-      SUBROUTINE DAMPVIB(T,Q,A,Vibrk)
-C
-C Dummy arguments
-C
-      REAL*8 A, Q, T, Vibrk
-C
-C Local variables
-C
-      REAL*8 arg,  dt,thalf
-      thalf = 1.5
-      dt=0.1
-      arg = (T - thalf)/dt
-      Q = 1.0/(EXP((-arg)) + 1.0)
-      Vibrk = EXP(0.09286*A**(2./3.)*T**(4./3.))
+      SUBROUTINE DAMPVIB(T,OM,CGA,LAM,Q)
+Ccc
+      IMPLICIT REAL*8 (a-h,o-z)
+      REAL*8 T,OM,Q
+      INTEGER LAM
+      REAL*8 cga, gam, fn, U, S
+      Q=1.D0
+      IF(T.LT.0.01) RETURN
+      GAM=cga*(OM**2+(2.*3.141593*T)**2)
+      FN=DEXP(-GAM/OM/2.D0)/(DEXP(OM/T)-1.D0)
+      IF(FN.LT.0.d0) RETURN
+      U=LAM*OM*FN
+      S=LAM*((1.+FN)*DLOG(1.+FN)-FN*DLOG(FN))
+      Q=DEXP(S-U/T)
+      if (Q.lt.1.D0) Q=1.D0
+      RETURN
       END
 
       SUBROUTINE EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -3236,7 +3212,7 @@ Cccc  ********************************************************************
       IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
       ap1 = 0.74055E-01
       ap2 = 0.28598E-03
-      gam = 0.57248 
+      gam = 0.57248
       gamma = gam/A(Nnuc)**0.333333
       IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
       ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
