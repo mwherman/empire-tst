@@ -28,6 +28,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.01   December  2008     A. Trkov
+!-V                        1. Increased precision of proton mass ratio.
 !-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Major updating of the code.
 !-V                        2. Further reduction of non-essential output.
@@ -149,7 +151,7 @@
 !-M            test such as a SUMUP test. If none is entered,
 !-M            the default value is .001 (1/10 of a percent). 
 !-M
-!-M If Record 4 is left entirely blank, then the �default� options are
+!-M If Record 4 is left entirely blank, then the 'default' options are
 !-M executed. Those are to process the entire input file, to omit the 
 !-M SUMUP and Deviant Point tests and to assume an allowed fractional 
 !-M error of .001.
@@ -191,9 +193,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -436,7 +438,7 @@
       INTEGER(KIND=I4), DIMENSION(NPARTS), PARAMETER ::                  &      
      &         IPARTS=(/0,1,1001,1002,1003,2003,2004/)
       REAL(KIND=R4), DIMENSION(NPARTS), PARAMETER ::                     &      
-     &         AWPART=(/0.,1.,0.99862,1.99626,2.98960,2.98903,3.96713/)
+     &     AWPART=(/0.,1.,0.998623,1.996256,2.989596,2.989033,3.967131/)
 !
 !     SIGNALS FOR PRESENCE OF FILES 5 AND 6
 !
@@ -551,7 +553,7 @@
       REAL(KIND=R4), PARAMETER :: PI=3.1415927
       REAL(KIND=R4), PARAMETER :: BIGNO=1.0E+20
       REAL(KIND=R4), PARAMETER :: EPSILN3=.001, EPSILN4=.0001,           &      
-     &                           EPSILN5=.00001, EPSILN6 = .000001
+     &                           EPSILN5=.00001, EPSILN6 =0.000001
       REAL(KIND=R4), PARAMETER :: DEFAULT_EPSILN=EPSILN3
 !
 !     COGEND DATA
