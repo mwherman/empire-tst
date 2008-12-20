@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2008-12-12 14:28:02 $ 
-Ccc   * $Id: empend.f,v 1.53 2008-12-12 14:28:02 trkov Exp $ 
+Ccc   * $Date: 2008-12-20 21:42:14 $ 
+Ccc   * $Id: empend.f,v 1.54 2008-12-20 21:42:14 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -71,6 +71,8 @@ C-V        - Fix gamma yields at high energies when cross sections go
 C-V          to zero, e.g. (z,ax) after subtracting (z,2n2px).
 C-V  08/12 - Fix formatting of MF10 reactions involving alphas.
 C-V        - Print WARNING when unprocessable spectra are encountered.
+C-V        - Fix unititialised variables.
+C-V        - Activate formatting of charged particles.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -742,422 +744,123 @@ C-Title  : Subroutine EMTIZA
 C-Purpose: Given projectile IZI, target IZA, residual JZA, assign MT
       MT =0
 C*
-      IF(IZI.EQ.0) THEN
-C* INCIDENT PHOTONS
-        IF     (JZA  .EQ. IZA+IZI-   1) THEN
-C* (g,n)
-          MT = 50
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (g,2nd) cross section
-          MT = 11
-        ELSE IF(JZA  .EQ. IZA+IZI-   2) THEN
-C* (g,2n) cross section
-          MT = 16
-        ELSE IF(JZA  .EQ. IZA+IZI-   3) THEN
-C* (g,3n) cross section
-          MT = 17
-        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
-C* (g,na) cross section
-          MT = 22
-        ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
-C* (g,n3a) cross section
-          MT = 23
-        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
-C* (g,2na) cross section
-          MT = 24
-        ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
-C* (g,3na) cross section
-          MT = 25
-        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C* (g,np) cross section
-          MT = 28
-        ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
-C* (g,n2a) cross section
-          MT = 29
-        ELSE IF(JZA  .EQ. IZA+IZI-4010) THEN
-C* (g,2n2a) cross section
-          MT = 30
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (g,nd) cross section
-          MT = 32
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (g,nt) cross section
-          MT = 33
-c... Conflicts with (a,a) reaction
-c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-c...C* (g,n+He3) cross section
-c...          MT = 34
-        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
-C* (g,nd2a) cross section
-          MT = 35
-        ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
-C* (g,nt2a) cross section
-          MT = 36
-        ELSE IF(JZA  .EQ. IZA+IZI-   4) THEN
-C* (g,4n) cross section
-          MT = 37
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (g,2np) cross section
-          MT = 41
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (g,3np) cross section
-          MT = 42
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (g,n2p) cross section
-          MT = 44
-        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
-C* (g,npa) cross section
-          MT = 45
-c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
-c...C* (g,5n) cross section
-c...          MT = 47
-        ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
-C* (g,g') radiative capture cross section
-          MT =102
-c...      MT =  3
-        ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
-C* (g,p) cross section
-          MT =103
-        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C* (g,d) cross section
-          MT =104
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (g,t) cross section
-          MT =105
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (g,He3) cross section
-          MT =106
-        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-C* (g,a) cross section
-          MT =107
-        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
-C* (g,2a) cross section
-          MT =108
-        ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
-C* (g,3a) cross section
-          MT =109
-        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
-C* (g,2p) cross section
-          MT =111
-        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
-C* (g,pa) cross section
-          MT =112
-        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
-C* (g,t2a) cross section
-          MT =113
-        ELSE IF(JZA  .EQ. IZA+IZI-5010) THEN
-C* (g,d2a) cross section
-          MT =114
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (g,pd) cross section
-          MT =115
-        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-C* (g,pt) cross section
-          MT =116
-        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
-C* (g,da) cross section
-          MT =117
-        END IF
-      ELSE IF(IZI.EQ.1) THEN
-C* INCIDENT NEUTRONS
         IF     (JZA  .EQ. IZA+IZI     ) THEN
 C* Radiative capture cross section
           MT =102
         ELSE IF(JZA  .EQ. IZA+IZI   -1) THEN
-C* Discrete levels inelastic scattering cross section
+C* Discrete levels (z,n') cross section
           MT =50
         ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
-C* Discrete levels (n,p) cross section
+C* Discrete levels (z,p') cross section
           MT =600
         ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-C* Discrete levels (n,a) cross section
+C* Discrete levels (z,a') cross section
           MT =800
+C... Conflicts with (p,3np)
+C...    ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C...C* (p,2nd) cross section
+C...      MT =   11
         ELSE IF(JZA  .EQ. IZA+IZI   -2) THEN
-C* (n,2n) cross section
+C* (z,2n) cross section
           MT =   16
         ELSE IF(JZA  .EQ. IZA+IZI   -3) THEN
-C* (n,3n) cross section
+C* (z,3n) cross section
           MT =   17
         ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
-C* (n,na) cross section
+C* (z,na) cross section
           MT =   22
+        ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
+C* (z,n3a) cross section
+          MT =   23
         ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
-C* (n,2na) cross section
-C...WARNING Cannot distinguish between (n,2na) and (n,4n2p)
+C* (z,2na) cross section
           MT =   24
-C...      MT =    5
         ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
-C* (n,3na) cross section
-C...WARNING Cannot distinguish between (n,3na) and (n,5n2p)
+C* (z,3na) cross section
           MT =   25
-C...      MT =    5
         ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C* (n,np) cross section
+C* (z,np) cross section
           MT =   28
-        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
-C* (n,4n) cross section
-          MT =   37
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (n,2np) cross section
-          MT =   41
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (n,3np) cross section
-          MT =   42
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (n,n2p) cross section
-          MT =44
-        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
-C* (n,npa) cross section
-          MT =   45
-c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
-c...C* (n,5n) cross section
-c...          MT =   47
-C... Conflicts with (n,2np)
-C...    ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (n,He3) cross section
-C...          MT =  106
-        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
-C* (n,2a) cross section
-          MT =  108
-        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
-C* (n,2p) cross section
-          MT =  111
-        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
-C* (n,pa) cross section
-          MT =  112
-        END IF
-C*
-      ELSE IF(IZI.EQ.1001) THEN
-C* INCIDENT PROTONS
-        IF     (JZA  .EQ. IZA+IZI  -1) THEN
-C* Discrete level (p,n) cross section
-          MT =50
-        ELSE IF(JZA  .EQ. IZA+IZI  -2) THEN
-C* (p,2nd) cross section
-          MT =11
-        ELSE IF(JZA  .EQ. IZA+IZI  -2) THEN
-C* (p,2n) cross section
-          MT =16
-        ELSE IF(JZA  .EQ. IZA+IZI  -3) THEN
-C* (p,3n) cross section
-          MT =17
-        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
-C* (p,na) cross section
-          MT =22
-        ELSE IF(JZA  .EQ. IZA-5012) THEN
-C* (p,n3a) cross section
-          MT =23
-        ELSE IF(JZA  .EQ. IZA-1005) THEN
-C* (p,2na) cross section
-          MT =24
-        ELSE IF(JZA  .EQ. IZA-1006) THEN
-C* (p,3na) cross section
-          MT =25
-        ELSE IF(JZA  .EQ. IZA-   1) THEN
-C* (p,np) cross section
-          MT =28
-        ELSE IF(JZA  .EQ. IZA-3008) THEN
-C* (p,n2a) cross section
-          MT =29
-        ELSE IF(JZA  .EQ. IZA-3009) THEN
-C* (p,2n2a) cross section
-          MT =30
-        ELSE IF(JZA  .EQ. IZA-   2) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
+C* (z,n2a) cross section
+          MT =   29
+        ELSE IF(JZA  .EQ. IZA+IZI-4010) THEN
+C* (z,2n2a) cross section
+          MT =   30
+c... Conflicts with (n,2np) reaction
+C...    ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
 C* (p,nd) cross section
-          MT =32
+C...      MT =   32
         ELSE IF(JZA  .EQ. IZA-   3) THEN
 C* (p,nt) cross section
-          MT =33
+          MT =   33
 c... Conflicts with (n,a) reaction
-c...        ELSE IF(JZA  .EQ. IZA-1003) THEN
+c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
 c...C* (p,n+He3) cross section
 c...          MT =34
-        ELSE IF(JZA  .EQ. IZA-4010) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
 C* (p,nd2a) cross section
-          MT =35
-        ELSE IF(JZA  .EQ. IZA-4011) THEN
+          MT =   35
+        ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
 C* (p,nt2a) cross section
-          MT =36
-        ELSE IF(JZA  .EQ. IZA- 997) THEN
-C* (p,4n) cross section
-          MT =37
-        ELSE IF(JZA  .EQ. IZA-   2) THEN
-C* (p,2np) cross section
-          MT =41
-        ELSE IF(JZA  .EQ. IZA-   3) THEN
-C* (p,3np) cross section
-          MT =42
-        ELSE IF(JZA  .EQ. IZA-1002) THEN
-C* (p,n2p) cross section
-          MT =44
-        ELSE IF(JZA  .EQ. IZA-2005) THEN
-C* (p,npa) cross section
-          MT =45
-c...        ELSE IF(JZA  .EQ. IZA+IZI-5) THEN
-c...C* (p,5n) cross section
-c...          MT =   47
-        ELSE IF(JZA  .EQ. IZA+1001) THEN
-C* Radiative capture cross section
-          MT =102
-        ELSE IF(JZA  .EQ. IZA     ) THEN
-C* Discrete levels (p,p) cross section
-          MT =600
-        ELSE IF(JZA  .EQ. IZA-   1) THEN
-C* (p,d) cross section
-          MT =104
-        ELSE IF(JZA  .EQ. IZA-   2) THEN
+          MT =   36
+        ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
+C* (z,4n) cross section
+          MT =   37
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C* (z,2np) cross section
+          MT =   41
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (z,3np) cross section
+          MT =   42
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (z,n2p) cross section
+          MT =   44
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C* (z,npa) cross section
+          MT =   45
+c...    ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
+C* (z,5n) cross section
+c...      MT =   47
+C... Cannot distinguish from (z,np)
+C...    ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C* (z,d) cross section
+C...      MT =  104
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
 C* (p,t) cross section
-          MT =105
-        ELSE IF(JZA  .EQ. IZA-1002) THEN
-C* (p,He3) cross section
-          MT =106
-        ELSE IF(JZA  .EQ. IZA-1003) THEN
-C* Discrete level (p,a) cross section
-          MT =800
-        ELSE IF(JZA  .EQ. IZA-3007) THEN
-C* (p,2a) cross section
-          MT =108
-        ELSE IF(JZA  .EQ. IZA-5011) THEN
+          MT =  105
+C... Conflicts with (n,n2p)
+C...    ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
+C* (z,He3) cross section
+C...      MT =  106
+        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
+C* (z,2a) cross section
+          MT =  108
+        ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
 C* (p,3a) cross section
-          MT =109
-        ELSE IF(JZA  .EQ. IZA-1001) THEN
-C* (p,2p) cross section
-          MT =111
-        ELSE IF(JZA  .EQ. IZA-2004) THEN
-C* (p,pa) cross section
-          MT =112
+          MT =  109
+        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
+C* (z,2p) cross section
+          MT =  111
+        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
+C* (z,pa) cross section
+          MT =  112
         ELSE IF(JZA  .EQ. IZA-4010) THEN
-C* (p,t2a) cross section
+C* (z,t2a) cross section
           MT =113
         ELSE IF(JZA  .EQ. IZA-4009) THEN
-C* (p,d2a) cross section
+C* (z,d2a) cross section
           MT =114
         ELSE IF(JZA  .EQ. IZA-1002) THEN
-C* (p,pd) cross section
+C* (z,pd) cross section
           MT =115
         ELSE IF(JZA  .EQ. IZA-1003) THEN
-C* (p,pt) cross section
+C* (z,pt) cross section
           MT =116
         ELSE IF(JZA  .EQ. IZA-2005) THEN
-C* (p,da) cross section
+C* (z,da) cross section
           MT =117
         END IF
-      ELSE IF(IZI.EQ.2004) THEN
-C* INCIDENT ALPHAS
-        IF     (JZA  .EQ. IZA+IZI-   1) THEN
-C* Discrete level (a,n) cross section
-          MT =50
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (a,2nd) cross section
-          MT =11
-        ELSE IF(JZA  .EQ. IZA+IZI-   2) THEN
-C* (a,2n) cross section
-          MT =16
-        ELSE IF(JZA  .EQ. IZA+IZI-   3) THEN
-C* (a,3n) cross section
-          MT =17
-        ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
-C* (a,na) cross section
-          MT =22
-        ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
-C* (a,n3a) cross section
-          MT =23
-        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
-C* (a,2na) cross section
-          MT =24
-        ELSE IF(JZA  .EQ. IZA+IZI-2007) THEN
-C* (a,3na) cross section
-          MT =25
-        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C* (a,np) cross section
-          MT =28
-        ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
-C* (a,n2a) cross section
-          MT =29
-        ELSE IF(JZA  .EQ. IZA+IZI-4010) THEN
-C* (a,2n2a) cross section
-          MT =30
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (a,nd) cross section
-          MT =32
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (a,nt) cross section
-          MT =33
-c... Conflicts with (a,a) reaction
-c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-c...C* (a,n+He3) cross section
-c...          MT =34
-        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
-C* (a,nd2a) cross section
-          MT =35
-        ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
-C* (a,nt2a) cross section
-          MT =36
-        ELSE IF(JZA  .EQ. IZA+IZI-   4) THEN
-C* (a,4n) cross section
-          MT =37
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (a,2np) cross section
-          MT =41
-        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C* (a,3np) cross section
-          MT =42
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (a,n2p) cross section
-          MT =44
-        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
-C* (a,npa) cross section
-          MT =45
-c...        ELSE IF(JZA  .EQ. IZA+IZI   -5) THEN
-c...C* (a,5n) cross section
-c...          MT =47
-        ELSE IF(JZA  .EQ. IZA+IZI     ) THEN
-C* (a,g) radiative capture cross section
-          MT =102
-        ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
-C* (a,p) cross section
-          MT =103
-        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C* (a,d) cross section
-          MT =104
-        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C* (a,t) cross section
-          MT =105
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (a,He3) cross section
-          MT =106
-        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-C* Discrete level (a,a) cross section
-          MT =800
-        ELSE IF(JZA  .EQ. IZA+IZI-4008) THEN
-C* (a,2a) cross section
-          MT =108
-        ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
-C* (a,3a) cross section
-          MT =109
-        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
-C* (a,2p) cross section
-          MT =111
-        ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
-C* (a,pa) cross section
-          MT =112
-        ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
-C* (a,t2a) cross section
-          MT =113
-        ELSE IF(JZA  .EQ. IZA+IZI-5010) THEN
-C* (a,d2a) cross section
-          MT =114
-        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C* (a,pd) cross section
-          MT =115
-        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
-C* (a,pt) cross section
-          MT =116
-        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
-C* (a,da) cross section
-          MT =117
-        END IF
-      END IF
       RETURN
       END
       SUBROUTINE EMTCHR(POUT,PTST,MT,IZI)
@@ -2327,7 +2030,10 @@ C*
 C* Search EMPIRE output for specific strings
   110 READ (LIN,891,END=700) REC
       IF(REC( 1:10).EQ.' REACTION '                  ) GO TO 200
+C*    -- Reaction - normal case
       IF(REC( 1:18).EQ.'  Decaying nucleus'          ) GO TO 210
+C*    -- Reaction - without "Decaying nucleus" --> no Q-value!!!
+      IF(REC(13:36).EQ.'production cross section'    ) GO TO 212
       IF(REC(13:35).EQ.'ground state population'     ) GO TO 220
       IF(REC(13:35).EQ.'isomer state population'     ) GO TO 224
       IF(REC( 1:10).EQ.' TOTAL  CR'                  ) GO TO 290
@@ -2383,6 +2089,7 @@ C* Allow for metastable targets
      &                 'te of target '//REC(24:34)//'                '
         LISO=0
       END IF
+      NOQV=0
 C* Read and check the energy
   201 READ (REC(51:60),994) EE
       EE = EE*1.E6
@@ -2433,7 +2140,7 @@ C*
 C* Next product nucleus data
   210 READ (REC(20:29),802) JZ,CH,JA
       JZA=JZ*1000+JA
-C* If target nucleus, read the mass
+C* If residual equals target nucleus, read the mass
       IF(JZA  .EQ. IZA  ) THEN
         READ (REC(37:46),994) AWR
         AWR=AWR/AWN
@@ -2445,6 +2152,7 @@ C* Read the reaction Q-value
 C* Assign MT number from residual ZA
       CALL EMTIZA(IZI,IZA,JZA,MT)
       IF(MT.EQ.0) MT=10*JZA+5
+      NOQV=0
 C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
       IF(MT.EQ. 50 .OR. MT.EQ.600 .OR. MT.EQ.800) THEN
         MT0=MT
@@ -2452,6 +2160,19 @@ C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
       END IF
 C* All other cross sections are processed in the same way
       GO TO 310
+C*
+C* Product nucleus without "Decaying nucleus" section
+  212 READ (REC(2:11),802) JZ,CH,JA
+      JZA=JZ*1000+JA
+C* Assign MT number from residual ZA
+      CALL EMTIZA(IZI,IZA,JZA,MT)
+      IF(MT.EQ.0) MT=10*JZA+5
+C*    -- no "decaying nucleus" --> no discrete levels
+      IF(MT.EQ. 50) MT=  4
+      IF(MT.EQ.600) MT=103
+      IF(MT.EQ.800) MT=107
+      NOQV=1
+      GO TO 311
 C*
 C* Isomer production cross section - ground state
   220 CONTINUE
@@ -2465,6 +2186,7 @@ C* Isomer production cross section - ground state
       MISO=1
   226 QI  =QQ-EISO
       MT  =JZA*10+MISO
+      NOQV=0
       GO TO 311
 C*
 C* Read the total cross section but exclude incident charged particles
@@ -2531,6 +2253,10 @@ C*            -- If level energy different, increment the MT
 C* Save Q-values and cross section for this reaction
       QQM(IXS)=QQ
       QQI(IXS)=QI
+      IF(NOQV.NE.0) THEN
+        PRINT *,'WARNING - Q-value may be incorrect for MT',MT
+        PRINT *,'          Check ENDF flag in EMPIRE input'
+      END IF
 C* Add cross section contribution
   320 IF((MT.GE. 450 .AND. MT.LT. 460) .OR.
      &   (MT.GE.1000 .AND. MT.LE.9999)) THEN
@@ -3589,8 +3315,8 @@ C* Assume 100% transition to ground level
           WRITE(LTT,912) IL
           WRITE(LER,912) IL
           JL=1
-          LBR(1,IL)=EL
-          BRR(1,IL)=1
+          LBR(1,IL)=1
+          BRR(1,IL)=EL
         END IF
         GO TO 39
       END IF
@@ -3639,7 +3365,7 @@ C*
   806 FORMAT(I12,F10.0,13X,F15.0,I3, 7(I4,F7.0))
   807 FORMAT(53X,7(I4,F7.0))
   891 FORMAT(A136)
-  912 FORMAT(' EMPEND WARNING - No b.r. data for level',I3/
+  912 FORMAT(' EMPEND WARNING - No b.r. data for level ',I4/
      1       '                  Transfer to ground state assumed')
       END
       SUBROUTINE WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LRP,LFI,NLIB,NMOD
@@ -4400,8 +4126,9 @@ C-
       DATA PTST/'        '/
 C* Initialize constants
       IZR=0
-      QM =0.
-      QI =0.
+      ZRO=0
+      QM =0
+      QI =0
       CALL POUCHR(PTST,IZI,AWI)
 C* Identify indices of MT 5,201,203,207
       NK =0
@@ -4527,7 +4254,7 @@ C* Repeat for other particles
       END IF
 C* Write CONT record - end of data set
       NS=99998
-      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       NS=0
 C*
       RETURN
@@ -4607,11 +4334,11 @@ C-
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),IWO(MXI),NBT(1),INT(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
-      DATA XSMALL,SMALL,ZRO,IZRO/ 1.0E-34, -34., 0., 0/
+      DATA XSMALL,SMALL,ZRO,IZR/ 1.0E-34, -34., 0., 0/
       DATA PTST/'        '/
 C*
-      MF=8
-      ZA=IZA
+      MF =8
+      ZA =IZA
       ETHRM=0.0253
       DO I=1,NXS
         IF(MTH(I).GT.9999) THEN
@@ -4643,8 +4370,6 @@ C*
 C* Scan activation cross sections for associated MT numbers
    80 N10=0
       NRC=0
-      IZR=0
-      ZRO=0
       CALL POUCHR(PTST,IZI,AWI)
 c...
       print '(10I8)',(mth(i),i=1,nxs)
@@ -4684,7 +4409,7 @@ C* Find reaction set with lowest MT number - save index list in LRC
           JXS=1
           IWO(LRC-1+JXS)=I
           MT=IWO(I)
-        ELSE IF(IWO(I).EQ.MT) THEN
+        ELSE IF(MT.LT.1000 .AND. IWO(I).EQ.MT) THEN
           JXS=JXS+1
           IF(LRC-1+JXS.GT.MXI)
      &       STOP 'WRMF10 ERROR - MXI limit exceeded'
@@ -4694,8 +4419,8 @@ C* Find reaction set with lowest MT number - save index list in LRC
 C* Check if last reaction
       IF(MT.GE.1000) GO TO 200
 c...
-      print *,'found',jxs,' reaction(s) for MT',mt,' at index'
-     &       ,(iwo(lrc-1+j),j=1,jxs)
+c...  print *,'found',jxs,' reaction(s) for MT',mt,' at index'
+c... &       ,(iwo(lrc-1+j),j=1,jxs)
 c...
 C*
 C* Save reaction labels for sorting - save list for current MT in LZA
@@ -4718,7 +4443,7 @@ C*
 C* Write file MF8 data
       IF(MF.EQ.8) THEN
         N2=1
-        CALL WRCONT(LOU,MAT,MF, MT,NS, ZA,AWR,L1,L2,JX1,N2)
+        CALL WRCONT(LOU,MAT,MF, MT,NS, ZA,AWR,IZR,IZR,JX1,N2)
 C* Sort constituent reactions by residual in ascending order
         JRC=0
   110   MRC=2000000
@@ -4744,7 +4469,7 @@ C* Flag residual for this reaction processed
 C*      -- Proceed to the next reaction of the current MT
         JRC=JRC+1
 c...
-c...    print *,'      reaction',jrc,' for mt/za',mt,jza,' processed'
+c...    print *,'      reaction',jrc,' for mf8 mt/za',mt,jza,' done'
 c...
         IF(JRC.LT.JX1) GO TO 110
 C* Flag reactions processed and try the next MT set
@@ -4756,13 +4481,13 @@ C* Flag reactions processed and try the next MT set
         END DO
         GO TO 100
       END IF
+c...
+c...  print *,'done',jxs,' reactions mf8'
+c...
 C*
 C* Write file MF10 data
       MF=10
-      L1=0
-      L2=0
-      N2=0
-      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,JX1,N2)
+      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,IZR,IZR,JX1,IZR)
 C* Sort constituent reactions by residual in ascending order
       JRC=0
   120 MRC=2000000
@@ -4782,8 +4507,8 @@ C* Flag residual for this reaction processed
       LFS=MTH(IT)-JZA*10
       IF(LFS.GE.5) LFS=LFS-5
 c...
-      print *,'    writing reaction at index',IT
-     &       ,' residual',jza,' state',lfs
+c...  print *,'    writing reaction at index',IT
+c... &       ,' residual',jza,' state',lfs
 c...
       NEO=NEP*NEN *2
       LX =3
@@ -4961,7 +4686,7 @@ c...  print *,'      reaction',jrc,' for mt/za',mt,jza,' processed'
 c...
       IF(JRC.LT.JX1) GO TO 120
 C* Flag reactions processed and try the next MT set
-      CALL WRCONT(LOU,MAT,MF,IZRO,NS,ZRO,ZRO,IZRO,IZRO,IZRO,IZRO)
+      CALL WRCONT(LOU,MAT,MF,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       N10=N10+1
       DO J=1,JXS
         L=IWO(LRC-1+J)
@@ -4978,7 +4703,7 @@ C* All reactions processed
 C* Write the FEND record
       IF(N10.GT.0) THEN
         NS=0
-        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+        CALL WRCONT(LOU,MAT,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       END IF
       IF(MF.EQ.8) THEN
         DO JX=1,JXS
@@ -4987,7 +4712,7 @@ C* Write the FEND record
         N10=0
         MF =10
 c...
-        print *,'Write file MF=10'
+c...    print *,'Write file MF=10'
 c...
         GO TO 80
       END IF
@@ -5029,6 +4754,10 @@ c... Level energies sorted in descending order (fix error that reappeared?)
 c...        LE=LBR(NT+1-JT,LL)
 C...        LE=LBR(JT,NS+1)
             LE=LBR(JT,LL)
+C...
+C...        print *,'jt,ll,le',jt,ll,le
+C...        print *,'       E',enl(le)
+C...
             RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
 c...        RWO(2,JT)=BRR(NT+1-JT,LL)
