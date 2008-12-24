@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-15 01:52:18 $
-Ccc   * $Id: fis_io.f,v 1.6 2008-12-15 01:52:18 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2008-12-24 16:14:33 $
+Ccc   * $Id: fis_io.f,v 1.7 2008-12-24 16:14:33 herman Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -1101,7 +1101,7 @@ C
       WRITE (80,'(a8,f2.0,a36)') ' FISBAR = ', FISbar(Nnuc),cara1
 
       IF (FISden(Nnuc).EQ.0.) cara1 = '  EGSM LD'
-      IF (FISden(Nnuc).EQ.0.) cara1 = '  Ignatyuk GSM LD'
+      IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD'
       IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD'
       WRITE (80,'(a8,f2.0,a36)') ' FISDEN = ', FISden(Nnuc), cara1
 
