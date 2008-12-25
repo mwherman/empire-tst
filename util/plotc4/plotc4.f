@@ -2419,7 +2419,7 @@ C
       DATA HL/' HL'/
       DATA BLANK/'    '/
       DATA COS1/'Degr','=   '/
-      DATA COSA/'Angl','e int','egra','ted '/
+      DATA COSA/'Angl','e in','tegr','ated'/
       DATA EN2/'E2 ='/
       DATA EN1/'E ='/
       DATA STAT1/'P','S','D','C','A','O','R'/

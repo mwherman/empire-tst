@@ -6,13 +6,15 @@ xxx.   xx.           ;TARGET  A , Z
 1                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       3.                                               
-LEVDEN     3.                               ! RIPL-3 HFB parity dependent NLD as default                                                          
+LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default                                                          
+*LEVDEN     3.                              ! RIPL-3 HFB parity dependent NLD (comented)                                                        
 FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
-NEX      080.                                                   
-MSD        0.                               ! Recommended default for nucleon induced reactions MSD=1                                        *COMPFF     1.
+NEX      080.                               ! Number of points in the outgoing energy grid
+HRTW       3.                               ! Width fluctuation are considered up to 3 MeV                     
+MSD        0.                               ! Recommended default for nucleon induced reactions MSD=1          
 MSC        0.                               ! Recommended default for nucleon induced reactions MSC=1                           
-ENDF       0.                               ! No ENDF formatting by default   
-PCROSS    1.5                               ! Default prequilibrium using the exciton model
+ENDF       0.                               ! No ENDF formatting by default (muxh faster than formatting)  
+PCROSS    1.5                               ! Default prequilibrium using the exciton model code PCROSS with default MFP parameter
 DEGAS      0.                               ! Spin conserving exciton model for nucleons and gammas 
 HMS        0.                               ! Monte Carlo Hybrid preequilibrium model   
 *TUNE       0.90    Z0   A0    0            ! To fit the capture channel (commented)                    
@@ -26,7 +28,7 @@ DIRECT     0.                               ! Spherical optical model by default
 *DIRECT     3.                              ! DWBA calculation using the potential given by DIRPOT (RIPL # 2408)         
 *DIRPOT -2408.       
 GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)   
-RECOIL     0.                               ! No recoils are calculated. Sizeable speed-u if no ENDF file is required  
+RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required  
 *KALMAN    1. 
 GO                                                  
 0.002
