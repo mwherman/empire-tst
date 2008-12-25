@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-15 01:52:20 $
-Ccc   * $Id: lev-dens.f,v 1.73 2008-12-15 01:52:20 Capote Exp $
+Ccc   * $Date: 2008-12-25 00:57:01 $
+Ccc   * $Id: lev-dens.f,v 1.74 2008-12-25 00:57:01 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -2370,7 +2370,7 @@ C-----where continuum starts,ends,steps in between
       DO nr = 1, NRFdis(Ib)
         IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
       ENDDO
-c      IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
+C     IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
 
       IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
         xmax = XMInn(Ib) + 3.5D0
@@ -2643,11 +2643,11 @@ C
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
      & TFB, TDIrect, ECFism(NFMOD)
 
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
 
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
-      INTEGER NLWst                                                       ! PARAM
+      INTEGER NLWst                                             ! PARAM
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
@@ -2685,7 +2685,7 @@ C-----where continuum starts,ends,steps in between
          DO nr = 1, NRFdis(Ib)
             IF (EFDis(nr,Ib).GT.XMInn(Ib)) XMInn(Ib) = EFDis(nr,Ib)
          ENDDO
-C        IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
+         IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
 
          IF (excn1.LE.(EFB(Ib) + XMInn(Ib))) THEN
             xmax = XMInn(Ib) + 3.5D0
@@ -2819,7 +2819,7 @@ C-----45.84 stands for (12/SQRT(pi))**2
       momparcrt=mompar
       momortcrt=momort
 
-      def2 = a2
+      def2 = DEFfis(Ib)
 
       IF (mompar.LT.0.0D0 .OR. momort.LT.0.0D0) THEN
          WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj

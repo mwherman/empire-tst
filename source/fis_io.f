@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-12-24 16:14:33 $
-Ccc   * $Id: fis_io.f,v 1.7 2008-12-24 16:14:33 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2008-12-25 00:57:00 $
+Ccc   * $Id: fis_io.f,v 1.8 2008-12-25 00:57:00 Capote Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -27,7 +27,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD) 
+     & TFB, TDIrect, ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -68,7 +68,7 @@ C
       CHARACTER*50 filename
       DOUBLE PRECISION rmiu, bb2, bb3, bb4
       INTEGER Find_Extrem
-      DATA chstar/70*'='/  
+      DATA chstar/70*'='/
       REAL*8 centr,  heigth,  width(NFPARAB), ucentr, uheigth, uwidth
 
 
@@ -90,10 +90,10 @@ C
       NRWel = 0
       NRHump =0
 c-----Fundamental barrier heights
-C-----FISBAR(Nnuc)=0 EMPIRE 
-C-----FISBAR(Nnuc)=1 Maslov 
+C-----FISBAR(Nnuc)=0 EMPIRE
+C-----FISBAR(Nnuc)=1 Maslov
 C-----FISBAR(Nnuc)=2 HFB parabolic
-C-----FISBAR(Nnuc)=3 HFB numeric 
+C-----FISBAR(Nnuc)=3 HFB numeric
 c
 C-----FISBAR(Nnuc)= 0 Empire internal library
       IF (FISbar(Nnuc).EQ.0.) THEN
@@ -205,8 +205,8 @@ c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
          endif
          do ii=1,npoints
            READ (52,*,END = 480) bb2, bb3, bb4, vdef_1d(ii)
-           eps_1d(ii) = bb2            
-         enddo      
+           eps_1d(ii) = bb2
+         enddo
          GOTO 480
  460     WRITE (8,*)' CHANGE FISBAR OPTION(NOW=3). EXECUTION TERMINATED'
          WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
@@ -263,7 +263,7 @@ C
          IF (LVP(1,Nnuc).NE.IPFdis(1,ibar)) IPFdis(1,ibar) = LVP(1,Nnuc)
          NRFdis(ibar) = 1
       ENDDO
-C  
+C
 c-----Maslov's transition bandheads
       IF (FISdis(Nnuc).EQ.1.) THEN
          IF (A(Nnuc)/2.EQ.INT(A(Nnuc)/2)) THEN
@@ -380,7 +380,7 @@ c-----------odd-even
             H(k,ibar) = H(1,ibar)
          ENDDO
       ENDDO
-      
+
       DO i = 1, NRBar
          Hcont(i)= H(1,i)
       ENDDO
@@ -451,8 +451,8 @@ C---- writing data in FISSION.INP
       WRITE (79,'(4x,a2,i3,2x,a2,i3)') 'Z=', INT(Z(Nnuc)), 'A=',
      &                                 INT(A(Nnuc))
       WRITE (79,'(a40)') '----------------------------------------'
-      WRITE (79,*)' '  
-c   
+      WRITE (79,*)' '
+c
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (79,*)chstar
          WRITE (79,*)' HFB numerical fission barrier'
@@ -463,8 +463,8 @@ c
          ENDDO
          WRITE (79,*)
          WRITE (79,'(a15,i1,a15,i1)') ' Nr.parabolas =', NRBar,
-     &                                '      Nr.wells=', NRWel 
-         NRHump = NRBar - NRWel 
+     &                                '      Nr.wells=', NRWel
+         NRHump = NRBar - NRWel
          nextr = nrbar
          WRITE (79,*)' '
          WRITE (79,*)' Index of extrema'
@@ -481,13 +481,13 @@ c
 c
       IF(FISbar(Nnuc).LT.3)THEN
          WRITE (79,'(a15,i1,a15,i1)') ' Nr.parabolas =', NRBar,
-     &                                '      Nr.wells=', NRWel 
+     &                                '      Nr.wells=', NRWel
          NRHump = NRBar - NRWel
-         WRITE(79,*)         
+         WRITE(79,*)
       ENDIF
- 
 
-      IF (Nrbar.EQ.1) THEN      
+
+      IF (Nrbar.EQ.1) THEN
          WRITE (79,'(a)') '    Va      ha    (in Mev) '
          WRITE (79,'(2f8.3)') EFB(1), H(1,1)
          WRITE (79,*) ' '
@@ -572,7 +572,7 @@ c
          WRITE (79,*) ' '
       ENDIF
       WRITE (79,*)chstar
-      WRITE (79,*)' Parameters of the imaginary potential used only if 
+      WRITE (79,*)' Parameters of the imaginary potential used only if
      & FISOPT>0'
       WRITE (79,*)chstar
       WRITE (79,*) '      W0         W1         W2'
@@ -581,7 +581,7 @@ c
       WRITE (79,*)chstar
       WRITE (79,*)' Discrete transitional states'
       WRITE (79,*)chstar
-c   
+c
       DO ibar = 1, NRBar
          WRITE (79,'(a39,I2,a2,I2)')
      &                            'Number of discrete states at barrier'
@@ -602,8 +602,8 @@ c
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
-      ENDDO   
-      WRITE (79,*)  
+      ENDDO
+      WRITE (79,*)
       WRITE (79,*)chstar
       WRITE (79,*)' Quantities used only if FISDEN=1 to calculate LD at
      & saddles'
@@ -615,7 +615,7 @@ c
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
      &          WRITE (79,'(1x, A8, 1x, I1,4x,I1, 8f9.3)') 'Barrier',
      &          nr, BFF(nr), SHCfis(nr), DELtafis(nr), GAMmafis(nr),
-     &          AFIs(nr), ECFis(nr),vibf12(nr),vibfdt(nr),vibfnorm(ib)
+     &          AFIs(nr), ECFis(nr),vibf12(nr),vibfdt(nr),vibfnorm(nr)
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
@@ -625,7 +625,7 @@ c
                ENDDO
             ENDIF
       ENDDO
-      WRITE (79,*) 
+      WRITE (79,*)
 
       WRITE (79,*)chstar
       WRITE (79,*)'  Coefficients used only if FISDEN=2 to adjust HFB LD
@@ -642,15 +642,15 @@ c
       WRITE (79,*)'  Coefficient(s) used to calculate the direct continu
 
      &um weight(s) '
-      WRITE (79,*)chstar 
+      WRITE (79,*)chstar
       DO nr = 1, nrwel
          awf(nr) = 0.d0
          WRITE (79,'(1x, A8, 1x, I1, 1f9.3)') '    Well', nr, awf(nr)
       ENDDO
       WRITE (79,*)
-      WRITE (79,*)'****************************************************' 
-      WRITE (79,*)'****************************************************' 
-     
+      WRITE (79,*)'****************************************************'
+      WRITE (79,*)'****************************************************'
+
       END
 C
 C
@@ -666,7 +666,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD) 
+     & TFB, TDIrect,  ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -674,9 +674,8 @@ C
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),               ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
      &                 rohfb_norm(NFHUMP)
-c      DOUBLE PRECISION vibf12(NFHump),vibfdt(NFHump),vibfnorm(NFHump)     ! FISVIB
 
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
@@ -684,10 +683,8 @@ c      DOUBLE PRECISION vibf12(NFHump),vibfdt(NFHump),vibfnorm(NFHump)     ! FIS
      &                 TFB, TDIrect,ECFism
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
       COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
-c      COMMON /FISVIB/ vibf12,vibfdt,vibfnorm
-
 C
-  
+
 C Dummy arguments
 C
       INTEGER Nnuc
@@ -721,24 +718,24 @@ C
       READ (79,*)
 
       IF(FISbar(Nnuc).EQ.3.)THEN
-         READ (79,'(//)')    
+         READ (79,'(//)')
          READ (79,'(i3)') npoints
          DO i = 1, npoints
             READ(79,'(i4,2f10.3)')ii, vdef_1d(i),eps_1d(i)
          ENDDO
          READ (79,*)
-         READ (79,'(15x,i1,15x,i1)') NRBar, NRWel     
+         READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
          NRHump = NRBar - NRWel
          nextr = nrbar
-         READ (79,'(/)')   
+         READ (79,'(/)')
          READ (79,*)(iiextr(j), j = 1, nrbar)
-         READ (79,*) 
+         READ (79,*)
          IF(Nrhump.EQ.1) READ (79,'(2f10.3)')(barnorm(nh), nh=1,nrhump),
      &                                        hnorm
          IF(Nrhump.EQ.2) READ (79,'(3f10.3)')(barnorm(nh), nh=1,nrhump),
      &                                        hnorm
          IF(Nrhump.EQ.3) READ (79,'(4f10.3)')(barnorm(nh), nh=1,nrhump),
-     &                                        hnorm     
+     &                                        hnorm
          READ (79,'(/)')
       ENDIF
 
@@ -747,12 +744,12 @@ c         READ (79,'(/)')
          READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
          NRHump = NRBar - NRWel
          READ (79,'(/)')
-      ENDIF       
-c     
+      ENDIF
+c
       nrmod = INT(FISmod(Nnuc)) + 1
-  
+
       IF (FISmod(Nnuc).EQ.0.) READ (79,*) (EFB(i),HCOnt(i),i = 1,NRBar)
-c 
+c
       IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1) READ (79,*) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFB(3), H(1,3)
       IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
@@ -761,15 +758,15 @@ c
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3),
      &    EFB(3), H(1,3)
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
-     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)    
+     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
 c
-      READ (79,' (/)')      
+      READ (79,' (/)')
       READ (79,*) (HJ(Nnuc,i),i = 1,NRBar)
       READ (79,' (/)')
       READ (79,*) (DEFfis(i),i = 1,NRBar)
-      READ (79,'(////)')   
+      READ (79,'(////)')
       READ (79,'(3f11.4)') (WIMag(i),i = 1,3)
-      READ (79,'(///)') 
+      READ (79,'(///)')
 
       DO ibar = 1, NRBar
          READ (79,'(a39,I2,a2,I2)') line, ibaro, cara8, NRFdis(ibar)
@@ -788,13 +785,13 @@ c
          ENDDO
       ENDDO
       READ (79,*)
- 
+
 C-----FISDEN(Nnuc)= 0 EMPIRE
 C-----FISDEN(Nnuc)= 1 Ignatyuk
 C-----FISDEN(Nnuc)= 2 HFB
 
       IF(FISDEN(Nnuc).LE.1)THEN
-         READ (79,'(///)') 
+         READ (79,'(///)')
          DO ib = 1, nrhump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) THEN
@@ -814,16 +811,16 @@ C                 For covariance
                ENDDO
             ENDIF
          ENDDO
-         IF(NRHump.EQ.1) READ (79,'(//////)') 
-         IF(NRHump.EQ.2) READ (79,'(///////)') 
-         IF(NRHump.EQ.3) READ (79,'(////////)') 
+         IF(NRHump.EQ.1) READ (79,'(//////)')
+         IF(NRHump.EQ.2) READ (79,'(///////)')
+         IF(NRHump.EQ.3) READ (79,'(////////)')
 c         READ (79,*)
-      ENDIF   
- 
+      ENDIF
+
       IF(FISDEN(Nnuc).EQ.2)THEN
-         IF(NRHump.EQ.1)READ (79,'(/////////)') 
-         IF(NRHump.EQ.2)READ (79,'(//////////)') 
-         IF(NRHump.EQ.3)READ (79,'(///////////)') 
+         IF(NRHump.EQ.1)READ (79,'(/////////)')
+         IF(NRHump.EQ.2)READ (79,'(//////////)')
+         IF(NRHump.EQ.3)READ (79,'(///////////)')
 
          DO ih = 1, nrhump
             READ (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
@@ -832,7 +829,7 @@ c         READ (79,*)
          READ (79,*)
       ENDIF
 
-      READ (79,'(//)') 
+      READ (79,'(//)')
       DO nr = 1, nrwel
          READ (79,'(1x, A8, 1x, I1, 1f9.3)') cara8, i, awf(nr)
       ENDDO
@@ -849,15 +846,15 @@ c--------width normalization
          DO i=1,npoints
             eps_1d(i) = eps_1d(i) * hnorm
          ENDDO
-c--------global height normalization 
+c--------global height normalization
          IF (barnorm(1).eq.10.) THEN
             DO i=1,npoints
                vdef_1d(i)=vdef_1d(i)*barnorm(2)
             ENDDO
          ELSE
-c--------height normalization per hump      
-            iiextr(0) = 1 
-            iiextr(nextr+1)= npoints 
+c--------height normalization per hump
+            iiextr(0) = 1
+            iiextr(nextr+1)= npoints
             barmin =  vdef_1d(iiextr(2))
             DO n = 3, nextr-1
                IF( vdef_1d(iiextr(n)).lt.barmin)
@@ -1044,15 +1041,15 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD) 
+     & TFB, TDIrect,  ECFism(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
-      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                                         ! NUMBAR
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),               ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
      &                 rohfb_norm(NFHUMP)
 
       DOUBLE PRECISION  TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
@@ -1093,28 +1090,28 @@ C
 
       WRITE (80,'(a8,f2.0,a36)') ' FISMOD = ', FISmod(Nnuc)
 
-      IF (FISbar(Nnuc).EQ.0.) cara1 = '  Internal library'
+      IF (FISbar(Nnuc).EQ.0.) cara1 = '  EMPIRE  internal library'
       IF (FISbar(Nnuc).EQ.1.) cara1 = '  RIPL-2  (Exp.) values'
       IF (FISbar(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB parabolic barriers'
       IF (FISbar(Nnuc).EQ.3.) cara1 = '  RIPL-3  HFB Numerical barriers'
-      
+
       WRITE (80,'(a8,f2.0,a36)') ' FISBAR = ', FISbar(Nnuc),cara1
 
-      IF (FISden(Nnuc).EQ.0.) cara1 = '  EGSM LD'
+      IF (FISden(Nnuc).EQ.0.) cara1 = '  RIPL-3  EGSM LD'
       IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD'
       IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD'
       WRITE (80,'(a8,f2.0,a36)') ' FISDEN = ', FISden(Nnuc), cara1
 
       IF (FISopt(Nnuc).EQ.0.) cara1 = '  Real fission potential'
       IF (FISopt(Nnuc).EQ.1.) cara1 = '  Complex fission potential'
-      IF (FISopt(Nnuc).EQ.2.) 
+      IF (FISopt(Nnuc).EQ.2.)
      &    cara1 = '  Complex fission potential, isomeric fission'
       WRITE (80,'(a8,f2.0,a36)') ' FISOPT = ', FISopt(Nnuc),cara1
       WRITE(80,*)' '
-      WRITE(80,*)chstar         
+      WRITE(80,*)chstar
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (80,*)' HFB numerical fission barrier'
-         WRITE(80,*)chstar  
+         WRITE(80,*)chstar
          WRITE(80,'(i3)')npoints
          DO ii=1, npoints
             WRITE(80,'(i4,2f10.3)')ii, vdef_1d(ii),eps_1d(ii)
@@ -1123,10 +1120,10 @@ C
          WRITE (80,*)' Index of extrema'
          WRITE (80,*)(iiextr(j), j = 1, nrbar)
          WRITE (80,*) ' Normalization factors for humps'
-         WRITE (80,'(4f10.3)')(barnorm(nh), nh=1,nrhump),hnorm     
+         WRITE (80,'(4f10.3)')(barnorm(nh), nh=1,nrhump),hnorm
       ENDIF
       WRITE (80,'(a15,i1,a15,i1)') ' Nr.parabolas =', NRBar,
-     &                             '      Nr.wells=', NRWel  
+     &                             '      Nr.wells=', NRWel
       WRITE (80,*)' '
       WRITE(80,*)chstar
 c
@@ -1232,7 +1229,7 @@ c
 
       WRITE (80,*)' Discrete transitional states'
 
-c   
+c
       DO ibar = 1, NRBar
          WRITE (80,'(a39,I2,a2,I2)')
      &                            'Number of discrete states at barrier'
@@ -1253,8 +1250,8 @@ c
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
-      ENDDO    
-      WRITE (80,*) 
+      ENDDO
+      WRITE (80,*)
 
       IF(FISDEN(Nnuc).LE.1)THEN
          DO nr = 1, NRHump
@@ -1262,7 +1259,7 @@ c
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
      &          WRITE (80,'(1x, A8, 1x, I1,4x,I1, 8f9.3)') 'Barrier',
      &          nr, BFF(nr), SHCfis(nr), DELtafis(nr), GAMmafis(nr),
-     &          AFIs(nr), ECFis(nr), vibf12(nr), vibfdt(nr),vibfnorm(ib)
+     &          AFIs(nr), ECFis(nr), vibf12(nr), vibfdt(nr),vibfnorm(nr)
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
@@ -1282,7 +1279,7 @@ c
             WRITE (80,'(A9,f9.5,A9,f9.5)') 'Tcrt=', TCRtf(ib), 'Scrt=',
      &             SCRtf(ib)
          ENDDO
-         WRITE (80,*)        
+         WRITE (80,*)
       ENDIF
 
 

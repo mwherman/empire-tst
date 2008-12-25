@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-15 01:53:10 $
-Ccc   * $Id: input.f,v 1.284 2008-12-15 01:53:10 Capote Exp $
+Ccc   * $Date: 2008-12-25 00:57:00 $
+Ccc   * $Id: input.f,v 1.285 2008-12-25 00:57:00 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -267,9 +267,9 @@ C--------        Default value 0. i.e. none but those selected automatically
 
 C--------set fission defaults
          DO nnuc = 1, NDNUC
-           FISbar(nnuc) = 2     ! HFB Goriely's parameters for parabolic barriers are default.
-           FISopt(nnuc) = 0
-C          FISden(nnuc) = 2     ! HFB NLD
+           FISbar(nnuc) = 3     ! RIPL-3 HFB barriers are default.
+           ! FISopt(nnuc) = 2
+           ! FISden(nnuc) = 2   ! HFB NLD
            FISden(nnuc) = 0     ! EMPIRE NLD at saddle points are default!!
            FISmod(nnuc) = 0
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
@@ -1297,7 +1297,7 @@ C--------print IDNa matrix
          WRITE (8,'('' prot. cont. '',8I10)') (IDNa(4,j),j = 1,NDMODELS)
          WRITE (8,'('' gammas      '',8I10)') (IDNa(5,j),j = 1,NDMODELS)
          WRITE (8,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
-         WRITE (8,'(''LI to continuum'',8I7)')(IDNa(7,j),j = 1,NDMODELS)
+         WRITE (8,'('' LI    cont. '',8I10)') (IDNa(7,j),j = 1,NDMODELS)
          WRITE (8,*) ' '
          WRITE(12,*) ' '
          WRITE(12,*)
