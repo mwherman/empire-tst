@@ -336,6 +336,7 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
    8   n    CC rig.  no   no   95-95  241-243   0.0- 30.0    96  P.G.Young
  412   n    CC rig.  no   no   96-96  246-246   0.0- 20.0    81  Ch.Lagrange
  413   n    CC rig.  no   no   98-98  252-252   0.0- 20.0    81  Ch.Lagrange
+
 4102   p    spher.   no   no    6-82   12-208  30.0- 60.0    97  J.J.H.Menet
 4015   p    spher.   no   no    6- 6   12- 12   0.0- 65.0    98  M.B.Chadwick
 5001   p    spher.   no   yes   6-82   12-208  50.0-400.0     2  D.G.Madland
@@ -466,6 +467,7 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 4601   p    CC rig.  no   yes  92-92  238-238   0.0-200.0    92  V.M.Maslov
 4602   p    CC rig.  no   yes  92-92  238-238   0.0-200.0    92  V.M.Maslov
 5006   p    CC rig.  no   no   92-92  238-238   0.0-200.0    88  P.G.Young
+
 6202   d    spher.   no   no    3- 3    6-  7   1.0-200.0   118  Yinlu
 6203   d    spher.   no   no    4- 4    8- 10   1.0-200.0   118  Yinlu
 6204   d    spher.   no   no    6- 6   11- 13   1.0-200.0   118  Yinlu
@@ -479,11 +481,14 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 6114   d    spher.   no   no   40-40   90- 90  11.8- 90.0   124  W.W.Daehnick
 6115   d    spher.   no   no   50-50  120-120  11.8- 90.0   124  W.W.Daehnick
 6116   d    spher.   no   no   82-82  208-208  11.8- 90.0   124  W.W.Daehnick
+
 7200   t    spher.   no   no   13-90   27-232   1.0- 40.0   125  Xiaohua
 7100   t    spher.   no   no   20-82   40-208   1.0- 40.0   126  F.D.Becchetti
+
 8100  3He   spher.   no   no   20-82   40-208   1.0- 40.0   126  F.D.Becchetti
 8101  3He   spher.   no   no   20-20   40- 40  21.0- 84.0   127  H.H.Chang
 8102  3He   spher.   no   no   28-28   58- 58  22.0- 84.0   127  H.H.Chang
+
 9602  4He   spher.   no   no    6-96   12-250   1.0-200.0   128  A.Kumar
 9100  4He   spher.   no   no    8-82   16-208   1.0- 25.0   129  L.McFadden
 9600  4He   spher.   no   no    8-96   16-250   1.0- 73.0   130  V.Avrigeanu
