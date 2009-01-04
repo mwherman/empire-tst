@@ -13,6 +13,7 @@ c
       character*1024 argv
       character*2048 basedir
       INTEGER*4 iwin,Ztarg,Atarg
+      integer*4 zam      
 c     
 C-----Mode of EXFOR retrieval
 C     IX4ret = 0 no EXFOR retrieval
@@ -32,7 +33,7 @@ C     IX4ret = 2 remote SYBASE server
 
       Aprojec = 1
       Zprojec = 0
-      Atarg = mod(int(zam),1000)
+      Atarg = mod(zam,1000)
       Ztarg = int(zam/1000)
 C     symb = SMAT(Ztarg)
       call SYMBOL(Ztarg,symb)
@@ -125,7 +126,7 @@ C-----------data for the target isotop only
          ENDIF
       ENDIF
 C-----EXFOR retrieval *** done ***
-      RETURN
+      STOP 'READX4 completed'
       END
       
       SUBROUTINE SYMBOL(Iz,SMAT)

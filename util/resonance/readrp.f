@@ -21,8 +21,8 @@ c         last resonance energy in the atlas and first excited level energy, in 
 C       local resonance parameter data (za?????.atlas)
 C
       character argv*2048
-      common/dat/sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,dap,abun,
-     1           ss,dss,cs,dcs
+      integer*4 zam
+      common/dat/sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,abun
       common/dir/basedir,basef,ilen
       character basedir*2048,basef*8
 c
@@ -53,7 +53,6 @@ c
       sf1=0.
       sf2=0.
       ap=0.
-      dap=0.
       awt=0.
       abun=0.
       emax=0.
@@ -70,23 +69,17 @@ c
    10 continue
 c
       iz=int(zam/1000)
-      imass=mod(int(zam),1000)
+      imass=mod(zam,1000)
       write(basef,'(a,i3.3,a)') 'z',iz,'.dat'
 c
       awt=readawt(iz,imass)
       flevel=readlvl(imass)
-      call readap
+      ap=readap()
       call readprop
       emax=readpara()
 c
-      print *, abun,awt,bn,spin,
-     1         D0,D1,D2,
-     1         sf0,sf1,sf2,
-     1         ggavg(1),ggavg(2),ggavg(3),
-     1         ap,dap,
-     1         ss,dss,
-     1         cs,dcs,
-     1         emax,flevel*1e6
+      print *, abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,
+     1         ggavg(1),ggavg(2),ggavg(3),ap,emax,flevel*1e6
 c
       end
 c
@@ -129,8 +122,8 @@ c
         else
           excess=xmassth
         endif
-c       readawt=iz*AMUpro+(imass-iz)*AMUneu+excess/AMUmev
-        readawt=(imass+excess/AMUmev)/AMUneu
+        readawt=imass+excess/AMUmev
+        readawt=iz*AMUpro+(imass-iz)*AMUneu+excess/AMUmev
         goto 190
       endif
       goto 100
@@ -167,17 +160,17 @@ c
   300 return
       end
 c
-c     read scattering radius, scattering and capture cross sections and their errors
-c     from thermal data of ATLAS
+c     read thermal data from ATLAS
 c
-      subroutine readap()
-      common/dat/sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,dap,abun,
-     1           ss,dss,cs,dcs
+      function readap()
+      integer*4 zam      
+      common/dat/ sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,abun
       common/dir/basedir,basef,ilen
       character basedir*2048,basef*8
       logical bExist
-      character fname*2048,keyw1*3,keyw2*1
+      character fname*2048,keyw*3
 
+      readap=0.
       if (basedir.eq.' ') then
         fname='../Atlas/thermal/'//basef
       else
@@ -185,35 +178,25 @@ c
       endif
       open(8,file=fname,status='old',err=400)
       do i=1,1000
-       read(8,1000,end=350) iza,keyw1,keyw2,fval,ferr
- 1000  format(i6,1x,2x,1x,3x,1x,11x,1x,a3,1x,a1,1x,1x,1x,f11.0,1x,f11.0)
-       if (iza.gt.zam) then
-         goto 350
-       elseif (iza.eq.zam.and.keyw1.eq.'R') then
+       read(8,1000,end=350) iza,keyw,fval,ferr
+ 1000  format(i6,1x,2x,1x,3x,1x,11x,1x,a3,1x,1x,1x,1x,1x,f11.0,1x,f11.0)
+       if (iza.eq.zam.and.keyw.eq.'R') then
 c        scattering radius [fm]
-         ap=fval
-         dap=ferr
-       elseif (iza.eq.zam.and.keyw1.eq.'SS') then
-c        scattering cross section [barn]
-         ss=fval
-         dss=ferr
-       elseif (iza.eq.zam.and.keyw1.eq.'NG'.and.keyw2.eq.'D') then
-c        capture cross section [barn]
-         cs=fval
-         dcs=ferr
+         readap=fval
+         goto 350
        endif
       enddo
   350 close(8)
   400 return
       end
 c
-c     read general resonance property table from ATLAS
+c     read resonance property table from ATLAS
 c
       subroutine readprop
       character fname*2048,tmpstr*100,line*200
       character keyw*3,val*11,err*11,flag*1
-      common/dat/sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,dap,abun,
-     1           ss,dss,cs,dcs
+      integer*4 zam      
+      common/dat/ sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,abun
       common/dir/basedir,basef,ilen
       character basedir*2048,basef*8
 
@@ -303,8 +286,8 @@ c     return the last energy of the resolved region
 c
       function readpara()
       character fname*2048,copyf*2048,line*196
-      common/dat/sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,dap,abun,
-     1           ss,dss,cs,dcs
+      integer*4 zam      
+      common/dat/ sf0,sf1,D0,sf2,D1,zam,spin,ggavg(3),bn,ap,abun
       common/dir/basedir,basef,ilen
       character basedir*2048,basef*8
 
