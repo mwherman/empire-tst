@@ -150,7 +150,7 @@ def runE(proj):
 						os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
 					else:
 						os.system('%s %s' % (psviewer,proj+'-cum.ps'))
-				elif sys.platform == 'linux':
+				elif 'linux' in sys.platform:
 					os.system('%s %s' % (psviewer,proj+'-cum.ps'))
 				else:
 					# probably windows...
