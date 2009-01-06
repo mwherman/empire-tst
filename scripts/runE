@@ -64,7 +64,7 @@ def runE(proj):
 			shutil.rmtree('TL')
 		except OSError: #directory DNE
 			pass
-		mkdir('TL')	
+		os.mkdir('TL')	
 	if not isEmpty(proj+'-lev.col'):
 		cp(proj+'-lev.col','TARGET_COLL.DAT')
 		print('Using existing file with collective levels: %s' % proj+'-lev.col')
