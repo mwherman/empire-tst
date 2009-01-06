@@ -23,7 +23,7 @@ def main():
 	
 	os.system(" ../scripts/runE %s" % project )
 	
-	f = file( project+'.lst','r').readlines()
+	f = file(project+'.lst','r').readlines()
 	try:
 		f[-10:].index('  CALCULATIONS COMPLETED SUCCESSFULLY\n')
 	except ValueError:
@@ -60,13 +60,21 @@ def main():
 	
 	# plotc4 is run if the last parameter below is set to 2:
 	# RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
+	return 0
 	
+
+def cleanUp():
+	"""
+	remove clutter from working directory.
+	called whether or not we have errors
+	"""
+	project = sys.argv[1]
 	# clean up some temporary files if present:
-	flist = [project+'-l.endf', project+'-lin.endf', project+'-f.endf',
-		project+'-rec.endf', project+'-.endf', project+'-s.endf']
-	
-	# rm function defined below
-	rm(fname)
+	for f in (project+'-l.endf', project+'-lin.endf', 
+		project+'-f.endf',project+'-rec.endf', 
+		project+'-.endf', project+'-s.endf'):
+		# rm function defined below
+		rm(f)
 	
 	# REMOVE EMPTY FILES		
 	if isEmpty(project+'-omp.dir'):
@@ -92,18 +100,19 @@ def isEmpty(filename):
 	return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
 
 
-def rm(*args):
+def rm(fname):
 	"""
 	assume we always want to be silent on error here,
 	see runE for a fancier version
 	"""
-	for f in args:
-		try:
-			os.remove(f)
-		except OSError:
-			# file DNE
-			pass
+	try:
+		os.remove(fname)
+	except OSError:
+		# file DNE
+		pass
 
 
 if __name__ == '__main__':
 	main()
+	cleanUp()
+
