@@ -61,48 +61,49 @@ def main():
 	# plotc4 is run if the last parameter below is set to 2:
 	# RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
 	
+	# clean up some temporary files if present:
+	flist = [project+'-l.endf', project+'-lin.endf', project+'-f.endf',
+		project+'-rec.endf', project+'-.endf', project+'-s.endf']
 	
-	# this next bit was to remove 'intermediate' ENDF files, but they appear to be
-	# already removed (maybe by format or verify scripts):
-	"""
-	# REMOVE INTERMEDIATE ENDF FILES
+	# rm function defined below
+	rm(fname)
 	
-	rm $work/$file-l.endf   2>/dev/null
-	rm $work/$file-lin.endf 2>/dev/null
-	rm $work/$file-f.endf   2>/dev/null
-	rm $work/$file-rec.endf 2>/dev/null
-	rm $work/$file-e.endf   2>/dev/null
-	#rm $work/$file-s.endf   2>/dev/null
-	"""
-	
-	# likewise, I don't see any of these 'empty files' on my system, so no reason
-	# to remove them:
-	"""
-	# REMOVE EMPTY FILES
-	
-	if [ ! -s $file-omp.dir ]; then 
-	       rm $file-omp.dir  2>/dev/null
-	fi
-	if [ ! -s $file-lev.col ]; then 
-	       rm $file-lev.col  2>/dev/null
-	fi
-	if [ ! -s $file.war ]; then 
-	       rm $file.war  2>/dev/null
-	fi
-	if [ ! -s $file-ecis.in ]; then 
-	       rm $file-ecis.in  2>/dev/null
-	fi
-	if [ ! -s $file-ecis.out ]; then 
-	       rm $file-ecis.out  2>/dev/null
-	fi
-	if [ ! -s $file-inp.fis ]; then 
-	       rm $file-inp.fis  2>/dev/null
-	fi
-	
-	"""
+	# REMOVE EMPTY FILES		
+	if isEmpty(project+'-omp.dir'):
+		rm(project+'-omp.dir')
+	if isEmpty(project+'-lev.col'):
+		rm(project+'-lev.col')
+	if isEmpty(project+'.war'):
+		rm(project+'.war')
+	if isEmpty(project+'-ecis.in'):
+		rm(project+'-ecis.in')
+	if isEmpty(project+'-ecis.out'):
+		rm(project+'-ecis.out')
+	if isEmpty(project+'-inp.fis'):
+		rm(project+'-inp.fis')	
 	return 0
+
+
+def isEmpty(filename):
+	"""
+	emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
+	also 'not isEmpty()' should be equivalent to [ -s filename ]
+	"""
+	return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
+
+
+def rm(*args):
+	"""
+	assume we always want to be silent on error here,
+	see runE for a fancier version
+	"""
+	for f in args:
+		try:
+			os.remove(f)
+		except OSError:
+			# file DNE
+			pass
 
 
 if __name__ == '__main__':
 	main()
-
