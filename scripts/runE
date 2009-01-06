@@ -1,277 +1,365 @@
-#!/bin/bash
-#SCRIPT TO RUN EMPIRE (ONLY X-SEC CALCULATIONS)
-echo '                                                           '
-echo '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 '
-echo '          E      MM  MM  P   P  I  R   R  E             33 '
-echo '          EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 '
-echo '          E      M    M  P      I  R  R   E              3 '
-echo '          EEEEE  M    M  P      I  R   R  EEEEE      33333 '
-echo '                                                           '
-echo '            A R C O L E (beta 2) Dec 2008                  '
-echo '                                                           '
-echo '                                                           '
-echo ' '
-file=$1
-work=`pwd`
-if [ "$1" = "" ]
-   then
-    echo 'Inputs ready to run'
-    echo ' '
-    ls *inp
-    echo ' '
-    echo -n 'Choose one of the above (without .inp extention!): '
-    read file
-fi
-if [ -f $file.inp ]; then
-   echo 'Using existing file with input:'  $file.inp
-   else
-   echo 'Input file :' $file.inp ' does not exist'
-   exit
-fi
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+runE.py
 
-# CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
+modified by Caleb Mattoon on 2008-12-19.
 
-rm $file.out $file.lst $file.endf $file.ps  2>/dev/null
-rm ecis06.{ang,cs,dat,ics,pol,tlj,leg,esp,inp} 2>/dev/null
-rm INCIDENT.CS INCIDENT.ICS INCIDENT.ANG INCIDENT.TLJ 2>/dev/null
-rm  OMP_A.DAT EMPIRE.STA PFNM.OUT PFNS.OUT 2>/dev/null
-rm  OUTPUT.DAT LIST.DAT 2>/dev/null
-rm  OMPAR.RIPL GAMMA.DAT fort.* FUSION 2>/dev/null
-rm  OMPAR.DIR 2>/dev/null
-rm  FISSION.INP FISS_XS.OUT 2>/dev/null
-rm  FISSION.OUT 2>/dev/null
-rm  CUMULPLOT.PS 2>/dev/null
-rm  ecVIB.inp ecROT.inp ecVIBROT.inp *.leg *.LEG 2>/dev/null
-rm  ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
-rm  TARGET_COLL.DAT 2>/dev/null
-rm  TARGET_COLL.RIPL 2>/dev/null
-rm  TARGET-*.tl 2>/dev/null
-rm  warnings 2>/dev/null
-rm  INPUT 2>/dev/null
-rm  XS-DOWN.DAT XSECTIONS.OUT XS-UP.DAT 2>/dev/null
-rm  SENSITIVITY.INP SENSITIVITY.MATRIX 2>/dev/null
+script to run EMPIRE (only X-sec calculations)
+ported to python, some error checking
+"""
 
-# COPY INPUT FILES FOR A GIVEN CASE
-cp $file.inp INPUT.DAT
-if [ -s $file.lev ]; then
-   cp $file.lev LEVELS
-   echo 'Using existing file with levels:'  $file.lev
-fi
-if [ -s $file-omp.ripl ]; then
-   cp $file-omp.ripl OMPAR.RIPL
-   echo 'Using existing file with optical model par.:'  $file-omp.ripl
-fi
-if [ -s $file-omp.dir ]; then
-   cp $file-omp.dir OMPAR.DIR
-   echo 'Using existing file with optical model par.:'  $file-omp.dir
-fi
-if [ -d $file-tl ]; then
-   cd ../
-   ln -sf $work/$file-tl $work/TL
-   cd $work
-   echo 'Using transmission coefficients stored in:'  $file-tl
-else
-   rm -r $work/TL/ 2>/dev/null
-   mkdir $work/TL
-fi
-if [ -s $file-lev.col ]; then
-   cp $file-lev.col TARGET_COLL.DAT
-   echo 'Using existing file with collective levels:'  $file-lev.col
-fi
-if [ -s $file.fus ]; then
-   cp $file.fus FUSION
-   echo 'Using existing file with fusion cross sections:'  $file.fus
-fi
-if [ -s $file-inp.fis ]; then
-   cp $file-inp.fis FISSION.INP
-   echo 'Using existing file with fission input:'  $file-inp.fis
-fi
-if [ -s $file.exf ]; then
-   cp $file.exf EXFOR.dat
-   echo 'Using existing file with EXFOR data:'  $file.exf
-fi
-if [ -s $file.c4 ]; then
-   cp $file.c4 C4.dat
-   echo 'Using existing file with C4 fit data:'  $file.c4
-fi
-if [ -s $file-inp.sen ]; then
-   cp $file-inp.sen SENSITIVITY.INP
-   echo 'File with sensitivity input exists:'  $file-inp.sen
-fi
-if [ -s $file-mat.sen ]; then
-   cp $file-mat.sen SENSITIVITY.MATRIX
-   echo 'File with sensitivity matrix exists:'  $file-mat.sen
-fi
-if [ -s $file.rng ]; then
-cp $file.rng R250SEED.DAT 
-   echo 'Using existing random number generator seed'
-fi
-if [ -s $file-cum.ps ]; then
-ln -sf  $file-cum.ps FITLEV.PS
-fi
+import sys
+import os
+import shutil
+from glob import glob
 
 
-echo ' '
-echo $file ' R U N N I N G  !! !  !   !    !     !'
-time nice ../source/empire
-echo 'DONE !!!'
- 
-#MOVE CASE-RELATED FILES TO THE RIGHT PLACE
+def runE(proj):
+	"""
+	run EMPIRE for project named proj
+	"""
+	
+	# CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
+	# rm is a function defined below
+	rm(proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
+	rm('OMP_A.DAT', 'EMPIRE.STA', 'PFNM.OUT', 'PFNS.OUT')
+	rm('OUTPUT.DAT', 'LIST.DAT', 'OMPAR.RIPL', 'GAMMA.DAT', 'FUSION')
+	rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT')
+	rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
+	rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
+	rm('TARGET_COLL.DAT', 'TARGET_COLL.RIPL', 'warnings', 'INPUT')
+	rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP')
+	rm('SENSITIVITY.MATRIX')
+	rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
+		glob('*.LEG') + glob('TARGET-*.tl') )
+	
+	
+	if os.path.exists(proj+'.inp'):
+		print("Using existing file with input: %s" % proj+'.inp')
+	else:
+		print("Input file : %s does not exist" % proj+'.inp')
+		sys.exit(1)
+	# COPY Input files for our project.
+	# EMPIRE wants files with certain names,
+	# so we must move our files around.
+	cp(proj+'.inp', 'INPUT.DAT')
+	
+	# check if the file exists and has size > 0, if so keep it
+	if not isEmpty(proj+'.lev'):
+		cp(proj+'.lev', 'LEVELS')
+		print ('Using existing file with levels: %s' % proj+'.lev')
+	if not isEmpty(proj+'-omp.ripl'):
+		cp(proj+'-omp.ripl', 'OMPAR.RIPL')
+	 	print('Using existing file with optical model par: %s' % proj+'-omp.ripl')
+	if not isEmpty(proj+'-omp.dir'):
+		cp(proj+'-omp.dir','OMPAR.DIR')
+		print('Using existing file with optical model par: %s' % proj+'-omp.dir')
+	# make symlink to transmission coefficient directory:
+	if os.path.isdir(proj+'-tl'):
+		ln(proj+'-tl','TL')
+		print('Using transmission coefficients stored in: %s' % proj+'-tl')
+	else:
+		try:
+			shutil.rmtree('TL')
+		except OSError: #directory DNE
+			pass
+		mkdir('TL')	
+	if not isEmpty(proj+'-lev.col'):
+		cp(proj+'-lev.col','TARGET_COLL.DAT')
+		print('Using existing file with collective levels: %s' % proj+'-lev.col')
+	if not isEmpty(proj+'.fus'):
+		cp(proj+'.fus','FUSION')
+		print('Using existing file with fusion cross sections: %s' % proj+'.fus')
+	if not isEmpty(proj+'-inp.fis'):
+		cp(proj+'-inp.fis','FISSION.INP')
+		print('Using existing file with fission input: %s' % proj+'-inp.fis')
+	if not isEmpty(proj+'.exf'):
+		cp(proj+'.exf','EXFOR.dat')
+		print('Using existing file with EXFOR data: %s' % proj+'.exf')
+	if not isEmpty(proj+'.c4'):
+		cp(proj+'.c4','C4.dat')
+		print('Using existing file with C4 fit data: %s' % proj+'.c4')
+	if not isEmpty(proj+'-inp.sen'):
+		cp(proj+'-inp.sen','SENSITIVITY.INP')
+		print('File with sensitivity input exists: %s' % proj+'-inp.sen')
+	if not isEmpty(proj+'-mat.sen'):
+		cp(proj+'-mat.sen','SENSITIVITY.MATRIX')
+		print('File with sensitivity matrix exists: %s' % proj+'-mat.sen')
+	if not isEmpty(proj+'.rng'):
+		cp(proj+'.rng','R250SEED.DAT')
+		print('Using existing random number generator seed')
+	if not isEmpty(proj+'-cum.ps'):
+		ln(proj+'-cum.ps','FITLEV.PS')
+	
+	
+	# OK, the environment is set up, time to run EMPIRE:
+	print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
+	os.system('time nice ../source/empire')
+	print ('DONE !!!')
+	
+	
+	#Move case-related files to the right place
+	mv('OUTPUT.DAT',proj+'.out')
+	mv('LIST.DAT',proj+'.lst')
+	mv('LEVELS',proj+'.lev')
+	mv('FISS_XS.OUT',proj+'-fiss.xsc')
+	
+	if not (os.path.isdir(proj+'-tl')):
+		mv('TL',proj+'-tl')
+	if os.path.islink('TL'):
+		os.unlink('TL')
+	
+	if isEmpty(proj+'-omp.ripl'):
+		cp('OMPAR.RIPL',proj+'-omp.ripl')
+	if isEmpty(proj+'-omp.dir'):
+		cp('OMPAR.DIR',proj+'-omp.dir')
+	if isEmpty(proj+'-inp.fis'):
+		cp('FISSION.INP',proj+'-inp.fis')
+	if isEmpty(proj+'-lev.col'):
+		if not isEmpty('TARGET_COLL.RIPL'):
+			mv('TARGET_COLL.RIPL',proj+'-lev.col')
+			tfile = file(proj+'-lev.col','a')	# append mode
+			tfile.write('\n\n\n')
+			tfile.write('NOTE: this line and those below will not be used by Empire. \n')
+			tfile.write('      The collective levels and ground state band deformation \n')
+			tfile.write('      printed below are inferred from the discrete level file   \n')
+			tfile.write('      and provided for comparison with the RIPL data above.\n')
+			tfile.write('\n\n')
+			if not isEmpty('TARGET_COLL.DAT'):
+				tfile1 = file('TARGET_COLL.DAT','r').readlines()
+				# emulate 'cat >> '
+				for tline in tfile1:
+					tfile.write(tline)
+			tfile.close()
+		else:
+			if not isEmpty('TARGET_COLL.DAT'):
+				cp('TARGET_COLL.DAT',proj+'-lev.col')
+		
+		# beware, these commands make assumptions about the system:
+		if not isEmpty('CUMULPLOT.PS'):
+			# no exception if ps2ps not found, just a message:
+			os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
+			if os.path.exists(proj+'-cum.ps'):
+				# read preferences from .Xrunrc:
+				prefs = file('../.Xrunrc','r').readlines()
+				psviewer = prefs[3].strip()
+				# open ps file properly:
+				if sys.platform == 'darwin':
+					if '.app' in psviewer:
+						os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
+					else:
+						os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+				elif sys.platform == 'linux':
+					os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+				else:
+					# probably windows...
+					print ('Unknown system trying to open ps file')
+		
+		if not isEmpty('SYSTEMATICS.TXT'):
+			mv('SYSTEMATICS.TXT',proj+'.sys')
+		if not isEmpty('XSECTIONS.OUT'):
+			mv('XSECTIONS.OUT',proj+'.xsc')
+		if not isEmpty('SENSITIVITY.MATRIX'):
+			mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
+		
+		mv('EXFOR.dat',proj+'.exf')
+		mv('ECIS_ROT.out',proj+'-ecis.out')
+		mv('ECIS_VIB.out',proj+'-ecis.out')
+		mv('ECIS_VIBROT.out',proj+'-ecis.out')
+		mv('ecVIB.inp',proj+'-ecis.in')
+		mv('ecROT.inp',proj+'-ecis.in')
+		mv('ecVIBROT.inp',proj+'-ecis.in')
+		mv('FISSION.OUT',proj+'-fiss.out')
+		mv('R250SEED.DAT',proj+'.rng')
+		mv('PFNM.OUT',proj+'-pfnm.out')
+		mv('PFNS.OUT',proj+'-pfns.out')
+		mv('FIT.OUT',proj+'-ompfit.lst')
+		mv('COVAR.DAT',proj+'-MC.par') 
+		mv('OMP_A.DAT',proj+'-aOMP.lst')
+		
+		# Extract Warnings from the list file:
+		# this is portable version of 'grep WARNING infile > outfile
+		listfile = file(proj+'.lst','r').readlines()
+		warnfile = file(proj+'.war','w')
+		for line in listfile:
+			if 'WARNING' in line:
+				warnfile.write(line)
+		warnfile.close()
+		
+		# Delete Temporary files
+		
+		rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
+		rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
+		rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
+		rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT')
+		rm( glob('TARGET-*.tl') )
+		rm('TARGET.LEV')
+		rm('EXFOR.datp')
+		rm('INPUT')
+		rm('INPUT.DAT')
+		rm('FISSION.INP')
+		rm('OMPAR.DIR')
+		rm('OMPdata.dat')
+		rm('mt_x4r.txt')
+		rm('TAPE15', 'TAPE16', 'TAPE66')
+		rm('file99')
+		rm('DEGASRESULT')
+		rm('angdis.pnt', 'angdis.cur')
+		rm('ccm.CS','dwba.CS','INCIDENT.CS', 'ccm.TLJ','dwba.TLJ','INCIDENT.TLJ',
+			'ccm.ANG','dwba.ANG','INCIDENT.ANG', 'ccm.ICS','dwba.ICS','INCIDENT.ICS',
+			'ccm.LEG','dwba.LEG','INCIDENT.LEG') 
+		rm('ecis06.ang','ecis06.cs','ecis06.dat','ecis06.ics','ecis06.pol',
+			'ecis06.tlj','ecis06.leg','ecis06.esp','ecis06.inp')
+		rm('ecSPH.inp')
+		rm('ECIS_SPH.out')
+		rm('C4.dat')
+		rm('FITIN.DAT')
+		rm('FITLEV.PS')
+		rm('INPUT1.DAT')
+		rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
+		rm('TARGET_COLL_RIPL.DAT')
+		rm('COVAR.DAT')
+		rm('OPTFIT.CAL', 'OMPAR0.DIR', 'INPUT0.DAT')
+		rm('OMPAR.DIR', 'LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
+		rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
+		
+		if not isEmpty(proj+'.exf'):
+			if isEmpty(proj+'.c4'):
+				# RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+				
+				os.system('../scripts/c4 %s' % proj)
+				
+				# RUN c4sort TO SORT C4 DATA
+				
+				os.system('../scripts/sortc4 %s' % proj)
+		
+		# REMOVE EMPTY FILES:
+		
+		if isEmpty(proj+'-omp.dir'):
+			rm(proj+'-omp.dir')
+		if isEmpty(proj+'-lev.col'):
+			rm(proj+'-lev.col')
+		if isEmpty(proj+'.war'):
+			rm(proj+'.war')
+		if isEmpty(proj+'-ecis.in'):
+			rm(proj+'-ecis.in')
+		if isEmpty(proj+'-ecis.out'):
+			rm(proj+'-ecis.out')
+		if isEmpty(proj+'-inp.fis'):
+			rm(proj+'-inp.fis')
+		if isEmpty(proj+'-pfns.out'):
+			rm(proj+'-pfns.out')
+		if isEmpty(proj+'-MC.par'):
+			rm(proj+'-MC.par')
+		if isEmpty('FISSION.OUT'):
+			rm('FISSION.OUT')
+		
+		# Produce ZVD files from cross-section tables:
+		if not isEmpty(proj+'.xsc'):
+			os.system('../scripts/cs2zvd %s' % proj)
+		
+		return 0
 
-mv OUTPUT.DAT $file.out
-mv LIST.DAT $file.lst
-mv LEVELS $file.lev
-mv FISS_XS.OUT $file-fiss.xsc 2>/dev/null
-if [ ! -d $file-tl ]; then
-   mv TL/ $file-tl
-fi
-rm -r TL 2>/dev/null
-if [ ! -s $file-omp.ripl ]; then
-   cp OMPAR.RIPL $file-omp.ripl  2>/dev/null
-fi
-if [ ! -s $file-omp.dir ]; then
-   cp OMPAR.DIR $file-omp.dir  2>/dev/null
-fi
-if [ ! -s $file-inp.fis ]; then
-   cp FISSION.INP $file-inp.fis  2>/dev/null
-fi
-if [ ! -s $file-lev.col ]; then
-   if [ -s TARGET_COLL.RIPL ]; then
-      mv TARGET_COLL.RIPL $file-lev.col 2>/dev/null
-      echo ' ' >>$file-lev.col
-      echo ' ' >>$file-lev.col
-      echo ' ' >>$file-lev.col
-      echo 'NOTE: this line and those below will not be used by Empire. ' >>$file-lev.col
-      echo '      The collective levels and ground state band deformation ' >>$file-lev.col
-      echo '      printed below are inferred from the discrete level file   ' >>$file-lev.col
-      echo '      and provided for comparison with the RIPL data above.' >>$file-lev.col
-      echo ' ' >>$file-lev.col
-      echo ' ' >>$file-lev.col
-   fi
-   if [ -s TARGET_COLL.DAT ]; then
-      cat TARGET_COLL.DAT >>$file-lev.col
-   fi
-else
-   if [ -s TARGET_COLL.DAT ]; then
-      cp TARGET_COLL.DAT $file-lev.col
-   fi
-fi
-if [ -s CUMULPLOT.PS ]; then
-   ps2ps -r9200 CUMULPLOT.PS $file-cum.ps
-   kghostview -landscape $file-cum.ps 
-fi
-if [ -s SYSTEMATICS.TXT ]; then
-   mv  SYSTEMATICS.TXT $file.sys
-fi
-if [ -s XSECTIONS.OUT ]; then
-   mv  XSECTIONS.OUT $file.xsc
-fi
-if [ -s SENSITIVITY.MATRIX ]; then
-   mv  SENSITIVITY.MATRIX $file-mat.sen
-fi
 
 
-mv EXFOR.dat $file.exf
-mv ECIS_ROT.out $file-ecis.out 2>/dev/null
-mv ECIS_VIB.out $file-ecis.out 2>/dev/null
-mv ECIS_VIBROT.out $file-ecis.out 2>/dev/null
-mv ecVIB.inp $file-ecis.in 2>/dev/null
-mv ecROT.inp $file-ecis.in 2>/dev/null
-mv ecVIBROT.inp $file-ecis.in 2>/dev/null
-mv FISSION.OUT  $file-fiss.out 2>/dev/null
-mv R250SEED.DAT $file.rng 2>/dev/null
-mv PFNM.OUT $file-pfnm.out 2>/dev/null
-mv PFNS.OUT $file-pfns.out 2>/dev/null
-mv FIT.OUT $file-ompfit.lst 2>/dev/null
-mv COVAR.DAT $file-MC.par 2>/dev/null
-mv OMP_A.DAT $file-aOMP.lst 2>/dev/null
-
-# EXTRACT WARNINGS
-
-grep WARNING $file.lst >$file.war
-
-# DELETE TEMPORARY FILES
-
-rm FUSION fort.70 fort.66 fort.16 2>/dev/null
-rm  ecVIB.inp ecROT.inp ecVIBROT.inp 2>/dev/null
-rm ECIS_ROT.out ECIS_VIB.out ECIS_VIBROT.out 2>/dev/null
-rm OMPAR.RIPL TARGET-*.tl TARGET_COLL.RIPL TARGET_COLL.DAT 2>/dev/null
-rm TARGET.LEV  2>/dev/null
-rm EXFOR.datp  2>/dev/null
-rm INPUT  2>/dev/null
-rm INPUT.DAT  2>/dev/null
-rm FISSION.INP  2>/dev/null
-rm OMPAR.DIR  2>/dev/null
-rm OMPdata.dat  2>/dev/null
-rm mt_x4r.txt  2>/dev/null
-rm TAPE15 2>/dev/null
-rm TAPE16 2>/dev/null
-rm TAPE66 2>/dev/null
-rm file99 2>/dev/null
-rm DEGASRESULT 2>/dev/null
-rm angdis.{pnt,cur} 2>/dev/null
-rm {ccm,dwba,INCIDENT}.{CS,TLJ,ANG,ICS,LEG} 2>/dev/null
-rm ecis06.{ang,cs,dat,ics,pol,tlj,leg,esp,inp} 2>/dev/null
-rm ecSPH.inp 2>/dev/null
-rm ECIS_SPH.out 2>/dev/null
-rm C4.dat 2>/dev/null
-rm FITIN.DAT 2>/dev/null
-rm FITLEV.PS 2>/dev/null
-rm INPUT1.DAT 2>/dev/null
-rm SENSITIVITY.INP XS-DOWN.DAT XS-UP.DAT 2>/dev/null
-rm TARGET_COLL_RIPL.DAT 2>/dev/null
-rm COVAR.DAT 2>/dev/null
-rm OPTFIT.CAL OMPAR0.DIR INPUT0.DAT  2>/dev/null
-rm OMPAR.DIR LOW_ENERGY.OUT ecis06.exp ecis06.smat 2>/dev/null
-rm angdis.p92 ecis06.dat empmf1.tmp FISS_XS.ZVD 2>/dev/null
-
-if  [ -s $file.exf ]; then
-    if  [ ! -s $file.c4 ]; then
-        # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
-
-        ../scripts/c4 $file
-
-        # RUN c4sort TO SORT C4 DATA
-
-        ../scripts/sortc4 $file
-
-    fi
-fi
-
-# REMOVE EMPTY FILES
+def splashscreen():
+	splash = [
+	'                                                           '+'\n'+
+	'          EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 '+'\n'+
+	'          E      MM  MM  P   P  I  R   R  E             33 '+'\n'+
+	'          EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 '+'\n'+
+	'          E      M    M  P      I  R  R   E              3 '+'\n'+
+	'          EEEEE  M    M  P      I  R   R  EEEEE      33333 '+'\n'+
+	'                                                           '+'\n'+
+	'                     A R C O L E (beta 1)                  '+'\n'+
+	'                                                           '+'\n'+
+	'                                                           '+'\n']
+	return splash[0]
 
 
-if [ ! -s $file-omp.dir ]; then
-       rm $file-omp.dir  2>/dev/null
-fi
-if [ ! -s $file-lev.col ]; then
-       rm $file-lev.col  2>/dev/null
-fi
-if [ ! -s $file.war ]; then
-       rm $file.war  2>/dev/null
-fi
-if [ ! -s $file-ecis.in ]; then
-       rm $file-ecis.in  2>/dev/null
-fi
-if [ ! -s $file-ecis.out ]; then
-       rm $file-ecis.out  2>/dev/null
-fi
-if [ ! -s $file-inp.fis ]; then
-       rm $file-inp.fis  2>/dev/null
-fi
-if [ ! -s $file-pfns.out ]; then
-       rm $file-pfns.out  2>/dev/null
-fi
-if [ ! -s $file-MC.par ]; then
-       rm $file-MC.par  2>/dev/null
-fi
-if [ ! -s FISSION.OUT ]; then
-       rm FISSION.OUT  2>/dev/null
-fi
+def rm(*args, **kwargs):
+	"""
+	remove file or list of files, silent on error unless verbose=True
+	example:
+	rm( 'foo.txt', 'bar.txt', verbose=True ) prints any errors
+	rm( 'foo.txt', 'bar.txt' ) is silent on error
+	"""
+	for f in args:
+		# so we can use lists returned by glob:
+		if type(f) is list:
+			for el in f:
+				try:
+					os.remove(el)
+				except OSError, e:
+					if 'verbose' in kwargs.keys() and kwargs['verbose']:
+						print (e)
+		else:
+			try:
+				os.remove(f)
+			except OSError, e:
+				if 'verbose' in kwargs.keys() and kwargs['verbose']:
+					print (e)
 
-# PRODUCE ZVD FILES FROM CROSS-SECTION TABLES
-if  [ -s $file.xsc ]; then
-      ../scripts/cs2zvd $file
-fi
 
-exit
+def mv(source, target, verbose=False):
+	"""
+	emulate bash mv command (one file at a time)
+	silent on error unless verbose=True
+	"""
+	try:
+		shutil.move(source, target)
+	except IOError, e:
+		if verbose:
+			print (e)
+
+
+def cp(source, target, verbose=False):
+	"""
+	emulate bash cp command
+	"""
+	try:
+		shutil.copy(source, target)
+	except IOError, e:
+		if verbose:
+			print (e)
+
+
+def ln(source, target, verbose=False):
+	"""
+	emulate bash ln command
+	"""
+	try:
+		os.symlink(source, target)
+	except OSError, e:
+		if verbose:
+			print (e)
+
+
+def isEmpty(filename):
+	"""
+	emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
+	also 'not isEmpty()' should be equivalent to [ -s filename ]
+	"""
+	return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
+
+
+if __name__ == '__main__':
+	
+	print( splashscreen() )
+	
+	if len(sys.argv)>=2:
+		proj = sys.argv[1]
+		if os.path.exists(proj+'.inp'):
+			print ("Using existing file with input: %s" % proj+'.inp' )
+		else:
+			print ("Input file %s does not exist" % proj+'.inp' )
+			sys.exit(1)
+	
+	if len(sys.argv)<2:
+		print ("Inputs ready to run:\n")
+		for a in glob('*.inp'):
+			print ("%s\n" % a)
+		proj = raw_input("Choose one of the above (without the .inp extension): ")
+	
+	runE(proj)
