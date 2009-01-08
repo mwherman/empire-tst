@@ -1,7 +1,7 @@
 #----GNU gfortran FORTRAN compiler
 #FC     =  gfortran
 #----flags for production compilation with gfortran
-#FFLAGS = -O3 -std=legacy
+#FFLAGS = -O3 -pg -std=legacy
 
 #----GNU f95 FORTRAN compiler
 #FC     =  f95
@@ -81,6 +81,11 @@ OBJE =      subecis06m.o systematics.o
 
 empire:   $(OBJF) $(OBJE)
 	$(FC) -o $@ $(OBJF) $(OBJE)
+
+
+#for profiling (also turn on -pg option for each -o file above):
+#empire:   $(OBJF) $(OBJE)
+#	$(FC) -o $@ -pg $(OBJF) $(OBJE)
 
 
 #empire:   $(OBJF) $(OBJE)
