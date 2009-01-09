@@ -13,4 +13,5 @@ awk '{if($1 ~ "Reaction")
      >> $1.res
 
 echo '//'>>$1.res
+export DISPLAY=:0
 ../util/c4zvd/zvview.exe $1.res/u

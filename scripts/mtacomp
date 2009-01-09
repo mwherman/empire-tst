@@ -1,6 +1,7 @@
 #!/bin/bash
 #Script to produce ZVV plots comparing four sets of calculations
 #with experimental data
+export DISPLAY=:0
 
 MT=$1
 suf=$2

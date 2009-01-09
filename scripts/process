@@ -60,7 +60,6 @@ mv LINEAR.OUT $work/$file-lin.endf
 mv LINEAR.LST $work/$file-log.linear
 cd $work
 
-
 # RUN RECENT
 
 cd ../util/recent/

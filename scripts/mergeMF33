@@ -31,7 +31,7 @@ set MATo [string trim [string range $line 66 69]]
 set MF   [string trim [string range $line 70 71]]
 set MT   [string trim [string range $line 72 74]]
 #take the first MAT if not specified
-if { $MATR == 0 } { 
+if { $MATR == 0 } {
         set MATR $MATo
   }
 }
@@ -47,7 +47,7 @@ gets $modendf line
 while { [string length $line] > 0 } {
        set MATm [string trim [string range $line 66 69]]
        set MF   [string trim [string range $line 70 71]]
-       set MT   [string trim [string range $line 72 74]] 
+       set MT   [string trim [string range $line 72 74]]
        if { $MF < $MFR || $MATm < $MATR } {
                gets $modendf line
                continue
@@ -70,7 +70,7 @@ gets $basendf line
 while { [string length $line] > 0 } {
        set MATm [string trim [string range $line 66 69]]
        set MF   [string trim [string range $line 70 71]]
-       set MT   [string trim [string range $line 72 74]] 
+       set MT   [string trim [string range $line 72 74]]
        if { $MF != $MFR || $MATm != $MATR } {
           puts $outendf $line
        }

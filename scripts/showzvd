@@ -1,4 +1,5 @@
 #!/bin/bash
+export DISPLAY=:0
 ln -s ../util/c4zvd/ps01.tit ps01.tit        
 for file in $*
 do
