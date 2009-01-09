@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:18 $
-Ccc   * $Id: auxiliary.f,v 1.36 2008-10-14 21:32:18 Capote Exp $
+Ccc   * $Date: 2009-01-09 15:09:37 $
+Ccc   * $Id: auxiliary.f,v 1.37 2009-01-09 15:09:37 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -32,129 +32,175 @@ C
 C Local variables
 C
       F_Print = F_Print + 10
-      XNI = 0.
-      TORy = 4.
-      EX1 = 0.0
-      EX2 = 0.0
+      XNI = 0.d0
+      TORy = 4.d0
+      EX1 = 0.d0
+      EX2 = 0.d0
       NLW = 0
-      CSFus = 0.0
-      TOTcsfis = 0.0
-      CRL = 0.0
-      DENhf = 0.0
-      DO nejc = 0, NDEJC
-         CSEmis(nejc,0) = 0.0
-         CSMsd(nejc) = 0.0
-         CSHms(nejc) = 0.0
-         DO necse = 1, NDEPFN
-           DO nnuc = 1, NDNUC
-             CSEfis(necse,nejc,nnuc) = 0.0
-           ENDDO
-         ENDDO
-         if (nejc.le.2) CSMsc(nejc) = 0.0
-         DO necse = 1, NDECSE
-            CSE(necse,nejc,0) = 0.0
-            CSEmsd(necse,nejc) = 0.0
-            CSEhms(necse,nejc) = 0.0
-            AUSpec(necse,nejc) = 0.0
-            DO nang = 1, NDANGecis
-               CSEa(necse,nang,nejc,0) = 0.0
-               CSEa(necse,nang,nejc,1) = 0.0
-               CSEahms(necse,nang,nejc) = 0.0
-            ENDDO
-         ENDDO
-      ENDDO
+      CSFus = 0.d0
+      TOTcsfis = 0.d0
+      CRL = 0.d0
+      DENhf = 0.d0
+      
+      CSEmis = 0.d0
+      CSMsd  = 0.d0
+      CSHms  = 0.d0
+      CSEfis = 0.d0
+      CSMsc  = 0.d0
+      
+      CSE    = 0.d0
+      CSEmsd = 0.d0
+      CSEhms = 0.d0
+      AUSpec = 0.d0
+      CSEa   = 0.d0
+      CSEahms= 0.d0
+      
+C     DO nejc = 0, NDEJC
+C        CSEmis(nejc,0) = 0.0
+C        CSMsd(nejc) = 0.0
+C        CSHms(nejc) = 0.0
+C        DO necse = 1, NDEPFN
+C          DO nnuc = 1, NDNUC
+C            CSEfis(necse,nejc,nnuc) = 0.0
+C          ENDDO
+C        ENDDO
+C        if (nejc.le.2) CSMsc(nejc) = 0.0
+C        DO necse = 1, NDECSE
+C           CSE(necse,nejc,0) = 0.0
+C           CSEmsd(necse,nejc) = 0.0
+C           CSEhms(necse,nejc) = 0.0
+C           AUSpec(necse,nejc) = 0.0
+C           DO nang = 1, NDANGecis
+C              CSEa(necse,nang,nejc,0) = 0.0
+C              CSEa(necse,nang,nejc,1) = 0.0
+C              CSEahms(necse,nang,nejc) = 0.0
+C           ENDDO
+C        ENDDO
+C     ENDDO
 
-      DO nejc = 0, NEJcm
-         DO il = 1, NDLV
-            REClev(il,nejc) = 0.0
-            CSDirlev(il,nejc) = 0.0
-         ENDDO
-         DO ie = 1, NDECSE
-            AUSpec(ie,nejc) = 0.0
-         ENDDO
-      ENDDO
-      DO nnuc = 1, NDNUC
-         POPmax(nnuc) = 0.0
-         CSPrd(nnuc) = 0.0
-         CSPfis(nnuc) = 0.0
-         EX(1,nnuc) = 0.0
-         JSTab(nnuc) = 0.0
-         QPRod(nnuc) = -1000.0
-         DO j = 1, NDLW
-            FISb(j,nnuc) = 0.0
-         ENDDO
-         DO nejc = 1, NDEJC
-            DO netl = 1, NDETL
-               ETL(netl,nejc,nnuc) = 0.0
-               LMAxtl(netl,nejc,nnuc) = 0
-               DO ilw = 1, NDLW
-                  TL(netl,ilw,nejc,nnuc) = 0.0
-               ENDDO
-            ENDDO
-         ENDDO
-         DO nnex = 1, NDEX
-            EX(nnex,nnuc) = 0.0
-            TNUc(nnex,nnuc) = 0.0
-            UEXcit(nnex,nnuc) = 0.0
-            TNUcf(nnex,nnuc) = 0.0
-            DO ilw = 1, NDLW
-               RO(nnex,ilw,1,nnuc) = 0.0
-               RO(nnex,ilw,2,nnuc) = 0.0
-               ROF(nnex,ilw,nnuc) = 0.0
-               POP(nnex,ilw,1,nnuc) = 0.0
-               POP(nnex,ilw,2,nnuc) = 0.0
-            ENDDO
-            DO irec = 1, NDEREC
-               RECcse(irec,nnex,nnuc) = 0.0
-               RECcse(irec,0,nnuc) = 0.0
-            ENDDO
-         ENDDO
-         EX(NDEX + 1,nnuc) = 0.0
-         DO nnlv = 1, NDLV
-            POPlv(nnlv,nnuc) = 0.0
-         ENDDO
-         DO nejc = 0, NDEJC
-            CSEmis(nejc,nnuc) = 0.0
-            DO necse = 1, NDECSE
-               CSE(necse,nejc,nnuc) = 0.0
-            ENDDO
-         ENDDO
-      ENDDO
-      DO nnuc = 1, NDExclus
-         DO necse = 0, NDEX_D
-            DO inecse = 1, NDECSED
-               DO nejcd = 0, NDEJCD
-                  POPcseaf(necse,nejcd,inecse,nnuc) = 0.0
-               ENDDO
-               DO nejc = 0, NDEJC
-                  POPcse(necse,nejc,inecse,nnuc) = 0.0
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      DO nejc = 0, NDEJC
-         SCRtem(nejc) = 0.0
-         DO ilw = 1, NDLW
-            DO nnex = 1, NDEX
-               SCRt(nnex,ilw,1,nejc) = 0.0
-               SCRt(nnex,ilw,2,nejc) = 0.0
-            ENDDO
-         ENDDO
-         DO nnlv = 1, NDLV
-            SCRtl(nnlv,nejc) = 0.0
-         ENDDO
-      ENDDO
-      DO nang = 1, NDANG
-         DO nnlv = 1, NDLV
-            DO nejc = 0, NDEJC
-               CSAlev(nang,nnlv,nejc) = 0.0
-            ENDDO
-         ENDDO
-      ENDDO
-      DO j = 1, NDLW
-         REDmsc(j,1) = 1.0
-         REDmsc(j,2) = 1.0
-      ENDDO
+      REClev   = 0.d0 
+      CSDirlev = 0.d0
+      POPmax   = 0.d0
+      CSPrd    = 0.d0
+      CSPfis   = 0.d0 
+      EX       = 0.d0
+      JSTab    = 0.d0
+      QPRod    = 0.d0
+      FISb     = 0.d0
+      ETL      = 0.d0
+      LMAxtl   = 0.d0
+      TL       = 0.d0
+
+      TNUc     = 0.d0
+      UEXcit   = 0.d0
+      TNUcf    = 0.d0
+      RO       = 0.d0
+      ROF      = 0.d0
+      POP      = 0.d0
+      RECcse   = 0.d0
+      POPlv    = 0.d0
+      CSEmis   = 0.d0
+      CSE      = 0.d0
+      POPcseaf = 0.d0
+      POPcse   = 0.d0
+      SCRtem   = 0.d0
+      SCRt     = 0.d0
+      SCRtl    = 0.d0
+      CSAlev   = 0.d0
+      REDmsc   = 1.d0
+      
+c     DO nejc = 0, NEJcm
+c        DO il = 1, NDLV
+c           REClevjc) = 0.0
+c           CSDirlev(il,nejc) = 0.0
+c        ENDDO
+c        DO ie = 1, NDECSE
+c           AUSpec(ie,nejc) = 0.0
+c        ENDDO
+c     ENDDO
+c     DO nnuc = 1, NDNUC
+c        POPmax(nnuc) = 0.0
+c        CSPrd(nnuc) = 0.0
+c        CSPfis(nnuc) = 0.0
+c        EX(1,nnuc) = 0.0
+c        JSTab(nnuc) = 0.0
+c        QPRod(nnuc) = -1000.0
+c        DO j = 1, NDLW
+c           FISb(j,nnuc) = 0.0
+c        ENDDO
+c        DO nejc = 1, NDEJC
+c           DO netl = 1, NDETL
+c              ETL(netl,nejc,nnuc) = 0.0
+c              LMAxtl(netl,nejc,nnuc) = 0
+c              DO ilw = 1, NDLW
+c                 TL(netl,ilw,nejc,nnuc) = 0.0
+c              ENDDO
+c           ENDDO
+c        ENDDO
+c        DO nnex = 1, NDEX
+c           EX(nnex,nnuc) = 0.0
+c           TNUc(nnex,nnuc) = 0.0
+c           UEXcit(nnex,nnuc) = 0.0
+c           TNUcf(nnex,nnuc) = 0.0
+c           DO ilw = 1, NDLW
+c              RO(nnex,ilw,1,nnuc) = 0.0
+c              RO(nnex,ilw,2,nnuc) = 0.0
+c              ROF(nnex,ilw,nnuc) = 0.0
+c              POP(nnex,ilw,1,nnuc) = 0.0
+c              POP(nnex,ilw,2,nnuc) = 0.0
+c           ENDDO
+c           DO irec = 1, NDEREC
+c              RECcse(irec,nnex,nnuc) = 0.0
+c              RECcse(irec,0,nnuc) = 0.0
+c           ENDDO
+c        ENDDO
+c        EX(NDEX + 1,nnuc) = 0.0
+c        DO nnlv = 1, NDLV
+c           POPlv(nnlv,nnuc) = 0.0
+c        ENDDO
+c        DO nejc = 0, NDEJC
+c           CSEmis(nejc,nnuc) = 0.0
+c           DO necse = 1, NDECSE
+c              CSE(necse,nejc,nnuc) = 0.0
+c           ENDDO
+c        ENDDO
+c     ENDDO
+c     DO nnuc = 1, NDExclus
+c        DO necse = 0, NDEX_D
+c           DO inecse = 1, NDECSED
+c              DO nejcd = 0, NDEJCD
+c                 POPcseaf(necse,nejcd,inecse,nnuc) = 0.0
+c              ENDDO
+c              DO nejc = 0, NDEJC
+c                 POPcse(necse,nejc,inecse,nnuc) = 0.0
+c              ENDDO
+c           ENDDO
+c        ENDDO
+c     ENDDO
+c     DO nejc = 0, NDEJC
+c        SCRtem(nejc) = 0.0
+c        DO ilw = 1, NDLW
+c           DO nnex = 1, NDEX
+c              SCRt(nnex,ilw,1,nejc) = 0.0
+c              SCRt(nnex,ilw,2,nejc) = 0.0
+c           ENDDO
+c        ENDDO
+c        DO nnlv = 1, NDLV
+c           SCRtl(nnlv,nejc) = 0.0
+c        ENDDO
+c     ENDDO
+c     DO nang = 1, NDANG
+c        DO nnlv = 1, NDLV
+c           DO nejc = 0, NDEJC
+c              CSAlev(nang,nnlv,nejc) = 0.0
+c           ENDDO
+c        ENDDO
+c     ENDDO
+c     DO j = 1, NDLW
+c        REDmsc(j,1) = 1.0
+c        REDmsc(j,2) = 1.0
+c     ENDDO
+      return
       END
 
 
