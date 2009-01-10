@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-10 22:18:13 $
-Ccc   * $Id: scnd-preeq.f,v 1.21 2008-12-10 22:18:13 Capote Exp $
+Ccc   * $Date: 2009-01-10 12:00:10 $
+Ccc   * $Id: scnd-preeq.f,v 1.22 2009-01-10 12:00:10 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -161,7 +161,8 @@ C--------------------probability *** done ***
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
                        IF (ENDf(Nnuc).EQ.1.D0) THEN
-                         CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
+                         IF(POPbin(iec,Nnuc).GT.0.d0) 
+     &                     CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                        ELSEIF (ENDf(Nnuc).EQ.2) THEN
                          CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + pop1
                        ENDIF
@@ -191,27 +192,31 @@ C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc,Nnuc) = CSEmis(Nejc,Nnuc) + sum
+C--------substract second chance emission cross section on the appropriate emission x-s	 
+C        CSEmis(Nejc,1) = CSEmis(Nejc,1)       - sum
       ENDIF
 C-----reduce 1-st residue population on the last entry
       IF (Last.GE.1) THEN
          DO iec = 1, NEX(Nnuc)
-            IF (POPbin(iec,Nnuc).NE.0) THEN
-               sumpopsub = 0
+            IF (POPbin(iec,Nnuc).NE.0.d0) THEN
+               sumpopsub = 0.d0
                DO jc = 1, NLW, LTUrbo
                   POP(iec,jc,1,Nnuc) = POP(iec,jc,1,Nnuc)
      &                                 - popsub(iec,jc,1)
                   POP(iec,jc,2,Nnuc) = POP(iec,jc,2,Nnuc)
      &                                 - popsub(iec,jc,2)
                   sumpopsub = sumpopsub + popsub(iec,jc,1)
-     &                        + popsub(iec,jc,2)
+     &                                  + popsub(iec,jc,2)
                ENDDO
 C-----------reduce 1-st residue population DDX spectra (using portions)
 C-----------on the last entry
                DO ie = 1, NDECSE
                   DO iejc = 1, NDEJCD
-                     POPcseaf(iec,iejc,ie,INExc(Nnuc))
-     &                  = POPcseaf(iec,iejc,ie,INExc(Nnuc))
-     &                  *(1 - sumpopsub/POPbin(iec,Nnuc))
+C                    POPcseaf(iec,iejc,ie,INExc(Nnuc))
+C    &                  = POPcseaf(iec,iejc,ie,INExc(Nnuc))
+                     POPcseaf(iec,iejc,ie,Nnuc)
+     &                  = POPcseaf(iec,iejc,ie,Nnuc)
+     &                  *(1.d0 - sumpopsub/POPbin(iec,Nnuc))
                   ENDDO
                ENDDO
             ENDIF

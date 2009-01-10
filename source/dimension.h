@@ -1,7 +1,7 @@
       PARAMETER(
      * NDNUC= 100
      *,NDEXCLUS = 40
-     *,NDEJC=3
+     *,NDEJC=4
      *,NDAFIS=1
      *,NDEX=  121
      *,NDLW= 40

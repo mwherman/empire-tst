@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2008-12-25 00:57:00 $
-Ccc   * $Id: input.f,v 1.285 2008-12-25 00:57:00 Capote Exp $
+Ccc   * $Date: 2009-01-10 12:00:09 $
+Ccc   * $Id: input.f,v 1.286 2009-01-10 12:00:09 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -284,7 +284,7 @@ C        IX4ret = 1 local MySQL server (default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 0
-         IF(IOPSYS.EQ.0) IX4ret = 1
+C        IF(IOPSYS.EQ.0) IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
