@@ -14,6 +14,8 @@ C-V  2006/11 Process discrete level partial reactions.
 C-V  2007/03 Suppress listing MT reactions of 40000 series (input change!)
 C-V  2008/01 Apply 1-degree tolerance on angles for 40000 series
 C-V  2008/02 Add metastable products (MF10) (A. Trkov).
+C-V  2009/01 Add option to force major cross sections and/or 
+C-V          double-differential spectra to the list (A. Trkov).
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -29,25 +31,28 @@ C-M  Instructions:
 C-M  Two input records may be specified:
 C-M  - Name of the file with EXFOR data in C4 format (default C4.DAT)
 C-M  - Name of the output list file (default PLOTC4.LST)
-C-M  - Flags (until EOF):
+C-M  - Flags in any order (until EOF):
 C-M      "no4000"  Suppress MT reactions of 4000 series
+C-M      "xsmajor" Force major cross sections to the list
+C-M      "xsddx"   Force double-differential cross sections to the list.
 C-M
 C-M  The default input filename is PLTLST.INP. If the file does not
 C-M  exist, the program tries to read the entries from the default
 C-M  input. If an end-of-file is encountered on the input file, the
 C-M  remaining entries assume their default values.
 C-
-      PARAMETER   (MXAN=200)
+      PARAMETER   (MXAN=200,MXDDE=7,MXDDA=2)
       LOGICAL      EXST
-      CHARACTER*1  CHA0,CHA1,CHB0,CHB1,MS0,MS1
+      CHARACTER*1  CHA0,CHA1,CHB0,CHB1,MS0,MS1,MSX
       CHARACTER*2  CH(100)
       CHARACTER*3  CHC0,CHC1
-      CHARACTER*10 CH10(3)
+      CHARACTER*10 CH10(3),CX10(3),BL10
       CHARACTER*26 REF
       CHARACTER*40 BLNK,FLNM,FLEX,FLLS,FLIN
       CHARACTER*80 RC1,RC2
       CHARACTER*130    REC
       DIMENSION    ANG(MXAN),ANS(MXAN),KAN(MXAN),ING(MXAN),KNG(MXAN)
+      DIMENSION    EDDX(MXDDE),ADDX(MXDDA)
       DATA BLNK/'                                        '/
      &     FLEX/'C4.DAT'/
      &     FLLS/'PLOTC4.LST'/
@@ -72,7 +77,23 @@ C*      fixed angles.
 C* MTOL Angle difference for differentiating energy-dependent
 C*      cross sections at fixed angles.
       DATA ETOL,ITOL,MTOL/ 0.015, 5, 1 /
+      DATA BL10/'          '/
+      DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
+      DATA ADDX/ 20., 160./
       NO4000=0
+      NXSMJR=0
+      NXSTOT=0
+      NXSINL=0
+      NXSN2N=0
+      NXSFIS=0
+      NXSCPT=0
+      NDDXN =0
+      NDDXA =1
+      DDXN  =0
+      IZX   =0
+      IAX   =0
+      MSX   =' '
+      RC1   =' '
       DO I=1,MXAN
         KAN(I)=0
         KNG(I)=0
@@ -103,6 +124,18 @@ C* Read flags until blank or EOF
         WRITE(LTT,903) BLNK
         WRITE(LTT,903) ' Suppress MT reactions of 4000 series   '
       END IF
+      IF(FLNM(1:6).EQ.'xsddx') THEN
+        NDDXN=1
+        WRITE(LTT,903) BLNK
+        WRITE(LTT,903) ' Force double-differen. x.s. to the list'
+      END IF
+c... Temporarily inactive until tested!!!
+c...  IF(FLNM(1:7).EQ.'xsmajor') THEN
+c...    NXSMJR=1
+c...    WRITE(LTT,903) BLNK
+c...    WRITE(LTT,903) ' Force major cross sections to the list '
+c...  END IF
+      GO TO 8
 C* Open the files
    10 OPEN (UNIT=LEX,FILE=FLEX,STATUS='OLD')
       OPEN (UNIT=LLS,FILE=FLLS,STATUS='UNKNOWN')
@@ -230,7 +263,7 @@ C* - MT out of range
 C* - Insufficient number of points (this also excludes distributions
 C*   which are not suitably sorted and would result in excessive output)
 c...  IF(IEX.LE.2) GO TO 60
-      IF(IEX.LE.2 .AND. (MF0.GT.3 .AND. MF0.NE.10)) GO TO 44
+      IF(IEX.LE.2 .AND. (MF0.GT.3 .AND. MF0.NE.10)) GO TO 48
 C*
 C* Printout conditions satisfied - prepare output record
       IZ=IZA1/1000
@@ -287,10 +320,100 @@ C* Check for close-lying discrete levels
           END IF
         END IF
       END IF
+C* Check for any entries forced from input
+   42 MFX=0
+      IF(NXSMJR.GT.0) THEN
+C*      -- Force major cross sections listing
+        IF(IEF.NE.0) THEN
+          IF(IDX.LE.0) STOP 'PLTLST ERROR - No data in C4 file'
+          GO TO 43
+        END IF
+        IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 43
+        IF(MMF.GE.3) GO TO 43
+        GO TO 46
+C*      -- Set output record
+   43   IZPX  =1
+        IZIX  =0
+        MFX   =3
+        IZIX  =1
+        CX10(1)='          '
+        CX10(2)='          '
+        CX10(3)='          '
+        IF(NXSTOT.EQ.0) THEN
+          NXSTOT=1
+          GO TO 46
+        END IF
+        IF(NXSINL.EQ.0) THEN
+          IZIX  =1
+          NXSINL=1
+          GO TO 46
+        END IF
+        IF(NXSN2N.EQ.0) THEN
+          IZIX  =1
+          NXSN2N=1
+          GO TO 46
+        END IF
+        IF(NXSCAP.EQ.0) THEN
+          NXSCAP=1
+          GO TO 46
+        END IF
+        MFX=0
+        GO TO 46
+      END IF
+C*
+      IF(NDDXN.GT.0 .AND. NDDXN.LT.MXDDE) THEN
+C* Force double-differential spectra listing
+        IF(IEF.NE.0) THEN
+          IF(IDX.LE.0) STOP 'PLTLST ERROR - No data in C4 file'
+          GO TO 44
+        END IF
+        IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 44
+        IF(MMF.GT.6) GO TO 44
+        IF(MMF.EQ.6 .AND. IZP0.EQ.1) THEN
+          IF(MMT.GT.9000) GO TO 44
+          IF(MMT.EQ.9000) THEN
+            IF(ABS(ENR0-EDDX(NDDXN)).GT. 0.5E6) THEN
+              IF(NDDXN.EQ.1 .OR. ENR0.GT.EDDX(NDDXN)) GO TO 44
+            ELSE
+              IF(NDDXN.LT.MXDDE) NDDXN=NDDXN+1
+            END IF
+          END IF
+        END IF
+        GO TO 46
+C*      -- Set output record
+   44   IZPX  =1
+        MFX   =6
+        MTX   =9000
+        IZIX  =1
+        WRITE(CX10(1),'(1P,E10.3E1)') EDDX(NDDXN)
+        WRITE(CX10(2),'(F8.2)')       ADDX(NDDXA)
+        CX10(3)='          '
+        IF(NDDXA.LT.MXDDA) THEN
+          NDDXA=NDDXA+1
+        ELSE
+          NDDXN=NDDXN+1
+          NDDXA=1
+        END IF
+      END IF
+   46 IF(MFX.NE.0) THEN
+C*        -- Force neutron emission spectra
+C          IDX=IDX+1
+          WRITE(LLS,914) IZX,CH(IZX),IAX,MSX,IZPX,MFX,MTX,0
+     &                  ,CX10,IDX,IZIX
+          GO TO 42
+      END IF
 C* Write a record to output list file
       IDX=IDX+1
       WRITE(LLS,914) IZ,CH(IZ),IA,MS0,IZP0,MMF,MMT,IEX,CH10,IDX,IZI0
-   44 IF(NO4000.EQ.0 .AND. MF0.EQ.4 .AND.
+      IZX=IZ
+      IAX=IA
+      MSX=MS0
+      IF(MMF.EQ.3 .AND. MMT.EQ.  1) NXSTOT=1
+      IF(MMF.EQ.3 .AND. MMT.EQ.  4) NXSINL=1
+      IF(MMF.EQ.3 .AND. MMT.EQ. 16) NXSN2N=1
+      IF(MMF.EQ.3 .AND. MMT.EQ. 18) NXSFIS=1
+      IF(MMF.EQ.3 .AND. MMT.EQ.102) NXSCPT=1
+   48 IF(NO4000.EQ.0 .AND. MF0.EQ.4 .AND.
      &   (MF1.GT.MF0 .OR. MT1.NE.MT0 .OR. IEF.EQ.1)) THEN
         CH10(1)='          '
 C* Use fine angular mesh for 40000 series
