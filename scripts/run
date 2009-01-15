@@ -11,6 +11,7 @@ replaces bash version, this has error checking
 
 import sys
 import os
+#import subprocess
 
 
 def main():
@@ -35,6 +36,9 @@ def main():
 	# EMPEND, fixup, stanef:
 	
 	i,o,e = os.popen3( '../scripts/format %s %s' %(project, mat) )
+	for l in o.readlines():
+		print (l.strip())
+	
 	if not 'STANEF - Completed successfully' in e.readlines()[-1]:
 		print ("STANEF did *not* finish successfully.")
 		print ("Press return to exit")
@@ -44,6 +48,9 @@ def main():
 	# run ENDF-6 checking codes
 	
 	i,o,e = os.popen3('../scripts/verify %s %s' %(project, mat) )
+	for l in o.readlines():
+		print (l.strip())
+	
 	for message in e.readlines():
 		if not 'completed successfully' in message:
 			print ("Failed a checking code. Final message:\n%s" % message)
@@ -52,6 +59,9 @@ def main():
 	# run preprocessing codes in preparation for plotting
 	
 	i,o,e = os.popen3('../scripts/process %s %s' %(project, mat) )
+	for l in o.readlines():
+		print (l.strip())
+	
 	if not 'PLTLST Completed' in e.readlines()[-1]:
 		print ("Trouble preprocessing files for plotting. Is c4 file present?")
 		print ("Press return to exit")
