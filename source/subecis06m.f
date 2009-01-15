@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-09-13 16:17:06 $
-Ccc   * $Id: subecis06m.f,v 1.1 2008-09-13 16:17:06 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:17 $
+Ccc   * $Id: subecis06m.f,v 1.2 2009-01-15 17:48:17 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
 C     20. Aug. 2008
@@ -20099,7 +20099,7 @@ C TRANSFORMATION.                                                       SCHE-408
       LC=LCP-1                                                          SCHE-440
       BJ=0.5D0*DFLOAT(MC(ICP,JI,3))                                     SCHE-441
       IF (LO(56)) WRITE (MW,1002) NC1,NC2,IV,LC,BJ,B1,B2,B3,D1,D2       SCHE-442
-      IF (LO(60)) WRITE (94,1003) NC1,NC2,IV,LC,BJ,B1,B2,B3             SCHE-443
+      IF (LO(60)) WRITE (94,10031) NC1,NC2,IV,LC,BJ,B1,B2,B3            SCHE-443
 C MULTIPLICATION BY THE COULOMB PHASE.                                  SCHE-444
    50 A1=DCOS(C1)                                                       SCHE-445
       A2=DSIN(C1)                                                       SCHE-446
@@ -20132,7 +20132,7 @@ C  HELICITY SCATTERING COEFFICIENTS.                                    SCHE-451
       READ (94,1001) U1,IPP,K1,K2                                       SCHE-473
       WRITE (60,1001) U1,IPP,K1,K2                                      SCHE-474
       DO 58 K=1,K2                                                      SCHE-475
-      READ (94,1003) K1,K2,K3,K4,BJ,B1,B2,B3                            SCHE-476
+      READ (94,10031) K1,K2,K3,K4,BJ,B1,B2,B3                           SCHE-476
    58 WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                           SCHE-477
    59 CONTINUE                                                          SCHE-478
 C     CLOSE (94)                                                        SCHE-479
@@ -20215,8 +20215,9 @@ C CALCULATION OF THE NEW SCATTERING COEFFICIENTS.                       SCHE-537
  1001 FORMAT (1X,F9.1,4X,A1,1X,I4,1X,I4)                                SCHE-556
  1002 FORMAT (1X,3I3,I5,F7.1,4X,1P,2D15.7,' I',4X,0P,3F11.8)            SCHE-557
  1003 FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     SCHE-558
+10031 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     SCHE-558 
  1004 FORMAT ('<S-MATRIX>',F10.2,1P,D20.8,0P,F10.2,2I5)                 SCHE-559
- 1005 FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),'I',4X,F11.8) SCHE-560
+ 1005 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),'I',4X,F11.8) SCHE-560
  1006 FORMAT (' AMPLITUDE =',I3,D15.7,' (',D15.7,')  NEW',2D15.7,3X,'OLDSCHE-561
      1',2D15.7)                                                         SCHE-562
  1007 FORMAT (5X,I2,' AMPLITUDES INSUFFICIENT TO INTERPOLATE.')         SCHE-563

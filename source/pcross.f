@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-10 02:02:06 $
-Ccc   * $Id: pcross.f,v 1.53 2008-12-10 02:02:06 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:17 $
+Ccc   * $Id: pcross.f,v 1.54 2009-01-15 17:48:17 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -163,10 +163,12 @@ C
      &//)
         call DTRANS(EXCn,DE,spec,cross)
 99003   FORMAT (7x,5F8.2)
-        write(8,99003) Ein,sigr,cross(2),cross(NDEJC)
-        dbreak=cross(2)
-C       Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
-        dpickup=cross(NDEJC)
+        IF(DXSRED.GT.0.d0) then
+          write(8,99003) Ein,sigr,cross(2),cross(NDEJC)
+          dbreak=cross(2)
+C         Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
+          dpickup=cross(NDEJC)
+        ENDIF 
       ENDIF
 C
       WRITE (8,99005)

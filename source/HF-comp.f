@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-10 12:00:10 $
-Ccc   * $Id: HF-comp.f,v 1.99 2009-01-10 12:00:10 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:15 $
+Ccc   * $Id: HF-comp.f,v 1.100 2009-01-15 17:48:15 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &                 popll, pops, popt, xcse, pmaxt
+     &                 popll, pops, popt, xcse
       REAL FLOAT
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER INT
@@ -55,94 +55,36 @@ C-----
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
-      IF (excnq.LT.ECUt(Nnur)) goto 100
-            
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
-
-      pmaxt = 0.d0
-      IF (Nejc.NE.0) pmaxt = POPmax(Nnur)            
-      ie = 1 ! First residual energy bin in the continuum
-      icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDECSE)
-      icse = MAX0(2,icse)
-      popt = 0.d0
-      DO j = 1, NLW, LTUrbo  !loop over residual spins
-         pop1 = Xnor*SCRt(ie,j,1,Nejc)
-         pop2 = Xnor*SCRt(ie,j,2,Nejc)
-         pops = 0.5d0*(pop1 + pop2)
-         popt = popt + pops !sum over spin/pi at a given energy bin
-         POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
-         POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
-         ! check why we have only one parity here !!! RCN	 
-         IF (Nejc.NE.0 .AND. pmaxt.LT.POP(ie,j,1,Nnur))
-     &          pmaxt = POP(ie,j,1,Nnur)
-      ENDDO !over residual spins
-      IF (popt.NE.0.0D+0) THEN
-         AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
-         CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
-         IF (ENDf(Nnuc).EQ.1) THEN
-            IF(POPbin(Iec,Nnuc).GT.0.d0) 
-     &        CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
-         ELSEIF (ENDf(Nnuc).EQ.2) THEN
-            CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
-         ENDIF
-      ENDIF
-      
-      IF(Nejc.gt.0) then
-        DO ie = 2, nexrt          !loop over residual energies (continuum)
-         icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDECSE)
-         icse = MAX0(2,icse)
-         popt = 0.d0
-         DO j = 1, NLW, LTUrbo  !loop over residual spins
-            pop1 = Xnor*SCRt(ie,j,1,Nejc)
-            pop2 = Xnor*SCRt(ie,j,2,Nejc)
-            pops = pop1 + pop2
-            popt = popt + pops !sum over spin/pi at a given energy bin
-            POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
-            POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
-	    ! check why we have only one parity here !!! RCN
-            IF (pmaxt.LT.POP(ie,j,1,Nnur)) pmaxt = POP(ie,j,1,Nnur) 
-         ENDDO !over residual spins
-         IF (popt.NE.0.0D+0) THEN
-            AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
-            CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
-            IF (ENDf(Nnuc).EQ.1) THEN
-              IF(POPbin(Iec,Nnuc).GT.0.d0) 
-     &          CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
-            ELSEIF (ENDf(Nnuc).EQ.2) THEN
-              CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
-            ENDIF
-         ENDIF
-        ENDDO !over residual energies in continuum
-        POPmax(Nnur) = pmaxt             
-      ELSE  ! Nejc = 0 (gammas)
-        DO ie = 2, nexrt          !loop over residual energies (continuum)
+      DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
          icse = MAX0(2,icse)
-         popt = 0.d0
+         popt = 0.0
          DO j = 1, NLW, LTUrbo  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
             pop2 = Xnor*SCRt(ie,j,2,Nejc)
             pops = pop1 + pop2
+            IF (ie.EQ.1) pops = pops*0.5
             popt = popt + pops !sum over spin/pi at a given energy bin
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
+            IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
+     &          POPmax(Nnur) = POP(ie,j,1,Nnur)
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             IF (ENDf(Nnuc).EQ.1) THEN
-              IF(POPbin(Iec,Nnuc).GT.0.d0) 
-     &          CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
+               CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
-              CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
+               CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
             ENDIF
          ENDIF
-        ENDDO !over residual energies in continuum
-      ENDIF 
+      ENDDO !over residual energies in continuum
 C-----
 C-----Discrete levels
 C-----
-100   DO il = 1, NLV(Nnur)
+      DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)
@@ -218,7 +160,6 @@ Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
 Ccc   *              This cross section is directly added to the spectrum*
 Ccc   *              and Popt*DE is used to define a portion of the      *
 Ccc   *              feeding spectrum that has to be moved.              *
-Ccc   *       Nemax- Maximum index of the energy loop over Iec           *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
@@ -239,7 +180,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION excnq, xnor, dtmp
+      DOUBLE PRECISION excnq, xnor
       INTEGER icsp, ie, iejc
       INTEGER INT
 C     data jsigma/0/,jsigma2/36/
@@ -259,15 +200,13 @@ C-----DE spectra (DDX are not done for fission although they could be)
 C
       IF (Nejc.EQ. -1) THEN
 C        fission of n,nx and npx nuclei considered
-C        IF (POPbin(Iec,Nnuc).EQ.0) RETURN
+         IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
 C           DO iejc = 0, NDEJC
             DO iejc = 0, 1  ! only neutrons and photons for the time being
-C             IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
-C    &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
-C    &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
-                 CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
+              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
+     &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
      &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
             ENDDO
          ENDDO
@@ -293,11 +232,11 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
-C        IF (POPbin(Iec,Nnuc).EQ.0) RETURN
+         IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
-C              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -306,11 +245,11 @@ C              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
      &                 POPcse(Ief,iejc,ie,INExc(Nnur))
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
-C              ENDIF
+               ENDIF
             ENDDO
 C-----------DDX spectra using portions
             DO iejc = 0, NDEJCD
-C              IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+               IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                       POPcseaf(Ief,iejc,ie,0)
      &                = POPcseaf(Ief,iejc,ie,0)
@@ -320,11 +259,10 @@ C              IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
      &                = POPcseaf(Ief,iejc,ie,INExc(Nnur))
      &                + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
-C              ENDIF
+               ENDIF
             ENDDO
          ENDDO
       ENDIF
-      RETURN
       END
 
 
@@ -373,7 +311,7 @@ C
 C Local variables
 C
       INTEGER iejc, iesp
-      DOUBLE PRECISION xnor, dtmp
+      DOUBLE PRECISION xnor
 C
 C
 C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
@@ -391,12 +329,11 @@ C-----Contribution comming straight from the current decay
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
-         dtmp = POPbin(Iec,Nnuc)    
-         IF (dtmp.EQ.0) RETURN
-         xnor = Popt*DE/dtmp
-         DO iesp = 1, NDECSE
+         IF (POPbin(Iec,Nnuc).GT.0) THEN
+            xnor = Popt*DE/POPbin(Iec,Nnuc)
+            DO iesp = 1, NDECSE
                DO iejc = 0, NDEJC
-C                 IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                  IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                     IF(ENDF(Nnur).EQ.2) THEN
                       CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
      &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
@@ -409,11 +346,11 @@ C---------------------Store also population spectra for discrete levels
      &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
      &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                     ENDIF
-C                 ENDIF
-         ENDDO
-C--------DDX spectra using portions
-         DO iejc = 0, NDEJCD
-C                 IF(POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                  ENDIF
+               ENDDO
+C--------------DDX spectra using portions
+               DO iejc = 0, NDEJCD
+                  IF(POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                      IF(ENDF(Nnur).EQ.2) THEN
                         POPcseaf(0,iejc,iesp,0)
      &                  = POPcseaf(0,iejc,iesp,0)
@@ -423,11 +360,11 @@ C                 IF(POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
      &                  = POPcseaf(0,iejc,iesp,INExc(Nnur))
      &                  + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
                      ENDIF
-C                 ENDIF
+                  ENDIF
                ENDDO
-         ENDDO
+            ENDDO
+         ENDIF
       ENDIF
-      RETURN      
       END
 
 

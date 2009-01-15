@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-01-10 12:00:09 $
-Ccc   * $Id: input.f,v 1.286 2009-01-10 12:00:09 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:15 $
+Ccc   * $Id: input.f,v 1.287 2009-01-15 17:48:15 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -251,6 +251,7 @@ C
          MODelecis = 0
          EXClusiv = .TRUE.
          WIDcoll = 0.d0
+         DXSred = 1.d0     ! scaling factor for direct processes in deuteron induced reactions
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
@@ -5681,6 +5682,25 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'DXSRED') THEN
+            IF(NEJCM.LT.4) GOTo 100
+            IF (DXSRED.LE.0.d0) THEN
+               WRITE ( 8,
+     &'(''  Deuteron break-up/pick-up are suppressed!'')')
+               WRITE (12,
+     &'(''  Deuteron break-up/pick-up are suppressed!'')')
+            ELSE
+               DXSred = val
+               WRITE ( 8,
+     &'(''  Deuteron break-up/pick-up cross section'',
+     &  '' normalized by a factor '',F6.3)') DXSred
+               WRITE (12,
+     &'(''  Deuteron break-up/pick-up cross section'',
+     &  '' normalized by a factor '',F6.3)') DXSred
+            ENDIF
+            GOTO 100
+         ENDIF
+C-----
 C-----shift parameter used to adjust HFB LD
          IF (name.EQ.'ROHFBP') THEN
             izar = i1*1000 + i2
@@ -7280,9 +7300,10 @@ C
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
 
 C
-C           CHECKING EWSR
+C           CHECKING EWSR (only for neutrons)
 C
-            IF(D_Def(i,2).GT.0.d0 .AND. D_Def(i,2).LE.0.05d0) then
+            IF(D_Def(i,2).GT.0.d0 .AND. D_Def(i,2).LE.0.05d0 .AND.
+     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               ftmp = D_Def(i,2)
               if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
      >                            ftmp = D_Def(1,2) ! coupled levels
@@ -7302,7 +7323,8 @@ C
          WRITE(12,*) ' '
          CLOSE (32)
 
-         if(igreson.eq.0) THEN
+         if(igreson.eq.0 .and.
+     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then     
            if (sgmr.gt.0.) betagmr=sqrt(sgmr/egrcoll(0,1))
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-06 01:29:38 $
-Ccc   * $Id: tl.f,v 1.100 2008-12-06 01:29:38 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:18 $
+Ccc   * $Id: tl.f,v 1.101 2009-01-15 17:48:18 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1731,10 +1731,12 @@ C    &  '(1x,3(I3,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)
 C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
 C       read (45, ! ecis06                
 C    &  '(3I3,I4,1x,F6.1,1x,2(D15.7,1x),1x,4x,F12.8)',END=90)
+C        (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),'I',4X,F11.8)
 C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
         read (45, ! ecis06 (Dec 2008)               
-     &  '(3I3,I4,1x,F5.1,2x,2(D14.7,2x),1x,4x,F12.8)',END=90,ERR=90)
-     &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
+C    &  '(3I3,I4,1x,F5.1,2x,2(D14.7,2x),1x,4x,F12.8)',END=90,ERR=90)
+     &  '(1X,3(I3,1X),I3,1X,F5.1,1X,2(D15.7,1X),1x,4X,F11.8)'
+     &  ,END=90,ERR=90) nc1,nc2,nlev,l,jj,sreal,simag,stmp
 
         IF (nlev.eq.1 .and. nc1.eq.nc2
      &  .and. stmp.GT.1.D-15 .AND. L.LT.NDLW)

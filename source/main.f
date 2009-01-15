@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-10 12:00:08 $
-Ccc   * $Id: main.f,v 1.196 2009-01-10 12:00:08 Capote Exp $
+Ccc   * $Date: 2009-01-15 17:48:17 $
+Ccc   * $Id: main.f,v 1.197 2009-01-15 17:48:17 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -354,7 +354,8 @@ C            WRITE(8,*) 'Ecut',ECUt(nnurec)
 C            WRITE(8,*) 'Ex',EX(NEX(1),1)-Q(nejcec,1)-(ncon-1)*DE
 C            WRITE(8,*) 'Continuum starts at bin number',ncon
 C------------Avoid reading closed channels
-             IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
+C            IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
+             IF (echannel.GE.0.0001 .and. icsl.gt.0)
      &         THEN
                READ (46,*,END = 1400) popread
 C
@@ -375,7 +376,8 @@ C              SUM_i(E_i*beta_i)=57.5*A**(-5/3)*L*(L+1)
 C
                isigma  = isigma0
                isigma2 = 2*isigma0*isigma0
-               if(D_Def(i,2).GE.0.05) then
+               if(D_Def(i,2).GE.0.05  .and. 
+     &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then        
                  if(int(D_Xjlv(i)).eq.0) isigma  = nint(ggmr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.2) isigma  = nint(ggqr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
@@ -405,7 +407,8 @@ C
                  READ (45,*,END = 1400)     ! Skipping level identifier line
                  iang = 0
                  DO iang1 = 1, NANgela
-                    READ (45,'(7x,E12.5)',END = 1400) ftmp
+C                   READ (45,'( 7x,E12.5)',END = 1400) ftmp
+                    READ (45,'(11x,E12.5)',END = 1400) ftmp
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
@@ -707,7 +710,8 @@ C-----
       totemis = 0.d0
       IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
 C        ftmp = CSFus - xsinl
-C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission so it should not used for normalization
+C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission
+C        so it should not used for normalization
 C        xsinl is calculated by MSD
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis,xsinl)
@@ -754,8 +758,6 @@ C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
          else
             SINlcont =  0.d0
          endif
-C        if(xsinlcont.gt.0) write(8,*)
-C    &   ' DWBA to continuum XS for inelastic channel (test) ',SINlcont
                WRITE (8,*)
          if(CSMsd(0).gt.0.) WRITE (8,*)
      &       ' g PE emission cross section ', CSMsd(0), ' mb'
@@ -769,13 +771,13 @@ C    &   ' DWBA to continuum XS for inelastic channel (test) ',SINlcont
      &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
          WRITE (8,*) ' '
 C--------Correct CN population for PE continuum emission
-         corrmsd = (CSFus - (xsinl + totemis))/CSFus
+         corrmsd = (CSFus - (xsinl + totemis))/CSFus   
          IF (corrmsd.LT.0.0D0) THEN
             write(8,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
             write(*,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
-            totemis = CSFus - xsinl
+            totemis = CSFus - xsinl 
             corrmsd = 0.d0
 
             if(xsinl.lt.0.0001d0) then
@@ -820,6 +822,10 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
          WRITE (8,*) ' PE + Direct reduction factor   ',1.d0-corrmsd
          WRITE (8,*) ' MSD contribution               ',xsinl/CSFus
          WRITE (8,*) ' PCROSS contribution            ',totemis/CSFus
+ 
+         if(xsinlcont.gt.0) write(8,*)
+     &               ' DWBA to continuum XS (inel)    ',SINlcont/CSFus
+ 
          WRITE (8,*) ' '
 C--------TRISTAN *** done ***
 C--------Add MSD contribution to the residual nucleus population
@@ -3543,8 +3549,8 @@ C-----------Fission
             Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
             CSFis = CSFis + Fisxse
             IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-     &        POPbin(Ke,Nnuc).GT.0.d0) 
-     &        CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
+     &        POPbin(Ke,Nnuc).GT.0.d0)            
+     &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
          ENDIF
          IF (FISmod(Nnuc).GT.0.) THEN
             IF ((Dencomp + TDIrect).GT.0.) THEN
@@ -3604,7 +3610,7 @@ C-----fission
            CSFis  = CSFis + Fisxse
            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
      &        POPbin(Ke,Nnuc).GT.0.d0) 
-     &        CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
+     &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF
 C
 C-----------Multimodal should be updated to allow for PFNS calculation !!!!

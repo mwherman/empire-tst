@@ -71,7 +71,7 @@
      &                 FISshi(ndnuc), FITlev, FLAm(ndcc), FCCred,
      &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv, GDIvp,
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
-     &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn,
+     &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn, DXSred,
      &                 GMRpar(ndgmrpm,0:ndnuc), GQRpar(ndgqrpm,0:ndnuc),
      &                 GST, GTIlnor(0:ndnuc), H(nftrans,nfparab),
      &                 HIS(0:ndnuc), HJ(ndnuc,nfparab), LQDfac, HHBarc,
@@ -155,7 +155,7 @@ c
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta,
      &                 DEFnor, FCCred, TISomer, rFCCred, rFUSred,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd, ATIlnoz
+     &                 EMInmsd, ATIlnoz, DXSred
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
