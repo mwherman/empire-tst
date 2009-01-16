@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-
-
+Ccc   * $Date: 2009-01-16 08:31:48 $
+Ccc   * $Id: dtrans.f,v 1.9 2009-01-16 08:31:48 Capote Exp $
 
       SUBROUTINE DTRANS(XMAX,ED,spec,cross)
 C
@@ -29,7 +29,7 @@ C-----Only deuteron reactions allowed
          UU=XMAX-Q(ip,1)-ED/2.D0
          NU=IDINT(UU/ED)+1
          if(NU.LE.0 .or. NU.GT.ndex) cycle
-       cross(ip) = 0.d0
+	 cross(ip) = 0.d0
          iab=jno(ip)+jpo(ip)
          ab=float(iab)
          aa=Aejc(0)
