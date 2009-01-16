@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-01-15 17:48:15 $
-Ccc   * $Id: input.f,v 1.287 2009-01-15 17:48:15 Capote Exp $
+
+
 C
       SUBROUTINE INPUT
 Ccc
@@ -5684,18 +5684,20 @@ C-----
 C-----
          IF (name.EQ.'DXSRED') THEN
             IF(NEJCM.LT.4) GOTo 100
-            IF (DXSRED.LE.0.d0) THEN
+            IF (val.LE.0.d0) THEN
+             DXSred = 0.d0
                WRITE ( 8,
-     &'(''  Deuteron break-up/pick-up are suppressed!'')')
+     &'('' Deuteron break-up/pick-up suppressed!'')')
                WRITE (12,
-     &'(''  Deuteron break-up/pick-up are suppressed!'')')
+     &'('' Deuteron break-up/pick-up suppressed!'')')
             ELSE
                DXSred = val
                WRITE ( 8,
-     &'(''  Deuteron break-up/pick-up cross section'',
+     &'('' Deuteron break-up/pick-up cross section'',
      &  '' normalized by a factor '',F6.3)') DXSred
                WRITE (12,
-     &'(''  Deuteron break-up/pick-up cross section'',
+     &'('' Deuteron break-up/pick-up cross section'',
+
      &  '' normalized by a factor '',F6.3)') DXSred
             ENDIF
             GOTO 100

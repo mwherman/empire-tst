@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:15 $
-Ccc   * $Id: dtrans.f,v 1.7 2009-01-15 17:48:15 Capote Exp $
+
+
 
       SUBROUTINE DTRANS(XMAX,ED,spec,cross)
 C
@@ -22,12 +22,14 @@ cig   cross(2)=0.D0
 cig   cross(4)=0.D0
 C-----Only deuteron reactions allowed
       if(Zejc(0).ne.1.D0.and.Aejc(0).ne.2.D0) return
-      if(DXSred.LE.0.d0) return      
+      if(DXSred.LE.0.d0) return
+             
       do ip=2,irea,2
          nnur=Nres(ip)
          UU=XMAX-Q(ip,1)-ED/2.D0
          NU=IDINT(UU/ED)+1
-         if(NU.LE.0) cycle
+         if(NU.LE.0 .or. NU.GT.ndex) cycle
+       cross(ip) = 0.d0
          iab=jno(ip)+jpo(ip)
          ab=float(iab)
          aa=Aejc(0)
@@ -56,7 +58,6 @@ C-----------sigabs(ke,ip,1) was estimated in global
             cross(ip)=cross(ip)+spectr*de
 C           write(8,102)ke,ek,fac1,fac2,sg,spec(ip,ke)
          enddo
-         cross(ip)=cross(ip)
       enddo
       return
 100   format(2i5,4(f6.2))
