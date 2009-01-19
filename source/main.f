@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:17 $
-Ccc   * $Id: main.f,v 1.197 2009-01-15 17:48:17 Capote Exp $
+Ccc   * $Date: 2009-01-19 00:00:32 $
+Ccc   * $Id: main.f,v 1.198 2009-01-19 00:00:32 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -107,7 +107,7 @@ C     CHARACTER*1 opart(3)
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
      &        icsh, icsl, ie, iizaejc, il, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
-     &        jcn, jj, ke, kemax, kemin, kk, ltrmax, m,
+     &        jcn, ke, kemax, kemin, ltrmax, m,
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp,
      &        nnur, nnurec, nnurn, nnurp, nspec,   neles,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
@@ -376,8 +376,8 @@ C              SUM_i(E_i*beta_i)=57.5*A**(-5/3)*L*(L+1)
 C
                isigma  = isigma0
                isigma2 = 2*isigma0*isigma0
-               if(D_Def(i,2).GE.0.05  .and. 
-     &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then        
+               if(D_Def(i,2).GE.0.05  .and.
+     &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
                  if(int(D_Xjlv(i)).eq.0) isigma  = nint(ggmr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.2) isigma  = nint(ggqr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
@@ -734,6 +734,8 @@ C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
      &                '(//30X,''     P  R  O  T  O  N  S ''/)')
               IF(nejc.eq.3) WRITE (8,
      &                '(//30X,''     A  L  P  H  A  S ''/)')
+              IF(nejc.eq.4) WRITE (8,
+     &                '(//30X,''     L  I  G  H  T    I  O  N''/)')
               WRITE (8,
      &                '(30X,''A      n      g      l      e      s '')')
               WRITE (8,*) ' '
@@ -771,13 +773,13 @@ C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
      &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
          WRITE (8,*) ' '
 C--------Correct CN population for PE continuum emission
-         corrmsd = (CSFus - (xsinl + totemis))/CSFus   
+         corrmsd = (CSFus - (xsinl + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
             write(8,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
             write(*,*)
      &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
-            totemis = CSFus - xsinl 
+            totemis = CSFus - xsinl
             corrmsd = 0.d0
 
             if(xsinl.lt.0.0001d0) then
@@ -814,18 +816,25 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
 C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
          ENDIF
+         ftmp = 0.d0
+         DO i = 1, NLW
+            ftmp = ftmp + POP(NEX(1),i,1,1) + POP(NEX(1),i,2,1)
+         ENDDO
+
          DO i = 1, NLW
             POP(NEX(1),i,1,1) = POP(NEX(1),i,1,1)*corrmsd
             POP(NEX(1),i,2,1) = POP(NEX(1),i,2,1)*corrmsd
          ENDDO
          WRITE (8,*) ' '
+         WRITE (8,*) ' Total CN population            ',ftmp
+         WRITE (8,*) ' Reaction cross section         ',CSFus
          WRITE (8,*) ' PE + Direct reduction factor   ',1.d0-corrmsd
          WRITE (8,*) ' MSD contribution               ',xsinl/CSFus
          WRITE (8,*) ' PCROSS contribution            ',totemis/CSFus
- 
+
          if(xsinlcont.gt.0) write(8,*)
      &               ' DWBA to continuum XS (inel)    ',SINlcont/CSFus
- 
+
          WRITE (8,*) ' '
 C--------TRISTAN *** done ***
 C--------Add MSD contribution to the residual nucleus population
@@ -835,8 +844,10 @@ C--------Locate residual nucleus after MSD emission
            IF(nnur.LT.0) CYCLE
            IF (CSMsd(nejc).NE.0.0D0) CALL ACCUMSD(1,nnur,nejc)
 C----------Add PE contribution to energy spectra (angle int.)
+           ftmp = 0.d0
            DO ie = 1, NDEcse
               CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
+              ftmp = ftmp + DE*CSEmsd(ie,nejc)
            ENDDO
 C----------Add PE contribution to the total NEJC emission
            CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
@@ -844,7 +855,9 @@ C----------Add PE contribution to the total NEJC emission
 C        Skipping all emitted but neutrons and protons
 C        Secondary emission was not tested for proton induced reactions
          nnur = NREs(nejcec)
-         IF(nnur.GE.2000) THEN
+         IF( AEJc(nejcec).LE.1 .and. ZEJc(nejcec).LE.1 
+
+     &                         .and. nnur.GE.2000) THEN
 C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
@@ -994,15 +1007,8 @@ C-----Renormalization of CN spin distribution if TURBO mode invoked
 C-----Start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
          IF(QPRod(nnuc).LT.-999.d0) CYCLE
-         DO kk = 0, NFISENMAX
-            DO jj = 1, NDLW
-               DO i = 1, NFHUMP
-                  ROFis(kk,jj,i) = 0.
-                  ROFisp(kk,jj,1,i) = 0.
-                  ROFisp(kk,jj,2,i) = 0.
-               ENDDO
-            ENDDO
-         ENDDO
+         ROFis  = 0.d0
+         ROFisp = 0.d0
          IF (IOUt.GT.0) THEN
          if(nnuc.le.NDEJC)
      &     WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)),
@@ -1323,7 +1329,8 @@ C--------
          ENDIF
 
          IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
-     &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1) + CSEmis(3,1))
+     &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
+     &                  + CSEmis(3,1) + CSEmis(4,1))
      &       .NE.0) THEN
             WRITE (8,*) ' '
             WRITE (8,*)
@@ -1332,6 +1339,7 @@ C--------
             IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
             IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
             IF(CSEmis(3,1).GT.0) CALL AUERST(1,3)
+            IF(NDEjc.eq.4 .AND. CSemis(4,1).GT.0) CALL AUERST(1,4)
             WRITE (8,*) ' '
             IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
                WRITE (8,*) ' HMS spectra stored as inclusive:'
@@ -3549,7 +3557,7 @@ C-----------Fission
             Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
             CSFis = CSFis + Fisxse
             IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-     &        POPbin(Ke,Nnuc).GT.0.d0)            
+     &        POPbin(Ke,Nnuc).GT.0.d0)
      &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
          ENDIF
          IF (FISmod(Nnuc).GT.0.) THEN
@@ -3609,7 +3617,7 @@ C-----fission
            Fisxse = Sumfis*Xnor
            CSFis  = CSFis + Fisxse
            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-     &        POPbin(Ke,Nnuc).GT.0.d0) 
+     &        POPbin(Ke,Nnuc).GT.0.d0)
      &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF
 C

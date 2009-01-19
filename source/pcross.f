@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:17 $
-Ccc   * $Id: pcross.f,v 1.54 2009-01-15 17:48:17 Capote Exp $
+Ccc   * $Date: 2009-01-19 00:00:33 $
+Ccc   * $Id: pcross.f,v 1.55 2009-01-19 00:00:33 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -34,6 +34,9 @@ C
       COMMON /CALC5 / L, NHEq
       COMMON /KALB/ XCOs
       COMMON /VWELL / VV
+
+      DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
+      COMMON /PEXS/ cross, spec
 C
 C Dummy arguments
 C
@@ -47,8 +50,8 @@ C
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
      &       dbreak, dpickup
 
-      DOUBLE PRECISION cross(0:NDEJC), g(0:NDEJC), pair(0:NDEJC),
-     &       spec(0:NDEJC,NDEX), we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
+      DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn,
+     &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
      &          ihmax, j, p, zc, zp, zr, zo
@@ -146,35 +149,10 @@ C-----ZERO ARRAY INITIALIZATION
             ENDDO
          ENDDO
          DO hh = 1, PMAX
-            L(nejc,hh) = 0.D0
+             L(nejc,hh) = 0.D0
          ENDDO
       ENDDO
-      WRITE (8,99020)
-C
-Cig---Direct reaction spectra for d,p and d,t only
-C
-      dbreak=0.d0
-      dpickup=0.d0
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
-     &                   .and. NDEJC.eq.4) THEN
-        write(8,99002)
-99002   FORMAT (/5X,
-     &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
-     &//)
-        call DTRANS(EXCn,DE,spec,cross)
-99003   FORMAT (7x,5F8.2)
-        IF(DXSRED.GT.0.d0) then
-          write(8,99003) Ein,sigr,cross(2),cross(NDEJC)
-          dbreak=cross(2)
-C         Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
-          dpickup=cross(NDEJC)
-        ENDIF 
-      ENDIF
-C
-      WRITE (8,99005)
-99005 FORMAT (//5X,' Preequilibrium decay (PCROSS)',/)
-      WRITE (8,99010) MFPp
-99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
+
 C
 C-----NEJcm is the maximum number of particles emitted
 C
@@ -184,16 +162,11 @@ C
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
          g(nejc) = FLOAT(ar)/ggg*GTIlnor(nnur)
-C        Empirically found that it is better not to use pairing correction here
-c        pair(nejc) = ROPar(3,nnur)
-c        IF( pair(nejc).eq.0.) THEN
-           ftmp = 0.
-           IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
-           pair(nejc) = ftmp
-           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-           IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
-c        ENDIF
-C        pair(nejc) = 0.d0
+         ftmp = 0.
+         IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
+         pair(nejc) = ftmp
+         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
+         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
 C--------Maximum and minimum energy bin
          excnq = EXCn -Q(nejc,1)
 C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
@@ -213,6 +186,54 @@ C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
      &         ienerg.LE.iemax(nejc) ) iemin(nejc) = ienerg
          ENDDO
       ENDDO
+
+      WRITE (8,99020)
+C
+Cig---Direct reaction spectra for d,p and d,t only
+C
+      dbreak  = 0.d0
+      dpickup = 0.d0
+      scompn  = Sigr
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
+     &                   .and. NDEJC.eq.4) THEN
+        write(8,99002)
+99002   FORMAT (/5X,
+     &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
+     &//)
+        call DTRANS(iemin,iemax)
+99003   FORMAT (7x,5F8.2)
+        IF(DXSRED.GT.0.d0) then
+          scompn = Sigr - cross(2) -cross(4)
+          IF(scompn.le.0.d0) THEN
+            scompn  = 0.d0
+            dbreak  = Sigr/(cross(2)+cross(4))*cross(2)
+            dpickup = Sigr/(cross(2)+cross(4))*cross(4)
+            cross(2)= dbreak
+C           Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
+            cross(4)= dpickup
+            DO ienerg = 1, NDEX
+              spec(2,ienerg) = Sigr/(cross(2)+cross(4))*spec(2,ienerg)
+              spec(4,ienerg) = Sigr/(cross(2)+cross(4))*spec(4,ienerg)
+            ENDDO
+            write(8,99003) Einl,sigr,cross(2),cross(4)
+            WRITE (8,59010)
+59010       FORMAT (/,1X,
+     &      'Warning: Direct emission exhausted reaction cross section')
+          ENDIF
+c         write(8,99003) Einl,sigr,cross(2),cross(4)
+          dbreak=cross(2)
+C         Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
+          dpickup=cross(4)
+        ENDIF
+      ENDIF
+C
+      IF(scompn.eq.0.d0) goto 60
+
+      WRITE (8,99005)
+99005 FORMAT (//5X,' Preequilibrium decay (PCROSS)',/)
+      WRITE (8,99010) MFPp
+99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
+
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
 C-----Last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
@@ -358,7 +379,7 @@ C
 C
 C-----PARTICLE LOOP FOR EMISSION SPECTRA CALCULATIONS
 C
-      totemis = 0.D0
+60    totemis = 0.D0
       DO nejc = 0, NEJcm
          hlp1 = 0.D0
          DO ienerg = iemin(nejc), iemax(nejc)
@@ -367,9 +388,8 @@ C
                wb = we(nejc,h1,ienerg)
                IF (wb.GT.0.) emis = emis + wb*em(h1)
             ENDDO
-            spec(nejc,ienerg) = spec(nejc,ienerg) + Sigr*emis
-C           spec(nejc,ienerg) = Sigr*emis
-            hlp1 = hlp1 + Sigr*emis*DE
+            spec(nejc,ienerg) = spec(nejc,ienerg) + scompn*emis
+            hlp1 = hlp1 + scompn*emis*DE
          ENDDO
          cross(nejc) = hlp1 + cross(nejc)
 C        Skipping cross sections if MSD and MSC active
@@ -378,7 +398,6 @@ C        Skipping cross sections if MSD and MSC active
            IF(IDNa(5     ,6).EQ.0) CYCLE
          ENDIF
          totemis = totemis + cross(nejc)
-cig      Some problems can arise later with a large direct cross section !
       ENDDO
 
       IF (IOUt.GE.1) THEN
@@ -425,7 +444,7 @@ C         WRITE(8, *)'==========================='
         WRITE (8,99014) Xsinl, totemis, fr
       ENDIF
 C
-C     write(8,*) 'Middle of PCROSS :',totemis,xsinl
+      write(8,*) 'Middle of PCROSS :',totemis,xsinl
 C
 99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
      &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
@@ -452,7 +471,7 @@ C     Note, that PCROSS only calculates emission into the continuum
       totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
-         IF(nnur.LT.0) cycle
+         IF(nnur.LT.0 .or. cross(nejc).le.0.d0) cycle
          IF (nejc.gt.0) THEN !particle
             IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) cycle
             IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle
@@ -474,6 +493,7 @@ C     Note, that PCROSS only calculates emission into the continuum
          DO ie = iemin(nejc), iemax(nejc)
             eee = DE*(ie - 1)
             ftmp = spec(nejc,ie)
+            if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
@@ -492,7 +512,7 @@ C           fmsd set to 0.d0 means isotropic distribution
          ENDDO
        ENDDO
 C
-C      write(8,*) 'End of PCROSS :',totemis,Xsinl
+       write(8,*) 'End of PCROSS :',totemis,Xsinl
 C
 cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr

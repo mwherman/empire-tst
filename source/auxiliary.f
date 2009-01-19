@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-09 15:09:37 $
-Ccc   * $Id: auxiliary.f,v 1.37 2009-01-09 15:09:37 Capote Exp $
+Ccc   * $Date: 2009-01-19 00:00:31 $
+Ccc   * $Id: auxiliary.f,v 1.38 2009-01-19 00:00:31 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -20,14 +20,6 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C
-C Local variables
-C
-      INTEGER ie, il, ilw, inecse, irec, j, nang, necse, nejc, nejcd,
-     &        netl, nnex, nnlv, nnuc
-C
-C
 C
 C Local variables
 C
