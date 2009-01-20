@@ -1,11 +1,13 @@
 #---- pfg90 compiler
 #FC     =  pgf90
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
 #FFLAGS = -O
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
+FC      = gfortran
+FFLAGS  = -O3 --std=legacy
 
 #----GNU g95 FORTRAN compiler
 #FC     =  g95
