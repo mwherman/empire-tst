@@ -1474,10 +1474,10 @@ c     compute number of lines for correlation coefficients
         j=1
         do while (j.lt.i)
           if (correff(j,i).ne.0) then
-cmattoon            len=min(13,i-j)
+            len=min(13,i-j)
             nm=nm+1
-cmattoon            j=j+len     ! in this case we only need j=j+1
-            j=j+1
+            j=j+len
+c            j=j+1      ! gives incorrect value for nm
           else
             j=j+1
           endif
@@ -1485,7 +1485,7 @@ cmattoon            j=j+len     ! in this case we only need j=j+1
       enddo
       call r2str(s1,11,6, 0.0)
       call r2str(s2,11,6, 0.0)
-      write(3,1000) s1,s2,ndigit,nnn,nm,0,mat,mfh,mth
+c      write(3,1000) s1,s2,ndigit,nnn,nm,0,mat,mfh,mth
 c     write the correlation coefficients
       do i=1,nnn
         j=1
@@ -2179,22 +2179,22 @@ c     set label and line colors
       write(9,*) 'set ylabel "Number of Resonances"'
  1000 format(a,a,/,a,i1,a)
       write(9,1000) 'plot "ptdist.dat" title ',
-     1           '"Experimental data (combined)"\\',
-     2           '     with points pt 4 ps 0.5 lt ',icolor(1),',\\'
+     1           '"Experimental data (combined)"\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(1),',\'
       write(9,1000) '     "ptdist.fit" title ',
-     1           '"Porter-Thomas fit (combined)"\\',
-     2           '     with line lt ',icolor(2),',\\'
+     1           '"Porter-Thomas fit (combined)"\',
+     2           '     with line lt ',icolor(2),',\'
       write(9,1000) '     "ptdist0.dat" title ',
-     1           '"Experimental data (s-wave)"\\',
-     1           '     with points pt 4 ps 0.5 lt ',icolor(3),',\\'
+     1           '"Experimental data (s-wave)"\',
+     1           '     with points pt 4 ps 0.5 lt ',icolor(3),',\'
       write(9,1000) '     "ptdist0.fit" title ',
-     1           '"Porter-Thomas fit (s-wave)"\\',
-     2           '     with line lt ',icolor(4),',\\'
+     1           '"Porter-Thomas fit (s-wave)"\',
+     2           '     with line lt ',icolor(4),',\'
       write(9,1000) '     "ptdist1.dat" title ',
-     1           '"Experimental data (p-wave)"\\',
-     2           '     with points pt 4 ps 0.5 lt ',icolor(5),',\\'
+     1           '"Experimental data (p-wave)"\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(5),',\'
       write(9,1000) '     "ptdist1.fit" title ',
-     1           '"Porter-Thomas fit (p-wave)"\\',
+     1           '"Porter-Thomas fit (p-wave)"\',
      2           '     with line lt ',icolor(6),''
       close(9)
       irt=system("gnuplot ptdist.gp")
