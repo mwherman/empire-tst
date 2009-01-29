@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-10 12:00:10 $
-Ccc   * $Id: scnd-preeq.f,v 1.22 2009-01-10 12:00:10 Capote Exp $
+Ccc   * $Date: 2009-01-29 12:17:29 $
+Ccc   * $Id: scnd-preeq.f,v 1.23 2009-01-29 12:17:29 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -56,7 +56,7 @@ C Local variables
 C
       DOUBLE PRECISION bind, corr, excnq, pnratio, pop1, popp,
      &                 popsub(NDEX,NDLW,2), ratioro, sum, sumem,
-     &                 sumpopsub, welld
+     &                 sumpopsub, welld, ftmp1, ftmp2
       REAL FLOAT, REAL
       INTEGER i, icse, ie, iec, iejc, ier, iermax, ietl, iexc, ip, itlc,
      &        j, jc, nh, np
@@ -64,14 +64,7 @@ C
       DOUBLE PRECISION WOB1
       IF (Last.NE.2) THEN
 C--------clean storing matrix for second chance preequilibrium emission
-         IF (Last.EQ.0) THEN
-            DO ie = 1, NDEX
-               DO j = 1, NDLW
-                  popsub(ie,j,1) = 0.0D0
-                  popsub(ie,j,2) = 0.0D0
-               ENDDO
-            ENDDO
-         ENDIF
+         IF (Last.EQ.0) popsub = 0.d0
 C--------calculation of factorial (note notation n!= FACT(n+1))
          IF (FACt(1).NE.1.0D0) THEN
             FACt(1) = 1.
@@ -122,6 +115,8 @@ C--------------------probability *** done ***
      &                  + pop1
                      CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
                      sumem = sumem + pop1
+C--------------------Bin population by SPE (spin/parity integrated)
+C                    POPbin(iermax,Nnur) = POPbin(iermax,Nnur) + pop1
                   ENDIF
 C-----------------decay to the highest but one bin (neutrons only)
                   IF (ZEJc(Nejc).EQ.0.0D0 .AND. iec.EQ.NEX(Nnuc) - 1)
@@ -144,6 +139,8 @@ C--------------------out it must be energy step and also emission step dependent
      &                  + pop1
                      CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
                      sumem = sumem + pop1
+C--------------------Bin population by SPE (spin/parity integrated)
+C                    POPbin(iermax,Nnur) = POPbin(iermax,Nnur) + pop1
                   ENDIF
 C-----------------do loop over r.n. energies (highest bin and eventually
 C-----------------the second bin from the top excluded as already done)
@@ -157,17 +154,19 @@ C--------------------probability of finding a particle at energy ...
 C--------------------probability *** done ***
                      ietl = iec - ier - itlc
                      pop1 = popp*TL(ietl,1,Nejc,Nnur)*ratioro*TURbo
-                      IF (pop1.GT.0) THEN
+                     IF (pop1.GT.0) THEN
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
                        IF (ENDf(Nnuc).EQ.1.D0) THEN
-                         IF(POPbin(iec,Nnuc).GT.0.d0) 
+                         IF(POPbin(iec,Nnuc).GT.0.d0)
      &                     CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                        ELSEIF (ENDf(Nnuc).EQ.2) THEN
                          CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + pop1
                        ENDIF
                        sumem = sumem + pop1
-                      ENDIF
+C----------------------Bin population by SPE (spin/parity integrated)
+C                      POPbin(ier,Nnur) = POPbin(ier,Nnur) + pop1
+                     ENDIF
                   ENDDO         !end do on 2-nd residue excitation energy
                   popsub(iec,jc,ip) = popsub(iec,jc,ip) + sumem
                ENDDO            !end do on 1-st residue spins
@@ -192,33 +191,46 @@ C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc,Nnuc) = CSEmis(Nejc,Nnuc) + sum
-C--------substract second chance emission cross section on the appropriate emission x-s	 
+C--------substract second chance emission cross section on the appropriate emission x-s
 C        CSEmis(Nejc,1) = CSEmis(Nejc,1)       - sum
       ENDIF
 C-----reduce 1-st residue population on the last entry
       IF (Last.GE.1) THEN
+C        WRITE(6,*) 'get with ',Last,', nnuc',nnuc
+C--------add SPE contribution to the population spectra
+C--------used for ENDF exclusive spectra
          DO iec = 1, NEX(Nnuc)
-            IF (POPbin(iec,Nnuc).NE.0.d0) THEN
-               sumpopsub = 0.d0
-               DO jc = 1, NLW, LTUrbo
-                  POP(iec,jc,1,Nnuc) = POP(iec,jc,1,Nnuc)
-     &                                 - popsub(iec,jc,1)
-                  POP(iec,jc,2,Nnuc) = POP(iec,jc,2,Nnuc)
-     &                                 - popsub(iec,jc,2)
-                  sumpopsub = sumpopsub + popsub(iec,jc,1)
-     &                                  + popsub(iec,jc,2)
-               ENDDO
+C           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
+            sumpopsub = 0.d0
+            DO jc = 1, NLW, LTUrbo
+              ftmp1 = popsub(iec,jc,1)
+              if(ftmp1.gt.0.d0) then
+                POP(iec,jc,1,Nnuc) = POP(iec,jc,1,Nnuc) - ftmp1
+                sumpopsub = sumpopsub + ftmp1
+              endif
+              ftmp2 = popsub(iec,jc,2)
+              if(ftmp2.gt.0.d0) then
+                POP(iec,jc,2,Nnuc) = POP(iec,jc,2,Nnuc) - ftmp2
+                sumpopsub = sumpopsub + ftmp2
+              endif
+            ENDDO
+
+C           WRITE(6,*) 'sumpopsub', sumpopsub
 C-----------reduce 1-st residue population DDX spectra (using portions)
 C-----------on the last entry
-               DO ie = 1, NDECSE
-                  DO iejc = 1, NDEJCD
-C                    POPcseaf(iec,iejc,ie,INExc(Nnuc))
-C    &                  = POPcseaf(iec,iejc,ie,INExc(Nnuc))
-                     POPcseaf(iec,iejc,ie,Nnuc)
-     &                  = POPcseaf(iec,iejc,ie,Nnuc)
-     &                  *(1.d0 - sumpopsub/POPbin(iec,Nnuc))
-                  ENDDO
+            IF (POPbin(iec,Nnuc).NE.0) THEN
+              ftmp1 = 1.d0 - sumpopsub/POPbin(iec,Nnuc)
+              DO ie = 1, NDECSE
+               DO iejc = 0, NDEJCD
+                 IF(ENDf(Nnur).EQ.2) THEN
+                   POPcseaf(iec,iejc,ie,0)
+     &             = POPcseaf(iec,iejc,ie,0)*ftmp1
+                 ELSE
+                   POPcseaf(iec,iejc,ie,INExc(Nnuc))
+     &             = POPcseaf(iec,iejc,ie,INExc(Nnuc))*ftmp1
+                 ENDIF
                ENDDO
+              ENDDO
             ENDIF
          ENDDO
       ENDIF

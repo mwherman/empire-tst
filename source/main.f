@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-19 00:00:32 $
-Ccc   * $Id: main.f,v 1.198 2009-01-19 00:00:32 Capote Exp $
+Ccc   * $Date: 2009-01-29 12:17:28 $
+Ccc   * $Id: main.f,v 1.199 2009-01-29 12:17:28 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -856,8 +856,7 @@ C        Skipping all emitted but neutrons and protons
 C        Secondary emission was not tested for proton induced reactions
          nnur = NREs(nejcec)
          IF( AEJc(nejcec).LE.1 .and. ZEJc(nejcec).LE.1 
-
-     &                         .and. nnur.GE.2000) THEN
+     &                         .and. nnur.GE.0) THEN
 C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)

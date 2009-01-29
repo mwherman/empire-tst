@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-01-16 08:31:48 $
-Ccc   * $Id: input.f,v 1.289 2009-01-16 08:31:48 Capote Exp $
+Ccc   * $Date: 2009-01-29 12:17:27 $
+Ccc   * $Id: input.f,v 1.290 2009-01-29 12:17:27 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -207,7 +207,8 @@ C--------set gamma-strength parameters
             GDRpar(7,nnuc) = 1.0
          ENDDO
          IZA(0) = 0
-         ENDf(0) = 0.0
+C        ENDf(0) = 0.0
+         ENDf(0) = 1.0  ! Jan 2009
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
@@ -569,7 +570,7 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
-C        ENDf(1) = 1.0
+         ENDf(1) = 1.0 ! Jan 2009
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------set CN  for EXFOR retrieval
@@ -5685,7 +5686,7 @@ C-----
          IF (name.EQ.'DXSRED') THEN
             IF(NEJCM.LT.4) GOTo 100
             IF (val.LE.0.d0) THEN
-	       DXSred = 0.d0
+             DXSred = 0.d0
                WRITE ( 8,
      &'('' Deuteron break-up/pick-up suppressed!'')')
                WRITE (12,
@@ -7325,7 +7326,7 @@ C
          CLOSE (32)
 
          if(igreson.eq.0 .and.
-     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then     
+     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            if (sgmr.gt.0.) betagmr=sqrt(sgmr/egrcoll(0,1))
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
