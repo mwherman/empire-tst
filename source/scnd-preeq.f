@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-29 12:17:29 $
-Ccc   * $Id: scnd-preeq.f,v 1.23 2009-01-29 12:17:29 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-01-30 06:08:16 $
+Ccc   * $Id: scnd-preeq.f,v 1.24 2009-01-30 06:08:16 herman Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -158,7 +158,7 @@ C--------------------probability *** done ***
                        POP(ier,jc,ip,Nnur) = POP(ier,jc,ip,Nnur) + pop1
                        CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + pop1
                        IF (ENDf(Nnuc).EQ.1.D0) THEN
-                         IF(POPbin(iec,Nnuc).GT.0.d0)
+                         IF(POPbin(iec,Nnuc).GT.0.d0) 
      &                     CALL EXCLUSIVEC(iec,ier,Nejc,Nnuc,Nnur,pop1)
                        ELSEIF (ENDf(Nnuc).EQ.2) THEN
                          CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + pop1
@@ -179,6 +179,10 @@ C--------trapezoidal integration of continuum population for ejectile nejc
                sum = sum + POP(i,j,1,Nnur) + POP(i,j,2,Nnur)
             ENDDO
          ENDDO
+C--------correct integration for end points
+         sum = sum - 0.5*(POP(1,j,1,Nnur) + POP(1,j,2,Nnur))
+         sum = sum - 0.5*(POP(NEX(Nnur),j,1,Nnur) + 
+     &         POP(NEX(Nnur),j,2,Nnur))
          sum = sum*DE
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
          WRITE (8,*) ' '
@@ -200,9 +204,9 @@ C        WRITE(6,*) 'get with ',Last,', nnuc',nnuc
 C--------add SPE contribution to the population spectra
 C--------used for ENDF exclusive spectra
          DO iec = 1, NEX(Nnuc)
-C           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
-            sumpopsub = 0.d0
-            DO jc = 1, NLW, LTUrbo
+c           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
+               sumpopsub = 0.d0
+               DO jc = 1, NLW, LTUrbo
               ftmp1 = popsub(iec,jc,1)
               if(ftmp1.gt.0.d0) then
                 POP(iec,jc,1,Nnuc) = POP(iec,jc,1,Nnuc) - ftmp1
@@ -213,7 +217,7 @@ C           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
                 POP(iec,jc,2,Nnuc) = POP(iec,jc,2,Nnuc) - ftmp2
                 sumpopsub = sumpopsub + ftmp2
               endif
-            ENDDO
+               ENDDO
 
 C           WRITE(6,*) 'sumpopsub', sumpopsub
 C-----------reduce 1-st residue population DDX spectra (using portions)
