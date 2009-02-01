@@ -78,7 +78,7 @@
      &                 MFPp, MOMortcrt, MOMparcrt,HCOnt(nfparab),
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),
      &                 PEQc, PI, POP(ndex,ndlw,2,ndnuc),
-     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,ndnucd),
+     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
