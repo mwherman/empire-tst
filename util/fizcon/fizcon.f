@@ -2765,7 +2765,8 @@
      &         'ENERGY=',BKK,' GAMMA-TOTAL=',BK,' SUM=',SSUM
             CALL ERROR_MESSAGE(0)
          END IF
-   50 END DO
+ 50   CONTINUE
+      END DO
 !
       RETURN
       END SUBROUTINE TESTW
@@ -2890,7 +2891,8 @@
      &           A(I),' = ',AM,' NOT IN SPECIFIED RANGE'
             CALL ERROR_MESSAGE(LINENO)
          END IF
-   90 END DO
+ 90   CONTINUE
+      END DO
 !
   100 RETURN
       END SUBROUTINE TESTDF
