@@ -152,9 +152,9 @@ class MF33(MF_base):
             
             self.elist = matrix_form[0][0][:-2] + matrix_form[1][0][1:]
         else:
-            #print "Many subsections, unsure how to proceed."
+            print "Many subsections, unsure how to proceed."
             #print matrix_form
-                        raise NotImplementedError
+            raise NotImplementedError
         
         # get the cross-section uncertainty:
         self.uncert = []
@@ -199,24 +199,27 @@ class MF33(MF_base):
         try:
             # check if threshold is already present, or add if not found
             idx = self.elist.index( threshold )
+            idxm = idx
         except ValueError:
             from bisect import bisect
             idx = bisect( self.elist, threshold )
             self.elist.insert( idx, threshold )
-
+            
+            # change idxm since we have added extra point to elist:
+            idxm = idx - 1
+            
         if keep=='+':
             self.elist = [1.0e-5] + self.elist[idx:]
             
-            # NOT changing values in the matrix/uncertainties 
+            # NOT changing values in the matrix/uncertainties
             # despite having a new threshold energy
-            idx -= 1
             self.uncert = self.uncert[0:1] + self.uncert[idx:]
             
             cov_mat = numpy.zeros( (len(self.elist)-1, len(self.elist)-1) )
-            cov_mat[1:,1:] = self.cov_mat[idx:, idx:]
+            cov_mat[1:,1:] = self.cov_mat[idxm:, idxm:]
             self.cov_mat = cov_mat
             corr_mat = numpy.zeros( (len(self.elist)-1, len(self.elist)-1) )
-            corr_mat[1:,1:] = self.corr_mat[idx:, idx:]
+            corr_mat[1:,1:] = self.corr_mat[idxm:, idxm:]
             self.corr_mat = corr_mat
         
         else:
