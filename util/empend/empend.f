@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-25 00:57:31 $ 
-Ccc   * $Id: empend.f,v 1.55 2008-12-25 00:57:31 Capote Exp $ 
+Ccc   * $Date: 2009-02-13 15:25:31 $ 
+Ccc   * $Id: empend.f,v 1.56 2009-02-13 15:25:31 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -477,8 +477,8 @@ C* Check if yields for unassigned reactions need to be printed
         IF(IWO(LBI-1+I).EQ.207) NK=NK+1
       END DO
       CALL WRMF6Y(LOU,MXE,MXT,LXR
-     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
-     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+     1           ,EIN,RWO(LXS),QQI,IWO(MTH),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NXS,NS)
       WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',5
       WRITE(LTT,995) '         Number of outgoing particles : ',NK
       WRITE(LTT,991)
@@ -1468,7 +1468,7 @@ C-Purpose: Scan EMPIRE output for all react. with energy/angle distrib.
       PARAMETER    (MXKUN=20)
       CHARACTER*136 REC
       CHARACTER*8   CUN(MXKUN)
-      DIMENSION MTH(1)
+      DIMENSION MTH(MXI)
 C*
       KUN=0
       NT6=0
@@ -1730,12 +1730,7 @@ C*    --Check point 2 (excluding discrete levels)
             F2=RWO(LD2+J)
             F3=RWO(LD3+J)
             FI=F1+(E2-E1)*(F3-F1)/(E3-E1)
-            IF(F2.GT.0) THEN
-              DF= ABS(FI/F2-1)
-              IF(DF.GT.ETOL) ISTAY=1
-            ELSE
-              ISTAY=1
-            END IF
+            IF(ABS(F2-FI).GT.ETOL*ABS(F2)) ISTAY=1
           END DO
         END IF
         IF(ISTAY.EQ.1) THEN
@@ -1826,7 +1821,7 @@ C-D  and PLG by specifying the same array when calling the routine.
 C-
       PARAMETER  (MAN=120)
       DIMENSION   SCR(MAN)
-      DIMENSION   ANG(NAN),DST(1),PLG(1),RWO(MXR)
+      DIMENSION   ANG(NAN),DST(*),PLG(*),RWO(MXR)
 C* Permissible tolerance for fitted angular distributions (fraction)
       DATA ETOL/ 0.010 /
 C*
@@ -1922,7 +1917,7 @@ C*       -- Function at 3/4 to the next mesh point
           END DO
           ANI=ANG(1)
           DSI=POLLG1(ANI,SCR,LOO)
-          WRITE(LPT,934) ANG(L),0.,0.,DST(LD+1)
+          WRITE(LPT,934) ANI,0.,0.,DST(LD+1)
           WRITE(LCU,934) ANI,DSI
           WRITE(LCU,934)
           WRITE(LPT,934)
@@ -2010,7 +2005,7 @@ C-
       CHARACTER*2  CH
       CHARACTER*8  PTST
       CHARACTER*30 CHEN
-      CHARACTER*80 REC,COM
+      CHARACTER*80 REC
 C* Declare XS,XC,XI double precision to avoid underflow on reading
       DOUBLE PRECISION XS,XC,XI
 C...There seems to be a bug in Lahey compiler - next statement helps
@@ -2114,11 +2109,11 @@ C* Read the scattering radius
         QQ=0
         QI=0
         MT=9151
-        READ(REC(27:33),*) XS
+        READ(REC(27:33),'(F7.0)') XS
         GO TO 312
       END IF
       IF(REC( 1:26).EQ.'       Calc. Strength func'  ) THEN
-        READ(REC(37:42),*) STF0
+        READ(REC(37:42),'(F6.0)') STF0
         STF0=STF0/10000
 c...
 c...        print *,'STF0',STF0
@@ -2181,7 +2176,7 @@ C* Isomer production cross section - ground state
       GO TO 226
 C* Isomer production cross section - ground state
   224 CONTINUE
-      READ (REC(59:65),*) EISO
+      READ (REC(59:65),'(F7.0)') EISO
       EISO=EISO*1.E6
       MISO=1
   226 QI  =QQ-EISO
@@ -2205,10 +2200,10 @@ C*      -- Trap print overflow in empire_ctl.f,v 1.27 2007/09/07
         IF(REC(7:7).EQ.'*') THEN
           GAMG=1000
         ELSE
-          READ(REC(6:14),*) GAMG
+          READ(REC(6:14),'(F9.0)') GAMG
         END IF
         READ (LIN,891) REC
-        READ(REC(6:14),*) D0LV
+        READ(REC(6:14),'(F9.0)') D0LV
 C*      -- Convert to eV
         GAMG=GAMG/1000
         D0LV=D0LV*1000
@@ -2302,7 +2297,7 @@ C*      -- Assign spin from first level when product=target
         READ (LIN,891)
         NBR=NBR-7
       END DO
-C* Test for last level (IL=0 from reading blank line)
+C* Test for last level (IL=0 for reading blank line)
       IF(IL.LE.0 ) GO TO 351
       EL=EL*1.E6
       XI=XI+XS
@@ -2486,8 +2481,8 @@ C* No.of input angles MXA, fine grid angles MXZ, particles/reaction MXP
       CHARACTER*136 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
-      DIMENSION     EIN(1),XSC(MXE,1),EIS(1),YLD(1),QQM(1),QQI(1)
-     1             ,RWO(1),ANG(MXA),DST(MXA),MTH(1)
+      DIMENSION     EIN(NE3),XSC(MXE,*),EIS(*),YLD(*),QQM(NXS),QQI(NXS)
+     1             ,RWO(MXR),ANG(MXA),MTH(NXS)
       DIMENSION     IZAK(MXP),AWPK(MXP),ZANG(MXA),ZDST(MXA)
 C*
       DATA PI/3.1415926/
@@ -2766,7 +2761,7 @@ C* Check if Legendre coefficients are given explicitly
       IF(REC(1:20).EQ.'  Legendre coefficie') THEN
         READ (LIN,891) REC
         READ (LIN,891) REC
-        READ (REC(9:13),*) LHI
+        READ (REC(9:13),'(I5)') LHI
         IF(LHI.GE.LMX) STOP 'REAMF6 - LMX array capacity exceeded'
         READ (LIN,891) REC
 C...
@@ -3162,7 +3157,7 @@ c...
 c...            print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
 c...
            DFP=100*(XSP-XS3)/XS3
-           IF(ABS(DFP).GT.2. .AND. MT.NE.18) THEN
+           IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
              WRITE(LTT,909) MT,EE,XS3,DFP
              WRITE(LER,909) MT,EE,XS3,DFP
            END IF
@@ -3847,8 +3842,7 @@ C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=202)
       CHARACTER*8  PTST
-      DOUBLE PRECISION DEIN,DAWR,DAWI,DAWP,DQQI
-      DIMENSION    RWO(1),QQM(1),QQI(1),MTH(1),NBT(1),INT(1)
+      DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INT(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
       DATA DLVL/1.E3/
@@ -4109,9 +4103,8 @@ C* All discrete levels processed - nothing to write
      &       '                  Distribution interpolated between   '
      &      ,2E12.5E1)
       END
-      SUBROUTINE WRMF6Y(LOU,MXE,MXT,MXR
-     1                 ,EIN,XSC,QQM,QQI,MTH,RWO
-     1                 ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,NS)
+      SUBROUTINE WRMF6Y(LOU,MXE,MXT,MXR,EIN,XSC,QQI,MTH,RWO
+     1                 ,MAT,IZI,IZA,AWR,NEN,NXS,NS)
 C-Title  : WRMF6Y Subroutine
 C-Purpose: Write unassigned react.yields (MF6) data in ENDF-6 format
 C-Description:
@@ -4121,8 +4114,8 @@ C-D  separately. If partly-inclusive spectra are not given, the
 C-D  yields for proton and alpha production are given in MF6.
 C-
       CHARACTER*8  PTST
-      DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
-     1            ,RWO(MXR),NBT(1),INT(1)
+      DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQI(MXT)
+     1            ,RWO(MXR),NBT(1),INR(1)
       DATA PTST/'        '/
 C* Initialize constants
       IZR=0
@@ -4235,10 +4228,10 @@ C*      -- Remove duplicate points
 C*      -- Write TAB1 record for yields
         ZAP   =IZAP
         NR    =1
-        INT(1)=2
+        INR(1)=2
         NBT(1)=NP
         CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
-     1             ,NR,NP,NBT,INT,RWO(LE),RWO(LX))
+     1             ,NR,NP,NBT,INR,RWO(LE),RWO(LX))
       END IF
 C* Repeat for other particles
       IF(IZAP.EQ.1) THEN
@@ -4262,7 +4255,7 @@ C*
       SUBROUTINE WRIMF6(LOU,RWO,MT,MAT,IZA,AWR,ELO,NK,LCT,NS)
 C-Title  : WRIMF6 Subroutine
 C-Purpose: Write energy/angle (file-6) data in ENDF-6 format
-      DIMENSION    RWO(1),NBT(1),INT(1)
+      DIMENSION    RWO(*),NBT(1),INR(1)
       DATA ZRO/0./
 C*
 C* Write file MF6 (energy/angle distributions)
@@ -4282,21 +4275,21 @@ c...
 c...      print *,'mf,mt,np,zap,awp',mf,mt,np,zap,awp
 c...
         NBT(1)=NP
-        INT(1)=2
+        INR(1)=2
         LAE=LL+6
         LAG=LAE+NP
         LA1=LAG+NP
         RWO(LAE)=ELO
         CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
-     &             ,NR,NP,NBT,INT,RWO(LAE),RWO(LAG))
+     &             ,NR,NP,NBT,INR,RWO(LAE),RWO(LAG))
         LANG  =RWO(LA1   )+0.1
         LEP   =RWO(LA1+ 1)+0.1
         NR    =RWO(LA1+ 2)+0.1
         NE    =RWO(LA1+ 3)+0.1
         NBT(1)=RWO(LA1+ 4)+0.1
-        INT(1)=RWO(LA1+ 5)+0.1
+        INR(1)=RWO(LA1+ 5)+0.1
         CALL WRTAB2(LOU,MAT,MF,MT,NS,0.,0.,LANG,LEP
-     &             ,NR,NE,NBT,INT)
+     &             ,NR,NE,NBT,INR)
         LL=LL+12+2*NP
 C* Loop over the incident particle energies
         IF(NE.GT.0) THEN
@@ -4332,7 +4325,7 @@ C-D - Sort printout in ascending order of MT numbers
 C-
       CHARACTER*8  PTST
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
-     1            ,RWO(MXR),IWO(MXI),NBT(1),INT(1)
+     1            ,RWO(MXR),IWO(MXI),NBT(1),INR(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
       DATA XSMALL,SMALL,ZRO,IZR/ 1.0E-34, -34., 0., 0/
       DATA PTST/'        '/
@@ -4674,10 +4667,10 @@ C* Extrapolate points down to EMIN
 
 C* Write TAB1 record
       NR    =1
-      INT(1)=2
+      INR(1)=2
       NBT(1)=NEO
       CALL WRTAB1(LOU,MAT,MF,MT,NS,QQM(IT),QQI(IT),JZA,LFS
-     1           ,NR,NEO,NBT,INT,RWO(LX),RWO(LY))
+     1           ,NR,NEO,NBT,INR,RWO(LX),RWO(LY))
 C*
 C* Proceed to the next reaction of the current MT
       JRC=JRC+1
@@ -4880,11 +4873,11 @@ C* Loop for all argument&function pairs
    42 FORMAT(I11)
       END
       SUBROUTINE WRTAB2(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
-     1                 ,NR,NZ,NBT,INT)
+     1                 ,NR,NZ,NBT,INR)
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INT(1)
+      DIMENSION     NBT(*),INR(*)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -4904,7 +4897,7 @@ C* Write interpolation data
       IF(N.GE.NR) GO TO 24
       N =N+1
       WRITE(REC(I+1),42) NBT(N)
-      WRITE(REC(I+2),42) INT(N)
+      WRITE(REC(I+2),42) INR(N)
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
@@ -4918,7 +4911,7 @@ C* Write interpolation data
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     BN(1)
+      DIMENSION     BN(*)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -5113,7 +5106,7 @@ C-Purpose: Move N words from array A to array B
 C-Extern.: none
 C-Author : A.Trkov, "J.Stefan" Inst. Ljubljana, Slovenia (1989)
 C-
-      DIMENSION A(1),B(1)
+      DIMENSION A(N),B(N)
       DO 10 I=1,N
    10 B(I) = A(I)
       RETURN
@@ -5126,7 +5119,7 @@ C-P        into array C given at X
 C-Extern.: none
 C-Author : A.Trkov, "J.Stefan" Inst. Ljubljana, Slovenia (1989)
 C-
-      DIMENSION A(1),B(1),C(1)
+      DIMENSION A(N),B(N),C(N)
       R = (X-XA)/(XB-XA)
       DO 10 I=1,N
       C(I) = A(I) + R*( B(I) - A(I) )
@@ -5141,7 +5134,7 @@ C-Extern.: none
 C-Author : A.Trkov, "J.Stefan" Inst. Ljubljana, Slovenia (1989)
 C-Version: 97/07 - separate A, B fields
 C-
-      DIMENSION A(1),B(1)
+      DIMENSION A(N),B(N)
       DO 10 I=1,N
       B(I) = A(I)*R
    10 CONTINUE
@@ -5225,25 +5218,35 @@ C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       PARAMETER (MXEH=120)
       DIMENSION  ERHI(MXEH)
-      DIMENSION  XP(1),YP(1),QQ(1),RWO(1)
+      DIMENSION  XP(NP),YP(NP),QQ(*),RWO(MXR)
       ERR=0
       NLG=0
       LM0=LMX
       LM1=LM0+1
       LST=0
-      LO1=1
-c...
-c...      LMX=MIN(LMX,NP-1)
-c...
 C* Check if zero-order
       QQ(1)=YP(1)
       IF(NP.LT.2) GO TO 40
-      SY =0.
+C* Check statistics of the distribution
+      SS1=YP(1)
+      SS2=SS1*SS1
+      SY =0
       DO I=2,NP
+        SS1=SS1+ YP(I)
+        SS2=SS2+ YP(I)*YP(I)
         SY =SY + 0.5*(YP(I)+YP(I-1))*(XP(I)-XP(I-1))
       END DO
+      IF(SY.EQ.0) GO TO 40
       QQ(1)=SY/(XP(NP)-XP(1))
       IF(LMX.LT.1) GO TO 30
+C* Average and standard deviation
+      SS1=SS1/NP
+      SS2=SS2/NP
+      SS2=MAX(0.0, SS2-SS1*SS1)
+      SS2=SQRT(SS2)
+C* Limit the order based on statistics
+      LMX=NINT(LMX*MIN(1.0, 4*SS2/SS1))
+      LMX=MAX(1,LMX)
 C* Clear the coefficients field
       DO L=1,LM1
         QQ(L+1)=0.
@@ -5260,9 +5263,8 @@ C* Save the input points, allow for quadrupling the mesh
       END DO
 C*
 C* Loop to find the appropriate Legendre order
-      L1 =MAX(1,LMI)
+      LO1=MAX(1,LMI)
       LL =LLG+LMX+2
-      LO1=L1
    20 NLG=LO1
       N1 =NLG+1
       LMM=MIN(LM0,NNP*2/3)
@@ -5333,8 +5335,10 @@ C* Case: Distribution negative at mesh point - increase L
         IF(LO1.LT.LMM) THEN
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
-          LO1=LO1+1
-          GO TO 20
+          IF(LO1.LT.LMX) THEN
+            LO1=LO1+1
+            GO TO 20
+          END IF
         END IF
       END IF
       IF(ERR.GT.EMM) THEN
@@ -5346,8 +5350,10 @@ c...        print *,'            Increase order to',LO1
 c...
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
-          LO1=LO1+1
-          GO TO 20
+          IF(LO1.LT.LMX) THEN
+            LO1=LO1+1
+            GO TO 20
+          END IF
         ELSE
 c...
 c...        print *,'            Double the mesh to',1+(NNP-1)*2
@@ -5412,12 +5418,14 @@ c###  DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
 C### &          ERHI(LO1-1).LT.2.0*EMM .AND. 
 C### &          ERHI(LO1-1).LT.1.2*ELS)
 C*      Reduce order as long as error <1.2*last and <2.0*max
-      DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
-     &          ERHI(LO1-1).LT.1.2*ELS)
-C*      Reduce order as long as error <1.2*last
-        LO1=LO1-1
-        ELS=MIN(ELS,ERHI(LO1))
-      END DO
+   32 IF(LO1.GT.1) THEN
+        IF(ERHI(LO1-1).GT.0 .AND. ERHI(LO1-1).LT.1.2*ELS) THEN
+C*        -- Reduce order as long as error <1.2*previous
+          LO1=LO1-1
+          ELS=MIN(ELS,ERHI(LO1))
+          GO TO 32
+        END IF
+      END IF
 c...
 c...  if(ll0.ge.64 .and. lo1.ge.64) print *,'Limit 64',erhi(lo1-1),err
 c...
@@ -5480,7 +5488,7 @@ C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
       PARAMETER (MXPL=80)
-      DIMENSION QL(1),PL(MXPL)
+      DIMENSION QL(*),PL(MXPL)
       IF(NL.GE.MXPL) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL  PLNLEG(UU,PL,NL)
       N1=NL+1
@@ -5500,7 +5508,7 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
-      DIMENSION PL(1)
+      DIMENSION PL(*)
       PL(1)=1.
       IF(NL.LT.1) RETURN
       L2=2
@@ -5522,57 +5530,70 @@ C-Author : A.Trkov , Institute J.Stefan, Ljubljana, Slovenia
 C-Version: 1984 Original coding
 C-V 93/03 - improved zero-determinant trapping
 C-V 00/11 - further refinement of zero-determinant trapping (A.Trkov)
+C-V 09/02 - Guard against determinant overflow (A. Trkov)
+C-V       - Arrange code in structured format
 C-
       DIMENSION A(N,N),F(N),X(N)
-      DET=1.
-      ER =1.
-      DO 40 I=2,N
-      I1=I-1
-C* Find the pivot
-      A1=0.
-      DO 10 K=I1,N
-      IF(ABS(A(K,I1)).LT.A1) GO TO 10
-      A1=ABS(A(K,I1))
-      K1=K
-   10 CONTINUE
-      IF(I1.LT.2) GO TO 12
-      IF(ABS(A1/A0) .GT.1.E-5) GO TO 12
-      DET=0.
-      RETURN
-   12 A0 =A1
-      DET=DET*A1
-      IF(K1.LT.I) GO TO 20
-      A1=A(K1,I1)
-      A(K1,I1)=A(I1,I1)
-      A(I1,I1)=A1
-      A1=F(K1)
-      F(K1)=F(I1)
-      F(I1)=A1
-   20 DO 30 J=I,N
-      X(J)=A(J,I1)/A(I1,I1)
-      A(J,I1)=0.
-   30 F(J)=F(J)-F(I1)*X(J)
-      DO 40 J=I,N
-      IF(K1.LT.I) GO TO 35
-      A1=A(K1,J)
-      A(K1,J)=A(I1,J)
-      A(I1,J)=A1
-   35 DO 40 K=I,N
-      A1=A(K,J)
-      A2=A1-A(I1,J)*X(K)
-      IF(ABS(A1).GT.0.) ER=AMIN1(ER,ABS(A2/A1))
-      A(K,J)=A2
-   40 CONTINUE
-C* Estimate number of digits lost due to subtraction
+      DET=1
+      ER =1
+      DO I=2,N
+        I1=I-1
+C*      --Find the pivot
+        A1=0
+        DO K=I1,N
+          IF(ABS(A(K,I1)).GE.A1) THEN
+            A1=ABS(A(K,I1))
+            K1=K
+          END IF
+        END DO
+        IF(I1.GT.1) THEN
+          IF(A1/A0 .LT.1.E-5) THEN
+            DET=0
+            RETURN
+          END IF
+        END IF
+        A0 =A1
+C*      --Guard against determinant overflow
+        IF(ABS(DET).LT.1.0E20) DET=DET*A1
+C*      -- Swap the pivot row
+        IF(K1.GE.I) THEN
+          A1=A(K1,I1)
+          A(K1,I1)=A(I1,I1)
+          A(I1,I1)=A1
+          A1=F(K1)
+          F(K1)=F(I1)
+          F(I1)=A1
+        END IF
+        DO J=I,N
+          X(J)=A(J,I1)/A(I1,I1)
+          A(J,I1)=0
+          F(J)=F(J)-F(I1)*X(J)
+        END DO
+        DO J=I,N
+          IF(K1.GE.I) THEN
+            A1=A(K1,J)
+            A(K1,J)=A(I1,J)
+            A(I1,J)=A1
+          END IF
+          DO K=I,N
+            A1=A(K,J)
+            A2=A1-A(I1,J)*X(K)
+            IF(ABS(A1).GT.0.) ER=AMIN1(ER,ABS(A2/A1))
+            A(K,J)=A2
+          END DO
+        END DO
+      END DO
+C*    --Estimate number of digits lost due to subtraction
       LDIG=-ALOG10(ER+1.E-33)+1.
-C* Solve by backward substitution
-   45 DO 60 I=2,N
-      I1=N-I+2
-      X(I1)=F(I1)/A(I1,I1)
-      J1=N+1-I
-      DO 60 J=1,J1
-      F(J)=F(J)-X(I1)*A(J,I1)
-   60 CONTINUE
+C*    --Solve by backward substitution
+   45 DO I=2,N
+        I1=N+2-I
+        X(I1)=F(I1)/A(I1,I1)
+        J1=N+1-I
+        DO J=1,J1
+          F(J)=F(J)-X(I1)*A(J,I1)
+        END DO
+      END DO
       X(1)=F(1)/A(1,1)
       RETURN
       END
