@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:18 $
-Ccc   * $Id: tl.f,v 1.101 2009-01-15 17:48:18 Capote Exp $
+Ccc   * $Date: 2009-02-15 00:14:23 $
+Ccc   * $Id: tl.f,v 1.102 2009-02-15 00:14:23 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2271,7 +2271,7 @@ C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
-      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0) THEN
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
       endif
@@ -2921,7 +2921,7 @@ C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
-      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.10.d0) THEN
+      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
       endif

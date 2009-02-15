@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-29 12:17:28 $
-Ccc   * $Id: main.f,v 1.199 2009-01-29 12:17:28 Capote Exp $
+Ccc   * $Date: 2009-02-15 00:14:22 $
+Ccc   * $Id: main.f,v 1.200 2009-02-15 00:14:22 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -855,24 +855,25 @@ C----------Add PE contribution to the total NEJC emission
 C        Skipping all emitted but neutrons and protons
 C        Secondary emission was not tested for proton induced reactions
          nnur = NREs(nejcec)
-         IF( AEJc(nejcec).LE.1 .and. ZEJc(nejcec).LE.1 
+         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.0
      &                         .and. nnur.GE.0) THEN
 C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
            CALL WHERE(izares,nnurn,iloc)
            IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
-           IF (iloc.EQ.0 .AND. IOUt.GT.3) CALL AUERST(nnur,1)
+           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,1)
+         ENDIF
+         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.1
+     &                         .and. nnur.GE.0) THEN
+C----------Second chance preequilibrium emission after MSD emission
 C----------Proton emission
-           izares = izares - 1000
+           izares = INT(1000.0*(Z(nnur)-1) + A(nnur) - 1)
            CALL WHERE(izares,nnurp,iloc)
-           IF (iloc.EQ.0) THEN
-             CALL SCNDPREEQ(nnur,nnurp,2,1)
-             IF (IOUt.GT.3) CALL AUERST(nnur,2)
-           ELSE
-             CALL SCNDPREEQ(nnur,nnurp,2,2)
-           ENDIF
-C----------Second chance preequilibrium *** done ***
+           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurp,2,0)
+           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,2)
+         ENDIF
+C--------Second chance preequilibrium *** done ***
          ENDIF
       ENDIF
 
@@ -907,7 +908,6 @@ c        ELSE
 c           CALL SCNDPREEQ(nnur, nnurp, 2, 2)
 c        ENDIF
 C--------second chance preequilibrium *** done ***
-
 
 C-----
 C-----PE + DWBA cont. *** done ***

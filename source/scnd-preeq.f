@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-01-30 06:08:16 $
-Ccc   * $Id: scnd-preeq.f,v 1.24 2009-01-30 06:08:16 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-02-15 00:14:23 $
+Ccc   * $Id: scnd-preeq.f,v 1.25 2009-02-15 00:14:23 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -62,7 +62,7 @@ C
      &        j, jc, nh, np
       INTEGER MAX0
       DOUBLE PRECISION WOB1
-      IF (Last.NE.2) THEN
+C     IF (Last.NE.2) THEN
 C--------clean storing matrix for second chance preequilibrium emission
          IF (Last.EQ.0) popsub = 0.d0
 C--------calculation of factorial (note notation n!= FACT(n+1))
@@ -185,28 +185,28 @@ C--------correct integration for end points
      &         POP(NEX(Nnur),j,2,Nnur))
          sum = sum*DE
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
-         WRITE (8,*) ' '
+         WRITE (6,*) ' '
          IF (Nejc.EQ.1) THEN
-            WRITE (8,*) ' n second-chance PE emission ',
+            WRITE (6,*) ' n second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ELSEIF (Nejc.EQ.2) THEN
-            WRITE (8,*) ' p second-chance PE emission ',
+            WRITE (6,*) ' p second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
          CSEmis(Nejc,Nnuc) = CSEmis(Nejc,Nnuc) + sum
 C--------substract second chance emission cross section on the appropriate emission x-s
 C        CSEmis(Nejc,1) = CSEmis(Nejc,1)       - sum
-      ENDIF
+C     ENDIF
 C-----reduce 1-st residue population on the last entry
-      IF (Last.GE.1) THEN
+C     IF (Last.GE.1) THEN
 C        WRITE(6,*) 'get with ',Last,', nnuc',nnuc
 C--------add SPE contribution to the population spectra
 C--------used for ENDF exclusive spectra
          DO iec = 1, NEX(Nnuc)
 c           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
-               sumpopsub = 0.d0
-               DO jc = 1, NLW, LTUrbo
+            sumpopsub = 0.d0
+            DO jc = 1, NLW, LTUrbo
               ftmp1 = popsub(iec,jc,1)
               if(ftmp1.gt.0.d0) then
                 POP(iec,jc,1,Nnuc) = POP(iec,jc,1,Nnuc) - ftmp1
@@ -217,8 +217,7 @@ c           IF (POPbin(iec,Nnuc).NE.0.d0) THEN
                 POP(iec,jc,2,Nnuc) = POP(iec,jc,2,Nnuc) - ftmp2
                 sumpopsub = sumpopsub + ftmp2
               endif
-               ENDDO
-
+            ENDDO
 C           WRITE(6,*) 'sumpopsub', sumpopsub
 C-----------reduce 1-st residue population DDX spectra (using portions)
 C-----------on the last entry
@@ -237,5 +236,6 @@ C-----------on the last entry
               ENDDO
             ENDIF
          ENDDO
-      ENDIF
+C     ENDIF
+      RETURN
       END
