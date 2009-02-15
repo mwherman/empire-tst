@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-02-15 00:14:22 $
-Ccc   * $Id: main.f,v 1.200 2009-02-15 00:14:22 Capote Exp $
+Ccc   * $Date: 2009-02-15 00:26:30 $
+Ccc   * $Id: main.f,v 1.201 2009-02-15 00:26:30 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -874,7 +874,6 @@ C----------Proton emission
            IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,2)
          ENDIF
 C--------Second chance preequilibrium *** done ***
-         ENDIF
       ENDIF
 
 C***************** OLD *************************************

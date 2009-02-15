@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-02-15 00:14:23 $
-Ccc   * $Id: scnd-preeq.f,v 1.25 2009-02-15 00:14:23 Capote Exp $
+Ccc   * $Date: 2009-02-15 00:26:30 $
+Ccc   * $Id: scnd-preeq.f,v 1.26 2009-02-15 00:26:30 Capote Exp $
 C
       SUBROUTINE SCNDPREEQ(Nnuc,Nnur,Nejc,Last)
 Ccc
@@ -185,12 +185,12 @@ C--------correct integration for end points
      &         POP(NEX(Nnur),j,2,Nnur))
          sum = sum*DE
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
-         WRITE (6,*) ' '
+         WRITE (8,*) ' '
          IF (Nejc.EQ.1) THEN
-            WRITE (6,*) ' n second-chance PE emission ',
+            WRITE (8,*) ' n second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ELSEIF (Nejc.EQ.2) THEN
-            WRITE (6,*) ' p second-chance PE emission ',
+            WRITE (8,*) ' p second-chance PE emission ',
      &                  'cross section ', sum, ' mb'
          ENDIF
 C--------store second chance emission cross section on the appropriate emission x-s
