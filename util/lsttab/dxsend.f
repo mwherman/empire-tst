@@ -1912,7 +1912,7 @@ C* Calculate  integral SS over distribution DXS at cosines ENR
       INT=INR(1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INT)
 
-      print *,'     SS=',SS
+C     print *,'     SS=',SS
 
 C*
 C* Process energy distributions for two-body reactions (AWP>0)
@@ -2689,7 +2689,7 @@ C...
 C* Scale the distribution by the cross section
       SS=YL*XS*SAN
 
-      print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
+C     print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
 
       DO I=1,NEN
         DXS(I)=SS*DXS(I)
