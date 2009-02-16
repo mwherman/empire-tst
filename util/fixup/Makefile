@@ -1,5 +1,5 @@
 #----GNU gfortran FORTRAN compiler
-FC     =  gfortran
+#FC     =  gfortran
 #FFLAGS = 
 #----GNU g77 FORTRAN compiler
 #FC     = g77
@@ -15,9 +15,9 @@ FC     =  gfortran
 #FC	= f90
 #----Fujitsu  f90 FORTRAN compiler
 #FC	= frt
+FC      = ifort
 
-
-OBJF =	fixup.o endfio.o  linux.o scratchb.o timer.o
+OBJF =	fixup.o endfio.o  LINUX.o scratchb.o timer.o
 
 
 fixup:   $(OBJF)
