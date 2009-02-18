@@ -16,6 +16,7 @@ C-V  2008/01 Apply 1-degree tolerance on angles for 40000 series
 C-V  2008/02 Add metastable products (MF10) (A. Trkov).
 C-V  2009/01 Add option to force major cross sections and/or 
 C-V          double-differential spectra to the list (A. Trkov).
+C-V  2009/02 Fix small bug in sequencing the forced entries.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -161,8 +162,10 @@ C*
 C* Process all C4 records and check for changes
    20 CONTINUE
       IEF =1
-      READ (LEX,901,END=40) REC
-      IF(REC(1:40).EQ.BLNK) GO TO 40
+      MMF =99
+      MMT =999
+      READ (LEX,901,END=42) REC
+      IF(REC(1:40).EQ.BLNK) GO TO 42
       READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
       IEF =0
@@ -179,10 +182,10 @@ C* Process all C4 records and check for changes
 C* Ignore MT 51 without specified level energies
       IF(MT1.EQ.51 .AND. PRC1.EQ.0) GO TO 20
 C* Mark for printout if any of the parameters change
-
+c...
 C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'mf1,mt1,m0,m1'
 C... &                                      ,mf1,mt1,cha1,cha0
-
+c...
       IF(IZI1.NE.IZI0) GO TO 40
       IF(IZA1.NE.IZA0) GO TO 40
       IF(MS1 .NE.MS0 ) GO TO 40
@@ -247,9 +250,9 @@ C* Reaction/Energy/Particle change - print record for previous set
    40 CONTINUE
 C* Exclude printout for the following conditions
 C* - MF out of range
-
+c...
 C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'passed 40'
-
+c...
       IF(MF0.NE.1 .AND. MF0.NE.3 .AND. MF0.NE.10 .AND.
      &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.6) GO TO 60
 C* - MT out of range
@@ -329,7 +332,7 @@ C*      -- Force major cross sections listing
           GO TO 43
         END IF
         IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 43
-        IF(MMF.GT.3) GO TO 43
+        IF(MMF.GT.3 .AND. MMF.NE.10) GO TO 43
         IF(MMF.EQ.3) THEN
           IF(NXSMJR.GT.MXXS) GO TO 44
           IF(MMT.GT.MJRXS(NXSMJR)) THEN
@@ -361,7 +364,7 @@ C* Force double-differential spectra listing
           GO TO 46
         END IF
         IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 46
-        IF(MMF.GT.6) GO TO 46
+        IF(MMF.GT.6 .AND. MMF.NE.10) GO TO 46
         IF(MMF.EQ.6 .AND. IZP0.EQ.1) THEN
           IF(MMT.GT.9000) GO TO 46
           IF(MMT.EQ.9000) THEN
@@ -395,6 +398,7 @@ C*        -- Force neutron emission spectra
      &                  ,CX10,IDX,IZIX
           GO TO 42
       END IF
+      IF(IEF.NE.0) GO TO 80
 C* Write a record to output list file
       IDX=IDX+1
       WRITE(LLS,914) IZ,CH(IZ),IA,MS0,IZP0,MMF,MMT,IEX,CH10,IDX,IZI0
