@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-01-29 12:17:27 $
-Ccc   * $Id: input.f,v 1.290 2009-01-29 12:17:27 Capote Exp $
+Ccc   * $Date: 2009-02-18 20:50:54 $
+Ccc   * $Id: input.f,v 1.291 2009-02-18 20:50:54 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2473,10 +2473,14 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '   Nuclear Data Sheets 108 (2007) 2655-2715     '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[RIPL]                                          '
-        WRITE (12,*) '   Handbook for calculations of nuclear reaction'
-        WRITE (12,*) '   data: Reference Input Parameter Library II.  '
-        WRITE (12,*) '   IAEA-TECDOC-1506, Vienna 2005. Available     '
-        WRITE (12,*) '   online at http://www-nds.iaea.org/RIPL-2/    '
+        WRITE (12,*) '   T.Belgya, O.Bersillon, R.Capote, T.Fukahori, '
+        WRITE (12,*) '   G.Zhigang, S.Goriely, M.Herman, A.V.Ignatyuk,'
+        WRITE (12,*) '   S.Kailas, A.Koning, P.Oblozinsky, V.Plujko   '
+        WRITE (12,*) '   and P.Young; "Handbook for calculations of   '
+        WRITE (12,*) '   nuclear reaction data: Reference Input       '
+        WRITE (12,*) '   Parameter Library II.", IAEA-TECDOC-1506,    '
+        WRITE (12,*) '   Vienna, Austria 2005. Available online at    '
+        WRITE (12,*) '   http://www-nds.iaea.org/RIPL-2/              '
         WRITE (12,*) '                                                '
         WRITE (12,*) '************************************************'
         WRITE (12,*) '                                                '
@@ -2865,7 +2869,7 @@ C     GOTO 10
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) 'Authors:'
       WRITE (12,*) ''
-      WRITE (12,*) 'EVALUATION PROCEDURE                               '
+      WRITE (12,*) 'CROSS-SECTION EVALUATION PROCEDURE                               '
       WRITE (12,*) ''
       WRITE (12,*) 'Adopted procedure is based on careful theoretical  '
       WRITE (12,*) 'analysis utilizing available experimental data and '
