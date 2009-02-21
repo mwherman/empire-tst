@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-02-18 20:50:54 $
-Ccc   * $Id: input.f,v 1.291 2009-02-18 20:50:54 Capote Exp $
+Ccc   * $Date: 2009-02-21 20:50:22 $
+Ccc   * $Id: input.f,v 1.292 2009-02-21 20:50:22 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -1564,7 +1564,8 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether spectrum array can accommodate capture with this DE
-      CALL CHECK_DE(EMAx(1),NDECSE)
+C     CALL CHECK_DE(EMAx(1),NDECSE)
+      CALL CHECK_DE(EMAx(1),NDEX)
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
       ichanmin = -1
@@ -1581,7 +1582,7 @@ C-----continuum using current DE, if not adjust DE
       CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 C-----check whether spectra array can accommodate the reaction with the largest
 C-----continuum using current DE, if not adjust DE
-      CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C     CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
       DO i = 1, NEX(1)
