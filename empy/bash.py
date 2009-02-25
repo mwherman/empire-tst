@@ -15,11 +15,12 @@ emulate some useful shell commands:
 
 >mv(foo, bar) equals mv foo bar
 
-also cp and ln
+also cp and ln -s
 """
 
 import sys
 import os
+import shutil
 
 def rm(*args, **kwargs):
     """
@@ -45,7 +46,7 @@ def rm(*args, **kwargs):
                     print (e)
 
 
-def mv(source, target, verbose=False):
+def mv(source, target, verbose=True):
     """
     emulate bash mv command (one file at a time)
     silent on error unless verbose=True
@@ -57,7 +58,7 @@ def mv(source, target, verbose=False):
             print (e)
 
 
-def cp(source, target, verbose=False):
+def cp(source, target, verbose=True):
     """
     emulate bash cp command
     """
@@ -68,7 +69,7 @@ def cp(source, target, verbose=False):
             print (e)
 
 
-def ln(source, target, verbose=False):
+def ln(source, target, verbose=True):
     """
     emulate bash ln command
     """
@@ -77,6 +78,14 @@ def ln(source, target, verbose=False):
     except OSError, e:
         if verbose:
             print (e)
+
+
+def isEmpty(filename):
+    """
+    emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
+    also 'not isEmpty()' should be equivalent to [ -s filename ]
+    """
+    return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
 
 
 def main():

@@ -11,118 +11,100 @@ replaces bash version, this has error checking
 
 import sys
 import os
+# get rm and isEmpty functions:
+from empy.bash import *
 #import subprocess
 
 
 def main():
-	project = sys.argv[1]
-	mat = sys.argv[2]
-	# work = os.system('pwd')	# don't really need,
-	# script will run in local dir unless specified otherwise
-	
-	# run EMPEND and FIXUP:
-	
-	os.system(" ../scripts/runE %s" % project )
-	
-	f = file(project+'.lst','r').readlines()
-	try:
-		f[-10:].index('  CALCULATIONS COMPLETED SUCCESSFULLY\n')
-	except ValueError:
-		print ("Empire did not finish successfully! Check the log.")
-		print ("Press return to exit")
-		raw_input()
-		return 1
-	
-	# EMPEND, fixup, stanef:
-	
-	i,o,e = os.popen3( '../scripts/format %s %s' %(project, mat) )
-	for l in o.readlines():
-		print (l.strip())
-	
-	if not 'STANEF - Completed successfully' in e.readlines()[-1]:
-		print ("STANEF did *not* finish successfully.")
-		print ("Press return to exit")
-		raw_input()
-		return 1
-	
-	# run ENDF-6 checking codes
-	
-	i,o,e = os.popen3('../scripts/verify %s %s' %(project, mat) )
-	for l in o.readlines():
-		print (l.strip())
-	
-	for message in e.readlines():
-		if not 'completed successfully' in message:
-			print ("Failed a checking code. Final message:\n%s" % message)
-			# assume these aren't fatal errors, we'll go on
-	
-	# run preprocessing codes in preparation for plotting
-	
-	i,o,e = os.popen3('../scripts/process %s %s' %(project, mat) )
-	for l in o.readlines():
-		print (l.strip())
-	
-	if not 'PLTLST Completed' in e.readlines()[-1]:
-		print ("Trouble preprocessing files for plotting. Is c4 file present?")
-		print ("Press return to exit")
-		raw_input()
-		return 1
-	
-	# plotc4 is run if the last parameter below is set to 2:
-	# RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
-	return 0
-	
+    project = sys.argv[1]
+    mat = sys.argv[2]
+    # work = os.system('pwd')   # don't really need,
+    # script will run in local dir unless specified otherwise
+    
+    # run EMPEND and FIXUP:
+    
+    os.system(" ../scripts/runE %s" % project )
+    
+    f = file(project+'.lst','r').readlines()
+    try:
+        f[-10:].index('  CALCULATIONS COMPLETED SUCCESSFULLY\n')
+    except ValueError:
+        print ("Empire did not finish successfully! Check the log.")
+        print ("Press return to exit")
+        raw_input()
+        return 1
+    
+    # EMPEND, fixup, stanef:
+    
+    i,o,e = os.popen3( '../scripts/format %s %s' %(project, mat) )
+    for l in o.readlines():
+        print (l.strip())
+    
+    if not 'STANEF - Completed successfully' in e.readlines()[-1]:
+        print ("STANEF did *not* finish successfully.")
+        print ("Press return to exit")
+        raw_input()
+        return 1
+    
+    # run ENDF-6 checking codes
+    
+    i,o,e = os.popen3('../scripts/verify %s %s' %(project, mat) )
+    for l in o.readlines():
+        print (l.strip())
+    
+    for message in e.readlines():
+        if not 'completed successfully' in message:
+            print ("Failed a checking code. Final message:\n%s" % message)
+            # assume these aren't fatal errors, we'll go on
+    
+    # run preprocessing codes in preparation for plotting
+    
+    i,o,e = os.popen3('../scripts/process %s %s' %(project, mat) )
+    for l in o.readlines():
+        print (l.strip())
+    
+    if not 'PLTLST Completed' in e.readlines()[-1]:
+        print ("Trouble preprocessing files for plotting. Is c4 file present?")
+        print ("Press return to exit")
+        raw_input()
+        return 1
+    
+    # plotc4 is run if the last parameter below is set to 2:
+    # RUN PLOTC4 (disabled, hit 'Plot' on GUI (or run plot) to get PLOTC4 plots)
+    return 0
+    
 
 def cleanUp():
-	"""
-	remove clutter from working directory.
-	called whether or not we have errors
-	"""
-	project = sys.argv[1]
-	# clean up some temporary files if present:
-	for f in (project+'-l.endf', project+'-lin.endf', 
-		project+'-f.endf',project+'-rec.endf', 
-		project+'-.endf', project+'-s.endf'):
-		# rm function defined below
-		rm(f)
-	
-	# REMOVE EMPTY FILES		
-	if isEmpty(project+'-omp.dir'):
-		rm(project+'-omp.dir')
-	if isEmpty(project+'-lev.col'):
-		rm(project+'-lev.col')
-	if isEmpty(project+'.war'):
-		rm(project+'.war')
-	if isEmpty(project+'-ecis.in'):
-		rm(project+'-ecis.in')
-	if isEmpty(project+'-ecis.out'):
-		rm(project+'-ecis.out')
-	if isEmpty(project+'-inp.fis'):
-		rm(project+'-inp.fis')	
-	return 0
-
-
-def isEmpty(filename):
-	"""
-	emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
-	also 'not isEmpty()' should be equivalent to [ -s filename ]
-	"""
-	return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
-
-
-def rm(fname):
-	"""
-	assume we always want to be silent on error here,
-	see runE for a fancier version
-	"""
-	try:
-		os.remove(fname)
-	except OSError:
-		# file DNE
-		pass
+    """
+    remove clutter from working directory.
+    called whether or not we have errors
+    """
+    project = sys.argv[1]
+    # clean up some temporary files if present:
+    for f in (project+'-l.endf', project+'-lin.endf', 
+        project+'-f.endf',project+'-rec.endf', 
+        project+'-.endf', project+'-s.endf'):
+        # rm function defined below
+        rm(f)
+    
+    # REMOVE EMPTY FILES        
+    if isEmpty(project+'-omp.dir'):
+        rm(project+'-omp.dir')
+    if isEmpty(project+'-lev.col'):
+        rm(project+'-lev.col')
+    if isEmpty(project+'.war'):
+        rm(project+'.war')
+    if isEmpty(project+'-ecis.in'):
+        rm(project+'-ecis.in')
+    if isEmpty(project+'-ecis.out'):
+        rm(project+'-ecis.out')
+    if isEmpty(project+'-inp.fis'):
+        rm(project+'-inp.fis')  
+    return 0
 
 
 if __name__ == '__main__':
-	main()
-	cleanUp()
+    main()
+    cleanUp()
 
