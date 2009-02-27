@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-02-13 15:25:31 $ 
-Ccc   * $Id: empend.f,v 1.56 2009-02-13 15:25:31 Capote Exp $ 
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2009-02-27 13:06:13 $ 
+Ccc   * $Id: empend.f,v 1.57 2009-02-27 13:06:13 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -791,18 +791,18 @@ c... Conflicts with (n,2np) reaction
 C...    ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
 C* (p,nd) cross section
 C...      MT =   32
-        ELSE IF(JZA  .EQ. IZA-   3) THEN
-C* (p,nt) cross section
+        ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
+C* (z,nt) cross section
           MT =   33
 c... Conflicts with (n,a) reaction
 c...        ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
 c...C* (p,n+He3) cross section
 c...          MT =34
         ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
-C* (p,nd2a) cross section
+C* (z,nd2a) cross section
           MT =   35
         ELSE IF(JZA  .EQ. IZA+IZI-5012) THEN
-C* (p,nt2a) cross section
+C* (z,nt2a) cross section
           MT =   36
         ELSE IF(JZA  .EQ. IZA+IZI   -4) THEN
 C* (z,4n) cross section
@@ -1126,18 +1126,23 @@ C-D       < 0  Particle cannot be produced from this reaction
 C-D  
       YI=-1
       IF     (KZAP.EQ.   1) THEN
-C* Outgoing neutrons
+C* Outgoing neutrons - single neutron emission
         IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
      &    (MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=0
+C*      -- single neutron emission
         IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.18 .OR.
      &     MT.EQ.22 .OR. MT.EQ.23 .OR.
      &    (MT.GE.28.AND. MT.LE.29).OR.
      &    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.44 .OR. MT.EQ.45 .OR.
      &    (MT.GE.50.AND.MT.LE.91)) YI=1
+C*      -- two neutron emission
         IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR.
      &     MT.EQ.30 .OR. MT.EQ.41) YI=2
+C*      -- three neutron emission
         IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
+C*      -- four neutron emission
         IF(MT.EQ.37) YI=4
+C*      -- five neutron emission (z,5n) 
         IF(MT.EQ.47) YI=5
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
@@ -4341,16 +4346,22 @@ C* Eliminate reactions with all-zero cross sections
             IF(XSC(J,I).GT.0) NPT=NPT+1
           END DO
           IF(NPT.EQ.0) MTH(I)=-MTH(I)
-c...C* Eliminate reactions 10*ZA+5 if 10*ZA is present
-C... !!! No!!! Known case: 10ZA+0,1,2...=(n,a)-->107, 10ZA+5=(n,2n+2p)
-c...          MM=MTH(I)/10
-c...          MM=MTH(I)-10*MM
-c...          IF(MM.EQ.5) THEN
-c...            JT=10*(MTH(I)/10)
-c...            DO K=1,NXS
-c...              IF(MTH(K).EQ.JT) MTH(I)=-ABS(MTH(I))
-c...            END DO
-c...          END IF
+C* Add reactions 10*ZA+5 to 10*ZA, if present, sum duplicate entries
+C* (e.g.: 10ZA+0,1,2...=(n,a)-->107, 10ZA+5=(n,2n+2p)
+          MM=MTH(I)/10
+          MM=MTH(I)-10*MM
+          IF(MM.GE.5) THEN
+            JT1=MTH(I)-5
+            JT2=MTH(I)
+            DO K=1,NXS
+              IF(MTH(K).EQ.JT1 .OR. MTH(K).EQ.JT2) THEN
+                DO L=1,NEN
+                  XSC(L,K)=XSC(L,K)+XSC(L,I)
+                END DO
+                MTH(I)=-ABS(MTH(I))
+              END IF
+            END DO
+          END IF
 C* Suppress processing of compound-elastic for incident neutrons
           JZA=MTH(I)/10
           IF(IZI.EQ.1 .AND. IZA.EQ.JZA) MTH(I)=-ABS(MTH(I))
@@ -4455,6 +4466,7 @@ C* Flag residual for this reaction processed
         QI =QQI(IT)
         JZA=MTH(IT)/10
         LFS=MTH(IT)-JZA*10
+C*      -- Treat any remaining reactions resulting from (z,2n+2p+X)
         IF(LFS.GE.5) LFS=LFS-5
         ZAP=JZA
         I10=10
