@@ -42,7 +42,7 @@ class MF33(MF_base):
         line, flag = endf.locate_section(filename, 33, MT)
         assert flag[0] == 0, "MT section not found in file!"
         
-        fin = file(filename,"r")
+        fin = open(filename,"r")
         
         # read up to MT file:
         for i in range(line+1):
@@ -257,7 +257,7 @@ class MF33(MF_base):
             if not (overwrite=='y' or overwrite=='Y'):
                 raise IOError, "Won't overwrite file"
         
-        fout = file(filename,"w")
+        fout = open(filename,"w")
         lineN = 1
         
         fout.write( self.header ); lineN += 1

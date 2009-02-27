@@ -37,7 +37,7 @@ class mgCovars:
         ngroups = 33
         
         assert os.path.exists(filename), "File %s not found!" % filename
-        f = file(filename,"r")
+        f = open(filename,"r")
         
         # Still not sure what the header represents:
         header = struct.unpack( "<10i140x", f.read(180) )

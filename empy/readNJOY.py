@@ -34,7 +34,7 @@ class mgCovars:
         self.ngroups = ngroups
         
         assert os.path.exists(filename), "File %s not found!" % filename
-        fin = file(filename,"r").readlines()
+        fin = open(filename,"r").readlines()
         
         i = 0
         while i < len(fin):

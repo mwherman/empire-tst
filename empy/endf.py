@@ -25,13 +25,13 @@ def insertMFMT(basefile,mergefile,outfile, MF, MT = '*', MAT = 0):
     """
         
     try:
-        inf = file(basefile,"r").readlines()
-        mergf = file(mergefile,"r").readlines()
-        outf = file(outfile,"w")
+        inf = open(basefile,"r").readlines()
+        mergf = open(mergefile,"r").readlines()
+        outf = open(outfile,"w")
         
         baseline, baseflag = locate_section( basefile, MF, MT, MAT )
         if baseflag[0] == 0:
-            print ("Before merging remove section using removeMFMT to avoid overlap")
+            print ("Before merging use removeMFMT to avoid overlap")
             return -1
         mergline, mergflag = locate_section( mergefile, MF, MT, MAT )
         if mergflag[0] != 0:
@@ -93,8 +93,8 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = False):
     
     line = 0
     try:
-        inf = file(infile, "r").readlines()
-        outf = file(outfile, "w")
+        inf = open(infile, "r").readlines()
+        outf = open(outfile, "w")
         
         line, flag = locate_section( infile, MF, MT, MAT )
         if flag[0] > 0:
@@ -109,9 +109,10 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = False):
     for i in range(line):
         outf.write( inf[i] )
     
-    # we've arrived at the correct section, now skip the next (MF or MFMT) section
+    # we've arrived at the correct section, now skip 
+    # the next (MF or MFMT) section
     if dumpfile:
-        dumpout = file(dumpfile,"w")
+        dumpout = open(dumpfile,"w")
 
     if MT=='*':
         while True:
@@ -132,7 +133,8 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = False):
             if not (MFr == MF and MTr == MT): break
             line += 1
         line += 1   # skip SEND
-        print ("These were the last lines removed from MF%i MT%i section:" % (MF,MT) )
+        print ("These were the last lines removed from MF%i MT%i section:" 
+                % (MF,MT) )
         print inf[line-2], inf[line-1]          
         
     # put rest of file back in:
@@ -156,12 +158,12 @@ def locate_section(infile, MF, MT, MAT=0, outfile=False):
         3 if MF should go at end of the current MAT
         4 if specified MAT not found in the file
     """
-    inf = file(infile,"r").readlines()
+    inf = open(infile,"r").readlines()
     
     #check initial values:
     find_mat = (MAT != 0)
     if outfile:
-        fout = file(outfile,"w")
+        fout = open(outfile,"w")
     
     # find correct MAT if necessary:
     line = 0
@@ -175,22 +177,24 @@ def locate_section(infile, MF, MT, MAT=0, outfile=False):
             return -1, flag
     
     # now at the proper MAT section
-    flag = 3        # flag for where we find the section
+    flag = (3,'')        # flag for where we find the section
     for line in range( line, len(inf) ):
         
         MATr, MFr, MTr = getVals( inf[line] )
         
         if ( MFr == MF and (MT=='*' or MTr==MT) ):
-            flag = 0, 'Found requested section'
+            flag = (0, 'Found requested section')
             break
         elif (MFr == MF and MTr > MT):
-            flag = 1, 'No such MT, found proper insertion spot at %i %i %i' % (MATr, MFr, MTr)
+            flag = (1, 'No such MT, found proper insertion spot at %i %i %i' 
+                    % (MATr, MFr, MTr))
             break
         elif (MFr > MF):
-            flag = 2, 'No such MF, found proper insertion spot at %i %i' % (MATr, MFr)
+            flag = (2, 'No such MF, found proper insertion spot at %i %i' 
+                    % (MATr, MFr))
             break
         elif isMEND(inf[line]):
-            flag = 3, 'MAT/MF not found in the file, insert at the end'
+            flag = (3, 'MAT/MF not found in the file, insert at the end')
             break
         else:
             pass
@@ -207,7 +211,8 @@ def locate_section(infile, MF, MT, MAT=0, outfile=False):
 
 def isSEND(string):
     """
-    SEND finishes an MT file: '0.000000+0 0.000000+0    0   0   0 0MATMF 099999\n'
+    SEND finishes an MT file: 
+    '0.000000+0 0.000000+0    0   0   0 0MATMF 099999\n'
     """
     return string[-6:-1] == '99999'
 
@@ -221,7 +226,8 @@ def isFEND(string, MAT):
 
 def isMEND(string):
     """
-    MEND finishes the MAT: '0.000000+0 0.000000+0   0   0   0   0   0   0   0   0\n'
+    MEND finishes the MAT: 
+    '0.000000+0 0.000000+0   0   0   0   0   0   0   0   0\n'
     """
     return string[-16:-1] == '0   0 0  0    0'
 

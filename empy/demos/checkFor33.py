@@ -21,10 +21,10 @@ lis = os.popen('ls')
 
 print ("MF33 present in:")
 for file in lis:
-	# locate_section returns a flag, if the flag is < 3 then at least 
-	# the MF section exists (the MT section may not)
-	if endf.locate_section( file.strip(), 33, 1)[1][0] < 3:
-		print (file.strip())
+    # locate_section returns a flag, if the flag is < 3 then at least 
+    # the MF section exists (the MT section may not)
+    if endf.locate_section( file.strip(), 33, 1)[1][0] < 3:
+        print (file.strip())
 
 end = time.clock()
 print ("Elapsed time = %.2fs" % (end-start) )
