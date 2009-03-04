@@ -14,7 +14,7 @@ import os
 import shutil
 from glob import glob
 # get rm(), mv(), cp(), ln() and isEmpty() functions:
-from empy.bash import *
+#from empy.bash import *
 
 
 def runE(proj):
@@ -125,7 +125,7 @@ def runE(proj):
     if isEmpty(proj+'-lev.col'):
         if not isEmpty('TARGET_COLL.RIPL'):
             mv('TARGET_COLL.RIPL',proj+'-lev.col')
-            tfile = file(proj+'-lev.col','a')   # append mode
+            tfile = open(proj+'-lev.col','a')   # append mode
             tfile.write('\n\n\n')
             tfile.write('NOTE: this line and those below will not be used by Empire. \n')
             tfile.write('      The collective levels and ground state band deformation \n')
@@ -133,7 +133,7 @@ def runE(proj):
             tfile.write('      and provided for comparison with the RIPL data above.\n')
             tfile.write('\n\n')
             if not isEmpty('TARGET_COLL.DAT'):
-                tfile1 = file('TARGET_COLL.DAT','r').readlines()
+                tfile1 = open('TARGET_COLL.DAT','r').readlines()
                 # emulate 'cat >> '
                 for tline in tfile1:
                     tfile.write(tline)
@@ -148,7 +148,7 @@ def runE(proj):
             os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
             if os.path.exists(proj+'-cum.ps'):
                 # read preferences from .Xrunrc:
-                prefs = file('../.Xrunrc','r').readlines()
+                prefs = open('../.Xrunrc','r').readlines()
                 psviewer = prefs[3].strip()
                 # open ps file properly:
                 if sys.platform == 'darwin':
@@ -186,8 +186,8 @@ def runE(proj):
         
         # Extract Warnings from the list file:
         # this is portable version of 'grep WARNING infile > outfile
-        listfile = file(proj+'.lst','r').readlines()
-        warnfile = file(proj+'.war','w')
+        listfile = open(proj+'.lst','r').readlines()
+        warnfile = open(proj+'.war','w')
         for line in listfile:
             if 'WARNING' in line:
                 warnfile.write(line)
@@ -284,6 +284,73 @@ def splashscreen():
     '                                                           '+'\n']
     return splash[0]
 
+
+
+#from bash.py:
+def rm(*args, **kwargs):
+    """
+    remove file or list of files, silent on error unless verbose=True
+    example:
+    rm( 'foo.txt', 'bar.txt', verbose=True ) prints any errors
+    rm( 'foo.txt', 'bar.txt' ) is silent on error
+    """
+    for f in args:
+        # so we can use lists returned by glob:
+        if type(f) is list:
+            for el in f:
+                try:
+                    os.remove(el)
+                except OSError, e:
+                    if 'verbose' in kwargs.keys() and kwargs['verbose']:
+                        print (e)
+        else:
+            try:
+                os.remove(f)
+            except OSError, e:
+                if 'verbose' in kwargs.keys() and kwargs['verbose']:
+                    print (e)
+
+
+def mv(source, target, verbose=True):
+    """
+    emulate bash mv command (one file at a time)
+    silent on error unless verbose=True
+    """
+    try:
+        shutil.move(source, target)
+    except IOError, e:
+        if verbose:
+            print (e)
+
+
+def cp(source, target, verbose=True):
+    """
+    emulate bash cp command
+    """
+    try:
+        shutil.copy(source, target)
+    except IOError, e:
+        if verbose:
+            print (e)
+
+def ln(source, target, verbose=True):
+    """
+    emulate bash ln command
+    """
+    try:
+        os.symlink(source, target)
+    except OSError, e:
+        if verbose:
+            print (e)
+
+
+def isEmpty(filename):
+    """
+    emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
+    also 'not isEmpty()' should be equivalent to [ -s filename ]
+    """
+    return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
+    
 
 
 if __name__ == '__main__':

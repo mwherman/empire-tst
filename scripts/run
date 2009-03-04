@@ -12,7 +12,7 @@ replaces bash version, this has error checking
 import sys
 import os
 # get rm and isEmpty functions:
-from empy.bash import *
+#from empy.bash import *
 #import subprocess
 
 
@@ -26,7 +26,7 @@ def main():
     
     os.system(" ../scripts/runE %s" % project )
     
-    f = file(project+'.lst','r').readlines()
+    f = open(project+'.lst','r').readlines()
     try:
         f[-10:].index('  CALCULATIONS COMPLETED SUCCESSFULLY\n')
     except ValueError:
@@ -102,6 +102,73 @@ def cleanUp():
     if isEmpty(project+'-inp.fis'):
         rm(project+'-inp.fis')  
     return 0
+
+
+# these are copied from bash.py:
+def rm(*args, **kwargs):
+    """
+    remove file or list of files, silent on error unless verbose=True
+    example:
+    rm( 'foo.txt', 'bar.txt', verbose=True ) prints any errors
+    rm( 'foo.txt', 'bar.txt' ) is silent on error
+    """
+    for f in args:
+        # so we can use lists returned by glob:
+        if type(f) is list:
+            for el in f:
+                try:
+                    os.remove(el)
+                except OSError, e:
+                    if 'verbose' in kwargs.keys() and kwargs['verbose']:
+                        print (e)
+        else:
+            try:
+                os.remove(f)
+            except OSError, e:
+                if 'verbose' in kwargs.keys() and kwargs['verbose']:
+                    print (e)
+
+
+def mv(source, target, verbose=True):
+    """
+    emulate bash mv command (one file at a time)
+    silent on error unless verbose=True
+    """
+    try:
+        shutil.move(source, target)
+    except IOError, e:
+        if verbose:
+            print (e)
+
+
+def cp(source, target, verbose=True):
+    """
+    emulate bash cp command
+    """
+    try:
+        shutil.copy(source, target)
+    except IOError, e:
+        if verbose:
+            print (e)
+
+
+def ln(source, target, verbose=True):
+    """
+    emulate bash ln command
+    """
+    try:
+        os.symlink(source, target)
+    except OSError, e:
+        if verbose:
+            print (e)
+
+
+def isEmpty(filename):
+    """
+    emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
+    also 'not isEmpty()' should be equivalent to [ -s filename ]
+    """
+    return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
 
 
 if __name__ == '__main__':
