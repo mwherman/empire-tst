@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-01-19 00:00:32 $
-Ccc   * $Id: MSD-tristan.f,v 1.64 2009-01-19 00:00:32 Capote Exp $
+Ccc   * $Date: 2009-03-09 23:49:28 $
+Ccc   * $Id: MSD-tristan.f,v 1.65 2009-03-09 23:49:28 Capote Exp $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -38,10 +38,10 @@ C     Geel 09/2005
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(6,6),      ! nilsson_newest
-     &                 CNOrin(6,6), CROs1(30,49,2*NDANGecis),           ! nilsson_newest
+      DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(8,8),      ! nilsson_newest
+     &                 CNOrin(8,8), CROs1(30,49,2*NDANGecis),           ! nilsson_newest
      &                   CROs2(30,49,2*NDANGecis),BET2in, GRin(2),      ! nilsson
-     &                 DTHeta, ECEntr(5), EFItin(6,6), EOUtmi, EOUtmx,
+     &                 DTHeta, ECEntr(5), EFItin(8,8), EOUtmi, EOUtmx,
      &                 ESTep, ETMax, ETMin, EXTcom(10), FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAPin(2), HOMin, Q0, QGRand, QMAx,
@@ -362,14 +362,14 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALSin, ANGle(NDANGecis), AU, AW,
-     &                 BETa(3*(NDEx+25),6,6),BET2in,GRin(2),             ! nilsson
-     &                 BST(3), BST1(2), CLRn(6,6), CNOrin(6,6), DTHeta,  ! nilsson_newest
-     &                 EBCs(500,2), ECEntr(5), EFItin(6,6), EOUtmi,      ! nilsson_newest
+     &                 BETa(3*(NDEx+25),8,8),BET2in,GRin(2),             ! nilsson
+     &                 BST(3), BST1(2), CLRn(8,8), CNOrin(8,8), DTHeta,  ! nilsson_newest
+     &                 EBCs(500,2), ECEntr(5), EFItin(8,8), EOUtmi,      ! nilsson_newest
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin, FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega,
      &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2,
-     &                 QSTep, RAC, RHO(3*(NDEx+25),6,6),                 ! nilsson_newest
+     &                 QSTep, RAC, RHO(3*(NDEx+25),8,8),                 ! nilsson_newest
      &                 RHOb(3*(NDEx+25),11,2),RI,
      &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
      &                 U0, U9, UAMp(500,2), VAMp(500,2), VLS(2), W0,
@@ -402,14 +402,14 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, bosc,
-     &                 cci(6,6), ccm(6,6), ccp(6,6), ccpm(2),            ! nilsson_newest
-     &                 ccr(6,6),                                         ! nilsson_newest
-     &                 ceff, clex(6,6), clsc(6,6), cneg, cnorm, cpos,    ! nilsson_newest
-     &                 cr1(6,6), cr2, cr3(6,6), dci(6,6), dcr(6,6),      ! nilsson_newest
+     &                 cci(8,8), ccm(8,8), ccp(8,8), ccpm(2),            ! nilsson_newest
+     &                 ccr(8,8),                                         ! nilsson_newest
+     &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    ! nilsson_newest
+     &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      ! nilsson_newest
      &                 ddr(2),
 c     &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
      &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  ! nilsson
-     &                 e0, efit(6,6), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
+     &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
 c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000),! nilsson
      &                 epl, eplsq, eqq,               eqqx,ess(0:10000), ! nilsson
 
@@ -429,16 +429,16 @@ c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000),! nilss
      &        kt, ktp1,                                                  ! nilsson_newest
      &        kth, ktp, iminh,iminp,nrad1,nrad2,n1,n2                    ! nilsson
       INTEGER IABS, INT
-      DOUBLE PRECISION rfqqr(0:3*(NDEx+25),6,6),
-     &                 rfqqx(0:3*(NDEx+25),6,6),                         ! nilsson_newest
-     &                 rfqqy(0:3*(NDEx+25),6,6),                         ! nilsson_newest
+      DOUBLE PRECISION rfqqr(0:3*(NDEx+25),8,8),
+     &                 rfqqx(0:3*(NDEx+25),8,8),                         ! nilsson_newest
+     &                 rfqqy(0:3*(NDEx+25),8,8),                         ! nilsson_newest
      &                 rh0, rho1, rl, rmax, rmosc, rmsgs, rnorm,
      &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2,
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
 c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
-     &                               wqrex, xea(6,6), xir, xneg,         ! nilsson
-     &                 xpos, yea(6,6), sum                               ! nilsson
+     &                               wqrex, xea(8,8), xir, xneg,         ! nilsson
+     &                 xpos, yea(8,8), sum                               ! nilsson
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
      &     0.8931D0/
@@ -520,6 +520,67 @@ C-----selfconsistent strength taken for the l=0 transfer field
       IF (EFItin(5,5).LT.0.0D0) efit(5,5) = 0.0                          ! nilsson_newest
       IF ((EFItin(5,5).lt.0.001).and.(EFItin(5,5).gt.-.001))             ! nilsson_newest
      &   efit(5,5)=efit(5,1)                                             ! nilsson_newest
+      efit(6,1) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,1).GT.0.0D0) efit(6,1) = EFItin(6,1)                  ! nilsson_newest
+      IF (EFItin(6,1).LT.0.0D0) efit(6,1) = 0.0                          ! nilsson_newest
+      efit(6,2) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,2).GT.0.0D0) efit(6,2) = EFItin(6,2)                  ! nilsson_newest
+      IF (EFItin(6,2).LT.0.0D0) efit(6,2) = 0.0                          ! nilsson_newest
+      IF ((EFItin(6,2).lt.0.001).and.(EFItin(6,2).gt.-.001))             ! nilsson_newest
+     &   efit(6,2)=efit(6,1)                                             ! nilsson_newest
+      efit(6,3) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,3).GT.0.0D0) efit(6,3) = EFItin(6,3)                  ! nilsson_newest
+      IF (EFItin(6,3).LT.0.0D0) efit(6,3) = 0.0                          ! nilsson_newest
+      IF ((EFItin(6,3).lt.0.001).and.(EFItin(6,3).gt.-.001))             ! nilsson_newest
+     &   efit(6,3)=efit(6,1)                                             ! nilsson_newest
+      efit(6,4) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,4).GT.0.0D0) efit(6,4) = EFItin(6,4)                  ! nilsson_newest
+      IF (EFItin(6,4).LT.0.0D0) efit(6,4) = 0.0                          ! nilsson_newest
+      IF ((EFItin(6,4).lt.0.001).and.(EFItin(6,4).gt.-.001))             ! nilsson_newest
+     &   efit(6,4)=efit(6,1)                                             ! nilsson_newest
+      efit(6,5) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,5).GT.0.0D0) efit(6,5) = EFItin(6,5)                  ! nilsson_newest
+      IF (EFItin(6,5).LT.0.0D0) efit(6,5) = 0.0                          ! nilsson_newest
+      IF ((EFItin(6,5).lt.0.001).and.(EFItin(6,5).gt.-.001))             ! nilsson_newest
+     &   efit(6,5)=efit(6,1)                                             ! nilsson_newest
+      efit(6,6) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(6,6).GT.0.0D0) efit(6,6) = EFItin(6,6)                  ! nilsson_newest
+      IF (EFItin(6,6).LT.0.0D0) efit(6,6) = 0.0                          ! nilsson_newest
+      IF ((EFItin(6,6).lt.0.001).and.(EFItin(6,6).gt.-.001))             ! nilsson_newest
+     &   efit(6,6)=efit(6,1)                                             ! nilsson_newest
+      efit(7,1) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,1).GT.0.0D0) efit(7,1) = EFItin(7,1)                  ! nilsson_newest
+      IF (EFItin(7,1).LT.0.0D0) efit(7,1) = 0.0                          ! nilsson_newest
+      efit(7,2) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,2).GT.0.0D0) efit(7,2) = EFItin(7,2)                  ! nilsson_newest
+      IF (EFItin(7,2).LT.0.0D0) efit(7,2) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,2).lt.0.001).and.(EFItin(7,2).gt.-.001))             ! nilsson_newest
+     &   efit(7,2)=efit(7,1)                                             ! nilsson_newest
+      efit(7,3) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,3).GT.0.0D0) efit(7,3) = EFItin(7,3)                  ! nilsson_newest
+      IF (EFItin(7,3).LT.0.0D0) efit(7,3) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,3).lt.0.001).and.(EFItin(7,3).gt.-.001))             ! nilsson_newest
+     &   efit(7,3)=efit(7,1)                                             ! nilsson_newest
+      efit(7,4) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,4).GT.0.0D0) efit(7,4) = EFItin(7,4)                  ! nilsson_newest
+      IF (EFItin(7,4).LT.0.0D0) efit(7,4) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,4).lt.0.001).and.(EFItin(7,4).gt.-.001))             ! nilsson_newest
+     &   efit(7,4)=efit(7,1)                                             ! nilsson_newest
+      efit(7,5) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,5).GT.0.0D0) efit(7,5) = EFItin(7,5)                  ! nilsson_newest
+      IF (EFItin(7,5).LT.0.0D0) efit(7,5) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,5).lt.0.001).and.(EFItin(7,5).gt.-.001))             ! nilsson_newest
+     &   efit(7,5)=efit(7,1)                                             ! nilsson_newest
+      efit(7,6) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,6).GT.0.0D0) efit(7,6) = EFItin(7,6)                  ! nilsson_newest
+      IF (EFItin(7,6).LT.0.0D0) efit(7,6) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,6).lt.0.001).and.(EFItin(7,6).gt.-.001))             ! nilsson_newest
+     &   efit(7,6)=efit(7,1)                                             ! nilsson_newest
+      efit(7,7) = 0.0                                                    ! nilsson_newest
+      IF (EFItin(7,7).GT.0.0D0) efit(7,7) = EFItin(7,7)                  ! nilsson_newest
+      IF (EFItin(7,7).LT.0.0D0) efit(7,7) = 0.0                          ! nilsson_newest
+      IF ((EFItin(7,7).lt.0.001).and.(EFItin(7,7).gt.-.001))             ! nilsson_newest
+     &   efit(7,7)=efit(7,1)                                             ! nilsson_newest
 C
 C-----check that energy interval is compatible with range of
 C-----experimental ex used to determine coupl. const.
@@ -1805,8 +1866,8 @@ C     Geel 09/2005
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, BET2in,BST(3), CNOrin(6,6), EBCs(500, 2),  ! nilsson
-     &                 EFItin(6,6),ESP(500, 2),GAP(2), GAPin(2),GRin(2), ! nilsson
+      DOUBLE PRECISION ALSin, BET2in,BST(3), CNOrin(8,8), EBCs(500, 2),  ! nilsson
+     &                 EFItin(8,8),ESP(500, 2),GAP(2), GAPin(2),GRin(2), ! nilsson
      &                 HOMega, HOMin, RMS(3), RST(201), UAMp(500, 2),    ! nilsson
      &                 VAMp(500, 2), VLS(2), WIDexin, ASP(500,14,2)      ! nilsson
       INTEGER KSP(500,2), NSP(500,2), NHOle(2), NRX, NTOtal(2),IBLK(2)   ! nilsson
@@ -2102,13 +2163,13 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION ALPha(11,6), AN(6), ANGle(NDANGecis),
-     &                 CLRn(6,6), DTHeta,DUMmy(1041),ECEntr(5),EOUtmi,
+     &                 CLRn(8,8), DTHeta,DUMmy(1041),ECEntr(5),EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin,
      &                 EXTcom(10), FACb, FAClog(500), FFAc1d(2),
      &                 FFAc2d(2), FFAc3d(2), FFTot(10), FNOrm(6),
      &                 FNQ(6,6), FQ(6), GAP(2), HOMega, Q0, QGRand,
      &                 QMAx, QMIna, QMInb, QS1, QS2, QSTep, RAC,
-     &                 RHO(3*(NDEx+25),6,6), RHOb(3*(NDEx+25),11,2),     ! nilsson_newest
+     &                 RHO(3*(NDEx+25),8,8), RHOb(3*(NDEx+25),11,2),     ! nilsson_newest
      &                 RMS(3), ROPt,
      &                 SREw(21), SREwl(21), SRNew(21), THEta1, THEta2,
      &                 U9, VLS(2), WIDex, BST(3)
@@ -2466,7 +2527,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ANGle(NDANGecis), CLRn(6,6), DTHeta, ECEntr(5),   ! nilsson_newest
+      DOUBLE PRECISION ANGle(NDANGecis), CLRn(8,8), DTHeta, ECEntr(5),   ! nilsson_newest
      &                 EOUtmi, EOUtmx, ESTep, ETMax, ETMin, EXTcom(10),
      &                 FAC1d(2), FAC2d(2), FAC3d(2), FACb, FFTot(10),
      &                 Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, QSTep,
@@ -2955,7 +3016,7 @@ C-----if ECIS active use only continuum part of the MSD spectrum
       ENDDO
       WRITE(8,*) ' '
       WRITE(8,'('' Integrated MSD emission at Elab '', G15.3,'' is ''
-     &         , G15.3,'' mb'')') EINl, CSMsd(nej) 
+     &         , G15.3,'' mb'')') EINl, CSMsd(nej)
       WRITE(8,*) ' '
 C-----angular distributions integration *** done ***
 99020 FORMAT (' ',F6.2,6E11.4,4X,6F9.4)
@@ -3039,10 +3100,6 @@ C-----distribution of the continuum MSD contribution -
 C-----proportional to the p-h spin distribution shifted by the target
 C-----ground state target spin XJLV(1,0)
       IF (nexrt.GT.0) THEN
-c        ftmp = 0.d0
-c        DO j = 1, NLW, LTUrbo
-c           ftmp = ftmp + 0.5*phdj(j)/somj
-c        ENDDO
          DO j = 1, NLW, LTUrbo
             xnor = 0.5*phdj(j)/somj
             DO ie = 1, nexrt

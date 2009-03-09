@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-02-21 20:50:22 $
-Ccc   * $Id: input.f,v 1.292 2009-02-21 20:50:22 Capote Exp $
+Ccc   * $Date: 2009-03-09 23:49:27 $
+Ccc   * $Id: input.f,v 1.293 2009-03-09 23:49:27 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2809,7 +2809,7 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, CNOrin(6,6), EFItin(6,6), GAPin(2), HOMin,
+      DOUBLE PRECISION ALSin, CNOrin(8,8), EFItin(8,8), GAPin(2), HOMin,
      &                 WIDexin, BET2in, GRIn(2)
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /R250COM/ INDexf,INDexb,BUFfer
@@ -2836,8 +2836,8 @@ C-----initialization of TRISTAN input parameters
       BET2in = 0.0
       GRIn(1) = 5.0
       GRIn(2) = 5.0
-      DO i = 1, 6                                                        ! nilsson_newest
-         do j = 1,6                                                      ! nilsson_newest
+      DO i = 1, 8                                                        ! nilsson_newest
+         do j = 1,8                                                      ! nilsson_newest
             CNOrin(i,j) = 1.0                                            ! nilsson_newest
             EFItin(i,j) = 0.0D0                                          ! nilsson_newest
          enddo                                                           ! nilsson_newest

@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-02-15 00:26:30 $
-Ccc   * $Id: main.f,v 1.201 2009-02-15 00:26:30 Capote Exp $
+Ccc   * $Date: 2009-03-09 23:49:29 $
+Ccc   * $Id: main.f,v 1.202 2009-03-09 23:49:29 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -673,10 +673,14 @@ C--------If it does not, the program start new calculations
          WRITE (8,*) ' '
          qmax = 0.99*EIN
          qstep = qmax/3.0
-         ltrmax = 4
-         IF (NLW.LE.10) ltrmax = 3
-         IF (NLW.LE.8) ltrmax = 2
-         IF (NLW.LE.6) ltrmax = 1
+C        Proposed by H. Wienke
+         ltrmax = 6
+         IF (NLW.LE.15) ltrmax = 5
+         IF (NLW.LE.13) ltrmax = 4
+C        ltrmax = 4
+C        IF (NLW.LE.10) ltrmax = 3
+C        IF (NLW.LE.8) ltrmax = 2
+C        IF (NLW.LE.6) ltrmax = 1
          WRITE(15,*) qmax,qstep,ltrmax
          q2 = qmax
          q3 = qmax

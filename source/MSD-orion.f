@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-11-11 21:22:46 $
-Ccc   * $Id: MSD-orion.f,v 1.23 2008-11-11 21:22:46 Capote Exp $
+Ccc   * $Date: 2009-03-09 23:49:28 $
+Ccc   * $Id: MSD-orion.f,v 1.24 2009-03-09 23:49:28 Capote Exp $
 C
 C
 C
@@ -119,7 +119,7 @@ C
      &                 WNIni(4), WNUnit, WR1(1000,2), WR2(5000,2),
      &                 WSFf(4), WSFr(4), WSOr(4), WSXf(4), WSXr(4),
      &                 XBAr, XMAx, XMEs, ZPR(4), ZTR(4)
-      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300,4), ZERo
+      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(9000,4), ZERo
       INTEGER ISTw(3), JJ, JLSmax, KCFf(4), KEXcom(50), KEXcom1(8),
      &        KEXcom2(28), KTLout(50), KTLout1(8), KTLout2(28), KTRl(30)
      &        , KTRl1(8), KTRl2(28), LBTrf(4), LDWmxr(4), LDWmxr1(3),
@@ -352,7 +352,7 @@ C
      &                   ai,rv,rw,RD,rs,ri,rc,mi,mt)
             IF (KTRl(4).EQ.1) vs = 0.0
 C
-C           RCN, June 30, 2005 
+C           RCN, June 30, 2005
 C           Added control to avoid division by zero
 C
             IF(av.eq.0.d0) av=1.d0
@@ -1321,10 +1321,10 @@ C
 C
 C           Definition of FormFactors :
 C           FF for KDER=1,2,3,4,5,6:   (selected by LBTRF in input!)
-C           1:= 1st Derivative WS        (Dispersive contribution considered)
-C           2:= Volume WS                     (Dispersive contribution
-C           considered) 3:= 2nd Derivative WS (Dispersive contribution
-C           considered) 4:= Modified 2nd deriv.
+C           1:= 1st Derivative WS      (Dispersive contribution considered)
+C           2:= Volume WS              (Dispersive contribution considered)
+C           3:= 2nd Derivative WS      (Dispersive contribution considered)
+C           4:= Modified 2nd deriv.
 C           5:= Volume and 1st deriv superimposed
 C
 C           1)  1st derivative of the real surface contribution ~ 2nd WS
@@ -1851,7 +1851,7 @@ C
      &                 VSOr(4), VSXr(4), WN(4), WNIni(4), WNUnit,
      &                 WR1(1000,2), WR2(5000,2), WSFr(4), WSXr(4), XBAr,
      &                 XMAx, XMEs
-      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300,4), ZERo
+      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(9000,4), ZERo
       INTEGER ISTw(3), ISTw1, ISTw2, ISTw3, J12mxt, J1Tw, J2Tw, JAS,
      &        JBS, JCS, JJ, JLMitw, JLMxtw, JLRang, KASe, KEXcom(50),
      &        KTLout(50), KTRl(30), L12mxm, L1Maxm, L1Tr, L1Tw, L2Maxm,
@@ -1884,7 +1884,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION s1, sqrt2i  
+      DOUBLE PRECISION s1, sqrt2i
       CHARACTER*1 hola, holl, holr, holx, nlrw
       INTEGER istw23, l0posi, l1p1, l1p1mx, l2p1, l2p1mx, lbcp1x,
      &        ll, llmax, lm10ps, lm20ps, lmm, lmp, lmpos, mm, mm1, n,
@@ -2107,7 +2107,7 @@ C
      &                 RHOmx, SGMa(25,NGLXX,2), SGMat(NGLXX,2), SGMaz,
      &                 SQRt10, THEta(NGLXX), U9, WNUnit, WR1(1000,2),
      &                 WR2(5000,2), XBAr, XMAx, XMEs
-      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(8300,4), ZERo
+      DOUBLE COMPLEX CSUm2(NGLXX), TTI, TTR, XAMp(9000,4), ZERo
       INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw,
      &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe,
      &        KEXcom(50), KTLout(50), KTRl(30), L12mxm, L1Maxm, L1Tr,
@@ -2397,7 +2397,7 @@ C
      &                 THEta(NGLXX), U9, WNUnit, WR1(1000,2),
      &                 WR2(5000,2), XBAr, XMAx, XMEs
       DOUBLE COMPLEX CMAt1(42,61), CMAt2(42,42,61), CSUm2(NGLXX), TTI,
-     &               TTR, XAMp(8300,4), ZERo
+     &               TTR, XAMp(9000,4), ZERo
       INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw,
      &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe, L12mxm,
      &        L1Maxm, L1Tr, L1Tw, L2Maxm, L2Tr, L2Tw, L9(9), LDWmxa,
