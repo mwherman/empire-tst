@@ -251,8 +251,8 @@ c
         else
           write(nwave,'(a,i2)') 'l = ',ll-1
         endif
- 2700   format(' plot "',a,'" title "',a,'" with line lt ',i1,',\')
- 2800   format('      "',a,'" title "',a,'" with line lt ',i1,',\')
+ 2700   format(' plot "',a,'" title "',a,'" with line lt ',i1,',\\')
+ 2800   format('      "',a,'" title "',a,'" with line lt ',i1,',\\')
         if (ll.eq.1) then
           write(8,2700) fname,nwave,icolor(ll*2-1)
         else
@@ -264,7 +264,7 @@ c
         if (ll.eq.nls) then
           write(8,'(a)') ''
         else
-          write(8,'(a)') ',\'
+          write(8,'(a)') ',\\'
         endif
       enddo
       close(8)

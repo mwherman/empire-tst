@@ -259,7 +259,7 @@ c      ptanla.unc is for writing uncertainty of resonance parameter to be adjust
        read(adjust(7:10),'(i4)') nplus
        if (nidx.gt.nres.or.nidx.ge.npos+nplus) then
          open(8,file='ptanal.unc',status='unknown')
-         write(8,'(a6,1x,i4,1x,e14.6)') 'DOSTOP',-999,0
+         write(8,'(a6,1x,i4,1x,e14.6)') 'DOSTOP',-999,0.0
          close(8)
          stop
        endif
@@ -1266,6 +1266,13 @@ C          decide gg based on supplied gn
           nrggg =nrggg+1
          endif
 c
+caleb  problem here: always assuming 1% err on energy if no value found
+caleb  in atlas.
+caleb
+caleb  could read as strings, and decide based on how many sig. digits...?
+c         if (rp(2,n).eq.0.0.and.rp(1,n).le.100e+3) then
+c           dEn=abs(0.001*En)
+c         elseif (rp(2,n).eq.0.0) then
          if (rp(2,n).eq.0.0) then
            dEn=abs(0.01*En)
          else
@@ -1273,15 +1280,26 @@ c
          endif
          if (rp(4,n).eq.0.0) then
            dgn=0.08*gn
+caleb  increase uncertainty on Gn above 200 keV if gaps exist:           
+           if (En.gt.2.e+5) then
+               dgn=0.16*gn
+           endif
          else
            if (gn.eq.rp(3,n)) then
+caleb  uncertainties on Gn in Atlas may be too small:
              dgn=rp(4,n)
+c             dgn=rp(4,n) * 3.0
            else
-             dgn=gn*rp(4,n)/rp(3,n)
+c             dgn=gn*rp(4,n)/rp(3,n)
+             dgn=gn*rp(4,n)/rp(3,n) * 3.0
            endif
          endif
          if (rp(6,n).eq.0.0) then
            dgg=0.1*gg
+caleb  increase uncertainty on Gg above 200 keV if gaps exist:           
+           if (En.gt.2.e+5) then
+               dgg=0.5*gg
+           endif
          else
            if (gg.eq.rp(5,n)) then
              dgg=rp(6,n)
@@ -1485,7 +1503,7 @@ c            j=j+1      ! gives incorrect value for nm
       enddo
       call r2str(s1,11,6, 0.0)
       call r2str(s2,11,6, 0.0)
-c      write(3,1000) s1,s2,ndigit,nnn,nm,0,mat,mfh,mth
+      write(3,1000) s1,s2,ndigit,nnn,nm,0,mat,mfh,mth
 c     write the correlation coefficients
       do i=1,nnn
         j=1
@@ -2179,22 +2197,22 @@ c     set label and line colors
       write(9,*) 'set ylabel "Number of Resonances"'
  1000 format(a,a,/,a,i1,a)
       write(9,1000) 'plot "ptdist.dat" title ',
-     1           '"Experimental data (combined)"\',
-     2           '     with points pt 4 ps 0.5 lt ',icolor(1),',\'
+     1           '"Experimental data (combined)"\\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(1),',\\'
       write(9,1000) '     "ptdist.fit" title ',
-     1           '"Porter-Thomas fit (combined)"\',
-     2           '     with line lt ',icolor(2),',\'
+     1           '"Porter-Thomas fit (combined)"\\',
+     2           '     with line lt ',icolor(2),',\\'
       write(9,1000) '     "ptdist0.dat" title ',
-     1           '"Experimental data (s-wave)"\',
-     1           '     with points pt 4 ps 0.5 lt ',icolor(3),',\'
+     1           '"Experimental data (s-wave)"\\',
+     1           '     with points pt 4 ps 0.5 lt ',icolor(3),',\\'
       write(9,1000) '     "ptdist0.fit" title ',
-     1           '"Porter-Thomas fit (s-wave)"\',
-     2           '     with line lt ',icolor(4),',\'
+     1           '"Porter-Thomas fit (s-wave)"\\',
+     2           '     with line lt ',icolor(4),',\\'
       write(9,1000) '     "ptdist1.dat" title ',
-     1           '"Experimental data (p-wave)"\',
-     2           '     with points pt 4 ps 0.5 lt ',icolor(5),',\'
+     1           '"Experimental data (p-wave)"\\',
+     2           '     with points pt 4 ps 0.5 lt ',icolor(5),',\\'
       write(9,1000) '     "ptdist1.fit" title ',
-     1           '"Porter-Thomas fit (p-wave)"\',
+     1           '"Porter-Thomas fit (p-wave)"\\',
      2           '     with line lt ',icolor(6),''
       close(9)
       irt=system("gnuplot ptdist.gp")
