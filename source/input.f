@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-03-09 23:49:27 $
-Ccc   * $Id: input.f,v 1.293 2009-03-09 23:49:27 Capote Exp $
+Ccc   * $Date: 2009-03-11 13:58:48 $
+Ccc   * $Id: input.f,v 1.294 2009-03-11 13:58:48 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2870,7 +2870,7 @@ C     GOTO 10
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) 'Authors:'
       WRITE (12,*) ''
-      WRITE (12,*) 'CROSS-SECTION EVALUATION PROCEDURE                               '
+      WRITE (12,*) 'CROSS-SECTION EVALUATION PROCEDURE                 '
       WRITE (12,*) ''
       WRITE (12,*) 'Adopted procedure is based on careful theoretical  '
       WRITE (12,*) 'analysis utilizing available experimental data and '
