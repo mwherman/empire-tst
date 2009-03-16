@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2009-02-27 13:06:13 $ 
-Ccc   * $Id: empend.f,v 1.57 2009-02-27 13:06:13 trkov Exp $ 
+Ccc   * $Date: 2009-03-16 20:28:17 $ 
+Ccc   * $Id: empend.f,v 1.58 2009-03-16 20:28:17 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -317,6 +317,9 @@ C* Read the EMPIRE output file to extract the cross sections
         WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
         STOP 'EMPEND ERROR - Zero energy entries in EMPIRE output'
       END IF
+c...
+c...  print *,(iwo(mth-1+j),j=1,nxs)
+c...
 C*
 C* Redefine lower energy limit to first point, if not a neutron file
       IF(IZI.NE.1) EMIN=EIN(1)
@@ -1470,6 +1473,9 @@ C*
       SUBROUTINE SCNMF6(LIN,LTT,LER,NT6,MTH,MXI,IZI)
 C-Title  : SCNMF6 Subroutine
 C-Purpose: Scan EMPIRE output for all react. with energy/angle distrib.
+C-Description:
+C-D  The output is scanned for the spectra. Reaction MT number is
+C-D  assigned, if possible.
       PARAMETER    (MXKUN=20)
       CHARACTER*136 REC
       CHARACTER*8   CUN(MXKUN)
@@ -2047,6 +2053,7 @@ c...  IF(REC( 5:20).EQ.'fission  cross s'            ) THEN
       END IF
       IF(REC(2:14).EQ.' Multiplicity') THEN
 C* Average number of (prompt) neutrons per fission
+C* (flagged negative to avoid processing as MF3)
         QQ=0
         QI=QQ
         MT=456
@@ -3639,7 +3646,7 @@ C* Select the cross section with the lowest MT number
 C* Exclude cross sections flagged "processed" (MT>1000)
 C* Special processing of MF 1 tabulated data (MT 450-460)
         MTJ=MTH(J)
-        IF((MF.EQ.1 .AND. (-MTJ.GT.450 .AND. -MTJ.LT.460)) .OR.
+        IF((MF.EQ.1 .AND. (MTJ.GT. 450 .AND. MTJ.LT.460)) .OR.
      &     (MF.EQ.3 .AND. (MTJ.GT.   0 .AND.
      &                     MTJ.LT.1000 .AND.
      &                     MTJ.LT.  MT) ) ) THEN
@@ -3836,6 +3843,9 @@ C* Change back the MT numbers that were flagged "+1000"
           MTFLG=MTFLG-1000
           IF(MTH(IT).LT.0) MTFLG=-MTFLG
           MTH(IT)=MTFLG
+        END IF
+        IF(MF.EQ.1 .AND. (MTFLG.GT.450 .AND. MTFLG.LT.460)) THEN
+          MTH(IT)=-MTFLG
         END IF
       END DO
 C*
