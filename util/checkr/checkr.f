@@ -28,6 +28,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.02   March 2009    A. Trkov
+!-V                        1. Correct MF/MT if first record out of sequence.
 !-V         Version 8.01   November 2008    A. Trkov
 !-V                        1. Minor update to process resonance LRF=7
 !-V                           representation
@@ -203,9 +205,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     Define variable precision
@@ -575,7 +577,7 @@
 !
        IF(MF.NE.MFO.AND.MFO.EQ.1)   THEN
          IF(LFI.EQ.1.AND.I452.NE.1.AND.MOD(NSUB,10).EQ.0) THEN
-            EMESS = 'LFI INCORRECT OR NUBAR MISSING         PRECEDING '
+            EMESS = 'LFI INCORRECT OR NUBAR-TOTAL MISSING   PRECEDING '
             CALL ERROR_MESSAGE(NSEQP)
          END IF
          IF(LFI.NE.1.AND.I452.EQ.1)  THEN
@@ -5688,7 +5690,7 @@
 !
       INTEGER(KIND=I4)  :: I
 !
-      INTEGER(KIND=I4)  :: NSEQT
+      INTEGER(KIND=I4)  :: NSEQT,MAT1,MF1,MT1
 !
 !     READ IN RECORD
 !
@@ -5697,7 +5699,7 @@
       NSEQP = 0
       READ(IFIELD,'(2E11.4,4I11,I4,I2,I3,I5)',ERR=30)                   &       
      &          C1H,C2H,L1H,L2H,N1H,N2H,MAT,MF,MT,NSEQP
-      IF(ASEQ.EQ.' ') NSEQP = ISEQ
+      IF(ASEQ.EQ.'     ') NSEQP = ISEQ
       GO TO 40
 !
 !     ERROR SO TRY TO READ EACH FIELD SEPARATELY
@@ -5725,9 +5727,18 @@
             NSEQT = NSEQ + 1
          END IF
       END IF
-      IF(NSEQP.NE.NSEQT.AND.ASEQ.NE.' ')  THEN
+      IF(NSEQP.NE.NSEQT.AND.ASEQ.NE.'     ')  THEN
+         MAT1=MATO
+         MF1=MFO
+         MT1=MTO
+         MATO=MAT
+         MFO=MF
+         MTO=MT
          EMESS = 'OUT OF SEQUENCE AT'
          CALL ERROR_MESSAGE(NSEQP)
+         MATO=MAT1
+         MFO=MF1
+         MTO=MT1
       END IF
       IF(MT.EQ.0.AND.NFOR.GT.5) THEN
          NSEQ = 0
@@ -6627,6 +6638,7 @@ c        END IF
             IF(INDX(N,1).EQ.INDXT) GO TO 90
          END DO
       ELSE
+         N=1
          GO TO 90
       END IF
       N = NXC + 1

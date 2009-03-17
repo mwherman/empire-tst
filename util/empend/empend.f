@@ -1,6 +1,6 @@
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2009-03-16 20:28:17 $ 
-Ccc   * $Id: empend.f,v 1.58 2009-03-16 20:28:17 trkov Exp $ 
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-03-17 07:44:13 $ 
+Ccc   * $Id: empend.f,v 1.59 2009-03-17 07:44:13 Capote Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -358,7 +358,7 @@ C* Write the ENDF file-1 data
       CALL WRIMF1(LIN,LOU,MAT,IZI,IZA,LISO,LRP,LFI,NLIB,NMOD
      &           ,ALAB,EDATE,AUTHOR,AWR,EMX,NS)
 C* Write tabulated ENDF file-1 data (nu-bar)
-      NS=-1
+      NS= 0
       MF= 1
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF,LRP,EMIN
      1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),RWO(LSC)
@@ -594,7 +594,7 @@ C* Process selecte discrete level reactions
           CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
      1               ,RWO(LBR),MXLI,MXLJ)
           CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,RWO(LEL)
-     1               ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NS)
+     1               ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NBL)
           KLV=NLV-NL1
           WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT0
           WRITE(LTT,995) '           Number of processed levels : ',KLV
@@ -3875,10 +3875,10 @@ C* Find the appropriate discrete level MT number
       IF(MT6.EQ.649) MT=MAX(MT,600)
       IF(MT6.EQ.849) MT=MAX(MT,800)
       IF(IZI.EQ.1 .AND. MT.EQ.50) MT=MT+1
-      DO 20 JT=1,NXS
-      IT=JT
-      IF(ABS(MTH(IT)).EQ.MT ) GO TO 22
-   20 CONTINUE
+      DO JT=1,NXS
+        IT=JT
+        IF(ABS(MTH(IT)).EQ.MT ) GO TO 22
+      END DO
       GO TO 80
 C*
 C* Write file MF4 angular distributions (first outgoing particle)
@@ -4734,7 +4734,7 @@ c...
       RETURN
       END
       SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,ENL,NBR,LBR,BRR
-     1                 ,RWO,MXLI,MXLJ,NS)
+     1                 ,RWO,MXLI,MXLJ,NBL)
 C-Title  : WRMF12 Subroutine
 C-Purpose: Write MF 12 data in ENDF-6 format
       DIMENSION      NBR(MXLI),ENL(MXLI),RWO(2,MXLI)
@@ -4749,25 +4749,25 @@ C*
 C* Loop over all discrete levels
       DO LL=1,NLV
 C* Number of levels below the present one
-        NS=NL1+LL-1
+        NBL=NL1+LL-1
 C* Define reaction type MT number
-C...    MT=MT0+NS
+C...    MT=MT0+NBL
         MT=MT0+LL-1
 C* Energy of the level
-C...    ES=ENL(NS+1)
+C...    ES=ENL(NBL+1)
         ES=ENL(LL)
 C* Number of levels with non-zero branching ratio
-C...    NT=NBR(NS+1)
+C...    NT=NBR(NBL+1)
         NT=NBR(LL)
         IF(NT.GT.0) THEN
 C* Head record
-          CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, L0, LG, NS,  0)
+          CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, L0, LG,NBL,  0)
 C* List record
           DO JT=1,NT
 C* Determine the energy level of the final state (sort in descending order)
 c... Level energies sorted in descending order (fix error that reappeared?)
 c...        LE=LBR(NT+1-JT,LL)
-C...        LE=LBR(JT,NS+1)
+C...        LE=LBR(JT,NBL+1)
             LE=LBR(JT,LL)
 C...
 C...        print *,'jt,ll,le',jt,ll,le
@@ -4776,7 +4776,7 @@ C...
             RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
 c...        RWO(2,JT)=BRR(NT+1-JT,LL)
-C...        RWO(2,JT)=BRR(JT,NS+1)
+C...        RWO(2,JT)=BRR(JT,NBL+1)
             RWO(2,JT)=BRR(JT,LL)
           END DO
           CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
