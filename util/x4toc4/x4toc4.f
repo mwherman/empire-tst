@@ -1086,11 +1086,12 @@ c     call outCharArray(tmp2,ll+1)
       end
 
       function mylen(str)
-      CHARACTER*1 str(1)
+C     CHARACTER*1 str(1)
+      CHARACTER*300 str
       mylen=0
       do i=1,300
 c       call outCharArray(str(i),1)
-        if (str(i).eq.' ') return
+        if (str(i:i).eq.' ') return
         mylen=mylen+1
       end do
       return

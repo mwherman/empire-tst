@@ -1729,7 +1729,9 @@ C=======================================================================
       COMMON/OUTTAB/N2OUT
       COMMON/MAXIE/ERRMAX,ERROK,ERRUSE,LOOPE
       INCLUDE 'legend.h'
-      DIMENSION XMUBASE(121)
+C... Increase array size to match maximum Legendre order MAXLEGS
+C...  DIMENSION XMUBASE(121)
+      DIMENSION XMUBASE(2001)
 C
 C     USE ONLY 2 POINTS FOR ISOTROPIC OR LINEARLY ANISOTROPIC.
 C
@@ -1749,6 +1751,7 @@ C
       NSTART=NMID+2*LEGUSE
       DMU=2.0/FLOAT(NSTART)
       XMUBASE(1)=-1.0
+C     print *,'LEGUSE,NMID,NSTART',LEGUSE,NMID,NSTART
       DO 20 I=2,NSTART
       XMUBASE(I)=XMUBASE(I-1)+DMU
       IF(I.EQ.NMID) XMUBASE(I)=0.0
