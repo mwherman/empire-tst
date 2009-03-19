@@ -89,10 +89,19 @@ class MF_base:
         could implement a test like:
         if not ( -100 < log_10( abs(flt) ) < 100 ):
             raise an Error. Very unlikely to come up, however
-        """ 
+        """
+        if type(flt) is int:
+            # integers are right-adjusted:
+            return ("%11i" % flt)
         
         if math.fabs(flt) < self._nzro:
+            # round small values down to zero
             flt = 0.
+        
+        # make files prettier: if a float requires only 1 significant digit
+        # to express, use standard notation:
+        if round(flt,1)==flt and math.log(flt,10)<2:
+            return("%- 11.1f" % flt)
         
         if (flt==0) or (-10 < math.log10( math.fabs(flt) ) < 10):
             str_rep = ("% E" % flt)
@@ -108,10 +117,13 @@ class MF_base:
                 return str_rep.replace('E-','-')
     
 
-    def writeENDFline(self, tmplist, MAT,MF,MT,lineNo):
+    def writeENDFline(self, tmplist, MAT,MF,MT,lineNo=False):
         """
         turn a list of 6 reals into an ENDF-formatted 80-column string
         with identifiers in right column
+
+        line number is added if lineNo specified 
+        (lineNo=0 is for FEND record only)
         """
         if len(tmplist) > 6:
             raise OverflowError, "only six values can fit onto an ENDF line"
@@ -125,17 +137,23 @@ class MF_base:
             nblank = 6 - len(tmplist)
             for i in range(nblank):
                 data += blank
-            rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
+            if lineNo:
+                rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
+            else:
+                rightColumn = ("%4i%2i%3i%5c") % (MAT, MF, MT, ' ')
             return data + rightColumn + "\n"
         
         else:   # len(list) == 6
             data = ''
             for a in tmplist:
                 data += self.untreat(a)
-            rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
+            if lineNo:
+                rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
+            else:
+                rightColumn = ("%4i%2i%3i%5c") % (MAT, MF, MT, ' ')
             return data + rightColumn + '\n'
     
-
+    
     def writeSEND(self, MAT, MF):
         """
         return a SEND line to finish of the MT section
@@ -143,6 +161,13 @@ class MF_base:
         str_val = " 0.000000+0 0.000000+0          0          0          0          0%4i%2i  099999\n" % (MAT,MF)
         return str_val
     
+    
+    def writeFEND(self, MAT):
+        """
+        return FEND line to finish MF section
+        """
+        str_val = ("%66c%4i%2i%3i%5i\n") % (' ',MAT,0,0,0)
+        return str_val
 
 
 if __name__ == '__main__':
