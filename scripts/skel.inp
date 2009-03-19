@@ -82,7 +82,7 @@ GO
 20.
 -1.
 Lines below are not active unless moved above into the optional input block
-(note that actual values are given as examples, 'zz' and 'aaa' should be
+(note that current values serve as examples, 'zz' and 'aaa' should be
 replaced by the actual atomic and mass numbers). Below are some more
 frequently used keywords (see GUI Help or manual for the full list)
 FISMOD     1.
