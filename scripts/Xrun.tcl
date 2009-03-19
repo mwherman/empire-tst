@@ -6458,7 +6458,7 @@ adjourn .top75} \
         -padx 5 -pady 2 -side left 
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
-        -activebackground #dcdcdc \
+        -activebackground #dcdcdc -background #d9d9d9  \
         -dblclickcommand {exec xterm -e ../scripts/zvcomb $file [selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
@@ -7108,7 +7108,7 @@ if {$exten == ".ps"} {
   editFile $selecfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Available files:} -listvariable filelist \
+        -labeltext {Available files:} -background #d9d9d9  -listvariable filelist \
         -selectioncommand {set selecfilelist [selection get]
 set selecfile [lindex $selecfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
@@ -7203,7 +7203,7 @@ adjourn .top75 }} \
     set site_8_5 [lindex [$top.tab88 childsite] 5]
     ::iwidgets::scrolledlistbox $site_8_5.scr77 \
         -activebackground #dcdcdc -hscrollmode dynamic \
-        -labelfont {Helvetica -12 } -labelpos nw \
+        -labelfont {Helvetica -12 } -labelpos nw -background #d9d9d9\
         -labeltext {Other working folders:} -listvariable archdirlist \
         -selectioncommand {set archdir [selection get]
 set  archfiletmp [glob -nocomplain $archdir/*$archfilter*]
@@ -7231,7 +7231,7 @@ if {$archexten == ".ps"} {
   editFile $archdir/$archfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Available files:} -listvariable archfilelist \
+        -labeltext {Available files:} -background #d9d9d9 -listvariable archfilelist \
         -selectioncommand {set selarchfilelist [selection get]
 set archfile [lindex $selarchfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
@@ -7699,7 +7699,7 @@ adjourn .top75} \
         -dblclickcommand { editFile ../source/[selection get] } \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Double click to edit} -listvariable modules \
-        -textbackground #ffffff -textfont {Helvetica -12 } -width 180 
+        -background #d9d9d9 -textfont {Helvetica -12 } -width 180 
     frame $site_9_0.fra79 \
         -borderwidth 2 -background #d9d9d9 -height 75 \
         -highlightbackground #dcdcdc -width 125 
