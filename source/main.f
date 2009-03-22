@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-03-09 23:49:29 $
-Ccc   * $Id: main.f,v 1.202 2009-03-09 23:49:29 Capote Exp $
+Ccc   * $Date: 2009-03-22 22:55:59 $
+Ccc   * $Id: main.f,v 1.203 2009-03-22 22:55:59 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -339,7 +339,7 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                   ENDDO
                ENDIF
              ENDIF
-           ELSE
+           ELSEIF (MSD.eq.0) then
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0)
@@ -443,7 +443,7 @@ C-----Print elastic and direct cross sections from ECIS
          WRITE (8,*) ' Results provided by Coupled Channel calculations'
          WRITE (8,*) ' Inelastic scattering results provided by'
          WRITE (8,*) ' Coupled Channel + DWBA calculations'
-         if(CSMsd(1)+CSMsd(2).NE.0.)
+         if((CSMsd(1)+CSMsd(2)).NE.0.)
      &   WRITE (8,*) ' Some discrete levels are embedded into continuum'
          WRITE (8,*) ' '
         ELSEIF (DIRect.EQ.3) THEN
