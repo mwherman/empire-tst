@@ -1,5 +1,7 @@
-FC     =  gfortran
-FFLAGS = -std=legacy 
+#----GNU FORTRAN compiler
+FC    =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----Linux script calling f2c converter and gcc C compiler

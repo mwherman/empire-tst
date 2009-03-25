@@ -1,11 +1,13 @@
+#----GNU FORTRAN compiler
+FC     =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
 #....Intel FORTRAN compiler
 #FC     =  ifort 
-#----GNU FORTRAN compiler
-FC     = gfortran
 #----G95 FORTRAN compiler
 #FC     = g95
 #----standard f90 FORTRAN compiler
-#FC	= f90
+#FC   = f90
 #===== M a c ==================================
 #---- gfortran Mac  compiler
 #FC     =  gfortran
@@ -17,12 +19,12 @@ FC     = gfortran
 #----flags for detailed warnings
 #FFLAGS = -Wall
 
-OBJF =	checkr.o
+OBJF =      checkr.o
 
 
 checkr:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+      $(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+      rm *.o
 

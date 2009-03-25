@@ -1,5 +1,7 @@
 #----GNU gfortran FORTRAN compiler
 FC     =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
 #----flags for production compilation with g77
@@ -35,11 +37,11 @@ FC     =  gfortran
 #FFLAGS = -g --chk
 
 
-OBJF =	empend.o
+OBJF =      empend.o
 
 
 empend:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+      $(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+      rm *.o
