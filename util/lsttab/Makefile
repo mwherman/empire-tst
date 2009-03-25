@@ -1,5 +1,7 @@
-#----GNU gfortran FORTRAN compiler
+#----GNU FORTRAN compiler
 FC     =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
 #----flags for production compilation with g77
@@ -36,11 +38,11 @@ FC     =  gfortran
 #----flag for Lahey/Fujitsu to check boundaries and more
 #FFLAGS = -g --chk
 
-OBJF =	lsttab.o dxsend.o 
+OBJF =      lsttab.o dxsend.o
 
 
 lsttab:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+      $(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+      rm *.o

@@ -1,5 +1,7 @@
-#----GNU gFORTRAN compiler
-FC     = gfortran
+#----GNU FORTRAN compiler
+FC     =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
 #----Intel FORTRAN compiler
 #FC     = ifort
 #----GNU FORTRAN95 compiler (FEDORA 6)
@@ -7,7 +9,7 @@ FC     = gfortran
 #----Lahey/Fujitsu FORTRAN95 compiler
 #FC     = lf95
 #----standard f90 FORTRAN compiler
-#FC	= f90
+#FC   = f90
 #===== M a c ==================================
 #---- gfortran Mac  compiler
 #FC     =  gfortran
@@ -20,11 +22,11 @@ FC     = gfortran
 #FFLAGS = -Wall
 
 
-OBJF =	stanef.o
+OBJF =      stanef.o
 
 
 stanef:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+      $(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+      rm *.o

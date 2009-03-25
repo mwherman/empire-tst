@@ -1,18 +1,20 @@
 #----GNU FORTRAN compiler
-FC     = gfortran
-#----GNU FORTRAN95 compiler 
+FC     =  gfortran
+#----flags for production compilation with gfortran
+FFLAGS = -std=legacy -O3
+#----GNU FORTRAN95 compiler
 #FC     = g95
 #....Intel FORTRAN compiler
-#FC     =  ifort 
-#----Lahey/Fujitsu FORTRAN95 compiler 
+#FC     =  ifort
+#----Lahey/Fujitsu FORTRAN95 compiler
 #FC     = lf95
 #----standard f90 FORTRAN compiler
-#FC	= f90
+#FC   = f90
 #----INTEL f95 compiler
 #FC     =  ifort
-#----flags for optimalization using ifort 
-#FFLAGS = -arch pn4 -O3 -axPW  -ipo   
-#FFLAGS = -arch pn4 -O3 -ipo 
+#----flags for optimalization using ifort
+#FFLAGS = -arch pn4 -O3 -axPW  -ipo
+#FFLAGS = -arch pn4 -O3 -ipo
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
@@ -22,13 +24,13 @@ FC     = gfortran
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
 
-OBJF =	psyche.o
+OBJF =      psyche.o
 
 
 psyche:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+      $(FC) -o $@ $(OBJF)
 
 
 clean:
-	rm *.o
+      rm *.o
 
