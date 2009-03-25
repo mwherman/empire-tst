@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-03-22 22:55:59 $
-Ccc   * $Id: main.f,v 1.203 2009-03-22 22:55:59 Capote Exp $
+Ccc   * $Date: 2009-03-25 15:36:47 $
+Ccc   * $Id: main.f,v 1.204 2009-03-25 15:36:47 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -338,6 +338,9 @@ C--------------------Escape if we go beyond recoil spectrum dimension
      &                  = RECcse(irec + 1,0,nnurec) + csmsdl*weight
                   ENDDO
                ENDIF
+             ELSE
+               READ (46,*,END = 1400) popread
+               READ (45,*,END = 1400)     ! Skipping level identifier line
              ENDIF
            ELSEIF (MSD.eq.0) then
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
