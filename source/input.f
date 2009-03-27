@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-03-11 13:58:48 $
-Ccc   * $Id: input.f,v 1.294 2009-03-11 13:58:48 Capote Exp $
+Ccc   * $Date: 2009-03-27 13:51:10 $
+Ccc   * $Id: input.f,v 1.295 2009-03-27 13:51:10 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -5208,7 +5208,7 @@ C-----Sensitivity calculations for KALMAN
 C--------Tuning factors
          IF (name.EQ.'TUNEPE') THEN
             IF (i1.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in PE TUNE '',I2)') i3
+               WRITE (8,'('' UNKNOWN EJECTILE in PE TUNE '',I2)') i1
                GOTO 100
             ENDIF
             if(i2.gt.0.) then
