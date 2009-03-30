@@ -29,8 +29,10 @@ class mgCovars:
     def __init__(self, filename, ngroups=33):
         self.elist = []
         self.xsecs = {}
+        self.uncert = {}
         self.covars = {}
         self.corrs = {}
+        self.filename = filename
         self.ngroups = ngroups
         
         assert os.path.exists(filename), "File %s not found!" % filename
@@ -63,6 +65,8 @@ class mgCovars:
         xsec2 = []
         rsd1 = []
         rsd2 = []
+        
+
         if MAT1==MAT2 and colMT==rowMT:
             # self-correlation:
             for i in range(i,i+self.ngroups):
@@ -73,9 +77,11 @@ class mgCovars:
                 rsd1.append(float(rs1))
                 rsd2.append(float(rs1))
                 
-                # write xsecs only for self-correlations
-                self.xsecs['MT%i'%colMT] = xsec1
-                
+            # write xsecs only for self-correlations
+            key = 'MT%i'%colMT
+            self.xsecs[key] = xsec1
+            self.uncert[key] = rsd1
+
             # only write the elist the first time we see it:
             if len(self.elist)==0:
                 self.elist = tuple(elist)
@@ -144,6 +150,7 @@ class mgCovars:
         returns the correlation matrix, index of upper and lower boundaries,
         and the line number for the end of this section in the file
         """
+        formatError = False
         mat = numpy.zeros( (self.ngroups,self.ngroups) )
         
         #find dimensions for the matrix:
@@ -179,13 +186,18 @@ class mgCovars:
             i += 2
             for row in range(low,high):
                 
-                line = fin[i].strip().split()
-                try:
-                    vals = [int(a) for a in line[1:] ]
-                except ValueError:
-                    # crap ***** format from NJOY:
-                    print "Out of range '***' in NJOY?"
-                    
+                column = fin[i][:6]
+                line = fin[i][6:].rstrip()
+                vals = [line[k:k+5] for k in range(0, len(line), 5)]
+                
+                for k in range(len(vals)):
+                    try:
+                        vals[k] = int(vals[k])
+                    except ValueError:
+                        # crap ***** format from NJOY:
+                        formatError = True
+                        vals[k] = 0 # or 'nan'
+                
                 # calculate bounds:
                 start = low + j*colsPerBlock
                 end = low + (j+1)*colsPerBlock
@@ -197,6 +209,8 @@ class mgCovars:
                 mat[row,start:end] = vals
                 i += 1
         
+        if formatError:
+            print "NaN problem in %s likely!" % self.filename
         return mat, low, high, i
     
 
