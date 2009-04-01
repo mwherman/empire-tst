@@ -98,9 +98,11 @@ c     inflag=2
       gncut(2)=0.
       gncuth(1)=1000000.
       gncuth(2)=1000000.
-      open(5,file='ptanal.inp',status='old')
-      read(5,data)
-      close(5)
+
+      call readinp
+c      open(5,file='ptanal.inp',status='old')
+c      read(5,data)
+c      close(5)
       open(7,file='ptanal.lis',status='unknown')
       write(7,700)
  700  format(/' <<<<< PTANAL >>>>>')
@@ -122,6 +124,30 @@ ccho  call readsas('sas.txt')
       close(7)
       stop
       end
+c.....
+      subroutine readinp
+C     read 'ptanal.inp' file into dat:
+      common/dat/ rad,awt,sf0,iset,sf1(3),D0,sf2(3),D1,ecut,ap,dap,
+     1            zam,spin,ggavg(3),gncut(3),gncuth(3),mat,abun
+      common/adj/ npos,nidx,nplus,adjust
+
+      namelist/data/ adjust,awt,sf0,iset,sf1,D0,sf2,D1,ecut,ap,dap,
+     1               zam,spin,ggavg,gncut,gncuth,mat,abun
+      character adjust*17
+
+
+      open(5,file='ptanal.inp',status='old')
+      read(5,data)
+      close(5)
+
+ccaleb Said suggests using arithmetic mean for d-wave gamma width:
+      if (ggavg(3).eq.0.0) then
+          ggavg(3) = sqrt(ggavg(1)*ggavg(2))
+      endif
+
+      return
+      end
+
 c.....
       subroutine readres
 C     read resonance parameter file in CFMTA format
@@ -217,8 +243,9 @@ ccho   rp(4,i)=dggn/inflag
        rp(4,i)=dggn
        rp(5,i)=gg
        rp(6,i)=dgg
+ccaleb use kernel to adjust gG_n?
        rp(7,i)=area
-       rp(7,i)=0
+c       rp(7,i)=0
        rp(8,i)=0
        SJ(i)=-1
 coh       if(jflag.eq.'F') SJ(i)=ajx
@@ -316,6 +343,7 @@ c      endif
      1         iline
       stop
       end
+
 c.....
       subroutine gamavg
 C     compute average Gg
@@ -1266,10 +1294,10 @@ C          decide gg based on supplied gn
           nrggg =nrggg+1
          endif
 c
-caleb  problem here: always assuming 1% err on energy if no value found
-caleb  in atlas.
-caleb
-caleb  could read as strings, and decide based on how many sig. digits...?
+ccaleb  problem here: always assuming 1% err on energy if no value found
+ccaleb  in atlas.
+ccaleb
+ccaleb  could read as strings, and decide based on how many sig. digits...?
 c         if (rp(2,n).eq.0.0.and.rp(1,n).le.100e+3) then
 c           dEn=abs(0.001*En)
 c         elseif (rp(2,n).eq.0.0) then
@@ -1278,25 +1306,27 @@ c         elseif (rp(2,n).eq.0.0) then
          else
            dEn=rp(2,n)
          endif
+c         dEn = 1.5*dEn
          if (rp(4,n).eq.0.0) then
            dgn=0.08*gn
-caleb  increase uncertainty on Gn above 200 keV if gaps exist:           
+ccaleb  increase uncertainty on Gn above 200 keV if gaps exist:           
            if (En.gt.2.e+5) then
                dgn=0.16*gn
            endif
          else
            if (gn.eq.rp(3,n)) then
-caleb  uncertainties on Gn in Atlas may be too small:
+ccaleb  uncertainties on Gn in Atlas may be too small:
              dgn=rp(4,n)
 c             dgn=rp(4,n) * 3.0
            else
-c             dgn=gn*rp(4,n)/rp(3,n)
-             dgn=gn*rp(4,n)/rp(3,n) * 3.0
+             dgn=gn*rp(4,n)/rp(3,n)
+c             dgn=gn*rp(4,n)/rp(3,n) * 3.0
            endif
          endif
+c         dgn = dgn*1.0
          if (rp(6,n).eq.0.0) then
            dgg=0.1*gg
-caleb  increase uncertainty on Gg above 200 keV if gaps exist:           
+ccaleb  increase uncertainty on Gg above 200 keV if gaps exist:           
            if (En.gt.2.e+5) then
                dgg=0.5*gg
            endif
@@ -1307,6 +1337,7 @@ caleb  increase uncertainty on Gg above 200 keV if gaps exist:
              dgg=gg*rp(6,n)/rp(5,n)
            endif
          endif
+c         dgg=1.5*dgg
 c
 ccho  uncertainty of resonance parameter to be adjusted is written
 c     to ptanal.unc and the corresponding parameter is adjusted
@@ -1784,6 +1815,7 @@ C     right justify
         RA(I)=RRA
       GO TO 10
       END
+c.....
 CTWB      SUBROUTINE mrqmin(x,y,sig,ndata,a,ia,ma,covar,alpha,nca,chisq,
 CTWB     *funcs,alamda)
       SUBROUTINE mrqmin(x,y,sig,ndata,a,ia,ma,covar,alpha,nca,chisq,
@@ -1853,6 +1885,7 @@ CTWB      call mrqcof(x,y,sig,ndata,atry,ia,ma,covar,da,nca,chisq,funcs)
       endif
       return
       END
+c.....
 CTWB      SUBROUTINE mrqcof(x,y,sig,ndata,a,ia,ma,alpha,beta,nalp,chisq,
 CTWB     *funcs)
       SUBROUTINE mrqcof(x,y,sig,ndata,a,ia,ma,alpha,beta,nalp,chisq)
@@ -1903,6 +1936,7 @@ CTWB        call funcs(x(i),a,ymod,dyda,ma)
 18    continue
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
 ccho
 c     SUBROUTINE gaussj(a,n,np,b,m,mp)
@@ -1989,6 +2023,7 @@ c       if (a(icol,icol).eq.0.) pause 'singular matrix in gaussj'
 24    continue
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       SUBROUTINE covsrt(covar,npc,ma,ia,mfit)
       INTEGER ma,mfit,npc,ia(ma)
@@ -2019,6 +2054,7 @@ C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
 15    continue
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       FUNCTION erf(x)
       REAL erf,x
@@ -2034,6 +2070,7 @@ cdub  REAL*8 gammp
       endif
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       FUNCTION gammp(a,x)
       REAL a,gammp,x
@@ -2055,6 +2092,7 @@ cdub    print *,'gammcf=',gammcf
       endif
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       SUBROUTINE gser(gamser,a,x,gln)
       INTEGER ITMAX
@@ -2138,6 +2176,7 @@ C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       gammln=tmp+log(stp*ser/x)
       return
       END
+c.....
 C  (C) Copr. 1986-92 Numerical Recipes Software <=s='%.
       FUNCTION ran2(idum)
       INTEGER idum,IM1,IM2,IMM1,IA1,IA2,IQ1,IQ2,IR1,IR2,NTAB,NDIV
@@ -2218,8 +2257,7 @@ c     set label and line colors
       irt=system("gnuplot ptdist.gp")
       return
       end
-
-
+c.....
 C cmattoon: the pause statement is obsolete in f90, this subroutine
 C gives equivalent function
 C NOT useful if we plan on parallelizing however.     
