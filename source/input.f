@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-03-27 13:51:10 $
-Ccc   * $Id: input.f,v 1.295 2009-03-27 13:51:10 Capote Exp $
+Ccc   * $Date: 2009-04-02 09:19:05 $
+Ccc   * $Id: input.f,v 1.296 2009-04-02 09:19:05 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -40,7 +40,7 @@ C
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
-      CHARACTER*2 deut, gamma, trit, cnejec2
+      CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT, SNGL
       LOGICAL gexist, nonzero, fexist
 
@@ -75,7 +75,7 @@ C
      &     0.71, 0., 0.41, 0., 0.38, 0., 0.67, 0., 0.61, 0., 0.78, 0.,
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0.,
      &     0.43, 0., 0.50, 0., 0.39/
-      DATA deut, trit, gamma/'d ', 't ', 'g '/
+      DATA deut, trit, gamma, he3/'d ', 't ', 'g ','h '/
       ARGred = -1.
 C-----maximum argument of EXP function supported by the computer (for real*8)
       EXPmax = 700.
@@ -409,6 +409,41 @@ C--------ejectile alpha
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.0
+
+         IF (NDEjc.LT.6) THEN
+           WRITE (8,*) ' '
+           WRITE (8,*) 
+     >    ' WARNING: this version of EMPIRe is prepared to emit complex'
+           WRITE (8,*)
+     >    ' WARNING: complex particles, NDEjc must be 6 in dimension.h '
+          STOP 'You have to increase NDEjc in dimension.h (set NDEjc=6)'
+         ENDIF
+
+C--------ejectile deuteron
+         AEJc(4) = 2.
+         ZEJc(4) = 1.
+         XNEjc(4) = AEJc(4) - ZEJc(4)
+         IZAejc(4) = INT(1000.*ZEJc(4) + AEJc(4))
+         iz = INT(ZEJc(4))
+         SYMbe(4) = SMAT(iz)
+         SEJc(4) = 1.0
+C--------ejectile triton
+         AEJc(5) = 3.
+         ZEJc(5) = 1.
+         XNEjc(5) = AEJc(5) - ZEJc(5)
+         IZAejc(5) = INT(1000.*ZEJc(5) + AEJc(5))
+         iz = INT(ZEJc(5))
+         SYMbe(5) = SMAT(iz)
+         SEJc(5) = 0.5
+C--------ejectile he-3
+         AEJc(6) = 3.
+         ZEJc(6) = 2.
+         XNEjc(6) = AEJc(6) - ZEJc(6)
+         IZAejc(6) = INT(1000.*ZEJc(6) + AEJc(6))
+         iz = INT(ZEJc(6))
+         SYMbe(6) = SMAT(iz)
+         SEJc(6) = 0.5
+
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
          KEY_shape = 0
@@ -535,20 +570,25 @@ C--------NEMP  number of protons  emitted
          READ (5,*) nemp
 C--------NEMA  number of alphas   emitted
          READ (5,*) nema
+C--------NEMC  number of deuterons emitted
+         READ (5,*) nemd
+C--------NEMC  number of tritons   emitted
+         READ (5,*) nemt
+C--------NEMC  number of he3       emitted
+         READ (5,*) nemh
 C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
-         IF (NEMc.GT.0 .AND. NDEJC.LT.4) THEN
+         IF (NEMc.GT.0) THEN
            WRITE (8,*) ' '
-           WRITE (8,*) ' WARNING: TO EMIT CLUSTERS change NDEJC to 4 in'
-           WRITE (8,*) ' dimension.h'
-           NEMc = 0
+           WRITE (8,*) ' WARNING: TO EMIT CLUSTERS change NDEJC to ',
+     >                 NDEjc+1,' in dimension.h'
+           STOP 'You have to increase NDEjc in dimension.h'
          ENDIF
 C--------cluster ejectile
-         IF (NDEJC.GT.3) THEN
+         IF (NDEJC.GT.6) THEN
             AEJc(NDEJC) = aclu
             ZEJc(NDEJC) = zclu
-            IF (aclu.EQ.2.0D0 .AND. zclu.EQ.1.0D0) SEJc(NDEJC) = 1.0
-            IF (aclu.EQ.3.0D0 .AND. zclu.EQ.2.0D0) SEJc(NDEJC) = 0.5
+            SEJc(NDEJC) = 0.5
             IF (aclu.EQ.6.0D0 .AND. zclu.EQ.3.0D0) SEJc(NDEJC) = 1.0
             IF (aclu.EQ.7.0D0 .AND. zclu.EQ.3.0D0 .OR.
      &          aclu.EQ.7.0D0 .AND. zclu.EQ.4.0D0) SEJc(NDEJC) = 1.5
@@ -558,6 +598,7 @@ C--------cluster ejectile
             SYMbe(NDEJC) = SMAT(iz)
          ENDIF
 C--------cluster ejectile *** done ***
+
 C--------ascribing location to each nucleus
 C--------compound nucleus 1
          nnuc = 1
@@ -594,7 +635,7 @@ C--------NNUcd number of decaying nuclei
 C--------NNUct total number of nuclei considered
 C
          NEJcm = NDEJC
-         IF (aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0) NEJcm = 3
+C        IF (aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0) NEJcm = 3
          IF (ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0) SYMbe(0) = gamma
 C--------correct ejectiles symbols
          DO nejc = 1, NEJcm
@@ -602,23 +643,34 @@ C--------correct ejectiles symbols
      &          SYMbe(nejc) = deut
             IF (ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.3.0D0)
      &          SYMbe(nejc) = trit
+            IF (ZEJc(nejc).EQ.2.0D0 .AND. AEJc(nejc).EQ.3.0D0)
+     &          SYMbe(nejc) = he3
          ENDDO
 C
 C        Please note that the order in which the array IZA(nnuc) is filled is
 C        quite important.
 C
          DO iac = 0, NEMc
+           DO ih = 0, nemh
+           DO it = 0, nemt
+           DO id = 0, nemd
            DO ia = 0, nema
              DO ip = 0, nemp
                DO in = 0, nemn
-                 IF (iac + ia + ip + in.NE.0) THEN
-                    atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
-     &                     *AEJc(2) - FLOAT(ia)*AEJc(3)
-                    IF (NDEJC.GT.3) atmp = atmp - FLOAT(iac)
+                 IF (iac + ih + it + id + ia + ip + in.NE.0) THEN
+                    atmp = A(1) - FLOAT(in)*AEJc(1) 
+     &                          - FLOAT(ip)*AEJc(2) 
+     &                          - FLOAT(ia)*AEJc(3)
+     &    - FLOAT(id)*AEJc(4) - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
+
+                    IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)
      &                  *AEJc(NDEJC)
+
                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)
      &                     *ZEJc(2) - FLOAT(ia)*ZEJc(3)
-                    IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
+     &    - FLOAT(id)*ZEJc(4) - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
+
+                    IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)
      &                  *ZEJc(NDEJC)
 
 C                   residues must be heavier than alpha !! (RCN)
@@ -678,31 +730,49 @@ C----------------------set reaction string
                           REAction(nnuc)(iend + 1:iend + 1) = 'a'
                           iend = iend + 1
                        ENDIF
-                       IF (NDEJC.GT.3 .AND. iac.NE.0) THEN
+
+                       IF (id.NE.0) THEN
+                          WRITE (cnejec,'(I1)') id
+                          IF (id.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 'd'
+                          iend = iend + 1
+                       ENDIF
+                       
+                               IF (it.NE.0) THEN
+                          WRITE (cnejec,'(I1)') it
+                          IF (it.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 't'
+                          iend = iend + 1
+                       ENDIF
+
+                       IF (ih.NE.0) THEN
+                          WRITE (cnejec,'(I1)') ih
+                          IF (ih.GT.1) THEN
+                             REAction(nnuc)(iend + 1:iend + 1)
+     &                          = cnejec
+                             iend = iend + 1
+                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 1) = 'h'
+                          iend = iend + 1
+                       ENDIF
+
+                       IF (NDEJC.GT.6 .AND. iac.NE.0) THEN
                           WRITE (cnejec,'(I1)') iac
                           IF (iac.GT.1) THEN
                              REAction(nnuc)(iend + 1:iend + 1)
      &                          = cnejec
                              iend = iend + 1
                           ENDIF
-C                         REAction(nnuc)(iend + 1:iend + 2) = 'li'
-C                         iend = iend + 2
-                          IF (AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC)
-     &                        .EQ.1) THEN
-                             REAction(nnuc)(iend + 1:iend + 1) = 'd'
-                             iend = iend + 1
-                          ENDIF
-                          IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
-     &                        .EQ.1) THEN
-                             REAction(nnuc)(iend + 1:iend + 1) = 't'
-                             iend = iend + 1
-                          ENDIF
-                          IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC)
-     &                        .EQ.2) THEN
-                             REAction(nnuc)(iend + 1:iend + 3)
-     &                           = 'He3'
-                             iend = iend + 3
-                          ENDIF
+                          REAction(nnuc)(iend + 1:iend + 2) = 'li'
+                          iend = iend + 2
                        ENDIF
                        REAction(nnuc)(iend + 1:iend + 1) = ')'
 C----------------------set residues to be used for EXFOR retrieval
@@ -726,6 +796,9 @@ C----------------------set residues to be used for EXFOR retrieval
                     ENDIF
                  ENDIF
               ENDDO
+           ENDDO
+           ENDDO
+           ENDDO
            ENDDO
           ENDDO
          ENDDO
@@ -753,6 +826,7 @@ C--------------set projectile  for EXFOR retrieval
                IF (AEJc(0).EQ.4.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'a'
                IF (AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 'd'
                IF (AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0) proj = 'g'
+               IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'h'
                IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 't'
 C--------------retrieval from the remote database
                IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.2) THEN
@@ -845,29 +919,25 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 5408
             ENDIF
          ELSEIF (AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
-            KTRlom(0,0) = 6200       ! Bojowald OMP for deuterons (replaced by Haixia)
+            KTRlom(0,0) = 6200       ! Haixia OMP for deuterons 
          ELSEIF (AEJc(0).EQ.3 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0,0) = 7100       ! Bechetti OMP for tritons
-         ELSEIF ((AEJc(0).EQ.4 .OR. AEJc(0).EQ.3) .AND. ZEJc(0).EQ.2)
-     &           THEN
-            KTRlom(0,0) = 9600       ! Avrigeanu OMP for He-4 and He-3
+         ELSEIF (AEJc(0).EQ.3 .AND. ZEJc(0).EQ.2) THEN
+            KTRlom(0,0) = 8100       ! Bechetti OMP for He-3
+         ELSEIF (AEJc(0).EQ.4 .AND. ZEJc(0).EQ.2) THEN
+            KTRlom(0,0) = 9600       ! Avrigeanu OMP for He-4
 C-----------(McFadden global potential 9100 could be used)
          ENDIF
+
          DO i = 1, NDNUC
             KTRlom(1,i) = 2405
-            IF (NPRoject.EQ.1) KTRlom(1,i) = KTRlom(0,0)
-            KTRlom(2,i) = 5405
-            IF (NPRoject.EQ.2) KTRlom(2,i) = KTRlom(0,0)
+              KTRlom(2,i) = 5405
             KTRlom(3,i) = 9600
-            IF (NPRoject.EQ.3) KTRlom(3,i) = KTRlom(0,0)
-            IF (NDEJC.GT.3) THEN
-               KTRlom(NDEJC,i) = 9600
-               IF (AEJc(NDEJC).EQ.2 .AND. ZEJc(NDEJC).EQ.1)
-     &             KTRlom(NDEJC,i) = 6200  ! Bojowald OMP for deuterons (replaced by Haixia)
-               IF (AEJc(NDEJC).EQ.3 .AND. ZEJc(NDEJC).EQ.1)
-     &             KTRlom(NDEJC,i) = 7100
-               IF (NPRoject.EQ.NDEJC) KTRlom(NDEJC,i) = KTRlom(0,0)
-            ENDIF
+            KTRlom(4,i) = 6200
+            KTRlom(5,i) = 7100
+            KTRlom(6,i) = 8100
+
+            KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
 C
 C--------inteligent defaults *** done ***
@@ -886,9 +956,6 @@ C
             ip = ipres - 2*ia
             mulem = ia + in + ip
             IF(mulem.LE.NENdf) ENDf(nnuc) = 1
-C           RCN, April 2008
-C           IF(ia.eq.0 .and. ip.eq.0  .and. in.le.6)  ENDf(nnuc) = 1 ! n,xn
-C           RCN, Dec 2008, (n,5n) and (n,6n) should be skipped as not implemented in ENDF-6 format
 C           These reactions are assumed to be always exclusive
             IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)  ENDf(nnuc) = 1 ! n,xn
             IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)  ENDf(nnuc) = 1 ! n,p; n,np; n,2np; n,3np
@@ -938,18 +1005,32 @@ C--------Set exclusive and inclusive ENDF formatting flags
 C-----------We fix below target ENDf flag since it escapes normal setting
             IF (ENDf(0).EQ.0) ENDf(0) = 1
             DO iac = 0, NEMc
+              DO ih = 0, nemh
+              DO it = 0, nemt
+              DO id = 0, nemd
               DO ia = 0, nema
                 DO ip = 0, nemp
                    DO in = 0, nemn
-                        mulem = iac + ia + ip + in
-                        atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)
-     &                         *AEJc(2) - FLOAT(ia)*AEJc(3)
-                        IF (NDEJC.GT.3) atmp = atmp - FLOAT(iac)
-     &                      *AEJc(NDEJC)
-                        ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)
-     &                         *ZEJc(2) - FLOAT(ia)*ZEJc(3)
-                        IF (NDEJC.GT.3) ztmp = ztmp - FLOAT(iac)
-     &                      *ZEJc(NDEJC)
+                        mulem = iac + ia + ip + in + id + it + ih
+
+                        atmp = A(1) - FLOAT(in)*AEJc(1) 
+     &                              - FLOAT(ip)*AEJc(2) 
+     &                              - FLOAT(ia)*AEJc(3)
+     &                              - FLOAT(id)*AEJc(4)
+     &                              - FLOAT(it)*AEJc(5)
+     &                              - FLOAT(ih)*AEJc(6)
+                    IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)
+     &                  *AEJc(NDEJC)
+
+                        ztmp = Z(1) - FLOAT(in)*ZEJc(1) 
+     &                              - FLOAT(ip)*ZEJc(2) 
+     &                              - FLOAT(ia)*ZEJc(3)
+     &                              - FLOAT(id)*ZEJc(4)
+     &                              - FLOAT(it)*ZEJc(5)
+     &                              - FLOAT(ih)*ZEJc(6)
+
+                    IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)
+     &                  *ZEJc(NDEJC)
 
 C                       residues must be heavier than alpha
                         if(atmp.le.4 . or. ztmp.le.2) cycle
@@ -966,12 +1047,7 @@ C                          Comment the following block and uncommment the line a
                            ENDIF
 C                          IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
                         ENDIF
-C                       RCN, Dec 2008
-C                       IF(ia.eq.0 .and. ip.eq.0  .and. in.le.4)
-C    >                    ENDf(nnuc) = 1 ! n,xn
-C                       IF(ia.eq.0 .and. ip.eq.1  .and. in.le.3)
-C    >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
-                  IF (ENDf(nnuc).EQ.1) THEN
+                        IF (ENDf(nnuc).EQ.1) THEN
                            NEXclusive = NEXclusive + 1
                            IF(NEXclusive.GT.NDExclus) THEN
                              WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
@@ -981,9 +1057,12 @@ C    >                    ENDf(nnuc) = 1 ! n,np; n,2np; n,3np
                            ENDIF
                            INExc(nnuc) = NEXclusive
                         ENDIF
-                     ENDDO
-                  ENDDO
-               ENDDO
+                   ENDDO
+                ENDDO
+              ENDDO
+              ENDDO
+              ENDDO
+              ENDDO
             ENDDO
 
            WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
@@ -1129,7 +1208,10 @@ C        3 prot. disc.   x     x     0      0      x      0
 C        4 prot. cont.   0     x     x      x      x      x
 C        5 gamma         0     0     x      x      0      x
 C        6 alpha. cont.  0     0     0      0      0      x
-C        7 LI   . cont.  0     0     0      0      0      x
+C        7 deut . cont.  0     0     0      0      0      x
+C        8 trit . cont.  0     0     0      0      0      x
+C        9 He-3 . cont.  0     0     0      0      0      x
+C       10 LI   . cont.  0     0     0      0      0      x
 C
 C--------with x=1 if used and x=0 if not.
 C
@@ -1257,6 +1339,9 @@ C--------set PCROSS  (.,6) cluster emission
             IDNa(5,6) = 1
             IDNa(6,6) = 1
             IDNa(7,6) = 1
+            IDNa(8,6) = 1
+            IDNa(9,6) = 1
+            IDNa(10,6) = 1
 C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
@@ -1299,7 +1384,10 @@ C--------print IDNa matrix
          WRITE (8,'('' prot. cont. '',8I10)') (IDNa(4,j),j = 1,NDMODELS)
          WRITE (8,'('' gammas      '',8I10)') (IDNa(5,j),j = 1,NDMODELS)
          WRITE (8,'('' alpha cont. '',8I10)') (IDNa(6,j),j = 1,NDMODELS)
-         WRITE (8,'('' LI    cont. '',8I10)') (IDNa(7,j),j = 1,NDMODELS)
+         WRITE (8,'('' deut. cont. '',8I10)') (IDNa(7,j),j = 1,NDMODELS)
+         WRITE (8,'('' trit. cont. '',8I10)') (IDNa(8,j),j = 1,NDMODELS)
+         WRITE (8,'('' He-3  cont. '',8I10)') (IDNa(9,j),j = 1,NDMODELS)
+         WRITE (8,'('' LI    cont. '',8I10)') (IDNa(10,j),j= 1,NDMODELS)
          WRITE (8,*) ' '
          WRITE(12,*) ' '
          WRITE(12,*)
@@ -2366,7 +2454,13 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
      &            KTRlom(3,1)
         else
         WRITE (12,*) 'Alpha     o. m. parameters: Kumar & Kailas 2007 '
-      endif
+        endif
+        WRITE (12,*) 'Deuteron  o. m. parameters: RIPL catalog number ',
+     &            KTRlom(4,1)
+        WRITE (12,*) 'Triton    o. m. parameters: RIPL catalog number ',
+     &            KTRlom(5,1)
+        WRITE (12,*) 'He-3      o. m. parameters: RIPL catalog number ',
+     &            KTRlom(6,1)
 
         IF (NEMc.GT.0) WRITE (12,*)
      &               'Cluster   o. m. parameters: RIPL catalog number ',
@@ -2530,7 +2624,13 @@ C        DO i = 1, NNUct
      &            KTRlom(3,1)
         else
         WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
-      endif
+        endif
+        WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
+     &            KTRlom(4,1)
+        WRITE (8,*) ' Triton    o. m. parameters: RIPL catalog number ',
+     &            KTRlom(5,1)
+        WRITE (8,*) ' He-3      o. m. parameters: RIPL catalog number ',
+     &            KTRlom(6,1)
         IF (NEMc.GT.0) WRITE (8,*)
      &            ' Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)

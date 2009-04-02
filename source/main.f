@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-03-25 15:36:47 $
-Ccc   * $Id: main.f,v 1.204 2009-03-25 15:36:47 Capote Exp $
+Ccc   * $Date: 2009-04-02 09:19:06 $
+Ccc   * $Id: main.f,v 1.205 2009-04-02 09:19:06 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -1344,7 +1344,10 @@ C--------
             IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
             IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
             IF(CSEmis(3,1).GT.0) CALL AUERST(1,3)
-            IF(NDEjc.eq.4 .AND. CSemis(4,1).GT.0) CALL AUERST(1,4)
+            IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
+            IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
+            IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
+            IF(NDEjc.eq.7 .AND. CSemis(7,1).GT.0) CALL AUERST(1,7)
             WRITE (8,*) ' '
             IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
                WRITE (8,*) ' HMS spectra stored as inclusive:'
@@ -1642,25 +1645,37 @@ C--------Integrating exclusive population spectra (ENDF)
          xtotsp = 0
          ptotsp = 0
          atotsp = 0
+         dtotsp = 0
+         ttotsp = 0
          htotsp = 0
+         ctotsp = 0
          emedg = 0
          emedn = 0
          emedp = 0
          emeda = 0
+         emedd = 0
+         emedt = 0
          emedh = 0
+         emedc = 0
          IF ( ENDf(nnuc).EQ.1 .AND. INExc(nnuc).GE.0)     THEN
            DO ispec = 1, min(NEX(1) + 10,ndecsed)
             gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
             xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
             ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
             atotsp = atotsp + POPcse(0,3,ispec,INExc(nnuc))*DE
+            dtotsp = dtotsp + POPcse(0,4,ispec,INExc(nnuc))*DE
+            ttotsp = ttotsp + POPcse(0,5,ispec,INExc(nnuc))*DE
+            htotsp = htotsp + POPcse(0,6,ispec,INExc(nnuc))*DE
             emedg = emedg+POPcse(0,0,ispec,INExc(nnuc))*DE*(ispec-1)*DE
             emedn = emedn+POPcse(0,1,ispec,INExc(nnuc))*DE*(ispec-1)*DE
             emedp = emedp+POPcse(0,2,ispec,INExc(nnuc))*DE*(ispec-1)*DE
             emeda = emeda+POPcse(0,3,ispec,INExc(nnuc))*DE*(ispec-1)*DE
-            IF (NDEJC.EQ.4) THEN
-               htotsp = htotsp + POPcse(0,NDEJC,ispec,INExc(nnuc))*DE
-               emedh = emedh + POPcse(0,NDEJC,ispec,INExc(nnuc))
+            emedd = emedd+POPcse(0,4,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            emedt = emedt+POPcse(0,5,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            emedh = emedh+POPcse(0,6,ispec,INExc(nnuc))*DE*(ispec-1)*DE
+            IF (NDEJC.EQ.7) THEN
+               ctotsp = ctotsp + POPcse(0,NDEJC,ispec,INExc(nnuc))*DE
+               emedc = emedc + POPcse(0,NDEJC,ispec,INExc(nnuc))
      &                    *DE*(ispec - 1)*DE
             ENDIF
            ENDDO
@@ -1668,12 +1683,18 @@ C--------Integrating exclusive population spectra (ENDF)
            POPcs(1,INExc(nnuc)) = xtotsp
            POPcs(2,INExc(nnuc)) = ptotsp
            POPcs(3,INExc(nnuc)) = atotsp
-           IF (NDEJC.EQ.4) POPcs(NDEJC,INExc(nnuc)) = htotsp
+           POPcs(4,INExc(nnuc)) = dtotsp
+           POPcs(5,INExc(nnuc)) = ttotsp
+           POPcs(6,INExc(nnuc)) = htotsp
+           IF (NDEJC.EQ.7) POPcs(NDEJC,INExc(nnuc)) = htotsp
            IF (gtotsp.NE.0) emedg = emedg/gtotsp
            IF (xtotsp.NE.0) emedn = emedn/xtotsp
            IF (ptotsp.NE.0) emedp = emedp/ptotsp
            IF (atotsp.NE.0) emeda = emeda/atotsp
+           IF (dtotsp.NE.0) emedd = emedd/dtotsp
+           IF (ttotsp.NE.0) emedt = emedt/ttotsp
            IF (htotsp.NE.0) emedh = emedh/htotsp
+           IF (ctotsp.NE.0) emedc = emedc/ctotsp
            IF (CSPrd(nnuc).GT.0.d0 .AND. IOUt.GT.3) THEN
 C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)

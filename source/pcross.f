@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-19 00:00:33 $
-Ccc   * $Id: pcross.f,v 1.55 2009-01-19 00:00:33 Capote Exp $
+Ccc   * $Date: 2009-04-02 09:19:06 $
+Ccc   * $Id: pcross.f,v 1.56 2009-04-02 09:19:06 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -194,8 +194,7 @@ C
       dbreak  = 0.d0
       dpickup = 0.d0
       scompn  = Sigr
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
-     &                   .and. NDEJC.eq.4) THEN
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
         write(8,99002)
 99002   FORMAT (/5X,
      &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
@@ -203,27 +202,26 @@ C
         call DTRANS(iemin,iemax)
 99003   FORMAT (7x,5F8.2)
         IF(DXSRED.GT.0.d0) then
-          scompn = Sigr - cross(2) -cross(4)
+          scompn = Sigr - cross(2) -cross(5)
+          scompn = Sigr - cross(2) -cross(5)
           IF(scompn.le.0.d0) THEN
             scompn  = 0.d0
-            dbreak  = Sigr/(cross(2)+cross(4))*cross(2)
-            dpickup = Sigr/(cross(2)+cross(4))*cross(4)
+            dbreak  = Sigr/(cross(2)+cross(5))*cross(2)
+            dpickup = Sigr/(cross(2)+cross(5))*cross(5)
             cross(2)= dbreak
-C           Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
-            cross(4)= dpickup
+            cross(5)= dpickup
             DO ienerg = 1, NDEX
-              spec(2,ienerg) = Sigr/(cross(2)+cross(4))*spec(2,ienerg)
-              spec(4,ienerg) = Sigr/(cross(2)+cross(4))*spec(4,ienerg)
+              spec(2,ienerg) = Sigr/(cross(2)+cross(5))*spec(2,ienerg)
+              spec(5,ienerg) = Sigr/(cross(2)+cross(5))*spec(5,ienerg)
             ENDDO
-            write(8,99003) Einl,sigr,cross(2),cross(4)
+            write(8,99003) Einl,sigr,cross(2),cross(5)
             WRITE (8,59010)
 59010       FORMAT (/,1X,
      &      'Warning: Direct emission exhausted reaction cross section')
           ENDIF
-c         write(8,99003) Einl,sigr,cross(2),cross(4)
+c         write(8,99003) Einl,sigr,cross(2),cross(5)
           dbreak=cross(2)
-C         Pickup reaction is added to the incident deuteron spectra as approximation (it is d,t) !!
-          dpickup=cross(4)
+          dpickup=cross(5)
         ENDIF
       ENDIF
 C
@@ -411,7 +409,7 @@ C        Skipping cross sections if MSD and MSC active
                WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
-            ELSEIF (nejc.EQ.4 .AND. NEJcm.NE.3) THEN !light ion (always accepted)
+            ELSEIF (nejc.ge.4) THEN !complex particle
                status = "  (accepted)"
                WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
@@ -451,8 +449,7 @@ C
      &   ' mb'/1X,'total   preequilibrium fraction              =',F8.2)
 99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
      &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0
-     &                   .and. NDEJC.eq.4) THEN
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
             WRITE (8,99016)
 99016 FORMAT (/1x,'Kalbach parameterization for pick-up and stripping',
      &           ' is considered')
@@ -476,6 +473,9 @@ C     Note, that PCROSS only calculates emission into the continuum
             IF (nejc.EQ.1 .AND. IDNa(2,6).EQ.0) cycle
             IF (nejc.EQ.2 .AND. IDNa(4,6).EQ.0) cycle
             IF (nejc.EQ.3 .AND. IDNa(6,6).EQ.0) cycle
+            IF (nejc.EQ.4 .AND. IDNa(7,6).EQ.0) cycle
+            IF (nejc.EQ.5 .AND. IDNa(8,6).EQ.0) cycle
+            IF (nejc.EQ.6 .AND. IDNa(9,6).EQ.0) cycle
             ao = AEJc(nejc)
             zo = ZEJc(nejc)
             excnq = EXCn - Q(nejc,1)
@@ -905,16 +905,17 @@ C--------NEVER COME BACK ASUMPTION
 C-----------------------------------------
          ls(h1) = Cme*ln(h1) + LP(h1) + LM(h1)
       ENDDO
-      IF (IOUt.GE.3 .AND. NEJcm.EQ.3) WRITE (8,99005)
+      IF (IOUt.GE.3 .AND. NEJcm.LE.6) WRITE (8,99005)
 99005 FORMAT (/2X,'N',5X,'T r a n s i t i o n   r a t e s   ',
      &        '        E  m  i  s  s  i  o  n     r  a  t  e  s',//,5X,
      &'   plus     minus     TOTAL              TOTAL     gammas   neutr
-     &ons   protons   alphas'/)
-      IF (IOUt.GE.3 .AND. NEJcm.EQ.4) WRITE (8,99010)
+     &ons   protons   alphas   deuteron   triton     He-3'/)
+      IF (IOUt.GE.3 .AND. NEJcm.EQ.7) WRITE (8,99010)
 99010 FORMAT (/2X,'N',5X,'T r a n s i t i o n   r a t e s   ',
      &        '        E  m  i  s  s  i  o  n     r  a  t  e  s',//,5X,
      &'   plus     minus     TOTAL              TOTAL     gammas   neutr
-     &ons   protons   alphas   light ions'/)
+     &ons   protons   alphas   deuteron   triton     He-3    light ions'
+     &/)
       DO h1 = 1, n
          hhh = h1 - 1
          ij = 2*hhh + Ap
@@ -923,7 +924,7 @@ C-----------------------------------------
          hlp4 = hlp1 + hlp2
          IF (IOUt.GE.3) WRITE (8,99015) ij, hlp1, hlp2, hlp4, ln(h1),
      &                                            (L(i,h1),i = 0,NEJcm)
-99015    FORMAT (I3,3E10.3,10X,6E10.3)
+99015    FORMAT (I3,3E10.3,10X,9E10.3)
       ENDDO
 C
 C-----INITIAL CONDITIONS

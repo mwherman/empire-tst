@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2008-11-14 20:08:46 $
-Ccc   * $Id: print.f,v 1.21 2008-11-14 20:08:46 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-04-02 09:19:06 $
+Ccc   * $Id: print.f,v 1.22 2009-04-02 09:19:06 Capote Exp $
 C
       SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
@@ -51,6 +51,7 @@ C
       kmax = MIN0(kmax,NDECSE)
 
       ia = AEJc(Nejc)
+
       IF (Nejc.EQ.0) THEN
          WRITE (8,99005)
 99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
@@ -172,8 +173,8 @@ C
       INTEGER i, kmax
       CHARACTER*13 caz 
       CHARACTER*31 title
-      character*1 part(0:4)
-      data part/'g','n','p','a','d'/
+      character*1 part(0:6)
+      data part/'g','n','p','a','d','t','h'/
 
       csemax = 0.d0
       kmax = 1

@@ -1,9 +1,9 @@
       PARAMETER(
      * NDNUC= 100
-     *,NDEXCLUS = 40
-     *,NDEJC=4
+     *,NDEXCLUS = 100
+     *,NDEJC=6
      *,NDAFIS=1
-     *,NDEX=  121
+     *,NDEX=  81
      *,NDLW= 40
      *,NDTL= 40
      *,NDMSCS=4
@@ -34,7 +34,7 @@
      *,NDROPM=7
      *,NDGDRPM=10
      *,NDGQRPM=8,NDGMRPM=8,NDKNTR=3,NMAsse=9066
-     *,NDREGIONS=7,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80
+     *,NDREGIONS=10,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80
      *,NFtrans=50,NFMOD=3,NFisbarpnt=300
      *,NFisEN1=60,NFisJ1=50 
      *,NFisEN=55,NFisJ=30,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
