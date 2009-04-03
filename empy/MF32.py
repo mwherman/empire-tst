@@ -201,7 +201,7 @@ class MF32(MF_base):
             print ("!!! Mean gamma width = 0!!!")
         if Gg_mean_unc==0:
             print ("!!! Mean gamma transition uncertainty = 0!!!")
-            # not sure what to do...
+            # if Gamma widths are provided in Atlas, use those instead
         for gg in Gg:
             if gg[0] == 0:
                 # could just use mean of existing Gamma widths, or 
@@ -339,7 +339,7 @@ class MF32(MF_base):
 
                     line += 1
 
-        # change from sorting by l to sorting by resonance energy:
+        # change from sorting by L to sorting by resonance energy:
         biglist = sorted( zip(En,Gn,Gg,L,J) )
         En = [a[0] for a in biglist]
         Gn = [a[1] for a in biglist]
@@ -418,7 +418,7 @@ class MF32(MF_base):
             for i in range(Dim):
                 for j in range(Dim):
                     corr_mat[j,i] = corr_mat[i,j]
-
+        
 
         self.En =   numpy.array(En)
         self.Gn =   numpy.array(Gn)
@@ -435,7 +435,7 @@ class MF32(MF_base):
 
     def writeENDF(filename):
         """
-        create new ENDF file
+        create new ENDF file containing MF1, MF2 and MF32
         """
         fout = open(filename,'w')
         

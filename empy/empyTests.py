@@ -8,7 +8,7 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 """
 
 import unittest
-import random
+from random import randrange
 from empy import *
 
 
@@ -23,35 +23,50 @@ class MF_baseTests(unittest.TestCase):
     
     
     def test_writeENDF(self):
-        for MAT in [9,99,999,9999]:
-            for MF in [9,99]:
-                for MT in [9,99,999]:
-                    for lineNo in [9,99,999,9999,99999]:
-                        #dat = [random.uniform(-10,10)+a for a in [1e11]*6] # now fine
-                        #dat = [random.uniform(-10,10)+a for a in [0]*6]  # fine
-                        dat = [random.uniform(-1e-29,1e-29) for a in [0]*6] 
-                        # 10**29 is probably beyond precision limit, but this checks out
-                        writeline = self.m.writeENDFline( tuple(dat), MAT, MF, MT, lineNo)
-                        self.assertEqual( len(writeline), 81 )
-                        self.assertEqual( int(writeline[66:70]), MAT )
+        """
+        write lines with MF_base, ensure line length is OK
+        Handles anything from 1e-99 to 9e+99 (abs)
+        Roundoff error likely when using writeENDFline
+        """
+        MAT = randrange(10000)
+        MF = randrange(100)
+        MT = randrange(1000)
         
-        # this one has funny syntax, it means OverflowError should be raised by
-        # m.writeENDFline( tuple(dat), MAT, MF, MT, lineNo):
-        dat = [random.uniform(-10,10)+a for a in [0]*7] # too many numbers!
-        self.assertRaises( OverflowError, self.m.writeENDFline, tuple(dat), MAT, MF, MT, lineNo )
-    
+        lists = ( [0.0, 0.0, 1, 3, 5],
+                [-8.783462824e-89, 7.84738298e+99, -6.73829462e+95],
+                [],
+                [9.9, 8.8, 7.7, 6.6, 5.5, 4.4]
+                )
+        
+        for l in lists:
+            writeline = self.m.writeENDFline(l, MAT,MF,MT)
+            self.assertEqual( len(writeline), 81 )
+            self.assertEqual( endf.getVals(writeline)[0], MAT )
+            # also try with a line number:
+            writeline = self.m.writeENDFline(l, MAT,MF,MT,99)
+            self.assertEqual( len(writeline), 81 )
+            self.assertEqual( endf.getVals(writeline)[0], MAT )
+        
+        
+        # assertRaises: means OverflowError should be raised by
+        # m.writeENDFline( data, MAT, MF, MT, lineNo=False):
+        l = [1,2,3,4,5,6,7] # too many numbers!
+        self.assertRaises( OverflowError, self.m.writeENDFline, 
+                l, MAT, MF, MT )
+        
         
     def test_writeSEND(self):
-        MAT = random.randint(0,10000)
-        MF = random.randint(0,100)
+        MAT = randrange(0,10000)
+        MF = randrange(0,100)
         #print len(self.m.writeSEND(MAT,MF)), MAT, MF
         self.assertEqual( len(self.m.writeSEND(MAT,MF)) , 81 )
 
 
 class endfTests(unittest.TestCase):
     """
-    put stuff in here to ensure that if we remove or insert sections, the proper MEND,
-    SEND, etc are put in place... but this is somewhat unecessary due to checkr/stanef!
+    put stuff in here to ensure that if we remove or insert sections, 
+    the proper MEND, SEND, etc are put in place... 
+    but this is somewhat unecessary due to checkr/stanef!
     """
     def setUp(self):
         pass

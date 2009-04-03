@@ -42,7 +42,8 @@ results = sorted( zip(vals, names) )
 belowCutoff = [a for a in results if a[0]<cutoff]
 aboveCutoff = [a for a in results if a[0]>=cutoff]
 
-print ("In ENDF-7.0, %i out of %i materials have MF2 defined"%(len(results),len(lis)))
+print ("In ENDF-7.0, %i out of %i materials have MF2 defined"%
+        (len(results),len(lis)))
 print 
 print ("%i materials have cutoffs below the 5e+3 threshold for low-fi project"%
         len(belowCutoff))
