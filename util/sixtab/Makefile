@@ -27,13 +27,13 @@ FFLAGS = -std=legacy -O3
 #FC     =  /sw/bin//g95
 #FFLAGS = -fsloppy-char
 
-OBJF =      sixtab.o dxsend.o
+OBJF =	sixtab.o dxsend.o
 
 
 sixtab:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 
 clean:
-      rm *.o
+	rm *.o
 

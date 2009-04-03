@@ -37,11 +37,11 @@ FFLAGS = -std=legacy -O3
 #FFLAGS = -g --chk
 
 
-OBJF =      empend.o
+OBJF =	empend.o
 
 
 empend:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

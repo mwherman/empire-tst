@@ -18,10 +18,10 @@ FFLAGS = -std=legacy -O3
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =      pltlst.o
+OBJF =	pltlst.o
 
 pltlst:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

@@ -18,11 +18,11 @@ FFLAGS = -std=legacy -O3
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =      endres.o
+OBJF =	endres.o
 
 
 endres:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

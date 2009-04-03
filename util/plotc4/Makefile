@@ -18,11 +18,11 @@ FFLAGS = -std=legacy -O3
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =      plotc4.o starplot.o  dxsend.o
+OBJF =	plotc4.o starplot.o  dxsend.o
 
 
 plotc4:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

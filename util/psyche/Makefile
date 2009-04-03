@@ -24,13 +24,13 @@ FFLAGS = -std=legacy -O3
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
 
-OBJF =      psyche.o
+OBJF =	psyche.o
 
 
 psyche:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 
 clean:
-      rm *.o
+	rm *.o
 

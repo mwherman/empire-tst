@@ -11,11 +11,11 @@ FFLAGS = -O3
 #----Intel f95 FORTRAN compiler
 #FC   = ifort
 
-OBJF =      fizcon.o
+OBJF =	fizcon.o
 
 
 fizcon:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

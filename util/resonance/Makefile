@@ -42,32 +42,32 @@ FFLAGS = -std=legacy -O3
 #FFLAGS = -g --chk
 
 
-OBJP =      ptanal.o
-OBJR =      readrp.o
-OBJW =      wriurr.o
-OBJS =      scanr.o
-OBJX =      readx4.o
-OBJT =  recent0.o endfio0.o scratchb.o timer.o LINUX.o
+OBJP =	ptanal.o
+OBJR =	readrp.o
+OBJW =	wriurr.o
+OBJS =	scanr.o
+OBJX =	readx4.o
+OBJT =	recent0.o endfio0.o scratchb.o timer.o LINUX.o
 
-all: ptanal readrp scanr wriurr readx4 thermx
+all:	ptanal readrp scanr wriurr readx4 thermx
 
 ptanal:   $(OBJP)
-      $(FC) -o $@ $(OBJP)
+	$(FC) -o $@ $(OBJP)
 
 readrp:   $(OBJR)
-      $(FC) -o $@ $(OBJR)
+	$(FC) -o $@ $(OBJR)
 
 wriurr:   $(OBJW)
-      $(FC) -o $@ $(OBJW)
+	$(FC) -o $@ $(OBJW)
 
 scanr:   $(OBJS)
-      $(FC) -o $@ $(OBJS)
+	$(FC) -o $@ $(OBJS)
 
 readx4:   $(OBJX)
-      $(FC) -o $@ $(OBJX)
+	$(FC) -o $@ $(OBJX)
 
 thermx:  $(OBJT)
-      $(FC) -o $@ $(OBJT)
+	$(FC) -o $@ $(OBJT)
 
 clean:
-      rm *.o
+	rm *.o

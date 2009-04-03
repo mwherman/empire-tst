@@ -19,12 +19,12 @@ FFLAGS = -std=legacy -O3
 #----flags for detailed warnings
 #FFLAGS = -Wall
 
-OBJF =      checkr.o
+OBJF =	checkr.o
 
 
 checkr:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o
 

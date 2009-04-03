@@ -25,11 +25,11 @@ FFLAGS = -std=legacy -O3
 #FC     =  /sw/bin//g95
 #FFLAGS = -fsloppy-char
 
-OBJF =      x4toc4.o
+OBJF =	x4toc4.o
 
 
 x4toc4:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

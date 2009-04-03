@@ -18,11 +18,11 @@ FFLAGS = -std=legacy -O3
 #FC   = frt
 #FC      = ifort
 
-OBJF =      fixup.o endfio.o  LINUX.o scratchb.o timer.o
+OBJF =	fixup.o endfio.o  LINUX.o scratchb.o timer.o
 
 
 fixup:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

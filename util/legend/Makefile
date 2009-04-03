@@ -23,11 +23,11 @@ FFLAGS = -std=legacy -O3
 #FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -f s -Qa -g
 
 
-OBJF =       LINUX.o  endfio.o  legend.o  scratchb.o  timer.o
+OBJF =	LINUX.o  endfio.o  legend.o  scratchb.o  timer.o
 
 
 legend:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

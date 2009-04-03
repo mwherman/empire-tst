@@ -31,14 +31,14 @@ FFLAGS =  -w -ipo -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel
 
-OBJF =       LINUX.o  endfio.o  sigma1.o  scratchb.o  timer.o
+OBJF =	LINUX.o  endfio.o  sigma1.o  scratchb.o  timer.o
 
 
 sigma1:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o
 
 
 

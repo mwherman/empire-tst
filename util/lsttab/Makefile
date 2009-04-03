@@ -38,11 +38,11 @@ FFLAGS = -std=legacy -O3
 #----flag for Lahey/Fujitsu to check boundaries and more
 #FFLAGS = -g --chk
 
-OBJF =      lsttab.o dxsend.o
+OBJF =	lsttab.o dxsend.o
 
 
 lsttab:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

@@ -22,11 +22,11 @@ FFLAGS = -std=legacy -O3
 #FFLAGS = -Wall
 
 
-OBJF =      stanef.o
+OBJF =	stanef.o
 
 
 stanef:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o

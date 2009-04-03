@@ -16,13 +16,13 @@ FFLAGS = -std=legacy -O3
 #FFLAGS =  -fno-underscoring  -ggdb
 
 
-OBJF =      c4sort.o
+OBJF =	c4sort.o
 
 
 c4sort:   $(OBJF)
-      $(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 clean:
-      rm *.o
+	rm *.o
 
 
