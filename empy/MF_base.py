@@ -78,39 +78,50 @@ class MF_base:
                     try:
                         retval.append( float(val) )
                     except ValueError:
-                        retval.append(None)
+                        if val.strip()=='':
+                            retval.append(None)
+                        else:
+                            # real format problem
+                            raise
         return retval
         #return [self.treat(a) for a in arr if a.strip() != '']
     
 
-    def untreat(self,flt):
+    def untreat(self,val):
         """
-        from python float back to 1.000000-5 format
-        could implement a test like:
-        if not ( -100 < log_10( abs(flt) ) < 100 ):
-            raise an Error. Very unlikely to come up, however
+        put int, string, or float into endf format
+        in case of float must use 1.000000-5 style
         """
-        if type(flt) is int:
+        if type(val) is int:
             # integers are right-adjusted:
-            return ("%11i" % flt)
+            return ("%11i" % val)
         
-        if math.fabs(flt) < self._nzro:
+        if type(val) is str:
+            # in case we want '0.0', '2.5', etc in the file
+            # for Jpi for example. Pass these as strings, and they
+            # will be printed as-is, right-adjusted with extra space
+            try:
+                dum = float(val)
+            except ValueError:
+                print "Numeric values only, please!"
+                raise
+            if len(val) > 10:
+                raise FormatError, "String too long for endf format"
+            return ("%10s " % val)
+        
+        # everything else is converted to Sci. notation
+        if math.fabs(val) < self._nzro:
             # round small values down to zero
-            flt = 0.
+            val = 0.
         
-        # make files prettier: if a float requires only 1 significant digit
-        # to express, use standard notation:
-        if round(flt,1)==flt and math.log(flt,10)<2:
-            return("%- 11.1f" % flt)
-        
-        if (flt==0) or (-10 < math.log10( math.fabs(flt) ) < 10):
-            str_rep = ("% E" % flt)
+        if (val==0) or (-10 < math.log10( math.fabs(val) ) < 10):
+            str_rep = ("% E" % val)
             if str_rep.find('+') > -1:
                 return str_rep.replace('E+0','+')
             else:
                 return str_rep.replace('E-0','-')
         else:
-            str_rep = ("% .5E" % flt)
+            str_rep = ("% .5E" % val)
             if str_rep.find('+') > -1:
                 return str_rep.replace('E+','+')
             else:
