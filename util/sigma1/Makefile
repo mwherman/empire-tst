@@ -4,8 +4,12 @@ FC     =  gfortran
 FFLAGS = -std=legacy -O3
 #---- pfg90 compiler
 #FC     =  pgf90
+#----GNU gfortran FORTRAN compiler
+#FC     = gfortran
 #----GNU g77 FORTRAN compiler
 #FC     = g77
+#----g95 FORTRAN compiler
+#FC     = g95
 #----flags for production compilation with g77
 #FFLAGS = -O3
 #----flags for debuging using g77 compiler
@@ -27,7 +31,7 @@ FFLAGS = -std=legacy -O3
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-FFLAGS =  -w -ipo -O3
+#FFLAGS =  -w -ipo -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel
 
