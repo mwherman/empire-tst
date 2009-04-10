@@ -232,7 +232,8 @@ class mgCovars:
         # how many times must ascii format wrap to write all columns?
         colsPerBlock = 25
         blocks, remainder = divmod( dim , colsPerBlock )
-        blocks += 1
+        if remainder:
+            blocks += 1
         
         for j in range(blocks):
             # in puff, three lines of labels at the beginning

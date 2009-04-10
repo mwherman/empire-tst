@@ -79,21 +79,25 @@ class MF32(MF_base):
                 raise
         
         assert os.path.exists(filename), ("Can't find file %s" % filename)
+
+        # use readrp to get resonance properties from Atlas:
+        # readrp is a fortran executable but hasn't caused any trouble
+        cmd = os.environ['EMPIREDIR'] + '/util/resonance/readrp %i' % zam
+        vals = os.popen(cmd).read()
+        ggavg = [0]*3
+        (abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,ggavg[0],ggavg[1],ggavg[2],
+                ap,dap,ss,dss,cs,dcs,emax,flevel) = [
+                        float(a) for a in vals.split()]
+        print "avg gamma widths = ", ggavg
         
         # Atlas-specific format flags:
         jflag = []; lflag = []; gnflag = []; ggflag = []; aaflag = [];
-        # spin-statistical factor
-        gfact = []
         
         # actual data:
         J = []; L = []
         En = []; Gn = []; Gg = []
         par4 = []; par5 = []; par6 = []
         
-        # must get spin, awt, abun, etc from ptanal.inp:
-        # for now it's hard-coded:
-        spin = 2.5
-        abun = 1.0
         
         f = open(filename,"r").readlines()
         assert f[5].endswith("#####################\n")
@@ -143,14 +147,16 @@ class MF32(MF_base):
             
             idx += 1
         
-        # now we have all the data from atlas, must take two more steps:
+        
+        
+        # at this point the atlas data is dumped to class, now two more steps:
         # 1) if missing data, do porter-thomas analysis or such to fill gaps
         # 2) make sure final output is all in form Gn, Gg (not 2gGn etc)
         
         def check(array, ncols=2):
             """
-            to convert to numpy arrays, we need to fill gaps. For now, use 0
-            (Used nan, not convenient to work with)
+            to convert to numpy arrays, we need to fill '' gaps.
+            For now, use 0 (Used nan, not convenient to work with)
             """
             if ncols==2:
                 for i in range(len(array)):
@@ -184,7 +190,7 @@ class MF32(MF_base):
                 en[1] = 0.001 * en[0]
         
         Gn_mean_unc = numpy.mean( Gn[:,1][ Gn[:,1].nonzero() ] )
-        assert Gn_mean_unc != 0.0, "Mean Gamma uncertainty = 0!"
+        assert not numpy.isnan(Gn_mean_unc), "Mean Gamma uncertainty = 0!"
         
         for gn in Gn:
             if gn[0] == 0:
@@ -197,9 +203,11 @@ class MF32(MF_base):
         Gg_mean = numpy.mean( Gg[:,0][ Gg[:,0].nonzero() ] )
         Gg_mean_unc = numpy.mean( Gg[:,1][ Gg[:,1].nonzero() ] )
         # these could be zero
-        if Gg_mean==0:
+        if numpy.isnan(Gg_mean):
+            Gg_mean=0.0
             print ("!!! Mean gamma width = 0!!!")
-        if Gg_mean_unc==0:
+        if numpy.isnan(Gg_mean_unc):
+            Gg_mean_unc=0.0
             print ("!!! Mean gamma transition uncertainty = 0!!!")
             # if Gamma widths are provided in Atlas, use those instead
         for gg in Gg:
@@ -213,30 +221,29 @@ class MF32(MF_base):
         
         
         # now all the gaps should be filled, also need to correct formats:
-        # we store G_n not 2*g*G_n and so on
+        # we want to store G_n not 2*g*G_n and so on
         for i in range(len(J)):
             if jflag[i] == 'A':
                 J[i] = -1
             if lflag[i] == 'A':
                 L[i] = -1
             
-            # compute g-factor for each resonance:
-            gfact.append( (2.0*J[i]+1) / (2.0*(2*spin+1)) )
+        # create array of g-factor for all resonances:
+        gfact = ( (2.0 * J + 1) / (2.0*(2*spin+1)) )
         
         # corrections to G_n and G_g based on format flags:
         # gnflag and ggflag are each three characters, #2 is important
         
         for i in range(len(Gn)):
-            if (gnflag[i][1]==' '):
-                Gn[i] /= 2*gfact[i]
-            elif (gnflag[i][1]=='B'):
-                pass
-            elif (gnflag[i][1]=='C'):
-                Gn[i] /= (2*abun*gfact[i])
-            elif (gnflag[i][1]=='D'):
-                Gn[i] /= abun*gfact[i]
-            elif (gnflag[i][1]=='E'):
-                Gn[i] /= (4*abun*gfact[i])
+            if (gnflag[i][1]=='C' or gnflag[i][1]=='D') and abun==0.0:
+                raise ValueError, "Need abundance to continue!"
+            
+            if (gnflag[i][1]==' '):     Gn[i] /= 2*gfact[i]
+            elif (gnflag[i][1]=='A'):   Gn[i] /= gfact[i]
+            elif (gnflag[i][1]=='B'):   pass
+            elif (gnflag[i][1]=='C'):   Gn[i] /= (2*abun*gfact[i])
+            elif (gnflag[i][1]=='D'):   Gn[i] /= abun*gfact[i]
+            elif (gnflag[i][1]=='E'):   Gn[i] /= (4*abun*gfact[i])
             else:
                 raise ValueError, ("Unknown gnflag in atlas: %s line %s" % 
                         (gnflag[i][1],i+6) )
@@ -245,6 +252,7 @@ class MF32(MF_base):
             # use penetrability to fill in values
         
         for i in range(len(Gg)):
+            # ptanal line 1456
             if (ggflag[i][2]=='?'):
                 if (ggflag[i]=='A'):
                     Gg[i] /= gfact[i]
@@ -271,6 +279,10 @@ class MF32(MF_base):
         
         self.nres = len(self.J)
         self.zam = zam
+        self.awt = awt
+        self.spin = spin
+        self.abun = abun
+        self.ap = ap
         
         # placeholder for covariance matrix:
         self.cov_mat = 0
@@ -433,7 +445,7 @@ class MF32(MF_base):
         self.corr_mat = corr_mat
 
 
-    def writeENDF(filename):
+    def writeENDF(self,filename):
         """
         create new ENDF file containing MF1, MF2 and MF32
         """
@@ -450,6 +462,24 @@ class MF32(MF_base):
         
         # MF 2
         #fout.write(m.write
+    
+    
+    def getResonanceInt(self):
+        """
+        use Atlas equation 2.86 to approximate capture RI and uncertainty
+        """
+        # gfactor for each resonance:
+        gfact = (2.0 * self.J + 1) / (2.0 * (2.0 * self.spin + 1) )
+        
+        # I_g = (constants) * sum_j { G_g * gfact * G_n / (E^2 (G_g+G_n) ) }
+        num = self.Gg[:,0] * gfact * self.Gn[:,0]
+        denom = self.En[:,0]**2 * (self.Gg[:,0] + self.Gn[:,0])
+
+        A = divmod(self.zam,1000)[1]
+        
+        result = numpy.pi/2 * 2.608e+6 * ((A+1.0)/A)**2 * numpy.sum(num/denom)
+
+        # but what about uncertainty?
 
 
 if __name__ == '__main__':
