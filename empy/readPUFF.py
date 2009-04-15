@@ -61,6 +61,7 @@ class mgCovars:
                 break
             elist += [float(a) for a in fin[i].split()]
             i += 1
+        self.elist = elist
         #extra line
         i += 1
         
