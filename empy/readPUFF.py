@@ -218,14 +218,16 @@ class mgCovars:
         formatError = False
         mat = numpy.zeros( (self.ngroups,self.ngroups) )
         
-        #find dimensions for the matrix: not really necessary here
-        # since puff doesn't trim off extra zeros like njoy
-        # No harm leaving this, though
+        #find dimensions for the matrix: low=1, high goes one line
+        # past the end of the matrix. Not really necessary: in puff matrix
+        # should always be ngroups x ngroups
         mline = i+3
         try:
             low = int(fin[mline].split()[0])
             high = low
             while True:
+                if fin[mline].strip()=='':
+                    break
                 if not int(fin[mline].split()[0]) == high:
                     break
                 high += 1
