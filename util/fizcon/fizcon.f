@@ -28,6 +28,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.02   April 2009   A. Koning
+!-V                        1. Fix ZA of the (z,3n+p) residual.
 !-V         Version 8.01   December  2008     A. Trkov
 !-V                        1. Increased precision of proton mass ratio.
 !-V         Version 8.00   August  2008     A. Trkov
@@ -193,9 +195,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -6218,7 +6220,7 @@
      &         -5, -2, -2, -3/)
       INTEGER(KIND=I4), PARAMETER, DIMENSION(NRECS) :: DA =             &       
      &       (/-1,-4,-2,-3,-5,-13,-6,-7,-2,-9,-10,-3,-4,-4,-11,-12, -4, &       
-     &         -3,-5,-3,-6,  0, -1, -2, -3, -3, -4, -8,-12, -2, -5,-11, &       
+     &         -3,-4,-3,-6,  0, -1, -2, -3, -3, -4, -8,-12, -2, -5,-11, &       
      &         -10, -3, -4, -6/)
 !
       GET_IZAP = 0
