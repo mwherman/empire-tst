@@ -109,12 +109,16 @@ class MF_base:
                 raise FormatError, "String too long for endf format"
             return ("%10s " % val)
         
+        if val is None:
+            # blank spot in file
+            return ("%11c" % ' ')
+        
         # everything else is converted to Sci. notation
         if math.fabs(val) < self._nzro:
             # round small values down to zero
             val = 0.
         
-        if (val==0) or (-10 < math.log10( math.fabs(val) ) < 10):
+        if (val==0) or (-9 <= math.log10( math.fabs(val) ) < 10):
             str_rep = ("% E" % val)
             if str_rep.find('+') > -1:
                 return str_rep.replace('E+0','+')
