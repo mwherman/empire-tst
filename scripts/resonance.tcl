@@ -1072,7 +1072,8 @@ proc ::RunKALMAN {} {
     set inpfile [open $fn w]
     set fn [format "%s-mat.sen" $m_szZAname]
     set senfile [open $fn w]
-
+    
+    # range(-3...) takes R' into account
     for {set i -3} {$i< [expr 2*6*$m_nNoResToBeAdjusted]} {incr i} {
       if {![file exists $m_szFile.atlas]} {
         tk_dialog .msgbox "Error" "Local resonance parameter table '$m_szFile.atlas' not found" info 0 OK
@@ -1230,7 +1231,7 @@ proc ::RunKALMAN {} {
       set MT $m_nKALMT
       set EXPDAT 1
     }
-    exec $m_szBaseDir/scripts/kalman $m_szZAname $MT $m_nMAT $EXPDAT
+    exec $m_szBaseDir/scripts/kalmanResonance $m_szZAname $MT $m_nMAT $EXPDAT
   
 #    set fn [format "%s.atlas" $m_szZAname]
 #    set atlas1 [open $fn r]
@@ -1393,7 +1394,7 @@ proc ::RunCodes {} {
     } else {
       exec xterm -T WRIURR -e sh -c "$m_szCodeDir/wriurr > wriurr.std"
     }
-    exec rm -f wriurr.inp
+#    exec rm -f wriurr.inp
     if {![file exists endfu.txt]} {
       tk_dialog .msgbox "Error" "Failed to run WRIURR.\nCheck the standard output of WRIURR" info 0 OK
       return
@@ -1551,11 +1552,14 @@ proc vTclWindow.top71 {base} {
     menu $site_3_0.men67.m \
         -tearoff 0 
     $site_3_0.men67.m add command \
-        -accelerator Ctrl+C -command {exec $m_szEditor $m_szFile.c4} \
+        -accelerator Ctrl+C -command {exec $m_szEditor $m_szZAname.c4} \
         -label {Edit C4} 
     $site_3_0.men67.m add command \
         -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} \
         -label {Edit EXFOR} 
+    $site_3_0.men67.m add command \
+        -command {exec $m_szEditor $m_szZAname-inp.sen} \
+        -label {Sensitivity input} 	
     $site_3_0.men67.m add command \
         -accelerator {} \
         -command {if {[file exists $m_szZAname-expcorr.kal]} {
@@ -1698,7 +1702,7 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" "KALMAN covariance matrices not found. Run KALMAN first" info 0 OK
   }
         } \
-        -label {covariance matrices} 
+        -label {Covariance matrices} 
     pack $site_3_0.01 \
         -in $site_3_0 -anchor center -expand 0 -fill none -side left 
     pack $site_3_0.05 \
