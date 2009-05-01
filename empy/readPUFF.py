@@ -28,7 +28,7 @@ class mgCovars:
     contents: elist (multigroup energies), xsecs for each reaction,
     and matrices in the 'covars' and 'corrs' dictionaries
     """
-    def __init__(self, filename):
+    def __init__(self, filename, zam=0, awt=0):
         self.elist = []
         self.xsecs = {}
         self.uncert = {}
@@ -37,8 +37,8 @@ class mgCovars:
         self.filename = filename
         self.ngroups = 0
         self.mat = 0
-        self.zam = 0
-        self.awt = 0
+        self.zam = float(zam)
+        self.awt = float(awt)
         
         # only in PUFF output: dict of (x-sec,uncert) 
         # for each reaction at thermal and res. integral
@@ -55,8 +55,12 @@ class mgCovars:
                 break
             i += 1
         self.mat = int(fin[i].split()[-1])
-        self.zam = float(fin[i+1].split()[-1])
-        self.awt = float(fin[i+2].split()[-1])
+        # this is an unreliable way to get zam and awt, better to pass
+        # them as arguments:
+        if self.zam==0:
+            self.zam = float(fin[i+1].split()[-1])
+        if self.awt==0:
+            self.awt = float(fin[i+2].split()[-1])
 
         # get to energy list:
         i = 0
@@ -75,8 +79,12 @@ class mgCovars:
             elist += [float(a) for a in fin[i].split()]
             i += 1
         self.elist = elist
-        #extra line
-        i += 1
+        
+        # look for first matrix:
+        while True:
+            if fin[i].startswith('1  material 1= '):
+                break
+            i += 1
         
         # now at matrices:
         while i < len(fin):
@@ -150,19 +158,21 @@ class mgCovars:
             
             mat, low, high, i = self.getMatrix( fin, i )
             
-            key = 'MT%iMT%i' % (colMT, rowMT)
-            self.corrs[key] = mat / 1000.
-            # reconstruct covariance:
-            covmat = self.corrs[key].copy()
-            for idx in range(self.ngroups):
-                covmat[idx,:] *= rsd1[idx]
-            for jdx in range(self.ngroups):
-                covmat[:,jdx] *= rsd2[jdx]
-            self.covars[key] = covmat
-            
-            if trim:
-                self.corrs[key] = self.corrs[key][low:high,low:high]
-                self.covars[key] = self.covars[key][low:high,low:high]
+            if mat is not None:
+                
+                key = 'MT%iMT%i' % (colMT, rowMT)
+                self.corrs[key] = mat / 1000.
+                # reconstruct covariance:
+                covmat = self.corrs[key].copy()
+                for idx in range(self.ngroups):
+                    covmat[idx,:] *= rsd1[idx]
+                for jdx in range(self.ngroups):
+                    covmat[:,jdx] *= rsd2[jdx]
+                self.covars[key] = covmat
+                
+                if trim:
+                    self.corrs[key] = self.corrs[key][low:high,low:high]
+                    self.covars[key] = self.covars[key][low:high,low:high]
         
         
         # after matrix, get thermal and RI values if present 
@@ -215,6 +225,10 @@ class mgCovars:
         returns the correlation matrix, index of upper and lower boundaries,
         and the line number for the end of this section in the file
         """
+        if 'Null Matrix' in fin[i+1]:
+            #print "found null matrix on line %i" % i
+            return None, 0, 0, i+5
+        
         formatError = False
         mat = numpy.zeros( (self.ngroups,self.ngroups) )
         
@@ -271,7 +285,7 @@ class mgCovars:
                 # calculate bounds:
                 start = low + j*colsPerBlock
                 end = low + (j+1)*colsPerBlock
-                if j==(blocks-1):
+                if j==(blocks-1) and remainder>0:
                     end = low + j*colsPerBlock + remainder
                 
                 #print vals
@@ -343,11 +357,15 @@ class mgCovars:
             key = 'MT%i'%mt
             # switch order:
             mtXsec = self.xsecs[key][::-1]
-            # split list up into segments of 6 (trouble only if segment>6):
-            mtXlist = [mtXsec[6*i:6*i+6] for i in range(len(mtXsec)//6+1)]
             
-            for el in mtXlist:
-                bxS += b.writeENDFline( el, self.mat,3,mt,lNum); lNum+=1
+            nline, rem = divmod( len(mtXsec), 6 )
+            
+            for jdx in range(nline):
+                bxS += b.writeENDFline( mtXsec[6*jdx:6*jdx+6], 
+                        self.mat,3,mt,lNum); lNum+=1
+            if rem>0:
+                bxS += b.writeENDFline( mtXsec[6*nline:6*nline+6], 
+                        self.mat,3,mt,lNum); lNum+=1
             
             bxS += b.writeSEND( self.mat, 3 )
         
