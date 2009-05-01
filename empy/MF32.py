@@ -83,11 +83,11 @@ class MF32(MF_base):
         # use readrp to get resonance properties from Atlas:
         # readrp is a fortran executable but hasn't caused any trouble
         cmd = os.environ['EMPIREDIR'] + '/util/resonance/readrp %i' % zam
-        vals = os.popen(cmd).read()
+        vals = os.popen(cmd).read().split()
         ggavg = [0]*3
         (abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,ggavg[0],ggavg[1],ggavg[2],
                 ap,dap,ss,dss,cs,dcs,emax,flevel) = [
-                        float(a) for a in vals.split()]
+                        float(a) for a in vals]
         print "avg gamma widths = ", ggavg
         
         # Atlas-specific format flags:
@@ -283,6 +283,8 @@ class MF32(MF_base):
         self.spin = spin
         self.abun = abun
         self.ap = ap
+        # assume we want all resonances:
+        self.erange = (1.e-5, self.En[-1][0])
         
         # placeholder for covariance matrix:
         self.cov_mat = 0
@@ -385,7 +387,6 @@ class MF32(MF_base):
                 break
             line += 1
 
-            print (fin[line])
             CONT = self.readENDFline(fin[line])
             spin,ap,dum,lcomp,dum1,dum2 = CONT[:]
             assert lcomp==2, "Only understand LCOMP=2 right now"
@@ -398,9 +399,9 @@ class MF32(MF_base):
 
             for i in range(nresA):
                 vals = self.readENDFline(fin[line])
-                
+                #print En[i][0]
                 # check if we're on correct resonance:
-                assert En[i][0] == vals[0] and J[i] == vals[1]
+                assert En[i][0] == vals[0] and J[i] == vals[1], line
                 
                 uncert = self.readENDFline(fin[line+1])
                 En[i][1] = uncert[0]
@@ -411,25 +412,27 @@ class MF32(MF_base):
 
             # correlation matrix:
             vals = self.readENDFline(fin[line])
-            dum,dum1, INTG, Dim, nlin, dum2 = vals[:]
+            dum,dum1, ndigit, Dim, nlin, dum2 = vals[:]
             line += 1
+            
+            # 10**ndigit is the max value in INTG format:
+            self.ndigit = ndigit
             
             corr_mat = numpy.zeros( (Dim,Dim) )
             for i in range(nlin):
-                """
-                vals = self.readINTG(fin[line])
+                r,c,vals = self.readINTG(fin[line])
                 # go to 0-based index:
-                r = vals[0]-1
-                c = vals[1]-1
-                l = len(vals)-2
-                corr_mat[r,c:c+l] = vals[2:]
-                """
+                r -= 1
+                c -= 1
+                l = len(vals)
+                corr_mat[r,c:c+l] = vals[:]
+                
                 line += 1
             corr_mat += 1000*numpy.eye(Dim)
             #symmetrize
             for i in range(Dim):
                 for j in range(Dim):
-                    corr_mat[j,i] = corr_mat[i,j]
+                    corr_mat[i,j] = corr_mat[j,i]
         
 
         self.En =   numpy.array(En)
@@ -441,27 +444,158 @@ class MF32(MF_base):
         self.awt = awt
         self.spin = spin
         self.ap = ap
+        # assume we want all resonances:
+        self.erange = (1.e-5, self.En[-1][0])
+        
         self.nres = len(En)
         self.corr_mat = corr_mat
-
-
+    
+    
     def writeENDF(self,filename):
         """
         create new ENDF file containing MF1, MF2 and MF32
         """
+        print ("Writing resonance region in range %f to %f" % self.erange)
+        
         fout = open(filename,'w')
         
-        from empy import MF_base
-        m = MF_base.MF_base()
+        # no, don't make an extra MF_base instance, just use self!
+        #from empy import MF_base
+        #m = MF_base.MF_base()
+
+        MAT = self.MAT
         
-        # MF 1
-        MAT = 2525; MF = 1; MT = 451;
-        line = 0
+        fs = self.writeENDFline([],1,0,0,0)
+        fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
         
-        #... write file 1
+        # MF1: surpress initial newline with \
+        mf1 = """\
+ 0.0        0.0                 0          0          0          67777 1451     
+ 1.000000-5 2.000000+7          0          0         10          77777 1451     
+ 0.0        0.0                 0          0          5          37777 1451     
+ zsymam               RES. EVAL.                       1999mmdd   7777 1451     
+**********************                                            7777 1451     
+ RESONANCE PARAMETER                                              7777 1451     
+                                                                  7777 1451     
+**********************                                            7777 1451     
+                                1        451         11          07777 1451     
+                                2        151       9999          07777 1451     
+                               32        151       9999          07777 1451     
+                                                                  7777 1  099999
+                                                                  7777 0  0    0"""
+        mf1 = mf1.replace('7777',repr(MAT))
+        
+        fs += mf1
+        
         
         # MF 2
-        #fout.write(m.write
+        mf2 = self.writeENDFline([self.zam,self.awt,0,0,1,0],MAT,2,151)
+        mf2 += self.writeENDFline([self.zam,1.0, 0,0,1,0],MAT,2,151)
+        LRF=2   # for MLBW format
+        mf2 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
+                MAT,2,151)
+        LCOMP=3 # compact format
+        mf2 += self.writeENDFline([0.0,self.ap,0,0,LCOMP,0],MAT,2,151)
+        
+        # in MF2 resonances are sorted by L-value. Cast back to python lists
+        # in order to do the sorting: 
+        L_list = list(self.L)
+        En_list = list(self.En[:,0])
+        J_list = list(self.J)
+        Gn_list = list(self.Gn[:,0])
+        Gg_list = list(self.Gg[:,0])
+        
+        MF2_arr = sorted( zip(L_list, En_list, J_list, Gn_list, Gg_list) )
+        
+        # now we can get all s-wave (l=0), p-wave (l=1), and d-wave (l=2)
+        # resonances, sorted by energy:
+        for lwave in range(3):
+            ResonancesThisL = [a for a in MF2_arr if a[0]==lwave]
+            numRes = len(ResonancesThisL)
+            mf2 += self.writeENDFline([self.awt,0.0,lwave,0,6*numRes,numRes],
+                    MAT,2,151)
+            for RES in ResonancesThisL:
+                mf2 += self.writeENDFline([RES[1],RES[2],RES[3]+RES[4],
+                    RES[3],RES[4]], MAT,2,151)
+        
+        mf2 += self.writeSEND( MAT, 2 )
+        mf2 += self.writeFEND( MAT )
+        
+        fs += mf2
+        
+        
+        # MF 32
+        mf32 = self.writeENDFline([self.zam,self.awt,0,0,1,0], MAT,32,151)
+        mf32 += self.writeENDFline([self.zam,1.0,0,0,1,0], MAT,32,151)
+        #LRF=2 I think this must be the same as in MF2
+        mf32 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
+                MAT,32,151)
+        LCOMP = 2
+        mf32 += self.writeENDFline([0.0,self.ap,0,LCOMP,0,0], MAT,32,151)
+        mf32 += self.writeENDFline([self.awt,0.0,0,0,12*self.nres,self.nres],
+                MAT,32,151)
+        
+        for i in range(self.nres):
+            # write two lines: first the values, second the uncertainty
+            mf32 += self.writeENDFline([self.En[i,0],self.J[i],
+                self.Gn[i,0]+self.Gg[i,0],self.Gn[i,0],self.Gg[i,0]],
+                MAT,32,151)
+            mf32 += self.writeENDFline([self.En[i,1],'0.0','0.0',self.Gn[i,1],
+                self.Gg[i,1]], MAT,32,151)
+        
+        # now write off-diagonal bit in INTG (compact) format:
+        # how many ints fit on the line depends on self.ndigit:
+        nfit = 56//self.ndigit
+        if self.ndigit == 3:    #special case
+            nfit = 13
+        
+        kij = numpy.zeros( (18) ,dtype='int')
+        
+        nnn = 3*self.nres
+        ndigit = self.ndigit
+        nm = 0
+        
+        for i in range(nnn):
+            j = 0
+            while j<i:
+                if self.corr_mat[i,j] != 0:
+                    leng=min(nfit,i-j)
+                    j=j+leng
+                    nm += 1
+                else:
+                    j+=1
+        
+        print "nm=",nm
+        
+        mf32 += self.writeENDFline([0.0,0.0, self.ndigit, 3*self.nres, nm, 0],
+                MAT, 32, 151)
+        for i in range(nnn):
+            j = 0
+            while j<i:
+                if self.corr_mat[i,j] != 0:
+                    leng = min(nfit,i-j)
+                    for n in range(leng):
+                        kij[n] = self.corr_mat[i,j+n]
+                    
+                    #print (kij[:nfit])
+                    mf32 += self.writeINTG(i+1,j+1, tuple(kij[:nfit]), 
+                            MAT,32,151)
+                    j += leng
+                    # reset kij to all zeros
+                    kij[:] = 0
+                else:
+                    j += 1
+        
+        mf32 += self.writeSEND( MAT, 32 )
+        mf32 += self.writeFEND( MAT )
+        
+        fs += mf32
+        
+        fs += self.writeENDFline([0.0,0.0,0,0,0,0],0,0,0,0)    #MEND
+        fs += self.writeENDFline([0.0,0.0,0,0,0,0],0,-1,0,0)   #TEND
+        
+        fout.write(fs)
+        fout.close()
     
     
     def getResonanceInt(self):
