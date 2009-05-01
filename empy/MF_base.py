@@ -37,7 +37,11 @@ class MF_base:
         # make a 'threshold' value: any floats closer to 
         # zero will just become zero
         self._nzro = 1.e-12
-
+        
+        # for reading/writing INTG format: max value = 10**self.ndigit
+        self.ndigit = 3
+    
+    
     def treat(self,string):
         """
         change a string from 1.000-5 to float(1.000e-5) format
@@ -132,7 +136,7 @@ class MF_base:
                 return str_rep.replace('E-','-')
     
 
-    def writeENDFline(self, tmplist, MAT,MF,MT,lineNo=False):
+    def writeENDFline(self, tmplist, MAT,MF,MT,lineNo=None):
         """
         turn a list of 6 reals into an ENDF-formatted 80-column string
         with identifiers in right column
@@ -152,7 +156,7 @@ class MF_base:
             nblank = 6 - len(tmplist)
             for i in range(nblank):
                 data += blank
-            if lineNo:
+            if lineNo is not None:
                 rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
             else:
                 rightColumn = ("%4i%2i%3i%5c") % (MAT, MF, MT, ' ')
@@ -162,11 +166,132 @@ class MF_base:
             data = ''
             for a in tmplist:
                 data += self.untreat(a)
-            if lineNo:
+            if lineNo is not None:
                 rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
             else:
                 rightColumn = ("%4i%2i%3i%5c") % (MAT, MF, MT, ' ')
             return data + rightColumn + '\n'
+    
+    
+    
+    def readINTG(self, string):
+        """
+        read the 'INTG' format from ENDF: integers only, can be very compact.
+        self.ndigit determines precision: max value=10**self.ndigit
+        
+        self.ndigit=2 line holds 18 ints
+        self.ndigit=3 line holds 13 ints
+        self.ndigit=4 line holds 11 ints
+        self.ndigit=5 line holds 9 ints
+        self.ndigit=6 line holds 8 ints
+        otherwise ValueError is raised
+        
+        returns (x,y, array)
+        where x,y give row,column of first element of array
+        
+        !! x and y use same index as in the file, so subtract 1 for c/python
+        compatibility
+        """
+        def parseInt(str):
+            """ helper function: read int OR blank space """
+            if str.strip()=='':
+                return None
+            return int(str)
+        
+        if self.ndigit==2:
+            sub = string[11:65]
+            vals = [sub[3*i:3*i+3] for i in range(len(sub)//3)]
+        elif self.ndigit==3:
+            sub = string[11:63]
+            vals = [sub[4*i:4*i+4] for i in range(len(sub)//4)]
+        elif self.ndigit==4:
+            sub = string[11:66]
+            vals = [sub[5*i:5*i+5] for i in range(len(sub)//5)]
+        elif self.ndigit==5:
+            sub = string[11:65]
+            vals = [sub[6*i:6*i+6] for i in range(len(sub)//6)]
+        elif self.ndigit==6:
+            sub = string[10:66]
+            vals = [sub[7*i:7*i+7] for i in range(len(sub)//7)]
+        else:
+            raise ValueError, ("Illegal self.ndigit (%i) for INTG format" 
+                    % self.ndigit)
+            
+        # x and y give row and column for the left-most array element:
+        x = int(string[:5]) # - 1
+        y = int(string[5:10]) # - 1
+        arr = [parseInt(a) for a in vals]
+        
+        return x,y,arr
+
+
+    def writeINTG(self, row, col, tmplist, MAT, MF, MT, lineNo=None):
+        """
+        turn row,col, list into INTG-formatted 80 column string
+        number of values for the list depends on self.ndigit
+        (see readINTG)
+        
+        line number is added only if specified
+        
+        just like with readINTG, it's the user's responsibility to change row/col
+        back from python 0-based to fortran 1-based index
+        """
+        # check if tmplist is too long?
+        linelength = 56 # space available for integers
+        nints = linelength // (self.ndigit + 1) # how many ints fit on line
+        if self.ndigit == 3:
+            nints = 13  # special case
+        if len(tmplist) > nints:
+            raise ValueError, ("List is too long (len=%i) for INTG format"
+                    % len(tmplist) )
+        
+        while len(tmplist) < nints:
+            # fill up with blank values
+            tmplist.append(None)
+        
+        leftColumn = "%5i%5i" % (row,col)
+        
+        def toStr(val):
+            """ helper function: put in format with checking """
+            
+            # create two template strings:
+            dat = "%" + "%ii" % (self.ndigit + 1)     # "%4i" for ndigit=3
+            blank = "%" + "%is" % (self.ndigit + 1)   # "%4s" for ndigit=3
+            
+            if val is None:
+                return blank % ' '
+            if abs(val) > 10**self.ndigit:
+                raise ValueError, "value %i too large for format" % val
+            return dat % val
+            
+        # for each value of self.ndigit the format is different
+        # the left and right side must be padded with spaces in some cases:
+        if self.ndigit==2:
+            data = ' '  # pad left side with 1 space
+            padr = ' '  # pad right side with 1 space
+        elif self.ndigit==3:
+            data = ' '
+            padr = '   '
+        elif self.ndigit==4:
+            data = ' '
+            padr = ''
+        elif self.ndigit==5:
+            data = ' '
+            padr = ' '
+        elif self.ndigit==6:
+            data = ''
+            padr = ''
+        
+        for a in tmplist:
+            data += toStr(a)
+        data += padr
+        
+        if lineNo is not None:
+            rightColumn = ("%4i%2i%3i%5i") % (MAT, MF, MT, lineNo)
+        else:
+            rightColumn = ("%4i%2i%3i%5c") % (MAT, MF, MT, ' ')
+        
+        return leftColumn + data + rightColumn + '\n'
     
     
     def writeSEND(self, MAT, MF):
