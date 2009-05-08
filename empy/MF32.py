@@ -79,16 +79,6 @@ class MF32(MF_base):
                 raise
         
         assert os.path.exists(filename), ("Can't find file %s" % filename)
-
-        # use readrp to get resonance properties from Atlas:
-        # readrp is a fortran executable but hasn't caused any trouble
-        cmd = os.environ['EMPIREDIR'] + '/util/resonance/readrp %i' % zam
-        vals = os.popen(cmd).read().split()
-        ggavg = [0]*3
-        (abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,ggavg[0],ggavg[1],ggavg[2],
-                ap,dap,ss,dss,cs,dcs,emax,flevel) = [
-                        float(a) for a in vals]
-        print "avg gamma widths = ", ggavg
         
         # Atlas-specific format flags:
         jflag = []; lflag = []; gnflag = []; ggflag = []; aaflag = [];
@@ -149,14 +139,15 @@ class MF32(MF_base):
         
         
         
-        # at this point the atlas data is dumped to class, now two more steps:
+        # at this point raw atlas data is dumped to lists, now two more steps:
         # 1) if missing data, do porter-thomas analysis or such to fill gaps
         # 2) make sure final output is all in form Gn, Gg (not 2gGn etc)
         
         def check(array, ncols=2):
             """
-            to convert to numpy arrays, we need to fill '' gaps.
-            For now, use 0 (Used nan, not convenient to work with)
+            before converting to numpy arrays, we need to fill all gaps.
+            For now just fill with 0.0, then we search through arrays
+            and replace with more realistic values. (0 is better than nan)
             """
             if ncols==2:
                 for i in range(len(array)):
@@ -169,7 +160,7 @@ class MF32(MF_base):
                         array[i]='0'
             return array
         
-        # convert to numpy arrays:
+        # convert raw atlas data to floating-point numpy arrays:
         J = numpy.array( check(J, ncols=1), dtype=float)
         L = numpy.array( check(L, ncols=1), dtype=float)
         En = numpy.array( check(En), dtype=float)
@@ -179,55 +170,111 @@ class MF32(MF_base):
         par5 = numpy.array( check(par5), dtype=float)
         par6 = numpy.array( check(par6, ncols=1), dtype=float)
         
-        # do some checking:
+        
+        ###############################################
+        # Done reading file, also read res.prop. file #
+        ###############################################
+        
+        
+        # also use readrp to get resonance properties from Atlas:
+        # readrp is a fortran executable but hasn't caused any trouble
+        cmd = os.environ['EMPIREDIR'] + '/util/resonance/readrp %i' % zam
+        vals = os.popen(cmd).read().split()
+        ggavg = [0]*3
+        (abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,ggavg[0],ggavg[1],ggavg[2],
+                ap,dap,ss,dss,cs,dcs,emax,flevel) = [
+                        float(a) for a in vals]
+        
+        
+        def getMean_nonZero(arr):
+            # unknown vals are set to zero, don't include them in mean
+            return numpy.mean( arr[ arr.nonzero() ] )
+        
+        # avg widths/uncertainties for Gn:
+        gn_mean = getMean_nonZero( Gn[:,0] )
+        gn_mean_unc = getMean_nonZero( Gn[:,1] )
+        assert not numpy.isnan(gn_mean_unc), "Mean Gamma uncertainty = 0!"
+        
+        
+        # ggavg has s,p,d-wave avg gamma widths from atlas (in meV, go to eV)
+        print "avg gamma widths (meV) according to readrp = ", ggavg
+        ggavg = [a/1000. for a in ggavg]
+                
+        
+        # if this approach fails just take mean of all Gg:
+        gg_mean = getMean_nonZero( Gg[:,0] )
+        gg_mean_unc = getMean_nonZero( Gg[:,1] )
+        if numpy.isnan(gg_mean_unc):
+            gg_mean_unc=0.0
+            print ("!!! Mean gamma transition uncertainty = 0!!!")
+        
+        # if we're missing Gn values, is the capture kernel available?
+        if 0 in Gn[:,0]:
+            kern = raw_input("is the kernel (g*Gn*Gg/Gamma) available Y/n?")
+            if kern.lower().startswith('n'):
+                kernel = False
+            else:
+                kern = raw_input("what column of the e-Atlas file (4,5,6)?")
+                if kern=='4': 
+                    kernel=par4
+                elif kern=='5': 
+                    kernel=par5
+                elif kern=='6': 
+                    kernel=par6
+                else:
+                    raise ValueError, "Don't recognize input \"%s\"" % kern
+        
+        
+        ###############################################
+        # OK, now we're ready to check/fix atlas data #
+        ###############################################
+        
         
         # Energies shouldn't have gaps, and uncertainty gaps can be filled:
-        for en in En:
-            if en[0] == 0:
+        for i in range(len(En)):
+            if En[i,0] == 0:
                 raise ValueError, 'Missing value for resonance energy!'
-            if en[1] == 0:
+            if En[i,1] == 0:
                 # Pavel suggests deciding based on num. sig figs in atlas...
-                en[1] = 0.001 * en[0]
+                # for now just use 0.1%
+                En[i,1] = 0.001 * En[i,0]
         
-        Gn_mean_unc = numpy.mean( Gn[:,1][ Gn[:,1].nonzero() ] )
-        assert not numpy.isnan(Gn_mean_unc), "Mean Gamma uncertainty = 0!"
+        for i in range(len(Gn)):
+            if Gn[i,0] == 0:
+                print ("missing Gamma_n value!")
+                # calculate using capture kernel if possible:
+                if kernel and kernel[i,0] != 0:
+                    Gn[i,0] = Gg[i,0]*kernel[i,0] / (gfact[i]*
+                            Gg[i,0]-kernel[i,0])
+                else:
+                    print ("use mean Gn to fill the value")
+                    Gn[i,0] = gn_mean
+            
+            if Gn[i,1] == 0:
+                # could calculate from kernel uncertainty...
+                Gn[i,1] = gn_mean_unc
         
-        for gn in Gn:
-            if gn[0] == 0:
-                print 'missing Gamma_n value!'
-                # I don't think this comes up
-            if gn[1] == 0:
-                gn[1] = Gn_mean_unc
-        
-        # ptanal also splits Gg_mean up by s- p- and d-wave contributions
-        Gg_mean = numpy.mean( Gg[:,0][ Gg[:,0].nonzero() ] )
-        Gg_mean_unc = numpy.mean( Gg[:,1][ Gg[:,1].nonzero() ] )
-        # these could be zero
-        if numpy.isnan(Gg_mean):
-            Gg_mean=0.0
-            print ("!!! Mean gamma width = 0!!!")
-        if numpy.isnan(Gg_mean_unc):
-            Gg_mean_unc=0.0
-            print ("!!! Mean gamma transition uncertainty = 0!!!")
-            # if Gamma widths are provided in Atlas, use those instead
-        for gg in Gg:
-            if gg[0] == 0:
-                # could just use mean of existing Gamma widths, or 
-                # use Gn value and capture kernel to calculate Gg:
-                
-                gg[0] = Gg_mean
-            if gg[1] == 0:
-                gg[1] = Gg_mean_unc
+        for i in range(len(Gg)):
+            if Gg[i,0] == 0:
+                # use 'ggavg' vals from atlas if available:
+                Gg[i,0] = ggavg[ int(L[i]) ]
+                if Gg[i,0] == 0:
+                    Gg[i,0] = gg_mean
+            if Gg[i,1] == 0:
+                Gg[i,1] = gg_mean_unc
         
         
         # now all the gaps should be filled, also need to correct formats:
         # we want to store G_n not 2*g*G_n and so on
-        for i in range(len(J)):
-            if jflag[i] == 'A':
-                J[i] = -1
-            if lflag[i] == 'A':
-                L[i] = -1
-            
+        
+        #for i in range(len(J)):
+        #    if jflag[i] == 'A':
+        #        # nothing, this just means "it's a guess"
+        #        pass
+        #    if lflag[i] == 'A':
+        #        pass
+        
+        
         # create array of g-factor for all resonances:
         gfact = ( (2.0 * J + 1) / (2.0*(2*spin+1)) )
         
@@ -262,10 +309,6 @@ class MF32(MF_base):
                     raise ValueError, ("Unknown ggflag in atlas: %s line %s" %
                             (ggflag[i],i+6) )
 
-            # could try using kernel to compute G_g:
-            # facg = par5[i][0]/(gfact[i]*Gg[i][0])
-            # if (facg < 0.5):
-            #   gGn = par5[i][0]/(1-facg)
         
         
         self.J = J
@@ -283,11 +326,12 @@ class MF32(MF_base):
         self.spin = spin
         self.abun = abun
         self.ap = ap
-        # assume we want all resonances:
-        self.erange = (1.e-5, self.En[-1][0])
+        # use emax from the atlas 'res properties' file:
+        self.erange = (1.e-5, emax)
+        print ("self.erange: %e eV to %e eV" % (self.erange) )
         
         # placeholder for covariance matrix:
-        self.cov_mat = 0
+        self.cov_mat = numpy.array(0)
     
      
     
@@ -444,8 +488,8 @@ class MF32(MF_base):
         self.awt = awt
         self.spin = spin
         self.ap = ap
-        # assume we want all resonances:
-        self.erange = (1.e-5, self.En[-1][0])
+        # use same energy range as the original file:
+        self.erange = (elow, ehigh)
         
         self.nres = len(En)
         self.corr_mat = corr_mat
@@ -455,6 +499,12 @@ class MF32(MF_base):
         """
         create new ENDF file containing MF1, MF2 and MF32
         """
+        if not hasattr(self,'MAT'):
+            # MAT isn't present in Atlas, needs to be set by hand
+            matstr = raw_input("Please assign a MAT number: ")
+            self.MAT = int(matstr)
+            assert 100 < self.MAT < 9999
+        
         print ("Writing resonance region in range %f to %f" % self.erange)
         
         fout = open(filename,'w')
@@ -497,8 +547,12 @@ class MF32(MF_base):
         LCOMP=3 # compact format
         mf2 += self.writeENDFline([0.0,self.ap,0,0,LCOMP,0],MAT,2,151)
         
-        # in MF2 resonances are sorted by L-value. Cast back to python lists
-        # in order to do the sorting: 
+        # in MF2 resonances must be sorted by L-value. For sorting,
+        # could use 'fancy indexing':
+        #En_swave = self.En[ self.L==0 ] # energies of s-wave resonances
+        #J_swave = self.J[ self.L==0 ] # Jpi for s-wave resonances (and so on)
+        
+        # or I can cast back to python lists, probably better choice:
         L_list = list(self.L)
         En_list = list(self.En[:,0])
         J_list = list(self.J)
@@ -527,7 +581,7 @@ class MF32(MF_base):
         # MF 32
         mf32 = self.writeENDFline([self.zam,self.awt,0,0,1,0], MAT,32,151)
         mf32 += self.writeENDFline([self.zam,1.0,0,0,1,0], MAT,32,151)
-        #LRF=2 I think this must be the same as in MF2
+        #LRF=2 I think this is required to be the same in MF2 and MF32
         mf32 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
                 MAT,32,151)
         LCOMP = 2
