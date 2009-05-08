@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-04-02 09:19:06 $
-Ccc   * $Id: main.f,v 1.205 2009-04-02 09:19:06 Capote Exp $
+Ccc   * $Date: 2009-05-08 10:07:33 $
+Ccc   * $Id: main.f,v 1.206 2009-05-08 10:07:33 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -680,10 +680,9 @@ C        Proposed by H. Wienke
          ltrmax = 6
          IF (NLW.LE.15) ltrmax = 5
          IF (NLW.LE.13) ltrmax = 4
-C        ltrmax = 4
-C        IF (NLW.LE.10) ltrmax = 3
-C        IF (NLW.LE.8) ltrmax = 2
-C        IF (NLW.LE.6) ltrmax = 1
+         IF (NLW.LE.10) ltrmax = 3
+         IF (NLW.LE.8) ltrmax = 2
+         IF (NLW.LE.6) ltrmax = 1
          WRITE(15,*) qmax,qstep,ltrmax
          q2 = qmax
          q3 = qmax
