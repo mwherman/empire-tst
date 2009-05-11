@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2006-08-09 12:37:42 $
-Ccc   * $Id: systematics.f,v 1.4 2006-08-09 12:37:42 Capote Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2009-05-11 20:31:06 $
+Ccc   * $Id: systematics.f,v 1.5 2009-05-11 20:31:06 herman Exp $
             
       
       SUBROUTINE SYSTEMATICS(Atrg,Ztrg,iprojectile)
