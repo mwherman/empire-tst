@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-04-02 09:19:06 $
-Ccc   * $Id: pcross.f,v 1.56 2009-04-02 09:19:06 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-11 20:48:35 $
+Ccc   * $Id: pcross.f,v 1.57 2009-05-11 20:48:35 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -1059,24 +1059,24 @@ C-----FOR FAST POLYNOMIAL EVALUATION
       ENDDO
 C-----DEUTERON (MASS = 2)
       IF (E.LT.80.D0) THEN
-         Flm(2,2) = MAX(0.00821 + 0.02038*x(1) + 5.95941E-4*x(2)
-     &              - 2.24726E-5*x(3) + 2.38917E-7*x(4)
-     &              - 8.34053E-10*x(5),0.)
+         Flm(2,2) = MAX(0.00821D0 + 0.02038D0*x(1) + 5.95941D-4*x(2)
+     &              - 2.24726D-5*x(3) + 2.38917D-7*x(4)
+     &              - 8.34053D-10*x(5),0.0D0)
       ELSE
          Flm(2,2) = 1.
       ENDIF
-      Flm(2,1) = MAX(1. - Flm(2,2),0.)
+      Flm(2,1) = MAX(1.D0 - Flm(2,2),0.0D0)
 C-----TRITIUM or HELIUM-3 (MASS = 3)
       IF (E.LT.70.D0) THEN
-         Flm(3,1) = MAX(0.57315 - 0.02083*x(1) + 3.19204E-4*x(2)
-     &              - 2.85876E-6*x(3) + 1.26332E-8*x(4),0.D0)
+         Flm(3,1) = MAX(0.57315D0 - 0.02083D0*x(1) + 3.19204D-4*x(2)
+     &              - 2.85876D-6*x(3) + 1.26332D-8*x(4),0.D0)
       ELSE
          Flm(3,1) = 0.D0
       ENDIF
       IF (E.LT.170.) THEN
-         Flm(3,3) = MAX(0.00705 - 0.00164*x(1) + 2.16549E-4*x(2)
-     &              - 1.73867E-6*x(3) + 5.24069E-9*x(4)
-     &              - 5.79848E-12*x(5),0.D0)
+         Flm(3,3) = MAX(0.00705D0 - 0.00164D0*x(1) + 2.16549D-4*x(2)
+     &              - 1.73867D-6*x(3) + 5.24069D-9*x(4)
+     &              - 5.79848D-12*x(5),0.D0)
       ELSE
          Flm(3,3) = 1.D0
       ENDIF

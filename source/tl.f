@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-02-15 00:14:23 $
-Ccc   * $Id: tl.f,v 1.102 2009-02-15 00:14:23 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-11 20:48:35 $
+Ccc   * $Id: tl.f,v 1.103 2009-05-11 20:48:35 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -98,7 +98,7 @@ C--------prepare starting values for searching critical l
          ELSE
             CRL = clf - 1 + (CSFus - xfum)/(xfu - xfum)
          ENDIF
-         NLW = max(CRL + MAX(5.D0,5.0D0*DFUs),float(NDLW-2))
+         NLW = max(CRL + MAX(5.D0,5.0D0*DFUs),DBLE(NDLW-2))
 C-----setting transmission coefficients for fusion if not distr. barr.
       ENDIF
       DO i = 1, NDLW
