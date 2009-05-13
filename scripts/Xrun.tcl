@@ -8081,7 +8081,7 @@ exec  xterm -e ../scripts/stanef $file & } \
         -command {exec lyx $file.lyx &} -font {} -label Report 
     $site_3_0.men70 add command \
         \
-        -command {exec xterm -e -bg darkorange -title WARNINGS -e less $file.war &} \
+        -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
         -font {} -label {EMPIRE warnings} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.empend } -font {} -label {EMPEND Log} 
