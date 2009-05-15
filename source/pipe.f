@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2007-09-03 14:20:32 $
-Ccc   * $Id: pipe.f,v 1.6 2007-09-03 14:20:32 Capote Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2009-05-15 19:10:29 $
+Ccc   * $Id: pipe.f,v 1.7 2009-05-15 19:10:29 herman Exp $
             
 C/* pipe.f
 C/*               R.Capote, 01/99                      */
@@ -22,7 +22,7 @@ C/* compiler and system dependent !!!!                 */
 C
       INTEGER*4 FUNCTION PIPE(Stringp)
 C     MSFORTRAN
-      USE PORTLIB
+C     USE PORTLIB
       CHARACTER*(*) STRINGP
 C     LAHEY FORTRAN
 C     pipe=0
