@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:25 $
-Ccc   * $Id: ph-lev-dens.f,v 1.12 2008-10-14 21:32:25 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-15 19:09:34 $
+Ccc   * $Id: ph-lev-dens.f,v 1.13 2009-05-15 19:09:34 herman Exp $
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
@@ -590,7 +590,7 @@ C
      &                 t1, t2
       DOUBLE PRECISION FCTR
       REAL FLOAT
-      INTEGER i, ii, j, jj, n, nn
+      INTEGER i, ii, j, jj, nn
       FCTR(n) = FACt(n + 1)
       WOB1 = 0.
       nn = Np + Nh

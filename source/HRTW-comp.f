@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:21 $
-Ccc   * $Id: HRTW-comp.f,v 1.57 2008-10-14 21:32:21 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-15 19:06:47 $
+Ccc   * $Id: HRTW-comp.f,v 1.58 2009-05-15 19:06:47 herman Exp $
 C
       SUBROUTINE HRTW
 Ccc
@@ -1388,7 +1388,7 @@ C
      &                 vl, xmas_npro, xmas_ntrg
       REAL FLOAT
       LOGICAL relcal
-      INTEGER i, ichsp, iel, ipa, k, kel, l, lmax, lmin, mul
+      INTEGER ichsp, iel, k, kel, lmax, lmin, mul
       INTEGER INT, MIN0
       DOUBLE PRECISION PAR
       DOUBLE PRECISION VT1

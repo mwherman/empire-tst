@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-11-11 21:22:45 $
-Ccc   * $Id: fusion.f,v 1.76 2008-11-11 21:22:45 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-15 19:07:10 $
+Ccc   * $Id: fusion.f,v 1.77 2009-05-15 19:07:10 herman Exp $
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc
@@ -47,7 +47,7 @@ C
       LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal, lodd
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
-      INTEGER i, ichsp, ip, ipa, itmp1, j, k, l, lmax, lmin, maxlw, mul,
+      INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
      &        nang, itmp2, kk
       INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
