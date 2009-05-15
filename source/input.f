@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-05-15 18:27:27 $
-Ccc   * $Id: input.f,v 1.297 2009-05-15 18:27:27 pigni Exp $
+Ccc   * $Date: 2009-05-15 19:05:48 $
+Ccc   * $Id: input.f,v 1.298 2009-05-15 19:05:48 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -8,8 +8,8 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
 Ccc   *                         I N P U T                                *
 Ccc   *                                                                  *
-Ccc   *     Sets default values of input parameters, reads mandatory     *
-Ccc   *     input and calls READIN for optional input reading.           *
+Ccc   *     Sets default values of input parameters, READs mandatory     *
+Ccc   *     input and calls READIN for optional input READing.           *
 Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
@@ -123,9 +123,9 @@ C-----Electron mass = 5.485 799 0945 x 10-4 u
       INQUIRE(file='R250SEED.DAT',exist=fexist)
       if(fexist) then
         OPEN(94,file='R250SEED.DAT',status='OLD')
-        read(94,*)  indexf, indexb
+        READ(94,*)  indexf, indexb
         Do i = 1, 250
-          read(94,*) buffer(i)
+          READ(94,*) buffer(i)
         ENDDO
         CLOSE(94)
       else
@@ -465,7 +465,7 @@ C           continuum and from continuum to discrete levels;
 C           can be changed in the optional input
 C           (keyword 'GRMULT')
          MAXmult = 2
-C--------read entire input for the first energy calculations
+C--------READ entire input for the first energy calculations
 C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
@@ -1428,16 +1428,16 @@ C Set number of angles to minimum for first energy of automatic search
           ANGles(1) = 0.0
           ANGles(2) = 180.
          ENDIF
-C--------read nuclear deformations and masses
+C--------READ nuclear deformations and masses
          CALL READNIX
 C--------set projectile/ejectile masses
          DO nejc = 0, NDEJC
             EJMass(nejc) = (AEJc(nejc)*AMUmev
      &                     -ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
          ENDDO
-C--------read shell corrections of RIPL-2/3
+C--------READ shell corrections of RIPL-2/3
          CALL READ_SHELL_CORR
-C--------read number of reasonably known levels and level density parameter 'a'
+C--------Read number of reasonably known levels and level density parameter 'a'
          CALL READLDP
 C--------fix-up deformations for CCFUS coupled channels
          IF (CSRead.EQ.( - 2.0D0) .AND. AEJc(0).GT.4.0D0) THEN
@@ -3297,7 +3297,7 @@ C
             IF(val.gt.0.) THEN
               WIDcoll = val
               WRITE (8,
-     &     '('' Collective levels in continuum will be spread using'')')
+     &     '('' Collective levels in continuum will be spREAD using'')')
               WRITE (8,
      &     '('' Gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
      &       ''R = '',F6.3, '' keV'' )') WIDcoll*1000
@@ -6177,7 +6177,7 @@ C             then starting seed is read
               Call R250Init(iseed)
             else
               OPEN(94,file='R250SEED.DAT',status='OLD')
-              read(94,*)  indexf, indexb
+              READ(94,*)  indexf, indexb
               CLOSE(94)
               WRITE (8,*) 'Random seeds :', indexf, indexb
             endif
