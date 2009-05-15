@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-03-17 07:44:13 $ 
-Ccc   * $Id: empend.f,v 1.59 2009-03-17 07:44:13 Capote Exp $ 
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2009-05-15 09:38:28 $ 
+Ccc   * $Id: empend.f,v 1.60 2009-05-15 09:38:28 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -73,6 +73,7 @@ C-V  08/12 - Fix formatting of MF10 reactions involving alphas.
 C-V        - Print WARNING when unprocessable spectra are encountered.
 C-V        - Fix unititialised variables.
 C-V        - Activate formatting of charged particles.
+C-V  09/04 - Fix gamma BR=1 to ground state in MF12 when no data given.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3323,7 +3324,7 @@ C* Assume 100% transition to ground level
           WRITE(LER,912) IL
           JL=1
           LBR(1,IL)=1
-          BRR(1,IL)=EL
+          BRR(1,IL)=1
         END IF
         GO TO 39
       END IF
