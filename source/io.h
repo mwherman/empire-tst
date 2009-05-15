@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-11-11 21:22:45 $
-Ccc   * $Id: io.h,v 1.39 2008-11-11 21:22:45 Capote Exp $
+Ccc   * $Author: pigni $ 
+Ccc   * $Date: 2009-05-15 18:24:51 $
+Ccc   * $Id: io.h,v 1.40 2009-05-15 18:24:51 pigni Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -144,7 +144,7 @@ C     Added to check if file is not empty
  895  CONTINUE
       OPEN (23,FILE='../data/nparac.dat'
      *,STATUS='OLD')
-      OPEN (24,FILE='../data/EGSM_ldp.dat'
+      OPEN (24,FILE='../RIPL-2/densities/total/level-densities-egsm.dat'
      *,STATUS='OLD')
       OPEN (26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
      *',STATUS='OLD')
