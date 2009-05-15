@@ -500,7 +500,10 @@
             WRITE(NOUT,'(//5X,2A)')  'End-of-file encountered before ', &       
      &                      'TEND record found!'
          END IF
-         IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+         IF(NOUT.NE.IOUT) THEN
+           WRITE(NOUT,'(A)') ' Done CHECKR'
+           CLOSE(UNIT=NOUT)
+         END IF
          CLOSE(UNIT=JIN)
          CHECKR_SUCCESS = 1
          GO TO 100
@@ -536,6 +539,7 @@
                WRITE(EMESS,'(A,I3,A)') 'LRP =',LRP,                     &       
      &          ' Requires the presence of File 2, but it is missing.'
                CALL ERROR_MESSAGE(0)
+               NERROR=NERROR+1
                IFL2 = 1
             END IF
          END IF
@@ -567,6 +571,7 @@
      &                 'SECTION MAT=',MATO,'MF=',INDX1,'MT=',           &       
      &                 INDX2,'IS MISSING'
                   CALL ERROR_MESSAGE(0)
+                  NERROR=NERROR+1
                END IF
             END DO
          END IF
@@ -609,9 +614,14 @@
      &     WRITE(NOUT,'(A/A,2(I6,A))') CHAR(12),
      &           '     Encountered',NERROR,' errors,  '                 &
      &                             ,NWARNG,' warnings'
+           NERROR=0
+           NWARNG=0
          END IF
 !
-      IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+      IF(NOUT.NE.IOUT) THEN
+        WRITE(NOUT,'(A)') ' Done CHECKR'
+        CLOSE(UNIT=NOUT)
+      END IF
       CLOSE(UNIT=JIN)
 !
 !     SEE IF ONE PASS LIMIT SET
@@ -1175,7 +1185,7 @@
 !
       IMPLICIT NONE
 !
-      CHARACTER(LEN=80) :: EMESSP
+      CHARACTER(LEN=72) :: EMESSP
       INTEGER(KIND=I4) :: IPATH
 !
 !     SET ERROR FLAG
@@ -1194,7 +1204,14 @@
       IF(IPATH.EQ.2) THEN
          WRITE(EMESSP(23:28),'(I6)') NSUB
       END IF
-      WRITE(EMESS,'(A,I3,1X,A)') 'FILE',MF,EMESS
+
+      PRINT *,'MF',MF
+      PRINT *,'EMESSP','"',EMESSP,'"'
+
+      WRITE(EMESS,'(A4,I3,1X,A)') 'FILE',MF,EMESSP
+
+      PRINT *,EMESS
+
       CALL ERROR_MESSAGE(0)
 !
       RETURN
@@ -1375,6 +1392,7 @@
       WRITE(EMESS,'(2A,I8,A,I8)') 'SECTION CANNOT BE',                  &       
      &      ' CHECKED FROM SEQUENCE NUMBER ',NSEQB,' TO',NSEQ
       CALL ERROR_MESSAGE(0)
+      NERROR=NERROR+1
    60 IF(MAT.LT.0)  THEN
          CALL CONTROL_ERRORS(1)
       ELSE IF (MAT.EQ.0) THEN
@@ -3109,7 +3127,7 @@
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM2,'/',MT,         &       
      &       ' NOT BE PRESENT'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(1)
       END IF
       MFM1 = MF - 1
       CALL TESTS(MFM1,MT,ISET)
@@ -3117,7 +3135,7 @@
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM1,'/',MT,         &       
      &       ' NOT BE PRESENT'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(1)
       END IF
 !
 !     CHECK LAB-CM FLAG
@@ -3681,7 +3699,7 @@
             IF(NER.NE.0)   THEN
                WRITE(EMESS,'(A,F4.1)')                                  &       
      &            'LCON=1 REQUIRES NER=0 FOR STYPE = ',STYPE
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(1)
             END IF
             GO TO 30
          END IF
@@ -3757,7 +3775,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &        'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,         &       
      &        ' NOT BE PRESENT'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(1)
          END IF
       ELSE
 !
@@ -3884,7 +3902,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &         'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,        &       
      &         ' NOT BE PRESENT'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(1)
          END IF
 !********L1(LO) MUST BE 0
          LO = L1H
@@ -4023,7 +4041,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A,I3,A,I3)')                        &       
      &        'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFM2,     &       
      &        '/',MT,' OR',MFM1,'/',MT
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(1)
          END IF
       END IF
 !
@@ -4124,7 +4142,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A,I3,A,I3)')                        &       
      &        'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFM2,     &       
      &        '/',MT,' OR',MFM1,'/',MT
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(1)
          END IF
       END IF
 !
@@ -4785,6 +4803,7 @@
             EMESS = '    COVARIANCE SECTION FOR MT = MTL '//            &       
      &             'IS MISSING'
             CALL ERROR_MESSAGE(0)
+            NERROR=NERROR+1
          END IF
 !
 !        CHECK SEQUENCING OF MTL-VALUES
@@ -6496,7 +6515,7 @@ c        END IF
          CASE (1)
             IF(MFT.EQ.1)   THEN
                IF(NFOR.GE.6)   THEN
-                  IF(MTT.NE.451.AND.NSUB.NE.10)   IEVAL = 1
+                  IF(MTT.NE.451 .AND. NSUB.NE.10)     IEVAL = 1
                END IF
             ELSE
                IEVAL = 2
@@ -6573,14 +6592,30 @@ c        END IF
 !********MTCAT=11;  TOTAL AND PROMPT FISSION NEUTRON PRODUCTION
          CASE (11)
             IF(MFT.EQ.1.OR.MFT.EQ.31)   THEN
-               IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4))  IEVAL = 1
+               IF(NFOR.GE.6) THEN
+                  IF(NSUB.EQ.  1 .OR.
+     &               NSUB.EQ.  3 .OR.
+     &               NSUB.EQ.  5 .OR.
+     &               NSUB.EQ.  6 .OR.
+     &               NSUB.EQ. 11 .OR.
+     &               NSUB.EQ. 12 .OR.
+     &               NSUB.EQ.113)    IEVAL = 1
+               END IF
             ELSE
                IEVAL = 2
            END IF
 !********MTCAT=12;  DELAYED FISSION NEUTRON PRODUCTION
          CASE (12)
             IF(MFT.EQ.1.OR.MFT.EQ.5.OR.MFT.EQ.31) THEN
-               IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4))  IEVAL = 1
+               IF(NFOR.GE.6) THEN
+                  IF(NSUB.EQ.  1 .OR.
+     &               NSUB.EQ.  3 .OR.
+     &               NSUB.EQ.  5 .OR.
+     &               NSUB.EQ.  6 .OR.
+     &               NSUB.EQ. 11 .OR.
+     &               NSUB.EQ. 12 .OR.
+     &               NSUB.EQ.113)    IEVAL = 1
+               END IF
             ELSE
                IEVAL = 2
             END IF
@@ -6697,7 +6732,7 @@ c        END IF
          WRITE(EMESS,'(A,I3,A,I3)')                                     &       
      &       'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFTEM,     &       
      &       '/',MTTEM
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(1)
       END IF
 !
       RETURN

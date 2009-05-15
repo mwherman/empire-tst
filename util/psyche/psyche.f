@@ -505,7 +505,10 @@
             WRITE(NOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
      &                      'TEND RECORD FOUND!'
          END IF
-         IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+         IF(NOUT.NE.IOUT) THEN
+           WRITE(NOUT,'(A)') ' Done FIZCON'
+           CLOSE(UNIT=NOUT)
+         END IF
          CLOSE(UNIT=JIN)
          PSYCHE_SUCCESS = 1
          GO TO 100
@@ -613,7 +616,10 @@
 !
 !     CLOSE FILES
 !
-   60 IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+   60 IF(NOUT.NE.IOUT) THEN
+         WRITE(NOUT,'(A)') ' Done PSYCHE'
+         CLOSE(UNIT=NOUT)
+      END IF
       CLOSE(UNIT=JIN)
       CLOSE(UNIT=ISCR,STATUS='DELETE')
       CLOSE(UNIT=JSCR,STATUS='DELETE')

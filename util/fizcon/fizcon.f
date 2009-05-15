@@ -947,7 +947,10 @@
             WRITE(NOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
      &                      'TEND RECORD FOUND!'
          END IF
-         IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+         IF(NOUT.NE.IOUT) THEN
+           WRITE(NOUT,'(A)') ' Done FIZCON'
+           CLOSE(UNIT=NOUT)
+         END IF
          CLOSE(UNIT=JIN)
          FIZCON_SUCCESS = 1
          GO TO 100
@@ -1093,9 +1096,14 @@
      &     WRITE(NOUT,'(A/A,2(I6,A))') CHAR(12),
      &           '     Encountered',NERROR,' errors,  '                 &
      &                             ,NWARNG,' warnings'
+           NERROR=0
+           NWARNG=0
          END IF
 !
-      IF(NOUT.NE.IOUT)   CLOSE(UNIT=NOUT)
+      IF(NOUT.NE.IOUT) THEN
+        WRITE(NOUT,'(A)') ' Done FIZCON'
+        CLOSE(UNIT=NOUT)
+      END IF
       CLOSE(UNIT=JIN)
       CLOSE(UNIT=ISCRX,STATUS='DELETE')
       CLOSE(UNIT=ISCRY,STATUS='DELETE')
@@ -1706,7 +1714,7 @@
       ELSE
          ASAV = AMOD(ZA,1000.)
          IF(ASAV.GT.0.) THEN
-            ZTRY = AINT(ASAV/2.) + 1.
+            ZTRY = AINT((ASAV+1.)/2.) + 1.
             CALL TEST6(ZT,1.,ZTRY,'Z')
          END IF
       END IF
@@ -3127,9 +3135,9 @@
 !
       INTEGER(KIND=I4) :: ILEVC,IEQU,IQTEST
       REAL(KIND=R4) :: ELEV,QTLOW,Q,EXL
-      REAL(KIND=R4), PARAMETER :: QLOW=-2.0E+07,QHIGH=2.0E+07
-      REAL(KIND=R4), PARAMETER :: QFLOW=1.7E+08,QFHIGH=2.1E+08
-      REAL(KIND=R4), PARAMETER :: QLLOW=1.0E+03,QLHIGH=2.0E+07
+      REAL(KIND=R4), PARAMETER :: QLOW =-2.0E+07,QHIGH =2.0E+07
+      REAL(KIND=R4), PARAMETER :: QFLOW= 1.7E+08,QFHIGH=2.3E+08
+      REAL(KIND=R4), PARAMETER :: QLLOW= 1.0E+03,QLHIGH=2.0E+07
 !
 !     SET UP FOR Q TEST
 !
@@ -3159,15 +3167,15 @@
          GO TO 100
       END IF
       WRITE(EMESS,'(A,1PE12.5,A)')                                      &       
-     &      'Q=',Q,' IS NOT REASONABLE FOR THIS SECTION'
-      CALL ERROR_MESSAGE(0)
+     &      'Q=',Q,' MIGHT BE UNREASONABLE'
+      CALL WARNING_MESSAGE(1)
 !
 !     CHECK IMPLIED INTERMEDIATE LEVEL ENERGY
 !
    50 IF(ILEVC.EQ.0)   THEN
          IF(EXL-ELIS.NE.0.)   THEN
             EMESS = 'IMPLIED INTERMEDIATE LEVEL ENERGY SHOULD BE 0.0'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(1)
             GO TO 100
          END IF
       END IF
@@ -3177,8 +3185,8 @@
       END IF
       IF(ILEVC.EQ.1.OR.LR.EQ.0)   THEN
          WRITE(EMESS,'(A,1PE12.5,A)')                                   &       
-     &          'ELEVEL=',ELEV,' IS NOT REASONABLE FOR THIS SECTION'
-         CALL ERROR_MESSAGE(0)
+     &          'ELEVEL=',ELEV,' MIGHT BE UNREASONABLE'
+         CALL WARNING_MESSAGE(1)
       END IF
 !
   100 RETURN
@@ -3816,7 +3824,7 @@
 !
       IF(IFMT.EQ.1.AND.IFISFL.EQ.0)   THEN
          EMESS = 'NO FISSION SPECTRUM FOR A FISSION REACTION'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(1)
       END IF
 !
 !     SAVE ENERGY RANGE SPANNED
@@ -9891,6 +9899,8 @@
      &                        'MUST BE PRESENT'
                WRITE(NOUT,'(/5X,A)')  TRIM(EMESS)
                NMISS = 1
+!              Increment count for warnings
+               NWARNG=NWARNG+1
             END IF
          ELSE
             NMISS = -1
@@ -9949,14 +9959,17 @@
                IF(LMFSN.NE.0.AND.LMFSN.EQ.M) THEN
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I2)')                           &       
-     &                          'MISSING SECTIONS IN FILE ',M
+                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+     &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
+!                    Increment count for warnings
                   END IF
                   WRITE(EMESS,'(A,I4,A,I3)')                            &       
      &               'FILE 8, MT=',LMFS(1,N),                           &       
      &               ' REQUIRES SAME MT IN FILE',LMFS(2,N)
                   WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
+!                 Increment count for warnings
+                  NERROR=NERROR+1
                END IF
             END DO
             IF(M.EQ.10)  NLMF = 0
@@ -9974,14 +9987,17 @@
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I2)')                           &       
-     &                          'MISSING SECTIONS IN FILE ',M
+                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+     &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
+!                    Increment count for warnings
                   END IF
                   WRITE(EMESS,'(A,I3,A,I3,A,I4)')                       &       
      &                'CONTENTS OF FILE',MFR,' REQUIRE A SECTION MF=',  &       
      &                M,'  AND MT=',MTR
                   WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
+!                 Increment count for errors
+                  NERROR=NERROR+1
                ELSE
                   ICON(N,2) = ICON(N,2) - 2000
                END IF
@@ -10000,14 +10016,16 @@
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I2)')                           &       
-     &                          'MISSING SECTIONS IN FILE ',M
+                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+     &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
                   END IF
                   WRITE(EMESS,'(A,I3,A,I3,A,I4)')                       &       
      &                'CONTENTS OF FILE',MFR,' REQUIRE A SECTION MF=',  &       
      &                M,'  AND MT=',MTR
                   WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
+!                 Increment count for errors
+                  NERROR=NERROR+1
                END IF
             END DO
             NPMT = 0
@@ -10064,8 +10082,8 @@
                   END IF
                END IF
                IF(MISFERR.NE.MF0) THEN
-                  WRITE(NOUT,'(/3X,A,I2)')  'MISSING SECTIONS IN FILE ',&       
-     &                                       MF0
+                  WRITE(NOUT,'(/3X,A,I5,A,I3)')                         &       
+     &            'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',MF0
                   MISFERR = MF0
                END IF
                WRITE(EMESS,'(A,I4,2A,I2)')                              &       
@@ -10073,6 +10091,8 @@
      &              'EQUIVALENT SECTION IN FILE',MF0
                WRITE(NOUT,'(5X,A)')  TRIM(EMESS)
                NMISS = NMISS + 1
+!              Increment count for errors
+               NERROR=NERROR+1
             END IF
          END IF
    50    NNL = NDUM
@@ -10121,7 +10141,7 @@
 !
    20 WRITE(EMESS,'(A,I3,A,I4,A)')                                      &       
      &     'FILE',MF1,', MT=',MT1,' IS MISSING FROM INDEX'
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(1)
       GO TO 100
 !
 !     FIND MF2/MT2 IN THE INDEX
@@ -11747,8 +11767,6 @@
       END IF
       IF(JSEQ.NE.0) THEN
          WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
-!        Increment count for errors
-         NERROR=NERROR+1
       ELSE
          IF(EMESS.EQ.' ') THEN
             NEMES = 1
@@ -11757,6 +11775,8 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
+!     Increment count for errors
+      NERROR=NERROR+1
       RETURN
       END SUBROUTINE ERROR_MESSAGE
 !
