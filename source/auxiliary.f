@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-19 00:00:31 $
-Ccc   * $Id: auxiliary.f,v 1.38 2009-01-19 00:00:31 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-05-15 18:40:57 $
+Ccc   * $Id: auxiliary.f,v 1.39 2009-05-15 18:40:57 herman Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -1433,3 +1433,11 @@ C-----------interpolate
       ENDDO
 C     WRITE(8,*)'recoil to cont=',summino*Sxo*Szo
       END
+
+      FUNCTION ETIME(A)
+C     Does nothing (returns 0)
+C     Introduced only to make Absoft compiler happy as ECIS asks
+C     for it in subroutine HORA
+      ETIME = 0.0
+      RETURN
+      END      
