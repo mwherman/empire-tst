@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-04-02 09:19:05 $
-Ccc   * $Id: input.f,v 1.296 2009-04-02 09:19:05 Capote Exp $
+Ccc   * $Date: 2009-05-15 18:27:27 $
+Ccc   * $Id: input.f,v 1.297 2009-05-15 18:27:27 pigni Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -6422,7 +6422,10 @@ C-----Set EGSM normalization factors for each Z
          DO iz = 1,NDZmax
             ATIlnoz(iz) = 1.0 !default
          ENDDO
-         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
+c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
+         OPEN(31, FILE=
+     &   '../RIPL-2/densities/total/level-densities-egsm-norm.dat', 
+     &   STATUS='OLD')
          READ (31,'(///)')
    90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
          ATIlnoz(iz) = atiln
