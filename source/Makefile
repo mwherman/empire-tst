@@ -1,7 +1,10 @@
 #----GNU gfortran FORTRAN compiler
-#FC     =  gfortran
+FC     =  gfortran
 #----flags for production compilation with gfortran
 #FFLAGS = -O3 -pg -std=legacy
+FFLAGS = -std=legacy
+#----flags for debuging using gfortran compiler
+#FFLAGS =  -g --bounds-check 
 
 #----GNU f95 FORTRAN compiler
 #FC     =  f95
@@ -27,10 +30,10 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
-#----flags for optimalization using ifort 
-FFLAGS = -arch pn4 -O3 -axPW -ipo  
-#FFLAGS = -arch pn4 -O3 -ipo 
+#FC     =  ifort
+#----flags for optimalization using ifort
+#FFLAGS = -arch pn4 -O3 -axPW -ipo
+#FFLAGS = -arch pn4 -O3 -ipo
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
@@ -55,9 +58,6 @@ FFLAGS = -arch pn4 -O3 -axPW -ipo
 #FFLAGS = --parallel
 
 #===== M a c ==================================
-#---- gfortran Mac  compiler
-#FC     =  gfortran
-
 #----GNU g95 FORTRAN Mac compiler
 #FC     =  /sw/bin//g95
 #----flags for production compilation with g95
