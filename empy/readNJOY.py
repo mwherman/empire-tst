@@ -202,7 +202,7 @@ class mgCovars:
                 # calculate bounds:
                 start = low + j*colsPerBlock
                 end = low + (j+1)*colsPerBlock
-                if j==(blocks-1):
+                if j==(blocks-1) and remainder>0:
                     end = low + j*colsPerBlock + remainder
                 
                 #print vals
