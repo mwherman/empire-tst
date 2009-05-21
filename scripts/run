@@ -19,12 +19,22 @@ import os
 def main():
     project = sys.argv[1]
     mat = sys.argv[2]
+    
+    if (not os.environ.has_key('EMPIREDIR')) or (os.environ['EMPIREDIR']==''):
+        import time
+        print ("Please set environment variable EMPIREDIR in your bashrc:\n")
+        print ("export EMPIREDIR=<path to empire>\n")
+        print ("Guessing at path for now")
+        time.sleep(2)
+        os.environ['EMPIREDIR'] = '..'
+
+    empire = os.environ['EMPIREDIR']
     # work = os.system('pwd')   # don't really need,
     # script will run in local dir unless specified otherwise
     
     # run EMPEND and FIXUP:
     
-    os.system(" ../scripts/runE %s" % project )
+    os.system(" %s/scripts/runE %s" % (empire, project) )
     
     f = open(project+'.lst','r').readlines()
     try:
@@ -37,7 +47,7 @@ def main():
     
     # EMPEND, fixup, stanef:
     
-    i,o,e = os.popen3( '../scripts/format %s %s' %(project, mat) )
+    i,o,e = os.popen3( '%s/scripts/format %s %s' %(empire, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -49,7 +59,7 @@ def main():
     
     # run ENDF-6 checking codes
     
-    i,o,e = os.popen3('../scripts/verify %s %s' %(project, mat) )
+    i,o,e = os.popen3('%s/scripts/verify %s %s' %(empire, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -60,7 +70,7 @@ def main():
     
     # run preprocessing codes in preparation for plotting
     
-    i,o,e = os.popen3('../scripts/process %s %s' %(project, mat) )
+    i,o,e = os.popen3('%s/scripts/process %s %s' %(empire, project, mat) )
     for l in o.readlines():
         print (l.strip())
     

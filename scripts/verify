@@ -23,7 +23,7 @@ $file-log.checkr
 
 DONE
 EOF
-../util/checkr/checkr <INPUT
+$EMPIREDIR/util/checkr/checkr <INPUT
 
 # RUN FIZCON
 
@@ -34,7 +34,7 @@ $file-log.fizcon
 
 DONE
 EOF
-../util/fizcon/fizcon <INPUT
+$EMPIREDIR/util/fizcon/fizcon <INPUT
 
 
 # RUN PSYCHE
@@ -46,7 +46,7 @@ $file-log.psyche
 Y
 
 EOF
-../util/psyche/psyche <INPUT
+$EMPIREDIR/util/psyche/psyche <INPUT
 
 
 rm -f INPUT

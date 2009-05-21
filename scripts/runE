@@ -101,7 +101,7 @@ def runE(proj):
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
-    os.system('time nice ../source/empire')
+    os.system('time nice %s/source/empire' % os.environ['EMPIREDIR'])
     print ('DONE !!!')
     
     
@@ -109,7 +109,7 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
-    mv('FISS_XS.OUT',proj+'-fiss.xsc')
+    mv('FISS_XS.OUT',proj+'-fiss.xsc',0) # no message if not present
     
     if not (os.path.isdir(proj+'-tl')):
         mv('TL',proj+'-tl')
@@ -121,7 +121,7 @@ def runE(proj):
     if isEmpty(proj+'-omp.dir'):
         cp('OMPAR.DIR',proj+'-omp.dir')
     if isEmpty(proj+'-inp.fis'):
-        cp('FISSION.INP',proj+'-inp.fis')
+        cp('FISSION.INP',proj+'-inp.fis',0) # no message if not present
     if isEmpty(proj+'-lev.col'):
         if not isEmpty('TARGET_COLL.RIPL'):
             mv('TARGET_COLL.RIPL',proj+'-lev.col')
@@ -169,20 +169,21 @@ def runE(proj):
         if not isEmpty('SENSITIVITY.MATRIX'):
             mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
         
-        mv('EXFOR.dat',proj+'.exf')
-        mv('ECIS_ROT.out',proj+'-ecis.out')
-        mv('ECIS_VIB.out',proj+'-ecis.out')
-        mv('ECIS_VIBROT.out',proj+'-ecis.out')
-        mv('ecVIB.inp',proj+'-ecis.in')
-        mv('ecROT.inp',proj+'-ecis.in')
-        mv('ecVIBROT.inp',proj+'-ecis.in')
-        mv('FISSION.OUT',proj+'-fiss.out')
-        mv('R250SEED.DAT',proj+'.rng')
-        mv('PFNM.OUT',proj+'-pfnm.out')
-        mv('PFNS.OUT',proj+'-pfns.out')
-        mv('FIT.OUT',proj+'-ompfit.lst')
-        mv('COVAR.DAT',proj+'-MC.par') 
-        mv('OMP_A.DAT',proj+'-aOMP.lst')
+        # move files, no warning if files DNE:
+        mv('EXFOR.dat',proj+'.exf',0)
+        mv('ECIS_ROT.out',proj+'-ecis.out',0)
+        mv('ECIS_VIB.out',proj+'-ecis.out',0)
+        mv('ECIS_VIBROT.out',proj+'-ecis.out',0)
+        mv('ecVIB.inp',proj+'-ecis.in',0)
+        mv('ecROT.inp',proj+'-ecis.in',0)
+        mv('ecVIBROT.inp',proj+'-ecis.in',0)
+        mv('FISSION.OUT',proj+'-fiss.out',0)
+        mv('R250SEED.DAT',proj+'.rng',0)
+        mv('PFNM.OUT',proj+'-pfnm.out',0)
+        mv('PFNS.OUT',proj+'-pfns.out',0)
+        mv('FIT.OUT',proj+'-ompfit.lst',0)
+        mv('COVAR.DAT',proj+'-MC.par',0)
+        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
         
         # Extract Warnings from the list file:
         # this is portable version of 'grep WARNING infile > outfile
@@ -235,11 +236,12 @@ def runE(proj):
             if isEmpty(proj+'.c4'):
                 # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
                 
-                os.system('../scripts/c4 %s' % proj)
+                os.system('%s/scripts/c4 %s' % (os.environ['EMPIREDIR'],proj) )
                 
                 # RUN c4sort TO SORT C4 DATA
                 
-                os.system('../scripts/sortc4 %s' % proj)
+                os.system('%/scripts/sortc4 %s' %
+                    (os.environ['EMPIREDIR'],proj) )
         
         # REMOVE EMPTY FILES:
         
@@ -264,7 +266,7 @@ def runE(proj):
         
         # Produce ZVD files from cross-section tables:
         if not isEmpty(proj+'.xsc'):
-            os.system('../scripts/cs2zvd %s' % proj)
+            os.system('%s/scripts/cs2zvd %s' % (os.environ['EMPIREDIR'],proj) )
         
         return 0
 

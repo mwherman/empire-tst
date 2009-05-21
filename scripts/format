@@ -1,6 +1,7 @@
 #! /bin/sh -
 #script to format EMPIRE II output
 file=$1
+MATid=$2
 work=`pwd`
 if [ "$1" = "" ]
    then
@@ -14,26 +15,24 @@ fi
 
 #run EMPEND to format EMPIRE output into ENDF
 
-cp $file.out OUTPUT.DAT
-rm -f EMPEND.INP
-cat >../util/empend/EMPEND.INP <<EOF
-OUTPUT.DAT
-OUTPUT.ENDF
+# EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
+cat >EMPEND.INP <<EOF
+$file.out
+$file-e.endf
 1 
 0.1
 $2
 EOF
-../util/empend/empend <../util/empend/EMPEND.INP && mv OUTPUT.ENDF $file-e.endf
+$EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
-rm OUTPUT.DAT
+rm EMPEND.INP
+
 
 # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+# careful, looks like fixup has fixed-form input
 
 rm $file-f.endf 2>/dev/null
-cd ../util/fixup/
-rm OUTPUT.ENDF 2>/dev/null
-ln -sf $work/$file-e.endf OUTPUT.ENDF
-rm -f FIXUP.INP
+ln -sf $file-e.endf OUTPUT.ENDF
 cat >FIXUP.INP <<EOF
 12101011111001                                                              
 OUTPUT.ENDF                                                                        
@@ -63,24 +62,28 @@ S  2=+(  1,  1)-(  3,  3)
                                                                       
 EOF
 #cp FIXUP1.INP FIXUP.INP
-./fixup
+$EMPIREDIR/util/fixup/fixup < FIXUP.INP
 rm OUTPUT.ENDF
+rm FIXUP.INP
 mv FIXUP.ENDF $work/$file-f.endf
 mv FIXUP.LST $work/$file-log.fixup
-cd $work
 
 
-# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
+# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2), currently disabled:
+# second input line should point to file containing MF2 (and 32?)
 
 #rm $file.endf 2>/dev/null
-#cd ../util/endres/
-#rm empire.end endf.dat 2>/dev/null
-#ln -sf $work/$file-f.endf empire.end
-#./endres <ENDRES.INP
-#rm empire.end 
-#mv endf.dat $work/$file.endf
-#mv endres.lst $work/$file-log.endres
-#cd $work
+#cat >ENDRES.INP <<EOF
+#$file-f.endf
+#$file-resonances.endf
+#endf.dat
+#0
+#EOF
+#
+#../util/endres/endres < ENDRES.INP
+#mv endf.dat $file.endf
+#mv endres.lst $file-log.endres
+
 # $work/$file.endf is the final ENDF output file
 mv $file-f.endf $file.endf
 
@@ -94,7 +97,7 @@ $file-stan.endf
 
 DONE
 EOF
-../util/stanef/stanef <INPUT
+$EMPIREDIR/util/stanef/stanef <INPUT
 mv $file-stan.endf $file.endf
 
 # remove left-over files

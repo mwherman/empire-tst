@@ -16,9 +16,9 @@ fi
 
 cp $file.xsc XSECTIONS.OUT
 rm -f CS2ZVD.INP
-cp ../util/cs2zvd/CS2ZVD.INP .
+ln -sf $EMPIREDIR/util/cs2zvd/CS2ZVD.INP CS2ZVD.INP
 #vi CS2ZVD.INP	
-../util/cs2zvd/cs2zvd.exe 
+$EMPIREDIR/util/cs2zvd/cs2zvd.exe 
 if [ -f "XS_(z,tot).zvd" ]; then
  mv "XS_(z,tot).zvd" $file-tot.zvd
 fi

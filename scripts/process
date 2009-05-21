@@ -17,11 +17,7 @@ fi
 # RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP
 
 rm $file-f2.endf 2>/dev/null
-cd ../util/fixup/
-rm OUTPUT.ENDF 2>/dev/null
-ln -sf $work/$file.endf OUTPUT.ENDF
-
-rm -f FIXUP.INP
+ln -sf $file.endf OUTPUT.ENDF
 cat >FIXUP.INP <<EOF
 12101011111001                                                              
 OUTPUT.ENDF                                                                        
@@ -42,69 +38,69 @@ S207=+( 22, 25)+(107,109)+(112,114)
                                                                  
 EOF
 
-./fixup
+$EMPIREDIR/util/fixup/fixup < FIXUP.INP
 rm OUTPUT.ENDF
+rm FIXUP.INP
 mv FIXUP.ENDF $work/$file-f2.endf
 mv FIXUP.LST $work/$file-log.fixup2
-cd $work
 
 
 # RUN LINEAR
 
-cd ../util/linear/
-rm LINEAR.OUT 2>/dev/null
-ln -sf $work/$file-f2.endf ENDF.IN
-./linear
+ln -sf $file-f2.endf ENDF.IN
+ln -sf $EMPIREDIR/util/linear/LINEAR.INP LINEAR.INP
+
+$EMPIREDIR/util/linear/linear < LINEAR.INP
 rm ENDF.IN
+rm LINEAR.INP
 mv LINEAR.OUT $work/$file-lin.endf
 mv LINEAR.LST $work/$file-log.linear
-cd $work
 
 # RUN RECENT
 
-cd ../util/recent/
-rm RECENT.OUT 2>/dev/null
 ln -sf $work/$file-lin.endf ENDF.IN
-./recent
+ln -sf $EMPIREDIR/util/recent/RECENT.INP RECENT.INP
+
+$EMPIREDIR/util/recent/recent < RECENT.INP
 rm ENDF.IN
+rm RECENT.INP
 mv RECENT.OUT $work/$file-rec.endf
 mv RECENT.LST $work/$file-log.recent
-cd $work
 
 # RUN SIGMA1
 
-cd ../util/sigma1/
-rm SIGMA1.OUT 2>/dev/null
 ln -sf $work/$file-rec.endf ENDF.IN
-./sigma1
+ln -sf $EMPIREDIR/util/sigma1/SIGMA1.INP SIGMA1.INP
+
+$EMPIREDIR/util/sigma1/sigma1 < SIGMA1.INP
 rm ENDF.IN
+rm SIGMA1.INP
 mv SIGMA1.OUT $work/$file-sig.endf
 mv SIGMA1.LST $work/$file-log.sigma1
-cd $work
 
 # RUN LEGEND
 
 rm $file-l.endf 2>/dev/null
-cd ../util/legend/
-rm LEGEND.OUT 2>/dev/null
 ln -sf $work/$file-sig.endf ENDF.IN
-./legend
+ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
+
+$EMPIREDIR/util/legend/legend < LEGEND.INP
 rm ENDF.IN
+rm LEGEND.INP
 mv LEGEND.OUT $work/$file-l.endf
 mv LEGEND.LST $work/$file-log.legend
-cd $work
 
 # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
 
 rm $file-s.endf 2>/dev/null
-cd ../util/sixtab/
-rm ENDF.IN ENDF.OUT 2>/dev/null
 ln -sf $work/$file-l.endf ENDF.IN
-./sixtab
-rm ENDF.IN
+ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
+
+$EMPIREDIR/util/sixtab/sixtab < SIXTAB.INP
+rm ENDF.IN 
+rm SIXTAB.INP SIXTAB.TMP
 mv ENDF.OUT $work/$file-s.endf
-cd $work
-   
+
 
 # RUN PLTLST TO PRODUCE LISTING OR PLOTC4
  ../scripts/plotlst $file
