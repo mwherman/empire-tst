@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-11 20:48:35 $
-Ccc   * $Id: pcross.f,v 1.57 2009-05-11 20:48:35 herman Exp $
+Ccc   * $Date: 2009-05-21 21:30:12 $
+Ccc   * $Id: pcross.f,v 1.58 2009-05-21 21:30:12 herman Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'

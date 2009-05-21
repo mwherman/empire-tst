@@ -1,6 +1,6 @@
 Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-11 20:48:35 $
-Ccc   * $Id: tl.f,v 1.103 2009-05-11 20:48:35 herman Exp $
+Ccc   * $Date: 2009-05-21 21:30:20 $
+Ccc   * $Id: tl.f,v 1.104 2009-05-21 21:30:20 herman Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
