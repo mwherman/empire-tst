@@ -3,15 +3,19 @@
 
 work=`pwd`
 file=$1
-cd ../util/x4toc4
 rm X4.DAT NEWX4.DAT X4TOC4.LST C4.DAT 2>/dev/null
+ln -sf $EMPIREDIR/util/x4toc4/EXFOR14A.DAT EXFOR14A.DAT
+ln -sf $EMPIREDIR/util/x4toc4/EXFOR24A.DAT EXFOR24A.DAT
+ln -sf $EMPIREDIR/util/x4toc4/EXFOR25A.DAT EXFOR25A.DAT
 ln  -sf $work/$file.exf X4.DAT
-./x4toc4
+
+$EMPIREDIR/util/x4toc4/x4toc4
 rm X4.DAT
-cd $work
-mv ../util/x4toc4/NEWX4.DAT $file.x42c4_errs
-mv ../util/x4toc4/X4TOC4.LST $file.x42c4_lst
-mv ../util/x4toc4/C4.DAT $file.c4
+rm EXFOR14A.DAT EXFOR24A.DAT EXFOR25A.DAT
+
+mv NEWX4.DAT $file.x42c4_errs
+mv X4TOC4.LST $file.x42c4_lst
+mv C4.DAT $file.c4
 if [ -s $file.c4 ]; then
    echo 'EXFOR data in computational format are stored in: '$file.c4
    else
