@@ -13,19 +13,15 @@ endf.dat
 0
 
 EOF
-mv -f ENDRES.INP ../util/endres/
-cp -f $file-res.endf ../util/endres/
 fi
 
-cd ../util/endres/
 rm empire.end endf.dat 2>/dev/null
-ln -sf $work/$file.endf empire.end
-./endres <ENDRES.INP
+ln -sf $file.endf empire.end
+$EMPIREDIR/util/endres/endres <ENDRES.INP
 rm empire.end 
 rm $file-res.endf 
-mv endf.dat $work/$file.endf
-mv endres.lst $work/$file-log.endres
-cd $work
+mv endf.dat $file.endf
+mv endres.lst $file-log.endres
 #$work/$file.endf is the final ENDF output file
 
 # RUN STANEF
@@ -38,10 +34,10 @@ $file-stan.endf
 
 DONE
 EOF
-../util/stanef/stanef <INPUT
+$EMPIREDIR/util/stanef/stanef <INPUT
 mv $file-stan.endf $file.endf
 
-../scripts/process $file
+$EMPIREDIR/scripts/process $file
 
 # remove left-over files
 rm INPUT 2>/dev/null

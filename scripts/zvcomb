@@ -1,12 +1,18 @@
 #! /bin/sh -
 #SCRIPT TO COMBINE TWO OR MORE zvd PLOTS INTO A SINGLE ONE
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 export DISPLAY=:0
 set -x
 echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
 file=$2
-ln -s ../util/c4zvd/ps01.tit ps01.tit
-command="../util/c4zvd/zvview.exe  ps01.tit/c"
+ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+command="$EMPIREDIR/util/c4zvd/zvview.exe  ps01.tit/c"
         if [ "$file" = "" ]
            then
             echo 'Plots available for merging:'
@@ -17,7 +23,7 @@ command="../util/c4zvd/zvview.exe  ps01.tit/c"
             read file
         fi
         command=$command" "$file
-ln -s ../util/c4zvd/ps01.tit ps01.tit
+ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 $command ps01.tit/c
 rm ps01.tit
 if [ -f zv00.ps ]; then

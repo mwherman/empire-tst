@@ -1,6 +1,12 @@
 #! /bin/sh -
 #script to process ENDF file (originating from EMPIRE) 
 #through PREPRO in preparation for plotting
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 file=$1
 work=`pwd`
 if [ "$1" = "" ]

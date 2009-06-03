@@ -1,9 +1,15 @@
 #!/bin/bash
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 dir1=`pwd`
 MTlist='1 2 4 16 102'
 for filef in $*; do
   for MT in $MTlist; do
-    ../scripts/mtacomp $MT def  `expr substr $filef 1 7` $dir1 `expr substr $filef 1 7`
+    $EMPIREDIR/scripts/mtacomp $MT def  `expr substr $filef 1 7` $dir1 `expr substr $filef 1 7`
     rm c4.zvd end1.zvd 
   done
 done

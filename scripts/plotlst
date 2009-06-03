@@ -1,4 +1,10 @@
 #! /bin/sh -
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 file=$1
 work=`pwd`
 if [ "$1" = "" ]

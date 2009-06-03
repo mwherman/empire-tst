@@ -1,6 +1,12 @@
 #!/bin/bash
 #Script to produce ZVV plots comparing four sets of calculations
 #with experimental data
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 export DISPLAY=:0
 
 MT=$1
@@ -21,15 +27,15 @@ if [ $suf == "-" ]; then
 fi
 
 rm $root-$MT$suf.zvd  2>/dev/null
-ln -sf ../util/c4zvd/mt_x4r.txt mt_x4r.txt
+ln -sf $EMPIREDIR/util/c4zvd/mt_x4r.txt mt_x4r.txt
 
 #     FIRST ENDF SET AND EXFOR (.c4)
 if [ "$name1" != "" ]; then
    rm EXFOR tmp.dat c4.zvd end1.zvd  $name1  2>/dev/null
    ln -sf $dir1/$root.c4 EXFOR
    ln -sf $dir1/$root-s.endf $name1
-   ../util/c4zvd/c4dat4l.exe  EXFOR tmp.dat MF=3 MT=$MT 
-   ../util/c4zvd/datzvdl.exe tmp.dat c4.zvd
+   $EMPIREDIR/util/c4zvd/c4dat4l.exe  EXFOR tmp.dat MF=3 MT=$MT 
+   $EMPIREDIR/util/c4zvd/datzvdl.exe tmp.dat c4.zvd
    echo '#begin aa.tit' >>c4.zvd
 #  put here counting of lines in c4.zvd and skip the rest if no real data inside  
    echo '[func]' >>c4.zvd
@@ -38,7 +44,7 @@ if [ "$name1" != "" ]; then
    echo '#end aa.tit' >>c4.zvd
    cat   c4.zvd >>$root-$MT$suf.zvd
 
-   ../util/c4zvd/endzvdl.exe A $MT $name1 end1.zvd
+   $EMPIREDIR/util/c4zvd/endzvdl.exe A $MT $name1 end1.zvd
    if [ -s end1.zvd ]; then
       echo '#begin aa.tit' >>end1.zvd
       echo '[func]' >>end1.zvd
@@ -54,7 +60,7 @@ fi
 if [ "$name2" != "" ]; then
    rm $name2 end2.zvd  2>/dev/null
    ln -sf $dir2 $name2
-   ../util/c4zvd/endzvdl.exe A $MT $name2 end2.zvd
+   $EMPIREDIR/util/c4zvd/endzvdl.exe A $MT $name2 end2.zvd
    if [ -s end2.zvd ]; then
       echo '#begin aa.tit' >>end2.zvd
       echo '[func]' >>end2.zvd
@@ -71,7 +77,7 @@ fi
 if [ "$name3" != "" ]; then
    rm $name3 end3.zvd  2>/dev/null
    ln -sf $dir3 $name3
-   ../util/c4zvd/endzvdl.exe A $MT $name3 end3.zvd
+   $EMPIREDIR/util/c4zvd/endzvdl.exe A $MT $name3 end3.zvd
    if [ -s end3.zvd ]; then
       echo '#begin aa.tit' >>end3.zvd
       echo '[func]' >>end3.zvd
@@ -88,7 +94,7 @@ fi
 if [ "$name4" != "" ]; then
    rm $name4 end4.zvd  2>/dev/null
    ln -sf $dir4 $name4
-   ../util/c4zvd/endzvdl.exe A $MT $name4 end4.zvd
+   $EMPIREDIR/util/c4zvd/endzvdl.exe A $MT $name4 end4.zvd
    if [ -s end4.zvd ]; then
       echo '#begin aa.tit' >>end4.zvd
       echo '[func]' >>end4.zvd

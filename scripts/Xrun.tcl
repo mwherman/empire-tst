@@ -7714,7 +7714,7 @@ adjourn .top75} \
     set site_10_0 $site_9_0.fra79
         button $site_10_0.but80 \
             -activebackground #eccceccceccc -activeforeground red \
-        -background #efefef -command { editFile {$::env(EMPIREDIR)/source/dimension.h} } \
+        -background #efefef -command { editFile $::env(EMPIREDIR)/source/dimension.h } \
             -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
         -text {Edit dimensions} -wraplength 0 
@@ -7796,31 +7796,31 @@ exit} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/scripts/skel.inp} } -label {Default input} 
+        -command { editFile $::env(EMPIREDIR)/scripts/skel.inp } -label {Default input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/scripts/skel-inp.sen} } \
+        -command { editFile $::env(EMPIREDIR)/scripts/skel-inp.sen } \
         -label {Default sensitivity input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/empend/EMPEND.INP} } \
+        -command { editFile $::env(EMPIREDIR)/util/empend/EMPEND.INP } \
         -label {EMPEND input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/endres/ENDRES.INP} } \
+        -command { editFile $::env(EMPIREDIR)/util/endres/ENDRES.INP } \
         -label {ENDRES input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/plotc4/PLOTC4.INP} } \
+        -command { editFile $::env(EMPIREDIR)/util/plotc4/PLOTC4.INP } \
         -label {PLOTC4 input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/fixup/FIXUP.INP} } -label {FIXUP input} 
+        -command { editFile $::env(EMPIREDIR)/util/fixup/FIXUP.INP } -label {FIXUP input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/c4sort/C4SORT.INP} } \
+        -command { editFile $::env(EMPIREDIR)/util/c4sort/C4SORT.INP } \
         -label {C4SORT input} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/x4toc4/reaction} } -label {X4TOC4 table} 
+        -command { editFile $::env(EMPIREDIR)/util/x4toc4/reaction } -label {X4TOC4 table} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/c4zvd/ps01.tit} } \
+        -command { editFile $::env(EMPIREDIR)/util/c4zvd/ps01.tit } \
         -label {ZVView options} 
     $site_3_0.menu90 add command \
-        -command { editFile {$::env(EMPIREDIR)/source/Makefile} } -label {Edit Makefile} 
+        -command { editFile $::env(EMPIREDIR)/source/Makefile } -label {Edit Makefile} 
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
     set site_4_0 $site_3_0.menu90
@@ -8164,7 +8164,7 @@ exec rm -f $file.inp} \
     menu $site_3_0.men78 \
         -disabledforeground #a1a4a1 -tearoff 0 
     $site_3_0.men78 add command \
-        -command { editFile {$::env(EMPIREDIR)/source/dimension.h} } -label Dimensions 
+        -command { editFile $::env(EMPIREDIR)/source/dimension.h } -label Dimensions 
     $site_3_0.men78 add command \
         -command {cd $::env(EMPIREDIR)/source
 exec xterm -e make &
@@ -8179,37 +8179,37 @@ cd $workdir} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/doc/inplist.txt} } -label {EMPIRE input} 
+        -command { editFile $::env(EMPIREDIR)/doc/inplist.txt } -label {EMPIRE input} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/RIPL-2/optical/om-data/om-index.txt} } \
+        -command { editFile $::env(EMPIREDIR)/RIPL-2/optical/om-data/om-index.txt } \
         -label {RIPL omp} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/doc/hints.txt} } -label FAQ 
+        -command { editFile $::env(EMPIREDIR)/doc/hints.txt } -label FAQ 
     $site_3_0.menu96 add command \
-        -command { pspdfView {$::env(EMPIREDIR)/doc/empire.ps} } -label {EMPIRE manual} 
+        -command { pspdfView $::env(EMPIREDIR)/doc/empire.ps } -label {EMPIRE manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/empend/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/empend/manual.txt } \
         -label {EMPEND manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/c4sort/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/c4sort/manual.txt } \
         -label {C4SORT manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/legend/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/legend/manual.txt } \
         -label {LEGEND manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/plotc4/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/plotc4/manual.txt } \
         -label {PLOTC4 manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/x4toc4/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/x4toc4/manual.txt } \
         -label {X4TOC4 manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/fixup/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/fixup/manual.txt } \
         -label {FIXUP manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/lsttab/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/lsttab/manual.txt } \
         -label {LSTTAB manual} 
     $site_3_0.menu96 add command \
-        -command { editFile {$::env(EMPIREDIR)/util/sixtab/manual.txt} } \
+        -command { editFile $::env(EMPIREDIR)/util/sixtab/manual.txt } \
         -label {SIXTAB manual} 
     menu $top.m76 \
         -disabledforeground #a1a4a1 -tearoff 1 

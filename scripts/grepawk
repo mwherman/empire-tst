@@ -1,3 +1,4 @@
+#! /bin/bash
 echo '//'>$1.res
 grep -f $1.pat $1.lst   |
 awk '{if($1 ~ "Reaction") 
@@ -14,4 +15,4 @@ awk '{if($1 ~ "Reaction")
 
 echo '//'>>$1.res
 export DISPLAY=:0
-../util/c4zvd/zvview.exe $1.res/u
+$EMPIREDIR/util/c4zvd/zvview.exe $1.res/u

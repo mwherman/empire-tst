@@ -1,14 +1,17 @@
 #!/bin/bash
 #Script to fire X4 retrieval interface
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
 
 work=`pwd`
 rm x4r1x4.x4 2>/dev/null
 rm /tmp/x4* 2>/dev/null
-cd ../x4cd/linux
-./mysql_start.sh 7777 0
-./x4java2_mysql.sh
-./mysql_stop.sh
-cd $work
+$EMPIREDIR/x4cd/linux/mysql_start.sh 7777 0
+$EMPIREDIR/x4cd/linux/x4java2_mysql.sh
+$EMPIREDIR/x4cd/linux/mysql_stop.sh
 if [ -s x4r1x4.x4 ]; then
 mv x4r1x4.x4 $work/$1.exf
 fi

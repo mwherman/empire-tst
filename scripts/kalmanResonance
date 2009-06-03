@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
 
 file=$1
 MT=$2
@@ -67,7 +72,7 @@ for k in $MT; do
     cat >INPUT.D <<EOF
 $file ${k} $MAT $EXPDAT
 EOF
-    ../util/kalman/genkal.exe <INPUT.D >check.out
+    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
 
 
     if [ -s check.out ]; then
@@ -79,7 +84,7 @@ EOF
        rm KALMAN.INP
     fi
 
-    ../util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+    $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
 
 
 # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
@@ -119,14 +124,14 @@ done
        emacs KALMAN.INP
     fi
 
-    ../util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
+    $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
 
     mv fort.13 $file-xsc.kal
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
     exit
 
-    ../util/kalman/kalend2.exe <INPUT.D >check.out
+    $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
 
 
     if [ -s check.out ]; then
@@ -143,7 +148,7 @@ done
     cp $file-${k}-c4.gpd expxscplot.d
 
 #    if [ "$EXPDAT" != 0 ]; then
-#       gnuplot ../util/kalman/corr.gp
+#       gnuplot $EMPIREDIR/util/kalman/corr.gp
 #    fi
 
     mv corrplot.d $file-${k}-cov.gpd

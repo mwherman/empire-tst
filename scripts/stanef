@@ -1,5 +1,11 @@
 #! /bin/sh -
 #script to standardize ENDF formatted file with STANEF
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 file=$1
 work=`pwd`
 if [ "$1" = "" ]
@@ -22,7 +28,7 @@ $file-stan.endf
 
 DONE
 EOF
-../util/stanef/stanef <INPUT
+$EMPIREDIR/util/stanef/stanef <INPUT
 mv $file-stan.endf $file.endf
 
 exit

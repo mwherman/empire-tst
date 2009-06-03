@@ -1,5 +1,10 @@
 #! /bin/sh -
 #SCRIPT TO RUN X4TOC4       
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
 
 work=`pwd`
 file=$1
@@ -22,11 +27,4 @@ if [ -s $file.c4 ]; then
    echo 'File with EXFOR data in computational format is EMPTY'
 fi
 exit
-
-
-
-
-
-
-
 

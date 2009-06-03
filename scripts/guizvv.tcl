@@ -606,7 +606,7 @@ set file [tk_getOpenFile -filetypes $types  -parent $w -title "Select ENDF file"
 
 proc ::init {argc argv} {
 global root suf name1 dir1 name2 dir2 name3 dir3 name4 dir4
-set rcfl [open ../.guizvvrc r+]
+set rcfl [open $::env(EMPIREDIR)/.guizvvrc r+]
 gets $rcfl root
 gets $rcfl suf
 gets $rcfl name1 
@@ -812,7 +812,7 @@ set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e ../scripts/showzvd $zvd} \
+exec xterm -e $::env(EMPIREDIR)/scripts/showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white \
         -text {Show selected plots} -width 15 
@@ -827,7 +827,7 @@ set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e ../scripts/zvv $zvd &
+exec xterm -e $::env(EMPIREDIR)/scripts/zvv $zvd &
 #exec showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white \
@@ -835,7 +835,7 @@ exec xterm -e ../scripts/zvv $zvd &
     button $top.exit \
         -activebackground #f00000 -activeforeground #ffffff \
         -background #dcdcdc \
-        -command {set rcfl [open ../.guizvvrc w]
+        -command {set rcfl [open $::env(EMPIREDIR)/.guizvvrc w]
 puts $rcfl "$root"
 puts $rcfl "$suf"
 puts $rcfl "$name1" 
@@ -867,7 +867,7 @@ exit} \
         -command {set suff -$suf
 set mts [list $tot $el $inel $n2n $n3n $nf $nna $nnp $nnpa $ng $np $na $npa $any]
 foreach i $mts {
-if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4}
+if {$i != ""} {exec xterm -e $::env(EMPIREDIR)/scripts/mtacomp $i $suff $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4}
 }} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -pady 1m \
@@ -875,7 +875,7 @@ if {$i != ""} {exec xterm -e ../scripts/mtacomp $i $suff $root $dir1 $name1 $dir
     button $top.creatazvd \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
-        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ ../scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\} \
+        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ $::env(EMPIREDIR)/scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Create all} \
         -width 15 
@@ -889,7 +889,7 @@ set mts [list 1 2 4 16 17 18 22 28 45 102 103 107 112 51 52 53 54 55 56 57 58 59
 foreach i $mts {
     if {$i != ""} {lappend  zvd $root-$i$suff.zvd}
 }
-exec xterm -e ../scripts/showzvd $zvd} \
+exec xterm -e $::env(EMPIREDIR)/scripts/showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Show all} \
         -width 15 
