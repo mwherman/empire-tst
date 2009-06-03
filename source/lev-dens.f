@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-25 00:57:01 $
-Ccc   * $Id: lev-dens.f,v 1.74 2008-12-25 00:57:01 Capote Exp $
+Ccc   * $Author: mattoon $
+Ccc   * $Date: 2009-06-03 18:17:50 $
+Ccc   * $Id: lev-dens.f,v 1.75 2009-06-03 18:17:50 mattoon Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1786,9 +1786,12 @@ C
       REAL*8 shelMSr, defcorr
       INTEGER  nz, na, nnuc, iloc
       CHARACTER*2 dum
+      CHARACTER*64 empiredir
+
+      CALL GETENV ('EMPIREDIR', empiredir)
 
 C-----Reading MS shell corrections and deformation energies
-      OPEN(11, FILE='../RIPL-2/densities/shellcor-ms.dat',
+      OPEN(11,FILE=trim(empiredir)//'/RIPL-2/densities/shellcor-ms.dat',
      &    STATUS='old')
 C-----Skipping header lines
       READ(11,*)
@@ -1907,9 +1910,12 @@ C
       CHARACTER*20 ctmp
       CHARACTER*7 caz
       CHARACTER*50 filename
+      CHARACTER*64 empiredir
       LOGICAL fexist
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
+
+      CALL GETENV ('EMPIREDIR', empiredir)
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1933,7 +1939,8 @@ C
       ENDDO
       WRITE (filename,99005) iz
 
-99005 FORMAT ('../RIPL-2/densities/Gs/z',i3.3,'.tab')
+99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
+      filename = trim(empiredir)//filename
       INQUIRE(file = filename, exist = fexist)
       IF(.not.fexist) THEN
        WRITE(8,*) filename, 'does not exist'
@@ -1990,7 +1997,8 @@ C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
         WRITE (filename,99007) iz
-99007   FORMAT ('../RIPL-2/densities/Gs/z',i3.3,'.cor')
+99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
+        filename = trim(empiredir)//filename
         INQUIRE(file = filename, exist = fexist)
         IF(fexist) then
           OPEN (UNIT = 34,FILE = filename,ERR = 440)
@@ -2485,6 +2493,7 @@ C
       CHARACTER*8 paritate
       REAL*8 DLOG10
       CHARACTER*56 filename
+      CHARACTER*64 empiredir
 
       LOGICAL fexist
       INTEGER i, ia, iar, ipp, iugrid, iz, izr, j, jmaxl, k, khi, kk,
@@ -2493,9 +2502,12 @@ C
       ia = A(Nnuc)
       iz = Z(Nnuc)
 
+      CALL GETENV ('EMPIREDIR',empiredir)
+
       WRITE (filename,99006)ib, iz
 99006 FORMAT
-     & ('../RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
+     & ('/RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
+      filename = trim(empiredir)//filename
       INQUIRE(file = filename, exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,

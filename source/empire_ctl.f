@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-10-14 21:32:20 $
-Ccc   * $Id: empire_ctl.f,v 1.28 2008-10-14 21:32:20 Capote Exp $
+Ccc   * $Author: mattoon $ 
+Ccc   * $Date: 2009-06-03 18:17:48 $
+Ccc   * $Id: empire_ctl.f,v 1.29 2009-06-03 18:17:48 mattoon Exp $
                   
       PROGRAM EMPIRE_CTL
 C
@@ -655,6 +655,7 @@ C
       parameter(disc=1.0e4)
 
       logical fexist
+      character*64 empiredir
       character metat*1,metap*1,ex4st*1,cm*1,lvl*3
       dimension mf(mxind),mt(mxind)
       dimension ex(mxind),dex(mxind),six(mxind),dsix(mxind)
@@ -669,6 +670,8 @@ C
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
 
       data elequiv/1.5e3/,aequiv/1.0e0/
+
+      CALL GETENV ('EMPIREDIR', empiredir)
 
 C--- The C4 file expresses energies in eV, so the min and max energy must
 C--- be converted accordingly.
@@ -696,11 +699,11 @@ C--- at 1 keV. MF=3, MT=0 is used internally to specify it.
       dsix(1)=0.0
 
 C--- It is obtained from the following file.
-      INQUIRE(FILE = ('../RIPL-2/resonances/resonances0.dat'),
-     &                        EXIST=fexist)
+      INQUIRE(FILE=trim(empiredir)//'/RIPL-2/resonances/resonances0.dat'
+     &                        ,EXIST=fexist)
       IF(fexist .and. iaa.ne.0) then
-        OPEN (47,FILE = '../RIPL-2/resonances/resonances0.dat',
-     &      STATUS = 'old')
+        OPEN (47,FILE=trim(empiredir)//'/RIPL-2/resonances'
+     &      //'/resonances0.dat',STATUS = 'old')
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
           READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60) 

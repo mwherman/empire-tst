@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $ 
-Ccc   * $Date: 2009-05-15 18:24:51 $
-Ccc   * $Id: io.h,v 1.40 2009-05-15 18:24:51 pigni Exp $
+Ccc   * $Author: mattoon $ 
+Ccc   * $Date: 2009-06-03 18:17:50 $
+Ccc   * $Id: io.h,v 1.41 2009-06-03 18:17:50 mattoon Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -100,6 +100,10 @@ c     99     ecis
 c    100     empire_ctl
 c    102     Non-RIPL potential
 c
+
+      Character*64 empiredir
+      CALL GETENV ('EMPIREDIR', empiredir)
+
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
       OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
@@ -142,12 +146,12 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-      OPEN (23,FILE='../data/nparac.dat'
+      OPEN (23,FILE=trim(empiredir)//'/data/nparac.dat'
      *,STATUS='OLD')
-      OPEN (24,FILE='../RIPL-2/densities/total/level-densities-egsm.dat'
-     *,STATUS='OLD')
-      OPEN (26,FILE='../RIPL-2/optical/om-data/om-parameter-u.dat
-     *',STATUS='OLD')
+      OPEN (24,FILE=trim(empiredir)//'/RIPL-2/densities/total'
+     * //'/level-densities-egsm.dat',STATUS='OLD')
+      OPEN (26,FILE=trim(empiredir)//'/RIPL-2/optical/om-data'
+     * //'/om-parameter-u.dat',STATUS='OLD')
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')
 C     OPEN (UNIT = 42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')

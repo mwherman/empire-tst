@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-05-15 19:05:48 $
-Ccc   * $Id: input.f,v 1.298 2009-05-15 19:05:48 herman Exp $
+Ccc   * $Date: 2009-06-03 18:17:49 $
+Ccc   * $Id: input.f,v 1.299 2009-06-03 18:17:49 mattoon Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -37,6 +37,7 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &                 qtmp, xfis, zclu, zres, ztmp, culbar
+      CHARACTER*64 empiredir
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
@@ -86,6 +87,8 @@ C-----maximum exponent of 10 supported by the computer (for real*8)
          EMAx(nnuc) = 0.0
       ENDDO
       iccerr = 0
+
+      CALL GETENV ('EMPIREDIR', empiredir)
 C
 C-----Defining global physical and mathematical constants
 C-----They are passed through CONSTANT common block
@@ -843,21 +846,25 @@ C--------------retrieval from the remote database
 C--------------retrieval from the local MySQL database
 C--------------including data for the natural element
 c              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-c                 x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)//
+c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
+c    &                       //SYMb(0)(1:1)//
 c    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
 c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
 c              ELSEIF(IX4ret.EQ.1)THEN
-c                 x4string = '../scripts/X4retrieve "'//SYMb(0)//'-0'//
+c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
+c    &                       //SYMb(0)//'-0'//
 c    &                       ';'//SYMb(0)//'-'//atar//'" '//
 c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
 c              ENDIF
 C--------------data for the target isotope only
                IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)(1:1)
+                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
+     &                       //SYMb(0)(1:1)
      &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
      &                       '"'//proj//',*"#'
                ELSEIF (IX4ret.EQ.1) THEN
-                  x4string = '../scripts/X4retrieve "'//SYMb(0)
+                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
+     &                       //SYMb(0)
      &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
      &                       '"'//proj//',*"#'
                ENDIF
@@ -2104,6 +2111,7 @@ C
 C Local variables
 C
       CHARACTER*132 ctmp
+      CHARACTER*64 empiredir
       INTEGER*4 iwin
       INTEGER*4 PIPE
 
@@ -2119,6 +2127,8 @@ C
       INTEGER INT
       LOGICAL LREad, ADDnuc, fexist
 
+      CALL GETENV ('EMPIREDIR', empiredir)
+
       ADDnuc = .FALSE.
 
       ia = A(Nnuc) + 0.001
@@ -2128,8 +2138,8 @@ C-----Check if FITLEV option was run
       INQUIRE (FILE = ('FITLEV.PS'),EXIST = fexist)
 C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
       IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
-        OPEN (47,FILE = '../RIPL-2/resonances/resonances0.dat',
-     &      STATUS = 'old',ERR = 65)
+        OPEN (47,FILE = trim(empiredir)//'/RIPL-2/resonances'
+     &      //'/resonances0.dat',STATUS = 'old',ERR = 65)
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
           READ (47,'(2i4,  17x,2(e9.2,2x),2(f4.2,2x),2(F5.1,1x))',
@@ -2146,7 +2156,7 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
    60   CLOSE (47)
         GOTO 70
    65   WRITE (8,*) ' WARNING: ',
-     &   '../RIPL-2/resonances/resonances0.dat file not found '
+     &   'empire/RIPL-2/resonances/resonances0.dat file not found '
         WRITE (8,*) ' WARNING: D0 and gamma width are not available '
    70   CONTINUE
       ENDIF
@@ -2154,7 +2164,8 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
          IF(ia.LT.40) THEN
            Gg_obs = 1593000/A(Nnuc)**2   !in meV
          ELSE
-            OPEN (47,FILE = '../data/Ggamma.dat',STATUS='old',ERR=75)
+            OPEN (47,FILE = trim(empiredir)//'/data/Ggamma.dat'
+     &         ,STATUS='old',ERR=75)
             READ (47,'(///)') ! Skipping first 4 title lines
             DO i = 1, 250
                READ (47,'(3x,I5,F8.4)',END=75,ERR=75) natmp, gggtmp
@@ -2162,7 +2173,7 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
                Gg_obs = gggtmp*1000.0D0 !in meV
                GOTO 85
             ENDDO
-   75       WRITE (8,*) ' WARNING:../data/Ggamma.dat file not found'
+   75       WRITE (8,*) 'WARNING: empire/data/Ggamma.dat file not found'
    85       CLOSE (47)
          ENDIF
       ENDIF
@@ -2205,8 +2216,8 @@ C-----set ground state *** done ***
 C-------constructing input and filenames
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
-        OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-     &         ERR = 400)
+        OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+     &      ,STATUS = 'OLD',ERR = 400)
       ELSE
         REWIND (13)
       ENDIF
@@ -2378,8 +2389,8 @@ C--------------------only gamma decay is considered up to now
         CLOSE(13)
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
-        OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-     &         ERR = 400)
+        OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+     &      ,STATUS = 'OLD',ERR = 400)
         CLOSE(14)
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
         ADDnuc = .TRUE.
@@ -2712,13 +2723,16 @@ C
       INTEGER i, iar, ilv, ilvr, iptmp, itmp2, izr, lvpr, natmp,
      &        ndbrlin, ngamr, nlvr, nmax, nztmp
       CHARACTER*6 reftmp
+      CHARACTER*64 empiredir
+
+      CALL GETENV ('EMPIREDIR', empiredir)
       E2p = 0.D0
       E3m = 0.D0
 C-----Avoiding searching of collective levels of the incident particle
       IF (Ia.EQ.AEJc(0)) GOTO 300
 C-----First try to find 2+ and 3- states in the RIPL om-deformations file
-      OPEN (47,FILE = '../RIPL-2/optical/om-data/om-deformations.dat',
-     &      STATUS = 'old',ERR = 100)
+      OPEN (47,FILE = trim(empiredir)//'/RIPL-2/optical/om-data'
+     &      //'/om-deformations.dat',STATUS = 'old',ERR = 100)
       READ (47,'(///)')
                        ! Skipping first 4 title lines
       DO i = 1, 1700
@@ -2732,7 +2746,7 @@ C-----First try to find 2+ and 3- states in the RIPL om-deformations file
       ENDDO
       GOTO 200
   100 WRITE (8,*) ' WARNING: ',
-     &   '../RIPL-2/optical/om-data/om-deformations.dat file not found '
+     &   'empire/RIPL-2/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
      &'E(2+) and E(3-) will be selected from the available target level
      &scheme'
@@ -2743,8 +2757,8 @@ C-----If missing in the RIPL om-deformations file try discrete levels file
 C-----constructing input and filenames
   300 WRITE (ctmp3,'(I3.3)') Iz
       finp = 'z'//ctmp3//'.dat'
-      OPEN (32,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-     &         ERR = 500)
+      OPEN (32,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+     &      ,STATUS = 'OLD', ERR = 500)
   400 READ (32,'(A5,6I5,2f12.6)',END = 500) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2
       IF (Ia.NE.iar .OR. Iz.NE.izr) THEN
@@ -6219,6 +6233,7 @@ C
       INTEGER ia, iapro, iatar, iflag, ii, iloc, in, iz, izaf(NMASSE),
      &        izpro, iztar, k, nixa, nixz, nnuc
       REAL REAL
+      CHARACTER*64 empiredir
 C
 C
 Ccc
@@ -6241,8 +6256,11 @@ Ccc   * revision:1    by: R.Capote               on:09.2004              *
 Ccc   * RIPL-2 database used                                             *
 Ccc   ********************************************************************
 Ccc
+      CALL GETENV ('EMPIREDIR', empiredir)
+
       OPEN (UNIT = 27,STATUS = 'OLD',
-     &      FILE = '../RIPL-2/masses/mass-frdm95.dat',ERR = 300)
+     &      FILE = trim(empiredir)//'/RIPL-2/masses/mass-frdm95.dat'
+     &      ,ERR = 300)
 C-----Skipping header lines
       READ (27,*,END = 300)
       READ (27,*)
@@ -6407,6 +6425,9 @@ C
       DOUBLE PRECISION FSHELL
       INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz
       INTEGER INT
+      CHARACTER*64 empiredir
+
+      CALL GETENV ('EMPIREDIR',empiredir)
 
       pi2 = PI**2
       izamx = 0
@@ -6423,8 +6444,8 @@ C-----Set EGSM normalization factors for each Z
             ATIlnoz(iz) = 1.0 !default
          ENDDO
 c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
-         OPEN(31, FILE=
-     &   '../RIPL-2/densities/total/level-densities-egsm-norm.dat', 
+         OPEN(31, FILE= trim(empiredir)//
+     &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat', 
      &   STATUS='OLD')
          READ (31,'(///)')
    90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
@@ -7132,6 +7153,7 @@ C
 C Local variables
 C
       CHARACTER*80 exforec
+      CHARACTER*64 empiredir
       CHARACTER*36 filename, toplast, topname
       CHARACTER*115 indexrec
       INTEGER nnuc
@@ -7144,7 +7166,10 @@ C-----constant parameters for EXFOR retrieval
 C-----open local file for storing retrieved EXFOR data
       OPEN (UNIT = 19,FILE = 'EXFOR.dat',STATUS = 'NEW',ERR = 99999)
 C-----open EXFOR index
-      OPEN (UNIT = 20,FILE = '../EXFOR/X4-INDEX.TXT',STATUS = 'OLD')
+      CALL GETENV ('EMPIREDIR', empiredir)
+
+      OPEN (UNIT = 20,FILE = trim(empiredir)//'/EXFOR/X4-INDEX.TXT'
+     &      ,STATUS = 'OLD')
 C
 C-----scan EXFOR index for relevant subentries
 C
@@ -7174,10 +7199,10 @@ C
 C-----retrive EXFOR entry including top subentry 001
 C
       toplast = ' '
-      filename = '../EXFOR/subent'//'/'//subent(1:2)//'/'//subent(1:4)
-     &           //'/'//subent(1:8)//'.txt'
-      topname = '../EXFOR/subent'//'/'//subent(1:2)//'/'//subent(1:4)
-     &          //'/'//subent(1:5)//'001.txt'
+      filename = trim(empiredir)//'/EXFOR/subent'//'/'
+     &     //subent(1:2)//'/'//subent(1:4)//'/'//subent(1:8)//'.txt'
+      topname = trim(empiredir)//'/EXFOR/subent'//'/'//subent(1:2)
+     &     //'/'//subent(1:4)//'/'//subent(1:5)//'001.txt'
       IF (topname.NE.toplast) THEN
          OPEN (UNIT = 22,FILE = topname,ERR = 600,STATUS = 'OLD')
   250    READ (22,99005,END = 300) exforec
@@ -7267,6 +7292,7 @@ C
      &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus, ncont
       INTEGER NINT
       CHARACTER*6 reftmp
+      CHARACTER*64 empiredir
 
       ND_nlv = 0
 C-----Target corresponds to nnurec = 0
@@ -7497,11 +7523,13 @@ C       It could be a bad approximation for a quasispherical nucleus
 C
 C-----constructing input and filenames
 C
+      CALL GETENV ('EMPIREDIR',empiredir)
+
       IF (.NOT.FILevel) THEN
          WRITE (ctmp3,'(I3.3)') iz
          finp = 'z'//ctmp3//'.dat'
-         OPEN (13,FILE = '../RIPL-2/levels/'//finp,STATUS = 'OLD',
-     &         ERR = 600)
+         OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+     &      ,STATUS = 'OLD',ERR = 600)
       ELSE
          REWIND (13)
       ENDIF
@@ -7551,7 +7579,8 @@ C-----levels for target NNUC copied to file TARGET.lev
 
       beta2 = 0.D0
       beta3 = 0.D0
-      OPEN (84,FILE = '../RIPL-2/optical/om-data/om-deformations.dat',
+      OPEN (84,FILE = trim(empiredir)//
+     &      '/RIPL-2/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
       READ (84,'(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
@@ -7579,7 +7608,7 @@ c            CCFUS deformations
       ENDDO
       GOTO 300
   200 WRITE (8,*) ' WARNING: ',
-     &   '../RIPL-2/optical/om-data/om-deformations.dat file not found '
+     &   'empire/RIPL-2/optical/om-data/om-deformations.dat not found '
 C     WRITE (8,*) ' WARNING: ',
 C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       GOTO 400
@@ -8369,6 +8398,8 @@ C
      &                 zz
       INTEGER i, ka, kz, n, natmp, nnat(MAXGDR), nngt(MAXGDR),
      &        nntmp, nnzt(MAXGDR)
+      CHARACTER*64 empiredir
+
       DATA pi/3.141592654D0/
       kz = Znucleus + 0.001
       ka = Anucleus + 0.001
@@ -8395,8 +8426,8 @@ C    &            NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
 C    &            HE2(i), HCS2(i), HGW2(i)
 C        ENDDO
 C  50    CLOSE (81)
-  100    OPEN (81,FILE = '../RIPL-2/gamma/gdr-parameters-theor.dat',
-     &         STATUS = 'old',ERR = 500)
+  100    OPEN (81,FILE = trim(empiredir)//'/RIPL-2/gamma/'
+     &      //'gdr-parameters-theor.dat',STATUS = 'old',ERR = 500)
          READ (81,'(///)') ! Skipping first 4 title lines
          DO i = 1, MAXGDR
             READ (81,'(2I4, 1x,2x, f7.3, 4F7.2)',END = 150,ERR = 150)
@@ -8406,15 +8437,16 @@ C  50    CLOSE (81)
             IF (he1t(i).EQ.he2t(i)) nngt(i) = 1
          ENDDO
   150    CLOSE (81)
-  200    OPEN (82,FILE = '../data/deflib.dat',STATUS = 'old',ERR = 550)
+  200    OPEN (82,FILE = trim(empiredir)//'/data/deflib.dat'
+     &      ,STATUS = 'old',ERR = 550)
          READ (82,'(////)') ! Skipping first 5 title lines
          DO i = 1, 9000
             READ (82,'((2I4, f7.3))',END = 250,ERR = 250) NANz(i),
      &            NANa(i), HALpha2(i)
          ENDDO
   250    CLOSE (82)
-  300    OPEN (84,FILE = '../RIPL-2/optical/om-data/om-deformations.dat'
-     &         ,STATUS = 'old',ERR = 600)
+  300    OPEN (84,FILE = trim(empiredir)//'/RIPL-2/optical/om-data'
+     &      //'/om-deformations.dat',STATUS = 'old',ERR = 600)
          READ (84,'(///)') ! Skipping first 4 title lines
          NUMram = 0
          DO i = 1, 700
@@ -8432,22 +8464,22 @@ C-----------Selecting only 2+ states
          GOTO 700
   400    CLOSE (84)
   450    WRITE (8,'(1x,A14,A39,A43)') ' WARNING: File ',
-     &                          '../RIPL-2/gamma/gdr-parameters-exp.dat'
+     &                      'empire/RIPL-2/gamma/gdr-parameters-exp.dat'
      &                          ,
      &                     ' not found, theoretical RIPL-2 will be used'
          GOTO 100
   500    WRITE (8,'(1x,A14,A41,A35)') ' WARNING: File ',
-     &                        '../RIPL-2/gamma/gdr-parameters-theor.dat'
+     &                    'empire/RIPL-2/gamma/gdr-parameters-theor.dat'
      &                        ,
      &                     ' not found, default GDR values will be used'
          GOTO 200
   550    WRITE (8,'(1x,A14,A18,A43)')
-     &                               ' WARNING: File ../data/deflib.dat'
+     &                           ' WARNING: File empire/data/deflib.dat'
      &                               ,
      &             ' not found, default deformation values will be used'
          GOTO 300
   600    WRITE (8,'(1x,A14,A45,A54)') ' WARNING: File ',
-     &                   '../RIPL-2/optical/om-data/om-deformations.dat'
+     &               'empire/RIPL-2/optical/om-data/om-deformations.dat'
      &                   ,
      &           ' not found, default dynamical deformation values used'
       ENDIF

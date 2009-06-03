@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-12-25 00:57:00 $
-Ccc   * $Id: fis_io.f,v 1.8 2008-12-25 00:57:00 Capote Exp $
+Ccc   * $Author: mattoon $
+Ccc   * $Date: 2009-06-03 18:17:48 $
+Ccc   * $Id: fis_io.f,v 1.9 2009-06-03 18:17:48 mattoon Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -63,6 +63,7 @@ C
 C Local variables
 C
       CHARACTER*1 chstar(70)
+      CHARACTER*64 empiredir
       INTEGER i, ib, ibar, ka, kz, m, nr,  nrmod, nrsm
       INTEGER INT,iz,ia,iarr,izrr
       CHARACTER*50 filename
@@ -70,7 +71,8 @@ C
       INTEGER Find_Extrem
       DATA chstar/70*'='/
       REAL*8 centr,  heigth,  width(NFPARAB), ucentr, uheigth, uwidth
-
+      
+      CALL GETENV ('EMPIREDIR', empiredir)
 
       iz=INT(Z(Nnuc))
       ia=INT(A(Nnuc))
@@ -97,7 +99,8 @@ C-----FISBAR(Nnuc)=3 HFB numeric
 c
 C-----FISBAR(Nnuc)= 0 Empire internal library
       IF (FISbar(Nnuc).EQ.0.) THEN
-         OPEN (81,FILE = '../data/fisbar.dat',STATUS = 'OLD',ERR = 400)
+         OPEN (81,FILE = trim(empiredir)//'/data/fisbar.dat'
+     &      ,STATUS = 'OLD',ERR = 400)
   350    READ (81,*,END = 400) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 350
@@ -114,8 +117,8 @@ C-----FISBAR(Nnuc)= 0 Empire internal library
 C-----FISBAR(Nnuc)= 1 RIPL-2 "experimental" values for barrier heights;
 C-----widths from Lynn systematics and wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
-         OPEN (52,FILE = '../RIPL-2/fission/fis-barrier-exp.dat',
-     &         STATUS = 'OLD',ERR = 200)
+         OPEN (52,FILE = trim(empiredir)//'/RIPL-2/fission'
+     &      //'/fis-barrier-exp.dat',STATUS = 'OLD',ERR = 200)
          READ (52,*,END = 200)
          READ (52,*)
          READ (52,*)
@@ -135,8 +138,8 @@ C-----widths from Lynn systematics and wells' parameters provided by code
          WRITE (8,*)
      &              ' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
          WRITE (8,*)
-     &     ' FATAL: File ../RIPL-2/fission/fis-barrier-exp.dat may be mi
-     &ssing'
+     &     ' FATAL: File empire/RIPL-2/fission/fis-barrier-exp.dat may b
+     &e missing'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
 C
@@ -177,8 +180,8 @@ C-----FISBAR(Nnuc)=2  HFB microscopic parameters for parabolic barriers
 C-----                extracted from HFB l.d.files and stored in
 c-----                data/HFB-fisbar.dat (default)
       IF (FISbar(Nnuc).EQ.2.) THEN
-         OPEN (81,FILE = '../data/HFB-fisbar.dat',STATUS = 'OLD',
-     &         ERR = 401)
+         OPEN (81,FILE = trim(empiredir)//'/data/HFB-fisbar.dat'
+     &      ,STATUS = 'OLD',ERR = 401)
   351    READ (81,*,END = 401) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 351
