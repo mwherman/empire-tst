@@ -22,6 +22,16 @@ def runE(proj):
     run EMPIRE for project named proj
     """
     
+    # set EMPIREDIR if necessary:
+    if (not os.environ.has_key('EMPIREDIR')) or (os.environ['EMPIREDIR']==''):
+        import time
+        print ("Please set environment variable EMPIREDIR in your bashrc:\n")
+        print ("export EMPIREDIR=<path to empire>\n")
+        print ("Guessing at path for now")
+        time.sleep(2)
+        os.environ['EMPIREDIR'] = '..'
+    
+    
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
     rm(proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
