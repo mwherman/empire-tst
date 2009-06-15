@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2008-10-14 21:32:20 $
-Ccc   * $Id: fitbarrier.f,v 1.6 2008-10-14 21:32:20 Capote Exp $
+Ccc   * $Date: 2009-06-15 21:52:21 $
+Ccc   * $Id: fitbarrier.f,v 1.7 2009-06-15 21:52:21 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
@@ -186,15 +186,18 @@ C-------Imaginary potential strengths
          DO iw = 2, nrbar, 2
             phasep(iw/2 + 1) = phase(iw)
          ENDDO
-
+C
+C        Expression below is limited to barriers with 2 or 3 humps !!
+C
          DO iw = 2, nrbar,2
             deltt(iw) = 0.d0
             dmom = max(Vheigth(iw-1),Vheigth(iw+1))
 
-            w = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
+            W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
      &                     ((dmom - Vheigth(iw)) *
-     &                     (1.d0 + (1.d0/wimag(1))*
-     &                      dexp( - (Ee - dmom) / wimag(iw))))
+     &                     (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
+     &                      dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
+C    &                      dexp( - (Ee - dmom) / wimag(iw))))
             if(Ee.le. Vheigth(iw)) W = 0.d0
             if(Ee.gt. dmom) W = 1.d0
             if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
