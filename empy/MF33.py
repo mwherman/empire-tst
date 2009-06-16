@@ -291,15 +291,14 @@ class MF33(MF_base):
         
         # write 6 values per line until tmplist is empty
         nlines, extra = divmod( len(tmplist), 6 )
-        for lin in range(nlines):
-            fout.write( super(MF33,self).writeENDFline( tuple(tmplist[:6]), 
-                self.MAT, self.MF, self.MT, lineN ) )
-            lineN += 1
-            tmplist = tmplist[6:]
         if extra:
-            fout.write( super(MF33,self).writeENDFline( tuple(tmplist), 
-                self.MAT, self.MF, self.MT, lineN ) )
-                
+            nlines += 1
+        
+        for i in range(nlines):
+            fout.write( super(MF33,self).writeENDFline( 
+                tuple(tmplist[i*6:i*6+6]), self.MAT,self.MF,self.MT,lineN ) )
+            lineN += 1
+        
         # done with data, write SEND
         fout.write( super(MF33,self).writeSEND( self.MAT, self.MF ) )
         fout.close()
