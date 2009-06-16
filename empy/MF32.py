@@ -441,18 +441,27 @@ class MF32(MF_base):
             assert nresB == nresA*12, "Trouble with number of resonances"
             line += 1
 
+            vallist = []
             for i in range(nresA):
-                vals = self.readENDFline(fin[line])
+                # read the vals/uncertainties into vallist:
+                vallist.append( (self.readENDFline(fin[line]),
+                        self.readENDFline(fin[line+1])) )
+                line += 2
+            
+            vallist.sort()  # should be increasing by energy
+            for i in range(nresA):
+                vals, uncert = vallist[i]
                 #print En[i][0]
                 # check if we're on correct resonance:
-                assert En[i][0] == vals[0] and J[i] == vals[1], line
+                assert En[i][0] == vals[0] and J[i] == vals[1], """
+        Trouble with resonance energy: %f """ % En[i][0]
                 
-                uncert = self.readENDFline(fin[line+1])
+                #uncert = self.readENDFline(fin[line+1])
                 En[i][1] = uncert[0]
                 Gn[i][1] = uncert[3]
                 Gg[i][1] = uncert[4]
                 
-                line += 2
+                #line += 2
 
             # correlation matrix:
             vals = self.readENDFline(fin[line])
@@ -520,20 +529,21 @@ class MF32(MF_base):
         
         # MF1: surpress initial newline with \
         mf1 = """\
- 0.0        0.0                 0          0          0          67777 1451     
- 1.000000-5 2.000000+7          0          0         10          77777 1451     
- 0.0        0.0                 0          0          5          37777 1451     
- zsymam               RES. EVAL.                       1999mmdd   7777 1451     
-**********************                                            7777 1451     
- RESONANCE PARAMETER                                              7777 1451     
-                                                                  7777 1451     
-**********************                                            7777 1451     
-                                1        451         11          07777 1451     
-                                2        151       9999          07777 1451     
-                               32        151       9999          07777 1451     
-                                                                  7777 1  099999
-                                                                  7777 0  0    0"""
-        mf1 = mf1.replace('7777',repr(MAT))
+ 0.0        0.0                 0          0          0          6MATN 1451     
+ 1.000000-5 2.000000+7          0          0         10          7MATN 1451     
+ 0.0        0.0                 0          0          5          3MATN 1451     
+ zsymam               RES. EVAL.                       1999mmdd   MATN 1451     
+**********************                                            MATN 1451     
+ RESONANCE PARAMETER                                              MATN 1451     
+                                                                  MATN 1451     
+**********************                                            MATN 1451     
+                                1        451         11          0MATN 1451     
+                                2        151       9999          0MATN 1451     
+                               32        151       9999          0MATN 1451     
+                                                                  MATN 1  099999
+                                                                  MATN 0  0    0
+"""
+        mf1 = mf1.replace('MATN',repr(MAT))
         
         fs += mf1
         
@@ -569,8 +579,8 @@ class MF32(MF_base):
             mf2 += self.writeENDFline([self.awt,0.0,lwave,0,6*numRes,numRes],
                     MAT,2,151)
             for RES in ResonancesThisL:
-                mf2 += self.writeENDFline([RES[1],RES[2],RES[3]+RES[4],
-                    RES[3],RES[4]], MAT,2,151)
+                mf2 += self.writeENDFline([RES[1],repr(RES[2]),
+                    RES[3]+RES[4],RES[3],RES[4]], MAT,2,151)
         
         mf2 += self.writeSEND( MAT, 2 )
         mf2 += self.writeFEND( MAT )
@@ -585,13 +595,13 @@ class MF32(MF_base):
         mf32 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
                 MAT,32,151)
         LCOMP = 2
-        mf32 += self.writeENDFline([0.0,self.ap,0,LCOMP,0,0], MAT,32,151)
+        mf32 += self.writeENDFline([self.spin,self.ap,0,LCOMP,0,0], MAT,32,151)
         mf32 += self.writeENDFline([self.awt,0.0,0,0,12*self.nres,self.nres],
                 MAT,32,151)
         
         for i in range(self.nres):
             # write two lines: first the values, second the uncertainty
-            mf32 += self.writeENDFline([self.En[i,0],self.J[i],
+            mf32 += self.writeENDFline([self.En[i,0],repr(self.J[i]),
                 self.Gn[i,0]+self.Gg[i,0],self.Gn[i,0],self.Gg[i,0]],
                 MAT,32,151)
             mf32 += self.writeENDFline([self.En[i,1],'0.0','0.0',self.Gn[i,1],
@@ -650,6 +660,161 @@ class MF32(MF_base):
         
         fout.write(fs)
         fout.close()
+
+        
+    def writeENDF_full(self,filename):
+        """
+        create new ENDF file containing MF1, MF2 and MF32
+        Use LCOMP=1 (full form) in MF32
+        May take much more space than LCOMP=2
+        """
+        if not hasattr(self,'MAT'):
+            # MAT isn't present in Atlas, needs to be set by hand
+            matstr = raw_input("Please assign a MAT number: ")
+            self.MAT = int(matstr)
+            assert 100 < self.MAT < 9999
+        
+        print ("Writing resonance region in range %f to %f" % self.erange)
+        
+        fout = open(filename,'w')
+        
+        # no, don't make an extra MF_base instance, just use self!
+        #from empy import MF_base
+        #m = MF_base.MF_base()
+
+        MAT = self.MAT
+        
+        fs = self.writeENDFline([],1,0,0,0)
+        fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
+        
+        # MF1: surpress initial newline with \
+        mf1 = """\
+ 0.0        0.0                 0          0          0          6MATN 1451     
+ 1.000000-5 2.000000+7          0          0         10          7MATN 1451     
+ 0.0        0.0                 0          0          5          3MATN 1451     
+ zsymam               RES. EVAL.                       1999mmdd   MATN 1451     
+**********************                                            MATN 1451     
+ RESONANCE PARAMETER                                              MATN 1451     
+                                                                  MATN 1451     
+**********************                                            MATN 1451     
+                                1        451         11          0MATN 1451     
+                                2        151       9999          0MATN 1451     
+                               32        151       9999          0MATN 1451     
+                                                                  MATN 1  099999
+                                                                  MATN 0  0    0
+"""
+        mf1 = mf1.replace('MATN',repr(MAT))
+        
+        fout.write( mf1 )
+        
+        
+        # MF 2
+        fout.write( self.writeENDFline([self.zam,self.awt,0,0,1,0],MAT,2,151) )
+        fout.write( self.writeENDFline([self.zam,1.0, 0,0,1,0],MAT,2,151) )
+        LRF=2   # for MLBW format
+        fout.write( self.writeENDFline([self.erange[0],self.erange[1],
+                1,LRF,0,0], MAT,2,151) )
+        LCOMP=3 # compact format
+        fout.write( self.writeENDFline([0.0,self.ap,0,0,LCOMP,0],MAT,2,151) )
+        
+        # in MF2 resonances must be sorted by L-value. For sorting,
+        # could use 'fancy indexing':
+        #En_swave = self.En[ self.L==0 ] # energies of s-wave resonances
+        #J_swave = self.J[ self.L==0 ] # Jpi for s-wave resonances (and so on)
+        
+        # or I can cast back to python lists, probably better choice:
+        L_list = list(self.L)
+        En_list = list(self.En[:,0])
+        J_list = list(self.J)
+        Gn_list = list(self.Gn[:,0])
+        Gg_list = list(self.Gg[:,0])
+        
+        MF2_arr = sorted( zip(L_list, En_list, J_list, Gn_list, Gg_list) )
+        
+        # now we can get all s-wave (l=0), p-wave (l=1), and d-wave (l=2)
+        # resonances, sorted by energy:
+        for lwave in range(3):
+            ResonancesThisL = [a for a in MF2_arr if a[0]==lwave]
+            numRes = len(ResonancesThisL)
+            fout.write( self.writeENDFline([self.awt,0.0,lwave,0,
+                    6*numRes,numRes], MAT,2,151) )
+            for RES in ResonancesThisL:
+                fout.write( self.writeENDFline([RES[1],repr(RES[2]),
+                    RES[3]+RES[4],RES[3],RES[4]], MAT,2,151) )
+        
+        fout.write( self.writeSEND( MAT, 2 ) )
+        fout.write( self.writeFEND( MAT ) )
+        
+        
+        # MF 32
+        fout.write( self.writeENDFline([self.zam,self.awt,0,0,1,0], 
+                MAT,32,151) )
+        fout.write( self.writeENDFline([self.zam,1.0,0,0,1,0], MAT,32,151) )
+        #LRF=2 I think this is required to be the same in MF2 and MF32
+        fout.write( self.writeENDFline([self.erange[0],self.erange[1],
+                1,LRF,0,0], MAT,32,151) )
+        LCOMP = 1
+        fout.write( self.writeENDFline([self.spin,self.ap,0,LCOMP,0,0], 
+                MAT,32,151) )
+        fout.write( self.writeENDFline([self.awt,0.0,0,0,1,0],
+                MAT,32,151) )
+        MPAR = 3    # number of uncertainties per resonance
+        NVS = (self.nres*MPAR) * (self.nres*MPAR+1) / 2
+        fout.write( self.writeENDFline([0.0,0.0,MPAR,0, 
+                NVS+6*self.nres,self.nres], MAT,32,151) )
+        
+        for i in range(self.nres):
+            # just write the values now, uncertainty in a moment
+            fout.write( self.writeENDFline([self.En[i,0],repr(self.J[i]),
+                self.Gn[i,0]+self.Gg[i,0],self.Gn[i,0],self.Gg[i,0]],
+                MAT,32,151) )
+        
+        # write full covariance matrix. sigma**2 is on diagonal, not
+        # (relative uncertainty)**2
+        def get_covmat():
+            """
+            get the absolute (not relative) covariance matrix
+            starting with correlations and uncertainties
+            """
+            cov = self.corr_mat / 1000
+            uncert = numpy.zeros( cov.shape[0] )
+            
+            # fill in uncertainty values on the diagonal:
+            # d(En), d(Gn), d(Gg) for each resonance
+            uncert[0::3] = self.En[:,1]
+            uncert[1::3] = self.Gn[:,1]
+            uncert[2::3] = self.Gg[:,1]
+
+            for i in range(len(uncert)):
+                cov[i,:] *= uncert
+            for j in range(len(uncert)):
+                cov[:,j] *= uncert
+            
+            return cov
+        
+        covmat = get_covmat()
+        # put upper diagonal into a list:
+        tmplist = []
+        for i in range(len(covmat)):
+            tmplist.extend( covmat[i,i:] )
+        print len(tmplist)
+        
+        # write 6 values per line until the end of tmplist
+        nlines, extra = divmod( len(tmplist), 6 )
+        if extra:
+            nlines += 1
+        
+        for i in range(nlines):
+            fout.write( self.writeENDFline(tuple(tmplist[i*6:i*6+6]), 
+                MAT, 32, 151) )
+        
+        fout.write( self.writeSEND( MAT, 32 ) )
+        fout.write( self.writeFEND( MAT ) )
+        
+        fout.write( self.writeENDFline([0.0,0.0,0,0,0,0],0,0,0,0) )   #MEND
+        fout.write( self.writeENDFline([0.0,0.0,0,0,0,0],0,-1,0,0) )  #TEND
+        
+        fout.close()
     
     
     def getResonanceInt(self):
@@ -667,7 +832,7 @@ class MF32(MF_base):
         
         result = numpy.pi/2 * 2.608e+6 * ((A+1.0)/A)**2 * numpy.sum(num/denom)
 
-        # but what about uncertainty?
+        # but what about uncertainty? Also, this neglects 1/E contribution
 
 
 if __name__ == '__main__':
