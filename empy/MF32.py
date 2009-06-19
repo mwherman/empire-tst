@@ -367,10 +367,18 @@ class MF32(MF_base):
         
         for nn in range(nsec):
             CONT = self.readENDFline(fin[line])
-            elow,ehigh,lru,lrf,nro,naps = CONT[:]
+            elow,ehigh,lru, LRF, nro,naps = CONT[:]
             if lru==2:
                 # don't bother with unresolved region for now
                 break
+            
+            if LRF==2:
+                print 'MLBW format in file 2'
+            elif LRF==3:
+                print 'Reich-Moore format in file 2'
+            else:
+                raise ValueError, "only LRF 2/3 currently recognized"
+            
             line += 1
 
             CONT = self.readENDFline(fin[line])
@@ -386,15 +394,24 @@ class MF32(MF_base):
                 for i in range(nresA):
                     vals = self.readENDFline(fin[line])
                     L.append(lval)
-                    J.append(vals[1])
-                    En.append([vals[0],0])
-                    Gn.append([vals[3],0])
-                    Gg.append([vals[4],0])
-
                     # MLBW or Reich-Moore? 
-                    # we might have fission widths...
-                    Gtot.append([vals[2],0])
-
+                    # order depends on format:
+                    
+                    if LRF==2:      #MLBW
+                        En.append([vals[0],0])
+                        J.append(vals[1])
+                        Gtot.append([vals[2],0])
+                        Gn.append([vals[3],0])
+                        Gg.append([vals[4],0])
+                    
+                    elif LRF==3:    #Reich-Moore
+                        En.append([vals[0],0])
+                        J.append(vals[1])
+                        Gn.append([vals[2],0])
+                        Gg.append([vals[3],0])
+                        
+                    # beware, if we have fission widths this is incorrect...
+                    
                     line += 1
 
         # change from sorting by L to sorting by resonance energy:
@@ -425,69 +442,134 @@ class MF32(MF_base):
         
         for nn in range(nsec):
             CONT = self.readENDFline(fin[line])
-            elow,ehigh,lru,lrf,nro,naps = CONT[:]
+            elow,ehigh,lru, LRF, nro,naps = CONT[:]
             if lru==2:
                 # don't bother with unresolved region for now
                 break
             line += 1
-
+            
             CONT = self.readENDFline(fin[line])
             spin,ap,dum,lcomp,dum1,dum2 = CONT[:]
-            assert lcomp==2, "Only understand LCOMP=2 right now"
-            line += 1
-
-            CONT = self.readENDFline(fin[line])
-            awt32,dum,dum1,dum2,nresB,nresA = CONT[:]
-            assert nresB == nresA*12, "Trouble with number of resonances"
-            line += 1
-
-            vallist = []
-            for i in range(nresA):
-                # read the vals/uncertainties into vallist:
-                vallist.append( (self.readENDFline(fin[line]),
-                        self.readENDFline(fin[line+1])) )
-                line += 2
-            
-            vallist.sort()  # should be increasing by energy
-            for i in range(nresA):
-                vals, uncert = vallist[i]
-                #print En[i][0]
-                # check if we're on correct resonance:
-                assert En[i][0] == vals[0] and J[i] == vals[1], """
-        Trouble with resonance energy: %f """ % En[i][0]
-                
-                #uncert = self.readENDFline(fin[line+1])
-                En[i][1] = uncert[0]
-                Gn[i][1] = uncert[3]
-                Gg[i][1] = uncert[4]
-                
-                #line += 2
-
-            # correlation matrix:
-            vals = self.readENDFline(fin[line])
-            dum,dum1, ndigit, Dim, nlin, dum2 = vals[:]
+            assert lcomp==1 or lcomp==2, "Currently understand LCOMP=1 or 2"
             line += 1
             
-            # 10**ndigit is the max value in INTG format:
-            self.ndigit = ndigit
-            
-            corr_mat = numpy.zeros( (Dim,Dim) )
-            for i in range(nlin):
-                r,c,vals = self.readINTG(fin[line])
-                # go to 0-based index:
-                r -= 1
-                c -= 1
-                l = len(vals)
-                corr_mat[r,c:c+l] = vals[:]
-                
+            if lcomp==1:
+                CONT = self.readENDFline(fin[line])
+                awt32,dum,dum1,dum2,nsrs,nlrs = CONT[:]
+                assert nlrs==0, "No long-range covariances"
                 line += 1
-            corr_mat += 1000*numpy.eye(Dim)
-            #symmetrize
-            for i in range(Dim):
-                for j in range(Dim):
-                    corr_mat[i,j] = corr_mat[j,i]
-        
+                
+                CONT = self.readENDFline(fin[line])
+                dum,dum1,mpar,dum2,nvs,nrb = CONT[:]
+                nvs -= 6*nrb
+                assert nvs==(nrb*mpar*(nrb*mpar+1)/2),"""
+            Incorrect value for nvs in MF32"""
+                line += 1
+                
+                vallist = []
+                for i in range(nrb):
+                    # read central values into list:
+                    vallist.append( self.readENDFline(fin[line]) )
+                    line += 1
+                
+                vallist.sort()  # we won't know if they're out of order!
+                for i in range(nrb):
+                    print En[i][0], vallist[i][0]
+                    assert (En[i][0] == vallist[i][0] 
+                            and J[i] == vallist[i][1]),  """
+            Trouble with resonance energy: %f """ % En[i][0]
+                
+                # find number of lines for *just* the matrix:
+                nlines, remainder = divmod( nvs, 6 )
+                if remainder > 0: nlines += 1
+                
+                matlist = []
+                for i in range(nlines):
+                    matlist += self.readENDFline(fin[line])
+                    line += 1
+                
+                covmat = numpy.zeros( (3*nrb,3*nrb) )
+                try:
+                    idx = 0
+                    for i in range(len(covmat)):
+                        for j in range(i, len(covmat)):
+                            covmat[i,j] = matlist[idx]
+                            idx += 1
+                    #symmetrize:
+                    for i in range(len(covmat)):
+                        for j in range(i,len(covmat)):
+                            covmat[j,i] = covmat[i,j]
+                except IndexError:
+                    print ("oops, trouble building the matrix!")
+                
+                self.cov_mat = covmat
+                
+                corr_mat = covmat.copy()
+                uncert = numpy.sqrt( corr_mat.diagonal() )
+                for i in range(len(uncert)):
+                    corr_mat[i,:] /= uncert
+                for j in range(len(uncert)):
+                    corr_mat[:,j] /= uncert
 
+                for i in range(nrb):
+                    En[i][1] = uncert[i*3]
+                    Gn[i][1] = uncert[i*3+1]
+                    Gg[i][1] = uncert[i*3+2]
+            
+            
+            if lcomp==2:
+                CONT = self.readENDFline(fin[line])
+                awt32,dum,dum1,dum2,nresB,nresA = CONT[:]
+                assert nresB == nresA*12, "Trouble with number of resonances"
+                line += 1
+                
+                vallist = []
+                for i in range(nresA):
+                    # read the vals/uncertainties into vallist:
+                    vallist.append( (self.readENDFline(fin[line]),
+                            self.readENDFline(fin[line+1])) )
+                    line += 2
+                
+                vallist.sort()  # should be increasing by energy
+                for i in range(nresA):
+                    vals, uncert = vallist[i]
+                    #print En[i][0]
+                    # check if we're on correct resonance:
+                    assert En[i][0] == vals[0] and J[i] == vals[1], """
+            Trouble with resonance energy: %f """ % En[i][0]
+                    
+                    #uncert = self.readENDFline(fin[line+1])
+                    En[i][1] = uncert[0]
+                    Gn[i][1] = uncert[3]
+                    Gg[i][1] = uncert[4]
+                    
+                    #line += 2
+                
+                # correlation matrix:
+                vals = self.readENDFline(fin[line])
+                dum,dum1, ndigit, Dim, nlin, dum2 = vals[:]
+                line += 1
+                
+                # 10**ndigit is the max value in INTG format:
+                self.ndigit = ndigit
+                
+                corr_mat = numpy.zeros( (Dim,Dim) )
+                for i in range(nlin):
+                    r,c,vals = self.readINTG(fin[line])
+                    # go to 0-based index:
+                    r -= 1
+                    c -= 1
+                    l = len(vals)
+                    corr_mat[r,c:c+l] = vals[:]
+                    
+                    line += 1
+                corr_mat += 1000*numpy.eye(Dim)
+                #symmetrize
+                for i in range(Dim):
+                    for j in range(Dim):
+                        corr_mat[i,j] = corr_mat[j,i]
+        
+        
         self.En =   numpy.array(En)
         self.Gn =   numpy.array(Gn)
         self.Gg =   numpy.array(Gg)
