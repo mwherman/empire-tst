@@ -28,6 +28,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.03   June 2009    A. Trkov
+!-V                        1. Allow INT 21-25 in MF6 LAW 7.
+!-V                        2. Suppress error message if NS=99999.
 !-V         Version 8.02   March 2009    A. Trkov
 !-V                        1. Correct MF/MT if first record out of sequence.
 !-V         Version 8.01   November 2008    A. Trkov
@@ -205,9 +208,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !---MDC---
 !
 !     Define variable precision
@@ -3308,7 +3311,7 @@
 !           LABORATORY ANGLE-ENERGY LAW
 !
             CASE(7)
-               CALL RDTAB2(0)
+               CALL RDTAB2(2)
                NE = NP2
                CALL TEST1(NE,1,NES5MAX,'NE',1)
                IF(IERX.EQ.1)      GO TO 100
@@ -5746,7 +5749,8 @@
             NSEQT = NSEQ + 1
          END IF
       END IF
-      IF(NSEQP.NE.NSEQT.AND.ASEQ.NE.'     ')  THEN
+      IF(NSEQP.NE.NSEQT.AND.ASEQ.NE.'     ' .AND.
+     &   NSEQP.LT.99999)  THEN
          MAT1=MATO
          MF1=MFO
          MT1=MTO
@@ -6088,7 +6092,8 @@
 !
 !     CHECK SEQUENCE NUMBER
 !
-      IF(NSEQP.NE.NSEQ+1.AND.ASEQ.NE.' ')    THEN
+      IF(NSEQP.NE.NSEQ+1.AND.ASEQ.NE.' ' .AND.
+     &   NSEQP.LT.99999)  THEN
          EMESS = 'OUT OF SEQUENCE AT'
          CALL ERROR_MESSAGE(NSEQP)
       END IF
