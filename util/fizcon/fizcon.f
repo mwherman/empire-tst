@@ -28,6 +28,9 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.03   June 2009   A. Trkov
+!-V                        1. Make error printout conditional for IZAPT>0 in MF10
+!-V                        2. Skip test on QM in MF10 for MT5
 !-V         Version 8.02   April 2009   A. Koning
 !-V                        1. Fix ZA of the (z,3n+p) residual.
 !-V         Version 8.01   December  2008     A. Trkov
@@ -195,9 +198,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -6129,8 +6132,12 @@
          IZA = IFIX(ZA+.001)
          IA = MOD(IZA,1000)
          IZ = IZA/1000
+!
+!        If IZAP can be uniquely defined from IZ, IA, MT and projectile
+!        check for valid IZAP
+!
          IZAPT = GET_IZAP(IZ,IA,NSUB/10,MT)
-         IF(IZAP.NE.IZAPT) THEN
+         IF(IZAPT.NE.0 .AND. IZAPT.NE.IZAP) THEN
             WRITE(EMESS,'(A,I6)')                                       &       
      &                'IZAP SHOULD BE SET TO ',IZAPT
             CALL ERROR_MESSAGE(NSEQP)
@@ -6149,7 +6156,7 @@
 !        COMPARE Q WITH Q VALUE FROM FILE 3 IF MT EXISTS IN FILE 3
 !
          IF(NMTX.GT.0)   THEN
-            IF(NFOR.GE.6)  THEN
+            IF(NFOR.GE.6 .AND. MT.NE.5)  THEN
                IF(QM.NE.QMVAL(NMTX)) THEN
                   WRITE(EMESS,'(A,1PE12.5,A,1PE12.5,A)')                &       
      &                'QM=',QM,'  MUST BE ',QMVAL(NMTX),', THE QM '//   &       
