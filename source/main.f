@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-05-08 10:07:33 $
-Ccc   * $Id: main.f,v 1.206 2009-05-08 10:07:33 Capote Exp $
+Ccc   * $Author: herman $
+Ccc   * $Date: 2009-06-29 18:34:02 $
+Ccc   * $Id: main.f,v 1.207 2009-06-29 18:34:02 herman Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -867,7 +867,7 @@ C----------Second chance preequilibrium emission after MSD emission
 C----------Neutron emission
            izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
            CALL WHERE(izares,nnurn,iloc)
-           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
+!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
            IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,1)
          ENDIF
          IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.1
@@ -876,7 +876,7 @@ C----------Second chance preequilibrium emission after MSD emission
 C----------Proton emission
            izares = INT(1000.0*(Z(nnur)-1) + A(nnur) - 1)
            CALL WHERE(izares,nnurp,iloc)
-           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurp,2,0)
+!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurp,2,0)
            IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,2)
          ENDIF
 C--------Second chance preequilibrium *** done ***
@@ -1346,7 +1346,7 @@ C--------
             IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
             IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
             IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
-            IF(NDEjc.eq.7 .AND. CSemis(7,1).GT.0) CALL AUERST(1,7)
+c            IF(NDEjc.eq.7 .AND. CSemis(7,1).GT.0) CALL AUERST(1,7)
             WRITE (8,*) ' '
             IF (LHMs.NE.0 .AND. ENDf(1).NE.1) THEN
                WRITE (8,*) ' HMS spectra stored as inclusive:'
