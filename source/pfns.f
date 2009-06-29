@@ -1,7 +1,7 @@
 Ccc
-Ccc   * $Date: 2007-10-25 21:34:44 $
-Ccc   * $Id: pfns.f,v 1.5 2007-10-25 21:34:44 herman Exp $
-      DOUBLE PRECISION function fniuLANL(en,iaf,izf)
+Ccc   * $Date: 2009-06-29 18:35:27 $
+Ccc   * $Id: pfns.f,v 1.6 2009-06-29 18:35:27 herman Exp $
+      DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
 C    Following Malinovskii 
 C
@@ -213,7 +213,7 @@ C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
       return
       end
 C
-      DOUBLE PRECISION function fniu(en,iaf,izf)
+      DOUBLE PRECISION FUNCTION fniu(en,iaf,izf)
 C
 C    Following Malinovskii 
 C
@@ -371,7 +371,7 @@ C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
       return
       end
 
-      real*8 function TKE(izf,iaf,einc)
+      real*8 FUNCTION TKE(izf,iaf,einc)
       integer izf,iaf
       real*8 ftmp, einc
       real*8 en
@@ -393,12 +393,12 @@ C     Itkis et al, Yad.Fiz.52(1990) 23; Fiz.Elem.Ch.At. Yadra 29(1998) 389
       endif
       if(izf.eq.90) then  ! Thorium
 C       TKE = 0.104*ftmp + 23.85             
-C       TKE = 0.104*ftmp + 24.05                 ! for delta <> 0 and beta2 = 0
-C       TKE = 0.104*ftmp + 23.7                  ! for delta <> 0 and beta2 <>0 
+C       TKE = 0.104*ftmp + 24.05                 ! for delta <& 0 and beta2 = 0
+C       TKE = 0.104*ftmp + 23.7                  ! for delta <& 0 and beta2 <>0 
 C       TKE = 0.104*ftmp + 25.1                  ! for delta = 0 and S2n = 0
-C       TKE = 0.104*ftmp + 24.85                 ! for delta = 0 and S2n <> 0
+C       TKE = 0.104*ftmp + 24.85                 ! for delta = 0 and S2n <& 0
 C       TKE = 0.112*ftmp + 13.7                  ! Vladuca
-C       TKE = 0.104*ftmp + 23.95                 ! for delta <> 0 and S2n <> 0
+C       TKE = 0.104*ftmp + 23.95                 ! for delta <& 0 and S2n <& 0
 
 C       TKE = 0.104*ftmp + 23.7                  ! for delta = 0 and S2n = 0
 C       TKE = TKE + 0.37*en                      ! eval
@@ -407,7 +407,7 @@ C       TKE = 0.104*ftmp + 25.1
 C       TKE = 0.104*ftmp + 25.6                 
 C       TKE = TKE + 0.15*en                     
 
-        TKE = 0.104*ftmp + 25.75                 ! for delta = 0 and S2n <> 0
+        TKE = 0.104*ftmp + 25.75                 ! for delta = 0 and S2n <& 0
         TKE = TKE + 0.50*en                      ! eval     
 
         return
@@ -429,9 +429,9 @@ C     Malinovskii et al, INDC(CCP)-277, IAEA 1987 (VANT N2,1987) in russian
         IF(en.lt.0.0001d0) TKE = TKE + 0.4*en
 C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For U-238 Bn=6.15
         IF(en.gt.0.0001d0 .and. en.le.1.65)
-     >        TKE = TKE + (-0.423 + 0.044*(iaf-230))*en
+     &        TKE = TKE + (-0.423 + 0.044*(iaf-230))*en
         IF(en.gt.1.65)
-     >        TKE = TKE + ( 0.144 - 0.047*(iaf-230))*en
+     &        TKE = TKE + ( 0.144 - 0.047*(iaf-230))*en
       endif
       if(izf.eq.93) then  ! Neptunium
         TKE = 172.43
@@ -469,8 +469,8 @@ C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Pu-239 Bn=5.65
       return
       end
 
-      subroutine get_fragmPFNS_LANL (fragmPFNS, emiss_en, nen_emis,
-     >      eincid, af, zf, emed, tequiv)
+      SUBROUTINE get_fragmPFNS_LANL (fragmPFNS, emiss_en, nen_emis,
+     &      eincid, af, zf, emed, tequiv)
 C
 C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
 C     Phys. At. Nuclei 62 (1999) pp 173-185
@@ -533,7 +533,7 @@ C     if(wscn.ne.0.d0) alpha0 = 1.d0
 C     Following Maslov we interpolate alpha from 10 to 12.1 MeV
       alpha = alpha0
       if(eincid.gt.10.and.eincid.le.12.)  
-     >                  alpha = alpha0 + 0.05*(10.d0 - eincid)
+     &                  alpha = alpha0 + 0.05*(10.d0 - eincid)
       if(eincid.gt.12.) alpha = 0.847d0  ! for Th,Pa,Ac chains
 C
       EniuL =  float(iah)/float(ial*iaf)*alpha*Efkin
@@ -556,12 +556,12 @@ C     Following formulae (7) of the paper
         eplus = (DSQRT(e) + DSQRT(EniuL))**2
         emin  = (DSQRT(e) - DSQRT(EniuL))**2
         ftmp1=
-     >  GAUSS_INT1(SL_LAB,0.d0,Tlf,abserr)/(2*Tlf*Tlf*DSQRT(EniuL))
+     &  GAUSS_INT1(SL_LAB,0.d0,Tlf,abserr)/(2*Tlf*Tlf*DSQRT(EniuL))
 
         eplus = (DSQRT(e) + DSQRT(EniuH))**2
         emin  = (DSQRT(e) - DSQRT(EniuH))**2
         ftmp2=
-     >  GAUSS_INT1(SH_LAB,0.d0,Thf,abserr)/(2*Thf*Thf*DSQRT(EniuH))
+     &  GAUSS_INT1(SH_LAB,0.d0,Thf,abserr)/(2*Thf*Thf*DSQRT(EniuH))
 
         fragmPFNS(i) = 0.5d0*(ftmp1 + ftmp2)
 
@@ -581,8 +581,8 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       return
       end
 
-      subroutine get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
-     >      eincid, af, zf, emed, tequiv)
+      SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
+     &      eincid, af, zf, emed, tequiv)
 C
 C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
 C     Phys. At. Nuclei 62 (1999) pp 173-185
@@ -642,7 +642,7 @@ C     if(wscn.ne.0.d0) alpha0 = 1.d0
 C     Following Maslov we interpolate alpha from 10 to 12.1 MeV
       alpha = alpha0
       if(eincid.gt.10.and.eincid.le.12.)  
-     >                  alpha = alpha0 + 0.05*(10.d0 - eincid)
+     &                  alpha = alpha0 + 0.05*(10.d0 - eincid)
       if(eincid.gt.12.) alpha = 0.847d0  ! for Th,Pa,Ac chains
 C
       EniuL =  float(iah)/float(ial*iaf)*alpha*Efkin
@@ -677,7 +677,7 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       return
       end
 
-      real*8 function fwatt(E,Eniu,T)
+      real*8 FUNCTION fwatt(E,Eniu,T)
       real*8 E,T,pi,Eniu,b
       data pi/3.1415926d0/
       fwatt = 0.d0
@@ -686,11 +686,11 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       if((E+Eniu).GT.50.d0*T) return
       b = 4*Eniu/T/T
       fwatt = 2.d0/T*DSQRT(E/(pi*T))*DEXP(-(E+Eniu)/T)*
-     >             sinh(DSQRT(b*E))/DSQRT(b*E)
+     &             sinh(DSQRT(b*E))/DSQRT(b*E)
       return
       end
 
-      real*8 function fmaxw(E,T)
+      real*8 FUNCTION fmaxw(E,T)
       real*8 E,T,pi
       data pi/3.1415926d0/
       fmaxw = 0.d0
@@ -701,7 +701,7 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       return
       end
 
-      real*8 function fscn(E,T)
+      real*8 FUNCTION fscn(E,T)
       real*8 E,T
       fscn = 0.d0
       if(E.le.0.1d-5) E=0.1d-5
@@ -711,7 +711,7 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       return
       end
 
-      real*8 function bind(nn,nz,exc)
+      real*8 FUNCTION bind(nn,nz,exc)
       integer nn,nz
       real*8 exc
 c     real*4 e  ! for mass10 CALL
@@ -741,7 +741,7 @@ C     print *, ' N=',nn,' Z=',nz,' B.E.=',e,' MassExcess=', exc
       return
       end
       
-      subroutine mass10(nx,nz,E)     ! Duflo-Zuker fevrier 1996
+      SUBROUTINE MASS10(nx,nz,E)     ! Duflo-Zuker fevrier 1996
 c Calculation of binding energy E (nx neutrons,nz protons)
       dimension b(10),dyda(10),op(2),n2(2),dx(2),qx(2),os(2),
      &          onp(0:8,2,2),oei(2),dei(2),nn(2),noc(18,2),pp(2),y(2)
@@ -872,26 +872,26 @@ c--------                            ! end of main loop
       return
       end
 
-      real*8 function fniuTH232(en)
+      real*8 FUNCTION fniuTH232(en)
       implicit real*8 (A-H,O-Z)
       real*8 Eniu(20),Vniu(20),en
       integer i
       data Eniu/
-     > 1.D-11, 1.D0, 3.d0, 4.d0, 5.7d0, 7.d0, 10.d0,14.7d0, 20.d0,
-     > 22.d0 ,24.d0,26.d0,28.d0,30.d0 ,35.d0,40.d0, 45.d0 , 50.d0,
-     > 55.d0 ,60.d0/
+     & 1.D-11, 1.D0, 3.d0, 4.d0, 5.7d0, 7.d0, 10.d0,14.7d0, 20.d0,
+     & 22.d0 ,24.d0,26.d0,28.d0,30.d0 ,35.d0,40.d0, 45.d0 , 50.d0,
+     & 55.d0 ,60.d0/
       data Vniu/
-     > 2.05D0, 2.127D0, 2.263D0, 2.4023D0, 2.64D0, 2.996D0, 3.37D0,
-     > 3.97D0, 4.79D0, 5.052D0, 5.2731D0, 5.5143D0, 5.7053D0, 5.9263D0,
-     > 6.4284D0, 6.8801D0, 7.3217D0, 7.7434D0, 8.1242D0, 8.5053D0/
+     & 2.05D0, 2.127D0, 2.263D0, 2.4023D0, 2.64D0, 2.996D0, 3.37D0,
+     & 3.97D0, 4.79D0, 5.052D0, 5.2731D0, 5.5143D0, 5.7053D0, 5.9263D0,
+     & 6.4284D0, 6.8801D0, 7.3217D0, 7.7434D0, 8.1242D0, 8.5053D0/
       fniu = Vniu(1)
       if(en.lt.1.d-11) RETURN
-c     if(en.gt.60) STOP 'En > 60 MeV, NO PFNM data'
+c     if(en.gt.60) STOP 'En & 60 MeV, NO PFNM data'
       do i=1,20
         if(Eniu(i).gt.en) exit
       enddo
       fniuTH232 = Vniu(i-1) +
-     >   (Vniu(i)-Vniu(i-1))*(en-Eniu(i-1))/(Eniu(i)-Eniu(i-1))
+     &   (Vniu(i)-Vniu(i-1))*(en-Eniu(i-1))/(Eniu(i)-Eniu(i-1))
       return
       end
 
