@@ -1,7 +1,7 @@
 """
 "empy" python package, containing python tools for EMPIRE:
 
-depends:    python (v 2.x), numpy, pylab
+depends:	python (v 2.x), numpy, pylab
 ==================
 
 empy:
