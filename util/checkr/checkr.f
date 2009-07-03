@@ -31,6 +31,8 @@
 !-V         Version 8.03   June 2009    A. Trkov
 !-V                        1. Allow INT 21-25 in MF6 LAW 7.
 !-V                        2. Suppress error message if NS=99999.
+!-V                        3. Restore checking of MF32 compact format
+!-V                           for LRF not equal to 7.
 !-V         Version 8.02   March 2009    A. Trkov
 !-V                        1. Correct MF/MT if first record out of sequence.
 !-V         Version 8.01   November 2008    A. Trkov
@@ -4679,10 +4681,12 @@
 !
          NJS=N1H
          CALL RDLIST
-         DO J=1,NJS
-            CALL RDLIST
-            CALL RDLIST
-         END DO
+         IF(LRF.EQ.7) THEN
+            DO J=1,NJS
+              CALL RDLIST
+              CALL RDLIST
+            END DO
+         END IF
 !
          CALL RDCONT
          NDIGIT=L1H
