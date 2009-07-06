@@ -386,13 +386,17 @@ class mgCovars:
                     self.mat,33, mt, lNum); lNum += 1
             
             for colMT in covarsThisMT:
+                taketranspose = False
+                
                 bxS += b.writeENDFline([0.0,0.0,self.mat,colMT,0,self.ngroups], 
                         self.mat,33,mt,lNum); lNum += 1
                 
                 # must try both 'MTxMTy' and 'MTyMTx':
                 key = 'MT%iMT%i' % (mt,colMT)
                 if not key in self.covars.keys():
+                    # if MTyMTx we need to use the transpose matrix:
                     key = 'MT%iMT%i' % (colMT,mt)
+                    taketranspose = True
                 if not key in self.covars.keys():
                     # ok, not present, so write blank section:
                     bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
@@ -405,7 +409,10 @@ class mgCovars:
     
                 # once again, reverse order of matrix,
                 # we want low-high energy order rather than default high-low
-                matrix = self.covars[key][::-1,::-1]
+                if taketranspose:
+                    matrix = numpy.transpose( self.covars[key] )[::-1,::-1]
+                else:
+                    matrix = self.covars[key][::-1,::-1]
                 empty = []
                 for idx in range(len(matrix)):
                     line = matrix[idx]
