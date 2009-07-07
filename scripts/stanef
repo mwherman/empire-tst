@@ -1,5 +1,7 @@
 #! /bin/sh -
 #script to standardize ENDF formatted file with STANEF
+# if processing is successful, result is renamed back to $1.endf
+
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -28,7 +30,14 @@ $file-stan.endf
 
 DONE
 EOF
-$EMPIREDIR/util/stanef/stanef <INPUT
-mv $file-stan.endf $file.endf
+$EMPIREDIR/util/stanef/stanef <INPUT 2>| err.log
+
+if grep 'Completed successfully' err.log; then
+    mv $file-stan.endf $file.endf
+else
+    echo STANEF did not finish successfully!
+fi
+
+rm err.log INPUT
 
 exit
