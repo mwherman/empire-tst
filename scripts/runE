@@ -329,10 +329,17 @@ def mv(source, target, verbose=True):
     silent on error unless verbose=True
     """
     try:
-        shutil.move(source, target)
+        os.rename(source, target)
+    except OSError, e:
+        if verbose:
+            print (e)
+    """
+    try:
+        shutil.move(source, target) # not present before v2.3
     except IOError, e:
         if verbose:
             print (e)
+    """
 
 
 def cp(source, target, verbose=True):
