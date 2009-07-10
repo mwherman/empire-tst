@@ -9,14 +9,18 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 Read NJOY ascii multi-group covariance output into class
 """
 
+__metaclass__ = type
+
 from __future__ import division
 import sys
 import os
 import math
 import numpy
 
+from mgBase import *
 
-class mgCovars:
+
+class mgCovars(mgBase):
     """
     class contains processed, multigroup covariances
     obtained from ascii output of NJOY:
@@ -27,11 +31,11 @@ class mgCovars:
     and matrices in the 'covars' and 'corrs' dictionaries
     """
     def __init__(self, filename, ngroups=33):
-        self.elist = []
-        self.xsecs = {}
-        self.uncert = {}
-        self.covars = {}
-        self.corrs = {}
+        """
+        read in ascii output from njoycovx
+        """
+        super(mgCovars,self).__init__()
+
         self.filename = filename
         self.ngroups = ngroups
         
@@ -106,8 +110,12 @@ class mgCovars:
             
             mat, low, high, i = self.getMatrix( fin, i )
             
+            if colMT==rowMT:
+                key = 'MT%i' % colMT
+                self.thresholds[key] = (low+1,high)
             key = 'MT%iMT%i' % (colMT, rowMT)
             self.corrs[key] = mat / 1000.
+            
             # reconstruct covariance:
             covmat = self.corrs[key].copy()
             for idx in range(self.ngroups):

@@ -103,15 +103,15 @@ class MF_base:
         if type(val) is str:
             # in case we want '0.0', '2.5', etc in the file
             # for Jpi for example. Pass these as strings, and they
-            # will be printed as-is, right-adjusted with extra space
+            # will be printed as-is, right-adjusted
             try:
                 dum = float(val)
             except ValueError:
                 print "Numeric values only, please!"
                 raise
-            if len(val) > 10:
+            if len(val) > 11:
                 raise FormatError, "String too long for endf format"
-            return ("%10s " % val)
+            return ("%11s" % val)
         
         if val is None:
             # blank spot in file
@@ -122,12 +122,14 @@ class MF_base:
             # round small values down to zero
             val = 0.
         
+        # exponents from E-09 to E+09:
         if (val==0) or (-9 <= math.log10( math.fabs(val) ) < 10):
             str_rep = ("% E" % val)
             if str_rep.find('+') > -1:
                 return str_rep.replace('E+0','+')
             else:
                 return str_rep.replace('E-0','-')
+        # need extra space for exponents from E-99 to E+99:
         else:
             str_rep = ("% .5E" % val)
             if str_rep.find('+') > -1:
@@ -233,8 +235,8 @@ class MF_base:
         
         line number is added only if specified
         
-        just like with readINTG, it's the user's responsibility to change row/col
-        back from python 0-based to fortran 1-based index
+        just like with readINTG, it's the user's responsibility to change 
+        row/col back from python 0-based to fortran 1-based index
         """
         # check if tmplist is too long?
         linelength = 56 # space available for integers

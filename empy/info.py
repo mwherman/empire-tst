@@ -1,7 +1,8 @@
 """
 "empy" python package, containing python tools for EMPIRE:
 
-depends:	python (v 2.x), numpy, pylab
+requires:   python (v 2.x)
+optional, recommended:  numpy (v 1.1 or later)
 ==================
 
 empy:
@@ -10,9 +11,10 @@ empy:
     
     bash:   rm(), mv(), cp(), etc. functions 
     using python os and shutil modules
-
-    MF_base:    base class for single MF file.
-    permits reading/writing single lines of ENDF files
+    
+    MF_base:
+        base class for single MF file.
+        permits reading/writing single lines of ENDF files
     
     **classes inheriting MF_base** 
     
@@ -27,7 +29,20 @@ empy:
         the file, can then manipulate and write new MT file. Limited to 1
         subsection (2 in special 'low-fidelity' case) right now
     
+     mgBase: 
+        base class for multi-group covariances, processed output from
+        PUFF/NJOY. Contains x-sections, correlations, thresholds etc for 
+        each reaction in multigroup format. Also functions for writing class
+        back to ascii format
     
+    **classes inheriting mgBase**
+    
+        readPUFF.mgCovars:  read 'puff.output' into class inheriting mgBase
+    
+        readNJOY.mgCovars:  read 'corr.matrix' into class inheriting mgBase
+    
+        boxr.mgCovars: read binary 'BOXR' format from njoy into mgBase
+       
     
     **visualization tools**
     

@@ -15,6 +15,12 @@ PYTHONPATH=$PYTHONPATH:<path_to_empire>
 export PYTHONPATH
 
 Note this should point to the directory *containing* empy, not to empy itself.
+Thus,
+
+PYTHONPATH=$PYTHONPATH:$EMPIREDIR
+export PYTHONPATH
+
+will work if EMPIREDIR is defined properly.
 
 Alternate installation via distutils may become available soon
 

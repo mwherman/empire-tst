@@ -11,14 +11,18 @@ Puff is more verbose than NJOY, has information on RI and Thermal values
 for example
 """
 
+__metaclass__ = type
+
 from __future__ import division
 import sys
 import os
 import math
 import numpy
 
+from mgBase import *
 
-class mgCovars:
+
+class mgCovars(mgBase):
     """
     class contains processed, multigroup covariances
     obtained from ascii output of PUFF (puff.output):
@@ -29,14 +33,12 @@ class mgCovars:
     and matrices in the 'covars' and 'corrs' dictionaries
     """
     def __init__(self, filename, zam=0, awt=0):
-        self.elist = []
-        self.xsecs = {}
-        self.uncert = {}
-        self.covars = {}
-        self.corrs = {}
+        """
+        read in puff.output
+        """
+        super(mgCovars,self).__init__()
+        
         self.filename = filename
-        self.ngroups = 0
-        self.mat = 0
         self.zam = float(zam)
         self.awt = float(awt)
         
@@ -61,7 +63,7 @@ class mgCovars:
             self.zam = float(fin[i+1].split()[-1])
         if self.awt==0:
             self.awt = float(fin[i+2].split()[-1])
-
+        
         # get to energy list:
         i = 0
         while True:
@@ -97,7 +99,7 @@ class mgCovars:
         """
         read a section from the ascii file, store x-sections 
         and matrices in the mgCovars class.
-
+        
         If 'trim', extra zeros on the matrix will be removed. 
         This is a bit awkward since we then don't know 
         what energy ranges belong with each bin
@@ -115,7 +117,7 @@ class mgCovars:
         rsd1 = []
         rsd2 = []
         
-
+        
         if MAT1==MAT2 and colMT==rowMT:
             # self-correlation:
             for i in range(i,i+self.ngroups):
@@ -131,7 +133,7 @@ class mgCovars:
             key = 'MT%i'%colMT
             self.xsecs[key] = xsec1
             self.uncert[key] = rsd1
-
+            
             # only write the elist the first time we see it:
             #if len(self.elist)==0:
             #    self.elist = tuple(elist)
@@ -160,8 +162,12 @@ class mgCovars:
             
             if mat is not None:
                 
+                if colMT==rowMT:
+                    key = 'MT%i' % colMT
+                    self.thresholds[key] = (low+1,high) # uses 1-based index!
                 key = 'MT%iMT%i' % (colMT, rowMT)
                 self.corrs[key] = mat / 1000.
+                
                 # reconstruct covariance:
                 covmat = self.corrs[key].copy()
                 for idx in range(self.ngroups):
@@ -195,7 +201,7 @@ class mgCovars:
             if fin[i].startswith('1  material 1='):
                 break
             i += 1
-
+        
         # now return the line number for start of next section:
         return i
     
