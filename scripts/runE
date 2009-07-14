@@ -250,7 +250,7 @@ def runE(proj):
                 
                 # RUN c4sort TO SORT C4 DATA
                 
-                os.system('%/scripts/sortc4 %s' %
+                os.system('%s/scripts/sortc4 %s' %
                     (os.environ['EMPIREDIR'],proj) )
         
         # REMOVE EMPTY FILES:
