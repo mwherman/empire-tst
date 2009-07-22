@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-06-03 18:17:49 $
-Ccc   * $Id: input.f,v 1.299 2009-06-03 18:17:49 mattoon Exp $
+Ccc   * $Date: 2009-07-22 19:55:24 $
+Ccc   * $Id: input.f,v 1.300 2009-07-22 19:55:24 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -85,6 +85,7 @@ C-----maximum exponent of 10 supported by the computer (for real*8)
       CALL CLEAR
       DO nnuc = 1, NDNUC
          EMAx(nnuc) = 0.0
+         ECUt(nnuc) = 0.0
       ENDDO
       iccerr = 0
 
