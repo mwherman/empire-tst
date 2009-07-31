@@ -115,14 +115,16 @@ class mgBase:
                 asc += ' <<< correlation matrix >>>\n'
                 asc += ' column material mat-mt=(%4i,%3i)  vs  row material mat-mt=(%4i,%3i)\n' % (self.mat, mt, self.mat, colMT)
                 
-                # matrix needs 1000 along diagonal:
-                matmax = ( self.corrs[key] ).max()
-                matmul = maxCorr / matmax
-                matrix = ( self.corrs[key]*matmul ).astype(int)
+                # self.corrs holds values from -1.0 to 1.0, we want
+                # to write integers from - to +maxCorr:
+                matrix = ( self.corrs[key]*maxCorr ).astype(int)
                 
                 # get dimensions of matrix (rows, columns):
                 r_start, r_end = self.thresholds[rkey]  # 1-based index
                 c_start, c_end = self.thresholds[ckey]
+                #if rkey != ckey:
+                #    print (r_start, r_end, rkey)
+                #    print (c_start, c_end, ckey)
                 
                 nblocks, remainder = divmod(c_end-c_start+1,cpb)
                 

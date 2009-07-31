@@ -49,7 +49,7 @@ class mgCovars(mgBase):
             #print i
     
     
-    def parseSection( self, fin, i, trim=True ):
+    def parseSection( self, fin, i, trim=False ):
         """
         read a section from the ascii file, store x-sections 
         and matrices in the mgCovars class.

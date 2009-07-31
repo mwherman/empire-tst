@@ -214,7 +214,7 @@ def isSEND(string):
     SEND finishes an MT file: 
     '0.000000+0 0.000000+0    0   0   0 0MATMF 099999\n'
     """
-    return string[-6:-1] == '99999'
+    return string[-8:-1] == ' 099999'
 
 
 def isFEND(string, MAT):
