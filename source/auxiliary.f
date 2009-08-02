@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-15 18:40:57 $
-Ccc   * $Id: auxiliary.f,v 1.39 2009-05-15 18:40:57 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-08-02 23:58:34 $
+Ccc   * $Id: auxiliary.f,v 1.40 2009-08-02 23:58:34 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -33,20 +33,20 @@ C
       TOTcsfis = 0.d0
       CRL = 0.d0
       DENhf = 0.d0
-      
+
       CSEmis = 0.d0
       CSMsd  = 0.d0
       CSHms  = 0.d0
       CSEfis = 0.d0
       CSMsc  = 0.d0
-      
+
       CSE    = 0.d0
       CSEmsd = 0.d0
       CSEhms = 0.d0
       AUSpec = 0.d0
       CSEa   = 0.d0
       CSEahms= 0.d0
-      
+
 C     DO nejc = 0, NDEJC
 C        CSEmis(nejc,0) = 0.0
 C        CSMsd(nejc) = 0.0
@@ -70,11 +70,11 @@ C           ENDDO
 C        ENDDO
 C     ENDDO
 
-      REClev   = 0.d0 
+      REClev   = 0.d0
       CSDirlev = 0.d0
       POPmax   = 0.d0
       CSPrd    = 0.d0
-      CSPfis   = 0.d0 
+      CSPfis   = 0.d0
       EX       = 0.d0
       JSTab    = 0.d0
       QPRod    = 0.d0
@@ -100,7 +100,7 @@ C     ENDDO
       SCRtl    = 0.d0
       CSAlev   = 0.d0
       REDmsc   = 1.d0
-      
+
 c     DO nejc = 0, NEJcm
 c        DO il = 1, NDLV
 c           REClevjc) = 0.0
@@ -1434,10 +1434,14 @@ C-----------interpolate
 C     WRITE(8,*)'recoil to cont=',summino*Sxo*Szo
       END
 
-      FUNCTION ETIME(A)
+C     FUNCTION ETIME(A)
+C
+C     This function should be used only with the ABSOFT compiler
+C     Otherwise it must be commented, RCN, July 2009
+C
 C     Does nothing (returns 0)
 C     Introduced only to make Absoft compiler happy as ECIS asks
 C     for it in subroutine HORA
-      ETIME = 0.0
-      RETURN
-      END      
+C     ETIME = 0.0
+C     RETURN
+C     END

@@ -1,6 +1,6 @@
-Ccc   * $Author: mattoon $
-Ccc   * $Date: 2009-06-03 18:17:50 $
-Ccc   * $Id: lev-dens.f,v 1.75 2009-06-03 18:17:50 mattoon Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-08-02 23:58:32 $
+Ccc   * $Id: lev-dens.f,v 1.76 2009-08-02 23:58:32 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -65,9 +65,8 @@ C
 C
 C Local variables
 C
-      REAL*8 ac, aj, cigor, dumm, momort, mompar, rbmsph,
-     &                 rotemp, saimid, saimin, saimx, selmax, stab, u,
-     &                 x1, x2, x3
+      REAL*8 ac, aj, cigor, momort, mompar, rbmsph,
+     &                 rotemp, saimid, saimin, saimx, selmax, stab, u
       REAL FLOAT
       INTEGER i, ia, iz, kk
       REAL*8 RODEF
@@ -82,32 +81,16 @@ C-----next call prepares for lev. dens. calculations
       rbmsph = 0.01448*A(Nnuc)**1.66667
       ac = A(Nnuc)/ADIv
       IF (Gcc.EQ.2.D0) THEN
-         CALL ALIT(iz,ia,x1,x2,x3,dumm,Gcc)
-C--------check whether a-parameter determined from the shell-model s.p.s. exists
-         IF (x1 + x2 + x3.EQ.0.0D0) THEN
-            WRITE (8,*) ' '
-            WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            WRITE (8,*) ' NO FIT DATA FOR LEVEL DENSITIES IN NUCLEUS'
-            WRITE (8,*) ' A=', A(Nnuc), '  Z=', Z(Nnuc)
-            WRITE (8,*) ' EXECUTION TERMINATED !!'
-            WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-            WRITE (8,*) ' '
-            STOP
-         ENDIF
+          WRITE (8,*) ' '
+          WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+          WRITE (8,*) ' OPTION GCC=2 ONSOLETE  '
+          WRITE (8,*) ' EXECUTION TERMINATED !!'
+          WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+          WRITE (8,*) ' '
       ENDIF
       DO kk = 1, NEX(Nnuc)
          u = EX(kk,Nnuc) - DEL
          UEXcit(kk,Nnuc) = MAX(u,0.D0)
-         IF (Gcc.EQ.2.D0) THEN
-C-----------a-parameter determined from the fit to the shell-model s.p.s.
-            IF (BF.EQ.0.D0) THEN
-C--------------saddle point
-               ac = x1 + x2*EXP(( - 200.*x3))
-            ELSE
-C--------------normal states
-               ac = x1 + x2*EXP(( - u*x3))
-            ENDIF
-         ENDIF
          IF (ac.GT.0.D0) THEN
 C-----------set nuclear temperature (spin independent taken at J=0 or 1/2)
             IF (BF.EQ.0.0D0) THEN !saddle point
@@ -1786,9 +1769,6 @@ C
       REAL*8 shelMSr, defcorr
       INTEGER  nz, na, nnuc, iloc
       CHARACTER*2 dum
-      CHARACTER*64 empiredir
-
-      CALL GETENV ('EMPIREDIR', empiredir)
 
 C-----Reading MS shell corrections and deformation energies
       OPEN(11,FILE=trim(empiredir)//'/RIPL-2/densities/shellcor-ms.dat',
@@ -1817,46 +1797,6 @@ C        SHC(0) = shelMSr - defcorr
       RETURN
       END
 C
-C
-      SUBROUTINE ALIT(Iz,Ia,X1,X2,X3,B,Gcc)
-C
-C-------------------------------------------------------------class:au
-C-----reads fit parameters to calculate a-parameter in level densities
-C-----and ground state nuclear deformation 'B'
-C-----input IZ and IA of the nucleus and level density control variable
-C-----GCC.
-C
-C
-C Dummy arguments
-C
-      REAL*8 B, Gcc, X1, X2, X3
-      INTEGER Ia, Iz
-C
-C Local variables
-C
-      REAL FLOAT
-      INTEGER izia, iziar
-      REWIND (23)
-      izia = Iz*1000 + Ia
-  100 READ (23,*,END = 200) iziar, B, X1, X2, X3
-      IF (izia.EQ.iziar) RETURN
-      GOTO 100
-  200 IF (Gcc.EQ.2D0) THEN
-         WRITE (8,
-     &'('' LEVEL DENSITY FIT FOR Z='',I3,'' A='',I3,'' NOT      FOUND.
-     &A/8 USED.'')') Iz, Ia
-         B = 0.
-         X1 = FLOAT(Ia)/8.
-         X2 = 0.
-         X3 = 0.
-      ELSE
-         WRITE (8,
-     &'('' DEFORMATION FOR Z='',I3,'' A='',I3,'' NOT FOUND.     ASSUMED
-     &SPHERICAL.'')') Iz, Ia
-         B = 0.
-      ENDIF
-      END
-
       SUBROUTINE ROHFB(Nnuc)
 CCC
 CCC   *********************************************************************
@@ -1878,8 +1818,6 @@ CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
 CCC   *                                                                   *
 CCC   *                                                                   *
 CCC   * OUTPUT:NONE                                                       *
-CCC   *                                                                   *
-CCC   * CALLS:ALIT                                                        *
 CCC   *                                                                   *
 CCC   *********************************************************************
 CCC
@@ -1909,13 +1847,11 @@ C
       CHARACTER*13 fname
       CHARACTER*20 ctmp
       CHARACTER*7 caz
-      CHARACTER*50 filename
-      CHARACTER*64 empiredir
+      CHARACTER*120 filename,cfiletmp
       LOGICAL fexist
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
 
-      CALL GETENV ('EMPIREDIR', empiredir)
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1937,14 +1873,14 @@ C
             ENDDO
          ENDDO
       ENDDO
-      WRITE (filename,99005) iz
+      WRITE (cfiletmp,99005) iz
 
 99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
-      filename = trim(empiredir)//filename
+      filename = trim(empiredir)//trim(cfiletmp)
       INQUIRE(file = filename, exist = fexist)
       IF(.not.fexist) THEN
-       WRITE(8,*) filename, 'does not exist'
-       WRITE(*,*) filename, 'does not exist'
+       WRITE(8,*) trim(filename), ' does not exist'
+       WRITE(*,*) trim(filename), ' does not exist'
        STOP 'ERROR: '
       ENDIF
 
@@ -1996,9 +1932,9 @@ C
 C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
-        WRITE (filename,99007) iz
+        WRITE (cfiletmp,99007) iz
 99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
-        filename = trim(empiredir)//filename
+        filename = trim(empiredir)//trim(cfiletmp)
         INQUIRE(file = filename, exist = fexist)
         IF(fexist) then
           OPEN (UNIT = 34,FILE = filename,ERR = 440)
@@ -2492,8 +2428,7 @@ C
       CHARACTER*2 car2
       CHARACTER*8 paritate
       REAL*8 DLOG10
-      CHARACTER*56 filename
-      CHARACTER*64 empiredir
+      CHARACTER*120 filename,cfiletmp
 
       LOGICAL fexist
       INTEGER i, ia, iar, ipp, iugrid, iz, izr, j, jmaxl, k, khi, kk,
@@ -2502,12 +2437,10 @@ C
       ia = A(Nnuc)
       iz = Z(Nnuc)
 
-      CALL GETENV ('EMPIREDIR',empiredir)
-
-      WRITE (filename,99006)ib, iz
+      WRITE (cfiletmp,99006) ib, iz
 99006 FORMAT
      & ('/RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
-      filename = trim(empiredir)//filename
+      filename = trim(empiredir)//trim(cfiletmp)
       INQUIRE(file = filename, exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
@@ -2683,7 +2616,7 @@ C
       REAL*8 aaj, accn, ar, desteppp, excn1, mm2, r0, cigor,
      &                 rotemp, shcf, u, xmax, xr, mompar, momort, temp,
      &                 vibbf12, vibbfdt, def2, stab, aj, vn
-C     REAL*8 qigor 	 
+C     REAL*8 qigor
       REAL FLOAT
       INTEGER ia, iff, in, ix, iz, jj, kk, nr
       INTEGER INT
@@ -2919,7 +2852,7 @@ C
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
      &       qk, qv, s, seff2, vibrk, def2,
      &       ro,ro_u,ro_j,ro_pi
-C     REAL*8 qdamp 
+C     REAL*8 qdamp
       REAL*8 rot_K, rot_Q, vib_KQ
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
@@ -3084,7 +3017,7 @@ C Dummy arguments
      &                 shcf,def2
 C Local variables
       REAL*8 arg, const, det, momo, phi, phi2,dphi2,
-     &                 vibdamp, robcs, s, seff2, 
+     &                 vibdamp, robcs, s, seff2,
      &                 seff2ort,mm2,qr,ac,e,rotdamp
 C     REAL*8 vibbf12, vibbfdt, vibrk, qv
       REAL*8 om2,om3,cga,q2,q3

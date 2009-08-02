@@ -1,6 +1,6 @@
-Ccc   * $Author: mattoon $ 
-Ccc   * $Date: 2009-06-03 18:17:50 $
-Ccc   * $Id: io.h,v 1.41 2009-06-03 18:17:50 mattoon Exp $
+Ccc   * $Author: Capote $ 
+Ccc   * $Date: 2009-08-02 23:58:35 $
+Ccc   * $Id: io.h,v 1.42 2009-08-02 23:58:35 Capote Exp $
             
 c     NOTE UNITS OPENED IN MODULES
 c
@@ -27,7 +27,7 @@ c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
 c     22     input
-c     23     io.h
+c     23     free
 c     24     io.h
 c     25     (seems to be used but don't know where)
 c     26     empire-ctrl, main
@@ -100,10 +100,6 @@ c     99     ecis
 c    100     empire_ctl
 c    102     Non-RIPL potential
 c
-
-      Character*64 empiredir
-      CALL GETENV ('EMPIREDIR', empiredir)
-
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
       OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
       OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
@@ -146,8 +142,6 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
-      OPEN (23,FILE=trim(empiredir)//'/data/nparac.dat'
-     *,STATUS='OLD')
       OPEN (24,FILE=trim(empiredir)//'/RIPL-2/densities/total'
      * //'/level-densities-egsm.dat',STATUS='OLD')
       OPEN (26,FILE=trim(empiredir)//'/RIPL-2/optical/om-data'

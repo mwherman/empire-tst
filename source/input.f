@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-07-22 19:55:24 $
-Ccc   * $Id: input.f,v 1.300 2009-07-22 19:55:24 herman Exp $
+Ccc   * $Date: 2009-08-02 23:58:31 $
+Ccc   * $Id: input.f,v 1.301 2009-08-02 23:58:31 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -37,7 +37,6 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &                 qtmp, xfis, zclu, zres, ztmp, culbar
-      CHARACTER*64 empiredir
       CHARACTER*3 atar, ca1
       CHARACTER*1 cnejec, proj
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
@@ -88,8 +87,6 @@ C-----maximum exponent of 10 supported by the computer (for real*8)
          ECUt(nnuc) = 0.0
       ENDDO
       iccerr = 0
-
-      CALL GETENV ('EMPIREDIR', empiredir)
 C
 C-----Defining global physical and mathematical constants
 C-----They are passed through CONSTANT common block
@@ -416,7 +413,7 @@ C--------ejectile alpha
 
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
-           WRITE (8,*) 
+           WRITE (8,*)
      >    ' WARNING: this version of EMPIRe is prepared to emit complex'
            WRITE (8,*)
      >    ' WARNING: complex particles, NDEjc must be 6 in dimension.h '
@@ -662,8 +659,8 @@ C
              DO ip = 0, nemp
                DO in = 0, nemn
                  IF (iac + ih + it + id + ia + ip + in.NE.0) THEN
-                    atmp = A(1) - FLOAT(in)*AEJc(1) 
-     &                          - FLOAT(ip)*AEJc(2) 
+                    atmp = A(1) - FLOAT(in)*AEJc(1)
+     &                          - FLOAT(ip)*AEJc(2)
      &                          - FLOAT(ia)*AEJc(3)
      &    - FLOAT(id)*AEJc(4) - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
 
@@ -745,7 +742,7 @@ C----------------------set reaction string
                           REAction(nnuc)(iend + 1:iend + 1) = 'd'
                           iend = iend + 1
                        ENDIF
-                       
+
                                IF (it.NE.0) THEN
                           WRITE (cnejec,'(I1)') it
                           IF (it.GT.1) THEN
@@ -927,7 +924,7 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 5408
             ENDIF
          ELSEIF (AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
-            KTRlom(0,0) = 6200       ! Haixia OMP for deuterons 
+            KTRlom(0,0) = 6200       ! Haixia OMP for deuterons
          ELSEIF (AEJc(0).EQ.3 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0,0) = 7100       ! Bechetti OMP for tritons
          ELSEIF (AEJc(0).EQ.3 .AND. ZEJc(0).EQ.2) THEN
@@ -1021,8 +1018,8 @@ C-----------We fix below target ENDf flag since it escapes normal setting
                    DO in = 0, nemn
                         mulem = iac + ia + ip + in + id + it + ih
 
-                        atmp = A(1) - FLOAT(in)*AEJc(1) 
-     &                              - FLOAT(ip)*AEJc(2) 
+                        atmp = A(1) - FLOAT(in)*AEJc(1)
+     &                              - FLOAT(ip)*AEJc(2)
      &                              - FLOAT(ia)*AEJc(3)
      &                              - FLOAT(id)*AEJc(4)
      &                              - FLOAT(it)*AEJc(5)
@@ -1030,8 +1027,8 @@ C-----------We fix below target ENDf flag since it escapes normal setting
                     IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)
      &                  *AEJc(NDEJC)
 
-                        ztmp = Z(1) - FLOAT(in)*ZEJc(1) 
-     &                              - FLOAT(ip)*ZEJc(2) 
+                        ztmp = Z(1) - FLOAT(in)*ZEJc(1)
+     &                              - FLOAT(ip)*ZEJc(2)
      &                              - FLOAT(ia)*ZEJc(3)
      &                              - FLOAT(id)*ZEJc(4)
      &                              - FLOAT(it)*ZEJc(5)
@@ -2112,7 +2109,6 @@ C
 C Local variables
 C
       CHARACTER*132 ctmp
-      CHARACTER*64 empiredir
       INTEGER*4 iwin
       INTEGER*4 PIPE
 
@@ -2127,8 +2123,6 @@ C
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
       LOGICAL LREad, ADDnuc, fexist
-
-      CALL GETENV ('EMPIREDIR', empiredir)
 
       ADDnuc = .FALSE.
 
@@ -2724,9 +2718,6 @@ C
       INTEGER i, iar, ilv, ilvr, iptmp, itmp2, izr, lvpr, natmp,
      &        ndbrlin, ngamr, nlvr, nmax, nztmp
       CHARACTER*6 reftmp
-      CHARACTER*64 empiredir
-
-      CALL GETENV ('EMPIREDIR', empiredir)
       E2p = 0.D0
       E3m = 0.D0
 C-----Avoiding searching of collective levels of the incident particle
@@ -2972,9 +2963,9 @@ C     GOTO 10
 
       WRITE (8,*)'                        ______ ______________________'
       WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |  E M P I R E  -  3 beta 2  |'
+      WRITE (8,*)'                       |  E M P I R E  -  3 beta 3  |'
       WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |    ARCOLE, Dec. 2008       |'
+      WRITE (8,*)'                       |    ARCOLE, Aug. 2009       |'
       WRITE (8,*)'                       |____________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -6234,7 +6225,6 @@ C
       INTEGER ia, iapro, iatar, iflag, ii, iloc, in, iz, izaf(NMASSE),
      &        izpro, iztar, k, nixa, nixz, nnuc
       REAL REAL
-      CHARACTER*64 empiredir
 C
 C
 Ccc
@@ -6257,8 +6247,6 @@ Ccc   * revision:1    by: R.Capote               on:09.2004              *
 Ccc   * RIPL-2 database used                                             *
 Ccc   ********************************************************************
 Ccc
-      CALL GETENV ('EMPIREDIR', empiredir)
-
       OPEN (UNIT = 27,STATUS = 'OLD',
      &      FILE = trim(empiredir)//'/RIPL-2/masses/mass-frdm95.dat'
      &      ,ERR = 300)
@@ -6426,10 +6414,6 @@ C
       DOUBLE PRECISION FSHELL
       INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz
       INTEGER INT
-      CHARACTER*64 empiredir
-
-      CALL GETENV ('EMPIREDIR',empiredir)
-
       pi2 = PI**2
       izamx = 0
       izamn = 200000
@@ -6446,7 +6430,7 @@ C-----Set EGSM normalization factors for each Z
          ENDDO
 c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          OPEN(31, FILE= trim(empiredir)//
-     &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat', 
+     &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat',
      &   STATUS='OLD')
          READ (31,'(///)')
    90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
@@ -7146,29 +7130,29 @@ Ccc
 C
 C COMMON variables
 C
+      CHARACTER*64 empiredir
       INTEGER NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
+      COMMON /GLOBAL_E/ EMPiredir
 C
 C Local variables
 C
       CHARACTER*80 exforec
-      CHARACTER*64 empiredir
       CHARACTER*36 filename, toplast, topname
       CHARACTER*115 indexrec
       INTEGER nnuc
       CHARACTER*5 quantity(5)
       CHARACTER*10 reaction(2)
       CHARACTER*8 subent
+
 C-----constant parameters for EXFOR retrieval
       DATA reaction/'N,F       ', 'N,TOT     '/
       DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
 C-----open local file for storing retrieved EXFOR data
       OPEN (UNIT = 19,FILE = 'EXFOR.dat',STATUS = 'NEW',ERR = 99999)
 C-----open EXFOR index
-      CALL GETENV ('EMPIREDIR', empiredir)
-
       OPEN (UNIT = 20,FILE = trim(empiredir)//'/EXFOR/X4-INDEX.TXT'
      &      ,STATUS = 'OLD')
 C
@@ -7293,7 +7277,6 @@ C
      &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus, ncont
       INTEGER NINT
       CHARACTER*6 reftmp
-      CHARACTER*64 empiredir
 
       ND_nlv = 0
 C-----Target corresponds to nnurec = 0
@@ -7524,8 +7507,6 @@ C       It could be a bad approximation for a quasispherical nucleus
 C
 C-----constructing input and filenames
 C
-      CALL GETENV ('EMPIREDIR',empiredir)
-
       IF (.NOT.FILevel) THEN
          WRITE (ctmp3,'(I3.3)') iz
          finp = 'z'//ctmp3//'.dat'
@@ -8378,6 +8359,7 @@ C
       INTEGER KAA, KEYload, KEY_gdrgfl, KEY_shape, KZZ,
      &        NANa(9000), NANz(9000), NARam(700), NG, NNA(300), NNG(300)
      &        , NNZ(300), NUMram, NZRam(700)
+      CHARACTER*64 EMPiredir
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLOCOM2/ KEYload, KZZ, KAA
@@ -8385,6 +8367,8 @@ C
      &                 NANz, NANa, HALpha2, HBEtagfl, HENergygfl, NZRam,
      &                 NARam, NUMram
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+
+      COMMON /GLOBAL_E/ EMPiredir
 C
 C Dummy arguments
 C
@@ -8399,8 +8383,6 @@ C
      &                 zz
       INTEGER i, ka, kz, n, natmp, nnat(MAXGDR), nngt(MAXGDR),
      &        nntmp, nnzt(MAXGDR)
-      CHARACTER*64 empiredir
-
       DATA pi/3.141592654D0/
       kz = Znucleus + 0.001
       ka = Anucleus + 0.001
@@ -8418,15 +8400,6 @@ C
      &            HE2(i), HCS2(i), HGW2(i)
          ENDDO
    50    CLOSE (81)
-C        OPEN (81,FILE = '../RIPL-2/resonances/resonances0.dat',
-C    &         STATUS = 'old',ERR = 450)
-C        READ (81,'(///)') ! Skipping first 4 title lines
-C        DO i = 1, 270
-C           READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
-C    &            NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
-C    &            HE2(i), HCS2(i), HGW2(i)
-C        ENDDO
-C  50    CLOSE (81)
   100    OPEN (81,FILE = trim(empiredir)//'/RIPL-2/gamma/'
      &      //'gdr-parameters-theor.dat',STATUS = 'old',ERR = 500)
          READ (81,'(///)') ! Skipping first 4 title lines

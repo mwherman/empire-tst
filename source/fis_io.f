@@ -1,6 +1,6 @@
-Ccc   * $Author: mattoon $
-Ccc   * $Date: 2009-06-03 18:17:48 $
-Ccc   * $Id: fis_io.f,v 1.9 2009-06-03 18:17:48 mattoon Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-08-02 23:58:35 $
+Ccc   * $Id: fis_io.f,v 1.10 2009-08-02 23:58:35 Capote Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -63,7 +63,6 @@ C
 C Local variables
 C
       CHARACTER*1 chstar(70)
-      CHARACTER*64 empiredir
       INTEGER i, ib, ibar, ka, kz, m, nr,  nrmod, nrsm
       INTEGER INT,iz,ia,iarr,izrr
       CHARACTER*50 filename
@@ -71,8 +70,6 @@ C
       INTEGER Find_Extrem
       DATA chstar/70*'='/
       REAL*8 centr,  heigth,  width(NFPARAB), ucentr, uheigth, uwidth
-      
-      CALL GETENV ('EMPIREDIR', empiredir)
 
       iz=INT(Z(Nnuc))
       ia=INT(A(Nnuc))
@@ -99,7 +96,7 @@ C-----FISBAR(Nnuc)=3 HFB numeric
 c
 C-----FISBAR(Nnuc)= 0 Empire internal library
       IF (FISbar(Nnuc).EQ.0.) THEN
-         OPEN (81,FILE = trim(empiredir)//'/data/fisbar.dat'
+         OPEN (81,FILE = trim(EMPiredir)//'/data/fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 400)
   350    READ (81,*,END = 400) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
@@ -117,7 +114,7 @@ C-----FISBAR(Nnuc)= 0 Empire internal library
 C-----FISBAR(Nnuc)= 1 RIPL-2 "experimental" values for barrier heights;
 C-----widths from Lynn systematics and wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
-         OPEN (52,FILE = trim(empiredir)//'/RIPL-2/fission'
+         OPEN (52,FILE = trim(EMPiredir)//'/RIPL-2/fission'
      &      //'/fis-barrier-exp.dat',STATUS = 'OLD',ERR = 200)
          READ (52,*,END = 200)
          READ (52,*)
@@ -180,7 +177,7 @@ C-----FISBAR(Nnuc)=2  HFB microscopic parameters for parabolic barriers
 C-----                extracted from HFB l.d.files and stored in
 c-----                data/HFB-fisbar.dat (default)
       IF (FISbar(Nnuc).EQ.2.) THEN
-         OPEN (81,FILE = trim(empiredir)//'/data/HFB-fisbar.dat'
+         OPEN (81,FILE = trim(EMPiredir)//'/data/HFB-fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 401)
   351    READ (81,*,END = 401) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)

@@ -1,3 +1,8 @@
+C
+C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
+C     If global.h is not included, then add the variable definition and the common
+C     line to have access to the system directory, RCN, July 2009
+C
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
      &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),
@@ -26,7 +31,7 @@
      &                 DRTl(ndlw), DV, D_Def(ndcollev,nddefcc),
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,
-     &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc), 
+     &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),
      &                 EFB(nfparab),EFDis(nftrans,nfparab),
      &                 EGDr1, EGDr2, EIN, EINl,
      &                 EJMass(0:ndejc), FISbou(0:ndnuc),
@@ -89,6 +94,7 @@
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc)
       CHARACTER*21 REAction(ndnuc)
+      CHARACTER*64 EMPiredir
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
      &                 ROFis(0:nfisenmax,ndlw,nfhump), ROPaa(ndnuc),
      &                 ROFisp(0:nfisenmax,ndlw,2,nfhump),
@@ -97,7 +103,7 @@
      &                 RVSo(0:ndejc,0:ndnuc),
      &                 RWOm(0:ndejc,0:ndnuc),
      &                 RWOmv(0:ndejc,0:ndnuc),
-     &                 RWSo(0:ndejc,0:ndnuc), 
+     &                 RWSo(0:ndejc,0:ndnuc),
      &                 ROHfbp(ndnuc), ROHfba(ndnuc),
      &                 SANgler(ndangecis),
      &                 SCRt(ndex,ndlw,2,0:ndejc), SCRtem(0:ndejc),
@@ -120,13 +126,13 @@
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED, rFCCRED, rFUSRED, rTUNEfi(0:ndnuc)    
+      DOUBLE PRECISION rTOTRED, rFCCRED, rFUSRED, rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
-c        
+c
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
-     &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp, 
+     &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp,
      &                    HCOnt, ECFis
 
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
@@ -172,6 +178,7 @@ c
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
      &                 CSPfis, RECoil, POPcselv
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
+      COMMON /GLOBAL_E/ EMPiredir
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
      &                  LHMs, NHMs, NEXreq, FISspe, NRSmooth, ISIsom,
      &                  IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX, IX4ret,

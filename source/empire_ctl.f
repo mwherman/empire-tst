@@ -1,16 +1,15 @@
-Ccc   * $Author: mattoon $ 
-Ccc   * $Date: 2009-06-03 18:17:48 $
-Ccc   * $Id: empire_ctl.f,v 1.29 2009-06-03 18:17:48 mattoon Exp $
-                  
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-08-02 23:58:34 $
+Ccc   * $Id: empire_ctl.f,v 1.30 2009-08-02 23:58:34 Capote Exp $
       PROGRAM EMPIRE_CTL
 C
-C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting, 
-C--- (iii) sensitivity matrix. 
+C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
+C--- (iii) sensitivity matrix.
 C---
 C--- The program has been designed to make the fitting routine, LOCALFIT,
-C--- as independent as possible of the rest of the code, so that it may 
+C--- as independent as possible of the rest of the code, so that it may
 C--- be easily exchanged for another routine. It depends on four input
-C--- parameters: 
+C--- parameters:
 C---   pars    - an array of parameters to be varied in fit
 C---   dparmx  - array of max variation allowed in each parameter in vars
 C---   nnft    - number of parameters in vars
@@ -21,9 +20,17 @@ C--- The logical variable autofit is true when fitting, false for a normal run.
 C--- The logical variable sensit is true for sensitivity calc., false for a normal run.
 C
       parameter(mxfit=20)
-
-      logical autofit, sensit 
+      CHARACTER*64 EMPiredir
+      logical autofit, sensit
       dimension pars(mxfit),dparmx(mxfit)
+      COMMON /GLOBAL_E/ EMPiredir
+
+      CALL GETENV ('EMPIREDIR', empiredir)
+C
+C     The follwing line defines the proper default for WINDOWS work
+C     even if EMPIREDIR is not defined
+C
+      if(empiredir(1:1).eq.' ') empiredir(1:3)='../'
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
       IF(autofit .AND. sensit) THEN
@@ -34,7 +41,7 @@ C
 
       IF (autofit) THEN
          CALL LOCALFIT(pars,dparmx,nnft,xitr)
-         CALL CLEANUP(nnft)  
+         CALL CLEANUP(nnft)
          CALL EMPIRE
       ELSEIF(sensit) THEN
          CALL SENSITIVITY
@@ -42,7 +49,7 @@ C
          CALL EMPIRE
       ENDIF
 
-      STOP 
+      STOP
       END
 C
 C-------------------------------------------------------------------
@@ -52,10 +59,10 @@ C
 C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=1) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
 C--- C4 data file is read to prepare experimental data and an appropriate
-C--- input file (FITIN.DAT) is prepared. 
-C--- Scans also INPUT.DAT for the request for sensitivity matrix calculations. 
+C--- input file (FITIN.DAT) is prepared.
+C--- Scans also INPUT.DAT for the request for sensitivity matrix calculations.
 C--- If none of the requests is found, control is returned to EMPIRE, which then
-C--- runs normally. 
+C--- runs normally.
 C--- Values returned by scan4fit:
 C---   autofit - logical variable, true for fit, false for normal run
 C---   sensit - logical variable, true for sensitivity calculations, false for normal run
@@ -66,7 +73,7 @@ C
       parameter(mxfit=20,mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
-      logical autofit, sensit 
+      logical autofit, sensit
       logical fexist
       logical LINUX
       character cmnd*35,cmndp*35,cmndt*35
@@ -104,29 +111,29 @@ C
       open(UNIT=18,file='FITIN.DAT',status='UNKNOWN')
       open(UNIT=72,file='INPUT1.DAT',status='UNKNOWN')
 
-C--- The energy on the first line of input is taken to be the minimum 
-C--- incident energy of data included in the fit.  
+C--- The energy on the first line of input is taken to be the minimum
+C--- incident energy of data included in the fit.
       read(5,'(a35)') cmnd
       read(cmnd,*) emin
       write(72,'(a35)') cmnd
 
-C--- The projectile and target mass and charges are needed to obtain the 
+C--- The projectile and target mass and charges are needed to obtain the
 C--- neutron s-wave scattering length, in the case of a neutron projectile,
 C--- and to estimate the minium incident energy, in the case of a proton
 C--- projectile.
       read(5,'(a35)') cmndt
       read(cmndt,*) aat,zzt
       write(72,'(a35)') cmndt
-  
+
       read(5,'(a35)') cmndp
       read(cmndp,*) aap,zzp
-      write(72,'(a35)') cmndp  
+      write(72,'(a35)') cmndp
 
 C--- With Zp, Zt and At, the Coulomb barrier and the lowest energy used in
 C--- the fit energy mesh can be estimated. For protons, the lowest energy is
 C--- taken to about 0.6 to 0.8 of the Coulomb barrier, for neutrons 1 keV.
       culbar=1.44*zzp*zzt/(3.75+1.25*aat**(1./3.))
-      eclmn= max(culbar-0.75-0.5*(2*zzp-aap)-0.01*zzt,0.6*culbar)    
+      eclmn= max(culbar-0.75-0.5*(2*zzp-aap)-0.01*zzt,0.6*culbar)
       eclmn=int(disc*eclmn+0.5)/disc
       emin=max(int(disc*emin+0.5),1)/disc
       egrid(1)=min(emin,max(0.001,eclmn))
@@ -137,11 +144,11 @@ C--- taken to about 0.6 to 0.8 of the Coulomb barrier, for neutrons 1 keV.
 
       do i=1,4
         read(5,'(a35)') cmnd
-        write(72,'(a35)') cmnd   
+        write(72,'(a35)') cmnd
        end do
 
 C--- Prepare (or not) for search for neutron s-wave scattering length
-C--- as well as prepare neutron or proton fit input or jump out. 
+C--- as well as prepare neutron or proton fit input or jump out.
       if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.0) then
         write(18,'(i3)') 1
         write(18,'(i3)') 0
@@ -183,7 +190,7 @@ C--- Check whether sensitivity matrix calculations are requested
        endif
 
 C--- The fundamental fit command - automatic fitting will be attempted
-C--- if its value is 2 or larger. 
+C--- if its value is 2 or larger.
       if (cmnd(1:6).eq.'FITOMP') then
         read(cmnd,'(6x,g10.5,4i5)') val
         if (val.gt.0.) then
@@ -196,7 +203,7 @@ C--- if its value is 2 or larger.
 
 C--- Generic command for varying parameters. Parameters must
 C--- be specifies by i1 - RIPL potential number (1-6), i2 - potential
-C--- parameter number (r=1,d=2,v=3), and i3 - postion in RIPL file (1-13 for 
+C--- parameter number (r=1,d=2,v=3), and i3 - postion in RIPL file (1-13 for
 C--- r and d, 1-24 for v) or by i1=7 (deformation) and i2 - multipolarity.
       if(cmnd(1:6).eq.'FITPAR') then
         nfit=min(nfit+1,mxfit-1)
@@ -207,7 +214,7 @@ C--- r and d, 1-24 for v) or by i1=7 (deformation) and i2 - multipolarity.
        endif
 
 C--- Keyword for varying deformations. At the moment l=2 and 4 are allowed
-C--- for rotational excitations, l=2 and 3 for vibrational ones. 
+C--- for rotational excitations, l=2 and 3 for vibrational ones.
       if(cmnd(1:6).eq.'FITDEF') then
         nfit=min(nfit+1,mxfit-1)
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i1
@@ -225,7 +232,7 @@ C--- idw(2,.) are specified by the corresponding MF and MT numbers.
         go to 10
        endif
 
-C--- Command for varying the weight of natural element data contained in 
+C--- Command for varying the weight of natural element data contained in
 C--- the C4 file.
       if(cmnd(1:6).eq.'FITWT0') then
         nwt=nwt+1
@@ -246,7 +253,7 @@ C--- Xitr consists of mxitr+itmax/100
        endif
 
 C--- Command for varying the maximum incident energy of experimental data
-C--- used in the fit. The default value is 30 MeV. 
+C--- used in the fit. The default value is 30 MeV.
       if(cmnd(1:6).eq.'FITEMX') then
         nwt=nwt+1
         read(cmnd,'(6x,g10.5,4i5)') emax
@@ -256,7 +263,7 @@ C--- used in the fit. The default value is 30 MeV.
 
 C--- Command for specifying mesh of incident energies at which EMPIRE
 C--- will calculate cross sections for subsequent interpolation of
-C--- integrated cross sections in CHISQRD. If specified, the intervals between 
+C--- integrated cross sections in CHISQRD. If specified, the intervals between
 C--- energies, from emin, are egrid(2), egrid(2)+0.001*i1,egrid(2)+0.002*i1,...
 C--- If not specified, the energies afte the GO line are used.
       if(cmnd(1:6).eq.'FITGRD') then
@@ -271,20 +278,20 @@ C--- If not specified, the energies afte the GO line are used.
         go to 10
        endif
 
-C--- Last look for FIT keywords -- the code can't look for more after this 
+C--- Last look for FIT keywords -- the code can't look for more after this
 C--- Looks for the various potential parameter options, FITRVR, FITRVD, etc.
-C--- The parameter i3 corresponds to the RIPL position of the parameter 
+C--- The parameter i3 corresponds to the RIPL position of the parameter
 C--- (1-13 for r and d, 1-24 for v).
       if(cmnd(1:3).eq.'FIT') then
         do i1=1,6
           if(cmnd(4:5).eq.pot1(i1)) go to 20
          end do
-        write(18,'(a35)') cmnd 
+        write(18,'(a35)') cmnd
         go to 10
  20     do i2=1,3
           if(cmnd(6:6).eq.pot2(i2)) go to 30
          end do
-        write(18,'(a35)') cmnd 
+        write(18,'(a35)') cmnd
         go to 10
  30     nfit=min(nfit+1,mxfit-1)
         read(cmnd,'(6x,g10.5,4i5)') valx(nfit),imx,i3
@@ -293,12 +300,12 @@ C--- (1-13 for r and d, 1-24 for v).
         go to 10
        endif
 
-C--- When GO is found, the program either exits or goes on to prepare 
+C--- When GO is found, the program either exits or goes on to prepare
 C--- parameters and data for the fit.
       if(cmnd(1:6).eq.'GO    ') then
         if (autofit) then
-          write(18,'(a35)') cmnd 
-          write(72,'(a35)') cmnd 
+          write(18,'(a35)') cmnd
+          write(72,'(a35)') cmnd
           do i=1,1000
             read(5,'(a35)',end=40) cmnd
             write(72,'(a35)') cmnd
@@ -322,13 +329,13 @@ C--- by FITGRD.
          endif
        endif
 
-C--- Write whatever falls through to FITIN.DAT (18) and INPUT1.DAT (72) 
+C--- Write whatever falls through to FITIN.DAT (18) and INPUT1.DAT (72)
 C--- (before GO is found).
       write(18,'(a35)') cmnd
-      write(72,'(a35)') cmnd 
+      write(72,'(a35)') cmnd
       go to 10
 
-C--- Open the principal file for printing of fit output 
+C--- Open the principal file for printing of fit output
  50   OPEN( UNIT=2, FILE='FIT.OUT',status='UNKNOWN')
 
       CALL THORA(2)
@@ -340,7 +347,7 @@ C--- Open the principal file for printing of fit output
 C-- Test for the existence of the C4 data file
       INQUIRE (FILE = ('C4.dat'),EXIST = fexist)
       if (.not.fexist) then
-        write(2,*) ' A C4 data file, *.c4, is necessary for fitting.', 
+        write(2,*) ' A C4 data file, *.c4, is necessary for fitting.',
      &           ' STOP.'
         stop 'A C4 data file is necessary for fitting'
        endif
@@ -366,12 +373,12 @@ C--- check of the parameters to be varied
              end do
            end if
          end do
-        close(70) 
+        close(70)
        endif
 
-C--- Tests for the existence of the collective level file and 
+C--- Tests for the existence of the collective level file and
 C--- determines whether the nucleus is teated as deformed or not
-C--- for posterior consistency of parameters to be varied  
+C--- for posterior consistency of parameters to be varied
       INQUIRE (FILE = ('TARGET_COLL.DAT'),EXIST = fexist)
       if (.not.fexist) then
         write(2,*) ' A collective level file, *-lev.col, is ',
@@ -403,11 +410,11 @@ C--- The strength function weight (MF=3, MT=0) is stored in wt(15,2)
             if(idw(2,n).eq.1) wt(1,1)=wtx(n)
             if(idw(2,n).eq.2) wt(3,1)=wtx(n)
             if(idw(2,n).eq.3) wt(2,1)=wtx(n)
-            if(idw(2,n).gt.50 .and. idw(2,n).lt.60) 
+            if(idw(2,n).gt.50 .and. idw(2,n).lt.60)
      &                          wt(idw(2,n)-47,1)=wtx(n)
            else if(idw(1,n).eq.4) then
             if(idw(2,n).eq.2) wt(1,2)=wtx(n)
-            if(idw(2,n).gt.50 .and. idw(2,n).lt.60) 
+            if(idw(2,n).gt.50 .and. idw(2,n).lt.60)
      &                         wt(idw(2,n)-49,2)=wtx(n)
            endif
          end do
@@ -415,13 +422,13 @@ C--- The strength function weight (MF=3, MT=0) is stored in wt(15,2)
 
       if(nfit.gt.mxfit-1) then
         write(2,'('' A maximum of'',i3,'' parameters may be fit '',
-     1   ''at once.'')') mxfit-1 
+     1   ''at once.'')') mxfit-1
         write(2,*) ' Please adjust your input accordingly. STOP.'
         stop
        endif
 
 C--- The parameters to be fit are first ordered according to the
-C--- parameter type, stored in axx. 
+C--- parameter type, stored in axx.
       if (nfit.gt.1) then
         call bubble(nfit,axx,ipt)
        else
@@ -444,7 +451,7 @@ C--- axx(n) determining the data type is stored as three integers in idv(.,n)
           axt=axt-1000*idv(1,n)
           idv(2,n)=axt/100.+0.1
           idv(3,n)=axt-100.*idv(2,n)+0.1
-          if(idv(1,n).lt.0 .or. idv(1,n).gt.7 .or. idv(2,n).lt.1 
+          if(idv(1,n).lt.0 .or. idv(1,n).gt.7 .or. idv(2,n).lt.1
      &                    .or.(idv(2,n).gt.3 .and. idv(1,n).lt.7)) then
             write(2,*) 'The set of parameters ',(idv(j,n),j=1,3),
      &             ' , used with FITPAR, is invalid. STOP.'
@@ -608,7 +615,7 @@ C
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
 
       data pot1/'Real volume  ','Imag volume  ','Real surface ',
-     &          'Imag surface ','Real spn-orb ','Imag spn-orb '/ 
+     &          'Imag surface ','Real spn-orb ','Imag spn-orb '/
       data pot2/'radius   ','diffuse  ','strength '/
 
 C--- First the optical potential parameters and their fit limits
@@ -632,13 +639,13 @@ C-------------------------------------------------------------------
 C
       subroutine readc4(emin,emax,izz,iaa)
 C
-C--- READC4 prepares the experimental data, obtained from the 
-C--- appropriate C4 file, for fitting. The s-wave neutron strength 
+C--- READC4 prepares the experimental data, obtained from the
+C--- appropriate C4 file, for fitting. The s-wave neutron strength
 C    function is also used, when it exists and is relevant.
 C--- The input parameters are
 C---      emin - minimum incident energy of data to be considered
 C---      emax - maximum incident energy of data to be considered
-C---      izz  - charge of the target 
+C---      izz  - charge of the target
 C---      iaa  - mass number of the target (for neutron projectile)
 C--- iaa is set to zero when the projectile is not a neutron.
 C--- izz and iaa are used to obtain the s-wave neutron scattering length.
@@ -647,8 +654,8 @@ C--- The routine also accumulates and prints statistics on the number and
 C--- type of data and calls the routine WRITENP which determines and writes
 C--- the energy grid for EMPIRE calculations used in CHISQRD.
 C---
-C--- To facilitate comparison, in particular, to be able to determine 
-C--- equality of incident energies, these are discretized on a scale of 
+C--- To facilitate comparison, in particular, to be able to determine
+C--- equality of incident energies, these are discretized on a scale of
 C--- 1/disc (MeV), where disc is a compilation parameter.
 C
       parameter(mxind=5000,mxinda=5000,mxelvls=9,nexlvl=2)
@@ -664,14 +671,14 @@ C
       dimension ipe(mxind),ipt(mxinda),istat(15,3)
       dimension angtmp(mxind),idtmp(mxind),loca(mxind)
 
+      COMMON /GLOBAL_E/ EMPiredir
+
       common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
      &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idint(mxind),idang(mxind),nnde
 
       data elequiv/1.5e3/,aequiv/1.0e0/
-
-      CALL GETENV ('EMPIREDIR', empiredir)
 
 C--- The C4 file expresses energies in eV, so the min and max energy must
 C--- be converted accordingly.
@@ -691,7 +698,7 @@ C--- Istat will be used later to accumulate statistics of data types.
       write(2,*)
 
 C--- The first datum included is the strength function, assumed to be that
-C--- at 1 keV. MF=3, MT=0 is used internally to specify it. 
+C--- at 1 keV. MF=3, MT=0 is used internally to specify it.
       ex(1)=egrid(1)
       mf(1)=3
       mt(1)=0
@@ -706,7 +713,7 @@ C--- It is obtained from the following file.
      &      //'/resonances0.dat',STATUS = 'old')
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
-          READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60) 
+          READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60)
      &                           nztmp, natmp, ss0tmp, ss0_unc
           IF (nztmp.NE.izz .OR. natmp.NE.iaa) CYCLE
           six(1) = ss0tmp
@@ -715,8 +722,8 @@ C--- It is obtained from the following file.
  60     CLOSE (47)
        endif
 
-C--- The C4 data file is used to obtain the rest of the experimental data. 
-C--- Z and A are not checked so that natural data can be included with the 
+C--- The C4 data file is used to obtain the rest of the experimental data.
+C--- Z and A are not checked so that natural data can be included with the
 C--- isotopic data.
       open(unit=26,file='C4.dat',status='old')
 
@@ -735,13 +742,13 @@ C--- The incident energy is discretized and converted to MeV.
       ex(ind)=int(1.0e-6*disc*ex(ind)+0.5)/disc
 C--- An experimental uncertainty of 10% is assumed when none is found.
       if(dsix(ind).lt.1.0e-6) dsix(ind)=0.1*six(ind)
-C--- Natural data may be weighted differently by modifiying their 
+C--- Natural data may be weighted differently by modifiying their
 C--- uncertainties.
       if(mod(izat,1000).eq.0) dsix(ind)=wt0*dsix(ind)
 C--- Sorting out the data to excited levels. Although data for up to
-C--- 9 (mxelvls) excited levels can be stored, only 2 (nexlvl) are 
+C--- 9 (mxelvls) excited levels can be stored, only 2 (nexlvl) are
 C--- actually used at the moment.
-      if( (mt(ind).gt.0 .and. mt(ind).lt.4) .or. 
+      if( (mt(ind).gt.0 .and. mt(ind).lt.4) .or.
      1    (mt(ind).eq.51 .and. lvl.eq.'LVL') ) then
         if(elvl.ne.0.0) then
           mlvl=0
@@ -788,10 +795,10 @@ C--- indmx is the total number of data points.
       if(mf(indmx).eq.4) dsix(indmx)=inda-0.9
 
 C--- The experimental data are ordered in incident energy. The ordering is
-C--- contained in the array ipe. 
+C--- contained in the array ipe.
       call bubble(indmx,ex,ipe)
 
-C--- The data are now explixcitly ordered in incident energy, as they will be 
+C--- The data are now explixcitly ordered in incident energy, as they will be
 C---  calculated in EMPIRE and used in CHISQRD.
 C---  The first point is the strength function.
       en(1)=ex(1)
@@ -805,8 +812,8 @@ C---  The first point is the strength function.
 C--- Several counters important for storage are initialized.
 C---   inde - number of distinct incident energies
 C---   nintot - number of integrated cross sections
-C---   nanxtot - number of angular data (angles times ang. dists.) 
-C---   nangtot - number of angles 
+C---   nanxtot - number of angular data (angles times ang. dists.)
+C---   nangtot - number of angles
 C---   nangdtot - number of angular distributions
       inde=1
       nintot=1
@@ -814,16 +821,16 @@ C---   nangdtot - number of angular distributions
       nangtot=0
       nangdtot=0
 
-C--- a fake point above the real data is added 
-C--- This fake point defines the energy limit above which the program 
-C--- will not function as written due to integer*4 overflow in the 
+C--- a fake point above the real data is added
+C--- This fake point defines the energy limit above which the program
+C--- will not function as written due to integer*4 overflow in the
 C--- discretization.
       ipe(indmx+1)=indmx+1
       ex(indmx+1)=(2**30-1)/disc
       mf(indmx+1)=3
       mt(indmx+1)=1
 
-C--- The data are scanned and combined according to the discretized 
+C--- The data are scanned and combined according to the discretized
 C--- incident energy.
       do i=2,indmx+1
         if(int(disc*ex(ipe(i))+0.5)-int(disc*en(inde)+0.5).GT.0) then
@@ -854,7 +861,7 @@ C--- no data for that angular distribution at the given angle.
               siga(nuind)=1.0e3*sixa(loca(ipt(1)))
               dsiga(nuind)=1.0e3*dsixa(loca(ipt(1)))
               do j=2,nangtmp
-                if(abs(angtmp(ipt(j))-angs(inda)).gt.aequiv) 
+                if(abs(angtmp(ipt(j))-angs(inda)).gt.aequiv)
      &                                                    inda=inda+1
                 nuind=nanxtot+nangs(inde)*idtmp(ipt(j))+inda-nangtot
 C--- Data are converted to millibarns.
@@ -872,7 +879,7 @@ C--- at a given incident energy is determined.
              endif
            endif
 C--- Once the angular data of the preceding energy has been treated,
-C--- relevant indices for the new enegry are initialized and the enrgy is 
+C--- relevant indices for the new enegry are initialized and the enrgy is
 C--- stored.
           inde=inde+1
           en(inde)=ex(ipe(i))
@@ -881,7 +888,7 @@ C--- stored.
           nangs(inde)=0
           nangtmp=0
          endif
-C--- Integrated data are stored. Data are converted to millibarns. 
+C--- Integrated data are stored. Data are converted to millibarns.
 C--- Statistics on data type are accumulated.
         if(mf(ipe(i)).eq.3) then
           nint(inde)=nint(inde)+1
@@ -932,26 +939,26 @@ C--- Nnde is the total number of incident energies at which data exist.
 
 C--- Statistics on experimental data are printed.
       write(2,'('' The experimental data set in the energy range from'',
-     &   f6.3,'' MeV to '', f6.2,'' MeV'',/,''  contains values at'',i5, 
+     &   f6.3,'' MeV to '', f6.2,'' MeV'',/,''  contains values at'',i5,
      &   '' energies:'')') emin,emax,nnde
       if(sig(1).gt.0.) write(2,'(7x,''1 s-wave strength function'')')
-      if(istat(1,1).gt.0) write(2,'(i8,'' total cross sections'')') 
-     &                                                    istat(1,1) 
+      if(istat(1,1).gt.0) write(2,'(i8,'' total cross sections'')')
+     &                                                    istat(1,1)
       if(istat(2,1).gt.0) write(2,'(i8,'' absorption cross sections'')')
      &                                                    istat(2,1)
-      if(istat(3,1).gt.0) write(2,'(i8,'' elastic cross sections'')') 
+      if(istat(3,1).gt.0) write(2,'(i8,'' elastic cross sections'')')
      &                                                    istat(3,1)
       if(istat(4,1).gt.0) write(2,'(i8,'' inelastic cross sections to'',
-     &   '' the 1st excited state'')') istat(4,1) 
+     &   '' the 1st excited state'')') istat(4,1)
       if(istat(5,1).gt.0) write(2,'(i8,'' inelastic cross sections to'',
-     &   '' the 2nd excited state'')') istat(5,1) 
+     &   '' the 2nd excited state'')') istat(5,1)
       if(istat(1,2).gt.0) write(2,'(i8, '' elastic angular distributi'',
      & ''ons with a total of '',i3,'' points'')') istat(1,2),istat(1,3)
       if(istat(2,2).gt.0) write(2,'(i8, '' inelastic angular distribu'',
-     & ''tions (1st state) with a total of '',i3,'' points'')') 
+     & ''tions (1st state) with a total of '',i3,'' points'')')
      &                                            istat(2,2),istat(2,3)
       if(istat(3,2).gt.0) write(2,'(i8, '' inelastic angular distribu'',
-     & ''tions (2nd state) with a total of '',i3,'' points'')') 
+     & ''tions (2nd state) with a total of '',i3,'' points'')')
      &                                            istat(3,2),istat(3,3)
 
 C--- Based on the existent experimental data, the energy mesh for fitting
@@ -998,7 +1005,7 @@ C--- keyword.
            endif
          end do
  10     ngr=min(igr,mxind)
-C--- Treats the case in which the energy mesh is defined by the energies 
+C--- Treats the case in which the energy mesh is defined by the energies
 C--- given after the GO keyword in the original input file.
        else
         ngr=egrid(0)
@@ -1012,10 +1019,10 @@ C--- given after the GO keyword in the original input file.
            endif
          end do
         write(2,*) ' Data points exist above the maximum energy, ',
-     &       egrid(ngr),' MeV, of the energy grid used in fitting.' 
+     &       egrid(ngr),' MeV, of the energy grid used in fitting.'
         write(2,*) ' They will be disregarded in the fit.'
  20     ngr=igr
-       endif  
+       endif
 
 C--- Initialize parameters used in writing the energy grid.
       ntangs=0
@@ -1023,7 +1030,7 @@ C--- Initialize parameters used in writing the energy grid.
       igr=2
       nodata=0
 
-C--- The mesh of energies is now written to the FITIN.DAT file. 
+C--- The mesh of energies is now written to the FITIN.DAT file.
 C--- Energies for which angular data exist are added to the mesh. Each
 C--- energy is written with the number of angles and of elastic/inelastic
 C--- distributions to be calculated. When the number of angles is greater
@@ -1034,7 +1041,7 @@ C--- be needed later for interpolation of integrated cross sections nor
 C--- for angular distributions.
  30   if(int(disc*en(ie)+0.5).lt.int(disc*egrid(igr)+0.5)) then
         if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
-        if(nangs(ie).gt.0) then        
+        if(nangs(ie).gt.0) then
           write(18,'(f8.4,3i8)') en(ie),nangs(ie),icala(ie)
           write(18,'(10f8.2)') (angs(j),j=ntangs+1,ntangs+nangs(ie))
           ntangs=ntangs+nangs(ie)
@@ -1069,7 +1076,7 @@ C--- Finalizes the energy grid, as required by EMPIRE
 
 C--- The file FITIN.DAT is now moved to INPUT.DAT to perform the
 C--- the EMPIRE calculations used in CHISQRD. The original input file
-C--- is first moved to INPUT0.DAT 
+C--- is first moved to INPUT0.DAT
       if(LINUX) then
         ctmp='mv INPUT.DAT INPUT0.DAT'
         itmp=PIPE(ctmp)
@@ -1098,7 +1105,7 @@ C--- Initialize the pointer array
         ipt(i)=i
        end do
 
-C-- First go up the array 
+C-- First go up the array
  10   imdone=1
       do i=1,ind-1
         if(a(ipt(i)).gt.a(ipt(i+1))) then
@@ -1128,7 +1135,7 @@ C
       subroutine localfit(p0,dpmx,nfit,xitr)
 C
 C--- This routine attempts to minimize a function CHISQRD. It performs a
-C--- simple gradient search using numerical derivatives. 
+C--- simple gradient search using numerical derivatives.
 C--- Its input is given by
 C---    p0 - the array of parameters to be varied.
 C---    dpmx - an array of which 0.01*dpmx(.) is used to calculate derivatives
@@ -1176,7 +1183,7 @@ c----------------------------------------------------------------------
       dchi2=0.0d0
 
       do n=1,nfit
-        
+
         if(dpmx(n).gt.1.0d-6) then
           dpn=0.01*dpmx(n)
           pp(n)=p0(n)+dpn
@@ -1193,7 +1200,7 @@ c----------------------------------------------------------------------
         write(2,*)
         write(2,*) ' Chi2 from change in ',n,'=   ', chix
         write(2,*) ' Derivative(',n,') of chi2= ', dchi(n)
-        write(2,*) 
+        write(2,*)
 
       end do
       write(2,*)
@@ -1203,7 +1210,7 @@ c----------------------------------------------------------------------
         return
        endif
 
-      dchi2=sqrt(dchi2)        
+      dchi2=sqrt(dchi2)
       do n=1,nfit
         dp(n)=-dchi(n)/dchi2
         if(abs(dp(n)).lt.1.0d-10) dp(n)=0.0d0
@@ -1308,7 +1315,7 @@ c----------------------------------------------------------------------
                endif
               chi1=chix-chi0
               dp1=dpx
-             endif 
+             endif
            endif
 
           if(chi1.gt.0.0d0) then
@@ -1354,7 +1361,7 @@ c----------------------------------------------------------------------
 
           write(2,*) dpx,dp1,chi1,dp2,chi2
 
-         endif  
+         endif
 
         if(dpx.lt.1.0d-6) go to 50
 
@@ -1362,7 +1369,7 @@ c----------------------------------------------------------------------
 
        end do
 
- 50    if((dpx.lt.1.0d-6 .and. ichng0.eq.0) .or. 
+ 50    if((dpx.lt.1.0d-6 .and. ichng0.eq.0) .or.
      &          (idsum+itmax.eq.0 .and. chi1.gt.0.0d0)) then
         write(2,*)
         write(2,*) ' Search suspended -- no min in last iteration'
@@ -1458,7 +1465,7 @@ C--- Data at the first energy are read from the file.
 
 C--- The loop runs over the experimental values of the incident energy.
 C--- Calculations are read from OPTFIT.CAL according to need for them.
-C--- Calculated integrated cross sections are interpolated. Angular 
+C--- Calculated integrated cross sections are interpolated. Angular
 C--- ditributions have been calculated at the experimental energy.
       nh=1
       nl=2
@@ -1524,7 +1531,7 @@ C--- limited by the values given in xvals.
 C--- If no parameters are to be changed, there is nothing to do.
       if (nfit.le.0) return
 
-C--- Compares parameter values to limits and changes them if necessary 
+C--- Compares parameter values to limits and changes them if necessary
       do n=1,nfit
         if(vals(n).gt.xvals(n)) vals(n)=xvals(n)
         if(vals(n).lt.-xvals(n)) vals(n)=-xvals(n)
@@ -1664,7 +1671,7 @@ C--- Read, modify and write vibrational level file
           do n=1,nlvl-1
             read(70,'(a29,e11.3)') line(1:29),betax
             read(line,'(12x,i2,3x,i2)') js,jp
-            if( nb2.eq.1 .and. idv(2,nxtpar).eq.2 
+            if( nb2.eq.1 .and. idv(2,nxtpar).eq.2
      &                                .and. js.eq.2 .and. jp.eq.1) then
               betax2=betax
               beta2=betax+vals(nxtpar)
@@ -1674,11 +1681,11 @@ C--- Read, modify and write vibrational level file
 C--- The deformation parameter of all states of a 2+ vibrational band are
 C--- modified.
             if(nb2.eq.0 .and. mod(js,2).eq.0 .and. jp.eq.1 .and.
-     &                                            betax.eq.betax2) then 
+     &                                            betax.eq.betax2) then
               write(71,'(a29,e11.3)') line(1:29),beta2
-             else if(nb3.eq.1 .and. idv(1,nxtpar).eq.7 .and. 
+             else if(nb3.eq.1 .and. idv(1,nxtpar).eq.7 .and.
      &            idv(2,nxtpar).eq.3 .and. js.eq.3 .and. jp.eq.-1) then
-               beta3=betax+vals(nxtpar) 
+               beta3=betax+vals(nxtpar)
                write(71,'(a29,e11.3)') line(1:29),beta3
                nxtpar=nxtpar+1
                nb3=0
@@ -1719,7 +1726,7 @@ C
       if(sig(1).gt.1.0e-3) then
         write(2,*)
         write(2,*) ' Neutron s-wave strength function:'
-        write(2,'(5x,''Expt value = '',f8.3,'' +/- '',f8.3)') 
+        write(2,'(5x,''Expt value = '',f8.3,'' +/- '',f8.3)')
      &                                            sig(1),dsig(1)
         write(2,'(5x,''Theo value = '',f8.3)') ths0
         write(2,*)
@@ -1768,19 +1775,19 @@ Ccc
       logical fexist
       logical LINUX
       CHARACTER*6 name, namee, namelst
-      CHARACTER*80 inprecord 
-      CHARACTER*238 outrecord 
+      CHARACTER*80 inprecord
+      CHARACTER*238 outrecord
       CHARACTER*1080 title
       character*132 ctmp
       character*1 namecat, category, dum
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, ndkeys
 
-C     integer nreac  
-      parameter (ndreac=90, ndkeys=129) 
+C     integer nreac
+      parameter (ndreac=90, ndkeys=129)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
-      dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac), 
+      dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
      &          sensmat(ndreac)
       integer*4 itmp
       INTEGER*4 PIPE
@@ -1790,54 +1797,54 @@ C
 C
       dimension namelst(ndkeys), namecat(ndkeys)
       data namelst /
-     &  'ATILNO', 'CHMS  ', 'DEFPAR', 'FUSRED', 'GDIVP ', 'GDRST1', 
-     &  'GDRST2', 'GDRWEI', 'GDRWP ', 'GTILNO', 'PCROSS', 'QFIS  ', 
-     &  'RESNOR', 'TOTRED', 'TUNEFI', 'TUNEPE', 'TUNE  ', 'UOMPAS', 
-     &  'UOMPAV', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'ALS   ', 'BETAV ', 
-     &  'BETCC ', 'BFUS  ', 'BNDG  ', 'CRL   ', 'CSGDR1', 'CSGDR2', 
-     &  'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ', 
-     &  'DV    ', 'EFIT  ', 'EGDR1 ', 'EGDR2 ', 'EX1   ', 'EX2   ', 
-     &  'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 
-     &  'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 
-     &  'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA', 
-     &  'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 
-     &  'TRUNC ', 'WIDEX ', 'COMPFF', 'DEGAS ', 'DIRECT', 'DIRPOT', 
-     &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN', 
-     &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP', 
-     &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT', 
-     &  'GSTRFN', 'GST   ', 'HMS   ', 'HRTW  ', 'IOUT  ', 'JSTAB ', 
-     &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ', 
-     &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ', 
-     &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF', 
+     &  'ATILNO', 'CHMS  ', 'DEFPAR', 'FUSRED', 'GDIVP ', 'GDRST1',
+     &  'GDRST2', 'GDRWEI', 'GDRWP ', 'GTILNO', 'PCROSS', 'QFIS  ',
+     &  'RESNOR', 'TOTRED', 'TUNEFI', 'TUNEPE', 'TUNE  ', 'UOMPAS',
+     &  'UOMPAV', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'ALS   ', 'BETAV ',
+     &  'BETCC ', 'BFUS  ', 'BNDG  ', 'CRL   ', 'CSGDR1', 'CSGDR2',
+     &  'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ',
+     &  'DV    ', 'EFIT  ', 'EGDR1 ', 'EGDR2 ', 'EX1   ', 'EX2   ',
+     &  'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ',
+     &  'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH',
+     &  'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA',
+     &  'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ',
+     &  'TRUNC ', 'WIDEX ', 'COMPFF', 'DEGAS ', 'DIRECT', 'DIRPOT',
+     &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN',
+     &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP',
+     &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT',
+     &  'GSTRFN', 'GST   ', 'HMS   ', 'HRTW  ', 'IOUT  ', 'JSTAB ',
+     &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ',
+     &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
+     &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
      &  'FISBOU', 'ATILFI', 'DEFNOR'/
       data namecat /
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
-     &  'A'     , 'F'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'F'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
-C-----R - variation of the parameter allowed with Restriction   
+C-----R - variation of the parameter allowed with Restriction
 C-----    (parameter must be explicitly specified in the optional part
 C-----    of the standard input)
 C-----F - variation of the parameter not allowed (discrete value keyword)
@@ -1845,7 +1852,7 @@ C-----F - variation of the parameter not allowed (discrete value keyword)
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
-     &E INSTRUCTING WHICH PARAMETERS TO VARY HAS BEEN FOUND ' 
+     &E INSTRUCTING WHICH PARAMETERS TO VARY HAS BEEN FOUND '
          STOP 'SENSITIVITY INPUT MISSING'
       ENDIF
 C-----Move original (reference) input out of the way
@@ -1862,8 +1869,8 @@ C-----
 C
 C-----Read target and projectile from the input file
 c     OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD')
-c     READ(44,'(A80)') inprecord 
-c     read(44,*) atarget,ztarget 
+c     READ(44,'(A80)') inprecord
+c     read(44,*) atarget,ztarget
 c     read(44,*) aprojec,Zprojec
 c     close(44)
 
@@ -1871,14 +1878,14 @@ c     close(44)
       OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
 C-----
-C-----Read and copy mandatory part of the standard input     
+C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,7
-         READ(44,'(A80)') inprecord 
+         READ(44,'(A80)') inprecord
 C--------Read target and projectile from the input file
-         IF(i.EQ.2) read(inprecord,*) atarget,ztarget  
+         IF(i.EQ.2) read(inprecord,*) atarget,ztarget
          IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
-         WRITE(7,'(A80)') inprecord 
+         WRITE(7,'(A80)') inprecord
       ENDDO
       WRITE(8,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
      &            aprojec,Zprojec
@@ -1889,14 +1896,14 @@ C-----Read line of optional input
          GOTO 70 !Jump to $ format for parameters that happens after GO
       ENDIF
 C-----Copy input but skip KALMAN
-      IF(namee.NE.'KALMAN') 
-     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
+      IF(namee.NE.'KALMAN')
+     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
       GOTO 50
 C-----
-C-----Read and copy optional part of the standard input     
+C-----Read and copy optional part of the standard input
 C-----
-   70 READ(44,'(A80)',END = 30) inprecord 
-      WRITE(7,'(A80)') inprecord 
+   70 READ(44,'(A80)',END = 30) inprecord
+      WRITE(7,'(A80)') inprecord
       GOTO 70
 
    30 CLOSE(7)
@@ -1922,14 +1929,14 @@ C-----
 C-----Run sensitivity calculations
 C-----
       OPEN (UNIT = 92,FILE='SENSITIVITY.MATRIX', STATUS='UNKNOWN') ! sensitivity matrix
-C-----Go to the end of the SENSITIVITY.MATRIX file      
+C-----Go to the end of the SENSITIVITY.MATRIX file
   111 READ(92,*,END=112) dum
       GOTO 111
   112 CONTINUE
       OPEN(UNIT = 17, FILE='SENSITIVITY.INP', STATUS='old') !list of parameters to vary
 C-----Read one line of the sensitivity input
   100 READ (17,'(A80)',END = 350) inprecord
-      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR. 
+      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 100
 C      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200) name,val,i1,i2, i3, i4
       READ (inprecord,'(A6,G10.5,4I5)',ERR = 200)name,val,i1p,i2p,i3, i4
@@ -1943,16 +1950,16 @@ C-----Check category of the parameter to be varied
             category = namecat(i)
             cycle
          ENDIF
-      ENDDO 
-      IF(category.EQ.'F') GOTO 100 
+      ENDDO
+      IF(category.EQ.'F') GOTO 100
       valmem = val
       IF(val.GE.1) THEN
 c       WRITE(8,*) 'PARAMETER ',name,' VARIATION ',val,
-c    &             ' IS BIGGER THAN 1' 
+c    &             ' IS BIGGER THAN 1'
       STOP 'PARAMETER VARIATION LARGER THAN 100%'
       ENDIF
 C-----Check whether omp is being varied - if so then move Tl directory out of the way
-      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN' 
+      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
          IF(LINUX) THEN
             ctmp='mv TL TLREF'
@@ -1970,8 +1977,8 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
       DO k = 1, 2 ! 1 for parameter+val, 2 for parameter-val
          OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
          IF(k.EQ.2) val = -val !normally we only invert the sign
-         IF(name(1:4).EQ.'UOMP'  .OR. name.EQ.'DEFDYN' 
-     &   .OR. name.EQ.'DEFSTA'.AND. k.EQ.2 ) THEN 
+         IF(name(1:4).EQ.'UOMP'  .OR. name.EQ.'DEFDYN'
+     &   .OR. name.EQ.'DEFSTA'.AND. k.EQ.2 ) THEN
             IF(LINUX) THEN
                ctmp='rm -r TL'
                itmp=PIPE(ctmp)
@@ -1984,27 +1991,27 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
                itmp=PIPE(ctmp)
             ENDIF
          ENDIF
-c     WRITE(8,'(''Varying parameter '',A6,''x''F10.3,4I5)')  
+c     WRITE(8,'(''Varying parameter '',A6,''x''F10.3,4I5)')
 c    &      name, 1.0+val, i1,i2, i3, i4
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
 C-----
-C-----Read and copy mandatory part of the standard input     
+C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,7
-         READ(44,'(A80)') inprecord 
-         WRITE(7,'(A80)') inprecord 
+         READ(44,'(A80)') inprecord
+         WRITE(7,'(A80)') inprecord
       ENDDO
 C-----Read line of optional input
   150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN
-            IF(category.EQ.'A') THEN 
+            IF(category.EQ.'A') THEN
                IF(name(1:4).EQ.'UOMP') THEN !special treatment for omp parameters (they must be negative)
-                  WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val), 
+                  WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val),
      &                     i1, i2, i3, i4 ! include omp parameter if missing
                ELSE
-                  WRITE(7,'(A6,F10.3,4I5)') name,  (1.0+val), 
-     &                     i1, i2, i3, i4 
+                  WRITE(7,'(A6,F10.3,4I5)') name,  (1.0+val),
+     &                     i1, i2, i3, i4
                ENDIF
             ELSEIF(category.EQ.'R') THEN
                CLOSE(7)
@@ -2021,29 +2028,29 @@ C-----Write modified input with increased value of the parameter if name matches
      &   .AND. i4.EQ.i4e) THEN
          WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
          ifound = 1
-      ELSEIF(namee.EQ.'ENDF  ') THEN 
-         WRITE(7,'(A6,F10.3,4I5)')namee, 0.0, i1e, i2e, i3e, i4e 
-      ELSEIF(namee.NE.'KALMAN') THEN 
-         WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e 
+      ELSEIF(namee.EQ.'ENDF  ') THEN
+         WRITE(7,'(A6,F10.3,4I5)')namee, 0.0, i1e, i2e, i3e, i4e
+      ELSEIF(namee.NE.'KALMAN') THEN
+         WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
       ENDIF
       GOTO 150
 C-----
-C-----Read and copy optional part of the standard input     
+C-----Read and copy optional part of the standard input
 C-----
-  170 READ(44,'(A80)',END = 300) inprecord 
+  170 READ(44,'(A80)',END = 300) inprecord
       IF(inprecord(1:1).EQ.'$') THEN
          READ (inprecord,'(1X,A6,G10.5,4I5)',END = 300) namee,vale, i1e,
      &      i2e, i3e, i4e
 C--------Write modified input with increased value of the parameter if name matches
-         IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND. 
-     &      i3.EQ.i3e .AND. i4.EQ.i4e) THEN 
-            WRITE(7,'(''$'',A6,F10.3,4I5)') namee,vale*(1+val), 
+         IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND.
+     &      i3.EQ.i3e .AND. i4.EQ.i4e) THEN
+            WRITE(7,'(''$'',A6,F10.3,4I5)') namee,vale*(1+val),
      &         i1e, i2e, i3e, i4e
          ELSE
-            WRITE(7,'(A80)') inprecord 
+            WRITE(7,'(A80)') inprecord
          ENDIF
       ELSE
-        WRITE(7,'(A80)') inprecord 
+        WRITE(7,'(A80)') inprecord
       ENDIF
       GOTO 170
 
@@ -2074,7 +2081,7 @@ C-----Delete modified input that has been used and move XSECTIONS.OUT file
       ENDIF
       ENDDO !loop over parameter+val and parameter-val
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
-      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN' 
+      IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
          IF(LINUX) THEN
             ctmp='rm -rf TL'
@@ -2088,12 +2095,12 @@ C-----Check whether omp has been varied - if so then restore original Tl directo
             itmp=PIPE(ctmp)
          ENDIF
       ENDIF
-C-----      
+C-----
 C-----Calculate sensitivity to the parameter
-C-----      
+C-----
       OPEN (UNIT = 34,FILE='XS-UP.DAT', STATUS='OLD') ! x-sections with parameter+val
-      READ(34,'(A238)') outrecord 
-      WRITE(92,'(A238)') outrecord 
+      READ(34,'(A238)') outrecord
+      WRITE(92,'(A238)') outrecord
       WRITE(92,'(''# Parameter: '',A6,2x,4I3,''  variation: +-''F5.3,
      &      ''     Sensitivity matrix'')') name,  i1p, i2p,
      &      i3, i4, valmem
@@ -2105,25 +2112,25 @@ C-----Check whether ireac is within dimensions
 C     nreac = ireac/19
 C     nreac = MAX(1,nreac)
 C     IF(ireac.GT.19*nreac) nreac = nreac + 1
-C     DO i=1,nreac 
+C     DO i=1,nreac
       READ(34,'(A1080)') title
       WRITE(92,'(A1080)') title
-C     READ(34,'(A238)') outrecord 
-C     WRITE(92,'(A238)') outrecord 
-C     ENDDO 
+C     READ(34,'(A238)') outrecord
+C     WRITE(92,'(A238)') outrecord
+C     ENDDO
       OPEN (UNIT = 35,FILE='XS-DOWN.DAT', STATUS='OLD') ! x-sections with parameter-val
       READ(35,'(A80)') inprecord !skip lines with heading
-C     DO i=1,nreac 
-      READ(35,'(A80)') inprecord 
-C     ENDDO 
-      OPEN (UNIT = 36,FILE='XSECTIONSREF.OUT', STATUS='OLD') ! central x-sections 
+C     DO i=1,nreac
+      READ(35,'(A80)') inprecord
+C     ENDDO
+      OPEN (UNIT = 36,FILE='XSECTIONSREF.OUT', STATUS='OLD') ! central x-sections
       READ(36,'(A80)') inprecord !skip lines with heading
-C     DO i=1,nreac 
-      READ(36,'(A80)') inprecord 
-C     ENDDO 
- 180  READ(34,'(G10.5,1P(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac) 
-      READ(35,'(G10.5,1P(90E12.5))') einl, (xsecd(i),i=1,ireac) 
-      READ(36,'(G10.5,1P(90E12.5))') einl, (xsec(i),i=1,ireac) 
+C     DO i=1,nreac
+      READ(36,'(A80)') inprecord
+C     ENDDO
+ 180  READ(34,'(G10.5,1P(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac)
+      READ(35,'(G10.5,1P(90E12.5))') einl, (xsecd(i),i=1,ireac)
+      READ(36,'(G10.5,1P(90E12.5))') einl, (xsec(i),i=1,ireac)
       DO i = 1, ireac
          IF(ABS(xsecu(i)-xsecd(i)).LE.((xsecu(i)+xsecd(i))*1.0D-5) )THEN
             sensmat(i) = 0
@@ -2131,10 +2138,10 @@ C     ENDDO
             sensmat(i) = 0
          ELSE
 c           sensmat(i) = (xsecu(i)-xsecd(i))/(2.0*valmem)
-C-----------Relative sensitivity (per variation interval) 
+C-----------Relative sensitivity (per variation interval)
             sensmat(i) = (xsecu(i)-xsecd(i))/xsec(i)
          ENDIF
-      ENDDO 
+      ENDDO
       WRITE(92,'(G10.5,1P(90E12.4))') EINl, (sensmat(i),i=1,ireac)
       GOTO 180
   190 CONTINUE
@@ -2147,7 +2154,7 @@ C-----------Relative sensitivity (per variation interval)
      &'('' FATAL: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
-C-----Resotore standard input 
+C-----Resotore standard input
   350 IF(LINUX) THEN
          ctmp='mv INPUTREF.DAT INPUT.DAT'
          itmp=PIPE(ctmp)

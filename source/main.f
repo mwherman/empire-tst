@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-06-29 18:34:02 $
-Ccc   * $Id: main.f,v 1.207 2009-06-29 18:34:02 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-08-02 23:58:33 $
+Ccc   * $Id: main.f,v 1.208 2009-08-02 23:58:33 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -101,7 +101,6 @@ C                      Total PF angular distribution defined only for neutrons
       CHARACTER*6 keyname
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
-C     CHARACTER*1 opart(3)
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -117,16 +116,12 @@ C     CHARACTER*1 opart(3)
       CHARACTER*21 reactionx, preaction(ndnuc)
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
-C     DATA opart/1hn,1hp,1ha/
+
       icalled = 0
       CALL THORA(8)
       EIN = 0.0d0
       epre=EIN
       ICAlangs = 0
-
-      open(94,file='EMPIRE.STA')
-      WRITE(94,'(1x,5HSTART)')
-      close(94)
 
 C-----
 C-----Read and prepare input data
@@ -175,13 +170,6 @@ C       WRITE(41,'(''#'',A10,1X,(90A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         (REAction(nnuc),nnuc=1,NNUcd)
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
-C       OPEN (98, FILE='FISS_XS.zvd', STATUS='unknown')
-C       write(98,'(A19)') '#begin LSTTAB.CUR/u'
-C       write(98,'(a4,1x,i3,''-'',A2,''-'',I3,5H(n,f))')
-C    &     'tit:',int(Z(0)), SYMb(0), int(A(0))
-C       write(98,'(A10)') 'fun: Empire'
-C       write(98,'(A10)') 'thick: 2   '
-C       write(98,'(A10/2H//)') 'length: 92 '
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
@@ -1779,6 +1767,7 @@ c                 ENDDO
          ENDIF
          IF (IOUt.GT.0) THEN
            DO m = 1, INT(FISmod(nnuc)) + 1
+              WFIsm(m) = 0.d0
               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
               WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
            ENDDO
@@ -1977,10 +1966,9 @@ C    &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
 C    &     TOTcsfis, CSPrd(1), csinel,
 C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
 C
-      WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
+      IF(TOTcsfis.gt.0.d0)
+     &  WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
-C     WRITE(98,'(G15.5,2X,1P(95E12.5))') 1.d6*EINl,
-C    &     TOTcsfis*1d-3
       CLOSE (80)
       CLOSE (79)
       WRITE (12,*) ' '
@@ -2032,13 +2020,6 @@ C     For Kalbach parameterization
                 zres = Z(nnuc) - ZEJc(nejc)
 C---------------Residual nuclei must be heavier than alpha
                 if(ares.le.4. and. zres.le.2.) cycle
-C               IF(nejc.GE.1 .AND. nejc.LE.3) THEN
-C                 DO itmp = 3,21
-C                   IF(REAction(nnuc)(itmp:itmp).eq.opart(nejc))
-C    &                goto 1529
-C                 ENDDO
-C                 CYCLE
-C               ENDIF
  1529           nspec = min(INT(EMAx(nnuc)/DE) + 2,NDECSE)
                 IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
@@ -3130,13 +3111,6 @@ C        CLOSE (68) ! for Chris
            CLOSE (73)
            CLOSE (74)
          ENDIF
-C        write(98,'(A2)') '//'
-C        write(98,'(A17)') '#end LSTTAB.CUR/u'
-C        write(98,'(A19)') '#begin LSTTAB.CUR/c'
-C        write(98,'(A19)') 'x-scale: auto      '
-C        write(98,'(A17)') 'y-scale: auto      '
-C        write(98,'(A2)') '//'
-C        write(98,'(A17)') '#end LSTTAB.CUR/c  '
          CLOSE (98)
 C--------Saving random seeds
          ftmp = grand()
@@ -3146,9 +3120,6 @@ C--------Saving random seeds
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
-         open(94,file='EMPIRE.STA',status='OLD')
-         WRITE(94,'(1x,2HOK )')
-         close(94)
          close(102)
          RETURN
       ENDIF
