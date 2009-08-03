@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-08-02 23:58:31 $
-Ccc   * $Id: input.f,v 1.301 2009-08-02 23:58:31 Capote Exp $
+Ccc   * $Date: 2009-08-03 00:35:19 $
+Ccc   * $Id: input.f,v 1.302 2009-08-03 00:35:19 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -7184,19 +7184,21 @@ C
 C-----retrive EXFOR entry including top subentry 001
 C
       toplast = ' '
-      filename = trim(empiredir)//'/EXFOR/subent'//'/'
+      filename = '/EXFOR/subent'//'/'
      &     //subent(1:2)//'/'//subent(1:4)//'/'//subent(1:8)//'.txt'
-      topname = trim(empiredir)//'/EXFOR/subent'//'/'//subent(1:2)
+      topname =  '/EXFOR/subent'//'/'//subent(1:2)
      &     //'/'//subent(1:4)//'/'//subent(1:5)//'001.txt'
       IF (topname.NE.toplast) THEN
-         OPEN (UNIT = 22,FILE = topname,ERR = 600,STATUS = 'OLD')
+         OPEN (UNIT = 22,FILE = trim(empiredir)//topname,
+     &         ERR = 600,STATUS = 'OLD')
   250    READ (22,99005,END = 300) exforec
          WRITE (19,99005) exforec
          GOTO 250
       ENDIF
   300 toplast = topname
       CLOSE (22,ERR = 600)
-      OPEN (UNIT = 22,FILE = filename,ERR = 600,STATUS = 'OLD')
+      OPEN (UNIT = 22,FILE = trim(empiredir)//filename,
+     &         ERR = 600,STATUS = 'OLD')
   400 READ (22,99005,END = 100) exforec
       WRITE (19,99005) exforec
       GOTO 400

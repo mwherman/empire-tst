@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:32 $
-Ccc   * $Id: lev-dens.f,v 1.76 2009-08-02 23:58:32 Capote Exp $
+Ccc   * $Date: 2009-08-03 00:35:20 $
+Ccc   * $Id: lev-dens.f,v 1.77 2009-08-03 00:35:20 Capote Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1847,7 +1847,7 @@ C
       CHARACTER*13 fname
       CHARACTER*20 ctmp
       CHARACTER*7 caz
-      CHARACTER*120 filename,cfiletmp
+      CHARACTER*50 filename
       LOGICAL fexist
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
@@ -1873,18 +1873,16 @@ C
             ENDDO
          ENDDO
       ENDDO
-      WRITE (cfiletmp,99005) iz
-
+      WRITE (filename,99005) iz
 99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
-      filename = trim(empiredir)//trim(cfiletmp)
-      INQUIRE(file = filename, exist = fexist)
+      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
       IF(.not.fexist) THEN
-       WRITE(8,*) trim(filename), ' does not exist'
-       WRITE(*,*) trim(filename), ' does not exist'
+       WRITE(8,*) trim(empiredir)//trim(filename), ' does not exist'
+       WRITE(*,*) trim(empiredir)//trim(filename), ' does not exist'
        STOP 'ERROR: '
       ENDIF
 
-      OPEN (UNIT = 34,FILE = filename,ERR = 300)
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
   100 READ (34,99010,ERR=300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
@@ -1932,12 +1930,11 @@ C
 C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
-        WRITE (cfiletmp,99007) iz
+        WRITE (filename,99007) iz
 99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
-        filename = trim(empiredir)//trim(cfiletmp)
-        INQUIRE(file = filename, exist = fexist)
+        INQUIRE(file = trim(empiredir)//filename, exist = fexist)
         IF(fexist) then
-          OPEN (UNIT = 34,FILE = filename,ERR = 440)
+          OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 440)
           pcorr = 0.d0
           acorr = 0.d0
   110     READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
@@ -2428,7 +2425,7 @@ C
       CHARACTER*2 car2
       CHARACTER*8 paritate
       REAL*8 DLOG10
-      CHARACTER*120 filename,cfiletmp
+      CHARACTER*56 filename
 
       LOGICAL fexist
       INTEGER i, ia, iar, ipp, iugrid, iz, izr, j, jmaxl, k, khi, kk,
@@ -2437,11 +2434,10 @@ C
       ia = A(Nnuc)
       iz = Z(Nnuc)
 
-      WRITE (cfiletmp,99006) ib, iz
+      WRITE (filename,99006) ib, iz
 99006 FORMAT
      & ('/RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
-      filename = trim(empiredir)//trim(cfiletmp)
-      INQUIRE(file = filename, exist = fexist)
+      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
      &                  ' IN HFB at saddle ',ib
@@ -2468,7 +2464,7 @@ C
          ENDDO
       ENDDO
 
-      OPEN (UNIT = 34,FILE = filename,ERR = 300)
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate
 99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
