@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-08-03 00:35:19 $
-Ccc   * $Id: input.f,v 1.302 2009-08-03 00:35:19 Capote Exp $
+Ccc   * $Date: 2009-08-03 14:33:14 $
+Ccc   * $Id: input.f,v 1.303 2009-08-03 14:33:14 mattoon Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -8393,8 +8393,8 @@ C
       KAA = ka
       IF (KEYload.NE.1) THEN
          KEYload = 1
-         OPEN (81,FILE = '../RIPL-2/gamma/gdr-parameters-exp.dat',
-     &         STATUS = 'old',ERR = 450)
+         OPEN (81,FILE = trim(empiredir)//'RIPL-2/gamma'
+     &      //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
          READ (81,'(///)') ! Skipping first 4 title lines
          DO i = 1, 270
             READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)

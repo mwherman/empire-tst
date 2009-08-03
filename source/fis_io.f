@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:35 $
-Ccc   * $Id: fis_io.f,v 1.10 2009-08-02 23:58:35 Capote Exp $
+Ccc   * $Author: mattoon $
+Ccc   * $Date: 2009-08-03 14:33:14 $
+Ccc   * $Id: fis_io.f,v 1.11 2009-08-03 14:33:14 mattoon Exp $
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
@@ -194,7 +194,8 @@ c
 c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (filename,99900)iz
-99900    FORMAT ('../RIPL-2/fission/HFB2007/z',i3.3,'.tab')
+99900    FORMAT (trim(empiredir)//'/RIPL-2/fission'
+     &      //'/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = filename,ERR = 460)
   410    read(52,*) izrr,iarr,npoints
          if(izrr.ne.iz .or. iarr.ne.ia) then
