@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:34 $
-Ccc   * $Id: empire_ctl.f,v 1.30 2009-08-02 23:58:34 Capote Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2009-08-07 19:02:43 $
+Ccc   * $Id: empire_ctl.f,v 1.31 2009-08-07 19:02:43 pigni Exp $
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
@@ -1820,25 +1820,25 @@ C
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
      &  'FISBOU', 'ATILFI', 'DEFNOR'/
       data namecat /
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'F'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
-     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'/
@@ -1880,8 +1880,8 @@ c     close(44)
 C-----
 C-----Read and copy mandatory part of the standard input
 C-----
-      DO i=1,7
-         READ(44,'(A80)') inprecord
+      DO i=1,10
+         READ(44,'(A80)') inprecord 
 C--------Read target and projectile from the input file
          IF(i.EQ.2) read(inprecord,*) atarget,ztarget
          IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
@@ -1997,9 +1997,9 @@ c    &      name, 1.0+val, i1,i2, i3, i4
 C-----
 C-----Read and copy mandatory part of the standard input
 C-----
-      DO i=1,7
-         READ(44,'(A80)') inprecord
-         WRITE(7,'(A80)') inprecord
+      DO i=1,10
+         READ(44,'(A80)') inprecord 
+         WRITE(7,'(A80)') inprecord 
       ENDDO
 C-----Read line of optional input
   150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
