@@ -7,6 +7,24 @@ Created by Caleb Mattoon on 2008-10-23.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 Extract from binary "Boxer" format, from NJOY
+
+This can handle binary output from errorj that has
+MF3 and MF33 (cross-sections and covariances)
+OR MF5 and MF35 (spectra and covariances)
+OR probably nubar covariances (not tested yet)
+
+binary output is obtained from njoy using '-' switch.
+For spectra for example, the input
+
+    -- ERRORJ, mf35
+    errorr
+     20 0 91 -28 0 0 /
+     9437 1 2 1 1 /
+     0 35 1 1 -1 5.0e5 /
+     33 / # of groups, energy boundaries follow:
+     ...
+
+puts binary output to tape28
 """
 
 from __future__ import division
@@ -62,18 +80,18 @@ class mgCovars:
                 # using 'MT1', 'MT2' etc as keys
                 if mf==1 and mt==451:
                     self.elist = datlist[i][18:]
-                elif mf==3:
+                elif mf in [3,5]:
                     name = 'MT'+repr(mt)
                     self.xsecs[name] = datlist[i][18:]
                 else:
                     print "unknown section in x-secs", fend, mf, mt
             
-            if mf==33:
-                # requires special handling
+            if mf in [31,33,35]:
+                # these require special handling
                 break
             i += 1
         
-        # idx should now point to start of MF33
+        # idx should now point to covariances
         #print "i = ", i
         
         MT = 0
