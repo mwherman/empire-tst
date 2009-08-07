@@ -235,4 +235,169 @@ class mgBase:
             fout.write( b.writeSEND( self.mat, 33 ) )
         
         fout.close()
+    
+    
+    def toBoxr(self,filename):
+        """
+        write all x-sections and matrices to "boxr" format
+        We can then run njoycovx and covr modules from njoy,
+        to produce simpler output style and 'njoy'-style plots
+        """
+        import numpy
+        import MF_base
+        
+        """
+        # not helpful for batch scripts unless raw_input can time out:
+        if os.path.exists(filename):
+            print ("file %s already exists. Overwrite y/N?" % filename)
+            overwrite = 'N'
+            try:
+                overwrite = raw_input()
+            except SyntaxError:
+                pass
+            if not (overwrite=='y' or overwrite=='Y'):
+                raise IOError, "Won't overwrite file"
+        """
+        
+        # MF_base is a class for easy writing ENDF-like files, including boxr
+        b = MF_base.MF_base()
+        
+        # get ordered list of mt #'s:
+        mtList = [int(a.strip('MT')) for a in self.xsecs.keys()]
+        mtList.sort()
+        
+        # writing BOXR format:
+        bxS = b.writeENDFline([],1,0,0,0)
+        lNum = 1
+        bxS += b.writeENDFline([self.zam,self.awt,0,0,-11,0], 
+                self.mat,1,451,lNum); lNum += 1
+        bxS += b.writeENDFline([0.0,0.0,self.ngroups,0,self.ngroups+1,0], 
+                self.mat,1,451,lNum); lNum += 1
+        
+        # we want elist from small to big. Need 1e-5 in first place:
+        elist = list(self.elist[::-1])
+        if elist[0] != 1.0e-5:
+            elist.insert(0,1.0e-5)
+        nline, rem = divmod(len(elist),6)
+        
+        for idx in range(nline):
+            bxS += b.writeENDFline( elist[6*idx:6*idx+6], 
+                    self.mat,1,451,lNum); lNum+=1
+        if rem>0:
+            bxS += b.writeENDFline( elist[6*nline:6*nline+6], 
+                    self.mat,1,451,lNum); lNum+=1
+        
+        bxS += b.writeSEND( self.mat, 1 )
+        bxS += b.writeFEND( self.mat )
+        
+        # write all x-sections, "MF-3"
+        for mt in mtList:
+            lNum = 1
+            bxS += b.writeENDFline([0.0,0.0, 0,0,self.ngroups,0], 
+                    self.mat,3,mt,lNum); lNum += 1
+            key = 'MT%i'%mt
+            # switch order:
+            mtXsec = self.xsecs[key][::-1]
+            
+            nline, rem = divmod( len(mtXsec), 6 )
+            
+            for jdx in range(nline):
+                bxS += b.writeENDFline( mtXsec[6*jdx:6*jdx+6], 
+                        self.mat,3,mt,lNum); lNum+=1
+            if rem>0:
+                bxS += b.writeENDFline( mtXsec[6*nline:6*nline+6], 
+                        self.mat,3,mt,lNum); lNum+=1
+            
+            bxS += b.writeSEND( self.mat, 3 )
+        
+        # done with MF-3:
+        bxS += b.writeFEND( self.mat )
+        
+        
+        # start MF-33:
+        # remember mtList has sorted list of mt #'s present
+        
+        for mtdx in range(len(mtList)):
+            mt = mtList[mtdx]
+            # 'column' mt #'s that must be supplied for this 'row' mt:
+            covarsThisMT = mtList[mtdx:]
+            
+            lNum = 1
+            bxS += b.writeENDFline([self.zam,self.awt,0,0,0,len(covarsThisMT)], 
+                    self.mat,33, mt, lNum); lNum += 1
+            
+            for colMT in covarsThisMT:
+                taketranspose = False
+                
+                bxS += b.writeENDFline([0.0,0.0,self.mat,colMT,0,self.ngroups], 
+                        self.mat,33,mt,lNum); lNum += 1
+                
+                # must try both 'MTxMTy' and 'MTyMTx':
+                key = 'MT%iMT%i' % (mt,colMT)
+                if not key in self.covars.keys():
+                    # if MTyMTx we need to use the transpose matrix:
+                    key = 'MT%iMT%i' % (colMT,mt)
+                    taketranspose = True
+                if not key in self.covars.keys():
+                    # ok, not present, so write blank section:
+                    bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
+                        self.ngroups], self.mat,33,mt,lNum); lNum += 1
+                    bxS += b.writeENDFline([0.0], 
+                            self.mat,33,mt,lNum); lNum += 1
+                    
+                    continue
+    
+    
+                # once again, reverse order of matrix,
+                # we want low-high energy order rather than default high-low
+                if taketranspose:
+                    matrix = numpy.transpose( self.covars[key] )[::-1,::-1]
+                else:
+                    matrix = self.covars[key][::-1,::-1]
+                empty = []
+                for idx in range(len(matrix)):
+                    line = matrix[idx]
+                    
+                    if numpy.all(line==0):
+                        # ignore the line
+                        empty.append(idx)
+                        continue
+                    
+                    # get first and last nonzero element, 
+                    # change to 1-based index:
+                    for start in range(len(line)):
+                        if line[start]!=0: break
+                    for end in range(len(line),0,-1):
+                        if line[end-1]!=0: break
+                    line = line[start:end]
+                    
+                    bxS += b.writeENDFline([0.0,0.0,len(line),start+1,
+                        len(line),idx+1], self.mat,33,mt,lNum); lNum += 1
+                    nline, rem = divmod( len(line), 6 )
+                    
+                    for jdx in range(nline):
+                        bxS += b.writeENDFline( line[6*jdx:6*jdx+6], 
+                                self.mat,33,mt,lNum); lNum+=1
+                    if rem>0:
+                        bxS += b.writeENDFline( line[6*nline:6*nline+6], 
+                                self.mat,33,mt,lNum); lNum+=1
+                
+                if len(empty)>0 and empty[-1] == self.ngroups-1:
+                    # the matrix has zeros at high energy, write a footer
+                    # to complete the section
+                    bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
+                        self.ngroups], self.mat,33,mt,lNum); lNum += 1
+                    bxS += b.writeENDFline([0.0], 
+                            self.mat,33,mt,lNum); lNum += 1
+            
+            bxS += b.writeSEND( self.mat, 33 )
+        
+        # end of file:
+        bxS += b.writeFEND( self.mat )
+        bxS += b.writeENDFline([], 0,0,0 )
+        bxS += b.writeENDFline([], -1,0,0 )
+        
+        fout = open(filename,"w")
+        fout.write(bxS)
+        fout.close()
 
