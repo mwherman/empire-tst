@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-08-03 14:33:14 $
-Ccc   * $Id: input.f,v 1.303 2009-08-03 14:33:14 mattoon Exp $
+Ccc   * $Date: 2009-08-07 11:02:18 $
+Ccc   * $Id: input.f,v 1.304 2009-08-07 11:02:18 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -2296,6 +2296,21 @@ C---------levels for nucleus NNUC copied to file *.lev
      &'('' WARNING: excited state No.'',I3,                          ''
      &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
             ENDIF
+
+            IF (ilv.EQ.1 .AND. XJLv(ilv,Nnuc).LT.0.) THEN
+              WRITE (8,'('' WARNING:'')')
+              WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+     &                      chelem, izr
+              WRITE (8,
+     &'('' WARNING: ground-state has no assigned spin/parity '')') 
+              WRITE (8, '('' WARNING: assuming a default '')') 
+              LVP(1,Nnuc) = 1
+              XJLv(1,Nnuc) = 0.0
+              IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) 
+     >           XJLv(1,Nnuc) = 0.5
+              ISIsom(1,Nnuc) = 0
+            ENDIF
+           
             IF (ilv.NE.1) THEN
               IF (ELV(ilv,Nnuc).EQ.0.) THEN
                 WRITE (8,'('' WARNING:'')')
