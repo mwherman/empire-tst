@@ -22,51 +22,50 @@ fi
 # FIRST RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
 
 if [ ! -f $file-s.endf ]; then
-   cd ../util/fixup/
-   rm OUTPUT.ENDF
+   #  FIXUP input expects file named OUTPUT.ENDF:   
    ln -sf $work/$file.endf OUTPUT.ENDF
-   ./fixup
-   rm OUTPUT.ENDF
+   ln -sf $EMPIREDIR/util/fixup/FIXUP.INP FIXUP.INP
+    
+   $EMPIREDIR/util/fixup/fixup < FIXUP.INP
+   rm OUTPUT.ENDF FIXUP.INP
    mv FIXUP.ENDF $work/$file-f.endf
-   cd $work
 
    # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
 
-   cd ../util/sixtab/
-   rm ENDF.IN ENDF.OUT 2>/dev/null
    ln -sf $work/$file-f.endf ENDF.IN
-   ./sixtab
-   rm ENDF.IN
+   ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
+
+   $EMPIREDIR/util/sixtab/sixtab < SIXTAB.INP
+   rm ENDF.IN SIXTAB.INP
    mv ENDF.OUT $work/$file-s.endf
-   cd $work
    if  [ -f $file-s.endf ]; then
       rm $file-f.endf 2>/dev/null
    fi   
 
 fi
 
-
 # RUN ZVD
+c4zvd_dir=$EMPIREDIR/util/c4zvd
 
-cd ../util/c4zvd/
+#cd ../util/c4zvd/
 ln -sf $work/$file-s.endf Present
 ln -sf $work/$file.c4 c4
 #./c4zvv $MT $file 
 rm tmp.dat c4.zvd end.zvd $file-$MT.zvd  zv*.ps zv*.eps 2>/dev/null
-./c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
-./datzvdl.exe tmp.dat c4.zvd
-./endzvdl.exe A $MT Present end.zvd
+$c4zvd_dir/c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
+$c4zvd_dir/datzvdl.exe tmp.dat c4.zvd
+$c4zvd_dir/endzvdl.exe A $MT Present end.zvd
 echo #!zvview.exe >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
-./zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
-mv $file-$MT.* $work
+$c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
+#mv $file-$MT.* $work
 if [ -f zv00.ps ]; then
    mv zv00.ps $work/$file-$MT.ps
 fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $work/$file-$MT.eps
 fi
-cd $work
+#cd $work
 
 exit
