@@ -26,7 +26,7 @@ if [ ! -f $file-s.endf ]; then
    ln -sf $work/$file.endf OUTPUT.ENDF
    ln -sf $EMPIREDIR/util/fixup/FIXUP.INP FIXUP.INP
     
-   $EMPIREDIR/util/fixup/fixup < FIXUP.INP
+   $EMPIREDIR/util/fixup/fixup
    rm OUTPUT.ENDF FIXUP.INP
    mv FIXUP.ENDF $work/$file-f.endf
 
@@ -35,7 +35,7 @@ if [ ! -f $file-s.endf ]; then
    ln -sf $work/$file-f.endf ENDF.IN
    ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
 
-   $EMPIREDIR/util/sixtab/sixtab < SIXTAB.INP
+   $EMPIREDIR/util/sixtab/sixtab
    rm ENDF.IN SIXTAB.INP
    mv ENDF.OUT $work/$file-s.endf
    if  [ -f $file-s.endf ]; then
@@ -47,10 +47,9 @@ fi
 # RUN ZVD
 c4zvd_dir=$EMPIREDIR/util/c4zvd
 
-#cd ../util/c4zvd/
 ln -sf $work/$file-s.endf Present
 ln -sf $work/$file.c4 c4
-#./c4zvv $MT $file 
+#$c4zvd_dir/c4zvv $MT $file 
 rm tmp.dat c4.zvd end.zvd $file-$MT.zvd  zv*.ps zv*.eps 2>/dev/null
 $c4zvd_dir/c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
 $c4zvd_dir/datzvdl.exe tmp.dat c4.zvd
@@ -59,13 +58,12 @@ echo #!zvview.exe >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
 $c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
-#mv $file-$MT.* $work
+
 if [ -f zv00.ps ]; then
    mv zv00.ps $work/$file-$MT.ps
 fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $work/$file-$MT.eps
 fi
-#cd $work
 
 exit
