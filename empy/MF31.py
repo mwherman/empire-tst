@@ -36,6 +36,9 @@ class MF31(MF_base):
         self.MAT
         self.MF
         self.MT
+        
+        these are nubars for neutron-induced fission,
+        format is similar to MF33
         """
         super(MF31,self).__init__()
         
@@ -45,39 +48,57 @@ class MF31(MF_base):
         fin = open(filename,"r")
         
         # read up to MT file:
-        for i in range(line+1):
+        for i in range(line):
             myline = fin.readline()
         
-        # should be at the MT file header, but may have to go past SEND or FEND
-        MAT_tmp, MF_tmp, MT_tmp = endf.getVals( myline )
-        while MF_tmp != 31 and MT_tmp != MT:
-            myline = fin.readline()
-            MAT_tmp, MF_tmp, MT_tmp = endf.getVals( myline )
-        
+        # next line read will start the file:
+        HEAD = fin.readline()
+        #print (HEAD)
+        MAT_tmp, MF_tmp, MT_tmp = endf.getVals( HEAD )
+        assert MF_tmp==31 and MT_tmp==MT, "Incorrect MF/MT values!"
         self.MAT, self.MF, self.MT = MAT_tmp, MF_tmp, MT_tmp
-        self.header = myline
-        while 1:
-            zam, awt = myline.split()[:2]
-            zam = super(MF31,self).treat(zam); awt=super(MF31,self).treat(awt)
-            # blank lines give a zam=0, don't stop until we see 
-            # hydrogen or heavier
-            if zam >= 1001:
-                break
-            myline = fin.readline()
-            self.header += myline
         
-        myline = fin.readline()
-        self.subsecLine = myline
-        assert int(myline.split()[3]) == MT, "wrong MT value in header"
+        zam, awt, dum, MTL, dum2, NL = self.readENDFline(HEAD)
+        assert zam >= 1001, "incorrect HEAD at start of file"
+        self.zam = zam
+        self.awt = awt
+
+        #for i in range(NL):
+        # we only look at first section, ignoring cross-reaction stuff
+        CONT = fin.readline()
+        XMF1, XLFS1, MAT1, MT1, NC, NI = self.readENDFline(CONT)
+        print ("%i NC and %i NI sub-sections" % (NC, NI))
         
-        # same line, get number of subsections, hopefully < 99:
-        self.n_subsecs = int(myline[64:66])
-        #print ("There are %i subsections" % n_subsecs)
+        for NCdx in range(NC):
+            print "NC subsection %i" % NCdx
+            CONT = fin.readline()
+            dum, dum1, dum2, LTY, dum3, dum4 = self.readENDFline(CONT)
+            CONT = fin.readline()
+            if LTY==0:
+                E1,E2,dum,dum2,NCI2,NCI = self.readENDFline(CONT)
+                print("\nDefined as sum/difference of other reactions (LTY0)!")
+                return
+            
+            else:   # LTY=1,2,3
+                E1,E2,MATS,MTS, NEI2, NEI = self.readENDFline(CONT)
+                raise NotImplementedError, "LTY>0 not implemented"
         
+        # proceed assuming only NI subsections:
+        self.n_subsecs = NI
+
         vals = []
         for i in range(self.n_subsecs):
-            mat_form, nvals, matlength = self.checkMTformat( fin.readline() )
-            if nvals != sum( range(matlength) ) + matlength:
+            print ("NI subsection %i header:" % i)
+            CONT = fin.readline()
+            print (CONT.rstrip())
+            dum, dum1, LS, LB, NT, NE = self.readENDFline(CONT)
+            
+            # is this an upper-diagonal matrix type section?
+            mat_form = (LB==5)
+            nvals = NT
+            matlength = NE
+            
+            if mat_form and (nvals != sum( range(matlength) ) + matlength):
                 print "Inconsistent values in section header!"
             
             nlines, remainder = divmod(nvals, 6)
@@ -116,11 +137,9 @@ class MF31(MF_base):
                     print "oops, trouble building the matrix!"
                 matrix_form.append( (elist, mat) )
             else:
-                # not in upper-diagonal matrix form
-                elist = [vals[i][2][a] for a in range(len(vals[i][2])) 
-                        if a%2 == 0]
-                errors = [vals[i][2][a] for a in range(len(vals[i][2])) 
-                        if a%2 == 1]
+                # list E1, err1, E2, err2...
+                elist = vals[i][2] [::2] # even values
+                errors = vals[i][2] [1::2] # odd values
                 
                 mat = numpy.zeros(( len(elist) - 1, len(elist) - 1 ))
                 try:
@@ -129,7 +148,7 @@ class MF31(MF_base):
                         mat[i,i] = errors[idx]
                         idx += 1
                 except IndexError:
-                    print "trouble building ornl matrix!"
+                    print "trouble building diagonal matrix!"
                 
                 matrix_form.append( (elist, mat) )
                 
@@ -170,25 +189,6 @@ class MF31(MF_base):
                 if numpy.isnan( self.corr_mat[i,j] ):
                     self.corr_mat[i,j] = 0
     
-
-    def checkMTformat(self,string):
-        """
-        find out what format our subsection is in, 
-        if format unknown raise UnknownMTFormat
-        """
-        substring = string[22:66]
-        sec, subsec, nvals, matlength = [int(a) for a in substring.split() ]
-        if sec==1 and subsec==5:
-            #we have a matrix form
-            mat_form = True
-        elif subsec==1:
-            #single-line adjustment
-            mat_form = False
-        else:
-            raise UnknownMTFormat
-
-        return mat_form, nvals, matlength
-    
     
     def truncate(self, threshold, keep='+'):
         """
@@ -202,7 +202,7 @@ class MF31(MF_base):
             from bisect import bisect
             idx = bisect( self.elist, threshold )
             self.elist.insert( idx, threshold )
-
+        
         if keep=='+':
             self.elist = [1.0e-5] + self.elist[idx:]
             
@@ -224,7 +224,8 @@ class MF31(MF_base):
             self.uncert = self.uncert[:idx+1]
             self.cov_mat = self.cov_mat[:idx+1, :idx+1]
             self.corr_mat = self.corr_mat[:idx+1, :idx+1]
-
+    
+    
     def scaleMatrix(self,maxVal):
         """
         scale the covariance matrix so max(min) val goes to maxVal(-maxVal)
@@ -254,36 +255,36 @@ class MF31(MF_base):
                 raise IOError, "Won't overwrite file"
         
         fout = open(filename,"w")
-        lineN = 1
         
-        fout.write( self.header ); lineN += 1
+        # start MF section for file 31. Just one section
+        HEAD = self.writeENDFline([self.zam, self.awt, 0,0,0,1],
+                self.MAT, self.MF, self.MT)
+        fout.write( HEAD )
         
-        # always write one subsection (no space-saving methods)
-        self.subsecLine = self.subsecLine[:65] + '1' + self.subsecLine[66:]
-        fout.write( self.subsecLine ); lineN += 1
+        # one NI subsection, although we may waste space with excess zeros:
+        CONT = self.writeENDFline([0.0, 0.0, 0, self.MT, 0, 1],
+                self.MAT, self.MF, self.MT)
+        fout.write( CONT )
         
+        # determine length of matrix, write header for matrix subsection:
         fullLength = sum( range( len(self.cov_mat)+1 ) ) + len(self.elist)
-        data = "% E% E%11i%11i%11i%11i" % (0.0, 0.0, 1, 5, fullLength, 
-                len(self.elist))
-        data = data.replace('E-0','-')
-        data = data.replace('E+0','+')
-        rightColumn = ("%i%i%3i%5i") % (self.MAT, self.MF, self.MT, lineN)
-        fout.write( data + rightColumn + '\n' ); lineN += 1
+        CONT = self.writeENDFline([0.0,0.0,1,5,fullLength,len(self.elist)],
+                self.MAT, self.MF, self.MT)
+        fout.write( CONT )
         
         # past the header, now write the actual data. First make a list
-        # with data in the right format, energy followed by 
-        # upper-diagonal matrix:
+        # with data in right format, energy followed by upper-diagonal matrix:
         tmplist = self.elist[:]
         for i in range(len(self.cov_mat)):
             tmplist += self.cov_mat[i][i:].tolist()
         
-        while len(tmplist) >= 6:
-            fout.write( super(MF31,self).writeENDFline( tuple(tmplist[:6]), 
-                self.MAT, self.MF, self.MT, lineN ) )
-            lineN += 1
-            tmplist = tmplist[6:]
-        fout.write( super(MF31,self).writeENDFline( tuple(tmplist), self.MAT, 
-            self.MF, self.MT, lineN ) )
+        # write 6 values per line until tmplist is empty
+        nlines, extra = divmod( len(tmplist), 6 )
+        if extra: nlines += 1
+        
+        for i in range(nlines):
+            fout.write( super(MF31,self).writeENDFline(
+                tuple(tmplist[i*6:i*6+6]), self.MAT, self.MF, self.MT ) )
                 
         # done with data, write SEND
         fout.write( super(MF31,self).writeSEND( self.MAT, self.MF ) )

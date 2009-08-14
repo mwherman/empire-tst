@@ -606,7 +606,10 @@ class MF32(MF_base):
 
         MAT = self.MAT
         
-        fs = self.writeENDFline([],1,0,0,0)
+        # disable line numbering:
+        self.numberLines = False
+        
+        fs = self.writeTINIT()
         fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
         
         # MF1: surpress initial newline with \
@@ -737,8 +740,8 @@ class MF32(MF_base):
         
         fs += mf32
         
-        fs += self.writeENDFline([0.0,0.0,0,0,0,0],0,0,0,0)    #MEND
-        fs += self.writeENDFline([0.0,0.0,0,0,0,0],0,-1,0,0)   #TEND
+        fs += self.writeMEND()
+        fs += self.writeTEND()   #TEND
         
         fout.write(fs)
         fout.close()
@@ -766,7 +769,10 @@ class MF32(MF_base):
 
         MAT = self.MAT
         
-        fs = self.writeENDFline([],1,0,0,0)
+        # disable line numbering:
+        self.numberLines = False
+        
+        fs = self.writeTINIT()
         fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
         
         # MF1: surpress initial newline with \
@@ -893,8 +899,8 @@ class MF32(MF_base):
         fout.write( self.writeSEND( MAT, 32 ) )
         fout.write( self.writeFEND( MAT ) )
         
-        fout.write( self.writeENDFline([0.0,0.0,0,0,0,0],0,0,0,0) )   #MEND
-        fout.write( self.writeENDFline([0.0,0.0,0,0,0,0],0,-1,0,0) )  #TEND
+        fout.write( self.writeMEND() )
+        fout.write( self.writeTEND() )
         
         fout.close()
     

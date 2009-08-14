@@ -265,23 +265,22 @@ class MF33(MF_base):
                 raise IOError, "Won't overwrite file"
         
         fout = open(filename,"w")
-        lineN = 1
         
         # start MF section for file 33. Just one section
         HEAD = self.writeENDFline([self.zam, self.awt, 0, 0, 0, 1],
-                self.MAT, self.MF, self.MT, lineN)
-        fout.write( HEAD ); lineN += 1
+                self.MAT, self.MF, self.MT)
+        fout.write( HEAD )
         
         # one NI subsection, although we may waste space with excess zeros:
         CONT = self.writeENDFline([0.0, 0.0, 0, self.MT, 0, 1],
-                self.MAT, self.MF, self.MT, lineN)
-        fout.write( CONT ); lineN += 1
+                self.MAT, self.MF, self.MT)
+        fout.write( CONT )
         
         # determine length of matrix, write header for matrix subsection:
         fullLength = sum( range( len(self.cov_mat)+1 ) ) + len(self.elist)
         CONT = self.writeENDFline([0.0,0.0,1,5,fullLength,len(self.elist)],
-                self.MAT, self.MF, self.MT, lineN)
-        fout.write( CONT ); lineN += 1
+                self.MAT, self.MF, self.MT)
+        fout.write( CONT )
         
         # past the header, now write the actual data. First make a list
         # with data in right format, energy followed by upper-diagonal matrix:
@@ -296,8 +295,7 @@ class MF33(MF_base):
         
         for i in range(nlines):
             fout.write( super(MF33,self).writeENDFline( 
-                tuple(tmplist[i*6:i*6+6]), self.MAT,self.MF,self.MT,lineN ) )
-            lineN += 1
+                tuple(tmplist[i*6:i*6+6]), self.MAT,self.MF,self.MT ) )
         
         # done with data, write SEND
         fout.write( super(MF33,self).writeSEND( self.MAT, self.MF ) )

@@ -183,7 +183,6 @@ class mgBase:
         
         
         for mt in mtList:
-            lineN = 1
             key = "MT%i" % mt
             
             # first get covariance matrix with energy in ascending order.
@@ -202,20 +201,19 @@ class mgBase:
             
             # right-most in tuple is number of sub-sections:
             str = b.writeENDFline([self.zam,self.awt,0,0,0,1],
-                    self.mat,33,mt,lineN); lineN += 1
+                    self.mat,33,mt)
             fout.write(str)
             # here number of sub-subsections:
             str = b.writeENDFline(['0.0','0.0',0,mt,0,1],
-                    self.mat,33,mt,lineN); lineN += 1
+                    self.mat,33,mt)
             fout.write(str)
             
             # CONT with number of energy points:
             matsize = len(covmat.diagonal())
             ndiag = matsize * (matsize+1) // 2
             str = b.writeENDFline(['0.0','0.0',1,5,ndiag,matsize],
-                    self.mat,33,mt,lineN)
+                    self.mat,33,mt)
             fout.write(str)
-            lineN += 1
             
             # write the matrix. elist should always start with 1.0e-5
             elist = [1.e-5] + list(self.elist[:self.thresholds[key][1]][::-1])
@@ -226,11 +224,11 @@ class mgBase:
             
             while len(tmplist) >= 6:
                 fout.write( b.writeENDFline( tuple(tmplist[:6]), 
-                    self.mat,33,mt,lineN ) ); lineN += 1
+                    self.mat,33,mt ) )
                 tmplist = tmplist[6:]
             if len(tmplist)>0:
                 fout.write( b.writeENDFline( tuple(tmplist), 
-                    self.mat,33,mt,lineN ) )
+                    self.mat,33,mt ) )
             
             fout.write( b.writeSEND( self.mat, 33 ) )
         
@@ -267,12 +265,11 @@ class mgBase:
         mtList.sort()
         
         # writing BOXR format:
-        bxS = b.writeENDFline([],1,0,0,0)
-        lNum = 1
+        bxS = b.writeTINIT()
         bxS += b.writeENDFline([self.zam,self.awt,0,0,-11,0], 
-                self.mat,1,451,lNum); lNum += 1
+                self.mat,1,451)
         bxS += b.writeENDFline([0.0,0.0,self.ngroups,0,self.ngroups+1,0], 
-                self.mat,1,451,lNum); lNum += 1
+                self.mat,1,451)
         
         # we want elist from small to big. Need 1e-5 in first place:
         elist = list(self.elist[::-1])
@@ -282,19 +279,18 @@ class mgBase:
         
         for idx in range(nline):
             bxS += b.writeENDFline( elist[6*idx:6*idx+6], 
-                    self.mat,1,451,lNum); lNum+=1
+                    self.mat,1,451)
         if rem>0:
             bxS += b.writeENDFline( elist[6*nline:6*nline+6], 
-                    self.mat,1,451,lNum); lNum+=1
+                    self.mat,1,451)
         
         bxS += b.writeSEND( self.mat, 1 )
         bxS += b.writeFEND( self.mat )
         
         # write all x-sections, "MF-3"
         for mt in mtList:
-            lNum = 1
             bxS += b.writeENDFline([0.0,0.0, 0,0,self.ngroups,0], 
-                    self.mat,3,mt,lNum); lNum += 1
+                    self.mat,3,mt)
             key = 'MT%i'%mt
             # switch order:
             mtXsec = self.xsecs[key][::-1]
@@ -303,10 +299,10 @@ class mgBase:
             
             for jdx in range(nline):
                 bxS += b.writeENDFline( mtXsec[6*jdx:6*jdx+6], 
-                        self.mat,3,mt,lNum); lNum+=1
+                        self.mat,3,mt)
             if rem>0:
                 bxS += b.writeENDFline( mtXsec[6*nline:6*nline+6], 
-                        self.mat,3,mt,lNum); lNum+=1
+                        self.mat,3,mt)
             
             bxS += b.writeSEND( self.mat, 3 )
         
@@ -322,15 +318,14 @@ class mgBase:
             # 'column' mt #'s that must be supplied for this 'row' mt:
             covarsThisMT = mtList[mtdx:]
             
-            lNum = 1
             bxS += b.writeENDFline([self.zam,self.awt,0,0,0,len(covarsThisMT)], 
-                    self.mat,33, mt, lNum); lNum += 1
+                    self.mat,33, mt)
             
             for colMT in covarsThisMT:
                 taketranspose = False
                 
                 bxS += b.writeENDFline([0.0,0.0,self.mat,colMT,0,self.ngroups], 
-                        self.mat,33,mt,lNum); lNum += 1
+                        self.mat,33,mt)
                 
                 # must try both 'MTxMTy' and 'MTyMTx':
                 key = 'MT%iMT%i' % (mt,colMT)
@@ -341,9 +336,8 @@ class mgBase:
                 if not key in self.covars.keys():
                     # ok, not present, so write blank section:
                     bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
-                        self.ngroups], self.mat,33,mt,lNum); lNum += 1
-                    bxS += b.writeENDFline([0.0], 
-                            self.mat,33,mt,lNum); lNum += 1
+                        self.ngroups], self.mat,33,mt)
+                    bxS += b.writeENDFline([0.0], self.mat,33,mt)
                     
                     continue
     
@@ -372,30 +366,29 @@ class mgBase:
                     line = line[start:end]
                     
                     bxS += b.writeENDFline([0.0,0.0,len(line),start+1,
-                        len(line),idx+1], self.mat,33,mt,lNum); lNum += 1
+                        len(line),idx+1], self.mat,33,mt)
                     nline, rem = divmod( len(line), 6 )
                     
                     for jdx in range(nline):
                         bxS += b.writeENDFline( line[6*jdx:6*jdx+6], 
-                                self.mat,33,mt,lNum); lNum+=1
+                                self.mat,33,mt)
                     if rem>0:
                         bxS += b.writeENDFline( line[6*nline:6*nline+6], 
-                                self.mat,33,mt,lNum); lNum+=1
+                                self.mat,33,mt)
                 
                 if len(empty)>0 and empty[-1] == self.ngroups-1:
                     # the matrix has zeros at high energy, write a footer
                     # to complete the section
                     bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
-                        self.ngroups], self.mat,33,mt,lNum); lNum += 1
-                    bxS += b.writeENDFline([0.0], 
-                            self.mat,33,mt,lNum); lNum += 1
+                        self.ngroups], self.mat,33,mt)
+                    bxS += b.writeENDFline([0.0], self.mat,33,mt)
             
             bxS += b.writeSEND( self.mat, 33 )
         
         # end of file:
         bxS += b.writeFEND( self.mat )
-        bxS += b.writeENDFline([], 0,0,0 )
-        bxS += b.writeENDFline([], -1,0,0 )
+        bxS += b.writeMEND()
+        bxS += b.writeTEND()
         
         fout = open(filename,"w")
         fout.write(bxS)
