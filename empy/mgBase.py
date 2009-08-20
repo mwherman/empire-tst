@@ -19,7 +19,6 @@ Some additional notes:
     self.corrs['MT1MT2'] gives cross-reaction correlations (n,tot) vs (n,el)
 """
 
-__metaclass__ = type
 
 from __future__ import division
 import sys
@@ -27,6 +26,7 @@ import os
 import math
 import numpy
 
+__metaclass__ = type
 
 class mgBase:
     """

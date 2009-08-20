@@ -10,7 +10,6 @@ Class for representing, reading and writing resonance region covariances
 (ENDF file 32)
 """
 
-__metaclass__ = type
 
 import sys
 import os
@@ -19,6 +18,8 @@ import math
 
 import endf
 from MF_base import *
+
+__metaclass__ = type
 
 class MF32(MF_base):
     def __init__(self, filename, zam=False):

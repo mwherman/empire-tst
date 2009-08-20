@@ -24,12 +24,12 @@ Usage:
 
 """
 
-__metaclass__ = type
 
 import sys
 import os
 import math
 
+__metaclass__ = type
 
 class UnknownMTFormat(NotImplementedError):
     """

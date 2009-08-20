@@ -11,7 +11,6 @@ Puff is more verbose than NJOY, has information on RI and Thermal values
 for example
 """
 
-__metaclass__ = type
 
 from __future__ import division
 import sys
@@ -21,6 +20,7 @@ import numpy
 
 from mgBase import *
 
+__metaclass__ = type
 
 class mgCovars(mgBase):
     """

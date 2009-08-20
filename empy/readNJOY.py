@@ -9,7 +9,6 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 Read NJOY ascii multi-group covariance output into class
 """
 
-__metaclass__ = type
 
 from __future__ import division
 import sys
@@ -19,6 +18,7 @@ import numpy
 
 from mgBase import *
 
+__metaclass__ = type
 
 class mgCovars(mgBase):
     """

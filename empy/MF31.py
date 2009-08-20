@@ -11,7 +11,6 @@ Includes functions for manipulating the matrix, and for writing a
 new MT section
 """
 
-__metaclass__ = type
 
 import sys
 import os
@@ -20,6 +19,8 @@ import math
 
 import endf
 from MF_base import *
+
+__metaclass__ = type
 
 class MF31(MF_base):
     def __init__(self, filename, MT):

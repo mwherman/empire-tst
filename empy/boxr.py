@@ -34,6 +34,7 @@ import math
 import struct
 import numpy
 
+__metaclass__ = type
 
 class mgCovars:
     """
