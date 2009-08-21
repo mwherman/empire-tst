@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:17 $
-Ccc   * $Id: subecis06m.f,v 1.2 2009-01-15 17:48:17 Capote Exp $
+Ccc   * $Date: 2009-08-21 09:13:02 $
+Ccc   * $Id: subecis06m.f,v 1.3 2009-08-21 09:13:02 Capote Exp $
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
 C     20. Aug. 2008
@@ -20994,7 +20994,7 @@ C COMPOUND NUCLEUS RESULTS.                                             RESU-357
 C PSEUDO DO LOOP ON LEVELS.                                             RESU-422
    43 IF (WV(3,INIV).GT.0.D0) GO TO 44                                  RESU-423
       WRITE (MW,1027) INIV                                              RESU-424
-      IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
+C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
       IF (LO(59)) WRITE (59,1029) INIV-1                                RESU-426
       GO TO 57                                                          RESU-427
    44 RX=TX(INIV+1)                                                     RESU-428
