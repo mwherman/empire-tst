@@ -32,7 +32,6 @@ def main(zam):
     writeKalmanPars = False
 
     flag1 = False
-    lineNo = 0
     MAT=0; MF=0; MT=0
     
     # read the endf file created by ptanal/wriurr, create 'resNew' file:
@@ -57,26 +56,24 @@ def main(zam):
     pars, mat = readKalmanOut(zam,nres)
     
     # write file up to MF32:
-    for ll in fin:
-        MAT, MF, MT = endf.getVals(ll)
+    for ll in range(len(fin)):
+        MAT, MF, MT = endf.getVals(fin[ll])
         #print MAT, MF, MT
         if MF==32:
             break
-        fout.write(ll)
-        lineNo += 1
-    
-    
-    mf32_line = 1
-    for ll in range(lineNo,lineNo+5):
-        # write the MF32 header:
         fout.write(fin[ll])
-        mf32_line += 1
+    
+    
+    for ll in range(ll,ll+5):
+        # write five lines of MF32 header:
+        fout.write(fin[ll])
     ll += 1
     
     # now go through the parameters changed in Kalman, and change here as well
     # skip R' however
     
     m = MF_base()
+    m.numberLines = False
     
     for i in range(len(pars) // 3 ):
         vals = m.readENDFline(fin[ll + 2*i])
@@ -89,7 +86,8 @@ def main(zam):
         Gg = pars[3*i + 3]
         
         # adjust parameters based on Kalman
-        vals[0] *= En[0]; vals[3] *= Gn[0]; vals[4] *= Gg[0]; vals[2] = vals[3]+vals[4]
+        vals[0] *= En[0]; vals[3] *= Gn[0]; vals[4] *= Gg[0]; 
+        vals[2] = vals[3]+vals[4]
         
         # and adjust uncertainties based on the new Kalman values:
         unc[0] = 0.01 * En[1] * math.fabs(vals[0])
@@ -99,17 +97,15 @@ def main(zam):
         
         if writeKalmanPars:
             # write new parameters from Kalman
-            st = m.writeENDFline(vals,MAT,MF,MT,mf32_line)
+            st = m.writeENDFline(vals,MAT,MF,MT)
             fout.write(st)
         else:
             # keep original parameters from Atlas
             fout.write( valLine )
-        mf32_line += 1
-    
+        
         # either way, write the new uncertainties from Kalman:
-        st = m.writeENDFline(unc,MAT,MF,MT,mf32_line)
+        st = m.writeENDFline(unc,MAT,MF,MT)
         fout.write(st)
-        mf32_line += 1
     
     # change ll now that we are past the first few parameters:
     ll += 2 * (len(pars) // 3)
@@ -128,11 +124,8 @@ def main(zam):
             break
         #otherwise write the line
         fout.write(fin[ll])
-        lineNo += 1
-    
     
     # add covariance matrix from Kalman output:
-    
     kij = numpy.zeros( (18) )
     
     nnn = 3*nres
@@ -156,12 +149,7 @@ def main(zam):
     mtwrite = 151
 
     # revised header:
-    fout.write( m.writeENDFline( [0.0,0.0,3,nnn,nm,0],MAT,MF,mtwrite,0 ) )
-
-    # INTG format isn't implemented in MF_base yet
-    str4000a = ("%5i%5i ")
-    str4000b = ("%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i")
-    str4000c = ("   %4i%2i%3i%5i\n")
+    fout.write( m.writeENDFline( [0.0,0.0,3,nnn,nm,0],MAT,MF,mtwrite ) )
     
     for i in range(nnn):
         j = 0
@@ -178,8 +166,7 @@ def main(zam):
                 
                 if i==9 or i==10:
                     print kij
-                str = (str4000a%(i+1,j+1) + str4000b%tuple(kij[:13]) 
-                        + str4000c%(MAT,MF,mtwrite,0))
+                str = m.writeINTG( i+1,j+1, tuple(kij[:13]), MAT,MF,mtwrite )
                 fout.write( str )
                 j += leng
                 # reset kij to all zeros
