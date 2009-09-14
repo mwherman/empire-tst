@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:34 $
-Ccc   * $Id: auxiliary.f,v 1.40 2009-08-02 23:58:34 Capote Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2009-09-14 18:45:59 $
+Ccc   * $Id: auxiliary.f,v 1.41 2009-09-14 18:45:59 pigni Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -77,7 +77,7 @@ C     ENDDO
       CSPfis   = 0.d0
       EX       = 0.d0
       JSTab    = 0.d0
-      QPRod    = 0.d0
+      QPRod    = -1.d10
       FISb     = 0.d0
       ETL      = 0.d0
       LMAxtl   = 0.d0
