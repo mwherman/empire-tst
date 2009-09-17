@@ -500,6 +500,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_10_0.cpd74 {
         array set save {-_tooltip 1 -background 1 -foreground 1 -highlightcolor 1 -insertbackground 1 -selectbackground 1 -selectforeground 1 -textvariable 1}
     }
+    namespace eval ::widgets::$site_10_0.ent65 {
+        array set save {-background 1 -insertbackground 1 -textvariable 1}
+    }
     namespace eval ::widgets::$site_8_0.lab77 {
         array set save {-foreground 1 -highlightcolor 1 -labelpos 1 -labeltext 1 -text 1}
     }
@@ -823,8 +826,8 @@ proc ::LoadVars {} {
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
   global m_fErmax m_fEumax
-# m_fR, m_fDR : scattering radius and its error
-  global m_fR m_fDR
+# m_fR, m_fdR : scattering radius and its error
+  global m_fR m_fdR
 # m_fSS, m_fDSS : scattering cross section and its error
   global m_fSS m_fDSS
 # m_fCS, m_fDCS : capture cross section and its error
@@ -884,7 +887,7 @@ proc ::LoadVars {} {
   set m_fGg1 [format "%.2f" [lindex $output 11]]
   set m_fGg2 [format "%.2f" [lindex $output 12]]
   set m_fR [format "%.2f" [lindex $output 13]]
-  set m_fDR [format "%.2f" [lindex $output 14]]
+  set m_fdR [format "%.2f" [lindex $output 14]]
   set m_fSS [format "%f" [lindex $output 15]]
   set m_fDSS [format "%f" [lindex $output 16]]
   set m_fCS [format "%f" [lindex $output 17]]
@@ -1025,7 +1028,7 @@ proc ::RunKALMAN {} {
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
   global m_fErmax m_fEumax
-  global m_fR m_fDR m_fCutoff m_fDe m_fLdp m_fGPower
+  global m_fR m_fdR m_fCutoff m_fDe m_fLdp m_fGPower
   global m_fSS m_fDSS m_fCS m_fDCS
   global m_fGn0_cut m_fGn1_cut
   global m_nNoResToBeAdjusted m_nNoResToBeEvaluated m_nNoExtraRes
@@ -1092,7 +1095,7 @@ proc ::RunKALMAN {} {
       puts $file " ggavg=$m_fGg0, $m_fGg1"
       if {$m_fErmax != ""} {puts $file " ecut=$m_fErmax"}
       if {$m_fGn0_cut != ""} {puts $file " gncut=$m_fGn0_cut,$m_fGn1_cut"}
-      puts $file [format " ap=%f dap=%f" [expr $m_fR/10] [expr $m_fDR/10]]
+      puts $file [format " ap=%f dap=%f" [expr $m_fR/10] [expr $m_fdR/10]]
       if {$i == -3} {
         puts $file [format " adjust='K0001/%04d %2d%4d'" $m_nNoResToBeAdjusted $m_nNoResToBeEvaluated $m_nNoExtraRes]
       } elseif {$i == -2} {
@@ -1278,7 +1281,7 @@ proc ::RunCodes {} {
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
   global m_fErmax m_fEumax
-  global m_fR m_fDR m_fCutoff m_fDe m_fLdp m_fGPower
+  global m_fR m_fdR m_fCutoff m_fDe m_fLdp m_fGPower
   global m_fGn0_cut m_fGn1_cut
   global m_bIcon1 m_bIcon2 m_bIcon3
   global m_bGotPTANAL m_bGotWRIURR m_bGotRECENT
@@ -1338,7 +1341,7 @@ proc ::RunCodes {} {
     puts $file " ggavg=$m_fGg0, $m_fGg1"
     if {$m_fErmax != ""} {puts $file " ecut=$m_fErmax"}
     if {$m_fGn0_cut != ""} {puts $file " gncut=$m_fGn0_cut,$m_fGn1_cut"}
-    puts $file [format " ap=%f" [expr $m_fR/10]]
+    puts $file [format " ap=%f dap=%f" [expr $m_fR/10] [expr $m_fdR/10]]
     puts $file "&end"
     close $file
 #   run PTANAL
@@ -1480,7 +1483,7 @@ proc vTclWindow. {base} {
     ###################
     wm focusmodel $top passive
     wm geometry $top 1x1+0+0; update
-    wm maxsize $top 1905 1170
+    wm maxsize $top 1905 1140
     wm minsize $top 1 1
     wm overrideredirect $top 0
     wm resizable $top 1 1
@@ -1511,7 +1514,7 @@ proc vTclWindow.top71 {base} {
     vTcl:toplevel $top -class Toplevel \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 617x543+623+144; update
+    wm geometry $top 617x543+955+176; update
     wm maxsize $top 1585 1120
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -1931,6 +1934,9 @@ proc vTclWindow.top71 {base} {
     bind $site_10_0.cpd74 <<SetBalloon>> {
         set ::vTcl::balloon::%W {weak resonance cutoff width for p-wave [meV]}
     }
+    entry $site_10_0.ent65 \
+        -background white -insertbackground black -textvariable m_fdR 
+    vTcl:DefineAlias "$site_10_0.ent65" "Entry22" vTcl:WidgetProc "Toplevel1" 1
     place $site_10_0.cpd75 \
         -in $site_10_0 -x 10 -y 5 -width 60 -height 20 -anchor nw \
         -bordermode ignore 
@@ -1941,7 +1947,7 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 185 -y 5 -width 60 -height 20 -anchor nw \
         -bordermode ignore 
     place $site_10_0.ent72 \
-        -in $site_10_0 -x 256 -y 5 -width 80 -height 22 -anchor nw \
+        -in $site_10_0 -x 256 -y 5 -width 40 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.cpd71 \
         -in $site_10_0 -x 10 -y 35 -width 60 -anchor nw -bordermode inside 
@@ -1953,6 +1959,9 @@ proc vTclWindow.top71 {base} {
         -bordermode ignore 
     place $site_10_0.cpd74 \
         -in $site_10_0 -x 256 -y 35 -width 80 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent65 \
+        -in $site_10_0 -x 301 -y 5 -width 35 -height 22 -anchor nw \
         -bordermode ignore 
     ::iwidgets::labeledframe $site_8_0.lab77 \
         -foreground #000000 -labelpos nw -labeltext {Unresolved region} 
