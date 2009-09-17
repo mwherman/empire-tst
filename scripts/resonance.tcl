@@ -351,6 +351,15 @@ proc vTcl:project:info {} {
             array set save {-command 1 -label 1}
         }
     }
+    namespace eval ::widgets::$site_3_0.men67 {
+        array set save {-menu 1 -padx 1 -pady 1 -text 1}
+    }
+    namespace eval ::widgets::$site_3_0.men67.m {
+        array set save {-tearoff 1}
+        namespace eval subOptions {
+            array set save {-accelerator 1 -command 1 -label 1}
+        }
+    }
     namespace eval ::widgets::$site_3_0.men72 {
         array set save {-menu 1 -padx 1 -pady 1 -text 1}
     }
@@ -386,15 +395,6 @@ proc vTcl:project:info {} {
         array set save {-tearoff 1}
         namespace eval subOptions {
             array set save {-command 1 -label 1}
-        }
-    }
-    namespace eval ::widgets::$site_3_0.men67 {
-        array set save {-menu 1 -padx 1 -pady 1 -text 1}
-    }
-    namespace eval ::widgets::$site_3_0.men67.m {
-        array set save {-tearoff 1}
-        namespace eval subOptions {
-            array set save {-accelerator 1 -command 1 -label 1}
         }
     }
     namespace eval ::widgets::$base.tab85 {
@@ -637,6 +637,9 @@ proc vTcl:project:info {} {
     }
     namespace eval ::widgets::$site_10_0.rad70 {
         array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
+    }
+    namespace eval ::widgets::$site_10_0.but66 {
+        array set save {-command 1 -text 1}
     }
     namespace eval ::widgets::$site_8_0.lab66 {
         array set save {-labelpos 1 -labeltext 1}
@@ -1212,11 +1215,12 @@ proc ::RunKALMAN {} {
     close $senfile
 
     set fn [format "%s.c4" $m_szZAname]
-    set c4file [open $fn w]
-    puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 2 0.0253 0 $m_fSS $m_fDSS 0 0 0 0 "S.F.Mughabghab (06)" 10000 1]
-    puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 102 0.0253 0 $m_fCS $m_fDCS 0 0 0 0 "S.F.Mughabghab (06)" 10000 2]
-    close $inpfile
-
+    if {![file exist $fn]} {
+      set c4file [open $fn w]
+      puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 2 0.0253 0 $m_fSS $m_fDSS 0 0 0 0 "S.F.Mughabghab (06)" 10000 1]
+      puts $c4file [format "%5i%6i%4i%4i   %9f%9f%9f%9f%9f%9f%9f%9f   %-25s%5d%3d" 1 $m_nZA 3 102 0.0253 0 $m_fCS $m_fDCS 0 0 0 0 "S.F.Mughabghab (06)" 10000 2]
+      close $inpfile
+    }
     set m_bGotSensitivity 1
   }
   if {$m_bAllcodes1 != 0 || $m_bKALMAN != 0} {
@@ -1476,7 +1480,7 @@ proc vTclWindow. {base} {
     ###################
     wm focusmodel $top passive
     wm geometry $top 1x1+0+0; update
-    wm maxsize $top 1425 848
+    wm maxsize $top 1905 1170
     wm minsize $top 1 1
     wm overrideredirect $top 0
     wm resizable $top 1 1
@@ -1552,14 +1556,14 @@ proc vTclWindow.top71 {base} {
     menu $site_3_0.men67.m \
         -tearoff 0 
     $site_3_0.men67.m add command \
-        -accelerator Ctrl+C -command {exec $m_szEditor $m_szZAname.c4} \
+        -accelerator Ctrl+C -command {exec $m_szEditor $m_szZAname.c4 &} \
         -label {Edit C4} 
     $site_3_0.men67.m add command \
-        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf} \
+        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf &} \
         -label {Edit EXFOR} 
     $site_3_0.men67.m add command \
-        -command {exec $m_szEditor $m_szZAname-inp.sen} \
-        -label {Sensitivity input} 	
+        -accelerator {} -command {exec $m_szEditor $m_szZAname-inp.sen &} \
+        -label {Sensitivity input} 
     $site_3_0.men67.m add command \
         -accelerator {} \
         -command {if {[file exists $m_szZAname-expcorr.kal]} {
@@ -2417,6 +2421,10 @@ proc vTclWindow.top71 {base} {
     bind $site_10_0.rad70 <<SetBalloon>> {
         set ::vTcl::balloon::%W {All reactions}
     }
+    button $site_10_0.but66 \
+        -command { exec $m_szBaseDir/scripts/addKalman.py $m_szFile } \
+        -text {Save cov.} 
+    vTcl:DefineAlias "$site_10_0.but66" "Button20" vTcl:WidgetProc "Toplevel1" 1
     place $site_10_0.lab71 \
         -in $site_10_0 -x 10 -y 10 -width 218 -height 20 -anchor nw \
         -bordermode ignore 
@@ -2424,19 +2432,19 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 255 -y 9 -width 47 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab73 \
-        -in $site_10_0 -x 10 -y 36 -width 243 -height 20 -anchor nw \
+        -in $site_10_0 -x 10 -y 38 -width 243 -height 20 -anchor nw \
         -bordermode ignore 
     place $site_10_0.ent74 \
-        -in $site_10_0 -x 255 -y 35 -width 47 -height 22 -anchor nw \
+        -in $site_10_0 -x 255 -y 37 -width 47 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.but73 \
-        -in $site_10_0 -x 413 -y 9 -width 110 -height 30 -anchor nw \
+        -in $site_10_0 -x 413 -y 1 -width 110 -height 30 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab65 \
-        -in $site_10_0 -x 10 -y 62 -width 214 -height 20 -anchor nw \
+        -in $site_10_0 -x 10 -y 65 -width 214 -height 20 -anchor nw \
         -bordermode ignore 
     place $site_10_0.ent66 \
-        -in $site_10_0 -x 255 -y 61 -width 47 -height 22 -anchor nw \
+        -in $site_10_0 -x 255 -y 64 -width 47 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.tex65 \
         -in $site_10_0 -x 540 -y 92 -anchor nw -bordermode ignore 
@@ -2444,34 +2452,37 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 311 -y 9 -width 82 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.che67 \
-        -in $site_10_0 -x 314 -y 34 -width 94 -height 22 -anchor nw \
+        -in $site_10_0 -x 314 -y 36 -width 94 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.che68 \
-        -in $site_10_0 -x 314 -y 59 -width 82 -height 22 -anchor nw \
+        -in $site_10_0 -x 314 -y 62 -width 82 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.but65 \
-        -in $site_10_0 -x 413 -y 47 -width 110 -height 30 -anchor nw \
+        -in $site_10_0 -x 413 -y 33 -width 110 -height 30 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab66 \
-        -in $site_10_0 -x 10 -y 89 -width 241 -height 20 -anchor nw \
+        -in $site_10_0 -x 10 -y 95 -width 241 -height 20 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad65 \
-        -in $site_10_0 -x 253 -y 88 -width 58 -height 22 -anchor nw \
+        -in $site_10_0 -x 253 -y 94 -width 58 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad66 \
-        -in $site_10_0 -x 313 -y 88 -width 33 -height 22 -anchor nw \
+        -in $site_10_0 -x 313 -y 94 -width 33 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad67 \
-        -in $site_10_0 -x 348 -y 88 -width 33 -height 22 -anchor nw \
+        -in $site_10_0 -x 348 -y 94 -width 33 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad68 \
-        -in $site_10_0 -x 384 -y 89 -width 42 -height 22 -anchor nw \
+        -in $site_10_0 -x 384 -y 95 -width 42 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad69 \
-        -in $site_10_0 -x 428 -y 89 -width 48 -height 22 -anchor nw \
+        -in $site_10_0 -x 428 -y 95 -width 48 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.rad70 \
-        -in $site_10_0 -x 478 -y 88 -width 43 -height 22 -anchor nw \
+        -in $site_10_0 -x 478 -y 94 -width 43 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.but66 \
+        -in $site_10_0 -x 413 -y 65 -width 110 -height 26 -anchor nw \
         -bordermode ignore 
     ::iwidgets::labeledframe $site_8_1.lab66 \
         -labelpos nw -labeltext Evaluation 
