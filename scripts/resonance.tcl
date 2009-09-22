@@ -740,6 +740,55 @@ proc vTcl:project:info {} {
 #################################
 # USER DEFINED PROCEDURES
 #
+
+#############################################################################
+# Edit file in editor of choice:
+#
+proc ::editFile {filename} {
+        ## make empire flexible enough to handle opening files
+        ## on various platforms. C.Mattoon, Nov 13 2008
+        if {$::m_szEditor == "specify editor"} {
+                set ::editor [tk_getOpenFile  -parent .top75 -title "Select editor"]
+        }
+        
+        if {$::tcl_platform(os)=="Darwin"} {
+                if [regexp {\.app} $::m_szEditor] {
+                        exec open -a $::m_szEditor $filename
+                } else {
+                        # hopefully command is recognized:
+                        exec $::m_szEditor $filename &
+                }
+        } elseif {$::tcl_platform(os)=="Linux"} {
+                exec $::m_szEditor $filename &
+        } else {
+                # most likely windows, I don't know how to handle this yet
+                # need a windows machine to test with...
+                exec $::m_szEditor $filename &
+        }
+}
+
+#############################################################################
+# Open ps/pdf file in viewer of choice:
+#
+proc ::pspdfView {filename} {
+        ## make empire flexible enough to handle opening files
+        ## on various platforms. C.Mattoon, Nov 13 2008
+        if {$::tcl_platform(os)=="Darwin"} {
+                if [regexp {\.app} $::m_szPsviewer] {
+                        exec open -a $::m_szPsviewer $filename      
+                } else {
+                        # hopefully command is recognized:
+                        exec $::m_szPsviewer $filename &
+                }
+        } elseif {$::tcl_platform(os)=="Linux"} {
+                exec $::m_szPsviewer $filename &
+        } else {
+                # most likely windows, I don't know how to handle this yet
+                # need a windows machine to test with
+                exec $::m_szPsviewer $filename &
+        }
+}
+
 #############################################################################
 ## Procedure:  main
 
@@ -757,7 +806,12 @@ proc ::main {argc argv} {
   } else {
     set m_szBaseDir [file dirname $argv0]
   }
-  set m_szBaseDir $m_szBaseDir/..
+  # use EMPIREDIR variable if available:
+  if {[file exists $::env(EMPIREDIR)] == 1} {
+      set m_szBaseDir $::env(EMPIREDIR)
+  } else {
+      set m_szBaseDir $m_szBaseDir/..
+  }
   cd $m_szBaseDir
   set m_szBaseDir [pwd]
   cd $m_szWorkingDir
@@ -1559,18 +1613,18 @@ proc vTclWindow.top71 {base} {
     menu $site_3_0.men67.m \
         -tearoff 0 
     $site_3_0.men67.m add command \
-        -accelerator Ctrl+C -command {exec $m_szEditor $m_szZAname.c4 &} \
+        -accelerator Ctrl+C -command { editFile $m_szZAname.c4 } \
         -label {Edit C4} 
     $site_3_0.men67.m add command \
-        -accelerator Ctrl+E -command {exec $m_szEditor $m_szFile.exf &} \
+        -accelerator Ctrl+E -command { editFile $m_szFile.exf } \
         -label {Edit EXFOR} 
     $site_3_0.men67.m add command \
-        -accelerator {} -command {exec $m_szEditor $m_szZAname-inp.sen &} \
+        -accelerator {} -command { editFile $m_szZAname-inp.sen } \
         -label {Sensitivity input} 
     $site_3_0.men67.m add command \
         -accelerator {} \
         -command {if {[file exists $m_szZAname-expcorr.kal]} {
-    exec $m_szEditor $m_szZAname-expcorr.kal &
+    editFile $m_szZAname-expcorr.kal 
   } else {
     tk_dialog .msgbox "Error" "KALMAN experimental correlations not found. Run KALMAN first" info 0 OK
   }} \
@@ -1578,7 +1632,7 @@ proc vTclWindow.top71 {base} {
     $site_3_0.men67.m add command \
         -accelerator {} \
         -command {if {[file exists $m_szZAname-expxsc.kal]} {
-    exec $m_szEditor $m_szZAname-expxsc.kal &
+    editFile $m_szZAname-expxsc.kal 
   } else {
     tk_dialog .msgbox "Error" "KALMAN experimental cross-sections not found. Run KALMAN first" info 0 OK
   }} \
@@ -1586,7 +1640,7 @@ proc vTclWindow.top71 {base} {
     $site_3_0.men67.m add command \
         -accelerator {} \
         -command {if {[file exists $m_szZAname-parcorr.kal]} {
-    exec $m_szEditor $m_szZAname-parcorr.kal &
+    editFile $m_szZAname-parcorr.kal 
   } else {
     tk_dialog .msgbox "Error" "Parameter correlations for KALMAN not found. Run KALMAN first" info 0 OK
   }} \
@@ -1606,7 +1660,7 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists ptanal.std]} {
-    exec $m_szEditor ptanal.std &
+    editFile ptanal.std 
   }
         } \
         -label log 
@@ -1615,7 +1669,7 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists $m_szFile-log.ptanal]} {
-    exec $m_szEditor $m_szFile-log.ptanal &
+    editFile $m_szFile-log.ptanal 
   }
         } \
         -label output 
@@ -1629,7 +1683,7 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists wriurr.std]} {
-    exec $m_szEditor wriurr.std &
+    editFile wriurr.std 
   }
         } \
         -label log 
@@ -1638,7 +1692,7 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists $m_szFile-log.wriurr]} {
-      exec $m_szEditor $m_szFile-log.wriurr &
+      editFile $m_szFile-log.wriurr 
   }
         } \
         -label output 
@@ -1652,7 +1706,7 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists recent.std]} {
-    exec $m_szEditor recent.std &
+    editFile recent.std 
   }
         } \
         -label log 
@@ -1661,7 +1715,7 @@ proc vTclWindow.top71 {base} {
         -command {
   if {$m_bGotRECENT} {
     cd $m_szWorkingDir
-    exec $m_szEditor RECENT.LST &
+    editFile RECENT.LST 
   }
          } \
         -label output 
@@ -1674,7 +1728,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szZAname-mat.sen]} {
-    exec $m_szEditor $m_szZAname-mat.sen &
+    editFile $m_szZAname-mat.sen 
   } else {
     tk_dialog .msgbox "Error" "Sensitivity matrix not found. Run 'Sensitivity' first" info 0 OK
   }
@@ -1684,7 +1738,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szZAname-out.kal]} {
-    exec $m_szEditor $m_szZAname-out.kal &
+    editFile $m_szZAname-out.kal 
   } else {
     tk_dialog .msgbox "Error" "KALMAN output not found. Run KALMAN first" info 0 OK
   }
@@ -1694,7 +1748,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szZAname-xsc.kal]} {
-    exec $m_szEditor $m_szZAname-xsc.kal &
+    editFile $m_szZAname-xsc.kal 
   } else {
     tk_dialog .msgbox "Error" "KALMAN x-sections not found. Run KALMAN first" info 0 OK
   }
@@ -1704,7 +1758,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szZAname-cov.kal]} {
-    exec $m_szEditor $m_szZAname-cov.kal &
+    editFile $m_szZAname-cov.kal 
   } else {
     tk_dialog .msgbox "Error" "KALMAN covariance matrices not found. Run KALMAN first" info 0 OK
   }
@@ -2105,7 +2159,7 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" [format "Local resonance parameter table '%s' not found" $m_szFile.atlas] info 0 OK
     return
   }
-  exec $m_szEditor $m_szFile.atlas &
+  editFile $m_szFile.atlas 
     } \
         -text {Edit resonance parameters} -width 211 
     vTcl:DefineAlias "$site_8_0.but75" "Button6" vTcl:WidgetProc "Toplevel1" 1
@@ -2118,7 +2172,7 @@ proc vTclWindow.top71 {base} {
         -command {
   set psfn [format "z%03d.ps" $m_nZ]
   if {[file exists $m_szAtlasDir/post-script/$psfn]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/$psfn &
+    pspdfView $m_szAtlasDir/post-script/$psfn
   } else {
     tk_dialog .msgbox "Error" "Atlas of Neutron Resonances not found" info 0 OK
   }
@@ -2133,7 +2187,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/rprime.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/rprime.eps &
+    pspdfView $m_szAtlasDir/post-script/rprime.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of R' not found" info 0 OK
   }
@@ -2144,7 +2198,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/density.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/density.eps &
+    pspdfView $m_szAtlasDir/post-script/density.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of level density parameter not found" info 0 OK
   }
@@ -2155,7 +2209,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/swave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/swave.eps &
+    pspdfView $m_szAtlasDir/post-script/swave.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of strength function for s-wave not found" info 0 OK
   }
@@ -2166,7 +2220,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/pwave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/pwave.eps &
+    pspdfView $m_szAtlasDir/post-script/pwave.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of strength function for p-wave not found" info 0 OK
   }
@@ -2177,7 +2231,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/dwave.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/dwave.eps &
+    pspdfView $m_szAtlasDir/post-script/dwave.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of strength function for d-wave not found" info 0 OK
   }
@@ -2188,7 +2242,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/gammagamma0.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma0.eps &
+    pspdfView $m_szAtlasDir/post-script/gammagamma0.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of s-wave average capture width not found" info 0 OK
   }
@@ -2199,7 +2253,7 @@ proc vTclWindow.top71 {base} {
         \
         -command {
   if {[file exists $m_szAtlasDir/post-script/gammagamma1.eps]} {
-    exec $m_szPsviewer $m_szAtlasDir/post-script/gammagamma1.eps &
+    pspdfView $m_szAtlasDir/post-script/gammagamma1.eps
   } else {
     tk_dialog .msgbox "Error" "Plot of p-wave average capture width not found" info 0 OK
   }
@@ -2378,7 +2432,7 @@ proc vTclWindow.top71 {base} {
         set ::vTcl::balloon::%W {Code for uncertainty and covariance estimation}
     }
     button $site_10_0.but65 \
-        -command {exec $m_szEditor $m_szZAname-parcorr.kal} \
+        -command { editFile $m_szZAname-parcorr.kal } \
         -text {Parameter unc.} 
     vTcl:DefineAlias "$site_10_0.but65" "Button9" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but65 "$site_10_0.but65 Button $top all _vTclBalloon"
@@ -2554,7 +2608,7 @@ proc vTclWindow.top71 {base} {
       return
     }
     exec mv -f scanr.ps $m_szFile-res.ps
-    exec $m_szPsviewer $m_szFile-res.ps &
+    pspdfView $m_szFile-res.ps
   } else {
     tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
   }
@@ -2574,7 +2628,7 @@ proc vTclWindow.top71 {base} {
       tk_dialog .msgbox "Error" "Plot not found\nProbably your GNUPLOT is outdated" info 0 OK
       return
     }
-    exec $m_szPsviewer ptdist.ps &
+    pspdfView ptdist.ps
   } else {
     tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
   }
@@ -2660,9 +2714,9 @@ proc vTclWindow.top71 {base} {
         -command {
   cd $m_szWorkingDir
   if {[file exists $m_szFile-res.endf]} {
-    exec $m_szEditor $m_szFile-res.endf &
+    editFile $m_szFile-res.endf 
   } elseif {$m_bGotPTANAL == 1} {
-    exec $m_szEditor endfr.txt &
+    editFile endfr.txt 
    }
     } \
         -text ENDF -width 112 
