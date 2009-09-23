@@ -4,6 +4,7 @@
 addKalman.py
 
 Created by Caleb Mattoon on 2008-10-09.
+Modified by Young-Sik Cho on 2009-09-22.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 1) run ptanal and wriurr to create basic MF2 and MF32.
@@ -24,9 +25,10 @@ import math
 from empy import endf
 from empy.MF_base import *
 
-def main(zam):
+def main(zam,rgn,rgg,nrr):
     # should be in form '025055'
     zam = zam.zfill(6)
+    print 'argument=',rgn,',',rgg,',',nrr
 
     # should we write new parameter vals from the Kalman update?
     writeKalmanPars = False
@@ -51,10 +53,15 @@ def main(zam):
     
     # lStart32+4 tells us how many resonances are present in the file:
     nResLine = fin[lStart32+4]; nres = int(nResLine[55:66])
-    
+   
     # read Kalman results for updated parameters and covariance matrix:
-    pars, mat = readKalmanOut(zam,nres)
-    
+    pars, mat, ncorr = readKalmanOut(zam,nres)
+    print 'ncorr=',ncorr   
+
+    # adjust nrr so that it is between ncorr/3 and nres (Cho)
+    nrr = min(nrr, nres);
+    nrr = max(nrr, ncorr // 3)
+
     # write file up to MF32:
     for ll in range(len(fin)):
         MAT, MF, MT = endf.getVals(fin[ll])
@@ -62,8 +69,19 @@ def main(zam):
         if MF==32:
             break
         fout.write(fin[ll])
-    
-    
+
+    # find out the energy of nrr(th) resonance and correct the upper energy limit (Cho)
+    nn = 0
+    for nn in range(ll+5,len(fin)):
+        if nn == ll+5+2*(nrr-1):
+          upenergy = fin[nn][0:11];
+          break;
+
+    fin[ll+2] = "%s%11s%s" % (fin[ll+2][0:11],upenergy,fin[ll+2][22:])
+
+    # correct the number of resonances
+    fin[ll+4] = "%s%11d%11d%s" % (fin[ll+4][0:44],18*nrr,nrr,fin[ll+4][66:])
+
     for ll in range(ll,ll+5):
         # write five lines of MF32 header:
         fout.write(fin[ll])
@@ -109,7 +127,10 @@ def main(zam):
     
     # change ll now that we are past the first few parameters:
     ll += 2 * (len(pars) // 3)
-    
+
+    # write uncertainties of only up to nrr resonances (Cho)
+    nunc = 2 * (len(pars) // 3)
+
     # keep writing ENDF file up to start of off-diagonal portion:
     for ll in range(ll,len(fin)):
         MAT, MF, MT = endf.getVals(fin[ll])
@@ -122,16 +143,30 @@ def main(zam):
         if flag1 and endf.isSEND(fin[ll]):
             # missed insertion spot, put at end of file
             break
-        #otherwise write the line
-        fout.write(fin[ll])
+        #otherwise write the line or loop while MF==32 (Cho)
+        nunc += 1
+        if nunc <= 2*nrr:
+            fout.write(fin[ll])
     
     # add covariance matrix from Kalman output:
     kij = numpy.zeros( (18) )
     
-    nnn = 3*nres
+#    nnn = 3*nres (Cho)
+    nnn = 3*nrr
     ndigit=3
     nm = 0
-    
+
+    # assign correlations between Gns or between Ggs (Cho)
+    for i in range(ncorr+1,min(3*nrr,nnn)):
+        if (i+2)%3 == 0:
+            for j in range(ncorr+1, i):
+                if (j+2)%3 == 0:
+                    mat[i,j] = rgn
+        elif (i+1)%3 == 0:
+            for j in range(ncorr+1, i):
+                if (j+1)%3 == 0:
+                    mat[i,j] = rgg
+
     # number of lines for correlation coefficients:
     for i in range(nnn):
         j = 0
@@ -144,7 +179,7 @@ def main(zam):
                 j+=1
     
     print 'nm=',nm
-    
+
     # mf and mt will always be 32 and 151 (I think)
     mtwrite = 151
 
@@ -198,7 +233,7 @@ def readKalmanOut(zam,nres):
     # the next line tells how many Kalman actually varies 
     # (ESTIMATED PARAMETERS):
     npar = int(fkal.next().strip().split()[-1])
-    
+   
     while True:
         # read past the header, search for start of 
         # uncertainties:
@@ -289,7 +324,9 @@ def readKalmanOut(zam,nres):
     #if numpy.max( numpy.any(corrmat,numpy.nan) ):
     # Nope! numpy.any() doesn't work properly with nan, (in v2.4, or any float values
     # in later versions), so use brute force method instead
-    
+
+    # find out number of resonance parameters (=ncorr) in Kalman output (Cho)
+    ncorr=npar
     for idx in range(npar)[::-1]: 
         # start at end to keep it simple, 
         # matrix should be lower-diagonal, DON'T symmetrize!
@@ -302,10 +339,11 @@ def readKalmanOut(zam,nres):
             print ('NaN found in column %i'%idx)
             RowCols = range(len(corrmat))
             RowCols.remove(idx)
+            ncorr-=1
             corrmat = corrmat.take( RowCols, axis=0 )
             corrmat = corrmat.take( RowCols, axis=1 )
 
-    
+   
     #print corrmat[:37,:10]
     
     # add extra correlations if desired:
@@ -322,11 +360,14 @@ def readKalmanOut(zam,nres):
     #for point in points:
     #    corrmat[point] = 1000
     
-    return kalMeasure, corrmat
-
-
+    return kalMeasure, corrmat, ncorr
 
 if __name__ == '__main__':
     zam = sys.argv[1]
-    c = main( zam )
+
+#   add new arguments for Gnn or Ggg correlation assignment (Cho)
+    rgn = sys.argv[2]
+    rgg = sys.argv[3]
+    nrr = sys.argv[4]
+    c = main( zam,1000*float(rgn),1000*float(rgg),int(nrr) )
 

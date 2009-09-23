@@ -71,9 +71,8 @@ for k in $MT; do
 
     cat >INPUT.D <<EOF
 $file ${k} $MAT $EXPDAT
-0.0 1.0                        # Corr between Gn, Corr between Gg
 EOF
-    $EMPIREDIR/util/kalman/genkal2.exe <INPUT.D >check.out
+    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
 
 
     if [ -s check.out ]; then

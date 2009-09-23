@@ -642,7 +642,28 @@ proc vTcl:project:info {} {
         array set save {-_tooltip 1 -anchor 1 -text 1 -value 1 -variable 1}
     }
     namespace eval ::widgets::$site_10_0.but66 {
-        array set save {-command 1 -text 1}
+        array set save {-command 1 -text 1 -width 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab67 {
+        array set save {-anchor 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab68 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent69 {
+        array set save {-background 1 -insertbackground 1 -textvariable 1 -width 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab70 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent71 {
+        array set save {-background 1 -insertbackground 1 -textvariable 1 -width 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab72 {
+        array set save {-anchor 1 -text 1 -width 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent73 {
+        array set save {-background 1 -insertbackground 1 -textvariable 1 -width 1}
     }
     namespace eval ::widgets::$site_8_0.lab66 {
         array set save {-labelpos 1 -labeltext 1}
@@ -673,10 +694,10 @@ proc vTcl:project:info {} {
     }
     set site_12_0 $site_12_0
     namespace eval ::widgets::$site_12_0.cpd65 {
-        array set save {-_tooltip 1 -command 1 -text 1}
+        array set save {-_tooltip 1 -command 1 -text 1 -width 1}
     }
     namespace eval ::widgets::$site_12_0.cpd66 {
-        array set save {-_tooltip 1 -command 1 -text 1}
+        array set save {-_tooltip 1 -command 1 -text 1 -width 1}
     }
     namespace eval ::widgets::$site_10_0.lab65 {
         array set save {-labelpos 1 -labeltext 1}
@@ -857,6 +878,7 @@ proc ::InitVars {} {
   global m_bGotPTANAL m_bGotWRIURR m_bGotRECENT
   global m_bGotSensitivity
   global m_nKALMT
+  global m_fGnGn m_fGgGg m_nNoResForCov
 
   set m_bGotPTANAL 0
   set m_bGotWRIURR 0
@@ -868,6 +890,10 @@ proc ::InitVars {} {
   set m_fDe 30
 
   set m_nKALMT  9999
+
+  set m_fGnGn 0.0
+  set m_fGgGg 0.0
+  set m_nNoResForCov 9999
 }
 #############################################################################
 ## Procedure:  LoadVars
@@ -2485,9 +2511,33 @@ proc vTclWindow.top71 {base} {
         set ::vTcl::balloon::%W {All reactions}
     }
     button $site_10_0.but66 \
-        -command { exec $m_szBaseDir/scripts/addKalman.py $m_szFile } \
-        -text {Save cov.} 
+        \
+        -command { exec $m_szBaseDir/scripts/addKalman.py $m_szFile $m_fGnGn $m_fGgGg $m_nNoResForCov } \
+        -text {Save cov.} -width 110 
     vTcl:DefineAlias "$site_10_0.but66" "Button20" vTcl:WidgetProc "Toplevel1" 1
+    label $site_10_0.lab67 \
+        -anchor w -text {Correlations of} 
+    vTcl:DefineAlias "$site_10_0.lab67" "Label22" vTcl:WidgetProc "Toplevel1" 1
+    label $site_10_0.lab68 \
+        -text GnGn: 
+    vTcl:DefineAlias "$site_10_0.lab68" "Label23" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent69 \
+        -background white -insertbackground black -textvariable m_fGnGn \
+        -width 36 
+    vTcl:DefineAlias "$site_10_0.ent69" "Entry23" vTcl:WidgetProc "Toplevel1" 1
+    label $site_10_0.lab70 \
+        -text GgGg: 
+    entry $site_10_0.ent71 \
+        -background white -insertbackground black -textvariable m_fGgGg \
+        -width 36 
+    vTcl:DefineAlias "$site_10_0.ent71" "Entry24" vTcl:WidgetProc "Toplevel1" 1
+    label $site_10_0.lab72 \
+        -anchor w -text {No. of res.:} -width 76 
+    vTcl:DefineAlias "$site_10_0.lab72" "Label24" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent73 \
+        -background white -insertbackground black \
+        -textvariable m_nNoResForCov -width 50 
+    vTcl:DefineAlias "$site_10_0.ent73" "Entry25" vTcl:WidgetProc "Toplevel1" 1
     place $site_10_0.lab71 \
         -in $site_10_0 -x 10 -y 10 -width 218 -height 20 -anchor nw \
         -bordermode ignore 
@@ -2501,7 +2551,7 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 255 -y 37 -width 47 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.but73 \
-        -in $site_10_0 -x 413 -y 1 -width 110 -height 30 -anchor nw \
+        -in $site_10_0 -x 413 -y 1 -width 110 -height 45 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab65 \
         -in $site_10_0 -x 10 -y 65 -width 214 -height 20 -anchor nw \
@@ -2521,7 +2571,7 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 314 -y 62 -width 82 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.but65 \
-        -in $site_10_0 -x 413 -y 33 -width 110 -height 30 -anchor nw \
+        -in $site_10_0 -x 413 -y 56 -width 110 -height 30 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab66 \
         -in $site_10_0 -x 10 -y 95 -width 241 -height 20 -anchor nw \
@@ -2545,7 +2595,28 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 478 -y 94 -width 43 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_10_0.but66 \
-        -in $site_10_0 -x 413 -y 65 -width 110 -height 26 -anchor nw \
+        -in $site_10_0 -x 413 -y 126 -width 110 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab67 \
+        -in $site_10_0 -x 10 -y 130 -width 96 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab68 \
+        -in $site_10_0 -x 104 -y 130 -width 40 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent69 \
+        -in $site_10_0 -x 146 -y 129 -width 36 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab70 \
+        -in $site_10_0 -x 189 -y 130 -width 40 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent71 \
+        -in $site_10_0 -x 231 -y 129 -width 36 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab72 \
+        -in $site_10_0 -x 276 -y 130 -width 76 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent73 \
+        -in $site_10_0 -x 353 -y 129 -width 50 -height 22 -anchor nw \
         -bordermode ignore 
     ::iwidgets::labeledframe $site_8_1.lab66 \
         -labelpos nw -labeltext Evaluation 
@@ -2613,7 +2684,7 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
   }
     } \
-        -text {Cumulative plot} 
+        -text {Cumulative plot} -width 240 
     vTcl:DefineAlias "$site_12_0.cpd65" "Button3" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.cpd65 "$site_12_0.cpd65 Button $top all _vTclBalloon"
     bind $site_12_0.cpd65 <<SetBalloon>> {
@@ -2633,17 +2704,17 @@ proc vTclWindow.top71 {base} {
     tk_dialog .msgbox "Error" "Run PTANAL first" info 0 OK
   }
         } \
-        -text {Porter-Thomas analysis} 
+        -text {Porter-Thomas analysis} -width 240 
     vTcl:DefineAlias "$site_12_0.cpd66" "Button10" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.cpd66 "$site_12_0.cpd66 Button $top all _vTclBalloon"
     bind $site_12_0.cpd66 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Porter-Thomas analysis}
     }
     place $site_12_0.cpd65 \
-        -in $site_12_0 -x 15 -y 11 -width 341 -height 26 -anchor nw \
+        -in $site_12_0 -x 15 -y 11 -width 240 -height 26 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd66 \
-        -in $site_12_0 -x 15 -y 43 -width 341 -height 26 -anchor nw \
+        -in $site_12_0 -x 15 -y 43 -width 240 -height 26 -anchor nw \
         -bordermode ignore 
     ::iwidgets::labeledframe $site_10_0.lab65 \
         -labelpos nw -labeltext Comparison 
@@ -2692,22 +2763,22 @@ proc vTclWindow.top71 {base} {
         set ::vTcl::balloon::%W {Compare with JEFF-3.1}
     }
     place $site_12_0.cpd66 \
-        -in $site_12_0 -x 15 -y 10 -width 100 -height 26 -anchor nw \
+        -in $site_12_0 -x 15 -y 43 -width 110 -height 26 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd67 \
-        -in $site_12_0 -x 15 -y 41 -width 100 -height 26 -anchor nw \
+        -in $site_12_0 -x 138 -y 43 -width 110 -height 26 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd68 \
-        -in $site_12_0 -x 15 -y 72 -width 100 -height 26 -anchor nw \
+        -in $site_12_0 -x 261 -y 43 -width 110 -height 26 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd69 \
-        -in $site_12_0 -x 140 -y 12 -width 93 -height 22 -anchor nw \
+        -in $site_12_0 -x 24 -y 12 -width 93 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd70 \
-        -in $site_12_0 -x 140 -y 43 -width 89 -height 22 -anchor nw \
+        -in $site_12_0 -x 148 -y 12 -width 89 -height 22 -anchor nw \
         -bordermode ignore 
     place $site_12_0.cpd71 \
-        -in $site_12_0 -x 140 -y 74 -width 78 -height 22 -anchor nw \
+        -in $site_12_0 -x 276 -y 12 -width 78 -height 22 -anchor nw \
         -bordermode ignore 
     button $site_10_0.cpd71 \
         \
@@ -2719,7 +2790,7 @@ proc vTclWindow.top71 {base} {
     editFile endfr.txt 
    }
     } \
-        -text ENDF -width 112 
+        -text ENDF -width 102 
     vTcl:DefineAlias "$site_10_0.cpd71" "Button2" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd71 "$site_10_0.cpd71 Button $top all _vTclBalloon"
     bind $site_10_0.cpd71 <<SetBalloon>> {
@@ -2747,22 +2818,22 @@ proc vTclWindow.top71 {base} {
         -in $site_10_0 -x 17 -y 83 -width 80 -height 36 -anchor nw \
         -bordermode ignore 
     place $site_10_0.cpd65 \
-        -in $site_10_0 -x 132 -y 1 -width 396 -height 110 -anchor nw \
+        -in $site_10_0 -x 122 -y 1 -width 291 -height 110 -anchor nw \
         -bordermode ignore 
     place $site_10_0.lab65 \
-        -in $site_10_0 -x 132 -y 111 -width 266 -height 139 -anchor nw \
+        -in $site_10_0 -x 122 -y 111 -width 406 -height 109 -anchor nw \
         -bordermode ignore 
     place $site_10_0.cpd71 \
-        -in $site_10_0 -x 410 -y 118 -width 112 -height 123 -anchor nw \
+        -in $site_10_0 -x 420 -y 10 -width 102 -height 93 -anchor nw \
         -bordermode ignore 
     place $site_10_0.cpd72 \
-        -in $site_10_0 -x 17 -y 131 -width 97 -height 110 -anchor nw \
+        -in $site_10_0 -x 14 -y 131 -width 97 -height 80 -anchor nw \
         -bordermode ignore 
     place $site_8_1.lab65 \
-        -in $site_8_1 -x 1 -y 299 -width 561 -height 154 -anchor nw \
+        -in $site_8_1 -x 1 -y 269 -width 561 -height 194 -anchor nw \
         -bordermode ignore 
     place $site_8_1.lab66 \
-        -in $site_8_1 -x 1 -y 11 -width 561 -height 284 -anchor nw \
+        -in $site_8_1 -x 1 -y 11 -width 561 -height 254 -anchor nw \
         -bordermode ignore 
     set site_8_2 [lindex [$top.tab85 childsite] 2]
     $top.tab85 select 0
