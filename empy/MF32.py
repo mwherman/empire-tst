@@ -77,7 +77,7 @@ class MF32(MF_base):
                 zam = int( filename.split('.')[0][-6:] )
             except ValueError:
                 print ("Please supply zam explicitly: MF32(filename,zam)")
-                raise
+                return
         
         assert os.path.exists(filename), ("Can't find file %s" % filename)
         
@@ -105,6 +105,10 @@ class MF32(MF_base):
         for line in f[idx:]:
             vals = line.split(';')
             
+            if int(vals[0]) != zam:
+                # finished with the isotope
+                break
+           
             # don't use strip() until we get the position-dependent flags:
             jflag.append(vals[6])
             lflag.append(vals[8])
@@ -115,26 +119,20 @@ class MF32(MF_base):
             # now we can strip()
             vals = [a.strip() for a in vals]
             
-            if int(vals[0]) != zam:
-                # finished with the isotope
-                break
             
-           
-            # Atlas sometimes has '2 .0e+3' type errors, use string.join to fix
-            # this should be fixed in the atlas files!
-            J.append( s.join(vals[7].split()) )
-            L.append( s.join(vals[9].split()) )
+            J.append( vals[7] )
+            L.append( vals[9] )
             
             # first three columns are fairly standard
-            En.append( [s.join(a.split()) for a in vals[4:6] ] )
-            Gn.append( [s.join(a.split()) for a in vals[16:18] ] )
-            Gg.append( [s.join(a.split()) for a in vals[20:22] ] )
+            En.append( vals[4:6] )
+            Gn.append( vals[16:18] )
+            Gg.append( vals[20:22] )
             # Said seems to use last three columns for various purposes:
             # Gn_0, capture kernel, G_p, G_a, or
             # fission channels in heavy nuclei. Must check book case-by-case
-            par4.append( [s.join(a.split()) for a in vals[24:26] ] )
-            par5.append( [s.join(a.split()) for a in vals[28:30] ] )
-            par6.append( s.join(vals[32].split()) )
+            par4.append( vals[24:26] )
+            par5.append( vals[28:30] )
+            par6.append( vals[32] )
             
             idx += 1
         
@@ -144,26 +142,35 @@ class MF32(MF_base):
         # 1) if missing data, do porter-thomas analysis or such to fill gaps
         # 2) make sure final output is all in form Gn, Gg (not 2gGn etc)
         
-        def check(array, ncols=2):
+        def check(array, ncols=2, val='0'):
             """
             before converting to numpy arrays, we need to fill all gaps.
-            For now just fill with 0.0, then we search through arrays
+            By default fill with 0.0, then we search through arrays
             and replace with more realistic values. (0 is better than nan)
             """
-            if ncols==2:
-                for i in range(len(array)):
-                    for j in range(ncols):
-                        if array[i][j]=='':
-                            array[i][j]='0'  # or 'nan'
-            else:
-                for i in range(len(array)):
-                    if array[i]=='':
-                        array[i]='0'
+            try:
+                if ncols==2:
+                    for i in range(len(array)):
+                        for j in range(ncols):
+                            if array[i][j]=='':
+                                array[i][j]=val
+                            else:
+                                dum = float(array[i][j])
+                else:
+                    for i in range(len(array)):
+                        if array[i]=='':
+                            array[i]=val
+                        else:
+                            dum = float(array[i])
+            
+            except ValueError:
+                # a value can't be converted to float!
+                raise ValueError, "Format error in Atlas, %ith line of material" % i
             return array
         
         # convert raw atlas data to floating-point numpy arrays:
-        J = numpy.array( check(J, ncols=1), dtype=float)
-        L = numpy.array( check(L, ncols=1), dtype=float)
+        J = numpy.array( check(J, ncols=1, val=-1), dtype=float)
+        L = numpy.array( check(L, ncols=1, val=-1), dtype=float)
         En = numpy.array( check(En), dtype=float)
         Gn = numpy.array( check(Gn), dtype=float)
         Gg = numpy.array( check(Gg), dtype=float)
@@ -178,14 +185,18 @@ class MF32(MF_base):
         
         
         # also use readrp to get resonance properties from Atlas:
-        # readrp is a fortran executable but hasn't caused any trouble
-        cmd = os.environ['EMPIREDIR'] + '/util/resonance/readrp %i' % zam
+        # second argument to readrp is base directory (use EMPIREDIR):
+        cmd = (os.environ['EMPIREDIR'] + 
+                '/util/resonance/readrp %i $EMPIREDIR' % zam)
         vals = os.popen(cmd).read().split()
         ggavg = [0]*3
         (abun,awt,bn,spin,D0,D1,D2,sf0,sf1,sf2,ggavg[0],ggavg[1],ggavg[2],
                 ap,dap,ss,dss,cs,dcs,emax,flevel) = [
                         float(a) for a in vals]
         
+        if abun==0 and spin==-1:
+            print "Unable to extract resonance properties from Atlas!"
+            print "Values will be incorrect\n"
         
         def getMean_nonZero(arr):
             # unknown vals are set to zero, don't include them in mean
@@ -237,8 +248,8 @@ class MF32(MF_base):
                 raise ValueError, 'Missing value for resonance energy!'
             if En[i,1] == 0:
                 # Pavel suggests deciding based on num. sig figs in atlas...
-                # for now just use 0.1%
-                En[i,1] = 0.001 * En[i,0]
+                # for now just use 1%
+                En[i,1] = 0.01 * numpy.abs( En[i,0] )
         
         for i in range(len(Gn)):
             if Gn[i,0] == 0:
@@ -587,6 +598,20 @@ class MF32(MF_base):
         self.corr_mat = corr_mat
     
     
+    def setMaximum(self, Emax):
+        """
+        set upper cutoff energy for the resolved resonance region
+        """
+        self.erange = (1e-5, Emax)
+        self.nres = len( self.En[ self.En[:,0] <= Emax ] )
+        
+        self.En = self.En[:self.nres]
+        self.Gn = self.Gn[:self.nres]
+        self.Gg = self.Gg[:self.nres]
+        self.J = self.J[:self.nres]
+        self.L = self.L[:self.nres]
+    
+    
     def writeENDF(self,filename):
         """
         create new ENDF file containing MF1, MF2 and MF32
@@ -611,7 +636,7 @@ class MF32(MF_base):
         self.numberLines = False
         
         fs = self.writeTINIT()
-        fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
+        fs += self.writeENDFline([float(self.zam),self.awt,1,0,0,0],MAT,1,451)
         
         # MF1: surpress initial newline with \
         mf1 = """\
@@ -635,8 +660,8 @@ class MF32(MF_base):
         
         
         # MF 2
-        mf2 = self.writeENDFline([self.zam,self.awt,0,0,1,0],MAT,2,151)
-        mf2 += self.writeENDFline([self.zam,1.0, 0,0,1,0],MAT,2,151)
+        mf2 = self.writeENDFline([float(self.zam),self.awt,0,0,1,0],MAT,2,151)
+        mf2 += self.writeENDFline([float(self.zam),1.0, 0,0,1,0],MAT,2,151)
         LRF=2   # for MLBW format
         mf2 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
                 MAT,2,151)
@@ -675,8 +700,9 @@ class MF32(MF_base):
         
         
         # MF 32
-        mf32 = self.writeENDFline([self.zam,self.awt,0,0,1,0], MAT,32,151)
-        mf32 += self.writeENDFline([self.zam,1.0,0,0,1,0], MAT,32,151)
+        mf32 = self.writeENDFline([float(self.zam),self.awt,0,0,1,0], 
+                MAT,32,151)
+        mf32 += self.writeENDFline([float(self.zam),1.0,0,0,1,0], MAT,32,151)
         #LRF=2 I think this is required to be the same in MF2 and MF32
         mf32 += self.writeENDFline([self.erange[0],self.erange[1],1,LRF,0,0],
                 MAT,32,151)
@@ -774,7 +800,7 @@ class MF32(MF_base):
         self.numberLines = False
         
         fs = self.writeTINIT()
-        fs += self.writeENDFline([self.zam,self.awt,1,0,0,0],MAT,1,451)
+        fs += self.writeENDFline([float(self.zam),self.awt,1,0,0,0],MAT,1,451)
         
         # MF1: surpress initial newline with \
         mf1 = """\
@@ -798,8 +824,10 @@ class MF32(MF_base):
         
         
         # MF 2
-        fout.write( self.writeENDFline([self.zam,self.awt,0,0,1,0],MAT,2,151) )
-        fout.write( self.writeENDFline([self.zam,1.0, 0,0,1,0],MAT,2,151) )
+        fout.write( self.writeENDFline([float(self.zam),self.awt,0,0,1,0],
+            MAT,2,151) )
+        fout.write( self.writeENDFline([float(self.zam),1.0, 0,0,1,0],
+            MAT,2,151) )
         LRF=2   # for MLBW format
         fout.write( self.writeENDFline([self.erange[0],self.erange[1],
                 1,LRF,0,0], MAT,2,151) )
@@ -836,9 +864,10 @@ class MF32(MF_base):
         
         
         # MF 32
-        fout.write( self.writeENDFline([self.zam,self.awt,0,0,1,0], 
+        fout.write( self.writeENDFline([float(self.zam),self.awt,0,0,1,0], 
                 MAT,32,151) )
-        fout.write( self.writeENDFline([self.zam,1.0,0,0,1,0], MAT,32,151) )
+        fout.write( self.writeENDFline([float(self.zam),1.0,0,0,1,0], 
+                MAT,32,151) )
         #LRF=2 I think this is required to be the same in MF2 and MF32
         fout.write( self.writeENDFline([self.erange[0],self.erange[1],
                 1,LRF,0,0], MAT,32,151) )
@@ -906,13 +935,21 @@ class MF32(MF_base):
         fout.close()
     
     
+    def gfact(self):
+        """
+        return array containing statistical g-factor for each resonance
+        """
+        return (2.0 * self.J + 1) / (2.0 * (2.0 * self.spin + 1) )
+    
+    
     def getResonanceInt(self):
         """
         use Atlas equation 2.86 to approximate capture RI and uncertainty
         """
         # gfactor for each resonance:
-        gfact = (2.0 * self.J + 1) / (2.0 * (2.0 * self.spin + 1) )
-        
+        #gfact = (2.0 * self.J + 1) / (2.0 * (2.0 * self.spin + 1) )
+        gfact = self.gfact()
+
         # I_g = (constants) * sum_j { G_g * gfact * G_n / (E^2 (G_g+G_n) ) }
         num = self.Gg[:,0] * gfact * self.Gn[:,0]
         denom = self.En[:,0]**2 * (self.Gg[:,0] + self.Gn[:,0])
