@@ -5238,7 +5238,7 @@ proc vTcl:project:info {} {
 proc ::editFile {filename} {
         ## make empire flexible enough to handle opening files
         ## on various platforms. C.Mattoon, Nov 13 2008
-        if {$::editor == "specify editor"} {
+        if {$::editor == "specify editor" || $::editor == ""} {
                 set ::editor [tk_getOpenFile  -parent .top75 -title "Select editor"]
         }
         
@@ -5264,6 +5264,10 @@ proc ::editFile {filename} {
 proc ::pspdfView {filename} {
         ## make empire flexible enough to handle opening files
         ## on various platforms. C.Mattoon, Nov 13 2008
+        if {$::psviewer == ""} {
+                set ::psviewer [tk_getOpenFile  -parent .top75 -title "Select ps viewer"]
+        }
+
         if {$::tcl_platform(os)=="Darwin"} {
                 if [regexp {\.app} $::psviewer] {
                         exec open -a $::psviewer $filename      
