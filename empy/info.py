@@ -22,14 +22,18 @@ empy:
         very simple right now
     
         MF32:   class for resonance parameters. Can read Atlas (Mughabghab) 
-        or ENDF file in certain formats. Writing of ENDF files 2/32 not yet
-        implemented
+        or ENDF file in certain formats. Writing of files 2/32 in compact and 
+        full format (LCOMP=1 or 2) is also supported
         
         MF33:   class for cross-section covariances. Read an MT section from 
-        the file, can then manipulate and write new MT file. Limited to 1
-        subsection (2 in special 'low-fidelity' case) right now
+        the file, can then manipulate and write new MT file. 
+        If multiple subsections are present, all will be read in to the 
+        'rawData' member array. Goal: also reconstruct full covariance matrix
+        from all subsections
+
+        MF35:   class for energy spectra covariances (PFNS). Fairly simple.
     
-     mgBase: 
+    mgBase: 
         base class for multi-group covariances, processed output from
         PUFF/NJOY. Contains x-sections, correlations, thresholds etc for 
         each reaction in multigroup format. Also functions for writing class
