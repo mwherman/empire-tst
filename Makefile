@@ -9,11 +9,11 @@
 # --------------------------------------------------------------
 
 compiler = "FC=gfortran"
-flags = "FFLAGS=-O3"
+flags = "FFLAGS=-O3 -std=legacy"
 
 
-MAIN = source util/*
-# some subdirectories in util are empty, so this will give errors
+MAIN = source util/c4sort util/c4zvd util/Calc_Cov util/checkr util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/lsttab util/plotc4 util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/x4toc4
+# util/resonance util/kalman not included for now
 
 
 # by default, compile everything with gfortran:
