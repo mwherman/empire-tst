@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-21 21:30:20 $
-Ccc   * $Id: tl.f,v 1.104 2009-05-21 21:30:20 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-10-22 15:02:33 $
+Ccc   * $Id: tl.f,v 1.105 2009-10-22 15:02:33 Capote Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3907,13 +3907,15 @@ C         WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
 C         ftmp1=2*DOM_int(Delta_WV,WVf,Ef,Ef+5.*Bv,150000.d0,EEE,0.d0)
 
 C         Coulomb correction for real volume potential 
-          if (pot(1,1,24).ne.1) DerDWV = 0.d0
+          if (pot(1,1,25).ne.0) DerDWV = 0.d0
           DerDWV = -b(1,1,5)*encoul2*DerDWV
 
 C         numerical DOM derivative (not needed for a time being) 
 C         DWVp = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE+0.1d0,n,dtmp)
 C         DWVm = DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE-0.1d0,n,dtmp)
-C         DerDWV = -b(1,1,5)*encoul2*(DWVp-DWVm)*5.d0
+C         DerDWV = (DWVp-DWVm)*5.d0
+C         if (pot(1,1,25).ne.0) DerDWV = 0.d0
+C         DerDWV = -b(1,1,5)*encoul2*DerDWV
 c         if(idr.le.-2) then
 c           numerical DOM integral (not needed for a time being)
 c           WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
@@ -3933,7 +3935,7 @@ c
              DWVnonl = Dwplus + Dwmin
 c            Coulomb correction for nonlocal dispersive contribution  
 c                to real volume potential 
-             if(b(1,1,5).ne.0.d0 .and. pot(1,1,24).eq.1) then
+             if(b(1,1,5).ne.0.d0 .and. pot(1,1,25).eq.0) then
                if(eee.ne.0.05d0) then
                  T2p = DOM_INT_T2(Ef,Ea,EEE+0.05d0)  
                  T2m = DOM_INT_T2(Ef,Ea,EEE-0.05d0)  
@@ -3962,7 +3964,7 @@ c       Only one energy range
         j=1
 c       Real surface contribution from Dispersive relation
         DWS=0.d0
-
+	  DerDWS=0.d0
         if(jrange(i).gt.0 .and. pot(4,1,24).ne.0) then
           As=b(i,j,8)
           Bs=b(i,j,10)
@@ -3984,10 +3986,9 @@ c         if(modtyp.eq.6) goto 156   ! modtyp = 5 for dispersive potentials
 c           analytical DOM integral
             DWS = DOM_INT_Ws(Ef,Ep,As,Bs,Cs,EEE,n,DerDWS)
 c           Coulomb correction for real surface potential 
-            DerDWS = (DWSp-DWSm)*5.d0
-            if (pot(1,1,24).ne.1) DerDWS = 0.d0
+            if (pot(1,1,25).ne.0) DerDWS = 0.d0
             VScoul = -b(1,1,5)*encoul2*DerDWS
-           endif
+          endif
 
           if(idr.le.-2) then
 c           numerical DOM integral
@@ -4003,7 +4004,9 @@ c           Coulomb correction for real surface potential
               DWSm =
      >         2*DOM_int(Delta_WD,WDf,Ef,Ef+30.d0,2000.d0,EEE-0.1d0,WDE)
 c             Numerical derivative
-              VScoul = -b(1,1,5)*encoul2*(DWSp-DWSm)*5.d0
+              DerDWS = (DWSp-DWSm)*5.d0
+              if (pot(1,1,25).ne.0) DerDWS = 0.d0
+              VScoul = -b(1,1,5)*encoul2*DerDWS
             endif
           endif
 
