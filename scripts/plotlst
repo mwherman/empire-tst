@@ -40,5 +40,5 @@ ln -sf $EMPIREDIR/util/pltlst/PLTLST.INP PLTLST.INP
 
 $EMPIREDIR/util/pltlst/pltlst
 rm C4.DAT ENDFMF.DAT ENDFMT.DAT ENDFZA.DAT PLOT.CHR PLTLST.INP
-mv PLOTC4.LST $work/$file-log.plotc4
+mv PLOTC4.LST $work/$file-log.plotc4 2>|/dev/null #ignore if same
 exit
