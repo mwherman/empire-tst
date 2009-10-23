@@ -109,7 +109,7 @@ mv ENDF.OUT $work/$file-s.endf
 
 
 # RUN PLTLST TO PRODUCE LISTING OR PLOTC4
- ../scripts/plotlst $file
+ $EMPIREDIR/scripts/plotlst $file
 
 # REMOVE INTERMEDIATE ENDF FILES
 
