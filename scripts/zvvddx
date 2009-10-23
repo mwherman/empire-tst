@@ -11,9 +11,11 @@ ln -sf $work/$file-s.endf ENDF.DAT
 #ln -sf $work/$file.lst EMPIRE.LST
 #ln -sf $work/HFde-p/$file.lst HF.DAT
 ln -sf $work/$file-log.plotc4 PLOTC4.LST
-ln -sf $EMPIREDIR/util/lsttab/LSTTAB.INP LSTTAB.INP
+
+# run locally, not in util/lsttab!
+#ln -sf $EMPIREDIR/util/lsttab/LSTTAB.INP LSTTAB.INP
 $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
-rm LSTTAB.INP
+#rm LSTTAB.INP
 
 # for plotting we are going to cd to c4zvd dir for now:
 mv LSTTAB.CUR $EMPIREDIR/util/c4zvd/LSTTAB.CUR

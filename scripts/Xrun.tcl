@@ -6732,8 +6732,12 @@ foreach el $ddx {
    incr i +1
 }
 
-if {$compeval != ""} {file delete $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT
-if {$compeval != ""} {file copy -force $compeval $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT }
+#if {$compeval != ""} {file delete $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT
+#if {$compeval != ""} {file copy -force $compeval $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT }
+#file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
+
+if {$compeval != ""} {file delete COMPARE.DAT
+if {$compeval != ""} {file copy -force $compeval COMPARE.DAT }
 #file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
 
 set lsttab [open LSTTAB.INP w+]
@@ -6753,7 +6757,7 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
 exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Plot the list } 
