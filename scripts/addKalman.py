@@ -53,15 +53,15 @@ def main(zam,rgn,rgg,nrr):
     
     # lStart32+4 tells us how many resonances are present in the file:
     nResLine = fin[lStart32+4]; nres = int(nResLine[55:66])
-   
+    
     # read Kalman results for updated parameters and covariance matrix:
     pars, mat, ncorr = readKalmanOut(zam,nres)
     print 'ncorr=',ncorr   
-
+    
     # adjust nrr so that it is between ncorr/3 and nres (Cho)
     nrr = min(nrr, nres);
     nrr = max(nrr, ncorr // 3)
-
+    
     # write file up to MF32:
     for ll in range(len(fin)):
         MAT, MF, MT = endf.getVals(fin[ll])
@@ -70,17 +70,9 @@ def main(zam,rgn,rgg,nrr):
             break
         fout.write(fin[ll])
 
-    # find out the energy of nrr(th) resonance and correct the upper energy limit (Cho)
-    nn = 0
-    for nn in range(ll+5,len(fin)):
-        if nn == ll+5+2*(nrr-1):
-          upenergy = fin[nn][0:11];
-          break;
-
-    fin[ll+2] = "%s%11s%s" % (fin[ll+2][0:11],upenergy,fin[ll+2][22:])
-
-    # correct the number of resonances
-    fin[ll+4] = "%s%11d%11d%s" % (fin[ll+4][0:44],18*nrr,nrr,fin[ll+4][66:])
+    # find out the energy of nrr(th) resonance and correct the upper energy
+    # limit (Cho)
+    #  removed-cmattoon, don't change energy limits unless we modify diagonal
 
     for ll in range(ll,ll+5):
         # write five lines of MF32 header:
@@ -179,7 +171,7 @@ def main(zam,rgn,rgg,nrr):
                 j+=1
     
     print 'nm=',nm
-
+    
     # mf and mt will always be 32 and 151 (I think)
     mtwrite = 151
 
@@ -233,7 +225,7 @@ def readKalmanOut(zam,nres):
     # the next line tells how many Kalman actually varies 
     # (ESTIMATED PARAMETERS):
     npar = int(fkal.next().strip().split()[-1])
-   
+    
     while True:
         # read past the header, search for start of 
         # uncertainties:
@@ -324,7 +316,7 @@ def readKalmanOut(zam,nres):
     #if numpy.max( numpy.any(corrmat,numpy.nan) ):
     # Nope! numpy.any() doesn't work properly with nan, (in v2.4, or any float values
     # in later versions), so use brute force method instead
-
+    
     # find out number of resonance parameters (=ncorr) in Kalman output (Cho)
     ncorr=npar
     for idx in range(npar)[::-1]: 
@@ -343,7 +335,7 @@ def readKalmanOut(zam,nres):
             corrmat = corrmat.take( RowCols, axis=0 )
             corrmat = corrmat.take( RowCols, axis=1 )
 
-   
+    
     #print corrmat[:37,:10]
     
     # add extra correlations if desired:
