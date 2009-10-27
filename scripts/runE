@@ -137,10 +137,14 @@ def runE(proj):
             mv('TARGET_COLL.RIPL',proj+'-lev.col')
             tfile = open(proj+'-lev.col','a')   # append mode
             tfile.write('\n\n\n')
-            tfile.write('NOTE: this line and those below will not be used by Empire. \n')
-            tfile.write('      The collective levels and ground state band deformation \n')
-            tfile.write('      printed below are inferred from the discrete level file   \n')
-            tfile.write('      and provided for comparison with the RIPL data above.\n')
+            tfile.write('NOTE: this line and those below will not\
+                    be used by Empire. \n')
+            tfile.write('      The collective levels and ground state band\
+                    deformation \n')
+            tfile.write('      printed below are inferred from the discrete\
+                    level file   \n')
+            tfile.write('      and provided for comparison with the RIPL data\
+                    above.\n')
             tfile.write('\n\n')
             if not isEmpty('TARGET_COLL.DAT'):
                 tfile1 = open('TARGET_COLL.DAT','r').readlines()
@@ -148,137 +152,137 @@ def runE(proj):
                 for tline in tfile1:
                     tfile.write(tline)
             tfile.close()
-        else:
-            if not isEmpty('TARGET_COLL.DAT'):
-                cp('TARGET_COLL.DAT',proj+'-lev.col')
+    else:
+        if not isEmpty('TARGET_COLL.DAT'):
+            cp('TARGET_COLL.DAT',proj+'-lev.col')
         
-        # beware, these commands make assumptions about the system:
-        if not isEmpty('CUMULPLOT.PS'):
-            # no exception if ps2ps not found, just a message:
-            os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
-            if os.path.exists(proj+'-cum.ps'):
-                # read preferences from .Xrunrc:
-                prefs = open('../.Xrunrc','r').readlines()
-                psviewer = prefs[3].strip()
-                # open ps file properly:
-                if sys.platform == 'darwin':
-                    if '.app' in psviewer:
-                        os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
-                    else:
-                        os.system('%s %s' % (psviewer,proj+'-cum.ps'))
-                elif 'linux' in sys.platform:
-                    os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+    # beware, these commands make assumptions about the system:
+    if not isEmpty('CUMULPLOT.PS'):
+        # no exception if ps2ps not found, just a message:
+        os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
+        if os.path.exists(proj+'-cum.ps'):
+            # read preferences from .Xrunrc:
+            prefs = open('../.Xrunrc','r').readlines()
+            psviewer = prefs[3].strip()
+            # open ps file properly:
+            if sys.platform == 'darwin':
+                if '.app' in psviewer:
+                    os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
                 else:
-                    # probably windows...
-                    print ('Unknown system trying to open ps file')
-        
-        if not isEmpty('SYSTEMATICS.TXT'):
-            mv('SYSTEMATICS.TXT',proj+'.sys')
-        if not isEmpty('XSECTIONS.OUT'):
-            mv('XSECTIONS.OUT',proj+'.xsc')
-        if not isEmpty('SENSITIVITY.MATRIX'):
-            mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
-        
-        # move files, no warning if files DNE:
-        mv('EXFOR.dat',proj+'.exf',0)
-        mv('ECIS_ROT.out',proj+'-ecis.out',0)
-        mv('ECIS_VIB.out',proj+'-ecis.out',0)
-        mv('ECIS_VIBROT.out',proj+'-ecis.out',0)
-        mv('ecVIB.inp',proj+'-ecis.in',0)
-        mv('ecROT.inp',proj+'-ecis.in',0)
-        mv('ecVIBROT.inp',proj+'-ecis.in',0)
-        mv('FISSION.OUT',proj+'-fiss.out',0)
-        mv('R250SEED.DAT',proj+'.rng',0)
-        mv('PFNM.OUT',proj+'-pfnm.out',0)
-        mv('PFNS.OUT',proj+'-pfns.out',0)
-        mv('FIT.OUT',proj+'-ompfit.lst',0)
-        mv('COVAR.DAT',proj+'-MC.par',0)
-        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
-        
-        # Extract Warnings from the list file:
-        # this is portable version of 'grep WARNING infile > outfile
-        listfile = open(proj+'.lst','r').readlines()
-        warnfile = open(proj+'.war','w')
-        for line in listfile:
-            if 'WARNING' in line:
-                warnfile.write(line)
-        warnfile.close()
-        
-        # Delete Temporary files
-        
-        rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
-        rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
-        rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
-        rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT')
-        rm( glob('TARGET-*.tl') )
-        rm('TARGET.LEV')
-        rm('EXFOR.datp')
-        rm('INPUT')
-        rm('INPUT.DAT')
-        rm('FISSION.INP')
-        rm('OMPAR.DIR')
-        rm('OMPdata.dat')
-        rm('mt_x4r.txt')
-        rm('TAPE15', 'TAPE16', 'TAPE66')
-        rm('file99')
-        rm('DEGASRESULT')
-        rm('angdis.pnt', 'angdis.cur')
-        rm('ccm.CS','dwba.CS','INCIDENT.CS', 'ccm.TLJ','dwba.TLJ',
-                'INCIDENT.TLJ','ccm.ANG','dwba.ANG','INCIDENT.ANG',
-                'ccm.ICS','dwba.ICS','INCIDENT.ICS','ccm.LEG','dwba.LEG',
-                'INCIDENT.LEG') 
-        rm('ecis06.ang','ecis06.cs','ecis06.dat','ecis06.ics','ecis06.pol',
-                'ecis06.tlj','ecis06.leg','ecis06.esp','ecis06.inp')
-        rm('ecSPH.inp')
-        rm('ECIS_SPH.out')
-        rm('C4.dat')
-        rm('FITIN.DAT')
-        rm('FITLEV.PS')
-        rm('INPUT1.DAT')
-        rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
-        rm('TARGET_COLL_RIPL.DAT')
-        rm('COVAR.DAT')
-        rm('OPTFIT.CAL', 'OMPAR0.DIR', 'INPUT0.DAT')
-        rm('OMPAR.DIR', 'LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
-        rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
-        
-        if not isEmpty(proj+'.exf'):
-            if isEmpty(proj+'.c4'):
-                # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
-                
-                os.system('%s/scripts/c4 %s' % (os.environ['EMPIREDIR'],proj) )
-                
-                # RUN c4sort TO SORT C4 DATA
-                
-                os.system('%s/scripts/sortc4 %s' %
-                    (os.environ['EMPIREDIR'],proj) )
-        
-        # REMOVE EMPTY FILES:
-        
-        if isEmpty(proj+'-omp.dir'):
-            rm(proj+'-omp.dir')
-        if isEmpty(proj+'-lev.col'):
-            rm(proj+'-lev.col')
-        if isEmpty(proj+'.war'):
-            rm(proj+'.war')
-        if isEmpty(proj+'-ecis.in'):
-            rm(proj+'-ecis.in')
-        if isEmpty(proj+'-ecis.out'):
-            rm(proj+'-ecis.out')
-        if isEmpty(proj+'-inp.fis'):
-            rm(proj+'-inp.fis')
-        if isEmpty(proj+'-pfns.out'):
-            rm(proj+'-pfns.out')
-        if isEmpty(proj+'-MC.par'):
-            rm(proj+'-MC.par')
-        if isEmpty('FISSION.OUT'):
-            rm('FISSION.OUT')
-        
-        # Produce ZVD files from cross-section tables:
-        if not isEmpty(proj+'.xsc'):
-            os.system('%s/scripts/cs2zvd %s' % (os.environ['EMPIREDIR'],proj) )
-        
-        return 0
+                    os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+            elif 'linux' in sys.platform:
+                os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+            else:
+                # probably windows...
+                print ('Unknown system trying to open ps file')
+    
+    if not isEmpty('SYSTEMATICS.TXT'):
+        mv('SYSTEMATICS.TXT',proj+'.sys')
+    if not isEmpty('XSECTIONS.OUT'):
+        mv('XSECTIONS.OUT',proj+'.xsc')
+    if not isEmpty('SENSITIVITY.MATRIX'):
+        mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
+    
+    # move files, no warning if files DNE:
+    mv('EXFOR.dat',proj+'.exf',0)
+    mv('ECIS_ROT.out',proj+'-ecis.out',0)
+    mv('ECIS_VIB.out',proj+'-ecis.out',0)
+    mv('ECIS_VIBROT.out',proj+'-ecis.out',0)
+    mv('ecVIB.inp',proj+'-ecis.in',0)
+    mv('ecROT.inp',proj+'-ecis.in',0)
+    mv('ecVIBROT.inp',proj+'-ecis.in',0)
+    mv('FISSION.OUT',proj+'-fiss.out',0)
+    mv('R250SEED.DAT',proj+'.rng',0)
+    mv('PFNM.OUT',proj+'-pfnm.out',0)
+    mv('PFNS.OUT',proj+'-pfns.out',0)
+    mv('FIT.OUT',proj+'-ompfit.lst',0)
+    mv('COVAR.DAT',proj+'-MC.par',0)
+    mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+    
+    # Extract Warnings from the list file:
+    # this is portable version of 'grep WARNING infile > outfile
+    listfile = open(proj+'.lst','r').readlines()
+    warnfile = open(proj+'.war','w')
+    for line in listfile:
+        if 'WARNING' in line:
+            warnfile.write(line)
+    warnfile.close()
+    
+    # Delete Temporary files
+    
+    rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
+    rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
+    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
+    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT')
+    rm( glob('TARGET-*.tl') )
+    rm('TARGET.LEV')
+    rm('EXFOR.datp')
+    rm('INPUT')
+    rm('INPUT.DAT')
+    rm('FISSION.INP')
+    rm('OMPAR.DIR')
+    rm('OMPdata.dat')
+    rm('mt_x4r.txt')
+    rm('TAPE15', 'TAPE16', 'TAPE66')
+    rm('file99')
+    rm('DEGASRESULT')
+    rm('angdis.pnt', 'angdis.cur')
+    rm('ccm.CS','dwba.CS','INCIDENT.CS', 'ccm.TLJ','dwba.TLJ',
+            'INCIDENT.TLJ','ccm.ANG','dwba.ANG','INCIDENT.ANG',
+            'ccm.ICS','dwba.ICS','INCIDENT.ICS','ccm.LEG','dwba.LEG',
+            'INCIDENT.LEG') 
+    rm('ecis06.ang','ecis06.cs','ecis06.dat','ecis06.ics','ecis06.pol',
+            'ecis06.tlj','ecis06.leg','ecis06.esp','ecis06.inp')
+    rm('ecSPH.inp')
+    rm('ECIS_SPH.out')
+    rm('C4.dat')
+    rm('FITIN.DAT')
+    rm('FITLEV.PS')
+    rm('INPUT1.DAT')
+    rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
+    rm('TARGET_COLL_RIPL.DAT')
+    rm('COVAR.DAT')
+    rm('OPTFIT.CAL', 'OMPAR0.DIR', 'INPUT0.DAT')
+    rm('OMPAR.DIR', 'LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
+    rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
+    
+    if not isEmpty(proj+'.exf'):
+        if isEmpty(proj+'.c4'):
+            # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+            
+            os.system('%s/scripts/c4 %s' % (os.environ['EMPIREDIR'],proj) )
+            
+            # RUN c4sort TO SORT C4 DATA
+            
+            os.system('%s/scripts/sortc4 %s' %
+                (os.environ['EMPIREDIR'],proj) )
+    
+    # REMOVE EMPTY FILES:
+    
+    if isEmpty(proj+'-omp.dir'):
+        rm(proj+'-omp.dir')
+    if isEmpty(proj+'-lev.col'):
+        rm(proj+'-lev.col')
+    if isEmpty(proj+'.war'):
+        rm(proj+'.war')
+    if isEmpty(proj+'-ecis.in'):
+        rm(proj+'-ecis.in')
+    if isEmpty(proj+'-ecis.out'):
+        rm(proj+'-ecis.out')
+    if isEmpty(proj+'-inp.fis'):
+        rm(proj+'-inp.fis')
+    if isEmpty(proj+'-pfns.out'):
+        rm(proj+'-pfns.out')
+    if isEmpty(proj+'-MC.par'):
+        rm(proj+'-MC.par')
+    if isEmpty('FISSION.OUT'):
+        rm('FISSION.OUT')
+    
+    # Produce ZVD files from cross-section tables:
+    if not isEmpty(proj+'.xsc'):
+        os.system('%s/scripts/cs2zvd %s' % (os.environ['EMPIREDIR'],proj) )
+    
+    return 0
 
 
 
