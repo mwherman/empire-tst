@@ -1,8 +1,13 @@
 #! /bin/sh -
 #SCRIPT TO PLOT ANG. DISTR. AND DOUBLE-DIFFERENTIAL CROSS SECTIONS
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 file=$1
 work=`pwd`
-#cd ../util/lsttab
 rm LSTTAB.CUR LSTTAB.PNT PLOTC4.LST EMPIRE.LST HF.DAT 2>/dev/null
 ln -sf $work/$file.c4 C4.DAT
 ln -sf $work/$file-s.endf ENDF.DAT
@@ -12,26 +17,25 @@ ln -sf $work/$file-s.endf ENDF.DAT
 #ln -sf $work/HFde-p/$file.lst HF.DAT
 ln -sf $work/$file-log.plotc4 PLOTC4.LST
 
-# run locally, not in util/lsttab!
-#ln -sf $EMPIREDIR/util/lsttab/LSTTAB.INP LSTTAB.INP
 $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
 #rm LSTTAB.INP
 
-# for plotting we are going to cd to c4zvd dir for now:
-mv LSTTAB.CUR $EMPIREDIR/util/c4zvd/LSTTAB.CUR
-mv LSTTAB.PNT $EMPIREDIR/util/c4zvd/LSTTAB.PNT
-cd $EMPIREDIR/util/c4zvd
-rm zv*.ps zv*.eps 2>/dev/null
+# stay in local dir, don't cd to util/c4zvd:
 #make actual plot 
-./pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
 mv DDXPLOT.zvd $work/$file-$2.zvd
-if [ -f zv00.ps ]; then
-   mv zv00.ps $work/$file-$2.ps
-fi
-if [ -f zv00.eps ]; then
-   mv zv00.eps $work/$file-$2.eps
-fi
+
+# not needed now: files saved in local dir by default
+#rm zv*.ps zv*.eps 2>/dev/null
+#if [ -f zv00.ps ]; then
+#   mv zv00.ps $work/$file-$2.ps
+#fi
+#if [ -f zv00.eps ]; then
+#   mv zv00.eps $work/$file-$2.eps
+#fi
+
+#cd $work
+
 rm LSTTAB.CUR LSTTAB.PNT  2>/dev/null
-cd $work
 exit
 
