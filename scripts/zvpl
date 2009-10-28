@@ -2,7 +2,7 @@
 #SCRIPT TO EXTRACT CROSS SECTIONS FROM THE EMPIRE OUTPUT AND PLOT THEM
 #WITH ZVVIEW
 
-export DISPLAY=:0
+#export DISPLAY=:0
 rm zv00.ps zv00.eps
 repeat=y
 echo '#zvview.exe' >PLOT.zvd

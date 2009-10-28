@@ -6,7 +6,7 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
-export DISPLAY=:0
+#export DISPLAY=:0
 set -x
 echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
