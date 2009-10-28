@@ -57,17 +57,6 @@ FFLAGS = -std=legacy
 #----flag for Lahey/Fujitsu parallel
 #FFLAGS = --parallel
 
-#===== M a c ==================================
-#----GNU g95 FORTRAN Mac compiler
-#FC     =  /sw/bin//g95
-#----flags for production compilation with g95
-#FFLAGS = -O
-#----flags for detailed warnings
-#FFLAGS = -Wall
-
-
-
-
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
             gamma-strgth.o    input.o           lev-dens.o    main.o\
