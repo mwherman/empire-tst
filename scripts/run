@@ -18,7 +18,7 @@ can be used to ignore errors, this is meant for running batch jobs
 
 import sys
 import os
-from subprocess import Popen, PIPE
+#from subprocess import Popen, PIPE # some users don't have subprocess
 
 # get rm and isEmpty functions:
 #from empy.bash import *
@@ -48,9 +48,9 @@ def main():
     
     # run EMPEND and FIXUP:
     
-    #os.system(" %s/scripts/runE %s" % (empire, project) )
-    p = Popen(" %s/scripts/runE %s" % (empire, project), shell=True)
-    sts = os.waitpid(p.pid, 0)  # returns (pid, status)
+    os.system(" %s/scripts/runE %s" % (empire, project) )
+    #p = Popen(" %s/scripts/runE %s" % (empire, project), shell=True)
+    #sts = os.waitpid(p.pid, 0)  # returns (pid, status)
     
     f = open(project+'.lst','r').readlines()
     try:
@@ -63,6 +63,7 @@ def main():
         return 1
     
     # EMPEND, fixup, stanef:
+    """
     # buffer for Popen: -1 means buffer by line:
     bufsize = -1
     
@@ -71,8 +72,12 @@ def main():
     o,e = p.communicate()   # these are strings!
     for l in o.split('\n'):
         print (l)
+    """
+    i,o,e = os.popen3( '%s/scripts/format %s %s' %(empire, project, mat) )
+    for l in o.readlines():
+        print (l.strip())
     
-    if not 'STANEF - Completed successfully' in e:
+    if not 'STANEF - Completed successfully' in e.readlines()[-1]:
         print ("STANEF did *not* finish successfully.")
         if opt.waitOnError:
             print ("Press return to exit")
@@ -81,26 +86,22 @@ def main():
     
     # run ENDF-6 checking codes
     
-    p = Popen( '%s/scripts/verify %s %s' %(empire, project, mat), shell=True,
-            bufsize=bufsize, stdout=PIPE,stderr=PIPE, close_fds=True)
-    o,e = p.communicate()
-    for l in o.split('\n'):
-        print (l)
+    i,o,e = os.popen3('%s/scripts/verify %s %s' %(empire, project, mat) )
+    for l in o.readlines():
+        print (l.strip())
     
-    for message in e.split('\n'):
+    for message in e.readlines():
         if not 'completed successfully' in message:
             print ("Failed a checking code. Final message:\n%s" % message)
             # assume these aren't fatal errors, we'll go on
     
     # run preprocessing codes in preparation for plotting
     
-    p = Popen( '%s/scripts/process %s %s' %(empire, project, mat), shell=True,
-            bufsize=bufsize, stdout=PIPE,stderr=PIPE, close_fds=True)
-    o,e = p.communicate()
-    for l in o.split('\n'):
-        print (l)
+    i,o,e = os.popen3('%s/scripts/process %s %s' %(empire, project, mat) )
+    for l in o.readlines():
+        print (l.strip())
     
-    if not 'PLTLST Completed' in e:
+    if not 'PLTLST Completed' in e.readlines()[-1]:
         print ("Trouble preprocessing files for plotting. Is c4 file present?")
         if opt.waitOnError:
             print ("Press return to exit")
