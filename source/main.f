@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:33 $
-Ccc   * $Id: main.f,v 1.208 2009-08-02 23:58:33 Capote Exp $
+Ccc   * $Date: 2009-10-30 22:33:08 $
+Ccc   * $Id: main.f,v 1.209 2009-10-30 22:33:08 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -2027,19 +2027,38 @@ C---------------Residual nuclei must be heavier than alpha
                 ELSEIF (nejc.EQ.1) THEN
                   cejectile = 'neutrons '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein) open(36,file='NEUTRON_SPE.zvd')
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='NEUTRON_SPE.zvd')
                 ELSEIF (nejc.EQ.2) THEN
                   cejectile = 'protons  '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein) open(36,file='PROTON_SPE.zvd')
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='PROTON_SPE.zvd')
                 ELSEIF (nejc.EQ.3) THEN
                   cejectile = 'alphas   '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein) open(36,file='ALPHA_SPE.zvd')
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='ALPHA_SPE.zvd')
                 ELSEIF (nejc.EQ.4) THEN
+                  cejectile = 'deuterons'
+                  iizaejc = IZAejc(nejc)
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='DEUTERON_SPE.zvd')
+                ELSEIF (nejc.EQ.5) THEN
+                  cejectile = 'tritons  '
+                  iizaejc = IZAejc(nejc)
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='TRITIUM_SPE.zvd')
+                ELSEIF (nejc.EQ.6) THEN
+                  cejectile = 'helium-3 '
+                  iizaejc = IZAejc(nejc)
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='HELIUM-3_SPE.zvd')
+                ELSEIF (nejc.EQ.7) THEN
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein) open(36,file='CLUSTER_SPE.zvd')
+                  if(FIRst_ein .AND. IOUT.GT.3)
+     >               open(36,file='CLUSTER_SPE.zvd')
                 ENDIF
 C---------------Double the first bin x-sec to preserve integral in EMPEND
 C               POPcse(0, nejc, 1, INExc(nnuc)) =  POPcse(0, nejc, 1, INExc(nnuc))*2
@@ -2999,8 +3018,62 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,3,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1), 0.d0
          ENDIF
+C--------deuterons
+         nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
+         IF(nspec.gt.0) then
+          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec - 1
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,4,0))
+          ENDDO
+C---------Exact endpoint
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(4,1),
+     &                              max(0.d0,CSE(nspec,4,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(4,1), 0.d0
+         ENDIF
+C--------tritons
+         nspec = INT((EMAx(1) - Q(5,1))/DE) + 2
+         IF(nspec.gt.0) then
+          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec - 1
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,5,0))
+          ENDDO
+C---------Exact endpoint
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(5,1),
+     &                              max(0.d0,CSE(nspec,5,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(5,1), 0.d0
+         ENDIF
+C--------heliums
+         nspec = INT((EMAx(1) - Q(6,1))/DE) + 2
+         IF(nspec.gt.0) then
+          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec - 1
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
+     &         max(0.d0,CSE(ie,6,0))
+          ENDDO
+C---------Exact endpoint
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(6,1),
+     &                              max(0.d0,CSE(nspec,6,0))
+          WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(6,1), 0.d0
+         ENDIF
 C--------light ions
-         IF (NDEJC.EQ.4) THEN
+         IF (NDEJC.EQ.7) THEN
            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
            IF(nspec.gt.0) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
