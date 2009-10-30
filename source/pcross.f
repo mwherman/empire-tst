@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-21 21:30:12 $
-Ccc   * $Id: pcross.f,v 1.58 2009-05-21 21:30:12 herman Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-10-30 22:32:43 $
+Ccc   * $Id: pcross.f,v 1.59 2009-10-30 22:32:43 Capote Exp $
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
       INCLUDE 'dimension.h'
@@ -137,7 +137,7 @@ C     so it was reduced by IAEA to 0.2.
 C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
-      NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
+      NHEq = MAX(5,MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1)
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
          iemin(nejc) = 2
