@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-11-01 01:01:31 $
-Ccc   * $Id: input.f,v 1.305 2009-11-01 01:01:31 Capote Exp $
+Ccc   * $Date: 2009-11-01 19:08:23 $
+Ccc   * $Id: input.f,v 1.306 2009-11-01 19:08:23 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -280,7 +280,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPsys = 0
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (default)
@@ -690,7 +690,7 @@ C                   residues must be heavier than alpha !! (RCN)
                        HIS(nnuc) = -1.
                        IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                     HIS(nnuc) = -0.5
-	                 if(mulem.eq.1) ENDF(nnuc) = 1
+                       if(mulem.eq.1) ENDF(nnuc) = 1
 C----------------------set reaction string
                        REAction(nnuc) = '(z,'
                        iend = 3
@@ -2303,15 +2303,15 @@ C---------levels for nucleus NNUC copied to file *.lev
               WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
               WRITE (8,
-     &'('' WARNING: ground-state has no assigned spin/parity '')') 
-              WRITE (8, '('' WARNING: assuming a default '')') 
+     &'('' WARNING: ground-state has no assigned spin/parity '')')
+              WRITE (8, '('' WARNING: assuming a default '')')
               LVP(1,Nnuc) = 1
               XJLv(1,Nnuc) = 0.0
-              IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) 
+              IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
      >           XJLv(1,Nnuc) = 0.5
               ISIsom(1,Nnuc) = 0
             ENDIF
-           
+
             IF (ilv.NE.1) THEN
               IF (ELV(ilv,Nnuc).EQ.0.) THEN
                 WRITE (8,'('' WARNING:'')')
@@ -8409,7 +8409,7 @@ C
       KAA = ka
       IF (KEYload.NE.1) THEN
          KEYload = 1
-         OPEN (81,FILE = trim(empiredir)//'RIPL-2/gamma'
+         OPEN (81,FILE = trim(empiredir)//'/RIPL-2/gamma'
      &      //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
          READ (81,'(///)') ! Skipping first 4 title lines
          DO i = 1, 270
