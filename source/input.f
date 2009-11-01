@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-08-07 11:02:18 $
-Ccc   * $Id: input.f,v 1.304 2009-08-07 11:02:18 Capote Exp $
+Ccc   * $Date: 2009-11-01 01:01:31 $
+Ccc   * $Id: input.f,v 1.305 2009-11-01 01:01:31 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -280,7 +280,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (default)
@@ -658,7 +658,8 @@ C
            DO ia = 0, nema
              DO ip = 0, nemp
                DO in = 0, nemn
-                 IF (iac + ih + it + id + ia + ip + in.NE.0) THEN
+                 mulem = iac + ih + it + id + ia + ip + in
+                 IF (mulem.NE.0) THEN
                     atmp = A(1) - FLOAT(in)*AEJc(1)
      &                          - FLOAT(ip)*AEJc(2)
      &                          - FLOAT(ia)*AEJc(3)
@@ -689,6 +690,7 @@ C                   residues must be heavier than alpha !! (RCN)
                        HIS(nnuc) = -1.
                        IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                     HIS(nnuc) = -0.5
+	                 if(mulem.eq.1) ENDF(nnuc) = 1
 C----------------------set reaction string
                        REAction(nnuc) = '(z,'
                        iend = 3
@@ -731,7 +733,6 @@ C----------------------set reaction string
                           REAction(nnuc)(iend + 1:iend + 1) = 'a'
                           iend = iend + 1
                        ENDIF
-
                        IF (id.NE.0) THEN
                           WRITE (cnejec,'(I1)') id
                           IF (id.GT.1) THEN
@@ -8454,12 +8455,12 @@ C-----------Selecting only 2+ states
          WRITE (8,*) ' RIPL-2 GDR parameters used'
          GOTO 700
   400    CLOSE (84)
-  450    WRITE (8,'(1x,A14,A39,A43)') ' WARNING: File ',
+  450    WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
      &                      'empire/RIPL-2/gamma/gdr-parameters-exp.dat'
      &                          ,
      &                     ' not found, theoretical RIPL-2 will be used'
          GOTO 100
-  500    WRITE (8,'(1x,A14,A41,A35)') ' WARNING: File ',
+  500    WRITE (8,'(1x,A14,A43,A42)') ' WARNING: File ',
      &                    'empire/RIPL-2/gamma/gdr-parameters-theor.dat'
      &                        ,
      &                     ' not found, default GDR values will be used'

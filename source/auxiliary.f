@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2009-09-14 18:45:59 $
-Ccc   * $Id: auxiliary.f,v 1.41 2009-09-14 18:45:59 pigni Exp $
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-11-01 01:01:20 $
+Ccc   * $Id: auxiliary.f,v 1.42 2009-11-01 01:01:20 Capote Exp $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -47,29 +47,6 @@ C
       CSEa   = 0.d0
       CSEahms= 0.d0
 
-C     DO nejc = 0, NDEJC
-C        CSEmis(nejc,0) = 0.0
-C        CSMsd(nejc) = 0.0
-C        CSHms(nejc) = 0.0
-C        DO necse = 1, NDEPFN
-C          DO nnuc = 1, NDNUC
-C            CSEfis(necse,nejc,nnuc) = 0.0
-C          ENDDO
-C        ENDDO
-C        if (nejc.le.2) CSMsc(nejc) = 0.0
-C        DO necse = 1, NDECSE
-C           CSE(necse,nejc,0) = 0.0
-C           CSEmsd(necse,nejc) = 0.0
-C           CSEhms(necse,nejc) = 0.0
-C           AUSpec(necse,nejc) = 0.0
-C           DO nang = 1, NDANGecis
-C              CSEa(necse,nang,nejc,0) = 0.0
-C              CSEa(necse,nang,nejc,1) = 0.0
-C              CSEahms(necse,nang,nejc) = 0.0
-C           ENDDO
-C        ENDDO
-C     ENDDO
-
       REClev   = 0.d0
       CSDirlev = 0.d0
       POPmax   = 0.d0
@@ -77,7 +54,7 @@ C     ENDDO
       CSPfis   = 0.d0
       EX       = 0.d0
       JSTab    = 0.d0
-      QPRod    = -1.d10
+      QPRod    = -1000.0
       FISb     = 0.d0
       ETL      = 0.d0
       LMAxtl   = 0.d0
@@ -101,97 +78,6 @@ C     ENDDO
       CSAlev   = 0.d0
       REDmsc   = 1.d0
 
-c     DO nejc = 0, NEJcm
-c        DO il = 1, NDLV
-c           REClevjc) = 0.0
-c           CSDirlev(il,nejc) = 0.0
-c        ENDDO
-c        DO ie = 1, NDECSE
-c           AUSpec(ie,nejc) = 0.0
-c        ENDDO
-c     ENDDO
-c     DO nnuc = 1, NDNUC
-c        POPmax(nnuc) = 0.0
-c        CSPrd(nnuc) = 0.0
-c        CSPfis(nnuc) = 0.0
-c        EX(1,nnuc) = 0.0
-c        JSTab(nnuc) = 0.0
-c        QPRod(nnuc) = -1000.0
-c        DO j = 1, NDLW
-c           FISb(j,nnuc) = 0.0
-c        ENDDO
-c        DO nejc = 1, NDEJC
-c           DO netl = 1, NDETL
-c              ETL(netl,nejc,nnuc) = 0.0
-c              LMAxtl(netl,nejc,nnuc) = 0
-c              DO ilw = 1, NDLW
-c                 TL(netl,ilw,nejc,nnuc) = 0.0
-c              ENDDO
-c           ENDDO
-c        ENDDO
-c        DO nnex = 1, NDEX
-c           EX(nnex,nnuc) = 0.0
-c           TNUc(nnex,nnuc) = 0.0
-c           UEXcit(nnex,nnuc) = 0.0
-c           TNUcf(nnex,nnuc) = 0.0
-c           DO ilw = 1, NDLW
-c              RO(nnex,ilw,1,nnuc) = 0.0
-c              RO(nnex,ilw,2,nnuc) = 0.0
-c              ROF(nnex,ilw,nnuc) = 0.0
-c              POP(nnex,ilw,1,nnuc) = 0.0
-c              POP(nnex,ilw,2,nnuc) = 0.0
-c           ENDDO
-c           DO irec = 1, NDEREC
-c              RECcse(irec,nnex,nnuc) = 0.0
-c              RECcse(irec,0,nnuc) = 0.0
-c           ENDDO
-c        ENDDO
-c        EX(NDEX + 1,nnuc) = 0.0
-c        DO nnlv = 1, NDLV
-c           POPlv(nnlv,nnuc) = 0.0
-c        ENDDO
-c        DO nejc = 0, NDEJC
-c           CSEmis(nejc,nnuc) = 0.0
-c           DO necse = 1, NDECSE
-c              CSE(necse,nejc,nnuc) = 0.0
-c           ENDDO
-c        ENDDO
-c     ENDDO
-c     DO nnuc = 1, NDExclus
-c        DO necse = 0, NDEX_D
-c           DO inecse = 1, NDECSED
-c              DO nejcd = 0, NDEJCD
-c                 POPcseaf(necse,nejcd,inecse,nnuc) = 0.0
-c              ENDDO
-c              DO nejc = 0, NDEJC
-c                 POPcse(necse,nejc,inecse,nnuc) = 0.0
-c              ENDDO
-c           ENDDO
-c        ENDDO
-c     ENDDO
-c     DO nejc = 0, NDEJC
-c        SCRtem(nejc) = 0.0
-c        DO ilw = 1, NDLW
-c           DO nnex = 1, NDEX
-c              SCRt(nnex,ilw,1,nejc) = 0.0
-c              SCRt(nnex,ilw,2,nejc) = 0.0
-c           ENDDO
-c        ENDDO
-c        DO nnlv = 1, NDLV
-c           SCRtl(nnlv,nejc) = 0.0
-c        ENDDO
-c     ENDDO
-c     DO nang = 1, NDANG
-c        DO nnlv = 1, NDLV
-c           DO nejc = 0, NDEJC
-c              CSAlev(nang,nnlv,nejc) = 0.0
-c           ENDDO
-c        ENDDO
-c     ENDDO
-c     DO j = 1, NDLW
-c        REDmsc(j,1) = 1.0
-c        REDmsc(j,2) = 1.0
-c     ENDDO
       return
       END
 
