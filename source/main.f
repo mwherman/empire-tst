@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-10-30 22:33:08 $
-Ccc   * $Id: main.f,v 1.209 2009-10-30 22:33:08 Capote Exp $
+Ccc   * $Date: 2009-11-02 16:48:40 $
+Ccc   * $Id: main.f,v 1.210 2009-11-02 16:48:40 Capote Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -763,6 +763,12 @@ C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
      &       ' p PE emission cross section ', CSMsd(2), ' mb'
          if(CSMsd(3).gt.0.) WRITE (8,*)
      &       ' a PE emission cross section ', CSMsd(3), ' mb'
+         if(CSMsd(4).gt.0.) WRITE (8,*)
+     &       ' d PE emission cross section ', CSMsd(4), ' mb'
+         if(CSMsd(5).gt.0.) WRITE (8,*)
+     &       ' t PE emission cross section ', CSMsd(5), ' mb'
+         if(CSMsd(6).gt.0.) WRITE (8,*)
+     &       ' h PE emission cross section ', CSMsd(6), ' mb'
          if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (8,*)
      &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
          WRITE (8,*) ' '
@@ -2027,38 +2033,24 @@ C---------------Residual nuclei must be heavier than alpha
                 ELSEIF (nejc.EQ.1) THEN
                   cejectile = 'neutrons '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='NEUTRON_SPE.zvd')
                 ELSEIF (nejc.EQ.2) THEN
                   cejectile = 'protons  '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='PROTON_SPE.zvd')
                 ELSEIF (nejc.EQ.3) THEN
                   cejectile = 'alphas   '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='ALPHA_SPE.zvd')
                 ELSEIF (nejc.EQ.4) THEN
                   cejectile = 'deuterons'
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='DEUTERON_SPE.zvd')
                 ELSEIF (nejc.EQ.5) THEN
                   cejectile = 'tritons  '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='TRITIUM_SPE.zvd')
                 ELSEIF (nejc.EQ.6) THEN
                   cejectile = 'helium-3 '
                   iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='HELIUM-3_SPE.zvd')
-                ELSEIF (nejc.EQ.7) THEN
+                ELSEIF (nejc.EQ.NDEJC) THEN
                   cejectile = 'lt. ions '
-                  iizaejc = IZAejc(nejc)
-                  if(FIRst_ein .AND. IOUT.GT.3)
-     >               open(36,file='CLUSTER_SPE.zvd')
+                  iizaejc = IZAejc(NDEJC)
                 ENDIF
 C---------------Double the first bin x-sec to preserve integral in EMPEND
 C               POPcse(0, nejc, 1, INExc(nnuc)) =  POPcse(0, nejc, 1, INExc(nnuc))*2
@@ -3018,6 +3010,7 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,3,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1), 0.d0
          ENDIF
+
 C--------deuterons
          nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
          IF(nspec.gt.0) then
@@ -3036,6 +3029,7 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,4,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(4,1), 0.d0
          ENDIF
+
 C--------tritons
          nspec = INT((EMAx(1) - Q(5,1))/DE) + 2
          IF(nspec.gt.0) then
@@ -3054,7 +3048,8 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,5,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(5,1), 0.d0
          ENDIF
-C--------heliums
+
+C--------helium-3
          nspec = INT((EMAx(1) - Q(6,1))/DE) + 2
          IF(nspec.gt.0) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3072,6 +3067,7 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,6,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(6,1), 0.d0
          ENDIF
+
 C--------light ions
          IF (NDEJC.EQ.7) THEN
            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
@@ -3097,29 +3093,29 @@ C------------exact endpoint
          WRITE (12,*) ' '
       ENDIF
 C-----End of ENDF spectra (inclusive)
-      IF (EXClusiv .AND. EINl.GE.1.d0 .AND. IOUT.EQ.6) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) '----------------------------------------------'
-         WRITE (8,*) 'Test - integrals of portions of DDX spectra'
-         WRITE (8,'('' Energy'',12x,'' gamma '',9x,''neutron'',
-     &                                10x,''proton '',8x,'' alpha'')')
-         WRITE (8,*) '----------------------------------------------'
-         DO ispec = 1, NEX(1) + 10
-            controlg = 0
-            controln = 0
-            controlp = 0
-            controla = 0
-            DO nnuc = 1, NNUcd
-               IF(ENDf(nnuc).NE.1) CYCLE
-               controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
-               controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
-               controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
-               controla = controla + POPcseaf(0,3,ispec,INExc(nnuc))
-            ENDDO
-            WRITE (8,'(5g15.5)') (ispec - 1)*DE, controlg,
-     &                       controln, controlp, controla
-         ENDDO
-      ENDIF
+C     IF (EXClusiv .AND. EINl.GE.1.d0 .AND. IOUT.EQ.6) THEN
+C        WRITE (8,*) ' '
+C        WRITE (8,*) '----------------------------------------------'
+C        WRITE (8,*) 'Test - integrals of portions of DDX spectra'
+C        WRITE (8,'('' Energy'',12x,'' gamma '',9x,''neutron'',
+C    &                                10x,''proton '',8x,'' alpha'')')
+C        WRITE (8,*) '----------------------------------------------'
+C        DO ispec = 1, NEX(1) + 10
+C           controlg = 0
+C           controln = 0
+C           controlp = 0
+C           controla = 0
+C           DO nnuc = 1, NNUcd
+C              IF(ENDf(nnuc).NE.1) CYCLE
+C              controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
+C              controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
+C              controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
+C              controla = controla + POPcseaf(0,3,ispec,INExc(nnuc))
+C           ENDDO
+C           WRITE (8,'(5g15.5)') (ispec - 1)*DE, controlg,
+C    &                       controln, controlp, controla
+C        ENDDO
+C     ENDIF
  1155 IF( FITomp.GE.0 ) THEN
         READ (5,'(A36)') nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
