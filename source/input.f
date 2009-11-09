@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-11-02 16:48:55 $
-Ccc   * $Id: input.f,v 1.307 2009-11-02 16:48:55 Capote Exp $
+Ccc   * $Date: 2009-11-09 15:39:29 $
+Ccc   * $Id: input.f,v 1.308 2009-11-09 15:39:29 Capote Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -762,14 +762,6 @@ C                    From n,2n2p   to   n,a
 		     ENDF(nnuc) = 1
                   ENDIF
 
-                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
-C                    From n,3n2p   to   n,an   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 1) = 'an'
-                     iend = iend + 1
-		     ENDF(nnuc) = 1
-                  ENDIF
-                                  
                   IF (ia.NE.0) THEN
                      WRITE (cnejec,'(I1)') ia
                      IF (ia.GT.1) THEN
