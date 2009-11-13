@@ -22,7 +22,8 @@ $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
 
 # stay in local dir, don't cd to util/c4zvd:
 #make actual plot 
-$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd
+$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
+    || { echo; echo 'zvview plotting failed!'; read; }
 mv DDXPLOT.zvd $work/$file-$2.zvd
 
 # not needed now: files saved in local dir by default
