@@ -6290,7 +6290,7 @@ foreach el $ddx {
 puts $lsttab ""
 close $lsttab
 #exec gvim LSTTAB.INP
-exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
 exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file omp1 1
 exec xterm -e $::env(EMPIREDIR)/scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
 
@@ -6318,7 +6318,7 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
 exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file omp2 1
 exec xterm -e $::env(EMPIREDIR)/scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
 adjourn .top75} \
