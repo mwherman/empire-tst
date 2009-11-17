@@ -7064,7 +7064,7 @@ lappend dd} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -state normal -text {Delete selected files} \
-        -wraplength 60 
+        -wraplength 80 
     vTcl:DefineAlias "$site_9_0.but123" "Button51" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but123 "$site_9_0.but123 Button $top all _vTclBalloon"
     bind $site_9_0.but123 <<SetBalloon>> {
@@ -7079,7 +7079,7 @@ adjourn .top75
 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {Clean project} -wraplength 60 
+        -pady 2m -relief raised -text {Clean project} -wraplength 80 
     vTcl:DefineAlias "$site_9_0.but124" "Button52" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but124 "$site_9_0.but124 Button $top all _vTclBalloon"
     bind $site_9_0.but124 <<SetBalloon>> {
@@ -7093,7 +7093,7 @@ exec rm -f $file.inp
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {Remove project} -wraplength 60 
+        -pady 2m -relief raised -text {Remove project} -wraplength 80 
     vTcl:DefineAlias "$site_9_0.but125" "Button53" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but125 "$site_9_0.but125 Button $top all _vTclBalloon"
     bind $site_9_0.but125 <<SetBalloon>> {
@@ -7863,10 +7863,8 @@ exit} \
         -value gedit -variable editor -command {} -label gedit 
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
-        -command {set types {
-       {"All   Files"              {*}           }
-    }
-set editor [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select editor"]} \
+        -command {
+set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
         -label other 
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.men87" -command {} -label {Select PS viewer} 
@@ -7882,10 +7880,8 @@ set editor [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select edit
         -command {# TODO: Your menu handler here} -label ggv 
     $site_4_0.men87 add radiobutton \
         -value gotfile -variable psviewer \
-        -command {set types {
-       {"All   Files"              {*}           }
-    }
-set psviewer [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select PS viewer"]} \
+        -command {
+set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         -label other 
     $top.m88 add cascade \
         -menu "$top.m88.menu92" -command {} -label Inputs 
