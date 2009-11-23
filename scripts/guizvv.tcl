@@ -606,6 +606,11 @@ set file [tk_getOpenFile -filetypes $types  -parent $w -title "Select ENDF file"
 
 proc ::init {argc argv} {
 global root suf name1 dir1 name2 dir2 name3 dir3 name4 dir4
+# create a blank prefs file if none found:
+if {! [file exists $::env(EMPIREDIR)/.guizvvrc]} {
+    set rcfl [open $::env(EMPIREDIR)/.guizvvrc w]
+    close $rcfl
+}
 set rcfl [open $::env(EMPIREDIR)/.guizvvrc r+]
 gets $rcfl root
 gets $rcfl suf
