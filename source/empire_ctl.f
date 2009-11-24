@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2009-08-07 19:02:43 $
-Ccc   * $Id: empire_ctl.f,v 1.31 2009-08-07 19:02:43 pigni Exp $
+Ccc   * $Author: mattoon $
+Ccc   * $Date: 2009-11-24 19:40:31 $
+Ccc   * $Id: empire_ctl.f,v 1.32 2009-11-24 19:40:31 mattoon Exp $
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
@@ -1890,7 +1890,11 @@ C--------Read target and projectile from the input file
       WRITE(8,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
      &            aprojec,Zprojec
 C-----Read line of optional input
-   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
+   50 READ (44,'(A80)',END = 350) inprecord
+      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
+     &    inprecord(1:1).EQ.'!') GOTO 50
+      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i3e,i4e
+C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          WRITE(7,'(A6)')namee
          GOTO 70 !Jump to $ format for parameters that happens after GO
@@ -2002,7 +2006,11 @@ C-----
          WRITE(7,'(A80)') inprecord 
       ENDDO
 C-----Read line of optional input
-  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
+  150 READ (44,'(A80)',END = 350) inprecord
+      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
+     &    inprecord(1:1).EQ.'!') GOTO 150
+      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i4e
+C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN
             IF(category.EQ.'A') THEN
