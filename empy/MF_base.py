@@ -85,13 +85,27 @@ class MF_base:
                 #print "Errors converting to floats (treat function)!"
         
         
+        def treat1(string):
+            """
+            faster version of 'treat'
+            """
+            if '-' in string.strip()[1:]:
+                loc = string.rfind('-') # position where exp goes
+                return float( string[:loc]+'e'+string[loc:] )
+            elif '+' in string.strip()[1:]:
+                loc = string.rfind('+')
+                return float( string[:loc]+'e'+string[loc:] )
+            else:
+                raise ValueError
+        
+        
         arr = (string[0:11], string[11:22], string[22:33], 
                 string[33:44], string[44:55], string[55:66])
         retval = []
         
         for val in arr:
             try:
-                retval.append( treat(val) )
+                retval.append( treat1(val) )
             except ValueError:
                 try:
                     retval.append( int(val) )
@@ -107,9 +121,7 @@ class MF_base:
         return retval
         #return [self.treat(a) for a in arr if a.strip() != '']
     
-
     
-
     def writeENDFline(self, tmplist, MAT,MF,MT):
         """
         turn a list of up to 6 values into ENDF-formatted 80-column string
@@ -119,7 +131,7 @@ class MF_base:
         or 'None'
         
         line number is added unless disabled (numberLines=False)
-
+        
         raises OverFlowError if len(tmplist)>6
         or FormatError if a non-numeric element is in the list
         """
@@ -240,8 +252,8 @@ class MF_base:
         arr = [parseInt(a) for a in vals]
         
         return x,y,arr
-
-
+    
+    
     def writeINTG(self, row, col, tmplist, MAT, MF, MT):
         """
         turn row,col, list into INTG-formatted 80 column string
@@ -341,7 +353,7 @@ class MF_base:
         str_val = "%11s%11s%11i%11i%11i%11i" + "%4i%2i%3i%5i\n"
         return str_val % ('0.000000+0','0.000000+0',0,0,0,0,
                 MAT,0,0,0)
-
+    
     
     def writeMEND(self):
         """
