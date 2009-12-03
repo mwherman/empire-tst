@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-11-09 15:39:29 $
-Ccc   * $Id: input.f,v 1.308 2009-11-09 15:39:29 Capote Exp $
+Ccc   * $Date: 2009-12-03 16:09:44 $
+Ccc   * $Id: input.f,v 1.309 2009-12-03 16:09:44 mattoon Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -259,8 +259,9 @@ C
          DEFnuc = 0.d0
          RECoil = 1.d0
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
-         IOPran = 1 ! Default gaussian 1 sigma error
-C        IOPran = 0 ! Uniform 1 sigma error
+C        IOPran = 1 ! Default gaussian 1 sigma error
+         IOPran = 0 ! MC sampling off by default, 'RANDOM' turns it on
+C        IOPran = -1 ! Uniform 1 sigma error
 C--------Relativistic kinematics
          RELkin = .FALSE.
 C--------Maximum energy to assume all levels are collective for DWBA calculations
@@ -1122,7 +1123,7 @@ C
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
      &      WRITE (8,*)
      &'Uncertainty samp.-gaussian pdf. Interval: [-3*sig,3*sig]'
-         IF(IOPran.le.0)  ! Uniform error
+         IF(IOPran.lt.0)  ! Uniform error
      &      WRITE (8,*)
      &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
             WRITE (8,*)
@@ -3204,7 +3205,7 @@ C--------DEGAS input
             GOTO 100
          ENDIF
          IF (name.EQ.'GDIVP ') THEN
-            if(i1.ne.0) then
+            if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' DEGAS proton s.p.l. density uncertainty '',
      &          '' is equal to '',i2,''%'')') i1
@@ -3245,7 +3246,7 @@ C--------PCROSS input
      &'('' Exciton model calculations with code PCROSS'',/,
      &  '' Cluster emission in terms of the Iwamoto-Harada model'',/
      &  '' Kalbach systematics angular distributions (see RIPL-1)'')')
-              if(i1.ne.0) then
+              if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Mean free path parameter uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
@@ -3582,7 +3583,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FCCRED') THEN
-            if(i1.ne.0) then
+            if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Direct cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
@@ -3627,7 +3628,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FUSRED') THEN
-            if(i1.ne.0) then
+            if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Fusion cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
@@ -3658,7 +3659,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'TOTRED') THEN
-            if(i1.ne.0) then
+            if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Total cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
@@ -3922,7 +3923,7 @@ C
      &'('' Real volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Real volume potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -3971,7 +3972,7 @@ C
      &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Volume potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4018,7 +4019,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '('' Imag. volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Imag. volume potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4066,7 +4067,7 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &      '('' Imag. surface potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &      '('' Imag. surface potential depth uncertainty in '',I3,A2,
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4114,7 +4115,7 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
      & '('' Surface potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Surface potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4161,7 +4162,7 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      & '('' Surface potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Surface potential radius uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4208,7 +4209,7 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      & '('' Volume imaginary potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Volume imaginary potential radius uncertainty in '',
      &        I3,A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4255,7 +4256,7 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
      & '('' Volume real potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
-            if(val.gt.0.) then
+            if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Volume real potential radius uncertainty in '',
      &        I3,A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
@@ -4306,7 +4307,7 @@ C-----
      &          '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR first hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4356,7 +4357,7 @@ C-----
      &          '('' NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR first hump width uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4406,7 +4407,7 @@ C-----
      &          '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR first hump cross section uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4456,7 +4457,7 @@ C-----
      &         '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR second hump energy uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4506,7 +4507,7 @@ C-----
      &          '('' NORMALIZATION OF GDR FIRST HUMP WIDTH IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR second hump width uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4556,7 +4557,7 @@ C-----
      &          '('' NORMALIZATION OF GDR FIRST HUMP XS IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' GDR second hump cross section uncertainty in '',I3,A2
      &        ,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -4914,7 +4915,7 @@ C-----
                WRITE (8,'('' BINDING ENERGY SETTING IGNORED'')')
                GOTO 100
             ENDIF
-            if(i4.ne.0) then
+            if(i4.ne.0 .and. IOPran.ne.0) then
                WRITE (8,
      & '('' Binding energy uncertainty of the projectile '',A2,'' in '',
      &   I3,A2,'' is equal to '',i2,''%'')')
@@ -5016,7 +5017,7 @@ C-----
          IF (name.EQ.'ATILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
-             if(i3.ne.0) then
+             if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Global L.d. a-parameter uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
@@ -5053,7 +5054,7 @@ C-----
                GOTO 100
             ENDIF
 
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' L.d. a-parameter uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5100,7 +5101,7 @@ C-----
                WRITE (8,'('' NORMALIZATION OF SP a-tilde IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Saddle-point l.d. a-parameter uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5148,7 +5149,7 @@ C-----
                GOTO 100
             ENDIF
 
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Inner fission barrier uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5196,7 +5197,7 @@ C-----
                GOTO 100
             ENDIF
 
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
                WRITE (8,
      &        '('' Outer fission barrier uncertainty in '',I3,
      &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5243,7 +5244,7 @@ C-----
                GOTO 100
             ENDIF
 
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Single particle l.d. parameter g uncertainty in '',
      &        I3,A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5375,7 +5376,7 @@ C--------Tuning factors
                WRITE (8,'('' UNKNOWN EJECTILE in PE TUNE '',I2)') i1
                GOTO 100
             ENDIF
-            if(i2.gt.0.) then
+            if(i2.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &'('' PE emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' uncertainty is equal to '',i2,'' %'')')
@@ -5416,7 +5417,7 @@ C--------Tuning factors
                WRITE (8,'('' FISSION WIDTH TUNING IGNORED'')')
                GOTO 100
             ENDIF
-            if(i3.gt.0.) then
+            if(i3.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &'('' Uncertainty of the Fission width of nucleus '',I3,A2,
      &         '' is equal to '',i2,'' %'')')
@@ -5470,7 +5471,7 @@ C--------Tuning factors
                WRITE (8,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
                GOTO 100
             ENDIF
-            if(i4.gt.0.) then
+            if(i4.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' uncertainty is equal to '',i2,'' %'')')
@@ -5504,7 +5505,7 @@ C--------Tuning factors
 C-----
          IF (name.EQ.'DEFDYN') THEN
             IF(val.gt.0) DEFdyn = val
-            IF(i1.gt.0.) then
+            IF(i1.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &'('' DWBA dynamical deformation uncertainty is equal to '',
      &i2,'' %'')') i1
@@ -5531,7 +5532,7 @@ C-----
 C-----
          IF (name.EQ.'DEFSTA') THEN
             IF(val.gt.0) DEFsta = val
-            IF(i1.gt.0.) then
+            IF(i1.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
      &'('' CC static deformation uncertainty is equal to '',
      &i2,'' %'')') i1
@@ -5876,7 +5877,7 @@ C-----shift parameter used to adjust HFB LD
          IF (name.EQ.'ROHFBP') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
-             if(i3.ne.0) then
+             if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Global GS HFB L.D. shift uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
@@ -5911,7 +5912,7 @@ C-----shift parameter used to adjust HFB LD
              WRITE (8,'(''  GS HFB L.D. SHIFT SETTING IGNORED'')')
              GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
              WRITE (8,
      &        '('' GS HFB L.D. shift uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -5942,7 +5943,7 @@ C-----pseudo a-parameter used to adjust HFB LD
          IF (name.EQ.'ROHFBA') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
-             if(i3.ne.0) then
+             if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
      &        '('' Global GS HFB normalization uncertainty '',
      &        '' is equal to '',i2,''%'')') i3
@@ -5977,7 +5978,7 @@ C-----pseudo a-parameter used to adjust HFB LD
              WRITE (8,'(''  GS HFB L.D. norm SETTING IGNORED'')')
              GOTO 100
             ENDIF
-            if(i3.ne.0) then
+            if(i3.ne.0 .and. IOPran.ne.0) then
              WRITE (8,
      &        '('' GS HFB L.D. normalization uncertainty in '',I3,A2,
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
@@ -6226,8 +6227,8 @@ C-----
               IOPran = 1
               WRITE (8,*)
      &          'Gaussian pdf assumed to calculate uncertainty'
-            else
-              IOPran = 0
+            else if(nint(val).lt.0) then
+              IOPran = -1
               WRITE (8,*)
      &          'Uniform pdf assumed to calculate uncertainty'
             endif
