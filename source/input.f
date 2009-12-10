@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-12-03 16:09:44 $
-Ccc   * $Id: input.f,v 1.309 2009-12-03 16:09:44 mattoon Exp $
+Ccc   * $Date: 2009-12-10 16:49:45 $
+Ccc   * $Id: input.f,v 1.310 2009-12-10 16:49:45 mattoon Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -3297,29 +3297,24 @@ C--------In the following block one parameter -KTRompCC- is defined
 C--------DIRECT is set to 1 if equal zero to allow for ECIS calc.
 C
          IF (name.EQ.'DIRPOT') THEN
-            IF (val.LT.0) THEN
-               ki = 26
-               ipoten = -INT(val)
-C--------------searching in the RIPL database
-               CALL FINDPOT(ki,ieof,ipoten)
-               IF (ieof.EQ.0) THEN
-                  val = -val
-               ELSE
-                  WRITE (8,*) 'WARNING: Requested RIPL entry ', ipoten,
+! historically val and -val meant different potentials. The '+val'
+! potentials are no longer in EMPIRE, so no need to treat differently:
+             IF (val.LT.0) THEN
+                 val = -val
+             ENDIF
+             ki = 26 ! file id for 'om-parameter-u.dat' in RIPL-2
+             ipoten = INT(val)
+             CALL FINDPOT(ki,ieof,ipoten)
+             IF (ieof.NE.0) THEN
+                 WRITE (8,*) 'WARNING: Requested RIPL entry ', ipoten,
      &                        ' for inelastic scattering not found'
-                  GOTO 100
-               ENDIF
-            ELSE
-               WRITE (8,
-     &    '('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')'
-     &    )
-               STOP
-            ENDIF
-            WRITE (8,
+                 GOTO 100
+             ENDIF
+             WRITE (8,
      &'('' Optical model parameters for direct inelastic scattering set
      & to RIPL #'',I4)') INT(val)
-            KTRompcc = INT(val)
-            GOTO 100
+             KTRompcc = INT(val)
+             GOTO 100
          ENDIF
          IF (name.EQ.'DIRECT') THEN
             DIRect = val
@@ -4865,33 +4860,29 @@ C-----
                GOTO 100
             ENDIF
 C-----
+! historically val and -val meant different potentials. The '+val'
+! potentials are no longer in EMPIRE, so no need to treat differently:
             IF (val.LT.0) THEN
-               ki = 26
-               ipoten = -INT(val)
+                val = -val
+            ENDIF
+            ki = 26 ! file id for 'om-parameter-u.dat' in RIPL-2
+            ipoten = INT(val)
 C--------------Searching in the RIPL database for i1 catalog number
-               CALL FINDPOT(ki,ieof,ipoten)
-               IF (ieof.EQ.0) THEN
-                  val = -val
-               ELSE
-                  WRITE (8,*) 'Requested RIPL entry ', ipoten,
+            CALL FINDPOT(ki,ieof,ipoten)
+            IF (ieof.NE.0) THEN
+                WRITE (8,*) 'Requested RIPL entry ', ipoten,
      &                        ' not found, using default choice'
-                  GOTO 100
-               ENDIF
-               if(INT(val).ne.9602) then
-                 WRITE (8,
+                GOTO 100
+            ENDIF
+            if(INT(val).ne.9602) then
+                WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
      &'', I4)') i1, INT(val)
-               else
-                 WRITE (8,
+            else
+                WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,
      & '' set to Kumar & Kailas 2007 values'')') i1
-               endif
-            ELSE
-               WRITE (8,
-     &    '('' Only RIPL OMP parameters are supported in EMPIRE 2.19'')'
-     &    )
-               STOP
-            ENDIF
+            endif
 C-----
             DO i = 1, NDNUC
                KTRlom(i1,i) = INT(val)
