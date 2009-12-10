@@ -111,8 +111,10 @@ def runE(proj):
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
+    sys.stdout.flush() # print in correct order under 'qsub'
     os.system('time nice %s/source/empire' % os.environ['EMPIREDIR'])
     print ('DONE !!!')
+    #return 0    # to keep temporary files, for debugging
     
     
     #Move case-related files to the right place
