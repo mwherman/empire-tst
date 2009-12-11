@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-10-22 15:02:33 $
-Ccc   * $Id: tl.f,v 1.105 2009-10-22 15:02:33 Capote Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2009-12-11 21:44:36 $
+Ccc   * $Id: tl.f,v 1.106 2009-12-11 21:44:36 pigni Exp $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -641,7 +641,9 @@ C
       EFErmi = EEFermi(Nejc,Nnuc)
 
       IF(KTRlom(Nejc,Nnuc).NE.9602) then
-        CALL OPTMOD(E,vlib,rlib,alib)
+        CALL OPTMOD(E,vlib,rlib,alib,Nejc,Nnuc,ndejc,ndnuc
+     &  ,FNrvomp,FNavomp,FNvvomp,FNrwvomp,FNrwvomp,FNwvomp
+     &  ,FNwsomp,FNrsomp,FNasomp)
       ELSE
         EcollTarget = -QCC(1)  ! energy of the collective state   
         CALL KUMAR_OMP(A(NNUC),Z(NNUC),EcollTarget,
@@ -670,19 +672,21 @@ C
       RCOul(Nejc,Nnuc) = RC
       ACOul(Nejc,Nnuc) = ACOu
 C-----Volume real potential: Woods-Saxon
-      VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
-      RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
-      AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
+      VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc,0)
+      RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc,0)
+      AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc,0)
 C-----Volume imaginary potential: Woods-Saxon
-      WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
-      RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
-      AWOmv(Nejc,Nnuc) = alib(2)*FNavomp(Nejc,Nnuc)
+      WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc,0)
+c      write(0,*) WOMv(Nejc,Nnuc),vlib(2)
+      RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc,0)
+      AWOmv(Nejc,Nnuc) = alib(2)*FNawvomp(Nejc,Nnuc,0)
 C-----Real surface contribution
-      VOMs(Nejc,Nnuc) = vlib(3)*FNwsomp(Nejc,Nnuc)
+      VOMs(Nejc,Nnuc) = vlib(3)*FNwsomp(Nejc,Nnuc,0)
 C-----Surface imaginary potential:
-      WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
-      RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
-      AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
+
+      WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc,0)
+      RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc,0)
+      AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc,0)
       SFIom(Nejc,Nnuc) = 1.D0
 C-----if rco(4,1,1) >0.0: Woods-Saxon derivative surface potential
 C-----if rco(4,1,1) <0.0: Gaussian surface potential.
@@ -3562,7 +3566,9 @@ C
 C     From om-retrieve.f (RIPL-3 interface)
 C     RCN,  Feb 28, 2005
 C
-      SUBROUTINE OPTMOD(El,Vlib,Rlib,Alib)
+      SUBROUTINE OPTMOD(El,Vlib,Rlib,Alib,Nejc,Nnuc,ndejc,ndnuc
+     &,FNrvomp,FNavomp,FNvvomp,FNrwvomp,FNawvomp,FNwvomp
+     &,FNwsomp,FNrsomp,FNasomp)
 C
 C     Routine to generate input for ECIS from RIPL-3 library
 C
@@ -3618,7 +3624,53 @@ C
       INTEGER i, j, jab, jc, jp, nn
       INTEGER IABS, INT, MIN0, NINT
 
+      integer Nejc, Nnuc,ii
+      real*8 
+     &FNrvomp(0:ndejc,0:ndnuc,0:ndim2),FNavomp(0:ndejc,0:ndnuc,0:ndim2),
+     &FNvvomp(0:ndejc,0:ndnuc,0:ndim3),FNrwvomp(0:ndejc,0:ndnuc,0:ndim2)
+     &,FNawvomp(0:ndejc,0:ndnuc,0:ndim2)
+     &,FNwvomp(0:ndejc,0:ndnuc,0:ndim3),FNwsomp(0:ndejc,0:ndnuc,0:ndim3)
+     &,FNrsomp(0:ndejc,0:ndnuc,0:ndim2),FNasomp(0:ndejc,0:ndnuc,0:ndim2)
+
       EXTERNAL DELTA_WD, DELTA_WV, WDF, WVF
+
+C Variation of optical potential parameters
+      do i=1,6
+        jp=1
+        jab=iabs(jrange(i))
+        do j=1,jab
+           if(el.gt.epot(i,j)) jp=j+1
+        enddo
+        j=min0(jp,jab)         
+        if (i.eq.1) then ! Real volume
+         do ii=1,ndim2
+          rco(i,j,ii)=rco(i,j,ii)*FNrvomp(Nejc,Nnuc,ii)
+          aco(i,j,ii)=aco(i,j,ii)*FNavomp(Nejc,Nnuc,ii)
+c          write(111,*) FNrvomp(Nejc,Nnuc,ii),Nejc,Nnuc,ii
+c          write(111,*) FNavomp(Nejc,Nnuc,ii),Nejc,Nnuc,ii
+         enddo
+         do ii=1,ndim3
+          pot(i,j,ii)=pot(i,j,ii)*FNvvomp(Nejc,Nnuc,ii)
+         enddo
+        elseif (i.eq.2) then ! Imag. volume
+         do ii=1,ndim2
+          rco(i,j,ii)=rco(i,j,ii)*FNrwvomp(Nejc,Nnuc,i)
+          aco(i,j,ii)=aco(i,j,ii)*FNawvomp(Nejc,Nnuc,i)
+         enddo
+         do ii=1,ndim3
+          pot(i,j,ii)=pot(i,j,ii)*FNwvomp(Nejc,Nnuc,ii)
+c          write(111,*) FNwvomp(Nejc,Nnuc,ii),Nejc,Nnuc,pot(i,j,ii),i
+         enddo
+        elseif (i.eq.4) then ! Imag. surface
+         do ii=1,ndim2
+          rco(i,j,ii)=rco(i,j,ii)*FNrsomp(Nejc,Nnuc,ii)
+          aco(i,j,ii)=aco(i,j,ii)*FNasomp(Nejc,Nnuc,ii)
+         enddo
+         do ii=1,ndim3
+          pot(i,j,ii)=pot(i,j,ii)*FNwsomp(Nejc,Nnuc,ii)
+         enddo
+        endif
+      enddo
 C
 C-----Generate optical model parameters for ECIS
 C
@@ -3690,6 +3742,33 @@ c
       elf = el - Ef - VCshift
 c
 c     Calculate radius and diffuseness parameters
+c$$$      if (i.eq.1) then ! real volume
+c$$$       do ii=1,ndim2
+c$$$          rco(i,j,ii)=rco(i,j,ii)*FNrvomp(Nejc,Nnuc,ii)
+c$$$          aco(i,j,ii)=aco(i,j,ii)*FNavomp(Nejc,Nnuc,ii)
+c$$$c          write(111,*) FNrvomp(Nejc,Nnuc,ii),Nejc,Nnuc,ii
+c$$$c          write(111,*) FNavomp(Nejc,Nnuc,ii),Nejc,Nnuc,ii
+c$$$       enddo
+c$$$       do ii=1,ndim3
+c$$$          pot(i,j,ii)=pot(i,j,ii)*FNvvomp(Nejc,Nnuc,ii)
+c$$$       enddo
+c$$$      elseif (i.eq.2) then ! imag. volume
+c$$$       do ii=1,ndim2
+c$$$          rco(i,j,ii)=rco(i,j,ii)*FNrwvomp(Nejc,Nnuc,ii)
+c$$$       enddo
+c$$$       do ii=1,ndim3
+c$$$          pot(i,j,ii)=pot(i,j,ii)*FNwvomp(Nejc,Nnuc,ii)
+c$$$          write(111,*) FNwvomp(Nejc,Nnuc,ii),Nejc,Nnuc,pot(i,j,ii),i
+c$$$       enddo
+c$$$      elseif (i.eq.4) then ! imag. surface
+c$$$       do ii=1,ndim2
+c$$$          rco(i,j,ii)=rco(i,j,ii)*FNrsomp(Nejc,Nnuc,ii)
+c$$$          aco(i,j,ii)=aco(i,j,ii)*FNasomp(Nejc,Nnuc,ii)
+c$$$       enddo
+c$$$       do ii=1,ndim3
+c$$$          pot(i,j,ii)=pot(i,j,ii)*FNwsomp(Nejc,Nnuc,ii)
+c$$$       enddo
+c$$$      endif
       if(rco(i,j,13).eq.0.) then
         rlib(i)=abs(rco(i,j,1)) + rco(i,j,3)*eta
      *       + rco(i,j,4)/atar + rco(i,j,5)/sqrt(atar)

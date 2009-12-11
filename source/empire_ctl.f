@@ -1,6 +1,6 @@
-Ccc   * $Author: mattoon $
-Ccc   * $Date: 2009-11-24 19:40:31 $
-Ccc   * $Id: empire_ctl.f,v 1.32 2009-11-24 19:40:31 mattoon Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2009-12-11 21:44:34 $
+Ccc   * $Id: empire_ctl.f,v 1.33 2009-12-11 21:44:34 pigni Exp $
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
@@ -1784,7 +1784,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=129)
+      parameter (ndreac=90, ndkeys=130)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1818,7 +1818,7 @@ C
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
-     &  'FISBOU', 'ATILFI', 'DEFNOR'/
+     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW'/
       data namecat /
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
@@ -1841,7 +1841,7 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1854,6 +1854,13 @@ C-----F - variation of the parameter not allowed (discrete value keyword)
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
      &E INSTRUCTING WHICH PARAMETERS TO VARY HAS BEEN FOUND '
          STOP 'SENSITIVITY INPUT MISSING'
+      ENDIF
+      INQUIRE (FILE = ('LEVELS'),EXIST = fexist)
+      IF(.not.fexist) THEN
+         STOP 'SENSITIVITY CALCULATIONS REQUESTED BUT LEVELS FILE MISSIN
+     &G. TO SOLVE: 1) TURN OFF KALMAN OPTION.2) RUN EMPIRE FOR A SINGLE 
+     &ENERGY. 3) CHECK IF .lev FILE IS PRESENT. 4) TURN ON KALMAN OPTION
+     & AND START SENSITIVITY CALCULATIONS. THANKS.'
       ENDIF
 C-----Move original (reference) input out of the way
       IF(LINUX) THEN
