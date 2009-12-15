@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2009-12-11 21:44:34 $
-Ccc   * $Id: empire_ctl.f,v 1.33 2009-12-11 21:44:34 pigni Exp $
+Ccc   * $Author: mattoon $
+Ccc   * $Date: 2009-12-15 23:27:28 $
+Ccc   * $Id: empire_ctl.f,v 1.34 2009-12-15 23:27:28 mattoon Exp $
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
@@ -1914,7 +1914,13 @@ C-----
 C-----Read and copy optional part of the standard input
 C-----
    70 READ(44,'(A80)',END = 30) inprecord
-      WRITE(7,'(A80)') inprecord
+      IF(inprecord(1:1).EQ.'$') THEN
+          READ(inprecord,'(1X,A6,G10.5,4I5)',END=30)namee,vale,i1e,i2e,
+     &    i3e,i4e
+          WRITE(7,'(''$'',A6,F10.3,4I5)')namee,vale,i1e,i2e,i3e,i4e
+      ELSE
+          WRITE(7,'(A80)') inprecord
+      ENDIF
       GOTO 70
 
    30 CLOSE(7)
@@ -2016,7 +2022,7 @@ C-----Read line of optional input
   150 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 150
-      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i4e
+      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i3e,i4e
 C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN
