@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-12-11 21:44:35 $
-Ccc   * $Id: input.f,v 1.311 2009-12-11 21:44:35 pigni Exp $
+Ccc   * $Date: 2009-12-28 21:40:42 $
+Ccc   * $Id: input.f,v 1.312 2009-12-28 21:40:42 herman Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -744,7 +744,7 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-		     ENDF(nnuc) = 1
+                     ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
@@ -752,7 +752,7 @@ C                    From n,2np   to   n,t
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
-		     ENDF(nnuc) = 1
+                     ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
@@ -760,7 +760,7 @@ C                    From n,n2p   to   n,he3
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
-		     ENDF(nnuc) = 1
+                     ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
@@ -768,9 +768,17 @@ C                    From n,2n2p   to   n,a
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
-		     ENDF(nnuc) = 1
+                     ENDF(nnuc) = 1
                   ENDIF
 
+                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
+C                    From n,3n2p   to   n,an   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 1) = 'an'
+                     iend = iend + 1
+                     ENDF(nnuc) = 1
+                  ENDIF
+                                  
                   IF (ia.NE.0) THEN
                      WRITE (cnejec,'(I1)') ia
                      IF (ia.GT.1) THEN
