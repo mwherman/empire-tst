@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-03 00:35:20 $
-Ccc   * $Id: lev-dens.f,v 1.77 2009-08-03 00:35:20 Capote Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2010-01-04 17:43:11 $
+Ccc   * $Id: lev-dens.f,v 1.78 2010-01-04 17:43:11 pigni Exp $
 C
 C
       SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
@@ -1784,12 +1784,12 @@ C-----Skipping header lines
       CALL WHERE(nz*1000+na,nnuc,iloc)
       IF (iloc.EQ.0) THEN
 C        SHC(Nnuc) = shelMSr - defcorr
-         SHC(Nnuc) = shelMSr
+         SHC(Nnuc) = SHLlnor(nnuc)*shelMSr
       ENDIF
 C-----projectile
       IF (nz.EQ.Z(0) .AND. na.EQ.A(0)) THEN
 C        SHC(0) = shelMSr - defcorr
-         SHC(0) = shelMSr
+         SHC(0) = SHLlnor(nnuc)*shelMSr
       ENDIF
       GO TO 40
   60  STOP 'Error reading shell correction file'
@@ -1847,7 +1847,7 @@ C
       CHARACTER*13 fname
       CHARACTER*20 ctmp
       CHARACTER*7 caz
-      CHARACTER*50 filename
+      CHARACTER*56 filename
       LOGICAL fexist
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
@@ -1874,7 +1874,9 @@ C
          ENDDO
       ENDDO
       WRITE (filename,99005) iz
-99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
+C99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
+99005 FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
+     &'.tab')
       INQUIRE(file = trim(empiredir)//filename, exist = fexist)
       IF(.not.fexist) THEN
        WRITE(8,*) trim(empiredir)//trim(filename), ' does not exist'
@@ -1931,7 +1933,9 @@ C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
         WRITE (filename,99007) iz
-99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
+C99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
+99007   FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
+     &'.cor')
         INQUIRE(file = trim(empiredir)//filename, exist = fexist)
         IF(fexist) then
           OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 440)

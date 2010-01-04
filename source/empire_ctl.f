@@ -1,6 +1,6 @@
-Ccc   * $Author: mattoon $
-Ccc   * $Date: 2009-12-15 23:27:28 $
-Ccc   * $Id: empire_ctl.f,v 1.34 2009-12-15 23:27:28 mattoon Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2010-01-04 17:43:10 $
+Ccc   * $Id: empire_ctl.f,v 1.35 2010-01-04 17:43:10 pigni Exp $
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,
@@ -1784,7 +1784,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=130)
+      parameter (ndreac=90, ndkeys=131)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1818,7 +1818,7 @@ C
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
-     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW'/
+     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO'/
       data namecat /
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
@@ -1841,7 +1841,7 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction

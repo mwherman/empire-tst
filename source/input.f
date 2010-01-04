@@ -1,6 +1,6 @@
 Ccc
-Ccc   * $Date: 2009-12-28 21:40:42 $
-Ccc   * $Id: input.f,v 1.312 2009-12-28 21:40:42 herman Exp $
+Ccc   * $Date: 2010-01-04 17:43:10 $
+Ccc   * $Id: input.f,v 1.313 2010-01-04 17:43:10 pigni Exp $
 C
       SUBROUTINE INPUT
 Ccc
@@ -192,6 +192,7 @@ C-----------set level density parameters
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
+            SHLlnor(nnuc) = 1.
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
             ATIlfi(nnuc) = 1.
@@ -296,7 +297,7 @@ C        IX4ret = 1 local MySQL server (default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 0
-C        IF(IOPSYS.EQ.0) IX4ret = 1
+         IF(IOPSYS.EQ.0) IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -3012,7 +3013,7 @@ C
       INTEGER INT
       CHARACTER*6 name, namee
       LOGICAL fexist
-      DOUBLE PRECISION val,vale,sigma
+      DOUBLE PRECISION val,vale,sigma,shelss
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -5086,7 +5087,74 @@ C-----
      & ) i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
+C-----
+         IF (NAME.EQ.'SHELNO') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+             if(i3.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &        '('' Shell correction uncertainty '',
+     &        '' is equal to '',i2,''%'')') i3
+              sigma = val*i3*0.01
+              IF(IOPran.gt.0) then
+                shelss = val + grand()*sigma
+              ELSE
+                shelss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              DO i = 1, NDNUC
+                SHLlnor(i) = shelss
+              ENDDO
+              WRITE (8,
+     &       '('' Shell correction in all nuclei multiplied by '',F6.2)'
+     &       ) shelss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, shelss,INDexf,INDexb
+             else
+              DO i = 1, NDNUC
+                SHLlnor(i) = val
+              ENDDO
+              WRITE (8,
+     &       '('' Shell correction in all nuclei multiplied by '',F6.2)'
+     &       ) val
+             endif
+             GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,'('' NORMALIZATION OF 
+     &                dw shell correction IGNORED'')')
+               GOTO 100
+            ENDIF
 
+            if(i3.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &        '('' Shell correction dw uncertainty in '',I3,A2,
+     &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
+               sigma = val*i3*0.01
+              IF(IOPran.gt.0) then
+                SHLlnor(nnuc) = val + grand()*sigma
+              ELSE
+                SHLlnor(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              WRITE (8,
+     &        '('' Shell correction dw sampled value : '',f8.3)')
+     &        SHLlnor(nnuc)
+               IPArCOV = IPArCOV +1
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &              IPArCOV, SHLlnor(nnuc),INDexf,INDexb
+            else
+              SHLlnor(nnuc) = val
+              WRITE (8,
+     &        '('' Shell correction dw in '',I3,A2,'' multiplied by
+     &        '',F6.2)') i2, SYMb(nnuc), val
+            endif
+
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'ATILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN

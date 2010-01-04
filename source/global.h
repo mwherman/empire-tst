@@ -8,7 +8,7 @@ C
      &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),
      &                 AUSpec(ndecse,0:ndejc), AVOm(0:ndejc,0:ndnuc),
      &                 AVSo(0:ndejc,0:ndnuc), awf(nfhump),
-     &                 AWOm(0:ndejc,0:ndnuc),
+     &                 AWOm(0:ndejc,0:ndnuc),SHLlnor(0:ndnuc),
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc),
      &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
      &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
@@ -162,7 +162,7 @@ c
      &                 FNrvomp, FNrwvomp, FNrsomp, FNawvomp, DEFdyn,
      &                 DEFsta, DEFnor, FCCred, TISomer, rFCCred,rFUSred,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd, ATIlnoz, DXSred
+     &                 EMInmsd, ATIlnoz, DXSred,SHLlnor
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
