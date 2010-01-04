@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-11-02 16:48:40 $
-Ccc   * $Id: main.f,v 1.210 2009-11-02 16:48:40 Capote Exp $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2010-01-04 17:35:30 $
+Ccc   * $Id: main.f,v 1.211 2010-01-04 17:35:30 pigni Exp $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -159,7 +159,7 @@ C         IF(ENDF(nnuc).LE.1) then
             preaction(i) = REAction(nnuc)
 C         ENDIF
         ENDDO
-        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+5,
+        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+4,
      &      int(Z(0)), SYMb(0), int(A(0))
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
      &       '  Elastic   ','  Reaction  ','  Fission   ',
@@ -1568,6 +1568,7 @@ C--------Printout of results for the decay of NNUC nucleus
          ENDIF
          DO il = 1, NLV(nnuc)
             CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
+c            write(0,*) CSPrd(nnuc),NLV(nnuc)
             IF(ISIsom(il,Nnuc).EQ.0) THEN
               IF (IOUt.GT.0) WRITE (8,99070) il, ELV(il,nnuc),
      &                              LVP(il,nnuc), XJLv(il,nnuc),
