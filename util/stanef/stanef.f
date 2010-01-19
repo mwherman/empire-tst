@@ -27,6 +27,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.02   January 2010     A. Trkov
+!-V                        Allow long LIST records (ASCII only).
 !-V         Version 8.01   November 2008     A. Trkov
 !-V                        1. If NSEQ>99999, reset NSEQ=0
 !-V         Version 8.00   August  2008     A. Trkov
@@ -164,9 +166,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -2994,7 +2996,7 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: L1,L2,N1,N2
+      INTEGER(KIND=I4) :: L1,L2,N1,N2,I1,I2
       REAL(KIND=R4) :: C1,C2
 !
       INTEGER(KIND=I4), INTRINSIC :: MIN0
@@ -3026,34 +3028,46 @@
 !     READ IN LIST FORMATTED ARRAY
 !
       ELSE
-         READ(ITAPE,'(6E11.4)') (Y(N),N=1,N1)
+         I1= 1
+         I2=MIN(6*(POINTSMAX/6),N1)
 !
-!        OUTPUT THE RECORD
+         DO WHILE(I1.LE.N1)
+           READ(ITAPE,'(6E11.4)') (Y(N-I1+1),N=I1,I2)
 !
-         IF(STANEF_DATA%MODE.EQ.1)   THEN
+!          OUTPUT THE RECORD
 !
-!           OUTPUT IN BINARY MODE
+           IF(STANEF_DATA%MODE.EQ.1)   THEN
 !
-            WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,(Y(N),N=1,N1)
-         ELSE
-            MM = 1
-            DO N=1,N1,6
-               NU = MIN0(6,N1+1-N)
-               DO M=1,6
-                  IF(M.LE.NU)   THEN
-                     CALL NORMAL(Y(MM),FLOATS(M))
-                  ELSE
-                     FLOATS(M) = ' '
-                  END IF
-                  MM = MM + 1
-               END DO
+!             OUTPUT IN BINARY MODE
 !
-!              OUTPUT NEXT SIX FIELD RECORD
+              IF(I2.NE.N1) THEN
+                STOP 'STANEF ERRORR - LIST too big for binary output'
+              END IF
 !
-               NSEQ = MIN0(NSEQ+1,99999)
-               WRITE(OTAPE,'(6A11,I4,I2,I3,I5)') FLOATS,MAT,MF,MT,NSEQ
-            END DO
-         END IF
+              WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,(Y(N),N=1,N1)
+           ELSE
+              MM = 1
+              DO N=I1,I2,6
+                 NU = MIN0(6,I2+1-N)
+                 DO M=1,6
+                    IF(M.LE.NU)   THEN
+                       CALL NORMAL(Y(MM),FLOATS(M))
+                    ELSE
+                       FLOATS(M) = ' '
+                    END IF
+                    MM = MM + 1
+                 END DO
+!
+!                OUTPUT NEXT SIX FIELD RECORD
+!
+                 NSEQ = NSEQ+1
+                 IF(NSEQ.GT.99999) NSEQ=0
+                 WRITE(OTAPE,'(6A11,I4,I2,I3,I5)') FLOATS,MAT,MF,MT,NSEQ
+              END DO
+           END IF
+           I1=I2+1
+           I2=MIN(I1-1+6*(POINTSMAX/6),N1)
+         END DO
       END IF
 !
       RETURN

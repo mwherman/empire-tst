@@ -28,6 +28,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.04   January 2010    A. Trkov
+!-V                        Remove checking NRB (not prescribed in ENDF-6)
 !-V         Version 8.03   June 2009    A. Trkov
 !-V                        1. Allow INT 21-25 in MF6 LAW 7.
 !-V                        2. Suppress error message if NS=99999.
@@ -210,9 +212,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !---MDC---
 !
 !     Define variable precision
@@ -4626,7 +4628,9 @@
                ENDIF
                CALL TEST1(MPAR,1,MPARM,'MPAR',1)
                NRB = N2L
-               CALL TEST1(NRB,1,250,'NRB',1)
+! WARNING: Limit on NRB is not prescribed by ENDF but may give
+!          rise to problems in some codes
+!              CALL TEST1(NRB,1,250,'NRB',1)
                NCOUNT = NRB*MPAR
                NVS = NCOUNT*(NCOUNT+1)/2
                NTT = NVS + 6*NRB
