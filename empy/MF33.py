@@ -23,7 +23,25 @@ from MF_base import *
 __metaclass__ = type
 
 class MF33(MF_base):
-    def __init__(self, filename, MT):
+    def __init__(self, filename=None, MT=None):
+        """
+        initialize from ENDF if file supplied.
+        Otherwise just initialize to 0
+        """
+        super(MF33,self).__init__()
+        
+        if filename and MT:
+            self.initFromENDF(filename,MT)
+        else:
+            self.cov_mat = numpy.identity(1)
+            self.corrmat = numpy.identity(1)
+            self.elist = []
+            self.uncert = []
+            self.MAT, self.MF, self.MT = 0,0,0
+            self.zam, self.awt = 0,0
+    
+    
+    def initFromENDF(self, filename, MT):
         """
         read in one MT section from file 33, represent here with class members:
         
@@ -41,8 +59,6 @@ class MF33(MF_base):
         
         self.rawData    # list of [(elist,matrix)...] for each subsection
         """
-        super(MF33,self).__init__()
-        
         line, flag = endf.locate_section(filename, 33, MT)
         assert flag[0] == 0, "MT section not found in file!"
         

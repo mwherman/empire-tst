@@ -224,11 +224,10 @@ class MF32(MF_base):
             print ("!!! Mean gamma transition uncertainty = 0!!!")
         
         # if we're missing Gn values, is the capture kernel available?
+        kernel=False
         if 0 in Gn[:,0]:
             kern = raw_input("is the kernel (g*Gn*Gg/Gamma) available Y/n?")
-            if kern.lower().startswith('n'):
-                kernel = False
-            else:
+            if not kern.lower().startswith('n'):
                 kern = raw_input("what column of the e-Atlas file (4,5,6)?")
                 if kern=='4': 
                     kernel=par4
@@ -243,6 +242,19 @@ class MF32(MF_base):
         ###############################################
         # OK, now we're ready to check/fix atlas data #
         ###############################################
+        
+        # are J assignments missing?
+        if -1 in J and (raw_input("J values are missing.\n"
+            +"Make J assignments? y/N\n").lower().startswith('y')):
+            numpy.random.seed(1)
+            from empy.extra import ljprob
+            for i in range(len(J)):
+                if J[i]==-1:
+                    jvals, probs = ljprob.ljprob(spin, L[i])
+                    # don't use i for list comprehension variable!
+                    cumprobs = [sum(probs[:k+1]) for k in range(len(probs))]
+                    idx = numpy.searchsorted(cumprobs,numpy.random.rand())
+                    J[i] = jvals[idx]
         
         
         # Energies shouldn't have gaps, and uncertainty gaps can be filled:
@@ -724,7 +736,7 @@ class MF32(MF_base):
         
         # now we can get all s-wave (l=0), p-wave (l=1), and d-wave (l=2)
         # resonances, sorted by energy:
-        for lwave in range(NLS):
+        for lwave in set(L_list):
             ResonancesThisL = [a for a in MF2_arr if a[0]==lwave]
             numRes = len(ResonancesThisL)
             mf2 += self.writeENDFline([self.awt,0.0,lwave,0,6*numRes,numRes],
@@ -898,7 +910,6 @@ class MF32(MF_base):
         use Atlas equation 2.86 to approximate capture RI and uncertainty
         """
         # gfactor for each resonance:
-        #gfact = (2.0 * self.J + 1) / (2.0 * (2.0 * self.spin + 1) )
         gfact = self.gfact()
 
         # I_g = (constants) * sum_j { G_g * gfact * G_n / (E^2 (G_g+G_n) ) }
@@ -907,9 +918,12 @@ class MF32(MF_base):
 
         A = divmod(self.zam,1000)[1]
         
+        # factor of 2.608e+6 = 4*pi*lambda_bar(E)**2 (in eV*barn)
+        # lambda_bar = reduced wavelength for neutron of energy E
         result = numpy.pi/2 * 2.608e+6 * ((A+1.0)/A)**2 * numpy.sum(num/denom)
 
-        # but what about uncertainty? Also, this neglects 1/E contribution
+        # but what about uncertainty? 
+        # Also, this neglects 1/E contribution: need sigma_0 (at thermal)
 
 
 if __name__ == '__main__':
