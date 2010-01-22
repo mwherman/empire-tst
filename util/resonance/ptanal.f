@@ -979,7 +979,7 @@ C     spj: minimum j-spin corresponding to pr(1)
       pr(3)=5/9.0
       go to 500
   120 if(isp2.gt.2) go to 130
-      j2=1
+      j2=2
       npr=3
       pr(1)=1/6.0
       pr(2)=2/6.0
