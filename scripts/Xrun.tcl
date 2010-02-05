@@ -5466,8 +5466,8 @@ set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project 
 puts $defile
 set workdirt [file dirname $defile]
 set pdir [lindex [file split $workdirt] end-1]
-if { $pdir != "empire" } {
-  if {[tk_dialog .dialogsi Confirm "Requested directory is in a wrong level. You will be able to view files but not to run calculations. Is it OK?" "" 0 No Yes ] == 1} {
+if { $pdir != "empire" && $env(EMPIREDIR) == ".." } {
+  if {[tk_dialog .dialogsi Confirm "To run EMPIRE outside the install directory, please set EMPIREDIR variable. Currently you can't run calculations in this directory. OK?" "" 0 No Yes ] == 1} {
     set workdir $workdirt
     cd $workdir
     set dfile [file rootname $defile]
@@ -5635,7 +5635,7 @@ set eres 0.02
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list empire_ctl.f main.f input.f  fusion.f tl.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis03.f fis_io.f plot-zvv.f degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h io.h ddhms.cmb Makefile]
+set modules [list empire_ctl.f main.f input.f  fusion.f tl.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f plot-zvv.f degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h io.h ddhms.cmb Makefile]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -7965,6 +7965,7 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add cascade \
+        -menu "$site_3_0.menu93.men87" \
         -command {} -label {KALMAN for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men87 \
