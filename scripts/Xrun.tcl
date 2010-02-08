@@ -5466,7 +5466,7 @@ set defile [tk_getOpenFile -filetypes $types  -parent $w -title "Select project 
 puts $defile
 set workdirt [file dirname $defile]
 set pdir [lindex [file split $workdirt] end-1]
-if { $pdir != "empire" && $env(EMPIREDIR) == ".." } {
+if { $pdir != "empire" && $::env(EMPIREDIR) == ".." } {
   if {[tk_dialog .dialogsi Confirm "To run EMPIRE outside the install directory, please set EMPIREDIR variable. Currently you can't run calculations in this directory. OK?" "" 0 No Yes ] == 1} {
     set workdir $workdirt
     cd $workdir
