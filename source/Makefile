@@ -1,8 +1,8 @@
 #----GNU gfortran FORTRAN compiler
-FC     =  gfortran
+#FC     =  gfortran
 #----flags for production compilation with gfortran
 #FFLAGS = -O3 -pg -std=legacy
-FFLAGS = -std=legacy
+#FFLAGS = -std=legacy
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check 
 
@@ -30,7 +30,7 @@ FFLAGS = -std=legacy
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for optimalization using ifort
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #FFLAGS = -arch pn4 -O3 -ipo
@@ -38,7 +38,7 @@ FFLAGS = -std=legacy
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
+#FFLAGS =  -O3 -ipo
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 

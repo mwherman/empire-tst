@@ -159,25 +159,17 @@ C--------neutralize tuning factors and OMP normalization factors
             DO nejc = 0, NDEJC
                TUNe(nejc,nnuc) = 1.d0
               rTUNe(nejc,nnuc) = 1.d0
-               DO i=0,13 ! radii and diff.
-C--------------Volume real potential 
-                  FNrvomp(Nejc,Nnuc,i)  = 1.d0
-                  FNavomp(Nejc,Nnuc,i)  = 1.d0
-C--------------Volume imaginary potential
-                  FNrwvomp(Nejc,Nnuc,i) = 1.d0
-                  FNawvomp(Nejc,Nnuc,i) = 1.d0
-C--------------Surface imaginary potential
-                  FNrsomp(Nejc,Nnuc,i) = 1.d0
-                  FNasomp(Nejc,Nnuc,i) = 1.d0
-               ENDDO
-               DO i=0,25 ! depths
 C--------------Volume real potential
-                  FNvvomp(Nejc,Nnuc,i) = 1.d0
+               FNvvomp(Nejc,Nnuc) = 1.d0
+               FNrvomp(Nejc,Nnuc) = 1.d0
+               FNavomp(Nejc,Nnuc) = 1.d0
 C--------------Volume imaginary potential
-                  FNwvomp(Nejc,Nnuc,i) = 1.d0
-C--------------Surface imaginary potential
-                  FNwsomp(Nejc,Nnuc,i) = 1.d0
-               ENDDO
+               FNwvomp(Nejc,Nnuc) = 1.d0
+               FNrwvomp(Nejc,Nnuc) = 1.d0
+C--------------Surface imaginary potential:
+               FNwsomp(Nejc,Nnuc) = 1.d0
+               FNrsomp(Nejc,Nnuc) = 1.d0
+               FNasomp(Nejc,Nnuc) = 1.d0
             ENDDO
          ENDDO
 C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
@@ -1552,19 +1544,14 @@ C            Selecting target from residuals
              IF (Z(0).EQ.Z(i) .AND. A(0).EQ.A(i)) then
                 KTRlom(0,0) = KTRlom(nejc,i)
 C               Setting the normalization factor for OMP (used in covariance calculation)
-                DO ii=0,13
-                  FNrvomp(0,0,ii)  = FNrvomp(Nejc,i,ii)
-                  FNavomp(0,0,ii)  = FNavomp(Nejc,i,ii)
-                  FNrwvomp(0,0,ii) = FNrwvomp(Nejc,i,ii)
-                  FNawvomp(0,0,ii) = FNawvomp(Nejc,i,ii)
-                  FNrsomp(0,0,ii)  = FNrsomp(Nejc,i,ii)
-                  FNasomp(0,0,ii)  = FNasomp(Nejc,i,ii)
-                ENDDO
-                DO ii=0,25
-                  FNvvomp(0,0,ii)  = FNvvomp(Nejc,i,ii)
-                  FNwvomp(0,0,ii)  = FNwvomp(Nejc,i,ii)
-                  FNwsomp(0,0,ii)  = FNwsomp(Nejc,i,ii)
-                ENDDO
+                FNvvomp(0,0) = FNvvomp(Nejc,i)
+                FNwvomp(0,0) = FNwvomp(Nejc,i)
+                FNwsomp(0,0) = FNwsomp(Nejc,i)
+                FNavomp(0,0) = FNavomp(Nejc,i)
+                FNasomp(0,0) = FNasomp(Nejc,i)
+                FNrvomp(0,0) = FNrvomp(Nejc,i)
+                FNrwvomp(0,0) = FNrwvomp(Nejc,i)
+                FNrsomp(0,0) = FNrsomp(Nejc,i)
                 GOTO 11
              ENDIF
             ENDDO
@@ -3927,7 +3914,6 @@ C
          IF (name.EQ.'UOMPVV') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNvvomp(i3,nnuc,i4)=abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -3947,26 +3933,25 @@ C
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNvvomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNvvomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNvvomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNvvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' Real volume potential depth sampled norm.factor : '',
-     &        f5.2)') FNvvomp(i3,nnuc,i4)
+     &        f5.2)') FNvvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNvvomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNvvomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Real volume potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNvvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Real volume potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')')
-     &        i2, SYMb(nnuc),  FNvvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -3978,92 +3963,44 @@ C
          IF (name.EQ.'UOMPAV') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNavomp(i3,nnuc,i4)=abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &        '('' Real volume potential diff. uncertainty ignored'')')
+     &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,'('' UNKNOWN EJECTILE in UOMPAV '',I2)') i3
                WRITE (8,
-     &        '('' Real volume potential diff. uncertainty ignored'')')
+     &        '('' Volume potential diffuseness uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
-     &        '('' Real volume potential diff. uncertainty in '',I3,
+     &        '('' Volume potential diffuseness uncertainty in '',I3,
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNavomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNavomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNavomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNavomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
-     &        '('' Real volume potential diff. sampled norm.factor : ''
-     &        ,f5.2)') FNavomp(i3,nnuc,i4)
+     &        '('' Volume potential diffuseness sampled norm.factor : ''
+     &        ,f5.2)') FNavomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNavomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNavomp(i3,nnuc) = abs(val)
               WRITE (8,
-     &        '('' Real volume potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNavomp(i3,nnuc,i4),i4
+     &        '('' Volume potential diffuseness in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
-     &        '('' Real volume potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNavomp(i3,nnuc,i4),i4
-            endif
-            GOTO 100
-         ENDIF
-         IF (name.EQ.'UOMPAW') THEN
-            izar = i1*1000 + i2
-            CALL WHERE(izar,nnuc,iloc)
-            FNawvomp(i3,nnuc,i4)=abs(val)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,
-     &        '('' Imag. volume potential diff. uncertainty ignored'')')
-               GOTO 100
-            ENDIF
-            IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPAW '',I2)') i3
-               WRITE (8,
-     &        '('' Imag. volume potential diff. uncertainty ignored'')')
-               GOTO 100
-            ENDIF
-            if(val.gt.0. .and. IOPran.ne.0) then
-              WRITE (8,
-     &        '('' Imag. volume potential diff. uncertainty in '',I3,
-     &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
-                 sigma = val*0.01
-              IF(IOPran.gt.0) then
-                FNawvomp(i3,nnuc,i4) = 1. + grand()*sigma
-              ELSE
-                FNawvomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF
-              WRITE (8,
-     &        '('' Imag. volume potential diff. sampled norm.factor : ''
-     &        ,f5.2)') FNawvomp(i3,nnuc,i4)
-                 IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNawvomp(i3,nnuc,i4), INDexf,INDexb
-            endif
-            if(val.lt.0.) then
-              WRITE (8,
-     &        '('' Imag. volume potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNawvomp(i3,nnuc,i4),i4
-              WRITE (12,
-     &        '('' Imag. volume potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNawvomp(i3,nnuc,i4),i4
+     &        '('' Volume potential diffuseness in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4072,7 +4009,6 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPWV') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNwvomp(i3,nnuc,i4) = abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -4092,27 +4028,26 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNwvomp(i3,nnuc,i4) = max(1. + grand()*sigma,0.d0)
+                FNwvomp(i3,nnuc) = max(1. + grand()*sigma,0.d0)
               ELSE
-                FNwvomp(i3,nnuc,i4) =
+                FNwvomp(i3,nnuc) =
      &            max(1. + 1.732d0*(2*drand()-1.)*sigma,0.d0)
               ENDIF
               WRITE (8,
      &        '('' Imag. volume potential depth sampled norm.factor : ''
-     &        ,f5.2)') FNwvomp(i3,nnuc,i4)
+     &        ,f5.2)') FNwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNwvomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNwvomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Imag. volume potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNwvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Imag. volume potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNwvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4122,7 +4057,6 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPWS') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNwsomp(i3,nnuc,i4) = abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -4142,27 +4076,26 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &        '' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNwsomp(i3,nnuc,i4) = max(1. + grand()*sigma,0.d0)
+                FNwsomp(i3,nnuc) = max(1. + grand()*sigma,0.d0)
               ELSE
-                FNwsomp(i3,nnuc,i4) =
+                FNwsomp(i3,nnuc) =
      &            max(1. + 1.732d0*(2*drand()-1.)*sigma,0.d0)
               ENDIF
               WRITE (8,
      &      '('' Imag. surface potential depth sampled norm.factor : '',
-     &        f5.2)') FNwsomp(i3,nnuc,i4)
+     &        f5.2)') FNwsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNwsomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNwsomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Imag. surface potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNwsomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Imag. surface potential depth in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNwsomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4172,7 +4105,6 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPAS') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNasomp(i3,nnuc,i4) = abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -4192,26 +4124,25 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNasomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNasomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNasomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNasomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' Surface potential diffuseness sampled norm.factor :''
-     &        ,f5.2)') FNasomp(i3,nnuc,i4)
+     &        ,f5.2)') FNasomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNasomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNasomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Imag. surface potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNasomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Imag. surface potential diff. in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNasomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4221,7 +4152,6 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPRS') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNrsomp(i3,nnuc,i4) = abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -4241,26 +4171,25 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      &        A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
                  sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNrsomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNrsomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNrsomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNrsomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' Surface potential radius sampled norm. factor :''
-     &        ,f5.2)') FNrsomp(i3,nnuc,i4)
+     &        ,f5.2)') FNrsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNrsomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNrsomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNrsomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Imag. surface potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrsomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Imag. surface potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrsomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4270,7 +4199,6 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPRW') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNrwvomp(i3,nnuc,i4) = abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
@@ -4290,26 +4218,25 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &        I3,A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
               sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNrwvomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNrwvomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNrwvomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNrwvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
      &        '('' Volume imaginary potential radius sampled factor :''
-     &        ,f5.2)') FNrwvomp(i3,nnuc,i4)
+     &        ,f5.2)') FNrwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNrwvomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNrwvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNrwvomp(i3,nnuc) = abs(val)
               WRITE (8,
      &        '('' Imag. volume potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrwvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
      &        '('' Imag. volume potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrwvomp(i3,nnuc,i4),i4
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
@@ -4319,46 +4246,44 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
          IF (name.EQ.'UOMPRV') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
-            FNrvomp(i3,nnuc,i4)=abs(val)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     & '('' Real volume potential radius uncertainty ignored'')')
+     & '('' Volume real potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,'('' UNKNOWN EJECTILE in UOMPRV'',I2)') i3
                WRITE (8,
-     & '('' Real volume potential radius uncertainty ignored'')')
+     & '('' Volume real potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
-     &        '('' Real volume potential radius uncertainty in '',
+     &        '('' Volume real potential radius uncertainty in '',
      &        I3,A2,'' is equal to '',f5.2,'' %'')') i2, SYMb(nnuc), val
               sigma = val*0.01
               IF(IOPran.gt.0) then
-                FNrvomp(i3,nnuc,i4) = 1. + grand()*sigma
+                FNrvomp(i3,nnuc) = 1. + grand()*sigma
               ELSE
-                FNrvomp(i3,nnuc,i4) = 1. + 1.732d0*(2*drand()-1.)*sigma
+                FNrvomp(i3,nnuc) = 1. + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               WRITE (8,
-     &        '('' Real volume potential radius sampled factor :''
-     &        ,f5.2)') FNrvomp(i3,nnuc,i4)
+     &        '('' Volume real potential radius sampled factor :''
+     &        ,f5.2)') FNrvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
                  write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FNrvomp(i3,nnuc,i4), INDexf,INDexb
+     &              IPArCOV, FNrvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
+              FNrvomp(i3,nnuc) = abs(val)
               WRITE (8,
-     &        '('' Real volume potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrvomp(i3,nnuc,i4),i4
+     &        '('' Volume real potential radius in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
               WRITE (12,
-     &        '('' Real volume potential radius in '',I3,A2,
-     &        '' scaled by '',f5.2,'' (par.'',i3,'')'')') 
-     &        i2, SYMb(nnuc), FNrvomp(i3,nnuc,i4),i4
+     &        '('' Volume real potential radius in '',I3,A2,
+     &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
             GOTO 100
          ENDIF
